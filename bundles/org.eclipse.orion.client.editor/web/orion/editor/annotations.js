@@ -14,6 +14,14 @@
 /*global define */
 
 define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/editor/eventTarget'], function(messages, mEventTarget) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	
+	/**
+	 * @class This object represents a regitry of annotation types.
+	 * @name orion.editor.AnnotationType
+	 */
+	function AnnotationType() {
+	}
+	
 	/**
 	 * @class This object represents a decoration attached to a range of text. Annotations are added to a
 	 * <code>AnnotationModel</code> which is attached to a <code>TextModel</code>.
@@ -78,11 +86,16 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 			}
 			return true;
 		},
-		/**
-		 * Collapses the annotation.
-		 */
-		collapse: function () {
+		_collapseImpl: function (checkOverlaping) {
 			if (this._collapse()) {
+				if (checkOverlaping) {
+					this._forEachOverlaping(function(annotation) {
+						if (!annotation.expanded) {
+							annotation._expandImpl(false);
+							annotation._recollapse = true;
+						}
+					});
+				}
 				var projectionModel = this._projectionModel;
 				var baseModel = projectionModel.getBaseModel();
 				this._projection = {
@@ -93,23 +106,45 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 				projectionModel.addProjection(this._projection);
 			}
 		},
+		_expandImpl: function(checkOverlaping) {
+			if (this._expand()) {
+				this._projectionModel.removeProjection(this._projection);
+				if (checkOverlaping) {
+					this._forEachOverlaping(function(annotation) {
+						if (annotation._recollapse) {
+							annotation._collapseImpl(false);
+							annotation._recollapse = false;
+						}
+					});
+				}
+			}
+		},
+		_forEachOverlaping: function(callback) {
+			if (!this._annotationModel) { return; }
+			var annotations = this._annotationModel.getAnnotations(this.start, this.end);
+			while (annotations.hasNext()) {
+				var annotation = annotations.next();
+				if (annotation !== this && annotation.type === AnnotationType.ANNOTATION_FOLDING) {
+					callback.call(this, annotation);
+				}
+			}
+		},
+		/**
+		 * Collapses the annotation.
+		 */
+		collapse: function () {
+			this._recollapse = false;
+			this._collapseImpl(true);
+		},
 		/**
 		 * Expands the annotation.
 		 */
 		expand: function () {
-			if (this._expand()) {
-				this._projectionModel.removeProjection(this._projection);
-			}
+			this._recollapse = false;
+			this._expandImpl(true);
 		}
 	};
 	 
-	/**
-	 * @class This object represents a regitry of annotation types.
-	 * @name orion.editor.AnnotationType
-	 */
-	function AnnotationType() {
-	}
-	
 	/**
 	 * Error annotation type.
 	 */
