@@ -2957,7 +2957,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		
 		/**************************************** Event handlers *********************************/
 		_handleRootMouseDown: function (e) {
-			this._cancelPoolSelectionChange();
+			this._cancelPollSelectionChange();
+			this._checkSelectionChange = false;
 			if (this._ignoreEvent(e)) { return; }
 			if (util.isFirefox < 13 && e.which === 1) {
 				this._clientDiv.contentEditable = false;
@@ -3009,7 +3010,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_handleBlur: function (e) {
-			this._cancelPoolSelectionChange();
+			this._cancelPollSelectionChange();
+			this._checkSelectionChange = false;
 			if (this._ignoreBlur) { return; }
 			this._hasFocus = false;
 			/*
@@ -3090,7 +3092,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				this._contextMenuOpen = true;
 				if (util.isFirefox) {
 					this._checkSelectionChange = true;
-					this._poolSelectionChange(true);
+					this._pollSelectionChange(true);
 				}
 			}
 		},
@@ -3975,7 +3977,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var start = this._getModelOffset(selection.anchorNode, selection.anchorOffset);
 			var end = this._getModelOffset(selection.focusNode, selection.focusOffset);
 			var sel = this._getSelection();
-			if (start === undefined || end === undefined || (sel.start == start && sel.end == end)) {
+			if (start === undefined || end === undefined || (sel.start === start && sel.end === end)) {
 			    return false;
 			}
 			
@@ -3995,23 +3997,23 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._checkSelectionChange = false;
 			return true;
 		},
-		_cancelPoolSelectionChange: function() {
-			this._checkSelectionChange = false;
-			if (this._selPoolTimer) {
-				window.clearTimeout(this._selPoolTimer);
-				this._selPoolTimer = null; 
+		_cancelPollSelectionChange: function() {
+			if (this._selPollTimer) {
+				var window = this._getWindow();
+				window.clearTimeout(this._selPollTimer);
+				this._selPollTimer = null; 
 			}
 		},
-		_poolSelectionChange: function(retryPool) {
+		_pollSelectionChange: function(retryPoll) {
 			var that = this;
 			var window = this._getWindow();
-			this._cancelPoolSelectionChange();
-			this._selPoolTimer = window.setTimeout(function() {
-				that._selPoolTimer = null; 
+			this._cancelPollSelectionChange();
+			this._selPollTimer = window.setTimeout(function() {
+				that._selPollTimer = null; 
 				if (!that._clientDiv) { return; }
 				var changed = that._updateSelectionFromDOM();
-				if (!changed && retryPool) {
-					that._poolSelectionChange(retryPool);
+				if (!changed && retryPoll) {
+					that._pollSelectionChange(retryPoll);
 				}
 			}, 100);
 		},
@@ -4026,7 +4028,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			 * sending the event to the application.
 			 */
 			if (util.isAndroid) {
-				this._poolSelectionChange();
+				this._pollSelectionChange();
 			} else {
 				this._updateSelectionFromDOM();
 			}
