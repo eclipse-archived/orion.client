@@ -31,15 +31,16 @@ if (!modules.length)
 	self.log("No modules found in build file " + buildFile, Project.MSG_WARN);
 
 modules.forEach(function(module) {
-	var path = module.name, bundle = module.bundle;
+	var bundle = module.bundle;
 	
 	// Determine @pageDir and base @name
-	var segments = path.split("/");
-	var baseName = segments.pop(); // last segment
+	var segments = module.name.split("/");
+	var baseName = module._baseName = segments.pop(); // last segment
 	var pageDir = segments.join("/");
 	if (!pageDir.length) {
 		pageDir = ".";
 	}
+	module._pageDir = pageDir;
 
 	// Determine the file name include pattern for the calling module(s). Default is {baseName}.html
 	var caller;
@@ -48,14 +49,28 @@ modules.forEach(function(module) {
 	} else {
 		caller = baseName + ".html";
 	}
+	module._caller = caller;
 
-	// Invoke finishModule macro
-	var task = project.createTask("finishModule");
+	// Invoke updateModuleID macro
+	var task = project.createTask("updateModuleID");
 	task.setOwningTarget(self.getOwningTarget()); // http://stackoverflow.com/a/12282731
 	task.setDynamicAttribute("out", attributes.get("out"));
 	task.setDynamicAttribute("name", baseName);
 	task.setDynamicAttribute("bundle", bundle);
 	task.setDynamicAttribute("pagedir", pageDir);
 	task.setDynamicAttribute("caller", caller);
+	task.perform();
+});
+
+// Copy optimized files back into bundle folders.
+modules.forEach(function(module) {
+	// Invoke copybackModule macro
+	var task = project.createTask("copybackModule");
+	task.setOwningTarget(self.getOwningTarget()); // http://stackoverflow.com/a/12282731
+	task.setDynamicAttribute("out", attributes.get("out"));
+	task.setDynamicAttribute("name", module._baseName);
+	task.setDynamicAttribute("bundle", module.bundle);
+	task.setDynamicAttribute("pagedir", module._pageDir);
+	task.setDynamicAttribute("caller", module._caller);
 	task.perform();
 });

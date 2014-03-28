@@ -96,7 +96,7 @@
         },
         { name: "javascript/plugins/javascriptPlugin",
           bundle: "${orionClient}/bundles/org.eclipse.orion.client.javascript",
-          caller: ["javascriptPluginLoader.js", "javascriptWorker.js"]
+          caller: ["built-javascriptPluginLoader.js", /* note built */ "javascriptWorker.js"]
         },
         { name: "mixloginstatic/LoginWindow", bundle: "${orionClient}/bundles/org.eclipse.orion.client.ui" },
         { name: "mixloginstatic/manageOpenids", bundle: "${orionClient}/bundles/org.eclipse.orion.client.ui" },

@@ -161,14 +161,21 @@ function build(buildConfig) {
 		return false;
 	});
 	var optimizes = filteredModules.map(function(module) {
-		var pageDir = getPageDir(module.name), baseName = getBaseName(module.name), caller = module.caller || (baseName + '.html');
+		var pageDir = getPageDir(module.name), baseName = getBaseName(module.name);
+		var caller;
+		if (!module.caller)
+			caller = [baseName + '.html'];
+		else
+			caller = Array.isArray(module.caller) ? module.caller : [module.caller];
 		return {
 			pageDir: pageDir,
 			name: baseName,
 			bundle: format(module.bundle, bundleFormatArgs),
 			outPath: path.join(pathToOutDir, pageDir, baseName) + '.js',
 			builtFilePath: path.join(pathToOutDir, pageDir, 'built-' + baseName) + '.js',
-			callerFilePath: path.join(pathToOutDir, pageDir, caller)
+			callerFilePaths: caller.map(function(callerFile) {
+				return path.join(pathToOutDir, pageDir, callerFile);
+			})
 		};
 	});
 	var cssFiles = optimizes.map(function(op) {
@@ -269,25 +276,33 @@ function build(buildConfig) {
 		return async.sequence(optimizes.map(function(op) {
 			return function() {
 				// TODO stat builtFilePath, only perform the replace if builtFile.size > 0
-				return dfs.exists(op.callerFilePath).then(function(exists) {
-					if (!exists) {
-						console.log('HTML file does not exist: ' + op.callerFilePath);
-						return;
-					}
-					var name = op.name;
-					var builtResult = 'require(["built-' + name + '.js"]);';
-					console.log("updateHTML " + op.callerFilePath);
-					return dfs.readFile(op.callerFilePath, 'utf8').then(function(callerFile) {
-						callerFile = callerFile.replace("require(['" + name + ".js']);", builtResult);
-						callerFile = callerFile.replace('require(["' + name + '.js"]);', builtResult);
-						callerFile = callerFile.replace("/require.js", "/require.min.js");
-						return dfs.writeFile(op.callerFilePath, callerFile);
-					}, function(error) {
-						// log and continue
-						console.log(error.stack || error);
-						console.log('');
-					});
-				});
+				var callerFiles = op.callerFilePaths;
+				return async.sequence(callerFiles.map(function(filepath) {
+					return function() {
+						return dfs.exists(filepath).then(function(exists) {
+							if (!exists) {
+								console.log('caller file does not exist: ' + filepath);
+								return;
+							}
+							var name = op.name;
+							var builtResult = 'require(["built-' + name + '.js"]);';
+							var builtResult2 = "data-main=\"built-" + name + ".js\"";
+							console.log("updateCaller " + filepath);
+							return dfs.readFile(filepath, 'utf8').then(function(callerFile) {
+								callerFile = callerFile.replace("require(['" + name + ".js'])", builtResult);
+								callerFile = callerFile.replace('require(["' + name + '.js"])', builtResult);
+								callerFile = callerFile.replace("/require.js", "/require.min.js");
+								callerFile = callerFile.replace("data-main=\"" + name + ".js\"", builtResult2);
+								callerFile = callerFile.replace("data-main='" + name + ".js'",   builtResult2);
+								return dfs.writeFile(filepath, callerFile);
+							}, function(error) {
+								// log and continue
+								console.log(error.stack || error);
+								console.log('');
+							});
+						});
+					};
+				}));
 			};
 		}));
 	}).then(function() {
@@ -318,23 +333,24 @@ function build(buildConfig) {
 		section('Copy built files to ' + pathToOrionClientBundlesFolder);
 		return async.sequence(optimizes.map(function(op) {
 			return function() {
-				return dfs.exists(op.callerFilePath).then(function(callerFileExists) {
-					var args = {
-						builtJsFile: op.builtFilePath,
-						callerFile: callerFileExists ? op.callerFilePath : "",
-						originalFolder: path.join(op.bundle, BUNDLE_WEB_FOLDER, op.pageDir)
-					};
-					if (IS_WINDOWS) {
-						return execCommand(format('xcopy /q /y /i ${builtJsFile} ${originalFolder}', args)).then(
-								function() {
-									if (!callerFileExists)
-										return;
-									return execCommand(format('xcopy /q /y /i ${callerFile} ${originalFolder}', args));
-								});
-					} else {
-						return execCommand(format("cp ${builtJsFile} ${callerFile} ${originalFolder}", args));
-					}
-				});
+				var args = {
+					builtJsFile: op.builtFilePath,
+					originalFolder: path.join(op.bundle, BUNDLE_WEB_FOLDER, op.pageDir)
+				};
+				if (IS_WINDOWS) {
+					return execCommand(format('xcopy /q /y /i ${builtJsFile} ${originalFolder}', args)).then(function() {
+						return async.sequence(op.callerFilePaths.map(function(callerFile) {
+							return function() {
+								args.callerFile = callerFile;
+								return execCommand(format('xcopy /q /y /i ${callerFile} ${originalFolder}', args));
+							};
+						}));
+					});
+				} else {
+					// cp allows any number of source files followed by a single target folder
+					args.callerFiles = op.callerFilePaths.join(" ");
+					return execCommand(format("cp ${builtJsFile} ${callerFiles} ${originalFolder}", args));
+				}
 			};
 		})).then(function() {
 			section('Copy optimized CSS files to ' + pathToOrionClientBundlesFolder);

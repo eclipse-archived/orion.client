@@ -51,22 +51,23 @@
 		<attribute name="todir" />
 	</scriptdef>
 
-	<macrodef name="finishModule">
+	<macrodef name="updateModuleID">
 		<attribute name="out" />
 		<attribute name="name" />
 		<attribute name="caller" /> <!-- Space-separated list of file names. Default is {name}.html -->
 		<attribute name="bundle" />
 		<attribute name="pagedir" />
 		<sequential>
-			<echo message="Finishing module @{pageDir}/@{name}, bundle: @{bundle}, caller: @{caller}..." />
+			<echo message="updateModuleID, module: @{pageDir}/@{name}, bundle: @{bundle}, caller: @{caller}" />
 			
-			<!-- copy @{name} to built-@{name}.js -->
-			<copy tofile="@{out}/@{pagedir}/built-@{name}.js">
+			<!-- move @{name} to built-@{name}.js -->
+			<move tofile="@{out}/@{pagedir}/built-@{name}.js">
 				<fileset file="@{out}/@{pagedir}/@{name}.js">
 					<size when="more" value="0" />
 				</fileset>
-			</copy>
+			</move>
 
+			<!-- Update the caller(s) -->
 			<antcall target="updateCaller">
 				<param name="dir" value="@{out}/@{pagedir}" />
 				<param name="caller" value="@{caller}" />
@@ -80,8 +81,19 @@
 				<param name="pageDir" value="@{pagedir}" />
 				<param name="name" value="@{name}" />
 			</antcall>
-		
-			<!-- Copy JS and caller back to bundle folder -->
+		</sequential>
+	</macrodef>
+
+	<macrodef name="copybackModule">
+		<attribute name="out" />
+		<attribute name="name" />
+		<attribute name="caller" /> <!-- Space-separated list of file names. Default is {name}.html -->
+		<attribute name="bundle" />
+		<attribute name="pagedir" />
+		<sequential>
+			<echo message="copybackModule, module: @{pageDir}/@{name}, caller: @{caller} to bundle: @{bundle}" />
+
+			<!-- Copy JS and caller(s) back to bundle folder -->
 			<copy todir="@{bundle}/web/@{pagedir}" >
 				<fileset dir="@{out}/@{pagedir}" includes="built-@{name}.js, @{caller}" >
 					<size when="more" value="0" />
@@ -254,10 +266,10 @@
 
 		<fileset dir="${dir}" includes="${caller}" id="caller.fileset" />
 
-		<replace token="require([&quot;${name}.js&quot;]);" value="require([&quot;${builtResult}.js&quot;]);">
+		<replace token="require([&quot;${name}.js&quot;])" value="require([&quot;${builtResult}.js&quot;])">
 			<fileset refid="caller.fileset" />
 		</replace>
-		<replace token="require([&apos;${name}.js&apos;]);" value="require([&quot;${builtResult}.js&quot;]);">
+		<replace token="require([&apos;${name}.js&apos;])" value="require([&quot;${builtResult}.js&quot;])">
 			<fileset refid="caller.fileset" />
 		</replace>
 		<replace token="requirejs/require.js" value="requirejs/require.min.js">
