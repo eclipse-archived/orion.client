@@ -2957,6 +2957,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		
 		/**************************************** Event handlers *********************************/
 		_handleRootMouseDown: function (e) {
+			this._cancelPoolSelectionChange();
 			if (this._ignoreEvent(e)) { return; }
 			if (util.isFirefox < 13 && e.which === 1) {
 				this._clientDiv.contentEditable = false;
@@ -3008,6 +3009,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_handleBlur: function (e) {
+			this._cancelPoolSelectionChange();
 			if (this._ignoreBlur) { return; }
 			this._hasFocus = false;
 			/*
@@ -3084,6 +3086,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (preventDefault) {
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
+			} else {
+				this._contextMenuOpen = true;
+				if (util.isFirefox) {
+					this._checkSelectionChange = true;
+					this._poolSelectionChange(true);
+				}
 			}
 		},
 		_handleCopy: function (e) {
@@ -3934,6 +3942,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_handleSelectStart: function (e) {
+			var menuOpen = this._contextMenuOpen;
+			this._contextMenuOpen = false;
+			if (menuOpen) {
+				this._checkSelectionChange = true;
+				return;
+			}
 			if (this._ignoreSelect) {
 				if (e && e.preventDefault) { e.preventDefault(); }
 				return false;
@@ -3953,14 +3967,53 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return lineNode._line.getModelOffset (node, offset);
 		},
 		_updateSelectionFromDOM: function() {
+			if (!(util.isOS || util.isAndroid || this._checkSelectionChange)) {
+				return false;
+			}
 			var window = this._getWindow();
 			var selection = window.getSelection();
 			var start = this._getModelOffset(selection.anchorNode, selection.anchorOffset);
 			var end = this._getModelOffset(selection.focusNode, selection.focusOffset);
-			if (start === undefined || end === undefined) {
-			    return;
+			var sel = this._getSelection();
+			if (start === undefined || end === undefined || (sel.start == start && sel.end == end)) {
+			    return false;
 			}
+			
+			// Detect select all
+			var firstLine = this._getLineNext();
+			var lastLine = this._getLinePrevious();
+			if (this._checkSelectionChange && 
+				(selection.anchorNode === firstLine.firstChild.firstChild && selection.anchorOffset === 0 && selection.focusNode === lastLine.lastChild.firstChild)
+				||
+				(selection.anchorNode === this._clientDiv && selection.focusNode === this._clientDiv)
+			) {
+				start = 0;
+				end = this.getModel().getCharCount();
+			}
+			
 			this._setSelection(new Selection(start, end), false, false);
+			this._checkSelectionChange = false;
+			return true;
+		},
+		_cancelPoolSelectionChange: function() {
+			this._checkSelectionChange = false;
+			if (this._selPoolTimer) {
+				window.clearTimeout(this._selPoolTimer);
+				this._selPoolTimer = null; 
+			}
+		},
+		_poolSelectionChange: function(retryPool) {
+			var that = this;
+			var window = this._getWindow();
+			this._cancelPoolSelectionChange();
+			this._selPoolTimer = window.setTimeout(function() {
+				that._selPoolTimer = null; 
+				if (!that._clientDiv) { return; }
+				var changed = that._updateSelectionFromDOM();
+				if (!changed && retryPool) {
+					that._poolSelectionChange(retryPool);
+				}
+			}, 100);
 		},
 		_handleSelectionChange: function (e) {
 			if (this._imeOffset !== -1) {
@@ -3973,16 +4026,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			 * sending the event to the application.
 			 */
 			if (util.isAndroid) {
-				var window = this._getWindow();
-				if (this._selTimer) {
-					window.clearTimeout(this._selTimer);
-				}
-				var that = this;
-				this._selTimer = window.setTimeout(function() {
-					if (!that._clientDiv) { return; }
-					that._selTimer = null; 
-					that._updateSelectionFromDOM();
-				}, 250);
+				this._poolSelectionChange();
 			} else {
 				this._updateSelectionFromDOM();
 			}
@@ -5575,8 +5619,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "copy", handler: function(e) { return self._handleCopy(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "cut", handler: function(e) { return self._handleCut(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "paste", handler: function(e) { return self._handlePaste(e ? e : window.event);}}); //$NON-NLS-0$
+			handlers.push({target: document, type: "selectionchange", handler: function(e) { return self._handleSelectionChange(e ? e : window.event); }}); //$NON-NLS-0$
 			if (util.isIOS || util.isAndroid) {
-				handlers.push({target: document, type: "selectionchange", handler: function(e) { return self._handleSelectionChange(e ? e : window.event); }}); //$NON-NLS-0$
 				handlers.push({target: clientDiv, type: "touchstart", handler: function(e) { return self._handleTouchStart(e ? e : window.event); }}); //$NON-NLS-0$
 				handlers.push({target: clientDiv, type: "touchmove", handler: function(e) { return self._handleTouchMove(e ? e : window.event); }}); //$NON-NLS-0$
 				handlers.push({target: clientDiv, type: "touchend", handler: function(e) { return self._handleTouchEnd(e ? e : window.event); }}); //$NON-NLS-0$
