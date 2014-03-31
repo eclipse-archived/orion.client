@@ -193,6 +193,8 @@
 			<copy todir= "${out}" >
 				<fileset dir="${orionClient}/bundles/org.eclipse.orion.client.ui/web/font"  includes="OrionIconFont-Regular.eot, OrionIconFont-Regular.woff, OrionIconFont-Regular.ttf, OrionIconFont-Regular.svg"/>
 			</copy>
+			<zip destFile="${out}/built-editor.zip" basedir="${out}" includes="built-editor.css, built-editor-amd.min.js, built-editor-amd.js, built-editor.min.js, built-editor.js" />
+			<zip destFile="${out}/built-compare.zip" basedir="${out}" includes="built-compare.css, built-compare-amd.min.js, built-compare-amd.js, built-compare.min.js, built-compare.js, OrionIconFont-Regular.eot, OrionIconFont-Regular.woff, OrionIconFont-Regular.ttf, OrionIconFont-Regular.svg" />
 		</sequential>
 	</target>
 
