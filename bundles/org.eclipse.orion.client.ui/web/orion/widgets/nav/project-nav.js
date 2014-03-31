@@ -52,7 +52,7 @@ define([
 		},
 		getChildren : function(parentItem, /* function(items) */ onComplete) {
 			if(parentItem.children){
-				onComplete(parentItem.children);
+				onComplete(this.processParent(parentItem, parentItem.children));
 				return;
 			}
 			if(parentItem.type==="Project"){ //$NON-NLS-0$
