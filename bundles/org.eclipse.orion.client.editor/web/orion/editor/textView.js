@@ -2957,8 +2957,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		
 		/**************************************** Event handlers *********************************/
 		_handleRootMouseDown: function (e) {
-			this._cancelPollSelectionChange();
-			this._checkSelectionChange = false;
+			this._cancelCheckSelection();
 			if (this._ignoreEvent(e)) { return; }
 			if (util.isFirefox < 13 && e.which === 1) {
 				this._clientDiv.contentEditable = false;
@@ -3010,8 +3009,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_handleBlur: function (e) {
-			this._cancelPollSelectionChange();
-			this._checkSelectionChange = false;
+			this._cancelCheckSelection();
 			if (this._ignoreBlur) { return; }
 			this._hasFocus = false;
 			/*
@@ -3097,6 +3095,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_handleCopy: function (e) {
+			this._cancelCheckSelection();
 			if (this._ignoreEvent(e)) { return; }
 			if (this._ignoreCopy) { return; }
 			if (this._doCopy(e)) {
@@ -3105,6 +3104,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_handleCut: function (e) {
+			this._cancelCheckSelection();
 			if (this._ignoreEvent(e)) { return; }
 			if (this._doCut(e)) {
 				if (e.preventDefault) { e.preventDefault(); }
@@ -3250,6 +3250,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_handleKeyDown: function (e) {
+			this._cancelCheckSelection();
 			if (this._ignoreEvent(e)) {	return;	}
 			if (this.isListening("KeyDown")) { //$NON-NLS-0$
 				var keyEvent = this._createKeyEvent("KeyDown", e); //$NON-NLS-0$
@@ -3820,6 +3821,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_handlePaste: function (e) {
+			this._cancelCheckSelection();
 			if (this._ignoreEvent(e)) { return; }
 			if (this._ignorePaste) { return; }
 			if (this._doPaste(e)) {
@@ -3981,21 +3983,36 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			    return false;
 			}
 			
-			// Detect select all
-			var firstLine = this._getLineNext();
-			var lastLine = this._getLinePrevious();
-			if (this._checkSelectionChange && 
+			if (this._checkSelectionChange) {
+				var firstLine = this._getLineNext();
+				var lastLine = this._getLinePrevious();
+				
+				// Selection is unchanged and bigger than the visible buffer region
+				if (selection.anchorNode === firstLine.firstChild.firstChild && selection.anchorOffset === 0 &&
+					selection.focusNode === lastLine.firstChild.firstChild && selection.focusOffset === 0)
+				{
+					return false;
+				}
+				
+				// Detect select all
+				if (
 				(selection.anchorNode === firstLine.firstChild.firstChild && selection.anchorOffset === 0 && selection.focusNode === lastLine.lastChild.firstChild)
-				||
-				(selection.anchorNode === this._clientDiv && selection.focusNode === this._clientDiv)
-			) {
-				start = 0;
-				end = this.getModel().getCharCount();
+				|| (selection.anchorNode === this._clientDiv && selection.focusNode === this._clientDiv)
+				) {
+					start = 0;
+					end = this.getModel().getCharCount();
+				}
 			}
 			
 			this._setSelection(new Selection(start, end), false, false);
 			this._checkSelectionChange = false;
 			return true;
+		},
+		_cancelCheckSelection: function() {
+			if (this._checkSelectionChange) {
+				this._checkSelectionChange = false;
+				this._cancelPollSelectionChange();
+			}
 		},
 		_cancelPollSelectionChange: function() {
 			if (this._selPollTimer) {
