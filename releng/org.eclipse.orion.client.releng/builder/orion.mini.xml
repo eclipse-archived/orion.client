@@ -41,67 +41,54 @@
 		</replace>
 	</target>
 
-	<scriptdef name="finishBuiltModules" language="javascript" src="${builder}/scripts/finishModules.js">
-		<attribute name="buildfile" />
-		<attribute name="out" />
-	</scriptdef>
-
 	<scriptdef name="stageBundles" language="javascript" src="${builder}/scripts/stageBundles.js">
 		<attribute name="buildfile" />
 		<attribute name="todir" />
 	</scriptdef>
 
-	<macrodef name="updateModuleID">
+	<scriptdef name="copyBackBundles" language="javascript" src="${builder}/scripts/copyBackBundles.js">
+		<attribute name="buildfile" />
 		<attribute name="out" />
-		<attribute name="name" />
-		<attribute name="caller" /> <!-- Space-separated list of file names. Default is {name}.html -->
-		<attribute name="bundle" />
-		<attribute name="pagedir" />
-		<sequential>
-			<echo message="updateModuleID, module: @{pageDir}/@{name}, bundle: @{bundle}, caller: @{caller}" />
-			
-			<!-- move @{name} to built-@{name}.js -->
-			<move tofile="@{out}/@{pagedir}/built-@{name}.js">
-				<fileset file="@{out}/@{pagedir}/@{name}.js">
-					<size when="more" value="0" />
-				</fileset>
-			</move>
+	</scriptdef>
 
-			<!-- Update the caller(s) -->
-			<antcall target="updateCaller">
-				<param name="dir" value="@{out}/@{pagedir}" />
-				<param name="caller" value="@{caller}" />
-				<param name="minifiedScript" value="@{out}/@{pagedir}/built-@{name}.js" />
-				<param name="name" value="@{name}" />
-			</antcall>
+	<!-- Copy the optimized files for bundle @{bundle} from the output folder @{out} back into the bundle. --> 
+	<target name="copybackBundle">
+		<!-- params: bundle, out -->
+		<property name="bundle.fullpath" location="${bundle}" />
+		<property name="out.fullpath" location="${out}" />
 
-			<!-- Rewrite the module name to built-@{name} -->
-			<antcall target="updateJS">
-				<param name="minifiedScript" value="@{out}/@{pagedir}/built-@{name}.js" />
-				<param name="pageDir" value="@{pagedir}" />
-				<param name="name" value="@{name}" />
-			</antcall>
-		</sequential>
-	</macrodef>
+		<!-- For each JS file in this bundle we need 3 optimized files: {foo}.js, {foo}.js.map, {foo}.js.src
+		We build the list of JS files from ${bundle}, but the actual optimized files are in ${out}. So we
+		construct a set of relative paths to the optimized files, which we can apply against ${out} later.
+		-->
+		<pathconvert property="optimized.paths" pathsep=",">
+			<fileset dir="${bundle.fullpath}">
+				<include name="**/*.js" />
+				<exclude name="**/node_modules/" />
+			</fileset>
+			<chainedmapper>
+				<!-- strip off leading bundle/web/ to get relative path -->
+				<globmapper from="${bundle.fullpath}/*" to="*" handledirsep="true" />
+				<compositemapper>
+					<identitymapper />
+					<globmapper from="*" to="*.map" />
+					<globmapper from="*" to="*.src" />
+				</compositemapper>
+			</chainedmapper>
+		</pathconvert>
 
-	<macrodef name="copybackModule">
-		<attribute name="out" />
-		<attribute name="name" />
-		<attribute name="caller" /> <!-- Space-separated list of file names. Default is {name}.html -->
-		<attribute name="bundle" />
-		<attribute name="pagedir" />
-		<sequential>
-			<echo message="copybackModule, module: @{pageDir}/@{name}, caller: @{caller} to bundle: @{bundle}" />
+		<!-- Evaluate the relative paths against @{out} and copy the resulting files back into our bundle folder. -->
+		<copy todir="${bundle}">
+			<!-- TODO: this breaks if a filename contains comma or space -->
+			<fileset dir="${out}" includes="${optimized.paths}" />
+		</copy>
+	</target>
 
-			<!-- Copy JS and caller(s) back to bundle folder -->
-			<copy todir="@{bundle}/web/@{pagedir}" >
-				<fileset dir="@{out}/@{pagedir}" includes="built-@{name}.js, @{caller}" >
-					<size when="more" value="0" />
-				</fileset>
-			</copy>
-		</sequential>
-	</macrodef>
-	
+	<!-- Replaces any references to the unminified `require.js` with the minified `require.min.js` in the bundles -->
+	<scriptdef name="updateRequire" language="javascript" src="${builder}/scripts/updateRequire.js">
+		<attribute name="buildfile" />
+	</scriptdef>
+
 	<target name="orionOptimize" unless="skipOrionUI">
 		<!-- $staging: Input folder for r.js -->
 		<!-- $out:     Output folder of r.js -->
@@ -128,7 +115,8 @@
 				<arg value="dir=${out}" />
 			</java>
 
-			<finishBuiltModules buildfile="${buildfile}" out="${out}" />
+			<copyBackBundles buildfile="${buildfile}" out="${out}" />
+			<updateRequire buildfile="${buildfile}" />
 		</sequential>
 	</target>
 
@@ -256,52 +244,6 @@
 			</java>
 		</sequential>
 	</macrodef>
-
-	<!-- Updates any require statements in the "calling module(s)" ${caller}. -->
-	<target name="updateCaller">
-		<echo message="update caller(s): ${caller}" />
-		<condition property="builtResult" value="built-${name}" else="${name}" >
-			<length file="${minifiedScript}" when="greater" length="0" />
-		</condition>
-
-		<fileset dir="${dir}" includes="${caller}" id="caller.fileset" />
-
-		<replace token="require([&quot;${name}.js&quot;])" value="require([&quot;${builtResult}.js&quot;])">
-			<fileset refid="caller.fileset" />
-		</replace>
-		<replace token="require([&apos;${name}.js&apos;])" value="require([&quot;${builtResult}.js&quot;])">
-			<fileset refid="caller.fileset" />
-		</replace>
-		<replace token="requirejs/require.js" value="requirejs/require.min.js">
-			<fileset refid="caller.fileset" />
-		</replace>
-		<replace token="data-main=&quot;${name}.js&quot;" value="data-main=&quot;${builtResult}.js&quot;">
-			<fileset refid="caller.fileset" />
-		</replace>
-		<replace token="data-main=&apos;${name}.js&apos;" value="data-main=&quot;${builtResult}.js&quot;">
-			<fileset refid="caller.fileset" />
-		</replace>
-	</target>
-
-	<target name="checkBuiltResult">
-		<condition property="builtResultExists" value="1" >
-			<length file="${minifiedScript}" when="greater" length="0" />
-		</condition>
-	</target>
-
-	<!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=404957 -->
-	<target name="updateJS" depends="checkBuiltResult" if="builtResultExists">
-		<!-- Omit superfluous prefix "./" if we're dealing with module in the cwd -->
-		<condition property="moduleName" value="${name}" else="${pageDir}/${name}">
-			<equals arg1="${pageDir}" arg2="." />
-		</condition>
-		<property name="builtModuleName" value="built-${name}.js" />
-
-		<replace file="${minifiedScript}" value="define(&apos;${builtModuleName}&apos;">
-			<replacefilter token="define(&quot;${moduleName}&quot;" />
-			<replacefilter token="define(&apos;${moduleName}&apos;" />
-		</replace>
-	</target>
 
 	<!-- These 3 tasks are just for conditionally removing existing ${staging} and ${optimized} -->
 	<target name="checkDirs">

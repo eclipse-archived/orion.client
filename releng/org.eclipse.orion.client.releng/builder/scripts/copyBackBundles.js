@@ -9,8 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*
- * Helper script for Orion build-time minification. Reads bundles from the provided @{buildfile}
- * and copies their web folders to @{todir}.
+ * Helper script for Orion build-time minification.
  */
 /*global importPackage orion Packages project attributes self*/
 
@@ -25,29 +24,24 @@
 
 var Project = Packages.org.apache.tools.ant.Project;
 var buildFile = attributes.get("buildfile");
-var todir = attributes.get("todir");
 
-if (!buildFile || !todir)
-	throw new Error("Missing attribute");
-	
-var bundles = orion.build.getBuildObject(buildFile).bundles || [];
-if (!bundles.length)
+var buildConfig = orion.build.getBuildObject(buildFile);
+if (!buildConfig.bundles || !buildConfig.bundles.length)
 	self.log("No bundles found in build file " + buildFile, Project.MSG_WARN);
 
-// Create a fileset for every bundle's web/ folder
-var buildConfig = orion.build.getBuildObject(buildFile);
-var filesets = orion.build.getBundles(buildConfig).map(function(bundle) {
-	var fileset = project.createDataType("fileset");
-	fileset.setDir(bundle.web);
-	fileset.setIncludes("**");
-	fileset.setExcludes("**/node_modules/**");
-	return fileset;
-});
+orion.build.getBundles(buildConfig).forEach(function(bundle) {
+	// Call the "copybackBundle" target
+	var antcall = project.createTask("antcall");
+	antcall.setTarget("copybackBundle");
+	//antcall.setDynamicAttribute("out", attributes.get("out"));
+	//antcall.setDynamicAttribute("bundle", (bundle.bundle + Packages.java.io.File.separator + "web"));
 
-// Copy all the filesets to the `todir`
-var task = project.createTask("copy");
-filesets.forEach(function(fileset) {
-	task.addFileset(fileset);
+	var outParam = antcall.createParam();
+	outParam.setName("out");
+	outParam.setValue(attributes.get("out"));
+
+	var bundleParam = antcall.createParam();
+	bundleParam.setName("bundle");
+	bundleParam.setValue(bundle.bundle + Packages.java.io.File.separator + "web");
+	antcall.execute();
 });
-task.setTodir(new Packages.java.io.File(todir));
-task.perform();
