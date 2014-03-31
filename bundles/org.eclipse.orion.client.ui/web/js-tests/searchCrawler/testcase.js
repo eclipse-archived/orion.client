@@ -666,7 +666,8 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			fileType: "*.*",
 			keyword: "EveryWhere"
 		},
-		{location: "root"});
+		{location: "root", reportOnCancel: true});
+		//There is time racing issue: if deferred.resolve is faster than deferred.cancel, then we need to tell the crawler teh mode is simulating.
 		return _cancellAndCompare(crawler, 3, {
 			response: {
 				numFound: 3,
