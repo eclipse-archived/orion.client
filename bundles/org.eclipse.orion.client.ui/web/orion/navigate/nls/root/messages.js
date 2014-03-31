@@ -107,5 +107,8 @@ define({
 	"Did not drop ${0}.  Folder drop is not supported in this browser.": "Did not drop ${0}.  Folder drop is not supported in this browser.",
 	"You cannot copy files directly into the workspace.  Create a folder first.": "You cannot copy files directly into the workspace.  Create a folder first.",
 	"Unzip ${0}?": "Unzip ${0}?",
+	"Upload progress: ": "Upload progress: ",
+	"Uploading ": "Uploading ",
+	"Uploading the following file failed: ": "Uploading the following file failed: ",
 	"NoFile": "Use the ${0} menu to create new files and folders. Click a file to start coding." //$NON-NLS-1$ //$NON-NLS-0$
 });

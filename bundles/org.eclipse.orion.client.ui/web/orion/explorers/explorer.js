@@ -85,8 +85,10 @@ exports.Explorer = (function() {
 				// make a row and empty column so that the new name appears after checkmarks/expansions
 				var tr = document.createElement("tr"); //$NON-NLS-0$
 				tr.id = domId+"placeHolderRow"; //$NON-NLS-0$
+				tr.classList.add("navRow"); //$NON-NLS-0$
 				var td = document.createElement("td"); //$NON-NLS-0$
 				td.id = domId+"placeHolderCol"; //$NON-NLS-0$
+				td.classList.add("navColumn"); //$NON-NLS-0$
 				tr.appendChild(td);
 				if (insertAfter) {
 					// insert tr after refNode, i.e. right before refNode's nextSibling in the parent

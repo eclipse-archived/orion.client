@@ -71,29 +71,60 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 * events describing the file upload.
 	 * @param {Boolean} unzip
 	 * @param {Boolean} force
+	 * @param {Object} handlers Optional. An object which contains handlers for the different events that the upload can fire.
+	 * 			handlers.progress The handler function that should be called when progress occurs.
+	 * 			handlers.load The handler function that should be called when the transfer completes successfully.
+	 * 			handlers.error The handler function that should be called if the transfer fails.
+	 * 			handlers.abort The handler function that should be called if the transfer is cancelled by the user.
+	 * 			handlers.loadend The handler function that should be called when the transfer completes (regardless of success or failure).
+	 * @returns {XMLHttpRequest} The XMLHttpRequest object that was created and used for the upload.
 	 */
-	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip, force) { 
-		this.req = new XMLHttpRequest();
-		this.req.open('post', force ? targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")>0 ? "&force=true" : "?force=true") : targetFolder.ImportLocation, true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		this.req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
-		this.req.setRequestHeader("Slug", file.name); //$NON-NLS-0$
+	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip, force, handlers) { 
+		var req = new XMLHttpRequest();
+		
+		if (handlers) {
+			if (handlers.progress) {
+				//transfer in progress
+				req.upload.addEventListener("progress", handlers.progress, false);
+			}
+			if (handlers.load) {
+				//transfer finished successfully
+				req.upload.addEventListener("load", handlers.load, false);	
+			}
+			if (handlers.error) {
+				//transfer failed
+				req.upload.addEventListener("error", handlers.error, false);	
+			}
+			if (handlers.abort) {
+				//transfer cancelled
+				req.upload.addEventListener("abort", handlers.abort, false);
+			}
+			if (handlers.loadend) {
+				//transfer finished, status unknown
+				req.addEventListener("loadend", handlers.loadend, false);
+			}
+		}
+		
+		req.open('post', force ? targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")>0 ? "&force=true" : "?force=true") : targetFolder.ImportLocation, true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
+		req.setRequestHeader("Slug", file.name); //$NON-NLS-0$
 		// TODO if we want to unzip zip files, don't use this...
 		if (!unzip) {
-			this.req.setRequestHeader("X-Xfer-Options", "raw"); //$NON-NLS-1$ //$NON-NLS-0$
+			req.setRequestHeader("X-Xfer-Options", "raw"); //$NON-NLS-1$ //$NON-NLS-0$
 		}
-		this.req.setRequestHeader("Content-Type", file.type); //$NON-NLS-0$
-		this.req.onreadystatechange = function(state) {
-			if(this.req.readyState === 4) {
-				if (this.req.status === 400){
+		req.setRequestHeader("Content-Type", file.type); //$NON-NLS-0$
+		req.onreadystatechange = function(state) {
+			if(req.readyState === 4) {
+				if (req.status === 400){
 					var result = {};
 					try{
-						result = JSON.parse(this.req.responseText);
+						result = JSON.parse(req.responseText);
 					}catch(e){
 					}
 					if(result.JsonData && result.JsonData.ExistingFiles){
 						var confirmFunction = (explorer && explorer.serviceRegistry) ? explorer.serviceRegistry.getService("orion.page.dialog").confirm : confirm; //$NON-NLS-0$
 						if(confirmFunction(result.Message + "\nWould you like to retry the import with force overwriting?")){
-							fileCommandUtils.uploadFile(targetFolder, file, explorer, unzip, true);
+							fileCommandUtils.uploadFile(targetFolder, file, explorer, unzip, true, handlers);
 							return;
 						}
 					}
@@ -101,7 +132,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				dispatchModelEventOn({ type: "create", parent: targetFolder, newValue: null /* haven't fetched the new file in Orion yet */ }); //$NON-NLS-0$
 			}
 		}.bind(this);
-		this.req.send(file);
+		req.send(file);
+		
+		return req;
 	};
 
 	/**

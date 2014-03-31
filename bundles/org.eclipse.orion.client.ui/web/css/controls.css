@@ -1164,3 +1164,69 @@ button.scopeDeleteButton:hover {
 .lightTreeTableRow, .darkTreeTableRow {
 	border-bottom: 1px solid #dadada;
 }
+
+.progressBar {
+	border-radius: 3px;
+	width: 0;
+	background-color: #fab467; /* for browsers that don't support linear-gradient */
+	background: linear-gradient(#fabb76, #e1a25c);
+	display: inline-block;
+	height: 100%;
+}
+
+.progressBarWrapper {
+	border: 1px solid #dadada;
+	border-radius: 3px;
+	margin-left: 5px;
+	padding: 1px;
+	width: 100px;
+	display: inline-block;
+	height: 14px;
+	overflow: hidden;
+}
+
+.uploadNode {
+	padding: 2px;
+	background-color: whitesmoke;
+}
+
+.uploadNode span {
+	vertical-align: middle;
+}
+
+.progressBarWrapper .progressBar {
+	vertical-align: top;
+}
+
+.uploadNode .uploadCancelButton {
+	cursor: pointer;
+	float: right;
+	font-size: 14px;
+}
+
+.uploadCancelButton:hover {
+	color: #F58B0F;
+}
+
+.progressBar.continuous {
+	-webkit-animation:uploadAnimation 1s infinite linear;
+	-moz-animation:uploadAnimation 1s infinite linear;
+	animation:uploadAnimation 1s infinite linear;
+	background: linear-gradient(to right, transparent, #fab467, transparent);
+	width: 100%;
+}
+
+@-webkit-keyframes uploadAnimation{
+	from{margin-left: -100%;}
+	to{margin-left: 100%;}
+}
+
+@-moz-keyframes uploadAnimation{
+	from{margin-left: -100%;}
+	to{margin-left: 100%;}
+}
+
+@keyframes uploadAnimation{
+	from{margin-left: -100%;}
+	to{margin-left: 100%;}
+}
