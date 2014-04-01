@@ -41,7 +41,10 @@ define([], function(){
 		 */
 		openFiles : function(onDone) {
 			// TODO
-		}	
+		},
+		accept : function(msg) {
+			window.alert(msg);
+		}
 	};
 	DialogService.prototype.constructor = DialogService;
 	//return module exports
