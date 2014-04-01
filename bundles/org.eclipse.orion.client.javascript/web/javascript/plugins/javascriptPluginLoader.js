@@ -28,7 +28,7 @@ define([
 
 	if (!useWorker) {
 		// Non-worker case
-		require(["javascriptPlugin.js"]);
+		require(["javascript/plugins/javascriptPlugin"]);
 		return;
 	}
 

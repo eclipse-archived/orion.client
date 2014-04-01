@@ -39,4 +39,4 @@ require.config({
 	}]
 });
 
-require(["javascriptPlugin.js"]);
+require(["javascript/plugins/javascriptPlugin"]);

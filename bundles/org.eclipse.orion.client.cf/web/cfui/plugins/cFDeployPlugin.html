@@ -17,7 +17,7 @@
 		  }
 		});
 
-		require(["cFDeployService.js", "../../orion/plugin.js"], function(cFDeployService, PluginProvider){
+		require(["cfui/plugins/cFDeployService", "../../orion/plugin.js"], function(cFDeployService, PluginProvider){
 			var deployService = new cFDeployService.DeployService();
 			
 			var headers = {
