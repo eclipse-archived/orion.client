@@ -39,6 +39,9 @@ define([], function(){
 		 * Prompts the user to select one or more files
 		 * @param {Function} onDone The function to invoke upon confirmation.
 		 */
+		accept : function(msg) {
+				window.alert(msg);
+		},
 		openFiles : function(onDone) {
 			// TODO
 		}	
