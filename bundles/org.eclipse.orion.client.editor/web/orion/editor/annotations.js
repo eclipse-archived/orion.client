@@ -340,15 +340,26 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * Only annotations of the specified types will be shown by
 		 * the receiver.
 		 * </p>
+		 * <p>
+		 * If the priority is not specified, the annotation type will be added
+		 * to the end of the receiver's list (lowest pririoty).
+		 * </p>
 		 *
 		 * @param {Object} type the annotation type to be shown
+		 * @param {Number} priority the priority for the annotation type
 		 * 
 		 * @see orion.editor.AnnotationTypeList#removeAnnotationType
 		 * @see orion.editor.AnnotationTypeList#isAnnotationTypeVisible
+		 * @see orion.editor.AnnotationTypeList#getAnnotationTypePriority
 		 */
-		addAnnotationType: function(type) {
+		addAnnotationType: function(type, priority) {
 			if (!this._annotationTypes) { this._annotationTypes = []; }
-			this._annotationTypes.push(type);
+			var index = priority - 1;
+			if (priority == undefined || !(0 <= index && index < this._annotationTypes.length)) {
+				this._annotationTypes.push(type);
+			} else {
+				this._annotationTypes.splice(index, 0, type);
+			}
 		},
 		/**
 		 * Gets the annotation type priority.  The priority is determined by the
