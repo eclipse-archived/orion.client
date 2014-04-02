@@ -36,6 +36,7 @@
 					deployTypes: ["Cloud Foundry"],
 					tooltip: "Deploy application in cloud.",
 					validationProperties: [{source: "NoShow" }],
+					logLocationTemplate: "{+OrionHome}/cfui/logs.html#{Name,Target*}",
 					priorityForDefault: 9
 				});
 				
