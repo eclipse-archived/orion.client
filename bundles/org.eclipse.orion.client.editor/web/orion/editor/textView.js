@@ -6513,7 +6513,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			this._resetLineHeight();
 		},
-		_showCaret: function (allSelection, callback, scrollAlign, pageScroll) {
+		_showCaret: function (allSelection, callback, scrollOptions, pageScroll) {
 			if (!this._clientDiv) { return; }
 			var model = this._model;
 			var selection = this._getSelection();
@@ -6521,6 +6521,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var caret = selection.getCaret();
 			var start = selection.start;
 			var end = selection.end;
+			var startLine = model.getLineAtOffset(start);
 			var endLine = model.getLineAtOffset(end);
 			var endInclusive = Math.max(Math.max(start, model.getLineStart(endLine)), end - 1);
 			var clientWidth = this._getClientWidth();
@@ -6531,19 +6532,24 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var right = bounds.right;
 			var top = bounds.top;
 			var bottom = bounds.bottom;
-			if (allSelection && !selection.isEmpty()) {
+			var selectionHeight = 0;
+			var hasScrollOptions = typeof scrollOptions === "object"; //$NON-NLS-0$
+			if ((allSelection || hasScrollOptions) && !selection.isEmpty()) {
 				bounds = this._getBoundsAtOffset(caret === end ? start : endInclusive);
-				if (bounds.top === top) {
-					if (caret === start) {
-						right = left + Math.min(bounds.right - left, clientWidth);
+				selectionHeight = (bounds.bottom > bottom ? bounds.bottom : bottom) - (bounds.top < top ? bounds.top : top);
+				if (allSelection) {
+					if (bounds.top === top) {
+						if (caret === start) {
+							right = left + Math.min(bounds.right - left, clientWidth);
+						} else {
+							left = right - Math.min(right - bounds.left, clientWidth);
+						}
 					} else {
-						left = right - Math.min(right - bounds.left, clientWidth);
-					}
-				} else {
-					if (caret === start) {
-						bottom = top + Math.min(bounds.bottom - top, clientHeight);
-					} else {
-						top = bottom - Math.min(bottom - bounds.top, clientHeight);
+						if (caret === start) {
+							bottom = top + Math.min(bounds.bottom - top, clientHeight);
+						} else {
+							top = bottom - Math.min(bottom - bounds.top, clientHeight);
+						}
 					}
 				}
 			}
@@ -6571,11 +6577,41 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					}
 				}
 			}
-			if (pixelX !== 0 || pixelY !== 0) {
-				if (pixelY !== 0 && typeof scrollAlign === "number") { //$NON-NLS-0$
-					if (scrollAlign < 0) { scrollAlign = 0; }
-					if (scrollAlign > 1) { scrollAlign = 1; }
-					pixelY += Math.floor(pixelY > 0 ? scrollAlign * clientHeight : -scrollAlign * clientHeight);
+			var alwaysScroll = hasScrollOptions && scrollOptions.scrollPolicy === "always"; //$NON-NLS-0$
+			if (pixelX !== 0 || pixelY !== 0 || alwaysScroll) {
+				if (hasScrollOptions) {
+					var flag = pixelY > 0;
+					if (pixelY === 0) {
+						pixelY = top - scroll.y;
+					}
+					var viewAnchor = scrollOptions.viewAnchor || "caret"; //$NON-NLS-0$
+					var selectionAnchor = scrollOptions.selectionAnchor || "caret"; //$NON-NLS-0$
+					var viewAnchorOffset = Math.min(Math.max(0, scrollOptions.viewAnchorOffset || 0));
+//					var selectionAnchorOffset = Math.min(Math.max(0, scrollOptions.selectionAnchorOffset || 0));
+					if (viewAnchor === "top") { //$NON-NLS-0$
+						pixelY += Math.floor(flag ? (1 - viewAnchorOffset) * clientHeight : -viewAnchorOffset * clientHeight);
+					} else if (viewAnchor === "bottom") { //$NON-NLS-0$
+						pixelY += Math.floor(flag ? viewAnchorOffset * clientHeight : -(1 - viewAnchorOffset) * clientHeight);
+					} else if (viewAnchor === "center") { //$NON-NLS-0$
+						pixelY += Math.floor(flag ? clientHeight / 2 + viewAnchorOffset * clientHeight : clientHeight / 2  - (1 - viewAnchorOffset) * clientHeight);
+					} else { // caret is the default
+						pixelY += Math.floor(flag ? viewAnchorOffset * clientHeight : -viewAnchorOffset * clientHeight);
+					}
+					if (startLine !== endLine) {
+						if (selectionAnchor === "top" && caret !== start) { //$NON-NLS-0$
+							pixelY += Math.floor(-selectionHeight);
+						} else if (selectionAnchor === "bottom" && caret !== end) { //$NON-NLS-0$
+							pixelY += Math.floor(selectionHeight);
+						} else if (selectionAnchor === "center") { //$NON-NLS-0$
+							pixelY += Math.floor(selectionHeight / 2);
+						} else {
+							// caret is the default
+						}
+					}
+				} else if (pixelY !== 0 && typeof scrollOptions === "number") { //$NON-NLS-0$
+					if (scrollOptions < 0) { scrollOptions = 0; }
+					if (scrollOptions > 1) { scrollOptions = 1; }
+					pixelY += Math.floor(pixelY > 0 ? scrollOptions * clientHeight : -scrollOptions * clientHeight);
 				}
 				this._scrollViewAnimated(pixelX, pixelY, callback);
 				/*
