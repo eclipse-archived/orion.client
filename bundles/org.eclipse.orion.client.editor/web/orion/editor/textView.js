@@ -210,7 +210,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 	/** @private */
 	function DOMReady(document, parent, className, callback) {
 		className = "_" + className + "DOMReady"; //$NON-NLS-1$ //$NON-NLS-0$
-		parent.classList.add(className); //$NON-NLS-0$
+		parent.className = parent.className ? parent.className + " " + className : className; //$NON-NLS-0$
 		parent.__DOMReady = callback;
 		var id = className + "Style"; //$NON-NLS-0$
 		if (document.getElementById(id)) { return; }
@@ -2703,7 +2703,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Boolean|Number} [show=true] if <code>true</code>, the view will scroll the minimum amount necessary to show the caret location. If
 		 *					<code>show</code> is a <code>Number</code>, the view will scroll the minimum amount necessary to show the caret location plus a
 		 *					percentage of the client area height. The parameter is clamped to the [0,1] range.  In either case, the view will only scroll
-		 *					if the new caret location is visible already.
+		 *					if the new caret location is not visible already.
 		 * @param {Function} [callback] if callback is specified and <code>scrollAnimation</code> is not zero, view scrolling is animated and
 		 *					the callback is called when the animation is done. Otherwise, callback is callback right away.
 		 *
@@ -2840,7 +2840,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Boolean|Number} [show=true] if <code>true</code>, the view will scroll the minimum amount necessary to show the caret location. If
 		 *					<code>show</code> is a <code>Number</code>, the view will scroll the minimum amount necessary to show the caret location plus a
 		 *					percentage of the client area height. The parameter is clamped to the [0,1] range.  In either case, the view will only scroll
-		 *					if the new caret location is visible already.
+		 *					if the new caret location is not visible already.
 		 * @param {Function} [callback] if callback is specified and <code>scrollAnimation</code> is not zero, view scrolling is animated and
 		 *					the callback is called when the animation is done. Otherwise, callback is callback right away.
 		 *
