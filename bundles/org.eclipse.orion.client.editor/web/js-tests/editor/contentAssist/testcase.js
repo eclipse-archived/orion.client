@@ -11,11 +11,12 @@
 /*global define setTimeout*/
 define([
 	'orion/Deferred',
-	'orion/assert',
+	'chai/chai',
 	'orion/editor/textModel',
 	'js-tests/editor/mockTextView',
 	'orion/editor/contentAssist'
-], function(Deferred, assert, mTextModel, mMockTextView, mContentAssist) {
+], function(Deferred, chai, mTextModel, mMockTextView, mContentAssist) {
+	var assert = chai.assert;
 	var ContentAssist = mContentAssist.ContentAssist,
 	    TextModel = mTextModel.TextModel,
 	    MockTextView = mMockTextView.MockTextView;

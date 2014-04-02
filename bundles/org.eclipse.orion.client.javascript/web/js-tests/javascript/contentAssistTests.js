@@ -15,14 +15,14 @@
 define([
 	'javascript/contentAssist/contentAssist',
 	'javascript/contentAssist/indexer',
-	'orion/assert',
+	'chai/chai',
 	'orion/objects',
 	'esprima',
 	'doctrine/doctrine',
 	'orion/Deferred',
 	'orion/editor/jsTemplateContentAssist' //TODO remove this once we merge the code
-], function(ContentAssist, Indexer, assert, objects, Esprima, Doctrine, Deferred, JSTemplateProposals) {
-
+], function(ContentAssist, Indexer, chai, objects, Esprima, Doctrine, Deferred, JSTemplateProposals) {
+	var assert = chai.assert;
 	/**
 	 * @description Parse the snippet
 	 * @returns {Object} The AST

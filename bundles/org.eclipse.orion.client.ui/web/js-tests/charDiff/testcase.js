@@ -10,9 +10,8 @@
  ******************************************************************************/
 /*global define orion */
 
-define(["orion/assert", "orion/compare/jsdiffAdapter"], function(assert, mJSDiffAdapter) {
-
-	
+define(["chai/chai", "orion/compare/jsdiffAdapter"], function(chai, mJSDiffAdapter) {
+	var assert = chai.assert;
 	var tests = {};
 	var adapter = new mJSDiffAdapter.JSDiffAdapter();
 	/**

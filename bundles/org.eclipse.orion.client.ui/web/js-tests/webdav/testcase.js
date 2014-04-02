@@ -10,7 +10,8 @@
  ******************************************************************************/
 /*jslint browser: true, devel: true*/
 /*global define XPathResult DOMParser*/
-define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "webdav"], function(assert, mServiceregistry, mPluginregistry, mWebdav) {
+define(["chai/chai", "orion/serviceregistry", "orion/pluginregistry", "webdav"], function(chai, mServiceregistry, mPluginregistry, mWebdav) {
+	var assert = chai.assert;
 	var tests = {};
 
 	tests["test plugin GET call"] = function() {

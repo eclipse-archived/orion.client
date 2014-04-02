@@ -9,8 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define*/
-define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/serviceregistry', 'orion/metatype', 'orion/settings/settingsRegistry'],
-		function(assert, Deferred, testHelpers, mServiceRegistry, mMetaType, SettingsRegistry) {
+define(['chai/chai', 'orion/Deferred', 'orion/testHelpers', 'orion/serviceregistry', 'orion/metatype', 'orion/settings/settingsRegistry'],
+		function(chai, Deferred, testHelpers, mServiceRegistry, mMetaType, SettingsRegistry) {
+	var assert = chai.assert;
 	var SETTING_SERVICE = 'orion.core.setting';
 	var METATYPE_SERVICE = 'orion.cm.metatype';
 

@@ -10,7 +10,8 @@
  ******************************************************************************/
 /*global define orion */
 
-define(["orion/assert", "orion/urlUtils"], function(assert, mUrlUtils) {
+define(["chai/chai", "orion/urlUtils"], function(chai, mUrlUtils) {
+	var assert = chai.assert;
       
 	// The test cases are for testing the urlUtils function to detect if a given text has any URL encoded by "[displayString](url)". 
 	// Currently this detecting function is used as a parser for rendering a string in the shell page, by different segment. The segment is mixed by plain text and url link.

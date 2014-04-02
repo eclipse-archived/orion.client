@@ -8,7 +8,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define XPathResult DOMParser*/
-define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], function(assert, mServiceregistry, mPluginregistry) {
+define(["chai/chai", "orion/serviceregistry", "orion/pluginregistry"], function(chai, mServiceregistry, mPluginregistry) {
+	var assert = chai.assert;
 	var tests = {};
 
 

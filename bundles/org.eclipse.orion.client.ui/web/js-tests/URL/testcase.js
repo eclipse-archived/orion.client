@@ -11,7 +11,8 @@
 /*global define document URL*/
 
 
-define(["orion/assert", "orion/URL-shim", "domReady!"], function(assert) {
+define(["chai/chai", "orion/URL-shim", "domReady!"], function(chai) {
+	var assert = chai.assert;
 	var tests = {};
 
 	tests.testSpecificationURL = function() {

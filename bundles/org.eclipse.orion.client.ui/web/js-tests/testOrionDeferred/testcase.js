@@ -11,8 +11,8 @@
 
 /*global define setTimeout console*/
 
-define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest, Deferred) {
-
+define(["chai/chai", "orion/test", "orion/Deferred"], function(chai, mTest, Deferred) {
+	var assert = chai.assert;
 	var tests = {};
 	// dummy change
 	tests["test basic synch"] = function() {};

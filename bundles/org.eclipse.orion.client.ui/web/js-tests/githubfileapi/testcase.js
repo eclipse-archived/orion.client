@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*global define console Uint8Array*/
 
-
-define(["orion/assert", "plugins/filePlugin/GitHubFileImpl", "domReady!"], function(assert, GitHubFileImpl) {
+define(["chai/chai", "plugins/filePlugin/GitHubFileImpl", "domReady!"], function(chai, GitHubFileImpl) {
+	var assert = chai.assert;
 	var tests = {};
 	
 	tests.testrepo = function() {

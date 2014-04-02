@@ -11,8 +11,8 @@
 /*global define console setTimeout navigator*/
 
 
-define(["require", "orion/Deferred", "orion/bootstrap", "orion/assert", "orion/i18nUtil", "orion/i18n"], function(require, Deferred, bootstrap, assert, i18nUtil) {
-
+define(["require", "orion/Deferred", "orion/bootstrap", "chai/chai", "orion/i18nUtil", "orion/i18n"], function(require, Deferred, bootstrap, chai, i18nUtil) {
+	var assert = chai.assert;
 	var I18N_PLUGIN = "orion/i18n";
 	var tests = {};
 	var locale = typeof navigator === "undefined" ? "root" : (navigator.language || navigator.userLanguage || "root").toLowerCase();

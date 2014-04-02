@@ -11,8 +11,9 @@
 /*global console:true define*/
 define([
 	'eslint/events',
-	'orion/assert'
-], function(events, assert) {
+	'chai/chai'
+], function(events, chai) {
+	var assert = chai.assert;
 	var EventEmitter = events.EventEmitter;
 
 	/**

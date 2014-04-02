@@ -9,8 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define setTimeout window*/
-define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', 'orion/serviceregistry', 'orion/pluginregistry'],
-		function(assert, Deferred, testHelpers, config, mServiceRegistry, mPluginRegistry) {
+define(['chai/chai', 'orion/Deferred', 'orion/testHelpers', 'orion/config', 'orion/serviceregistry', 'orion/pluginregistry'],
+		function(chai, Deferred, testHelpers, config, mServiceRegistry, mPluginRegistry) {
+	var assert = chai.assert;			
 	var ConfigAdminFactory = config.ConfigurationAdminFactory;
 	var MANAGED_SERVICE = 'orion.cm.managedservice';
 

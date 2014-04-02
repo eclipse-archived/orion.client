@@ -9,7 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define console window*/
-define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/contentTypes', 'orion/serviceregistry', 'orion/Deferred'], function(assert, mMockFileClient, mSearchCrawler, mContentTypes, mServiceRegistry, Deferred) {
+define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/contentTypes', 'orion/serviceregistry', 'orion/Deferred'], function(chai, mMockFileClient, mSearchCrawler, mContentTypes, mServiceRegistry, Deferred) {
+	var assert = chai.assert;
 
 /******  mock up a file system tree  ******/
 	var f1_1_Contents =	"Search EveryWhere\n" + //js

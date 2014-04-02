@@ -10,11 +10,12 @@
  ******************************************************************************/
 /*global console:true define*/
 define([
-	'orion/assert',
+	'chai/chai',
 	'javascript/finder',
 	'javascript/astManager',
 	'orion/Deferred'
-], function(Assert, Finder, ASTManager, Deferred) {
+], function(chai, Finder, ASTManager, Deferred) {
+	var assert = chai.assert;
 	
 	var astManager = new ASTManager.ASTManager();
 	var editorContext = {
@@ -58,97 +59,97 @@ define([
 		/***/
 		test_findWord1: function() {
 			var word = Finder.findWord('function(param1, param2)', 12);
-			Assert.equal(word, 'param1', 'Should have found the word param1');
+			assert.equal(word, 'param1', 'Should have found the word param1');
 		},
 		/***/
 		test_findWord2: function() {
 			var word = Finder.findWord('function(param1, param2)', 9);
-			Assert.equal(word, 'param1', 'Should have found the word param1');
+			assert.equal(word, 'param1', 'Should have found the word param1');
 		},
 		/***/
 		test_findWord3: function() {
 			var word = Finder.findWord('function(param1, param2)', 17);
-			Assert.equal(word, 'param2', 'Should have found the word param2');
+			assert.equal(word, 'param2', 'Should have found the word param2');
 		},
 		/***/
 		test_findWord4: function() {
 			var word = Finder.findWord('var foo.bar = function(param1, param2)', 4);
-			Assert.equal(word, 'foo', 'Should have found the word foo');
+			assert.equal(word, 'foo', 'Should have found the word foo');
 		},
 		/***/
 		test_findWord5: function() {
 			var word = Finder.findWord('var foo.bar = function(param1, param2)', 8);
-			Assert.equal(word, 'bar', 'Should have found the word bar');
+			assert.equal(word, 'bar', 'Should have found the word bar');
 		},
 		/***/
 		test_findWord6: function() {
 			var word = Finder.findWord('f =function(p1) {', 3);
-			Assert.equal(word, 'function', 'Should have found word function');
+			assert.equal(word, 'function', 'Should have found word function');
 		},
 		/***/
 		test_findWord7: function() {
 			var word = Finder.findWord('f ={foo:true', 4);
-			Assert.equal(word, 'foo', 'Should have found word foo');
+			assert.equal(word, 'foo', 'Should have found word foo');
 		},
 		/***/
 		test_findWord8: function() {
 			var word = Finder.findWord('function(param1, param2)', 15);
-			Assert.equal(word, 'param1', 'Should have found word param1');
+			assert.equal(word, 'param1', 'Should have found word param1');
 		},
 		/***/
 		test_findWord9: function() {
 			var word = Finder.findWord('var foo.bar = function(param1, param2)', 7);
-			Assert.equal(word, 'foo', 'Should have found word foo');
+			assert.equal(word, 'foo', 'Should have found word foo');
 		},
 		/***/
 		test_findWord10: function() {
 			var word = Finder.findWord('   foo.bar = function(param1, param2)', 4);
-			Assert.equal(word, 'foo', 'Should have found word foo');
+			assert.equal(word, 'foo', 'Should have found word foo');
 		},
 		/***/
 		test_findWord11: function() {
 			var word = Finder.findWord('	foo.bar = function(param1, param2)', 2);
-			Assert.equal(word, 'foo', 'Should have found word foo');
+			assert.equal(word, 'foo', 'Should have found word foo');
 		},
 		/***/
 		test_findNoWord1: function() {
 			var word = Finder.findWord('f: function(p1, p2)', 2);
-			Assert.equal(word, null, 'Should have found no word');
+			assert.equal(word, null, 'Should have found no word');
 		},
 		/***/
 		test_findNoWord2: function() {
 			var word = Finder.findWord('f: function(p1, p2)', 15);
-			Assert.equal(word, null, 'Should have found no word');
+			assert.equal(word, null, 'Should have found no word');
 		},
 		/***/
 		test_findNoWord3: function() {
 			var word = Finder.findWord('f: function(p1) {', 16);
-			Assert.equal(word, null, 'Should have found no word');
+			assert.equal(word, null, 'Should have found no word');
 		},
 		/***/
 		test_findNoWord4: function() {
 			var word = Finder.findWord('f: function(p1) {', 17);
-			Assert.equal(word, null, 'Should have found no word');
+			assert.equal(word, null, 'Should have found no word');
 		},
 		/***/
 		test_findNoWord5: function() {
 			var word = Finder.findWord('f = function(p1) {', 2);
-			Assert.equal(word, null, 'Should have found no word');
+			assert.equal(word, null, 'Should have found no word');
 		},
 		/***/
 		test_findNoWord6: function() {
 			var word = Finder.findWord('f = function(p1) {', 3);
-			Assert.equal(word, null, 'Should have found no word');
+			assert.equal(word, null, 'Should have found no word');
 		},
 		/***/
 		test_findNoWord7: function() {
 			var word = Finder.findWord('var a = [1, 2]', 7);
-			Assert.equal(word, null, 'Should have found no word');
+			assert.equal(word, null, 'Should have found no word');
 		},
 		/***/
 		test_findNoWord8: function() {
 			var word = Finder.findWord('var a = [1, 2]', 14);
-			Assert.equal(word, null, 'Should have found no word');
+			assert.equal(word, null, 'Should have found no word');
 		},
 		/***/
 		test_findNode1: function() {
@@ -159,10 +160,10 @@ define([
 				return astManager.getAST(editorContext).then(function(ast) {
 					var node = Finder.findNode(9, ast);
 					if(!node) {
-						Assert.fail("Should have found a node");
+						assert.fail("Should have found a node");
 					}
 					else {
-						Assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
+						assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
 					}
 				});
 			}
@@ -179,10 +180,10 @@ define([
 				return astManager.getAST(editorContext).then(function(ast) {
 					var node = Finder.findNode(12, ast);
 					if(!node) {
-						Assert.fail("Should have found a node");
+						assert.fail("Should have found a node");
 					}
 					else {
-						Assert.equal(node.type, 'Identifier', 'Should have found a Identifier node');
+						assert.equal(node.type, 'Identifier', 'Should have found a Identifier node');
 					}
 				});
 			}
@@ -199,10 +200,10 @@ define([
 				return astManager.getAST(editorContext).then(function(ast) {
 					var node = Finder.findNode(14, ast);
 					if(!node) {
-						Assert.fail("Should have found a node");
+						assert.fail("Should have found a node");
 					}
 					else {
-						Assert.equal(node.type, 'Identifier', 'Should have found a Identifier node');
+						assert.equal(node.type, 'Identifier', 'Should have found a Identifier node');
 					}
 				});
 			}
@@ -220,10 +221,10 @@ define([
 				return astManager.getAST(editorContext).then(function(ast) {
 					var node = Finder.findNode(28, ast);
 					if(!node) {
-						Assert.fail("Should have found a node");
+						assert.fail("Should have found a node");
 					}
 					else {
-						Assert.equal(node.type, 'Identifier', 'Should have found a Identifier node');
+						assert.equal(node.type, 'Identifier', 'Should have found a Identifier node');
 					}
 				});
 			}
@@ -240,11 +241,11 @@ define([
 				try {
 					var token = Finder.findToken(0, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Punctuator', 'Should have found a Punctuator token');
-						Assert.equal(token.value, '(', 'Should have found a ( token');
+						assert.equal(token.type, 'Punctuator', 'Should have found a Punctuator token');
+						assert.equal(token.value, '(', 'Should have found a ( token');
 					}
 				}
 				finally {
@@ -263,11 +264,11 @@ define([
 				try {
 					var token = Finder.findToken(4, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
-						Assert.equal(token.value, 'function', 'Should have found a function token');
+						assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
+						assert.equal(token.value, 'function', 'Should have found a function token');
 					}
 				}
 				finally {
@@ -286,11 +287,11 @@ define([
 				try {
 					var token = Finder.findToken(21, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Punctuator', 'Should have found a Punctuator token');
-						Assert.equal(token.value, '}', 'Should have found a } token');
+						assert.equal(token.type, 'Punctuator', 'Should have found a Punctuator token');
+						assert.equal(token.value, '}', 'Should have found a } token');
 					}
 				}
 				finally {
@@ -309,11 +310,11 @@ define([
 				try {
 					var token = Finder.findToken(1, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
-						Assert.equal(token.value, 'var', 'Should have found a var token');
+						assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
+						assert.equal(token.value, 'var', 'Should have found a var token');
 					}
 				}
 				finally {
@@ -332,11 +333,11 @@ define([
 				try {
 					var token = Finder.findToken(12, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Punctuator', 'Should have found a Punctuator token');
-						Assert.equal(token.value, '/', 'Should have found a / token');
+						assert.equal(token.type, 'Punctuator', 'Should have found a Punctuator token');
+						assert.equal(token.value, '/', 'Should have found a / token');
 					}
 				}
 				finally {
@@ -355,11 +356,11 @@ define([
 				try {
 					var token = Finder.findToken(1, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
-						Assert.equal(token.value, 'var', 'Should have found a var token');
+						assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
+						assert.equal(token.value, 'var', 'Should have found a var token');
 					}
 				}
 				finally {
@@ -378,11 +379,11 @@ define([
 				try {
 					var token = Finder.findToken(7, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
-						Assert.equal(token.value, 'function', 'Should have found a function token');
+						assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
+						assert.equal(token.value, 'function', 'Should have found a function token');
 					}
 				}
 				finally {
@@ -401,11 +402,11 @@ define([
 				try {
 					var token = Finder.findToken(18, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
-						Assert.equal(token.value, 'function', 'Should have found a function token');
+						assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
+						assert.equal(token.value, 'function', 'Should have found a function token');
 					}
 				}
 				finally {
@@ -423,7 +424,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findToken(-1, ast.tokens);
-					Assert.equal(token, null, "Should not have found a token for out of range");
+					assert.equal(token, null, "Should not have found a token for out of range");
 				}
 				finally {
 					astManager.updated();
@@ -441,11 +442,11 @@ define([
 				try {
 					var token = Finder.findToken(9, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
-						Assert.equal(token.value, 'f', 'Should have found a f token');
+						assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
+						assert.equal(token.value, 'f', 'Should have found a f token');
 					}
 				}
 				finally {
@@ -464,11 +465,11 @@ define([
 				try {
 					var token = Finder.findToken(8, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Punctuator', 'Should have found an Punctuator token');
-						Assert.equal(token.value, '=', 'Should have found a = token');
+						assert.equal(token.type, 'Punctuator', 'Should have found an Punctuator token');
+						assert.equal(token.value, '=', 'Should have found a = token');
 					}
 				}
 				finally {
@@ -487,11 +488,11 @@ define([
 				try {
 					var token = Finder.findToken(11, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
-						Assert.equal(token.value, 'f', 'Should have found a f token');
+						assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
+						assert.equal(token.value, 'f', 'Should have found a f token');
 					}
 				}
 				finally {
@@ -510,11 +511,11 @@ define([
 				try {
 					var token = Finder.findToken(14, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Keyword', 'Should have found an Keyword token');
-						Assert.equal(token.value, 'function', 'Should have found a function token');
+						assert.equal(token.type, 'Keyword', 'Should have found an Keyword token');
+						assert.equal(token.value, 'function', 'Should have found a function token');
 					}
 				}
 				finally {
@@ -533,11 +534,11 @@ define([
 				try {
 					var token = Finder.findToken(18, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Keyword', 'Should have found an Keyword token');
-						Assert.equal(token.value, 'function', 'Should have found a function token');
+						assert.equal(token.type, 'Keyword', 'Should have found an Keyword token');
+						assert.equal(token.value, 'function', 'Should have found a function token');
 					}
 				}
 				finally {
@@ -556,11 +557,11 @@ define([
 				try {
 					var token = Finder.findToken(23, ast.tokens);
 					if(!token) {
-						Assert.fail("Should have found a token");
+						assert.fail("Should have found a token");
 					}
 					else {
-						Assert.equal(token.type, 'Punctuator', 'Should have found an Punctuator token');
-						Assert.equal(token.value, ')', 'Should have found a ) token');
+						assert.equal(token.type, 'Punctuator', 'Should have found an Punctuator token');
+						assert.equal(token.value, ')', 'Should have found a ) token');
 					}
 				}
 				finally {
@@ -578,7 +579,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findToken(4, ast.tokens);
-					Assert.equal(null, token, 'Should not have found a token');
+					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
 					astManager.updated();
@@ -595,7 +596,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findToken(5, ast.tokens);
-					Assert.equal(null, token, 'Should not have found a token');
+					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
 					astManager.updated();
@@ -612,7 +613,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findToken(12, ast.tokens);
-					Assert.equal(null, token, 'Should not have found a token');
+					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
 					astManager.updated();
@@ -629,7 +630,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findToken(14, ast.tokens);
-					Assert.equal(null, token, 'Should not have found a token');
+					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
 					astManager.updated();
@@ -646,7 +647,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findToken(15, ast.tokens);
-					Assert.equal(null, token, 'Should not have found a token');
+					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
 					astManager.updated();
@@ -663,7 +664,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findToken(1, ast.tokens);
-					Assert.equal(null, token, 'Should not have found a token');
+					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
 					astManager.updated();
@@ -680,7 +681,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findToken(0, ast.tokens);
-					Assert.equal(null, token, 'Should not have found a token');
+					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
 					astManager.updated();
@@ -698,11 +699,11 @@ define([
 				try {
 					var token = Finder.findToken(17, ast.tokens);
 					if(!token) {
-						Assert.fail('Should have found a token');
+						assert.fail('Should have found a token');
 					}
 					else {
-						Assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
-						Assert.equal(token.value, 'foo', 'Should have found a foo token');
+						assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
+						assert.equal(token.value, 'foo', 'Should have found a foo token');
 					}
 				}
 				finally {
@@ -721,7 +722,7 @@ define([
 				try {
 					var comment = Finder.findComment(0, ast);
 					if(!comment) {
-						Assert.fail("Should have found a comment");
+						assert.fail("Should have found a comment");
 					}
 				}
 				finally {
@@ -740,7 +741,7 @@ define([
 				try {
 					var comment = Finder.findComment(4, ast);
 					if(!comment) {
-						Assert.fail("Should have found a comment");
+						assert.fail("Should have found a comment");
 					}
 				}
 				finally {
@@ -759,7 +760,7 @@ define([
 				try {
 					var comment = Finder.findComment(11, ast);
 					if(!comment) {
-						Assert.fail("Should have found a comment");
+						assert.fail("Should have found a comment");
 					}
 				}
 				finally {
@@ -778,7 +779,7 @@ define([
 				try {
 					var comment = Finder.findComment(14, ast);
 					if(!comment) {
-						Assert.fail("Should have found a comment");
+						assert.fail("Should have found a comment");
 					}
 				}
 				finally {
@@ -797,7 +798,7 @@ define([
 				try {
 					var comment = Finder.findComment(19, ast);
 					if(!comment) {
-						Assert.fail("Should have found a comment");
+						assert.fail("Should have found a comment");
 					}
 				}
 				finally {
@@ -816,7 +817,7 @@ define([
 				try {
 					var comment = Finder.findComment(26, ast);
 					if(!comment) {
-						Assert.fail("Should have found a comment");
+						assert.fail("Should have found a comment");
 					}
 				}
 				finally {
@@ -834,7 +835,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findToken(-1, ast);
-					Assert.equal(token, null, "Should not have found a token for a negative offset");
+					assert.equal(token, null, "Should not have found a token for a negative offset");
 				}
 				finally {
 					astManager.updated();
@@ -851,7 +852,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findToken(null, ast);
-					Assert.equal(token, null, "Should not have found a token for a null offset");
+					assert.equal(token, null, "Should not have found a token for a null offset");
 				}
 				finally {
 					astManager.updated();
@@ -868,7 +869,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findToken(undefined, ast);
-					Assert.equal(token, null, "Should not have found a token for an undefined offset");
+					assert.equal(token, null, "Should not have found a token for an undefined offset");
 				}
 				finally {
 					astManager.updated();
@@ -885,7 +886,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findNode(null, ast);
-					Assert.equal(token, null, "Should not have found a node for a null offset");
+					assert.equal(token, null, "Should not have found a node for a null offset");
 				}
 				finally {
 					astManager.updated();
@@ -902,7 +903,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findNode(-1, ast);
-					Assert.equal(token, null, "Should not have found a node for a negative offset");
+					assert.equal(token, null, "Should not have found a node for a negative offset");
 				}
 				finally {
 					astManager.updated();
@@ -919,7 +920,7 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findNode(undefined, ast);
-					Assert.equal(token, null, "Should not have found a node for an undefined offset");
+					assert.equal(token, null, "Should not have found a node for an undefined offset");
 				}
 				finally {
 					astManager.updated();
@@ -934,9 +935,9 @@ define([
 		test_findScriptBlock1: function() {
 			var text = "<!DOCTYPE html><head><script>function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
-			Assert.equal(blocks.length, 1, "Should have found one script block");
-			Assert.equal(blocks[0].offset, 29);
-			Assert.equal(blocks[0].text, 'function f() {}');
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 29);
+			assert.equal(blocks[0].text, 'function f() {}');
 		},
 		
 		/**
@@ -946,9 +947,9 @@ define([
 		test_findScriptBlock2: function() {
 			var text = "<!DOCTYPE html><head><scriPt>function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
-			Assert.equal(blocks.length, 1, "Should have found one script block");
-			Assert.equal(blocks[0].offset, 29);
-			Assert.equal(blocks[0].text, 'function f() {}');
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 29);
+			assert.equal(blocks[0].text, 'function f() {}');
 		},
 		
 		/**
@@ -958,9 +959,9 @@ define([
 		test_findScriptBlock3: function() {
 			var text = "<!DOCTYPE html><head><script>function f() {}</scriPt></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
-			Assert.equal(blocks.length, 1, "Should have found one script block");
-			Assert.equal(blocks[0].offset, 29);
-			Assert.equal(blocks[0].text, 'function f() {}');
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 29);
+			assert.equal(blocks[0].text, 'function f() {}');
 		},
 		
 		/**
@@ -970,9 +971,9 @@ define([
 		test_findScriptBlock4: function() {
 			var text = "<!DOCTYPE html><head><scRipt>function f() {}</scripT></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
-			Assert.equal(blocks.length, 1, "Should have found one script block");
-			Assert.equal(blocks[0].offset, 29);
-			Assert.equal(blocks[0].text, 'function f() {}');
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 29);
+			assert.equal(blocks[0].text, 'function f() {}');
 		},
 		
 		/**
@@ -982,9 +983,9 @@ define([
 		test_findScriptBlock5: function() {
 			var text = "<!DOCTYPE html><head><scriPt   >function f() {}</scRIpt></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
-			Assert.equal(blocks.length, 1, "Should have found one script block");
-			Assert.equal(blocks[0].offset, 32);
-			Assert.equal(blocks[0].text, 'function f() {}');
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 32);
+			assert.equal(blocks[0].text, 'function f() {}');
 		},
 		
 		/**
@@ -994,11 +995,11 @@ define([
 		test_findScriptBlockMulti1: function() {
 			var text = "<!DOCTYPE html><head><script>function f() {}</script><script>function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
-			Assert.equal(blocks.length, 2, "Should have found two script blocks");
-			Assert.equal(blocks[0].offset, 29);
-			Assert.equal(blocks[0].text, 'function f() {}');
-			Assert.equal(blocks[1].offset, 61);
-			Assert.equal(blocks[1].text, 'function f() {}');
+			assert.equal(blocks.length, 2, "Should have found two script blocks");
+			assert.equal(blocks[0].offset, 29);
+			assert.equal(blocks[0].text, 'function f() {}');
+			assert.equal(blocks[1].offset, 61);
+			assert.equal(blocks[1].text, 'function f() {}');
 		},
 		
 		/**
@@ -1008,11 +1009,11 @@ define([
 		test_findScriptBlockMulti2: function() {
 			var text = "<!DOCTYPE html><head><scrIpt>function f() {}</script><scRipt>function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
-			Assert.equal(blocks.length, 2, "Should have found two script blocks");
-			Assert.equal(blocks[0].offset, 29);
-			Assert.equal(blocks[0].text, 'function f() {}');
-			Assert.equal(blocks[1].offset, 61);
-			Assert.equal(blocks[1].text, 'function f() {}');
+			assert.equal(blocks.length, 2, "Should have found two script blocks");
+			assert.equal(blocks[0].offset, 29);
+			assert.equal(blocks[0].text, 'function f() {}');
+			assert.equal(blocks[1].offset, 61);
+			assert.equal(blocks[1].text, 'function f() {}');
 		},
 		
 		/**
@@ -1022,11 +1023,11 @@ define([
 		test_findScriptBlockMulti3: function() {
 			var text = "<!DOCTYPE html><head><scripT>function f() {}</scriPt><scRipt>function f() {}</Script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
-			Assert.equal(blocks.length, 2, "Should have found two script blocks");
-			Assert.equal(blocks[0].offset, 29);
-			Assert.equal(blocks[0].text, 'function f() {}');
-			Assert.equal(blocks[1].offset, 61);
-			Assert.equal(blocks[1].text, 'function f() {}');
+			assert.equal(blocks.length, 2, "Should have found two script blocks");
+			assert.equal(blocks[0].offset, 29);
+			assert.equal(blocks[0].text, 'function f() {}');
+			assert.equal(blocks[1].offset, 61);
+			assert.equal(blocks[1].text, 'function f() {}');
 		},
 		
 		/**
@@ -1036,11 +1037,11 @@ define([
 		test_findScriptBlockMulti4: function() {
 			var text = "<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
-			Assert.equal(blocks.length, 2, "Should have found two script blocks");
-			Assert.equal(blocks[0].offset, 30);
-			Assert.equal(blocks[0].text, 'function f() {}');
-			Assert.equal(blocks[1].offset, 64);
-			Assert.equal(blocks[1].text, 'function f() {}');
+			assert.equal(blocks.length, 2, "Should have found two script blocks");
+			assert.equal(blocks[0].offset, 30);
+			assert.equal(blocks[0].text, 'function f() {}');
+			assert.equal(blocks[1].offset, 64);
+			assert.equal(blocks[1].text, 'function f() {}');
 		},
 		
 		/**
@@ -1050,9 +1051,9 @@ define([
 		test_findScriptBlockMultiWithOffset1: function() {
 			var text = "<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 39);
-			Assert.equal(blocks.length, 1, "Should have found one script block");
-			Assert.equal(blocks[0].offset, 30);
-			Assert.equal(blocks[0].text, 'function f() {}');
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 30);
+			assert.equal(blocks[0].text, 'function f() {}');
 		},
 		/**
 		 * Tests the suport for finding script blocks in HTML
@@ -1061,9 +1062,9 @@ define([
 		test_findScriptBlockMultiWithOffset2: function() {
 			var text = "<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 71);
-			Assert.equal(blocks.length, 1, "Should have found one script block");
-			Assert.equal(blocks[0].offset, 64);
-			Assert.equal(blocks[0].text, 'function f() {}');
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 64);
+			assert.equal(blocks[0].text, 'function f() {}');
 		},
 		
 		/**
@@ -1073,9 +1074,9 @@ define([
 		test_findScriptBlockWithOffset1: function() {
 			var text = "<!DOCTYPE html><head><script >function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 39);
-			Assert.equal(blocks.length, 1, "Should have found one script block");
-			Assert.equal(blocks[0].offset, 30);
-			Assert.equal(blocks[0].text, 'function f() {}');
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 30);
+			assert.equal(blocks[0].text, 'function f() {}');
 		},
 	};
 	

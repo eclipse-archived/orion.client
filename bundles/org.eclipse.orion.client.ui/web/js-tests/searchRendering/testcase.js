@@ -9,8 +9,9 @@
  *     Andrew Eisenberg - initial API and implementation
  ******************************************************************************/
 /*global define document*/
-define(["orion/assert", "orion/serviceregistry", "orion/searchRenderer"], 
-		function(assert, mServiceregistry, mSearchRenderer) {
+define(["chai/chai", "orion/serviceregistry", "orion/searchRenderer"], 
+		function(chai, mServiceregistry, mSearchRenderer) {
+	var assert = chai.assert;
 	var tests = {};
 	
 	tests.testEmptyRendererWithQueryName = function() {

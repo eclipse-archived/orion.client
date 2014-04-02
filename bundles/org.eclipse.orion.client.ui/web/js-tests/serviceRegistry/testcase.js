@@ -11,7 +11,8 @@
 /*global define console setTimeout*/
 
 
-define(["orion/assert", "orion/serviceregistry", "orion/EventTarget", "orion/Deferred"], function(assert, mServiceRegistry, EventTarget, Deferred) {
+define(["chai/chai", "orion/serviceregistry", "orion/EventTarget", "orion/Deferred"], function(chai, mServiceRegistry, EventTarget, Deferred) {
+	var assert = chai.assert;
     var tests = {};
     tests.testRegisterAndGetService = function() {
         var count = 0;
@@ -46,8 +47,8 @@ define(["orion/assert", "orion/serviceregistry", "orion/EventTarget", "orion/Def
         }).then(function() {
             assert.equal(service1, service2);
             registration.unregister();
-            assert["throws"](service2.test);
-        });
+            return service2.test();
+        }).then(assert.fail, function(){});
     };
 
     tests.testRegisterUnregisterMultipleServices = function() {

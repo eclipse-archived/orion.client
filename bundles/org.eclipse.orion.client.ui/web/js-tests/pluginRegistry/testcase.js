@@ -11,7 +11,8 @@
 /*global define navigator Worker console*/
 
 
-define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/Deferred"], function(assert, mServiceregistry, mPluginregistry, Deferred) {
+define(["chai/chai", "orion/serviceregistry", "orion/pluginregistry", "orion/Deferred"], function(chai, mServiceregistry, mPluginregistry, Deferred) {
+	var assert = chai.assert;
     var tests = {};
 
     tests["test init/stop empty registry"] = function() {

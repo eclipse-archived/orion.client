@@ -10,9 +10,10 @@
  ******************************************************************************/
 
 /*global console define navigator setTimeout Blob XMLHttpRequest*/
-define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/editor/eventTarget"],
+define(["chai/chai", "orion/test", "orion/Deferred", "orion/xhr", "orion/editor/eventTarget"],
 
-function(assert, mTest, Deferred, xhr, mEventTarget) {
+function(chai, mTest, Deferred, xhr, mEventTarget) {
+	var assert = chai.assert;
 	var EventTarget = mEventTarget.EventTarget;
 	var isIE = navigator.appName.indexOf("Microsoft Internet Explorer") !== -1;
 	var hasReadyStateOpenedBug = (function() {

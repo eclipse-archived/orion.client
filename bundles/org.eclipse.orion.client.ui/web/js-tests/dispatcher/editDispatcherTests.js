@@ -11,12 +11,13 @@
 /*global define esprima:true*/
 define([
 	'js-tests/editor/mockEditor',
-	'orion/assert',
+	'chai/chai',
 	'orion/Deferred',
 	'orion/edit/dispatcher',
 	'orion/contentTypes',
 	'orion/serviceregistry'
-], function(MockEditor, assert, Deferred, mDispatcher, mContentTypes, mServiceRegistry) {
+], function(MockEditor, chai, Deferred, mDispatcher, mContentTypes, mServiceRegistry) {
+	var assert = chai.assert;
 
 	function setup() {
 		var serviceRegistry = new mServiceRegistry.ServiceRegistry(),

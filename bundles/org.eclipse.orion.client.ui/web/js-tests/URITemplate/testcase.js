@@ -11,7 +11,8 @@
 /*global define */
 
 
-define(["orion/assert", "orion/URITemplate"], function(assert, URITemplate) {
+define(["chai/chai", "orion/URITemplate"], function(chai, URITemplate) {
+	var assert = chai.assert;
 	var tests = {};
 	
 	var variables = {

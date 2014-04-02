@@ -10,12 +10,13 @@
  ******************************************************************************/
 /*global define*/
 define([
-	"orion/assert",
+	"chai/chai",
 	"orion/Deferred",
 	"orion/edit/typedefs",
 	"orion/edit/editorContext",
-	"orion/serviceRegistry"
-], function(assert, Deferred, TypeDefRegistry, EditorContext, mServiceRegistry) {
+	"orion/serviceregistry"
+], function(chai, Deferred, TypeDefRegistry, EditorContext, mServiceRegistry) {
+	var assert = chai.assert;
 	var ServiceRegistry = mServiceRegistry.ServiceRegistry;
 
 	function setup() {

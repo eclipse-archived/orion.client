@@ -15,8 +15,9 @@
 define([
 	'javascript/contentAssist/typesFromIndexFile',
 	'javascript/contentAssist/typeEnvironment',
-	'orion/assert'
-], function(mTypes, typeEnv, assert) {
+	'chai/chai'
+], function(mTypes, typeEnv, chai) {
+	var assert = chai.assert;
 
 	//////////////////////////////////////////////////////////
 	// helpers

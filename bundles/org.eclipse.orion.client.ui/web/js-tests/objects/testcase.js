@@ -10,10 +10,10 @@
  ******************************************************************************/
 /*global define */
 define([
-	"orion/assert",
+	"chai/chai",
 	"orion/objects"
-], function(assert, objects) {
-
+], function(chai, objects) {
+	var assert = chai.assert;
 	var tests = {};
 	tests.test_clone_object = function() {
 		var foo = {

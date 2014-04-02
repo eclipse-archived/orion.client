@@ -10,9 +10,9 @@
  ******************************************************************************/
 /*global define orion window document */
 
-define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/commands', 'orion/keyBinding', 'orion/selection', 'orion/Deferred', 'orion/webui/littlelib', 'orion/webui/dropdown'], 
-			function(require, assert, mServiceregistry, mCommandRegistry, mCommands, mKeyBinding, mSelection, Deferred, lib, mDropdown) {
-			
+define(['require', 'chai/chai', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/commands', 'orion/keyBinding', 'orion/selection', 'orion/Deferred', 'orion/webui/littlelib', 'orion/webui/dropdown'], 
+			function(require, chai, mServiceregistry, mCommandRegistry, mCommands, mKeyBinding, mSelection, Deferred, lib, mDropdown) {
+	var assert = chai.assert;		
 	/**
 	 * dom elements we need
 	 */

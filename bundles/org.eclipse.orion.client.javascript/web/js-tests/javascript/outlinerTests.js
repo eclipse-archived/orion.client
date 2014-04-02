@@ -10,12 +10,12 @@
  ******************************************************************************/
 /*global console:true define*/
 define([
-	'orion/assert',
+	'chai/chai',
 	'javascript/astManager',
 	'orion/Deferred',
 	'javascript/outliner'
-], function(Assert, ASTManager, Deferred, Outliner) {
-	
+], function(chai, ASTManager, Deferred, Outliner) {
+	var assert = chai.assert;	
 	var astManager = new ASTManager.ASTManager();
 	var outliner = new Outliner.JSOutliner(astManager);
 	var context = {
@@ -51,20 +51,20 @@ define([
 	 */
 	function assertElement(element, label, start, end) {
 		if(!element) {
-			Assert.fail("The tested element cannot be null");
+			assert.fail("The tested element cannot be null");
 		}
 		if(!element.label) {
-			Assert.fail("The outlined element must have a label");
+			assert.fail("The outlined element must have a label");
 		}
 		if(!element.start) {
-			Assert.fail("The outlined element must have a start range");
+			assert.fail("The outlined element must have a start range");
 		}
 		if(!element.end) {
-			Assert.fail("The outlied element must have an end range");
+			assert.fail("The outlied element must have an end range");
 		}
-		Assert.equal(element.label, label, "The label is not the same");
-		Assert.equal(element.start, start, "The start range is not the same");
-		Assert.equal(element.end, end, "The end range is not the same");
+		assert.equal(element.label, label, "The label is not the same");
+		assert.equal(element.start, start, "The start range is not the same");
+		assert.equal(element.end, end, "The end range is not the same");
 	};
 	
 	var Tests = {};
@@ -77,7 +77,7 @@ define([
 			return outliner.computeOutline(context).then(function(outline) {
 				try {
 					if(!outline || outline.length < 1) {
-						Assert.fail("There should be one outline element");
+						assert.fail("There should be one outline element");
 					}
 					assertElement(outline[0], "F1(p1, p2)", 9, 11);
 				}
@@ -97,10 +97,10 @@ define([
 		return outliner.computeOutline(context).then(function(outline) {
 			try {
 				if(!outline || outline.length < 1) {
-					Assert.fail("There should be one outline element");
+					assert.fail("There should be one outline element");
 				}
 				if(!outline[0].children || outline[0].children.length < 1) {
-					Assert.fail("There should be one child outline element");
+					assert.fail("There should be one child outline element");
 				}
 				assertElement(outline[0].children[0], "item(p1, p2)", 13, 17);
 			}
@@ -118,7 +118,7 @@ define([
 		return outliner.computeOutline(context).then(function(outline) {
 			try {
 				if(!outline || outline.length < 1) {
-					Assert.fail("There should be one outline element");
+					assert.fail("There should be one outline element");
 				}
 				assertElement(outline[0], "var object = {...}", 4, 10);
 			}
@@ -139,10 +139,10 @@ define([
 		return outliner.computeOutline(context).then(function(outline) {
 			try {
 				if(!outline || outline.length < 1) {
-					Assert.fail("There should be one outline element");
+					assert.fail("There should be one outline element");
 				}
 				if(!outline[0].children || outline[0].children.length < 1) {
-					Assert.fail("There should be one child outline element");
+					assert.fail("There should be one child outline element");
 				}
 				assertElement(outline[0].children[0], "item(p1, p2)", 13, 19);
 			}
@@ -163,10 +163,10 @@ define([
 		return outliner.computeOutline(context).then(function(outline) {
 			try {
 				if(!outline || outline.length < 1) {
-					Assert.fail("There should be one outline element");
+					assert.fail("There should be one outline element");
 				}
 				if(!outline[0].children || outline[0].children.length < 1) {
-					Assert.fail("There should be one child outline element");
+					assert.fail("There should be one child outline element");
 				}
 				assertElement(outline[0].children[0], "item", 13, 19);
 			}
@@ -187,10 +187,10 @@ define([
 		return outliner.computeOutline(context).then(function(outline) {
 			try {
 				if(!outline || outline.length < 1) {
-					Assert.fail("There should be one outline element");
+					assert.fail("There should be one outline element");
 				}
 				if(!outline[0].children || outline[0].children.length < 1) {
-					Assert.fail("There should be one child outline element");
+					assert.fail("There should be one child outline element");
 				}
 				assertElement(outline[0].children[0], "item {...}", 13, 19);
 			}
@@ -211,10 +211,10 @@ define([
 		return outliner.computeOutline(context).then(function(outline) {
 			try {
 				if(!outline || outline.length < 1) {
-					Assert.fail("There should be one outline element");
+					assert.fail("There should be one outline element");
 				}
 				if(!outline[0].children || outline[0].children.length < 1) {
-					Assert.fail("There should be one child outline element");
+					assert.fail("There should be one child outline element");
 				}
 				assertElement(outline[0].children[0], "item(p1, p2)", 13, 19);
 			}
@@ -235,10 +235,10 @@ define([
 		return outliner.computeOutline(context).then(function(outline) {
 			try {
 				if(!outline || outline.length < 1) {
-					Assert.fail("There should be one outline element");
+					assert.fail("There should be one outline element");
 				}
 				if(!outline[0].children || outline[0].children.length < 1) {
-					Assert.fail("There should be one child outline element");
+					assert.fail("There should be one child outline element");
 				}
 				assertElement(outline[0].children[0], "item", 13, 19);
 			}
@@ -259,10 +259,10 @@ define([
 		return outliner.computeOutline(context).then(function(outline) {
 			try {
 				if(!outline || outline.length < 1) {
-					Assert.fail("There should be one outline element");
+					assert.fail("There should be one outline element");
 				}
 				if(!outline[0].children || outline[0].children.length < 1) {
-					Assert.fail("There should be one child outline element");
+					assert.fail("There should be one child outline element");
 				}
 				assertElement(outline[0].children[0], "item {...}", 13, 19);
 			}
@@ -283,10 +283,10 @@ define([
 		return outliner.computeOutline(context).then(function(outline) {
 			try {
 				if(!outline || outline.length < 1) {
-					Assert.fail("There should be one outline element");
+					assert.fail("There should be one outline element");
 				}
 				if(!outline[0].children || outline[0].children.length < 1) {
-					Assert.fail("There should be one child outline element");
+					assert.fail("There should be one child outline element");
 				}
 				assertElement(outline[0].children[0], "return {...}", 18, 24);
 			}
@@ -307,10 +307,10 @@ define([
 		return outliner.computeOutline(context).then(function(outline) {
 			try {
 				if(!outline || outline.length < 1) {
-					Assert.fail("There should be one outline element");
+					assert.fail("There should be one outline element");
 				}
 				if(!outline[0].children || outline[0].children.length < 1) {
-					Assert.fail("There should be one child outline element");
+					assert.fail("There should be one child outline element");
 				}
 				assertElement(outline[0].children[0], "return {...}", 18, 24);
 			}
@@ -333,16 +333,16 @@ define([
 		return outliner.computeOutline(context).then(function(outline) {
 			try {
 				if(!outline || outline.length < 1) {
-					Assert.fail("There should be one outline element");
+					assert.fail("There should be one outline element");
 				}
 				if(!outline[0].children || outline[0].children.length < 1) {
-					Assert.fail("There should be one level one child outline element");
+					assert.fail("There should be one level one child outline element");
 				}
 				if(!outline[0].children[0].children || outline[0].children[0].children.length < 1) {
-					Assert.fail("There should be one level two child outline element");
+					assert.fail("There should be one level two child outline element");
 				}
 				if(!outline[0].children[0].children[0].children || outline[0].children[0].children[0].children.length < 1) {
-					Assert.fail("There should be one level three child outline element");
+					assert.fail("There should be one level three child outline element");
 				}
 				assertElement(outline[0].children[0].children[0].children[0], "return {...}", 45, 51);
 			}
@@ -365,16 +365,16 @@ define([
 		return outliner.computeOutline(context).then(function(outline) {
 			try {
 				if(!outline || outline.length < 1) {
-					Assert.fail("There should be one outline element");
+					assert.fail("There should be one outline element");
 				}
 				if(!outline[0].children || outline[0].children.length < 1) {
-					Assert.fail("There should be one level one child outline element");
+					assert.fail("There should be one level one child outline element");
 				}
 				if(!outline[0].children[0].children || outline[0].children[0].children.length < 1) {
-					Assert.fail("There should be one level two child outline element");
+					assert.fail("There should be one level two child outline element");
 				}
 				if(!outline[0].children[0].children[0].children || outline[0].children[0].children[0].children.length < 1) {
-					Assert.fail("There should be one level three child outline element");
+					assert.fail("There should be one level three child outline element");
 				}
 				assertElement(outline[0].children[0].children[0].children[0], "return {...}", 45, 51);
 			}

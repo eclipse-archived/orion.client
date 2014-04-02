@@ -10,9 +10,9 @@
  ******************************************************************************/
 /*global define orion window document */
 
-define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/extensionCommands'], 
-			function(require, assert, mServiceregistry, mCommandRegistry, mExtensionCommands) {
-			
+define(['require', 'chai/chai', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/extensionCommands'], 
+			function(require, chai, mServiceregistry, mCommandRegistry, mExtensionCommands) {
+	var assert = chai.assert;
 	/**
 	 * mock services
 	 */

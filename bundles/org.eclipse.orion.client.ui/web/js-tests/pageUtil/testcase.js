@@ -10,7 +10,8 @@
  ******************************************************************************/
 /*global window define */
 
-define(["orion/assert", "orion/URITemplate", "orion/PageUtil"], function(assert, URITemplate, PageUtil) {
+define(["chai/chai", "orion/URITemplate", "orion/PageUtil"], function(chai, URITemplate, PageUtil) {
+	var assert = chai.assert;
 	var tests = {};
 	
 	var aResource = "http://localhost/a/resource";

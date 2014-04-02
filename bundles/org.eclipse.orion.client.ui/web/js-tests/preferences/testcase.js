@@ -9,7 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define top orion console localStorage document window*/
-define(["orion/assert", "orion/Deferred"], function(assert, Deferred) {
+define(["chai/chai", "orion/Deferred"], function(chai, Deferred) {
+	var assert = chai.assert;
 	var tests = {};
 	
 	function saveStorage(storage) {

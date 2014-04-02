@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*global define orion */
 
-define(["orion/assert", "orion/searchUtils"], function(assert, mSearchUtils) {
-
+define(["chai/chai", "orion/searchUtils"], function(chai, mSearchUtils) {
+	var assert = chai.assert;
 	/**
 	 * Generate a dummy search model node on a file.
 	 */

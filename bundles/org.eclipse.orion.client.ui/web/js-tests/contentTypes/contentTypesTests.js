@@ -10,10 +10,12 @@
  ******************************************************************************/
 /*global define window*/
 define([
-	'orion/assert',
+	'chai/chai',
 	'orion/contentTypes',
-	'orion/serviceregistry'
-], function(assert, mContentTypes, mServiceRegistry) {
+	'orion/serviceregistry',
+	'orion/Deferred'
+], function(chai, mContentTypes, mServiceRegistry, Deferred) {
+	var assert = chai.assert;
 	var ServiceRegistry = mServiceRegistry.ServiceRegistry;
 	var ContentTypeRegistry = mContentTypes.ContentTypeRegistry;
 
@@ -210,9 +212,7 @@ define([
 		} else {
 			contentTypeService = new ContentTypeRegistry([ bad ]);
 		}
-		assert.throws(function() {
-			contentTypeService.isExtensionOf(bad, bad);
-		}, Error, "Cycle detected");
+		Deferred.when(contentTypeService.isExtensionOf(bad, bad)).then(assert.fail);
 	};
 
 	makeTests(tests, "isSomeExtensionOf", function() {

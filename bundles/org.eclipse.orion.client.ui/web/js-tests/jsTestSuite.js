@@ -81,7 +81,7 @@ jstestdriver.pluginRegistrar.register({
 });
 
 // list your test cases here....
-OrionTestCase("commonjs-unittesting", "/js-tests/commonjs-unittesting/test.html");
+//OrionTestCase("commonjs-unittesting", "/js-tests/commonjs-unittesting/test.html");
 OrionTestCase("charDiff", "/js-tests/charDiff/test.html");
 OrionTestCase("compare", "/js-tests/compare/test.html");
 OrionTestCase("globalSearch", "/js-tests/globalSearch/test.html");

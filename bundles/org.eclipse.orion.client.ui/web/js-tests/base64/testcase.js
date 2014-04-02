@@ -11,7 +11,8 @@
 /*global define console Uint8Array*/
 
 
-define(["orion/assert", "orion/Base64", "domReady!"], function(assert, Base64) {
+define(["chai/chai", "orion/Base64", "domReady!"], function(chai, Base64) {
+	var assert = chai.assert;
 	var tests = {};
 	var testData = "abcdef";
 	testData += testData;

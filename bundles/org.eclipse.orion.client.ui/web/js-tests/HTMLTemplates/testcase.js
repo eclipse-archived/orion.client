@@ -11,7 +11,8 @@
 /*global define document*/
 
 
-define(["orion/assert", "orion/HTMLTemplates-shim", "domReady!"], function(assert, URITemplate) {
+define(["chai/chai", "orion/HTMLTemplates-shim", "domReady!"], function(chai, URITemplate) {
+	var assert = chai.assert;
 	var tests = {};
 	
 	tests.testTemplateElement = function() {
@@ -40,7 +41,6 @@ define(["orion/assert", "orion/HTMLTemplates-shim", "domReady!"], function(asser
 		document.body.appendChild(document.getElementById("xyzzy").content.cloneNode(true));
 		assert.equal(document.body.querySelectorAll("div.comment4").length, 2);
 	};
-	
 
 	return tests;
 });

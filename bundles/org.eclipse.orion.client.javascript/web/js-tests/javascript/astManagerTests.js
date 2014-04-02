@@ -11,10 +11,10 @@
 /*global define esprima:true*/
 define([
 	'javascript/astManager',
-	'orion/assert',
+	'chai/chai',
 	'orion/Deferred',
-], function(ASTManager, assert, Deferred) {
-
+], function(ASTManager, chai, Deferred) {
+	var assert = chai.assert;
 	/**
 	 * @name setup
 	 * @description Sets the test up prior to running

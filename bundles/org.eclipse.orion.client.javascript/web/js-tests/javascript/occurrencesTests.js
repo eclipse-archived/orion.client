@@ -10,11 +10,12 @@
  ******************************************************************************/
 /*global console:true define*/
 define([
-	'orion/assert',
+	'chai/chai',
 	'javascript/astManager',
 	'orion/Deferred',
 	'javascript/occurrences'
-], function(Assert, ASTManager, Deferred, Occurrences) {
+], function(chai, ASTManager, Deferred, Occurrences) {
+	var assert = chai.assert;
 	
 	var astManager = new ASTManager.ASTManager();
 	var occurrences = new Occurrences.JavaScriptOccurrences(astManager);
@@ -59,9 +60,9 @@ define([
 	 */
 	function assertOccurrences(results, expected) {
 		if(!results) {
-			Assert.fail("The occurrence array cannot be null");
+			assert.fail("The occurrence array cannot be null");
 		}
-		Assert.equal(results.length, expected.length, "The wrong number of occurrences was returned");
+		assert.equal(results.length, expected.length, "The wrong number of occurrences was returned");
 		for(var i = 0; i < expected.length; i++) {
 			//for each expected result try to find it in the results, and remove it if it is found
 			for(var j = 0; j < results.length; j++) {
@@ -75,7 +76,7 @@ define([
 		}
 		for(var k = 0; k < results.length; k++) {
 			if(results[k]) {
-				Assert.fail("Found an unknown occurrence: [start "+results[k].start+"][end "+results[k].end+"]");
+				assert.fail("Found an unknown occurrence: [start "+results[k].start+"][end "+results[k].end+"]");
 			}
 		}
 	}
