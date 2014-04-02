@@ -9,7 +9,7 @@
 
 @import "../orion/editor/editor.css";
 
-@import "browserTheme.css";
+@import "../css/theme.css";
 
 @import "../font/font.css";
 
