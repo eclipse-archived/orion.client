@@ -217,14 +217,13 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 
 	
 	function getNewItemName(explorer, item, domId, defaultName, onDone) {
-		var refNode, name, tempNode;
+		var refNode, name;
 		var hideRefNode = true;
 		var insertAsChild = false;
 		
-		var nodes = explorer.makeNewItemPlaceHolder(item, domId, null, true);
-		if (nodes) {
-			refNode = nodes.refNode;
-			tempNode = nodes.tempNode;
+		var placeholder = explorer.makeNewItemPlaceholder(item, domId, true);
+		if (placeholder) {
+			refNode = placeholder.refNode;
 			hideRefNode = false;
 			insertAsChild = true;
 		} else {
@@ -237,15 +236,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					onDone(name);
 				}
 			};
-			var destroy = function() {
-				try {
-					if (tempNode && tempNode.parentNode) {
-						tempNode.parentNode.removeChild(tempNode);
-					}	
-				} catch (err) {
-					// tempNode already removed, do nothing
-				}
-			};
 			
 			mUIUtils.getUserText({
 				id: domId+"EditBox", //$NON-NLS-0$
@@ -253,7 +243,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				hideRefNode: hideRefNode,
 				initialText: defaultName,
 				onComplete: done,
-				onEditDestroy: destroy,
+				onEditDestroy: placeholder.destroyFunction,
 				isInitialValid: true,
 				insertAsChild: insertAsChild
 			});

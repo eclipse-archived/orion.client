@@ -68,20 +68,11 @@ exports.Explorer = (function() {
 			}
 		},
 		
-		makeNewItemPlaceHolder: function(item, domId, column_no, insertAfter) {
-			// we want to popup the name prompt underneath the parent item.
-			var refNode = this.getRow(item);
-			var tempNode;
-			if(column_no){
-				refNode = refNode.childNodes[column_no];
-				// make a row and empty column so that the new name appears after checkmarks/expansions
-				refNode.appendChild(document.createElement("br")); //$NON-NLS-0$
-				var span = document.createElement("span"); //$NON-NLS-0$
-				span.id = domId+"placeHolderRow"; //$NON-NLS-0$
-				refNode.appendChild(span);
-				return {tempNode: span, refNode: span};
-			}
-			if (refNode) {
+		makeNewItemPlaceholder: function(item, domId, insertAfter) {
+			var placeholder = null;
+			var itemRow = this.getRow(item);
+			if (itemRow) {
+				var parentNode = itemRow.parentNode;
 				// make a row and empty column so that the new name appears after checkmarks/expansions
 				var tr = document.createElement("tr"); //$NON-NLS-0$
 				tr.id = domId+"placeHolderRow"; //$NON-NLS-0$
@@ -91,25 +82,35 @@ exports.Explorer = (function() {
 				td.classList.add("navColumn"); //$NON-NLS-0$
 				tr.appendChild(td);
 				if (insertAfter) {
-					// insert tr after refNode, i.e. right before refNode's nextSibling in the parent
-					var parentNode = refNode.parentNode;
-					var nextSibling = refNode.nextSibling;
+					// insert tr after itemRow, i.e. right before itemRow's nextSibling in the parent
+					var nextSibling = itemRow.nextSibling;
 					parentNode.insertBefore(tr, nextSibling);
-					
-					var parentIndentation = parseInt(refNode.firstChild.style.paddingLeft); //refNode is a <tr>, we want the indentation of its <td>
-					td.style.paddingLeft = (this.myTree.getIndent() + parentIndentation) + "px";
 				} else {
-					refNode.appendChild(tr);
+					// insert tr before itemRow
+					parentNode.insertBefore(tr, itemRow);
 				}
-				tempNode = lib.node(domId+"placeHolderRow"); //$NON-NLS-0$
-				refNode = lib.node(domId+"placeHolderCol"); //$NON-NLS-0$
-				if (tempNode && refNode) {
-					return {tempNode: tempNode, refNode: refNode};
-				}
+				
+				var parentIndentation = parseInt(itemRow.firstChild.style.paddingLeft); //itemRow is a <tr>, we want the indentation of its <td>
+				td.style.paddingLeft = (this.myTree.getIndent() + parentIndentation) + "px";
+				
+				placeholder = {
+					wrapperNode: tr, 
+					refNode: td,
+					destroyFunction: function() {
+						try {
+							if (tr && tr.parentNode) {
+								tr.parentNode.removeChild(tr);
+							}	
+						} catch (err) {
+							// tr already removed, do nothing
+						}
+					}
+				};
 			}
-			return null;
+			
+			return placeholder;
 		},
-		
+
 		getRow: function(item) {
 			var rowId = this.model.getId(item);
 			if (rowId) {

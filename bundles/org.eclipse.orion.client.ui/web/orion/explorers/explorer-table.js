@@ -72,21 +72,23 @@ define([
 	
 			// not ideal, but for now, sort here so it's done in one place.
 			// this should really be something pluggable that the UI defines
-			parent.children.sort(function(a, b) {
-				var isDir1 = a.Directory;
-				var isDir2 = b.Directory;
-				if (isDir1 !== isDir2) {
-					return isDir1 ? -1 : 1;
-				}
-				var n1 = a.Name && a.Name.toLowerCase();
-				var n2 = b.Name && b.Name.toLowerCase();
-				if (n1 < n2) { return -1; }
-				if (n1 > n2) { return 1; }
-				return 0;
-			}); 
+			parent.children.sort(this.sortChildren); 
 			return children;
 		},
-			
+		
+		sortChildren: function(a, b) {
+			var isDir1 = a.Directory;
+			var isDir2 = b.Directory;
+			if (isDir1 !== isDir2) {
+				return isDir1 ? -1 : 1;
+			}
+			var n1 = a.Name && a.Name.toLowerCase();
+			var n2 = b.Name && b.Name.toLowerCase();
+			if (n1 < n2) { return -1; }
+			if (n1 > n2) { return 1; }
+			return 0;
+		},
+		
 		getChildren: function(parentItem, /* function(items) */ onComplete) {
 			var self = this;
 			// the parent already has the children fetched
@@ -363,6 +365,50 @@ define([
 				return this.onModelMove(modelEvent);
 			}
 		},
+		
+		/**
+		 * @param {Object} parentItem The item in the model which represents the new item's parent
+		 * @param {Object} child An object describing the child that a placeholder needs to be created for.
+		 * 			child.Name {String} The name of the child artifact
+		 * 			child.Directory {Boolean} true if the child is a directory, false otherwise
+		 * @param {String} domId The prefix to use for the Id of the newly created DOM nodes
+		 * @returns A deferred that resolves with the placeholder object (see explorer.js->makeNewItemPlaceholder())
+		 */
+		makeNewChildItemPlaceholder: function(parentItem, child, domId) {
+			var deferred = new Deferred();
+			
+			this.model.getChildren(parentItem, function(children){
+				var item = null;
+				var insertAfter = false;
+				if(children) {
+					children.push(child);
+					children.sort(this.model.sortChildren);
+					var childIndex = children.indexOf(child);
+					var nextIndex = childIndex + 1;
+					if (children.length > nextIndex) {
+						item = children[nextIndex];
+					} else {
+						var previousIndex = childIndex - 1;
+						//should be placed last
+						if (0 <= previousIndex) {
+							item = children[previousIndex];
+						} else {
+							item = parentItem;
+						}
+						
+						insertAfter = true;
+					}
+				} else {
+					//place before parentItem
+					item = parentItem;
+				}
+				
+				var placeholder = this.makeNewItemPlaceholder(item, domId, insertAfter);
+				deferred.resolve(placeholder);
+			}.bind(this));
+			
+			return deferred;
+		},
 
 		_makeDropTarget: function(item, node, persistAndReplace) {
 			if (this.dragAndDrop) {
@@ -476,7 +522,6 @@ define([
 				};
 						
 				function dropFileEntry(entry, target, explorer, performDrop, fileClient, deferredWrapper) {
-					var uploadNodeContainer = null;
 					var preventNotification = false;
 					var targetIsRoot = mFileUtils.isAtRoot(target.Location);
 					if (deferredWrapper) {
@@ -484,18 +529,19 @@ define([
 						preventNotification = true;
 						deferredWrapper.entryCount++;
 					} else if (entry.isDirectory) {
-						var cleanup = function() {
-							uploadNodeContainer.destroyFunction();
-							if (targetIsRoot) {
-								explorer.loadResourceList(explorer.treeRoot.Path, true);	
-							} else {
-								explorer.changedItem(target);	
-							}						
-						};
 						preventNotification = true; //we don't want to notify for each item that is in the folder
 						deferredWrapper = {entryCount: 1, deferred: new Deferred()};
-						uploadNodeContainer = explorer._makeUploadNode(target, entry.name, false);
-						deferredWrapper.deferred.then(cleanup, cleanup);
+						explorer._makeUploadNode(target, entry.name, true).then(function(uploadNodeContainer){
+							var cleanup = function() {
+								uploadNodeContainer.destroyFunction();
+								if (targetIsRoot) {
+									explorer.loadResourceList(explorer.treeRoot.Path, true);	
+								} else {
+									explorer.changedItem(target);	
+								}						
+							};
+							deferredWrapper.deferred.then(cleanup, cleanup);
+						});
 					}
 					
 					var decrementEntryCount = function() {
@@ -503,7 +549,7 @@ define([
 							deferredWrapper.entryCount--;
 							if (0 === deferredWrapper.entryCount) {
 								deferredWrapper.deferred.resolve();
-							}	
+							}
 						}
 					};
 					
@@ -548,11 +594,11 @@ define([
 										},
 										loadend: decrementEntryCount
 									};
-									performDrop(target, file, this, unzip, false, handlers);
+									performDrop(target, file, explorer, unzip, false, handlers);
 								} else {
 									explorer._uploadFile(item, file, true);
 								}
-							});
+							}.bind(this));
 						}
 					} else if (entry.isDirectory) {
 						var dirReader = entry.createReader();
@@ -668,51 +714,51 @@ define([
 		 */
 		_uploadFile: function(parentItem, file, expandParent) {
 			var uploadImpl = function() {
-				var uploadNodeContainer = this._makeUploadNode(parentItem, file.name, true);
-
-				var refNode = uploadNodeContainer.refNode; //td
-				var progressBar = uploadNodeContainer.progressBar;
-				var cancelButton = uploadNodeContainer.cancelButton;
-				var destroy = uploadNodeContainer.destroyFunction;
-				
-				var statusService = this.registry.getService("orion.page.message");	 //$NON-NLS-0$
-				
-				var handlers = {
-					progress: function(event) {
-						var percentageText = ""; //$NON-NLS-0$
-						if (event.lengthComputable) {
-							percentageText = Math.floor((event.loaded / event.total) * 100) + "%"; //$NON-NLS-0$
-							progressBar.style.width = percentageText;
-							var loadedKB = Math.round(event.loaded / 1024);
-							var totalKB = Math.round(event.total / 1024);
-							progressBar.title = messages["Upload progress: "] + percentageText + ",  " + loadedKB + "/" + totalKB + " KB"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							refNode.title = progressBar.title;
-						}
-					},
-					loadend: function(event) {
-						destroy();
-						this.changedItem(parentItem);
-					}.bind(this),
-					error: function(event) {
-						var errorMessage = messages["Uploading the following file failed: "] + file.name; //$NON-NLS-0$
-						if (statusService) {
-							statusService.setProgressResult({Severity: "Error", Message: errorMessage});	//$NON-NLS-0$ 
-						} else {
-							window.console.log(errorMessage);
-						}
-					}
-				};
+				this._makeUploadNode(parentItem, file.name, false).then(function(uploadNodeContainer){
+					var refNode = uploadNodeContainer.refNode; //td
+					var progressBar = uploadNodeContainer.progressBar;
+					var cancelButton = uploadNodeContainer.cancelButton;
+					var destroy = uploadNodeContainer.destroyFunction;
 					
-				var unzip = file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
-				var req = this.dragAndDrop(parentItem, file, this, unzip, false, handlers); 
-				
-				cancelButton.addEventListener("click", function(){ //$NON-NLS-0$
-					req.abort();
-				});
+					var statusService = this.registry.getService("orion.page.message");	 //$NON-NLS-0$
+					
+					var handlers = {
+						progress: function(event) {
+							var percentageText = ""; //$NON-NLS-0$
+							if (event.lengthComputable) {
+								percentageText = Math.floor((event.loaded / event.total) * 100) + "%"; //$NON-NLS-0$
+								progressBar.style.width = percentageText;
+								var loadedKB = Math.round(event.loaded / 1024);
+								var totalKB = Math.round(event.total / 1024);
+								progressBar.title = messages["Upload progress: "] + percentageText + ",  " + loadedKB + "/" + totalKB + " KB"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								refNode.title = progressBar.title;
+							}
+						},
+						loadend: function(event) {
+							destroy();
+							this.changedItem(parentItem);
+						}.bind(this),
+						error: function(event) {
+							var errorMessage = messages["Uploading the following file failed: "] + file.name; //$NON-NLS-0$
+							if (statusService) {
+								statusService.setProgressResult({Severity: "Error", Message: errorMessage});	//$NON-NLS-0$ 
+							} else {
+								window.console.log(errorMessage);
+							}
+						}
+					};
+						
+					var unzip = file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
+					var req = this.dragAndDrop(parentItem, file, this, unzip, false, handlers); 
+					
+					cancelButton.addEventListener("click", function(){ //$NON-NLS-0$
+						req.abort();
+					});
+				}.bind(this));
 			}.bind(this);
 			
 			if (expandParent) {
-				this.expandItem(parentItem, false).then(uploadImpl());
+				this.expandItem(parentItem, false).then(uploadImpl);
 			} else {
 				uploadImpl();
 			}
@@ -726,70 +772,66 @@ define([
 		 * 
 		 * @param {Object} parentItem The item in the model representing the folder under which the file should be placed. Workspace root is supported.
 	 	 * @param {String} artifactName The name of the file or folder being uploaded.
-	 	 * @param {Boolean} isFile true if the artifact is a file, false if it is a directory
+	 	 * @param {Boolean} isDirectory true if the artifact is a directory, false otherwise
 	 	 * 
-	 	 * @returns {Object} nodeContainer An object containing the following:
+	 	 * @returns {orion.Deferred.promise} which resolves with the following object:
+	 	 * 		 {Object} nodeContainer An object containing the following:
 	 	 * 			nodeContainer.refNode The td of the newly created DOM node
 	 	 * 			nodeContainer.tempNode The tr of the newly created DOM node (this is the top-level DOM node)
 	 	 * 			nodeContainer.progressBar The DOM node containing the progress bar
 	 	 * 			nodeContainer.cancelButton The DOM node of the upload cancel button (only if isFile === true)
 	 	 * 			nodeContainer.destroyFunction The function that should be called to remove the temporary upload node from the navigator
 		 */
-		_makeUploadNode: function(parentItem, artifactName, isFile) {
-			var nodeContainer = null;
+		_makeUploadNode: function(parentItem, artifactName, isDirectory) {
+			
 			var domId = this.getRow(parentItem).id;
-			var refNode, tempNode;
-			var insertAfter = mFileUtils.isAtRoot(parentItem.Location) ? false : true; //controls whether the placeholder will be a child or a sibling
-			var nodes = this.makeNewItemPlaceHolder(parentItem, domId, null, insertAfter);
-			if (nodes) {
-				nodeContainer = {};
-				refNode = nodes.refNode;
-				tempNode = nodes.tempNode;
-				refNode.classList.add("uploadNode"); //$NON-NLS-0$
-				
-				nodeContainer.refNode = refNode;
-				nodeContainer.tempNode = tempNode;
-				
-				var textSpan = document.createElement("span");
-				textSpan.appendChild(document.createTextNode(artifactName));
-				refNode.appendChild(textSpan); //$NON-NLS-0$
-				
-				var progressBarWrapper = document.createElement("span"); //$NON-NLS-0$
-				progressBarWrapper.classList.add("progressBarWrapper"); //$NON-NLS-0$
-				
-				var progressBar = document.createElement("span"); //$NON-NLS-0$
-				progressBar.classList.add("progressBar"); //$NON-NLS-0$
-				progressBarWrapper.appendChild(progressBar);
-				refNode.appendChild(progressBarWrapper);
-				
-				nodeContainer.progressBar = progressBar;
-				
-				if (isFile) {
-					var cancelButton = document.createElement("button"); //$NON-NLS-0$
-					cancelButton.classList.add("imageSprite"); //$NON-NLS-0$
-					cancelButton.classList.add("core-sprite-delete"); //$NON-NLS-0$
-					cancelButton.classList.add("uploadCancelButton"); //$NON-NLS-0$
-					refNode.appendChild(cancelButton);
+			var child = {Name: artifactName, Directory: isDirectory};
+			
+			return this.makeNewChildItemPlaceholder(parentItem, child, domId).then(function(placeholder) {
+				var nodeContainer = null;
+				var refNode, wrapperNode;
+				if (placeholder) {
+					nodeContainer = {};
+					refNode = placeholder.refNode;
+					wrapperNode = placeholder.wrapperNode;
+					refNode.classList.add("uploadNode"); //$NON-NLS-0$
 					
-					nodeContainer.cancelButton = cancelButton;
-				} else {
-					progressBar.classList.add("continuous"); //$NON-NLS-0$
-					refNode.title = messages["Uploading "] + artifactName; //$NON-NLS-0$
-					progressBar.title = refNode.title; //$NON-NLS-0$
+					nodeContainer.refNode = refNode;
+					nodeContainer.wrapperNode = wrapperNode;
+					
+					var textSpan = document.createElement("span");
+					textSpan.appendChild(document.createTextNode(artifactName));
+					refNode.appendChild(textSpan); //$NON-NLS-0$
+					
+					var progressBarWrapper = document.createElement("span"); //$NON-NLS-0$
+					progressBarWrapper.classList.add("progressBarWrapper"); //$NON-NLS-0$
+					
+					var progressBar = document.createElement("span"); //$NON-NLS-0$
+					progressBar.classList.add("progressBar"); //$NON-NLS-0$
+					progressBarWrapper.appendChild(progressBar);
+					refNode.appendChild(progressBarWrapper);
+					
+					nodeContainer.progressBar = progressBar;
+					
+					if (isDirectory) {
+						progressBar.classList.add("continuous"); //$NON-NLS-0$
+						refNode.title = messages["Uploading "] + artifactName; //$NON-NLS-0$
+						progressBar.title = refNode.title; //$NON-NLS-0$
+					} else {
+						var cancelButton = document.createElement("button"); //$NON-NLS-0$
+						cancelButton.classList.add("imageSprite"); //$NON-NLS-0$
+						cancelButton.classList.add("core-sprite-delete"); //$NON-NLS-0$
+						cancelButton.classList.add("uploadCancelButton"); //$NON-NLS-0$
+						refNode.appendChild(cancelButton);
+						
+						nodeContainer.cancelButton = cancelButton;
+					}
+					
+					nodeContainer.destroyFunction = placeholder.destroyFunction;
 				}
 				
-				nodeContainer.destroyFunction = function() {
-					try {
-						if (tempNode && tempNode.parentNode) {
-							tempNode.parentNode.removeChild(tempNode);
-						}
-					} catch (err) {
-						// tempNode already removed, do nothing
-					}
-				};
-			}
-			
-			return nodeContainer;
+				return nodeContainer;
+			}.bind(this));
 		},
 
 		/**
