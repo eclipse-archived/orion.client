@@ -169,6 +169,14 @@
 						<phase>verify</phase>
 						<configuration>
 							<target unless="orion.client.build.skip">
+								<!-- generate jsdocs -->
+								<property name="jsdocHome"
+									value="${jsdocHome}"/>
+								<ant antfile="${basedir}/releng/org.eclipse.orion.client.releng/builder/orion.jsdoc.xml">
+									<target name="download3rdPartyLibs"/>
+									<target name="jsdocs"/>
+								</ant>
+
 							    <!-- minify javascript -->
 								<property name="builder" value="${basedir}/releng/org.eclipse.orion.client.releng/builder/"/>
 								<property name="requirejsHome" value="${requirejsHome}"/>
@@ -181,13 +189,6 @@
 									<target name="requirejs"/>
 								</ant>
 
-								<!-- generate jsdocs -->
-                                <property name="jsdocHome"
-                                    value="${jsdocHome}"/>
-								<ant antfile="${basedir}/releng/org.eclipse.orion.client.releng/builder/orion.jsdoc.xml">
-								    <target name="download3rdPartyLibs"/>
-								    <target name="jsdocs"/>
-								</ant>
 							</target>
 						</configuration>
 						<goals>
