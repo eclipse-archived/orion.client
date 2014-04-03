@@ -403,6 +403,11 @@ define({
 	". Could not revert into active branch": ". Could not revert into active branch",
 	"Login": "Login",
 	"Authentication required for: ${0}. ${1} and re-try the request.": "Authentication required for: ${0}. ${1} and re-try the request.",
+	"Remember my committer name and email:":"Remember my committer name and email:",
+	"Successfully added ":"Successfully added ",
+	" to git repository config":" to git repository config",
+	"Successfully edited ":"Successfully edited ",
+	" git repository config":" git repository config",
 	"Signed-off-by: ":"Signed-off-by: ",
 	"Change-Id: ":"Change-Id: "
 });
