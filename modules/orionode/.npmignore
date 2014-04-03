@@ -1,7 +1,3 @@
-# Want to track this .gitignore file in Git, so override the top-level ignore
-!.gitignore
-.project
-
 # Ignore npm artifacts
 **/node_modules/
 npm-debug.log
@@ -11,9 +7,6 @@ npm-debug.log
 
 # Ignore built browser widget until we get it removed from version control
 **/web/browse/
-
-# Ignore inlined orion client code copied by Grunt build
-lib/orion.client/
 
 # Ignore per-user Orionode data
 .workspace/

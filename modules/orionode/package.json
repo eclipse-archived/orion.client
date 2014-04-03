@@ -15,11 +15,17 @@
   "devDependencies": {
     "mocha": "*",
     "requirejs": "~2.1.2",
-    "supertest": "*"
+    "supertest": "*",
+    "grunt": "~0.4.4",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-requirejs": "~0.4.3",
+    "grunt-string-replace": "~0.2.7",
+    "grunt-simple-mocha": "~0.4.0"
   },
   "main": "index.js",
   "scripts": {
-    "test": "mocha --reporter spec"
+    "test": "mocha --reporter spec",
+    "prepublish": "grunt"
   },
   "repository": {
     "type": "git",
@@ -31,5 +37,32 @@
     "ide"
   ],
   "author": "Orion contributors",
-  "license": "Eclipse Public License + Eclipse Distribution License"
+  "license": "Eclipse Public License + Eclipse Distribution License",
+  "requirejsExcludeModules": [
+    "authenticationPlugin",
+    "cFDeployService",
+    "cFPlugin",
+    "deploy",
+    "git-commit",
+    "git-log",
+    "git-repository",
+    "git-status",
+    "gitBlamePlugin",
+    "gitPlugin",
+    "GerritFilePlugin",
+    "GitHubFilePlugin",
+    "index",
+    "LoginWindow",
+    "logs",
+    "manageOpenids",
+    "npmPlugin",
+    "preferencesPlugin",
+    "site",
+    "sitePlugin",
+    "sites",
+    "taskPlugin",
+    "user-list",
+    "userservicePlugin",
+    "view"
+  ]
 }
