@@ -169,6 +169,12 @@
 						<phase>verify</phase>
 						<configuration>
 							<target unless="orion.client.build.skip">
+								<property name="builder" value="${basedir}/releng/org.eclipse.orion.client.releng/builder/"/>
+								<property name="requirejsHome" value="${requirejsHome}"/>
+								<property name="buildConfig" value="${builder}/scripts/orion.build.js" />
+								<property name="buildDirectory" value="${basedir}"/>
+								<property name="orionClient" value="${buildDirectory}"/>
+
 								<!-- generate jsdocs -->
 								<property name="jsdocHome"
 									value="${jsdocHome}"/>
@@ -178,11 +184,6 @@
 								</ant>
 
 							    <!-- minify javascript -->
-								<property name="builder" value="${basedir}/releng/org.eclipse.orion.client.releng/builder/"/>
-								<property name="requirejsHome" value="${requirejsHome}"/>
-								<property name="buildConfig" value="${builder}/scripts/orion.build.js" />
-								<property name="buildDirectory" value="${basedir}"/>
-								<property name="orionClient" value="${buildDirectory}"/>
 								<ant antfile="${basedir}/releng/org.eclipse.orion.client.releng/builder/orion.mini.xml">
 								    <target name="download3rdPartyLibs"/>
 								    <target name="updateBuildLabel"/>
