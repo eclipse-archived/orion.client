@@ -31,5 +31,6 @@ define({
 	'unusedVars' : 'Unused variables', //$NON-NLS-0$  //$NON-NLS-1$
 	'varRedecl' : 'Variable re-declarations', //$NON-NLS-0$  //$NON-NLS-1$
 	'undefMember' : 'Undefined member use', //$NON-NLS-0$  //$NON-NLS-1$
-	'unnecessarySemis' : 'Unnecessary semicolons' //$NON-NLS-0$  //$NON-NLS-1$
+	'unnecessarySemis' : 'Unnecessary semicolons', //$NON-NLS-0$  //$NON-NLS-1$
+	'unusedParams' : 'Unused parameters' //$NON-NLS-0$  //$NON-NLS-1$
 });

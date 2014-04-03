@@ -226,6 +226,12 @@ define([
 							defaultValue: warning,
 							options: severities
 						},
+						{	id: "validate_unused_params",  //$NON-NLS-0$
+							nameKey: 'unusedParams',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: warning,
+							options: severities
+						},
 						{	id: "validate_no_unused_vars",  //$NON-NLS-0$
 							nameKey: 'unusedVars',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
