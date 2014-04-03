@@ -19,11 +19,6 @@ define("orion/editor/htmlGrammar", [], function() {
 	 * @class orion.syntax.HtmlGrammar
 	 */
 	function HtmlGrammar() {
-		/**
-		 * Object containing the grammar rules.
-		 * @public
-		 * @type Object
-		 */
 		return {
 			"scopeName": "source.html",
 			"uuid": "3B5C76FB-EBB5-D930-F40C-047D082CE99B",

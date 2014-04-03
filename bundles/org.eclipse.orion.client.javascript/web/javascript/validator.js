@@ -118,7 +118,7 @@ define([
 
 	Objects.mixin(ESLintValidator.prototype, {
 		/**
-		 * @descritpion Extracts any errors captured by the tolerant Esprima parser and returns them
+		 * @description Extracts any errors captured by the tolerant Esprima parser and returns them
 		 * @function
 		 * @private
 		 * @param {esprima.AST} ast The AST
@@ -165,7 +165,7 @@ define([
 			return errors;
 		},
 		/**
-		 * @descripion Callback to create problems from orion.edit.validator
+		 * @description Callback to create problems from orion.edit.validator
 		 * @function
 		 * @public
 		 * @param {orion.edit.EditorContext} editorContext The editor context
