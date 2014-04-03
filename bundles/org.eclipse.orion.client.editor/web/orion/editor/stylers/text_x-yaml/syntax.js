@@ -59,7 +59,8 @@ define("orion/editor/stylers/text_x-yaml/syntax", [], function() { //$NON-NLS-0$
 		],
 		repository: {
 			numberSignComment: {
-				match: {match: "(?:^|\\s)#.*", literal: "#"}, //$NON-NLS-0$
+				begin: {match: "(?:^|\\s)#", literal: "#"}, //$NON-NLS-0$
+				end: {match: "$", literal: ""}, //$NON-NLS-0$
 				name: "comment.line.number-sign.yaml", //$NON-NLS-0$
 				patterns: [
 					{include: "orion.lib#todo_comment_singleLine"} //$NON-NLS-0$
