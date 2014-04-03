@@ -263,8 +263,6 @@ a.currentLocation:hover {
 	background-color: #ddd;
 	border-radius: 2px;
 	vertical-align:middle;
-	-webkit-transition: all 0.2s ease;
-	transition: all 0.2s ease;
 }
 
 .commandButton:hover, .commandButton:focus {
