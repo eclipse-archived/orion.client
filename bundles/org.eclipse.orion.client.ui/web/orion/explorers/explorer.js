@@ -90,8 +90,7 @@ exports.Explorer = (function() {
 					parentNode.insertBefore(tr, itemRow);
 				}
 				
-				var parentIndentation = parseInt(itemRow.firstChild.style.paddingLeft); //itemRow is a <tr>, we want the indentation of its <td>
-				td.style.paddingLeft = (this.myTree.getIndent() + parentIndentation) + "px";
+				td.style.paddingLeft = itemRow.firstChild.style.paddingLeft; //itemRow is a <tr>, we want the indentation of its <td>
 				
 				placeholder = {
 					wrapperNode: tr, 

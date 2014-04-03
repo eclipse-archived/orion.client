@@ -109,6 +109,7 @@ define({
 	"Unzip ${0}?": "Unzip ${0}?",
 	"Upload progress: ": "Upload progress: ",
 	"Uploading ": "Uploading ",
+	"Cancel upload": "Cancel upload",
 	"Uploading the following file failed: ": "Uploading the following file failed: ",
 	"NoFile": "Use the ${0} menu to create new files and folders. Click a file to start coding." //$NON-NLS-1$ //$NON-NLS-0$
 });

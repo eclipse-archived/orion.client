@@ -77,9 +77,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 * 			handlers.error The handler function that should be called if the transfer fails.
 	 * 			handlers.abort The handler function that should be called if the transfer is cancelled by the user.
 	 * 			handlers.loadend The handler function that should be called when the transfer completes (regardless of success or failure).
+	 * @param {Boolean} preventNotification Optional. true if a model event should not be dispatched after the file is uploaded, false otherwise
 	 * @returns {XMLHttpRequest} The XMLHttpRequest object that was created and used for the upload.
 	 */
-	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip, force, handlers) { 
+	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip, force, handlers, preventNotification) { 
 		var req = new XMLHttpRequest();
 		
 		if (handlers) {
@@ -129,7 +130,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						}
 					}
 				}
-				dispatchModelEventOn({ type: "create", parent: targetFolder, newValue: null /* haven't fetched the new file in Orion yet */ }); //$NON-NLS-0$
+				if (!preventNotification) {
+					dispatchModelEventOn({ type: "create", parent: targetFolder, newValue: null /* haven't fetched the new file in Orion yet */ }); //$NON-NLS-0$	
+				}
 			}
 		}.bind(this);
 		req.send(file);

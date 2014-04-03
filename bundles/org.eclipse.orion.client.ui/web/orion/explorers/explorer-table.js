@@ -594,7 +594,7 @@ define([
 										},
 										loadend: decrementEntryCount
 									};
-									performDrop(target, file, explorer, unzip, false, handlers);
+									performDrop(target, file, explorer, unzip, false, handlers, true);
 								} else {
 									explorer._uploadFile(item, file, true);
 								}
@@ -749,7 +749,7 @@ define([
 					};
 						
 					var unzip = file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
-					var req = this.dragAndDrop(parentItem, file, this, unzip, false, handlers); 
+					var req = this.dragAndDrop(parentItem, file, this, unzip, false, handlers, true); 
 					
 					cancelButton.addEventListener("click", function(){ //$NON-NLS-0$
 						req.abort();
@@ -800,6 +800,7 @@ define([
 					nodeContainer.wrapperNode = wrapperNode;
 					
 					var textSpan = document.createElement("span");
+					textSpan.classList.add("uploadNodeText");
 					textSpan.appendChild(document.createTextNode(artifactName));
 					refNode.appendChild(textSpan); //$NON-NLS-0$
 					
@@ -822,6 +823,7 @@ define([
 						cancelButton.classList.add("imageSprite"); //$NON-NLS-0$
 						cancelButton.classList.add("core-sprite-delete"); //$NON-NLS-0$
 						cancelButton.classList.add("uploadCancelButton"); //$NON-NLS-0$
+						cancelButton.title = messages["Cancel upload"]; //$NON-NLS-0$
 						refNode.appendChild(cancelButton);
 						
 						nodeContainer.cancelButton = cancelButton;
