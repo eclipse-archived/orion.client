@@ -9,14 +9,13 @@ A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orio
 * Shell command for supporting npm
 * Client caching for static content
 * Gzip
-* Pages are concatenated and minified so they load faster
 
 ## Usage
 For full instructions, see the [Getting Started guide](http://wiki.eclipse.org/Orion/Node/Getting_started).
 
 ### Running the server
 1. Run ```npm start orion``` or ```node [node_modules]/orion/server.js```.
-2. Go to [localhost:8081](http://localhost:8081) to use Orion. (You can change the port by passing the```-p``` option).
+2. Go to [localhost:8081](http://localhost:8081) to use Orion. (You can change the port by passing the ```-p``` option).
 
 ### Using Orion within a larger app
 Use ```require('orion')``` to get access to our startServer function, which is suitable for use within a larger [connect](https://github.com/senchalabs/connect/) project:
