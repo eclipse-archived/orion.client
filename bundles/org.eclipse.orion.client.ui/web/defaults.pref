@@ -9,7 +9,7 @@
 		"edit/content/imageViewerPlugin.html":true,
 		"edit/content/jsonEditorPlugin.html":true,
 		"plugins/webEditingPlugin.html":true,
-		"plugins/languages/arduino/arduinoPlugin.html",
+		"plugins/languages/arduino/arduinoPlugin.html":true,
 		"plugins/languages/c/cPlugin.html":true,
 		"plugins/languages/cpp/cppPlugin.html":true,
 		"plugins/languages/css/cssPlugin.html":true,
