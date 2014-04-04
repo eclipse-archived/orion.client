@@ -146,6 +146,11 @@ define([
 							if(this.resourceChangeDispatcher) {
 								this.resourceChangeDispatcher.dispatchEvent({ type: "resourceChanged", newResource: params.resource, defaultChild: params.defaultChild, changeHash: params.changeHash}); //$NON-NLS-0$
 							}
+						} else {
+							params.resource.selectorAllItems = [{Name: "none", Location: params.resource.Location, Directory: true}];
+							if(this.resourceChangeDispatcher) {
+								this.resourceChangeDispatcher.dispatchEvent({ type: "resourceChanged", newResource: params.resource, defaultChild: params.defaultChild, changeHash: params.changeHash}); //$NON-NLS-0$
+							}
 						}
 					}.bind(this),
 					function(err) {

@@ -227,13 +227,11 @@ define([
 				}
 				var metadata = evt.metadata;
 				if(this._branches && this._branchSelector){
-					var activeBranchName = this._branches[0].Name;
 					this._activeBranchLocation = this._branches[0].Location;
 					this._activeComponentLocation = null;
 					var newLocation = null;
 					if(metadata.Parents) {
 						if(metadata.Parents.length > 0) {
-							activeBranchName = metadata.Parents[metadata.Parents.length-1].Name;
 							this._activeBranchLocation = metadata.Parents[metadata.Parents.length-1].Location;
 							if(metadata.Parents.length > 1) {
 								this._activeComponentLocation = metadata.Parents[metadata.Parents.length-2].Location;
@@ -241,13 +239,12 @@ define([
 								this._activeComponentLocation = metadata.Location;
 							}
 						} else {
-							activeBranchName = metadata.Name;
 							this._activeBranchLocation = metadata.Location;
+							this._activeComponentLocation = metadata.Location;
 						}
 					} else {
 						this._branches.some(function(branch){
 							if(branch.Name.toLowerCase() === "master") { //$NON-NLS-0$
-								activeBranchName = branch.Name;
 								this._activeBranchLocation = branch.Location;
 								newLocation = branch.Location;
 								return true;
@@ -259,7 +256,7 @@ define([
 					this._branchSelector.activeResourceLocation = this._activeBranchLocation;
 					
 					if(this._showComponent) {
-						this._branchSelector.setActiveResource({resource: this._branchSelector.getActiveResource(this._activeBranchLocation), changeHash: metadata.Parents,  defaultChild: this._activeComponentLocation});
+						this._branchSelector.setActiveResource({resource: this._branchSelector.getActiveResource(this._activeBranchLocation), changeHash: false,  defaultChild: this._activeComponentLocation});
 						if(!this._activeComponentLocation) {
 							return;
 						}
@@ -404,6 +401,8 @@ define([
 						} else if(resource.Parents.length > 1) {//Skip the componet level parents
 							resource.Parents[resource.Parents.length -1].skip = true;
 							resource.Parents[resource.Parents.length -2].skip = true;
+						} else {
+							resource.skip = true;
 						}
 					}
 				} else if(this._branchSelector && resource.Parents) {
