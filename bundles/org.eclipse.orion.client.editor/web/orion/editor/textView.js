@@ -2700,10 +2700,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * Sets the caret offset relative to the start of the document.
 		 *
 		 * @param {Number} caret the caret offset relative to the start of the document.
-		 * @param {Boolean|Number} [show=true] if <code>true</code>, the view will scroll the minimum amount necessary to show the caret location. If
+		 * @param {Boolean|Number|orion.editor.TextViewShowOptions} [show=true]
+		 * 					if <code>true</code>, the view will scroll the minimum amount necessary to show the caret location. If
 		 *					<code>show</code> is a <code>Number</code>, the view will scroll the minimum amount necessary to show the caret location plus a
 		 *					percentage of the client area height. The parameter is clamped to the [0,1] range.  In either case, the view will only scroll
-		 *					if the new caret location is not visible already.
+		 *					if the new caret location is not visible already.  The <code>show</code> parameter can also be a <code>orion.editor.TextViewShowOptions</code> object. See
+		 * 					{@link orion.editor.TextViewShowOptions} for further information in how the options can be used to control the scrolling behavior.
 		 * @param {Function} [callback] if callback is specified and <code>scrollAnimation</code> is not zero, view scrolling is animated and
 		 *					the callback is called when the animation is done. Otherwise, callback is callback right away.
 		 *
@@ -2821,6 +2823,43 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		/**
+		 * @class This object describes the selection show options.
+		 * <p>
+		 * <b>See:</b><br/>
+		 * {@link orion.editor.TextView#setSelection}
+		 * {@link orion.editor.TextView#setCaretOffset}	 
+		 * {@link orion.editor.TextView#showSelection}	 
+		 * </p>		 
+		 * @name orion.editor.TextViewShowOptions
+		 *
+		 * @property {String} viewAnchor the view anchor.  The view anchor can be one of these values:
+		 * <p>
+		 * <ul>
+		 *   <li>"top" - align the selection to the top of the view client area.</li>
+		 *   <li>"bottom" - align the selection to the bottom of the view client area.</li>
+		 *   <li>"center" - align the selection to the center of the view client area.</li>
+		 *   <li> by default - align the selection to the top or bottom of the client area depending on whether the caret is above or below the client area respectively. </li>
+		 * </ul>
+		 * </p>
+		 * @property {Number} [viewAnchorOffset=0] an offset from the view anchor. The offset is a percentage of the client area height and it is clamped to [0-1] range.
+		 * @property {String} [selectionAnchor=caret] the selection anchor. The seleciton anchor can be one of these values:
+		 * <p>
+		 * <ul>
+		 *   <li>"top" - align the top of the selection to the view anchor.</li>
+		 *   <li>"bottom" - align the bottom of the selection to the view anchor.</li>
+		 *   <li>"center" - align the center of the selection to the view anchor.</li>
+		 *   <li> by default - align the top or bottom of the selection to the view anchor depending on whether the caret is at the start or end of the selection. </li>
+		 * </ul>
+		 * </p>
+		 * @property {String} [scrollPolicy] the scroll policy. The scroll policy can be one of these values:
+		 * <p>
+		 * <ul>
+		 *   <li>"always" - always scroll vertically to the desired pixel offset even if the caret is already visible.</li>
+		 *   <li> by default - only scroll if the caret is not visible. </li>
+		 * </ul>
+		 * </p>
+		 */
+		/**
 		 * Sets the text view selection.
 		 * <p>
 		 * The selection is defined by a start and end character offset relative to the
@@ -2837,10 +2876,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * 
 		 * @param {Number} start the start offset of the selection
 		 * @param {Number} end the end offset of the selection
-		 * @param {Boolean|Number} [show=true] if <code>true</code>, the view will scroll the minimum amount necessary to show the caret location. If
+		 * @param {Boolean|Number|orion.editor.TextViewShowOptions} [show=true]
+		 * 					if <code>true</code>, the view will scroll the minimum amount necessary to show the caret location. If
 		 *					<code>show</code> is a <code>Number</code>, the view will scroll the minimum amount necessary to show the caret location plus a
 		 *					percentage of the client area height. The parameter is clamped to the [0,1] range.  In either case, the view will only scroll
-		 *					if the new caret location is not visible already.
+		 *					if the new caret location is not visible already.  The <code>show</code> parameter can also be a <code>orion.editor.TextViewShowOptions</code> object. See
+		 * 					{@link orion.editor.TextViewShowOptions} for further information in how the options can be used to control the scrolling behavior.
 		 * @param {Function} [callback] if callback is specified and <code>scrollAnimation</code> is not zero, view scrolling is animated and
 		 *					the callback is called when the animation is done. Otherwise, callback is callback right away.
 		 *
@@ -2935,13 +2976,22 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		/**
 		 * Scrolls the selection into view if needed.
 		 *
+ 		 * @param {Number|orion.editor.TextViewShowOptions} [show=0]
+		 * 					If <code>show</code> is a <code>Number</code>, the view will scroll the minimum amount necessary to show the caret location plus a
+		 *					percentage of the client area height. The parameter is clamped to the [0,1] range.  The view will only scroll
+		 *					if the new caret location is not visible already.  The <code>show</code> parameter can also be a <code>orion.editor.TextViewShowOptions</code> object. See
+		 * 					{@link orion.editor.TextViewShowOptions} for further information in how the options can be used to control the scrolling behavior.
+		 * @param {Function} [callback] if callback is specified and <code>scrollAnimation</code> is not zero, view scrolling is animated and
+		 *					the callback is called when the animation is done. Otherwise, callback is callback right away.
+		 *
 		 * @returns {Boolean} true if the view was scrolled.
 		 *
 		 * @see orion.editor.TextView#getSelection
 		 * @see orion.editor.TextView#setSelection
+		 * @see orion.editor.TextView#setCaretOffset
 		 */
-		showSelection: function() {
-			return this._showCaret(true);
+		showSelection: function(show, callback) {
+			return this._showCaret(show ? false : true, callback, show);
 		},
 		update: function(styleChanged, sync) {
 			if (!this._clientDiv) { return; }
@@ -6513,7 +6563,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			this._resetLineHeight();
 		},
-		_showCaret: function (allSelection, callback, scrollOptions, pageScroll) {
+		_showCaret: function (allSelection, callback, showOptions, pageScroll) {
 			if (!this._clientDiv) { return; }
 			var model = this._model;
 			var selection = this._getSelection();
@@ -6533,8 +6583,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var top = bounds.top;
 			var bottom = bounds.bottom;
 			var selectionHeight = 0;
-			var hasScrollOptions = typeof scrollOptions === "object"; //$NON-NLS-0$
-			if ((allSelection || hasScrollOptions) && !selection.isEmpty()) {
+			var hasShowOptions = typeof showOptions === "object"; //$NON-NLS-0$
+			if ((allSelection || hasShowOptions) && !selection.isEmpty()) {
 				bounds = this._getBoundsAtOffset(caret === end ? start : endInclusive);
 				selectionHeight = (bounds.bottom > bottom ? bounds.bottom : bottom) - (bounds.top < top ? bounds.top : top);
 				if (allSelection) {
@@ -6577,17 +6627,17 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					}
 				}
 			}
-			var alwaysScroll = hasScrollOptions && scrollOptions.scrollPolicy === "always"; //$NON-NLS-0$
+			var alwaysScroll = hasShowOptions && showOptions.scrollPolicy === "always"; //$NON-NLS-0$
 			if (pixelX !== 0 || pixelY !== 0 || alwaysScroll) {
-				if (hasScrollOptions) {
+				if (hasShowOptions) {
 					var flag = pixelY > 0;
 					if (pixelY === 0) {
 						pixelY = top - scroll.y;
 					}
-					var viewAnchor = scrollOptions.viewAnchor || "caret"; //$NON-NLS-0$
-					var selectionAnchor = scrollOptions.selectionAnchor || "caret"; //$NON-NLS-0$
-					var viewAnchorOffset = Math.min(Math.max(0, scrollOptions.viewAnchorOffset || 0));
-//					var selectionAnchorOffset = Math.min(Math.max(0, scrollOptions.selectionAnchorOffset || 0));
+					var viewAnchor = showOptions.viewAnchor;
+					var selectionAnchor = showOptions.selectionAnchor;
+					var viewAnchorOffset = Math.min(Math.max(0, showOptions.viewAnchorOffset || 0));
+//					var selectionAnchorOffset = Math.min(Math.max(0, showOptions.selectionAnchorOffset || 0));
 					if (viewAnchor === "top") { //$NON-NLS-0$
 						pixelY += Math.floor(flag ? (1 - viewAnchorOffset) * clientHeight : -viewAnchorOffset * clientHeight);
 					} else if (viewAnchor === "bottom") { //$NON-NLS-0$
@@ -6608,10 +6658,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 							// caret is the default
 						}
 					}
-				} else if (pixelY !== 0 && typeof scrollOptions === "number") { //$NON-NLS-0$
-					if (scrollOptions < 0) { scrollOptions = 0; }
-					if (scrollOptions > 1) { scrollOptions = 1; }
-					pixelY += Math.floor(pixelY > 0 ? scrollOptions * clientHeight : -scrollOptions * clientHeight);
+				} else if (pixelY !== 0 && typeof showOptions === "number") { //$NON-NLS-0$
+					if (showOptions < 0) { showOptions = 0; }
+					if (showOptions > 1) { showOptions = 1; }
+					pixelY += Math.floor(pixelY > 0 ? showOptions * clientHeight : -showOptions * clientHeight);
 				}
 				this._scrollViewAnimated(pixelX, pixelY, callback);
 				/*
