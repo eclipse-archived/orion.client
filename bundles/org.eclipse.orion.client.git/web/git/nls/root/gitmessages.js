@@ -403,6 +403,9 @@ define({
 	". Could not revert into active branch": ". Could not revert into active branch",
 	"Login": "Login",
 	"Authentication required for: ${0}. ${1} and re-try the request.": "Authentication required for: ${0}. ${1} and re-try the request.",
+	"Remember my committer name and email:":"Remember my committer name and email:",
+	"Successfully edited ${0} to have value ${1}":"Successfully edited ${0} to have value ${1}",
+	"Successfully added ${0} with value ${1}":"Successfully added ${0} with value ${1}",
 	"Signed-off-by: ":"Signed-off-by: ",
 	"Change-Id: ":"Change-Id: "
 });
