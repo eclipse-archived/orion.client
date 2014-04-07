@@ -6086,9 +6086,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._ignoreCopy = true;
 			try {
 				result = document.execCommand("copy", false, null); //$NON-NLS-0$
-			} catch (e) {
-				log("here")
-			}
+			} catch (e) {}
 			this._ignoreCopy = false;
 			if (!result) {
 				if (event) {
