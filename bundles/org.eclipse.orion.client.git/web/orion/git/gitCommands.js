@@ -3442,21 +3442,72 @@ var exports = {};
 			 new mCommandRegistry.CommandParameter('changeId', 'boolean', messages['ChangeId:'], false)], //$NON-NLS-0$  //$NON-NLS-1$
 			 {hasOptionalParameters: true});
 		
+		var handleGitCloneConfigSaveSuccess = function(message) {
+			serviceRegistry.getService("orion.page.dialog").accept(message); //$NON-NLS-0$
+		}
+		
+		var setGitCloneConfig = function(key,value,location) {
+			var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+			var handleError = function(error){
+				exports.handleProgressServiceResponse(error, {}, serviceRegistry);
+			};
+			
+			return gitService.addCloneConfigurationProperty(location, key, value).then(
+				function() {
+					message = i18nUtil.formatMessage(messages["Successfully added ${0} with value ${1}"], key, value); //$NON-NLS-0$
+					handleGitCloneConfigSaveSuccess(message);
+				},
+				function(err) {
+					if(err.status === 409) { // when confing entry is already defined we have to edit it
+						var configDeffered = gitService.getGitCloneConfig(location);
+						configDeffered.then(function(config){
+							if(config.Children){
+								for(var i=0; i<config.Children.length; i++){
+									if(config.Children[i].Key===key){
+										var locationToUpdate = config.Children[i].Location;
+										return gitService.editCloneConfigurationProperty(locationToUpdate,value).then(
+												function(){ 
+													message = i18nUtil.formatMessage(messages["Successfully edited ${0} to have value ${1}"],key, value); //$NON-NLS-0$
+													handleGitCloneConfigSaveSuccess(message);
+												},
+												function(err) {
+													handleError(err);
+												}
+										);
+										break;
+									}
+								}
+							}
+						}, function(err) {
+							handleError(err);
+						});
+					} else {
+						handleError(err);
+ 					}
+			});
+		}
+		
 		var commitCommand = new mCommands.Command({
-			name: messages["Commit"],
-			tooltip: messages["Commit"],
+			name: messages["Commit"], //$NON-NLS-0$
+			tooltip: messages["Commit"], //$NON-NLS-0$
 			id: "eclipse.orion.git.commitCommand", //$NON-NLS-0$
 			parameters: commitMessageParameters,
 			callback: function(data) {
 				var item = data.items.status;
-				
-				var commitFunction = function(body){		
+				var location = item.Clone.ConfigLocation;
+				var commitFunction = function(body){
+					if (body.persist) {
+						setGitCloneConfig("user.name",body.CommitterName,location).then( //$NON-NLS-0$
+							function() {
+								setGitCloneConfig("user.email", body.CommitterEmail, location); //$NON-NLS-0$
+							});	
+					}
 					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").commitAll(item.Clone.HeadLocation, null, JSON.stringify(body)), messages["Committing changes"]); //$NON-NLS-0$ 
+					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").commitAll(item.Clone.HeadLocation, null, JSON.stringify(body)), messages["Committing changes"]); //$NON-NLS-0$ //$NON-NLS-1$
 					progressService.createProgressMonitor(
 						deferred,
-						messages["Committing changes"]);
+						messages["Committing changes"]); //$NON-NLS-0$
 					deferred.then(
 						function(jsonData){
 							explorer.changedItem(item);
@@ -3472,7 +3523,7 @@ var exports = {};
 						} else if (config[i].Key === "user.email"){ //$NON-NLS-0$
 							body.CommitterEmail = config[i].Value;
 							body.AuthorEmail = config[i].Value;
-						}					
+						}
 					}
 					
 					if (body.Message && body.CommitterName && body.CommitterEmail && !data.parameters.optionsRequested) {
@@ -3496,10 +3547,10 @@ var exports = {};
 				if(body.Amend && !body.Message){
 					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").doGitLog(item.CommitLocation + "?page=1&pageSize=1"), messages["Committing changes"]); //$NON-NLS-0$ 
+					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").doGitLog(item.CommitLocation + "?page=1&pageSize=1"), messages["Committing changes"]); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ 
 					progressService.createProgressMonitor(
 						deferred,
-						messages["Committing changes"]);
+						messages["Committing changes"]); //$NON-NLS-0$
 					deferred.then(
 						function(resp){
 							// use the last commit message
