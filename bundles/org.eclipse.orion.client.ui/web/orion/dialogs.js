@@ -35,6 +35,10 @@ define([], function(){
 		 confirm : function(msg, onDone) {
 		 onDone(window.confirm(msg));
 		 },
+
+		accept : function(msg) {
+				window.alert(msg);
+		},
 		 /**
 		 * Prompts the user to select one or more files
 		 * @param {Function} onDone The function to invoke upon confirmation.
