@@ -6042,7 +6042,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (clipboardData) {
 				clipboardText = [];
 				convertDelimiter(text, function(t) {clipboardText.push(t);}, function() {clipboardText.push(util.platformDelimiter);});
-				if (clipboardData.setData(util.isIE ? "Text" : "text/plain", clipboardText.join(""))) { //$NON-NLS-1$ //$NON-NLS-0$
+				/*
+				* Note that setData() succeeds on Firefox 22 and greater, but the return value is not a boolean like IE and Chrome.
+				*/
+				var success = clipboardData.setData(util.isIE ? "Text" : "text/plain", clipboardText.join("")); //$NON-NLS-1$ //$NON-NLS-0$
+				if (success || util.isFirefox > 21) {
 					return true;
 				}
 			}
@@ -6082,7 +6086,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._ignoreCopy = true;
 			try {
 				result = document.execCommand("copy", false, null); //$NON-NLS-0$
-			} catch (e) {}
+			} catch (e) {
+				log("here")
+			}
 			this._ignoreCopy = false;
 			if (!result) {
 				if (event) {
