@@ -37,15 +37,17 @@
 			checkbox.checked = (value === null ? defaultState : JSON.parse(value));
 			checkbox.onchange = function(event) {
 				var newState = !!event.target.checked;
-				if (newState === defaultState)
+				if (newState === defaultState) {
 					localStorage.removeItem(key);
-				else
+				}
+				else {
 					localStorage.setItem(key, JSON.stringify(newState));
+				}
 			};
 		});
 	</script>
 </head>
-<body id="orion-settings" class="orionPage" style="padding: 10px; width: calc(100% - 20px); height: calc(100% - 20px);">
+<body>
 	<h1>JavaScript Tools Support</h1>
 	<p>This plugin provides a variety of JavaScript tooling, including:</p>
 	<ul>
@@ -59,14 +61,8 @@
 	<form>
 		<label><input type="checkbox" id="useworker" /> Use a web worker (improves responsiveness when editing large files)</label>
 	</form>
-
-	<div class="split-selection-table">
-	<div class="sectionWrapper toolComposite" style="margin: 30px 30px 0px 15px; max-width: 600px;">
-		<div class="sectionAnchor sectionTitle layoutLeft">
-			License
-		</div>
-	</div>
-	<div class="sections sectionTable" style="margin: 0px 30px 0px 15px; padding-left: 6px; padding-right: 6px; max-width: 600px;">
+	<div style="width:50%">
+		<h3>License</h3>
 		<p>
 		The Eclipse Foundation makes available all content in this plug-in (&quot;Content&quot;).  Unless otherwise 
 		indicated below, the Content is provided to you under the terms and conditions of the
@@ -84,7 +80,6 @@
 		indicated below, the terms and conditions of the EPL still apply to any source code in the Content
 		and such source code may be obtained at <a href="http://www.eclipse.org/">http://www.eclipse.org</a>.
 		</p>
-	</div>
 	</div>
 </body>	
 </html>
