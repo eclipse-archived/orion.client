@@ -17,6 +17,7 @@
     "requirejs": "~2.1.2",
     "supertest": "*",
     "grunt": "~0.4.4",
+    "grunt-cli": "~0.1.13",
     "grunt-contrib-copy": "~0.5.0",
     "grunt-contrib-requirejs": "~0.4.3",
     "grunt-string-replace": "~0.2.7",
