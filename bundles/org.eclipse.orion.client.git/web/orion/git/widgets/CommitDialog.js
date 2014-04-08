@@ -23,7 +23,7 @@ define(
 			CommitDialog.prototype = new dialog.Dialog();
 
 			CommitDialog.prototype.TEMPLATE = '<div style="display: none; padding-top: 10px; padding-bottom: 10px;" id="commitInfoBar"><strong id="commitInfo"></strong></div>'
-					+ '<div style="padding:4px"><label id="commitMessageLabel" for="commitMessage">${Message:}</label><input id="commitMessage" style="width: 30em" value=""></div>'
+					+ '<div style="padding:4px"><div style="vertical-align:top"><label style="display:block; float:left" id="commitMessageLabel" for="commitMessage">${Message:}</label><textarea id="commitMessage" rows="5" style="width: 30em"></textarea></div></div>'
 					+ '<div style="padding:4px"><label id="amendLabel" for="amend">${Amend:}</label><input id="amend" type="checkbox"></div>'
 					+ '<div style="padding:4px"><label id="changeIdLabel" for="changeId">${ChangeId:}</label><input id="changeId" type="checkbox"></div>'
 					+ '<div style="padding:4px"><label id="committerNameLabel" for="committerName">${Committer Name:}</label><input id="committerName" style="width: 30em" value=""></div>'
