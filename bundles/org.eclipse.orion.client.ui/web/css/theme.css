@@ -274,6 +274,11 @@ a.currentLocation:hover {
 	color: #cdcdcd;
 }
 
+.commandButton.disabled:hover {
+	background-color: #ddd;
+	box-shadow: none;
+}
+
 .commandImage {
 	border: 1px solid transparent;
     border-radius: 1px;
@@ -653,7 +658,6 @@ a.currentLocation:hover {
 	border-top-right-radius: 1px;
 }
 
-
 .dialogTitleText {
 	margin: 2px 2px 0;
 	color: whitesmoke;
@@ -663,6 +667,18 @@ a.currentLocation:hover {
 	font-weight: bold;
 }
 
+.dialogTitle .dismissButton {
+	margin-right: 0;	
+}
+
+.parameterPopup .dismissButton, .dialogTitle .dismissButton {
+	color: rgb(221, 221, 221);
+	cursor: pointer;
+}
+
+.parameterPopup .dismissButton:hover, .dialogTitle .dismissButton:hover {
+	color: white;
+}
 
 .dialogDismiss {
 	display: block;
