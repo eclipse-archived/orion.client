@@ -15,8 +15,7 @@ define([
 	"orion/objects",
 	"javascript/astManager",
 	"javascript/finder",
-	'orion/Deferred'
-], function(eslint, Objects, ASTManager, Finder, Deferred) {
+], function(eslint, Objects, ASTManager, Finder) {
 	// Should have a better way of keeping this up-to-date with ./load-rules-async.js
 	var config = {
 		// 0:off, 1:warning, 2:error
@@ -219,10 +218,7 @@ define([
 				error = e;
 			}
 			var parseErrors = this._extractParseErrors(ast);
-			var problems = []
-				.concat(eslintErrors)
-				.concat(parseErrors)
-				.map(toProblem);
+			var problems = this._filterProblems(parseErrors, eslintErrors).map(toProblem);
 			if (error && !parseErrors.length) {
 				// Warn about ESLint failure
 				problems.push({
@@ -232,6 +228,37 @@ define([
 				});
 			}
 			return { problems: problems };
+		},
+		
+		/**
+		 * @description Post-processes the ESLint generated problems to determine if there are any linting issues reported for the same 
+		 * nodes as parse errors. If there are we discard those problems.
+		 * @function
+		 * @private
+		 * @param {Array} parseErrors The array of parse errors, never <code>null</code>
+		 * @param {Array} eslintErrors The array of eslint computed errors, never <code>null</code>
+		 * @returns {Array} The filtered list of errors to report to the editor
+		 * @since 6.0
+		 */
+		_filterProblems: function(parseErrors, eslintErrors) {
+			var len = parseErrors.length;
+			if(len < 1) {
+				return eslintErrors;
+			}
+			var filtered = [].concat(parseErrors);
+			var len2 = eslintErrors.length;
+			filter: for(var i = 0; i < len2; i++) {
+				var ee = eslintErrors[i];
+				for(var j = 0; j < len; j++) {
+					var pe = parseErrors[j];
+					var node = ee.node;
+					if(node && node.range[0] >= pe.index && node.range[0] <= pe.end) {
+						continue filter;
+					}
+				}
+				filtered.push(ee);
+			}
+			return filtered;
 		},
 		
 		/**
@@ -262,20 +289,5 @@ define([
 			config.setOption("no-unused-params", properties.validate_unused_params); //$NON-NLS-0$
 		}
 	});
-
-	/**
-	 * @name eslint.Error
-	 * @class
-	 * @property {String} ruleId
-	 * @property {esprima.ASTNode} node
-	 * @property {String} message
-	 * @property {Number} line
-	 * @property {Number} col
-	 */
-	/**
-	 * @name esprima.Error
-	 * @property {Number} index
-	 * @property {String} message
-	 */
 	return ESLintValidator;
 });
