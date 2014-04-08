@@ -144,7 +144,7 @@ define(
 					body.CommitterEmail = this.$committerEmail.value;
 					body.AuthorName = this.$authorName.value;
 					body.AuthorEmail = this.$authorEmail.value;
-					body.persist = this.$persist ? true : false;
+					body.persist = this.$persist.checked ? true : false;
 
 					this.options.func(body);
 				}
