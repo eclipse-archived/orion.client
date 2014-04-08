@@ -167,13 +167,22 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		},
 		
 		createProject: function(workspaceLocation, projectMetadata){
-				return this.fileClient.createProject(workspaceLocation, projectMetadata.Name, projectMetadata.ContentLocation, true).then(function(fileMetadata){
+			var deferred = new Deferred();
+			
+			this.fileClient.createProject(workspaceLocation, projectMetadata.Name, projectMetadata.ContentLocation, true).then(
+				function(fileMetadata){
 					delete projectMetadata.Name;
-					return this.initProject(fileMetadata.ContentLocation, projectMetadata);
+					deferred.resolve(this.initProject(fileMetadata.ContentLocation, projectMetadata));
 				}.bind(this), 
-				function(error){return error;},
-				function(progress){return progress;}
+				function(error){
+					deferred.reject(error);
+				},
+				function(progress){
+					deferred.progress(progress);
+				}
 			);
+			
+			return deferred;
 		},
 		
 		getDependencyFileMetadata : function(dependency, workspaceLocation){

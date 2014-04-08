@@ -9,13 +9,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window define orion XMLHttpRequest confirm*/
+/*global window define orion XMLHttpRequest confirm document*/
 /*jslint sub:true*/
 define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
- 'orion/commandRegistry', 'orion/i18nUtil', 'orion/webui/dialogs/ImportDialog', 'orion/widgets/projects/ProjectOptionalParametersDialog', 
+ 'orion/commandRegistry', 'orion/i18nUtil', 'orion/webui/dialogs/PromptDialog', 'orion/widgets/projects/ProjectOptionalParametersDialog', 
  'orion/fileCommands', 'orion/editorCommands', 'orion/EventTarget',
  'orion/URITemplate', 'orion/PageLinks', 'orion/objects', 'orion/preferences'],
-	function(require, messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, ImportDialog, ProjectOptionalParametersDialog, FileCommands, mEditorCommands, EventTarget,
+	function(require, messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, PromptDialog, ProjectOptionalParametersDialog, FileCommands, mEditorCommands, EventTarget,
 		URITemplate, PageLinks, objects, mPreferences){
 		var projectCommandUtils = {};
 		
@@ -641,6 +641,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 	};
 	
 	var explorer;
+	
 	projectCommandUtils.setExplorer = function(theExplorer) {
 		explorer = theExplorer;
 	};
@@ -1018,7 +1019,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					}
 					var item = forceSingleItem(data.items);
 					fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
-						progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name}), "Creating project " + name).then(function(project){
+						progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name}), messages["Creating project "] + name).then(function(project){
 							dispatchNewProject(workspace, project);
 						});
 					});
@@ -1036,30 +1037,68 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			commandService.addCommand(createBasicProjectCommand);
 				
 			var createZipProjectCommand = new mCommands.Command({
-			name: "File System",
-			tooltip: "Create project from a local zipped file.",
-			id: "orion.project.create.fromfile",
-			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", "Name: ")]),
+			name: "File System", //$NON-NLS-0$
+			tooltip: "Create project from a local zipped file.", //$NON-NLS-0$
+			id: "orion.project.create.fromfile", //$NON-NLS-0$
 			callback: function(data){
-					var name = data.parameters.valueFor("name");
-					if(!name){
-						return;
-					}
 					var item = forceSingleItem(data.items);
+
+					var fileInput = lib.node("fileSelectorInput"); //$NON-NLS-0$
+					var cloneInput = fileInput.cloneNode(); // clone file input before its value is changed
 					
-					fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
-						progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name}), "Creating project " + name).then(function(projectInfo){
-							progress.progress(fileClient.read(projectInfo.ContentLocation, true)).then(function(projectMetadata){
-								var dialog = new ImportDialog.ImportDialog({
-									importLocation: projectMetadata.ImportLocation,
-									func: function() {
-										dispatchNewProject(workspace, projectInfo);
-									}
-								});
-								dialog.show();
-							});
-						});
+					var projectNameDialog = new PromptDialog.PromptDialog({
+						title: messages["Enter project name:"] //$NON-NLS-0$
 					});
+					
+					// add listener which uses project name entered by user to create a new project
+					projectNameDialog.addEventListener("ok", function(event) { //$NON-NLS-0$
+						var projectName = event.value;
+						fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: projectName}), messages["Creating project "] + projectName).then(function(projectInfo){ //$NON-NLS-0$
+								progress.progress(fileClient.read(projectInfo.ContentLocation, true)).then(function(projectMetadata){
+									
+									explorer.changedItem(workspace, true).then(function(newWorkspace){ //force workspace reload
+										var children = newWorkspace.Children;
+										// find the item that represents the newly created project
+										var projectItem = null;
+										children.some(function(child){
+											if (child.Location === projectMetadata.Location) {
+												projectItem = child;
+												return true;
+											}
+											return false;
+										});
+										// upload files selected by user into newly created project
+										if (projectItem) {
+											if (fileInput.files && fileInput.files.length > 0) {
+												for (var i = 0; i < fileInput.files.length; i++) {
+													explorer._uploadFile(projectItem, fileInput.files.item(i), true);
+												}
+											}
+										}
+									});
+									
+								}, errorHandler);
+							}, errorHandler);
+						}, errorHandler);
+					});
+					
+					var changeListener = function(){
+						if (fileInput.files && fileInput.files.length > 0) {
+							projectNameDialog.show();	// ask user for project name
+						}
+
+						fileInput.removeEventListener("change", changeListener);	
+					};
+					fileInput.addEventListener("change", changeListener);
+					
+					// Launch file picker. Note that at the time when this code was written, web browser 
+					// restrictions made it so that fileInput.click() cannot be called asynchronously.
+					// e.g. cannot be called from event handler after the user enters the project name
+					fileInput.click();
+					
+					//replace original fileInput so that change event always fires
+					fileInput.parentNode.replaceChild(cloneInput, fileInput);
 				},
 			visibleWhen: function(item) {
 					if (!explorer || !explorer.isCommandsVisible()) {
@@ -1090,7 +1129,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 						}
 						var item = forceSingleItem(data.items);
 						fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
-							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name, ContentLocation: url}), "Creating project " + name).then(function(project){
+							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name, ContentLocation: url}), messages["Creating project "] + name).then(function(project){
 								dispatchNewProject(workspace, project);
 							});
 						});

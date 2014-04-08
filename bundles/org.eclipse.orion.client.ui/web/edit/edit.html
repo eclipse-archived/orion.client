@@ -23,6 +23,8 @@
     </head>
 
 	<body id="orion-editor" spellcheck="false" class="orionPage">
+		<!-- file input doesn't function properly on all web browsers if it is dynamically generated, we don't want the input to be visible -->
+		<input id="fileSelectorInput" type="file" multiple style="position:fixed; top: -100px;"/>
 		<div id="sideMenu" class="sideMenu"></div>
 		<div id="pageContent" class="content-fixedHeight">
 			<div id="sideMenuToggle" class="sideMenuToggle"></div>

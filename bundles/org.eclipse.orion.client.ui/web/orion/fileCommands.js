@@ -14,9 +14,9 @@
 
 define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 
 	'orion/commandRegistry', 'orion/extensionCommands', 'orion/contentTypes', 'orion/compare/compareUtils', 
-	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog', 'orion/webui/dialogs/ImportDialog',
+	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog',
 	'orion/EventTarget'],
-	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mCommandRegistry, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, ImportDialog, EventTarget){
+	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mCommandRegistry, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget){
 
 	/**
 	 * Utility methods
@@ -1067,13 +1067,25 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			id: "orion.import", //$NON-NLS-0$
 			callback : function(data) {
 				var item = getTargetFolder(data.items);
-				var dialog = new ImportDialog.ImportDialog({
-					importLocation: item.ImportLocation,
-					func: function() {
-						dispatchModelEvent({ type: "import", target: item }); //$NON-NLS-0$
+				var fileInput = lib.node("fileSelectorInput");
+				var cloneInput = fileInput.cloneNode(); // clone file input before its value is changed
+
+				var changeListener = function(){ //$NON-NLS-0$
+					if (fileInput.files && fileInput.files.length > 0) {
+						for (var i = 0; i < fileInput.files.length; i++) {
+							explorer._uploadFile(item, fileInput.files.item(i), true);
+						}
 					}
-				});
-				dialog.show();
+					
+					fileInput.removeEventListener("change", changeListener);
+				};
+				
+				fileInput.addEventListener("change", changeListener);
+				fileInput.click();
+				
+				//replace original fileInput so that "change" event always fires
+				fileInput.parentNode.replaceChild(cloneInput, fileInput);
+				
 			},
 			visibleWhen: checkFolderSelection
 		});
