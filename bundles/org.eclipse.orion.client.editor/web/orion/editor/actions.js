@@ -1036,11 +1036,12 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var selection = editor.getSelection();
 			var firstLine = model.getLineAtOffset(selection.start);
 			var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
-			var uncomment = true, lines = [], lineText, index;
+			var uncomment = true, lineIndices = [], index;
 			for (var i = firstLine; i <= lastLine; i++) {
-				lineText = model.getLine(i, true);
-				lines.push(lineText);
-				if (!uncomment || (index = lineText.indexOf(comment)) === -1) {
+				var lineText = model.getLine(i, true);
+				index = lineText.indexOf(comment);
+				lineIndices.push(index);
+				if (!uncomment || index === -1) {
 					uncomment = false;
 				} else {
 					if (index !== 0) {
@@ -1055,26 +1056,28 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					}
 				}
 			}
-			var text, selStart, selEnd, l = comment.length;
+			var selStart, selEnd, l = comment.length, k;
 			var lineStart = model.getLineStart(firstLine);
-			var lineEnd = model.getLineEnd(lastLine, true);
+			textView.setRedraw(false);
+			this.startUndo();
 			if (uncomment) {
-				for (var k = 0; k < lines.length; k++) {
-					lineText = lines[k];
-					index = lineText.indexOf(comment);
-					lines[k] = lineText.substring(0, index) + lineText.substring(index + l);
+				for (k = lineIndices.length - 1; k >= 0; k--) {
+					index = lineIndices[k] + model.getLineStart(firstLine + k);
+					editor.setText("", index, index + l);
 				}
-				text = lines.join("");
 				var lastLineStart = model.getLineStart(lastLine);
 				selStart = lineStart === selection.start ? selection.start : selection.start - l;
 				selEnd = selection.end - (l * (lastLine - firstLine + 1)) + (selection.end === lastLineStart+1 ? l : 0);
 			} else {
-				lines.splice(0, 0, "");
-				text = lines.join(comment);
+				for (k = lineIndices.length - 1; k >= 0; k--) {
+					index = model.getLineStart(firstLine + k);
+					editor.setText(comment, index, index);
+				}
 				selStart = lineStart === selection.start ? selection.start : selection.start + l;
 				selEnd = selection.end + (l * (lastLine - firstLine + 1));
 			}
-			editor.setText(text, lineStart, lineEnd);
+			this.endUndo();
+			textView.setRedraw(true);
 			editor.setSelection(selStart, selEnd);
 			return true;
 		},
