@@ -17,8 +17,9 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 	'orion/editor/annotations', //$NON-NLS-0$
 	'orion/editor/tooltip', //$NON-NLS-0$
 	'orion/editor/find', //$NON-NLS-0$
+	'orion/editor/findUI', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mKeyBinding, mAnnotations, mTooltip, mFind, util) {
+], function(messages, mKeyBinding, mAnnotations, mTooltip, mFind, mFindUI, util) {
 
 	var AT = mAnnotations.AnnotationType;
 
@@ -31,7 +32,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		this.editor = editor;
 		this.undoStack = undoStack;
 		this._incrementalFind = new mFind.IncrementalFind(editor);
-		this._find = find ? find : new mFind.Find(editor, undoStack);
+		this._find = find ? find : new mFindUI.FindUI(editor, undoStack);
 		this._lastEditLocation = null;
 		this.init();
 	}
@@ -83,11 +84,10 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			textView.setAction("find", function() { //$NON-NLS-0$
 				if (this._find) {
 					var selection = this.editor.getSelection();
-					var search = prompt(messages.find, this.editor.getText(selection.start, selection.end));
-					if (search) {
-						this._find.find(true, {findString:search});
-					}
+					this._find.show({findString:this.editor.getText(selection.start, selection.end)});
+					return true;
 				}
+				return false;
 			}.bind(this), {name: messages.find});
 
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true), "findNext"); //$NON-NLS-1$ //$NON-NLS-0$

@@ -3024,6 +3024,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				if (topNode === temp) {
 					return;
 				}
+				if (temp.className && temp.className.indexOf("textViewFind") !== -1) { //$NON-NLS-0$
+					return;
+				}
 				temp = temp.parentNode;
 			}
 			if (e.preventDefault) { e.preventDefault(); }
