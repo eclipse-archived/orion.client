@@ -440,12 +440,17 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	};
 	
 	/** @private */
-	function binarySearch (array, offset) {
-		var high = array.length, low = -1, index;
+	function binarySearch(array, offset, inclusive, low, high) {
+		var index;
+		if (low === undefined) { low = -1; }
+		if (high === undefined) { high = array.length; }
 		while (high - low > 1) {
 			index = Math.floor((high + low) / 2);
 			if (offset <= array[index].start) {
 				high = index;
+			} else if (inclusive && offset < array[index].end) {
+				high = index;
+				break;
 			} else {
 				low = index;
 			}
@@ -858,7 +863,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 			if (!ranges) {
 				ranges = [];
 			}
-			var mergedStyle, i = binarySearch(ranges, styleRange.start);
+			var mergedStyle, i = binarySearch(ranges, styleRange.start, true);
 			for (; i<ranges.length && styleRange; i++) {
 				var range = ranges[i];
 				if (styleRange.end <= range.start) { break; }
