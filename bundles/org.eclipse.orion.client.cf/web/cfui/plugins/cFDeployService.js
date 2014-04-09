@@ -184,51 +184,6 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 						Width: "400px", 
 						Height: "270px",
 						UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate"});
-					
-//					cFService.pushApp(target, null, decodeURIComponent(project.ContentLocation + appPath)).then(
-//						function(result){
-//							deferred.resolve({
-//								CheckState: true,
-//								ToSave: {
-//									ConfigurationName: result.App.entity.name + " on " + result.Target.Space.Name + " / " + result.Target.Org.Name,
-//									Parameters: {
-//										Target: {
-//											Url: result.Target.Url,
-//											Org: result.Target.Org.Name,
-//											Space: result.Target.Space.Name
-//										},
-//										Name: result.App.entity.name
-//									},
-//									Url: "http://" + result.Route.entity.host + "." + result.Domain,
-//									UrlTitle: result.App.entity.name,
-//									Type: "Cloud Foundry",
-//									ManageUrl: result.ManageUrl,
-//									Path: appPath
-//								}
-//							});
-//						}, function(error){
-//							if (error.HttpCode === 404){
-//								deferred.resolve({
-//									State: "NOT_DEPLOYED",
-//									Message: error.Message
-//								});
-//							} else if (error.JsonData && error.JsonData.error_code) {
-//								var err = error.JsonData;
-//								if (err.error_code === "CF-InvalidAuthToken"){
-//									error.Retry = {
-//										parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
-//									};
-//								} else if (err.error_code === "CF-TargetNotSet"){
-//									var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
-//									error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
-//									deferred.reject(error);
-//								}
-//								deferred.reject(error);
-//							} else {
-//								deferred.reject(error);
-//							}
-//						}
-//					);
 				}
 			},
 			
