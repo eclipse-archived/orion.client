@@ -65,6 +65,7 @@
         "${orionClient}/bundles/org.eclipse.orion.client.editor",
         "${orionClient}/bundles/org.eclipse.orion.client.git",
         "${orionClient}/bundles/org.eclipse.orion.client.javascript",
+        "${orionClient}/bundles/org.eclipse.orion.client.webtools",
         "${orionClient}/bundles/org.eclipse.orion.client.users"
     ],
     // Folders that should be searched for JSDoc
@@ -75,6 +76,7 @@
         "${orionClient}/bundles/org.eclipse.orion.client.editor/web/orion/",
         "${orionClient}/bundles/org.eclipse.orion.client.git/web/orion/",
         "${orionClient}/bundles/org.eclipse.orion.client.javascript/web/javascript/",
+        "${orionClient}/bundles/org.eclipse.orion.client.webtools/web/webtools/",
         "${orionClient}/bundles/org.eclipse.orion.client.users/web/orion/"
     ],
     // List of modules that r.js will optimize
@@ -107,8 +109,6 @@
         { name: "plugins/languages/arduino/arduinoPlugin" },
         { name: "plugins/languages/c/cPlugin" },
         { name: "plugins/languages/cpp/cppPlugin" },
-        { name: "plugins/languages/css/cssPlugin" },
-        { name: "plugins/languages/html/htmlPlugin" },
         { name: "plugins/languages/java/javaPlugin" },
         { name: "plugins/languages/php/phpPlugin" },
         { name: "plugins/languages/python/pythonPlugin" },
@@ -130,5 +130,6 @@
         { name: "sites/site" },
         { name: "sites/sites" },
         { name: "sites/view" },
+        { name: "webtools/plugins/webToolsPlugin" },
     ]
 })

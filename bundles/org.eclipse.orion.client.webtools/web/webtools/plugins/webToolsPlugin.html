@@ -3,7 +3,8 @@
 <head>
 	<meta charset="UTF-8">
     <meta name="copyright" content="Copyright (c) IBM Corporation and others 2014.">
-    <title>Orion CSS Support</title>
+    <title>Orion Web Tools Support</title>
+    <link rel="stylesheet" type="text/css" href="../../settings/settings.css"/>
 	<script src="../../../requirejs/require.js"></script>
 	<script type="text/javascript">
 		/*global require*/
@@ -17,19 +18,21 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/css/cssPlugin"]);
+		require(["webToolsPlugin.js"]);
 	</script>
 </head>
 
 <body id="orion-settings" class="orionPage" style="padding: 10px;">
-	<h2>CSS Tools Support</h2>
+	<h2>Orion Web Tools Support</h2>
 	<p>
-		This plugin provides CSS tooling, including:
+		This plug-in provides tools for web languages, including HTML, CSS and Markdown:
 	</p>
 	<ul>
 		<li><em>Editing</em> - an editor with syntax highlighting</li>
+		<li><em>Content Assist</em> - completion and templates while editing</li>
+		<li><em>Navigation</em> - source navigation and a source outline</li>
 	</ul>
-	<p>October 16, 2013</p>	
+	<p>March 27, 2014</p>	
 	
 	<div class="split-selection-table">
 	<div class="sectionWrapper toolComposite" style="margin: 15px 30px 0px 15px; max-width: 600px;">

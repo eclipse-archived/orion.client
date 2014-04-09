@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-   Copyright (C) 2013, SAP AG and others.
+   Copyright (C) 2013, 2014 SAP AG and others.
 
    All rights reserved. This program and the accompanying materials
    are made available under the terms of the Eclipse Public License v1.0
@@ -102,6 +102,7 @@
 	<modules>
 		<module>bundles/org.eclipse.orion.client.core</module>
 		<module>bundles/org.eclipse.orion.client.editor</module>
+		<module>bundles/org.eclipse.orion.client.webtools</module>
 		<module>bundles/org.eclipse.orion.client.javascript</module>
 		<module>bundles/org.eclipse.orion.client.git</module>
 		<module>bundles/org.eclipse.orion.client.cf</module>
