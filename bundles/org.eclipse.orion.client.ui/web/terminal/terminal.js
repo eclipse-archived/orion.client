@@ -21,7 +21,7 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
 
 	var orionTerminal = {
 		connect: function() {
-			return xhr("POST", "/docker/connect", { //$NON-NLS-1$ //$NON-NLS-0$
+			return xhr("POST", "../docker/connect", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
 				},
@@ -31,7 +31,7 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
 			});
 		},
 		disconnect: function() {
-			return xhr("POST", "/docker/disconnect", { //$NON-NLS-1$ //$NON-NLS-0$
+			return xhr("POST", "../docker/disconnect", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
 				},
