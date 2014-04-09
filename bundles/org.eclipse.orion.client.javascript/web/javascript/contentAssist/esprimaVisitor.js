@@ -34,7 +34,8 @@ define([
 				// gather children to visit
 				children = [];
 				for (key in node) {
-					if (key !== "range" && key !== "errors" && key !== "target" && key !== "extras" && key !== "comments") {
+					if (key !== "range" && key !== "errors" && key !== "target" && key !== "extras" && 
+						key !== "comments" && key !== 'parent') {
 						child = node[key];
 						if (child instanceof Array) {
 							for (i = 0; i < child.length; i++) {
