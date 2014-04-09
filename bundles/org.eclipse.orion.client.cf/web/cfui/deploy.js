@@ -268,6 +268,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 											org.Spaces.forEach(function(space){
 												var newTarget = {};
 												newTarget.Url = target.Url;
+												if (target.ManageUrl)
+													newTarget.ManageUrl = target.ManageUrl;
 												newTarget.Org = org.Name;
 												newTarget.Space = space.Name;
 												targets[org.Name].push(newTarget);
