@@ -6572,6 +6572,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		},
 		_showCaret: function (allSelection, callback, showOptions, pageScroll) {
 			if (!this._clientDiv) { return; }
+			if (this._redrawCount > 0) { return; }
 			var model = this._model;
 			var selection = this._getSelection();
 			var scroll = this._getScroll();
