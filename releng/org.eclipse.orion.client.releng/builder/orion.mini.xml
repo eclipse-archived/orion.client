@@ -14,6 +14,8 @@
 		${skipOrionUI}      If set, the Orion pages and plugins will not be built
 		${skipBrowser}      If set, the readonly file browser widget will not be generated 
 		${skipEditor}       If set, the standalone editor will not be generated
+		${skipEditorStylers}       If set, the standalone editor stylers will not be generated
+		${skipCompareEditor}       If set, the standalone compare editor will not be generated
 	-->
 
 	<property name="super" value="Build specific targets and properties" />
@@ -125,6 +127,7 @@
 			<or>
 				<not><isset property="skipBrowser" /></not>
 				<not><isset property="skipEditor" /></not>
+				<not><isset property="skipCompareEditor" /></not>
 			</or>
 		</condition>
 	</target>
@@ -149,7 +152,7 @@
 		<copy file="${builder}/scripts/editor.build.stylers-js.js" tofile="${staging}/editor.build.stylers-js.js" overwrite="true"/>
 	</target>
 	
-	<target name="editorStylersOptimize" if="buildEditorStylers">
+	<target name="editorStylersOptimize" unless="skipEditorStylers">
 		<stylerOptimizeFile out="${out}/stylers/text_x-yaml/syntax.min.js"
 			name="orion/editor/stylers/text_x-yaml/syntax"
 			optimize="closure"
@@ -184,7 +187,12 @@
 				buildfile="${staging}/editor.build.almond-js.js"
 				optimize="none"
 				staging="${staging}" />
+			<zip destFile="${out}/built-editor.zip" basedir="${out}" includes="built-editor.css, built-editor-amd.min.js, built-editor-amd.js, built-editor.min.js, built-editor.js, stylers/**/*" />
+		</sequential>
+	</target>
 				
+	<target name="compareOptimize" unless="skipCompareEditor">
+		<sequential>
 			<widgetOptimizeFile out="${out}/built-compare.css"
 				buildfile="${staging}/compare.build-css.js"
 				optimize="closure"
@@ -208,7 +216,6 @@
 			<copy todir= "${out}" >
 				<fileset dir="${orionClient}/bundles/org.eclipse.orion.client.ui/web/font"  includes="OrionIconFont-Regular.eot, OrionIconFont-Regular.woff, OrionIconFont-Regular.ttf, OrionIconFont-Regular.svg"/>
 			</copy>
-			<zip destFile="${out}/built-editor.zip" basedir="${out}" includes="built-editor.css, built-editor-amd.min.js, built-editor-amd.js, built-editor.min.js, built-editor.js, stylers/**/*" />
 			<zip destFile="${out}/built-compare.zip" basedir="${out}" includes="built-compare.css, built-compare-amd.min.js, built-compare-amd.js, built-compare.min.js, built-compare.js, OrionIconFont-Regular.eot, OrionIconFont-Regular.woff, OrionIconFont-Regular.ttf, OrionIconFont-Regular.svg" />
 		</sequential>
 	</target>
@@ -333,6 +340,12 @@
 
 		<!-- build standalone editor (unless skipEditor is set) -->
 		<antcall target="editorOptimize">
+			<param name="staging" value="${staging}" />
+			<param name="out" value="${widgetOutDirectory}" />
+		</antcall>
+
+		<!-- build standalone compare editor (unless skipCompareEditor is set) -->
+		<antcall target="compareOptimize">
 			<param name="staging" value="${staging}" />
 			<param name="out" value="${widgetOutDirectory}" />
 		</antcall>
