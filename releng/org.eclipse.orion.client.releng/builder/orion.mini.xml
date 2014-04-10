@@ -150,13 +150,11 @@
 	</target>
 	
 	<target name="editorStylersOptimize" if="buildEditorStylers">
-		<stylerOptimizeFile out="${out}/text_x-yaml-syntax.min.js"
-			buildfile="${staging}/editor.build.stylers-js.js"
+		<stylerOptimizeFile out="${out}/stylers/text_x-yaml/syntax.min.js"
 			name="orion/editor/stylers/text_x-yaml/syntax"
 			optimize="closure"
 			staging="${staging}" />
-		<stylerOptimizeFile out="${out}/text_x-yaml-syntax.js"
-			buildfile="${staging}/editor.build.stylers-js.js"
+		<stylerOptimizeFile out="${out}/stylers/text_x-yaml/syntax.js"
 			name="orion/editor/stylers/text_x-yaml/syntax"
 			optimize="none"
 			staging="${staging}" />
@@ -210,7 +208,7 @@
 			<copy todir= "${out}" >
 				<fileset dir="${orionClient}/bundles/org.eclipse.orion.client.ui/web/font"  includes="OrionIconFont-Regular.eot, OrionIconFont-Regular.woff, OrionIconFont-Regular.ttf, OrionIconFont-Regular.svg"/>
 			</copy>
-			<zip destFile="${out}/built-editor.zip" basedir="${out}" includes="built-editor.css, built-editor-amd.min.js, built-editor-amd.js, built-editor.min.js, built-editor.js" />
+			<zip destFile="${out}/built-editor.zip" basedir="${out}" includes="built-editor.css, built-editor-amd.min.js, built-editor-amd.js, built-editor.min.js, built-editor.js, stylers/**/*" />
 			<zip destFile="${out}/built-compare.zip" basedir="${out}" includes="built-compare.css, built-compare-amd.min.js, built-compare-amd.js, built-compare.min.js, built-compare.js, OrionIconFont-Regular.eot, OrionIconFont-Regular.woff, OrionIconFont-Regular.ttf, OrionIconFont-Regular.svg" />
 		</sequential>
 	</target>
@@ -264,7 +262,6 @@
 	
 	<macrodef name="stylerOptimizeFile">
 		<attribute name="staging" />
-		<attribute name="buildfile" />
 		<attribute name="out" />
 		<attribute name="name" />
 		<attribute name="optimize" />
@@ -282,7 +279,7 @@
 				<arg value="180" />
 				<arg value="${requirejsHome}/r.js"/>
 				<arg value="-o" />
-				<arg value="@{buildfile}"/>
+				<arg value="@{staging}/editor.build.stylers-js.js"/>
 				<arg value="optimize=@{optimize}" />
 				<arg value="name=@{name}"/>
 				<arg value="out=@{out}"/>
