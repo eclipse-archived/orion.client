@@ -713,8 +713,12 @@ define([
 	 	 * @param {Boolean} expandParent Specifies whether or not the parentItem should be expanded after the upload completes.
 		 */
 		_uploadFile: function(parentItem, file, expandParent) {
+			var targetItem = parentItem;
+			if (!targetItem.Location && targetItem.fileMetadata) {
+				targetItem = targetItem.fileMetadata;
+			}
 			var uploadImpl = function() {
-				this._makeUploadNode(parentItem, file.name, false).then(function(uploadNodeContainer){
+				this._makeUploadNode(targetItem, file.name, false).then(function(uploadNodeContainer){
 					var refNode = uploadNodeContainer.refNode; //td
 					var progressBar = uploadNodeContainer.progressBar;
 					var cancelButton = uploadNodeContainer.cancelButton;
@@ -736,7 +740,7 @@ define([
 						},
 						loadend: function(event) {
 							destroy();
-							this.changedItem(parentItem);
+							this.changedItem(targetItem);
 						}.bind(this),
 						error: function(event) {
 							var errorMessage = messages["Uploading the following file failed: "] + file.name; //$NON-NLS-0$
@@ -749,7 +753,7 @@ define([
 					};
 						
 					var unzip = file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
-					var req = this.dragAndDrop(parentItem, file, this, unzip, false, handlers, true); 
+					var req = this.dragAndDrop(targetItem, file, this, unzip, false, handlers, true); 
 					
 					cancelButton.addEventListener("click", function(){ //$NON-NLS-0$
 						req.abort();
@@ -758,7 +762,7 @@ define([
 			}.bind(this);
 			
 			if (expandParent) {
-				this.expandItem(parentItem, false).then(uploadImpl);
+				this.expandItem(targetItem, false).then(uploadImpl);
 			} else {
 				uploadImpl();
 			}
