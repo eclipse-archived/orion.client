@@ -16,7 +16,7 @@
 		"plugins/languages/yaml/yamlPlugin.html":true,
 		"plugins/pageLinksPlugin.html":true,
 		"plugins/csslintPlugin.html": true,
-		"html/plugins/webToolsPlugin.html":true,
+		"webtools/plugins/webToolsPlugin.html":true,
 		"javascript/plugins/javascriptPlugin.html":true,
 		"shell/plugins/shellPagePlugin.html":true,
 		"plugins/nodePlugin.html":true,

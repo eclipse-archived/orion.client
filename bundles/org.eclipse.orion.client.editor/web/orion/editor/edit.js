@@ -32,8 +32,8 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	"orion/editor/editorFeatures", //$NON-NLS-0$
 	
 	"orion/editor/contentAssist", //$NON-NLS-0$
-	"orion/editor/cssContentAssist", //$NON-NLS-0$
-	"orion/editor/htmlContentAssist", //$NON-NLS-0$
+	"webtools/cssContentAssist", //$NON-NLS-0$
+	"webtools/htmlContentAssist", //$NON-NLS-0$
 	"orion/editor/jsTemplateContentAssist", //$NON-NLS-0$
 	
 	"orion/editor/AsyncStyler", //$NON-NLS-0$
