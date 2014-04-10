@@ -1,10 +1,11 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
-                    "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 	<script src="../../../orion/plugin.js"></script>
 	<script src="../../../requirejs/require.js"></script>
 	<script>
+		var useNewEsprima = window.location.hash === "#new";
+
 		/*global window require */
 		require({
 		  baseUrl: '../../',
@@ -12,7 +13,7 @@
 				text: 'requirejs/text',
 				i18n: 'requirejs/i18n',
 				domReady: 'requirejs/domReady',
-				esprima: 'esprima/esprima',
+				esprima: (useNewEsprima ? 'esprima/esprima_tolerant' : 'esprima/esprima'),
 				estraverse: 'estraverse/estraverse'
 		  }
 		});

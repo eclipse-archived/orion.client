@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="../../../requirejs/require.js"></script>
+	<script>
+		var useNewEsprima = window.location.hash === "#new";
+
+		/*jslint amd:true browser:true*/
+		require({
+			baseUrl: "../../",
+			paths: {
+				text: "requirejs/text",
+				i18n: "requirejs/i18n",
+				domReady: "requirejs/domReady",
+				esprima: (useNewEsprima ? 'esprima/esprima_tolerant' : 'esprima/esprima'),
+				estraverse: "estraverse/estraverse"
+			}
+		});
+
+		require(["estraverse", "esprima", "domReady!"], function(Estraverse, _esprima) {
+			var esprima = typeof window.esprima !== "undefined" ? window.esprima : _esprima;
+
+			var element = document.getElementById("source");
+			element.onchange = function() {
+				var source = element.value.replace(/\\n/g, "\n");
+				document.getElementById("source2").value = source;
+				
+				var ast = esprima.parse(source, {comment:true, tokens:true, tolerant:true, range:true, raw:true});
+				var expected = [];
+				Estraverse.traverse(ast, {
+					enter: function(node) {
+						var n = {};
+						n.type = node.type;
+						if (node.name)
+							n.name = node.name;
+						if (node.kind)
+							n.kind = node.kind;
+						if (node.range)
+							n.range = node.range;
+						if (node.value)
+							n.value = node.value;
+						expected.push(n);
+					}
+				});
+				var result = {
+					nodes: expected.slice(1) // omit Program
+				};
+				document.getElementById("testData").textContent = JSON.stringify(result.nodes)
+					.replace(/"(\w+)":/g, function(match, propName) {
+						return propName + ":";
+					});
+
+				document.getElementById("ast").value = JSON.stringify(ast);
+			};
+		});
+		
+	</script>
+</head>
+<form>
+	<p>Source code</p>
+	<textarea id="source" rows=20 cols=100></textarea>
+
+	<p>Normalized</p>
+	<textarea id="source2" readonly rows=5, cols=100></textarea>
+
+	<p>Test data</p>
+	<textarea id="testData" rows=10 cols=150></textarea>
+
+	<p>AST</p>
+	<textarea id="ast" rows=30 cols=100></textarea>
+</form>
+</html>
