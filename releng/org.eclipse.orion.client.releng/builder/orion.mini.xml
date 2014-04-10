@@ -150,6 +150,17 @@
 
 	<target name="editorOptimize" unless="skipEditor">
 		<sequential>
+			<stylerOptimizeFile out="${out}/text_x-yaml-syntax.min.js"
+				buildfile="${staging}/editor.build.stylers-js.js"
+				name="orion/editor/stylers/text_x-yaml/syntax"
+				optimize="closure"
+				staging="${staging}" />
+			<stylerOptimizeFile out="${out}/text_x-yaml-syntax.js"
+				buildfile="${staging}/editor.build.stylers-js.js"
+				name="orion/editor/stylers/text_x-yaml/syntax"
+				optimize="none"
+				staging="${staging}" />
+				
 			<widgetOptimizeFile out="${out}/built-editor.css"
 				buildfile="${staging}/editor.build-css.js"
 				optimize="closure"
@@ -168,17 +179,6 @@
 				staging="${staging}" />
 			<widgetOptimizeFile out="${out}/built-editor.js"
 				buildfile="${staging}/editor.build.almond-js.js"
-				optimize="none"
-				staging="${staging}" />
-				
-			<stylerOptimizeFile out="${out}/stylers/text_x-yaml/syntax.min.js"
-				buildfile="${staging}/editor.build.stylers-js.js"
-				name="orion/editor/stylers/text_x-yaml/syntax"
-				optimize="closure"
-				staging="${staging}" />
-			<stylerOptimizeFile out="${out}/stylers/text_x-yaml/syntax.js"
-				buildfile="${staging}/editor.build.stylers-js.js"
-				name="orion/editor/stylers/text_x-yaml/syntax"
 				optimize="none"
 				staging="${staging}" />
 				
