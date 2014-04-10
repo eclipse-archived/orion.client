@@ -262,6 +262,7 @@
 		<attribute name="buildfile" />
 		<attribute name="out" />
 		<attribute name="name" />
+		<attribute name="optimize" />
 		<sequential>
 			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}" failonerror="true">
 				<classpath>
