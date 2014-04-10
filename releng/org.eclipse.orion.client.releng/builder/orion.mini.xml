@@ -171,7 +171,7 @@
 				optimize="none"
 				staging="${staging}" />
 				
-			<widgetOptimizeFile out="${out}/stylers/text_x-yaml/syntax.min.js"
+			<!--widgetOptimizeFile out="${out}/stylers/text_x-yaml/syntax.min.js"
 				buildfile="${staging}/editor.build.stylers-js.js"
 				name="orion/editor/stylers/text_x-yaml/syntax"
 				optimize="closure"
@@ -180,7 +180,7 @@
 				buildfile="${staging}/editor.build.stylers-js.js"
 				name="orion/editor/stylers/text_x-yaml/syntax"
 				optimize="none"
-				staging="${staging}" />
+				staging="${staging}" /-->
 				
 			<widgetOptimizeFile out="${out}/built-compare.css"
 				buildfile="${staging}/compare.build-css.js"
