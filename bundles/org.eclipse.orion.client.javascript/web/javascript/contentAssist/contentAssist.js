@@ -21,9 +21,9 @@ define([
 	'javascript/contentAssist/proposalUtils', 
 	'orion/Deferred',
 	'orion/objects',
-	'esprima',
-	'estraverse'
-], function(typeEnv, typeInf, typeUtils, proposalUtils, Deferred, Objects, Esprima, Estraverse) {
+	'estraverse',
+	'esprima' // this must stay at the end since it does not load a module
+], function(typeEnv, typeInf, typeUtils, proposalUtils, Deferred, Objects, Estraverse) {
 
 	/**
 	 * @description Convert an array of parameters into a string and also compute linked editing positions
@@ -82,6 +82,7 @@ define([
 		var parents = [];
 		Estraverse.traverse(ast, {
 			skipped: false,
+			/*override*/
 			enter: function(node) {
 				this.skipped = false;
 				// extras prop is where we stuff everything that we have added
@@ -111,6 +112,7 @@ define([
 					return Estraverse.VisitorOption.Skip;
 				}
 			},
+			/*override*/
 			leave: function(node) {
 				if(!this.skipped) {
 					// if we have reached the end of an inRange block expression then
@@ -166,36 +168,6 @@ define([
 			}
 		}
 		return { kind : "top", toDefer : toDefer };
-	}
-
-	/**
-	 * @description Extracts all doccomments that fall inside the given range.
-	 * Side effect is to remove the array elements
-	 * @param Array.<{range:Array.<Number}>> doccomments
-	 * @param Array.<Number> range
-	 * @return {{value:String,range:Array.<Number>}} array elements that are removed
-	 */
-	function extractDocComments(doccomments, range) {
-		var start = 0, end = 0, i, docStart, docEnd;
-		for (i = 0; i < doccomments.length; i++) {
-			docStart = doccomments[i].range[0];
-			docEnd = doccomments[i].range[1];
-			if (!proposalUtils.isBefore(docStart, range) || !proposalUtils.isBefore(docEnd, range)) {
-				break;
-			}
-		}
-		if (i < doccomments.length) {
-			start = i;
-			for (i = i; i < doccomments.length; i++) {
-				docStart = doccomments[i].range[0];
-				docEnd = doccomments[i].range[1];
-				if (!proposalUtils.inRange(docStart, range, true) || !proposalUtils.inRange(docEnd, range, true)) {
-					break;
-				}
-			}
-			end = i;
-		}
-		return doccomments.splice(start, end-start);
 	}
 
 	/**
@@ -320,367 +292,6 @@ define([
 		}
 	}
 	
-	/**
-	 * @description Creates the collection of non-inferred proposals and adds them to the 
-	 * given proposals object
-	 * @param {Object} environment The type environment
-	 * @param {String} prefix The prefix of the porposal
-	 * @param {Number} replaceStart The offset to start replacing from
-	 * @param {Object} proposals The proposals object
-	 */
-	function createNoninferredProposals(environment, prefix, replaceStart, proposals) {
-		var proposalAdded = false;
-		// a property to return is one that is
-		//  1. defined on the type object
-		//  2. prefixed by the prefix
-		//  3. doesn't already exist
-		//  4. is not an internal property
-		function isInterestingProperty(type, prop) {
-			return type.hasOwnProperty(prop) && prop.indexOf(prefix) === 0 && !proposals['$' + prop] && prop !== '$$proto'&& prop !== '$$isBuiltin' &&
-			prop !== '$$fntype' && prop !== '$$newtype' && prop !== '$$prototype';
-		}
-		/**
-		 * @description Walks over the given type object collection proposals
-		 * @param {Object} type The type object to check
-		 */
-		function forType(type) {
-			for (var prop in type) {
-				if (isInterestingProperty(type, prop)) {
-					var propType = type[prop].typeObj;
-					if (propType.type === 'FunctionType') {
-						var res = calculateFunctionProposal(prop, propType, replaceStart - 1);
-						proposals[prop] = {
-							proposal: res.completion.substring(prefix.length),
-							name: prop,
-							description: createProposalDescription(propType, environment),
-							positions: res.positions,
-							escapePosition: replaceStart + res.completion.length,
-							// prioritize methods over fields
-							relevance: -99,
-							style: 'noemphasis'
-						};
-						proposalAdded = true;
-					} else {
-						proposals[prop] = {
-							proposal: prop.substring(prefix.length),
-							name: prop,
-							description: createProposalDescription(propType, environment),
-							relevance: -100,
-							style: 'noemphasis'
-						};
-						proposalAdded = true;
-					}
-				}
-			}
-		}
-		var allTypes = environment.getAllTypes();
-		for (var typeName in allTypes) {
-			// need to traverse into the prototype
-			if (allTypes[typeName].$$proto) {
-				forType(allTypes[typeName]);
-			}
-		}
-		if (proposalAdded) {
-			proposals['---dummy'] = {
-				proposal: '',
-				name: '',
-				description: 'Non-inferred proposals',
-				relevance: -98,
-				style: 'noemphasis',
-				unselectable: true
-			};
-		}
-	}
-	/**
-	 * @description Visits the given type object
-	 * @param {Object} typeObj The type object to check
-	 * @param {Function} operation The function to call on nodes
-	 */
-	function visitTypeStructure(typeObj, operation) {
-		if (typeof typeObj !== 'object') {
-			return;
-		}
-		switch (typeObj.type) {
-			case 'NullableLiteral':
-			case 'AllLiteral':
-			case 'NullLiteral':
-			case 'UndefinedLiteral':
-			case 'VoidLiteral':
-				// leaf nodes
-				return;
-			case 'NameExpression':
-				operation(typeObj, operation);
-				return;
-			case 'ArrayType':
-				visitTypeStructure(typeObj.expression, operation);
-				// fall-through
-			case 'UnionType':
-				if (typeObj.elements) {
-					typeObj.elements.forEach(function(elt) { visitTypeStructure(elt, operation); });
-				}
-				return;
-			case 'RecordType':
-				if (typeObj.fields) {
-					typeObj.fields.forEach(function(elt) { visitTypeStructure(elt, operation); });
-				}
-				return;
-			case 'FieldType':
-				visitTypeStructure(typeObj.expression, operation);
-				return;
-			case 'FunctionType':
-				// do we need to check for serialized functions???
-				if (typeObj.params) {
-					typeObj.params.forEach(function(elt) { visitTypeStructure(elt, operation); });
-				}
-				if (typeObj.result) {
-					visitTypeStructure(typeObj.result, operation);
-				}
-				return;
-			case 'ParameterType':
-				// TODO FIXADE uncomment to make the size of summaries smaller
-				// by not including parameter types in summary.
-//				typeObj.expression = { name: 'Object', type: 'NameExpression' };
-				visitTypeStructure(typeObj.expression, operation);
-				return;
-
-			case 'TypeApplication':
-				if (typeObj.applications) {
-					typeObj.applications.forEach(function(elt) { visitTypeStructure(elt, operation); });
-				}
-				// fall-through
-			case 'RestType':
-			case 'NonNullableType':
-			case 'OptionalType':
-			case 'NullableType':
-				visitTypeStructure(typeObj.expression, operation);
-				return;
-		}
-	}
-
-	/** 
-	 * @description finds unreachable types from the given type name and marks them as already seen
-	 * @param {String} currentTypeName The type name
-	 * @param {Object} allTypes The root type object
-	 * @param {Object} alreadySeen The type object with signatures tagged as already seen (if they have been)
-	 */
-	function findUnreachable(currentTypeName, allTypes, alreadySeen) {
-		var currentType = allTypes[currentTypeName];
-		var operation = function(typeObj, operation) {
-			if (alreadySeen[typeObj.name]) {
-				// prevent infinite recursion for circular refs
-				return;
-			}
-			alreadySeen[typeObj.name] = true;
-			findUnreachable(typeObj.name, allTypes, alreadySeen);
-		};
-		if (currentType) {
-			for(var prop in currentType) {
-				if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
-					var propType = prop === '$$fntype' ? currentType[prop] : currentType[prop].typeObj;
-					// don't count $$newtype as keeping a type reachable, since we inline function types
-					if (prop === '$$newtype') { continue; }
-					// must visit the type strucutre
-					visitTypeStructure(propType, operation);
-				}
-			}
-		}
-	}
-
-	/**
-	 * @description Before we can remove empty objects from the type graph, we need to update
-	 * the properties currently pointing to those types.  Make them point to the
-	 * closest non-empty type in their prototype hierarchy (most likely, this is Object).
-	 * @param {Object} currentTypeObject The current object context
-	 * @param {Object} allTypes The root type object
-	 * @param {Object} empties The object of empty types
-	 * @param {Object} alreadySeen The type object of already seen types
-	 */
-	function fixMissingPointers(currentTypeObj, allTypes, empties, alreadySeen) {
-		alreadySeen = alreadySeen || {};
-		var operation = function(typeObj, operation) {
-			while (empties[typeObj.name]) {
-				// change this to the first non-empty prototype of the empty type
-				typeObj.name = allTypes[typeObj.name].$$proto.typeObj.name;
-				if (!typeObj.name) {
-					typeObj.name = 'Object';
-				}
-			}
-			if (alreadySeen[typeObj.name]) {
-				return;
-			}
-			alreadySeen[typeObj.name] = true;
-			var currentType = allTypes[typeObj.name];
-			if (currentType) {
-				for(var prop in currentType) {
-					if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
-						var propType = prop === '$$fntype' ? currentType[prop] : currentType[prop].typeObj;
-						// must visit the type strucutre
-						visitTypeStructure(propType, operation);
-					}
-				}
-			}
-		};
-		visitTypeStructure(currentTypeObj, operation);
-	}
-
-	/**
-	 * @description If the typeObj is a reference to a function type
-	 * @param {Object} typeObj The type object
-	 * @param {Object} allTypes The root type object
-	 * @returns {Boolean} If the given type object is a NameExpression and is known in the given type collection
-	 * and that its name references a function type
-	 */
-	function fnTypeRef(typeObj, allTypes) {
-		return typeObj.type === "NameExpression" &&
-			allTypes[typeObj.name] && allTypes[typeObj.name].$$fntype;
-	}
-
-	/**
-	 * @description Inline all the function types referenced from the function type
-	 * def, by replacing references to object types with a $$fntype
-	 * property to the value of the $$fntype property
-	 * @param {Object} def The function type
-	 * @param {Object} allTypes The root type object
-	 * @param {Object} fnTypes The function type collector
-	 */
-	function inlineFunctionTypes(def,allTypes,fnTypes) {
-		if (def.params) {
-			for (var i = 0; i < def.params.length; i++) {
-				var paramType = def.params[i];
-				if (fnTypeRef(paramType, allTypes)) {
-					if (fnTypes) { fnTypes[paramType.name] = true; }
-					inlineFunctionTypes(allTypes[paramType.name].$$fntype,allTypes,fnTypes);
-					def.params[i] = allTypes[paramType.name].$$fntype;
-				}
-			}
-		}
-		if (def.result) {
-			if (fnTypeRef(def.result, allTypes)) {
-				if (fnTypes) { fnTypes[def.result.name] = true; }
-				inlineFunctionTypes(allTypes[def.result.name].$$fntype,allTypes,fnTypes);
-				def.result = allTypes[def.result.name].$$fntype;
-			}
-		}
-	}
-
-	/**
-	 * //TODO should this be moved to the environment to filter types as they are added / asked for?
-	 * @description Filters types from the environment that should not be exported
-	 * @param {Object} environment The type environment
-	 * @param {Number} kind The kind 
-	 * @param {Object} moduleTypeObj The type object for the module
-	 * @param {Object} provided The object of provided types
-	 */
-	function filterTypes(environment, kind, moduleTypeObj, provided) {
-		var moduleTypeName = doctrine.type.stringify(moduleTypeObj, {compact: true});
-		var allTypes = environment.getAllTypes();
-		allTypes.clearDefaultGlobal();
-
-
-		// recursively walk the type tree to find unreachable types and delete them, too
-		var reachable = { };
-		var wasReachable = true;
-		if (moduleTypeObj.type !== "NameExpression") {
-			// TODO FIXADE duplicated code
-			visitTypeStructure(moduleTypeObj, function(typeObj, operation) {
-				if (reachable[typeObj.name]) {
-					// prevent infinite recursion for circular refs
-					return;
-				}
-				reachable[typeObj.name] = true;
-				findUnreachable(typeObj.name, allTypes, reachable);
-			});
-		} else {
-			// first remove any types that are unreachable
-			findUnreachable(moduleTypeName, allTypes, reachable);
-			if (!reachable[moduleTypeName]) {
-				// not really reachable, but need to keep it for now to track empties
-				reachable[moduleTypeName] = true;
-				wasReachable = false;
-			}
-		}
-		for (var prop in allTypes) {
-			if (allTypes.hasOwnProperty(prop) && !reachable[prop]) {
-				delete allTypes[prop];
-			}
-		}
-
-		// now find empty types
-		var empties = {};
-		Object.keys(allTypes).forEach(function(key) {
-			if (typeUtils.isEmpty(key, allTypes)) {
-				empties[key] = true;
-			}
-		});
-		// now fix up pointers to empties
-		fixMissingPointers(moduleTypeObj, allTypes, empties);
-
-		if (!wasReachable) {
-			delete allTypes[moduleTypeName];
-		}
-		// don't need the empty types any more
-		Object.keys(empties).forEach(function(key) {
-			delete allTypes[key];
-		});
-
-		// for now, we delete *all* object types representing functions,
-		// "inlining" the function type wherever it appears
-		// TODO devise a serialized representation for function types with
-		// properties
-		var fnTypes = {};
-
-		// now reformat the types so that they are combined and serialized
-		Object.keys(allTypes).forEach(function(typeName) {
-		    var type = allTypes[typeName];
-			for (var defName in type) {
-				if (type.hasOwnProperty(defName)) {
-					var def = type[defName];
-					if (defName === '$$fntype') {
-						// here, we still need to "inline" function types for parameters
-						// and result
-						// TODO make this a visitor?
-						inlineFunctionTypes(def, allTypes, fnTypes);
-					} else {
-						var typeObj = def.typeObj;
-						if (fnTypeRef(typeObj, allTypes)) {
-							fnTypes[typeObj.name] = true;
-							typeObj = allTypes[typeObj.name].$$fntype;
-						}
-						def.typeSig = doctrine.type.stringify(typeObj, {compact: true});
-						delete def._typeObj;
-					}
-				}
-			}
-		});
-
-		if (typeof provided === 'object') {
-			for (var defName in provided) {
-				if (provided.hasOwnProperty(defName)) {
-					var def = provided[defName];
-					if (defName === '$$fntype') {
-						inlineFunctionTypes(def, allTypes, fnTypes);
-					} else {
-						if (def.typeObj) {
-							var typeObj = def.typeObj;
-							if (fnTypeRef(typeObj, allTypes)) {
-								fnTypes[typeObj.name] = true;
-								typeObj = allTypes[typeObj.name].$$fntype;
-							}
-							def.typeSig = doctrine.type.stringify(typeObj, {compact: true});
-							delete def._typeObj;
-						}
-					}
-				}
-			}
-		}
-
-		// finally, delete all function types
-		Object.keys(fnTypes).forEach(function(key) {
-			delete allTypes[key];
-		});
-
-	}
-
 	var browserRegExp = /browser\s*:\s*true/;
 	var nodeRegExp = /node\s*:\s*true/;
 	var amdRegExp = /amd\s*:\s*true/;
@@ -838,6 +449,14 @@ define([
 			}
 			return this.indexDataPromise;
 		},
+		/**
+		 * @description Computes inferred proposals from the backing AST
+		 * @function
+		 * @private
+		 * @param {Object} ast The AST
+		 * @param {String} buffer The text for the backing compilation unit
+		 * @param {Object} context The assist context
+		 */
 		_computeProposalsFromAST: function(ast, buffer, context) {
 			/**
 			 * @description An empty promise
@@ -876,15 +495,11 @@ define([
 					environment.defer = completionKind.toDefer;
 					if (environment.defer) {
 						// remove these comments from consideration until we are inferring the deferred
-						environment.deferredComments = extractDocComments(environment.comments, environment.defer.range);
+						environment.deferredComments = proposalUtils.extractDocComments(environment.comments, environment.defer.range);
 					}
 					var target = typeInf.inferTypes(root, environment, self.lintOptions);
 					var proposalsObj = { };
 					createInferredProposals(target, environment, completionKind.kind, context.prefix, offset - context.prefix.length, proposalsObj);
-					if (context.includeNonInferred) {
-						// include the entire universe as potential proposals
-						createNoninferredProposals(environment, context.prefix, offset - context.prefix.length, proposalsObj);
-					}
 					return filterAndSortProposals(proposalsObj);
 				});
 			} else {
