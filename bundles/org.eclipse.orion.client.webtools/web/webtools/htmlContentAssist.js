@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define */
 
-define("orion/webtools/htmlContentAssist", ['orion/editor/templates'], function(mTemplates) { //$NON-NLS-1$ //$NON-NLS-0$
+define("webtools/htmlContentAssist", ['orion/editor/templates'], function(mTemplates) { //$NON-NLS-1$ //$NON-NLS-0$
 
 	var simpleDocTemplate = new mTemplates.Template("", "Simple HTML document", //$NON-NLS-0$
 		"<!DOCTYPE html>\n" + //$NON-NLS-0$

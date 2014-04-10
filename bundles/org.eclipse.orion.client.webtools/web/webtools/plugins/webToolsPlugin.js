@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global esprima*/
 /*jslint amd:true*/
-define(['orion/plugin', 'orion/webtools/htmlContentAssist', 'orion/webtools/htmlGrammar', 'orion/editor/stylers/text_html/syntax', 'orion/webtools/cssContentAssist', 'orion/editor/stylers/text_css/syntax'], function(PluginProvider, htmlContentAssist, htmlGrammar, mHTML, cssContentAssist, mCSS) {
+define(['orion/plugin', 'webtools/htmlContentAssist', 'webtools/htmlGrammar', 'orion/editor/stylers/text_html/syntax', 'webtools/cssContentAssist', 'orion/editor/stylers/text_css/syntax'], function(PluginProvider, htmlContentAssist, htmlGrammar, mHTML, cssContentAssist, mCSS) {
 	/**
 	 * Plug-in headers
 	 */
@@ -60,9 +60,23 @@ define(['orion/plugin', 'orion/webtools/htmlContentAssist', 'orion/webtools/html
 
 	/**
 	 * Register syntax styling
+	 * TODO There should be a better way, see Bug 432540
 	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mHTML.grammars[mHTML.grammars.length - 1]);
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mCSS.grammars[mCSS.grammars.length - 1]);
+	for (var i=mCSS.grammars.length-1; i>=0; i--) {
+		if (mCSS.grammars[i].id === "orion.css"){
+			provider.registerServiceProvider("orion.edit.highlighter", {}, mCSS.grammars[i]);
+			break;
+		}
+	}
+	for (var i=mHTML.grammars.length-1; i>=0; i--) {
+		if (mHTML.grammars[i].id === "orion.html"){
+			provider.registerServiceProvider("orion.edit.highlighter", {}, mHTML.grammars[i]);
+			break;
+		}
+	}
+//	provider.registerServiceProvider("orion.edit.highlighter", {}, mCSS.grammars[mCSS.grammars.length - 1]);
+//	provider.registerServiceProvider("orion.edit.highlighter", {}, mHTML.grammars[mHTML.grammars.length - 1]);
+	
 
 	provider.connect();
 });

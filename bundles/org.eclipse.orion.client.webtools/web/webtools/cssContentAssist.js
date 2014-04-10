@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define */
 
-define("orion/webtools/cssContentAssist", [ //$NON-NLS-0$
+define("webtools/cssContentAssist", [ //$NON-NLS-0$
 	'orion/editor/templates', //$NON-NLS-0$
 	'orion/editor/stylers/text_css/syntax' //$NON-NLS-0$
 ], function(mTemplates, mCSS) {
