@@ -14,14 +14,13 @@
 /*global define esprima console setTimeout doctrine*/
 define([
 	'javascript/contentAssist/contentAssist',
-	'javascript/contentAssist/indexer',
 	'chai/chai',
 	'orion/objects',
-	'esprima',
-	'doctrine/doctrine',
 	'orion/Deferred',
-	'orion/editor/jsTemplateContentAssist' //TODO remove this once we merge the code
-], function(ContentAssist, Indexer, chai, objects, Esprima, Doctrine, Deferred, JSTemplateProposals) {
+	'orion/editor/jsTemplateContentAssist', //TODO remove this once we merge the code
+	'esprima', //must stay at the end, does not export a module  
+	'doctrine/doctrine' //must stay at the end, does not export a module 
+], function(ContentAssist, chai, objects, Deferred, JSTemplateProposals) {
 	var assert = chai.assert;
 	/**
 	 * @description Parse the snippet
@@ -45,7 +44,6 @@ define([
 		var buffer = options.buffer,
 		    prefix = options.prefix,
 		    offset = options.offset,
-		    indexer = options.indexer || new Indexer(), // need for resolving require() calls
 		    lintOptions = options.lintOptions,
 		    editorContextMixin = options.editorContextMixin || {},
 		    paramsMixin = options.paramsMixin || {};
@@ -53,8 +51,9 @@ define([
 			prefix = "";
 		}
 		if (!offset) {
-			if (typeof buffer !== "string")
+			if (typeof buffer !== "string") {
 				throw new Error("invalid buffer");
+			}
 			offset = buffer.indexOf("/**/");
 			if (offset < 0) {
 				offset = buffer.length;
@@ -62,12 +61,14 @@ define([
 		}
 
 		var astManager = {
+			/*override*/
 			getAST: function() {
 				return new Deferred().resolve(parseFull(buffer));
 			}
 		};
-		var contentAssist = new ContentAssist.JSContentAssist(astManager, indexer, lintOptions);
+		var contentAssist = new ContentAssist.JSContentAssist(astManager, lintOptions);
 		var editorContext = {
+			/*override*/
 			getText: function() {
 				return new Deferred().resolve(buffer);
 			}
@@ -81,7 +82,7 @@ define([
 			contentAssist: contentAssist,
 			editorContext: editorContext,
 			params: params
-		}
+		};
 	}
 
 	// Also accepts a single object containing a map of arguments
@@ -321,18 +322,21 @@ define([
 
 	var tests = {};
 
+	/* basic recovery */
 	tests["test recovery basic parse"] = function() {
 		var parsedProgram = parseFull("foo.bar");
 		assertNoErrors(parsedProgram);
 		assert.equal(stringify(parsedProgram),"{type:ExpressionStatement,expression:{type:MemberExpression,object:{type:Identifier,name:foo,range:[0,3]},property:{type:Identifier,name:bar,range:[4,7]},range:[0,7]},range:[0,7]}");
 	};
-
+	
+	/* basic recovery */
 	tests["test recovery - dot followed by EOF"] = function() {
 		var parsedProgram = parseFull("foo.");
 		assertErrors(parsedProgram,message(1,'Unexpected end of input'));
 		assert.equal(stringify(parsedProgram),"{type:ExpressionStatement,expression:{type:MemberExpression,object:{type:Identifier,name:foo,range:[0,3]},property:null,range:[0,4]},range:[0,4]}");
 	};
 
+	/* basic recovery */
 	tests["test Empty Content Assist"] = function() {
 		var resultPromise = computeContentAssist("x", "x");
 		return resultPromise.then(function (results) {
@@ -2137,6 +2141,7 @@ define([
 			["foo", "foo : Number"]
 		]);
 	};
+	/* constructors */
 	tests["test constructor prototype2"] = function() {
 		var results = computeContentAssist(
 			"var AAA = function() { };\nAAA.prototype = { foo : 9 };\nnew AAA().f", "f");
@@ -2144,6 +2149,8 @@ define([
 			["foo", "foo : Number"]
 		]);
 	};
+	
+	/* constructors */
 	tests["test constructor prototype3"] = function() {
 		var results = computeContentAssist(
 			"var AAA = function() { this.foo = 0; };\nAAA.prototype = { foo : '' };\nnew AAA().f", "f");
@@ -2151,6 +2158,8 @@ define([
 			["foo", "foo : Number"]
 		]);
 	};
+	
+	/* constructors */
 	tests["test constructor prototype4"] = function() {
 		var results = computeContentAssist(
 			"var AAA = function() { };\nAAA.prototype = { foo : 9 };\nvar x = new AAA();\n x.f", "f");
@@ -2158,6 +2167,8 @@ define([
 			["foo", "foo : Number"]
 		]);
 	};
+	
+	/* constructors */
 	tests["test constructor prototype5"] = function() {
 		var results = computeContentAssist(
 			"var AAA = function() { };\nAAA.prototype = { foo : '' };\nvar x = new AAA();\nx.foo = 9;\nx.f", "f");
@@ -2165,6 +2176,8 @@ define([
 			["foo", "foo : Number"]
 		]);
 	};
+	
+	/* constructors */
 	tests["test constructor prototype6"] = function() {
 		var results = computeContentAssist(
 			"var Fun = function() { };\n" +
@@ -2175,8 +2188,8 @@ define([
 			["num", "num : Number"]
 		]);
 	};
-
-
+	
+	/* constructors */
 	tests["test dotted constructor1"] = function() {
 		var results = computeContentAssist(
 			"var obj = { Fun : function() { }, fun : function() {}, fun2 : 9 }\nnew obj", "obj");
@@ -2186,7 +2199,8 @@ define([
 			["obj", "obj : {Fun:function(new:obj.Fun):obj.Fun,fun:function(),fun2:Number}"]
 		]);
 	};
-
+	
+	/* constructors */
 	tests["test dotted constructor2"] = function() {
 		var results = computeContentAssist(
 			"var obj = { Fun : function() { } }\nnew obj.F", "F");
@@ -2194,7 +2208,8 @@ define([
 			["Fun()", "Fun() : obj.Fun"]
 		]);
 	};
-
+	
+	/* constructors */
 	tests["test dotted constructor3"] = function() {
 		var results = computeContentAssist(
 			"var obj = { };\nobj.Fun = function() { };\nnew obj", "obj");
@@ -2204,7 +2219,8 @@ define([
 			["obj", "obj : {Fun:function(new:obj.Fun):obj.Fun}"]
 		]);
 	};
-
+	
+	/* constructors */
 	tests["test dotted constructor4"] = function() {
 		var results = computeContentAssist(
 			"var obj = { inner : { Fun : function() { } } }\nnew obj", "obj");
@@ -2214,7 +2230,8 @@ define([
 			["obj", "obj : {inner:{Fun:function(new:obj.inner.Fun):obj.inner.Fun}}"]
 		]);
 	};
-
+	
+	/* constructors */
 	tests["test dotted constructor5"] = function() {
 		var results = computeContentAssist(
 			"var obj = { inner : {} }\nobj.inner.Fun = function() { }\nnew obj", "obj");
@@ -2225,7 +2242,8 @@ define([
 
 		]);
 	};
-
+	
+	/* constructors */
 	tests["test dotted constructor6"] = function() {
 		var results = computeContentAssist(
 			"var obj = { inner : {} }\nobj.inner.inner2 = { Fun : function() { } }\nnew obj", "obj");
@@ -2269,6 +2287,8 @@ define([
 			["yy1", "yy1 : Number"]
 		]);
 	};
+	
+	/* constructors */
 	tests["test dotted constructor10"] = function() {
 		var results = computeContentAssist(
 			"var obj = { Fun : function() { } }\nobj.Fun.prototype = { yy1 : 9};\n" +
@@ -2345,7 +2365,8 @@ define([
 			["window", "window : Global"]
 		]);
 	};
-
+	
+	// browser awareness
 	tests["test browser2"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:false*/\n" +
@@ -2367,6 +2388,7 @@ define([
 		]);
 	};
 
+	// browser awareness
 	tests["test browser4"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:true*/\n" +
@@ -2378,6 +2400,7 @@ define([
 		]);
 	};
 
+	// browser awareness
 	tests["test browser5"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:true*/\n" +
@@ -2391,6 +2414,7 @@ define([
 		]);
 	};
 
+	// browser awareness
 	tests["test browser6"] = function() {
 		var results = computeContentAssist(
 			"/*global location*/\n" +
@@ -2403,6 +2427,7 @@ define([
 		]);
 	};
 
+	// browser awareness
 	tests["test browser7"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:true*/\n" +
@@ -2414,6 +2439,7 @@ define([
 		]);
 	};
 
+	// browser awareness
 	tests["test browser8"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:true*/\n" +
@@ -2425,6 +2451,7 @@ define([
 		]);
 	};
 
+	// browser awareness
 	tests["test browser9"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:true*/\n" +
@@ -2489,6 +2516,7 @@ define([
 		return testProposals(results, []);
 	};
 
+	// browser awareness
 	tests["test browser15"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:true */\n" +
@@ -2508,6 +2536,7 @@ define([
 		]);
 	};
 
+	// node awareness
 	tests["test node2"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:true*/\n" +
@@ -2518,6 +2547,7 @@ define([
 		]);
 	};
 
+	// node awareness
 	tests["test node3"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:false node:true*/\n" +
@@ -2528,6 +2558,7 @@ define([
 		]);
 	};
 
+	// node awareness
 	tests["test node4"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:false*/\n" +
@@ -2536,7 +2567,7 @@ define([
 		return testProposals(results, []);
 	};
 
-
+	// node awareness
 	tests["test node5"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:false*/\n" +
@@ -2608,6 +2639,7 @@ define([
 		]);
 	};
 
+	// node awareness
 	tests["test node12"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:true*/\n" +
@@ -2617,6 +2649,7 @@ define([
 		return results.then(function () {});
 	};
 
+	// node awareness
 	tests["test node13"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:true*/\n" +
@@ -2629,6 +2662,7 @@ define([
 		]);
 	};
 	
+	// node awareness
 	tests["test node14"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:true*/\n" +
@@ -2639,6 +2673,7 @@ define([
 		]);
 	};
 
+	// node awareness
 	tests["test node15"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:true*/\n" +
@@ -2649,6 +2684,7 @@ define([
 		]);
 	};
 
+	// node awareness
 	tests["test node16"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:true*/\n" +
@@ -2660,6 +2696,7 @@ define([
 		]);
 	};
 
+	// node awareness
 	tests["test node17"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:true*/\n" +
@@ -2671,7 +2708,7 @@ define([
 		]);
 	};
 
-
+	// node awareness
 	tests["test node18"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:true*/\n" +
@@ -2683,6 +2720,7 @@ define([
 		]);
 	};
 
+	// node awareness
 	tests["test node19 - proposals shown for Node core module when no lint option"] = function() {
 		var results = computeContentAssist(
 			"\n" +
@@ -2693,6 +2731,8 @@ define([
 			["mkdirSync(path, [mode])", "mkdirSync(path, [mode])"]
 		]);
 	};
+	
+	// node awareness
 	tests["test node20 - proposals NOT shown for Node core module when `amd:true`"] = function() {
 		var results = computeContentAssist(
 			"/*jslint amd:true*/\n" +
@@ -2700,6 +2740,8 @@ define([
 		);
 		return testProposals(results, []);
 	};
+	
+	// node awareness
 	tests["test node21 - proposals NOT shown for Node core module when `browser:true`"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:true*/\n" +
@@ -2722,7 +2764,8 @@ define([
 				["xx", "xx : Number"]
 			]);
 		};
-
+		
+		//jsdoc test
 		tests["test simple jsdoc2"] = function() {
 			var results = computeContentAssist(
 				"/** @type String*/\n" +
@@ -2733,7 +2776,8 @@ define([
 				["xx", "xx : Number"]
 			]);
 		};
-
+		
+		//jsdoc test
 		tests["test simple jsdoc3"] = function() {
 			var results = computeContentAssist(
 				"/** @type Number*/\n" +
@@ -2744,7 +2788,8 @@ define([
 				["xx", "xx : Number"]
 			]);
 		};
-
+		
+		//jsdoc test
 		tests["test simple jsdoc4"] = function() {
 			var results = computeContentAssist(
 				"/** @type Number*/\n" +
@@ -2768,6 +2813,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test simple jsdoc6"] = function() {
 			var results = computeContentAssist(
 				"/** @type String*/\n" +
@@ -2780,6 +2826,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test simple jsdoc7"] = function() {
 			var results = computeContentAssist(
 				"/** @type String*/" +
@@ -2792,6 +2839,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test simple jsdoc8"] = function() {
 			var results = computeContentAssist(
 				"/** @returns String\n@type Number*/\n" +
@@ -2802,6 +2850,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test simple jsdoc9"] = function() {
 			var results = computeContentAssist(
 				"/** @param String f\n@type Number*/\n" +
@@ -2812,6 +2861,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test simple jsdoc10"] = function() {
 			var results = computeContentAssist(
 				"/** @return Number*/\n" +
@@ -2822,6 +2872,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test simple jsdoc11"] = function() {
 			var results = computeContentAssist(
 				"/** @type String\n@return Number*/\n" +
@@ -2856,6 +2907,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test simple jsdoc14"] = function() {
 			var results = computeContentAssist(
 				"var xx;\n" +
@@ -2867,6 +2919,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test simple jsdoc15"] = function() {
 			var results = computeContentAssist(
 				"var xx;\n" +
@@ -2878,6 +2931,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test simple jsdoc14"] = function() {
 			var results = computeContentAssist(
 				"/** @type Number*/\n" +
@@ -2902,6 +2956,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type nullable jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @type {?String}*/\n" +
@@ -2912,6 +2967,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type non-nullable jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @type {!String}*/\n" +
@@ -2922,6 +2978,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type array jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @type {[]}*/\n" +
@@ -2932,6 +2989,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type parameterized jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @type {Array.<String>}*/\n" +
@@ -2942,6 +3000,8 @@ define([
 				["xx", "xx : Array.<String>"]
 			]);
 		};
+		
+		//jsdoc test
 		tests["test type parameterized jsdoc1a"] = function() {
 			var results = computeContentAssist(
 				"/** @type {[String]}*/\n" +
@@ -2953,6 +3013,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type record jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo}}*/\n" +
@@ -2963,6 +3024,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type record jsdoc2"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:String}}*/\n" +
@@ -2973,6 +3035,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type record jsdoc3"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:string,foo2:number}}*/\n" +
@@ -2984,6 +3047,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type record jsdoc4"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:{foo2:number}}}*/\n" +
@@ -2994,6 +3058,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type record jsdoc5"] = function() {
 			var results = computeContentAssist(
 				"function Flart() { this.xx = 9; }\n" +
@@ -3005,6 +3070,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type record jsdoc6"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:{foo:function()}}}*/\n" +
@@ -3015,6 +3081,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type record jsdoc7"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:{foo:function(a:String,b:Number)}}}*/\n" +
@@ -3025,6 +3092,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type record jsdoc8"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:{foo:function(a:String,b:Number):Number}}}*/\n" +
@@ -3035,6 +3103,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type record jsdoc9"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:{foo:function(a:String,b:Number):{len:Number}}}}*/\n" +
@@ -3045,6 +3114,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type record jsdoc10"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:function(a:String,b:Number):{len:function():Number}}}*/\n" +
@@ -3055,6 +3125,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type record jsdoc11"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:function():IDontExist}}*/\n" +
@@ -3065,6 +3136,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test type record jsdoc12"] = function() {
 			var results = computeContentAssist(
 				"var Flart = function() {}" +
@@ -3090,6 +3162,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test param jsdoc2"] = function() {
 			var results = computeContentAssist(
 				"/** @param {Number} xx2\n@param {String} xx1\n */" +
@@ -3101,6 +3174,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test param jsdoc3"] = function() {
 			var results = computeContentAssist(
 				"/** @param {function(String,Number):Number} xx2\n */" +
@@ -3112,6 +3186,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test param jsdoc4"] = function() {
 			var results = computeContentAssist(
 				"/** @param {function(a:String,Number):Number} xx2\n */" +
@@ -3123,6 +3198,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test param jsdoc5"] = function() {
 			var results = computeContentAssist(
 				"/** @param {function(a:String,?Number):Number} xx2\n */" +
@@ -3146,6 +3222,7 @@ define([
 			]);
 		};
 
+		//jsdoc test
 		tests["test return jsdoc2"] = function() {
 			var results = computeContentAssist(
 				"/** @return {function(String):Number} xx2\n */" +
@@ -3203,6 +3280,8 @@ define([
 				["foo", "foo : String"]
 			]);
 		};
+		
+		//jsdoc test
 		tests["test object literal type jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"var obj = {\n" +
@@ -3214,6 +3293,8 @@ define([
 				["foo", "foo : String"]
 			]);
 		};
+		
+		//jsdoc test
 		tests["test object literal fn return jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"var foo = {\n" +
@@ -3226,7 +3307,8 @@ define([
 				["res", "res : String"]
 			]);
 		};
-
+		
+		//jsdoc test
 		tests["test dotted constructor jsdoc type 1"] = function() {
 			var results = computeContentAssist(
 				"var obj = { Fun : function() {} };\n" +
@@ -3235,6 +3317,8 @@ define([
 				["xxx", "xxx : obj.Fun"]
 			]);
 		};
+		
+		//jsdoc test
 		tests["test dotted constructor jsdoc type 2"] = function() {
 			var results = computeContentAssist(
 				"var obj = { Fun : function() { this.yyy = 9; } };\n" +

@@ -20,7 +20,6 @@ define([
 	'javascript/contentAssist/indexFiles/expressIndex',
 	'javascript/contentAssist/indexFiles/amqpIndex',
 	'javascript/contentAssist/contentAssist',
-	'javascript/contentAssist/indexer',
 	'javascript/validator',
 	'javascript/occurrences',
 	'javascript/outliner',
@@ -30,7 +29,7 @@ define([
 	'orion/editor/stylers/application_json/syntax',
 	'orion/editor/stylers/application_schema_json/syntax',
 	'orion/editor/stylers/application_x-ejs/syntax'
-], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, Indexer, EslintValidator, Occurrences, Outliner,
+], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, EslintValidator, Occurrences, Outliner,
 			PluginProvider, jsTemplateContentAssist, mJS, mJSON, mJSONSchema, mEJS) {
 
 	/**
@@ -112,7 +111,7 @@ define([
 			name: 'contentAssist',  //$NON-NLS-0$
 			contentType: ["application/javascript"]  //$NON-NLS-0$
 		});
-	provider.registerService("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager, new Indexer()),  //$NON-NLS-0$
+	provider.registerService("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager),  //$NON-NLS-0$
 		{
 			contentType: ["application/javascript"],  //$NON-NLS-0$
 			nls: 'javascript/nls/messages',  //$NON-NLS-0$

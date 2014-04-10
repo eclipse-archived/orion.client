@@ -22,8 +22,9 @@ define([
 	'orion/Deferred',
 	'orion/objects',
 	'estraverse',
+	'javascript//contentAssist/indexer',
 	'esprima' // this must stay at the end since it does not load a module
-], function(typeEnv, typeInf, typeUtils, proposalUtils, Deferred, Objects, Estraverse) {
+], function(typeEnv, typeInf, typeUtils, proposalUtils, Deferred, Objects, Estraverse, Indexer) {
 
 	/**
 	 * @description Creates a new JSContentAssist object
@@ -33,9 +34,9 @@ define([
 	 * @param {Object} [indexer] An indexer to load / work with supplied indexes
 	 * @param {Object} lintOptions the given jslint options from the source
 	 */
-	function JSContentAssist(astManager, indexer, lintOptions) {
+	function JSContentAssist(astManager, lintOptions) {
 		this.astManager = astManager;
-		this.indexer = indexer;
+		this.indexer = new Indexer();
 		this.lintOptions = lintOptions;
 	}
 
