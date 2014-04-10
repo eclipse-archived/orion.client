@@ -32,6 +32,11 @@ module.exports = function(grunt) {
 				}
 			}
 		},
+		clean: {
+			outdirs: {
+				src: [staging + "/**" , optimized + "/**"]
+			}
+		},
 		copy: {
 			// Copy each client {bundle} to lib/orion.client/bundles/{bundle}
 			orionclient: {
@@ -81,7 +86,9 @@ module.exports = function(grunt) {
 							bundlefile = src;
 						}
 						var newDest;
-						bundles.some(function(bundle) {
+						// Reverse order here so later bundle in list wins over earlier one, if both contain a bundlefile
+						grunt.verbose.write("Finding origin bundle for " + src + "... ");
+						bundles.slice().reverse().some(function(bundle) {
 							if (grunt.file.exists(_path.join(bundle.web, bundlefile))) {
 								// This file originated from bundle
 								newDest = _path.join(dest, "orion.client/bundles/", bundle.name, "web/", src);
@@ -92,8 +99,10 @@ module.exports = function(grunt) {
 						if (grunt.file.exists(_path.join("lib/orionode.client/", bundlefile)))
 							newDest = _path.join(dest, "orionode.client/", src);
 
-						if (!newDest)
-							grunt.verbose.write("Could not determine originating bundle for " + src);
+						if (newDest)
+							grunt.verbose.ok();
+						else
+							grunt.fail.warn("Could not determine origin bundle for " + src + ".");
 						return newDest;
 					}
 				}]
@@ -147,6 +156,7 @@ module.exports = function(grunt) {
 	}));
 
 	// Task definitions
+	grunt.loadNpmTasks("grunt-contrib-clean");
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-contrib-requirejs");
 	grunt.loadNpmTasks("grunt-simple-mocha");
@@ -162,7 +172,7 @@ module.exports = function(grunt) {
 	});
 
 	grunt.registerTask("test", ["simplemocha"]);
-	grunt.registerTask("optimize", ["copy:stage", "requirejs", "string-replace", "copy:unstage"]);
+	grunt.registerTask("optimize", ["clean", "copy:stage", "requirejs", "string-replace", "copy:unstage"]);
 	grunt.registerTask("default", ["checkDirs", "copy:orionclient", "optimize", "test"]);
 	grunt.registerTask("nomin",   ["checkDirs", "copy:orionclient", "string-replace:orionclient", "test"]);
 };

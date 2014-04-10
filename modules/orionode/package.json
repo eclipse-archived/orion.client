@@ -21,7 +21,8 @@
     "grunt-contrib-copy": "~0.5.0",
     "grunt-contrib-requirejs": "~0.4.3",
     "grunt-string-replace": "~0.2.7",
-    "grunt-simple-mocha": "~0.4.0"
+    "grunt-simple-mocha": "~0.4.0",
+    "grunt-contrib-clean": "~0.5.0"
   },
   "main": "index.js",
   "scripts": {
@@ -66,7 +67,7 @@
     "userservicePlugin",
     "view"
   ],
-  "bin" : {
+  "bin": {
     "orion": "./bin-global/orion.js"
   }
 }
