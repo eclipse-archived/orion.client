@@ -147,20 +147,24 @@
 		<copy file="${builder}/scripts/browse.build-css.js" tofile="${staging}/browse.build-css.js" overwrite="true"/>
 		<copy file="${builder}/scripts/browse.build.almond-js.js" tofile="${staging}/browse.build.almond-js.js" overwrite="true"/>
 	</target>
+	
+	<target name="editorStylersOptimize" if="buildEditorStylers">
+		<stylerOptimizeFile out="${out}/text_x-yaml-syntax.min.js"
+			buildfile="${staging}/editor.build.stylers-js.js"
+			name="orion/editor/stylers/text_x-yaml/syntax"
+			optimize="closure"
+			staging="${staging}" />
+		<stylerOptimizeFile out="${out}/text_x-yaml-syntax.js"
+			buildfile="${staging}/editor.build.stylers-js.js"
+			name="orion/editor/stylers/text_x-yaml/syntax"
+			optimize="none"
+			staging="${staging}" />
+	</target>
 
 	<target name="editorOptimize" unless="skipEditor">
 		<sequential>
-			<stylerOptimizeFile out="${out}/text_x-yaml-syntax.min.js"
-				buildfile="${staging}/editor.build.stylers-js.js"
-				name="orion/editor/stylers/text_x-yaml/syntax"
-				optimize="closure"
-				staging="${staging}" />
-			<stylerOptimizeFile out="${out}/text_x-yaml-syntax.js"
-				buildfile="${staging}/editor.build.stylers-js.js"
-				name="orion/editor/stylers/text_x-yaml/syntax"
-				optimize="none"
-				staging="${staging}" />
-				
+			<antcall target="editorStylersOptimize"/>
+			
 			<widgetOptimizeFile out="${out}/built-editor.css"
 				buildfile="${staging}/editor.build-css.js"
 				optimize="closure"
