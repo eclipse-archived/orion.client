@@ -31,8 +31,9 @@ function auth(pwd) {
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
 var port = args.port || args.p || 8081;
+var configFile = args.config || args.c || path.join(__dirname, 'orion.conf');
 
-argslib.readConfigFile(path.join(__dirname, 'orion.conf'), function(configParams) {
+argslib.readConfigFile(configFile, function(configParams) {
 	configParams = configParams || {};
 
 	var workspaceArg = args.workspace || args.w;
