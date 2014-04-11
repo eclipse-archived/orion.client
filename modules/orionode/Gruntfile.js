@@ -34,7 +34,7 @@ module.exports = function(grunt) {
 		},
 		clean: {
 			outdirs: {
-				src: [staging + "/**" , optimized + "/**"]
+				src: [staging + "/**" , optimized + "/**", "lib/orion.client/**"]
 			}
 		},
 		copy: {
@@ -150,6 +150,7 @@ module.exports = function(grunt) {
 	// Dynamic configuration
 	grunt.config("requirejs.compile.options", util.mixin(grunt.config("nodeBuildConfig"), {
 		optimize: "uglify2",
+		generateSourceMaps: false, // Turn off source maps to reduce download size
 		appDir: staging,
 		baseUrl: "./",
 		dir: optimized // TODO <% optimized %> ?
@@ -172,7 +173,7 @@ module.exports = function(grunt) {
 	});
 
 	grunt.registerTask("test", ["simplemocha"]);
-	grunt.registerTask("optimize", ["clean", "copy:stage", "requirejs", "string-replace", "copy:unstage"]);
-	grunt.registerTask("default", ["checkDirs", "copy:orionclient", "optimize", "test"]);
-	grunt.registerTask("nomin",   ["checkDirs", "copy:orionclient", "string-replace:orionclient", "test"]);
+	grunt.registerTask("optimize", ["copy:stage", "requirejs", "string-replace", "copy:unstage"]);
+	grunt.registerTask("default", ["checkDirs", "clean", "copy:orionclient", "optimize", "test"]);
+	grunt.registerTask("nomin",   ["checkDirs", "clean", "copy:orionclient", "string-replace:orionclient", "test"]);
 };
