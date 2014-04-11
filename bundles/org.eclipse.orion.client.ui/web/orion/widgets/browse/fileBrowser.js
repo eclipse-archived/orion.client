@@ -108,7 +108,10 @@ define([
 	 */
 	function FileBrowser(options) {
 		this._parentDomNode = lib.node(options.parent);//Required
-		this._parentDomNode.classList.add("browserParentDome");
+		this.snippetShareOptions = options.snippetShareOptions;
+		if(!this.snippetShareOptions) {
+			this._parentDomNode.classList.add("browserParentDom");
+		}
 		if(options.fileClient) {
 			this._fileClient = options.fileClient;
 		} else if(options.serviceRegistry) {
@@ -179,9 +182,11 @@ define([
 			
 			this._uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 			
-			window.addEventListener("hashchange", function() { //$NON-NLS-0$
-				this.refresh(PageUtil.hash());
-			}.bind(this));
+			if(!this.snippetShareOptions) {
+				window.addEventListener("hashchange", function() { //$NON-NLS-0$
+					this.refresh(PageUtil.hash());
+				}.bind(this));
+			}
 			if(this._fileClient) {
 				this.startup();
 			}
@@ -205,9 +210,11 @@ define([
 				this._fileClient = new mFileClient.FileClient(serviceRegistry);	
 			}
 			if(this.repoURL) {
-				this.repoURLHandler = new repoURLHandler(this.repoURL, this.baseURL);
+				this.repoURLHandler = this.snippetShareOptions ? null : new repoURLHandler(this.repoURL, this.baseURL);
 			}
-			this._registerCommands();
+			if(!this.snippetShareOptions) {
+				this._registerCommands();
+			}
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
 				statusReporter: this._statusReport,
@@ -226,50 +233,52 @@ define([
 					return;
 				}
 				var metadata = evt.metadata;
-				if(this._branches && this._branchSelector){
-					this._activeBranchLocation = this._branches[0].Location;
-					this._activeComponentLocation = null;
-					var newLocation = null;
-					if(metadata.Parents) {
-						if(metadata.Parents.length > 0) {
-							this._activeBranchLocation = metadata.Parents[metadata.Parents.length-1].Location;
-							if(metadata.Parents.length > 1) {
-								this._activeComponentLocation = metadata.Parents[metadata.Parents.length-2].Location;
+				if(!this.snippetShareOptions) {
+					if(this._branches && this._branchSelector){
+						this._activeBranchLocation = this._branches[0].Location;
+						this._activeComponentLocation = null;
+						var newLocation = null;
+						if(metadata.Parents) {
+							if(metadata.Parents.length > 0) {
+								this._activeBranchLocation = metadata.Parents[metadata.Parents.length-1].Location;
+								if(metadata.Parents.length > 1) {
+									this._activeComponentLocation = metadata.Parents[metadata.Parents.length-2].Location;
+								} else {
+									this._activeComponentLocation = metadata.Location;
+								}
 							} else {
+								this._activeBranchLocation = metadata.Location;
 								this._activeComponentLocation = metadata.Location;
 							}
 						} else {
-							this._activeBranchLocation = metadata.Location;
-							this._activeComponentLocation = metadata.Location;
+							this._branches.some(function(branch){
+								if(branch.Name.toLowerCase() === "master") { //$NON-NLS-0$
+									this._activeBranchLocation = branch.Location;
+									newLocation = branch.Location;
+									return true;
+								}
+							}.bind(this));
+							newLocation = newLocation || this._branches[0].Location;
+							this._activeBranchLocation = this._activeBranchLocation || this._branches[0].Location;
 						}
-					} else {
-						this._branches.some(function(branch){
-							if(branch.Name.toLowerCase() === "master") { //$NON-NLS-0$
-								this._activeBranchLocation = branch.Location;
-								newLocation = branch.Location;
-								return true;
+						this._branchSelector.activeResourceLocation = this._activeBranchLocation;
+						
+						if(this._showComponent) {
+							this._branchSelector.setActiveResource({resource: this._branchSelector.getActiveResource(this._activeBranchLocation), changeHash: false,  defaultChild: this._activeComponentLocation});
+							if(!this._activeComponentLocation) {
+								return;
 							}
-						}.bind(this));
-						newLocation = newLocation || this._branches[0].Location;
-						this._activeBranchLocation = this._activeBranchLocation || this._branches[0].Location;
-					}
-					this._branchSelector.activeResourceLocation = this._activeBranchLocation;
-					
-					if(this._showComponent) {
-						this._branchSelector.setActiveResource({resource: this._branchSelector.getActiveResource(this._activeBranchLocation), changeHash: false,  defaultChild: this._activeComponentLocation});
-						if(!this._activeComponentLocation) {
+						} else if(newLocation){
+							this.refresh(new URITemplate("{,resource}").expand({resource:newLocation}));
 							return;
 						}
-					} else if(newLocation){
-						this.refresh(new URITemplate("{,resource}").expand({resource:newLocation}));
-						return;
 					}
-				}
-				this._breadCrumbName = evt.name;
-				this._breadCrumbTarget = metadata;
-				if (evt.input === null || evt.input === undefined) {
-					this._breadCrumbName = this._lastRoot ? this._lastRoot.Name : "";
-					this._breadCrumbTarget = this._lastRoot;
+					this._breadCrumbName = evt.name;
+					this._breadCrumbTarget = metadata;
+					if (evt.input === null || evt.input === undefined) {
+						this._breadCrumbName = this._lastRoot ? this._lastRoot.Name : "";
+						this._breadCrumbTarget = this._lastRoot;
+					}
 				}
 				var view = this._getEditorView(evt.input, evt.contents, metadata);
 				this._setEditor(view ? view.editor : null);
@@ -285,48 +294,52 @@ define([
 				statusReporter: function(message, type, isAccessible) {this._statusReport(message, type, isAccessible);}.bind(this)
 			};
 			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
-			if(this._showBranch) {
-				var branchSelectorContainer = document.createElement("div"); //$NON-NLS-0$
-				branchSelectorContainer.classList.add("resourceSelectorContainer"); //$NON-NLS-0$
-				var rootURL = this._fileClient.fileServiceRootURL("");
-				this._fileClient.fetchChildren(rootURL).then(function(contents){
-					if(contents && contents.length > 0) {
-						this._branches = contents;
-						this._branchSelector = new mResourceSelector.ResourceSelector({
-							commandRegistry: this._commandRegistry,
-							fileClient: this._fileClient,
-							parentNode: branchSelectorContainer,
-							labelHeader: this._showComponent ? "Stream" : "Branch",
-							resourceChangeDispatcher: this._showComponent ? this._resourceChangeHandler : null,
-							fetchChildren: this._showComponent ? true : false,
-							commandScopeId: "orion.browse.brSelector", //$NON-NLS-0$
-							dropDownId: "orion.browse.switchbr", //$NON-NLS-0$
-							dropDownTooltip: this._showComponent ? "Select a stream" : "Select a branch", //$NON-NLS-0$
-							allItems: contents
-						});
-						if(this._showComponent){
-							var compSelectorContainer = document.createElement("div"); //$NON-NLS-0$
-							compSelectorContainer.classList.add("resourceSelectorContainer"); //$NON-NLS-0$
-							compSelectorContainer.classList.add("componentSelectorContainer"); //$NON-NLS-0$
-							this._componentSelector = new mResourceSelector.ResourceSelector({
+			if(!this.snippetShareOptions) {
+				if(this._showBranch) {
+					var branchSelectorContainer = document.createElement("div"); //$NON-NLS-0$
+					branchSelectorContainer.classList.add("resourceSelectorContainer"); //$NON-NLS-0$
+					var rootURL = this._fileClient.fileServiceRootURL("");
+					this._fileClient.fetchChildren(rootURL).then(function(contents){
+						if(contents && contents.length > 0) {
+							this._branches = contents;
+							this._branchSelector = new mResourceSelector.ResourceSelector({
 								commandRegistry: this._commandRegistry,
 								fileClient: this._fileClient,
-								parentNode: compSelectorContainer,
-								labelHeader: "Component",
-								commandScopeId: "orion.browse.compSelector", //$NON-NLS-0$
-								dropDownId: "orion.browse.switchcomp", //$NON-NLS-0$
-								dropDownTooltip: "Select a componet", //$NON-NLS-0$
+								parentNode: branchSelectorContainer,
+								labelHeader: this._showComponent ? "Stream" : "Branch",
+								resourceChangeDispatcher: this._showComponent ? this._resourceChangeHandler : null,
+								fetchChildren: this._showComponent ? true : false,
+								commandScopeId: "orion.browse.brSelector", //$NON-NLS-0$
+								dropDownId: "orion.browse.switchbr", //$NON-NLS-0$
+								dropDownTooltip: this._showComponent ? "Select a stream" : "Select a branch", //$NON-NLS-0$
 								allItems: contents
 							});
+							if(this._showComponent){
+								var compSelectorContainer = document.createElement("div"); //$NON-NLS-0$
+								compSelectorContainer.classList.add("resourceSelectorContainer"); //$NON-NLS-0$
+								compSelectorContainer.classList.add("componentSelectorContainer"); //$NON-NLS-0$
+								this._componentSelector = new mResourceSelector.ResourceSelector({
+									commandRegistry: this._commandRegistry,
+									fileClient: this._fileClient,
+									parentNode: compSelectorContainer,
+									labelHeader: "Component",
+									commandScopeId: "orion.browse.compSelector", //$NON-NLS-0$
+									dropDownId: "orion.browse.switchcomp", //$NON-NLS-0$
+									dropDownTooltip: "Select a componet", //$NON-NLS-0$
+									allItems: contents
+								});
+							}
 						}
-					}
+						this.refresh(PageUtil.hash());
+					}.bind(this),
+					function(error){
+						mInputManager.handleError(this._statusService, error);
+					}.bind(this));
+				} else {
 					this.refresh(PageUtil.hash());
-				}.bind(this),
-				function(error){
-					mInputManager.handleError(this._statusService, error);
-				}.bind(this));
+				}
 			} else {
-				this.refresh(PageUtil.hash());
+				this.refresh(this.snippetShareOptions.fileURL);
 			}
 		},
 		_switchView: function(view) {
@@ -448,8 +461,9 @@ define([
 					inputManager: this._inputManager,
 					repoURLHandler: this.repoURLHandler,
 					fileService: this._fileClient,
+					snippetShareOptions: this.snippetShareOptions,
 					//clickHandler: function(location) {this.refresh(location);}.bind(this),
-					breadCrumbMaker: function(bcContainer, maxLength) {this._breadCrumbMaker(bcContainer, maxLength);}.bind(this)
+					breadCrumbMaker: this.snippetShareOptions ? null: function(bcContainer, maxLength) {this._breadCrumbMaker(bcContainer, maxLength);}.bind(this)
 				};
 				if (!metadata.Directory) {
 					var cType = this._contentTypeService.getFileContentType(metadata);

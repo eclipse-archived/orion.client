@@ -20,7 +20,7 @@ if (_all_script && _all_script.length && _all_script.length > 0) {
 					break;
 				}
 			} else {
-				var regex = /.*built-browse.*.js/;
+				var regex = /.*built-browser.*.js/;
 				if (_all_script[i].src && regex.exec(_all_script[i].src)) {
 					_browser_script_source = _all_script[i].src;
 					break;
@@ -48,6 +48,9 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			}
 			if (arguments.length > 3) {
 				params.codeURL = arguments[3];
+			}
+			if (arguments.length > 4) {
+				params.snippetShareOptions = arguments[4];
 			}
 		} else {
 			params = params || {};
@@ -97,9 +100,10 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			repoURL: repo,
 			baseURL: (selectorNumber === 2 ? base : null),
 			codeURL: params.codeURL,
+			snippetShareOptions: params.snippetShareOptions,
 			selectorNumber: selectorNumber,
 			rootName: params.rootName,
-			maxEditorLines: 300,
+			maxEditorLines: params.snippetShareOptions && params.snippetShareOptions.maxLine ? params.snippetShareOptions.maxLine : 300,
 			init: true
 		});
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {

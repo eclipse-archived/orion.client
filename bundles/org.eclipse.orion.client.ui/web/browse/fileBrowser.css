@@ -282,7 +282,7 @@ a.currentLocation:hover {
 	color: #02ADD0;
 	padding-top: 2px;
 }
-.browserParentDome {
+.browserParentDom {
 	min-height: 215px !important;
 }
 .tooltip {

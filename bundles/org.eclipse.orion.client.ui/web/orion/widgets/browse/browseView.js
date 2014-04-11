@@ -118,7 +118,7 @@ define([
 		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.readonly = options.readonly;
-		this.folderViewer = options.fodlerViewer;
+		this.folderViewer = options.folderViewer;
 		this.editorInputManager = options.editorInputManager;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.clickHandler = options.clickHandler;
@@ -191,6 +191,7 @@ define([
 		this.breadCrumbInHeader = options.breadCrumbInHeader;
 		this.isMarkdownView = options.isMarkdownView;
 		this.repoURLHandler =  options.repoURLHandler;
+		this.snippetShareOptions = options.snippetShareOptions;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.branchSelector = options.branchSelector;
 		this.componentSelector = options.componentSelector;
@@ -314,9 +315,17 @@ define([
 							this.sectionContents.appendChild(this.editorView.getParent());
 							this.editorView.getParent().style.height = "30px"; //$NON-NLS-0$
 							this.editorView.create();
+							this.resetTextModel = this.snippetShareOptions && this.snippetShareOptions.end ? true : false;
 							var textView = this.editorView. editor.getTextView();
 							textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
-								var linesToRender = textView.getModel().getLineCount();
+								var textModel = textView.getModel();
+								if(this.resetTextModel) {
+									var newContents = textModel.getText(this.snippetShareOptions.start ?  this.snippetShareOptions.start : 0, this.snippetShareOptions.end);
+									this.resetTextModel = false;
+									textModel.setText(newContents);
+									return;
+								}
+								var linesToRender = textModel.getLineCount();
 								if(this._maxEditorLines && this._maxEditorLines > 0 && linesToRender >this._maxEditorLines) {
 									linesToRender = this._maxEditorLines;
 								}
@@ -335,7 +344,7 @@ define([
 						} else {
 							this.folderNavExplorer = new FolderNavExplorer({
 								parentId: navNode,
-								fodlerViewer: this,
+								folderViewer: this,
 								readonly: this.readonly,
 								breadCrumbMaker: this.breadCrumbMaker,
 								clickHandler: this.clickHandler,
