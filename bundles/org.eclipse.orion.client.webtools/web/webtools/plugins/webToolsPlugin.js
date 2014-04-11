@@ -11,7 +11,12 @@
  *******************************************************************************/
 /*global esprima*/
 /*jslint amd:true*/
-define(['orion/plugin', 'webtools/htmlContentAssist', 'orion/editor/htmlGrammar', 'orion/editor/stylers/text_html/syntax', 'webtools/cssContentAssist', 'orion/editor/stylers/text_css/syntax'], function(PluginProvider, htmlContentAssist, htmlGrammar, mHTML, cssContentAssist, mCSS) {
+define(['orion/plugin', 
+'webtools/htmlContentAssist', 
+'orion/editor/stylers/text_html/syntax', 
+'webtools/cssContentAssist', 
+'orion/editor/stylers/text_css/syntax'
+], function(PluginProvider, htmlContentAssist, mHTML, cssContentAssist, mCSS) {
 	/**
 	 * Plug-in headers
 	 */
@@ -76,7 +81,6 @@ define(['orion/plugin', 'webtools/htmlContentAssist', 'orion/editor/htmlGrammar'
 	}
 //	provider.registerServiceProvider("orion.edit.highlighter", {}, mCSS.grammars[mCSS.grammars.length - 1]);
 //	provider.registerServiceProvider("orion.edit.highlighter", {}, mHTML.grammars[mHTML.grammars.length - 1]);
-	
 
 	provider.connect();
 });
