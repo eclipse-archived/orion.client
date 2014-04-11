@@ -150,11 +150,14 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 			
 			// Apps CF v2 operations
 			
-			pushApp: function(target, appName, contentLocation) {
-				var pushReq = {
-					Name: appName, 
-					ContentLocation: contentLocation
-				};
+			pushApp: function(target, name, contentLocation) {
+				var pushReq = {};
+				
+				if (name)
+					pushReq.Name = name;
+				
+				if (contentLocation)
+					pushReq.ContentLocation = contentLocation;
 				
 				if (target)
 					pushReq.Target = target;
@@ -167,7 +170,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				
 				if (name) {
 					url += "?Name=" + name;
-				} else if (location) {
+				} else if (contentLocation) {
 					url += "?ContentLocation=" + contentLocation;
 				}
 				
