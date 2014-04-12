@@ -27,7 +27,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec",
-    "prepublish": "grunt"
+    "optimize": "grunt"
   },
   "repository": {
     "type": "git",
