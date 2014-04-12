@@ -14,6 +14,7 @@
 define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "orion/URL-shim"], function(Deferred, xhr, Base64) {
 
 	function GitHubFileImpl(repoURL, token) {
+		this._originalRepoURL = repoURL;//Used for reference in error message to indicate a repo URL
 		var found = repoURL.match(/https\:\/\/github\.com(?:\:443)?\/([^/]+)\/([^/]+).git$/);
 		if (!found) {
 			throw "Bad Github repository url " + repoURL;
@@ -55,6 +56,32 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			}
 			return location;
 		},
+		_handleError: function(error, isRoot) {
+			var errorMessageHeader = "GitHub Error: ";
+			var errorMessage = "Unknown";
+			if(error.status && error.status === 404) {//There are two types of displayed error if 404 comes from GitHub
+				if(isRoot) { //If the request was sent from the repo's root level, then it is a private repository. https://developer.github.com/v3/#authentication
+					errorMessage = "This repository(" + this._originalRepoURL +") is private. Authentication is not supported in readonly mode. Please use edit mode to get authentication.";
+				} else { //Otherwise it is a bad URL
+					errorMessage = "Bad URL(" + (error.url ? error.url : "") + ").";
+				}
+			} else {//For errors other than 404, we just use the "message" and "documentation_url" properties for a detailed message
+				errorMessageHeader = errorMessageHeader + (error.status ? "Error code " + error.status + ". " : "");
+				var responseText = error.responseText;
+				try {
+					var parsedError = JSON.parse(responseText);
+					errorMessage = (parsedError.message || "Unknown") + ". ";
+					if(parsedError.documentation_url) {
+						errorMessage = errorMessage + "Refer to " + parsedError.documentation_url + " for details.";
+					}
+				} catch (e) {
+					errorMessage = "Unknown";
+				}
+			}
+			var errorObj = {Severity: "error", Message: errorMessageHeader + errorMessage};
+			error.responseText = JSON.stringify(errorObj);
+			return new Deferred().reject(error);
+		},
 		_getBranches: function() {
 			var _this = this;
 			return xhr("GET", this._repoURL.href + "/branches", {
@@ -79,7 +106,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 						ChildrenLocation: location
 					};
 				});
-			});
+			}, function(error) { return _this._handleError(error, true);});
 		},
 		_getChildren: function(location) {
 			location = this._refPathToQuery(location);
@@ -110,7 +137,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 					}
 					return result;
 				});
-			});
+			}, function(error) { return _this._handleError(error);});
 		},
 		_getParents: function(location) {
 			if (location === this._repoURL.href) {
@@ -180,7 +207,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 					result.Parents = _this._getParents(location);
 				}
 				return result;
-			});
+			}, function(error) { return _this._handleError(error, true);});
 		},
 		createProject: function(url, projectName, serverPath, create) {
 			throw "Not supported";
@@ -230,7 +257,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 							return true;
 						}
 					});
-					return result;
+					return result ? result : _this._handleError({status: 404, url: location});//We have to fake a non-root 404 error here, because children.some may not match an invalid URL
 				});
 			}
 			return this.readBlob(location).then(function(bytes) {
@@ -248,6 +275,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			throw "Not supported";
 		},
 		readBlob: function(location) {
+			var _this = this;
 			location = this._refPathToQuery(location);
 			return xhr("GET", location, {
 				headers: this._headers,
@@ -263,8 +291,8 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 				}).then(function(result) {
 					var content = JSON.parse(result.response);
 					return Base64.decode(content.content);
-				});
-			});
+				}, function(error) { return _this._handleError(error);});
+			}, function(error) { return _this._handleError(error);});
 		},
 		writeBlob: function(location, contents, args) {
 			throw "Not supported";
