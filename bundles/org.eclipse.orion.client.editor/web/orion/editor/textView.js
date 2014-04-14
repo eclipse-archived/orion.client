@@ -3643,6 +3643,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._lastMouseMoveY = e.clientY;
 			this._setLinksVisible(changed && !this._isMouseDown && (util.isMac ? e.metaKey : e.ctrlKey));
 
+			this._checkOverlayScroll();
+
 			/*
 			* Feature in IE8 and older, the sequence of events in the IE8 event model
 			* for a doule-click is:
@@ -3982,6 +3984,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_handleScroll: function () {
+			this._lastScrollTime = new Date().getTime();
 			var scroll = this._getScroll(false);
 			var oldX = this._hScroll;
 			var oldY = this._vScroll;
@@ -5830,6 +5833,33 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			/* Create elements */
 			this._createActions();
 			this._createView();
+		},
+		_checkOverlayScroll: function() {
+			if (util.isMac && util.isWebkit) {
+				if (!this._metrics.invalid && this._metrics.scrollWidth === 0) {
+					var viewDiv = this._viewDiv;
+					var overlay = this._isOverOverlayScroll();
+					if (overlay.vertical || overlay.horizontal) {
+						viewDiv.style.pointerEvents = ""; //$NON-NLS-0$
+					} else {
+						viewDiv.style.pointerEvents = "none"; //$NON-NLS-0$
+					}
+				}
+			}	
+		},
+		_isOverOverlayScroll: function() {
+			var scrollShowing = new Date().getTime() - this._lastScrollTime < 200;
+			if (!scrollShowing) {
+				return {};
+			}
+			var rect = this._viewDiv.getBoundingClientRect();
+			var x = this._lastMouseMoveX;
+			var y = this._lastMouseMoveY;
+			var overlayScrollWidth = 15;
+			return {
+				vertical: rect.top <= y && y < rect.bottom && rect.right - overlayScrollWidth <= x && x < rect.right,
+				horizontal: rect.bottom - overlayScrollWidth <= y && y < rect.bottom && rect.left <= x && x < rect.right
+			};
 		},
 		_modifyContent: function(e, updateCaret) {
 			if (this._readonly && !e._code) {
