@@ -115,7 +115,14 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			plugins: plugins
 		});
 		pluginRegistry.start().then(function() {
-			this._fileBrowser.startup(serviceRegistry);
+			var allReferences = serviceRegistry.getServiceReferences("orion.core.file"); //$NON-NLS-0$
+			if(allReferences.length === 0) {//If there is no file service reference, we treat it as plugin activation error.
+				this._fileBrowser._statusService.setProgressResult({Severity: "error", Message: "File system plugin activation error."}); //$NON-NLS-0$ //$NON-NLS-1$
+			} else {//Plugin activation succeeds, start up the readonly widget.
+				this._fileBrowser.startup(serviceRegistry);
+			}
+		}.bind(this), function() {//The pluginRegistry starts with rejection(not sure if it is reachable though, we treat it as plugin activation error.
+			this._fileBrowser._statusService.setProgressResult({Severity: "error", Message: "File system plugin activation error."}); //$NON-NLS-0$ //$NON-NLS-1$
 		}.bind(this));
 	}
 
