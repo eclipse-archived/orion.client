@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="../../../requirejs/require.js"></script>
+	<script>
+	/*global require window*/
+	require({
+		baseUrl: '../../',
+		paths: {
+			text: 'requirejs/text',
+			i18n: 'requirejs/i18n',
+			domReady: 'requirejs/domReady'
+		},
+		isTest: true
+	});
+
+	window.onload = function() {
+		require(["orion/test","js-tests/webtools/cssValidatorTests"], function(test, testcase) {
+			test.run(testcase);
+		});
+	};
+	</script>
+</head>
+<body>
+<h2>CSS Validator Tests</h2>
+<p>
+This suite tests the csslint validator
+</p>
+</body>
+</html>

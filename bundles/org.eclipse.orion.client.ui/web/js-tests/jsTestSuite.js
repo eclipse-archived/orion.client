@@ -114,6 +114,9 @@ OrionTestCase("javascript-index-file-parsing", "/js-tests/javascript/indexFilePa
 OrionTestCase("javascript-occurrences", "/js-tests/javascript/occurrencesTests.html");
 OrionTestCase("javascript-outline", "/js-tests/javascript/outlinerTests.html");
 
+// These live in the webtools bundle
+OrionTestCase("webtools-css-validator", "/js-tests/webtools/cssValidatorTests.html");
+
 //OrionTestCase("searchRendering", "/js-tests/searchRendering/test.html");
 //OrionUITestCase("textviewPerformance", "/js-tests/editor/test-performance.html");
 

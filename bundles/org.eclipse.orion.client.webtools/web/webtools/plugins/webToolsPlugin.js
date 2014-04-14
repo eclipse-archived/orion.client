@@ -15,8 +15,10 @@ define(['orion/plugin',
 'webtools/htmlContentAssist', 
 'orion/editor/stylers/text_html/syntax', 
 'webtools/cssContentAssist', 
+'webtools/cssValidator',
+'webtools/cssOutliner',
 'orion/editor/stylers/text_css/syntax'
-], function(PluginProvider, htmlContentAssist, mHTML, cssContentAssist, mCSS) {
+], function(PluginProvider, htmlContentAssist, mHTML, cssContentAssist, mCssValidator, mCssOutliner, mCSS) {
 	/**
 	 * Plug-in headers
 	 */
@@ -63,6 +65,18 @@ define(['orion/plugin',
 			contentType: ["text/css"]
 		});
 
+	provider.registerService("orion.edit.validator", new mCssValidator.CssValidator(),
+		{
+			contentType: ["text/css"]
+		});
+	
+	provider.registerService("orion.edit.outliner", new mCssOutliner.CssOutliner(), 
+		{
+			id: "orion.outline.css.csslint",
+			name: "CSS rule outline",
+			contentType: ["text/css"]
+		});
+		
 	/**
 	 * Register syntax styling
 	 * TODO There should be a better way, see Bug 432540

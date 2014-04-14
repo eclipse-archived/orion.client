@@ -102,7 +102,6 @@
         { name: "plugins/GerritFilePlugin" },
         { name: "plugins/GitHubFilePlugin" },
         { name: "plugins/authenticationPlugin" },
-        { name: "plugins/csslintPlugin" },
         { name: "plugins/fileClientPlugin" },
         { name: "plugins/gitBlamePlugin" },
         { name: "plugins/jslintPlugin" },
