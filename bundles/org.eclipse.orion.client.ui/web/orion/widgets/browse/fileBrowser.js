@@ -301,6 +301,13 @@ define([
 					var rootURL = this._fileClient.fileServiceRootURL("");
 					this._fileClient.fetchChildren(rootURL).then(function(contents){
 						if(contents && contents.length > 0) {
+							contents.sort(function(a, b) {
+								var	n1 = a.Name && a.Name.toLowerCase();
+								var	n2 = b.Name && b.Name.toLowerCase();
+								if (n1 < n2) { return -1; }
+								if (n1 > n2) { return 1; }
+								return 0;
+							}); 
 							this._branches = contents;
 							this._branchSelector = new mResourceSelector.ResourceSelector({
 								commandRegistry: this._commandRegistry,

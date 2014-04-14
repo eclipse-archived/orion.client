@@ -142,6 +142,13 @@ define([
 				} else {
 					this.fileClient.fetchChildren(params.resource.Location).then(function(contents){
 						if(contents && contents.length > 0) {
+							contents.sort(function(a, b) {
+								var	n1 = a.Name && a.Name.toLowerCase();
+								var	n2 = b.Name && b.Name.toLowerCase();
+								if (n1 < n2) { return -1; }
+								if (n1 > n2) { return 1; }
+								return 0;
+							}); 
 							params.resource.selectorAllItems = contents;
 							if(this.resourceChangeDispatcher) {
 								this.resourceChangeDispatcher.dispatchEvent({ type: "resourceChanged", newResource: params.resource, defaultChild: params.defaultChild, changeHash: params.changeHash}); //$NON-NLS-0$
