@@ -43,7 +43,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme'],
 			return resultString + result;
 		}
 		
-		var defaultFont = '"Consolas", "Monaco", "Vera Mono", "monospace"';
+		var defaultFont = '"Consolas", "Monaco", "Vera Mono", monospace';
 		var defaultFontSize = '10pt';
 
 		function ThemeData() {
