@@ -5134,10 +5134,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			viewDiv.style.margin = "0px"; //$NON-NLS-0$
 			viewDiv.style.outline = "none"; //$NON-NLS-0$
 			viewDiv.style.background = "transparent"; //$NON-NLS-0$
-			if (util.isMac && util.isWebkit) {
-				viewDiv.style.pointerEvents = "none"; //$NON-NLS-0$
-				viewDiv.style.zIndex = "2"; //$NON-NLS-0$
-			}
 			rootDiv.appendChild(viewDiv);
 			
 			var rightDiv = this._createRulerParent(document, "textviewRightRuler"); //$NON-NLS-0$
@@ -7312,6 +7308,16 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				this._rootDiv.style.lineHeight = "normal"; //$NON-NLS-0$
 			}
 			this._updateStyleSheet();
+			if (util.isMac && util.isWebkit) {
+				var viewDiv = this._viewDiv;
+				if (!metrics.invalid && metrics.scrollWidth === 0) {
+					viewDiv.style.pointerEvents = "none"; //$NON-NLS-0$
+					viewDiv.style.zIndex = "2"; //$NON-NLS-0$
+				} else {
+					viewDiv.style.pointerEvents = ""; //$NON-NLS-0$
+					viewDiv.style.zIndex = ""; //$NON-NLS-0$
+				}
+			}
 			if (!init) {
 				this.redraw();
 				this._resetLineWidth();
