@@ -532,6 +532,9 @@ define([
 		if (toolNode.classList.contains("commandMarker")) { //$NON-NLS-0$
 			elements.commandNode = toolNode;
 		}
+		if (!toolbarNode) {
+			toolbarNode = lib.node("pageToolbar"); //$NON-NLS-0$
+		}
 		if (toolbarNode) {
 			elements.slideContainer = lib.$(".slideParameters", toolbarNode); //$NON-NLS-0$
 			elements.parameterArea = lib.$(".parameters", toolbarNode); //$NON-NLS-0$
