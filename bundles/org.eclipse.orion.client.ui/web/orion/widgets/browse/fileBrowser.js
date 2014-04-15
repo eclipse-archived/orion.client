@@ -150,12 +150,22 @@ define([
 			this._componentSelector.allItems = event.newResource.selectorAllItems;
 			var currentComponentLocation = event.defaultChild;
 			if(!currentComponentLocation) {
+				var firstDirLocation = null;
 				event.newResource.selectorAllItems.some(function(component){
 					if(component.Directory) {
-						currentComponentLocation = component.Location;
-						return true;
+						if(!firstDirLocation) {//Remember the first directory in the component list
+							firstDirLocation = component.Location;
+						}
+						//If the component name contains "default", we should set it as default in the selector
+						if(component.Name && component.Name.toLowerCase().indexOf("default") >= 0) { //$NON-NLS-0$
+							currentComponentLocation = component.Location;
+							return true;
+						}
 					}
 				});
+				if(!currentComponentLocation) {//If no component name contains "default", use the first directory as the defaul. 
+					currentComponentLocation = firstDirLocation;
+				}
 				if(event.changeHash) {
 					window.location = new URITemplate("#{,resource,params*}").expand({resource:currentComponentLocation});
 				} else {
