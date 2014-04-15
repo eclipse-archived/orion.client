@@ -103,7 +103,8 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 						Length: 0,
 						LocalTimeStamp: 0,
 						Directory: true,
-						ChildrenLocation: location
+						ChildrenLocation: location,
+						Sha: (branch.commit ? branch.commit.sha : null)
 					};
 				});
 			}, function(error) { return _this._handleError(error, true);});
@@ -129,7 +130,8 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 						Name: entry.name,
 						Length: entry.size,
 						LocalTimeStamp: 0,
-						Directory: false
+						Directory: false,
+						Sha: entry.sha
 					};
 					if (entry.type === "dir") {
 						result.Directory = true;
@@ -170,11 +172,98 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			}
 			return result.reverse();
 		},
+		_readGitBlob: function(metaData, errorForwarded) {
+			var _this = this;
+			//We only try the /git/blobs/ API if the file does not have size or size is greater than 1M.
+			if(metaData && metaData.Sha && !metaData.Directory && (!metaData.Length || (typeof metaData.Length === "number" && metaData.Length >= (1024*1024)))){
+				return xhr("GET", _this._repoURL.href + "/git/blobs/" + metaData.Sha, {
+					headers: this._headers,
+					timeout: 15000
+				}).then(function(result) {
+					var content = JSON.parse(result.response);
+					return content;
+				}, function(error) { return _this._handleError(error);});
+			} else if(errorForwarded){
+				return _this._handleError(errorForwarded);
+			} else {
+				return metaData;
+			}
+		},
+		_retryBlob: function(originalLocation, errorForwarded) {
+			var _this = this;
+			return this.read(originalLocation, true).then(function(metaData) {//Get the sha by getting meta data
+				return _this._readGitBlob(metaData, errorForwarded).then(function(content){
+					if (content.content && content.size) {
+						return Base64.decode(content.content);
+					} else {
+						_this._handleError(errorForwarded);
+					}
+				});
+			});
+		},
+		_getSHA: function(location) {
+			var _this = this;
+			var parents = this._getParents(location);
+			if (parents) {
+				if(parents.length === 0) {
+					return _this._getBranches().then(function(branches) {
+						var result;
+						branches.some(function(entry) {
+							if (entry.Location === location) {
+								result = entry.Sha;
+								return true;
+							}
+						});
+						return result;
+					});
+				}
+				return _this.read(location, true).then(function(metaData){
+					return metaData.Sha;
+				});
+			}
+			return new Deferred().resolve();
+		},
+		_refineFetchedChildren: function(location, children) {
+			var _this = this;
+			var filesWithoutSize = [];
+			children.forEach(function(child) {
+				if(!child.Directory && !child.Length) {
+					filesWithoutSize.push(child);
+				}
+			});
+			if(filesWithoutSize.length > 0) {// We only want to use /git/trees/ API if there is any file that does not have size info
+				return _this._getSHA(location).then(function(sha) {
+					if(sha){
+						return xhr("GET", _this._repoURL.href + "/git/trees/" + sha, {
+							headers: this._headers,
+							timeout: 15000
+						}).then(function(result) {
+							var content = JSON.parse(result.response);
+							if(content && content.tree) {// All the children are here in content.tree
+								filesWithoutSize.forEach(function(file) {
+									content.tree.forEach(function(item) {
+										if(item.sha === file.Sha) {
+											file.Length = item.size;// Assign the size of a tree item responded from the /git/tree/ API.
+										}
+									});
+								});
+							}
+							return children;
+						}, function(error) { return _this._handleError(error);});
+					}
+					return children;
+				});
+			}
+			return children;
+		},
 		fetchChildren: function(location) {
+			var _this = this;
 			if (location === this._repoURL.href) {
 				return this._getBranches();
 			} else {
-				return this._getChildren(location);
+				return this._getChildren(location).then(function(children){
+					return _this._refineFetchedChildren(location, children);//If there is any file returned without size, we have to fill up the size by /git/trees/ API
+				});
 			}
 		},
 		loadWorkspaces: function() {
@@ -274,9 +363,9 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 		remoteExport: function(sourceLocation, options) {
 			throw "Not supported";
 		},
-		readBlob: function(location) {
+		readBlob: function(originalLocation) {
 			var _this = this;
-			location = this._refPathToQuery(location);
+			var location = this._refPathToQuery(originalLocation);
 			return xhr("GET", location, {
 				headers: this._headers,
 				timeout: 15000
@@ -292,7 +381,9 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 					var content = JSON.parse(result.response);
 					return Base64.decode(content.content);
 				}, function(error) { return _this._handleError(error);});
-			}, function(error) { return _this._handleError(error);});
+			}, function(error) {//In case of error of read blob, we have to retry it by /git/blobs/ API because the error might have been caused by a 1M+ file. 
+				return _this._retryBlob(originalLocation, error);
+			});
 		},
 		writeBlob: function(location, contents, args) {
 			throw "Not supported";
