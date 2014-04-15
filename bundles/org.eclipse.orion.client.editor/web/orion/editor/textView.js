@@ -5874,14 +5874,14 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			try {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = true; }
 				model.setText(e.text, e.start, e.end);
+
+				if (updateCaret) {
+					var selection = this._getSelection ();
+					selection.setCaret(e.start + e.text.length);
+					this._setSelection(selection, true);
+				}
 			} finally {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = false; }
-			}
-			
-			if (updateCaret) {
-				var selection = this._getSelection ();
-				selection.setCaret(e.start + e.text.length);
-				this._setSelection(selection, true);
 			}
 			this.onModify({type: "Modify"}); //$NON-NLS-0$
 		},
@@ -6599,6 +6599,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		_showCaret: function (allSelection, callback, showOptions, pageScroll) {
 			if (!this._clientDiv) { return; }
 			if (this._redrawCount > 0) { return; }
+			if (this._ignoreDOMSelection) { return; }
 			var model = this._model;
 			var selection = this._getSelection();
 			var scroll = this._getScroll();
