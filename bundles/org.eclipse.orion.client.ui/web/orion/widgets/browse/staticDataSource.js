@@ -24,8 +24,10 @@ define([
 	"orion/editor/stylers/text_x-php/syntax",
 	"orion/editor/stylers/text_x-python/syntax",
 	"orion/editor/stylers/text_x-ruby/syntax",
-	'orion/editor/stylers/application_x-ejs/syntax'
-], function(Deferred, mStyler, mJS, mCss, mHtml, mJava, mJson, mPhp, mPython, mRuby, mEJS) {
+	'orion/editor/stylers/application_x-ejs/syntax',
+	'orion/editor/stylers/application_xml/syntax',
+	'orion/editor/stylers/text_x-yaml/syntax',
+], function(Deferred, mStyler, mJS, mCss, mHtml, mJava, mJson, mPhp, mPython, mRuby, mEJS, mXml, mYaml) {
 	var ContentTypes = [{	id: "text/plain",
 			name: "Text",
 			extension: ["txt"],
@@ -186,6 +188,13 @@ define([
 						break;
 					case "text/x-php": //$NON-NLS-0$
 						this.styler = new mStyler.TextStyler(textView, annotationModel, mPhp.grammars, "orion.php"); //$NON-NLS-0$
+						break;
+					case "application/xml": //$NON-NLS-0$
+					case "application/xhtml+xml": //$NON-NLS-0$
+						this.styler = new mStyler.TextStyler(textView, annotationModel, mXml.grammars, "orion.xml"); //$NON-NLS-0$
+						break;
+					case "text/x-yaml": //$NON-NLS-0$
+						this.styler = new mStyler.TextStyler(textView, annotationModel, mYaml.grammars, "orion.yaml"); //$NON-NLS-0$
 						break;
 				}
 			}
