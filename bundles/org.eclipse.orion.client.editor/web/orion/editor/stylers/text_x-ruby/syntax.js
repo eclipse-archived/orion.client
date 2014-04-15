@@ -52,8 +52,8 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 					{include: "orion.lib#todo_comment_singleLine"} //$NON-NLS-0$
 				]
 			}, {
-				begin: {match: "^=begin", literal: "^=begin"}, //$NON-NLS-0$
-				end: {match: "^=end", literal: "^=end"}, //$NON-NLS-0$
+				begin: {match: "^=begin\\b", literal: "=begin"}, //$NON-NLS-0$
+				end: {match: "^=end\\b", literal: "=end"}, //$NON-NLS-0$
 				name: "comment.block.ruby", //$NON-NLS-0$
 				patterns: [
 					{
