@@ -93,7 +93,8 @@ define([
 		if (item.Directory) {
 			link = document.createElement("a"); //$NON-NLS-0$
 			link.className = "navlinkonpage"; //$NON-NLS-0$
-			link.href = !folderPageURL ? uriTemplate : new URITemplate(folderPageURL + "#{,resource,params*}").expand({resource: item.ChildrenLocation}); //$NON-NLS-0$
+			var template = !folderPageURL ? uriTemplate : new URITemplate(folderPageURL + "#{,resource,params*}"); //$NON-NLS-0$
+			link.href = template.expand({resource: item.ChildrenLocation});
 			if(item.Name){
 				link.appendChild(document.createTextNode(item.Name));
 			}
