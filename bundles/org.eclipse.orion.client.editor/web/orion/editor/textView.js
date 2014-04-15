@@ -4153,7 +4153,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					start += lineStart;
 					end += lineStart;
 					
-					this._modifyContent({text: deltaText, start: start, end: end, _ignoreDOMSelection: true}, true);
+					this._modifyContent({text: deltaText, start: start, end: end, _ignoreDOMSelection: true, _ignoreDOMSelection1: true}, true);
 				}
 			} else {
 				this._doContent(e.data);
@@ -5874,14 +5874,19 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			try {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = true; }
 				model.setText(e.text, e.start, e.end);
-
-				if (updateCaret) {
-					var selection = this._getSelection ();
-					selection.setCaret(e.start + e.text.length);
-					this._setSelection(selection, true);
-				}
 			} finally {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = false; }
+			}
+
+			if (updateCaret) {
+				var selection = this._getSelection ();
+				selection.setCaret(e.start + e.text.length);
+				try {
+					if (e._ignoreDOMSelection1) { this._ignoreDOMSelection = true; }
+					this._setSelection(selection, true);
+				} finally {
+					if (e._ignoreDOMSelection1) { this._ignoreDOMSelection = false; }
+				}
 			}
 			this.onModify({type: "Modify"}); //$NON-NLS-0$
 		},
