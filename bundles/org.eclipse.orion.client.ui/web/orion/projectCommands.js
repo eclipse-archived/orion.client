@@ -968,40 +968,44 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				allContributedCommandsDeferreds.push(createInitProjectCommand(dependencyType));
 			}
 		
+		var readmeFilename = "README.md"; //$NON-NLS-0$
 		var addReadmeCommand = new mCommands.Command({
-			name: "Readme File",
-			tooltip: "Create a README.md file in this project",
-			id: "orion.project.create.readme",
+			name: "Readme File", //$NON-NLS-0$
+			tooltip: "Create a README.md file in this project", //$NON-NLS-0$
+			id: "orion.project.create.readme", //$NON-NLS-0$
 			callback: function(data){
 				var item = forceSingleItem(data.items);
-				progress.progress(fileClient.createFile(item.Project.ContentLocation, "README.md"), "Creating README.md").then(function(readmeMeta){
+				progress.progress(fileClient.createFile(item.Project.ContentLocation, readmeFilename), i18nUtil.formatMessage("Creating ${0}", readmeFilename)).then(function(readmeMeta){ //$NON-NLS-0$
 					function dispatch() {
 						var dispatcher = FileCommands.getModelEventDispatcher();
-						dispatcher.dispatchEvent({ type: "create", parent: item, newValue: readmeMeta });
+						dispatcher.dispatchEvent({ type: "create", parent: item.Project.fileMetadata, newValue: readmeMeta }); //$NON-NLS-0$
 					}
 					if(item.Project){
-						progress.progress(fileClient.write(readmeMeta.Location, "# " + item.Project.Name), "Writing sample readme").then(function(){
+						progress.progress(fileClient.write(readmeMeta.Location, "# " + item.Project.Name), "Writing sample readme").then(function(){ //$NON-NLS-1$ //$NON-NLS-0$
 							dispatch();
 						});
 					} else {
 						dispatch();
 					}
-				});
+				}, errorHandler);
 			},
 			visibleWhen: function(item) {
 				if (!explorer || !explorer.isCommandsVisible()) {
 					return false;
 				}
 				item = forceSingleItem(item);
-				if(!item.Project || !item.Project.children || !item.Project.ContentLocation){
+				if(!item.Project || !item.Project.fileMetadata || !item.Project.fileMetadata.children || !item.Project.ContentLocation){
 					return false;
 				}
-				for(var i=0; i<item.Project.children.length; i++){
-					if(item.Project.children[i].Name && item.Project.children[i].Name.toLowerCase() === "readme.md"){
-						return false;
+				var children = item.Project.fileMetadata.children;
+				var hasReadMe = children.some(function(child){
+					if(child.Name && (child.Name.toLowerCase() === readmeFilename.toLowerCase()) ){
+						return true;
 					}
-				}
-				return true;
+					return false;
+				});
+				
+				return !hasReadMe;
 			}
 		});
 		
