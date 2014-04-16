@@ -547,9 +547,6 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			var editor = this._editor;
 			if (this._regex) {
 				newStr = editor.getText(start, end).replace(new RegExp(searchStr, this._caseInsensitive ? "i" : ""), newStr); //$NON-NLS-0$
-				if (!newStr) {
-					return;
-				}
 			}
 			editor.setText(newStr, start, end);
 			editor.setSelection(start, start + newStr.length, true);
