@@ -256,11 +256,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 		 */
 		show: function(near) {
 			if(this.modal){//Modal dialog should only appear once unless they are chain dialog
-				try {
-					this._makeModal();
-				} catch(e){
-					// bug!! -- see Bug 432873 
-				}
+				this._makeModal();
 				if(modalDialogManager.dialog) {//There is already modal dialog opened
 					if(!modalDialogManager.dialog._inModalExclusion(this)) {//The dialog is NOT a child dialog of the exisitng dialog
 						this.hide(true);

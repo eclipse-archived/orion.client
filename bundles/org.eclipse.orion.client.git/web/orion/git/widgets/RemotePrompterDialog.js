@@ -161,6 +161,9 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 		isDefault: true,
 		id: "remoteOk"
 		});
+		
+		// Start the dialog initialization.
+		this._initialize();
 	};
 
 	RemotePrompterDialog.prototype._bindToDom = function(parent) {
@@ -178,8 +181,6 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 	};
 
 	RemotePrompterDialog.prototype._beforeShowing = function() {
-		// Start the dialog initialization.
-		this._initialize();
 		this._loadRemoteChildren();
 	};
 	
