@@ -15,8 +15,8 @@
 define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 
 	'orion/commandRegistry', 'orion/extensionCommands', 'orion/contentTypes', 'orion/compare/compareUtils', 
 	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog',
-	'orion/EventTarget'],
-	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mCommandRegistry, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget){
+	'orion/EventTarget', 'orion/form'],
+	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mCommandRegistry, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form){
 
 	/**
 	 * Utility methods
@@ -108,7 +108,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		
 		req.open('post', force ? targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")>0 ? "&force=true" : "?force=true") : targetFolder.ImportLocation, true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
-		req.setRequestHeader("Slug", encodeURIComponent(file.name)); //$NON-NLS-0$
+		req.setRequestHeader("Slug", form.encodeSlug(file.name)); //$NON-NLS-0$
 		// TODO if we want to unzip zip files, don't use this...
 		if (!unzip) {
 			req.setRequestHeader("X-Xfer-Options", "raw"); //$NON-NLS-1$ //$NON-NLS-0$
