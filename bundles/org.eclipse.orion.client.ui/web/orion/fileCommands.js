@@ -113,7 +113,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		if (!unzip) {
 			req.setRequestHeader("X-Xfer-Options", "raw"); //$NON-NLS-1$ //$NON-NLS-0$
 		}
-		req.setRequestHeader("Content-Type", file.type); //$NON-NLS-0$
+		req.setRequestHeader("Content-Type", "application/octet-stream"); //$NON-NLS-0$
 		req.onreadystatechange = function(state) {
 			if(req.readyState === 4) {
 				if (req.status === 400){
