@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -108,7 +108,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		
 		req.open('post', force ? targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")>0 ? "&force=true" : "?force=true") : targetFolder.ImportLocation, true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
-		req.setRequestHeader("Slug", file.name); //$NON-NLS-0$
+		req.setRequestHeader("Slug", encodeURIComponent(file.name)); //$NON-NLS-0$
 		// TODO if we want to unzip zip files, don't use this...
 		if (!unzip) {
 			req.setRequestHeader("X-Xfer-Options", "raw"); //$NON-NLS-1$ //$NON-NLS-0$
