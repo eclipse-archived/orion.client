@@ -4153,7 +4153,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					start += lineStart;
 					end += lineStart;
 					
-					this._modifyContent({text: deltaText, start: start, end: end, _ignoreDOMSelection: true, _ignoreDOMSelection1: true}, true);
+					this._ignoreQueueUpdate = util.isSafari;
+					this._modifyContent({text: deltaText, start: start, end: end, _ignoreDOMSelection: true, _ignoreDOMSelection1: util.isChrome}, true);
+					this._ignoreQueueUpdate = false;
 				}
 			} else {
 				this._doContent(e.data);
@@ -5560,14 +5562,14 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		},
 		_getLineNext: function (lineNode) {
 			var node = lineNode ? lineNode.nextSibling : this._clientDiv.firstChild;
-			while (node && node.lineIndex === -1) {
+			while (node && (node.lineIndex === -1 || !node._line)) {
 				node = node.nextSibling;
 			}
 			return node;
 		},
 		_getLinePrevious: function (lineNode) {
 			var node = lineNode ? lineNode.previousSibling : this._clientDiv.lastChild;
-			while (node && node.lineIndex === -1) {
+			while (node && (node.lineIndex === -1 || !node._line)) {
 				node = node.previousSibling;
 			}
 			return node;
