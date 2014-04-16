@@ -139,36 +139,36 @@
 }
 
 .progressWatch.running .watchBody .hand.longHour {
-	-webkit-animation-duration: 2.4s;
-	-moz-animation-duration: 2.4s;
-	-ms-animation-duration: 2.4s;
-	-o-animation-duration: 2.4s;
-	animation-duration: 2.4s;
+	-webkit-animation-duration: 6s;
+	-moz-animation-duration: 6s;
+	-ms-animation-duration: 6s;
+	-o-animation-duration: 6s;
+	animation-duration: 6s;
 }
 
 .progressWatch.running .watchBody .hand.longMinute {
-	-webkit-animation-duration: 0.2s;
-	-moz-animation-duration: 0.2s;
-	-ms-animation-duration: 0.2s;
-	-o-animation-duration: 0.2s;
-	animation-duration: 0.2s;
+	-webkit-animation-duration: 0.5s;
+	-moz-animation-duration: 0.5s;
+	-ms-animation-duration: 0.5s;
+	-o-animation-duration: 0.5s;
+	animation-duration: 0.5s;
 }
 
 .progressWatch.running .watchButton {
-	border-color: #F58B0F;
+	border-color: #333333;
 	top: 1px;
 }
 
 .progressWatch.running .watchBody {
-	border-color: #F58B0F;
+	border-color: #333333;
 }
 
 .progressWatch.running .watchBody .hand.longHour > .darkSide {
-	background-color: red;
+	background-color: #333333;
 }
 
 .progressWatch.running .watchBody .hand.longMinute > .darkSide {
-	background-color: red;
+	background-color: #333333;
 }
 
 /* warning */
