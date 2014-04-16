@@ -56,17 +56,22 @@ define("webtools/cssOutliner", [ //$NON-NLS-0$
 				parser.addListener("startrule", function(event) {
 					var selectors = event.selectors;
 					if (selectors && selectors.length) {
-						var selectorText = [], line = null, col = null;
+						var selectorText = [], line = null, col = null, length = null;
 						for (var i=0; i < selectors.length; i++) {
 							var sel = selectors[i];
 							if (line === null) { line = sel.line; }
 							if (col === null) { col = sel.col; }
+							if (length === null) {
+								length = sel.text.length;
+								if (length > 0){ length--; /*length range is inclusive*/}
+							}
 							selectorText.push(sel.text);
 						}
 						that.outline.push({
 							label: selectorText.join(", "),
 							line: line,
-							col: col
+							offset: col,
+							length: length
 						});
 					}
 				});
