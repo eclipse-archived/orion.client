@@ -162,10 +162,11 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 				ChildrenLocation: url.href
 			});
 			for (var i = 0; i < segments.length; ++i) {
-				var parentName = decodeURIComponent(segments[i]);
+				var parentName = segments[i];
+				var parentDisplayName = decodeURIComponent(segments[i]);
 				url.pathname += "/" + parentName;
 				result.push({
-					Name: parentName,
+					Name: parentDisplayName,
 					Location: url.href,
 					ChildrenLocation: url.href
 				});
