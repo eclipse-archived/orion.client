@@ -237,7 +237,9 @@ define([
 					return new Deferred().resolve(resource);
 				};
 			}
-			
+			this._inputManager._unknownContentTypeAsText = function() {
+				return true;
+			};
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				if(!evt.metadata || !evt.input) {
 					return;
@@ -485,7 +487,17 @@ define([
 				if (!metadata.Directory) {
 					var cType = this._contentTypeService.getFileContentType(metadata);
 					if(!cType) {
-						browseViewOptons.editorView = this._editorView;
+						if(this._inputManager._unknownContentTypeAsText()) {
+							browseViewOptons.editorView = this._editorView;
+						} else {
+							var objectURLLink = URL.createObjectURL(new Blob([contents],{type: ""}));
+							var downloadLink = document.createElement("a"); //$NON-NLS-0$
+							downloadLink.href = objectURLLink;
+							downloadLink.appendChild(document.createTextNode("Download " + metadata.Name));
+							downloadLink.download = metadata.Name;
+							downloadLink.classList.add("downloadLinkName"); //$NON-NLS-0$
+							browseViewOptons.binaryView = {domElement: downloadLink};
+						}
 					} else if(cType.id === "text/x-markdown") {
 						browseViewOptons.isMarkdownView = true;
 					} else if(!mNavigatorRenderer.isImage(cType)) {
@@ -495,7 +507,7 @@ define([
 						var image = document.createElement("img"); //$NON-NLS-0$
 						image.src = objectURL;
 						image.classList.add("readonlyImage"); //$NON-NLS-0$
-						browseViewOptons.imageView = {image: image};
+						browseViewOptons.binaryView = {domElement: image};
 					}
 				}
 				view = new mBrowseView.BrowseView(browseViewOptons);

@@ -493,10 +493,13 @@ define([
 		_getSaveDiffsEnabled: function() {
 			return this._saveDiffsEnabled && this._acceptPatch !== null && this._acceptPatch.indexOf("application/json-patch") !== -1; //$NON-NLS-0$
 		},
+		_unknownContentTypeAsText: function() {// Return true if we think unknown content type is text type
+			return true;
+		},
 		_isText: function(metadata) {
 			var contentType = this.contentTypeRegistry.getFileContentType(metadata);
 			// Allow unkownn content types to be loaded as text files
-			if (!contentType) { return true; }
+			if (!contentType) { return this._unknownContentTypeAsText(); }
 			var textPlain = this.contentTypeRegistry.getContentType("text/plain"); //$NON-NLS-0$
 			return this.contentTypeRegistry.isExtensionOf(contentType, textPlain);
 		},

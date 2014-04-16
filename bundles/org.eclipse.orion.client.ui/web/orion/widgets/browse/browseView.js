@@ -186,7 +186,7 @@ define([
 		this.readonly = true;
 		this.editorView = options.editorView;
 		this._maxEditorLines = options.maxEditorLines;
-		this.imageView = options.imageView;
+		this.binaryView = options.binaryView;
 		this.messageView = options.messageView;
 		this.breadCrumbInHeader = options.breadCrumbInHeader;
 		this.isMarkdownView = options.isMarkdownView;
@@ -337,9 +337,9 @@ define([
 							div = document.createElement("div"); //$NON-NLS-0$
 							this.markdownView.displayContents(div, this._metadata);
 							this.sectionContents.appendChild(div);
-						} else if(this.imageView) {
-							if(this.imageView.image) {
-								this.updateImage(this.imageView.image);
+						} else if(this.binaryView) {
+							if(this.binaryView.domElement) {
+								this.updateBinaryView(this.binaryView.domElement);
 							}						
 						} else {
 							this.folderNavExplorer = new FolderNavExplorer({
@@ -370,17 +370,17 @@ define([
 			var sectionsOrder = ["folderNav", "readme"];
 			renderSections.apply(this, [sectionsOrder]);
 		},
-		updateImage: function(image) {
-			var imageTable = document.createElement("table");
-			imageTable.classList.add("imageViewTable");
+		updateBinaryView: function(domElement) {
+			var binaryTable = document.createElement("table");
+			binaryTable.classList.add("binaryViewTable");
 			var tr = document.createElement("tr");
 			var td = document.createElement("td"); 
-			var imageContent = document.createElement("div");
-			imageContent.appendChild(image);
-			td.appendChild(imageContent);
+			var binaryContent = document.createElement("div");
+			binaryContent.appendChild(domElement);
+			td.appendChild(binaryContent);
 			tr.appendChild(td);
-			imageTable.appendChild(tr);
-			this.sectionContents.appendChild(imageTable);
+			binaryTable.appendChild(tr);
+			this.sectionContents.appendChild(binaryTable);
 		},
 		updateMessageContents: function(message, messageClasses, tdClass, doNotEmpty) {
 			var messageTable = document.createElement("table");
@@ -408,7 +408,7 @@ define([
 			if(this._metadata && this._metadata.Projects){ //this is a workspace root
 				this.displayWorkspaceView();
 			}
-			if(this.editorView || this.imageView || this.isMarkdownView || this.messageView) {
+			if(this.editorView || this.binaryView || this.isMarkdownView || this.messageView) {
 				this.displayBrowseView(this._metadata);
 			} else if(this._metadata.Children){
 				this.displayBrowseView(this._metadata);
