@@ -11,7 +11,7 @@
 /*global console define orion confirm*/
 /*jslint browser:true */
 
-define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui/dialog', 'orion/util'], function(messages, lib, dialog, util) {
+define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui/dialog', 'orion/form', 'orion/util'], function(messages, lib, dialog, form, util) {
 
 
 	function ImportDialog(options) {
@@ -89,7 +89,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		this.req = new XMLHttpRequest();
 		this.req.open('post', force ? this._importLocation + (this._importLocation.indexOf("?") > 0 ? "&force=true" : "?force=true") : this._importLocation, true); //$NON-NLS-0$
 		this.req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
-		this.req.setRequestHeader("Slug", encodeURIComponent(file.name)); //$NON-NLS-0$
+		this.req.setRequestHeader("Slug", form.encodeSlug(file.name)); //$NON-NLS-0$
 		if (!unzip) {
 			this.req.setRequestHeader("X-Xfer-Options", "raw"); //$NON-NLS-1$ //$NON-NLS-0$
 		}

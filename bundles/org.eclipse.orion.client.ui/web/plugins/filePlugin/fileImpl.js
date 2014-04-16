@@ -9,11 +9,12 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window define URL XMLHttpRequest BlobBuilder*/
-/*jslint forin:true devel:true browser:true regexp:false*/
+/*global URL*/
+/*jslint forin:true devel:true amd:true browser:true regexp:false*/
 
 
-define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], function(Deferred, xhr, _, operation) {
+define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "orion/form"], function(Deferred, xhr, _, operation, form) {
+
 	/**
 	 * An implementation of the file service that understands the Orion 
 	 * server file API. This implementation is suitable for invocation by a remote plugin.
@@ -48,13 +49,6 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 
 	function _xhr(method, url, options) {
 		return xhr(method, cleanseUrl(url), options);
-	}
-
-	/**
-	 * http://tools.ietf.org/html/rfc5023#section-9.7.1
-	 */
-	function encodeSlug(s) {
-		return s.replace(/([^\u0020-\u007e]|%)+/g, encodeURIComponent);
 	}
 
 	// Wrap orion/xhr to handle long-running operations.
@@ -176,7 +170,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 			return _xhr("POST", this.workspaceBase, {
 				headers: {
 					"Orion-Version": "1",
-					"Slug": encodeSlug(name)
+					"Slug": form.encodeSlug(name)
 				},
 				timeout: 15000
 			}).then(function(result) {
@@ -295,7 +289,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 				headers: {
 					"Orion-Version": "1",
 					"X-Create-Options" : "no-overwrite",
-					"Slug": encodeSlug(folderName),
+					"Slug": form.encodeSlug(folderName),
 					"Content-Type": "application/json;charset=UTF-8"
 				},
 				data: JSON.stringify({
@@ -325,7 +319,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 				headers: {
 					"Orion-Version": "1",
 					"X-Create-Options" : "no-overwrite",
-					"Slug": encodeSlug(fileName),
+					"Slug": form.encodeSlug(fileName),
 					"Content-Type": "application/json;charset=UTF-8"
 				},
 				data: JSON.stringify({
@@ -402,7 +396,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 			return _xhr("POST", targetLocation, {
 				headers: {
 					"Orion-Version": "1",
-					"Slug": encodeSlug(name),
+					"Slug": form.encodeSlug(name),
 					"X-Create-Options": "no-overwrite," + (isMove ? "move" : "copy"),
 					"Content-Type": "application/json;charset=UTF-8"
 				},
