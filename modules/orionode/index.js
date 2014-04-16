@@ -57,11 +57,7 @@ function startServer(options) {
 				root: '/node'
 			}));
 
-		// Socket server
-    var io = socketio.listen(app, { 'log level': 1 });
-
-		appSocket.install({io: io, appContext: appContext});
-		app.on('error', handleError);
+		app.appContext = appContext;
 		return app;
 	} catch (e) {
 		handleError(e);

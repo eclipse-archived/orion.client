@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="/orion/plugin.js"></script>
+    <meta charset="UTF-8" />
+    <title>Console Plugin</title>
+    <script src="../../requirejs/require.js"></script>
+    <script>
+      /*global require*/
+      require({
+        baseUrl: '../',
+        paths: {
+          text: 'requirejs/text',
+          i18n: 'requirejs/i18n',
+          domReady: 'requirejs/domReady'
+        }
+      });
+
+		  require(['consolePlugin.js']);
+    </script>
+  </head>
+  <body>
+    <h1>Shell Plugin for Orion using tty.js</h1>
+  </body>
+</html>

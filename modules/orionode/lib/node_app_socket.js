@@ -105,47 +105,51 @@ exports.install = function(options) {
 		});
 	});
   io.of('/tty').on('connection', function(sock) {
+    sock.on('start', function(cwd) {
+      var realCWD = appContext.getPath(cwd);
+      var buff = [];
+      // Open Terminal Connection
+      var terminal = pty.fork(process.env.SHELL || 'sh', [], {
+        name: require('fs').existsSync('/usr/share/terminfo/x/xterm-256color')
+        ? 'xterm-256color'
+        : 'xterm',
+          cols: 80,
+          rows: 24,
+          cwd: realCWD
+      });
 
-    var buff = [];
-    // Open Terminal Connection
-    var terminal = pty.fork(process.env.SHELL || 'sh', [], {
-      name: require('fs').existsSync('/usr/share/terminfo/x/xterm-256color')
-      ? 'xterm-256color'
-      : 'xterm',
-        cols: 80,
-        rows: 24,
-        cwd: process.env.HOME
+      terminal.on('data', function(data) {
+        return !sock
+        ? buff.push(data)
+        : sock.emit('data', data);
+      });
+
+      console.log('Created new %s (fd: %d, pid: %d)',
+        process.env.SHELL || 'sh',
+        terminal.fd, 
+        terminal.pid);
+
+      // Set up communication paths
+      sock.on('data', function(data) {
+        terminal.write(data);
+      });
+
+      // Set up resize path
+      sock.on('resize', function(cols, rows) {
+        terminal.resize(cols, rows);
+      });
+
+      sock.on('disconnect', function() {
+        terminal.destroy()
+        termsocket = null;
+      });
+
+      while (buff.length) {
+        sock.emit('data', buff.shift());
+      }
+
+      sock.emit('ready');
     });
-
-    terminal.on('data', function(data) {
-      return !sock
-      ? buff.push(data)
-      : sock.emit('data', data);
-    });
-
-    console.log(''
-      + 'Created shell h pty master/slave'
-      + ' pair (master: %d, pid: %d)',
-      terminal.fd, terminal.pid);
-
-    // Set up communication paths
-    sock.on('data', function(data) {
-      terminal.write(data);
-    });
-
-    // Set up resize path
-    sock.on('resize', function(cols, rows) {
-      terminal.resize(cols, rows);
-    });
-
-    sock.on('disconnect', function() {
-      terminal.destroy()
-      termsocket = null;
-    });
-
-    while (buff.length) {
-      sock.emit('data', buff.shift());
-    }
   });
 };
 

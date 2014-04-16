@@ -1,7 +1,19 @@
-require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js"], function(io, Terminal, onReady) {
+require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js", "orion/PageUtil", "orion/fileClient", "orion/bootstrap"], 
+    function(io, Terminal, onReady, PageUtil, FileClient, mBootstrap) {
   // default settings:
   var bgColor = '#000000';
   var txColor = '#FFFFFF';
+  var serviceRegistry, fileClient;
+
+  mBootstrap.startup().then(function(core) {
+		serviceRegistry = core.serviceRegistry;
+		fileClient = new FileClient.FileClient(serviceRegistry);
+    fileClient.loadWorkspace(getCWD()).then(function(args) {
+      debugger;
+      console.log(args);
+      console.log(fileClient.fileServiceRootURL(args.Location));
+    });
+	});
 
   onReady(function() {
     var socket;
@@ -33,6 +45,10 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js"]
 
     socket = io.connect('/tty');
     socket.on('connect', function() {
+      socket.emit('start', getCWD());
+    });
+
+    socket.on('ready', function() {
       var term = new Terminal({
         cols: 80,
           rows: 24,
@@ -60,8 +76,6 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js"]
         clearTimeout(timeout);
         timeout = setTimeout(fitToDiv, 500, term);
       }
-
-      term.write('\x1b[31mWelcome to your terminal emulator.\x1b[m\r\n');
       socket.on('data', function(data) {
         term.write(data);
       });
@@ -129,4 +143,10 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js"]
     }
     t[0].style.backgroundColor = bgColor;
   }
+
+	function getCWD() {
+		var result = PageUtil.matchResourceParameters(window.location.href).resource;
+		return result.length > 0 ? result : null;
+	}
+
 });

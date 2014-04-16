@@ -334,6 +334,10 @@ var AppContext = function(options) {
 		}
 		return null;
 	};
+
+  this.getPath = function(wwwPath) {
+    return _resolveWWWPath(fileRoot, workspaceDir, wwwPath);
+  };
 };
 
 exports.AppContext = AppContext;
