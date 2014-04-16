@@ -19,12 +19,33 @@ define([
 	'javascript/contentAssist/typeInference', 
 	'javascript/contentAssist/typeUtils', 
 	'javascript/contentAssist/proposalUtils', 
+	'orion/editor/templates', //$NON-NLS-0$
+	'orion/editor/stylers/application_javascript/syntax', //$NON-NLS-0$
+	'javascript/contentAssist/templates',
 	'orion/Deferred',
 	'orion/objects',
 	'estraverse',
-	'javascript//contentAssist/indexer',
+	'javascript/contentAssist/indexer',
 	'esprima' // this must stay at the end since it does not load a module
-], function(typeEnv, typeInf, typeUtils, proposalUtils, Deferred, Objects, Estraverse, Indexer) {
+], function(typeEnv, typeInf, typeUtils, proposalUtils, mTemplates, JSSyntax, Templates, Deferred, Objects, Estraverse, Indexer) {
+
+	/**
+	 * @description Creates a new delegate to create keyword and template proposals
+	 */
+	function TemplateProvider() {
+ 	}
+ 	
+	TemplateProvider.prototype = new mTemplates.TemplateContentAssist(JSSyntax.keywords, Templates.templates);
+	Objects.mixin(TemplateProvider.prototype, {
+		uninterestingChars: ":!@#$^&*.?<>", //$NON-NLS-0$
+		/**
+		 * @description Override from TemplateContentAssist
+		 */
+		isValid: function(prefix, buffer, offset, context) {
+			var char = buffer.charAt(offset-prefix.length-1);
+			return !char || this.uninterestingChars.indexOf(char) === -1;
+		}
+	});
 
 	/**
 	 * @description Creates a new JSContentAssist object
@@ -38,6 +59,7 @@ define([
 		this.astManager = astManager;
 		this.indexer = new Indexer();
 		this.lintOptions = lintOptions;
+		this.provider = new TemplateProvider();
 	}
 
 	/**
@@ -128,7 +150,9 @@ define([
 					var target = typeInf.inferTypes(ast, environment, self.lintOptions);
 					var proposalsObj = { };
 					self._createInferredProposals(target, environment, completionKind.kind, context.prefix, offset - context.prefix.length, proposalsObj);
-					return self._filterAndSortProposals(proposalsObj);
+					return [].concat(self._filterAndSortProposals(proposalsObj), 
+									 self._createTemplateProposals(context, completionKind, buffer),
+									 self._createKeywordProposals(context, completionKind, buffer));
 				});
 			} else {
 				// invalid completion location
@@ -147,6 +171,44 @@ define([
 			var d = new Deferred();
 			d.resolve([]);
 			return d.promise;
+		},
+		
+		/**
+		 * @description Create the keyword proposals
+		 * @function
+		 * @private
+		 * @param {Object} context The completion context
+		 * @param {Object} completionKind The computed completion kind to make
+		 * @param {String} buffer The compilation unit buffer
+		 * @returns {Array} The array of keyword proposals
+		 * @since 6.0
+		 */
+		_createKeywordProposals: function(context, completionKind, buffer) {
+			if((typeof context.keyword === 'undefined' || context.keyword) && 
+					completionKind.kind !== 'member' &&
+					this.provider.isValid(context.prefix, buffer, context.offset, context)) {
+				return this.provider.getKeywordProposals(context.prefix, context.offset, context);
+			}
+			return [];
+		},
+		
+		/**
+		 * @description Create the template proposals
+		 * @function
+		 * @private
+		 * @param {Object} context The completion context
+		 * @param {Object} completionKind The computed completion kind to make
+		 * @param {String} buffer The compilation unit buffer
+		 * @returns {Array} The array of template proposals
+		 * @since 6.0
+		 */
+		_createTemplateProposals: function(context, completionKind, buffer) {
+			if((typeof context.template === 'undefined' || context.template) && 
+					completionKind.kind !== 'member' &&
+					this.provider.isValid(context.prefix, buffer, context.offset, context)) {
+				return this.provider.getTemplateProposals(context.prefix, context.offset, context);
+			}
+			return [];
 		},
 		
 		/**

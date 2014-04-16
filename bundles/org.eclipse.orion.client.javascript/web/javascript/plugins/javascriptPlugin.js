@@ -24,13 +24,12 @@ define([
 	'javascript/occurrences',
 	'javascript/outliner',
 	'orion/plugin',
-	'orion/editor/jsTemplateContentAssist',
 	'orion/editor/stylers/application_javascript/syntax',
 	'orion/editor/stylers/application_json/syntax',
 	'orion/editor/stylers/application_schema_json/syntax',
 	'orion/editor/stylers/application_x-ejs/syntax'
 ], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, EslintValidator, Occurrences, Outliner,
-			PluginProvider, jsTemplateContentAssist, mJS, mJSON, mJSONSchema, mEJS) {
+			PluginProvider, mJS, mJSON, mJSONSchema, mEJS) {
 
 	/**
 	 * Plug-in headers
@@ -101,16 +100,6 @@ define([
 			contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
 	});
 	
-	/**
-	 * Register the content assist support
-	 */
-	provider.registerService("orion.edit.contentassist",  //$NON-NLS-0$
-		new jsTemplateContentAssist.JSTemplateContentAssistProvider(),
-		{
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			name: 'contentAssist',  //$NON-NLS-0$
-			contentType: ["application/javascript"]  //$NON-NLS-0$
-		});
 	provider.registerService("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager),  //$NON-NLS-0$
 		{
 			contentType: ["application/javascript"],  //$NON-NLS-0$

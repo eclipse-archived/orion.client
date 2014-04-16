@@ -34,7 +34,6 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	"orion/editor/contentAssist", //$NON-NLS-0$
 	"webtools/cssContentAssist", //$NON-NLS-0$
 	"webtools/htmlContentAssist", //$NON-NLS-0$
-	"orion/editor/jsTemplateContentAssist", //$NON-NLS-0$
 	
 	"orion/editor/AsyncStyler", //$NON-NLS-0$
 	"orion/editor/mirror", //$NON-NLS-0$
@@ -47,7 +46,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 
 ], function(require, shim, mTextView, mTextModel, mTextTheme, mProjModel, mEventTarget, mKeyBinding, mRulers, mAnnotations,
 			mTooltip, mUndoStack, mTextDND, mEditor, mEditorFeatures, mContentAssist, mCSSContentAssist, mHtmlContentAssist,
-			mJSContentAssist, mAsyncStyler, mMirror, mTextMateStyler, mHtmlGrammar, mTextStyler, mJS, mCSS, mHTML) {
+			mAsyncStyler, mMirror, mTextMateStyler, mHtmlGrammar, mTextStyler, mJS, mCSS, mHTML) {
 
 	/**	@private */
 	function getDisplay(window, document, element) {
@@ -337,12 +336,9 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		if (contentAssist) {
 			var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
 			var htmlContentAssistProvider = new mHtmlContentAssist.HTMLContentAssistProvider();
-			var jsTemplateContentAssistProvider = new mJSContentAssist.JSTemplateContentAssistProvider();
 			contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
 				if (/css$/.test(options.lang)) {
 					contentAssist.setProviders([cssContentAssistProvider]);
-				} else if (/js$/.test(options.lang)) {
-					contentAssist.setProviders([jsTemplateContentAssistProvider]);
 				} else if (/html$/.test(options.lang)) {
 					contentAssist.setProviders([htmlContentAssistProvider]);
 				}

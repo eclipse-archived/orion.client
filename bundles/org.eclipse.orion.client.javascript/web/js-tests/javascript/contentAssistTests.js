@@ -17,10 +17,9 @@ define([
 	'chai/chai',
 	'orion/objects',
 	'orion/Deferred',
-	'orion/editor/jsTemplateContentAssist', //TODO remove this once we merge the code
 	'esprima', //must stay at the end, does not export a module  
 	'doctrine/doctrine' //must stay at the end, does not export a module 
-], function(ContentAssist, chai, objects, Deferred, JSTemplateProposals) {
+], function(ContentAssist, chai, objects, Deferred) {
 	var assert = chai.assert;
 	/**
 	 * @description Parse the snippet
@@ -74,7 +73,7 @@ define([
 			}
 		};
 		
-		var params = {offset: offset, prefix : prefix, includeNonInferred: false };
+		var params = {offset: offset, prefix : prefix, keyword: false, template: false };
 		objects.mixin(editorContext, editorContextMixin);
 		objects.mixin(params, paramsMixin);
 		return {
@@ -105,16 +104,6 @@ define([
 		return contentAssist.computeContentAssist(editorContext, params);
 	}
 
-	/**
-	 * @description Computes the content assist proposals for templates and keywords
-	 * @returns {Object} Array of proposal objects
-	 * TODO remove this once we merge the proposal computers
-	 * @since 5.0
-	 */
-	function computeTemplateContentAssist(buffer, offset, context) {
-		var templateAssist = new JSTemplateProposals.JSTemplateContentAssistProvider();
-		return new Deferred().resolve(templateAssist.computeProposals(buffer, offset, context));
-	}
 	/**
 	 * @description Conpares the given proposal to the given text and description
 	 * @param {Object} proposal The proposal returned from the content assist
@@ -4712,9 +4701,16 @@ define([
 	 * @since 5.0
 	 */
 	tests["test completions for Function1"] = function() {
-		var results = computeTemplateContentAssist("var foo; foo !== null ? fun : function(f2) {};", 27, { prefix: "fun"});
+		//computeContentAssist(buffer, prefix, offset, lintOptions, editorContextMixin, paramsMixin) {
+		var results = computeContentAssist("var foo; foo !== null ? fun : function(f2) {};", 
+										   "fun",
+										   27, 
+										   {},
+										   {},
+										   {keyword:true, template:true});
 		return testProposals(results, [
 				//proposal, description
+				["Function()", "Function() : Function"],
 				["", "Templates"], 
 				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
 				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
@@ -4728,9 +4724,15 @@ define([
 	 * @since 5.0
 	 */
 	tests["test completions for Function2"] = function() {
-		var results = computeTemplateContentAssist("var foo; foo !== null ? function(f2) {} : fun;", 45, { prefix: "fun"});
+		var results = computeContentAssist("var foo; foo !== null ? function(f2) {} : fun;",
+											"fun",
+											45, 
+											{},
+											{},
+											{keyword:true, template:true});
 		return testProposals(results, [
 				//proposal, description
+				["Function()", "Function() : Function"],
 				["", "Templates"], 
 				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
 				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
@@ -4744,9 +4746,15 @@ define([
 	 * @since 5.0
 	 */
 	tests["test completions for Function3"] = function() {
-		var results = computeTemplateContentAssist("var foo = {f: fun};", 17, { prefix: "fun"});
+		var results = computeContentAssist("var foo = {f: fun};", 
+											'fun',
+											17, 
+											{},
+											{},
+											{keyword:true, template:true});
 		return testProposals(results, [
 				//proposal, description
+				["Function()", "Function() : Function"],
 				["", "Templates"], 
 				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
 				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
@@ -4760,9 +4768,15 @@ define([
 	 * @since 5.0
 	 */
 	tests["test completions for Function4"] = function() {
-		var results = computeTemplateContentAssist("var foo = {f: fun};", 17, { prefix: "fun"});
+		var results = computeContentAssist("var foo = {f: fun};", 
+											'fun',
+											17,
+											{},
+											{},
+											{keyword:true, template:true});
 		return testProposals(results, [
 				//proposal, description
+				["Function()", "Function() : Function"],
 				["", "Templates"], 
 				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
 				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
@@ -4776,9 +4790,15 @@ define([
 	 * @since 5.0
 	 */
 	tests["test completions for Function5"] = function() {
-		var results = computeTemplateContentAssist("fun", 3, { prefix: "fun"});
+		var results = computeContentAssist("fun", 
+											'fun',
+											3,
+											{},
+											{},
+											{keyword:true, template:true});
 		return testProposals(results, [
 				//proposal, description
+				["Function()", "Function() : Function"],
 				["", "Templates"], 
 				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
 				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
@@ -4792,8 +4812,16 @@ define([
 	 * @since 5.0
 	 */
 	tests.testKeywordCompletionInVariableMember = function() {
-		var result = computeTemplateContentAssist("var x; x.to", 11, {prefix:"to"});
-		return testProposals(result, []);
+		var result = computeContentAssist("var x; x.to", 
+											'to',
+											11,
+											{},
+											{},
+											{keyword:true, template:true});
+		return testProposals(result, [
+				["toLocaleString()", "toLocaleString() : String"],
+				["toString()", "toString() : String"]
+		]);
 	};
 
 	/**
@@ -4801,7 +4829,12 @@ define([
 	 * @since 5.0
 	 */
 	tests.testTemplateInFunctionBody= function() {
-		var result = computeTemplateContentAssist("function x(a) {\n ", 18, {prefix: " "});
+		var result = computeContentAssist("function x(a) {\n ", 
+											' ',
+											18,
+											{},
+											{},
+											{keyword:true, template:true});
 		assertNoProposal("toString", result);
 		assertProposal("for", result);
 		assertProposal("while", result);
@@ -4819,7 +4852,12 @@ define([
 	 * Test completion of control structure templates in the body of a function.
 	 */
 	tests.testKeywordsInFunctionBodyWithPrefix= function() {
-		var result = computeTemplateContentAssist("function x(a) {\n t", 19, {prefix: "t"});
+		var result = computeContentAssist("function x(a) {\n t", 
+											't',
+											19,
+											{},
+											{},
+											{keyword:true, template:true});
 		assertNoProposal("toString".substr(1), result);
 		assertProposal("this".substr(1), result);
 		assertProposal("throw".substr(1), result);
@@ -4833,7 +4871,12 @@ define([
 	 * Test completion of control structure templates in the body of a function.
 	 */
 	tests.testTemplateInFunctionBodyWithPrefix= function() {
-		var result = computeTemplateContentAssist("function x(a) {\n f", 19, {prefix: "f"});
+		var result = computeContentAssist("function x(a) {\n f",
+											'f',
+											19,
+											{},
+											{},
+											{keyword:true, template:true});
 		assertNoProposal("toString", result);
 		assertProposal("for".substr(1), result);
 		assertProposalMatching(["for".substr(1), "in"], [], result);
@@ -4849,7 +4892,12 @@ define([
 	 * Test completion after non-whitespace chars and there should be no template content assist
 	 */
 	tests.testTemplateAfterNonWhitespace1= function() {
-		var result = computeTemplateContentAssist("x.", 2, {prefix: "."});
+		var result = computeContentAssist("x.", 
+											'.',
+											2,
+											{},
+											{},
+											{keyword:true, template:true});
 		assertNoProposal("toString", result);
 		assertNoProposal("for".substr(1), result);
 		assertNoProposal("while", result);
@@ -4863,7 +4911,12 @@ define([
 	 * Test completion after non-whitespace chars and there should be no template content assist
 	 */
 	tests.testTemplateAfterNonWhitespace2= function() {
-		var result = computeTemplateContentAssist("x.  ", 2, {prefix: " "});
+		var result = computeContentAssist("x.  ",
+											' ',
+											2,
+											{},
+											{},
+											{keyword:true, template:true});
 		assertNoProposal("toString", result);
 		assertProposal("for".substr(1), result);
 		assertProposal("while", result);
@@ -4877,7 +4930,12 @@ define([
 	 * Test completion after non-whitespace chars and there should be no template content assist
 	 */
 	tests.testTemplateAfterNonWhitespace3= function() {
-		var result = computeTemplateContentAssist("$  ", 1, {prefix: " "});
+		var result = computeContentAssist("$  ",
+											' ',
+											1,
+											{},
+											{},
+											{keyword:true, template:true});
 		assertNoProposal("toString", result);
 		assertProposal("for".substr(1), result);
 		assertProposal("while", result);
@@ -4892,7 +4950,12 @@ define([
 	 * there is a newline
 	 */
 	tests.testTemplateAfterNonWhitespace4= function() {
-		var result = computeTemplateContentAssist("x.\n  ", 5, {prefix: " "});
+		var result = computeContentAssist("x.\n  ",
+											' ',
+											5,
+											{},
+											{},
+											{keyword:true, template:true});
 		assertNoProposal("toString", result);
 		assertProposal("for", result);
 		assertProposal("while", result);
