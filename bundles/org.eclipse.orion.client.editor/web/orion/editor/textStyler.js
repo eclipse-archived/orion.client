@@ -400,24 +400,26 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var computeTasks = function(block, baseModel, annotations, start, end) {
 		start = start || block.start;
 		end = end || block.end;
-		var annotationModel = block.getAnnotationModel();
-		if (!annotationModel) { return; }
+		if (block.start <= end && start <= block.end) {
+			var annotationModel = block.getAnnotationModel();
+			if (!annotationModel) { return; }
 
-		var annotationType = mAnnotations.AnnotationType.ANNOTATION_TASK;
-		var subPatterns = block.getLinePatterns();
-		if (subPatterns.length && block.pattern && block.pattern.pattern.name && block.pattern.pattern.name.indexOf("comment") === 0) {
-			var substyles = [];
-			parse(baseModel.getText(block.contentStart, block.end), block.contentStart, block, substyles, true);
-			for (var i = 0; i < substyles.length; i++) {
-				if (substyles[i].style === "meta.annotation.task.todo" && start <= substyles[i].start && substyles[i].end <= end) {
-					annotations.push(mAnnotations.AnnotationType.createAnnotation(annotationType, substyles[i].start, substyles[i].end, baseModel.getText(substyles[i].start, substyles[i].end)));
+			var annotationType = mAnnotations.AnnotationType.ANNOTATION_TASK;
+			var subPatterns = block.getLinePatterns();
+			if (subPatterns.length && block.pattern && block.pattern.pattern.name && block.pattern.pattern.name.indexOf("comment") === 0) {
+				var substyles = [];
+				parse(baseModel.getText(block.contentStart, block.end), block.contentStart, block, substyles, true);
+				for (var i = 0; i < substyles.length; i++) {
+					if (substyles[i].style === "meta.annotation.task.todo" && start <= substyles[i].start && substyles[i].end <= end) {
+						annotations.push(mAnnotations.AnnotationType.createAnnotation(annotationType, substyles[i].start, substyles[i].end, baseModel.getText(substyles[i].start, substyles[i].end)));
+					}
 				}
 			}
+	
+			block.getBlocks().forEach(function(current) {
+				computeTasks(current, baseModel, annotations, start, end);
+			}.bind(this));
 		}
-
-		block.getBlocks().forEach(function(current) {
-			computeTasks(current, baseModel, annotations, start, end);
-		}.bind(this));
 	};
 
 	function PatternManager(grammars, rootId) {
@@ -1449,7 +1451,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				}
 				if (doFolding) {
 					parent.getBlocks().forEach(function(block) {
-						this._updateFolding(block, baseModel, viewModel, allFolding, add);
+						this._updateFolding(block, baseModel, viewModel, allFolding, add, ts, te);
 					}.bind(this));
 				}
 				if (this.detectTasks) {
@@ -1489,17 +1491,21 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				result = regex.exec(text);
 			}
 		},
-		_updateFolding: function(block, baseModel, viewModel, allFolding, _add) {
-			var index = binarySearch(allFolding, block.start, true);
-			if (!(index < allFolding.length && allFolding[index].start === block.start && allFolding[index].end === block.end)) {
-				var annotation = this._createFoldingAnnotation(viewModel, baseModel, block.start, block.end);
-				if (annotation) {
-					_add.push(annotation);
+		_updateFolding: function(block, baseModel, viewModel, allFolding, _add, start, end) {
+			start = start || block.start;
+			end = end || block.end;
+			if (block.start <= end && start <= block.end) {
+				var index = binarySearch(allFolding, block.start, true);
+				if (!(index < allFolding.length && allFolding[index].start === block.start && allFolding[index].end === block.end)) {
+					var annotation = this._createFoldingAnnotation(viewModel, baseModel, block.start, block.end);
+					if (annotation) {
+						_add.push(annotation);
+					}
 				}
+				block.getBlocks().forEach(function(current) {
+					this._updateFolding(current, baseModel, viewModel, allFolding, _add, start, end);
+				}.bind(this));
 			}
-			block.getBlocks().forEach(function(current) {
-				this._updateFolding(current, baseModel, viewModel, allFolding, _add);
-			}.bind(this));
 		}
 	};
 
