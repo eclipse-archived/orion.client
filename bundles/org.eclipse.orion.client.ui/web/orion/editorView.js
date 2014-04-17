@@ -392,7 +392,7 @@ define([
 					// preload content assist plugins to reduce the delay 
 					// that happens when a user first triggers content assist
 					setContentAssistProviders(editor, contentAssist);
-					contentAssist.computeProposals();
+					contentAssist.initialize();
 					return result;
 				}
 			};

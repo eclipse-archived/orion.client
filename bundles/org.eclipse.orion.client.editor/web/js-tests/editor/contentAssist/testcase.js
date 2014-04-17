@@ -181,7 +181,7 @@ define([
 						if (current.unselectable) {
 							previous++;
 						}
-						return previous
+						return previous;
 					}, 0);
 					assert.strictEqual(3, event.data.proposals.length - numUnselectable); // applicable proposals: "b", "ba", "ab"
 					init.resolve();
@@ -287,7 +287,7 @@ define([
 						if (current.unselectable) {
 							previous++;
 						}
-						return previous
+						return previous;
 					}, 0);
 					assert.strictEqual(1, event.data.proposals.length - numUnselectable, 'Got right # of proposals');
 					assert.deepEqual(event.data.proposals[0], proposal);
@@ -346,6 +346,24 @@ define([
 			return {
 				computeContentAssist: checkParamsCallback
 			};
+		});
+	};
+
+	// Tests that contentAssist.initialize() calls each provider's initialize method
+	tests.test_initialize = function() {
+		withData(function(view, contentAssist) {
+			var d1 = new Deferred(), d2 = new Deferred();
+			var provider1 = {
+				initialize: d1.resolve.bind(d1),
+				computeContentAssist: function() {}
+			},
+			provider2 = {
+				initialize: d2.resolve.bind(d2),
+				computeContentAssist: function() {}
+			};
+			contentAssist.setProviders([provider1, provider2]);
+			contentAssist.initialize();
+			return Deferred.all([d1, d2]);
 		});
 	};
 

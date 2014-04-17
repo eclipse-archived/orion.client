@@ -41,7 +41,7 @@ define([
 		/**
 		 * @description Override from TemplateContentAssist
 		 */
-		isValid: function(prefix, buffer, offset, context) {
+		isValid: function(prefix, buffer, offset/*, context*/) {
 			var char = buffer.charAt(offset-prefix.length-1);
 			return !char || this.uninterestingChars.indexOf(char) === -1;
 		},
@@ -159,6 +159,12 @@ define([
 		amdRegExp: /amd\s*:\s*true/,
 
 		/**
+		 * Called by the framework to initialize this provider before any <tt>computeContentAssist</tt> calls.
+		 */
+		initialize: function() {
+		},
+
+		/**
 		 * @description Implements the Orion content assist API v4.0
 		 */
 		computeContentAssist: function(editorContext, params) {
@@ -171,6 +177,7 @@ define([
 				var ast = results[0], buffer = results[1];
 				return self._computeProposalsFromAST(ast, buffer, params);
 			});
+
 		},
 		/**
 		 * @description Reshapes typedefs into the expected format, sets up indexData

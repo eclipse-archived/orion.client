@@ -289,6 +289,18 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			}
 		},
 		/**
+		 * Initializes the providers. A provider must define an <tt>initialize()</tt> method to be initialized.
+		 * @since 6.0
+		 */
+		initialize: function() {
+			this._providerInfoArray.forEach(function(info) {
+				var provider = info.provider;
+				if (typeof provider.initialize === "function") {//$NON-NLS-0$
+					provider.initialize();
+				}
+			});
+		},
+		/**
 		 * Retrieves the proposals at the given offset.
 		 * @private
 		 * @param {Number} offset The caret offset.
