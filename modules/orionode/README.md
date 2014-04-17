@@ -17,6 +17,11 @@ For full instructions, see the [Getting Started guide](http://wiki.eclipse.org/O
 1. Run ```npm start orion``` or ```node [node_modules]/orion/server.js```.
 2. Go to [localhost:8081](http://localhost:8081) to use Orion. (You can change the port by passing the ```-p``` option).
 
+### Global installation
+If you installed Orion as a global package with ```npm install -g orion```, you can run the command ```orion``` from any directory (rather than ```npm start orion``` as outlined above.)
+Orion will then start using your current directory (or a directory you specify on the command  line) as the location.
+See the [Getting Started guide](https://wiki.eclipse.org/Orion/Node/Getting_started#Using_a_global_installation_of_Orionode) for more details.
+
 ### Using Orion within a larger app
 Use ```require('orion')``` to get access to our startServer function, which is suitable for use within a larger [connect](https://github.com/senchalabs/connect/) project:
 
