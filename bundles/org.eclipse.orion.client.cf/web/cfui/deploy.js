@@ -144,6 +144,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						cFService.pushApp(selection, null, decodeURIComponent(deployResourceJSON.ContentLocation + deployResourceJSON.AppPath)).then(
 							function(result){
 								var appName = result.App.name || result.App.entity.name;
+								var host = result.App.host || result.App.entity.host;
 								postMsg({
 									CheckState: true,
 									ToSave: {
@@ -157,7 +158,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 											Name: appName,
 											Timeout: (result.Timeout !== undefined) ? result.Timeout : undefined
 										},
-										Url: (result.Route !== undefined) ? "http://" + result.Route.entity.host + "." + result.Domain : undefined,
+										Url: (result.Route !== undefined) ? "http://" + host + "." + result.Domain : undefined,
 										UrlTitle: (result.Route !== undefined) ? appName : undefined,
 										Type: "Cloud Foundry",
 										ManageUrl: result.ManageUrl,
