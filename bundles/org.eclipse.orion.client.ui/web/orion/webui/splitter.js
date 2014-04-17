@@ -179,9 +179,7 @@ define([
 					localStorage.setItem(this._prefix+"/yPosition", this._splitTop);  //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				var top = this._splitTop;
-				if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$
-					top = this._splitTop - parentRect.top;
-				}
+				top = this._splitTop - parentRect.top;
 				this.$sideNode.style.height = top + "px"; //$NON-NLS-0$
 				this.$sideNode.style.display = "block"; //$NON-NLS-0$
 				this.$node.style.top = top + "px"; //$NON-NLS-0$
@@ -193,9 +191,7 @@ define([
 					localStorage.setItem(this._prefix+"/xPosition", this._splitLeft);  //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				var left = this._splitLeft;
-				if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$
-					left = this._splitLeft - parentRect.left;
-				}
+				left = this._splitLeft - parentRect.left;
 				this.$sideNode.style.width = left + "px"; //$NON-NLS-0$
 				this.$sideNode.style.display = "block"; //$NON-NLS-0$
 				this.$node.style.left = left + "px"; //$NON-NLS-0$
@@ -334,8 +330,7 @@ define([
 						this._splitLeft = parentRect.left + parentRect.width - MIN_SIDE_NODE_WIDTH;
 					}
 					var left = this._splitLeft;
-					//TODO why multiple by 2?
-					left = this._splitLeft - 2 * parentRect.left;
+					left = this._splitLeft - parentRect.left;
 					this.$node.style.left = left + "px"; //$NON-NLS-0$
 				}
 				this._adjustToSplitPosition(true);
