@@ -156,6 +156,10 @@ define([
 				} else {
 					visited = {};
 				}
+				if (typeUtils.isArrayType(proto.typeObj)) {
+					// inferred type of expression is the type of the dereferenced array
+					proto.typeObj = typeUtils.extractArrayParameterType(proto.typeObj);
+				}
 				visited[proto.typeObj.name] = true;
 				return innerLookup(env, name, env.lookupQualifiedType(proto.typeObj.name), includeDefinition, visited);
 			} else {
