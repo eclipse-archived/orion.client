@@ -7,6 +7,7 @@
 
 html, body {
     min-width: 350px;
+    overflow: hidden;
 }
 
 .dialogFrame {
@@ -31,41 +32,85 @@ html, body {
 	width: 100%;
 }
 
-#orgsSection{
-    border: 0 none;
-    box-shadow: none;
-    margin-bottom: 10px;
+select{
+	height: 24px;
+    width: 250px;
 }
 
-#orgsDropdown{
-    float: right;
-    text-align: right;
-    width: calc(100% - 80px);
+.formTable{
+	font-family: Arial,sans-serif;
+	font-size: 9pt;
+	width: 100%;
 }
 
-#orgsLabel{
-    border: 0 none;
-    float: left;
+.selectCell {
     padding-top: 4px;
-    width: 80px;
+    text-align: right;
 }
 
-#spacesTree{
-    margin-bottom: 0;
-    max-height: 100px;
-    overflow-y: auto;
+.messageContainer {
+	display: none;
+	padding-top: 2px;
+	position: absolute;
+	text-align: center;
+	width: 100%;
 }
 
-.progressWatch {
-	top: 3px;
-	position: relative;
+.messageContainer.showing {
+	display: block;	
+}
+
+.messageLabel {
+	background-color: #DBEB8F;
+	border-radius: 5px;
+	color: black;
 	display: inline-block;
+	padding: 4px 5px;
 }
 
-.watchButton {
-	position: relative;
+.manifestInformation {
+	padding: 20px 2px;
 }
 
-.watchBody{
-	position: relative;
+.manifest{
+	text-align: left;
 }
+
+.buttonRow {
+    bottom: 20px;
+    position: absolute;
+    right: 20px;
+}
+
+.buttonRow .orionButton {
+	border: none;
+	background-color: #DFE6EB;
+	color: black;
+	padding: 4px 12px;
+	cursor: pointer;
+}
+
+.buttonRow .orionButton:hover {
+	background-color: #e9eff2;
+	box-shadow: none;
+}
+
+.buttonRow .orionButton.commandButton.disabled {
+	cursor: default;
+	opacity: 0.5;
+	background-color: #DFE6EB;
+}
+
+.buttonRow .orionButton.commandButton.deployButton.disabled {
+	background-color: #00aed1;
+}
+
+.buttonRow .deployButton.orionButton {
+	background-color: #00aed1;
+	color: white;
+}
+
+.buttonRow .deployButton.orionButton:hover {
+	background-color: #00bfe5;
+}
+
