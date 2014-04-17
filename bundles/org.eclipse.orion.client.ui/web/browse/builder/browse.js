@@ -71,14 +71,11 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			}
 		}
 		try {
-			var repoServerDisplayName = "Jazz SCM server";
 			if (url.host === "github.com") {
 				pluginURL = new URL("../../plugins/GitHubFilePlugin.html?repo=" + url.href, _browser_script_source);
-				repoServerDisplayName = "GitHub server";
 			} else if (url.pathname.indexOf("/git/") === 0) {
 				pluginURL = new URL("/gerrit/plugins/gerritfs/static/plugins/GerritFilePlugin.html", url);
 				pluginURL.query.set("project", url.pathname.substring(5));
-				repoServerDisplayName = "Git server";
 			} else if (url.pathname.indexOf("/ccm") === 0) {
 				if (!base) {
 					var ccmPath = url.pathname.match(/^\/ccm[^/]*/);
@@ -117,7 +114,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			storage: {},
 			plugins: plugins
 		});
-		var errorMessage = "Could not connect to the repository " + repo + " from the " + repoServerDisplayName + (base ? " " + base : "") + ".";
+		var errorMessage = "Could not connect to the repository " + repo + ".";
 		pluginRegistry.start().then(function() {
 			var allReferences = serviceRegistry.getServiceReferences("orion.core.file"); //$NON-NLS-0$
 			if(allReferences.length === 0) {//If there is no file service reference, we treat it as plugin activation error.
