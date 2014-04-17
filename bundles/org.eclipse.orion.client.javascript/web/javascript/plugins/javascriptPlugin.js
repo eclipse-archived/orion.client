@@ -74,11 +74,12 @@ define([
 	 * Register AST manager as Model Change listener
 	 */
 	provider.registerService("orion.edit.model", {  //$NON-NLS-0$
-			onModelChanging: astManager.updated.bind(astManager)
+			onModelChanging: astManager.updated.bind(astManager),
+			onDestroy: astManager.updated.bind(astManager)
 		},
 		{
 			contentType: ["application/javascript"],  //$NON-NLS-0$
-			types: ["ModelChanging"]  //$NON-NLS-0$
+			types: ["ModelChanging", 'Destroy']  //$NON-NLS-0$  //$NON-NLS-1$
 	});
 
 	/**
