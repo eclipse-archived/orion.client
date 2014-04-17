@@ -35,7 +35,7 @@ define([
 	function TemplateProvider() {
  	}
  	
-	TemplateProvider.prototype = new mTemplates.TemplateContentAssist(JSSyntax.keywords, Templates.templates);
+	TemplateProvider.prototype = new mTemplates.TemplateContentAssist(JSSyntax.keywords, []);
 	Objects.mixin(TemplateProvider.prototype, {
 		uninterestingChars: ":!@#$^&*.?<>", //$NON-NLS-0$
 		/**
@@ -44,7 +44,94 @@ define([
 		isValid: function(prefix, buffer, offset, context) {
 			var char = buffer.charAt(offset-prefix.length-1);
 			return !char || this.uninterestingChars.indexOf(char) === -1;
-		}
+		},
+		
+		/**
+		 * @desription override
+		 */
+		getKeywordProposals: function(prefix, completionKind) {
+			var proposals = [];
+			switch(completionKind.kind) {
+				case 'top':
+					proposals = this._createKeywordProposals(this._keywords, prefix);
+					break;
+				case 'prop':
+					proposals = this._createKeywordProposals(['false', 'function', 'new', 'null', 'this', 'true', 'typeof', 'undefined'], prefix);
+					break;
+			}
+			if(proposals.length > 0) {
+				proposals.splice(0, 0,{
+					proposal: '',
+					description: 'Keywords', //$NON-NLS-0$
+					style: 'noemphasis_title_keywords', //$NON-NLS-0$
+					unselectable: true
+				});	
+			}
+			return proposals;
+		},
+		
+		/**
+		 * @description Creates proposal entries from the given array of candidate keywords
+		 * @function
+		 * @private
+		 * @param {Array} keywords The array of keywords
+		 * @param {String} prefix The completion prefix
+		 * @returns {Array} The array of proposal objects
+		 * @since 6.0
+		 */
+		_createKeywordProposals: function(keywords, prefix) {
+			var proposals = [];
+			var len = keywords.length;
+			for (var i = 0; i < len; i++) {
+				if (keywords[i].slice(0, prefix.length) === prefix) {
+					proposals.push({
+						proposal: keywords[i].slice(prefix.length), 
+						description: keywords[i], 
+						style: 'noemphasis_keyword'//$NON-NLS-0$
+					});
+				}
+			}
+			return proposals;
+		},
+		
+		/**
+		 * @description override
+		 */
+		getTemplateProposals: function(prefix, offset, context, completionKind) {
+			var proposals = [];
+			var templates = Templates.getTemplatesForKind(completionKind.kind); //this.getTemplates();
+			for (var t = 0; t < templates.length; t++) {
+				var template = templates[t];
+				if (template.match(prefix)) {
+					var proposal = template.getProposal(prefix, offset, context);
+					this.removePrefix(prefix, proposal);
+					proposals.push(proposal);
+				}
+			}
+			
+			if (0 < proposals.length) {
+				//sort the proposals by name
+				proposals.sort(function(p1, p2) {
+					if (p1.name < p2.name) {
+						return -1;
+					}
+					if (p1.name > p2.name) {
+						return 1;
+					}
+					return 0;
+				});
+				// if any templates were added to the list of 
+				// proposals, add a title as the first element
+				proposals.splice(0, 0, {
+					proposal: '',
+					description: 'Templates', //$NON-NLS-0$
+					style: 'noemphasis_title', //$NON-NLS-0$
+					unselectable: true
+				});
+			}
+			
+			return proposals;
+		},
 	});
 
 	/**
@@ -185,9 +272,8 @@ define([
 		 */
 		_createKeywordProposals: function(context, completionKind, buffer) {
 			if((typeof context.keyword === 'undefined' || context.keyword) && 
-					completionKind.kind !== 'member' &&
 					this.provider.isValid(context.prefix, buffer, context.offset, context)) {
-				return this.provider.getKeywordProposals(context.prefix, context.offset, context);
+				return this.provider.getKeywordProposals(context.prefix, completionKind);
 			}
 			return [];
 		},
@@ -204,9 +290,8 @@ define([
 		 */
 		_createTemplateProposals: function(context, completionKind, buffer) {
 			if((typeof context.template === 'undefined' || context.template) && 
-					completionKind.kind !== 'member' &&
 					this.provider.isValid(context.prefix, buffer, context.offset, context)) {
-				return this.provider.getTemplateProposals(context.prefix, context.offset, context);
+				return this.provider.getTemplateProposals(context.prefix, context.offset, context, completionKind);
 			}
 			return [];
 		},
@@ -553,10 +638,10 @@ define([
 					case Estraverse.Syntax.MemberExpression: 
 						if (parent.property && proposalUtils.inRange(offset-1, parent.property.range)) {
 							// on the right hand side of a property, eg: foo.b^
-							return { kind : "member", toDefer : toDefer };
+							return { kind : 'member', toDefer : toDefer };
 						} else if (proposalUtils.inRange(offset-1, parent.range) && proposalUtils.afterDot(offset, parent, contents)) {
 							// on the right hand side of a dot with no text after, eg: foo.^
-							return { kind : "member", toDefer : toDefer };
+							return { kind : 'member', toDefer : toDefer };
 						}
 						break
 					case Estraverse.Syntax.Program:
@@ -573,9 +658,16 @@ define([
 							return true;						
 						}
 						break;
+					case Estraverse.Syntax.Property:
+						if(proposalUtils.inRange(offset-1, parent.value.range)) {
+							return { kind : 'prop', toDefer : toDefer };
+						}
+						return null;
+					case Estraverse.Syntax.SwitchStatement:
+						return {kind: 'swtch', toDefer: toDefer};
 				}
 			}
-			return { kind : "top", toDefer : toDefer };
+			return { kind : 'top', toDefer : toDefer };
 		}
 	});
 	

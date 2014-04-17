@@ -4713,9 +4713,9 @@ define([
 				["Function()", "Function() : Function"],
 				["", "Templates"], 
 				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
-				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
+				//["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
 				["", "Keywords"], 
-				["ction", "function"], 
+				["ction", "function"]
 				]);
 	};
 
@@ -4735,9 +4735,8 @@ define([
 				["Function()", "Function() : Function"],
 				["", "Templates"], 
 				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
-				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
 				["", "Keywords"], 
-				["ction", "function"], 
+				["ction", "function"]
 				]);
 	};
 	
@@ -4754,12 +4753,11 @@ define([
 											{keyword:true, template:true});
 		return testProposals(results, [
 				//proposal, description
-				["Function()", "Function() : Function"],
+				['Function()', 'Function() : Function'],
 				["", "Templates"], 
-				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
-				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
+				['ction(parameter) {\n\t\n}', 'function - member function expression'],
 				["", "Keywords"], 
-				["ction", "function"], 
+				["ction", "function"]
 				]);
 	};
 	
@@ -4776,10 +4774,9 @@ define([
 											{keyword:true, template:true});
 		return testProposals(results, [
 				//proposal, description
-				["Function()", "Function() : Function"],
+				['Function()', 'Function() : Function'],
 				["", "Templates"], 
-				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
-				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
+				['ction(parameter) {\n\t\n}', 'function - member function expression'],
 				["", "Keywords"], 
 				["ction", "function"], 
 				]);
@@ -4801,9 +4798,87 @@ define([
 				["Function()", "Function() : Function"],
 				["", "Templates"], 
 				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
-				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
 				["", "Keywords"], 
-				["ction", "function"], 
+				["ction", "function"]
+				]);
+	};
+
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426284
+	 * @since 6.0
+	 */
+	tests["test completions for Function6"] = function() {
+		var results = computeContentAssist("var foo = {f: t};", 
+											't',
+											15,
+											{},
+											{},
+											{keyword:true, template:true});
+		return testProposals(results, [
+				//proposal, description
+				['this', 'this : {f:Object}'],
+				['', '---------------------------------'],
+				["toLocaleString()", "toLocaleString() : String"],
+				["toString()", "toString() : String"],
+				["", "Keywords"], 
+				["his", "this"], 
+				["rue", "true"],
+				["ypeof", "typeof"]
+				]);
+	};
+
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426284
+	 * @since 6.0
+	 */
+	tests["test completions for Function7"] = function() {
+		var results = computeContentAssist("var foo = {f: h};", 
+											'h',
+											15,
+											{},
+											{},
+											{keyword:true, template:true});
+		return testProposals(results, [
+				['hasOwnProperty(property)', 'hasOwnProperty(property) : Boolean']
+				]);
+	};
+
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426284
+	 * @since 6.0
+	 */
+	tests["test completions for Function8"] = function() {
+		var results = computeContentAssist("var foo = {f: fal};", 
+											'fal',
+											17,
+											{},
+											{},
+											{keyword:true, template:true});
+		return testProposals(results, [
+				//proposal, description
+				["", "Keywords"], 
+				["se", "false"]
+				]);
+	};
+
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426284
+	 * @since 6.0
+	 */
+	tests["test completions for Function9"] = function() {
+		var results = computeContentAssist("var foo = {f: n};", 
+											'n',
+											15,
+											{},
+											{},
+											{keyword:true, template:true});
+		return testProposals(results, [
+				//proposal, description
+				['Number([val])', 'Number([val]) : Number'],
+				['NaN', 'NaN : Number'],
+				["", "Keywords"], 
+				["ew", "new"],
+				['ull', 'null']
 				]);
 	};
 

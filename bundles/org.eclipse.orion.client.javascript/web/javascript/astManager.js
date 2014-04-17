@@ -11,11 +11,11 @@
  *******************************************************************************/
 /*global define esprima*/
 define([
-	'esprima',
 	'orion/Deferred',
 	'orion/objects',
-	'orion/serialize'
-], function(Esprima, Deferred, Objects, Serialize) {
+	'orion/serialize',
+	'esprima' //must stay at the end, does not export AMD module
+], function(Deferred, Objects, Serialize) {
 	/**
 	 * @description Object of error types
 	 * @since 5.0
