@@ -244,13 +244,14 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					this.listenerAdded = false;
 				}
 			} else if (state === State.ACTIVE) {
-				if (!this.listenerAdded) {
-					this.textView.addEventListener("ModelChanging", this.contentAssistListener.onModelChanging); //$NON-NLS-0$
-					this.textView.addEventListener("Scroll", this.contentAssistListener.onScroll); //$NON-NLS-0$
-					this.textView.addEventListener("Selection", this.contentAssistListener.onSelection); //$NON-NLS-0$
-					this.listenerAdded = true;
-				}
-				this.computeProposals();
+				this.computeProposals().then(function(){
+					if (this._computedProposals && !this.listenerAdded) {
+						this.textView.addEventListener("ModelChanging", this.contentAssistListener.onModelChanging); //$NON-NLS-0$
+						this.textView.addEventListener("Scroll", this.contentAssistListener.onScroll); //$NON-NLS-0$
+						this.textView.addEventListener("Selection", this.contentAssistListener.onSelection); //$NON-NLS-0$
+						this.listenerAdded = true;
+					}
+				}.bind(this));
 			}
 		},
 		/**
@@ -266,7 +267,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var selectionStart = Math.min(sel.start, sel.end);			
 			this._initialCaretOffset = Math.min(offset, selectionStart);
 			
-			this._computeProposals(this._initialCaretOffset).then(function(proposals) {
+			return this._computeProposals(this._initialCaretOffset).then(function(proposals) {
 				self._computedProposals = proposals;
 				if (!self.isActive()) { return; }
 				var displayProposals = self._flatten(proposals);
