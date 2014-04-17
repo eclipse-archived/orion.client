@@ -191,8 +191,15 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			
 			var display = {};
 			display.Severity = "Info";
-			display.HTML = true;
-			display.Message = "Use <a href=\""+ require.toUrl("edit/edit.html#" + context.project.ContentLocation) + "\">Project</a> page to view and manage the application.";
+			
+			if (result.Message){
+				display.HTML = false;
+				display.Message = result.Message;
+			} else {
+				display.HTML = true;
+				display.Message = "Use <a href=\""+ require.toUrl("edit/edit.html#" + context.project.ContentLocation) + "\">Project</a> page to view and manage the application.";
+			}
+			
 			progress.setProgressResult(display);
 			
 		}, function(error){
