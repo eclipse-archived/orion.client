@@ -326,7 +326,7 @@ define([
 				{
 					computeProposals: function() {
 						d2.resolve();
-						return new Deferred().reject('i rejected');
+						return new Deferred().reject(new Error('i rejected'));
 					}
 				},
 				{

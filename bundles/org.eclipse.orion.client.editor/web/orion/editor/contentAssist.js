@@ -350,10 +350,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					}
 					proposals = self.progress ? self.progress.progress(promise, "Generating content assist proposal") : promise; //$NON-NLS-0$
 				} catch (e) {
-					self.handleError(e);
+					return new Deferred().reject(e);
 				}
 				return Deferred.when(proposals);
 			});
+			// TODO should we allow error to propagate instead of handling here?
 			return Deferred.all(promises, this.handleError);
 		},
 
