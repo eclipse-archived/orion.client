@@ -25,27 +25,33 @@
 		</button>
 	</div>
 	
-	<div>
-		<div id="messageContainer" class="messageContainer"><span id="messageLabel" class="messageLabel"></span></div>
-		<div style="overflow: hidden; padding: 15px; min-height: 140px">
-			<table class="formTable">
-				<tr>
-					<td id="orgsLabel" class="label"></td>
-					<td id="orgs" class="selectCell"></td>
-				</tr>
-				<tr>
-					<td id="spacesLabel" class="label"></td>
-					<td id="spaces" class="selectCell"></td>
-				</tr>
-			</table>
-			<div id="manifestInformation" class="manifestInformation">
-				<span id="manifestLabel" class="manifestLabel"></span>
-				<span id="manifest" class="manifest"></td>
+	<div style="display: table;" id="messageRow">
+		<div style="display: table-row">
+			<div id="messageArea"><label id="messageLabel"></label></div>
+			<div id="progressPane" style="display: table-cell;" class="progressWatch" tabindex="0" role="progressbar">
+				<div id="watchButton" class="watchButton"></div>
+				<div id="watchBody" class="watchBody">
+					<span class="hand longMinute">
+						<span class="darkSide"></span>
+					</span>
+					<span class="hand longHour">
+						<span class="darkSide"></span>
+					</span>
+				</div>
 			</div>
 		</div>
-		<div class="buttonRow">
-		    <button class="orionButton commandButton deployButton" id="okbutton" type="button" value="OK">Deploy</button>
-		    <button class="orionButton commandButton" id="cancelButton" type="button" value="CANCEL">CANCEL</button>
+	</div>
+	
+	<div>
+		
+		<div style="overflow: hidden; margin: 15px; min-height: 140px">
+			<div id="orgsSection"></div>
+			<div id="spacesTree">
+			</div>
+		</div>
+		
+		<div style="padding: 5px;" id="okRow">
+		    <button class="orionButton commandButton" style="float: right;margin-right: 20px;" id="okbutton" type="button" value="OK">OK</button>    
 		</div>
 	</div>
 	

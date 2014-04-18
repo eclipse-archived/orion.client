@@ -16,6 +16,5 @@ define({
 	'API URL':'API URL',
 	'Manage URL':'Manage URL',
 	'Settings':'Settings',
-	'Cloud':'Cloud',
-	'Loading deployment settings...': 'Loading deployment settings...'
+	'Cloud':'Cloud'
 });

@@ -2,12 +2,10 @@
 	
 var uiTestFunc = null;
 
-define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection',
-	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences', 'i18n!cfui/nls/messages'], 
-		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, URITemplate, PageLinks, Preferences, messages) {
+define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection', 'orion/explorers/explorer',
+	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences'], 
+		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, mExplorer, URITemplate, PageLinks, Preferences) {
 
-	var cloudManageUrl;
-	
 	mBootstrap.startup().then(
 		function(core) {
 			
@@ -15,26 +13,29 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			var deployResource = decodeURIComponent(pageParams.resource);
 			
 			var serviceRegistry = core.serviceRegistry;
+//			var preferences = core.preferences;
 			var cFService = new CFClient.CFService(serviceRegistry);
 			
 			// initial message
-			document.getElementById('title').appendChild(document.createTextNode("Configure Application Deployment")); //$NON-NLS-1$//$NON-NLS-0$
-			var msgContainer = document.getElementById('messageContainer'); //$NON-NLS-0$
+			document.getElementById('title').appendChild(document.createTextNode("Choose Space To Deploy")); //$NON-NLS-1$//$NON-NLS-0$
+			var progressPane = document.getElementById('progressPane'); //$NON-NLS-0$
 			var msgLabel = document.getElementById('messageLabel'); //$NON-NLS-0$
 			var msgNode;
+			var orgsDropdownNode = document.getElementById('orgsSection');
+			var spacesTree = document.getElementById('spacesTree'); //$NON-NLS-0$
 			var okButton = document.getElementById('okbutton'); //$NON-NLS-0$
-			var orgsDropdown;
-			var spacesDropdown;
-			var deployResourceJSON = JSON.parse(deployResource);
-
+			var explorer;
+			
 			function showMessage(message){
-				msgLabel.appendChild(document.createTextNode(message));
-				msgContainer.classList.add("showing"); //$NON-NLS-0$
+				msgNode = msgLabel.appendChild(document.createTextNode(message)); //$NON-NLS-0$
+				progressPane.classList.add("running");
 			}
 			
 			function hideMessage(){
-				lib.empty(msgLabel);
-				msgContainer.classList.remove("showing"); //$NON-NLS-0$
+				if(msgNode){
+					msgLabel.removeChild(msgNode);
+				}
+				progressPane.classList.remove("running");
 			}
 			
 			var selection;
@@ -62,7 +63,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				});
 			};
 			
-			showMessage(messages["Loading deployment settings..."]);
+			showMessage("Getting spaces...");
 			validate();
 			
 			
@@ -136,13 +137,9 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 							return;
 						}
 						
-						if(orgsDropdown){
-							orgsDropdown.disabled = true;
-						}
-						if(spacesDropdown){
-							spacesDropdown.disabled = true;
-						}
+						explorer.getNavHandler().setSelectionPolicy("readonlySelection");
 						
+						var deployResourceJSON = JSON.parse(deployResource);
 						
 						cFService.pushApp(selection, null, decodeURIComponent(deployResourceJSON.ContentLocation + deployResourceJSON.AppPath)).then(
 							function(result){
@@ -169,16 +166,33 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 									}
 								});
 							}, function(error){
-								postError(error);
+//								if (error.HttpCode === 404){
+//									postError({
+//										State: "NOT_DEPLOYED",
+//										Message: error.Message
+//									});
+//								} else if (error.JsonData && error.JsonData.error_code) {
+//									var err = error.JsonData;
+//									if (err.error_code === "CF-InvalidAuthToken"){
+//										error.Retry = {
+//											parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
+//										};
+//									} else if (err.error_code === "CF-TargetNotSet"){
+//										var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+//										error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+//									}
+//									postError(error);
+//								} else {
+									postError(error);
+//								}
 							}
 						);
 					}
 				);
 			};
 
-			document.getElementById('okbutton').addEventListener('click', doAction); //$NON-NLS-1$ //$NON-NLS-0$
-			document.getElementById('closeDialog').addEventListener('click', closeFrame); //$NON-NLS-1$ //$NON-NLS-0$
-			document.getElementById('cancelButton').addEventListener('click', closeFrame); //$NON-NLS-1$ //$NON-NLS-0$
+			document.getElementById('okbutton').onclick = doAction;
+			document.getElementById('closeDialog').onclick = closeFrame;
 			 
 			// allow frame to be dragged by title bar
 			var that=this;
@@ -219,14 +233,20 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 					 // get target and app, then do push and open application
 					getTarget(cFService, config, preferences).then(
 						function(target){
-							cloudManageUrl = target.ManageUrl;
 							cFService.getOrgs(target).then(
 								function(result2){
 									hideMessage();
-																		
-									document.getElementById("orgsLabel").appendChild(document.createTextNode("Organization:"));
+									
+									var div1 = document.createElement("div");
+									div1.id = "orgsLabel";
+									var label = document.createElement("label");
+									label.appendChild(document.createTextNode("Organization:"));
+									div1.appendChild(label);
+									orgsDropdownNode.appendChild(div1);
 
-									orgsDropdown = document.createElement("select");
+									var div2 = document.createElement("div");
+									div2.id = "orgsDropdown";
+									var orgsDropdown = document.createElement("select");
 									result2.Orgs.forEach(function(org){
 										var option = document.createElement("option");
 										option.appendChild(document.createTextNode(org.Name));
@@ -239,7 +259,9 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 										loadTargets(selectedOrg);
 									};
 									
-									document.getElementById("orgs").appendChild(orgsDropdown);
+									div2.appendChild(orgsDropdown);
+									orgsDropdownNode.classList.add("sectionTable");
+									orgsDropdownNode.appendChild(div2);
 																		
 									var targets = {};
 									result2.Orgs.forEach(function(org){
@@ -248,8 +270,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 											org.Spaces.forEach(function(space){
 												var newTarget = {};
 												newTarget.Url = target.Url;
-												if (cloudManageUrl)
-													newTarget.ManageUrl = cloudManageUrl;
+												if (target.ManageUrl)
+													newTarget.ManageUrl = target.ManageUrl;
 												newTarget.Org = org.Name;
 												newTarget.Space = space.Name;
 												targets[org.Name].push(newTarget);
@@ -259,56 +281,21 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 									selection = new mSelection.Selection(serviceRegistry, "orion.Spaces.selection"); //$NON-NLS-0$
 									selection.addEventListener("selectionChanged", validate);
 
-										document.getElementById("spacesLabel").appendChild(document.createTextNode("Space:"));
-	
-										spacesDropdown = document.createElement("select");
-										
-										function setSelection(){
-											if(!spacesDropdown.value){
-												selection.setSelections();
-											} else {
-												var orgTargets = targets[orgsDropdown.value];
-												if(!orgTargets){
-													selection.setSelections();
-												} else {
-													for(var i=0; i<orgTargets.length; i++){
-														if(orgTargets[i].Space == spacesDropdown.value){
-															selection.setSelections(orgTargets[i]);
-															break;
-														}
-													}
-												}
-											}											
-										}
-										
-										spacesDropdown.onchange = function(event){
-											setSelection();
-										};
-										
-										document.getElementById("spaces").appendChild(spacesDropdown);
+									explorer = new mExplorer.Explorer(
+										serviceRegistry,
+										selection,
+										new SpacesRenderer({checkbox: false, singleSelection: true, treeTableClass: "Spaces"}));
 									
 									function loadTargets(org){
-										
-										var targetsToDisplay = targets[org];
-										lib.empty(spacesDropdown);
-										targetsToDisplay.forEach(function(target){
-											var option = document.createElement("option");
-											option.appendChild(document.createTextNode(target.Space));
-											option.target = target;
-											spacesDropdown.appendChild(option);
-										});
-										setSelection();
+										var model = new mExplorer.ExplorerFlatModel(null, null, targets[org]);
+										model.getId = function(item){
+											return item.Space + item.Org;
+										};
+										spacesTree.classList.add("sectionTable");
+										explorer.createTree(spacesTree.id, model, {});										
 									}
 									
-									document.getElementById("manifestLabel").appendChild(document.createTextNode("Using manifest:"));
-									
-									var manifestFolder = deployResourceJSON.AppPath || "";
-									manifestFolder = manifestFolder.substring(0, manifestFolder.lastIndexOf("/")+1);
-									
-									document.getElementById("manifest").appendChild(document.createTextNode("/" + manifestFolder + "manifest.yml"));
-									
 									loadTargets(orgsDropdown.value);
-									
 									
 								}, function(error){
 									postError(error);
@@ -354,6 +341,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 							deferred.resolve(target);
 							return;
 						} else {
+//							deferred.resolve(null);
 							var error = {};
 							var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
 							error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
@@ -365,6 +353,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
 						error.Severity = "Warning";
 						deferred.reject(error);
+//						deferred.resolve(null);
 					}
 				);
 			}, function(error){
@@ -372,9 +361,63 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
 				error.Severity = "Warning";
 				deferred.reject(error);
+//				deferred.resolve(null);
 			}
 		);
 		return deferred;
+		
+		
+//		var deferred = new Deferred();
+//		
+//		preferences.getPreferences('/settingsCF').then(
+//			function(settings){
+//				var props = config.getProperties() || {};
+//				var cfgTarget = props["app.target"] || ""; //$NON-NLS-0$
+//				var cfgValid = (typeof cfgTarget === 'string' && cfgTarget.length > 0);
+//
+//				var defaultTarget = settings.get("targetUrl");
+//				if (!cfgValid){
+//					props["app.target"] = defaultTarget;
+//					props["app.manage.url"] = settings.get("manageUrl");
+//					config.update(props);
+//				}
+//				
+//				cFService.getTarget().then(function(result) {
+//					var cFTarget = result.Url;
+//					var cFValid = (typeof cFTarget === 'string' && cFTarget.length > 0);
+//					// if cf target is invalid, prompt for target
+//					if (!cFValid) {
+//						if (defaultTarget) {
+//							cFService.setTarget(defaultTarget).then(function (result) {
+//								deferred.resolve(result);					
+//							}, function(error) {
+//								deferred.reject(error);					
+//							});
+//						} else {
+//							var error = {};
+//							var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+//							error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+//							error.Severity = "Warning";
+//							deferred.reject(error);
+//						}
+//					} else {
+//						// if cf target doesn't match settings, change settings
+//						if (cFValid && cFTarget !== cfgTarget) {
+//							props["app.target"] = cFTarget;
+//							config.update(props);
+//						}
+//						deferred.resolve({target:cFTarget});
+//					}
+//				}, function (error) {
+//					var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+//					error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+//					error.Severity = "Warning";
+//					deferred.reject(error);
+//				});	
+//			}
+//		);
+//
+//		return deferred;
 	}
 
 	function postMsg(status) {
@@ -384,13 +427,6 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 	}
 	
 	function postError(error) {
-		if(error.Message){
-			if (error.Message.indexOf("The host is taken")===0){
-				error.Message = error.Message.replace("The host is taken", "The BlueMix route");
-				error.Message += " is already in use by another application. Please check the host/domain in the manifest file.";
-			}
-		}
-		
 		if (error.HttpCode === 404){
 			error = {
 				State: "NOT_DEPLOYED",
@@ -400,13 +436,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			var err = error.JsonData;
 			if (err.error_code === "CF-InvalidAuthToken"){
 				error.Retry = {
-					parameters: [{id: "user", type: "text", name: "IBM ID:"}, {id: "password", type: "password", name: "Password:"}]
+					parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
 				};
-				
-				error.forceShowMessage = true;
-				error.Severity = "Info";
-				error.Message = "Please enter your IBM id below to authorize deployment to BlueMix. Note that ids are case-sensitive. If you have not registered to use BlueMix, you can do so [here](" + cloudManageUrl + ").";				
-			
 			} else if (err.error_code === "CF-TargetNotSet"){
 				var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
 				error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
@@ -417,5 +448,35 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			 source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
 			 status: error}), "*");
 	}
+	
+	function SpacesRenderer (options) {
+		this._init(options);
+	}
+	SpacesRenderer.prototype = new mExplorer.SelectionRenderer(); 
+	SpacesRenderer.prototype.constructor = SpacesRenderer;
+	SpacesRenderer.prototype.getLabelColumnIndex = function() {
+		return 0;
+	};
+	SpacesRenderer.prototype.emptyCallback = function(bodyElement){
+		var tr = document.createElement("tr"); //$NON-NLS-0$
+		var td = document.createElement("td"); //$NON-NLS-0$
+		var noWorkspaceItems = document.createElement("div"); //$NON-NLS-0$
+		noWorkspaceItems.classList.add("noFile"); //$NON-NLS-0$
+		noWorkspaceItems.textContent = "No spaces found in this organization.";
+		td.appendChild(noWorkspaceItems);
+		tr.appendChild(td);
+		bodyElement.appendChild(tr);
+	}
+	SpacesRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		if(col_no===0){
+			var col = document.createElement("td"); //$NON-NLS-0$
+			var span = document.createElement("span"); //$NON-NLS-0$
+			span.id = tableRow.id+"navSpan"; //$NON-NLS-0$
+			col.appendChild(span);
+			span.className = "mainNavColumn singleNavColumn"; //$NON-NLS-0$
+			span.appendChild(document.createTextNode(item.Space + " (" + item.Org + ")"));
+			return col;
+		}
+	};
 
 });
