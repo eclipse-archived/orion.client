@@ -149,72 +149,84 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			context.launchConfiguration.status = {State: "PROGRESS"};
 			sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration });
 		}
-		progress.showWhile(context.deployService.deploy(context.project, enhansedLaunchConf), context.deployService.name + " in progress", true).then(function(result){
-			if(!result){
-				return;
-			}
-			
-			if (result.UriTemplate) {
-			    var options = {};
-				options.uriTemplate = result.UriTemplate;
-				options.width = result.Width;
-				options.height = result.Height;
-				options.id = result.UriTemplateId || context.deployService.id; 
-				context.oldParams = enhansedLaunchConf.Params;
-				options.done = function(status){
-					localHandleStatus(status, null, context);
-				};
-				options.status = function(status){localHandleStatus(status, null, context);};
-				mEditorCommands.createDelegatedUI(options);
-				return;
-			}
-
-			if(context.launchConfiguration && (result.State || result.CheckState)){
-				context.launchConfiguration.status = result;
-				if(sharedLaunchConfigurationDispatcher){
-					sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration});
+		if(context.deployService.getDeployProgressMessage){
+			context.deployService.getDeployProgressMessage(context.project, enhansedLaunchConf).then(function(message){
+				deploy(message);
+			}.bind(this), function(){
+				deploy(context.deployService.name + " in progress");
+			}.bind(this));
+		} else {
+			deploy(context.deployService.name + " in progress");
+		}
+		
+		function deploy(progressMessage){
+			progress.showWhile(context.deployService.deploy(context.project, enhansedLaunchConf), progressMessage, true).then(function(result){
+				if(!result){
+					return;
 				}
-			}
-			
-			if(result.ToSave){
-				progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, result.ToSave.ConfigurationName, context.deployService.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path, result.ToSave.UrlTitle, result.ToSave.Type), "Saving configuration").then(
-					function(configuration){
-						storeLastDeployment(context.project.Name, context.deployService, configuration);
-						if(sharedLaunchConfigurationDispatcher){
-							sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration});
-						}
-					}, context.errorHandler
-				);
-			} else {
-				storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
-			}
-			
-			var display = {};
-			display.Severity = "Info";
-			
-			if (result.Message){
-				display.HTML = false;
-				display.Message = result.Message;
-			} else {
-				display.HTML = true;
-				display.Message = "Use <a href=\""+ require.toUrl("edit/edit.html#" + context.project.ContentLocation) + "\">Project</a> page to view and manage the application.";
-			}
-			
-			progress.setProgressResult(display);
-			
-		}, function(error){
-			if(error.Retry && error.Retry.parameters){
-				if(error.forceShowMessage){
+				
+				if (result.UriTemplate) {
+				    var options = {};
+					options.uriTemplate = result.UriTemplate;
+					options.width = result.Width;
+					options.height = result.Height;
+					options.id = result.UriTemplateId || context.deployService.id; 
+					context.oldParams = enhansedLaunchConf.Params;
+					options.done = function(status){
+						localHandleStatus(status, null, context);
+					};
+					options.status = function(status){localHandleStatus(status, null, context);};
+					mEditorCommands.createDelegatedUI(options);
+					return;
+				}
+	
+				if(context.launchConfiguration && (result.State || result.CheckState)){
+					context.launchConfiguration.status = result;
+					if(sharedLaunchConfigurationDispatcher){
+						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration});
+					}
+				}
+				
+				if(result.ToSave){
+					progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, result.ToSave.ConfigurationName, context.deployService.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path, result.ToSave.UrlTitle, result.ToSave.Type), "Saving configuration").then(
+						function(configuration){
+							storeLastDeployment(context.project.Name, context.deployService, configuration);
+							if(sharedLaunchConfigurationDispatcher){
+								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration});
+							}
+						}, context.errorHandler
+					);
+				} else {
+					storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
+				}
+				
+				var display = {};
+				display.Severity = "Info";
+				
+				if (result.Message){
+					display.HTML = false;
+					display.Message = result.Message;
+				} else {
+					display.HTML = true;
+					display.Message = "Use <a href=\""+ require.toUrl("edit/edit.html#" + context.project.ContentLocation) + "\">Project</a> page to view and manage the application.";
+				}
+				
+				progress.setProgressResult(display);
+				
+			}, function(error){
+				if(error.Retry && error.Retry.parameters){
+					if(error.forceShowMessage){
+						context.errorHandler(error);
+					}
+					context.data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters);
+					context.data.oldParams = enhansedLaunchConf.Params;
+					context.commandService.collectParameters(context.data);
+				} else {
 					context.errorHandler(error);
+					storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
 				}
-				context.data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters);
-				context.data.oldParams = enhansedLaunchConf.Params;
-				context.commandService.collectParameters(context.data);
-			} else {
-				context.errorHandler(error);
-				storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
-			}
-		});
+			});
+		}
 	}
 	
 	var sharedDependencyDispatcher;

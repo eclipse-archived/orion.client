@@ -121,6 +121,28 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 				return deferred;
 			},
 			
+			getDeployProgressMessage: function(project, launchConf){
+				var message = "Deploying application to Cloud Foundry: ";
+				if(launchConf.Name){
+					return message + " " + launchConf.Name;
+				}
+				var params = launchConf.Params || {};
+				var appName = params.Name;
+				if(!appName){
+					var manifestFolder = params.AppPath || "";
+					manifestFolder = manifestFolder.substring(0, manifestFolder.lastIndexOf("/")+1);
+					appName = "application from /" + manifestFolder + "manifest.yml";
+				}
+				
+				message += appName;
+				
+				if(params.Target){
+					message += " on " + params.Target.Space + " / " + params.Target.Org;
+				}
+				
+				return message;
+			},
+			
 			deploy: function(project, launchConf) {
 				var that = this;
 				var deferred = new Deferred();
