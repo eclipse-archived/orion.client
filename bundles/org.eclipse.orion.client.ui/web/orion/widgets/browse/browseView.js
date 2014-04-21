@@ -190,7 +190,7 @@ define([
 		this.messageView = options.messageView;
 		this.breadCrumbInHeader = options.breadCrumbInHeader;
 		this.isMarkdownView = options.isMarkdownView;
-		this.repoURLHandler =  options.repoURLHandler;
+		this.infoDropDownHandlers =  options.infoDropDownHandlers;
 		this.snippetShareOptions = options.snippetShareOptions;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.branchSelector = options.branchSelector;
@@ -245,36 +245,45 @@ define([
 						this.sectionContents.classList.add("browseSectionWrapper"); 
 						this._foldersSection.setContent(this.sectionContents);
 						//Render the action node
-						if(!this.messageView && this.repoURLHandler) {
+						if(!this.messageView && this.infoDropDownHandlers && this.infoDropDownHandlers.length > 0) {
 							var actionNode = this._foldersSection.getActionElement();
 							if(actionNode) {
 								lib.empty(actionNode);
+								this._destroyInfoDropDowns();
 								var letfNode = document.createElement("div"), rightNode=document.createElement("div");
 								letfNode.classList.add("layoutLeft");
 								rightNode.classList.add("layoutRight");
 								actionNode.appendChild(letfNode);
 								actionNode.appendChild(rightNode);
 								this.actionNode = rightNode;
-								var range = document.createRange();
-								range.selectNode(letfNode);
-								var repoURLFragment = range.createContextualFragment(this.repoURLHandler.RepoURLTriggerTemplate);
-								letfNode.appendChild(repoURLFragment);
-								this.repoURLDropdown = new mDropdown.Dropdown({
-									triggerNode: lib.node("orion.browse.repoURLTrigger"), 
-									dropdown: lib.node("orion.browse.repoURLDropdown")
-								});
-								this.repoURLDropdown.getItems = function() {
-									lib.node("orion.browse.repoURLInput").value = this.repoURLHandler.promptValue;
-									return [lib.node("orion.browse.repoURLInput")];
-								}.bind(this);
-								this.repoURLDropdown._focusDropdownNode = function() {
-									lib.node("orion.browse.repoURLInput").select();
-								};
-								this.repoURLDropdown._positionDropdown = function(evt) {
-									this._dropdownNode.style.left = "";
-									this._dropdownNode.style.top = "";
-									this._dropdownNode.style.left = this._triggerNode.offsetLeft + this._triggerNode.offsetWidth - this._dropdownNode.offsetWidth  + "px";
-								}.bind(this.repoURLDropdown);
+								
+								this.infoDropDownHandlers.forEach(function(handler) {
+									var dropdownHolder = document.createElement("div")
+									dropdownHolder.classList.add("infoDropDownHolder");
+									letfNode.appendChild(dropdownHolder);
+									var range = document.createRange();
+									range.selectNode(dropdownHolder);
+									var infoFragment = range.createContextualFragment(handler.popupTemplate);
+									dropdownHolder.appendChild(infoFragment);
+									var infoDropDown = new mDropdown.Dropdown({
+										triggerNode: lib.node(handler.triggerNodeId), 
+										dropdown: lib.node(handler.dropdownNodeId)
+									});
+									infoDropDown.getItems = function() {
+										var inputNode = lib.node(handler.popupTextAreaId);
+										inputNode.value = handler.popupTextAreaValue;
+										return [inputNode];
+									};
+									infoDropDown._focusDropdownNode = function() {
+										lib.node(handler.popupTextAreaId).select();
+									};
+									infoDropDown._positionDropdown = function() {
+										this._dropdownNode.style.left = "";
+										this._dropdownNode.style.top = "";
+										this._dropdownNode.style.left = this._triggerNode.offsetLeft + this._triggerNode.offsetWidth - this._dropdownNode.offsetWidth  + "px";
+									}.bind(infoDropDown);
+									this.infoDropDowns.push(infoDropDown);
+								}.bind(this));
 							}
 						} else if (!this.messageView) {
 							this.actionNode =  this._foldersSection.getActionElement();
@@ -422,6 +431,14 @@ define([
 				}.bind(this));
 			}
 		},
+		_destroyInfoDropDowns: function() {
+			if(this.infoDropDowns) {
+				this.infoDropDowns.forEach(function(infoDropDown){
+					infoDropDown.destroy();
+				});
+			}
+			this.infoDropDowns = [];
+		},
 		destroy: function() {
 			if(this.editorView) {
 				this.editorView. editor.getTextView().getModel().removeEventListener("Changed", this._editorViewModelChangedListener); //$NON-NLS-0$
@@ -431,9 +448,7 @@ define([
 			if (this.folderNavExplorer) {
 				this.folderNavExplorer.destroy();
 			}
-			if(this.repoURLDropdown) {
-				this.repoURLDropdown.destroy();
-			}
+			this._destroyInfoDropDowns();
 			this.folderNavExplorer = null;
 			if (this._node && this._node.parentNode) {
 				this._node.parentNode.removeChild(this._node);

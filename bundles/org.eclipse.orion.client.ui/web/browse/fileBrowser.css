@@ -251,6 +251,11 @@ a.currentLocation:hover {
 	height: 18px;
 }
 
+.infoDropDownHolder {
+	margin-left: 4px;
+	display: inline-block;
+}
+
 .repoUrlHeaderTitle {
 	float: right;
 	font-weight: bold;

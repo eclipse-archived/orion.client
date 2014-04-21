@@ -64,22 +64,23 @@ define([
 	});
 	
 	function repoURLHandler(repoURL, baseURL){
-		this.repoURL = repoURL;
-		this.baseURL = baseURL;
-		if(this.baseURL) {
-			this.RepoURLTriggerTemplate = RepoAndBaseURLTriggerTemplate;
-			var found = this.repoURL.match(/\/([^\/]+)\/([^\/]+)$/);
+		this.triggerNodeId = "orion.browse.repoURLTrigger";
+		this.dropdownNodeId = "orion.browse.repoURLDropdown";
+		this.popupTextAreaId = "orion.browse.repoURLInput";
+		if(baseURL) {
+			this.popupTemplate = RepoAndBaseURLTriggerTemplate;
+			var found = repoURL.match(/\/([^\/]+)\/([^\/]+)$/);
 			if (found) {
-				this.promptValue = "teamRepository=" + this.baseURL + "\n" +
+				this.popupTextAreaValue = "teamRepository=" + baseURL + "\n" +
 								   "userId=" + decodeURIComponent(found[1]) + "\n" + 
 								   "userName=" + decodeURIComponent(found[1]) + "\n" + 
 								   "projectAreaName=" + decodeURIComponent(found[1]) + " | " + decodeURIComponent(found[2]);
 			} else {
-				this.promptValue = this.baseURL;
+				this.popupTextAreaValue = baseURL;
 			}
 		} else {
-			this.RepoURLTriggerTemplate = RepoURLTriggerTemplate;
-			this.promptValue = this.repoURL;
+			this.popupTemplate = RepoURLTriggerTemplate;
+			this.popupTextAreaValue = repoURL;
 		}
 	}
 	
@@ -478,7 +479,7 @@ define([
 					commandRegistry: this._commandRegistry,
 					contentTypeRegistry: this._contentTypeService,
 					inputManager: this._inputManager,
-					repoURLHandler: this.repoURLHandler,
+					infoDropDownHandlers: this.repoURLHandler ? [this.repoURLHandler] : null,
 					fileService: this._fileClient,
 					snippetShareOptions: this.snippetShareOptions,
 					//clickHandler: function(location) {this.refresh(location);}.bind(this),
