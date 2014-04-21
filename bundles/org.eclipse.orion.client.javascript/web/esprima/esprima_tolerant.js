@@ -35,7 +35,8 @@
 /*global esprima:true, define:true, exports:true, window: true,
 createLocationMarker: true,
 throwError: true, generateStatement: true, peek: true,
-parseAssignmentExpression: true, parseBlock: true, parseExpression: true,
+parseAssignmentExpression: true, parseBlock: true, 
+expectConditionCloseBracketWrapThrow: true, parseExpression: true,
 parseFunctionDeclaration: true, parseFunctionExpression: true,
 parseFunctionSourceElements: true, parseVariableIdentifier: true,
 parseLeftHandSideExpression: true,
@@ -1952,6 +1953,9 @@ parseStatement: true, parseSourceElement: true */
         }
 
         if (lookahead.type !== Token.EOF && !match('}')) {
+        	if (extra.errors) {
+                rewind();
+            }
             throwUnexpected(lookahead);
         }
     }
@@ -2201,11 +2205,22 @@ parseStatement: true, parseSourceElement: true */
                 if (match(')')) {
                     break;
                 }
-                expect(',');
+               try {
+                    expect(',');
+                } catch (e) {
+                    if (extra.errors) {
+                        // pretend the argument list is done
+                        pushError(e);
+                        break;
+                    } else {
+                        throw e;
+                    }
+                }
             }
         }
 
-        expect(')');
+        //expect(')');
+        expectConditionCloseParenWrapThrow();
 
         return args;
     }
@@ -2217,6 +2232,9 @@ parseStatement: true, parseSourceElement: true */
         token = lex();
 
         if (!isIdentifierName(token)) {
+        	if (extra.errors) {
+                attemptRecoveryNonComputedProperty(token);
+            }
             throwUnexpected(token);
         }
 
@@ -2623,7 +2641,8 @@ parseStatement: true, parseSourceElement: true */
 
         block = parseStatementList();
 
-        expect('}');
+        //expect('}');
+        expectConditionCloseBracketWrapThrow();
 
         return delegate.markEnd(delegate.createBlockStatement(block));
     }
@@ -2730,6 +2749,7 @@ parseStatement: true, parseSourceElement: true */
     // 12.5 If statement
 
     function parseIfStatement() {
+    	
         var test, consequent, alternate;
 
         expectKeyword('if');
@@ -2738,10 +2758,14 @@ parseStatement: true, parseSourceElement: true */
 
         test = parseExpression();
 
-        expect(')');
+        //expect(')');
+        expectConditionCloseParenWrapThrow();
 
         consequent = parseStatement();
-
+		// required because of the check in wrapTracking that returns nothing if node is undefined
+        if (!consequent) {
+            consequent = null;
+        }
         if (matchKeyword('else')) {
             lex();
             alternate = parseStatement();
@@ -2790,7 +2814,8 @@ parseStatement: true, parseSourceElement: true */
 
         test = parseExpression();
 
-        expect(')');
+        //expect(')');
+        expectConditionCloseParenWrapThrow();
 
         oldInIteration = state.inIteration;
         state.inIteration = true;
@@ -2870,7 +2895,8 @@ parseStatement: true, parseSourceElement: true */
             }
         }
 
-        expect(')');
+        //expect(')');
+        expectConditionCloseParenWrapThrow();
 
         oldInIteration = state.inIteration;
         state.inIteration = true;
@@ -3245,7 +3271,7 @@ parseStatement: true, parseSourceElement: true */
         expr = parseExpression();
 
         // 12.12 Labelled Statements
-        if ((expr.type === Syntax.Identifier) && match(':')) {
+        if (expr && (expr.type === Syntax.Identifier) && match(':')) {
             lex();
 
             key = '$' + expr.name;
@@ -3320,7 +3346,8 @@ parseStatement: true, parseSourceElement: true */
             sourceElements.push(sourceElement);
         }
 
-        expect('}');
+        //expect('}');
+        expectConditionCloseBracketWrapThrow();
 
         state.labelSet = oldLabelSet;
         state.inIteration = oldInIteration;
@@ -3812,6 +3839,215 @@ parseStatement: true, parseSourceElement: true */
         }
 
         return program;
+    }
+
+	/**
+	 * @name expectConditionCloseBracketWrapThrow
+	 * @description Gracefully handles a missing '}' if the mode is set to tolerant
+	 * @function
+	 * @private
+	 * @since 5.0
+	 */
+	function expectConditionCloseBracketWrapThrow() {
+		if (extra.errors) {
+			// continue parsing even with missing close
+			// brace.  This gives a better AST for the
+			// block, as information about
+			// the parsed statements remain
+			try {
+				expect('}');
+			} catch (e) {
+				pushError(e);
+	        }
+		} else {
+			expect('}');
+		}
+	}
+
+	/**
+	 * @name expectConditionCloseParenWrapThrow
+	 * @description For statements like if, while, for, etc. check for the ')' on the condition. If
+	 * it is not present, catch the error, and backtrack if we see a '{' instead (to continue parsing the block)
+	 * @function
+	 * @private
+	 * @throws The original error from  trying to consume the ')' char if not in tolerant mode
+	 * @since 5.0
+	 */
+	function expectConditionCloseParenWrapThrow() {
+        // needs generalizing to a 'expect A but don't consume if you hit B or C'
+        try {
+            expect(')');
+        } catch (e) {
+            if (extra.errors) {
+	            pushError(e);
+	            // If a { was hit instead of a ) then don't consume it, let us assume a ')' was 
+	            // missed and the consequent block is OK
+	            if (source[e.index] === '{') {
+	              index=e.index;
+	              lookahead = null;
+	            // activating this block will mean the following statement is parsed as a consequent / body.
+	            // without it the statement is considered not at all part of the enclosing statement at all
+	            //} else {
+	            //  rewind();
+	            }
+            } else {
+                throw e;
+            }
+        }
+
+	}
+
+	/**
+	 * @name pushError
+     * @description Add the error if not already reported.
+     * @function
+     * @private
+     * @param {Object} error The error object to push
+     * @since 5.0
+     */
+    function pushError(error) {
+        var len = extra.errors.length;
+        for (var e=0; e < len; e++) {
+            var existingError = extra.errors[e];
+            if (existingError.index === error.index && existingError.message === error.message) {
+                return; // do not add duplicate
+            }
+        }
+        extra.errors.push(error);
+    }
+    
+    //Recovery
+    
+    /**
+     * @name isNewlineOrSemicolon
+     * @description If the given char is the new line char or a semicolon char
+     * @function
+     * @private
+     * @param {String} ch The character to check
+     * @returns {Boolean} <code>true</code> if the char is a new line or semicolon <code>false</code> otherwise
+     * @since 5.0
+     */
+    function isNewlineOrSemicolon(ch) {
+      return ch===';' || ch==='\n';
+    }
+    
+    /**
+     * @name rewind
+     * @descripton Rewind the lex position to the most recent newline or semicolon.  If that turns out
+     * to be the same position as the most recent parsing of a statement was attempted at, 
+     * don't rewind (because it will fail in the same way).  If it turns out to be the same
+     * position as where we last rewound to, don't do it.  Clears the buffer and sets the
+     * index in order to continue lexing from the new position.
+     * @function
+     * @private
+     * @since 5.0
+     */
+    function rewind() {
+        var idx = index;
+        while (idx>0 && !isNewlineOrSemicolon(source[idx])) {
+            idx--;
+        }
+        if (idx<=extra.statementStart) {
+            return;
+        }
+        var doRewind = false;
+        if (extra.lastRewindLocation) {
+            doRewind = true;
+        } else {
+            var v = extra.lastRewindLocation;
+            if (v!==idx) {
+              doRewind=true;
+            }
+        }	        
+        if (doRewind) {
+	        index = idx;
+	        lookahead = null;
+	        extra.lastRewindLocation = index;
+        }
+    }
+
+	/**
+	 * @name rewindToInterestingChar
+     * @description From a position 'idx' in the source this function moves back through the source until
+     * it finds a non-whitespace (including newlines) character.  It will jump over block comments.
+     * Returns an object with properties: index - the index it rewound to.  lineChange - boolean indicating
+     * if a line was crossed during rewind.
+     * @function
+     * @private
+     * @param {Number} idx The index to rewind to
+     * @returns {Object} Returns the object with the index and line change to rewind to
+     * @since 5.0
+     */
+    function rewindToInterestingChar(idx) {
+        var done = false;
+        var lineChange=false;
+        var ch;
+        while (!done) {
+          ch = source[idx];
+          if (ch==='/') {
+            // possibly rewind over a block comment
+            if (idx>2 && source[idx-1]==='*') {
+                // it is, let's reverse over it
+                idx = idx - 2;
+                var skippedComment = false;
+                while (!skippedComment) {
+                    ch = source[idx];
+                    if (ch === '*') {
+                        if (idx>0 && source[idx-1]==='/') {
+                            skippedComment=true;
+                        }
+                    } else if (ch==='\n') {
+                        lineChange=true;
+                    }
+                    if (idx === 0) {
+                        skippedComment = true; // error scenario, hit front of array before finding /*
+                    }
+                    idx--;                
+                }
+            } else {
+              done=true;
+            }
+          } else 
+          if (ch==='\n') {
+              lineChange=true;
+          } else if (!isWhiteSpace(ch)) {
+              done=true;
+          }
+          if (!done) {
+              idx--;
+          }
+        }
+        return {"index":idx,"lineChange":lineChange};
+    }
+    
+    /**
+     * @name attemptRecoveryNonComputedProperty
+     * @description When a problem occurs in parseNonComputedProperty, attempt to reposition 
+     * the lexer to continue processing.
+     * Example: '(foo.)' we will hit the ')' instead of discovering a property and consuming the ')'
+     * will cause the parse of the paretheses to fail, so 'unconsume' it.
+     * Basically rewind by one token if punctuation (type 7) is hit and the char before it was
+     * a dot.  This will enable the enclosing parse rule to consume the punctuation.
+     * @function
+     * @private
+     * @param {String} token The token to try and recover from
+     * @since 5.0
+     */
+    function attemptRecoveryNonComputedProperty(token) {
+        if (token.value && token.type===Token.Punctuator) {
+            var rewindInfo = rewindToInterestingChar(index-token.value.length-1);
+            var idx = rewindInfo.index;
+            var ch= source[idx];
+            // Check if worth rewinding
+            // Special case:
+            // "foo.\n(foo())\n" - don't really want that to parse as "foo(foo())"
+            if (ch==='.' && rewindInfo.lineChange && token.value==='(') {
+                // do not recover in this case
+            } else if (ch==='.') {
+	            index = idx+1;
+	            lookahead=null;
+            }
+        }
     }
 
     // Sync with *.json manifests.
