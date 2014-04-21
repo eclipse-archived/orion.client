@@ -31,14 +31,14 @@ define([
 	'orion/URITemplate',
 	'orion/objects',
 	'orion/EventTarget',
-	'text!orion/widgets/browse/repoUrlTrigger.html',
 	'text!orion/widgets/browse/repoAndBaseUrlTrigger.html',
+	'text!orion/widgets/browse/repoUrlTrigger.html',
 	'orion/commands',
 	'orion/webui/littlelib',
 	'orion/URL-shim'
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector, mMarkdownView,
-	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, RepoURLTriggerTemplate, RepoAndBaseURLTriggerTemplate, mCommands, lib
+	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, RepoAndBaseURLTriggerTemplate, RepoURLTriggerTemplate, mCommands, lib
 ) {
 	
 	function ResourceChangeHandler(options) {

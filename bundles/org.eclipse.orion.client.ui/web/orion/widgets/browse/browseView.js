@@ -267,11 +267,13 @@ define([
 									lib.node("orion.browse.repoURLInput").value = this.repoURLHandler.promptValue;
 									return [lib.node("orion.browse.repoURLInput")];
 								}.bind(this);
+								this.repoURLDropdown._focusDropdownNode = function() {
+									lib.node("orion.browse.repoURLInput").select();
+								};
 								this.repoURLDropdown._positionDropdown = function(evt) {
 									this._dropdownNode.style.left = "";
 									this._dropdownNode.style.top = "";
 									this._dropdownNode.style.left = this._triggerNode.offsetLeft + this._triggerNode.offsetWidth - this._dropdownNode.offsetWidth  + "px";
-									lib.node("orion.browse.repoURLInput").select();
 								}.bind(this.repoURLDropdown);
 							}
 						} else if (!this.messageView) {
@@ -307,6 +309,7 @@ define([
 								this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 5);
 							}
 						}
+						//Render the section contents
 						if(this.messageView) {
 							if(typeof this.messageView.message === "string") {
 								this.updateMessageContents(this.messageView.message, this.messageView.classes ? this.messageView.classes : ["messageViewTable"], this.messageView.tdClass);

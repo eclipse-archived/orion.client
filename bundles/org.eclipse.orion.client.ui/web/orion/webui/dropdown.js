@@ -166,7 +166,7 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 					
 					this._positionDropdown(mouseEvent);
 					
-					this._dropdownNode.focus();
+					this._focusDropdownNode();
 					actionTaken = true;
 					
 					if (this._parentDropdown) {
@@ -175,6 +175,10 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 				}
 			}
 			return actionTaken;
+		},
+		
+		_focusDropdownNode :function() {
+			this._dropdownNode.focus();
 		},
 		
 		_autoDismiss: function(event) {
