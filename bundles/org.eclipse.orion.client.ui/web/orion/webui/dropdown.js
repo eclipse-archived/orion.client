@@ -177,7 +177,7 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 			return actionTaken;
 		},
 		
-		_focusDropdownNode :function() {
+		_focusDropdownNode :function() {//Sub classes can override this to set focus on different items.
 			this._dropdownNode.focus();
 		},
 		
@@ -204,7 +204,7 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 		 * 
 		 * @param {MouseEvent} mouseEvent
 		 */
-		_positionDropdown: function(mouseEvent) {
+		_positionDropdown: function(mouseEvent) {//Sub classes can override this to position the drop down differently.
 			this._dropdownNode.style.left = "";
 			this._dropdownNode.style.top = "";
 			
