@@ -11,7 +11,7 @@
  *     IBM Corporation - Various improvements
  ******************************************************************************/
 
-/*global define esprima console setTimeout doctrine*/
+/*global define esprima:true console setTimeout doctrine*/
 define([
 	'javascript/contentAssist/contentAssist',
 	'chai/chai',
@@ -21,6 +21,9 @@ define([
 	'doctrine/doctrine' //must stay at the end, does not export a module 
 ], function(ContentAssist, chai, objects, Deferred) {
 	var assert = chai.assert;
+	if (Esprima) 
+		esprima = Esprima;
+
 	/**
 	 * @description Parse the snippet
 	 * @returns {Object} The AST
@@ -85,7 +88,11 @@ define([
 	}
 
 	// Also accepts a single object containing a map of arguments
+	buffers = {};
+	var currentName = null;
 	function computeContentAssist(buffer, prefix, offset, lintOptions, editorContextMixin, paramsMixin) {
+		buffers[currentName] = buffer;
+
 		var result;
 		if (arguments.length === 1 && typeof arguments[0] === "object") {
 			// Single param containing a map of arguments for setup()
@@ -246,86 +253,12 @@ define([
 		});
 	}
 	
-	/**
-	 * @description Check that the AST has no errors in it
-	 * @param {Objet} ast The AST to check
-	 */
-	function assertNoErrors(ast) {
-		assert.ok(ast.errors===null || ast.errors.length===0,
-			'errors: '+ast.errors.length+'\n'+ast.errors);
-	}
-	
-	/**
-	 * @description Check that the AST has the given error
-	 * @param {Object} ast The AST
-	 * @param {Array} expectedErrors The array of expected errors
-	 */
-	function assertErrors(ast,expectedErrors) {
-		var expectedErrorList = (expectedErrors instanceof Array ? expectedErrors: [expectedErrors]);
-		var correctNumberOfErrors = ast.errors!==null && ast.errors.length===expectedErrorList.length;
-		assert.ok(correctNumberOfErrors,'errors: '+ast.errors.length+'\n'+ast.errors);
-		if (correctNumberOfErrors) {
-			for (var e=0;e<expectedErrors.length;e++) {
-				var expectedError = expectedErrorList[e];
-				var actualError = ast.errors[e];
-				assert.equal(actualError.lineNumber,expectedError.lineNumber,"checking line for message #"+(e+1)+": "+actualError);
-				var actualMessage = actualError.message.replace(/Line [0-9]*: /,'');
-				assert.equal(actualMessage,expectedError.message,"checking text for message #"+(e+1)+": "+actualError);
-			}
-		}
-	}
-	/**
-	 * @description Pretty-print the AST
-	 * @param {Object} parsedProgram The AST
-	 * @returns {String} The pretty-printed AST
-	 */
-	function stringify(parsedProgram) {
-		var body = parsedProgram.body;
-		if (body.length===1) {
-			body=body[0];
-		}
-		var replacer = function(key,value) {
-			if (key==='computed') {
-				return;
-			}
-			return value;
-		};
-		return JSON.stringify(body,replacer).replace(/"/g,'');
-	}
-	/**
-	 * @description Create a new message object
-	 * @param {Number} line The line number
-	 * @param {String} text The message text
-	 * @returns A new message object: {lineNumber, message}
-	 */
-	function message(line, text) {
-		return {
-			lineNumber:line,
-			message:text
-		};
-	}
-
 	//////////////////////////////////////////////////////////
 	// tests
 	//////////////////////////////////////////////////////////
 
 	var tests = {};
 
-	/* basic recovery */
-	tests["test recovery basic parse"] = function() {
-		var parsedProgram = parseFull("foo.bar");
-		assertNoErrors(parsedProgram);
-		assert.equal(stringify(parsedProgram),"{type:ExpressionStatement,expression:{type:MemberExpression,object:{type:Identifier,name:foo,range:[0,3]},property:{type:Identifier,name:bar,range:[4,7]},range:[0,7]},range:[0,7]}");
-	};
-	
-	/* basic recovery */
-	tests["test recovery - dot followed by EOF"] = function() {
-		var parsedProgram = parseFull("foo.");
-		assertErrors(parsedProgram,message(1,'Unexpected end of input'));
-		assert.equal(stringify(parsedProgram),"{type:ExpressionStatement,expression:{type:MemberExpression,object:{type:Identifier,name:foo,range:[0,3]},property:null,range:[0,4]},range:[0,4]}");
-	};
-
-	/* basic recovery */
 	tests["test Empty Content Assist"] = function() {
 		var resultPromise = computeContentAssist("x", "x");
 		return resultPromise.then(function (results) {
@@ -5161,5 +5094,6 @@ define([
 		]);
 
 	};
+
 	return tests;
 });

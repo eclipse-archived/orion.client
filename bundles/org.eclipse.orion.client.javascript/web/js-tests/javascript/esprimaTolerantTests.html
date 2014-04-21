@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="../../../orion/plugin.js"></script>
+	<script src="../../../requirejs/require.js"></script>
+	<script>
+		var useNewEsprima = window.location.hash === "#new";
+
+		/*jslint amd:true browser:true*/
+		require({
+			baseUrl: "../../",
+			paths: {
+				text: "requirejs/text",
+				i18n: "requirejs/i18n",
+				domReady: "requirejs/domReady",
+				esprima: (useNewEsprima ? 'esprima/esprima_tolerant' : 'esprima/esprima'),
+				estraverse: "estraverse/estraverse"
+			}
+		});
+		window.onload = function() {
+			require(["orion/test", "js-tests/javascript/esprimaTolerantTests"],
+				function(test, jsTests) {
+					test.run(jsTests);
+				});
+		};
+	</script>
+</head>
+<body>
+	<h2>Esprima Tolerant Tests</h2>
+	<p>
+		This suite tests the tolerant (recoverable) esprima parser
+	</p>
+</body>
+</html>
