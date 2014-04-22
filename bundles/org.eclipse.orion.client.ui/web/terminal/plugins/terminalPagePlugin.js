@@ -40,6 +40,51 @@ define([
 		category: "shell",
 		order: 10 // First link in Shell category
 	});
+	
+	var rowsDefault = "24";
+	var colsDefault = "80";
+	provider.registerService(["orion.core.setting"], null, {
+		settings: [{
+			pid: "orion.terminal.settings",
+			name: "Settings", 
+			category: "Terminal",
+			properties: [{
+				id: "cols",
+				name: "Columns Size",
+				type: "string",
+				defaultValue: colsDefault
+			},{
+				id: "rows",
+				name: "Rows Size",
+				type: "string",
+				defaultValue: rowsDefault
+			},{
+				id: "autoresize",
+				name: "Auto resize shell",
+				type: "boolean",
+				defaultValue: false
+			},{
+				id: "color",
+				name: "Terminal color",
+				type: "string",
+				defaultValue: "white",
+				options: [
+					{  label: "white",
+					value: "white"
+					},
+					{  label: "green",
+					value: "green"
+					}
+				]
+			},{
+				id: "pageTrim",
+				name: "Show page trim",
+				type: "boolean",
+				defaultValue: true
+			},]
+		}]
+	});
 
+ 
 	provider.connect();
 });

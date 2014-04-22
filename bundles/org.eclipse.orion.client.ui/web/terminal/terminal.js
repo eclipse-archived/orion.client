@@ -61,9 +61,48 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
 			commandService: commandRegistry
 		});
 		
+		var autoresize;
+		var rows;
+		var cols
+		var color;
+		var pageTrim;
 		var term;
 		var websocket;
 		
+		serviceRegistry.registerService("orion.cm.managedservice", //$NON-NLS-0$
+		{
+			updated: function (properties) {
+				var target;
+				if (properties) {
+					if (properties["cols"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
+						cols = properties["cols"]; //$NON-NLS-0$ 
+					}
+					if (properties["rows"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
+						rows = properties["rows"]; //$NON-NLS-0$ 
+					}
+					if (properties["autoresize"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
+						autoresize = properties["autoresize"]; //$NON-NLS-0$ 
+					}
+					if (properties["color"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
+						color = properties["color"]; //$NON-NLS-0$ 
+					}
+					if (properties["pageTrim"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
+						pageTrim = properties["pageTrim"]; //$NON-NLS-0$ 
+					}
+					
+					//update term with new settings
+					if (term && websocket && !autoresize) {
+						websocket.send(" stty -echo\r"); //$NON-NLS-0$
+						websocket.send(" stty columns " + calcWidth + " rows " + calcHeight + "\r"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+						websocket.send(" stty echo\r"); //$NON-NLS-0$
+						term.resize(calcWidth, calcHeight);
+					}
+				}
+			}
+		}, {
+			pid: "orion.terminal.settings" //$NON-NLS-0$
+		}); //$NON-NLS-0$
+				
 		function getFirstChild(element) {
 			var el = element.firstChild;
 			while (el != null && el.nodeType == 3) {
@@ -73,6 +112,9 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
 		}
 		
 		function resize() {
+			if (!autoresize) {
+				return;
+			}
 			var terminalDiv = getFirstChild(document.getElementById("mainNode")); //$NON-NLS-0$
 			var div1 = document.createElement("div"); //$NON-NLS-0$
 			div1.style.position = "fixed"; //$NON-NLS-0$
@@ -167,12 +209,13 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
 		window.onbeforeunload = function() {
 			disconnect();
 		};
-
+		
 		// Initialize
 		(function() {
+		
 			term = new Terminal({
-				cols: 80,
-				rows: 24,
+				cols: cols,
+				rows: rows,
 				useStyle: true,
 				screenKeys: true
 			});
