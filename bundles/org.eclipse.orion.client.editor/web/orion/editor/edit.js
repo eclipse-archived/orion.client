@@ -14,6 +14,8 @@
 
 define('orion/editor/edit', [ //$NON-NLS-0$
 	"require", //$NON-NLS-0$
+
+	"orion/editor/config", //$NON-NLS-0$
 	"orion/editor/shim", //$NON-NLS-0$
 	
 	"orion/editor/textView", //$NON-NLS-0$
@@ -44,7 +46,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	"orion/editor/stylers/text_css/syntax", //$NON-NLS-0$
 	"orion/editor/stylers/text_html/syntax" //$NON-NLS-0$
 
-], function(require, shim, mTextView, mTextModel, mTextTheme, mProjModel, mEventTarget, mKeyBinding, mRulers, mAnnotations,
+], function(require, config, shim, mTextView, mTextModel, mTextTheme, mProjModel, mEventTarget, mKeyBinding, mRulers, mAnnotations,
 			mTooltip, mUndoStack, mTextDND, mEditor, mEditorFeatures, mContentAssist, mCSSContentAssist, mHtmlContentAssist,
 			mAsyncStyler, mMirror, mTextMateStyler, mHtmlGrammar, mTextStyler, mJS, mCSS, mHTML) {
 

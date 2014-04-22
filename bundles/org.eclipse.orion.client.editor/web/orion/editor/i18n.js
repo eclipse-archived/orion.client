@@ -10,7 +10,6 @@
  ******************************************************************************/
 
 /*global define */
-var __i18nGlobal__ = this;
 define({
 	load: function(name, parentRequire, onLoad, config) {
 		if (parentRequire.specified && parentRequire.specified("orion/bootstrap")) { //$NON-NLS-0$
@@ -18,8 +17,9 @@ define({
 				onLoad(languages);
 			});
 		} else {
-			var orion = __i18nGlobal__.orion;
-			onLoad(orion && orion.editor && orion.editor.languages ? orion.editor.languages : {});
+			parentRequire(["orion/editor/config"], function(config) { //$NON-NLS-0$
+				onLoad(config.languages || {});
+			});
 		}
 	}
 });
