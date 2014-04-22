@@ -147,6 +147,21 @@ define([
 	}
 
 	var tests = {};
+
+	tests.test_getsetProviders = function() {
+		withData(function(view, contentAssist) {
+			var p1 = { computeContentAssist: function() {} };
+			var p2 = {
+				id: "test.provider2", provider: { computeContentAssist: function() {} }
+			};
+			contentAssist.setProviders([p1, p2]);
+			var providers = contentAssist.getProviders();
+			assert.equal(providers.length, 2);
+			assert.equal(providers[0].provider, p1); // p1 should have been wrapped into a provider info
+			assert.equal(providers[1], p2); // p2 should have been returned as-is
+		});
+	};
+
 	// Tests that ContentAssist calls a provider's computeProposals() method with the expected parameters.
 	tests.testComputeProposals = function() {
 		var text = 'this is the first line\nthis is the second line@@@';

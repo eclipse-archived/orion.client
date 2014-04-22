@@ -105,7 +105,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	function ContentAssist(textView) {
 		this.textView = textView;
 		this.state = State.INACTIVE;
-		this.resetProviderInfoArray();
+		this.clearProviders();
 		var self = this;
 		this._textViewListeners = {
 			onModelChanging: (function(event) {
@@ -182,10 +182,10 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this.dispatchEvent({type: "ProposalApplied", data: data}); //$NON-NLS-0$
 			return true;
 		},
-		activate: function(providerInfoArray, autoTriggered) {
+		activate: function(providers, autoTriggered) {
 			if (this.state === State.INACTIVE) {
 				this._autoTriggered = autoTriggered ? true : false;
-				this.setState(State.ACTIVE, providerInfoArray);
+				this.setState(State.ACTIVE, providers);
 			}
 		},
 		deactivate: function() {
@@ -214,7 +214,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			return isDeactivating;
 		},
 		/** @private */
-		setState: function(state, /* Optional. Array of providers to pass to dispatched event.*/ providerInfoArray) {
+		setState: function(state, /* Optional. Array of providers to pass to dispatched event.*/ providers) {
 			var eventType;
 			if (state === State.ACTIVE) {
 				eventType = "Activating"; //$NON-NLS-0$
@@ -224,7 +224,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				if (this._mode) { this._mode.setActive(false); }
 			}
 			if (eventType) {
-				this.dispatchEvent({type: eventType, providerInfoArray: providerInfoArray});
+				this.dispatchEvent({type: eventType, providers: providers});
 			}
 			this.state = state;
 			this.onStateChange(state);
@@ -293,7 +293,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		 * @since 6.0
 		 */
 		initialize: function() {
-			this._providerInfoArray.forEach(function(info) {
+			this._providers.forEach(function(info) {
 				var provider = info.provider;
 				if (typeof provider.initialize === "function") {//$NON-NLS-0$
 					provider.initialize();
@@ -307,7 +307,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		 * @returns {Deferred} A promise that will provide the proposals.
 		 */
 		_computeProposals: function(offset) {
-			var providerInfoArray = this._providerInfoArray;
+			var providerInfoArray = this._providers;
 			var textView = this.textView;
 			var sel = textView.getSelection();
 			var model = textView.getModel(), mapOffset = offset;
@@ -481,14 +481,14 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		 * object and if all of the other IDs are also generated using this method.
 		 */
 		_generateProviderId: function() {
-			if (this._uniqueProviderIdCounter) {
-				this._uniqueProviderIdCounter++;
+			if (this._idcount) {
+				this._idcount++;
 			} else {
-				this._uniqueProviderIdCounter = 0;
+				this._idcount = 0;
 			}
-			return "ContentAssistGeneratedID_" +  this._uniqueProviderIdCounter;
+			return "ContentAssistGeneratedID_" +  this._idcount; //$NON-NLS-0$
 		},
-		
+
 		/**
 		 * Sets whether or not automatic content assist triggering is enabled.
 		 * @param {Boolean} enableAutoTrigger
@@ -497,49 +497,63 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this._autoTriggerEnabled = enableAutoTrigger;
 			this._updateAutoTriggerListenerState();
 		},
-		
+
+		/**
+		 * @name orion.editor.ContentAssistProviderInfo
+		 * @class Encapsulates a content assist provider and its automatic triggers.
+		 *
+		 * @property {String} id Unique ID of this provider.
+		 * @property {RegExp} charTriggers A regular expression matching the characters that, when typed,
+		 * will cause this provider to be activated automatically by the content assist engine.
+		 * @property {RegExp} excludedStyles A regular expression matching the style names that are
+		 * exclusions to this provider's <tt>charTriggers</tt> matching.
+		 * @property {orion.editor.ContentAssistProvider} provider The actual content assist provider.
+		 */
+
 		/**
 		 * Sets the content assist providers that this ContentAssist will consult to obtain proposals.
-		 * @param {orion.editor.ContentAssistProvider[]} providers The providers.
+		 *
+		 * @param {orion.editor.ContentAssistProvider[]|orion.edit.ContentAssistProviderInfo[]} providers The
+		 * providers. Each element may be either a plain {@link orion.editor.ContentAssistProvider}, or a
+		 * {@link orion.edit.ContentAssistProviderInfo}.
 		 */
 		setProviders: function(providers) {
-			var providerInfoArray = providers.map(function(provider){
-				return {
-					provider: provider,
-					id: this._generateProviderId()
-				}
-			}, this);
-			
-			this.setProviderInfoArray(providerInfoArray);
+			var _self = this;
+			this.setProviderInfoArray(providers.map(function(p) {
+				// Wrap any plain Provider into a ProviderInfo
+				return p.id ? p : {
+					provider: p,
+					id: _self._generateProviderId()
+				};
+			}));
 		},
-		
+
 		/**
-		 * Sets the array of content assist provider info that this ContentAssist will 
-		 * consult to obtain proposals and automatic triggers.
-		 * @param {Array { provider: orion.editor.ContentAssistProvider, 
-		 * 				   id: {String},
-		 * 				   charTriggers: {RegExp},
-		 * 				   excludedStyles: {RegExp}
-		 * 				  }
-		 * 		 } providers The providers.
+		 * @private
 		 */
 		setProviderInfoArray: function(providerInfoArray) {
-			this.resetProviderInfoArray();
+			this.clearProviders();
 			
-			this._providerInfoArray = providerInfoArray;
+			this._providers = providerInfoArray;
 			this._charTriggersInstalled = providerInfoArray.some(function(info){
 				return info.charTriggers;
 			});
 			this._updateAutoTriggerListenerState();
 		},
-		
-		resetProviderInfoArray: function() {
-			this._providerInfoArray = [];
+
+		/**
+		 * @returns orion.edit.ContentAssistProviderInfo[]
+		 */
+		getProviders: function() {
+			return this._providers;
+		},
+
+		clearProviders: function() {
+			this._providers = [];
 			this._charTriggersInstalled = false;
 			this._updateAutoTriggerListenerState();
 		},
 
-		
 		/**
 		 * Sets the progress handler that will display progress information, if any are generated by content assist providers.
 		 */
@@ -613,7 +627,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				if (this._charTriggersInstalled) {
 					var currentChar = this.textView.getText(caretOffset - 1, caretOffset);
 					
-					this._providerInfoArray.forEach(function(info) {
+					this._providers.forEach(function(info) {
 						// check if the charTriggers RegExp matches the currentChar
 						// we're assuming that this will fail much more often than
 						// the excludedStyles test so do this first for better performance

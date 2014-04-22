@@ -338,7 +338,7 @@ define([
 				var fileContentType = inputManager.getContentType();
 				var fileName = editor.getTitle();
 				var serviceRefs = serviceRegistry.getServiceReferences("orion.edit.contentAssist").concat(serviceRegistry.getServiceReferences("orion.edit.contentassist")); //$NON-NLS-1$ //$NON-NLS-0$
-				var providerInfoArray = event && event.providerInfoArray;				
+				var providerInfoArray = event && event.providers;
 				if (!providerInfoArray) {
 					providerInfoArray = serviceRefs.map(function(serviceRef) {
 						var contentTypeIds = serviceRef.getProperty("contentType"), //$NON-NLS-0$
@@ -374,7 +374,7 @@ define([
 					}
 				});
 				contentAssist.setEditorContextProvider(boundEditorContext);
-				contentAssist.setProviderInfoArray(providerInfoArray);
+				contentAssist.setProviders(providerInfoArray);
 				contentAssist.setAutoTriggerEnabled(self.settings.contentAssistAutoTrigger);
 				contentAssist.setProgress(progress);
 				contentAssist.setStyleAccessor(self.getStyleAccessor());
