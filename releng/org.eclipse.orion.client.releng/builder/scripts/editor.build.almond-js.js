@@ -34,7 +34,6 @@
 		start: "/* orion editor */ ", //start cannot be empty
 		end: "\
 var orion = this.orion || (this.orion = {});\n\
-var editor = orion.editor || (orion.editor = {});\n\
-editor.edit = require('orion/editor/edit');"
+var editor = orion.editor || (orion.editor = {});"
 	}
 })

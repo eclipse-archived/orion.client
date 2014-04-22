@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define */
+/*global define orion */
 define({
 	load: function(name, parentRequire, onLoad, config) {
 		if (parentRequire.specified && parentRequire.specified("orion/bootstrap")) { //$NON-NLS-0$
@@ -17,7 +17,7 @@ define({
 				onLoad(languages);
 			});
 		} else {
-			onLoad({});
+			onLoad(orion && orion.editor && orion.editor.languages ? orion.editor.languages : {});
 		}
 	}
 });

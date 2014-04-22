@@ -361,6 +361,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		for (var i = 0; i < arguments.length; i++) {
 			merge(editorNS, arguments[i]);	
 		}
+		editorNS.edit = edit;
 	}
 	
 	return edit;
