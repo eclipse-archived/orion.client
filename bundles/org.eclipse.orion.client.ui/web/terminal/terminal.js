@@ -93,9 +93,9 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
 					//update term with new settings
 					if (term && websocket && !autoresize) {
 						websocket.send(" stty -echo\r"); //$NON-NLS-0$
-						websocket.send(" stty columns " + calcWidth + " rows " + calcHeight + "\r"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+						websocket.send(" stty columns " + cols + " rows " + rows + "\r"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 						websocket.send(" stty echo\r"); //$NON-NLS-0$
-						term.resize(calcWidth, calcHeight);
+						term.resize(cols, rows);
 					}
 				}
 			}
