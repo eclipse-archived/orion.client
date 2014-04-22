@@ -1060,8 +1060,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			commandService.addCommand(createBasicProjectCommand);
 				
 			var createZipProjectCommand = new mCommands.Command({
-			name: "File System", //$NON-NLS-0$
-			tooltip: "Create project from a local zipped file.", //$NON-NLS-0$
+			name: "Zip archive", //$NON-NLS-0$
+			tooltip: "Create a project from a local zip archive.", //$NON-NLS-0$
 			id: "orion.project.create.fromfile", //$NON-NLS-0$
 			callback: function(data){
 					var item = forceSingleItem(data.items);

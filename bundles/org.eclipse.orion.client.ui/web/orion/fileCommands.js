@@ -944,7 +944,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 
 		var importZipURLCommand = new mCommands.Command({
 			name: messages["Import from HTTP..."],
-			tooltip: messages["Copy a file from a URL and optionally unzip it"],
+			tooltip: messages["Import a file from a URL and optionally unzip it"],
 			id: "orion.importZipURL", //$NON-NLS-0$
 			parameters: zipURLParameters,
 			callback: function(data) {
@@ -1061,8 +1061,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		commandService.addCommand(goIntoCommand);
 					
 		var importCommand = new mCommands.Command({
-			name : messages["Import local file..."],
-			tooltip: messages["Copy files and folders from your local file system"],
+			name : messages["File or zip archive"],
+			tooltip: messages["Import a file or zip archive from your local file system"],
 			imageClass: "core-sprite-importzip", //$NON-NLS-0$
 			id: "orion.import", //$NON-NLS-0$
 			callback : function(data) {
