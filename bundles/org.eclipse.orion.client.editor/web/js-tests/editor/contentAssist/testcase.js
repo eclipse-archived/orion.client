@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define setTimeout*/
+/*global define window setTimeout document*/
 define([
 	'orion/Deferred',
 	'chai/chai',
@@ -18,15 +18,25 @@ define([
 ], function(Deferred, chai, mTextModel, mMockTextView, mContentAssist) {
 	var assert = chai.assert;
 	var ContentAssist = mContentAssist.ContentAssist,
+		ContentAssistWidget = mContentAssist.ContentAssistWidget,
+		ContentAssistMode = mContentAssist.ContentAssistMode,
 	    TextModel = mTextModel.TextModel,
 	    MockTextView = mMockTextView.MockTextView;
 
+	function getNewView() {
+		return new MockTextView({parent: document.createElement("div")});
+	}
+	
+	function getNewContentAssist(view) {
+		return new ContentAssist(view);
+	}
+	
 	function withData(func) {
-		var view = new MockTextView({});
-		var contentAssist = new ContentAssist(view);
+		var view = getNewView();
+		var contentAssist = getNewContentAssist(view);
 		return func(view, contentAssist);
 	}
-
+	
 	/**
 	 * Sets the text in a TextView. An appearance of '@@@' in the text will be replaced by the editing caret.
 	 * @returns {Number} The caret offset
@@ -157,9 +167,7 @@ define([
 		});
 	};
 	
-	// Tests that active ContentAssist will not call providers as we type but rather
-	// will filter the proposals itself.
-	tests.testFiltering = function() {
+	function filterTestImpl(delayMS) {
 		var init = new Deferred(),
 			first = new Deferred(),
 		    second = new Deferred(),
@@ -184,7 +192,15 @@ define([
 						return previous;
 					}, 0);
 					assert.strictEqual(3, event.data.proposals.length - numUnselectable); // applicable proposals: "b", "ba", "ab"
-					init.resolve();
+					
+					if (delayMS) {
+						window.setTimeout(function(){
+							init.resolve();
+						}, delayMS);
+					} else {
+						init.resolve();
+					}
+					
 				} catch (e) {
 					init.reject(e); 
 				}
@@ -195,7 +211,13 @@ define([
 					assert.strictEqual("foo b", view.getText());
 					assert.strictEqual(view.getCaretOffset(), view.getModel().getCharCount());
 					assert.strictEqual(2, event.data.proposals.length); // applicable proposals: "b", "ba"
-					first.resolve();
+					if (delayMS) {
+						window.setTimeout(function(){
+							first.resolve();
+						}, delayMS);
+					} else {
+						first.resolve();
+					}
 				} catch (e) {
 					first.reject(e); 
 				}
@@ -228,10 +250,16 @@ define([
 				// 'foo '
 				contentAssist.removeEventListener('ProposalsComputed', initialComputedEvent);
 				contentAssist.addEventListener('ProposalsComputed', firstFilter);
-				
+
 				// Start filtering
 				// 'foo b'
-				view._handleKeyPress(createKeyPressEvent('b'));
+				if (delayMS) {
+					window.setTimeout(function(){
+						view._handleKeyPress(createKeyPressEvent('b'));
+					}, delayMS);
+				} else {
+					view._handleKeyPress(createKeyPressEvent('b'));
+				}
 			});
 			first.then(function() {
 				// Continue filtering
@@ -239,9 +267,172 @@ define([
 				contentAssist.removeEventListener('ProposalsComputed', firstFilter);
 				contentAssist.addEventListener('ProposalsComputed', secondFilter);
 
-				view._handleKeyPress(createKeyPressEvent('a'));
+				// continue filtering
+				// 'foo a'
+				if (delayMS) {
+					window.setTimeout(function(){
+						view._handleKeyPress(createKeyPressEvent('a'));
+					}, delayMS);
+				} else {
+					view._handleKeyPress(createKeyPressEvent('a'));
+				}
 			});
 		});
+		return deferred;
+	}
+	
+	
+	// Tests that active ContentAssist will not call providers as we type but rather
+	// will filter the proposals itself.
+	tests.testFiltering = function() {
+		return filterTestImpl(0);
+	};
+	
+	// Tests that content assist filtering will behave as expected if a 
+	// delay is introduced between the sequence of events
+	tests.testFilteringWith200MSDelay = function() {
+		return filterTestImpl(200);
+	};
+	
+	// Tests that content assist filtering will behave as expected if a 
+	// delay is introduced between the sequence of events
+	tests.testFilteringWith500MSDelay = function() {
+		return filterTestImpl(500);
+	};
+	
+	tests.testFiltering2 = function() {
+		var init = new Deferred(),
+			first = new Deferred(),
+		    second = new Deferred(),
+		    third = new Deferred(),
+		    fourth = new Deferred(),
+		    fifth = new Deferred(),
+		    deferred = Deferred.all([init, first, second, third, fourth, fifth]);
+		var view = getNewView();
+		var contentAssist = getNewContentAssist(view);
+		var dummyNode = document.createElement("div");
+		var contentAssistWidget = new ContentAssistWidget(contentAssist, dummyNode);
+		// creating a mode so that deactivation is triggered by it
+		var contentAssistMode = new ContentAssistMode(contentAssist, contentAssistWidget);
+		var delayMS = 100;
+		
+		setText(view, 'foo @@@');
+		var expectedText = "foo ";
+		
+		var provider = {
+			computeProposals: function(buffer, actualOffset, context) {
+				return [{proposal: "b"}, {proposal: "baa"}, {proposal: "ab"}];
+			}
+		};
+		
+		contentAssist.setProviders([ provider ]);
+
+		function proposalsComputedListener(boundUserArgs, event) {
+			var boundDeferred = boundUserArgs.boundDeferred;
+			try {
+				contentAssist.removeEventListener('ProposalsComputed', boundUserArgs.currentFunction);
+				assert.strictEqual(expectedText, view.getText());
+				assert.strictEqual(view.getCaretOffset(), view.getModel().getCharCount());
+				var numUnselectable = event.data.proposals.reduce(function(previous, current){
+					if (current.unselectable) {
+						previous++;
+					}
+					return previous;
+				}, 0);
+				assert.strictEqual(boundUserArgs.expectedNumProposals, event.data.proposals.length - numUnselectable);
+				if (delayMS) {
+					window.setTimeout(function(){
+						boundDeferred.resolve();
+					}, delayMS);
+				} else {
+					boundDeferred.resolve();
+				}
+			} catch (e) {
+				boundDeferred.reject(e); 
+			}
+		}
+		
+		function addProposalsComputedListener(boundDeferred, expectedNumProposals) {
+			var boundUserArgs = {
+				boundDeferred: boundDeferred,
+				expectedNumProposals: expectedNumProposals
+			};
+			boundUserArgs.currentFunction = proposalsComputedListener.bind(this, boundUserArgs);
+			contentAssist.addEventListener('ProposalsComputed', boundUserArgs.currentFunction);
+		}
+		
+		addProposalsComputedListener(init, 3);
+		contentAssist.activate();
+		
+		init.then(function() {
+			expectedText = "foo b";
+			addProposalsComputedListener(first, 2);
+
+			// Start filtering
+			// 'foo b'
+			if (delayMS) {
+				window.setTimeout(function(){
+					view._handleKeyPress(createKeyPressEvent('b'));
+				}, delayMS);
+			} else {
+				view._handleKeyPress(createKeyPressEvent('b'));
+			}
+		});
+		
+		first.then(function() {
+			// Continue filtering
+			// 'foo ba'
+			expectedText = "foo ba";
+			addProposalsComputedListener(second, 1);
+			
+			if (delayMS) {
+				window.setTimeout(function(){
+					view._handleKeyPress(createKeyPressEvent('a'));
+				}, delayMS);
+			} else {
+				view._handleKeyPress(createKeyPressEvent('a'));
+			}
+		});
+		
+		function deactivatingHandler(){
+			contentAssist.removeEventListener('Deactivating', deactivatingHandler);
+			third.resolve();
+			window.setTimeout(function(){
+				third.resolve();
+			}, 500);
+		}
+		
+		second.then(function(){
+			contentAssist.addEventListener('Deactivating', deactivatingHandler);
+			
+			view._handleKeyPress(createKeyPressEvent('x'));
+		});
+
+		third.then(function(){
+			setText(view, 'foo b@@@');
+			expectedText = "foo b";
+			addProposalsComputedListener(fourth, 3);
+			provider.computeProposals = function(buffer, actualOffset, context) {
+				return [{proposal: "aa"}, {proposal: "ab"}, {proposal: "za"}];
+			};
+			contentAssist.activate();	
+		});
+		
+		fourth.then(function(){
+			// Continue filtering
+			// 'foo ba'
+			expectedText = "foo ba";
+			addProposalsComputedListener(fifth, 2);
+			
+			if (delayMS) {
+				window.setTimeout(function(){
+					view._handleKeyPress(createKeyPressEvent('a'));
+				}, delayMS);
+			} else {
+				view._handleKeyPress(createKeyPressEvent('a'));
+			}
+		});
+		
 		return deferred;
 	};
 

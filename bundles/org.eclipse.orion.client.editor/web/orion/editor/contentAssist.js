@@ -107,9 +107,12 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		this.state = State.INACTIVE;
 		this.resetProviderInfoArray();
 		var self = this;
-		this.contentAssistListener = {
+		this._textViewListeners = {
 			onModelChanging: (function(event) {
 				this._latestModelChangingEvent = event;
+				if (event) {
+					this._updateFilterText(event);	
+				}
 			}).bind(this),
 			onSelection: (function(event) {
 				if (this.isDeactivatingChange(this._latestModelChangingEvent, event)) {
@@ -119,7 +122,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 						if (this.state === State.ACTIVE) {
 							this.setState(State.FILTERING);
 						}
-						this.filterProposals(event);
+						this.filterProposals();
 					}
 				}
 				this._latestModelChangingEvent = null;
@@ -202,7 +205,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			
 			var isPriorToInitialCaretOffset = selectionEvent.newValue.start < this._initialCaretOffset;
 			
-			if (isPriorToInitialCaretOffset) {
+			if (isPriorToInitialCaretOffset || !event) {
 				isDeactivating = true;
 			} else if (event) {
 				isDeactivating = (event.removedLineCount > 0) || (event.addedLineCount > 0);
@@ -214,15 +217,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		setState: function(state, /* Optional. Array of providers to pass to dispatched event.*/ providerInfoArray) {
 			var eventType;
 			if (state === State.ACTIVE) {
-				this._filterText = "";
 				eventType = "Activating"; //$NON-NLS-0$
 				if (this._mode) { this._mode.setActive(true); }
-				
 			} else if (state === State.INACTIVE) {
 				eventType = "Deactivating"; //$NON-NLS-0$
 				if (this._mode) { this._mode.setActive(false); }
-				this._initialCaretOffset = -1;
-				this._filterText = "";
 			}
 			if (eventType) {
 				this.dispatchEvent({type: eventType, providerInfoArray: providerInfoArray});
@@ -236,43 +235,41 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		/** @private */
 		onStateChange: function(state) {
 			if (state === State.INACTIVE) {
-				if (this.listenerAdded) {
-					this._latestModelChangingEvent = null;
-					this.textView.removeEventListener("ModelChanging", this.contentAssistListener.onModelChanging); //$NON-NLS-0$
-					this.textView.removeEventListener("Scroll", this.contentAssistListener.onScroll); //$NON-NLS-0$
-					this.textView.removeEventListener("Selection", this.contentAssistListener.onSelection); //$NON-NLS-0$
-					this.listenerAdded = false;
-				}
+				this._removeTextViewListeners();
+				this._filterText = "";
+				this._initialCaretOffset = -1;
+				this._computedProposals = null;
 			} else if (state === State.ACTIVE) {
-				this.computeProposals().then(function(){
-					if (this._computedProposals && !this.listenerAdded) {
-						this.textView.addEventListener("ModelChanging", this.contentAssistListener.onModelChanging); //$NON-NLS-0$
-						this.textView.addEventListener("Scroll", this.contentAssistListener.onScroll); //$NON-NLS-0$
-						this.textView.addEventListener("Selection", this.contentAssistListener.onSelection); //$NON-NLS-0$
-						this.listenerAdded = true;
-					}
-				}.bind(this));
+				this._filterText = "";
+				this._addTextViewListeners();
+				this.computeProposals();
 			}
 		},
 		/**
 		 * Computes the proposals at the TextView's current caret offset.
 		 */
 		computeProposals: function() {
-			var self = this;
-			
 			// figure out initial offset, it should be the minimum between 
 			// the beginning of the selection and the current caret offset
 			var offset = this.textView.getCaretOffset();
 			var sel = this.textView.getSelection();
 			var selectionStart = Math.min(sel.start, sel.end);			
 			this._initialCaretOffset = Math.min(offset, selectionStart);
+			this._computedProposals = null;
 			
-			return this._computeProposals(this._initialCaretOffset).then(function(proposals) {
-				self._computedProposals = proposals;
-				if (!self.isActive()) { return; }
-				var displayProposals = self._flatten(proposals);
-				self.dispatchEvent({type: "ProposalsComputed", data: {proposals: displayProposals}, autoApply: !self._autoTriggered}); //$NON-NLS-0$
-			});
+			this._computeProposals(this._initialCaretOffset).then(function(proposals) {
+				if (this.isActive()) {
+					this._computedProposals = proposals;
+					var displayProposals = this._flatten(proposals);
+					this.dispatchEvent({type: "ProposalsComputed", data: {proposals: displayProposals}, autoApply: !this._autoTriggered}); //$NON-NLS-0$
+					if (displayProposals && this._filterText) {
+						// force filtering here because user entered text after
+						// computeProposals() was called but before the plugins
+						// returned the computed proposals
+						this.filterProposals(true);
+					}
+				}
+			}.bind(this));
 		},
 		/** @private */
 		getPrefixStart: function(model, end) {
@@ -358,87 +355,68 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			return Deferred.all(promises, this.handleError);
 		},
 
-		filterProposals: function(event) {
-			var text = "";
-			var removedCharCount = 0;
-			if (this._latestModelChangingEvent) {
-				text = this._latestModelChangingEvent.text;
-				removedCharCount = this._latestModelChangingEvent.removedCharCount;
-			} else {
-				// the selection was changed but not the model, do nothing for now
-				return;
-			}
-			
-			// update this._filterText based on the modification info
-			// contained in the event
-			if (removedCharCount) {
-				var lastIndex = this._filterText.length - removedCharCount;
-				this._filterText = this._filterText.substring(0, lastIndex);
-			}
-			if (text) {
-				this._filterText = this._filterText.concat(text);
-			}
-			
-			var model = this.textView.getModel();
-			if (model.getBaseModel) {
-				model = model.getBaseModel();
-			}
-			
-			var prefixStart = this.getPrefixStart(model, this._initialCaretOffset);
-			var prefixText = this.textView.getText(prefixStart, this._initialCaretOffset);
-			
-			// filter proposals based on prefixes and _filterText
-			var proposals = []; //array of arrays of proposals
-			this._computedProposals.forEach(function(proposalArray) {
-				var includedProposals = proposalArray.filter(function(proposal) {
-					if ((STYLES[proposal.style] === STYLES.hr)
-						|| (STYLES[proposal.style] === STYLES.noemphasis_title)) {
-						return true;
-					}
-					
-					var proposalString = "";
-					if (proposal.overwrite) {
-						if (proposal.name) {
-							proposalString = proposal.name;
-						} else if (proposal.proposal) {
-							proposalString = proposal.proposal;
+		filterProposals: function(force) {
+			if (this._computedProposals && (this._latestModelChangingEvent || force)) {
+				var model = this.textView.getModel();
+				if (model.getBaseModel) {
+					model = model.getBaseModel();
+				}
+				var prefixStart = this.getPrefixStart(model, this._initialCaretOffset);
+				var prefixText = this.textView.getText(prefixStart, this._initialCaretOffset);
+				
+				// filter proposals based on prefixes and _filterText
+				var proposals = []; //array of arrays of proposals
+				this._computedProposals.forEach(function(proposalArray) {
+					var includedProposals = proposalArray.filter(function(proposal) {
+						if ((STYLES[proposal.style] === STYLES.hr)
+							|| (STYLES[proposal.style] === STYLES.noemphasis_title)) {
+							return true;
+						}
+						
+						var proposalString = "";
+						if (proposal.overwrite) {
+							if (proposal.name) {
+								proposalString = proposal.name;
+							} else if (proposal.proposal) {
+								proposalString = proposal.proposal;
+							} else {
+								return false; // unknown format
+							}
+		
+							return (0 === proposalString.indexOf(prefixText + this._filterText));
+							
+						} else if (proposal.name || proposal.proposal) {
+							var activated = false;
+							// try matching name
+							if (proposal.name) {
+								activated = (0 === proposal.name.indexOf(prefixText + this._filterText));	
+							}
+							
+							// try matching proposal text
+							if (!activated && proposal.proposal) {
+								activated = (0 === proposal.proposal.indexOf(this._filterText));
+							}
+							
+							return activated;
+						} else if (typeof proposal === "string") { //$NON-NLS-0$
+							return 0 === proposal.indexOf(this._filterText);
 						} else {
-							return false; // unknown format
+							return false;
 						}
-	
-						return (0 === proposalString.indexOf(prefixText + this._filterText));
-						
-					} else if (proposal.name || proposal.proposal) {
-						var activated = false;
-						// try matching name
-						if (proposal.name) {
-							activated = (0 === proposal.name.indexOf(prefixText + this._filterText));	
-						}
-						
-						// try matching proposal text
-						if (!activated && proposal.proposal) {
-							activated = (0 === proposal.proposal.indexOf(this._filterText));
-						}
-						
-						return activated;
-					} else if (typeof proposal === "string") { //$NON-NLS-0$
-						return 0 === proposal.indexOf(this._filterText);
-					} else {
-						return false;
+					}, this);
+					
+					if (includedProposals.length > 0) {
+						proposals.push(includedProposals);	
 					}
 				}, this);
 				
-				if (includedProposals.length > 0) {
-					proposals.push(includedProposals);	
-				}
-			}, this);
-			
-			// filter out extra separators and titles
-			proposals = this._removeExtraUnselectableElements(proposals);
-			
-			var displayProposals = this._flatten(proposals);
-			
-			this.dispatchEvent({type: "ProposalsComputed", data: {proposals: displayProposals}, autoApply: false}); //$NON-NLS-0$
+				// filter out extra separators and titles
+				proposals = this._removeExtraUnselectableElements(proposals);
+				
+				var displayProposals = this._flatten(proposals);
+				
+				this.dispatchEvent({type: "ProposalsComputed", data: {proposals: displayProposals}, autoApply: false}); //$NON-NLS-0$
+			}
 		},
 		
 		/**
@@ -665,6 +643,39 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				// install the listener if necessary
 				this.textView.addEventListener("Modify", this._boundTriggerListener); //$NON-NLS-0$
 				this._triggerListenerInstalled = true;
+			}
+		},
+		
+		_addTextViewListeners: function() {
+			if (!this._textViewListenersAdded) {
+				this.textView.addEventListener("ModelChanging", this._textViewListeners.onModelChanging); //$NON-NLS-0$
+				this.textView.addEventListener("Scroll", this._textViewListeners.onScroll); //$NON-NLS-0$
+				this.textView.addEventListener("Selection", this._textViewListeners.onSelection); //$NON-NLS-0$
+				this._textViewListenersAdded = true;
+			}
+		},
+		
+		_removeTextViewListeners: function() {
+			if (this._textViewListenersAdded) {
+				this._latestModelChangingEvent = null;
+				this.textView.removeEventListener("ModelChanging", this._textViewListeners.onModelChanging); //$NON-NLS-0$
+				this.textView.removeEventListener("Scroll", this._textViewListeners.onScroll); //$NON-NLS-0$
+				this.textView.removeEventListener("Selection", this._textViewListeners.onSelection); //$NON-NLS-0$
+				this._textViewListenersAdded = false;
+			}
+		},
+		
+		_updateFilterText: function(modelChangingEvent) {
+			// update this._filterText based on the modification info
+			// contained in the event
+			var removedCharCount = modelChangingEvent.removedCharCount;
+			if (removedCharCount) {
+				var lastIndex = this._filterText.length - removedCharCount;
+				this._filterText = this._filterText.substring(0, lastIndex);
+			}
+			var text = modelChangingEvent.text;
+			if (text) {
+				this._filterText = this._filterText.concat(text);
 			}
 		}
 	};
