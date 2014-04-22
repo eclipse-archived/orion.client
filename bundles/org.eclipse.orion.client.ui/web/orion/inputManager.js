@@ -27,7 +27,7 @@ define([
 		this._timeout = options.timeout;
 		//TODO: remove listeners if there are no clients
 		//TODO: add support for multiple clients with different timeouts
-		var events = ["keypress","keydown","keyup","mousemove","mousedown","mousemove"]; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		var events = ["keypress","keydown","keyup"]; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 		var reset = function (e) { this._resetTimer(); }.bind(this);
 		for (var i = 0; i < events.length; i++) {
 			var event = events[i];

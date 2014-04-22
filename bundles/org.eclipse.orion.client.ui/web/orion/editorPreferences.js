@@ -19,7 +19,7 @@ define([], function() {
 		autoSave: false,
 		autoSaveVisible: true,
 		autoSaveLocalVisible: true,
-		autoSaveTimeout: 1000,
+		autoSaveTimeout: 250,
 		autoSaveTimeoutVisible: true,
 		themeVisible: true,
 		themeLocalVisible: true,
