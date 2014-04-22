@@ -17,12 +17,11 @@ define([
 	'chai/chai',
 	'orion/objects',
 	'orion/Deferred',
-	'esprima', //must stay at the end, does not export a module  
+	'esprima',
 	'doctrine/doctrine' //must stay at the end, does not export a module 
-], function(ContentAssist, chai, objects, Deferred) {
+], function(ContentAssist, chai, objects, Deferred, _esprima) {
 	var assert = chai.assert;
-	if (Esprima) 
-		esprima = Esprima;
+	var esprima = typeof _esprima !== "undefined" ? _esprima : (function() {return this;}()).esprima;
 
 	/**
 	 * @description Parse the snippet
