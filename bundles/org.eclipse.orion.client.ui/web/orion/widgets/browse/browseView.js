@@ -304,6 +304,13 @@ define([
 								titleNode.appendChild(this.componentSelector.parentNode);
 								this.componentSelector.refresh();
 							}
+							if(this.snippetShareOptions && this.snippetShareOptions.originalHref) {
+								var titleLink = document.createElement("a"); //$NON-NLS-0$
+								titleLink.href = this.snippetShareOptions.originalHref;
+								titleLink.appendChild(document.createTextNode("Click here to see the original file."));
+								titleLink.classList.add("downloadLinkName"); //$NON-NLS-0$
+								titleNode.appendChild(titleLink);
+							}
 						}
 						//Render the bread crumb 
 						if(this.breadCrumbMaker) {

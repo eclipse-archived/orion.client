@@ -96,7 +96,7 @@ define([
 		this.popupTextAreaId = "orion.browse.shareSnippetInput";
 		this.popupTemplate = ShareSnippetTriggerTemplate;
 		this.tags = '<div id="${0}"></div><link rel="stylesheet" type="text/css" href="${1}"/><script src="${2}"></script>' +
-					'<script> orion.browse.browser("${3}","${4}",${5},null,{maxLine: 20, fileURL:"${6}",start:${7},end:${8}});</script>';
+					'<script> orion.browse.browser("${3}","${4}",${5},null,{maxLine:20,originalHref:"${6}",fileURL:"${7}",start:${8},end:${9}});</script>';
 		this.getTextAreaValue = function() {
 			if(this.textView) {
 				var snippetContainerId = "snippet_container_" + Math.floor((Math.random()*1000000)+1);
@@ -107,9 +107,13 @@ define([
 					start = selection.start;
 					end = selection.end;
 				}
+				var originalHref = new URITemplate("#{,resource,params*}").expand({resource:this.currentSnippetURI, params: {start: start, end: end}});
+				var url = new URL(window.location.href);
+				url.hash = originalHref;
 				var base = this.widgetSource.base ? '"' + this.widgetSource.base + '"' : 'null';
 	
-            	var tagString = i18nUtil.formatMessage(this.tags, snippetContainerId, this.widgetSource.css, this.widgetSource.js, snippetContainerId, this.widgetSource.repo, base, this.currentSnippetURI, start, end);
+            	var tagString = i18nUtil.formatMessage(this.tags, snippetContainerId, this.widgetSource.css, this.widgetSource.js, snippetContainerId, 
+            										   this.widgetSource.repo, base, url.href, this.currentSnippetURI, start, end);
 				return tagString;
 				//"selection start: " + selection.start + ". selection end: " + selection.end + "." + "URI: " + this.currentSnippetURI + " Widget source: " + JSON.stringify(this.widgetSource);
 			}
@@ -509,11 +513,19 @@ define([
 		},
 		onTextViewCreated: function(textView) {
 			if(this.shareSnippetHandler) {
+				//this._currentURI = PageUtil.matchResourceParameters().resource;
 				this.shareSnippetHandler.textView = textView;
 				if(this._currentURI.length > 0) {
 					this.shareSnippetHandler.currentSnippetURI = (this._currentURI[0] === "#" ?  this._currentURI.substring(1) : this._currentURI);
 				} else {
 					this.shareSnippetHandler.currentSnippetURI = "";
+				}
+			}
+			if(!this.snippetShareOptions) {
+				var editorParams = PageUtil.matchResourceParameters();
+				if(editorParams && editorParams.end && editorParams.end !== editorParams.end.start) {
+					window.setTimeout(function() {
+						textView.setSelection(editorParams.start, editorParams.end, true);}, 100);
 				}
 			}
 		},
