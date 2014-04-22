@@ -259,10 +259,13 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			
 			this._computeProposals(this._initialCaretOffset).then(function(proposals) {
 				if (this.isActive()) {
-					this._computedProposals = proposals;
 					var displayProposals = this._flatten(proposals);
+					//check if flattened proposals form a valid array with at least one entry
+					if (displayProposals && Array.isArray(displayProposals) && (0 < displayProposals.length)) {
+						this._computedProposals = proposals;
+					}
 					this.dispatchEvent({type: "ProposalsComputed", data: {proposals: displayProposals}, autoApply: !this._autoTriggered}); //$NON-NLS-0$
-					if (displayProposals && this._filterText) {
+					if (this._computedProposals && this._filterText) {
 						// force filtering here because user entered text after
 						// computeProposals() was called but before the plugins
 						// returned the computed proposals
@@ -367,53 +370,57 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				// filter proposals based on prefixes and _filterText
 				var proposals = []; //array of arrays of proposals
 				this._computedProposals.forEach(function(proposalArray) {
-					var includedProposals = proposalArray.filter(function(proposal) {
-						if ((STYLES[proposal.style] === STYLES.hr)
-							|| (STYLES[proposal.style] === STYLES.noemphasis_title)) {
-							return true;
-						}
-						
-						var proposalString = "";
-						if (proposal.overwrite) {
-							if (proposal.name) {
-								proposalString = proposal.name;
-							} else if (proposal.proposal) {
-								proposalString = proposal.proposal;
+					if (proposalArray && Array.isArray(proposalArray)) {
+						var includedProposals = proposalArray.filter(function(proposal) {
+							if ((STYLES[proposal.style] === STYLES.hr)
+								|| (STYLES[proposal.style] === STYLES.noemphasis_title)) {
+								return true;
+							}
+							
+							var proposalString = "";
+							if (proposal.overwrite) {
+								if (proposal.name) {
+									proposalString = proposal.name;
+								} else if (proposal.proposal) {
+									proposalString = proposal.proposal;
+								} else {
+									return false; // unknown format
+								}
+			
+								return (0 === proposalString.indexOf(prefixText + this._filterText));
+								
+							} else if (proposal.name || proposal.proposal) {
+								var activated = false;
+								// try matching name
+								if (proposal.name) {
+									activated = (0 === proposal.name.indexOf(prefixText + this._filterText));	
+								}
+								
+								// try matching proposal text
+								if (!activated && proposal.proposal) {
+									activated = (0 === proposal.proposal.indexOf(this._filterText));
+								}
+								
+								return activated;
+							} else if (typeof proposal === "string") { //$NON-NLS-0$
+								return 0 === proposal.indexOf(this._filterText);
 							} else {
-								return false; // unknown format
+								return false;
 							}
-		
-							return (0 === proposalString.indexOf(prefixText + this._filterText));
-							
-						} else if (proposal.name || proposal.proposal) {
-							var activated = false;
-							// try matching name
-							if (proposal.name) {
-								activated = (0 === proposal.name.indexOf(prefixText + this._filterText));	
-							}
-							
-							// try matching proposal text
-							if (!activated && proposal.proposal) {
-								activated = (0 === proposal.proposal.indexOf(this._filterText));
-							}
-							
-							return activated;
-						} else if (typeof proposal === "string") { //$NON-NLS-0$
-							return 0 === proposal.indexOf(this._filterText);
-						} else {
-							return false;
+						}, this);
+						
+						if (includedProposals.length > 0) {
+							proposals.push(includedProposals);	
 						}
-					}, this);
-					
-					if (includedProposals.length > 0) {
-						proposals.push(includedProposals);	
 					}
 				}, this);
 				
-				// filter out extra separators and titles
-				proposals = this._removeExtraUnselectableElements(proposals);
-				
-				var displayProposals = this._flatten(proposals);
+				var displayProposals = [];
+				if (proposals) {
+					// filter out extra separators and titles
+					proposals = this._removeExtraUnselectableElements(proposals);
+					displayProposals = this._flatten(proposals);
+				}
 				
 				this.dispatchEvent({type: "ProposalsComputed", data: {proposals: displayProposals}, autoApply: false}); //$NON-NLS-0$
 			}
