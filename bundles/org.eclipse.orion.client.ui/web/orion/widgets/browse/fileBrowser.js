@@ -21,7 +21,6 @@ define([
 	'orion/explorers/navigatorRenderer',
 	'orion/widgets/browse/readonlyEditorView',
 	'orion/widgets/browse/resourceSelector',
-	'orion/markdownView',
 	'orion/commandRegistry',
 	'orion/fileClient',
 	'orion/contentTypes',
@@ -33,12 +32,15 @@ define([
 	'orion/EventTarget',
 	'text!orion/widgets/browse/repoAndBaseUrlTrigger.html',
 	'text!orion/widgets/browse/repoUrlTrigger.html',
+	'text!orion/widgets/browse/shareSnippetTrigger.html',
 	'orion/commands',
 	'orion/webui/littlelib',
+	'orion/i18nUtil',
 	'orion/URL-shim'
 ], function(
-	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector, mMarkdownView,
-	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, RepoAndBaseURLTriggerTemplate, RepoURLTriggerTemplate, mCommands, lib
+	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector,
+	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, 
+	EventTarget, RepoAndBaseURLTriggerTemplate, RepoURLTriggerTemplate, ShareSnippetTriggerTemplate, mCommands, lib, i18nUtil
 ) {
 	
 	function ResourceChangeHandler(options) {
@@ -82,6 +84,37 @@ define([
 			this.popupTemplate = RepoURLTriggerTemplate;
 			this.popupTextAreaValue = repoURL;
 		}
+		this.getTextAreaValue = function() {
+			return this.popupTextAreaValue;
+		}.bind(this);
+	}
+	
+	function shareSnippetHandler(widgetSource){
+		this.widgetSource = widgetSource;
+		this.triggerNodeId = "orion.browse.shareSnippetTrigger";
+		this.dropdownNodeId = "orion.browse.shareSnippetDropdown";
+		this.popupTextAreaId = "orion.browse.shareSnippetInput";
+		this.popupTemplate = ShareSnippetTriggerTemplate;
+		this.tags = '<div id="${0}"></div><link rel="stylesheet" type="text/css" href="${1}"/><script src="${2}"></script>' +
+					'<script> orion.browse.browser("${3}","${4}",${5},null,{maxLine: 20, fileURL:"${6}",start:${7},end:${8}});</script>';
+		this.getTextAreaValue = function() {
+			if(this.textView) {
+				var snippetContainerId = "snippet_container_" + Math.floor((Math.random()*1000000)+1);
+				var selection = this.textView.getSelection();
+				var start = 0;
+				var end = 0;
+				if(selection.start !== selection.end) {
+					start = selection.start;
+					end = selection.end;
+				}
+				var base = this.widgetSource.base ? '"' + this.widgetSource.base + '"' : 'null';
+	
+            	var tagString = i18nUtil.formatMessage(this.tags, snippetContainerId, this.widgetSource.css, this.widgetSource.js, snippetContainerId, this.widgetSource.repo, base, this.currentSnippetURI, start, end);
+				return tagString;
+				//"selection start: " + selection.start + ". selection end: " + selection.end + "." + "URI: " + this.currentSnippetURI + " Widget source: " + JSON.stringify(this.widgetSource);
+			}
+			return "Nothing to share";
+		}.bind(this);
 	}
 	
 	/**
@@ -108,11 +141,16 @@ define([
 	 * @name orion.browse.FileBrowser
 	 */
 	function FileBrowser(options) {
+		var url = new URL(window.location.href);
+		this.shareSnippet = url.query.get("shareSnippet") === "true" && options.widgetSource;
+		if(this.shareSnippet) {
+			this.widgetSource = options.widgetSource;
+		}
 		this._parentDomNode = lib.node(options.parent);//Required
 		this.snippetShareOptions = options.snippetShareOptions;
 		if(!this.snippetShareOptions) {
 			this._parentDomNode.classList.add("browserParentDom");
-		}
+		} 
 		if(options.fileClient) {
 			this._fileClient = options.fileClient;
 		} else if(options.serviceRegistry) {
@@ -219,6 +257,9 @@ define([
 		startup: function(serviceRegistry) {
 			if(serviceRegistry) {
 				this._fileClient = new mFileClient.FileClient(serviceRegistry);	
+			}
+			if(this.shareSnippet) {
+				this.shareSnippetHandler = new shareSnippetHandler(this.widgetSource);
 			}
 			if(this.repoURL) {
 				this.repoURLHandler = this.snippetShareOptions ? null : new repoURLHandler(this.repoURL, this.baseURL);
@@ -466,11 +507,22 @@ define([
 			}
 			return workspaceRootURL;
 		},
+		onTextViewCreated: function(textView) {
+			if(this.shareSnippetHandler) {
+				this.shareSnippetHandler.textView = textView;
+				if(this._currentURI.length > 0) {
+					this.shareSnippetHandler.currentSnippetURI = (this._currentURI[0] === "#" ?  this._currentURI.substring(1) : this._currentURI);
+				} else {
+					this.shareSnippetHandler.currentSnippetURI = "";
+				}
+			}
+		},
 		_getEditorView: function(input, contents, metadata) {
 			var view = null;
 			if (metadata && input) {
 				var browseViewOptons = {
 					parent: this._parentDomNode,
+					browser: this,
 					maxEditorLines: this._maxEditorLines,
 					breadCrumbInHeader: this._breadCrumbInHeader,
 					metadata: metadata,
@@ -479,17 +531,23 @@ define([
 					commandRegistry: this._commandRegistry,
 					contentTypeRegistry: this._contentTypeService,
 					inputManager: this._inputManager,
-					infoDropDownHandlers: this.repoURLHandler ? [this.repoURLHandler] : null,
+					infoDropDownHandlers: this.repoURLHandler ? [this.repoURLHandler] : [],
 					fileService: this._fileClient,
 					snippetShareOptions: this.snippetShareOptions,
 					//clickHandler: function(location) {this.refresh(location);}.bind(this),
 					breadCrumbMaker: this.snippetShareOptions ? null: function(bcContainer, maxLength) {this._breadCrumbMaker(bcContainer, maxLength);}.bind(this)
 				};
 				if (!metadata.Directory) {
+					if(this.shareSnippetHandler) {
+						this.shareSnippetHandler.textView = null;
+					}
 					var cType = this._contentTypeService.getFileContentType(metadata);
 					if(!cType) {
 						if(this._inputManager._unknownContentTypeAsText()) {
 							browseViewOptons.editorView = this._editorView;
+							if(this.shareSnippetHandler) {
+								browseViewOptons.infoDropDownHandlers.unshift(this.shareSnippetHandler);
+							}
 						} else {
 							var objectURLLink = URL.createObjectURL(new Blob([contents],{type: ""}));
 							var downloadLink = document.createElement("a"); //$NON-NLS-0$
@@ -503,6 +561,9 @@ define([
 						browseViewOptons.isMarkdownView = true;
 					} else if(!mNavigatorRenderer.isImage(cType)) {
 						browseViewOptons.editorView = this._editorView;
+						if(this.shareSnippetHandler) {
+							browseViewOptons.infoDropDownHandlers.unshift(this.shareSnippetHandler);
+						}
 					} else {
 						var objectURL = URL.createObjectURL(new Blob([contents],{type: cType.id}));
 						var image = document.createElement("img"); //$NON-NLS-0$
@@ -519,6 +580,7 @@ define([
 			if(!uri) {
 				uri = new URITemplate("{,resource}").expand({resource:this._fileClient.fileServiceRootURL("")});
 			}
+			this._currentURI = uri;
 			this._inputManager.setInput(uri);
 		},
 		create: function() {

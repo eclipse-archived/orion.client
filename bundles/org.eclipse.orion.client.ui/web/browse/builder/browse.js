@@ -107,6 +107,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			snippetShareOptions: params.snippetShareOptions,
 			selectorNumber: selectorNumber,
 			rootName: params.rootName,
+			widgetSource: _browser_script_source ? {repo: params.repo, base: params.base, js: _browser_script_source , css: _browser_script_source.replace(/built-browser.*.js/, "built-browser.css")} : null,
 			maxEditorLines: params.snippetShareOptions && params.snippetShareOptions.maxLine ? params.snippetShareOptions.maxLine : 300,
 			init: true
 		});

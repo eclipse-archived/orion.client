@@ -205,20 +205,20 @@ a.currentLocation:hover {
     background-color: #f5f7f9;
 }
 
-.repoUrlLink {
+.infoDropdownLink {
 	margin-top: 5px;
 	margin-right: 4px;
 	color: #02ADD0;
 	font-size: 1.1em;
 }
 
-.repoUrlLink:hover {
+.infoDropdownLink:hover {
 	text-decoration: underline;
 	color: #F58B0F;
 	cursor: pointer;
 }
 
-.repoUrlDropdown {
+.infoContainerDropdown {
 	width: 360px;
 	color: #666666;
 	overflow: hidden;
@@ -244,7 +244,16 @@ a.currentLocation:hover {
 	outline: none !important;
 }
 
-.repoUrlHeader {
+.shareSnippetInput {
+	border: 1px solid #dadada;
+	margin-top: 1px;
+	margin-left: 9px;
+	width: 340px;
+	height: 24px;
+	margin-bottom: 4px;
+}
+
+.infoDropdownHeader {
 	margin-top: 3px;
 	margin-left: 9px;
 	width: 340px;
@@ -256,13 +265,13 @@ a.currentLocation:hover {
 	display: inline-block;
 }
 
-.repoUrlHeaderTitle {
+.infoDropdownHeaderTitle {
 	float: right;
 	font-weight: bold;
 	/*font-size: 1em;*/
 }
 
-.repoUrlHeaderClose {
+.infoDropdownHeaderClose {
 	float: left;
 	color: grey;
 	padding-left: 0 !important;
@@ -273,7 +282,7 @@ a.currentLocation:hover {
 	cursor: pointer;
 }
 
-.repoUrlHeaderClose:hover {
+.infoDropdownHeaderClose:hover {
 	color: #F58B0F; 
 }
 

@@ -176,6 +176,7 @@ define([
 	 */
 	function BrowseView(options) {
 		this._parent = options.parent;
+		this._browser = options.browser;
 		this._metadata = options.metadata;
 		this.editorInputManager = options.inputManager;
 		this.fileClient = options.fileService;
@@ -271,7 +272,7 @@ define([
 									});
 									infoDropDown.getItems = function() {
 										var inputNode = lib.node(handler.popupTextAreaId);
-										inputNode.value = handler.popupTextAreaValue;
+										inputNode.value = handler.getTextAreaValue();
 										return [inputNode];
 									};
 									infoDropDown._focusDropdownNode = function() {
@@ -328,7 +329,7 @@ define([
 							this.editorView.getParent().style.height = "30px"; //$NON-NLS-0$
 							this.editorView.create();
 							this.resetTextModel = this.snippetShareOptions && this.snippetShareOptions.end ? true : false;
-							var textView = this.editorView. editor.getTextView();
+							var textView = this.editorView.editor.getTextView();
 							textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
 								var textModel = textView.getModel();
 								if(this.resetTextModel) {
@@ -343,6 +344,9 @@ define([
 								}
 								var textViewheight = textView.getLineHeight() * linesToRender + 20;
 								this.editorView.getParent().style.height = textViewheight + "px"; //$NON-NLS-0$
+								if(this._browser) {
+									this._browser.onTextViewCreated(textView);
+								}
 							}.bind(this));
 							this.editor = this.editorView.editor;
 						} else if(this.isMarkdownView) {
