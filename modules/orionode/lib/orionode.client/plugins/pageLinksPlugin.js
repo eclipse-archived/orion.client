@@ -50,6 +50,14 @@ define([
 		imageClass: "core-sprite-shell",
 		order: 40
 	});
+	
+	provider.registerService("orion.page.link.category", null, {
+		id: "settings",
+		nameKey: "Settings",
+		nls: "orion/widgets/nls/messages",
+		imageClass: "core-sprite-gear",
+		order: 60
+	});
 
 	// Primary navigation links
 	provider.registerService("orion.page.link", null, {
@@ -76,6 +84,15 @@ define([
 		"default": true,
 		order: 10,
 		uriTemplate: "{+OrionHome}/search/search.html",
+	});
+
+	provider.registerService("orion.page.link", null, {
+		nameKey: "Settings",
+		id: "orion.settings",
+		nls: "orion/widgets/nls/messages",
+		category: "settings",
+		"default": true, // Only show if nothing more specific is available
+		uriTemplate: "{+OrionHome}/settings/settings.html"
 	});
 
 	// Links to an Editor view of current folder. This is only useful from non-Editor pages
@@ -130,13 +147,6 @@ define([
 		nls: "orion/widgets/nls/messages",
 		uriTemplate: 'http://wiki.eclipse.org/Orion/Getting_Started_with_Orion_node',
 		category: "user.0"
-	});
-	provider.registerService("orion.page.link.user", null, {
-		id: "orion.settings",
-		nameKey: "Settings",
-		nls: "orion/widgets/nls/messages",
-		uriTemplate: "{+OrionHome}/settings/settings.html",
-		category: "user.1"
 	});
 
 	var htmlHelloWorld = document.createElement('a');
