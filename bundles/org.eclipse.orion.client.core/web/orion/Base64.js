@@ -11,7 +11,7 @@
 
 /*global define atob btoa*/
 define(function() {
-	
+
 	var handlesWhitespace = (function(){
 		try {
 			return atob("AA==") === atob("A A = =");
@@ -19,7 +19,7 @@ define(function() {
 			return false;
 		}
 	})();
-	
+
 	function encode(buffer) {
 		buffer = (buffer instanceof Uint8Array) ? buffer : new Uint8Array(buffer);
 		var result = [];
@@ -28,7 +28,7 @@ define(function() {
 		}
 		return btoa(result.join(""));
 	}
-	
+
 	function decode(base64) {
 		base64 = String(base64 !== undefined ? base64 : "");
 		if (!handlesWhitespace) {
