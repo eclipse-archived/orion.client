@@ -312,6 +312,7 @@ define([
 		var contentAssist = getNewContentAssist(view);
 		var dummyNode = document.createElement("div");
 		var contentAssistWidget = new ContentAssistWidget(contentAssist, dummyNode);
+		contentAssistWidget.selectNode = function(){}; //override selectNode() since we aren't testing it here
 		// creating a mode so that deactivation is triggered by it
 		var contentAssistMode = new ContentAssistMode(contentAssist, contentAssistWidget);
 		var delayMS = 100;
@@ -321,11 +322,23 @@ define([
 		
 		var provider = {
 			computeProposals: function(buffer, actualOffset, context) {
+				return undefined;
+			}
+		};
+		
+		var provider2 = {
+			computeProposals: function(buffer, actualOffset, context) {
 				return [{proposal: "b"}, {proposal: "baa"}, {proposal: "ab"}];
 			}
 		};
 		
-		contentAssist.setProviders([ provider ]);
+		var provider3 = {
+			computeProposals: function(buffer, actualOffset, context) {
+				return [undefined];
+			}
+		};
+		
+		contentAssist.setProviders([ provider, provider2, provider3 ]);
 
 		function proposalsComputedListener(boundUserArgs, event) {
 			var boundDeferred = boundUserArgs.boundDeferred;
@@ -412,9 +425,19 @@ define([
 			setText(view, 'foo b@@@');
 			expectedText = "foo b";
 			addProposalsComputedListener(fourth, 3);
+			
 			provider.computeProposals = function(buffer, actualOffset, context) {
-				return [{proposal: "aa"}, {proposal: "ab"}, {proposal: "za"}];
+				return [undefined];
 			};
+			
+			provider2.computeProposals = function(buffer, actualOffset, context) {
+				return [{proposal: "aa"}];
+			};
+			
+			provider3.computeProposals = function(buffer, actualOffset, context) {
+				return [{proposal: "ab"}, {proposal: "za"}];
+			};
+			
 			contentAssist.activate();	
 		});
 		

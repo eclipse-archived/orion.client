@@ -259,12 +259,12 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			
 			this._computeProposals(this._initialCaretOffset).then(function(proposals) {
 				if (this.isActive()) {
-					var displayProposals = this._flatten(proposals);
+					var flatProposalArray = this._flatten(proposals);
 					//check if flattened proposals form a valid array with at least one entry
-					if (displayProposals && Array.isArray(displayProposals) && (0 < displayProposals.length)) {
+					if (flatProposalArray && Array.isArray(flatProposalArray) && (0 < flatProposalArray.length)) {
 						this._computedProposals = proposals;
 					}
-					this.dispatchEvent({type: "ProposalsComputed", data: {proposals: displayProposals}, autoApply: !this._autoTriggered}); //$NON-NLS-0$
+					this.dispatchEvent({type: "ProposalsComputed", data: {proposals: flatProposalArray}, autoApply: !this._autoTriggered}); //$NON-NLS-0$
 					if (this._computedProposals && this._filterText) {
 						// force filtering here because user entered text after
 						// computeProposals() was called but before the plugins
@@ -372,6 +372,10 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				this._computedProposals.forEach(function(proposalArray) {
 					if (proposalArray && Array.isArray(proposalArray)) {
 						var includedProposals = proposalArray.filter(function(proposal) {
+							if (!proposal) {
+								return false;
+							}
+							
 							if ((STYLES[proposal.style] === STYLES.hr)
 								|| (STYLES[proposal.style] === STYLES.noemphasis_title)) {
 								return true;
@@ -415,14 +419,14 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					}
 				}, this);
 				
-				var displayProposals = [];
+				var flatProposalArray = [];
 				if (proposals) {
 					// filter out extra separators and titles
 					proposals = this._removeExtraUnselectableElements(proposals);
-					displayProposals = this._flatten(proposals);
+					flatProposalArray = this._flatten(proposals);
 				}
 				
-				this.dispatchEvent({type: "ProposalsComputed", data: {proposals: displayProposals}, autoApply: false}); //$NON-NLS-0$
+				this.dispatchEvent({type: "ProposalsComputed", data: {proposals: flatProposalArray}, autoApply: false}); //$NON-NLS-0$
 			}
 		},
 		
@@ -430,6 +434,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		 * Helper method which removes extra separators and titles from
 		 * an array containing arrays of proposals from the various providers.
 		 * @param{Array[]} proposals An array with each element containing an array of proposals
+		 * @returns {Array} An array without the extra unselectable elements
 		 */
 		_removeExtraUnselectableElements: function(proposals) {
 			// get rid of extra separators and titles
@@ -555,22 +560,31 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			
 			return arrayOrObjectArray.reduce(function(prev, curr) {
 				var returnValue = prev;
+				var filteredArray = null;
+				
+				if (curr && Array.isArray(curr)) {
+					filteredArray = curr.filter(function(element){
+						return element; //filter out falsy elements
+					});	
+				}
 				
 				// add current proposal array to flattened array
 				// skip current elements that are not arrays
-				if (Array.isArray(curr) && curr.length > 0) {		
-					var first = curr;
+				if (filteredArray && Array.isArray(filteredArray) && (filteredArray.length > 0)) {
+					var first = filteredArray;
 					var last = prev;
+					var filteredArrayStyle = filteredArray[0].style;
 					
-					if (curr[0].style && (0 === STYLES[curr[0].style].indexOf(STYLES.noemphasis))) {
+					if (filteredArrayStyle && (0 === STYLES[filteredArrayStyle].indexOf(STYLES.noemphasis))) {
 						// the style of the first element starts with noemphasis
 						// add these proposals to the end of the array
 						first = prev;
-						last = curr;
+						last = filteredArray;
 					}
 					
 					if (first.length > 0) {
-						if (first[first.length - 1].style && (STYLES.hr !== STYLES[first[first.length - 1].style])) {
+						var firstArrayStyle = first[first.length - 1].style;
+						if (firstArrayStyle && (STYLES.hr !== STYLES[firstArrayStyle])) {
 							// add separator between proposals from different providers 
 							// if the previous array didn't already end with a separator
 							first = first.concat({
