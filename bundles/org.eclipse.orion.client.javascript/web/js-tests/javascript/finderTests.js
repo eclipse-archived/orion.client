@@ -929,7 +929,7 @@ define([
 		},
 		
 		/**
-		 * Tests the suport for finding script blocks in HTML
+		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		test_findScriptBlock1: function() {
@@ -941,7 +941,7 @@ define([
 		},
 		
 		/**
-		 * Tests the suport for finding script blocks in HTML
+		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		test_findScriptBlock2: function() {
@@ -953,7 +953,7 @@ define([
 		},
 		
 		/**
-		 * Tests the suport for finding script blocks in HTML
+		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		test_findScriptBlock3: function() {
@@ -965,7 +965,7 @@ define([
 		},
 		
 		/**
-		 * Tests the suport for finding script blocks in HTML
+		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		test_findScriptBlock4: function() {
@@ -977,7 +977,7 @@ define([
 		},
 		
 		/**
-		 * Tests the suport for finding script blocks in HTML
+		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		test_findScriptBlock5: function() {
@@ -989,7 +989,7 @@ define([
 		},
 		
 		/**
-		 * Tests the suport for finding script blocks in HTML
+		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		test_findScriptBlockMulti1: function() {
@@ -1003,7 +1003,7 @@ define([
 		},
 		
 		/**
-		 * Tests the suport for finding script blocks in HTML
+		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		test_findScriptBlockMulti2: function() {
@@ -1017,7 +1017,7 @@ define([
 		},
 		
 		/**
-		 * Tests the suport for finding script blocks in HTML
+		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		test_findScriptBlockMulti3: function() {
@@ -1031,7 +1031,7 @@ define([
 		},
 		
 		/**
-		 * Tests the suport for finding script blocks in HTML
+		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		test_findScriptBlockMulti4: function() {
@@ -1045,7 +1045,7 @@ define([
 		},
 		
 		/**
-		 * Tests the suport for finding script blocks in HTML
+		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		test_findScriptBlockMultiWithOffset1: function() {
@@ -1056,7 +1056,7 @@ define([
 			assert.equal(blocks[0].text, 'function f() {}');
 		},
 		/**
-		 * Tests the suport for finding script blocks in HTML
+		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		test_findScriptBlockMultiWithOffset2: function() {
@@ -1068,7 +1068,7 @@ define([
 		},
 		
 		/**
-		 * Tests the suport for finding script blocks in HTML
+		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		test_findScriptBlockWithOffset1: function() {
@@ -1078,6 +1078,134 @@ define([
 			assert.equal(blocks[0].offset, 30);
 			assert.equal(blocks[0].text, 'function f() {}');
 		},
+		
+		/**
+		 * Tests the support for finding script blocks in HTML with postamble text
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
+		 */
+		test_findScriptBlockWithSpacePostamble1: function() {
+			var text = "<!DOCTYPE html><head><script type='javascript'>function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 48);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 47);
+			assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the support for finding script blocks in HTML with postamble text
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
+		 */
+		test_findScriptBlockWithSpacePostamble2: function() {
+			var text = "<!DOCTYPE html><head><script type=javascript  >function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 48);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 47);
+			assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the support for finding script blocks in HTML with postamble text
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
+		 */
+		test_findScriptBlockWithSpacePostamble3: function() {
+			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 47);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 46);
+			assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the support for finding script blocks in HTML with postamble text
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
+		 */
+		test_findScriptBlockWithSpacePostamble4: function() {
+			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type='javascript' ></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 47);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 46);
+			assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the support for finding script blocks in HTML with postamble text
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
+		 */
+		test_findScriptBlockWithSpacePostamble5: function() {
+			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type=javascript ></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 47);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 46);
+			assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the support for finding script blocks in HTML with postamble text
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
+		 */
+		test_findScriptBlockWithSpacePostamble6: function() {
+			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type= javas cript ></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 47);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 46);
+			assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the support for finding script blocks in HTML with postamble text
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
+		 */
+		test_findScriptBlockWithSpacePostamble7: function() {
+			var text = "<!DOCTYPE html><head>< script source=foo bar  >function f() {}</script type= javas cript ></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 48);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 47);
+			assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the support for finding script blocks in HTML with postamble text
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
+		 */
+		test_findScriptBlockWithSpacePostamble8: function() {
+			var text = "<!DOCTYPE html><head><   scrIpt source=foo bar  >function f() {}</script type= javas cript ></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 50);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 49);
+			assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the support for finding script blocks in HTML with postamble text
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
+		 */
+		test_findScriptBlockWithSpacePostamble9: function() {
+			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}<   /scrIpt type= javas cript ></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 47);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 46);
+			assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the support for finding script blocks in HTML with postamble text
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
+		 */
+		test_findNoScriptBlockWithSpacePostamble1: function() {
+			var text = "<!DOCTYPE html><head><script <source=foo bar  >function f() {}</script type= javas cript ></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 39);
+			assert.equal(blocks.length, 0, "Should not have found any script blocks");
+		},
+		
+		/**
+		 * Tests the support for finding script blocks in HTML with postamble text
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
+		 */
+		test_findNoScriptBlockWithSpacePostamble2: function() {
+			var text = "<!DOCTYPE html><head><script source=foo bar  > source='js'>function f() {}</script type= javas cript ></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 39);
+			assert.equal(blocks.length, 0, "Should not have found any script blocks");
+		}
 	};
 	
 	return Tests;

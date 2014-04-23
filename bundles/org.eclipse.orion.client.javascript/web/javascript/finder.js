@@ -502,7 +502,7 @@ define([
 		 */
 		findScriptBlocks: function(buffer, offset) {
 			var blocks = [];
-			var val = null, regex = /<script\s*>((?:.|\r?\n)*?)<\/script\s*>/ig;
+			var val = null, regex = /<\s*script(?:[^>]|\n)*>((?:.|\r?\n)*?)<\s*\/script(?:[^>]|\n)*>/ig;
 			while((val = regex.exec(buffer)) != null) {
 				var text = val[1];
 				if(text.length < 1) {
