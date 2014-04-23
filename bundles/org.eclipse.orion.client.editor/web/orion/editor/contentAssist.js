@@ -618,43 +618,41 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			}, []);
 		},
 		
-		_triggerListener: function(event) {
-			if (this._styleAccessor) {
-				var caretOffset = this.textView.getCaretOffset();
-				var stylesAtOffset = null;
-				var providerInfosToActivate = [];
-				
-				if (this._charTriggersInstalled) {
-					var currentChar = this.textView.getText(caretOffset - 1, caretOffset);
-					
-					this._providers.forEach(function(info) {
-						// check if the charTriggers RegExp matches the currentChar
-						// we're assuming that this will fail much more often than
-						// the excludedStyles test so do this first for better performance
-						var charTriggers = info.charTriggers;
-						if (charTriggers && charTriggers.test(currentChar)) {
-							var isExcluded = false;
-							var excludedStyles = info.excludedStyles;
-							if (excludedStyles) {
-								if (!stylesAtOffset) {
-									// lazily initialize this variable to avoid getting the styles
-									// for every model modification, only ones that may trigger
-									stylesAtOffset = this._styleAccessor.getStyles(caretOffset - 1);
-								}
-								// check if any of the styles match the excludedStyles RegExp
-								isExcluded = stylesAtOffset.some(function (element) {
-									return excludedStyles.test(element.style);
-								});
+		_triggerListener: function(/*event*/) {
+			var caretOffset = this.textView.getCaretOffset();
+			var stylesAtOffset = null;
+			var providerInfosToActivate = [];
+
+			if (this._charTriggersInstalled) {
+				var currentChar = this.textView.getText(caretOffset - 1, caretOffset);
+
+				this._providers.forEach(function(info) {
+					// check if the charTriggers RegExp matches the currentChar
+					// we're assuming that this will fail much more often than
+					// the excludedStyles test so do this first for better performance
+					var charTriggers = info.charTriggers;
+					if (charTriggers && charTriggers.test(currentChar)) {
+						var isExcluded = false;
+						var excludedStyles = info.excludedStyles;
+						if (this._styleAccessor && excludedStyles) {
+							if (!stylesAtOffset) {
+								// lazily initialize this variable to avoid getting the styles
+								// for every model modification, only ones that may trigger
+								stylesAtOffset = this._styleAccessor.getStyles(caretOffset - 1);
 							}
-							if (!isExcluded) {
-								providerInfosToActivate.push(info);
-							}
+							// check if any of the styles match the excludedStyles RegExp
+							isExcluded = stylesAtOffset.some(function (element) {
+								return excludedStyles.test(element.style);
+							});
 						}
-					}, this);
-					
-					if (providerInfosToActivate.length > 0) {
-						this.activate(providerInfosToActivate, true);
+						if (!isExcluded) {
+							providerInfosToActivate.push(info);
+						}
 					}
+				}, this);
+
+				if (providerInfosToActivate.length > 0) {
+					this.activate(providerInfosToActivate, true);
 				}
 			}
 		},

@@ -101,6 +101,25 @@ define([
 	}
 
 	/**
+	 * Sets up a dummy editorContextProvider on the contentAssist so we can test the Orion 5.0+ API.
+	 */
+	function setEditorContextProvider(contentAssist) {
+		var mockEditorContext = {
+			foo: function() {}
+		};
+		contentAssist.setEditorContextProvider({
+			getEditorContext: function() {
+				return mockEditorContext;
+			},
+			getOptions: function() {
+				return {
+					__contributed: "blort"
+				};
+			}
+		});
+	}
+
+	/**
 	 * Like assertProviderInvoked(), but tests the v4 content assist API.
 	 */
 	function assertProviderInvoked_v4(text, providerCallback) {
@@ -127,19 +146,7 @@ define([
 			};
 
 			var provider = providerCallback(checkParams);
-			var mockEditorContext = {
-				foo: function() {}
-			};
-			contentAssist.setEditorContextProvider({
-				getEditorContext: function() {
-					return mockEditorContext;
-				},
-				getOptions: function() {
-					return {
-						__contributed: "blort"
-					};
-				}
-			});
+			setEditorContextProvider(contentAssist);
 			contentAssist.setProviders([ provider ]);
 			contentAssist.activate();
 		});
@@ -160,6 +167,27 @@ define([
 			assert.equal(providers[0].provider, p1); // p1 should have been wrapped into a provider info
 			assert.equal(providers[1], p2); // p2 should have been returned as-is
 		});
+	};
+
+	// Test that the provider having charTriggers leads to automatic invocation of that provider
+	tests.test_charTriggers = function() {
+		var d = new Deferred();
+		withData(function(view, contentAssist) {
+			var p1 = {
+					id: "p1",
+					charTriggers: /</,
+					provider : {
+						computeContentAssist: function() {
+							d.resolve("we were invoked");
+						}
+					}
+			};
+			contentAssist.setProviders([p1]);
+			contentAssist.setAutoTriggerEnabled(true);
+			setEditorContextProvider(contentAssist);
+			view._handleKeyPress(createKeyPressEvent('<'));
+		});
+		return d;
 	};
 
 	// Tests that ContentAssist calls a provider's computeProposals() method with the expected parameters.
