@@ -108,9 +108,27 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					if(sharedLaunchConfigurationDispatcher){
 						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
 					}
+					displayDeployResult(progress, status, context);
 				}, context.errorHandler
 			);
+		} else {
+			displayDeployResult(progress, status, context);
 		}
+	}
+	
+	function displayDeployResult(progress, status, context){
+		var display = [];
+		display.Severity = "Info";
+		
+		if (status.Message){
+			display.HTML = false;
+			display.Message = status.Message;
+		} else {
+			display.HTML = true;
+			display.Message = "Use <a href=\""+ require.toUrl("edit/edit.html#" + context.project.ContentLocation) + "\">Project</a> page to view and manage the application.";
+		}
+		
+		progress.setProgressResult(display);
 	}
 	
 	function storeLastDeployment(projectName, deployService, launchConfiguration){
@@ -194,24 +212,14 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 							if(sharedLaunchConfigurationDispatcher){
 								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration});
 							}
+							displayDeployResult(progress, result, context);
 						}, context.errorHandler
 					);
 				} else {
 					storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
 				}
 				
-				var display = {};
-				display.Severity = "Info";
-				
-				if (result.Message){
-					display.HTML = false;
-					display.Message = result.Message;
-				} else {
-					display.HTML = true;
-					display.Message = "Use <a href=\""+ require.toUrl("edit/edit.html#" + context.project.ContentLocation) + "\">Project</a> page to view and manage the application.";
-				}
-				
-				progress.setProgressResult(display);
+				displayDeployResult(progress, result, context);
 				
 			}, function(error){
 				if(error.Retry && error.Retry.parameters){
