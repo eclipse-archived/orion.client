@@ -545,7 +545,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		 * @returns orion.edit.ContentAssistProviderInfo[]
 		 */
 		getProviders: function() {
-			return this._providers;
+			return this._providers.slice();
 		},
 
 		clearProviders: function() {

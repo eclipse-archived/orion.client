@@ -169,6 +169,19 @@ define([
 		});
 	};
 
+	// Make sure we can't mutate the backing array of content assist providers from outside
+	tests.test_getProviders_mutate = function() {
+		withData(function(view, contentAssist) {
+			var p1 = { computeContentAssist: function() {} },
+			    providersIn = [p1];
+			contentAssist.setProviders(providersIn);
+			providersIn.pop();
+			assert.equal(contentAssist.getProviders().length, 1, "Mutation does not change backing array");
+			contentAssist.getProviders().pop();
+			assert.equal(contentAssist.getProviders().length, 1, "Mutation does not change backing array");
+		});
+	};
+
 	// Test that the provider having charTriggers leads to automatic invocation of that provider
 	tests.test_charTriggers = function() {
 		var d = new Deferred();
