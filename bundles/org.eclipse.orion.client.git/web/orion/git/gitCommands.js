@@ -402,7 +402,7 @@ var exports = {};
 				var display = [];
 				display.Severity = "Error"; //$NON-NLS-0$
 				display.HTML = false;
-				display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
+				display.Message = translateGitStatusMessages(jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message);
 				serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 				
 				if (callback) {
@@ -412,6 +412,12 @@ var exports = {};
 		}
 			
 	};
+	
+	function translateGitStatusMessages(message){
+		if (message === "REJECTED_NONFASTFORWARD")
+			return messages["REJECTED_NONFASTFORWARD"];
+		return message;
+	}
 
 	exports.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 		
