@@ -9,12 +9,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define esprima*/
+/*global define*/
 define([
 	'orion/Deferred',
 	'orion/objects',
-	'orion/serialize',
-	'esprima' //must stay at the end, does not export AMD module
+	'orion/serialize'
 ], function(Deferred, Objects, Serialize) {
 	/**
 	 * @description Object of error types
@@ -35,9 +34,13 @@ define([
 	 * Provides a shared AST.
 	 * @name javascript.ASTManager
 	 * @class Provides a shared AST.
+	 * @param {Object} esprima The esprima parser that this ASTManager will use.
 	 */
-	function ASTManager() {
+	function ASTManager(esprima) {
+		this.parser = esprima;
 		this.cache = null;
+		if (!this.parser)
+			throw new Error("Missing parser");
 	}
 	
 	Objects.mixin(ASTManager.prototype, /** @lends javascript.ASTManager.prototype */ {
@@ -63,7 +66,7 @@ define([
 		 */
 		parse: function(text) {
 			try {
-				var ast = esprima.parse(text, {
+				var ast = this.parser.parse(text, {
 					range: true,
 					tolerant: true,
 					comment: true,
@@ -124,7 +127,7 @@ define([
 		 * Notifies the AST manager of a change to the model.
 		 * @param {Object} event
 		 */
-		updated: function(event) {
+		updated: function(/*event*/) {
 			this.cache = null;
 		}
 	});

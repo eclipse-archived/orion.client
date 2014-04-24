@@ -11,12 +11,15 @@
 /*global console:true define*/
 define([
 	'chai/chai',
+	'esprima',
 	'javascript/astManager',
 	'orion/Deferred',
 	'javascript/outliner'
-], function(chai, ASTManager, Deferred, Outliner) {
+], function(chai, esprima, ASTManager, Deferred, Outliner) {
+	esprima = esprima || window.esprima;
 	var assert = chai.assert;	
-	var astManager = new ASTManager.ASTManager();
+
+	var astManager = new ASTManager.ASTManager(esprima);
 	var outliner = new Outliner.JSOutliner(astManager);
 	var context = {
 		text: "",

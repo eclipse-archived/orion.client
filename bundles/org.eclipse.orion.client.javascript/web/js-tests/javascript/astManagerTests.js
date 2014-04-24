@@ -15,6 +15,19 @@ define([
 	'orion/Deferred',
 ], function(ASTManager, chai, Deferred) {
 	var assert = chai.assert;
+
+	/**
+	 * Fake esprima that we can use to return an arbitary AST to the caller.
+	 */
+	function MockEsprima() {
+	}
+	MockEsprima.prototype._setAST = function(ast) {
+		this.ast = ast;
+	};
+	MockEsprima.prototype.parse = function(text, options) {
+		return this.ast;
+	};
+
 	/**
 	 * @name setup
 	 * @description Sets the test up prior to running
@@ -31,15 +44,8 @@ define([
 				return new Deferred().resolve(this.text);
 			}
 		};
-		var mockEsprima = {
-			_setAST: function(ast) {
-				this.ast = ast;
-			},
-			parse: function(text, options) {
-				return this.ast;
-			}
-		};
-		var astManager = new ASTManager.ASTManager();
+		var mockEsprima = new MockEsprima();
+		var astManager = new ASTManager.ASTManager(mockEsprima);
 		return {
 			astManager: astManager,
 			editorContext: mockEditorContext,

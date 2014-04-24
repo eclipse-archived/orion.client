@@ -12,6 +12,7 @@
 /*global URL console*/
 /*jslint amd:true browser:true*/
 define([
+	'esprima',
 	'javascript/astManager',
 	'javascript/contentAssist/indexFiles/mongodbIndex',
 	'javascript/contentAssist/indexFiles/mysqlIndex',
@@ -28,8 +29,11 @@ define([
 	'orion/editor/stylers/application_json/syntax',
 	'orion/editor/stylers/application_schema_json/syntax',
 	'orion/editor/stylers/application_x-ejs/syntax'
-], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, EslintValidator, Occurrences, Outliner,
+], function(esprima, ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, EslintValidator, Occurrences, Outliner,
 			PluginProvider, mJS, mJSON, mJSONSchema, mEJS) {
+
+	var global = (function() {return this;}());
+	esprima = esprima || global.esprima;
 
 	/**
 	 * Plug-in headers
@@ -68,7 +72,7 @@ define([
 	/**
 	 * Create the AST manager
 	 */
-	var astManager = new ASTManager.ASTManager();
+	var astManager = new ASTManager.ASTManager(esprima);
 
 	/**
 	 * Register AST manager as Model Change listener

@@ -8,16 +8,18 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console:true define*/
+/*global console:true define window*/
 define([
 	'chai/chai',
+	'esprima',
 	'javascript/finder',
 	'javascript/astManager',
 	'orion/Deferred'
-], function(chai, Finder, ASTManager, Deferred) {
+], function(chai, esprima, Finder, ASTManager, Deferred) {
+	esprima = esprima || window.esprima;
 	var assert = chai.assert;
-	
-	var astManager = new ASTManager.ASTManager();
+
+	var astManager = new ASTManager.ASTManager(esprima);
 	var editorContext = {
 		text: "",
 		/**
