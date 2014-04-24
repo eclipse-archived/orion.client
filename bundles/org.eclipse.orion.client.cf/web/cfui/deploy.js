@@ -144,7 +144,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						cFService.pushApp(selection, null, decodeURIComponent(deployResourceJSON.ContentLocation + deployResourceJSON.AppPath)).then(
 							function(result){
 								var appName = result.App.name || result.App.entity.name;
-								var host = result.Route.host || result.Route.entity.host;
+								var host = (result.Route !== undefined ? (result.Route.host || result.Route.entity.host) : undefined);
 								postMsg({
 									CheckState: true,
 									ToSave: {
