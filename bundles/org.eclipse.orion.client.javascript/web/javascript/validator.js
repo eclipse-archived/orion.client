@@ -35,7 +35,11 @@ define([
 			'curly' : 0, //$NON-NLS-0$ 
 			'new-parens' : 2, //$NON-NLS-0$
 			'use-isnan' : 2, //$NON-NLS-0$
-			'no-unused-params' : 1 //$NON-NLS-0$
+			'no-unused-params': 1, //$NON-NLS-0$
+			"no-new-array": 1, //$NON-NLS-0$
+			"no-new-func": 1, //$NON-NLS-0$
+			"no-new-object": 1, //$NON-NLS-0$
+			"no-new-wrappers": 1, //$NON-NLS-0$
 		},
 		/**
 		 * @description Sets the given rule to the given enabled value
@@ -271,6 +275,8 @@ define([
 			if (!properties) {
 				return;
 			}
+			// TODO these option -> setting mappings are becoming hard to manage
+			// And they must be kept in sync with javascriptPlugin.js
 			config.setOption("missing-func-decl-doc", properties.validate_func_decl); //$NON-NLS-0$
 			config.setOption("missing-func-expr-doc", properties.validate_func_expr); //$NON-NLS-0$
 			config.setOption("eqeqeq", properties.validate_eqeqeq); //$NON-NLS-0$
@@ -287,6 +293,10 @@ define([
 			config.setOption("new-parens", properties.validate_new_parens); //$NON-NLS-0$
 			config.setOption("use-isnan", properties.validate_use_isnan); //$NON-NLS-0$
 			config.setOption("no-unused-params", properties.validate_unused_params); //$NON-NLS-0$
+			config.setOption("no-new-array", properties["no-new-array"]); //$NON-NLS-1$ //$NON-NLS-0$
+			config.setOption("no-new-func", properties["no-new-func"]); //$NON-NLS-1$ //$NON-NLS-0$
+			config.setOption("no-new-object", properties["no-new-object"]); //$NON-NLS-1$ //$NON-NLS-0$
+			config.setOption("no-new-wrappers", properties["no-new-wrappers"]); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	});
 	return ESLintValidator;

@@ -88,5 +88,64 @@ exports.getDeclaration = function(ref, scope) {
 		curScope = curScope.upper;
 	}
 };
+
+/**
+ * Generalized helper for 'no-new-array'-like rules. Creates a a rule capable of flagging NewExpression
+ * applied to a callee that is a builtin.
+ * @param {String|String[]} symbol The name of the builtin symbol to check (eg "Array", "Object"),
+ * or an array of symbol names.
+ * @param {String|Function} message Error message to report, or a function that performs the reporting
+ * itself.
+ * @param {Object} context The rule context
+ * @returns {Object} The rule
+ */
+exports.createNewBuiltinRule = function(symbol, messageOrFunc, context) {
+	var symbols = Array.isArray(symbol) ? symbol : [symbol];
+	var message = typeof messageOrFunc === "string" ? messageOrFunc : null; //$NON-NLS-0$
+	var reportCallback = message ? null : messageOrFunc;
+
+	function isGlobalScope(scope) {
+		return scope.type === "global"; //$NON-NLS-0$
+	}
+
+	function isSynthetic(variable) {
+		// Synthetic vars created by eslint (due to environments.json or a /*global block) have no defs
+		return !variable.defs.length;
+	}
+
+	/**
+	 * @returns {Boolean} true if name is declared as an explicit variable in scope
+	 */
+	function isDeclaredIn(name, scope) {
+		return scope.variables.some(function(variable) {
+			return name === variable.name && !isSynthetic(variable);
+		});
+	}
+
+	/**
+	 * @returns {Boolean} true if callee refers to a builtin
+	 */
+	function isBuiltin(callee) {
+		var decl = exports.getDeclaration(callee, context.getScope());
+		return decl && isGlobalScope(decl.scope) && !isDeclaredIn(callee.name, decl.scope);
+	}
+
+	return {
+		"NewExpression": function(node) { //$NON-NLS-0$
+			var callee = node.callee, index;
+			if (callee && (index = symbols.indexOf(callee.name)) !== -1) {
+				var badSymbol = symbols[index];
+				if (isBuiltin(callee)) {
+					// callee refers to the builtin `badSymbol`, so flag it
+					if (message)
+						context.report(callee, message);
+					else
+						reportCallback(context, callee, badSymbol);
+				}
+			}
+		}
+	};
+};
+
     return module.exports;
 }));

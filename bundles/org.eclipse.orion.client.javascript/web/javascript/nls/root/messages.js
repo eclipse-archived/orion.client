@@ -27,6 +27,10 @@ define({
 	'docFuncExpr' : 'No JSDoc on function expressions', //$NON-NLS-0$  //$NON-NLS-1$
 	'useBeforeDefine' : 'Member used before definition', //$NON-NLS-0$  //$NON-NLS-1$
 	'newParens' : 'Missing parentheses in constructor call', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-new-array': 'Discouraged \'new Array()\'', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-new-func': 'Discouraged \'new Function()\'', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-new-object': 'Discouraged \'new Object()\'', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-new-wrappers': 'Discouraged wrapper objects', //$NON-NLS-0$  //$NON-NLS-1$
 	'missingSemi' : 'Missing semicolons', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedVars' : 'Unused variables', //$NON-NLS-0$  //$NON-NLS-1$
 	'varRedecl' : 'Variable re-declarations', //$NON-NLS-0$  //$NON-NLS-1$

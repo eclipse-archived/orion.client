@@ -1,0 +1,79 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2014 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+/*jslint mocha:true node:true */
+var assert = require("assert"),
+	eslint = require("../../../lib/eslint");
+
+var RULE_ID = "no-new-func";
+
+describe(RULE_ID, function() {
+	describe("should", function() {
+		it("flag in global scope", function() {
+			var topic = "new Function";
+
+			var config = { rules: {} };
+			config.rules[RULE_ID] = 1;
+
+			var messages = eslint.verify(topic, config);
+			assert.equal(messages.length, 1);
+			assert.equal(messages[0].ruleId, RULE_ID);
+			assert.equal(messages[0].message, "The Function constructor is eval.");
+			assert.equal(messages[0].node.type, "Identifier");
+		});
+		it("flag when symbol is declared in /*global block", function() {
+			var topic = "/*global Function*/ new Function();";
+
+			var config = { rules: {} };
+			config.rules[RULE_ID] = 1;
+
+			var messages = eslint.verify(topic, config);
+			assert.equal(messages.length, 1);
+			assert.equal(messages[0].ruleId, RULE_ID);
+			assert.equal(messages[0].message, "The Function constructor is eval.");
+			assert.equal(messages[0].node.type, "Identifier");
+		});
+		it("flag in inner scope", function() {
+			var topic = "(function f() { new Function(); }());";
+
+			var config = { rules: {} };
+			config.rules[RULE_ID] = 1;
+
+			var messages = eslint.verify(topic, config);
+			assert.equal(messages.length, 1);
+			assert.equal(messages[0].ruleId, RULE_ID);
+			assert.equal(messages[0].message, "The Function constructor is eval.");
+			assert.equal(messages[0].node.type, "Identifier");
+		});
+	});
+
+	describe("shalt not", function() {
+		it("flag when symbol refers to in-scope var - global", function() {
+			var topic = "var Function; new Function();";
+
+			var config = { rules: {} };
+			config.rules[RULE_ID] = 1;
+
+			var messages = eslint.verify(topic, config);
+			assert.equal(messages.length, 0);
+		});
+
+		it("flag when symbol refers to in-scope var - non-global", function() {
+			var topic = "var Function; function f() { new Function(); }";
+
+			var config = { rules: {} };
+			config.rules[RULE_ID] = 1;
+
+			var messages = eslint.verify(topic, config);
+			assert.equal(messages.length, 0);
+		});
+	});
+});

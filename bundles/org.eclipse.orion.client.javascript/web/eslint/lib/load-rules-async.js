@@ -27,10 +27,15 @@ define([
 	'eslint/rules/no-eval',
 	'eslint/rules/curly',
 	'eslint/rules/new-parens',
+	'eslint/rules/no-new-array',
+	'eslint/rules/no-new-func',
+	'eslint/rules/no-new-object',
+	'eslint/rules/no-new-wrappers',
 	'eslint/rules/use-isnan',
 	'eslint/rules/no-unused-params'
 ], function(eqeqeq, no_redeclare, no_undef, no_unused_vars, no_use_before_define, semi, no_extra_semi, missing_doc,
-				no_debugger, no_dupe_keys, no_eval, curly, new_parens, use_isnan, no_unused_params) {
+				no_debugger, no_dupe_keys, no_eval, curly, new_parens, no_new_array, no_new_func, no_new_object,
+				no_new_wrappers, use_isnan, no_unused_params) {
 	return function() {
 		return {
 			"eqeqeq": eqeqeq,
@@ -47,6 +52,10 @@ define([
 			'no-eval' : no_eval,
 			'curly' : curly,
 			'new-parens' : new_parens,
+			'no-new-array': no_new_array,
+			'no-new-func': no_new_func,
+			'no-new-object': no_new_object,
+			'no-new-wrappers': no_new_wrappers,
 			'use-isnan' : use_isnan,
 			'no-unused-params' : no_unused_params
 		};
