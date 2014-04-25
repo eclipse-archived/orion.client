@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Webtools Mocha Tests</title>
+	<link rel="stylesheet" href="../../mocha/mocha.css" />
+	<script src="../../requirejs/require.js"></script>
+	<script>
+		/*jslint amd:true*/
+		/*global mocha*/
+		require({
+		baseUrl: "../../",
+		paths: {
+			text: "requirejs/text",
+			i18n: "requirejs/i18n",
+		}
+	});
+	require(["mocha/mocha"], function() {
+		mocha.setup("bdd");
+		require([
+			"js-tests/webtools/cssValidatorTests"
+		], function(){
+			mocha.run();
+		});
+	});
+	</script>
+</head>
+<body>
+	<h3>Webtools Mocha Tests</h3>
+	<div id="mocha"></div>
+</body>
+</html>

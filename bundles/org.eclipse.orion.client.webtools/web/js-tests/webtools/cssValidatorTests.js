@@ -8,54 +8,47 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console:true define*/
+/*jslint amd:true mocha:true*/
 define([
 	'chai/chai',
 	'orion/Deferred',
-	'webtools/cssValidator'
-], function(chai, Deferred, CssValidator) {
-	var assert = chai.assert;	
+	'webtools/cssValidator',
+	'mocha/promocha'
+], function(chai, Deferred, CssValidator, mochapromise) {
+	var assert = chai.assert;
+//	var it = mochapromise.it;
 	var validator = new CssValidator.CssValidator();
-	
-	var context = {
-		text: "",
+
+	describe("CSS validator", function() {
+		var context = {
+			text: "",
+			/**
+			 * gets the text
+			 */
+			getText: function() {
+				return new Deferred().resolve(this.text);
+			}
+		};
+
 		/**
-		 * gets the text
+		 * Resets the test state between runs
 		 */
-		getText: function() {
-			return new Deferred().resolve(this.text);
-		}
-	};
-		
-	/**
-	 * @name tearDown
-	 * @description Resets the test state between runs, must explicitly be called per-test
-	 * @function
-	 * @public
-	 */
-	function tearDown() {
-		context.text = "";
-	}
-	
-	var Tests = {};
-		
-	/**
-	 * Tests a bad property decl
-	 */
-	Tests.test_bad_prop1 = function() {
+		beforeEach(function() {
+			context.text = "";
+		});
+
+		/**
+		 * Tests a bad property decl
+		 */
+		it("should flag a bad property decl", function(/*done*/) {
 			context.text = "h1:{f: 22px}";
 			return validator.computeProblems(context).then(function(result) {
-				try {
-					var problems = result.problems;
-					assert(problems != null, 'There should be CSS problems');
-					assert(problems.length === 1, 'There should only be one CSS problem');
-					assert.equal(problems[0].description, 'Unknown property \'f\'.', 'problem text is wrong');
-				}
-				finally {
-					tearDown();
-				}
+				assert.ok(false);
+				var problems = result.problems;
+				assert(problems != null, 'There should be CSS problems');
+				assert(problems.length === 1, 'There should only be one CSS problem');
+				assert.equal(problems[0].description, 'Unknown property \'f\'.', 'problem text is wrong');
 			});
-	};
-	
-	return Tests;
+		});
+	});
 });
