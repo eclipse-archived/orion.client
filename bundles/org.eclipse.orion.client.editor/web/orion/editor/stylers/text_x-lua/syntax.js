@@ -29,11 +29,9 @@ define("orion/editor/stylers/text_x-lua/syntax", ["orion/editor/stylers/lib/synt
 		"while", //$NON-NLS-0$
 	];
 
-	// base library global variables and functions
+	// base library functions and variables
 	// from http://lua-users.org/files/wiki_insecure/users/thomasl/luarefv51.pdf
-	var base_globals = [
-		"_G", //$NON-NLS-0$
-		"_VERSION", //$NON-NLS-0$
+	var base_functions = [
 		"assert", "arg", //$NON-NLS-1$ //$NON-NLS-0$
 		"collectgarbage", //$NON-NLS-0$
 		"dofile", //$NON-NLS-0$
@@ -41,7 +39,6 @@ define("orion/editor/stylers/text_x-lua/syntax", ["orion/editor/stylers/lib/synt
 		"getfenv", "getmetatable", //$NON-NLS-1$ //$NON-NLS-0$
 		"ipairs", //$NON-NLS-0$
 		"load", "loadfile", "loadstring", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"LUA_INIT", "LUA_PATH", "LUA_CPATH", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"next", //$NON-NLS-0$
 		"pairs", "pcall", "print", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"rawequal", "rawget", "rawset", "require", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -49,6 +46,11 @@ define("orion/editor/stylers/text_x-lua/syntax", ["orion/editor/stylers/lib/synt
 		"tonumber", "tostring", "type", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"unpack", //$NON-NLS-0$
 		"xpcall" //$NON-NLS-0$
+	];
+	var base_variables = [
+		"_G", //$NON-NLS-0$
+		"LUA_INIT", "LUA_PATH", "LUA_CPATH", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"_VERSION" //$NON-NLS-0$
 	];
 
 	var grammars = mLib.grammars;
@@ -59,6 +61,8 @@ define("orion/editor/stylers/text_x-lua/syntax", ["orion/editor/stylers/lib/synt
 			{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
 			{include: "orion.lib#string_singleQuote"}, //$NON-NLS-0$
 			{include: "orion.c-like#comment_singleLine"}, //$NON-NLS-0$
+			{include: "#comment_block_dash_dash"}, //$NON-NLS-0$
+			{include: "#comment_singleLine_dash_dash"}, //$NON-NLS-0$
 			{include: "orion.lib#brace_open"}, //$NON-NLS-0$
 			{include: "orion.lib#brace_close"}, //$NON-NLS-0$
 			{include: "orion.lib#bracket_open"}, //$NON-NLS-0$
@@ -67,9 +71,8 @@ define("orion/editor/stylers/text_x-lua/syntax", ["orion/editor/stylers/lib/synt
 			{include: "orion.lib#parenthesis_close"}, //$NON-NLS-0$
 			{include: "orion.lib#number_decimal"}, //$NON-NLS-0$
 			{include: "orion.lib#number_hex"}, //$NON-NLS-0$
-			{include: "#comment_block_dash_dash"}, //$NON-NLS-0$
-			{include: "#comment_singleLine_dash_dash"}, //$NON-NLS-0$
-			{include: "#global_variable"}, //$NON-NLS-0$
+			{include: "#base_functions"}, //$NON-NLS-0$
+			{include: "#base_variables"}, //$NON-NLS-0$
 			{include: "#reserved_underscore_capital"}, //$NON-NLS-0$
 			{
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -78,17 +81,22 @@ define("orion/editor/stylers/text_x-lua/syntax", ["orion/editor/stylers/lib/synt
 		],
 		repository: {
 			comment_block_dash_dash: {
-				begin: {match: "--\\[\\[", literal: "--"}, //$NON-NLS-0$
-				end: {match: "\\]\\]", literal: "]]"}, //$NON-NLS-0$
+				begin: {match: "--\\[\\[", literal: "--[["}, //$NON-NLS-1$ //$NON-NLS-0$
+				end: {match: "\\]\\]", literal: "]]"}, //$NON-NLS-1$ //$NON-NLS-0$
 				name: "comment.block.dash-dash.lua", //$NON-NLS-0$
 				patterns: [
 					{
-						include: "orion.lib#todo_comment_singleLine" //$NON-NLS-0$
+						match: "(\\b)(TODO)(\\b)(((?!\\]\\]).)*)", //$NON-NLS-0$
+						name: "meta.annotation.task.todo", //$NON-NLS-0$
+						captures: {
+							2: {name: "keyword.other.documentation.task"}, //$NON-NLS-0$
+							4: {name: "comment.block"} //$NON-NLS-0$
+						}
 					}
 				]
 			},
 			comment_singleLine_dash_dash: {
-				begin: {match: "--", literal: "--"}, //$NON-NLS-0$
+				begin: {match: "--", literal: "--"}, //$NON-NLS-1$ //$NON-NLS-0$
 				end: {match: "$", literal: ""}, //$NON-NLS-0$
 				name: "comment.line.dash-dash.lua", //$NON-NLS-0$
 				patterns: [
@@ -97,20 +105,24 @@ define("orion/editor/stylers/text_x-lua/syntax", ["orion/editor/stylers/lib/synt
 					}
 				]
 			},
-			global_variable: {
-				match: "\\b(?:" + base_globals.join("|") + ")\\b", //$NON-NLS-0$
-				name: "constant.global_variable.lua" //$NON-NLS-0$
+			base_functions: {
+				match: "\\b(?:" + base_functions.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				name: "support.function.lua" //$NON-NLS-0$
+			},
+			base_variables: {
+				match: "\\b(?:" + base_variables.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				name: "support.variable.lua" //$NON-NLS-0$
 			},
 			// _ANYCAPITALS is reserved in Lua
 			reserved_underscore_capital: {
 				match: "\\b_[A-Z]*\\b", //$NON-NLS-0$
-				name: "constant.global_variable.lua" //$NON-NLS-0$
+				name: "constant.other.userdefined.lua" //$NON-NLS-0$
 			}
 		}
 	});
 	return {
 		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
-		keywords: keywords.concat(base_globals)
+		keywords: keywords
 	};
 });
