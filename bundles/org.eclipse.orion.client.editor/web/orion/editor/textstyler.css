@@ -63,10 +63,28 @@
 
 .markup.heading, .markup-heading {
 	font-weight: bold;
+	color: purple;
+}
+
+.markup.list {
+	color: beige;
+}
+
+.markup.other.separator {
+	color: crimson;
 }
 
 .markup.quote, .markup-quote {
 	font-style: italic;
+	color: aqua;
+}
+
+.markup.raw {
+	color: chocolate;
+}
+
+.markup.underline.link {
+	color: DarkGoldenRod;
 }
 
 .meta.annotation.currentLine {

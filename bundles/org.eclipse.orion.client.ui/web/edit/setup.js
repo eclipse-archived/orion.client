@@ -24,6 +24,7 @@ define([
 	'orion/editorView',
 	'orion/editorPluginView',
 	'orion/markdownView',
+	'orion/markdownEditor',
 	'orion/commandRegistry',
 	'orion/contentTypes',
 	'orion/fileClient',
@@ -50,7 +51,7 @@ define([
 ], function(
 	messages, Sidebar, mInputManager, mGlobalCommands,
 	mTextModel, mUndoStack,
-	mFolderView, mEditorView, mPluginEditorView , mMarkdownView,
+	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
 	mProblems, mBlameAnnotation,
 	Deferred, EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, mProjectClient
@@ -281,6 +282,8 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 					view = editorView;
 				} else if (id === "orion.viewer.markdown") { //$NON-NLS-0$
 					view = new mMarkdownView.MarkdownEditorView(options);
+				} else if (id === "orion.editor.markdown") { //$NON-NLS-0$
+					view = new mMarkdownEditor.MarkdownEditorView(options);
 				} else {
 					var editors = serviceRegistry.getServiceReferences("orion.edit.editor"); //$NON-NLS-0$
 					for (var i=0; i<editors.length; i++) {
