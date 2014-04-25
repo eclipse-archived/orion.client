@@ -108,7 +108,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			selectorNumber: selectorNumber,
 			rootName: params.rootName,
 			widgetSource: _browser_script_source ? {repo: params.repo, base: params.base, js: _browser_script_source , css: _browser_script_source.replace(/built-browser.*.js/, "built-browser.css")} : null,
-			maxEditorLines: params.snippetShareOptions && params.snippetShareOptions.maxLine ? params.snippetShareOptions.maxLine : 300,
+			maxEditorLines: params.snippetShareOptions && params.snippetShareOptions.maxL ? params.snippetShareOptions.maxL : 300,
 			init: true
 		});
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {

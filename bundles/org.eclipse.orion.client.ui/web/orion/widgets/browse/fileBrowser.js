@@ -96,7 +96,7 @@ define([
 		this.popupTextAreaId = "orion.browse.shareSnippetInput";
 		this.popupTemplate = ShareSnippetTriggerTemplate;
 		this.tags = '<div id="${0}"></div><link rel="stylesheet" type="text/css" href="${1}"/><script src="${2}"></script>' +
-					'<script> orion.browse.browser("${3}","${4}",${5},null,{maxLine:20,originalHref:"${6}",fileURL:"${7}",start:${8},end:${9}});</script>';
+					'<script> orion.browse.browser("${3}","${4}",${5},null,{maxL:20,oHref:"${6}",fURI:"${7}",s:${8},e:${9}});</script>';
 		this.getTextAreaValue = function() {
 			if(this.textView) {
 				var snippetContainerId = "snippet_container_" + Math.floor((Math.random()*1000000)+1);
@@ -115,7 +115,6 @@ define([
             	var tagString = i18nUtil.formatMessage(this.tags, snippetContainerId, this.widgetSource.css, this.widgetSource.js, snippetContainerId, 
             										   this.widgetSource.repo, base, url.href, this.currentSnippetURI, start, end);
 				return tagString;
-				//"selection start: " + selection.start + ". selection end: " + selection.end + "." + "URI: " + this.currentSnippetURI + " Widget source: " + JSON.stringify(this.widgetSource);
 			}
 			return "Nothing to share";
 		}.bind(this);
@@ -404,7 +403,7 @@ define([
 					this.refresh(PageUtil.hash());
 				}
 			} else {
-				this.refresh(this.snippetShareOptions.fileURL);
+				this.refresh(new URITemplate("{,resource}").expand({resource:this.snippetShareOptions.fURI}));
 			}
 		},
 		_switchView: function(view) {
@@ -513,25 +512,21 @@ define([
 		},
 		onTextViewCreated: function(textView) {
 			if(this.shareSnippetHandler) {
-				//this._currentURI = PageUtil.matchResourceParameters().resource;
 				this.shareSnippetHandler.textView = textView;
-				if(this._currentURI.length > 0) {
-					this.shareSnippetHandler.currentSnippetURI = (this._currentURI[0] === "#" ?  this._currentURI.substring(1) : this._currentURI);
-				} else {
-					this.shareSnippetHandler.currentSnippetURI = "";
-				}
+				this.shareSnippetHandler.currentSnippetURI = (this._currentURI && this._currentURI.length > 0) ? this._currentURI : "";
 			}
 			if(!this.snippetShareOptions) {
 				var editorParams = PageUtil.matchResourceParameters();
-				if(editorParams && editorParams.end && editorParams.end !== editorParams.end.start) {
+				if(editorParams && editorParams.end && editorParams.end !== editorParams.start) {
 					window.setTimeout(function() {
-						textView.setSelection(editorParams.start, editorParams.end, true);}, 100);
+						textView.setSelection(editorParams.start, editorParams.end, true);}, 500);
 				}
 			}
 		},
 		_getEditorView: function(input, contents, metadata) {
 			var view = null;
 			if (metadata && input) {
+				this._currentURI = metadata.Location;
 				var browseViewOptons = {
 					parent: this._parentDomNode,
 					browser: this,
@@ -592,7 +587,6 @@ define([
 			if(!uri) {
 				uri = new URITemplate("{,resource}").expand({resource:this._fileClient.fileServiceRootURL("")});
 			}
-			this._currentURI = uri;
 			this._inputManager.setInput(uri);
 		},
 		create: function() {

@@ -304,9 +304,9 @@ define([
 								titleNode.appendChild(this.componentSelector.parentNode);
 								this.componentSelector.refresh();
 							}
-							if(this.snippetShareOptions && this.snippetShareOptions.originalHref) {
+							if(this.snippetShareOptions && this.snippetShareOptions.oHref) {
 								var titleLink = document.createElement("a"); //$NON-NLS-0$
-								titleLink.href = this.snippetShareOptions.originalHref;
+								titleLink.href = this.snippetShareOptions.oHref;
 								titleLink.appendChild(document.createTextNode("Click here to see the original file."));
 								titleLink.classList.add("downloadLinkName"); //$NON-NLS-0$
 								titleNode.appendChild(titleLink);
@@ -335,12 +335,12 @@ define([
 							this.sectionContents.appendChild(this.editorView.getParent());
 							this.editorView.getParent().style.height = "30px"; //$NON-NLS-0$
 							this.editorView.create();
-							this.resetTextModel = this.snippetShareOptions && this.snippetShareOptions.end ? true : false;
+							this.resetTextModel = this.snippetShareOptions && this.snippetShareOptions.e ? true : false;
 							var textView = this.editorView.editor.getTextView();
 							textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
 								var textModel = textView.getModel();
 								if(this.resetTextModel) {
-									var newContents = textModel.getText(this.snippetShareOptions.start ?  this.snippetShareOptions.start : 0, this.snippetShareOptions.end);
+									var newContents = textModel.getText(this.snippetShareOptions.s ?  this.snippetShareOptions.s : 0, this.snippetShareOptions.e);
 									this.resetTextModel = false;
 									textModel.setText(newContents);
 									return;
