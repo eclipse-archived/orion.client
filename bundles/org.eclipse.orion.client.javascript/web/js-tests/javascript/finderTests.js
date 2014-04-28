@@ -15,11 +15,10 @@ define([
 	'javascript/finder',
 	'javascript/astManager',
 	'orion/Deferred'
-], function(chai, esprima, Finder, ASTManager, Deferred) {
-	esprima = esprima || window.esprima;
+], function(chai, Esprima, Finder, ASTManager, Deferred) {
 	var assert = chai.assert;
 
-	var astManager = new ASTManager.ASTManager(esprima);
+	var astManager = new ASTManager.ASTManager(Esprima);
 	var editorContext = {
 		text: "",
 		/**

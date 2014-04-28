@@ -15,11 +15,10 @@ define([
 	'javascript/astManager',
 	'orion/Deferred',
 	'javascript/occurrences'
-], function(chai, esprima, ASTManager, Deferred, Occurrences) {
-	esprima = esprima || window.esprima;
+], function(chai, Esprima, ASTManager, Deferred, Occurrences) {
 	var assert = chai.assert;
 	
-	var astManager = new ASTManager.ASTManager(esprima);
+	var astManager = new ASTManager.ASTManager(Esprima);
 	var occurrences = new Occurrences.JavaScriptOccurrences(astManager);
 	var editorContext = {
 		text: "",
