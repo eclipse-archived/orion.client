@@ -177,6 +177,15 @@ define([
 		//////////////////////////////////////////////////////////
 		// Tests
 		//////////////////////////////////////////////////////////
+		describe("non-tolerant", function() {
+			it('parser should work when called several times', function() {
+				var ast = Esprima.parse("var a", { tolerant: false });
+				assert.equal(ast.type, "Program");
+				Esprima.parse("var a", { tolerant: false });
+				assert.equal(ast.type, "Program");
+			});
+		});
+
 		it('recovery basic parse - ', function() {
 			var data = { 
 				source: "foo.bar",

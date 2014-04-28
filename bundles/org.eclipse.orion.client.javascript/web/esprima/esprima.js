@@ -3926,10 +3926,12 @@ parseStatement: true, parseSourceElement: true */
             throw e;
         } finally {
 			// mamacdon unpatch
-			parseStatement = extra.parseStatement;
-			parseExpression = extra.parseExpression;
-			parseNonComputedProperty = extra.parseNonComputedProperty;
-			consumeSemicolon = extra.consumeSemicolon;
+        	if (typeof extra.errors !== 'undefined') {
+        		parseStatement = extra.parseStatement;
+        		parseExpression = extra.parseExpression;
+        		parseNonComputedProperty = extra.parseNonComputedProperty;
+        		consumeSemicolon = extra.consumeSemicolon;
+        	}
 
             extra = {};
         }
