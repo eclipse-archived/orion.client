@@ -407,5 +407,6 @@ define({
 	"Successfully edited ${0} to have value ${1}":"Successfully edited ${0} to have value ${1}",
 	"Successfully added ${0} with value ${1}":"Successfully added ${0} with value ${1}",
 	"Signed-off-by: ":"Signed-off-by: ",
-	"Change-Id: ":"Change-Id: "
+	"Change-Id: ":"Change-Id: ",
+	"Commit and Push" : "Commit and Push"
 });
