@@ -32,6 +32,7 @@ define([
 		}
 		this.menuitems = Object.create(null); // Maps category id {String} to menuitem
 		this.links = null;
+		this.showSubMenus = false;
 		this.categories = null;
 
 		this.anchor = document.createElement("ul"); //$NON-NLS-0$
@@ -265,6 +266,32 @@ define([
 				}
 			});
 		},
+		
+		_createSubMenus: function(menuitem, links){
+			var sideMenuSubMenu = document.createElement('ul');
+				sideMenuSubMenu.className="sideMenuSubMenu";
+				links.forEach( function( item ){
+					var sideMenuSubMenuItem = document.createElement('li');	
+					sideMenuSubMenuItem.className="sideMenuSubMenuItem";
+					
+					var sideMenuSubMenuItemLink = document.createElement('a');
+					sideMenuSubMenuItemLink.href = item;
+					sideMenuSubMenuItemLink.className="sideMenuSubMenuItemLink";
+					
+					var sideMenuSubMenuItemSpan = document.createElement('span');
+					sideMenuSubMenuItemSpan.innerHTML = item.innerHTML;
+					sideMenuSubMenuItemSpan.className="sideMenuSubMenuItemSpan";
+					
+					sideMenuSubMenuItemLink.appendChild( sideMenuSubMenuItemSpan );
+					
+					sideMenuSubMenuItem.appendChild(sideMenuSubMenuItemLink);
+					
+					sideMenuSubMenu.appendChild(sideMenuSubMenuItem);
+				});
+			
+			menuitem.appendChild(sideMenuSubMenu);
+		},
+		
 		_renderLinks: function(exclusions) {
 			exclusions = exclusions || [];
 			this._sort();
@@ -308,29 +335,12 @@ define([
 
 				// First link becomes the icon link
 				menuitem.appendChild(_self._createCategoryElement(catId, menuitem, bin[0]));
-
+				
 				// Links go into submenu
-				var sideMenuSubMenu = document.createElement('ul');
-				sideMenuSubMenu.className="sideMenuSubMenu";
-				bin.forEach( function( item ){
-					var sideMenuSubMenuItem = document.createElement('li');	
-					sideMenuSubMenuItem.className="sideMenuSubMenuItem";
-					
-					var sideMenuSubMenuItemLink = document.createElement('a');
-					sideMenuSubMenuItemLink.href = item;
-					sideMenuSubMenuItemLink.className="sideMenuSubMenuItemLink";
-					
-					var sideMenuSubMenuItemSpan = document.createElement('span');
-					sideMenuSubMenuItemSpan.innerHTML = item.innerHTML;
-					sideMenuSubMenuItemSpan.className="sideMenuSubMenuItemSpan";
-					
-					sideMenuSubMenuItemLink.appendChild( sideMenuSubMenuItemSpan );
-					
-					sideMenuSubMenuItem.appendChild(sideMenuSubMenuItemLink);
-					
-					sideMenuSubMenu.appendChild(sideMenuSubMenuItem);
-				});
-				menuitem.appendChild(sideMenuSubMenu);
+				
+				if( _self.showSubMenus ){	
+					_self._createSubMenus(menuitem, bin);
+				}
 			});
 		},
 		_createCategoryElement: function(catId, menuitem, linkElement) {
