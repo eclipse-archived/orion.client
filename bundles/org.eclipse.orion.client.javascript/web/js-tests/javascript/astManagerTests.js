@@ -108,7 +108,6 @@ define([
 		    editorContext = result.editorContext,
 		    mockEsprima = result.mockEsprima;
 
-		var d = new Deferred();
 		return withMockEsprima(mockEsprima, function() {
 			var i = 0;
 			mockEsprima.parse = function() {

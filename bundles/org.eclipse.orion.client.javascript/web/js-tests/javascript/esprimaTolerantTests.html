@@ -4,7 +4,6 @@
 	<script src="../../../orion/plugin.js"></script>
 	<script src="../../../requirejs/require.js"></script>
 	<script>
-		var useNewEsprima = window.location.hash === "#new";
 
 		/*jslint amd:true browser:true*/
 		require({
@@ -13,7 +12,7 @@
 				text: "requirejs/text",
 				i18n: "requirejs/i18n",
 				domReady: "requirejs/domReady",
-				esprima: (useNewEsprima ? 'esprima/esprima_tolerant' : 'esprima/esprima'),
+				esprima: 'esprima/esprima',
 				estraverse: "estraverse/estraverse"
 			}
 		});
@@ -28,7 +27,7 @@
 <body>
 	<h2>Esprima Tolerant Tests</h2>
 	<p>
-		This suite tests the tolerant (recoverable) esprima parser
+		This suite tests the tolerant (recoverable) Esprima parser
 	</p>
 </body>
 </html>

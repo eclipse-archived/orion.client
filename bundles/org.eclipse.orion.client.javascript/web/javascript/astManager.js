@@ -13,7 +13,7 @@
 define([
 	'orion/Deferred',
 	'orion/objects',
-	'orion/serialize'
+	'orion/serialize',
 ], function(Deferred, Objects, Serialize) {
 	/**
 	 * @description Object of error types
@@ -39,8 +39,9 @@ define([
 	function ASTManager(esprima) {
 		this.parser = esprima;
 		this.cache = null;
-		if (!this.parser)
+		if (!this.parser) {
 			throw new Error("Missing parser");
+		}
 	}
 	
 	Objects.mixin(ASTManager.prototype, /** @lends javascript.ASTManager.prototype */ {
@@ -70,8 +71,10 @@ define([
 					range: true,
 					tolerant: true,
 					comment: true,
-					tokens: true
+					tokens: true,
+					attachComments: true
 				});
+				
 			} catch (e) {
 				// The "tolerant" Esprima sometimes blows up from parse errors in initial statements of code.
 				// Just return an empty AST with the parse error.

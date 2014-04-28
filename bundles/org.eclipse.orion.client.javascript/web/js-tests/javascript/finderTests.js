@@ -402,7 +402,7 @@ define([
 			var text = "var function f1() {";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
-					var token = Finder.findToken(18, ast.tokens);
+					var token = Finder.findToken(7, ast.tokens);
 					if(!token) {
 						assert.fail("Should have found a token");
 					}
