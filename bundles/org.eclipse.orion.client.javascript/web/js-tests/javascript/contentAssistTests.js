@@ -19,16 +19,15 @@ define([
 	'orion/Deferred',
 	'esprima',
 	'doctrine/doctrine' //must stay at the end, does not export a module 
-], function(ContentAssist, chai, objects, Deferred, _esprima) {
+], function(ContentAssist, chai, objects, Deferred, Esprima) {
 	var assert = chai.assert;
-	var esprima = typeof _esprima !== "undefined" ? _esprima : (function() {return this;}()).esprima;
 
 	/**
 	 * @description Parse the snippet
 	 * @returns {Object} The AST
 	 */
 	function parseFull(contents) {
-		return esprima.parse(contents, {
+		return Esprima.parse(contents, {
 					range: true,
 					tolerant: true,
 					comment: true,
@@ -87,7 +86,7 @@ define([
 	}
 
 	// Also accepts a single object containing a map of arguments
-	buffers = {};
+	var buffers = {};
 	var currentName = null;
 	function computeContentAssist(buffer, prefix, offset, lintOptions, editorContextMixin, paramsMixin) {
 		buffers[currentName] = buffer;
