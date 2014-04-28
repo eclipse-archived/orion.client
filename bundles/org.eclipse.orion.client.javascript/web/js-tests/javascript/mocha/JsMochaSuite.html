@@ -7,17 +7,18 @@
   <script src="../../../../requirejs/require.js"></script>
   <script>
     /* global require mocha */
-  	require({
-	  baseUrl: '../../../',
-	  paths: {
-		  text: 'requirejs/text',
-		  i18n: 'requirejs/i18n',
-		  domReady: 'requirejs/domReady',
-		  estraverse: 'estraverse/estraverse',
-		  esprima: 'esprima/esprima',
-		  escope: 'escope/escope'
-	  },
-	  packages: [
+	require({
+		baseUrl: '../../../',
+		paths: {
+			text: 'requirejs/text',
+			i18n: 'requirejs/i18n',
+			domReady: 'requirejs/domReady',
+			estraverse: 'estraverse/estraverse',
+			esprima: 'esprima/esprima',
+			escope: 'escope/escope',
+			'eslint/tests': 'eslint/tests'
+		},
+		packages: [
 			{
 				name: "eslint",
 				location: "eslint/lib",
@@ -31,7 +32,9 @@
 	});
 	require(['mocha/mocha'], function() {
 		mocha.setup('bdd');
-		require(['js-tests/javascript/mocha/astManagerTests',
+		require([
+				'eslint/tests/load-tests',
+				'js-tests/javascript/mocha/astManagerTests',
 				'js-tests/javascript/mocha/contentAssistTests',
 				'js-tests/javascript/mocha/eslintEventTests',
 				'js-tests/javascript/mocha/esprimaTolerantTests',
