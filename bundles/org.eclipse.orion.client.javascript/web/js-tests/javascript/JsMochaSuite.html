@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>JavaScript Tools Mocha Tests</title>
-  <link rel="stylesheet" href="js-tests/javascript/mocha/mocha.css" />
+  <link rel="stylesheet" href="./mocha.css" />
   <script src="../../../../requirejs/require.js"></script>
   <script>
     /* global require mocha */
@@ -34,14 +34,14 @@
 		mocha.setup('bdd');
 		require([
 				'eslint/tests/load-tests',
-				'js-tests/javascript/mocha/astManagerTests',
-				'js-tests/javascript/mocha/contentAssistTests',
-				'js-tests/javascript/mocha/eslintEventTests',
-				'js-tests/javascript/mocha/esprimaTolerantTests',
-				'js-tests/javascript/mocha/finderTests',
-				'js-tests/javascript/mocha/indexFileParsingTests',
-				'js-tests/javascript/mocha/occurrencesTests',
-				'js-tests/javascript/mocha/outlinerTests'
+				'js-tests/javascript/astManagerTests',
+				'js-tests/javascript/contentAssistTests',
+				'js-tests/javascript/eslintEventTests',
+				'js-tests/javascript/esprimaTolerantTests',
+				'js-tests/javascript/finderTests',
+				'js-tests/javascript/indexFileParsingTests',
+				'js-tests/javascript/occurrencesTests',
+				'js-tests/javascript/outlinerTests'
 				], function(){
 			mocha.run();
 		});
