@@ -3668,7 +3668,7 @@ define([
 			var results = computeContentAssist(
 				"var obj = { _myFun : function() { this._/**/ } }", "_");
 	
-			return testProposals("_", results, [
+			return testProposals(results, [
 				// inferred as object type since invocation request is happening inside of object literal.
 				["_myFun", "_myFun : Object"]
 			]);
