@@ -156,6 +156,34 @@ define([
 							defaultValue: ignore,
 							options: severities
 						},
+						{
+							id: "no-new-array", //$NON-NLS-0$
+							nameKey: "no-new-array", //$NON-NLS-0$
+							type: "number", //$NON-NLS-0$
+							defaultValue: warning, //$NON-NLS-0$
+							options: severities //$NON-NLS-0$
+						},
+						{
+							id: "no-new-func", //$NON-NLS-0$
+							nameKey: "no-new-func", //$NON-NLS-0$
+							type: "number", //$NON-NLS-0$
+							defaultValue: warning, //$NON-NLS-0$
+							options: severities //$NON-NLS-0$
+						},
+						{
+							id: "no-new-object", //$NON-NLS-0$
+							nameKey: "no-new-object", //$NON-NLS-0$
+							type: "number", //$NON-NLS-0$
+							defaultValue: warning, //$NON-NLS-0$
+							options: severities //$NON-NLS-0$
+						},
+						{
+							id: "no-new-wrappers", //$NON-NLS-0$
+							nameKey: "no-new-wrappers", //$NON-NLS-0$
+							type: "number", //$NON-NLS-0$
+							defaultValue: warning, //$NON-NLS-0$
+							options: severities //$NON-NLS-0$
+						},
 						{	id: "validate_dupe_obj_keys",  //$NON-NLS-0$
 							nameKey: 'noDupeKeys',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
@@ -191,34 +219,6 @@ define([
 							type: "number",  //$NON-NLS-0$
 							defaultValue: error,
 							options: severities
-						},
-						{
-							id: "no-new-array", //$NON-NLS-0$
-							nameKey: "no-new-array", //$NON-NLS-0$
-							type: "number", //$NON-NLS-0$
-							defaultValue: warning, //$NON-NLS-0$
-							options: severities //$NON-NLS-0$
-						},
-						{
-							id: "no-new-func", //$NON-NLS-0$
-							nameKey: "no-new-func", //$NON-NLS-0$
-							type: "number", //$NON-NLS-0$
-							defaultValue: warning, //$NON-NLS-0$
-							options: severities //$NON-NLS-0$
-						},
-						{
-							id: "no-new-object", //$NON-NLS-0$
-							nameKey: "no-new-object", //$NON-NLS-0$
-							type: "number", //$NON-NLS-0$
-							defaultValue: warning, //$NON-NLS-0$
-							options: severities //$NON-NLS-0$
-						},
-						{
-							id: "no-new-wrappers", //$NON-NLS-0$
-							nameKey: "no-new-wrappers", //$NON-NLS-0$
-							type: "number", //$NON-NLS-0$
-							defaultValue: warning, //$NON-NLS-0$
-							options: severities //$NON-NLS-0$
 						},
 						{	id: "validate_missing_semi",  //$NON-NLS-0$
 							nameKey: 'missingSemi',  //$NON-NLS-0$
