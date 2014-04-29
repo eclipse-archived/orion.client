@@ -391,8 +391,21 @@ var exports = {};
 		
 		switch (jsonData.HttpCode) {
 			case 401:
-				sshCallback(jsonData);
-				return;
+				
+				/* authentication error, clear remaining credentials */
+				var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+				gitPreferenceStorage.isEnabled().then(function(isEnabled){
+					if(isEnabled && jsonData.JsonData.Url !== undefined){
+						gitPreferenceStorage.remove(jsonData.JsonData.Url).then(function(){
+							sshCallback(jsonData);
+						});
+					} else {
+						/* nothing to delete, proceed */
+						sshCallback(jsonData);
+					}
+				});
+				
+				break;
 			case 400:
 				if(jsonData.JsonData && jsonData.JsonData.HostKey){
 					sshCallback(jsonData);
