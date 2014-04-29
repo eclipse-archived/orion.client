@@ -14,8 +14,9 @@ define([
 	"chai/chai",
 	"esprima",
 	'estraverse',
+	'orion/util',
 	'mocha/mocha'  //must stay last, not a module
-], function(chai, Esprima, Estraverse) {
+], function(chai, Esprima, Estraverse, Util) {
 	var assert = chai.assert;
 
 	describe('Esprima Tolerant Parsing Tests', function() {
@@ -1293,9 +1294,9 @@ define([
 		it('obj prop recovery - broken property 1 - ', function() {
 			var data = {
 				source: 'require({, paths: {foo/bar": "foo/bar",}});',
-				nodes: [{"type":"ExpressionStatement","range":[0,9]},{"type":"ExpressionStatement","range":[9,11]},{"type":"LabeledStatement","range":[11,43]},{"type":"Identifier","name":"paths","range":[11,16]},{"type":"BlockStatement","range":[18,43]},{"type":"ExpressionStatement","range":[19,26]},{"type":"BinaryExpression","range":[19,26]},{"type":"Identifier","name":"foo","range":[19,22]},{"type":"Identifier","name":"bar","range":[23,26]},{"type":"ExpressionStatement","range":[26,30]},{"type":"Literal","range":[26,30],"value":": "},{"type":"ExpressionStatement","range":[30,42]},{"type":"EmptyStatement","range":[42,43]}],
-			tokens: [{"type":"Identifier","range":[0,7],"value":"require"},{"type":"Punctuator","range":[7,8],"value":"("},{"type":"Punctuator","range":[8,9],"value":"{"},{"type":"Punctuator","range":[9,10],"value":","},{"type":"Identifier","range":[11,16],"value":"paths"},{"type":"Punctuator","range":[16,17],"value":":"},{"type":"Punctuator","range":[18,19],"value":"{"},{"type":"Identifier","range":[19,22],"value":"foo"},{"type":"Punctuator","range":[22,23],"value":"/"},{"type":"Identifier","range":[23,26],"value":"bar"},{"type":"String","range":[26,30],"value":"\": \""},{"type":"Identifier","range":[30,33],"value":"foo"},{"type":"Punctuator","range":[33,34],"value":"/"},{"type":"Identifier","range":[34,37],"value":"bar"},{"type":"Punctuator","range":[42,43],"value":";"}],
-			errors: [{"lineNumber":1,"index":9,"message":"Unexpected token ,","token":","},{"lineNumber":1,"index":11,"message":"Unexpected identifier","token":"paths"},{"lineNumber":1,"index":26,"message":"Unexpected string","token":": "},{"lineNumber":1,"index":30,"message":"Unexpected identifier","token":"foo"},{"lineNumber":1,"index":43,"message":"Unexpected token ILLEGAL"},{"lineNumber":1,"index":34,"message":"Unexpected identifier","token":"bar"},{"lineNumber":1,"index":43,"message":"Unexpected end of input"}]
+				nodes: [{"type":"ExpressionStatement","range":[0,9]},{"type":"ExpressionStatement","range":[9,11]},{"type":"LabeledStatement","range":[11,43]},{"type":"Identifier","name":"paths","range":[11,16]},{"type":"BlockStatement","range":[18,43]},{"type":"ExpressionStatement","range":[19,26]},{"type":"BinaryExpression","range":[19,26]},{"type":"Identifier","name":"foo","range":[19,22]},{"type":"Identifier","name":"bar","range":[23,26]},{"type":"ExpressionStatement","range":[26,30]},{"type":"Literal","range":[26,30],"value":": "},{"type":"ExpressionStatement","range":[30,37]},{"type":"BinaryExpression","range":[30,37]},{"type":"Identifier","name":"foo","range":[30,33]},{"type":"Identifier","name":"bar","range":[34,37]},{"type":"ExpressionStatement","range":[37,43]},{"type":"Literal","range":[37,43],"value":",}});"}],
+				tokens: [{"type":"Identifier","range":[0,7],"value":"require"},{"type":"Punctuator","range":[7,8],"value":"("},{"type":"Punctuator","range":[8,9],"value":"{"},{"type":"Punctuator","range":[9,10],"value":","},{"type":"Identifier","range":[11,16],"value":"paths"},{"type":"Punctuator","range":[16,17],"value":":"},{"type":"Punctuator","range":[18,19],"value":"{"},{"type":"Identifier","range":[19,22],"value":"foo"},{"type":"Punctuator","range":[22,23],"value":"/"},{"type":"Identifier","range":[23,26],"value":"bar"},{"type":"String","range":[26,30],"value":"\": \""},{"type":"Identifier","range":[30,33],"value":"foo"},{"type":"Punctuator","range":[33,34],"value":"/"},{"type":"Identifier","range":[34,37],"value":"bar"},{"type":"String","range":[37,44],"value":"\",}});"}],
+				errors: [{"lineNumber":1,"index":9,"message":"Unexpected token ,","token":","},{"lineNumber":1,"index":11,"message":"Unexpected identifier","token":"paths"},{"lineNumber":1,"index":26,"message":"Unexpected string","token":": "},{"lineNumber":1,"index":30,"message":"Unexpected identifier","token":"foo"},{"lineNumber":1,"index":43,"message":"Unexpected token ILLEGAL"},{"lineNumber":1,"index":37,"message":"Unexpected string","token":",}});"},{"lineNumber":1,"index":43,"message":"Unexpected end of input"}]
 			};
 			runTest(data);
 		});
@@ -1303,6 +1304,66 @@ define([
 		it('dangling string terminator with CR', function() {
 			var data = {
 				source: 'bar": "foobar",\r\nqux": "foobar"\r\n '
+			};
+			runTest(data);
+		});
+		
+		it('string literal recovery 1 - ', function() {
+			var data = {
+				source: 'var f = "busted',
+				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,15]},{"type":"VariableDeclarator","range":[4,15]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"Literal","range":[8,15],"value":"busted"}],
+				tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Identifier","range":[4,5],"value":"f"},{"type":"Punctuator","range":[6,7],"value":"="},{"type":"String","range":[8,15],"value":"\"busted"}],
+				errors: [{"lineNumber":1,"index":15,"message":"Unexpected token ILLEGAL"}]
+			};
+			runTest(data);
+		});
+		
+		it('string literal recovery 2 - ', function() {
+			var data = {
+				source: Util.isWindows ? 'var f = "busted\r\nvar o = {};' : 'var f = "busted\nvar o = {};',
+				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,17]},{"type":"VariableDeclarator","range":[4,16]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"Literal","range":[8,16],"value":"busted"},{"type":"VariableDeclaration","kind":"var","range":[17,28]},{"type":"VariableDeclarator","range":[21,27]},{"type":"Identifier","name":"o","range":[21,22]},{"type":"ObjectExpression","range":[25,27]}],
+			tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Identifier","range":[4,5],"value":"f"},{"type":"Punctuator","range":[6,7],"value":"="},{"type":"String","range":[8,16],"value":"\"busted\r"},{"type":"Keyword","range":[17,20],"value":"var"},{"type":"Identifier","range":[21,22],"value":"o"},{"type":"Punctuator","range":[23,24],"value":"="},{"type":"Punctuator","range":[25,26],"value":"{"},{"type":"Punctuator","range":[26,27],"value":"}"},{"type":"Punctuator","range":[27,28],"value":";"}],
+			errors: [{"lineNumber":1,"index":16,"message":"Unexpected token ILLEGAL"}]
+			};
+			runTest(data);
+		});
+		
+		it('string literal recovery 3 - ', function() {
+			var data = {
+				source: 'var f = {one: "busted};',
+				nodes: [],
+				tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Identifier","range":[4,5],"value":"f"},{"type":"Punctuator","range":[6,7],"value":"="},{"type":"Punctuator","range":[8,9],"value":"{"},{"type":"Identifier","range":[9,12],"value":"one"},{"type":"Punctuator","range":[12,13],"value":":"},{"type":"String","range":[14,23],"value":"\"busted};"}],
+				errors: [{"lineNumber":1,"index":23,"message":"Unexpected token ILLEGAL"},{"lineNumber":1,"index":23,"message":"Missing expected ','"},{"lineNumber":1,"index":23,"message":"Unexpected end of input"}]
+			};
+			runTest(data);
+		});
+		
+		it('string literal recovery 4 - ', function() {
+			var data = {
+				source: Util.isWindows ? 'var f = {one: "busted\r\n};' : 'var f = {one: "busted\n};',
+				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,25]},{"type":"VariableDeclarator","range":[4,24]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[8,24]},{"type":"Property","kind":"init","range":[9,22]},{"type":"Identifier","name":"one","range":[9,12]},{"type":"Literal","range":[14,22],"value":"busted"}],
+				tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Identifier","range":[4,5],"value":"f"},{"type":"Punctuator","range":[6,7],"value":"="},{"type":"Punctuator","range":[8,9],"value":"{"},{"type":"Identifier","range":[9,12],"value":"one"},{"type":"Punctuator","range":[12,13],"value":":"},{"type":"String","range":[14,22],"value":"\"busted\r"},{"type":"Punctuator","range":[23,24],"value":"}"},{"type":"Punctuator","range":[24,25],"value":";"}],
+				errors: [{"lineNumber":1,"index":22,"message":"Unexpected token ILLEGAL"}]
+			};
+			runTest(data);
+		});
+		
+		it('string literal recovery 5 - ', function() {
+			var data = {
+				source: 'var o = {}; o["busted]',
+				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,11]},{"type":"VariableDeclarator","range":[4,10]},{"type":"Identifier","name":"o","range":[4,5]},{"type":"ObjectExpression","range":[8,10]},{"type":"ExpressionStatement","range":[12,22]}],
+				tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Identifier","range":[4,5],"value":"o"},{"type":"Punctuator","range":[6,7],"value":"="},{"type":"Punctuator","range":[8,9],"value":"{"},{"type":"Punctuator","range":[9,10],"value":"}"},{"type":"Punctuator","range":[10,11],"value":";"},{"type":"Identifier","range":[12,13],"value":"o"},{"type":"Punctuator","range":[13,14],"value":"["},{"type":"String","range":[14,22],"value":"\"busted]"}],
+				errors: [{"lineNumber":1,"index":22,"message":"Unexpected token ILLEGAL"},{"lineNumber":1,"index":22,"message":"Unexpected end of input"}]
+			};
+			runTest(data);
+		});
+		
+		it('string literal recovery 6 - ', function() {
+			var data = {
+				source: Util.isWindows ? 'var o = {}; o["busted]\r\nvar f = {};' : 'var o = {}; o["busted]\nvar f = {};',
+				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,11]},{"type":"VariableDeclarator","range":[4,10]},{"type":"Identifier","name":"o","range":[4,5]},{"type":"ObjectExpression","range":[8,10]},{"type":"ExpressionStatement","range":[12,23]},{"type":"VariableDeclaration","kind":"var","range":[24,35]},{"type":"VariableDeclarator","range":[28,34]},{"type":"Identifier","name":"f","range":[28,29]},{"type":"ObjectExpression","range":[32,34]}],
+				tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Identifier","range":[4,5],"value":"o"},{"type":"Punctuator","range":[6,7],"value":"="},{"type":"Punctuator","range":[8,9],"value":"{"},{"type":"Punctuator","range":[9,10],"value":"}"},{"type":"Punctuator","range":[10,11],"value":";"},{"type":"Identifier","range":[12,13],"value":"o"},{"type":"Punctuator","range":[13,14],"value":"["},{"type":"String","range":[14,23],"value":"\"busted]\r"},{"type":"Keyword","range":[24,27],"value":"var"},{"type":"Identifier","range":[28,29],"value":"f"},{"type":"Keyword","range":[24,27],"value":"var"},{"type":"Identifier","range":[28,29],"value":"f"},{"type":"Punctuator","range":[30,31],"value":"="},{"type":"Punctuator","range":[32,33],"value":"{"},{"type":"Punctuator","range":[33,34],"value":"}"},{"type":"Punctuator","range":[34,35],"value":";"}],
+				errors: [{"lineNumber":1,"index":23,"message":"Unexpected token ILLEGAL"},{"lineNumber":2,"index":24,"message":"Unexpected token var","token":"var"},{"lineNumber":2,"index":28,"message":"Unexpected identifier","token":"f"}]
 			};
 			runTest(data);
 		});

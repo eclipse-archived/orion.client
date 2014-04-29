@@ -1025,7 +1025,8 @@ parseStatement: true, parseSourceElement: true */
         }
 
         if (quote !== '') {
-            throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+           //mrennie https://bugs.eclipse.org/bugs/show_bug.cgi?id=433709
+            throwErrorTolerant({}, Messages.UnexpectedToken, 'ILLEGAL');
         }
 
         return {
