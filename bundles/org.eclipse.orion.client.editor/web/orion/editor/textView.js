@@ -4359,7 +4359,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					line.destroy();
 				}
 			}
-			this._modifyContent({text: text, start: selection.start, end: selection.end, _ignoreDOMSelection: true}, true);
+			return this._modifyContent({text: text, start: selection.start, end: selection.end, _ignoreDOMSelection: true}, true);
 		},
 		_doCopy: function (e) {
 			var selection = this._getSelection();
@@ -4990,13 +4990,17 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var model = this._model;
 			var lineIndex = model.getLineAtOffset(this._imeOffset);
 			var lineStart = model.getLineStart(lineIndex);
-			var newText = this._getDOMText(this._getLineNode(lineIndex)).text;
+			var line = this._getLineNode(lineIndex);
+			var newText = this._getDOMText(line).text;
 			var oldText = model.getLine(lineIndex);
 			var start = this._imeOffset - lineStart;
 			var end = start + newText.length - oldText.length;
 			if (start !== end) {
 				var insertText = newText.substring(start, end);
-				this._doContent(insertText);
+				if (!this._doContent(insertText) && util.isFirefox) {
+					line.lineRemoved = true;
+					this._queueUpdate();
+				}
 			}
 			this._imeOffset = -1;
 		},
@@ -5865,12 +5869,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		},
 		_modifyContent: function(e, updateCaret) {
 			if (this._readonly && !e._code) {
-				return;
+				return false;
 			}
 			e.type = "Verify"; //$NON-NLS-0$
 			this.onVerify(e);
 
-			if (e.text === null || e.text === undefined) { return; }
+			if (e.text === null || e.text === undefined) { return false; }
 			
 			var model = this._model;
 			try {
@@ -5891,6 +5895,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 			}
 			this.onModify({type: "Modify"}); //$NON-NLS-0$
+			return true;
 		},
 		_onModelChanged: function(modelChangedEvent) {
 			modelChangedEvent.type = "ModelChanged"; //$NON-NLS-0$
