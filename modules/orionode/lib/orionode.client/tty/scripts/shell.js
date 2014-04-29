@@ -4,15 +4,6 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js",
   
   var serviceRegistry, fileClient;
 
-  mBootstrap.startup().then(function(core) {
-		serviceRegistry = core.serviceRegistry;
-		fileClient = new FileClient.FileClient(serviceRegistry);
-    fileClient.loadWorkspace(getCWD()).then(function(args) {
-      debugger;
-      console.log(args);
-      console.log(fileClient.fileServiceRootURL(args.Location));
-    });
-	});
 
   onReady(function() {
     var socket;
@@ -84,11 +75,8 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js",
       });
     });
 
-    var bgButton = document.getElementById("bg");
-    bgButton.onchange = changeBg;
-
-    var txButton = document.getElementById("tx");
-    txButton.onchange = changeTx;
+    var schemeButton = document.getElementById("color-scheme-dropdown");
+    schemeButton.onchange = changeScheme;
 
     var wrenchButton = document.getElementById("menuWrench");
 		wrenchButton.onclick = function() {
@@ -129,52 +117,11 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js",
 	  }
   }
 
-/*
-  function changeTx() {
+  function changeScheme() {
     var t = document.getElementsByClassName('terminal');
-    var tx = document.getElementById("tx").value;
-    switch(tx)
-    {
-      case 'Blue':
-        txColor = '#0404B4';
-        break;
-      case 'White':
-        txColor = '#FFFFFF';
-        break;
-      case 'Green':
-        txColor = '#01DF01';
-        break;
-      case 'Black':
-        txColor = '#000000';
-        break;
-      case 'Orange':
-        txColor = '#FF8000';
-        break;
-    }
-    t[0].style.color = txColor;
+    var schemeName = document.getElementById("color-scheme-dropdown").value;
+    __changeScheme(schemeName)
   }
-
-  function changeBg() {
-    var t = document.getElementsByClassName('terminal');
-    var bg = document.getElementById("bg").value;
-    switch(bg)
-    {
-      case 'Blue':
-        bgColor = '#0404B4';
-        break;
-      case 'Grey':
-        bgColor = '#585858';
-        break;
-      case 'Green':
-        bgColor = '#0B6121';
-        break;
-      case 'Black':
-        bgColor = '#000000';
-    }
-    t[0].style.backgroundColor = bgColor;
-  }
-  
-  */
 
 	function getCWD() {
 		var result = PageUtil.matchResourceParameters(window.location.href).resource;
