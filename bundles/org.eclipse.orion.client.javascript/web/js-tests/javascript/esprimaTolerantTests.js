@@ -1299,5 +1299,12 @@ define([
 			};
 			runTest(data);
 		});
+
+		it('dangling string terminator with CR', function() {
+			var data = {
+				source: 'bar": "foobar",\r\nqux": "foobar"\r\n '
+			};
+			runTest(data);
+		});
 	});
 });
