@@ -19,6 +19,7 @@
 		module.exports = {};
 	} else if (typeof define === "function" && define.amd) {
 		define([
+			"js-tests/javascript/eslintEventTests",
 			"eslint/tests/lib/eslint",
 			"eslint/tests/lib/util",
 			"eslint/tests/lib/rules/curly",
