@@ -79,50 +79,50 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js",
     schemeButton.onchange = changeScheme;
 
     var wrenchButton = document.getElementById("menuWrench");
-		wrenchButton.onclick = function() {
-			var d = document.getElementById("dropdown");
-			if (d.style.display == "block")
-				d.style.display = "none";
-			else
-				d.style.display = "block";
-		};
+    wrenchButton.onclick = function() {
+        var d = document.getElementById("dropdown");
+        if (d.style.display == "block")
+            d.style.display = "none";
+        else
+            d.style.display = "block";
+    };
+    
+    function __changeScheme(schemeName) {
+        if (term != null) {
+            switch(schemeName) {
+                case 'Dark':
+                case 'Light':
+                case 'Solarized':
+                    term.colors[0] = '#073642';
+                    term.colors[1] = '#dc322f';
+                    term.colors[2] = '#859900';
+                    term.colors[3] = '#b58900';
+                    term.colors[4] = '#268bd2';
+                    term.colors[5] = '#d33682';
+                    term.colors[6] = '#2aa198';
+                    term.colors[7] = '#eee8d5';
+                    term.colors[8] = '#002b36';
+                    term.colors[9] = '#cb4b16';
+                    term.colors[10] = '#586e75';
+                    term.colors[11] = '#657b83';
+                    term.colors[12] = '#839496';
+                    term.colors[13] = '#6c71c4';
+                    term.colors[14] = '#93a1a1';
+                    term.colors[15] = '#fdf6e3';
+                    term.colors[256] = '#002b36';
+                    term.colors[257] = '#fdf6e3';
+                    break;
+            }
+        }
+    }
+
+    function changeScheme() {
+        var t = document.getElementsByClassName('terminal');
+        var schemeName = document.getElementById("color-scheme-dropdown").value;
+        __changeScheme(schemeName)
+    }
   });
   
-  function __changeScheme(var schemeName) {
-  	if (term != null) {
-	  	switch(schemeName) {
-	  		case 'Dark':
-	  		case 'Light':
-	  		case 'Solarized':
-	  			term.colors[0] = '#262626';
-	  			term.colors[1] = '#d70000';
-	  			term.colors[2] = '#5f8700';
-	  			term.colors[3] = '#af8700';
-	  			term.colors[4] = '#0087ff';
-	  			term.colors[5] = '#af005f';
-	  			term.colors[6] = '#00afaf';
-	  			term.colors[7] = '#d7d7af';
-	  			term.colors[8] = '#1c1c1c';
-	  			term.colors[9] = '#d75f00';
-	  			term.colors[10] = '#4e4e4e';
-	  			term.colors[11] = '#585858';
-	  			term.colors[12] = '#808080';
-	  			term.colors[13] = '#5f5faf';
-	  			term.colors[14] = '#8a8a8a';
-	  			term.colors[15] = '#ffffd7';
-	  			term.colors[256] = '#1c1c1c';
-	  			term.colors[257] = '#585858';
-	  			break;
-	  	}
-	  }
-  }
-
-  function changeScheme() {
-    var t = document.getElementsByClassName('terminal');
-    var schemeName = document.getElementById("color-scheme-dropdown").value;
-    __changeScheme(schemeName)
-  }
-
 	function getCWD() {
 		var result = PageUtil.matchResourceParameters(window.location.href).resource;
 		return result.length > 0 ? result : null;
