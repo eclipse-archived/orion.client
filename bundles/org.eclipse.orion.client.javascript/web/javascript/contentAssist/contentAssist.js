@@ -12,21 +12,19 @@
  *   IBM Corporation - Various improvements
  ******************************************************************************/
 
-/*global esprima doctrine*/
-/*jslint amd:true*/
+/*global doctrine:true define:true */
 define([
-	'javascript/contentAssist/typeEnvironment', 
-	'javascript/contentAssist/typeInference', 
-	'javascript/contentAssist/typeUtils', 
-	'javascript/contentAssist/proposalUtils', 
+	'javascript/contentAssist/typeEnvironment',  //$NON-NLS-0$
+	'javascript/contentAssist/typeInference',  //$NON-NLS-0$
+	'javascript/contentAssist/typeUtils',  //$NON-NLS-0$
+	'javascript/contentAssist/proposalUtils',  //$NON-NLS-0$
 	'orion/editor/templates', //$NON-NLS-0$
 	'orion/editor/stylers/application_javascript/syntax', //$NON-NLS-0$
-	'javascript/contentAssist/templates',
-	'orion/Deferred',
-	'orion/objects',
-	'estraverse',
-	'javascript/contentAssist/indexer',
-	'esprima' // this must stay at the end since it does not load a module
+	'javascript/contentAssist/templates',  //$NON-NLS-0$
+	'orion/Deferred',  //$NON-NLS-0$
+	'orion/objects',  //$NON-NLS-0$
+	'estraverse',  //$NON-NLS-0$
+	'javascript/contentAssist/indexer'  //$NON-NLS-0$
 ], function(typeEnv, typeInf, typeUtils, proposalUtils, mTemplates, JSSyntax, Templates, Deferred, Objects, Estraverse, Indexer) {
 
 	/**
