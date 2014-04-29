@@ -1,8 +1,7 @@
 require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js", "orion/PageUtil", "orion/fileClient", "orion/bootstrap"], 
     function(io, Terminal, onReady, PageUtil, FileClient, mBootstrap) {
   // default settings:
-  var bgColor = '#000000';
-  var txColor = '#FFFFFF';
+  
   var serviceRegistry, fileClient;
 
   mBootstrap.startup().then(function(core) {
@@ -47,16 +46,17 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js",
     socket.on('connect', function() {
       socket.emit('start', getCWD());
     });
-
+	
+	var term;
     socket.on('ready', function() {
-      var term = new Terminal({
+      term = new Terminal({
         cols: 80,
           rows: 24,
           useStyle: true,
           screenKeys: true,
       });
-      term.colors[257] = txColor;
-      term.colors[256] = bgColor;
+      
+      
       term.on('data', function(data) {
         socket.emit('data', data);
       });
@@ -99,7 +99,37 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js",
 				d.style.display = "block";
 		};
   });
+  
+  function __changeScheme(var schemeName) {
+  	if (term != null) {
+	  	switch(schemeName) {
+	  		case 'Dark':
+	  		case 'Light':
+	  		case 'Solarized':
+	  			term.colors[0] = '#262626';
+	  			term.colors[1] = '#d70000';
+	  			term.colors[2] = '#5f8700';
+	  			term.colors[3] = '#af8700';
+	  			term.colors[4] = '#0087ff';
+	  			term.colors[5] = '#af005f';
+	  			term.colors[6] = '#00afaf';
+	  			term.colors[7] = '#d7d7af';
+	  			term.colors[8] = '#1c1c1c';
+	  			term.colors[9] = '#d75f00';
+	  			term.colors[10] = '#4e4e4e';
+	  			term.colors[11] = '#585858';
+	  			term.colors[12] = '#808080';
+	  			term.colors[13] = '#5f5faf';
+	  			term.colors[14] = '#8a8a8a';
+	  			term.colors[15] = '#ffffd7';
+	  			term.colors[256] = '#1c1c1c';
+	  			term.colors[257] = '#585858';
+	  			break;
+	  	}
+	  }
+  }
 
+/*
   function changeTx() {
     var t = document.getElementsByClassName('terminal');
     var tx = document.getElementById("tx").value;
@@ -143,6 +173,8 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js",
     }
     t[0].style.backgroundColor = bgColor;
   }
+  
+  */
 
 	function getCWD() {
 		var result = PageUtil.matchResourceParameters(window.location.href).resource;
