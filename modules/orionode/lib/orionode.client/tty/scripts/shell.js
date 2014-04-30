@@ -138,10 +138,11 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js",
                   break;
                 case 'Solarized':
                     var t = document.getElementsByClassName('terminal');
-                    t[0].style.color = "#eee8d5";
+                    t[0].style.backgroundColor = "#002b36";
+                    t[0].style.color = "#839496";
                     term.colors[0] = '#073642';
-                    term.colors[1] = '#dc322f';
-                    term.colors[2] = '#859900';
+                    term.colors[1] = '#dc322f'; //git - changes not staged for commit
+                    term.colors[2] = '#268bd2'; //git - changes staged for commit
                     term.colors[3] = '#b58900';
                     term.colors[4] = '#268bd2';
                     term.colors[5] = '#d33682';
@@ -149,14 +150,12 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js",
                     term.colors[7] = '#eee8d5';
                     term.colors[8] = '#002b36';
                     term.colors[9] = '#cb4b16';
-                    term.colors[10] = '#586e75';
-                    term.colors[11] = '#657b83';
-                    term.colors[12] = '#839496';
+                    term.colors[10] = '#d33682'; //magenta user@machine
+                    term.colors[11] = '#268bd2';
+                    term.colors[12] = '#859900'; //green location
                     term.colors[13] = '#6c71c4';
-                    term.colors[14] = '#93a1a1';
+                    term.colors[14] = '#2aa198';
                     term.colors[15] = '#fdf6e3';
-                    term.colors[256] = '#002b36';
-                    term.colors[257] = '#fdf6e3';
                     break;
             }
         }
