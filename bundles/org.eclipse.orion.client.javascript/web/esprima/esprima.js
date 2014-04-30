@@ -2093,20 +2093,24 @@ parseStatement: true, parseSourceElement: true */
 	            	return delegate.markEnd(delegate.createProperty('init', id, parseAssignmentExpression()));
 	        	} catch(e) {
 	        		//trap the exception and ignore the broken property
+	        		delegate.markEndIf(id);
 	        		return null;
 	        	}
 	        } else if(token.type === Token.Punctuator && token.value === '}') {
 	        	throwErrorTolerant(prev, Messages.UnexpectedToken, prev.value);
+	        	delegate.markEndIf(id);
 	        	return null;
 	        } else {
 	        	throwErrorTolerant(prev, Messages.UnexpectedToken, prev.value);
 	        	if(token.type === Token.Identifier || token.type === Token.StringLiteral) {
 	        		//if the next token is an identifer / literal, start over
+	        		delegate.markEndIf(id);
 	        		return null;
 	        	}
 	        	while(token.type !== Token.EOF) {
 	        		if(token.type === Token.Punctuator && (token.value === ',' || token.value === '}')) {
 		            	//entering a prop, not complete, return null
+		            	delegate.markEndIf(id);
 		            	return null;
 		            } else {
 	        			token = lex(); // the token if we skipped it
@@ -2114,6 +2118,7 @@ parseStatement: true, parseSourceElement: true */
 	        		token = advance();
 	        	}
 	        }
+	        delegate.markEndIf(id);
 	        return null;
         }
         else {
