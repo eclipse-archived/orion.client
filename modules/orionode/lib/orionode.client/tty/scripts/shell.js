@@ -90,9 +90,55 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js",
     function __changeScheme(schemeName) {
         if (term != null) {
             switch(schemeName) {
-                case 'Dark':
+                case 'Dark': 
+                  var t = document.getElementsByClassName('terminal');
+                  t[0].style.backgroundColor = "#000000";
+                  t[0].style.color = "#fdf6e3";
+                    term.colors[0] = '#000000';
+                    term.colors[1] = '#dc322f';
+                    term.colors[2] = '#859900';
+                    term.colors[3] = '#b58900';
+                    term.colors[4] = '#268bd2';
+                    term.colors[5] = '#d33682';
+                    term.colors[6] = '#2aa198';
+                    term.colors[7] = '#eee8d5';
+                    term.colors[8] = '#002b36';
+                    term.colors[9] = '#cb4b16';
+                    term.colors[10] = '#8AE234'; //Linux Tango - user@machine, shell scripts
+                    term.colors[11] = '#FCE94F'; //Linux Tango - ~/location/
+                    term.colors[12] = '#729FCF'; //Linux Tango - (git-branch)
+                    term.colors[13] = '#AD7FA8'; //Linux Tango - images
+                    term.colors[14] = '#3465A4'; //Linux Tango - javascript comments
+                    term.colors[15] = '#fdf6e3';
+                    term.colors[256] = '#000000';
+                    term.colors[257] = '#fdf6e3';
+                  break;
                 case 'Light':
+                  var t = document.getElementsByClassName('terminal');
+                  t[0].style.backgroundColor = "#ffffff";
+                  t[0].style.color = "#000000";
+                    term.colors[0] = '#ffffff';
+                    term.colors[1] = '#dc322f';
+                    term.colors[2] = '#859900';
+                    term.colors[3] = '#b58900';
+                    term.colors[4] = '#268bd2';
+                    term.colors[5] = '#d33682';
+                    term.colors[6] = '#2aa198';
+                    term.colors[7] = '#000000';
+                    term.colors[8] = '#002b36';
+                    term.colors[9] = '#cb4b16';
+                    term.colors[10] = '#8AE234'; //Linux Tango - user@machine, shell scripts
+                    term.colors[11] = '#FCE94F'; //Linux Tango - ~/location/
+                    term.colors[12] = '#729FCF'; //Linux Tango - (git-branch)
+                    term.colors[13] = '#AD7FA8'; //Linux Tango - images
+                    term.colors[14] = '#3465A4'; //Linux Tango - javascript comments
+                    term.colors[15] = '#000000';
+                    term.colors[256] = '#ffffff';
+                    term.colors[257] = '#000000';
+                  break;
                 case 'Solarized':
+                    var t = document.getElementsByClassName('terminal');
+                    t[0].style.color = "#eee8d5";
                     term.colors[0] = '#073642';
                     term.colors[1] = '#dc322f';
                     term.colors[2] = '#859900';
