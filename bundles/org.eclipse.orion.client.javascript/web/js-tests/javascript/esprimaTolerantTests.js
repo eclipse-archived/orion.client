@@ -178,14 +178,14 @@ define([
 		//////////////////////////////////////////////////////////
 		// Tests
 		//////////////////////////////////////////////////////////
-		it('parser should work when called several times - ', function() {
+		it('parser should work when called several times', function() {
 			var ast = Esprima.parse("var a", { tolerant: false });
 			assert.equal(ast.type, "Program");
 			Esprima.parse("var a", { tolerant: false });
 			assert.equal(ast.type, "Program");
 		});
 
-		it('recovery basic parse - ', function() {
+		it('recovery basic parse', function() {
 			var data = { 
 				source: "foo.bar",
 				errors: [],
@@ -193,7 +193,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('recovery - dot followed by EOF - ', function() {
+		it('recovery - dot followed by EOF', function() {
 			var data = { 
 				source: "foo.",
 				errors: [{ index: 4, lineNumber: 1, message: "Unexpected end of input" }],
@@ -201,7 +201,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('Function args 2 - ', function() {
+		it('Function args 2', function() {
 			var data = { 
 				source: "var ttt, uuu;\nttt(ttt, /**/)",
 				errors: [{ index:27, lineNumber: 2, message: "Unexpected token )", token: ")" }],
@@ -209,7 +209,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('Function args 3 - ', function() {
+		it('Function args 3', function() {
 			var data = { 
 				source: "var ttt, uuu;\nttt(ttt, /**/, uuu)",
 				errors: [
@@ -221,7 +221,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('broken after dot 1 - ', function() {
+		it('broken after dot 1', function() {
 			var data = { 
 				source: "var ttt = { ooo:8};\nttt.",
 				errors: [{ index: 24, message: "Unexpected end of input" }],
@@ -229,7 +229,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('broken after dot 2 - ', function() {
+		it('broken after dot 2', function() {
 			var data = { 
 				source: "var ttt = { ooo:8};\nif (ttt.) { ttt }",
 				errors: [{ index: 28, message: "Unexpected token )", token: ")" }],
@@ -237,7 +237,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('broken after dot 3 - ', function() {
+		it('broken after dot 3', function() {
 			var data = { 
 				source: "var ttt = { ooo:this.};",
 				errors: [{ index: 21, message: "Unexpected token }", token: "}" }],
@@ -245,7 +245,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('broken after dot 3a - ', function() {
+		it('broken after dot 3a', function() {
 			var data = { 
 				source: "var ttt = { ooo:this./**/};",
 				errors: [{ index: 25, message: "Unexpected token }", token: "}" }],
@@ -253,7 +253,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('broken after dot 4 - ', function() {
+		it('broken after dot 4', function() {
 			var data = { 
 				source: "var ttt = { ooo:8};\nfunction ff() { \nttt.}",
 				errors: [{ index: 41, message: "Unexpected token }", token: "}" }],
@@ -261,7 +261,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('broken after dot 4a - ', function() {
+		it('broken after dot 4a', function() {
 			var data = { 
 				source: "var ttt = { ooo:8};\nfunction ff() { \nttt./**/}",
 				errors: [{ index: 45, message: "Unexpected token }", token: "}" }],
@@ -269,7 +269,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('broken after dot 5 - ', function() {
+		it('broken after dot 5', function() {
 			var data = { 
 				source: "var first = {ooo:9};\nfirst.\nvar jjj;",
 				errors: [{ index: 32, message: "Unexpected identifier", token: "jjj" }],
@@ -277,7 +277,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('broken after dot 6 - ', function() {
+		it('broken after dot 6', function() {
 			var data = { 
 				source: "var first = {ooo:9};\nfirst.\nif (x) { }",
 				errors: [{ index: 35, message: "Unexpected token {", token: "{" }],
@@ -285,7 +285,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('computed member expressions5 - ', function() {
+		it('computed member expressions5', function() {
 			var data = { 
 				source: "var foo = { at: { bar: 0} };\nfoo[at.foo.bar].",
 				errors: [{ lineNumber: 2, message: "Unexpected end of input" }],
@@ -293,7 +293,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('computed member expressions6 - ', function() {
+		it('computed member expressions6', function() {
 			var data = { 
 				source: "var x = 0;\nvar foo = [];\nfoo[x./**/]",
 				errors: [{ lineNumber: 3, message: "Unexpected token ]", token: "]" }],
@@ -301,7 +301,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('invalid member expression1 - ', function() {
+		it('invalid member expression1', function() {
 			var data = { 
 				source: "x./**/\nvar x = {};\nx.fff = '';",
 				errors: [{ lineNumber: 2, message: "Unexpected identifier", token: "x" }],
@@ -309,7 +309,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('invalid member expression2 - ', function() {
+		it('invalid member expression2', function() {
 			var data = { 
 				source: "function a() {\nx.fff = '';\n}\nx./**/\nvar x = {}; ",
 				errors: [{ lineNumber: 5, message: "Unexpected identifier", token: "x" }],
@@ -317,7 +317,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('invalid member expression3 - ', function() {
+		it('invalid member expression3', function() {
 			var data = { 
 				source: "x./**/\nfunction a() {\nx.fff = '';\n}\nvar x = {}; ",
 				errors: [{ lineNumber: 2, message: "Unexpected identifier", token: "a" }],
@@ -330,7 +330,7 @@ define([
 //			errors: [{ lineNumber: 2, message: "Unexpected identifier" }],
 //			nodes: [{type:"ExpressionStatement",range:[21,29]},{type:"MemberExpression",range:[21,29]},{type:"Identifier",name:"process",range:[21,28]}]
 //		});
-		it('tolerant parsing function 1 - ', function() {
+		it('tolerant parsing function 1', function() {
 			var data = { 
 				source: "var xxxyyy = {};\nfunction foo() {\n    if (xx",
 				errors: [{ lineNumber: 3, message: "Unexpected end of input" }],
@@ -338,7 +338,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('tolerant parsing function 2 - ', function() {
+		it('tolerant parsing function 2', function() {
 			var data = { 
 				source: "function foo() {\n    var xxxyyy = false;\n    if (!xx",
 				errors: [{ lineNumber: 3, message: "Unexpected end of input" }],
@@ -346,7 +346,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('tolerant parsing function 3 - ', function() {
+		it('tolerant parsing function 3', function() {
 			var data = { 
 				source: "function foo(xxxyyy) {\n    if (!xx",
 				errors: [{ lineNumber: 2, message: "Unexpected end of input" }],
@@ -354,7 +354,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('tolerant parsing function 4 - ', function() {
+		it('tolerant parsing function 4', function() {
 			var data = { 
 				source: "var x = { bazz: 3 };\nfunction foo() {\n    if (x.b",
 				errors: [{ lineNumber: 3, message: "Unexpected end of input" }],
@@ -362,7 +362,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('tolerant parsing function 5 - ', function() {
+		it('tolerant parsing function 5', function() {
 			var data = { 
 				source: "function foo(p) {\n    p.ffffff = false;\n    while (p.ff",
 				errors: [{ lineNumber: 3, message: "Unexpected end of input" }],
@@ -370,7 +370,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('tolerant parsing function 6 - ', function() {
+		it('tolerant parsing function 6', function() {
 			var data = { 
 				source: "function foo(p) {\n    p.ffffff = false;\n    if (p) {\n        while (p.ff",
 				errors: [{ lineNumber: 4, message: "Unexpected end of input" }],
@@ -378,7 +378,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('tolerant parsing function 7 - ', function() {
+		it('tolerant parsing function 7', function() {
 			var data = { 
 				source: "function foo(p) {\n    p.ffffff = false;\n    if (p) {\n        for (var q in p.ff",
 				errors: [{ lineNumber: 4, message: "Unexpected end of input" }],
@@ -386,7 +386,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('tolerant parsing function 8 - ', function() {
+		it('tolerant parsing function 8', function() {
 			var data = { 
 				source: "function foo(p) {\n    p.ffffff = false;\n    if (p) {\n        for (var q in p) {\n            while (p.ff",
 				errors: [{ lineNumber: 5, message: "Unexpected end of input" }],
@@ -394,7 +394,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('tolerant parsing function 9 - ', function() {
+		it('tolerant parsing function 9', function() {
 			var data = { 
 				source: "function f(s) {}\nf(JSON.str",
 				errors: [{ lineNumber: 2, message: "Unexpected end of input" }],
@@ -402,7 +402,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('tolerant parsing function 10 - ', function() {
+		it('tolerant parsing function 10', function() {
 			var data = { 
 				source: "function f(a,b) {}\nf(0,JSON.str",
 				errors: [{ lineNumber: 2, message: "Unexpected end of input" }],
@@ -410,7 +410,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('cycle 2 - ', function() {
+		it('cycle 2', function() {
 			var data = { 
 				source: "function foo() {\nthis._init = function() { return this; }\nthis.cmd = function() {\nthis._in",
 				errors: [{ lineNumber: 4, message: "Unexpected end of input" }],
@@ -423,7 +423,7 @@ define([
 		 * Object property recovery tests
 		 * @since 6.0
 		 */
-		it('obj prop ident recovery - ident only - ', function() {
+		it('obj prop ident recovery - ident only', function() {
 			var data = { 
 				source: "var f = {a};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,12]},{"type":"VariableDeclarator","range":[7,11]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,11]}],
@@ -433,7 +433,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - literal ident only - ', function() {
+		it('obj prop ident recovery - literal ident only', function() {
 			var data = { 
 				source: "var f = {'a'};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,14]},{"type":"VariableDeclarator","range":[7,13]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,13]}],
@@ -443,7 +443,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - ident only with postamble - ', function() {
+		it('obj prop ident recovery - ident only with postamble', function() {
 			var data = { 
 				source: "var f = {a/**/};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,16]},{"type":"VariableDeclarator","range":[7,15]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,15]}],
@@ -453,7 +453,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - literal ident only with postamble - ', function() {
+		it('obj prop ident recovery - literal ident only with postamble', function() {
 			var data = { 
 				source: "var f = {'a'/**/};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,18]},{"type":"VariableDeclarator","range":[7,17]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,17]}],
@@ -463,7 +463,7 @@ define([
 			runTest(data);
 		});
 		
-		it('nested obj prop ident recovery - nested ident only - ', function() {
+		it('nested obj prop ident recovery - nested ident only', function() {
 			var data = { 
 				source: "var f = {one: {a}};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,19]},{"type":"VariableDeclarator","range":[7,18]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,18]},{"type":"Property","kind":"init","range":[13,17]},{"type":"Identifier","name":"one","range":[9,12]},{"type":"ObjectExpression","range":[15,17]}],
@@ -473,7 +473,7 @@ define([
 			runTest(data);
 		});
 		
-		it('nested obj prop ident recovery - nested literal ident only - ', function() {
+		it('nested obj prop ident recovery - nested literal ident only', function() {
 			var data = { 
 				source: "var f = {'one': {'a'}};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,23]},{"type":"VariableDeclarator","range":[7,22]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,22]},{"type":"Property","kind":"init","range":[15,21]},{"type":"Literal","range":[9,14],"value":"one"},{"type":"ObjectExpression","range":[17,21]}],
@@ -483,7 +483,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive 1 - ', function() {
+		it('obj prop ident recovery - successive 1', function() {
 			var data = { 
 				source: "var f = {a b:1};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,16]},{"type":"VariableDeclarator","range":[7,15]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,15]},{"type":"Property","kind":"init","range":[12,14]},{"type":"Identifier","name":"b","range":[12,12]},{"type":"Literal","range":[13,14],"value":1}],
@@ -493,7 +493,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive 2 - ', function() {
+		it('obj prop ident recovery - successive 2', function() {
 			var data = { 
 				source: "var f = {a b:1,c:2};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,20]},{"type":"VariableDeclarator","range":[7,19]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,19]},{"type":"Property","kind":"init","range":[12,14]},{"type":"Identifier","name":"b","range":[12,12]},{"type":"Literal","range":[13,14],"value":1},{"type":"Property","kind":"init","range":[15,18]},{"type":"Identifier","name":"c","range":[15,16]},{"type":"Literal","range":[17,18],"value":2}],
@@ -503,7 +503,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive 3 - ', function() {
+		it('obj prop ident recovery - successive 3', function() {
 			var data = { 
 				source: "var f = {b:1,a};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,16]},{"type":"VariableDeclarator","range":[7,15]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[13,15]},{"type":"Property","kind":"init","range":[9,12]},{"type":"Identifier","name":"b","range":[9,10]},{"type":"Literal","range":[11,12],"value":1}],
@@ -513,7 +513,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive 4 - ', function() {
+		it('obj prop ident recovery - successive 4', function() {
 			var data = { 
 				source: "var f = {b:1,c:2,a};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,20]},{"type":"VariableDeclarator","range":[7,19]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[17,19]},{"type":"Property","kind":"init","range":[9,12]},{"type":"Identifier","name":"b","range":[9,10]},{"type":"Literal","range":[11,12],"value":1},{"type":"Property","kind":"init","range":[13,16]},{"type":"Identifier","name":"c","range":[13,14]},{"type":"Literal","range":[15,16],"value":2}],
@@ -523,7 +523,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive 5 - ', function() {
+		it('obj prop ident recovery - successive 5', function() {
 			var data = { 
 				source: "var f = {b:1,a c:2};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,20]},{"type":"VariableDeclarator","range":[7,19]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[13,19]},{"type":"Property","kind":"init","range":[9,12]},{"type":"Identifier","name":"b","range":[9,10]},{"type":"Literal","range":[11,12],"value":1},{"type":"Property","kind":"init","range":[16,18]},{"type":"Identifier","name":"c","range":[16,16]},{"type":"Literal","range":[17,18],"value":2}],
@@ -533,7 +533,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive 6 - ', function() {
+		it('obj prop ident recovery - successive 6', function() {
 			var data = { 
 				source: 'var f = {one: {a b:1,c}};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,25]},{"type":"VariableDeclarator","range":[7,24]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[13,24]},{"type":"Property","kind":"init","range":[13,23]},{"type":"Identifier","name":"one","range":[9,12]},{"type":"ObjectExpression","range":[21,23]},{"type":"Property","kind":"init","range":[18,20]},{"type":"Identifier","name":"b","range":[18,18]},{"type":"Literal","range":[19,20],"value":1}],
@@ -543,7 +543,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive 7 - ', function() {
+		it('obj prop ident recovery - successive 7', function() {
 			var data = { 
 				source: 'var f = {one: {a c b:1}};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,25]},{"type":"VariableDeclarator","range":[7,24]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[13,24]},{"type":"Property","kind":"init","range":[13,23]},{"type":"Identifier","name":"one","range":[9,12]},{"type":"ObjectExpression","range":[19,23]},{"type":"Property","kind":"init","range":[20,22]},{"type":"Identifier","name":"b","range":[20,20]},{"type":"Literal","range":[21,22],"value":1}],
@@ -553,7 +553,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive nested 1 - ', function() {
+		it('obj prop ident recovery - successive nested 1', function() {
 			var data = { 
 				source: 'var f = {one: {a b:1}};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,23]},{"type":"VariableDeclarator","range":[7,22]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,22]},{"type":"Property","kind":"init","range":[13,21]},{"type":"Identifier","name":"one","range":[9,12]},{"type":"ObjectExpression","range":[15,21]},{"type":"Property","kind":"init","range":[18,20]},{"type":"Identifier","name":"b","range":[18,18]},{"type":"Literal","range":[19,20],"value":1}],
@@ -563,7 +563,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive nested 2 - ', function() {
+		it('obj prop ident recovery - successive nested 2', function() {
 			var data = { 
 				source: 'var f = {one: {a b:1,c:2}};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,27]},{"type":"VariableDeclarator","range":[7,26]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,26]},{"type":"Property","kind":"init","range":[13,25]},{"type":"Identifier","name":"one","range":[9,12]},{"type":"ObjectExpression","range":[15,25]},{"type":"Property","kind":"init","range":[18,20]},{"type":"Identifier","name":"b","range":[18,18]},{"type":"Literal","range":[19,20],"value":1},{"type":"Property","kind":"init","range":[21,24]},{"type":"Identifier","name":"c","range":[21,22]},{"type":"Literal","range":[23,24],"value":2}],
@@ -573,7 +573,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive nested 3 - ', function() {
+		it('obj prop ident recovery - successive nested 3', function() {
 			var data = { 
 				source: 'var f = {one: {b: 1,a c:2}};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,28]},{"type":"VariableDeclarator","range":[7,27]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,27]},{"type":"Property","kind":"init","range":[13,26]},{"type":"Identifier","name":"one","range":[9,12]},{"type":"ObjectExpression","range":[20,26]},{"type":"Property","kind":"init","range":[15,19]},{"type":"Identifier","name":"b","range":[15,16]},{"type":"Literal","range":[18,19],"value":1},{"type":"Property","kind":"init","range":[23,25]},{"type":"Identifier","name":"c","range":[23,23]},{"type":"Literal","range":[24,25],"value":2}],
@@ -583,7 +583,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive nested 4 - ', function() {
+		it('obj prop ident recovery - successive nested 4', function() {
 			var data = { 
 				source: 'var f = {one: {b: 1,c:2,a }};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,29]},{"type":"VariableDeclarator","range":[7,28]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,28]},{"type":"Property","kind":"init","range":[13,27]},{"type":"Identifier","name":"one","range":[9,12]},{"type":"ObjectExpression","range":[24,27]},{"type":"Property","kind":"init","range":[15,19]},{"type":"Identifier","name":"b","range":[15,16]},{"type":"Literal","range":[18,19],"value":1},{"type":"Property","kind":"init","range":[20,23]},{"type":"Identifier","name":"c","range":[20,21]},{"type":"Literal","range":[22,23],"value":2}],
@@ -593,7 +593,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive nested 5 - ', function() {
+		it('obj prop ident recovery - successive nested 5', function() {
 			var data = { 
 				source: 'var f = {one: {d b: 1,c:2,a }};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,31]},{"type":"VariableDeclarator","range":[7,30]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[13,30]},{"type":"Property","kind":"init","range":[13,29]},{"type":"Identifier","name":"one","range":[9,12]},{"type":"ObjectExpression","range":[26,29]},{"type":"Property","kind":"init","range":[18,21]},{"type":"Identifier","name":"b","range":[18,18]},{"type":"Literal","range":[20,21],"value":1},{"type":"Property","kind":"init","range":[22,25]},{"type":"Identifier","name":"c","range":[22,23]},{"type":"Literal","range":[24,25],"value":2}],
@@ -603,7 +603,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive nested 6 - ', function() {
+		it('obj prop ident recovery - successive nested 6', function() {
 			var data = { 
 				source: 'var f = {two one: {d b: 1,c:2,a }};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,35]},{"type":"VariableDeclarator","range":[8,34]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[17,34]},{"type":"Property","kind":"init","range":[17,33]},{"type":"Identifier","name":"one","range":[16,16]},{"type":"ObjectExpression","range":[30,33]},{"type":"Property","kind":"init","range":[22,25]},{"type":"Identifier","name":"b","range":[22,22]},{"type":"Literal","range":[24,25],"value":1},{"type":"Property","kind":"init","range":[26,29]},{"type":"Identifier","name":"c","range":[26,27]},{"type":"Literal","range":[28,29],"value":2}],
@@ -613,7 +613,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - successive nested 7 - ', function() {
+		it('obj prop ident recovery - successive nested 7', function() {
 			var data = { 
 				source: 'var f = {two three one: {d b: 1,c:2,a }};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[8,41]},{"type":"VariableDeclarator","range":[8,40]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[23,40]},{"type":"Property","kind":"init","range":[23,39]},{"type":"Identifier","name":"one","range":[22,22]},{"type":"ObjectExpression","range":[36,39]},{"type":"Property","kind":"init","range":[28,31]},{"type":"Identifier","name":"b","range":[28,28]},{"type":"Literal","range":[30,31],"value":1},{"type":"Property","kind":"init","range":[32,35]},{"type":"Identifier","name":"c","range":[32,33]},{"type":"Literal","range":[34,35],"value":2}],
@@ -623,7 +623,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - func decl 1 - ', function() {
+		it('obj prop ident recovery - func decl 1', function() {
 			var data = { 
 				source: 'function f(){} f({a});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,22]},{"type":"CallExpression","range":[15,21]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[18,20]}],
@@ -633,7 +633,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - func decl 2 - ', function() {
+		it('obj prop ident recovery - func decl 2', function() {
 			var data = { 
 				source: 'function f(){} f({a b:1});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,26]},{"type":"CallExpression","range":[15,25]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[18,24]},{"type":"Property","kind":"init","range":[21,23]},{"type":"Identifier","name":"b","range":[21,21]},{"type":"Literal","range":[22,23],"value":1}],
@@ -643,7 +643,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - func decl 3 - ', function() {
+		it('obj prop ident recovery - func decl 3', function() {
 			var data = { 
 				source: 'function f(){} f({a b:1,c:2});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,30]},{"type":"CallExpression","range":[15,29]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[18,28]},{"type":"Property","kind":"init","range":[21,23]},{"type":"Identifier","name":"b","range":[21,21]},{"type":"Literal","range":[22,23],"value":1},{"type":"Property","kind":"init","range":[24,27]},{"type":"Identifier","name":"c","range":[24,25]},{"type":"Literal","range":[26,27],"value":2}],
@@ -653,7 +653,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - func decl 4 - ', function() {
+		it('obj prop ident recovery - func decl 4', function() {
 			var data = { 
 				source: 'function f(){} f({b:1,a});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,26]},{"type":"CallExpression","range":[15,25]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[22,24]},{"type":"Property","kind":"init","range":[18,21]},{"type":"Identifier","name":"b","range":[18,19]},{"type":"Literal","range":[20,21],"value":1}],
@@ -663,7 +663,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - func decl 5 - ', function() {
+		it('obj prop ident recovery - func decl 5', function() {
 			var data = { 
 				source: 'function f(){} f({b:1,c:2,a});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,30]},{"type":"CallExpression","range":[15,29]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[26,28]},{"type":"Property","kind":"init","range":[18,21]},{"type":"Identifier","name":"b","range":[18,19]},{"type":"Literal","range":[20,21],"value":1},{"type":"Property","kind":"init","range":[22,25]},{"type":"Identifier","name":"c","range":[22,23]},{"type":"Literal","range":[24,25],"value":2}],
@@ -673,7 +673,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - func decl 6 - ', function() {
+		it('obj prop ident recovery - func decl 6', function() {
 			var data = { 
 				source: 'function f(){} f({a b c:2});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,28]},{"type":"CallExpression","range":[15,27]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[22,26]},{"type":"Property","kind":"init","range":[23,25]},{"type":"Identifier","name":"c","range":[23,23]},{"type":"Literal","range":[24,25],"value":2}],
@@ -683,7 +683,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - func decl 7 - ', function() {
+		it('obj prop ident recovery - func decl 7', function() {
 			var data = { 
 				source: 'function f(){} f({a b:1,c});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,28]},{"type":"CallExpression","range":[15,27]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[24,26]},{"type":"Property","kind":"init","range":[21,23]},{"type":"Identifier","name":"b","range":[21,21]},{"type":"Literal","range":[22,23],"value":1}],
@@ -693,7 +693,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - func decl nested 1 - ', function() {
+		it('obj prop ident recovery - func decl nested 1', function() {
 			var data = { 
 				source: 'function f(){} f({one: {a}});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,29]},{"type":"CallExpression","range":[15,28]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[18,27]},{"type":"Property","kind":"init","range":[22,26]},{"type":"Identifier","name":"one","range":[18,21]},{"type":"ObjectExpression","range":[24,26]}],
@@ -703,7 +703,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - func decl nested 2 - ', function() {
+		it('obj prop ident recovery - func decl nested 2', function() {
 			var data = { 
 				source: 'function f(){} f({one: {a b:1}});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,33]},{"type":"CallExpression","range":[15,32]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[18,31]},{"type":"Property","kind":"init","range":[22,30]},{"type":"Identifier","name":"one","range":[18,21]},{"type":"ObjectExpression","range":[24,30]},{"type":"Property","kind":"init","range":[27,29]},{"type":"Identifier","name":"b","range":[27,27]},{"type":"Literal","range":[28,29],"value":1}],
@@ -713,7 +713,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - func decl nested 3 - ', function() {
+		it('obj prop ident recovery - func decl nested 3', function() {
 			var data = { 
 				source: 'function f(){} f({one: {a b:1,c:2}});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,37]},{"type":"CallExpression","range":[15,36]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[18,35]},{"type":"Property","kind":"init","range":[22,34]},{"type":"Identifier","name":"one","range":[18,21]},{"type":"ObjectExpression","range":[24,34]},{"type":"Property","kind":"init","range":[27,29]},{"type":"Identifier","name":"b","range":[27,27]},{"type":"Literal","range":[28,29],"value":1},{"type":"Property","kind":"init","range":[30,33]},{"type":"Identifier","name":"c","range":[30,31]},{"type":"Literal","range":[32,33],"value":2}],
@@ -723,7 +723,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - func decl nested 4 - ', function() {
+		it('obj prop ident recovery - func decl nested 4', function() {
 			var data = { 
 				source: 'function f(){} f({one: {a b c:2}});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,35]},{"type":"CallExpression","range":[15,34]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[22,33]},{"type":"Property","kind":"init","range":[22,32]},{"type":"Identifier","name":"one","range":[18,21]},{"type":"ObjectExpression","range":[28,32]},{"type":"Property","kind":"init","range":[29,31]},{"type":"Identifier","name":"c","range":[29,29]},{"type":"Literal","range":[30,31],"value":2}],
@@ -733,7 +733,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - func decl nested 5 - ', function() {
+		it('obj prop ident recovery - func decl nested 5', function() {
 			var data = { 
 				source: 'function f(){} f({two one: {a b:1}});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,37]},{"type":"CallExpression","range":[15,36]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[25,35]},{"type":"Property","kind":"init","range":[26,34]},{"type":"Identifier","name":"one","range":[25,25]},{"type":"ObjectExpression","range":[28,34]},{"type":"Property","kind":"init","range":[31,33]},{"type":"Identifier","name":"b","range":[31,31]},{"type":"Literal","range":[32,33],"value":1}],
@@ -743,7 +743,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - func decl nested 6 - ', function() {
+		it('obj prop ident recovery - func decl nested 6', function() {
 			var data = { 
 				source: 'function f(){} f({two one: {a b:1},three});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,43]},{"type":"CallExpression","range":[15,42]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[35,41]},{"type":"Property","kind":"init","range":[26,34]},{"type":"Identifier","name":"one","range":[25,25]},{"type":"ObjectExpression","range":[28,34]},{"type":"Property","kind":"init","range":[31,33]},{"type":"Identifier","name":"b","range":[31,31]},{"type":"Literal","range":[32,33],"value":1}],
@@ -753,7 +753,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - return 1 - ', function() {
+		it('obj prop ident recovery - return 1', function() {
 			var data = { 
 				source: 'function f() {return {a};}',
 				nodes: [{"type":"FunctionDeclaration","range":[13,26]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[14,26]},{"type":"ReturnStatement","range":[20,25]},{"type":"ObjectExpression","range":[22,24]}],
@@ -763,7 +763,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - return 2 - ', function() {
+		it('obj prop ident recovery - return 2', function() {
 			var data = { 
 				source: 'function f() {return {a b:1};}',
 				nodes: [{"type":"FunctionDeclaration","range":[13,30]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[14,30]},{"type":"ReturnStatement","range":[20,29]},{"type":"ObjectExpression","range":[22,28]},{"type":"Property","kind":"init","range":[25,27]},{"type":"Identifier","name":"b","range":[25,25]},{"type":"Literal","range":[26,27],"value":1}],
@@ -773,7 +773,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - return 3 - ', function() {
+		it('obj prop ident recovery - return 3', function() {
 			var data = { 
 				source: 'function f() {return {b:1, a c:2};}',
 				nodes: [{"type":"FunctionDeclaration","range":[13,35]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[14,35]},{"type":"ReturnStatement","range":[20,34]},{"type":"ObjectExpression","range":[27,33]},{"type":"Property","kind":"init","range":[22,25]},{"type":"Identifier","name":"b","range":[22,23]},{"type":"Literal","range":[24,25],"value":1},{"type":"Property","kind":"init","range":[30,32]},{"type":"Identifier","name":"c","range":[30,30]},{"type":"Literal","range":[31,32],"value":2}],
@@ -783,7 +783,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - return 4 - ', function() {
+		it('obj prop ident recovery - return 4', function() {
 			var data = { 
 				source: 'function f() {return {b:1,a c};}',
 				nodes: [{"type":"FunctionDeclaration","range":[14,32]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[20,32]},{"type":"ReturnStatement","range":[20,31]},{"type":"ObjectExpression","range":[29,30]},{"type":"Property","kind":"init","range":[22,25]},{"type":"Identifier","name":"b","range":[22,23]},{"type":"Literal","range":[24,25],"value":1}],
@@ -793,7 +793,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - return 5 - ', function() {
+		it('obj prop ident recovery - return 5', function() {
 			var data = { 
 				source: 'function f() {return {a b:1,c};}',
 				nodes: [{"type":"FunctionDeclaration","range":[14,32]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[20,32]},{"type":"ReturnStatement","range":[20,31]},{"type":"ObjectExpression","range":[28,30]},{"type":"Property","kind":"init","range":[25,27]},{"type":"Identifier","name":"b","range":[25,25]},{"type":"Literal","range":[26,27],"value":1}],
@@ -803,7 +803,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - return nested 1 - ', function() {
+		it('obj prop ident recovery - return nested 1', function() {
 			var data = { 
 				source: 'function f() {return {one:{a}};}',
 				nodes: [{"type":"FunctionDeclaration","range":[13,32]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[14,32]},{"type":"ReturnStatement","range":[20,31]},{"type":"ObjectExpression","range":[22,30]},{"type":"Property","kind":"init","range":[26,29]},{"type":"Identifier","name":"one","range":[22,25]},{"type":"ObjectExpression","range":[27,29]}],
@@ -813,7 +813,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - return nested 2 - ', function() {
+		it('obj prop ident recovery - return nested 2', function() {
 			var data = { 
 				source: 'function f() {return {one:{a b:1}};}',
 				nodes: [{"type":"FunctionDeclaration","range":[13,36]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[14,36]},{"type":"ReturnStatement","range":[20,35]},{"type":"ObjectExpression","range":[22,34]},{"type":"Property","kind":"init","range":[26,33]},{"type":"Identifier","name":"one","range":[22,25]},{"type":"ObjectExpression","range":[27,33]},{"type":"Property","kind":"init","range":[30,32]},{"type":"Identifier","name":"b","range":[30,30]},{"type":"Literal","range":[31,32],"value":1}],
@@ -823,7 +823,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - return nested 3 - ', function() {
+		it('obj prop ident recovery - return nested 3', function() {
 			var data = { 
 				source: 'function f() {return {one:{b:1, a c:2}};}',
 				nodes: [{"type":"FunctionDeclaration","range":[13,41]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[14,41]},{"type":"ReturnStatement","range":[20,40]},{"type":"ObjectExpression","range":[22,39]},{"type":"Property","kind":"init","range":[26,38]},{"type":"Identifier","name":"one","range":[22,25]},{"type":"ObjectExpression","range":[32,38]},{"type":"Property","kind":"init","range":[27,30]},{"type":"Identifier","name":"b","range":[27,28]},{"type":"Literal","range":[29,30],"value":1},{"type":"Property","kind":"init","range":[35,37]},{"type":"Identifier","name":"c","range":[35,35]},{"type":"Literal","range":[36,37],"value":2}],
@@ -833,7 +833,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - return nested 4 - ', function() {
+		it('obj prop ident recovery - return nested 4', function() {
 			var data = { 
 				source: 'function f() {return {one:{a b:1,c}};}',
 				nodes: [{"type":"FunctionDeclaration","range":[14,38]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[20,38]},{"type":"ReturnStatement","range":[20,37]},{"type":"ObjectExpression","range":[26,36]},{"type":"Property","kind":"init","range":[26,35]},{"type":"Identifier","name":"one","range":[22,25]},{"type":"ObjectExpression","range":[33,35]},{"type":"Property","kind":"init","range":[30,32]},{"type":"Identifier","name":"b","range":[30,30]},{"type":"Literal","range":[31,32],"value":1}],
@@ -842,7 +842,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('obj prop ident recovery - return nested 5 - ', function() {
+		it('obj prop ident recovery - return nested 5', function() {
 			var data = { 
 				source: 'function f() {return {two one:{a b:1,c}};}',
 				nodes: [{"type":"FunctionDeclaration","range":[20,42]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[20,42]},{"type":"ReturnStatement","range":[20,41]},{"type":"ObjectExpression","range":[30,40]},{"type":"Property","kind":"init","range":[30,39]},{"type":"Identifier","name":"one","range":[29,29]},{"type":"ObjectExpression","range":[37,39]},{"type":"Property","kind":"init","range":[34,36]},{"type":"Identifier","name":"b","range":[34,34]},{"type":"Literal","range":[35,36],"value":1}],
@@ -851,7 +851,7 @@ define([
 			};
 			runTest(data);
 		});
-		it('obj prop ident recovery - return nested 6 - ', function() {
+		it('obj prop ident recovery - return nested 6', function() {
 			var data = { 
 				source: 'function f() {return {two one:{a b:1,c}, three};}',
 				nodes: [{"type":"FunctionDeclaration","range":[20,49]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[20,49]},{"type":"ReturnStatement","range":[21,48]},{"type":"ObjectExpression","range":[41,47]},{"type":"Property","kind":"init","range":[30,39]},{"type":"Identifier","name":"one","range":[29,29]},{"type":"ObjectExpression","range":[37,39]},{"type":"Property","kind":"init","range":[34,36]},{"type":"Identifier","name":"b","range":[34,34]},{"type":"Literal","range":[35,36],"value":1}],
@@ -861,7 +861,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - multi 1 - ', function() {
+		it('obj prop ident recovery - multi 1', function() {
 			var data = { 
 				source: 'function f() {return {two one:{a b:1,c}, three};}var v = {d:1, a};',
 				nodes: [{"type":"FunctionDeclaration","range":[20,49]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[20,49]},{"type":"ReturnStatement","range":[21,48]},{"type":"ObjectExpression","range":[41,47]},{"type":"Property","kind":"init","range":[30,39]},{"type":"Identifier","name":"one","range":[29,29]},{"type":"ObjectExpression","range":[37,39]},{"type":"Property","kind":"init","range":[34,36]},{"type":"Identifier","name":"b","range":[34,34]},{"type":"Literal","range":[35,36],"value":1},{"type":"VariableDeclaration","kind":"var","range":[53,66]},{"type":"VariableDeclarator","range":[56,65]},{"type":"Identifier","name":"v","range":[53,54]},{"type":"ObjectExpression","range":[63,65]},{"type":"Property","kind":"init","range":[58,61]},{"type":"Identifier","name":"d","range":[58,59]},{"type":"Literal","range":[60,61],"value":1}],
@@ -871,7 +871,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - multi 2 - ', function() {
+		it('obj prop ident recovery - multi 2', function() {
 			var data = { 
 				source: 'function f() {return {two one:{a b:1,c}, three};}var v = {d:1, a};f({aa bb:1, cc});',
 				nodes: [{"type":"FunctionDeclaration","range":[20,49]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[20,49]},{"type":"ReturnStatement","range":[21,48]},{"type":"ObjectExpression","range":[41,47]},{"type":"Property","kind":"init","range":[30,39]},{"type":"Identifier","name":"one","range":[29,29]},{"type":"ObjectExpression","range":[37,39]},{"type":"Property","kind":"init","range":[34,36]},{"type":"Identifier","name":"b","range":[34,34]},{"type":"Literal","range":[35,36],"value":1},{"type":"VariableDeclaration","kind":"var","range":[53,66]},{"type":"VariableDeclarator","range":[56,65]},{"type":"Identifier","name":"v","range":[53,54]},{"type":"ObjectExpression","range":[63,65]},{"type":"Property","kind":"init","range":[58,61]},{"type":"Identifier","name":"d","range":[58,59]},{"type":"Literal","range":[60,61],"value":1},{"type":"ExpressionStatement","range":[66,83]},{"type":"CallExpression","range":[66,82]},{"type":"Identifier","name":"f","range":[66,67]},{"type":"ObjectExpression","range":[78,81]},{"type":"Property","kind":"init","range":[74,76]},{"type":"Identifier","name":"bb","range":[74,74]},{"type":"Literal","range":[75,76],"value":1}],
@@ -881,7 +881,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 1 - ', function() {
+		it('obj prop recovery - missing comma 1', function() {
 			var data = { 
 				source: 'var f = {a:1 b:2};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,18]},{"type":"VariableDeclarator","range":[4,17]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[8,17]},{"type":"Property","kind":"init","range":[9,12]},{"type":"Identifier","name":"a","range":[9,10]},{"type":"Literal","range":[11,12],"value":1},{"type":"Property","kind":"init","range":[13,16]},{"type":"Identifier","name":"b","range":[13,14]},{"type":"Literal","range":[15,16],"value":2}],
@@ -891,7 +891,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 2 - ', function() {
+		it('obj prop recovery - missing comma 2', function() {
 			var data = { 
 				source: 'var f = {a:1 b:2 c:3};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,22]},{"type":"VariableDeclarator","range":[4,21]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[8,21]},{"type":"Property","kind":"init","range":[9,12]},{"type":"Identifier","name":"a","range":[9,10]},{"type":"Literal","range":[11,12],"value":1},{"type":"Property","kind":"init","range":[13,16]},{"type":"Identifier","name":"b","range":[13,14]},{"type":"Literal","range":[15,16],"value":2},{"type":"Property","kind":"init","range":[17,20]},{"type":"Identifier","name":"c","range":[17,18]},{"type":"Literal","range":[19,20],"value":3}],
@@ -901,7 +901,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 3 - ', function() {
+		it('obj prop recovery - missing comma 3', function() {
 			var data = { 
 				source: 'var f = {a:1 b:{aa:1 bb:2}};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,28]},{"type":"VariableDeclarator","range":[4,27]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[8,27]},{"type":"Property","kind":"init","range":[9,12]},{"type":"Identifier","name":"a","range":[9,10]},{"type":"Literal","range":[11,12],"value":1},{"type":"Property","kind":"init","range":[13,26]},{"type":"Identifier","name":"b","range":[13,14]},{"type":"ObjectExpression","range":[15,26]},{"type":"Property","kind":"init","range":[16,20]},{"type":"Identifier","name":"aa","range":[16,18]},{"type":"Literal","range":[19,20],"value":1},{"type":"Property","kind":"init","range":[21,25]},{"type":"Identifier","name":"bb","range":[21,23]},{"type":"Literal","range":[24,25],"value":2}],
@@ -911,7 +911,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 4 - ', function() {
+		it('obj prop recovery - missing comma 4', function() {
 			var data = { 
 				source: 'var f = {a:1, b:{aa:1 bb:2} c:4};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,33]},{"type":"VariableDeclarator","range":[4,32]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[8,32]},{"type":"Property","kind":"init","range":[9,12]},{"type":"Identifier","name":"a","range":[9,10]},{"type":"Literal","range":[11,12],"value":1},{"type":"Property","kind":"init","range":[14,27]},{"type":"Identifier","name":"b","range":[14,15]},{"type":"ObjectExpression","range":[16,27]},{"type":"Property","kind":"init","range":[17,21]},{"type":"Identifier","name":"aa","range":[17,19]},{"type":"Literal","range":[20,21],"value":1},{"type":"Property","kind":"init","range":[22,26]},{"type":"Identifier","name":"bb","range":[22,24]},{"type":"Literal","range":[25,26],"value":2},{"type":"Property","kind":"init","range":[28,31]},{"type":"Identifier","name":"c","range":[28,29]},{"type":"Literal","range":[30,31],"value":4}],
@@ -921,7 +921,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 5 - ', function() {
+		it('obj prop recovery - missing comma 5', function() {
 			var data = { 
 				source: 'var f = {a:1, b:{aa:1, bb:2 cc:4} c:4};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,39]},{"type":"VariableDeclarator","range":[4,38]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[8,38]},{"type":"Property","kind":"init","range":[9,12]},{"type":"Identifier","name":"a","range":[9,10]},{"type":"Literal","range":[11,12],"value":1},{"type":"Property","kind":"init","range":[14,33]},{"type":"Identifier","name":"b","range":[14,15]},{"type":"ObjectExpression","range":[16,33]},{"type":"Property","kind":"init","range":[17,21]},{"type":"Identifier","name":"aa","range":[17,19]},{"type":"Literal","range":[20,21],"value":1},{"type":"Property","kind":"init","range":[23,27]},{"type":"Identifier","name":"bb","range":[23,25]},{"type":"Literal","range":[26,27],"value":2},{"type":"Property","kind":"init","range":[28,32]},{"type":"Identifier","name":"cc","range":[28,30]},{"type":"Literal","range":[31,32],"value":4},{"type":"Property","kind":"init","range":[34,37]},{"type":"Identifier","name":"c","range":[34,35]},{"type":"Literal","range":[36,37],"value":4}],
@@ -931,7 +931,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 6 - ', function() {
+		it('obj prop recovery - missing comma 6', function() {
 			var data = { 
 				source: 'function f(){} f({a:1, b:{aa:1, bb:2 cc:4} c:4});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,49]},{"type":"CallExpression","range":[15,48]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[17,47]},{"type":"Property","kind":"init","range":[18,21]},{"type":"Identifier","name":"a","range":[18,19]},{"type":"Literal","range":[20,21],"value":1},{"type":"Property","kind":"init","range":[23,42]},{"type":"Identifier","name":"b","range":[23,24]},{"type":"ObjectExpression","range":[25,42]},{"type":"Property","kind":"init","range":[26,30]},{"type":"Identifier","name":"aa","range":[26,28]},{"type":"Literal","range":[29,30],"value":1},{"type":"Property","kind":"init","range":[32,36]},{"type":"Identifier","name":"bb","range":[32,34]},{"type":"Literal","range":[35,36],"value":2},{"type":"Property","kind":"init","range":[37,41]},{"type":"Identifier","name":"cc","range":[37,39]},{"type":"Literal","range":[40,41],"value":4},{"type":"Property","kind":"init","range":[43,46]},{"type":"Identifier","name":"c","range":[43,44]},{"type":"Literal","range":[45,46],"value":4}],
@@ -941,7 +941,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 7 - ', function() {
+		it('obj prop recovery - missing comma 7', function() {
 			var data = { 
 				source: 'function f(){} f({a:1 b:2});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,28]},{"type":"CallExpression","range":[15,27]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[17,26]},{"type":"Property","kind":"init","range":[18,21]},{"type":"Identifier","name":"a","range":[18,19]},{"type":"Literal","range":[20,21],"value":1},{"type":"Property","kind":"init","range":[22,25]},{"type":"Identifier","name":"b","range":[22,23]},{"type":"Literal","range":[24,25],"value":2}],
@@ -951,7 +951,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 8 - ', function() {
+		it('obj prop recovery - missing comma 8', function() {
 			var data = { 
 				source: 'function f(){} f({a:1 b:{aa:1 bb:2}});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,38]},{"type":"CallExpression","range":[15,37]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[17,36]},{"type":"Property","kind":"init","range":[18,21]},{"type":"Identifier","name":"a","range":[18,19]},{"type":"Literal","range":[20,21],"value":1},{"type":"Property","kind":"init","range":[22,35]},{"type":"Identifier","name":"b","range":[22,23]},{"type":"ObjectExpression","range":[24,35]},{"type":"Property","kind":"init","range":[25,29]},{"type":"Identifier","name":"aa","range":[25,27]},{"type":"Literal","range":[28,29],"value":1},{"type":"Property","kind":"init","range":[30,34]},{"type":"Identifier","name":"bb","range":[30,32]},{"type":"Literal","range":[33,34],"value":2}],
@@ -961,7 +961,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 9 - ', function() {
+		it('obj prop recovery - missing comma 9', function() {
 			var data = { 
 				source: 'function f(){} f({a:1, b:{aa:1 bb:2} c:4});',
 				nodes: [{"type":"FunctionDeclaration","range":[0,14]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,14]},{"type":"ExpressionStatement","range":[15,43]},{"type":"CallExpression","range":[15,42]},{"type":"Identifier","name":"f","range":[15,16]},{"type":"ObjectExpression","range":[17,41]},{"type":"Property","kind":"init","range":[18,21]},{"type":"Identifier","name":"a","range":[18,19]},{"type":"Literal","range":[20,21],"value":1},{"type":"Property","kind":"init","range":[23,36]},{"type":"Identifier","name":"b","range":[23,24]},{"type":"ObjectExpression","range":[25,36]},{"type":"Property","kind":"init","range":[26,30]},{"type":"Identifier","name":"aa","range":[26,28]},{"type":"Literal","range":[29,30],"value":1},{"type":"Property","kind":"init","range":[31,35]},{"type":"Identifier","name":"bb","range":[31,33]},{"type":"Literal","range":[34,35],"value":2},{"type":"Property","kind":"init","range":[37,40]},{"type":"Identifier","name":"c","range":[37,38]},{"type":"Literal","range":[39,40],"value":4}],
@@ -971,7 +971,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 10 - ', function() {
+		it('obj prop recovery - missing comma 10', function() {
 			var data = { 
 				source: 'function f(){return {a:1 b:2};}',
 				nodes: [{"type":"FunctionDeclaration","range":[0,31]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,31]},{"type":"ReturnStatement","range":[13,30]},{"type":"ObjectExpression","range":[20,29]},{"type":"Property","kind":"init","range":[21,24]},{"type":"Identifier","name":"a","range":[21,22]},{"type":"Literal","range":[23,24],"value":1},{"type":"Property","kind":"init","range":[25,28]},{"type":"Identifier","name":"b","range":[25,26]},{"type":"Literal","range":[27,28],"value":2}],
@@ -981,7 +981,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 11 - ', function() {
+		it('obj prop recovery - missing comma 11', function() {
 			var data = { 
 				source: 'function f(){return {a:1 b:2 c:3};}',
 				nodes: [{"type":"FunctionDeclaration","range":[0,35]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,35]},{"type":"ReturnStatement","range":[13,34]},{"type":"ObjectExpression","range":[20,33]},{"type":"Property","kind":"init","range":[21,24]},{"type":"Identifier","name":"a","range":[21,22]},{"type":"Literal","range":[23,24],"value":1},{"type":"Property","kind":"init","range":[25,28]},{"type":"Identifier","name":"b","range":[25,26]},{"type":"Literal","range":[27,28],"value":2},{"type":"Property","kind":"init","range":[29,32]},{"type":"Identifier","name":"c","range":[29,30]},{"type":"Literal","range":[31,32],"value":3}],
@@ -991,7 +991,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 12 - ', function() {
+		it('obj prop recovery - missing comma 12', function() {
 			var data = { 
 				source: 'function f(){return {a:1 b:{aa:1 bb:2}};}',
 				nodes: [{"type":"FunctionDeclaration","range":[0,41]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,41]},{"type":"ReturnStatement","range":[13,40]},{"type":"ObjectExpression","range":[20,39]},{"type":"Property","kind":"init","range":[21,24]},{"type":"Identifier","name":"a","range":[21,22]},{"type":"Literal","range":[23,24],"value":1},{"type":"Property","kind":"init","range":[25,38]},{"type":"Identifier","name":"b","range":[25,26]},{"type":"ObjectExpression","range":[27,38]},{"type":"Property","kind":"init","range":[28,32]},{"type":"Identifier","name":"aa","range":[28,30]},{"type":"Literal","range":[31,32],"value":1},{"type":"Property","kind":"init","range":[33,37]},{"type":"Identifier","name":"bb","range":[33,35]},{"type":"Literal","range":[36,37],"value":2}],
@@ -1001,7 +1001,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 13 - ', function() {
+		it('obj prop recovery - missing comma 13', function() {
 			var data = { 
 				source: 'function f(){return {a:1, b:{aa:1 bb:2} c:4};}',
 				nodes: [{"type":"FunctionDeclaration","range":[0,46]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,46]},{"type":"ReturnStatement","range":[13,45]},{"type":"ObjectExpression","range":[20,44]},{"type":"Property","kind":"init","range":[21,24]},{"type":"Identifier","name":"a","range":[21,22]},{"type":"Literal","range":[23,24],"value":1},{"type":"Property","kind":"init","range":[26,39]},{"type":"Identifier","name":"b","range":[26,27]},{"type":"ObjectExpression","range":[28,39]},{"type":"Property","kind":"init","range":[29,33]},{"type":"Identifier","name":"aa","range":[29,31]},{"type":"Literal","range":[32,33],"value":1},{"type":"Property","kind":"init","range":[34,38]},{"type":"Identifier","name":"bb","range":[34,36]},{"type":"Literal","range":[37,38],"value":2},{"type":"Property","kind":"init","range":[40,43]},{"type":"Identifier","name":"c","range":[40,41]},{"type":"Literal","range":[42,43],"value":4}],
@@ -1011,7 +1011,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - missing comma 14 - ', function() {
+		it('obj prop recovery - missing comma 14', function() {
 			var data = { 
 				source: 'function f(){return {a:1, b:{aa:1, bb:2 cc:4} c:4};',
 				nodes: [{"type":"FunctionDeclaration","range":[0,51]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[12,51]},{"type":"ReturnStatement","range":[13,51]},{"type":"ObjectExpression","range":[20,50]},{"type":"Property","kind":"init","range":[21,24]},{"type":"Identifier","name":"a","range":[21,22]},{"type":"Literal","range":[23,24],"value":1},{"type":"Property","kind":"init","range":[26,45]},{"type":"Identifier","name":"b","range":[26,27]},{"type":"ObjectExpression","range":[28,45]},{"type":"Property","kind":"init","range":[29,33]},{"type":"Identifier","name":"aa","range":[29,31]},{"type":"Literal","range":[32,33],"value":1},{"type":"Property","kind":"init","range":[35,39]},{"type":"Identifier","name":"bb","range":[35,37]},{"type":"Literal","range":[38,39],"value":2},{"type":"Property","kind":"init","range":[40,44]},{"type":"Identifier","name":"cc","range":[40,42]},{"type":"Literal","range":[43,44],"value":4},{"type":"Property","kind":"init","range":[46,49]},{"type":"Identifier","name":"c","range":[46,47]},{"type":"Literal","range":[48,49],"value":4}],
@@ -1021,7 +1021,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - mixed 1 - ', function() {
+		it('obj prop recovery - mixed 1', function() {
 			var data = { 
 				source: 'var v = {a b:1 c:2};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,20]},{"type":"VariableDeclarator","range":[7,19]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[9,19]},{"type":"Property","kind":"init","range":[12,14]},{"type":"Identifier","name":"b","range":[12,12]},{"type":"Literal","range":[13,14],"value":1},{"type":"Property","kind":"init","range":[15,18]},{"type":"Identifier","name":"c","range":[15,16]},{"type":"Literal","range":[17,18],"value":2}],
@@ -1031,7 +1031,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - mixed 2 - ', function() {
+		it('obj prop recovery - mixed 2', function() {
 			var data = { 
 				source: 'var v = {a b:1 d c:2};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,22]},{"type":"VariableDeclarator","range":[7,21]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[15,21]},{"type":"Property","kind":"init","range":[12,14]},{"type":"Identifier","name":"b","range":[12,12]},{"type":"Literal","range":[13,14],"value":1},{"type":"Property","kind":"init","range":[18,20]},{"type":"Identifier","name":"c","range":[18,18]},{"type":"Literal","range":[19,20],"value":2}],
@@ -1041,7 +1041,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - mixed 3 - ', function() {
+		it('obj prop recovery - mixed 3', function() {
 			var data = { 
 				source: 'var v = {a b:{cc:3, dd:\'hey\' e} c:2};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,37]},{"type":"VariableDeclarator","range":[7,36]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[12,36]},{"type":"Property","kind":"init","range":[13,31]},{"type":"Identifier","name":"b","range":[12,12]},{"type":"ObjectExpression","range":[29,31]},{"type":"Property","kind":"init","range":[14,18]},{"type":"Identifier","name":"cc","range":[14,16]},{"type":"Literal","range":[17,18],"value":3},{"type":"Property","kind":"init","range":[20,28]},{"type":"Identifier","name":"dd","range":[20,22]},{"type":"Literal","range":[23,28],"value":"hey"},{"type":"Property","kind":"init","range":[32,35]},{"type":"Identifier","name":"c","range":[32,33]},{"type":"Literal","range":[34,35],"value":2}],
@@ -1051,7 +1051,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - mixed 4 - ', function() {
+		it('obj prop recovery - mixed 4', function() {
 			var data = { 
 				source: 'var v = {a b:{cc:3, dd:\'hey\' e} c:2};function f() {return {a b:{cc:3, dd:\'hey\' e} c:2};}',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,37]},{"type":"VariableDeclarator","range":[7,36]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[12,36]},{"type":"Property","kind":"init","range":[13,31]},{"type":"Identifier","name":"b","range":[12,12]},{"type":"ObjectExpression","range":[29,31]},{"type":"Property","kind":"init","range":[14,18]},{"type":"Identifier","name":"cc","range":[14,16]},{"type":"Literal","range":[17,18],"value":3},{"type":"Property","kind":"init","range":[20,28]},{"type":"Identifier","name":"dd","range":[20,22]},{"type":"Literal","range":[23,28],"value":"hey"},{"type":"Property","kind":"init","range":[32,35]},{"type":"Identifier","name":"c","range":[32,33]},{"type":"Literal","range":[34,35],"value":2},{"type":"FunctionDeclaration","range":[51,88]},{"type":"Identifier","name":"f","range":[46,47]},{"type":"BlockStatement","range":[57,88]},{"type":"ReturnStatement","range":[57,87]},{"type":"ObjectExpression","range":[62,86]},{"type":"Property","kind":"init","range":[63,81]},{"type":"Identifier","name":"b","range":[62,62]},{"type":"ObjectExpression","range":[79,81]},{"type":"Property","kind":"init","range":[64,68]},{"type":"Identifier","name":"cc","range":[64,66]},{"type":"Literal","range":[67,68],"value":3},{"type":"Property","kind":"init","range":[70,78]},{"type":"Identifier","name":"dd","range":[70,72]},{"type":"Literal","range":[73,78],"value":"hey"},{"type":"Property","kind":"init","range":[82,85]},{"type":"Identifier","name":"c","range":[82,83]},{"type":"Literal","range":[84,85],"value":2}],
@@ -1061,7 +1061,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - mixed 5 - ', function() {
+		it('obj prop recovery - mixed 5', function() {
 			var data = { 
 				source: 'var v = {a b:1 c:2};function f() {return {a b:1 c:2};}',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,20]},{"type":"VariableDeclarator","range":[7,19]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[9,19]},{"type":"Property","kind":"init","range":[12,14]},{"type":"Identifier","name":"b","range":[12,12]},{"type":"Literal","range":[13,14],"value":1},{"type":"Property","kind":"init","range":[15,18]},{"type":"Identifier","name":"c","range":[15,16]},{"type":"Literal","range":[17,18],"value":2},{"type":"FunctionDeclaration","range":[33,54]},{"type":"Identifier","name":"f","range":[29,30]},{"type":"BlockStatement","range":[34,54]},{"type":"ReturnStatement","range":[40,53]},{"type":"ObjectExpression","range":[42,52]},{"type":"Property","kind":"init","range":[45,47]},{"type":"Identifier","name":"b","range":[45,45]},{"type":"Literal","range":[46,47],"value":1},{"type":"Property","kind":"init","range":[48,51]},{"type":"Identifier","name":"c","range":[48,49]},{"type":"Literal","range":[50,51],"value":2}],
@@ -1071,7 +1071,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - mixed 6 - ', function() {
+		it('obj prop recovery - mixed 6', function() {
 			var data = { 
 				source: 'var v = {a b:1 d c:2};function f() {return {a b:1 d c:2};}',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,22]},{"type":"VariableDeclarator","range":[7,21]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[15,21]},{"type":"Property","kind":"init","range":[12,14]},{"type":"Identifier","name":"b","range":[12,12]},{"type":"Literal","range":[13,14],"value":1},{"type":"Property","kind":"init","range":[18,20]},{"type":"Identifier","name":"c","range":[18,18]},{"type":"Literal","range":[19,20],"value":2},{"type":"FunctionDeclaration","range":[36,58]},{"type":"Identifier","name":"f","range":[31,32]},{"type":"BlockStatement","range":[42,58]},{"type":"ReturnStatement","range":[42,57]},{"type":"ObjectExpression","range":[50,56]},{"type":"Property","kind":"init","range":[47,49]},{"type":"Identifier","name":"b","range":[47,47]},{"type":"Literal","range":[48,49],"value":1},{"type":"Property","kind":"init","range":[53,55]},{"type":"Identifier","name":"c","range":[53,53]},{"type":"Literal","range":[54,55],"value":2}],
@@ -1081,7 +1081,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - mixed 7 - ', function() {
+		it('obj prop recovery - mixed 7', function() {
 			var data = { 
 				source: 'var v = {a b:1 c:2};function f() {return {a b:1 c:2};}f({a b:1 c:2});',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,20]},{"type":"VariableDeclarator","range":[7,19]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[9,19]},{"type":"Property","kind":"init","range":[12,14]},{"type":"Identifier","name":"b","range":[12,12]},{"type":"Literal","range":[13,14],"value":1},{"type":"Property","kind":"init","range":[15,18]},{"type":"Identifier","name":"c","range":[15,16]},{"type":"Literal","range":[17,18],"value":2},{"type":"FunctionDeclaration","range":[33,54]},{"type":"Identifier","name":"f","range":[29,30]},{"type":"BlockStatement","range":[34,54]},{"type":"ReturnStatement","range":[40,53]},{"type":"ObjectExpression","range":[42,52]},{"type":"Property","kind":"init","range":[45,47]},{"type":"Identifier","name":"b","range":[45,45]},{"type":"Literal","range":[46,47],"value":1},{"type":"Property","kind":"init","range":[48,51]},{"type":"Identifier","name":"c","range":[48,49]},{"type":"Literal","range":[50,51],"value":2},{"type":"ExpressionStatement","range":[54,69]},{"type":"CallExpression","range":[54,68]},{"type":"Identifier","name":"f","range":[54,55]},{"type":"ObjectExpression","range":[57,67]},{"type":"Property","kind":"init","range":[60,62]},{"type":"Identifier","name":"b","range":[60,60]},{"type":"Literal","range":[61,62],"value":1},{"type":"Property","kind":"init","range":[63,66]},{"type":"Identifier","name":"c","range":[63,64]},{"type":"Literal","range":[65,66],"value":2}],
@@ -1091,7 +1091,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - mixed 8 - ', function() {
+		it('obj prop recovery - mixed 8', function() {
 			var data = { 
 				source: 'var v = {a b:1 d c:2};function f() {return {a b:1 d c:2};}f({a b:1 d c:2});',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,22]},{"type":"VariableDeclarator","range":[7,21]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[15,21]},{"type":"Property","kind":"init","range":[12,14]},{"type":"Identifier","name":"b","range":[12,12]},{"type":"Literal","range":[13,14],"value":1},{"type":"Property","kind":"init","range":[18,20]},{"type":"Identifier","name":"c","range":[18,18]},{"type":"Literal","range":[19,20],"value":2},{"type":"FunctionDeclaration","range":[36,58]},{"type":"Identifier","name":"f","range":[31,32]},{"type":"BlockStatement","range":[42,58]},{"type":"ReturnStatement","range":[42,57]},{"type":"ObjectExpression","range":[50,56]},{"type":"Property","kind":"init","range":[47,49]},{"type":"Identifier","name":"b","range":[47,47]},{"type":"Literal","range":[48,49],"value":1},{"type":"Property","kind":"init","range":[53,55]},{"type":"Identifier","name":"c","range":[53,53]},{"type":"Literal","range":[54,55],"value":2},{"type":"ExpressionStatement","range":[58,75]},{"type":"CallExpression","range":[58,74]},{"type":"Identifier","name":"f","range":[58,59]},{"type":"ObjectExpression","range":[67,73]},{"type":"Property","kind":"init","range":[64,66]},{"type":"Identifier","name":"b","range":[64,64]},{"type":"Literal","range":[65,66],"value":1},{"type":"Property","kind":"init","range":[70,72]},{"type":"Identifier","name":"c","range":[70,70]},{"type":"Literal","range":[71,72],"value":2}],
@@ -1101,7 +1101,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - mixed 9 - ', function() {
+		it('obj prop recovery - mixed 9', function() {
 			var data = { 
 				source: 'var v = {a b:{cc:3, dd:\'hey\' e} c:2};function f() {return {a b:{cc:3, dd:\'hey\' e} c:2};}f({a b:{cc:3, dd:\'hey\' e} c:2});',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,37]},{"type":"VariableDeclarator","range":[7,36]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[12,36]},{"type":"Property","kind":"init","range":[13,31]},{"type":"Identifier","name":"b","range":[12,12]},{"type":"ObjectExpression","range":[29,31]},{"type":"Property","kind":"init","range":[14,18]},{"type":"Identifier","name":"cc","range":[14,16]},{"type":"Literal","range":[17,18],"value":3},{"type":"Property","kind":"init","range":[20,28]},{"type":"Identifier","name":"dd","range":[20,22]},{"type":"Literal","range":[23,28],"value":"hey"},{"type":"Property","kind":"init","range":[32,35]},{"type":"Identifier","name":"c","range":[32,33]},{"type":"Literal","range":[34,35],"value":2},{"type":"FunctionDeclaration","range":[51,88]},{"type":"Identifier","name":"f","range":[46,47]},{"type":"BlockStatement","range":[57,88]},{"type":"ReturnStatement","range":[57,87]},{"type":"ObjectExpression","range":[62,86]},{"type":"Property","kind":"init","range":[63,81]},{"type":"Identifier","name":"b","range":[62,62]},{"type":"ObjectExpression","range":[79,81]},{"type":"Property","kind":"init","range":[64,68]},{"type":"Identifier","name":"cc","range":[64,66]},{"type":"Literal","range":[67,68],"value":3},{"type":"Property","kind":"init","range":[70,78]},{"type":"Identifier","name":"dd","range":[70,72]},{"type":"Literal","range":[73,78],"value":"hey"},{"type":"Property","kind":"init","range":[82,85]},{"type":"Identifier","name":"c","range":[82,83]},{"type":"Literal","range":[84,85],"value":2},{"type":"ExpressionStatement","range":[88,120]},{"type":"CallExpression","range":[88,119]},{"type":"Identifier","name":"f","range":[88,89]},{"type":"ObjectExpression","range":[94,118]},{"type":"Property","kind":"init","range":[95,113]},{"type":"Identifier","name":"b","range":[94,94]},{"type":"ObjectExpression","range":[111,113]},{"type":"Property","kind":"init","range":[96,100]},{"type":"Identifier","name":"cc","range":[96,98]},{"type":"Literal","range":[99,100],"value":3},{"type":"Property","kind":"init","range":[102,110]},{"type":"Identifier","name":"dd","range":[102,104]},{"type":"Literal","range":[105,110],"value":"hey"},{"type":"Property","kind":"init","range":[114,117]},{"type":"Identifier","name":"c","range":[114,115]},{"type":"Literal","range":[116,117],"value":2}],
@@ -1111,7 +1111,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - get/set 1 - ', function() {
+		it('obj prop recovery - get/set 1', function() {
 			var data = { 
 				source: 'var v = {get a() {} set b(a) {}};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,33]},{"type":"VariableDeclarator","range":[4,32]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[8,32]},{"type":"Property","kind":"get","range":[9,19]},{"type":"Identifier","name":"a","range":[13,14]},{"type":"FunctionExpression","range":[17,19]},{"type":"BlockStatement","range":[17,19]},{"type":"Property","kind":"set","range":[20,31]},{"type":"Identifier","name":"b","range":[24,25]},{"type":"FunctionExpression","range":[29,31]},{"type":"Identifier","name":"a","range":[26,27]},{"type":"BlockStatement","range":[29,31]}],
@@ -1121,7 +1121,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - get/set 2 - ', function() {
+		it('obj prop recovery - get/set 2', function() {
 			var data = { 
 				source: 'var v = {a get a() {} set b(a) {}};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,35]},{"type":"VariableDeclarator","range":[7,34]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[9,34]},{"type":"Property","kind":"get","range":[15,21]},{"type":"Identifier","name":"a","range":[15,16]},{"type":"FunctionExpression","range":[19,21]},{"type":"BlockStatement","range":[19,21]},{"type":"Property","kind":"set","range":[22,33]},{"type":"Identifier","name":"b","range":[26,27]},{"type":"FunctionExpression","range":[31,33]},{"type":"Identifier","name":"a","range":[28,29]},{"type":"BlockStatement","range":[31,33]}],
@@ -1131,7 +1131,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - get/set 3 - ', function() {
+		it('obj prop recovery - get/set 3', function() {
 			var data = { 
 				source: 'var v = {a get a() {} b set b(a) {}};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,37]},{"type":"VariableDeclarator","range":[7,36]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[22,36]},{"type":"Property","kind":"get","range":[15,21]},{"type":"Identifier","name":"a","range":[15,16]},{"type":"FunctionExpression","range":[19,21]},{"type":"BlockStatement","range":[19,21]},{"type":"Property","kind":"set","range":[28,35]},{"type":"Identifier","name":"b","range":[28,29]},{"type":"FunctionExpression","range":[33,35]},{"type":"Identifier","name":"a","range":[30,31]},{"type":"BlockStatement","range":[33,35]}],
@@ -1141,7 +1141,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - get/set 4 - ', function() {
+		it('obj prop recovery - get/set 4', function() {
 			var data = { 
 				source: 'var v = {a: {get a() {} set b(a) {}} b };',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,41]},{"type":"VariableDeclarator","range":[7,40]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[37,40]},{"type":"Property","kind":"init","range":[9,36]},{"type":"Identifier","name":"a","range":[9,10]},{"type":"ObjectExpression","range":[12,36]},{"type":"Property","kind":"get","range":[13,23]},{"type":"Identifier","name":"a","range":[17,18]},{"type":"FunctionExpression","range":[21,23]},{"type":"BlockStatement","range":[21,23]},{"type":"Property","kind":"set","range":[24,35]},{"type":"Identifier","name":"b","range":[28,29]},{"type":"FunctionExpression","range":[33,35]},{"type":"Identifier","name":"a","range":[30,31]},{"type":"BlockStatement","range":[33,35]}],
@@ -1151,7 +1151,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - get/set 5 - ', function() {
+		it('obj prop recovery - get/set 5', function() {
 			var data = { 
 				source: 'var v = {a: {aa get a() {} set b(a) {}} b };',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,44]},{"type":"VariableDeclarator","range":[7,43]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[40,43]},{"type":"Property","kind":"init","range":[11,39]},{"type":"Identifier","name":"a","range":[9,10]},{"type":"ObjectExpression","range":[13,39]},{"type":"Property","kind":"get","range":[20,26]},{"type":"Identifier","name":"a","range":[20,21]},{"type":"FunctionExpression","range":[24,26]},{"type":"BlockStatement","range":[24,26]},{"type":"Property","kind":"set","range":[27,38]},{"type":"Identifier","name":"b","range":[31,32]},{"type":"FunctionExpression","range":[36,38]},{"type":"Identifier","name":"a","range":[33,34]},{"type":"BlockStatement","range":[36,38]}],
@@ -1161,7 +1161,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - get/set 6 - ', function() {
+		it('obj prop recovery - get/set 6', function() {
 			var data = { 
 				source: 'var v = {a: {aa get a() {} bb set b(a) {}} b };',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,47]},{"type":"VariableDeclarator","range":[8,46]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[43,46]},{"type":"Property","kind":"init","range":[11,42]},{"type":"Identifier","name":"a","range":[9,10]},{"type":"ObjectExpression","range":[27,42]},{"type":"Property","kind":"get","range":[20,26]},{"type":"Identifier","name":"a","range":[20,21]},{"type":"FunctionExpression","range":[24,26]},{"type":"BlockStatement","range":[24,26]},{"type":"Property","kind":"set","range":[34,41]},{"type":"Identifier","name":"b","range":[34,35]},{"type":"FunctionExpression","range":[39,41]},{"type":"Identifier","name":"a","range":[36,37]},{"type":"BlockStatement","range":[39,41]}],
@@ -1171,7 +1171,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - literal successive 1 - ', function() {
+		it('obj prop ident recovery - literal successive 1', function() {
 			var data = { 
 				source: "var f = {'a' 'b':1 c:2};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,24]},{"type":"VariableDeclarator","range":[7,23]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,23]},{"type":"Property","kind":"init","range":[16,18]},{"type":"Literal","range":[16,16],"value":"b"},{"type":"Literal","range":[17,18],"value":1},{"type":"Property","kind":"init","range":[19,22]},{"type":"Identifier","name":"c","range":[19,20]},{"type":"Literal","range":[21,22],"value":2}],
@@ -1181,7 +1181,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - literal successive 2 - ', function() {
+		it('obj prop ident recovery - literal successive 2', function() {
 			var data = { 
 				source: "var f = {'a' b:1 'c':2};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,24]},{"type":"VariableDeclarator","range":[7,23]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,23]},{"type":"Property","kind":"init","range":[14,16]},{"type":"Identifier","name":"b","range":[14,14]},{"type":"Literal","range":[15,16],"value":1},{"type":"Property","kind":"init","range":[17,22]},{"type":"Literal","range":[17,20],"value":"c"},{"type":"Literal","range":[21,22],"value":2}],
@@ -1191,7 +1191,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - literal nested successive 1 - ', function() {
+		it('obj prop ident recovery - literal nested successive 1', function() {
 			var data = { 
 				source: "var f = {'a': {'aa' cc:2} b:1 'c':2};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,37]},{"type":"VariableDeclarator","range":[7,36]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,36]},{"type":"Property","kind":"init","range":[13,25]},{"type":"Literal","range":[9,12],"value":"a"},{"type":"ObjectExpression","range":[15,25]},{"type":"Property","kind":"init","range":[22,24]},{"type":"Identifier","name":"cc","range":[22,22]},{"type":"Literal","range":[23,24],"value":2},{"type":"Property","kind":"init","range":[26,29]},{"type":"Identifier","name":"b","range":[26,27]},{"type":"Literal","range":[28,29],"value":1},{"type":"Property","kind":"init","range":[30,35]},{"type":"Literal","range":[30,33],"value":"c"},{"type":"Literal","range":[34,35],"value":2}],
@@ -1201,7 +1201,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - literal func decl 1 - ', function() {
+		it('obj prop ident recovery - literal func decl 1', function() {
 			var data = { 
 				source: "function f() {} f({'a'});",
 				nodes: [{"type":"FunctionDeclaration","range":[0,15]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[13,15]},{"type":"ExpressionStatement","range":[16,25]},{"type":"CallExpression","range":[16,24]},{"type":"Identifier","name":"f","range":[16,17]},{"type":"ObjectExpression","range":[19,23]}],
@@ -1211,7 +1211,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - literal func decl 2 - ', function() {
+		it('obj prop ident recovery - literal func decl 2', function() {
 			var data = { 
 				source: "var f = {'a' b:1 'c':2};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,24]},{"type":"VariableDeclarator","range":[7,23]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,23]},{"type":"Property","kind":"init","range":[14,16]},{"type":"Identifier","name":"b","range":[14,14]},{"type":"Literal","range":[15,16],"value":1},{"type":"Property","kind":"init","range":[17,22]},{"type":"Literal","range":[17,20],"value":"c"},{"type":"Literal","range":[21,22],"value":2}],
@@ -1221,7 +1221,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop ident recovery - literal func decl 3 - ', function() {
+		it('obj prop ident recovery - literal func decl 3', function() {
 			var data = { 
 				source: "var f = {'a': {'aa' cc:2} b:1 'c':2};",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[4,37]},{"type":"VariableDeclarator","range":[7,36]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[9,36]},{"type":"Property","kind":"init","range":[13,25]},{"type":"Literal","range":[9,12],"value":"a"},{"type":"ObjectExpression","range":[15,25]},{"type":"Property","kind":"init","range":[22,24]},{"type":"Identifier","name":"cc","range":[22,22]},{"type":"Literal","range":[23,24],"value":2},{"type":"Property","kind":"init","range":[26,29]},{"type":"Identifier","name":"b","range":[26,27]},{"type":"Literal","range":[28,29],"value":1},{"type":"Property","kind":"init","range":[30,35]},{"type":"Literal","range":[30,33],"value":"c"},{"type":"Literal","range":[34,35],"value":2}],
@@ -1231,7 +1231,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - literal return 1 - ', function() {
+		it('obj prop recovery - literal return 1', function() {
 			var data = { 
 				source: "var v = function f() {return {a 'b':1 d 'c':2};}",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,48]},{"type":"VariableDeclarator","range":[7,48]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"FunctionExpression","range":[21,48]},{"type":"Identifier","name":"f","range":[17,18]},{"type":"BlockStatement","range":[28,48]},{"type":"ReturnStatement","range":[28,47]},{"type":"ObjectExpression","range":[38,46]},{"type":"Property","kind":"init","range":[35,37]},{"type":"Literal","range":[35,35],"value":"b"},{"type":"Literal","range":[36,37],"value":1},{"type":"Property","kind":"init","range":[43,45]},{"type":"Literal","range":[43,43],"value":"c"},{"type":"Literal","range":[44,45],"value":2}],
@@ -1241,7 +1241,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - literal return 2 - ', function() {
+		it('obj prop recovery - literal return 2', function() {
 			var data = { 
 				source: "var v = function f() {return {a 'b':{'aa' 'bb' cc:3} d 'c':2};}",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[8,63]},{"type":"VariableDeclarator","range":[8,63]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"FunctionExpression","range":[28,63]},{"type":"Identifier","name":"f","range":[17,18]},{"type":"BlockStatement","range":[28,63]},{"type":"ReturnStatement","range":[29,62]},{"type":"ObjectExpression","range":[53,61]},{"type":"Property","kind":"init","range":[36,52]},{"type":"Literal","range":[35,35],"value":"b"},{"type":"ObjectExpression","range":[47,52]},{"type":"Property","kind":"init","range":[49,51]},{"type":"Identifier","name":"cc","range":[49,49]},{"type":"Literal","range":[50,51],"value":3},{"type":"Property","kind":"init","range":[58,60]},{"type":"Literal","range":[58,58],"value":"c"},{"type":"Literal","range":[59,60],"value":2}],
@@ -1251,7 +1251,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - literal mixed 1 - ', function() {
+		it('obj prop recovery - literal mixed 1', function() {
 			var data = { 
 				source: "var v = {'a' b:1 'd' c:2};function f() {return {a 'b':1 d 'c':2};}",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,26]},{"type":"VariableDeclarator","range":[7,25]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[17,25]},{"type":"Property","kind":"init","range":[14,16]},{"type":"Identifier","name":"b","range":[14,14]},{"type":"Literal","range":[15,16],"value":1},{"type":"Property","kind":"init","range":[22,24]},{"type":"Identifier","name":"c","range":[22,22]},{"type":"Literal","range":[23,24],"value":2},{"type":"FunctionDeclaration","range":[40,66]},{"type":"Identifier","name":"f","range":[35,36]},{"type":"BlockStatement","range":[46,66]},{"type":"ReturnStatement","range":[46,65]},{"type":"ObjectExpression","range":[56,64]},{"type":"Property","kind":"init","range":[53,55]},{"type":"Literal","range":[53,53],"value":"b"},{"type":"Literal","range":[54,55],"value":1},{"type":"Property","kind":"init","range":[61,63]},{"type":"Literal","range":[61,61],"value":"c"},{"type":"Literal","range":[62,63],"value":2}],
@@ -1261,7 +1261,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - literal mixed 2 - ', function() {
+		it('obj prop recovery - literal mixed 2', function() {
 			var data = { 
 				source: "var v = {'a' 'b':1 d c:2};function f() {return {a b:1 'd' 'c':2};}f({a 'b':1 d c:2});",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,26]},{"type":"VariableDeclarator","range":[7,25]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[19,25]},{"type":"Property","kind":"init","range":[16,18]},{"type":"Literal","range":[16,16],"value":"b"},{"type":"Literal","range":[17,18],"value":1},{"type":"Property","kind":"init","range":[22,24]},{"type":"Identifier","name":"c","range":[22,22]},{"type":"Literal","range":[23,24],"value":2},{"type":"FunctionDeclaration","range":[40,66]},{"type":"Identifier","name":"f","range":[35,36]},{"type":"BlockStatement","range":[46,66]},{"type":"ReturnStatement","range":[46,65]},{"type":"ObjectExpression","range":[54,64]},{"type":"Property","kind":"init","range":[51,53]},{"type":"Identifier","name":"b","range":[51,51]},{"type":"Literal","range":[52,53],"value":1},{"type":"Property","kind":"init","range":[61,63]},{"type":"Literal","range":[61,61],"value":"c"},{"type":"Literal","range":[62,63],"value":2},{"type":"ExpressionStatement","range":[66,85]},{"type":"CallExpression","range":[66,84]},{"type":"Identifier","name":"f","range":[66,67]},{"type":"ObjectExpression","range":[77,83]},{"type":"Property","kind":"init","range":[74,76]},{"type":"Literal","range":[74,74],"value":"b"},{"type":"Literal","range":[75,76],"value":1},{"type":"Property","kind":"init","range":[80,82]},{"type":"Identifier","name":"c","range":[80,80]},{"type":"Literal","range":[81,82],"value":2}],
@@ -1271,7 +1271,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - literal mixed 3 - ', function() {
+		it('obj prop recovery - literal mixed 3', function() {
 			var data = { 
 				source: "var v = {'a' b:{cc:3, 'dd':'hey' e} c:2};function f() {return {a 'b':{cc:3, dd:'hey' 'e'} c:2};}f({a b:{'cc':3, dd:'hey' e} c:2});",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[7,41]},{"type":"VariableDeclarator","range":[7,40]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[14,40]},{"type":"Property","kind":"init","range":[15,35]},{"type":"Identifier","name":"b","range":[14,14]},{"type":"ObjectExpression","range":[33,35]},{"type":"Property","kind":"init","range":[16,20]},{"type":"Identifier","name":"cc","range":[16,18]},{"type":"Literal","range":[19,20],"value":3},{"type":"Property","kind":"init","range":[22,32]},{"type":"Literal","range":[22,26],"value":"dd"},{"type":"Literal","range":[27,32],"value":"hey"},{"type":"Property","kind":"init","range":[36,39]},{"type":"Identifier","name":"c","range":[36,37]},{"type":"Literal","range":[38,39],"value":2},{"type":"FunctionDeclaration","range":[55,96]},{"type":"Identifier","name":"f","range":[50,51]},{"type":"BlockStatement","range":[61,96]},{"type":"ReturnStatement","range":[61,95]},{"type":"ObjectExpression","range":[68,94]},{"type":"Property","kind":"init","range":[69,89]},{"type":"Literal","range":[68,68],"value":"b"},{"type":"ObjectExpression","range":[85,89]},{"type":"Property","kind":"init","range":[70,74]},{"type":"Identifier","name":"cc","range":[70,72]},{"type":"Literal","range":[73,74],"value":3},{"type":"Property","kind":"init","range":[76,84]},{"type":"Identifier","name":"dd","range":[76,78]},{"type":"Literal","range":[79,84],"value":"hey"},{"type":"Property","kind":"init","range":[90,93]},{"type":"Identifier","name":"c","range":[90,91]},{"type":"Literal","range":[92,93],"value":2},{"type":"ExpressionStatement","range":[96,130]},{"type":"CallExpression","range":[96,129]},{"type":"Identifier","name":"f","range":[96,97]},{"type":"ObjectExpression","range":[102,128]},{"type":"Property","kind":"init","range":[103,123]},{"type":"Identifier","name":"b","range":[102,102]},{"type":"ObjectExpression","range":[121,123]},{"type":"Property","kind":"init","range":[104,110]},{"type":"Literal","range":[104,108],"value":"cc"},{"type":"Literal","range":[109,110],"value":3},{"type":"Property","kind":"init","range":[112,120]},{"type":"Identifier","name":"dd","range":[112,114]},{"type":"Literal","range":[115,120],"value":"hey"},{"type":"Property","kind":"init","range":[124,127]},{"type":"Identifier","name":"c","range":[124,125]},{"type":"Literal","range":[126,127],"value":2}],
@@ -1281,7 +1281,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - broken literal 1 - ', function() {
+		it('obj prop recovery - broken literal 1', function() {
 			var data = {
 				source: 'require({baseUrl: "../../../",paths: {foo/bar": "foo/bar"   // note missing " in obj key}});',
 				nodes: [{"type":"ExpressionStatement","range":[0,92]},{"type":"CallExpression","range":[0,91]},{"type":"Identifier","name":"require","range":[0,7]},{"type":"ObjectExpression","range":[30,90]},{"type":"Property","kind":"init","range":[9,29]},{"type":"Identifier","name":"baseUrl","range":[9,16]},{"type":"Literal","range":[18,29],"value":"../../../"},{"type":"Property","kind":"init","range":[36,89]},{"type":"Identifier","name":"paths","range":[30,35]},{"type":"ObjectExpression","range":[38,89]}],
@@ -1291,7 +1291,7 @@ define([
 			runTest(data);
 		});
 		
-		it('obj prop recovery - broken property 1 - ', function() {
+		it('obj prop recovery - broken property 1', function() {
 			var data = {
 				source: 'require({, paths: {foo/bar": "foo/bar",}});',
 				nodes: [{"type":"ExpressionStatement","range":[0,9]},{"type":"ExpressionStatement","range":[9,11]},{"type":"LabeledStatement","range":[11,43]},{"type":"Identifier","name":"paths","range":[11,16]},{"type":"BlockStatement","range":[18,43]},{"type":"ExpressionStatement","range":[19,26]},{"type":"BinaryExpression","range":[19,26]},{"type":"Identifier","name":"foo","range":[19,22]},{"type":"Identifier","name":"bar","range":[23,26]},{"type":"ExpressionStatement","range":[26,30]},{"type":"Literal","range":[26,30],"value":": "},{"type":"ExpressionStatement","range":[30,37]},{"type":"BinaryExpression","range":[30,37]},{"type":"Identifier","name":"foo","range":[30,33]},{"type":"Identifier","name":"bar","range":[34,37]},{"type":"ExpressionStatement","range":[37,43]},{"type":"Literal","range":[37,43],"value":",}});"}],
@@ -1308,7 +1308,7 @@ define([
 			runTest(data);
 		});
 		
-		it('string literal recovery 1 - ', function() {
+		it('string literal recovery 1', function() {
 			var data = {
 				source: 'var f = "busted',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,15]},{"type":"VariableDeclarator","range":[4,15]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"Literal","range":[8,15],"value":"busted"}],
@@ -1318,7 +1318,7 @@ define([
 			runTest(data);
 		});
 		
-		it('string literal recovery 2 - ', function() {
+		it('string literal recovery 2', function() {
 			var data = {
 				source: Util.isWindows ? 'var f = "busted\r\nvar o = {};' : 'var f = "busted\nvar o = {};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,17]},{"type":"VariableDeclarator","range":[4,16]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"Literal","range":[8,16],"value":"busted"},{"type":"VariableDeclaration","kind":"var","range":[17,28]},{"type":"VariableDeclarator","range":[21,27]},{"type":"Identifier","name":"o","range":[21,22]},{"type":"ObjectExpression","range":[25,27]}],
@@ -1328,7 +1328,7 @@ define([
 			runTest(data);
 		});
 		
-		it('string literal recovery 3 - ', function() {
+		it('string literal recovery 3', function() {
 			var data = {
 				source: 'var f = {one: "busted};',
 				nodes: [],
@@ -1338,7 +1338,7 @@ define([
 			runTest(data);
 		});
 		
-		it('string literal recovery 4 - ', function() {
+		it('string literal recovery 4', function() {
 			var data = {
 				source: Util.isWindows ? 'var f = {one: "busted\r\n};' : 'var f = {one: "busted\n};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,25]},{"type":"VariableDeclarator","range":[4,24]},{"type":"Identifier","name":"f","range":[4,5]},{"type":"ObjectExpression","range":[8,24]},{"type":"Property","kind":"init","range":[9,22]},{"type":"Identifier","name":"one","range":[9,12]},{"type":"Literal","range":[14,22],"value":"busted"}],
@@ -1348,7 +1348,7 @@ define([
 			runTest(data);
 		});
 		
-		it('string literal recovery 5 - ', function() {
+		it('string literal recovery 5', function() {
 			var data = {
 				source: 'var o = {}; o["busted]',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,11]},{"type":"VariableDeclarator","range":[4,10]},{"type":"Identifier","name":"o","range":[4,5]},{"type":"ObjectExpression","range":[8,10]},{"type":"ExpressionStatement","range":[12,22]}],
@@ -1358,7 +1358,7 @@ define([
 			runTest(data);
 		});
 		
-		it('string literal recovery 6 - ', function() {
+		it('string literal recovery 6', function() {
 			var data = {
 				source: Util.isWindows ? 'var o = {}; o["busted]\r\nvar f = {};' : 'var o = {}; o["busted]\nvar f = {};',
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,11]},{"type":"VariableDeclarator","range":[4,10]},{"type":"Identifier","name":"o","range":[4,5]},{"type":"ObjectExpression","range":[8,10]},{"type":"ExpressionStatement","range":[12,23]},{"type":"VariableDeclaration","kind":"var","range":[24,35]},{"type":"VariableDeclarator","range":[28,34]},{"type":"Identifier","name":"f","range":[28,29]},{"type":"ObjectExpression","range":[32,34]}],

@@ -72,7 +72,7 @@ define([
 			assert.equal(element.end, end, "The end range is not the same");
 		}
 			
-		it('testfuncDeclaration1 - ', function() {
+		it('testfuncDeclaration1', function() {
 			context.text = "function F1(p1, p2) {};";
 			return outliner.computeOutline(context).then(function(outline) {
 				try {
@@ -87,7 +87,7 @@ define([
 			});
 		});
 		
-		it('testfuncExpression1 - ', function() {
+		it('testfuncExpression1', function() {
 			context.text = "var obj = {\n"+
 				"\titem: function(p1, p2) {}\n"+
 				"};";
@@ -107,7 +107,7 @@ define([
 			});
 		});
 		
-		it('testObjectExpression1 - ', function() {
+		it('testObjectExpression1', function() {
 			context.text = "var object = {};";
 			return outliner.computeOutline(context).then(function(outline) {
 				try {
@@ -122,7 +122,7 @@ define([
 			});
 		});
 		
-		it('testObjectPropertyLiteral1 - ', function() {
+		it('testObjectPropertyLiteral1', function() {
 			context.text = "var obj = {\n"+
 				"\t\"item\": function(p1, p2) {}\n"+
 				"};";
@@ -142,7 +142,7 @@ define([
 			});
 		});
 		
-		it('testObjectPropertyLiteral2 - ', function() {
+		it('testObjectPropertyLiteral2', function() {
 			context.text = "var obj = {\n"+
 				"\t\"item\": null\n"+
 				"};";
@@ -162,7 +162,7 @@ define([
 			});
 		});
 		
-		it('testObjectPropertyLiteral3 - ', function() {
+		it('testObjectPropertyLiteral3', function() {
 			context.text = "var obj = {\n"+
 				"\t\"item\": {}\n"+
 				"};";
@@ -182,7 +182,7 @@ define([
 			});
 		});
 		
-		it('testObjectPropertyLiteral4 - ', function() {
+		it('testObjectPropertyLiteral4', function() {
 			context.text = "var obj = {\n"+
 				"\t\"item\": function(p1, p2) {}\n"+
 				"};";
@@ -202,7 +202,7 @@ define([
 			});
 		});
 		
-		it('testObjectPropertyLiteral5 - ', function() {
+		it('testObjectPropertyLiteral5', function() {
 			context.text = "var obj = {\n"+
 				"\t\"item\": null\n"+
 				"};";
@@ -222,7 +222,7 @@ define([
 			});
 		});
 		
-		it('testObjectPropertyLiteral6 - ', function() {
+		it('testObjectPropertyLiteral6', function() {
 			context.text = "var obj = {\n"+
 				"\t\"item\": {}\n"+
 				"};";
@@ -246,7 +246,7 @@ define([
 		 * Tests a return statement that is an object expression
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424202
 		 */
-		it('testReturnObject1 - ', function() {
+		it('testReturnObject1', function() {
 			context.text = "function f1() {\n"+
 				"\t return {};\n"+
 				"};";
@@ -270,7 +270,7 @@ define([
 		 * Tests a return statement that is an object expression
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424202
 		 */
-		it('testReturnObject2 - ', function() {
+		it('testReturnObject2', function() {
 			context.text = "function f1() {\n"+
 				"\t return function() {};\n"+
 				"};";
@@ -294,7 +294,7 @@ define([
 		 * Tests a return statement that is an object expression
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424202
 		 */
-		it('testReturnObject3 - ', function() {
+		it('testReturnObject3', function() {
 			context.text = "function f1() {\n"+
 				"\t return {\n"+
 				"\t\tf1: function() {return {};}"+
@@ -326,7 +326,7 @@ define([
 		 * Tests a return statement that is an object expression
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424202
 		 */
-		it('testReturnObject4 - ', function() {
+		it('testReturnObject4', function() {
 			context.text = "function f1() {\n"+
 				"\t return {\n"+
 				"\t\tf1: function() {return function() {};}"+

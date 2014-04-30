@@ -18,46 +18,44 @@
 }(this, function(require, exports, module, assert, eslint) {
 	assert = assert.assert /*chai*/ || assert;
 
-	describe("eslint", function() {
-		describe("#getScope", function() {
-			var topic = "function f() {} \n var g = function() {}";
-	
-			it("should return global scope when called from Program", function() {
-				var config = { rules: {} };
-	
-				eslint.reset();
-				eslint.on("Program", function(node) {
-					var scope = eslint.getScope();
-					assert.equal(scope.type, "global");
-					assert.equal(scope.block, node);
-				});
-	
-				eslint.verify(topic, config, true /* do not reset */);
+	describe("ESLint Scope Tests", function() {
+		var topic = "function f() {} \n var g = function() {}";
+
+		it("should return global scope when called from Program", function() {
+			var config = { rules: {} };
+
+			eslint.reset();
+			eslint.on("Program", function(node) {
+				var scope = eslint.getScope();
+				assert.equal(scope.type, "global");
+				assert.equal(scope.block, node);
 			});
-			it("should return function scope when called from FunctionDeclaration", function() {
-				var config = { rules: {} };
-	
-				eslint.reset();
-				eslint.on("FunctionDeclaration", function(node) {
-					var scope = eslint.getScope();
-					assert.equal(scope.type, "function");
-					assert.equal(scope.block, node);
-				});
-	
-				eslint.verify(topic, config, true);
+
+			eslint.verify(topic, config, true /* do not reset */);
+		});
+		it("should return function scope when called from FunctionDeclaration", function() {
+			var config = { rules: {} };
+
+			eslint.reset();
+			eslint.on("FunctionDeclaration", function(node) {
+				var scope = eslint.getScope();
+				assert.equal(scope.type, "function");
+				assert.equal(scope.block, node);
 			});
-			it("should return function scope when called from FunctionExpression", function() {
-				var config = { rules: {} };
-	
-				eslint.reset();
-				eslint.on("FunctionExpression", function(node) {
-					var scope = eslint.getScope();
-					assert.equal(scope.type, "function");
-					assert.equal(scope.block, node);
-				});
-	
-				eslint.verify(topic, config, true);
+
+			eslint.verify(topic, config, true);
+		});
+		it("should return function scope when called from FunctionExpression", function() {
+			var config = { rules: {} };
+
+			eslint.reset();
+			eslint.on("FunctionExpression", function(node) {
+				var scope = eslint.getScope();
+				assert.equal(scope.type, "function");
+				assert.equal(scope.block, node);
 			});
+
+			eslint.verify(topic, config, true);
 		});
 	});
 }));

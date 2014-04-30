@@ -89,7 +89,7 @@ define([
 			}
 		}
 		
-		it("test get AST - ", function() {
+		it("test get AST", function() {
 			var result = setup(),
 			    astManager = result.astManager,
 			    editorContext = result.editorContext,
@@ -102,7 +102,7 @@ define([
 				});
 			});
 		});
-		it("test AST cache is used - ", function() {
+		it("test AST cache is used", function() {
 			var result = setup(),
 			    astManager = result.astManager,
 			    editorContext = result.editorContext,
@@ -121,7 +121,7 @@ define([
 				});
 			});
 		});
-		it("test AST cache is invalidated - ", function() {
+		it("test AST cache is invalidated", function() {
 			var result = setup(),
 			    astManager = result.astManager,
 			    editorContext = result.editorContext,
@@ -142,7 +142,7 @@ define([
 				});
 			});
 		});
-		it("test get AST with throwy parser - ", function() {
+		it("test get AST with throwy parser", function() {
 			var result = setup(),
 			    astManager = result.astManager,
 			    editorContext = result.editorContext,

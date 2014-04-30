@@ -39,7 +39,7 @@ define([
 			}
 		}
 	
-		it('test_addListener - ', function() {
+		it('test_addListener', function() {
 			var e = new EventEmitter(), called = false;
 			e.addListener("foo", function(v) {
 				called = true;
@@ -47,7 +47,7 @@ define([
 			});
 			e.emit("foo", "hi");
 		});
-		it('test_on - ', function() {
+		it('test_on', function() {
 			var e = new EventEmitter(), called = false;
 			e.addListener("foo", function(v) {
 				called = true;
@@ -56,7 +56,7 @@ define([
 			e.emit("foo", "hi");
 			assert.ok(called, "listener was called");
 		});
-		it('test_once - ', function() {
+		it('test_once', function() {
 			var e = new EventEmitter(), callCount = 0;
 			e.once("foo", function(v) {
 				callCount++;
@@ -66,7 +66,7 @@ define([
 			e.emit("foo", "emit");
 			assert.equal(callCount, 1, "listener was called exactly once");
 		});
-		it('test_removeListener - ', function() {
+		it('test_removeListener', function() {
 			var e = new EventEmitter();
 			var listener = function(v) {
 				assert.fail("should not be called");
@@ -75,7 +75,7 @@ define([
 			e.removeListener("foo", listener);
 			e.emit("foo", 1);
 		});
-		it('test_removeAllListeners_allEventTypes - ', function() {
+		it('test_removeAllListeners_allEventTypes', function() {
 			var e = new EventEmitter();
 			e.addListener("foo", function() {
 				assert.fail("should not be called");
@@ -87,7 +87,7 @@ define([
 			e.emit("foo", 1);
 			e.emit("bar", 1);
 		});
-		it('test_removeAllListeners_singleEventType - ', function() {
+		it('test_removeAllListeners_singleEventType', function() {
 			var e = new EventEmitter(), barCalled = false;
 			e.addListener("foo", function() {
 				assert.fail("should not be called");
@@ -99,7 +99,7 @@ define([
 			e.emit("bar", 1);
 			assert.ok(barCalled, "bar listener was called");
 		});
-		it('test_setMaxListeners_zero - ', function() {
+		it('test_setMaxListeners_zero', function() {
 			var e = new EventEmitter(), warned = false;
 			e.setMaxListeners(0);
 			withMockConsole(function(msg) {
@@ -111,7 +111,7 @@ define([
 				});
 			assert.equal(warned, false, "we were not warned");
 		});
-		it('test_setMaxListeners_N - ', function() {
+		it('test_setMaxListeners_N', function() {
 			var e = new EventEmitter(), warned = false;
 			e.setMaxListeners(2);
 			withMockConsole(function(msg) {
@@ -124,7 +124,7 @@ define([
 				});
 			assert.equal(warned, true, "we were warned about leaks");
 		});
-		it('test_setMaxListeners_default - ', function() {
+		it('test_setMaxListeners_default', function() {
 			var e = new EventEmitter(), warned = false;
 			// Default number of max listeners is 10
 			withMockConsole(function(msg) {
@@ -136,14 +136,14 @@ define([
 				});
 			assert.equal(warned, true, "we were warned about leaks");
 		});
-		it('test_listeners - ', function() {
+		it('test_listeners', function() {
 			var e = new EventEmitter();
 			var l1 = function() {}, l2 = function() {};
 			e.on('foo', l1);
 			e.on('foo', l2);
 			assert.deepEqual(e.listeners('foo'), [l1, l2]);
 		});
-		it('test_emit - ', function() {
+		it('test_emit', function() {
 			var e = new EventEmitter(), called = false;
 			e.on('foo', function(arg1, arg2) {
 				called = true;
@@ -153,7 +153,7 @@ define([
 			e.emit('foo', 'a', 'b');
 			assert.equal(called, true);
 		});
-		it('test_listenerCount - ', function() {
+		it('test_listenerCount', function() {
 			var e = new EventEmitter();
 			assert.equal(EventEmitter.listenerCount(e, 'foo'), 0);
 			e.on('foo', function() {});
@@ -163,7 +163,7 @@ define([
 			e.removeAllListeners('foo');
 			assert.equal(EventEmitter.listenerCount(e, 'foo'), 0);
 		});
-		it('test_event_newListener - ', function() {
+		it('test_event_newListener', function() {
 			var e = new EventEmitter(),
 			    listeners = [ function() {}, function() {} ],
 			    callCount = 0;
@@ -176,7 +176,7 @@ define([
 			e.on('bar', listeners[1]);
 			assert.equal(callCount, 2);
 		});
-		it('test_event_removeListener - ', function() {
+		it('test_event_removeListener', function() {
 			var e = new EventEmitter(),
 			    listeners = [ function() {}, function() {} ],
 			    callCount = 0;
@@ -193,7 +193,7 @@ define([
 			assert.equal(callCount, 2);
 		});
 		// These methods return the emitter to allow chaining: addListener, on, once, removeListener, removeAllListeners
-		it('test_chaining - ', function() {
+		it('test_chaining', function() {
 			var e = new EventEmitter(), numCalls = 0, l = function() { numCalls++; };
 			var returnVal = e.addListener('foo', l);
 			returnVal.on('foo', l);

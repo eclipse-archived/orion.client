@@ -58,83 +58,83 @@ define([
 			astManager.updated();
 		}
 	
-		it('test_findWord1 - ', function() {
+		it('test_findWord1', function() {
 			var word = Finder.findWord('function(param1, param2)', 12);
 			assert.equal(word, 'param1', 'Should have found the word param1');
 		});
-		it('test_findWord2 - ', function() {
+		it('test_findWord2', function() {
 			var word = Finder.findWord('function(param1, param2)', 9);
 			assert.equal(word, 'param1', 'Should have found the word param1');
 		});
-		it('test_findWord3 - ', function() {
+		it('test_findWord3', function() {
 			var word = Finder.findWord('function(param1, param2)', 17);
 			assert.equal(word, 'param2', 'Should have found the word param2');
 		});
-		it('test_findWord4 - ', function() {
+		it('test_findWord4', function() {
 			var word = Finder.findWord('var foo.bar = function(param1, param2)', 4);
 			assert.equal(word, 'foo', 'Should have found the word foo');
 		});
-		it('test_findWord5 - ', function() {
+		it('test_findWord5', function() {
 			var word = Finder.findWord('var foo.bar = function(param1, param2)', 8);
 			assert.equal(word, 'bar', 'Should have found the word bar');
 		});
-		it('test_findWord6 - ', function() {
+		it('test_findWord6', function() {
 			var word = Finder.findWord('f =function(p1) {', 3);
 			assert.equal(word, 'function', 'Should have found word function');
 		});
-		it('test_findWord7 - ', function() {
+		it('test_findWord7', function() {
 			var word = Finder.findWord('f ={foo:true', 4);
 			assert.equal(word, 'foo', 'Should have found word foo');
 		});
-		it('test_findWord8 - ', function() {
+		it('test_findWord8', function() {
 			var word = Finder.findWord('function(param1, param2)', 15);
 			assert.equal(word, 'param1', 'Should have found word param1');
 		});
-		it('test_findWord9 - ', function() {
+		it('test_findWord9', function() {
 			var word = Finder.findWord('var foo.bar = function(param1, param2)', 7);
 			assert.equal(word, 'foo', 'Should have found word foo');
 		});
-		it('test_findWord10 - ', function() {
+		it('test_findWord10', function() {
 			var word = Finder.findWord('   foo.bar = function(param1, param2)', 4);
 			assert.equal(word, 'foo', 'Should have found word foo');
 		});
-		it('test_findWord11 - ', function() {
+		it('test_findWord11', function() {
 			var word = Finder.findWord('	foo.bar = function(param1, param2)', 2);
 			assert.equal(word, 'foo', 'Should have found word foo');
 		});
-		it('test_findNoWord1 - ', function() {
+		it('test_findNoWord1', function() {
 			var word = Finder.findWord('f: function(p1, p2)', 2);
 			assert.equal(word, null, 'Should have found no word');
 		});
-		it('test_findNoWord2 - ', function() {
+		it('test_findNoWord2', function() {
 			var word = Finder.findWord('f: function(p1, p2)', 15);
 			assert.equal(word, null, 'Should have found no word');
 		});
-		it('test_findNoWord3 - ', function() {
+		it('test_findNoWord3', function() {
 			var word = Finder.findWord('f: function(p1) {', 16);
 			assert.equal(word, null, 'Should have found no word');
 		});
-		it('test_findNoWord4 - ', function() {
+		it('test_findNoWord4', function() {
 			var word = Finder.findWord('f: function(p1) {', 17);
 			assert.equal(word, null, 'Should have found no word');
 		});
-		it('test_findNoWord5 - ', function() {
+		it('test_findNoWord5', function() {
 			var word = Finder.findWord('f = function(p1) {', 2);
 			assert.equal(word, null, 'Should have found no word');
 		});
-		it('test_findNoWord6 - ', function() {
+		it('test_findNoWord6', function() {
 			var word = Finder.findWord('f = function(p1) {', 3);
 			assert.equal(word, null, 'Should have found no word');
 		});
-		it('test_findNoWord7 - ', function() {
+		it('test_findNoWord7', function() {
 			var word = Finder.findWord('var a = [1, 2]', 7);
 			assert.equal(word, null, 'Should have found no word');
 		});
-		it('test_findNoWord8 - ', function() {
+		it('test_findNoWord8', function() {
 			var word = Finder.findWord('var a = [1, 2]', 14);
 			assert.equal(word, null, 'Should have found no word');
 		});
-		it('test_findNode1 - ', function() {
+		it('test_findNode1', function() {
 			try {
 				editorContext.text = "function  F1(p1, p2) {\n"+
 					"\tvar out = p1;\n"+
@@ -153,7 +153,7 @@ define([
 				tearDown();
 			}
 		});
-		it('test_findNode2 - ', function() {
+		it('test_findNode2', function() {
 			try {
 				editorContext.text = "function  F1(p1, p2) {\n"+
 					"\tvar out = p1;\n"+
@@ -172,7 +172,7 @@ define([
 				tearDown();
 			}
 		});
-		it('test_findNode3 - ', function() {
+		it('test_findNode3', function() {
 			try {
 				editorContext.text = "function  F1(p1, p2) {\n"+
 					"\tvar out = p1;\n"+
@@ -192,7 +192,7 @@ define([
 			}
 		});
 		
-		it('test_findNode4 - ', function() {
+		it('test_findNode4', function() {
 			try {
 				editorContext.text = "function  F1(p1, p2) {\n"+
 					"\tvar out = p1;\n"+
@@ -215,7 +215,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken1 - ', function() {
+		it('test_findToken1', function() {
 			return astManager.getAST(setUp("(")).then(function(ast) {
 				try {
 					var token = Finder.findToken(0, ast.tokens);
@@ -237,7 +237,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken2 - ', function() {
+		it('test_findToken2', function() {
 			var text = "var function f() {}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -260,7 +260,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken3 - ', function() {
+		it('test_findToken3', function() {
 			var text = "(var function f() {}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -283,7 +283,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken4 - ', function() {
+		it('test_findToken4', function() {
 			var text = "(var function f() {}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -306,7 +306,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken5 - ', function() {
+		it('test_findToken5', function() {
 			var text = "var foo.baz / = 43;";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -329,7 +329,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken6 - ', function() {
+		it('test_findToken6', function() {
 			var text = "var foo.baz / = 43;";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -352,7 +352,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken7 - ', function() {
+		it('test_findToken7', function() {
 			var text = "var function f1() {";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -375,7 +375,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken8 - ', function() {
+		it('test_findToken8', function() {
 			var text = "var function f1() {";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -398,7 +398,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken9 - ', function() {
+		it('test_findToken9', function() {
 			var text = "(var function f() {}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -415,7 +415,7 @@ define([
 		 * Find a token in a correct AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken10 - ', function() {
+		it('test_findToken10', function() {
 			var text = "function f() {}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -438,7 +438,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken11 - ', function() {
+		it('test_findToken11', function() {
 			var text = "var foo = {}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -461,7 +461,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken12 - ', function() {
+		it('test_findToken12', function() {
 			var text = "var foo = {f: function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -484,7 +484,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken13 - ', function() {
+		it('test_findToken13', function() {
 			var text = "var foo = {f: function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -507,7 +507,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken14 - ', function() {
+		it('test_findToken14', function() {
 			var text = "var foo = {f: function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -530,7 +530,7 @@ define([
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
-		it('test_findToken15 - ', function() {
+		it('test_findToken15', function() {
 			var text = "var foo = {f: function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -553,7 +553,7 @@ define([
 		 * Find a token in an AST with copious whitespace
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
-		it('test_findToken16 - ', function() {
+		it('test_findToken16', function() {
 			var text = "var   foo = {f: function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -570,7 +570,7 @@ define([
 		 * Find a token in an AST with copious whitespace
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
-		it('test_findToken17 - ', function() {
+		it('test_findToken17', function() {
 			var text = "var   foo = {f: function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -587,7 +587,7 @@ define([
 		 * Find a token in an AST with copious whitespace
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
-		it('test_findToken18 - ', function() {
+		it('test_findToken18', function() {
 			var text = "var foo = {  f: function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -604,7 +604,7 @@ define([
 		 * Find a token in an AST with copious whitespace
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
-		it('test_findToken19 - ', function() {
+		it('test_findToken19', function() {
 			var text = "var foo = {f:   function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -621,7 +621,7 @@ define([
 		 * Find a token in an AST with copious whitespace
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
-		it('test_findToken20 - ', function() {
+		it('test_findToken20', function() {
 			var text = "var foo = {f:   function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -638,7 +638,7 @@ define([
 		 * Find a token in an AST with copious whitespace
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
-		it('test_findToken21 - ', function() {
+		it('test_findToken21', function() {
 			var text = "  var foo = {f: function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -655,7 +655,7 @@ define([
 		 * Find a token in an AST with copious whitespace
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
-		it('test_findToken22 - ', function() {
+		it('test_findToken22', function() {
 			var text = "  var foo = {f:   function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -672,7 +672,7 @@ define([
 		 * Find a token in an AST with copious whitespace
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
-		it('test_findToken23 - ', function() {
+		it('test_findToken23', function() {
 			var text = "function f3(  foo   ,   bar   , baz) {};";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -695,7 +695,7 @@ define([
 		 * Find a comment
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
 		 */
-		it('test_findComment1 - ', function() {
+		it('test_findComment1', function() {
 			var text = "/***/var foo = {f: function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -714,7 +714,7 @@ define([
 		 * Find a comment
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
 		 */
-		it('test_findComment2 - ', function() {
+		it('test_findComment2', function() {
 			var text = "/***/var foo = {f: function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -733,7 +733,7 @@ define([
 		 * Find a comment
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
 		 */
-		it('test_findComment3 - ', function() {
+		it('test_findComment3', function() {
 			var text = "var foo = {/***/f: function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -752,7 +752,7 @@ define([
 		 * Find a comment
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
 		 */
-		it('test_findComment4 - ', function() {
+		it('test_findComment4', function() {
 			var text = "var foo = {/***/f: function() {}}";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -771,7 +771,7 @@ define([
 		 * Find a comment
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
 		 */
-		it('test_findComment5 - ', function() {
+		it('test_findComment5', function() {
 			var text = "/***/function f() {/***/};";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -790,7 +790,7 @@ define([
 		 * Find a comment
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
 		 */
-		it('test_findComment6 - ', function() {
+		it('test_findComment6', function() {
 			var text = "/***/function f() {/***/};/***/";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -809,7 +809,7 @@ define([
 		 * Find a token with a bogus offset
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
 		 */
-		it('test_findTokenBadOffset1 - ', function() {
+		it('test_findTokenBadOffset1', function() {
 			var text = "if(()) {};";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -826,7 +826,7 @@ define([
 		 * Find a token with a bogus offset
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
 		 */
-		it('test_findTokenBadOffset2 - ', function() {
+		it('test_findTokenBadOffset2', function() {
 			var text = "if(()) {};";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -843,7 +843,7 @@ define([
 		 * Find a token with a bogus offset
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
 		 */
-		it('test_findTokenBadOffset3 - ', function() {
+		it('test_findTokenBadOffset3', function() {
 			var text = "if(()) {};";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -860,7 +860,7 @@ define([
 		 * Find a node with a bogus offset
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
 		 */
-		it('test_findNodeBadOffset1 - ', function() {
+		it('test_findNodeBadOffset1', function() {
 			var text = "if(()) {};";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -877,7 +877,7 @@ define([
 		 * Find a node with a bogus offset
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
 		 */
-		it('test_findNodeBadOffset2 - ', function() {
+		it('test_findNodeBadOffset2', function() {
 			var text = "if(()) {};";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -894,7 +894,7 @@ define([
 		 * Find a node with a bogus offset
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
 		 */
-		it('test_findNodeBadOffset3 - ', function() {
+		it('test_findNodeBadOffset3', function() {
 			var text = "if(()) {};";
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
@@ -911,7 +911,7 @@ define([
 		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
-		it('test_findScriptBlock1 - ', function() {
+		it('test_findScriptBlock1', function() {
 			var text = "<!DOCTYPE html><head><script>function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -923,7 +923,7 @@ define([
 		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
-		it('test_findScriptBlock2 - ', function() {
+		it('test_findScriptBlock2', function() {
 			var text = "<!DOCTYPE html><head><scriPt>function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -935,7 +935,7 @@ define([
 		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
-		it('test_findScriptBlock3 - ', function() {
+		it('test_findScriptBlock3', function() {
 			var text = "<!DOCTYPE html><head><script>function f() {}</scriPt></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -947,7 +947,7 @@ define([
 		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
-		it('test_findScriptBlock4 - ', function() {
+		it('test_findScriptBlock4', function() {
 			var text = "<!DOCTYPE html><head><scRipt>function f() {}</scripT></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -959,7 +959,7 @@ define([
 		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
-		it('test_findScriptBlock5 - ', function() {
+		it('test_findScriptBlock5', function() {
 			var text = "<!DOCTYPE html><head><scriPt   >function f() {}</scRIpt></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -971,7 +971,7 @@ define([
 		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
-		it('test_findScriptBlockMulti1 - ', function() {
+		it('test_findScriptBlockMulti1', function() {
 			var text = "<!DOCTYPE html><head><script>function f() {}</script><script>function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
 			assert.equal(blocks.length, 2, "Should have found two script blocks");
@@ -985,7 +985,7 @@ define([
 		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
-		it('test_findScriptBlockMulti2 - ', function() {
+		it('test_findScriptBlockMulti2', function() {
 			var text = "<!DOCTYPE html><head><scrIpt>function f() {}</script><scRipt>function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
 			assert.equal(blocks.length, 2, "Should have found two script blocks");
@@ -999,7 +999,7 @@ define([
 		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
-		it('test_findScriptBlockMulti3 - ', function() {
+		it('test_findScriptBlockMulti3', function() {
 			var text = "<!DOCTYPE html><head><scripT>function f() {}</scriPt><scRipt>function f() {}</Script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
 			assert.equal(blocks.length, 2, "Should have found two script blocks");
@@ -1013,7 +1013,7 @@ define([
 		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
-		it('test_findScriptBlockMulti4 - ', function() {
+		it('test_findScriptBlockMulti4', function() {
 			var text = "<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text);
 			assert.equal(blocks.length, 2, "Should have found two script blocks");
@@ -1027,7 +1027,7 @@ define([
 		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
-		it('test_findScriptBlockMultiWithOffset1 - ', function() {
+		it('test_findScriptBlockMultiWithOffset1', function() {
 			var text = "<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 39);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -1038,7 +1038,7 @@ define([
 		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
-		it('test_findScriptBlockMultiWithOffset2 - ', function() {
+		it('test_findScriptBlockMultiWithOffset2', function() {
 			var text = "<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 71);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -1050,7 +1050,7 @@ define([
 		 * Tests the support for finding script blocks in HTML
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
-		it('test_findScriptBlockWithOffset1 - ', function() {
+		it('test_findScriptBlockWithOffset1', function() {
 			var text = "<!DOCTYPE html><head><script >function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 39);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -1062,7 +1062,7 @@ define([
 		 * Tests the support for finding script blocks in HTML with postamble text
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
-		it('test_findScriptBlockWithSpacePostamble1 - ', function() {
+		it('test_findScriptBlockWithSpacePostamble1', function() {
 			var text = "<!DOCTYPE html><head><script type='javascript'>function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 48);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -1074,7 +1074,7 @@ define([
 		 * Tests the support for finding script blocks in HTML with postamble text
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
-		it('test_findScriptBlockWithSpacePostamble2 - ', function() {
+		it('test_findScriptBlockWithSpacePostamble2', function() {
 			var text = "<!DOCTYPE html><head><script type=javascript  >function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 48);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -1086,7 +1086,7 @@ define([
 		 * Tests the support for finding script blocks in HTML with postamble text
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
-		it('test_findScriptBlockWithSpacePostamble3 - ', function() {
+		it('test_findScriptBlockWithSpacePostamble3', function() {
 			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 47);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -1098,7 +1098,7 @@ define([
 		 * Tests the support for finding script blocks in HTML with postamble text
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
-		it('test_findScriptBlockWithSpacePostamble4 - ', function() {
+		it('test_findScriptBlockWithSpacePostamble4', function() {
 			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type='javascript' ></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 47);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -1110,7 +1110,7 @@ define([
 		 * Tests the support for finding script blocks in HTML with postamble text
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
-		it('test_findScriptBlockWithSpacePostamble5 - ', function() {
+		it('test_findScriptBlockWithSpacePostamble5', function() {
 			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type=javascript ></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 47);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -1122,7 +1122,7 @@ define([
 		 * Tests the support for finding script blocks in HTML with postamble text
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
-		it('test_findScriptBlockWithSpacePostamble6 - ', function() {
+		it('test_findScriptBlockWithSpacePostamble6', function() {
 			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type= javas cript ></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 47);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -1134,7 +1134,7 @@ define([
 		 * Tests the support for finding script blocks in HTML with postamble text
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
-		it('test_findScriptBlockWithSpacePostamble7 - ', function() {
+		it('test_findScriptBlockWithSpacePostamble7', function() {
 			var text = "<!DOCTYPE html><head>< script source=foo bar  >function f() {}</script type= javas cript ></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 48);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -1146,7 +1146,7 @@ define([
 		 * Tests the support for finding script blocks in HTML with postamble text
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
-		it('test_findScriptBlockWithSpacePostamble8 - ', function() {
+		it('test_findScriptBlockWithSpacePostamble8', function() {
 			var text = "<!DOCTYPE html><head><   scrIpt source=foo bar  >function f() {}</script type= javas cript ></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 50);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -1158,7 +1158,7 @@ define([
 		 * Tests the support for finding script blocks in HTML with postamble text
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
-		it('test_findScriptBlockWithSpacePostamble9 - ', function() {
+		it('test_findScriptBlockWithSpacePostamble9', function() {
 			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}<   /scrIpt type= javas cript ></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 47);
 			assert.equal(blocks.length, 1, "Should have found one script block");
@@ -1170,7 +1170,7 @@ define([
 		 * Tests the support for finding script blocks in HTML with postamble text
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
-		it('test_findNoScriptBlockWithSpacePostamble1 - ', function() {
+		it('test_findNoScriptBlockWithSpacePostamble1', function() {
 			var text = "<!DOCTYPE html><head><script <source=foo bar  >function f() {}</script type= javas cript ></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 39);
 			assert.equal(blocks.length, 0, "Should not have found any script blocks");
@@ -1180,7 +1180,7 @@ define([
 		 * Tests the support for finding script blocks in HTML with postamble text
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
-		it('test_findNoScriptBlockWithSpacePostamble2 - ', function() {
+		it('test_findNoScriptBlockWithSpacePostamble2', function() {
 			var text = "<!DOCTYPE html><head><script source=foo bar  > source='js'>function f() {}</script type= javas cript ></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 39);
 			assert.equal(blocks.length, 0, "Should not have found any script blocks");

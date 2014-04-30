@@ -49,112 +49,112 @@ define([
 			return result;	
 		}
 		
-		it("test basic 1 - ", function() {
+		it("test basic 1", function() {
 			testSig("fn() -> String", "function():String");
 		});
 	
-		it("test basic 2 - ", function() {
+		it("test basic 2", function() {
 			testSig("fn(m: Number, n?: Number) -> Boolean", "function(m:Number,n:Number=):Boolean");
 		});
 		
-		it("test constructor 1 - ", function() {
+		it("test constructor 1", function() {
 			// TODO is this really right?  comma after Fizz?
 			testSig("fn()", "function(new:Fizz):Fizz", "Fizz");
 		});
 		
-		it("test array of functions - ", function() {
+		it("test array of functions", function() {
 			testSig("fn() -> [fn()]", "function():Array.<function():undefined>");
 		});
 	
-		it("test array of Strings - ", function() {
+		it("test array of Strings", function() {
 			testSig("fn() -> [String]", "function():Array.<String>");
 		});
 	
-		it("test array of custom type - ", function() {
+		it("test array of custom type", function() {
 			testSig("fn() -> [Fizzle]", "function():Array.<Fizzle>");
 		});
 	
-		it("test array of undefined type - ", function() {
+		it("test array of undefined type", function() {
 			testSig("fn() -> [?]", "function():Array"); // Someday this  should be Array.<Object> not Array
 		});
 	
-		it("test array of Object type - ", function() {
+		it("test array of Object type", function() {
 			testSig("fn() -> [Object]", "function():Array"); // Someday this should be Array.<Object> not Array
 		});
 	
-		it("test callback - ", function() {
+		it("test callback", function() {
 			testSig("fn(cb: fn(x: Object) -> Object) -> Number", "function(cb:function(x:Object):Object):Number");
 		});
 	
-		it("test callback 2 - ", function() {
+		it("test callback 2", function() {
 			testSig("fn(cb: fn(x: Object) -> Object) -> fn(y: Object) -> Object", 
 					"function(cb:function(x:Object):Object):function(y:Object):Object");
 		});
 	
-		it("test callback 3 - ", function() {
+		it("test callback 3", function() {
 			testSig("fn(cb: fn(x: Object) -> fn(z: Object) -> Object, cb2: fn(p: Object) -> String) -> fn(y: Object) -> Object", 
 					"function(cb:function(x:Object):function(z:Object):Object,cb2:function(p:Object):String):function(y:Object):Object");
 		});
 	
-		it("test callback 4 - ", function() {
+		it("test callback 4", function() {
 			testSig("fn(callback: fn())", "function(callback:function():undefined):undefined");
 		});
 	
-		it("test callback 5 - ", function() {
+		it("test callback 5", function() {
 			testSig("fn(callback: fn()) -> Function", "function(callback:function():undefined):Function");
 		});
 		
-		it("test callback 6 - ", function() {
+		it("test callback 6", function() {
 			testSig("fn(callback: fn()->Object)", "function(callback:function():Object):undefined");
 		});
 	
-		it("test callback 7 - ", function() {
+		it("test callback 7", function() {
 			testSig("fn(callback: fn())->Object", "function(callback:function():undefined):Object");
 		});
 		
-		it("test callback 8 - ", function() {
+		it("test callback 8", function() {
 			testSig("fn(callback: fn(), parm:Boolean)->Object", "function(callback:function():undefined,parm:Boolean):Object");
 		});
 	
-		it("test callback 9 - ", function() {
+		it("test callback 9", function() {
 			testSig("fn(parm:Boolean, callback: fn())->Object", "function(parm:Boolean,callback:function():undefined):Object");
 		});
 		
-		it("test callback 10 - ", function() {
+		it("test callback 10", function() {
 			testSig("fn(parm:Boolean, callback: fn()->Number)->Object", "function(parm:Boolean,callback:function():Number):Object");
 		});
 		
-		it("test callback 11 - ", function() {
+		it("test callback 11", function() {
 			testSig("fn(parm:Boolean, callback: fn()->Number)", "function(parm:Boolean,callback:function():Number):undefined");
 		});
 		
-		it("test callback 12 - ", function() {
+		it("test callback 12", function() {
 			testSig("fn(callback: fn()->Object, parm:Boolean)", "function(callback:function():Object,parm:Boolean):undefined");
 		});
 		
-		it("test callback 13 - ", function() {
+		it("test callback 13", function() {
 			testSig("fn(callback: fn()->Number, parm:Boolean)->Object", "function(callback:function():Number,parm:Boolean):Object");
 		});
 		
-		it("test callback 14 - ", function() {
+		it("test callback 14", function() {
 			testSig("fn(callback: fn()->Function, parm:Boolean)->Object", "function(callback:function():Function,parm:Boolean):Object");
 		});
 		
-		it("test callback 15 - ", function() {
+		it("test callback 15", function() {
 			testSig("fn(callback: fn()->Function, parm:Boolean)->Function", "function(callback:function():Function,parm:Boolean):Function");
 		});
 	
 		/**
 		 * From the mongoDB index
 		 */
-		it("test callback 16 - ", function() {
+		it("test callback 16", function() {
 			testSig("fn(collectionName: String, callback: fn())", "function(collectionName:String,callback:function():undefined):undefined");
 		});
 		
 		/**
 		 * From the mongoDB index
 		 */
-		it("test callback 17 - ", function() {
+		it("test callback 17", function() {
 			testSig("fn(code: Code, parameters: Object, options: Object, callback: fn())", 
 						"function(code:Code,parameters:Object,options:Object,callback:function():undefined):undefined");
 		});
@@ -162,28 +162,28 @@ define([
 		/**
 		 * From the mongoDB index
 		 */
-		it("test callback 18 - ", function() {
+		it("test callback 18", function() {
 			testSig("fn(dbName: String) -> Db", "function(dbName:String):Db");
 		});
 		
 		/**
 		 * From the mySQL index
 		 */
-		it("test callback 19 - ", function() {
+		it("test callback 19", function() {
 			testSig("fn(sql: String, values: Object, cb: fn()) -> Query", "function(sql:String,values:Object,cb:function():undefined):Query");
 		});
 		
 		/**
 		 * From the mySQL index
 		 */
-		it("test callback 20 - ", function() {
+		it("test callback 20", function() {
 			testSig("fn(cb: fn(err: Error))", "function(cb:function(err:Error):undefined):undefined");
 		});
 		
 		/**
 		 * From the mySQL index
 		 */
-		it("test callback 21 - ", function() {
+		it("test callback 21", function() {
 			testSig("fn(default_flags: Object, user_flags:[String]) -> Number", 
 						"function(default_flags:Object,user_flags:Array.<String>):Number");
 		});
@@ -191,7 +191,7 @@ define([
 		/**
 		 * From the postgres index
 		 */
-		it("test callback 22 - ", function() {
+		it("test callback 22", function() {
 			testSig("fn(buffer: Buffer, length: Number) -> Message", 
 						"function(buffer:Buffer,length:Number):Message");
 		});
@@ -199,7 +199,7 @@ define([
 		/**
 		 * From the postgres index
 		 */
-		it("test callback 23 - ", function() {
+		it("test callback 23", function() {
 			testSig("fn(default_flags: Object, user_flags:[String]) -> Number", 
 						"function(default_flags:Object,user_flags:Array.<String>):Number");
 		});
@@ -207,12 +207,12 @@ define([
 		/**
 		 * From the express index
 		 */
-		it("test callback 24 - ", function() {
+		it("test callback 24", function() {
 			testSig("fn(method: String, path: String, callbacks: [fn()], options: Object)", 
 						"function(method:String,path:String,callbacks:Array.<function():undefined>,options:Object):undefined");
 		});
 		
-		it("test type 1 - ", function() {
+		it("test type 1", function() {
 			var type = {
 				fizz: "String",
 				bazz: "Number"
@@ -237,7 +237,7 @@ define([
 			testType(type, "Foo", expected);
 		});
 		
-		it("test type reference with dot - ", function() {
+		it("test type reference with dot", function() {
 			var type = {
 				foo: "+x.OtherType"
 			};
@@ -255,7 +255,7 @@ define([
 			testType(type, "Foo", expected);
 		});
 		
-		it("test environment basic - ", function() {
+		it("test environment basic", function() {
 			var index = {
 				bizz: "String"
 			};
@@ -264,7 +264,7 @@ define([
 			});
 		});
 		
-		it("test environment prototype - ", function() {
+		it("test environment prototype", function() {
 			var index = {
 				Fizz: {
 					"!type": "fn(p:String)",
@@ -285,7 +285,7 @@ define([
 			});
 		});
 		
-		it("test top-level dot - ", function() {
+		it("test top-level dot", function() {
 			var index = {
 				Fizz: "foo.bazz"
 			};
@@ -298,7 +298,7 @@ define([
 		 * Tests simple function declarations
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425813
 		 */
-		it("test function decl1 - ", function() {
+		it("test function decl1", function() {
 			var index = {
 				Fizz: {
 					"!type": "fn(p:String)",
