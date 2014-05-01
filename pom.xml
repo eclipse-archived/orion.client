@@ -9,6 +9,7 @@
 
    Contributors:
       Matthias Sohn - initial implementation
+      IBM - Updated for Orion 6.0
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -56,13 +57,14 @@
 
 	<properties>
 		<orion-version>1.0.0-SNAPSHOT</orion-version>
-		<tycho-version>0.18.1</tycho-version>
-		<tycho-extras-version>0.18.1</tycho-extras-version>
+		<tycho-version>0.20.0</tycho-version>
+		<tycho-extras-version>0.20.0</tycho-extras-version>
 		<tycho.scmUrl>scm:git:http://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git</tycho.scmUrl>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java-version>1.6</java-version>
+		<java-version>1.7</java-version>
 		<requirejsHome>${basedir}/target/requirejs/</requirejsHome>
 		<jsdocHome>${basedir}/target/jsdoc</jsdocHome>
+		<antrun-version>1.7</antrun-version>
 	</properties>
 
 	<distributionManagement>
@@ -122,7 +124,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>3.1</version>
 				<configuration>
 					<source>${java-version}</source>
 					<target>${java-version}</target>
@@ -221,14 +223,14 @@
 					<version>${tycho-version}</version>
 					<configuration>
 						<format>'v'yyyyMMdd-HHmm</format>
-						<sourceReferences>
-							<generate>true</generate>
-						</sourceReferences>
+						<timestampProvider>jgit</timestampProvider>
+						<jgit.ignore>pom.xml</jgit.ignore>
+						<jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
 					</configuration>
 					<dependencies>
 						<dependency>
 							<groupId>org.eclipse.tycho.extras</groupId>
-							<artifactId>tycho-sourceref-jgit</artifactId>
+							<artifactId>tycho-buildtimestamp-jgit</artifactId>
 							<version>${tycho-extras-version}</version>
 						</dependency>
 					</dependencies>
@@ -244,7 +246,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
-					<version>1.7</version>
+					<version>${antrun-version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
