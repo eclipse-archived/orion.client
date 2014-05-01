@@ -547,12 +547,12 @@ parseStatement: true, parseSourceElement: true */
         // '\u' (char #92, char #117) denotes an escaped character.
         if (ch === 92) {
             if (source.charCodeAt(index) !== 117) {
-                throwErrorTolerant({}, Messages.UnexpectedToken, 'ILLEGAL');
+                throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
             }
             ++index;
             ch = scanHexEscape('u');
             if (!ch || ch === '\\' || !isIdentifierStart(ch.charCodeAt(0))) {
-                throwErrorTolerant({}, Messages.UnexpectedToken, 'ILLEGAL');
+                throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
             }
             id = ch;
         }
@@ -562,19 +562,19 @@ parseStatement: true, parseSourceElement: true */
                 break;
             }
             ++index;
-            id += String.fromCharCode(ch);
             // '\u' (char #92, char #117) denotes an escaped character.
             if (ch === 92) {
-            	id = id.slice(0, id.length-1);
                 if (source.charCodeAt(index) !== 117) {
-                	throwErrorTolerant({}, Messages.UnexpectedToken, 'ILLEGAL');
+                	throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
                 }
                 ++index;
                 ch = scanHexEscape('u');
                 if (!ch || ch === '\\' || !isIdentifierPart(ch.charCodeAt(0))) {
-                    throwErrorTolerant({}, Messages.UnexpectedToken, 'ILLEGAL');
+                    throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
                 }
                 id += ch;
+            } else {
+            	id += String.fromCharCode(ch);
             }
         }
 
@@ -2090,11 +2090,11 @@ parseStatement: true, parseSourceElement: true */
 	        	try {
 	        		token = lex(); // eat the ':' so the assignment parsing starts on the correct index
 	            	return delegate.markEnd(delegate.createProperty('init', id, parseAssignmentExpression()));
-	        	} catch(e) {
-	        		//trap the exception and ignore the broken property
-	        		delegate.markEndIf(id);
-	        		return null;
-	        	}
+            	}
+            	catch(e) {
+            		delegate.markEndIf(id);
+            		return null;
+            	}
 	        } else if(token.type === Token.Punctuator && token.value === '}') {
 	        	throwErrorTolerant(prev, Messages.UnexpectedToken, prev.value);
 	        	delegate.markEndIf(id);
@@ -3370,9 +3370,7 @@ parseStatement: true, parseSourceElement: true */
             delete state.labelSet[key];
             return delegate.markEnd(delegate.createLabeledStatement(expr, labeledBody));
         }
-
         consumeSemicolon();
-
         return delegate.markEnd(delegate.createExpressionStatement(expr));
     }
 
@@ -3421,14 +3419,16 @@ parseStatement: true, parseSourceElement: true */
         state.inSwitch = false;
         state.inFunctionBody = true;
 
+		var startidx = index;
         while (index < length) {
             if (match('}')) {
                 break;
             }
             sourceElement = parseSourceElement();
-            if (typeof sourceElement === 'undefined') {
+            if (typeof sourceElement === 'undefined' || startidx === index) {
                 break;
             }
+            startidx = index;
             sourceElements.push(sourceElement);
         }
 
@@ -3630,12 +3630,13 @@ parseStatement: true, parseSourceElement: true */
                 }
             }
         }
-
+		var startidx = index;
         while (index < length) {
             sourceElement = parseSourceElement();
-            if (typeof sourceElement === 'undefined') {
+            if (typeof sourceElement === 'undefined' || startidx === index) {
                 break;
             }
+            startidx = index;
             sourceElements.push(sourceElement);
         }
         return sourceElements;
