@@ -13,7 +13,7 @@
 define([
 	'orion/Deferred',
 	'orion/objects',
-	'orion/serialize',
+	'orion/serialize'
 ], function(Deferred, Objects, Serialize) {
 	/**
 	 * @description Object of error types

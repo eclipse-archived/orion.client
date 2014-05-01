@@ -537,25 +537,25 @@ parseStatement: true, parseSourceElement: true */
         return String.fromCharCode(code);
     }
 
+	//mrennie https://bugs.eclipse.org/bugs/show_bug.cgi?id=433893
     function getEscapedIdentifier() {
         var ch, id;
 
         ch = source.charCodeAt(index++);
         id = String.fromCharCode(ch);
-
+		
         // '\u' (char #92, char #117) denotes an escaped character.
         if (ch === 92) {
             if (source.charCodeAt(index) !== 117) {
-                throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                throwErrorTolerant({}, Messages.UnexpectedToken, 'ILLEGAL');
             }
             ++index;
             ch = scanHexEscape('u');
             if (!ch || ch === '\\' || !isIdentifierStart(ch.charCodeAt(0))) {
-                throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                throwErrorTolerant({}, Messages.UnexpectedToken, 'ILLEGAL');
             }
             id = ch;
         }
-
         while (index < length) {
             ch = source.charCodeAt(index);
             if (!isIdentifierPart(ch)) {
@@ -563,17 +563,16 @@ parseStatement: true, parseSourceElement: true */
             }
             ++index;
             id += String.fromCharCode(ch);
-
             // '\u' (char #92, char #117) denotes an escaped character.
             if (ch === 92) {
-                id = id.substr(0, id.length - 1);
+            	id = id.slice(0, id.length-1);
                 if (source.charCodeAt(index) !== 117) {
-                    throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                	throwErrorTolerant({}, Messages.UnexpectedToken, 'ILLEGAL');
                 }
                 ++index;
                 ch = scanHexEscape('u');
                 if (!ch || ch === '\\' || !isIdentifierPart(ch.charCodeAt(0))) {
-                    throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                    throwErrorTolerant({}, Messages.UnexpectedToken, 'ILLEGAL');
                 }
                 id += ch;
             }
@@ -2088,8 +2087,8 @@ parseStatement: true, parseSourceElement: true */
 		if(extra.errors) {
 			var token = advance();
 	        if(token.value === ':') {
-	        	token = lex(); // eat the ':' so the assignment parsing starts on the correct index
 	        	try {
+	        		token = lex(); // eat the ':' so the assignment parsing starts on the correct index
 	            	return delegate.markEnd(delegate.createProperty('init', id, parseAssignmentExpression()));
 	        	} catch(e) {
 	        		//trap the exception and ignore the broken property
@@ -2169,14 +2168,18 @@ parseStatement: true, parseSourceElement: true */
 
             if (!match('}')) {
             	//mrennie https://bugs.eclipse.org/bugs/show_bug.cgi?id=432956
-            	var token = lookahead;
-            	if(token.type !== Token.Punctuator && token.value !== ',') {
-            		if(extra.tokens && extra.tokens.length > 0) {
-            			token = extra.tokens[extra.tokens.length-1];
-            		}
-            		throwErrorTolerant(token, Messages.MissingToken, ',');
+            	if(extra.errors) {
+	            	var token = lookahead;
+	            	if(token.type !== Token.Punctuator && token.value !== ',') {
+	            		if(extra.tokens && extra.tokens.length > 0) {
+	            			token = extra.tokens[extra.tokens.length-1];
+	            		}
+	            		throwErrorTolerant(token, Messages.MissingToken, ',');
+	            	} else {
+	            		lex();
+	            	}
             	} else {
-            		lex();
+            		expect(',');
             	}
             }
         }
@@ -4029,8 +4032,9 @@ parseStatement: true, parseSourceElement: true */
             } catch (e) {
 				pushError(e);
 				// Clean up un-popped end markers from failed parse
-				while (state.markerStack.length > initialHeight)
+				while (state.markerStack.length > initialHeight) {
 					delegate.markEndIf(null);
+				}
 				return null;
             }
         };

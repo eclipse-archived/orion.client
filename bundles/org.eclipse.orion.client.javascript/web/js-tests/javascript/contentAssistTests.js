@@ -2828,18 +2828,6 @@ define([
 			});
 	
 			//jsdoc test
-			it("test simple jsdoc14", function() {
-				var results = computeContentAssist(
-					"var xx;\n" +
-					"/** @return Number*/\n" +
-					"xx = function() { };\nx", "x"
-				);
-				return testProposals(results, [
-					["xx()", "xx : String"]
-				]);
-			});
-	
-			//jsdoc test
 			it("test simple jsdoc15", function() {
 				var results = computeContentAssist(
 					"var xx;\n" +
@@ -3660,17 +3648,6 @@ define([
 				"wind", "wind", null, jsOptionsAndGlobals);
 			return testProposals(results, [
 				["window", "window : Global"]
-			]);
-		});
-	
-		// SCRIPTED-100
-		it("test obj literal with underscore", function() {
-			var results = computeContentAssist(
-				"var obj = { _myFun : function() { this._/**/ } }", "_");
-	
-			return testProposals(results, [
-				// inferred as object type since invocation request is happening inside of object literal.
-				["_myFun", "_myFun : Object"]
 			]);
 		});
 	
