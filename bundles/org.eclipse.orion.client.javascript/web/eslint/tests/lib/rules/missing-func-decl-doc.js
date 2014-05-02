@@ -19,14 +19,15 @@
 	assert = assert.assert /*chai*/ || assert;
 
 	var RULE_ID = "missing-doc";
+	var flagDecl = { rules: {} };
+	flagDecl.rules[RULE_ID] = [1, {decl: 1}];
 	
 	describe("missing-doc - function declaration", function() {
 		describe("should not flag", function() {
 			it("for root function declaration", function() {
 				var topic = "var v;\n/**foo*/function f() {};";
 		
-				var config = { rules: {} };
-				config.rules[RULE_ID] = [1, 'decl'];
+				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 0);
@@ -34,8 +35,7 @@
 			it("for excessive white space", function() {
 				var topic = "var v;\n/**foo*/\n\n\nfunction f() {};";
 		
-				var config = { rules: {} };
-				config.rules[RULE_ID] = [1, 'decl'];
+				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 0);
@@ -43,8 +43,7 @@
 			it("for line comment", function() {
 				var topic = "var v;\n//foo\nfunction f() {};";
 		
-				var config = { rules: {} };
-				config.rules[RULE_ID] = [1, 'decl'];
+				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 0);
@@ -52,8 +51,7 @@
 			it("for excessive space with line comment", function() {
 				var topic = "var v;\n//foo\n\n\n\nfunction f() {};";
 		
-				var config = { rules: {} };
-				config.rules[RULE_ID] = [1, 'decl'];
+				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 0);
@@ -61,8 +59,7 @@
 			it("for inner block comment", function() {
 				var topic = "var v;\n/***/function o() {/***/function f() {};};";
 		
-				var config = { rules: {} };
-				config.rules[RULE_ID] = [1, 'decl'];
+				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 0);
@@ -70,8 +67,7 @@
 			it("for excessive space with inner block comment", function() {
 				var topic = "var v;\n/***/function o() {/***/\n\n\n\nfunction f() {};};";
 		
-				var config = { rules: {} };
-				config.rules[RULE_ID] = [1, 'decl'];
+				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 0);
@@ -79,8 +75,7 @@
 			it("for inner line comment", function() {
 				var topic = "var v;\n/***/function o() {//foo\nfunction f() {};};";
 		
-				var config = { rules: {} };
-				config.rules[RULE_ID] = [1, 'decl'];
+				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 0);
@@ -88,8 +83,7 @@
 			it("for excessive space with inner line comment", function() {
 				var topic = "var v;\n/***/function o() {//foo\n\n\n\nfunction f() {};};";
 		
-				var config = { rules: {} };
-				config.rules[RULE_ID] = [1, 'decl'];
+				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 0);
@@ -99,8 +93,7 @@
 			it("for function f", function() {
 				var topic = "var foo;\nfunction f() {};";
 		
-				var config = { rules: {} };
-				config.rules[RULE_ID] = [1, 'decl'];
+				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 1);
@@ -111,8 +104,7 @@
 			it("for inner function declaration", function() {
 				var topic = "var foo;\n/***/\nfunction o() {\nfunction f() {}; };";
 		
-				var config = { rules: {} };
-				config.rules[RULE_ID] = [1, 'decl'];
+				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 1);
@@ -127,14 +119,22 @@
 				 */
 				var topic = "/***/function f() {};";
 		
-				var config = { rules: {} };
-				config.rules[RULE_ID] = [1, 'decl'];
+				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 1);
 				assert.equal(messages[0].ruleId, RULE_ID);
 				assert.equal(messages[0].message, "Missing documentation for function \'f\'");
 				assert.equal(messages[0].node.type, "Identifier");
+			});
+			it("should include {type: 'decl'} as related object", function() {
+				var topic = "var foo;\nfunction f() {};";
+
+				var config = flagDecl;
+
+				var messages = eslint.verify(topic, config);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].related.type, "decl");
 			});
 		});
 	});

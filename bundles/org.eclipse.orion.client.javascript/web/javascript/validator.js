@@ -27,8 +27,7 @@ define([
 			"no-use-before-define": 1, //$NON-NLS-0$
 			"semi": 1, //$NON-NLS-0$
 			"no-extra-semi": 1, //$NON-NLS-0$
-			"missing-func-decl-doc": [0, 'decl'], //$NON-NLS-0$ //$NON-NLS-1$
-			"missing-func-expr-doc": [0, 'expr'], //$NON-NLS-0$ //$NON-NLS-1$
+			"missing-doc": [1, {decl: 0, expr: 0}], //$NON-NLS-0$
 			'no-debugger' : 1, //$NON-NLS-0$
 			'no-dupe-keys' : 2, //$NON-NLS-0$ 
 			'no-eval' : 0, //$NON-NLS-0$ 
@@ -46,15 +45,22 @@ define([
 		 * @function
 		 * @private
 		 * @param {String} ruleId The id of the rule to change
-		 * @param {Number} value The vlaue to set the rule to
+		 * @param {Number} value The value to set the rule to
+		 * @param {Object} [key] Optional key to use for complex rule configuration.
 		 */
-		setOption: function(ruleId, value) {
+		setOption: function(ruleId, value, key) {
 			if (typeof value === "number") {
-				if(Array.isArray(this.rules[ruleId])) {
-					this.rules[ruleId][0] = value;
+				var ruleConfig = this.rules[ruleId];
+				if(Array.isArray(ruleConfig)) {
+					if (key) {
+						ruleConfig[1] = ruleConfig[1] || {};
+						ruleConfig[1][key] = value;
+					} else {
+						ruleConfig[0] = value;
+					}
 				}
 				else {
-					this.rules[ruleId] = value;
+					ruleConfig = value;
 				}
 			}
 		}
@@ -79,11 +85,19 @@ define([
 	 */
 	function getSeverity(prob) {
 		var val = 2;
-		if(Array.isArray(config.rules[prob.ruleId])) {
-			val = config.rules[prob.ruleId][0];
+		var ruleConfig = config.rules[prob.ruleId];
+		if(Array.isArray(ruleConfig)) {
+			// Hack for missing-doc which overloads the prob.related object to expose which subrule
+			// generated the problem
+			var related = prob.related, ruleType = related && related.type;
+			if (prob.ruleId === "missing-doc" && ruleConfig[1][ruleType] !== undefined) {
+				val = ruleConfig[1][ruleType];
+			} else {
+				val = ruleConfig[0];
+			}
 		}
 		else {
-			val = config.rules[prob.ruleId];
+			val = ruleConfig;
 		}
 		switch (val) {
 			case 1: return "warning"; //$NON-NLS-0$
@@ -104,7 +118,7 @@ define([
 			// Error produced by eslint
 			start = e.node.range[0];
 			end = e.node.range[1];
-			if (e.related) {
+			if (e.related && e.related.range) {
 				// Flagging the entire node is distracting. Just flag the bad token.
 				var relatedToken = e.related;
 				start = relatedToken.range[0];
@@ -227,7 +241,7 @@ define([
 				// Warn about ESLint failure
 				problems.push({
 					start: 0,
-					description: "ESLint could not validate this file because an error occurred: " + error.toString(),
+					description: "Orion could not validate this file because an error occurred: " + error.toString(),
 					severity: "error" //$NON-NLS-0$
 				});
 			}
@@ -277,8 +291,8 @@ define([
 			}
 			// TODO these option -> setting mappings are becoming hard to manage
 			// And they must be kept in sync with javascriptPlugin.js
-			config.setOption("missing-func-decl-doc", properties.validate_func_decl); //$NON-NLS-0$
-			config.setOption("missing-func-expr-doc", properties.validate_func_expr); //$NON-NLS-0$
+			config.setOption("missing-doc", properties.validate_func_decl, "decl"); //$NON-NLS-0$ // missing-func-decl-doc
+			config.setOption("missing-doc", properties.validate_func_expr, "expr"); //$NON-NLS-0$ // missing-func-expr-doc
 			config.setOption("eqeqeq", properties.validate_eqeqeq); //$NON-NLS-0$
 			config.setOption("no-redeclare", properties.validate_no_redeclare); //$NON-NLS-0$
 			config.setOption("no-undef", properties.validate_no_undef); //$NON-NLS-0$
