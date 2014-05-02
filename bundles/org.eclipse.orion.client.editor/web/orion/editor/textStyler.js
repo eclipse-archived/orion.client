@@ -12,7 +12,7 @@
 
 /*global define */
 
-define("orion/editor/textStyler", ['orion/editor/annotations'], function(mAnnotations) { //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eventTarget'], function(mAnnotations, mEventTarget) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	/*
 	 * Throughout textStyler "block" refers to a potentially multi-line token.
@@ -223,16 +223,17 @@ define("orion/editor/textStyler", ['orion/editor/annotations'], function(mAnnota
 			}
 			return fullBlock;
 		},
-		createBlock: function(bounds, styler, model, parent, pattern) {
+		createBlock: function(bounds, styler, model, parent, data) {
+			/* for pattern-based matching data is a pattern */
 			return new Block(
 				bounds,
-				pattern ? pattern.pattern.name : null,
-				pattern ? pattern.pattern.id : null,
+				data ? data.pattern.name : null,
+				data ? data.pattern.id : null,
 				styler,
 				model,
 				parent,
 				function(newBlock) {
-					newBlock.pattern = pattern;
+					newBlock.pattern = data;
 					newBlock.linePatterns = [];
 					newBlock.blockPatterns = [];
 					newBlock.enclosurePatterns = {};
@@ -398,6 +399,8 @@ define("orion/editor/textStyler", ['orion/editor/annotations'], function(mAnnota
 				var regex = current.regex || current.regexBegin;
 				regex.lastIndex = regex.oldLastIndex;
 			});
+		},
+		setStyler: function(/*styler*/) {	
 		},
 		verifyBlock: function(baseModel, text, ancestorBlock, changeCount) {
 			var result = null;
@@ -819,8 +822,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations'], function(mAnnota
 		this._view = view;
 		this._annotationModel = annotationModel;
 		this._stylerAdapter = stylerAdapter;
+		this._stylerAdapter.setStyler(this);
 		this._accessor = new TextStylerAccessor(this);
-		this._bracketAnnotations = undefined;
+		this._bracketAnnotations;
 
 		var self = this;
 		this._listener = {
@@ -1168,6 +1172,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations'], function(mAnnota
 						if (current.start - index) {
 							styles.push({start: index, end: current.start, style: blockStyleName});
 						}
+						if (current.mergeable) {
+							current.style += "," + blockStyleName;
+						}
 						styles.push(current);
 						index = current.end;
 					});
@@ -1355,6 +1362,21 @@ define("orion/editor/textStyler", ['orion/editor/annotations'], function(mAnnota
 					}
 				}
 			}
+
+			if (!newBlocks.length) {
+				this.dispatchEvent({
+					type: "BlocksChanged",
+					old: [ancestorBlock],
+					new: [ancestorBlock]
+				});
+			} else {
+				this.dispatchEvent({
+					type: "BlocksChanged",
+					old: blocks.slice(blockStart, blockEnd),
+					new: newBlocks
+				});
+			}
+
 			var args = [blockStart, blockEnd - blockStart].concat(newBlocks);
 			Array.prototype.splice.apply(blocks, args);
 			if (redraw) {
@@ -1538,8 +1560,11 @@ define("orion/editor/textStyler", ['orion/editor/annotations'], function(mAnnota
 		_tabPattern: {regex: /\t/g, style: {styleClass: "punctuation separator tab", unmergeable: true}} //$NON-NLS-0$
 	};
 
+	mEventTarget.EventTarget.addMixin(TextStyler.prototype);
+
 	return {
 		TextStyler: TextStyler,
+		Block: Block,
 		createPatternBasedAdapter: createPatternBasedAdapter
 	};
 });

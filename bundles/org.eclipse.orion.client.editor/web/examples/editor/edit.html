@@ -34,18 +34,17 @@ pre {
 	});
 	require(["orion/editor/edit"], function(edit) {
 		edit({
-			contentType: "text/x-ruby"
+			contentType: "application/javascript"
 		});
 	});
 </script>
 </head>
 <body spellcheck="false">
-<pre id="editor">
-    def start
-=begin
-      UI.puts "Welcome to Ruby Warrior"
-=end
-      if File.exist?(Config.path_prefix + '/.profile')
-</pre>
+<pre id="editor">/*
+ * This is an Orion editor sample.
+ */
+function () {
+	var a = 'hi there!';
+}</pre>
 </body>
 </html>

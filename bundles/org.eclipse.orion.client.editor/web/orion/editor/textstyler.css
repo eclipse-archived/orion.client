@@ -61,30 +61,36 @@
 	font-weight: bold;
 }
 
-.markup.heading, .markup-heading {
+.markup.bold {
 	font-weight: bold;
-	color: purple;
+}
+
+.markup.heading, .markup-heading {
+	color: blue;
+}
+
+.markup.italic {
+	font-style: italic;
 }
 
 .markup.list {
-	color: beige;
+	color: #CC4C07;
 }
 
 .markup.other.separator {
-	color: crimson;
+	color: #3C802C;
 }
 
 .markup.quote, .markup-quote {
-	font-style: italic;
-	color: aqua;
+	color: #446fbd;
 }
 
 .markup.raw {
-	color: chocolate;
+	font-family: monospace
 }
 
 .markup.underline.link {
-	color: DarkGoldenRod;
+	text-decoration: underline;
 }
 
 .meta.annotation.currentLine {
