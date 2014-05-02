@@ -229,14 +229,14 @@ define([
 		 * @since 6.0
 		 */
 		_validateAst: function(ast) {
-			var eslintErrors = [], error;
+			var eslintErrors = [], error, parseErrors = [], problems = [];
 			try {
 				eslintErrors = eslint.verify(ast, config);
+				parseErrors = this._extractParseErrors(ast);
+				problems = this._filterProblems(parseErrors, eslintErrors).map(toProblem);
 			} catch (e) {
 				error = e;
 			}
-			var parseErrors = this._extractParseErrors(ast);
-			var problems = this._filterProblems(parseErrors, eslintErrors).map(toProblem);
 			if (error && !parseErrors.length) {
 				// Warn about ESLint failure
 				problems.push({
