@@ -11,13 +11,18 @@
 /*global widgets orion window console define localStorage ActiveXObject DOMParser*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme'], 
-	function(messages, mTextTheme) {
+define([
+		'i18n!orion/settings/nls/messages',
+		'orion/editor/textTheme',
+		'orion/widgets/themes/ThemeVersion'
+], function(messages, mTextTheme, THEMES_VERSION) {
 
-		/**
-		 * Version string for theme data. Please update this string whenever you change the style of a themable element.
-		 */
-		var THEMES_VERSION = "6.0";
+	// *******************************************************************************
+	//
+	// If you change any styles in this file, you must increment the version number
+	// in ThemeVersion.js.
+	//
+	// *******************************************************************************
 
 		/* Synchronizing colors and styles for HTML, CSS and JS files like this ...
 	
