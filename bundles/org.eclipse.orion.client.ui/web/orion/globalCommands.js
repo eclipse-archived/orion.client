@@ -745,40 +745,53 @@ define([
 
 		commandRegistry.addCommand(openResourceCommand);
 		commandRegistry.registerCommandContribution("globalActions", "orion.openResource", 100, null, true, new KeyBinding.KeyBinding('f', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
-		// Toggle trim command
-		var toggleBanner = new mCommands.Command({
-			name: messages["Toggle banner and footer"],
-			tooltip: messages["Hide or show the page banner and footer"],
-			id: "orion.toggleTrim", //$NON-NLS-0$
-			callback: function () {
-				var header = lib.node("banner"); //$NON-NLS-0$
-				var footer = lib.node("footer"); //$NON-NLS-0$
-				var sideMenu = lib.node("sideMenu"); //$NON-NLS-0$
-				var content = lib.$(".content-fixedHeight"); //$NON-NLS-0$
-				var maximized = header.style.visibility === "hidden"; //$NON-NLS-0$
-				if (maximized) {
-					header.style.visibility = "visible"; //$NON-NLS-0$
-					footer.style.visibility = "visible"; //$NON-NLS-0$
-					content.classList.remove("content-fixedHeight-maximized"); //$NON-NLS-0$
-					if (sideMenu) {
-						sideMenu.classList.remove("sideMenu-maximized"); //$NON-NLS-0$
-					}
-				} else {
-					header.style.visibility = "hidden"; //$NON-NLS-0$
-					footer.style.visibility = "hidden"; //$NON-NLS-0$
-					content.classList.add("content-fixedHeight-maximized"); //$NON-NLS-0$
-					if (sideMenu) {
-						sideMenu.classList.add("sideMenu-maximized"); //$NON-NLS-0$
-					}
-				}
-				getGlobalEventTarget().dispatchEvent({type: "toggleTrim", maximized: !maximized}); //$NON-NLS-0$
-				return true;
+		var noBanner = false;
+		var toggleBannerFunc = function () {
+			if (noBanner) {
+				return false;
 			}
-		});
-		commandRegistry.addCommand(toggleBanner);
-		commandRegistry.registerCommandContribution("globalActions", "orion.toggleTrim", 100, null, true, new KeyBinding.KeyBinding("m", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var header = lib.node("banner"); //$NON-NLS-0$
+			var footer = lib.node("footer"); //$NON-NLS-0$
+			var sideMenu = lib.node("sideMenu"); //$NON-NLS-0$
+			var content = lib.$(".content-fixedHeight"); //$NON-NLS-0$
+			var maximized = header.style.visibility === "hidden"; //$NON-NLS-0$
+			if (maximized) {
+				header.style.visibility = "visible"; //$NON-NLS-0$
+				footer.style.visibility = "visible"; //$NON-NLS-0$
+				content.classList.remove("content-fixedHeight-maximized"); //$NON-NLS-0$
+				if (sideMenu) {
+					sideMenu.classList.remove("sideMenu-maximized"); //$NON-NLS-0$
+				}
+			} else {
+				header.style.visibility = "hidden"; //$NON-NLS-0$
+				footer.style.visibility = "hidden"; //$NON-NLS-0$
+				content.classList.add("content-fixedHeight-maximized"); //$NON-NLS-0$
+				if (sideMenu) {
+					sideMenu.classList.add("sideMenu-maximized"); //$NON-NLS-0$
+				}
+			}
+			getGlobalEventTarget().dispatchEvent({type: "toggleTrim", maximized: !maximized}); //$NON-NLS-0$
+			return true;
+		};
+			
 
+		var noTrim = window.orionNoTrim || false;
+		if (noTrim) {
+			toggleBannerFunc();
+			noBanner = true;
+			sideMenu.hideMenu();
+		} else {
+			// Toggle trim command
+			var toggleBanner = new mCommands.Command({
+				name: messages["Toggle banner and footer"],
+				tooltip: messages["Hide or show the page banner and footer"],
+				id: "orion.toggleTrim", //$NON-NLS-0$
+				callback: toggleBannerFunc
+			});
+			commandRegistry.addCommand(toggleBanner);
+			commandRegistry.registerCommandContribution("globalActions", "orion.toggleTrim", 100, null, true, new KeyBinding.KeyBinding("m", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		}
+		
 		// Open configuration page, Ctrl+Shift+F1
 		var configDetailsCommand = new mCommands.Command({
 			name: messages["System Configuration Details"],
