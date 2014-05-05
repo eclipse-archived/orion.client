@@ -3117,6 +3117,18 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				this.onBlur({type: "Blur"}); //$NON-NLS-0$
 			}
 		},
+		_handleCompositionStart: function (e) {
+			if (this._ignoreEvent(e)) { return; }
+			this._startIME();
+			if (this._mutationObserver) {
+				this._mutationObserver.disconnect();
+				this._mutationObserver = null;
+			}
+		},
+		_handleCompositionEnd: function (e) {
+			if (this._ignoreEvent(e)) { return; }
+			this._commitIME(e.data);
+		},
 		_handleContextMenu: function (e) {
 			if (this._ignoreEvent(e)) { return; }
 			if (util.isIE && this._lastMouseButton === 3) {
@@ -4979,25 +4991,29 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._setSelection(selection, true);
 			return true;
 		},
-		_commitIME: function () {
+		_commitIME: function (insertText) {
 			if (this._imeOffset === -1) { return; }
-			// make the state of the IME match the state the view expects it be in
-			// when the view commits the text and IME also need to be committed
-			// this can be accomplished by changing the focus around
-			this._scrollDiv.focus();
-			this._clientDiv.focus();
-			
 			var model = this._model;
 			var lineIndex = model.getLineAtOffset(this._imeOffset);
 			var lineStart = model.getLineStart(lineIndex);
 			var line = this._getLineNode(lineIndex);
-			var newText = this._getDOMText(line).text;
-			var oldText = model.getLine(lineIndex);
-			var start = this._imeOffset - lineStart;
-			var end = start + newText.length - oldText.length;
-			if (start !== end) {
-				var insertText = newText.substring(start, end);
-				if (!this._doContent(insertText) && util.isFirefox) {
+			if (!insertText) {
+				// make the state of the IME match the state the view expects it be in
+				// when the view commits the text and IME also need to be committed
+				// this can be accomplished by changing the focus around
+				this._scrollDiv.focus();
+				this._clientDiv.focus();
+				
+				var newText = this._getDOMText(line).text;
+				var oldText = model.getLine(lineIndex);
+				var start = this._imeOffset - lineStart;
+				var end = start + newText.length - oldText.length;
+				if (start !== end) {
+					insertText = newText.substring(start, end);
+				}
+			}
+			if (insertText) {
+				if (!this._doContent(insertText) && !util.isWebkit) {
 					line.lineRemoved = true;
 					this._queueUpdate();
 				}
@@ -5729,6 +5745,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					} else {
 						handlers.push({target: this._clientDiv, type: "DOMCharacterDataModified", handler: function (e) { return self._handleDataModified(e ? e : window.event); }}); //$NON-NLS-0$
 					}
+					handlers.push({target: this._clientDiv, type: "compositionstart", handler: function (e) { return self._handleCompositionStart(e ? e : window.event); }}); //$NON-NLS-0$
+					handlers.push({target: this._clientDiv, type: "compositionend", handler: function (e) { return self._handleCompositionEnd(e ? e : window.event); }}); //$NON-NLS-0$
 				}
 				if (this._overlayDiv) {
 					handlers.push({target: this._overlayDiv, type: "mousedown", handler: function(e) { return self._handleMouseDown(e ? e : window.event);}}); //$NON-NLS-0$
