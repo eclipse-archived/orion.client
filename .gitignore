@@ -4,3 +4,6 @@ target
 /doc/org.eclipse.orion.doc.isv/jsdoc/files.html
 /doc/org.eclipse.orion.doc.isv/jsdoc/index.html
 /doc/org.eclipse.orion.doc.isv/jsdoc/symbols/
+built-js
+optimized
+staging
