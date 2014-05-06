@@ -280,7 +280,7 @@ define([
 		 * This method is the actual implementation for collecting parameters and invoking a callback.
 		 * "forceCollect" specifies whether we should always collect parameters or consult the parameters description to see if we should.
 		 */
-		_collectAndInvoke: function(commandInvocation, forceCollect) {
+		_collectAndInvoke: function(commandInvocation, forceCollect, cancelCallback) {
 			if (commandInvocation) {
 				// Establish whether we should be trying to collect parameters. 
 				if (this._parameterCollector && commandInvocation.parameters && commandInvocation.parameters.hasParameters() && 
@@ -290,7 +290,7 @@ define([
 					// Consult shouldCollectParameters() again to verify we still need collection. Due to updateParameters(), the CommandInvocation
 					// could have dynamically set its parameters to null (meaning no collection should be done).
 					if (commandInvocation.parameters.shouldCollectParameters()) {
-						collecting = this._parameterCollector.collectParameters(commandInvocation);
+						collecting = this._parameterCollector.collectParameters(commandInvocation,cancelCallback);
 						// The parameter collector cannot collect.  We will do a default implementation using a popup.
 						if (!collecting) {
 							var tooltip = new mTooltip.Tooltip({
@@ -309,7 +309,7 @@ define([
 									originalFocusNode.focus();
 								}
 								tooltip.destroy();
-							})(parameterArea);
+							}, cancelCallback)(parameterArea);
 							tooltip.show();
 							window.setTimeout(function() {
 								focusNode.focus();
@@ -343,8 +343,8 @@ define([
 		 *
 		 * @param {orion.commands.CommandInvocation} commandInvocation the current invocation of the command 
 		 */
-		collectParameters: function(commandInvocation) {
-			this._collectAndInvoke(commandInvocation, true); 
+		collectParameters: function(commandInvocation,cancelCallback) {
+			this._collectAndInvoke(commandInvocation, true, cancelCallback); 
 		},
 		
 		/**
