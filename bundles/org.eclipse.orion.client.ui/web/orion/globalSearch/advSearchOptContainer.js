@@ -100,7 +100,6 @@ define([
 			}, this);
 
 			return {keyword: this._searchBox.value,
-					sort: this._sortBy.options[this._sortBy.selectedIndex].value,
 					rows: 40,
 					start: 0,
 					replace:this._replaceBox.value ? this._replaceBox.value : undefined,
@@ -113,7 +112,6 @@ define([
 		
 		loadSearchParams: function(searchParams){
 			this._searchParams = searchParams;
-			this._locationName = null;
 			//TODO handle resource parameter containing multiple resources once multiple file/folder search is enabled (see getOptions())
 			this._rootURL = this.fileClient.fileServiceRootURL(this._searchParams.resource);
 			
@@ -122,22 +120,12 @@ define([
 	        	if (this._searchScopeExplorer) {
 	        		this._searchScopeExplorer.loadRoot(this._rootURL);
 	        	}
-	            this._locationName = messages["root"]; //$NON-NLS-0$
-	            if(this._searchNameBox){
-					this._searchNameBox.value = this._getDefaultSaveName();
-				}
 			}.bind(this);
 			
 			this.dispatchEvent({type: "rootChanged", root: this._rootURL}); //$NON-NLS-0$
 	        if ((this._searchParams.resource.length > 0) && (this._rootURL !== this._searchParams.resource)) {
 	            this._serviceRegistry.getService("orion.page.progress").progress(this.fileClient.read(this._searchParams.resource, true), "Getting file metadata " + this._searchParams.resource).then( //$NON-NLS-1$ //$NON-NLS-0$
 	            function(meta) {
-	                var parentName = meta.Parents ? mSearchUtils.fullPathNameByMeta(meta.Parents) : "";
-	                this._locationName = parentName.length === 0 ? meta.Name : parentName + "/" + meta.Name; //$NON-NLS-0$
-		            if(this._searchNameBox){
-						this._searchNameBox.value = this._getDefaultSaveName();
-					}
-					
 					if (this._searchScopeSection) {
 						this._searchLocations = [this._searchParams.resource];
 						
@@ -170,13 +158,13 @@ define([
 					this._fileTypes.selectedIndex = x;
 					break;
 			    }
-			}		
-			for (x = 0; x < this._sortBy.options.length; x++) {
-			    if(this._sortBy.options[x].value === this._searchParams.sort){
-					this._sortBy.selectedIndex = x;
-					break;
-			    }
-			}		
+			}
+			
+			if (undefined !== this._searchParams.replace) {
+				this._showReplaceField();
+			} else {
+				this._hideReplaceField();
+			}
 		},
 	
 		render: function(){
@@ -209,31 +197,11 @@ define([
 				mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.keyword, options);
 			}
 		},
-		
-	    _saveSearch: function() {
-			if(this._searchBox.value && this._searchNameBox.value){
-				var searchParams = this.getOptions();
-			    var query = mSearchUtils.generateSearchHref(searchParams).split("#")[1]; //$NON-NLS-0$
-				this._serviceRegistry.getService("orion.core.savedSearches").addSearch(this._searchNameBox.value, query); //$NON-NLS-0$
-			}
-	    },
-	
-	    _getDefaultSaveName: function() {
-	        if (this._searchBox && this._searchBox.value) {
-	            var qName = "\'" + this._searchBox.value + "\' in "; //$NON-NLS-1$ //$NON-NLS-0$
-	            var locName = messages["root"]; //$NON-NLS-0$
-	            if(this._locationName){
-					locName = this._locationName;
-	            }
-	            return qName + locName;
-	        } 
-	        return "";
-	    },
-	
+
 	    _initCompletion: function() {
 			//Required. Reading recent&saved search from user preference. Once done call the uiCallback
 			var defaultProposalProvider = function(uiCallback){
-				mSearchUtils.getMixedSearches(this._serviceRegistry, true, false, function(searches){
+				mSearchUtils.getMixedSearches(this._serviceRegistry, false, false, function(searches){
 					var i, fullSet = [], hasSavedSearch = false, hasRecentSearch = false;
 					for (i in searches) {
 						if(searches[i].label && searches[i].value){
@@ -296,16 +264,24 @@ define([
 				}.bind(this),
 				deleteToolTips: messages['Click or use delete key to delete the search term']
 			});
+			
+			var previousSearchButton = lib.node("previousSearchButton");
+			previousSearchButton.addEventListener("click", function(event){
+				this._searchBox.focus();
+				this._completion._proposeOn();
+				lib.stop(event);
+			}.bind(this));
 	    },
 	    
 		_initControls: function(){
 			this._searchBox = document.getElementById("advSearchInput"); //$NON-NLS-0$
+			this._searchButtonWrapper = document.getElementById("advSearchCmd"); //$NON-NLS-0$
 			this._replaceBox = document.getElementById("advReplaceInput"); //$NON-NLS-0$
-			this._searchNameBox = document.getElementById("advSaveSearchInput"); //$NON-NLS-0$
 			this._fileTypes = document.getElementById("advSearchTypes"); //$NON-NLS-0$
-			this._sortBy = document.getElementById("advSortBy"); //$NON-NLS-0$
 			this._caseSensitiveCB = document.getElementById("advSearchCaseSensitive"); //$NON-NLS-0$
 			this._regExCB = document.getElementById("advSearchRegEx"); //$NON-NLS-0$
+			this._toggleReplaceLink = document.getElementById("toggleReplaceLink");
+			this._replaceWrapper = document.getElementById("replaceInputFieldWrapper");
 			//Load file types content type provider
 			var fTypes = [ {label: messages["All types"], value: mSearchUtils.ALL_FILE_TYPE} ];
 			for(var i = 0; i < this.contentTypesCache.length; i++){
@@ -322,15 +298,7 @@ define([
 			    this._fileTypes.appendChild(option);
 			    option.value = fType.value;
 			}.bind(this));
-			var sortByData = [{label: messages["Path name"], value: "Path asc"}, {label: messages["File name"], value: "NameLower asc"}]; //$NON-NLS-1$ //$NON-NLS-0$
-			sortByData.forEach(function(sortBy) {
-			    var option = document.createElement('option'); //$NON-NLS-0$
-			    var text = document.createTextNode(sortBy.label);
-			    option.appendChild(text);
-			    this._sortBy.appendChild(option);
-			    option.value = sortBy.value;
-			}.bind(this));
-			
+
 			this._init = true;
 			this._loadSearchParams();
 			this._initCompletion();
@@ -344,11 +312,6 @@ define([
 					this._submitSearch();
 				} 
 			}.bind(this));
-			
-			this._searchBox.addEventListener("change", function(e) { //$NON-NLS-0$
-				this._searchNameBox.value = this._getDefaultSaveName();
-			}.bind(this));
-			
 			
 			this._replaceBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				var keyCode= e.charCode || e.keyCode;
@@ -378,10 +341,9 @@ define([
 	            }
 	        });
 	
-	        var previewCurrentPageCommand = new mCommands.Command({
-	            name: messages['Replace'],
-	            //tooltip: messages["Replace all matches with..."],
-	            id: "orion.globalSearch.previewCurrentPage", //$NON-NLS-0$
+	        var replaceCommand = new mCommands.Command({
+	            name: messages['Replace...'],
+	            id: "orion.globalSearch.replace", //$NON-NLS-0$
 	            callback: function(data) {
 	                this._replacePreview();
 	            }.bind(this),
@@ -390,17 +352,6 @@ define([
 	            }
 	        });
 			
-	        var saveSearchCommand = new mCommands.Command({
-	            name: messages["Save"],
-	            tooltip: messages["Save the current search"],
-	            id: "orion.globalSearch.saveSearch", //$NON-NLS-0$
-	            callback: function(data) {
-	                this._saveSearch();
-	            },
-	            visibleWhen: function(item) {
-	                return true;
-	            }
-	        });
 			/*
 			//Init the "More..." option section
 			var tableNode = lib.node('moreOptions'); //$NON-NLS-0$
@@ -416,33 +367,34 @@ define([
 			});
 			*/
 			this._commandService.addCommand(searchCommand);	
-			this._commandService.addCommand(previewCurrentPageCommand);	
-			this._commandService.addCommand(saveSearchCommand);	
+			this._commandService.addCommand(replaceCommand);	
 	        this._commandService.registerCommandContribution("advSearchCmd", "orion.globalSearch.search", 1);//$NON-NLS-1$ //$NON-NLS-0$
 	        var domWrapperList = [];
 	        this._commandService.renderCommands("advSearchCmd", "advSearchCmd", this, this, "button", null, domWrapperList); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	        domWrapperList[0].domNode.classList.add("search-button"); //$NON-NLS-0$
-	        this._commandService.registerCommandContribution("advReplacePreviewCmd", "orion.globalSearch.previewCurrentPage", 1);//$NON-NLS-1$ //$NON-NLS-0$
+	        domWrapperList[0].domNode.classList.remove("commandMargins"); //$NON-NLS-0$
+	        this._commandService.registerCommandContribution("advReplacePreviewCmd", "orion.globalSearch.replace", 1);//$NON-NLS-1$ //$NON-NLS-0$
 			domWrapperList = [];
 	        this._commandService.renderCommands("advReplacePreviewCmd", "advReplacePreviewCmd", this, this, "button", null, domWrapperList); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	        domWrapperList[0].domNode.classList.add("search-button"); //$NON-NLS-0$
-	        this._commandService.registerCommandContribution("advSaveSearchCmd", "orion.globalSearch.saveSearch", 1);//$NON-NLS-1$ //$NON-NLS-0$
-			domWrapperList = [];
-	        this._commandService.renderCommands("advSaveSearchCmd", "advSaveSearchCmd", this, this, "button", null, domWrapperList); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	        domWrapperList[0].domNode.classList.add("search-button"); //$NON-NLS-0$
+	        domWrapperList[0].domNode.classList.remove("commandMargins"); //$NON-NLS-0$
+	        
+	        if ("none" === this._replaceWrapper.style.display) {
+	        	this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$	
+	        }
+	        this._toggleReplaceLink.addEventListener("click", this._toggleReplaceFieldVisibility.bind(this)); //$NON-NLS-1$ //$NON-NLS-0$
 	        
 	        this._initSearchScope();
 		},
 		
 		_initHTMLLabels: function(){
-			//document.getElementById("advSearchLabel").appendChild(document.createTextNode(messages["Files that contain:"])); //$NON-NLS-0$ //$NON-NLS-0$
 			document.getElementById("advSearchInput").placeholder = messages["Type a search term"]; //$NON-NLS-0$ //$NON-NLS-0$
-			document.getElementById("advReplaceInput").placeholder = messages["Type a replace term"]; //$NON-NLS-0$ //$NON-NLS-0$
-			document.getElementById("advSaveSearchInput").placeholder = messages["Type a name for the search"]; //$NON-NLS-0$ //$NON-NLS-0$
+			document.getElementById("advReplaceInput").placeholder = messages["Replace With"]; //$NON-NLS-0$ //$NON-NLS-0$
 			document.getElementById("advSearchTypeLabel").appendChild(document.createTextNode(messages["File type"])); //$NON-NLS-0$ //$NON-NLS-0$
 			document.getElementById("advSearchCaseSensitiveLabel").appendChild(document.createTextNode(messages["Case sensitive"])); //$NON-NLS-0$ //$NON-NLS-0$
 			document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expression"])); //$NON-NLS-0$ //$NON-NLS-0$
-			document.getElementById("advSortByLabel").appendChild(document.createTextNode(messages["Sort by"])); //$NON-NLS-0$ //$NON-NLS-0$
+			document.getElementById("previousSearchButton").title = messages["Show previous search terms"]; //$NON-NLS-0$ //$NON-NLS-0$
+			document.getElementById("advReplacePreviewCmd").title = messages["Show replacement preview"]; //$NON-NLS-0$ //$NON-NLS-0$
 		},
 		
 		_initSearchScope: function() {
@@ -503,6 +455,26 @@ define([
 			this._searchScopeSection.embedExplorer(this._searchScopeExplorer, scopeExplorerNode);	
 			this._searchScopeExplorer.setCommandsVisible(true, "singleSelection"); //$NON-NLS-0$ //TODO remove "singleSelection" once multiple selection is supported
 			this._searchScopeExplorer.loadRoot(this._rootURL);
+		},
+		
+		_toggleReplaceFieldVisibility: function () {
+			if ("none" === this._replaceWrapper.style.display) {
+				this._showReplaceField();
+			} else {
+				this._hideReplaceField();
+			}
+		},
+		
+		_showReplaceField: function() {
+			this._searchButtonWrapper.style.display = "none"; //$NON-NLS-0$
+			this._replaceWrapper.style.display = "inline-block"; //$NON-NLS-0$
+			this._toggleReplaceLink.innerHTML = messages["Hide Replace"]; //$NON-NLS-0$
+		},
+		
+		_hideReplaceField: function() {
+			this._searchButtonWrapper.style.display = "inline-block"; //$NON-NLS-0$
+			this._replaceWrapper.style.display = "none"; //$NON-NLS-0$
+			this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$
 		},
 		
 		_setSearchScopeTitle: function() {

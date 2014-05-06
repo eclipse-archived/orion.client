@@ -1012,7 +1012,7 @@ textarea.parameterInput {
 /* Search Scope section */
 .searchScope .sectionWrapper {
 	color: #222; /* same as globalSearch.css->.search-label */
-	margin: 0 5px;
+	margin: 0;
 }
 
 .searchScope .sectionWrapper.sectionClosed {
@@ -1022,7 +1022,7 @@ textarea.parameterInput {
 .searchScope .sectionTable {
 	background-color: white;
 	box-shadow: none;
-	margin: 2px 10px;
+	margin: 2px 5px;
 }
 
 .searchScope .sectionTable .mainNavColumn span{
@@ -1079,6 +1079,7 @@ button.scopeDeleteButton:hover {
 	width:100%;
 	position:relative;
 	overflow-y: auto;
+	overflow-x: auto;
 }
 
 .searchOutlineContainer .filesystemSwitcher .dropdownMenu {

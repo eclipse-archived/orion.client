@@ -13,10 +13,10 @@
 /*browser:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress','orion/dialogs',
-        'orion/commandRegistry', 'orion/searchOutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/globalCommands', 
-        'orion/contentTypes', 'orion/searchUtils', 'orion/PageUtil','orion/webui/littlelib'], 
-		function(messages, require, mBrowserCompatibility, mBootstrap, mStatus, mProgress, mDialogs, mCommandRegistry, mSearchOutliner, 
-				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes, mSearchUtils, PageUtil, lib) {
+        'orion/commandRegistry', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/globalCommands', 
+        'orion/contentTypes', 'orion/searchUtils', 'orion/PageUtil','orion/webui/littlelib', 'orion/globalSearch/advSearchOptContainer'], 
+		function(messages, require, mBrowserCompatibility, mBootstrap, mStatus, mProgress, mDialogs, mCommandRegistry, 
+				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes, mSearchUtils, PageUtil, lib, mAdvSearchOptContainer) {
 	
 	function setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchBuilder, searchParams, progress){
 		var searchLoc = searchParams.resource;
@@ -60,14 +60,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/browserCompatibility
 		var commandRegistry = new mCommandRegistry.CommandRegistry({ });
 		var progress = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 		// saved searches
-		new mSearchOutliner.SavedSearches({serviceRegistry: serviceRegistry});
 
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		var contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
-		
-		var searchOutliner = new mSearchOutliner.SearchOutliner({parent: "searchProgress", serviceRegistry: serviceRegistry, commandService: commandRegistry}); //$NON-NLS-0$
-		var searchBuilder = new mSearchOutliner.SearchBuilder({parent: "searchBuilder", searcher: searcher, serviceRegistry: serviceRegistry, commandService: commandRegistry}); //$NON-NLS-0$
+	
+		var searchOptionsContainer = new mAdvSearchOptContainer.AdvSearchOptContainer("searchBuilder", searcher, serviceRegistry, commandRegistry);
+		var searchBuilder = searchOptionsContainer.getRenderer();
 		
 		mGlobalCommands.generateBanner("orion-searchResults", serviceRegistry, commandRegistry, preferences, searcher, searcher, null, false); //$NON-NLS-0$
 		

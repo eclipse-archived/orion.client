@@ -27,7 +27,10 @@ define({
 	"Next": "Next",
 	"Previous": "Previous",
 	"Replace": "Replace",
+	"Replace...": "Replace...",
 	"Replace All": "Replace All",
+	"Show Replace": "Show Replace",
+	"Hide Replace": "Hide Replace",
 	"Search ${0}": "Search ${0}",
 	"Type a keyword or wild card to search in ": "Type a keyword or wild card to search in ",
 	"Search failed.": "Search failed.",
@@ -71,10 +74,7 @@ define({
 	"Replace All Matches": "Replace All Matches",
 	"No matches": "No matches",
 	"Rename": "Rename",
-	"My Saved Searches": "My Saved Searches",
-	"Save frequently used searches by choosing ${0} shown above.": "Save frequently used searches by choosing ${0} shown above.",
 	"Save frequently used searches by clicking on the ${0} button above.": "Save frequently used searches by clicking on the ${0} button above.",
-	"Files that contain:": "Files that contain:",
 	"Search": "Search",
 	"All types": "All types",
 	"File type": "File type",
@@ -83,12 +83,9 @@ define({
 	"Type a search term": "Type a search term",
 	"Type a replace term": "Type a replace term",
 	"Case sensitive": "Case sensitive",
-	"Sort by" : "Sort by",
 	"File name": "File name",
 	"Path name": "Path name",
 	"Save": "Save",
-	"Type a name for the search": "Type a name for the search",
-	"Save the current search": "Save the current search",
 	"Type filter text": "Type filter text",
 	"Scope Search": "Scoped Search",
 	"Open in Search page for this directory": "Open the Search page for this folder.",
@@ -100,5 +97,7 @@ define({
 	"Regular expression is on. You can click here or use options to turn it off - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>." : 
 	"Regular expression is on. You can click here or use options to turn it off - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>.",
 	"root": "root",
-	"Scope": "Scope"
+	"Scope": "Scope",
+	"Show previous search terms": "Show previous search terms",
+	"Show replacement preview": "Show replacement preview"
 });
