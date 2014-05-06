@@ -1381,7 +1381,7 @@ parseStatement: true, parseSourceElement: true */
             }
 
             // Check for possible additional trailing comments.
-            peek();
+            //peek();
 
             for (i = 0; i < extra.pendingComments.length; ++i) {
                 attacher = extra.pendingComments[i];
