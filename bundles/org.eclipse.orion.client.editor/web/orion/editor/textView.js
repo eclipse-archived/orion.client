@@ -1348,6 +1348,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var lineIndex = this.lineIndex;
 			var result = 0, range, length;
 			var lineOffset = model.getLineStart(lineIndex);
+			var lineText = model.getLine(lineIndex);
+			var lineStart = model.getLineStart(lineIndex);
 			var document = child.ownerDocument;
 			var lineChild;
 			var step = data.count < 0 ? -1 : 1;
@@ -1396,6 +1398,18 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					lineChild = lineChild.nextSibling;
 				}
 			}
+			var offsetInLine = result - lineStart;
+			c = lineText.charCodeAt(offsetInLine);
+			// Handle Unicode surrogates
+			if (0xDC00 <= c && c <= 0xDFFF) {
+				if (offsetInLine > 0) {
+					c = lineText.charCodeAt(offsetInLine - 1);
+					if (0xD800 <= c && c <= 0xDBFF) {
+						offsetInLine += step;
+					}
+				}
+			}
+			result = offsetInLine + lineStart;
 			data.count -= step;
 			return result;
 		},
