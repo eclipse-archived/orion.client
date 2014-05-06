@@ -377,10 +377,12 @@ define([
 		 * @memberof javascript.Finder
 		 * @param {Number} offset The offset into the source file
 		 * @param {Object} ast The AST to search
+		 * @param {Object} options The optional options
 		 * @returns The AST node at the given offset or <code>null</code> if it could not be computed.
 		 */
-		findNode: function(offset, ast) {
+		findNode: function(offset, ast, options) {
 			var found = null;
+			var parents = options && options.parents ? [] : null;
 			if(offset != null && offset > -1 && ast) {
 				Estraverse.traverse(ast, {
 					/**
@@ -391,13 +393,31 @@ define([
 							//only check nodes that are typed, we don't care about any others
 							if(node.range[0] <= offset) {
 								found = node;
-							}
-							else {
+								if(parents) {
+									parents.push(node);
+								}
+							} else {
+								if(parents && parents.length > 0) {
+									var p = parents[parents.length-1];
+									if(p.range[0] === found.range[0] && p.range[1] === found.range[1]) {
+										//a node can't be its own parent
+										parents.pop();
+									}
+								}
 								return Estraverse.VisitorOption.Break;
 							}
 						}
-					}					
+					},
+					/** override */
+					leave: function(node) {
+						if(parents && offset >= node.range[1]) {
+							parents.pop();
+						}
+					}
 				});
+			}
+			if(found && parents) {
+				found.parents = parents;
 			}
 			return found;
 		},
@@ -523,7 +543,7 @@ define([
 		 * @description Finds all of the occurrences of the token / ranges / text from the context within the given AST
 		 * @function 
 		 * @public 
-		 * @param {Object} editorContext The editor context to get the AST from
+		 * @param {Object} ast The editor context to get the AST from
 		 * @param {Object} ctxt The context object {start:number, end:number, contentType:string}
 		 * @returns {orion.Promise} The promise to compute occurrences
 		 * @since 6.0

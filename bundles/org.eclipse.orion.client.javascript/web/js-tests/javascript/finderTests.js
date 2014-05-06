@@ -211,6 +211,59 @@ define([
 				tearDown();
 			}
 		});
+		
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427303
+		 * @since 6.0
+		 */
+		it('test_findNodeAndParents1', function() {
+			try {
+				editorContext.text = "function  F1(p1, p2) {\n"+
+					"\tvar out = p1;\n"+
+					"};";
+				return astManager.getAST(editorContext).then(function(ast) {
+					var node = Finder.findNode(9, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
+						assert.equal(node.parents.length, 1, 'Should have found one parent');
+						assert.equal(node.parents[0].type, 'Program', 'The program node should be the only parent');
+					}
+				});
+			}
+			finally {
+				tearDown();
+			}
+		});
+		
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427303
+		 * @since 6.0
+		 */
+		it('test_findNodeAndParents2', function() {
+			try {
+				editorContext.text = "function  F1(p1, p2) {\n"+
+					"\tvar out = p1;\n"+
+					"};";
+				return astManager.getAST(editorContext).then(function(ast) {
+					var node = Finder.findNode(14, ast, {parents:true});
+					if(!node) {
+						assert.fail("Should have found a node");
+					}
+					else {
+						assert.equal(node.type, 'Identifier', 'Should have found a Identifier node');
+						assert.equal(node.parents.length, 2, 'Should have found five parents');
+						assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the first parent');
+						assert.equal(node.parents[1].type, 'FunctionDeclaration', 'Should have found the parent function decl as the second parent');
+					}
+				});
+			}
+			finally {
+				tearDown();
+			}
+		});
 		/**
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399

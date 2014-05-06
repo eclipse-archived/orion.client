@@ -72,7 +72,7 @@ define([
 					tolerant: true,
 					comment: true,
 					tokens: true,
-					attachComments: true
+					attachComment: true
 				});
 				
 			} catch (e) {
