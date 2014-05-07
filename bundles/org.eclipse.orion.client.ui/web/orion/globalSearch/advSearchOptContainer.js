@@ -276,12 +276,15 @@ define([
 		_initControls: function(){
 			this._searchBox = document.getElementById("advSearchInput"); //$NON-NLS-0$
 			this._searchButtonWrapper = document.getElementById("advSearchCmd"); //$NON-NLS-0$
+			this._searchBoxWrapper = document.getElementById("searchInputFieldWrapper"); //$NON-NLS-0$
 			this._replaceBox = document.getElementById("advReplaceInput"); //$NON-NLS-0$
+			this._replaceBoxWrapper = document.getElementById("replaceInputFieldWrapper"); //$NON-NLS-0$
+			this._replaceWrapper = document.getElementById("replaceWrapper"); //$NON-NLS-0$
 			this._fileTypes = document.getElementById("advSearchTypes"); //$NON-NLS-0$
 			this._caseSensitiveCB = document.getElementById("advSearchCaseSensitive"); //$NON-NLS-0$
 			this._regExCB = document.getElementById("advSearchRegEx"); //$NON-NLS-0$
 			this._toggleReplaceLink = document.getElementById("toggleReplaceLink");
-			this._replaceWrapper = document.getElementById("replaceInputFieldWrapper");
+			
 			//Load file types content type provider
 			var fTypes = [ {label: messages["All types"], value: mSearchUtils.ALL_FILE_TYPE} ];
 			for(var i = 0; i < this.contentTypesCache.length; i++){
@@ -313,11 +316,27 @@ define([
 				} 
 			}.bind(this));
 			
+			this._searchBox.addEventListener("focus", function(e) { //$NON-NLS-0$
+				this._searchBoxWrapper.classList.add("searchPageWrapperFocussed"); //$NON-NLS-0$ 
+			}.bind(this));
+			
+			this._searchBox.addEventListener("blur", function(e) { //$NON-NLS-0$
+				this._searchBoxWrapper.classList.remove("searchPageWrapperFocussed"); //$NON-NLS-0$ 
+			}.bind(this));
+			
 			this._replaceBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				var keyCode= e.charCode || e.keyCode;
 				if (keyCode === 13 ) {// ENTER
 					this._replacePreview();
 				} 
+			}.bind(this));
+			
+			this._replaceBox.addEventListener("focus", function(e) { //$NON-NLS-0$
+				this._replaceBoxWrapper.classList.add("searchPageWrapperFocussed"); //$NON-NLS-0$ 
+			}.bind(this));
+			
+			this._replaceBox.addEventListener("blur", function(e) { //$NON-NLS-0$
+				this._replaceBoxWrapper.classList.remove("searchPageWrapperFocussed"); //$NON-NLS-0$ 
 			}.bind(this));
 			
 			this._fileTypes.addEventListener("change", function(e) { //$NON-NLS-0$
@@ -379,7 +398,7 @@ define([
 	        domWrapperList[0].domNode.classList.add("search-button"); //$NON-NLS-0$
 	        domWrapperList[0].domNode.classList.remove("commandMargins"); //$NON-NLS-0$
 	        
-	        if ("none" === this._replaceWrapper.style.display) {
+			if (this._replaceBoxIsHidden()) {
 	        	this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$	
 	        }
 	        this._toggleReplaceLink.addEventListener("click", this._toggleReplaceFieldVisibility.bind(this)); //$NON-NLS-1$ //$NON-NLS-0$
@@ -457,8 +476,12 @@ define([
 			this._searchScopeExplorer.loadRoot(this._rootURL);
 		},
 		
+		_replaceBoxIsHidden: function() {
+			return this._replaceWrapper.classList.contains("replaceWrapperHidden"); //$NON-NLS-0$
+		},
+		
 		_toggleReplaceFieldVisibility: function () {
-			if ("none" === this._replaceWrapper.style.display) {
+			if (this._replaceBoxIsHidden()) {
 				this._showReplaceField();
 			} else {
 				this._hideReplaceField();
@@ -466,14 +489,14 @@ define([
 		},
 		
 		_showReplaceField: function() {
-			this._searchButtonWrapper.style.display = "none"; //$NON-NLS-0$
-			this._replaceWrapper.style.display = "inline-block"; //$NON-NLS-0$
+			this._searchButtonWrapper.classList.add("isHidden"); //$NON-NLS-0$
+			this._replaceWrapper.classList.remove("replaceWrapperHidden"); //$NON-NLS-0$
 			this._toggleReplaceLink.innerHTML = messages["Hide Replace"]; //$NON-NLS-0$
 		},
 		
 		_hideReplaceField: function() {
-			this._searchButtonWrapper.style.display = "inline-block"; //$NON-NLS-0$
-			this._replaceWrapper.style.display = "none"; //$NON-NLS-0$
+			this._searchButtonWrapper.classList.remove("isHidden"); //$NON-NLS-0$
+			this._replaceWrapper.classList.add("replaceWrapperHidden"); //$NON-NLS-0$
 			this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$
 		},
 		

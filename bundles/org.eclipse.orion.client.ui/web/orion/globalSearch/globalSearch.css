@@ -122,6 +122,8 @@
 	border-left: 1px solid lightgray;
 	border-radius: 0 3px 3px 0;
 	font-size:14px;
+	transition: all 0.1s ease;
+	max-width: 150px; /* for transition */
 }
 
 .search-filter-text {

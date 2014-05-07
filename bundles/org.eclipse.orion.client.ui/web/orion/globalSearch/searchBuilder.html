@@ -1,14 +1,16 @@
 	<div class="searchOptionBlock">
 		<div id="searchInputFieldWrapper" class="searchPageInputFieldWrapper">
 		   	<input type="text" id="advSearchInput" class="searchPageInputField">
-		  	<button id="previousSearchButton" class="orionButton previousSearchButton" style="">
+		  	<button id="previousSearchButton" class="orionButton previousSearchButton" tabindex="-1">
 		  		<span class="core-sprite-openarrow" class="previousSearchArrow"></span>
 			</button>
 			<span id="advSearchCmd"></span>
 		</div>
-		<div id="replaceInputFieldWrapper" class="searchPageInputFieldWrapper" style="display:none;">
-		   	<input type="text" id="advReplaceInput" class="searchPageInputField replaceInputField" placeholder="Replace with">
-			<span id="advReplacePreviewCmd"></span>
+		<div id="replaceWrapper" class="replaceWrapper replaceWrapperHidden">
+			<div id="replaceInputFieldWrapper" class="searchPageInputFieldWrapper searchPageWrapperHidden">
+			   	<input type="text" id="advReplaceInput" class="searchPageInputField replaceInputField" placeholder="Replace with">
+				<span id="advReplacePreviewCmd"></span>
+			</div>	
 		</div>
 		<a id="toggleReplaceLink" class="toggleDisplayLink"></a>
 	</div>
