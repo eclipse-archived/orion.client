@@ -115,26 +115,37 @@ define([
 				this.downloadFromBlob(contents, fileMetaData.Name, contentType, forceDownload);
 			}.bind(this), errorHandler);
 		},
-		downloadFromBlob: function(blobContents, fileName, contentType, forceDownload) {
+		downloadFromBlob: function(blobContents, fileName, contentType, forceDownload, createLink) {
 			if(!this._isSupported(forceDownload)) {
 				return;
 			}
 			var cType = (contentType && contentType.id) ? contentType.id : "application/octet-stream";
-			var blobObj, downloadLink = document.createElementNS("http://www.w3.org/1999/xhtml", "a"); //$NON-NLS-1$ //$NON-NLS-0$
+			var blobObj = new Blob([blobContents],{type: cType}); 
+			var downloadLink = createLink ? document.createElementNS("http://www.w3.org/1999/xhtml", "a") : document.createElement("a"); //$NON-NLS-1$ //$NON-NLS-0$
 			if(typeof downloadLink.download !== "undefined") {//Chrome and FireFox
-				blobObj= new Blob([blobContents],{type: cType});
 				var objectURLLink = URL.createObjectURL(blobObj);
 				downloadLink.href = objectURLLink;
 				downloadLink.download = fileName;
-				var event = document.createEvent("MouseEvents");
-				event.initMouseEvent(
-					"click", true, false, window, 0, 0, 0, 0, 0
-					, false, false, false, false, 0, null
-				);
-				downloadLink.dispatchEvent(event);
+				if(!createLink) {
+					var event = document.createEvent("MouseEvents");
+					event.initMouseEvent(
+						"click", true, false, window, 0, 0, 0, 0, 0
+						, false, false, false, false, 0, null
+					);
+					downloadLink.dispatchEvent(event);
+				} else {
+					return downloadLink;
+				}
 			} else if(typeof window.navigator !== "undefined" && window.navigator.msSaveOrOpenBlob) {//IE 9+
-				blobObj= new Blob([blobContents],{type: cType});
-				window.navigator.msSaveBlob(blobObj, fileName);
+				if(!createLink) {
+					window.navigator.msSaveBlob(blobObj, fileName);
+				} else {
+					downloadLink.href = "javascript:void(0)";
+					downloadLink.addEventListener("click", function(){
+						window.navigator.msSaveBlob(blobObj, fileName);
+					});
+					return downloadLink;
+				}
 			}
 		}
 	};

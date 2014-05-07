@@ -109,6 +109,22 @@ define([
 			name: "sh",
 			extension: ["sh"]
 		},
+		{	id: "application/browser-renderable",
+			name: "browser-renderable"
+		},
+		{	id: "application/pdf",
+			"extends": "application/browser-renderable",
+			name: "PDF",
+			extension: ["pdf"]
+		},
+		{	id: "application/octet-stream",
+			name: "octet-stream"
+		},
+		{	id: "application/zip",
+			"extends": "application/octet-stream",
+			name: "ZIP",
+			extension: ["war", "zip", "rar"]
+		},
 		// Image types
 		{	id: "image/gif",
 			name: "GIF",

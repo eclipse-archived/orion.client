@@ -36,11 +36,12 @@ define([
 	'orion/commands',
 	'orion/webui/littlelib',
 	'orion/i18nUtil',
+	'orion/fileDownloader',
 	'orion/URL-shim'
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector,
 	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, 
-	EventTarget, RepoAndBaseURLTriggerTemplate, RepoURLTriggerTemplate, ShareSnippetTriggerTemplate, mCommands, lib, i18nUtil
+	EventTarget, RepoAndBaseURLTriggerTemplate, RepoURLTriggerTemplate, ShareSnippetTriggerTemplate, mCommands, lib, i18nUtil, mFileDownloader
 ) {
 	
 	function ResourceChangeHandler(options) {
@@ -523,6 +524,33 @@ define([
 				}
 			}
 		},
+		_isKnownBinary: function(cType) {
+			var binaryType = this._contentTypeService.getContentType("application/octet-stream"); //$NON-NLS-0$
+			return this._contentTypeService.isExtensionOf(cType, binaryType);
+		},
+		_isBrowserRenderable: function(cType) {
+			var renderableType = this._contentTypeService.getContentType("application/browser-renderable"); //$NON-NLS-0$
+			return this._contentTypeService.isExtensionOf(cType, renderableType);
+		},
+		_testBlobURLSupported: function(contents, cType) {
+			var blobObj= new Blob([contents],{type: cType.id});
+			var objectURLLink = URL.createObjectURL(blobObj);
+		   	var downloadLink = document.createElement("image"); 
+		   	downloadLink.setAttribute("src", objectURLLink); 
+		   	//downloadLink.style.width = 640+"px"; 
+			//downloadLink.style.height = 480+"px"; 
+			downloadLink.onerror = function() {
+				this._statusService.setProgressResult({Severity: "error", Message: "This type of file is not supportef in Safri. Please use Chrome or FireFox."});									
+			}.bind(this);
+		},
+		_generateViewLink: function(contents, metadata, cType, browseViewOptons) {
+			var downloadLink = document.createElement("a"); //$NON-NLS-0$
+			var blobObj = new Blob([contents],{type: cType.id});
+			downloadLink.href = URL.createObjectURL(blobObj);
+			downloadLink.classList.add("downloadLinkName"); //$NON-NLS-0$
+			downloadLink.appendChild(document.createTextNode("View " + metadata.Name));
+			browseViewOptons.binaryView = {domElement: downloadLink};
+		},
 		_getEditorView: function(input, contents, metadata) {
 			var view = null;
 			if (metadata && input) {
@@ -549,21 +577,27 @@ define([
 						this.shareSnippetHandler.textView = null;
 					}
 					var cType = this._contentTypeService.getFileContentType(metadata);
-					if(!cType) {
-						if(this._inputManager._unknownContentTypeAsText()) {
+					if(!cType) {//The content type is not registered
+						if(this._inputManager._unknownContentTypeAsText) {//If we treate 
 							browseViewOptons.editorView = this._editorView;
 							if(this.shareSnippetHandler) {
 								browseViewOptons.infoDropDownHandlers.unshift(this.shareSnippetHandler);
 							}
 						} else {
-							var objectURLLink = URL.createObjectURL(new Blob([contents],{type: ""}));
-							var downloadLink = document.createElement("a"); //$NON-NLS-0$
-							downloadLink.href = objectURLLink;
-							downloadLink.appendChild(document.createTextNode("Download " + metadata.Name));
-							downloadLink.download = metadata.Name;
-							downloadLink.classList.add("downloadLinkName"); //$NON-NLS-0$
-							browseViewOptons.binaryView = {domElement: downloadLink};
+							this.makeDownloadLink();
 						}
+					} else if(this._isKnownBinary(cType)) {
+						if(mFileDownloader.downloadSupported()) {
+							var downloader = new mFileDownloader.FileDownloader(this._fileClient);
+							var linkElement = downloader.downloadFromBlob(contents, metadata.Name, cType, true, true);
+							linkElement.classList.add("downloadLinkName"); //$NON-NLS-0$
+							linkElement.appendChild(document.createTextNode("Download " + metadata.Name));
+							browseViewOptons.binaryView = {domElement: linkElement};
+						} else {
+							this._generateViewLink(contents, metadata, {id: "text/plain"}, browseViewOptons);
+						}
+					} else if(this._isBrowserRenderable(cType)) {
+						this._generateViewLink(contents, metadata, cType, browseViewOptons);
 					} else if(cType.id === "text/x-markdown") {
 						browseViewOptons.isMarkdownView = true;
 					} else if(!mNavigatorRenderer.isImage(cType)) {
