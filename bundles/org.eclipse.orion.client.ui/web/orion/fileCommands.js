@@ -12,11 +12,11 @@
 /*global window define orion XMLHttpRequest confirm*/
 /*jslint sub:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 
+define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/fileDownloader',
 	'orion/commandRegistry', 'orion/extensionCommands', 'orion/contentTypes', 'orion/compare/compareUtils', 
 	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog',
 	'orion/EventTarget', 'orion/form'],
-	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mCommandRegistry, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form){
+	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form){
 
 	/**
 	 * Utility methods
@@ -758,6 +758,31 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			} 
 		});
 		commandService.addCommand(compareWithCommand);
+		
+		var downloadSingleFileCommand = new mCommands.Command({
+			name : messages["Download"],
+			tooltip: messages["Download_tooltips"], 
+			id: "eclipse.downloadSingleFile", //$NON-NLS-0$
+			visibleWhen: function(item) {
+				if (!explorer || !explorer.isCommandsVisible()) {
+					return false;
+				}
+				if (Array.isArray(item)) {
+					if(item.length === 1 && !item[0].Directory){
+						return true;
+					}
+				}
+				return false;
+			},
+			callback: function(data) {
+				var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+				var downloader = new mFileDownloader.FileDownloader(fileClient, statusService, progressService);
+				var items = Array.isArray(data.items) ? data.items : [data.items];
+				var contentType = contentTypeService.getFilenameContentType(items[0].Name);
+				downloader.downloadFromLocation(items[0], contentType);
+			} 
+		});
+		commandService.addCommand(downloadSingleFileCommand);
 		
 		var deleteCommand = new mCommands.Command({
 			name: messages["Delete"],

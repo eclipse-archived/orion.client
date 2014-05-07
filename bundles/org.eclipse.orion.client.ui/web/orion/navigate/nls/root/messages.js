@@ -113,5 +113,9 @@ define({
 	"Uploading the following file failed: ": "Uploading the following file failed: ",
 	"Enter project name:": "Enter project name:",
 	"Creating project ": "Creating project ",
-	"NoFile": "Use the ${0} menu to create new files and folders. Click a file to start coding." //$NON-NLS-1$ //$NON-NLS-0$
+	"NoFile": "Use the ${0} menu to create new files and folders. Click a file to start coding.",
+	"Download": "Download",
+	"Download_tooltips": "Download the file contents as the displayed name",
+	"Downloading...": "Reading file contents...",
+	"Download not supported": "Contents export is not supported in this browser. Please use supported browsers such as Chrome, Firefox and Internet Explorer."
 });

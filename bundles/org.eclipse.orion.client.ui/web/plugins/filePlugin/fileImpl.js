@@ -577,36 +577,40 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		}
 	};
 	
-	function _call2(method, url, headers, body) {
-		var d = new Deferred(); // create a promise
-		var xhr = new XMLHttpRequest();
-		try {
-			xhr.open(method, cleanseUrl(url));
-			if (headers) {
-				Object.keys(headers).forEach(function(header){
-					xhr.setRequestHeader(header, headers[header]);
-				});
-			}
-			xhr.responseType = "arraybuffer";
-			xhr.send(body);
-			xhr.onload = function() {
-				d.resolve({
-					status: xhr.status,
-					statusText: xhr.statusText,
-					headers: xhr.getAllResponseHeaders(),
-					response: xhr.response //builder.getBlob()
-				});
-			};
-		} catch (e) {
-			d.reject(e);
+	function _handleError(error) {
+		var errorMessage = "Unknown Error";
+		if(error.status && error.status === 404) {
+			errorMessage = "File not found.";
+		} else if (error.xhr && error.xhr.statusText){
+			errorMessage = error.xhr.statusText;
 		}
-		return d; // return the promise immediately
+		var errorObj = {Severity: "Error", Message: errorMessage};
+		error.responseText = JSON.stringify(errorObj);
+		return new Deferred().reject(error);
+	}
+	
+	function _call2(method, url, headerData, body) {
+		var options = {
+			//timeout: 15000,
+			responseType: "arraybuffer",
+			headers: headerData ? headerData : {"Orion-Version": "1"},
+			data: body,
+			log: false
+		};
+		return _xhr(method, url, options).then(function(result) {
+			return result.response;
+		}, function(error) { return _handleError(error);}).then(function(result) {
+			if (this.makeAbsolute) {
+				_normalizeLocations(result);
+			}
+			return result;
+		}.bind(this));
 	}
 
 	if (window.Blob) {
 		FileServiceImpl.prototype.readBlob = function(location) {
 			return _call2("GET", location).then(function(result) {
-				return result.response;
+				return result;
 			});
 		};
 
