@@ -218,6 +218,15 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 					url += "?Target=" + JSON.stringify(target);
 				
 				return this._xhrV1("GET", url);
+			},
+			
+			getRoutes: function(target) {
+				var url = require.toUrl("cfapi/routes");
+				
+				if (target)
+					url += "?Target=" + JSON.stringify(target);
+				
+				return this._xhrV1("GET", url);
 			}
 		};
 		

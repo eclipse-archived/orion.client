@@ -481,6 +481,42 @@ define(['i18n!cfui/nls/messages','require', 'orion/xhr', 'orion/Deferred', 'orio
 		}
 	);
 	
+	/** Add cf routes command **/
+	function describeRoute(route) {
+		var host = route.Host;
+		var strResult = "\n" + host + "\t";
+		if (host.length <= 4) {
+			strResult += "\t";
+		}
+		strResult += route.DomainName + "\t";
+		return strResult;
+	}
+	
+	var routesImpl = {
+		callback: function(args) {
+			return cFService.getRoutes().then(function(result) {
+				result = result.Routes;
+				
+				if (!result || result.length === 0) {
+					return "No routes.";
+				}
+				var strResult = "\nhost\tdomain\tapps\n";
+				result.forEach(function(route) {
+					strResult += describeRoute(route);
+				});
+				return strResult;
+			});
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		routesImpl, {
+			name: "cfo routes",
+			description: "List all routes in the target space"
+		}
+	);
+	
 	/** Add cf delete command **/
 	/** var deleteImpl = {
 		callback: function(args, context) {
