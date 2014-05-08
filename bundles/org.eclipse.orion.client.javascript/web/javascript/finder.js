@@ -523,16 +523,50 @@ define([
 		findScriptBlocks: function(buffer, offset) {
 			var blocks = [];
 			var val = null, regex = /<\s*script(?:[^>]|\n)*>((?:.|\r?\n)*?)<\s*\/script(?:[^>]|\n)*>/ig;
-			while((val = regex.exec(buffer)) != null) {
+			var comments = this.findHtmlCommentBlocks(buffer, offset);
+			loop: while((val = regex.exec(buffer)) != null) {
 				var text = val[1];
 				if(text.length < 1) {
 					continue;
 				}
 				var index = val.index+val[0].indexOf('>')+1;
 				if((offset == null || (index <= offset && index+text.length >= offset))) {
+					for(var i = 0; i < comments.length; i++) {
+						if(comments[i].start <= index && comments[i].end >= index) {
+							continue loop;
+						}
+					}
 					blocks.push({
 						text: text,
 						offset: index
+					});
+				}
+			}
+			return blocks;
+		},
+		
+		/**
+		 * @description Finds all of the block comments in an HTML file
+		 * @function
+		 * @public
+		 * @param {String} buffer The file contents
+		 * @param {Number} offset The optional offset to compute the block(s) for
+		 * @return {Array} The array of block objects {text, start, end}
+		 * @since 6.0
+		 */
+		findHtmlCommentBlocks: function(buffer, offset) {
+			var blocks = [];
+			var val = null, regex = /<!--((?:.|\r?\n)*?)-->/ig;
+			while((val = regex.exec(buffer)) != null) {
+				var text = val[1];
+				if(text.length < 1) {
+					continue;
+				}
+				if((offset == null || (val.index <= offset && val.index+text.length >= val.index))) {
+					blocks.push({
+						text: text,
+						start: val.index,
+						end: val.index+text.length
 					});
 				}
 			}

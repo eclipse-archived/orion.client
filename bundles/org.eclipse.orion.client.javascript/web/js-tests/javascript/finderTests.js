@@ -1238,5 +1238,42 @@ define([
 			var blocks = Finder.findScriptBlocks(text, 39);
 			assert.equal(blocks.length, 0, "Should not have found any script blocks");
 		});
+		
+		/**
+		 * Tests finding script blocks within comments
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=431054
+		 */
+		it('test_findNoScriptBlockInHTMLComment1', function() {
+			var text = "<!DOCTYPE html><head><!--<script>function f() {}</script>--></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 39);
+			assert.equal(blocks.length, 0, "Should not have found any script blocks");
+		});
+		/**
+		 * Tests finding script blocks within comments
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=431054
+		 */
+		it('test_findNoScriptBlockInHTMLComment2', function() {
+			var text = "<!DOCTYPE html><head><!--<script>function f() {}</script>--><script>function f() {}</script><!--<script>function f() {}</script>--></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+		});
+		/**
+		 * Tests finding script blocks within comments
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=431054
+		 */
+		it('test_findNoScriptBlockInHTMLComment3', function() {
+			var text = "<!DOCTYPE html><head><!--<script>function f() {}</script><script>function f() {}</script><script>function f() {}</script>--></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			assert.equal(blocks.length, 0, "Should have found no script blocks");
+		});
+		/**
+		 * Tests finding script blocks within comments
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=431054
+		 */
+		it('test_findNoScriptBlockInHTMLComment2', function() {
+			var text = "<!DOCTYPE html><head><script>function f() {}</script><!--<script>function f() {}</script>--><script>function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			assert.equal(blocks.length, 2, "Should have found two script blocks");
+		});
 	});
 });
