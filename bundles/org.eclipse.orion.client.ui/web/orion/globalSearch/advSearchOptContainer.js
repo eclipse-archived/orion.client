@@ -403,6 +403,10 @@ define([
 	        }
 	        this._toggleReplaceLink.addEventListener("click", this._toggleReplaceFieldVisibility.bind(this)); //$NON-NLS-1$ //$NON-NLS-0$
 	        
+	        //the replace button should be rendered by now,
+	        //fix the width of the replaceWrapper div to prevent it from resizing
+	        this._replaceWrapper.style.width = this._replaceBoxWrapper.scrollWidth + 2 + "px"; //$NON-NLS-0$ //adding an extra 2 pixels to account for border
+	        
 	        this._initSearchScope();
 		},
 		
