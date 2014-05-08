@@ -1296,7 +1296,7 @@ define([
 	//	};
 		
 		/**
-		 * Tests conputing occurrences from a script block in the <head> block
+		 * Tests computing occurrences from a script block in the <head> block
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHead1', function() {
@@ -1312,7 +1312,7 @@ define([
 		});
 		
 		/**
-		 * Tests conputing occurrences from a script block in the <head> block
+		 * Tests computing occurrences from a script block in the <head> block
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHead2', function() {
@@ -1328,7 +1328,7 @@ define([
 		});
 		
 		/**
-		 * Tests conputing occurrences from a script block in the <head> block
+		 * Tests computing occurrences from a script block in the <head> block
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHead3', function() {
@@ -1344,7 +1344,7 @@ define([
 		});
 		
 		/**
-		 * Tests conputing occurrences from a script block in the <head> block
+		 * Tests computing occurrences from a script block in the <head> block
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHeadMulti1', function() {
@@ -1360,7 +1360,7 @@ define([
 		});
 		
 		/**
-		 * Tests conputing occurrences from a script block in the <head> block
+		 * Tests computing occurrences from a script block in the <head> block
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHeadMulti2', function() {
@@ -1376,7 +1376,7 @@ define([
 		});
 		
 		/**
-		 * Tests conputing occurrences from a script block in the <head> block
+		 * Tests computing occurrences from a script block in the <head> block
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHeadMulti3', function() {
@@ -1392,7 +1392,7 @@ define([
 		});
 		
 		/**
-		 * Tests conputing occurrences from a script block in the <head> block
+		 * Tests computing occurrences from a script block in the <head> block
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHeadMulti4', function() {
@@ -1400,6 +1400,37 @@ define([
 			return occurrences.computeOccurrences(editorContext, setContext(74, 74, 'text/html')).then(function(results) {
 				try {
 					assertOccurrences(results, [{start:73, end:74}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		//RECOVERED OCCURRENCES
+		/**
+		 * Tests computing occurrences within an AST that has been recovered
+		 */
+		it('test_recovered_occurrence 1', function() {
+			editorContext.text = "var one = 1; func(one two); one = 23";
+			return occurrences.computeOccurrences(editorContext, setContext(7, 7)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:7}, {start:18, end:21}, {start:28, end:31}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences within an AST that has been recovered
+		 */
+		it('test_recovered_occurrence 2', function() {
+			editorContext.text = "var one = 1; var o = {f:one d:2}";
+			return occurrences.computeOccurrences(editorContext, setContext(27, 27)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:7}, {start:24, end:27}]);
 				}
 				finally {
 					tearDown();

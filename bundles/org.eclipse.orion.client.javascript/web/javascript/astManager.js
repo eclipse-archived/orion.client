@@ -74,7 +74,6 @@ define([
 					tokens: true,
 					attachComment: true
 				});
-				
 			} catch (e) {
 				// The "tolerant" Esprima sometimes blows up from parse errors in initial statements of code.
 				// Just return an empty AST with the parse error.

@@ -1892,7 +1892,27 @@ parseStatement: true, parseSourceElement: true */
             throwUnexpected(token);
         }
     }
-
+	
+	//mrennie quietly notify about a missing token
+	function expectTolerant(value) {
+		if(extra.errors) {
+			var token = lookahead;
+			if (token.type === Token.EOF) {
+	            throwErrorTolerant(token, Messages.UnexpectedEOS);
+	        } else if(token.type !== Token.Punctuator && token.value !== value) {
+        		if(extra.tokens && extra.tokens.length > 0) {
+        			token = extra.tokens[extra.tokens.length-1];
+        		}
+        		throwErrorTolerant(token, Messages.MissingToken, value);
+        	} else {
+        		lex();
+        	}
+		}
+		else {
+			expect(value);
+		}
+	}
+	
     // Expect the next token to match the specified keyword.
     // If not, an exception will be thrown.
 
@@ -2168,19 +2188,7 @@ parseStatement: true, parseSourceElement: true */
 
             if (!match('}')) {
             	//mrennie https://bugs.eclipse.org/bugs/show_bug.cgi?id=432956
-            	if(extra.errors) {
-	            	var token = lookahead;
-	            	if(token.type !== Token.Punctuator && token.value !== ',') {
-	            		if(extra.tokens && extra.tokens.length > 0) {
-	            			token = extra.tokens[extra.tokens.length-1];
-	            		}
-	            		throwErrorTolerant(token, Messages.MissingToken, ',');
-	            	} else {
-	            		lex();
-	            	}
-            	} else {
-            		expect(',');
-            	}
+            	expectTolerant(',');
             }
         }
 
@@ -2272,17 +2280,7 @@ parseStatement: true, parseSourceElement: true */
                 if (match(')')) {
                     break;
                 }
-                try {
-                    expect(',');
-                } catch (e) {
-                    if (extra.errors) {
-                        // pretend the argument list is done
-                        pushError(e);
-                        break;
-                    } else {
-                        throw e;
-                    }
-                }
+                expectTolerant(',');
             }
         }
 

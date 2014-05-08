@@ -31,7 +31,7 @@ define([
 				tolerant: true,
 				comment: true,
 				tokens: true,
-				attachComments:true
+				attachComment:true
 			});
 		}
 		/**
@@ -44,6 +44,7 @@ define([
 			console.log('--- TEST OUTPUT ---');
 			var expected = [];
 			Estraverse.traverse(ast, {
+				/** override */
 				enter: function(node) {
 					if(node.type === 'Program') {
 						return;
@@ -126,6 +127,7 @@ define([
 				assert(ast, 'The AST should exist');
 				var counter = 0;
 				Estraverse.traverse(ast, {
+					/** override */
 					enter: function(node) {
 						if(node.type !== 'Program') {
 							assert(counter < expectedNodes.length, 'There are more nodes to visit: '+ JSON.stringify(node));
@@ -170,8 +172,6 @@ define([
 					assert.equal(actual.message.replace(/^Line [0-9]*: /, ""), expected.message, pf("Error %s has incorrect %s", i, "message"));
 				});
 			}
-	
-			// TODO extras
 		}
 	
 		//////////////////////////////////////////////////////////
@@ -1338,7 +1338,7 @@ define([
 				source: 'var f = {one: "busted};',
 				nodes: [],
 				tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Identifier","range":[4,5],"value":"f"},{"type":"Punctuator","range":[6,7],"value":"="},{"type":"Punctuator","range":[8,9],"value":"{"},{"type":"Identifier","range":[9,12],"value":"one"},{"type":"Punctuator","range":[12,13],"value":":"},{"type":"String","range":[14,23],"value":"\"busted};"}],
-				errors: [{"lineNumber":1,"index":23,"message":"Unexpected token ILLEGAL"},{"lineNumber":1,"index":23,"message":"Missing expected ','"},{"lineNumber":1,"index":23,"message":"Unexpected end of input"}]
+				errors: [{"lineNumber":1,"index":23,"message":"Unexpected token ILLEGAL"},{"lineNumber":1,"index":23,"message":"Unexpected end of input"}]
 			};
 			runTest(data);
 		});
@@ -1422,7 +1422,7 @@ define([
 				source: "function f() {	return {b:{	cc:3, dd:'hey\\' e}c:2};}",
 				nodes: [{"type":"FunctionDeclaration","range":[0,51]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[13,51]},{"type":"ReturnStatement","range":[15,51]}],
 				tokens: [{"type":"Keyword","range":[0,8],"value":"function"},{"type":"Identifier","range":[9,10],"value":"f"},{"type":"Punctuator","range":[10,11],"value":"("},{"type":"Punctuator","range":[11,12],"value":")"},{"type":"Punctuator","range":[13,14],"value":"{"},{"type":"Keyword","range":[15,21],"value":"return"},{"type":"Punctuator","range":[22,23],"value":"{"},{"type":"Identifier","range":[23,24],"value":"b"},{"type":"Punctuator","range":[24,25],"value":":"},{"type":"Punctuator","range":[25,26],"value":"{"},{"type":"Identifier","range":[27,29],"value":"cc"},{"type":"Punctuator","range":[29,30],"value":":"},{"type":"Numeric","range":[30,31],"value":"3"},{"type":"Punctuator","range":[31,32],"value":","},{"type":"Identifier","range":[33,35],"value":"dd"},{"type":"Punctuator","range":[35,36],"value":":"},{"type":"String","range":[36,51],"value":"'hey\\' e}c:2};}"}],
-				errors: [{"lineNumber":1,"index":51,"message":"Unexpected token ILLEGAL"},{"lineNumber":1,"index":51,"message":"Missing expected ','"},{"lineNumber":1,"index":51,"message":"Unexpected end of input"}]
+				errors: [{"lineNumber":1,"index":51,"message":"Unexpected token ILLEGAL"},{"lineNumber":1,"index":51,"message":"Unexpected end of input"}]
 			});
 		});
 		
@@ -1440,7 +1440,7 @@ define([
 				source: "var v = {a b:{cc:3, dd:'hey' e} c:2};function f() {return {a b:{cc:3, dd:'hey\\' e} c:2};}",
 				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,37]},{"type":"VariableDeclarator","range":[4,36]},{"type":"Identifier","name":"v","range":[4,5]},{"type":"ObjectExpression","range":[8,36]},{"type":"Property","kind":"init","range":[12,31]},{"type":"Identifier","name":"b","range":[12,12]},{"type":"ObjectExpression","range":[13,31]},{"type":"Property","kind":"init","range":[14,18]},{"type":"Identifier","name":"cc","range":[14,16]},{"type":"Literal","range":[17,18],"value":3},{"type":"Property","kind":"init","range":[20,28]},{"type":"Identifier","name":"dd","range":[20,22]},{"type":"Literal","range":[23,28],"value":"hey"},{"type":"Property","kind":"init","range":[32,35]},{"type":"Identifier","name":"c","range":[32,33]},{"type":"Literal","range":[34,35],"value":2},{"type":"FunctionDeclaration","range":[37,89]},{"type":"Identifier","name":"f","range":[46,47]},{"type":"BlockStatement","range":[50,89]},{"type":"ReturnStatement","range":[51,89]}],
 				tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Identifier","range":[4,5],"value":"v"},{"type":"Punctuator","range":[6,7],"value":"="},{"type":"Punctuator","range":[8,9],"value":"{"},{"type":"Identifier","range":[9,10],"value":"a"},{"type":"Identifier","range":[11,12],"value":"b"},{"type":"Punctuator","range":[12,13],"value":":"},{"type":"Punctuator","range":[13,14],"value":"{"},{"type":"Identifier","range":[14,16],"value":"cc"},{"type":"Punctuator","range":[16,17],"value":":"},{"type":"Numeric","range":[17,18],"value":"3"},{"type":"Punctuator","range":[18,19],"value":","},{"type":"Identifier","range":[20,22],"value":"dd"},{"type":"Punctuator","range":[22,23],"value":":"},{"type":"String","range":[23,28],"value":"'hey'"},{"type":"Identifier","range":[29,30],"value":"e"},{"type":"Punctuator","range":[30,31],"value":"}"},{"type":"Identifier","range":[32,33],"value":"c"},{"type":"Punctuator","range":[33,34],"value":":"},{"type":"Numeric","range":[34,35],"value":"2"},{"type":"Punctuator","range":[35,36],"value":"}"},{"type":"Punctuator","range":[36,37],"value":";"},{"type":"Keyword","range":[37,45],"value":"function"},{"type":"Identifier","range":[46,47],"value":"f"},{"type":"Punctuator","range":[47,48],"value":"("},{"type":"Punctuator","range":[48,49],"value":")"},{"type":"Punctuator","range":[50,51],"value":"{"},{"type":"Keyword","range":[51,57],"value":"return"},{"type":"Punctuator","range":[58,59],"value":"{"},{"type":"Identifier","range":[59,60],"value":"a"},{"type":"Identifier","range":[61,62],"value":"b"},{"type":"Punctuator","range":[62,63],"value":":"},{"type":"Punctuator","range":[63,64],"value":"{"},{"type":"Identifier","range":[64,66],"value":"cc"},{"type":"Punctuator","range":[66,67],"value":":"},{"type":"Numeric","range":[67,68],"value":"3"},{"type":"Punctuator","range":[68,69],"value":","},{"type":"Identifier","range":[70,72],"value":"dd"},{"type":"Punctuator","range":[72,73],"value":":"},{"type":"String","range":[73,89],"value":"'hey\\' e} c:2};}"}],
-				errors: [{"lineNumber":1,"index":9,"message":"Unexpected token a","token":"a"},{"lineNumber":1,"index":28,"message":"Missing expected ','"},{"lineNumber":1,"index":29,"message":"Unexpected token e","token":"e"},{"lineNumber":1,"index":31,"message":"Missing expected ','"},{"lineNumber":1,"index":59,"message":"Unexpected token a","token":"a"},{"lineNumber":1,"index":89,"message":"Unexpected token ILLEGAL"},{"lineNumber":1,"index":89,"message":"Missing expected ','"},{"lineNumber":1,"index":89,"message":"Unexpected end of input"}]
+				errors: [{"lineNumber":1,"index":9,"message":"Unexpected token a","token":"a"},{"lineNumber":1,"index":28,"message":"Missing expected ','"},{"lineNumber":1,"index":29,"message":"Unexpected token e","token":"e"},{"lineNumber":1,"index":31,"message":"Missing expected ','"},{"lineNumber":1,"index":59,"message":"Unexpected token a","token":"a"},{"lineNumber":1,"index":89,"message":"Unexpected token ILLEGAL"},{"lineNumber":1,"index":89,"message":"Unexpected end of input"}]
 			});
 		});
 		
@@ -1450,6 +1450,52 @@ define([
 				nodes: [],
 				tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Identifier","range":[4,5],"value":"v"},{"type":"Punctuator","range":[6,7],"value":"="},{"type":"Punctuator","range":[8,9],"value":"{"},{"type":"Identifier","range":[9,10],"value":"a"},{"type":"Identifier","range":[11,12],"value":"b"},{"type":"Punctuator","range":[12,13],"value":":"},{"type":"Punctuator","range":[13,14],"value":"{"},{"type":"Identifier","range":[14,16],"value":"cc"},{"type":"Punctuator","range":[16,17],"value":":"},{"type":"Numeric","range":[17,18],"value":"3"},{"type":"Punctuator","range":[18,19],"value":","},{"type":"Identifier","range":[20,22],"value":"dd"},{"type":"Punctuator","range":[22,23],"value":":"}],
 				errors: [{"lineNumber":1,"index":9,"message":"Unexpected token a","token":"a"},{"lineNumber":1,"index":22,"message":"Unexpected token :","token":":"}]
+			});
+		});
+		
+		// ARGUMENT RECOVERY
+		it('argument recovery 1', function() {
+			runTest({
+				source: "function f() {} f(\"1\" \"2\");",
+				nodes: [{"type":"FunctionDeclaration","range":[0,15]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[13,15]},{"type":"ExpressionStatement","range":[16,27]},{"type":"CallExpression","range":[16,26]},{"type":"Identifier","name":"f","range":[16,17]},{"type":"Literal","range":[18,21],"value":"1"},{"type":"Literal","range":[22,25],"value":"2"}],
+				tokens: [{"type":"Keyword","range":[0,8],"value":"function"},{"type":"Identifier","range":[9,10],"value":"f"},{"type":"Punctuator","range":[10,11],"value":"("},{"type":"Punctuator","range":[11,12],"value":")"},{"type":"Punctuator","range":[13,14],"value":"{"},{"type":"Punctuator","range":[14,15],"value":"}"},{"type":"Identifier","range":[16,17],"value":"f"},{"type":"Punctuator","range":[17,18],"value":"("},{"type":"String","range":[18,21],"value":"\"1\""},{"type":"String","range":[22,25],"value":"\"2\""},{"type":"Punctuator","range":[25,26],"value":")"},{"type":"Punctuator","range":[26,27],"value":";"}],
+				errors: [{"lineNumber":1,"index":21,"message":"Missing expected ','"}]
+			});
+		});
+		
+		it('argument recovery 2', function() {
+			runTest({
+				source: "function f() {} f(function() {} \"2\");",
+				nodes: [{"type":"FunctionDeclaration","range":[0,15]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[13,15]},{"type":"ExpressionStatement","range":[16,37]},{"type":"CallExpression","range":[16,36]},{"type":"Identifier","name":"f","range":[16,17]},{"type":"FunctionExpression","range":[18,31]},{"type":"BlockStatement","range":[29,31]},{"type":"Literal","range":[32,35],"value":"2"}],
+				tokens: [{"type":"Keyword","range":[0,8],"value":"function"},{"type":"Identifier","range":[9,10],"value":"f"},{"type":"Punctuator","range":[10,11],"value":"("},{"type":"Punctuator","range":[11,12],"value":")"},{"type":"Punctuator","range":[13,14],"value":"{"},{"type":"Punctuator","range":[14,15],"value":"}"},{"type":"Identifier","range":[16,17],"value":"f"},{"type":"Punctuator","range":[17,18],"value":"("},{"type":"Keyword","range":[18,26],"value":"function"},{"type":"Punctuator","range":[26,27],"value":"("},{"type":"Punctuator","range":[27,28],"value":")"},{"type":"Punctuator","range":[29,30],"value":"{"},{"type":"Punctuator","range":[30,31],"value":"}"},{"type":"String","range":[32,35],"value":"\"2\""},{"type":"Punctuator","range":[35,36],"value":")"},{"type":"Punctuator","range":[36,37],"value":";"}],
+				errors: [{"lineNumber":1,"index":31,"message":"Missing expected ','"}]
+			});
+		});
+		
+		it('argument recovery 3', function() {
+			runTest({
+				source: "function f() {} f(function() {} \"2\" three);",
+				nodes: [{"type":"FunctionDeclaration","range":[0,15]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[13,15]},{"type":"ExpressionStatement","range":[16,43]},{"type":"CallExpression","range":[16,42]},{"type":"Identifier","name":"f","range":[16,17]},{"type":"FunctionExpression","range":[18,31]},{"type":"BlockStatement","range":[29,31]},{"type":"Literal","range":[32,35],"value":"2"},{"type":"Identifier","name":"three","range":[36,41]}],
+				tokens: [{"type":"Keyword","range":[0,8],"value":"function"},{"type":"Identifier","range":[9,10],"value":"f"},{"type":"Punctuator","range":[10,11],"value":"("},{"type":"Punctuator","range":[11,12],"value":")"},{"type":"Punctuator","range":[13,14],"value":"{"},{"type":"Punctuator","range":[14,15],"value":"}"},{"type":"Identifier","range":[16,17],"value":"f"},{"type":"Punctuator","range":[17,18],"value":"("},{"type":"Keyword","range":[18,26],"value":"function"},{"type":"Punctuator","range":[26,27],"value":"("},{"type":"Punctuator","range":[27,28],"value":")"},{"type":"Punctuator","range":[29,30],"value":"{"},{"type":"Punctuator","range":[30,31],"value":"}"},{"type":"String","range":[32,35],"value":"\"2\""},{"type":"Identifier","range":[36,41],"value":"three"},{"type":"Punctuator","range":[41,42],"value":")"},{"type":"Punctuator","range":[42,43],"value":";"}],
+				errors: [{"lineNumber":1,"index":31,"message":"Missing expected ','"},{"lineNumber":1,"index":35,"message":"Missing expected ','"}]
+			});
+		});
+		
+		it('argument recovery 4', function() {
+			runTest({
+				source: "function f() {} f(function() {} \"2\", three);",
+				nodes: [{"type":"FunctionDeclaration","range":[0,15]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[13,15]},{"type":"ExpressionStatement","range":[16,44]},{"type":"CallExpression","range":[16,43]},{"type":"Identifier","name":"f","range":[16,17]},{"type":"FunctionExpression","range":[18,31]},{"type":"BlockStatement","range":[29,31]},{"type":"Literal","range":[32,35],"value":"2"},{"type":"Identifier","name":"three","range":[37,42]}],
+				tokens: [{"type":"Keyword","range":[0,8],"value":"function"},{"type":"Identifier","range":[9,10],"value":"f"},{"type":"Punctuator","range":[10,11],"value":"("},{"type":"Punctuator","range":[11,12],"value":")"},{"type":"Punctuator","range":[13,14],"value":"{"},{"type":"Punctuator","range":[14,15],"value":"}"},{"type":"Identifier","range":[16,17],"value":"f"},{"type":"Punctuator","range":[17,18],"value":"("},{"type":"Keyword","range":[18,26],"value":"function"},{"type":"Punctuator","range":[26,27],"value":"("},{"type":"Punctuator","range":[27,28],"value":")"},{"type":"Punctuator","range":[29,30],"value":"{"},{"type":"Punctuator","range":[30,31],"value":"}"},{"type":"String","range":[32,35],"value":"\"2\""},{"type":"Punctuator","range":[35,36],"value":","},{"type":"Identifier","range":[37,42],"value":"three"},{"type":"Punctuator","range":[42,43],"value":")"},{"type":"Punctuator","range":[43,44],"value":";"}],
+				errors: [{"lineNumber":1,"index":31,"message":"Missing expected ','"}]
+			});
+		});
+		
+		it('argument recovery 5', function() {
+			runTest({
+				source: "function f() {} f(d(one two three) \"2\", three);",
+				nodes: [{"type":"FunctionDeclaration","range":[0,15]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[13,15]},{"type":"ExpressionStatement","range":[16,47]},{"type":"CallExpression","range":[16,46]},{"type":"Identifier","name":"f","range":[16,17]},{"type":"CallExpression","range":[18,34]},{"type":"Identifier","name":"d","range":[18,19]},{"type":"Identifier","name":"one","range":[20,23]},{"type":"Identifier","name":"two","range":[24,27]},{"type":"Identifier","name":"three","range":[28,33]},{"type":"Literal","range":[35,38],"value":"2"},{"type":"Identifier","name":"three","range":[40,45]}],
+				tokens: [{"type":"Keyword","range":[0,8],"value":"function"},{"type":"Identifier","range":[9,10],"value":"f"},{"type":"Punctuator","range":[10,11],"value":"("},{"type":"Punctuator","range":[11,12],"value":")"},{"type":"Punctuator","range":[13,14],"value":"{"},{"type":"Punctuator","range":[14,15],"value":"}"},{"type":"Identifier","range":[16,17],"value":"f"},{"type":"Punctuator","range":[17,18],"value":"("},{"type":"Identifier","range":[18,19],"value":"d"},{"type":"Punctuator","range":[19,20],"value":"("},{"type":"Identifier","range":[20,23],"value":"one"},{"type":"Identifier","range":[24,27],"value":"two"},{"type":"Identifier","range":[28,33],"value":"three"},{"type":"Punctuator","range":[33,34],"value":")"},{"type":"String","range":[35,38],"value":"\"2\""},{"type":"Punctuator","range":[38,39],"value":","},{"type":"Identifier","range":[40,45],"value":"three"},{"type":"Punctuator","range":[45,46],"value":")"},{"type":"Punctuator","range":[46,47],"value":";"}],
+				errors: [{"lineNumber":1,"index":23,"message":"Missing expected ','"},{"lineNumber":1,"index":27,"message":"Missing expected ','"},{"lineNumber":1,"index":34,"message":"Missing expected ','"}]
 			});
 		});
 	});
