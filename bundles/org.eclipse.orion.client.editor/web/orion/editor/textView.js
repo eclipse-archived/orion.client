@@ -3078,6 +3078,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		_handleBlur: function (e) {
 			this._cancelCheckSelection();
 			if (this._ignoreBlur) { return; }
+			this._commitIME();
 			this._hasFocus = false;
 			/*
 			* Bug in IE 8 and earlier. For some reason when text is deselected
