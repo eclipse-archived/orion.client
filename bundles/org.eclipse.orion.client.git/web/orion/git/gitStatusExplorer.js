@@ -546,7 +546,9 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 				}
 			});
 
-			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "eclipse.orion.git.commitCommand", 100); //$NON-NLS-0$
+			this.commandService.addCommandGroup(stagedSection.actionsNode.id, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.commitCommand"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "eclipse.orion.git.commitCommand", 100, "eclipse.gitCommitGroup"); //$NON-NLS-0$
+			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "eclipse.orion.git.commitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-0$
 			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "orion.explorer.expandAll", 200); //$NON-NLS-0$
 			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "orion.explorer.collapseAll", 300); //$NON-NLS-0$
 			this.commandService.registerCommandContribution(stagedSection.selectionNode.id, "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
@@ -796,12 +798,11 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 							that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id,
 								currentBranch.RemoteLocation[0].Children[0], that, "button"); //$NON-NLS-0$
 						}
-
+						
 						that.commandService.addCommandGroup(titleWrapper.actionsNode.id, "eclipse.gitPushGroup", 1000, "Push", null, null, null, "Push", null, "eclipse.orion.git.push"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.push", 1100, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
 						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.pushBranch", 1200, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
 						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.pushToGerrit", 1200, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
-						
 						that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, currentBranch, that, "button"); //$NON-NLS-0$
 
 						if (currentBranch.RemoteLocation[0] === null) {

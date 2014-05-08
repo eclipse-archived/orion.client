@@ -408,5 +408,6 @@ define({
 	"Successfully added ${0} with value ${1}":"Successfully added ${0} with value ${1}",
 	"Signed-off-by: ":"Signed-off-by: ",
 	"Change-Id: ":"Change-Id: ",
-	"REJECTED_NONFASTFORWARD":"Push is non-fastforward and was rejected. Use Fetch to see new commits that must be merged."
+	"REJECTED_NONFASTFORWARD":"Push is non-fastforward and was rejected. Use Fetch to see new commits that must be merged.",
+	"Commit and Push" : "Commit and Push"
 });
