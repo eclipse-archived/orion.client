@@ -147,6 +147,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 		this.gitClient = options.gitClient;
 		this.hideNewBranch = options.hideNewBranch;
 		this.serviceRegistry = options.serviceRegistry;
+		this._afterHiding = options.closeCallback;
 
 		this.buttons = [];
 
