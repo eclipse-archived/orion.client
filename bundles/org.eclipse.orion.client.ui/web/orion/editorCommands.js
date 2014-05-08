@@ -604,7 +604,7 @@ define([
 					deferred.then(function(commandOptions){
 						var command = makeCommand(info, service, commandOptions);
 						self.commandService.addCommand(command);
-						self.commandService.registerCommandContribution(self.toolbarId, command.id, position, "orion.menuBarToolsGroup", false, createKeyBinding(info.key)); //$NON-NLS-0$
+						self.commandService.registerCommandContribution(self.toolbarId, command.id, position, "orion.menuBarToolsGroup", info.bindingOnly, createKeyBinding(info.key)); //$NON-NLS-0$
 					});
 					position++;
 				});
