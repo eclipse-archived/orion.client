@@ -66,26 +66,43 @@ define([
 		}
 	});
 	
-	function repoURLHandler(repoURL, baseURL){
+	function repoURLHandler(repoURL, baseURL, fileBrowser){
 		this.triggerNodeId = "orion.browse.repoURLTrigger";
 		this.dropdownNodeId = "orion.browse.repoURLDropdown";
 		this.popupTextAreaId = "orion.browse.repoURLInput";
-		if(baseURL) {
+		
+		this.baseURL = baseURL;
+		this.repoURL = repoURL;
+		this.fileBrowser = fileBrowser;
+		
+		if (this.baseURL) {
 			this.popupTemplate = RepoAndBaseURLTriggerTemplate;
-			var found = repoURL.match(/\/([^\/]+)\/([^\/]+)$/);
-			if (found) {
-				this.popupTextAreaValue = "teamRepository=" + baseURL + "\n" +
-								   "userId=" + decodeURIComponent(found[1]) + "\n" + 
-								   "userName=" + decodeURIComponent(found[1]) + "\n" + 
-								   "projectAreaName=" + decodeURIComponent(found[1]) + " | " + decodeURIComponent(found[2]);
-			} else {
-				this.popupTextAreaValue = baseURL;
-			}
 		} else {
 			this.popupTemplate = RepoURLTriggerTemplate;
-			this.popupTextAreaValue = repoURL;
 		}
+		
 		this.getTextAreaValue = function() {
+			if(this.baseURL) {
+				var found = this.repoURL.match(/\/([^\/]+)\/([^\/]+)$/);
+				if (found) {
+					this.popupTextAreaValue = "teamRepository=" + this.baseURL + "\n" +
+									   "userId=" + decodeURIComponent(found[1]) + "\n" + 
+									   "userName=" + decodeURIComponent(found[1]) + "\n" + 
+									   "projectAreaName=" + decodeURIComponent(found[1]) + " | " + decodeURIComponent(found[2]);
+								
+					// Check if we can find a stream ID to put into the configuration
+					var file = this.fileBrowser._branchSelector.getActiveResource(this.fileBrowser._branchSelector.activeResourceLocation);
+					
+					if (file && file.RTCSCM && file.RTCSCM.ItemId) {
+						this.popupTextAreaValue = this.popupTextAreaValue + "\nstreamId="+ file.RTCSCM.ItemId;
+					}
+				} else {
+					this.popupTextAreaValue = this.baseURL;
+				}
+			} else {
+				this.popupTextAreaValue = this.repoURL;
+			}
+		
 			return this.popupTextAreaValue;
 		}.bind(this);
 	}
@@ -266,7 +283,7 @@ define([
 				this.shareSnippetHandler = new shareSnippetHandler(this.widgetSource);
 			}
 			if(this.repoURL) {
-				this.repoURLHandler = this.snippetShareOptions ? null : new repoURLHandler(this.repoURL, this.baseURL);
+				this.repoURLHandler = this.snippetShareOptions ? null : new repoURLHandler(this.repoURL, this.baseURL, this);
 			}
 			if(!this.snippetShareOptions) {
 				this._registerCommands();
@@ -390,7 +407,7 @@ define([
 									labelHeader: "Component",
 									commandScopeId: "orion.browse.compSelector", //$NON-NLS-0$
 									dropDownId: "orion.browse.switchcomp", //$NON-NLS-0$
-									dropDownTooltip: "Select a componet", //$NON-NLS-0$
+									dropDownTooltip: "Select a component", //$NON-NLS-0$
 									allItems: contents
 								});
 							}
@@ -474,9 +491,9 @@ define([
 				if(this._componentSelector) {
 					if(resource.Parents) {
 						if(resource.Parents.length === 1) {//Skip the branch level parents
-							resource.Parents[resource.Parents.length -1].skip = true;
+							resource.Parents[0].skip = true;
 							resource.skip = true;
-						} else if(resource.Parents.length > 1) {//Skip the componet level parents
+						} else if(resource.Parents.length > 1) {//Skip the component level parents
 							resource.Parents[resource.Parents.length -1].skip = true;
 							resource.Parents[resource.Parents.length -2].skip = true;
 						} else {

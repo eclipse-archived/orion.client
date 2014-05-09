@@ -71,8 +71,8 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	max-width: calc(100% - 1px - 4px - 28px);
-	max-width: -webkit-calc(100% - 1px - 4px - 28px);
+	max-width: calc(100% - 1px - 4px - 35px);
+	max-width: -webkit-calc(100% - 1px - 4px - 35px);
 	-moz-user-select: -moz-none;
 	-webkit-user-select: none;
 	-ms-user-select: none;
@@ -237,7 +237,7 @@ a.currentLocation:hover {
 	border: 1px solid #dadada;
 	margin-top: 1px;
 	margin-left: 9px;
-	width: 340px;
+	width: 328px;
 	height: 64px;
 	margin-bottom: 4px;
 	overflow: hidden;
