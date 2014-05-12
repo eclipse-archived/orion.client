@@ -30,6 +30,18 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 	}
 
 	GitHubFileImpl.prototype = {
+		_getBranchName: function(location) {
+			var url = new URL(location);
+			var path = url.pathname;
+			if (path.indexOf(this._contentsPath) === 0) {
+				var suffix = path.substring(this._contentsPath.length);
+				var matches = suffix.match(/\!([^\/]+)(.*)/);
+				if (matches && matches[1]) {
+					return matches[1];
+				}
+			}
+			return "master";
+		},
 		_refPathToQuery: function(location) {
 			var url = new URL(location);
 			var path = url.pathname;
@@ -84,7 +96,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 		},
 		_getBranches: function() {
 			var _this = this;
-			return xhr("GET", this._repoURL.href + "/branches", {
+			return xhr("GET", this._repoURL.href + "/branches?per_page=1000", {
 				headers: this._headers,
 				timeout: 15000
 			}).then(function(result) {
@@ -131,7 +143,8 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 						Length: entry.size,
 						LocalTimeStamp: 0,
 						Directory: false,
-						Sha: entry.sha
+						Sha: entry.sha,
+						CommitPath: entry.path
 					};
 					if (entry.type === "dir") {
 						result.Directory = true;
@@ -224,38 +237,56 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			}
 			return new Deferred().resolve();
 		},
+		_readMoreInfo: function(child, branchName) {
+			var _this = this;
+			return xhr("GET", _this._repoURL.href + "/commits?sha=" + branchName + "&path=" + child.CommitPath, {
+				headers: this._headers,
+				timeout: 15000
+			}).then(function(result) {
+				var content = JSON.parse(result.response);
+				if(content.length > 0 && content[0].commit && content[0].commit.author && content[0].commit.author.date) {
+					child.LocalTimeStamp = content[0].commit.author.date;
+					child.MoreInformation = content[0].commit.author.name + ": " + content[0].commit.message;
+				}
+				return child;
+			}, function(error) { return _this._handleError(error);});
+		},
 		_refineFetchedChildren: function(location, children) {
 			var _this = this;
-			var filesWithoutSize = [];
+			var branchName = this._getBranchName(location);
+			var filesWithoutSize = [], requestTimeStamps = [];
 			children.forEach(function(child) {
+				requestTimeStamps.push(_this._readMoreInfo(child, branchName));
 				if(!child.Directory && !child.Length) {
 					filesWithoutSize.push(child);
 				}
 			});
-			if(filesWithoutSize.length > 0) {// We only want to use /git/trees/ API if there is any file that does not have size info
-				return _this._getSHA(location).then(function(sha) {
-					if(sha){
-						return xhr("GET", _this._repoURL.href + "/git/trees/" + sha, {
-							headers: this._headers,
-							timeout: 15000
-						}).then(function(result) {
-							var content = JSON.parse(result.response);
-							if(content && content.tree) {// All the children are here in content.tree
-								filesWithoutSize.forEach(function(file) {
-									content.tree.forEach(function(item) {
-										if(item.sha === file.Sha) {
-											file.Length = item.size;// Assign the size of a tree item responded from the /git/tree/ API.
-										}
+			return Deferred.all(requestTimeStamps).then(function(){
+				if(filesWithoutSize.length > 0) {// We only want to use /git/trees/ API if there is any file that does not have size info
+					return _this._getSHA(location).then(function(sha) {
+						if(sha){
+							return xhr("GET", _this._repoURL.href + "/git/trees/" + sha, {
+								headers: this._headers,
+								timeout: 15000
+							}).then(function(result) {
+								var content = JSON.parse(result.response);
+								if(content && content.tree) {// All the children are here in content.tree
+									filesWithoutSize.forEach(function(file) {
+										content.tree.forEach(function(item) {
+											if(item.sha === file.Sha) {
+												file.Length = item.size;// Assign the size of a tree item responded from the /git/tree/ API.
+											}
+										});
 									});
-								});
-							}
-							return children;
-						}, function(error) { return _this._handleError(error);});
-					}
-					return children;
-				});
-			}
-			return children;
+								}
+								return children;
+							}, function(error) { return _this._handleError(error);});
+						}
+						return children;
+					});
+				}
+				return children;
+			});
 		},
 		fetchChildren: function(location) {
 			var _this = this;

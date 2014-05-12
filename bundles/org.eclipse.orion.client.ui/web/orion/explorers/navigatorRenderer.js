@@ -22,6 +22,7 @@ define([
 	'orion/webui/littlelib'
 ], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, lib) {
 		
+	var max_more_info_column_length = 100;
 	function isImage(contentType) {
 		switch (contentType && contentType.id) {
 			case "image/jpeg": //$NON-NLS-0$
@@ -315,6 +316,9 @@ define([
 	 * @returns {Element}
 	 */
 	NavigatorRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		var timeStampCase = item.MoreInformation ? 2 : 1;
+		var sizeCase = item.MoreInformation ? 3 : 2;
+		var moreInfoCase = item.MoreInformation ? 1 : -1;
 		switch(col_no){
 		case 0:
 			var col = document.createElement('td'); //$NON-NLS-0$
@@ -354,7 +358,7 @@ define([
 				this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool", null, true); //$NON-NLS-0$
 			}
 			return col;
-		case 1:
+		case timeStampCase:
 			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
 			if (this.oneColumn) {
 				return null;
@@ -365,7 +369,7 @@ define([
 				dateColumn.textContent = fileDate.toLocaleString();
 			}
 			return dateColumn;
-		case 2:
+		case sizeCase:
 			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
 			if (this.oneColumn) {
 				return null;
@@ -378,6 +382,19 @@ define([
 			}
 			sizeColumn.style.textAlign = "right"; //$NON-NLS-0$
 			return sizeColumn;
+		case moreInfoCase:
+			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
+			if (this.oneColumn || !item.MoreInformation) {
+				return null;
+			}
+			var messageColumn = document.createElement('td'); //$NON-NLS-0$
+			var message = item.MoreInformation;
+			if(item.MoreInformation.length > max_more_info_column_length) {
+				message = message.substring(0, max_more_info_column_length - 3) + "...";
+			}
+			messageColumn.textContent = message;
+			//messageColumn.style.textAlign = "right"; //$NON-NLS-0$
+			return messageColumn;
 		}
 	};
 	NavigatorRenderer.prototype.constructor = NavigatorRenderer;
