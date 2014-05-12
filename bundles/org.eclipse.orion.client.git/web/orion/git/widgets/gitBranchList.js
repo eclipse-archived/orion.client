@@ -230,7 +230,7 @@ define([
 						actionsArea.id = "branchActionsArea";
 						horizontalBox.appendChild(actionsArea);
 					} 
-					this.commandService.renderCommands(this.actionScopeId, actionsArea, item, this, "tool");	 //$NON-NLS-0$	
+					this.commandService.renderCommands(this.actionScopeId, actionsArea, item, this.explorer, "tool");	 //$NON-NLS-0$	
 					return td;
 			}
 		}
