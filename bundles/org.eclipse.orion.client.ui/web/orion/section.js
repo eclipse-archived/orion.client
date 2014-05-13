@@ -36,6 +36,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		
 		this._expandImageClass = "core-sprite-openarrow"; //$NON-NLS-0$
 		this._collapseImageClass = "core-sprite-closedarrow"; //$NON-NLS-0$
+		this._progressImageClass = "core-sprite-progress"; //$NON-NLS-0$
 		this._twistieSpriteClass = "modelDecorationSprite"; //$NON-NLS-0$
 		
 		// ...
@@ -362,6 +363,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 				progressTitle+=this._loading[loadingId];
 			}
 			this._progressNode.title = progressTitle;
+			this._updateExpandedState(false);
 		},
 		
 		_monitorDone: function(monitorId){
@@ -377,6 +379,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 			if(progressTitle===""){
 				this._progressNode.style.visibility = "hidden"; //$NON-NLS-0$
 			}
+			this._updateExpandedState(false);
 		},
 		
 		_changeExpandedState: function() {
@@ -391,11 +394,14 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		
 		_updateExpandedState: function(storeValue) {
 			var isExpanded = !this.hidden;
+			var isProgress = this.working;
 			var expandImage = this.twistie;
 			var id = this.id;
 			if (expandImage) {
-				expandImage.classList.add(isExpanded ? this._expandImageClass : this._collapseImageClass);
-				expandImage.classList.remove(isExpanded ? this._collapseImageClass : this._expandImageClass);
+				expandImage.classList.remove(this._expandImageClass);
+				expandImage.classList.remove(this._collapseImageClass);
+				expandImage.classList.remove(this._progressImageClass);
+				expandImage.classList.add(isProgress ? this._progressImageClass : isExpanded ? this._expandImageClass : this._collapseImageClass); //$NON-NLS-0$
 			}
 			// if a preference service was specified, we remember the state.
 			if (this._preferenceService && storeValue) {
@@ -434,6 +440,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 	
 	ProgressMonitor.prototype = {
 		begin: function(message){
+			this._section.working = true;
 			this.status = message;
 			this._section._setMonitorMessage(this.id, message);
 		},
@@ -444,6 +451,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		},
 		
 		done: function(status){
+			this._section.working = false;
 			this.status = status;
 			this._section._monitorDone(this.id);
 		}
