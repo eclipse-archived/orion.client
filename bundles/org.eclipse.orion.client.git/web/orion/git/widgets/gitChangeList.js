@@ -247,6 +247,7 @@ define([
 		this.changes = options.changes;
 		this.section = options.section;
 		this.location = options.location;
+		this.editableInComparePage = options.editableInComparePage;
 		this.handleError = options.handleError;
 		this.createSelection();
 		this.updateCommands();
@@ -395,7 +396,7 @@ define([
 							hasConflict,
 							diffContainer,
 							compareWidgetActionWrapper.id,
-							false, //editableInComparePage
+							explorer.editableInComparePage,
 							{
 								navGridHolder : navGridHolder,
 								additionalCmdRender : function(gridHolder) {

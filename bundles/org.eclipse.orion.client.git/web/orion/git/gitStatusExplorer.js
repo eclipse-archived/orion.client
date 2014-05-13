@@ -155,6 +155,7 @@ define([
 				prefix: "unstaged",
 				location: location,
 				section: unstagedSection,
+				editableInComparePage: true,
 				handleError: this.handleError
 			});
 			return this.unstagedNavigator.display();
@@ -193,6 +194,7 @@ define([
 				prefix: "staged",
 				location: location,
 				section: stagedSection,
+				editableInComparePage: true,
 				handleError: this.handleError
 			});
 			return this.stagedNavigator.display();
