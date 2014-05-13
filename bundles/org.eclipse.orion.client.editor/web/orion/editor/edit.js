@@ -283,7 +283,8 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 				if (contentType) {
 					contentType = contentType.replace(/[*|:/".<>?+]/g, '_');
 					require(["./stylers/" + contentType + "/syntax"], function(grammar) { //$NON-NLS-1$ //$NON-NLS-0$
-						this.styler = new mTextStyler.TextStyler(textView, annotationModel, grammar.grammars, grammar.id);
+						var stylerAdapter = new mTextStyler.createPatternBasedAdapter(grammar.grammars, grammar.id);
+						this.styler = new mTextStyler.TextStyler(textView, annotationModel, stylerAdapter);
 					});
 				}
 				if (contentType === "text/css") { //$NON-NLS-0$

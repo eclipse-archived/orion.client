@@ -125,6 +125,9 @@ define([
 		getParent: function() {
 			return this._parent;
 		},
+		setParent: function(parent) {
+			this._parent = parent;	
+		},
 		updateSourceCodeActions: function(prefs, sourceCodeActions) {
 			if (sourceCodeActions) {
 				sourceCodeActions.setAutoPairParentheses(prefs.autoPairParentheses);
@@ -263,7 +266,7 @@ define([
 
 			var self = this;
 
-			var editorDomNode = this._parent;
+//			var editorDomNode = this._parent;
 			var readonly = this.readonly;
 			var commandRegistry = this.commandRegistry;
 			var serviceRegistry = this.serviceRegistry;
@@ -276,7 +279,7 @@ define([
 			var textViewFactory = function() {
 				var options = self.updateViewOptions(self.settings);
 				objects.mixin(options, {
-					parent: editorDomNode,
+					parent: self._parent,
 					model: new mProjectionTextModel.ProjectionTextModel(self.model || new mTextModel.TextModel()),
 					wrappable: true
 				});
@@ -410,7 +413,7 @@ define([
 				contentAssistFactory: contentAssistFactory,
 				keyBindingFactory: keyBindingFactory,
 				statusReporter: this.statusReporter,
-				domNode: editorDomNode
+				domNode: this._parent
 			});
 			editor.id = "orion.editor"; //$NON-NLS-0$
 			editor.processParameters = function(params) {
