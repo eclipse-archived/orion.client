@@ -362,7 +362,7 @@ define([
 							this.sectionContents.appendChild(div);
 						} else if(this.binaryView) {
 							if(this.binaryView.domElement) {
-								this.updateBinaryView(this.binaryView.domElement);
+								this.updateBinaryView(this.binaryView.domElement, this.binaryView.message);
 							}						
 						} else {
 							this.folderNavExplorer = new FolderNavExplorer({
@@ -393,11 +393,25 @@ define([
 			var sectionsOrder = ["folderNav", "readme"];
 			renderSections.apply(this, [sectionsOrder]);
 		},
-		updateBinaryView: function(domElement) {
+		updateBinaryView: function(domElement, message) {
 			var binaryTable = document.createElement("table");
 			binaryTable.classList.add("binaryViewTable");
-			var tr = document.createElement("tr");
-			var td = document.createElement("td"); 
+			var tr, td;
+			if(message){
+				tr = document.createElement("tr");
+				tr.classList.add("binaryViewTD");
+				td = document.createElement("td"); 
+				td.classList.add("binaryViewTD");
+				var messageDiv = document.createElement("span");
+				messageDiv.textContent = message;
+				td.appendChild(messageDiv);
+				tr.appendChild(td);
+				binaryTable.appendChild(tr);
+			}
+			tr = document.createElement("tr");
+			tr.classList.add("binaryViewTD");
+			td = document.createElement("td"); 
+			td.classList.add("binaryViewTD");
 			var binaryContent = document.createElement("div");
 			binaryContent.appendChild(domElement);
 			td.appendChild(binaryContent);

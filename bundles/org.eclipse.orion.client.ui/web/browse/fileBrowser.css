@@ -178,7 +178,11 @@ a.currentLocation:hover {
     text-align:center; 
     vertical-align:middle;
     min-height: 60px;
- }
+}
+
+.binaryViewTD {
+	border: 0; 
+}
 
 .messageViewTable {
     width:100%;

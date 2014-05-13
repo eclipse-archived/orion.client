@@ -117,5 +117,5 @@ define({
 	"Download": "Download",
 	"Download_tooltips": "Download the file contents as the displayed name",
 	"Downloading...": "Reading file contents...",
-	"Download not supported": "Contents export is not supported in this browser. Please use supported browsers such as Chrome, Firefox and Internet Explorer."
+	"Download not supported": "Contents download is not supported in this browser."
 });

@@ -118,7 +118,8 @@ define([
 			extension: ["pdf"]
 		},
 		{	id: "application/octet-stream",
-			name: "octet-stream"
+			name: "octet-stream",
+			extension: ["exe", "bin", "doc", "ppt"]
 		},
 		{	id: "application/zip",
 			"extends": "application/octet-stream",

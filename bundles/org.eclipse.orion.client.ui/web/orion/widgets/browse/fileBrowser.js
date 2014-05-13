@@ -560,13 +560,13 @@ define([
 				this._statusService.setProgressResult({Severity: "error", Message: "This type of file is not supportef in Safri. Please use Chrome or FireFox."});									
 			}.bind(this);
 		},
-		_generateViewLink: function(contents, metadata, cType, browseViewOptons) {
+		_generateViewLink: function(contents, metadata, cType, browseViewOptons, message) {
 			var downloadLink = document.createElement("a"); //$NON-NLS-0$
 			var blobObj = new Blob([contents],{type: cType.id});
 			downloadLink.href = URL.createObjectURL(blobObj);
 			downloadLink.classList.add("downloadLinkName"); //$NON-NLS-0$
 			downloadLink.appendChild(document.createTextNode("View " + metadata.Name));
-			browseViewOptons.binaryView = {domElement: downloadLink};
+			browseViewOptons.binaryView = {domElement: downloadLink, message: message};
 		},
 		_getEditorView: function(input, contents, metadata) {
 			var view = null;
@@ -611,7 +611,7 @@ define([
 							linkElement.appendChild(document.createTextNode("Download " + metadata.Name));
 							browseViewOptons.binaryView = {domElement: linkElement};
 						} else {
-							this._generateViewLink(contents, metadata, {id: "text/plain"}, browseViewOptons);
+							this._generateViewLink(contents, metadata, {id: "text/plain"}, browseViewOptons, "The browser does not support the contents download directlly. But you can view the raw contents and save it from the browser.");
 						}
 					} else if(this._isBrowserRenderable(cType)) {
 						this._generateViewLink(contents, metadata, cType, browseViewOptons);
