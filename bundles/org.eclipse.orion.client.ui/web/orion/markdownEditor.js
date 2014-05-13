@@ -565,8 +565,9 @@ define([
 			previewDiv.id = ID_PREVIEW; //$NON-NLS-0$
 			previewDiv.style.position = "absolute"; //$NON-NLS-0$
 			previewDiv.style.height = "100%"; //$NON-NLS-0$
-			previewDiv.style.overflowX = "hidden";
-			previewDiv.style.overflowY = "auto";
+			previewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
+			previewDiv.style.overflowY = "auto"; //$NON-NLS-0$
+			previewDiv.classList.add("orionMarkdown"); //$NON-NLS-0$
 			rootDiv.appendChild(previewDiv);
 
 			new mSplitter.Splitter({
