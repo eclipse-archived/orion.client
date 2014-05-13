@@ -877,6 +877,10 @@ textarea.parameterInput {
 	vertical-align: middle;
 }
 
+.navColumnBold {
+    font-weight: bold;
+}
+
 .icon-inline {
 	display: inline-block;
 	vertical-align: middle;

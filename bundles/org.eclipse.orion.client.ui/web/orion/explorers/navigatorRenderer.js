@@ -316,9 +316,9 @@ define([
 	 * @returns {Element}
 	 */
 	NavigatorRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-		var timeStampCase = item.MoreInformation ? 2 : 1;
-		var sizeCase = item.MoreInformation ? 3 : 2;
-		var moreInfoCase = item.MoreInformation ? 1 : -1;
+		var timeStampCase = item.LastCommit ? 2 : 1;
+		var sizeCase = item.LastCommit ? 3 : 2;
+		var commitCase = item.LastCommit ? 1 : -1;
 		switch(col_no){
 		case 0:
 			var col = document.createElement('td'); //$NON-NLS-0$
@@ -382,18 +382,28 @@ define([
 			}
 			sizeColumn.style.textAlign = "right"; //$NON-NLS-0$
 			return sizeColumn;
-		case moreInfoCase:
-			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
-			if (this.oneColumn || !item.MoreInformation) {
+		case commitCase:// LastCommit field is optional. For file services that dod not return this properties, we do not have to render this column.
+			if (this.oneColumn || !item.LastCommit) {
 				return null;
 			}
 			var messageColumn = document.createElement('td'); //$NON-NLS-0$
-			var message = item.MoreInformation;
-			if(item.MoreInformation.length > max_more_info_column_length) {
-				message = message.substring(0, max_more_info_column_length - 3) + "...";
+			var message = item.LastCommit.Message ? item.LastCommit.Message : "";
+			var authorName = item.LastCommit.Author && item.LastCommit.Author.Name ? item.LastCommit.Author.Name : "";
+			if((authorName.length +  message.length + 2) > max_more_info_column_length) {
+				var trimmedLength = max_more_info_column_length - authorName.length - 5;
+				if(trimmedLength > 0) {
+					message = message.substring(0, trimmedLength) + "...";
+				} else {
+					message = "";
+				}
 			}
-			messageColumn.textContent = message;
-			//messageColumn.style.textAlign = "right"; //$NON-NLS-0$
+			var fragment = document.createDocumentFragment();
+			fragment.textContent = "${0} " + message;
+			var nameLabel = document.createElement("span"); //$NON-NLS-0$
+			nameLabel.appendChild(document.createTextNode(authorName + ":")); //$NON-NLS-0$
+			nameLabel.classList.add("navColumnBold"); //$NON-NLS-0$
+			lib.processDOMNodes(fragment, [nameLabel]);
+			messageColumn.appendChild(fragment);
 			return messageColumn;
 		}
 	};

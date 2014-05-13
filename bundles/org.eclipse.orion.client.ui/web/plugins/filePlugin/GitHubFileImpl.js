@@ -9,10 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define URL TextDecoder*/
+/*global define URL console TextDecoder*/
 
 define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "orion/URL-shim"], function(Deferred, xhr, Base64) {
-
+	
 	function GitHubFileImpl(repoURL, token) {
 		this._originalRepoURL = repoURL;//Used for reference in error message to indicate a repo URL
 		var found = repoURL.match(/https\:\/\/github\.com(?:\:443)?\/([^/]+)\/([^/]+).git$/);
@@ -29,6 +29,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 		}
 	}
 
+	var _request_commit_info = false;
 	GitHubFileImpl.prototype = {
 		_getBranchName: function(location) {
 			var url = new URL(location);
@@ -96,7 +97,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 		},
 		_getBranches: function() {
 			var _this = this;
-			return xhr("GET", this._repoURL.href + "/branches?per_page=1000", {
+			return xhr("GET", this._repoURL.href + "/branches?per_page=1000", {//https://developer.github.com/v3/#pagination
 				headers: this._headers,
 				timeout: 15000
 			}).then(function(result) {
@@ -237,31 +238,44 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			}
 			return new Deferred().resolve();
 		},
-		_readMoreInfo: function(child, branchName) {
+		_getCommitInfo: function(child, branchName) {
 			var _this = this;
-			return xhr("GET", _this._repoURL.href + "/commits?sha=" + branchName + "&path=" + child.CommitPath, {
+			return xhr("GET", _this._repoURL.href + "/commits?sha=" + branchName + "&path=" + child.CommitPath + "&per_page=1", {//https://developer.github.com/v3/#pagination
 				headers: this._headers,
 				timeout: 15000
 			}).then(function(result) {
 				var content = JSON.parse(result.response);
 				if(content.length > 0 && content[0].commit && content[0].commit.author && content[0].commit.author.date) {
 					child.LocalTimeStamp = content[0].commit.author.date;
-					child.MoreInformation = content[0].commit.author.name + ": " + content[0].commit.message;
+					child.LastCommit = {};
+					child.LastCommit.Author = {};
+					child.LastCommit.Author.Date = content[0].commit.author.date;
+					child.LastCommit.Author.Name = content[0].commit.author.name ? content[0].commit.author.name : "";
+					child.LastCommit.Author.Email = content[0].commit.author.email ? content[0].commit.author.email : "";
+					if(content[0].commit.committer) {
+						child.LastCommit.Committer = {};
+						child.LastCommit.Committer.Date = content[0].commit.committer.date ? content[0].commit.committer.date : "";
+						child.LastCommit.Committer.Name = content[0].commit.committer.name ? content[0].commit.committer.name : "";
+						child.LastCommit.Committer.Email = content[0].commit.committer.email ? content[0].commit.committer.email : "";
+					}
+					child.LastCommit.Message = content[0].commit.message ? content[0].commit.message : "";
 				}
 				return child;
 			}, function(error) { return _this._handleError(error);});
 		},
 		_refineFetchedChildren: function(location, children) {
 			var _this = this;
-			var branchName = this._getBranchName(location);
-			var filesWithoutSize = [], requestTimeStamps = [];
-			children.forEach(function(child) {
-				requestTimeStamps.push(_this._readMoreInfo(child, branchName));
-				if(!child.Directory && !child.Length) {
-					filesWithoutSize.push(child);
-				}
-			});
-			return Deferred.all(requestTimeStamps).then(function(){
+			var filesWithoutSize = [], commitPromises = [];
+			if(_request_commit_info) {
+				var branchName = this._getBranchName(location);
+				children.forEach(function(child) {
+					commitPromises.push(_this._getCommitInfo(child, branchName));
+					if(!child.Directory && !child.Length) {
+						filesWithoutSize.push(child);
+					}
+				});
+			} 
+			return Deferred.all(commitPromises).then(function(){
 				if(filesWithoutSize.length > 0) {// We only want to use /git/trees/ API if there is any file that does not have size info
 					return _this._getSHA(location).then(function(sha) {
 						if(sha){
