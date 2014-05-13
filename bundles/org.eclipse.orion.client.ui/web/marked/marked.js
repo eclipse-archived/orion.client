@@ -192,8 +192,7 @@ Lexer.prototype.token = function(src, top) {
       this.tokens.push({
         type: 'heading',
         depth: cap[1].length,
-        text: cap[2],
-        detail: {style: 'atx'} // this line added by Orion
+        text: cap[2]
       });
       continue;
     }
@@ -236,8 +235,7 @@ Lexer.prototype.token = function(src, top) {
       this.tokens.push({
         type: 'heading',
         depth: cap[2] === '=' ? 1 : 2,
-        text: cap[1],
-        detail: {style: 'Setext'} // this line added by Orion
+        text: cap[1]
       });
       continue;
     }

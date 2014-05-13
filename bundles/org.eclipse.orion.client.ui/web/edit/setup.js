@@ -1,5 +1,4 @@
 /*******************************************************************************
- *
  * @license
  * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
@@ -258,6 +257,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 	// Shared text model and undo stack
 	var model = new mTextModel.TextModel();
 	var undoStack = new mUndoStack.UndoStack(model, 500);
+	var lastMetadata;
 	var contextImpl = {};
 	[	
 		"getText", //$NON-NLS-0$
@@ -278,11 +278,13 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 				view = new mFolderView.FolderView(options);
 			} else {
 				var id = input.editor;
+				editorView.setParent(editorDomNode);
 				if (!id || id === "orion.editor") { //$NON-NLS-0$
 					view = editorView;
 				} else if (id === "orion.viewer.markdown") { //$NON-NLS-0$
 					view = new mMarkdownView.MarkdownEditorView(options);
 				} else if (id === "orion.editor.markdown") { //$NON-NLS-0$
+					options.editorView = editorView;
 					view = new mMarkdownEditor.MarkdownEditorView(options);
 				} else {
 					var editors = serviceRegistry.getServiceReferences("orion.edit.editor"); //$NON-NLS-0$
@@ -301,11 +303,15 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			if (currentEditorView) {
 				currentEditorView.destroy();
 			}
+			if (lastMetadata && lastMetadata.Location !== metadata.Location) {
+				model.setText("");
+			}
 			currentEditorView = view;
 			if (currentEditorView) {
 				currentEditorView.create();
 			}
 		}
+		lastMetadata = metadata;
 		return currentEditorView;
 	}
 	

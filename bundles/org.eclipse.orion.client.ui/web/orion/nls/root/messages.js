@@ -25,6 +25,7 @@ define({
 	"Filter bindings": "Filter bindings",
 	"Orion Editor": "Orion Editor",
 	"Orion Image Viewer": "Orion Image Viewer",
+	"Orion Markdown Editor": "Orion Markdown Editor",
 	"Orion Markdown Viewer": "Orion Markdown Viewer",
 	"Orion JSON Editor": "Orion JSON Editor",
 	"View on Site": "View on Site",

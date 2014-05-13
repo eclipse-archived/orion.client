@@ -887,10 +887,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				this._view = null;
 			}
 		},
-//		getPatterns: function(offset) {
-//			var block = this._findBlock(this._rootBlock, offset);
-//			return block.getPatterns();
-//		},
+		getRootBlock: function() {
+			return this._rootBlock;
+		},
 		getStyleAccessor: function() {
 			return this._accessor;
 		},
@@ -1239,7 +1238,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(start));
 			var ancestorBlock = this._findBlock(this._rootBlock, start);
 
-			var blocks, parentBlock, redraw, text, te, ts;
+			var blockExtended, blocks, parentBlock, redraw, text, te, ts;
 			do {
 				parentBlock = ancestorBlock.parent;
 
@@ -1247,7 +1246,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				 * Determine whether ancestorBlock contains the full range of
 				 * text whose styling may be affected by this model change.
 				 */
-				if (parentBlock) {
+				if (!blockExtended && parentBlock) {
 					/* verify that ancestorBlock's start and end matches are not affected by this change */
 					text = baseModel.getText(ancestorBlock.start, Math.min(charCount, ancestorBlock.end + changeCount + 1));
 					if (!this._stylerAdapter.verifyBlock(baseModel, text, ancestorBlock, changeCount)) {
@@ -1266,7 +1265,22 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				var blockStart = binarySearch(blocks, lineStart, true);
 				var blockEnd = binarySearch(blocks, end, false, blockStart - 1, blockCount);
 
-				if (blockStart < blockCount && blocks[blockStart].start <= lineStart && lineStart < blocks[blockStart].end) {
+				/*
+				 * If the change immediately follows the preceding block then test whether
+				 * the block should be extended.
+				 */
+				blockExtended = false;
+				if (blockStart && blocks.length && blocks[blockStart - 1].end === start) {
+					text = baseModel.getText(blocks[blockStart - 1].start, Math.min(charCount, start + 1));
+					var tempBlocks = this.computeBlocks(baseModel, text, ancestorBlock, blocks[blockStart - 1].start, null, null, null);
+					if (tempBlocks.length && tempBlocks[0].end !== blocks[blockStart - 1].end) {
+						/* the change has affected the preceding block's end, so include this block */
+						blockStart--;
+						blockExtended = true;
+					}
+				}
+
+				if (blockStart < blockCount && blocks[blockStart].start <= lineStart && (lineStart < blocks[blockStart].end || blockExtended)) {
 					ts = blocks[blockStart].start;
 					if (ts > start) { ts += changeCount; }
 				} else if (blockStart === blockCount && blockCount > 0 && ancestorBlock.end - changeCount === blocks[blockCount - 1].end) {
@@ -1363,7 +1377,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				}
 			}
 
-			if (!newBlocks.length) {
+			if (!blocks.length && !newBlocks.length) {
 				this.dispatchEvent({
 					type: "BlocksChanged",
 					old: [ancestorBlock],

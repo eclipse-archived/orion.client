@@ -78,6 +78,14 @@
 }
 
 .markup.other.separator {
+	color: #00008F;
+}
+
+.markup.other.strikethrough {
+	text-decoration: line-through;
+}
+
+.markup.other.table {
 	color: #3C802C;
 }
 

@@ -115,6 +115,8 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 		
 		var editors = getEditors();
 		var fileCommands = [];
+		var genericEditorOpen;
+		var orionEditorId = "orion.editor";
 
 		for (var i=0; i < editors.length; i++) {
 			var editor = editors[i];
@@ -133,7 +135,15 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 				isEditor: (editor["default"] ? "default": "editor"), // Distinguishes from a normal fileCommand //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				validationProperties: editor.validationProperties
 			};
-			fileCommands.push({properties: properties, service: {}});
+			var command = {properties: properties, service: {}};
+			if (editor.id === orionEditorId) {
+				genericEditorOpen = command;
+			} else {
+				fileCommands.push(command);
+			}
+		}
+		if (genericEditorOpen) {
+			fileCommands.push(genericEditorOpen);
 		}
 		return fileCommands;
 	};

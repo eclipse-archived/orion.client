@@ -119,6 +119,7 @@ define([
 		id: MARKDOWN_EDITOR_ID,
 		nameKey: "Orion Markdown Editor",
 		nls: "orion/nls/messages",
+		default: true,
 		uriTemplate: "../edit/edit.html#{,Location,params*},editor=" + MARKDOWN_EDITOR_ID});
 
 	provider.registerService("orion.navigate.openWith", {}, {
