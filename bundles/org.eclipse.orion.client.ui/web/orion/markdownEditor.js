@@ -578,10 +578,6 @@ define([
 
 			BaseEditor.prototype.install.call(this);
 		},
-		setInput: function(title, message, contents, contentsSaved) {
-			this._editorView.editor.setInput(title, message, contents, contentsSaved);
-			BaseEditor.prototype.setInput.call(this, title, message, contents, contentsSaved);
-		},
 		uninstall: function() {
 			this._styler.destroy();
 			lib.empty(this._parent);
