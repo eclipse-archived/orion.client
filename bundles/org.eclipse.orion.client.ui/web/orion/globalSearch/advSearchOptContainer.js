@@ -98,14 +98,16 @@ define([
 				}
 				resource = resource.concat(searchLocation);
 			}, this);
-
+			
+			var fileNamePatterns = mSearchUtils.cleanupFileNamePatterns(this._fileNamePatternsInput.value);
+			
 			return {keyword: this._searchBox.value,
 					rows: 40,
 					start: 0,
 					replace:this._replaceBox.value ? this._replaceBox.value : undefined,
 					caseSensitive: this._caseSensitiveCB.checked,
 			        regEx: this._regExCB.checked,
-			        fileType: this._fileTypes.options[this._fileTypes.selectedIndex].value,
+					fileNamePatterns: fileNamePatterns,
 			        resource: resource
 			};
 		},
@@ -152,13 +154,7 @@ define([
 			this._replaceBox.value = this._searchParams.replace ? this._searchParams.replace : "";
 			this._caseSensitiveCB.checked = this._searchParams.caseSensitive;
 			this._regExCB.checked = this._searchParams.regEx;
-			var x;
-			for (x = 0; x < this._fileTypes.options.length; x++) {
-			    if(this._fileTypes.options[x].value === this._searchParams.fileType){
-					this._fileTypes.selectedIndex = x;
-					break;
-			    }
-			}
+			this._fileNamePatternsInput.value = this._searchParams.fileNamePatterns ? this._searchParams.fileNamePatterns : "";
 			
 			if (undefined !== this._searchParams.replace) {
 				this._showReplaceField();
@@ -280,27 +276,12 @@ define([
 			this._replaceBox = document.getElementById("advReplaceInput"); //$NON-NLS-0$
 			this._replaceBoxWrapper = document.getElementById("replaceInputFieldWrapper"); //$NON-NLS-0$
 			this._replaceWrapper = document.getElementById("replaceWrapper"); //$NON-NLS-0$
-			this._fileTypes = document.getElementById("advSearchTypes"); //$NON-NLS-0$
+			this._fileNamePatternsInput = document.getElementById("fileNamePatternsInput"); //$NON-NLS-0$
 			this._caseSensitiveCB = document.getElementById("advSearchCaseSensitive"); //$NON-NLS-0$
 			this._regExCB = document.getElementById("advSearchRegEx"); //$NON-NLS-0$
 			this._toggleReplaceLink = document.getElementById("toggleReplaceLink");
-			
-			//Load file types content type provider
-			var fTypes = [ {label: messages["All types"], value: mSearchUtils.ALL_FILE_TYPE} ];
-			for(var i = 0; i < this.contentTypesCache.length; i++){
-				if(this.contentTypesCache[i]['extends'] === "text/plain" || this.contentTypesCache[i].id === "text/plain"){ //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
-					for(var j = 0; j < this.contentTypesCache[i].extension.length; j++){
-						fTypes.push({label: this.contentTypesCache[i].extension[j], value: this.contentTypesCache[i].extension[j]});
-					}
-				}
-			}
-			fTypes.forEach(function(fType) {
-			    var option = document.createElement('option'); //$NON-NLS-0$
-			    var text = document.createTextNode(fType.label);
-			    option.appendChild(text);
-			    this._fileTypes.appendChild(option);
-			    option.value = fType.value;
-			}.bind(this));
+
+			this._fileNamePatternsInput.placeholder = messages["File name patterns (comma-separated)"]; //$NON-NLS-0$
 
 			this._init = true;
 			this._loadSearchParams();
@@ -338,16 +319,7 @@ define([
 			this._replaceBox.addEventListener("blur", function(e) { //$NON-NLS-0$
 				this._replaceBoxWrapper.classList.remove("searchPageWrapperFocussed"); //$NON-NLS-0$ 
 			}.bind(this));
-			
-			this._fileTypes.addEventListener("change", function(e) { //$NON-NLS-0$
-				var type = this._fileTypes.options[this._fileTypes.selectedIndex].value;
-				if(type === mSearchUtils.ALL_FILE_TYPE){
-					this._searchBox.placeholder = messages["Type a search term"];
-				} else {
-					this._searchBox.placeholder =i18nUtil.formatMessage(messages["All ${0} files"], type);
-				}
-			}.bind(this));
-			
+
 	        var searchCommand = new mCommands.Command({
 	            name: messages["Search"],
 	            //tooltip: messages["Hide compare view of changes"],
@@ -413,7 +385,6 @@ define([
 		_initHTMLLabels: function(){
 			document.getElementById("advSearchInput").placeholder = messages["Type a search term"]; //$NON-NLS-0$ //$NON-NLS-0$
 			document.getElementById("advReplaceInput").placeholder = messages["Replace With"]; //$NON-NLS-0$ //$NON-NLS-0$
-			document.getElementById("advSearchTypeLabel").appendChild(document.createTextNode(messages["File type"])); //$NON-NLS-0$ //$NON-NLS-0$
 			document.getElementById("advSearchCaseSensitiveLabel").appendChild(document.createTextNode(messages["Case sensitive"])); //$NON-NLS-0$ //$NON-NLS-0$
 			document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expression"])); //$NON-NLS-0$ //$NON-NLS-0$
 			document.getElementById("previousSearchButton").title = messages["Show previous search terms"]; //$NON-NLS-0$ //$NON-NLS-0$

@@ -60,6 +60,19 @@
 	min-width: 279px;
 }
 
+.fileNamePatternsInput {
+	border: 1px solid lightgray;
+	border-radius: 3px;
+	padding: 4px;
+	min-width: 284px;
+	margin: 0;
+}
+
+.fileNamePatternsInput:focus {
+	border-color: black;
+	outline: none;
+}
+
 .toggleDisplayLink {
 	display: block;
 	margin: 0 0 0 5px;

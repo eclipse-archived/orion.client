@@ -107,6 +107,18 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 					newKeyword = "NameLower:*." + searchParams.fileType;
 					newSort = newSort.replace("Path", "NameLower");
 				}
+			} else if (searchParams.fileNamePatterns && searchParams.fileNamePatterns !== "*") {
+				//If the search string is not empty, we just combine the file type.
+				if(newKeyword !== ""){
+					//If the search string contains white space, we should add double quotes at both ends. 
+					if(newKeyword.indexOf(" ") >= 0){
+						newKeyword = "\"" + newKeyword + "\"";
+					}
+					newKeyword = encodeURIComponent(newKeyword) + "+Name:" + searchParams.fileNamePatterns;
+				} else {//If the search string is empty, we have to simulate a file name search on *.fileType.
+					newKeyword = "Name:" + searchParams.fileNamePatterns;
+					newSort = newSort.replace("Path", "Name");
+				}
 			} else if(newKeyword.indexOf(" ") >= 0){//If the search string contains white space, we should add double quato at both end.
 				newKeyword = encodeURIComponent("\"" + newKeyword + "\"");
 			} else {
@@ -557,6 +569,8 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 		 * @param {Boolean} searchParams.regEx Optional. The option of regular expression search.
 		 * @param {integer} searchParams.start Optional. The zero based strat number for the range of the returned hits. E.g if there are 1000 hits in total, then 5 means the 6th hit.
 		 * @param {integer} searchParams.rows Optional. The number of hits of the range. E.g if there are 1000 hits in total and start=5 and rows=40, then the return range is 6th-45th.
+		 * @param {String} searchParams.fileNamePatterns Optional. The file name patterns within which to search. If specified, search will be performed under files which match the provided patterns. Patterns should be comma-separated and may use "*" and "?" as wildcards. 
+		 *															E.g. "*" means all files. "*.html,test*.js" means all html files html files and all .js files that start with "test".
 		 */
 		search: function(searchParams) {
 			var query = _generateLuceneQuery(searchParams);

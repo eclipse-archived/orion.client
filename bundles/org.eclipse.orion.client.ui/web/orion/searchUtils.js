@@ -131,6 +131,23 @@ searchUtils.convertSearchParams = function(searchParams) {
 	if(typeof searchParams.nameSearch === "string"){ //$NON-NLS-0$
 		searchParams.nameSearch = (searchParams.nameSearch.toLowerCase() === "true"); //$NON-NLS-0$
 	}
+	if(searchParams.fileNamePatterns !== undefined){
+		searchParams.fileNamePatterns = searchUtils.cleanupFileNamePatterns(searchParams.fileNamePatterns);
+	}
+};
+
+searchUtils.cleanupFileNamePatterns = function(patterns) {
+	var fileNamePatterns = undefined;
+	
+	if (patterns) {
+		fileNamePatterns = patterns.trim();
+		fileNamePatterns = fileNamePatterns.replace(/(\s*,\s*)/g, ","); //get rid of spaces between commas
+		fileNamePatterns = fileNamePatterns.replace(/(,,+)/g, ","); //get rid of empty patterns
+		fileNamePatterns = fileNamePatterns.replace(/^(,)+/g, ""); //get rid of leading commas
+		fileNamePatterns = fileNamePatterns.replace(/(,)+$/g, ""); //get rid of trailing commas
+	}
+	
+	return fileNamePatterns;
 };
 
 searchUtils.copySearchParams = function(searchParams, copyReplace) {

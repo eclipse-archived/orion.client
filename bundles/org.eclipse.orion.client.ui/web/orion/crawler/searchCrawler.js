@@ -181,16 +181,18 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 		return 0;
 	};
 	
-	SearchCrawler.prototype._onFileType = function(contentType){
-		if(this.searchHelper.params.fileType){
-			if(this.searchHelper.params.fileType === mSearchUtils.ALL_FILE_TYPE){
-				return true;
-			}
-			return contentType.extension.indexOf(this.searchHelper.params.fileType) >= 0;
+	SearchCrawler.prototype._fileNameMatches = function(fileName){
+		var matches = true;
+		if(this.searchHelper.params.fileNamePatterns){
+			var fileNamePatternArray = this.searchHelper.params.fileNamePatterns.split(",");
+			matches = fileNamePatternArray.some(function(pattern){
+				var regExpPattern = "^" + pattern.replace(/([*?])/g, ".$1"); // add line start and convert user input * and ? to .* and .? //$NON-NLS-0$
+				return fileName.match(regExpPattern);
+			});
 		}
-		return true;
+		return matches;
 	};
-
+	
 	SearchCrawler.prototype._visitRecursively = function(directoryLocation){
 		var results = [];
 		var _this = this;
@@ -206,7 +208,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 						results.push(_this._buildSingleSkeleton(children[i]));
 					}else if(!_this._cancelled) {
 						var contentType = mContentTypes.getFilenameContentType(children[i].Name, _this.contentTypesCache);
-						if(contentType && (contentType['extends'] === "text/plain" || contentType.id === "text/plain") && _this._onFileType(contentType)){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						if(contentType && (contentType['extends'] === "text/plain" || contentType.id === "text/plain") && _this._fileNameMatches(children[i].Name)){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							var fileDeferred = _this._sniffSearch(children[i]);
 							results.push(fileDeferred);
 							_this._deferredArray.push(fileDeferred);
