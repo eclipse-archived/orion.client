@@ -283,6 +283,7 @@ define([
 					var resource = resp;
 					
 					that.getOutgoingIncomingChanges(resource).then(function(items){
+						that.incomingCommits = that.outgoingCommits = [];
 						that.createTree(that.parentId, new GitCommitListModel(items.Children));
 						loadingDeferred.resolve({resource: resource, items: items});
 					});
@@ -316,24 +317,27 @@ define([
 				horizontalBox.style.overflow = "hidden";
 				sectionItem.appendChild(horizontalBox);
 				
-				var incomingCommits = this.explorer.incomingCommits;
-				var outgoingCommits = this.explorer.outgoingCommits;
+				var incomingCommits = this.explorer.incomingCommits || [];
+				var outgoingCommits = this.explorer.outgoingCommits || [];
 				
 				var incomingCommit = false;
-				for(var i=0; i<incomingCommits.length; i++){
-					var comm = incomingCommits[i];
-					
+				var comm, i;
+				for(i=0; i<incomingCommits.length; i++){
+					comm = incomingCommits[i];
 					if (commit.Name === comm.Name){
 						incomingCommit = true;
+						break;
 					}
 				}
 					
 				var outgoingCommit = false;
-				for(var i=0; i<outgoingCommits.length; i++){
-					var comm = outgoingCommits[i];
-					
-					if (commit.Name === comm.Name){
-						outgoingCommit = true;
+				if (!incomingCommit) {
+					for(i=0; i<outgoingCommits.length; i++){
+						comm = outgoingCommits[i];
+						if (commit.Name === comm.Name){
+							outgoingCommit = true;
+							break;
+						}
 					}
 				}
 				
