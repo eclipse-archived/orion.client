@@ -793,10 +793,6 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		getBlocks: function() {
 			return this._subBlocks;
 		},
-//		getPatterns: function() {
-//			/* all patterns appear in the line patterns list */
-//			return this.getLinePatterns();
-//		},
 		isRenderingWhitespace: function() {
 			return this.styler._isRenderingWhitespace();
 		}
@@ -806,9 +802,6 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		this._styler = styler;
 	}
 	TextStylerAccessor.prototype = {
-//		getPatterns: function(offset) {
-//			return this._styler.getPatterns(offset);
-//		},
 		getStyles: function(offset) {
 			return this._styler.getStyles(offset);
 		}
@@ -886,6 +879,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				this._view.removeEventListener("LineStyle", this._listener.onLineStyle); //$NON-NLS-0$
 				this._view = null;
 			}
+		},
+		getBlockAtIndex: function(index) {
+			return this._findBlock(this._rootBlock, index);
 		},
 		getRootBlock: function() {
 			return this._rootBlock;

@@ -13,12 +13,13 @@ define([
 	'marked/marked',
 	'orion/editor/editor',
 	'orion/editor/textStyler',
+	'orion/editor/util',
 	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/URITemplate',
 	'orion/webui/splitter', 
 	'orion/URL-shim'
-], function(marked, mEditor, mTextStyler, objects, lib, URITemplate, mSplitter) {
+], function(marked, mEditor, mTextStyler, mTextUtil, objects, lib, URITemplate, mSplitter) {
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	var extensionRegex = /\.([0-9a-z]+)(?:[\?#]|$)/i;
@@ -268,7 +269,7 @@ define([
 			return null;
 		},
 		initialPopulatePreview: function() {
-			/* hack, see the explaination in MarkdownEditor.createStyler() */
+			/* hack, see the explaination in MarkdownEditor.initSourceEditor() */
 			var rootBlock = this._styler.getRootBlock();
 			this._onBlocksChanged({old: [], new: rootBlock.getBlocks()});
 		},
@@ -514,17 +515,56 @@ define([
 		this._parent = options.parent;
 		this._model = options.model;
 		this._editorView = options.editorView;
+
+		this._scrollListener = function(/*e*/) {
+			var textView = this._editorView.editor.getTextView();
+			var charIndex = textView.getOffsetAtLocation(0, (textView.getBottomPixel() + textView.getTopPixel()) / 2);
+			var block = this._styler.getBlockAtIndex(charIndex);
+			if (block) {
+				var element = document.getElementById(block.elementId);
+				if (element) {
+					if (this._animation) {
+						this._animation.stop();
+						this._animation = null;
+					}
+
+					var newTop = Math.max(0, Math.floor(element.offsetTop - (this._previewDiv.clientHeight - element.offsetHeight) / 2));
+					var pixelY = newTop - this._previewDiv.scrollTop;
+					if (!pixelY) {
+						return;
+					}
+
+					this._animation = new mTextUtil.Animation({
+						window: window,
+						curve: [pixelY, 0],
+						onAnimate: function(x) {
+							var deltaY = pixelY - Math.floor(x);
+							this._previewDiv.scrollTop += deltaY;
+							pixelY -= deltaY;
+						}.bind(this),
+						onEnd: function() {
+							this._animation = null;
+							this._previewDiv.scrollTop += pixelY;
+						}.bind(this)
+					});
+					this._animation.play();
+				}
+			}
+		}.bind(this);
+		
 		BaseEditor.apply(this, arguments);
 	}
 
 	MarkdownEditor.prototype = Object.create(BaseEditor.prototype);
 	objects.mixin(MarkdownEditor.prototype, /** @lends orion.edit.MarkdownEditor.prototype */ {
-		createStyler: function() {
+		initSourceEditor: function() {
 			var editor = this._editorView.editor;
 			var textView = editor.getTextView();
 			var annotationModel = editor.getAnnotationModel();
 			var stylerAdapter = new MarkdownStylingAdapter(this._model, this._metadata.Location, this._fileService);
 			this._styler = new mTextStyler.TextStyler(textView, annotationModel, stylerAdapter);
+
+			this._editorView.editor.getTextView().addEventListener("Scroll", this._scrollListener);
 
 			/*
 			 * If the model already has content then it is being shared with a previous
@@ -560,26 +600,27 @@ define([
 			splitterDiv.id = "orion.markdown.editor.splitter";
 			rootDiv.appendChild(splitterDiv);			
 
-			var previewDiv = document.createElement("div"); //$NON-NLS-0$
-			previewDiv.className = "mainPanelLayout hasSplit"; //$NON-NLS-0$
-			previewDiv.id = ID_PREVIEW; //$NON-NLS-0$
-			previewDiv.style.position = "absolute"; //$NON-NLS-0$
-			previewDiv.style.height = "100%"; //$NON-NLS-0$
-			previewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
-			previewDiv.style.overflowY = "auto"; //$NON-NLS-0$
-			previewDiv.classList.add("orionMarkdown"); //$NON-NLS-0$
-			rootDiv.appendChild(previewDiv);
+			this._previewDiv = document.createElement("div"); //$NON-NLS-0$
+			this._previewDiv.className = "mainPanelLayout hasSplit"; //$NON-NLS-0$
+			this._previewDiv.id = ID_PREVIEW; //$NON-NLS-0$
+			this._previewDiv.style.position = "absolute"; //$NON-NLS-0$
+			this._previewDiv.style.height = "100%"; //$NON-NLS-0$
+			this._previewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
+			this._previewDiv.style.overflowY = "auto"; //$NON-NLS-0$
+			this._previewDiv.classList.add("orionMarkdown"); //$NON-NLS-0$
+			rootDiv.appendChild(this._previewDiv);
 
 			new mSplitter.Splitter({
 				node: splitterDiv,
 				sidePanel: editorDiv,
-				mainPanel: previewDiv
+				mainPanel: this._previewDiv
 			}); 
 
 			BaseEditor.prototype.install.call(this);
 		},
 		uninstall: function() {
 			this._styler.destroy();
+			this._editorView.editor.getTextView().removeEventListener("Scroll", this._scrollListener);
 			lib.empty(this._parent);
 			BaseEditor.prototype.uninstall.call(this);
 		}
@@ -593,16 +634,12 @@ define([
 			this.editor = new MarkdownEditor(this._options);
 			this.editor.install();
 			this._options.editorView.create();
-			this.editor.createStyler();
+			this.editor.initSourceEditor();
 		},
 		destroy: function() {
-			if (this.editor) {
-				this.editor.destroy();
-			}
+			this.editor.destroy();
 			this.editor = null;
-			if (this._options.editorView) {
-				this._options.editorView.destroy();
-			}
+			this._options.editorView.destroy();
 			this._options.editorView = null;
 		}
 	};
