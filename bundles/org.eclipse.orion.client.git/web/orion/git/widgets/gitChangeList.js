@@ -94,7 +94,11 @@ define([
 														if (config[i].Key === "user.name" || config[i].Key === "user.email") //$NON-NLS-1$ //$NON-NLS-0$
 															status.Clone.Config.push(config[i]);
 													}
-													onComplete(that._sortBlock(that.prefix === "staged" ? interestedStagedGroup : interestedUnstagedGroup));
+													var children = parentItem.children = that._sortBlock(that.prefix === "staged" ? interestedStagedGroup : interestedUnstagedGroup);
+													children.forEach(function(child) {
+														child.parent = parentItem;
+													});
+													onComplete(children);
 
 												}, function(error) {
 													that.handleError(error);
