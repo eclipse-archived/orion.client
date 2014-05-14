@@ -37,11 +37,12 @@ define([
 	'orion/webui/littlelib',
 	'orion/i18nUtil',
 	'orion/fileDownloader',
+	'orion/util',
 	'orion/URL-shim'
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector,
 	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, 
-	EventTarget, RepoAndBaseURLTriggerTemplate, RepoURLTriggerTemplate, ShareSnippetTriggerTemplate, mCommands, lib, i18nUtil, mFileDownloader
+	EventTarget, RepoAndBaseURLTriggerTemplate, RepoURLTriggerTemplate, ShareSnippetTriggerTemplate, mCommands, lib, i18nUtil, mFileDownloader, util
 ) {
 	
 	function ResourceChangeHandler(options) {
@@ -568,6 +569,13 @@ define([
 			downloadLink.appendChild(document.createTextNode("View " + metadata.Name));
 			browseViewOptons.binaryView = {domElement: downloadLink, message: message};
 		},
+		_generateDownloadLink: function(contents, metadata, cType, browseViewOptons, message) {
+			var downloader = new mFileDownloader.FileDownloader(this._fileClient);
+			var linkElement = downloader.downloadFromBlob(contents, metadata.Name, cType, true, true);
+			linkElement.classList.add("downloadLinkName"); //$NON-NLS-0$
+			linkElement.appendChild(document.createTextNode("Download " + metadata.Name));
+			browseViewOptons.binaryView = {domElement: linkElement, message: message};
+		},
 		_getEditorView: function(input, contents, metadata) {
 			var view = null;
 			if (metadata && input) {
@@ -605,17 +613,17 @@ define([
 						}
 					} else if(this._isKnownBinary(cType)) {
 						if(mFileDownloader.downloadSupported()) {
-							var downloader = new mFileDownloader.FileDownloader(this._fileClient);
-							var linkElement = downloader.downloadFromBlob(contents, metadata.Name, cType, true, true);
-							linkElement.classList.add("downloadLinkName"); //$NON-NLS-0$
-							linkElement.appendChild(document.createTextNode("Download " + metadata.Name));
-							browseViewOptons.binaryView = {domElement: linkElement};
+							this._generateDownloadLink(contents, metadata, cType, browseViewOptons);
 						} else {
 							this._generateViewLink(contents, metadata, {id: "text/plain"}, browseViewOptons, 
 							'Directly downloading the contents of files is not supported in your browser. You can click the link below, then save the resulting page using "Save As...".');
 						}
 					} else if(this._isBrowserRenderable(cType)) {
-						this._generateViewLink(contents, metadata, cType, browseViewOptons);
+						if(util.isIE) {//IE(tested on 10 and 11) does not support objectURL on a link yet. http://stackoverflow.com/questions/17951644/can-i-open-object-url-in-ie
+							this._generateDownloadLink(contents, metadata, cType, browseViewOptons);
+						} else {
+							this._generateViewLink(contents, metadata, cType, browseViewOptons);
+						}
 					} else if(cType.id === "text/x-markdown") {
 						browseViewOptons.isMarkdownView = true;
 					} else if(!mNavigatorRenderer.isImage(cType)) {
