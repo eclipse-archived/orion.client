@@ -47,6 +47,10 @@ exports.GitRepositoryExplorer = (function() {
 		this.registry = registry;
 		this.linkService = linkService;
 		this.commandService = commandService;
+		this.gitClient = this.registry.getService("orion.git.provider"); //$NON-NLS-0$
+		this.progressService = this.registry.getService("orion.page.progress"); //$NON-NLS-0$
+		this.preferencesService = this.registry.getService("orion.core.preference"); //$NON-NLS-0$
+		this.messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 		this.selection = selection;
 		this.parentId = parentId;
 		this.pageNavId = pageNavId;
@@ -64,7 +68,7 @@ exports.GitRepositoryExplorer = (function() {
 		} catch (Exception) {
 			display.Message = error.DetailedMessage || error.Message || error.message;
 		}
-		this.registry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+		this.messageService.setProgressResult(display);
 		
 		if (error.status === 404) {
 			this.initTitleBar();
@@ -99,7 +103,7 @@ exports.GitRepositoryExplorer = (function() {
 			gitapiCloneUrl = gitapiCloneUrl.substring(0, gitapiCloneUrl.length-2);
 			
 			this.displayRepositories2(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath, processURLs); //$NON-NLS-1$ //$NON-NLS-0$
-		};
+		}
 	};
 	
 	GitRepositoryExplorer.prototype.displayRepositories2 = function(location, processURLs){
@@ -111,7 +115,7 @@ exports.GitRepositoryExplorer = (function() {
 			});
 		}
 		
-		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitClone(location), "Getting git repository details").then( //$NON-NLS-0$
+		this.progressService.progress(this.gitClient.getGitClone(location), "Getting git repository details").then(
 			function(resp){
 				if (resp.Children.length === 0) {
 					that.initTitleBar({});
@@ -133,41 +137,42 @@ exports.GitRepositoryExplorer = (function() {
 	GitRepositoryExplorer.prototype.displayRepository = function(location){
 		var that = this;
 		this.loadingDeferred = new Deferred();
-		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitClone(location), "Getting git repository details").then( //$NON-NLS-0$
+		this.progressService.progress(this.gitClient.getGitClone(location), "Getting git repository details").then(
 			function(resp){
 				
 				// render navigation commands
 				var pageNav = lib.node(that.pageNavId);
 				if(pageNav){
 					lib.empty(pageNav);
-					that.commandService.renderCommands(that.pageNavId, pageNav, resp, that, "button");
+					that.commandService.renderCommands(that.pageNavId, pageNav, resp, that, "button"); //$NON-NLS-0$
 				}
 				if (!resp.Children) {
 					return;
 				}
 				
+				var repositories;
 				if (resp.Children.length === 0) {
 					that.initTitleBar({});
 					that.displayRepositories([], "full"); //$NON-NLS-0$
 				} else if (resp.Children.length && resp.Children.length === 1 && resp.Children[0].Type === "Clone") { //$NON-NLS-0$
-					var repositories = resp.Children;
+					repositories = resp.Children;
 					
 					that.initTitleBar(repositories[0]);
-					that.displayRepositories(repositories, "full");
+					that.displayRepositories(repositories, "full"); //$NON-NLS-0$
 					that.displayCommits(repositories[0]);
 					that.displayBranches(repositories[0]);
 					that.displayTags(repositories[0]);
 					that.displayRemotes(repositories[0]);
 					that.displayConfig(repositories[0]);
 				} else if (resp.Children[0].Type === "Clone"){ //$NON-NLS-0$
-					var repositories = resp.Children;
+					repositories = resp.Children;
 					
 					that.initTitleBar(repositories);
 					that.displayRepositories(repositories, "full", true); //$NON-NLS-0$
 				} else if (resp.Children[0].Type === "Branch"){ //$NON-NLS-0$
 					var branches = resp.Children;
 					
-					that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitClone(branches[0].CloneLocation), "Getting git repository details").then( //$NON-NLS-0$
+					that.progressService.progress(that.gitClient.getGitClone(branches[0].CloneLocation), "Getting git repository details").then( //$NON-NLS-0$
 						function(resp){
 							var repositories = resp.Children;
 							
@@ -183,7 +188,7 @@ exports.GitRepositoryExplorer = (function() {
 				} else if (resp.Children[0].Type === "Tag"){ //$NON-NLS-0$
 					var tags = resp.Children;
 					
-					that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitClone(tags[0].CloneLocation), "Getting git repository details").then( //$NON-NLS-0$
+					that.progressService.progress(that.gitClient.getGitClone(tags[0].CloneLocation), "Getting git repository details").then( //$NON-NLS-0$
 						function(resp){
 							var repositories = resp.Children;
 							
@@ -196,7 +201,7 @@ exports.GitRepositoryExplorer = (function() {
 						}
 					);
 				} else if (resp.Children[0].Type === "Config"){ //$NON-NLS-0$
-					that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitClone(resp.CloneLocation), "Getting git repository details").then( //$NON-NLS-0$
+					that.progressService.progress(that.gitClient.getGitClone(resp.CloneLocation), "Getting git repository details").then( //$NON-NLS-0$
 						function(resp){
 							var repositories = resp.Children;
 							
@@ -298,7 +303,7 @@ exports.GitRepositoryExplorer = (function() {
 			slideout: true,
 			content: '<div id="branchNode"></div>', //$NON-NLS-0$
 			canHide: true,
-			preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
+			preferenceService: this.preferencesService
 		});
 		var branchNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
@@ -328,7 +333,7 @@ exports.GitRepositoryExplorer = (function() {
 			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			content: '<div id="remoteBranchNode" class="mainPadding"></div>', //$NON-NLS-0$
 			canHide: true,
-			preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
+			preferenceService: this.preferencesService
 		}); 
 
 		var branchNavigator = new mGitBranchList.GitBranchListExplorer({
@@ -358,7 +363,7 @@ exports.GitRepositoryExplorer = (function() {
 			slideout: true,
 			content: '<div id="commitNode"></div>', //$NON-NLS-0$
 			canHide: true,
-			preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
+			preferenceService: this.preferencesService
 		}); 
 		
 		var explorer = new mGitCommitList.GitCommitListExplorer({
@@ -389,7 +394,7 @@ exports.GitRepositoryExplorer = (function() {
 			content : '<div id="tagNode"></div>',
 			canHide : true,
 			hidden : true,
-			preferenceService : this.registry.getService("orion.core.preference")
+			preferenceService : this.preferencesService
 		});
 
 		var tagsNavigator = new mGitTagList.GitTagListExplorer({
@@ -418,7 +423,7 @@ exports.GitRepositoryExplorer = (function() {
 			content: '<div id="remoteNode" class="mainPadding"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
-			preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
+			preferenceService: this.preferencesService
 		});
 		var branchNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
@@ -444,18 +449,18 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var titleWrapper = new mSection.Section(tableNode, {
 			id: "configSection", //$NON-NLS-0$
-			title: messages['Configuration'] + (mode === "full" ? "" : " (user.*)"), //$NON-NLS-2$ //$NON-NLS-1$
+			title: messages['Configuration'] + (mode === "full" ? "" : " (user.*)"), //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="configNode" class="mainPadding"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
-			preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
+			preferenceService: this.preferencesService
 		});
 			
 		var configNavigator = new mGitConfigList.GitConfigListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
-			parentId:"configNode", //hack
+			parentId:"configNode",
 			actionScopeId: this.actionScopeId,
 			section: titleWrapper,
 			handleError: this.handleError,
