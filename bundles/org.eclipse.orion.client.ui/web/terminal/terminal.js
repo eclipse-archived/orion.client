@@ -63,7 +63,7 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
 		
 		var autoresize;
 		var rows;
-		var cols
+		var cols;
 		var color;
 		var pageTrim;
 		var term;
@@ -96,6 +96,7 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
 						websocket.send(" stty columns " + cols + " rows " + rows + "\r"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 						websocket.send(" stty echo\r"); //$NON-NLS-0$
 						term.resize(cols, rows);
+						websocket.send(" clear\r"); //$NON-NLS-0$
 					}
 				}
 			}
@@ -138,6 +139,7 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
 			//websocket.send("\u0019"); //$NON-NLS-0$
 			term.resize(calcWidth, calcHeight);
 			//term.reset();
+			websocket.send(" clear\r"); //$NON-NLS-0$
 		}
 		window.onresize = resize;
 
