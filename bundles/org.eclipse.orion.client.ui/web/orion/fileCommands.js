@@ -618,7 +618,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						return false;
 					});
 				}
-				var deferred = fileClient.moveFile(moveLocation, parent.Location, newText);
+				var parentLocation = parent.Location || parent.WorkspaceLocation;
+				var deferred = fileClient.moveFile(moveLocation, parentLocation, newText);
 				progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Renaming ${0}"], moveLocation)).then(
 					function(newItem) {
 						if (!item.parent) {
