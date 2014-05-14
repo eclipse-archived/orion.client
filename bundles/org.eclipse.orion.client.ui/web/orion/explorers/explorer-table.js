@@ -653,7 +653,7 @@ define([
 						
 						var isCopy = dropEffect === "copy"; //$NON-NLS-0$
 						var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
-						deferred = func.apply(fileClient, [source.Location, item.Location]);
+						deferred = func.apply(fileClient, [source.Location, item.Location, source.Name]);
 						if (progress) {
 							var message = i18nUtil.formatMessage(messages[isCopy ? "Copying ${0}" : "Moving ${0}"], source.Location); //$NON-NLS-1$ //$NON-NLS-0$
 							deferred = progress.showWhile(deferred, message);
