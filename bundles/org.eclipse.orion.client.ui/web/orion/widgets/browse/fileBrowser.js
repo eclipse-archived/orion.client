@@ -611,7 +611,7 @@ define([
 							linkElement.appendChild(document.createTextNode("Download " + metadata.Name));
 							browseViewOptons.binaryView = {domElement: linkElement};
 						} else {
-							this._generateViewLink(contents, metadata, {id: "text/plain"}, browseViewOptons, "The browser does not support the contents download directlly. But you can view the raw contents and save it from the browser.");
+							this._generateViewLink(contents, metadata, {id: "text/plain"}, browseViewOptons, "Contents download is not supported in this browser. Please use the link below and save it from the browser.");
 						}
 					} else if(this._isBrowserRenderable(cType)) {
 						this._generateViewLink(contents, metadata, cType, browseViewOptons);

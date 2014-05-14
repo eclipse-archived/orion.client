@@ -397,21 +397,14 @@ define([
 			var binaryTable = document.createElement("table");
 			binaryTable.classList.add("binaryViewTable");
 			var tr, td;
-			if(message){
-				tr = document.createElement("tr");
-				tr.classList.add("binaryViewTD");
-				td = document.createElement("td"); 
-				td.classList.add("binaryViewTD");
-				var messageDiv = document.createElement("span");
-				messageDiv.textContent = message;
-				td.appendChild(messageDiv);
-				tr.appendChild(td);
-				binaryTable.appendChild(tr);
-			}
 			tr = document.createElement("tr");
-			tr.classList.add("binaryViewTD");
 			td = document.createElement("td"); 
-			td.classList.add("binaryViewTD");
+			if(message){
+				var messageDiv = document.createElement("div");
+				messageDiv.textContent = message;
+				messageDiv.classList.add("binaryViewMessage");
+				td.appendChild(messageDiv);
+			}
 			var binaryContent = document.createElement("div");
 			binaryContent.appendChild(domElement);
 			td.appendChild(binaryContent);

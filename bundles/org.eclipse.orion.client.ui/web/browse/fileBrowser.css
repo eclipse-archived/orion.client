@@ -180,8 +180,8 @@ a.currentLocation:hover {
     min-height: 60px;
 }
 
-.binaryViewTD {
-	border: 0; 
+.binaryViewMessage {
+	padding: 6px; 
 }
 
 .messageViewTable {
