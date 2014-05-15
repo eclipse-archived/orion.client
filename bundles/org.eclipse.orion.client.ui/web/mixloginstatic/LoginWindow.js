@@ -11,7 +11,7 @@
 
 /*eslint-env browser, amd*/
 
-define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/webui/littlelib'], function(domReady, xhr, PageUtil, PageLinks, lib) {
+define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/webui/littlelib', 'orion/xsrfUtils'], function(domReady, xhr, PageUtil, PageLinks, lib, xsrfUtils) {
 	var userCreationEnabled;
 	var registrationURI;
 	var forceUserEmail;
@@ -130,6 +130,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		mypostrequest.open("POST", "../useremailconfirmation", true);
 		mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		mypostrequest.setRequestHeader("Orion-Version", "1");
+		xsrfUtils.addCSRFNonce(mypostrequest);
 		mypostrequest.send("{login='" + document.getElementById("reset").value + "', email='" + document.getElementById("resetEmail").value + "'}");
 
 		setResetMessage(false, "Sending password reset confirmation...");
@@ -206,6 +207,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 			mypostrequest.open("POST", "../login/form", true);
 			mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 			mypostrequest.setRequestHeader("Orion-Version", "1");
+			xsrfUtils.addCSRFNonce(mypostrequest);
 			mypostrequest.send(parameters);
 		}
 	}
@@ -271,6 +273,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		mypostrequest.open("POST", "../users", true);
 		mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		mypostrequest.setRequestHeader("Orion-Version", "1");
+		xsrfUtils.addCSRFNonce(mypostrequest);
 		mypostrequest.send(parameters);
 	}
 
@@ -301,6 +304,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		mypostrequest.open("POST", "../users", true);
 		mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		mypostrequest.setRequestHeader("Orion-Version", "1");
+		xsrfUtils.addCSRFNonce(mypostrequest);
 		mypostrequest.send(parameters);
 	}
 
@@ -438,6 +442,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		checkusersrequest.open("POST", "../login/canaddusers", true);
 		checkusersrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		checkusersrequest.setRequestHeader("Orion-Version", "1");
+		xsrfUtils.addCSRFNonce(checkusersrequest);
 		checkusersrequest.send();
 
 		var checkemailrequest = new XMLHttpRequest();
