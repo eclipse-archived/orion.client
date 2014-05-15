@@ -11,6 +11,9 @@
 /**
  * Holds common functions that can be shared by various commands
  */
+
+/*globals confirm define*/
+
 define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orion/git/widgets/GitCredentialsDialog','orion/Deferred','i18n!git/nls/gitmessages'],
 		function(mGitUtil,i18nUtil,GitPreferenceStorage,mGitCredentials,Deferred,messages) {
 	
@@ -216,6 +219,8 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 						}
 					}
 				);
+			} else {
+				if (typeof(closeCallback) === 'function') closeCallback();
 			}
 			return def;
 		}
