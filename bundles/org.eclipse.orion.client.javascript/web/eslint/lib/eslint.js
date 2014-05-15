@@ -200,7 +200,7 @@ module.exports = (function() {
 
     var api = Object.create(new EventEmitter()),
         messages = [],
-        commentsAttached = false,
+        commentsAttached = true,
         currentText = null,
         currentConfig = null,
         currentTokens = null,
@@ -224,7 +224,7 @@ module.exports = (function() {
          * problem that ESLint identified just like any other.
          */
         try {
-            return esprima.parse(text, { loc: true, range: true, raw: true, tokens: true, comment: true });
+            return esprima.parse(text, { loc: true, range: true, raw: true, tokens: true, comment: true, attachComment:true });
         } catch (ex) {
 
             messages.push({
@@ -251,7 +251,7 @@ module.exports = (function() {
     api.reset = function() {
         this.removeAllListeners();
         messages = [];
-        commentsAttached = false;
+        commentsAttached = true;
         currentConfig = null;
         currentText = null;
         currentTokens = null;
