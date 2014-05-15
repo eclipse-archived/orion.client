@@ -9,9 +9,11 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+/*globals document define*/
+
 define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/Deferred','orion/git/widgets/CommitDialog',
-        'orion/git/logic/gitCommon'], 
-		function(messages,mCommandRegistry,Deferred,mCommit,mGitCommon) {
+        'orion/git/logic/gitCommon', 'orion/i18nUtil'], 
+		function(messages,mCommandRegistry,Deferred,mCommit,mGitCommon,i18nUtil) {
 	
 	var handleProgressServiceResponse = mGitCommon.handleProgressServiceResponse;
 	
