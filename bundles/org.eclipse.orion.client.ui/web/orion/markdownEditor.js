@@ -179,6 +179,13 @@ define([
 					match = endRegex.exec(text);
 					end = index + match[0].length;
 
+					/* trim trailing blank lines from the end bound */
+					this._emptyLineRegex.lastIndex = 0;
+					match = this._emptyLineRegex.exec(match[0]);
+					if (match) {
+						end -= match[0].length;
+					}
+					
 					bounds = {
 						start: index,
 						contentStart: contentStart,
@@ -356,15 +363,15 @@ define([
 		_getLineEnd: function(text, index, lineSkip, include) {
 			lineSkip = lineSkip || 0;
 			while (true) {
-				this._newlineRegex.lastIndex = index;
-				var result = this._newlineRegex.exec(text);
+				this._eolRegex.lastIndex = index;
+				var result = this._eolRegex.exec(text);
 				if (!result) {
 					return text.length;
 				}
 				if (!lineSkip--) {
 					return result.index + (include ? result[0].length : 0);
 				}
-				index = result.index + 1;
+				index = result.index + 2;
 			}
 		},
 		_onBlocksChanged: function(e) {
@@ -457,6 +464,7 @@ define([
 		_NEWLINE: "\n", //$NON-NLS-0$
 		_blockquoteRegex: />/g,
 		_elementCounter: 0,
+		_emptyLineRegex: /(\r?\n)*$/g,
 		_eolRegex: /$/gm,
 		_htmlNewlineRegex: /\n\s*\S[\s\S]*$/g,
 		_newlineRegex: /\n/g,
@@ -620,7 +628,8 @@ define([
 		},
 		uninstall: function() {
 			this._styler.destroy();
-			this._editorView.editor.getTextView().removeEventListener("Scroll", this._scrollListener);
+			var textView = this._editorView.editor.getTextView();
+			textView.removeEventListener("Scroll", this._scrollListener);
 			lib.empty(this._parent);
 			BaseEditor.prototype.uninstall.call(this);
 		}
