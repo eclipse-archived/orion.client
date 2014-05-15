@@ -549,6 +549,10 @@ define([
 			}
 		}.bind(this);
 
+		this._resizeListener = function(/*e*/) {
+			this._editorView.editor.resize();
+		}.bind(this);
+
 		BaseEditor.apply(this, arguments);
 	}
 
@@ -561,7 +565,8 @@ define([
 			var stylerAdapter = new MarkdownStylingAdapter(this._model, this._metadata.Location, this._fileService);
 			this._styler = new mTextStyler.TextStyler(textView, annotationModel, stylerAdapter);
 
-			this._editorView.editor.getTextView().addEventListener("Scroll", this._scrollListener);
+			this._editorView.editor.getTextView().addEventListener("Scroll", this._scrollListener); //$NON-NLS-0$
+			this._splitter.addEventListener("resize", this._resizeListener); //$NON-NLS-0$
 
 			/*
 			 * If the model already has content then it is being shared with a previous
@@ -607,7 +612,7 @@ define([
 			this._previewDiv.classList.add("orionMarkdown"); //$NON-NLS-0$
 			rootDiv.appendChild(this._previewDiv);
 
-			new mSplitter.Splitter({
+			this._splitter = new mSplitter.Splitter({
 				node: splitterDiv,
 				sidePanel: editorDiv,
 				mainPanel: this._previewDiv
@@ -618,7 +623,8 @@ define([
 		uninstall: function() {
 			this._styler.destroy();
 			var textView = this._editorView.editor.getTextView();
-			textView.removeEventListener("Scroll", this._scrollListener);
+			textView.removeEventListener("Scroll", this._scrollListener); //$NON-NLS-0$
+			this._splitter.removeEventListener("resize", this._resizeListener); //$NON-NLS-0$
 			lib.empty(this._parent);
 			BaseEditor.prototype.uninstall.call(this);
 		}
