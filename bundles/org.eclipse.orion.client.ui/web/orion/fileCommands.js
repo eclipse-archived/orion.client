@@ -109,6 +109,19 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		req.open('post', force ? targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")>0 ? "&force=true" : "?force=true") : targetFolder.ImportLocation, true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
 		req.setRequestHeader("Slug", form.encodeSlug(file.name)); //$NON-NLS-0$
+
+		var cookies = document.cookie.split(";");//$NON-NLS-0$
+		var i,n,v;
+		var XSRF_TOKEN = "x-csrf-token";//$NON-NLS-0$
+		for(i = 0; i<cookies.length; i++) {
+			n = cookies[i].substr(0, cookies[i].indexOf("=")).trim();//$NON-NLS-0$
+			v = cookies[i].substr(cookies[i].indexOf("=") + 1).trim();//$NON-NLS-0$
+			if(n == XSRF_TOKEN) {
+				req.setRequestHeader(XSRF_TOKEN, v);
+				break;
+			}
+		}
+
 		// TODO if we want to unzip zip files, don't use this...
 		if (!unzip) {
 			req.setRequestHeader("X-Xfer-Options", "raw"); //$NON-NLS-1$ //$NON-NLS-0$
