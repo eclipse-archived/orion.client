@@ -5696,6 +5696,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					} else {
 						handlers.push({target: this._clientDiv, type: "DOMCharacterDataModified", handler: function (e) { return self._handleDataModified(e ? e : window.event); }}); //$NON-NLS-0$
 					}
+				}
+				if ((util.isFirefox && (!util.isWindows || util.isFirefox >= 15)) || util.isIE) {
 					handlers.push({target: this._clientDiv, type: "compositionstart", handler: function (e) { return self._handleCompositionStart(e ? e : window.event); }}); //$NON-NLS-0$
 					handlers.push({target: this._clientDiv, type: "compositionend", handler: function (e) { return self._handleCompositionEnd(e ? e : window.event); }}); //$NON-NLS-0$
 				}
