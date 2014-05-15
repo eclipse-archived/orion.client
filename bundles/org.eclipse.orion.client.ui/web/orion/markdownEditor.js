@@ -490,8 +490,20 @@ define([
 						}
 					}
 					if (cap[0][0] !== '!') { //$NON-NLS-0$
+						/*
+						 * TODO: should not need to remove the URL hash to create a link that opens in the markdown editor
+						 * 
+						 * eg.- http://...,editor=orion.editor.markdown#hash works fine, but uriTemplate generates 
+						 * http://...#hash,editor=orion.editor.markdown for this, which does not work.  Since the
+						 * markdown editor does not currently acknowledge hashes, removing it here does not hurt anything.
+						 * However if the editor began opening to hashes then this would be removing a valuable piece
+						 * of the URL.  Need to determine if uriTemplate is creating an invalid URL, or if the editor
+						 * opener that looks at the URL is handling this case incorrectly.
+						 */
+						linkURL.hash = "";
 						link.href = uriTemplate.expand({
-							resource: linkURL.href
+							resource: linkURL.href,
+							params: "editor=orion.editor.markdown" //$NON-NLS-0$
 						});
 					} else {
 						if (fileClient.readBlob) {
