@@ -1893,7 +1893,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
         /**
 		 * Returns the specified view options.
 		 * <p>
-		 * The returned value is either a <code>orion.editor.TextViewOptions</code> or an option value. An option value is returned when only one string paremeter
+		 * The returned value is either a <code>orion.editor.TextViewOptions</code> or an option value. An option value is returned when only one string parameter
 		 * is specified. A <code>orion.editor.TextViewOptions</code> is returned when there are no paremeters, or the parameters are a list of options names or a
 		 * <code>orion.editor.TextViewOptions</code>. All view options are returned when there no paremeters.
 		 * </p>

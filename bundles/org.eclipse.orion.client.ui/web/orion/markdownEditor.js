@@ -524,42 +524,31 @@ define([
 		this._model = options.model;
 		this._editorView = options.editorView;
 
-		this._scrollListener = function(/*e*/) {
+		this._scrollListener = function(e) {
 			var textView = this._editorView.editor.getTextView();
-			var charIndex = textView.getOffsetAtLocation(0, (textView.getBottomPixel() + textView.getTopPixel()) / 2);
-			var block = this._styler.getBlockAtIndex(charIndex);
+
+			var block;
+			if (!e.newValue.y) {
+				/* the editor is at the top so ensure that preview is at the top as well */
+				var rootBlock = this._styler.getRootBlock();
+				var blocks = rootBlock.getBlocks();
+				if (blocks.length) {
+					block = blocks[0];
+				}
+			} else {
+				var charIndex = textView.getOffsetAtLocation(0, Math.floor(e.newValue.y + (this._previewDiv.clientHeight / 2)));
+				block = this._styler.getBlockAtIndex(charIndex);
+			}
+
 			if (block) {
 				var element = document.getElementById(block.elementId);
 				if (element) {
-					if (this._animation) {
-						this._animation.stop();
-						this._animation = null;
-					}
-
-					var newTop = Math.max(0, Math.floor(element.offsetTop - (this._previewDiv.clientHeight - element.offsetHeight) / 2));
-					var pixelY = newTop - this._previewDiv.scrollTop;
-					if (!pixelY) {
-						return;
-					}
-
-					this._animation = new mTextUtil.Animation({
-						window: window,
-						curve: [pixelY, 0],
-						onAnimate: function(x) {
-							var deltaY = pixelY - Math.floor(x);
-							this._previewDiv.scrollTop += deltaY;
-							pixelY -= deltaY;
-						}.bind(this),
-						onEnd: function() {
-							this._animation = null;
-							this._previewDiv.scrollTop += pixelY;
-						}.bind(this)
-					});
-					this._animation.play();
+					var newTop = Math.max(0, Math.ceil(element.offsetTop - (this._previewDiv.clientHeight - element.offsetHeight) / 2));
+					this._previewDiv.scrollTop = newTop;
 				}
 			}
 		}.bind(this);
-		
+
 		BaseEditor.apply(this, arguments);
 	}
 
