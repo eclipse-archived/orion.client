@@ -15,7 +15,7 @@
  * @name orion.xhr
  * @namespace Provides a promise-based API to {@link XMLHttpRequest}.
  */
-define(['orion/Deferred'], function(Deferred) {
+define(['orion/Deferred','orion/xsrfUtils'], function(Deferred, xsrfUtils) {
 
 	/**
 	 * @name orion.xhr.Result
@@ -89,6 +89,7 @@ define(['orion/Deferred'], function(Deferred) {
 		var xhr = (arguments.length > 3 && arguments[3]) ? arguments[3] : new XMLHttpRequest(); //$NON-NLS-0$
 		var d = new Deferred();
 		var headers = options.headers || {};
+		xsrfUtils.setNonceHeader(headers);
 		var log = options.log || false;
 		var data;
 		if (typeof headers['X-Requested-With'] === 'undefined') { //$NON-NLS-1$ //$NON-NLS-0$
