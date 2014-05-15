@@ -15,8 +15,8 @@
 define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/fileDownloader',
 	'orion/commandRegistry', 'orion/contentTypes', 'orion/compare/compareUtils', 
 	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog',
-	'orion/EventTarget', 'orion/form'],
-	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form){
+	'orion/EventTarget', 'orion/form', 'orion/xsrfUtils'],
+	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form, xsrfUtils){
 
 	/**
 	 * Utility methods
@@ -109,6 +109,11 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		req.open('post', targetFolder.ImportLocation, true);
 		req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
 		req.setRequestHeader("Slug", form.encodeSlug(file.name)); //$NON-NLS-0$
+
+		var token = xsrfUtils.getCSRFToken();
+		if(token) {
+			req.setRequestHeader(xsrfUtils.XSRF_TOKEN, token);
+		}
 
 		var xferOptions = force ? "overwrite-older": "no-overwrite";
 		// TODO if we want to unzip zip files, don't use this...
