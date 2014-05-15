@@ -216,6 +216,8 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 						}
 					}
 				);
+			} else {
+				if (typeof(closeCallback) === 'function') closeCallback();
 			}
 			return def;
 		}

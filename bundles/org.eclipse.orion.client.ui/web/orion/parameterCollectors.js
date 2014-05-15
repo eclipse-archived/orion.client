@@ -156,6 +156,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 					if (closeFunction) {
 						closeFunction();
 					}
+					if (typeof(cancelFunction) == 'function') cancelFunction();
 					self.close();
 				};
 				var keyHandler = function(event) {
@@ -275,7 +276,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 				close.title = messages['Close'];
 				close.addEventListener("click", function(event) { //$NON-NLS-0$
 					localClose();
-					if (typeof(cancelFunction) == 'function') cancelFunction();
 				}, false);
 				return first;
 			};
