@@ -116,16 +116,19 @@
 				/**
 				 * This test covers the Estraverse bug:
 				 * https://github.com/Constellation/estraverse/issues/20
+				 * 
+				 * Fixed with https://bugs.eclipse.org/bugs/show_bug.cgi?id=434994
+				 * we no longer require Estraverse to attach comments
 				 */
 				var topic = "/***/function f() {};";
 		
 				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
-				assert.equal(messages.length, 1);
-				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages.length, 0);
+				/*assert.equal(messages[0].ruleId, RULE_ID);
 				assert.equal(messages[0].message, "Missing documentation for function \'f\'");
-				assert.equal(messages[0].node.type, "Identifier");
+				assert.equal(messages[0].node.type, "Identifier");*/
 			});
 			it("should include {type: 'decl'} as related object", function() {
 				var topic = "var foo;\nfunction f() {};";
