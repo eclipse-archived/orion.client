@@ -32,6 +32,26 @@ define(['orion/Deferred'], function(Deferred) {
 	 * XMLHttpRequest, this field contains information about the error.
 	 */
 
+	var XSRF_NONCE_FETCH="fetch";
+	var XSRF_NONCE_REQUEST_ATTR = "x-csrf-token";
+	var nonce = "";
+
+	function addNonceRequest(method, headers) {
+		if(nonce == "") {
+			if(method.match("GET")) {
+				headers[XSRF_NONCE_REQUEST_ATTR] = XSRF_NONCE_FETCH;
+			}
+		} else {
+			headers[XSRF_NONCE_REQUEST_ATTR] = nonce;
+		}
+	}
+
+	function extractNonce(responsevalue) {
+		if(responsevalue != "" && responsevalue != null) {
+			nonce = responsevalue;
+		}
+	}
+
 	/**
 	 * @param {String} url
 	 * @param {Object} options
@@ -89,6 +109,7 @@ define(['orion/Deferred'], function(Deferred) {
 		var xhr = (arguments.length > 3 && arguments[3]) ? arguments[3] : new XMLHttpRequest(); //$NON-NLS-0$
 		var d = new Deferred();
 		var headers = options.headers || {};
+		addNonceRequest(method, headers);
 		var log = options.log || false;
 		var data;
 		if (typeof headers['X-Requested-With'] === 'undefined') { //$NON-NLS-1$ //$NON-NLS-0$
@@ -118,6 +139,7 @@ define(['orion/Deferred'], function(Deferred) {
 		xhr.onload = function() {
 			var result = makeResult(url, options, xhr);
 			if(200 <= xhr.status && xhr.status < 400) {
+				extractNonce(xhr.getResponseHeader(XSRF_NONCE_REQUEST_ATTR));
 				d.resolve(result);
 			} else {
 				d.reject(result);
