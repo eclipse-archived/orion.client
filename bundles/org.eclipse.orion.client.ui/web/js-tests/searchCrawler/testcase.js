@@ -446,7 +446,6 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: false,
 			regEx: false,
-			fileType: "*.*",
 			keyword: "EveryWhere"
 		},
 		{location: "root"});
@@ -500,7 +499,6 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: false,
 			regEx: false,
-			fileType: "*.*",
 			keyword: "EveryWhere"
 		},
 		{location: "root"});
@@ -553,7 +551,6 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: false,
 			regEx: false,
-			fileType: "*.*",
 			keyword: "EveryWhere"
 		},
 		{location: "d1"});
@@ -594,7 +591,6 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: false,
 			regEx: false,
-			fileType: "*.*",
 			keyword: "EveryWhere"
 		},
 		{location: "d1"});
@@ -635,7 +631,6 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: false,
 			regEx: false,
-			fileType: "*.*",
 			keyword: "EveryWhere"
 		},
 		{location: "d3"});
@@ -664,7 +659,6 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: false,
 			regEx: false,
-			fileType: "*.*",
 			keyword: "EveryWhere"
 		},
 		{location: "root", reportOnCancel: true});
@@ -698,7 +692,7 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: false,
 			regEx: false,
-			fileType: "css",
+			fileNamePatterns: ["*.css"],
 			keyword: "EveryWhere"
 		},
 		{location: "root"});
@@ -727,7 +721,6 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: true,
 			regEx: false,
-			fileType: "*.*",
 			keyword: "Case Sensitive"
 		},
 		{location: "root"});
@@ -768,7 +761,6 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: false,
 			regEx: false,
-			fileType: "*.*",
 			keyword: "EveryWhere"
 		},
 		{location: "d1"});
@@ -805,7 +797,6 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: false,
 			regEx: false,
-			fileType: "*.*",
 			keyword: "EveryWhere"
 		},
 		{location: "d1_2"});
@@ -833,7 +824,7 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: false,
 			regEx: true,
-			fileType: "js",
+			fileNamePatterns: ["*.js"],
 			keyword: "Ev.*here"
 		},
 		{location: "root"});
@@ -866,7 +857,6 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: true,
 			regEx: true,
-			fileType: "*.*",
 			keyword: "Ev.*Where"
 		},
 		{location: "root"});
@@ -903,7 +893,6 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: false,
 			regEx: false,
-			fileType: "*.*",
 			keyword: "artia"
 		},
 		{location: "root"});
@@ -936,7 +925,6 @@ define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/
 			start: 0,
 			caseSensitive: false,
 			regEx: false,
-			fileType: "*.*",
 			keyword: "NothingAtAll"
 		},
 		{location: "root"});
