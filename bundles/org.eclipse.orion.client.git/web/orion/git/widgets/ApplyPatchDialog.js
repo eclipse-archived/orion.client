@@ -11,7 +11,7 @@
  
 /*eslint-env browser, amd*/
 
-define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog' ], function(messages, dialog) {
+define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils' ], function(messages, dialog, xsrfUtils) {
 
 	function ApplyPatchDialog(options) {
 		this._init(options);
@@ -69,6 +69,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog' ], function(messages, 
 		this.req.open('post', this.options.diffLocation);
 		this.req.setRequestHeader("Orion-Version", "1");
 		this.req.onreadystatechange = this.handleReadyState.bind(this);
+		xsrfUtils.addCSRFNonce(this.req);
 		this.req.send(formData);
 	};
 
