@@ -32,6 +32,27 @@ define(['orion/Deferred'], function(Deferred) {
 	 * XMLHttpRequest, this field contains information about the error.
 	 */
 
+	var XSRF_TOKEN = "x-csrf-token";//$NON-NLS-0$
+
+	/**
+	 * adds xsrf nonce to header if set in cookies
+	 * @param {Object} request header
+	 */
+	function setNonceHeader(headers) {
+		var cookies = document.cookie.split(";");//$NON-NLS-0$
+
+		var i,n,v;
+		for(i = 0; i<cookies.length; i++) {
+			n = cookies[i].substr(0, cookies[i].indexOf("=")).trim();//$NON-NLS-0$
+			v = cookies[i].substr(cookies[i].indexOf("=") + 1).trim();//$NON-NLS-0$
+
+			if(n == XSRF_TOKEN) {
+				headers[XSRF_TOKEN] = v;
+				return;
+			}
+		}
+	}
+
 	/**
 	 * @param {String} url
 	 * @param {Object} options
@@ -89,6 +110,7 @@ define(['orion/Deferred'], function(Deferred) {
 		var xhr = (arguments.length > 3 && arguments[3]) ? arguments[3] : new XMLHttpRequest(); //$NON-NLS-0$
 		var d = new Deferred();
 		var headers = options.headers || {};
+		setNonceHeader(headers);
 		var log = options.log || false;
 		var data;
 		if (typeof headers['X-Requested-With'] === 'undefined') { //$NON-NLS-1$ //$NON-NLS-0$
