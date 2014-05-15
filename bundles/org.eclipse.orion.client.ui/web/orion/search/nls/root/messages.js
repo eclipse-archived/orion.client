@@ -100,5 +100,6 @@ define({
 	"Scope": "Scope",
 	"Show previous search terms": "Show previous search terms",
 	"Show replacement preview": "Show replacement preview",
-	"File name patterns (comma-separated)": "File name patterns (comma-separated)"
+	"File name patterns (comma-separated)": "File name patterns (comma-separated)",
+	"(* = any string, ? = any character)": "(* = any string, ? = any character)"
 });

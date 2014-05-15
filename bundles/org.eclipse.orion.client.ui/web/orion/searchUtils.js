@@ -132,22 +132,28 @@ searchUtils.convertSearchParams = function(searchParams) {
 		searchParams.nameSearch = (searchParams.nameSearch.toLowerCase() === "true"); //$NON-NLS-0$
 	}
 	if(searchParams.fileNamePatterns !== undefined){
-		searchParams.fileNamePatterns = searchUtils.cleanupFileNamePatterns(searchParams.fileNamePatterns);
+		searchParams.fileNamePatterns = searchUtils.getFileNamePatternsArray(searchParams.fileNamePatterns);
 	}
 };
 
-searchUtils.cleanupFileNamePatterns = function(patterns) {
-	var fileNamePatterns = undefined;
+searchUtils.getFileNamePatternsArray = function(patterns) {
+	var fileNamePatternArray = undefined;
 	
 	if (patterns) {
-		fileNamePatterns = patterns.trim();
-		fileNamePatterns = fileNamePatterns.replace(/(\s*,\s*)/g, ","); //get rid of spaces between commas
-		fileNamePatterns = fileNamePatterns.replace(/(,,+)/g, ","); //get rid of empty patterns
-		fileNamePatterns = fileNamePatterns.replace(/^(,)+/g, ""); //get rid of leading commas
-		fileNamePatterns = fileNamePatterns.replace(/(,)+$/g, ""); //get rid of trailing commas
+		var fileNamePatterns = patterns.trim();
+		
+		fileNamePatterns = fileNamePatterns.replace(/^(\s*,\s*)+/g, ""); //get rid of leading commas
+		
+		fileNamePatterns = fileNamePatterns.replace(/([^\\]),(\s*,\s*)*/g, "$1/"); //replace all unescaped commas with slashes (since slashes aren't legal in file names)
+		
+		fileNamePatterns = fileNamePatterns.replace(/(\s*\/\s*)/g, "/"); //get rid of spaces before and after delimiter
+		fileNamePatterns = fileNamePatterns.replace(/\/\/+/g, "/"); //get rid of empty patterns
+		fileNamePatterns = fileNamePatterns.replace(/\/+$/g, ""); //get rid of trailing delimiters
+		
+		fileNamePatternArray = fileNamePatterns.split("/");
 	}
 	
-	return fileNamePatterns;
+	return fileNamePatternArray;
 };
 
 searchUtils.copySearchParams = function(searchParams, copyReplace) {

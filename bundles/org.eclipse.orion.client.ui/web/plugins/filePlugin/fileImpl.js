@@ -107,16 +107,16 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation", "ori
 					newKeyword = "NameLower:*." + searchParams.fileType;
 					newSort = newSort.replace("Path", "NameLower");
 				}
-			} else if (searchParams.fileNamePatterns && searchParams.fileNamePatterns !== "*") {
+			} else if (searchParams.fileNamePatterns && (searchParams.fileNamePatterns.length > 0)) {
 				//If the search string is not empty, we just combine the file type.
 				if(newKeyword !== ""){
 					//If the search string contains white space, we should add double quotes at both ends. 
 					if(newKeyword.indexOf(" ") >= 0){
 						newKeyword = "\"" + newKeyword + "\"";
 					}
-					newKeyword = encodeURIComponent(newKeyword) + "+Name:" + searchParams.fileNamePatterns;
+					newKeyword = encodeURIComponent(newKeyword) + "+Name:" + searchParams.fileNamePatterns.join("/");
 				} else {//If the search string is empty, we have to simulate a file name search on *.fileType.
-					newKeyword = "Name:" + searchParams.fileNamePatterns;
+					newKeyword = "Name:" + searchParams.fileNamePatterns.join("/");
 					newSort = newSort.replace("Path", "Name");
 				}
 			} else if(newKeyword.indexOf(" ") >= 0){//If the search string contains white space, we should add double quato at both end.

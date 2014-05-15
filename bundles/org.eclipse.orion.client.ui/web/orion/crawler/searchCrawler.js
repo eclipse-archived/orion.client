@@ -184,9 +184,8 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 	SearchCrawler.prototype._fileNameMatches = function(fileName){
 		var matches = true;
 		if(this.searchHelper.params.fileNamePatterns){
-			var fileNamePatternArray = this.searchHelper.params.fileNamePatterns.split(",");
-			matches = fileNamePatternArray.some(function(pattern){
-				var regExpPattern = "^" + pattern.replace(/([*?])/g, ".$1"); // add line start and convert user input * and ? to .* and .? //$NON-NLS-0$
+			matches = this.searchHelper.params.fileNamePatterns.some(function(pattern){
+				var regExpPattern = "^" + pattern.replace(/([*?])/g, ".$1") + "$"; // add line start, line end, and convert user input * and ? to .* and .? //$NON-NLS-0$
 				return fileName.match(regExpPattern);
 			});
 		}

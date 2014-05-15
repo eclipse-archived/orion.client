@@ -73,6 +73,20 @@
 	outline: none;
 }
 
+.fileNamePatternsHint {
+	color: #222;
+	font-size: 11px;
+	margin: -10px 0 0 0;
+	padding: 0 2px;
+	display: block;
+	opacity: 0;
+	transition: opacity 0.1s ease;
+}
+
+.fileNamePatternsHintVisible {
+	opacity: 1 !important;
+}
+
 .toggleDisplayLink {
 	display: block;
 	margin: 0 0 0 5px;

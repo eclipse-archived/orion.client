@@ -99,7 +99,7 @@ define([
 				resource = resource.concat(searchLocation);
 			}, this);
 			
-			var fileNamePatterns = mSearchUtils.cleanupFileNamePatterns(this._fileNamePatternsInput.value);
+			var fileNamePatternsArray = mSearchUtils.getFileNamePatternsArray(this._fileNamePatternsInput.value);
 			
 			return {keyword: this._searchBox.value,
 					rows: 40,
@@ -107,7 +107,7 @@ define([
 					replace:this._replaceBox.value ? this._replaceBox.value : undefined,
 					caseSensitive: this._caseSensitiveCB.checked,
 			        regEx: this._regExCB.checked,
-					fileNamePatterns: fileNamePatterns,
+					fileNamePatterns: fileNamePatternsArray,
 			        resource: resource
 			};
 		},
@@ -154,7 +154,7 @@ define([
 			this._replaceBox.value = this._searchParams.replace ? this._searchParams.replace : "";
 			this._caseSensitiveCB.checked = this._searchParams.caseSensitive;
 			this._regExCB.checked = this._searchParams.regEx;
-			this._fileNamePatternsInput.value = this._searchParams.fileNamePatterns ? this._searchParams.fileNamePatterns : "";
+			this._fileNamePatternsInput.value = this._searchParams.fileNamePatterns ? this._searchParams.fileNamePatterns.join(", ") : "";
 			
 			if (undefined !== this._searchParams.replace) {
 				this._showReplaceField();
@@ -277,11 +277,10 @@ define([
 			this._replaceBoxWrapper = document.getElementById("replaceInputFieldWrapper"); //$NON-NLS-0$
 			this._replaceWrapper = document.getElementById("replaceWrapper"); //$NON-NLS-0$
 			this._fileNamePatternsInput = document.getElementById("fileNamePatternsInput"); //$NON-NLS-0$
+			this._fileNamePatternsHint = document.getElementById("fileNamePatternsHint"); //$NON-NLS-0$
 			this._caseSensitiveCB = document.getElementById("advSearchCaseSensitive"); //$NON-NLS-0$
 			this._regExCB = document.getElementById("advSearchRegEx"); //$NON-NLS-0$
-			this._toggleReplaceLink = document.getElementById("toggleReplaceLink");
-
-			this._fileNamePatternsInput.placeholder = messages["File name patterns (comma-separated)"]; //$NON-NLS-0$
+			this._toggleReplaceLink = document.getElementById("toggleReplaceLink"); //$NON-NLS-0$
 
 			this._init = true;
 			this._loadSearchParams();
@@ -379,6 +378,20 @@ define([
 	        //fix the width of the replaceWrapper div to prevent it from resizing
 	        this._replaceWrapper.style.width = this._replaceBoxWrapper.scrollWidth + 2 + "px"; //$NON-NLS-0$ //adding an extra 2 pixels to account for border
 	        
+	        this._fileNamePatternsInput.placeholder = messages["File name patterns (comma-separated)"]; //$NON-NLS-0$
+			lib.empty(this._fileNamePatternsHint);
+			this._fileNamePatternsHint.appendChild(document.createTextNode(messages["(* = any string, ? = any character)"])); //$NON-NLS-0$
+			
+			this._fileNamePatternsInput.addEventListener("focus", function(){
+				this._fileNamePatternsHint.classList.add("fileNamePatternsHintVisible"); //$NON-NLS-0$
+			}.bind(this));
+			
+			this._fileNamePatternsInput.addEventListener("blur", function(){
+				var correctedPatterns = mSearchUtils.getFileNamePatternsArray(this._fileNamePatternsInput.value).join(", ");
+				this._fileNamePatternsInput.value = correctedPatterns;
+				this._fileNamePatternsHint.classList.remove("fileNamePatternsHintVisible"); //$NON-NLS-0$
+			}.bind(this));
+			
 	        this._initSearchScope();
 		},
 		
