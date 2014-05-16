@@ -178,6 +178,11 @@ define([
 			});
 			return activeResource;
 		},
+		setCommitInfo: function(location, commitInfo) {
+			if(commitInfo) {
+				this.getActiveResource(location).LastCommit = commitInfo;
+			}
+		}
 	});
 
 	return {ResourceSelector: ResourceSelector};

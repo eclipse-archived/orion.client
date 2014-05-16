@@ -216,7 +216,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 				});
 			});
 		},
-		_getSHA: function(location) {
+		_getSHAObject: function(location) {
 			var _this = this;
 			var parents = this._getParents(location);
 			if (parents) {
@@ -225,7 +225,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 						var result;
 						branches.some(function(entry) {
 							if (entry.Location === location) {
-								result = entry.Sha;
+								result = entry;
 								return true;
 							}
 						});
@@ -233,14 +233,15 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 					});
 				}
 				return _this.read(location, true).then(function(metaData){
-					return metaData.Sha;
+					return metaData;
 				});
 			}
 			return new Deferred().resolve();
 		},
-		_getCommitInfo: function(child, branchName) {
+		_getCommitInfo: function(child, branchNameOrSha, asSha) {
 			var _this = this;
-			return xhr("GET", _this._repoURL.href + "/commits?sha=" + branchName + "&path=" + child.CommitPath + "&per_page=1", {//https://developer.github.com/v3/#pagination
+			var shaValue = asSha ? branchNameOrSha : branchNameOrSha + "&path=" + child.CommitPath;
+			return xhr("GET", _this._repoURL.href + "/commits?sha=" + shaValue + "&per_page=1", {//https://developer.github.com/v3/#pagination
 				headers: this._headers,
 				timeout: 15000
 			}).then(function(result) {
@@ -277,9 +278,9 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			} 
 			return Deferred.all(commitPromises).then(function(){
 				if(filesWithoutSize.length > 0) {// We only want to use /git/trees/ API if there is any file that does not have size info
-					return _this._getSHA(location).then(function(sha) {
-						if(sha){
-							return xhr("GET", _this._repoURL.href + "/git/trees/" + sha, {
+					return _this._getSHAObject(location).then(function(shaObj) {//We have to get the SHA of the current root in order to call the /git/trees/ API
+						if(shaObj && shaObj.Sha){
+							return xhr("GET", _this._repoURL.href + "/git/trees/" + shaObj.Sha, {
 								headers: this._headers,
 								timeout: 15000
 							}).then(function(result) {
@@ -366,7 +367,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			if (isMetadata) {
 				var _this = this;
 				var parents = this._getParents(location);
-				if (parents === null || parents.length === 0) {
+				if (parents === null) {//Repo Root meata data
 					return {
 						Attributes: {
 							Archive: false,
@@ -382,7 +383,19 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 						Directory: true,
 						ChildrenLocation: location
 					};
+				} else if (parents.length === 0) {//Branch meta data
+					return _this._getSHAObject(location).then(function(shaObj) {//We have to get the basic branch meta data first
+						var brMeta = shaObj;
+						if(shaObj && shaObj.Sha){
+							brMeta.Parents = parents;
+							return _this._getCommitInfo(shaObj, shaObj.Sha, true).then(function(){
+								return brMeta;
+							});
+						}
+						return brMeta;
+					});
 				}
+				//Meta data for any item under a branch
 				return this._getChildren(parents[0].Location).then(function(children) {
 					var result;
 					children.some(function(entry) {

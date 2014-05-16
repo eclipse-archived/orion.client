@@ -315,18 +315,20 @@ define([
 						this._activeComponentLocation = null;
 						var newLocation = null;
 						if(metadata.Parents) {
-							if(metadata.Parents.length > 0) {
+							if(metadata.Parents.length > 0) {//The input change happens on a sub folder of a branch, we need to find the branch in its parent chain
 								this._activeBranchLocation = metadata.Parents[metadata.Parents.length-1].Location;
 								if(metadata.Parents.length > 1) {
 									this._activeComponentLocation = metadata.Parents[metadata.Parents.length-2].Location;
 								} else {
 									this._activeComponentLocation = metadata.Location;
 								}
-							} else {
+							} else {//The input change happens jsut on a branch, we need to we need to set the commit information in the branch selector
+								//TODO: in the future if the root fetchChildren provides the commit information in each child that represents a branch, we dod not nee to do this
+								this._branchSelector.setCommitInfo(metadata.LastCommit);
 								this._activeBranchLocation = metadata.Location;
 								this._activeComponentLocation = metadata.Location;
 							}
-						} else {
+						} else {//The input change happens on the root directory of a repo, we need to set the default to "master" if it exist
 							this._branches.some(function(branch){
 								if(branch.Name.toLowerCase() === "master") { //$NON-NLS-0$
 									this._activeBranchLocation = branch.Location;
