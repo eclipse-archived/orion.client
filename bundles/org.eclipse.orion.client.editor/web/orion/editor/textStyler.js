@@ -1377,13 +1377,13 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				this.dispatchEvent({
 					type: "BlocksChanged",
 					old: [ancestorBlock],
-					new: [ancestorBlock]
+					"new": [ancestorBlock]
 				});
 			} else {
 				this.dispatchEvent({
 					type: "BlocksChanged",
 					old: blocks.slice(blockStart, blockEnd),
-					new: newBlocks
+					"new": newBlocks
 				});
 			}
 

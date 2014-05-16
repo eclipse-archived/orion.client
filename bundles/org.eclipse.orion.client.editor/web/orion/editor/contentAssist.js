@@ -995,7 +995,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			}
 		}
 		
-		this.parentNode.addEventListener("scroll", this.onScroll.bind(this)); //$NON-NLS-0$
+		textUtil.addEventListener(this.parentNode, "scroll", this.onScroll.bind(this)); //$NON-NLS-0$
 		
 		var self = this;
 		this.textViewListener = {
@@ -1054,7 +1054,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		createAccessible: function() {
 			var mode = this._contentAssistMode;
 			var self = this;
-			this.parentNode.addEventListener("keydown", function(evt) { //$NON-NLS-0$
+			textUtil.addEventListener(this.parentNode, "keydown", function(evt) { //$NON-NLS-0$
 				if (!evt) { evt = window.event; }
 				if (evt.preventDefault) {
 					evt.preventDefault();

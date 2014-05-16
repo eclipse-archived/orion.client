@@ -241,9 +241,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			classRule += "}"; //$NON-NLS-0$
 			return frames + classRule;
 		}
-		document.addEventListener("animationstart", insertListener, false); //$NON-NLS-0$
-		document.addEventListener("MSAnimationStart", insertListener, false);  //$NON-NLS-0$
-		document.addEventListener("webkitAnimationStart", insertListener, false); //$NON-NLS-0$
+		addHandler(document, "animationstart", insertListener, false); //$NON-NLS-0$
+		addHandler(document, "MSAnimationStart", insertListener, false);  //$NON-NLS-0$
+		addHandler(document, "webkitAnimationStart", insertListener, false); //$NON-NLS-0$
 		var style = document.createElement("style"); //$NON-NLS-0$
 		style.id = id;
 		var head = document.getElementsByTagName("head")[0] || document.documentElement; //$NON-NLS-0$
