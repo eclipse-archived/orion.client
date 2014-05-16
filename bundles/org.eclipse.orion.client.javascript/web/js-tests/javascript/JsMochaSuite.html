@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="js-tests/javascript/mocha.css" />
   <script src="../../../../requirejs/require.js"></script>
   <script>
-    /* global require mocha */
+	/*jslint amd:true*/
 	require({
 		baseUrl: '../../',
 		paths: {
@@ -31,7 +31,7 @@
 			}
 		],
 	});
-	require(['mocha/mocha'], function() {
+	require(['mocha/sauce'], function(mocha) {
 		mocha.setup('bdd');
 		require([
 				'eslint/tests/load-tests',

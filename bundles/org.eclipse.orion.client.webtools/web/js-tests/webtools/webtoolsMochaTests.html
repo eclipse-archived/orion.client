@@ -6,7 +6,6 @@
 	<script src="../../requirejs/require.js"></script>
 	<script>
 		/*jslint amd:true*/
-		/*global mocha*/
 		require({
 		baseUrl: "../../",
 		paths: {
@@ -14,12 +13,12 @@
 			i18n: "requirejs/i18n",
 		}
 	});
-	require(["mocha/mocha"], function() {
-		mocha.setup("bdd");
+	require(["mocha/sauce"], function(mochaSauce) {
+		mochaSauce.setup("bdd");
 		require([
 			"js-tests/webtools/cssValidatorTests"
 		], function(){
-			mocha.run();
+			mochaSauce.run();
 		});
 	});
 	</script>

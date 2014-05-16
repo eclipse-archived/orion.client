@@ -1,0 +1,9 @@
+# CF application that runs Orion client tests.
+# This manifest is for development time use only. It is not used by the Maven build.
+---
+applications:
+- name: orion-test
+  host: orion-test
+  memory: 1G
+  instances: 1
+  path: .
