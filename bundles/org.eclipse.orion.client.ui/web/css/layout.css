@@ -598,3 +598,10 @@ hard-coded numbers elsewhere.
 	position:absolute;
 	left:50px;
 }
+
+.innerPanels{
+	position:absolute;
+	width:100%;
+	top:36px;
+	bottom:0;
+}
