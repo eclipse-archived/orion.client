@@ -985,6 +985,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			if (startLine === endLine) {
 				return null;
 			}
+			if (startLine + 1 === endLine && baseModel.getLineStart(endLine) === baseModel.getLineEnd(endLine)) {
+				return null;
+			}
 			return new (mAnnotations.AnnotationType.getType(mAnnotations.AnnotationType.ANNOTATION_FOLDING))(start, end, viewModel);
 		},
 		_findBlock: function(parentBlock, offset) {

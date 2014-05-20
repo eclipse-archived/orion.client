@@ -83,8 +83,8 @@ define([
 
 				if (tokens[i].type === "heading") { //$NON-NLS-0$
 					var isSetext = text[index] !== "#"; //$NON-NLS-0$
-					var lineEnd = this._getLineEnd(text, index);
-					end = isSetext ? this._getLineEnd(text, index, 1) : lineEnd;
+					var lineEnd = this._getLineEnd(text, index, model);
+					end = isSetext ? this._getLineEnd(text, index, model, 1) : lineEnd;
 					bounds = {
 						start: index,
 						contentStart: index + (isSetext ? 0 : tokens[i].depth + 1),
@@ -121,7 +121,7 @@ define([
 						}
 					}
 
-					end = this._getLineEnd(text, index, newlineCount, true);
+					end = this._getLineEnd(text, index, model, newlineCount);
 					bounds = {
 						start: index,
 						contentStart: index,
@@ -204,12 +204,12 @@ define([
 						// TODO create a block and syntax style it if a supported lang is provided
 						start = index;
 						newlines = tokens[i].text.match(this._newlineRegex);
-						end = this._getLineEnd(text, index, 2 + (newlines ? newlines.length : 0));
+						end = this._getLineEnd(text, index, model, 2 + (newlines ? newlines.length : 0));
 						name = "markup.raw.code.fenced.gfm"; //$NON-NLS-0$
 					} else {
 						start = this._getLineStart(text, index); /* backtrack to start of line */
 						newlines = tokens[i].text.match(this._newlineRegex);
-						end = this._getLineEnd(text, index, newlines ? newlines.length : 0);
+						end = this._getLineEnd(text, index, model, newlines ? newlines.length : 0);
 						name = "markup.raw.code.markdown"; //$NON-NLS-0$
 					}
 
@@ -221,7 +221,7 @@ define([
 					};
 					index = end;
 				} else if (tokens[i].type === "hr") { //$NON-NLS-0$
-					end = this._getLineEnd(text, index);
+					end = this._getLineEnd(text, index, model);
 					bounds = {
 						start: index,
 						contentStart: index,
@@ -231,7 +231,7 @@ define([
 					name = "markup.other.separator.markdown"; //$NON-NLS-0$ 
 					index = end;
 				} else if (tokens[i].type === "table") { //$NON-NLS-0$
-					end = this._getLineEnd(text, index, tokens[i].cells.length + 1);
+					end = this._getLineEnd(text, index, model, tokens[i].cells.length + 1);
 					bounds = {
 						start: index,
 						contentStart: index,
@@ -360,7 +360,7 @@ define([
 			}
 			return 0;
 		},
-		_getLineEnd: function(text, index, lineSkip, include) {
+		_getLineEnd: function(text, index, model, lineSkip) {
 			lineSkip = lineSkip || 0;
 			while (true) {
 				this._eolRegex.lastIndex = index;
@@ -369,7 +369,7 @@ define([
 					return text.length;
 				}
 				if (!lineSkip--) {
-					return result.index + (include ? result[0].length : 0);
+					return Math.min(text.length, result.index + model.getLineDelimiter().length);
 				}
 				index = result.index + 2;
 			}
@@ -396,55 +396,69 @@ define([
 				e.new[0].tokens = newTokens;
 			}
 
-			var elements = [];
-			e.old.forEach(function(current) {
-				elements.push(document.getElementById(current.elementId));
-			});
-
-			if (e.old.length < e.new.length) {
-				/* replacing a set of blocks with a larger set of blocks */
-				var parentElement, nextElement;
-				if (elements.length) {
-					parentElement = elements[0].parentNode;
-					var children = parentElement.childNodes;
-					var id = elements[elements.length - 1].id;
-					for (var i = e.old.length; i < children.length; i++) {
-						if (children[i].id === id) {
-							if (i + 1 < children.length) {
-								/* not the last child in the list */
-								nextElement = children[i + 1];
-							}
-							break;
+			var oldBlocksIndex = 0, parentElement, i, j, children = [];
+			if (e.old.length) {
+				var currentElement = document.getElementById(e.old[0].elementId);
+				parentElement = currentElement.parentElement;
+				for (i = 0; i < parentElement.children.length; i++) {
+					if (parentElement.children[i].id === currentElement.id) {
+						for (j = i; j < i + e.old.length; j++) {
+							children.push(parentElement.children[j]);
 						}
-					}
-				} else {
-					parentElement = document.getElementById(ID_PREVIEW);
-				}
-				while (elements.length < e.new.length) {
-					var newElement = document.createElement("div"); //$NON-NLS-0$
-					elements.push(newElement);
-					if (nextElement) {
-						parentElement.insertBefore(newElement, nextElement);
-					} else {
-						parentElement.appendChild(newElement);
+						break;
 					}
 				}
-			} else if (e.new.length < elements.length) {
-				/* replacing a set of blocks with a smaller set of blocks */
-				parentElement = elements[0].parentNode;
-				for (i = e.new.length; i < elements.length; i++) {
-					parentElement.removeChild(elements[i]);
-				}
+			} else {
+				parentElement = document.getElementById(ID_PREVIEW);
 			}
 
-			var index = 0;
 			e.new.forEach(function(current) {
-				elements[index].id = current.elementId;
+				/* try to find an existing old block and DOM element corresponding to the current new block */
+				var element = null;
+				for (i = oldBlocksIndex; i < e.old.length; i++) {
+					if (e.old[i].elementId === current.elementId) {
+						/*
+						 * Found it.  If any old blocks have been passed over during this search
+						 * then remove their elements from the DOM as they no longer exist.
+						 */
+						element = children[i];
+						for (j = i - 1; oldBlocksIndex <= j; j--) {
+							parentElement.removeChild(children[j]);
+						}
+						oldBlocksIndex = i + 1;
+						break;
+					}
+				}
+				if (!element) {
+					/*
+					 * An existing block was not found, so there is not an existing corresponding
+					 * DOM element to reuse.  Create one now.
+					 */
+					element = document.createElement("div"); //$NON-NLS-0$
+					element.id = current.elementId;
+					if (children.length) {
+						parentElement.insertBefore(element, children[oldBlocksIndex]);
+					} else {
+						parentElement.appendChild(element);
+					}
+				}
+
+				/* create a new div with content corresponding to this block */
+
+				var newElement = document.createElement("div"); //$NON-NLS-0$
+
 				/* must pass a copy of the tokens to marked because it removes them from the array during processing */
 				var parseTokens = current.tokens.slice();
 				parseTokens.links = current.tokens.links;
-				elements[index++].innerHTML = marked.Parser.parse(parseTokens, this._markedOptions);
+				newElement.innerHTML = marked.Parser.parse(parseTokens, this._markedOptions);
+
+				this._updateNode(element, newElement);
 			}.bind(this));
+
+			/* all new blocks have been processed, so remove all remaining old elements that were not reused */
+			for (i = e.old.length - 1; oldBlocksIndex <= i; i--) {
+				parentElement.removeChild(children[i]);
+			}
 		},
 		_updateMatch: function(match, text, matches, minimumIndex) {
 			match.pattern.regex.lastIndex = minimumIndex;
@@ -460,6 +474,65 @@ define([
 				matches.push(match);
 			}
 		},
+		_updateNode: function(targetNode, newNode) {
+			/* modify the existing node */
+			
+			if (newNode.nodeName === "#text") {
+				targetNode.textContent = newNode.textContent;
+				return;
+			} else if (newNode.nodeName === "IMG") {
+				if (targetNode.src !== newNode.src) {
+					targetNode.parentElement.replaceChild(newNode, targetNode);
+					return;
+				}
+			}
+
+			var targetNodesIndex = 0;
+			var targetNodes = [], newNodes = [];
+			var temp = targetNode.childNodes;
+			for (var i = 0; i < temp.length; i++) {
+				targetNodes.push(temp[i]);
+			}
+			temp = newNode.childNodes;
+			for (i = 0; i < temp.length; i++) {
+				newNodes.push(temp[i]);
+			}
+
+			newNodes.forEach(function(currentNode) {
+				/* try to find an existing node that can be adapted to the current node */
+				var node = null;
+				for (i = targetNodesIndex; i < targetNodes.length; i++) {
+					if (targetNodes[i].nodeName === currentNode.nodeName) {
+						/*
+						 * Found one.  If any nodes have been passed over during this search
+						 * then remove them from the DOM as they no longer exist.
+						 */
+						node = targetNodes[i];
+						for (var j = i - 1; targetNodesIndex <= j; j--) {
+							targetNode.removeChild(targetNodes[j]);
+						}
+						targetNodesIndex = i + 1;
+						break;
+					}
+				}
+
+				if (!node) {
+					/* an existing node was not found to reuse, so just insert the new one */
+					if (targetNodes.length) {
+						targetNode.insertBefore(currentNode, targetNodes[targetNodesIndex]);
+					} else {
+						targetNode.appendChild(currentNode);
+					}
+				} else {
+					this._updateNode(node, currentNode);
+				}
+			}.bind(this));
+
+			/* all new nodes have been processed, so remove all remaining target nodes that were not reused */
+			for (i = targetNodes.length - 1; targetNodesIndex <= i; i--) {
+				targetNode.removeChild(targetNodes[i]);
+			}
+		},
 		_CR: "\r", //$NON-NLS-0$
 		_NEWLINE: "\n", //$NON-NLS-0$
 		_blockquoteRegex: />/g,
@@ -472,6 +545,8 @@ define([
 		_unorderedListRegex: /[*+-][ \t]/g,
 		_whitespaceRegex: /\s*/g
 	};
+	
+	var _imageCache = {};
 	
 	function filterOutputLink(outputLink, resourceURL, fileClient, isRelative) {
 		return function(cap, link) {
@@ -506,6 +581,11 @@ define([
 							params: "editor=orion.editor.markdown" //$NON-NLS-0$
 						});
 					} else {
+						var entry = _imageCache[linkURL.href];
+						if (entry) {
+							return "<img id='" + entry.id + "' src='" + (entry.src ? entry.src : "") + "'>"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						}
+
 						if (fileClient.readBlob) {
 							var id = "_md_img_" + imgCount++; //$NON-NLS-0$
 							fileClient.readBlob(linkURL.href).then(function(bytes) {
@@ -513,8 +593,10 @@ define([
 								var mimeType = extensionMatch ? "image/" +extensionMatch[1] : "image/png"; //$NON-NLS-1$ //$NON-NLS-0$
 								var objectURL = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
 								document.getElementById(id).src = objectURL;
-								URL.revokeObjectURL(objectURL);
-							});
+								// URL.revokeObjectURL(objectURL); /* do not revoke, cache for reuse instead */
+								_imageCache[linkURL.href].src = objectURL;
+							}.bind(this));
+							_imageCache[linkURL.href] = {id: id};
 							return "<img id='" + id + "' src=''>";	//$NON-NLS-1$ //$NON-NLS-0$			
 						}
 						link.href = linkURL.href;
