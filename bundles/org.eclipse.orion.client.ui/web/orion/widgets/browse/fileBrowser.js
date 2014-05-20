@@ -323,11 +323,11 @@ define([
 									this._activeComponentLocation = metadata.Location;
 								}
 							} else {//The input change happens jsut on a branch, we need to we need to set the commit information in the branch selector
-								//TODO: in the future if the root fetchChildren provides the commit information in each child that represents a branch, we dod not nee to do this
-								this._branchSelector.setCommitInfo(metadata.LastCommit);
 								this._activeBranchLocation = metadata.Location;
 								this._activeComponentLocation = metadata.Location;
 							}
+							//TODO: in the future if the root fetchChildren provides the commit information in each child that represents a branch, we dod not nee to do this
+							this._branchSelector.setCommitInfo(this._activeBranchLocation, metadata.LastCommit);
 						} else {//The input change happens on the root directory of a repo, we need to set the default to "master" if it exist
 							this._branches.some(function(branch){
 								if(branch.Name.toLowerCase() === "master") { //$NON-NLS-0$
