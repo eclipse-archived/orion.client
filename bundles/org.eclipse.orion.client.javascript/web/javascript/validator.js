@@ -50,8 +50,8 @@ define([
 		 */
 		setOption: function(ruleId, value, key) {
 			if (typeof value === "number") {
-				var ruleConfig = this.rules[ruleId];
-				if(Array.isArray(ruleConfig)) {
+				if(Array.isArray(this.rules[ruleId])) {
+					var ruleConfig = this.rules[ruleId];
 					if (key) {
 						ruleConfig[1] = ruleConfig[1] || {};
 						ruleConfig[1][key] = value;
@@ -60,7 +60,7 @@ define([
 					}
 				}
 				else {
-					ruleConfig = value;
+					this.rules[ruleId] = value;
 				}
 			}
 		}
