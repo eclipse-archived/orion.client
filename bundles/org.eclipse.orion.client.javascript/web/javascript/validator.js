@@ -20,25 +20,25 @@ define([
 	var config = {
 		// 0:off, 1:warning, 2:error
 		rules: {
+			"curly" : 0, //$NON-NLS-0$
 			"eqeqeq": 1, //$NON-NLS-0$
-			"no-redeclare": 1, //$NON-NLS-0$
-			"no-undef": 2, //$NON-NLS-0$
-			"no-unused-vars": 1, //$NON-NLS-0$
-			"no-use-before-define": 1, //$NON-NLS-0$
-			"semi": 1, //$NON-NLS-0$
-			"no-extra-semi": 1, //$NON-NLS-0$
 			"missing-doc": [1, {decl: 0, expr: 0}], //$NON-NLS-0$
-			'no-debugger' : 1, //$NON-NLS-0$
-			'no-dupe-keys' : 2, //$NON-NLS-0$ 
-			'no-eval' : 0, //$NON-NLS-0$ 
-			'curly' : 0, //$NON-NLS-0$ 
-			'new-parens' : 2, //$NON-NLS-0$
-			'use-isnan' : 2, //$NON-NLS-0$
-			'no-unused-params': 1, //$NON-NLS-0$
+			"new-parens" : 2, //$NON-NLS-0$
+			"no-debugger" : 1, //$NON-NLS-0$
+			"no-dupe-keys" : 2, //$NON-NLS-0$
+			"no-eval" : 0, //$NON-NLS-0$
+			"no-extra-semi": 1, //$NON-NLS-0$
 			"no-new-array": 1, //$NON-NLS-0$
 			"no-new-func": 1, //$NON-NLS-0$
 			"no-new-object": 1, //$NON-NLS-0$
 			"no-new-wrappers": 1, //$NON-NLS-0$
+			"no-redeclare": 1, //$NON-NLS-0$
+			"no-undef": 2, //$NON-NLS-0$
+			"no-unused-params": 1, //$NON-NLS-0$
+			"no-unused-vars": 1, //$NON-NLS-0$
+			"no-use-before-define": 1, //$NON-NLS-0$
+			"semi": 1, //$NON-NLS-0$
+			"use-isnan" : 2, //$NON-NLS-0$
 		},
 		/**
 		 * @description Sets the given rule to the given enabled value
@@ -291,26 +291,26 @@ define([
 			}
 			// TODO these option -> setting mappings are becoming hard to manage
 			// And they must be kept in sync with javascriptPlugin.js
+			config.setOption("curly", properties.validate_curly); //$NON-NLS-0$
+			config.setOption("eqeqeq", properties.validate_eqeqeq); //$NON-NLS-0$
 			config.setOption("missing-doc", properties.validate_func_decl, "decl"); //$NON-NLS-0$ // missing-func-decl-doc
 			config.setOption("missing-doc", properties.validate_func_expr, "expr"); //$NON-NLS-0$ // missing-func-expr-doc
-			config.setOption("eqeqeq", properties.validate_eqeqeq); //$NON-NLS-0$
-			config.setOption("no-redeclare", properties.validate_no_redeclare); //$NON-NLS-0$
-			config.setOption("no-undef", properties.validate_no_undef); //$NON-NLS-0$
-			config.setOption("no-unused-vars", properties.validate_no_unused_vars); //$NON-NLS-0$
-			config.setOption("no-use-before-define", properties.validate_use_before_define); //$NON-NLS-0$
-			config.setOption("semi", properties.validate_missing_semi); //$NON-NLS-0$
-			config.setOption("no-extra-semi", properties.validate_unnecessary_semi); //$NON-NLS-0$
+			config.setOption("new-parens", properties.validate_new_parens); //$NON-NLS-0$
 			config.setOption("no-debugger", properties.validate_debugger); //$NON-NLS-0$
 			config.setOption("no-dupe-keys", properties.validate_dupe_obj_keys); //$NON-NLS-0$
 			config.setOption("no-eval", properties.validate_eval); //$NON-NLS-0$
-			config.setOption("curly", properties.validate_curly); //$NON-NLS-0$
-			config.setOption("new-parens", properties.validate_new_parens); //$NON-NLS-0$
-			config.setOption("use-isnan", properties.validate_use_isnan); //$NON-NLS-0$
-			config.setOption("no-unused-params", properties.validate_unused_params); //$NON-NLS-0$
+			config.setOption("no-extra-semi", properties.validate_unnecessary_semi); //$NON-NLS-0$
 			config.setOption("no-new-array", properties["no-new-array"]); //$NON-NLS-1$ //$NON-NLS-0$
 			config.setOption("no-new-func", properties["no-new-func"]); //$NON-NLS-1$ //$NON-NLS-0$
 			config.setOption("no-new-object", properties["no-new-object"]); //$NON-NLS-1$ //$NON-NLS-0$
 			config.setOption("no-new-wrappers", properties["no-new-wrappers"]); //$NON-NLS-1$ //$NON-NLS-0$
+			config.setOption("no-redeclare", properties.validate_no_redeclare); //$NON-NLS-0$
+			config.setOption("no-undef", properties.validate_no_undef); //$NON-NLS-0$
+			config.setOption("no-unused-params", properties.validate_unused_params); //$NON-NLS-0$
+			config.setOption("no-unused-vars", properties.validate_no_unused_vars); //$NON-NLS-0$
+			config.setOption("no-use-before-define", properties.validate_use_before_define); //$NON-NLS-0$
+			config.setOption("semi", properties.validate_missing_semi); //$NON-NLS-0$
+			config.setOption("use-isnan", properties.validate_use_isnan); //$NON-NLS-0$
 		}
 	});
 	return ESLintValidator;

@@ -152,24 +152,6 @@ define([
 					tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
 					category: "validation",  //$NON-NLS-0$
 					properties: [
-						{	id: "validate_eqeqeq",  //$NON-NLS-0$
-							nameKey: 'eqeqeq',  //$NON-NLS-0$
-							type: "number",  //$NON-NLS-0$
-							defaultValue: warning,
-							options: severities
-						},
-						{	id: "validate_debugger",  //$NON-NLS-0$
-							nameKey: 'noDebugger',  //$NON-NLS-0$
-							type: "number",  //$NON-NLS-0$
-							defaultValue: warning,
-							options: severities
-						},
-						{	id: "validate_eval",  //$NON-NLS-0$
-							nameKey: 'noEval',  //$NON-NLS-0$
-							type: "number",  //$NON-NLS-0$
-							defaultValue: ignore,
-							options: severities
-						},
 						{
 							id: "no-new-array", //$NON-NLS-0$
 							nameKey: "no-new-array", //$NON-NLS-0$
@@ -198,16 +180,34 @@ define([
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
+						{	id: "validate_curly",  //$NON-NLS-0$
+							nameKey: 'curly',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: ignore,
+							options: severities
+						},
+						{	id: "validate_debugger",  //$NON-NLS-0$
+							nameKey: 'noDebugger',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: warning,
+							options: severities
+						},
 						{	id: "validate_dupe_obj_keys",  //$NON-NLS-0$
 							nameKey: 'noDupeKeys',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
 							defaultValue: error,
 							options: severities
 						},
-						{	id: "validate_use_isnan",  //$NON-NLS-0$
-							nameKey: 'useIsNaN',  //$NON-NLS-0$
+						{	id: "validate_eqeqeq",  //$NON-NLS-0$
+							nameKey: 'eqeqeq',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: error,
+							defaultValue: warning,
+							options: severities
+						},
+						{	id: "validate_eval",  //$NON-NLS-0$
+							nameKey: 'noEval',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: ignore,
 							options: severities
 						},
 						{	id: "validate_func_decl",  //$NON-NLS-0$
@@ -222,8 +222,8 @@ define([
 							defaultValue: ignore,
 							options: severities
 						},
-						{	id: "validate_use_before_define",  //$NON-NLS-0$
-							nameKey: 'useBeforeDefine',  //$NON-NLS-0$
+						{	id: "validate_missing_semi",  //$NON-NLS-0$
+							nameKey: 'missingSemi',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
 							defaultValue: warning,
 							options: severities
@@ -234,22 +234,22 @@ define([
 							defaultValue: error,
 							options: severities
 						},
-						{	id: "validate_missing_semi",  //$NON-NLS-0$
-							nameKey: 'missingSemi',  //$NON-NLS-0$
+						{	id: "validate_no_redeclare",  //$NON-NLS-0$
+							nameKey: 'varRedecl',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
 							defaultValue: warning,
-							options: severities
-						},
-						{	id: "validate_curly",  //$NON-NLS-0$
-							nameKey: 'curly',  //$NON-NLS-0$
-							type: "number",  //$NON-NLS-0$
-							defaultValue: ignore,
 							options: severities
 						},
 						{	id: "validate_no_undef",  //$NON-NLS-0$
 							nameKey: 'undefMember',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
 							defaultValue: error,
+							options: severities
+						},
+						{	id: "validate_no_unused_vars",  //$NON-NLS-0$
+							nameKey: 'unusedVars',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: warning,
 							options: severities
 						},
 						{	id: "validate_unnecessary_semi",  //$NON-NLS-0$
@@ -264,18 +264,18 @@ define([
 							defaultValue: warning,
 							options: severities
 						},
-						{	id: "validate_no_unused_vars",  //$NON-NLS-0$
-							nameKey: 'unusedVars',  //$NON-NLS-0$
+						{	id: "validate_use_before_define",  //$NON-NLS-0$
+							nameKey: 'useBeforeDefine',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
 							defaultValue: warning,
 							options: severities
 						},
-						{	id: "validate_no_redeclare",  //$NON-NLS-0$
-							nameKey: 'varRedecl',  //$NON-NLS-0$
+						{	id: "validate_use_isnan",  //$NON-NLS-0$
+							nameKey: 'useIsNaN',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: warning,
+							defaultValue: error,
 							options: severities
-						}
+						},
 					]
 				}
 			]
