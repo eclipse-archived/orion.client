@@ -24,6 +24,13 @@
 		root.rules.noundef = factory(req, exp, mod);
 	}
 }(this, function(require, exports, module) {
+	/**
+	 * @name module.exports
+	 * @description Rule exports
+	 * @function
+	 * @param context
+	 * @returns {Object} Rule exports
+	 */
 	module.exports = function(context) {
 		"use strict";  //$NON-NLS-0$
 
@@ -31,6 +38,13 @@
 			return ref.isRead();
 		}
 
+		/**
+		 * @name getReferences
+		 * @description The array of references to the given variable
+		 * @param scope
+		 * @param variable
+		 * @returns {Array} The references
+		 */
 		function getReferences(scope, variable) {
 			var refs = variable.references;
 			if (scope.type === "global") {  //$NON-NLS-0$
@@ -43,19 +57,29 @@
 			return refs;
 		}
 
+		/**
+		 * @name check
+		 * @description Lints the given node
+		 * @param node
+		 */
 		function check(node) {
-			var scope = context.getScope();
-			scope.variables.forEach(function(variable) {
-				if (!variable.defs.length || variable.defs[0].type === "Parameter") { // Don't care about parameters  //$NON-NLS-0$
-					return;
-				}
-				var references = getReferences(scope, variable), id = variable.defs[0].node.id;
-				if (!references.length) {
-					context.report(id, "'{{name}}' is never used.", {name: id.name});
-				} else if (!references.some(isRead)) {
-					context.report(id, "'{{name}}' is never read.", {name: id.name});
-				}
-			});
+			try {
+				var scope = context.getScope();
+				scope.variables.forEach(function(variable) {
+					if (!variable.defs.length || variable.defs[0].type === "Parameter") { // Don't care about parameters  //$NON-NLS-0$
+						return;
+					}
+					var references = getReferences(scope, variable), id = variable.defs[0].node.id;
+					if (!references.length) {
+						context.report(id, "'{{name}}' is never used.", {name: id.name});
+					} else if (!references.some(isRead)) {
+						context.report(id, "'{{name}}' is never read.", {name: id.name});
+					}
+				});
+			}
+			catch(ex) {
+				console.log(ex);
+			}
 		}
 
 		return {

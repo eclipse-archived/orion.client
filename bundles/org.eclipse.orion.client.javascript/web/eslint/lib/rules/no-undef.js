@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports */
+/*global define module require exports console */
 (function(root, factory) {
     if(typeof exports === 'object') {  //$NON-NLS-0$
         module.exports = factory(require, exports, module);
@@ -70,19 +70,29 @@ module.exports = function(context) {
 
     return {
 
+        /**
+         * @name Program
+         * @description Linting for Program nodes
+         * @function
+         * @returns returns
+         */
         "Program": function(/*node*/) {  //$NON-NLS-0$
-
-            var globalScope = context.getScope();
-
-            globalScope.through.forEach(function(ref) {
-                var variable = getDeclaredGlobalVariable(globalScope, ref),
-                    name = ref.identifier.name;
-                if (!variable) {
-                    context.report(ref.identifier, "'{{name}}' is not defined.", { name: name });
-                } else if (ref.isWrite() && variable.writeable === false) {
-                    context.report(ref.identifier, "'{{name}}' is read only.", { name: name });
-                }
-            });
+			try {
+	            var globalScope = context.getScope();
+	
+	            globalScope.through.forEach(function(ref) {
+	                var variable = getDeclaredGlobalVariable(globalScope, ref),
+	                    name = ref.identifier.name;
+	                if (!variable) {
+	                    context.report(ref.identifier, "'{{name}}' is not defined.", { name: name });
+	                } else if (ref.isWrite() && variable.writeable === false) {
+	                    context.report(ref.identifier, "'{{name}}' is read only.", { name: name });
+	                }
+	            });
+        	}
+        	catch(ex) {
+        		console.log(ex);
+        	}
         }
     };
 

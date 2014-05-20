@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports */
+/*global define module require exports console */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module);
@@ -25,6 +25,13 @@
 	}
 }(this, function(require, exports, module) {
 
+	/**
+	 * @name module.exports
+	 * @description Exported rule
+	 * @function
+	 * @param context
+	 * @returns {Object} Exported AST nodes to lint
+	 */
 	module.exports = function(context) {
 		"use strict";  //$NON-NLS-0$
 		
@@ -33,20 +40,25 @@
 		 * @param {Object} node The AST node to check
 		 */
 		function checkBlock(node) {
-			if(node.type === 'IfStatement') {
-				if(node.consequent && node.consequent.type !== 'BlockStatement') {
-					//flag the first token of the statement that should be in the block
-					context.report(node.consequent, "Statement should be enclosed in braces.", null, context.getTokens(node.consequent)[0]);
+			try {
+				if(node.type === 'IfStatement') {
+					if(node.consequent && node.consequent.type !== 'BlockStatement') {
+						//flag the first token of the statement that should be in the block
+						context.report(node.consequent, "Statement should be enclosed in braces.", null, context.getTokens(node.consequent)[0]);
+					}
+					if(node.alternate && node.alternate.type !== 'BlockStatement' && node.alternate.type !== 'IfStatement') {
+						//flag the first token of the statement that should be in the block
+						context.report(node.alternate, "Statement should be enclosed in braces.", null, context.getTokens(node.alternate)[0]);
+					}
+				} else if(node.type === 'WhileStatement' || node.type === 'ForStatement' || node.type === 'ForInStatement') {
+					if(node.body && node.body.type !== 'BlockStatement') {
+						//flag the first token of the statement that should be in the block
+						context.report(node.body, "Statement should be enclosed in braces.", null, context.getTokens(node.body)[0]);
+					}
 				}
-				if(node.alternate && node.alternate.type !== 'BlockStatement' && node.alternate.type !== 'IfStatement') {
-					//flag the first token of the statement that should be in the block
-					context.report(node.alternate, "Statement should be enclosed in braces.", null, context.getTokens(node.alternate)[0]);
-				}
-			} else if(node.type === 'WhileStatement' || node.type === 'ForStatement' || node.type === 'ForInStatement') {
-				if(node.body && node.body.type !== 'BlockStatement') {
-					//flag the first token of the statement that should be in the block
-					context.report(node.body, "Statement should be enclosed in braces.", null, context.getTokens(node.body)[0]);
-				}
+			}
+			catch(ex) {
+				console.log(ex);
 			}
 		}
 		

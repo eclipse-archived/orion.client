@@ -25,6 +25,13 @@
 	}
 }(this, function(require, exports, module, util) {
 
+	/**
+	 * @name module.exports
+	 * @description Rule exports
+	 * @function
+	 * @param context
+	 * @returns {Object} Rule exports
+	 */
 	module.exports = function(context) {
 
 		return util.createNewBuiltinRule("Array", "Use the array literal notation '[]'.", context); //$NON-NLS-0$

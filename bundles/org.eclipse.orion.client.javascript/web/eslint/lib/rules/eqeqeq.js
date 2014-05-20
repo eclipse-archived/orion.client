@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports */
+/*global define module require exports console */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module);
@@ -53,18 +53,36 @@
 		return false;
 	}
 
+	/**
+	 * @name module.exports
+	 * @description Rule exports
+	 * @function
+	 * @param context
+	 * @returns {Object} AST nodes to lint
+	 */
 	module.exports = function(context) {
 		"use strict";  //$NON-NLS-0$
 		return {
+			/**
+			 * @name BinaryExpression
+			 * @description Linting for BinaryExpressions
+			 * @function
+			 * @param node
+			 */
 			"BinaryExpression": function(node) {  //$NON-NLS-0$
-				if(isNullness(node.left) || isNullness(node.right)) {
-					return;
+				try {
+					if(isNullness(node.left) || isNullness(node.right)) {
+						return;
+					}
+					var op = node.operator;
+					if (op === "==") {  //$NON-NLS-0$
+						context.report(node, "Expected '===' and instead saw '=='.", null, getOperatorToken(context, node));
+					} else if (op === "!=") {  //$NON-NLS-0$
+						context.report(node, "Expected '!==' and instead saw '!='.", null, getOperatorToken(context, node));
+					}
 				}
-				var op = node.operator;
-				if (op === "==") {  //$NON-NLS-0$
-					context.report(node, "Expected '===' and instead saw '=='.", null, getOperatorToken(context, node));
-				} else if (op === "!=") {  //$NON-NLS-0$
-					context.report(node, "Expected '!==' and instead saw '!='.", null, getOperatorToken(context, node));
+				catch(ex) {
+					console.log(ex);
 				}
 			}
 		};

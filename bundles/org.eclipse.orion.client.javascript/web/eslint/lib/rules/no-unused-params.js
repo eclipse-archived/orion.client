@@ -24,24 +24,36 @@
 		root.rules.noundef = factory(req, exp, mod);
 	}
 }(this, function(require, exports, module) {
+	/**
+	 * @name module.exports
+	 * @description Rule exports
+	 * @function
+	 * @param context
+	 * @returns {Object} Rule exports
+	 */
 	module.exports = function(context) {
 		"use strict";  //$NON-NLS-0$
 
 		function check(node) {
-			var scope = context.getScope();
-			var kids = scope.childScopes;
-			if(scope.functionExpressionScope && kids && kids.length) {
-				scope = kids[0];
+			try {
+				var scope = context.getScope();
+				var kids = scope.childScopes;
+				if(scope.functionExpressionScope && kids && kids.length) {
+					scope = kids[0];
+				}
+				scope.variables.forEach(function(variable) {
+					if (!variable.defs.length || variable.defs[0].type !== "Parameter") { // only care about parameters  //$NON-NLS-0$
+						return;
+					}
+					var node = variable.defs[0].name;
+					if (!variable.references.length) {
+						context.report(node, "Parameter '{{name}}' is never used.", {name: node.name}); //$NON-NLS-0
+					}
+				});
 			}
-			scope.variables.forEach(function(variable) {
-				if (!variable.defs.length || variable.defs[0].type !== "Parameter") { // only care about parameters  //$NON-NLS-0$
-					return;
-				}
-				var node = variable.defs[0].name;
-				if (!variable.references.length) {
-					context.report(node, "Parameter '{{name}}' is never used.", {name: node.name}); //$NON-NLS-0
-				}
-			});
+			catch(ex) {
+				console.log(ex);
+			}
 		}
 
 		return {

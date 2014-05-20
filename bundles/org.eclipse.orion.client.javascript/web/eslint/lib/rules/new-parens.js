@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports */
+/*global define module require exports console */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module);
@@ -25,20 +25,38 @@
 	}
 }(this, function(require, exports, module) {
 
+	/**
+	 * @name module.exports
+	 * @description Rule exports
+	 * @function
+	 * @param context
+	 * @returns returns
+	 */
 	module.exports = function(context) {
 		"use strict";  //$NON-NLS-0$
 		
 		return {
+			/**
+			 * @name NewExpression
+			 * @description Linting for NewExpressions
+			 * @function
+			 * @param node
+			 */
 			'NewExpression' : function(node) {
-				if(node.callee) {
-					var tokens = context.getTokens(node.callee, 0, 1);
-					if(tokens && tokens.length > 0) {
-						var last = tokens[tokens.length-1];
-						if(last.type !== 'Punctuator' || last.value !== '(') {
-							//if there s no opening parenthesis its safe to assume they are missing
-							context.report(node.callee, 'Missing parentheses invoking constructor.', null, tokens[0]);
+				try {
+					if(node.callee) {
+						var tokens = context.getTokens(node.callee, 0, 1);
+						if(tokens && tokens.length > 0) {
+							var last = tokens[tokens.length-1];
+							if(last.type !== 'Punctuator' || last.value !== '(') {
+								//if there s no opening parenthesis its safe to assume they are missing
+								context.report(node.callee, 'Missing parentheses invoking constructor.', null, tokens[0]);
+							}
 						}
 					}
+				}
+				catch(ex) {
+					console.log(ex);
 				}
 			}
 		};

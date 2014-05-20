@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports */
+/*global define module require exports console */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module, require('../util'));
@@ -24,38 +24,56 @@
 		root.rules.noundef = factory(req, exp, mod, root.util);
 	}
 }(this, function(require, exports, module, util) {
+	/**
+	 * @name module.exports
+	 * @description Rule exports
+	 * @function
+	 * @param context
+	 * @returns {Object} Rule exports
+	 */
 	module.exports = function(context) {
 		"use strict";  //$NON-NLS-0$
 		
 		return {
+			/**
+			 * @name CallExpression
+			 * @description Linting for CallExpressions
+			 * @function
+			 * @param node
+			 */
 			"CallExpression": function(node) {
-				var name = node.callee.name;
-				if(!name) {
-					return;
-				}
-				if('eval' === name) {
-					context.report(node.callee, "'eval' function calls are discouraged.", null, context.getTokens(node.callee)[0]);
-				}
-				else if('setInterval' === name || 'setTimeout' === name) {
-					if(node.arguments.length > 0) {
-						var arg = node.arguments[0];
-						if(arg.type === 'Literal') {
-							context.report(node.callee, "Implicit 'eval' function calls are discouraged.", null, context.getTokens(node.callee)[0]);
-						}
-						else if(arg.type === 'Identifier') {
-							//lets see if we can find it definition
-							var scope = context.getScope();
-							var decl = util.getDeclaration(arg, scope);
-							if (decl && decl.defs && decl.defs.length) {
-								var def = decl.defs[0];
-								var dnode = def.node;
-								if(def.type === 'Variable' && dnode && dnode.type === 'VariableDeclarator' &&
-									dnode.init && dnode.init.type === 'Literal') {
-									context.report(node.callee, "Implicit 'eval' function calls are discouraged.", null, context.getTokens(node.callee)[0]);
+				try {
+					var name = node.callee.name;
+					if(!name) {
+						return;
+					}
+					if('eval' === name) {
+						context.report(node.callee, "'eval' function calls are discouraged.", null, context.getTokens(node.callee)[0]);
+					}
+					else if('setInterval' === name || 'setTimeout' === name) {
+						if(node.arguments.length > 0) {
+							var arg = node.arguments[0];
+							if(arg.type === 'Literal') {
+								context.report(node.callee, "Implicit 'eval' function calls are discouraged.", null, context.getTokens(node.callee)[0]);
+							}
+							else if(arg.type === 'Identifier') {
+								//lets see if we can find it definition
+								var scope = context.getScope();
+								var decl = util.getDeclaration(arg, scope);
+								if (decl && decl.defs && decl.defs.length) {
+									var def = decl.defs[0];
+									var dnode = def.node;
+									if(def.type === 'Variable' && dnode && dnode.type === 'VariableDeclarator' &&
+										dnode.init && dnode.init.type === 'Literal') {
+										context.report(node.callee, "Implicit 'eval' function calls are discouraged.", null, context.getTokens(node.callee)[0]);
+									}
 								}
 							}
 						}
 					}
+				}
+				catch(ex) {
+					console.log(ex);
 				}
 			}
 		};

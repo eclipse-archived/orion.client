@@ -25,6 +25,13 @@
 	}
 }(this, function(require, exports, module, util) {
 
+	/**
+	 * @name module.exports
+	 * @description Rule exports
+	 * @function
+	 * @param context
+	 * @returns {Object} Rule exports
+	 */
 	module.exports = function(context) {
 
 		var wrappers = ["String", "Number", "Math", "Boolean", "JSON"]; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

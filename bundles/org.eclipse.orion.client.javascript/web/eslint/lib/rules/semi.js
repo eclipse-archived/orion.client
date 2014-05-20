@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports */
+/*global define module require exports console */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module);
@@ -24,6 +24,13 @@
 		root.rules.noundef = factory(req, exp, mod);
 	}
 }(this, function(require, exports, module) {
+	/**
+	 * @name module.exports
+	 * @description Rule exports
+	 * @function
+	 * @param context
+	 * @returns {Object} Rule exports
+	 */
 	module.exports = function(context) {
 		"use strict";  //$NON-NLS-0$
 		
@@ -34,13 +41,18 @@
 		 * @param {Object} node The AST node
 		 */
 		function checkForSemicolon(node) {
-			var tokens = context.getTokens(node);
-			var len = tokens.length;
-			var t = tokens[len - 1];
-			if (t && t.type === "Punctuator" && t.value === ";") {  //$NON-NLS-0$  //$NON-NLS-1$
-				return;
+			try {
+				var tokens = context.getTokens(node);
+				var len = tokens.length;
+				var t = tokens[len - 1];
+				if (t && t.type === "Punctuator" && t.value === ";") {  //$NON-NLS-0$  //$NON-NLS-1$
+					return;
+				}
+				context.report(node, "Missing semicolon.", null, t /* expose the bad token */);
 			}
-			context.report(node, "Missing semicolon.", null, t /* expose the bad token */);
+			catch(ex) {
+				console.log(ex);
+			}
 		}
 
 		/**
@@ -50,16 +62,21 @@
 		 * @param {Object} node The AST node
 		 */
 		function checkVariableDeclaration(node) {
-			var ancestors = context.getAncestors(node),
-			    parent = ancestors[ancestors.length - 1],
-			    parentType = parent.type;
-			if ((parentType === "ForStatement" && parent.init === node) || (parentType === "ForInStatement" && parent.left === node)){  //$NON-NLS-0$  //$NON-NLS-1$
-				// One of these cases, no semicolon token is required after the VariableDeclaration:
-				// for(var x;;)
-				// for(var x in y)
-				return;
+			try {
+				var ancestors = context.getAncestors(node),
+				    parent = ancestors[ancestors.length - 1],
+				    parentType = parent.type;
+				if ((parentType === "ForStatement" && parent.init === node) || (parentType === "ForInStatement" && parent.left === node)){  //$NON-NLS-0$  //$NON-NLS-1$
+					// One of these cases, no semicolon token is required after the VariableDeclaration:
+					// for(var x;;)
+					// for(var x in y)
+					return;
+				}
+				checkForSemicolon(node);
 			}
-			checkForSemicolon(node);
+			catch(ex) {
+				console.log(ex);
+			}
 		}
 
 		return {

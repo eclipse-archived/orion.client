@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports */
+/*global define module require exports console */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module);
@@ -24,26 +24,44 @@
 		root.rules.noundef = factory(req, exp, mod);
 	}
 }(this, function(require, exports, module) {
+	/**
+	 * @name module.exports
+	 * @description Rule exports
+	 * @function
+	 * @param context
+	 * @returns {Object} Rule exports
+	 */
 	module.exports = function(context) {
 		"use strict";  //$NON-NLS-0$
 		
 		return {
+			/**
+			 * @name ObjectExpression
+			 * @description Linting for ObjectExpressions
+			 * @function
+			 * @param node
+			 */
 			"ObjectExpression": function(node) {
-				var props = node.properties;
-				if(props && props.length > 0) {
-					var len = props.length;
-					var seen = Object.create(null);
-					for(var i = 0; i < len; i++) {
-						var prop = props[i];
-						var name = (prop.key.name ? prop.key.name : prop.key.value);
-						if(Object.prototype.hasOwnProperty.call(seen, name)) {
-							context.report(prop, 'Duplicate object key \'{{key}}\'', {key: name}, context.getTokens(prop)[0]);
+				try {
+					var props = node.properties;
+					if(props && props.length > 0) {
+						var len = props.length;
+						var seen = Object.create(null);
+						for(var i = 0; i < len; i++) {
+							var prop = props[i];
+							var name = (prop.key.name ? prop.key.name : prop.key.value);
+							if(Object.prototype.hasOwnProperty.call(seen, name)) {
+								context.report(prop, 'Duplicate object key \'{{key}}\'', {key: name}, context.getTokens(prop)[0]);
+							}
+							else {
+								seen[name] = 1;
+							}
 						}
-						else {
-							seen[name] = 1;
-						}
+						
 					}
-					
+				}
+				catch(ex) {
+					console.log(ex);
 				}
 			}
 		};

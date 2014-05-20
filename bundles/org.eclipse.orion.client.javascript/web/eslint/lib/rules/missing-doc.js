@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports */
+/*global define module require exports console */
 /**
  * Rule configuration is passed in context.options[0] which should be an object.
  * Settings are:
@@ -30,6 +30,13 @@
 		root.rules.noundef = factory(req, exp, mod);
 	}
 }(this, function(require, exports, module) {
+	/**
+	 * @name module.exports
+	 * @description Rule exports
+	 * @function
+	 * @param context
+	 * @returns {Object} Rule exports
+	 */
 	module.exports = function(context) {
 		"use strict";  //$NON-NLS-0$
 
@@ -44,49 +51,54 @@
 		 * @param {Object} node The currently visited AST node
 		 */
 		function checkDoc(node) {
-			if(!declEnabled && !exprEnabled) {
-				return;
-			}
-			var comments;
-			var name;
-			switch(node.type) {
-				case 'Property':  //$NON-NLS-0$
-					if(exprEnabled && node.value && (node.value.type === 'FunctionExpression')) {  //$NON-NLS-0$  //$NON-NLS-1$
-						comments = context.getComments(node);
-						if(!comments || comments.leading.length < 1) {
-							switch(node.key.type) { 
-								case 'Identifier':  //$NON-NLS-0$
-									name = node.key.name;
-									break;
-								case 'Literal':  //$NON-NLS-0$
-									name = node.key.value;
-									break;
-							}
-							reportMissingDoc(node.key, name, "expr"); //$NON-NLS-0$
-						}
-					}
-					break;
-				case 'FunctionDeclaration':  //$NON-NLS-0$
-					if(declEnabled) {  //$NON-NLS-0$
-						comments = context.getComments(node);
-						if(!comments || comments.leading.length < 1) {
-							reportMissingDoc(node.id, node.id.name, "decl"); //$NON-NLS-0$
-						}
-					}
-					break;
-				case 'ExpressionStatement':  //$NON-NLS-0$
-					if(exprEnabled && node.expression && node.expression.type === 'AssignmentExpression') {  //$NON-NLS-0$  //$NON-NLS-1$
-						var anode = node.expression;
-						if(anode.right && (anode.right.type === 'FunctionExpression') && anode.left && (anode.left.type === 'MemberExpression')) {  //$NON-NLS-0$  //$NON-NLS-1$
-							//comments are attached to the enclosing expression statement
+			try {
+				if(!declEnabled && !exprEnabled) {
+					return;
+				}
+				var comments;
+				var name;
+				switch(node.type) {
+					case 'Property':  //$NON-NLS-0$
+						if(exprEnabled && node.value && (node.value.type === 'FunctionExpression')) {  //$NON-NLS-0$  //$NON-NLS-1$
 							comments = context.getComments(node);
 							if(!comments || comments.leading.length < 1) {
-								name = anode.left.computed === true ? anode.left.property.value : anode.left.property.name;
-								reportMissingDoc(anode.left.property, name, "expr"); //$NON-NLS-0$
+								switch(node.key.type) { 
+									case 'Identifier':  //$NON-NLS-0$
+										name = node.key.name;
+										break;
+									case 'Literal':  //$NON-NLS-0$
+										name = node.key.value;
+										break;
+								}
+								reportMissingDoc(node.key, name, "expr"); //$NON-NLS-0$
 							}
 						}
-					}
-					break;
+						break;
+					case 'FunctionDeclaration':  //$NON-NLS-0$
+						if(declEnabled) {  //$NON-NLS-0$
+							comments = context.getComments(node);
+							if(!comments || comments.leading.length < 1) {
+								reportMissingDoc(node.id, node.id.name, "decl"); //$NON-NLS-0$
+							}
+						}
+						break;
+					case 'ExpressionStatement':  //$NON-NLS-0$
+						if(exprEnabled && node.expression && node.expression.type === 'AssignmentExpression') {  //$NON-NLS-0$  //$NON-NLS-1$
+							var anode = node.expression;
+							if(anode.right && (anode.right.type === 'FunctionExpression') && anode.left && (anode.left.type === 'MemberExpression')) {  //$NON-NLS-0$  //$NON-NLS-1$
+								//comments are attached to the enclosing expression statement
+								comments = context.getComments(node);
+								if(!comments || comments.leading.length < 1) {
+									name = anode.left.computed === true ? anode.left.property.value : anode.left.property.name;
+									reportMissingDoc(anode.left.property, name, "expr"); //$NON-NLS-0$
+								}
+							}
+						}
+						break;
+				}
+			}
+			catch(ex) {
+				console.log(ex);
 			}
 		}
 		

@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports */
+/*global define module require exports console */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module);
@@ -24,12 +24,30 @@
 		root.rules.noundef = factory(req, exp, mod);
 	}
 }(this, function(require, exports, module) {
+	/**
+	 * @name module.exports
+	 * @description Rule exports
+	 * @function
+	 * @param context
+	 * @returns {Object} Rule exports
+	 */
 	module.exports = function(context) {
 		"use strict";  //$NON-NLS-0$
 		
 		return {
+			/**
+			 * @name DebuggerStatement
+			 * @description Linting for DebuggerStatements
+			 * @function
+			 * @param node
+			 */
 			"DebuggerStatement": function(node) {
-				context.report(node, '\'debugger\' statement use is discouraged.', null, context.getTokens(node)[0]);
+				try {
+					context.report(node, '\'debugger\' statement use is discouraged.', null, context.getTokens(node)[0]);
+				}
+				catch(ex) {
+					console.log(ex);
+				}
 			}
 		};
 	};

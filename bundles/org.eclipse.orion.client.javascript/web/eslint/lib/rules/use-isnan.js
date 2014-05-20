@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports */
+/*global define module require exports console */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module);
@@ -25,15 +25,33 @@
 	}
 }(this, function(require, exports, module) {
 
+	/**
+	 * @name module.exports
+	 * @description Rule exports
+	 * @function
+	 * @param context
+	 * @returns {Object} Rule exports
+	 */
 	module.exports = function(context) {
 		"use strict";  //$NON-NLS-0$
 		
 		return {
+			/**
+			 * @name BinaryExpression
+			 * @description Lintig for BinaryExpressions
+			 * @function
+			 * @param node
+			 */
 			'BinaryExpression' : function(node) {
-				if(node.left.type === 'Identifier' && node.left.name === 'NaN') {
-					context.report(node.left, 'Use the isNaN function to compare with NaN.', null, node.left);
-				} else if(node.right.type === 'Identifier' && node.right.name === 'NaN') {
-					context.report(node.right, 'Use the isNaN function to compare with NaN.', null, node.right);
+				try {
+					if(node.left.type === 'Identifier' && node.left.name === 'NaN') {
+						context.report(node.left, 'Use the isNaN function to compare with NaN.', null, node.left);
+					} else if(node.right.type === 'Identifier' && node.right.name === 'NaN') {
+						context.report(node.right, 'Use the isNaN function to compare with NaN.', null, node.right);
+					}
+				}
+				catch(ex) {
+					console.log(ex);
 				}
 			}
 		};

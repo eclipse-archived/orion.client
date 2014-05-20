@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports */
+/*global define module require exports console */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module, require('../util'));
@@ -25,7 +25,13 @@
 	}
 }(this, function(require, exports, module, util) {
 
-
+	/**
+	 * @name booleanOption
+	 * @description The boolean value of the given boolean, or the default value
+	 * @param b
+	 * @param defaultValue
+	 * @returns {Boolean}
+	 */
 	function booleanOption(b, defaultValue) {
 		return typeof b === "boolean" ? b : defaultValue;  //$NON-NLS-0$
 	}
@@ -41,17 +47,22 @@
 		    flag_funcs = booleanOption(options[1], false); // ... but not funcs
 
 		function check(node) {
-			var scope = context.getScope();
-			scope.references.forEach(function(ref) {
-				var decl = util.getDeclaration(ref, scope), identifier = ref.identifier, name = identifier.name, defs;
-				if (decl && (defs = decl.defs).length && identifier.range[0] < defs[0].node.range[0]) {
-					var defType = defs[0].type;
-					if ((!flag_funcs && defType === "FunctionName") || (!flag_vars && defType === "Variable")) {  //$NON-NLS-0$  //$NON-NLS-1$
-						return;
+				try {
+				var scope = context.getScope();
+				scope.references.forEach(function(ref) {
+					var decl = util.getDeclaration(ref, scope), identifier = ref.identifier, name = identifier.name, defs;
+					if (decl && (defs = decl.defs).length && identifier.range[0] < defs[0].node.range[0]) {
+						var defType = defs[0].type;
+						if ((!flag_funcs && defType === "FunctionName") || (!flag_vars && defType === "Variable")) {  //$NON-NLS-0$  //$NON-NLS-1$
+							return;
+						}
+						context.report(identifier, "'{{name}}' was used before it was defined.", {name: name});
 					}
-					context.report(identifier, "'{{name}}' was used before it was defined.", {name: name});
-				}
-			});
+				});
+			}
+			catch(ex) {
+				console.log(ex);
+			}
 		}
 
 		return {

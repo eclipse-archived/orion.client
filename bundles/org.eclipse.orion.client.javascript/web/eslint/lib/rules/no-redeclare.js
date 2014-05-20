@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports */
+/*global define module require exports console */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require('../util'), require, exports, module);  //$NON-NLS-0$
@@ -24,6 +24,13 @@
 		root.rules.noundef = factory(req, exp, mod);
 	}
 }(this, function(util, require, exports, module) {
+	/**
+	 * @name module.exports
+	 * @description Rule exports
+	 * @function
+	 * @param context
+	 * @returns {Object} Rule exports
+	 */
 	module.exports = function(context) {
 		"use strict";  //$NON-NLS-0$
 
@@ -31,6 +38,13 @@
 			context.report(node, "'{{name}}' is already defined.", {name: name});
 		}
 
+		/**
+		 * @name addNamedFunctions
+		 * @description Adds named functions to the given map
+		 * @param map
+		 * @param scope
+		 * @returns {Boolean} If scope vars were added to the map
+		 */
 		function addNamedFunctions(map, scope) {
 			scope.variables.forEach(function(variable) {
 				variable.defs.some(function(def) {
@@ -67,6 +81,12 @@
 			return named;
 		}
 
+		/**
+		 * @name isParameter
+		 * @description Returns if the given variable is a parameter or not
+		 * @param variable
+		 * @returns {Boolean} If the given variable is a parameter
+		 */
 		function isParameter(variable) {
 			return variable.defs.some(function(def) {
 				return def.type === "Parameter";  //$NON-NLS-0$
@@ -74,29 +94,34 @@
 		}
 
 		function checkScope(node) {
-			var scope = context.getScope();
-			var namedFunctions = createNamedFunctionMap(scope);
-
-			scope.variables.forEach(function(variable) {
-				// If variable collides with a named function name from an upper scope, it's a redeclaration. Unless
-				// the variable is a param, then we allow it.
-				var bindingSource;
-				if (node.type !== "Program" && (bindingSource = namedFunctions[variable.name]) && bindingSource !== scope && !isParameter(variable)) {  //$NON-NLS-0$
-					reportRedeclaration(variable.defs[0].name, variable.name);
-				}
-
-				// If variable has multiple defs, every one after the 1st is a redeclaration
-				var defs = variable.defs.filter(function(def) {
-					// Workaround for escope bug
-					// https://github.com/Constellation/escope/issues/21
-					return def.type !== "ImplicitGlobalVariable";  //$NON-NLS-0$
-				});
-				defs.forEach(function(def, i) {
-					if (i > 0) {
-						reportRedeclaration(def.name, def.name.name);
+			try {
+				var scope = context.getScope();
+				var namedFunctions = createNamedFunctionMap(scope);
+	
+				scope.variables.forEach(function(variable) {
+					// If variable collides with a named function name from an upper scope, it's a redeclaration. Unless
+					// the variable is a param, then we allow it.
+					var bindingSource;
+					if (node.type !== "Program" && (bindingSource = namedFunctions[variable.name]) && bindingSource !== scope && !isParameter(variable)) {  //$NON-NLS-0$
+						reportRedeclaration(variable.defs[0].name, variable.name);
 					}
+	
+					// If variable has multiple defs, every one after the 1st is a redeclaration
+					var defs = variable.defs.filter(function(def) {
+						// Workaround for escope bug
+						// https://github.com/Constellation/escope/issues/21
+						return def.type !== "ImplicitGlobalVariable";  //$NON-NLS-0$
+					});
+					defs.forEach(function(def, i) {
+						if (i > 0) {
+							reportRedeclaration(def.name, def.name.name);
+						}
+					});
 				});
-			});
+			}
+			catch(ex) {
+				console.log(ex);
+			}
 		}
 
 		return {
