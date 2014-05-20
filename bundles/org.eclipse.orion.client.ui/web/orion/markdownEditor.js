@@ -182,8 +182,8 @@ define([
 					/* trim trailing blank lines from the end bound */
 					this._emptyLineRegex.lastIndex = 0;
 					match = this._emptyLineRegex.exec(match[0]);
-					if (match) {
-						end -= match[0].length;
+					if (match && match[1]) {
+						end -= match[1].length;
 					}
 					
 					bounds = {
@@ -537,7 +537,7 @@ define([
 		_NEWLINE: "\n", //$NON-NLS-0$
 		_blockquoteRegex: />/g,
 		_elementCounter: 0,
-		_emptyLineRegex: /(\r?\n)*$/g,
+		_emptyLineRegex: /\n(([ \t]*\r?\n)*)$/g,
 		_eolRegex: /$/gm,
 		_htmlNewlineRegex: /\n\s*\S[\s\S]*$/g,
 		_newlineRegex: /\n/g,
@@ -643,6 +643,20 @@ define([
 			}
 		}.bind(this);
 
+		this._selectionListener = function(e) {
+			var block = this._styler.getBlockAtIndex(e.newValue.start);
+			if (!this._selectedElement || this._selectedElement.id !== block.elementId) {
+				if (this._selectedElement) {
+					this._selectedElement.className = this._selectedElement.className.replace(this._markdownSelected, "");
+					this._selectedElement = null;
+				}
+				if (block.elementId) {
+					this._selectedElement = document.getElementById(block.elementId);
+					this._selectedElement.className += this._markdownSelected;
+				}
+			}
+		}.bind(this);
+
 		this._resizeListener = function(/*e*/) {
 			this._editorView.editor.resize();
 		}.bind(this);
@@ -660,6 +674,7 @@ define([
 			this._styler = new mTextStyler.TextStyler(textView, annotationModel, stylerAdapter);
 
 			this._editorView.editor.getTextView().addEventListener("Scroll", this._scrollListener); //$NON-NLS-0$
+			this._editorView.editor.getTextView().addEventListener("Selection", this._selectionListener); //$NON-NLS-0$
 			this._splitter.addEventListener("resize", this._resizeListener); //$NON-NLS-0$
 
 			/*
@@ -718,10 +733,12 @@ define([
 			this._styler.destroy();
 			var textView = this._editorView.editor.getTextView();
 			textView.removeEventListener("Scroll", this._scrollListener); //$NON-NLS-0$
+			textView.removeEventListener("Selection", this._selectionListener); //$NON-NLS-0$
 			this._splitter.removeEventListener("resize", this._resizeListener); //$NON-NLS-0$
 			lib.empty(this._parent);
 			BaseEditor.prototype.uninstall.call(this);
-		}
+		},
+		_markdownSelected: " markdownSelected" //$NON-NLS-0$
 	});
 
 	function MarkdownEditorView(options) {

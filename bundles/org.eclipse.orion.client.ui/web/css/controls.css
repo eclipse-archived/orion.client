@@ -1095,6 +1095,10 @@ button.scopeDeleteButton:hover {
 	color: gray;
 }
 
+.orionMarkdown h1 {
+	position: relative;
+}
+
 .orionMarkdown img {
 	max-width: 100%;
 }
@@ -1122,6 +1126,10 @@ button.scopeDeleteButton:hover {
 	margin: 0;
 }
 
+.markdownSelected {
+	background-color: #f7f7d5;
+}
+
 .orionProject input, .orionProject textarea{
 	border: 1px solid lightgrey;
 }
@@ -1145,10 +1153,6 @@ button.scopeDeleteButton:hover {
 .discreetInputLabel {
 	font-weight: bold;
 	padding: 8px;
-}
-
-.orionMarkdown h1 {
-	position: relative;
 }
 
 .sectionTreeTable {
