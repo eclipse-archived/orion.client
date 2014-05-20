@@ -25,6 +25,7 @@ define([
 	var extensionRegex = /\.([0-9a-z]+)(?:[\?#]|$)/i;
 	var imgCount = 0;
 
+	var ID_PREFIX = "_orionMDBlock"; //$NON-NLS-0$
 	var ID_PREVIEW = "_previewDiv"; //$NON-NLS-0$
 
 	var MarkdownStylingAdapter = function(model, resource, fileClient) {
@@ -250,7 +251,7 @@ define([
 					var newBlock = this.createBlock(bounds, this._styler, model, block, name);
 					newBlock.tokens = tokens.slice(startTokenIndex, i + 1);
 					newBlock.tokens.links = tokens.links;
-					newBlock.elementId = "orionMDBlock" + this._elementCounter++;
+					newBlock.elementId = ID_PREFIX + this._elementCounter++;
 					result.push(newBlock);
 				}
 			}
@@ -270,6 +271,15 @@ define([
 			return null;
 		},
 		getBlockStartStyle: function(/*block, text, index, _styles*/) {
+			return null;
+		},
+		getBlockWithId: function(id) {
+			var blocks = this._styler.getRootBlock().getBlocks();
+			for (var i = 0; i < blocks.length; i++) {
+				if (blocks[i].elementId === id) {
+					return blocks[i];
+				}
+			}
 			return null;
 		},
 		getBracketMatch: function(/*block, text*/) {
@@ -618,7 +628,43 @@ define([
 		this._model = options.model;
 		this._editorView = options.editorView;
 
+		this._previewMouseClickListener = function(e) {
+			var target = e.target;
+			while (target && target.id.indexOf(ID_PREFIX) !== 0) {
+				target = target.parentElement;
+			}
+
+			if (!target) {
+				// TODO find the next nearest?
+				return;
+			}
+
+			var previewBounds = this._previewDiv.getBoundingClientRect();
+		    var targetBounds = target.getBoundingClientRect();
+		    var relativeTop = targetBounds.top - previewBounds.top;
+		    var previewElementCentre = relativeTop + target.offsetHeight / 2;
+
+			var block = this._stylerAdapter.getBlockWithId(target.id);
+			var textView = this._editorView.editor.getTextView();
+			var blockTop = textView.getLocationAtOffset(block.start);
+			var blockBottom = textView.getLocationAtOffset(block.end);
+			blockBottom.y += textView.getLineHeight();
+			var editorBlockCentre = blockTop.y + (blockBottom.y - blockTop.y) / 2;
+			this._scrollSourceEditor(editorBlockCentre - previewElementCentre);
+		}.bind(this);
+
+		this._resizeListener = function(/*e*/) {
+			this._editorView.editor.resize();
+		}.bind(this);
+
 		this._scrollListener = function(e) {
+			if (this._ignoreEditorScrollsUntilValue) {
+				if (this._ignoreEditorScrollsUntilValue === e.newValue.y) {
+					this._ignoreEditorScrollsUntilValue = null;
+				}
+				return;
+			}
+
 			var textView = this._editorView.editor.getTextView();
 
 			var block;
@@ -650,15 +696,13 @@ define([
 					this._selectedElement.className = this._selectedElement.className.replace(this._markdownSelected, "");
 					this._selectedElement = null;
 				}
+				this._selectedBlock = null;
 				if (block.elementId) {
+					this._selectedBlock = block;
 					this._selectedElement = document.getElementById(block.elementId);
 					this._selectedElement.className += this._markdownSelected;
 				}
 			}
-		}.bind(this);
-
-		this._resizeListener = function(/*e*/) {
-			this._editorView.editor.resize();
 		}.bind(this);
 
 		BaseEditor.apply(this, arguments);
@@ -670,12 +714,13 @@ define([
 			var editor = this._editorView.editor;
 			var textView = editor.getTextView();
 			var annotationModel = editor.getAnnotationModel();
-			var stylerAdapter = new MarkdownStylingAdapter(this._model, this._metadata.Location, this._fileService);
-			this._styler = new mTextStyler.TextStyler(textView, annotationModel, stylerAdapter);
+			this._stylerAdapter = new MarkdownStylingAdapter(this._model, this._metadata.Location, this._fileService);
+			this._styler = new mTextStyler.TextStyler(textView, annotationModel, this._stylerAdapter);
 
 			this._editorView.editor.getTextView().addEventListener("Scroll", this._scrollListener); //$NON-NLS-0$
 			this._editorView.editor.getTextView().addEventListener("Selection", this._selectionListener); //$NON-NLS-0$
 			this._splitter.addEventListener("resize", this._resizeListener); //$NON-NLS-0$
+			this._previewDiv.addEventListener("click", this._previewMouseClickListener); //$NON-NLS-0$
 
 			/*
 			 * If the model already has content then it is being shared with a previous
@@ -685,7 +730,7 @@ define([
 			 * change event to trigger it.
 			 */
 			if (this._model.getCharCount()) {
-				stylerAdapter.initialPopulatePreview();
+				this._stylerAdapter.initialPopulatePreview();
 			}
 		},
 		install: function() {
@@ -729,12 +774,44 @@ define([
 
 			BaseEditor.prototype.install.call(this);
 		},
+		_scrollSourceEditor: function(top) {
+			if (this._animation) {
+				this._animation.stop();
+				this._animation = null;
+			}
+
+			var textView = this._editorView.editor.getTextView(); 
+			var pixelY = top - textView.getTopPixel();
+			if (!pixelY) {
+				return;
+			}
+
+			this._animation = new mTextUtil.Animation({
+				window: window,
+				curve: [pixelY, 0],
+				onAnimate: function(x) {
+					var deltaY = pixelY - Math.floor(x);
+					textView.setTopPixel(textView.getTopPixel() + deltaY);
+					pixelY -= deltaY;
+				}.bind(this),
+				onEnd: function() {
+					this._animation = null;
+					var finalValue = Math.floor(textView.getTopPixel() + pixelY);
+					this._ignoreEditorScrollsUntilValue = finalValue;
+					textView.setTopPixel(finalValue);
+				}.bind(this)
+			});
+
+			this._ignoreEditorScrollsUntilValue = -1;
+			this._animation.play();	
+		},
 		uninstall: function() {
 			this._styler.destroy();
 			var textView = this._editorView.editor.getTextView();
 			textView.removeEventListener("Scroll", this._scrollListener); //$NON-NLS-0$
 			textView.removeEventListener("Selection", this._selectionListener); //$NON-NLS-0$
 			this._splitter.removeEventListener("resize", this._resizeListener); //$NON-NLS-0$
+			this._previewDiv.removeEventListener("click", this._previewMouseClickListener); //$NON-NLS-0$
 			lib.empty(this._parent);
 			BaseEditor.prototype.uninstall.call(this);
 		},
