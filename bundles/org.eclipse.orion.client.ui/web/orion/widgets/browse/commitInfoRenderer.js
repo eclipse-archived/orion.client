@@ -60,15 +60,26 @@ define([
 			var commitDate = this._commitInfo.Author && this._commitInfo.Author.Date ? new Date(this._commitInfo.Author.Date).toLocaleString() : "";
 			var message = this._commitInfo.Message ? this._commitInfo.Message : "";
 			var authorName = this._commitInfo.Author && this._commitInfo.Author.Name ? this._commitInfo.Author.Name : "";
+			var messageContainer = document.createElement("div"), messageNode;
+			messageContainer.classList.add("commitInfoMessageContainer"); //$NON-NLS-0$
+			if(this._commitInfo.URL) {
+				messageNode = document.createElement("a"); //$NON-NLS-0$
+				messageNode.href = this._commitInfo.URL;
+				messageNode.classList.add("commitInfolink"); //$NON-NLS-0$
+				messageNode.appendChild(document.createTextNode(message));
+			} else {
+				messageNode = document.createElement("span"); //$NON-NLS-0$
+				messageNode.appendChild(document.createTextNode(message));
+			}
+			messageContainer.appendChild(messageNode);
+			this._parentDomNode.appendChild(messageContainer);
+
 			var fragment = document.createDocumentFragment();
-			fragment.textContent = "${0} " + " modified on " + commitDate + ". " +  "${1}";
+			fragment.textContent = "by ${0} on " + commitDate +".";
 			var nameLabel = document.createElement("span"); //$NON-NLS-0$
 			nameLabel.appendChild(document.createTextNode(authorName)); //$NON-NLS-0$
 			nameLabel.classList.add("navColumnBold"); //$NON-NLS-0$
-			var messageLabel = document.createElement("span"); //$NON-NLS-0$
-			messageLabel.appendChild(document.createTextNode(message)); //$NON-NLS-0$
-			messageLabel.classList.add("navColumnBold"); //$NON-NLS-0$
-			lib.processDOMNodes(fragment, [nameLabel, messageLabel]);
+			lib.processDOMNodes(fragment, [nameLabel]);
 			this._parentDomNode.appendChild(fragment);
 		}
 	});

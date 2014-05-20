@@ -20,6 +20,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			throw "Bad Github repository url " + repoURL;
 		}
 		this._repoURL = new URL("https://api.github.com/repos/" + found[1] + "/" + found[2]);
+		this._commitURLBase = "https://github.com/" + found[1] + "/" + found[2] + "/commit/";
 		this._contentsPath = this._repoURL.pathname + "/contents";
 		this._headers = {
 			"Accept": "application/vnd.github.v3+json"
@@ -260,6 +261,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 						child.LastCommit.Committer.Email = content[0].commit.committer.email ? content[0].commit.committer.email : "";
 					}
 					child.LastCommit.Message = content[0].commit.message ? content[0].commit.message : "";
+					child.LastCommit.URL = content[0].sha ? _this._commitURLBase + content[0].sha : null;
 				}
 				return child;
 			}, function(error) { return _this._handleError(error);});

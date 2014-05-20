@@ -139,6 +139,18 @@
 	box-sizing: initial !important;
 }
 
+.commitInfoMessagelink:hover {
+	color: #F58B0F !important;
+}
+
+.commitInfoMessagelink {
+	color: #02ADD0 !important;
+}
+
+.commitInfoMessageContainer {
+	padding-bottom: 4px;
+}
+
 .dropdownMenu > li {
 	-webkit-box-sizing: initial !important;
 	box-sizing: initial !important;
