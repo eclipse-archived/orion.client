@@ -19,8 +19,9 @@ define([
 	'orion/extensionCommands',
 	'orion/objects',
 	'orion/URITemplate',
+	'orion/widgets/browse/commitInfoRenderer',
 	'orion/webui/littlelib'
-], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, lib) {
+], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, mCommitInfoRenderer, lib) {
 		
 	var max_more_info_column_length = 100;
 	function isImage(contentType) {
@@ -387,23 +388,7 @@ define([
 				return null;
 			}
 			var messageColumn = document.createElement('td'); //$NON-NLS-0$
-			var message = item.LastCommit.Message ? item.LastCommit.Message : "";
-			var authorName = item.LastCommit.Author && item.LastCommit.Author.Name ? item.LastCommit.Author.Name : "";
-			if((authorName.length +  message.length + 2) > max_more_info_column_length) {
-				var trimmedLength = max_more_info_column_length - authorName.length - 5;
-				if(trimmedLength > 0) {
-					message = message.substring(0, trimmedLength) + "...";
-				} else {
-					message = "";
-				}
-			}
-			var fragment = document.createDocumentFragment();
-			fragment.textContent = "${0} " + message;
-			var nameLabel = document.createElement("span"); //$NON-NLS-0$
-			nameLabel.appendChild(document.createTextNode(authorName + ":")); //$NON-NLS-0$
-			nameLabel.classList.add("navColumnBold"); //$NON-NLS-0$
-			lib.processDOMNodes(fragment, [nameLabel]);
-			messageColumn.appendChild(fragment);
+			new mCommitInfoRenderer.CommitInfoRenderer({parent: messageColumn, commitInfo: item.LastCommit}).renderSimple(max_more_info_column_length);
 			return messageColumn;
 		}
 	};

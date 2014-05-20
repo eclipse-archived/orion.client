@@ -124,6 +124,21 @@
 	/*background: none repeat scroll 0 0 #f7f7f7;*/
 }
 
+.commitInfoContainer {
+	border-bottom: 1px solid;
+	margin-top: 1px;
+	padding-left: 4px;
+	padding-top: 7px;
+	padding-bottom: 7px;
+	width: 100%;
+	/*height: 22px;*/
+	border-color: #dadada;
+	color: #444;
+    background-color: #f0f7f9;
+	-webkit-box-sizing: initial !important;
+	box-sizing: initial !important;
+}
+
 .dropdownMenu > li {
 	-webkit-box-sizing: initial !important;
 	box-sizing: initial !important;

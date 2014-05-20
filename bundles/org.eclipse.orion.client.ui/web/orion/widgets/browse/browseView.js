@@ -20,8 +20,9 @@ define([
 	'orion/objects',
 	'orion/Deferred',
 	'orion/webui/dropdown',
+	'orion/widgets/browse/commitInfoRenderer',
 	'orion/section'
-], function(messages, mExplorerTable, mNavigatorRenderer, mMarkdownView, PageUtil, URITemplate, lib, objects, Deferred, mDropdown, mSection) {
+], function(messages, mExplorerTable, mNavigatorRenderer, mMarkdownView, PageUtil, URITemplate, lib, objects, Deferred, mDropdown, mCommitInfoRenderer, mSection) {
 	
 	var FileExplorer = mExplorerTable.FileExplorer;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
@@ -325,6 +326,15 @@ define([
 								this.sectionContents.appendChild(bcNodeContainer);
 								this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 5);
 							}
+						}
+						//Render the branch level commit information 
+						var commitInfo = this.branchSelector ? this.branchSelector.getCommitInfo() : null;
+						if(commitInfo) {
+							var commitNodeContainer = document.createElement("div"), commitNode=document.createElement("div");
+							commitNodeContainer.appendChild(commitNode);
+							commitNodeContainer.classList.add("commitInfoContainer"); 
+							this.sectionContents.appendChild(commitNodeContainer);
+							new mCommitInfoRenderer.CommitInfoRenderer({parent: commitNode, commitInfo: commitInfo}).render();
 						}
 						//Render the section contents
 						if(this.messageView) {

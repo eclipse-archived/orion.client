@@ -179,9 +179,16 @@ define([
 			return activeResource;
 		},
 		setCommitInfo: function(location, commitInfo) {
-			if(commitInfo) {
+			//if(commitInfo) {
 				this.getActiveResource(location).LastCommit = commitInfo;
+			//}
+		},
+		getCommitInfo: function() {
+			var activeResource = this.getActiveResource(this.activeResourceLocation);
+			if(activeResource && activeResource.LastCommit) {
+				return activeResource.LastCommit;
 			}
+			return null;
 		}
 	});
 
