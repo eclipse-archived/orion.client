@@ -32,11 +32,11 @@
 				var props = node.properties;
 				if(props && props.length > 0) {
 					var len = props.length;
-					var seen = {};
+					var seen = Object.create(null);
 					for(var i = 0; i < len; i++) {
 						var prop = props[i];
 						var name = (prop.key.name ? prop.key.name : prop.key.value);
-						if(seen.hasOwnProperty(name)) {
+						if(Object.prototype.hasOwnProperty.call(seen, name)) {
 							context.report(prop, 'Duplicate object key \'{{key}}\'', {key: name}, context.getTokens(prop)[0]);
 						}
 						else {
