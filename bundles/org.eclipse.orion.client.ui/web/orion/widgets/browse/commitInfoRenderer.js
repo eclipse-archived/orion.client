@@ -76,7 +76,7 @@ define([
 			this._parentDomNode.appendChild(messageContainer);
 
 			var fragment = document.createDocumentFragment();
-			fragment.textContent = "by ${0} on " + commitDate +".";
+			fragment.textContent = commitDate ? "by ${0} on " + commitDate +"." : "by ${0}.";
 			var nameLabel = document.createElement("span"); //$NON-NLS-0$
 			nameLabel.appendChild(document.createTextNode(authorName)); //$NON-NLS-0$
 			nameLabel.classList.add("navColumnBold"); //$NON-NLS-0$
