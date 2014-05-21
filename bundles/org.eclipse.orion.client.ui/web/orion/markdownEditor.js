@@ -640,17 +640,17 @@ define([
 			}
 
 			var previewBounds = this._previewDiv.getBoundingClientRect();
-		    var targetBounds = target.getBoundingClientRect();
-		    var relativeTop = targetBounds.top - previewBounds.top;
-		    var previewElementCentre = relativeTop + target.offsetHeight / 2;
+		    var elementBounds = target.getBoundingClientRect();
+		    var relativeTop = elementBounds.top - previewBounds.top;
+		    var elementCentre = relativeTop + target.offsetHeight / 2;
 
 			var block = this._stylerAdapter.getBlockWithId(target.id);
 			var textView = this._editorView.editor.getTextView();
 			var blockTop = textView.getLocationAtOffset(block.start);
 			var blockBottom = textView.getLocationAtOffset(block.end);
 			blockBottom.y += textView.getLineHeight();
-			var editorBlockCentre = blockTop.y + (blockBottom.y - blockTop.y) / 2;
-			this._scrollSourceEditor(editorBlockCentre - previewElementCentre);
+			var blockCentre = blockTop.y + (blockBottom.y - blockTop.y) / 2;
+			this._scrollSourceEditor(blockCentre - elementCentre);
 		}.bind(this);
 
 		this._resizeListener = function(/*e*/) {
@@ -701,6 +701,21 @@ define([
 					this._selectedBlock = block;
 					this._selectedElement = document.getElementById(block.elementId);
 					this._selectedElement.className += this._markdownSelected;
+
+					var textView = this._editorView.editor.getTextView();
+					var blockTop = textView.getLocationAtOffset(block.start);
+					var blockBottom = textView.getLocationAtOffset(block.end);
+					blockBottom.y += textView.getLineHeight();
+					var blockHeight = blockBottom.y - blockTop.y;
+					var relativeTop = blockTop.y - textView.getTopPixel();
+					var blockCentre = relativeTop + blockHeight / 2;
+
+					var previewBounds = this._previewDiv.getBoundingClientRect();
+				    var elementBounds = this._selectedElement.getBoundingClientRect();
+				    var elementTop = elementBounds.top - previewBounds.top + this._previewDiv.scrollTop;
+				    var elementCentre = elementTop + this._selectedElement.offsetHeight / 2;
+
+					this._scrollPreviewDiv(elementCentre - blockCentre);
 				}
 			}
 		}.bind(this);
@@ -774,10 +789,37 @@ define([
 
 			BaseEditor.prototype.install.call(this);
 		},
+		_scrollPreviewDiv: function(top) {
+			if (this._scrollPreviewAnimation) {
+				this._scrollPreviewAnimation.stop();
+				this._scrollPreviewAnimation = null;
+			}
+
+			var pixelY = top - this._previewDiv.scrollTop;
+			if (!pixelY) {
+				return;
+			}
+
+			this._scrollPreviewAnimation = new mTextUtil.Animation({
+				window: window,
+				curve: [pixelY, 0],
+				onAnimate: function(x) {
+					var deltaY = pixelY - Math.floor(x);
+					this._previewDiv.scrollTop += deltaY;
+					pixelY -= deltaY;
+				}.bind(this),
+				onEnd: function() {
+					this._scrollPreviewAnimation = null;
+					this._previewDiv.scrollTop += pixelY;
+				}.bind(this)
+			});
+
+			this._scrollPreviewAnimation.play();	
+		},
 		_scrollSourceEditor: function(top) {
-			if (this._animation) {
-				this._animation.stop();
-				this._animation = null;
+			if (this._scrollSourceAnimation) {
+				this._scrollSourceAnimation.stop();
+				this._scrollSourceAnimation = null;
 			}
 
 			var textView = this._editorView.editor.getTextView(); 
@@ -786,7 +828,7 @@ define([
 				return;
 			}
 
-			this._animation = new mTextUtil.Animation({
+			this._scrollSourceAnimation = new mTextUtil.Animation({
 				window: window,
 				curve: [pixelY, 0],
 				onAnimate: function(x) {
@@ -795,7 +837,7 @@ define([
 					pixelY -= deltaY;
 				}.bind(this),
 				onEnd: function() {
-					this._animation = null;
+					this._scrollSourceAnimation = null;
 					var finalValue = Math.floor(textView.getTopPixel() + pixelY);
 					this._ignoreEditorScrollsUntilValue = finalValue;
 					textView.setTopPixel(finalValue);
@@ -803,7 +845,7 @@ define([
 			});
 
 			this._ignoreEditorScrollsUntilValue = -1;
-			this._animation.play();	
+			this._scrollSourceAnimation.play();	
 		},
 		uninstall: function() {
 			this._styler.destroy();
