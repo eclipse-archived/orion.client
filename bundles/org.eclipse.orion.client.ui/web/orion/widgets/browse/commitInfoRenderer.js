@@ -26,7 +26,8 @@ define([
 	 *	{
 	 *	   Author: {Name: "string", Email: "email@addre.ss", Date: milliseconds(integer) },
 	 *	   Committer: {Name: "string", Email: "email@addre.ss", Date: milliseconds(integer) },
-	 *	   Message: "string"
+	 *	   Message: "string",
+	 * 	   URL: "string"
 	 *	}
 	 */
 

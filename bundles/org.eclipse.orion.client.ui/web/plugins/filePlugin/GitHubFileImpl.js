@@ -13,6 +13,13 @@
 
 define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "orion/URL-shim"], function(Deferred, xhr, Base64) {
 	
+	//This flag controls how we inject the commit information as additional properties of meta data and fetchChildren function.
+	//0: no commit information injected to either meta data or the return list of fetchChildren function
+	//1: only inject commit information to a bracn's meta data
+	//2: inject commit information to all level of meta data 
+	//3: inject commit information to both meta data and each item of the return list of fetchChildren function
+	var commit_info_level = 0;
+
 	function GitHubFileImpl(repoURL, token) {
 		this._originalRepoURL = repoURL;//Used for reference in error message to indicate a repo URL
 		var found = repoURL.match(/https\:\/\/github\.com(?:\:443)?\/([^/]+)\/([^/]+).git$/);
@@ -27,10 +34,12 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 		};
 		if (token) {
 			this._headers.Authorization = "token " + token;
+			commit_info_level = 3;
+		} else {
+			commit_info_level = 2;
 		}
 	}
 
-	var _request_commit_info = false;
 	GitHubFileImpl.prototype = {
 		_getBranchName: function(location) {
 			var url = new URL(location);
@@ -239,7 +248,18 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			}
 			return new Deferred().resolve();
 		},
-		_getCommitInfo: function(child, branchNameOrSha, asSha) {
+
+		/**
+		 * Inject commit information to an item. The item can be either meta data or an item form the return list of fetchChildren.
+		 *	
+		 *  CommitInfo {
+		 *	   Author: {Name: "string", Email: "email@addre.ss", Date: milliseconds(integer) },
+		 *	   Committer: {Name: "string", Email: "email@addre.ss", Date: milliseconds(integer) },
+		 *	   Message: "string",
+		 * 	   URL: "string"
+		 *	}
+		 */
+		_injectCommitInfo: function(child, branchNameOrSha, asSha) {
 			var _this = this;
 			var shaValue = asSha ? branchNameOrSha : branchNameOrSha + "&path=" + child.CommitPath;
 			return xhr("GET", _this._repoURL.href + "/commits?sha=" + shaValue + "&per_page=1", {//https://developer.github.com/v3/#pagination
@@ -269,10 +289,10 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 		_refineFetchedChildren: function(location, children) {
 			var _this = this;
 			var filesWithoutSize = [], commitPromises = [];
-			if(_request_commit_info) {
+			if(commit_info_level > 2) {
 				var branchName = this._getBranchName(location);
 				children.forEach(function(child) {
-					commitPromises.push(_this._getCommitInfo(child, branchName));
+					commitPromises.push(_this._injectCommitInfo(child, branchName));
 					if(!child.Directory && !child.Length) {
 						filesWithoutSize.push(child);
 					}
@@ -388,11 +408,13 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 				} else if (parents.length === 0) {//Branch meta data
 					return _this._getSHAObject(location).then(function(shaObj) {//We have to get the basic branch meta data first
 						var brMeta = shaObj;
+						brMeta.Parents = parents;
 						if(shaObj && shaObj.Sha){
-							brMeta.Parents = parents;
-							return _this._getCommitInfo(shaObj, shaObj.Sha, true).then(function(){
-								return brMeta;
-							});
+							if(commit_info_level > 0) {
+								return _this._injectCommitInfo(shaObj, shaObj.Sha, true).then(function(){
+									return brMeta;
+								});
+							}
 						}
 						return brMeta;
 					});
@@ -407,7 +429,16 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 							return true;
 						}
 					});
-					return result ? result : _this._handleError({status: 404, url: location});//We have to fake a non-root 404 error here, because children.some may not match an invalid URL
+					if(result) {
+						if(commit_info_level > 1) {
+							return _this._injectCommitInfo(result, _this._getBranchName(result.Location)).then(function(){
+								return result;
+							});
+						}
+						return result;
+					} else {
+						return _this._handleError({status: 404, url: location});//We have to fake a non-root 404 error here, because children.some may not match an invalid URL
+					}
 				});
 			}
 			return this.readBlob(location).then(function(bytes) {
