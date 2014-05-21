@@ -61,8 +61,25 @@ define([
 			var commitDate = this._commitInfo.Author && this._commitInfo.Author.Date ? new Date(this._commitInfo.Author.Date).toLocaleString() : "";
 			var message = this._commitInfo.Message ? this._commitInfo.Message : "";
 			var authorName = this._commitInfo.Author && this._commitInfo.Author.Name ? this._commitInfo.Author.Name : "";
-			var messageContainer = document.createElement("div"), messageNode;
+			
+			//Render the avatar
+			var avatarContainer = document.createElement("div");
+			var avatarImage = new Image();//document.createElement("image");
+			if(this._commitInfo.AvatarURL) {
+				avatarImage.src = this._commitInfo.AvatarURL;
+			} else {
+				avatarImage.src = "https://www.gravatar.com/avatar/?d=mm";
+			}
+			avatarImage.classList.add("commitInfoAvatar"); //$NON-NLS-0$
+			avatarContainer.appendChild(avatarImage);
+			this._parentDomNode.appendChild(avatarContainer);
+			
+			//Render the message, author and date on the right of the avatar
+			var messageContainer = document.createElement("div");
 			messageContainer.classList.add("commitInfoMessageContainer"); //$NON-NLS-0$
+			
+			var messageTextContainer = document.createElement("div"), messageNode;
+			messageTextContainer.classList.add("commitInfoMessageTextContainer"); //$NON-NLS-0$
 			if(this._commitInfo.URL) {
 				messageNode = document.createElement("a"); //$NON-NLS-0$
 				messageNode.href = this._commitInfo.URL;
@@ -72,8 +89,8 @@ define([
 				messageNode = document.createElement("span"); //$NON-NLS-0$
 				messageNode.appendChild(document.createTextNode(message));
 			}
-			messageContainer.appendChild(messageNode);
-			this._parentDomNode.appendChild(messageContainer);
+			messageTextContainer.appendChild(messageNode);
+			messageContainer.appendChild(messageTextContainer);
 
 			var fragment = document.createDocumentFragment();
 			fragment.textContent = commitDate ? "by ${0} on " + commitDate +"." : "by ${0}.";
@@ -81,7 +98,8 @@ define([
 			nameLabel.appendChild(document.createTextNode(authorName)); //$NON-NLS-0$
 			nameLabel.classList.add("navColumnBold"); //$NON-NLS-0$
 			lib.processDOMNodes(fragment, [nameLabel]);
-			this._parentDomNode.appendChild(fragment);
+			messageContainer.appendChild(fragment);
+			this._parentDomNode.appendChild(messageContainer);
 		}
 	});
 

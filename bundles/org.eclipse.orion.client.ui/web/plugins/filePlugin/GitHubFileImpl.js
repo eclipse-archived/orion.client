@@ -18,7 +18,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 	//1: only inject commit information to a bracn's meta data
 	//2: inject commit information to all level of meta data 
 	//3: inject commit information to both meta data and each item of the return list of fetchChildren function
-	var commit_info_level = 0;
+	var commit_info_level = 1;
 
 	function GitHubFileImpl(repoURL, token) {
 		this._originalRepoURL = repoURL;//Used for reference in error message to indicate a repo URL
@@ -282,6 +282,9 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 					}
 					child.LastCommit.Message = content[0].commit.message ? content[0].commit.message : "";
 					child.LastCommit.URL = content[0].sha ? _this._commitURLBase + content[0].sha : null;
+					if(content[0].author && content[0].author.avatar_url) {
+						child.LastCommit.AvatarURL = content[0].author.avatar_url;
+					}
 				}
 				return child;
 			}, function(error) { return _this._handleError(error);});

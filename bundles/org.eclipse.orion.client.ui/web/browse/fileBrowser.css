@@ -126,12 +126,10 @@
 
 .commitInfoContainer {
 	border-bottom: 1px solid;
-	margin-top: 1px;
 	padding-left: 4px;
-	padding-top: 7px;
-	padding-bottom: 7px;
+	padding-top: 4px;
+	padding-bottom: 6px;
 	width: 100%;
-	/*height: 22px;*/
 	border-color: #dadada;
 	color: #444;
     background-color: #f0f7f9;
@@ -147,8 +145,25 @@
 	color: #02ADD0 !important;
 }
 
-.commitInfoMessageContainer {
+.commitInfoMessageTextContainer {
 	padding-bottom: 4px;
+}
+
+.commitInfoAvatar {
+	float: left;
+	position: relative;
+	height: 32px;
+	vertical-align: text-top;
+	width: 32px;
+	border: 1px solid lightgrey;
+	padding: 2px;
+	margin-left: 2px;
+	margin-right: 8px;
+}
+
+.commitInfoMessageContainer {
+	position: relative;
+	white-space: normal;
 }
 
 .dropdownMenu > li {

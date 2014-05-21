@@ -330,11 +330,10 @@ define([
 						//Render the branch level commit information 
 						var commitInfo = this.branchSelector ? this.branchSelector.getCommitInfo() : null;
 						if(commitInfo) {
-							var commitNodeContainer = document.createElement("div"), commitNode=document.createElement("div");
-							commitNodeContainer.appendChild(commitNode);
+							var commitNodeContainer = document.createElement("div");
 							commitNodeContainer.classList.add("commitInfoContainer"); 
 							this.sectionContents.appendChild(commitNodeContainer);
-							new mCommitInfoRenderer.CommitInfoRenderer({parent: commitNode, commitInfo: commitInfo}).render();
+							new mCommitInfoRenderer.CommitInfoRenderer({parent: commitNodeContainer, commitInfo: commitInfo}).render();
 						}
 						//Render the section contents
 						if(this.messageView) {
