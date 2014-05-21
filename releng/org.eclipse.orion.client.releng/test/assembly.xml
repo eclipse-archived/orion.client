@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright (c) 2014 IBM Corporation and others.
+
+   All rights reserved. This program and the accompanying materials are made 
+   available under the terms of the Eclipse Public License v1.0 
+   (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+   License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+-->
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+	<id>orion-test-assembly</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<fileSets>
+		<fileSet>
+			<!-- Zip the entire source repo, which is the parent -->
+			<directory>${project.parent.basedir}</directory>
+			<outputDirectory>/</outputDirectory>
+			<useDefaultExcludes>true</useDefaultExcludes>
+
+			<!-- The excludes here should be kept equivalent to the top-level .cfignore file -->
+			<excludes>
+				<exclude>.git/**</exclude>
+				<!-- Maven build artifacts: target/ -->
+				<exclude>**/${project.build.directory}/**</exclude>
+				<!-- Eclipse/OSGi -->
+				<exclude>**/.settings/**</exclude>
+				<exclude>**/META-INF/**</exclude>
+				<!-- Orion node artifacts -->
+				<exclude>**/.temp/**</exclude>
+				<exclude>**/.workspace/**</exclude>
+				<exclude>**/.test_workspace/**</exclude>
+				<!-- Source dirs, image resources not needed for CF app -->
+				<exclude>doc/**</exclude>
+				<exclude>features/</exclude>
+				<exclude>**/*.gif</exclude>
+				<exclude>**/*.png</exclude>
+				<!-- Client build output -->
+				<exclude>built-js/**</exclude>
+				<exclude>optimized/**</exclude>
+				<exclude>staging/**</exclude>
+				<!-- Node/npm -->
+				<exclude>**/*.log</exclude>
+				<exclude>**/node_modules/**</exclude>
+			</excludes>
+		</fileSet>
+	</fileSets>
+</assembly>

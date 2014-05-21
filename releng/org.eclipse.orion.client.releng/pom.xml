@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright (c) 2014 IBM Corporation and others.
+
+   All rights reserved. This program and the accompanying materials are made 
+   available under the terms of the Eclipse Public License v1.0 
+   (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+   License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.eclipse.orion</groupId>
+	<artifactId>org.eclipse.orion.client.releng</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<parent>
+		<groupId>org.eclipse.orion</groupId>
+		<artifactId>org.eclipse.orion.client.parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../..</relativePath>
+	</parent>
+
+	<dependencies>
+	</dependencies>
+
+	<profiles>
+		<profile>
+		<!-- The "orion-test" profile runs unit tests when it is activated. Supported properties/settings are:
+
+		username, password                                 The CF credentials to use. See docs for cf-maven-plugin
+		SAUCE_USERNAME, SAUCE_ACCESS_KEY                   Properties passed to the Sauce job.
+		tests.target, tests.org, tests.space, tests.route  CF settings for the test app.
+		-->
+			<id>orion-test</id>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- NOTE: We don't need a groupId specification because the group is org.apache.maven.plugins, which is assumed by default. -->
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>2.4</version>
+						<executions>
+							<!-- Builds the CF app zip. -->
+							<execution>
+								<id>create-test-app</id>
+								<phase>process-test-resources</phase>
+								<configuration>
+									<appendAssemblyId>false</appendAssemblyId>
+									<attach>false</attach>
+									<descriptors>
+										<descriptor>test/assembly.xml</descriptor>
+									</descriptors>
+									<finalName>orion-test-app</finalName>
+								</configuration>
+								<goals>
+									<goal>single</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<!-- Deploys the CF test app. -->
+						<!-- https://github.com/cloudfoundry/cf-java-client/tree/master/cloudfoundry-maven-plugin#readme -->
+						<groupId>org.cloudfoundry</groupId>
+						<artifactId>cf-maven-plugin</artifactId>
+						<version>1.0.2</version>
+						<executions>
+							<execution>
+								<id>deploy-test-app</id>
+								<phase>process-test-resources</phase>
+								<configuration>
+									<server>orion-test-server</server>
+									<appname>orion-test</appname>
+									<target>${tests.target}</target>
+									<org>${tests.org}</org>
+									<space>${tests.space}</space>
+									<url>${tests.route}</url>
+									<memory>1024</memory>
+									<instances>1</instances>
+									<path>${project.build.directory}/orion-test-app.zip</path>
+									<command>node runtests.js</command>
+									<env>
+										<BUILD_ID>${env.BUILD_ID}</BUILD_ID>
+										<BUILD_NAME>${env.BUILD_NAME}</BUILD_NAME>
+										<BUILD_TAG>${env.BUILD_TAG}</BUILD_TAG>
+										<SAUCE_USERNAME>${SAUCE_USERNAME}</SAUCE_USERNAME>
+										<SAUCE_ACCESS_KEY>${SAUCE_ACCESS_KEY}</SAUCE_ACCESS_KEY>
+									</env>
+								</configuration>
+								<goals>
+									<goal>push-only</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<!-- Clean up previous test and deploy artifacts -->
+								<id>clean-artifacts</id>
+								<phase>clean</phase>
+								<configuration>
+									<target>
+										<delete failonerror="false" verbose="true">
+											<fileset dir="${project.build.directory}" includes="orion-test-app.zip" />
+											<fileset dir="${project.build.directory}/test-reports" includes="*.xml, *.zip" />
+										</delete>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+							<execution>
+								<!-- Fetches the test results. -->
+								<id>fetch-results</id>
+								<phase>process-test-resources</phase>
+								<configuration>
+									<target>
+										<fail unless="tests.route" message="tests.route is required"/>
+										<property name="url" value="http://${tests.route}/testresults" />
+										<property name="test.directory" value="${project.build.directory}/test-reports" />
+										<property name="results.file" value="${test.directory}/results.zip" />
+
+										<mkdir dir="${test.directory}" />
+										<echo message="Downloading test results to ${test.directory}..." />
+										<get src="${url}" dest="${results.file}" httpusecaches="false" maxtime="300" />
+										<echo message="Unzipping test results..." />
+										<unzip src="${results.file}" dest="${test.directory}" stripAbsolutePathSpec="true" />
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

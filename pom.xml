@@ -116,6 +116,7 @@
 
 		<module>features/org.eclipse.orion.client-feature</module>
 
+		<module>releng/org.eclipse.orion.client.releng</module>
 		<module>releng/org.eclipse.orion.client.repository</module>
 	</modules>
 
