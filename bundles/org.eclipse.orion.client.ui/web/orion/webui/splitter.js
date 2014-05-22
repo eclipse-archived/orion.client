@@ -61,7 +61,18 @@ define([
 			if (!this.$sideNode) { throw "no dom node for side panel found"; } //$NON-NLS-0$
 			this.$mainNode = lib.node(options.mainPanel);
 			if (!this.$mainNode) { throw "no dom node for main panel found"; } //$NON-NLS-0$
-			this._vertical = options.vertical;
+			this._vertical = options.vertical || false;
+
+			var classList = this.$node.classList;
+			classList.add("split"); //$NON-NLS-0$
+			classList.add(this._vertical ? "splitVerticalLayout" : "splitLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+			classList = this.$sideNode.classList;
+			classList.add("hasSplit"); //$NON-NLS-0$
+			classList.add(this._vertical ? "sidePanelVerticalLayout" : "sidePanelLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+			classList = this.$mainNode.classList;
+			classList.add("hasSplit"); //$NON-NLS-0$
+			classList.add(this._vertical ? "mainPanelVerticalLayout" : "mainPanelLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+
 			this._prefix = "/orion/splitter/" + (this.$node.id || document.body.id || "");  //$NON-NLS-0$
 			if (options.toggle) {
 				this._thumb = document.createElement("div"); //$NON-NLS-0$
@@ -90,6 +101,44 @@ define([
 		},
 		isClosed: function() {
 			return this._closed;
+		},
+		setVertical: function(value) {
+			value = !!value;
+			if (value === this._vertical) {
+				return;
+			}
+
+			this._vertical = value;
+
+			var classList = this.$node.classList;
+			classList.toggle("splitLayout"); //$NON-NLS-0$
+			classList.toggle("splitVerticalLayout"); //$NON-NLS-0$
+			this.$node.style.left = "";
+			this.$node.style.top = "";
+			
+			classList = this.$sideNode.classList;
+			classList.toggle("sidePanelLayout"); //$NON-NLS-0$
+			classList.toggle("sidePanelVerticalLayout"); //$NON-NLS-0$
+			this.$sideNode.style.left = "";
+			this.$sideNode.style.top = "";
+			this.$sideNode.style.width = "";
+			this.$sideNode.style.height = "";
+			
+			classList = this.$mainNode.classList;
+			classList.toggle("mainPanelLayout"); //$NON-NLS-0$ 
+			classList.toggle("mainPanelVerticalLayout"); //$NON-NLS-0$
+			this.$mainNode.style.left = "";
+			this.$mainNode.style.top = "";
+			this.$mainNode.style.width = "";
+			this.$mainNode.style.height = "";
+
+			if (this._thumb) {
+				classList = this._thumb.classList;
+				classList.toggle("splitThumbLayout"); //$NON-NLS-0$
+				classList.toggle("splitVerticalThumbLayout"); //$NON-NLS-0$
+			}
+
+			this._resize();
 		},
 		/**
 		 * Toggle the open/closed state of the side panel.
