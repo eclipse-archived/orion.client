@@ -387,8 +387,11 @@ define([
 			}.bind(this));
 			
 			this._fileNamePatternsInput.addEventListener("blur", function(){
-				var correctedPatterns = mSearchUtils.getFileNamePatternsArray(this._fileNamePatternsInput.value).join(", ");
-				this._fileNamePatternsInput.value = correctedPatterns;
+				var inputValue = this._fileNamePatternsInput.value;
+				if (inputValue) {
+					var correctedPatternArray = mSearchUtils.getFileNamePatternsArray(inputValue);
+					this._fileNamePatternsInput.value = correctedPatternArray.join(", ");
+				}
 				this._fileNamePatternsHint.classList.remove("fileNamePatternsHintVisible"); //$NON-NLS-0$
 			}.bind(this));
 			
