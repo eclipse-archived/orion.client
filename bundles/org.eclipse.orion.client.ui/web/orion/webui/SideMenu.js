@@ -20,9 +20,7 @@ define([
 	'orion/URITemplate',
 	'orion/URL-shim',
 	'orion/util'
-], function(mCommands, objects, lib, PageLinks, PageUtil, URITemplate, _, util) {
-
-	var isTouch = util.isTouch;
+], function(mCommands, objects, lib, PageLinks, PageUtil, URITemplate) {
 
 	function SideMenu(parentNode, contentNode){
 		this.parentNode = lib.node(parentNode);
@@ -32,7 +30,6 @@ define([
 		}
 		this.menuitems = Object.create(null); // Maps category id {String} to menuitem
 		this.links = null;
-		this.showSubMenus = false;
 		this.categories = null;
 
 		this.anchor = document.createElement("ul"); //$NON-NLS-0$
@@ -64,20 +61,6 @@ define([
 		
 			this.menuitems[categoryId] = listItem;
 		},
-//		setAllMenuItemsInactive: function(){
-//			this.getMenuItems().forEach( function( item ){
-//				item.className = item.iconClass + ' inactive';
-//			} );
-//		},
-//		setActiveMenuItem: function( link ){
-//			this.setAllMenuItemsInactive();
-//			
-//			this.getMenuItems().forEach( function( item ){
-//				if( item.href === link ){
-//					item.className = item.iconClass + ' active';
-//				} 
-//			});
-//		},
 		setSideMenu: function(){
 			var sideMenuNavigation = this.getDisplayState();
 			
@@ -270,32 +253,6 @@ define([
 				}
 			});
 		},
-		
-		_createSubMenus: function(menuitem, links){
-			var sideMenuSubMenu = document.createElement('ul');
-				sideMenuSubMenu.className="sideMenuSubMenu";
-				links.forEach( function( item ){
-					var sideMenuSubMenuItem = document.createElement('li');	
-					sideMenuSubMenuItem.className="sideMenuSubMenuItem";
-					
-					var sideMenuSubMenuItemLink = document.createElement('a');
-					sideMenuSubMenuItemLink.href = item;
-					sideMenuSubMenuItemLink.className="sideMenuSubMenuItemLink";
-					
-					var sideMenuSubMenuItemSpan = document.createElement('span');
-					sideMenuSubMenuItemSpan.innerHTML = item.innerHTML;
-					sideMenuSubMenuItemSpan.className="sideMenuSubMenuItemSpan";
-					
-					sideMenuSubMenuItemLink.appendChild( sideMenuSubMenuItemSpan );
-					
-					sideMenuSubMenuItem.appendChild(sideMenuSubMenuItemLink);
-					
-					sideMenuSubMenu.appendChild(sideMenuSubMenuItem);
-				});
-			
-			menuitem.appendChild(sideMenuSubMenu);
-		},
-		
 		_renderLinks: function(exclusions) {
 			exclusions = exclusions || [];
 			this._sort();
@@ -339,34 +296,31 @@ define([
 
 				// First link becomes the icon link
 				menuitem.appendChild(_self._createCategoryElement(catId, menuitem, bin[0]));
-				
-				// Links go into submenu
-				
-				if( _self.showSubMenus ){	
-					_self._createSubMenus(menuitem, bin);
-				}
 			});
 		},
 		_createCategoryElement: function(catId, menuitem, linkElement) {
-			var category = this.categories.getCategory(catId), element;
-			if (isTouch) {
-				element = document.createElement("button"); //$NON-NLS-0$
-				element.type = "button"; //$NON-NLS-0$
-			} else {
-				element = document.createElement("a"); //$NON-NLS-0$
-				element.href = linkElement.href;
-			}
-			element.className += category.imageClass;
+			var category = this.categories.getCategory(catId);
+			var element = document.createElement("a"); //$NON-NLS-0$
+			element.href = linkElement.href;
 			element.classList.add("submenu-trigger"); //$NON-NLS-0$
 			element.tabIndex = "0"; //$NON-NLS-0$
-			menuitem.classList.remove(category.imageClass); // remove icon from menuitem; on link instead
+			if (category.imageClass) {
+				element.classList.add(category.imageClass);
+				menuitem.classList.remove(category.imageClass); // remove icon from menuitem; on link instead
+			} else if (category.imageDataURL && category.imageDataURL.indexOf("data:image") === 0) {
+				var img = document.createElement("img");
+				img.width="16";
+				img.height="16";
+				img.src = category.imageDataURL;
+				element.appendChild(img);
+			}
 			return element;
 		},
 		_handleEvent: function(event) {
 			var target = event.target, isFocus = event.type === "focus"; //$NON-NLS-0$
 			if (target.tagName === "A" && !isFocus)
 				return; // do not interfere with link clicking
-			if (isMenuTrigger(target) && (isTouch || isFocus)) {
+			if (isMenuTrigger(target) && (isFocus)) {
 				this._expandMenu(getMenu(target));
 			}
 		},
@@ -393,16 +347,6 @@ define([
 	function getMenu(triggerNode) {
 		return lib.$(".sideMenuSubMenu", triggerNode.parentNode); //$NON-NLS-0$
 	}
-
-//	function debug() {
-//		console.log(" ------- ");
-//		var _self = this;
-//		Object.keys(this.links).forEach(function(catId) {
-//			console.log(catId + " -> [" + _self.links[catId].map(function(l) { 
-//				return l.textContent + " (" + l.href + ")";
-//			}).join(", ") + "]");
-//		});
-//	}
 
 	function isNotRelatedLink(elem) {
 		return !elem.isRelatedLink;
