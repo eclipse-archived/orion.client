@@ -25,24 +25,34 @@
 			<!-- The excludes here should be kept equivalent to the top-level .cfignore file -->
 			<excludes>
 				<exclude>.git/**</exclude>
+				<exclude>.maven/**</exclude>
+
 				<!-- Maven build artifacts: target/ -->
 				<exclude>**/${project.build.directory}/**</exclude>
+
 				<!-- Eclipse/OSGi -->
 				<exclude>**/.settings/**</exclude>
 				<exclude>**/META-INF/**</exclude>
+
 				<!-- Orion node artifacts -->
 				<exclude>**/.temp/**</exclude>
 				<exclude>**/.workspace/**</exclude>
 				<exclude>**/.test_workspace/**</exclude>
+
 				<!-- Source dirs, image resources not needed for CF app -->
 				<exclude>doc/**</exclude>
 				<exclude>features/</exclude>
 				<exclude>**/*.gif</exclude>
 				<exclude>**/*.png</exclude>
-				<!-- Client build output -->
+
+				<!-- Client build output, source maps -->
 				<exclude>built-js/**</exclude>
 				<exclude>optimized/**</exclude>
 				<exclude>staging/**</exclude>
+				<exclude>**/*.map</exclude>
+				<exclude>**/*.src</exclude>
+				<exclude>**/built-*.js</exclude>
+
 				<!-- Node/npm -->
 				<exclude>**/*.log</exclude>
 				<exclude>**/node_modules/**</exclude>

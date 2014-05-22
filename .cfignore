@@ -4,6 +4,7 @@ bin
 .git/
 
 # Maven artifacts
+.maven/
 target/
 
 # Eclipse/OSGi info not needed for CF app
@@ -21,10 +22,13 @@ features/
 *.gif
 *.png
 
-# Client build output
+# Client build output and source maps
 built-js
 optimized
 staging
+*.map
+*.src
+built-*.js
 
 # Node/npm
 *.log
