@@ -23,7 +23,7 @@ define([
 	'orion/webui/littlelib'
 ], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, mCommitInfoRenderer, lib) {
 		
-	var max_more_info_column_length = 100;
+	var max_more_info_column_length = 60;
 	function isImage(contentType) {
 		switch (contentType && contentType.id) {
 			case "image/jpeg": //$NON-NLS-0$
@@ -207,6 +207,13 @@ define([
 	};
 
 	/**
+	 * @param {Element} bodyElement
+	 */
+	NavigatorRenderer.prototype.getDisplayTime = function(timeStamp) {
+		return new Date(timeStamp).toLocaleString();
+	};
+	
+	/**
 	 * Creates the column header element. We are really only using the header for a spacer at this point.
 	 * @name orion.explorer.NavigatorRenderer.prototype.getCellHeaderElement
 	 * @function
@@ -366,8 +373,7 @@ define([
 			}
 			var dateColumn = document.createElement('td'); //$NON-NLS-0$
 			if (item.LocalTimeStamp) {
-				var fileDate = new Date(item.LocalTimeStamp);
-				dateColumn.textContent = fileDate.toLocaleString();
+				dateColumn.textContent = this.getDisplayTime(item.LocalTimeStamp);
 			}
 			return dateColumn;
 		case sizeCase:

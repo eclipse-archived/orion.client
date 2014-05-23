@@ -126,10 +126,12 @@
 
 .commitInfoContainer {
 	border-bottom: 1px solid;
+	/*margin: 2px;*/
+	/*outline: 1px solid #02ADD0;*/
 	padding-left: 4px;
 	padding-top: 4px;
-	padding-bottom: 6px;
-	width: 100%;
+	padding-bottom: 4px;
+	/*width: 100%;*/
 	border-color: #dadada;
 	color: #444;
     background-color: #f0f7f9;
@@ -146,7 +148,22 @@
 }
 
 .commitInfoMessageTextContainer {
+	padding-bottom: 1px;
+	text-overflow: ellipsis;
+}
+
+.commitInfoAutorContainer {
 	padding-bottom: 4px;
+}
+
+.commitInfoLabelContainer {
+	float: left;
+	position: relative;
+	padding-bottom: 10px;
+	padding-top: 1px;
+	margin-right: 8px;
+	margin-left: 2px;
+	font-weight: bold;
 }
 
 .commitInfoAvatar {

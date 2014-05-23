@@ -19,7 +19,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 	//2: inject commit information to all level of meta data 
 	//3: inject commit information to both meta data and each item of the return list of fetchChildren function
 	var commit_info_level = 1;
-
+	var use_gravatar_id = true;
 	function GitHubFileImpl(repoURL, token) {
 		this._originalRepoURL = repoURL;//Used for reference in error message to indicate a repo URL
 		var found = repoURL.match(/https\:\/\/github\.com(?:\:443)?\/([^/]+)\/([^/]+).git$/);
@@ -282,7 +282,9 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 					}
 					child.LastCommit.Message = content[0].commit.message ? content[0].commit.message : "";
 					child.LastCommit.URL = content[0].sha ? _this._commitURLBase + content[0].sha : null;
-					if(content[0].author && content[0].author.avatar_url) {
+					if(use_gravatar_id && content[0].author && content[0].author.gravatar_id) {
+						child.LastCommit.AvatarURL = "https://www.gravatar.com/avatar/" + content[0].author.gravatar_id + "?d=mm";
+					} else 	if(content[0].author && content[0].author.avatar_url) {
 						child.LastCommit.AvatarURL = content[0].author.avatar_url;
 					}
 				}

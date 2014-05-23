@@ -100,6 +100,12 @@ define([
 		 */
 		getExpandImage: function() {
 			return null;
+		},
+		/**
+		 * override NavigatorRenderer's prototype
+		 */
+		getDisplayTime: function(timeStamp) {
+			return mCommitInfoRenderer.calculateTime(timeStamp);
 		}
 	});
 	
@@ -333,7 +339,7 @@ define([
 							var commitNodeContainer = document.createElement("div");
 							commitNodeContainer.classList.add("commitInfoContainer"); 
 							this.sectionContents.appendChild(commitNodeContainer);
-							new mCommitInfoRenderer.CommitInfoRenderer({parent: commitNodeContainer, commitInfo: commitInfo}).render();
+							new mCommitInfoRenderer.CommitInfoRenderer({parent: commitNodeContainer, commitInfo: commitInfo}).render(this.componentSelector ? "Delivery" : "Commit", true);
 						}
 						//Render the section contents
 						if(this.messageView) {

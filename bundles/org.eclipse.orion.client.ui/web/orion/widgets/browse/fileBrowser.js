@@ -511,11 +511,18 @@ define([
 					}
 				}
 				var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
+				var bcRootName = this.rootName ? this.rootName : workspaceRootURL;
+				if(this._componentSelector) {
+					bcRootName = "Component Root(" + this._componentSelector.getActiveResource().Name + ")";
+				} else {
+					bcRootName = "Branch Root(" + this._branchSelector.getActiveResource().Name + ")";
+				}
 				new mBreadcrumbs.BreadCrumbs({
 					container: locationNode,
 					maxLength: options.maxLength,
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
+					//workspaceRootSegmentName: bcRootName,
 					workspaceRootSegmentName: this.rootName ? this.rootName : workspaceRootURL,
 					workspaceRootURL: this._calculateRootURL(workspaceRootURL),
 					makeFinalHref: options.makeBreadcrumFinalLink,

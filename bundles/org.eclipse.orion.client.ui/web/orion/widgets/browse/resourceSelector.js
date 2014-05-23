@@ -169,6 +169,9 @@ define([
 			}
 		},
 		getActiveResource: function(location){
+			if(!location) {
+				location = this.activeResourceLocation;
+			}
 			var activeResource = this.allItems[0];
 			this.allItems.some(function(item){
 				if(item.Location === location) {
@@ -184,7 +187,7 @@ define([
 			//}
 		},
 		getCommitInfo: function() {
-			var activeResource = this.getActiveResource(this.activeResourceLocation);
+			var activeResource = this.getActiveResource();
 			if(activeResource && activeResource.LastCommit) {
 				return activeResource.LastCommit;
 			}
