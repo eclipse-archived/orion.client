@@ -751,43 +751,54 @@ define([
 		install: function() {
 			this._parent.style.overflow = "hidden"; //$NON-NLS-0$
 
-			var rootDiv = document.createElement("div"); //$NON-NLS-0$
-			rootDiv.style.position = "absolute"; //$NON-NLS-0$
-			rootDiv.style.width = "100%"; //$NON-NLS-0$
-			rootDiv.style.height = "100%"; //$NON-NLS-0$
-			this._parent.appendChild(rootDiv);
+			this._rootDiv = document.createElement("div"); //$NON-NLS-0$
+			this._rootDiv.style.position = "absolute"; //$NON-NLS-0$
+			this._rootDiv.style.width = "100%"; //$NON-NLS-0$
+			this._rootDiv.style.height = "100%"; //$NON-NLS-0$
+			this._parent.appendChild(this._rootDiv);
 
 			var editorDiv = document.createElement("div"); //$NON-NLS-0$
-			editorDiv.style.position = "absolute"; //$NON-NLS-0$
-			editorDiv.className = "sidePanelLayout hasSplit"; //$NON-NLS-0$
-			editorDiv.style.width = "100%"; //$NON-NLS-0$
-			editorDiv.style.height = "100%"; //$NON-NLS-0$
-			rootDiv.appendChild(editorDiv);	
+			this._rootDiv.appendChild(editorDiv);	
 			this._editorView.setParent(editorDiv);
 
-			var splitterDiv = document.createElement("div"); //$NON-NLS-0$
-			splitterDiv.className = "split splitLayout"; //$NON-NLS-0$
-			splitterDiv.style.left = "50%";
-			splitterDiv.id = "orion.markdown.editor.splitter";
-			rootDiv.appendChild(splitterDiv);			
+			this._splitterDiv = document.createElement("div"); //$NON-NLS-0$
+			this._splitterDiv.id = "orion.markdown.editor.splitter";
+			this._rootDiv.appendChild(this._splitterDiv);			
 
 			this._previewDiv = document.createElement("div"); //$NON-NLS-0$
-			this._previewDiv.className = "mainPanelLayout hasSplit"; //$NON-NLS-0$
 			this._previewDiv.id = ID_PREVIEW; //$NON-NLS-0$
-			this._previewDiv.style.position = "absolute"; //$NON-NLS-0$
-			this._previewDiv.style.height = "100%"; //$NON-NLS-0$
 			this._previewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
 			this._previewDiv.style.overflowY = "auto"; //$NON-NLS-0$
 			this._previewDiv.classList.add("orionMarkdown"); //$NON-NLS-0$
-			rootDiv.appendChild(this._previewDiv);
+			this._rootDiv.appendChild(this._previewDiv);
+
+			this._editorView.addEventListener("Settings", this._updateSettings.bind(this)); //$NON-NLS-0$
+			var settings = this._editorView.getSettings();
 
 			this._splitter = new mSplitter.Splitter({
-				node: splitterDiv,
+				node: this._splitterDiv,
 				sidePanel: editorDiv,
-				mainPanel: this._previewDiv
-			}); 
+				mainPanel: this._previewDiv,
+				vertical: settings && settings.splitOrientation === mSplitter.ORIENTATION_VERTICAL
+			});
+
+			if (!settings) {
+				/* hide the content until the split orientation setting has been retrieved */
+				this._rootDiv.style.visibility = "hidden"; //$NON-NLS-0$
+				this._splitterDiv.style.visibility = "hidden"; //$NON-NLS-0$
+			}
 
 			BaseEditor.prototype.install.call(this);
+		},
+		uninstall: function() {
+			this._styler.destroy();
+			var textView = this._editorView.editor.getTextView();
+			textView.removeEventListener("Scroll", this._scrollListener); //$NON-NLS-0$
+			textView.removeEventListener("Selection", this._selectionListener); //$NON-NLS-0$
+			this._splitter.removeEventListener("resize", this._resizeListener); //$NON-NLS-0$
+			this._previewDiv.removeEventListener("click", this._previewMouseClickListener); //$NON-NLS-0$
+			lib.empty(this._parent);
+			BaseEditor.prototype.uninstall.call(this);
 		},
 		_scrollPreviewDiv: function(top) {
 			if (this._scrollPreviewAnimation) {
@@ -847,15 +858,14 @@ define([
 			this._ignoreEditorScrollsUntilValue = -1;
 			this._scrollSourceAnimation.play();	
 		},
-		uninstall: function() {
-			this._styler.destroy();
-			var textView = this._editorView.editor.getTextView();
-			textView.removeEventListener("Scroll", this._scrollListener); //$NON-NLS-0$
-			textView.removeEventListener("Selection", this._selectionListener); //$NON-NLS-0$
-			this._splitter.removeEventListener("resize", this._resizeListener); //$NON-NLS-0$
-			this._previewDiv.removeEventListener("click", this._previewMouseClickListener); //$NON-NLS-0$
-			lib.empty(this._parent);
-			BaseEditor.prototype.uninstall.call(this);
+		_updateSettings: function(event) {
+			this._splitter.setOrientation(event.newSettings.splitOrientation);
+			/*
+			 * If this is the initial retrieval of these settings then the root
+			 * and splitter elements likely need to have their visibilities updated.
+			 */
+			this._rootDiv.style.visibility = "visible"; //$NON-NLS-0$
+			this._splitterDiv.style.visibility = "visible"; //$NON-NLS-0$
 		},
 		_markdownSelected: " markdownSelected" //$NON-NLS-0$
 	});

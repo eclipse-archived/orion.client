@@ -77,7 +77,10 @@ define([], function() {
 		marginOffsetVisible: true,
 		keyBindings: "Default",
 		keyBindingsVisible: true,
-		keyBindingsLocalVisible: true
+		keyBindingsLocalVisible: true,
+		splitOrientation: "horizontal",
+		splitOrientationVisible: true,
+		splitOrientationLocalVisible: true
 	};
 
 	function EditorPreferences(preferences, callback) {

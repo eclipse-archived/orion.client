@@ -16,7 +16,9 @@ define([
 	'orion/webui/littlelib'
 ], function(require, EventTarget, lib) {
 
-	var MIN_SIDE_NODE_WIDTH = 5;//The minimium width/height of the splitted nodes by the splitter
+	var MIN_SIDE_NODE_WIDTH = 5; //The minimium width/height of the splitted nodes by the splitter
+	var ORIENTATION_HORIZONTAL = "horizontal"; //$NON-NLS-0$
+	var ORIENTATION_VERTICAL = "vertical"; //$NON-NLS-0$
 
 	/**
 	 * @name orion.webui.Splitter
@@ -102,13 +104,16 @@ define([
 		isClosed: function() {
 			return this._closed;
 		},
-		setVertical: function(value) {
-			value = !!value;
-			if (value === this._vertical) {
+		getOrientation: function() {
+			return this._vertical ? ORIENTATION_VERTICAL : ORIENTATION_HORIZONTAL;
+		},		
+		setOrientation: function(value) {
+			var vertical = value === ORIENTATION_VERTICAL;
+			if (vertical === this._vertical) {
 				return;
 			}
 
-			this._vertical = value;
+			this._vertical = vertical;
 
 			var classList = this.$node.classList;
 			classList.toggle("splitLayout"); //$NON-NLS-0$
@@ -401,5 +406,9 @@ define([
 	};
 	Splitter.prototype.constructor = Splitter;
 	//return the module exports
-	return {Splitter: Splitter};
+	return {
+		Splitter: Splitter,
+		ORIENTATION_HORIZONTAL: ORIENTATION_HORIZONTAL,
+		ORIENTATION_VERTICAL: ORIENTATION_VERTICAL
+	};
 });

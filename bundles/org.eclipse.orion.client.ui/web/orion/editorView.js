@@ -15,6 +15,7 @@
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/editor/editor',
+	'orion/editor/eventTarget',
 	'orion/editor/textView',
 	'orion/editor/textModel',
 	'orion/editor/projectionTextModel',
@@ -41,8 +42,8 @@ define([
 	'orion/objects'
 ], function(
 	messages,
-	mEditor, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mContentAssist, mEmacs, mVI,
-	mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
+	mEditor, mEventTarget, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mContentAssist,
+	mEmacs, mVI, mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands, mGlobalCommands,
 	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
 	mMarkOccurrences, mSyntaxchecker,
@@ -63,6 +64,9 @@ define([
 	 *
 	 * @class
 	 * @name orion.EditorView
+	 * @borrows orion.editor.EventTarget#addEventListener as #addEventListener
+	 * @borrows orion.editor.EventTarget#removeEventListener as #removeEventListener
+	 * @borrows orion.editor.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function EditorView(options) {
 		this._parent = options.parent;
@@ -125,6 +129,9 @@ define([
 		getParent: function() {
 			return this._parent;
 		},
+		getSettings: function() {
+			return this.settings;
+		},
 		setParent: function(parent) {
 			this._parent = parent;	
 		},
@@ -186,6 +193,11 @@ define([
 			if (editor.getContentAssist()) {
 				editor.getContentAssist().setAutoTriggerEnabled(prefs.contentAssistAutoTrigger);	
 			}
+
+			this.dispatchEvent({
+				type: "Settings",
+				newSettings: this.settings
+			});
 		},
 		updateStyler: function(prefs) {
 			var styler = this.syntaxHighlighter.getStyler();
@@ -498,5 +510,7 @@ define([
 			return styleAccessor;
 		}
 	};
+	mEventTarget.EventTarget.addMixin(EditorView.prototype);
+
 	return {EditorView: EditorView};
 });
