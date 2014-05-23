@@ -307,11 +307,11 @@ define([
 			if (category.imageClass) {
 				element.classList.add(category.imageClass);
 				menuitem.classList.remove(category.imageClass); // remove icon from menuitem; on link instead
-			} else if (category.imageDataURL && category.imageDataURL.indexOf("data:image") === 0) {
+			} else if (category.imageDataURI && category.imageDataURI.indexOf("data:image") === 0) {
 				var img = document.createElement("img");
 				img.width="16";
 				img.height="16";
-				img.src = category.imageDataURL;
+				img.src = category.imageDataURI;
 				element.appendChild(img);
 			}
 			return element;
