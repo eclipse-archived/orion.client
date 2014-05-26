@@ -195,7 +195,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 	function setEditor(newEditor) {
 		if (editor === newEditor) { return; }
 		if (editor) {
-			editor.addEventListener("DirtyChanged", editorDirtyListener); //$NON-NLS-0$
+			editor.removeEventListener("DirtyChanged", editorDirtyListener); //$NON-NLS-0$
 		}
 		editor = newEditor;
 		if (editor) {
