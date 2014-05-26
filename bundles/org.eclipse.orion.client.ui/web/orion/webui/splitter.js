@@ -143,7 +143,13 @@ define([
 				classList.toggle("splitVerticalThumbLayout"); //$NON-NLS-0$
 			}
 
-			this._resize();
+			this._initializeFromStoredSettings();
+			if (this._closed) {
+				this._closed = false;        // _thumbDown will toggle it, so turn it off and then call _thumbDown.
+				this._thumbDown(true, true); // do not animate. do not persist the initial state
+			} else {
+				this._adjustToSplitPosition();
+			}
 		},
 		/**
 		 * Toggle the open/closed state of the side panel.
