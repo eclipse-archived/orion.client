@@ -13,10 +13,9 @@ define([
 	'chai/chai',
 	'orion/Deferred',
 	'webtools/cssValidator',
-	'mocha/promocha'
-], function(chai, Deferred, CssValidator, mochapromise) {
+	'mocha/mocha' // no exports
+], function(chai, Deferred, CssValidator) {
 	var assert = chai.assert;
-//	var it = mochapromise.it;
 	var validator = new CssValidator.CssValidator();
 
 	describe("CSS validator", function() {

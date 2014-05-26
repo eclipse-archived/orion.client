@@ -46,6 +46,7 @@ define([
 				assert.equal(v, "hi");
 			});
 			e.emit("foo", "hi");
+			assert.equal(called, true);
 		});
 		it('test_on', function() {
 			var e = new EventEmitter(), called = false;
@@ -58,7 +59,7 @@ define([
 		});
 		it('test_once', function() {
 			var e = new EventEmitter(), callCount = 0;
-			e.once("foo", function(v) {
+			e.once("foo", function(/*v*/) {
 				callCount++;
 			});
 			e.emit("foo", "wow");
@@ -68,7 +69,7 @@ define([
 		});
 		it('test_removeListener', function() {
 			var e = new EventEmitter();
-			var listener = function(v) {
+			var listener = function(/*v*/) {
 				assert.fail("should not be called");
 			};
 			e.addListener("foo", listener);
