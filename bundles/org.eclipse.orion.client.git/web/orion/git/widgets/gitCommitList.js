@@ -117,6 +117,9 @@ define([
 							commandService.registerCommandContribution(section.actionsNode.id, "eclipse.orion.git.merge", 100); //$NON-NLS-0$
 							commandService.registerCommandContribution(section.actionsNode.id, "eclipse.orion.git.rebase", 100); //$NON-NLS-0$
 							commandService.registerCommandContribution(section.actionsNode.id, "eclipse.orion.git.resetIndex", 100); //$NON-NLS-0$
+							
+							currentBranch.RemoteLocation[0].Children[0].GitUrl = currentBranch.RemoteLocation[0].GitUrl
+							
 							commandService.renderCommands(section.actionsNode.id, section.actionsNode.id,
 								currentBranch.RemoteLocation[0].Children[0], that, "button"); //$NON-NLS-0$
 						}

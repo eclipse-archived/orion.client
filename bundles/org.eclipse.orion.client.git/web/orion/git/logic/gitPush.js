@@ -165,7 +165,7 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/git/widgets/Co
 							function(options) {
 								var result = new Deferred();
 								
-								if (item.RemoteLocation.length === 1 && item.RemoteLocation[0].Children.length === 1) { //when we push next time - chance to switch saved remote
+								if (item.RemoteLocation.length === 1 && item.RemoteLocation[0].Children && item.RemoteLocation[0].Children.length === 1) { //when we push next time - chance to switch saved remote
 									result = progress.progress(gitService.getGitRemote(remoteLocation), "Getting git remote details " + item.Name);
 								} else {
 									var remotes = {};
@@ -212,6 +212,8 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/git/widgets/Co
 																			progress.progress(gitService.editCloneConfigurationProperty(locationToUpdate,target.parent.Name), "Updating configuration property " + target.parent.Name).then(
 																					function(){
 																						commandInvocation.targetBranch = target;
+																						commandInvocation.items.RemoteLocation = [];
+																						commandInvocation.items.RemoteLocation.push( {GitUrl: target.parent.GitUrl});
 																						handlePush(options, target.Location, "HEAD",target.Name, false);
 																					},
 																					handleError
@@ -230,7 +232,7 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/git/widgets/Co
 											}
 										});
 										
-										if (item.RemoteLocation.length === 1 && item.RemoteLocation[0].Children.length === 1) { //when we push next time - chance to switch saved remote
+										if (item.RemoteLocation.length === 1 && item.RemoteLocation[0].Children && item.RemoteLocation[0].Children.length === 1) { //when we push next time - chance to switch saved remote
 											var dialog2 = dialog;
 											
 											dialog = new mConfirmPush.ConfirmPushDialog({
