@@ -408,6 +408,9 @@ define([
 		this.sidebarNavInputManager.addEventListener("linkClick", function(event){ //$NON-NLS-0$
 			openProject(event.item);
 		});
+		this.sidebarNavInputManager.addEventListener("itemExpanded", function(event){ //$NON-NLS-0$
+			openProject(event.item);
+		});
 		// Only show project view mode if selection is in a project
 		this.sidebarNavInputManager.addEventListener("selectionChanged", function(event){ //$NON-NLS-0$
 			if (sidebar.getActiveViewModeId() === _self.id) { return; }
@@ -451,7 +454,6 @@ define([
 				toolbarNode: this.toolbarNode
 			});
 			this.explorer.display(this.project);
-			window.location.href = uriTemplate.expand({resource: this.project.Location});
 			this.sidebar.hideToolbar();
 		},
 		destroy: function() {
