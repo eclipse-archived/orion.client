@@ -322,11 +322,6 @@ define([
 			};
 			runTest(data);
 		});
-//		node12: {
-//			source: "/*jslint node:true*/\nprocess.",
-//			errors: [{ lineNumber: 2, message: "Unexpected identifier" }],
-//			nodes: [{type:"ExpressionStatement",range:[21,29]},{type:"MemberExpression",range:[21,29]},{type:"Identifier",name:"process",range:[21,28]}]
-//		});
 		it('tolerant parsing function 1', function() {
 			var data = { 
 				source: "var xxxyyy = {};\nfunction foo() {\n    if (xx",
@@ -412,6 +407,123 @@ define([
 				source: "function foo() {\nthis._init = function() { return this; }\nthis.cmd = function() {\nthis._in",
 				errors: [{ lineNumber: 4, message: "Unexpected end of input" }],
 				nodes: [{type:"FunctionDeclaration",range:[0,90]},{type:"Identifier",name:"foo",range:[9,12]},{type:"BlockStatement",range:[15,90]},{type:"ExpressionStatement",range:[17,58]},{type:"AssignmentExpression",range:[17,57]},{type:"MemberExpression",range:[17,27]},{type:"ThisExpression",range:[17,21]},{type:"Identifier",name:"_init",range:[22,27]},{type:"FunctionExpression",range:[30,57]},{type:"BlockStatement",range:[41,57]},{type:"ReturnStatement",range:[43,55]},{type:"ThisExpression",range:[50,54]},{type:"ExpressionStatement",range:[58,90]},{type:"AssignmentExpression",range:[58,90]},{type:"MemberExpression",range:[58,66]},{type:"ThisExpression",range:[58,62]},{type:"Identifier",name:"cmd",range:[63,66]},{type:"FunctionExpression",range:[69,90]},{type:"BlockStatement",range:[80,90]},{type:"ExpressionStatement",range:[82,90]},{type:"MemberExpression",range:[82,90]},{type:"ThisExpression",range:[82,86]},{type:"Identifier",name:"_in",range:[87,90]}]
+			};
+			runTest(data);
+		});
+		it('if missing ) 1', function() {
+			var data = { 
+				source: "if(foo ",
+				nodes: [{"type":"IfStatement","range":[0,7]},{"type":"Identifier","name":"foo","range":[3,6]}],
+				tokens: [{"type":"Keyword","range":[0,2],"value":"if"},{"type":"Punctuator","range":[2,3],"value":"("},{"type":"Identifier","range":[3,6],"value":"foo"}],
+				errors: [{"lineNumber":1,"index":7,"message":"Unexpected end of input"}]
+			};
+			runTest(data);
+		});
+		it('if missing ) 2', function() {
+			var data = { 
+				source: "if(foo {",
+				nodes: [{"type":"IfStatement","range":[0,8]},{"type":"Identifier","name":"foo","range":[3,6]},{"type":"BlockStatement","range":[7,8]}],
+				tokens: [{"type":"Keyword","range":[0,2],"value":"if"},{"type":"Punctuator","range":[2,3],"value":"("},{"type":"Identifier","range":[3,6],"value":"foo"},{"type":"Punctuator","range":[7,8],"value":"{"},{"type":"Punctuator","range":[7,8],"value":"{"}],
+				errors: [{"lineNumber":1,"index":7,"message":"Unexpected token {","token":"{"},{"lineNumber":1,"index":8,"message":"Unexpected end of input"}]
+			};
+			runTest(data);
+		});
+		it('if missing ) 3', function() {
+			var data = { 
+				source: "if(foo {}",
+				nodes: [{"type":"IfStatement","range":[0,9]},{"type":"Identifier","name":"foo","range":[3,6]},{"type":"BlockStatement","range":[7,9]}],
+				tokens: [{"type":"Keyword","range":[0,2],"value":"if"},{"type":"Punctuator","range":[2,3],"value":"("},{"type":"Identifier","range":[3,6],"value":"foo"},{"type":"Punctuator","range":[7,8],"value":"{"},{"type":"Punctuator","range":[8,9],"value":"}"},{"type":"Punctuator","range":[7,8],"value":"{"},{"type":"Punctuator","range":[8,9],"value":"}"}],
+				errors: [{"lineNumber":1,"index":7,"message":"Unexpected token {","token":"{"}]
+			};
+			runTest(data);
+		});
+		it('if missing ) 4', function() {
+			var data = { 
+				source: "if(foo() {}",
+				nodes: [{"type":"IfStatement","range":[0,11]},{"type":"CallExpression","range":[3,8]},{"type":"Identifier","name":"foo","range":[3,6]},{"type":"BlockStatement","range":[9,11]}],
+				tokens: [{"type":"Keyword","range":[0,2],"value":"if"},{"type":"Punctuator","range":[2,3],"value":"("},{"type":"Identifier","range":[3,6],"value":"foo"},{"type":"Punctuator","range":[6,7],"value":"("},{"type":"Punctuator","range":[7,8],"value":")"},{"type":"Punctuator","range":[9,10],"value":"{"},{"type":"Punctuator","range":[10,11],"value":"}"},{"type":"Punctuator","range":[9,10],"value":"{"},{"type":"Punctuator","range":[10,11],"value":"}"}],
+				errors: [{"lineNumber":1,"index":9,"message":"Unexpected token {","token":"{"}]
+			};
+			runTest(data);
+		});
+		it('while missing ) 1', function() {
+			var data = { 
+				source: "while(foo ",
+				nodes: [{"type":"WhileStatement","range":[0,10]},{"type":"Identifier","name":"foo","range":[6,9]}],
+				tokens: [{"type":"Keyword","range":[0,5],"value":"while"},{"type":"Punctuator","range":[5,6],"value":"("},{"type":"Identifier","range":[6,9],"value":"foo"}],
+				errors: [{"lineNumber":1,"index":10,"message":"Unexpected end of input"}]
+			};
+			runTest(data);
+		});
+		it('while missing ) 2', function() {
+			var data = { 
+				source: "while(foo {",
+				nodes: [{"type":"WhileStatement","range":[0,11]},{"type":"Identifier","name":"foo","range":[6,9]},{"type":"BlockStatement","range":[10,11]}],
+				tokens: [{"type":"Keyword","range":[0,5],"value":"while"},{"type":"Punctuator","range":[5,6],"value":"("},{"type":"Identifier","range":[6,9],"value":"foo"},{"type":"Punctuator","range":[10,11],"value":"{"},{"type":"Punctuator","range":[10,11],"value":"{"}],
+				errors: [{"lineNumber":1,"index":10,"message":"Unexpected token {","token":"{"},{"lineNumber":1,"index":11,"message":"Unexpected end of input"}]
+			};
+			runTest(data);
+		});
+		it('while missing ) 3', function() {
+			var data = { 
+				source: "while(foo {}",
+				nodes: [{"type":"WhileStatement","range":[0,12]},{"type":"Identifier","name":"foo","range":[6,9]},{"type":"BlockStatement","range":[10,12]}],
+				tokens: [{"type":"Keyword","range":[0,5],"value":"while"},{"type":"Punctuator","range":[5,6],"value":"("},{"type":"Identifier","range":[6,9],"value":"foo"},{"type":"Punctuator","range":[10,11],"value":"{"},{"type":"Punctuator","range":[11,12],"value":"}"},{"type":"Punctuator","range":[10,11],"value":"{"},{"type":"Punctuator","range":[11,12],"value":"}"}],
+				errors: [{"lineNumber":1,"index":10,"message":"Unexpected token {","token":"{"}]
+			};
+			runTest(data);
+		});
+		it('while missing ) 4', function() {
+			var data = { 
+				source: "while(foo() {}",
+				nodes: [{"type":"WhileStatement","range":[0,14]},{"type":"CallExpression","range":[6,11]},{"type":"Identifier","name":"foo","range":[6,9]},{"type":"BlockStatement","range":[12,14]}],
+				tokens: [{"type":"Keyword","range":[0,5],"value":"while"},{"type":"Punctuator","range":[5,6],"value":"("},{"type":"Identifier","range":[6,9],"value":"foo"},{"type":"Punctuator","range":[9,10],"value":"("},{"type":"Punctuator","range":[10,11],"value":")"},{"type":"Punctuator","range":[12,13],"value":"{"},{"type":"Punctuator","range":[13,14],"value":"}"},{"type":"Punctuator","range":[12,13],"value":"{"},{"type":"Punctuator","range":[13,14],"value":"}"}],
+				errors: [{"lineNumber":1,"index":12,"message":"Unexpected token {","token":"{"}]
+			};
+			runTest(data);
+		});
+		it('for missing ) 1', function() {
+			var data = { 
+				source: "for(var foo = 1; foo < 2; foo++",
+				nodes: [{"type":"ForStatement","range":[0,31]},{"type":"VariableDeclaration","kind":"var","range":[4,15]},{"type":"VariableDeclarator","range":[8,15]},{"type":"Identifier","name":"foo","range":[8,11]},{"type":"Literal","range":[14,15],"value":1},{"type":"BinaryExpression","range":[17,24]},{"type":"Identifier","name":"foo","range":[17,20]},{"type":"Literal","range":[23,24],"value":2},{"type":"UpdateExpression","range":[26,31]},{"type":"Identifier","name":"foo","range":[26,29]}],
+				tokens: [{"type":"Keyword","range":[0,3],"value":"for"},{"type":"Punctuator","range":[3,4],"value":"("},{"type":"Keyword","range":[4,7],"value":"var"},{"type":"Identifier","range":[8,11],"value":"foo"},{"type":"Punctuator","range":[12,13],"value":"="},{"type":"Numeric","range":[14,15],"value":"1"},{"type":"Punctuator","range":[15,16],"value":";"},{"type":"Identifier","range":[17,20],"value":"foo"},{"type":"Punctuator","range":[21,22],"value":"<"},{"type":"Numeric","range":[23,24],"value":"2"},{"type":"Punctuator","range":[24,25],"value":";"},{"type":"Identifier","range":[26,29],"value":"foo"},{"type":"Punctuator","range":[29,31],"value":"++"}],
+				errors: [{"lineNumber":1,"index":31,"message":"Unexpected end of input"}]
+			};
+			runTest(data);
+		});
+		it('for missing ) 2', function() {
+			var data = { 
+				source: "for(var foo = 1; foo < 2; foo++ {",
+				nodes: [{"type":"ForStatement","range":[0,33]},{"type":"VariableDeclaration","kind":"var","range":[4,15]},{"type":"VariableDeclarator","range":[8,15]},{"type":"Identifier","name":"foo","range":[8,11]},{"type":"Literal","range":[14,15],"value":1},{"type":"BinaryExpression","range":[17,24]},{"type":"Identifier","name":"foo","range":[17,20]},{"type":"Literal","range":[23,24],"value":2},{"type":"UpdateExpression","range":[26,31]},{"type":"Identifier","name":"foo","range":[26,29]},{"type":"BlockStatement","range":[32,33]}],
+				tokens: [{"type":"Keyword","range":[0,3],"value":"for"},{"type":"Punctuator","range":[3,4],"value":"("},{"type":"Keyword","range":[4,7],"value":"var"},{"type":"Identifier","range":[8,11],"value":"foo"},{"type":"Punctuator","range":[12,13],"value":"="},{"type":"Numeric","range":[14,15],"value":"1"},{"type":"Punctuator","range":[15,16],"value":";"},{"type":"Identifier","range":[17,20],"value":"foo"},{"type":"Punctuator","range":[21,22],"value":"<"},{"type":"Numeric","range":[23,24],"value":"2"},{"type":"Punctuator","range":[24,25],"value":";"},{"type":"Identifier","range":[26,29],"value":"foo"},{"type":"Punctuator","range":[29,31],"value":"++"},{"type":"Punctuator","range":[32,33],"value":"{"},{"type":"Punctuator","range":[32,33],"value":"{"}],
+				errors: [{"lineNumber":1,"index":32,"message":"Unexpected token {","token":"{"},{"lineNumber":1,"index":33,"message":"Unexpected end of input"}]
+			};
+			runTest(data);
+		});
+		it('for missing ) 3', function() {
+			var data = { 
+				source: "for(var foo = 1; foo < 2; foo++ {}",
+				nodes: [{"type":"ForStatement","range":[0,34]},{"type":"VariableDeclaration","kind":"var","range":[4,15]},{"type":"VariableDeclarator","range":[8,15]},{"type":"Identifier","name":"foo","range":[8,11]},{"type":"Literal","range":[14,15],"value":1},{"type":"BinaryExpression","range":[17,24]},{"type":"Identifier","name":"foo","range":[17,20]},{"type":"Literal","range":[23,24],"value":2},{"type":"UpdateExpression","range":[26,31]},{"type":"Identifier","name":"foo","range":[26,29]},{"type":"BlockStatement","range":[32,34]}],
+				tokens: [{"type":"Keyword","range":[0,3],"value":"for"},{"type":"Punctuator","range":[3,4],"value":"("},{"type":"Keyword","range":[4,7],"value":"var"},{"type":"Identifier","range":[8,11],"value":"foo"},{"type":"Punctuator","range":[12,13],"value":"="},{"type":"Numeric","range":[14,15],"value":"1"},{"type":"Punctuator","range":[15,16],"value":";"},{"type":"Identifier","range":[17,20],"value":"foo"},{"type":"Punctuator","range":[21,22],"value":"<"},{"type":"Numeric","range":[23,24],"value":"2"},{"type":"Punctuator","range":[24,25],"value":";"},{"type":"Identifier","range":[26,29],"value":"foo"},{"type":"Punctuator","range":[29,31],"value":"++"},{"type":"Punctuator","range":[32,33],"value":"{"},{"type":"Punctuator","range":[33,34],"value":"}"},{"type":"Punctuator","range":[32,33],"value":"{"},{"type":"Punctuator","range":[33,34],"value":"}"}],
+				errors: [{"lineNumber":1,"index":32,"message":"Unexpected token {","token":"{"}]
+			};
+			runTest(data);
+		});
+		it('do-while missing ) 1', function() {
+			var data = { 
+				source: "do {} while(foo",
+				nodes: [{"type":"DoWhileStatement","range":[0,15]},{"type":"BlockStatement","range":[3,5]},{"type":"Identifier","name":"foo","range":[12,15]}],
+				tokens: [{"type":"Keyword","range":[0,2],"value":"do"},{"type":"Punctuator","range":[3,4],"value":"{"},{"type":"Punctuator","range":[4,5],"value":"}"},{"type":"Keyword","range":[6,11],"value":"while"},{"type":"Punctuator","range":[11,12],"value":"("},{"type":"Identifier","range":[12,15],"value":"foo"}],
+				errors: [{"lineNumber":1,"index":15,"message":"Unexpected end of input"}]
+			};
+			runTest(data);
+		});
+		it('do-while missing ) 2', function() {
+			var data = { 
+				source: "do {} while(foo {",
+				nodes: [{"type":"DoWhileStatement","range":[0,16]},{"type":"BlockStatement","range":[3,5]},{"type":"Identifier","name":"foo","range":[12,15]},{"type":"BlockStatement","range":[16,17]}],
+				tokens: [{"type":"Keyword","range":[0,2],"value":"do"},{"type":"Punctuator","range":[3,4],"value":"{"},{"type":"Punctuator","range":[4,5],"value":"}"},{"type":"Keyword","range":[6,11],"value":"while"},{"type":"Punctuator","range":[11,12],"value":"("},{"type":"Identifier","range":[12,15],"value":"foo"},{"type":"Punctuator","range":[16,17],"value":"{"},{"type":"Punctuator","range":[16,17],"value":"{"}],
+				errors: [{"lineNumber":1,"index":16,"message":"Unexpected token {","token":"{"},{"lineNumber":1,"index":17,"message":"Unexpected end of input"}]
 			};
 			runTest(data);
 		});

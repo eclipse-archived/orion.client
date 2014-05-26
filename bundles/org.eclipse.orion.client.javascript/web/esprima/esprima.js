@@ -36,7 +36,7 @@
 createLocationMarker: true,
 throwError: true, generateStatement: true, peek: true,
 parseAssignmentExpression: true, parseBlock: true, 
-expectConditionCloseBracketWrapThrow: true, parseExpression: true,
+parseExpression: true,
 parseFunctionDeclaration: true, parseFunctionExpression: true,
 parseFunctionSourceElements: true, parseVariableIdentifier: true,
 parseLeftHandSideExpression: true,
@@ -1299,10 +1299,9 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function collectToken() {
-        var start, loc, token, range, value;
+        var loc, token, range, value;
 
         skipComment();
-        start = index;
         loc = {
             start: {
                 line: lineNumber,
@@ -1838,13 +1837,12 @@ parseStatement: true, parseSourceElement: true */
         throw error;
     }
 
-    // mamacdon: in tolerant mode, records the error and returns undefined. If non tolerant, throws.
     function throwErrorTolerant() {
         try {
             throwError.apply(null, arguments);
         } catch (e) {
             if (extra.errors) {
-                extra.errors.push(e);
+                recordError(e);
             } else {
                 throw e;
             }
@@ -2187,7 +2185,6 @@ parseStatement: true, parseSourceElement: true */
             properties.push(property);
 
             if (!match('}')) {
-            	//mrennie https://bugs.eclipse.org/bugs/show_bug.cgi?id=432956
             	expectTolerant(',');
             }
         }
@@ -2289,7 +2286,7 @@ parseStatement: true, parseSourceElement: true */
         } catch (e) {
             if (extra.errors) {   
                 // soldier on...
-                pushError(e);
+                recordError(e);
             } else {
                 throw e;
             }
@@ -2719,10 +2716,7 @@ parseStatement: true, parseSourceElement: true */
 
         block = parseStatementList();
 
-        // mamacdon 853a9865
-        // @ 1.0.0 esprima.js:2204
-        //expect('}');
-        expectConditionCloseBracketWrapThrow();
+        expectSkipTo('}');
 
         return delegate.markEnd(delegate.createBlockStatement(block));
     }
@@ -2838,9 +2832,7 @@ parseStatement: true, parseSourceElement: true */
 
         test = parseExpression();
 
-        // mamacdon 853a9865
-        //expect(')');
-        expectConditionCloseParenWrapThrow();
+        expectSkipTo(')', '{');
 
         consequent = parseStatement();
         // mamacdon 853a9865: required because of the check in wrapTracking that returns nothing if node is undefined
@@ -2878,7 +2870,7 @@ parseStatement: true, parseSourceElement: true */
 
         test = parseExpression();
 
-        expect(')');
+        expectSkipTo(')', '{');
 
         if (match(';')) {
             lex();
@@ -2896,9 +2888,7 @@ parseStatement: true, parseSourceElement: true */
 
         test = parseExpression();
 
-        // mamacdon 853a9865
-        //expect(')');
-        expectConditionCloseParenWrapThrow();
+        expectSkipTo(')', '{');
 
         oldInIteration = state.inIteration;
         state.inIteration = true;
@@ -2978,9 +2968,7 @@ parseStatement: true, parseSourceElement: true */
             }
         }
 
-        // mamacdon 853a9865
-        //expect(')');
-        expectConditionCloseParenWrapThrow();
+        expectSkipTo(')', '{');
 
         oldInIteration = state.inIteration;
         state.inIteration = true;
@@ -3430,9 +3418,7 @@ parseStatement: true, parseSourceElement: true */
             sourceElements.push(sourceElement);
         }
 
-        // mamacdon 853a986
-        //expect('}');
-        expectConditionCloseBracketWrapThrow();
+        expectSkipTo('}');
 
         state.labelSet = oldLabelSet;
         state.inIteration = oldInIteration;
@@ -3652,11 +3638,10 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function attachComments() {
-        var i, attacher, comment, leading, trailing;
+        var i, attacher, leading, trailing;
 
         for (i = 0; i < extra.pendingComments.length; ++i) {
             attacher = extra.pendingComments[i];
-            comment = attacher.comment;
             leading = attacher.leading;
             if (leading) {
                 if (typeof leading.leadingComments === 'undefined') {
@@ -3744,7 +3729,6 @@ parseStatement: true, parseSourceElement: true */
 
     function tokenize(code, options) {
         var toString,
-            token,
             tokens;
 
         toString = String;
@@ -3768,10 +3752,10 @@ parseStatement: true, parseSourceElement: true */
             lastCommentStart: -1
         };
 
-        extra = {};
+        extra = Object.create(null);
 
         // Options matching.
-        options = options || {};
+        options = options || Object.create(null);
 
         // Of course we collect tokens here.
         options.tokens = true;
@@ -3808,14 +3792,13 @@ parseStatement: true, parseSourceElement: true */
                 return extra.tokens;
             }
 
-            token = lex();
+            lex();
             while (lookahead.type !== Token.EOF) {
                 try {
-                    token = lex();
+                    lex();
                 } catch (lexError) {
-                    token = lookahead;
                     if (extra.errors) {
-                        extra.errors.push(lexError);
+                        recordError(lexError);
                         // We have to break on the first error
                         // to avoid infinite loops.
                         break;
@@ -3836,7 +3819,7 @@ parseStatement: true, parseSourceElement: true */
         } catch (e) {
             throw e;
         } finally {
-            extra = {};
+            extra = Object.create(null);
         }
         return tokens;
     }
@@ -3948,30 +3931,7 @@ parseStatement: true, parseSourceElement: true */
     }
 
 	/**
-	 * @name expectConditionCloseBracketWrapThrow
-	 * @description Gracefully handles a missing '}' if the mode is set to tolerant
-	 * @function
-	 * @private
-	 * @since 5.0
-	 */
-	function expectConditionCloseBracketWrapThrow() {
-		if (extra.errors) {
-			// continue parsing even with missing close
-			// brace.  This gives a better AST for the
-			// block, as information about
-			// the parsed statements remain
-			try {
-				expect('}');
-			} catch (e) {
-				pushError(e);
-	        }
-		} else {
-			expect('}');
-		}
-	}
-
-	/**
-	 * @name expectConditionCloseParenWrapThrow
+	 * @name expectSkipTo
 	 * @description For statements like if, while, for, etc. check for the ')' on the condition. If
 	 * it is not present, catch the error, and backtrack if we see a '{' instead (to continue parsing the block)
 	 * @function
@@ -3979,43 +3939,35 @@ parseStatement: true, parseSourceElement: true */
 	 * @throws The original error from  trying to consume the ')' char if not in tolerant mode
 	 * @since 5.0
 	 */
-	function expectConditionCloseParenWrapThrow() {
-        // needs generalizing to a 'expect A but don't consume if you hit B or C'
+	function expectSkipTo(value, skipTo) {
         try {
-            expect(')');
+            expect(value);
         } catch (e) {
             if (extra.errors) {
-	            pushError(e);
-	            // If a { was hit instead of a ) then don't consume it, let us assume a ')' was 
-	            // missed and the consequent block is OK
-	            if (source[e.index] === '{') {
-	              index=e.index;
-	              lookahead = null;
-	            // activating this block will mean the following statement is parsed as a consequent / body.
-	            // without it the statement is considered not at all part of the enclosing statement at all
-	            //} else {
-	            //  rewind();
+	            recordError(e);
+	            if (skipTo &&  source[e.index] === skipTo) {
+	              index = e.index;
+	              peek();
 	            }
             } else {
                 throw e;
             }
         }
 	}
-    // mamacdon 1420b19
-    // @ 1.0.0 esprima.js:1609
+    
 	/**
-	 * @name pushError
+	 * @name recordError
      * @description Add the error if not already reported.
      * @function
      * @private
-     * @param {Object} error The error object to push
+     * @param {Object} error The error object to record
      * @since 5.0
      */
-    function pushError(error) {
+    function recordError(error) {
         var len = extra.errors.length;
-        for (var e=0; e < len; e++) {
-            var existingError = extra.errors[e];
-            if (existingError.index === error.index && existingError.message === error.message) {
+        for (var e = 0; e < len; e++) {
+            var existing = extra.errors[e];
+            if (existing.index === error.index && existing.message === error.message) {
                 return; // do not add duplicate
             }
         }
@@ -4029,7 +3981,7 @@ parseStatement: true, parseSourceElement: true */
             	var initialHeight = state.markerStack.length;
                 return parseFunction.apply(null, arguments);
             } catch (e) {
-				pushError(e);
+				recordError(e);
 				// Clean up un-popped end markers from failed parse
 				while (state.markerStack.length > initialHeight) {
 					delegate.markEndIf(null);
@@ -4045,7 +3997,7 @@ parseStatement: true, parseSourceElement: true */
             try {
                 return parseFunction.apply(null, arguments);
             } catch (e) {
-				pushError(e);
+				recordError(e);
 //				return null;   // why is this commented out
             }
         };
