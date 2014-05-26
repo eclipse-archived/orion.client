@@ -45,9 +45,8 @@ define([
 	EventTarget, RepoAndBaseURLTriggerTemplate, RepoURLTriggerTemplate, ShareSnippetTriggerTemplate, mCommands, lib, i18nUtil, mFileDownloader, util
 ) {
 	
-	function ResourceChangeHandler(options) {
+	function ResourceChangeHandler() {
 		EventTarget.attach(this);
-		//this.resourceSelector = options.resourceSelector;
 	}
 	
 	function statusService(fileBrowser){
@@ -203,7 +202,7 @@ define([
 			} 
 		}
 		this._breadCrumbInHeader= options.breadCrumbInHeader;
-		this._resourceChangeHandler = new ResourceChangeHandler(options.repo);
+		this._resourceChangeHandler = new ResourceChangeHandler();
 		this._resourceChangeHandler.addEventListener("resourceChanged", function(event){
 			if(!this._componentSelector || !event || !event.newResource || !event.newResource.selectorAllItems) {
 				return;
@@ -266,10 +265,10 @@ define([
 			var editCodeCommand = new mCommands.Command({
 				imageClass: "core-sprite-edit", //$NON-NLS-0$
 				id: "orion.browse.gotoEdit",
-				visibleWhen: function(item) {
+				visibleWhen: function() {
 					return true;
 				},
-				hrefCallback : function(data) {
+				hrefCallback : function() {
 					return this.codeURL ? this.codeURL : (new URL("code", window.location.href)).href;
 				}.bind(this)			
 			});
@@ -287,7 +286,7 @@ define([
 				this.repoURLHandler = this.snippetShareOptions ? null : new repoURLHandler(this.repoURL, this.baseURL, this);
 			}
 			if(!this.snippetShareOptions) {
-				this._registerCommands();
+				//this._registerCommands();
 			}
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
@@ -513,17 +512,18 @@ define([
 				var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
 				var bcRootName = this.rootName ? this.rootName : workspaceRootURL;
 				if(this._componentSelector) {
-					bcRootName = "Component Root(" + this._componentSelector.getActiveResource().Name + ")";
+					//TODO: We need a better way to show the root of a repo
+					//bcRootName = "Component Root(" + this._componentSelector.getActiveResource().Name + ")";
 				} else {
-					bcRootName = "Branch Root(" + this._branchSelector.getActiveResource().Name + ")";
+					//TODO: We need a better way to show the root of a repo
+					//bcRootName = "Branch Root(" + this._branchSelector.getActiveResource().Name + ")";
 				}
 				new mBreadcrumbs.BreadCrumbs({
 					container: locationNode,
 					maxLength: options.maxLength,
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
-					//workspaceRootSegmentName: bcRootName,
-					workspaceRootSegmentName: this.rootName ? this.rootName : workspaceRootURL,
+					workspaceRootSegmentName: bcRootName,
 					workspaceRootURL: this._calculateRootURL(workspaceRootURL),
 					makeFinalHref: options.makeBreadcrumFinalLink,
 					makeHref: options.makeBreadcrumbLink
