@@ -42,7 +42,6 @@ define([
 		it("should flag a bad property decl", function(/*done*/) {
 			context.text = "h1:{f: 22px}";
 			return validator.computeProblems(context).then(function(result) {
-				assert.ok(false);
 				var problems = result.problems;
 				assert(problems != null, 'There should be CSS problems');
 				assert(problems.length === 1, 'There should only be one CSS problem');
