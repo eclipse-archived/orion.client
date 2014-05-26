@@ -10,6 +10,9 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+	<!--
+		This assembly produces a test runner zip suitable for deploying to Cloud Foundry.
+	-->
 	<id>orion-test-assembly</id>
 	<formats>
 		<format>zip</format>
@@ -17,12 +20,20 @@
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
 		<fileSet>
-			<!-- Zip the entire source repo, which is the parent -->
+			<!-- Place the test runner code at the root of the assembly. -->
+			<directory>test/</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>*.json</include>
+				<include>*.js</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<!-- Place the client source code (minus certain exclusions) at the root of the assembly. Here, the
+			parent project's basedir is the root of the repo. -->
 			<directory>${project.parent.basedir}</directory>
 			<outputDirectory>/</outputDirectory>
 			<useDefaultExcludes>true</useDefaultExcludes>
-
-			<!-- The excludes here should be kept equivalent to the top-level .cfignore file -->
 			<excludes>
 				<exclude>.git/**</exclude>
 				<exclude>.maven/**</exclude>
