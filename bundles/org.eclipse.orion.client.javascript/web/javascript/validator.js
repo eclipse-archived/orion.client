@@ -23,7 +23,7 @@ define([
 			"curly" : 0, //$NON-NLS-0$
 			"eqeqeq": 1, //$NON-NLS-0$
 			"missing-doc": [1, {decl: 0, expr: 0}], //$NON-NLS-0$
-			"new-parens" : 2, //$NON-NLS-0$
+			"new-parens" : 1, //$NON-NLS-0$
 			"no-debugger" : 1, //$NON-NLS-0$
 			"no-dupe-keys" : 2, //$NON-NLS-0$
 			"no-eval" : 0, //$NON-NLS-0$
