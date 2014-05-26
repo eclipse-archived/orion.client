@@ -54,6 +54,7 @@ define([
 			}
 		}.bind(this));
 
+		this._blockquoteRemoveMarkersRegex = /^[ \t]*>[ \t]?/gm;
 		this._blockquoteStartRegex = /[ ]*>/g;
 		this._blockquoteRegex = /(?:[ \\t]*>[^\r\n]+(?:\r?\n[ \\t]*\S[^\r\n]*)*(?:\r?\n)*)+/g; /* based on marked.Lexer.rules.normal.blockquote */
 		this._listRegex = /([ \t]*)(?:[*+-]|\d+\.)[ \t][\s\S]+?(?:([ \t]*[-*_]){3,}[ \t]*(?:(\r?\n)+|$)|(\s*\r?\n){2,}(?![ \t])(?!\1(?:[*+-]|\d+\.)[ \t])(\r?\n)*|\s*$)/g; /* based on marked.Lexer.rules.normal.list */
@@ -65,16 +66,29 @@ define([
 		},
 		computeBlocks: function(model, text, block, offset/*, startIndex, endIndex, maxBlockCount*/) {
 			var index = 0;
+			var indexAdjustments = [];
 			var result = [];
 			if (block.typeId) {
-				/* nested blocks do not get different styling, so nothing to do here */
-				return result;
+				if (block.typeId === "markup.quote.markdown") { //$NON-NLS-0$
+					this._blockquoteRemoveMarkersRegex.lastIndex = 0;
+					var match = this._blockquoteRemoveMarkersRegex.exec(text);
+					while (match) {
+						indexAdjustments.push({index: match.index, length: match[0].length});
+						match = this._blockquoteRemoveMarkersRegex.exec(text);
+					}
+					text = text.replace(this._blockquoteRemoveMarkersRegex, "");
+				} else if (block.typeId.indexOf("markup.list.") === 0) { //$NON-NLS-0$
+					return result; // TODO
+				} else {
+					/* only blockquotes and lists have their contents parsed into sub-blocks */
+					return result;
+				}
 			}
 
 			var bounds, name, end, newlines;			
 			var tokens = marked.lexer(text, this.markedOptions);
 			for (var i = 0; i < tokens.length; i++) {
-				var startTokenIndex = i;
+				var customTokenSet = null;
 				name = null;
 				this._whitespaceRegex.lastIndex = index;
 				var whitespaceResult = this._whitespaceRegex.exec(text);
@@ -107,7 +121,7 @@ define([
 						var lastIndex = 0;
 						while (true) {
 							this._htmlNewlineRegex.lastIndex = lastIndex;
-							var match = this._htmlNewlineRegex.exec(tokens[i].text);
+							match = this._htmlNewlineRegex.exec(tokens[i].text);
 							if (match) {
 								newlineCount++;
 								lastIndex = match.index + 1;
@@ -161,13 +175,14 @@ define([
 					var j = i;
 					var stack = 0;
 					while (true) {
-						if (tokens[j++].type === tokens[i].type) {
+						if (tokens[j].type === tokens[i].type) {
 							stack++; /* a start token */
 						} else if (tokens[j].type === endToken) {
 							if (!--stack) {
 								break;
 							}
 						}
+						j++;
 					}
 
 					/* compute the block's contentStart bound */
@@ -181,18 +196,25 @@ define([
 					end = index + match[0].length;
 
 					/* trim trailing blank lines from the end bound */
-					this._emptyLineRegex.lastIndex = 0;
-					match = this._emptyLineRegex.exec(match[0]);
+					this._trailingEmptyLinesRegex.lastIndex = 0;
+					match = this._trailingEmptyLinesRegex.exec(match[0]);
 					if (match && match[1]) {
 						end -= match[1].length;
 					}
-					
+
 					bounds = {
 						start: index,
 						contentStart: contentStart,
 						contentEnd: end,
 						end: end
 					};
+
+					if (tokens[i].type === "blockquote_start") { //$NON-NLS-0$
+						customTokenSet = [tokens[i], tokens[j]];
+					} else {
+						customTokenSet = tokens.slice(i, j + 1);
+					}
+
 					i = j;
 					index = end;
 				} else if (tokens[i].type === "code") { //$NON-NLS-0$
@@ -244,12 +266,18 @@ define([
 				}
 
 				if (name) {
-					bounds.start += offset;
-					bounds.contentStart += offset;
-					bounds.contentEnd += offset;
-					bounds.end += offset;
+					bounds.start = this._adjustIndex(bounds.start, indexAdjustments) + offset;
+					bounds.contentStart = this._adjustIndex(bounds.contentStart, indexAdjustments) + offset;
+					bounds.contentEnd = this._adjustIndex(bounds.contentEnd, indexAdjustments) + offset;
+					bounds.end = this._adjustIndex(bounds.end, indexAdjustments) + offset;
 					var newBlock = this.createBlock(bounds, this._styler, model, block, name);
-					newBlock.tokens = tokens.slice(startTokenIndex, i + 1);
+
+					if (block.name) {
+						/* sub-blocks are not styled differently from their parent block */
+						newBlock.name = block.name;
+					}
+
+					newBlock.tokens = customTokenSet || [tokens[i]];
 					newBlock.tokens.links = tokens.links;
 					newBlock.elementId = ID_PREFIX + this._elementCounter++;
 					result.push(newBlock);
@@ -361,6 +389,39 @@ define([
 		},
 
 		/** @private */
+		_adjustIndex: function(index, adjustments) {
+			for (var i = 0; i < adjustments.length; i++) {
+				var current = adjustments[i];
+				if (current.index <= index) {
+					index += current.length;
+				} else {
+					break;
+				}
+			}
+			return index;
+		},
+		_adoptTokens: function(targetBlock, sourceBlock) {
+			targetBlock.tokens = sourceBlock.tokens;
+			var targetSubBlocks = targetBlock.getBlocks();
+			var sourceSubBlocks = sourceBlock.getBlocks();
+			for (var i = 0; i < targetSubBlocks.length; i++) {
+				this._adoptTokens(targetSubBlocks[i], sourceSubBlocks[i]);
+			}
+		},
+		_generateHTML: function(rootElement, block) {
+			/* must pass a copy of the tokens to marked because it removes them from the array during processing */
+			var parseTokens = block.tokens.slice();
+			parseTokens.links = block.tokens.links;
+			rootElement.innerHTML = marked.Parser.parse(parseTokens, this._markedOptions);
+
+			var subBlocks = block.getBlocks();
+			subBlocks.forEach(function(current) {
+				var newElement = document.createElement("div"); //$NON-NLS-0$
+				newElement.id = current.elementId;
+				rootElement.children[0].appendChild(newElement);
+				this._generateHTML(newElement, current);
+			}.bind(this));
+		},
 		_getLineStart: function(text, index) {
 			while (0 <= --index) {
 				var char = text.charAt(index);
@@ -401,9 +462,8 @@ define([
 					return;
 				}
 
-				var newTokens = marked.lexer(this.model.getText(e.old[0].start, e.old[0].end), this._markedOptions);
-				newTokens.links = e.old[0].tokens.links;
-				e.new[0].tokens = newTokens;
+				var recomputedBlocks = this.computeBlocks(this.model, this.model.getText(e.old[0].start, e.old[0].end), e.old[0].parent, e.old[0].start);
+				this._adoptTokens(e.new[0], recomputedBlocks[0]);
 			}
 
 			var oldBlocksIndex = 0, parentElement, i, j, children = [];
@@ -457,11 +517,7 @@ define([
 
 				var newElement = document.createElement("div"); //$NON-NLS-0$
 
-				/* must pass a copy of the tokens to marked because it removes them from the array during processing */
-				var parseTokens = current.tokens.slice();
-				parseTokens.links = current.tokens.links;
-				newElement.innerHTML = marked.Parser.parse(parseTokens, this._markedOptions);
-
+				this._generateHTML(newElement, current);
 				this._updateNode(element, newElement);
 			}.bind(this));
 
@@ -545,13 +601,12 @@ define([
 		},
 		_CR: "\r", //$NON-NLS-0$
 		_NEWLINE: "\n", //$NON-NLS-0$
-		_blockquoteRegex: />/g,
 		_elementCounter: 0,
-		_emptyLineRegex: /\n(([ \t]*\r?\n)*)$/g,
 		_eolRegex: /$/gm,
 		_htmlNewlineRegex: /\n\s*\S[\s\S]*$/g,
 		_newlineRegex: /\n/g,
 		_orderedListRegex: /\d+\.[ \t]/g,
+		_trailingEmptyLinesRegex: /\n(([ \t]*\r?\n)*)$/g,
 		_unorderedListRegex: /[*+-][ \t]/g,
 		_whitespaceRegex: /\s*/g
 	};
@@ -691,32 +746,55 @@ define([
 
 		this._selectionListener = function(e) {
 			var block = this._styler.getBlockAtIndex(e.newValue.start);
-			if (!this._selectedElement || this._selectedElement.id !== block.elementId) {
-				if (this._selectedElement) {
-					this._selectedElement.className = this._selectedElement.className.replace(this._markdownSelected, "");
-					this._selectedElement = null;
+
+			/*
+			 * If block has sub-blocks then get the sub-block that contains the selection index.
+			 * If no sub-block contains it then the selection index is in whitespace.
+			 */
+			var subBlocks = block.getBlocks();
+			if (subBlocks.length) {
+				var i = 0;
+				for (; i < subBlocks.length; i++) {
+					if (subBlocks[i].start <= e.newValue.start && e.newValue.start < subBlocks[i].end) {
+						block = subBlocks[i];
+						break;
+					}
 				}
+				if (i === subBlocks.length) {
+					/* the selection index was not within a sub-block */
+					block = null;
+				}
+			}
+
+			if (block === this._selectedBlock) {
+				return; /* no change */
+			}
+
+			if (this._selectedElement) {
+				this._selectedElement.className = this._selectedElement.className.replace(this._markdownSelected, "");
+				this._selectedElement = null;
 				this._selectedBlock = null;
-				if (block.elementId) {
-					this._selectedBlock = block;
-					this._selectedElement = document.getElementById(block.elementId);
-					this._selectedElement.className += this._markdownSelected;
+			}
 
-					var textView = this._editorView.editor.getTextView();
-					var blockTop = textView.getLocationAtOffset(block.start);
-					var blockBottom = textView.getLocationAtOffset(block.end);
-					blockBottom.y += textView.getLineHeight();
-					var blockHeight = blockBottom.y - blockTop.y;
-					var relativeTop = blockTop.y - textView.getTopPixel();
-					var blockCentre = relativeTop + blockHeight / 2;
+			if (block && block.elementId) {
+				this._selectedBlock = block;
+				this._selectedElement = document.getElementById(block.elementId);
+				this._selectedElement.className += this._markdownSelected;
 
-					var previewBounds = this._previewDiv.getBoundingClientRect();
-				    var elementBounds = this._selectedElement.getBoundingClientRect();
-				    var elementTop = elementBounds.top - previewBounds.top + this._previewDiv.scrollTop;
-				    var elementCentre = elementTop + this._selectedElement.offsetHeight / 2;
+				var textView = this._editorView.editor.getTextView();
+				var blockTop = textView.getLocationAtOffset(block.start);
+				var blockBottom = textView.getLocationAtOffset(block.end);
+				blockBottom.y += textView.getLineHeight();
+				var blockHeight = blockBottom.y - blockTop.y;
+				var relativeTop = blockTop.y - textView.getTopPixel();
+				var blockCentre = relativeTop + blockHeight / 2;
 
-					this._scrollPreviewDiv(elementCentre - blockCentre);
-				}
+				var previewBounds = this._previewDiv.getBoundingClientRect();
+			    var elementBounds = this._selectedElement.getBoundingClientRect();
+			    var elementTop = elementBounds.top - previewBounds.top + this._previewDiv.scrollTop;
+			    var elementCentre = elementTop + this._selectedElement.offsetHeight / 2;
+
+				this._scrollPreviewDiv(elementCentre - blockCentre);
 			}
 		}.bind(this);
 
@@ -867,7 +945,8 @@ define([
 			this._rootDiv.style.visibility = "visible"; //$NON-NLS-0$
 			this._splitterDiv.style.visibility = "visible"; //$NON-NLS-0$
 		},
-		_markdownSelected: " markdownSelected" //$NON-NLS-0$
+		_markdownSelected: " markdownSelected", //$NON-NLS-0$
+		_selectedBlock: null
 	});
 
 	function MarkdownEditorView(options) {
