@@ -314,7 +314,7 @@ define([
 	        
 	        //the replace button should be rendered by now,
 	        //fix the width of the replaceWrapper div to prevent it from resizing
-	        this._replaceWrapper.style.width = this._replaceBoxWrapper.scrollWidth + 2 + "px"; //$NON-NLS-0$ //adding an extra 2 pixels to account for border
+			this._replaceWrapper.style.width = this._replaceBoxWrapper.offsetWidth + "px"; //$NON-NLS-0$
 	        
 	        this._fileNamePatternsInput.placeholder = "*.*"; //$NON-NLS-0$
 			lib.empty(this._fileNamePatternsHint);
@@ -435,7 +435,7 @@ define([
 												
 				var locationElement = document.createElement("span"); //$NON-NLS-0$
 				locationElement.classList.add("searchScopeElement"); //$NON-NLS-0$
-				locationElement.dataset.locationString = searchLocation;
+				
 				locationElement.title = decodedLocation;
 				scopeElementWrapper.title = decodedLocation;
 				
