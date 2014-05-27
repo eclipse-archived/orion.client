@@ -172,6 +172,12 @@ define([
 						}
 					}
 					break;
+				case Estraverse.Syntax.DoWhileStatement:
+					this.checkId(node.test);
+					break;
+				case Estraverse.Syntax.ForStatement:
+					this.checkId(node.init);
+					break;
 			}
 		},
 		

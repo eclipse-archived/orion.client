@@ -1437,5 +1437,100 @@ define([
 				}
 			});
 		});
+		
+		/**
+		 * Tests computing occurrences for for-loop inits
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=435941
+		 */
+		it('test_for_init_1', function() {
+			editorContext.text = "var f = 3; for(f; i < 10; i++) {}";
+			return occurrences.computeOccurrences(editorContext, setContext(5, 5)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:15, end:16}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for for-loop inits
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=435941
+		 */
+		it('test_for_init_2', function() {
+			editorContext.text = "var f = 3; for(f; i < 10; i++) {}";
+			return occurrences.computeOccurrences(editorContext, setContext(15, 15)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:15, end:16}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for for-loop inits
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=435941
+		 */
+		it('test_for_init_3', function() {
+			editorContext.text = "var f = 3; for(var i = f; i < 10; i++) {}";
+			return occurrences.computeOccurrences(editorContext, setContext(4, 4)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:23, end:24}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for do-while tests
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=435941
+		 */
+		it('test_do_while_test_1', function() {
+			editorContext.text = "var f = 3; do{} while(f) {}";
+			return occurrences.computeOccurrences(editorContext, setContext(5, 5)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:22, end:23}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for do-while tests
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=435941
+		 */
+		it('test_do_while_test_2', function() {
+			editorContext.text = "var f = 3; do{} while(f) {}";
+			return occurrences.computeOccurrences(editorContext, setContext(22, 22)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:22, end:23}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * Tests computing occurrences for do-while tests
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=435941
+		 */
+		it('test_do_while_test_3', function() {
+			editorContext.text = "var f = 3; do{} while(f < 12) {}";
+			return occurrences.computeOccurrences(editorContext, setContext(22, 22)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:22, end:23}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
 	});
 });
