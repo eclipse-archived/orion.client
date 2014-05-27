@@ -81,7 +81,8 @@ define(["orion/Deferred", "orion/xhr", "orion/URITemplate", "orion/URL-shim"], f
 						Name: name,
 						Length: entry.size,
 						LocalTimeStamp: 0,
-						Directory: false
+						Directory: false,
+						LastCommit: entry.LastCommit
 					};
 					if (entry.type !== "file") {
 						result.Directory = true;
@@ -153,12 +154,13 @@ define(["orion/Deferred", "orion/xhr", "orion/URITemplate", "orion/URL-shim"], f
 		},
 		read: function(location, isMetadata) {
 			if (isMetadata) {
-				var _this = this;
+				//var _this = this;
 				var url = new URL(location);
 				var pathmatch = url.pathname.match(pathRegex);
 				var ref = pathmatch[2] ? decodeURIComponent(pathmatch[2]) : pathmatch[2];
-				var path = pathmatch[3] ? decodeURIComponent(pathmatch[3]) : pathmatch[3];
-				if (!ref || !path) {
+				//var path = pathmatch[3] ? decodeURIComponent(pathmatch[3]) : pathmatch[3];
+				var parents = this._getParents(location);
+				if (!parents) {
 					return {
 						Attributes: {
 							Archive: false,
@@ -170,18 +172,23 @@ define(["orion/Deferred", "orion/xhr", "orion/URITemplate", "orion/URL-shim"], f
 						Location: location,
 						Length: 0,
 						LocalTimeStamp: 0,
-						Parents: this._getParents(location),
+						Parents: parents,
 						Directory: true,
 						ChildrenLocation: location
 					};
 				}
-				var parents = this._getParents(location);
-				return this.fetchChildren(parents[0].Location).then(function(children) {
+				var parentLocation;
+				if(parents.length === 0) {
+					parentLocation = this._repoURL;
+				} else {
+					parentLocation = parents[0].Location;
+				}
+				return this.fetchChildren(parentLocation).then(function(children) {
 					var result;
 					children.some(function(entry) {
 						if (entry.Location === location) {
 							result = entry;
-							result.Parents = _this._getParents(location);
+							result.Parents = parents;
 							return true;
 						}
 					});
