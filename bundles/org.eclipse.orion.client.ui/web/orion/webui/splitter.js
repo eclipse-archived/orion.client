@@ -11,10 +11,10 @@
 /*global window define document localStorage */
 
 define([
-	'require',
 	'orion/EventTarget',
+	'orion/util',
 	'orion/webui/littlelib'
-], function(require, EventTarget, lib) {
+], function(EventTarget, util, lib) {
 
 	var MIN_SIDE_NODE_WIDTH = 5; //The minimium width/height of the splitted nodes by the splitter
 	var ORIENTATION_HORIZONTAL = "horizontal"; //$NON-NLS-0$
@@ -97,8 +97,17 @@ define([
 			this.$node.style.visibility = "visible"; //$NON-NLS-0$
 			this.$mainNode.style.display = "block"; //$NON-NLS-0$
 			this.$sideNode.style.display = "block"; //$NON-NLS-0$
-			this.$node.addEventListener("mousedown", this._mouseDown.bind(this), false); //$NON-NLS-0$
-			window.addEventListener("mouseup", this._mouseUp.bind(this), false); //$NON-NLS-0$
+			if (util.isIOS || util.isAndroid) {
+				this.$node.addEventListener("touchstart", this._touchStart.bind(this), false); //$NON-NLS-0$
+				if (this._thumb) {
+					this._thumb.addEventListener("touchstart", this._touchStart.bind(this), false); //$NON-NLS-0$
+				}
+				this.$node.addEventListener("touchmove", this._touchMove.bind(this), false); //$NON-NLS-0$
+				this.$node.addEventListener("touchend", this._touchEnd.bind(this), false); //$NON-NLS-0$
+			} else {
+				this.$node.addEventListener("mousedown", this._mouseDown.bind(this), false); //$NON-NLS-0$
+				window.addEventListener("mouseup", this._mouseUp.bind(this), false); //$NON-NLS-0$
+			}
 			window.addEventListener("resize", this._resize.bind(this), false);  //$NON-NLS-0$
 		},
 		isClosed: function() {
@@ -351,6 +360,44 @@ define([
 			this.$mainNode.classList.add(this._vertical ? "mainPanelVerticalLayoutAnimation" : "mainPanelLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.$node.classList.add(this._vertical ? "splitVerticalLayoutAnimation" : "splitLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$
 		},
+		
+		_down: function() {
+			this.$node.classList.add("splitTracking"); //$NON-NLS-0$
+			this.$mainNode.classList.add("panelTracking"); //$NON-NLS-0$
+			this.$sideNode.classList.add("panelTracking"); //$NON-NLS-0$
+		},
+		
+		_move: function(clientX, clientY) {
+			var parentRect = lib.bounds(this.$node.parentNode);
+			if (this._vertical) {
+				this._splitTop = clientY;
+				if(this._splitTop < parentRect.top + MIN_SIDE_NODE_WIDTH) {//If the top side of the splitted node is shorter than the min size
+					this._splitTop = parentRect.top + MIN_SIDE_NODE_WIDTH;
+				} else if(this._splitTop > parentRect.top + parentRect.height - MIN_SIDE_NODE_WIDTH) {//If the bottom side of the splitted node is shorter than the min size
+					this._splitTop = parentRect.top + parentRect.height - MIN_SIDE_NODE_WIDTH;
+				}
+				var top = this._splitTop;
+				top = this._splitTop - parentRect.top;
+				this.$node.style.top = top + "px"; //$NON-NLS-0$
+			} else {
+				this._splitLeft = clientX;
+				if(this._splitLeft < parentRect.left + MIN_SIDE_NODE_WIDTH) {//If the left side of the splitted node is narrower than the min size
+					this._splitLeft = parentRect.left + MIN_SIDE_NODE_WIDTH;
+				} else if(this._splitLeft > parentRect.left + parentRect.width - MIN_SIDE_NODE_WIDTH) {//If the right side of the splitted node is narrower than the min size
+					this._splitLeft = parentRect.left + parentRect.width - MIN_SIDE_NODE_WIDTH;
+				}
+				var left = this._splitLeft;
+				left = this._splitLeft - parentRect.left;
+				this.$node.style.left = left + "px"; //$NON-NLS-0$
+			}
+			this._adjustToSplitPosition(true);	
+		},
+		
+		_up: function() {
+			this.$node.classList.remove("splitTracking"); //$NON-NLS-0$
+			this.$mainNode.classList.remove("panelTracking"); //$NON-NLS-0$
+			this.$sideNode.classList.remove("panelTracking"); //$NON-NLS-0$
+		},
 
 		_mouseDown: function(event) {
 			if (event.target === this._thumb) {
@@ -360,9 +407,7 @@ define([
 			if (this._tracking) {
 				return;
 			}
-			this.$node.classList.add("splitTracking"); //$NON-NLS-0$
-			this.$mainNode.classList.add("panelTracking"); //$NON-NLS-0$
-			this.$sideNode.classList.add("panelTracking"); //$NON-NLS-0$
+			this._down(event);
 			this._tracking = this._mouseMove.bind(this);
 			window.addEventListener("mousemove", this._tracking); //$NON-NLS-0$
 			lib.setFramesEnabled(false);
@@ -371,30 +416,7 @@ define([
 
 		_mouseMove: function(event) {
 			if (this._tracking) {
-				var parentRect = lib.bounds(this.$node.parentNode);
-				if (this._vertical) {
-					this._splitTop = event.clientY;
-					if(this._splitTop < parentRect.top + MIN_SIDE_NODE_WIDTH) {//If the top side of the splitted node is shorter than the min size
-						this._splitTop = parentRect.top + MIN_SIDE_NODE_WIDTH;
-					} else if(this._splitTop > parentRect.top + parentRect.height - MIN_SIDE_NODE_WIDTH) {//If the bottom side of the splitted node is shorter than the min size
-						this._splitTop = parentRect.top + parentRect.height - MIN_SIDE_NODE_WIDTH;
-					}
-					var top = this._splitTop;
-					top = this._splitTop - parentRect.top;
-					this.$node.style.top = top + "px"; //$NON-NLS-0$
-				} else {
-					this._splitLeft = event.clientX;
-					if(this._splitLeft < parentRect.left + MIN_SIDE_NODE_WIDTH) {//If the left side of the splitted node is narrower than the min size
-						this._splitLeft = parentRect.left + MIN_SIDE_NODE_WIDTH;
-					} else if(this._splitLeft > parentRect.left + parentRect.width - MIN_SIDE_NODE_WIDTH) {//If the right side of the splitted node is narrower than the min size
-						this._splitLeft = parentRect.left + parentRect.width - MIN_SIDE_NODE_WIDTH;
-					}
-					var left = this._splitLeft;
-					left = this._splitLeft - parentRect.left;
-					this.$node.style.left = left + "px"; //$NON-NLS-0$
-				}
-				this._adjustToSplitPosition(true);
-				lib.stop(event);
+				this._move(event.clientX, event.clientY);
 			}
 		},
 
@@ -403,10 +425,38 @@ define([
 				lib.setFramesEnabled(true);
 				window.removeEventListener("mousemove", this._tracking); //$NON-NLS-0$
 				this._tracking = null;
-				this.$node.classList.remove("splitTracking"); //$NON-NLS-0$
-				this.$mainNode.classList.remove("panelTracking"); //$NON-NLS-0$
-				this.$sideNode.classList.remove("panelTracking"); //$NON-NLS-0$
+				this._up();
 				lib.stop(event);
+			}
+		},
+		
+		_touchStart: function(event) {
+			var touches = event.touches;
+			if (touches.length === 1) {
+				lib.stop(event);
+				if (event.target === this._thumb) {
+					return this._thumbDown();
+				}
+				this._down(event);
+				this._touching = true;
+			}
+		},
+		
+		_touchMove: function(event) {
+			if (this._touching) {
+				var touches = event.touches;
+				if (touches.length === 1) {
+					var touch = touches[0];
+					this._move(touch.clientX, touch.clientY);
+				}
+			}
+		},
+		
+		_touchEnd: function(event) {
+			var touches = event.touches;
+			if (touches.length === 0) {
+				this._touching = false;
+				this._up();
 			}
 		}
 	};
