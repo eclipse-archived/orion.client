@@ -8,12 +8,10 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define console Uint8Array*/
-
-
-define(["chai/chai", "orion/Base64", "domReady!"], function(chai, Base64) {
+/*global console Uint8Array*/
+/*jslint amd:true mocha:true*/
+define(["chai/chai", "orion/Base64", "mocha/mocha"], function(chai, Base64) {
 	var assert = chai.assert;
-	var tests = {};
 	var testData = "abcdef";
 	testData += testData;
 	testData += testData;
@@ -38,16 +36,17 @@ define(["chai/chai", "orion/Base64", "domReady!"], function(chai, Base64) {
 	testData += testData;
 	testData += testData;
 
-	tests.testDecodeEncode = function() {
-		var decoded = Base64.decode(testData);
-		var result = Base64.encode(decoded);
-
-		assert.equal(result, testData);
-	};
+	describe("base64", function() {
+		it("#decode, #encode", function() {
+			var decoded = Base64.decode(testData);
+			var result = Base64.encode(decoded);
 	
-	tests.testWhitespace = function() {
-		Base64.decode(" ");
-	};
+			assert.equal(result, testData);
+		});
 
-	return tests;
+		it("whitespace", function() {
+			Base64.decode(" ");
+		});
+
+	});
 });

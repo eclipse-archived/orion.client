@@ -129,7 +129,7 @@
 
 										<mkdir dir="${test.directory}" />
 										<echo message="Downloading test results to ${test.directory}..." />
-										<get src="${url}" dest="${results.file}" httpusecaches="false" maxtime="300" />
+										<get src="${url}" dest="${results.file}" httpusecaches="false" maxtime="540" />
 										<echo message="Unzipping test results..." />
 										<unzip src="${results.file}" dest="${test.directory}" stripAbsolutePathSpec="true" />
 									</target>

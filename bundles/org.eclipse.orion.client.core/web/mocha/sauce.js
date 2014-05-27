@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*jslint amd:true */
+/*jslint amd:true browser:true */
 /*global console:true TextEncoder*/
 /**
  * Wrapper for mocha that exposes mocha test results to Sauce Labs.
@@ -32,14 +32,22 @@ define([
 ], function(Base64, pako, objects) {
 	var global = new Function("return this")();
 
+	// Try to filter non-xunit log messages, so tests that print junk to the console are less likely to break xunit report.
+	function isXunit(message) {
+		return /^<\/?test(case|suite)/.test(message);
+	}
+
 	function addxunit(mocha, runner, reportHolder) {
-		// xunit reporter writes directly to console.log() so we monkey patch console.log and buffer it
+		// Unfortunately the xunit reporter is hardcoded to write directly to console.log()
+		// So monkey patch console.log
 		if (!console) {
 			console = {};
 		}
 		var log = console.log;
 		console.log = global.console.log = function(str) {
-			reportHolder.report += str + "\n";
+			if (isXunit(str)) {
+				reportHolder.report += str + "\n";
+			}
 			log && log.apply(global.console, Array.prototype.slice.call(arguments));
 		};
 		reportHolder.report = "";

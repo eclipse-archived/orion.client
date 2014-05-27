@@ -84,6 +84,9 @@ module.exports = function(grunt) {
 					port: "<%= port %>",
 					base: bundles.map(function(bundle) { return bundle.web; }),
 					middleware: function(connect, options, middlewares) {
+						// Inject logger and compress at the top of the middleware stack
+						middlewares.splice(0, 0, connect.logger(), connect.compress());
+						// And /testresults at the bottom
 						middlewares.push(testResultsMiddleware);
 						return middlewares;
 					}
