@@ -57,7 +57,7 @@ define([
 			}, {id: "application/json", //$NON-NLS-0$
 				"extends": "text/plain", //$NON-NLS-0$
 				name: "JSON", //$NON-NLS-0$
-				extension: ["json"], //$NON-NLS-0$
+				extension: ["json", "pref"], //$NON-NLS-0$ //$NON-NLS-1$
 				imageClass: "file-sprite-javascript modelDecorationSprite" //$NON-NLS-0$
 			}, {id: "application/x-ejs", //$NON-NLS-0$
 				"extends": "text/plain", //$NON-NLS-0$
