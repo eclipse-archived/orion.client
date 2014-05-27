@@ -3990,7 +3990,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return lineNode._line.getModelOffset (node, offset);
 		},
 		_updateSelectionFromDOM: function() {
-			if (!(util.isOS || util.isAndroid || this._checkSelectionChange)) {
+			if (!(util.isIOS || util.isAndroid || this._checkSelectionChange)) {
 				return false;
 			}
 			var window = this._getWindow();
