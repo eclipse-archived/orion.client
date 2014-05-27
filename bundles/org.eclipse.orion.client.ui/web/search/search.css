@@ -29,7 +29,7 @@
 }
 
 .searchPageWrapperFocussed {
-	border-color: black;
+	border-color: #999;
 }
 
 .replaceWrapper {
@@ -63,23 +63,24 @@
 .fileNamePatternsInput {
 	border: 1px solid lightgray;
 	border-radius: 3px;
-	padding: 4px;
-	min-width: 284px;
 	margin: 0;
+	padding: 4px;
+	width: calc(100% - 10px); /* -10px accounts for borders and padding */
 }
 
 .fileNamePatternsInput:focus {
-	border-color: black;
+	border-color: #999;
 	outline: none;
 }
 
 .fileNamePatternsHint {
-	color: #222;
+	color: #777;
 	font-size: 11px;
-	margin: -10px 0 0 0;
+	margin: 0 0 2px 0;
 	padding: 0 2px;
 	display: block;
 	opacity: 0;
+	text-align: center;
 	transition: opacity 0.1s ease;
 }
 
@@ -92,8 +93,13 @@
 	margin: 0 0 0 5px;
 }
 
+.searchMainOptionBlock {
+	margin: 30px 10px;
+}
+
 .searchOptionBlock {
-	margin: 15px 10px;
+	margin: 20px 15px;
+	width: 285px;
 }
 
 .isHidden > .commandButton.search-button {
@@ -120,4 +126,55 @@
 
 .previousSearchArrow {
 	font-size: 18px;
+}
+
+.searchLabel {
+	margin: 1px 2px;
+}
+
+.searchCheckboxLabel {
+	vertical-align: middle;
+}
+
+.searchCheckbox {
+	margin: 0 0 0 5px;
+	vertical-align: middle;
+}
+
+.searchScopeInputWrapper {
+	background-color: whitesmoke;
+	border: 1px solid lightgray;
+	border-radius: 3px;
+	display: inline-block;
+}
+
+.searchScopeElementWrapper {
+	display: inline-block;
+	width: 254px;
+}
+
+.searchScopeElement {
+	color: #222;
+	cursor: initial;
+	display: inline-block;
+	font-weight: normal;
+	margin: 0 5px;
+	overflow: hidden;
+	padding: 0;
+	max-width: 100%; /* prevents span from overflowing parent */
+	text-overflow: ellipsis;
+	vertical-align: bottom;
+	white-space: nowrap;
+}
+
+.commandButton.searchScopeSelectButton {
+	border: none;
+	border-left: 1px solid lightgray;
+	border-bottom-left-radius: 0;
+	border-top-left-radius: 0;
+	cursor: pointer;
+	font-size: 12px;
+	margin: 0;
+	padding: 6px;
+	vertical-align: baseline;
 }

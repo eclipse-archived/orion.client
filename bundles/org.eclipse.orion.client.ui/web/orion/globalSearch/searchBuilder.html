@@ -1,4 +1,4 @@
-	<div class="searchOptionBlock">
+	<div class="searchMainOptionBlock">
 		<div id="searchInputFieldWrapper" class="searchPageInputFieldWrapper">
 		   	<input type="text" id="advSearchInput" class="searchPageInputField">
 		  	<button id="previousSearchButton" class="orionButton previousSearchButton" tabindex="-1">
@@ -16,14 +16,21 @@
 	</div>
 	
 	<div class="searchOptionBlock">
-		<label id="advSearchCaseSensitiveLabel" class="search-label" ><input type="checkbox" id="advSearchCaseSensitive" class="search-control"></label>
-		<label id="advSearchRegExLabel" class="search-label" style="margin-left:20px;"><input type="checkbox" id="advSearchRegEx" class="search-control"></label>
+		<label id="advSearchCaseSensitiveLabel" class="searchCheckboxLabel" for="advSearchCaseSensitive"></label><input type="checkbox" id="advSearchCaseSensitive" class="searchCheckbox">
+		<span class="layoutRight">
+			<label id="advSearchRegExLabel" class="searchCheckboxLabel" for="advSearchRegEx"></label><input type="checkbox" id="advSearchRegEx" class="searchCheckbox">
+		</span>
 	</div>
 	<div class="searchOptionBlock">
-		<span id="fileNamePatternsHint" class="fileNamePatternsHint"></span>
+		<div id="fileNamePatternsLabel" class="searchLabel"></div>
 		<input id="fileNamePatternsInput" type="text" class="fileNamePatternsInput">
-	</div>
-	
-	<div class="searchOptionBlock">
-		<div id="searchScope" class="searchScope"></div>
+		<span id="fileNamePatternsHint" class="fileNamePatternsHint"></span>
+		
+		<div id="searchScope" class="searchScope">
+			<div id="searchScopeLabel" class="searchLabel"></div>
+			<span id="searchScopeInputWrapper" class="searchScopeInputWrapper">
+				<span id="searchScopeElementWrapper" class="searchScopeElementWrapper"></span>
+				<button id="searchScopeSelectButton" class="commandButton core-sprite-outline searchScopeSelectButton"></button>
+			</span>
+		</div>
 	</div>

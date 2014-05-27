@@ -96,10 +96,10 @@ define({
 	"Regular expression is off. You can click here or use options to turn it on for replacement - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>.",
 	"Regular expression is on. You can click here or use options to turn it off - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>." : 
 	"Regular expression is on. You can click here or use options to turn it off - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>.",
-	"root": "root",
 	"Scope": "Scope",
 	"Show previous search terms": "Show previous search terms",
 	"Show replacement preview": "Show replacement preview",
 	"File name patterns (comma-separated)": "File name patterns (comma-separated)",
-	"(* = any string, ? = any character)": "(* = any string, ? = any character)"
+	"(* = any string, ? = any character)": "(* = any string, ? = any character)",
+	"Choose a Folder": "Choose a Folder"
 });
