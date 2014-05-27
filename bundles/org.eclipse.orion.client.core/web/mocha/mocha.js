@@ -4258,12 +4258,14 @@ Runnable.prototype.run = function(fn){
     return done(new Error('--async-only option in use without declaring `done()`'));
   }
 
-  // sync
+  // sync (or promise-returning)
   try {
     if (!this.pending) {
       var result = this.fn.call(ctx);
       // Handle a test that returns a promise
       if (result && typeof result.then === "function") {
+        // Check 'ms' again in case the test called timeout()
+        ms = this.timeout();
         if (ms) {
           this.timer = setTimeout(function(){
             done(new Error('timeout of ' + ms + 'ms exceeded'));
