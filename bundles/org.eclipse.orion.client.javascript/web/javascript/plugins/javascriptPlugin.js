@@ -282,33 +282,13 @@ define([
 		});
 
 	/**
-	 * Register syntax styling for js, json, json schema and ejs content
+	 * Register syntax styling for js, json and json schema content
 	 */
-	for (var i=mJS.grammars.length-1; i>=0; i--) {
-		if (mJS.grammars[i].id === "orion.js"){  //$NON-NLS-0$
-			provider.registerServiceProvider("orion.edit.highlighter", {}, mJS.grammars[i]);  //$NON-NLS-0$
-			break;
-		}
-	}
-	for (i=mJSON.grammars.length-1; i>=0; i--) {
-		if (mJSON.grammars[i].id === "orion.json"){  //$NON-NLS-0$
-			provider.registerServiceProvider("orion.edit.highlighter", {}, mJSON.grammars[i]);  //$NON-NLS-0$
-			break;
-		}
-	}
-	for (i=mJSONSchema.grammars.length-1; i>=0; i--) {
-		if (mJSONSchema.grammars[i].id === "orion.json.schema"){  //$NON-NLS-0$
-			provider.registerServiceProvider("orion.edit.highlighter", {}, mJSONSchema.grammars[i]);  //$NON-NLS-0$
-			break;
-		}
-	}
-	for (i=mEJS.grammars.length-1; i>=0; i--) {
-		if (mEJS.grammars[i].id === "orion.ejs"){  //$NON-NLS-0$
-			provider.registerServiceProvider("orion.edit.highlighter", {}, mEJS.grammars[i]);  //$NON-NLS-0$
-			break;
-		}
-	}
-	
+	var grammars = mJS.grammars.concat(mJSON.grammars).concat(mJSONSchema.grammars).concat(mEJS.grammars);
+	grammars.forEach(function(current) {
+		provider.registerService("orion.edit.highlighter", {}, current);
+	}.bind(this));
+
 	/**
 	 * Register type definitions for known JS libraries
 	 */
