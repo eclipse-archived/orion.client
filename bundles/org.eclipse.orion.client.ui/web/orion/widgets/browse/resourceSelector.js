@@ -174,7 +174,7 @@ define([
 			}
 			var activeResource = this.allItems[0];
 			this.allItems.some(function(item){
-				if(item.Location === location) {
+				if(item.Location === location || item.Location === (location + "/") || (item.Location + "/") === location) {
 					activeResource = item;
 					return true;
 				}
