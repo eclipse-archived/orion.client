@@ -207,10 +207,18 @@ define([
 	};
 
 	/**
-	 * @param {Element} bodyElement
+	 * @param {int|string} the local time stamp
 	 */
 	NavigatorRenderer.prototype.getDisplayTime = function(timeStamp) {
 		return new Date(timeStamp).toLocaleString();
+	};
+	
+	/**
+	 * @param {Element} parent the parent dom where the commit info is rendered
+	 * @param {Object} commitInfo the commit info
+	 */
+	NavigatorRenderer.prototype.getCommitRenderer = function(parent, commitInfo) {
+		return new mCommitInfoRenderer.CommitInfoRenderer({parent: parent, commitInfo: commitInfo});
 	};
 	
 	/**
@@ -394,7 +402,7 @@ define([
 				return null;
 			}
 			var messageColumn = document.createElement('td'); //$NON-NLS-0$
-			new mCommitInfoRenderer.CommitInfoRenderer({parent: messageColumn, commitInfo: item.LastCommit}).renderSimple(max_more_info_column_length);
+			this.getCommitRenderer(messageColumn, item.LastCommit).renderSimple(max_more_info_column_length);
 			return messageColumn;
 		}
 	};

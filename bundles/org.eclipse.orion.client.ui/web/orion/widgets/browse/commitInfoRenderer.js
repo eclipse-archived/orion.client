@@ -85,6 +85,7 @@ define([
 	function CommitInfoRenderer(params) {
 		this._parentDomNode = lib.node(params.parent);//Required
 		this._commitInfo = params.commitInfo;//Required
+		this._commitURLBase = params.commitURLBase;
 	}
 	objects.mixin(CommitInfoRenderer.prototype, /** @lends orion.widgets.Filesystem.CommitInfoRenderer */ {
 		destroy: function() {
@@ -106,7 +107,11 @@ define([
 			var messageNode;
 			if(this._commitInfo.URL) {
 				messageNode = document.createElement("a"); //$NON-NLS-0$
-				messageNode.href = this._commitInfo.URL;
+				if(this._commitURLBase) {
+					messageNode.href = this._commitURLBase + "/" + this._commitInfo.URL;
+				} else {
+					messageNode.href = this._commitInfo.URL;
+				}
 				messageNode.classList.add("commitInfolink"); //$NON-NLS-0$
 				messageNode.appendChild(document.createTextNode(message));
 			} else {

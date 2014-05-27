@@ -20,6 +20,7 @@ function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 			if(fileBrowser) {
 				fileBrowser.destroy();
 			}
+			//http://9.31.17.57:8080/plugins/gerritfs/static/plugins/GerritFilePlugin.html?project=org.eclipse.orion.client
 			var pluginURL = urlInput.value;
 			var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 			var plugins = {};
@@ -32,6 +33,7 @@ function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 				fileBrowser = new mFileBrowser.FileBrowser({
 					parent: "fileBrowser", 
 					selectorNumber: 1,
+					useSHA: true,
 					//maxEditorHeight: 800,
 					serviceRegistry: serviceRegistry
 				});
