@@ -73,7 +73,6 @@ define({
 	"Advanced search" : "Advanced search",
 	"Submit" : "Submit",
 	"More" : "More",
-	"Saved searches" : "Saved searches",
 	"Recent searches" : "Recent searches",
 	"Regular expression" : "Regular expression",
 	"Search options" : "Search options",

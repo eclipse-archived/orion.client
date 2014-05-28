@@ -136,24 +136,14 @@ define([
 			//Required. Reading recent&saved search from user preference. Once done call the uiCallback
 			var defaultProposalProvider = function(uiCallback){
 				mSearchUtils.getMixedSearches(this._serviceRegistry, false, false, function(searches){
-					var i, fullSet = [], hasSavedSearch = false, hasRecentSearch = false;
-					for (i in searches) {
-						if(searches[i].label && searches[i].value){
-							if(!hasSavedSearch){
-								fullSet.push({type: "category", label: messages["Saved searches"]});//$NON-NLS-0$
-								hasSavedSearch = true;
-							}
-							fullSet.push({type: "proposal", value: {name: searches[i].label, value: require.toUrl("search/search.html") + "#" + searches[i].value, type: "link"}});  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							//fullSet.push({type: "proposal", label: searches[i].label, value: searches[i].name});//$NON-NLS-0$
-						} else {
-							if(!hasRecentSearch){
-								fullSet.push({type: "category", label: messages["Recent searches"]});//$NON-NLS-0$
-								hasRecentSearch = true;
-							}
-							fullSet.push({type: "proposal", label: searches[i].name, value: searches[i].name});//$NON-NLS-0$
-						}
+					var recentSearches = [];
+					if (searches.length > 0) {
+						recentSearches.push({type: "category", label: messages["Recent searches"]});//$NON-NLS-0$
+						searches.forEach(function(search){
+							recentSearches.push({type: "proposal", label: search.name, value: search.name});//$NON-NLS-0$
+						}, this);
 					}
-					uiCallback(fullSet);
+					uiCallback(recentSearches);
 				});
 			}.bind(this);
 			//Optional. Reading extended search proposals by asking plugins, if any.
@@ -310,7 +300,7 @@ define([
 			if (this._replaceBoxIsHidden()) {
 	        	this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$	
 	        }
-	        this._toggleReplaceLink.addEventListener("click", this._toggleReplaceFieldVisibility.bind(this)); //$NON-NLS-1$ //$NON-NLS-0$
+	        this._toggleReplaceLink.addEventListener("click", this._toggleReplaceFieldVisibility.bind(this)); //$NON-NLS-0$
 	        
 	        //the replace button should be rendered by now,
 	        //fix the width of the replaceWrapper div to prevent it from resizing
