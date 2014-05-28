@@ -802,6 +802,9 @@ define([
 				var textView = this._editorView.editor.getTextView();
 				var blockTop = textView.getLocationAtOffset(model.mapOffset(block.start, true));
 				var blockBottom = textView.getLocationAtOffset(model.mapOffset(block.end, true));
+				if (!blockBottom.y) { /* indicates that the block bottom is within a collapsed section */
+					blockBottom.y = blockTop.y;
+				}
 				blockBottom.y += textView.getLineHeight();
 				var blockHeight = blockBottom.y - blockTop.y;
 				var relativeTop = blockTop.y - textView.getTopPixel();
