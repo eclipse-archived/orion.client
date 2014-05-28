@@ -106,14 +106,6 @@ define([
 		 */
 		getDisplayTime: function(timeStamp) {
 			return mCommitInfoRenderer.calculateTime(timeStamp);
-		},
-		/**
-		 * override NavigatorRenderer's prototype
-		 * @param {Element} parent the parent dom where the commit info is rendered
-		 * @param {Object} commitInfo the commit info
-		 */
-		getCommitRenderer: function(parent, commitInfo) {
-			return new mCommitInfoRenderer.CommitInfoRenderer({parent: parent, commitInfo: commitInfo, commitURLBase: this.explorer.folderViewer._browser.commitURLBase});
 		}
 	});
 	
@@ -347,7 +339,7 @@ define([
 							var commitNodeContainer = document.createElement("div");
 							commitNodeContainer.classList.add("commitInfoContainer"); 
 							this.sectionContents.appendChild(commitNodeContainer);
-							new mCommitInfoRenderer.CommitInfoRenderer({parent: commitNodeContainer, commitInfo: commitInfo, commitURLBase: this._browser.commitURLBase}).render(this.componentSelector ? "Delivery" : "Commit", true);
+							new mCommitInfoRenderer.CommitInfoRenderer({parent: commitNodeContainer, commitInfo: commitInfo}).render(this.componentSelector ? "Delivery" : "Commit", true);
 						}
 						//Render the section contents
 						if(this.messageView) {

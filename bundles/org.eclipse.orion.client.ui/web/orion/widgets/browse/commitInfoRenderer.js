@@ -12,8 +12,10 @@
 /*jslint browser:true sub:true*/
 define([
 	'orion/objects',
-	'orion/webui/littlelib'
-], function(objects, lib) {
+	"orion/URITemplate",
+	'orion/webui/littlelib',
+	'orion/URL-shim'
+], function(objects, URITemplate, lib) {
 
 	function _timeDifference(commitTimeStamp) {
 		var currentDate = new Date();
@@ -85,7 +87,6 @@ define([
 	function CommitInfoRenderer(params) {
 		this._parentDomNode = lib.node(params.parent);//Required
 		this._commitInfo = params.commitInfo;//Required
-		this._commitURLBase = params.commitURLBase;
 	}
 	objects.mixin(CommitInfoRenderer.prototype, /** @lends orion.widgets.Filesystem.CommitInfoRenderer */ {
 		destroy: function() {
@@ -107,8 +108,9 @@ define([
 			var messageNode;
 			if(this._commitInfo.URL || this._commitInfo.SHA1) {
 				messageNode = document.createElement("a"); //$NON-NLS-0$
-				if(this._commitURLBase && this._commitInfo.SHA1) {
-					messageNode.href = this._commitURLBase + "/" + this._commitInfo.SHA1;
+				if(this._commitInfo.SHA1) {
+					var commitURLBase = (new URL("commit", window.location.href)).href;
+					messageNode.href = new URITemplate(commitURLBase + "{/SHA1}").expand(this._commitInfo);
 				} else {
 					messageNode.href = this._commitInfo.URL;
 				}

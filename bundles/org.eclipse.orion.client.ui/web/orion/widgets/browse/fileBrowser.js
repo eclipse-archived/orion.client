@@ -182,7 +182,6 @@ define([
 		this.repoURL = options.repoURL;
 		this.baseURL = options.baseURL;
 		this.codeURL = options.codeURL;
-		this.commitURLBase = (new URL("commit", window.location.href)).href;
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
 		if(!this._syntaxHighlighter) {
 			this._syntaxHighlighter =  new mStaticDataSource.SyntaxHighlighter();
