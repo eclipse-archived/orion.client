@@ -123,13 +123,21 @@
 								<configuration>
 									<target>
 										<fail unless="tests.route" message="tests.route is required"/>
-										<property name="url" value="http://${tests.route}/testresults" />
+										<property name="test.results.url" value="http://${tests.route}/testresults" />
 										<property name="test.directory" value="${project.build.directory}/test-reports" />
 										<property name="results.file" value="${test.directory}/results.zip" />
 
 										<mkdir dir="${test.directory}" />
+
+										<!-- Wait for the tests to finish -->
+										<echo message="Waiting for ${test.results.url} to become available..." />
+										<waitfor maxwait="10" maxwaitunit="minute" checkevery="30" checkeveryunit="second">
+											<http url="${test.results.url}"/>
+										</waitfor>
+
 										<echo message="Downloading test results to ${test.directory}..." />
-										<get src="${url}" dest="${results.file}" httpusecaches="false" maxtime="540" />
+										<get src="${test.results.url}" dest="${results.file}" httpusecaches="false" maxtime="60" />
+
 										<echo message="Unzipping test results..." />
 										<unzip src="${results.file}" dest="${test.directory}" stripAbsolutePathSpec="true" />
 									</target>

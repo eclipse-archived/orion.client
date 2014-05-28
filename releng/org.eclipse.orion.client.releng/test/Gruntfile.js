@@ -12,9 +12,10 @@
 /*
  * Script for running Orion mocha tests at Sauce Labs. This launches a mini Orion web server (using connect)
  * that hosts the client code. Then Sauce Labs API is called, passing the URLs of test pages on the web
- * server. Sauce loads the URLs in various browsers. This script captures the test results. The caller
- * can request the /testresults URL which will remain open until the tests results are available, then
- * return a zip file containing all results.
+ * server. Sauce loads the URLs in various browsers. This script captures the test results.
+ * 
+ * The caller can obtain test results by GET /testresults. If tests are not complete, 404 will be 
+ * returned. Once complete, a zip file containing all results will be returned.
  *
  * Each test page needs to use Orion's mocha wrapper (see `sauce.js`) to integrate with this script.
  *
@@ -51,7 +52,8 @@ module.exports = function(grunt) {
 	    env = process.env,
 	    vcap_app = getJSON(env.VCAP_APPLICATION);
 	// Track the tests that have finished so far
-	var testFilenames = [];
+	var allTestsComplete = false,
+	    testFilenames = [];
 	var testPromises = {
 		index: 0,
 		deferreds: (function() {
@@ -64,7 +66,10 @@ module.exports = function(grunt) {
 			return this.deferreds[this.index++] || null;
 		}
 	};
-	var allTests = Q.allSettled(testPromises.deferreds.map(function(d) { return d.promise; }));
+	var allTests = Q.allSettled(testPromises.deferreds.map(function(d) { return d.promise; }))
+		.then(function() {
+			allTestsComplete = true;
+		});
 
 	grunt.initConfig({
 		pkg: pkg,
@@ -223,8 +228,14 @@ module.exports = function(grunt) {
 	function testResultsMiddleware(req, res, next) {
 		if (req.url !== "/testresults" || req.method !== "GET")
 			return next();
-		// Keep the connection open until all the test results have come in
-		allTests.then(function() {
+
+		if (!allTestsComplete) {
+			// Tests not finished yet, return 404
+			res.statusCode = 404;
+			res.end();
+			return;
+		}
+		try {
 			grunt.verbose.writeln("Sending result zip...");
 			res.setHeader("Content-Type", "application/x-zip");
 			res.setHeader("Content-Disposition", "attachment; filename=tests-" + grunt.config.get("buildId") + ".zip;");
@@ -239,7 +250,9 @@ module.exports = function(grunt) {
 			res.on("finish", function() {
 				grunt.verbose.writeln("Sent result zip (" + archive.pointer() + " bytes)");
 			});
-		}).catch(grunt.warn).done();
+		} catch(e) {
+			grunt.warn(e);
+		}
 	}
 
 	function getJSON(str) {
