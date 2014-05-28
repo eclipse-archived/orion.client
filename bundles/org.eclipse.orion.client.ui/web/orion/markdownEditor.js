@@ -800,8 +800,8 @@ define([
 				this._selectedElement.className += this._markdownSelected;
 
 				var textView = this._editorView.editor.getTextView();
-				var blockTop = textView.getLocationAtOffset(block.start);
-				var blockBottom = textView.getLocationAtOffset(block.end);
+				var blockTop = textView.getLocationAtOffset(model.mapOffset(block.start, true));
+				var blockBottom = textView.getLocationAtOffset(model.mapOffset(block.end, true));
 				blockBottom.y += textView.getLineHeight();
 				var blockHeight = blockBottom.y - blockTop.y;
 				var relativeTop = blockTop.y - textView.getTopPixel();
