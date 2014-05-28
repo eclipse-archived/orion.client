@@ -3874,11 +3874,10 @@ parseStatement: true, parseSourceElement: true */
 				extra.parseNonComputedProperty = parseNonComputedProperty;
 				extra.consumeSemicolon = consumeSemicolon;
 
-				parseStatement = wrapThrowParseStatement(parseStatement);       // Note special case
-				parseExpression = wrapThrow(parseExpression);
-				// this enables 'foo.<EOF>' to return something
-				parseNonComputedProperty = wrapThrow(parseNonComputedProperty);
-				consumeSemicolon = wrapThrow(consumeSemicolon);
+				parseStatement = parseTolerant(parseStatement);       // Note special case
+				parseExpression = parseTolerant(parseExpression);
+				parseNonComputedProperty = parseTolerant(parseNonComputedProperty);
+				consumeSemicolon = parseTolerant(consumeSemicolon);
             }
             if (extra.attachComment) {
                 extra.range = true;
@@ -3931,11 +3930,8 @@ parseStatement: true, parseSourceElement: true */
     }
 
 	/**
-	 * @name expectSkipTo
 	 * @description For statements like if, while, for, etc. check for the ')' on the condition. If
 	 * it is not present, catch the error, and backtrack if we see a '{' instead (to continue parsing the block)
-	 * @function
-	 * @private
 	 * @throws The original error from  trying to consume the ')' char if not in tolerant mode
 	 * @since 5.0
 	 */
@@ -3958,8 +3954,6 @@ parseStatement: true, parseSourceElement: true */
 	/**
 	 * @name recordError
      * @description Add the error if not already reported.
-     * @function
-     * @private
      * @param {Object} error The error object to record
      * @since 5.0
      */
@@ -3974,42 +3968,41 @@ parseStatement: true, parseSourceElement: true */
         extra.errors.push(error);
     }
     
-    //Recovery
-    function wrapThrow(parseFunction) {
+    /**
+     * @description Wraps the given parse function to handle parse failures
+     * @param {Function} parseFunction The function to wrap
+     * @returns {Object} The wrapped function value or <code>null</code>
+     * @since 6.0
+     */
+    function parseTolerant(parseFunction) {
         return function () {
+        	var stmtparse = parseFunction.name === 'parseStatement';
+        	if(stmtparse) {
+        		extra.statementStart = index;
+        	} else {
+        		var initialHeight = state.markerStack.length;
+        	}
             try {
-            	var initialHeight = state.markerStack.length;
                 return parseFunction.apply(null, arguments);
             } catch (e) {
 				recordError(e);
-				// Clean up un-popped end markers from failed parse
-				while (state.markerStack.length > initialHeight) {
-					delegate.markEndIf(null);
+				if(!stmtparse) {
+					//don't rewind here for statements
+					while (state.markerStack.length > initialHeight) {
+						delegate.markEndIf(null);
+					}
+					return null;
 				}
-				return null;
             }
         };
     }
     
-    function wrapThrowParseStatement(parseFunction) {
-        return function () {
-            extra.statementStart = index; // record where attempting to parse statement from
-            try {
-                return parseFunction.apply(null, arguments);
-            } catch (e) {
-				recordError(e);
-            }
-        };
-    }
-
     /**
-     * @name rewind
      * @descripton Rewind the lex position to the most recent newline or semicolon.  If that turns out
      * to be the same position as the most recent parsing of a statement was attempted at, 
      * don't rewind (because it will fail in the same way).  If it turns out to be the same
      * position as where we last rewound to, don't do it.  Clears the buffer and sets the
      * index in order to continue lexing from the new position.
-     * @private
      * @since 5.0
      */
     function rewind() {
@@ -4036,16 +4029,13 @@ parseStatement: true, parseSourceElement: true */
     }
     
     /**
-     * @name recoverNonComputedProperty
      * @description When a problem occurs in parseNonComputedProperty, attempt to reposition 
      * the lexer to continue processing.
      * Example: '(foo.)' we will hit the ')' instead of discovering a property and consuming the ')'
      * will cause the parse of the paretheses to fail, so 'unconsume' it.
      * Basically rewind by one token if punctuation (type 7) is hit and the char before it was
      * a dot.  This will enable the enclosing parse rule to consume the punctuation.
-     * @function
-     * @private
-     * @param {String} token The token to try and recover from
+     * @param {Object} token The token to try and recover from
      * @since 5.0
      */
     function recoverNonComputedProperty(token) {
