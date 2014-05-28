@@ -105,10 +105,10 @@ define([
 		},
 		_generateMessageNode: function(message) {
 			var messageNode;
-			if(this._commitInfo.URL) {
+			if(this._commitInfo.URL || this._commitInfo.SHA1) {
 				messageNode = document.createElement("a"); //$NON-NLS-0$
-				if(this._commitURLBase) {
-					messageNode.href = this._commitURLBase + "/" + this._commitInfo.URL;
+				if(this._commitURLBase && this._commitInfo.SHA1) {
+					messageNode.href = this._commitURLBase + "/" + this._commitInfo.SHA1;
 				} else {
 					messageNode.href = this._commitInfo.URL;
 				}

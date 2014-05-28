@@ -60,7 +60,6 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		var repo = url.href;
 		var base = params.base;
 		var selectorNumber = 1;
-		var useSHA = false;
 
 		if (!params.rootName) {
 			var found = repo.match(/\/([^/]+)\/([^/]+)$/);
@@ -77,7 +76,6 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			} else if (url.pathname.indexOf("/git/") === 0) {
 				pluginURL = new URL("/gerrit/plugins/gerritfs/static/plugins/GerritFilePlugin.html", url);
 				pluginURL.query.set("project", url.pathname.substring(5));
-				useSHA = true;
 			} else if (url.pathname.indexOf("/ccm") === 0) {
 				if (!base) {
 					var ccmPath = url.pathname.match(/^\/ccm[^/]*/);
@@ -106,7 +104,6 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			repoURL: repo,
 			baseURL: (selectorNumber === 2 ? base : null),
 			codeURL: params.codeURL,
-			useSHA: useSHA,
 			snippetShareOptions: params.snippetShareOptions,
 			selectorNumber: selectorNumber,
 			rootName: params.rootName,
