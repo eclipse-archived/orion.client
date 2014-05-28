@@ -761,7 +761,9 @@ define([
 		}.bind(this);
 
 		this._selectionListener = function(e) {
-			var block = this._styler.getBlockAtIndex(e.newValue.start);
+			var model = this._editorView.editor.getTextView().getModel();
+			var selectionStart = model.mapOffset(e.newValue.start);
+			var block = this._styler.getBlockAtIndex(selectionStart);
 
 			/*
 			 * If block has sub-blocks then get the sub-block that contains the selection index.
@@ -771,7 +773,7 @@ define([
 			if (subBlocks.length) {
 				var i = 0;
 				for (; i < subBlocks.length; i++) {
-					if (subBlocks[i].start <= e.newValue.start && e.newValue.start < subBlocks[i].end) {
+					if (subBlocks[i].start <= selectionStart && selectionStart < subBlocks[i].end) {
 						block = subBlocks[i];
 						break;
 					}
