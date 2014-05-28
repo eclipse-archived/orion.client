@@ -69,6 +69,9 @@ define(["orion/Deferred", "orion/xhr", "orion/URITemplate", "orion/URL-shim"], f
 				return directory.map(function(entry) {
 					var template = entry.type === "file" ? _this._contentTemplate : _this._listTemplate;
 					var name = entry.name.split("/").pop();
+					if(entry.path === "") {
+						entry.path = null;
+					}
 					var location = template.expand(entry);
 					var result = {
 						Attributes: {
