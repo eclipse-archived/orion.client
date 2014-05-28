@@ -2307,10 +2307,9 @@ parseStatement: true, parseSourceElement: true */
 
         if (!isIdentifierName(token)) {
         	if (extra.errors) {
-                attemptRecoveryNonComputedProperty(token);
+                recoverNonComputedProperty(token);
             }
             throwUnexpected(token);
-            // return null; // unecessary
         }
 
         return delegate.markEnd(delegate.createIdentifier(token.value));
@@ -3867,7 +3866,8 @@ parseStatement: true, parseSourceElement: true */
             }
             if (typeof options.tolerant === 'boolean' && options.tolerant) {
                 extra.errors = [];
-
+				extra.tokens = []; //require tokens for recovery, more robust than our own char walking code
+				
 				// mamacdon patch
 				extra.parseStatement = parseStatement;
 				extra.parseExpression = parseExpression;
@@ -3924,7 +3924,7 @@ parseStatement: true, parseSourceElement: true */
         		consumeSemicolon = extra.consumeSemicolon;
         	}
 
-            extra = {};
+            extra = Object.create(null);
         }
 
         return program;
@@ -3998,24 +3998,10 @@ parseStatement: true, parseSourceElement: true */
                 return parseFunction.apply(null, arguments);
             } catch (e) {
 				recordError(e);
-//				return null;   // why is this commented out
             }
         };
     }
 
-    /**
-     * @name isNewlineOrSemicolon
-     * @description If the given char is the new line char or a semicolon char
-     * @function
-     * @private
-     * @param {String} ch The character to check
-     * @returns {Boolean} <code>true</code> if the char is a new line or semicolon <code>false</code> otherwise
-     * @since 5.0
-     */
-    function isNewlineOrSemicolon(ch) {
-      return ch===';' || ch==='\n';
-    }
-    
     /**
      * @name rewind
      * @descripton Rewind the lex position to the most recent newline or semicolon.  If that turns out
@@ -4023,25 +4009,23 @@ parseStatement: true, parseSourceElement: true */
      * don't rewind (because it will fail in the same way).  If it turns out to be the same
      * position as where we last rewound to, don't do it.  Clears the buffer and sets the
      * index in order to continue lexing from the new position.
-     * @function
      * @private
      * @since 5.0
      */
     function rewind() {
         var idx = index;
-        while (idx>0 && !isNewlineOrSemicolon(source[idx])) {
+        while (idx > -1 && source[idx] !== ';' && source[idx] !== '\n') {
             idx--;
         }
-        if (idx<=extra.statementStart) {
+        if (idx <= extra.statementStart) {
             return;
         }
         var doRewind = false;
         if (extra.lastRewindLocation) {
             doRewind = true;
         } else {
-            var v = extra.lastRewindLocation;
-            if (v!==idx) {
-              doRewind=true;
+            if (extra.lastRewindLocation !== idx) {
+            	doRewind=true;
             }
         }	        
         if (doRewind) {
@@ -4050,66 +4034,9 @@ parseStatement: true, parseSourceElement: true */
 	        extra.lastRewindLocation = index;
         }
     }
-
-    // mamacdon 1420b19
-    // @ 1.0.0 esprima.js:1661
-    // TODO refactor
-	/**
-	 * @name rewindToInterestingChar
-     * @description From a position 'idx' in the source this function moves back through the source until
-     * it finds a non-whitespace (including newlines) character.  It will jump over block comments.
-     * Returns an object with properties: index - the index it rewound to.  lineChange - boolean indicating
-     * if a line was crossed during rewind.
-     * @function
-     * @private
-     * @param {Number} idx The index to rewind to
-     * @returns {Object} Returns the object with the index and line change to rewind to
-     * @since 5.0
-     */
-    function rewindToInterestingChar(idx) {
-        var done = false;
-        var lineChange=false;
-        var ch;
-        while (!done) {
-          ch = source[idx];
-          if (ch==='/') {
-            // possibly rewind over a block comment
-            if (idx>2 && source[idx-1]==='*') {
-                // it is, let's reverse over it
-                idx = idx - 2;
-                var skippedComment = false;
-                while (!skippedComment) {
-                    ch = source[idx];
-                    if (ch === '*') {
-                        if (idx>0 && source[idx-1]==='/') {
-                            skippedComment=true;
-                        }
-                    } else if (ch==='\n') {
-                        lineChange=true;
-                    }
-                    if (idx === 0) {
-                        skippedComment = true; // error scenario, hit front of array before finding /*
-                    }
-                    idx--;                
-                }
-            } else {
-              done=true;
-            }
-          } else 
-          if (ch==='\n') {
-              lineChange=true;
-          } else if (!isWhiteSpace(ch)) {
-              done=true;
-          }
-          if (!done) {
-              idx--;
-          }
-        }
-        return {"index":idx,"lineChange":lineChange};
-    }
     
     /**
-     * @name attemptRecoveryNonComputedProperty
+     * @name recoverNonComputedProperty
      * @description When a problem occurs in parseNonComputedProperty, attempt to reposition 
      * the lexer to continue processing.
      * Example: '(foo.)' we will hit the ')' instead of discovering a property and consuming the ')'
@@ -4121,21 +4048,23 @@ parseStatement: true, parseSourceElement: true */
      * @param {String} token The token to try and recover from
      * @since 5.0
      */
-    function attemptRecoveryNonComputedProperty(token) {
+    function recoverNonComputedProperty(token) {
         if (token.value && token.type===Token.Punctuator) {
-            var rewindInfo = rewindToInterestingChar(index-token.value.length-1);
-            var idx = rewindInfo.index;
-            var ch= source[idx];
-            // Check if worth rewinding
-            // Special case:
-            // "foo.\n(foo())\n" - don't really want that to parse as "foo(foo())"
-            if (ch==='.' && rewindInfo.lineChange && token.value==='(') {
-                // do not recover in this case
-            } else if (ch==='.') {
-	            index = idx+1;
-//                lookahead=null;
+        	var idx = extra.tokens.length-1;
+        	while(idx > 0) {
+        		if(extra.tokens[idx].range[0] === token.range[0]) {
+        			extra.tokens.pop(); //correct the stream
+        			break;
+        		}
+        		idx--;
+        		extra.tokens.pop(); //correct the stream
+        	}
+        	var prev = extra.tokens[idx-1];
+        	if(prev.type === TokenName[Token.Punctuator] && prev.value === '.') {
+        		extra.tokens.pop();
+        		index = prev.range[0]+1;
                 peek(); // recalculate lookahead
-            }
+        	}
         }
     }
 
