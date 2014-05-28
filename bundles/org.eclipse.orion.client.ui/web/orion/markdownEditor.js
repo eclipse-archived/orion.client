@@ -450,15 +450,15 @@ define([
 		_getLineEnd: function(text, index, model, lineSkip) {
 			lineSkip = lineSkip || 0;
 			while (true) {
-				this._eolRegex.lastIndex = index;
-				var result = this._eolRegex.exec(text);
+				this._newlineRegex.lastIndex = index;
+				var result = this._newlineRegex.exec(text);
 				if (!result) {
 					return text.length;
 				}
+				index = result.index + result[0].length;
 				if (!lineSkip--) {
-					return Math.min(text.length, result.index + model.getLineDelimiter().length);
+					return index;
 				}
-				index = result.index + 2;
 			}
 		},
 		_onBlocksChanged: function(e) {
@@ -618,7 +618,6 @@ define([
 		_CR: "\r", //$NON-NLS-0$
 		_NEWLINE: "\n", //$NON-NLS-0$
 		_elementCounter: 0,
-		_eolRegex: /$/gm,
 		_htmlNewlineRegex: /\n\s*\S[\s\S]*$/g,
 		_newlineRegex: /\n/g,
 		_orderedListRegex: /\d+\.[ \t]/g,
