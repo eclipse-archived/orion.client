@@ -150,10 +150,15 @@
 .commitInfoMessageTextContainer {
 	padding-bottom: 1px;
 	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
 }
 
 .commitInfoAutorContainer {
 	padding-bottom: 4px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
 }
 
 .commitInfoLabelContainer {
@@ -174,8 +179,10 @@
 	width: 32px;
 	border: 1px solid lightgrey;
 	padding: 2px;
+	margin-top: -1px;
 	margin-left: 2px;
 	margin-right: 8px;
+	box-sizing: initial !important;
 }
 
 .commitInfoMessageContainer {

@@ -127,7 +127,7 @@ define([
 			//var commitDate = this._commitInfo.Author && this._commitInfo.Author.Date ? new Date(this._commitInfo.Author.Date).toLocaleString() : "";
 			var commitDate = this._commitInfo.Author && this._commitInfo.Author.Date ? calculateTime(this._commitInfo.Author.Date) : "";
 			
-			var message = this._simpleMessage(100);
+			var message = this._simpleMessage(-1);
 			var authorName = this._commitInfo.Author && this._commitInfo.Author.Name ? this._commitInfo.Author.Name : "";
 			
 			//Render the avatar or label
