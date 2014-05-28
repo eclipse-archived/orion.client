@@ -21,7 +21,7 @@ define([
 	// Returns a URL to a test plugin
 	function url(pluginUrl) {
 		// base is the relative path from window.location (ie. coreTests.html) to the test plugins
-		var base = "pluginRegistry/";
+		var base = "pluginregistry/";
 		return base + pluginUrl;
 	}
 
