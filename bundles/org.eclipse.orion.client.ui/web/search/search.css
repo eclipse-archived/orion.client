@@ -176,5 +176,6 @@
 	font-size: 12px;
 	margin: 0;
 	padding: 6px;
+	text-transform: none;
 	vertical-align: baseline;
 }
