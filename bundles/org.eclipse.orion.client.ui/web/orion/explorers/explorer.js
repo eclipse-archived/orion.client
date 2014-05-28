@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -448,6 +448,7 @@ exports.ExplorerRenderer = (function() {
 				this._cachePrefix = options.cachePrefix;
 				this.getCheckedFunc = options.getCheckedFunc;
 				this.onCheckedFunc = options.onCheckedFunc;
+				this._noRowHighlighting = options.noRowHighlighting; // Whether to have alternating light/dark rows
 				this._highlightSelection = true;
 				this._treeTableClass = options.treeTableClass || "treetable";  //$NON-NLS-0$
 				if (options.highlightSelection === false){
@@ -717,13 +718,15 @@ exports.ExplorerRenderer = (function() {
 				this.explorer.refreshSelection();
 				this.explorer.initNavHandler();			
 			}
-			if(lib.$(".sectionTreeTable", this.tableNode.parentNode) || lib.$(".treetable", this.tableNode.parentNode)) {
-				lib.$$array(".treeTableRow", this.tableNode).forEach(function(node, i) { //$NON-NLS-0$
-					var on = (!(i % 2)) ? "darkSectionTreeTableRow" : "lightSectionTreeTableRow";
-					var off = (on === "darkSectionTreeTableRow") ? "lightSectionTreeTableRow" : "darkSectionTreeTableRow";
-					node.classList.add(on);
-					node.classList.remove(off);
-				});
+			if (!this._noRowHighlighting){
+				if(lib.$(".sectionTreeTable", this.tableNode.parentNode) || lib.$(".treetable", this.tableNode.parentNode)) {
+					lib.$$array(".treeTableRow", this.tableNode).forEach(function(node, i) { //$NON-NLS-0$
+						var on = (!(i % 2)) ? "darkSectionTreeTableRow" : "lightSectionTreeTableRow";
+						var off = (on === "darkSectionTreeTableRow") ? "lightSectionTreeTableRow" : "darkSectionTreeTableRow";
+						node.classList.add(on);
+						node.classList.remove(off);
+					});
+				}
 			}
 		},
 		updateCommands: function(){
@@ -801,13 +804,13 @@ exports.SelectionRenderer = (function(){
 	SelectionRenderer.prototype.renderRow = function(item, tableRow) {
 		tableRow.verticalAlign = "baseline"; //$NON-NLS-0$
 		tableRow.classList.add("treeTableRow"); //$NON-NLS-0$
-		
-		if (this.explorer.selectionPolicy !== "cursorOnly") {
-			tableRow.classList.add("selectableNavRow"); //$NON-NLS-0$
-		}
-		
+
 		var navDict = this.explorer.getNavDict();
 		if(navDict){
+			if (this.explorer.selectionPolicy !== "cursorOnly") {
+				tableRow.classList.add("selectableNavRow"); //$NON-NLS-0$
+			}
+			
 			navDict.addRow(item, tableRow);
 			var self = this;
 			tableRow.addEventListener("click", function(evt) { //$NON-NLS-0$
