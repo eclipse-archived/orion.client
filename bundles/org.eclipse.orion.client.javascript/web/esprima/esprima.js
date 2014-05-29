@@ -3874,7 +3874,7 @@ parseStatement: true, parseSourceElement: true */
 				extra.parseNonComputedProperty = parseNonComputedProperty;
 				extra.consumeSemicolon = consumeSemicolon;
 
-				parseStatement = parseTolerant(parseStatement);       // Note special case
+				parseStatement = parseStatementTolerant(parseStatement); // Note special case
 				parseExpression = parseTolerant(parseExpression);
 				parseNonComputedProperty = parseTolerant(parseNonComputedProperty);
 				consumeSemicolon = parseTolerant(consumeSemicolon);
@@ -3971,28 +3971,37 @@ parseStatement: true, parseSourceElement: true */
     /**
      * @description Wraps the given parse function to handle parse failures
      * @param {Function} parseFunction The function to wrap
-     * @returns {Object} The wrapped function value or <code>null</code>
+     * @returns {Object} The wrapped function value or <code>undefined</code>
      * @since 6.0
      */
     function parseTolerant(parseFunction) {
         return function () {
-        	var stmtparse = parseFunction.name === 'parseStatement';
-        	if(stmtparse) {
-        		extra.statementStart = index;
-        	} else {
-        		var initialHeight = state.markerStack.length;
-        	}
+        	var initialHeight = state.markerStack.length;
             try {
                 return parseFunction.apply(null, arguments);
             } catch (e) {
 				recordError(e);
-				if(!stmtparse) {
-					//don't rewind here for statements
-					while (state.markerStack.length > initialHeight) {
-						delegate.markEndIf(null);
-					}
-					return null;
+				//don't rewind here for statements
+				while (state.markerStack.length > initialHeight) {
+					delegate.markEndIf(null);
 				}
+            }
+        };
+    }
+    
+    /**
+     * @description Wraps the given parse function to handle parse failures
+     * @param {Function} parseFunction The function to wrap
+     * @returns {Object} The wrapped function value or <code>undefined</code>
+     * @since 6.0
+     */
+    function parseStatementTolerant(parseFunction) {
+        return function () {
+        	extra.statementStart = index;
+            try {
+                return parseFunction.apply(null, arguments);
+            } catch (e) {
+				recordError(e);
             }
         };
     }
