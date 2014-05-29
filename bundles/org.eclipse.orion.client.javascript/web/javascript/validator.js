@@ -14,7 +14,7 @@ define([
 	"eslint",
 	"orion/objects",
 	"javascript/astManager",
-	"javascript/finder",
+	"javascript/finder"
 ], function(eslint, Objects, ASTManager, Finder) {
 	// Should have a better way of keeping this up-to-date with ./load-rules-async.js
 	var config = {
@@ -113,7 +113,7 @@ define([
 	 * @returns {Object} Orion Problem object
 	 */
 	function toProblem(e) {
-		var start, end;
+		var start = e.start, end = e.end;
 		if (e.node) {
 			// Error produced by eslint
 			start = e.node.range[0];
@@ -229,23 +229,20 @@ define([
 		 * @since 6.0
 		 */
 		_validateAst: function(ast) {
-			var eslintErrors = [], error, parseErrors = [], problems = [];
+			var eslintErrors = [], 
+				parseErrors = this._extractParseErrors(ast);
 			try {
 				eslintErrors = eslint.verify(ast, config);
-				parseErrors = this._extractParseErrors(ast);
-				problems = this._filterProblems(parseErrors, eslintErrors).map(toProblem);
 			} catch (e) {
-				error = e;
+				if(parseErrors.length < 1) {
+					eslintErrors.push({
+						start: 0,
+						message: "ESLint failed to validate this file because an error occurred: " + e.toString(),
+						severity: "error" //$NON-NLS-0$
+					});
+				}
 			}
-			if (error && !parseErrors.length) {
-				// Warn about ESLint failure
-				problems.push({
-					start: 0,
-					description: "Orion could not validate this file because an error occurred: " + error.toString(),
-					severity: "error" //$NON-NLS-0$
-				});
-			}
-			return { problems: problems };
+			return { problems: this._filterProblems(parseErrors, eslintErrors).map(toProblem) };
 		},
 		
 		/**
