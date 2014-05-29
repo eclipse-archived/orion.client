@@ -81,6 +81,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			var self = this;
 			this.$close.addEventListener("click", function(event) { //$NON-NLS-0$
 				self.hide();
+				if (self._closeEventCallback) self._closeEventCallback();
 			}, false);
 						
 			this.$parent = lib.$(".dialogContent", this.$frame); //$NON-NLS-0$

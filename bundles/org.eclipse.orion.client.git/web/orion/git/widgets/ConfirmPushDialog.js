@@ -32,6 +32,14 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog'], function(messages, d
 		this.func = options.func;
 		this._afterHiding = options.closeCallback;
 		
+		var self = this;
+		// called when click event is captured, we need to destroy the second dialog also
+		this._closeEventCallback = function () {
+			if (self.dialog2) {
+				self.dialog2.destroy();
+			}
+		}
+		
 		this.buttons = [];
 		if (this.dialog2)
 			this.buttons.push({
@@ -49,9 +57,10 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog'], function(messages, d
 			}, 
 			text: 'OK'}
 		);
-
+		
 		// Start the dialog initialization.
 		this._initialize();
+
 	};
 
 	ConfirmPushDialog.prototype._bindToDom = function(parent) {
