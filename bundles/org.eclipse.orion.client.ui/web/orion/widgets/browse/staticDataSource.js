@@ -124,7 +124,7 @@ define([
 		{	id: "application/zip",
 			"extends": "application/octet-stream",
 			name: "ZIP",
-			extension: ["war", "zip", "rar"]
+			extension: ["war", "jar", "zip", "rar"]
 		},
 		// Image types
 		{	id: "image/gif",
