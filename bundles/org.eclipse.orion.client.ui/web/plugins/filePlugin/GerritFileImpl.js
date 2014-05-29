@@ -82,8 +82,8 @@ define(["orion/Deferred", "orion/xhr", "orion/URITemplate", "orion/URL-shim"], f
 						},
 						Location: location,
 						Name: name,
-						Length: entry.size,
-						LocalTimeStamp: 0,
+						Length: (typeof entry.size === "string" ? parseInt(entry.size, 10) : entry.size) ,
+						LocalTimeStamp: (entry.LastCommit && entry.LastCommit.Author &&  entry.LastCommit.Author.Date ?  entry.LastCommit.Author.Date : 0),
 						Directory: false,
 						LastCommit: entry.LastCommit
 					};
