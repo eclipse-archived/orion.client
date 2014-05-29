@@ -710,7 +710,7 @@ define([
 				return;
 			}
 
-			var previewBounds = this._previewDiv.getBoundingClientRect();
+			var previewBounds = this._previewWrapperDiv.getBoundingClientRect();
 		    var elementBounds = target.getBoundingClientRect();
 		    var relativeTop = elementBounds.top - previewBounds.top;
 		    var elementCentre = relativeTop + target.offsetHeight / 2;
@@ -747,15 +747,15 @@ define([
 					block = blocks[0];
 				}
 			} else {
-				var charIndex = textView.getOffsetAtLocation(0, Math.floor(e.newValue.y + (this._previewDiv.clientHeight / 2)));
+				var charIndex = textView.getOffsetAtLocation(0, Math.floor(e.newValue.y + (this._previewWrapperDiv.clientHeight / 2)));
 				block = this._styler.getBlockAtIndex(charIndex);
 			}
 
 			if (block) {
 				var element = document.getElementById(block.elementId);
 				if (element) {
-					var newTop = Math.max(0, Math.ceil(element.offsetTop - (this._previewDiv.clientHeight - element.offsetHeight) / 2));
-					this._previewDiv.scrollTop = newTop;
+					var newTop = Math.max(0, Math.ceil(element.offsetTop - (this._previewWrapperDiv.clientHeight - element.offsetHeight) / 2));
+					this._previewWrapperDiv.scrollTop = newTop;
 				}
 			}
 		}.bind(this);
@@ -810,9 +810,9 @@ define([
 				var relativeTop = blockTop.y - textView.getTopPixel();
 				var blockCentre = relativeTop + blockHeight / 2;
 
-				var previewBounds = this._previewDiv.getBoundingClientRect();
+				var previewBounds = this._previewWrapperDiv.getBoundingClientRect();
 			    var elementBounds = this._selectedElement.getBoundingClientRect();
-			    var elementTop = elementBounds.top - previewBounds.top + this._previewDiv.scrollTop;
+			    var elementTop = elementBounds.top - previewBounds.top + this._previewWrapperDiv.scrollTop;
 			    var elementCentre = elementTop + this._selectedElement.offsetHeight / 2;
 
 				this._scrollPreviewDiv(elementCentre - blockCentre);
@@ -848,8 +848,6 @@ define([
 			}
 		},
 		install: function() {
-			this._parent.style.overflow = "hidden"; //$NON-NLS-0$
-
 			this._rootDiv = document.createElement("div"); //$NON-NLS-0$
 			this._rootDiv.style.position = "absolute"; //$NON-NLS-0$
 			this._rootDiv.style.width = "100%"; //$NON-NLS-0$
@@ -864,12 +862,15 @@ define([
 			this._splitterDiv.id = "orion.markdown.editor.splitter";
 			this._rootDiv.appendChild(this._splitterDiv);			
 
+			this._previewWrapperDiv = document.createElement("div"); //$NON-NLS-0$
+			this._previewWrapperDiv.style.overflowX = "hidden"; //$NON-NLS-0$
+			this._previewWrapperDiv.style.overflowY = "auto"; //$NON-NLS-0$
+			this._rootDiv.appendChild(this._previewWrapperDiv);
+			
 			this._previewDiv = document.createElement("div"); //$NON-NLS-0$
 			this._previewDiv.id = ID_PREVIEW; //$NON-NLS-0$
-			this._previewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
-			this._previewDiv.style.overflowY = "auto"; //$NON-NLS-0$
 			this._previewDiv.classList.add("orionMarkdown"); //$NON-NLS-0$
-			this._rootDiv.appendChild(this._previewDiv);
+			this._previewWrapperDiv.appendChild(this._previewDiv);
 
 			this._editorView.addEventListener("Settings", this._updateSettings.bind(this)); //$NON-NLS-0$
 			var settings = this._editorView.getSettings();
@@ -877,7 +878,7 @@ define([
 			this._splitter = new mSplitter.Splitter({
 				node: this._splitterDiv,
 				sidePanel: editorDiv,
-				mainPanel: this._previewDiv,
+				mainPanel: this._previewWrapperDiv,
 				vertical: settings && settings.splitOrientation === mSplitter.ORIENTATION_VERTICAL
 			});
 
@@ -905,7 +906,7 @@ define([
 				this._scrollPreviewAnimation = null;
 			}
 
-			var pixelY = top - this._previewDiv.scrollTop;
+			var pixelY = top - this._previewWrapperDiv.scrollTop;
 			if (!pixelY) {
 				return;
 			}
@@ -915,12 +916,12 @@ define([
 				curve: [pixelY, 0],
 				onAnimate: function(x) {
 					var deltaY = pixelY - Math.floor(x);
-					this._previewDiv.scrollTop += deltaY;
+					this._previewWrapperDiv.scrollTop += deltaY;
 					pixelY -= deltaY;
 				}.bind(this),
 				onEnd: function() {
 					this._scrollPreviewAnimation = null;
-					this._previewDiv.scrollTop += pixelY;
+					this._previewWrapperDiv.scrollTop += pixelY;
 				}.bind(this)
 			});
 
