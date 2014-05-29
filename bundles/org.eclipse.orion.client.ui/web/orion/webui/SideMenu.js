@@ -304,6 +304,10 @@ define([
 			element.href = linkElement.href;
 			element.classList.add("submenu-trigger"); //$NON-NLS-0$
 			element.tabIndex = "0"; //$NON-NLS-0$
+			element.title = catId;
+			if (linkElement.source && (linkElement.source.tooltip || linkElement.source.tooltipKey || linkElement.source.textContent)) {
+				element.title = linkElement.source.tooltip || linkElement.source.tooltipKey || linkElement.source.textContent;
+			}
 			if (category.imageClass) {
 				element.classList.add(category.imageClass);
 				menuitem.classList.remove(category.imageClass); // remove icon from menuitem; on link instead
