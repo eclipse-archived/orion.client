@@ -282,6 +282,7 @@ define([
 
 		describe("on plugin load", function() {
 			afterEach(tearDown);
+			this.timeout(20000); // increase timeout since we are dealing with plugins here
 
 			describe("early registration", function() {
 				before(setUp);
