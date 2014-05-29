@@ -52,7 +52,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 							}
 							return false;
 						});
-						workspace.Projects.some(function(project) {
+						workspace.Projects && workspace.Projects.some(function(project) {
 							if (project.Id === projectId) {
 								projectJson.ProjectLocation = project.Location;
 								return true;
