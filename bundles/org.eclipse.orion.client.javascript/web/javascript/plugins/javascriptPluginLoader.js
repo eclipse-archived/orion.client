@@ -41,7 +41,7 @@ define([
 		framework = window.opener;
 	}
 	if (!framework)
-		throw new Error("No valid plugin target");
+		console.log(new Error("No valid plugin target"));
 
 	addEventListener("message", onFrameworkMessage);
 
@@ -60,7 +60,7 @@ define([
 		var msg = event.data;
 		// Plugin-related messages have either a "method" field (for regular messages) or an "id" field (for errors)
 		if (msg && (msg.method || msg.id)) {
-			framework.postMessage(event.data, "*");
+			framework && framework.postMessage(event.data, "*");
 			return;
 		}
 	}
