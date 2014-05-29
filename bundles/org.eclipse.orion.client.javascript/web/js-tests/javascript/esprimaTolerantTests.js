@@ -1610,5 +1610,11 @@ define([
 				errors: [{"lineNumber":1,"index":23,"message":"Missing expected ','"},{"lineNumber":1,"index":27,"message":"Missing expected ','"},{"lineNumber":1,"index":34,"message":"Missing expected ','"}]
 			});
 		});
+		
+		it('no infinite loop 1', function() {
+			runTest({
+				source: "f({p: function(errors) {if(/^U/.test('')) {error.token = ast.tokens[token.index>0index-1]}}});",
+			});
+		});
 	});
 });

@@ -2691,18 +2691,18 @@ parseStatement: true, parseSourceElement: true */
     function parseStatementList() {
         var list = [],
             statement;
-
+		var startIndex = index;
         while (index < length) {
             if (match('}')) {
                 break;
             }
             statement = parseSourceElement();
-            if (typeof statement === 'undefined') {
+            if (typeof statement === 'undefined' || startIndex === index) {
                 break;
             }
             list.push(statement);
+            startIndex = index;
         }
-
         return list;
     }
 
