@@ -79,5 +79,6 @@ define({
 	"Main Pages": "Main Pages",
 	"Related Links": "Related Links",
 	"Yes": "Yes",
-	"No": "No"
+	"No": "No",
+	"Click or use delete key to delete the search term": "Click or use delete key to delete the search term"
 });

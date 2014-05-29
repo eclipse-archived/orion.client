@@ -12,21 +12,20 @@
 /*jslint sub:true*/
 
 define([
-	'i18n!orion/search/nls/messages', 
-	'require', 
+	'i18n!orion/search/nls/messages',
 	'orion/fileClient', 
 	'orion/searchUtils', 
 	'orion/contentTypes', 
-	'orion/webui/littlelib', 
-	'orion/inputCompletion/inputCompletion', 
+	'orion/webui/littlelib',
 	'orion/Deferred', 
 	'orion/commands', 
 	'orion/objects',
 	'orion/EventTarget',
 	'text!orion/globalSearch/searchBuilder.html',
 	'orion/PageUtil',
-	'orion/webui/dialogs/DirectoryPrompterDialog'
-], function(messages, require, mFileClient, mSearchUtils, mContentTypes, lib, mInputCompletion, Deferred, mCommands, objects, EventTarget, optionTemplate, mPageUtil, DirectoryPrompterDialog){
+	'orion/webui/dialogs/DirectoryPrompterDialog',
+	'orion/widgets/input/ComboTextInput'
+], function(messages, mFileClient, mSearchUtils, mContentTypes, lib, Deferred, mCommands, objects, EventTarget, optionTemplate, mPageUtil, DirectoryPrompterDialog, ComboTextInput){
 
 	/**
 	 * @name orion.search.AdvSearchOptRenderer
@@ -65,11 +64,12 @@ define([
 			}, this);
 			
 			var fileNamePatternsArray = mSearchUtils.getFileNamePatternsArray(this._fileNamePatternsInput.value);
+			var replaceValue = this._replaceBox.getTextInputValue() || undefined;
 			
-			return {keyword: this._searchBox.value,
+			return {keyword: this._searchBox.getTextInputValue(),
 					rows: 40,
 					start: 0,
-					replace:this._replaceBox.value ? this._replaceBox.value : undefined,
+					replace: replaceValue,
 					caseSensitive: this._caseSensitiveCB.checked,
 			        regEx: this._regExCB.checked,
 					fileNamePatterns: fileNamePatternsArray,
@@ -88,8 +88,8 @@ define([
 			if(!this._init || !this._searchParams){
 				return;
 			}
-			this._searchBox.value = this._searchParams.keyword ? this._searchParams.keyword : "";
-			this._replaceBox.value = this._searchParams.replace ? this._searchParams.replace : "";
+			this._searchBox.setTextInputValue(this._searchParams.keyword || "");
+			this._replaceBox.setTextInputValue(this._searchParams.replace || "");
 			this._caseSensitiveCB.checked = this._searchParams.caseSensitive;
 			this._regExCB.checked = this._searchParams.regEx;
 			this._fileNamePatternsInput.value = this._searchParams.fileNamePatterns ? this._searchParams.fileNamePatterns.join(", ") : "";
@@ -110,20 +110,24 @@ define([
 	
 		_render: function(){
 			this._parentDiv.innerHTML = optionTemplate;
+			
 			this._initHTMLLabels();
 		    this._initControls();
-			this._searchBox.focus();
+			this._searchTextInputBox.focus();
 			
 		},
 		
 		_submitSearch: function(){
 			var options = this.getOptions();
 			options.replace = null;
+			this._searchBox.addTextInputValueToRecentEntries();
 			mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.keyword, options);
 		},
 		
 		_replacePreview: function(){
 			var options = this.getOptions();
+			this._searchBox.addTextInputValueToRecentEntries();
+			this._replaceBox.addTextInputValueToRecentEntries();
 			if(!options.replace){
 				options.replace = "";
 			}
@@ -131,21 +135,8 @@ define([
 				mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.keyword, options);
 			}
 		},
-
-	    _initCompletion: function() {
-			//Required. Reading recent&saved search from user preference. Once done call the uiCallback
-			var defaultProposalProvider = function(uiCallback){
-				mSearchUtils.getMixedSearches(this._serviceRegistry, false, false, function(searches){
-					var recentSearches = [];
-					if (searches.length > 0) {
-						recentSearches.push({type: "category", label: messages["Recent searches"]});//$NON-NLS-0$
-						searches.forEach(function(search){
-							recentSearches.push({type: "proposal", label: search.name, value: search.name});//$NON-NLS-0$
-						}, this);
-					}
-					uiCallback(recentSearches);
-				});
-			}.bind(this);
+	    
+	    _initSearchBox: function(){
 			//Optional. Reading extended search proposals by asking plugins, if any.
 			//If there are multiple plugins then merge all the proposals and call uiCallBack.
 			//Plugins(with service id "orion.search.proposal") should define the property "filterForMe" to true or false. Which means:
@@ -179,42 +170,29 @@ define([
 					uiCallback(returnValues);
 				});
 			}.bind(this);
-			//Create and hook up the inputCompletion instance with the search box dom node.
-			//The defaultProposalProvider provides proposals from the recent and saved searches.
-			//The exendedProposalProvider provides proposals from plugins.
-			this._completion = new mInputCompletion.InputCompletion(this._searchBox, defaultProposalProvider, {serviceRegistry: this._serviceRegistry, group: "globalSearch", extendedProvider: exendedProposalProvider, //$NON-NLS-0$
-				onDelete: function(item, evtTarget) {
-					mSearchUtils.removeRecentSearch(this._serviceRegistry, item, evtTarget);
-				}.bind(this),
-				deleteToolTips: messages['Click or use delete key to delete the search term']
+			
+			var searchBoxParentNode = lib.$(".searchMainOptionBlock", this._parentDiv);
+			
+			this._searchBox = new ComboTextInput({
+				id: "advSearchInput",
+				insertBeforeNode: searchBoxParentNode.firstElementChild,
+				parentNode: searchBoxParentNode,
+				hasButton: true,
+				buttonText: messages["Search"],
+				buttonClickListener: this._submitSearch.bind(this),
+				hasInputCompletion: true,
+				serviceRegistry: this._serviceRegistry,
+				extendedRecentEntryProposalProvider: exendedProposalProvider
 			});
 			
-			var previousSearchButton = lib.node("previousSearchButton");
-			previousSearchButton.addEventListener("click", function(event){
-				this._searchBox.focus();
-				this._completion._proposeOn();
-				lib.stop(event);
-			}.bind(this));
-	    },
-	    
-		_initControls: function(){
-			this._searchBox = document.getElementById("advSearchInput"); //$NON-NLS-0$
-			this._searchButtonWrapper = document.getElementById("advSearchCmd"); //$NON-NLS-0$
-			this._searchBoxWrapper = document.getElementById("searchInputFieldWrapper"); //$NON-NLS-0$
-			this._replaceBox = document.getElementById("advReplaceInput"); //$NON-NLS-0$
-			this._replaceBoxWrapper = document.getElementById("replaceInputFieldWrapper"); //$NON-NLS-0$
-			this._replaceWrapper = document.getElementById("replaceWrapper"); //$NON-NLS-0$
-			this._fileNamePatternsInput = document.getElementById("fileNamePatternsInput"); //$NON-NLS-0$
-			this._fileNamePatternsHint = document.getElementById("fileNamePatternsHint"); //$NON-NLS-0$
-			this._caseSensitiveCB = document.getElementById("advSearchCaseSensitive"); //$NON-NLS-0$
-			this._regExCB = document.getElementById("advSearchRegEx"); //$NON-NLS-0$
-			this._toggleReplaceLink = document.getElementById("toggleReplaceLink"); //$NON-NLS-0$
-
-			this._init = true;
-			this._loadSearchParams();
-			this._initCompletion();
-			//Add listeners
-			this._searchBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
+			this._searchTextInputBox = this._searchBox.getTextInputNode();
+			this._searchTextInputBox.placeholder = messages["Type a search term"]; //$NON-NLS-1$ //$NON-NLS-0$
+			
+			this._searchButtonWrapper = this._searchBox.getButtonWrapper();
+			this._recentSearchButton = this._searchBox.getRecentEntryButton();
+			this._recentSearchButton.title = messages["Show previous search terms"]; //$NON-NLS-1$ //$NON-NLS-0$
+			
+			this._searchTextInputBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
 					return;
 				}
@@ -223,88 +201,59 @@ define([
 					this._submitSearch();
 				} 
 			}.bind(this));
+	    },
+	    
+	    _initReplaceBox: function() {
+	        this._replaceWrapper = document.getElementById("replaceWrapper"); //$NON-NLS-0$
+	        
+	        this._replaceBox = new ComboTextInput({
+				id: "advReplaceInput", //$NON-NLS-0$
+				parentNode: this._replaceWrapper,
+				hasButton: true,
+				buttonText: messages["Replace..."], //$NON-NLS-0$
+				buttonClickListener: this._replacePreview.bind(this),
+				hasInputCompletion: true,
+				serviceRegistry: this._serviceRegistry,
+			});
 			
-			this._searchBox.addEventListener("focus", function(e) { //$NON-NLS-0$
-				this._searchBoxWrapper.classList.add("searchPageWrapperFocussed"); //$NON-NLS-0$ 
-			}.bind(this));
+			this._replaceTextInputBox = this._replaceBox.getTextInputNode();
+			this._replaceTextInputBox.placeholder = messages["Replace With"]; //$NON-NLS-0$
 			
-			this._searchBox.addEventListener("blur", function(e) { //$NON-NLS-0$
-				this._searchBoxWrapper.classList.remove("searchPageWrapperFocussed"); //$NON-NLS-0$ 
-			}.bind(this));
+			this._replaceButton = this._replaceBox.getButton();
+			this._replaceButton.title = messages["Show replacement preview"]; //$NON-NLS-0$
 			
-			this._replaceBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
+			this._recentReplaceButton = this._replaceBox.getRecentEntryButton();
+			this._recentReplaceButton.title = messages["Show previous replace terms"]; //$NON-NLS-0$
+			
+			this._replaceTextInputBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				var keyCode= e.charCode || e.keyCode;
-				if (keyCode === 13 ) {// ENTER
+				if (keyCode === lib.KEY.ENTER) {
 					this._replacePreview();
 				} 
 			}.bind(this));
 			
-			this._replaceBox.addEventListener("focus", function(e) { //$NON-NLS-0$
-				this._replaceBoxWrapper.classList.add("searchPageWrapperFocussed"); //$NON-NLS-0$ 
-			}.bind(this));
+			//fix the width of the replaceWrapper div to prevent it from resizing
+			this._replaceWrapper.style.width = "auto"; //$NON-NLS-0$
+			this._replaceWrapper.style.width = this._replaceBox.getDomNode().scrollWidth + 8 + "px"; //$NON-NLS-0$
+	    },
+	    
+		_initControls: function(){
+			this._initSearchBox();
+			this._initReplaceBox();
 			
-			this._replaceBox.addEventListener("blur", function(e) { //$NON-NLS-0$
-				this._replaceBoxWrapper.classList.remove("searchPageWrapperFocussed"); //$NON-NLS-0$ 
-			}.bind(this));
+			this._fileNamePatternsInput = document.getElementById("fileNamePatternsInput"); //$NON-NLS-0$
+			this._fileNamePatternsHint = document.getElementById("fileNamePatternsHint"); //$NON-NLS-0$
+			this._caseSensitiveCB = document.getElementById("advSearchCaseSensitive"); //$NON-NLS-0$
+			this._regExCB = document.getElementById("advSearchRegEx"); //$NON-NLS-0$
+			this._toggleReplaceLink = document.getElementById("toggleReplaceLink"); //$NON-NLS-0$
 
-	        var searchCommand = new mCommands.Command({
-	            name: messages["Search"],
-	            //tooltip: messages["Hide compare view of changes"],
-	            id: "orion.globalSearch.search", //$NON-NLS-0$
-	            callback: function(data) {
-	                this._submitSearch();
-	            }.bind(this),
-	            visibleWhen: function(item) {
-	                return true;
-	            }
-	        });
-	
-	        var replaceCommand = new mCommands.Command({
-	            name: messages['Replace...'],
-	            id: "orion.globalSearch.replace", //$NON-NLS-0$
-	            callback: function(data) {
-	                this._replacePreview();
-	            }.bind(this),
-	            visibleWhen: function(item) {
-	                return true;
-	            }
-	        });
-			
-			/*
-			//Init the "More..." option section
-			var tableNode = lib.node('moreOptions'); //$NON-NLS-0$
-			var moreOptionsSection = new mSection.Section(tableNode, {
-				id : "moreOptionsSection", //$NON-NLS-0$
-				title : "More...", //$NON-NLS-0$
-				content : moreOptionTemplate,
-				canHide : true,
-				useAuxStyle: true,
-				hidden: true,
-				onExpandCollapse : function(isExpanded, section) {
-				}
-			});
-			*/
-			this._commandService.addCommand(searchCommand);	
-			this._commandService.addCommand(replaceCommand);	
-	        this._commandService.registerCommandContribution("advSearchCmd", "orion.globalSearch.search", 1);//$NON-NLS-1$ //$NON-NLS-0$
-	        var domWrapperList = [];
-	        this._commandService.renderCommands("advSearchCmd", "advSearchCmd", this, this, "button", null, domWrapperList); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	        domWrapperList[0].domNode.classList.add("search-button"); //$NON-NLS-0$
-	        domWrapperList[0].domNode.classList.remove("commandMargins"); //$NON-NLS-0$
-	        this._commandService.registerCommandContribution("advReplacePreviewCmd", "orion.globalSearch.replace", 1);//$NON-NLS-1$ //$NON-NLS-0$
-			domWrapperList = [];
-	        this._commandService.renderCommands("advReplacePreviewCmd", "advReplacePreviewCmd", this, this, "button", null, domWrapperList); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	        domWrapperList[0].domNode.classList.add("search-button"); //$NON-NLS-0$
-	        domWrapperList[0].domNode.classList.remove("commandMargins"); //$NON-NLS-0$
-	        
+			this._init = true;
+			this._loadSearchParams();
+				        
 			if (this._replaceBoxIsHidden()) {
 	        	this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$	
 	        }
 	        this._toggleReplaceLink.addEventListener("click", this._toggleReplaceFieldVisibility.bind(this)); //$NON-NLS-0$
-	        
-	        //the replace button should be rendered by now,
-	        //fix the width of the replaceWrapper div to prevent it from resizing
-			this._replaceWrapper.style.width = this._replaceBoxWrapper.offsetWidth + "px"; //$NON-NLS-0$
 	        
 	        this._fileNamePatternsInput.placeholder = "*.*"; //$NON-NLS-0$
 			lib.empty(this._fileNamePatternsHint);
@@ -327,12 +276,8 @@ define([
 		},
 		
 		_initHTMLLabels: function(){
-			document.getElementById("advSearchInput").placeholder = messages["Type a search term"]; //$NON-NLS-1$ //$NON-NLS-0$
-			document.getElementById("advReplaceInput").placeholder = messages["Replace With"]; //$NON-NLS-1$ //$NON-NLS-0$
 			document.getElementById("advSearchCaseSensitiveLabel").appendChild(document.createTextNode(messages["Case sensitive"])); //$NON-NLS-1$ //$NON-NLS-0$
 			document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expression"])); //$NON-NLS-1$ //$NON-NLS-0$
-			document.getElementById("previousSearchButton").title = messages["Show previous search terms"]; //$NON-NLS-1$ //$NON-NLS-0$
-			document.getElementById("advReplacePreviewCmd").title = messages["Show replacement preview"]; //$NON-NLS-1$ //$NON-NLS-0$
 			document.getElementById("searchScopeLabel").appendChild(document.createTextNode(messages["Scope"])); //$NON-NLS-1$ //$NON-NLS-0$
 			document.getElementById("fileNamePatternsLabel").appendChild(document.createTextNode(messages["File name patterns (comma-separated)"])); //$NON-NLS-1$ //$NON-NLS-0$
 			document.getElementById("searchScopeSelectButton").title = messages["Choose a Folder"]; //$NON-NLS-1$ //$NON-NLS-0$

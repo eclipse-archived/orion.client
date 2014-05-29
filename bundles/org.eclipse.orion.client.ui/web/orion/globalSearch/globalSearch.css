@@ -113,19 +113,6 @@
 	min-width:20em;
 }
 
-.commandButton.search-button {
-	visibility: visible;
-	display: inline-block;
-	padding: 8px 15px;
-	border: none;
-	vertical-align: middle;
-	border-left: 1px solid lightgray;
-	border-radius: 0 3px 3px 0;
-	font-size:14px;
-	transition: all 0.1s ease;
-	max-width: 150px; /* for transition */
-}
-
 .search-filter-text {
 	background : yellow;
 }

@@ -59,9 +59,6 @@ searchUtils.doSearch = function(searcher, serviceRegistry, searchStr, advOptions
 			commitSearch = advOptions && advOptions.type !== searchUtils.ALL_FILE_TYPE;
 		}
 		if (commitSearch) {
-			if(newSearchStr !== ""){
-				searchUtils.addRecentSearch(serviceRegistry, newSearchStr, advOptions ? advOptions.regEx: false);
-			}
 			var searchParams = searcher.createSearchParams(newSearchStr, false, false, advOptions);
 			var href = searchUtils.generateSearchHref(searchParams);
 			window.location = href;
@@ -523,115 +520,6 @@ searchUtils.fullPathNameByMeta = function(parents){
 searchUtils.path2FolderName = function(filePath, fileName, keepTailSlash){
 	var tail = keepTailSlash ? 0: 1;
 	return filePath.substring(0, filePath.length-fileName.length-tail);
-};
-
-var MAX_RECENT_SEARCH_NUMBER = 20;
-
-searchUtils._storeRecentSearch = function(serviceRegistry, searches, eventTarget, deleting){
-	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-		prefs.put("recentSearch", searches); //$NON-NLS-0$
-		if(eventTarget) {
-			window.setTimeout(function() {
-				eventTarget.dispatchEvent({type:"inputDataListChanged", deleting: deleting}); //$NON-NLS-0$
-			}.bind(this), 20);
-		}
-	});
-};
-
-searchUtils.addRecentSearch = function(serviceRegistry, searchName, useRegEx){
-	if(typeof searchName !== "string" || !searchName ){ //$NON-NLS-0$
-		return;
-	}
-	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-		var i;
-		var searches = prefs.get("recentSearch"); //$NON-NLS-0$
-		if (typeof searches === "string") { //$NON-NLS-0$
-			searches = JSON.parse(searches);
-		}
-		if (searches) {
-			for (i in searches) {
-				if (searches[i].name === searchName) {
-					return;
-				}
-			}
-			if(searches.length >= MAX_RECENT_SEARCH_NUMBER){
-				var len = searches.length;
-				searches.splice(MAX_RECENT_SEARCH_NUMBER-1, len-MAX_RECENT_SEARCH_NUMBER+1);
-			}
-		} else {
-			searches = [];
-		}
-		searches.splice(0,0,{ "name": searchName, "regEx": useRegEx});//$NON-NLS-1$ //$NON-NLS-0$
-		searchUtils._storeRecentSearch(serviceRegistry, searches);
-		//prefs.put("recentSearch", searches); //$NON-NLS-0$
-	});
-};
-
-searchUtils.removeRecentSearch = function(serviceRegistry, searchName, eventTarget){
-	if(typeof searchName !== "string" || !searchName ){ //$NON-NLS-0$
-		return;
-	}
-	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-		var i;
-		var searches = prefs.get("recentSearch"); //$NON-NLS-0$
-		if (typeof searches === "string") { //$NON-NLS-0$
-			searches = JSON.parse(searches);
-		}
-		if (searches) {
-			for (i in searches) {
-				if (searches[i].name === searchName) {
-					searches.splice(i, 1);
-					searchUtils._storeRecentSearch(serviceRegistry, searches, eventTarget, true);
-					break;
-				}
-			}
-		}
-	});
-};
-
-searchUtils.getSearches = function(serviceRegistry, type, callback){
-	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-		var searches = prefs.get(type); //$NON-NLS-0$
-		if (typeof searches === "string") { //$NON-NLS-0$
-			searches = JSON.parse(searches);
-		}
-		if (searches && callback) {
-			callback(searches);
-		}
-	});
-};
-
-searchUtils.getMixedSearches = function(serviceRegistry, mixed, checkDuplication, callback){
-	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-		var searches = prefs.get("recentSearch"); //$NON-NLS-0$
-		if (typeof searches === "string") { //$NON-NLS-0$
-			searches = JSON.parse(searches);
-		}
-		if(mixed){
-			var savedSearches = prefs.get("search"); //$NON-NLS-0$
-			if (typeof savedSearches === "string") { //$NON-NLS-0$
-				savedSearches = JSON.parse(savedSearches);
-			}
-			if(savedSearches){
-				savedSearches.forEach(function(savedSearch) {
-					if(checkDuplication){
-						var qObj = searchUtils.parseQueryStr(savedSearch.query);
-						var duplicated = searches.some(function(search) {
-								return qObj.searchStrTitle === search.name;
-						});
-						if(!duplicated){
-							searches.push({"name": qObj.searchStrTitle, "label": savedSearch.name}); //$NON-NLS-1$ //$NON-NLS-0$
-						}
-					} else {
-						searches.push({"name": null, "label": savedSearch.name, value: savedSearch.query}); //$NON-NLS-1$ //$NON-NLS-0$
-					}
-				});
-			}
-		}
-		if (searches && callback) {
-			callback(searches);
-		}
-	});
 };
 
 searchUtils.getOpenSearchPref = function(serviceRegistry, callback){

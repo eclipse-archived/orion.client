@@ -10,30 +10,16 @@
 
 @import "../orion/globalSearch/globalSearch.css";
 
+@import "../orion/widgets/input/ComboTextInput.css";
+
 @import "../css/theme.css";
 
 #resultsinnerTree.treetable td {
 	padding: 5px !important;
 }
 
-.searchPageInputFieldWrapper {
-	background: white;
-    border: 1px solid lightgray;
-    border-radius: 3px;
-    display: inline-block;
-    padding: 0;
-    margin: 5px 0;
-    text-align: right;
-    vertical-align: middle;
-    white-space: nowrap;
-}
-
-.searchPageWrapperFocussed {
-	border-color: #999;
-}
-
 .replaceWrapper {
-	display: block;
+	display: inline-block;
 	max-height: 50px; /* for transition */
 	overflow: hidden;
 	transition: max-height 0.2s ease;
@@ -41,23 +27,6 @@
 
 .replaceWrapperHidden {
 	max-height: 0; /* for transition */
-}
-
-.searchPageInputField {
-	border: none;
-	display: inline-block;
-	font-size: 14px;
-	outline: none;
-	margin: 5px;
-	min-width: 260px;
-	padding: 0;
-	position: relative;
-	vertical-align: middle;
-	transition: all 0.2s ease;
-}
-
-.replaceInputField {
-	min-width: 279px;
 }
 
 .fileNamePatternsInput {
@@ -100,32 +69,6 @@
 .searchOptionBlock {
 	margin: 20px 15px;
 	width: 285px;
-}
-
-.isHidden > .commandButton.search-button {
-	border-width: 0;
-	max-width: 0;
-	margin: 0;
-	overflow: hidden;
-	padding-left: 0;
-	padding-right: 0;
-}
-
-.previousSearchButton {
-	background: white;
-	border-radius: 0;
-	box-shadow: none;
-	border: none;
-	cursor: pointer;
-	display: inline-block;
-	margin: -3px 0 0 0;
-	padding: 0;
-	position: relative;
-	vertical-align: middle;
-}
-
-.previousSearchArrow {
-	font-size: 18px;
 }
 
 .searchLabel {
