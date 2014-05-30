@@ -161,32 +161,25 @@ define([
 					};
 					name = "markup.other.paragraph.markdown"; //$NON-NLS-0$
 					index = end;
-				} else if (tokens[i].type === "blockquote_start" || tokens[i].type === "list_start") { //$NON-NLS-1$ //$NON-NLS-0$
+				} else if (tokens[i].type === "blockquote_start") { //$NON-NLS-0$
 					/*
-					 * The source ranges for blockquotes and lists cannot be reliably computed solely
+					 * The source ranges for blockquotes cannot be reliably computed solely
 					 * from their generated tokens because it is possible for inputs with varying line
 					 * counts to produce identical token sets.  To handle this, use marked's regex's
 					 * to compute the bounds for these elements.  The tokens that are internal to
 					 * these elements are skipped over because the styler does not style blocks within
-					 * blocks differently (eg.- blockquotes within lists).
+					 * blocks differently (eg.- lists within blockquotes).
 					 */
 
 					var startRegex, endRegex, endToken;
-					if (tokens[i].type === "blockquote_start") { //$NON-NLS-0$
-						startRegex = this._blockquoteStartRegex;
-						endRegex = this._blockquoteRegex;
-						endToken = "blockquote_end"; //$NON-NLS-0$
-						name = "markup.quote.markdown"; //$NON-NLS-0$
-					} else {
-						startRegex = marked.Lexer.rules.normal.bullet;
-						endRegex = this._listRegex;
-						endToken = "list_end"; //$NON-NLS-0$
-						name = tokens[i].ordered ? "markup.list.numbered.markdown" : "markup.list.unnumbered.markdown"; //$NON-NLS-1$ //$NON-NLS-0$
-					}
+					startRegex = this._blockquoteStartRegex;
+					endRegex = this._blockquoteRegex;
+					endToken = "blockquote_end"; //$NON-NLS-0$
+					name = "markup.quote.markdown"; //$NON-NLS-0$
 
 					/*
 					 * Skip through tokens that are internal to the element.  Note that these tokens can stack
-					 * (eg.- a list within a list) so must be sure to find the _matching_ end token.
+					 * (eg.- a blockquote within a blockquote) so must be sure to find the _matching_ end token.
 					 */
 					var j = i;
 					var stack = 0;
@@ -225,16 +218,72 @@ define([
 						end: end
 					};
 
-					if (tokens[i].type === "blockquote_start") { //$NON-NLS-0$
-						customTokenSet = [tokens[i], tokens[j]];
-					} else {
-						customTokenSet = tokens.slice(i, j + 1);
-					}
-
+					customTokenSet = [tokens[i], tokens[j]];
 					i = j;
 					index = end;
+				} else if (tokens[i].type === "list_start") { //$NON-NLS-0$
+					/*
+					 * Use text contained in the tokens between the list_start and list_end
+					 * tokens to crawl through the text to determine the list's end bound.
+					 */
+					var start = index;
+
+					startRegex = marked.Lexer.rules.normal.bullet;
+					endRegex = this._listRegex;
+					endToken = "list_end"; //$NON-NLS-0$
+					name = tokens[i].ordered ? "markup.list.numbered.markdown" : "markup.list.unnumbered.markdown"; //$NON-NLS-1$ //$NON-NLS-0$
+
+					/*
+					 * Skip through tokens that are internal to the element.  Note that these tokens can stack
+					 * (eg.- a list within a list) so must be sure to find the _matching_ end token.
+					 */
+					j = i;
+					stack = 0;
+					while (true) {
+						if (tokens[j].type === tokens[i].type) {
+							stack++; /* a start token */
+						} else if (tokens[j].type === endToken) {
+							if (!--stack) {
+								break;
+							}
+						} else {
+							/* an in-between token */
+							if (tokens[j].text) {
+								/*
+								 * Must split the text and crawl through each of its parts because
+								 * the token text may not exactly match our source text (in
+								 * particular because marked converts all tabs to spaces).
+								 */
+								this._splitTextRegex.lastIndex = 0;
+								var segments = tokens[j].text.split(this._splitTextRegex);
+								segments.forEach(function(current) {
+									if (current.length) {
+										index = text.indexOf(current, index) + current.length;
+									}
+								});
+							}
+						}
+						j++;
+					}
+
+					/* claim the newline character that ends this list's last item */
+					index += model.getLineDelimiter().length;
+
+					/* compute the block's contentStart bound */
+					startRegex.lastIndex = start;
+					match = startRegex.exec(text);
+					contentStart = start + match[0].length;
+
+					bounds = {
+						start: start,
+						contentStart: contentStart,
+						contentEnd: index,
+						end: index
+					};
+
+					customTokenSet = tokens.slice(i, j + 1);
+					i = j;
 				} else if (tokens[i].type === "code") { //$NON-NLS-0$
-					var start;
 					/*
 					 * gfm fenced code blocks can be differentiated from markdown code blocks by the
 					 * presence of a "lang" property.
@@ -621,7 +670,8 @@ define([
 		_htmlNewlineRegex: /\n\s*\S[\s\S]*$/g,
 		_newlineRegex: /\n/g,
 		_orderedListRegex: /\d+\.[ \t]/g,
-		_setextUnderlineRegex: /^[-=]+[ \t]*\r?\n?/g,
+		_setextUnderlineRegex: /^[ \t]*[-=]+[ \t]*\r?\n?/g,
+		_splitTextRegex: /[ \t]/,
 		_trailingEmptyLinesRegex: /\n(([ \t]*\r?\n)*)$/g,
 		_unorderedListRegex: /[*+-][ \t]/g,
 		_whitespaceRegex: /\s*/g
