@@ -110,6 +110,7 @@ define([
 				messageNode = document.createElement("a"); //$NON-NLS-0$
 				if(this._commitInfo.SHA1) {
 					var commitURLBase = (new URL("commit", window.location.href)).href;
+					commitURLBase = decodeURIComponent(commitURLBase);
 					messageNode.href = new URITemplate(commitURLBase + "{/SHA1}").expand(this._commitInfo);
 				} else {
 					messageNode.href = this._commitInfo.URL;
