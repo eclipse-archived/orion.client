@@ -9,7 +9,7 @@
 
    Contributors:
       Matthias Sohn - initial implementation
-      IBM - Updated for Orion 6.0
+      IBM Corporation - Updated for Orion 6.0
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -167,9 +167,10 @@
 	        </plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<inherited>false</inherited>
 				<executions>
 					<execution>
+						<id>generate-jsdocs-and-minify-javascript</id>
+						<inherited>false</inherited>
 						<phase>verify</phase>
 						<configuration>
 							<target unless="orion.client.build.skip">
@@ -200,7 +201,38 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>replace-build-token</id>
+						<phase>generate-sources</phase>
+						<configuration>
+							<target>
+								<taskdef resource="net/sf/antcontrib/antcontrib.properties"
+									classpathref="maven.plugin.classpath" />
+								<if>
+									<available file="about.properties" />
+									<then>
+										<echo
+											message="Replacing @qualifier@ token within about.properties with build id ${unqualifiedVersion}.${buildQualifier}" />
+										<replace file="about.properties">
+											<replacefilter token="@qualifier@"
+												value="${unqualifiedVersion}.${buildQualifier}" />
+										</replace>
+									</then>
+								</if>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>ant-contrib</groupId>
+						<artifactId>ant-contrib</artifactId>
+						<version>20020829</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 		<pluginManagement>
