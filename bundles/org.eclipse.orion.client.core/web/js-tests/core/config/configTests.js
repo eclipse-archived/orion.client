@@ -184,10 +184,11 @@ define([
 					var d = new Deferred();
 					serviceRegistry.registerService(MANAGED_SERVICE, 
 						{	updated: function(properties) {
-								if (properties === null) {
+								try {
+									assert.strictEqual(properties, null);
 									d.resolve();
-								} else {
-									d.reject();
+								} catch (e) {
+									d.reject(e);
 								}
 							}
 						},

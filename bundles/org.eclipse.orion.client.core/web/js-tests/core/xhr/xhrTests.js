@@ -241,10 +241,10 @@ define([
 		return d;
 	}
 
-	function fail(/*err*/) {
-		var d = new Deferred();
-		d.reject.apply(d, Array.prototype.slice.call(arguments));
-		return d;
+	function fail(value) {
+		if (value === null || typeof value === "undefined")
+			value = new Error("Failed, no message");
+		return new Deferred().reject(value);
 	}
 
 	describe("xhr", function() {
