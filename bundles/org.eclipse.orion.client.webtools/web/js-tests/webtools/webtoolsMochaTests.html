@@ -16,7 +16,8 @@
 	require(["mocha/sauce"], function(mochaSauce) {
 		mochaSauce.setup("bdd");
 		require([
-			"js-tests/webtools/cssValidatorTests"
+			"js-tests/webtools/cssValidatorTests",
+			"js-tests/webtools/cssOutlinerTests"
 		], function(){
 			mochaSauce.run();
 		});
