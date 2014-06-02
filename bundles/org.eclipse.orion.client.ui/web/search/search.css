@@ -30,17 +30,8 @@
 	max-height: 0; /* for transition */
 }
 
-.fileNamePatternsInput {
-	border: 1px solid lightgray;
-	border-radius: 3px;
-	margin: 0;
-	padding: 4px;
-	width: calc(100% - 10px); /* -10px accounts for borders and padding */
-}
-
-.fileNamePatternsInput:focus {
-	border-color: #999;
-	outline: none;
+.fileNamePatternsTextInput {
+	min-width: 250px;
 }
 
 .fileNamePatternsHint {

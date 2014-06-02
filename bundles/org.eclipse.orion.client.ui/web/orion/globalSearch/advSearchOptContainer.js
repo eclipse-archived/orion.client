@@ -60,7 +60,7 @@ define([
 				resource = resource.concat(searchLocation);
 			}, this);
 			
-			var fileNamePatternsArray = mSearchUtils.getFileNamePatternsArray(this._fileNamePatternsInput.value);
+			var fileNamePatternsArray = mSearchUtils.getFileNamePatternsArray(this._fileNamePatternsBox.getTextInputValue());
 			var replaceValue = this._replaceBox.getTextInputValue() || undefined;
 			
 			return {keyword: this._searchBox.getTextInputValue(),
@@ -85,11 +85,13 @@ define([
 			if(!this._init || !this._searchParams){
 				return;
 			}
-			this._searchBox.setTextInputValue(this._searchParams.keyword || "");
-			this._replaceBox.setTextInputValue(this._searchParams.replace || "");
+			this._searchBox.setTextInputValue(this._searchParams.keyword || ""); //$NON-NLS-0$
+			this._replaceBox.setTextInputValue(this._searchParams.replace || ""); //$NON-NLS-0$
 			this._caseSensitiveCB.checked = this._searchParams.caseSensitive;
 			this._regExCB.checked = this._searchParams.regEx;
-			this._fileNamePatternsInput.value = this._searchParams.fileNamePatterns ? this._searchParams.fileNamePatterns.join(", ") : "";
+			
+			var fileNamePatternsInputValue = this._searchParams.fileNamePatterns ? this._searchParams.fileNamePatterns.join(", ") : ""; //$NON-NLS-1$ //$NON-NLS-0$
+			this._fileNamePatternsBox.setTextInputValue(fileNamePatternsInputValue);
 			
 			if (undefined !== this._searchParams.replace) {
 				this._showReplaceField();
@@ -118,6 +120,7 @@ define([
 			var options = this.getOptions();
 			options.replace = null;
 			this._searchBox.addTextInputValueToRecentEntries();
+			this._fileNamePatternsBox.addTextInputValueToRecentEntries();
 			mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.keyword, options);
 		},
 		
@@ -125,6 +128,7 @@ define([
 			var options = this.getOptions();
 			this._searchBox.addTextInputValueToRecentEntries();
 			this._replaceBox.addTextInputValueToRecentEntries();
+			this._fileNamePatternsBox.addTextInputValueToRecentEntries();
 			if(!options.replace){
 				options.replace = "";
 			}
@@ -171,11 +175,11 @@ define([
 			var searchBoxParentNode = lib.$(".searchMainOptionBlock", this._parentDiv);
 			
 			this._searchBox = new ComboTextInput({
-				id: "advSearchInput",
+				id: "advSearchInput", //$NON-NLS-0$
 				insertBeforeNode: searchBoxParentNode.firstElementChild,
 				parentNode: searchBoxParentNode,
 				hasButton: true,
-				buttonText: messages["Search"],
+				buttonText: messages["Search"], //$NON-NLS-0$
 				buttonClickListener: this._submitSearch.bind(this),
 				hasInputCompletion: true,
 				serviceRegistry: this._serviceRegistry,
@@ -233,12 +237,43 @@ define([
 			this._replaceWrapper.style.width = this._replaceBox.getDomNode().scrollWidth + 8 + "px"; //$NON-NLS-0$
 	    },
 	    
+	    _initFileNamePatternsBox: function() {
+			this._fileNamePatternsHint = document.getElementById("fileNamePatternsHint"); //$NON-NLS-0$
+			
+			this._fileNamePatternsBox = new ComboTextInput({
+				id: "fileNamePatternsInput", //$NON-NLS-0$
+				insertBeforeNode: this._fileNamePatternsHint,
+				parentNode: this._fileNamePatternsHint.parentNode,
+				hasButton: false,
+				hasInputCompletion: true,
+				serviceRegistry: this._serviceRegistry
+			});
+			
+			this._fileNamePatternsTextInput = this._fileNamePatternsBox.getTextInputNode();
+			this._fileNamePatternsTextInput.classList.add("fileNamePatternsTextInput"); //$NON-NLS-0$
+			this._fileNamePatternsTextInput.placeholder = "*.*"; //$NON-NLS-0$
+			lib.empty(this._fileNamePatternsHint);
+			this._fileNamePatternsHint.appendChild(document.createTextNode(messages["(* = any string, ? = any character)"])); //$NON-NLS-0$
+			
+			this._fileNamePatternsTextInput.addEventListener("focus", function(){ //$NON-NLS-0$
+				this._fileNamePatternsHint.classList.add("fileNamePatternsHintVisible"); //$NON-NLS-0$
+			}.bind(this));
+			
+			this._fileNamePatternsTextInput.addEventListener("blur", function(){ //$NON-NLS-0$
+				var inputValue = this._fileNamePatternsBox.getTextInputValue();
+				if (inputValue) {
+					var correctedPatternArray = mSearchUtils.getFileNamePatternsArray(inputValue);
+					this._fileNamePatternsBox.setTextInputValue(correctedPatternArray.join(", ")); //$NON-NLS-0$
+				}
+				this._fileNamePatternsHint.classList.remove("fileNamePatternsHintVisible"); //$NON-NLS-0$
+			}.bind(this));
+	    },
+	    
 		_initControls: function(){
 			this._initSearchBox();
 			this._initReplaceBox();
+			this._initFileNamePatternsBox();
 			
-			this._fileNamePatternsInput = document.getElementById("fileNamePatternsInput"); //$NON-NLS-0$
-			this._fileNamePatternsHint = document.getElementById("fileNamePatternsHint"); //$NON-NLS-0$
 			this._caseSensitiveCB = document.getElementById("advSearchCaseSensitive"); //$NON-NLS-0$
 			this._regExCB = document.getElementById("advSearchRegEx"); //$NON-NLS-0$
 			this._toggleReplaceLink = document.getElementById("toggleReplaceLink"); //$NON-NLS-0$
@@ -250,24 +285,7 @@ define([
 	        	this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$	
 	        }
 	        this._toggleReplaceLink.addEventListener("click", this._toggleReplaceFieldVisibility.bind(this)); //$NON-NLS-0$
-	        
-	        this._fileNamePatternsInput.placeholder = "*.*"; //$NON-NLS-0$
-			lib.empty(this._fileNamePatternsHint);
-			this._fileNamePatternsHint.appendChild(document.createTextNode(messages["(* = any string, ? = any character)"])); //$NON-NLS-0$
-			
-			this._fileNamePatternsInput.addEventListener("focus", function(){
-				this._fileNamePatternsHint.classList.add("fileNamePatternsHintVisible"); //$NON-NLS-0$
-			}.bind(this));
-			
-			this._fileNamePatternsInput.addEventListener("blur", function(){
-				var inputValue = this._fileNamePatternsInput.value;
-				if (inputValue) {
-					var correctedPatternArray = mSearchUtils.getFileNamePatternsArray(inputValue);
-					this._fileNamePatternsInput.value = correctedPatternArray.join(", ");
-				}
-				this._fileNamePatternsHint.classList.remove("fileNamePatternsHintVisible"); //$NON-NLS-0$
-			}.bind(this));
-			
+
 	        this._initSearchScope();
 		},
 		

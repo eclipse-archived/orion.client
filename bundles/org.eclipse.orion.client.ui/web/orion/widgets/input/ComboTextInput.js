@@ -20,26 +20,36 @@ define([
 ], function(objects, lib, ComboTextInputTemplate, messages, InputCompletion) {
 
 	/**
-	 * TODO add full docs
 	 * Creates a text input box combined with:
 	 * 1) [Optional] An attached button.
 	 * 2) [Optional] Input completion based on recent entries.
 	 * 
 	 * @param {Object} options Contains the set of properties that describe this ComboTextInput.
-	 * 		{Boolean} options.hasButton   true if this ComboTextInput should have an attached button, false otherwise
-	 * 		{Boolean} options.hasInputCompletion   true if this ComboTextInput should create and use input completion, false otherwise
+	 *	{String} options.id The id of this ComboTextInput's wrapping DOM node
+	 *	{Object} options.parentNode The DOM node that will act as the parent of this ComboTextInput's wrapping DOM node
+	 *	{Object} options.insertBeforeNode [Optional] The DOM node that this ComboTextInput's wrapper node should be inserted before in the parentNode
+	 *	{Boolean} options.hasButton true if this ComboTextInput should have an attached button, false otherwise
+	 *		[if options.hasButton === true]
+	 *		{String} options.buttonText The text to display on this ComboTextInput's button
+	 *		{Function} options.buttonClickListener The event listener function that should be called when the button is clicked
+	 *	{Boolean} options.hasInputCompletion true if this ComboTextInput should create and use input completion, false otherwise
+	 *		[if options.hasInputCompletion === true]
+	 *		{Object} options.serviceRegistry The service registry that the InputCompletion instance will use
+	 *		{Function} options.defaultRecentEntryProposalProvider [Optional] The default proposal provider that the input completion should use
+	 *		{Function} options.extendedRecentEntryProposalProvider [Optional] The extended proposal provider that the input completion should use
+	 *		{Function} options.onRecentEntryDelete [Optional] The function that should be called when the user attempts to delete an entry from the input completion list
 	 */
 	function ComboTextInput(options){
 		this._domNodeId = options.id;
 		this._parentNode = options.parentNode;
+		this._insertBeforeNode = options.insertBeforeNode;
+		
 		this._hasButton = options.hasButton;
 		this._buttonText = options.buttonText;
 		this._buttonClickListener = options.buttonClickListener;
-		
-		this._insertBeforeNode = options.insertBeforeNode;
-				
-		this._serviceRegistry = options.serviceRegistry;
+
 		this._hasInputCompletion = options.hasInputCompletion;
+		this._serviceRegistry = options.serviceRegistry;
 		this._defaultRecentEntryProposalProvider = options.defaultRecentEntryProposalProvider;
 		this._extendedRecentEntryProposalProvider = options.extendedRecentEntryProposalProvider;
 		this._onRecentEntryDelete = options.onRecentEntryDelete;
@@ -83,7 +93,7 @@ define([
 					this._comboTextInputButton.appendChild(document.createTextNode(this._buttonText));	
 				}
 				if (this._buttonClickListener) {
-					this._comboTextInputButton.addEventListener("click", function(event){
+					this._comboTextInputButton.addEventListener("click", function(event){ //$NON-NLS-0$
 						this._buttonClickListener(event);
 					}.bind(this)); //$NON-NLS-0$
 				}
@@ -147,37 +157,63 @@ define([
 				deleteToolTips: messages['Click or use delete key to delete the search term'] //$NON-NLS-0$
 			});
 
-			this._recentEntryButton.addEventListener("click", function(event){
+			this._recentEntryButton.addEventListener("click", function(event){ //$NON-NLS-0$
 				this._textInputNode.focus();
 				this._inputCompletion._proposeOn();
 				lib.stop(event);
 			}.bind(this));
 	    },
 		
+		/**
+		 * @returns {Object} The DOM node which wraps all the other nodes in this ComboTextInput
+		 */
 		getDomNode: function() {
 			return this._domNode;
 		},
 		
+		/**
+		 * @returns {Object} The DOM node of this ComboTextInput's <input type="text"> field
+		 */
 		getTextInputNode: function() {
 			return this._textInputNode;
 		},
 		
+		/**
+		 * @returns {String} The value of this ComboTextInput's <input type="text"> field
+		 */
 		getTextInputValue: function() {
 			return this._textInputNode.value;	
 		},
 		
+		/**
+		 * Sets the value of this ComboTextInput's <input type="text"> field
+		 * @param {String} value
+		 */
 		setTextInputValue: function(value) {
 			this._textInputNode.value = value;	
 		},
 
+		/**
+		 * @returns {Object} 	The DOM node of this ComboTextInput's <button> or null if 
+		 * 						options.hasButton was set to false.
+		 */
 		getButton: function() {
 			return this._comboTextInputButton;	
 		},
 		
+		/**
+		 * @returns {Object} 	The DOM node of this ComboTextInput's recent entry button 
+		 * 						or null if options.hasInputCompletion was set to false.
+		 */
 		getRecentEntryButton: function() {
 			return this._recentEntryButton;
 		},
 		
+		/**
+		 * Adds the value that is in the text input field to the
+		 * recent entries in localStorage. Empty and duplicate
+		 * values are ignored.
+		 */
 		addTextInputValueToRecentEntries: function() {
 			var value = this.getTextInputValue();
 			if (value) {
@@ -192,7 +228,7 @@ define([
 				if (-1 === indexOfElement) {
 					//no duplicate entry found, add new entry to array
 					recentEntryArray.push({
-						type: "proposal", 
+						type: "proposal", //$NON-NLS-0$
 						label: value, 
 						value: value
 					});
@@ -222,10 +258,20 @@ define([
 			return indexOfElement;
 		},
 		
+		/**
+		 * Makes this ComboTextInput's button visible.
+		 * Should only be called if this ComboTextInput was created
+		 * with options.hasButton set to true.
+		 */
 		showButton: function() {
 			this._comboTextInputButton.classList.remove("isHidden"); //$NON-NLS-0$
 		},
 		
+		/**
+		 * Hides this ComboTextInput's button.
+		 * Should only be called if this ComboTextInput was created
+		 * with options.hasButton set to true.
+		 */
 		hideButton: function() {
 			this._comboTextInputButton.classList.add("isHidden"); //$NON-NLS-0$
 		}
