@@ -1,6 +1,6 @@
 {
   "name": "orion",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "description": "An Eclipse Orion server based on Node.js and connect.",
   "homepage": "http://eclipse.org/orion/",
   "bugs": "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Node",
