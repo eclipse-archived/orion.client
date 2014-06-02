@@ -27,7 +27,8 @@
   "urls": [
     "js-tests/javascript/JsMochaSuite.html",
     "js-tests/webtools/webtoolsMochaTests.html",
-    "js-tests/core/coreTests.html"
+    "js-tests/core/coreTests.html",
+    "js-tests/ui/uiTests.html"
   ],
   "browsers": [
     {

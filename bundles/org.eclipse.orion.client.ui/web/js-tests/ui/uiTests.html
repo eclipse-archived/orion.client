@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>UI Tests</title>
+	<link rel="stylesheet" href="../../mocha/mocha.css" />
+	<script src="../../requirejs/require.js"></script>
+	<script>
+		/*jslint amd:true*/
+		require({
+		baseUrl: "../../",
+		paths: {
+			text: "requirejs/text",
+			i18n: "requirejs/i18n",
+		}
+	});
+	require(["mocha/sauce"], function(mocha) {
+		mocha.setup("bdd");
+		require([
+//			"js-tests/ui/asyncStyler/test.html",
+//			"js-tests/ui/charDiff/test.html",
+//			"js-tests/ui/commands/test.html",
+//			"js-tests/ui/commonjs-unittesting/test.html",
+//			"js-tests/ui/compare/test.html",
+//			"js-tests/ui/contentTypes/contentTypesTests.html",
+//			"js-tests/ui/dispatcher/editDispatcherTests.html",
+//			"js-tests/ui/encoding/test.html",
+//			"js-tests/ui/extensionParsing/test.html",
+//			"js-tests/ui/fileapi/test.html",
+//			"js-tests/ui/githubfileapi/test.html",
+//			"js-tests/ui/globalSearch/test.html",
+//			"js-tests/ui/HTMLTemplates/test.html",
+//			"js-tests/ui/i18n/test.html",
+//			"js-tests/ui/objects/test.html",
+//			"js-tests/ui/pageUtil/test.html",
+//			"js-tests/ui/searchCrawler/test.html",
+			"js-tests/ui/settings/settingsTests",
+//			"js-tests/ui/testRunAsynch/test.html",
+//			//"js-tests/ui/searchRendering/disabled-test.html", // disabled
+//			"js-tests/ui/typedefs/typedefsTests",
+//			"js-tests/ui/urlUtils/test.html",
+//			"js-tests/ui/webdav/test.html",
+		], function(){
+			mocha.run();
+		});
+	});
+	</script>
+</head>
+<body>
+	<div id="mocha">
+		<h1>UI Tests</h1>
+	</div>
+</body>
+//</html>
