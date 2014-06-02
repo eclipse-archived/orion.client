@@ -30,8 +30,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 	};
 	objects.mixin(PropertyWidget.prototype, /** @lends orion.settings.ui.PropertyWidget.prototype */ {
 		postCreate: function() {
-			var property = this.property, config = this.configuration;
-			var properties = config.getProperties();
+			var property = this.property, config = this.config, properties = config.getProperties();
 			var value;
 			if (properties && typeof properties[property.getId()] !== 'undefined') { //$NON-NLS-0$
 				value = properties[property.getId()];
@@ -141,6 +140,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 		objects.mixin(this, options);
 		if (!parentNode) { throw "parentNode is required"; }
 		this.node = parentNode;
+		this.config = this.defaultConfig = null;
 	};
 	objects.mixin(PropertiesWidget.prototype, { //$NON-NLS-0$
 		createElements: function() {
@@ -169,13 +169,17 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 		},
 		/** Creates a new configuration if necessary */
 		initConfiguration: function() {
-			var configuration = this.configuration;
+			var configuration = this.config;
 			if (!configuration) {
-				var self = this;
-				this.configPromise = this.configPromise || this.configAdmin.getConfiguration(this.setting.getPid())
-					.then(function(resolvedConfiguration) {
-						self.configuration = resolvedConfiguration;
-						return resolvedConfiguration;
+				var pid = this.setting.getPid(), self = this;
+				this.configPromise = this.configPromise ||
+					Deferred.all([
+						this.configAdmin.getDefaultConfiguration(pid),
+						this.configAdmin.getConfiguration(pid)
+					]).then(function(result) {
+						self.defaultConfig = result[0];
+						self.config = result[1];
+						return self.config;
 					});
 				return this.configPromise;
 			} else {
@@ -186,8 +190,10 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 			var self = this;
 			this.setting.getAttributeDefinitions().forEach(function(property) {
 				var options = {
-					property: property, configuration: configuration, serviceRegistry: self.serviceRegistry,
-					changeProperty: self.changeProperty.bind(self, property)
+					config: configuration,
+					property: property,
+					changeProperty: self.changeProperty.bind(self, property) ,
+					serviceRegistry: self.serviceRegistry
 				};
 				var widget;
 				if (property.getOptionValues()) {
@@ -212,9 +218,13 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 				var setting = this.setting;
 				var props = configuration.getProperties() || {};
 				props[attributeDefinition.getId()] = value;
-				if (setting.isDefaults(props)) {
+				// Decide if this configuration equals the setting's default values.
+				var defaultProps = this.defaultConfig ? this.defaultConfig.getProperties() : null;
+				var isNoop = setting.isDefaults(props, defaultProps);
+				if (isNoop) {
+					// Entire configuration is a no-op (i.e. it equals its default values) so remove it entirely
 					configuration.remove();
-					this.configuration = null;
+					this.config = null;
 					this.configPromise = null;
 				} else {
 					configuration.update(props);

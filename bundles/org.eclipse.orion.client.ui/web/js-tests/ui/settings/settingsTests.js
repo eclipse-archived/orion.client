@@ -11,11 +11,10 @@
 /*jslint amd:true mocha:true*/
 define([
 	'chai/chai',
-	'orion/Deferred',
 	'orion/serviceregistry',
 	'orion/metatype',
 	'orion/settings/settingsRegistry',
-], function(chai, Deferred, mServiceRegistry, mMetaType, SettingsRegistry) {
+], function(chai, mServiceRegistry, mMetaType, SettingsRegistry) {
 	var assert = chai.assert;
 	var SETTING_SERVICE = 'orion.core.setting';
 	var METATYPE_SERVICE = 'orion.cm.metatype';
@@ -23,12 +22,9 @@ define([
 	var serviceRegistry, metaTypeRegistry, settingsRegistry;
 
 	var setUp = function() {
-		var d = new Deferred();
 		serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		metaTypeRegistry = new mMetaType.MetaTypeRegistry(serviceRegistry);
 		settingsRegistry = new SettingsRegistry(serviceRegistry, metaTypeRegistry);
-		d.resolve();
-		return d;
 	},
 	tearDown = function() {
 		serviceRegistry = null;
@@ -166,5 +162,30 @@ define([
 			assert.equal(settingsRegistry.getSettings('cat').length, 1);
 			assert.equal(settingsRegistry.getSettings('dog').length, 0);
 		});
-	});
+		it("#isDefaults", function() {
+			serviceRegistry.registerService(SETTING_SERVICE, {}, {
+					settings: [{
+						pid: "mysetting",
+						name: "My Setting",
+						properties: [
+							{ id: "a", type: "number", defaultValue: 5 },
+							{ id: "b", type: "string", defaultValue: "hi" }
+						]
+					}]
+				});
+			var setting = settingsRegistry.getSettings()[0];
+			// 1 argument
+			assert.equal(setting.isDefaults({ a: 0 }), false);
+			assert.equal(setting.isDefaults({ a: 0, b: ":D" }), false);
+			assert.equal(setting.isDefaults({ }), true, "Empty map should be considered as default");
+			assert.equal(setting.isDefaults({ a: 5, b: "hi" }), true);
+			// 2 arguments -- 2nd arg should override default values set in the setting definition
+			var realDefaults = { a: 0, b: "foo"};
+			assert.equal(setting.isDefaults({ a: 99, b: "bar"}, realDefaults), false);
+			assert.equal(setting.isDefaults({ }, realDefaults), true);
+			assert.equal(setting.isDefaults({ a: 0 }, realDefaults), true);
+			assert.equal(setting.isDefaults({ b: "foo" }, realDefaults), true);
+			assert.equal(setting.isDefaults({ a: 0, b: "foo" }, realDefaults), true);
+		});
+	}); // SettingsRegistry
 });
