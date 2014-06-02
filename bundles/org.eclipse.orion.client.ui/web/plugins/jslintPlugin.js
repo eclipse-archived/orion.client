@@ -66,7 +66,7 @@ define([
 			"Stopping, unable to continue"
 		];
 		// All problems are warnings by default
-		fixWith(warnings, "warning", true);
+		fixWith(warnings, "warning");
 		fixWith(errors, "error");
 		return isBogus(error) ? null : error;
 	}
