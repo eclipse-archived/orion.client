@@ -15,3 +15,6 @@ test/.test_workspace/
 
 # Ignore Cloud Foundry support
 **/bundles/org.eclipse.orion.client.cf/*
+
+# Ignore client js tests
+**/bundles/**/js-tests/
