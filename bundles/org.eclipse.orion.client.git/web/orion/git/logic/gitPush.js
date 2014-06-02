@@ -213,7 +213,7 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/git/widgets/Co
 																					function(){
 																						commandInvocation.targetBranch = target;
 																						commandInvocation.items.RemoteLocation = [];
-																						commandInvocation.items.RemoteLocation.push( {GitUrl: target.parent.GitUrl});
+																						commandInvocation.items.RemoteLocation.push( target.parent );
 																						handlePush(options, target.Location, "HEAD",target.Name, false);
 																					},
 																					handleError
@@ -245,7 +245,10 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/git/widgets/Co
 													commandInvocation.targetBranch = item.RemoteLocation[0].Children[0];
 													handlePush(options,item.RemoteLocation[0].Children[0].Location, "HEAD", item.Name, false);
 												},
-												closeCallback : confirmDialogCallback
+												closeCallback : function() {
+													dialog2.destroy();
+													confirmDialogCallback();
+												}
 											});
 										}
 										

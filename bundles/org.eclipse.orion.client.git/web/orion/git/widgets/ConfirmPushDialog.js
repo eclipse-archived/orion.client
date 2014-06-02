@@ -46,12 +46,14 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog'], function(messages, d
 			callback: function(){
 				that.destroy();
 				that.func();
+				that.dialog2.destroy();
 			}, 
 			text: 'OK'}
 		);
-
+		
 		// Start the dialog initialization.
 		this._initialize();
+
 	};
 
 	ConfirmPushDialog.prototype._bindToDom = function(parent) {
