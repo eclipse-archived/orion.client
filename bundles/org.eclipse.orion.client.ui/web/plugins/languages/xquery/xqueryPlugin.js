@@ -18,7 +18,7 @@ define(['orion/plugin', 'orion/editor/stylers/application_xquery/syntax'], funct
 	var headers = {
 		name: "Orion XQuery Tool Support",
 		version: "1.0",
-		description: "This plugin provides Xquery tools support for Orion."
+		description: "This plugin provides XQuery tools support for Orion."
 	};
 	var provider = new PluginProvider(headers);
 
@@ -29,7 +29,7 @@ define(['orion/plugin', 'orion/editor/stylers/application_xquery/syntax'], funct
 		contentTypes: [
 			{	id: "application/xquery",
 				"extends": "text/plain",
-				name: "XQ",
+				name: "XQuery",
 				extension:  ["xq", "xqy", "xquery"]
 			}
 		] 
