@@ -79,22 +79,19 @@ define(['orion/plugin',
 		
 	/**
 	 * Register syntax styling
-	 * TODO There should be a better way, see Bug 432540
 	 */
-	for (var i=mCSS.grammars.length-1; i>=0; i--) {
-		if (mCSS.grammars[i].id === "orion.css"){
-			provider.registerServiceProvider("orion.edit.highlighter", {}, mCSS.grammars[i]);
-			break;
-		}
-	}
-	for (var i=mHTML.grammars.length-1; i>=0; i--) {
-		if (mHTML.grammars[i].id === "orion.html"){
-			provider.registerServiceProvider("orion.edit.highlighter", {}, mHTML.grammars[i]);
-			break;
-		}
-	}
-//	provider.registerServiceProvider("orion.edit.highlighter", {}, mCSS.grammars[mCSS.grammars.length - 1]);
-//	provider.registerServiceProvider("orion.edit.highlighter", {}, mHTML.grammars[mHTML.grammars.length - 1]);
+	var newGrammars = {};
+	mCSS.grammars.forEach(function(current){
+		newGrammars[current.id] = current;
+	});
+	mHTML.grammars.forEach(function(current){
+		newGrammars[current.id] = current;
+	});
+	for (var current in newGrammars) {
+	    if (newGrammars.hasOwnProperty(current)) {
+   			provider.registerService("orion.edit.highlighter", {}, newGrammars[current]);
+  		}
+    }
 
 	provider.connect();
 });

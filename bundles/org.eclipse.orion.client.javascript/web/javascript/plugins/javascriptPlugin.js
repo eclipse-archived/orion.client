@@ -288,10 +288,24 @@ define([
 	/**
 	 * Register syntax styling for js, json and json schema content
 	 */
-	var grammars = mJS.grammars.concat(mJSON.grammars).concat(mJSONSchema.grammars).concat(mEJS.grammars);
-	grammars.forEach(function(current) {
-		provider.registerService("orion.edit.highlighter", {}, current);
-	}.bind(this));
+	var newGrammars = {};
+	mJS.grammars.forEach(function(current){
+		newGrammars[current.id] = current;
+	});
+	mJSON.grammars.forEach(function(current){
+		newGrammars[current.id] = current;
+	});
+	mJSONSchema.grammars.forEach(function(current){
+		newGrammars[current.id] = current;
+	});
+	mEJS.grammars.forEach(function(current){
+		newGrammars[current.id] = current;
+	});
+	for (var current in newGrammars) {
+	    if (newGrammars.hasOwnProperty(current)) {
+   			provider.registerService("orion.edit.highlighter", {}, newGrammars[current]);
+  		}
+    }
 
 	/**
 	 * Register type definitions for known JS libraries
