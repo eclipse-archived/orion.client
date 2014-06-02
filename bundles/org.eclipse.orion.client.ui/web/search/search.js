@@ -65,7 +65,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/browserCompatibility
 		var contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 	
-		var searchOptionsContainer = new mAdvSearchOptContainer.AdvSearchOptContainer("searchBuilder", searcher, serviceRegistry, commandRegistry);
+		var searchOptionsContainer = new mAdvSearchOptContainer.AdvSearchOptContainer("searchBuilder", searcher, serviceRegistry);
 		var searchBuilder = searchOptionsContainer.getRenderer();
 		
 		mGlobalCommands.generateBanner("orion-searchResults", serviceRegistry, commandRegistry, preferences, searcher, searcher, null, false); //$NON-NLS-0$

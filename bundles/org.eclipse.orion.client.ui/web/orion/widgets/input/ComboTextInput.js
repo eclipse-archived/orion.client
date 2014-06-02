@@ -75,8 +75,8 @@ define([
 				this._domNode.removeChild(this._recentEntryButton);
 				this._recentEntryButton = undefined;
 			}
-			
-			this._comboTextInputButtonWrapper = lib.$(".comboTextInputButtonWrapper", this._domNode); //$NON-NLS-0$
+
+			this._comboTextInputButton = lib.$(".comboTextInputButton", this._domNode); //$NON-NLS-0$
 			if (this._hasButton) {
 				this._comboTextInputButton = lib.$(".comboTextInputButton", this._domNode); //$NON-NLS-0$
 				if (this._buttonText) {
@@ -88,8 +88,8 @@ define([
 					}.bind(this)); //$NON-NLS-0$
 				}
 			} else {
-				this._domNode.removeChild(this._comboTextInputButtonWrapper);
-				this._comboTextInputButtonWrapper = undefined;
+				this._domNode.removeChild(this._comboTextInputButton);
+				this._comboTextInputButton = undefined;
 			}
 			
 			if (this._insertBeforeNode) {
@@ -115,17 +115,23 @@ define([
 			
 			if (!this._onRecentEntryDelete) {
 				this._onRecentEntryDelete = function(item, evtTarget) {
-					//TODO investigate why this isn't working and fix it
-					var element = {
-						type: "proposal", 
-						label: item, 
-						value: item
-					};
-					var recentEntryArray = localStorage.getItem(this._localStorageKey);
-					var indexOfElement = recentEntryArray.indexOf(element);
+					var recentEntryString = localStorage.getItem(this._localStorageKey);
+					var recentEntryArray = JSON.parse(recentEntryString);
+					
+					//look for the item in the recentEntryArray
+					var indexOfElement = this._getIndexOfValue(recentEntryArray, item);
+					
 					if (-1 < indexOfElement) {
+						//found the item in the array, remove it and update localStorage
 						recentEntryArray.splice(indexOfElement, 1);
-						localStorage.setItem(this._localStorageKey, recentEntryArray);
+						recentEntryString = JSON.stringify(recentEntryArray);
+						localStorage.setItem(this._localStorageKey, recentEntryString);
+						
+						if(evtTarget) {
+							window.setTimeout(function() {
+								evtTarget.dispatchEvent({type:"inputDataListChanged", deleting: true}); //$NON-NLS-0$
+							}.bind(this), 20);
+						}
 					}
 				}.bind(this);
 			}
@@ -163,11 +169,7 @@ define([
 		setTextInputValue: function(value) {
 			this._textInputNode.value = value;	
 		},
-		
-		getButtonWrapper: function() {
-			return this._comboTextInputButtonWrapper;
-		},
-		
+
 		getButton: function() {
 			return this._comboTextInputButton;	
 		},
@@ -177,7 +179,6 @@ define([
 		},
 		
 		addTextInputValueToRecentEntries: function() {
-			//TODO guard agains adding duplicate entries
 			var value = this.getTextInputValue();
 			if (value) {
 				var recentEntryString = localStorage.getItem(this._localStorageKey);
@@ -187,14 +188,46 @@ define([
 					recentEntryArray = JSON.parse(recentEntryString);
 				}
 				
-				recentEntryArray.push({
-					type: "proposal", 
-					label: value, 
-					value: value
-				});
-				
-				localStorage.setItem(this._localStorageKey, JSON.stringify(recentEntryArray));	
+				var indexOfElement = this._getIndexOfValue(recentEntryArray, value); //check if a duplicate entry exists
+				if (-1 === indexOfElement) {
+					//no duplicate entry found, add new entry to array
+					recentEntryArray.push({
+						type: "proposal", 
+						label: value, 
+						value: value
+					});
+					recentEntryString = JSON.stringify(recentEntryArray);
+					localStorage.setItem(this._localStorageKey, recentEntryString);		
+				}
 			}
+		},
+		
+		/**
+		 * Looks for an entry in the specified recentEntryArray with 
+		 * a value that is equivalent to the specified value parameter.
+		 *  
+		 * @returns The index of the matching entry in the array or -1 
+		 */
+		_getIndexOfValue: function(recentEntryArray, value) {
+			var indexOfElement = -1;
+			
+			recentEntryArray.some(function(entry, index){
+				if (entry.value === value) {
+					indexOfElement = index;
+					return true;
+				}
+				return false;
+			});
+			
+			return indexOfElement;
+		},
+		
+		showButton: function() {
+			this._comboTextInputButton.classList.remove("isHidden"); //$NON-NLS-0$
+		},
+		
+		hideButton: function() {
+			this._comboTextInputButton.classList.add("isHidden"); //$NON-NLS-0$
 		}
 	});
 	return ComboTextInput;

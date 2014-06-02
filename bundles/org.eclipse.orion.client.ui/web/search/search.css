@@ -26,6 +26,7 @@
 }
 
 .replaceWrapperHidden {
+	display: block !important; /* removes the need to also set the width to 0 */
 	max-height: 0; /* for transition */
 }
 

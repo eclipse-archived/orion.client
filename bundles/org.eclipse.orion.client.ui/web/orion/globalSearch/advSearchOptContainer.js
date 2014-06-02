@@ -18,14 +18,13 @@ define([
 	'orion/contentTypes', 
 	'orion/webui/littlelib',
 	'orion/Deferred', 
-	'orion/commands', 
 	'orion/objects',
 	'orion/EventTarget',
 	'text!orion/globalSearch/searchBuilder.html',
 	'orion/PageUtil',
 	'orion/webui/dialogs/DirectoryPrompterDialog',
 	'orion/widgets/input/ComboTextInput'
-], function(messages, mFileClient, mSearchUtils, mContentTypes, lib, Deferred, mCommands, objects, EventTarget, optionTemplate, mPageUtil, DirectoryPrompterDialog, ComboTextInput){
+], function(messages, mFileClient, mSearchUtils, mContentTypes, lib, Deferred, objects, EventTarget, optionTemplate, mPageUtil, DirectoryPrompterDialog, ComboTextInput){
 
 	/**
 	 * @name orion.search.AdvSearchOptRenderer
@@ -33,10 +32,9 @@ define([
 	 * @description The renderer to render all search parameters.
 	 * @param {Dome node} parentDiv.
 	 * @param {orion.search.Searcher} A searcher that knows how to start a search.
-	 * @param {orion.commands.CommandRegistry} commandService
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 */
-	function AdvSearchOptRenderer(parentDiv, searcher, serviceRegistry, commandService) {
+	function AdvSearchOptRenderer(parentDiv, searcher, serviceRegistry) {
 		EventTarget.attach(this);
 		this._parentDiv = parentDiv;
 		this._searcher = searcher;
@@ -46,7 +44,6 @@ define([
 			this._contentTypeService = new mContentTypes.ContentTypeRegistry(this._serviceRegistry);
 		}
 		this.contentTypesCache = this._contentTypeService.getContentTypes();
-		this._commandService = commandService;
         this.fileClient = new mFileClient.FileClient(this._serviceRegistry);
 	}
 	
@@ -188,7 +185,6 @@ define([
 			this._searchTextInputBox = this._searchBox.getTextInputNode();
 			this._searchTextInputBox.placeholder = messages["Type a search term"]; //$NON-NLS-1$ //$NON-NLS-0$
 			
-			this._searchButtonWrapper = this._searchBox.getButtonWrapper();
 			this._recentSearchButton = this._searchBox.getRecentEntryButton();
 			this._recentSearchButton.title = messages["Show previous search terms"]; //$NON-NLS-1$ //$NON-NLS-0$
 			
@@ -333,13 +329,13 @@ define([
 		},
 		
 		_showReplaceField: function() {
-			this._searchButtonWrapper.classList.add("isHidden"); //$NON-NLS-0$
+			this._searchBox.hideButton();
 			this._replaceWrapper.classList.remove("replaceWrapperHidden"); //$NON-NLS-0$
 			this._toggleReplaceLink.innerHTML = messages["Hide Replace"]; //$NON-NLS-0$
 		},
 		
 		_hideReplaceField: function() {
-			this._searchButtonWrapper.classList.remove("isHidden"); //$NON-NLS-0$
+			this._searchBox.showButton();
 			this._replaceWrapper.classList.add("replaceWrapperHidden"); //$NON-NLS-0$
 			this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$
 		},
@@ -384,9 +380,9 @@ define([
 	 * AdvSearchOptContainer is the container for all search options.
 	 * @param {String|DOMElement} parent the parent element for the container, it can be either a DOM element or an ID for a DOM element.
 	 */
-	function AdvSearchOptContainer(parent, searcher, serviceRegistry, commandService) {
+	function AdvSearchOptContainer(parent, searcher, serviceRegistry) {
 		this._parent = lib.node(parent);
-		this._optRenderer = new AdvSearchOptRenderer(this._parent, searcher, serviceRegistry, commandService);
+		this._optRenderer = new AdvSearchOptRenderer(this._parent, searcher, serviceRegistry);
 		this._optRenderer.render();	
 	}
 	

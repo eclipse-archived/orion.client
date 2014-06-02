@@ -43,10 +43,6 @@
 	color: #F58B0F !important;
 }
 
-.comboTextInputButtonWrapper {
-	display: inline-block;
-}
-
 .commandButton.comboTextInputButton {
 	visibility: visible;
 	display: inline-block;
@@ -60,10 +56,9 @@
 	max-width: 150px; /* for transition */
 }
 
-.isHidden > .commandButton.comboTextInputButton {
+.commandButton.comboTextInputButton.isHidden {
 	border-width: 0;
 	max-width: 0;
-	margin: 0;
 	overflow: hidden;
 	padding-left: 0;
 	padding-right: 0;
