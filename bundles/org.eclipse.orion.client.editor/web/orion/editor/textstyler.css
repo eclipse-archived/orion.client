@@ -156,6 +156,10 @@
 	color: #0000c0;
 }
 
+.variable.other {
+	color: #E038AD;
+}
+
 /* CodeMirror styles */
 .cm-meta { color: #00008F; }
 .cm-keyword { font-weight: bold; color: #7F0055; }
