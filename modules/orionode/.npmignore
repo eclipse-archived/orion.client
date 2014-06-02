@@ -1,15 +1,17 @@
+
+
+
+
 # Ignore npm artifacts
-**/node_modules/
+node_modules/
 npm-debug.log
 
 # Ignore any Maven artifacts that creep into the repo
-**/bundles/*/target/*
-
-# Ignore built browser widget until we get it removed from version control
-**/web/browse/
+target/
 
 # Ignore per-user Orionode data
 .workspace/
-build/.temp/
-build/.temp-optimized/
 test/.test_workspace/
+
+# Ignore Cloud Foundry support
+**/bundles/org.eclipse.orion.client.cf/*

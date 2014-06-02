@@ -8,8 +8,8 @@ module.exports = function(grunt) {
 	    // All paths here are relative to Gruntfile.js
 	    configPath = "../../releng/org.eclipse.orion.client.releng/builder/scripts/orion.build.js",
 	    clientPath = "../../",
-	    staging = "build/.temp/",
-	    optimized = "build/.temp-optimized/";
+	    staging = "target/staging/",
+	    optimized = "target/optimized/";
 
 	var orionBuildConfig = util.loadBuildConfig(configPath),
 	    bundles = util.parseBundles(orionBuildConfig, {
