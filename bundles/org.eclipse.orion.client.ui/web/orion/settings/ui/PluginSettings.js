@@ -243,7 +243,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 
 		var sectionHeader = document.createElement('h3'); //$NON-NLS-0$
 		sectionHeader.id = headerId;
-		sectionHeader.className = 'setting-header'; //$NON-NLS-0$
+		// setting-header-generated sets the heading to be 0 width as there are no categories on generated settings pages
+		sectionHeader.className = 'setting-header setting-header-generated'; //$NON-NLS-0$
 //		sectionHeader.textContent = setting.getName(); // TODO nls
 
 		var propertiesElement = document.createElement('div'); //$NON-NLS-0$
@@ -317,7 +318,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 			
 			for (var i=0; i<settings.length; i++) {
 				var sectionId = idPrefix + 'section' + i; //$NON-NLS-0$
-				var section = this._makeSection(parent, sectionId, settings[i], settings[i].getName());
+				var section = this._makeSection(parent, sectionId, settings[i], settings[i].getName() ? settings[i].getName() : ""); //$NON-NLS-0$
 				// Add a class name based on the category (all settings on the page have the same category currently)
 				if(settings[i].category){
 					section.getContentElement().classList.add(settings[i].category + "SettingsTable"); //$NON-NLS-0$

@@ -134,14 +134,20 @@
 .setting-header {
 	margin-top:0px;
 	vertical-align: middle;
-	width: 170px;
+	min-width: 100px;
+	width: 15%;
 	padding-right: 10px;
 	padding-left:10px;
 }
 
+.setting-header-generated {
+	width: 10px;
+	min-width: 5px;
+}
+
 .setting-content {
 	margin: 0;
-	width: 70%;
+	width: 100%;
 	vertical-align: middle;
 }
 
@@ -150,6 +156,7 @@
 }
 
 .setting-label {
+	width: 200px;
 	min-width: 30%;
 	display: inline-block;
 }
