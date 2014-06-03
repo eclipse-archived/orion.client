@@ -94,26 +94,9 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 							if (cloud.space)
 								target.Space = cloud.space;
 							deferred.resolve(target);
-							return;
+						} else {
+							deferred.resolve(null);
 						}
-						
-						preferences.getPreferences('/settingsCF', 1).then(
-							function(settings){
-								var cloud = settings;
-								if (cloud && cloud.get("targetUrl")){
-									var target = {};
-									target.Url = cloud.get("targetUrl");
-									if (cloud.get("manageUrl"))
-										target.ManageUrl = cloud.get("manageUrl");
-									deferred.resolve(target);
-									return;
-								} else {
-									deferred.resolve(null);
-								}
-							}, function(error){
-								deferred.resolve(null);
-							}
-						);
 					}, function(error){
 						deferred.resolve(null);
 					}

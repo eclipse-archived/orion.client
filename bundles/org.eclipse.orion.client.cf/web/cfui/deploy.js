@@ -328,96 +328,21 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						target.Space = cloud.space;
 					deferred.resolve(target);
 					return;
+				} else {
+					var error = {};
+					var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+					error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+					error.Severity = "Warning";
+					deferred.reject(error);
 				}
-				
-				preferences.getPreferences('/settingsCF', 1).then(
-					function(settings){
-						var cloud = settings;
-						if (cloud && cloud.get("targetUrl")){
-							var target = {};
-							target.Url = cloud.get("targetUrl");
-							if (cloud.get("manageUrl"))
-								target.ManageUrl = cloud.get("manageUrl");
-							deferred.resolve(target);
-							return;
-						} else {
-//							deferred.resolve(null);
-							var error = {};
-							var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
-							error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
-							error.Severity = "Warning";
-							deferred.reject(error);
-						}
-					}, function(error){
-						var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
-						error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
-						error.Severity = "Warning";
-						deferred.reject(error);
-//						deferred.resolve(null);
-					}
-				);
 			}, function(error){
 				var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
 				error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
 				error.Severity = "Warning";
 				deferred.reject(error);
-//				deferred.resolve(null);
 			}
 		);
 		return deferred;
-		
-		
-//		var deferred = new Deferred();
-//		
-//		preferences.getPreferences('/settingsCF').then(
-//			function(settings){
-//				var props = config.getProperties() || {};
-//				var cfgTarget = props["app.target"] || ""; //$NON-NLS-0$
-//				var cfgValid = (typeof cfgTarget === 'string' && cfgTarget.length > 0);
-//
-//				var defaultTarget = settings.get("targetUrl");
-//				if (!cfgValid){
-//					props["app.target"] = defaultTarget;
-//					props["app.manage.url"] = settings.get("manageUrl");
-//					config.update(props);
-//				}
-//				
-//				cFService.getTarget().then(function(result) {
-//					var cFTarget = result.Url;
-//					var cFValid = (typeof cFTarget === 'string' && cFTarget.length > 0);
-//					// if cf target is invalid, prompt for target
-//					if (!cFValid) {
-//						if (defaultTarget) {
-//							cFService.setTarget(defaultTarget).then(function (result) {
-//								deferred.resolve(result);					
-//							}, function(error) {
-//								deferred.reject(error);					
-//							});
-//						} else {
-//							var error = {};
-//							var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
-//							error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
-//							error.Severity = "Warning";
-//							deferred.reject(error);
-//						}
-//					} else {
-//						// if cf target doesn't match settings, change settings
-//						if (cFValid && cFTarget !== cfgTarget) {
-//							props["app.target"] = cFTarget;
-//							config.update(props);
-//						}
-//						deferred.resolve({target:cFTarget});
-//					}
-//				}, function (error) {
-//					var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
-//					error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
-//					error.Severity = "Warning";
-//					deferred.reject(error);
-//				});	
-//			}
-//		);
-//
-//		return deferred;
 	}
 
 	function postMsg(status) {

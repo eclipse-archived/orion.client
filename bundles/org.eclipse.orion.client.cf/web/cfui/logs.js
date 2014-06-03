@@ -160,13 +160,6 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 								return;
 							}
 						}
-						if(e.HttpCode === 404 && e.Message === "Target not set"){
-							preferences.getPreferences("/settingsCF").then(function(cfSettings){
-								logParams.Url = cfSettings.get("targetUrl");
-								loadLogs(logParams);
-							});
-							return;
-						}
 
 						handleError(e);
 					});
