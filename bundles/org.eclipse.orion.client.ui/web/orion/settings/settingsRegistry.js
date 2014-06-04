@@ -25,11 +25,10 @@ define([
 	 */
 	function equalsDefaultValue(value, attributeDefinition) {
 		var defaultValue = attributeDefinition.getDefaultValue();
-		var result = value === defaultValue;
-		if (attributeDefinition.getType() === 'string') { //$NON-NLS-0$
-			result = result || (value === '' && defaultValue === null);
-		}
-		return result;
+		if (attributeDefinition.getType() === 'string') //$NON-NLS-0$
+			return value === defaultValue || (value === '' && defaultValue === null);
+		else
+			return value === defaultValue;
 	}
 
 	function getStringOrNull(obj, property) {

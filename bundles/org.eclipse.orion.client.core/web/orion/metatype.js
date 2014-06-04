@@ -25,9 +25,8 @@ define([
 	function MetaTypeRegistry(serviceRegistry) {
 		function forEach(serviceRef, propertyName, func) {
 			var array = serviceRef.getProperty(propertyName);
-			if (array instanceof Array) {
+			if (Array.isArray(array))
 				array.forEach(func);
-			}
 		}
 		var tracker = new ServiceTracker(serviceRegistry, METATYPE_SERVICE); //$NON-NLS-0$
 		var ocdsMap = this.ocdsMap = {}; // OCD Id {String} -> {ObjectClassDefinition}
