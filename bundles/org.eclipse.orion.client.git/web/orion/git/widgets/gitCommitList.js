@@ -153,9 +153,10 @@ define([
 			} else if (parentItem.Type === "CommitRoot") { //$NON-NLS-0$
 				var section = this.section;
 				var progress = section.createProgressMonitor();
+				progress.begin(messages["Getting git log"]);
 				Deferred.when(parentItem.repository || that._getRepository(), function(repository) {
 					var currentBranchMsg = i18nUtil.formatMessage(messages['GettingCurrentBranch'], repository.Name);
-					progress.begin(currentBranchMsg);
+					progress.worked(currentBranchMsg);
 					that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=1&page=1&pageSize=5"), currentBranchMsg).then(function(resp) { //$NON-NLS-0$
 						var currentBranch;
 						resp.Children.some(function(branch) {
@@ -346,6 +347,9 @@ define([
 					that.model.getChildren(root, function(children) {
 						that.myTree.expand(that.model.getId(children[0]));
 						that.myTree.expand(that.model.getId(children[1]));
+						if (that.location) {
+							that.myTree.expand(that.model.getId(children[2]));
+						}
 					});
 				});
 				that.updateCommands();
