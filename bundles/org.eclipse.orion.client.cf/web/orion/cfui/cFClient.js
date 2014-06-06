@@ -227,6 +227,40 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 					url += "?Target=" + JSON.stringify(target);
 				
 				return this._xhrV1("GET", url);
+			},
+			
+			deleteRoute: function(target, domainName, hostName) {
+				var routeObj = {
+					DomainName: domainName,
+					HostName: hostName
+				};
+				
+				var url = require.toUrl("cfapi/routes");
+				url += "?Route=" + encodeURIComponent(JSON.stringify(routeObj));
+				
+				if (target)
+					url += "&Target=" + JSON.stringify(target);
+				
+				return this._xhrV1("DELETE", url);
+			},
+			
+			deleteRouteById: function(target, routeId) {				
+				var url = require.toUrl("cfapi/routes/" + routeId);
+				
+				if (target)
+					url += "&Target=" + JSON.stringify(target);
+				
+				return this._xhrV1("DELETE", url);
+			},
+			
+			deleteOrphanedRoutes: function () {
+				var url = require.toUrl("cfapi/routes/" + routeId);
+				url += "?Orphaned=true";
+				
+				if (target)
+					url += "&Target=" + JSON.stringify(target);
+				
+				return this._xhrV1("DELETE", url);
 			}
 		};
 		
