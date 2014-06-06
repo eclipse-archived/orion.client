@@ -178,6 +178,13 @@ define([
 				case Estraverse.Syntax.ForStatement:
 					this.checkId(node.init);
 					break;
+				case Estraverse.Syntax.ForInStatement:
+                    this.checkId(node.left);
+                    this.checkId(node.right);
+                    break;
+				case Estraverse.Syntax.WithStatement:
+                    this.checkId(node.object);
+                    break;
 			}
 		},
 		

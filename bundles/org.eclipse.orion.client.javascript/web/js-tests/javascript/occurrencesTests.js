@@ -1532,5 +1532,140 @@ define([
 				}
 			});
 		});
+		/**
+		 * Tests computing occurrences for with statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436630
+		 */
+		it('test_with_1', function() {
+			editorContext.text = "var f = 3; with(f) {f = 2;}";
+			return occurrences.computeOccurrences(editorContext, setContext(4, 4)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:16, end:17}, {start:20, end:21}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * Tests computing occurrences for with statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436630
+		 */
+		it('test_with_2', function() {
+			editorContext.text = "var f = 3; with(f) {f = 2;}";
+			return occurrences.computeOccurrences(editorContext, setContext(16, 16)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:16, end:17}, {start:20, end:21}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * Tests computing occurrences for with statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436630
+		 */
+		it('test_with_test_3', function() {
+			editorContext.text = "var f = 3; with(f) {f = 2;}";
+			return occurrences.computeOccurrences(editorContext, setContext(20, 20)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:16, end:17}, {start:20, end:21}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * Tests computing occurrences for for-in statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436630
+		 */
+		it('test_for-in_1', function() {
+			editorContext.text = "var f = 3; for(f in bar) {f = 2;}";
+			return occurrences.computeOccurrences(editorContext, setContext(4, 4)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:15, end:16}, {start:26, end:27}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * Tests computing occurrences for for-in statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436630
+		 */
+		it('test_for-in_2', function() {
+			editorContext.text = "var f = 3; for(f in bar) {f = 2;}";
+			return occurrences.computeOccurrences(editorContext, setContext(15, 15)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:15, end:16}, {start:26, end:27}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * Tests computing occurrences for for-in statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436630
+		 */
+		it('test_for-in_3', function() {
+			editorContext.text = "var f = 3; for(f in bar) {f = 2;}";
+			return occurrences.computeOccurrences(editorContext, setContext(26, 26)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:15, end:16}, {start:26, end:27}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * Tests computing occurrences for for-in statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436630
+		 */
+		it('test_for-in_4', function() {
+			editorContext.text = "var f = 3; for(var q in f) {q = f;}";
+			return occurrences.computeOccurrences(editorContext, setContext(4, 4)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:24, end:25}, {start:32, end:33}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * Tests computing occurrences for for-in statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436630
+		 */
+		it('test_for-in_5', function() {
+			editorContext.text = "var f = 3; for(var q in f) {q = f;}";
+			return occurrences.computeOccurrences(editorContext, setContext(24, 24)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:24, end:25}, {start:32, end:33}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * Tests computing occurrences for for-in statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436630
+		 */
+		it('test_for-in_6', function() {
+			editorContext.text = "var f = 3; for(var q in f) {q = f;}";
+			return occurrences.computeOccurrences(editorContext, setContext(32, 32)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:24, end:25}, {start:32, end:33}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
 	});
 });
