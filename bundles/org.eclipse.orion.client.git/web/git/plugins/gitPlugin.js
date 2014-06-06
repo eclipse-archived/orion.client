@@ -98,7 +98,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 	provider.registerService("orion.page.link.related", null, {
 		id: "eclipse.git.repository",
 		category: "git",
-		order: 10 // Git Repository should be first in the Git category
+		order: 10, // Git Repository should be first in the Git category
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
@@ -151,7 +151,22 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		],
 		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitCloneLocation}"
 	});
-
+	
+	provider.registerService("orion.page.link.related", null, {
+		id: "eclipse.git.repository3",
+		category: "git",
+		order: 10,
+		nameKey: "Git Repository",
+		tooltipKey: "Go to the git repository",
+		nls: "git/nls/gitmessages",
+		validationProperties: [
+			{source: "Location", variableName: "GitCloneLocation"},
+			{source: "Type", match: "Clone"}
+		],
+		force: true,
+		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitCloneLocation}"
+	});
+	
 	// Applies to File objects
 	provider.registerService("orion.page.link.related", null, {
 		id: "eclipse.git.repository", // ref existing orion.navigate.command
