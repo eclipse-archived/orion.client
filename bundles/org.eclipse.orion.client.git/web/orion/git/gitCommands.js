@@ -1144,6 +1144,7 @@ var exports = {};
 						case "FAILED_WRONG_REPOSITORY_STATE": //$NON-NLS-0$
 						case "FAILED_UNMERGED_PATHS": //$NON-NLS-0$
 						case "FAILED_PENDING_CHANGES": //$NON-NLS-0$
+						case "UNCOMMITTED_CHANGES": //$NON-NLS-0$
 							display.Severity = "Error"; //$NON-NLS-0$
 							break;
 						case "STOPPED": //$NON-NLS-0$
@@ -1157,7 +1158,8 @@ var exports = {};
 						display.Message = jsonData.Result;
 					} else {
 						display.HTML = true;
-						display.Message = "<span>" + jsonData.Result + messages["Rebase" + jsonData.Result] + "</span>"; //$NON-NLS-1$ //$NON-NLS-0$ 
+						var msg = messages["Rebase" + jsonData.Result];
+						display.Message = "<span>" + jsonData.Result + (msg ? msg : "") + "</span>"; //$NON-NLS-1$ //$NON-NLS-0$ 
 					}
 					serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 					d.resolve(jsonData);

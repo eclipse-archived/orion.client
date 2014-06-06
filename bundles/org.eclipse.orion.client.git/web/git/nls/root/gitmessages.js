@@ -286,6 +286,7 @@ define({
 	"RebaseFAILED_WRONG_REPOSITORY_STATE": ". Repository state is invalid (i.e. already during rebasing).",
 	"RebaseFAILED_UNMERGED_PATHS": ". Repository contains unmerged paths.",
 	"RebaseFAILED_PENDING_CHANGES": ". Repository contains pending changes. Please commit or stash them.",
+	"RebaseUNCOMMITTED_CHANGES": ". There are uncommitted changes.",
 	"Rebase your commits by removing them from the active branch, ": "Rebase your commits by removing them from the active branch, ",
 	"starting the active branch again based on the latest state of '": "starting the active branch again based on the latest state of '",
 	"and applying each commit again to the updated active branch.": "and applying each commit again to the updated active branch.",
