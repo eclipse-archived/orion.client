@@ -168,6 +168,7 @@ exports.GitLogExplorer = (function() {
 	GitLogExplorer.prototype.display = function(location){
 		
 		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
+		lib.empty(tableNode);
 
 		var titleWrapper = new mSection.Section(tableNode, {
 			id: "commitSection", //$NON-NLS-0$
