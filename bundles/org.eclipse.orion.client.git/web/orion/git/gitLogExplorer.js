@@ -15,6 +15,7 @@ define([
 	'require',
 	'i18n!git/nls/gitmessages',
 	'orion/git/widgets/gitCommitList',
+	'orion/section',
 	'orion/Deferred',
 	'orion/URITemplate',
 	'orion/globalCommands', 
@@ -22,7 +23,7 @@ define([
 	'orion/i18nUtil',
 	'orion/PageUtil',
 	'orion/webui/littlelib'
-], function(require, messages, mGitCommitList, Deferred, URITemplate, mGlobalCommands, mGitCommands, i18nUtil, PageUtil, lib) {
+], function(require, messages, mGitCommitList, mSection, Deferred, URITemplate, mGlobalCommands, mGitCommands, i18nUtil, PageUtil, lib) {
 var exports = {};
 
 var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
@@ -33,31 +34,38 @@ exports.GitLogExplorer = (function() {
 	 * Creates a new Git log explorer.
 	 * @class Git repository explorer
 	 * @name orion.git.GitLogExplorer
-	 * @param registry
-	 * @param commandService
-	 * @param linkService
-	 * @param selection
-	 * @param parentId
-	 * @param actionScopeId
+	 * @param options
+	 * @param options.parentId
+	 * @param options.registry
+	 * @param options.linkService
+	 * @param options.commandService
+	 * @param options.fileClient
+	 * @param options.gitClient
+	 * @param options.progressService
+	 * @param options.preferencesService
+	 * @param options.statusService
+	 * @param options.selection
+	 * @param options.pageNavId
+	 * @param options.actionScopeId
 	 */
-	function GitLogExplorer(serviceRegistry, fileClient, commandService, selection, options, parentId, pageTitleId, toolbarId, selectionToolsId, pageNavId, actionScopeId) {
-		this.registry = serviceRegistry;
-		this.fileClient = fileClient;
-		this.commandService = commandService;
-		this.selection = selection;
-		
-		this.checkbox = options !== null ? options.checkbox : true;
-		this.minimal = options !== null ? options.minimal : false;
-		
-		this.parentId = parentId;
-		this.pageTitleId = pageTitleId;
-		this.toolbarId = toolbarId;
-		this.selectionToolsId = selectionToolsId;
-		this.pageNavId = pageNavId;
-		this.actionScopeId = actionScopeId || options.actionScopeId;
-		
-		this.incomingCommits = [];
-		this.outgoingCommits = [];
+	function GitLogExplorer(options) {
+		options = options || {};
+		this.registry = options.registry;
+		this.fileClient = options.fileClient;
+		this.gitClient = options.gitClient;
+		this.commandService = options.commandService;
+		this.statusService = options.statusService;
+		this.progressService = options.progressService;
+		this.preferencesService = options.preferencesService;
+		this.selection = options.selection;
+		this.checkbox = options.checkbox;
+		this.minimal = options.minimal;
+		this.parentId = options.parentId;
+		this.pageTitleId = options.pageTitleId;
+		this.toolbarId = options.toolbarId;
+		this.selectionToolsId = options.selectionToolsId;
+		this.pageNavId = options.pageNavId;
+		this.actionScopeId = options.actionScopeId;
 	}
 	
 	GitLogExplorer.prototype.getCloneFileUri = function(){
@@ -95,9 +103,9 @@ exports.GitLogExplorer = (function() {
 		var that = this;
 		
 		if(fileURI){		
-			this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileURI, true), "Getting metadata of " + fileURI).then(
+			this.progressService.progress(this.fileClient.read(fileURI, true), "Getting metadata of " + fileURI).then(
 				function(metadata) {
-					this.isDirectory = metadata.Directory;
+					this.isDirectory = this.commitNavigator.isDirectory = metadata.Directory;
 					
 					/* breadcrumb target item */
 					var breadcrumbItem = {};
@@ -154,37 +162,44 @@ exports.GitLogExplorer = (function() {
 		} catch (Exception) {
 			display.Message = error.DetailedMessage || error.Message || error.message;
 		}
-		this.registry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+		this.statusService.setProgressResult(display); //$NON-NLS-0$
 	};
 	
 	GitLogExplorer.prototype.display = function(location){
 		
-		var tableNode = lib.node('table'); //$NON-NLS-0$
-		var contentParent = document.createElement("div");
-		contentParent.className = "sectionTable";
-		tableNode.appendChild(contentParent);
-		var logNode  = document.createElement("div");
-		logNode.id = "logNode";
-		logNode.className = "mainPadding";
-		contentParent.appendChild(logNode);
+		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
+
+		var titleWrapper = new mSection.Section(tableNode, {
+			id: "commitSection", //$NON-NLS-0$
+			title: messages["Commits"],
+			slideout: true,
+			content: '<div class="mainPadding" id="logNode"></div>', //$NON-NLS-0$
+			canHide: true,
+			preferenceService: this.preferencesService
+		}); 
 		
-		var explorer = new mGitCommitList.GitCommitListExplorer({
+		var explorer = this.commitNavigator = new mGitCommitList.GitCommitListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
+			fileClient: this.fileClient,
+			gitClient: this.gitClient,
+			progressService: this.progressService,
+			statusService: this.statusService,
 			selection: this.selection,
 			actionScopeId: this.actionScopeId,
-			parentId: logNode,
+			parentId: "logNode",
 			location: location,
+			section: titleWrapper,
 			handleError: this.handleError,
 			root: {
-				Type: "LogRoot"
+				Type: "CommitRoot"
 			}
 		});
 		var that = this;
 		
 		explorer.display().then(function(result) {
-			that.initTitleBar(result.resource);
-			mGitCommands.updateNavTools(that.registry, that.commandService, that, that.toolbarId, that.selectionToolsId, result.items, that.pageNavId);
+			that.initTitleBar(result);
+			mGitCommands.updateNavTools(that.registry, that.commandService, that, that.toolbarId, that.selectionToolsId, result, that.pageNavId);
 		});
 	};
 	return GitLogExplorer;

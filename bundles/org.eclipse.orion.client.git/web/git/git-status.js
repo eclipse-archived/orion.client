@@ -28,8 +28,8 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/browserCompatibility', 'or
 		new mSshTools.SshService(serviceRegistry);
 		var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
+		var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 		var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
 		themePreferences.apply();
 	
@@ -40,7 +40,21 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/browserCompatibility', 'or
 		var contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 
-		var explorer = new mGitStatusExplorer.GitStatusExplorer(serviceRegistry, commandRegistry, linkService, /* selection */ null, "artifacts", "pageActions", null, "itemLevelCommands"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var explorer = new mGitStatusExplorer.GitStatusExplorer({
+			registry: serviceRegistry,
+			commandService: commandRegistry,
+			fileClient: fileClient,
+			gitClient: gitClient,
+			progressService: progressService,
+			preferencesService: preferences,
+			statusService: statusService,
+			linkService: linkService,
+			selection: null,
+			parentId: "artifacts", //$NON-NLS-0$
+			toolbarId: "pageActions", //$NON-NLS-0$
+			selectionToolsId: null,
+			actionScopeId: "itemLevelCommands" //$NON-NLS-0$
+		});
 		mGlobalCommands.setPageCommandExclusions(["eclipse.git.status2", "eclipse.git.status"]); //$NON-NLS-1$ //$NON-NLS-0$
 		mGlobalCommands.generateBanner("orion-git-status", serviceRegistry, commandRegistry, preferences, searcher, explorer); //$NON-NLS-0$
 

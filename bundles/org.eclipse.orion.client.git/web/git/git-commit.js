@@ -29,8 +29,8 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status'
 			var selection = new mSelection.Selection(serviceRegistry);
 			var commandRegistry = new CommandRegistry.CommandRegistry({selection: selection});
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 			var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
 			themePreferences.apply();
 
@@ -45,8 +45,21 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status'
 				fileService: fileClient
 			});
 
-			var explorer = new mGitCommitExplorer.GitCommitExplorer(serviceRegistry, commandRegistry, linkService, /* selection */null,
-				"artifacts", "pageActions", null, "itemLevelCommands"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var explorer = new mGitCommitExplorer.GitCommitExplorer({
+				registry: serviceRegistry,
+				commandService: commandRegistry,
+				fileClient: fileClient,
+				gitClient: gitClient,
+				statusService: statusService,
+				progressService: progressService,
+				preferencesService: preferences,
+				linkService: linkService,
+				selection: null,
+				parentId: "artifacts", //$NON-NLS-0$
+				toolbarId: "pageActions", //$NON-NLS-0$
+				selectionToolsId: null,
+				actionScopeId: "itemLevelCommands" //$NON-NLS-0$
+			});
 			mGlobalCommands.generateBanner("orion-git-commit", serviceRegistry, commandRegistry, preferences, searcher, explorer); //$NON-NLS-0$
 
 			// define commands

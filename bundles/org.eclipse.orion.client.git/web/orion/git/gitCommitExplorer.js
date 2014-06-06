@@ -43,18 +43,22 @@ define([
 				 * @param sectionToolsId
 				 * @param actionScopeId
 				 */
-				function GitCommitExplorer(registry, commandService, linkService, selection, parentId, toolbarId, selectionToolsId, actionScopeId) {
-					this.parentId = parentId;
-					this.registry = registry;
-					this.commandService = commandService;
-					this.linkService = linkService;
-					this.selection = selection;
-					this.parentId = parentId;
-					this.toolbarId = toolbarId;
-					this.selectionToolsId = selectionToolsId;
+				function GitCommitExplorer(options) {
+					this.parentId = options.parentId;
+					this.registry = options.registry;
+					this.commandService = options.commandService;
+					this.fileClient = options.fileClient;
+					this.gitClient = options.gitClient;
+					this.commandService = options.commandService;
+					this.statusService = options.statusService;
+					this.progressService = options.progressService;
+					this.preferencesService = options.preferencesService;
+					this.linkService = options.linkService;
+					this.selection = options.selection;
+					this.toolbarId = options.toolbarId;
+					this.selectionToolsId = options.selectionToolsId;
+					this.actionScopeId = options.actionScopeId;
 					this.checkbox = false;
-					this.actionScopeId = actionScopeId;
-					mExplorer.createExplorerCommands(commandService);
 				}
 
 				GitCommitExplorer.prototype.handleError = function(error) {
@@ -67,7 +71,7 @@ define([
 					} catch (Exception) {
 						display.Message = error.message;
 					}
-					this.registry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+					this.statusService.setProgressResult(display); //$NON-NLS-0$
 
 					if (error.status === 404) {
 						this.initTitleBar();
@@ -86,10 +90,10 @@ define([
 
 				GitCommitExplorer.prototype.display = function(location) {
 					var that = this;
-					var progressService = this.registry.getService("orion.page.progress"); //$NON-NLS-0$
+					var progressService = this.progressService;
 
 					progressService
-							.showWhile(this.registry.getService("orion.git.provider").getGitClone(location), "Getting repository details").then( //$NON-NLS-0$
+							.showWhile(this.gitClient.getGitClone(location), "Getting repository details").then( //$NON-NLS-0$
 									function(resp) {
 										if (resp.Children.length === 0) {
 											that.initTitleBar();
@@ -99,7 +103,7 @@ define([
 
 											progressService
 													.progress(
-															that.registry.getService("orion.git.provider").getGitClone(resp.CloneLocation), "Getting repository details " + resp.Name).then( //$NON-NLS-0$
+															that.gitClient.getGitClone(resp.CloneLocation), "Getting repository details " + resp.Name).then( //$NON-NLS-0$
 													function(resp) {
 														var repositories = resp.Children;
 														that.initTitleBar(commits[0], repositories[0]);
@@ -198,7 +202,7 @@ define([
 						slideout : true,
 						content : '<div id="tagNode"></div>', //$NON-NLS-0$
 						canHide : true,
-						preferenceService : this.registry.getService("orion.core.preference") //$NON-NLS-0$
+						preferencesService : this.preferencesService
 					});
 
 					var tagsNavigator = new mGitTagList.GitTagListExplorer({
@@ -235,7 +239,7 @@ define([
 						title : messages["Diffs"],
 						content : '<div id="diffNode"></div>', //$NON-NLS-0$
 						canHide : true,
-						preferenceService : this.registry.getService("orion.core.preference") //$NON-NLS-0$
+						preferencesService : this.preferencesService
 					});
 					
 					if (this.diffNavigator) {

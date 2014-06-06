@@ -32,6 +32,9 @@ define([
 	function GitRepoListExplorer(options) {
 		this.registry = options.serviceRegistry;
 		this.commandService = options.commandRegistry;
+		this.fileClient = options.fileClient,
+		this.gitClient = options.gitClient,
+		this.progressService = options.progressService,
 		this.parentId = options.parentId;
 		this.actionScopeId = options.actionScopeId;
 		this.repositories = options.repositories;
@@ -54,16 +57,16 @@ define([
 		_repositorySorter: function(repo1, repo2) {
 			return repo1.Name.localeCompare(repo2.Name);
 		},
-		decorateRepository: function(repository, mode, deferred){
+		decorateRepository: function(repository){
 			var that = this;
-			deferred = deferred || new Deferred();
-			
+			var deferred = new Deferred();
+			var mode = this.mode;
 			if(!mode){
 				mode = "full";
 			}
 			
 			
-			this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.core.file").loadWorkspace(repository.ContentLocation + "?parts=meta"), "Loading workspace info").then( //$NON-NLS-1$ //$NON-NLS-0$
+			this.progressService.progress(this.fileClient.loadWorkspace(repository.ContentLocation + "?parts=meta"), "Loading workspace info").then( //$NON-NLS-1$ //$NON-NLS-0$
 					function(resp){
 						try{
 							repository.Content = {};
@@ -82,12 +85,12 @@ define([
 								return;
 							}
 							
-							that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitStatus(repository.StatusLocation), "Getting status for " + repository.Name).then( //$NON-NLS-0$
+							that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), "Getting status for " + repository.Name).then( //$NON-NLS-0$
 								function(resp){
 									try{
 										repository.Status = resp;
 			
-										that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation), "Getting branches for " + repository.Name).then( //$NON-NLS-0$
+										that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation), "Getting branches for " + repository.Name).then( //$NON-NLS-0$
 											function(resp){
 												try{
 													var branches = resp.Children || [];
@@ -107,7 +110,7 @@ define([
 													var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 													
 													if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
-														that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD"), "Getting incomming commits " + repository.Name).then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+														that.progressService.progress(that.gitClient.getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD"), "Getting incomming commits " + repository.Name).then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 															function(resp){
 																if(resp.Children === undefined) { repository.CommitsToPush = 0; }
 																else { repository.CommitsToPush = resp.Children.length; }
@@ -119,7 +122,7 @@ define([
 															}
 														);
 													} else {
-														that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20"), "Getting outgoing commits " + repository.Name).then(  //$NON-NLS-1$ //$NON-NLS-0$
+														that.progressService.progress(that.gitClient.doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20"), "Getting outgoing commits " + repository.Name).then(  //$NON-NLS-1$ //$NON-NLS-0$
 															function(resp){	
 																if(resp.Children === undefined) { repository.CommitsToPush = 0; }
 																else { repository.CommitsToPush = resp.Children.length; }

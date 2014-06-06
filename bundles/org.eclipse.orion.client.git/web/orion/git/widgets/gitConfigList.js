@@ -25,6 +25,8 @@ define([
 		this.registry = options.registry;
 		this.handleError = options.handleError;
 		this.section = options.section;
+		this.progressService = options.progressService;
+		this.gitClient = options.gitClient;
 	}
 	GitConfigListModel.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitConfigListModel.prototype, /** @lends orion.git.GitConfigListModel.prototype */ {
@@ -36,10 +38,10 @@ define([
 		getChildren: function(parentItem, onComplete){	
 			var that = this;
 			var progress;
-			if (parentItem.Type === "ConfigRoot") {
+			if (parentItem.Type === "ConfigRoot") { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
 				progress.begin(messages["Getting confituration"]);
-				this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitCloneConfig(parentItem.repository.ConfigLocation), "Getting configuration of " + parentItem.repository.Name).then( function(resp){  //$NON-NLS-0$
+				this.progressService.progress(this.gitClient.getGitCloneConfig(parentItem.repository.ConfigLocation), "Getting configuration of " + parentItem.repository.Name).then( function(resp){
 					progress.worked("Rendering configuration"); //$NON-NLS-0$
 					var configurationEntries = resp.Children;
 					
@@ -63,7 +65,7 @@ define([
 			}
 		},
 		getId: function(/* item */ item){
-			if (item.Type === "ConfigRoot") {
+			if (item.Type === "ConfigRoot") { //$NON-NLS-0$
 				return "ConfigRoot"; //$NON-NLS-0$
 			} else {
 				return item.Name;
@@ -84,11 +86,13 @@ define([
 		this.root = options.root;
 		this.section = options.section;
 		this.handleError = options.handleError;
+		this.progressService = options.progressService;
+		this.gitClient = options.gitClient;
 	}
 	GitConfigListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitConfigListExplorer.prototype, /** @lends orion.git.GitConfigListExplorer.prototype */ {
 		display: function() {
-			this.createTree(this.parentId, new GitConfigListModel({root: this.root, registry: this.registry, section: this.section, handleError: this.handleError}));
+			this.createTree(this.parentId, new GitConfigListModel({root: this.root, registry: this.registry, progressService: this.progressService, gitClient: this.gitClient, section: this.section, handleError: this.handleError}));
 			this.updateCommands();
 		},
 		isRowSelectable: function(modelItem) {

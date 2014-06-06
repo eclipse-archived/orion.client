@@ -12,6 +12,7 @@
 define([
 	'require',
 	'i18n!git/nls/gitmessages',
+	'orion/git/widgets/gitChangeList',
 	'orion/git/widgets/gitCommitList',
 	'orion/git/widgets/gitBranchList',
 	'orion/git/widgets/gitConfigList',
@@ -24,7 +25,7 @@ define([
 	'orion/fileUtils',
 	'orion/globalCommands',
 	'orion/Deferred'
-], function(require, messages, mGitCommitList, mGitBranchList, mGitConfigList, mGitTagList, mGitRepoList, mSection, lib, URITemplate, PageUtil, mFileUtils, mGlobalCommands, Deferred) {
+], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitTagList, mGitRepoList, mSection, lib, URITemplate, PageUtil, mFileUtils, mGlobalCommands, Deferred) {
 var exports = {};
 	
 var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
@@ -35,26 +36,33 @@ exports.GitRepositoryExplorer = (function() {
 	 * Creates a new Git repository explorer.
 	 * @class Git repository explorer
 	 * @name orion.git.GitRepositoryExplorer
-	 * @param registry
-	 * @param commandService
-	 * @param linkService
-	 * @param selection
-	 * @param parentId
-	 * @param actionScopeId
+	 * @param options
+	 * @param options.parentId
+	 * @param options.registry
+	 * @param options.linkService
+	 * @param options.commandService
+	 * @param options.fileClient
+	 * @param options.gitClient
+	 * @param options.progressService
+	 * @param options.preferencesService
+	 * @param options.statusService
+	 * @param options.selection
+ 	 * @param options.pageNavId
+	 * @param options.actionScopeId
 	 */
-	function GitRepositoryExplorer(registry, commandService, linkService, selection, parentId, pageNavId, actionScopeId){
-		this.parentId = parentId;
-		this.registry = registry;
-		this.linkService = linkService;
-		this.commandService = commandService;
-		this.gitClient = this.registry.getService("orion.git.provider"); //$NON-NLS-0$
-		this.progressService = this.registry.getService("orion.page.progress"); //$NON-NLS-0$
-		this.preferencesService = this.registry.getService("orion.core.preference"); //$NON-NLS-0$
-		this.messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-		this.selection = selection;
-		this.parentId = parentId;
-		this.pageNavId = pageNavId;
-		this.actionScopeId = actionScopeId;
+	function GitRepositoryExplorer(options) {
+		this.parentId = options.parentId;
+		this.registry = options.registry;
+		this.linkService = options.linkService;
+		this.commandService = options.commandService;
+		this.fileClient = options.fileClient;
+		this.gitClient = options.gitClient;
+		this.progressService = options.progressService;
+		this.preferencesService = options.preferencesService;
+		this.statusService = options.statusService;
+		this.selection = options.selection;
+		this.pageNavId = options.pageNavId;
+		this.actionScopeId = options.actionScopeId;
 		this.checkbox = false;
 	}
 	
@@ -68,7 +76,7 @@ exports.GitRepositoryExplorer = (function() {
 		} catch (Exception) {
 			display.Message = error.DetailedMessage || error.Message || error.message;
 		}
-		this.messageService.setProgressResult(display);
+		this.statusService.setProgressResult(display);
 		
 		if (error.status === 404) {
 			this.initTitleBar();
@@ -158,7 +166,8 @@ exports.GitRepositoryExplorer = (function() {
 					repositories = resp.Children;
 					
 					that.initTitleBar(repositories[0]);
-					that.displayRepositories(repositories, "full"); //$NON-NLS-0$
+					that.displayRepositories(repositories, "mini"); //$NON-NLS-0$
+					that.statusDeferred = that.displayStatus(repositories[0]);
 					that.displayCommits(repositories[0]);
 					that.displayBranches(repositories[0]);
 					that.displayTags(repositories[0]);
@@ -279,6 +288,9 @@ exports.GitRepositoryExplorer = (function() {
 		var repoNavigator = new mGitRepoList.GitRepoListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
+			fileClient: this.fileClient,
+			gitClient: this.gitClient,
+			progressService: this.progressService,
 			parentId: "repositoryNode",
 			actionScopeId: this.actionScopeId,
 			handleError: this.handleError,
@@ -308,6 +320,9 @@ exports.GitRepositoryExplorer = (function() {
 		var branchNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
+			fileClient: this.fileClient,
+			gitClient: this.gitClient,
+			progressService: this.progressService,
 			parentId: "branchNode",
 			actionScopeId: this.actionScopeId,
 			section: titleWrapper,
@@ -339,7 +354,10 @@ exports.GitRepositoryExplorer = (function() {
 		var branchNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
-			parentId:"remoteBranchNode", //hack
+			fileClient: this.fileClient,
+			gitClient: this.gitClient,
+			progressService: this.progressService,
+			parentId:"remoteBranchNode",
 			actionScopeId: this.actionScopeId,
 			section: titleWrapper,
 			handleError: this.handleError,
@@ -351,6 +369,38 @@ exports.GitRepositoryExplorer = (function() {
 		});
 		branchNavigator.display();
 	};
+	
+	// Git status
+		
+	GitRepositoryExplorer.prototype.displayStatus = function(repository){	
+		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
+
+		var titleWrapper = new mSection.Section(tableNode, {
+			id: "statusSection", //$NON-NLS-0$
+			title: messages["ChangedFiles"],
+			slideout: true,
+			content: '<div id="statusNode"></div>', //$NON-NLS-0$
+			canHide: true,
+			preferenceService: this.preferencesService
+		}); 
+		
+		var explorer  = new mGitChangeList.GitChangeListExplorer({
+			serviceRegistry: this.registry,
+			commandRegistry: this.commandService,
+			selection: this.stagedSelection,
+			parentId:"statusNode", 
+			prefix: "all",
+			location: repository.StatusLocation,
+			repository: repository,
+			section: titleWrapper,
+			editableInComparePage: true,
+			handleError: this.handleError,
+			gitClient: this.gitClient,
+			progressService: this.progressService
+		});
+		return explorer.display();
+	};
+	
 
 	// Git commits
 		
@@ -369,6 +419,10 @@ exports.GitRepositoryExplorer = (function() {
 		var explorer = new mGitCommitList.GitCommitListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
+			fileClient: this.fileClient,
+			gitClient: this.gitClient,
+			progressService: this.progressService,
+			statusService: this.statusService,
 			selection: this.selection,
 			actionScopeId: this.actionScopeId,
 			parentId:"commitNode",
@@ -379,7 +433,9 @@ exports.GitRepositoryExplorer = (function() {
 				repository: repository
 			}
 		});
-		explorer.display();
+		this.statusDeferred.then(function() {
+			explorer.display();
+		});
 	};
 	
 	// Git tags
@@ -428,6 +484,9 @@ exports.GitRepositoryExplorer = (function() {
 		var branchNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
+			fileClient: this.fileClient,
+			gitClient: this.gitClient,
+			progressService: this.progressService,
 			parentId:"remoteNode",
 			actionScopeId: this.actionScopeId,
 			section: titleWrapper,
@@ -460,6 +519,9 @@ exports.GitRepositoryExplorer = (function() {
 		var configNavigator = new mGitConfigList.GitConfigListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
+			fileClient: this.fileClient,
+			gitClient: this.gitClient,
+			progressService: this.progressService,
 			parentId:"configNode",
 			actionScopeId: this.actionScopeId,
 			section: titleWrapper,

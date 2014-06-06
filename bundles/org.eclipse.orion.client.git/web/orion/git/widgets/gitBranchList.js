@@ -26,6 +26,8 @@ define([
 		this.registry = options.registry;
 		this.handleError = options.handleError;
 		this.section = options.section;
+		this.progressService = options.progressService;
+		this.gitClient = options.gitClient;
 	}
 	GitBranchListModel.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitBranchListModel.prototype, /** @lends orion.git.GitBranchListModel.prototype */ {
@@ -37,10 +39,11 @@ define([
 		getChildren: function(parentItem, onComplete){	
 			var that = this;
 			var progress;
-			if (parentItem.Type === "LocalRoot") {
+			if (parentItem.Type === "LocalRoot") { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
 				progress.begin("Getting branches");
-				this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitBranch(parentItem.repository.BranchLocation + (parentItem.mode === "full" ? "?commits=1" : "?commits=1&page=1&pageSize=5")), "Getting branches " + parentItem.repository.Name).then(function(resp) { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				this.progressService.progress(this.gitClient.getGitBranch(parentItem.repository.BranchLocation + (parentItem.mode === "full" ? "?commits=1" : "?commits=1&page=1&pageSize=5")), "Getting branches " + parentItem.repository.Name).then(function(resp) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				
 					var branches = resp.Children;
 					branches.forEach(function(item) {
 						item.parent = parentItem;
@@ -51,10 +54,10 @@ define([
 					progress.done();
 					that.handleError(error);
 				});
-			} else if (parentItem.Type === "RemoteRoot") {
+			} else if (parentItem.Type === "RemoteRoot") { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
-				progress.begin("Getting remote branches"); //$NON-NLS-0$
-				this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitRemote(parentItem.repository.RemoteLocation), "Getting remote branches " + parentItem.repository.Name).then(function (resp) { //$NON-NLS-0$
+				progress.begin("Getting remote branches");
+				this.progressService.progress(this.gitClient.getGitRemote(parentItem.repository.RemoteLocation), "Getting remote branches " + parentItem.repository.Name).then(function (resp) {
 					var remotes = resp.Children;
 					remotes.forEach(function(item) {
 						item.parent = parentItem;
@@ -68,10 +71,10 @@ define([
 					progress.done();
 					that.handleError(error);
 				});
-			} else if (parentItem.Type === "Remote") {
+			} else if (parentItem.Type === "Remote") { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
 				progress.begin(messages["Rendering branches"]);
-				this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitRemote(parentItem.Location), "Getting remote branches " + parentItem.Name).then(function (resp) { //$NON-NLS-0$
+				this.progressService.progress(this.gitClient.getGitRemote(parentItem.Location), "Getting remote branches " + parentItem.Name).then(function (resp) {
 					var remotes = resp.Children;
 					remotes.forEach(function(item) {
 						item.parent = parentItem;
@@ -87,7 +90,7 @@ define([
 			}
 		},
 		getId: function(/* item */ item){
-			if (item.Type === "LocalRoot") {
+			if (item.Type === "LocalRoot") { //$NON-NLS-0$
 				return "LocalRoot"; //$NON-NLS-0$
 			} else {
 				return item.Name;
@@ -108,11 +111,13 @@ define([
 		this.root = options.root;
 		this.section = options.section;
 		this.handleError = options.handleError;
+		this.gitClient = options.gitClient;
+		this.progressService = options.progressService;
 	}
 	GitBranchListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitBranchListExplorer.prototype, /** @lends orion.git.GitBranchListExplorer.prototype */ {
 		display: function() {
-			this.createTree(this.parentId, new GitBranchListModel({root: this.root, registry: this.registry, section: this.section, handleError: this.handleError}));
+			this.createTree(this.parentId, new GitBranchListModel({root: this.root, registry: this.registry, progressService: this.progressService, gitClient: this.gitClient, section: this.section, handleError: this.handleError}));
 			this.updateCommands();
 		},
 		isRowSelectable: function(modelItem) {

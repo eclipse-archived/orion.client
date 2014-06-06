@@ -96,7 +96,13 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 				this.domNode.classList.add(aClass);
 			}.bind(this));
 		}
-		
+
+		this.titleActionsNode = document.createElement("div"); //$NON-NLS-0$
+		this.titleActionsNode.id = options.id + "TitleActionsArea"; //$NON-NLS-0$
+		this.titleActionsNode.classList.add("layoutLeft"); //$NON-NLS-0$
+		this.titleActionsNode.classList.add("sectionActions"); //$NON-NLS-0$
+		this.domNode.appendChild(this.titleActionsNode);
+
 		this.titleNode = document.createElement("div"); //$NON-NLS-0$
 		this.titleNode.id = options.id + "Title"; //$NON-NLS-0$
 		this.titleNode.classList.add("sectionAnchor"); //$NON-NLS-0$
@@ -119,9 +125,16 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		this._progressNode.classList.add("sectionProgress"); //$NON-NLS-0$
 		this._progressNode.classList.add("sectionTitle"); //$NON-NLS-0$
 		this._progressNode.classList.add("layoutLeft"); //$NON-NLS-0$
-		this._progressNode.style.visibility = "hidden"; //$NON-NLS-0$
+		this._progressNode.style.display = "none"; //$NON-NLS-0$
 		this._progressNode.textContent = "..."; //$NON-NLS-0$ 
 		this.domNode.appendChild(this._progressNode);
+		
+		this.titleLeftActionsNode = document.createElement("div"); //$NON-NLS-0$
+		this.titleLeftActionsNode.id = options.id + "LeftTitleActionsArea"; //$NON-NLS-0$
+		this.titleLeftActionsNode.classList.add("layoutLeft"); //$NON-NLS-0$
+		this.titleLeftActionsNode.classList.add("sectionActions"); //$NON-NLS-0$
+		this.domNode.appendChild(this.titleLeftActionsNode);
+		
 		// add filter search box
 		var searchbox = document.createElement("div"); //$NON-NLS-0$
 		searchbox.id = options.id + "FilterSearchBox"; //$NON-NLS-0$
@@ -353,7 +366,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		},
 		
 		_setMonitorMessage: function(monitorId, message){
-			this._progressNode.style.visibility = "visible"; //$NON-NLS-0$
+			this._progressNode.style.display = "block"; //$NON-NLS-0$
 			this._loading[monitorId] = message;
 			var progressTitle = "";
 			for(var loadingId in this._loading){
@@ -377,7 +390,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 			}
 			this._progressNode.title = progressTitle;
 			if(progressTitle===""){
-				this._progressNode.style.visibility = "hidden"; //$NON-NLS-0$
+				this._progressNode.style.display = "none"; //$NON-NLS-0$
 			}
 			this._updateExpandedState(false);
 		},

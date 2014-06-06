@@ -446,8 +446,12 @@ exports.ExplorerRenderer = (function() {
 				this._useCheckboxSelection = options.checkbox === undefined ? false : options.checkbox;
 				this.selectionPolicy = options.singleSelection ? "singleSelection" : "";//$NON-NLS-0$
 				this._cachePrefix = options.cachePrefix;
-				this.getCheckedFunc = options.getCheckedFunc;
-				this.onCheckedFunc = options.onCheckedFunc;
+				if (options.getCheckedFunc) {
+					this.getCheckedFunc = options.getCheckedFunc;
+				}
+				if (options.onCheckedFunc) {
+					this.onCheckedFunc = options.onCheckedFunc;
+				}
 				this._noRowHighlighting = options.noRowHighlighting; // Whether to have alternating light/dark rows
 				this._highlightSelection = true;
 				this._treeTableClass = options.treeTableClass || "treetable";  //$NON-NLS-0$
@@ -524,7 +528,7 @@ exports.ExplorerRenderer = (function() {
 				var self = this;
 				check.addEventListener("click", function(evt) { //$NON-NLS-0$
 					var newValue = evt.target.checked ? false : true;
-					self.onCheck(tableRow, evt.target, newValue, true);
+					self.onCheck(tableRow, evt.target, newValue, true, false, item);
 				}, false);
 				return checkColumn;
 			}
@@ -534,7 +538,7 @@ exports.ExplorerRenderer = (function() {
 			return rowId + "selectedState"; //$NON-NLS-0$
 		},
 			
-		onCheck: function(tableRow, checkBox, checked, manually, setSelection){
+		onCheck: function(tableRow, checkBox, checked, manually, setSelection, item){
 			checkBox.checked = checked;
 			if (checked) {
 				checkBox.classList.add("core-sprite-check_on"); //$NON-NLS-0$
@@ -542,7 +546,7 @@ exports.ExplorerRenderer = (function() {
 				checkBox.classList.remove("core-sprite-check_on"); //$NON-NLS-0$
 			}
 			if(this.onCheckedFunc){
-				this.onCheckedFunc(checkBox.rowId, checked, manually);
+				this.onCheckedFunc(checkBox.rowId, checked, manually, item);
 			}
 			if(this.explorer.getNavHandler() && setSelection){
 				this.explorer.getNavHandler().setSelection(this.explorer.getNavDict().getValue(tableRow.id).model, true);	
@@ -719,10 +723,12 @@ exports.ExplorerRenderer = (function() {
 				this.explorer.initNavHandler();			
 			}
 			if (!this._noRowHighlighting){
-				if(lib.$(".sectionTreeTable", this.tableNode.parentNode) || lib.$(".treetable", this.tableNode.parentNode)) {
+				var even = "darkSectionTreeTableRow"; //$NON-NLS-0$
+				var odd = "lightSectionTreeTableRow"; //$NON-NLS-0$
+				if(lib.$(".sectionTreeTable", this.tableNode.parentNode) || lib.$(".treetable", this.tableNode.parentNode)) { //$NON-NLS-1$ //$NON-NLS-0$
 					lib.$$array(".treeTableRow", this.tableNode).forEach(function(node, i) { //$NON-NLS-0$
-						var on = (!(i % 2)) ? "darkSectionTreeTableRow" : "lightSectionTreeTableRow";
-						var off = (on === "darkSectionTreeTableRow") ? "lightSectionTreeTableRow" : "darkSectionTreeTableRow";
+						var on = (!(i % 2)) ? odd : even;
+						var off = (on === odd) ? even : odd;
 						node.classList.add(on);
 						node.classList.remove(off);
 					});
@@ -805,24 +811,27 @@ exports.SelectionRenderer = (function(){
 		tableRow.verticalAlign = "baseline"; //$NON-NLS-0$
 		tableRow.classList.add("treeTableRow"); //$NON-NLS-0$
 
-		var navDict = this.explorer.getNavDict();
-		if(navDict){
-			if (this.explorer.selectionPolicy !== "cursorOnly") {
-				tableRow.classList.add("selectableNavRow"); //$NON-NLS-0$
-			}
-			
-			navDict.addRow(item, tableRow);
-			var self = this;
-			tableRow.addEventListener("click", function(evt) { //$NON-NLS-0$
-				if(self.explorer.getNavHandler()){
-					self.explorer.getNavHandler().onClick(item, evt);
+	
+		if (item.selectable === undefined || item.selectable) {
+			var navDict = this.explorer.getNavDict();
+			if(navDict){
+				if (this.explorer.selectionPolicy !== "cursorOnly") { //$NON-NLS-0$
+					tableRow.classList.add("selectableNavRow"); //$NON-NLS-0$
 				}
-			}, false);
-		}
-		var checkColumn = this.getCheckboxColumn(item, tableRow);
-		if(checkColumn) {
-			checkColumn.classList.add('checkColumn'); //$NON-NLS-0$
-			tableRow.appendChild(checkColumn);
+				
+				navDict.addRow(item, tableRow);
+				var self = this;
+				tableRow.addEventListener("click", function(evt) { //$NON-NLS-0$
+					if(self.explorer.getNavHandler()){
+						self.explorer.getNavHandler().onClick(item, evt);
+					}
+				}, false);
+			}
+			var checkColumn = this.getCheckboxColumn(item, tableRow);
+			if(checkColumn) {
+				checkColumn.classList.add('checkColumn'); //$NON-NLS-0$
+				tableRow.appendChild(checkColumn);
+			}
 		}
 
 		var i = 0;
@@ -844,7 +853,6 @@ exports.SelectionRenderer = (function(){
 			}
 			cell = this.getCellElement(++i, item, tableRow);
 		}
-		
 	};
 
 	/**

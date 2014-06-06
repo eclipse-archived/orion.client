@@ -23,12 +23,12 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/browserCompatibility', 'or
 			var preferences = core.preferences;
 			
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			new mDialogs.DialogService(serviceRegistry);
 			var selection = new mSelection.Selection(serviceRegistry);
 			new mSshTools.SshService(serviceRegistry);
 			var commandService = new mCommandRegistry.CommandRegistry({selection: selection});
-			new mProgress.ProgressService(serviceRegistry, operationsClient, commandService);
+			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandService);
 			var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
 		
 			// Git operations
@@ -37,8 +37,23 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/browserCompatibility', 'or
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, fileService: fileClient, commandService: commandService});
 
 			// Git log explorer
-			var explorer = new mGitLogExplorer.GitLogExplorer(serviceRegistry, fileClient, commandService, selection, 
-					null, "table", "pageTitle", "pageActions", "selectionTools", "pageNavigationActions", "itemLevelCommands");
+			var explorer = new mGitLogExplorer.GitLogExplorer({
+				registry: serviceRegistry,
+				fileClient: fileClient,
+				gitClient: gitClient,
+				statusService: statusService,
+				progressService: progressService,
+				preferencesService: preferences,
+				commandService: commandService,
+				linkService: linkService,
+				selection: selection, 
+				parentId: "table", //$NON-NLS-0$
+				pageTitleId: "pageTitle", //$NON-NLS-0$
+				toolbarId: "pageActions", //$NON-NLS-0$
+				selectionToolsId: "selectionTools", //$NON-NLS-0$
+				pageNavId: "pageNavigationActions", //$NON-NLS-0$
+				actionScopeId: "itemLevelCommands" //$NON-NLS-0$
+			});
 			mGlobalCommands.setPageCommandExclusions(["eclipse.git.remote", "eclipse.git.log"]); //$NON-NLS-1$ //$NON-NLS-0$
 			mGlobalCommands.generateBanner("orion-gitlog", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
 			

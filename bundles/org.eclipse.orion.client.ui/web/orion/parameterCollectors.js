@@ -132,10 +132,24 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 			lib.$$array("textArea", parent).forEach(function(field) { //$NON-NLS-0$
 				commandInvocation.parameters.setValue(field.parameterName, field.value.trim());
 			});
+			var getParameterElement = commandInvocation.parameters.getParameterElement;
+			if (getParameterElement) {
+				commandInvocation.parameters.forEach(function(param) {
+					var field = getParameterElement(param, parent);
+					if (field) {
+						if (field.type === "checkbox") { //$NON-NLS-0$
+							commandInvocation.parameters.setValue(field.parameterName, field.checked);
+						} else if (field.type !== "button") { //$NON-NLS-0$
+							commandInvocation.parameters.setValue(field.parameterName, field.value.trim());
+						} else if (field.type !== "textarea") { //$NON-NLS-0$
+							commandInvocation.parameters.setValue(field.parameterName, field.value.trim());
+						}
+					}
+				});
+			}
 			if (commandInvocation.command.callback) {
 				commandInvocation.command.callback.call(commandInvocation.handler, commandInvocation);
 			}
-
 		},
 		
 		collectParameters: function(commandInvocation,cancelCallback) {
@@ -170,9 +184,12 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 						lib.stop(event);
 					}
 				};
-				commandInvocation.parameters.forEach(function(parm) {
+				
+				var parameters = commandInvocation.parameters;
+				parameters.forEach(function(parm) {
+					var field = parameters.getParameterElement ? parameters.getParameterElement(parm, parameterArea) : null;
 					var label = null;
-					if (parm.label) {
+					if (!field && parm.label) {
 						label = document.createElement("label"); //$NON-NLS-0$
 						label.classList.add("parameterInput"); //$NON-NLS-0$
 						label.setAttribute("for", parm.name + "parameterCollector"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -181,14 +198,15 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 					} 
 					var type = parm.type;
 					var id = parm.name + "parameterCollector"; //$NON-NLS-0$
-					var field;
 					var parent = label || parameterArea;
 					if (type === "text" && typeof(parm.lines) === "number" && parm.lines > 1) { //$NON-NLS-1$ //$NON-NLS-0$
-						field = document.createElement("textarea"); //$NON-NLS-0$
-						field.rows = parm.lines;
-						field.type = "textarea"; //$NON-NLS-0$
-						field.id = id;
-						parent.appendChild(field);
+						if (!field) {
+							field = document.createElement("textarea"); //$NON-NLS-0$
+							field.rows = parm.lines;
+							field.type = "textarea"; //$NON-NLS-0$
+							field.id = id;
+							parent.appendChild(field);
+						}
 						// esc only
 						keyHandler = function(event) {
 							if (event.keyCode === lib.KEY.ESCAPE) {
@@ -197,19 +215,23 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 							}
 						};
 					} else if (parm.type === "boolean") { //$NON-NLS-0$
-						field = document.createElement("input"); //$NON-NLS-0$
-						field.type = "checkbox"; //$NON-NLS-0$
-						field.id = id;
-						
-						parent.appendChild(field);
+						if (!field) {
+							field = document.createElement("input"); //$NON-NLS-0$
+							field.type = "checkbox"; //$NON-NLS-0$
+							field.id = id;
+							
+							parent.appendChild(field);
+						}
 						if (parm.value) {
 							field.checked = true;
 						}
 					} else {
-						field = document.createElement("input"); //$NON-NLS-0$
-						field.type = parm.type;
-						field.id = id;
-						parent.appendChild(field);
+						if (!field) {
+							field = document.createElement("input"); //$NON-NLS-0$
+							field.type = parm.type;
+							field.id = id;
+							parent.appendChild(field);
+						}
 						if (parm.value) {
 							field.value = parm.value;
 						}
@@ -266,7 +288,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 					}, false);
 				}
 				// OK and cancel buttons
-				var ok = makeButton(messages["Submit"], parentDismiss);
+				var ok = makeButton(parameters.getSubmitName ? parameters.getSubmitName(commandInvocation) : messages["Submit"], parentDismiss);
 					ok.addEventListener("click", function() { //$NON-NLS-0$
 					finish(self);
 				}, false);

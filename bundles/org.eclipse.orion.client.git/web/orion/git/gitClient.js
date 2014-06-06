@@ -377,7 +377,7 @@ eclipse.GitService = (function() {
 			return clientDeferred;
 		},
 		
-		resetIndex : function(gitIndexURI, refId) {
+		resetIndex : function(gitIndexURI, refId, mode) {
 			var service = this;
 			
 			var clientDeferred = new Deferred();
@@ -390,7 +390,7 @@ eclipse.GitService = (function() {
 				handleAs : "json", //$NON-NLS-0$
 				data: JSON.stringify({
 					"Commit" : refId, //$NON-NLS-0$
-					"Reset" : "HARD" //$NON-NLS-1$ //$NON-NLS-0$
+					"Reset" : mode ? mode : "HARD" //$NON-NLS-1$ //$NON-NLS-0$
 				})
 			}).then(function(result) {
 				service._getGitServiceResponse(clientDeferred, result);

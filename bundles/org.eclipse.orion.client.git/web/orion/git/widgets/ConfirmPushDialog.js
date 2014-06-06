@@ -28,16 +28,16 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog'], function(messages, d
 		this.modal = true;
 		this.messages = messages;
 		this.location = options.location;
-		this.dialog2 = options.dialog;
+		this.moreCallback = options.moreCallback;
 		this.func = options.func;
 		this._afterHiding = options.closeCallback;
 		
 		this.buttons = [];
-		if (this.dialog2)
+		if (this.moreCallback)
 			this.buttons.push({
 				callback: function(){
 					that.destroy();
-					that.dialog2.show();
+					that.moreCallback();
 				},
 				text: 'More'}
 			);
@@ -58,7 +58,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog'], function(messages, d
 		var header = this.$header;
 		header.appendChild(document.createTextNode("You are going to push to the following remote: " + this.location));
 		header.appendChild(document.createElement("br"));
-		if (this.dialog2)
+		if (this.moreCallback)
 			header.appendChild(document.createTextNode(" Click More to push to another remote or OK to push to default."));
 	};
 	

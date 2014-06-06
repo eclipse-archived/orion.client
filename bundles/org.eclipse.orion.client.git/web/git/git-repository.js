@@ -29,7 +29,7 @@ mBootstrap.startup().then(function(core) {
 	var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
 	var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 	var progress = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
-	new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	
 	// ...
 	var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
@@ -37,12 +37,27 @@ mBootstrap.startup().then(function(core) {
 	var fileClient = new mFileClient.FileClient(serviceRegistry);
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 	
-	var explorer = new mGitRepositoryExplorer.GitRepositoryExplorer(serviceRegistry, commandRegistry, linkService, /* selection */ null, "artifacts", "pageNavigationActions", "itemLevelCommands"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var explorer = new mGitRepositoryExplorer.GitRepositoryExplorer({
+		parentId: "artifacts", //$NON-NLS-0$
+		registry: serviceRegistry,
+		linkService: linkService,
+		commandService: commandRegistry,
+		fileClient: fileClient,
+		gitClient: gitClient,
+		progressService: progress,
+		preferencesService: preferences,
+		statusService: statusService,
+		selection : null,
+		pageNavId: "pageNavigationActions", //$NON-NLS-0$
+		actionScopeId: "itemLevelCommands"  //$NON-NLS-0$
+	});
+	
 	mGlobalCommands.generateBanner("orion-repository", serviceRegistry, commandRegistry, preferences, searcher, explorer); //$NON-NLS-0$
 	
 	// define commands
 	mGitCommands.createFileCommands(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$
 	mGitCommands.createGitClonesCommands(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", fileClient); //$NON-NLS-1$ //$NON-NLS-0$
+	mGitCommands.createGitStatusCommands(serviceRegistry, commandRegistry, explorer, true);
 
 	// define the command contributions - where things appear, first the groups
 	commandRegistry.addCommandGroup("pageActions", "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
@@ -75,6 +90,7 @@ mBootstrap.startup().then(function(core) {
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.mergeSquash", 700); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.rebase", 700); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.resetIndex", 800); //$NON-NLS-1$ //$NON-NLS-0$
+	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.undoCommit", 900); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.removeRemote", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.deleteConfigEntryCommand", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.editConfigEntryCommand", 200); //$NON-NLS-1$ //$NON-NLS-0$

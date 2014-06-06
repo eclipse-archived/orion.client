@@ -12,8 +12,8 @@
 /*globals document define*/
 
 define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/Deferred','orion/git/widgets/CommitDialog',
-        'orion/git/logic/gitCommon', 'orion/i18nUtil'], 
-		function(messages,mCommandRegistry,Deferred,mCommit,mGitCommon,i18nUtil) {
+        'orion/git/logic/gitCommon', 'orion/i18nUtil', 'orion/webui/littlelib'], 
+		function(messages,mCommandRegistry,Deferred,mCommit,mGitCommon,i18nUtil, lib) {
 	
 	var handleProgressServiceResponse = mGitCommon.handleProgressServiceResponse;
 	
@@ -29,7 +29,7 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/Deferred','ori
 		/* Fetches the appropriate commit message when the 'amend' flag is used */
 		var amendEventListener = new mCommandRegistry.CommandEventListener('change', function(event, commandInvocation){ //$NON-NLS-0$
 			var target = event.target;
-			var item = commandInvocation.items.status;
+			var item = commandInvocation.items.status || commandInvocation.handler.status;
 			var commitMessageBox = document.getElementById("name" + "parameterCollector"); //$NON-NLS-0$//$NON-NLS-1$
 				
 			if(target.checked){
@@ -49,11 +49,24 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/Deferred','ori
 			}
 		});
 		
-		var parameters = new mCommandRegistry.ParametersDescription(
-				[new mCommandRegistry.CommandParameter('name', 'text', messages['Commit message:'], "", 4), //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-3$
-				 new mCommandRegistry.CommandParameter('amend', 'boolean', messages['Amend:'], false, null, amendEventListener), //$NON-NLS-0$  //$NON-NLS-1$
-				 new mCommandRegistry.CommandParameter('changeId', 'boolean', messages['ChangeId:'], false)], //$NON-NLS-0$  //$NON-NLS-1$
-				 {hasOptionalParameters: true});
+		var createParameters = function(newLook) {return new mCommandRegistry.ParametersDescription(
+				[
+					new mCommandRegistry.CommandParameter('name', 'text', messages['Commit message:'], "", 4), //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-3$
+					new mCommandRegistry.CommandParameter('amend', 'boolean', newLook ? messages['SmartAmend'] : messages['Amend:'], false, null, amendEventListener), //$NON-NLS-0$  //$NON-NLS-1$
+					new mCommandRegistry.CommandParameter('changeId', 'boolean', newLook ? messages['SmartChangeId'] : messages['ChangeId:'], false) //$NON-NLS-0$  //$NON-NLS-1$
+				],{
+					hasOptionalParameters: true, 
+					getParameterElement: newLook ? function(parm, parmArea) {
+						return lib.$("#"+ parm.name + "parameterCollector", parmArea.parentNode.parentNode);
+					} : null,
+					getSubmitName: newLook ? function(commandInvocation) { 
+						var items = commandInvocation.items;
+						if (!Array.isArray(items)) {
+							items = [items];
+						}
+						return i18nUtil.formatMessage(messages['SmartCountCommit'], items.length);
+					} : null
+				})};
 		
 		var setGitCloneConfig = function(key,value,location) {
 			var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
@@ -112,7 +125,7 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/Deferred','ori
 		var perform = function(data) {
 			var d = new Deferred();
 				
-			var item = data.items.status;
+			var item = data.items.status || data.handler.status;
 			var location = item.Clone.ConfigLocation;
 			var handleError = function(error){
 				handleProgressServiceResponse(error, {}, serviceRegistry);
@@ -200,7 +213,7 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/Deferred','ori
 		};
 		return {
 			perform:perform,
-			parameters:parameters,
+			createParameters:createParameters,
 			displayErrorOnStatus:displayErrorOnStatus,
 			amendEventListener:amendEventListener,
 			setGitCloneConfig: setGitCloneConfig
