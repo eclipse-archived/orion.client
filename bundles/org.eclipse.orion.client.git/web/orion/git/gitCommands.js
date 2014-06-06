@@ -2204,7 +2204,7 @@ var exports = {};
 				var deferred = new Deferred();
 				var dialog = new mApplyPatch.ApplyPatchDialog({
 					title: messages['Apply Patch'],
-					diffLocation: item.DiffLocation,
+					diffLocation: item.DiffLocation || item.repository.DiffLocation,
 					deferred: deferred
 				});
 				dialog.show();
@@ -2253,7 +2253,7 @@ var exports = {};
 				});
 			},
 			visibleWhen : function(item) {
-				return item.Type === "Clone" ; //$NON-NLS-0$
+				return item.Type === "Clone" || item.repository; //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(applyPatchCommand);

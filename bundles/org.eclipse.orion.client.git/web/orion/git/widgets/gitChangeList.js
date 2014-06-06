@@ -384,6 +384,7 @@ define([
 				this.commandService.registerCommandContribution(this.commitActionScope, "eclipse.orion.git.commitCommand", 100); //$NON-NLS-0$
 				this.commandService.registerCommandContribution(titleActionsNode, "orion.explorer.selectAll", 100); //$NON-NLS-0$
 				this.commandService.registerCommandContribution(titleActionsNode, "orion.explorer.deselectAllCommand", 100); //$NON-NLS-0$
+				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 100); //$NON-NLS-0$
 				
 				this.commandService.renderCommands(this.commitActionScope, this.commitActionScope, [], this, "button"); //$NON-NLS-0$
 				this.commandService.renderCommands(selectionNodeScope, selectionNodeScope, [], this, "button", {"Clone" : this.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
