@@ -366,6 +366,7 @@ define({
 	"Abort Rebase": "Abort Rebase",
 	"Discard": "Discard ${0} file(s)",
 	"Your changes to the selected files will be discarded and cannot be recovered.": "Your changes to the selected files will be discarded and cannot be recovered.",
+	"Getting git log": "Getting git log",
 	"Active Branch Log": "Git Log (Active Branch)",
 	"Show the log for the active local branch": "Show the log for the active local branch",
 	"Remote Branch Log": "Git Log (Remote Branch)",

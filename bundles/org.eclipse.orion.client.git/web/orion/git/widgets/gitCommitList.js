@@ -66,7 +66,15 @@ define([
 		},
 		_getLog: function() {
 			var that = this;
-			return that.progressService.progress(that.gitClient.doGitLog(that.location || (that.currentBranch.CommitLocation + pageSizeQuery)), that.location ? "Getting git log" : i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], that.currentBranch.Name)).then(function(resp) { //$NON-NLS-0$
+			var logMsg = that.location ? messages["Getting git log"] : i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], that.currentBranch.Name);
+			return that.progressService.progress(that.gitClient.doGitLog(that.location || (that.currentBranch.CommitLocation + pageSizeQuery)), logMsg).then(function(resp) {
+				if (that.location && resp.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
+					return that.progressService.progress(that.gitClient.doGitLog(resp.CommitLocation), logMsg).then(function(resp) { //$NON-NLS-0$
+						return that.log = resp;
+					}, function(error){
+						that.handleError(error);
+					});
+				}
 				return that.log = resp;
 			}, function(error){
 				that.handleError(error);
