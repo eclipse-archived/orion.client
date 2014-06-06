@@ -441,6 +441,9 @@ define([
 				var incomingActionScope = this.incomingActionScope;
 				var outgoingActionScope = this.outgoingActionScope;
 				
+				if (lib.node(actionsNodeScope)) {
+					commandService.destroy(actionsNodeScope);
+				}
 				if (lib.node(titleLeftActionsNodeScope)) {
 					commandService.destroy(titleLeftActionsNodeScope);
 				}
