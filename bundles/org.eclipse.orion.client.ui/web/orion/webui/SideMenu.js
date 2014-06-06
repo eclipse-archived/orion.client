@@ -262,7 +262,7 @@ define([
 			// Start fresh. This creates menuitems anew
 			this._renderCategories();
 
-			var _self = this, windowHref = window.location.href;
+			var _self = this;
 			// Append link elements to each menu item
 			Object.keys(this.menuitems).forEach(function(catId) {
 				var menuitem = _self.getMenuItem(catId);
@@ -270,10 +270,8 @@ define([
 					return;
 				var bin = _self._getLinksBin(catId).slice();
 				bin = bin.filter(function(link) {
-					// Don't render links that the page has requested we exclude, nor a non-default-link that links to the current page.
-					// However! If the link has force==true then it wants to be shown despite being a no-op link.
-					var source = link.source;
-					if (exclusions.indexOf(source.id) >= 0 || (!source.default && !source.force && link.href === windowHref))
+					// Don't render links that the page has requested we exclude
+					if (exclusions.indexOf(link.source.id) >= 0)
 						return false;
 					return true;
 				});
