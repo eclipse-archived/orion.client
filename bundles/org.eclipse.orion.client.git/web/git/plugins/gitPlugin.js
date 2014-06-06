@@ -49,19 +49,6 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 	});
 	
 	provider.registerService("orion.navigate.command", {}, {
-		nameKey: "Git Status",
-		id: "eclipse.git.status",
-		tooltipKey: "Go to Git Status",
-		nls: "git/nls/gitmessages",
-		validationProperties: [
-			{source: "Git:StatusLocation", variableName: "GitStatusLocation"},
-			{source: "Directory", match: true}
-		],
-		uriTemplate: "{+OrionHome}/git/git-status.html#{,GitStatusLocation}",
-		forceSingleItem: true
-	});
-	
-	provider.registerService("orion.navigate.command", {}, {
 		nameKey: "Git Log",
 		id: "eclipse.git.log",
 		tooltipKey: "Go to Git Log",
@@ -109,23 +96,9 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 	});
 
 	provider.registerService("orion.page.link.related", null, {
-		id: "eclipse.git.status",
+		id: "eclipse.git.repository",
 		category: "git",
-		order: 10 // Git Status should be first in the Git category
-	});
-	
-	provider.registerService("orion.page.link.related", null, {
-		nameKey: "Git Status",
-		id: "eclipse.git.status2",
-		tooltipKey: "Go to Git Status",
-		nls: "git/nls/gitmessages",
-		category: "git",
-		order: 10,
-		validationProperties: [{
-			source: "StatusLocation|Clone:StatusLocation", 
-			variableName: "GitStatusLocation"
-		}],
-		uriTemplate: "{+OrionHome}/git/git-status.html#{,GitStatusLocation}"
+		order: 10 // Git Repository should be first in the Git category
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
@@ -168,6 +141,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 	provider.registerService("orion.page.link.related", null, {
 		id: "eclipse.git.repository2",
 		category: "git",
+		order: 10,
 		nameKey: "Git Repository",
 		tooltipKey: "Go to the git repository",
 		nls: "git/nls/gitmessages",
