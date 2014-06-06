@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2009, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -124,6 +124,8 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 						if (field.orionType && field.name && jsonData[field.name]) {
 							if (field.orionType === "DateLong") { //$NON-NLS-0$
 								field.textContent = new Date(parseInt(jsonData[field.name], 10)).toLocaleString();
+							} else if (field.orionType === "Text") { //$NON-NLS-0$
+								field.textContent = jsonData[field.name];
 							} else if (field.orionType === "CheckBox") { //$NON-NLS-0$
 								field.checked = jsonData[field.name];
 							} else {
@@ -153,6 +155,16 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 			var label, field;
 			switch (json.type) {
 				case "DateLong": //$NON-NLS-0$
+					label = document.createElement("label"); //$NON-NLS-0$
+					label.appendChild(document.createTextNode(json.label || ""));
+					field = document.createElement("span"); //$NON-NLS-0$
+					field.className = "userprofile userInput"; //$NON-NLS-0$
+					field.id = json.props.id;
+					field.name = json.props.name;
+					label.appendChild(field);
+					node.appendChild(label);
+					break;
+				case "Text": //$NON-NLS-0$
 					label = document.createElement("label"); //$NON-NLS-0$
 					label.appendChild(document.createTextNode(json.label || ""));
 					field = document.createElement("span"); //$NON-NLS-0$

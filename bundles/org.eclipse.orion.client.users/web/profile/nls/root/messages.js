@@ -23,6 +23,7 @@ define({
 	"Actions": "Actions",
 	"Name": "Name",
 	"Last Login": "Last Login",
+	"Disk Usage": "Disk Usage",
 	"Delete": "Delete",
 	"Delete user ": "Delete user ",
 	"Do you want to delete user ${0}?": "Do you want to delete user ${0}?",
@@ -51,5 +52,6 @@ define({
 	"Email:" : "Email:",
 	"Create" : "Create",
 	"Set Password" : "Set Password",
-	"Permission to view user list denied." : "Permission to view user list denied."
+	"Permission to view user list denied." : "Permission to view user list denied.",
+	"${0} ( last calculated ${1} )" : "${0} ( last calculated ${1} )"
 });
