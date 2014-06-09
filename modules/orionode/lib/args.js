@@ -11,7 +11,6 @@
 /*global console exports process require*/
 /*jslint regexp:false*/
 var async = require('../lib/async');
-var compat = require('./compat');
 var fs = require('fs');
 var path = require('path');
 var dfs = require('deferred-fs'), Deferred = dfs.Deferred;

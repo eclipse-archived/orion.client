@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*jslint node:true*/
-require('./compat');
 var connect = require('connect');
 var fs = require('fs');
 var path = require('path');
