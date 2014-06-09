@@ -19,7 +19,6 @@ var connect = require('connect'),
     orionStatic = require('./lib/orion_static');
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
-    NODE_MODULES = path.normalize(path.join(__dirname, 'node_modules/')),
     ORION_CLIENT = path.normalize(path.join(__dirname, '../../'));
 
 function handleError(err) {
@@ -35,9 +34,7 @@ function startServer(options) {
 
 		var app = connect()
 			// static code
-			.use(orionNodeStatic(path.normalize(path.join(LIBS, 'orionode.client/')), {
-				socketIORoot: path.resolve(NODE_MODULES, 'socket.io-client/')
-			}))
+			.use(orionNodeStatic(path.normalize(path.join(LIBS, 'orionode.client/'))))
 			.use(orionStatic({
 				orionClientRoot: ORION_CLIENT,
 				maxAge: options.maxAge

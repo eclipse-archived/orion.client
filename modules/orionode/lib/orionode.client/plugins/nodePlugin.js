@@ -9,8 +9,14 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global console define URL XMLHttpRequest window*/
-define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socketIO/socket.io'],
-		function(PluginProvider, xhr, Deferred, url, io) {
+define([
+	'orion/plugin',
+	'orion/xhr',
+	'orion/Deferred',
+	'socket.io/socket.io',
+	'orion/URL-shim', // no exports
+], function(PluginProvider, xhr, Deferred, io) {
+
 	function fromJson(xhrResult) {
 		return JSON.parse(xhrResult.response);
 	}
