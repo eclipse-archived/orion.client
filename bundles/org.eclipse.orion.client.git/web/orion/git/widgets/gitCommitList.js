@@ -157,9 +157,9 @@ define([
 				Deferred.when(parentItem.repository || that._getRepository(), function(repository) {
 					var currentBranchMsg = i18nUtil.formatMessage(messages['GettingCurrentBranch'], repository.Name);
 					progress.worked(currentBranchMsg);
-					that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=1&page=1&pageSize=5"), currentBranchMsg).then(function(resp) { //$NON-NLS-0$
-						var currentBranch;
-						resp.Children.some(function(branch) {
+					Deferred.when(repository.Branches || that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=1&page=1&pageSize=5"), currentBranchMsg), function(resp) { //$NON-NLS-0$
+						var currentBranch, branches = resp.Children || resp;
+						branches.some(function(branch) {
 							if (branch.Current) {
 								currentBranch = branch;
 								return true;
@@ -179,7 +179,7 @@ define([
 							return;
 						}
 						repository.ActiveBranch = currentBranch.CommitLocation;
-						repository.Branches = resp.Children;
+						repository.Branches = branches;
 						var localBranch = that.getLocalBranch();
 						var remoteBranch = that.getRemoteBranch();
 						if (localBranch) {

@@ -16,8 +16,9 @@ define([
 	'orion/explorers/explorer',
 	'orion/URITemplate',
 	'orion/i18nUtil',
+	'orion/Deferred',
 	'orion/objects'
-], function(messages, mExplorer, URITemplate, i18nUtil, objects) {
+], function(messages, mExplorer, URITemplate, i18nUtil, Deferred, objects) {
 
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 
@@ -42,14 +43,10 @@ define([
 			if (parentItem.Type === "LocalRoot") { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
 				progress.begin("Getting branches");
-				this.progressService.progress(this.gitClient.getGitBranch(parentItem.repository.BranchLocation + (parentItem.mode === "full" ? "?commits=1" : "?commits=1&page=1&pageSize=5")), "Getting branches " + parentItem.repository.Name).then(function(resp) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				
-					var branches = resp.Children;
-					branches.forEach(function(item) {
-						item.parent = parentItem;
-					});
+				var repository = parentItem.repository;
+				Deferred.when(repository.Branches || this.progressService.progress(this.gitClient.getGitBranch(parentItem.repository.BranchLocation + (parentItem.mode === "full" ? "?commits=1" : "?commits=1&page=1&pageSize=5")), "Getting branches " + parentItem.repository.Name), function(resp) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					progress.done();
-					onComplete(branches);
+					onComplete(that.processChildren(parentItem, resp.Children || resp));
 				}, function(error){
 					progress.done();
 					that.handleError(error);
@@ -58,15 +55,12 @@ define([
 				progress = this.section.createProgressMonitor();
 				progress.begin("Getting remote branches");
 				this.progressService.progress(this.gitClient.getGitRemote(parentItem.repository.RemoteLocation), "Getting remote branches " + parentItem.repository.Name).then(function (resp) {
-					var remotes = resp.Children;
-					remotes.forEach(function(item) {
-						item.parent = parentItem;
-					});
 					progress.done();
+					var remotes = resp.Children;
+					onComplete(that.processChildren(parentItem, remotes));
 					if (remotes.length === 0){
 						this.section.setTitle(messages["No Remote Branches"]);
 					}
-					onComplete(remotes);
 				}, function(error){
 					progress.done();
 					that.handleError(error);
@@ -75,12 +69,8 @@ define([
 				progress = this.section.createProgressMonitor();
 				progress.begin(messages["Rendering branches"]);
 				this.progressService.progress(this.gitClient.getGitRemote(parentItem.Location), "Getting remote branches " + parentItem.Name).then(function (resp) {
-					var remotes = resp.Children;
-					remotes.forEach(function(item) {
-						item.parent = parentItem;
-					});
 					progress.done();
-					onComplete(remotes);
+					onComplete(that.processChildren(parentItem, resp.Children));
 				}, function(error){
 					progress.done();
 					that.handleError(error);
@@ -88,6 +78,13 @@ define([
 			} else {
 				onComplete([]);
 			}
+		},
+		processChildren: function(parentItem, children) {
+			children.forEach(function(item) {
+				item.parent = parentItem;
+			});
+			parentItem.children = children;
+			return children;
 		},
 		getId: function(/* item */ item){
 			if (item.Type === "LocalRoot") { //$NON-NLS-0$
