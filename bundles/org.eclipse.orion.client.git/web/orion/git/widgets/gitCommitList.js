@@ -555,10 +555,9 @@ define([
 					
 					horizontalBox.classList.add("toolComposite"); //$NON-NLS-0$
 					var slideoutFragment = mHTMLFragments.slideoutHTMLFragment(actionsArea.id);
-					var range = document.createRange();
-					range.selectNode(horizontalBox);
-					slideoutFragment = range.createContextualFragment(slideoutFragment);
-					horizontalBox.appendChild(slideoutFragment);
+					var slideoutDiv = document.createElement("div"); //$NON-NLS-0$
+					slideoutDiv.innerHTML = slideoutFragment;
+					horizontalBox.appendChild(slideoutDiv);
 				} else {
 					sectionItem.className = "sectionTableItem"; //$NON-NLS-0$
 					if (commit.AuthorImage) {
