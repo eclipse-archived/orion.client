@@ -1667,5 +1667,50 @@ define([
 				}
 			});
 		});
+		/**
+		 * Tests computing occurrences for while statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_while_1', function() {
+			editorContext.text = "var f = 3; while(f) {var q = f;}";
+			return occurrences.computeOccurrences(editorContext, setContext(4, 4)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:17, end:18}, {start:29, end:30}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * Tests computing occurrences for while statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_while_2', function() {
+			editorContext.text = "var f = 3; while(f) {var q = f;}";
+			return occurrences.computeOccurrences(editorContext, setContext(17, 17)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:17, end:18}, {start:29, end:30}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * Tests computing occurrences for while statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_while_3', function() {
+			editorContext.text = "var f = 3; while(f) {var q = f;}";
+			return occurrences.computeOccurrences(editorContext, setContext(29, 29)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:17, end:18}, {start:29, end:30}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
 	});
 });

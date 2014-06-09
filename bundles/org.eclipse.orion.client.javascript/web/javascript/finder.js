@@ -100,9 +100,6 @@ define([
 				case Estraverse.Syntax.UnaryExpression:
 					this.checkId(node.argument);
 					break;
-				case Estraverse.Syntax.IfStatement:
-					this.checkId(node.test);
-					break;
 				case Estraverse.Syntax.SwitchStatement:
 					this.checkId(node.discriminant);
 					break;
@@ -172,7 +169,9 @@ define([
 						}
 					}
 					break;
+				case Estraverse.Syntax.IfStatement:
 				case Estraverse.Syntax.DoWhileStatement:
+				case Estraverse.Syntax.WhileStatement:
 					this.checkId(node.test);
 					break;
 				case Estraverse.Syntax.ForStatement:
