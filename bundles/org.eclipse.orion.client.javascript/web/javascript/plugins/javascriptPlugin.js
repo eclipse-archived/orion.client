@@ -184,10 +184,10 @@ define([
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
-						{	id: "validate_curly",  //$NON-NLS-0$
-							nameKey: 'curly',  //$NON-NLS-0$
+						{	id: "validate_eqeqeq",  //$NON-NLS-0$
+							nameKey: 'eqeqeq',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: ignore,
+							defaultValue: warning,
 							options: severities
 						},
 						{	id: "validate_debugger",  //$NON-NLS-0$
@@ -196,22 +196,34 @@ define([
 							defaultValue: warning,
 							options: severities
 						},
+						{	id: "validate_eval",  //$NON-NLS-0$
+							nameKey: 'noEval',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: ignore,
+							options: severities
+						},
 						{	id: "validate_dupe_obj_keys",  //$NON-NLS-0$
 							nameKey: 'noDupeKeys',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
 							defaultValue: error,
 							options: severities
 						},
-						{	id: "validate_eqeqeq",  //$NON-NLS-0$
-							nameKey: 'eqeqeq',  //$NON-NLS-0$
+						{	id: "validate_use_before_define",  //$NON-NLS-0$
+							nameKey: 'useBeforeDefine',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
 							defaultValue: warning,
 							options: severities
 						},
-						{	id: "validate_eval",  //$NON-NLS-0$
-							nameKey: 'noEval',  //$NON-NLS-0$
+						{	id: "validate_new_parens",  //$NON-NLS-0$
+							nameKey: 'newParens',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: ignore,
+							defaultValue: error,
+							options: severities
+						},
+						{	id: "validate_use_isnan",  //$NON-NLS-0$
+							nameKey: 'useIsNaN',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: error,
 							options: severities
 						},
 						{	id: "validate_func_decl",  //$NON-NLS-0$
@@ -226,28 +238,10 @@ define([
 							defaultValue: ignore,
 							options: severities
 						},
-						{	id: "validate_use_isnan",  //$NON-NLS-0$
-							nameKey: 'useIsNaN',  //$NON-NLS-0$
+						{	id: "validate_curly",  //$NON-NLS-0$
+							nameKey: 'curly',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: error,
-							options: severities
-						},
-						{	id: "validate_no_unreachable",  //$NON-NLS-0$
-							nameKey: 'noUnreachable',  //$NON-NLS-0$
-							type: "number",  //$NON-NLS-0$
-							defaultValue: error,
-							options: severities
-						},
-						{	id: "validate_new_parens",  //$NON-NLS-0$
-							nameKey: 'newParens',  //$NON-NLS-0$
-							type: "number",  //$NON-NLS-0$
-							defaultValue: error,
-							options: severities
-						},
-						{	id: "validate_no_redeclare",  //$NON-NLS-0$
-							nameKey: 'varRedecl',  //$NON-NLS-0$
-							type: "number",  //$NON-NLS-0$
-							defaultValue: warning,
+							defaultValue: ignore,
 							options: severities
 						},
 						{	id: "validate_no_undef",  //$NON-NLS-0$
@@ -274,18 +268,18 @@ define([
 							defaultValue: warning,
 							options: severities
 						},
-						{	id: "validate_use_before_define",  //$NON-NLS-0$
-							nameKey: 'useBeforeDefine',  //$NON-NLS-0$
-							type: "number",  //$NON-NLS-0$
-							defaultValue: warning,
-							options: severities
-						},
-						{	id: "validate_use_isnan",  //$NON-NLS-0$
-							nameKey: 'useIsNaN',  //$NON-NLS-0$
+						{	id: "validate_no_unreachable",  //$NON-NLS-0$
+							nameKey: 'noUnreachable',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
 							defaultValue: error,
 							options: severities
 						},
+						{	id: "validate_no_redeclare",  //$NON-NLS-0$
+							nameKey: 'varRedecl',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: warning,
+							options: severities
+						}
 					]
 				}
 			]
