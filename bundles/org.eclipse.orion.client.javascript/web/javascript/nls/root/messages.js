@@ -16,7 +16,7 @@ define({
 	'sourceOutline' : 'Source Outline', //$NON-NLS-0$  //$NON-NLS-1$
 	'sourceOutlineTitle': 'JavaScript source outline',  //$NON-NLS-0$  //$NON-NLS-1$
 	'contentAssist' : 'JavaScript content assist', //$NON-NLS-0$  //$NON-NLS-1$
-	'eslintValidator' : 'ESLint Validator', //$NON-NLS-0$  //$NON-NLS-1$
+	'eslintValidator' : 'JavaScript Validator', //$NON-NLS-0$  //$NON-NLS-1$
 	'curly' : 'Statements not enclosed in braces', //$NON-NLS-0$  //$NON-NLS-1$
 	'eqeqeq' : 'Discouraged \'==\' use', //$NON-NLS-0$  //$NON-NLS-1$
 	'noDebugger' : 'Discouraged \'debugger\' statement use', //$NON-NLS-0$  //$NON-NLS-1$
@@ -35,7 +35,7 @@ define({
 	'missingSemi' : 'Missing semicolons', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedVars' : 'Unused variables', //$NON-NLS-0$  //$NON-NLS-1$
 	'varRedecl' : 'Variable re-declarations', //$NON-NLS-0$  //$NON-NLS-1$
-	'undefMember' : 'Undefined member use', //$NON-NLS-0$  //$NON-NLS-1$
+	'undefMember' : 'Undeclared global reference', //$NON-NLS-0$  //$NON-NLS-1$
 	'unnecessarySemis' : 'Unnecessary semicolons', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedParams' : 'Unused parameters', //$NON-NLS-0$  //$NON-NLS-1$
 	'generateDocName' : 'Generate Element Comment',  //$NON-NLS-0$  //$NON-NLS-1$
