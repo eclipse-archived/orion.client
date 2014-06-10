@@ -39,12 +39,13 @@ define([
 		},
 		getChildren: function(parentItem, onComplete){	
 			var that = this;
-			var progress;
+			var progress, msg;
 			if (parentItem.Type === "LocalRoot") { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
-				progress.begin("Getting branches");
-				var repository = parentItem.repository;
-				Deferred.when(repository.Branches || this.progressService.progress(this.gitClient.getGitBranch(parentItem.repository.BranchLocation + (parentItem.mode === "full" ? "?commits=1" : "?commits=1&page=1&pageSize=5")), "Getting branches " + parentItem.repository.Name), function(resp) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var repository = parentItem.repository || parentItem.parent.repository;
+				msg = i18nUtil.formatMessage(messages["Getting remote branches"], repository.Name);
+				progress.begin(msg);
+				Deferred.when(repository.Branches || this.progressService.progress(this.gitClient.getGitBranch(repository.BranchLocation + (parentItem.mode === "full" ? "?commits=1" : "?commits=1&page=1&pageSize=5")), msg), function(resp) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					progress.done();
 					onComplete(that.processChildren(parentItem, resp.Children || resp));
 				}, function(error){
@@ -53,10 +54,11 @@ define([
 				});
 			} else if (parentItem.Type === "RemoteRoot") { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
-				progress.begin("Getting remote branches");
-				this.progressService.progress(this.gitClient.getGitRemote(parentItem.repository.RemoteLocation), "Getting remote branches " + parentItem.repository.Name).then(function (resp) {
+				msg = i18nUtil.formatMessage(messages["Getting remote branches"], parentItem.repository.Name);
+				this.progressService.progress(this.gitClient.getGitRemote(parentItem.repository.RemoteLocation), msg).then(function (resp) {
 					progress.done();
 					var remotes = resp.Children;
+					remotes.unshift({Type: "LocalRoot", Name: messages["Local"]}); //$NON-NLS-0$
 					onComplete(that.processChildren(parentItem, remotes));
 					if (remotes.length === 0){
 						this.section.setTitle(messages["No Remote Branches"]);
@@ -67,8 +69,9 @@ define([
 				});
 			} else if (parentItem.Type === "Remote") { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
-				progress.begin(messages["Rendering branches"]);
-				this.progressService.progress(this.gitClient.getGitRemote(parentItem.Location), "Getting remote branches " + parentItem.Name).then(function (resp) {
+				msg = i18nUtil.formatMessage(messages["Getting remote branches"], parentItem.Name);
+				progress.begin(msg);
+				this.progressService.progress(this.gitClient.getGitRemote(parentItem.Location), msg).then(function (resp) {
 					progress.done();
 					onComplete(that.processChildren(parentItem, resp.Children));
 				}, function(error){
@@ -127,23 +130,19 @@ define([
 			var root = this.root;
 			var section = this.section;
 			var actionsNodeScope = section.actionsNode.id;
-			if (root.Type === "LocalRoot") {
-				if (root.mode !== "full" /*&& branches.length !== 0*/){ //$NON-NLS-0$
-					this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
-					this.commandService.renderCommands(actionsNodeScope, actionsNodeScope, 
-						{"ViewAllLink":repoTemplate.expand({resource: root.repository.BranchLocation}), "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all local and remote tracking branches"]}, this, "button"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				}
-				
-				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.addBranch", 200); //$NON-NLS-0$
-				this.commandService.renderCommands(actionsNodeScope, actionsNodeScope, root.repository, this, "button"); //$NON-NLS-0$
-			} else {
-				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.addRemote", 100); //$NON-NLS-0$
-				this.commandService.renderCommands(actionsNodeScope, actionsNodeScope, root.repository, this, "button"); //$NON-NLS-0$
+			if (root.mode !== "full" /*&& branches.length !== 0*/){ //$NON-NLS-0$
+				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
+				this.commandService.renderCommands(actionsNodeScope, actionsNodeScope, 
+					{"ViewAllLink":repoTemplate.expand({resource: root.repository.BranchLocation}), "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all local and remote tracking branches"]}, this, "button"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
+			
+			this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.addBranch", 200); //$NON-NLS-0$
+			this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.addRemote", 100); //$NON-NLS-0$
+			this.commandService.renderCommands(actionsNodeScope, actionsNodeScope, root.repository, this, "button"); //$NON-NLS-0$
 		}
 	});
 	
-	function GitBranchListRenderer(options, explorer) {
+	function GitBranchListRenderer(options) {
 		mExplorer.SelectionRenderer.apply(this, arguments);
 		this.registry = options.registry;
 	}
@@ -157,82 +156,59 @@ define([
 					div = document.createElement("div"); //$NON-NLS-0$
 					div.className = "sectionTableItem lightTreeTableRow"; //$NON-NLS-0$
 					td.appendChild(div);
-					var horizontalBox = document.createElement("div");
-					horizontalBox.style.overflow = "hidden";
+					var horizontalBox = document.createElement("div"); //$NON-NLS-0$
+					horizontalBox.style.overflow = "hidden"; //$NON-NLS-0$
 					div.appendChild(horizontalBox);	
-					var actionsArea, detailsView, title, description;
-					if (item.parent.Type === "LocalRoot") {
+					var actionsID, title, description, titleClass;
+					if (item.parent.Type === "LocalRoot") { //$NON-NLS-0$
 						var branch = item;
 						if (branch.Current){
-							var span = document.createElement("span");
-							span.className = "sectionIcon gitImageSprite git-sprite-branch-active";
+							var span = document.createElement("span"); //$NON-NLS-0$
+							span.className = "sectionIcon gitImageSprite git-sprite-branch-active"; //$NON-NLS-0$
 							horizontalBox.appendChild(span);
 						}
 	
-						detailsView = document.createElement("div");
-						detailsView.className = "stretch";
-						horizontalBox.appendChild(detailsView);
-				
-						title = document.createElement("span");
-						title.className = (branch.Current ? "activeBranch" : "");
-						title.textContent = branch.Name;
-						detailsView.appendChild(title);
+						titleClass = branch.Current ? "activeBranch" : ""; //$NON-NLS-0$
 				
 						var commit = branch.Commit.Children[0];
-						
 						var tracksMessage = ((branch.RemoteLocation.length && branch.RemoteLocation.length === 1 && branch.RemoteLocation[0].Children.length && branch.RemoteLocation[0].Children.length === 1) ? 
 								i18nUtil.formatMessage(messages["tracks ${0}, "], branch.RemoteLocation[0].Children[0].Name) : messages["tracks no branch, "]);
-								
-						description = document.createElement("div");
-						description.textContent = tracksMessage + i18nUtil.formatMessage(messages["last modified ${0} by ${1}"], new Date(commit.Time).toLocaleString(), //$NON-NLS-0$
-								commit.AuthorName);
-						detailsView.appendChild(description);
-						
-						actionsArea = document.createElement("div");
-						actionsArea.className = "sectionTableItemActions";
-						actionsArea.id = "branchActionsArea";
-						horizontalBox.appendChild(actionsArea);
-						
-					} else if (item.parent.Type === "RemoteRoot") {
-						var expandContainer = document.createElement("div");
-						expandContainer.style.display = "inline-block";
-						expandContainer.style.styleFloat = "left";
-						expandContainer.style.cssFloat = "left";
+						description = tracksMessage + i18nUtil.formatMessage(messages["last modified ${0} by ${1}"], new Date(commit.Time).toLocaleString(), commit.AuthorName); //$NON-NLS-0$
+						actionsID = "branchActionsArea"; //$NON-NLS-0$
+					} else if (item.parent.Type === "RemoteRoot") { //$NON-NLS-0$
+						var expandContainer = document.createElement("div"); //$NON-NLS-0$
+						expandContainer.style.display = "inline-block"; //$NON-NLS-0$
+						expandContainer.style.styleFloat = expandContainer.style.cssFloat = "left"; //$NON-NLS-0$
 						this.getExpandImage(tableRow, expandContainer);
 						horizontalBox.appendChild(expandContainer);
-							
-						detailsView = document.createElement("div");
-						detailsView.className = "stretch";
-						horizontalBox.appendChild(detailsView);
 						
-						title = document.createElement("div");
-						var remote = item;
-						title.textContent = remote.Name;
-						detailsView.appendChild(title);
-						
-						description = document.createElement("div");
-						description.textContent = remote.GitUrl;
-						detailsView.appendChild(description);
-				
-						actionsArea = document.createElement("div");
-						actionsArea.className = "sectionTableItemActions";
-						actionsArea.id = "remoteActionsArea";
-						horizontalBox.appendChild(actionsArea);
-					} else if (item.parent.Type === "Remote") {
-						detailsView = document.createElement("div");
-						detailsView.className = "stretch";
-						horizontalBox.appendChild(detailsView);
-				
-						title = document.createElement("span");
-						title.textContent = item.Name;
-						detailsView.appendChild(title);
-						
-						actionsArea = document.createElement("div");
-						actionsArea.className = "sectionTableItemActions";
-						actionsArea.id = "branchActionsArea";
-						horizontalBox.appendChild(actionsArea);
+						description = item.GitUrl || item.Description || item.parent.repository.ContentLocation;
+						actionsID = "remoteActionsArea"; //$NON-NLS-0$
+					} else if (item.parent.Type === "Remote") { //$NON-NLS-0$
+						actionsID = "branchActionsArea"; //$NON-NLS-0$
+						description = "";
 					} 
-					this.commandService.renderCommands(this.actionScopeId, actionsArea, item, this.explorer, "tool");	 //$NON-NLS-0$	
+					
+					var detailsView = document.createElement("div"); //$NON-NLS-0$
+					detailsView.className = "stretch"; //$NON-NLS-0$
+					horizontalBox.insertBefore(detailsView);
+					
+					var titleDiv = document.createElement("span"); //$NON-NLS-0$
+					titleDiv.className = titleClass;
+					titleDiv.textContent = title || item.Name;
+					detailsView.appendChild(titleDiv);
+					
+					var descriptionDiv = document.createElement("div"); //$NON-NLS-0$
+					if (description) {
+						descriptionDiv.textContent = description;
+					}
+					detailsView.appendChild(descriptionDiv);
+						
+					var actionsArea = document.createElement("div"); //$NON-NLS-0$
+					actionsArea.className = "sectionTableItemActions"; //$NON-NLS-0$
+					actionsArea.id = actionsID;
+					horizontalBox.appendChild(actionsArea);
+					this.commandService.renderCommands(this.actionScopeId, actionsArea, item, this.explorer, "tool"); //$NON-NLS-0$	
 					return td;
 			}
 		}

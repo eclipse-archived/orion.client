@@ -169,9 +169,8 @@ exports.GitRepositoryExplorer = (function() {
 					that.displayRepositories(repositories, "mini"); //$NON-NLS-0$
 					that.statusDeferred = that.displayStatus(repositories[0]);
 					that.displayCommits(repositories[0]);
-					that.displayBranches(repositories[0]);
+					that.displayBranches(repositories[0], "full"); //$NON-NLS-0$
 					that.displayTags(repositories[0]);
-					that.displayRemotes(repositories[0]);
 					that.displayConfig(repositories[0]);
 				} else if (resp.Children[0].Type === "Clone"){ //$NON-NLS-0$
 					repositories = resp.Children;
@@ -189,7 +188,6 @@ exports.GitRepositoryExplorer = (function() {
 							
 							that.displayRepositories(repositories, "mini", true); //$NON-NLS-0$
 							that.displayBranches(repositories[0], "full"); //$NON-NLS-0$
-							that.displayRemoteBranches(repositories[0], "full"); //$NON-NLS-0$
 						}, function (error) {
 							that.handleError(error);
 						}
@@ -328,40 +326,6 @@ exports.GitRepositoryExplorer = (function() {
 			section: titleWrapper,
 			handleError: this.handleError,
 			root: {
-				Type: "LocalRoot",
-				repository: repository,
-				mode: mode
-			}
-		});
-		branchNavigator.display();
-	};
-	
-	// Git remote branches
-	
-	GitRepositoryExplorer.prototype.displayRemoteBranches = function(repository, mode){
-		
-		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
-		
-		var titleWrapper = new mSection.Section(tableNode, {
-			id: "remoteBranchSection", //$NON-NLS-0$
-			title: "Remote Branches", //$NON-NLS-0$
-			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
-			content: '<div id="remoteBranchNode" class="mainPadding"></div>', //$NON-NLS-0$
-			canHide: true,
-			preferenceService: this.preferencesService
-		}); 
-
-		var branchNavigator = new mGitBranchList.GitBranchListExplorer({
-			serviceRegistry: this.registry,
-			commandRegistry: this.commandService,
-			fileClient: this.fileClient,
-			gitClient: this.gitClient,
-			progressService: this.progressService,
-			parentId:"remoteBranchNode",
-			actionScopeId: this.actionScopeId,
-			section: titleWrapper,
-			handleError: this.handleError,
-			root: {
 				Type: "RemoteRoot",
 				repository: repository,
 				mode: mode
@@ -370,6 +334,7 @@ exports.GitRepositoryExplorer = (function() {
 		branchNavigator.display();
 	};
 	
+
 	// Git status
 		
 	GitRepositoryExplorer.prototype.displayStatus = function(repository){	
@@ -463,41 +428,6 @@ exports.GitRepositoryExplorer = (function() {
 			mode: mode
 		});
 		tagsNavigator.display();
-	};
-	
-	// Git Remotes
-	
-	GitRepositoryExplorer.prototype.displayRemotes = function(repository, mode){
-
-		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
-		
-		var titleWrapper = new mSection.Section(tableNode, {
-			id: "remoteSection", //$NON-NLS-0$
-			title: messages["Remotes"],
-			iconClass: ["gitImageSprite", "git-sprite-remote"], //$NON-NLS-1$ //$NON-NLS-0$
-			slideout: true,
-			content: '<div id="remoteNode" class="mainPadding"></div>', //$NON-NLS-0$
-			canHide: true,
-			hidden: true,
-			preferenceService: this.preferencesService
-		});
-		var branchNavigator = new mGitBranchList.GitBranchListExplorer({
-			serviceRegistry: this.registry,
-			commandRegistry: this.commandService,
-			fileClient: this.fileClient,
-			gitClient: this.gitClient,
-			progressService: this.progressService,
-			parentId:"remoteNode",
-			actionScopeId: this.actionScopeId,
-			section: titleWrapper,
-			handleError: this.handleError,
-			root: {
-				Type: "RemoteRoot",
-				repository: repository,
-				mode: mode
-			}
-		});
-		branchNavigator.display();
 	};
 	
 	// Git Config
