@@ -472,13 +472,12 @@ define([
 					remoteBranch.GitUrl = localBranch.RemoteLocation[0].GitUrl;
 					commandService.renderCommands(incomingActionScope, incomingActionScope, remoteBranch, this, "button"); //$NON-NLS-0$
 
-					commandService.registerCommandContribution(titleLeftActionsNodeScope, "eclipse.orion.git.commit.chooseBranch", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandService.renderCommands(titleLeftActionsNodeScope, titleLeftActionsNodeScope, remoteBranch, this, "button"); //$NON-NLS-0$
-					
 					commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.sync", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					commandService.renderCommands(actionsNodeScope, actionsNodeScope, {LocalBranch: localBranch, RemoteBranch: remoteBranch}, this, "button"); //$NON-NLS-0$
 				}
-
+				commandService.registerCommandContribution(titleLeftActionsNodeScope, "eclipse.orion.git.commit.chooseBranch", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				commandService.renderCommands(titleLeftActionsNodeScope, titleLeftActionsNodeScope, remoteBranch, this, "button"); //$NON-NLS-0$
+				
 				commandService.addCommandGroup(outgoingActionScope, "eclipse.gitPushGroup", 1000, "Push", null, null, null, "Push", null, "eclipse.orion.git.push"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.push", 1100, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
 				commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushBranch", 1200, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
