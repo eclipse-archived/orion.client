@@ -1283,10 +1283,10 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 					ts = blocks[blockStart].start;
 					if (ts > start) { ts += changeCount; }
 				} else if (blockStart === blockCount && blockCount > 0 && ancestorBlock.end - changeCount === blocks[blockCount - 1].end) {
-					ts = blocks[blockCount - 1].start;
+					ts = blocks[--blockStart].start;
 					if (ts > start) { ts += changeCount; }
 				} else {
-					ts = lineStart;
+					ts = Math.max(lineStart, ancestorBlock.contentStart);
 				}
 
 				if (blockEnd < blockCount) {

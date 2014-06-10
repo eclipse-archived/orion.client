@@ -35,6 +35,7 @@ define([
 						};
 					} else {
 						linkURL = new URL(link.href, resourceURL);
+//						fileClient.toAbsURL(resourceURL, link.href);
 						if (isRelative) {
 							linkURL.protocol = "";
 							linkURL.host = "";

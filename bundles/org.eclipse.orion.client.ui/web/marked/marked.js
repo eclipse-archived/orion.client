@@ -192,7 +192,8 @@ Lexer.prototype.token = function(src, top) {
       this.tokens.push({
         type: 'heading',
         depth: cap[1].length,
-        text: cap[2]
+        text: cap[2],
+        style: 'atx' // added by Orion
       });
       continue;
     }
@@ -235,7 +236,8 @@ Lexer.prototype.token = function(src, top) {
       this.tokens.push({
         type: 'heading',
         depth: cap[2] === '=' ? 1 : 2,
-        text: cap[1]
+        text: cap[1],
+        style: 'setext' // added by Orion
       });
       continue;
     }
