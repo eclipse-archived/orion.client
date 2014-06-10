@@ -159,17 +159,15 @@ define([
 					var horizontalBox = document.createElement("div"); //$NON-NLS-0$
 					horizontalBox.style.overflow = "hidden"; //$NON-NLS-0$
 					div.appendChild(horizontalBox);	
-					var actionsID, title, description, titleClass;
+					var actionsID, title, description, titleClass = "";
 					if (item.parent.Type === "LocalRoot") { //$NON-NLS-0$
 						var branch = item;
 						if (branch.Current){
 							var span = document.createElement("span"); //$NON-NLS-0$
 							span.className = "sectionIcon gitImageSprite git-sprite-branch-active"; //$NON-NLS-0$
 							horizontalBox.appendChild(span);
+							titleClass = "activeBranch"; //$NON-NLS-0$
 						}
-	
-						titleClass = branch.Current ? "activeBranch" : ""; //$NON-NLS-0$
-				
 						var commit = branch.Commit.Children[0];
 						var tracksMessage = ((branch.RemoteLocation.length && branch.RemoteLocation.length === 1 && branch.RemoteLocation[0].Children.length && branch.RemoteLocation[0].Children.length === 1) ? 
 								i18nUtil.formatMessage(messages["tracks ${0}, "], branch.RemoteLocation[0].Children[0].Name) : messages["tracks no branch, "]);
