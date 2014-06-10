@@ -14,9 +14,10 @@
 define([
 	'i18n!git/nls/gitmessages',
 	'orion/explorers/explorer',
+	'orion/i18nUtil',
 	'orion/URITemplate',
 	'orion/objects'
-], function(messages, mExplorer, URITemplate, objects) {
+], function(messages, mExplorer, i18nUtil, URITemplate, objects) {
 
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$		
 		
@@ -40,8 +41,9 @@ define([
 			var progress;
 			if (parentItem.Type === "ConfigRoot") { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
-				progress.begin(messages["Getting confituration"]);
-				this.progressService.progress(this.gitClient.getGitCloneConfig(parentItem.repository.ConfigLocation), "Getting configuration of " + parentItem.repository.Name).then( function(resp){
+				var msg = i18nUtil.formatMessage(messages['Getting configuration of'], parentItem.repository.Name);
+				progress.begin(msg);
+				this.progressService.progress(this.gitClient.getGitCloneConfig(parentItem.repository.ConfigLocation), msg).then( function(resp){
 					progress.worked("Rendering configuration"); //$NON-NLS-0$
 					var configurationEntries = resp.Children;
 					
@@ -104,8 +106,7 @@ define([
 			var actionsNodeScope = section.actionsNode.id;
 			if (root.mode !== "full"/* && configurationEntries.length !== 0*/){ //$NON-NLS-0$
 				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
-				this.commandService.renderCommands(actionsNodeScope, actionsNodeScope,
-						{"ViewAllLink":repoTemplate.expand({resource: root.repository.ConfigLocation}), "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all configuration entries"]}, this, "button"); //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				this.commandService.renderCommands(actionsNodeScope, actionsNodeScope, {"ViewAllLink":repoTemplate.expand({resource: root.repository.ConfigLocation}), "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all configuration entries"]}, this, "button"); //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		
 			if (root.mode === "full"){ //$NON-NLS-0$
@@ -115,46 +116,39 @@ define([
 		}
 	});
 	
-	function GitConfigListRenderer(options, explorer) {
+	function GitConfigListRenderer() {
 		mExplorer.SelectionRenderer.apply(this, arguments);
-		this.registry = options.registry;
 	}
 	GitConfigListRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(GitConfigListRenderer.prototype, {
 		getCellElement: function(col_no, item, tableRow){
+			if (col_no > 2) return null;
 			var div, td;
+			td = document.createElement("td"); //$NON-NLS-0$
+			div = document.createElement("div"); //$NON-NLS-0$
+			div.style.overflow = "hidden"; //$NON-NLS-0$
+//			div.className = "sectionTableItem"; //$NON-NLS-0$
+			td.appendChild(div);
 			switch (col_no) {
 				case 0:
-					td = document.createElement("td"); //$NON-NLS-0$
-					div = document.createElement("div"); //$NON-NLS-0$
-					div.className = "sectionTableItem lightTreeTableRow"; //$NON-NLS-0$
-					td.appendChild(div);
-			
-					var horizontalBox = document.createElement("div");
-					horizontalBox.style.overflow = "hidden";
-					div.appendChild(horizontalBox);
-					
-					var detailsView = document.createElement("div");
-					detailsView.className = "stretch";
-					horizontalBox.appendChild(detailsView);
-			
-					var keySpan = document.createElement("span");
+					var keySpan = document.createElement("span"); //$NON-NLS-0$
 					keySpan.textContent = item.Key;
-					detailsView.appendChild(keySpan);
-					
-					var valueSpan = document.createElement("span");
-					valueSpan.style.paddingLeft = "10px";
+					div.appendChild(keySpan);
+					break;
+				case 1:
+					var valueSpan = document.createElement("span"); //$NON-NLS-0$
 					valueSpan.textContent = item.Value;
-					detailsView.appendChild(valueSpan);
-					
-					var actionsArea = document.createElement("div");
-					actionsArea.className = "sectionTableItemActions";
-					actionsArea.id = "configActionsArea";
-					horizontalBox.appendChild(actionsArea);
-			
+					div.appendChild(valueSpan);
+					break;
+				case 2:
+					var actionsArea = document.createElement("ul"); //$NON-NLS-0$
+					actionsArea.className = "sectionTableItemActions layoutRight commandList"; //$NON-NLS-0$
+					actionsArea.id = "configActionsArea"; //$NON-NLS-0$
+					div.appendChild(actionsArea);
 					this.commandService.renderCommands(this.actionScopeId, actionsArea, item, this.explorer, "tool"); //$NON-NLS-0$
-					return td;
+					break;
 			}
+			return td;
 		}
 	});
 	
