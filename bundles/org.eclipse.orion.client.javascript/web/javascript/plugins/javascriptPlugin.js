@@ -226,10 +226,16 @@ define([
 							defaultValue: ignore,
 							options: severities
 						},
-						{	id: "validate_missing_semi",  //$NON-NLS-0$
-							nameKey: 'missingSemi',  //$NON-NLS-0$
+						{	id: "validate_use_isnan",  //$NON-NLS-0$
+							nameKey: 'useIsNaN',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: warning,
+							defaultValue: error,
+							options: severities
+						},
+						{	id: "validate_no_unreachable",  //$NON-NLS-0$
+							nameKey: 'noUnreachable',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: error,
 							options: severities
 						},
 						{	id: "validate_new_parens",  //$NON-NLS-0$

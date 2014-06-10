@@ -39,6 +39,7 @@ define([
 			"no-use-before-define": 1, //$NON-NLS-0$
 			"semi": 1, //$NON-NLS-0$
 			"use-isnan" : 2, //$NON-NLS-0$
+			'no-unreachable': 2 
 		},
 		/**
 		 * @description Sets the given rule to the given enabled value
@@ -308,6 +309,7 @@ define([
 			config.setOption("no-use-before-define", properties.validate_use_before_define); //$NON-NLS-0$
 			config.setOption("semi", properties.validate_missing_semi); //$NON-NLS-0$
 			config.setOption("use-isnan", properties.validate_use_isnan); //$NON-NLS-0$
+			config.setOption("no-unreachable", properties.validate_no_unreachable); //$NON-NLS-0$
 		}
 	});
 	return ESLintValidator;

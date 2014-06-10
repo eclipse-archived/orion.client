@@ -41,7 +41,8 @@
 			"eslint/tests/lib/rules/no-unused-vars",
 			"eslint/tests/lib/rules/no-use-before-define",
 			"eslint/tests/lib/rules/semi",
-			"eslint/tests/lib/rules/use-isnan"
+			"eslint/tests/lib/rules/use-isnan",
+			'eslint/tests/lib/rules/no-unreachable'
 		], factory);
 	}
 }(this, function() {
