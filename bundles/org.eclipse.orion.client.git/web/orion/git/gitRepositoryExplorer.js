@@ -170,7 +170,6 @@ exports.GitRepositoryExplorer = (function() {
 					that.statusDeferred = that.displayStatus(repositories[0]);
 					that.displayCommits(repositories[0]);
 					that.displayBranches(repositories[0], "full"); //$NON-NLS-0$
-					that.displayTags(repositories[0]);
 					that.displayConfig(repositories[0], "full"); //$NON-NLS-0$
 				} else if (resp.Children[0].Type === "Clone"){ //$NON-NLS-0$
 					repositories = resp.Children;
@@ -202,7 +201,6 @@ exports.GitRepositoryExplorer = (function() {
 							that.initTitleBar(repositories[0], messages['Tags']);
 							
 							that.displayRepositories(repositories, "mini", true); //$NON-NLS-0$
-							that.displayTags(repositories[0], "full"); //$NON-NLS-0$
 						}, function (error) {
 							that.handleError(error);
 						}
@@ -401,33 +399,6 @@ exports.GitRepositoryExplorer = (function() {
 		this.statusDeferred.then(function() {
 			explorer.display();
 		});
-	};
-	
-	// Git tags
-	
-	GitRepositoryExplorer.prototype.displayTags = function(repository, mode){
-		// render section even before initialRender
-		var tableNode = lib.node("table");
-		var titleWrapper = new mSection.Section(tableNode, {
-			id : "tagSection",
-			iconClass : ["gitImageSprite", "git-sprite-tag"], //$NON-NLS-1$ //$NON-NLS-0$
-			title : ("Tags" + (mode === "full" ? "" : " (5 most recent)")),
-			content : '<div id="tagNode"></div>',
-			canHide : true,
-			hidden : true,
-			preferenceService : this.preferencesService
-		});
-
-		var tagsNavigator = new mGitTagList.GitTagListExplorer({
-			serviceRegistry: this.registry,
-			commandRegistry: this.commandService,
-			parentId:"tagNode",
-			actionScopeId: this.actionScopeId,
-			section: titleWrapper,
-			repository: repository,
-			mode: mode
-		});
-		tagsNavigator.display();
 	};
 	
 	// Git Config

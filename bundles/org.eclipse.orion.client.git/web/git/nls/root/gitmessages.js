@@ -230,7 +230,7 @@ define({
 	"Link Repository": "Link Repository",
 	"Folder name:": "Folder name:",
 	"Repository was linked to ": "Repository was linked to ",
-	"Checkout the current tag, creating a local branch based on its contents.": "Checkout the current tag, creating a local branch based on its contents.",
+	"Checkout the current tag, creating a local branch based on its contents.": "Checkout this commit, creating a local branch based on its contents.",
 	"Checking out tag ${0}": "Checking out tag ${0}",
 	"Checkout the branch or corresponding local branch and make it active. If the remote tracking branch does not have a corresponding local branch, the local branch will be created first.": "Checkout the branch or corresponding local branch and make it active. If the remote tracking branch does not have a corresponding local branch, the local branch will be created first.",
 	"Checking out branch...": "Checking out branch...",
@@ -435,5 +435,6 @@ define({
 	"Incoming" : "Incoming",
 	"Outgoing" : "Outgoing",
 	"Synchronized" : "Common",
-	"NoBranch" : "No Branch"
+	"NoBranch" : "No Branch",
+	"None": "None"
 });

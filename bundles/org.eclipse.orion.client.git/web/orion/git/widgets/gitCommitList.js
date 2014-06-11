@@ -310,6 +310,7 @@ define([
 		this.incomingActionScope = "IncomingActions"; //$NON-NLS-0$
 		this.outgoingActionScope = "OutgoingActions"; //$NON-NLS-0$
 		this.syncActionScope = "SynchronizedActions"; //$NON-NLS-0$
+		this.tagsActionScope  = "TagsAction"; //$NON-NLS-0$
 		this.createCommands();
 	}
 	GitCommitListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
@@ -461,6 +462,8 @@ define([
 //					"ViewAllTooltip" : messages["See the full log"]
 //				}, this, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	
+				commandService.registerCommandContribution(this.tagsActionScope, "eclipse.removeTag", 1000); //$NON-NLS-1$ //$NON-NLS-0$
+					
 				var tracksRemoteBranch = model.tracksRemoteBranch();
 				var localBranch = model.getLocalBranch();
 				var remoteBranch = model.getRemoteBranch();
@@ -532,7 +535,7 @@ define([
 						horizontalBox.appendChild(expandContainer);
 						tableRow.classList.add("gitCommitListSection"); //$NON-NLS-0$
 					} else {
-						tableRow.classList.add("gitComitListNoCommit"); //$NON-NLS-0$
+						tableRow.classList.add("gitCommitListNoCommit"); //$NON-NLS-0$
 						sectionItem.classList.add("sectionTableItem"); //$NON-NLS-0$
 					}
 					
@@ -543,7 +546,7 @@ define([
 					var title = document.createElement("div"); //$NON-NLS-0$
 					title.textContent = messages[item.Type];
 					if (item.Type !== "NoCommits") { //$NON-NLS-0$
-						title.classList.add("gitComitListSectionTitle"); //$NON-NLS-0$
+						title.classList.add("gitCommitListSectionTitle"); //$NON-NLS-0$
 					}
 					detailsView.appendChild(title);
 			
@@ -588,10 +591,36 @@ define([
 					var d = document.createElement("div"); //$NON-NLS-0$
 					detailsView.appendChild(d);
 	
-					description = document.createElement("span"); //$NON-NLS-0$
+					description = document.createElement("div"); //$NON-NLS-0$
 					description.textContent = messages[" (SHA "] + commit.Name + messages[") by "] + commit.AuthorName + messages[" on "]
 							+ new Date(commit.Time).toLocaleString();
 					detailsView.appendChild(description);
+					
+					var tags = document.createElement("div"); //$NON-NLS-0$
+					tags.textContent = messages["Tags:"];
+					tags.className = "gitCommitListTagsTitle"; //$NON-NLS-0$
+					if (commit.Tags && commit.Tags.length) {
+						commit.Tags.forEach(function (tag) {
+							var tagSpan = document.createElement("span"); //$NON-NLS-0$
+							tagSpan.textContent = tag.Name;
+							tagSpan.className = "gitCommitListTag"; //$NON-NLS-0$
+							tags.appendChild(tagSpan);
+							
+							var tagSpanAction = document.createElement("span"); //$NON-NLS-0$
+							tagSpanAction.className = "core-sprite-close gitCommitListTagClose"; //$NON-NLS-0$
+							tagSpanAction.addEventListener("click", function(){ //$NON-NLS-0$
+								explorer.commandService.runCommand("eclipse.removeTag", tag, explorer); //$NON-NLS-0$
+							});
+							tagSpan.appendChild(tagSpanAction);
+						});
+					}
+					else {
+						var tagsNone = document.createElement("span"); //$NON-NLS-0$
+						tagsNone.textContent = messages["None"];
+						tags.className = "gitCommitListNoTag"; //$NON-NLS-0$
+						tags.appendChild(tagsNone);
+					}
+					detailsView.appendChild(tags);
 					
 					var itemActionScope = "itemLevelCommands"; //$NON-NLS-0$
 					actionsArea = document.createElement("ul"); //$NON-NLS-0$

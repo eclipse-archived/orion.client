@@ -480,7 +480,7 @@ var exports = {};
 				}
 			},
 			visibleWhen: function(item){
-				return item.Type === "Tag"; //$NON-NLS-0$
+				return item.Type === "Tag" || item.Type === "Commit"; //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(checkoutTagCommand);
