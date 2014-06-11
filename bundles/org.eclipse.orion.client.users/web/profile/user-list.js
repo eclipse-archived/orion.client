@@ -126,7 +126,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 				var item = data.items;
 				var userService = serviceRegistry.getService("orion.core.user"); //$NON-NLS-0$
 				if(Array.isArray(item) && item.length > 1){
-					if(confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete these ${0} users?"], item.length))){
+					if(confirm(i18nUtil.formatMessage(messages["ConfirmDeleteUsers"], item.length))){
 						var usersProcessed = 0;
 						for(var i=0; i<item.length; i++){
 							userService.deleteUser(item[i].Location).then(function(jsonData) {
@@ -140,7 +140,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 					
 				}else{
 					item = Array.isArray(item) ? item[0] : item;
-					if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete user ${0}?"], item.login))) {
+					if (confirm(i18nUtil.formatMessage(messages["ConfirmDeleteUser"], item.login))) {
 						userService.deleteUser(item.Location).then(function(jsonData) {
 						  usersList.loadUsers();
 					  });
