@@ -1616,5 +1616,16 @@ define([
 				source: "f({p: function(errors) {if(/^U/.test('')) {error.token = ast.tokens[token.index>0index-1]}}});",
 			});
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437086
+		 */
+		it('no infinite loop 2', function() {
+			runTest({
+				source: "switch(foo) { case 1: var }",
+				nodes: [],
+				tokens: [{"type":"Keyword","range":[0,6],"value":"switch"},{"type":"Punctuator","range":[6,7],"value":"("},{"type":"Identifier","range":[7,10],"value":"foo"},{"type":"Punctuator","range":[10,11],"value":")"},{"type":"Punctuator","range":[12,13],"value":"{"},{"type":"Keyword","range":[14,18],"value":"case"},{"type":"Numeric","range":[19,20],"value":"1"},{"type":"Punctuator","range":[20,21],"value":":"},{"type":"Keyword","range":[22,25],"value":"var"},{"type":"Punctuator","range":[26,27],"value":"}"}],
+				errors: [{"lineNumber":1,"index":26,"message":"Unexpected token }","token":"}"},{"lineNumber":1,"index":27,"message":"Unexpected end of input"}]
+			});
+		});
 	});
 });

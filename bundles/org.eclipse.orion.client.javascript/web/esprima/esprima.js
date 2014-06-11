@@ -2265,7 +2265,6 @@ parseStatement: true, parseSourceElement: true */
 
     // 11.2 Left-Hand-Side Expressions
 
-    // mamacdon 1420b19
     function parseArguments() {
         var args = [];
 
@@ -3143,12 +3142,16 @@ parseStatement: true, parseSourceElement: true */
             test = parseExpression();
         }
         expect(':');
-
+        var startIndex = index;
         while (index < length) {
             if (match('}') || matchKeyword('default') || matchKeyword('case')) {
                 break;
             }
             statement = parseStatement();
+            if(typeof statement === 'undefined' || startIndex === index) {
+                break;
+            }
+            startIndex = index;
             consequent.push(statement);
         }
 
@@ -3868,7 +3871,6 @@ parseStatement: true, parseSourceElement: true */
                 extra.errors = [];
 				extra.tokens = []; //require tokens for recovery, more robust than our own char walking code
 				
-				// mamacdon patch
 				extra.parseStatement = parseStatement;
 				extra.parseExpression = parseExpression;
 				extra.parseNonComputedProperty = parseNonComputedProperty;
