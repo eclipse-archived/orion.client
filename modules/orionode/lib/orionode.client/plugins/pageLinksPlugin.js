@@ -65,7 +65,7 @@ define([
 		nls: "orion/nls/messages",
 		tooltip: "Edit code",
 		category: "edit",
-		"default": true, // Only show if nothing more specific is available
+		order: 1000, // low priority
 		uriTemplate: "{+OrionHome}/edit/edit.html"
 	});
 	provider.registerService("orion.page.link", serviceImpl, {
@@ -73,7 +73,7 @@ define([
 		id: "orion.shell",
 		nls: "orion/nls/messages",
 		category: "shell",
-		"default": true,
+		order: 1000, // low priority
 		uriTemplate: "{+OrionHome}/shell/shellPage.html"
 	});
 	provider.registerService("orion.page.link", serviceImpl, {
@@ -81,8 +81,7 @@ define([
 		id: "orion.Search",
 		nls: "orion/nls/messages",
 		category: "search",
-		"default": true,
-		order: 10,
+		order: 1000, // low priority
 		uriTemplate: "{+OrionHome}/search/search.html",
 	});
 
@@ -91,7 +90,7 @@ define([
 		id: "orion.settings",
 		nls: "orion/widgets/nls/messages",
 		category: "settings",
-		"default": true, // Only show if nothing more specific is available
+		order: 1000, // low priority
 		uriTemplate: "{+OrionHome}/settings/settings.html"
 	});
 

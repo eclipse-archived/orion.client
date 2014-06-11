@@ -257,13 +257,11 @@ define([
 			exclusions = exclusions || [];
 			this._sort();
 
-//			debug.call(this);
-
 			// Start fresh. This creates menuitems anew
 			this._renderCategories();
 
 			var _self = this;
-			// Append link elements to each menu item
+			// Add link element to each menu item
 			Object.keys(this.menuitems).forEach(function(catId) {
 				var menuitem = _self.getMenuItem(catId);
 				if (!menuitem)
@@ -275,18 +273,6 @@ define([
 						return false;
 					return true;
 				});
-				// Don't render a default link if (i) there are others available in this category and (ii) it isn't force'd
-				bin = bin.filter(function(link) {
-					var source = link.source;
-					return !(bin.length > 1 && source.default && !source.force);
-				});
-				// Filter out duplicate links (we sorted bin earlier, so any duplicates are consecutive elements)
-				for (var i = bin.length-1; i > 0; i--) {
-					var a = bin[i], b = bin[i-1];
-					if (a.href === b.href) {
-						bin.splice(i, 1); // remove one of the dupes
-					}
-				}
 				if (!bin.length) {
 					// Empty category: can happen if the page has excluded every command in this category
 					return;

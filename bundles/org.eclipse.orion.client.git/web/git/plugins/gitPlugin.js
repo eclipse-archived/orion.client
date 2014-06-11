@@ -42,9 +42,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		id: "orion.git.repositories",
 		nls: "git/nls/gitmessages",
 		category: "git",
-		order: 110, // Bottom
-		"default": true,
-		force: true,
+		order: 1000, // low priority
 		uriTemplate: "{+OrionHome}/git/git-repository.html#"
 	});
 	
@@ -163,7 +161,6 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 			{source: "Location", variableName: "GitCloneLocation"},
 			{source: "Type", match: "Clone"}
 		],
-		force: true,
 		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitCloneLocation}"
 	});
 	
