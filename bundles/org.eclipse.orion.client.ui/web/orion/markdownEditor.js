@@ -60,100 +60,30 @@ define([
 			return false;
 		},
 		computeBlocks: function(model, text, block, offset/*, startIndex, endIndex, maxBlockCount*/) {
-			var tokens;
-			var index = 0;
-			var indexAdjustments = [];
 			var result = [];
-
-			/*
-			 * Remove the appropriate count of blockquote marker sets from text before parsing
-			 * it (the indices get adjusted later to account for these text changes).
-			 */
-			var depth = 0;
-			var current = block;
-			while (current) {
-				if (current.typeId === "markup.quote.markdown") { //$NON-NLS-0$
-					depth++;
-				}
-				current = current.parent;
-			}
-			for (var i = 0; i < depth; i++) {
-				this._blockquoteRemoveMarkersRegex.lastIndex = 0;
-				var match = this._blockquoteRemoveMarkersRegex.exec(text);
-				/*
-				 * If there's a match at index 0 then do not remove the ">" markers because
-				 * this indicates an additional level of blockquote depth, not just markers
-				 * belonging to the parent blockquote.
-				 */
-//				if (match && match.index > 0) {
-					while (match) {
-						indexAdjustments.push({
-							index: this._adjustIndex(match.index, indexAdjustments),
-							length: match[0].length
-						});
-						match = this._blockquoteRemoveMarkersRegex.exec(text);
-					}
-					text = text.replace(this._blockquoteRemoveMarkersRegex, "");
-//				}
-			}
+			var tokens;
 
 			if (block.typeId) {
 				/* parent is a block other than the root block */
-				if (block.typeId === "markup.quote.markdown") { //$NON-NLS-0$
-					/*
-					 * Nothing to do here, the token set will already not contain blockquote_start/end
-					 * tokens for block as a result of the text adjustments made above.
-					 */					
-				} else if (block.typeId === "markup.list.markdown") { //$NON-NLS-0$
-					/* Remove the list_start/end tokens for block */
-					tokens = marked.lexer(text, this._markedOptions);
-					if (tokens[0].type === "list_start") { //$NON-NLS-0$
-						/*
-						 * The matching list_end token should be either the last or second-last
-						 * token (the second-last case can happen when called from #verifyBlock
-						 * because it includes an extra character at the end by design).
-						 */
-						var endIndex = tokens.length - 1;
-						if (tokens[endIndex].type !== "list_end" && tokens[endIndex - 1].type === "list_end") { //$NON-NLS-1$ //$NON-NLS-0$
-							endIndex--;
-						}
-						tokens = tokens.slice(1, endIndex);
-					}
-				} else if (block.typeId === "markup.list.item.markdown") { //$NON-NLS-0$
-					/* Remove the list/loose_item_start and end tokens for block */
-					tokens = marked.lexer(text, this._markedOptions);
-					for (var i = 0; i < tokens.length; i++) {
-						if (tokens[i].type.indexOf("_item_start") !== -1) { //$NON-NLS-0$
-							var startIndex = i;
-							break;
-						}
-					}
-					if (startIndex) {
-						for (i = tokens.length - 1; i > startIndex; i--) {
-							if (tokens[i].type === "list_item_end") { //$NON-NLS-0$
-								var endIndex = i;
-								break;
-							}
-						}
-					}
-					if (endIndex) {
-						tokens = tokens.slice(startIndex + 1, endIndex);
-						marked.Lexer.rules.normal.bullet.lastIndex = 0;
-						var match = marked.Lexer.rules.normal.bullet.exec(text);
-						index = match.index + match[0].length;
-					}
-				} else {
-					/* no other kinds of blocks have sub-blocks, so just return */
-					return result;
+				if (block.typeId !== "markup.quote.markdown" && //$NON-NLS-0$
+					block.typeId !== "markup.list.markdown" && //$NON-NLS-0$
+					block.typeId !== "markup.list.item.markdown") { //$NON-NLS-0$
+						/* no other kinds of blocks have sub-blocks, so just return */
+						return result;
 				}
+
+				tokens = block.seedTokens;
+				block.seedTokens = null;
 			}
 
+			var index = 0;
 			tokens = tokens || marked.lexer(text, this._markedOptions);
 
-			var childIndex = 0;
-			for (i = 0; i < tokens.length; i++) {
+			for (var i = 0; i < tokens.length; i++) {
 				var bounds = null, name = null, end = null, newlines = null;
 				var startToken = null, contentToken = null, parentTokens = null, endToken = null;
+				var seedTokens = null;
+
 				name = null;
 				this._whitespaceRegex.lastIndex = index;
 				var whitespaceResult = this._whitespaceRegex.exec(text);
@@ -175,7 +105,7 @@ define([
 					if (isSetext) {
 						var underlineLine = text.substring(lineEnd, end);
 						this._setextUnderlineRegex.lastIndex = 0;
-						match = this._setextUnderlineRegex.exec(underlineLine);
+						var match = this._setextUnderlineRegex.exec(underlineLine);
 						if (match[0].length < underlineLine.length) {
 							end -= underlineLine.length - match[0].length;
 						}
@@ -296,6 +226,7 @@ define([
 
 					startToken = tokens[i];
 					endToken = tokens[j];
+					seedTokens = tokens.slice(i + 1, j);
 					i = j;
 				} else if (tokens[i].type.indexOf("_item_start") !== -1) { //$NON-NLS-0$
 					/*
@@ -346,6 +277,7 @@ define([
 					name = "markup.list.item.markdown"; //$NON-NLS-0$
 					startToken = tokens[i];
 					endToken = tokens[j];
+					seedTokens = tokens.slice(i + 1, j);
 					i = j;
 				} else if (tokens[i].type === "code") { //$NON-NLS-0$
 					/*
@@ -418,10 +350,10 @@ define([
 				}
 
 				if (name) {
-					bounds.start = this._adjustIndex(bounds.start, indexAdjustments) + offset;
-					bounds.contentStart = this._adjustIndex(bounds.contentStart, indexAdjustments) + offset;
-					bounds.contentEnd = this._adjustIndex(bounds.contentEnd, indexAdjustments) + offset;
-					bounds.end = this._adjustIndex(bounds.end, indexAdjustments) + offset;
+					bounds.start = bounds.start + offset;
+					bounds.contentStart = bounds.contentStart + offset;
+					bounds.contentEnd = bounds.contentEnd + offset;
+					bounds.end = bounds.end + offset;
 					var newBlock = this.createBlock(bounds, this._styler, model, block, name, function(newBlock) {
 						if (block.name) {
 							/* sub-blocks are not styled differently from their parent block */
@@ -433,8 +365,8 @@ define([
 						}
 						newBlock.parentTokens = parentTokens;
 						newBlock.endToken = endToken;
+						newBlock.seedTokens = seedTokens;
 					});
-					newBlock.index = childIndex;
 					result.push(newBlock);
 				}
 			}
@@ -546,14 +478,12 @@ define([
 			 * The semantics of list descendents are different than non-list-
 			 * descendents, so don't attempt to update at a block level within a list.
 			 */
-			if (block.typeId !== "markup.list.markdown") { //$NON-NLS-0$
-				var current = block.parent;
-				while (current) {
-					if (current.typeId === "markup.list.markdown") { //$NON-NLS-0$
-						return false;
-					}
-					current = current.parent;
+			var current = block.parent;
+			while (current) {
+				if (current.typeId === "markup.list.markdown" || current.typeId === "markup.quote.markdown") { //$NON-NLS-1$ //$NON-NLS-0$
+					return false;
 				}
+				current = current.parent;
 			}
 
 			var blocks = this.computeBlocks(baseModel, text, block.parent, block.start);
@@ -565,17 +495,7 @@ define([
 		},
 
 		/** @private */
-		_adjustIndex: function(index, adjustments) {
-			for (var i = 0; i < adjustments.length; i++) {
-				var current = adjustments[i];
-				if (current.index <= index) {
-					index += current.length;
-				} else {
-					break;
-				}
-			}
-			return index;
-		},
+
 		_adoptTokens: function(targetBlock, sourceBlock) {
 			targetBlock.tokens = sourceBlock.tokens;
 			var targetSubBlocks = targetBlock.getBlocks();
