@@ -148,13 +148,14 @@
 }
 
 .commitInfoMessageTextContainer {
-	padding-bottom: 1px;
+	padding-bottom: 2px;
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
 }
 
 .commitInfoAutorContainer {
+	padding-top: 2px;
 	padding-bottom: 4px;
 	text-overflow: ellipsis;
 	overflow: hidden;
