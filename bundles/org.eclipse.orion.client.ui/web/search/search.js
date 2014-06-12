@@ -14,9 +14,9 @@
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress','orion/dialogs',
         'orion/commandRegistry', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/globalCommands', 
-        'orion/contentTypes', 'orion/searchUtils', 'orion/PageUtil','orion/webui/littlelib', 'orion/globalSearch/advSearchOptContainer'], 
+        'orion/contentTypes', 'orion/searchUtils', 'orion/PageUtil','orion/webui/littlelib', 'orion/globalSearch/advSearchOptRenderer'], 
 		function(messages, require, mBrowserCompatibility, mBootstrap, mStatus, mProgress, mDialogs, mCommandRegistry, 
-				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes, mSearchUtils, PageUtil, lib, mAdvSearchOptContainer) {
+				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes, mSearchUtils, PageUtil, lib, mAdvSearchOptRenderer) {
 	
 	function setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchBuilder, searchParams, progress){
 		var searchLoc = searchParams.resource;
@@ -65,8 +65,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/browserCompatibility
 		var contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 	
-		var searchOptionsContainer = new mAdvSearchOptContainer.AdvSearchOptContainer("searchBuilder", searcher, serviceRegistry);
-		var searchBuilder = searchOptionsContainer.getRenderer();
+		var searchBuilder = new mAdvSearchOptRenderer.AdvSearchOptRenderer("searchBuilder", searcher, serviceRegistry);
 		
 		mGlobalCommands.generateBanner("orion-searchResults", serviceRegistry, commandRegistry, preferences, searcher, searcher, null, false); //$NON-NLS-0$
 		

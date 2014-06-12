@@ -75,21 +75,6 @@
 .outlinerSplitLayout {
 }
 
-.advSearchOptContainer {
-	color: black;
-	display: block;
-	border:  1px solid #666;
-	background: white;
-	max-height: 300px;
-	max-width: 300px;
-	min-width: 150px;
-	position: absolute;
-	overflow-y: auto;
-	overflow-x: hidden;
-	padding: 2px;
-	z-index:200;
-}
-
 .searchOptionBlock {
 	margin-left: 2px;
 	margin-right: 0px;

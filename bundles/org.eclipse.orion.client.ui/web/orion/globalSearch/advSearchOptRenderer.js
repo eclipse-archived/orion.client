@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2009, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -30,13 +30,13 @@ define([
 	 * @name orion.search.AdvSearchOptRenderer
 	 * @class AdvSearchOptRenderer.
 	 * @description The renderer to render all search parameters.
-	 * @param {Dome node} parentDiv.
+	 * @param {String|DOMElement} parent the parent element for the container, it can be either a DOM element or an ID for a DOM element.
 	 * @param {orion.search.Searcher} A searcher that knows how to start a search.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 */
-	function AdvSearchOptRenderer(parentDiv, searcher, serviceRegistry) {
+	function AdvSearchOptRenderer(parent, searcher, serviceRegistry) {
 		EventTarget.attach(this);
-		this._parentDiv = parentDiv;
+		this._parentDiv = lib.node(parent);
 		this._searcher = searcher;
 		this._serviceRegistry = serviceRegistry;
 		this._contentTypeService = this._serviceRegistry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
@@ -45,6 +45,7 @@ define([
 		}
 		this.contentTypesCache = this._contentTypeService.getContentTypes();
         this.fileClient = new mFileClient.FileClient(this._serviceRegistry);
+        this.render();
 	}
 	
 	objects.mixin(AdvSearchOptRenderer.prototype, /** @lends orion.search.AdvSearchOptRenderer */ {
@@ -189,8 +190,7 @@ define([
 			this._searchTextInputBox = this._searchBox.getTextInputNode();
 			this._searchTextInputBox.placeholder = messages["Type a search term"]; //$NON-NLS-1$ //$NON-NLS-0$
 			
-			this._recentSearchButton = this._searchBox.getRecentEntryButton();
-			this._recentSearchButton.title = messages["Show previous search terms"]; //$NON-NLS-1$ //$NON-NLS-0$
+			this._searchBox.setRecentEntryButtonTitle(messages["Show previous search terms"]); //$NON-NLS-0$
 			
 			this._searchTextInputBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
@@ -221,9 +221,8 @@ define([
 			
 			this._replaceButton = this._replaceBox.getButton();
 			this._replaceButton.title = messages["Show replacement preview"]; //$NON-NLS-0$
-			
-			this._recentReplaceButton = this._replaceBox.getRecentEntryButton();
-			this._recentReplaceButton.title = messages["Show previous replace terms"]; //$NON-NLS-0$
+
+			this._replaceBox.setRecentEntryButtonTitle(messages["Show previous replace terms"]); //$NON-NLS-0$
 			
 			this._replaceTextInputBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
 				var keyCode= e.charCode || e.keyCode;
@@ -280,7 +279,7 @@ define([
 
 			this._init = true;
 			this._loadSearchParams();
-				        
+
 			if (this._replaceBoxIsHidden()) {
 	        	this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$	
 	        }
@@ -393,26 +392,9 @@ define([
 			}, this);
 		}
 	});
-	
-	/**
-	 * AdvSearchOptContainer is the container for all search options.
-	 * @param {String|DOMElement} parent the parent element for the container, it can be either a DOM element or an ID for a DOM element.
-	 */
-	function AdvSearchOptContainer(parent, searcher, serviceRegistry) {
-		this._parent = lib.node(parent);
-		this._optRenderer = new AdvSearchOptRenderer(this._parent, searcher, serviceRegistry);
-		this._optRenderer.render();	
-	}
-	
-	AdvSearchOptContainer.prototype.getRenderer = function(){
-		return this._optRenderer;
-	};
-	
-	AdvSearchOptContainer.prototype.constructor = AdvSearchOptContainer;
-	
+
 	//return module exports
 	return {
-		AdvSearchOptContainer: AdvSearchOptContainer,
 		AdvSearchOptRenderer: AdvSearchOptRenderer
 	};
 });
