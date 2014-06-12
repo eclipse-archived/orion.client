@@ -13,12 +13,14 @@
 /*jslint forin:true regexp:false sub:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 
-	'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 
-	'orion/compare/compareUIFactory', 'orion/compare/compareView', 'orion/highlight', 'orion/explorers/navigationUtils', 'orion/webui/tooltip',
-	'orion/explorers/navigatorRenderer', 'orion/extensionCommands'],
-
-function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler, mFileClient, mCommands, 
-	mSearchUtils, mSearchFeatures, mCompareUIFactory, mCompareView, mHighlight, mNavUtils, mTooltip, navigatorRenderer, extensionCommands) {
+	'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compareUIFactory', 'orion/compare/compareView', 
+	'orion/highlight', 'orion/explorers/navigationUtils', 'orion/webui/tooltip', 'orion/explorers/navigatorRenderer', 'orion/extensionCommands',
+	'orion/searchModel', 'orion/crawler/searchCrawler'
+],
+function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClient, mCommands, 
+	mSearchUtils, mSearchFeatures, mCompareUIFactory, mCompareView, mHighlight, mNavUtils, mTooltip, 
+	navigatorRenderer, extensionCommands, mSearchModel, mSearchCrawler
+) {
     /* Internal wrapper functions*/
     function _empty(nodeToEmpty) {
         var node = lib.node(nodeToEmpty);
@@ -1602,8 +1604,108 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this.getNavHandler().iterate(next, forceExpand);
     };
 
-    SearchResultExplorer.prototype.constructor = SearchResultExplorer;
+	SearchResultExplorer.prototype._renderSearchResult = function(crawling, resultsNode, searchParams, jsonData, incremental) {
+		var foundValidHit = false;
+		var resultLocation = [];
+		lib.empty(lib.node(resultsNode));
+		if (jsonData.response.numFound > 0) {
+			for (var i=0; i < jsonData.response.docs.length; i++) {
+				var hit = jsonData.response.docs[i];
+				if (!hit.Directory) {
+					if (!foundValidHit) {
+						foundValidHit = true;
+					}
+					var loc = hit.Location;
+					resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, path: hit.Path ? hit.Path : loc, name: hit.Name, lastModified: hit.LastModified}); //$NON-NLS-1$ //$NON-NLS-0$
+					
+				}
+			}
+		}
+		this.setCrawling(crawling);
+		var that = this;
+        var searchModel = new mSearchModel.SearchResultModel(this.registry, this.fileClient, resultLocation, jsonData.response.numFound, searchParams, {
+            onMatchNumberChanged: function(fileItem) {
+                that.renderer.replaceFileElement(fileItem);
+            }
+        });
+		this.setResult(resultsNode, searchModel);
+		if(incremental){
+			this.incrementalRender();
+		} else {
+			this.startUp();
+		}
+	};
 
+	/**
+	 * Runs a search and displays the results under the given DOM node.
+	 *
+	 * @param {DOMNode} resultsNode Node under which results will be added.
+	 * @param {Object} searchParams The search parameters to use for the search
+	 * @param {Searcher} searcher
+	 */
+	SearchResultExplorer.prototype._search = function(resultsNode, searchParams, searcher) {
+		//For crawling search, temporary
+		//TODO: we need a better way to render the progress and allow user to be able to cancel hte crawling search
+		var crawling = searchParams.regEx || searchParams.caseSensitive;
+		var crawler;
+		lib.empty(lib.node("pageNavigationActions")); //$NON-NLS-0$
+		lib.empty(lib.node("pageActions")); //$NON-NLS-0$
+		
+		lib.empty(resultsNode);
+		
+		//If there is no search keyword defined, then we treat the search just as the scope change.
+		if(typeof searchParams.keyword === "undefined"){ //$NON-NLS-0$
+			return;
+		}
+		
+		if (crawling) {
+			resultsNode.appendChild(document.createTextNode(""));
+			crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileClient, searchParams, {childrenLocation: searcher.getChildrenLocation()});
+			crawler.search( function(jsonData, incremental) {
+				this._renderSearchResult(crawling, resultsNode, searchParams, jsonData, incremental);
+			}.bind(this));
+		} else {
+			this.registry.getService("orion.page.message").setProgressMessage(messages["Searching..."]); //$NON-NLS-0$
+			try{
+				this.registry.getService("orion.page.progress").progress(this.fileClient.search(searchParams), "Searching " + searchParams.keyword).then( //$NON-NLS-1$ //$NON-NLS-0$
+					function(jsonData) {
+						this.registry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$
+						this._renderSearchResult(false, resultsNode, searchParams, jsonData);
+					}.bind(this),
+					function(error) {
+						var message = i18nUtil.formatMessage(messages["${0}. Try your search again."], error && error.error ? error.error : "Error"); //$NON-NLS-0$
+						this.registry.getService("orion.page.message").setProgressResult({Message: message, Severity: "Error"}); //$NON-NLS-0$
+					}.bind(this)
+				);
+			} catch(error) {
+				lib.empty(resultsNode);
+				resultsNode.appendChild(document.createTextNode(""));
+				if(typeof(error) === "string" && error.indexOf("search") > -1){ //$NON-NLS-1$ //$NON-NLS-0$
+					crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileClient, searchParams, {childrenLocation: searcher.getChildrenLocation()});
+					crawler.search( function(jsonData, incremental) {
+						this._renderSearchResult(true, resultsNode, searchParams, jsonData, incremental);
+					}.bind(this));
+				} else {
+					this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
+				}
+			}
+		}
+	};
+
+	/**
+	 * Performs the given query and generates the user interface 
+	 * representation of the search results.
+	 * @param {String} query The search query
+	 * @param {String | DomNode} parentNode The parent node to display the results in
+	 * @param {Searcher} searcher
+	 */
+	SearchResultExplorer.prototype.runSearch = function(searchParams, parentNode, searcher) {
+		var parent = lib.node(parentNode);
+		this._search(parent, searchParams, searcher);
+	};
+
+    SearchResultExplorer.prototype.constructor = SearchResultExplorer;
+    
     //return module exports
     return {
         SearchResultExplorer: SearchResultExplorer
