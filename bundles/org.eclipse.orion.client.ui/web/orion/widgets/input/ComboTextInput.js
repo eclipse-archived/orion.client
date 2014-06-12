@@ -114,10 +114,9 @@ define([
 			
 			if (!this._defaultRecentEntryProposalProvider) {
 				this._defaultRecentEntryProposalProvider = function(uiCallback) {
-					var recentEntryString = localStorage.getItem(this._localStorageKey);
-					var recentEntryArray = [];
-					if (recentEntryString) {
-						recentEntryArray = JSON.parse(recentEntryString);
+					var recentEntryArray = this.getRecentEntryArray();
+					if (!recentEntryArray) {
+						recentEntryArray = [];
 					}
 					uiCallback(recentEntryArray);
 				}.bind(this);
@@ -125,8 +124,7 @@ define([
 			
 			if (!this._onRecentEntryDelete) {
 				this._onRecentEntryDelete = function(item, evtTarget) {
-					var recentEntryString = localStorage.getItem(this._localStorageKey);
-					var recentEntryArray = JSON.parse(recentEntryString);
+					var recentEntryArray = this.getRecentEntryArray();
 					
 					//look for the item in the recentEntryArray
 					var indexOfElement = this._getIndexOfValue(recentEntryArray, item);
@@ -134,8 +132,11 @@ define([
 					if (-1 < indexOfElement) {
 						//found the item in the array, remove it and update localStorage
 						recentEntryArray.splice(indexOfElement, 1);
-						recentEntryString = JSON.stringify(recentEntryArray);
-						localStorage.setItem(this._localStorageKey, recentEntryString);
+						this._storeRecentEntryArray(recentEntryArray);
+						
+						if (0 === recentEntryArray.length) {
+							this._hideRecentEntryButton();
+						}
 						
 						if(evtTarget) {
 							window.setTimeout(function() {
@@ -154,14 +155,21 @@ define([
 				group: this._domNodeId + "InputCompletion", //$NON-NLS-0$
 				extendedProvider: this._extendedRecentEntryProposalProvider, 
 				onDelete: this._onRecentEntryDelete,
-				deleteToolTips: messages['Click or use delete key to delete the search term'] //$NON-NLS-0$
+				deleteToolTips: messages["Click or use delete key to delete the search term"] //$NON-NLS-0$
 			});
-
-			this._recentEntryButton.addEventListener("click", function(event){ //$NON-NLS-0$
+			
+			this._recentEntryButton.addEventListener("click", function(event){ 
 				this._textInputNode.focus();
 				this._inputCompletion._proposeOn();
 				lib.stop(event);
-			}.bind(this));
+			}.bind(this)); //$NON-NLS-0$
+
+			var recentEntryArray = this.getRecentEntryArray();
+			if (recentEntryArray && 0 < recentEntryArray.length) {
+				this._showRecentEntryButton();
+			} else {
+				this._hideRecentEntryButton();
+			}
 	    },
 		
 		/**
@@ -210,6 +218,18 @@ define([
 		},
 		
 		/**
+		 * Sets the HTML title of the recentyEntryButton 
+		 * belonging to this combo text input.
+		 * 
+		 * @param {String} title The title of the recentEntryButton
+		 */
+		setRecentEntryButtonTitle: function(title){
+			if (this._recentEntryButton) {
+				this._recentEntryButton.title = title;
+			}
+		},
+		
+		/**
 		 * Adds the value that is in the text input field to the
 		 * recent entries in localStorage. Empty and duplicate
 		 * values are ignored.
@@ -217,11 +237,9 @@ define([
 		addTextInputValueToRecentEntries: function() {
 			var value = this.getTextInputValue();
 			if (value) {
-				var recentEntryString = localStorage.getItem(this._localStorageKey);
-				var recentEntryArray = [];
-				
-				if (recentEntryString) {
-					recentEntryArray = JSON.parse(recentEntryString);
+				var recentEntryArray = this.getRecentEntryArray();
+				if (!recentEntryArray) {
+					recentEntryArray = [];
 				}
 				
 				var indexOfElement = this._getIndexOfValue(recentEntryArray, value); //check if a duplicate entry exists
@@ -232,8 +250,9 @@ define([
 						label: value, 
 						value: value
 					});
-					recentEntryString = JSON.stringify(recentEntryArray);
-					localStorage.setItem(this._localStorageKey, recentEntryString);		
+					this._storeRecentEntryArray(recentEntryArray);
+					
+					this._showRecentEntryButton();
 				}
 			}
 		},
@@ -241,7 +260,7 @@ define([
 		/**
 		 * Looks for an entry in the specified recentEntryArray with 
 		 * a value that is equivalent to the specified value parameter.
-		 *  
+		 *
 		 * @returns The index of the matching entry in the array or -1 
 		 */
 		_getIndexOfValue: function(recentEntryArray, value) {
@@ -274,6 +293,40 @@ define([
 		 */
 		hideButton: function() {
 			this._comboTextInputButton.classList.add("isHidden"); //$NON-NLS-0$
+		},
+		
+		/**
+		 * @returns an array of the recent entries that were
+		 * saved by this combo text input, or null
+		 */
+		getRecentEntryArray: function() {
+			var recentEntryArray = null;
+
+			if (this._localStorageKey) {
+				var recentEntryString = localStorage.getItem(this._localStorageKey);
+				if (recentEntryString) {
+					recentEntryArray = JSON.parse(recentEntryString);
+				}
+			}
+
+			return recentEntryArray;
+		},
+		
+		/**
+		 * Private helper method that saves the specified recentEntryArray to localStorage.
+		 * @param {Array} recentEntryArray An array containing recent entries that should be saved.
+		 */
+		_storeRecentEntryArray: function(recentEntryArray) {
+			var recentEntryString = JSON.stringify(recentEntryArray);
+			localStorage.setItem(this._localStorageKey, recentEntryString);
+		},
+		
+		_showRecentEntryButton: function() {
+			this._recentEntryButton.classList.remove("isHidden"); //$NON-NLS-0$
+		},
+		
+		_hideRecentEntryButton: function() {
+			this._recentEntryButton.classList.add("isHidden"); //$NON-NLS-0$
 		}
 	});
 	return ComboTextInput;

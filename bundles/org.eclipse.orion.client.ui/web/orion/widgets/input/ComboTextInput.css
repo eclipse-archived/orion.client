@@ -34,13 +34,21 @@
 	box-shadow: none;
 	cursor: pointer;
 	display: inline-block;
+	opacity: 1;
+	outline: none;
 	padding: 2px;
 	position: relative;
+	transition: opacity 0.2s ease;
 	vertical-align: middle;
 }
 
+.orionButton.recentEntryButton.isHidden {
+	cursor: default;
+	opacity: 0;
+}
+
 .recentEntryArrow:hover {
-	color: #F58B0F !important;
+	color: #F58B0F;
 }
 
 .commandButton.comboTextInputButton {
