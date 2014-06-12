@@ -17,6 +17,30 @@
 define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orion/git/widgets/GitCredentialsDialog','orion/Deferred','i18n!git/nls/gitmessages'],
 		function(mGitUtil,i18nUtil,GitPreferenceStorage,mGitCredentials,Deferred,messages) {
 	
+
+	function displayErrorOnStatus(error, serviceRegistry) {
+		var display = {};
+		display.Severity = "Error"; //$NON-NLS-0$
+		display.HTML = false;
+		var status = error.status || error.HttpCode;
+		
+		try {
+			var resp = error.responseText ? JSON.parse(error.responseText) : error;
+			if (status === 401) {
+				display.HTML = true;
+				display.Message = "<span>"; //$NON-NLS-0$
+				display.Message += i18nUtil.formatMessage(messages["Authentication required for: ${0}. ${1} and re-try the request."], resp.label, "<a target=\"_blank\" href=\"" + resp.SignInLocation //$NON-NLS-1$ //$NON-NLS-0$
+				+ "\">" + messages["Login"] + "</a>") + "</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			} else {
+				display.Message = resp.DetailedMessage ? resp.DetailedMessage : (resp.Message ? resp.Message : messages["Problem while performing the action"]);
+			}
+		} catch (Exception) {
+			display.Message = messages["Problem while performing the action"];
+		}
+		
+		serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+	}
+	
 	
 	function translateResponseToStatus(response) {
 		var json;
@@ -128,8 +152,9 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 						/* nothing to delete, proceed */
 						sshCallback(jsonData);
 					}
+					
 				});
-				
+				displayErrorOnStatus(jsonData, serviceRegistry);
 				break;
 			case 400:
 				if(jsonData.JsonData && jsonData.JsonData.HostKey){
