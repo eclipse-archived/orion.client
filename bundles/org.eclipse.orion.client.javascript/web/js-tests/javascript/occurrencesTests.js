@@ -1517,6 +1517,7 @@ define([
 				}
 			});
 		});
+		
 		/**
 		 * Tests computing occurrences for do-while tests
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=435941
@@ -1712,5 +1713,194 @@ define([
 				}
 			});
 		});
+		
+		/**
+		 * Tests computing occurrences for object properties and references to them
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423083
+		 */
+		it('test_object_properties_1A', function() {
+			editorContext.text = "Objects.mixin({ test1: function() {}, test2: function() { return this.test1(); } });";
+			return occurrences.computeOccurrences(editorContext, setContext(19, 19)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:16, end:21}, {start:70, end:75}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object properties and references to them
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423083
+		 */
+		it('test_object_properties_1B', function() {
+			editorContext.text = "Objects.mixin({ test1: function() {}, test2: function() { return this.test1(); } });";
+			return occurrences.computeOccurrences(editorContext, setContext(71, 71)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:16, end:21}, {start:70, end:75}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object properties and references to them
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423083
+		 */
+		it('test_object_properties_2A', function() {
+			editorContext.text = "var foo = { test1: function() {}, test2: function() { return this.test1(); } };";
+			return occurrences.computeOccurrences(editorContext, setContext(15, 15)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:12, end:17}, {start:66, end:71}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object properties and references to them
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423083
+		 */
+		it('test_object_properties_2B', function() {
+			editorContext.text = "var foo = { test1: function() {}, test2: function() { return this.test1(); } };";
+			return occurrences.computeOccurrences(editorContext, setContext(66, 71)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:12, end:17}, {start:66, end:71}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object properties and references to them
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423083
+		 */
+		it('test_object_properties_3A', function() {
+			editorContext.text = "var foo = {a: this.a(), b: {a: this.a(), c: {a: this.a()}}, c: this.a()};";
+			return occurrences.computeOccurrences(editorContext, setContext(11, 11)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:11, end:12}, {start:19, end:20}, {start:68, end:69}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object properties and references to them
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423083
+		 */
+		it('test_object_properties_3B', function() {
+			editorContext.text = "var foo = {a: this.a(), b: {a: this.a(), c: {a: this.a()}}, c: this.a()};";
+			return occurrences.computeOccurrences(editorContext, setContext(28, 28)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:28, end:29}, {start:36, end:37}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object properties and references to them
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423083
+		 */
+		it('test_object_properties_3C', function() {
+			editorContext.text = "var foo = {a: this.a(), b: {a: this.a(), c: {a: this.a()}}, c: this.a()};";
+			return occurrences.computeOccurrences(editorContext, setContext(60, 61)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:60, end:61}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object properties and references to them
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423083
+		 */
+		it('test_object_properties_3D', function() {
+			editorContext.text = "var foo = {a: this.a(), b: {a: this.a(), c: {a: this.a()}}, c: this.a()};";
+			return occurrences.computeOccurrences(editorContext, setContext(68, 69)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:11, end:12}, {start:19, end:20}, {start:68, end:69}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests whether occurrences finds and selects the correct token/word/node
+		 */
+		it('test_punctuators_1A', function() {
+			editorContext.text = "var \tfoo ; bar\n;";
+			return occurrences.computeOccurrences(editorContext, setContext(4, 4)).then(function(results) {
+				try {
+					assertOccurrences(results, []);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests whether occurrences finds and selects the correct token/word/node
+		 */
+		it('test_punctuators_1B', function() {
+			editorContext.text = "var \tfoo ; bar\n;";
+			return occurrences.computeOccurrences(editorContext, setContext(9, 9)).then(function(results) {
+				try {
+					assertOccurrences(results, []);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests whether occurrences finds and selects the correct token/word/node
+		 */
+		it('test_punctuators_1C', function() {
+			editorContext.text = "var \tfoo ; bar\n;";
+			return occurrences.computeOccurrences(editorContext, setContext(10, 10)).then(function(results) {
+				try {
+					assertOccurrences(results, []);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests whether occurrences finds and selects the correct token/word/node
+		 */
+		it('test_punctuators_1D', function() {
+			editorContext.text = "var \tfoo ; bar\n;";
+			return occurrences.computeOccurrences(editorContext, setContext(15, 15)).then(function(results) {
+				try {
+					assertOccurrences(results, []);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
 	});
 });
