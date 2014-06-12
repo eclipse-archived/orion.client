@@ -133,6 +133,8 @@ define([
 			if(sig) {
 				var item = {
 					label: sig.sig,
+					labelPost: sig.details,
+//					classNamePost: "status",  //$NON-NLS-0$
 					start: sig.range[0],
 					end: sig.range[1]
 				};
