@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global alert confirm console define document window */
 
-define(["orion/xhr", "orion/webui/littlelib", "domReady!"], function(xhr, lib) {
+define(["i18n!mixloginstatic/nls/messages", "orion/xhr", "orion/webui/littlelib", "domReady!"], function(messages, xhr, lib) {
 	var lastHash;
 	var jsonData;
 
@@ -134,7 +134,14 @@ define(["orion/xhr", "orion/webui/littlelib", "domReady!"], function(xhr, lib) {
 	
 	// this function is directly invoked by ManageOpenidsServlet, must be global
 	window.handleOpenIDResponse = function(openid) {
-
+		var newOpenId = lib.node("newOpenId"); //$NON-NLS-0$
+		var h2 = document.createElement("h2"); //$NON-NLS-0$
+		h2.style.margin = "10px 5px 10px 0"; //$NON-NLS-0$
+		h2.style.float = "left";//$NON-NLS-0$
+		h2.id = "addExternalAccount";//$NON-NLS-0$
+		h2.innerHtml = messages["AddExternalAccount"];//$NON-NLS-0$
+		newOpenId.append(h2);
+		
 		var openids = jsonData.properties.openid ? jsonData.properties.openid.split('\n') : [];
 		for (var i = 0; i < openids.length; i++) {
 			if (openids[i] === openid) {
