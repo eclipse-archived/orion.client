@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global alert confirm console define document window */
 
-define(["orion/xhr", "orion/webui/littlelib", "domReady!"], function(xhr, lib) {
+define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/littlelib", "domReady!"], function(messages, xhr, lib) {
 	var lastHash;
 	var jsonData;
 
@@ -134,7 +134,6 @@ define(["orion/xhr", "orion/webui/littlelib", "domReady!"], function(xhr, lib) {
 	
 	// this function is directly invoked by ManageOpenidsServlet, must be global
 	window.handleOpenIDResponse = function(openid) {
-
 		var openids = jsonData.properties.openid ? jsonData.properties.openid.split('\n') : [];
 		for (var i = 0; i < openids.length; i++) {
 			if (openids[i] === openid) {
@@ -181,12 +180,23 @@ define(["orion/xhr", "orion/webui/littlelib", "domReady!"], function(xhr, lib) {
 		return a;
 	}
 
+	function attachExternalAccountsHeader(){
+		var openIdContainer = document.getElementById("newOpenId");
+		var h2 = document.createElement("h2"); //$NON-NLS-0$
+		h2.style.margin = "10px 5px 10px 0"; //$NON-NLS-0$
+		h2.style.cssFloat = "left";//$NON-NLS-0$
+		h2.id = "addExternalAccount";//$NON-NLS-0$
+		h2.innerHTML = messages["AddExternalAccount"];//$NON-NLS-0$
+		openIdContainer.appendChild(h2);
+	}
+	
 	// Page glue code starts here
 	window.addEventListener("hashchange", function() {
 		onHashChange(window.location.hash.substring(1));
 	});
 
 	onHashChange(window.location.hash.substring(1));
+	attachExternalAccountsHeader();
 
 	xhr("GET", "../mixlogin/manageopenids") //$NON-NLS-1$ //$NON-NLS-0$
 		.then(function(xhrResult) {
@@ -196,8 +206,9 @@ define(["orion/xhr", "orion/webui/littlelib", "domReady!"], function(xhr, lib) {
 			});
 			providerElements.push(createProviderLink("Mozilla Persona", "../mixloginstatic/images/persona.png",
 				alert.bind(null, "To link your account with a Persona, set your Orion email address above to match your Persona email address.")));
-
+ 
 			var openIdContainer = document.getElementById("newOpenId");
+						
 			providerElements.forEach(function(provider) {
 				openIdContainer.appendChild(provider);
 				openIdContainer.appendChild(document.createTextNode(" "));
