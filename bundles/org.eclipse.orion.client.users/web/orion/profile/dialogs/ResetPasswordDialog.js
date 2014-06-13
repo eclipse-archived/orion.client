@@ -44,7 +44,7 @@ define(['i18n!profile/nls/messages','orion/webui/dialog'], function(messages, di
 		var dialog = this;
 		
 		this.registry.getService("orion.core.user").resetUserPassword(dialog.user.login, dialog.$password.value).then(dialog.func, function(response) { //$NON-NLS-0$
-		  var message = response.message;
+		  var message = response.Message;
 		  try{
 			  if(response.responseText){
 				  message = JSON.parse(response.responseText).Message;

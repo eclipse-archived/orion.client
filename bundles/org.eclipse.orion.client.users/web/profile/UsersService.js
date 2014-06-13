@@ -186,9 +186,8 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 			return ret;
 		},
 		resetUserPassword: function(login, password, onLoad){
-			var ret = new Deferred();
 			var service = this;
-			xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
+			return xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
 					"Content-Type": "application/x-www-form-urlencoded", //$NON-NLS-1$ //$NON-NLS-0$
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
@@ -207,11 +206,14 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 					else
 						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
-				ret.resolve(jsonData);
-			}, function(error) {
-				ret.reject(error.response || error);
+				return new Deferred().resolve(jsonData);
+			}, function(result) {
+				var error = result;
+				try {
+					error = getJSON(result.response || result.error);
+				} catch (e) {}
+				return new Deferred().reject(error);
 			});
-			return ret;
 		}
 	};
 	return UsersService;
