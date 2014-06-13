@@ -38,7 +38,6 @@ define([
 
 	var notifyAuthenticationSite = qualifyURL(require.toUrl('auth/NotifyAuthentication.html')); //$NON-NLS-0$
 	var authRendered = {};
-	var sideMenu = null;
 
 	function getLabel(authService, serviceReference) {
 		if (authService.getLabel) {
@@ -110,12 +109,12 @@ define([
 					position: ["right"] //$NON-NLS-0$
 				});
 
-				sideMenu = this.sideMenu = new SideMenu(sideMenuParent, lib.node("pageContent")); //$NON-NLS-0$
-				nav.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu)); //$NON-NLS-0$
+				this.sideMenu = new SideMenu(sideMenuParent, lib.node("pageContent")); //$NON-NLS-0$
+				nav.addEventListener("click", this.sideMenu.toggle.bind(this.sideMenu)); //$NON-NLS-0$
 				
 				var sideMenuToggle = lib.node("sideMenuToggle"); //$NON-NLS-0$
 				if (sideMenuToggle) {
-					sideMenuToggle.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu)); //$NON-NLS-0$
+					sideMenuToggle.addEventListener("click", this.sideMenu.toggle.bind(this.sideMenu)); //$NON-NLS-0$
 				}
 			}
 		},
@@ -671,15 +670,15 @@ define([
 		var categoriesPromise = PageLinks.getCategoriesInfo(serviceRegistry);
 		var pageLinksPromise = PageLinks.getPageLinksInfo(serviceRegistry, "orion.page.link");
 		Deferred.all([ categoriesPromise, pageLinksPromise ]).then(function(results) {
-			if (sideMenu) {
+			if (this.sideMenu) {
 				var categoriesInfo = results[0], pageLinksInfo = results[1];
-				sideMenu.setCategories(categoriesInfo);
-				sideMenu.setPageLinks(pageLinksInfo);
+				this.sideMenu.setCategories(categoriesInfo);
+				this.sideMenu.setPageLinks(pageLinksInfo);
 
 				// Now we have enough to show the sidemenu with its close-to-final layout
-				sideMenu.setSideMenu();
+				this.sideMenu.render();
 			}
-		});
+		}.bind(this));
 
 		// hook up split behavior - the splitter widget and the associated global command/key bindings.
 		var splitNode = lib.$(".split"); //$NON-NLS-0$
@@ -752,22 +751,22 @@ define([
 			}
 			var header = lib.node("banner"); //$NON-NLS-0$
 			var footer = lib.node("footer"); //$NON-NLS-0$
-			var sideMenu = lib.node("sideMenu"); //$NON-NLS-0$
+			var sideMenuNode = lib.node("sideMenu"); //$NON-NLS-0$
 			var content = lib.$(".content-fixedHeight"); //$NON-NLS-0$
 			var maximized = header.style.visibility === "hidden"; //$NON-NLS-0$
 			if (maximized) {
 				header.style.visibility = "visible"; //$NON-NLS-0$
 				footer.style.visibility = "visible"; //$NON-NLS-0$
 				content.classList.remove("content-fixedHeight-maximized"); //$NON-NLS-0$
-				if (sideMenu) {
-					sideMenu.classList.remove("sideMenu-maximized"); //$NON-NLS-0$
+				if (sideMenuNode) {
+					sideMenuNode.classList.remove("sideMenu-maximized"); //$NON-NLS-0$
 				}
 			} else {
 				header.style.visibility = "hidden"; //$NON-NLS-0$
 				footer.style.visibility = "hidden"; //$NON-NLS-0$
 				content.classList.add("content-fixedHeight-maximized"); //$NON-NLS-0$
-				if (sideMenu) {
-					sideMenu.classList.add("sideMenu-maximized"); //$NON-NLS-0$
+				if (sideMenuNode) {
+					sideMenuNode.classList.add("sideMenu-maximized"); //$NON-NLS-0$
 				}
 			}
 			getGlobalEventTarget().dispatchEvent({type: "toggleTrim", maximized: !maximized}); //$NON-NLS-0$
@@ -779,7 +778,7 @@ define([
 		if (noTrim) {
 			toggleBannerFunc();
 			noBanner = true;
-			sideMenu.hideMenu();
+			this.sideMenu.hide();
 		} else {
 			// Toggle trim command
 			var toggleBanner = new mCommands.Command({
