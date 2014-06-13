@@ -80,15 +80,20 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			return location;
 		},
 		_handleError: function(error, isRoot) {
-			var errorMessageHeader = "GitHub Error: ";
+			//var errorMessageHeader = "GitHub Error: ";
 			var errorMessage = "Unknown";
 			if(error.status && error.status === 404) {//There are two types of displayed error if 404 comes from GitHub
 				if(isRoot) { //If the request was sent from the repo's root level, then it is a private repository. https://developer.github.com/v3/#authentication
-					errorMessage = "This repository(" + this._originalRepoURL +") is private. Authentication is not supported in readonly mode. Please use edit mode to get authentication.";
+					errorMessage = "This is a private GitHub project. Authorized users can view the source on the GitHub repository page: "+ this._originalRepoURL;
 				} else { //Otherwise it is a bad URL
 					errorMessage = "Bad URL(" + (error.url ? error.url : "") + ").";
 				}
-			} else {//For errors other than 404, we just use the "message" and "documentation_url" properties for a detailed message
+			} else if(error.status && error.status === 403) {//403 means rate limit exceeded.
+				//errorMessage = "Unable to display repository contents at this time. Wait a while and then refresh the browser to try again.";
+				errorMessage = "GitHub is currently limiting our ability to display repository contents. Wait a while and then refresh the browser to try again or go to the Github repository page: "+ this._originalRepoURL;
+			} else {//For errors other than 404 and 403, we just use the "message" and "documentation_url" properties for a detailed message
+				errorMessage = "Unable to display repository contents at this time. Refresh the browser to try again.";
+				/*
 				errorMessageHeader = errorMessageHeader + (error.status ? "Error code " + error.status + ". " : "");
 				var responseText = error.responseText;
 				try {
@@ -100,8 +105,9 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 				} catch (e) {
 					errorMessage = "Unknown";
 				}
+				*/
 			}
-			var errorObj = {Severity: "error", Message: errorMessageHeader + errorMessage};
+			var errorObj = {Severity: "Warning", Message: errorMessage};
 			error.responseText = JSON.stringify(errorObj);
 			return new Deferred().reject(error);
 		},

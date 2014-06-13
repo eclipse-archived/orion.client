@@ -266,6 +266,13 @@ a.currentLocation:hover {
 	color: #DD0000 !important;
 }
 
+.warningMessageViewTable {
+	font-weight: bold;
+	color: #c09853 !important;
+	background-color: #fcf8e3 !important;
+	outline: 1px solid #fbeed5 !important;
+}
+
 .emptyViewTable {
 	padding-left: 1px;
     width:100%;

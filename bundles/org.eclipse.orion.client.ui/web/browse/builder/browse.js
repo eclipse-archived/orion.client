@@ -115,16 +115,16 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			storage: {},
 			plugins: plugins
 		});
-		var errorMessage = "Could not connect to the repository " + repo + ".";
+		var errorMessage = "Unable to display repository contents at this time. Refresh the browser to try again.";
 		pluginRegistry.start().then(function() {
 			var allReferences = serviceRegistry.getServiceReferences("orion.core.file"); //$NON-NLS-0$
 			if(allReferences.length === 0) {//If there is no file service reference, we treat it as plugin activation error.
-				this._fileBrowser._statusService.setProgressResult({Severity: "error", Message: errorMessage}); //$NON-NLS-0$
+				this._fileBrowser._statusService.setProgressResult({Severity: "Warning", Message: errorMessage}); //$NON-NLS-0$
 			} else {//Plugin activation succeeds, start up the readonly widget.
 				this._fileBrowser.startup(serviceRegistry);
 			}
 		}.bind(this), function() {//The pluginRegistry starts with rejection(not sure if it is reachable though, we treat it as plugin activation error.
-			this._fileBrowser._statusService.setProgressResult({Severity: "error", Message: errorMessage}); //$NON-NLS-0$
+			this._fileBrowser._statusService.setProgressResult({Severity: "Warning", Message: errorMessage}); //$NON-NLS-0$
 		}.bind(this));
 	}
 

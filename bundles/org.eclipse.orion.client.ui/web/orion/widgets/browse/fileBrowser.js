@@ -54,12 +54,13 @@ define([
 	}
 	objects.mixin(statusService.prototype, {
 		setProgressResult: function(error){
+			var messageTdClass = (error.Severity && error.Severity.toLowercase === "error" ? "errorMessageViewTable" : "warningMessageViewTable");
 			if(this.fileBrowser._currentEditorView && this.fileBrowser._currentEditorView.messageView) {
-				this.fileBrowser._currentEditorView.updateMessageContents(error.Message, ["messageViewTable"], "errorMessageViewTable");
+				this.fileBrowser._currentEditorView.updateMessageContents(error.Message, ["messageViewTable"], messageTdClass);
 			} else {
 				var browseViewOptons = {
 					parent: this.fileBrowser._parentDomNode,
-					messageView: {message: error.Message, classes: ["messageViewTable"], tdClass: "errorMessageViewTable"}
+					messageView: {message: error.Message, classes: ["messageViewTable"], tdClass: messageTdClass}
 				};
 				this.fileBrowser._switchView(new mBrowseView.BrowseView(browseViewOptons));
 			}
