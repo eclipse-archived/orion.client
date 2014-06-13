@@ -102,6 +102,8 @@ define({
 	"Reload the plugin": "Reload the plugin",
 	"Delete": "Delete",
 	"Delete this plugin from the configuration": "Delete this plugin from the configuration",
+	"DeleteUser" : "Delete User Profile as well as workspaces and projects",
+	"DeleteUserComfirmation" : "WARNING: This will permanently delete your user profile as well all your work!",
 	"Type a plugin url here ...": "Type a plugin url here ...",
 	"Installed ": "Installed ",
 	"Installing ": "Installing ",

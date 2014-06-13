@@ -77,6 +77,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			var passwordSection = new Subsection( {sectionName:messages['Password'], parentNode: this.sections, children: this.passwordFields } );
 			passwordSection.show();
 
+			this.username = "";
+			var deleteCommand = new mCommands.Command({
+				name: messages["Delete"],
+				tooltip: messages["DeleteUser"],
+				id: "orion.deleteprofile", //$NON-NLS0$
+				callback: function(){
+					this.deleteUser();
+				}
+			});
+			
+			this.commandService.addCommand(deleteCommand);
+			this.commandService.registerCommandContribution('profileCommands', "orion.deleteprofile", 3); //$NON-NLS-1$ //$NON-NLS-0$
+			
 			var updateCommand = new mCommands.Command({
 				name: messages["Update"],
 				tooltip: messages["Update Profile Settings"],
@@ -114,6 +127,17 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			}
 		},
 		
+	deleteUser: function(){
+		if(confirm(messages["DeleteUserComfirmation"])){			
+			var userService = this.userService; //$NON-NLS-0$
+			userService.deleteUser("/users/" + this.username).then(function(jsonData) {
+				window.location.reload();
+			}, function(jsonData) {
+				alert(jsonData.Message);
+			});
+		}
+	},
+	
 	update: function(data){
 			
 			var authenticationIds = [];
@@ -218,7 +242,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						var data = jsonData;
 						
 						var b = userService.getUserInfo(jsonData.Location).then( function( accountData ){
-
+							settingsWidget.username = accountData.login;
 							settingsWidget.accountFields[0].setValue( accountData.login );
 							settingsWidget.accountFields[1].setValue( accountData.Name );
 							settingsWidget.accountFields[2].setValue( accountData.email );

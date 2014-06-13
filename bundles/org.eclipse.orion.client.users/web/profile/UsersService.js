@@ -96,8 +96,12 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
 				ret.resolve(jsonData);
-			}, function(error) {
-				ret.reject(error.response || error);
+			}, function(result) {
+				var error = result;
+				try {
+					error = getJSON(result.response || result.error);
+				} catch (e) {}
+				ret.reject(error);
 			});
 			return ret;
 		},
