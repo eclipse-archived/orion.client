@@ -949,8 +949,8 @@ define([
 
 		this._selectionListener = function(e) {
 			var model = this._editorView.editor.getTextView().getModel();
-			var selectionStart = model.mapOffset(e.newValue.start);
-			var block = this._styler.getBlockAtIndex(selectionStart);
+			var selectionIndex = model.mapOffset(e.newValue.start);
+			var block = this._styler.getBlockAtIndex(selectionIndex);
 
 			var element = document.getElementById(block.elementId);
 			while (!element) {
@@ -961,21 +961,14 @@ define([
 				element = document.getElementById(block.elementId);
 			}
 
-			if (block === this._selectedBlock) {
-				return; /* no change */
+			if (this._selectedElement && this._selectedElement !== element) {
+				this._selectedElement.classList.remove(this._markdownSelected);
 			}
-
-			if (this._selectedElement) {
-				this._selectedElement.className = this._selectedElement.className.replace(this._markdownSelected, "");
-				this._selectedElement = null;
-				this._selectedBlock = null;
-			}
+			this._selectedElement = element;
+			this._selectedBlock = block;
 
 			if (block && block.elementId) {
-				this._selectedElement = element;
-				this._selectedElement.className += this._markdownSelected;
-				this._selectedBlock = block;
-
+				this._selectedElement.classList.add(this._markdownSelected);
 				var textView = this._editorView.editor.getTextView();
 				var blockTop = textView.getLocationAtOffset(model.mapOffset(block.start, true));
 				var blockBottom = textView.getLocationAtOffset(model.mapOffset(block.end, true));
@@ -984,15 +977,20 @@ define([
 				}
 				blockBottom.y += textView.getLineHeight();
 				var blockHeight = blockBottom.y - blockTop.y;
-				var relativeTop = blockTop.y - textView.getTopPixel();
-				var blockCentre = relativeTop + blockHeight / 2;
-
+				var selectionLocation = textView.getLocationAtOffset(model.mapOffset(selectionIndex, true));
+				selectionLocation.y += textView.getLineHeight();
+				var selectionPercentageWithinBlock = (selectionLocation.y - blockTop.y) / blockHeight;
 				var previewBounds = this._previewWrapperDiv.getBoundingClientRect();
-			    var elementBounds = this._selectedElement.getBoundingClientRect();
-			    var elementTop = elementBounds.top - previewBounds.top + this._previewWrapperDiv.scrollTop;
-			    var elementCentre = elementTop + this._selectedElement.offsetHeight / 2;
-
-				this._scrollPreviewDiv(elementCentre - blockCentre);
+				if (this._splitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL) {
+					var relativeY = (previewBounds.bottom - previewBounds.top) / 2;
+				} else {
+					relativeY = selectionLocation.y - textView.getTopPixel();
+				}
+				previewBounds = this._previewWrapperDiv.getBoundingClientRect();
+				var elementBounds = this._selectedElement.getBoundingClientRect();
+				var elementTop = elementBounds.top - previewBounds.top + this._previewWrapperDiv.scrollTop;
+				var elementCentre = elementTop + this._selectedElement.offsetHeight * selectionPercentageWithinBlock;
+				this._scrollPreviewDiv(elementCentre - relativeY);
 			}
 		}.bind(this);
 
@@ -1099,9 +1097,11 @@ define([
 				onEnd: function() {
 					this._scrollPreviewAnimation = null;
 					this._previewWrapperDiv.scrollTop += pixelY;
+					this._ignoreEditorScrollsUntilValue = null;
 				}.bind(this)
 			});
 
+			this._ignoreEditorScrollsUntilValue = -1;
 			this._scrollPreviewAnimation.play();	
 		},
 		_scrollSourceEditor: function(top) {
@@ -1144,7 +1144,7 @@ define([
 			this._rootDiv.style.visibility = "visible"; //$NON-NLS-0$
 			this._splitterDiv.style.visibility = "visible"; //$NON-NLS-0$
 		},
-		_markdownSelected: " markdownSelected", //$NON-NLS-0$
+		_markdownSelected: "markdownSelected", //$NON-NLS-0$
 		_selectedBlock: null
 	});
 
