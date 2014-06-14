@@ -49,6 +49,10 @@
 						var seen = Object.create(null);
 						for(var i = 0; i < len; i++) {
 							var prop = props[i];
+							// Here we're concerned only with duplicate keys having kind == "init". Duplicates among other kinds (get, set)
+							// cause syntax errors, by spec, so don't need to be linted.
+							if(prop.kind !== "init")
+								continue;
 							var name = (prop.key.name ? prop.key.name : prop.key.value);
 							if(Object.prototype.hasOwnProperty.call(seen, name)) {
 								context.report(prop, 'Duplicate object key \'{{key}}\'', {key: name}, context.getTokens(prop)[0]);
@@ -57,7 +61,6 @@
 								seen[name] = 1;
 							}
 						}
-						
 					}
 				}
 				catch(ex) {
