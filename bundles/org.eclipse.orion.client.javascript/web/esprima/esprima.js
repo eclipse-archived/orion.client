@@ -3118,7 +3118,7 @@ parseStatement: true, parseSourceElement: true */
 
         object = parseExpression();
 
-        expect(')');
+        expectSkipTo(')', '{');
 
         body = parseStatement();
 

@@ -446,6 +446,42 @@ define([
 			};
 			runTest(data);
 		});
+		it('with missing ) 1', function() {
+			var data = { 
+				source: "with(foo ",
+				nodes: [{"type":"WithStatement","range":[0,9]},{"type":"Identifier","name":"foo","range":[5,8]}],
+				tokens: [{"type":"Keyword","range":[0,4],"value":"with"},{"type":"Punctuator","range":[4,5],"value":"("},{"type":"Identifier","range":[5,8],"value":"foo"}],
+				errors: [{"lineNumber":1,"index":9,"message":"Unexpected end of input"}]
+			};
+			runTest(data);
+		});
+		it('with missing ) 2', function() {
+			var data = { 
+				source: "with(foo {",
+				nodes: [{"type":"WithStatement","range":[0,10]},{"type":"Identifier","name":"foo","range":[5,8]},{"type":"BlockStatement","range":[9,10]}],
+				tokens: [{"type":"Keyword","range":[0,4],"value":"with"},{"type":"Punctuator","range":[4,5],"value":"("},{"type":"Identifier","range":[5,8],"value":"foo"},{"type":"Punctuator","range":[9,10],"value":"{"},{"type":"Punctuator","range":[9,10],"value":"{"}],
+				errors: [{"lineNumber":1,"index":9,"message":"Unexpected token {","token":"{"},{"lineNumber":1,"index":10,"message":"Unexpected end of input"}]
+			};
+			runTest(data);
+		});
+		it('with missing ) 3', function() {
+			var data = { 
+				source: "with(foo {}",
+				nodes: [{"type":"WithStatement","range":[0,11]},{"type":"Identifier","name":"foo","range":[5,8]},{"type":"BlockStatement","range":[9,11]}],
+				tokens: [{"type":"Keyword","range":[0,4],"value":"with"},{"type":"Punctuator","range":[4,5],"value":"("},{"type":"Identifier","range":[5,8],"value":"foo"},{"type":"Punctuator","range":[9,10],"value":"{"},{"type":"Punctuator","range":[10,11],"value":"}"},{"type":"Punctuator","range":[9,10],"value":"{"},{"type":"Punctuator","range":[10,11],"value":"}"}],
+				errors: [{"lineNumber":1,"index":9,"message":"Unexpected token {","token":"{"}]
+			};
+			runTest(data);
+		});
+		it('with missing ) 4', function() {
+			var data = { 
+				source: "with(foo() {}",
+				nodes: [{"type":"WithStatement","range":[0,13]},{"type":"CallExpression","range":[5,10]},{"type":"Identifier","name":"foo","range":[5,8]},{"type":"BlockStatement","range":[11,13]}],
+				tokens: [{"type":"Keyword","range":[0,4],"value":"with"},{"type":"Punctuator","range":[4,5],"value":"("},{"type":"Identifier","range":[5,8],"value":"foo"},{"type":"Punctuator","range":[8,9],"value":"("},{"type":"Punctuator","range":[9,10],"value":")"},{"type":"Punctuator","range":[11,12],"value":"{"},{"type":"Punctuator","range":[12,13],"value":"}"},{"type":"Punctuator","range":[11,12],"value":"{"},{"type":"Punctuator","range":[12,13],"value":"}"}],
+				errors: [{"lineNumber":1,"index":11,"message":"Unexpected token {","token":"{"}]
+			};
+			runTest(data);
+		});
 		it('while missing ) 1', function() {
 			var data = { 
 				source: "while(foo ",
