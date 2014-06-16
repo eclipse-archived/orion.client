@@ -10,6 +10,7 @@
 .search_primaryColumn {
 	padding-left: 0 !important;
 	vertical-align: top;
+	white-space: nowrap;
 	width: 45px;
 }
 
