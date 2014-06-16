@@ -793,6 +793,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		getBlocks: function() {
 			return this._subBlocks;
 		},
+		getBlockAtIndex: function(index) {
+			return binarySearch(this.getBlocks(), index, true);
+		},
 		isRenderingWhitespace: function() {
 			return this.styler._isRenderingWhitespace();
 		}

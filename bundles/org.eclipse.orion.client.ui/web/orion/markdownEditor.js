@@ -891,9 +891,8 @@ define([
 			while (target && target.id.indexOf(ID_PREFIX) !== 0) {
 				target = target.parentElement;
 			}
-
 			if (!target) {
-				// TODO find the next nearest?
+				/* click was not on a preview element */
 				return;
 			}
 
@@ -925,23 +924,37 @@ define([
 				return;
 			}
 
-			var textView = this._editorView.editor.getTextView();
-
-			var block;
 			if (!e.newValue.y) {
-				/* the editor is at the top so ensure that preview is at the top as well */
-				var rootBlock = this._styler.getRootBlock();
-				var blocks = rootBlock.getBlocks();
-				if (blocks.length) {
-					block = blocks[0];
+				/* the editor is now at the top so ensure that preview is at its top as well */
+				this._previewWrapperDiv.scrollTop = 0;
+				return;
+			}
+
+			var textView = this._editorView.editor.getTextView();
+			var bottomLineIndex = textView.getBottomIndex();
+			if (bottomLineIndex === this._model.getLineCount() - 1) {
+				/* the editor is now at the bottom so ensure that preview is at its bottom as well */
+				this._previewWrapperDiv.scrollTop = this._previewWrapperDiv.scrollHeight;
+				return;
+			}
+
+			var charIndex = textView.getOffsetAtLocation(0, Math.floor(e.newValue.y + this._previewWrapperDiv.clientHeight / 2));
+			var block = this._styler.getBlockAtIndex(charIndex);
+			var element = document.getElementById(block.elementId);
+			while (!element) {
+				if (!block.parent) {
+					/* have reached the root block, so choose the nearest child block */
+					var childIndex = Math.max(0, block.getBlockAtIndex(charIndex));
+					var subBlocks = block.getBlocks();
+					block = subBlocks[Math.min(childIndex, subBlocks.length - 1)];
+					break;
 				}
-			} else {
-				var charIndex = textView.getOffsetAtLocation(0, Math.floor(e.newValue.y + (this._previewWrapperDiv.clientHeight / 2)));
-				block = this._styler.getBlockAtIndex(charIndex);
+				block = block.parent;
+				element = document.getElementById(block.elementId);
 			}
 
 			if (block) {
-				var element = document.getElementById(block.elementId);
+				element = element || document.getElementById(block.elementId);
 				if (element) {
 					var newTop = Math.max(0, Math.ceil(element.offsetTop - (this._previewWrapperDiv.clientHeight - element.offsetHeight) / 2));
 					this._previewWrapperDiv.scrollTop = newTop;
@@ -956,10 +969,11 @@ define([
 
 			var element = document.getElementById(block.elementId);
 			while (!element) {
-				block = block.parent;
-				if (!block) {
+				if (!block.parent) {
+					/* have reached the root block */
 					break;
 				}
+				block = block.parent;
 				element = document.getElementById(block.elementId);
 			}
 
@@ -969,30 +983,63 @@ define([
 			this._selectedElement = element;
 			this._selectedBlock = block;
 
-			if (block && block.elementId) {
+			var textView = this._editorView.editor.getTextView();
+			if (element) {
 				this._selectedElement.classList.add(this._markdownSelected);
-				var textView = this._editorView.editor.getTextView();
-				var blockTop = textView.getLocationAtOffset(model.mapOffset(block.start, true));
-				var blockBottom = textView.getLocationAtOffset(model.mapOffset(block.end, true));
-				if (!blockBottom.y) { /* indicates that the block bottom is within a collapsed section */
-					blockBottom.y = blockTop.y;
+				var sourceAlignTop = textView.getLocationAtOffset(model.mapOffset(block.start, true));
+				var sourceAlignBottom = textView.getLocationAtOffset(model.mapOffset(block.end, true));
+				if (!sourceAlignBottom.y) { /* indicates that the block bottom is within a collapsed section */
+					sourceAlignBottom.y = sourceAlignTop.y;
 				}
-				blockBottom.y += textView.getLineHeight();
-				var blockHeight = blockBottom.y - blockTop.y;
-				var selectionLocation = textView.getLocationAtOffset(model.mapOffset(selectionIndex, true));
-				selectionLocation.y += textView.getLineHeight();
-				var selectionPercentageWithinBlock = (selectionLocation.y - blockTop.y) / blockHeight;
-				var previewBounds = this._previewWrapperDiv.getBoundingClientRect();
-				if (this._splitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL) {
-					var blockRelativeY = (previewBounds.bottom - previewBounds.top) / 2;
+				sourceAlignBottom.y += textView.getLineHeight();
+			 } else {
+				/* selection is in whitespace in the root block */
+				var childIndex = block.getBlockAtIndex(selectionIndex);
+				var subBlocks = block.getBlocks();
+				var start = childIndex ? subBlocks[childIndex - 1].end : 0;
+				if (childIndex < subBlocks.length) {
+					var end = subBlocks[childIndex].start;
 				} else {
-					blockRelativeY = selectionLocation.y - textView.getTopPixel();
+					/* beyond end of last block */
+					end = model.getCharCount();
 				}
+				sourceAlignTop = textView.getLocationAtOffset(model.mapOffset(start, true));
+				sourceAlignBottom = textView.getLocationAtOffset(model.mapOffset(end, true));
+				sourceAlignBottom.y += textView.getLineHeight();
+			}
+			var sourceAlignHeight = sourceAlignBottom.y - sourceAlignTop.y;
+			var selectionLocation = textView.getLocationAtOffset(model.mapOffset(selectionIndex, true));
+			selectionLocation.y += textView.getLineHeight();
+			var selectionPercentageWithinBlock = (selectionLocation.y - sourceAlignTop.y) / sourceAlignHeight;
+			var previewBounds = this._previewWrapperDiv.getBoundingClientRect();
+			if (this._splitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL) {
+				var sourceRelativeY = (previewBounds.bottom - previewBounds.top) / 2;
+			} else {
+				sourceRelativeY = selectionLocation.y - textView.getTopPixel();
+			}
+
+			if (element) {
 				var elementBounds = this._selectedElement.getBoundingClientRect();
 				var elementTop = elementBounds.top - previewBounds.top + this._previewWrapperDiv.scrollTop;
 				var elementAlignY = elementTop + this._selectedElement.offsetHeight * selectionPercentageWithinBlock;
-				this._scrollPreviewDiv(elementAlignY - blockRelativeY);
+			} else {
+				if (childIndex < subBlocks.length) {
+					var nextElement = document.getElementById(subBlocks[childIndex].elementId);
+					var nextElementTop = nextElement.getBoundingClientRect().top;
+				} else {
+					/* beyond end of last block */
+					nextElementTop = previewBounds.bottom;
+				}
+				if (childIndex) {
+					var previousElement = document.getElementById(subBlocks[childIndex - 1].elementId);
+					var previousElementBottom = previousElement.getBoundingClientRect().bottom;
+				} else {
+					previousElementBottom = 0;
+				}
+				var previousElementRelativeBottom = previousElementBottom - previewBounds.top + this._previewWrapperDiv.scrollTop;
+				elementAlignY = previousElementRelativeBottom + (nextElementTop - previousElementBottom) * selectionPercentageWithinBlock;
 			}
+			this._scrollPreviewDiv(elementAlignY - sourceRelativeY);
 		}.bind(this);
 
 		this._splitterResizeListener = function(/*e*/) {
