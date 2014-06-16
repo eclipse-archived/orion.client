@@ -886,7 +886,7 @@ define([
 		this._model = options.model;
 		this._editorView = options.editorView;
 
-		this._previewMouseClickListener = function(e) {
+		this._previewClickListener = function(e) {
 			var target = e.target;
 			while (target && target.id.indexOf(ID_PREFIX) !== 0) {
 				target = target.parentElement;
@@ -897,25 +897,27 @@ define([
 				return;
 			}
 
-			var previewBounds = this._previewWrapperDiv.getBoundingClientRect();
 		    var elementBounds = target.getBoundingClientRect();
-		    var relativeTop = elementBounds.top - previewBounds.top;
-		    var elementCentre = relativeTop + target.offsetHeight / 2;
+		    var selectionPercentageWithinElement = (e.clientY - elementBounds.top) / (elementBounds.bottom - elementBounds.top);
 
 			var block = this._stylerAdapter.getBlockWithId(target.id);
 			var textView = this._editorView.editor.getTextView();
 			var blockTop = textView.getLocationAtOffset(block.start);
 			var blockBottom = textView.getLocationAtOffset(block.end);
 			blockBottom.y += textView.getLineHeight();
-			var blockCentre = blockTop.y + (blockBottom.y - blockTop.y) / 2;
-			this._scrollSourceEditor(blockCentre - elementCentre);
+			var blockAlignY = blockTop.y + (blockBottom.y - blockTop.y) * selectionPercentageWithinElement;
+
+			var editorBounds = this._editorDiv.getBoundingClientRect();
+			if (this._splitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL) {
+				var elementRelativeY = editorBounds.height / 2;
+			} else {
+				elementRelativeY = e.clientY - editorBounds.top;
+			}
+
+			this._scrollSourceEditor(blockAlignY - elementRelativeY);
 		}.bind(this);
 
-		this._resizeListener = function(/*e*/) {
-			this._editorView.editor.resize();
-		}.bind(this);
-
-		this._scrollListener = function(e) {
+		this._sourceScrollListener = function(e) {
 			if (this._ignoreEditorScrollsUntilValue) {
 				if (this._ignoreEditorScrollsUntilValue === e.newValue.y) {
 					this._ignoreEditorScrollsUntilValue = null;
@@ -947,7 +949,7 @@ define([
 			}
 		}.bind(this);
 
-		this._selectionListener = function(e) {
+		this._sourceSelectionListener = function(e) {
 			var model = this._editorView.editor.getTextView().getModel();
 			var selectionIndex = model.mapOffset(e.newValue.start);
 			var block = this._styler.getBlockAtIndex(selectionIndex);
@@ -982,16 +984,19 @@ define([
 				var selectionPercentageWithinBlock = (selectionLocation.y - blockTop.y) / blockHeight;
 				var previewBounds = this._previewWrapperDiv.getBoundingClientRect();
 				if (this._splitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL) {
-					var relativeY = (previewBounds.bottom - previewBounds.top) / 2;
+					var blockRelativeY = (previewBounds.bottom - previewBounds.top) / 2;
 				} else {
-					relativeY = selectionLocation.y - textView.getTopPixel();
+					blockRelativeY = selectionLocation.y - textView.getTopPixel();
 				}
-				previewBounds = this._previewWrapperDiv.getBoundingClientRect();
 				var elementBounds = this._selectedElement.getBoundingClientRect();
 				var elementTop = elementBounds.top - previewBounds.top + this._previewWrapperDiv.scrollTop;
-				var elementCentre = elementTop + this._selectedElement.offsetHeight * selectionPercentageWithinBlock;
-				this._scrollPreviewDiv(elementCentre - relativeY);
+				var elementAlignY = elementTop + this._selectedElement.offsetHeight * selectionPercentageWithinBlock;
+				this._scrollPreviewDiv(elementAlignY - blockRelativeY);
 			}
+		}.bind(this);
+
+		this._splitterResizeListener = function(/*e*/) {
+			this._editorView.editor.resize();
 		}.bind(this);
 
 		BaseEditor.apply(this, arguments);
@@ -1006,10 +1011,10 @@ define([
 			this._stylerAdapter = new MarkdownStylingAdapter(this._model, this._metadata.Location, this._fileService);
 			this._styler = new mTextStyler.TextStyler(textView, annotationModel, this._stylerAdapter);
 
-			this._editorView.editor.getTextView().addEventListener("Scroll", this._scrollListener); //$NON-NLS-0$
-			this._editorView.editor.getTextView().addEventListener("Selection", this._selectionListener); //$NON-NLS-0$
-			this._splitter.addEventListener("resize", this._resizeListener); //$NON-NLS-0$
-			this._previewDiv.addEventListener("click", this._previewMouseClickListener); //$NON-NLS-0$
+			this._editorView.editor.getTextView().addEventListener("Scroll", this._sourceScrollListener); //$NON-NLS-0$
+			this._editorView.editor.getTextView().addEventListener("Selection", this._sourceSelectionListener); //$NON-NLS-0$
+			this._splitter.addEventListener("resize", this._splitterResizeListener); //$NON-NLS-0$
+			this._previewDiv.addEventListener("click", this._previewClickListener); //$NON-NLS-0$
 
 			/*
 			 * If the model already has content then it is being shared with a previous
@@ -1029,9 +1034,9 @@ define([
 			this._rootDiv.style.height = "100%"; //$NON-NLS-0$
 			this._parent.appendChild(this._rootDiv);
 
-			var editorDiv = document.createElement("div"); //$NON-NLS-0$
-			this._rootDiv.appendChild(editorDiv);	
-			this._editorView.setParent(editorDiv);
+			this._editorDiv = document.createElement("div"); //$NON-NLS-0$
+			this._rootDiv.appendChild(this._editorDiv);	
+			this._editorView.setParent(this._editorDiv);
 
 			this._splitterDiv = document.createElement("div"); //$NON-NLS-0$
 			this._splitterDiv.id = "orion.markdown.editor.splitter";
@@ -1052,7 +1057,7 @@ define([
 
 			this._splitter = new mSplitter.Splitter({
 				node: this._splitterDiv,
-				sidePanel: editorDiv,
+				sidePanel: this._editorDiv,
 				mainPanel: this._previewWrapperDiv,
 				vertical: settings && settings.splitOrientation === mSplitter.ORIENTATION_VERTICAL
 			});
@@ -1068,10 +1073,10 @@ define([
 		uninstall: function() {
 			this._styler.destroy();
 			var textView = this._editorView.editor.getTextView();
-			textView.removeEventListener("Scroll", this._scrollListener); //$NON-NLS-0$
-			textView.removeEventListener("Selection", this._selectionListener); //$NON-NLS-0$
-			this._splitter.removeEventListener("resize", this._resizeListener); //$NON-NLS-0$
-			this._previewDiv.removeEventListener("click", this._previewMouseClickListener); //$NON-NLS-0$
+			textView.removeEventListener("Scroll", this._sourceScrollListener); //$NON-NLS-0$
+			textView.removeEventListener("Selection", this._sourceSelectionListener); //$NON-NLS-0$
+			this._splitter.removeEventListener("resize", this._splitterResizeListener); //$NON-NLS-0$
+			this._previewDiv.removeEventListener("click", this._previewClickListener); //$NON-NLS-0$
 			lib.empty(this._parent);
 			BaseEditor.prototype.uninstall.call(this);
 		},
