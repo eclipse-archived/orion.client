@@ -232,5 +232,14 @@
 			var messages = eslint.verify(topic, config);
 			assert.equal(messages.length, 0);
 		});
+		it("should not flag EmptyStatement", function() {
+			var topic = "function f() {return;;}";
+
+			var config = { rules: {} };
+			config.rules[RULE_ID] = 1;
+
+			var messages = eslint.verify(topic, config);
+			assert.equal(messages.length, 0);
+		});
 	});
 }));

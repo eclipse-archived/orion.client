@@ -81,8 +81,9 @@
             }
             //mark all the remaining child statemnts as unreachable
             for(i++; i < children.length; i++) {
-                if(!hoisted(children[i])) {
-                    context.report(children[i], "Unreachable code.");
+                var child = children[i];
+                if(!hoisted(child) && child.type !== "EmptyStatement") {
+                    context.report(child, "Unreachable code.");
                 }
             }
         }
