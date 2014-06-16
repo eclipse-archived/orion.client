@@ -435,13 +435,6 @@ define([
 									parents.push(node);
 								}
 							} else {
-								if(parents && parents.length > 0) {
-									var p = parents[parents.length-1];
-									if(p.range[0] === found.range[0] && p.range[1] === found.range[1]) {
-										//a node can't be its own parent
-										parents.pop();
-									}
-								}
 								return Estraverse.VisitorOption.Break;
 							}
 						}
@@ -454,16 +447,12 @@ define([
 					}
 				});
 			}
-			if(found && parents) {
-				// If there are no nodes after the found node, remove it from the parents list
-				if(parents.length > 0) {
-					var p = parents[parents.length-1];
-					if(p.range[0] === found.range[0] && p.range[1] === found.range[1]) {
-						//a node can't be its own parent
-						parents.pop();
-					}
+			if(found && parents && parents.length > 0) {
+				var p = parents[parents.length-1];
+				if(p.type !== 'Program' && p.range[0] === found.range[0] && p.range[1] === found.range[1]) {
+					//a node can't be its own parent
+					parents.pop();
 				}
-				
 				found.parents = parents;
 			}
 			return found;
