@@ -41,7 +41,7 @@ define(['orion/PageUtil', "orion/URL-shim"], function(PageUtil) {
 		if (lastNonMatchIndex === 0) {
 			return null;
 		}
-		if (lastNonMatchIndex < (text.length - 1)) {
+		if (lastNonMatchIndex < text.length) {
 			matches.push({segmentStr: text.substring(lastNonMatchIndex)});
 		}
 		return matches;

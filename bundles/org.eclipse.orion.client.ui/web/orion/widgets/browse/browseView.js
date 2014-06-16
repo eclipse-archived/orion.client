@@ -21,8 +21,9 @@ define([
 	'orion/Deferred',
 	'orion/webui/dropdown',
 	'orion/widgets/browse/commitInfoRenderer',
+	'orion/urlUtils',
 	'orion/section'
-], function(messages, mExplorerTable, mNavigatorRenderer, mMarkdownView, PageUtil, URITemplate, lib, objects, Deferred, mDropdown, mCommitInfoRenderer, mSection) {
+], function(messages, mExplorerTable, mNavigatorRenderer, mMarkdownView, PageUtil, URITemplate, lib, objects, Deferred, mDropdown, mCommitInfoRenderer, mUrlUtils, mSection) {
 	
 	var FileExplorer = mExplorerTable.FileExplorer;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
@@ -440,7 +441,13 @@ define([
 				td.classList.add(tdClass);
 			}
 			var messageContent = document.createElement("div");
-			messageContent.appendChild(document.createTextNode(message));
+			var segments = mUrlUtils.detectValidURL(message);
+			if (segments) {
+				mUrlUtils.processURLSegments(messageContent, segments);				
+			} else {
+				messageContent.appendChild(document.createTextNode(message));
+			}
+			//messageContent.appendChild(document.createTextNode(message));
 			td.appendChild(messageContent);
 			tr.appendChild(td);
 			messageTable.appendChild(tr);
