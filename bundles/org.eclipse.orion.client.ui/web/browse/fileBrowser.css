@@ -71,8 +71,7 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	max-width: calc(100% - 1px - 4px - 35px);
-	max-width: -webkit-calc(100% - 1px - 4px - 35px);
+	max-width: 280px;
 	-moz-user-select: -moz-none;
 	-webkit-user-select: none;
 	-ms-user-select: none;
@@ -89,7 +88,6 @@
 	margin-left: 4px;
 	border: 1px solid;
 	height: 21px; 
-	width: 200px; 
 	margin-top: -2px;
 	background-color: white;
 	display: inline-block;
@@ -223,7 +221,7 @@
 	vertical-align: top;
 	padding-top:1px;
 	font-weight: bold;
-	font-size: 1.05em;
+	font-size: 1em;
 	color: #444;
 	text-decoration: none;
 	line-height: 10pt;
@@ -375,7 +373,8 @@ a.currentLocation:hover {
 }
 
 .breadcrumb {
-	font-size: 1.05em;
+	font-size: 1em;
+	font-weight: bold;
 	text-decoration: none;
 	color: #02ADD0;
 	padding-top: 2px;
