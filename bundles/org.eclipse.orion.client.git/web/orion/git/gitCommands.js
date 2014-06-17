@@ -14,9 +14,9 @@
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/commandRegistry', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 'orion/git/gitConfigPreference',
         'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
-        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks', 'orion/URITemplate','orion/git/logic/gitPush','orion/git/logic/gitCommit', 'orion/objects', 'orion/git/logic/gitCommon'], 
+        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks', 'orion/URITemplate','orion/git/logic/gitPush','orion/git/logic/gitCommit', 'orion/objects'], 
         function(messages, require, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, mCompareUtils, GitPreferenceStorage, GitConfigPreference, mConfirmPush, mRemotePrompter,
-        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch, _, PageLinks, URITemplate, mGitPushLogic, mGitCommitLogic, objects, mGitCommonLogic) {
+        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch, _, PageLinks, URITemplate, mGitPushLogic, mGitCommitLogic, objects) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -908,7 +908,7 @@ var exports = {};
 						statusService.createProgressMonitor(deferred, messages["Fetching remote: "] + name);
 						deferred.then(
 							function(jsonData) {
-								mGitCommonLogic.handleGitServiceResponse(jsonData, serviceRegistry, 
+								exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 									function() {
 										d.resolve();
 									}, function (jsonData) {
@@ -916,7 +916,7 @@ var exports = {};
 									}
 								);
 							}, function(jsonData) {
-								mGitCommonLogic.handleGitServiceResponse(jsonData, serviceRegistry, 
+								exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 									function() {
 										d.resolve();
 									}, function (jsonData) {
@@ -1036,16 +1036,13 @@ var exports = {};
 						}else{
 							display.Message = result.error.message;
 						}
-						displayErrorOnStatus(result); //$NON-NLS-1$ //$NON-NLS-0$
+						display.HTML = true;
+						display.Message ="<span>" + display.Message +"</span>"; //$NON-NLS-1$ //$NON-NLS-0$
 					}
 
 					progressService.setProgressResult(display);
 					explorer.changedItem(item);
 				}, function (error, ioArgs) {
-					if (!ioArgs) {
-						displayErrorOnStatus(error);
-						return;
-					}
 					var display = {};
 					display.Severity = "Error"; //$NON-NLS-0$
 					display.HTML = true;
@@ -1408,7 +1405,11 @@ var exports = {};
 						explorer.changedItem(item);
 						progressService.setProgressResult(display);
 					}, function (error){
-						displayErrorOnStatus(error);
+						var display = {};
+						display.Severity = "Error"; //$NON-NLS-0$
+						display.HTML = false;
+						display.Message = error.message;
+						progressService.setProgressResult(display);
 					}
 				);
 			}
