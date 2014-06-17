@@ -26,6 +26,7 @@ define({
 	'docFuncDecl' : 'No JSDoc on function declarations', //$NON-NLS-0$  //$NON-NLS-1$
 	'docFuncExpr' : 'No JSDoc on function expressions', //$NON-NLS-0$  //$NON-NLS-1$
 	'noUnreachable' : 'Unreachable code', //$NON-NLS-0$  //$NON-NLS-1$
+	'noFallthrough' : 'Switch case fall-through', //$NON-NLS-0$  //$NON-NLS-1$
 	'useBeforeDefine' : 'Member used before definition', //$NON-NLS-0$  //$NON-NLS-1$
 	'newParens' : 'Missing parentheses in constructor call', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-array': 'Discouraged \'new Array()\'', //$NON-NLS-0$  //$NON-NLS-1$

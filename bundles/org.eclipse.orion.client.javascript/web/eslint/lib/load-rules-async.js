@@ -33,10 +33,12 @@ define([
 	"eslint/rules/no-use-before-define",
 	"eslint/rules/semi",
 	"eslint/rules/use-isnan",
-	'eslint/rules/no-unreachable'
+	'eslint/rules/no-unreachable',
+	'eslint/rules/no-fallthrough'
 ], function(curly, eqeqeq, missing_doc, new_parens, no_debugger, no_dupe_keys, no_eval,
 		no_extra_semi, no_new_array, no_new_func, no_new_object, no_new_wrappers, no_redeclare,
-		no_undef, no_unused_params, no_unused_vars, no_use_before_define, semi, use_isnan, no_unreachable) {
+		no_undef, no_unused_params, no_unused_vars, no_use_before_define, semi, use_isnan, no_unreachable,
+		no_fallthrough) {
 	return function() {
 		return {
 			"curly" : curly,
@@ -58,7 +60,8 @@ define([
 			"no-use-before-define": no_use_before_define,
 			"semi": semi,
 			"use-isnan" : use_isnan,
-			'no-unreachable' : no_unreachable
+			'no-unreachable' : no_unreachable,
+			'no-fallthrough' : no_fallthrough
 		};
 	};
 });

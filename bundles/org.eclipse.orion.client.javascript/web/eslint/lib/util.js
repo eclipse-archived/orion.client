@@ -90,6 +90,23 @@ exports.getDeclaration = function(ref, scope) {
 };
 
 /**
+ * @description Returns if the node can lead to an unreachable statement
+ * @param {Object} node The AST node
+ * @returns {Boolean} If the node can lead to an unreachable warning
+ * @since 6.0
+ */
+exports.returnableStatement = function(node) {
+    switch (node.type) {
+        case "ReturnStatement":
+        case "ThrowStatement":
+        case "ContinueStatement":
+        case "BreakStatement":
+            return true;
+    }
+    return false;
+};
+
+/**
  * Generalized helper for 'no-new-array'-like rules. Creates a a rule capable of flagging NewExpression
  * applied to a callee that is a builtin.
  * @param {String|String[]} symbol The name of the builtin symbol to check (eg "Array", "Object"),

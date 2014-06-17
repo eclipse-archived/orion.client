@@ -244,6 +244,12 @@ define([
 							defaultValue: ignore,
 							options: severities
 						},
+						{	id: "validate_no_fallthrough",  //$NON-NLS-0$
+							nameKey: 'noFallthrough',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: error,
+							options: severities
+						},
 						{	id: "validate_no_undef",  //$NON-NLS-0$
 							nameKey: 'undefMember',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$

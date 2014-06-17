@@ -42,7 +42,8 @@
 			"eslint/tests/lib/rules/no-use-before-define",
 			"eslint/tests/lib/rules/semi",
 			"eslint/tests/lib/rules/use-isnan",
-			'eslint/tests/lib/rules/no-unreachable'
+			'eslint/tests/lib/rules/no-unreachable',
+			'eslint/tests/lib/rules/no-fallthrough'
 		], factory);
 	}
 }(this, function() {
