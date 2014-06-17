@@ -204,7 +204,7 @@ define([
 				renderBeforeItemPopulation : function(i){
 					// Title area
 					var repoSection = document.createElement("div");
-					repoSection.className = "sectionWrapper toolComposite";
+					repoSection.className =  (that.mode === "mini" ? "miniWrapper" : "sectionWrapper") + " toolComposite";
 					lib.node("repositoryNode").appendChild(repoSection);
 					
 					var sectionAnchor = document.createElement("div");
@@ -230,7 +230,7 @@ define([
 					actionsArea.className = "layoutRight sectionActions";
 					actionsArea.id = "repositoryActionsArea";
 					repoSection.appendChild(actionsArea);
-					that.commandService.renderCommands(that.actionScopeId, actionsArea, repositories[i], that, "button"); //$NON-NLS-0$
+					that.commandService.renderCommands(that.actionScopeId, actionsArea, repositories[i], that, mode === "full" ? "tool" : "button"); //$NON-NLS-0$
 						
 						
 					if (mode === "full"){
