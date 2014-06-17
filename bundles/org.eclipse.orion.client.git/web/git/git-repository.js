@@ -67,11 +67,15 @@ mBootstrap.startup().then(function(core) {
 	commandRegistry.registerCommandContribution("reposPageActions", "eclipse.createGitProject", 300, "eclipse.gitGroup", true, null, new mCommandRegistry.URLBinding("createProjectContext", "name")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("reposPageActions", "eclipse.initGitRepository", 200, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	
-	commandRegistry.registerCommandContribution("repoPageActions", "eclipse.orion.git.pull", 100, "eclipse.gitGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("repoPageActions", "eclipse.git.deleteClone", 200, "eclipse.gitGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+//	commandRegistry.registerCommandContribution("repoPageActions", "eclipse.orion.git.pull", 100, "eclipse.gitGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+//	commandRegistry.registerCommandContribution("repoPageActions", "eclipse.git.deleteClone", 200, "eclipse.gitGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	commandRegistry.registerCommandContribution("repoPageActions", "eclipse.orion.git.openCommitCommand", 1000, "eclipse.gitGroup", true,  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		new KeyBinding.KeyBinding('h', true, true), new mCommandRegistry.URLBinding("openGitCommit", "commitName")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	
+	//TODO: remove when getting rid of multi repos page
+	commandRegistry.registerCommandContribution("itemLevelCommandsMini", "eclipse.orion.git.pull", 100); //$NON-NLS-1$ //$NON-NLS-0$
+	commandRegistry.registerCommandContribution("itemLevelCommandsMini", "eclipse.git.deleteClone", 200); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	// object contributions
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.openCloneContent", 100); //$NON-NLS-1$ //$NON-NLS-0$

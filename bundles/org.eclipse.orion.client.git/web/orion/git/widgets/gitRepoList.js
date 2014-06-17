@@ -225,39 +225,39 @@ define([
 					
 					//create indicator
 					this.explorer.progressIndicators[i] = new this.explorer.progressIndicator(i, title);
+					
+					var actionsArea = document.createElement("div");
+					actionsArea.className = "layoutRight sectionActions";
+					actionsArea.id = "repositoryActionsArea";
+					repoSection.appendChild(actionsArea);
+					that.commandService.renderCommands(that.actionScopeId, actionsArea, repositories[i], that, "button"); //$NON-NLS-0$
+						
 						
 					if (mode === "full"){
-						var actionsArea = document.createElement("div");
-						actionsArea.className = "layoutRight sectionActions";
-						actionsArea.id = "repositoryActionsArea";
-						repoSection.appendChild(actionsArea);
-						that.commandService.renderCommands(that.actionScopeId, actionsArea, repositories[i], that, "tool"); //$NON-NLS-0$
-					}
+						// Content area
+						var repoSectionContent = document.createElement("div");
+						repoSectionContent.className = "sectionTable sectionTableItem";
+						lib.node("repositoryNode").appendChild(repoSectionContent);
+												
+						var detailsView = document.createElement("div");
+						detailsView.className = "stretch";
+						repoSectionContent.appendChild(detailsView);
+						
+						var div = document.createElement("div");
+						detailsView.appendChild(div);
+						
+						var span = document.createElement("span");
+						span.textContent = (repositories[i].GitUrl !== null ? messages["git url:"] + repositories[i].GitUrl : messages["(no remote)"]);
+						detailsView.appendChild(span);
+						
+						div = document.createElement("div");
+						detailsView.appendChild(div);
+						
+						span = document.createElement("span");
+						span.id = "location"+i;
+						detailsView.appendChild(span);
+		
 					
-					// Content area
-					var repoSectionContent = document.createElement("div");
-					repoSectionContent.className = "sectionTable sectionTableItem";
-					lib.node("repositoryNode").appendChild(repoSectionContent);
-											
-					var detailsView = document.createElement("div");
-					detailsView.className = "stretch";
-					repoSectionContent.appendChild(detailsView);
-					
-					var div = document.createElement("div");
-					detailsView.appendChild(div);
-					
-					var span = document.createElement("span");
-					span.textContent = (repositories[i].GitUrl !== null ? messages["git url:"] + repositories[i].GitUrl : messages["(no remote)"]);
-					detailsView.appendChild(span);
-					
-					div = document.createElement("div");
-					detailsView.appendChild(div);
-					
-					span = document.createElement("span");
-					span.id = "location"+i;
-					detailsView.appendChild(span);
-	
-					if (mode === "full"){
 						div = document.createElement("div");
 						div.style.paddingTop = "10px";
 						detailsView.appendChild(div);

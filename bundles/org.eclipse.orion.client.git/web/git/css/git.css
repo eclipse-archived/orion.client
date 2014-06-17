@@ -18,6 +18,11 @@
 	background-position: left top; 
 }
 
+.sectionTable {
+	margin-left: 5%;
+	margin-right: 5%;
+}
+
 .gitCommitMessage .orionButton {
 	margin: 15px;
 	padding: 15px;

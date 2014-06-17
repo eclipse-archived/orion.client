@@ -434,7 +434,7 @@ define({
 	"NoCommits" : "No Commits",
 	"Incoming" : "Incoming",
 	"Outgoing" : "Outgoing",
-	"Synchronized" : "Common",
+	"Synchronized" : "History",
 	"NoBranch" : "No Branch",
 	"None": "None"
 });

@@ -288,7 +288,7 @@ exports.GitRepositoryExplorer = (function() {
 			gitClient: this.gitClient,
 			progressService: this.progressService,
 			parentId: "repositoryNode",
-			actionScopeId: this.actionScopeId,
+			actionScopeId: mode === "mini" ? "itemLevelCommandsMini" : this.actionScopeId,
 			handleError: this.handleError,
 			repositories: repositories,
 			mode: mode,
