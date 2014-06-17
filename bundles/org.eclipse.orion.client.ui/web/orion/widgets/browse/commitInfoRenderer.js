@@ -14,8 +14,9 @@ define([
 	'orion/objects',
 	"orion/URITemplate",
 	'orion/webui/littlelib',
+	'orion/xhr',
 	'orion/URL-shim'
-], function(objects, URITemplate, lib) {
+], function(objects, URITemplate, lib, xhr) {
 
 	function _timeDifference(commitTimeStamp) {
 		var currentDate = new Date();
@@ -123,6 +124,27 @@ define([
 			}
 			return messageNode;
 		},
+		_requestPhotoURL: function(userId, avatarImage) {
+			var _this = this;
+			var relativeURL = "/manage/service/com.ibm.team.jazzhub.common.service.IPhotoService/getContributorPhotoURI";
+			var absURL = new URL(relativeURL, window.location.href);
+			absURL.query.set("contributorUserId", userId);
+			var requestURL = absURL.href;
+			xhr("GET", requestURL, {
+				timeout: 15000
+			}).then(function(result) {
+				var photo = JSON.parse(result.response);
+				avatarImage.src = photo.photoURI;
+			}, function() { _this._useOtherPhotoURL(avatarImage);});
+			
+		},
+		_useOtherPhotoURL: function(avatarImage) {
+			if(this._commitInfo.AvatarURL) {
+				avatarImage.src = this._commitInfo.AvatarURL;
+			} else {
+				avatarImage.src = "https://www.gravatar.com/avatar/?d=mm";
+			}
+		},
 		renderSimple: function(maxWidth) {
 			this._parentDomNode.appendChild(this._generateMessageNode(this._simpleMessage(maxWidth)));
 		},
@@ -142,10 +164,10 @@ define([
 			if(showAvatar) {
 				var avatarContainer = document.createElement("div");
 				var avatarImage = new Image();//document.createElement("image");
-				if(this._commitInfo.AvatarURL) {
-					avatarImage.src = this._commitInfo.AvatarURL;
+				if(this._commitInfo.Author && this._commitInfo.Author.UserId) {
+					this._requestPhotoURL(this._commitInfo.Author.UserId, avatarImage);
 				} else {
-					avatarImage.src = "https://www.gravatar.com/avatar/?d=mm";
+					this._useOtherPhotoURL(avatarImage);
 				}
 				avatarImage.classList.add("commitInfoAvatar"); //$NON-NLS-0$
 				avatarContainer.appendChild(avatarImage);
