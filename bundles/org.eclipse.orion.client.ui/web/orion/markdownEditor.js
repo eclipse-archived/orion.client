@@ -583,30 +583,53 @@ define([
 			parseTokens.links = links;
 			rootElement.innerHTML = marked.Parser.parse(parseTokens, this._markedOptions);
 
+			var processParentTokens = function(parentTokens) {
+				/*
+				 * Create a stream of tokens with this block's start/end tokens (to provide
+				 * context to marked) and the tokens being contributed from child blocks.
+				 */
+				parseTokens = [block.startToken].concat(parentTokens).concat(block.endToken);
+				parseTokens.links = links;
+				var tempElement = document.createElement("div"); //$NON-NLS-0$
+				tempElement.innerHTML = marked.Parser.parse(parseTokens, this._markedOptions);
+				var createdNodes = tempElement.children[0].childNodes;
+				while (createdNodes.length) {
+					rootElement.children[0].appendChild(createdNodes[0]);
+				}				
+			}.bind(this);
+
+			/*
+			 * Parent tokens are accumulated until either a child with its own content tokens is
+			 * encountered or all children have been processed.  These tokens are then parsed
+			 * together in order to provide needed context to marked.
+			 */
+			var accumulatedParentTokens = [];
+
 			block.getBlocks().forEach(function(current) {
 				if (current.parentTokens) {
 					/* a child block that contributes all of its tokens to its parent */
-
-					/*
-					 * Create a stream of tokens with this block's start/end tokens (to provide
-					 * context to marked) and the token being contributed from the child block.
-					 */
-					parseTokens = [block.startToken].concat(current.parentTokens).concat(block.endToken);
-					parseTokens.links = links;
-					var tempElement = document.createElement("div"); //$NON-NLS-0$
-					tempElement.innerHTML = marked.Parser.parse(parseTokens, this._markedOptions);
-					var createdNodes = tempElement.children[0].childNodes;
-					while (createdNodes.length) {
-						rootElement.children[0].appendChild(createdNodes[0]);
-					}
+					accumulatedParentTokens = accumulatedParentTokens.concat(current.parentTokens);
 				} else {
 					/* a child block with its own content tokens */
+					
+					/* first flush accumulated parent tokens */
+					if (accumulatedParentTokens.length) {
+						processParentTokens(accumulatedParentTokens);
+						accumulatedParentTokens = [];
+					}
+					
+					/* now process the child block */
 					var newElement = document.createElement("div"); //$NON-NLS-0$
 					this._generateHTML(newElement, current);
 					newElement.id = current.elementId;
 					rootElement.children[0].appendChild(newElement);
 				}
 			}.bind(this));
+			
+			/* flush any remaining parent tokens */
+			if (accumulatedParentTokens.length) {
+				processParentTokens(accumulatedParentTokens);
+			}
 		},
 		_getLineStart: function(text, index) {
 			while (0 <= --index) {
