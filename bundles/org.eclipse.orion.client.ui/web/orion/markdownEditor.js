@@ -916,6 +916,19 @@ define([
 			this._scrollSourceEditor(blockAlignY - elementRelativeY);
 		}.bind(this);
 
+		this._settingsListener = function(e) {
+			this._splitter.setOrientation(e.newSettings.splitOrientation);
+			/*
+			 * If this is the initial retrieval of these settings then the root
+			 * and splitter elements likely need to have their visibilities updated.
+			 */
+			this._rootDiv.style.visibility = "visible"; //$NON-NLS-0$
+			this._splitterDiv.style.visibility = "visible"; //$NON-NLS-0$
+
+			this._styler.setTabsVisible(e.newSettings.showTabs);
+			this._styler.setSpacesVisible(e.newSettings.showSpaces);
+		}.bind(this);
+
 		this._sourceScrollListener = function(e) {
 			if (this._ignoreEditorScrollsUntilValue) {
 				if (this._ignoreEditorScrollsUntilValue === e.newValue.y) {
@@ -1073,6 +1086,10 @@ define([
 			if (this._model.getCharCount()) {
 				this._stylerAdapter.initialPopulatePreview();
 			}
+
+			var settings = this._editorView.getSettings();
+			this._styler.setTabsVisible(settings.showTabs);
+			this._styler.setSpacesVisible(settings.showSpaces);
 		},
 		install: function() {
 			this._rootDiv = document.createElement("div"); //$NON-NLS-0$
@@ -1099,7 +1116,7 @@ define([
 			this._previewDiv.classList.add("orionMarkdown"); //$NON-NLS-0$
 			this._previewWrapperDiv.appendChild(this._previewDiv);
 
-			this._editorView.addEventListener("Settings", this._updateSettings.bind(this)); //$NON-NLS-0$
+			this._editorView.addEventListener("Settings", this._settingsListener); //$NON-NLS-0$
 			var settings = this._editorView.getSettings();
 
 			this._splitter = new mSplitter.Splitter({
@@ -1119,6 +1136,7 @@ define([
 		},
 		uninstall: function() {
 			this._styler.destroy();
+			this._editorView.removeEventListener("Settings", this._settingsListener); //$NON-NLS-0$
 			var textView = this._editorView.editor.getTextView();
 			textView.removeEventListener("Scroll", this._sourceScrollListener); //$NON-NLS-0$
 			textView.removeEventListener("Selection", this._sourceSelectionListener); //$NON-NLS-0$
@@ -1190,15 +1208,6 @@ define([
 
 			this._ignoreEditorScrollsUntilValue = -1;
 			this._scrollSourceAnimation.play();	
-		},
-		_updateSettings: function(event) {
-			this._splitter.setOrientation(event.newSettings.splitOrientation);
-			/*
-			 * If this is the initial retrieval of these settings then the root
-			 * and splitter elements likely need to have their visibilities updated.
-			 */
-			this._rootDiv.style.visibility = "visible"; //$NON-NLS-0$
-			this._splitterDiv.style.visibility = "visible"; //$NON-NLS-0$
 		},
 		_markdownSelected: "markdownSelected", //$NON-NLS-0$
 		_selectedBlock: null
