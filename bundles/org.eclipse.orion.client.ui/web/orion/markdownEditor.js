@@ -1138,9 +1138,11 @@ define([
 				return;
 			}
 
+			var settings = this._editorView.getSettings();
 			this._scrollPreviewAnimation = new mTextUtil.Animation({
 				window: window,
 				curve: [pixelY, 0],
+				duration: settings.scrollAnimation ? settings.scrollAnimationTimeout : 0,
 				onAnimate: function(x) {
 					var deltaY = pixelY - Math.floor(x);
 					this._previewWrapperDiv.scrollTop += deltaY;
@@ -1168,9 +1170,11 @@ define([
 				return;
 			}
 
+			var settings = this._editorView.getSettings();
 			this._scrollSourceAnimation = new mTextUtil.Animation({
 				window: window,
 				curve: [pixelY, 0],
+				duration: settings.scrollAnimation ? settings.scrollAnimationTimeout : 0,
 				onAnimate: function(x) {
 					var deltaY = pixelY - Math.floor(x);
 					textView.setTopPixel(textView.getTopPixel() + deltaY);
