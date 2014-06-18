@@ -35,6 +35,7 @@ define([
 	'orion/highlight',
 	'orion/markOccurrences',
 	'orion/syntaxchecker',
+	'orion/liveEditSession',
 	'orion/keyBinding',
 	'orion/uiUtils',
 	'orion/util',
@@ -45,7 +46,7 @@ define([
 	mEmacs, mVI, mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands, mGlobalCommands,
 	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
-	mMarkOccurrences, mSyntaxchecker,
+	mMarkOccurrences, mSyntaxchecker, mLiveEditor,
 	mKeyBinding, mUIUtils, util, objects
 ) {
 
@@ -437,9 +438,11 @@ define([
 				localSettings = new EditorSettings({local: true, editor: editor, themePreferences: themePreferences, preferences: editorPreferences});
 			}
 
+			var liveEditSession = new mLiveEditor.LiveEditSession(serviceRegistry, editor);
 			inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 				var textView = editor.getTextView();
 				if (textView) {
+					liveEditSession.start(inputManager.getContentType(), event.title, event.contents);
 					textView.setOptions(this.updateViewOptions(this.settings));
 					this.syntaxHighlighter.setup(event.contentType, editor.getTextView(), editor.getAnnotationModel(), event.title, true).then(function() {
 						this.updateStyler(this.settings);
@@ -448,6 +451,8 @@ define([
 							setContentAssistProviders(editor, editor.getContentAssist());
 						}
 					}.bind(this));
+				} else {
+					liveEditSession.start();					
 				}
 			}.bind(this));
 			inputManager.addEventListener("Saving", function(event) { //$NON-NLS-0$
@@ -471,6 +476,7 @@ define([
 			var markOccurrences = this.markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, inputManager, editor);
 			markOccurrences.setOccurrencesVisible(this.settings.occurrencesVisible);
 			markOccurrences.findOccurrences();
+			
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
@@ -480,6 +486,7 @@ define([
 			});
 
 			var contextImpl = {};
+			var liveContextImpl = {};
 			[	
 				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-0$
 				"getSelection", "setSelection", //$NON-NLS-1$ //$NON-NLS-0$
@@ -488,8 +495,15 @@ define([
 				"getLineStart" //$NON-NLS-0$
 			].forEach(function(method) {
 				contextImpl[method] = editor[method].bind(editor);
+				liveContextImpl[method] = editor[method].bind(editor);
 			});
+			liveContextImpl["markClean"] = editor.markClean.bind(editor);
+			liveContextImpl["isDirty"] = editor.isDirty.bind(editor);
+			liveContextImpl.showMarkers = function(markers) {
+				serviceRegistry.getService("orion.core.marker")._setProblems(markers);
+			};
 			serviceRegistry.registerService("orion.edit.context", contextImpl, null); //$NON-NLS-0$
+			serviceRegistry.registerService("orion.edit.liveContext", liveContextImpl, null); //$NON-NLS-0$
 			if(this.editorPreferences) {
 				this.editorPreferences.getPrefs(this.updateSettings.bind(this));
 			}
