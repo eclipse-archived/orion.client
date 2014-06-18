@@ -916,7 +916,7 @@ textarea.parameterInput {
 	border-collapse: collapse;
 	border-spacing: 0;
 	padding: 0;
-	margin-top: 30px;
+	margin-top: 40px;
 	overflow-y: hidden; /* prevent vertical scrollbar from showing during expand/collapse */
 }
 
@@ -933,13 +933,12 @@ textarea.parameterInput {
 
 .sectionTable {
 	margin-top: 0;
-	margin-left: 6%;
-	margin-right: 6%;
+	margin-left: 8%;
+	margin-right: 8%;
 	border: 1px solid;
 	border-bottom-left-radius: 3px;
 	border-bottom-right-radius: 3px;
 	border-color:#dadada;
-	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.1);
 	-webkit-transition: all 0.1s ease;
 	transition: all 0.1s ease;
 	-webkit-transform-origin: top;
@@ -949,7 +948,6 @@ textarea.parameterInput {
 
 /* sectionTable preceeded by a sectionWrapper */
 .sectionWrapper+.sectionTable {
-	margin-top: 2px;
 	border-top: none;
 }
 
@@ -966,8 +964,8 @@ textarea.parameterInput {
 
 .sectionWrapper{
 	border: 1px solid;
-	margin-left: 5%;
-	margin-right: 5%;
+	margin-left: 8%;
+	margin-right: 8%;
 	background: none repeat scroll 0 0 #f4f4f4;
 	vertical-align: middle;
 	font-weight: bold;
@@ -975,7 +973,6 @@ textarea.parameterInput {
 	color: gray;
 	margin-bottom: 0;
 	border-color: #dadada;
-	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
 	transition: all 0.1s ease;
 }
 
