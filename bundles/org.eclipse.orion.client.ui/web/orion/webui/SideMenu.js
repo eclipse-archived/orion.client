@@ -11,7 +11,7 @@
 /*global URL*/
 /*jslint amd:true browser:true*/
 
-define(['orion/webui/littlelib', 'orion/URL-shim'], function(lib) {
+define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(lib, PageUtil) {
 	var LOCAL_STORAGE_NAME = "sideMenuNavigation";
 	var OPEN_STATE = "open";
 	var CLOSED_STATE = "closed";
@@ -20,26 +20,28 @@ define(['orion/webui/littlelib', 'orion/URL-shim'], function(lib) {
 	var TRANSITION_DURATION_MS = 301; /* this should always be greater than the duration of the left transition of .content-fixedHeight */
 
 	function SideMenu(parentNode, contentNode) {
-		this.parentNode = lib.node(parentNode);
-		if (!this.parentNode) {
+		this._parentNode = lib.node(parentNode);
+		if (!this._parentNode) {
 			throw new Error("Missing parentNode"); //$NON-NLS-0$
 		}
-		this.contentNode = lib.node(contentNode);
+		this._contentNode = lib.node(contentNode);
 
-		this.categoryInfos = [];
-		this.categorizedPageLinks = {};
-		this.categorizedRelatedLinks = {};
+		this._categoryInfos = [];
+		this._categorizedPageLinks = {};
+		this._categorizedRelatedLinks = {};
 
-		this.categorizedAnchors = null;
-		this.state = localStorage.getItem(LOCAL_STORAGE_NAME) || DEFAULT_STATE;
-		this.currentCategory = "";
+		this._categorizedAnchors = null;
+		this._state = localStorage.getItem(LOCAL_STORAGE_NAME) || DEFAULT_STATE;
+		this._currentCategory = "";
+		this._notificationTimeout = null;
+		this._renderTimeout = null;
 	}
 
 	SideMenu.prototype = {
 		constructor: SideMenu.prototype.constructor,
 		// Should only be called once
 		setCategories: function(categories) {
-			this.categoryInfos = categories.getCategoryIDs().map(function(catId) {
+			this._categoryInfos = categories.getCategoryIDs().map(function(catId) {
 				return categories.getCategory(catId);
 			}).sort(function(c1, c2) {
 				var o1 = c1.order || 100;
@@ -49,16 +51,16 @@ define(['orion/webui/littlelib', 'orion/URL-shim'], function(lib) {
 				} else if (o2 < o1) {
 					return 1;
 				}
-				return 0; //c1.textContent.localeCompare(c2.textContent);
+				return c1.textContent.localeCompare(c2.textContent);
 			});
 		},
 		// Should only be called once
 		setPageLinks: function(pageLinks) {
-			this.categorizedPageLinks = {};
+			this._categorizedPageLinks = {};
 			pageLinks.getAllLinks().forEach(function(link) {
 				var category = link.category;
-				this.categorizedPageLinks[category] = this.categorizedPageLinks[category] || [];
-				this.categorizedPageLinks[category].push({
+				this._categorizedPageLinks[category] = this._categorizedPageLinks[category] || [];
+				this._categorizedPageLinks[category].push({
 					title: link.textContent,
 					order: link.order || 100,
 					href: link.href
@@ -71,15 +73,15 @@ define(['orion/webui/littlelib', 'orion/URL-shim'], function(lib) {
 		 * @param {String[]} exclusions List of related link IDs that the page has requested to not be shown.
 		 */
 		setRelatedLinks: function(relatedLinks, exclusions) {
-			this.categorizedRelatedLinks = {};
+			this._categorizedRelatedLinks = {};
 			relatedLinks.forEach(function(info) {
 				var relatedLink = info.relatedLink;
 				var command = info.command;
 				var invocation = info.invocation;
 				if (!exclusions || exclusions.indexOf(relatedLink.id) === -1) {
 					var category = relatedLink.category;
-					this.categorizedRelatedLinks[category] = this.categorizedRelatedLinks[category] || [];
-					this.categorizedRelatedLinks[category].push({
+					this._categorizedRelatedLinks[category] = this._categorizedRelatedLinks[category] || [];
+					this._categorizedRelatedLinks[category].push({
 						title: command.name,
 						order: relatedLink.order || 100,
 						href: command.hrefCallback.call(invocation.handler, invocation)
@@ -87,23 +89,24 @@ define(['orion/webui/littlelib', 'orion/URL-shim'], function(lib) {
 				}
 			}, this);
 			this._updateCategoryAnchors();
+			this._updateCategoryNotifications();
 		},
 		// Should only be called once
 		render: function() {
-			if (this.categorizedAnchors === null) {
-				this.categorizedAnchors = {};
+			if (this._categorizedAnchors === null) {
+				this._categorizedAnchors = {};
 				var pageURL = new URL(window.location.href);
 				pageURL.hash = "";
 
-				this.currentCategory = "";
-				Object.keys(this.categorizedPageLinks).some(function(category) {
-					var links = this.categorizedPageLinks[category];
+				this._currentCategory = "";
+				Object.keys(this._categorizedPageLinks).some(function(category) {
+					var links = this._categorizedPageLinks[category];
 					if (links.some(function(link) {
 						var linkURL = new URL(link.href);
 						link.hash = "";
 						return pageURL.href === linkURL.href;
 					})) {
-						this.currentCategory = category;
+						this._currentCategory = category;
 						return true;
 					}
 				}, this);
@@ -111,10 +114,11 @@ define(['orion/webui/littlelib', 'orion/URL-shim'], function(lib) {
 				var sideMenuList = document.createElement("ul"); //$NON-NLS-0$
 				sideMenuList.classList.add("sideMenuList"); //$NON-NLS-0$
 
-				this.categoryInfos.forEach(function(categoryInfo) {
+				this._categoryInfos.forEach(function(categoryInfo) {
 					var listItem = document.createElement('li'); //$NON-NLS-0$
 					listItem.classList.add("sideMenuItem"); //$NON-NLS-0$
-					if (this.currentCategory === categoryInfo.id) {
+					listItem.classList.add("sideMenu-notification"); //$NON-NLS-0$
+					if (this._currentCategory === categoryInfo.id) {
 						listItem.classList.add("sideMenuItemActive");
 					}
 					listItem.categoryId = categoryInfo.id;
@@ -133,75 +137,77 @@ define(['orion/webui/littlelib', 'orion/URL-shim'], function(lib) {
 					}
 					listItem.appendChild(anchor);
 					sideMenuList.appendChild(listItem);
-					this.categorizedAnchors[categoryInfo.id] = anchor;
+					this._categorizedAnchors[categoryInfo.id] = anchor;
 				}, this);
 
 				this._updateCategoryAnchors();
-				this.parentNode.appendChild(sideMenuList);
+				this._parentNode.appendChild(sideMenuList);
 			}
 
-			if (this.state === CLOSED_STATE) {
-				this.contentNode.style.left = "0"; //$NON-NLS-0$
-				if (this._timeout) {
-					window.clearTimeout(this._timeout);
-					this._timeout = null;
+			if (this._state === CLOSED_STATE) {
+				this._contentNode.style.left = "0"; //$NON-NLS-0$
+				if (this._renderTimeout) {
+					window.clearTimeout(this._renderTimeout);
+					this._renderTimeout = null;
 				}
-				this._timeout = window.setTimeout(function() {
-					this.parentNode.style.display = 'none'; //$NON-NLS-0$
-					this._timeout = null;
+				this._renderTimeout = window.setTimeout(function() {
+					this._parentNode.style.display = 'none'; //$NON-NLS-0$
+					this._renderTimeout = null;
 				}.bind(this), TRANSITION_DURATION_MS);
-				this.parentNode.classList.add("animating"); //$NON-NLS-0$
+				this._parentNode.classList.add("animating"); //$NON-NLS-0$
 			} else {
-				if (this._timeout) {
-					window.clearTimeout(this._timeout);
-					this._timeout = null;
+				if (this._renderTimeout) {
+					window.clearTimeout(this._renderTimeout);
+					this._renderTimeout = null;
 				}
-				this.parentNode.classList.remove("animating"); //$NON-NLS-0$
-				this.parentNode.style.display = 'block'; //$NON-NLS-0$
-				this.parentNode.style.width = SIDE_MENU_OPEN_WIDTH;
-				this.contentNode.style.left = SIDE_MENU_OPEN_WIDTH;
+				this._parentNode.classList.remove("animating"); //$NON-NLS-0$
+				this._parentNode.style.display = 'block'; //$NON-NLS-0$
+				this._parentNode.style.width = SIDE_MENU_OPEN_WIDTH;
+				this._contentNode.style.left = SIDE_MENU_OPEN_WIDTH;
 			}
 		},
 		hide: function() {
 			localStorage.setItem(LOCAL_STORAGE_NAME, CLOSED_STATE);
-			this.contentNode.style.left = "0"; //$NON-NLS-0$
+			this._contentNode.style.left = "0"; //$NON-NLS-0$
 		},
 		toggle: function() {
 			// add animation if necessary
-			var pageContent = this.contentNode;
+			var pageContent = this._contentNode;
 			if (pageContent) {
 				pageContent.classList.add("content-fixedHeight-animation"); //$NON-NLS-0$
 			}
 
-			if (this.state === OPEN_STATE) {
-				this.state = CLOSED_STATE;
+			if (this._state === OPEN_STATE) {
+				this._state = CLOSED_STATE;
 			} else {
-				this.state = OPEN_STATE;
+				this._state = OPEN_STATE;
 			}
 
-			if (this.state === DEFAULT_STATE) {
+			if (this._state === DEFAULT_STATE) {
 				localStorage.removeItem(LOCAL_STORAGE_NAME);
 			} else {
-				localStorage.setItem(LOCAL_STORAGE_NAME, this.state);
+				localStorage.setItem(LOCAL_STORAGE_NAME, this._state);
 			}
 			this.render();
 		},
 		_updateCategoryAnchors: function() {
-			Object.keys(this.categorizedAnchors).forEach(function(category) {
-				var anchor = this.categorizedAnchors[category];
+			Object.keys(this._categorizedAnchors).forEach(function(category) {
+				var anchor = this._categorizedAnchors[category];
 				var links = [];
-				if (category === this.currentCategory) {
+				if (category === this._currentCategory) {
 					anchor.href = "";
-					anchor.onclick = function(){return false;};
+					anchor.onclick = function() {
+						return false;
+					};
 					anchor.title = anchor.parentElement.categoryName;
 					return;
 				}
 
-				if (this.categorizedPageLinks[category]) {
-					links.push.apply(links, this.categorizedPageLinks[category]);
+				if (this._categorizedPageLinks[category]) {
+					links.push.apply(links, this._categorizedPageLinks[category]);
 				}
-				if (this.categorizedRelatedLinks[category]) {
-					links.push.apply(links, this.categorizedRelatedLinks[category]);
+				if (this._categorizedRelatedLinks[category]) {
+					links.push.apply(links, this._categorizedRelatedLinks[category]);
 				}
 				if (links.length === 0) {
 					anchor.href = "";
@@ -218,6 +224,38 @@ define(['orion/webui/littlelib', 'orion/URL-shim'], function(lib) {
 					var bestLink = links.shift();
 					anchor.href = bestLink.href;
 					anchor.title = bestLink.title;
+				}
+			}, this);
+		},
+		_updateCategoryNotifications: function() {
+			clearTimeout(this._notificationTimeout);
+			this._notificationTimeout = setTimeout(this._updateCategoryNotifications.bind(this), 15000); // 5 minutes
+			var resource = PageUtil.matchResourceParameters().resource;
+			var resourceURL = new URL(resource, window.location.href).href;
+			this._categoryInfos.forEach(function(categoryInfo) {
+				if (categoryInfo.service && categoryInfo.service.getNotifications) {
+					var listItem = this._categorizedAnchors[categoryInfo.id].parentElement;
+					categoryInfo.service.getNotifications(resourceURL).then(function(notifications) {
+						if (resource === PageUtil.matchResourceParameters().resource) {
+							var level = "";
+							notifications.forEach(function(notification) {
+								if (notification.level === "info" && !level) {
+									level = "info";
+								} else if (notification.level === "warn" && (!level || level === "info")) {
+									level = "warn";
+								} else if (notification.level === "error" && level !== "error") {
+									level = "error";
+								}
+							});
+							if (level) {
+								listItem.setAttribute("level", level);
+							} else {
+								listItem.removeAttribute("level");
+							}
+						}
+					}, function(err) {
+						window.console.log(err);
+					});
 				}
 			}, this);
 		}

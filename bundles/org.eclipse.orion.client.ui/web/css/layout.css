@@ -518,6 +518,30 @@ hard-coded numbers elsewhere.
 	display: none;
 }
 
+.sideMenu-notification {
+	position: relative; /* Required for absolute positioning of the badge. */
+}
+.sideMenu-notification[level=info] {
+	background-image: radial-gradient(#1EB3DC, #1EB3DC 2px, transparent 3px);
+    background-size: 6px 6px;
+    background-repeat: no-repeat;
+    background-position: 30px 29px;
+}
+
+.sideMenu-notification[level=warn] {
+	background-image: radial-gradient(#FFFF66, #FFFF66 2px, transparent 3px);
+    background-size: 6px 6px;
+    background-repeat: no-repeat;
+    background-position: 30px 29px;
+}
+
+.sideMenu-notification[level=error] {
+	background-image: radial-gradient(#FF0000, #FF0000 2px, transparent 3px);
+    background-size: 6px 6px;
+    background-repeat: no-repeat;
+    background-position: 30px 29px;
+}
+
 /* sub menus */
 .sideMenuSubMenu{
 	display: none;
@@ -599,6 +623,18 @@ hard-coded numbers elsewhere.
  */
 .sideMenuItem:hover .sideMenuSubMenu, .sideMenuSubMenu.expanded { 
     display:inline-block;
+}
+
+.sidebar-decorate-active {
+	position: relative; /* Required for absolute positioning of the badge. */
+    background: 
+        radial-gradient(#1EB3DC, #1EB3DC 2px, #47575F 3px) no-repeat,
+        #47575F;
+    background-position:
+        30px 29px,
+        0 0;
+    background-size: 
+    	8px 8px;
 }
 
 /* .sideMenuitem:hover > li:hover ul {

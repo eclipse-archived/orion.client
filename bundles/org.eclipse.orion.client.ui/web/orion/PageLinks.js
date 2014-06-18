@@ -119,6 +119,7 @@ define([
 				if (!info.id || (!info.name && !info.nameKey)) {
 					return;
 				}
+				info.service = serviceRegistry.getService(serviceRef);
 				if (info.nls) {
 					categoryInfos.push(_loadTranslatedName(info));
 				} else {
