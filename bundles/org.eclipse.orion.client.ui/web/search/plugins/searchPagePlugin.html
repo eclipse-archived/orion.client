@@ -15,8 +15,8 @@
 
 			var provider = new orion.PluginProvider(headers);
 			provider.registerService("orion.navigate.command", {}, {
-				nameKey: "Scope Search",
 				id: "eclipse.search.open",
+				nameKey: "Scope Search",
 				tooltipKey: "Open in Search page for this directory",
 				nls: "orion/search/nls/messages",
 				validationProperties: [
@@ -25,10 +25,10 @@
 				uriTemplate: "{+OrionHome}/search/search.html#{,Location}",
 				forceSingleItem: true
 			});
-//			provider.registerService("orion.page.link.related", null, {
-//				id: "eclipse.search.open",
-//				category: "search"
-//			});
+			provider.registerService("orion.page.link.related", null, {
+				id: "eclipse.search.open",
+				category: "search"
+			});
 			provider.connect();
 		};
 		</script>
