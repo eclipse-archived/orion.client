@@ -1245,7 +1245,68 @@ define([
 			assert.equal(blocks[0].offset, 46);
 			assert.equal(blocks[0].text, 'function f() {}');
 		});
-		
+		/**
+		 * Tests the support for finding script blocks with type tags
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
+		 */
+		it('test_findScriptBlockWithType1', function() {
+			var text = "<!DOCTYPE html><head><script type=\"javascript\">function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 51);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 47);
+			assert.equal(blocks[0].text, 'function f() {}');
+		});
+		/**
+		 * Tests the support for finding script blocks with type tags
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
+		 */
+		it('test_findScriptBlockWithType2', function() {
+			var text = "<!DOCTYPE html><head><script type=\"text/javascript\">function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 54);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 52);
+			assert.equal(blocks[0].text, 'function f() {}');
+		});
+		/**
+		 * Tests the support for finding script blocks with type tags
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
+		 */
+		it('test_findScriptBlockWithType3', function() {
+			var text = "<!DOCTYPE html><head><script type=\"text/handlebars\">function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 54);
+			assert.equal(blocks.length, 0, "Should have found one script block");
+		});
+		/**
+		 * Tests the support for finding script blocks with type tags
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
+		 */
+		it('test_findScriptBlockWithLanguage1', function() {
+			var text = "<!DOCTYPE html><head><script language=\"javascript\">function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 53);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 51);
+			assert.equal(blocks[0].text, 'function f() {}');
+		});
+		/**
+		 * Tests the support for finding script blocks with type tags
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
+		 */
+		it('test_findScriptBlockWithLanguage2', function() {
+			var text = "<!DOCTYPE html><head><script language=\"text/javascript\">function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 58);
+			assert.equal(blocks.length, 1, "Should have found one script block");
+			assert.equal(blocks[0].offset, 56);
+			assert.equal(blocks[0].text, 'function f() {}');
+		});
+		/**
+		 * Tests the support for finding script blocks with type tags
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
+		 */
+		it('test_findScriptBlockWithLanguage3', function() {
+			var text = "<!DOCTYPE html><head><script language=\"text/handlebars\">function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 58);
+			assert.equal(blocks.length, 0, "Should have found one script block");
+		});
 		/**
 		 * Tests the support for finding script blocks in HTML with postamble text
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263

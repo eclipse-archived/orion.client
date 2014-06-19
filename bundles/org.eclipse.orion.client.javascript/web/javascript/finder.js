@@ -558,10 +558,14 @@ define([
 		 */
 		findScriptBlocks: function(buffer, offset) {
 			var blocks = [];
-			var val = null, regex = /<\s*script(?:[^>]|\n)*>((?:.|\r?\n)*?)<\s*\/script(?:[^>]|\n)*>/ig;
+			var val = null, regex = /<\s*script(?:[type|language](?:\s*)=(?:\s*)"(.*)"|[^>]|\n)*>((?:.|\r?\n)*?)<\s*\/script(?:[^>]|\n)*>/ig;
 			var comments = this.findHtmlCommentBlocks(buffer, offset);
 			loop: while((val = regex.exec(buffer)) != null) {
-				var text = val[1];
+			    var type = val[1];
+			    if(type && type.indexOf('javascript') === -1) {
+			        continue;
+			    }
+				var text = val[2];
 				if(text.length < 1) {
 					continue;
 				}
