@@ -189,7 +189,7 @@ define([
 					
 					var detailsView = document.createElement("div"); //$NON-NLS-0$
 					detailsView.className = "stretch"; //$NON-NLS-0$
-					horizontalBox.insertBefore(detailsView);
+					horizontalBox.appendChild(detailsView);
 					
 					var titleDiv = document.createElement("span"); //$NON-NLS-0$
 					titleDiv.className = titleClass;
