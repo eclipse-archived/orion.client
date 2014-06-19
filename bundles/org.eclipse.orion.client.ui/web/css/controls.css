@@ -655,6 +655,7 @@ textarea.parameterInput {
 
 .checkColumn {
 	padding: 0;
+	padding-left:10px;
 }
 
 .testNavTreetable {
