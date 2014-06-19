@@ -28,34 +28,8 @@ define([
 	}
 
 	function cleanup(error) {
-		function fixWith(fixes, severity, force) {
-			var description = error.description;
-			for (var i=0; i < fixes.length; i++) {
-				var fix = fixes[i],
-				    find = (typeof fix === "string" ? fix : fix[0]),
-				    replace = (typeof fix === "string" ? null : fix[1]),
-				    found = description.indexOf(find) !== -1;
-				if (force || found) {
-					error.severity = severity;
-				}
-				if (found && replace) {
-					error.description = replace;
-				}
-			}
-		}
-		function isBogus() {
-			var bogus = ["Dangerous comment"], description = error.description;
-			for (var i=0; i < bogus.length; i++) {
-				if (description.indexOf(bogus[i]) !== -1) {
-					return true;
-				}
-			}
-			return false;
-		}
-		var warnings = [
-			["Expected '{'", "Statement body should be inside '{ }' braces."]
-		];
-		var errors = [
+	    var fixes = [
+		  ["Expected '{'", "Statement body should be inside '{ }' braces."],
 			"Missing semicolon",
 			"Extra comma",
 			"Missing property name",
@@ -65,10 +39,19 @@ define([
 			"Unclosed string",
 			"Stopping, unable to continue"
 		];
-		// All problems are warnings by default
-		fixWith(warnings, "warning");
-		fixWith(errors, "error");
-		return isBogus(error) ? null : error;
+		var description = error.description;
+		if(description.indexOf("Dangerous comment") === -1) {
+    		for (var i=0; i < fixes.length; i++) {
+    			var fix = fixes[i],
+    			    find = (typeof fix === "string" ? fix : fix[0]),
+    			    replace = (typeof fix === "string" ? null : fix[1]);
+    			if((description.indexOf(find) !== -1) && replace) {
+    				error.description = replace;
+    			}
+    		}
+    		return error;
+		}
+		return null;
 	}
 
 	/**
