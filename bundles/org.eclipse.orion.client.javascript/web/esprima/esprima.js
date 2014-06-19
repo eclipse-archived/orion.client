@@ -18,7 +18,7 @@
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-
+      
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -2105,14 +2105,18 @@ parseStatement: true, parseSourceElement: true */
 		if(extra.errors) {
 			var token = advance();
 	        if(token.value === ':') {
+	            var expr = null;
 	        	try {
 	        		token = lex(); // eat the ':' so the assignment parsing starts on the correct index
-	            	return delegate.markEnd(delegate.createProperty('init', id, parseAssignmentExpression()));
+	        		expr = parseAssignmentExpression();
             	}
             	catch(e) {
+            	    token = extra.tokens[extra.tokens.length-1];    
+            	    throwErrorTolerant(token, Messages.UnexpectedToken, token.value);
             		delegate.markEndIf(id);
             		return null;
             	}
+            	return delegate.markEnd(delegate.createProperty('init', id, expr));
 	        } else if(token.type === Token.Punctuator && token.value === '}') {
 	        	throwErrorTolerant(prev, Messages.UnexpectedToken, prev.value);
 	        	delegate.markEndIf(id);
