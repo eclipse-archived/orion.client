@@ -229,7 +229,7 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 		},
 		_updateCategoryNotifications: function() {
 			clearTimeout(this._notificationTimeout);
-			this._notificationTimeout = setTimeout(this._updateCategoryNotifications.bind(this), 15000); // 5 minutes
+			this._notificationTimeout = setTimeout(this._updateCategoryNotifications.bind(this), 300000); // 5 minutes
 			var resource = PageUtil.matchResourceParameters().resource;
 			var resourceURL = new URL(resource, window.location.href).href;
 			this._categoryInfos.forEach(function(categoryInfo) {
