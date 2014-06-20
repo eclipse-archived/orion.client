@@ -180,7 +180,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 				this._removeChildRows(parentId);
 				this._generateChildren(children, 0);
 				this._rowsChanged();
-			} else if (parentId === this._treeModel.getId(this._root)) {
+			} else if (parentId === this._treeModel.getId(this._root) && item.removeAll) {
 				this._removeAllRows();
 				this._generateChildren(children, 0);
 				this._rowsChanged();

@@ -305,6 +305,7 @@ define([
 				var that = this;
 				parent.children = parent.Children = null;
 				this.model.getChildren(parent, function(children) {
+					parent.removeAll = true;
 					that.myTree.refresh.bind(that.myTree)(parent, children, false);
 					var selection = children.filter(function(item) {
 						return that.model.isStaged(item.type);
