@@ -191,6 +191,7 @@ exports.GitLogExplorer = (function() {
 			parentId: "logNode",
 			location: location,
 			section: titleWrapper,
+			legacyLog: true,
 			handleError: this.handleError,
 			root: {
 				Type: "CommitRoot"

@@ -42,6 +42,7 @@ define([
 		this.statusService = options.statusService;
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;
+		this.legacyLog = options.legacyLog;
 		this.logDeferred = new Deferred();
 	}
 	GitCommitListModel.prototype = Object.create(mExplorer.Explorer.prototype);
@@ -188,7 +189,9 @@ define([
 							section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch"], remoteBranch.Name));
 						}
 						progress.done();
-						onComplete(that.processChildren(parentItem, [
+						var branchesToProcess = that.legacyLog ? [{
+								Type: "Synchronized" //$NON-NLS-0$
+							}] : [
 							{
 								Type: "Outgoing", //$NON-NLS-0$
 								localBranch: localBranch,
@@ -202,7 +205,8 @@ define([
 							{
 								Type: "Synchronized" //$NON-NLS-0$
 							}
-						]));
+						];
+						onComplete(that.processChildren(parentItem, branchesToProcess));
 					}, function(error){
 						progress.done();
 						that.handleError(error);
@@ -306,6 +310,7 @@ define([
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;
 		this.statusService = options.statusService;
+		this.legacyLog = options.legacyLog;
 		
 		this.incomingActionScope = "IncomingActions"; //$NON-NLS-0$
 		this.outgoingActionScope = "OutgoingActions"; //$NON-NLS-0$
@@ -341,7 +346,7 @@ define([
 		display: function() {
 			var that = this;
 			var deferred = new Deferred();
-			var model = new GitCommitListModel({root: this.root, registry: this.registry, progressService: this.progressService, statusService: this.statusService, gitClient: this.gitClient, section: this.section, location: this.location, handleError: this.handleError});
+			var model = new GitCommitListModel({root: this.root, registry: this.registry, progressService: this.progressService, statusService: this.statusService, gitClient: this.gitClient, section: this.section, location: this.location, handleError: this.handleError, legacyLog: this.legacyLog});
 			this.createTree(this.parentId, model, {onComplete: function() {
 				that.status = model.status;
 				that.model.getRoot(function(root) {
