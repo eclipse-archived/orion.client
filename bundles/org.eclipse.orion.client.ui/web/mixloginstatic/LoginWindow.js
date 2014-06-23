@@ -145,6 +145,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/webui/littlelib', 'per
 
 	function finishLogin() {
 		var redirect = getRedirect();
+		redirect = redirect === null ? window.location.protocol + "//" + window.location.host : redirect;
 		if (redirect !== null) {
 			redirect = decodeURIComponent(redirect);
 			if(PageUtil.validateURLScheme(redirect)) {
