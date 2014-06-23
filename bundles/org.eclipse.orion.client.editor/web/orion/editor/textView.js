@@ -1966,7 +1966,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @since 5.0
 		 */
 		getLineAtOffset: function(offset) {
-			this.getModel().getLineAtOffset(offset);
+			return this.getModel().getLineAtOffset(offset);
 		},
 		/**
 		 * @name getLineStart

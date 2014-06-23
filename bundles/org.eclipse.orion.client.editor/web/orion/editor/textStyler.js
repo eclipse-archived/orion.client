@@ -1558,7 +1558,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		_updateFolding: function(block, baseModel, viewModel, allFolding, _add, start, end) {
 			start = start || block.start;
 			end = end || block.end;
-			if (block.start <= end && start <= block.end) {
+			if (!block.doNotFold && block.start <= end && start <= block.end) {
 				var index = binarySearch(allFolding, block.start, true);
 				if (!(index < allFolding.length && allFolding[index].start === block.start && allFolding[index].end === block.end)) {
 					var annotation = this._createFoldingAnnotation(viewModel, baseModel, block.start, block.end);

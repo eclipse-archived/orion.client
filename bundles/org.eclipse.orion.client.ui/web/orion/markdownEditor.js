@@ -363,9 +363,12 @@ define([
 						if (contentToken) {
 							newBlock.tokens = [contentToken];
 						}
-						newBlock.parentTokens = parentTokens;
 						newBlock.endToken = endToken;
 						newBlock.seedTokens = seedTokens;
+						if (parentTokens) {
+							newBlock.parentTokens = parentTokens;
+							newBlock.doNotFold = true;
+						}
 					});
 					result.push(newBlock);
 				}
@@ -500,7 +503,7 @@ define([
 			targetBlock.tokens = sourceBlock.tokens;
 			var targetSubBlocks = targetBlock.getBlocks();
 			var sourceSubBlocks = sourceBlock.getBlocks();
-			for (var i = 0; i < targetSubBlocks.length; i++) {
+			for (var i = 0; i < Math.min(targetSubBlocks.length, sourceSubBlocks.length); i++) {
 				this._adoptTokens(targetSubBlocks[i], sourceSubBlocks[i]);
 			}
 		},
@@ -910,10 +913,7 @@ define([
 		this._editorView = options.editorView;
 
 		this._previewClickListener = function(e) {
-			var target = e.target;
-			while (target && target.id.indexOf(ID_PREFIX) !== 0) {
-				target = target.parentElement;
-			}
+			var target = this._findNearestBlockElement(e.target);
 			if (!target) {
 				/* click was not on a preview element */
 				return;
@@ -922,11 +922,26 @@ define([
 		    var elementBounds = target.getBoundingClientRect();
 		    var selectionPercentageWithinElement = (e.clientY - elementBounds.top) / (elementBounds.bottom - elementBounds.top);
 
-			var block = this._stylerAdapter.getBlockWithId(target.id);
 			var textView = this._editorView.editor.getTextView();
-			var blockTop = textView.getLocationAtOffset(block.start);
-			var blockBottom = textView.getLocationAtOffset(block.end);
-			blockBottom.y += textView.getLineHeight();
+			var block = this._stylerAdapter.getBlockWithId(target.id);
+			var projectionBlockStart = textView.getModel().mapOffset(block.start, true);
+			while (projectionBlockStart === -1) {
+				/*
+				 * Indicates that the block corresponding to the target element is within a collapsed ancestor,
+				 * so it is not visible in the source editor at all.  Move up to its parent block.
+				 */
+				block = block.parent;
+				projectionBlockStart = textView.getModel().mapOffset(block.start, true);
+			}
+			var blockTop = textView.getLocationAtOffset(projectionBlockStart);
+			var projectionBlockEnd = textView.getModel().mapOffset(block.end, true);
+			if (projectionBlockEnd === -1) {
+				/* indicates that the block bottom is within a collapsed section */
+				projectionBlockEnd = projectionBlockStart;
+			}
+			var blockBottom = textView.getLocationAtOffset(projectionBlockEnd);
+			var lineIndex = textView.getLineAtOffset(projectionBlockEnd);
+			blockBottom.y += textView.getLineHeight(lineIndex);
 			var blockAlignY = blockTop.y + (blockBottom.y - blockTop.y) * selectionPercentageWithinElement;
 
 			var editorBounds = this._editorDiv.getBoundingClientRect();
@@ -953,49 +968,50 @@ define([
 		}.bind(this);
 
 		this._sourceScrollListener = function(e) {
-			if (this._ignoreEditorScrollsUntilValue) {
-				if (this._ignoreEditorScrollsUntilValue === e.newValue.y) {
-					this._ignoreEditorScrollsUntilValue = null;
-				}
+			if (this._ignoreEditorScrollsCounter) {
+				this._ignoreEditorScrollsCounter--;
 				return;
 			}
 
 			if (!e.newValue.y) {
 				/* the editor is now at the top so ensure that preview is at its top as well */
-				this._previewWrapperDiv.scrollTop = 0;
+				this._scrollPreviewDiv(0);
 				return;
 			}
 
 			var textView = this._editorView.editor.getTextView();
-			var bottomLineIndex = textView.getBottomIndex();
-			if (bottomLineIndex === this._model.getLineCount() - 1) {
+			var bottomIndex = textView.getBottomIndex();
+			if (bottomIndex === textView.getModel().getLineCount() - 1) {
 				/* the editor is now at the bottom so ensure that preview is at its bottom as well */
-				this._previewWrapperDiv.scrollTop = this._previewWrapperDiv.scrollHeight;
+				this._scrollPreviewDiv(this._previewWrapperDiv.scrollHeight);
 				return;
 			}
+			/*
+			 * If the caret is within the viewport then align according to its location.
+			 * If the caret is not within the viewport then align on the text view's
+			 * vertical mid-way point.
+			 */
+			var topIndex = textView.getTopIndex();
+			var caretOffset = textView.getCaretOffset();
+			var lineIndex = textView.getLineAtOffset(caretOffset);
+			if (topIndex <= lineIndex && lineIndex <= bottomIndex) {
+				var charIndex = caretOffset;
+			} else {
+				charIndex = textView.getOffsetAtLocation(0, Math.floor(e.newValue.y + this._previewWrapperDiv.clientHeight / 2));
+			}
+			charIndex = textView.getModel().mapOffset(charIndex);
 
-			var charIndex = textView.getOffsetAtLocation(0, Math.floor(e.newValue.y + this._previewWrapperDiv.clientHeight / 2));
 			var block = this._styler.getBlockAtIndex(charIndex);
 			var element = document.getElementById(block.elementId);
 			while (!element) {
 				if (!block.parent) {
-					/* have reached the root block, so choose the nearest child block */
-					var childIndex = Math.max(0, block.getBlockAtIndex(charIndex));
-					var subBlocks = block.getBlocks();
-					block = subBlocks[Math.min(childIndex, subBlocks.length - 1)];
+					/* have reached the root block */
 					break;
 				}
 				block = block.parent;
 				element = document.getElementById(block.elementId);
 			}
-
-			if (block) {
-				element = element || document.getElementById(block.elementId);
-				if (element) {
-					var newTop = Math.max(0, Math.ceil(element.offsetTop - (this._previewWrapperDiv.clientHeight - element.offsetHeight) / 2));
-					this._previewWrapperDiv.scrollTop = newTop;
-				}
-			}
+			this._alignPreviewOnSourceBlock(block, charIndex);
 		}.bind(this);
 
 		this._sourceSelectionListener = function(e) {
@@ -1019,63 +1035,26 @@ define([
 			this._selectedElement = element;
 			this._selectedBlock = block;
 
-			var textView = this._editorView.editor.getTextView();
-			if (element) {
+			if (this._selectedElement) {
 				this._selectedElement.classList.add(this._markdownSelected);
-				var sourceAlignTop = textView.getLocationAtOffset(model.mapOffset(block.start, true));
-				var sourceAlignBottom = textView.getLocationAtOffset(model.mapOffset(block.end, true));
-				if (!sourceAlignBottom.y) { /* indicates that the block bottom is within a collapsed section */
-					sourceAlignBottom.y = sourceAlignTop.y;
-				}
-				sourceAlignBottom.y += textView.getLineHeight();
-			 } else {
-				/* selection is in whitespace in the root block */
-				var childIndex = block.getBlockAtIndex(selectionIndex);
-				var subBlocks = block.getBlocks();
-				var start = childIndex ? subBlocks[childIndex - 1].end : 0;
-				if (childIndex < subBlocks.length) {
-					var end = subBlocks[childIndex].start;
-				} else {
-					/* beyond end of last block */
-					end = model.getCharCount();
-				}
-				sourceAlignTop = textView.getLocationAtOffset(model.mapOffset(start, true));
-				sourceAlignBottom = textView.getLocationAtOffset(model.mapOffset(end, true));
-				sourceAlignBottom.y += textView.getLineHeight();
-			}
-			var sourceAlignHeight = sourceAlignBottom.y - sourceAlignTop.y;
-			var selectionLocation = textView.getLocationAtOffset(model.mapOffset(selectionIndex, true));
-			selectionLocation.y += textView.getLineHeight();
-			var selectionPercentageWithinBlock = (selectionLocation.y - sourceAlignTop.y) / sourceAlignHeight;
-			var previewBounds = this._previewWrapperDiv.getBoundingClientRect();
-			if (this._splitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL) {
-				var sourceRelativeY = (previewBounds.bottom - previewBounds.top) / 2;
-			} else {
-				sourceRelativeY = selectionLocation.y - textView.getTopPixel();
 			}
 
-			if (element) {
-				var elementBounds = this._selectedElement.getBoundingClientRect();
-				var elementTop = elementBounds.top - previewBounds.top + this._previewWrapperDiv.scrollTop;
-				var elementAlignY = elementTop + this._selectedElement.offsetHeight * selectionPercentageWithinBlock;
-			} else {
-				if (childIndex < subBlocks.length) {
-					var nextElement = document.getElementById(subBlocks[childIndex].elementId);
-					var nextElementTop = nextElement.getBoundingClientRect().top;
-				} else {
-					/* beyond end of last block */
-					nextElementTop = previewBounds.bottom;
-				}
-				if (childIndex) {
-					var previousElement = document.getElementById(subBlocks[childIndex - 1].elementId);
-					var previousElementBottom = previousElement.getBoundingClientRect().bottom;
-				} else {
-					previousElementBottom = 0;
-				}
-				var previousElementRelativeBottom = previousElementBottom - previewBounds.top + this._previewWrapperDiv.scrollTop;
-				elementAlignY = previousElementRelativeBottom + (nextElementTop - previousElementBottom) * selectionPercentageWithinBlock;
+			/*
+			 * If the new selection is within the viewport then scroll the preview
+			 * pane to match it.  If the selection is outside of the viewport then
+			 * do not scroll the preview pane here, the subsequently-called scroll
+			 * event listener will take care of this.
+			 */
+			var textView = this._editorView.editor.getTextView();
+			var lineIndex = textView.getLineAtOffset(e.newValue.start);
+			var topIndex = textView.getTopIndex(true);
+			var bottomIndex = textView.getBottomIndex(true);
+			if (!(topIndex <= lineIndex && lineIndex <= bottomIndex)) {
+				/* new selection is outside of the viewport */
+				return;
 			}
-			this._scrollPreviewDiv(elementAlignY - sourceRelativeY);
+
+			this._alignPreviewOnSourceBlock(block, selectionIndex);
 		}.bind(this);
 
 		this._splitterResizeListener = function(/*e*/) {
@@ -1168,6 +1147,103 @@ define([
 			lib.empty(this._parent);
 			BaseEditor.prototype.uninstall.call(this);
 		},
+		_alignPreviewOnSourceBlock: function(block, selectionIndex) {
+			var textView = this._editorView.editor.getTextView();
+			var projectionModel = textView.getModel();
+			var element = document.getElementById(block.elementId);
+			if (element) {
+				var projectionBlockStart = projectionModel.mapOffset(block.start, true);
+				var projectionBlockEnd = projectionModel.mapOffset(block.end, true);
+				if (projectionBlockEnd === -1) {
+					/* indicates that the block bottom is within a collapsed section */
+					projectionBlockEnd = projectionBlockStart;
+				}
+				var sourceAlignTop = textView.getLocationAtOffset(projectionBlockStart);
+				var sourceAlignBottom = textView.getLocationAtOffset(projectionBlockEnd);
+				var lineIndex = textView.getLineAtOffset(projectionBlockEnd);
+				sourceAlignBottom.y += textView.getLineHeight(lineIndex);
+			 } else {
+				/* selection is in whitespace in the root block */
+				var childIndex = block.getBlockAtIndex(selectionIndex);
+				var subBlocks = block.getBlocks();
+				var start = childIndex ? subBlocks[childIndex - 1].end : 0;
+				if (childIndex < subBlocks.length) {
+					var end = subBlocks[childIndex].start;
+				} else {
+					/* beyond end of last block */
+					end = this._model.getCharCount();
+				}
+				sourceAlignTop = textView.getLocationAtOffset(projectionModel.mapOffset(start, true));
+				var projectionEnd = projectionModel.mapOffset(end, true);
+				sourceAlignBottom = textView.getLocationAtOffset(projectionEnd);
+				lineIndex = textView.getLineAtOffset(projectionEnd);
+				sourceAlignBottom.y += textView.getLineHeight(lineIndex);
+			}
+			var sourceAlignHeight = sourceAlignBottom.y - sourceAlignTop.y;
+			var selectionLocation = textView.getLocationAtOffset(projectionModel.mapOffset(selectionIndex, true));
+			selectionLocation.y += textView.getLineHeight(); /* default line height */
+			var selectionPercentageWithinBlock = (selectionLocation.y - sourceAlignTop.y) / sourceAlignHeight;
+			var previewBounds = this._previewWrapperDiv.getBoundingClientRect();
+			if (this._splitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL) {
+				var sourceRelativeY = (previewBounds.bottom - previewBounds.top) / 2;
+			} else {
+				sourceRelativeY = selectionLocation.y - textView.getTopPixel();
+			}
+
+			if (element) {
+				var elementBounds = element.getBoundingClientRect();
+				var elementTop = elementBounds.top - previewBounds.top + this._previewWrapperDiv.scrollTop;
+				var elementAlignY = elementTop + element.offsetHeight * selectionPercentageWithinBlock;
+			} else {
+				if (childIndex < subBlocks.length) {
+					var nextElement = document.getElementById(subBlocks[childIndex].elementId);
+					var nextElementTop = nextElement.getBoundingClientRect().top;
+				} else {
+					/* beyond end of last block */
+					nextElementTop = previewBounds.bottom;
+				}
+				if (childIndex) {
+					var previousElement = document.getElementById(subBlocks[childIndex - 1].elementId);
+					var previousElementBottom = previousElement.getBoundingClientRect().bottom;
+				} else {
+					previousElementBottom = 0;
+				}
+				var previousElementRelativeBottom = previousElementBottom - previewBounds.top + this._previewWrapperDiv.scrollTop;
+				elementAlignY = previousElementRelativeBottom + (nextElementTop - previousElementBottom) * selectionPercentageWithinBlock;
+			}
+			this._scrollPreviewDiv(elementAlignY - sourceRelativeY);
+		},
+		_findNearestBlockElement: function(element) {
+			if (element.id === ID_PREVIEW) {
+				/* have reached the preview root, do not look any farther */
+				return null;
+			}
+
+			/* try siblings first, nearest-to-farthest */
+			var nextSibling = element;
+			var previousSibling = element;
+			var siblingUpdated = true;
+			while (siblingUpdated) {
+				siblingUpdated = false;
+				if (nextSibling) {
+					if (!nextSibling.id.indexOf(ID_PREFIX)) {
+						return nextSibling;
+					}
+					nextSibling = nextSibling.nextElementSibling;
+					siblingUpdated = true;
+				}
+				if (previousSibling) {
+					if (!previousSibling.id.indexOf(ID_PREFIX)) {
+						return previousSibling;
+					}
+					previousSibling = previousSibling.previousElementSibling;
+					siblingUpdated = true;
+				}
+			}
+
+			/* did not find a sibling to use, so move up to the parent element */
+			return this._findNearestBlockElement(element.parentElement);
+		},
 		_scrollPreviewDiv: function(top) {
 			if (this._scrollPreviewAnimation) {
 				this._scrollPreviewAnimation.stop();
@@ -1192,11 +1268,9 @@ define([
 				onEnd: function() {
 					this._scrollPreviewAnimation = null;
 					this._previewWrapperDiv.scrollTop += pixelY;
-					this._ignoreEditorScrollsUntilValue = null;
 				}.bind(this)
 			});
 
-			this._ignoreEditorScrollsUntilValue = -1;
 			this._scrollPreviewAnimation.play();	
 		},
 		_scrollSourceEditor: function(top) {
@@ -1224,12 +1298,12 @@ define([
 				onEnd: function() {
 					this._scrollSourceAnimation = null;
 					var finalValue = Math.floor(textView.getTopPixel() + pixelY);
-					this._ignoreEditorScrollsUntilValue = finalValue;
+					this._ignoreEditorScrollsCounter = 1;
 					textView.setTopPixel(finalValue);
 				}.bind(this)
 			});
 
-			this._ignoreEditorScrollsUntilValue = -1;
+			this._ignoreEditorScrollsCounter = Infinity;
 			this._scrollSourceAnimation.play();	
 		},
 		_markdownSelected: "markdownSelected", //$NON-NLS-0$
