@@ -95,7 +95,7 @@ define([
 								localStorage.removeItem(name);
 							}
 						}
-						authService.getAuthForm(window.location.href).then(function(formURL) {
+						authService.getAuthForm(PageLinks.getOrionHome()).then(function(formURL) {
 							window.location = formURL;
 						});
 					});
