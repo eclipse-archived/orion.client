@@ -12,7 +12,7 @@
 /*jslint browser:true devel:true regexp:false*/
 /*global define navigator window*/
 
-define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/webui/littlelib', 'persona/include'], function(domReady, xhr, PageUtil, lib) {
+define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/webui/littlelib', 'persona/include'], function(domReady, xhr, PageUtil, PageLinks, lib) {
 	var userCreationEnabled;
 	var registrationURI;
 	var forceUserEmail;
@@ -145,6 +145,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/webui/littlelib', 'per
 
 	function finishLogin() {
 		var redirect = getRedirect();
+		redirect = redirect === null ? PageLinks.getOrionHome() : redirect;
 		if (redirect !== null) {
 			redirect = decodeURIComponent(redirect);
 			if(PageUtil.validateURLScheme(redirect)) {
