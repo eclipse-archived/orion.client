@@ -924,20 +924,29 @@ define([
 
 			var textView = this._editorView.editor.getTextView();
 			var block = this._stylerAdapter.getBlockWithId(target.id);
-			var projectionBlockStart = textView.getModel().mapOffset(block.start, true);
+			var projectionModel = textView.getModel();
+			var projectionBlockStart = projectionModel.mapOffset(block.start, true);
 			while (projectionBlockStart === -1) {
 				/*
 				 * Indicates that the block corresponding to the target element is within a collapsed ancestor,
 				 * so it is not visible in the source editor at all.  Move up to its parent block.
 				 */
 				block = block.parent;
-				projectionBlockStart = textView.getModel().mapOffset(block.start, true);
+				projectionBlockStart = projectionModel.mapOffset(block.start, true);
 			}
 			var blockTop = textView.getLocationAtOffset(projectionBlockStart);
-			var projectionBlockEnd = textView.getModel().mapOffset(block.end, true);
+			var projectionBlockEnd = projectionModel.mapOffset(block.end, true);
 			if (projectionBlockEnd === -1) {
-				/* indicates that the block bottom is within a collapsed section */
-				projectionBlockEnd = projectionBlockStart;
+				/*
+				 * Indicates that the block bottom is within a collapsed section.
+				 * Find the block that is collapsed and make its start line the
+				 * end line to center on.
+				 */
+				var currentBlock = this._styler.getBlockAtIndex(block.end - 1);
+				while (projectionBlockEnd === -1) {
+					currentBlock = currentBlock.parent;
+					projectionBlockEnd = projectionModel.mapOffset(currentBlock.start, true);
+				}
 			}
 			var blockBottom = textView.getLocationAtOffset(projectionBlockEnd);
 			var lineIndex = textView.getLineAtOffset(projectionBlockEnd);
@@ -1155,8 +1164,16 @@ define([
 				var projectionBlockStart = projectionModel.mapOffset(block.start, true);
 				var projectionBlockEnd = projectionModel.mapOffset(block.end, true);
 				if (projectionBlockEnd === -1) {
-					/* indicates that the block bottom is within a collapsed section */
-					projectionBlockEnd = projectionBlockStart;
+					/*
+					 * Indicates that the block bottom is within a collapsed section.
+					 * Find the block that is collapsed and make its start line the
+					 * end line to center on.
+					 */
+					var currentBlock = this._styler.getBlockAtIndex(block.end - 1);
+					while (projectionBlockEnd === -1) {
+						currentBlock = currentBlock.parent;
+						projectionBlockEnd = projectionModel.mapOffset(currentBlock.start, true);
+					}
 				}
 				var sourceAlignTop = textView.getLocationAtOffset(projectionBlockStart);
 				var sourceAlignBottom = textView.getLocationAtOffset(projectionBlockEnd);
@@ -1185,7 +1202,7 @@ define([
 			var selectionLocation = textView.getLocationAtOffset(projectionModel.mapOffset(selectionIndex, true));
 			if (sourceAlignBottom.y - sourceAlignTop.y === lineHeight) {
 				/* block is on a single line, center on the line's mid-height */
-				selectionLocation.y += lineHeight / 2;
+				selectionLocation.y += textView.getLineHeight() / 2; /* default line height */
 			} else {
 				selectionLocation.y += textView.getLineHeight(); /* default line height */
 			}
