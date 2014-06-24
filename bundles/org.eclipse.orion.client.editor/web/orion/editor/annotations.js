@@ -108,7 +108,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		},
 		_expandImpl: function(checkOverlaping) {
 			if (this._expand()) {
-				this._projectionModel.removeProjection(this._projection);
+				this._projectionModel._removeProjection(this._projection, !this._annotationModel);
 				if (checkOverlaping) {
 					this._forEachOverlaping(function(annotation) {
 						if (annotation._recollapse) {

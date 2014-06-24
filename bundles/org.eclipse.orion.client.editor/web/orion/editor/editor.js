@@ -883,6 +883,9 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			
 			textView.destroy();
 			
+			if (this._annotationModel) {
+				this._annotationModel.setTextModel(null);
+			}
 			this._textView = this._undoStack = this._textDND = this._contentAssist = 
 				this._listener = this._annotationModel = this._annotationStyler =
 				this._annotationRuler = this._overviewRuler = this._lineNumberRuler =
