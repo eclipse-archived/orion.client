@@ -183,30 +183,37 @@ define([
 						repository.Branches = branches;
 						var localBranch = that.getLocalBranch();
 						var remoteBranch = that.getRemoteBranch();
-						if (localBranch) {
+						if (localBranch && !that.legacyLog) {
 							section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch against"], localBranch.Name));
 						} else {
 							section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch"], remoteBranch.Name));
 						}
 						progress.done();
-						var branchesToProcess = that.legacyLog ? [{
-								Type: "Synchronized" //$NON-NLS-0$
-							}] : [
-							{
-								Type: "Outgoing", //$NON-NLS-0$
-								localBranch: localBranch,
-								remoteBranch: remoteBranch
-							},
-							{
-								Type: "Incoming", //$NON-NLS-0$
-								localBranch: localBranch,
-								remoteBranch: remoteBranch
-							},
-							{
-								Type: "Synchronized" //$NON-NLS-0$
-							}
-						];
-						onComplete(that.processChildren(parentItem, branchesToProcess));
+						if (that.legacyLog) {
+							return Deferred.when(that.log || that._getLog(), function(log) {
+								parentItem.log = log;
+								that.logDeferred.resolve(log);
+								onComplete(that.processChildren(parentItem, log.Children));
+							}, function(error){
+								that.handleError(error);
+							});
+						} else {
+							onComplete(that.processChildren(parentItem, [
+								{
+									Type: "Outgoing", //$NON-NLS-0$
+									localBranch: localBranch,
+									remoteBranch: remoteBranch
+								},
+								{
+									Type: "Incoming", //$NON-NLS-0$
+									localBranch: localBranch,
+									remoteBranch: remoteBranch
+								},
+								{
+									Type: "Synchronized" //$NON-NLS-0$
+								}
+							]));
+						}	
 					}, function(error){
 						progress.done();
 						that.handleError(error);
@@ -315,7 +322,6 @@ define([
 		this.incomingActionScope = "IncomingActions"; //$NON-NLS-0$
 		this.outgoingActionScope = "OutgoingActions"; //$NON-NLS-0$
 		this.syncActionScope = "SynchronizedActions"; //$NON-NLS-0$
-		this.tagsActionScope  = "TagsAction"; //$NON-NLS-0$
 		this.createCommands();
 	}
 	GitCommitListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
@@ -443,7 +449,7 @@ define([
 				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseSkipPatchCommand", 300); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseAbortCommand", 400); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.renderCommands(actionsNodeScope, actionsNodeScope, repository.status, this, "button"); //$NON-NLS-0$
-			} else if (currentBranch) {
+			} else if (currentBranch && !this.legacyLog) {
 				var incomingActionScope = this.incomingActionScope;
 				var outgoingActionScope = this.outgoingActionScope;
 				
@@ -467,8 +473,6 @@ define([
 //					"ViewAllTooltip" : messages["See the full log"]
 //				}, this, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	
-				commandService.registerCommandContribution(this.tagsActionScope, "eclipse.removeTag", 1000); //$NON-NLS-1$ //$NON-NLS-0$
-					
 				var tracksRemoteBranch = model.tracksRemoteBranch();
 				var localBranch = model.getLocalBranch();
 				var remoteBranch = model.getRemoteBranch();
