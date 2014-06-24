@@ -1250,10 +1250,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
 		 */
 		it('test_findScriptBlockWithType1', function() {
-			var text = "<!DOCTYPE html><head><script type=\"javascript\">function f() {}</script></head><html></html>";
+			var text = "<!DOCTYPE html><head><script type=\"\">function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 51);
 			assert.equal(blocks.length, 1, "Should have found one script block");
-			assert.equal(blocks[0].offset, 47);
+			assert.equal(blocks[0].offset, 37);
 			assert.equal(blocks[0].text, 'function f() {}');
 		});
 		/**
@@ -1274,8 +1274,56 @@ define([
 		it('test_findScriptBlockWithType3', function() {
 			var text = "<!DOCTYPE html><head><script type=\"text/handlebars\">function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 54);
-			assert.equal(blocks.length, 0, "Should have found one script block");
+			assert.equal(blocks.length, 0, "Should have found no script blocks");
 		});
+		
+		/**
+		 * Tests the support for finding script blocks is spec compliant
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
+		 */
+		it('test_findScriptBlockWithType4', function() {
+			var text = "<!DOCTYPE html><head>\n";
+			text += "<script type=\"application/ecmascript\">function f1() {}</script>\n";
+			text += "<script type=\"application/javascript\">function f2() {}</script>\n";
+			text += "<script type=\"application/x-ecmascript\">function f3() {}</script>\n";
+			text += "<script type=\"application/x-javascript\">function f4() {}</script>\n";
+			text += "<script type=\"text/ecmascript\">function f5() {}</script>\n";
+			text += "<script type=\"text/javascript\">function f6() {}</script>\n";
+			text += "<script type=\"text/javascript1.0\">function f7() {}</script>\n";
+			text += "<script type=\"text/javascript1.5\">function f8() {}</script>\n";
+			text += "<script type=\"text/jscript\">function f9() {}</script>\n";
+			text += "<script type=\"text/livescript\">function f10() {}</script>\n";
+			text += "<script type=\"text/x-ecmascript\">function f11() {}</script>\n";
+			text += "<script type=\"text/x-javascript\">function f12() {}</script>\n";
+			text += "</head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			assert.equal(blocks.length, 12, "Should have found 12 script blocks");
+		});
+		
+		/**
+		 * Tests the support for finding script blocks is spec compliant
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
+		 */
+		it('test_findScriptBlockWithType5', function() {
+			var text = "<!DOCTYPE html><head>\n";
+			text += "<script type=\"ecmascript\">function f1() {}</script>\n";
+			text += "<script type=\"javascript\">function f2() {}</script>\n";
+			text += "<script type=\"application\">function f3() {}</script>\n";
+			text += "<script type=\"application/\">function f4() {}</script>\n";
+			text += "<script type=\"application/xml\">function f5() {}</script>\n";
+			text += "<script type=\"application/javascriptBLARGH\">function f6() {}</script>\n";
+			text += "<script type=\"text\">function f7() {}</script>\n";
+			text += "<script type=\"text/\">function f8() {}</script>\n";
+			text += "<script type=\"text/plain\">function f9() {}</script>\n";
+			text += "<script type=\"text/xml\">function f10() {}</script>\n";
+			text += "<script type=\"text/javascript1.1.1\">function f11() {}</script>\n";
+			text += "<script type=\"text/javascript1\">function f12() {}</script>\n";
+			text += "<script type=\"text/javascriptBLARGH\">function f13() {}</script>\n";
+			text += "</head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			assert.equal(blocks.length, 0, "Should have found 0 valid script blocks");
+		});
+		
 		/**
 		 * Tests the support for finding script blocks with type tags
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
@@ -1294,9 +1342,7 @@ define([
 		it('test_findScriptBlockWithLanguage2', function() {
 			var text = "<!DOCTYPE html><head><script language=\"text/javascript\">function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 58);
-			assert.equal(blocks.length, 1, "Should have found one script block");
-			assert.equal(blocks[0].offset, 56);
-			assert.equal(blocks[0].text, 'function f() {}');
+			assert.equal(blocks.length, 0, "Should have found no valid script block");
 		});
 		/**
 		 * Tests the support for finding script blocks with type tags
@@ -1305,8 +1351,50 @@ define([
 		it('test_findScriptBlockWithLanguage3', function() {
 			var text = "<!DOCTYPE html><head><script language=\"text/handlebars\">function f() {}</script></head><html></html>";
 			var blocks = Finder.findScriptBlocks(text, 58);
-			assert.equal(blocks.length, 0, "Should have found one script block");
+			assert.equal(blocks.length, 0, "Should have found no valid script block");
 		});
+
+		/**
+		 * Tests the support for finding script blocks is spec compliant
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
+		 */
+		it('test_findScriptBlockWithLanguage4', function() {
+			var text = "<!DOCTYPE html><head>\n";
+			text += "<script language=\"ecmascript\">function f1() {}</script>\n";
+			text += "<script language=\"javascript\">function f2() {}</script>\n";
+			text += "<script language=\"javascript1.0\">function f3() {}</script>\n";
+			text += "<script language=\"javascript1.5\">function f4() {}</script>\n";
+			text += "<script language=\"jscript\">function f5() {}</script>\n";
+			text += "<script language=\"livescript\">function f6() {}</script>\n";
+			text += "<script language=\"x-ecmascript\">function f7() {}</script>\n";
+			text += "<script language=\"x-javascript\">function f8() {}</script>\n";
+			text += "</head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			assert.equal(blocks.length, 8, "Should have found 8 script blocks");
+		});
+		
+		/**
+		 * Tests the support for finding script blocks is spec compliant
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
+		 */
+		it('test_findScriptBlockWithLanguage5', function() {
+			var text = "<!DOCTYPE html><head>\n";
+			text += "<script language=\"application/ecmascript\">function f1() {}</script>\n";
+			text += "<script language=\"text/ecmascript\">function f2() {}</script>\n";
+			text += "<script language=\"application\">function f3() {}</script>\n";
+			text += "<script language=\"application/\">function f4() {}</script>\n";
+			text += "<script language=\"javascriptBLARGH\">function f5() {}</script>\n";
+			text += "<script language=\"text\">function f6() {}</script>\n";
+			text += "<script language=\"text/\">function f7() {}</script>\n";
+			text += "<script language=\"plain\">function f8() {}</script>\n";
+			text += "<script language=\"xml\">function f9() {}</script>\n";
+			text += "<script language=\"javascript1.1.1\">function f10() {}</script>\n";
+			text += "<script language=\"javascript1\">function f11() {}</script>\n";
+			text += "</head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			assert.equal(blocks.length, 0, "Should have found 0 valid script blocks");
+		});
+
 		/**
 		 * Tests the support for finding script blocks in HTML with postamble text
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
@@ -1363,5 +1451,58 @@ define([
 			var blocks = Finder.findScriptBlocks(text);
 			assert.equal(blocks.length, 2, "Should have found two script blocks");
 		});
+		
+		/**
+		 * Tests the support for finding script blocks is spec compliant
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
+		 */
+		it('test_findScriptBlockEmptyAndMixedAttributes1', function() {
+			var text = "<!DOCTYPE html><head><script language=\"BLARGH\" type=\"\">function f() {}</script>\n</head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			assert.equal(blocks.length, 1, "Should have found 1 script block");
+		});
+		
+		/**
+		 * Tests the support for finding script blocks is spec compliant
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
+		 */
+		it('test_findScriptBlockEmptyAndMixedAttributes2', function() {
+			var text = "<!DOCTYPE html><head><script language=\"\">function f() {}</script>\n</head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			assert.equal(blocks.length, 1, "Should have found 1 script block");
+		});
+		
+		/**
+		 * Tests the support for finding script blocks is spec compliant
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
+		 */
+		it('test_findScriptBlockEmptyAndMixedAttributes3', function() {
+			var text = "<!DOCTYPE html><head><script>function f() {}</script>\n</head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			assert.equal(blocks.length, 1, "Should have found 1 script block");
+		});
+		
+		/**
+		 * Tests the support for finding script blocks is spec compliant
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
+		 */
+		it('test_findScriptBlockEmptyAndMixedAttributes4', function() {
+			var text = "<!DOCTYPE html><head><script language=\"BLARGH\" type=\"text/javascript\">function f() {}</script>\n</head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			assert.equal(blocks.length, 1, "Should have found 1 script block");
+		});
+		
+		/**
+		 * Tests the support for finding script blocks is spec compliant
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
+		 */
+		it('test_findScriptBlockEmptyAndMixedAttributes5', function() {
+			var text = "<!DOCTYPE html><head><script type=\"text/javascript\" language=\"BLARGH\">function f() {}</script>\n</head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			// If we have both attributes, the regex will always take the last matching 
+//			assert.equal(blocks.length, 1, "Should have found 1 script block");
+			assert.equal(blocks.length, 0, "We don't currently support both type and language attributes on a script tag (Bug 437957)");
+		});
+
 	});
 });

@@ -260,7 +260,7 @@ define([
 							delete node.isprop; //remove the tag
 							break;
 						}
-						//FALL-THROUGH
+					//$FALLTHROUGH$
 					case Estraverse.Syntax.ObjectExpression:
 					case Estraverse.Syntax.Program:
 						if(this._popScope()) {
@@ -449,7 +449,7 @@ define([
 			}
 			if(found && parents && parents.length > 0) {
 				var p = parents[parents.length-1];
-				if(p.type !== 'Program' && p.range[0] === found.range[0] && p.range[1] === found.range[1]) {
+				if(p.type !== 'Program' && p.range[0] === found.range[0] && p.range[1] === found.range[1]) {  //$NON-NLS-0$
 					//a node can't be its own parent
 					parents.pop();
 				}
@@ -558,14 +558,20 @@ define([
 		 */
 		findScriptBlocks: function(buffer, offset) {
 			var blocks = [];
-			var val = null, regex = /<\s*script(?:[type|language](?:\s*)=(?:\s*)"(.*)"|[^>]|\n)*>((?:.|\r?\n)*?)<\s*\/script(?:[^>]|\n)*>/ig;
+			var val = null, regex = /<\s*script(?:(type|language)(?:\s*)=(?:\s*)"([^"]*)"|[^>]|\n)*>((?:.|\r?\n)*?)<\s*\/script(?:[^>]|\n)*>/ig;
 			var comments = this.findHtmlCommentBlocks(buffer, offset);
 			loop: while((val = regex.exec(buffer)) != null) {
-			    var type = val[1];
-			    if(type && type.indexOf('javascript') === -1) {
-			        continue;
+				var attribute = val[1];
+			    var type = val[2];
+			    if(attribute && type){
+			    	if (attribute === "language"){  //$NON-NLS-0$
+			    		type = "text/" + type;  //$NON-NLS-0$
+			    	}
+			    	if (!/^(application|text)\/(ecmascript|javascript(\d.\d)?|livescript|jscript|x\-ecmascript|x\-javascript)$/ig.test(type)) {
+			        	continue;
+			        }
 			    }
-				var text = val[2];
+				var text = val[3];
 				if(text.length < 1) {
 					continue;
 				}
