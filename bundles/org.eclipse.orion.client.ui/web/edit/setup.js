@@ -1,4 +1,5 @@
 /*******************************************************************************
+ *
  * @license
  * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
@@ -23,7 +24,6 @@ define([
 	'orion/editorView',
 	'orion/editorPluginView',
 	'orion/markdownView',
-	'orion/markdownEditor',
 	'orion/commandRegistry',
 	'orion/contentTypes',
 	'orion/fileClient',
@@ -33,6 +33,7 @@ define([
 	'orion/progress',
 	'orion/operationsClient',
 	'orion/outliner',
+	'orion/templateExplorer',
 	'orion/dialogs',
 	'orion/extensionCommands',
 	'orion/projectCommands',
@@ -50,8 +51,8 @@ define([
 ], function(
 	messages, Sidebar, mInputManager, mGlobalCommands,
 	mTextModel, mUndoStack,
-	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
-	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
+	mFolderView, mEditorView, mPluginEditorView , mMarkdownView,
+	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mTemplateExplorer, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
 	mProblems, mBlameAnnotation,
 	Deferred, EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, mProjectClient
 ) {
@@ -156,6 +157,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 	var problemService;
 	var blameService;
 	var outlineService;
+	var templateExplorerService;
 	var contentTypeRegistry;
 	var progressService;
 	var dialogService;
@@ -175,6 +177,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		// Editor needs additional services
 		problemService = new mProblems.ProblemService(serviceRegistry);
 		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: preferences});
+		templateExplorerService = new mTemplateExplorer.TemplateExplorerService({serviceRegistry: serviceRegistry, preferences: preferences});
 		contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		fileClient = new mFileClient.FileClient(serviceRegistry);
 		projectClient = new mProjectClient.ProjectClient(serviceRegistry, fileClient);
@@ -195,7 +198,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 	function setEditor(newEditor) {
 		if (editor === newEditor) { return; }
 		if (editor) {
-			editor.removeEventListener("DirtyChanged", editorDirtyListener); //$NON-NLS-0$
+			editor.addEventListener("DirtyChanged", editorDirtyListener); //$NON-NLS-0$
 		}
 		editor = newEditor;
 		if (editor) {
@@ -257,7 +260,6 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 	// Shared text model and undo stack
 	var model = new mTextModel.TextModel();
 	var undoStack = new mUndoStack.UndoStack(model, 500);
-	var lastMetadata;
 	var contextImpl = {};
 	[	
 		"getText", //$NON-NLS-0$
@@ -278,14 +280,10 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 				view = new mFolderView.FolderView(options);
 			} else {
 				var id = input.editor;
-				editorView.setParent(editorDomNode);
 				if (!id || id === "orion.editor") { //$NON-NLS-0$
 					view = editorView;
 				} else if (id === "orion.viewer.markdown") { //$NON-NLS-0$
 					view = new mMarkdownView.MarkdownEditorView(options);
-				} else if (id === "orion.editor.markdown") { //$NON-NLS-0$
-					options.editorView = editorView;
-					view = new mMarkdownEditor.MarkdownEditorView(options);
 				} else {
 					var editors = serviceRegistry.getServiceReferences("orion.edit.editor"); //$NON-NLS-0$
 					for (var i=0; i<editors.length; i++) {
@@ -303,15 +301,11 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			if (currentEditorView) {
 				currentEditorView.destroy();
 			}
-			if (lastMetadata && lastMetadata.Location !== metadata.Location) {
-				model.setText("");
-			}
 			currentEditorView = view;
 			if (currentEditorView) {
 				currentEditorView.create();
 			}
 		}
-		lastMetadata = metadata;
 		return currentEditorView;
 	}
 	
@@ -417,6 +411,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			preferences: preferences,
 			fileClient: fileClient,
 			outlineService: outlineService,
+			templateExplorerService: templateExplorerService,
 			parent: sidebarDomNode,
 			progressService: progressService,
 			selection: selection,

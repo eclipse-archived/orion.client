@@ -123,6 +123,9 @@ define("webtools/htmlContentAssist", ['orion/editor/templates'], function(mTempl
 		template = description = "<" + element + "/>"; //$NON-NLS-1$ //$NON-NLS-0$
 		templates.push({prefix: "<" + element, description: description, template: template}); //$NON-NLS-0$
 	}
+	templates.forEach(function(template){
+		template.contentType = 'text/html';
+	});
 
 	/**
 	 * @name orion.editor.HTMLContentAssistProvider
@@ -169,6 +172,7 @@ define("webtools/htmlContentAssist", ['orion/editor/templates'], function(mTempl
 	};
 
 	return {
-		HTMLContentAssistProvider: HTMLContentAssistProvider
+		HTMLContentAssistProvider: HTMLContentAssistProvider,
+		templates: templates
 	};
 });

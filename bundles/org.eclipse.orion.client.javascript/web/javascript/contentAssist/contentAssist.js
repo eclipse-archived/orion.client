@@ -20,12 +20,11 @@ define([
 	'javascript/contentAssist/proposalUtils',  //$NON-NLS-0$
 	'orion/editor/templates', //$NON-NLS-0$
 	'orion/editor/stylers/application_javascript/syntax', //$NON-NLS-0$
-	'javascript/contentAssist/templates',  //$NON-NLS-0$
 	'orion/Deferred',  //$NON-NLS-0$
 	'orion/objects',  //$NON-NLS-0$
 	'estraverse',  //$NON-NLS-0$
 	'javascript/contentAssist/indexer'  //$NON-NLS-0$
-], function(typeEnv, typeInf, typeUtils, proposalUtils, mTemplates, JSSyntax, Templates, Deferred, Objects, Estraverse, Indexer) {
+], function(typeEnv, typeInf, typeUtils, proposalUtils, mTemplates, JSSyntax, Deferred, Objects, Estraverse, Indexer) {
 
 	/**
 	 * @description Creates a new delegate to create keyword and template proposals
@@ -89,45 +88,6 @@ define([
 					});
 				}
 			}
-			return proposals;
-		},
-		
-		/**
-		 * @description override
-		 */
-		getTemplateProposals: function(prefix, offset, context, completionKind) {
-			var proposals = [];
-			var templates = Templates.getTemplatesForKind(completionKind.kind); //this.getTemplates();
-			for (var t = 0; t < templates.length; t++) {
-				var template = templates[t];
-				if (template.match(prefix)) {
-					var proposal = template.getProposal(prefix, offset, context);
-					this.removePrefix(prefix, proposal);
-					proposals.push(proposal);
-				}
-			}
-			
-			if (0 < proposals.length) {
-				//sort the proposals by name
-				proposals.sort(function(p1, p2) {
-					if (p1.name < p2.name) {
-						return -1;
-					}
-					if (p1.name > p2.name) {
-						return 1;
-					}
-					return 0;
-				});
-				// if any templates were added to the list of 
-				// proposals, add a title as the first element
-				proposals.splice(0, 0, {
-					proposal: '',
-					description: 'Templates', //$NON-NLS-0$
-					style: 'noemphasis_title', //$NON-NLS-0$
-					unselectable: true
-				});
-			}
-			
 			return proposals;
 		},
 	});
@@ -242,8 +202,7 @@ define([
 					var target = typeInf.inferTypes(ast, environment, self.lintOptions);
 					var proposalsObj = { };
 					self._createInferredProposals(target, environment, completionKind.kind, context.prefix, offset - context.prefix.length, proposalsObj);
-					return [].concat(self._filterAndSortProposals(proposalsObj), 
-									 self._createTemplateProposals(context, completionKind, buffer),
+					return [].concat(self._filterAndSortProposals(proposalsObj),
 									 self._createKeywordProposals(context, completionKind, buffer));
 				});
 			} else {
@@ -279,24 +238,6 @@ define([
 			if((typeof context.keyword === 'undefined' || context.keyword) && 
 					this.provider.isValid(context.prefix, buffer, context.offset, context)) {
 				return this.provider.getKeywordProposals(context.prefix, completionKind);
-			}
-			return [];
-		},
-		
-		/**
-		 * @description Create the template proposals
-		 * @function
-		 * @private
-		 * @param {Object} context The completion context
-		 * @param {Object} completionKind The computed completion kind to make
-		 * @param {String} buffer The compilation unit buffer
-		 * @returns {Array} The array of template proposals
-		 * @since 6.0
-		 */
-		_createTemplateProposals: function(context, completionKind, buffer) {
-			if((typeof context.template === 'undefined' || context.template) && 
-					this.provider.isValid(context.prefix, buffer, context.offset, context)) {
-				return this.provider.getTemplateProposals(context.prefix, context.offset, context, completionKind);
 			}
 			return [];
 		},

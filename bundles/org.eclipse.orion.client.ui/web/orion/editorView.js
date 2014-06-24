@@ -15,12 +15,13 @@
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/editor/editor',
-	'orion/editor/eventTarget',
 	'orion/editor/textView',
 	'orion/editor/textModel',
 	'orion/editor/projectionTextModel',
 	'orion/editor/editorFeatures',
 	'orion/editor/contentAssist',
+	'orion/editor/templateCollector',
+	'orion/editor/templateExplorer',
 	'orion/editor/emacs',
 	'orion/editor/vi',
 	'orion/editorPreferences',
@@ -42,8 +43,9 @@ define([
 	'orion/objects'
 ], function(
 	messages,
-	mEditor, mEventTarget, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mContentAssist,
-	mEmacs, mVI, mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
+	mEditor, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures,
+	mContentAssist, mTemplateCollector, mTemplateExplorer, mEmacs, mVI,
+	mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands, mGlobalCommands,
 	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
 	mMarkOccurrences, mSyntaxchecker,
@@ -64,9 +66,6 @@ define([
 	 *
 	 * @class
 	 * @name orion.EditorView
-	 * @borrows orion.editor.EventTarget#addEventListener as #addEventListener
-	 * @borrows orion.editor.EventTarget#removeEventListener as #removeEventListener
-	 * @borrows orion.editor.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function EditorView(options) {
 		this._parent = options.parent;
@@ -129,12 +128,6 @@ define([
 		getParent: function() {
 			return this._parent;
 		},
-		getSettings: function() {
-			return this.settings;
-		},
-		setParent: function(parent) {
-			this._parent = parent;	
-		},
 		updateSourceCodeActions: function(prefs, sourceCodeActions) {
 			if (sourceCodeActions) {
 				sourceCodeActions.setAutoPairParentheses(prefs.autoPairParentheses);
@@ -193,11 +186,6 @@ define([
 			if (editor.getContentAssist()) {
 				editor.getContentAssist().setAutoTriggerEnabled(prefs.contentAssistAutoTrigger);	
 			}
-
-			this.dispatchEvent({
-				type: "Settings",
-				newSettings: this.settings
-			});
 		},
 		updateStyler: function(prefs) {
 			var styler = this.syntaxHighlighter.getStyler();
@@ -278,7 +266,7 @@ define([
 
 			var self = this;
 
-//			var editorDomNode = this._parent;
+			var editorDomNode = this._parent;
 			var readonly = this.readonly;
 			var commandRegistry = this.commandRegistry;
 			var serviceRegistry = this.serviceRegistry;
@@ -291,7 +279,7 @@ define([
 			var textViewFactory = function() {
 				var options = self.updateViewOptions(self.settings);
 				objects.mixin(options, {
-					parent: self._parent,
+					parent: editorDomNode,
 					model: new mProjectionTextModel.ProjectionTextModel(self.model || new mTextModel.TextModel()),
 					wrappable: true
 				});
@@ -346,7 +334,37 @@ define([
 
 				return keyBindings;
 			};
-
+			
+			// Creates a templateCollector and a templateExplorer for each content type
+			serviceRegistry.getService("orion.core.contentTypeRegistry").getContentTypes().then(function(contentTypes) {
+				var templateCollector;
+			    contentTypes.forEach(function(contentType) {
+					//workarounds
+					if ("text/plain" === contentType.id || "image" === contentType.id.substring(0,5)){
+						return;
+					}
+					
+					templateCollector = new mTemplateCollector.TemplateCollector(serviceRegistry, contentType);
+					serviceRegistry.registerService("orion.edit.contentassist",templateCollector,{
+						contentType: [contentType.id],  //$NON-NLS-0$
+						name: 'templateCollector',  //$NON-NLS-0$
+						id: "orion.templates." + contentType.id  //$NON-NLS-0$
+					});
+			    	
+			    	var templateExplorer = new mTemplateExplorer.TemplateExplorer(templateCollector);
+					serviceRegistry.registerService("orion.edit.templateExplorer",templateExplorer,{
+						contentType: [contentType.id],  //$NON-NLS-0$
+						//TODO move messages to appropriate place(s)
+						nls: 'javascript/nls/messages',  //$NON-NLS-0$
+					  	nameKey: 'templateExplorer',  //$NON-NLS-0$
+					  	titleKey: 'templateExplorerTitle',  //$NON-NLS-0$
+					  	id: "orion.templateExplorer." + contentType.id  //$NON-NLS-0$
+					});
+			    });
+				//hack to initialize the templates plugins and improve their performance the first time contentAssist or contentExplorer is invoked
+				templateCollector.getTemplates();
+			});
+			
 			// Content Assist
 			var setContentAssistProviders = function(editor, contentAssist, event) {
 				// Content assist is about to be activated; set its providers.
@@ -425,7 +443,7 @@ define([
 				contentAssistFactory: contentAssistFactory,
 				keyBindingFactory: keyBindingFactory,
 				statusReporter: this.statusReporter,
-				domNode: this._parent
+				domNode: editorDomNode
 			});
 			editor.id = "orion.editor"; //$NON-NLS-0$
 			editor.processParameters = function(params) {
@@ -510,7 +528,5 @@ define([
 			return styleAccessor;
 		}
 	};
-	mEventTarget.EventTarget.addMixin(EditorView.prototype);
-
 	return {EditorView: EditorView};
 });

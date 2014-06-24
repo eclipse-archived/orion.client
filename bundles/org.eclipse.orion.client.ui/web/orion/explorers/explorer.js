@@ -876,6 +876,109 @@ exports.SelectionRenderer = (function(){
 	return SelectionRenderer;
 }());
 
+exports.SnippetRenderer = (function(){
+	/**
+	 * Create a selection renderer with the specified options.  Options are defined in
+	 * ExplorerRenderer.  An additional option is added here.
+	 * @param {Boolean}singleSelection If true, set the selection policy to "singleSelection".
+	 *
+	 */
+	function SnippetRenderer(options, explorer) {
+		this._init(options);
+		this.explorer = explorer;
+	}
+	SnippetRenderer.prototype = new exports.ExplorerRenderer();
+
+	SnippetRenderer.prototype.renderTableHeader = function(tableNode){
+		var thead = document.createElement('thead'); //$NON-NLS-0$
+		var row = document.createElement('tr'); //$NON-NLS-0$
+		thead.classList.add("navTableHeading"); //$NON-NLS-0$
+		if (this._useCheckboxSelection) {
+			row.appendChild(this.initCheckboxColumn(tableNode));
+		}
+		
+		var i = 0;
+		var cell = this.getCellHeaderElement(i);
+		while(cell){
+			if (cell.innerHTML.length > 0) {
+				cell.classList.add("navColumn"); //$NON-NLS-0$
+			}
+			row.appendChild(cell);			
+			cell = this.getCellHeaderElement(++i);
+		}
+		thead.appendChild(row);
+		if (i > 0) {
+			tableNode.appendChild(thead);
+		}
+	};
+	
+	SnippetRenderer.prototype.renderRow = function(item, tableRow) {
+		tableRow.verticalAlign = "baseline"; //$NON-NLS-0$
+		tableRow.classList.add("treeTableRow"); //$NON-NLS-0$
+		
+		if (this.explorer.selectionPolicy !== "cursorOnly") {
+			tableRow.classList.add("selectableNavRow"); //$NON-NLS-0$
+		}
+		
+		var navDict = this.explorer.getNavDict();
+		if(navDict){
+			navDict.addRow(item, tableRow);
+			var self = this;
+			tableRow.addEventListener("click", function(evt) { //$NON-NLS-0$
+				if(self.explorer.getNavHandler()){
+					self.explorer.getNavHandler().onClick(item, evt);
+				}
+			}, false);
+		}
+		var checkColumn = this.getCheckboxColumn(item, tableRow);
+		if(checkColumn) {
+			checkColumn.classList.add('checkColumn'); //$NON-NLS-0$
+			tableRow.appendChild(checkColumn);
+		}
+
+		var i = 0;
+		var cell = this.getCellElement(i, item, tableRow);
+		while(cell){
+			tableRow.appendChild(cell);
+			if (i===0) {
+				if(this.getPrimColumnStyle){
+					cell.classList.add(this.getPrimColumnStyle(item)); //$NON-NLS-0$
+				} else {
+					cell.classList.add("navColumn"); //$NON-NLS-0$
+				}
+			} else {
+				if(this.getSecondaryColumnStyle){
+					cell.classList.add(this.getSecondaryColumnStyle()); //$NON-NLS-0$
+				} else {
+					cell.classList.add("secondaryColumn"); //$NON-NLS-0$
+				}
+			}
+			cell = this.getCellElement(++i, item, tableRow);
+		}
+		
+	};
+
+	/**
+	 * Override to return a dom element containing table header, preferably <code>th</code>
+	 * @name orion.explorer.SnippetRenderer#getCellHeaderElement
+	 * @function
+	 * @param col_no number of column
+	 */
+	SnippetRenderer.prototype.getCellHeaderElement = function(col_no){};
+
+	/**
+	 * Override to return a dom element containing table cell, preferable <code>td</code>
+	 * @name orion.explorer.SnippetRenderer#getCellElement
+	 * @function
+	 * @param col_no number of column
+	 * @param item item to be rendered
+	 * @param tableRow the current table row
+	 */
+	SnippetRenderer.prototype.getCellElement = function(col_no, item, tableRow){};
+	
+	return SnippetRenderer;
+}());
+
 exports.SimpleFlatModel = (function() {	
 	/**
 	 * Creates a new flat model based on an array of items already known.

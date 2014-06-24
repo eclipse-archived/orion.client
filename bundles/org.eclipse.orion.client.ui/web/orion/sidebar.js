@@ -1,12 +1,12 @@
 /*global console define*/
 /*jslint browser:true sub:true*/
-define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/littlelib',
+define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', 'orion/templateExplorer', 'orion/webui/littlelib',
 		'orion/PageUtil',
 		'orion/widgets/nav/mini-nav',
 		'orion/widgets/nav/project-nav',
 		'orion/globalCommands',
 		'i18n!orion/edit/nls/messages'],
-		function(Deferred, objects, mCommands, mOutliner, lib, PageUtil, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages) {
+		function(Deferred, objects, mCommands, mOutliner, mTemplateExplorer, lib, PageUtil, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages) {
 
 	/**
 	 * @name orion.sidebar.Sidebar
@@ -18,6 +18,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 	 * @param {orion.fileClient.FileClient} params.fileClient
 	 * @param {orion.editor.InputManager} params.editorInputManager
 	 * @param {orion.outliner.OutlineService} params.outlineService
+	 * @param {orion.templates.TemplateExplorerService} params.templateExplorerService
 	 * @param {orion.progress.ProgressService} params.progressService
 	 * @param {orion.selection.Selection} params.selection
 	 * @param {orion.serviceregistry.ServiceRegistry} params.serviceRegistry
@@ -34,6 +35,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		this.fileClient = params.fileClient;
 		this.editorInputManager = params.editorInputManager;
 		this.outlineService = params.outlineService;
+		this.templateExplorerService = params.templateExplorerService;
 		this.parentNode = lib.node(params.parent);
 		this.toolbarNode = lib.node(params.toolbar);
 		this.selection = params.selection;
@@ -61,6 +63,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			var fileClient = this.fileClient;
 			var editorInputManager = this.editorInputManager;
 			var outlineService = this.outlineService;
+			var templateExplorerService = this.templateExplorerService;
 			var parentNode = this.parentNode;
 			var progressService = this.progressService;
 			var selection = this.selection;
@@ -69,6 +72,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 
 			var switcherNode = this.switcherNode = lib.node(this.switcherScope);
 			
+			//TODO do we need to add a new mode?
 			var changeViewModeCommand = new mCommands.Command({
 				name: messages["SidePanel"],
 				imageClass: "core-sprite-outline", //$NON-NLS-0$
@@ -127,6 +131,22 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				progressService: progressService,
 				sidebar: this
 			});
+			
+			// TemplateExplorer is responsible for adding its view mode(s) to this sidebar
+			this.templateExplorer = new mTemplateExplorer.TemplateExplorer({
+				parent: parentNode,
+				toolbar: toolbarNode,
+				serviceRegistry: serviceRegistry,
+				contentTypeRegistry: contentTypeRegistry,
+				preferences: this.preferences,
+				templateExplorerService: templateExplorerService,
+				commandService: commandRegistry,
+				selectionService: selection,
+				inputManager: editorInputManager,
+				progressService: progressService,
+				sidebar: this
+			});
+			
 			this.setViewMode(this.defaultViewMode);
 		},
 		showToolbar: function() {
