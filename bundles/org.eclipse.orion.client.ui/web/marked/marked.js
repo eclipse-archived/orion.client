@@ -550,6 +550,28 @@ InlineLexer.output = function(src, links, options) {
  * Lexing/Compiling
  */
 
+function sanitizeLink(link) {
+	try {
+		var href = link.replace(/&([#\w]+);/g, function(_, n) {
+			n = n.toLowerCase();
+			if (n === 'colon') return ':';
+			if (n.charAt(0) === '#') {
+				var charCode = n.charAt(1) === 'x' ? parseInt(n.substring(2), 16) : parseInt(n.substring(1),10);
+				return String.fromCharCode(charCode);
+			}
+			return '';
+		});
+		var protocol = decodeURIComponent(href).replace(/[^\w:]/g, '').toLowerCase();
+		if (protocol.indexOf('javascript:') === 0) {
+			return '';
+		}
+	} catch (e) {
+		return '';
+	}
+	return link;
+}
+
+
 InlineLexer.prototype.output = function(src) {
   var out = ''
     , link
@@ -591,7 +613,7 @@ InlineLexer.prototype.output = function(src) {
       text = escape(cap[1]);
       href = text;
       out += '<a href="'
-        + href
+        + this.options.sanitize ? sanitizeLink(href) : href
         + '">'
         + text
         + '</a>';
@@ -611,7 +633,7 @@ InlineLexer.prototype.output = function(src) {
     if (cap = this.rules.link.exec(src)) {
       src = src.substring(cap[0].length);
       out += this.outputLink(cap, {
-        href: cap[2],
+        href: this.options.sanitize ? sanitizeLink(cap[2]) : cap[2],
         title: cap[3]
       });
       continue;
@@ -627,6 +649,9 @@ InlineLexer.prototype.output = function(src) {
         out += cap[0][0];
         src = cap[0].substring(1) + src;
         continue;
+      }
+      if (this.options.sanitize) {
+      	link.href = sanitizeLink(link.href);
       }
       out += this.outputLink(cap, link);
       continue;
@@ -860,7 +885,7 @@ Parser.prototype.tok = function() {
         + (this.token.lang
         ? ' class="'
         + this.options.langPrefix
-        + this.token.lang
+        + escape(this.token.lang)
         + '"'
         : '')
         + '>'
