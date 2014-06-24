@@ -1161,7 +1161,8 @@ define([
 				var sourceAlignTop = textView.getLocationAtOffset(projectionBlockStart);
 				var sourceAlignBottom = textView.getLocationAtOffset(projectionBlockEnd);
 				var lineIndex = textView.getLineAtOffset(projectionBlockEnd);
-				sourceAlignBottom.y += textView.getLineHeight(lineIndex);
+				var lineHeight = textView.getLineHeight(lineIndex);
+				sourceAlignBottom.y += lineHeight;
 			 } else {
 				/* selection is in whitespace in the root block */
 				var childIndex = block.getBlockAtIndex(selectionIndex);
@@ -1177,11 +1178,17 @@ define([
 				var projectionEnd = projectionModel.mapOffset(end, true);
 				sourceAlignBottom = textView.getLocationAtOffset(projectionEnd);
 				lineIndex = textView.getLineAtOffset(projectionEnd);
-				sourceAlignBottom.y += textView.getLineHeight(lineIndex);
+				lineHeight = textView.getLineHeight(lineIndex);
+				sourceAlignBottom.y += lineHeight;
 			}
 			var sourceAlignHeight = sourceAlignBottom.y - sourceAlignTop.y;
 			var selectionLocation = textView.getLocationAtOffset(projectionModel.mapOffset(selectionIndex, true));
-			selectionLocation.y += textView.getLineHeight(); /* default line height */
+			if (sourceAlignBottom.y - sourceAlignTop.y === lineHeight) {
+				/* block is on a single line, center on the line's mid-height */
+				selectionLocation.y += lineHeight / 2;
+			} else {
+				selectionLocation.y += textView.getLineHeight(); /* default line height */
+			}
 			var selectionPercentageWithinBlock = (selectionLocation.y - sourceAlignTop.y) / sourceAlignHeight;
 			var previewBounds = this._previewWrapperDiv.getBoundingClientRect();
 			if (this._splitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL) {
