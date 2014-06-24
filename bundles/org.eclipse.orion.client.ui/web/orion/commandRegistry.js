@@ -105,14 +105,14 @@ define([
 				if (enabled && command.callback) {
 					var commandInvocation = new Commands.CommandInvocation(handler, item, userData, command, self);
 					commandInvocation.domParent = parent;
-					self._invoke(commandInvocation, parameters);
+					return self._invoke(commandInvocation, parameters);
 				}
 			} else {
 				//TODO should we be keeping invocation context for commands without bindings? 
 				var binding = this._urlBindings[commandId];
 				if (binding && binding.command) {
 					if (binding.command.callback) {
-						self._invoke(binding.invocation, parameters);
+						return self._invoke(binding.invocation, parameters);
 					}
 				}
 			}
@@ -324,11 +324,11 @@ define([
 					}
 					if (!collecting) {
 						// Just call the callback with the information we had.
-						commandInvocation.command.callback.call(commandInvocation.handler || window, commandInvocation);
+						return commandInvocation.command.callback.call(commandInvocation.handler || window, commandInvocation);
 					}
 				} else {
 					// We should not be trying to collect parameters, just call the callback.
-					commandInvocation.command.callback.call(commandInvocation.handler || window, commandInvocation);
+					return commandInvocation.command.callback.call(commandInvocation.handler || window, commandInvocation);
 				}
 			} else {
 				window.console.log("Client attempted to invoke command without an available (rendered) command invocation"); //$NON-NLS-0$

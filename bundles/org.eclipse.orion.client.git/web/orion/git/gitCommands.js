@@ -240,7 +240,7 @@ var exports = {};
 		}
 	};
 
-	exports.gatherSshCredentials = function(serviceRegistry, data, title){
+	exports.gatherSshCredentials = function(serviceRegistry, data, title, noAuth){
 		var def = new Deferred();
 		var repository;
 		
@@ -313,6 +313,11 @@ var exports = {};
 		}
 		
 		var failure = function(){
+			if (noAuth) {
+				def.reject();
+				return;
+			}
+			
 			if (!data.parameters && !data.optionsRequested){
 				triggerCallback({gitSshUsername: "", gitSshPassword: "", gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				return;
@@ -430,7 +435,13 @@ var exports = {};
 
 	exports.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 
-		var refresh = function() { explorer.changedItem(); };
+		var refresh = function(data) { 
+			if (data.handler.changedItem) {
+				data.handler.changedItem();
+			} else { 
+				explorer.changedItem(); 
+			}
+		};
 		
 		function displayErrorOnStatus(error) {
 			var display = {};
@@ -839,7 +850,9 @@ var exports = {};
 			}
 
 			var item = data.items;
+			var noAuth = false;
 			if (item.LocalBranch && item.RemoteBranch) {
+				noAuth = item.noAuth;
 				item = item.RemoteBranch;
 			}
 			var path = item.Location;
@@ -894,7 +907,7 @@ var exports = {};
 					progress.removeOperation(commandInvocation.errorData.failedOperation);
 				}
 				
-				exports.gatherSshCredentials(serviceRegistry, commandInvocation).then(
+				exports.gatherSshCredentials(serviceRegistry, commandInvocation, null, noAuth).then(
 					function(options) {
 						var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 						var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
@@ -925,7 +938,8 @@ var exports = {};
 								);
 							}
 						);
-					}
+					},
+					d.reject
 				);
 			};
 			
@@ -950,6 +964,9 @@ var exports = {};
 			return d;
 		};
 		var fetchVisibleWhen = function(item) {
+			if (item.LocalBranch && item.RemoteBranch) {
+				item = item.RemoteBranch;
+			}
 			if (item.Type === "RemoteTrackingBranch") //$NON-NLS-0$
 				return true;
 			if (item.Type === "Remote") //$NON-NLS-0$
@@ -966,8 +983,8 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id: "eclipse.orion.git.fetch", //$NON-NLS-0$
 			callback: function(data) {
-				fetchCallback(data, false).then(function() {
-					refresh();
+				return fetchCallback(data, false).then(function() {
+					refresh(data);
 				});
 			},
 			visibleWhen: fetchVisibleWhen
@@ -983,7 +1000,7 @@ var exports = {};
 			callback: function(data) {
 				var confirm = messages["You're going to override content of the remote tracking branch. This can cause the branch to lose commits."]+"\n\n"+messages['Are you sure?']; //$NON-NLS-0$
 				fetchCallback(data, true, confirm).then(function() {
-					refresh();
+					refresh(data);
 				});
 			},
 			visibleWhen : fetchVisibleWhen
@@ -1180,7 +1197,7 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			callback: function(data) {
 				rebaseCallback(data).then(function() {
-					refresh();
+					refresh(data);
 				});
 			},
 			visibleWhen : function(item) {
@@ -1227,7 +1244,7 @@ var exports = {};
 					return rebaseCallback(data).then(function(jsonData) {
 						if (jsonData.Result === "OK" || jsonData.Result === "FAST_FORWARD" || jsonData.Result === "UP_TO_DATE") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							return pushCallbackTags(data).then(function() {
-								refresh();
+								refresh(data);
 							});
 						}
 					});
@@ -1245,7 +1262,7 @@ var exports = {};
 			id : "eclipse.orion.git.push", //$NON-NLS-0$
 			callback: function(data) {
 				pushCallbackTags(data).then(function() {
-					refresh();
+					refresh(data);
 				});
 			},
 			visibleWhen: pushVisibleWhen
@@ -1260,7 +1277,7 @@ var exports = {};
 			id : "eclipse.orion.git.pushBranch", //$NON-NLS-0$
 			callback:  function(data) {
 				pushCallbackNoTags(data).then(function() {
-					refresh();
+					refresh(data);
 				});
 			},
 			visibleWhen: pushVisibleWhen
@@ -1275,7 +1292,7 @@ var exports = {};
 			id : "eclipse.orion.git.pushToGerrit", //$NON-NLS-0$
 			callback:  function(data) {
 				pushCallbackGerrit(data).then(function() {
-					refresh();
+					refresh(data);
 				});
 			},
 			visibleWhen: function(item) {
@@ -1302,7 +1319,7 @@ var exports = {};
 			id : "eclipse.orion.git.pushForce", //$NON-NLS-0$
 			callback: function(data) {
 				pushCallbackTagsForce(data).then(function() {
-					refresh();
+					refresh(data);
 				});
 			},
 			visibleWhen: pushVisibleWhen
@@ -1317,7 +1334,7 @@ var exports = {};
 			id : "eclipse.orion.git.pushForceBranch", //$NON-NLS-0$
 			callback: function(data) {
 				pushCallbackNoTagsForce(data).then(function() {
-					refresh();
+					refresh(data);
 				});
 			},
 			visibleWhen: pushVisibleWhen

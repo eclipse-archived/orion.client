@@ -330,6 +330,12 @@ define([
 			var deferred = new Deferred();
 			var that = this;
 			var model = this.model;
+			if (!item) {
+				model.getRoot(function(root) {
+					item = root;
+				});
+			}
+			
 			if (item.Type === "CommitRoot") { //$NON-NLS-0$
 				model.incomingCommits = model.outgoingCommits = null;
 			}
@@ -338,7 +344,13 @@ define([
 			var progress = this.section.createProgressMonitor();
 			progress.begin(messages["Getting git log"]);
 			model.getChildren(item, function(children) {
+				item.removeAll = true;
 				that.myTree.refresh.bind(that.myTree)(item, children, false);
+				that.myTree.expand(that.model.getId(children[0]));
+				that.myTree.expand(that.model.getId(children[1]));
+				if (that.location) {
+					that.myTree.expand(that.model.getId(children[2]));
+				}
 				if (item.Type === "Synchronized") { //$NON-NLS-0$
 					that.updatePageCommands(item);
 				} else {
@@ -355,17 +367,20 @@ define([
 			var model = new GitCommitListModel({root: this.root, registry: this.registry, progressService: this.progressService, statusService: this.statusService, gitClient: this.gitClient, section: this.section, location: this.location, handleError: this.handleError, legacyLog: this.legacyLog});
 			this.createTree(this.parentId, model, {onComplete: function() {
 				that.status = model.status;
-				that.model.getRoot(function(root) {
-					that.model.getChildren(root, function(children) {
-						that.myTree.expand(that.model.getId(children[0]));
-						that.myTree.expand(that.model.getId(children[1]));
-						if (that.location) {
-							that.myTree.expand(that.model.getId(children[2]));
-						}
+				var fetched = function(){
+					that.model.getRoot(function(root) {
+						that.model.getChildren(root, function(children) {
+							that.myTree.expand(that.model.getId(children[0]));
+							that.myTree.expand(that.model.getId(children[1]));
+							if (that.location) {
+								that.myTree.expand(that.model.getId(children[2]));
+							}
+						});
 					});
-				});
-				that.updateCommands();
-				deferred.resolve(model.log);
+					that.updateCommands();
+					deferred.resolve(model.log);
+				};
+				that.fetch().then(fetched, fetched);
 			}});
 			return deferred;
 		},
@@ -434,6 +449,16 @@ define([
 				}
 			});
 			commandService.addCommand(chooseBranchCommand);
+		},
+		fetch: function() {
+			var model = this.model;
+			if (model.tracksRemoteBranch() && !this.legacyLog) {
+				var commandService = this.commandService;
+				var remoteBranch = model.getRemoteBranch();
+				var localBranch = model.getLocalBranch();
+				return commandService.runCommand("eclipse.orion.git.fetch", {LocalBranch: localBranch, RemoteBranch: remoteBranch, noAuth: true}, this);
+			}
+			return new Deferred().resolve();
 		},
 		updateCommands: function() {
 			var model = this.model;
