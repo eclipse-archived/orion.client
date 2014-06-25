@@ -195,6 +195,7 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 				var anchor = this._categorizedAnchors[category];
 				var links = [];
 				if (category === this._currentCategory) {
+					anchor.parentElement.style.display = "";
 					anchor.href = "";
 					anchor.onclick = function() {
 						return false;
@@ -212,7 +213,9 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 				if (links.length === 0) {
 					anchor.href = "";
 					anchor.title = anchor.parentElement.categoryName;
+					anchor.parentElement.style.display = "none";
 				} else {
+					anchor.parentElement.style.display = "";
 					links.sort(function compareLinks(link1, link2) {
 						if (link1.order < link2.order) {
 							return -1;
