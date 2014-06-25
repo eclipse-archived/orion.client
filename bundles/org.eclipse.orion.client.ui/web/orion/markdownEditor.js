@@ -882,15 +882,23 @@ define([
 
 						if (fileClient.readBlob) {
 							var id = "_md_img_" + imgCount++; //$NON-NLS-0$
-							fileClient.readBlob(linkURL.href).then(function(bytes) {
-								var extensionMatch = linkURL.href.match(extensionRegex);
-								var mimeType = extensionMatch ? "image/" +extensionMatch[1] : "image/png"; //$NON-NLS-1$ //$NON-NLS-0$
-								var objectURL = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
-								document.getElementById(id).src = objectURL;
-								// URL.revokeObjectURL(objectURL); /* do not revoke, cache for reuse instead */
-								_imageCache[linkURL.href].src = objectURL;
-							}.bind(this));
-							_imageCache[linkURL.href] = {id: id};
+							(function(id, href) {
+								fileClient.readBlob(href).then(
+									function(bytes) {
+										var extensionMatch = href.match(extensionRegex);
+										var mimeType = extensionMatch ? "image/" +extensionMatch[1] : "image/png"; //$NON-NLS-1$ //$NON-NLS-0$
+										var objectURL = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
+										document.getElementById(id).src = objectURL;
+										// URL.revokeObjectURL(objectURL); /* cache image data for reuse (revoke when editor is destroyed) */
+										_imageCache[href] = {id: id, src: objectURL};
+									}.bind(this),
+									function(/*e*/) {
+										var element = document.getElementById(id);
+										if (element) {
+											element.src = "missing"; //$NON-NLS-0$
+										}
+									}.bind(this));
+							}.bind(this))(id, linkURL.href);
 							return "<img id='" + id + "' src=''>";	//$NON-NLS-1$ //$NON-NLS-0$			
 						}
 						link.href = linkURL.href;
@@ -1349,6 +1357,14 @@ define([
 			this.editor = null;
 			this._options.editorView.destroy();
 			this._options.editorView = null;
+
+			/* release cached image data */
+			var keys = Object.keys(_imageCache);
+			keys.forEach(function(key) {
+				var current = _imageCache[key];
+				URL.revokeObjectURL(current.src);
+			});
+			_imageCache = {};
 		}
 	};
 
