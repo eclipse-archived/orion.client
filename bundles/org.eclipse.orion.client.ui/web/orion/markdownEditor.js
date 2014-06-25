@@ -888,9 +888,15 @@ define([
 										var extensionMatch = href.match(extensionRegex);
 										var mimeType = extensionMatch ? "image/" +extensionMatch[1] : "image/png"; //$NON-NLS-1$ //$NON-NLS-0$
 										var objectURL = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
-										document.getElementById(id).src = objectURL;
-										// URL.revokeObjectURL(objectURL); /* cache image data for reuse (revoke when editor is destroyed) */
-										_imageCache[href] = {id: id, src: objectURL};
+										var element = document.getElementById(id);
+										if (element) {
+											element.src = objectURL;
+											// URL.revokeObjectURL(objectURL); /* cache image data for reuse (revoke when editor is destroyed) */
+											_imageCache[href] = {id: id, src: objectURL};
+										} else {
+											/* element was removed during the image retrieval */
+											URL.revokeObjectURL(objectURL);
+										}
 									}.bind(this),
 									function(/*e*/) {
 										var element = document.getElementById(id);
