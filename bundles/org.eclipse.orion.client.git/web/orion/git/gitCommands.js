@@ -313,11 +313,7 @@ var exports = {};
 		}
 		
 		var failure = function(){
-			if (noAuth) {
-				def.reject();
-				return;
-			}
-			
+		
 			if (!data.parameters && !data.optionsRequested){
 				triggerCallback({gitSshUsername: "", gitSshPassword: "", gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				return;
@@ -436,7 +432,7 @@ var exports = {};
 	exports.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 
 		var refresh = function(data) { 
-			if (data.handler.changedItem) {
+			if (data && data.handler.changedItem) {
 				data.handler.changedItem();
 			} else { 
 				explorer.changedItem(); 
@@ -907,7 +903,7 @@ var exports = {};
 					progress.removeOperation(commandInvocation.errorData.failedOperation);
 				}
 				
-				exports.gatherSshCredentials(serviceRegistry, commandInvocation, null, noAuth).then(
+				exports.gatherSshCredentials(serviceRegistry, commandInvocation, null).then(
 					function(options) {
 						var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 						var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
@@ -921,6 +917,10 @@ var exports = {};
 						statusService.createProgressMonitor(deferred, messages["Fetching remote: "] + name);
 						deferred.then(
 							function(jsonData) {
+								if (noAuth) {
+									d.reject();
+									return;
+								}
 								exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 									function() {
 										d.resolve();
@@ -929,6 +929,10 @@ var exports = {};
 									}
 								);
 							}, function(jsonData) {
+								if (noAuth) {
+									d.reject();
+									return;
+								}
 								exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 									function() {
 										d.resolve();
@@ -1173,13 +1177,14 @@ var exports = {};
 					if (display.Severity === "Ok") { //$NON-NLS-0$
 						display.HTML = false;
 						display.Message = jsonData.Result;
+						d.resolve(jsonData);
 					} else {
 						display.HTML = true;
 						var msg = messages["Rebase" + jsonData.Result];
 						display.Message = "<span>" + jsonData.Result + (msg ? msg : "") + "</span>"; //$NON-NLS-1$ //$NON-NLS-0$ 
+						d.reject(jsonData);
 					}
 					serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-					d.resolve(jsonData);
 				}, function(error) {
 					displayErrorOnStatus(error);
 					d.reject();
@@ -1198,6 +1203,8 @@ var exports = {};
 			callback: function(data) {
 				rebaseCallback(data).then(function() {
 					refresh(data);
+				}, function() {
+					refresh();
 				});
 			},
 			visibleWhen : function(item) {
@@ -1242,11 +1249,11 @@ var exports = {};
 			callback: function(data) {
 				return fetchCallback(data).then(function() {
 					return rebaseCallback(data).then(function(jsonData) {
-						if (jsonData.Result === "OK" || jsonData.Result === "FAST_FORWARD" || jsonData.Result === "UP_TO_DATE") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							return pushCallbackTags(data).then(function() {
-								refresh(data);
-							});
-						}
+						return pushCallbackTags(data).then(function() {
+							refresh(data);
+						});
+					}, function() {
+						refresh();
 					});
 				});
 			},

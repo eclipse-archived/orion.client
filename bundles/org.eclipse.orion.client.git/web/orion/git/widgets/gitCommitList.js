@@ -346,11 +346,7 @@ define([
 			model.getChildren(item, function(children) {
 				item.removeAll = true;
 				that.myTree.refresh.bind(that.myTree)(item, children, false);
-				that.myTree.expand(that.model.getId(children[0]));
-				that.myTree.expand(that.model.getId(children[1]));
-				if (that.location) {
-					that.myTree.expand(that.model.getId(children[2]));
-				}
+				that.expandSections(children);
 				if (item.Type === "Synchronized") { //$NON-NLS-0$
 					that.updatePageCommands(item);
 				} else {
@@ -370,11 +366,7 @@ define([
 				var fetched = function(){
 					that.model.getRoot(function(root) {
 						that.model.getChildren(root, function(children) {
-							that.myTree.expand(that.model.getId(children[0]));
-							that.myTree.expand(that.model.getId(children[1]));
-							if (that.location) {
-								that.myTree.expand(that.model.getId(children[2]));
-							}
+							that.expandSections(children);
 						});
 					});
 					that.updateCommands();
@@ -383,6 +375,15 @@ define([
 				that.fetch().then(fetched, fetched);
 			}});
 			return deferred;
+		},
+		expandSections: function(children) {
+			if (!this.legacyLog && !this.model.isRebasing() && children.length > 2) {
+				this.myTree.expand(this.model.getId(children[0]));
+				this.myTree.expand(this.model.getId(children[1]));
+				if (this.location) {
+					this.myTree.expand(this.model.getId(children[2]));
+				}
+			}
 		},
 		createCommands: function() {
 			var commandService = this.commandService;
@@ -452,7 +453,7 @@ define([
 		},
 		fetch: function() {
 			var model = this.model;
-			if (model.tracksRemoteBranch() && !this.legacyLog) {
+			if (model.tracksRemoteBranch() && !this.legacyLog && !model.isRebasing()) {
 				var commandService = this.commandService;
 				var remoteBranch = model.getRemoteBranch();
 				var localBranch = model.getLocalBranch();
