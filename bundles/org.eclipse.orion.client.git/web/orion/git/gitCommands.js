@@ -917,10 +917,6 @@ var exports = {};
 						statusService.createProgressMonitor(deferred, messages["Fetching remote: "] + name);
 						deferred.then(
 							function(jsonData) {
-								if (noAuth) {
-									d.reject();
-									return;
-								}
 								exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 									function() {
 										d.resolve();
@@ -929,7 +925,7 @@ var exports = {};
 									}
 								);
 							}, function(jsonData) {
-								if (noAuth) {
+								if (noAuth && (jsonData.status === 400 || jsonData.status === 401)) {
 									d.reject();
 									return;
 								}
