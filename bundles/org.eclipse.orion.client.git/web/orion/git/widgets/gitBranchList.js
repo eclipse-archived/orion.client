@@ -45,7 +45,7 @@ define([
 				var repository = parentItem.repository || parentItem.parent.repository;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], repository.Name);
 				progress.begin(msg);
-				Deferred.when(repository.Branches || this.progressService.progress(this.gitClient.getGitBranch(repository.BranchLocation + (parentItem.mode === "full" ? "?commits=1" : "?commits=1&page=1&pageSize=5")), msg), function(resp) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				Deferred.when(repository.Branches || this.progressService.progress(this.gitClient.getGitBranch(repository.BranchLocation + (that.root.mode === "full" ? "?commits=1" : "?commits=1&page=1&pageSize=5")), msg), function(resp) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					progress.done();
 					onComplete(that.processChildren(parentItem, resp.Children || resp));
 				}, function(error){
