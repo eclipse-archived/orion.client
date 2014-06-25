@@ -82,7 +82,10 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 		_handleError: function(error, isRoot) {
 			//var errorMessageHeader = "GitHub Error: ";
 			var errorMessage = "Unknown";
-			if(error.status && error.status === 404) {//There are two types of displayed error if 404 comes from GitHub
+			var severity = "Warning";
+			if(error.name === "Cancel") {
+				return new Deferred().reject(error);
+			} else if(error.status && error.status === 404) {//There are two types of displayed error if 404 comes from GitHub
 				if(isRoot) { //If the request was sent from the repo's root level, then it is a private repository. https://developer.github.com/v3/#authentication
 					errorMessage = "This is a private GitHub project. Authorized users can view the source on the [GitHub repository page](" + this._originalRepoURL + ").";
 				} else { //Otherwise it is a bad URL
@@ -107,7 +110,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 				}
 				*/
 			}
-			var errorObj = {Severity: "Warning", Message: errorMessage};
+			var errorObj = {Severity: severity, Message: errorMessage};
 			error.responseText = JSON.stringify(errorObj);
 			return new Deferred().reject(error);
 		},

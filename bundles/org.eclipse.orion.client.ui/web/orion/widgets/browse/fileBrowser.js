@@ -54,7 +54,10 @@ define([
 	}
 	objects.mixin(statusService.prototype, {
 		setProgressResult: function(error){
-			var messageTdClass = (error.Severity && error.Severity.toLowercase === "error" ? "errorMessageViewTable" : "warningMessageViewTable");
+			if(error.Cancel) {
+				return;
+			}
+			var messageTdClass = (error.Severity && error.Severity.toLowerCase() === "error" ? "errorMessageViewTable" : "warningMessageViewTable");
 			if(this.fileBrowser._currentEditorView && this.fileBrowser._currentEditorView.messageView) {
 				this.fileBrowser._currentEditorView.updateMessageContents(error.Message, ["messageViewTable"], messageTdClass);
 			} else {

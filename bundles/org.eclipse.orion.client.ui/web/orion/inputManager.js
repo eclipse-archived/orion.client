@@ -65,7 +65,9 @@ define([
 			Severity: "Error", //$NON-NLS-0$
 			Message: messages.noResponse
 		};
-		if (error.status === 0) {
+		if(error.name === "Cancel") {
+			return {Severity: "Warning", Message: error.name, Cancel: true};
+		} else if (error.status === 0) {
 			return newError; // might do better here
 		} else if (error.responseText) {
 			var responseText = error.responseText;
