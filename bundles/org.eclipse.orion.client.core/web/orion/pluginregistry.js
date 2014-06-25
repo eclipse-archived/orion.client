@@ -12,7 +12,7 @@
 
 /*global define setTimeout clearTimeout addEventListener removeEventListener document console localStorage location URL Worker XMLSerializer XMLHttpRequest*/
 
-define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Deferred, EventTarget, _) {
+define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Deferred, EventTarget) {
 
     function _equal(obj1, obj2) {
         var keys1 = Object.keys(obj1);
@@ -365,6 +365,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                         }
                     } else {
                         if ("plugin" === message.method) { //$NON-NLS-0$
+                        	_channel.connected();
                             var manifest = message.params[0];
                             _update({
                                 headers: manifest.headers,
@@ -476,6 +477,8 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                 lastModified: _lastModified
             });
         }
+        
+        this._default = false; // used to determine if a plugin is part of the configuration
 
         this._persist = _persist;
 
@@ -660,7 +663,11 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                 _state = "resolved";
                 _deferredStateChange = null;
                 _internalRegistry.dispatchEvent(new PluginEvent("stopped", _this));
-                deferredStateChange.reject(new Error("plugin activation error"));
+                deferredStateChange.reject(new Error("Failed to load plugin: " + _url));
+                if (_this._default) {
+                	_lastModified = 0;
+                	_persist();
+                }
             });
             return deferredStateChange.promise;
         };
@@ -716,14 +723,20 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                     _lastModified = new Date().getTime();
                     _persist();
                 }
-                return _internalRegistry.loadManifest(_url).then(_update);
+                return _internalRegistry.loadManifest(_url).then(_update, function() {
+                	if (_this._default) {
+                		_lastModified = 0;
+                		_persist();
+                	}
+                	console.log("Failed to load plugin: " + _url);
+                });
             }
 
             var oldHeaders = _headers;
             var oldServices = _services;
             var oldAutostart = _autostart;
             _headers = input.headers || {};
-            _services = input.services || {};
+            _services = input.services || [];
             _autostart = input.autostart || _autostart;
 
             if (input.lastModified) {
@@ -926,6 +939,9 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 	        	iframe.frameBorder = 0;
                 (parent || _parent).appendChild(iframe);
                 channel.target = iframe.contentWindow;
+                channel.connected = function() {
+                	clearTimeout(loadTimeout);
+                };
                 channel.close = function() {
                     clearTimeout(loadTimeout);
                     if (iframe) {
@@ -1129,7 +1145,11 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                         	manifest = {};
                         }
                         manifest.autostart = manifest.autostart || configuration.defaultAutostart || "lazy";
-                        _plugins.push(new Plugin(url, manifest, internalRegistry));
+                        plugin = new Plugin(url, manifest, internalRegistry);
+                        plugin._default = true;
+                        _plugins.push(plugin);
+                    } else {
+                    	plugin._default = true;
                     }
                 }.bind(this));
             }
