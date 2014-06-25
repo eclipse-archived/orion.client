@@ -169,7 +169,7 @@ exports.GitRepositoryExplorer = (function() {
 					that.displayRepositories(repositories, "mini"); //$NON-NLS-0$
 					that.statusDeferred = that.displayStatus(repositories[0]);
 					that.displayCommits(repositories[0]);
-					that.displayBranches(repositories[0], "full"); //$NON-NLS-0$
+					that.displayBranches(repositories[0]); //$NON-NLS-0$
 					that.displayTags(repositories[0]);
 					that.displayConfig(repositories[0], "full"); //$NON-NLS-0$
 				} else if (resp.Children[0].Type === "Clone"){ //$NON-NLS-0$
