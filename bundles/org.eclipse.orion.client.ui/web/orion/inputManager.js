@@ -68,6 +68,7 @@ define([
 		if(error.name === "Cancel") {
 			return {Severity: "Warning", Message: error.name, Cancel: true};
 		} else if (error.status === 0) {
+			newError.Cancel = true;
 			return newError; // might do better here
 		} else if (error.responseText) {
 			var responseText = error.responseText;
