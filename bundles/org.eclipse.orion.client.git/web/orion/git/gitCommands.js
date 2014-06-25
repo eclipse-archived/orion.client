@@ -925,7 +925,8 @@ var exports = {};
 									}
 								);
 							}, function(jsonData) {
-								if (noAuth && (jsonData.status === 400 || jsonData.status === 401)) {
+								var code = jsonData.status || jsonData.HttpCode;
+								if (noAuth && (code === 400 || code === 401)) {
 									d.reject();
 									return;
 								}
