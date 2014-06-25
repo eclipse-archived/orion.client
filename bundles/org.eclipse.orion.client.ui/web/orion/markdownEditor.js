@@ -263,9 +263,11 @@ define([
 					}
 
 					/* compute the block's contentStart bound */
-					marked.Lexer.rules.normal.bullet.lastIndex = start;
-					match = marked.Lexer.rules.normal.bullet.exec(text);
-					contentStart = match.index + match[0].length;
+
+					/* marked.Lexer.rules.normal.bullet is not global, so cannot set its lastIndex */
+					var tempText = text.substring(start);
+					match = marked.Lexer.rules.normal.bullet.exec(tempText);
+					contentStart = start + match.index + match[0].length;
 					index = Math.max(index, contentStart);
 					bounds = {
 						start: start,
@@ -543,6 +545,11 @@ define([
 						index = text.indexOf(current, index) + current.length;
 					}
 				});
+			} else if (token.type.indexOf("_item_start") !== -1) { //$NON-NLS-0$
+				/* marked.Lexer.rules.normal.bullet is not global, so cannot set its lastIndex */
+				text = text.substring(index);
+				match = marked.Lexer.rules.normal.bullet.exec(text);
+				index += match.index + match[0].length;
 			}
 			return index;
 		},
