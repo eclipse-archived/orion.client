@@ -64,6 +64,7 @@ define([
 					}
 					break;
 				case Estraverse.Syntax.FunctionExpression:
+					this.checkId(node.id, true); // Function expressions can be named expressions
 					if (node.params) {
 						if(this._enterScope(node)) {
 							return Estraverse.VisitorOption.Skip;

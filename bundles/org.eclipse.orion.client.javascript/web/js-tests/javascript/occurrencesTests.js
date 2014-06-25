@@ -63,7 +63,7 @@ define([
 		 */
 		function assertOccurrences(results, expected) {
 			if(!results) {
-				assert.fail("The occurrence array cannot be null");
+				assert.ok(false, "The occurrence array cannot be null");
 			}
 			assert.equal(results.length, expected.length, "The wrong number of occurrences was returned");
 			for(var i = 0; i < expected.length; i++) {
@@ -79,7 +79,7 @@ define([
 			}
 			for(var k = 0; k < results.length; k++) {
 				if(results[k]) {
-					assert.fail("Found an unknown occurrence: [start "+results[k].start+"][end "+results[k].end+"]");
+					assert.ok(false, "Found an unknown occurrence: [start "+results[k].start+"][end "+results[k].end+"]");
 				}
 			}
 		}
@@ -1895,6 +1895,87 @@ define([
 			return occurrences.computeOccurrences(editorContext, setContext(15, 15)).then(function(results) {
 				try {
 					assertOccurrences(results, []);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests named function expressions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438083
+		 */
+		it('test_namedFuncExpr1', function() {
+			editorContext.text = "var a; log(a); var x = function a(){ log(a); var y = function a(){ log(a); }; };";
+			return occurrences.computeOccurrences(editorContext, setContext(11, 11)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:11, end:12},  {start:41, end:42},  {start:71, end:72}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests named function expressions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438083
+		 */
+		it('test_namedFuncExpr2', function() {
+			editorContext.text = "var a; log(a); var x = function a(){ log(a); var y = function a(){ log(a); }; };";
+			return occurrences.computeOccurrences(editorContext, setContext(32, 32)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:32, end:33}, {start:41, end:42},  {start:71, end:72}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests named function expressions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438083
+		 */
+		it('test_namedFuncExpr3', function() {
+			editorContext.text = "var a; log(a); var x = function a(){ log(a); var y = function a(){ log(a); }; };";
+			return occurrences.computeOccurrences(editorContext, setContext(41, 42)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:32, end:33}, {start:41, end:42},  {start:71, end:72}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		
+		/**
+		 * Tests named function expressions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438083
+		 */
+		it('test_namedFuncExpr4', function() {
+			editorContext.text = "var a; log(a); var x = function a(){ log(a); var y = function a(){ log(a); }; };";
+			return occurrences.computeOccurrences(editorContext, setContext(63, 63)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:62, end:63}, {start:71, end:72}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests named function expressions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438083
+		 */
+		it('test_namedFuncExpr5', function() {
+			editorContext.text = "var a; log(a); var x = function a(){ log(a); var y = function a(){ log(a); }; };";
+			return occurrences.computeOccurrences(editorContext, setContext(72, 72)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:62, end:63}, {start:71, end:72}]);
 				}
 				finally {
 					tearDown();
