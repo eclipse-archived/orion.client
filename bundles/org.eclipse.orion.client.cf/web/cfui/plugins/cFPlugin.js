@@ -394,12 +394,14 @@ define(['i18n!cfui/nls/messages','require', 'orion/xhr', 'orion/Deferred', 'orio
 						return "Application not found";
 					}
 					
-					return cFService.getApp(null, result.App.name).then(function(result) {
-						if (!result) {
-							return "Application not found";
+					return cFService.getApp(null, args.app, decodeURIComponent(context.cwd)).then(
+						function(result) {
+							if (!result) {
+								return "Application not found";
+							}
+							return describeAppVerbose(result);
 						}
-						return describeAppVerbose(result);
-					});
+					);
 				}
 			);
 		}
