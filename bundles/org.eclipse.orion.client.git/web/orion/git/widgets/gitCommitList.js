@@ -122,6 +122,11 @@ define([
 			}
 		},
 		tracksRemoteBranch: function(){
+			if (this.remoteBranch) {
+				if (this.isNewBranch(this.remoteBranch)) {
+					return false;
+				}
+			}
 			var ref = (this.log && this.log.toRef) || this.currentBranch ;
 			if (ref && ref.Type === "RemoteTrackingBranch" && (this.root.repository && this.root.repository.Branches)) { //$NON-NLS-0$
 				var result = false;
@@ -143,6 +148,9 @@ define([
 		isRebasing: function() {
 			var repository = this.root.repository;
 			return repository && repository.status && repository.status.RepositoryState === "REBASING_INTERACTIVE"; //$NON-NLS-0$
+		},
+		isNewBranch: function(branch) {
+			return branch.Type === "RemoteTrackingBranch" && !branch.Id; //$NON-NLS-0$
 		},
 		getChildren: function(parentItem, onComplete) {
 			var that = this;
@@ -386,6 +394,7 @@ define([
 			}
 		},
 		createCommands: function() {
+			var that = this;
 			var commandService = this.commandService;
 			var nextPageCommand = new mCommands.Command({
 				name: messages['Next Page >'],
@@ -442,7 +451,7 @@ define([
 				visibleWhen: function(item) {
 					var branch = item;
 					var name = branch.Name;
-					if (branch.Type === "RemoteTrackingBranch" && !branch.Id) { //$NON-NLS-0$
+					if (that.model.isNewBranch(branch)) {
 						name += messages[" [New branch]"];
 					}
 					chooseBranchCommand.name = name;
@@ -457,7 +466,7 @@ define([
 				var commandService = this.commandService;
 				var remoteBranch = model.getRemoteBranch();
 				var localBranch = model.getLocalBranch();
-				return commandService.runCommand("eclipse.orion.git.fetch", {LocalBranch: localBranch, RemoteBranch: remoteBranch, noAuth: true}, this);
+				return commandService.runCommand("eclipse.orion.git.fetch", {LocalBranch: localBranch, RemoteBranch: remoteBranch, noAuth: true}, this); //$NON-NLS-0$
 			}
 			return new Deferred().resolve();
 		},
