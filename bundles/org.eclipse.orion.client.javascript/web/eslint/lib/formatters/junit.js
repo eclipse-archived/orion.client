@@ -10,22 +10,12 @@
 // Helper Functions
 //------------------------------------------------------------------------------
 
-function getMessageType(message, rules) {
-
-    // TODO: Get rule severity in a better way
-    var severity = null;
-
-    if (message.fatal) {
+function getMessageType(message) {
+    if (message.fatal || message.severity === 2) {
         return "Error";
+    } else {
+        return "Warning";
     }
-
-    severity = rules[message.ruleId][0] || rules[message.ruleId];
-
-    if (severity === 2) {
-        return "Error";
-    }
-
-    return "Warning";
 }
 
 /**
@@ -63,10 +53,9 @@ function escapeSpecialCharacters(message) {
 // Public Interface
 //------------------------------------------------------------------------------
 
-module.exports = function(results, config) {
+module.exports = function(results) {
 
-    var output = "",
-        rules = config.rules || {};
+    var output = "";
 
     output += "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
     output += "<testsuites>\n";
@@ -85,7 +74,7 @@ module.exports = function(results, config) {
             output += "<" + type + " message=\"" + escapeSpecialCharacters(message.message) + "\">";
             output += "<![CDATA[";
             output += "line " + (message.line || 0) +  ", col ";
-            output += (message.column || 0) + ", " + getMessageType(message, rules);
+            output += (message.column || 0) + ", " + getMessageType(message);
             output += " - " + escapeSpecialCharacters(message.message);
             output += (message.ruleId ? " (" + message.ruleId + ")" : "");
             output += "]]>";

@@ -42,7 +42,7 @@ function escapeSpecialCharacters(message) {
 //------------------------------------------------------------------------------
 // Public Interface
 //------------------------------------------------------------------------------
-/* global module */
+
 module.exports = function(results) {
 
     var output = "";

@@ -8,27 +8,17 @@
 // Helper Functions
 //------------------------------------------------------------------------------
 
-function getMessageType(message, rules) {
-
-    // TODO: Get rule severity in a better way
-    var severity = null;
-
-    if (message.fatal) {
+function getMessageType(message) {
+    if (message.fatal || message.severity === 2) {
         return "error";
+    } else {
+        return "warning";
     }
-
-    severity = rules[message.ruleId][0] || rules[message.ruleId];
-
-    if (severity === 2) {
-        return "error";
-    }
-
-    return "warning";
 }
 
 function xmlEscape(s) {
     return ("" + s).replace(/[<>&"']/g, function(c) {
-        switch(c) {
+        switch (c) {
             case "<":
                 return "&lt;";
             case ">":
@@ -39,6 +29,7 @@ function xmlEscape(s) {
                 return "&quot;";
             case "'":
                 return "&apos;";
+            // no default
         }
     });
 }
@@ -46,11 +37,10 @@ function xmlEscape(s) {
 //------------------------------------------------------------------------------
 // Public Interface
 //------------------------------------------------------------------------------
-/* global module */
-module.exports = function(results, config) {
 
-    var output = "",
-        rules = config.rules || {};
+module.exports = function(results) {
+
+    var output = "";
 
     output += "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
     output += "<checkstyle version=\"4.3\">";
@@ -63,7 +53,7 @@ module.exports = function(results, config) {
         messages.forEach(function(message) {
             output += "<error line=\"" + xmlEscape(message.line) + "\" " +
                 "column=\"" + xmlEscape(message.column) + "\" " +
-                "severity=\"" + xmlEscape(getMessageType(message, rules)) + "\" " +
+                "severity=\"" + xmlEscape(getMessageType(message)) + "\" " +
                 "message=\"" + xmlEscape(message.message) +
                 (message.ruleId ? " (" + message.ruleId + ")" : "") + "\" />";
         });

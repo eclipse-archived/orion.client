@@ -96,6 +96,9 @@
 		function checkScope(node) {
 			try {
 				var scope = context.getScope();
+				if(node.type === 'FunctionExpression' && node.id && node.id.name) {
+				    scope  = scope.upper;
+				}
 				var namedFunctions = createNamedFunctionMap(scope);
 	
 				scope.variables.forEach(function(variable) {
@@ -107,12 +110,7 @@
 					}
 	
 					// If variable has multiple defs, every one after the 1st is a redeclaration
-					var defs = variable.defs.filter(function(def) {
-						// Workaround for escope bug
-						// https://github.com/Constellation/escope/issues/21
-						return def.type !== "ImplicitGlobalVariable";  //$NON-NLS-0$
-					});
-					defs.forEach(function(def, i) {
+					variable.defs.forEach(function(def, i) {
 						if (i > 0) {
 							reportRedeclaration(def.name, def.name.name);
 						}

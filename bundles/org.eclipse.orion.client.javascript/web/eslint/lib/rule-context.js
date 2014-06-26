@@ -26,10 +26,19 @@
 var PASSTHROUGHS = [
         "getSource",
         "getTokens",
+        "getTokensBefore",
+        "getTokenBefore",
+        "getTokensAfter",
+        "getTokenAfter",
+        "getFirstTokens",
+        "getFirstToken",
+        "getLastTokens",
+        "getLastToken",
         "getComments",
         "getAncestors",
         "getScope",
-        "getJSDocComment"
+        "getJSDocComment",
+        "getFilename"
     ];
 
 //------------------------------------------------------------------------------
@@ -41,9 +50,10 @@ var PASSTHROUGHS = [
  * @constructor
  * @param {string} ruleId The ID of the rule using this object.
  * @param {eslint} eslint The eslint object.
+ * @param {number} severity The configured severity level of the rule.
  * @param {array} options the configuration information to be added to the rule
  */
-function RuleContext(ruleId, eslint, options) {
+function RuleContext(ruleId, eslint, severity, options) {
 
     /**
      * The read-only ID of the rule.
@@ -69,14 +79,15 @@ function RuleContext(ruleId, eslint, options) {
     /**
      * Passthrough to eslint.report() that automatically assigns the rule ID.
      * @param {ASTNode} node The AST node related to the message.
+     * @param {Object=} location The location of the error.
      * @param {string} message The message to display to the user.
      * @param {Object} opts Optional template data which produces a formatted message
      *     with symbols being replaced by this object's values.
      * @param {Object} related Optional related token or node.
      * @returns {void}
      */
-    this.report = function(node, message, opts, related) {
-        eslint.report(ruleId, node, message, opts, related);
+    this.report = function(node, location, message, opts, related) {
+        eslint.report(ruleId, severity, node, location, message, opts, related);
     };
 
 }
@@ -87,5 +98,6 @@ RuleContext.prototype = {
 
 module.exports = RuleContext;
 
-    return module.exports;
+ return module.exports;
 }));
+

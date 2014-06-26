@@ -15,10 +15,10 @@
 }(this, function(require, exports, module) {
 module.exports = {
     "builtin": {
-        "NaN"                : false,
-        "Infinity"           : false,
-        "undefined"          : false,
-        "eval"               : false,
+        "NaN": false,
+        "Infinity": false,
+        "undefined": false,
+        "eval": false,
 
         "parseFloat"         : false,
         "parseInt"           : false,
@@ -75,6 +75,7 @@ module.exports = {
             "clearTimeout"         : false,
             "close"                : false,
             "closed"               : false,
+            "console"              : false,
             "crypto"               : false,
             "defaultStatus"        : false,
             "devicePixelRatio"     : false,
@@ -369,15 +370,6 @@ module.exports = {
             "clearInterval" : false,
             "setImmediate"  : false,
             "clearImmediate": false
-        },
-
-        "rules": {
-            "no-catch-shadow": 0,
-            "no-console": 0,
-            "no-global-strict": 0,
-            "no-mixed-requires": 2,
-            "no-path-concat": 2,
-            "no-process-exit": 2
         }
     },
 

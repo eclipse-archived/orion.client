@@ -8,34 +8,23 @@
 // Helper Functions
 //------------------------------------------------------------------------------
 
-function getMessageType(message, rules) {
-
-    // TODO: Get rule severity in a better way
-    var severity = null;
-
-    if (message.fatal) {
+function getMessageType(message) {
+    if (message.fatal || message.severity === 2) {
         return "Error";
+    } else {
+        return "Warning";
     }
-
-    severity = rules[message.ruleId][0] || rules[message.ruleId];
-
-    if (severity === 2) {
-        return "Error";
-    }
-
-    return "Warning";
 }
 
 
 //------------------------------------------------------------------------------
 // Public Interface
 //------------------------------------------------------------------------------
-/* global module */
-module.exports = function(results, config) {
+
+module.exports = function(results) {
 
     var output = "",
-        total = 0,
-        rules = config.rules || {};
+        total = 0;
 
     results.forEach(function(result) {
 
@@ -45,9 +34,13 @@ module.exports = function(results, config) {
         messages.forEach(function(message) {
 
             output += result.filePath + ": ";
-            output += "line " + (message.line || 0) +  ", col " +
-                (message.column || 0) + ", " + getMessageType(message, rules);
-            output += " - " + message.message + (message.ruleId ? " (" + message.ruleId + ")" : "") + "\n";
+            output += "line " + (message.line || 0);
+            output += ", col " + (message.column || 0);
+            output += ", " + getMessageType(message);
+            output += " - " + message.message;
+            output += message.ruleId ? " (" + message.ruleId + ")" : "";
+            output += "\n";
+            
         });
 
     });

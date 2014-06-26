@@ -3,3 +3,4 @@ test.js
 coverage/
 npm-debug.log
 .DS_Store
+tmp/

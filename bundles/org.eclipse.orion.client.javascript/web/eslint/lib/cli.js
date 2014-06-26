@@ -10,78 +10,36 @@
  * exit codes. This allows other programs to use the CLI object and still control
  * when the program exits.
  */
-/* global require module console process */
+
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
 
-var options = require("./options"),
-    fs = require("fs"),
+var fs = require("fs"),
     path = require("path"),
+
+    options = require("./options"),
     rules = require("./rules"),
-    eslint = require("./eslint"),   // TODO: More formatters
-    Config = require("./config");
-
-var existsSync = fs.existsSync || path.existsSync;
-
+    eslint = require("./eslint"),
+    traverse = require("./util/traverse"),
+    debug = require("debug"),
+    Config = require("./config"),
+    IgnoredPaths = require("./ignored-paths");
 
 //------------------------------------------------------------------------------
 // Helpers
 //------------------------------------------------------------------------------
 
 var results = [];
+debug = debug("eslint:cli");
 
-function isDirectory(name){
-    try {
-        return fs.statSync(name).isDirectory();
-    } catch (ex) {
-        return false;
-    }
-}
-
-function getFiles(dir, configHelper){
-    var files = [];
-
-    try {
-        fs.statSync(dir);
-    } catch (ex){
-        /* istanbul ignore next too hard to make fs.stat fail */
-        return [];
-    }
-
-    function traverse(dir, stack){
-        stack.push(dir);
-        try {
-            configHelper.cacheExclusions(path.join.apply(path, stack));
-        } catch(e) {
-            /* istanbul ignore next Error handling doesn't need testing */
-            console.log(e.message);
-        }
-        fs.readdirSync(path.join.apply(path, stack)).forEach(function(file){
-            var filePath = path.join.apply(path, stack.concat([file])),
-                stat = fs.statSync(filePath);
-
-            //if this file or directory is excluded from linting, skip over it.
-            if (configHelper.checkForExclusion(path.resolve(filePath))) {
-                return;
-            }
-
-            if (file[0] === ".") {
-                return;
-            } else if (stat.isFile() && /\.js$/.test(file)){
-                files.push(filePath);
-            } else if (stat.isDirectory()){
-                traverse(file, stack);
-            }
-        });
-        stack.pop();
-    }
-
-    traverse(dir, []);
-
-    return files;
-}
-
+/**
+ * Stores the messages for a particular file.
+ * @param {string} filename The name of the file.
+ * @param {Object[]} messages The messages to store for the file.
+ * @returns {void}
+ * @private
+ */
 function storeResults(filename, messages) {
     results.push({filePath: filename, messages: messages});
 }
@@ -96,24 +54,22 @@ function printResults(config) {
     var formatter,
         formatterPath,
         output;
-
-    if (existsSync(path.resolve(process.cwd(), config.format))) {
+    if (fs.existsSync(path.resolve(process.cwd(), config.format))) {
         formatterPath = path.resolve(process.cwd(), config.format);
     } else {
         formatterPath = "./formatters/" + config.format;
     }
-
     try {
         formatter = require(formatterPath);
-        output = formatter(results, config);
-        if (output) {
-            console.log(output);
-        }
-        return true;
     } catch (ex) {
         console.error("Could not find formatter '%s'.", config.format);
         return false;
     }
+    output = formatter(results, config);
+    if (output) {
+        console.log(output);
+    }
+    return true;
 
 }
 
@@ -133,11 +89,13 @@ function processFile(filename, configHelper) {
         text,
         messages;
 
-    if (existsSync(filePath)) {
+    if (fs.existsSync(filePath)) {
+        debug("Linting " + filePath);
         config = configHelper.getConfig(filePath);
-        text = fs.readFileSync(path.resolve(filename), "utf8").replace(/^#![^\r\n]+[\r\n]/, "");
-        messages = eslint.verify(text, config);
+        text = fs.readFileSync(path.resolve(filename), "utf8");
+        messages = eslint.verify(text, config, filename);
     } else {
+        debug("Couldn't find " + filePath);
         messages = [{
             fatal: true,
             message: "Could not find file at '" + filePath + "'."
@@ -149,20 +107,13 @@ function processFile(filename, configHelper) {
 
     // count all errors and return the total
     return messages.reduce(function(previous, message) {
-        var severity = null;
 
-        if (message.fatal) {
-            return previous + 1;
-        }
-
-        severity = config.rules[message.ruleId][0] ||
-                config.rules[message.ruleId];
-
-        if (severity === 2) {
+        if (message.fatal || message.severity === 2) {
             return previous + 1;
         }
 
         return previous;
+        
     }, 0);
 }
 
@@ -174,21 +125,35 @@ function processFile(filename, configHelper) {
  */
 function processFiles(files, configHelper) {
 
-    var fullFileList = [],
-        errors = 0;
+    var errors = 0,
+        ignoredPaths = IgnoredPaths.load(configHelper.options);
 
-    files.forEach(function(file) {
+    traverse({
+        files: files
+    }, function(filename) {
 
-        if (isDirectory(file)) {
-            fullFileList = fullFileList.concat(getFiles(file, configHelper));
-        } else {
-            fullFileList.push(file);
+        debug("Processing " + filename);
+
+        if (path.extname(filename) === ".js") {
+
+            if (configHelper.options.force || !ignoredPaths.contains(filename)) {
+
+                errors += processFile(filename, configHelper);
+
+            } else if (files.indexOf(filename) > -1) {
+
+                debug("Ignoring " + filename);
+                // only warn for files explicitly passes on the command line
+                storeResults(filename, [{
+                    fatal: false,
+                    message: "File ignored because of your .eslintignore file. Use --no-ignore to override."
+                }]);
+
+            }
+
         }
-    });
 
-    errors = fullFileList.reduce(function(previous, file) {
-        return previous + processFile(file, configHelper);
-    }, 0);
+    });
 
     // If the formatter succeeds return validation errors count, otherwise
     // return 1 for the formatter error.
@@ -219,10 +184,10 @@ var cli = {
             result;
 
         try {
-          currentOptions = options.parse(args);
+            currentOptions = options.parse(args);
         } catch (error) {
-          console.error(error.message);
-          return 1;
+            console.error(error.message);
+            return 1;
         }
 
         files = currentOptions._;
@@ -245,7 +210,10 @@ var cli = {
             // TODO: Figure out correct option vs. config for this
             // load rules
             if (currentOptions.rulesdir) {
-                rules.load(currentOptions.rulesdir);
+                currentOptions.rulesdir.forEach(function(rulesdir) {
+                    debug("Loading rules from " + rulesdir);
+                    rules.load(rulesdir);
+                });
             }
 
             result = processFiles(files, configHelper);
