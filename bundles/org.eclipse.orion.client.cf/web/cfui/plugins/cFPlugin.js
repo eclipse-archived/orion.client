@@ -339,27 +339,24 @@ define(['i18n!cfui/nls/messages','require', 'orion/xhr', 'orion/Deferred', 'orio
 	function describeAppVerbose(app) {
 		var name = app.name;
 		var strResult = "\n" + name + ": ";
-		var runningInstances = app.runningInstances;
+		var runningInstances = app.running_instances;
 		var instances = app.instances;
 		if (!runningInstances) {
 			runningInstances = 0;
 		}
 		var percentage = runningInstances / instances * 100;
-		strResult += percentage + "%\n\tplatform: ";
+		strResult += percentage + "%";
 		strResult += "\n\tusage: " + app.memory + "M x ";
 		strResult += runningInstances + " instance(s)";
-		strResult += "\n\turls:";
+		strResult += "\n\turl: ";
 		
-		if (app.urls)
-			app.urls.forEach(function(url) {
-				strResult += "\n\t\t[" + url + "](http://" + url + ")";
-			});
-		/**if (app.services && app.services.length > 0) {
-			strResult += "\n\tservices:";
-			app.services.forEach(function(service) {
-				strResult += "\n\t\t" + service;
-			});
-		}**/
+		if (app.routes && app.routes.length > 0){
+			var host = app.routes[0].host;
+			var domain = app.routes[0].domain.name;
+			var route = host + "." + domain;
+			strResult += "[" + route + "](http://" + route + ")";
+		}
+		
 		return strResult;
 	}
 	
@@ -391,17 +388,20 @@ define(['i18n!cfui/nls/messages','require', 'orion/xhr', 'orion/Deferred', 'orio
 	/** Add cf push command **/
 	var pushImpl = {
 		callback: function(args, context) {
-			return cFService.pushApp(null, args.app, decodeURIComponent(context.cwd)).then(function(result) {
-				if (!result || !result.applications) {
-					return "Application not found";
+			return cFService.pushApp(null, args.app, decodeURIComponent(context.cwd)).then(
+				function(result) {
+					if (!result || !result.App) {
+						return "Application not found";
+					}
+					
+					return cFService.getApp(null, result.App.name).then(function(result) {
+						if (!result) {
+							return "Application not found";
+						}
+						return describeAppVerbose(result);
+					});
 				}
-				var strResult = "";
-				result.applications.forEach(function(item) {
-					var uri = item.uris[0];
-					strResult += "\nApplication " + item.name + " ready at: [" + uri + "](http://" + uri + ")";
-				});
-				return strResult;
-			});
+			);
 		}
 	};
 	
