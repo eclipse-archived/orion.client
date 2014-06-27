@@ -2686,7 +2686,8 @@ var exports = {};
 				return url;
 			},
 			visibleWhen: function(item) {
-				return true;
+				var items = forceArray(item);
+				return items.length !== 0;
 			}
 		});
 		
