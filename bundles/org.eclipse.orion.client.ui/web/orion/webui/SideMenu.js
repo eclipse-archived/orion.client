@@ -198,13 +198,11 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 		},
 		_updateCategoryAnchors: function() {			
 			// treat *-scm and git categories as singleton if a related link exists
-			var scm = "";
-			Object.keys(this._categorizedRelatedLinks).some(function(category) {
+			var scmInScope = [];
+			Object.keys(this._categorizedRelatedLinks).forEach(function(category) {
 				if (category === "git" || category.match(/-scm$/)) {
-					scm = category;
-					return true;
+					scmInScope.push(category);
 				}
-				return false;
 			});
 			
 			Object.keys(this._categorizedAnchors).forEach(function(category) {
@@ -226,7 +224,7 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 				if (this._categorizedRelatedLinks[category]) {
 					links.push.apply(links, this._categorizedRelatedLinks[category]);
 				}
-				if (links.length === 0 || (scm && category !== scm && (category === "git" || category.match(/-scm$/)))) {
+				if (links.length === 0 || (scmInScope.length !== 0 && (category === "git" || category.match(/-scm$/)) && scmInScope.indexOf(category) === -1)) {
 					anchor.href = "";
 					anchor.title = anchor.parentElement.categoryName;
 					anchor.parentElement.style.display = "none";
