@@ -74,8 +74,9 @@ mBootstrap.startup().then(function(core) {
 		new KeyBinding.KeyBinding('h', true, true), new mCommandRegistry.URLBinding("openGitCommit", "commitName")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	
 	//TODO: remove when getting rid of multi repos page
-	commandRegistry.registerCommandContribution("itemLevelCommandsMini", "eclipse.orion.git.pull", 100); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommandsMini", "eclipse.git.deleteClone", 200); //$NON-NLS-1$ //$NON-NLS-0$
+	commandRegistry.registerCommandContribution("itemLevelCommandsMini", "eclipse.orion.git.applyPatch", 100); //$NON-NLS-0$
+	commandRegistry.registerCommandContribution("itemLevelCommandsMini", "eclipse.orion.git.pull", 200); //$NON-NLS-1$ //$NON-NLS-0$
+	commandRegistry.registerCommandContribution("itemLevelCommandsMini", "eclipse.git.deleteClone", 300); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	// object contributions
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.openCloneContent", 100); //$NON-NLS-1$ //$NON-NLS-0$
