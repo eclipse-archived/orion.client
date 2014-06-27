@@ -141,7 +141,13 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 				}, this);
 
 				this._updateCategoryAnchors();
-				this._parentNode.appendChild(sideMenuList);
+				this._show = function() {
+					this._parentNode.appendChild(sideMenuList);
+					this._show = SideMenu.prototype._show;
+				};				
+				window.setTimeout(function() {
+					this._show(); // this._show can be re-assigned
+				}.bind(this), 1000); // we delay rendering to give a chance to set related links
 			}
 
 			if (this._state === CLOSED_STATE) {
@@ -190,7 +196,17 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 			}
 			this.render();
 		},
-		_updateCategoryAnchors: function() {
+		_updateCategoryAnchors: function() {			
+			// treat *-scm and git categories as singleton if a related link exists
+			var scm = "";
+			Object.keys(this._categorizedRelatedLinks).some(function(category) {
+				if (category === "git" || category.match(/-scm$/)) {
+					scm = category;
+					return true;
+				}
+				return false;
+			});
+			
 			Object.keys(this._categorizedAnchors).forEach(function(category) {
 				var anchor = this._categorizedAnchors[category];
 				var links = [];
@@ -210,7 +226,7 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 				if (this._categorizedRelatedLinks[category]) {
 					links.push.apply(links, this._categorizedRelatedLinks[category]);
 				}
-				if (links.length === 0) {
+				if (links.length === 0 || (scm && category !== scm && (category === "git" || category.match(/-scm$/)))) {
 					anchor.href = "";
 					anchor.title = anchor.parentElement.categoryName;
 					anchor.parentElement.style.display = "none";
@@ -229,6 +245,7 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 					anchor.title = bestLink.title;
 				}
 			}, this);
+			this._show();
 		},
 		_updateCategoryNotifications: function() {
 			clearTimeout(this._notificationTimeout);
@@ -261,6 +278,8 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 					});
 				}
 			}, this);
+		},
+		_show : function(){
 		}
 	};
 	return SideMenu;
