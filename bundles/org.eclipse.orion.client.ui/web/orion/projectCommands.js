@@ -292,6 +292,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				tooltip: "Deploy to " + launchConfiguration.Name,
 				id: "orion.launchConfiguration.deploy." + launchConfiguration.ServiceId + launchConfiguration.Name,
 				imageClass: "core-sprite-deploy",
+				isDeployProject: true,
 				callback: function(data) {
 					var item = forceSingleItem(data.items);
 					
