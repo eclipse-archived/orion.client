@@ -313,6 +313,7 @@ exports.GitRepositoryExplorer = (function() {
 			slideout: true,
 			content: '<div id="branchNode"></div>', //$NON-NLS-0$
 			canHide: true,
+			hidden: true,
 			preferenceService: this.preferencesService
 		});
 		var branchNavigator = new mGitBranchList.GitBranchListExplorer({
