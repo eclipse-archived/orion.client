@@ -43,7 +43,7 @@
 			        for(var i = 0; i < len; i++) {
 			            var comment = comments[i];
 			            if(comment.type === 'Block') {
-			                var match = /^\s*(js[l|h]int)\s*(\w*:\w*)+/ig.exec(comment.value);
+			                var match = /^\s*(js[l|h]int)(\s+\w+:\w+)+/ig.exec(comment.value);
 			                if(match) {
 			                    var jslint = match[1];
 			                    if(jslint.length < 1) {
@@ -51,7 +51,7 @@
 			                    }
 			                    var start = 2 + comment.value.indexOf(jslint) + comment.range[0];
 			                    var end = start + jslint.length;
-			                    context.report({type:'comment', range:[start, end]}, 'The \'{{a}}\' directive is unsupported, please use eslint-env.', {a: jslint});
+			                    context.report({type:'BlockComment', range:[start, end]}, 'The \'{{a}}\' directive is unsupported, please use eslint-env.', {a: jslint});
 			                }
 			            }
 			        }

@@ -43,7 +43,8 @@
 			"eslint/tests/lib/rules/semi",
 			"eslint/tests/lib/rules/use-isnan",
 			'eslint/tests/lib/rules/no-unreachable',
-			'eslint/tests/lib/rules/no-fallthrough'
+			'eslint/tests/lib/rules/no-fallthrough',
+			'eslint/tests/lib/rules/no-jslint'
 		], factory);
 	}
 }(this, function() {
