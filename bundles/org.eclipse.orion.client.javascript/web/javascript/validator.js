@@ -28,6 +28,7 @@ define([
 			"no-dupe-keys" : 2, //$NON-NLS-0$
 			"no-eval" : 0, //$NON-NLS-0$
 			"no-extra-semi": 1, //$NON-NLS-0$
+			'no-jslint' : 1,  //$NON-NLS-0$
 			"no-new-array": 1, //$NON-NLS-0$
 			"no-new-func": 1, //$NON-NLS-0$
 			"no-new-object": 1, //$NON-NLS-0$
@@ -312,6 +313,7 @@ define([
 			config.setOption("use-isnan", properties.validate_use_isnan); //$NON-NLS-0$
 			config.setOption("no-unreachable", properties.validate_no_unreachable); //$NON-NLS-0$
 			config.setOption("no-fallthrough", properties.validate_no_fallthrough); //$NON-NLS-0$
+			config.setOption("no-jslint", properties.validate_no_jslint); //$NON-NLS-0$
 		}
 	});
 	return ESLintValidator;

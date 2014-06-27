@@ -39,6 +39,7 @@ define({
 	'undefMember' : 'Undeclared global reference', //$NON-NLS-0$  //$NON-NLS-1$
 	'unnecessarySemis' : 'Unnecessary semicolons', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedParams' : 'Unused parameters', //$NON-NLS-0$  //$NON-NLS-1$
+	'unsupportedJSLint' : 'Unsupported JSLint / JSHint directive',  //$NON-NLS-0$  //$NON-NLS-1$
 	'generateDocName' : 'Generate Element Comment',  //$NON-NLS-0$  //$NON-NLS-1$
 	'generateDocTooltip' : 'Generate a JSDoc-like comment for the selected JavaScript element',  //$NON-NLS-0$  //$NON-NLS-1$
 });
