@@ -600,7 +600,7 @@ define([
 					} else if (item.Type === "ExplorerSelection") {
 						td.colSpan = 2;
 						itemLabel = document.createElement("span"); //$NON-NLS-0$
-						itemLabel.textContent = "All Files";
+						itemLabel.textContent =  messages["SelectAll"];
 						div.appendChild(itemLabel);
 						
 						var actionsArea = document.createElement("div"); //$NON-NLS-0$

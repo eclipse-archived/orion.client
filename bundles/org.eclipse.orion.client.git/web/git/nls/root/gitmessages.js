@@ -220,6 +220,7 @@ define({
 	"Type the commit name (sha1):": "Type the commit name (sha1):",
 	"Search": "Search",
 	"Searching...": "Searching...",
+	"SelectAll": "Select All",
 	"Looking for the commit": "Looking for the commit",
 	"New Branch:": "New Branch:",
 	"No remote selected": "No remote selected",
