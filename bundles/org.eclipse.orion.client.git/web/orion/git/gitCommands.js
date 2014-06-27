@@ -2369,8 +2369,6 @@ var exports = {};
 		
 		var logic = mGitCommitLogic(commitOptions);
 		var commitCallback = logic.perform;
-		var commitMessageParameters = logic.createParameters(newLook);
-		var amendEventListener = logic.amendEventListener;
 		var displayErrorOnStatus = logic.displayErrorOnStatus;
 		
 		function forceArray(item) {
@@ -2491,7 +2489,6 @@ var exports = {};
 			name: newLook ? messages["SmartCommit"] : messages["Commit"], //$NON-NLS-0$
 			tooltip: newLook ? "" : messages["Commit"], //$NON-NLS-0$
 			id: "eclipse.orion.git.commitCommand", //$NON-NLS-0$
-			parameters: commitMessageParameters,
 			callback: function(data) {
 				commitCallback(data).then(function() {
 					refresh();

@@ -345,7 +345,7 @@ exports.GitRepositoryExplorer = (function() {
 			title: messages["ChangedFiles"],
 			slideout: true,
 			content: '<div id="statusNode"></div>', //$NON-NLS-0$
-			canHide: true,
+			canHide: false,
 			preferenceService: this.preferencesService
 		}); 
 		
