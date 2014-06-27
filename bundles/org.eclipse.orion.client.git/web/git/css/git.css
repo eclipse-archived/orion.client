@@ -52,9 +52,20 @@
 	overflow: hidden;
 }
 
+.primaryButton {
+	background-color: #7fa4c0 !important;
+	color: white !important;
+	border: 1px solid #7fa4c0 !important;
+}
+
+.gitCommitMessage .gitCommitMessageExplorerRow {
+	width: calc(100% - 6px);
+	padding: 0px;
+	overflow: hidden;
+}
 
 .gitCommitListSection {
-	background-color: #eee;
+	background-color: #f4f4f4;
 }
 
 .gitCommitListSectionTitle {

@@ -117,6 +117,9 @@ define([
 													}
 													var children = parentItem.children = that._sortBlock(that.getGroups(that.prefix));
 													if (that.prefix === "all") {
+														if (children.length > 0) {
+															children.unshift({Type: "ExplorerSelection", selectable: true});
+														}
 														children.unshift({Type: "CommitMsg", selectable: false});
 													}
 													children.forEach(function(child) {
@@ -155,8 +158,10 @@ define([
 				return prefix + "Root"; //$NON-NLS-0$
 			} else if (mGitUIUtil.isChange(item)) {
 				return  prefix + item.type + item.name; 
+			} else if (item.Type === "ExplorerSelection" || item.Type === "CommitMsg") {
+				return prefix + item.Type;
 			} else {
-				return  prefix + + item.type + item.DiffLocation;
+				return  prefix + item.type + item.DiffLocation;
 			}
 		},
 		getModelType: function(groupItem, groupName) {
@@ -192,7 +197,7 @@ define([
 
 				// we have the same file at "Modified" ,"Added",
 				// "Changed","Missing" groups
-				if (itemsInDetectGroup.length === (conflictPattern.length - 2)) {
+				if (itemsInDetectGroup.length === Math.max(0, conflictPattern.length - 2)) {
 					baseGroup[i].Conflicting = conflictPattern[0];
 					for (var k = 0; k < itemsInDetectGroup.length; k++) {
 						itemsInDetectGroup[k].Conflicting = "Hide"; //$NON-NLS-0$
@@ -284,6 +289,7 @@ define([
 		this.handleError = options.handleError;
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;
+		this.explorerSelectionScope = "explorerSelection";  //$NON-NLS-0$
 		this.createSelection();
 		this.createCommands();
 		if (this.prefix !== "all") {
@@ -349,7 +355,7 @@ define([
 				model.getRoot(function(root) {
 					model.getChildren(root, function(children) {
 						// -1 for the commit message item
-						result = children.length - 1;
+						result = Math.max(0, children.length - 2);
 					});
 				});
 			}
@@ -359,9 +365,9 @@ define([
 			mExplorer.createExplorerCommands(this.commandService);
 			var actionsNodeScope = this.section.actionsNode.id;
 			var selectionNodeScope = this.section.selectionNode.id;
-			var titleActionsNode = this.section.titleActionsNode.id;
-			this.commandService.registerCommandContribution(actionsNodeScope, "orion.explorer.expandAll", 200); //$NON-NLS-0$
-			this.commandService.registerCommandContribution(actionsNodeScope, "orion.explorer.collapseAll", 300); //$NON-NLS-0$
+			var explorerSelectionScope = this.explorerSelectionScope;
+			this.commandService.registerCommandContribution(explorerSelectionScope, "orion.explorer.expandAll", 200); //$NON-NLS-0$
+			this.commandService.registerCommandContribution(explorerSelectionScope, "orion.explorer.collapseAll", 300); //$NON-NLS-0$
 			if (this.prefix === "staged") {
 				this.commandService.addCommandGroup(actionsNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.commitCommand"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
 				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commitCommand", 100, "eclipse.gitCommitGroup"); //$NON-NLS-0$ 	550
@@ -377,11 +383,11 @@ define([
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showStagedPatchCommand", 100); //$NON-NLS-0$
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 200); //$NON-NLS-0$
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitCommand", 300); //$NON-NLS-0$
-				this.commandService.registerCommandContribution(titleActionsNode, "orion.explorer.selectAll", 100); //$NON-NLS-0$
-				this.commandService.registerCommandContribution(titleActionsNode, "orion.explorer.deselectAllCommand", 100); //$NON-NLS-0$
-				
+			
+				if (lib.node(explorerSelectionScope)) {
+					this.commandService.renderCommands(explorerSelectionScope, explorerSelectionScope, this, this, "button"); //$NON-NLS-0$	
+				}
 				this.commandService.renderCommands(selectionNodeScope, selectionNodeScope, [], this, "button", {"Clone" : this.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
-				this.commandService.renderCommands(titleActionsNode, titleActionsNode, this, this, "button"); //$NON-NLS-0$
 			}
 		
 			this.commandService.renderCommands(actionsNodeScope, actionsNodeScope, this, this, "button"); //$NON-NLS-0$	
@@ -394,7 +400,7 @@ define([
 			var selectAllCommand = new mCommands.Command({
 				tooltip : messages["Select all"],
 				imageClass : "core-sprite-check", //$NON-NLS-0$
-				id: "orion.explorer.selectAll", //$NON-NLS-0$
+				id: "orion.explorer.selectAllCommandChangeList", //$NON-NLS-0$
 				visibleWhen : function(item) {
 					var result = false;
 					that.model.getRoot(function(root) {
@@ -418,7 +424,7 @@ define([
 			var deselectAllCommand = new mCommands.Command({
 				tooltip : messages["Deselect all"],
 				imageClass : "core-sprite-check_on", //$NON-NLS-0$
-				id: "orion.explorer.deselectAllCommand", //$NON-NLS-0$
+				id: "orion.explorer.deselectAllCommandChangeList", //$NON-NLS-0$
 				visibleWhen : function(item) {
 					var result = false;
 					that.model.getRoot(function(root) {
@@ -426,7 +432,7 @@ define([
 							var selection = root.children.filter(function(item) {
 								return that.model.isStaged(item.type);
 							});
-							result = selection.length === (root.children.length - 1);
+							result = selection.length === Math.max(0, root.children.length - 2);
 						}
 					});
 					return result;
@@ -444,6 +450,7 @@ define([
 			var precommitCommand = new mCommands.Command({
 				tooltip: messages["Commit"], //$NON-NLS-0$
 				id: "eclipse.orion.git.precommitCommand", //$NON-NLS-0$
+				extraClass: "primaryButton", //$NON-NLS-0$
 				callback: function(data) {
 					var name = that.messageTextArea.value.trim();
 					var amend = that.amendCheck.checked;
@@ -500,7 +507,7 @@ define([
 	GitChangeListRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(GitChangeListRenderer.prototype, {
 		getCellElement: function(col_no, item, tableRow){
-			var div, td, navGridHolder;
+			var div, td, navGridHolder, itemLabel, diffActionWrapper;
 			var explorer = this.explorer;
 			switch (col_no) {
 				case 0:
@@ -509,6 +516,7 @@ define([
 					div.className = "sectionTableItem"; //$NON-NLS-0$
 					td.appendChild(div);
 					if (item.Type === "CommitMsg") {
+						tableRow.classList.add("gitCommitListSection");
 						var outerDiv = document.createElement("div"); //$NON-NLS-0$
 						outerDiv.id = "gitCommitMessage";
 						outerDiv.className = "gitCommitMessage toolComposite";
@@ -568,7 +576,7 @@ define([
 						this.getExpandImage(tableRow, div);
 	
 						navGridHolder = explorer.getNavDict() ? explorer.getNavDict().getGridNavHolder(item, true) : null;
-						var diffActionWrapper = document.createElement("span"); //$NON-NLS-0$
+						diffActionWrapper = document.createElement("span"); //$NON-NLS-0$
 						diffActionWrapper.id = explorer.prefix + item.name + item.type + "DiffActionWrapper"; //$NON-NLS-0$
 						diffActionWrapper.className = "sectionExplorerActions"; //$NON-NLS-0$
 						div.appendChild(diffActionWrapper);
@@ -586,9 +594,20 @@ define([
 						});
 						div.appendChild(icon);
 	
-						var itemLabel = document.createElement("span"); //$NON-NLS-0$
+						itemLabel = document.createElement("span"); //$NON-NLS-0$
 						itemLabel.textContent = item.name;
 						div.appendChild(itemLabel);
+					} else if (item.Type === "ExplorerSelection") {
+						td.colSpan = 2;
+						itemLabel = document.createElement("span"); //$NON-NLS-0$
+						itemLabel.textContent = "All Files";
+						div.appendChild(itemLabel);
+						
+						var actionsArea = document.createElement("div"); //$NON-NLS-0$
+						actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$
+						actionsArea.id = explorer.explorerSelectionScope;
+						div.appendChild(actionsArea);
+						explorer.commandService.renderCommands(actionsArea.id, actionsArea, explorer, explorer, "button"); //$NON-NLS-0$	
 					} else {
 						// render the compare widget
 						td.colSpan = 2;
@@ -596,7 +615,7 @@ define([
 						actionsWrapper.className = "sectionExplorerActions"; //$NON-NLS-0$
 						div.appendChild(actionsWrapper);
 
-						var diffActionWrapper = document.createElement("span"); //$NON-NLS-0$
+						diffActionWrapper = document.createElement("span"); //$NON-NLS-0$
 						var prefix = explorer.prefix + item.parent.name + item.parent.type;
 						diffActionWrapper.id = prefix + "DiffActionWrapperChange"; //$NON-NLS-0$
 						actionsWrapper.appendChild(diffActionWrapper);
@@ -637,14 +656,26 @@ define([
 			}
 		},
 		onCheckedFunc: function(rowId, checked, manually, item) {
-			//stage or unstage
-			if (checked) {
-				this.explorer.commandService.runCommand("eclipse.orion.git.stageCommand", [item], this.explorer);
+			if (item.Type === "ExplorerSelection") {
+				if (checked) {
+					this.explorer.commandService.runCommand("orion.explorer.selectAllCommandChangeList", this.explorer, this.explorer);
+				} else {
+					this.explorer.commandService.runCommand("orion.explorer.deselectAllCommandChangeList", this.explorer, this.explorer);
+				}
 			} else {
-				this.explorer.commandService.runCommand("eclipse.orion.git.unstageCommand", [item], this.explorer);
+				//stage or unstage
+				if (checked) {
+					this.explorer.commandService.runCommand("eclipse.orion.git.stageCommand", [item], this.explorer);
+				} else {
+					this.explorer.commandService.runCommand("eclipse.orion.git.unstageCommand", [item], this.explorer);
+				}
 			}
 		}, 
 		getCheckedFunc: function(item){
+			if (item.Type === "ExplorerSelection") {
+				return !this.explorer.commandService.findCommand("orion.explorer.selectAllCommandChangeList").visibleWhen(this.explorer);
+			}
+			
 			return this.explorer.model.isStaged(item.type);
 		}
 	});

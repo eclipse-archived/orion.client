@@ -372,6 +372,9 @@ define([
 		} else {
 			element = document.createElement("button"); //$NON-NLS-0$
 			element.className = "orionButton"; //$NON-NLS-0$
+			if (command.extraClass) {
+				element.classList.add(command.extraClass);
+			}
 			if (useImage) {
 				if (command.hasImage()) {
 					_addImageToElement(command, element, id);
@@ -622,6 +625,7 @@ define([
 			this.imageClass = options.imageClass;   // points to the location in a sprite
 			this.addImageClassToElement = options.addImageClassToElement; // optional boolean if true will add the image class to the 
 																		// element's class list
+			this.extraClass = options.extraClass;
 			this.selectionClass = options.selectionClass;
 			this.spriteClass = options.spriteClass || "commandSprite"; // defines the background image containing sprites //$NON-NLS-0$
 			this.visibleWhen = options.visibleWhen;

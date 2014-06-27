@@ -1240,6 +1240,7 @@ var exports = {};
 		var syncCommand = new mCommands.Command({
 			name : messages["Sync"],
 			tooltip: messages["SyncTooltip"],
+			extraClass: "primaryButton",  //$NON-NLS-0$
 //			imageClass: "git-sprite-push", //$NON-NLS-0$
 //			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.sync", //$NON-NLS-0$
