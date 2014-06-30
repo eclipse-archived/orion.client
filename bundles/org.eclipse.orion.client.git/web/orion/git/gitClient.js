@@ -253,29 +253,6 @@ eclipse.GitService = (function() {
 			return clientDeferred;
 		},
 		
-		ignorePath: function(gitIgnoreURI, paths){
-			var service = this;
-			
-			var clientDeferred = new Deferred();
-			xhr("PUT", gitIgnoreURI, { 
-				headers : { 
-					"Orion-Version" : "1",
-					"Content-Type" : contentType
-				},
-				timeout : 15000,
-				handleAs : "json", //$NON-NLS-0$
-				data: JSON.stringify({
-					"Path" : paths, //$NON-NLS-0$
-				})
-			}).then(function(result) {
-				service._getGitServiceResponse(clientDeferred, result);
-			}, function(error){
-				service._handleGitServiceResponseError(clientDeferred, error);
-			});
-
-			return clientDeferred;
-		},
-		
 		commitAll: function(location , message , body){
 			var service = this;
 			
