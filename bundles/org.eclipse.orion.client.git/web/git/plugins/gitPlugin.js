@@ -414,9 +414,9 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 								Value: clone.GitUrl
 							},
 							{
-								Name: "Git Status",
-								Value: "Git Status",
-								Href: "{+OrionHome}/git/git-status.html#" + item.Git.StatusLocation
+								Name: "Git Repository",
+								Value: "Git Repository",
+								Href: "{+OrionHome}/git/git-repository.html#" + item.Git.CloneLocation
 							}
 						]
 					}
