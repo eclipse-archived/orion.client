@@ -183,7 +183,8 @@ define([
 						parent: detailsView,
 						commit: commit,
 						showTags: false,
-						commitLink: false
+						commitLink: false,
+						fullMessage: true
 					});
 					info.display();
 					
