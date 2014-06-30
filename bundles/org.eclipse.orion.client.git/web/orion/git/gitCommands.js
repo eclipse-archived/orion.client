@@ -2640,6 +2640,52 @@ var exports = {};
 
 		commandService.addCommand(checkoutStagedCommand);
 
+		var ignoreCommand = new mCommands.Command({
+			name: messages["Ignore"],
+			tooltip: messages["Add all the selected files to .gitignore file(s)"],
+			imageClass: "git-sprite-checkout", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			id: "eclipse.orion.git.ignoreCommand", //$NON-NLS-0$
+			callback: function(data) {
+				
+				var items = data.items;
+				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				
+				var paths = [];
+				for (var i = 0; i < items.length; i++) {
+					paths[i] = items[i].name;
+				}
+				
+				var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").ignorePath(data.userData.Clone.IgnoreLocation, paths), messages["Writting .gitignore rules"]); //$NON-NLS-0$ //$NON-NLS-1$
+				progressService.createProgressMonitor(
+					deferred,
+					messages["Writting .gitignore rules"]);
+				
+				return deferred.then(
+					function(jsonData){
+						
+						deferred = progress.progress(serviceRegistry.getService("orion.git.provider").unstage(data.userData.Clone.IndexLocation, paths), messages['Resetting local changes']); //$NON-NLS-0$ //$NON-NLS-1$
+						progressService.createProgressMonitor(
+							deferred,
+							messages['Resetting local changes']);
+						
+						return deferred.then(function(jsonData){
+							newLook? data.handler.changedItem(items) : explorer.changedItem(items);
+						}, displayErrorOnStatus);
+						
+					}, displayErrorOnStatus
+				);
+			},
+			visibleWhen: function(item) {
+				var items = forceArray(item);
+				ignoreCommand.name = i18nUtil.formatMessage(messages["Ignore"], items.length);
+				return true;
+			}
+		});
+		
+		commandService.addCommand(ignoreCommand);
+		
 		var showPatchCommand = new mCommands.Command({
 			name: messages["Show Patch"],
 			tooltip: messages["Show workspace changes as a patch"],
