@@ -20,8 +20,6 @@ define([
 	var interestedUnstagedGroup = ["Missing", "Modified", "Untracked", "Conflicting"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var interestedStagedGroup = ["Added", "Changed", "Removed"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	
-	var statusUILocation = "git/git-status.html"; //$NON-NLS-0$
-
 	function isStaged(change) {
 		for (var i = 0; i < interestedStagedGroup.length; i++) {
 			if (change.type === interestedStagedGroup[i]) {
@@ -136,7 +134,6 @@ define([
 	}
 
 	return {
-		statusUILocation: statusUILocation,
 		isStaged: isStaged,
 		isUnstaged: isUnstaged,
 		isChange: isChange,
