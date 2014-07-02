@@ -16,6 +16,7 @@
 
 .entity.name.function, .entity.name.type, .entity-name-function, .entity-name-type {
 	font-weight: bold;
+	color: #3f7f7f;
 }
 
 .entity.name, .entity-name-tag {
@@ -158,10 +159,6 @@
 
 .variable.other {
 	color: #E038AD;
-}
-
-.method {
-	color: #FFA500;
 }
 
 /* CodeMirror styles */
