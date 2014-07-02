@@ -160,6 +160,10 @@
 	color: #E038AD;
 }
 
+.method {
+	color: #FFA500;
+}
+
 /* CodeMirror styles */
 .cm-meta { color: #00008F; }
 .cm-keyword { font-weight: bold; color: #7F0055; }
