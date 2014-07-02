@@ -95,22 +95,6 @@ define([
 					var isSetext = tokens[i].style === "setext"; //text[index] !== "#"; //$NON-NLS-0$
 					var lineEnd = this._getLineEnd(text, index, model);
 					end = isSetext ? this._getLineEnd(text, index, model, 1) : lineEnd;
-
-					/*
-					 * marked considers setext-style headers to end at the last non-'-' or '='
-					 * character on the underline line.  Determine this index, and if it preceeds
-					 * the current end value by more than the newline then move end back to this
-					 * index.
-					 */
-					if (isSetext) {
-						var underlineLine = text.substring(lineEnd, end);
-						this._setextUnderlineRegex.lastIndex = 0;
-						var match = this._setextUnderlineRegex.exec(underlineLine);
-						if (match[0].length < underlineLine.length) {
-							end -= underlineLine.length - match[0].length;
-						}
-					}
-
 					bounds = {
 						start: index,
 						contentStart: index + (isSetext ? 0 : tokens[i].depth + 1),
@@ -133,7 +117,7 @@ define([
 						var lastIndex = 0;
 						while (true) {
 							this._htmlNewlineRegex.lastIndex = lastIndex;
-							match = this._htmlNewlineRegex.exec(tokens[i].text);
+							var match = this._htmlNewlineRegex.exec(tokens[i].text);
 							if (match) {
 								newlineCount++;
 								lastIndex = match.index + 1;
@@ -843,7 +827,6 @@ define([
 		_htmlNewlineRegex: /\n\s*\S[\s\S]*$/g,
 		_newlineRegex: /\n/g,
 		_orderedListRegex: /\d+\.[ \t]/g,
-		_setextUnderlineRegex: /^[ \t]*[-=]+[ \t]*\r?\n?/g,
 		_whitespaceRegex: /\s+/g
 	};
 
