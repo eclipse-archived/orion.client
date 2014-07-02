@@ -302,6 +302,9 @@ define([
 			window.location.href = uriTemplate.expand({resource: resource, params: input});
 			this.sidebar.setViewMode("nav"); //$NON-NLS-0$
 		},
+		_getPopupRoot: function() {
+			return this.fileMetadata;
+		},
 		changedItem: function(item, forceExpand){
 			if(!item || !this.model){
 				return this.display(this.fileMetadata, true);
