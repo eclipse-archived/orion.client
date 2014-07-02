@@ -201,7 +201,7 @@ define([
 					commandRegistry.registerCommandContribution(fileActionsScope, command.id, position++, "orion.menuBarFileGroup/orion.newContentGroup/orion.newDependency"); //$NON-NLS-0$
 				});
 
-				commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy As"], null, null, null, messages["Deploy As"], "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+				commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy As"], null, null, null, messages["Deploy As"], "dropdownSelection", true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
 				this.deployCommands = ProjectCommands.getDeployProjectCommands(commandRegistry);
 				if(this.deployCommands && this.deployCommands.length>0){
 					this.defaultDeployCommand = this.deployCommands[0];
