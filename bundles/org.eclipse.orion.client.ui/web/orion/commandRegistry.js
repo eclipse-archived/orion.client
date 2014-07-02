@@ -1007,7 +1007,7 @@ define([
 					var self = this;
 					menuButton.onclick = function(evt){
 						var bounds = lib.bounds(dropdownArrow);
-						if (evt.clientX >= bounds.left && created.dropdown) {
+						if ((evt.clientX >= bounds.left && created.dropdown) || pretendDefaultActionId === true) {
 							created.dropdown.toggle(evt);
 						} else {
 							self._invoke(defaultInvocation);
