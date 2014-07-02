@@ -302,7 +302,7 @@ define([
 			window.location.href = uriTemplate.expand({resource: resource, params: input});
 			this.sidebar.setViewMode("nav"); //$NON-NLS-0$
 		},
-		_getPopupRoot: function() {
+		getTreeRoot: function() {
 			return this.fileMetadata;
 		},
 		changedItem: function(item, forceExpand){

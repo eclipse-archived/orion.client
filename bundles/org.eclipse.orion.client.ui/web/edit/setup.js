@@ -132,7 +132,7 @@ var exports = {};
 			if (explorer) {
 				visible = explorer.isCommandsVisible();
 				selection = explorer.selection;
-				treeRoot = explorer.treeRoot;
+				treeRoot = explorer.getTreeRoot();
 			}
 			var metadata = this.inputManager.getFileMetadata();
 			var commandRegistry = this.commandRegistry, serviceRegistry = this.serviceRegistry;

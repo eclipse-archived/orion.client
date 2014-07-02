@@ -387,7 +387,7 @@ define([
 			}
 		},
 		
-		_getPopupRoot: function() {
+		getTreeRoot: function() {
 			return this.treeRoot;
 		},
 		
@@ -400,7 +400,7 @@ define([
 			
 			if (!selections || (Array.isArray(selections) && !selections.length)) {
 				//no selections, use this.treeRoot to determine commands
-				items = this._getPopupRoot();
+				items = this.getTreeRoot();
 			}
 			this.commandRegistry.renderCommands(this.contextMenuActionsScope, contextMenuNode, items, this, "menu");  //$NON-NLS-0$	
 		},

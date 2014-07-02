@@ -197,7 +197,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		}
 		
 		if (selectionToolbarId) {
-			updateSelectionTools(null, explorer ? explorer.treeRoot : null);
+			updateSelectionTools(null, explorer ? explorer.getTreeRoot() : null);
 		}
 
 		// Attach selection listener once, keep forever
@@ -205,7 +205,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			selectionListenerAdded = true;
 			var selectionService = registry.getService("orion.page.selection"); //$NON-NLS-0$
 			selectionService.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-				updateSelectionTools(selectionService, explorer ? explorer.treeRoot : null);
+				updateSelectionTools(selectionService, explorer ? explorer.getTreeRoot() : null);
 			});
 		}
 	};
