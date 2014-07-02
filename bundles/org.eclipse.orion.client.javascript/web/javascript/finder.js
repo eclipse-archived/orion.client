@@ -189,6 +189,10 @@ define([
 				case Estraverse.Syntax.WithStatement:
                     this.checkId(node.object);
                     break;
+                case Estraverse.Syntax.ThrowStatement: {
+                    this.checkId(node.argument);
+                    break;
+                }
 			}
 		},
 		

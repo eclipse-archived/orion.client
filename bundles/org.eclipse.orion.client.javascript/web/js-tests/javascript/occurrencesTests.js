@@ -1983,5 +1983,52 @@ define([
 			});
 		});
 		
+		/**
+		 * Tests throw statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438402
+		 */
+		it('test_throwStatement1', function() {
+			editorContext.text = "var a; throw a;";
+			return occurrences.computeOccurrences(editorContext, setContext(4, 4)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:13, end:14}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests throw statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438402
+		 */
+		it('test_throwStatement2', function() {
+			editorContext.text = "var a; function f() { if(a) { throw a; }}";
+			return occurrences.computeOccurrences(editorContext, setContext(25, 25)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:25, end:26}, {start:36, end:37}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests throw statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438402
+		 */
+		it('test_throwStatement3', function() {
+			editorContext.text = "var a; function f() { if(a) { throw a; }}";
+			return occurrences.computeOccurrences(editorContext, setContext(36, 36)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:25, end:26}, {start:36, end:37}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
 	});
 });
