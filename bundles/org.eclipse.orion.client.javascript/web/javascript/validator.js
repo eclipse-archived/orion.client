@@ -129,7 +129,6 @@ define([
 			}
 		}
 		var prob = {
-		    nls: 'javascript/nls/problems',  //$NON-NLS-0$
 		    descriptionKey: e.ruleId,
 		    descriptionArgs: e.args,
 			description: e.message,
