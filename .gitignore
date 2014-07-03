@@ -1,8 +1,6 @@
 /.project
-bin
-
-# Maven artifacts
-target/
+/*/*/bin/
+/*/*/target/
 
 # JSDoc
 /doc/org.eclipse.orion.doc.isv/jsdoc/files.html
