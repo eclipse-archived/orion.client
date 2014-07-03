@@ -41,8 +41,13 @@
 	border: 1px solid #ddd;
 }
 
+.gitCommitMessage .gitCommitMessageTopRow.invalidCommitMessage {
+	background-color: rgba(255, 0, 0, 0.1);
+}
+
 .gitCommitMessage .gitCommitMessageTopRow textarea {
 	width: calc(100% - 10px);
+	background-color: transparent;
 	border-width: 0px;
 }
 

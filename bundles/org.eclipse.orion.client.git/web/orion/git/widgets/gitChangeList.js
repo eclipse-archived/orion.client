@@ -406,10 +406,12 @@ define([
 				visibleWhen : function(item) {
 					var result = false;
 					that.model.getRoot(function(root) {
-						var selection = root.children.filter(function(item) {
-							return !that.model.isStaged(item.type) && mGitUtil.isChange(item);
-						});
-						result = selection.length > 0;
+						if (root.children) {
+							var selection = root.children.filter(function(item) {
+								return !that.model.isStaged(item.type) && mGitUtil.isChange(item);
+							});
+							result = selection.length > 0;
+						}
 					});
 					return result;
 				},
@@ -430,7 +432,7 @@ define([
 				visibleWhen : function(item) {
 					var result = false;
 					that.model.getRoot(function(root) {
-						if (root.children.length > 1) {
+						if (root.children && root.children.length > 1) {
 							var selection = root.children.filter(function(item) {
 								return that.model.isStaged(item.type);
 							});
@@ -450,11 +452,16 @@ define([
 			});
 			
 			var precommitCommand = new mCommands.Command({
-				tooltip: messages["Commit"], //$NON-NLS-0$
+				tooltip: messages["CommitTooltip"], //$NON-NLS-0$
 				id: "eclipse.orion.git.precommitCommand", //$NON-NLS-0$
 				extraClass: "primaryButton", //$NON-NLS-0$
 				callback: function(data) {
 					var name = that.messageTextArea.value.trim();
+					if (!name) {
+						that.messageTextArea.parentNode.classList.add("invalidCommitMessage");
+						that.messageTextArea.select();
+						return;
+					}
 					var amend = that.amendCheck.checked;
 					var changeId = that.changeIDCheck.checked;
 					that.commandService.runCommand("eclipse.orion.git.commitCommand", data.items, data.handler, null, {name: name, amend: amend, changeId: changeId});
@@ -534,6 +541,9 @@ define([
 						textArea.id = "nameparameterCollector";
 						textArea.placeholder = messages["SmartCommit"];
 						textArea.classList.add("parameterInput"); //$NON-NLS-0$
+						textArea.addEventListener("keyup", function() {
+							textArea.parentNode.classList.remove("invalidCommitMessage");
+						});
 						topRow.appendChild(textArea);
 						
 						var bottomRow = document.createElement("div");
