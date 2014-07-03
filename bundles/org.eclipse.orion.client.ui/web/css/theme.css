@@ -310,7 +310,7 @@ a.currentLocation:hover {
 .commandLink {
 	display: inline-block;
 	vertical-align: middle;
-	padding: 5px 0;  /* other commands have 1px plus a border and 4px of padding, so we need 5px */
+	padding: 4px 0 1px;  /* other commands have 1px plus a border and 4px of padding, so we need 5px */
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
