@@ -89,7 +89,7 @@
             		                }
             		            }
             		        }
-			                context.report(reportednode, 'Switch case may be entered by falling through the previous case.');
+			                context.report(reportednode, 'Switch case may be entered by falling through the previous case. If intended, add a new comment //$FALLTHROUGH$ on the line above.');
 			            }
 			        }
 			    }

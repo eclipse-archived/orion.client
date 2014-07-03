@@ -30,7 +30,7 @@
 			var messages = eslint.verify(topic, config);
 			assert.equal(messages.length, 1);
 			assert.equal(messages[0].ruleId, RULE_ID);
-			assert.equal(messages[0].message, "Switch case may be entered by falling through the previous case.");
+			assert.equal(messages[0].message, "Switch case may be entered by falling through the previous case. If intended, add a new comment //$FALLTHROUGH$ on the line above.");
 			assert.equal(messages[0].node.type, "SwitchCase");
 		});
 		it("should flag simple case 2", function() {
@@ -42,7 +42,7 @@
 			var messages = eslint.verify(topic, config);
 			assert.equal(messages.length, 1);
 			assert.equal(messages[0].ruleId, RULE_ID);
-			assert.equal(messages[0].message, "Switch case may be entered by falling through the previous case.");
+			assert.equal(messages[0].message, "Switch case may be entered by falling through the previous case. If intended, add a new comment //$FALLTHROUGH$ on the line above.");
 			assert.equal(messages[0].node.type, "SwitchCase");
 		});
 		it("should flag nested case", function() {
@@ -54,7 +54,7 @@
 			var messages = eslint.verify(topic, config);
 			assert.equal(messages.length, 1);
 			assert.equal(messages[0].ruleId, RULE_ID);
-			assert.equal(messages[0].message, "Switch case may be entered by falling through the previous case.");
+			assert.equal(messages[0].message, "Switch case may be entered by falling through the previous case. If intended, add a new comment //$FALLTHROUGH$ on the line above.");
 			assert.equal(messages[0].node.type, "SwitchCase");
 		});
 		it("should flag default", function() {
@@ -66,7 +66,7 @@
 			var messages = eslint.verify(topic, config);
 			assert.equal(messages.length, 1);
 			assert.equal(messages[0].ruleId, RULE_ID);
-			assert.equal(messages[0].message, "Switch case may be entered by falling through the previous case.");
+			assert.equal(messages[0].message, "Switch case may be entered by falling through the previous case. If intended, add a new comment //$FALLTHROUGH$ on the line above.");
 			assert.equal(messages[0].node.type, "SwitchCase");
 		});
 		it("should not flag break;", function() {
