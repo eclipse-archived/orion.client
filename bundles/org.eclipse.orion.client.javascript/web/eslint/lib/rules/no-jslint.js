@@ -51,7 +51,7 @@
 			                    }
 			                    var start = 2 + comment.value.indexOf(jslint) + comment.range[0];
 			                    var end = start + jslint.length;
-			                    context.report({type:'BlockComment', range:[start, end]}, 'The \'{{a}}\' directive is unsupported, please use eslint-env.', {a: jslint});
+			                    context.report({type:'BlockComment', range:[start, end]}, 'The \'${0}\' directive is unsupported, please use eslint-env.', {0:jslint});
 			                }
 			            }
 			        }

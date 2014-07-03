@@ -56,7 +56,7 @@
 						if ((!flag_funcs && defType === "FunctionName") || (!flag_vars && defType === "Variable")) {  //$NON-NLS-0$  //$NON-NLS-1$
 							return;
 						}
-						context.report(identifier, "'{{name}}' was used before it was defined.", {name: name});
+						context.report(identifier, "'${0}' was used before it was defined.", {0:name});
 					}
 				});
 			}

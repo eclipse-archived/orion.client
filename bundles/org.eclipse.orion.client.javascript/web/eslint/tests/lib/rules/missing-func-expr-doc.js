@@ -164,7 +164,7 @@
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 1);
 				assert.equal(messages[0].ruleId, RULE_ID);
-				assert.equal(messages[0].message, "Missing documentation for function \'f\'");
+				assert.equal(messages[0].message, "Missing documentation for function \'f\'.");
 				assert.equal(messages[0].node.type, "Identifier");
 			});
 			it("for function expression member", function() {
@@ -175,7 +175,7 @@
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 1);
 				assert.equal(messages[0].ruleId, RULE_ID);
-				assert.equal(messages[0].message, "Missing documentation for function \'member\'");
+				assert.equal(messages[0].message, "Missing documentation for function \'member\'.");
 				assert.equal(messages[0].node.type, "Identifier");
 			});
 			it("for function expression literal member", function() {
@@ -186,7 +186,7 @@
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 1);
 				assert.equal(messages[0].ruleId, RULE_ID);
-				assert.equal(messages[0].message, "Missing documentation for function \'member\'");
+				assert.equal(messages[0].message, "Missing documentation for function \'member\'.");
 				assert.equal(messages[0].node.type, "Literal");
 			});
 			it("for inner function expression", function() {
@@ -197,7 +197,7 @@
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 1);
 				assert.equal(messages[0].ruleId, RULE_ID);
-				assert.equal(messages[0].message, "Missing documentation for function \'f\'");
+				assert.equal(messages[0].message, "Missing documentation for function \'f\'.");
 				assert.equal(messages[0].node.type, "Identifier");
 			});
 			it("should include {type: 'decl'} as related object", function() {

@@ -47,7 +47,7 @@
 					}
 					var node = variable.defs[0].name;
 					if (!variable.references.length) {
-						context.report(node, "Parameter '{{name}}' is never used.", {name: node.name}); //$NON-NLS-0
+						context.report(node, "Parameter '${0}' is never used.", {0:node.name}); //$NON-NLS-0
 					}
 				});
 			}

@@ -23,7 +23,7 @@
 	function assertMessages(messages) {
 		messages.forEach(function(message) {
 			assert.equal(message.ruleId, RULE_ID);
-			assert.ok(/Do not use \w+ as a constructor\./.test(message.message), "Has expected message");
+			assert.ok(/Do not use \'\w+\' as a constructor\./.test(message.message), "Has expected message");
 			assert.equal(message.node.type, "Identifier");
 		});
 	}

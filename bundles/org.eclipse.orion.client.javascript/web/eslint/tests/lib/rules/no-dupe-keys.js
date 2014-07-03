@@ -39,7 +39,7 @@
 			var messages = eslint.verify(topic, config);
 			assert.equal(messages.length, 1);
 			assert.equal(messages[0].ruleId, RULE_ID);
-			assert.equal(messages[0].message, "Duplicate object key 'toString'");
+			assert.equal(messages[0].message, "Duplicate object key 'toString'.");
 			assert.equal(messages[0].node.type, "Property");
 		});
 		it("should not flag single literal prototypal property", function() {
@@ -60,7 +60,7 @@
 			var messages = eslint.verify(topic, config);
 			assert.equal(messages.length, 1);
 			assert.equal(messages[0].ruleId, RULE_ID);
-			assert.equal(messages[0].message, "Duplicate object key 'toString'");
+			assert.equal(messages[0].message, "Duplicate object key 'toString'.");
 			assert.equal(messages[0].node.type, "Property");
 		});
 		it("should flag single dupe", function() {
@@ -72,7 +72,7 @@
 			var messages = eslint.verify(topic, config);
 			assert.equal(messages.length, 1);
 			assert.equal(messages[0].ruleId, RULE_ID);
-			assert.equal(messages[0].message, "Duplicate object key 'one'");
+			assert.equal(messages[0].message, "Duplicate object key 'one'.");
 			assert.equal(messages[0].node.type, "Property");
 		});
 		it("should flag single literal dupe", function() {
@@ -84,7 +84,7 @@
 			var messages = eslint.verify(topic, config);
 			assert.equal(messages.length, 1);
 			assert.equal(messages[0].ruleId, RULE_ID);
-			assert.equal(messages[0].message, "Duplicate object key 'one'");
+			assert.equal(messages[0].message, "Duplicate object key 'one'.");
 			assert.equal(messages[0].node.type, "Property");
 		});
 		it("should flag double literal dupe", function() {
@@ -96,7 +96,7 @@
 			var messages = eslint.verify(topic, config);
 			assert.equal(messages.length, 1);
 			assert.equal(messages[0].ruleId, RULE_ID);
-			assert.equal(messages[0].message, "Duplicate object key 'one'");
+			assert.equal(messages[0].message, "Duplicate object key 'one'.");
 			assert.equal(messages[0].node.type, "Property");
 		});
 		it("should flag multi dupe", function() {
@@ -108,10 +108,10 @@
 			var messages = eslint.verify(topic, config);
 			assert.equal(messages.length, 2);
 			assert.equal(messages[0].ruleId, RULE_ID);
-			assert.equal(messages[0].message, "Duplicate object key 'one'");
+			assert.equal(messages[0].message, "Duplicate object key 'one'.");
 			assert.equal(messages[0].node.type, "Property");
 			assert.equal(messages[1].ruleId, RULE_ID);
-			assert.equal(messages[1].message, "Duplicate object key 'two'");
+			assert.equal(messages[1].message, "Duplicate object key 'two'.");
 			assert.equal(messages[1].node.type, "Property");
 		});
 		it("should flag multi dupe of same key", function() {
@@ -123,10 +123,10 @@
 			var messages = eslint.verify(topic, config);
 			assert.equal(messages.length, 2);
 			assert.equal(messages[0].ruleId, RULE_ID);
-			assert.equal(messages[0].message, "Duplicate object key 'one'");
+			assert.equal(messages[0].message, "Duplicate object key 'one'.");
 			assert.equal(messages[0].node.type, "Property");
 			assert.equal(messages[1].ruleId, RULE_ID);
-			assert.equal(messages[1].message, "Duplicate object key 'one'");
+			assert.equal(messages[1].message, "Duplicate object key 'one'.");
 			assert.equal(messages[1].node.type, "Property");
 		});
 		it("should flag multi dupe of multi keys", function() {
@@ -138,16 +138,16 @@
 			var messages = eslint.verify(topic, config);
 			assert.equal(messages.length, 4);
 			assert.equal(messages[0].ruleId, RULE_ID);
-			assert.equal(messages[0].message, "Duplicate object key 'one'");
+			assert.equal(messages[0].message, "Duplicate object key 'one'.");
 			assert.equal(messages[0].node.type, "Property");
 			assert.equal(messages[1].ruleId, RULE_ID);
-			assert.equal(messages[1].message, "Duplicate object key 'two'");
+			assert.equal(messages[1].message, "Duplicate object key 'two'.");
 			assert.equal(messages[1].node.type, "Property");
 			assert.equal(messages[2].ruleId, RULE_ID);
-			assert.equal(messages[2].message, "Duplicate object key 'one'");
+			assert.equal(messages[2].message, "Duplicate object key 'one'.");
 			assert.equal(messages[2].node.type, "Property");
 			assert.equal(messages[3].ruleId, RULE_ID);
-			assert.equal(messages[3].message, "Duplicate object key 'two'");
+			assert.equal(messages[3].message, "Duplicate object key 'two'.");
 			assert.equal(messages[3].node.type, "Property");
 		});
 		describe("kind", function() {

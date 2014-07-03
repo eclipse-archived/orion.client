@@ -17,8 +17,8 @@ define({
 	'sourceOutlineTitle': 'JavaScript source outline',  //$NON-NLS-0$  //$NON-NLS-1$
 	'contentAssist' : 'JavaScript content assist', //$NON-NLS-0$  //$NON-NLS-1$
 	'eslintValidator' : 'JavaScript Validator', //$NON-NLS-0$  //$NON-NLS-1$
-	'curly' : 'Statements not enclosed in braces', //$NON-NLS-0$  //$NON-NLS-1$
-	'eqeqeq' : 'Discouraged \'==\' use', //$NON-NLS-0$  //$NON-NLS-1$
+	'missingCurly' : 'Statements not enclosed in braces', //$NON-NLS-0$  //$NON-NLS-1$
+	'noEqeqeq' : 'Discouraged \'==\' use', //$NON-NLS-0$  //$NON-NLS-1$
 	'noDebugger' : 'Discouraged \'debugger\' statement use', //$NON-NLS-0$  //$NON-NLS-1$
 	'noEval' : 'Discouraged \'eval()\' use', //$NON-NLS-0$  //$NON-NLS-1$
 	'noDupeKeys' : 'Duplicate object keys', //$NON-NLS-0$  //$NON-NLS-1$
@@ -29,10 +29,10 @@ define({
 	'noFallthrough' : 'Switch case fall-through', //$NON-NLS-0$  //$NON-NLS-1$
 	'useBeforeDefine' : 'Member used before definition', //$NON-NLS-0$  //$NON-NLS-1$
 	'newParens' : 'Missing parentheses in constructor call', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-new-array': 'Discouraged \'new Array()\'', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-new-func': 'Discouraged \'new Function()\'', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-new-object': 'Discouraged \'new Object()\'', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-new-wrappers': 'Discouraged wrapper objects', //$NON-NLS-0$  //$NON-NLS-1$
+	'noNewArray': 'Discouraged \'new Array()\'', //$NON-NLS-0$  //$NON-NLS-1$
+	'noNewFunc': 'Discouraged \'new Function()\'', //$NON-NLS-0$  //$NON-NLS-1$
+	'noNewObject': 'Discouraged \'new Object()\'', //$NON-NLS-0$  //$NON-NLS-1$
+	'noNewWrappers': 'Discouraged wrapper objects', //$NON-NLS-0$  //$NON-NLS-1$
 	'missingSemi' : 'Missing semicolons', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedVars' : 'Unused variables', //$NON-NLS-0$  //$NON-NLS-1$
 	'varRedecl' : 'Variable re-declarations', //$NON-NLS-0$  //$NON-NLS-1$

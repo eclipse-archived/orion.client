@@ -98,7 +98,7 @@
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 1);
 				assert.equal(messages[0].ruleId, RULE_ID);
-				assert.equal(messages[0].message, "Missing documentation for function \'f\'");
+				assert.equal(messages[0].message, "Missing documentation for function \'f\'.");
 				assert.equal(messages[0].node.type, "Identifier");
 			});
 			it("for inner function declaration", function() {
@@ -109,7 +109,7 @@
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 1);
 				assert.equal(messages[0].ruleId, RULE_ID);
-				assert.equal(messages[0].message, "Missing documentation for function \'f\'");
+				assert.equal(messages[0].message, "Missing documentation for function \'f\'.");
 				assert.equal(messages[0].node.type, "Identifier");
 			});
 			it("for root node", function() {

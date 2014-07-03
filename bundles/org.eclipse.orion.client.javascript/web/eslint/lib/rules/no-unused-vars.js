@@ -70,10 +70,13 @@
 						return;
 					}
 					var references = getReferences(scope, variable), id = variable.defs[0].node.id;
+					var reason;
 					if (!references.length) {
-						context.report(id, "'{{name}}' is never used.", {name: id.name});
+					    reason = 'never used';
+						context.report(id, "'${0}' is ${1}.", {0:id.name, 1:reason});
 					} else if (!references.some(isRead)) {
-						context.report(id, "'{{name}}' is never read.", {name: id.name});
+					    reason = 'never read';
+						context.report(id, "'${0}' is ${1}.", {0:id.name, 1:reason});
 					}
 				});
 			}

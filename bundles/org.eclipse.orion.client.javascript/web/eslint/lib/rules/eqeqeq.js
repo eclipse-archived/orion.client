@@ -75,10 +75,13 @@
 						return;
 					}
 					var op = node.operator;
+					var expected = null;
 					if (op === "==") {  //$NON-NLS-0$
-						context.report(node, "Expected '===' and instead saw '=='.", null, getOperatorToken(context, node));
+					    expected = '===';
+						context.report(node, "Expected '${0}' and instead saw '${1}'.", {0: expected, 1:op}, getOperatorToken(context, node));
 					} else if (op === "!=") {  //$NON-NLS-0$
-						context.report(node, "Expected '!==' and instead saw '!='.", null, getOperatorToken(context, node));
+					    expected = '!==';
+						context.report(node, "Expected '${0}' and instead saw '${1}'.", {0:expected, 1:op}, getOperatorToken(context, node));
 					}
 				}
 				catch(ex) {

@@ -35,7 +35,7 @@
 		"use strict";  //$NON-NLS-0$
 
 		function reportRedeclaration(node, name) {
-			context.report(node, "'{{name}}' is already defined.", {name: name});
+			context.report(node, "'${0}' is already defined.", {0:name});
 		}
 
 		/**

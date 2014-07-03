@@ -136,6 +136,7 @@ define([
 	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new EslintValidator(astManager),  //$NON-NLS-0$  //$NON-NLS-1$
 		{
 			contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$
+			nls: 'javascript/nls/problems',  //$NON-NLS-0$
 			pid: 'eslint.config'  //$NON-NLS-0$
 		});
 
@@ -158,34 +159,34 @@ define([
 					properties: [
 						{
 							id: "no-new-array", //$NON-NLS-0$
-							nameKey: "no-new-array", //$NON-NLS-0$
+							nameKey: "noNewArray", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "no-new-func", //$NON-NLS-0$
-							nameKey: "no-new-func", //$NON-NLS-0$
+							nameKey: "noNewFunc", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "no-new-object", //$NON-NLS-0$
-							nameKey: "no-new-object", //$NON-NLS-0$
+							nameKey: "noNewObject", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "no-new-wrappers", //$NON-NLS-0$
-							nameKey: "no-new-wrappers", //$NON-NLS-0$
+							nameKey: "noNewWrappers", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{	id: "validate_eqeqeq",  //$NON-NLS-0$
-							nameKey: 'eqeqeq',  //$NON-NLS-0$
+							nameKey: 'noEqeqeq',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
 							defaultValue: warning,
 							options: severities
@@ -239,7 +240,7 @@ define([
 							options: severities
 						},
 						{	id: "validate_curly",  //$NON-NLS-0$
-							nameKey: 'curly',  //$NON-NLS-0$
+							nameKey: 'missingCurly',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
 							defaultValue: ignore,
 							options: severities

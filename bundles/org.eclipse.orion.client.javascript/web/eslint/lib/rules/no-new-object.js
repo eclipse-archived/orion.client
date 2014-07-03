@@ -34,7 +34,7 @@
 	 */
 	module.exports = function(context) {
 
-		return util.createNewBuiltinRule("Object", "Use the object literal notation '{}'.", context); //$NON-NLS-0$
+		return util.createNewBuiltinRule("Object", "Use the object literal notation '{}' or Object.create(null).", context); //$NON-NLS-0$
 
 	};
 

@@ -634,10 +634,14 @@ module.exports = (function() {
             message = location;
         }
 
-        Object.keys(opts || {}).forEach(function (key) {
-            var rx = new RegExp("{{" + escapeRegExp(key) + "}}", "g");
+       /* Object.keys(opts || {}).forEach(function (key) {
+            var rx = new RegExp("\$\{" + escapeRegExp(key) + "\}", "g");
             message = message.replace(rx, opts[key]);
         });
+        */
+		message = message.replace(/\$\{([^\}]+)\}/g, function(str, key) {
+			return opts[key];
+		});
 
         if (isDisabledByReportingConfig(reportingConfig, ruleId, location)) {
             return;
@@ -648,6 +652,7 @@ module.exports = (function() {
             severity: severity,
             node: node,
             message: message,
+            args: opts, //mrennie Orion
             source: api.getSource(node),
             related: typeof related !== "undefined" ? related : null
         });

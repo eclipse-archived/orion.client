@@ -31,7 +31,7 @@
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 1);
 				assert.equal(messages[0].ruleId, RULE_ID);
-				assert.equal(messages[0].message, "Use the object literal notation '{}'.");
+				assert.equal(messages[0].message, "Use the object literal notation '{}' or Object.create(null).");
 				assert.equal(messages[0].node.type, "Identifier");
 			});
 			it("flag when symbol is declared in /*global block", function() {
@@ -43,7 +43,7 @@
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 1);
 				assert.equal(messages[0].ruleId, RULE_ID);
-				assert.equal(messages[0].message, "Use the object literal notation '{}'.");
+				assert.equal(messages[0].message, "Use the object literal notation '{}' or Object.create(null).");
 				assert.equal(messages[0].node.type, "Identifier");
 			});
 			it("flag in inner scope", function() {
@@ -55,7 +55,7 @@
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 1);
 				assert.equal(messages[0].ruleId, RULE_ID);
-				assert.equal(messages[0].message, "Use the object literal notation '{}'.");
+				assert.equal(messages[0].message, "Use the object literal notation '{}' or Object.create(null).");
 				assert.equal(messages[0].node.type, "Identifier");
 			});
 		});

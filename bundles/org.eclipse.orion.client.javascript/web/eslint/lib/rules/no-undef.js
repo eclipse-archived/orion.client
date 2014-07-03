@@ -82,11 +82,14 @@ module.exports = function(context) {
 	
 	            globalScope.through.forEach(function(ref) {
 	                var variable = getDeclaredGlobalVariable(globalScope, ref),
-	                    name = ref.identifier.name;
+	                    name = ref.identifier.name,
+	                    reason;
 	                if (!variable) {
-	                    context.report(ref.identifier, "'{{name}}' is not defined.", { name: name });
+	                    reason = 'not defined';
+	                    context.report(ref.identifier, "'${0}' is ${1}.", {0:name, 1:reason});
 	                } else if (ref.isWrite() && variable.writeable === false) {
-	                    context.report(ref.identifier, "'{{name}}' is read only.", { name: name });
+	                    reason = 'read only';
+	                    context.report(ref.identifier, "'${0}' is ${1}.", {0:name, 1:reason});
 	                }
 	            });
         	}

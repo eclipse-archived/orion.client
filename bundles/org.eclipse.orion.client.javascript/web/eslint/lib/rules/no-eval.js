@@ -48,13 +48,13 @@
 						return;
 					}
 					if('eval' === name) {
-						context.report(node.callee, "'eval' function calls are discouraged.", null, context.getTokens(node.callee)[0]);
+						context.report(node.callee, "${0} function calls are discouraged.", {0:'\'eval\''}, context.getTokens(node.callee)[0]);
 					}
 					else if('setInterval' === name || 'setTimeout' === name) {
 						if(node.arguments.length > 0) {
 							var arg = node.arguments[0];
 							if(arg.type === 'Literal') {
-								context.report(node.callee, "Implicit 'eval' function calls are discouraged.", null, context.getTokens(node.callee)[0]);
+								context.report(node.callee, "${0} function calls are discouraged.", {0:'Implicit \'eval\''}, context.getTokens(node.callee)[0]);
 							}
 							else if(arg.type === 'Identifier') {
 								//lets see if we can find it definition
@@ -65,7 +65,7 @@
 									var dnode = def.node;
 									if(def.type === 'Variable' && dnode && dnode.type === 'VariableDeclarator' &&
 										dnode.init && dnode.init.type === 'Literal') {
-										context.report(node.callee, "Implicit 'eval' function calls are discouraged.", null, context.getTokens(node.callee)[0]);
+										context.report(node.callee, "${0} function calls are discouraged.", {0:'Implicit \'eval\''}, context.getTokens(node.callee)[0]);
 									}
 								}
 							}

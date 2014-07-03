@@ -108,7 +108,7 @@
 		 * @private
 		 */
 		function reportMissingDoc(node, name, kind) {
-			context.report(node, 'Missing documentation for function \'{{name}}\'', {name: name}, { type: kind });
+			context.report(node, 'Missing documentation for function \'${0}\'.', {0:name}, { type: kind });
 		}
 		
 		return {
