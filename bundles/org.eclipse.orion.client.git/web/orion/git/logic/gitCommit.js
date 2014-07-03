@@ -41,6 +41,7 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/Deferred','ori
 					// use the last commit message
 					var message = resp.Children[0].Message;
 					commitMessageBox.value = message;
+					commitMessageBox.parentNode.classList.remove("invalidCommitMessage"); //$NON-NLS-0$
 				}), function(error){
 					commitMessageBox.value = ""; //$NON-NLS-0$
 				});
