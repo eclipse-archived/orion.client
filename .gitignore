@@ -1,8 +1,13 @@
 /.project
-bin
-
-# Maven artifacts
-target/
+/*/*/bin/
+/*/*/target
+*~
+*.rej
+*.bak
+javacore.*
+heapdump.*
+core.*
+Snap.*
 
 # JSDoc
 /doc/org.eclipse.orion.doc.isv/jsdoc/files.html
