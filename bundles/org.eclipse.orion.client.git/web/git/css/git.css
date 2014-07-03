@@ -92,17 +92,13 @@
 	background-color: LemonChiffon;
 	border-radius: 4px;
 	display: inline-block;
-	margin: 2px;
-	padding: 2px;
+	margin-left: 2px;
+	padding-left: 2px;
 }
 
 .gitCommitListTagClose {
 	padding: 0px;
 	padding-left: 5px;
-}
-
-.gitCommitListNoTag {
-	margin-left: 4px;
 }
 
 .gitAuthorImage {

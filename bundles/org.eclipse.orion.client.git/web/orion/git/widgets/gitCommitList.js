@@ -636,14 +636,13 @@ define([
 					detailsView.appendChild(d);
 	
 					description = document.createElement("div"); //$NON-NLS-0$
-					description.textContent = messages[" (SHA "] + commit.Name + messages[") by "] + commit.AuthorName + messages[" on "]
-							+ new Date(commit.Time).toLocaleString();
+					description.textContent = commit.AuthorName + messages[" on "] + new Date(commit.Time).toLocaleString();
 					detailsView.appendChild(description);
 					
-					var tags = document.createElement("div"); //$NON-NLS-0$
-					tags.textContent = messages["Tags:"];
-					tags.className = "gitCommitListTagsTitle"; //$NON-NLS-0$
 					if (commit.Tags && commit.Tags.length) {
+						var tags = document.createElement("div"); //$NON-NLS-0$
+						tags.textContent = messages["Tags:"];
+						tags.className = "gitCommitListTagsTitle"; //$NON-NLS-0$
 						commit.Tags.forEach(function (tag) {
 							var tagSpan = document.createElement("span"); //$NON-NLS-0$
 							tagSpan.textContent = tag.Name;
@@ -657,14 +656,8 @@ define([
 							});
 							tagSpan.appendChild(tagSpanAction);
 						});
+						detailsView.appendChild(tags);
 					}
-					else {
-						var tagsNone = document.createElement("span"); //$NON-NLS-0$
-						tagsNone.textContent = messages["None"];
-						tags.className = "gitCommitListNoTag"; //$NON-NLS-0$
-						tags.appendChild(tagsNone);
-					}
-					detailsView.appendChild(tags);
 					
 					var itemActionScope = "itemLevelCommands"; //$NON-NLS-0$
 					actionsArea = document.createElement("ul"); //$NON-NLS-0$
