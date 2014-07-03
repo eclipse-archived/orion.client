@@ -12,8 +12,8 @@
 /*globals define confirm */
 
 define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/git/widgets/ConfirmPushDialog','orion/git/gitPreferenceStorage','orion/git/logic/gitCommon','orion/Deferred'
-        ,'orion/git/widgets/RemotePrompterDialog'], 
-		function(messages,mCommandRegistry,mConfirmPush,GitPreferenceStorage, mGitCommon, Deferred,mRemotePrompter) {
+        ,'orion/git/widgets/RemotePrompterDialog', 'orion/objects'], 
+		function(messages,mCommandRegistry,mConfirmPush,GitPreferenceStorage, mGitCommon, Deferred,mRemotePrompter, objects) {
 	
 	var handleGitServiceResponse = mGitCommon.handleGitServiceResponse;
 	var handleProgressServiceResponse = mGitCommon.handleProgressServiceResponse;
@@ -217,7 +217,14 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/git/widgets/Co
 						function(jsonData){
 							handleGitServiceResponse(jsonData, serviceRegistry, 
 								function() {
-									d.resolve();
+									if (itemTargetBranch && !itemTargetBranch.Id) {
+										gitService.getGitBranch(itemTargetBranch.Location).then(function(remote) {
+											objects.mixin(itemTargetBranch, remote);
+											d.resolve();
+										}, d.resolve);
+									} else {
+										d.resolve();
+									}
 								}, function (jsonData) {
 									handleResponse(jsonData, commandInvocation);
 								}
