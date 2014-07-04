@@ -185,8 +185,11 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/section', 'orion/i18nUtil'
 				if (deferred === null)
 					deferred = new Deferred();
 				if (repositories.length > 0) {
+					var repository = repositories[0];
+					var prefix = repository.CommitLocation.substring(0, repository.CommitLocation.indexOf(repository.ContentLocation) + 1);
+					var location = prefix + sha + repository.Location + "?page=1&pageSize=1"; //$NON-NLS-0$
 					that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").doGitLog( //$NON-NLS-0$
-						"/gitapi/commit/" + sha + repositories[0].Location + "?page=1&pageSize=1", null, null, messages['Looking for the commit']), "Looking for commit " + sha).then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						location, null, null, messages['Looking for the commit']), "Looking for commit " + sha).then( //$NON-NLS-0$
 						function(resp){
 							that.currentCommit = resp;
 							deferred.resolve(resp.Children[0].Location);
