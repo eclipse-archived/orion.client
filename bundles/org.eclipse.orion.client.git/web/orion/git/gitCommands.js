@@ -2296,11 +2296,16 @@ var exports = {};
 						deferred = new Deferred();
 					
 					if (repositories.length > 0) {
+						commitName = data.parameters.valueFor("commitName"); //$NON-NLS-0$
 						var repository = repositories[0];
-						var prefix = repository.CommitLocation.substring(0, repository.CommitLocation.indexOf(repository.ContentLocation) + 1);
-						var location = prefix + data.parameters.valueFor("commitName") + repository.ContentLocation + "?page=1&pageSize=1"; //$NON-NLS-1$ //$NON-NLS-0$
+						var segment = "/commit/"; //$NON-NLS-0$
+						var location = repository.CommitLocation;
+						var index = location.indexOf(segment) + segment.length;
+						var prefix = location.substring(0, index);
+						var sufix = location.substring(index - 1);
+						location = prefix + commitName + sufix + "?page=1&pageSize=1"; //$NON-NLS-0$
 						progress.progress(serviceRegistry.getService("orion.git.provider").doGitLog( //$NON-NLS-0$
-							location, null, null, messages['Looking for the commit']), "Looking for commit " + data.parameters.valueFor("commitName")).then( //$NON-NLS-1$ //$NON-NLS-0$
+							location, null, null, messages['Looking for the commit']), "Looking for commit " + commitName).then( //$NON-NLS-0$
 							function(resp){
 								deferred.resolve(resp.Children[0].Location);
 							},

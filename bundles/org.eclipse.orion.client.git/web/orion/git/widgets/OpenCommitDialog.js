@@ -102,8 +102,12 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred
 
 		if (repositories.length > 0) {
 			var repository = repositories[0];
-			var prefix = repository.CommitLocation.substring(0, repository.CommitLocation.indexOf(repository.ContentLocation) + 1);
-			var location = prefix + commitName + repository.ContentLocation + "?page=1&pageSize=1"; //$NON-NLS-0$
+			var segment = "/commit/"; //$NON-NLS-0$
+			var location = repository.CommitLocation;
+			var index = location.indexOf(segment) + segment.length;
+			var prefix = location.substring(0, index);
+			var sufix = location.substring(index - 1);
+			location = prefix + commitName + sufix + "?page=1&pageSize=1"; //$NON-NLS-0$
 			this.serviceRegistry.getService("orion.page.progress").progress(
 				that.serviceRegistry.getService("orion.git.provider").doGitLog(location), "Getting commit details " + commitName).then(
 				function(resp) {
