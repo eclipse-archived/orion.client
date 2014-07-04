@@ -101,9 +101,11 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred
 		}
 
 		if (repositories.length > 0) {
+			var repository = repositories[0];
+			var prefix = repository.CommitLocation.substring(0, repository.CommitLocation.indexOf(repository.ContentLocation) + 1);
+			var location = prefix + commitName + repository.ContentLocation + "?page=1&pageSize=1"; //$NON-NLS-0$
 			this.serviceRegistry.getService("orion.page.progress").progress(
-				that.serviceRegistry.getService("orion.git.provider").doGitLog(
-					"/gitapi/commit/" + commitName + repositories[0].ContentLocation + "?page=1&pageSize=1"), "Getting commit details " + commitName).then(
+				that.serviceRegistry.getService("orion.git.provider").doGitLog(location), "Getting commit details " + commitName).then(
 				function(resp) {
 					deferred.resolve(resp.Children[0]);
 				}, function(error) {

@@ -2296,8 +2296,11 @@ var exports = {};
 						deferred = new Deferred();
 					
 					if (repositories.length > 0) {
+						var repository = repositories[0];
+						var prefix = repository.CommitLocation.substring(0, repository.CommitLocation.indexOf(repository.ContentLocation) + 1);
+						var location = prefix + data.parameters.valueFor("commitName") + repository.ContentLocation + "?page=1&pageSize=1"; //$NON-NLS-1$ //$NON-NLS-0$
 						progress.progress(serviceRegistry.getService("orion.git.provider").doGitLog( //$NON-NLS-0$
-							"/gitapi/commit/" + data.parameters.valueFor("commitName") + repositories[0].ContentLocation + "?page=1&pageSize=1", null, null, messages['Looking for the commit']), "Looking for commit " + data.parameters.valueFor("commitName")).then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							location, null, null, messages['Looking for the commit']), "Looking for commit " + data.parameters.valueFor("commitName")).then( //$NON-NLS-1$ //$NON-NLS-0$
 							function(resp){
 								deferred.resolve(resp.Children[0].Location);
 							},
