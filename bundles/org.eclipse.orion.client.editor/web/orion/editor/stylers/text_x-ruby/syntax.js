@@ -74,6 +74,8 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 			{include: "orion.lib#parenthesis_close"}, //$NON-NLS-0$
 			{include: "orion.lib#number_decimal"}, //$NON-NLS-0$
 			{include: "orion.lib#number_hex"}, //$NON-NLS-0$
+			{include: "#symbol"}, //$NON-NLS-0$
+			{include: "#variable"}, //$NON-NLS-0$
 			{
 				match: "\\b0[bB][01]+\\b", //$NON-NLS-0$
 				name: "constant.numeric.binary.ruby" //$NON-NLS-0$
@@ -81,7 +83,17 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "keyword.control.ruby" //$NON-NLS-0$
 			}
-		]
+		],
+		repository: {
+			symbol: {
+				match: ":\\w+", //$NON-NLS-0$
+				name: "entity.name.symbol.ruby" //$NON-NLS-0$
+			},
+			variable: {
+				match: "@\\w+", //$NON-NLS-0$
+				name: "entity.name.variable.ruby" //$NON-NLS-0$
+			}
+		}
 	});
 	return {
 		id: grammars[grammars.length - 1].id,

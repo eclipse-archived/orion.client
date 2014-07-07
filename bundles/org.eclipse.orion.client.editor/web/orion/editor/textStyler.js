@@ -768,7 +768,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		if (initFn) {
 			initFn(this);
 		}
-		this._subBlocks = styler.computeBlocks(model, model.getText(this.start, this.end), this, this.start, null, null, null);
+		this._subBlocks = styler.computeBlocks(model, model.getText(this.contentStart, this.end), this, this.contentStart, null, null, null);
 	}
 	Block.prototype = {
 		adjustBounds: function(index, value) {
