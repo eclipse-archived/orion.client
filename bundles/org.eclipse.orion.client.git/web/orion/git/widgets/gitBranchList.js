@@ -9,17 +9,21 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define document */
+/*global define document Image*/
 
 define([
+	'require',
 	'i18n!git/nls/gitmessages',
 	'orion/explorers/explorer',
 	'orion/URITemplate',
+	'orion/git/widgets/CommitTooltipDialog',
+	'orion/git/util',
 	'orion/i18nUtil',
 	'orion/Deferred',
 	'orion/objects'
-], function(messages, mExplorer, URITemplate, i18nUtil, Deferred, objects) {
+], function(require, messages, mExplorer, URITemplate, mCommitTooltip, util, i18nUtil, Deferred, objects) {
 
+	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 
 	function GitBranchListModel(options) {
@@ -76,6 +80,15 @@ define([
 					onComplete(that.processChildren(parentItem, resp.Children));
 				}, function(error){
 					progress.done();
+					that.handleError(error);
+				});
+			} else if (parentItem.Type === "Branch" || parentItem.Type === "RemoteTrackingBranch") { //$NON-NLS-1$ //$NON-NLS-0$
+				progress = this.section.createProgressMonitor();
+				msg = i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], parentItem.Name);
+				this.progressService.progress(that.gitClient.doGitLog(parentItem.CommitLocation + "?page=1&pageSize=20"), msg).then(function(resp) { //$NON-NLS-0$
+					progress.done();
+					onComplete(that.processChildren(parentItem, resp.Children));
+				}, function(error){
 					that.handleError(error);
 				});
 			} else {
@@ -152,14 +165,25 @@ define([
 			var div, td;
 			switch (col_no) {
 				case 0:
+					var commit, explorer = this.explorer;
+				
 					td = document.createElement("td"); //$NON-NLS-0$
 					div = document.createElement("div"); //$NON-NLS-0$
-					div.className = "sectionTableItem lightTreeTableRow"; //$NON-NLS-0$
+					div.className = "sectionTableItem"; //$NON-NLS-0$
 					td.appendChild(div);
 					var horizontalBox = document.createElement("div"); //$NON-NLS-0$
 					horizontalBox.style.overflow = "hidden"; //$NON-NLS-0$
 					div.appendChild(horizontalBox);	
-					var actionsID, title, description, titleClass = "";
+					
+					if (item.Type !== "Commit") { //$NON-NLS-0$
+						var expandContainer = document.createElement("div"); //$NON-NLS-0$
+						expandContainer.style.display = "inline-block"; //$NON-NLS-0$
+						expandContainer.style.styleFloat = expandContainer.style.cssFloat = "left"; //$NON-NLS-0$
+						this.getExpandImage(tableRow, expandContainer);
+						horizontalBox.appendChild(expandContainer);
+					}
+					
+					var actionsID, title, description, titleClass = "", titleLink;
 					if (item.parent.Type === "LocalRoot") { //$NON-NLS-0$
 						var branch = item;
 						if (branch.Current){
@@ -168,31 +192,46 @@ define([
 							horizontalBox.appendChild(span);
 							titleClass = "activeBranch"; //$NON-NLS-0$
 						}
-						var commit = branch.Commit.Children[0];
+						commit = branch.Commit.Children[0];
 						var tracksMessage = ((branch.RemoteLocation.length && branch.RemoteLocation.length === 1 && branch.RemoteLocation[0].Children.length && branch.RemoteLocation[0].Children.length === 1) ? 
 								i18nUtil.formatMessage(messages["tracks ${0}, "], branch.RemoteLocation[0].Children[0].Name) : messages["tracks no branch, "]);
 						description = tracksMessage + i18nUtil.formatMessage(messages["last modified ${0} by ${1}"], new Date(commit.Time).toLocaleString(), commit.AuthorName); //$NON-NLS-0$
 						actionsID = "branchActionsArea"; //$NON-NLS-0$
 					} else if (item.parent.Type === "RemoteRoot") { //$NON-NLS-0$
-						var expandContainer = document.createElement("div"); //$NON-NLS-0$
-						expandContainer.style.display = "inline-block"; //$NON-NLS-0$
-						expandContainer.style.styleFloat = expandContainer.style.cssFloat = "left"; //$NON-NLS-0$
-						this.getExpandImage(tableRow, expandContainer);
-						horizontalBox.appendChild(expandContainer);
 						
 						description = item.GitUrl || item.Description || item.parent.repository.ContentLocation;
 						actionsID = "remoteActionsArea"; //$NON-NLS-0$
 					} else if (item.parent.Type === "Remote") { //$NON-NLS-0$
 						actionsID = "branchActionsArea"; //$NON-NLS-0$
 						description = "";
-					} 
+					} else if (item.Type === "Commit") { //$NON-NLS-0$
+						commit = item;
+						if (commit.AuthorImage) {
+							var authorImage = document.createElement("div"); //$NON-NLS-0$
+							authorImage.style["float"] = "left"; //$NON-NLS-1$ //$NON-NLS-0$
+							var image = new Image();
+							image.src = commit.AuthorImage;
+							image.name = commit.AuthorName;
+							image.className = "git-author-icon"; //$NON-NLS-0$
+							authorImage.appendChild(image);
+							horizontalBox.appendChild(authorImage);
+						}
+						
+						title = util.trimCommitMessage(commit.Message);
+						description = commit.AuthorName + messages[" on "] + new Date(commit.Time).toLocaleString();
+						titleLink = require.toUrl(commitTemplate.expand({resource: commit.Location})); //$NON-NLS-0$
+						titleClass = "navlinkonpage"; //$NON-NLS-0$
+					}
 					
 					var detailsView = document.createElement("div"); //$NON-NLS-0$
 					detailsView.className = "stretch"; //$NON-NLS-0$
 					horizontalBox.appendChild(detailsView);
 					
-					var titleDiv = document.createElement("span"); //$NON-NLS-0$
+					var titleDiv = document.createElement(titleLink ? "a" : "span"); //$NON-NLS-1$ //$NON-NLS-0$
 					titleDiv.className = titleClass;
+					if (titleLink) {
+						titleDiv.href = titleLink;
+					}
 					titleDiv.textContent = title || item.Name;
 					detailsView.appendChild(titleDiv);
 					
@@ -201,7 +240,30 @@ define([
 						descriptionDiv.textContent = description;
 					}
 					detailsView.appendChild(descriptionDiv);
-						
+					
+					if (item.Type === "Commit") { //$NON-NLS-0$
+						new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: titleDiv});
+						if (commit.Tags && commit.Tags.length) {
+							var tags = document.createElement("div"); //$NON-NLS-0$
+							tags.textContent = messages["Tags:"];
+							tags.className = "gitCommitListTagsTitle"; //$NON-NLS-0$
+							commit.Tags.forEach(function (tag) {
+								var tagSpan = document.createElement("span"); //$NON-NLS-0$
+								tagSpan.textContent = tag.Name;
+								tagSpan.className = "gitCommitListTag"; //$NON-NLS-0$
+								tags.appendChild(tagSpan);
+								
+								var tagSpanAction = document.createElement("span"); //$NON-NLS-0$
+								tagSpanAction.className = "core-sprite-close gitCommitListTagClose"; //$NON-NLS-0$
+								tagSpanAction.addEventListener("click", function(){ //$NON-NLS-0$
+									explorer.commandService.runCommand("eclipse.removeTag", tag, explorer); //$NON-NLS-0$
+								});
+								tagSpan.appendChild(tagSpanAction);
+							});
+							detailsView.appendChild(tags);
+						}
+					}
+
 					var actionsArea = document.createElement("div"); //$NON-NLS-0$
 					actionsArea.className = "sectionTableItemActions"; //$NON-NLS-0$
 					actionsArea.id = actionsID;
