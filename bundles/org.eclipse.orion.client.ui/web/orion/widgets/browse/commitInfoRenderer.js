@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console define URL*/
+/*global window Image document console define URL*/
 /*jslint browser:true sub:true*/
 define([
 	'orion/objects',

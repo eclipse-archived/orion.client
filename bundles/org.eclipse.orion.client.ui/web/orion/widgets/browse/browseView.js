@@ -267,7 +267,7 @@ define([
 								this.actionNode = rightNode;
 								
 								this.infoDropDownHandlers.forEach(function(handler) {
-									var dropdownHolder = document.createElement("div")
+									var dropdownHolder = document.createElement("div");
 									dropdownHolder.classList.add("infoDropDownHolder");
 									letfNode.appendChild(dropdownHolder);
 									var range = document.createRange();
@@ -280,7 +280,10 @@ define([
 									});
 									infoDropDown.getItems = function() {
 										var inputNode = lib.node(handler.popupTextAreaId);
-										inputNode.value = handler.getTextAreaValue();
+										handler.getTextAreaValue().then(function(result){
+											inputNode.value = result;
+											inputNode.select();
+										});
 										return [inputNode];
 									};
 									infoDropDown._focusDropdownNode = function() {
