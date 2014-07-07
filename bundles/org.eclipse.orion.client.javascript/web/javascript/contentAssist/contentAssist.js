@@ -24,8 +24,10 @@ define([
 	'orion/Deferred',  //$NON-NLS-0$
 	'orion/objects',  //$NON-NLS-0$
 	'estraverse',  //$NON-NLS-0$
-	'javascript/contentAssist/indexer'  //$NON-NLS-0$
-], function(typeEnv, typeInf, typeUtils, proposalUtils, mTemplates, JSSyntax, Templates, Deferred, Objects, Estraverse, Indexer) {
+	'javascript/contentAssist/indexer',  //$NON-NLS-0$
+	'javascript/finder'
+], function(typeEnv, typeInf, typeUtils, proposalUtils, mTemplates, JSSyntax, Templates, Deferred, Objects, Estraverse, Indexer,
+            Finder) {
 
 	/**
 	 * @description Creates a new delegate to create keyword and template proposals
@@ -35,7 +37,7 @@ define([
  	
 	TemplateProvider.prototype = new mTemplates.TemplateContentAssist(JSSyntax.keywords, []);
 	Objects.mixin(TemplateProvider.prototype, {
-		uninterestingChars: ":!@#$^&*.?<>", //$NON-NLS-0$
+		uninterestingChars: ":!#$^&*.?<>", //$NON-NLS-0$
 		/**
 		 * @description Override from TemplateContentAssist
 		 */
@@ -93,6 +95,24 @@ define([
 		},
 		
 		/**
+		 * @description Corrects the prefix to include the starting '@' symbol when completing doc
+		 * @param {String} kind
+		 * @param {String} prefix
+		 * @param {Object} context
+		 * @since 7.0
+		 */
+		fixPrefix: function(kind, prefix, context) {
+		    if(kind === 'doc' && typeof prefix === 'string' && typeof context.line === 'string') {
+		        var line = context.line;
+		        var idx = line.indexOf('@'+prefix);
+		        if(idx > -1) {
+		            return line.slice(idx);
+		        }
+		    }
+		    return prefix;
+		},
+		
+		/**
 		 * @description override
 		 */
 		getTemplateProposals: function(prefix, offset, context, completionKind) {
@@ -100,9 +120,10 @@ define([
 			var templates = Templates.getTemplatesForKind(completionKind.kind); //this.getTemplates();
 			for (var t = 0; t < templates.length; t++) {
 				var template = templates[t];
-				if (template.match(prefix)) {
-					var proposal = template.getProposal(prefix, offset, context);
-					this.removePrefix(prefix, proposal);
+				var newprefix = this.fixPrefix(completionKind.kind, prefix, context);
+				if (template.match(newprefix)) {
+					var proposal = template.getProposal(newprefix, offset, context);
+					this.removePrefix(newprefix, proposal);
 					proposals.push(proposal);
 				}
 			}
@@ -315,6 +336,10 @@ define([
 		 * @param {Object} visited Those types visited thus far while computing proposals (to detect cycles)
 		 */
 		_createInferredProposals: function(targetTypeName, env, completionKind, prefix, replaceStart, proposals, relevance, visited) {
+		    if(completionKind === 'doc') {
+		        //for now just quit, ideally we will return all known types when we are in doc in a type object
+		        return;
+		    }
 			var prop, propTypeObj, propName, res, type = env.lookupQualifiedType(targetTypeName), proto = type.$$proto;
 			if (!relevance) {
 				relevance = 100;
@@ -580,6 +605,10 @@ define([
 		 * @since 6.0
 		 */
 		_getCompletionContext: function(ast, offset, contents) {
+		    var comment = Finder.findComment(offset, ast);
+		    if(comment) {
+		        return {kind:'doc'};
+		    }
 			var parents = [];
 			Estraverse.traverse(ast, {
 				skipped: false,

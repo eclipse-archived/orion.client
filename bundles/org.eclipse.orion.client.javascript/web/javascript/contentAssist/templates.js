@@ -33,6 +33,34 @@ define([
 	 * @private
 	 */
 	var templates = [
+	    {
+	        prefix: "@description", //$NON-NLS-0$
+			name: "@description",  //$NON-NLS-0$
+			nodes: {top:false, member:false, prop:false, doc:true},
+			description: " - Description JSDoc tag", //$NON-NLS-0$
+			template: "@description ${cursor}" //$NON-NLS-0$  
+	    },
+	    {
+	        prefix: "@param", //$NON-NLS-0$
+			name: "@param",  //$NON-NLS-0$
+			nodes: {top:false, member:false, prop:false, doc:true},
+			description: " - Param JSDoc tag", //$NON-NLS-0$
+			template: "@param {${type}} ${name} ${cursor}" //$NON-NLS-0$
+	    },
+	    {
+	        prefix: "@returns", //$NON-NLS-0$
+			name: "@returns",  //$NON-NLS-0$
+			nodes: {top:false, member:false, prop:false, doc:true},
+			description: " - Returns JSDoc tag", //$NON-NLS-0$
+			template: "@returns {${type}} ${cursor}" //$NON-NLS-0$
+	    },
+	    {
+	        prefix: "@throws", //$NON-NLS-0$
+			name: "@throws",  //$NON-NLS-0$
+			nodes: {top:false, member:false, prop:false, doc:true},
+			description: " - Throws JSDoc tag", //$NON-NLS-0$
+			template: "@throws {${type}} ${cursor}" //$NON-NLS-0$
+	    },
 		{
 			prefix: "if", //$NON-NLS-0$
 			name: "if",  //$NON-NLS-0$
@@ -319,14 +347,14 @@ define([
 					  "});\n" //$NON-NLS-0$
 		},
 		{
-			prefix: "pg", //$NON-NLS-0$
+			prefix: "postgres", //$NON-NLS-0$
 			name: "postgres", //$NON-NLS-0$
 			nodes: {top:true, member:false, prop:false},
 			description: " - Node.js require statement for Postgres DB", //$NON-NLS-0$
 			template: "var pg = require('pg');\n" //$NON-NLS-0$
 		},
 		{
-			prefix: "pg", //$NON-NLS-0$
+			prefix: "postgres", //$NON-NLS-0$
 			name: "postgres client", //$NON-NLS-0$
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Postgres DB client", //$NON-NLS-0$
@@ -335,7 +363,7 @@ define([
 					  "var ${client} = new pg.Client(url);\n"  //$NON-NLS-0$
 		},
 		{
-			prefix: "pg", //$NON-NLS-0$
+			prefix: "postgres", //$NON-NLS-0$
 			name: "postgres connect", //$NON-NLS-0$
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Postgres DB client and connect", //$NON-NLS-0$
@@ -347,7 +375,7 @@ define([
 					  "});\n"
 		},
 		{
-			prefix: "pg", //$NON-NLS-0$
+			prefix: "postgres", //$NON-NLS-0$
 			name: "postgres query", //$NON-NLS-0$
 			nodes: {top:true, member:false, prop:false},
 			description: " - create a new Postgres DB query statement", //$NON-NLS-0$
