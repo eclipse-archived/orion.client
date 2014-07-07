@@ -499,7 +499,7 @@ define([
 	
 		it("test no dupe 1", function() {
 			var results = computeContentAssist(
-					"var coo = 9; var other = function(coo) { c/**/ }", "c");
+					"var coo = 9; var other = function(coo) { c }", "c", 42);
 			return testProposals(results, [
 				["coo", "coo : {}"]
 			]);
@@ -507,7 +507,7 @@ define([
 	
 		it("test no dupe 2", function() {
 			var results = computeContentAssist(
-					"var coo = { }; var other = function(coo) { coo = 9;\nc/**/ }", "c");
+					"var coo = { }; var other = function(coo) { coo = 9;\nc }", "c", 53);
 			return testProposals(results, [
 				["coo", "coo : Number"]
 			]);
@@ -515,7 +515,7 @@ define([
 	
 		it("test no dupe 3", function() {
 			var results = computeContentAssist(
-					"var coo = function () { var coo = 9; \n c/**/};", "c");
+					"var coo = function () { var coo = 9; \n c};", "c", 40);
 			return testProposals(results, [
 				["coo", "coo : Number"]
 			]);
@@ -523,7 +523,7 @@ define([
 	
 		it("test no dupe 4", function() {
 			var results = computeContentAssist(
-					"var coo = 9; var other = function () { var coo = function() { return 9; }; \n c/**/};", "c");
+					"var coo = 9; var other = function () { var coo = function() { return 9; }; \n c};", "c", 78);
 			return testProposals(results, [
 				["coo()", "coo() : Number"]
 			]);
@@ -532,15 +532,15 @@ define([
 		it("test scopes 1", function() {
 			// only the outer foo is available
 			var results = computeContentAssist(
-					"var coo;\nfunction other(a, b, c) {\nfunction inner() { var coo2; }\nco/**/}", "co");
+					"var coo;\nfunction other(a, b, c) {\nfunction inner() { var coo2; }\nco}", "co", 68);
 			return testProposals(results, [
 				["coo", "coo : {}"]
 			]);
 		});
 		it("test scopes 2", function() {
 			// the inner assignment should not affect the value of foo
-			var results = computeContentAssist("var foo;\n" +
-					"var foo = 1;\nfunction other(a, b, c) {\nfunction inner() { foo2 = \"\"; }\nfoo.toF/**/}", "toF");
+			var results = computeContentAssist(
+			         "var foo;\n var foo = 1;\nfunction other(a, b, c) {\nfunction inner() { foo2 = \"\"; }\nfoo.toF}", "toF", 88);
 			return testProposals(results, [
 				["toFixed(digits)", "toFixed(digits) : String"]
 			]);
@@ -552,7 +552,7 @@ define([
 			]);
 		});
 		it("test in function 1", function() {
-			var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(a, b, c) {/**/}", "");
+			var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(a, b, c) {}", "", 49);
 			return testProposals(results, [
 				["a", "a : {}"],
 				["arguments", "arguments : Arguments"],
@@ -595,7 +595,7 @@ define([
 			]);
 		});
 		it("test in function 2", function() {
-			var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(a, b, c) {\n/**/nuthin}", "");
+			var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(a, b, c) {\nnuthin}", "", 50);
 			return testProposals(results, [
 				["a", "a : {}"],
 				["arguments", "arguments : Arguments"],
@@ -639,14 +639,14 @@ define([
 			]);
 		});
 		it("test in function 3", function() {
-			var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(a, b, c) {f/**/}", "f");
+			var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(a, b, c) {f}", "f", 51);
 			return testProposals(results, [
 				["fun(a, b, c)", "fun(a, b, c) : undefined"],
 				["Function()", "Function() : Function"]
 			]);
 		});
 		it("test in function 4", function() {
-			var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(aa, ab, c) {a/**/}", "a");
+			var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(aa, ab, c) {a}", "a", 53);
 			return testProposals(results, [
 				["aa", "aa : {}"],
 				["ab", "ab : {}"],
@@ -656,7 +656,7 @@ define([
 			]);
 		});
 		it("test in function 5", function() {
-			var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(aa, ab, c) {var abb;\na/**/\nvar aaa}", "a");
+			var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(aa, ab, c) {var abb;\na\nvar aaa}", "a", 62);
 			return testProposals(results, [
 				["aaa", "aaa : {}"],
 				["abb", "abb : {}"],
@@ -669,10 +669,7 @@ define([
 			]);
 		});
 		it("test in function 6", function() {
-			var results = computeContentAssist(
-			"function fun(a, b, c) {\n" +
-			"function other(aa, ab, c) {\n"+
-			"var abb;\na/**/\nvar aaa\n}\n}", "a");
+			var results = computeContentAssist("function fun(a, b, c) {\n function other(aa, ab, c) {\n var abb;\na\nvar aaa\n}\n}", "a", 65);
 			return testProposals(results, [
 				["aaa", "aaa : {}"],
 				["abb", "abb : {}"],
@@ -689,9 +686,9 @@ define([
 		it("test in function 7", function() {
 			// should not see 'aaa' or 'abb' since declared in another function
 			var results = computeContentAssist(
-			"function fun(a, b, c) {/**/\n" +
+			"function fun(a, b, c) {\n" +
 			"function other(aa, ab, ac) {\n"+
-			"var abb;\na\nvar aaa\n}\n}");
+			"var abb;\na\nvar aaa\n}\n}", "", 23);
 			return testProposals(results, [
 				["a", "a : {}"],
 				["arguments", "arguments : Arguments"],
@@ -735,10 +732,7 @@ define([
 		});
 		it("test in function 8", function() {
 			// should not see 'aaa' since that is declared later
-			var results = computeContentAssist(
-			"function fun(a, b, c) {\n" +
-			"function other(aa, ab, ac) {\n"+
-			"var abb;\na\nvar aaa\n} /**/\n}");
+			var results = computeContentAssist("function fun(a, b, c) {\nfunction other(aa, ab, ac) {\n var abb;\na\nvar aaa\n} \n}", "", 75);
 			return testProposals(results, [
 				["other(aa, ab, ac)", "other(aa, ab, ac) : undefined"],
 				["", "---------------------------------"],
@@ -867,7 +861,7 @@ define([
 		});
 	
 		it("test Object Literal inside", function() {
-			var results = computeContentAssist("var x = { the : 1, far : this.th/**/ };", "th");
+			var results = computeContentAssist("var x = { the : 1, far : this.th };", "th", 32);
 			return testProposals(results, [
 				["the", "the : Number"]
 			]);
@@ -890,13 +884,13 @@ define([
 			]);
 		});
 		it("test Object Literal outside 3", function() {
-			var results = computeContentAssist("var x = { the : 1, far : 2 };\nwho(x.th/**/)", "th");
+			var results = computeContentAssist("var x = { the : 1, far : 2 };\nwho(x.th)", "th", 38);
 			return testProposals(results, [
 				["the", "the : Number"]
 			]);
 		});
 		it("test Object Literal outside 4", function() {
-			var results = computeContentAssist("var x = { the : 1, far : 2 };\nwho(yyy, x.th/**/)", "th");
+			var results = computeContentAssist("var x = { the : 1, far : 2 };\nwho(yyy, x.th)", "th", 43);
 			return testProposals(results, [
 				["the", "the : Number"]
 			]);
@@ -916,7 +910,7 @@ define([
 	
 		// not working since for loop is not storing slocs of var ii
 		it("test for loop 1", function() {
-			var results = computeContentAssist("for (var ii=0;i/**/<8;ii++) { ii }", "i");
+			var results = computeContentAssist("for (var ii=0;i<8;ii++) { ii }", "i", 15);
 			return testProposals(results, [
 				["isFinite(num)", "isFinite(num) : Boolean"],
 				["isNaN(num)", "isNaN(num) : Boolean"],
@@ -927,7 +921,7 @@ define([
 			]);
 		});
 		it("test for loop 2", function() {
-			var results = computeContentAssist("for (var ii=0;ii<8;i/**/++) { ii }", "i");
+			var results = computeContentAssist("for (var ii=0;ii<8;i++) { ii }", "i", 20);
 			return testProposals(results, [
 				["isFinite(num)", "isFinite(num) : Boolean"],
 				["isNaN(num)", "isNaN(num) : Boolean"],
@@ -938,7 +932,7 @@ define([
 			]);
 		});
 		it("test for loop 3", function() {
-			var results = computeContentAssist("for (var ii=0;ii<8;ii++) { i/**/ }", "i");
+			var results = computeContentAssist("for (var ii=0;ii<8;ii++) { i }", "i", 28);
 			return testProposals(results, [
 				["isFinite(num)", "isFinite(num) : Boolean"],
 				["isNaN(num)", "isNaN(num) : Boolean"],
@@ -949,25 +943,25 @@ define([
 			]);
 		});
 		it("test while loop 1", function() {
-			var results = computeContentAssist("var iii;\nwhile(ii/**/ === null) {\n}", "ii");
+			var results = computeContentAssist("var iii;\nwhile(ii === null) {\n}", "ii", 17);
 			return testProposals(results, [
 				["iii", "iii : {}"]
 			]);
 		});
 		it("test while loop 2", function() {
-			var results = computeContentAssist("var iii;\nwhile(this.ii/**/ === null) {\n}", "ii");
+			var results = computeContentAssist("var iii;\nwhile(this.ii === null) {\n}", "ii", 22);
 			return testProposals(results, [
 				["iii", "iii : {}"]
 			]);
 		});
 		it("test while loop 3", function() {
-			var results = computeContentAssist("var iii;\nwhile(iii === null) {this.ii/**/\n}", "ii");
+			var results = computeContentAssist("var iii;\nwhile(iii === null) {this.ii\n}", "ii", 37);
 			return testProposals(results, [
 				["iii", "iii : {}"]
 			]);
 		});
 		it("test catch clause 1", function() {
-			var results = computeContentAssist("try { } catch (eee) {e/**/  }", "e");
+			var results = computeContentAssist("try { } catch (eee) {e  }", "e", 22);
 			return testProposals(results, [
 				["eee", "eee : Error"],
 				["", "---------------------------------"],
@@ -979,7 +973,7 @@ define([
 		});
 		it("test catch clause 2", function() {
 			// the type of the catch variable is Error
-			var results = computeContentAssist("try { } catch (eee) {\neee.me/**/  }", "me");
+			var results = computeContentAssist("try { } catch (eee) {\neee.me  }", "me", 28);
 			return testProposals(results, [
 				["message", "message : String"]
 			]);
@@ -990,7 +984,7 @@ define([
 		// since we don't really have any idea if the global object will be passed as 'this'
 		// it("test get global var"] = function() {
 		// 	// should infer that we are referring to the globally defined xxx, not the param
-		// 	var results = computeContentAssist("var xxx = 9;\nfunction fff(xxx) { this.xxx.toF/**/}", "toF");
+		// 	var results = computeContentAssist("var xxx = 9;\nfunction fff(xxx) { this.xxx.toF}", "toF", 45);
 		// 	return testProposals(results, [
 		// 		["toFixed(digits)", "toFixed(digits) : Number"]
 		// 	]);
@@ -998,7 +992,7 @@ define([
 	
 		it("test get local var", function() {
 			// should infer that we are referring to the locally defined xxx, not the global
-			var results = computeContentAssist("var xxx = 9;\nfunction fff(xxx) { xxx.toF/**/}", "toF");
+			var results = computeContentAssist("var xxx = 9;\nfunction fff(xxx) { xxx.toF}", "toF", 40);
 			return testProposals(results, [
 			]);
 		});
@@ -1017,7 +1011,7 @@ define([
 		});
 		it("test Math 3", function() {
 			// Math not available when this isn't the global this
-			var results = computeContentAssist("var ff = { f: this.Mat/**/ }", "Mat");
+			var results = computeContentAssist("var ff = { f: this.Mat }", "Mat", 22);
 			return testProposals(results, [
 			]);
 		});
@@ -1063,7 +1057,7 @@ define([
 		});
 		it("test constructor 1", function() {
 			var results = computeContentAssist(
-			"function Fun() {\n	this.xxx = 9;\n	this.uuu = this.x/**/;}", "x");
+			"function Fun() {\n	this.xxx = 9;\n	this.uuu = this.x;}", "x", 50);
 			return testProposals(results, [
 				["xxx", "xxx : Number"]
 			]);
@@ -1170,7 +1164,7 @@ define([
 	
 		it("test Function args 1", function() {
 			var results = computeContentAssist(
-			"var ttt, uuu;\nttt(/**/)");
+			"var ttt, uuu;\nttt()", "", 18);
 			return testProposals(results, [
 				["Array([val])", "Array([val]) : Array"],
 				["Boolean([val])", "Boolean([val]) : Boolean"],
@@ -1209,7 +1203,7 @@ define([
 		});
 		it("test Function args 2", function() {
 			var results = computeContentAssist(
-			"var ttt, uuu;\nttt(ttt, /**/)");
+			"var ttt, uuu;\nttt(ttt, )", "", 23);
 			return testProposals(results, [
 				["Array([val])", "Array([val]) : Array"],
 				["Boolean([val])", "Boolean([val]) : Boolean"],
@@ -1248,7 +1242,7 @@ define([
 		});
 		it("test Function args 3", function() {
 			var results = computeContentAssist(
-			"var ttt, uuu;\nttt(ttt, /**/, uuu)");
+			"var ttt, uuu;\nttt(ttt, , uuu)", "", 23);
 			return testProposals(results, [
 				["Array([val])", "Array([val]) : Array"],
 				["Boolean([val])", "Boolean([val]) : Boolean"],
@@ -1289,7 +1283,7 @@ define([
 		// check that function args don't get assigned the same type
 		it("test function args 4", function() {
 			var results = computeContentAssist(
-				"function tt(aaa, bbb) { aaa.foo = 9;bbb.foo = ''\naaa.f/**/}", "f");
+				"function tt(aaa, bbb) { aaa.foo = 9;bbb.foo = ''\naaa.f}", "f", 54);
 			return testProposals(results, [
 				["foo", "foo : Number"]
 			]);
@@ -1298,7 +1292,7 @@ define([
 		// check that function args don't get assigned the same type
 		it("test function args 5", function() {
 			var results = computeContentAssist(
-				"function tt(aaa, bbb) { aaa.foo = 9;bbb.foo = ''\nbbb.f/**/}", "f");
+				"function tt(aaa, bbb) { aaa.foo = 9;bbb.foo = ''\nbbb.f}", "f", 54);
 			return testProposals(results, [
 				["foo", "foo : String"]
 			]);
@@ -1316,10 +1310,7 @@ define([
 	//	});
 		it("test constructor 6", function() {
 			var results = computeContentAssist(
-			"function Fun2() {\n" +
-			"function Fun() {	this.xxx = 9;	this.uuu = this.xxx; }\n" +
-			"var y = new Fun();\n" +
-			"y.uuu.toF/**/}", "toF");
+			"function Fun2() {\n function Fun() {	this.xxx = 9;	this.uuu = this.xxx; }\n var y = new Fun();\n y.uuu.toF}", "toF", 103);
 			return testProposals(results, [
 				["toFixed(digits)", "toFixed(digits) : String"]
 			]);
@@ -1518,9 +1509,9 @@ define([
 				["valueOf()", "valueOf() : Object"]
 			]);
 		});
-		// same as above, except use /**/
+		// same as above, except use 
 		it("test broken after dot 3a", function() {
-			var results = computeContentAssist("var ttt = { ooo:this./**/};", "");
+			var results = computeContentAssist("var ttt = { ooo:this.};", "", 21);
 			return testProposals(results, [
 				["ooo", "ooo : {ooo:{ooo:{...}}}"],
 				["", "---------------------------------"],
@@ -1546,9 +1537,9 @@ define([
 				["valueOf()", "valueOf() : Object"]
 			]);
 		});
-		// same as above, except use /**/
+		// same as above, except use 
 		it("test broken after dot 4a", function() {
-			var results = computeContentAssist("var ttt = { ooo:8};\nfunction ff() { \nttt./**/}", "");
+			var results = computeContentAssist("var ttt = { ooo:8};\nfunction ff() { \nttt.}", "", 41);
 			return testProposals(results, [
 				["ooo", "ooo : Number"],
 				["", "---------------------------------"],
@@ -1899,7 +1890,7 @@ define([
 		// should see an implicit even if it comes after the invocation location
 		it("test implicit7", function() {
 			var results = computeContentAssist(
-				"xx/**/\nxxx", "xx");
+				"xx \nxxx", "xx", 2);
 			return testProposals(results, [
 				["xxx", "xxx : {}"]
 			]);
@@ -2818,10 +2809,7 @@ define([
 			// @type overrides @return
 			it("test simple jsdoc13", function() {
 				var results = computeContentAssist(
-					"var xx;\n" +
-					"/** @type String\n@param Number ss*/\n" +
-					"xx = function(yy) { y/**/ };", "y"
-				);
+					"var xx;\n /** @type String\n@param Number ss*/\n xx = function(yy) { y };", "y", 67);
 				return testProposals(results, [
 					["yy", "yy : {}"]
 				]);
@@ -2830,10 +2818,7 @@ define([
 			//jsdoc test
 			it("test simple jsdoc15", function() {
 				var results = computeContentAssist(
-					"var xx;\n" +
-					"/** @param Number ss\n@return String*/\n" +
-					"xx = function(yy) { y/**/ };", "y"
-				);
+					"var xx;\n /** @param Number ss\n@return String*/\n xx = function(yy) { y };", "y", 69);
 				return testProposals(results, [
 					["yy", "yy : {}"]
 				]);
@@ -3061,9 +3046,7 @@ define([
 			// the param tag
 			it("test param jsdoc1", function() {
 				var results = computeContentAssist(
-					"/** @param {String} xx1\n@param {Number} xx2 */" +
-					"var flart = function(xx1,xx2) { xx/**/ }",
-					"xx");
+					"/** @param {String} xx1\n@param {Number} xx2 */ var flart = function(xx1,xx2) { xx }", "xx", 81);
 				return testProposals(results, [
 					["xx1", "xx1 : String"],
 					["xx2", "xx2 : Number"]
@@ -3073,9 +3056,8 @@ define([
 			//jsdoc test
 			it("test param jsdoc2", function() {
 				var results = computeContentAssist(
-					"/** @param {Number} xx2\n@param {String} xx1\n */" +
-					"var flart = function(xx1,xx2) { xx/**/ }",
-					"xx");
+					"/** @param {Number} xx2\n@param {String} xx1\n */ var flart = function(xx1,xx2) { xx }",
+					"xx", 82);
 				return testProposals(results, [
 					["xx1", "xx1 : String"],
 					["xx2", "xx2 : Number"]
@@ -3085,9 +3067,8 @@ define([
 			//jsdoc test
 			it("test param jsdoc3", function() {
 				var results = computeContentAssist(
-					"/** @param {function(String,Number):Number} xx2\n */" +
-					"var flart = function(xx1,xx2) { xx/**/ }",
-					"xx");
+					"/** @param {function(String,Number):Number} xx2\n */ var flart = function(xx1,xx2) { xx }",
+					"xx", 86);
 				return testProposals(results, [
 					["xx2(String, Number)", "xx2(String, Number) : Number"],
 					["xx1", "xx1 : {}"]
@@ -3097,9 +3078,8 @@ define([
 			//jsdoc test
 			it("test param jsdoc4", function() {
 				var results = computeContentAssist(
-					"/** @param {function(a:String,Number):Number} xx2\n */" +
-					"var flart = function(xx1,xx2) { xx/**/ }",
-					"xx");
+					"/** @param {function(a:String,Number):Number} xx2\n */ var flart = function(xx1,xx2) { xx }",
+					"xx", 88);
 				return testProposals(results, [
 					["xx2(a, Number)", "xx2(a, Number) : Number"],
 					["xx1", "xx1 : {}"]
@@ -3109,9 +3089,8 @@ define([
 			//jsdoc test
 			it("test param jsdoc5", function() {
 				var results = computeContentAssist(
-					"/** @param {function(a:String,?Number):Number} xx2\n */" +
-					"var flart = function(xx1,xx2) { xx/**/ }",
-					"xx");
+					"/** @param {function(a:String,?Number):Number} xx2\n */ var flart = function(xx1,xx2) { xx }",
+					"xx", 89);
 				return testProposals(results, [
 					["xx2(a, arg1)", "xx2(a, arg1) : Number"],
 					["xx1", "xx1 : {}"]
@@ -3180,10 +3159,7 @@ define([
 			// SCRIPTED-138 jsdoc support for functions parameters that are in object literals
 			it("test object literal fn param jsdoc1", function() {
 				var results = computeContentAssist(
-					"var obj = {\n" +
-					"  /** @param {String} foo */\n" +
-					"  fun : function(foo) { foo/**/ }\n" +
-					"}", "foo");
+					"var obj = {\n  /** @param {String} foo */\n fun : function(foo) { foo }\n}", "foo", 67);
 				return testProposals(results, [
 					["foo", "foo : String"]
 				]);
@@ -3742,9 +3718,7 @@ define([
 	
 		it("test computed member expressions6", function() {
 			var results = computeContentAssist(
-				"var x = 0;\n" +
-				"var foo = [];\n" +
-				"foo[x./**/]");
+				"var x = 0;\n var foo = [];\n foo[x.]", "", 33);
 			return testProposals(results, [
 				["toExponential(digits)", "toExponential(digits) : String"],
 				["toFixed(digits)", "toFixed(digits) : String"],
@@ -3765,66 +3739,60 @@ define([
 		/////////////////////////////////////
 		it("test full file inferecing 1", function() {
 			var results = computeContentAssist(
-				"x/**/;\n" +
-				"var x = 0;", "x");
+				"x;\n var x = 0;", "x", 1);
 			return testProposals(results, [
 				["x", "x : Number"]
 			]);
 		});
 		it("test full file inferecing 2", function() {
 			var results = computeContentAssist(
-				"function a() { x/**/; }\n" +
-				"var x = 0;", "x");
+				"function a() { x; }\n var x = 0;", "x", 16);
 			return testProposals(results, [
 				["x", "x : Number"]
 			]);
 		});
 		it("test full file inferecing 3", function() {
 			var results = computeContentAssist(
-				"function a() { var y = x; y/**/}\n" +
-				"var x = 0;", "y");
+				"function a() { var y = x; y}\n var x = 0;", "y", 27);
 			return testProposals(results, [
 				["y", "y : Number"]
 			]);
 		});
 		it("test full file inferecing 4", function() {
 			var results = computeContentAssist(
-				"function a() { var y = x.fff; y/**/}\n" +
-				"var x = { fff : 0 };", "y");
+				"function a() { var y = x.fff; y}\n var x = { fff : 0 };", "y", 31);
 			return testProposals(results, [
 				["y", "y : Number"]
 			]);
 		});
 		it("test full file inferecing 5", function() {
 			var results = computeContentAssist(
-				"function a() { var y = x.fff; y/**/}\n" +
-				"var x = {};\n" +
-				"x.fff = 8;", "y");
+				"function a() { var y = x.fff; y}\n var x = {};\n x.fff = 8;", "y", 31);
 			return testProposals(results, [
 				["y", "y : Number"]
 			]);
 		});
 		it("test full file inferecing 6", function() {
 			var results = computeContentAssist(
-				"function a() { x.fff = ''; var y = x.fff; y/**/}\n" +
+				"function a() { x.fff = ''; var y = x.fff; y}\n" +
 				"var x = {};\n" +
-				"x.fff = 8;", "y");
+				"x.fff = 8;", "y", 43);
 			return testProposals(results, [
 				["y", "y : String"]
 			]);
 		});
 		it("test full file inferecing 7", function() {
 			var results = computeContentAssist(
-				"function a() { x.fff = ''; var y = x(); y/**/}\n" +
-				"var x = function() { return 8; }", "y");
+				"function a() { x.fff = ''; var y = x(); y}\n" +
+				"var x = function() { return 8; }", "y", 41);
 			return testProposals(results, [
 				["y", "y : Number"]
 			]);
 		});
 		it("test full file inferecing 8", function() {
 			var results = computeContentAssist(
-				"function a() { x.fff = ''; var y = z(); y/**/}\n" +
-				"var x = function() { return 8; }, z = x", "y");
+				"function a() { x.fff = ''; var y = z(); y}\n" +
+				"var x = function() { return 8; }, z = x", "y", 41);
 			return testProposals(results, [
 				["y", "y : Number"]
 			]);
@@ -3832,27 +3800,14 @@ define([
 	
 		it("test full file inferecing 9", function() {
 			var results = computeContentAssist(
-				"function a() {\n" +
-				"  function b() {\n" +
-				"    x.fff = '';\n" +
-				"  }\n" +
-				"  x.f/**/\n" +
-				"}\n" +
-				"var x = {};", "f");
+				"function a() {\n function b() {\n x.fff = '';\n }\n x.f\n}\n var x = {};", "f", 51);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
 		});
 		it("test full file inferecing 10", function() {
 			var results = computeContentAssist(
-				"function a() {\n" +
-				"  function b() {\n" +
-				"    x.fff = '';\n" +
-				"  }\n" +
-				"  var y = x;\n" +
-				"  y.f/**/\n" +
-				"}\n" +
-				"var x = {};", "f");
+				"function a() {\n function b() {\n x.fff = '';\n }\n var y = x;\n y.f\n }\n var x = {};", "f", 63);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
@@ -3860,14 +3815,7 @@ define([
 	
 		it("test full file inferecing 11a", function() {
 			var results = computeContentAssist(
-				"var x = {};\n" +
-				"function a() {\n" +
-				"  var y = x;\n" +
-				"  y.f/**/\n" +
-				"  function b() {\n" +
-				"    x.fff = '';\n" +
-				"  }\n" +
-				"}", "f");
+				"var x = {};\n function a() {\n var y = x;\n y.f\n function b() {\n x.fff = '';\n}\n}", "f", 44);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
@@ -3875,14 +3823,7 @@ define([
 	
 		it("test full file inferecing 11", function() {
 			var results = computeContentAssist(
-				"function a() {\n" +
-				"  var y = x;\n" +
-				"  y.f/**/\n" +
-				"  function b() {\n" +
-				"    x.fff = '';\n" +
-				"  }\n" +
-				"}\n" +
-				"var x = {};", "f");
+				"function a() {\n var y = x;\n y.f\n function b() {\n x.fff = '';\n }\n }\n var x = {};", "f", 31);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
@@ -3890,12 +3831,7 @@ define([
 	
 		it("test full file inferecing 12", function() {
 			var results = computeContentAssist(
-				"function a() {\n" +
-				"  var y = x;\n" +
-				"  y.f/**/\n" +
-				"  x.fff = '';\n" +
-				"}\n" +
-				"var x = {};", "f");
+				"function a() {\n var y = x;\n y.f\n x.fff = '';\n }\n var x = {};", "f", 31);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
@@ -3903,14 +3839,7 @@ define([
 	
 		it("test full file inferecing 13", function() {
 			var results = computeContentAssist(
-				"function b() {\n" +
-				"  x.fff = '';\n" +
-				"}\n" +
-				"function a() {\n" +
-				"  var y = x;\n" +
-				"  y.f/**/\n" +
-				"}\n" +
-				"var x = {};", "f");
+				"function b() {\n x.fff = '';\n }\n function a() {\n var y = x;\n y.f\n }\n var x = {};", "f", 63);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
@@ -3918,14 +3847,7 @@ define([
 	
 		it("test full file inferecing 14", function() {
 			var results = computeContentAssist(
-				"function a() {\n" +
-				"  var y = x;\n" +
-				"  y.f/**/\n" +
-				"}\n" +
-				"function b() {\n" +
-				"  x.fff = '';\n" +
-				"}\n" +
-				"var x = {};", "f");
+				"function a() {\n  var y = x;\n y.f\n }\n function b() {\n x.fff = '';\n }\n var x = {};", "f", 32);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
@@ -3933,13 +3855,7 @@ define([
 	
 		it("test full file inferecing 15", function() {
 			var results = computeContentAssist(
-				"function b() {\n" +
-				"  x.fff = '';\n" +
-				"}\n" +
-				"function a() {\n" +
-				"  x.f/**/\n" +
-				"}\n" +
-				"var x = {};", "f");
+				"function b() {\n x.fff = '';\n }\n function a() {\n x.f\n }\n var x = {};", "f", 51);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
@@ -3949,26 +3865,14 @@ define([
 		// is defined after and in another funxtion
 		it("test full file inferecing 16", function() {
 			var results = computeContentAssist(
-				"function a() {\n" +
-				"  x.f/**/\n" +
-				"}\n" +
-				"function b() {\n" +
-				"  x.fff = '';\n" +
-				"}\n" +
-				"var x = {};", "f");
+				"function a() {\n x.f\n }\n function b() {\n x.fff = '';\n }\n var x = {};", "f", 19);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
 		});
 		it("test full file inferecing 17", function() {
 			var results = computeContentAssist(
-				"function a() {\n" +
-				"  x.f/**/\n" +
-				"  function b() {\n" +
-				"    x.fff = '';\n" +
-				"  }\n" +
-				"}\n" +
-				"var x = {};", "f");
+				"function a() {\n x.f\n function b() {\n x.fff = '';\n }\n }\n var x = {};", "f", 19);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
@@ -3976,13 +3880,7 @@ define([
 	
 		it("test full file inferecing 18", function() {
 			var results = computeContentAssist(
-				"function a() {\n" +
-				"  x.fff = '';\n" +
-				"  function b() {\n" +
-				"    x.f/**/\n" +
-				"  }\n" +
-				"}\n" +
-				"var x = {};", "f");
+				"function a() {\n x.fff = '';\n function b() {\n x.f\n }\n }\n var x = {};", "f", 48);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
@@ -3990,13 +3888,7 @@ define([
 	
 		it("test full file inferecing 19", function() {
 			var results = computeContentAssist(
-				"function a() {\n" +
-				"  function b() {\n" +
-				"    x.f/**/\n" +
-				"  }\n" +
-				"  x.fff = '';\n" +
-				"}\n" +
-				"var x = {};", "f");
+				"function a() {\n function b() {\n x.f\n }\n x.fff = '';\n }\n var x = {};", "f", 35);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
@@ -4005,20 +3897,16 @@ define([
 		// don't find anything because assignment is in same scope, but after
 		it("test full file inferecing 20", function() {
 			var results = computeContentAssist(
-				"x./**/\n" +
+				"x.\n" +
 				"var x = {};\n" +
-				"x.fff = '';", "f");
+				"x.fff = '';", "f", 2);
 			return testProposals(results, [
 			]);
 		});
 	
 		it("test full file inferecing 21", function() {
 			var results = computeContentAssist(
-				"function a() {\n" +
-				"x.fff = '';\n" +
-				"}\n" +
-				"x./**/\n" +
-				"var x = {}; ", "f");
+				"function a() {\n x.fff = '';\n }\n x.\n var x = {}; ", "f", 34);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
@@ -4026,77 +3914,19 @@ define([
 	
 		it("test full file inferecing 22", function() {
 			var results = computeContentAssist(
-				"x./**/\n" +
+				"x.\n" +
 				"function a() {\n" +
 				"x.fff = '';\n" +
 				"}\n" +
-				"var x = {}; ", "f");
+				"var x = {}; ", "f", 2);
 			return testProposals(results, [
 				["fff", "fff : String"]
 			]);
 		});
 	
-		// disabling next three tests since, empirically, we do
-		// better by only deferring type inference for the closest
-		// enclosing function of the completion.  --MS
-		
-	//	it("test full file inferecing 23", function() {
-	//		var results = computeContentAssist(
-	//			"function a() {\n" +
-	//			"  function b() {\n" +
-	//			"    x.f/**/\n" +
-	//			"  }\n" +
-	//			"  x.fff = '';\n" +
-	//			"}\n" +
-	//			"var x = {ff2 : ''};", "f");
-	//		return testProposals(results, [
-	//			["ff2", "ff2 : String"],
-	//			["fff", "fff : String"]
-	//		]);
-	//	});
-	//
-	//	it("test full file inferecing 24", function() {
-	//		var results = computeContentAssist(
-	//			"function a() {\n" +
-	//			"  function b() {\n" +
-	//			"    var y = x;\n" +
-	//			"    y.f/**/\n" +
-	//			"  }\n" +
-	//			"  x.fff = '';\n" +
-	//			"}\n" +
-	//			"var x = {ff2 : ''};", "f");
-	//		return testProposals(results, [
-	//			["ff2", "ff2 : String"],
-	//			["fff", "fff : String"]
-	//		]);
-	//	});
-	//
-	//	it("test full file inferecing 25", function() {
-	//		var results = computeContentAssist(
-	//			"function a() {\n" +
-	//			"  function b() {\n" +
-	//			"    x.f/**/\n" +
-	//			"  }\n" +
-	//			"  var y = x;\n" +
-	//			"  y.fff = '';\n" +
-	//			"}\n" +
-	//			"var x = {ff2 : ''};", "f");
-	//		return testProposals(results, [
-	//			["ff2", "ff2 : String"],
-	//			["fff", "fff : String"]
-	//		]);
-	//	});
-	
-	
 		it("test full file inferecing 26", function() {
 			var results = computeContentAssist(
-				"function a() {\n" +
-				"  function b() {\n" +
-				"    var fff = x();\n" +
-				"    f/**/;\n" +
-				"  }\n" +
-				"}\n" +
-				"function x() { return ''; }", "f");
+				"function a() {\n function b() {\n var fff = x();\n f;\n }\n }\n function x() { return ''; }", "f", 49);
 			return testProposals(results, [
 				["fff", "fff : String"],
 				["", "---------------------------------"],
@@ -4107,9 +3937,7 @@ define([
 		// Not inferencing String because function decl comes after reference in same scope
 		it("test full file inferecing 27", function() {
 			var results = computeContentAssist(
-				"var fff = x();\n" +
-				"f/**/;\n" +
-				"function x() { return ''; }", "f");
+				"var fff = x();\n f;\n function x() { return ''; }", "f", 17);
 			return testProposals(results, [
 				["Function()", "Function() : Function"],
 				["fff", "fff : {}"]
@@ -4119,10 +3947,7 @@ define([
 		// Not gonna work because of recursive
 		it("test full file inferecing 28", function() {
 			var results = computeContentAssist(
-				"function x() {\n" +
-				"  var fff = x();\n" +
-				"  f/**/;\n" +
-				"  return ''; }", "f");
+				"function x() {\n var fff = x();\n f;\n return ''; }", "f", 33);
 			return testProposals(results, [
 				["fff", "fff : undefined"],
 				["", "---------------------------------"],
@@ -4132,13 +3957,7 @@ define([
 	
 		it("test full file inferecing 29", function() {
 			var results = computeContentAssist(
-				"function a() {\n" +
-				"  function b() {\n" +
-				"    var fff = x();\n" +
-				"    f/**/;\n" +
-				"  }\n" +
-				"}\n" +
-				"var x = function() { return ''; }", "f");
+				"function a() {\n function b() {\n var fff = x();\n f;\n }\n }\n var x = function() { return ''; }", "f", 49);
 			return testProposals(results, [
 				["fff", "fff : String"],
 				["", "---------------------------------"],
@@ -4149,9 +3968,7 @@ define([
 		// Not working because function decl comes after reference in same scope
 		it("test full file inferecing 30", function() {
 			var results = computeContentAssist(
-				"var fff = x();\n" +
-				"f/**/;\n" +
-				"var x = function() { return ''; }", "f");
+				"var fff = x();\n f;\n var x = function() { return ''; }", "f", 17);
 			return testProposals(results, [
 				["Function()", "Function() : Function"],
 				["fff", "fff : {}"]
@@ -4161,7 +3978,7 @@ define([
 		// Not gonna work because of recursive
 		it("test full file inferecing 31", function() {
 			var results = computeContentAssist(
-				"var x = function() { var fff = x();\nf/**/;return ''; }", "f");
+				"var x = function() { var fff = x();\nf;return ''; }", "f", 37);
 			return testProposals(results, [
 				["fff", "fff : undefined"],
 				["", "---------------------------------"],
@@ -4171,8 +3988,7 @@ define([
 	
 		it("test full file inferecing 32", function() {
 			var results = computeContentAssist(
-				"x/**/\n" +
-				"function x() { return ''; }", "x");
+				"x\n function x() { return ''; }", "x", 1);
 			return testProposals(results, [
 				["x()", "x() : String"]
 			]);
@@ -4180,10 +3996,7 @@ define([
 	
 		it("test full file inferecing 33", function() {
 			var results = computeContentAssist(
-				"var xxx = {\n" +
-				"	aaa: '',\n" +
-				"	bbb: this.a/**/\n" +
-				"};", "a");
+				"var xxx = {\n aaa: '',\n bbb: this.a\n};", "a", 34);
 			return testProposals(results, [
 				["aaa", "aaa : String"]
 			]);
@@ -4192,9 +4005,9 @@ define([
 		it("test full file inferecing 34", function() {
 			var results = computeContentAssist(
 				"var xxx = {\n" +
-				"	bbb: this.a/**/,\n" +
+				"	bbb: this.a,\n" +
 				"	aaa: ''\n" +
-				"};", "a");
+				"};", "a", 24);
 			return testProposals(results, [
 				["aaa", "aaa : String"]
 			]);
@@ -4218,8 +4031,8 @@ define([
 		it("test property read after", function() {
 			var results = computeContentAssist(
 				"var xxx;\n" +
-				"xxx.ll/**/;\n" +
-				"xxx.lll++;", "ll");
+				"xxx.ll;\n" +
+				"xxx.lll++;", "ll", 15);
 			return testProposals(results, [
 				["lll", "lll : {}"]
 			]);
@@ -4236,8 +4049,7 @@ define([
 	
 		it("test property read global after", function() {
 			var results = computeContentAssist(
-				"ll/**/;\n" +
-				"lll++;", "ll");
+				"ll;\n lll++;", "ll", 2);
 			return testProposals(results, [
 				["lll", "lll : {}"]
 			]);
@@ -4409,22 +4221,14 @@ define([
 		// Issue 221 problems with navigating to proto definitions inside of constructors
 		it('test proto ref in this1', function() {
 			var results = computeContentAssist(
-				"function TextView () {\n" +
-				"	this._init/**/;\n" +
-				"}\n" +
-				"TextView.prototype = {\n" +
-				"	_init: function() { }\n" +
-				"};", "_init");
+				"function TextView () {\n this._init;\n }\n TextView.prototype = {\n _init: function() { }\n };", "_init", 34);
 			return testProposals(results, [
 				["_init()", "_init() : TextView.prototype._init"]
 			]);
 		});
 		it('test proto ref in this2 - ', function() {
 			var results = computeContentAssist(
-				"function TextView () {\n" +
-				"	this._init/**/;\n" +
-				"}\n" +
-				"TextView.prototype._init = function() { };", "_init");
+				"function TextView () {\n this._init;\n }\n TextView.prototype._init = function() { };", "_init", 34);
 			return testProposals(results, [
 				["_init()", "_init() : TextView.prototype._init"]
 			]);
@@ -4433,7 +4237,7 @@ define([
 			var results = computeContentAssist(
 				"function TextView () { }\n" +
 				"TextView.prototype._init = function() { };\n" +
-				"new TextView()._init/**/", "_init");
+				"new TextView()._init", "_init");
 			return testProposals(results, [
 				["_init()", "_init() : TextView.prototype._init"]
 			]);
@@ -4541,7 +4345,7 @@ define([
 		});
 		it("test lowercase constructor 1", function() {
 			var results = computeContentAssist(
-			"function fun() {\n	this.xxx = 9;\n	this.uuu = this.x/**/;}", "x");
+			"function fun() {\n	this.xxx = 9;\n	this.uuu = this.x;}", "x", 50);
 			return testProposals(results, [
 				["xxx", "xxx : Number"]
 			]);
@@ -4564,7 +4368,7 @@ define([
 		});
 		it("test object literal usage-based inference", function() {
 			var results = computeContentAssist(
-				"var p = { xxxx: function() { }, yyyy: function() { this.x/**/; } };", "x");
+				"var p = { xxxx: function() { }, yyyy: function() { this.x; } };", "x", 57);
 			return testProposals(results, [
 				["xxxx()", "xxxx() : undefined"]
 			]);
@@ -4581,7 +4385,7 @@ define([
 	
 		it("test object literal usage-based inference 3", function() {
 			var results = computeContentAssist(
-				"var p = { f1: function(a) { this.cccc = a; }, f2: function(b) { this.dddd = b; }, f3: function() { var y = this.ccc/**/ } };", "ccc");
+				"var p = { f1: function(a) { this.cccc = a; }, f2: function(b) { this.dddd = b; }, f3: function() { var y = this.ccc } };", "ccc", 115);
 			return testProposals(results, [
 				["cccc", "cccc : {}"]
 			]);
@@ -4589,7 +4393,7 @@ define([
 	
 		it("test object literal usage-based inference 4", function() {
 			var results = computeContentAssist(
-				"var p = { o1: { cccc: 3 }, f1: function() { this.o1.ffff = 4; }, f2: function() { var y = this.o1.ccc/**/ } };", "ccc");
+				"var p = { o1: { cccc: 3 }, f1: function() { this.o1.ffff = 4; }, f2: function() { var y = this.o1.ccc } };", "ccc", 101);
 			return testProposals(results, [
 				["cccc", "cccc : Number"]
 			]);
@@ -4597,7 +4401,7 @@ define([
 	
 		it("test object literal usage-based inference 5", function() {
 			var results = computeContentAssist(
-				"var p = { o1: { cccc: 3 }, f1: function() { this.o1.ffff = 4; }, f2: function() { var y = this.o1.fff/**/ } };", "fff");
+				"var p = { o1: { cccc: 3 }, f1: function() { this.o1.ffff = 4; }, f2: function() { var y = this.o1.fff } };", "fff", 101);
 			return testProposals(results, [
 				["ffff", "ffff : Number"]
 			]);
@@ -4992,14 +4796,14 @@ define([
 		});
 	
 		it("test one-shot closure 1", function() {
-		    var results = computeContentAssist("var x = {ffff : 3 }; (function (p) { p.fff/**/ })(x);", "fff");
+		    var results = computeContentAssist("var x = {ffff : 3 }; (function (p) { p.fff })(x);", "fff", 42);
 		    return testProposals(results, [
 		       ["ffff", "ffff : Number"]
 		    ]);
 	     });
 	
 		it("test one-shot closure 2", function() {
-		    var results = computeContentAssist("(function() { var x = { y: { zzz: 3 }, f: function() { var s = this.y.zz/**/ } };}());", "zz");
+		    var results = computeContentAssist("(function() { var x = { y: { zzz: 3 }, f: function() { var s = this.y.zz } };}());", "zz", 72);
 		    return testProposals(results, [
 		       ["zzz", "zzz : Number"]
 		    ]);
