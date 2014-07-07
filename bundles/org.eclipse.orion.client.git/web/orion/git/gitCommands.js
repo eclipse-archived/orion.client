@@ -838,9 +838,9 @@ var exports = {};
 		});
 		commandService.addCommand(openGitCommit);
 		
-		var fetchCallback = function(data, force, confirm) {
+		var fetchCallback = function(data, force, confirmMsg) {
 			var d = new Deferred();
-			if (confirm && !confirm(confirm)) {
+			if (confirmMsg && !confirm(confirmMsg)) {
 				d.reject();
 				return d;
 			}
