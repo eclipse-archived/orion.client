@@ -30,14 +30,29 @@ define([
 		this.commit = options.commit;
 		this.showTags = options.showTags;
 		this.commitLink = options.commitLink;
+		this.fullMessage = options.fullMessage;
 	}
 	
 	objects.mixin(GitCommitInfo.prototype, {
 		display: function(){
 			var commit = this.commit;
 			var tableNode = this.parent;
+			var fullMessage = this.fullMessage;
+			
+			var headerMessage;
+			var additionalOffset = 0;
+			
+			if(fullMessage){
+				headerMessage = commit.Message.split(/(\r?\n|$)/)[0].trim();
+				if (headerMessage.length > 100) {
+					var cutPoint = headerMessage.indexOf(" ", 90); //$NON-NLS-0$
+					headerMessage = headerMessage.substring(0, (cutPoint !== -1 ? cutPoint : 100)) + "...";
+					additionalOffset = 3;
+				}
+			} else {
+				headerMessage = util.trimCommitMessage(commit.Message);
+			}
 	
-			var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
 			var link;
 			if (this.commitLink) {
 				link = document.createElement("a"); //$NON-NLS-0$
@@ -46,8 +61,20 @@ define([
 			} else {
 				link = document.createElement("span"); //$NON-NLS-0$
 			}
-			link.appendChild(document.createTextNode(util.trimCommitMessage(commitMessage0)));
+			link.appendChild(document.createTextNode(headerMessage));
 			tableNode.appendChild(link);
+			
+			var secondaryMessageLength = commit.Message.length - (headerMessage.length + additionalOffset);
+			if(fullMessage && secondaryMessageLength > 0){
+				var secondaryMessagePre = document.createElement("pre");
+				secondaryMessagePre.style.paddingBottom = "15px";
+				secondaryMessagePre.style.marginTop = "0px";
+				
+				var secondaryMessage = (additionalOffset > 0) ? "..." : "";
+				secondaryMessage += commit.Message.substring(headerMessage.length - additionalOffset);
+				secondaryMessagePre.appendChild(document.createTextNode(secondaryMessage));
+				tableNode.appendChild(secondaryMessagePre);
+			}
 			
 			var textDiv = document.createElement("div"); //$NON-NLS-0$
 			textDiv.style.paddingTop = "15px"; //$NON-NLS-0$
