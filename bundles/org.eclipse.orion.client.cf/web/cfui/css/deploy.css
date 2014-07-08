@@ -7,12 +7,51 @@
 
 html, body {
     min-width: 350px;
+	font-family: Arial,sans-serif;
+	font-size: 12px;
+}
+
+select, .manifest{
+	height: 24px;
+	width: 250px;
+}
+
+input:invalid, .invalid {
+	box-shadow: 0px 0px 5px rgba(255,0,0,0.6);
 }
 
 .dialogFrame {
 	background-color: #fdfdfd;
 }
 
+.dialogTitle .closeDialog {
+	margin: 0;
+	cursor: pointer;
+}
+
+.deployForm {
+	overflow: hidden;
+	margin: 15px;
+	min-height: 140px;
+}
+
+.deployForm td {
+	padding-top: 4px;
+}
+
+.formTable{
+	width: 100%;
+}
+
+.selectCell {
+	text-align: right;
+}
+
+.hidden {
+	display: none;
+}
+
+/* -- message area */
 #messageArea{
 	display: table-cell;
     width: calc(100% - 16px);
@@ -26,46 +65,81 @@ html, body {
 	display: table;
     width: calc(100% - 15px);
 }
-
-.Spaces{
+.messageContainer {
+	display: none;
+	padding-top: 2px;
+	position: absolute;
+	text-align: center;
 	width: 100%;
 }
 
-#orgsSection{
-    border: 0 none;
-    box-shadow: none;
-    margin-bottom: 10px;
+.messageContainer.showing {
+	display: block;	
 }
 
-#orgsDropdown{
-    float: right;
-    text-align: right;
-    width: calc(100% - 80px);
-}
-
-#orgsLabel{
-    border: 0 none;
-    float: left;
-    padding-top: 4px;
-    width: 80px;
-}
-
-#spacesTree{
-    margin-bottom: 0;
-    max-height: 100px;
-    overflow-y: auto;
-}
-
-.progressWatch {
-	top: 3px;
-	position: relative;
+.messageLabel {
+	background-color: #DBEB8F;
+	border-radius: 5px;
+	color: black;
 	display: inline-block;
+	padding: 4px 5px;
+}
+/* end message area -- */
+
+.manifest{
+	text-align: left;
 }
 
-.watchButton {
-	position: relative;
+/* -- dev section */
+.devSection {
+	border: 1px solid #dadada;
+	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.098), 0 1px 0 0 rgba(0, 0, 0, 0.098);
+	margin-top: 10px;
+	padding: 10px 10px 10px 10px;
+	min-height: 50px;
 }
+.devSection label {
+	-ms-user-select: none;
+	-moz-user-select: -moz-none;
+	-webkit-user-select: none;
+	user-select: none;
+}
+.devSection tr:last-child {
+	margin-bottom: 0;
+}
+.field {
+	width: 175px;
+}
+/* end dev section -- */
 
-.watchBody{
-	position: relative;
+/* -- button row */
+.buttonRow {
+    bottom: 20px;
+    position: absolute;
+    right: 20px;
 }
+.buttonRow .orionButton {
+	border: none;
+	border-radius: 5px;
+	/*background-color: #DFE6EB;*/
+	color: black;
+	cursor: pointer;
+	font-size: 9pt;
+	padding: 7.5px;
+}
+.buttonRow .orionButton:hover {
+	background-color: #e9eff2;
+	box-shadow: none;
+}
+.buttonRow .orionButton.commandButton.disabled {
+	cursor: default;
+	opacity: 0.5;
+}
+.buttonRow .deployButton.orionButton {
+	background-color: #cedce7;
+	margin-right: 12px;
+}
+.buttonRow .orionButton:last-child {
+	margin-right: 0;
+}
+/* end button row -- */

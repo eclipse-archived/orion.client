@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="css/deploy.css" />
@@ -19,40 +20,52 @@
 <body id="deployBody" class="dialogFrame">
 
 	<div class="dialogTitle" id="titleBar">
-		<span id="title" class="dialogTitleText layoutLeft">
-		</span>
-		<button aria-label="Close" class="dismissButton layoutRight core-sprite-close imageSprite" id="closeDialog">
-		</button>
-	</div>
-	
-	<div style="display: table;" id="messageRow">
-		<div style="display: table-row">
-			<div id="messageArea"><label id="messageLabel"></label></div>
-			<div id="progressPane" style="display: table-cell;" class="progressWatch" tabindex="0" role="progressbar">
-				<div id="watchButton" class="watchButton"></div>
-				<div id="watchBody" class="watchBody">
-					<span class="hand longMinute">
-						<span class="darkSide"></span>
-					</span>
-					<span class="hand longHour">
-						<span class="darkSide"></span>
-					</span>
-				</div>
-			</div>
-		</div>
+		<span id="title" class="dialogTitleText layoutLeft"></span>
+		<button aria-label="Close" class="dismissButton layoutRight core-sprite-close imageSprite" id="closeDialog"></button>
 	</div>
 	
 	<div>
-		
-		<div style="overflow: hidden; margin: 15px; min-height: 140px">
-			<div id="orgsSection"></div>
-			<div id="spacesTree">
+		<div id="messageContainer" class="messageContainer"><span id="messageLabel" class="messageLabel"></span></div>
+		<form id="deployForm" class="deployForm hidden">
+			<table class="formTable">
+				<tr>
+					<td id="orgsLabel" class="label"></td>
+					<td id="orgs" class="selectCell"></td>
+				</tr>
+				<tr>
+					<td id="spacesLabel" class="label"></td>
+					<td id="spaces" class="selectCell"></td>
+				</tr>
+				<tr>
+					<td id="manifestLabel" class="label"></td>
+					<td id="manifest" class="manifest"></td>
+				</tr>
+			</table>
+			<fieldset id="devSection" class="devSection">
+				<table>
+					<tr>
+						<td colspan="2"><label title="Deploys your Node.js application with built-in debugger.">
+							<input type="checkbox" id="devCheckbox"> Deploy in development mode</label>
+						</td>
+					</tr>
+					<tr>
+						<td><label for="devPassword">Debugger password:</label></td>
+						<td><input type="password" id="devPassword" class="field" disabled
+							title="Enter a password to prevent unauthorized access to the debugger."></td>
+					</tr>
+					<tr>
+						<td><label for="devUrlPrefix">Debugger URL prefix:</label></td>
+						<td><input type="text" id="devUrlPrefix" class="field" placeholder="launcher"
+							title="Prefix for URLs reserved by the debugger."></td>
+					</tr>
+				</table>
+				<legend>Development Options for Node.js apps</legend>
+			</fieldset>
+			<div class="buttonRow">
+				<button class="orionButton commandButton deployButton" id="okbutton" type="button" value="OK">Deploy</button>
+				<button class="orionButton commandButton" id="cancelButton" type="button" value="CANCEL">Cancel</button>
 			</div>
-		</div>
-		
-		<div style="padding: 5px;" id="okRow">
-		    <button class="orionButton commandButton" style="float: right;margin-right: 20px;" id="okbutton" type="button" value="OK">OK</button>    
-		</div>
+		</form>
 	</div>
 	
 </body>

@@ -104,6 +104,11 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 				name: messages['Manage URL'],
 				type: "string",
 				defaultValue: manageUrl
+			}, {
+				id: "showDevDeploy",
+				name: "Show development options for Node.js (beta)",
+				type: "boolean",
+				defaultValue: false,
 			}]
 		}]
 	});
