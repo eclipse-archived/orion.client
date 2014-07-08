@@ -142,16 +142,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
 
     SearchResultRenderer.prototype.getCellHeaderElement = function(col_no) {
-        var title = null;
-        if (col_no === 0) {
-        	title = _createElement("th"); //$NON-NLS-0$
-        } else if (col_no === 1) {
-            title = _createElement("th"); //$NON-NLS-0$
-            var h2 = _createElement("h2", "search_header", null, title); //$NON-NLS-1$  //$NON-NLS-0$
-            h2.textContent = _headerString(this.explorer.model);
-        }
-        
-        return title;
+        return null;
     };
 
     SearchResultRenderer.prototype.focus = function() {
@@ -215,11 +206,31 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }
 		var params = helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, null, helper.params.replace, true) : null;
 		var name = this.explorer.model._filterText ? null : renderName;
-		var link = navigatorRenderer.createLink(null, {Location: item.location, Name: name}, this.explorer._commandService, this.explorer._contentTypeService,
-			this.explorer._openWithCommands, {id:this.getItemLinkId(item)}, params, {holderDom: this._lastFileIconDom});
+		var link = null;
+		var folders = item.fullPathName.split("/");
+		var parentFolder = folders[folders.length - 1];
+		var parentSpan = document.createElement("span"); //$NON-NLS-0$
+		parentSpan.classList.add("fileParentSpan"); //$NON-NLS-0$
+		parentSpan.appendChild(document.createTextNode(parentFolder + "/")); //$NON-NLS-0$
+		
+		if (this.explorer.model.replaceMode()) {
+			link = document.createTextNode(renderName);
+			spanHolder.classList.add("replaceFileNameSpan"); //$NON-NLS-0$
+			spanHolder.appendChild(parentSpan);
+		} else {
+			link = navigatorRenderer.createLink(null, 
+					{Location: item.location, Name: name}, 
+					this.explorer._commandService, 
+					this.explorer._contentTypeService,
+					this.explorer._openWithCommands, 
+					{id:this.getItemLinkId(item)}, 
+					params, 
+					{holderDom: this._lastFileIconDom});
+			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
+			link.insertBefore(parentSpan, link.firstChild);
+		}
         spanHolder.appendChild(link);
         spanHolder.classList.add("fileNameSpan"); //$NON-NLS-0$
-        mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
     };
 
     SearchResultRenderer.prototype.generateContextTip = function(detailModel) {
@@ -386,15 +397,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         return this.explorer.model.getId(item) + "_detailIcon"; //$NON-NLS-0$
     };
 
-    SearchResultRenderer.prototype.renderLocationElement = function(item, onSpan) {
-        var spanHolder = onSpan ? onSpan : lib.node(this.getLocationSpanId(item));
-        _empty(spanHolder);
-        var scopeParams = this.explorer.model.getScopingParams(item);
-        
-        spanHolder.appendChild(document.createTextNode("[" + scopeParams.name + "]"));
-        spanHolder.classList.add("fileLocationSpan"); //$NON-NLS-0$
-    };
-
     SearchResultRenderer.prototype.getPrimColumnStyle = function(item) {
         if(item && item.type === "file") { //$NON-NLS-0$
         	return "search_primaryColumn"; //$NON-NLS-0$
@@ -437,11 +439,23 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                     //render file location
                     span = _createSpan(null, this.getLocationSpanId(item), col, null);
                     if (item.parentLocation) {
-                        this.renderLocationElement(item, span);
+						var scopeParams = this.explorer.model.getScopingParams(item);
+						tableRow.title = scopeParams.name;
                     }
+                } else {
+					this.renderDetailLineNumber(item, span);
+                    span.classList.add("searchDetailLineNumber"); //$NON-NLS-0$
+                    
+                    this.renderDetailElement(item, col);
+                }
+                break;
+			case 20: //TODO fix look and feel, re-enable
+				if (item.type === "file") { //$NON-NLS-0$
+					col = _createElement('td'); //$NON-NLS-0$
                     var button = _createElement("button", ["imageSprite", "core-sprite-delete", "dismissButton", "deleteSearchRowButton"], null, col); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					button.title = messages["Remove from search results"]; //$NON-NLS-0$
                     button.addEventListener("click", function(){ //$NON-NLS-0$
+                    //TODO fix behavior in replace preview mode
                     	var model = this.explorer.model;
                     	model.removeChild(item.parent, item);
                     	this.explorer.getNavHandler().refreshModel(this.explorer.getNavDict(), model, model.children);
@@ -456,14 +470,9 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             			}
             			
             			//TODO update match count, maybe...
-                    }.bind(this));                    
-                } else {
-					this.renderDetailLineNumber(item, span);
-                    span.classList.add("searchDetailLineNumber"); //$NON-NLS-0$
-                    
-                    this.renderDetailElement(item, col);
+                    }.bind(this));
                 }
-                break;
+				break;
         }
         
         return col;
@@ -584,12 +593,13 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
      * Creates a new search result explorer.
      * @name orion.InlineSearchResultExplorer
      */
-    function InlineSearchResultExplorer(registry, commandService) {
+    function InlineSearchResultExplorer(registry, commandService, inlineSearchPane) {
         this.registry = registry;
         this._commandService = commandService;
         this.fileClient = new mFileClient.FileClient(this.registry);
         this.defaulRows = 40;
 		this._contentTypeService = new mContentTypes.ContentTypeRegistry(this.registry);
+		this._inlineSearchPane = inlineSearchPane;
         this.declareCommands();
     }
 
@@ -627,15 +637,13 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }
 
         this._reporting = false;
-        this._uiFactory = null;
         this._currentPreviewModel = null;
         this._currentReplacedContents = {
             contents: null
         };
         this._popUpContext = false;
-        this.timerRunning -= false;
         this._timer = null;
-        this.twoWayCompareView = null;
+        this.compareView = null;
     };
 
     /* one-time setup of commands */
@@ -653,46 +661,51 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 return that.model && that.model.replaceMode() && !that._reporting && that._hasCheckedItems;
             }
         });
-
-        var hideCompareCommand = new mCommands.Command({
-            name: messages["Hide Compare"],
-            tooltip: messages["Hide compare view of changes"],
-            id: "orion.globalSearch.hideCompare", //$NON-NLS-0$
-            callback: function(data) {
-                that.toggleCompare(false);
-            },
-            visibleWhen: function(item) {
-                return that.model && that.model.replaceMode() && !that._reporting && that._uiFactory;
-            }
-        });
-
-        var showCompareCommand = new mCommands.Command({
-            name: messages["Show Compare"],
-            tooltip: messages["Show compare view of changes"],
-            id: "orion.globalSearch.showCompare", //$NON-NLS-0$
-            callback: function(data) {
-                that.toggleCompare(true);
-            },
-            visibleWhen: function(item) {
-                return that.model && that.model.replaceMode() && !that._reporting && !that._uiFactory;
-            }
-        });
-
-        this._commandService.addCommand(hideCompareCommand);
-        this._commandService.addCommand(showCompareCommand);
-        this._commandService.addCommand(replaceAllCommand);
-        this._commandService.addCommandGroup("pageActions", "orion.searchActions.unlabeled", 200); //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.hideCompare", 1, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.showCompare", 2, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.replaceAll", 3, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
         
-        mExplorer.createExplorerCommands(this._commandService, function(item) {
+        var nextResultCommand = new mCommands.Command({
+            tooltip: messages["Next result"],
+            imageClass: "core-sprite-move-down", //$NON-NLS-0$
+            id: "orion.search.nextResult", //$NON-NLS-0$
+            groupId: "orion.searchGroup", //$NON-NLS-0$
+            visibleWhen: function(item) {
+                return !that._reporting && (that.getItemCount() > 0);
+            },
+            callback: function() {
+                that.gotoNext(true, true);
+            }
+        });
+        var prevResultCommand = new mCommands.Command({
+            tooltip: messages["Previous result"],
+            imageClass: "core-sprite-move-up", //$NON-NLS-0$
+            id: "orion.search.prevResult", //$NON-NLS-0$
+            groupId: "orion.searchGroup", //$NON-NLS-0$
+            visibleWhen: function(item) {
+                return !that._reporting && (that.getItemCount() > 0);
+            },
+            callback: function() {
+                that.gotoNext(false, true);
+            }
+        });
+        this._commandService.addCommand(nextResultCommand);
+        this._commandService.addCommand(prevResultCommand);
+
+        this._commandService.addCommand(replaceAllCommand);
+        this._commandService.addCommandGroup("searchPageActions", "orion.searchActions.unlabeled", 200); //$NON-NLS-1$ //$NON-NLS-0$
+        
+         mExplorer.createExplorerCommands(this._commandService, function(item) {
 			var emptyKeyword = false;
 			if(that.model._provideSearchHelper && that.model._provideSearchHelper().params.keyword === ""){
 				emptyKeyword = true;
 			}
 			return !item._reporting && !emptyKeyword;
         });
+        
+        this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.replaceAll", 1); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        
+        this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.expandAll", 2); //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.collapseAll", 3); //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.search.nextResult", 4); //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.search.prevResult", 5); //$NON-NLS-1$ //$NON-NLS-0$
     };
 
     InlineSearchResultExplorer.prototype._checkStale = function(model) {
@@ -746,19 +759,19 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 
     InlineSearchResultExplorer.prototype.preview = function() {
         var that = this;
-        this._commandService.openParameterCollector("pageActions", function(parentDiv) { //$NON-NLS-0$
+        this._commandService.openParameterCollector("searchPageActions", function(parentDiv) { //$NON-NLS-0$
             // create replace text
             var replaceStringDiv = _createElement('input', null, "globalSearchReplaceWith", parentDiv); //$NON-NLS-1$  //$NON-NLS-0$
             replaceStringDiv.type = "text"; //$NON-NLS-0$
             replaceStringDiv.name = "ReplaceWith:"; //$NON-NLS-0$
             replaceStringDiv.placeholder = "Replace With"; //$NON-NLS-0$
             replaceStringDiv.onkeydown = function(e) {
-                if (e.keyCode === 13 /*Enter*/ ) {
+                if (e.keyCode === lib.KEY.ENTER) {
                     var replaceInputDiv = lib.node("globalSearchReplaceWith"); //$NON-NLS-0$
                     that._commandService.closeParameterCollector();
                     return that._doPreview(replaceInputDiv.value);
                 }
-                if (e.keyCode === 27 /*ESC*/ ) {
+                if (e.keyCode === lib.KEY.ESCAPE) {
                     that._commandService.closeParameterCollector();
                     return false;
                 }
@@ -859,18 +872,16 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     InlineSearchResultExplorer.prototype.replacePreview = function(init, comparing) {
         _empty(this.getParentDivId());
         if (comparing) {
-            this._uiFactory = new mSearchFeatures.SearchUIFactory({
-                parentDivID: this.getParentDivId()
-            });
-            this._uiFactory.buildUI();
-            this.twoWayCompareView = null;
+            if (this.compareView) {
+            	this.compareView.destroy();
+            	this.compareView = null;
+            }
             this._currentPreviewModel = null;
         } else {
-            if (this._uiFactory) {
-                this._uiFactory.destroy();
+            if (this.compareView) {
+            	this.compareView.destroy();
+            	this.compareView = null;
             }
-            this._uiFactory = null;
-            this.twoWayCompareView = null;
             this._currentPreviewModel = null;
         }
         this.initCommands();
@@ -878,7 +889,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             this.reportStatus(messages["Preparing preview..."]);
         }
         var that = this;
-        this.createTree(this._uiFactory ? this._uiFactory.getMatchDivID() : this.getParentDivId(), this.model, {
+		this.createTree(this.getParentDivId(), this.model, {
             selectionPolicy: "singleSelection", //$NON-NLS-0$
             indent: 0,
             setFocus: false,
@@ -971,36 +982,31 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
 
     InlineSearchResultExplorer.prototype.buildPreview = function(updating) {
-        if (!this._uiFactory) {
-            return;
-        }
         if (_validFiles(this.model).length === 0) {
             return;
         }
-        var uiFactory = this._uiFactory;
         var fileItem = _getFileModel(this.getNavHandler().currentModel());
         this._currentPreviewModel = fileItem;
         var that = this;
         this.model.provideFileContent(fileItem, function(fileItem) {
-            if (that.model.onMatchNumberChanged) {
-                that.model.onMatchNumberChanged(fileItem);
+            if (this.model.onMatchNumberChanged) {
+                this.model.onMatchNumberChanged(fileItem);
             }
-			that.model.getReplacedFileContent(that._currentReplacedContents, updating, fileItem);
-			var replacedContents = that._currentReplacedContents.contents;
+			this.model.getReplacedFileContent(this._currentReplacedContents, updating, fileItem);
+			var replacedContents = this._currentReplacedContents.contents;
 			if(Array.isArray(replacedContents)){
-				replacedContents = that._currentReplacedContents.contents.join(that._currentReplacedContents.lineDelim);
+				replacedContents = this._currentReplacedContents.contents.join(this._currentReplacedContents.lineDelim);
 			}
             // Diff operations
-            var fileName = that.model.getFileName(fileItem);
-            var fType = that._contentTypeService.getFilenameContentType(fileName);
+            var fileName = this.model.getFileName(fileItem);
+            var fType = this._contentTypeService.getFilenameContentType(fileName);
             var options = {
                 readonly: true,
                 hasConflicts: false,
-                newFileOnRight: true,
                 oldFile: {
                     Name: fileItem.location,
                     Type: fType,
-                    Content: that.model.getFileContents(fileItem)
+                    Content: this.model.getFileContents(fileItem)
                 },
                 newFile: {
                     Name: fileItem.location,
@@ -1008,33 +1014,19 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                     Content: replacedContents
                 }
             };
-            if (!that.twoWayCompareView) {
-                that.uiFactoryCompare = new mCompareUIFactory.TwoWayCompareUIFactory({
-                    parentDivID: uiFactory.getCompareDivID(),
-                    showTitle: true,
-                    rightTitle: i18nUtil.formatMessage(messages["Replaced File (${0})"], fileName),
-                    leftTitle: i18nUtil.formatMessage(messages["Original File (${0})"], fileName),
-                    showLineStatus: false
-                });
-                that.uiFactoryCompare.buildUI();
-                options.uiFactory = that.uiFactoryCompare;
-                options.parentDivID =  uiFactory.getCompareDivID();
-                that.twoWayCompareView = new mCompareView.TwoWayCompareView(options);
-				that.twoWayCompareView.setOptions({highlighters: [new CompareStyler(that.registry), new CompareStyler(that.registry)]});
-                that.twoWayCompareView.startup();
-                that._uiFactory.setCompareWidget(that.twoWayCompareView);
+            if (!this.compareView) {           	
+				options.parentDivId = this._replaceCompareNode;
+                this.compareView = new mCompareView.InlineCompareView(options);
+                this.compareView.setOptions({highlighters: [new CompareStyler(this.registry)]});
+                this.compareView.startup();
             } else {
-                that.twoWayCompareView.setOptions(options);
-                that.twoWayCompareView.refresh(true);
+                this.compareView.setOptions(options);
+                this.compareView.refresh(true);
             }
-             _empty(that.uiFactoryCompare.getTitleDiv());
-            _place(document.createTextNode(i18nUtil.formatMessage(messages['Replaced File (${0})'], fileName)), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$ //$NON-NLS-0$
-            _empty(that.uiFactoryCompare.getTitleDiv(true));
-            _place(document.createTextNode(i18nUtil.formatMessage(messages['Original File (${0})'], fileName)), that.uiFactoryCompare.getTitleDiv(true), "only"); //$NON-NLS-1$ //$NON-NLS-0$
            window.setTimeout(function() {
-                that.renderer.focus();
-            }, 100);
-        });
+                this.renderer.focus();
+            }.bind(this), 100);
+        }.bind(this));
     };
     
     InlineSearchResultExplorer.prototype.caculateNextPage = function() {
@@ -1062,8 +1054,8 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 
     InlineSearchResultExplorer.prototype.initCommands = function() {
         var that = this;
-        this._commandService.destroy("pageActions"); //$NON-NLS-0$
-        this._commandService.renderCommands("pageActions", "pageActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.destroy("searchPageActions"); //$NON-NLS-0$
+        this._commandService.renderCommands("searchPageActions", "searchPageActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
         this._commandService.destroy("pageNavigationActions"); //$NON-NLS-0$
         this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -1196,9 +1188,9 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         if (!_onSameFile(this._currentPreviewModel, currentModel)) {
             this.buildPreview();
         }
-        if (currentModel.type === "detail") { //$NON-NLS-0$
+        if (this.compareView && (currentModel.type === "detail")) { //$NON-NLS-0$
 		    var detailInfo = this.model.getDetailInfo(currentModel);
-            this.twoWayCompareView.gotoDiff(detailInfo.lineNumber, detailInfo.matches[detailInfo.matchNumber].startIndex, false);
+			this.compareView.gotoDiff(detailInfo.lineNumber, detailInfo.matches[detailInfo.matchNumber].startIndex);
         }
     };
 
@@ -1207,25 +1199,14 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         if (this.model.storeLocationStatus) {
             this.model.storeLocationStatus(currentModel);
         }
-        var that = this;
         if (this.model.replaceMode()) {
-            if (!this._uiFactory) {
-                return;
-            }
-            if (!this._timer) {
-                this._timer = window.setTimeout(function() {
-                    that.onReplaceCursorChanged(prevModel, currentModel);
-                    that.timerRunning = false;
-                    that._timer = null;
-                }, 500);
-            } else if (this.timerRunning) {
-                window.clearTimeOut(this._timer);
-                this._timer = window.setTimeout(function() {
-                    that.onReplaceCursorChanged(prevModel, currentModel);
-                    that.timerRunning = false;
-                    that._timer = null;
-                }, 500);
-            }
+			if (this._timer) {
+				window.clearTimeout(this._timer);
+			}			
+            this._timer = window.setTimeout(function() {
+            	this._timer = null;
+                this.onReplaceCursorChanged(prevModel, currentModel);
+            }.bind(this), 200);
         } else if (currentModel.type === "detail") { //$NON-NLS-0$
             if (this._popUpContext) {
                 this.popupContext(currentModel);
@@ -1348,15 +1329,15 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 
     //provide to the expandAll/collapseAll commands
     InlineSearchResultExplorer.prototype.getItemCount = function() {
-        return this.model.getListRoot().children.length;
+    	var count = 0;
+    	if (this.model) {
+    		count = this.model.getListRoot().children.length;
+    	}
+        return count;
     };
 
     InlineSearchResultExplorer.prototype.getParentDivId = function(secondLevel) {
-        if (!this.model.replaceMode() || !secondLevel) {
-            return this.parentNode.id;
-        } else {
-            return this._uiFactory ? this._uiFactory.getMatchDivID() : this.parentNode.id;
-        }
+    	return this.parentNode.id;
     };
 
     InlineSearchResultExplorer.prototype.gotoCurrent = function(cachedItem) {
@@ -1416,6 +1397,10 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		} else {
 			this.startUp();
 		}
+		
+		var resultTitleDiv = this._inlineSearchPane.getSearchResultsTitleDiv();
+		lib.empty(resultTitleDiv);
+		resultTitleDiv.appendChild(document.createTextNode(_headerString(this.model)));
 	};
 
 	/**
@@ -1430,8 +1415,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		//TODO: we need a better way to render the progress and allow user to be able to cancel the crawling search
 		var crawling = searchParams.regEx || searchParams.caseSensitive;
 		var crawler;
-//		lib.empty(lib.node("pageNavigationActions")); //$NON-NLS-0$
-//		lib.empty(lib.node("pageActions")); //$NON-NLS-0$
 		
 		lib.empty(resultsNode);
 		
@@ -1481,8 +1464,11 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 	 * @param {String | DomNode} parentNode The parent node to display the results in
 	 * @param {Searcher} searcher
 	 */
-	InlineSearchResultExplorer.prototype.runSearch = function(searchParams, parentNode, searcher) {
+	InlineSearchResultExplorer.prototype.runSearch = function(searchParams, parentNode, searcher, compareNode) {
 		var parent = lib.node(parentNode);
+		if (compareNode) {
+			this._replaceCompareNode = compareNode;
+		}
 		this._search(parent, searchParams, searcher);
 	};
 

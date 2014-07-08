@@ -1215,3 +1215,7 @@ textarea.parameterInput {
 	font-size: 12px;
 	color: #222;
 }
+
+.fileExplorerProgressDiv {
+	margin-left: 10px;	
+}

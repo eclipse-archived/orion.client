@@ -762,6 +762,12 @@ exports.InlineCompareView = (function() {
 		this._conflcit = conflicting;
 	};
 	
+	InlineCompareView.prototype.gotoDiff = function(lineNumber, offsetInTheLine){
+		//TODO find out why this isn't working...
+		var offset = this._textView.getModel().getLineStart(lineNumber) + offsetInTheLine;
+		this._diffNavigator.gotoDiff(offset, this._textView);
+	};
+	
 	return InlineCompareView;
 }());
 

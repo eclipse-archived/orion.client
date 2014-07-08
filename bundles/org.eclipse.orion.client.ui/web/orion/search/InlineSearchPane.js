@@ -46,7 +46,6 @@ define([
 			this._parentNode.appendChild(domNodeFragment);
 			
 			this._searchWrapper = lib.$(".searchWrapper", this._parentNode); //$NON-NLS-0$
-			this._wrapperDiv = lib.$(".inlineSearchWrapperDiv", this._parentNode); //$NON-NLS-0$
 			
 			this._focusOnTextInput = function(){
 				this._searchTextInputBox.focus();
@@ -57,25 +56,26 @@ define([
 				this.hide();
 			}.bind(this));
 			
-			this._searchOptWrapperDiv = lib.$(".searchOptWrapperDiv", this._wrapperDiv); //$NON-NLS-0$
-			this._searchResultsWrapperDiv = lib.$(".searchResultsWrapperDiv", this._wrapperDiv); //$NON-NLS-0$
-			
+			this._searchOptWrapperDiv = lib.$(".searchOptWrapperDiv", this._parentNode); //$NON-NLS-0$
+			this._searchResultsTitle = lib.$(".searchResultsTitle", this._parentNode); //$NON-NLS-0$
+			this._searchResultsWrapperDiv = lib.$(".searchResultsWrapperDiv", this._parentNode); //$NON-NLS-0$
 			this._searchResultsWrapperDiv.id = "inlineSearchResultsWrapper";
+			
+			this._replaceCompareDiv = lib.node("replaceCompareDiv"); //$NON-NLS-0$
 
 			this._searcher = new mSearchClient.Searcher({serviceRegistry: this._serviceRegistry, commandService: this._commandRegistry, fileService: this._fileClient});
-			this._searchResultExplorer = new InlineSearchResultExplorer(this._serviceRegistry, this._commandRegistry);
+			this._searchResultExplorer = new InlineSearchResultExplorer(this._serviceRegistry, this._commandRegistry, this);
 			this._render();
 		},
 		
 		isVisible: function() {
-			return this._wrapperDiv.classList.contains("isVisible"); //$NON-NLS-0$
+			return this._searchWrapper.classList.contains("searchWrapperActive"); //$NON-NLS-0$
 		},
 				
 		show: function() {
 			this._previousActiveElement = document.activeElement;
 			
 			this._searchWrapper.classList.add("searchWrapperActive"); //$NON-NLS-0$
-			this._wrapperDiv.classList.add("isVisible"); //$NON-NLS-0$
 			window.setTimeout(this._focusOnTextInput, 100);
 			
 			this.dispatchEvent({type: "open"});
@@ -83,7 +83,6 @@ define([
 		
 		hide: function() {
 			this._searchWrapper.classList.remove("searchWrapperActive"); //$NON-NLS-0$
-			this._wrapperDiv.classList.remove("isVisible"); //$NON-NLS-0$
 			
 			if (!this._replaceBoxIsHidden()) {
 				this._hideReplaceField();
@@ -141,7 +140,7 @@ define([
 				this._replaceBox.addTextInputValueToRecentEntries();
 				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
 				var searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
-				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, this._searcher);
+				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, this._searcher, this._replaceCompareDiv);
 			}
 		},
 	    
@@ -192,6 +191,7 @@ define([
 			this._searchBox = new ComboTextInput({
 				id: "advSearchInput", //$NON-NLS-0$
 				parentNode: searchBoxParentNode,
+				insertBeforeNode: this._searchOptWrapperDiv,
 				hasButton: true,
 				buttonClickListener: searchButtonListener,
 				hasInputCompletion: true,
@@ -369,17 +369,22 @@ define([
 			} else {
 				this._hideReplaceField();
 			}
+			this._searchResultExplorer.initCommands();
 		},
 		
 		_showReplaceField: function() {
 			this._searchBox.hideButton();
 			this._replaceWrapper.classList.remove("replaceWrapperHidden"); //$NON-NLS-0$
+			this._searchWrapper.classList.add("replaceModeActive"); //$NON-NLS-0$
+			this._replaceCompareDiv.classList.add("replaceCompareDivVisible");
 			this._toggleReplaceLink.innerHTML = messages["Hide Replace"]; //$NON-NLS-0$
 		},
 		
 		_hideReplaceField: function() {
 			this._searchBox.showButton();
 			this._replaceWrapper.classList.add("replaceWrapperHidden"); //$NON-NLS-0$
+			this._searchWrapper.classList.remove("replaceModeActive"); //$NON-NLS-0$
+			this._replaceCompareDiv.classList.remove("replaceCompareDivVisible");
 			this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$
 		},
 		
@@ -416,6 +421,10 @@ define([
 				locationElement.appendChild(document.createTextNode(scopeString));
 				scopeElementWrapper.appendChild(locationElement);	
 			}, this);
+		},
+		
+		getSearchResultsTitleDiv: function() {
+			return this._searchResultsTitle;
 		}
 	});
 

@@ -305,9 +305,13 @@ hard-coded numbers elsewhere.
 .sidebarWrapper > .sidebar {
 	position: relative;
 	left: 0;
-	top: 5px;
-	height: calc(100% - 70px);
+	top: 0;
+	height: calc(100% - 38px);
 	overflow-x: visible;
+}
+
+.projectNavSidebarWrapper > .sidebar {
+	height: calc(100% - 4px);
 }
 
 .workingTarget {
