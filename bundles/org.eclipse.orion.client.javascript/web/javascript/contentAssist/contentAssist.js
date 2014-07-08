@@ -262,7 +262,7 @@ define([
 					}
 					var target = typeInf.inferTypes(ast, environment, self.lintOptions);
 					var proposalsObj = { };
-					self._createInferredProposals(target, environment, completionKind.kind, context.prefix, offset - context.prefix.length, proposalsObj);
+					self._createInferredProposals(target, environment, completionKind.kind, context, buffer, offset - context.prefix.length, proposalsObj);
 					return [].concat(self._filterAndSortProposals(proposalsObj), 
 									 self._createTemplateProposals(context, completionKind, buffer),
 									 self._createKeywordProposals(context, completionKind, buffer));
@@ -329,18 +329,25 @@ define([
 		 * @param {String} targetTypeName The name of the type to find
 		 * @param {Object} env The backing type environment
 		 * @param {String} completionKind The kind of the completion
-		 * @param {String} prefix The start of the expression to complete
+		 * @param {Object} context The content assist context
+		 * @param {String} buffer The complete text of the file
 		 * @param {Number} replaceStart The offset into the source where to start the completion
 		 * @param {Object} proposals The object that attach computed proposals to
 		 * @param {Number} relevance The ordering relevance of the proposals
 		 * @param {Object} visited Those types visited thus far while computing proposals (to detect cycles)
 		 */
-		_createInferredProposals: function(targetTypeName, env, completionKind, prefix, replaceStart, proposals, relevance, visited) {
-		    if(completionKind === 'doc') {
-		        //for now just quit, ideally we will return all known types when we are in doc in a type object
-		        return;
-		    }
-			var prop, propTypeObj, propName, res, type = env.lookupQualifiedType(targetTypeName), proto = type.$$proto;
+		_createInferredProposals: function(targetTypeName, env, completionKind, context, buffer, replaceStart, proposals, relevance, visited) {
+		    var isdoc = completionKind === 'doc';
+		    if(isdoc) {
+		       /* var offset = context.offset > context.prefix.length ? context.offset-context.prefix.length-1 : 0;
+		        if(buffer.charAt(offset) !== '{') {
+		            return;
+		        }
+		        */
+		       return; //TODO For now just do nothing
+		    } 
+			var type = env.lookupQualifiedType(targetTypeName);
+			var proto = type.$$proto;
 			if (!relevance) {
 				relevance = 100;
 			}
@@ -356,10 +363,9 @@ define([
 				}
 				if (!cycle) {
 					visited[proto.typeObj.name] = true;
-					this._createInferredProposals(proto.typeObj.name, env, completionKind, prefix, replaceStart, proposals, relevance - 10, visited);
+					this._createInferredProposals(proto.typeObj.name, env, completionKind, context, buffer, replaceStart, proposals, relevance - 10, visited);
 				}
 			}
-	
 			// add a separator proposal
 			proposals['---dummy' + relevance] = {
 				proposal: '',
@@ -375,7 +381,8 @@ define([
 			// the next level is not Object
 			var realProto = Object.getPrototypeOf(type);
 			var protoIsObject = !Object.getPrototypeOf(realProto);
-			for (prop in type) {
+			var propName;
+			for (var prop in type) {
 				if (type.hasOwnProperty(prop) || (!protoIsObject && realProto.hasOwnProperty(prop))) {
 					if (prop.charAt(0) === "$" && prop.charAt(1) === "$") {
 						// special property
@@ -396,16 +403,14 @@ define([
 						// minified files sometimes have invalid property names (eg- numbers).  Ignore them)
 						continue;
 					}
-					if (proposalUtils.looselyMatches(prefix, propName)) {
-						propTypeObj = type[prop].typeObj;
-						// if propTypeObj is a reference to a function type,
-						// extract the actual function type
+					if (proposalUtils.looselyMatches(context.prefix, propName)) {
+						var propTypeObj = type[prop].typeObj;
+						// if propTypeObj is a reference to a function type, extract the actual function type
 						if ((env._allTypes[propTypeObj.name]) && (env._allTypes[propTypeObj.name].$$fntype)) {
 							propTypeObj = env._allTypes[propTypeObj.name].$$fntype;
 						}
 						if (propTypeObj.type === 'FunctionType') {
-							res = this._calculateFunctionProposal(propName,
-									propTypeObj, replaceStart - 1);
+							var res = this._calculateFunctionProposal(propName, propTypeObj, replaceStart - 1);
 							proposals["$"+propName] = {
 								proposal: res.completion,
 								name: res.completion,
@@ -607,7 +612,9 @@ define([
 		_getCompletionContext: function(ast, offset, contents) {
 		    var comment = Finder.findComment(offset, ast);
 		    if(comment) {
-		        return {kind:'doc'};
+		        if(offset > comment.range[0]+2 && (comment.type === 'Block' && offset < comment.range[1]-2)) {
+		          return {kind:'doc'};
+		        }
 		    }
 			var parents = [];
 			Estraverse.traverse(ast, {
