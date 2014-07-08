@@ -35,7 +35,8 @@ define("orion/editor/stylers/text_x-c__src/syntax", ["orion/editor/stylers/lib/s
 		"union", "unsigned", "using", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"virtual", "void", "volatile", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"wchar_t", "while", //$NON-NLS-1$ //$NON-NLS-0$
-		"xor_eq", "xor" //$NON-NLS-1$ //$NON-NLS-0$
+		"xor_eq", "xor", //$NON-NLS-1$ //$NON-NLS-0$
+		"_Bool", "_Complex", "_Imaginary" //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
 	var directives = [

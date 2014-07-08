@@ -17,6 +17,7 @@
 		"plugins/languages/haml/hamlPlugin.html":true,
 		"plugins/languages/java/javaPlugin.html":true,
 		"plugins/languages/lua/luaPlugin.html":true,
+		"plugins/languages/objectiveC/objectiveCPlugin.html":true,
 		"plugins/languages/php/phpPlugin.html":true,
 		"plugins/languages/python/pythonPlugin.html":true,
 		"plugins/languages/ruby/rubyPlugin.html":true,
