@@ -165,11 +165,11 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
 
     SearchResultRenderer.prototype.replaceFileElement = function(item) {
-        var renderName = item.totalMatches ? this.explorer.model.getFileName(item) + " (" + i18nUtil.formatMessage(messages["${0} matches"], item.totalMatches) + ")" :  //$NON-NLS-1$ //$NON-NLS-0$
-						 this.explorer.model.getFileName(item) + " (" + messages["No matches"] + ")"; //$NON-NLS-1$ //$NON-NLS-0$
+		var renderName = item.totalMatches ? " (" + i18nUtil.formatMessage(messages["${0} matches"], item.totalMatches) + ")" :  //$NON-NLS-1$ //$NON-NLS-0$
+						 " (" + messages["No matches"] + ")"; //$NON-NLS-1$ //$NON-NLS-0$
 		if(item.totalMatches) {
 			var linkDiv = lib.node(this.getItemLinkId(item));
-	        _place(document.createTextNode(renderName), linkDiv, "only"); //$NON-NLS-0$
+			_place(document.createTextNode(renderName), linkDiv); //$NON-NLS-0$
 	    } else {
 			item.stale = true;
 			this.staleFileElement(item, renderName);
@@ -211,7 +211,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		var parentFolder = folders[folders.length - 1];
 		var parentSpan = document.createElement("span"); //$NON-NLS-0$
 		parentSpan.classList.add("fileParentSpan"); //$NON-NLS-0$
-		parentSpan.appendChild(document.createTextNode(parentFolder + "/")); //$NON-NLS-0$
+		parentSpan.appendChild(document.createTextNode(".../" + parentFolder + "/")); //$NON-NLS-0$
 		
 		if (this.explorer.model.replaceMode()) {
 			link = document.createTextNode(renderName);
@@ -426,13 +426,42 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                         //decorateImage.classList.add('core-sprite-file'); //$NON-NLS-0$
                     } else {
                         this.getExpandImage(tableRow, span); //$NON-NLS-0$
-                    } 
+                    }
+                    if (this.explorer.model.replaceMode()) {
+                    	var addImage = function (contentType) {
+                    		var image = document.createElement("span"); //$NON-NLS-0$
+							image.classList.add("core-sprite-file"); //$NON-NLS-0$
+							image.classList.add("modelDecorationSprite"); //$NON-NLS-0$
+							image.classList.add("thumbnail"); //$NON-NLS-0$
+							if (contentType) {
+								var imageClass = contentType.imageClass, imageURL = contentType.image;
+								if (imageClass) {
+									image.className = imageClass; // may be several classes in here
+									image.classList.add("thumbnail"); //$NON-NLS-0$
+								} else if (imageURL) {
+									image = document.createElement("img"); //$NON-NLS-0$
+									image.src = imageURL;
+									// to minimize the height/width in case of a large one
+									image.classList.add("thumbnail"); //$NON-NLS-0$
+								}
+							}
+							
+							col.appendChild(image);
+						};
+						item.Name = item.name; //required for contentTypeService.getFileContentType() to work
+						Deferred.when(this.explorer._contentTypeService.getFileContentType(item), function(contentType) {
+							addImage(contentType);
+						});
+                    }
+                } else {
+                	span = _createSpan(null, null, col, null);
+                	this.renderDetailLineNumber(item, span);
                 }
                 break;
             case 1:
 				col = _createElement('td'); //$NON-NLS-0$
-                span = _createSpan(null, this.getFileSpanId(item), col, null);
                 if (item.type === "file") { //$NON-NLS-0$
+                	span = _createSpan(null, this.getFileSpanId(item), col, null);
                     var renderName = item.totalMatches ? this.explorer.model.getFileName(item) + " (" + item.totalMatches + " matches)" : this.explorer.model.getFileName(item); //$NON-NLS-1$ //$NON-NLS-0$
                     this.renderFileElement(item, span, renderName);
                     
@@ -442,10 +471,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 						var scopeParams = this.explorer.model.getScopingParams(item);
 						tableRow.title = scopeParams.name;
                     }
-                } else {
-					this.renderDetailLineNumber(item, span);
-                    span.classList.add("searchDetailLineNumber"); //$NON-NLS-0$
-                    
+                } else {                   
                     this.renderDetailElement(item, col);
                 }
                 break;
@@ -1239,11 +1265,13 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		} 
         var that = this;       
         this.model.buildResultModel();
-        if (!this.model.replaceMode()) {
+        if (this.model.replaceMode()) {
+            that.replacePreview(true, true);
+        } else {
             this.initCommands();
             _empty(this.getParentDivId());
             this.createTree(this.getParentDivId(), this.model, {
-                selectionPolicy: "singleSelection", //$NON-NLS-0$
+				selectionPolicy: "singleSelection", //$NON-NLS-0$
                 indent: 0,
 				getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
 				setFocus: false,
@@ -1258,8 +1286,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 	                that.refreshValidFiles();
 	            });
             }
-        } else {
-            that.replacePreview(true, true);
         }
     };
 

@@ -103,5 +103,6 @@ define({
 	"File name patterns (comma-separated)": "File name patterns (comma-separated)",
 	"(* = any string, ? = any character)": "(* = any string, ? = any character)",
 	"Choose a Folder": "Choose a Folder",
-	"Remove from search results": "Remove from search results"
+	"Remove from search results": "Remove from search results",
+	"Modify Search Parameters": "Modify Search Parameters"
 });

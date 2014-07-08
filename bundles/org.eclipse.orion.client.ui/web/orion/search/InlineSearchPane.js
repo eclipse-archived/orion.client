@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define URL*/
+/*global define URL window document*/
 /*jslint browser:true sub:true*/
 define([
 	'orion/objects',
@@ -55,6 +55,8 @@ define([
 			this._dismissButton.addEventListener("click", function(){ //$NON-NLS-0$
 				this.hide();
 			}.bind(this));
+			
+			this._replaceWrapper = document.getElementById("replaceWrapper"); //$NON-NLS-0$
 			
 			this._searchOptWrapperDiv = lib.$(".searchOptWrapperDiv", this._parentNode); //$NON-NLS-0$
 			this._searchResultsTitle = lib.$(".searchResultsTitle", this._parentNode); //$NON-NLS-0$
@@ -127,6 +129,7 @@ define([
 				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
 				var searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
 				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, this._searcher);
+				this._hideSearchOptions();
 			}
 		},
 		
@@ -141,6 +144,7 @@ define([
 				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
 				var searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
 				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, this._searcher, this._replaceCompareDiv);
+				this._hideSearchOptions();
 			}
 		},
 	    
@@ -179,7 +183,7 @@ define([
 				});
 			}.bind(this);
 			
-			var searchBoxParentNode = lib.$(".searchWrapper", this._parentNode);
+			var searchBoxParentNode = lib.$(".searchMainOptionBlock", this._parentNode); //$NON-NLS-0$
 			
 			var searchButtonListener = function() {
 				if (!this.isVisible()) {
@@ -191,7 +195,7 @@ define([
 			this._searchBox = new ComboTextInput({
 				id: "advSearchInput", //$NON-NLS-0$
 				parentNode: searchBoxParentNode,
-				insertBeforeNode: this._searchOptWrapperDiv,
+				insertBeforeNode: this._replaceWrapper,
 				hasButton: true,
 				buttonClickListener: searchButtonListener,
 				hasInputCompletion: true,
@@ -237,8 +241,6 @@ define([
 	    },
 	    
 	    _initReplaceBox: function() {
-	        this._replaceWrapper = document.getElementById("replaceWrapper"); //$NON-NLS-0$
-	        
 	        this._replaceBox = new ComboTextInput({
 				id: "advReplaceInput", //$NON-NLS-0$
 				parentNode: this._replaceWrapper,
@@ -304,15 +306,19 @@ define([
 			this._initReplaceBox();
 			this._initFileNamePatternsBox();
 			
-			this._caseSensitiveCB = document.getElementById("advSearchCaseSensitive"); //$NON-NLS-0$
-			this._regExCB = document.getElementById("advSearchRegEx"); //$NON-NLS-0$
-			this._toggleReplaceLink = document.getElementById("toggleReplaceLink"); //$NON-NLS-0$
+			this._caseSensitiveCB = lib.$("#advSearchCaseSensitive", this._parentNode); //$NON-NLS-0$
+			this._regExCB = lib.$("#advSearchRegEx", this._parentNode); //$NON-NLS-0$
+			this._toggleReplaceLink = lib.$("#toggleReplaceLink", this._parentNode); //$NON-NLS-0$
+			
+			this._toggleSearchOptionsLink = lib.$("#toggleSearchOptionsLink", this._parentNode); //$NON-NLS-0$
+			this._toggleSearchOptionsLink.addEventListener("click", this._showSearchOptions.bind(this)); //$NON-NLS-0$
+			this._toggleSearchOptionsLink.innerHTML = messages["Modify Search Parameters"]; //$NON-NLS-0$
 
 			if (this._replaceBoxIsHidden()) {
 	        	this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$	
 	        }
 	        this._toggleReplaceLink.addEventListener("click", this._toggleReplaceFieldVisibility.bind(this)); //$NON-NLS-0$
-
+	        
 	        this._initSearchScope();
 		},
 		
@@ -348,12 +354,21 @@ define([
 			this._searchScopeElementWrapper = lib.$("#searchScopeElementWrapper", this._searchOptWrapperDiv); //$NON-NLS-0$
 			this._searchScopeSelectButton = lib.$("#searchScopeSelectButton", this._searchOptWrapperDiv); //$NON-NLS-0$
 			
+			var directoryPrompterCallback = function(targetFolder) {
+				this.setSearchScope(targetFolder);
+				if (this._replaceBoxIsHidden()) {
+					this._submitSearch();
+				} else {
+					this._replacePreview();
+				}
+			}.bind(this);
+			
 			this._searchScopeSelectButton.addEventListener("click", function(){ //$NON-NLS-0$
 				var searchScopeDialog = new DirectoryPrompterDialog.DirectoryPrompterDialog({
 					title: messages["Choose a Folder"], //$NON-NLS-0$
 					serviceRegistry: this._serviceRegistry,
 					fileClient: this._fileClient,				
-					func: this.setSearchScope.bind(this)
+					func: directoryPrompterCallback
 				});
 				searchScopeDialog.show();
 			}.bind(this));
@@ -363,6 +378,10 @@ define([
 			return this._replaceWrapper.classList.contains("replaceWrapperHidden"); //$NON-NLS-0$
 		},
 		
+		_searchOptionsVisible: function() {
+			return !this._searchWrapper.classList.contains("searchOptionsHidden"); //$NON-NLS-0$
+		},
+		
 		_toggleReplaceFieldVisibility: function () {
 			if (this._replaceBoxIsHidden()) {
 				this._showReplaceField();
@@ -370,6 +389,16 @@ define([
 				this._hideReplaceField();
 			}
 			this._searchResultExplorer.initCommands();
+		},
+		
+		_showSearchOptions: function() {
+			this._searchWrapper.classList.remove("searchOptionsHidden"); //$NON-NLS-0$
+			this._toggleSearchOptionsLink.classList.add("linkHidden"); //$NON-NLS-0$
+		},
+		
+		_hideSearchOptions: function() {
+			this._searchWrapper.classList.add("searchOptionsHidden"); //$NON-NLS-0$
+			this._toggleSearchOptionsLink.classList.remove("linkHidden"); //$NON-NLS-0$
 		},
 		
 		_showReplaceField: function() {

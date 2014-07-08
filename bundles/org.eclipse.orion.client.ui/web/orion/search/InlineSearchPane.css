@@ -32,8 +32,22 @@
 	transition: width 0.2s ease;
 }
 
+.searchOptWrapperDiv {
+	height: 224px;
+	transition: height 0.2s ease;
+}
+
+.replaceModeActive > .searchOptWrapperDiv {
+	height: 262px;
+}
+
+.searchWrapper.searchOptionsHidden > .searchOptWrapperDiv {
+	height: 0;
+	overflow: hidden;
+}
+
 .searchResultsWrapperDiv {
-	height: calc(100% - 220px - 18px); /* subtract height of search options*/
+	height: calc(100% - 224px - 30px); /* subtract height of search options*/
 	width: 100%;
 }
 
@@ -49,8 +63,12 @@
 	table-layout: fixed;
 }
 
+.searchWrapper.searchOptionsHidden > .searchResultsWrapperDiv{
+	height: calc(100% - 56px);
+}
+
 .replaceModeActive > .searchResultsWrapperDiv {
-	height: calc(100% - 220px - 18px - 38px); /* subtract height of search options and replace box */
+	height: calc(100% - 220px - 30px - 42px); /* subtract height of search options and replace box */
 }
 
 .searchWrapper > .comboTextInputWrapper {
@@ -107,6 +125,10 @@
 .toggleDisplayLink {
 	display: block;
 	margin: 0 0 0 5px;
+}
+
+.toggleDisplayLink.linkHidden {
+	display: none;
 }
 
 .searchMainOptionBlock {
@@ -218,12 +240,14 @@
 	background: white !important;
 }
 
-.searchDetailLineNumber {
-	margin-right: 4px;
-}
-
 .navlink.searchDetailLink {
 	vertical-align: baseline;
+}
+
+/* search match occurrences */
+.navlink.searchDetailLink > span > b {
+	color: black;
+	background: #cedce7;
 }
 
 .searchWrapper:not(.searchWrapperActive) > .comboTextInputWrapper > .comboTextInputButton {
