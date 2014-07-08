@@ -9,6 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/*global define*/
 /*jslint amd:true*/
 define([], function() {
 	var SERVICE_ID = "orion.core.contentTypeRegistry"; //$NON-NLS-0$
@@ -29,6 +30,26 @@ define([], function() {
 		return array.indexOf(item) !== -1;
 	}
 
+	function isImage(contentType) {
+		switch (contentType && contentType.id) {
+			case "image/jpeg": //$NON-NLS-0$
+			case "image/png": //$NON-NLS-0$
+			case "image/gif": //$NON-NLS-0$
+			case "image/ico": //$NON-NLS-0$
+			case "image/tiff": //$NON-NLS-0$
+			case "image/svg": //$NON-NLS-0$
+				return true;
+		}
+		return false;
+	}
+	
+	function isBinary(cType) {
+		if(!cType) {
+			return false;
+		}
+		return (cType.id === "application/octet-stream" || cType['extends'] === "application/octet-stream");
+	}
+	
 	function getFilenameContentType(/**String*/ filename, contentTypes) {
 		function winner(best, other, filename, extension) {
 			var nameMatch = other.filename.indexOf(filename) >= 0;
@@ -211,6 +232,8 @@ define([], function() {
 	};
 	return {
 		ContentTypeRegistry: ContentTypeRegistry,
+		isImage: isImage,
+		isBinary: isBinary,
 		getFilenameContentType: getFilenameContentType
 	};
 });

@@ -51,6 +51,16 @@ define([
 				name: "sh",
 				extension: ["sh"]
 			},
+			// binary files
+			{	id: "application/octet-stream",
+				name: "octet-stream",
+				extension: ["exe", "bin", "doc", "ppt", "pdf"]
+			},
+			{	id: "application/zip",
+				"extends": "application/octet-stream",
+				name: "ZIP",
+				extension: ["war", "jar", "zip", "rar"]
+			},
 			// Image types
 			{	id: "image/gif",
 				name: "GIF",

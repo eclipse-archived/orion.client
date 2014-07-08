@@ -11,7 +11,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*jslint browser:true devel:true sub:true*/
-/*global define console eclipse:true orion:true window URL*/
+/*global define Blob document console eclipse:true orion:true window URL*/
 
 define([
 	'orion/PageUtil', 
@@ -577,10 +577,6 @@ define([
 				}
 			}
 		},
-		_isKnownBinary: function(cType) {
-			var binaryType = this._contentTypeService.getContentType("application/octet-stream"); //$NON-NLS-0$
-			return this._contentTypeService.isExtensionOf(cType, binaryType);
-		},
 		_isBrowserRenderable: function(cType) {
 			var renderableType = this._contentTypeService.getContentType("application/browser-renderable"); //$NON-NLS-0$
 			return this._contentTypeService.isExtensionOf(cType, renderableType);
@@ -646,7 +642,7 @@ define([
 						} else {
 							this.makeDownloadLink();
 						}
-					} else if(this._isKnownBinary(cType)) {
+					} else if(mContentTypes.isBinary(cType)) {
 						if(mFileDownloader.downloadSupported()) {
 							this._generateDownloadLink(contents, metadata, cType, browseViewOptons);
 						} else {
@@ -661,7 +657,7 @@ define([
 						}
 					} else if(cType.id === "text/x-markdown") {
 						browseViewOptons.isMarkdownView = true;
-					} else if(!mNavigatorRenderer.isImage(cType)) {
+					} else if(!mContentTypes.isImage(cType)) {
 						browseViewOptons.editorView = this._editorView;
 						if(this.shareSnippetHandler) {
 							browseViewOptons.infoDropDownHandlers.unshift(this.shareSnippetHandler);

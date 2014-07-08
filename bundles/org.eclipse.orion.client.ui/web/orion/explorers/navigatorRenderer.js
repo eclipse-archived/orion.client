@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define */
+/*global define document*/
 /*jslint regexp:false browser:true forin:true sub:true*/
 
 define([
@@ -20,23 +20,11 @@ define([
 	'orion/objects',
 	'orion/URITemplate',
 	'orion/widgets/browse/commitInfoRenderer',
+	'orion/contentTypes',
 	'orion/webui/littlelib'
-], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, mCommitInfoRenderer, lib) {
+], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, mCommitInfoRenderer, mContentTypes, lib) {
 		
 	var max_more_info_column_length = 60;
-	function isImage(contentType) {
-		switch (contentType && contentType.id) {
-			case "image/jpeg": //$NON-NLS-0$
-			case "image/png": //$NON-NLS-0$
-			case "image/gif": //$NON-NLS-0$
-			case "image/ico": //$NON-NLS-0$
-			case "image/tiff": //$NON-NLS-0$
-			case "image/svg": //$NON-NLS-0$
-				return true;
-		}
-		return false;
-	}
-	
 	/* Internal */
 	function addImageToLink(contentType, link, location, replace) {
 		if (contentType) {
@@ -140,7 +128,7 @@ define([
 				}
 				link.href = href;
 				if(renderer && typeof renderer.updateFileNode === 'function') { //$NON-NLS-0$
-					renderer.updateFileNode(item, link, isImage(contentType));
+					renderer.updateFileNode(item, link, mContentTypes.isImage(contentType));
 				}
 			});
 		}
@@ -411,7 +399,6 @@ define([
 	//return module exports
 	return {
 		NavigatorRenderer: NavigatorRenderer,
-		isImage : isImage,
 		getClickedItem: getClickedItem,
 		createLink: createLink
 	};

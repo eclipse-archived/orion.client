@@ -13,8 +13,8 @@
 /*jslint forin:true regexp:false sub:true*/
 
 define(['i18n!orion/compare/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/compare/compareUtils', 'orion/compare/diffProvider', 'orion/compare/compareView', 'orion/highlight', 
-		'orion/fileClient', 'orion/globalCommands', 'orion/commands', 'orion/keyBinding', 'orion/searchAndReplace/textSearcher', 'orion/editorCommands', 'orion/objects', 'orion/inputManager', 'orion/editor/editorFeatures', 'orion/URL-shim'], 
-		function(messages, require, Deferred, lib, mCompareUtils, mDiffProvider, mCompareView, Highlight, mFileClient, mGlobalCommands, mCommands, mKeyBinding, mSearcher, mEditorCommands, objects, mInputManager, mEditorFeatures) {
+		'orion/fileClient', 'orion/globalCommands', 'orion/commands', 'orion/keyBinding', 'orion/searchAndReplace/textSearcher', 'orion/editorCommands', 'orion/objects', 'orion/inputManager', 'orion/editor/editorFeatures', 'orion/contentTypes', 'orion/URL-shim'], 
+		function(messages, require, Deferred, lib, mCompareUtils, mDiffProvider, mCompareView, Highlight, mFileClient, mGlobalCommands, mCommands, mKeyBinding, mSearcher, mEditorCommands, objects, mInputManager, mEditorFeatures, mContentTypes) {
 
 var exports = {};
 
@@ -358,19 +358,6 @@ exports.ResourceComparer = (function() {
 			}.bind(this));
 			return Deferred.all(promises, function(error) { return {_error: error}; });
 	    },
-		/* Internal */
-		_isImage: function(contentType) {
-			switch (contentType && contentType.id) {
-				case "image/jpeg": //$NON-NLS-0$
-				case "image/png": //$NON-NLS-0$
-				case "image/gif": //$NON-NLS-0$
-				case "image/ico": //$NON-NLS-0$
-				case "image/tiff": //$NON-NLS-0$
-				case "image/svg": //$NON-NLS-0$
-					return true;
-			}
-			return false;
-		},
 	    _loadSingleFile: function(file) {
 	        return this._registry.getService("orion.page.progress").progress(this._fileClient.read(file.URL), "Getting contents of " + file.URL).then( //$NON-NLS-1$ //$NON-NLS-0$
 		        function(contents) {
@@ -396,7 +383,7 @@ exports.ResourceComparer = (function() {
 				var that = this;
 				return that.options.diffProvider.resolveDiff(that.options.resource, that.options.compareTo, that.options.hasConflicts).then( function(diffParam){
 					that._compareView.getWidget().setOptions(diffParam);
-					var isImage = that._isImage(diffParam.newFile.Type);
+					var isImage = mContentTypes.isImage(diffParam.newFile.Type);
 					var viewOptions = that._compareView.getWidget().options;
 					if(that._checkReadonly(that.options.readonlyRight) || isImage) {
 						viewOptions.oldFile.readonly = true;
