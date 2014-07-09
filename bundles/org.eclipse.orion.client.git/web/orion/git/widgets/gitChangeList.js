@@ -654,7 +654,7 @@ define([
 							hasConflict,
 							diffContainer,
 							compareWidgetActionWrapper.id,
-							explorer.editableInComparePage,
+							explorer.editableInComparePage ? !this.explorer.model.isStaged(item.parent.type) : false,
 							{
 								navGridHolder : navGridHolder,
 								additionalCmdRender : function(gridHolder) {
