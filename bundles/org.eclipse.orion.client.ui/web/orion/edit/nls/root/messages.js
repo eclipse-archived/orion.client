@@ -16,7 +16,7 @@ define({
 	"Editor": "Editor", //$NON-NLS-1$ //$NON-NLS-0$
 	"switchEditor": "Switch Editor", //$NON-NLS-1$ //$NON-NLS-0$
 	"Fetching": "Fetching: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
-	"confirmUnsavedChanges": "There are unsaved changes.  Do you still want to navigate away?", //$NON-NLS-1$ //$NON-NLS-0$
+	"confirmUnsavedChanges": "There are unsaved changes. Do you still want to navigate away?", //$NON-NLS-1$ //$NON-NLS-0$
 	"searchFiles": "Search Files...", //$NON-NLS-1$ //$NON-NLS-0$
 	"searchTerm": "Enter search term:", //$NON-NLS-1$ //$NON-NLS-0$
 	"unsavedChanges": "There are unsaved changes.", //$NON-NLS-1$ //$NON-NLS-0$
@@ -28,7 +28,7 @@ define({
 	"saveOutOfSync": "Resource is out of sync with the server. Do you want to save it anyway?", //$NON-NLS-1$ //$NON-NLS-0$
 	"loadOutOfSync": "Resource is out of sync with the server. Do you want to load it anyway? This will overwrite your local changes.", //$NON-NLS-1$ //$NON-NLS-0$
 	"ReadingMetadata": "Reading metadata of ${0}", //$NON-NLS-1$ //$NON-NLS-0$
-	"ReadingMetadataError": "Can not get metadata of ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"ReadingMetadataError": "Cannot get metadata of ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"Reading": "Reading ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"readonly": "Read Only.", //$NON-NLS-1$ //$NON-NLS-0$
 	"saveFile": "Save this file", //$NON-NLS-1$ //$NON-NLS-0$
@@ -38,7 +38,7 @@ define({
 	"Undo": "Undo", //$NON-NLS-1$ //$NON-NLS-0$
 	"Redo": "Redo", //$NON-NLS-1$ //$NON-NLS-0$
 	"Find": "Find...", //$NON-NLS-1$ //$NON-NLS-0$
-	"noResponse": "No response from server.  Check your internet connection and try again.", //$NON-NLS-1$ //$NON-NLS-0$
+	"noResponse": "No response from server. Check your internet connection and try again.", //$NON-NLS-1$ //$NON-NLS-0$
 	"savingFile": "Saving file ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"running": "Running ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"Saving..." : "Saving...", //$NON-NLS-1$ //$NON-NLS-0$
