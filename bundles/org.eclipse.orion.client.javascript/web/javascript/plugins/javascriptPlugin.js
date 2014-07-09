@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global URL */
-/*jslint amd:true */
+/*eslint-env amd */
 /*
  * This module may be loaded in a web worker or a regular Window. Therefore it must NOT use the DOM or other
  * APIs not available in workers.

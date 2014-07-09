@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint amd:true browser:true*/
+/*eslint-env amd, browser, node*/
 /*global URL console*/
 /*
  * Allows the implementation of the JS tooling plugin to be loaded either in this Window or in a web worker.

@@ -11,8 +11,8 @@
  *	 Andrew Eisenberg (VMware) - implemented visitor pattern
  *   IBM Corporation - Various improvements
  ******************************************************************************/
-
-/*global doctrine:true define:true */
+/*global doctrine */
+/*eslint-env amd */
 define([
 	'javascript/contentAssist/typeEnvironment',  //$NON-NLS-0$
 	'javascript/contentAssist/typeInference',  //$NON-NLS-0$

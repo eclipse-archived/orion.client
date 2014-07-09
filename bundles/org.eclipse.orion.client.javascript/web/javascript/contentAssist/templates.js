@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*jslint amd:true*/
+/*eslint-env amd*/
 define([
 'orion/editor/templates' //$NON-NLS-0$
 ], function(mTemplates) {

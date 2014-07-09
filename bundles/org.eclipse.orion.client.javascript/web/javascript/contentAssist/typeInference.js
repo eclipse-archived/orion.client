@@ -410,19 +410,20 @@ define([
 			}
 
 			var callArgs = new Array(params.length);
+			var len = 0;
 			if (node.extras.paramTypeObj && node.extras.paramTypeObj.type === 'FunctionType') {
 				// this function is an anonymous function being passed as an argument
 				// to another function and we have a hint of what the function type is
 				// shunt the argument types to this function's arguments
 				var paramTypes = node.extras.paramTypeObj.params;
-				var len = Math.min(params.length || 0, paramTypes.length || 0);
+                len = Math.min(params.length || 0, paramTypes.length || 0);
 				for (i = 0; i < len; i++) {
 					callArgs[i] = paramTypes[i];
 				}
 			} else if (node.extras.stashedArguments) {
 			    // this is a one-shot closure; read the types that were already inferred
 			    // for the arguments
-			    var len = Math.min(params.length || 0, node.extras.stashedArguments.length || 0);
+			    len = Math.min(params.length || 0, node.extras.stashedArguments.length || 0);
 			    for (i = 0; i < len; i++) {
 			        callArgs[i] = node.extras.stashedArguments[i].extras.inferredTypeObj;
 			    }

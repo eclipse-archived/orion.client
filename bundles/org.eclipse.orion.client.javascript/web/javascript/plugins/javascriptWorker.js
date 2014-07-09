@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global importScripts*/
-/*jslint amd:true*/
+/*eslint-env amd*/
 
 // This file bootstraps RequireJS in the worker context, then loads the JavaScript plugin impl
 

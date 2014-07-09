@@ -10,8 +10,8 @@
  *     Andrew Eisenberg (VMware) - initial API and implementation
  * 	   IBM Corporation - bug fixes / improvements
  ******************************************************************************/
-
-/*global define esprima */
+/*global esprima */
+/*eslint-env amd*/
 define([
 ], function() {
 

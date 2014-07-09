@@ -11,8 +11,7 @@
  *     Andrew Eisenberg (VMware) - implemented visitor pattern
  * 	   IBM Corporation - bug fixes / improvements
  ******************************************************************************/
-
-/*global define */
+/*eslint-env amd */
 define(function() {
 
 	return {

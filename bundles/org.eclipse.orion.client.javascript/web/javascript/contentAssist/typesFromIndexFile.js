@@ -16,13 +16,13 @@
 
 /*global define require definitionForType doctrine*/
 define([
-	'doctrine/doctrine',
 	'javascript/contentAssist/indexFiles/browserIndex',
 	'javascript/contentAssist/indexFiles/ecma5Index',
 	'javascript/contentAssist/indexFiles/nodeIndex',
 	'javascript/contentAssist/typeUtils',
-	'orion/Deferred'
-], function (Doctrine, BrowserIndex, Ecma5Index, NodeIndex, typeUtils, Deferred) {
+	'orion/Deferred',
+	'doctrine/doctrine' //stays last, exports into global scope
+], function (BrowserIndex, Ecma5Index, NodeIndex, typeUtils, Deferred) {
 
 	/**
 	 * for case where an object has its own hasOwnProperty property 
