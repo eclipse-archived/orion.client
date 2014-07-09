@@ -615,7 +615,12 @@ define([
 					/* now process the child block */
 					var newElement = document.createElement("div"); //$NON-NLS-0$
 					this._generateHTML(newElement, current);
-					newElement.id = current.elementId;
+					newElement = newElement.children[0];
+					if (!newElement.id) {
+						newElement.id = current.elementId; /* typical */
+					} else {
+						current.elementId = newElement.id; /* header element */
+					}
 					rootElement.children[0].appendChild(newElement);
 				}
 			}.bind(this));
@@ -701,42 +706,47 @@ define([
 			}
 
 			e.new.forEach(function(current) {
+				/* create a new div with content corresponding to this block */
+				var newElement = document.createElement("div"); //$NON-NLS-0$
+				this._generateHTML(newElement, current);
+
 				/* try to find an existing old block and DOM element corresponding to the current new block */
-				var element = null;
 				for (i = oldBlocksIndex; i < e.old.length; i++) {
 					if (e.old[i].elementId === current.elementId) {
 						/*
 						 * Found it.  If any old blocks have been passed over during this search
 						 * then remove their elements from the DOM as they no longer exist.
 						 */
-						element = children[i];
+						var element = children[i];
 						for (j = i - 1; oldBlocksIndex <= j; j--) {
 							parentElement.removeChild(children[j]);
 						}
 						oldBlocksIndex = i + 1;
+
+						this._updateNode(element, newElement.children[0]);
 						break;
 					}
 				}
-				if (!element) {
+
+				if (i === e.old.length) {
 					/*
 					 * An existing block was not found, so there is not an existing corresponding
 					 * DOM element to reuse.  Create one now.
 					 */
 					element = document.createElement("div"); //$NON-NLS-0$
-					element.id = current.elementId;
+					this._updateNode(element, newElement);
+					element = element.children[0];
+					if (!element.id) {
+						element.id = current.elementId; /* typical */
+					} else {
+						current.elementId = element.id; /* header element */
+					}
 					if (children.length) {
 						parentElement.insertBefore(element, children[oldBlocksIndex]);
 					} else {
 						parentElement.appendChild(element);
 					}
 				}
-
-				/* create a new div with content corresponding to this block */
-
-				var newElement = document.createElement("div"); //$NON-NLS-0$
-
-				this._generateHTML(newElement, current);
-				this._updateNode(element, newElement);
 			}.bind(this));
 
 			/* all new blocks have been processed, so remove all remaining old elements that were not reused */
@@ -759,6 +769,12 @@ define([
 			}
 		},
 		_updateNode: function(targetNode, newNode) {
+			if (targetNode.nodeName !== newNode.nodeName) {
+				/* node types do not match, must replace the target node in the parent */
+				targetNode.parentElement.replaceChild(newNode, targetNode);
+				return;
+			}
+			
 			/* modify the existing node */
 
 			if (newNode.nodeName === "#text") {
