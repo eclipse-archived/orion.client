@@ -615,7 +615,7 @@ define([
 					/* now process the child block */
 					var newElement = document.createElement("div"); //$NON-NLS-0$
 					this._generateHTML(newElement, current);
-					newElement = newElement.children[0];
+					newElement = newElement.children[0] || newElement;
 					if (!newElement.id) {
 						newElement.id = current.elementId; /* typical */
 					} else {
@@ -723,7 +723,7 @@ define([
 						}
 						oldBlocksIndex = i + 1;
 
-						this._updateNode(element, newElement.children[0]);
+						this._updateNode(element, newElement.children[0] || newElement);
 						break;
 					}
 				}
@@ -735,7 +735,7 @@ define([
 					 */
 					element = document.createElement("div"); //$NON-NLS-0$
 					this._updateNode(element, newElement);
-					element = element.children[0];
+					element = element.children[0] || element;
 					if (!element.id) {
 						element.id = current.elementId; /* typical */
 					} else {
