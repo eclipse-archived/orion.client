@@ -34,7 +34,7 @@ define([
 				"extends": "text/plain",
 				name: "XML",
 				extension: ["xml"],
-				imageClass: "file-sprite-xml"
+				imageClass: "file-sprite-xml modelDecorationSprite"
 			},
 			{	id: "text/x-markdown",
 				"extends": "text/plain",
