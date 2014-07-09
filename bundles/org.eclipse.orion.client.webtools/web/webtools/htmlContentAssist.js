@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define */
-
+/*eslint-env amd */
 define("webtools/htmlContentAssist", ['orion/editor/templates'], function(mTemplates) { //$NON-NLS-1$ //$NON-NLS-0$
 
 	var simpleDocTemplate = new mTemplates.Template("", "Simple HTML document", //$NON-NLS-0$

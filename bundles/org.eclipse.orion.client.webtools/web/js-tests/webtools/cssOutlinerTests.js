@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console:true window:true describe:true it:true define*/
+/*eslint-env window, mocha, node, amd*/
 define([
 	'chai/chai',
 	'webtools/cssOutliner',

@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global esprima*/
-/*jslint amd:true*/
+/*eslint-env amd*/
 define(['orion/plugin', 
 'webtools/htmlContentAssist', 
 'orion/editor/stylers/text_html/syntax', 
