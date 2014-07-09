@@ -101,7 +101,7 @@ define([
 			name: "@param",  //$NON-NLS-0$
 			nodes: {top:false, member:false, prop:false, doc:true},
 			description: " - Param JSDoc tag", //$NON-NLS-0$
-			template: "@param {${type}} ${name} ${cursor}" //$NON-NLS-0$
+			template: "@param {${type}} ${cursor}" //$NON-NLS-0$
 	    },
 	    {
 	        prefix: "@private", //$NON-NLS-0$

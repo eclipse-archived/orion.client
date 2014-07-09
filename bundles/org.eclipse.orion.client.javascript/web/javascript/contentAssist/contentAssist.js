@@ -25,9 +25,10 @@ define([
 	'orion/objects',  //$NON-NLS-0$
 	'estraverse',  //$NON-NLS-0$
 	'javascript/contentAssist/indexer',  //$NON-NLS-0$
-	'javascript/finder'
+	'javascript/finder',
+	'javascript/signatures'
 ], function(typeEnv, typeInf, typeUtils, proposalUtils, mTemplates, JSSyntax, Templates, Deferred, Objects, Estraverse, Indexer,
-            Finder) {
+            Finder, Signatures) {
 
 	/**
 	 * @description Creates a new delegate to create keyword and template proposals
@@ -263,7 +264,8 @@ define([
 					var target = typeInf.inferTypes(ast, environment, self.lintOptions);
 					var proposalsObj = { };
 					self._createInferredProposals(target, environment, completionKind.kind, context, buffer, offset - context.prefix.length, proposalsObj);
-					return [].concat(self._filterAndSortProposals(proposalsObj), 
+					return [].concat(self._filterAndSortProposals(proposalsObj),
+					                 self._createDocProposals(context, completionKind, buffer, environment, ast),
 									 self._createTemplateProposals(context, completionKind, buffer),
 									 self._createKeywordProposals(context, completionKind, buffer));
 				});
@@ -323,12 +325,99 @@ define([
 		},
 		
 		/**
+		 * @description Create proposals specific to JSDoc
+		 * @returns {Array} The array of proposals
+		 * @since 7.0
+		 */
+		_createDocProposals: function(context, kind, buffer, env, ast) {
+		    var proposals = [];
+		    if(kind.kind === 'doc') {
+    		    var offset = context.offset > context.prefix.length ? context.offset-context.prefix.length-1 : 0;
+    		    switch(buffer.charAt(offset)) {
+    		        case '{': {
+    		            proposals = this._getAllObjectProposals(env);
+    		            break;
+    		        }
+    		        case ' ': {
+    		            var node = Finder.findNode(kind.node.range[1], ast, {parents:true, next:true});
+        	               if(node) {
+        	                   var isdecl = node.type === 'FunctionDeclaration';
+        	                   var ismember = node.type === 'ExpressionStatement';
+        	                   if(isdecl || (node.type === 'Property' && node.value.type === 'FunctionExpression') || ismember) {
+        	                       if(ismember && node.expression && node.expression.type === 'AssignmentExpression') {
+        	                           node = node.expression;
+        	                           if(node.left.type !== 'MemberExpression' && node.right.type !== 'FunctionExpression') {
+        	                               break;
+        	                           }
+        	                       }
+        	                       var val;
+            	                   if((val = /\s*\*\s*\@name\s*(\w*)/ig.exec(context.line)) !== null) {
+            	                       if(val[1] === context.prefix) {
+            	                           var name;
+            	                           if(ismember) {
+                	                           name = Signatures.expandMemberExpression(node.left, '');
+                	                       } else {
+                	                           name = isdecl ? node.id.name : node.key.name;
+                	                       }
+                	                       proposals.push({
+                								proposal: name,
+                								relevance: 100,
+                								name: name,
+                								description: ' - The name of the function',
+                								style: 'emphasis',
+                								overwrite: true
+            							    });
+        							}
+            	                   } else if((val = /\s*\*\s*\@param\s*(?:\{\w*\})?\s*(\w*)/ig.exec(context.line)) !== null) {
+            	                       if(val[1] === context.prefix) {
+            	                           var params = isdecl ? node.params : node.value.params;
+            	                           if(params) {
+            	                               for(var i = 0; i < params.length; i++) {
+            	                                   name = params[i].name;
+            	                                   if(proposalUtils.looselyMatches(context.prefix, name)) { 
+                	                                   proposals.push({
+                            								proposal: name,
+                            								relevance: 100,
+                            								name: name,
+                            								description: ' - Function parameter',
+                            								style: 'emphasis',
+                            								overwrite: true
+                        							    });
+                    							    }
+            	                               }
+            	                           }
+            	                       }
+            	                   }
+        	                   }
+        	               }
+    		        }
+    		    }
+	        }
+	        return proposals;
+		},
+		
+		/**
+		 * @description Returns all of the object proposals from the type environment
+		 * @param {javascript.contentAssist.TypeEnvironment} env The type environment
+		 * @returns {Array} The array of proposals
+		 * @since 7.0
+		 */
+		_getAllObjectProposals: function _getAllObjects(env) {
+		    var objects = [];
+		    var types = env.getAllTypes();
+		    if(types) {
+		        //TODO compute the type proposals
+		    }
+		    return objects;
+		},
+		
+		/**
 		 * @description Create the array of inferred proposals
 		 * @function
 		 * @private
 		 * @param {String} targetTypeName The name of the type to find
 		 * @param {Object} env The backing type environment
-		 * @param {String} completionKind The kind of the completion
+		 * @param {String} kind The kind of the completion
 		 * @param {Object} context The content assist context
 		 * @param {String} buffer The complete text of the file
 		 * @param {Number} replaceStart The offset into the source where to start the completion
@@ -336,15 +425,9 @@ define([
 		 * @param {Number} relevance The ordering relevance of the proposals
 		 * @param {Object} visited Those types visited thus far while computing proposals (to detect cycles)
 		 */
-		_createInferredProposals: function(targetTypeName, env, completionKind, context, buffer, replaceStart, proposals, relevance, visited) {
-		    var isdoc = completionKind === 'doc';
-		    if(isdoc) {
-		       /* var offset = context.offset > context.prefix.length ? context.offset-context.prefix.length-1 : 0;
-		        if(buffer.charAt(offset) !== '{') {
-		            return;
-		        }
-		        */
-		       return; //TODO For now just do nothing
+		_createInferredProposals: function(targetTypeName, env, kind, context, buffer, replaceStart, proposals, relevance, visited) {
+		    if(kind === 'doc') {
+    	        return;
 		    } 
 			var type = env.lookupQualifiedType(targetTypeName);
 			var proto = type.$$proto;
@@ -363,7 +446,7 @@ define([
 				}
 				if (!cycle) {
 					visited[proto.typeObj.name] = true;
-					this._createInferredProposals(proto.typeObj.name, env, completionKind, context, buffer, replaceStart, proposals, relevance - 10, visited);
+					this._createInferredProposals(proto.typeObj.name, env, kind, context, buffer, replaceStart, proposals, relevance - 10, visited);
 				}
 			}
 			// add a separator proposal
@@ -394,7 +477,7 @@ define([
 					} else {
 						propName = prop;
 					}
-					if (propName === "this" && completionKind === "member") {
+					if (propName === "this" && kind === "member") {
 						// don't show "this" proposals for non-top-level locations
 						// (eg- this.this is wrong)
 						continue;
@@ -613,7 +696,7 @@ define([
 		    var comment = Finder.findComment(offset, ast);
 		    if(comment) {
 		        if(offset > comment.range[0]+2 && (comment.type === 'Block' && offset < comment.range[1]-2)) {
-		          return {kind:'doc'};
+		          return {kind:'doc', node: comment};
 		        }
 		    }
 			var parents = [];

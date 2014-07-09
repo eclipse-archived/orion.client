@@ -4872,5 +4872,244 @@ define([
 			]);
 	
 		});
+		
+		//TESTS FOR JSDOC CONTENT ASSIST
+		
+		/**
+		 * Tests the author tag insertion
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test author tag", function() {
+			var results = computeContentAssist("/**\n* @a \n*/", "@a", 8);
+			testProposals(results, [
+			     ['uthor', '@author', 'Author JSDoc tag']
+			]);
+		});
+		/**
+		 * Tests the lends tag insertion
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test lends tag", function() {
+			var results = computeContentAssist("/**\n* @name foo\n* @l \n*/", "@l", 20);
+			testProposals(results, [
+			     ['ends', '@lends', 'Lends JSDoc tag']
+			]);
+		});
+		/**
+		 * Tests the function name insertion for a function decl with no prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test name tag completion 1", function() {
+			var results = computeContentAssist("/**\n* @name  \n*/function a(){}", "", 12);
+			testProposals(results, [
+			     ['a', 'a', 'The name of the function']
+			]);
+		});
+		/**
+		 * Tests the function name insertion for a function decl with a prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test name tag completion 2", function() {
+			var results = computeContentAssist("/**\n* @name  \n*/function bar(){}", "b", 12);
+			testProposals(results, [
+			     ['ar', 'bar', 'The name of the function']
+			]);
+		});
+		/**
+		 * Tests the function name insertion for a object property with function expr with no prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test name tag completion 3", function() {
+			var results = computeContentAssist("var o = {/**\n* @name  \n*/f: function bar(){}}", "", 21);
+			testProposals(results, [
+			     ['bar', 'bar', 'The name of the function']
+			]);
+		});
+		/**
+		 * Tests the function name insertion for a object property with function expr with a prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test name tag completion 4", function() {
+			var results = computeContentAssist("var o = {/**\n* @name  \n*/f: function bar(){}}", "b", 21);
+			testProposals(results, [
+			     ['ar', 'bar', 'The name of the function']
+			]);
+		});
+		/**
+		 * Tests the function name insertion for a object property with function expr with no prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test name tag completion 5", function() {
+			var results = computeContentAssist("/**\n* @name  \n*/Foo.bar.baz = function(){}", "", 12);
+			testProposals(results, [
+			     ['Foo.bar.baz', 'Foo.bar.baz', 'The name of the function']
+			]);
+		});
+		/**
+		 * Tests the function name insertion for a object property with function expr with a prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test name tag completion 6", function() {
+			var results = computeContentAssist("/**\n* @name  \n*/Foo.bar.baz = function(){}", "Foo", 12);
+			testProposals(results, [
+			     ['.bar.baz', 'Foo.bar.baz', 'The name of the function']
+			]);
+		});
+		/**
+		 * Tests no proposals for assingment expression
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test name tag completion 6", function() {
+			var results = computeContentAssist("/**\n* @name f \n*/Foo.bar.baz = function(){}", "", 14);
+			testProposals(results, []);
+		});
+		/**
+		 * Tests func decl param name proposals no prefix, no type
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test param name completion 1", function() {
+			var results = computeContentAssist("/**\n* @param  \n*/function a(a, b, c){}", "", 13);
+			testProposals(results, [
+			     ['a', 'a', 'Function parameter'],
+			     ['b', 'b', 'Function parameter'],
+			     ['c', 'c', 'Function parameter']
+			]);
+		});
+		
+		/**
+		 * Tests func decl param name proposals no prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test param name completion 2", function() {
+			var results = computeContentAssist("/**\n* @param {type} \n*/function a(a, b, c){}", "", 20);
+			testProposals(results, [
+			     ['a', 'a', 'Function parameter'],
+			     ['b', 'b', 'Function parameter'],
+			     ['c', 'c', 'Function parameter']
+			]);
+		});
+		/**
+		 * Tests func decl param name proposals a prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test param name completion 3", function() {
+			var results = computeContentAssist("/**\n* @param a \n*/function a(aa, bb, cc){}", "a", 14);
+			testProposals(results, [
+			     ['a', 'aa', 'Function parameter']
+			]);
+		});
+		/**
+		 * Tests no proposals for after name
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test param name completion 4", function() {
+			var results = computeContentAssist("/**\n* @param f  \n*/function a(aa, bb, cc){}", "", 15);
+			testProposals(results, []);
+		});
+		/**
+		 * Tests object property func expr param name proposals no prefix, no type
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test param name completion 5", function() {
+			var results = computeContentAssist("var o = {/**\n* @param  \n*/f: function a(a, b, c){}}", "", 22);
+			testProposals(results, [
+			     ['a', 'a', 'Function parameter'],
+			     ['b', 'b', 'Function parameter'],
+			     ['c', 'c', 'Function parameter']
+			]);
+		});
+		/**
+		 * Tests object property func expr param name proposals no prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test param name completion 6", function() {
+			var results = computeContentAssist("var o = {/**\n* @param {type} \n*/f: function a(a, b, c){}}", "", 28);
+			testProposals(results, [
+			     ['a', 'a', 'Function parameter'],
+			     ['b', 'b', 'Function parameter'],
+			     ['c', 'c', 'Function parameter']
+			]);
+		});
+		/**
+		 * Tests object property func expr param name proposals a prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test param name completion 7", function() {
+			var results = computeContentAssist("var o = {/**\n* @param {type} a\n*/f: function a(aa, bb, cc){}}", "a", 30);
+			testProposals(results, [
+			     ['a', 'aa', 'Function parameter']
+			]);
+		});
+		/**
+		 * Tests object property func expr param name proposals a prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test param name completion 8", function() {
+			var results = computeContentAssist("var o = {/**\n* @param {type} a \n*/f: function a(aa, bb, cc){}}", "a", 31);
+			testProposals(results, []);
+		});
+		/**
+		 * Tests assingment func expr param name proposals no prefix, no type
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test param name completion 9", function() {
+			var results = computeContentAssist("/**\n* @param  \n*/Foo.bar.baz = function a(a, b, c){}", "", 13);
+			testProposals(results, [
+			     ['a', 'a', 'Function parameter'],
+			     ['b', 'b', 'Function parameter'],
+			     ['c', 'c', 'Function parameter']
+			]);
+		});
+		/**
+		 * Tests assingment func expr param name proposals no prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test param name completion 10", function() {
+			var results = computeContentAssist("/**\n* @param {type} \n*/Foo.bar.baz = function a(a, b, c){}", "", 19);
+			testProposals(results, [
+			     ['a', 'a', 'Function parameter'],
+			     ['b', 'b', 'Function parameter'],
+			     ['c', 'c', 'Function parameter']
+			]);
+		});
+		/**
+		 * Tests assingment func expr param name proposals no prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test param name completion 10", function() {
+			var results = computeContentAssist("/**\n* @param {type} a\n*/Foo.bar.baz = function a(aa, bb, cc){}", "a", 20);
+			testProposals(results, [
+			     ['a', 'aa', 'Function parameter']
+			]);
+		});
+		/**
+		 * Tests assingment func expr param name proposals no prefix
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test param name completion 11", function() {
+			var results = computeContentAssist("/**\n* @param {type} d\n*/Foo.bar.baz = function a(aa, bb, cc){}", "d", 20);
+			testProposals(results, []);
+		});
 	});
 });
