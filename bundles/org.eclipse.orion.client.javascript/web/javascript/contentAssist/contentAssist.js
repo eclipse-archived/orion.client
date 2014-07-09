@@ -174,10 +174,6 @@ define([
 	 */
 	Objects.mixin(JSContentAssist.prototype, {
 
-		browserRegExp: /browser\s*:\s*true/,
-		nodeRegExp: /node\s*:\s*true/,
-		amdRegExp: /amd\s*:\s*true/,
-
 		/**
 		 * Called by the framework to initialize this provider before any <tt>computeContentAssist</tt> calls.
 		 */
@@ -662,12 +658,14 @@ define([
 		_findGlobalObject: function(comments, lintOptions) {
 			for (var i = 0; i < comments.length; i++) {
 				var comment = comments[i];
-				if (comment.type === "Block" && (comment.value.substring(0, "jslint".length) === "jslint" ||
-												  comment.value.substring(0,"jshint".length) === "jshint")) {
+				var value = comment.value.trim();
+				if (comment.type === "Block" && value.match(/^(?:jslint|jshint|eslint-env).*/)) {
 					// the lint options section.  now look for the browser or node
-					if (comment.value.match(this.browserRegExp) || comment.value.match(this.amdRegExp)) {
+					if (value.match(/^(?:jslint|jshint)\s+.*(?:browser|amd)\s*:\s*true(?:\s+|$).*/) || 
+					    value.match(/^eslint-env\s+.*(?:browser|amd)(?:\s+|$).*/)) {
 						return "Window";
-					} else if (comment.value.match(this.nodeRegExp)) {
+					} else if (value.match(/^(?:jslint|jshint)\s+.*node\s*:\s*true(?:\s+|$).*/) ||
+					           value.match(/^eslint-env\s+.*node(?:\s+|$).*/)) {
 						return "Module";
 					} else {
 						return "Global";
@@ -675,7 +673,7 @@ define([
 				}
 			}
 			if (lintOptions && lintOptions.options) {
-				if (lintOptions.options.browser === true) {
+				if (lintOptions.options.browser === true || lintOptions.options.amd === true) {
 					return "Window";
 				} else if (lintOptions.options.node === true) {
 					return "Module";

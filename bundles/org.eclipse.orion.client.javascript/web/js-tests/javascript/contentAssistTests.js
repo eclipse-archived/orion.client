@@ -2277,6 +2277,77 @@ define([
 			]);
 		});
 		
+		/**
+		 * Tests support for the eslint-env directive to find global objects
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+		 * @since 7.0
+		 */
+		it("test browser eslint-env 1", function() {
+			var results = computeContentAssist(
+				"/*eslint-env browser*/\n" +
+				"win", "win"
+			);
+			return testProposals(results, [
+				["window", "window : Global"]
+			]);
+		});
+		
+		/**
+		 * Tests support for the eslint-env directive to find global objects
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+		 * @since 7.0
+		 */
+		it("test browser eslint-env 2", function() {
+			var results = computeContentAssist(
+				"/*eslint-env browser*/\n" +
+				"JSON.st", "st");
+			return testProposals(results, [
+				["stringify(json)", "stringify(json) : String"]
+			]);
+		});
+		
+		/**
+		 * Tests support for the eslint-env directive to find global objects
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+		 * @since 7.0
+		 */
+		it("test browser eslint-env 3", function() {
+			var results = computeContentAssist(
+				"/*eslint-env browser node*/\n" +
+				"win", "win"
+			);
+			return testProposals(results, [
+				["window", "window : Global"]
+			]);
+		});
+		/**
+		 * Tests support for the eslint-env directive to find global objects
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+		 * @since 7.0
+		 */
+		it("test browser eslint-env 4", function() {
+			var results = computeContentAssist(
+				"/*eslint-env node browser*/\n" +
+				"win", "win"
+			);
+			return testProposals(results, [
+				["window", "window : Global"]
+			]);
+		});
+		
+		/**
+		 * Tests support for the eslint-env directive to find global objects
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+		 * @since 7.0
+		 */
+		it("test browser eslint-env 5", function() {
+			var results = computeContentAssist(
+				"/*eslint-env */\n" +
+				"win", "win", null, {options:{browser:true}}
+			);
+			return testProposals(results, []);
+		});
+		
 		// browser awareness
 		it("test browser2", function() {
 			var results = computeContentAssist(
@@ -2288,7 +2359,7 @@ define([
 				
 			]);
 		});
-	
+	       
 		// regular stuff should still work in the browser
 		it("test browser3", function() {
 			var results = computeContentAssist(
@@ -2374,17 +2445,6 @@ define([
 			]);
 		});
 	
-		// redundant with "test browser1"
-	//	it("test browser10", function() {
-	//		var results = computeContentAssist(
-	//			"/*jslint browser:true*/\n" +
-	//			"thi", "thi"
-	//		);
-	//		return testProposals(results, [
-	//			["this", "this : Window"]
-	//		]);
-	//	});
-	
 		// browser takes higher precedence than node
 		it("test browser11", function() {
 			var results = computeContentAssist(
@@ -2447,6 +2507,57 @@ define([
 			]);
 		});
 	
+	    /**
+		 * Tests support for the eslint-env directive to find global objects
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+		 * @since 7.0
+		 */
+		it("test node eslint-env 1", function() {
+			var results = computeContentAssist(
+				"/*eslint-env node*/\n" +
+				"glo", "glo"
+			);
+			return testProposals(results, [
+				["global", "global : Global"]
+			]);
+		});
+		/**
+		 * Tests support for the eslint-env directive to find global objects
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+		 * @since 7.0
+		 */
+		it("test node eslint-env 2", function() {
+			var results = computeContentAssist(
+				"/*eslint-env */\n" +
+				"glo", "glo", null, {options:{node:true}}
+			);
+			return testProposals(results, []);
+		});
+		/**
+		 * Tests support for the eslint-env directive to find global objects
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+		 * @since 7.0
+		 */
+		it("test node eslint-env 3", function() {
+			var results = computeContentAssist(
+				"/*eslint-env amd*/\n" +
+				"require(\"fs\").mk", "mk"
+			);
+			return testProposals(results, []);
+		});
+		/**
+		 * Tests support for the eslint-env directive to find global objects
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439056
+		 * @since 7.0
+		 */
+		it("test node eslint-env 4", function() {
+			var results = computeContentAssist(
+				"/*eslint-env browser*/\n" +
+				"require(\"fs\").mk", "mk"
+			);
+			return testProposals(results, []);
+		});
+		
 		// node awareness
 		it("test node2", function() {
 			var results = computeContentAssist(
