@@ -16,7 +16,7 @@
 	} else if(typeof define === "function" && define.amd) { //$NON-NLS-0$
 		define(["require", "exports", "module", "chai/chai", "eslint"], factory);
 	}
-}}(this, function(require, exports, module, assert, eslint) {
+}(this, function(require, exports, module, assert, eslint) {
 	assert = assert.assert /*chai*/ || assert;
 
 	var RULE_ID = "no-unused-vars";
