@@ -92,12 +92,14 @@ define([
 				}
 
 				if (tokens[i].type === "heading") { //$NON-NLS-0$
-					var isSetext = tokens[i].style === "setext"; //text[index] !== "#"; //$NON-NLS-0$
+					this._atxDetectRegex.lastIndex = index;
+					var match = this._atxDetectRegex.exec(text);
+					var isAtx = match && match.index === index;
 					var lineEnd = this._getLineEnd(text, index, model);
-					end = isSetext ? this._getLineEnd(text, index, model, 1) : lineEnd;
+					end = isAtx ? lineEnd : this._getLineEnd(text, index, model, 1);
 					bounds = {
 						start: index,
-						contentStart: index + (isSetext ? 0 : tokens[i].depth + 1),
+						contentStart: index + (isAtx ? tokens[i].depth + 1 : 0),
 						contentEnd: lineEnd,
 						end: end
 					};
@@ -117,7 +119,7 @@ define([
 						var lastIndex = 0;
 						while (true) {
 							this._htmlNewlineRegex.lastIndex = lastIndex;
-							var match = this._htmlNewlineRegex.exec(tokens[i].text);
+							match = this._htmlNewlineRegex.exec(tokens[i].text);
 							if (match) {
 								newlineCount++;
 								lastIndex = match.index + 1;
@@ -835,6 +837,7 @@ define([
 		},
 		_CR: "\r", //$NON-NLS-0$
 		_NEWLINE: "\n", //$NON-NLS-0$
+		_atxDetectRegex: /\s*#/g,
 		_blockquoteRemoveMarkersRegex: /^[ \t]*>[ \t]?/gm,
 		_blockquoteStartRegex: /[ \t]*>[ \t]?/g,
 		_blocksCache: {},
