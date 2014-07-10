@@ -789,56 +789,56 @@ define([
 			});
 			commandRegistry.addCommand(toggleBanner);
 			commandRegistry.registerCommandContribution("globalActions", "orion.toggleTrim", 100, null, true, new KeyBinding.KeyBinding("m", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+			// Open configuration page, Ctrl+Shift+F1
+			var configDetailsCommand = new mCommands.Command({
+				name: messages["System Configuration Details"],
+				tooltip: messages["System Config Tooltip"],
+				id: "orion.configDetailsPage", //$NON-NLS-0$
+				hrefCallback: function () {
+					return require.toUrl("help/about.html"); //$NON-NLS-0$
+				}
+			});
+	
+			commandRegistry.addCommand(configDetailsCommand);
+			commandRegistry.registerCommandContribution("globalActions", "orion.configDetailsPage", 100, null, true, new KeyBinding.KeyBinding(112, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	
+			// Background Operations Page, Ctrl+Shift+O
+			var operationsCommand = new mCommands.Command({
+				name: messages["Background Operations"],
+				tooltip: messages["Background Operations Tooltip"],
+				id: "orion.backgroundOperations", //$NON-NLS-0$
+				hrefCallback: function () {
+					return require.toUrl("operations/list.html"); //$NON-NLS-0$
+				}
+			});
+	
+			commandRegistry.addCommand(operationsCommand);
+			commandRegistry.registerCommandContribution("globalActions", "orion.backgroundOperations", 100, null, true, new KeyBinding.KeyBinding('o', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	
+			// Key assist
+			keyAssist = new mKeyAssist.KeyAssistPanel({
+				commandRegistry: commandRegistry
+			});
+			var keyAssistCommand = new mCommands.Command({
+				name: messages["Show Keys"],
+				tooltip: messages["Show a list of all the keybindings on this page"],
+				id: "orion.keyAssist", //$NON-NLS-0$
+				callback: function () {
+					if (keyAssist.isVisible()) {
+						keyAssist.hide();
+					} else {
+						keyAssist.show();
+					}
+					return true;
+				}
+			});
+			commandRegistry.addCommand(keyAssistCommand);
+			commandRegistry.registerCommandContribution("globalActions", "orion.keyAssist", 100, null, true, new KeyBinding.KeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
+	
+			renderGlobalCommands(commandRegistry);
 		}
 		
-		// Open configuration page, Ctrl+Shift+F1
-		var configDetailsCommand = new mCommands.Command({
-			name: messages["System Configuration Details"],
-			tooltip: messages["System Config Tooltip"],
-			id: "orion.configDetailsPage", //$NON-NLS-0$
-			hrefCallback: function () {
-				return require.toUrl("help/about.html"); //$NON-NLS-0$
-			}
-		});
-
-		commandRegistry.addCommand(configDetailsCommand);
-		commandRegistry.registerCommandContribution("globalActions", "orion.configDetailsPage", 100, null, true, new KeyBinding.KeyBinding(112, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
-		// Background Operations Page, Ctrl+Shift+O
-		var operationsCommand = new mCommands.Command({
-			name: messages["Background Operations"],
-			tooltip: messages["Background Operations Tooltip"],
-			id: "orion.backgroundOperations", //$NON-NLS-0$
-			hrefCallback: function () {
-				return require.toUrl("operations/list.html"); //$NON-NLS-0$
-			}
-		});
-
-		commandRegistry.addCommand(operationsCommand);
-		commandRegistry.registerCommandContribution("globalActions", "orion.backgroundOperations", 100, null, true, new KeyBinding.KeyBinding('o', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
-		// Key assist
-		keyAssist = new mKeyAssist.KeyAssistPanel({
-			commandRegistry: commandRegistry
-		});
-		var keyAssistCommand = new mCommands.Command({
-			name: messages["Show Keys"],
-			tooltip: messages["Show a list of all the keybindings on this page"],
-			id: "orion.keyAssist", //$NON-NLS-0$
-			callback: function () {
-				if (keyAssist.isVisible()) {
-					keyAssist.hide();
-				} else {
-					keyAssist.show();
-				}
-				return true;
-			}
-		});
-		commandRegistry.addCommand(keyAssistCommand);
-		commandRegistry.registerCommandContribution("globalActions", "orion.keyAssist", 100, null, true, new KeyBinding.KeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
-
-		renderGlobalCommands(commandRegistry);
-
 		generateUserInfo(serviceRegistry, keyAssistCommand.callback);
 
 		// now that footer containing progress pane is added
