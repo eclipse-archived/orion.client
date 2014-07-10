@@ -375,13 +375,20 @@ exports.GitRepositoryExplorer = (function() {
 			preferenceService : this.preferencesService
 		});
 
-		var tagsNavigator = new mGitTagList.GitTagListExplorer({
+		var tagsNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
-			parentId:"tagNode",
+			fileClient: this.fileClient,
+			gitClient: this.gitClient,
+			progressService: this.progressService,
+			parentId: "tagNode",
 			actionScopeId: this.actionScopeId,
 			section: titleWrapper,
-			repository: repository,
+			handleError: this.handleError,
+			root: {
+				Type: "TagRoot",
+				repository: repository,
+			}
 		});
 		tagsNavigator.display();
 	};
