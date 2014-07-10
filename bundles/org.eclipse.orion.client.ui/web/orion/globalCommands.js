@@ -837,9 +837,10 @@ define([
 			commandRegistry.registerCommandContribution("globalActions", "orion.keyAssist", 100, null, true, new KeyBinding.KeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
 	
 			renderGlobalCommands(commandRegistry);
+
+			generateUserInfo(serviceRegistry, keyAssistCommand.callback);
 		}
 		
-		generateUserInfo(serviceRegistry, keyAssistCommand.callback);
 
 		// now that footer containing progress pane is added
 		startProgressService(serviceRegistry);
