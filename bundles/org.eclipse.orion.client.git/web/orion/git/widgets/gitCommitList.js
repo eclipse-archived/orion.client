@@ -14,6 +14,9 @@
 define([
 	'require',
 	'i18n!git/nls/gitmessages',
+	'orion/git/widgets/gitChangeList',
+	'orion/git/widgets/gitCommitInfo',
+	'orion/section',
 	'orion/commands',
 	'orion/Deferred',
 	'orion/explorers/explorer',
@@ -26,7 +29,7 @@ define([
 	'orion/git/widgets/CommitTooltipDialog',
 	'orion/webui/littlelib',
 	'orion/objects'
-], function(require, messages, mCommands, Deferred, mExplorer, URITemplate, util, mHTMLFragments, gitPush, i18nUtil, mNavUtils, mCommitTooltip, lib, objects) {
+], function(require, messages, mGitChangeList, mGitCommitInfo, mSection, mCommands, Deferred, mExplorer, URITemplate, util, mHTMLFragments, gitPush, i18nUtil, mNavUtils, mCommitTooltip, lib, objects) {
 	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$
 //	var logTemplate = new URITemplate("git/git-log.html#{,resource,params*}?page=1"); //$NON-NLS-0$
 
@@ -157,7 +160,7 @@ define([
 			var tracksRemoteBranch = this.tracksRemoteBranch();
 			if (parentItem instanceof Array && parentItem.length > 0) {
 				onComplete(parentItem);
-			} else if (parentItem.children) {
+			} else if (parentItem.children && parentItem.Type !== "Synchronized") {  //$NON-NLS-0$
 				onComplete(parentItem.children);
 			} else if (parentItem.Type === "CommitRoot") { //$NON-NLS-0$
 				var section = this.section;
@@ -166,7 +169,7 @@ define([
 				Deferred.when(parentItem.repository || that._getRepository(), function(repository) {
 					var currentBranchMsg = i18nUtil.formatMessage(messages['GettingCurrentBranch'], repository.Name);
 					progress.worked(currentBranchMsg);
-					Deferred.when(that.Branches || that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=0"), currentBranchMsg), function(resp) { //$NON-NLS-0$
+					Deferred.when(that.Branches || that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=0&page=1&pageSize=5"), currentBranchMsg), function(resp) { //$NON-NLS-0$
 						var currentBranch, branches = resp.Children || resp;
 						branches.some(function(branch) {
 							if (branch.Current) {
@@ -279,7 +282,17 @@ define([
 									children.push(commit);
 								}
 							});
-							onComplete(that.processChildren(parentItem, children));
+							var fullList = parentItem.children;
+							if (fullList) {
+								var args = [fullList.length - 1, 1].concat(children);
+								Array.prototype.splice.apply(fullList, args);
+							} else {
+								fullList = children;
+							}
+							if (log.NextLocation) {
+								fullList.push({Type: "MoreCommits", NextLocation: log.NextLocation}); //$NON-NLS-0$
+							}
+							onComplete(that.processChildren(parentItem, fullList));
 						}, function(error){
 							that.handleError(error);
 						});
@@ -289,12 +302,14 @@ define([
 				} else {
 					onComplete(that.processChildren(parentItem, []));
 				}
+			} else if (parentItem.Type === "Commit") {  //$NON-NLS-0$
+				onComplete(that.processChildren(parentItem, [{Type: "CommitChanges"}]));  //$NON-NLS-0$
 			} else {
 				onComplete([]);
 			}
 		},
 		getId: function(/* item */ item){
-			return item.Name || item.Type;
+			return "commitList" + (item.Name || item.Type);
 		},
 		processChildren: function(parentItem, items) {
 			if (items.length === 0) {
@@ -347,7 +362,10 @@ define([
 			if (item.Type === "CommitRoot") { //$NON-NLS-0$
 				model.incomingCommits = model.outgoingCommits = null;
 			}
-			item.children = model.log = null;
+			if (item.Type !== "Synchronized") {
+				item.children = null;
+			}
+			model.log = null;
 			model.logDeferred = new Deferred();
 			var progress = this.section.createProgressMonitor();
 			progress.begin(messages["Getting git log"]);
@@ -355,9 +373,7 @@ define([
 				item.removeAll = true;
 				that.myTree.refresh.bind(that.myTree)(item, children, false);
 				that.expandSections(children);
-				if (item.Type === "Synchronized") { //$NON-NLS-0$
-					that.updatePageCommands(item);
-				} else {
+				if (item.Type !== "Synchronized") { //$NON-NLS-0$
 					that.updateCommands();
 				}
 				progress.done();
@@ -396,39 +412,6 @@ define([
 		createCommands: function() {
 			var that = this;
 			var commandService = this.commandService;
-			var nextPageCommand = new mCommands.Command({
-				name: messages['Next Page >'],
-				tooltip: messages["Show next page of git log"],
-				id: "eclipse.orion.git.commit.nextPage", //$NON-NLS-0$
-				callback: function(data) {
-					var item = data.items;
-					if (item.log) {
-						data.handler.model.location = item.log.NextLocation;
-						data.handler.changedItem(item);
-					}
-				},
-				visibleWhen: function(item) {
-					return !!item.log.NextLocation;
-				}
-			});
-			commandService.addCommand(nextPageCommand);
-
-			var previousPageCommand = new mCommands.Command({
-				name: messages['< Previous Page'],
-				tooltip: messages["Show previous page of git log"],
-				id: "eclipse.orion.git.commit.previousPage", //$NON-NLS-0$
-				callback: function(data) {
-					var item = data.items;
-					if (item.log) {
-						data.handler.model.location = item.log.PreviousLocation;	
-						data.handler.changedItem(item);
-					}
-				},
-				visibleWhen: function(item) {
-					return !!item.log.PreviousLocation;
-				}
-			});
-			commandService.addCommand(previousPageCommand);
 			
 			var chooseBranchCommand = new mCommands.Command({
 				name: messages["Choose Branch"],
@@ -537,18 +520,6 @@ define([
 
 				commandService.renderCommands(outgoingActionScope, outgoingActionScope, {LocalBranch: localBranch, RemoteBranch: remoteBranch}, this, "button"); //$NON-NLS-0$
 			}
-		},
-		updatePageCommands: function(item) {
-			var that = this;
-			this.model.logDeferred.then(function() {
-				var commandService = that.commandService;
-				if (lib.node(that.syncActionScope)) {
-					commandService.destroy(that.syncActionScope);
-				}
-				commandService.registerCommandContribution(that.syncActionScope, "eclipse.orion.git.commit.nextPage", 200); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				commandService.registerCommandContribution(that.syncActionScope, "eclipse.orion.git.commit.previousPage", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				commandService.renderCommands(that.syncActionScope, that.syncActionScope, item, that, "button"); //$NON-NLS-0$
-			});
 		}
 	});
 	
@@ -568,21 +539,87 @@ define([
 				var horizontalBox = document.createElement("div"); //$NON-NLS-0$
 				horizontalBox.style.overflow = "hidden"; //$NON-NLS-0$
 				sectionItem.appendChild(horizontalBox);	
+				var that = this;
+				function createExpand() {
+					var expandContainer = document.createElement("div"); //$NON-NLS-0$
+					expandContainer.style.display = "inline-block"; //$NON-NLS-0$
+					expandContainer.style.styleFloat = "left"; //$NON-NLS-0$
+					expandContainer.style.cssFloat = "left"; //$NON-NLS-0$
+					var expandImage = that.getExpandImage(tableRow, expandContainer);
+					horizontalBox.appendChild(expandContainer);
+					return expandImage;
+				}
+				
 				var description, detailsView, actionsArea;
-				if (item.Type !== "Commit") { //$NON-NLS-0$
+				var model = explorer.model;
+				if (item.Type === "MoreCommits") { //$NON-NLS-1$ //$NON-NLS-0$
+					td.classList.add("gitCommitListMore"); //$NON-NLS-0$
+					td.textContent = i18nUtil.formatMessage(messages[item.Type], model.getLocalBranch().Name);
+					var listener;
+					td.addEventListener("click", listener = function() { //$NON-NLS-0$
+						td.removeEventListener("click", listener); //$NON-NLS-0$
+						td.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], model.getLocalBranch().Name);
+						model.location = item.NextLocation;
+						explorer.changedItem(item.parent);
+					});
+					return td;
+				} else if (item.Type === "CommitChanges") {
+						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
+						commit = item.parent;
+						var commitDetails = document.createElement("div"); //$NON-NLS-0$
+						var info = new mGitCommitInfo.GitCommitInfo({
+							parent: commitDetails,
+							commit: commit,
+							showTags: false,
+							commitLink: false,
+							showMessage: false,
+							showImage: false,
+							showAuthor: false,
+							showParentLink: false
+						});
+						info.display();
+						horizontalBox.appendChild(commitDetails);
+						
+						var diffs = commit.Diffs;
+
+						diffs.forEach(function(item) {
+							var path = item.OldPath;
+							if (item.ChangeType === "ADD") { //$NON-NLS-0$
+								path = item.NewPath;
+							} 
+							item.name = path;
+							item.type = item.ChangeType;
+						});
+						
+						var titleWrapper = new mSection.Section(horizontalBox, {
+							id: "commitdDiffSection" + commit.Name, //$NON-NLS-0$
+							title: messages["ChangedFiles"],
+							slideout: true,
+							canHide: false,
+							preferenceService: explorer.preferencesService
+						}); 
+
+						var repository = explorer.model.root.repository;
+						setTimeout(function() {
+							var explorer2  = new mGitChangeList.GitChangeListExplorer({
+								serviceRegistry: explorer.registry,
+								commandRegistry: explorer.commandService,
+								selection: null,
+								parentId: titleWrapper.getContentElement(), 
+								actionScopeId: "diffSectionItemActionArea",
+								prefix: "diff",
+								changes: diffs,
+								location: repository.StatusLocation,
+								repository: repository,
+								section: titleWrapper
+							});
+							explorer2.display();
+						}, 10);
+						return td;
+					}  else if (item.Type !== "Commit") { //$NON-NLS-0$
 					if (item.Type !== "NoCommits") { //$NON-NLS-0$
 						sectionItem.className = "gitCommitSectionTableItem"; //$NON-NLS-0$
-						var expandContainer = document.createElement("div"); //$NON-NLS-0$
-						expandContainer.style.display = "inline-block"; //$NON-NLS-0$
-						expandContainer.style.styleFloat = "left"; //$NON-NLS-0$
-						expandContainer.style.cssFloat = "left"; //$NON-NLS-0$
-						var expandImage = this.getExpandImage(tableRow, expandContainer);
-						if (item.Type === "Synchronized") { //$NON-NLS-0$
-							expandImage.addEventListener("click",function() { //$NON-NLS-0$
-								explorer.updatePageCommands(item);
-							});
-						}
-						horizontalBox.appendChild(expandContainer);
+						createExpand();
 						tableRow.classList.add("gitCommitListSection"); //$NON-NLS-0$
 					} else {
 						tableRow.classList.add("gitCommitListNoCommit"); //$NON-NLS-0$
@@ -611,6 +648,7 @@ define([
 					slideoutDiv.innerHTML = slideoutFragment;
 					horizontalBox.appendChild(slideoutDiv);
 				} else {
+					createExpand();
 					sectionItem.className = "sectionTableItem"; //$NON-NLS-0$
 					if (commit.AuthorImage) {
 						var authorImage = document.createElement("div"); //$NON-NLS-0$
@@ -627,22 +665,27 @@ define([
 					detailsView.className = "stretch"; //$NON-NLS-0$
 					horizontalBox.appendChild(detailsView);
 	
-					var titleLink = document.createElement("a"); //$NON-NLS-0$
-					titleLink.className = "navlinkonpage"; //$NON-NLS-0$
-					titleLink.href = require.toUrl(commitTemplate.expand({resource: commit.Location})); //$NON-NLS-0$
+					var titleLink;
+					if (explorer.showCommitLinks) {
+						titleLink = document.createElement("a"); //$NON-NLS-0$
+						titleLink.className = "navlinkonpage"; //$NON-NLS-0$
+						titleLink.href = require.toUrl(commitTemplate.expand({resource: commit.Location})); //$NON-NLS-0$
+					} else {
+						titleLink = document.createElement("span"); //$NON-NLS-0$
+						titleLink.className = "gitCommitTitle"; //$NON-NLS-0$
+					}
 					titleLink.textContent = util.trimCommitMessage(commit.Message);
 					detailsView.appendChild(titleLink);
 					
 					//Add the commit page link as the first grid of the row
 					mNavUtils.addNavGrid(this.explorer.getNavDict(), item, titleLink);
 					
-					new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: titleLink});
-	
 					var d = document.createElement("div"); //$NON-NLS-0$
 					detailsView.appendChild(d);
 	
 					description = document.createElement("div"); //$NON-NLS-0$
-					description.textContent = commit.AuthorName + messages[" on "] + new Date(commit.Time).toLocaleString();
+					description.textContent = i18nUtil.formatMessage(messages["authored by 0 (1) on 2"], //$NON-NLS-0$
+									commit.AuthorName, commit.AuthorEmail, new Date(commit.Time).toLocaleString()); 
 					detailsView.appendChild(description);
 					
 					if (commit.Tags && commit.Tags.length) {

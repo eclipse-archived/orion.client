@@ -30,11 +30,32 @@ define([
 		this.commit = options.commit;
 		this.showTags = options.showTags;
 		this.commitLink = options.commitLink;
+		this.showMessage = options.showMessage;
+		this.showImage = options.showImage;
+		this.showAuthor = options.showAuthor;
+		this.showCommitter = options.showCommitter;
+		this.showParentLink = options.showParentLink;
 		this.fullMessage = options.fullMessage;
 	}
 	
 	objects.mixin(GitCommitInfo.prototype, {
 		display: function(){
+		
+			function createInfo(parent, keys, values) {
+				keys = Array.isArray(keys) ? keys : [keys];
+				values = Array.isArray(values) ? values : [values];
+				var div = document.createElement("div"); //$NON-NLS-0$
+				for (var i = 0; i < keys.length; i++) {
+					div.appendChild(document.createTextNode(messages[keys[i]]));
+					var span = document.createElement("span"); //$NON-NLS-0$
+					span.className = "gitCommitInfoValue"; //$NON-NLS-0$
+					span.appendChild(document.createTextNode(values[i])); //$NON-NLS-0$  //$NON-NLS-1$
+					div.appendChild(span);
+				}
+				parent.appendChild(div);
+				return div;
+			}
+			
 			var commit = this.commit;
 			var tableNode = this.parent;
 			var fullMessage = this.fullMessage;
@@ -53,87 +74,92 @@ define([
 				headerMessage = util.trimCommitMessage(commit.Message);
 			}
 	
-			var link;
-			if (this.commitLink) {
-				link = document.createElement("a"); //$NON-NLS-0$
-				link.className = "navlinkonpage"; //$NON-NLS-0$
-				link.href = require.toUrl(commitTemplate.expand({resource: commit.Location}));
-			} else {
-				link = document.createElement("span"); //$NON-NLS-0$
-			}
-			link.appendChild(document.createTextNode(headerMessage));
-			tableNode.appendChild(link);
-			
-			var secondaryMessageLength = commit.Message.length - (headerMessage.length + additionalOffset);
-			if(fullMessage && secondaryMessageLength > 0){
-				var secondaryMessagePre = document.createElement("pre");
-				secondaryMessagePre.style.paddingBottom = "15px";
-				secondaryMessagePre.style.marginTop = "0px";
-				
-				var secondaryMessage = (additionalOffset > 0) ? "..." : "";
-				secondaryMessage += commit.Message.substring(headerMessage.length - additionalOffset);
-				secondaryMessagePre.appendChild(document.createTextNode(secondaryMessage));
-				tableNode.appendChild(secondaryMessagePre);
+			if (this.showMessage === undefined || this.showMessage) {
+				var link;
+				if (this.commitLink) {
+					link = document.createElement("a"); //$NON-NLS-0$
+					link.className = "navlinkonpage"; //$NON-NLS-0$
+					link.href = require.toUrl(commitTemplate.expand({resource: commit.Location}));
+				} else {
+					link = document.createElement("span"); //$NON-NLS-0$
+					link.className = "gitCommitTitle"; //$NON-NLS-0$
+				}
+				link.appendChild(document.createTextNode(headerMessage));
+				tableNode.appendChild(link);
+
+				var secondaryMessageLength = commit.Message.length - (headerMessage.length + additionalOffset);
+				if(fullMessage && secondaryMessageLength > 0){
+					var secondaryMessagePre = document.createElement("pre");
+					secondaryMessagePre.style.paddingBottom = "15px";
+					secondaryMessagePre.style.marginTop = "0px";
+					
+					var secondaryMessage = (additionalOffset > 0) ? "..." : "";
+					secondaryMessage += commit.Message.substring(headerMessage.length - additionalOffset);
+					secondaryMessagePre.appendChild(document.createTextNode(secondaryMessage));
+					tableNode.appendChild(secondaryMessagePre);
+				}
 			}
 			
 			var textDiv = document.createElement("div"); //$NON-NLS-0$
 			textDiv.style.paddingTop = "15px"; //$NON-NLS-0$
 			tableNode.appendChild(textDiv);
 			
-			if (commit.AuthorImage) {
-				var image = new Image();
-				image.src = commit.AuthorImage;
-				image.name = commit.AuthorName;
-				image.className = "git-author-icon"; //$NON-NLS-0$
-				textDiv.appendChild(image);
-			}
-			
-			var authoredByDiv = document.createElement("div"); //$NON-NLS-0$
-			authoredByDiv.textContent = i18nUtil.formatMessage(messages[" authored by ${0} {${1}) on ${2}"], //$NON-NLS-0$
-				commit.AuthorName, commit.AuthorEmail, new Date(commit.Time).toLocaleString()); 
-			textDiv.appendChild(authoredByDiv);
-			
-			var committedByDiv = document.createElement("div"); //$NON-NLS-0$
-			committedByDiv.textContent = i18nUtil.formatMessage(messages['committed by 0 (1)'], commit.CommitterName, commit.CommitterEmail); //$NON-NLS-0$
-			textDiv.appendChild(committedByDiv);
-	
-			var commitNameDiv = document.createElement("div"); //$NON-NLS-0$
-			commitNameDiv.style.paddingTop = "15px"; //$NON-NLS-0$
-			commitNameDiv.textContent = messages["commit:"] + commit.Name; //$NON-NLS-0$
-			textDiv.appendChild(commitNameDiv);
-			
-			var gerritFooter = util.getGerritFooter(commit.Message);
-	
-			if (gerritFooter.changeId) {
-				var changeIdDiv = document.createElement("div"); //$NON-NLS-0$
-				changeIdDiv.style.paddingTop = "15px"; //$NON-NLS-0$
-				changeIdDiv.textContent = messages["Change-Id: "]+gerritFooter.changeId; //$NON-NLS-0$
-				textDiv.appendChild(changeIdDiv);
-			}
-			
-			if (gerritFooter.signedOffBy) {
-				var signedOffByDiv = document.createElement("div"); //$NON-NLS-0$
-				signedOffByDiv.textContent = messages["Signed-off-by: "]+gerritFooter.signedOffBy; //$NON-NLS-0$
-				textDiv.appendChild(signedOffByDiv);
-			}
-	
-			if (commit.Parents && commit.Parents.length > 0) {
-				var parentNode = document.createElement("div"); //$NON-NLS-0$
-				parentNode.textContent = messages["parent:"]; //$NON-NLS-0$
-				if (gerritFooter.signedOffBy || gerritFooter.changeId) parentNode.style.paddingTop = "15px";
-				var parentLink = document.createElement("a");
-				parentLink.className = "navlinkonpage"; //$NON-NLS-0$
-				parentLink.href = require.toUrl(commitTemplate.expand({resource: commit.Parents[0].Location}));
-				parentLink.textContent = commit.Parents[0].Name;
-				parentNode.appendChild(parentLink);
+			if (this.showImage === undefined || this.showImage) {
+				if (commit.AuthorImage) {
+					var image = new Image();
+					image.src = commit.AuthorImage;
+					image.name = commit.AuthorName;
+					image.className = "git-author-icon"; //$NON-NLS-0$
+					textDiv.appendChild(image);
+				}
 				
-				textDiv.appendChild(parentNode);
+			}
+			
+			if (this.showAuthor === undefined || this.showAuthor) {
+				createInfo(textDiv, ["authoredby", "on"], [i18nUtil.formatMessage(messages["nameEmail"], commit.AuthorName,  commit.AuthorEmail), new Date(commit.Time).toLocaleString()]);
+			}
+			
+			if (this.showCommitter === undefined || this.showCommitter) {
+				createInfo(textDiv, "committedby", i18nUtil.formatMessage(messages["nameEmail"], commit.CommitterName, commit.CommitterEmail));
+			}
+			
+			if (this.showCommit === undefined || this.showCommit) {
+				var commitNameDiv = createInfo(textDiv, "commit:", commit.Name);  //$NON-NLS-0$
+				commitNameDiv.style.paddingTop = "15px"; //$NON-NLS-0$
+			}
+			
+			if (this.showGerrit === undefined || this.showGerrit) {
+				var gerritFooter = util.getGerritFooter(commit.Message);
+		
+				if (gerritFooter.changeId) {
+					var changeIdDiv = createInfo(textDiv, "Change-Id: ", gerritFooter.changeId);  //$NON-NLS-0$
+					changeIdDiv.style.paddingTop = "15px"; //$NON-NLS-0$
+				}
+				
+				if (gerritFooter.signedOffBy) {
+					createInfo(textDiv, "Signed-off-by: ", gerritFooter.signedOffBy);
+				}
+			}
+			
+			if (this.showParentLink === undefined || this.showParentLink) {
+				if (commit.Parents && commit.Parents.length > 0) {
+					var parentNode = document.createElement("div"); //$NON-NLS-0$
+					parentNode.textContent = messages["parent:"]; //$NON-NLS-0$
+					if (gerritFooter.signedOffBy || gerritFooter.changeId) parentNode.style.paddingTop = "15px"; //$NON-NLS-0$
+					var parentLink = document.createElement("a"); //$NON-NLS-0$
+					parentLink.className = "navlinkonpage"; //$NON-NLS-0$
+					parentLink.href = require.toUrl(commitTemplate.expand({resource: commit.Parents[0].Location}));
+					parentLink.textContent = commit.Parents[0].Name;
+					parentNode.appendChild(parentLink);
+					textDiv.appendChild(parentNode);
+				}
 			}
 	
-			var displayBranches = commit.Branches && commit.Branches.length > 0;
+			var displayBranches = (this.showBranches === undefined || this.showBranches) && commit.Branches && commit.Branches.length > 0;
 			var displayTags = this.showTags && commit.Tags && commit.Tags.length > 0;
 	
 			if (displayBranches) {
+				
 				var branchesSection = document.createElement("section"); //$NON-NLS-0$
 				branchesSection.style.paddingTop = "15px"; //$NON-NLS-0$
 				branchesSection.textContent = messages["branches: "]; //$NON-NLS-0$
@@ -146,6 +172,7 @@ define([
 					var branchNameSpan = document.createElement("span"); //$NON-NLS-0$
 					branchNameSpan.style.paddingLeft = "10px"; //$NON-NLS-0$
 					branchNameSpan.textContent = commit.Branches[i].FullName;
+					branchNameSpan.className = "gitCommitInfoValue"; //$NON-NLS-0$
 					branchesList.appendChild(branchNameSpan);
 				}
 			}
@@ -169,6 +196,7 @@ define([
 					var tagNameSpan = document.createElement("span"); //$NON-NLS-0$
 					tagNameSpan.style.paddingLeft = "10px"; //$NON-NLS-0$
 					tagNameSpan.textContent = commit.Tags[i].Name;
+					tagNameSpan.className = "gitCommitInfoValue";
 					tagsList.appendChild(tagNameSpan);
 				}
 			}

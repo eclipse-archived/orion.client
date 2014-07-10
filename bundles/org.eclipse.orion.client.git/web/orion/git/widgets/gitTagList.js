@@ -15,15 +15,13 @@ define([
 	'require',
 	'i18n!git/nls/gitmessages',
 	'orion/URITemplate',
-	'orion/PageUtil',
 	'orion/Deferred',
 	'orion/dynamicContent',
 	'orion/webui/littlelib',
 	'orion/git/widgets/CommitTooltipDialog',
 	'orion/objects'
-], function(require, messages, URITemplate, PageUtil, Deferred, mDynamicContent, lib, mCommitTooltip, objects) {
+], function(require, messages, URITemplate, Deferred, mDynamicContent, lib, mCommitTooltip, objects) {
 		
-	var repoPageTemplate = new URITemplate("git/git-repository.html#{,resource,params*}?page=1&pageSize=20"); //$NON-NLS-0$
 	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$
 	
 	/**
@@ -36,7 +34,6 @@ define([
 		this.parentId = options.parentId;
 		this.actionScopeId = options.actionScopeId;
 		this.repository = options.repository;
-		this.mode = options.mode;
 		this.section = options.section;
 		this.commit = options.commit;
 	}
@@ -44,25 +41,24 @@ define([
 	objects.mixin(GitTagListExplorer.prototype, {
 		decorateTag: function(tag, deferred){
 			deferred = deferred || new Deferred();
-			this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").doGitLog(tag.CommitLocation + "?page=1&pageSize=1"), "Getting tag last commit " + tag.Name).then(
-				function(resp){
-					tag.Commit = resp.Children[0];
-					deferred.resolve();
-				}, function(err){
-					deferred.reject();
-				}
-			);
+			if (tag.Commit) {
+				deferred.resolve();
+			} else {
+				this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").doGitLog(tag.CommitLocation + "?page=1&pageSize=1"), "Getting tag last commit " + tag.Name).then(
+					function(resp){
+						tag.Commit = resp.Children[0];
+						deferred.resolve();
+					}, function(err){
+						deferred.reject();
+					}
+				);
+			}
 			return deferred;
 		},
 		display: function(){
 			var that = this;
 			var section = this.section;
 			
-			var url = document.createElement("a");
-			var pageParams = PageUtil.matchResourceParameters();
-			url.href = pageParams.resource;	
-			var pageQuery = (url.search? url.search : "?page=1&pageSize=20");
-							
 			var progress = section.createProgressMonitor();
 			progress.begin(messages["Getting tags"]);
 	
@@ -70,8 +66,7 @@ define([
 			tagsContainer.className = "mainPadding";
 			
 			var repository = this.repository;
-			var mode = this.mode;
-			Deferred.when (this.commit || this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitBranch(repository.TagLocation + (mode === "full" ? pageQuery : "?page=1&pageSize=5")), "Getting tags " + repository.Name), 
+			Deferred.when (this.commit || this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitBranch(that.location ? that.location : repository.TagLocation + "?page=1&pageSize=5"), "Getting tags " + repository.Name), 
 				function(resp){
 				
 					var tags = resp.Children;
@@ -79,6 +74,18 @@ define([
 					if (!tags) {
 						 tags = resp.Tags;
 						 isCommit = true;
+					} else {
+						var children = that.children;
+						if (children) { //$NON-NLS-0$
+							var args = [children.length - 1, 1].concat(tags);
+							Array.prototype.splice.apply(children, args);
+						} else {
+							children = tags;
+						}
+						if (resp.NextLocation) {
+							children.push({Type: "MoreTags", NextLocation: resp.NextLocation}); //$NON-NLS-0$
+						}
+						tags = that.children = children;
 					}
 					var dynamicContentModel = new mDynamicContent.DynamicContentModel(tags,
 						function(i){
@@ -99,12 +106,7 @@ define([
 							
 							that.commandService.destroy(section.actionsNode.id);
 							
-							if (mode !== "full" && tags.length !== 0){ //$NON-NLS-0$
-								that.commandService.registerCommandContribution(section.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
-								that.commandService.renderCommands(section.actionsNode.id, section.actionsNode.id,
-										{"ViewAllLink":require.toUrl(repoPageTemplate.expand({resource: repository.TagLocation})), "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all tags"]}, that, "button"); //$NON-NLS-7$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							} 
-							else if (that.commit) {
+							if (that.commit) {
 								that.commandService.registerCommandContribution(section.actionsNode.id, "eclipse.orion.git.addTag", 100); //$NON-NLS-0$
 								that.commandService.renderCommands(section.actionsNode.id, section.actionsNode, that.commit, that, "button"); //$NON-NLS-0$
 							}
@@ -126,23 +128,36 @@ define([
 							var detailsView = document.createElement("div");
 							detailsView.className = "stretch";
 							horizontalBox.appendChild(detailsView);
-							
-							var title = document.createElement("span");
-							title.textContent = tags[i].Name;
-							detailsView.appendChild(title);
+
+							if (tags[i].Type === "MoreTags") {
+								detailsView.className = "gitTagListMore"; //$NON-NLS-0$
+								detailsView.textContent = messages["MoreTags"];
+								var listener;
+								detailsView.addEventListener("click", listener = function() { //$NON-NLS-0$
+									detailsView.removeEventListener("click", listener); //$NON-NLS-0$
+									detailsView.textContent = messages["MoreTagsProgress"];
+									that.location = tags[i].NextLocation;
+									that.display();
+								});
+							} else {
+								var title = document.createElement("span");
+								title.textContent = tags[i].Name;
+								detailsView.appendChild(title);
+			
+								this.explorer.progressIndicators[i] = new this.explorer.progressIndicator(i, title);
+								
+								var div = document.createElement("div");
+								div.id = "tagDetailsView"+i;
+								detailsView.appendChild(div);
 		
-							this.explorer.progressIndicators[i] = new this.explorer.progressIndicator(i, title);
-							
-							var div = document.createElement("div");
-							div.id = "tagDetailsView"+i;
-							detailsView.appendChild(div);
-	
-							var actionsArea = document.createElement("div");
-							actionsArea.className = "sectionTableItemActions";
-							actionsArea.id = "tagActionsArea";
-							horizontalBox.appendChild(actionsArea);
-							
-							that.commandService.renderCommands(that.actionScopeId, actionsArea, tags[i], that, "tool");	 //$NON-NLS-0$
+								var actionsArea = document.createElement("div");
+								actionsArea.className = "sectionTableItemActions";
+								actionsArea.id = "tagActionsArea";
+								horizontalBox.appendChild(actionsArea);
+								
+								that.commandService.renderCommands(that.actionScopeId, actionsArea, tags[i], that, "tool");	 //$NON-NLS-0$
+								
+							}
 						},
 							
 						renderAfterItemPopulation : function(i){
@@ -163,8 +178,9 @@ define([
 			var description = document.createElement("span");
 			description.className = "tag-description";
 			
-			lib.empty(lib.node("tagDetailsView"+i));
-			lib.node("tagDetailsView"+i).appendChild(description);
+			var detailsDiv = lib.node("tagDetailsView"+i);
+			lib.empty(detailsDiv);
+			detailsDiv.appendChild(description);
 	
 			var commit = tag.Commit;
 			if (commit) {
@@ -173,11 +189,11 @@ define([
 				link.href = require.toUrl(commitTemplate.expand({resource: commit.Location}));
 				link.textContent = commit.Message;
 				description.appendChild(link);
-				
-				description.appendChild(document.createTextNode(messages[" by "] + commit.AuthorName + messages[" on "] + 
-						new Date(commit.Time).toLocaleString()));
-								
 				 new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: link});
+
+				var author = document.createElement("div");
+				author.textContent = commit.AuthorName + messages[" on "] + new Date(commit.Time).toLocaleString();
+				detailsDiv.appendChild(author);
 			 }
 		}
 	});
