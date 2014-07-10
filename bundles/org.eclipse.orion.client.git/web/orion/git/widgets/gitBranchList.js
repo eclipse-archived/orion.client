@@ -177,7 +177,7 @@ define([
 		}, this);
 		mExplorer.Explorer.call(this, options.serviceRegistry, options.selection, renderer, options.commandRegistry);	
 		this.checkbox = false;
-		this.showHistory = false;
+		this.showHistory = true;
 		this.showTags = false;
 		this.parentId = options.parentId;
 		this.actionScopeId = options.actionScopeId;
