@@ -17,8 +17,8 @@ define([
 ], function(EventTarget, util, lib) {
 
 	var MIN_SIDE_NODE_WIDTH = 5; //The minimium width/height of the splitted nodes by the splitter
-	var ORIENTATION_HORIZONTAL = "horizontal"; //$NON-NLS-0$
-	var ORIENTATION_VERTICAL = "vertical"; //$NON-NLS-0$
+	var ORIENTATION_HORIZONTAL = 1;
+	var ORIENTATION_VERTICAL = 2;
 
 	/**
 	 * @name orion.webui.Splitter
@@ -80,7 +80,11 @@ define([
 				this._thumb = document.createElement("div"); //$NON-NLS-0$
 				this.$node.appendChild(this._thumb);
 				this._thumb.classList.add("splitThumb"); //$NON-NLS-0$
-				this._thumb.classList.add(this._vertical ? "splitVerticalThumbLayout" : "splitThumbLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+				if (this._vertical) {
+					this._thumb.classList.add(this._closeReversely ? "splitVerticalThumbDownLayout" : "splitVerticalThumbUpLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+				} else {
+					this._thumb.classList.add(this._closeReversely ? "splitThumbRightLayout" : "splitThumbLeftLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+				}
 			}
 			this._closeByDefault = this.$node.getAttribute("data-initial-state") === "closed"; //$NON-NLS-1$ //$NON-NLS-0$
 			if (typeof options.closeByDefault !== "undefined") { //$NON-NLS-0$
@@ -148,8 +152,13 @@ define([
 
 			if (this._thumb) {
 				classList = this._thumb.classList;
-				classList.toggle("splitThumbLayout"); //$NON-NLS-0$
-				classList.toggle("splitVerticalThumbLayout"); //$NON-NLS-0$
+				if (this._vertical) {
+					classList.remove(this._closeReversely ? "splitThumbRightLayout" : "splitThumbLeftLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+					classList.add(this._closeReversely ? "splitVerticalThumbDownLayout" : "splitVerticalThumbUpLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+				} else {
+					classList.remove(this._closeReversely ? "splitVerticalThumbDownLayout" : "splitVerticalThumbUpLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+					classList.add(this._closeReversely ? "splitThumbRightLayout" : "splitThumbLeftLayout"); //$NON-NLS-1$ //$NON-NLS-0$
+				}
 			}
 
 			this._initializeFromStoredSettings();

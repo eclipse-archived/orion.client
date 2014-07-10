@@ -984,7 +984,8 @@ define([
 		}.bind(this);
 
 		this._settingsListener = function(e) {
-			this._splitter.setOrientation(e.newSettings.splitOrientation);
+			var orientation = e.newSettings.splitOrientation === "horizontal" ? mSplitter.ORIENTATION_HORIZONTAL : mSplitter.ORIENTATION_VERTICAL; //$NON-NLS-0$
+			this._splitter.setOrientation(orientation);
 			/*
 			 * If this is the initial retrieval of these settings then the root
 			 * and splitter elements likely need to have their visibilities updated.
@@ -1154,7 +1155,9 @@ define([
 				node: this._splitterDiv,
 				sidePanel: this._editorDiv,
 				mainPanel: this._previewWrapperDiv,
-				vertical: settings && settings.splitOrientation === mSplitter.ORIENTATION_VERTICAL
+				toggle: true,
+				closeReversely: true,
+				vertical: settings && settings.splitOrientation === "vertical" //$NON-NLS-0$
 			});
 
 			if (!settings) {
