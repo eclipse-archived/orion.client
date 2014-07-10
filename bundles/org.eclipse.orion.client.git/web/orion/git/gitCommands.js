@@ -2665,7 +2665,7 @@ var exports = {};
 					paths[i] = items[i].name;
 				}
 				
-				var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").ignorePath(data.userData.Clone.IgnoreLocation, paths), messages["Writting .gitignore rules"]); //$NON-NLS-0$ //$NON-NLS-1$
+				var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").ignorePath(data.userData.Clone.IgnoreLocation, paths), messages["Writing .gitignore rules"]); //$NON-NLS-0$ //$NON-NLS-1$
 				progressService.createProgressMonitor(
 					deferred,
 					messages["Writting .gitignore rules"]);

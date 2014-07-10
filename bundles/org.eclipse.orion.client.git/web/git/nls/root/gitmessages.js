@@ -112,7 +112,7 @@ define({
 	"Staging...": "Staging...",
 	"Checkout all the selected files, discarding all changes": "Checkout all the selected files, discarding all changes",
 	"Add all the selected files to .gitignore file(s)" : "Add all the selected files to .gitignore file(s)",
-	"Writting .gitignore rules" : "Writting .gitignore rules", 
+	"Writing .gitignore rules" : "Writing .gitignore rules", 
 	"Your changes to all the selected files will be lost. Are you sure you want to checkout?": "Your changes to all the selected files will be lost. Are you sure you want to checkout?",
 	"Save Patch": "Save Patch",
 	"Save workspace changes as a patch": "Save workspace changes as a patch",
