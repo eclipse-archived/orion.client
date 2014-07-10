@@ -8,7 +8,7 @@
  *
  ******************************************************************************/
 //NLS_CHARSET=UTF-8
-/* global define */
+/*eslint-env amd */
 define({
 	'curly': 'Statement should be enclosed in braces.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'eqeqeq' : 'Expected \'${0}\' and instead saw \'${1}\'.',  //$NON-NLS-0$  //$NON-NLS-1$
@@ -16,6 +16,7 @@ define({
 	'new-parens' : 'Missing parentheses invoking constructor.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-debugger': '\'debugger\' statement use is discouraged.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'no-dupe-keys' : 'Duplicate object key \'${0}\'.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-empty-block' : 'Empty block should be removed or commented.',  //$NON-NLS-0$ //$NON-NLS-1$
 	'no-eval' : '${0} function calls are discouraged.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-extra-semi' : 'Unnecessary semicolon.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-fallthrough' : 'Switch case may be entered by falling through the previous case. If intended, add a new comment //$FALLTHROUGH$ on the line above.', //$NON-NLS-0$  //$NON-NLS-1$

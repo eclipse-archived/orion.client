@@ -8,7 +8,7 @@
  *
  ******************************************************************************/
 //NLS_CHARSET=UTF-8
-/* global define */
+/*eslint-env amd*/
 define({
 	'error': 'Error',  //$NON-NLS-0$  //$NON-NLS-1$
 	'warning' : 'Warning',  //$NON-NLS-0$  //$NON-NLS-1$
@@ -28,6 +28,7 @@ define({
 	'noUnreachable' : 'Unreachable code', //$NON-NLS-0$  //$NON-NLS-1$
 	'noFallthrough' : 'Switch case fall-through', //$NON-NLS-0$  //$NON-NLS-1$
 	'useBeforeDefine' : 'Member used before definition', //$NON-NLS-0$  //$NON-NLS-1$
+	'noEmptyBlock' : 'Undocumented empty block', //$NON-NLS-0$  //$NON-NLS-1$
 	'newParens' : 'Missing parentheses in constructor call', //$NON-NLS-0$  //$NON-NLS-1$
 	'noNewArray': 'Discouraged \'new Array()\'', //$NON-NLS-0$  //$NON-NLS-1$
 	'noNewFunc': 'Discouraged \'new Function()\'', //$NON-NLS-0$  //$NON-NLS-1$
@@ -39,7 +40,7 @@ define({
 	'undefMember' : 'Undeclared global reference', //$NON-NLS-0$  //$NON-NLS-1$
 	'unnecessarySemis' : 'Unnecessary semicolons', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedParams' : 'Unused parameters', //$NON-NLS-0$  //$NON-NLS-1$
-	'unsupportedJSLint' : 'Unsupported JSLint / JSHint directive',  //$NON-NLS-0$  //$NON-NLS-1$
+	'unsupportedJSLint' : 'Unsupported environment directive',  //$NON-NLS-0$  //$NON-NLS-1$
 	'generateDocName' : 'Generate Element Comment',  //$NON-NLS-0$  //$NON-NLS-1$
 	'generateDocTooltip' : 'Generate a JSDoc-like comment for the selected JavaScript element',  //$NON-NLS-0$  //$NON-NLS-1$
 });

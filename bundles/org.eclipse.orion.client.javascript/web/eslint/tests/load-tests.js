@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint amd:true node:true*/
+/*eslint-env amd, node*/
 /**
  * This file loads the AMD modules containing tests for eslint.
  */
@@ -44,7 +44,8 @@
 			"eslint/tests/lib/rules/use-isnan",
 			'eslint/tests/lib/rules/no-unreachable',
 			'eslint/tests/lib/rules/no-fallthrough',
-			'eslint/tests/lib/rules/no-jslint'
+			'eslint/tests/lib/rules/no-jslint',
+			'eslint/tests/lib/rules/no-empty-block'
 		], factory);
 	}
 }(this, function() {

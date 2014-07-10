@@ -41,7 +41,8 @@ define([
 			"semi": 1, //$NON-NLS-0$
 			"use-isnan" : 2, //$NON-NLS-0$
 			'no-unreachable': 2,  //$NON-NLS-0$
-			'no-fallthrough' : 2  //$NON-NLS-0$
+			'no-fallthrough' : 2,  //$NON-NLS-0$
+			'no-empty-block' : 0  //$NON-NLS-0$
 		},
 		/**
 		 * @description Sets the given rule to the given enabled value
@@ -319,6 +320,7 @@ define([
 			config.setOption("no-unreachable", properties.validate_no_unreachable); //$NON-NLS-0$
 			config.setOption("no-fallthrough", properties.validate_no_fallthrough); //$NON-NLS-0$
 			config.setOption("no-jslint", properties.validate_no_jslint); //$NON-NLS-0$
+			config.setOption("no-empty-block", properties.validate_no_empty_block); //$NON-NLS-0$
 		}
 	});
 	return ESLintValidator;

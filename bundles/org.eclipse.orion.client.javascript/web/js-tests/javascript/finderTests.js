@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console:true describe:true it:true define window*/
+/*eslint-env amd, node, mocha*/
 define([
 	'chai/chai',
 	'esprima',

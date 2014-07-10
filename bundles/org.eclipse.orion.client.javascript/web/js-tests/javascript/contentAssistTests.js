@@ -10,8 +10,8 @@
  *     Andrew Eisenberg (VMware) - initial API and implementation
  *     IBM Corporation - Various improvements
  ******************************************************************************/
-
-/*global define describe:true it:true console setTimeout doctrine*/
+/*eslint-env amd, mocha, node*/
+/*global doctrine*/
 define([
 	'javascript/contentAssist/contentAssist',
 	'chai/chai',

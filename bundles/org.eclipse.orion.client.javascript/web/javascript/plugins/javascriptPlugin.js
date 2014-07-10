@@ -9,7 +9,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global URL */
 /*eslint-env amd */
 /*
  * This module may be loaded in a web worker or a regular Window. Therefore it must NOT use the DOM or other
@@ -255,6 +254,12 @@ define([
 							nameKey: 'undefMember',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
 							defaultValue: error,
+							options: severities
+						},
+						{	id: "validate_no_empty_block",  //$NON-NLS-0$
+							nameKey: 'noEmptyBlock',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: ignore,
 							options: severities
 						},
 						{	id: "validate_unnecessary_semi",  //$NON-NLS-0$

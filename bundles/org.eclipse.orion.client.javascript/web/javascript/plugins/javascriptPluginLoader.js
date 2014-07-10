@@ -9,21 +9,22 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/*global URL*/
 /*eslint-env amd, browser, node*/
-/*global URL console*/
 /*
  * Allows the implementation of the JS tooling plugin to be loaded either in this Window or in a web worker.
  */
 define([
-	'orion/URL-shim'
-], function(_) {
+	'orion/URL-shim' // exports into global, stays last
+], function() {
 	var pref = localStorage.getItem("jstools.worker"),
 	    useWorker = false;
 	try {
 		useWorker = pref === null ? false : !!JSON.parse(pref);
 	} catch (e) {
-		if (typeof console !== "undefined" && console)
+		if (typeof console !== "undefined" && console) {
 			console.log(e);
+		}
 	}
 
 	if (!useWorker) {
@@ -40,9 +41,9 @@ define([
 	else {
 		framework = window.opener;
 	}
-	if (!framework)
+	if (!framework) {
 		console.log(new Error("No valid plugin target"));
-
+    }
 	addEventListener("message", onFrameworkMessage);
 
 	// Start the worker

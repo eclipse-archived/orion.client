@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint amd:true*/
+/*eslint-env amd*/
 /**
  * Implements eslint"s load-rules API for AMD. Our rules are loaded as AMD modules.
  */
@@ -35,11 +35,12 @@ define([
 	"eslint/rules/use-isnan",
 	'eslint/rules/no-unreachable',
 	'eslint/rules/no-fallthrough',
-	'eslint/rules/no-jslint'
+	'eslint/rules/no-jslint',
+	'eslint/rules/no-empty-block'
 ], function(curly, eqeqeq, missing_doc, new_parens, no_debugger, no_dupe_keys, no_eval,
 		no_extra_semi, no_new_array, no_new_func, no_new_object, no_new_wrappers, no_redeclare,
 		no_undef, no_unused_params, no_unused_vars, no_use_before_define, semi, use_isnan, no_unreachable,
-		no_fallthrough, no_jslint) {
+		no_fallthrough, no_jslint, no_empty_block) {
 	return function() {
 		return {
 			"curly" : curly,
@@ -63,7 +64,8 @@ define([
 			"use-isnan" : use_isnan,
 			'no-unreachable' : no_unreachable,
 			'no-fallthrough' : no_fallthrough,
-			'no-jslint': no_jslint
+			'no-jslint': no_jslint,
+			'no-empty-block' : no_empty_block
 		};
 	};
 });

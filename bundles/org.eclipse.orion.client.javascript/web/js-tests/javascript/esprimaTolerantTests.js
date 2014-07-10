@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*jslint amd:true*/
-/*global describe:true it:true console */
+/*eslint-env amd, mocha, node*/
 define([
 	"chai/chai",
 	"esprima",
