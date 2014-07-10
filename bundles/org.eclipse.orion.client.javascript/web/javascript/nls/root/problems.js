@@ -32,5 +32,6 @@ define({
 	'no-unused-vars' : '\'${0}\' is ${1}.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-use-before-define': '\'${0}\' was used before it was defined.', //$NON-NLS-0$  //$NON-NLS-1$
 	'semi': 'Missing semicolon.', //$NON-NLS-0$  //$NON-NLS-1$
+	'throw-error': 'Throw an Error instead.', //$NON-NLS-0$  //$NON-NLS-1$
 	'use-isnan': 'Use the isNaN function to compare with NaN.', //$NON-NLS-0$  //$NON-NLS-1$
 });

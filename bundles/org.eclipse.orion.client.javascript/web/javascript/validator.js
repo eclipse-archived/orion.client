@@ -39,6 +39,7 @@ define([
 			"no-unused-vars": 1, //$NON-NLS-0$
 			"no-use-before-define": 1, //$NON-NLS-0$
 			"semi": 1, //$NON-NLS-0$
+			"throw-error": 1, //$NON-NLS-0$
 			"use-isnan" : 2, //$NON-NLS-0$
 			'no-unreachable': 2,  //$NON-NLS-0$
 			'no-fallthrough' : 2,  //$NON-NLS-0$
@@ -316,6 +317,7 @@ define([
 			config.setOption("no-unused-vars", properties.validate_no_unused_vars); //$NON-NLS-0$
 			config.setOption("no-use-before-define", properties.validate_use_before_define); //$NON-NLS-0$
 			config.setOption("semi", properties.validate_missing_semi); //$NON-NLS-0$
+			config.setOption("throw-error", properties.validate_throw_error); //$NON-NLS-0$
 			config.setOption("use-isnan", properties.validate_use_isnan); //$NON-NLS-0$
 			config.setOption("no-unreachable", properties.validate_no_unreachable); //$NON-NLS-0$
 			config.setOption("no-fallthrough", properties.validate_no_fallthrough); //$NON-NLS-0$

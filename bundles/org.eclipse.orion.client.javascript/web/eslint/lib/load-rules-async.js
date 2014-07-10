@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*eslint-env amd*/
 /**
- * Implements eslint"s load-rules API for AMD. Our rules are loaded as AMD modules.
+ * Implements eslint's load-rules API for AMD. Our rules are loaded as AMD modules.
  */
 define([
 	"eslint/rules/curly",
@@ -32,6 +32,7 @@ define([
 	"eslint/rules/no-unused-vars",
 	"eslint/rules/no-use-before-define",
 	"eslint/rules/semi",
+	"eslint/rules/throw-error",
 	"eslint/rules/use-isnan",
 	'eslint/rules/no-unreachable',
 	'eslint/rules/no-fallthrough',
@@ -39,8 +40,8 @@ define([
 	'eslint/rules/no-empty-block'
 ], function(curly, eqeqeq, missing_doc, new_parens, no_debugger, no_dupe_keys, no_eval,
 		no_extra_semi, no_new_array, no_new_func, no_new_object, no_new_wrappers, no_redeclare,
-		no_undef, no_unused_params, no_unused_vars, no_use_before_define, semi, use_isnan, no_unreachable,
-		no_fallthrough, no_jslint, no_empty_block) {
+		no_undef, no_unused_params, no_unused_vars, no_use_before_define, semi, throw_error, use_isnan,
+		no_unreachable, no_fallthrough, no_jslint, no_empty_block) {
 	return function() {
 		return {
 			"curly" : curly,
@@ -61,6 +62,7 @@ define([
 			"no-unused-vars": no_unused_vars,
 			"no-use-before-define": no_use_before_define,
 			"semi": semi,
+			"throw-error": throw_error,
 			"use-isnan" : use_isnan,
 			'no-unreachable' : no_unreachable,
 			'no-fallthrough' : no_fallthrough,
