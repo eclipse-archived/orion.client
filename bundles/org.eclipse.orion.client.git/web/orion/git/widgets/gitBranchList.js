@@ -29,6 +29,8 @@ define([
 
 	function GitBranchListModel(options) {
 		this.root = options.root;
+		this.showHistory = options.showHistory === undefined || options.showHistory;
+		this.showTags = options.showTags === undefined || options.showTags;
 		this.registry = options.registry;
 		this.handleError = options.handleError;
 		this.section = options.section;
@@ -95,7 +97,9 @@ define([
 					progress.done();
 					var remotes = resp.Children;
 					remotes.unshift({Type: "LocalRoot", Name: messages["Local"]}); //$NON-NLS-0$
-//					remotes.push({Type: "TagRoot", Name: messages["Tags"]}); //$NON-NLS-0$
+					if (that.showTags) {
+						remotes.push({Type: "TagRoot", Name: messages["Tags"]}); //$NON-NLS-0$
+					}
 					onComplete(that.processChildren(parentItem, remotes));
 					if (remotes.length === 0){
 						this.section.setTitle(messages["No Remote Branches"]);
@@ -115,7 +119,7 @@ define([
 					progress.done();
 					that.handleError(error);
 				});
-			} else if (parentItem.Type === "Branch" || parentItem.Type === "RemoteTrackingBranch" || parentItem.Type === "Tag") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			} else if (this.showHistory && (parentItem.Type === "Branch" || parentItem.Type === "RemoteTrackingBranch" || parentItem.Type === "Tag")) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
 				msg = i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], parentItem.Name);
 				this.progressService.progress(that.gitClient.doGitLog(parentItem.location ? parentItem.location : parentItem.CommitLocation + "?page=1&pageSize=20"), msg).then(function(resp) { //$NON-NLS-0$
@@ -173,6 +177,8 @@ define([
 		}, this);
 		mExplorer.Explorer.call(this, options.serviceRegistry, options.selection, renderer, options.commandRegistry);	
 		this.checkbox = false;
+		this.showHistory = false;
+		this.showTags = false;
 		this.parentId = options.parentId;
 		this.actionScopeId = options.actionScopeId;
 		this.root = options.root;
@@ -195,7 +201,16 @@ define([
 			return deferred;
 		},
 		display: function() {
-			this.createTree(this.parentId, new GitBranchListModel({root: this.root, registry: this.registry, progressService: this.progressService, gitClient: this.gitClient, section: this.section, handleError: this.handleError}));
+			this.createTree(this.parentId, new GitBranchListModel({
+				root: this.root,
+				registry: this.registry,
+				progressService: this.progressService,
+				gitClient: this.gitClient,
+				section: this.section,
+				showHistory: this.showHistory,
+				showTags: this.showTags,
+				handleError: this.handleError
+			}));
 			this.updateCommands();
 		},
 		isRowSelectable: function(modelItem) {
@@ -258,7 +273,7 @@ define([
 						});
 						return td;
 					} else if (item.parent.Type === "LocalRoot") { //$NON-NLS-0$
-						createExpand();
+						if (explorer.showHistory) createExpand();
 						var branch = item;
 						if (branch.Current){
 							var span = document.createElement("span"); //$NON-NLS-0$
@@ -272,7 +287,7 @@ define([
 						description = tracksMessage + i18nUtil.formatMessage(messages["last modified ${0} by ${1}"], new Date(commit.Time).toLocaleString(), commit.AuthorName); //$NON-NLS-0$
 						actionsID = "branchActionsArea"; //$NON-NLS-0$
 					} else if (item.parent.Type === "TagRoot") { //$NON-NLS-0$
-						createExpand();
+						if (explorer.showHistory) createExpand();
 						commit = item.Commit.Children[0];
 //						description = util.trimCommitMessage(commit.Message);
 //						subDescription = i18nUtil.formatMessage(messages["authored by 0 (1) on 2"], commit.AuthorName, commit.AuthorEmail, new Date(commit.Time).toLocaleString()); //$NON-NLS-0$
@@ -284,7 +299,7 @@ define([
 						}
 						actionsID = "remoteActionsArea"; //$NON-NLS-0$
 					} else if (item.parent.Type === "Remote") { //$NON-NLS-0$
-						createExpand();
+						if (explorer.showHistory) createExpand();
 						actionsID = "branchActionsArea"; //$NON-NLS-0$
 						description = "";
 					} else if (item.Type === "Commit") { //$NON-NLS-0$
