@@ -441,5 +441,6 @@ define({
 	"Outgoing" : "Outgoing",
 	"Synchronized" : "History",
 	"NoBranch" : "No Branch",
-	"None": "None"
+	"None": "None",
+	"CommitAndPushCount": "Commit and push ${0} file(s)"
 });

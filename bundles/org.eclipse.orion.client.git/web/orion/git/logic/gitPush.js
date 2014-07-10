@@ -295,7 +295,7 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/git/widgets/Co
 						);
 					}
 				);
-			}
+			} 
 			command(data);
 			return d;
 		};
