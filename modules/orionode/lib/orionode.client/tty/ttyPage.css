@@ -51,6 +51,18 @@ html,body {
   display: none;
 }
 
+.dropDownContainer{
+	border-radius:1px;
+	background:#fefefe;
+	border: 1px solid #DDD;
+	padding:10px;
+	margin-top: 5px;
+	outline: none;
+	position:absolute;
+	z-index:100;
+	box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+}
+
 .terminal {
   font-size: 14px;
   font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
