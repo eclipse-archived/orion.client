@@ -11,7 +11,7 @@
  *******************************************************************************/
 
 /*global define window URL*/
-/*jslint browser:true sub:true*/
+/*eslint-env browser, sub*/
 
 define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
 		"orion/shell/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
