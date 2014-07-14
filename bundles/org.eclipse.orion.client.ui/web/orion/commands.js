@@ -284,7 +284,8 @@ define([
 		return node;
 	}
 
-	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass, positioningNode, displayDropdownArrow) {
+	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass, positioningNode, displayDropdownArrow, extraClasses) {
+		
 		parent = lib.node(parent);
 		if (!parent) {
 			throw "no parent node was specified"; //$NON-NLS-0$
@@ -310,6 +311,10 @@ define([
 			menuButton.classList.add("orionButton"); //$NON-NLS-0$
 			menuButton.classList.add("commandButton"); //$NON-NLS-0$
 		}
+		if (extraClasses) {
+			extraClasses.split(" ").forEach(menuButton.classList.add.bind(menuButton.classList));
+		}
+		
 		if (buttonIconClass) {
 			if(!showName) {
 				menuButton.textContent = ""; //$NON-NLS-0$
