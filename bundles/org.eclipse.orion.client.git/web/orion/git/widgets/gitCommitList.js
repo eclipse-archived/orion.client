@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define document Image*/
+/*global define document Image setTimeout*/
 
 define([
 	'require',
@@ -26,12 +26,10 @@ define([
 	'orion/git/logic/gitPush',
 	'orion/i18nUtil',
 	'orion/explorers/navigationUtils',
-	'orion/git/widgets/CommitTooltipDialog',
 	'orion/webui/littlelib',
 	'orion/objects'
-], function(require, messages, mGitChangeList, mGitCommitInfo, mSection, mCommands, Deferred, mExplorer, URITemplate, util, mHTMLFragments, gitPush, i18nUtil, mNavUtils, mCommitTooltip, lib, objects) {
+], function(require, messages, mGitChangeList, mGitCommitInfo, mSection, mCommands, Deferred, mExplorer, URITemplate, util, mHTMLFragments, gitPush, i18nUtil, mNavUtils, lib, objects) {
 	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$
-//	var logTemplate = new URITemplate("git/git-log.html#{,resource,params*}?page=1"); //$NON-NLS-0$
 
 	var pageSizeQuery = "?page=1&pageSize=20"; //$NON-NLS-0$
 
@@ -483,13 +481,6 @@ define([
 				if (lib.node(outgoingActionScope)) {
 					commandService.destroy(outgoingActionScope);
 				}
-				
-//				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
-//				commandService.renderCommands(actionsNodeScope, actionsNodeScope, {
-//					"ViewAllLink" : logTemplate.expand({resource: currentBranch.CommitLocation}),
-//					"ViewAllLabel" : messages['See Full Log'],
-//					"ViewAllTooltip" : messages["See the full log"]
-//				}, this, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	
 				var tracksRemoteBranch = model.tracksRemoteBranch();
 				var localBranch = model.getLocalBranch();
@@ -563,7 +554,7 @@ define([
 						explorer.changedItem(item.parent);
 					});
 					return td;
-				} else if (item.Type === "CommitChanges") {
+				} else if (item.Type === "CommitChanges") { //$NON-NLS-0$
 						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 						commit = item.parent;
 						var commitDetails = document.createElement("div"); //$NON-NLS-0$
@@ -579,28 +570,26 @@ define([
 						});
 						info.display();
 						horizontalBox.appendChild(commitDetails);
-						
-						var diffs = commit.Diffs;
-
-						diffs.forEach(function(item) {
-							var path = item.OldPath;
-							if (item.ChangeType === "ADD") { //$NON-NLS-0$
-								path = item.NewPath;
-							} 
-							item.name = path;
-							item.type = item.ChangeType;
-						});
-						
-						var titleWrapper = new mSection.Section(horizontalBox, {
-							id: "commitdDiffSection" + commit.Name, //$NON-NLS-0$
-							title: messages["ChangedFiles"],
-							slideout: true,
-							canHide: false,
-							preferenceService: explorer.preferencesService
-						}); 
 
 						var repository = explorer.model.root.repository;
 						setTimeout(function() {
+							var diffs = commit.Diffs;
+	
+							diffs.forEach(function(item) {
+								var path = item.OldPath;
+								if (item.ChangeType === "ADD") { //$NON-NLS-0$
+									path = item.NewPath;
+								} 
+								item.name = path;
+								item.type = item.ChangeType;
+							});
+							var titleWrapper = new mSection.Section(horizontalBox, {
+								id: "commitdDiffSection" + commit.Name, //$NON-NLS-0$
+								title: messages["ChangedFiles"],
+								slideout: true,
+								canHide: false,
+								preferenceService: explorer.preferencesService
+							}); 
 							var explorer2  = new mGitChangeList.GitChangeListExplorer({
 								serviceRegistry: explorer.registry,
 								commandRegistry: explorer.commandService,
