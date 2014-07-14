@@ -451,5 +451,7 @@ define({
 	"Outgoing" : "Outgoing",
 	"Synchronized" : "History",
 	"NoBranch" : "No Branch",
-	"None": "None"
+	"None": "None",
+	"Commit and push ${0} file(s)": "Commit and push ${0} file(s)",
+	"Commits and pushes files to the default remote": "Commits and pushes files to the default remote"
 });
