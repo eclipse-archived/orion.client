@@ -8,6 +8,8 @@
 
 @import "../css/sections.css";
 
+@import "../orion/compare/compareView.css";
+
 @import "../css/theme.css";
 
 .tag-description {
