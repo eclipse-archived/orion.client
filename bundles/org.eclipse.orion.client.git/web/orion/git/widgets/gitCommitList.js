@@ -360,7 +360,7 @@ define([
 			if (item.Type === "CommitRoot") { //$NON-NLS-0$
 				model.incomingCommits = model.outgoingCommits = null;
 			}
-			if (item.Type !== "Synchronized") {
+			if (item.Type !== "Synchronized") { //$NON-NLS-0$
 				item.children = null;
 			}
 			model.log = null;
@@ -370,7 +370,9 @@ define([
 			model.getChildren(item, function(children) {
 				item.removeAll = true;
 				that.myTree.refresh.bind(that.myTree)(item, children, false);
-				that.expandSections(children);
+				if (item.Type === "CommitRoot") { //$NON-NLS-0$
+					that.expandSections(children);
+				}
 				if (item.Type !== "Synchronized") { //$NON-NLS-0$
 					that.updateCommands();
 				}
