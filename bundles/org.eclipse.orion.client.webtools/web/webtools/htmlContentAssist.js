@@ -32,7 +32,7 @@ define("webtools/htmlContentAssist", ['orion/editor/templates'], function(mTempl
 			prefix: "<img", //$NON-NLS-0$
 			name: "<img>", //$NON-NLS-0$
 			description: " - HTML image element", //$NON-NLS-0$
-			template: "<img src=\"${cursor}\" alt=\"${Image}\"/>" //$NON-NLS-0$
+			template: "<img src=\"${URI}\" alt=\"${Image}\"/>" //$NON-NLS-0$
 		},
 		{
 			prefix: "<a", //$NON-NLS-0$
