@@ -369,8 +369,8 @@ define([
 			this.commandService.registerCommandContribution(explorerSelectionScope, "orion.explorer.expandAll", 200); //$NON-NLS-0$
 			this.commandService.registerCommandContribution(explorerSelectionScope, "orion.explorer.collapseAll", 300); //$NON-NLS-0$
 			if (this.prefix === "staged") {
-				this.commandService.addCommandGroup(actionsNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.commitCommand"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
-				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commitCommand", 100, "eclipse.gitCommitGroup"); //$NON-NLS-0$ 	550
+				//this.commandService.addCommandGroup(actionsNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.commitCommand"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
+				//this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commitCommand", 100, "eclipse.gitCommitGroup"); //$NON-NLS-0$ 	550
 				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-0$ 
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
 				this.commandService.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
@@ -383,8 +383,11 @@ define([
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showStagedPatchCommand", 100); //$NON-NLS-0$
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 200); //$NON-NLS-0$
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.ignoreCommand", 300); //$NON-NLS-0$
-				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitCommand", 400); //$NON-NLS-0$
-			
+				
+				this.commandService.addCommandGroup(selectionNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.precommitCommand", "primaryButton"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
+				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitCommand", 100, "eclipse.gitCommitGroup"); //$NON-NLS-0$
+				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-0$
+				
 				var node = lib.node(explorerSelectionScope);
 				if (node) {
 					this.commandService.destroy(node);
@@ -476,11 +479,38 @@ define([
 					precommitCommand.name =  i18nUtil.formatMessage(messages['SmartCountCommit'], items.length);
 					return true;
 				}
-			});	
+			});
+			
+			var precommitAndPushCommand = new mCommands.Command({
+				tooltip: messages["CommitAndPushTooltip"],
+				id: "eclipse.orion.git.precommitAndPushCommand",
+				callback: function(data) {
+					var name = that.messageTextArea.value.trim();
+					if (!name) {
+						that.messageTextArea.parentNode.classList.add("invalidCommitMessage");
+						that.messageTextArea.select();
+						return;
+					}
+					var amend = that.amendCheck.checked;
+					var changeId = that.changeIDCheck.checked;
+					data.items = {};
+					data.items.Clone = data.userData.Clone;
+					that.commandService.runCommand("eclipse.orion.git.commitAndPushCommand", data.items, data.handler, null, {name: name, amend: amend, changeId: changeId});
+				},
+				visibleWhen: function(item) {
+					var items = item;
+					if (!Array.isArray(items)) {
+						items = [items];
+					}
+					precommitAndPushCommand.name = i18nUtil.formatMessage(messages['CommitAndPushCount'], items.length);
+					return true;
+				}
+			});
 
 			this.commandService.addCommand(precommitCommand);
 			this.commandService.addCommand(selectAllCommand);
 			this.commandService.addCommand(deselectAllCommand);
+			this.commandService.addCommand(precommitAndPushCommand);
 		},
 		createSelection: function(){
 			if (!this.selection) {
