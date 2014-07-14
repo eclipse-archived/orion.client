@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint browser:true devel:true sub:true*/
-/*global define eclipse:true orion:true window*/
+/*eslint-env browser, amd*/
 
 define([
 	'i18n!orion/edit/nls/messages',
@@ -39,7 +38,6 @@ define([
 	'orion/searchClient',
 	'orion/problems',
 	'orion/blameAnnotations',
-	'orion/Deferred',
 	'orion/EventTarget',
 	'orion/URITemplate',
 	'orion/i18nUtil',
@@ -53,7 +51,7 @@ define([
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
 	mProblems, mBlameAnnotation,
-	Deferred, EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, mProjectClient
+	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, mProjectClient
 ) {
 
 var exports = {};

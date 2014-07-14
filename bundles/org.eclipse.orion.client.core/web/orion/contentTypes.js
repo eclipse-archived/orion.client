@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define*/
-/*jslint amd:true*/
+/*eslint-env browser, amd*/
 define([], function() {
 	var SERVICE_ID = "orion.core.contentTypeRegistry"; //$NON-NLS-0$
 	var EXTENSION_ID = "orion.core.contenttype"; //$NON-NLS-0$

@@ -9,12 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define console window*/
-/*jslint forin:true regexp:false sub:true*/
+/*eslint-env browser, amd*/
+define(['i18n!orion/search/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/searchUtils'],
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/searchUtils'],
-
-function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
+function(messages, Deferred, i18nUtil, mExplorer, mSearchUtils) {
 
     /*** Internal model wrapper functions ***/
 

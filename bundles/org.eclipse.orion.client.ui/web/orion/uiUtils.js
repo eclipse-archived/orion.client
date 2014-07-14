@@ -8,8 +8,7 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define window document navigator*/
-
+/*eslint-env browser, amd*/
 define(['orion/webui/littlelib'], function(lib) {
                 
 	/**

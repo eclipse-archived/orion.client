@@ -9,11 +9,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global document define */
-/*browser:true*/
+/*eslint-env browser, amd*/
 
-define(['require', 'orion/webui/littlelib', 'text!orion/banner/slideout.html'], 
-        function(require, lib, SlideoutTemplate){
+define(['orion/webui/littlelib', 'text!orion/banner/slideout.html'], 
+        function(lib, SlideoutTemplate){
         
 	/**
 	 * This module contains dynamic HTML fragments that depend on client information.

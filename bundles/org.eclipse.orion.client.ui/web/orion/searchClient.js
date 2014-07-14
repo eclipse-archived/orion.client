@@ -10,9 +10,7 @@
  * IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-/*global define window document console*/
-/*jslint forin:true regexp:false sub:true*/
-
+/*eslint-env browser, amd*/
 define([
 	'i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/searchUtils', 'orion/crawler/searchCrawler',
 	'orion/explorers/navigatorRenderer', 'orion/extensionCommands', 'orion/Deferred'

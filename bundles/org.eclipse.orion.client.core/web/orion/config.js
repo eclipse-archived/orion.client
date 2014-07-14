@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console define setTimeout*/
+/*eslint-env browser, amd*/
 define([
 	'orion/Deferred',
 	'orion/objects',

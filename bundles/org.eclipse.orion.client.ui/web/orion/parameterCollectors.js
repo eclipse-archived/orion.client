@@ -9,11 +9,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window document define orion */
-/*browser:true*/
+/*eslint-env browser, amd*/
 
-define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'], 
-        function(messages, require, lib) {
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], 
+        function(messages, lib) {
 
 	
 	/**

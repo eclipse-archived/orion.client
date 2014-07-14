@@ -9,9 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define document console window*/
-/*jslint forin:true regexp:false sub:true*/
-
+/*eslint-env browser, amd*/
 define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 
 	'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compareUIFactory', 'orion/compare/compareView', 
 	'orion/highlight', 'orion/explorers/navigationUtils', 'orion/webui/tooltip', 'orion/explorers/navigatorRenderer', 'orion/extensionCommands',

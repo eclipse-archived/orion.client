@@ -9,14 +9,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window define orion XMLHttpRequest confirm*/
-/*jslint sub:true*/
+/*eslint-env browser, amd*/
+/*global confirm*/
 
-define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/fileDownloader',
-	'orion/commandRegistry', 'orion/extensionCommands', 'orion/contentTypes', 'orion/compare/compareUtils', 
+define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/fileDownloader',
+	'orion/commandRegistry', 'orion/contentTypes', 'orion/compare/compareUtils', 
 	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog',
 	'orion/EventTarget', 'orion/form'],
-	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form){
+	function(messages, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mFileDownloader, mCommandRegistry, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, EventTarget, form){
 
 	/**
 	 * Utility methods

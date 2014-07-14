@@ -8,14 +8,12 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document window*/
-/*jslint sub:true*/
+/*eslint-env browser, amd*/
 define([
 	'i18n!orion/nls/messages',
 	'orion/Deferred',
 	'orion/webui/littlelib',
 	'orion/uiUtils',
-	'orion/section',
 	'orion/explorers/explorer',
 	'orion/commands',
 	'orion/URITemplate',
@@ -24,7 +22,7 @@ define([
 	'orion/edit/editorContext',
 	'orion/keyBinding',
 	'orion/globalCommands'
-], function(messages, Deferred, lib, mUIUtils, mSection, mExplorer, mCommands, URITemplate, EventTarget, i18nUtil, EditorContext, KeyBinding, mGlobalCommands) {
+], function(messages, Deferred, lib, mUIUtils, mExplorer, mCommands, URITemplate, EventTarget, i18nUtil, EditorContext, KeyBinding, mGlobalCommands) {
 
 	function OutlineRenderer (options, explorer, title, selectionService) {
 		this.explorer = explorer;

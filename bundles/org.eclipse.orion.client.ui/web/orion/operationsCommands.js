@@ -9,10 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window define */
-/*browser:true*/
-define(['i18n!orion/operations/nls/messages', 'require', 'orion/webui/littlelib', 'orion/commands'], 
-        function(messages, require, lib, mCommands) {
+/*eslint-env browser, amd*/
+define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/commands'], 
+        function(messages, lib, mCommands) {
 	/**
 	 * @namespace The global container for eclipse APIs.
 	 */ 

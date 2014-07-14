@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*jslint sub:true*/
- /*global define document window Image */
+/*eslint-env browser, amd*/
  
 define([
 	'orion/util',
@@ -17,10 +16,9 @@ define([
 	'orion/webui/dropdown',
 	'text!orion/webui/dropdowntriggerbutton.html',
 	'text!orion/webui/dropdowntriggerbuttonwitharrow.html',
-	'text!orion/webui/submenutriggerbutton.html',
 	'text!orion/webui/checkedmenuitem.html',
 	'orion/webui/tooltip'
-], function(util, lib, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, SubMenuButtonFragment, CheckedMenuItemFragment, Tooltip) {
+], function(util, lib, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, CheckedMenuItemFragment, Tooltip) {
 		/**
 		 * @name orion.commands.NO_IMAGE
 		 * @description Image data for 16x16 transparent png.

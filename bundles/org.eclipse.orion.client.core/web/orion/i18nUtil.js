@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global define localStorage*/
+/*eslint-env browser, amd*/
 define(['require', 'orion/Deferred'], function(require, Deferred) {
 
 	var messageBundleDeffereds = {};

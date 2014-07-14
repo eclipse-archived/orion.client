@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window define document */
+/*eslint-env browser, amd*/
 define(['require', 'orion/webui/littlelib'], function (require, lib) {
 
     /**

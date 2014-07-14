@@ -8,8 +8,8 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define window document URL*/
-
+/*eslint-env browser, amd*/
+/*global URL*/
 define(['orion/PageUtil', "orion/URL-shim"], function(PageUtil) {
                 
     /**

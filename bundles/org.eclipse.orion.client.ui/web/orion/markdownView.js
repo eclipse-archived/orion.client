@@ -8,7 +8,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define document window URL console Blob*/
+/*eslint-env browser, amd*/
+/*global URL*/
 define([
 	'marked/marked',
 	'orion/editor/editor',
@@ -35,7 +36,6 @@ define([
 						};
 					} else {
 						linkURL = new URL(link.href, resourceURL);
-//						fileClient.toAbsURL(resourceURL, link.href);
 						if (isRelative) {
 							linkURL.protocol = "";
 							linkURL.host = "";

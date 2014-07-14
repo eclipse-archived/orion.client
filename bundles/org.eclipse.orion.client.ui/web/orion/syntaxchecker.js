@@ -8,9 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
-/*global define window */
-
+/*eslint-env browser, amd*/
 define([
 	'orion/Deferred',
 	'orion/edit/editorContext',

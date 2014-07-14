@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*jslint amd:true sub:true*/
-/*global console document window  */
+/*eslint-env browser, amd*/
  
 define([
 	'orion/commands',
@@ -19,10 +18,8 @@ define([
 	'orion/webui/littlelib',
 	'orion/webui/dropdown',
 	'orion/webui/tooltip',
-	'text!orion/webui/checkedmenuitem.html',
-	'text!orion/webui/dropdowntriggerbutton.html',
 	'text!orion/webui/submenutriggerbutton.html'
-], function(Commands, mNavUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, CheckedMenuItemFragment, DropdownButtonFragment, SubMenuButtonFragment) {
+], function(Commands, mNavUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, SubMenuButtonFragment) {
 
 	/**
 	 * Constructs a new command registry with the given options.

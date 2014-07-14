@@ -160,10 +160,6 @@ define([
 		}
 	}
 
-	function continueOnError(error) {
-		return error;
-	}
-
 	// Related links menu management. The related menu is reused as content changes. If the menu becomes empty, we hide the dropdown.
 	var pageItem;
 	var exclusions = [];
@@ -294,6 +290,11 @@ define([
 					deferredCommandItems.push(commandItem(relatedLink, commandOptionsPromise, null));
 				}
 			});
+			
+			function continueOnError(error) {
+				return error;
+			}
+			
 			Deferred.all(deferredCommandItems, continueOnError).then(function(commandItems) {
 				commandItems.sort(function(a, b) {
 					return a.command.name.localeCompare(b.command.name);

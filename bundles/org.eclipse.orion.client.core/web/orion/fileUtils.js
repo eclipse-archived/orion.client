@@ -8,9 +8,9 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define window document navigator URL*/
-
-define(['require', 'i18n!orion/nls/messages', 'orion/URL-shim'], function(require, messages) {
+/*eslint-env browser, amd*/
+/*global URL*/
+define(['require', 'orion/URL-shim'], function(require) {
                 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.

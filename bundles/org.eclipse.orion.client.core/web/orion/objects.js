@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define*/
+/*eslint-env browser, amd*/
 define([], function() {
 	function mixin(target/*, source..*/) {
 		var hasOwnProperty = Object.prototype.hasOwnProperty;

@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window define orion XMLHttpRequest confirm document*/
-/*jslint sub:true*/
+/*eslint-env browser, amd*/
 define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
  'orion/commandRegistry', 'orion/i18nUtil', 'orion/webui/dialogs/PromptDialog', 'orion/widgets/projects/ProjectOptionalParametersDialog', 
  'orion/fileCommands', 'orion/editorCommands', 'orion/EventTarget',
@@ -59,14 +58,15 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		}
 		
 		var params = data.oldParams || {};
+		var param;
 		if(data.parameters){
-			for (var param in data.parameters.parameterTable) {
+			for (param in data.parameters.parameterTable) {
 				params[param] = data.parameters.valueFor(param);
 			}
 		}
 		if(data.parameters && data.parameters._options.optionalParams)
 		for(var i=0; i<data.parameters._options.optionalParams.length; i++){
-			var param = data.parameters._options.optionalParams[i];
+			param = data.parameters._options.optionalParams[i];
 			params[param.id] = param.value;
 		}
 		return params;
@@ -877,14 +877,14 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 										}
 										var def = handler.getDependencyDescription(workspace.Children[i]);
 										checkdefs.push(def);
-										(function(i, def){
+										(function(def){
 											def.then(function(matches){
 												if(matches && matches.Location === dependency.Location){
 													found = true;
 													searchLocallyDeferred.resolve(matches);
 												}
 											});
-										})(i, def);
+										})(def);
 									}
 									Deferred.all(checkdefs).then(function(){
 										if(!found){

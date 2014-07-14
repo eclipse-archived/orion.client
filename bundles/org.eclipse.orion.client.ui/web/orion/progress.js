@@ -8,10 +8,9 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*globals define*/
-
-define(['i18n!orion/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/webui/dialogs/OperationsDialog'], 
-function(messages, require, Deferred, lib, mOperationsDialog) {
+/*eslint-env browser, amd*/
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/webui/dialogs/OperationsDialog'], 
+function(messages, lib, mOperationsDialog) {
 	
 	function ProgressMonitorTool(progressPane, commandRegistry){
 		if(this._progressPane){
@@ -62,8 +61,8 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 				}
 				
 				var status = "";
-				for(var i in operationsToDisplay){
-					var operation = operationsToDisplay[i];
+				for(var j in operationsToDisplay){
+					var operation = operationsToDisplay[j];
 					if(operation.type && (operation.type==="loadstart" || operation.type==="progress")){
 						status = "running"; //$NON-NLS-0$
 						break;
@@ -73,7 +72,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 				// TODO fixme this entire block does nothing
 				if(status==="" && this._lastOperation!=null){
 					if(this._lastOperation.type && this._lastOperation.type==="error"){
-						status=="error";
+						status==="error";
 					}
 				}
 				switch(status){

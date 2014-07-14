@@ -10,8 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global define */
-
+/*eslint-env browser, amd*/
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/editor/editor',

@@ -10,8 +10,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global define setTimeout clearTimeout addEventListener removeEventListener document console localStorage location URL Worker XMLSerializer XMLHttpRequest*/
-
+/*eslint-env browser, amd*/
+/*global URL*/
 define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Deferred, EventTarget) {
 
     function _equal(obj1, obj2) {

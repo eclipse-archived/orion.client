@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
- /*global define window document*/
-define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'orion/commonHTMLFragments', 'orion/objects', 	'orion/selection'], function(lib, mSelection, mCommands, mHTMLFragments, objects, Selection){
+/*eslint-env browser, amd*/
+define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	'orion/selection'], function(lib, mHTMLFragments, objects, Selection){
 	
 	/**
 	 * Generates a section

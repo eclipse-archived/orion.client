@@ -1,12 +1,21 @@
-/*global console define*/
-/*jslint browser:true sub:true*/
-define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/littlelib',
-		'orion/PageUtil',
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors: IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+/*eslint-env browser, amd*/
+define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/littlelib',
 		'orion/widgets/nav/mini-nav',
 		'orion/widgets/nav/project-nav',
 		'orion/globalCommands',
 		'i18n!orion/edit/nls/messages'],
-		function(Deferred, objects, mCommands, mOutliner, lib, PageUtil, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages) {
+		function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages) {
 
 	/**
 	 * @name orion.sidebar.Sidebar

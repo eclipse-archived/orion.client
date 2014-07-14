@@ -9,9 +9,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define window */
-
-define(['i18n!orion/nls/messages', 'require', 'orion/regex', 'orion/commandRegistry', 'orion/PageUtil', 'orion/URITemplate'], function(messages, require, mRegex, mCommands, PageUtil, URITemplate) {
+/*eslint-env browser, amd*/
+define(['i18n!orion/nls/messages', 'require', 'orion/regex', 'orion/URITemplate'], function(messages, require, mRegex, URITemplate) {
 
 /**
  * @name orion.searchUtils.SearchParams

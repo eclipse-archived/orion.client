@@ -9,8 +9,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window define prompt */
-/*jslint browser:true devel:true*/
+/*global prompt */
+/*eslint-env browser, amd*/
 
 define([
 	'i18n!orion/edit/nls/messages',

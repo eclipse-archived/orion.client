@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define window console*/
-define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCommands'], function(messages, Deferred, mExtensionCommands){
+/*eslint-env browser, amd*/
+define(['orion/Deferred', 'orion/extensionCommands'], function(Deferred, mExtensionCommands){
 
 	function _toJSON(text) {
 		try {

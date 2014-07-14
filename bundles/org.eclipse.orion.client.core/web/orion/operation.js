@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global console define setTimeout XMLHttpRequest*/
-
+/*eslint-env browser, amd*/
 /**
  * @name orion.operation
  * @namespace Provides an API for handling long running operations as promises.
