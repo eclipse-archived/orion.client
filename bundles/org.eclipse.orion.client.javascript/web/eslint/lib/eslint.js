@@ -316,7 +316,7 @@ function isDisabledByReportingConfig(reportingConfig, ruleId, location) {
     for (var i = 0, c = reportingConfig.length; i < c; i++) {
 
         var ignore = reportingConfig[i];
-        if ((!ignore.rule || ignore.rule === ruleId) && location && //ORION
+        if ((!ignore.rule || ignore.rule === ruleId) &&
             (location.line > ignore.start.line || (location.line === ignore.start.line && location.column >= ignore.start.column)) &&
             (!ignore.end || (location.line < ignore.end.line || (location.line === ignore.end.line && location.column <= ignore.end.column)))) {
                 return true;
@@ -632,6 +632,7 @@ module.exports = (function() {
             related = opts; //mrennie Orion
             opts = message;
             message = location;
+            location = node.loc.start;
         }
 
        /* Object.keys(opts || {}).forEach(function (key) {
@@ -642,7 +643,7 @@ module.exports = (function() {
 		message = message.replace(/\$\{([^\}]+)\}/g, function(str, key) {
 			return opts[key];
 		});
-
+		
         if (isDisabledByReportingConfig(reportingConfig, ruleId, location)) {
             return;
         }

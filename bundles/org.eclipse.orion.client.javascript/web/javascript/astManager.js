@@ -69,8 +69,8 @@ define([
 			try {
 				var ast = this.parser.parse(text, {
 					range: true,
+					loc: true,
 					tolerant: true,
-					comment: true,
 					tokens: true,
 					attachComment: true
 				});
