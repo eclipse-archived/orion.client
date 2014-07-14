@@ -2861,7 +2861,6 @@ var exports = {};
 		var pushLogic = mGitPushLogic(pushOptions);
 		var commitLogic = mGitCommitLogic(commitOptions);
 		
-		var commitMessageParameters = commitLogic.createParameters(false);
 		var commitCallback = commitLogic.perform;
 		var displayErrorOnStatus = commitLogic.displayErrorOnStatus;
 		var pushCallback = pushLogic.perform;
@@ -2869,12 +2868,12 @@ var exports = {};
 		
 		var commitAndPushCommand = new mCommands.Command({
 			name: messages["Commit and Push"],
-			tooltip: messages["Commit and Push"],
+			tooltip: messages["CommitAndPushTooltip"],
 			id: "eclipse.orion.git.commitAndPushCommand",
-			parameters: commitMessageParameters,
 			callback: function(data) {
 				commitCallback(data).then(function() {
-					serviceRegistry.getService("orion.git.provider").getGitBranch(data.items.status.Clone.BranchLocation).then(
+					refresh();
+					serviceRegistry.getService("orion.git.provider").getGitBranch(data.items.Clone.BranchLocation).then(
 							function(resp) { 
 								var branches = resp.Children;
 								var currentBranch;
@@ -2889,18 +2888,20 @@ var exports = {};
 								data.targetBranch = undefined;
 								data.parameters = undefined;
 								
-								data.items = currentBranch;
+								data.items.LocalBranch = currentBranch;
+								data.items.RemoteBranch = currentBranch.RemoteLocation[0].Children[0];
+								
 								pushCallback(data).then(function() {
 									refresh();
 								});
 							},
 							function(err) {
 								displayErrorOnStatus(err);
+								refresh();
 							});
 				},
 				function(err) {
 					displayErrorOnStatus(err);
-					refresh();
 				});
 			},
 			visibleWhen: function(item) {
