@@ -409,6 +409,9 @@ define([
 				}
 			}
 		},
+		isRowSelectable: function(modelItem) {
+			return false;
+		},
 		createCommands: function() {
 			var that = this;
 			var commandService = this.commandService;
