@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define document Image*/
+/*global define document Image setTimeout */
 
 define([
 	'require',
@@ -341,28 +341,27 @@ define([
 						});
 						info.display();
 						horizontalBox.appendChild(commitDetails);
-						
-						var diffs = commit.Diffs;
-
-						diffs.forEach(function(item) {
-							var path = item.OldPath;
-							if (item.ChangeType === "ADD") { //$NON-NLS-0$
-								path = item.NewPath;
-							} 
-							item.name = path;
-							item.type = item.ChangeType;
-						});
-						
-						var titleWrapper = new mSection.Section(horizontalBox, {
-							id: "diffSection" + commit.Name, //$NON-NLS-0$
-							title: messages["ChangedFiles"],
-							slideout: true,
-							canHide: false,
-							preferenceService: explorer.preferencesService
-						}); 
 
 						var repository = explorer.model.root.repository;
 						setTimeout(function() {
+							var diffs = commit.Diffs;
+	
+							diffs.forEach(function(item) {
+								var path = item.OldPath;
+								if (item.ChangeType === "ADD") { //$NON-NLS-0$
+									path = item.NewPath;
+								} 
+								item.name = path;
+								item.type = item.ChangeType;
+							});
+							
+							var titleWrapper = new mSection.Section(horizontalBox, {
+								id: "diffSection" + commit.Name, //$NON-NLS-0$
+								title: messages["ChangedFiles"],
+								slideout: true,
+								canHide: false,
+								preferenceService: explorer.preferencesService
+							}); 
 							var explorer2  = new mGitChangeList.GitChangeListExplorer({
 								serviceRegistry: explorer.registry,
 								commandRegistry: explorer.commandService,
