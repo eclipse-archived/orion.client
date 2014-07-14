@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define document console prompt window*/
-
+/*eslint-env browser, amd*/
 define(['jsdiff/diff'], function(JsDiff) {
 
 var orion = orion || {};

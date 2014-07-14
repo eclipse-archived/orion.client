@@ -10,9 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *     Andy Clement (vmware) - bug 344614
  *******************************************************************************/
-/*jslint browser:true*/
-/*global define orion window console*/
-
+/*eslint-env browser, amd*/
 define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion/contentTypes', 'require', 'orion/webui/littlelib', 'orion/util', 'orion/webui/dialog'], 
 		function(messages, mSearchCrawler, mContentTypes, require, lib, util, dialog) {
 	/**

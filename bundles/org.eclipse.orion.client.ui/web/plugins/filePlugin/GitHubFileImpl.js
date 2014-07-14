@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define URL console TextDecoder*/
-
+/*eslint-env browser, amd*/
+/*global URL*/
 define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "orion/URL-shim"], function(Deferred, xhr, Base64) {
 	
 	//This flag controls how we inject the commit information as additional properties of meta data and fetchChildren function.

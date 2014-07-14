@@ -9,8 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define document window */
-
+/*eslint-env browser, amd*/
 define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commandRegistry', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
 		'orion/contentTypes', 'orion/PageUtil', 'orion/compare/compareTreeExplorer'],
 		function(mBootstrap, mStatus, mProgress, mOperationsClient, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mContentTypes, PageUtil, mCompareTreeExplorer) {

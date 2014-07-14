@@ -9,9 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define URL TextDecoder*/
-
-define(["orion/Deferred", "orion/xhr", "orion/URITemplate", "orion/URL-shim"], function(Deferred, xhr, URITemplate) {
+/*eslint-env browser, amd*/
+/*global URL*/
+define(["orion/xhr", "orion/URITemplate", "orion/URL-shim"], function(xhr, URITemplate) {
 
 	var pathRegex = /.*\/(?:contents|list)\/([^\/]*)(?:\/([^\/]*)(?:\/(.*))?)?/;
 

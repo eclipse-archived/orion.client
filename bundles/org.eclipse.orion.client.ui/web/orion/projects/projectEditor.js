@@ -8,9 +8,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
-/*global define document setTimeout window*/
-define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/objects',  'orion/projectCommands', 'orion/commandRegistry', 'orion/PageLinks', 'orion/explorers/explorer', 'orion/section'],
-	function(URITemplate, lib, Deferred, objects, mProjectCommands, mCommandRegistry, PageLinks, mExplorer, mSection) {
+/*eslint-env browser, amd*/
+define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/objects',  'orion/projectCommands', 'orion/PageLinks', 'orion/explorers/explorer', 'orion/section'],
+	function(URITemplate, lib, Deferred, objects, mProjectCommands, PageLinks, mExplorer, mSection) {
 	
 	var editTemplate = new URITemplate("./edit.html#{,resource,params*}"); //$NON-NLS-0$
 	

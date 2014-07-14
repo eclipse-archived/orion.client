@@ -9,8 +9,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint forin:true regexp:false*/
-/*global console define JSLINT window*/
+/*eslint-env browser, amd*/
+/*global JSLINT*/
 define([
 	"orion/plugin",
 	"orion/jslintworker",

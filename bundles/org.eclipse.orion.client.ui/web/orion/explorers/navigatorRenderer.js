@@ -8,9 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document*/
-/*jslint regexp:false browser:true forin:true sub:true*/
-
+/*eslint-env browser, amd*/
 define([
 	'i18n!orion/navigate/nls/messages',
 	'orion/Deferred',

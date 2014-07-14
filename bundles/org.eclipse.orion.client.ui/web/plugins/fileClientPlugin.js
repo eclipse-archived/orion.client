@@ -9,8 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window document parent define console eclipse*/
-
+/*eslint-env browser, amd*/
 define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", "domReady!"], function(Deferred, PluginProvider, FileServiceImpl) {
 	function trace(implementation) {
 		var method;

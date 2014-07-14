@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document TextEncoder TextDecoder Uint8Array unescape escape*/
-
+/*eslint-env browser, amd*/
+/*global TextEncoder TextDecoder unescape escape*/
 
 define(["chai/chai", "orion/encoding-shim", "domReady!"], function(chai) {
 	var assert = chai.assert;

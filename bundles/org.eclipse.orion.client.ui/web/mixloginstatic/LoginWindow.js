@@ -9,8 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*jslint browser:true devel:true regexp:false*/
-/*global define navigator window*/
+/*eslint-env browser, amd*/
 
 define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/webui/littlelib', 'persona/include'], function(domReady, xhr, PageUtil, PageLinks, lib) {
 	var userCreationEnabled;

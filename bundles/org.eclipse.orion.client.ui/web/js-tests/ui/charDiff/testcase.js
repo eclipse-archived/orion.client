@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define orion */
-
+/*eslint-env browser, amd*/
 define(["chai/chai", "orion/compare/jsdiffAdapter"], function(chai, mJSDiffAdapter) {
 	var assert = chai.assert;
 	var tests = {};

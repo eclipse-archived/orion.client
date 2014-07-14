@@ -8,7 +8,7 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define esprima:true*/
+/*eslint-env browser, amd*/
 define([
 	'js-tests/editor/mockEditor',
 	'chai/chai',

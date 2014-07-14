@@ -9,13 +9,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window define document*/
-/*browser:true*/
+/*eslint-env browser, amd*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/dialogs', 'orion/commandRegistry', 
+define(['i18n!orion/search/nls/messages', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/dialogs', 'orion/commandRegistry', 
 	'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchExplorer', 'orion/globalCommands', 
 	'orion/contentTypes', 'orion/searchUtils', 'orion/PageUtil','orion/webui/littlelib', 'orion/globalSearch/advSearchOptRenderer'],
-function(messages, require, mBootstrap, mStatus, mProgress, mDialogs, mCommandRegistry, mSearchClient, mFileClient, mOperationsClient, 
+function(messages, mBootstrap, mStatus, mProgress, mDialogs, mCommandRegistry, mSearchClient, mFileClient, mOperationsClient, 
 		mSearchExplorer, mGlobalCommands, mContentTypes, mSearchUtils, PageUtil, lib, mAdvSearchOptRenderer
 ) {
 	

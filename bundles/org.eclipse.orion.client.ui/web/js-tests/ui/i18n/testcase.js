@@ -8,9 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define console setTimeout navigator*/
-
-
+/*eslint-env browser, amd*/
 define(["require", "orion/Deferred", "orion/bootstrap", "chai/chai", "orion/i18nUtil", "orion/i18n"], function(require, Deferred, bootstrap, chai, i18nUtil) {
 	var assert = chai.assert;
 	var I18N_PLUGIN = "orion/i18n";

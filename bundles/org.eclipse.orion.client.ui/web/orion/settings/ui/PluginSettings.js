@@ -8,10 +8,10 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document orion*/
-define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/section', 'orion/i18nUtil', 'orion/Deferred', 'orion/objects',
+/*eslint-env browser, amd*/
+define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/objects',
 		'orion/widgets/input/LabeledCheckbox', 'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledSelect'],
-		function(messages, mExplorer, mSection, i18nUtil, Deferred, objects, LabeledCheckbox, LabeledTextfield, LabeledSelect) {
+		function(mExplorer, mSection, Deferred, objects, LabeledCheckbox, LabeledTextfield, LabeledSelect) {
 	var Explorer = mExplorer.Explorer, SelectionRenderer = mExplorer.SelectionRenderer, Section = mSection.Section;
 
 	/**

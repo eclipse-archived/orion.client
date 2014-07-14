@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define*/
-/*jslint browser:true devel:true sub:true*/
+/*eslint-env browser, amd*/
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/commands',
@@ -20,11 +19,10 @@ define([
 	'orion/projectCommands',
 	'orion/PageUtil',
 	'orion/URITemplate',
-	'orion/Deferred',
-	'orion/projectClient'
+	'orion/Deferred'
 ], function(
 	messages, mCommands, objects, lib, mExplorer, mCommonNav, ProjectCommands,
-	PageUtil, URITemplate, Deferred, mProjectClient
+	PageUtil, URITemplate, Deferred
 ) {
 	var CommonNavExplorer = mCommonNav.CommonNavExplorer;
 	var CommonNavRenderer = mCommonNav.CommonNavRenderer;

@@ -8,8 +8,7 @@
  *
  ******************************************************************************/
 
-/*global define */
-
+/*eslint-env browser, amd*/
 //NLS_CHARSET=UTF-8
 
 define({

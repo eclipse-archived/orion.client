@@ -8,9 +8,7 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global orion window console define localStorage*/
-/*jslint browser:true*/
-
+/*eslint-env browser, amd*/
 define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 	function TextField(options, node) {
 		objects.mixin(this, options);

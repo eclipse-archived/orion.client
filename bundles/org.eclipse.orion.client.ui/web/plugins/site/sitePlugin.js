@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document eclipse parent window*/
+/*eslint-env browser, amd*/
 define([
 	'orion/plugin',
 	'plugins/site/siteServiceImpl',

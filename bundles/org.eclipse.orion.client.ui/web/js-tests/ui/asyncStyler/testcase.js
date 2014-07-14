@@ -8,10 +8,10 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define setTimeout window*/
-define(['chai/chai', 'orion/Deferred', 'orion/testHelpers', 'js-tests/editor/mockTextView', 'orion/editor/AsyncStyler',
+/*eslint-env browser, amd*/
+define(['chai/chai', 'orion/Deferred', 'js-tests/editor/mockTextView', 'orion/editor/AsyncStyler',
 		'orion/serviceregistry', 'orion/EventTarget'],
-		function(chai, Deferred, testHelpers, mMockTextView, AsyncStyler, mServiceRegistry, EventTarget) {
+		function(chai, Deferred, mMockTextView, AsyncStyler, mServiceRegistry, EventTarget) {
 	var assert = chai.assert;
 var MockTextView = mMockTextView.MockTextView;
 

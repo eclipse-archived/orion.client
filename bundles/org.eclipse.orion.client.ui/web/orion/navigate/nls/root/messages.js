@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 //NLS_CHARSET=UTF-8
- 
+/*eslint-env browser, amd*/
 define({
 	"Click one of the tasks below to create an Orion folder.  You can upload, import, or generate files.": "Click one of the tasks below to create an Orion folder.  You can upload, import, or generate files.",
 	"Toggle Left Pane": "Toggle Left Pane",

@@ -8,9 +8,7 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window console define*/
-/*jslint browser:true*/
-
+/*eslint-env browser, amd*/
 /* This PluginEntry widget supplies the HTML and related interactivity to display
    detailed information about a single plugin. It is designed to work with the
    PluginList widget, but each plugin entry element should fit into any HTML list

@@ -8,9 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define*/
-/*jslint browser:true*/
-
+/*eslint-env browser, amd*/
 define(['i18n!orion/operations/nls/messages', 'require', 'orion/webui/littlelib', 'orion/webui/popupdialog', 'orion/operationsCommands'],
 function(messages, require, lib, popupdialog, mOperationsCommands) {
 	

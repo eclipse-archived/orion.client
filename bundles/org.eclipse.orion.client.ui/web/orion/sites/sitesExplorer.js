@@ -8,11 +8,9 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document*/
-/*jslint sub:true*/
-define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/Deferred', 'orion/commands', 'orion/keyBinding', 'orion/section', 'orion/globalCommands',
-		'orion/selection', 'orion/sites/siteUtils', 'orion/explorers/navigationUtils', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/webui/treetable', 'orion/webui/littlelib'],
-		function(messages, i18nUtil, mExplorer, Deferred, mCommands, mKeyBinding, mSection, mGlobalCommands, mSelection, mSiteUtils, mNavUtils, mSiteClient, mSiteCommands, treetable, lib) {
+/*eslint-env browser, amd*/
+define(['i18n!orion/sites/nls/messages', 'orion/explorers/explorer', 'orion/Deferred', 'orion/section', 'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/webui/littlelib'],
+		function(messages, mExplorer, Deferred, mSection, mSiteUtils, mSiteClient, lib) {
 	var SiteServicesExplorer, SitesRenderer, SiteTreeModel;
 
 	/** 

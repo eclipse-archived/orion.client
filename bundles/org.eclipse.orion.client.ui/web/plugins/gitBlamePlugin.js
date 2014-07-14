@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document window parent */
-
+/*eslint-env browser, amd*/
 define(["require", "orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], function(require, xhr, PluginProvider, Deferred, operation) {
 	var headers = {
 		name: "Git Blame Plugin",

@@ -8,18 +8,14 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
-/*global define window document localStorage*/
-
+/*eslint-env browser, amd*/
 define([
 	'i18n!orion/widgets/nls/messages',
-	'require',
 	'orion/webui/littlelib',
 	'orion/PageLinks',
 	'orion/widgets/userAssistance/UATaskPanel',
-	'orion/webui/dialog',
 	'orion/webui/dropdown'
-], function(messages, require, lib, PageLinks, UATaskPanel, dialog, Dropdown) {
+], function(messages, lib, PageLinks, UATaskPanel, Dropdown) {
 	
 	function UserMenu(options) {
 		this._displaySignOut = true;

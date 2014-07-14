@@ -8,9 +8,7 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console define*/
-/*jslint browser:true sub:true*/
-
+/*eslint-env browser, amd*/
 define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/littlelib'], function(messages, objects, lib) {
 
 	function setBounds(node, bounds) {

@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define URL*/
-/*jslint browser:true sub:true*/
+/*eslint-env browser, amd*/
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/objects',
@@ -17,7 +16,7 @@ define([
 	'orion/i18nUtil',
 	'orion/commands',
 	'orion/URL-shim'
-], function(messages, objects, lib, i18nUtil, Commands, _) {
+], function(messages, objects, lib, i18nUtil, Commands) {
 
 	/**
 	 * @name orion.widgets.Filesystem.FilesystemSwitcher

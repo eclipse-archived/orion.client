@@ -9,9 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global clearTimeout console define document setTimeout window */
-/*jslint regexp:false forin:true*/
-
+/*eslint-env browser, amd*/
 define([
 	'i18n!orion/navigate/nls/messages',
 	'orion/Deferred',

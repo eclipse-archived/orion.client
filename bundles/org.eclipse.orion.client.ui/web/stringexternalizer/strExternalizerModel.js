@@ -9,9 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define console window*/
-/*jslint regexp:false browser:true forin:true*/
-
+/*eslint-env browser, amd*/
 define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/searchUtils', 'stringexternalizer/nonnlsSearchUtil'],
 
 function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils, mNonnlsSearchUtil) {
@@ -22,7 +20,7 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils, mNonnls
             message: message ? message : (passed ? messages["Passed"] : messages["Failed"]),
             status: passed ? "pass" : "failed" //$NON-NLS-0$ //$NON-NLS-0$
         });
-    };
+    }
     
     function _matchesReplaced(fileModel) {
         var matchesReplaced = 0;
@@ -37,7 +35,7 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils, mNonnls
             }
         }
         return matchesReplaced;
-    };
+    }
 
     /*
      *	The model to support the string externalizer in the generaic searchExplorer.

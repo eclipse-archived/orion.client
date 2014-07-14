@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window define document */
-
+/*eslint-env browser, amd*/
 define([
 	'orion/webui/littlelib', 
 	'orion/webui/dropdown', 

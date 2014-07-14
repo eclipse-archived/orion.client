@@ -8,9 +8,7 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window console define */
-/*jslint browser:true sub:true*/
-
+/*eslint-env browser, amd*/
 define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/git/gitPreferenceStorage', 'orion/git/gitConfigPreference', 'orion/webui/littlelib', 'orion/objects', 'orion/i18nUtil',
 		'orion/widgets/settings/Subsection', 'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledCheckbox', 'orion/widgets/input/LabeledCommand'
 		], function(messages, require, mCommands, mSection, GitPreferenceStorage, GitConfigPreference, lib, objects, i18nUtil, Subsection, LabeledTextfield, LabeledCheckbox, LabeledCommand) {

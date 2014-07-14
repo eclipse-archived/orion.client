@@ -10,16 +10,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint browser:true devel:true sub:true*/
-/*global define eclipse:true orion:true window*/
-
+/*eslint-env browser, amd*/
 define([
 	'orion/Deferred',
 	"orion/editor/textStyler", 
 	"orion/editor/stylers/application_javascript/syntax",
 	"orion/editor/stylers/text_css/syntax",
 	"orion/editor/stylers/text_html/syntax",
-	"orion/editor/stylers/text_x-java-source/syntax",
 	"orion/editor/stylers/application_json/syntax",
 	"orion/editor/stylers/text_x-php/syntax",
 	"orion/editor/stylers/text_x-python/syntax",
@@ -27,7 +24,7 @@ define([
 	'orion/editor/stylers/application_x-ejs/syntax',
 	'orion/editor/stylers/application_xml/syntax',
 	'orion/editor/stylers/text_x-yaml/syntax',
-], function(Deferred, mStyler, mJS, mCss, mHtml, mJava, mJson, mPhp, mPython, mRuby, mEJS, mXml, mYaml) {
+], function(Deferred, mStyler, mJS, mCss, mHtml, mJson, mPhp, mPython, mRuby, mEJS, mXml, mYaml) {
 	var ContentTypes = [{	id: "text/plain",
 			name: "Text",
 			extension: ["txt"],

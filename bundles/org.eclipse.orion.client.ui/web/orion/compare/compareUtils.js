@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define require orion window document console */
-
+/*eslint-env browser, amd*/
 define(['orion/URITemplate'], function(URITemplate) {
 
 var orion = orion || {};

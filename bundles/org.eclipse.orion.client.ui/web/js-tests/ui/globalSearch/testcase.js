@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define orion */
-
+/*eslint-env browser, amd*/
 define(["chai/chai", "orion/searchUtils"], function(chai, mSearchUtils) {
 	var assert = chai.assert;
 	/**

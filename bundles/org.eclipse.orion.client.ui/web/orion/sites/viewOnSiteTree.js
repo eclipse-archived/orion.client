@@ -8,12 +8,11 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document*/
-/*jslint sub:true*/
-define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/Deferred', 'orion/commandRegistry', 'orion/globalCommands',
-		'orion/selection', 'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/webui/treetable',
+/*eslint-env browser, amd*/
+define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/Deferred', 'orion/globalCommands',
+		'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/webui/treetable',
 		'orion/webui/littlelib'],
-		function(messages, i18nUtil, Deferred, mCommands, mGlobalCommands, mSelection, mSiteUtils, mSiteClient, mSiteCommands, treetable, lib) {
+		function(messages, i18nUtil, Deferred, mGlobalCommands, mSiteUtils, mSiteClient, treetable, lib) {
 	var formatMessage = i18nUtil.formatMessage;
 	var TableTree = treetable.TableTree;
 	var ViewOnSiteTree;

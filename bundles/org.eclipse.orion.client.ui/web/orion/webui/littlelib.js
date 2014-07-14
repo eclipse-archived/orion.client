@@ -8,9 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console window define document*/
-/*jslint regexp:false*/
-
+/*eslint-env browser, amd*/
 define(["orion/util"], function(util) {
 	/**
 	 * @name orion.webui.littlelib

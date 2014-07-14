@@ -9,11 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window define */
-/*jslint forin:true devel:true*/
-
-/** @namespace The global container for eclipse APIs. */
-
+/*eslint-env browser, amd*/
 define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"], function(messages, Deferred, i18nUtil){
 	/**
 	 * @name orion.serviceregistry.DeferredService

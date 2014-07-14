@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/*eslint-env browser, amd*/
 define({
 	"Change Directory": "Change Directory",
 	"Change messages directory": "Change messages directory",

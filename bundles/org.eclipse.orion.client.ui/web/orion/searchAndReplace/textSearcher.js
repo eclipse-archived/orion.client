@@ -10,17 +10,14 @@
  *	IBM Corporation - initial API and implementation
  *	Adrian Aichner - regular expression capture group support in replace
  ******************************************************************************/
-/*global console define window document navigator*/
-/*jslint sub:true*/
-
+/*eslint-env browser, amd*/
 define([
 	'i18n!orion/search/nls/messages', 
 	'orion/editor/find', 'orion/commands', 
-	'orion/objects', 
-	'orion/searchUtils', 
+	'orion/objects',
 	'orion/inputCompletion/inputCompletion', 
 	'orion/webui/littlelib' ], 
-	function(messages, mFind, mCommands, objects, mSearchUtils, mInputCompletion, lib){
+	function(messages, mFind, mCommands, objects, mInputCompletion, lib){
 	
 	var MAX_RECENT_FIND_NUMBER = 30;
 	function TextSearcher(editor, serviceRegistry, cmdservice, undoStack, options) {

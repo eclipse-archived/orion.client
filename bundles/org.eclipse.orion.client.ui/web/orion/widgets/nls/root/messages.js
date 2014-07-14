@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 //NLS_CHARSET=UTF-8
-
+/*eslint-env browser, amd*/
 define({
 	"no input": "no input",
 	"no output": "no output",

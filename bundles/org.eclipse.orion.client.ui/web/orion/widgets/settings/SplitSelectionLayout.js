@@ -8,13 +8,12 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global widgets orion  window console define localStorage*/
-/*jslint browser:true*/
+/*eslint-env browser, amd*/
 
 /* This SettingsContainer widget is a container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 'orion/objects'], function(messages, require, lib, objects) {
+define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects) {
 	/**
 	 * @name orion.widgets.settings.SplitSelectionLayout
 	 * @class

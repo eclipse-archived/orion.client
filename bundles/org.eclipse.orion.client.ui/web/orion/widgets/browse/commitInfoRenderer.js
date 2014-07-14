@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window Image document console define URL*/
-/*jslint browser:true sub:true*/
+/*eslint-env browser, amd*/
+/*global URL*/
 define([
 	'orion/objects',
 	"orion/URITemplate",

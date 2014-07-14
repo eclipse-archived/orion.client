@@ -9,11 +9,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint browser:true*/
-/*global define orion window */
-
-define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', 'orion/webui/tooltip'], 
-		function(messages, require, lib, tooltip) {
+/*eslint-env browser, amd*/
+define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui/tooltip'], 
+		function(messages, lib, tooltip) {
 	/**
 	 * PopupDialog is used to implement a lightweight, automatically dismissed dialog in Orion that is triggered when
 	 * clicking a DOM node.

@@ -8,12 +8,11 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
-/*global define document window*/
+/*eslint-env browser, amd*/
 define(['orion/projects/projectExplorer',
 	'orion/selection',
 	'orion/URITemplate',
-	'orion/webui/littlelib',
-	'orion/fileCommands'], function(mProjectExplorer, Selection, URITemplate, lib, FileCommands) {
+	'orion/fileCommands'], function(mProjectExplorer, Selection, URITemplate, FileCommands) {
 	
 		var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	

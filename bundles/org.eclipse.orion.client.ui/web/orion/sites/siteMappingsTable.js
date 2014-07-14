@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document */
-/*jslint sub:true*/
+/*eslint-env browser, amd*/
 define(['i18n!orion/sites/nls/messages', 'orion/commands', 'orion/explorers/explorer', 'orion/i18nUtil', 'orion/Deferred', 'orion/webui/littlelib', 'orion/EventTarget'],
 		function(messages, mCommands, mExplorer, i18nUtil, Deferred, lib, EventTarget) {
 

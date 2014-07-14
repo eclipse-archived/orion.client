@@ -8,9 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global orion window console define localStorage*/
-/*jslint browser:true*/
-
+/*eslint-env browser, amd*/
 define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/Checkbox'],  function(objects, lib, Checkbox) {
 
 	/**

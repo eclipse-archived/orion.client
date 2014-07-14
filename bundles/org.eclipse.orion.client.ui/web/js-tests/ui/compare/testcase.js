@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define JsDiff*/
-/*jslint forin:true regexp:false sub:true*/
+/*eslint-env browser, amd*/
+/*global JsDiff*/
 
 define(['chai/chai', 
 		'orion/compare/diffParser', 

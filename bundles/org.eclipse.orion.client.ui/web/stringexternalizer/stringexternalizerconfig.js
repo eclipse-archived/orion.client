@@ -9,9 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window document define localStorage setTimeout */
-/*jslint forin:true*/
-
+/*eslint-env browser, amd*/
 define(['i18n!orion/stringexternalizer/nls/messages', 'orion/section', 'orion/webui/littlelib', 'orion/commands', 'orion/webui/dialogs/DirectoryPrompterDialog'], function(messages, mSection, lib, mCommands, DirPrompter) {
 	function StringExternalizerConfig(options) {
 		this.parent = lib.node(options.parent);

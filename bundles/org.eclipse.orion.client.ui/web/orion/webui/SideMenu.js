@@ -8,9 +8,8 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
+/*eslint-env browser, amd*/
 /*global URL*/
-/*jslint amd:true browser:true*/
-
 define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(lib, PageUtil) {
 	var LOCAL_STORAGE_NAME = "sideMenuNavigation";
 	var OPEN_STATE = "open";

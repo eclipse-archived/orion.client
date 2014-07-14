@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 //NLS_CHARSET=UTF-8
-
+/*eslint-env browser, amd*/
 define({
 	"Shell": "Shell",
 	"Changed to: ": "Changed to: ",

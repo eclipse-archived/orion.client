@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define console window*/
+/*eslint-env browser, amd*/
 define(['chai/chai', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'orion/contentTypes', 'orion/serviceregistry', 'orion/Deferred'], function(chai, mMockFileClient, mSearchCrawler, mContentTypes, mServiceRegistry, Deferred) {
 	var assert = chai.assert;
 

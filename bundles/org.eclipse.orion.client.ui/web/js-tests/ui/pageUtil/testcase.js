@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window define */
-
+/*eslint-env browser, amd*/
 define(["chai/chai", "orion/URITemplate", "orion/PageUtil"], function(chai, URITemplate, PageUtil) {
 	var assert = chai.assert;
 	var tests = {};

@@ -12,10 +12,10 @@
 /*global define document window */
 /*jslint */
 define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/fileClient', 'orion/operationsClient',
-		'orion/searchClient', 'orion/globalCommands', 'orion/sites/siteUtils', 'orion/sites/siteCommands', 
+		'orion/searchClient', 'orion/globalCommands', 'orion/sites/siteCommands', 
 		'orion/sites/viewOnSiteTree', 'orion/PageUtil', 'orion/webui/littlelib'],
 	function(mBootstrap, mStatus, mProgress, mCommandRegistry, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands,
-			mSiteUtils, mSiteCommands, ViewOnSiteTree, PageUtil, lib) {
+			mSiteCommands, ViewOnSiteTree, PageUtil, lib) {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;

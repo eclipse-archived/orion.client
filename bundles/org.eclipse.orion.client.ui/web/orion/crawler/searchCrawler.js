@@ -9,11 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define console window*/
-/*jslint regexp:false browser:true forin:true*/
-
-define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/searchUtils', 'orion/contentTypes', 'orion/Deferred'], 
-		function(messages, require, i18nUtil, mSearchUtils, mContentTypes, Deferred) {
+/*eslint-env browser, amd*/
+define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils', 'orion/contentTypes', 'orion/Deferred'], 
+		function(messages, i18nUtil, mSearchUtils, mContentTypes, Deferred) {
 	
 	/**
 	 * SearchCrawler is an alternative when a file service does not provide the search API.

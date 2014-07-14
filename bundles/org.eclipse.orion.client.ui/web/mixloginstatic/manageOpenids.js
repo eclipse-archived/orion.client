@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global alert confirm console define document window */
-
+/*eslint-env browser, amd*/
+/*global confirm*/
 define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/littlelib", "domReady!"], function(messages, xhr, lib) {
 	var lastHash;
 	var jsonData;

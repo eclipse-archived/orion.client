@@ -8,9 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document*/
-
-
+/*eslint-env browser, amd*/
 define(["chai/chai", "orion/HTMLTemplates-shim", "domReady!"], function(chai, URITemplate) {
 	var assert = chai.assert;
 	var tests = {};

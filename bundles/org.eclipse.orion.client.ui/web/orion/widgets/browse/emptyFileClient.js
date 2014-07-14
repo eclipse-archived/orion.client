@@ -9,11 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window define */
-/*jslint forin:true devel:true*/
-
-/** @namespace The global container for eclipse APIs. */
-
+/*eslint-env browser, amd*/
 define(["orion/Deferred"], function(Deferred){
 	
 	var reameFile = {

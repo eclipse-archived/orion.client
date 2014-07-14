@@ -10,8 +10,7 @@
  *     Kris De Volder (VMWare) - initial API and implementation
  *******************************************************************************/
 
-/*global define*/
-
+/*eslint-env browser, amd*/
 /**
  * This module stores one 'current' directory node and proactively fetches
  * its child nodes in an attempt to answer them synchronously when requested.

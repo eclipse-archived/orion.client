@@ -9,11 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define window */
-/*jslint regexp:false browser:true forin:true*/
-
-define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib', 'orion/webui/treetable', 'orion/explorers/explorerNavHandler', 'orion/commands'], 
-function(messages, require, lib, mTreeTable, mNavHandler, mCommands){
+/*eslint-env browser, amd*/
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/webui/treetable', 'orion/explorers/explorerNavHandler', 'orion/commands'], 
+function(messages, lib, mTreeTable, mNavHandler, mCommands){
 
 var exports = {};
 

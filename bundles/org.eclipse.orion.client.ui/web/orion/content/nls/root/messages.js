@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 //NLS_CHARSET=UTF-8
-
+/*eslint-env browser, amd*/
 define({
 	"Plugin content could not be found": "Plugin content could not be found",
 	"Content has been saved.  Click OK to go to the navigator, Cancel to keep editing.": "Content has been saved.  Click OK to go to the navigator, Cancel to keep editing.",

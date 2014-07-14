@@ -8,15 +8,14 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define URL*/
-/*jslint browser:true sub:true*/
+/*global URL*/
+/*eslint-env browser, amd*/
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer',
-	'orion/explorers/explorerNavHandler',
 	'orion/keyBinding',
 	'orion/fileCommands',
 	'orion/projectCommands',
@@ -25,11 +24,10 @@ define([
 	'orion/selection',
 	'orion/URITemplate',
 	'orion/PageUtil',
-	'orion/Deferred',
 	'orion/webui/contextmenu'
 ], function(
-	messages, objects, lib, mExplorer, mNavigatorRenderer, mExplorerNavHandler, mKeyBinding,
-	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, Deferred, mContextMenu
+	messages, objects, lib, mExplorer, mNavigatorRenderer, mKeyBinding,
+	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, mContextMenu
 ) {
 	var FileExplorer = mExplorer.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;

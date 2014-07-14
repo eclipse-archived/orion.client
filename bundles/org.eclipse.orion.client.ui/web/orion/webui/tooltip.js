@@ -8,9 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window define document */
-
-define(['require', 'orion/webui/littlelib'], function(require, lib) {
+/*eslint-env browser, amd*/
+define(['orion/webui/littlelib'], function(lib) {
 
 	/**
 	 * Attaches tooltip behavior to a given node.  The tooltip will be assigned class "tooltip" which can be

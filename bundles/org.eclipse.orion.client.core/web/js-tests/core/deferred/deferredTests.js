@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global Mocha*/
-/*jslint amd:true browser:true mocha:true */
+/*eslint-env browser, amd*/
+/*global describe it*/
 
 define(["chai/chai", "orion/Deferred", "mocha/mocha"], function(chai, Deferred) {
 	var assert = chai.assert;

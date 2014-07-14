@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 //NLS_CHARSET=UTF-8
-
+/*eslint-env browser, amd*/
 define({
 	"Copy current change from right to left": "Copy current change from right to left",
 	"Copy current change from left to right": "Copy current change from left to right",

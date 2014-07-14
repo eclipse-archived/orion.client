@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define console window*/
-
+/*eslint-env browser, amd*/
 define(['orion/treeModelIterator', 'orion/compare/compareUtils', 'orion/editor/annotations', 'orion/compare/jsdiffAdapter'], function(mTreeModelIterator, mCompareUtils, mAnnotations, mJSDiffAdapter){
 
 var exports = {};

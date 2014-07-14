@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global console define URL window*/
-define(['require', 'orion/URITemplate', 'orion/URL-shim', 'orion/serviceTracker', 'orion/PageLinks'], function(require, URITemplate, _, ServiceTracker, PageLinks) {
+define(['orion/URL-shim', 'orion/serviceTracker', 'orion/PageLinks'], function(_, ServiceTracker, PageLinks) {
 	var AUTOIMPORT_SERVICE_NAME = 'orion.core.autoimport'; //$NON-NLS-0$
 
 	function debug(msg) { console.log('Orion: ' + msg); }

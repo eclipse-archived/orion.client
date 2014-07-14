@@ -7,13 +7,12 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window console define localStorage*/
-/*jslint browser:true forin:true*/
+/*eslint-env browser, amd*/
 
-define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegistry', 'orion/globalCommands', 'orion/PageUtil', 'orion/webui/littlelib',
-    'orion/widgets/themes/ThemeComponent', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/input/Select', 'orion/widgets/input/TextField'],
+define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegistry', 'orion/webui/littlelib',
+    'orion/widgets/themes/ThemeComponent', 'orion/widgets/input/Select', 'orion/widgets/input/TextField'],
 
-function(messages, mCommands, mCommandRegistry, mGlobalCommands, PageUtil, lib, Component, ThemeData, Select, TextField) {
+function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextField) {
 
     var TOP = 10;
     var LEFT = 10;

@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*jslint amd:true browser:true mocha:true*/
-/*global console*/
+/*eslint-env browser, amd*/
+/*global describe it*/
 define([
 	"chai/chai",
 	"orion/Deferred",

@@ -9,8 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define setTimeout*/
-
+/*eslint-env browser, amd*/
 define(["chai/chai", "orion/Deferred", "orion/test"], function(chai, Deferred, mTest) {
 	var assert = chai.assert;
 	var tests = {};

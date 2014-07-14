@@ -8,7 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*jslint amd:true mocha:true*/
+/*eslint-env browser, amd*/
+/*global describe it beforeEach afterEach*/
 define([
 	'chai/chai',
 	'orion/serviceregistry',

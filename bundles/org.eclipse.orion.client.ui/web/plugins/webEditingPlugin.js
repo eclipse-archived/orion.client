@@ -9,11 +9,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define*/
+/*eslint-env browser, amd*/
 define([
-	'orion/plugin',
-	'orion/editor/templates'
-], function(PluginProvider, templates) {
+	'orion/plugin'
+], function(PluginProvider) {
 	var headers = {
 		name: "Orion Web Editing Plugin",
 		version: "1.0",

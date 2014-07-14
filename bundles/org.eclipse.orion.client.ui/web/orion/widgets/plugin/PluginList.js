@@ -8,16 +8,14 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window console define localStorage*/
-/*jslint browser:true sub:true*/
-
+/*eslint-env browser, amd*/
 /* This PluginList widget provides a HTML list placeholder for PluginEntries, and
    provides JavaScript functions for user management of Orion plugins. It is designed
    to contain PluginEntry widgets */
 
 define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/commonHTMLFragments', 'orion/objects', 'orion/webui/littlelib',
-		'orion/widgets/plugin/PluginEntry', 'orion/explorers/explorer', 'orion/URITemplate', 'orion/PageLinks'
-		], function(messages, require, Deferred, mCommands, mCommandRegistry, mHTMLFragments, objects, lib, PluginEntry, mExplorer, URITemplate, PageLinks) {
+		'orion/widgets/plugin/PluginEntry', 'orion/explorers/explorer'
+		], function(messages, require, Deferred, mCommands, mCommandRegistry, mHTMLFragments, objects, lib, PluginEntry, mExplorer) {
 
 	var Explorer = mExplorer.Explorer;
 	var SelectionRenderer = mExplorer.SelectionRenderer;

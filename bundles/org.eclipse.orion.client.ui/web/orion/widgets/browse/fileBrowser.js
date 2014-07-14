@@ -10,9 +10,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint browser:true devel:true sub:true*/
-/*global define Blob document console eclipse:true orion:true window URL*/
-
+/*eslint-env browser, amd*/
+/*global URL*/
 define([
 	'orion/PageUtil', 
 	'orion/inputManager',

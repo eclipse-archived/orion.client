@@ -8,9 +8,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
-/*global define document window*/
+/*eslint-env browser, amd*/
 define([
-	'i18n!orion/edit/nls/messages',
 	'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer',
 	'orion/markdownView', 
@@ -23,7 +22,7 @@ define([
 	'orion/widgets/browse/commitInfoRenderer',
 	'orion/urlUtils',
 	'orion/section'
-], function(messages, mExplorerTable, mNavigatorRenderer, mMarkdownView, PageUtil, URITemplate, lib, objects, Deferred, mDropdown, mCommitInfoRenderer, mUrlUtils, mSection) {
+], function(mExplorerTable, mNavigatorRenderer, mMarkdownView, PageUtil, URITemplate, lib, objects, Deferred, mDropdown, mCommitInfoRenderer, mUrlUtils, mSection) {
 	
 	var FileExplorer = mExplorerTable.FileExplorer;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;

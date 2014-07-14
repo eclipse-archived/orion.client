@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define require document console prompt XMLHttpRequest window*/
-
+/*eslint-env browser, amd*/
 define(['orion/commandRegistry',
 		'orion/Deferred',
 		'orion/compare/compareView',

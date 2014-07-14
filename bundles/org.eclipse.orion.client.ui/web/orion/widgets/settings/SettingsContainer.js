@@ -8,8 +8,7 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window console define localStorage*/
-/*jslint browser:true sub:true*/
+/*eslint-env browser, amd*/
 
 /* This SettingsContainer widget manages a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */

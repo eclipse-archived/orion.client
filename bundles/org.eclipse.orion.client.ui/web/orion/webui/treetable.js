@@ -9,9 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*jslint amd:true forin:true devel:true*/
-/*global console document*/
-
+/*eslint-env browser, amd*/
 define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, lib) {
 
 	/**

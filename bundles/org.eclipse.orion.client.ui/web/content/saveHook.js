@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define orion window */
-/*jslint browser:true*/
+/*eslint-env browser, amd*/
 
 /*
  * Save hook for verifying that the user wants to save the content from a visual plugin.

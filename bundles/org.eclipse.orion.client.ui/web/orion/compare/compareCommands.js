@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define */
-/*jslint forin:true regexp:false sub:true*/
+/*eslint-env browser, amd*/
 
 define(['i18n!orion/compare/nls/messages', 'orion/commands', 'orion/keyBinding', 'orion/webui/littlelib'], 
 function(messages, mCommands, mKeyBinding, lib) {

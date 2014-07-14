@@ -10,15 +10,14 @@
  *     Kris De Volder (VMWare) - initial API and implementation
  *******************************************************************************/
 
-/*global define window URL*/
-/*jslint browser:true sub:true*/
-
+/*eslint-env browser, amd*/
+/*global URL*/
 define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
 		"orion/shell/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
-		"orion/i18nUtil", "orion/extensionCommands", "orion/contentTypes", "orion/pluginregistry", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
+		"orion/i18nUtil", "orion/extensionCommands", "orion/contentTypes", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
 		"orion/status", "orion/progress", "orion/operationsClient", "shell/resultWriters", "orion/URL-shim"],
 	function(require, messages, mBrowserCompatibility, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
-		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry, PageUtil, URITemplate, Deferred, mStatus, mProgress,
+		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, PageUtil, URITemplate, Deferred, mStatus, mProgress,
 		mOperationsClient, mResultWriters, _) {
 
 	var shellPageFileService, fileClient, commandRegistry, output, fileType;

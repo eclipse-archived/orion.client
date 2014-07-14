@@ -9,7 +9,7 @@
  ******************************************************************************/
 
 //NLS_CHARSET=UTF-8
-
+/*eslint-env browser, amd*/
 define({
 	"AddExternalAccount" : "Add external account:"	
 });

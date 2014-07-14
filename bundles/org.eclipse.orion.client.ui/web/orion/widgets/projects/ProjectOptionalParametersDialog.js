@@ -8,9 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document */
-/*jslint browser:true */
-
+/*eslint-env browser, amd*/
 define(['orion/webui/littlelib', 'orion/webui/dialog'],
 function(lib, dialog){
 	

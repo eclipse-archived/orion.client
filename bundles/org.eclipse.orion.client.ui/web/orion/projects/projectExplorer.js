@@ -8,15 +8,14 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*globals define window document*/
+/*eslint-env browser, amd*/
 define([
 	'i18n!orion/edit/nls/messages',
-	'orion/Deferred',
 	'orion/URITemplate',
 	'orion/webui/littlelib',
 	'orion/explorers/explorer',
 	'orion/section'
-], function(messages, Deferred, URITemplate, lib, mExplorer, mSection){
+], function(messages, URITemplate, lib, mExplorer, mSection){
 	
 	var editTemplate = new URITemplate("../edit/edit.html#{,resource,params*}"); //$NON-NLS-0$
 			

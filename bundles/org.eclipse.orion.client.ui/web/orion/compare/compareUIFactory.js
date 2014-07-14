@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define */
-
+/*eslint-env browser, amd*/
 define(['orion/webui/littlelib', 'orion/webui/splitter', 'text!orion/compare/sideBySideTemplate.html'], 
 function(lib, mSplitter, SideBySideTemplate) {
 

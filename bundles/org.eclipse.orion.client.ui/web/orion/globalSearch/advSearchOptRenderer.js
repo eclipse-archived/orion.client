@@ -8,9 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define window document console*/
-/*jslint sub:true*/
-
+/*eslint-env browser, amd*/
 define([
 	'i18n!orion/search/nls/messages',
 	'orion/fileClient', 

@@ -8,8 +8,7 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global widgets orion window console define localStorage ActiveXObject DOMParser*/
-/*jslint browser:true*/
+/*eslint-env browser, amd*/
 
 define([
 		'i18n!orion/settings/nls/messages',

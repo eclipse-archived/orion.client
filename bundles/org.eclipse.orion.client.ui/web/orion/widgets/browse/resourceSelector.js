@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console define URL*/
-/*jslint browser:true sub:true*/
+/*eslint-env browser, amd*/
 define([
 	'orion/objects',
 	'orion/webui/littlelib',

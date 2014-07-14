@@ -8,10 +8,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define orion window document */
-
-define(['require', 'chai/chai', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/extensionCommands'], 
-			function(require, chai, mServiceregistry, mCommandRegistry, mExtensionCommands) {
+/*eslint-env browser, amd*/
+define(['chai/chai', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/extensionCommands'], 
+			function(chai, mServiceregistry, mCommandRegistry, mExtensionCommands) {
 	var assert = chai.assert;
 	/**
 	 * mock services

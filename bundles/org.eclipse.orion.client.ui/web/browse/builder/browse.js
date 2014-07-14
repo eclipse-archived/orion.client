@@ -8,7 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define require URL document console prompt XMLHttpRequest window*/
+/*eslint-env browser, amd*/
+/*global URL*/
 var _browser_script_source = null; //We need to know where the browser script lives
 var _all_script = document.getElementsByTagName('script');
 if (_all_script && _all_script.length && _all_script.length > 0) {

@@ -7,7 +7,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define XPathResult DOMParser*/
+/*eslint-env browser, amd*/
 define(["chai/chai", "orion/serviceregistry", "orion/pluginregistry"], function(chai, mServiceregistry, mPluginregistry) {
 	var assert = chai.assert;
 	var tests = {};

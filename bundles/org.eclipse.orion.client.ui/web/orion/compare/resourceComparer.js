@@ -9,9 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define document console prompt window URL*/
-/*jslint forin:true regexp:false sub:true*/
-
+/*eslint-env browser, amd*/
 define(['i18n!orion/compare/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/compare/compareUtils', 'orion/compare/diffProvider', 'orion/compare/compareView', 'orion/highlight', 
 		'orion/fileClient', 'orion/globalCommands', 'orion/commands', 'orion/keyBinding', 'orion/searchAndReplace/textSearcher', 'orion/editorCommands', 'orion/objects', 'orion/inputManager', 'orion/editor/editorFeatures', 'orion/contentTypes', 'orion/URL-shim'], 
 		function(messages, require, Deferred, lib, mCompareUtils, mDiffProvider, mCompareView, Highlight, mFileClient, mGlobalCommands, mCommands, mKeyBinding, mSearcher, mEditorCommands, objects, mInputManager, mEditorFeatures, mContentTypes) {

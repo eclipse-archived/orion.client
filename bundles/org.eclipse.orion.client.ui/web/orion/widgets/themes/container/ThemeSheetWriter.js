@@ -8,8 +8,7 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global orion window console define localStorage*/
-/*jslint browser:true forin:true*/
+/*eslint-env browser, amd*/
 
 define(['orion/widgets/themes/ThemeClass'], 
 	function(ThemeClass) {

@@ -10,9 +10,7 @@
  *     Kris De Volder (VMWare) - initial API and implementation
  *******************************************************************************/
 
-/*global define*/
-/*jslint browser:true*/
-
+/*eslint-env browser, amd*/
 define(["i18n!orion/shell/nls/messages", "orion/shell/Shell", "orion/i18nUtil", "orion/Deferred", "shell/resultWriters"],
 	function(messages, mShell, i18nUtil, Deferred, mResultWriters) {
 
