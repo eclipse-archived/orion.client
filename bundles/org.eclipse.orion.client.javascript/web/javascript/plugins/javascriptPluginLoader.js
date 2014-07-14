@@ -15,16 +15,15 @@
  * Allows the implementation of the JS tooling plugin to be loaded either in this Window or in a web worker.
  */
 define([
+    'logger',
 	'orion/URL-shim' // exports into global, stays last
-], function() {
+], function(Logger) {
 	var pref = localStorage.getItem("jstools.worker"),
 	    useWorker = false;
 	try {
 		useWorker = pref === null ? false : !!JSON.parse(pref);
 	} catch (e) {
-		if (typeof console !== "undefined" && console) {
-			console.log(e);
-		}
+	    Logger.log(e);
 	}
 
 	if (!useWorker) {
@@ -42,7 +41,7 @@ define([
 		framework = window.opener;
 	}
 	if (!framework) {
-		console.log(new Error("No valid plugin target"));
+		Logger.log(new Error("No valid plugin target"));
     }
 	addEventListener("message", onFrameworkMessage);
 
@@ -52,9 +51,7 @@ define([
 	worker.addEventListener("error", onWorkerError);
 
 	function onWorkerError(err) {
-		if (typeof console !== "undefined" && console) {
-			console.log(err);
-		}
+	    Logger.log(err);
 	}
 
 	function onWorkerMessage(event) {

@@ -9,13 +9,13 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports console */
+/*eslint-env amd, node */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require('../util'), require, exports, module);  //$NON-NLS-0$
 	}
 	else if(typeof define === 'function' && define.amd) {  //$NON-NLS-0$
-		define(['eslint/util', 'require', 'exports', 'module'], factory);
+		define(['eslint/util', 'require', 'exports', 'module', 'logger'], factory);
 	}
 	else {
 		var req = function(id) {return root[id];},
@@ -23,7 +23,7 @@
 			mod = {exports: exp};
 		root.rules.noundef = factory(req, exp, mod);
 	}
-}(this, function(util, require, exports, module) {
+}(this, function(util, require, exports, module, Logger) {
 
 	/**
 	 * @name module.exports
@@ -59,39 +59,44 @@
 		
 		return {
 			'SwitchStatement' : function(node) {
-			    if(node.cases && node.cases.length > 1) {
-			        //single case is implicitly fallthrough
-			        var caselen  = node.cases.length;
-			       cases: for(var i = 0; i < caselen; i++) {
-			            if(i+1 === caselen) {
-			                //last node is implicitly fall-through
-			                break;
-			            }
-			            if(fallsthrough(node.cases[i])) {
-			                //corect the highlighting to match eclipse
-			                var reportednode = node.cases[i+1];
-			                if(reportednode.test) {
-			                    reportednode.range[1] = reportednode.test.range[1];
-			                } else {
-			                    //default case - tag the token
-			                    var tokens = context.getTokens(reportednode);
-			                    if(tokens && tokens.length > 0) {
-			                        reportednode.range[1] = tokens[0].range[1];
-			                    }
-			                }
-			                var len = reportednode.leadingComments ? reportednode.leadingComments.length : 0;
-			                if(len > 0) {
-            		            var comment = null;
-            		            for(var c = 0; c < len; c++) {
-            		                comment = reportednode.leadingComments[c];
-            		                if(/\s*\$FALLTHROUGH\$\s*/.test(comment.value)) {
-            		                    continue cases;
-            		                }
-            		            }
-            		        }
-			                context.report(reportednode, 'Switch case may be entered by falling through the previous case. If intended, add a new comment //$FALLTHROUGH$ on the line above.');
-			            }
-			        }
+			    try {
+    			    if(node.cases && node.cases.length > 1) {
+    			        //single case is implicitly fallthrough
+    			        var caselen  = node.cases.length;
+    			       cases: for(var i = 0; i < caselen; i++) {
+    			            if(i+1 === caselen) {
+    			                //last node is implicitly fall-through
+    			                break;
+    			            }
+    			            if(fallsthrough(node.cases[i])) {
+    			                //corect the highlighting to match eclipse
+    			                var reportednode = node.cases[i+1];
+    			                if(reportednode.test) {
+    			                    reportednode.range[1] = reportednode.test.range[1];
+    			                } else {
+    			                    //default case - tag the token
+    			                    var tokens = context.getTokens(reportednode);
+    			                    if(tokens && tokens.length > 0) {
+    			                        reportednode.range[1] = tokens[0].range[1];
+    			                    }
+    			                }
+    			                var len = reportednode.leadingComments ? reportednode.leadingComments.length : 0;
+    			                if(len > 0) {
+                		            var comment = null;
+                		            for(var c = 0; c < len; c++) {
+                		                comment = reportednode.leadingComments[c];
+                		                if(/\s*\$FALLTHROUGH\$\s*/.test(comment.value)) {
+                		                    continue cases;
+                		                }
+                		            }
+                		        }
+    			                context.report(reportednode, 'Switch case may be entered by falling through the previous case. If intended, add a new comment //$FALLTHROUGH$ on the line above.');
+    			            }
+    			        }
+    			    }
+			    }
+			    catch(ex) {
+			        Logger.log(ex);
 			    }
 			 }
 		};

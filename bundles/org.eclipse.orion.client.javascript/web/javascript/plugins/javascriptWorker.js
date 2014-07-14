@@ -25,7 +25,8 @@ require.config({
 		text: "requirejs/text",
 		esprima: "esprima/esprima",
 		estraverse: "estraverse/estraverse",
-		escope: "escope/escope"
+		escope: "escope/escope",
+		logger: "javascript/logger"
 	},
 	packages: [
 		{

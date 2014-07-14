@@ -15,12 +15,13 @@
 This module contains functions for manipulating internal type signatures and
 other utility functions related to types.
 */
-/*eslint-env es5, browser*/
-/*global define doctrine console */
+/*eslint-env es5, browser, amd*/
+/*global doctrine*/
 define([
 'javascript/contentAssist/proposalUtils',
+'logger',
 'doctrine/doctrine' //stays last, exports into global scope
-], function(proposalUtils) {
+], function(proposalUtils, Logger) {
 	/**
 	 * @description Doctrine closure compiler style type objects
 	 * @param {String} signature The Doctrine-style signature to parse
@@ -36,7 +37,7 @@ define([
 		try {
 			return doctrine.parseParamType(signature);
 		} catch(e) {
-			console.error("doctrine failure to parse: " + signature);
+			Logger.error("doctrine failure to parse: " + signature);
 			return {};
 		}
 	}

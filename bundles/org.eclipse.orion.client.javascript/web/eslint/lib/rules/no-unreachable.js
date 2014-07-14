@@ -9,13 +9,13 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports console */
+/*eslint-env amd, node */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require('../util'), require, exports, module);  //$NON-NLS-0$
 	}
 	else if(typeof define === 'function' && define.amd) {  //$NON-NLS-0$
-		define(['eslint/util', 'require', 'exports', 'module'], factory);
+		define(['eslint/util', 'require', 'exports', 'module', 'logger'], factory);
 	}
 	else {
 		var req = function(id) {return root[id];},
@@ -23,7 +23,7 @@
 			mod = {exports: exp};
 		root.rules.noundef = factory(req, exp, mod);
 	}
-}(this, function(util, require, exports, module) {
+}(this, function(util, require, exports, module, Logger) {
 
 	/**
 	 * @name module.exports
@@ -56,18 +56,23 @@
          * @since 6.0
          */
         function checkUnreachable(children) {
-            var i = 0;
-            for(i; i < children.length; i++) {
-                if(util.returnableStatement(children[i])) {
-                    break;
+            try {
+                var i = 0;
+                for(i; i < children.length; i++) {
+                    if(util.returnableStatement(children[i])) {
+                        break;
+                    }
+                }
+                //mark all the remaining child statemnts as unreachable
+                for(i++; i < children.length; i++) {
+                    var child = children[i];
+                    if(!hoisted(child) && child.type !== "EmptyStatement") {
+                        context.report(child, "Unreachable code.");
+                    }
                 }
             }
-            //mark all the remaining child statemnts as unreachable
-            for(i++; i < children.length; i++) {
-                var child = children[i];
-                if(!hoisted(child) && child.type !== "EmptyStatement") {
-                    context.report(child, "Unreachable code.");
-                }
+            catch(ex) {
+                Logger.log(ex);
             }
         }
 

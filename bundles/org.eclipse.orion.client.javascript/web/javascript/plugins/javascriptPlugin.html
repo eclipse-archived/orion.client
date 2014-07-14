@@ -5,14 +5,15 @@
 	<title>Orion JavaScript Support</title>
 	<script src="../../requirejs/require.js"></script>
 	<script type="text/javascript">
-		/*jslint amd:true*/
+		/*eslint-env amd*/
 		require({
 			baseUrl: "../../",
 			paths: {
 				text: "requirejs/text",
 				esprima: "esprima/esprima",
 				estraverse: "estraverse/estraverse",
-				escope: "escope/escope"
+				escope: "escope/escope",
+				logger: "javascript/logger"
 			},
 			packages: [
 				{
@@ -30,7 +31,7 @@
 	</script>
 
 	<script>
-		/*jslint browser:true*/
+		/*eslint-env browser*/
 		document.addEventListener("DOMContentLoaded", function(e) {
 			var checkbox = document.getElementById("useworker");
 			var key = "jstools.worker", value = localStorage.getItem(key), defaultState = false;

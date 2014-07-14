@@ -9,13 +9,13 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint node:true amd:true*/
+/*eslint-env amd, node */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module);
 	}
 	else if(typeof define === 'function' && define.amd) {  //$NON-NLS-0$
-		define(['require', 'exports', 'module'], factory);
+		define(['require', 'exports', 'module', 'logger'], factory);
 	}
 	else {
 		var req = function(id) {return root[id];},
@@ -23,7 +23,7 @@
 			mod = {exports: exp};
 		root.rules.noundef = factory(req, exp, mod);
 	}
-}(this, function(require, exports, module) {
+}(this, function(require, exports, module, Logger) {
 	/**
 	 * @name module.exports
 	 * @description Rule exports
@@ -45,14 +45,14 @@
 					if (!variable.defs.length || variable.defs[0].type !== "Parameter") { // only care about parameters  //$NON-NLS-0$
 						return;
 					}
-					var node = variable.defs[0].name;
+					var defnode = variable.defs[0].name;
 					if (!variable.references.length) {
-						context.report(node, "Parameter '${0}' is never used.", {0:node.name}); //$NON-NLS-0
+						context.report(defnode, "Parameter '${0}' is never used.", {0:defnode.name}); //$NON-NLS-0
 					}
 				});
 			}
 			catch(ex) {
-				console.log(ex);
+				Logger.log(ex);
 			}
 		}
 

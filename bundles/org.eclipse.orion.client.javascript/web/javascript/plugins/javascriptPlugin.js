@@ -226,6 +226,12 @@ define([
 							defaultValue: error,
 							options: severities
 						},
+						{	id: "validate_throw_error",  //$NON-NLS-0$
+							nameKey: 'throwError',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: warning,
+							options: severities
+						},
 						{	id: "validate_func_decl",  //$NON-NLS-0$
 							nameKey: 'docFuncDecl',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
@@ -294,12 +300,6 @@ define([
 						},
 						{	id: "validate_no_redeclare",  //$NON-NLS-0$
 							nameKey: 'varRedecl',  //$NON-NLS-0$
-							type: "number",  //$NON-NLS-0$
-							defaultValue: warning,
-							options: severities
-						},
-						{	id: "validate_throw_error",  //$NON-NLS-0$
-							nameKey: 'throwError',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
 							defaultValue: warning,
 							options: severities

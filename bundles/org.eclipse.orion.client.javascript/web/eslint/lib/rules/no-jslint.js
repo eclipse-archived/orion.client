@@ -9,13 +9,13 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports console */
+/*eslint-env amd, node */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module);
 	}
 	else if(typeof define === 'function' && define.amd) {  //$NON-NLS-0$
-		define(['require', 'exports', 'module'], factory);
+		define(['require', 'exports', 'module', 'logger'], factory);
 	}
 	else {
 		var req = function(id) {return root[id];},
@@ -23,7 +23,7 @@
 			mod = {exports: exp};
 		root.rules.noundef = factory(req, exp, mod);
 	}
-}(this, function(require, exports, module) {
+}(this, function(require, exports, module, Logger) {
 
 	/**
 	 * @name module.exports
@@ -37,24 +37,29 @@
 		
 		return {
 			'Program' : function(node) {
-			    var comments = node.comments;
-			    var len;
-			    if(comments && (len = comments.length) && comments.length > 0) {
-			        for(var i = 0; i < len; i++) {
-			            var comment = comments[i];
-			            if(comment.type === 'Block') {
-			                var match = /^\s*(js[l|h]int)(\s+\w+:\w+)+/ig.exec(comment.value);
-			                if(match) {
-			                    var jslint = match[1];
-			                    if(jslint.length < 1) {
-			                        continue;
-			                    }
-			                    var start = 2 + comment.value.indexOf(jslint) + comment.range[0];
-			                    var end = start + jslint.length;
-			                    context.report({type:'BlockComment', range:[start, end], loc: comment.loc}, 'The \'${0}\' directive is unsupported, please use eslint-env.', {0:jslint});
-			                }
-			            }
-			        }
+			    try {
+    			    var comments = node.comments;
+    			    var len;
+    			    if(comments && (len = comments.length) && comments.length > 0) {
+    			        for(var i = 0; i < len; i++) {
+    			            var comment = comments[i];
+    			            if(comment.type === 'Block') {
+    			                var match = /^\s*(js[l|h]int)(\s+\w+:\w+)+/ig.exec(comment.value);
+    			                if(match) {
+    			                    var jslint = match[1];
+    			                    if(jslint.length < 1) {
+    			                        continue;
+    			                    }
+    			                    var start = 2 + comment.value.indexOf(jslint) + comment.range[0];
+    			                    var end = start + jslint.length;
+    			                    context.report({type:'BlockComment', range:[start, end], loc: comment.loc}, 'The \'${0}\' directive is unsupported, please use eslint-env.', {0:jslint});
+    			                }
+    			            }
+    			        }
+    			    }
+			    }
+			    catch(ex) {
+			        Logger.log(ex);
 			    }
 			 }
 		};

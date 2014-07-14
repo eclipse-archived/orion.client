@@ -9,7 +9,7 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define module require exports */
+/*eslint-env amd, node */
 (function(root, factory) {
 	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module, require('../util')); //$NON-NLS-0$
@@ -33,9 +33,7 @@
 	 * @returns {Object} Rule exports
 	 */
 	module.exports = function(context) {
-
 		return util.createNewBuiltinRule("Object", "Use the object literal notation '{}' or Object.create(null).", context); //$NON-NLS-0$
-
 	};
 
 	return module.exports;

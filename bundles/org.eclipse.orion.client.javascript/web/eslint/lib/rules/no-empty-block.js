@@ -15,7 +15,7 @@
 		module.exports = factory(require, exports, module);
 	}
 	else if(typeof define === 'function' && define.amd) {  //$NON-NLS-0$
-		define(['require', 'exports', 'module'], factory);
+		define(['require', 'exports', 'module', 'logger'], factory);
 	}
 	else {
 		var req = function(id) {return root[id];},
@@ -23,7 +23,7 @@
 			mod = {exports: exp};
 		root.rules.noundef = factory(req, exp, mod);
 	}
-}(this, function(require, exports, module) {
+}(this, function(require, exports, module, Logger) {
 
 	/**
 	 * @name module.exports
@@ -41,15 +41,20 @@
 		          comments = node.comments;  
 		    },
 			'BlockStatement' : function(node) {
-			    if(node.body.length < 1) {
-			        for(var i = 0; i < comments.length; i++) {
-			            var range = comments[i].range;
-			            if(range[0] >= node.range[0] && range[1] <= node.range[1]) {
-			                //a commented empty block, ignore
-			                return;
-			            }
-			        }
-			        context.report(node, 'Empty block should be removed or commented.');
+			    try {
+    			    if(node.body.length < 1) {
+    			        for(var i = 0; i < comments.length; i++) {
+    			            var range = comments[i].range;
+    			            if(range[0] >= node.range[0] && range[1] <= node.range[1]) {
+    			                //a commented empty block, ignore
+    			                return;
+    			            }
+    			        }
+    			        context.report(node, 'Empty block should be removed or commented.');
+    			    }
+			    }
+			    catch(ex) {
+			        Logger.log(ex);
 			    }
 			}
 		};
