@@ -48,7 +48,9 @@ define([
 			var that = this;
 			var progress, msg;
 			var repository = parentItem.repository || parentItem.parent.repository;
-			if (parentItem.Type === "LocalRoot") { //$NON-NLS-0$
+			if (parentItem.children && !parentItem.more) {
+				onComplete(parentItem.children);
+			} else if (parentItem.Type === "LocalRoot") { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], repository.Name);
 				progress.begin(msg);
@@ -269,7 +271,10 @@ define([
 							td.removeEventListener("click", listener); //$NON-NLS-0$
 							td.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], item.parent.Name);
 							item.parent.location = item.NextLocation;
-							explorer.changedItem(item.parent);
+							item.parent.more = true;
+							explorer.changedItem(item.parent).then(function() {
+								item.parent.more = false;
+							});
 						});
 						return td;
 					} else if (item.parent.Type === "LocalRoot") { //$NON-NLS-0$

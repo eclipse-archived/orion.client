@@ -158,7 +158,7 @@ define([
 			var tracksRemoteBranch = this.tracksRemoteBranch();
 			if (parentItem instanceof Array && parentItem.length > 0) {
 				onComplete(parentItem);
-			} else if (parentItem.children && parentItem.Type !== "Synchronized") {  //$NON-NLS-0$
+			} else if (parentItem.children && !parentItem.more) {
 				onComplete(parentItem.children);
 			} else if (parentItem.Type === "CommitRoot") { //$NON-NLS-0$
 				var section = this.section;
@@ -556,7 +556,10 @@ define([
 						td.removeEventListener("click", listener); //$NON-NLS-0$
 						td.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], model.getLocalBranch().Name);
 						model.location = item.NextLocation;
-						explorer.changedItem(item.parent);
+						item.parent.more = true;
+						explorer.changedItem(item.parent).then(function() {
+							item.parent.more = false;
+						});
 					});
 					return td;
 				} else if (item.Type === "CommitChanges") { //$NON-NLS-0$
