@@ -20,6 +20,8 @@ define([
 	'orion/editor/projectionTextModel',
 	'orion/editor/editorFeatures',
 	'orion/editor/contentAssist',
+	'orion/editor/templateCollector',
+	'orion/editor/templateExplorer',
 	'orion/editor/emacs',
 	'orion/editor/vi',
 	'orion/editorPreferences',
@@ -42,7 +44,7 @@ define([
 ], function(
 	messages,
 	mEditor, mEventTarget, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mContentAssist,
-	mEmacs, mVI, mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
+	mTemplateCollector, mTemplateExplorer, mEmacs, mVI, mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands, mGlobalCommands,
 	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
 	mMarkOccurrences, mSyntaxchecker,
@@ -345,7 +347,37 @@ define([
 
 				return keyBindings;
 			};
-
+			
+			// Creates a templateCollector and a templateExplorer for each content type
+			serviceRegistry.getService("orion.core.contentTypeRegistry").getContentTypes().then(function(contentTypes) {
+				var templateCollector;
+			    contentTypes.forEach(function(contentType) {
+					//workarounds
+					if ("text/plain" === contentType.id || "image" === contentType.id.substring(0,5)){
+						return;
+					}
+					
+					templateCollector = new mTemplateCollector.TemplateCollector(serviceRegistry, contentType);
+					serviceRegistry.registerService("orion.edit.contentassist",templateCollector,{
+						contentType: [contentType.id],  //$NON-NLS-0$
+						name: 'templateCollector',  //$NON-NLS-0$
+						id: "orion.templates." + contentType.id  //$NON-NLS-0$
+					});
+			    	
+			    	var templateExplorer = new mTemplateExplorer.TemplateExplorer(templateCollector);
+					serviceRegistry.registerService("orion.edit.templateExplorer",templateExplorer,{
+						contentType: [contentType.id],  //$NON-NLS-0$
+						//TODO move messages to appropriate place(s)
+						nls: 'javascript/nls/messages',  //$NON-NLS-0$
+					  	nameKey: 'templateExplorer',  //$NON-NLS-0$
+					  	titleKey: 'templateExplorerTitle',  //$NON-NLS-0$
+					  	id: "orion.templateExplorer." + contentType.id  //$NON-NLS-0$
+					});
+			    });
+				//hack to initialize the templates plugins and improve their performance the first time contentAssist or contentExplorer is invoked
+				templateCollector.getTemplates();
+			});
+			
 			// Content Assist
 			var setContentAssistProviders = function(editor, contentAssist, event) {
 				// Content assist is about to be activated; set its providers.

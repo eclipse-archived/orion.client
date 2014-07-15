@@ -32,6 +32,7 @@ define([
 	'orion/progress',
 	'orion/operationsClient',
 	'orion/outliner',
+	'orion/templateExplorer',
 	'orion/dialogs',
 	'orion/extensionCommands',
 	'orion/projectCommands',
@@ -49,7 +50,7 @@ define([
 	messages, Sidebar, mInputManager, mGlobalCommands,
 	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
-	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
+	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mTemplateExplorer, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
 	mProblems, mBlameAnnotation,
 	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, mProjectClient
 ) {
@@ -154,6 +155,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 	var problemService;
 	var blameService;
 	var outlineService;
+	var templateExplorerService;
 	var contentTypeRegistry;
 	var progressService;
 	var dialogService;
@@ -173,6 +175,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		// Editor needs additional services
 		problemService = new mProblems.ProblemService(serviceRegistry);
 		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: preferences});
+		templateExplorerService = new mTemplateExplorer.TemplateExplorerService({serviceRegistry: serviceRegistry, preferences: preferences});
 		contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		fileClient = new mFileClient.FileClient(serviceRegistry);
 		projectClient = new mProjectClient.ProjectClient(serviceRegistry, fileClient);
@@ -415,6 +418,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			preferences: preferences,
 			fileClient: fileClient,
 			outlineService: outlineService,
+			templateExplorerService: templateExplorerService,
 			parent: sidebarDomNode,
 			progressService: progressService,
 			selection: selection,
