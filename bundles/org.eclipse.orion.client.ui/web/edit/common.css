@@ -10,6 +10,27 @@
 
 @import "../css/theme.css";
 
+.templateExplorerItemHidden {
+	display: none;
+}
+
+.templateExplorerItemShown {
+	display: block;
+	color: #ccc;
+	background-color: #4a4a4a;
+}
+
+.templateExplorerItemShown pre {
+	margin: 0;
+	padding: 10px 10px;
+}
+
+.templateExplorer {
+	overflow-y: hidden;
+	white-space:nowrap;
+	width: 100%;
+}
+
 .outlineExplorer {
 	overflow-y: hidden;
 	white-space:nowrap;

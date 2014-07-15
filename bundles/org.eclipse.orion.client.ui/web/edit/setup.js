@@ -32,6 +32,7 @@ define([
 	'orion/progress',
 	'orion/operationsClient',
 	'orion/outliner',
+	'orion/templateCollector',
 	'orion/dialogs',
 	'orion/extensionCommands',
 	'orion/projectCommands',
@@ -49,7 +50,7 @@ define([
 	messages, Sidebar, mInputManager, mGlobalCommands,
 	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
-	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
+	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mTemplateCollector, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
 	mProblems, mBlameAnnotation,
 	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, mProjectClient
 ) {
@@ -154,6 +155,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 	var problemService;
 	var blameService;
 	var outlineService;
+	var templateCollector;
 	var contentTypeRegistry;
 	var progressService;
 	var dialogService;
@@ -372,6 +374,8 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		commandRegistry.processURL(window.location.href);
 	});
 	
+	templateCollector = new mTemplateCollector.TemplateCollector(serviceRegistry, inputManager);
+	
 	menuBar = new MenuBar({
 		parentNode: pageToolbar,
 		fileClient: fileClient,
@@ -415,6 +419,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			preferences: preferences,
 			fileClient: fileClient,
 			outlineService: outlineService,
+			templateCollector: templateCollector,
 			parent: sidebarDomNode,
 			progressService: progressService,
 			selection: selection,

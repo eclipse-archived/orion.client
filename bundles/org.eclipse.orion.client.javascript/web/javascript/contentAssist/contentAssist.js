@@ -119,6 +119,7 @@ define([
 		 * @description override
 		 */
 		getTemplateProposals: function(prefix, offset, context, completionKind, buffer) {
+			if ( completionKind.kind === 'top') { return []; }  // Allows templateCollector to handle top-level templates
 			var proposals = [];
 			var newprefix = this.fixPrefix(completionKind.kind, prefix, context, buffer);
 			if(newprefix != null && typeof newprefix !== 'undefined') {
