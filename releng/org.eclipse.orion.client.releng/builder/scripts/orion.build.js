@@ -43,6 +43,7 @@
         esprima: 'esprima/esprima',
         estraverse: 'estraverse/estraverse',
         escope: 'escope/escope',
+        logger: 'javascript/logger',
         csslint: 'csslint/csslint'
     },
     packages: [
