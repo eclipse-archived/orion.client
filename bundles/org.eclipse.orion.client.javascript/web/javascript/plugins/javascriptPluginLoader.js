@@ -15,7 +15,7 @@
  * Allows the implementation of the JS tooling plugin to be loaded either in this Window or in a web worker.
  */
 define([
-    'logger',
+    'javascript/logger',
 	'orion/URL-shim' // exports into global, stays last
 ], function(Logger) {
 	var pref = localStorage.getItem("jstools.worker"),
