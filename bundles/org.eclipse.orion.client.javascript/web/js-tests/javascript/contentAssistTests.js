@@ -5235,5 +5235,42 @@ define([
 			     ['icense', '@license', 'License JSDoc tag']
 			]);
 		});
+		
+		/**
+		 * Tests object JSDoc completions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test object doc completion 1", function() {
+			var results = computeContentAssist("/**\n* @param {O \n*/", "O", 15);
+			testProposals(results, [
+			     ['bject', 'Object', 'Object'],
+			]);
+		});
+		
+		/**
+		 * Tests object JSDoc completions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test object doc completion 2", function() {
+			var results = computeContentAssist("/**\n* @returns {I} \n*/", "I", 17);
+			testProposals(results, [
+			     ['nfinity', 'Infinity', 'Infinity'],
+			]);
+		});
+		
+		/**
+		 * Tests object JSDoc completions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426185
+		 * @since 7.0
+		 */
+		it("test object doc completion 2", function() {
+			var results = computeContentAssist("/*eslint-env amd*//**\n* @returns {I} \n*/", "I", 35);
+			testProposals(results, [
+			     ['mage', 'Image', 'Image']
+			     ['nfinity', 'Infinity', 'Infinity'],
+			]);
+		});
 	});
 });

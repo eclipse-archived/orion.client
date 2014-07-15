@@ -34,6 +34,7 @@ define([
 	 * @description Creates a new delegate to create keyword and template proposals
 	 */
 	function TemplateProvider() {
+	    //constructor
  	}
  	
 	TemplateProvider.prototype = new mTemplates.TemplateContentAssist(JSSyntax.keywords, []);
@@ -100,14 +101,16 @@ define([
 		 * @param {String} kind
 		 * @param {String} prefix
 		 * @param {Object} context
+		 * @param {Object} buffer 
 		 * @since 7.0
 		 */
-		fixPrefix: function(kind, prefix, context) {
+		fixPrefix: function(kind, prefix, context, buffer) {
 		    if(kind === 'doc' && typeof prefix === 'string' && typeof context.line === 'string') {
-		        var line = context.line;
-		        var idx = line.indexOf('@'+prefix);
-		        if(idx > -1) {
-		            return line.slice(idx, idx+prefix.length+1);
+		        if(buffer.charAt(context.offset-1) === '{') {
+		            return null;
+		        }
+		        if(buffer.charAt(context.offset-prefix.length-1) === '@') {
+		            return '@'+prefix;
 		        }
 		    }
 		    return prefix;
@@ -116,40 +119,41 @@ define([
 		/**
 		 * @description override
 		 */
-		getTemplateProposals: function(prefix, offset, context, completionKind) {
+		getTemplateProposals: function(prefix, offset, context, completionKind, buffer) {
 			var proposals = [];
-			var templates = Templates.getTemplatesForKind(completionKind.kind); //this.getTemplates();
-			for (var t = 0; t < templates.length; t++) {
-				var template = templates[t];
-				var newprefix = this.fixPrefix(completionKind.kind, prefix, context);
-				if (template.match(newprefix)) {
-					var proposal = template.getProposal(newprefix, offset, context);
-					this.removePrefix(newprefix, proposal);
-					proposals.push(proposal);
-				}
+			var newprefix = this.fixPrefix(completionKind.kind, prefix, context, buffer);
+			if(newprefix) {
+    			var templates = Templates.getTemplatesForKind(completionKind.kind); //this.getTemplates();
+    			for (var t = 0; t < templates.length; t++) {
+    				var template = templates[t];
+    				if (template.match(newprefix)) {
+    					var proposal = template.getProposal(newprefix, offset, context);
+    					this.removePrefix(newprefix, proposal);
+    					proposals.push(proposal);
+    				}
+    			}
+    			
+    			if (0 < proposals.length) {
+    				//sort the proposals by name
+    				proposals.sort(function(p1, p2) {
+    					if (p1.name < p2.name) {
+    						return -1;
+    					}
+    					if (p1.name > p2.name) {
+    						return 1;
+    					}
+    					return 0;
+    				});
+    				// if any templates were added to the list of 
+    				// proposals, add a title as the first element
+    				proposals.splice(0, 0, {
+    					proposal: '',
+    					description: 'Templates', //$NON-NLS-0$
+    					style: 'noemphasis_title', //$NON-NLS-0$
+    					unselectable: true
+    				});
+    			}
 			}
-			
-			if (0 < proposals.length) {
-				//sort the proposals by name
-				proposals.sort(function(p1, p2) {
-					if (p1.name < p2.name) {
-						return -1;
-					}
-					if (p1.name > p2.name) {
-						return 1;
-					}
-					return 0;
-				});
-				// if any templates were added to the list of 
-				// proposals, add a title as the first element
-				proposals.splice(0, 0, {
-					proposal: '',
-					description: 'Templates', //$NON-NLS-0$
-					style: 'noemphasis_title', //$NON-NLS-0$
-					unselectable: true
-				});
-			}
-			
 			return proposals;
 		},
 	});
@@ -178,6 +182,7 @@ define([
 		 * Called by the framework to initialize this provider before any <tt>computeContentAssist</tt> calls.
 		 */
 		initialize: function() {
+		    //override
 		},
 
 		/**
@@ -315,7 +320,7 @@ define([
 		_createTemplateProposals: function(context, completionKind, buffer) {
 			if((typeof context.template === 'undefined' || context.template) && 
 					this.provider.isValid(context.prefix, buffer, context.offset, context)) {
-				return this.provider.getTemplateProposals(context.prefix, context.offset, context, completionKind);
+				return this.provider.getTemplateProposals(context.prefix, context.offset, context, completionKind, buffer);
 			}
 			return [];
 		},
@@ -331,8 +336,27 @@ define([
     		    var offset = context.offset > context.prefix.length ? context.offset-context.prefix.length-1 : 0;
     		    switch(buffer.charAt(offset)) {
     		        case '{': {
-    		            proposals = this._getAllObjectProposals(env);
+    		            proposals = this._getAllObjectProposals(context, env);
     		            break;
+    		        }
+    		        case '.': {
+    		            //TODO re-write the infferenncing code to only pick out 'typed' proposals - we 
+    		            //only want non-functions here
+    		            return [];
+    		            /*var idx = offset-1;
+    		            var char = buffer.charAt(idx);
+    		            var tname = '';
+    		            while(idx > 0 && /[^\s\{]/.test(char)) {
+    		               tname = char+tname;
+    		               idx--;
+    		               char = buffer.charAt(idx);
+    		            }
+    		            if(tname && tname !== '') {
+    		                var pObj = Object.create(null);
+    		                this._createInferredProposals(tname, env, {kind:'member'}, context, buffer, offset+1, pObj, 100, false);
+    		                proposals = this._filterAndSortProposals(pObj);
+    		            }
+    		            break; */
     		        }
     		        case ' ': {
     		            var node = Finder.findNode(kind.node.range[1], ast, {parents:true, next:true});
@@ -394,17 +418,81 @@ define([
 		
 		/**
 		 * @description Returns all of the object proposals from the type environment
+		 * @param {Object} context
 		 * @param {javascript.contentAssist.TypeEnvironment} env The type environment
 		 * @returns {Array} The array of proposals
 		 * @since 7.0
 		 */
-		_getAllObjectProposals: function _getAllObjects(env) {
-		    var objects = [];
+		_getAllObjectProposals: function _getAllObjectProposals(context, env) {
+		    var proposals = [];
 		    var types = env.getAllTypes();
-		    if(types) {
-		        //TODO compute the type proposals
-		    }
-		    return objects;
+		    var keys = Object.keys(types);
+		    var prop, type;
+	        for(var i = 0; i < keys.length; i++) {
+	            prop = keys[i];
+	            type = types[prop];
+	            if(prop.slice(0, 4) === 'gen~') {
+	                //a generated type, resolve it
+	                if(type.$$fntype && type.$$fntype.type !== 'FunctionType' && proposalUtils.looselyMatches(context.prefix, prop)) {
+    	                proposals.push({
+    						proposal: prop,
+    						relevance: 100,
+    						name: prop,
+    						description: this._createProposalDescription(type, env),
+    						style: 'emphasis',
+    						overwrite: true
+    					});
+	                }
+	            } else if(prop === 'Global') {
+	                //pull up the global types, global is not generated nor tagged builtin
+	                var gtype;
+	                global: for(var p in type) {
+	                    //we intentionally want the types from the proto chain
+	                    if(!proposalUtils.looselyMatches(context.prefix, p)) {
+	                        continue global;
+	                    }
+	                    if(/^(?:\$\$|get|set|is|encode|decode|clear|eval).*/.test(p)) {
+	                        //filter out some common function globals that are tagged as objects
+	                        continue global;
+	                    }
+	                    gtype = type[p];
+	                    if(typeof gtype === 'function' || Function.prototype.isPrototypeOf(gtype)) {
+	                        continue global;
+	                    }
+	                    proposals.push({
+    						proposal: p,
+    						relevance: 100,
+    						name: p,
+    						description: this._createProposalDescription(gtype, env),
+    						style: 'emphasis',
+    						overwrite: true
+    					});
+	                }
+	            } else {
+    	            if(type.$$isBuiltin && !type.$$fntype && proposalUtils.looselyMatches(context.prefix, prop)) {
+    	                proposals.push({
+    						proposal: prop,
+    						relevance: 100,
+    						name: prop,
+    						description: this._createProposalDescription(type, env),
+    						style: 'emphasis',
+    						overwrite: true
+    					});
+    	            }
+	            }
+	        }
+	        if(proposals.length > 0) {
+	            proposals.sort(function(p1, p2) {
+    					if (p1.name < p2.name) {
+    						return -1;
+    					}
+    					if (p1.name > p2.name) {
+    						return 1;
+    					}
+    					return 0;
+    				});
+	        }
+		    return proposals;
 		},
 		
 		/**
@@ -593,10 +681,9 @@ define([
 		_filterAndSortProposals: function(proposalsObj) {
 			// convert from object to array
 			var proposals = [];
-			for (var prop in proposalsObj) {
-				if (proposalsObj.hasOwnProperty(prop)) {
-					proposals.push(proposalsObj[prop]);
-				}
+			var keys = Object.keys(proposalsObj);
+			for(var i = 0; i < keys.length; i++) {
+			    proposals.push(proposalsObj[keys[i]]);
 			}
 			proposals.sort(function(l,r) {
 				// sort by relevance and then by name
@@ -620,7 +707,7 @@ define([
 			var toRemove = [];
 	
 			// now remove any leading or trailing dummy proposals as well as double dummies
-			var i = proposals.length -1;
+			i = proposals.length -1;
 			while (i >= 0 && proposals[i].description.indexOf('---') === 0) {
 				toRemove[i] = true;
 				i--;
