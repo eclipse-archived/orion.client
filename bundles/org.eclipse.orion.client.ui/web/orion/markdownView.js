@@ -53,7 +53,9 @@ define([
 								var mimeType = extensionMatch ? "image/" +extensionMatch[1] : "image/png";
 								var objectURL = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
 								document.getElementById(id).src = objectURL;
-								URL.revokeObjectURL(objectURL);
+								document.getElementById(id).onload = function() {
+									URL.revokeObjectURL(objectURL);
+								};
 							});
 							return "<img id='" + id + "' src=''>";							
 						}

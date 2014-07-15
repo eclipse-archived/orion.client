@@ -666,6 +666,9 @@ define([
 						var image = document.createElement("img"); //$NON-NLS-0$
 						image.src = objectURL;
 						image.classList.add("readonlyImage"); //$NON-NLS-0$
+						image.onload = function() {
+							URL.revokeObjectURL(objectURL);
+						};
 						browseViewOptons.binaryView = {domElement: image};
 					}
 				}
