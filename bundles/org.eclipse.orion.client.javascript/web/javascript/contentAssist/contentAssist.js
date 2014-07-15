@@ -107,7 +107,7 @@ define([
 		        var line = context.line;
 		        var idx = line.indexOf('@'+prefix);
 		        if(idx > -1) {
-		            return line.slice(idx);
+		            return line.slice(idx, idx+prefix.length+1);
 		        }
 		    }
 		    return prefix;

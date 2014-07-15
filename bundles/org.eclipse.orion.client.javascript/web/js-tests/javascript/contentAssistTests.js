@@ -5222,5 +5222,18 @@ define([
 			var results = computeContentAssist("/**\n* @param {type} d\n*/Foo.bar.baz = function a(aa, bb, cc){}", "d", 20);
 			testProposals(results, []);
 		});
+		
+		/**
+		 * Tests one-line JSDoc completions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439574
+		 * @since 7.0
+		 */
+		it("test one-line doc completion", function() {
+			var results = computeContentAssist("Objects.mixin(Foo.prototype, /** @l  */{});", "@l", 35);
+			testProposals(results, [
+			     ['ends', '@lends', 'Lends JSDoc tag'],
+			     ['icense', '@license', 'License JSDoc tag']
+			]);
+		});
 	});
 });
