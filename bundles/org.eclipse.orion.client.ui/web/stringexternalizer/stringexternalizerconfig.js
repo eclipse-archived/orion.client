@@ -165,7 +165,9 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'orion/section', 'orion/we
 			var that = this;
 			localStorage.setItem("StringExternalizerConfig_" + this.config.root.Location, JSON.stringify(this.config)); //$NON-NLS-0$
 			if (changedFile) {
-				this.config.fileLocation = this.config.directory.Location + "/root/" + this.config.file; //$NON-NLS-0$
+				this.config.fileLocation = this.config.directory.Location 
+				+ (this.config.directory.Location[this.config.directory.Location.length - 1] === '/'?"root/":"/root/")  
+				+ this.config.file; //$NON-NLS-0$
 				this.serviceRegistry.getService("orion.page.progress").progress(this.fileClient.read(this.config.fileLocation), "Reading nls configuration file " + this.config.fileLocation).then(function(contents) {
 					var match = new RegExp("define\\(\\{(.*\\r?\\n*)*\\}\\);", "gmi").exec(contents); //$NON-NLS-1$ //$NON-NLS-0$
 					var messages = {};
