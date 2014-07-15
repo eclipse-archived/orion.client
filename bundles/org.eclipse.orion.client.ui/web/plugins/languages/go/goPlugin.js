@@ -122,8 +122,8 @@ define(['orion/plugin', 'orion/form', 'orion/editor/stylers/text_x-go/syntax'], 
 								"func main() {"         +NL+
 								TAB                     +NL+
 								"}"                     +NL,
-					escapePosition: 66 + NL.length * 10,
-					positions: [{offset: 28 + NL.length * 3, length: 7}, {offset: 42 +  NL.length * 7, length: 9}]
+					escapePosition: 68 + NL.length * 10,
+					positions: [{offset: 28 + NL.length * 3, length: 7}, {offset: 43 +  NL.length * 7, length: 9}]
 				});
 
 				proposals.push({
