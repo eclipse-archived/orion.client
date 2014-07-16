@@ -29,6 +29,7 @@ define([
 		this.handleError = options.handleError;
 		this.section = options.section;
 		this.progressService = options.progressService;
+		this.parentId = options.parentId;
 		this.gitClient = options.gitClient;
 	}
 	GitBranchListModel.prototype = Object.create(mExplorer.Explorer.prototype);
@@ -130,13 +131,7 @@ define([
 			return children;
 		},
 		getId: function(/* item */ item){
-			if (item.Type === "LocalRoot") { //$NON-NLS-0$
-				return "LocalRoot"; //$NON-NLS-0$
-			} else if (item.Type === "MoreTags" || item.Type === "MoreBranches" || item.Type === "CommitList") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				return item.Type + item.parent.Name;
-			} else {
-				return "branchList" + (item.Name || item.Type); //$NON-NLS-0$
-			}
+			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : ""); //$NON-NLS-0$
 		}
 	});
 	
@@ -187,6 +182,7 @@ define([
 				section: this.section,
 				showHistory: this.showHistory,
 				showTags: this.showTags,
+				parentId: this.parentId,
 				handleError: this.handleError
 			}));
 			this.updateCommands();

@@ -44,6 +44,7 @@ define([
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;
 		this.legacyLog = options.legacyLog;
+		this.parentId = options.parentId;
 		this.logDeferred = new Deferred();
 	}
 	GitCommitListModel.prototype = Object.create(mExplorer.Explorer.prototype);
@@ -318,7 +319,7 @@ define([
 			}
 		},
 		getId: function(/* item */ item){
-			return "commitList" + (item.Name || item.Type); //$NON-NLS-0$
+			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : ""); //$NON-NLS-0$
 		},
 		processChildren: function(parentItem, items) {
 			if (items.length === 0) {
@@ -404,6 +405,7 @@ define([
 				section: this.section,
 				location: this.location,
 				handleError: this.handleError,
+				parentId: this.parentId,
 				legacyLog: this.legacyLog
 			});
 			this.createTree(this.parentId, model, {onComplete: function() {
