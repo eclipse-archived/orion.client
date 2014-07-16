@@ -1,4 +1,4 @@
-/*global parent window document define orion setTimeout*/
+/*eslint-env browser,amd*/
 	
 var uiTestFunc = null;
 

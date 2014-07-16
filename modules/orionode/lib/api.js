@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global exports require*/
+/*eslint-env node*/
 var url = require('url');
 
 /*

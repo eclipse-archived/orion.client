@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global exports require*/
+/*eslint-env node*/
 var crypto = require('crypto');
 var fs = require('fs');
 var dfs = require('deferred-fs'), Deferred = dfs.Deferred;

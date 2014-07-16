@@ -9,9 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global console define */
-/*jslint browser:true */
-
+/*eslint-env browser, amd*/
 define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
 	'orion/keyBinding', //$NON-NLS-0$

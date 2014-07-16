@@ -11,7 +11,7 @@
  *     Mihai Sucan (Mozilla Foundation) - fix for bug 350636
  *******************************************************************************/
  
-/*globals define window */
+/*eslint-env browser, amd*/
 
 define(['examples/editor/demoSetup', 'tests/editor/test-performance', 'orion/util'],   
  

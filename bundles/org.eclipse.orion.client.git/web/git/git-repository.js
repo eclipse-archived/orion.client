@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*globals define window*/
+/*eslint-env browser, amd*/
 
 var eclipse;
 

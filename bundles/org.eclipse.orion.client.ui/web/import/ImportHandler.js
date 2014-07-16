@@ -8,7 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console define URL window*/
+/*eslint-env browser, amd*/
+/*global URL*/
 define(['orion/URL-shim', 'orion/serviceTracker', 'orion/PageLinks'], function(_, ServiceTracker, PageLinks) {
 	var AUTOIMPORT_SERVICE_NAME = 'orion.core.autoimport'; //$NON-NLS-0$
 

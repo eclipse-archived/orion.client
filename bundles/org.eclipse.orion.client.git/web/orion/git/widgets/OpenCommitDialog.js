@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*globals define document clearTimeout setTimeout window Image*/
+/*eslint-env browser, amd*/
 
 define(['require', 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/webui/dialog', 'orion/URITemplate', 'orion/webui/littlelib'], function(require, messages, i18nUtil, Deferred, dialog, URITemplate, lib) {
 

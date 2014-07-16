@@ -13,8 +13,8 @@
  * This module contains the code for parsing index files and converting them
  * to the type structure expected by esprimaJsContentAssist.js
  */
-
-/*global define require definitionForType doctrine*/
+/*eslint-env browser, amd*/
+/*global  doctrine*/
 define([
 	'javascript/contentAssist/indexFiles/browserIndex',
 	'javascript/contentAssist/indexFiles/ecma5Index',

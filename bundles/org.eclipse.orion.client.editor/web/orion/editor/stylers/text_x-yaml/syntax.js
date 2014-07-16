@@ -9,8 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define*/
-
+/*eslint-env browser, amd*/
 define("orion/editor/stylers/text_x-yaml/syntax", [], function() { //$NON-NLS-0$
 	var keywords = ["false", "null", "true"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var casts = ["!!bool", "!!float", "!!int", "!!map", "!!null", "!!omap", "!!seq", "!!str"]; //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

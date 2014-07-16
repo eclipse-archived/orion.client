@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global console module process require*/
+/*eslint-env node*/
 var child_process = require('child_process');
 var fs = require('fs');
 var path = require('path');

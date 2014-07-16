@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define require setTimeout window */
+/*eslint-env browser, amd*/
 
 define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferred) {
 

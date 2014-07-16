@@ -9,14 +9,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define document*/
+/*eslint-env browser, amd*/
 define([
-	'require',
 	'orion/PageLinks',
 	'orion/plugin',
 	'orion/URITemplate',
-	'i18n!orion/nls/messages'
-], function(require, PageLinks, PluginProvider, URITemplate, messages) {
+], function(PageLinks, PluginProvider, URITemplate) {
 
 	var serviceImpl = { /* All data is in properties */ };
 

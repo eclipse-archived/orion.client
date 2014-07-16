@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define document window */
-/*jslint */
+/*eslint-env browser,amd*/
 define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/fileClient', 'orion/operationsClient',
 		'orion/searchClient', 'orion/globalCommands', 'orion/sites/siteCommands', 
 		'orion/sites/viewOnSiteTree', 'orion/PageUtil', 'orion/webui/littlelib'],

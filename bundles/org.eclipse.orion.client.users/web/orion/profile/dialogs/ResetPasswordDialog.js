@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define alert */
-/* jslint browser:true */
+/*global alert */
+/*eslint-env browser, amd*/
 define(['i18n!profile/nls/messages','orion/webui/dialog'], function(messages, dialog) {
 
 	function ResetPasswordDialog(options) {

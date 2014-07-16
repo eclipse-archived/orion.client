@@ -8,7 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define escape */
+/*eslint-env browser, amd*/
+/*global alert*/
 define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], function(Deferred, xhr, EventTarget, form) {
 
 	function getJSON(data) {

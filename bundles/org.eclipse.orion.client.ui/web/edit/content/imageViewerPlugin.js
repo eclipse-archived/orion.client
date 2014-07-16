@@ -9,7 +9,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define document URL */
+/*eslint-env browser, amd*/
+/*global URL*/
 define([
 	'orion/plugin',
 	'orion/Deferred',

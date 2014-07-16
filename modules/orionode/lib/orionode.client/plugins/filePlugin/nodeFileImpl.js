@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define*/
+/*eslint-env browser, amd*/
 define(['plugins/filePlugin/fileImpl', 'orion/objects'], function(FileServiceImpl, objects) {
 	// Override the Orion FileServiceImpl to remove the search method, which we don't support.
 	function NodeFileServiceImpl() {

@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define confirm document*/
+/*eslint-env browser, amd*/
 define(["orion/plugin", "profile/UsersService", "domReady!"], function(PluginProvider, UsersService) {
 	var usersService = new UsersService();
 		var temp = document.createElement('a');

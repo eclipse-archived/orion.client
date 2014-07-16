@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-/*globals define XMLHttpRequest log */
+/*eslint-env browser, amd*/
  
 define(["require", 
 		"orion/keyBinding",

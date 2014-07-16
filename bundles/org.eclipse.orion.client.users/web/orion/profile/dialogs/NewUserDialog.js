@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define alert console */
-/*jslint browser:true */
+/*eslint-env browser, amd*/
+/*global alert*/
 define(['i18n!profile/nls/messages', 'orion/webui/dialog'], function(messages, dialog) {
 
 	function NewUserDialog(options) {

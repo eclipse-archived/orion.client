@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document Image window*/
+/*eslint-env browser, amd*/
 define([
 	'require',
 	'i18n!git/nls/gitmessages',

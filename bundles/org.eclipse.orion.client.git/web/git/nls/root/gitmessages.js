@@ -7,7 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  ******************************************************************************/
- /*global define*/
+/*eslint-env browser, amd*/
 
 //NLS_CHARSET=UTF-8
 

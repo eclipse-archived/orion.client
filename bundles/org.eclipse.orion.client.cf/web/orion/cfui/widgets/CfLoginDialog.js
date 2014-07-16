@@ -7,8 +7,7 @@
  * duplication or disclosure restricted by GSA ADP Schedule 
  * Contract with IBM Corp.
  *******************************************************************************/
-/*global define*/
-/*jslint browser:true*/
+/*eslint-env browser, amd*/
 define(['orion/webui/dialog'], function(dialog) {
 
 /**

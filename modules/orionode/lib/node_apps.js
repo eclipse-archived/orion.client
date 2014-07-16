@@ -8,8 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global exports module process require*/
-/*jslint devel:true forin:true*/
+/*eslint-env node*/
 var child_process = require('child_process');
 var events = require('events'), EventEmitter = events.EventEmitter;
 var path = require('path');

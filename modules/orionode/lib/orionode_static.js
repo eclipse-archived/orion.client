@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global exports:true module require*/
+/*eslint-env node*/
 var connect = require('connect');
 var statik = connect['static'];
 

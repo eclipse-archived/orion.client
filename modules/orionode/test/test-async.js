@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global require describe it setTimeout*/
+/*eslint-env node, mocha*/
 var assert = require('assert');
 var mocha = require('mocha');
 var async = require('../lib/async');

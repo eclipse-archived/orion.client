@@ -10,8 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-/*globals define*/
-
+/*eslint-env browser, amd*/
 define("orion/editor/textTheme", //$NON-NLS-0$
 [
 	'require', //$NON-NLS-0$

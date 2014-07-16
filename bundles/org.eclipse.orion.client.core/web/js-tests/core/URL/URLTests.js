@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*eslint-env browser, amd*/
-/*global describe it URL*/
+/*eslint-env browser, amd, mocha*/
+/*global URL*/
 define([
 	"chai/chai",
 	"orion/URL-shim",

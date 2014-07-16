@@ -9,11 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 
-/*jslint */
-/*global define*/
+/*eslint-env browser, amd*/
 
-define(["chai/chai", "orion/editor/eventTarget", "orion/editor/textModel", "orion/editor/annotations", "orion/editor/mirror"],
-		function(chai, mEventTarget, mTextModel, mAnnotations, mMirror) {
+define(["chai/chai", "orion/editor/textModel", "orion/editor/annotations", "orion/editor/mirror"],
+		function(chai, mTextModel, mAnnotations, mMirror) {
 	var assert = chai.assert;
 	var tests = {};
 	

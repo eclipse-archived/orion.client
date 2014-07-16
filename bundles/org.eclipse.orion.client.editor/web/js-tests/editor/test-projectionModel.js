@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define */
+/*eslint-env browser, amd*/
 
 define(["chai/chai", 'orion/editor/textModel', 'orion/editor/projectionTextModel'], function(chai, mTextModel, mProjectionTextModel) {
 	var assert = chai.assert;

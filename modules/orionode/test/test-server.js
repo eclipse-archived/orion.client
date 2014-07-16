@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global __dirname console require describe it beforeEach*/
+/*eslint-env node, mocha*/
 var assert = require("assert");
 var mocha = require("mocha");
 var request = require("supertest");

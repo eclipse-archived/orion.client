@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define console window*/
+/*eslint-env browser, amd*/
 define(['orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'], function(Deferred, xhr, form) {
 	function debug(msg) { console.log('orion injector: ' + msg); }
 

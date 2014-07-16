@@ -11,7 +11,7 @@
 /*
  * Helpers for the grunt build script.
  */
-/*jslint node:true*/
+/*eslint-env browser, node*/
 var _path = require("path");
 module.exports = function(grunt) {
 	var self = {};

@@ -8,8 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global console exports process require*/
-/*jslint regexp:false*/
+/*eslint-env node*/
 var async = require('../lib/async');
 var fs = require('fs');
 var path = require('path');

@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env browser, amd*/
-/*global exports module*/
+/*eslint-env browser, amd, node*/
 (function(root, factory) { // UMD
     if (typeof define === "function" && define.amd) { //$NON-NLS-0$
         define(["orion/Deferred"], factory);

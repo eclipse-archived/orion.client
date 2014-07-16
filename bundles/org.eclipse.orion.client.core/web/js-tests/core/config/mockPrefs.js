@@ -8,8 +8,7 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*eslint-env browser, amd*/
-/*global describe it*/
+/*eslint-env browser, amd, mocha*/
 define([
 	"orion/Deferred",
 	"orion/preferences", // Only used for constant field values, no API calls

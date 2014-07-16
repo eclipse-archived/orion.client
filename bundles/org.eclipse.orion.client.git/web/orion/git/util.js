@@ -8,7 +8,7 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define URL*/
+/*eslint-env browser, amd*/
 
 /**
  * Utility methods that do not have UI dependencies.

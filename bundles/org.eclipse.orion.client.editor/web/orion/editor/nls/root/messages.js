@@ -13,7 +13,7 @@
 
 //NLS_CHARSET=UTF-8
 
-/*global define*/
+/*eslint-env browser, amd*/
 
 define({
 	"multipleAnnotations": "Multiple annotations:", //$NON-NLS-1$ //$NON-NLS-0$

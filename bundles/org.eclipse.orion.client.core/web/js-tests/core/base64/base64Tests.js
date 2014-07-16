@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*eslint-env browser, amd*/
-/*global describe it*/
+/*eslint-env browser, amd, mocha*/
+
 define(["chai/chai", "orion/Base64", "mocha/mocha"], function(chai, Base64) {
 	var assert = chai.assert;
 	var testData = "abcdef";

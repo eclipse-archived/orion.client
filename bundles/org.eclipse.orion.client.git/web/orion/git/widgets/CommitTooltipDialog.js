@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
- /*globals define window document Image*/
+/*eslint-env browser, amd*/
 
 define([
 	'orion/git/widgets/gitCommitInfo',

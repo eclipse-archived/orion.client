@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env amd */
+/*eslint-env browser, amd*/
 define("webtools/cssContentAssist", [ //$NON-NLS-0$
 	'orion/editor/templates', //$NON-NLS-0$
 	'orion/editor/stylers/text_css/syntax' //$NON-NLS-0$

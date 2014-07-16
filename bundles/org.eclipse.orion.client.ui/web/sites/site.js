@@ -12,9 +12,9 @@
 /*eslint-env browser, amd*/
 /*global confirm*/
 define(['require', 'i18n!orion/sites/nls/messages', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 
-	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteClient', 'orion/sites/siteCommands',
+	'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteClient', 'orion/sites/siteCommands',
 	'orion/PageUtil', 'orion/sites/SiteEditor'], 
-	function(require, messages, mBootstrap, mStatus, mProgress, mCommandRegistry, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteClient, mSiteCommands, PageUtil, SiteEditor) {
+	function(require, messages, mBootstrap, mStatus, mProgress, mCommandRegistry, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteClient, mSiteCommands, PageUtil, SiteEditor) {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;

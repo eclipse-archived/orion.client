@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window define document*/
+/*eslint-env browser,amd*/
 
 define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/serviceregistry', 
         'orion/preferences', 'orion/PageLinks', 'orion/xhr'],

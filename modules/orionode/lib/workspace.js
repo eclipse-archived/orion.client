@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global module require*/
+/*eslint-env node*/
 var connect = require('connect');
 var fs = require('fs');
 var util = require('util');

@@ -7,8 +7,8 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  *******************************************************************************/
-/*global alert confirm */
 /*eslint-env browser, amd*/
+/*global alert confirm */
 
 (function() {
 	function isSupportedBrowser() {

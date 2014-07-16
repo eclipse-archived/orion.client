@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
-  /*globals define window document*/
+/*eslint-env browser, amd*/
 
 define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog'], function(messages, dialog) {
 

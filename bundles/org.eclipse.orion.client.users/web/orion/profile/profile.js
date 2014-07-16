@@ -8,10 +8,10 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window document define console*/
+/*eslint-env browser, amd*/
 
-define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/xhr', 'orion/i18nUtil', 'orion/section', 'orion/commands', 'orion/globalCommands'], 
-			function(messages, require, lib, xhr, i18nUtil, mSection, mCommands, mGlobalCommands) {
+define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/xhr', 'orion/section', 'orion/commands', 'orion/globalCommands'], 
+			function(messages, require, lib, xhr, mSection, mCommands, mGlobalCommands) {
 
 	function Profile(options) {
 		this._init(options);

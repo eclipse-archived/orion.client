@@ -10,8 +10,7 @@
  *               Alex Lakatos - fix for bug#369781
  ******************************************************************************/
 
-/*global define */
-
+/*eslint-env browser, amd*/
 define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eventTarget'], function(mAnnotations, mEventTarget) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	/*

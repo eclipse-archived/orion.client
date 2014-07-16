@@ -8,7 +8,6 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window console define localStorage*/
 /*eslint-env browser, amd*/
 define(['orion/objects'], function(objects) {
 

@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define console */
+/*eslint-env browser, amd*/
 
 /** @namespace The global container for eclipse APIs. */
 

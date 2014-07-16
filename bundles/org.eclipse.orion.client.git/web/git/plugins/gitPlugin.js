@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document URL window confirm*/
+/*eslint-env browser, amd*/
 
 define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClient", "orion/ssh/sshTools",
  "orion/i18nUtil", "orion/Deferred", "orion/git/util", "orion/URL-shim", "domReady!"], 

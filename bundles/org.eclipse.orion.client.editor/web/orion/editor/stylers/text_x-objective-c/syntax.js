@@ -9,8 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define*/
-
+/*eslint-env browser, amd*/
 define("orion/editor/stylers/text_x-objective-c/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/text_x-csrc/syntax"], function(mLib, mC) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var keywords = [
 		"atomic", //$NON-NLS-0$

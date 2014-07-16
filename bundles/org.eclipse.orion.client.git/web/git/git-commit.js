@@ -7,12 +7,10 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  * Contributors: IBM Corporation - initial API and implementation
- *****************************************************************************
+ *****************************************************************************/
 
- /*global define document window */
-
+/*eslint-env browser, amd*/
 var eclipse;
-
 define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/commands', 'orion/keyBinding', 'orion/dialogs', 'orion/selection',
 		'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitCommitExplorer', 'orion/git/gitCommands', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData',
 		'orion/git/gitClient', 'orion/links', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil'],

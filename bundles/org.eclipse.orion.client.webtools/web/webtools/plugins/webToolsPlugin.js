@@ -9,8 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global esprima*/
-/*eslint-env amd*/
+/*eslint-env browser, amd*/
 define(['orion/plugin', 
 'webtools/htmlContentAssist', 
 'orion/editor/stylers/text_html/syntax', 

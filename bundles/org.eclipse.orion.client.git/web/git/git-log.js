@@ -9,13 +9,13 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
-/*global define window */
+/*eslint-env browser, amd*/
 
-define(['i18n!git/nls/gitmessages', 'require', 'orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',
+define(['i18n!git/nls/gitmessages', 'orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',
         'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
         'orion/ssh/sshTools', 'orion/git/gitLogExplorer', 'orion/git/gitCommands',
 	    'orion/links', 'orion/PageUtil'], 
-		function(messages, require, mBrowserCompatibility, mBootstrap, mStatus, mProgress, mCommandRegistry, mDialogs, mSelection, mFileClient, mOperationsClient,
+		function(messages, mBrowserCompatibility, mBootstrap, mStatus, mProgress, mCommandRegistry, mDialogs, mSelection, mFileClient, mOperationsClient,
 					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitLogExplorer, mGitCommands, mLinks, PageUtil) {
 
 		mBootstrap.startup().then(function(core) {

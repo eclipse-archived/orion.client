@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*globals define confirm */
+/*eslint-env browser, amd*/
 
 define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/git/widgets/ConfirmPushDialog','orion/git/gitPreferenceStorage','orion/git/logic/gitCommon','orion/Deferred'
         ,'orion/git/widgets/RemotePrompterDialog', 'orion/objects'], 

@@ -7,7 +7,7 @@
  * duplication or disclosure restricted by GSA ADP Schedule 
  * Contract with IBM Corp.
  *******************************************************************************/
- /*global define window document*/
+/*eslint-env browser, amd*/
 
 define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',  'orion/keyBinding', 'orion/dialogs', 'orion/selection',
 	'orion/contentTypes','orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/links',

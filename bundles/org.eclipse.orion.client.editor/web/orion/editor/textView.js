@@ -12,8 +12,7 @@
  *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286 Bug#354270 Bug#361474 Bug#363945 Bug#366312 Bug#370584
  ******************************************************************************/
 
-/*global define */
-
+/*eslint-env browser, amd*/
 define("orion/editor/textView", [ //$NON-NLS-0$
 	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
 	'orion/editor/textModel', //$NON-NLS-0$

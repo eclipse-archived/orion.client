@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint node:true*/
+/*eslint-env node*/
 var connect = require('connect');
 var fs = require('fs');
 var path = require('path');

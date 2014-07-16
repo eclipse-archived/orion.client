@@ -12,7 +12,7 @@
  *   IBM Corporation - Various improvements
  ******************************************************************************/
 
-/*global define inferencerPostOp */
+/*eslint-env browser, amd*/
 define([
 'javascript/contentAssist/esprimaVisitor',
 'javascript/contentAssist/typeUtils',

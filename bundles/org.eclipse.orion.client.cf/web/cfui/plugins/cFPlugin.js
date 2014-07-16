@@ -9,12 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window document define setTimeout*/
+/*eslint-env browser,amd*/
 
-define(['i18n!cfui/nls/messages','require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cFClient', 'orion/serviceregistry', 
-        'orion/preferences', 'orion/URITemplate', 'orion/PageLinks', 'domReady!'],
-		function(messages,require, xhr, Deferred, PluginProvider, CFClient, ServiceRegistry, Preferences, URITemplate,
-			PageLinks) {
+define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/serviceregistry', 'domReady!'],
+		function(messages, xhr, PluginProvider, CFClient, ServiceRegistry) {
 
 	var temp = document.createElement('a');
 	var login = temp.href;

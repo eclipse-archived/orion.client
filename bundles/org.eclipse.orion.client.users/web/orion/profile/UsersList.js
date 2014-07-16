@@ -9,8 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
- /*jslint browser:true devel:true sub:true*/
- /*global define window document*/
+/*eslint-env browser, amd*/
 
 define(['i18n!profile/nls/messages', 'orion/i18nUtil', 'require', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/profile/usersUtil', 'orion/explorers/navigationUtils'], 
 		function(messages, i18nUtil, require, lib, mExplorer, mUsersUtil, mNavUtils) {

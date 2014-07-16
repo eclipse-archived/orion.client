@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define console document */
+/*eslint-env browser, amd*/
 
 define([
 	'require',

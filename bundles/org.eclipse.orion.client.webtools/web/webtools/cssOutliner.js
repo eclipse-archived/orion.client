@@ -9,8 +9,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/*eslint-env browser, amd*/
 /*global CSSLint*/
-/*eslint-env amd*/
 define("webtools/cssOutliner", [ //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
 	'csslint' //must go at the end, provides global object not amd module //$NON-NLS-0$

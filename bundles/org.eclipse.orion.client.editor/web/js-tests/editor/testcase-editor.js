@@ -9,8 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 
-/*jslint */
-/*global define*/
+/*eslint-env browser, amd*/
 
 define(["chai/chai", "orion/editor/editor"],
 		function(chai, mEditor) {

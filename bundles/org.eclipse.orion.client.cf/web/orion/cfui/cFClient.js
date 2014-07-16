@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define*/
+/*eslint-env browser, amd*/
 define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(require, xhr, Deferred, operation) {
 
 	var eclipse = eclipse || {};
@@ -68,7 +68,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 					json = JSON.parse(response.responseText);
 				} catch (e) {
 					json = { 
-						Message : messages["Problem while performing the action"]
+						Message : "Problem while performing the action"
 					};
 				}
 				json.HttpCode = response.status;

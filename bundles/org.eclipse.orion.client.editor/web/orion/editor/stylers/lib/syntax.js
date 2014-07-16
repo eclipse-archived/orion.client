@@ -9,8 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define*/
-
+/*eslint-env browser, amd*/
 define("orion/editor/stylers/lib/syntax", [], function() { //$NON-NLS-0$
 	return {
 		id: "orion.lib", //$NON-NLS-0$

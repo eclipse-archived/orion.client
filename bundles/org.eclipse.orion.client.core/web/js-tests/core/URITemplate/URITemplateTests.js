@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*eslint-env browser, amd*/
-/*global describe it*/
+/*eslint-env browser, amd, mocha*/
 define([
 	"chai/chai",
 	"orion/URITemplate",

@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define document window*/
+/*eslint-env browser, amd*/
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/section', 'orion/i18nUtil', 'orion/URITemplate', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/globalCommands',
         'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'], 

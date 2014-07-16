@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint node:true*/
+/*eslint-env node*/
 
 function emitError(socket, error) {
 	socket.emit('error', error && error.stack);

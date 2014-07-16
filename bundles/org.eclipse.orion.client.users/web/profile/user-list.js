@@ -9,14 +9,13 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
- /*jslint browser:true devel:true sub:true */
- /*global define window orion */
+/*eslint-env browser, amd*/
 
-define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 
+define(['i18n!profile/nls/messages', 'require', 'orion/i18nUtil', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 
 			'orion/commandRegistry', 'orion/commands', 'orion/selection',
-	        'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/profile/UsersList', 'orion/profile/usersUtil',
+	        'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/profile/UsersList',
 	        'orion/profile/dialogs/NewUserDialog', 'orion/profile/dialogs/ResetPasswordDialog'], 
-			function(messages, require, lib, i18nUtil, mBootstrap, mStatus, mProgress, mOperationsClient, mCommandRegistry, mCommands, mSelection, mSearchClient, mFileClient, mGlobalCommands, mUsersList, mUsersUtil, NewUserDialog, ResetPasswordDialog) {
+			function(messages, require, i18nUtil, mBootstrap, mStatus, mProgress, mOperationsClient, mCommandRegistry, mCommands, mSelection, mSearchClient, mFileClient, mGlobalCommands, mUsersList, NewUserDialog, ResetPasswordDialog) {
 
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;

@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
- /*global define*/
+/*eslint-env browser,amd*/
  
 define(['orion/i18n!cfui/nls/messages', 'cfui/nls/root/messages'], function(bundle, root) {
 	var result = {

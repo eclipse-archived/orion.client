@@ -8,19 +8,16 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define document window URL console*/
+/*eslint-env browser, amd*/
 define([
-	'orion/editor/editor',
 	'orion/editor/textModel',
 	'orion/editorView',
 	'orion/inputManager',
 	'orion/objects',
-	'orion/webui/littlelib',
-	'orion/PageUtil',
 	'orion/Deferred',
 	'orion/globalCommands',
 	'orion/URL-shim'
-], function(mEditor, mTextModel, mEditorView, mInputManager, objects, lib, PageUtil, Deferred, mGlobalCommands) {
+], function(mTextModel, mEditorView, mInputManager, objects, Deferred, mGlobalCommands) {
 
 	function handleError(statusService, error) {
 		if (!statusService) {

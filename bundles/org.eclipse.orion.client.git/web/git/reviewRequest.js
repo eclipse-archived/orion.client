@@ -8,13 +8,13 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*globals define window*/
+/*eslint-env browser, amd*/
 var eclipse;
 
-define([ 'i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/dialogs', 'orion/selection',
+define([ 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/dialogs', 'orion/selection',
 		'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitReviewRequestExplorer',
-		'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links', 'orion/contentTypes', 'orion/PageUtil' ], function(messages,
-		require, mBootstrap, mStatus, mProgress, mCommandRegistry, mDialogs, mSelection, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands,
+		'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links', 'orion/contentTypes', 'orion/PageUtil' 
+		], function(mBootstrap, mStatus, mProgress, mCommandRegistry, mDialogs, mSelection, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands,
 		mGitReviewRequestExplorer, mGitCommands, mGitClient, mSshTools, mLinks, mContentTypes, PageUtil) {
 
 	mBootstrap.startup().then(function(core) {

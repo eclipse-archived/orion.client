@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
- /*globals define window setTimeout document*/
+/*eslint-env browser, amd*/
 
 define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialog', 'orion/URITemplate', 'require' ], function(messages, DirPrompter, dialog, URITemplate, require) {
 

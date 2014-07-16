@@ -8,8 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global describe it beforeEach*/
-/*jslint node:true*/
+/*eslint-env node, mocha*/
 var assert = require('assert');
 var path = require('path');
 var testData = require('./support/test_data');

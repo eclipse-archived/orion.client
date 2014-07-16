@@ -9,8 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 
-/*jslint laxbreak:true regexp:false*/
-/*global define eclipse */
+/*eslint-env browser, amd*/
 
 define(["chai/chai", "../mockTextView.js", "orion/editor/textMateStyler", "testGrammars.js"],
 		function(chai, mMockTextView, mTextMateStyler, mTestGrammars) {

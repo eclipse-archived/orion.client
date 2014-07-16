@@ -8,7 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console define URL XMLHttpRequest window*/
+/*eslint-env browser, amd*/
+/*global URL*/
 define([
 	'orion/plugin',
 	'orion/xhr',
