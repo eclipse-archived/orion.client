@@ -257,7 +257,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					actionComment = handler.actionComment;
 				}
 			} else {
-				actionComment = "Getting content from "	+ handler.type;
+				actionComment = messages["gettingContentFrom"]	+ handler.type;
 			}
 			progress.showWhile(handler.initDependency(dependency, params, project), actionComment).then(function(dependency){
 				projectClient.addProjectDependency(project, dependency).then(function(){
@@ -288,8 +288,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		for(var i=0; i<launchConfigurations.length; i++){
 			(function(launchConfiguration){
 			var command = new mCommands.Command({
-				name: "Deploy to " + launchConfiguration.Name,
-				tooltip: "Deploy to " + launchConfiguration.Name,
+				name: messages["deployTo"] + launchConfiguration.Name,
+				tooltip: messages["deployTo"] + launchConfiguration.Name,
 				id: "orion.launchConfiguration.deploy." + launchConfiguration.ServiceId + launchConfiguration.Name,
 				imageClass: "core-sprite-deploy",
 				callback: function(data) {
@@ -300,7 +300,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					}
 	
 					var func = arguments.callee;
-					var params = handleParamsInCommand(func, data, "Deploy " + item.Name);
+					var params = handleParamsInCommand(func, data, messages["deploy"] + item.Name);
 					if(!params){
 						return;
 					}
@@ -338,14 +338,14 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		}
 		
 		var connectDependencyCommand = new mCommands.Command({
-			name: "Connect",
-			tooltip: "Fetch content",
+			name: messages["connect"],
+			tooltip: messages["fetchContent"],
 			id: "orion.project.dependency.connect", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
 				
 				var func = arguments.callee;
-				var params = handleParamsInCommand(func, data, "Fetch content of " + item.Dependency.Name);
+				var params = handleParamsInCommand(func, data, messages["fetchContentOf"] + item.Dependency.Name);
 				if(!params){
 					return;
 				}
@@ -377,8 +377,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		
 				
 		var disconnectDependencyCommand = new mCommands.Command({
-			name: "Disconnect from project",
-			tooltip: "Do not treat this folder as a part of the project",
+			name: messages["disconnectFromProject"],
+			tooltip: messages["doNotTreatThisFolder"],
 			imageClass: "core-sprite-delete", //$NON-NLS-0$
 			id: "orion.project.dependency.disconnect", //$NON-NLS-0$
 			callback: function(data) {
@@ -400,8 +400,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		commandService.addCommand(disconnectDependencyCommand);
 		
 		var checkStateCommand = new mCommands.Command({
-			name: "Check status",
-			tooltip: "Check application status",
+			name: messages["checkStatus"],
+			tooltip: messages["checkApplicationStatus"],
 			id: "orion.launchConfiguration.checkStatus", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
@@ -414,7 +414,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				}
 
 				var func = arguments.callee;
-				var params = handleParamsInCommand(func, data, "Check application state");
+				var params = handleParamsInCommand(func, data, messages["checkApplicationState"]);
 				if(!params){
 					return;
 				}
@@ -472,8 +472,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		
 		function createStartStopCommand(start){
 			var stopApplicationCommand = new mCommands.Command({
-				name: start ? "Start" :"Stop",
-				tooltip: start ? "Start application" : "Stop application",
+				name: start ? messages["start"] :messages["stop"],
+				tooltip: start ? messages["startApplication"] : messages["stopApplication"],
 				id: start ? "orion.launchConfiguration.startApp" : "orion.launchConfiguration.stopApp", //$NON-NLS-0$
 				imageClass: start ? "core-sprite-start" : "core-sprite-stop",
 				callback: function(data) {
@@ -482,7 +482,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					data.oldParams = item.Params;
 	
 					var func = arguments.callee;
-					var params = handleParamsInCommand(func, data, start? "Start application" : "Stop application");
+					var params = handleParamsInCommand(func, data, start? messages["startApplication"] : messages["stopApplication"]);
 					if(!params){
 						return;
 					}
@@ -532,8 +532,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		createStartStopCommand(false);
 		
 		var manageLaunchConfigurationCommand = new mCommands.Command({
-			name: "Manage",
-			tooltip: "Manage this application on remote server",
+			name: messages["manage"],
+			tooltip: messages["manageThisApplicationOnRemote"],
 			id: "orion.launchConfiguration.manage",
 			hrefCallback: function(data) {
 				var item = forceSingleItem(data.items);
@@ -556,8 +556,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		commandService.addCommand(manageLaunchConfigurationCommand);
 		
 		var deployLaunchConfigurationCommands = new mCommands.Command({
-			name: "Deploy",
-			tooltip: "Deploy this application again",
+			name: messages["deploy"],
+			tooltip: messages["deployThisApplicationAgain"],
 			id: "orion.launchConfiguration.deploy",
 			imageClass: "core-sprite-deploy",
 			callback: function(data) {
@@ -568,7 +568,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				}
 
 				var func = arguments.callee;
-				var params = handleParamsInCommand(func, data, "Deploy " + item.Name);
+				var params = handleParamsInCommand(func, data, messages["deploy"] + item.Name);
 				if(!params){
 					return;
 				}
@@ -718,8 +718,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		dependencyTypes =  dependencyTypes || [];
 		
 		var addFolderCommand = new mCommands.Command({
-			name: "Associated Folder",
-			tooltip: "Associate a folder from the workspace with this project.",
+			name: messages["associatedFolder"],
+			tooltip: messages["associateAFolderFromThe"],
 			id: "orion.project.addFolder", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items).Project;
@@ -797,8 +797,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		commandService.addCommand(addFolderCommand);
 		
 		var initProjectCommand = new mCommands.Command({
-			name: "Convert to project",
-			tooltip: "Convert this folder into a project",
+			name: messages["convertToProject"],
+			tooltip: messages["convertThisFolderIntoA"],
 			id: "orion.project.initProject", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
@@ -814,7 +814,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					projectClient.readProject(item).then(function(project) {
 						if (project) {
 							progress.setProgressResult({
-								Message: "This folder is a project already.",
+								Message: messages["thisFolderIsAProject"],
 								Severity: "Warning" //$NON-NLS-0$
 							});
 							explorer.changedItem(item, true);
@@ -956,7 +956,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 								actionComment = handler.actionComment;
 							}
 						} else {
-							actionComment = "Getting content from "	+ handler.type;
+							actionComment = messages["gettingContentFrom"]	+ handler.type;
 						}
 						progress.showWhile(handler.initProject(params, {WorkspaceLocation: item.Location}), actionComment).then(function(project){
 							dispatchNewProject(item, project);
@@ -1039,8 +1039,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		commandService.addCommand(addReadmeCommand);
 		
 		var createBasicProjectCommand = new mCommands.Command({
-			name: "Basic",
-			tooltip: "Create an empty project.",
+			name: messages["basic"],
+			tooltip: messages["createAnEmptyProject."],
 			id: "orion.project.create.basic",
 			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", "Name: ")]),
 			callback: function(data){
@@ -1144,8 +1144,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			commandService.addCommand(createZipProjectCommand);
 			
 			var createSftpProjectCommand = new mCommands.Command({
-				name: "SFTP",
-				tooltip: "Create a project from an SFTP site.",
+				name: messages["sFTP"],
+				tooltip: messages["createAProjectFromAn"],
 				id: "orion.project.create.sftp",
 				parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:'),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		                                                               		new mCommandRegistry.CommandParameter('url', 'url', 'Url:')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
