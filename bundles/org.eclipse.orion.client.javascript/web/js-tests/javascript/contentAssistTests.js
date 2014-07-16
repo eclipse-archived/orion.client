@@ -776,6 +776,18 @@ define([
 			]);
 		});
 	    
+	    /**
+	    * Tests inferencing with $$-qualified members
+	    * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439628
+	    * @since 7.0
+	    */
+	    it("test inferencing $$-qualified member types", function() {
+			var results = computeContentAssist("var baz = foo.$$fntype && foo.$$fntype.foo;A", "A", 44);
+			return testProposals(results, [
+			     ["Array([val])", "Array([val]) : Array"]
+			]);
+		});
+	    
 		// all inferencing based content assist tests here
 		it("test Object inferencing with Variable", function() {
 			var results = computeContentAssist("var t = {}\nt.h", "h");

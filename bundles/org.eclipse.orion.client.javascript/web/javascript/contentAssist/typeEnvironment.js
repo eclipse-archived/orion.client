@@ -320,6 +320,9 @@ define([
 						return target;
 					} else if (target && target.extras.inferredTypeObj) {
 						var inferredTypeObj = target.extras.inferredTypeObj;
+						if(typeof inferredTypeObj.type === 'undefined' && inferredTypeObj.typeObj) {
+						    inferredTypeObj = inferredTypeObj.typeObj;
+						}
 						// TODO what happens if not a NameExpression or FunctionType???
 						if (inferredTypeObj.type === 'NameExpression') {
 							return inferredTypeObj.name;
