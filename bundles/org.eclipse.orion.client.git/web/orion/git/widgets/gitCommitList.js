@@ -162,11 +162,11 @@ define([
 				onComplete(parentItem.children);
 			} else if (parentItem.Type === "CommitRoot") { //$NON-NLS-0$
 				var section = this.section;
-				var progress = section.createProgressMonitor();
-				progress.begin(messages["Getting git log"]);
+				var progress = section ? section.createProgressMonitor() : null;
+				if (progress) progress.begin(messages["Getting git log"]);
 				Deferred.when(parentItem.repository || that._getRepository(), function(repository) {
 					var currentBranchMsg = i18nUtil.formatMessage(messages['GettingCurrentBranch'], repository.Name);
-					progress.worked(currentBranchMsg);
+					if (progress) progress.worked(currentBranchMsg);
 					Deferred.when(that.Branches || that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=0&page=1&pageSize=5"), currentBranchMsg), function(resp) { //$NON-NLS-0$
 						var currentBranch, branches = resp.Children || resp;
 						branches.some(function(branch) {
@@ -179,13 +179,13 @@ define([
 						that.currentBranch = currentBranch;
 						if (!that.currentBranch || !currentBranch.RemoteLocation[0]) {
 							if (that.isRebasing()) {
-								section.setTitle(messages["RebaseProgress"]);
+								if (section) section.setTitle(messages["RebaseProgress"]);
 								onComplete([]);
 							} else {
-								section.setTitle(messages["NoBranch"]);
+								if (section) section.setTitle(messages["NoBranch"]);
 								onComplete(that.processChildren(parentItem, []));
 							}
-							progress.done();
+							if (progress) progress.done();
 							return;
 						}
 						repository.ActiveBranch = currentBranch.CommitLocation;
@@ -193,16 +193,27 @@ define([
 						var localBranch = that.getLocalBranch();
 						var remoteBranch = that.getRemoteBranch();
 						if (localBranch && !that.legacyLog) {
-							section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch against"], localBranch.Name));
+							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch against"], localBranch.Name));
 						} else {
-							section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch"], remoteBranch.Name));
+							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch"], remoteBranch.Name));
 						}
-						progress.done();
+						if (progress) progress.done();
 						if (that.legacyLog) {
 							return Deferred.when(that.log || that._getLog(), function(log) {
 								parentItem.log = log;
 								that.logDeferred.resolve(log);
-								onComplete(that.processChildren(parentItem, log.Children));
+								var children = log.Children;
+								var fullList = parentItem.children;
+								if (fullList) {
+									var args = [fullList.length - 1, 1].concat(children);
+									Array.prototype.splice.apply(fullList, args);
+								} else {
+									fullList = children;
+								}
+								if (log.NextLocation) {
+									fullList.push({Type: "MoreCommits", NextLocation: log.NextLocation}); //$NON-NLS-0$
+								}
+								onComplete(that.processChildren(parentItem, fullList));
 							}, function(error){
 								that.handleError(error);
 							});
@@ -224,11 +235,11 @@ define([
 							]));
 						}	
 					}, function(error){
-						progress.done();
+						if (progress) progress.done();
 						that.handleError(error);
 					});
 				}, function(error){
-					progress.done();
+					if (progress) progress.done();
 					that.handleError(error);
 				});
 			} else if (parentItem.Type === "Incoming") { //$NON-NLS-0$
@@ -307,7 +318,7 @@ define([
 			}
 		},
 		getId: function(/* item */ item){
-			return "commitList" + (item.Name || item.Type);
+			return "commitList" + (item.Name || item.Type); //$NON-NLS-0$
 		},
 		processChildren: function(parentItem, items) {
 			if (items.length === 0) {
@@ -360,13 +371,13 @@ define([
 			if (item.Type === "CommitRoot") { //$NON-NLS-0$
 				model.incomingCommits = model.outgoingCommits = null;
 			}
-			if (item.Type !== "Synchronized") { //$NON-NLS-0$
+			if (!item.more) {
 				item.children = null;
 			}
 			model.log = null;
 			model.logDeferred = new Deferred();
-			var progress = this.section.createProgressMonitor();
-			progress.begin(messages["Getting git log"]);
+			var progress = this.section ? this.section.createProgressMonitor() : null;
+			if (progress) progress.begin(messages["Getting git log"]);
 			model.getChildren(item, function(children) {
 				item.removeAll = true;
 				that.myTree.refresh.bind(that.myTree)(item, children, false);
@@ -376,7 +387,7 @@ define([
 				if (item.Type !== "Synchronized") { //$NON-NLS-0$
 					that.updateCommands();
 				}
-				progress.done();
+				if (progress) progress.done();
 				deferred.resolve(children);
 			});
 			return deferred;
@@ -384,7 +395,17 @@ define([
 		display: function() {
 			var that = this;
 			var deferred = new Deferred();
-			var model = new GitCommitListModel({root: this.root, registry: this.registry, progressService: this.progressService, statusService: this.statusService, gitClient: this.gitClient, section: this.section, location: this.location, handleError: this.handleError, legacyLog: this.legacyLog});
+			var model = new GitCommitListModel({
+				root: this.root,
+				registry: this.registry,
+				progressService: this.progressService,
+				statusService: this.statusService,
+				gitClient: this.gitClient,
+				section: this.section,
+				location: this.location,
+				handleError: this.handleError,
+				legacyLog: this.legacyLog
+			});
 			this.createTree(this.parentId, model, {onComplete: function() {
 				that.status = model.status;
 				var fetched = function(){
@@ -409,7 +430,7 @@ define([
 				}
 			}
 		},
-		isRowSelectable: function(modelItem) {
+		isRowSelectable: function() {
 			return false;
 		},
 		createCommands: function() {
@@ -462,6 +483,7 @@ define([
 			var repository = this.root.repository;
 			var commandService = this.commandService;
 			var section = this.section;
+			if (!section) return;
 			var actionsNodeScope = section.actionsNode.id;
 			var titleLeftActionsNodeScope = section.titleLeftActionsNode.id;
 			if (!currentBranch && model.isRebasing()) {
@@ -550,11 +572,12 @@ define([
 				var model = explorer.model;
 				if (item.Type === "MoreCommits") { //$NON-NLS-1$ //$NON-NLS-0$
 					td.classList.add("gitCommitListMore"); //$NON-NLS-0$
-					td.textContent = i18nUtil.formatMessage(messages[item.Type], model.getLocalBranch().Name);
+					var branch = model.getLocalBranch() || model.getRemoteBranch();
+					td.textContent = i18nUtil.formatMessage(messages[item.Type], branch.Name);
 					var listener;
 					td.addEventListener("click", listener = function() { //$NON-NLS-0$
 						td.removeEventListener("click", listener); //$NON-NLS-0$
-						td.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], model.getLocalBranch().Name);
+						td.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], branch.Name);
 						model.location = item.NextLocation;
 						item.parent.more = true;
 						explorer.changedItem(item.parent).then(function() {
@@ -563,57 +586,56 @@ define([
 					});
 					return td;
 				} else if (item.Type === "CommitChanges") { //$NON-NLS-0$
-						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
-						commit = item.parent;
-						var commitDetails = document.createElement("div"); //$NON-NLS-0$
-						var info = new mGitCommitInfo.GitCommitInfo({
-							parent: commitDetails,
-							commit: commit,
-							showTags: false,
-							commitLink: false,
-							showMessage: false,
-							showImage: false,
-							showAuthor: false,
-							showParentLink: false
-						});
-						info.display();
-						horizontalBox.appendChild(commitDetails);
+					tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
+					commit = item.parent;
+					var commitDetails = document.createElement("div"); //$NON-NLS-0$
+					var info = new mGitCommitInfo.GitCommitInfo({
+						parent: commitDetails,
+						commit: commit,
+						showTags: false,
+						commitLink: false,
+						showMessage: false,
+						showImage: false,
+						showAuthor: false,
+						showParentLink: false
+					});
+					info.display();
+					horizontalBox.appendChild(commitDetails);
 
-						var repository = explorer.model.root.repository;
-						setTimeout(function() {
-							var diffs = commit.Diffs;
-	
-							diffs.forEach(function(item) {
-								var path = item.OldPath;
-								if (item.ChangeType === "ADD") { //$NON-NLS-0$
-									path = item.NewPath;
-								} 
-								item.name = path;
-								item.type = item.ChangeType;
-							});
-							var titleWrapper = new mSection.Section(horizontalBox, {
-								id: "commitdDiffSection" + commit.Name, //$NON-NLS-0$
-								title: messages["ChangedFiles"],
-								slideout: true,
-								canHide: false,
-								preferenceService: explorer.preferencesService
-							}); 
-							var explorer2  = new mGitChangeList.GitChangeListExplorer({
-								serviceRegistry: explorer.registry,
-								commandRegistry: explorer.commandService,
-								selection: null,
-								parentId: titleWrapper.getContentElement(), 
-								actionScopeId: "diffSectionItemActionArea",
-								prefix: "diff",
-								changes: diffs,
-								location: repository.StatusLocation,
-								repository: repository,
-								section: titleWrapper
-							});
-							explorer2.display();
-						}, 10);
-						return td;
-					}  else if (item.Type !== "Commit") { //$NON-NLS-0$
+					var repository = explorer.model.root.repository;
+					setTimeout(function() {
+						var diffs = commit.Diffs;
+
+						diffs.forEach(function(item) {
+							var path = item.OldPath;
+							if (item.ChangeType === "ADD") { //$NON-NLS-0$
+								path = item.NewPath;
+							} 
+							item.name = path;
+							item.type = item.ChangeType;
+						});
+						var titleWrapper = new mSection.Section(horizontalBox, {
+							id: "commitdDiffSection" + commit.Name, //$NON-NLS-0$
+							title: messages["ChangedFiles"],
+							slideout: true,
+							canHide: false,
+							preferenceService: explorer.preferencesService
+						}); 
+						var explorer2  = new mGitChangeList.GitChangeListExplorer({
+							serviceRegistry: explorer.registry,
+							commandRegistry: explorer.commandService,
+							selection: null,
+							parentId: titleWrapper.getContentElement(), 
+							actionScopeId: "diffSectionItemActionArea", //$NON-NLS-0$
+							prefix: "diff", //$NON-NLS-0$
+							changes: diffs,
+							location: repository.StatusLocation,
+							repository: repository,
+							section: titleWrapper
+						});
+						explorer2.display();
+					}, 0);
+				}  else if (item.Type !== "Commit") { //$NON-NLS-0$
 					if (item.Type !== "NoCommits") { //$NON-NLS-0$
 						sectionItem.className = "gitCommitSectionTableItem"; //$NON-NLS-0$
 						createExpand();

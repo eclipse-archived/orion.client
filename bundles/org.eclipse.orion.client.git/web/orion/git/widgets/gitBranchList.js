@@ -12,20 +12,14 @@
 /*eslint-env browser, amd*/
 
 define([
-	'require',
 	'i18n!git/nls/gitmessages',
-	'orion/git/widgets/gitChangeList',
-	'orion/git/widgets/gitCommitInfo',
-	'orion/section',
+	'orion/git/widgets/gitCommitList',
 	'orion/explorers/explorer',
-	'orion/URITemplate',
-	'orion/git/util',
 	'orion/i18nUtil',
 	'orion/Deferred',
+	'orion/webui/littlelib',
 	'orion/objects'
-], function(require, messages, mGitChangeList, mGitCommitInfo, mSection, mExplorer, URITemplate, util, i18nUtil, Deferred, objects) {
-
-	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$
+], function(messages, mGitCommitList, mExplorer, i18nUtil, Deferred, lib, objects) {
 
 	function GitBranchListModel(options) {
 		this.root = options.root;
@@ -51,9 +45,9 @@ define([
 			if (parentItem.children && !parentItem.more) {
 				onComplete(parentItem.children);
 			} else if (parentItem.Type === "LocalRoot") { //$NON-NLS-0$
-				progress = this.section.createProgressMonitor();
+				progress = this.section && !parentItem.parent ? this.section.createProgressMonitor() : null;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], repository.Name);
-				progress.begin(msg);
+				if (progress) progress.begin(msg);
 				Deferred.when(repository.Branches || this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.BranchLocation + "?commits=1&page=1&pageSize=5"), msg), function(resp) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					var children = parentItem.children;
 					if (children) { //$NON-NLS-0$
@@ -65,16 +59,16 @@ define([
 					if (resp.NextLocation) {
 						children.push({Type: "MoreBranches", NextLocation: resp.NextLocation}); //$NON-NLS-0$
 					}
-					progress.done();
+					if (progress) progress.done();
 					onComplete(that.processChildren(parentItem, children));
 				}, function(error){
-					progress.done();
+					if (progress) progress.done();
 					that.handleError(error);
 				});
 			} else if (parentItem.Type === "TagRoot") { //$NON-NLS-0$
-				progress = this.section.createProgressMonitor();
+				progress = this.section && !parentItem.parent  ? this.section.createProgressMonitor() : null;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], repository.Name);
-				progress.begin(msg);
+				if (progress) progress.begin(msg);
 				Deferred.when(repository.Branches || this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.TagLocation + "?commits=1&page=1&pageSize=5"), msg), function(resp) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					var children = parentItem.children;
 					if (children) { //$NON-NLS-0$
@@ -86,62 +80,44 @@ define([
 					if (resp.NextLocation) {
 						children.push({Type: "MoreTags", NextLocation: resp.NextLocation}); //$NON-NLS-0$
 					}
-					progress.done();
+					if (progress) progress.done();
 					onComplete(that.processChildren(parentItem, children));
 				}, function(error){
-					progress.done();
+					if (progress) progress.done();
 					that.handleError(error);
 				});
 			} else if (parentItem.Type === "RemoteRoot") { //$NON-NLS-0$
-				progress = this.section.createProgressMonitor();
+				progress = this.section && !parentItem.parent  ? this.section.createProgressMonitor() : null;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], parentItem.repository.Name);
+				if (progress) progress.begin(msg);
 				this.progressService.progress(this.gitClient.getGitRemote(parentItem.repository.RemoteLocation), msg).then(function (resp) {
-					progress.done();
+					if (progress) progress.done();
 					var remotes = resp.Children;
 					remotes.unshift({Type: "LocalRoot", Name: messages["Local"]}); //$NON-NLS-0$
 					if (that.showTags) {
 						remotes.push({Type: "TagRoot", Name: messages["Tags"]}); //$NON-NLS-0$
 					}
 					onComplete(that.processChildren(parentItem, remotes));
-					if (remotes.length === 0){
+					if (remotes.length === 0 && this.section){
 						this.section.setTitle(messages["No Remote Branches"]);
 					}
 				}, function(error){
-					progress.done();
+					if (progress) progress.done();
 					that.handleError(error);
 				});
 			} else if (parentItem.Type === "Remote") { //$NON-NLS-0$
-				progress = this.section.createProgressMonitor();
+				progress = this.section && !parentItem.parent  ? this.section.createProgressMonitor() : null;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], parentItem.Name);
-				progress.begin(msg);
+				if (progress) progress.begin(msg);
 				this.progressService.progress(this.gitClient.getGitRemote(parentItem.Location), msg).then(function (resp) {
-					progress.done();
+					if (progress) progress.done();
 					onComplete(that.processChildren(parentItem, resp.Children));
 				}, function(error){
-					progress.done();
+					if (progress) progress.done();
 					that.handleError(error);
 				});
 			} else if (this.showHistory && (parentItem.Type === "Branch" || parentItem.Type === "RemoteTrackingBranch" || parentItem.Type === "Tag")) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				progress = this.section.createProgressMonitor();
-				msg = i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], parentItem.Name);
-				this.progressService.progress(that.gitClient.doGitLog(parentItem.location ? parentItem.location : parentItem.CommitLocation + "?page=1&pageSize=20"), msg).then(function(resp) { //$NON-NLS-0$
-					var children = parentItem.children;
-					if (children) {
-						var args = [children.length - 1, 1].concat(resp.Children);
-						Array.prototype.splice.apply(children, args);
-					} else {
-						children = resp.Children;
-					}
-					if (resp.NextLocation) {
-						children.push({Type: "MoreCommits", NextLocation: resp.NextLocation}); //$NON-NLS-0$
-					}
-					progress.done();
-					onComplete(that.processChildren(parentItem, children));
-				}, function(error){
-					that.handleError(error);
-				});
-			} else if (parentItem.Type === "Commit") {  //$NON-NLS-0$
-				onComplete(that.processChildren(parentItem, [{Type: "CommitChanges"}]));  //$NON-NLS-0$
+				onComplete(that.processChildren(parentItem, [{Type: "CommitList"}]));  //$NON-NLS-0$
 			} else {
 				onComplete([]);
 			}
@@ -156,7 +132,7 @@ define([
 		getId: function(/* item */ item){
 			if (item.Type === "LocalRoot") { //$NON-NLS-0$
 				return "LocalRoot"; //$NON-NLS-0$
-			} else if (item.Type === "MoreCommits" || item.Type === "MoreBranches") { //$NON-NLS-1$ //$NON-NLS-0$
+			} else if (item.Type === "MoreTags" || item.Type === "MoreBranches" || item.Type === "CommitList") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				return item.Type + item.parent.Name;
 			} else {
 				return "branchList" + (item.Name || item.Type); //$NON-NLS-0$
@@ -215,15 +191,13 @@ define([
 			}));
 			this.updateCommands();
 		},
-		isRowSelectable: function(modelItem) {
+		isRowSelectable: function() {
 			return false;
 		},
-//		getItemCount: function() {
-//			return this.branches.length;
-//		},
 		updateCommands: function() {
 			var root = this.root;
 			var section = this.section;
+			if (!section) return;
 			var actionsNodeScope = section.actionsNode.id;
 			if (root.Type === "RemoteRoot") { //$NON-NLS-0$
 				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.addBranch", 200); //$NON-NLS-0$
@@ -263,7 +237,7 @@ define([
 					}
 					
 					var actionsID, title, description, subDescription, titleClass = "", titleLink;
-					if (item.Type === "MoreCommits" || item.Type === "MoreBranches" || item.Type === "MoreTags") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					if (item.Type === "MoreBranches" || item.Type === "MoreTags") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						td.classList.add("gitCommitListMore"); //$NON-NLS-0$
 						td.textContent = i18nUtil.formatMessage(messages[item.Type], item.parent.Name);
 						var listener;
@@ -307,80 +281,42 @@ define([
 						if (explorer.showHistory) createExpand();
 						actionsID = "branchActionsArea"; //$NON-NLS-0$
 						description = "";
-					} else if (item.Type === "Commit") { //$NON-NLS-0$
-						createExpand();
-						commit = item;
-						if (commit.AuthorImage) {
-							var authorImage = document.createElement("div"); //$NON-NLS-0$
-							authorImage.style["float"] = "left"; //$NON-NLS-1$ //$NON-NLS-0$
-							var image = new Image();
-							image.src = commit.AuthorImage;
-							image.name = commit.AuthorName;
-							image.className = "git-author-icon"; //$NON-NLS-0$
-							authorImage.appendChild(image);
-							horizontalBox.appendChild(authorImage);
-						}
-						
-						title = util.trimCommitMessage(commit.Message);
-						description = i18nUtil.formatMessage(messages["authored by 0 (1) on 2"], //$NON-NLS-0$
-									commit.AuthorName, commit.AuthorEmail, new Date(commit.Time).toLocaleString()); 
-						if (explorer.showCommitLinks) {
-							titleLink = require.toUrl(commitTemplate.expand({resource: commit.Location})); //$NON-NLS-0$
-							titleClass = "navlinkonpage"; //$NON-NLS-0$
-						} else {
-							titleClass = "gitCommitTitle"; //$NON-NLS-0$
-						}
-					} else if (item.Type === "CommitChanges") { //$NON-NLS-0$
+					} else if (item.Type === "CommitList") { //$NON-NLS-0$
 						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
-						commit = item.parent;
-						var commitDetails = document.createElement("div"); //$NON-NLS-0$
-						var info = new mGitCommitInfo.GitCommitInfo({
-							parent: commitDetails,
-							commit: commit,
-							showTags: false,
-							commitLink: false,
-							showMessage: false,
-							showImage: false,
-							showAuthor: false,
-							showParentLink: false
-						});
-						info.display();
-						horizontalBox.appendChild(commitDetails);
-
-						var repository = explorer.model.root.repository;
+					
 						setTimeout(function() {
-							var diffs = commit.Diffs;
-	
-							diffs.forEach(function(item) {
-								var path = item.OldPath;
-								if (item.ChangeType === "ADD") { //$NON-NLS-0$
-									path = item.NewPath;
-								} 
-								item.name = path;
-								item.type = item.ChangeType;
-							});
+							var parentRow = lib.node(explorer.model.getId(item.parent));
+							that.updateExpandVisuals(parentRow, "progress"); //$NON-NLS-0$
 							
-							var titleWrapper = new mSection.Section(horizontalBox, {
-								id: "diffSection" + commit.Name, //$NON-NLS-0$
-								title: messages["ChangedFiles"],
-								slideout: true,
-								canHide: false,
-								preferenceService: explorer.preferencesService
-							}); 
-							var explorer2  = new mGitChangeList.GitChangeListExplorer({
+							var loading = document.createElement("div"); //$NON-NLS-0$
+							loading.textContent = messages["Loading..."];
+							loading.className = "gitLoading"; //$NON-NLS-0$
+							horizontalBox.appendChild(loading);
+
+							horizontalBox.id = "commitListContent" + item.parent.Name; //$NON-NLS-0$
+							var commitListExplorer = new mGitCommitList.GitCommitListExplorer({
 								serviceRegistry: explorer.registry,
 								commandRegistry: explorer.commandService,
-								selection: null,
-								parentId: titleWrapper.getContentElement(), 
-								actionScopeId: "diffSectionItemActionArea",
-								prefix: "diff",
-								changes: diffs,
-								location: repository.StatusLocation,
-								repository: repository,
-								section: titleWrapper
+								fileClient: explorer.fileClient,
+								gitClient: explorer.gitClient,
+								progressService: explorer.progressService,
+								statusService: explorer.statusService,
+								parentId: horizontalBox,
+								location: item.parent.CommitLocation + "?page=1&pageSize=10", //$NON-NLS-0$
+								legacyLog: true,
+								handleError: explorer.handleError,
+								root: {
+									Type: "CommitRoot" //$NON-NLS-0$
+								}
 							});
-							explorer2.display();
-						}, 10);
+						
+							commitListExplorer.display().then(function() {
+								horizontalBox.classList.add("gitCommitListLoaded"); //$NON-NLS-0$
+								that.updateExpandVisuals(parentRow, true);
+							}, function() {
+								that.updateExpandVisuals(parentRow, true);
+							});
+						}, 0);
 						return td;
 					}
 					
@@ -406,28 +342,6 @@ define([
 						var subDescriptionDiv = document.createElement("div"); //$NON-NLS-0$
 						subDescriptionDiv.textContent = subDescription;
 						detailsView.appendChild(subDescriptionDiv);
-					}
-					
-					if (item.Type === "Commit") { //$NON-NLS-0$
-						if (commit.Tags && commit.Tags.length) {
-							var tags = document.createElement("div"); //$NON-NLS-0$
-							tags.textContent = messages["Tags:"];
-							tags.className = "gitCommitListTagsTitle"; //$NON-NLS-0$
-							commit.Tags.forEach(function (tag) {
-								var tagSpan = document.createElement("span"); //$NON-NLS-0$
-								tagSpan.textContent = tag.Name;
-								tagSpan.className = "gitCommitListTag"; //$NON-NLS-0$
-								tags.appendChild(tagSpan);
-								
-								var tagSpanAction = document.createElement("span"); //$NON-NLS-0$
-								tagSpanAction.className = "core-sprite-close gitCommitListTagClose"; //$NON-NLS-0$
-								tagSpanAction.addEventListener("click", function(){ //$NON-NLS-0$
-									explorer.commandService.runCommand("eclipse.removeTag", tag, explorer); //$NON-NLS-0$
-								});
-								tagSpan.appendChild(tagSpanAction);
-							});
-							detailsView.appendChild(tags);
-						}
 					}
 
 					var actionsArea = document.createElement("div"); //$NON-NLS-0$

@@ -53,6 +53,10 @@ table .sectionTable {
 	color: white;
 }
 
+.gitLoading {
+	font-weight: bold;
+}
+
 .gitCommitMessage .gitCommitMessageTopRow {
 	width: calc(100% - 6px);
 	background-color: white;
@@ -102,6 +106,10 @@ table .sectionTable {
 	width: calc(100% - 6px);
 	padding: 0px;
 	overflow: hidden;
+}
+
+.gitCommitListLoaded {
+	border: 1px solid #ddd;
 }
 
 .gitCommitListSection {
