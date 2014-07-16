@@ -122,7 +122,7 @@ define([
 		getTemplateProposals: function(prefix, offset, context, completionKind, buffer) {
 			var proposals = [];
 			var newprefix = this.fixPrefix(completionKind.kind, prefix, context, buffer);
-			if(newprefix) {
+			if(newprefix != null && typeof newprefix !== 'undefined') {
     			var templates = Templates.getTemplatesForKind(completionKind.kind); //this.getTemplates();
     			for (var t = 0; t < templates.length; t++) {
     				var template = templates[t];

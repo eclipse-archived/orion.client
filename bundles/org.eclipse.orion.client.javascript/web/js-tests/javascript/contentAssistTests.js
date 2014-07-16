@@ -775,8 +775,7 @@ define([
 				["valueOf()", "valueOf() : Object"]
 			]);
 		});
-	
-	
+	    
 		// all inferencing based content assist tests here
 		it("test Object inferencing with Variable", function() {
 			var results = computeContentAssist("var t = {}\nt.h", "h");
@@ -2243,9 +2242,6 @@ define([
 				["Inner()", "Inner() : Inner"]
 			]);
 		});
-	
-	
-	
 	
 		// should not be able to redefine or add to global types
 		it("test global redefine1", function() {
@@ -5271,6 +5267,25 @@ define([
 			     ['mage', 'Image', 'Image']
 			     ['nfinity', 'Infinity', 'Infinity'],
 			]);
+		});
+		
+		/**
+		 * Tests that an empty snippet with no prefix returns templates
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439741
+		 */
+		it("test empty template prefix 1", function() {
+			var results = computeContentAssist("", "", 0);
+			assertProposal('amqp', results);
+			assertProposal('with', results);
+		});
+		/**
+		 * Tests that a snippet with no prefix returns templates
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439741
+		 */
+		it("test empty template prefix 2", function() {
+			var results = computeContentAssist("var foo = 10;\n ", "", 15);
+			assertProposal('amqp', results);
+			assertProposal('with', results);
 		});
 	});
 });
