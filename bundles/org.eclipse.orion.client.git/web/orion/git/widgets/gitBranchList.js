@@ -165,6 +165,11 @@ define([
 		changedItem: function(item) {
 			var deferred = new Deferred();
 			var model = this.model;
+			if (!item) {
+				model.getRoot(function(root) {
+					item = root;
+				});
+			}
 			var that = this;
 			model.getChildren(item, function(children) {
 				item.removeAll = true;
