@@ -227,7 +227,7 @@ var exports = {};
 				}
 			default:
 				var display = [];
-				display.Severity = "Error"; //$NON-NLS-0$
+				display.Severity = jsonData.Severity || "Error"; //$NON-NLS-0$
 				display.HTML = false;
 				display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
 				serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
@@ -242,13 +242,16 @@ var exports = {};
 	exports.gatherSshCredentials = function(serviceRegistry, data, title, noAuth){
 		var def = new Deferred();
 		var repository;
-		
+		var item = data.items;
+		if (item.LocalBranch && item.RemoteBranch) {
+			item = item.LocalBranch;
+		}
 		//TODO This should be somehow unified
-		if(data.items.RemoteLocation !== undefined){ repository = data.items.RemoteLocation[0].GitUrl; }
-		else if(data.items.GitUrl !== undefined) { repository = data.items.GitUrl; }
-		else if(data.items.errorData !== undefined) { repository = data.items.errorData.Url; }
-		else if(data.items.toRef !== undefined) { repository = data.items.toRef.RemoteLocation[0].GitUrl; }
-
+		if(item.RemoteLocation !== undefined){ repository = item.RemoteLocation[0].GitUrl; }
+		else if(item.GitUrl !== undefined) { repository = item.GitUrl; }
+		else if(item.errorData !== undefined) { repository = item.errorData.Url; }
+		else if(item.toRef !== undefined) { repository = item.toRef.RemoteLocation[0].GitUrl; }
+		
 		var sshService = serviceRegistry.getService("orion.net.ssh");
 		var repositoryURL = mGitUtil.parseSshGitUrl(repository);
 
