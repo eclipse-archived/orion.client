@@ -120,7 +120,7 @@ define([
 			if (ref.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
 				return ref;
 			} else {
-				return ref.RemoteLocation[0].Children[ref.RemoteLocation[0].Children.length - 1];
+				return ref.RemoteLocation[0] && ref.RemoteLocation[0].Children[ref.RemoteLocation[0].Children.length - 1];
 			}
 		},
 		tracksRemoteBranch: function(){
@@ -178,14 +178,15 @@ define([
 							return false;
 						});
 						that.currentBranch = currentBranch;
-						if (!that.currentBranch || !currentBranch.RemoteLocation[0]) {
-							if (that.isRebasing()) {
-								if (section) section.setTitle(messages["RebaseProgress"]);
-								onComplete([]);
-							} else {
-								if (section) section.setTitle(messages["NoBranch"]);
-								onComplete(that.processChildren(parentItem, []));
-							}
+						if (!that.currentBranch && that.isRebasing()) {
+							if (section) section.setTitle(messages["RebaseProgress"]);
+							onComplete([]);
+							if (progress) progress.done();
+							return;
+						}
+						if (!that.currentBranch) {
+							if (section) section.setTitle(messages["NoBranch"]);
+							onComplete(that.processChildren(parentItem, []));
 							if (progress) progress.done();
 							return;
 						}
@@ -193,10 +194,10 @@ define([
 						that.Branches = branches;
 						var localBranch = that.getLocalBranch();
 						var remoteBranch = that.getRemoteBranch();
-						if (localBranch && !that.legacyLog) {
+						if (localBranch && remoteBranch && !that.legacyLog) {
 							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch against"], localBranch.Name));
 						} else {
-							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch"], remoteBranch.Name));
+							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch"], (remoteBranch || localBranch).Name));
 						}
 						if (progress) progress.done();
 						if (that.legacyLog) {
@@ -528,9 +529,10 @@ define([
 					commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.sync", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					commandService.renderCommands(actionsNodeScope, actionsNodeScope, {LocalBranch: localBranch, RemoteBranch: remoteBranch}, this, "button"); //$NON-NLS-0$
 				}
-				commandService.registerCommandContribution(titleLeftActionsNodeScope, "eclipse.orion.git.commit.chooseBranch", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				commandService.renderCommands(titleLeftActionsNodeScope, titleLeftActionsNodeScope, remoteBranch, this, "button"); //$NON-NLS-0$
-				
+				if (remoteBranch) {
+					commandService.registerCommandContribution(titleLeftActionsNodeScope, "eclipse.orion.git.commit.chooseBranch", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandService.renderCommands(titleLeftActionsNodeScope, titleLeftActionsNodeScope, remoteBranch, this, "button"); //$NON-NLS-0$
+				}
 				commandService.addCommandGroup(outgoingActionScope, "eclipse.gitPushGroup", 1000, "Push", null, null, null, "Push", null, "eclipse.orion.git.push"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.push", 1100, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
 				commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushForce", 1200, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
