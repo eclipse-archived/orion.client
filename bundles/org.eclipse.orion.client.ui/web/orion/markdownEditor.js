@@ -11,20 +11,29 @@
 /*eslint-env browser, amd*/
 /*global URL*/
 define([
+	'orion/i18nUtil',
+	'i18n!orion/nls/messages',
 	'marked/marked',
+	'orion/commands',
+	'orion/keyBinding',
 	'orion/editor/editor',
 	'orion/editor/textStyler',
 	'orion/editor/util',
+	'orion/fileCommands',
 	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/URITemplate',
-	'orion/webui/splitter', 
+	'orion/webui/splitter',
 	'orion/URL-shim'
-], function(marked, mEditor, mTextStyler, mTextUtil, objects, lib, URITemplate, mSplitter) {
+], function(i18nUtil, messages, marked, mCommands, mKeyBinding, mEditor, mTextStyler, mTextUtil, mFileCommands, objects, lib, URITemplate, mSplitter) {
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	var extensionRegex = /\.([0-9a-z]+)(?:[\?#]|$)/i;
+	var markedOutputLink = marked.InlineLexer.prototype.outputLink;
 	var imgCount = 0;
+	var markedOptions = marked.parse.defaults;
+	markedOptions.sanitize = true;
+	markedOptions.tables = true;
 
 	var ID_PREFIX = "_orionMDBlock"; //$NON-NLS-0$
 	var ID_PREVIEW = "_previewDiv"; //$NON-NLS-0$
@@ -33,13 +42,8 @@ define([
 		this.model = model;
 
 		/* relativize marked's outputLink */
-		var outputLink = marked.InlineLexer.prototype.outputLink;
 		var resourceURL = new URL(resource, window.location.href);
-		marked.InlineLexer.prototype.outputLink = filterOutputLink(outputLink, resourceURL, fileClient, resource.indexOf(":") === -1); //$NON-NLS-0$
-
-		this._markedOptions = marked.parse.defaults;
-		this._markedOptions.sanitize = true;
-		this._markedOptions.tables = true;
+		marked.InlineLexer.prototype.outputLink = filterOutputLink(resourceURL, fileClient, resource.indexOf(":") === -1); //$NON-NLS-0$
 
 		this._inlinePatterns = [];
 		var patternIndex = 0;
@@ -78,7 +82,7 @@ define([
 			}
 
 			var index = 0;
-			tokens = tokens || marked.lexer(text, this._markedOptions);
+			tokens = tokens || marked.lexer(text, markedOptions);
 
 			for (var i = 0; i < tokens.length; i++) {
 				var bounds = null, name = null, end = null, newlines = null;
@@ -566,7 +570,7 @@ define([
 				 */
 				var parseTokens = block.tokens.slice();
 				parseTokens.links = links;
-				rootElement.innerHTML = marked.Parser.parse(parseTokens, this._markedOptions);
+				rootElement.innerHTML = marked.Parser.parse(parseTokens, markedOptions);
 				return;
 			}
 
@@ -578,7 +582,7 @@ define([
 			
 			parseTokens = [block.startToken, block.endToken];
 			parseTokens.links = links;
-			rootElement.innerHTML = marked.Parser.parse(parseTokens, this._markedOptions);
+			rootElement.innerHTML = marked.Parser.parse(parseTokens, markedOptions);
 
 			var processParentTokens = function(parentTokens) {
 				/*
@@ -588,7 +592,7 @@ define([
 				parseTokens = [block.startToken].concat(parentTokens).concat(block.endToken);
 				parseTokens.links = links;
 				var tempElement = document.createElement("div"); //$NON-NLS-0$
-				tempElement.innerHTML = marked.Parser.parse(parseTokens, this._markedOptions);
+				tempElement.innerHTML = marked.Parser.parse(parseTokens, markedOptions);
 				var createdNodes = tempElement.children[0].childNodes;
 				while (createdNodes.length) {
 					rootElement.children[0].appendChild(createdNodes[0]);
@@ -852,7 +856,7 @@ define([
 
 	var _imageCache = {};
 	
-	function filterOutputLink(outputLink, resourceURL, fileClient, isRelative) {
+	function filterOutputLink(resourceURL, fileClient, isRelative) {
 		return function(cap, link) {
 			if (link.href.indexOf(":") === -1) { //$NON-NLS-0$
 				try {
@@ -923,8 +927,66 @@ define([
 					console.log(e); // best effort
 				}				
 			}
-			return outputLink.call(this, cap, link);
+			return markedOutputLink.call(this, cap, link);
 		};
+	}
+
+	function exportHTML(text, fileService, metadata, statusService) {
+		var oldOutputLink = marked.InlineLexer.prototype.outputLink;
+		marked.InlineLexer.prototype.outputLink = markedOutputLink;
+		var html = marked.parse(text, markedOptions);
+		marked.InlineLexer.prototype.outputLink = oldOutputLink;
+
+		var name = metadata.Name;
+		var match = /(.*)\.[^.]*$/.exec(name);
+		if (match) {
+			name = match[1];
+		}
+		var counter = 0;
+
+		function writeFileFn(file) {
+			/*
+			 * The file creation succeeded, so send a "create" notification so that
+			 * listeners like the navigator will update.
+			 */			
+			var dispatcher = mFileCommands.getModelEventDispatcher();
+			if (dispatcher && typeof dispatcher.dispatchEvent === "function") { //$NON-NLS-0$
+				dispatcher.dispatchEvent({type: "create", parent: file.Parents[0]}); //$NON-NLS-0$
+			}
+
+			fileService.write(file.Location, html).then(
+				function() {
+					statusService.setProgressResult({Message: i18nUtil.formatMessage(messages["Wrote: ${0}"], file.Name), Severity:"Normal"}); //$NON-NLS-0$
+				},
+				function(error) {
+					if (!error.responseText) {
+						error = {Message: messages["UnknownError"], Severity: "Error"}; //$NON-NLS-0$
+					}
+					statusService.setProgressResult(error);
+				}
+			);
+		}
+		function fileCreateFailedFn(error) {
+			if (error.status === 412 && counter < 99) {
+				/*
+				 * The likely problem is a collision with an existing file with
+				 * the attempted name, so try again with an incremented name.
+				 */
+				counter++;
+				createFileFn();
+			} else {
+				if (!error.responseText) {
+					error = {Message: messages["UnknownError"], Severity: "Error"}; //$NON-NLS-0$
+				}
+				statusService.setProgressResult(error);
+			}
+		}
+		function createFileFn() {
+			var testName = counter ? name + "(" + counter + ").html" : name + ".html"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			fileService.createFile(metadata.Parents[0].Location, testName).then(writeFileFn, fileCreateFailedFn);
+		}
+
+		createFileFn();
 	}
 
 	var BaseEditor = mEditor.BaseEditor;
@@ -1363,6 +1425,29 @@ define([
 
 	function MarkdownEditorView(options) {
 		this._options = options;
+
+		var ID = "markdown.generate.html"; //$NON-NLS-0$
+		var generateCommand = new mCommands.Command({
+			name: messages["GenerateHTML"],
+			tooltip: messages["GenerateHTMLTooltip"],
+   			id: ID,
+			visibleWhen: function() {
+				return !!this._options;
+			}.bind(this),
+			callback: function(/*data*/) {
+				var textView = options.editorView.editor.getTextView();
+				var text = textView.getText();
+				exportHTML(text, options.fileService, options.metadata, options.statusService);
+			}
+		});
+		options.commandRegistry.addCommand(generateCommand);
+		options.commandRegistry.registerCommandContribution(
+			options.menuBar.toolsActionsScope,
+			ID,
+			1,
+			"orion.menuBarToolsGroup",
+			false,
+			new mKeyBinding.KeyBinding("G", true, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
 	}
 	MarkdownEditorView.prototype = {
 		create: function() {
@@ -1384,6 +1469,7 @@ define([
 				URL.revokeObjectURL(current.src);
 			});
 			_imageCache = {};
+			this._options = null;
 		}
 	};
 
