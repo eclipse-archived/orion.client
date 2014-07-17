@@ -249,7 +249,7 @@ exports.GitRepositoryExplorer = (function() {
 			progressService: this.progressService,
 			parentId: "repositoryNode",
 			actionScopeId: mode === "mini" ? "itemLevelCommandsMini" : this.actionScopeId,
-			handleError: this.handleError,
+			handleError: this.handleError.bind(this),
 			repositories: repositories,
 			mode: mode,
 			links: links,
@@ -283,7 +283,7 @@ exports.GitRepositoryExplorer = (function() {
 			parentId: "branchNode",
 			actionScopeId: this.actionScopeId,
 			section: titleWrapper,
-			handleError: this.handleError,
+			handleError: this.handleError.bind(this),
 			showTags: !this.showTagsSeparately,
 			root: {
 				Type: "RemoteRoot",
@@ -318,7 +318,7 @@ exports.GitRepositoryExplorer = (function() {
 			repository: repository,
 			section: titleWrapper,
 			editableInComparePage: true,
-			handleError: this.handleError,
+			handleError: this.handleError.bind(this),
 			gitClient: this.gitClient,
 			progressService: this.progressService
 		});
@@ -351,7 +351,7 @@ exports.GitRepositoryExplorer = (function() {
 			actionScopeId: this.actionScopeId,
 			parentId:"commitNode",
 			section: titleWrapper,
-			handleError: this.handleError,
+			handleError: this.handleError.bind(this),
 			root: {
 				Type: "CommitRoot",
 				repository: repository
@@ -386,7 +386,7 @@ exports.GitRepositoryExplorer = (function() {
 			parentId: "tagNode",
 			actionScopeId: this.actionScopeId,
 			section: titleWrapper,
-			handleError: this.handleError,
+			handleError: this.handleError.bind(this),
 			root: {
 				Type: "TagRoot",
 				repository: repository,
@@ -420,7 +420,7 @@ exports.GitRepositoryExplorer = (function() {
 			parentId:"configNode",
 			actionScopeId: this.actionScopeId,
 			section: titleWrapper,
-			handleError: this.handleError,
+			handleError: this.handleError.bind(this),
 			root: {
 				Type: "ConfigRoot",
 				repository: repository,
