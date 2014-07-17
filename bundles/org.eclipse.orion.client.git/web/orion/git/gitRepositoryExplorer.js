@@ -169,7 +169,9 @@ exports.GitRepositoryExplorer = (function() {
 					that.statusDeferred = that.displayStatus(repositories[0]);
 					that.displayCommits(repositories[0]);
 					that.displayBranches(repositories[0]); //$NON-NLS-0$
-					that.displayTags(repositories[0]);
+					if (that.showTagsSeparately) {
+						that.displayTags(repositories[0]);
+					}
 					that.displayConfig(repositories[0], "full"); //$NON-NLS-0$
 				} else if (resp.Children[0].Type === "Clone"){ //$NON-NLS-0$
 					repositories = resp.Children;
@@ -264,7 +266,7 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var titleWrapper = new mSection.Section(tableNode, {
 			id: "branchSection", //$NON-NLS-0$
-			title: messages['Branches'],
+			title: this.showTagsSeparately ? messages["Branches"] : messages['BranchesTags'],
 			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="branchNode"></div>', //$NON-NLS-0$
@@ -282,6 +284,7 @@ exports.GitRepositoryExplorer = (function() {
 			actionScopeId: this.actionScopeId,
 			section: titleWrapper,
 			handleError: this.handleError,
+			showTags: !this.showTagsSeparately,
 			root: {
 				Type: "RemoteRoot",
 				repository: repository,

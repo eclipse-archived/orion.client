@@ -96,7 +96,7 @@ define([
 					var remotes = resp.Children;
 					remotes.unshift({Type: "LocalRoot", Name: messages["Local"]}); //$NON-NLS-0$
 					if (that.showTags) {
-						remotes.push({Type: "TagRoot", Name: messages["Tags"]}); //$NON-NLS-0$
+						remotes.push({Type: "TagRoot", Name: messages["tags"]}); //$NON-NLS-0$
 					}
 					onComplete(that.processChildren(parentItem, remotes));
 					if (remotes.length === 0 && this.section){
@@ -150,8 +150,8 @@ define([
 		}, this);
 		mExplorer.Explorer.call(this, options.serviceRegistry, options.selection, renderer, options.commandRegistry);	
 		this.checkbox = false;
-		this.showHistory = true;
-		this.showTags = false;
+		this.showHistory = options.showHistory === undefined || options.showHistory;
+		this.showTags = options.showTags;
 		this.parentId = options.parentId;
 		this.actionScopeId = options.actionScopeId;
 		this.root = options.root;
@@ -307,7 +307,8 @@ define([
 								legacyLog: true,
 								handleError: explorer.handleError,
 								root: {
-									Type: "CommitRoot" //$NON-NLS-0$
+									Type: "CommitRoot", //$NON-NLS-0$
+									Name: item.parent.Name
 								}
 							});
 						

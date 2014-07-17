@@ -105,7 +105,7 @@ define([
 		},
 		getLocalBranch: function() {
 			var ref = this.log ? this.log.toRef : this.currentBranch;
-			if (ref.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
+			if (ref && ref.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
 				this.tracksRemoteBranch();// compute localBranch
 				return this.localBranch;
 			} else {
@@ -117,6 +117,7 @@ define([
 				return this.remoteBranch;
 			}
 			var ref = this.log ? this.log.toRef : this.currentBranch;
+			if (!ref) return ref;
 			if (ref.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
 				return ref;
 			} else {
@@ -196,7 +197,7 @@ define([
 						var remoteBranch = that.getRemoteBranch();
 						if (localBranch && remoteBranch && !that.legacyLog) {
 							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch against"], localBranch.Name));
-						} else {
+						} else if (remoteBranch || localBranch) {
 							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch"], (remoteBranch || localBranch).Name));
 						}
 						if (progress) progress.done();
@@ -577,11 +578,11 @@ define([
 				if (item.Type === "MoreCommits") { //$NON-NLS-1$ //$NON-NLS-0$
 					td.classList.add("gitCommitListMore"); //$NON-NLS-0$
 					var branch = model.getLocalBranch() || model.getRemoteBranch();
-					td.textContent = i18nUtil.formatMessage(messages[item.Type], branch.Name);
+					td.textContent = i18nUtil.formatMessage(messages[item.Type], branch ? branch.Name : model.root.Name);
 					var listener;
 					td.addEventListener("click", listener = function() { //$NON-NLS-0$
 						td.removeEventListener("click", listener); //$NON-NLS-0$
-						td.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], branch.Name);
+						td.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], branch ? branch.Name : model.root.Name);
 						model.location = item.NextLocation;
 						item.parent.more = true;
 						explorer.changedItem(item.parent).then(function() {
