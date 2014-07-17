@@ -308,6 +308,7 @@ define([
 								handleError: explorer.handleError,
 								root: {
 									Type: "CommitRoot", //$NON-NLS-0$
+									repository: explorer.model.root.repository,
 									Name: item.parent.Name
 								}
 							});
