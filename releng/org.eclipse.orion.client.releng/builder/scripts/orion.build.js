@@ -110,7 +110,7 @@
             { name: "plugins/languages/c/cPlugin" },
             { name: "plugins/languages/cpp/cppPlugin" },
             { name: "plugins/languages/java/javaPlugin" },
-            { name: "plugins/languages/erlang/erlangPlugin" }
+            { name: "plugins/languages/erlang/erlangPlugin" },
             { name: "plugins/languages/php/phpPlugin" },
             { name: "plugins/languages/python/pythonPlugin" },
             { name: "plugins/languages/ruby/rubyPlugin" },
