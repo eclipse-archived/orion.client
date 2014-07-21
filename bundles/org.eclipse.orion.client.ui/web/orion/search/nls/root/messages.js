@@ -48,7 +48,7 @@ define({
 	"Status": "Status",
 	"${0} out of ${1}  matches replaced.": "${0} out of ${1}  matches replaced.",
 	"Replace all matches with...": "Replace all matches with...",
-	"Apply Changes": "Apply Changes",
+	"Apply Changes": "Replace Selected",
 	"Replace all selected matches": "Replace all selected matches",
 	"Hide Compare": "Hide Compare",
 	"Hide compare view of changes": "Hide compare view of changes",
