@@ -28,6 +28,7 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 	 * @param {Boolean} [options.canHide] if true section may be hidden
 	 * @param {Boolean} [options.hidden] if true section will be hidden at first display
 	 * @param {Boolean} [options.useAuxStyle] if true the section will be styled for an auxiliary pane
+	 * @param {Boolean} [options.keepHeader] if true the embedded explorer will keep its header
 	 * @param {Function} [options.onExpandCollapse] a function that will be called when the expanded/collapsed state changes
 	 */
 	function Section(parent, options) {
@@ -95,6 +96,10 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 			classes.forEach(function(aClass) {
 				this.domNode.classList.add(aClass);
 			}.bind(this));
+		}
+		
+		if(options.keepHeader){
+			this._keepHeader = options.keepHeader;
 		}
 
 		this.titleActionsNode = document.createElement("div"); //$NON-NLS-0$
@@ -349,15 +354,17 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 			});
 			if(explorer.renderer){
 				explorer.renderer.section = this;
-				objects.mixin(explorer.renderer, {
-					getCellHeaderElement: function(col_no){
-						var firstHeader = Object.getPrototypeOf(this).getCellHeaderElement.call(this, col_no);
-						if(firstHeader){
-							this.section.setTitle(firstHeader.innerHTML);
+				if(!this._keepHeader){
+					objects.mixin(explorer.renderer, {
+						getCellHeaderElement: function(col_no){
+							var firstHeader = Object.getPrototypeOf(this).getCellHeaderElement.call(this, col_no);
+							if(firstHeader){
+								this.section.setTitle(firstHeader.innerHTML);
+							}
+							return null;
 						}
-						return null;
-					}
-				});
+					});
+				}
 			}
 		},
 
