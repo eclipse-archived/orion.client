@@ -180,8 +180,13 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				return this._xhrV1("GET", url);
 			},
 			
-			getApps: function() {
-				return this._xhrV1("GET", require.toUrl("cfapi/apps"));
+			getApps: function(target) {
+				var url = require.toUrl("cfapi/apps");
+				
+				if (target)
+					url += "?Target=" + JSON.stringify(target);
+				
+				return this._xhrV1("GET", url);
 			},
 			
 			startApp: function(target, name, contentLocation, timeout) {
