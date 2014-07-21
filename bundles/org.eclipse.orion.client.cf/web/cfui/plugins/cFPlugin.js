@@ -517,6 +517,41 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 		}
 	);
 	
+	/** Add cf delete-route command **/
+	var deleteRouteImpl = {
+		callback: function(args, context) {
+			return cFService.deleteRoute(null, args.domain, args.hostname).then(function(result) {
+				if (!result || !result.Routes) {
+					return "No routes found";
+				}
+				var strResult = "";
+				result.Routes.forEach(function(item) {
+					strResult += "\nDeleted " + item.Host + " at " + item.DomainName;
+				});
+				return strResult;
+			});
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		deleteRouteImpl, {
+			name: "cfo delete-route",
+			description: "Delete a route",
+			parameters: [{
+				name: "domain",
+				type: "string",
+				description: "Domain",
+				defaultValue: null
+			}, {
+				name: "hostname",
+				type: "string",
+				description: "Hostname",
+				defaultValue: null
+			}]
+		}
+	);
+	
 	/** Add cf delete command **/
 	/** var deleteImpl = {
 		callback: function(args, context) {

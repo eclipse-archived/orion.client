@@ -232,7 +232,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 			deleteRoute: function(target, domainName, hostName) {
 				var routeObj = {
 					DomainName: domainName,
-					HostName: hostName
+					Host: hostName
 				};
 				
 				var url = require.toUrl("cfapi/routes");
