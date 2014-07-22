@@ -39,7 +39,7 @@ define({
 	"Resource has been changed by others.": "Resource has been changed by others.",
 	"Failed to write file.": "Failed to write file.",
 	"Results": "Results",
-	"Files ${0} of ${1} matching ${2}": "Files ${0} of ${1} matching ${2}",
+	"Files ${0} of ${1} matching ${2}": "Files ${0} of ${1} matching \"${2}\"",
 	"Replace ${0} with ${1} for files ${2} of ${3}": "Replace ${0} with ${1} for files ${2} of ${3}",
 	"Location": "Location",
 	"Click to compare": "Click to compare",

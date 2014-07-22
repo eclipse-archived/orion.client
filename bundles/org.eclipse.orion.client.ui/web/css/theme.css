@@ -181,9 +181,11 @@ a.currentLocation:hover {
 }
 
 .filesystemName {
+	display: inline-block;
 	font-weight: bold;
 	margin-left: 10px;
-	margin-top: 8px;
+	margin-top: 4px;
+	margin-bottom: 8px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -198,10 +200,20 @@ a.currentLocation:hover {
 }
 
 .filesystemSwitcher {
+	display: inline-block;
+	margin: 0;
+}
+
+.filesystemSwitcherWrapper {
+	display: inline-block;
+	max-width: calc(100% - 50px);
+	white-space: nowrap;
 }
 
 .sidebarToolbar {
+	overflow: visible;
 	padding-right: 4px;
+	padding-left: 0;
 }
 
 /* Searchbox in the top navigation area seems a difficult thing to 

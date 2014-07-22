@@ -294,7 +294,20 @@ hard-coded numbers elsewhere.
 	height: 100%;
 	width: 100%;
 	min-width:140px;
+}
 
+.sidebarWrapper {
+	overflow-x: auto;
+	overflow-y: hidden;
+	min-width: 0;
+}
+
+.sidebarWrapper > .sidebar {
+	position: relative;
+	left: 0;
+	top: 0;
+	height: calc(100% - 30px);
+	overflow-x: visible;
 }
 
 .workingTarget {

@@ -90,14 +90,18 @@ define([
 		render: function() {
 			this.fsName = document.createElement("div"); //$NON-NLS-0$
 			this.fsName.classList.add("filesystemName"); //$NON-NLS-0$
-			this.fsName.classList.add("layoutLeft"); //$NON-NLS-0$
 			this.menu = document.createElement("ul"); //$NON-NLS-0$
 			this.menu.classList.add("filesystemSwitcher"); //$NON-NLS-0$
 			this.menu.classList.add("commandList"); //$NON-NLS-0$
-			this.menu.classList.add("layoutRight"); //$NON-NLS-0$
 			this.menu.classList.add("pageActions"); //$NON-NLS-0$
-			this.node.appendChild(this.fsName);
-			this.node.appendChild(this.menu);
+			
+			var wrapper = document.createElement("span");
+			wrapper.classList.add("filesystemSwitcherWrapper");
+			
+			wrapper.appendChild(this.fsName);
+			wrapper.appendChild(this.menu);
+			
+			this.node.appendChild(wrapper);
 
 			this.registerCommands();
 
@@ -148,6 +152,8 @@ define([
 
 			this.commandRegistry.destroy(this.menu);
 			this.commandRegistry.renderCommands("orion.mininav", this.menu, {}, "menu"); //$NON-NLS-1$ //$NON-NLS-0$
+			var dropdown = lib.$(".dropdownMenu", this.menu); //$NON-NLS-0$
+			dropdown.style.position = "fixed"; //ensures that dropdown isn't hidden by editor
 		},
 		/**
 		 * @param {Object|String} location The ChildrenLocation, or an object with a ChildrenLocation field.

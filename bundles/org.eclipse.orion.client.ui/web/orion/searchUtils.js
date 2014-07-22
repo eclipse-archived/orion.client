@@ -67,6 +67,26 @@ searchUtils.doSearch = function(searcher, serviceRegistry, searchStr, advOptions
 	}
 };
 
+searchUtils.getSearchParams = function(searcher, searchStr, advOptions){
+	if (searcher) {
+		var newSearchStr = searchStr, commitSearch = true;
+		if(newSearchStr === "*"){ //$NON-NLS-0$
+			newSearchStr = "";
+		}
+		if(newSearchStr === ""){
+			commitSearch = advOptions && advOptions.type !== searchUtils.ALL_FILE_TYPE;
+		}
+		if (commitSearch) {
+			var searchParams = searcher.createSearchParams(newSearchStr, false, false, advOptions);
+			return searchParams;
+		}
+	} else {
+		window.alert(messages["Can't search: no search service is available"]);
+	}
+	
+	return null;
+};
+
 /**
  * Generate a helper query object used for search result renderer.
  * @param {orion.searchUtils.SearchParams} searchParams The search parameters.

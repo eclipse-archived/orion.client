@@ -63,7 +63,7 @@ define([
 			var replaceValue = this._replaceBox.getTextInputValue() || undefined;
 			
 			return {keyword: this._searchBox.getTextInputValue(),
-					rows: 40,
+					rows: 10000,
 					start: 0,
 					replace: replaceValue,
 					caseSensitive: this._caseSensitiveCB.checked,
@@ -71,6 +71,10 @@ define([
 					fileNamePatterns: fileNamePatternsArray,
 			        resource: resource
 			};
+		},
+		
+		getSearchTextInputBox: function() {
+			return this._searchTextInputBox;	
 		},
 		
 		loadSearchParams: function(searchParams){
@@ -98,6 +102,11 @@ define([
 				this._hideReplaceField();
 			}
 		},
+		
+		setResultInfo: function(searchResultExplorer, resultsNode) {
+			this._searchResultExplorer = searchResultExplorer;
+			this._resultsNode = resultsNode;
+		},
 	
 		render: function(){
 			this._contentTypeService.getContentTypes().then(function(ct) {
@@ -111,27 +120,32 @@ define([
 			
 			this._initHTMLLabels();
 		    this._initControls();
-			this._searchTextInputBox.focus();
-			
 		},
 		
 		_submitSearch: function(){
 			var options = this.getOptions();
 			options.replace = null;
-			this._searchBox.addTextInputValueToRecentEntries();
-			this._fileNamePatternsBox.addTextInputValueToRecentEntries();
-			mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.keyword, options);
+			if(options.keyword){
+				this._searchBox.addTextInputValueToRecentEntries();
+				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
+				if (this._searchResultExplorer && this._resultsNode) {
+					var searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
+					this._searchResultExplorer.runSearch(searchParams, this._resultsNode, this._searcher);
+				} else {
+					mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.keyword, options);
+				}
+			}
 		},
 		
 		_replacePreview: function(){
 			var options = this.getOptions();
-			this._searchBox.addTextInputValueToRecentEntries();
-			this._replaceBox.addTextInputValueToRecentEntries();
-			this._fileNamePatternsBox.addTextInputValueToRecentEntries();
 			if(!options.replace){
 				options.replace = "";
 			}
 			if(options.keyword){
+				this._searchBox.addTextInputValueToRecentEntries();
+				this._replaceBox.addTextInputValueToRecentEntries();
+				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
 				mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.keyword, options);
 			}
 		},
@@ -228,10 +242,6 @@ define([
 					this._replacePreview();
 				} 
 			}.bind(this));
-			
-			//fix the width of the replaceWrapper div to prevent it from resizing
-			this._replaceWrapper.style.width = "auto"; //$NON-NLS-0$
-			this._replaceWrapper.style.width = this._replaceBox.getDomNode().scrollWidth + 8 + "px"; //$NON-NLS-0$
 	    },
 	    
 	    _initFileNamePatternsBox: function() {
@@ -245,6 +255,8 @@ define([
 				hasInputCompletion: true,
 				serviceRegistry: this._serviceRegistry
 			});
+			
+			this._fileNamePatternsBox.getDomNode().classList.add("fileNamePatternsInput"); //$NON-NLS-0$
 			
 			this._fileNamePatternsTextInput = this._fileNamePatternsBox.getTextInputNode();
 			this._fileNamePatternsTextInput.classList.add("fileNamePatternsTextInput"); //$NON-NLS-0$

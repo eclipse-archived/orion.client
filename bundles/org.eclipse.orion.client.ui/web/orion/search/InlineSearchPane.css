@@ -1,0 +1,173 @@
+@import "../compare/compareView.css";
+
+@import "../globalSearch/globalSearch.css";
+
+@import "../widgets/input/ComboTextInput.css";
+
+#resultsinnerTree.treetable td {
+	padding: 5px !important;
+}
+
+.replaceWrapper {
+	display: inline-block;
+	max-height: 50px; /* for transition */
+	overflow: hidden;
+	transition: max-height 0.2s ease;
+}
+
+.replaceWrapperHidden {
+	display: block !important; /* removes the need to also set the width to 0 */
+	max-height: 0; /* for transition */
+}
+
+.fileNamePatternsTextInput {
+	min-width: 210px;
+}
+
+.fileNamePatternsHint {
+	color: #777;
+	font-size: 11px;
+	margin: 0 0 2px 0;
+	padding: 0 2px;
+	display: block;
+	opacity: 0;
+	text-align: center;
+	transition: opacity 0.1s ease;
+}
+
+.fileNamePatternsHintVisible {
+	opacity: 1 !important;
+}
+
+.fileNamePatternsInput {
+	margin-bottom: 0;
+}
+
+.toggleDisplayLink {
+	display: block;
+	margin: 0 0 0 5px;
+}
+
+.searchMainOptionBlock {
+	margin: 5px 10px 0 10px;
+}
+
+.searchOptionBlock {
+	margin: 15px 15px;
+	width: 245px;
+}
+
+.searchLabel {
+	margin: 1px 2px;
+}
+
+.searchCheckboxLabel {
+	vertical-align: middle;
+}
+
+.searchCheckbox {
+	margin: 0 0 0 5px;
+	vertical-align: middle;
+}
+
+.searchScopeInputWrapper {
+	background-color: whitesmoke;
+	border: 1px solid lightgray;
+	border-radius: 3px;
+	display: inline-block;
+	white-space: nowrap;
+}
+
+.searchScopeElementWrapper {
+	display: inline-block;
+	width: 215px;
+}
+
+.searchScopeElement {
+	color: #222;
+	cursor: initial;
+	display: inline-block;
+	font-weight: normal;
+	margin: 0 5px;
+	overflow: hidden;
+	padding: 0;
+	max-width: 100%; /* prevents span from overflowing parent */
+	text-overflow: ellipsis;
+	vertical-align: bottom;
+	white-space: nowrap;
+}
+
+.commandButton.searchScopeSelectButton {
+	border: none;
+	border-left: 1px solid lightgray;
+	border-bottom-left-radius: 0;
+	border-top-left-radius: 0;
+	cursor: pointer;
+	font-size: 12px;
+	margin: 0;
+	padding: 6px;
+	text-transform: none;
+	vertical-align: baseline;
+}
+
+.commandButton.inlineSearchButton {
+	margin-right: 15px;
+	outline: none;
+	vertical-align: top;
+}
+
+.inlineSearchButton > .core-sprite-search {
+	font-size: 14px;
+}
+
+.commandButton.inlineSearchButton:focus {
+	background-color: rgb(221, 221, 221);
+	box-shadow: none;
+}
+
+.commandButton.orionButton.inlineSearchButtonActive {
+	background-color: whitesmoke;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.inlineSearchWrapperDiv {
+	background: whitesmoke;
+	display: block;
+	height: calc(100% - 28px);
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	top: 26px;
+	transition: opacity 0.2s ease, overflow 0s ease 0.2s, visibility 0s ease 0.2s;
+	visibility: hidden;
+	width: calc(100% - 2px); /* subtract border width */
+	z-index: 100;
+}
+
+.isVisible {
+	border: 1px solid rgb(222, 222, 222);
+	opacity: 1;
+	overflow: auto;
+	transition-delay: 0s;
+	visibility: visible;
+}
+
+.fileNameSpan {
+	display: inline-block;
+	outline: none;
+	padding: 2px;
+	vertical-align: middle;
+}
+
+.fileLocationSpan {
+	cursor: text;
+	display: inline-block;
+	margin-left: 5px;
+	outline: none;
+	padding: 2px;
+	vertical-align: middle;
+	-webkit-user-select: text;
+	-moz-user-select: text;
+	user-select: text;
+}
