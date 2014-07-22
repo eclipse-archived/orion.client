@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @license
+  * @license
  * Copyright (c) 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
@@ -541,14 +541,37 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 			parameters: [{
 				name: "domain",
 				type: "string",
-				description: "Domain",
-				defaultValue: null
+				description: "Domain"
 			}, {
 				name: "hostname",
 				type: "string",
-				description: "Hostname",
-				defaultValue: null
+				description: "Hostname"
 			}]
+		}
+	);
+	
+	/** Add cf delete-orphaned-routes command **/
+	var deleteRouteImpl = {
+		callback: function(args, context) {
+			return cFService.deleteOrphanedRoutes(null).then(function(result) {
+				if (!result || !result.Routes) {
+					return "No orphaned routes";
+				}
+				var strResult = "";
+				result.Routes.forEach(function(item) {
+					strResult += "\nDeleted " + item.Host + " at " + item.DomainName;
+				});
+				return strResult;
+			});
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		deleteRouteImpl, {
+			name: "cfo delete-orphaned-routes",
+			description: "Delete all orphaned routes (e.g.: those that are not mapped to an app)",
+			parameters: []
 		}
 	);
 	

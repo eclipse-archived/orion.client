@@ -258,8 +258,8 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				return this._xhrV1("DELETE", url);
 			},
 			
-			deleteOrphanedRoutes: function () {
-				var url = require.toUrl("cfapi/routes/" + routeId);
+			deleteOrphanedRoutes: function (target) {
+				var url = require.toUrl("cfapi/routes");
 				url += "?Orphaned=true";
 				
 				if (target)
