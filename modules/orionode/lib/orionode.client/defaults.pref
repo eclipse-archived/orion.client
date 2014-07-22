@@ -25,8 +25,7 @@
 		"webtools/plugins/webToolsPlugin.html":true,
 		"javascript/plugins/javascriptPlugin.html":true,
 		"shell/plugins/shellPagePlugin.html":true,
-		"plugins/nodePlugin.html":true,
-		"search/plugins/searchPagePlugin.html":true
+		"plugins/nodePlugin.html":true
 	},
 	"/settingsContainer":{
 		"categories":{

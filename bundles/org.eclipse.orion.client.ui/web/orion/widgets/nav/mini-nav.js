@@ -112,8 +112,6 @@ define([
 				serviceRegistry: this.serviceRegistry,
 				toolbarNode: this.toolbarNode
 			});
-			
-			var searchWrapper = lib.$(".searchWrapper", this.toolbarNode); 
 
 			// Create switcher here
 			this.fsSwitcher = new mFilesystemSwitcher.FilesystemSwitcher({
@@ -122,7 +120,6 @@ define([
 				filesystemChangeDispatcher: this.explorer.sidebarNavInputManager,
 				fileClient: this.fileClient,
 				node: this.toolbarNode,
-				insertBeforeNode: searchWrapper,
 				serviceRegistry: this.serviceRegistry
 			});
 
