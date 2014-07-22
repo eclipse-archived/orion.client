@@ -471,10 +471,10 @@ define([
 		},
 		verifyBlock: function(baseModel, text, block, changeCount) {
 			/*
-			 * The semantics of list descendents are different than non-list-
-			 * descendents, so don't attempt to update at a block level within a list.
+			 * The semantics of list and blockquote descendents are different than top-level
+			 * elements, so don't attempt to update at a block level within a list or blockquote.
 			 */
-			var current = block.parent;
+			var current = block;
 			while (current) {
 				if (current.typeId === "markup.list.markdown" || current.typeId === "markup.quote.markdown") { //$NON-NLS-1$ //$NON-NLS-0$
 					return false;
