@@ -96,7 +96,7 @@ define([
 			this.menu.classList.add("commandList"); //$NON-NLS-0$
 			this.menu.classList.add("pageActions"); //$NON-NLS-0$
 			
-			var wrapper = document.createElement("span");
+			var wrapper = document.createElement("div"); //$NON-NLS-0$
 			wrapper.classList.add("filesystemSwitcherWrapper");
 			
 			wrapper.appendChild(this.fsName);

@@ -465,7 +465,7 @@ define([
 			});
 			
 			// set the scope to the target folder that is selected in the navigator pane
-			this._inlineSearchPane.addEventListener("open", function(){
+			this._inlineSearchPane.addEventListener("open", function(){ //$NON-NLS-0$
 				var selectionService = this.selection;
 				var selections = selectionService.getSelections();
 				if (selections && (1 === selections.length)) {
@@ -483,22 +483,26 @@ define([
 				this._inlineSearchPane.setSearchScope(event.root);
 			}.bind(this));
 			
-			this.toolbarNode.parentNode.addEventListener("scroll", function(){
+			this.toolbarNode.parentNode.addEventListener("scroll", function(){ //$NON-NLS-0$
 				if (this._inlineSearchPane.isVisible()) {
 					this.toolbarNode.parentNode.scrollTop = 0;
 				}
 			}.bind(this));
 			
 			var openSearchCommand = new mCommands.Command({
-				name: "open inline search pane",
+				name: messages["Global Search"], //$NON-NLS-0$
 				id: "orion.openInlineSearchPane", //$NON-NLS-0$
+				visibleWhen: function() {
+					return true;	
+				},
 				callback: function (data) {
 					this._inlineSearchPane.show();
+					this._inlineSearchPane.showSearchOptions();
 				}.bind(this)
 			});
 	
 			this.commandRegistry.addCommand(openSearchCommand);
-			this.commandRegistry.registerCommandContribution(this.additionalActionsScope, "orion.openInlineSearchPane", 100, null, true, new KeyBinding('f', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandRegistry.registerCommandContribution(this.editActionsScope, "orion.openInlineSearchPane", 100, "orion.menuBarEditGroup/orion.findGroup", false, new KeyBinding('h', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	});
 

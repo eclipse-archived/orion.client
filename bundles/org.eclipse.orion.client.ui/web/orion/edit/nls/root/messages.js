@@ -16,7 +16,7 @@ define({
 	"switchEditor": "Switch Editor", //$NON-NLS-1$ //$NON-NLS-0$
 	"Fetching": "Fetching: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"confirmUnsavedChanges": "There are unsaved changes. Do you still want to navigate away?", //$NON-NLS-1$ //$NON-NLS-0$
-	"searchFiles": "Search Files...", //$NON-NLS-1$ //$NON-NLS-0$
+	"searchFiles": "Quick Search...", //$NON-NLS-1$ //$NON-NLS-0$
 	"searchTerm": "Enter search term:", //$NON-NLS-1$ //$NON-NLS-0$
 	"unsavedChanges": "There are unsaved changes.", //$NON-NLS-1$ //$NON-NLS-0$
 	"unsavedAutoSaveChanges": "Please stay on the page until Auto Save is complete.", //$NON-NLS-1$ //$NON-NLS-0$
@@ -69,5 +69,6 @@ define({
 	"OpenWith": "Open With", //$NON-NLS-1$ //$NON-NLS-0$
 	"OpenRelated": "Open Related", //$NON-NLS-1$ //$NON-NLS-0$
 	"Dependency": "Dependency", //$NON-NLS-1$ //$NON-NLS-0$
-	"UnnamedCommand": "Unnamed" //$NON-NLS-1$ //$NON-NLS-0$
+	"UnnamedCommand": "Unnamed", //$NON-NLS-1$ //$NON-NLS-0$
+	"Global Search": "Global Search..." //$NON-NLS-1$ //$NON-NLS-0$
 });

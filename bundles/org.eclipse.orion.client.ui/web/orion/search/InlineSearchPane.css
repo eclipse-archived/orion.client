@@ -7,7 +7,6 @@
 .searchResultsWrapperDiv .treeTableRow > td {
 	padding: 3px;
 	overflow: hidden;
-	text-overflow: ellipsis;
 }
 
 .searchResultsWrapperDiv > b {
@@ -47,12 +46,12 @@
 }
 
 .searchResultsWrapperDiv {
-	height: calc(100% - 224px - 30px); /* subtract height of search options*/
+	height: calc(100% - 220px - 60px); /* subtract height of search options*/
 	width: 100%;
 }
 
 .searchResultsWrapperDiv > div {
-	border-top: 1px solid #333;
+	border-top: 1px solid lightgray;
 	height: 100%;
 	overflow: auto;
 	width: 100%;
@@ -64,11 +63,11 @@
 }
 
 .searchWrapper.searchOptionsHidden > .searchResultsWrapperDiv{
-	height: calc(100% - 56px);
+	height: calc(100% - 76px);
 }
 
 .replaceModeActive > .searchResultsWrapperDiv {
-	height: calc(100% - 220px - 30px - 42px); /* subtract height of search options and replace box */
+	height: calc(100% - 220px - 60px - 38px); /* subtract height of search options and replace box */
 }
 
 .searchWrapper > .comboTextInputWrapper {
@@ -100,7 +99,7 @@
 }
 
 .fileNamePatternsTextInput {
-	min-width: 210px;
+	min-width: 218px;
 }
 
 .fileNamePatternsHint {
@@ -119,16 +118,20 @@
 }
 
 .fileNamePatternsInput {
-	margin-bottom: 0;
+	margin: 0;
 }
 
 .toggleDisplayLink {
 	display: block;
-	margin: 0 0 0 5px;
+	margin: 0;
 }
 
 .toggleDisplayLink.linkHidden {
 	display: none;
+}
+
+.toggleSearchOptionsLink {
+	margin: 5px;
 }
 
 .searchMainOptionBlock {
@@ -136,12 +139,12 @@
 }
 
 .searchOptionBlock {
-	margin: 15px 15px;
-	width: 245px;
+	margin: 15px 10px;
+	width: 254px;
 }
 
 .searchLabel {
-	margin: 1px 2px;
+	margin: 1px 0;
 }
 
 .searchCheckboxLabel {
@@ -163,7 +166,7 @@
 
 .searchScopeElementWrapper {
 	display: inline-block;
-	width: 215px;
+	width: 222px;
 }
 
 .searchScopeElement {
@@ -195,9 +198,11 @@
 
 .searchButton > span {
 	font-size: 14px;
+	color: white;
 }
 
 .commandButton.comboTextInputButton.searchButton {
+	background-color: #7fa4c0;
 	padding: 3px 5px 5px 5px;
 }
 
@@ -206,6 +211,8 @@
 }
 
 .replaceWrapper > .comboTextInputWrapper > .comboTextInputButton {
+	background-color: #7fa4c0;
+	color: white;
 	padding: 7px 10px;
 }
 
@@ -272,6 +279,25 @@
 	background-color: rgb(221, 221, 221);
 }
 
+.replaceCompareTitleDiv {
+	border: 1px solid lightgray;
+	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.33);
+	background: white;
+	display: none;
+	font-size: 8pt;
+	font-weight: bold;
+	height: 20px;
+	left: 1px;
+	padding: 3px 10px;
+	position: absolute;
+	top: -19px;
+	z-index: 1;
+}
+
+.replaceCompareTitleDivVisible {
+	display: block;
+}
+
 .replaceCompareDiv {
 	display: none;
 	z-index: 1;
@@ -286,20 +312,20 @@
 	display: inline-block;
 	font-weight: bold;
 	margin: 0;
-	margin-left: 20px;
+	margin-left: 5px;
 	color: #333;
-	width: calc(100% - 150px);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	vertical-align: middle;
 	white-space: nowrap;
-}
-
-.replaceModeActive > .searchResultsTitle {
-	width: calc(100% - 250px);
+	width: calc(100% - 4px);
 }
 
 .searchPageActions {
-	display: inline-block;
+	display: block;
+	margin: 5px 0;
 }
 
+.searchPageActions > .orionButton > .core-sprite-move-down, .searchPageActions > .orionButton > .core-sprite-move-up {
+	padding-left: 0;
+}

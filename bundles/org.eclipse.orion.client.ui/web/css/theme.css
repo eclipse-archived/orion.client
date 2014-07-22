@@ -205,7 +205,7 @@ a.currentLocation:hover {
 }
 
 .filesystemSwitcherWrapper {
-	display: inline-block;
+	display: block;
 	max-width: 100%;
 	white-space: nowrap;
 }

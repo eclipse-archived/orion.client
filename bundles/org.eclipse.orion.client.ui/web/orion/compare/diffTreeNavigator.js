@@ -327,6 +327,32 @@ exports.DiffTreeNavigator = (function() {
 			return retVal;
 		},
 		
+		/**
+		 * Goes to the change at the specified changeIndex in the current file.
+		 * 
+		 * @param[in] changeIndex The index of the desired change in the current file.
+		 */
+		gotoChangeUsingIndex: function(changeIndex) {
+			var count = 0;
+			var blockIndex = 0;
+			
+			if (0 <= changeIndex) {
+				// iterate through blocks looking for the one that contains 
+				// the change with the specified changeIndex
+				while (blockIndex < this._root.children.length) {
+					var numChangesInCurrentBlock = this._root.children[blockIndex].children.length;
+					if (((count + numChangesInCurrentBlock) - 1) < changeIndex) {
+						count += numChangesInCurrentBlock; //keep going
+					} else {
+						// found block, go to change in block
+						var changeIndexInBlock = changeIndex - count;
+						return this.gotoBlock(blockIndex, changeIndexInBlock);
+					}
+					blockIndex++;
+				}
+			}
+		},
+		
 		gotoBlock: function(blockIndex, changeIndex){
 			if(!this.iterator){
 				return;

@@ -696,7 +696,7 @@ define([
 		});
 
 		commandRegistry.addCommand(openResourceCommand);
-		commandRegistry.registerCommandContribution("globalActions", "orion.openResource", 100, null, true, new KeyBinding.KeyBinding('r', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("globalActions", "orion.openResource", 100, null, true, new KeyBinding.KeyBinding('f', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		var noBanner = false;
 		var toggleBannerFunc = function () {
 			if (noBanner) {

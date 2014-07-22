@@ -63,6 +63,7 @@ define([
 			this._searchResultsWrapperDiv = lib.$(".searchResultsWrapperDiv", this._parentNode); //$NON-NLS-0$
 			this._searchResultsWrapperDiv.id = "inlineSearchResultsWrapper";
 			
+			this._replaceCompareTitleDiv = lib.node("replaceCompareTitleDiv"); //$NON-NLS-0$
 			this._replaceCompareDiv = lib.node("replaceCompareDiv"); //$NON-NLS-0$
 
 			this._searcher = new mSearchClient.Searcher({serviceRegistry: this._serviceRegistry, commandService: this._commandRegistry, fileService: this._fileClient});
@@ -77,6 +78,10 @@ define([
 		show: function() {
 			this._previousActiveElement = document.activeElement;
 			
+			if (!this._replaceBoxIsHidden()) {
+				this._showReplacePreview();
+			}
+			
 			this._searchWrapper.classList.add("searchWrapperActive"); //$NON-NLS-0$
 			window.setTimeout(this._focusOnTextInput, 100);
 			
@@ -86,9 +91,7 @@ define([
 		hide: function() {
 			this._searchWrapper.classList.remove("searchWrapperActive"); //$NON-NLS-0$
 			
-			if (!this._replaceBoxIsHidden()) {
-				this._hideReplaceField();
-			}
+			this._hideReplacePreview();
 
 			this._previousActiveElement = null;			
 		},
@@ -117,8 +120,8 @@ define([
 		},
 		
 		_render: function(){
+			this._initControls();
 			this._initHTMLLabels();
-		    this._initControls();
 		},
 		
 		_submitSearch: function(){
@@ -143,7 +146,7 @@ define([
 				this._replaceBox.addTextInputValueToRecentEntries();
 				this._fileNamePatternsBox.addTextInputValueToRecentEntries();
 				var searchParams = mSearchUtils.getSearchParams(this._searcher, options.keyword, options);
-				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, this._searcher, this._replaceCompareDiv);
+				this._searchResultExplorer.runSearch(searchParams, this._searchResultsWrapperDiv, this._searcher);
 				this._hideSearchOptions();
 			}
 		},
@@ -222,6 +225,7 @@ define([
 				var keyCode= e.charCode || e.keyCode;
 				if (keyCode === lib.KEY.ENTER) {
 					this._submitSearch();
+					this._searchTextInputBox.blur();
 				} else if (keyCode === lib.KEY.ESCAPE) {
 					if (this._previousActiveElement) {
 						if (this._previousActiveElement === this._searchTextInputBox) {
@@ -229,14 +233,9 @@ define([
 						} else {
 							this._previousActiveElement.focus();
 						}
-						
 						this.hide();
 					}
 				}
-			}.bind(this));
-			
-			this._searchTextInputBox.addEventListener("focus", function(){
-				this.show();
 			}.bind(this));
 	    },
 	    
@@ -263,6 +262,7 @@ define([
 				var keyCode= e.charCode || e.keyCode;
 				if (keyCode === lib.KEY.ENTER) {
 					this._replacePreview();
+					this._replaceTextInputBox.blur();
 				} 
 			}.bind(this));
 	    },
@@ -311,7 +311,7 @@ define([
 			this._toggleReplaceLink = lib.$("#toggleReplaceLink", this._parentNode); //$NON-NLS-0$
 			
 			this._toggleSearchOptionsLink = lib.$("#toggleSearchOptionsLink", this._parentNode); //$NON-NLS-0$
-			this._toggleSearchOptionsLink.addEventListener("click", this._showSearchOptions.bind(this)); //$NON-NLS-0$
+			this._toggleSearchOptionsLink.addEventListener("click", this.showSearchOptions.bind(this)); //$NON-NLS-0$
 			this._toggleSearchOptionsLink.innerHTML = messages["Modify Search Parameters"]; //$NON-NLS-0$
 
 			if (this._replaceBoxIsHidden()) {
@@ -323,6 +323,7 @@ define([
 		},
 		
 		_initHTMLLabels: function(){
+			this._replaceCompareTitleDiv.innerHTML = messages["Preview: "]; //$NON-NLS-0$
 			document.getElementById("advSearchCaseSensitiveLabel").appendChild(document.createTextNode(messages["Case sensitive"])); //$NON-NLS-1$ //$NON-NLS-0$
 			document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expression"])); //$NON-NLS-1$ //$NON-NLS-0$
 			document.getElementById("searchScopeLabel").appendChild(document.createTextNode(messages["Scope"])); //$NON-NLS-1$ //$NON-NLS-0$
@@ -378,7 +379,7 @@ define([
 			return this._replaceWrapper.classList.contains("replaceWrapperHidden"); //$NON-NLS-0$
 		},
 		
-		_searchOptionsVisible: function() {
+		searchOptionsVisible: function() {
 			return !this._searchWrapper.classList.contains("searchOptionsHidden"); //$NON-NLS-0$
 		},
 		
@@ -391,7 +392,7 @@ define([
 			this._searchResultExplorer.initCommands();
 		},
 		
-		_showSearchOptions: function() {
+		showSearchOptions: function() {
 			this._searchWrapper.classList.remove("searchOptionsHidden"); //$NON-NLS-0$
 			this._toggleSearchOptionsLink.classList.add("linkHidden"); //$NON-NLS-0$
 		},
@@ -405,16 +406,26 @@ define([
 			this._searchBox.hideButton();
 			this._replaceWrapper.classList.remove("replaceWrapperHidden"); //$NON-NLS-0$
 			this._searchWrapper.classList.add("replaceModeActive"); //$NON-NLS-0$
-			this._replaceCompareDiv.classList.add("replaceCompareDivVisible");
 			this._toggleReplaceLink.innerHTML = messages["Hide Replace"]; //$NON-NLS-0$
+			this._showReplacePreview();
 		},
 		
 		_hideReplaceField: function() {
 			this._searchBox.showButton();
 			this._replaceWrapper.classList.add("replaceWrapperHidden"); //$NON-NLS-0$
 			this._searchWrapper.classList.remove("replaceModeActive"); //$NON-NLS-0$
-			this._replaceCompareDiv.classList.remove("replaceCompareDivVisible");
 			this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$
+			this._hideReplacePreview();
+		},
+		
+		_showReplacePreview: function() {
+			this._replaceCompareTitleDiv.classList.add("replaceCompareTitleDivVisible"); //$NON-NLS-0$
+			this._replaceCompareDiv.classList.add("replaceCompareDivVisible"); //$NON-NLS-0$
+		},
+		
+		_hideReplacePreview: function() {
+			this._replaceCompareTitleDiv.classList.remove("replaceCompareTitleDivVisible"); //$NON-NLS-0$
+			this._replaceCompareDiv.classList.remove("replaceCompareDivVisible"); //$NON-NLS-0$
 		},
 		
 		_displaySelectedSearchScope: function() {
@@ -454,6 +465,14 @@ define([
 		
 		getSearchResultsTitleDiv: function() {
 			return this._searchResultsTitle;
+		},
+		
+		getReplaceCompareTitleDiv: function() {
+			return this._replaceCompareTitleDiv;
+		},
+		
+		getReplaceCompareDiv: function() {
+			return this._replaceCompareDiv;
 		}
 	});
 

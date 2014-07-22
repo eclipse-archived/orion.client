@@ -104,5 +104,6 @@ define({
 	"(* = any string, ? = any character)": "(* = any string, ? = any character)",
 	"Choose a Folder": "Choose a Folder",
 	"Remove from search results": "Remove from search results",
-	"Modify Search Parameters": "Modify Search Parameters"
+	"Modify Search Parameters": "Modify Search Parameters",
+	"Preview: " : "Preview: "
 });
