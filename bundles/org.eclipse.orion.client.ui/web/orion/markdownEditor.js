@@ -784,14 +784,16 @@ define([
 			
 			/* modify the existing node */
 
-			if (newNode.nodeName === "#text") {
+			if (newNode.nodeName === "#text") { //$NON-NLS-0$
 				targetNode.textContent = newNode.textContent;
 				return;
-			} else if (newNode.nodeName === "IMG") {
+			} else if (newNode.nodeName === "IMG") { //$NON-NLS-0$
 				if (targetNode.src !== newNode.src) {
 					targetNode.parentElement.replaceChild(newNode, targetNode);
 					return;
 				}
+			} else if (newNode.nodeName === "TH" || newNode.nodeName === "TD") { //$NON-NLS-1$ //$NON-NLS-0$
+				targetNode.style.textAlign = newNode.style.textAlign;
 			}
 
 			var targetNodesIndex = 0;
