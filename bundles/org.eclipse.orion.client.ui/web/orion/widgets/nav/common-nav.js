@@ -493,9 +493,13 @@ define([
 				name: messages["Global Search"], //$NON-NLS-0$
 				id: "orion.openInlineSearchPane", //$NON-NLS-0$
 				visibleWhen: function() {
-					return true;	
+					return true;
 				},
 				callback: function (data) {
+					var mainSplitter = mGlobalCommands.getMainSplitter();
+					if (mainSplitter.splitter.isClosed()) {
+						mainSplitter.splitter.toggleSidePanel();
+					}
 					this._inlineSearchPane.show();
 					this._inlineSearchPane.showSearchOptions();
 				}.bind(this)
