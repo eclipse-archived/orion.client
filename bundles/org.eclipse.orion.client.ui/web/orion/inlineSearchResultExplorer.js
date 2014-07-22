@@ -13,12 +13,12 @@
 /*jslint forin:true regexp:false sub:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 
-	'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compareUIFactory', 'orion/compare/compareView', 
+	'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/compare/compareView', 
 	'orion/highlight', 'orion/explorers/navigationUtils', 'orion/webui/tooltip', 'orion/explorers/navigatorRenderer', 'orion/extensionCommands',
 	'orion/searchModel', 'orion/crawler/searchCrawler', 'orion/selection'
 ],
 function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClient, mCommands, 
-	mSearchUtils, mSearchFeatures, mCompareUIFactory, mCompareView, mHighlight, mNavUtils, mTooltip, 
+	mSearchUtils, mCompareView, mHighlight, mNavUtils, mTooltip, 
 	navigatorRenderer, extensionCommands, mSearchModel, mSearchCrawler, mSelection
 ) {
     /* Internal wrapper functions*/
