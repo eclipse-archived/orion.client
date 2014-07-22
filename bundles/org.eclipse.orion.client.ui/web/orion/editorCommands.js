@@ -361,6 +361,9 @@ define([
 				},
 				parameters: findParameter,
 				callback: function(data) {
+					if (lib.node("replaceCompareDiv").classList.contains("replaceCompareDivVisible")) { //$NON-NLS-1$ //$NON-NLS-0$
+						return false; //TODO is there a better way of preventing the command from being executed?
+					}
 					if (self._localSearcher) {
 						var searchString = "";
 						var parsedParam = null;
@@ -386,6 +389,7 @@ define([
 							}
 							self._localSearcher.show({findString: searchString, replaceString: parsedParam.replaceWith});
 							self._localSearcher.find(true, tempOptions);
+							self.commandService.closeParameterCollector(); //TODO is there a better way of hiding the parameter collector?
 						} else {
 							self._localSearcher.show({findString: searchString});
 						}
