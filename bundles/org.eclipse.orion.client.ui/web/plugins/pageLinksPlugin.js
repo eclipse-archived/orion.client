@@ -35,13 +35,6 @@ define([
 		order: 10
 	});
 	provider.registerService("orion.page.link.category", null, {
-		id: "search",
-		nameKey: "Search",
-		nls: "orion/nls/messages",
-		imageClass: "core-sprite-search",
-		order: 30
-	});
-	provider.registerService("orion.page.link.category", null, {
 		id: "shell",
 		nameKey: "Shell",
 		nls: "orion/nls/messages",
@@ -73,14 +66,6 @@ define([
 		category: "shell",
 		order: 1000, // low priority
 		uriTemplate: "{+OrionHome}/shell/shellPage.html"
-	});
-	provider.registerService("orion.page.link", serviceImpl, {
-		nameKey: "Search",
-		id: "orion.Search",
-		nls: "orion/nls/messages",
-		category: "search",
-		order: 1000, // low priority
-		uriTemplate: "{+OrionHome}/search/search.html",
 	});
 
 	provider.registerService("orion.page.link", null, {

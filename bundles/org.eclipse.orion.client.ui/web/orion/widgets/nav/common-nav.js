@@ -25,10 +25,11 @@ define([
 	'orion/URITemplate',
 	'orion/PageUtil',
 	'orion/webui/contextmenu',
-	'orion/search/InlineSearchPane'
+	'orion/search/InlineSearchPane',
+	'orion/commands'
 ], function(
 	messages, objects, lib, mExplorer, mNavigatorRenderer, mKeyBinding,
-	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, mContextMenu, InlineSearchPane
+	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, mContextMenu, InlineSearchPane, mCommands
 ) {
 	var FileExplorer = mExplorer.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
@@ -463,9 +464,23 @@ define([
 				fileClient: this.fileClient
 			});
 			
+			// set the scope to the target folder that is selected in the navigator pane
+			this._inlineSearchPane.addEventListener("open", function(){
+				var selectionService = this.selection;
+				var selections = selectionService.getSelections();
+				if (selections && (1 === selections.length)) {
+					if (selections[0]) {
+						var targetFolder = selections[0].Directory ? selections[0] : selections[0].parent;
+						this._inlineSearchPane.setSearchScope(targetFolder);	
+					}
+				} else {
+					// no selection or multiple selections, set the scope to the root
+					this._inlineSearchPane.setSearchScope(this.treeRoot);
+				}
+			}.bind(this));
+			
 			this.addEventListener("rootChanged", function(event) { //$NON-NLS-0$
-				//TODO change scope in search builder
-//				_self.sidebarNavInputManager.dispatchEvent({type: "InputChanged", input: event.root.ChildrenLocation}); //$NON-NLS-0$
+				this._inlineSearchPane.setSearchScope(event.root);
 			}.bind(this));
 			
 			this.toolbarNode.parentNode.addEventListener("scroll", function(){
@@ -473,6 +488,17 @@ define([
 					this.toolbarNode.parentNode.scrollTop = 0;
 				}
 			}.bind(this));
+			
+			var openSearchCommand = new mCommands.Command({
+				name: "open inline search pane",
+				id: "orion.openInlineSearchPane", //$NON-NLS-0$
+				callback: function (data) {
+					this._inlineSearchPane.show();
+				}.bind(this)
+			});
+	
+			this.commandRegistry.addCommand(openSearchCommand);
+			this.commandRegistry.registerCommandContribution(this.additionalActionsScope, "orion.openInlineSearchPane", 100, null, true, new KeyBinding('f', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	});
 

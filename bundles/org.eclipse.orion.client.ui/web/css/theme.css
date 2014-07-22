@@ -211,9 +211,9 @@ a.currentLocation:hover {
 }
 
 .sidebarToolbar {
+	display: inline;
 	overflow: visible;
-	padding-right: 4px;
-	padding-left: 0;
+	padding: 0 !important;
 }
 
 /* Searchbox in the top navigation area seems a difficult thing to 

@@ -112,6 +112,14 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this.explorer = explorer;
     }
     SearchResultRenderer.prototype = new mExplorer.SelectionRenderer();
+    
+    // Overrides Explorer.SelectionRenderer.prototype.renderRow
+    SearchResultRenderer.prototype.renderRow = function(item, tableRow) {
+    	mExplorer.SelectionRenderer.prototype.renderRow.call(this, item, tableRow);
+    	if (item.type !== "file") {
+    		tableRow.classList.add("searchDetailRow"); //$NON-NLS-0$
+    	}
+    };
 
     // TODO:  this should be handled outside of here in a common select all command
     // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339500
@@ -339,6 +347,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		var link = navigatorRenderer.createLink(null, {Location: item.parent.location, Name: name}, this.explorer._commandService, this.explorer._contentTypeService,
 			this.explorer._openWithCommands, {id:this.getItemLinkId(item)}, params, {});
         spanHolder.appendChild(link);
+        link.classList.add("searchDetailLink"); //$NON-NLS-0$
        
        mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
         _connect(link, "click", function() { //$NON-NLS-0$
@@ -416,11 +425,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                     } else {
                         this.getExpandImage(tableRow, span); //$NON-NLS-0$
                     } 
-                } else {
-                    span = _createSpan(null, null, col, null);
-                    col.noWrap = true;
-                    col.align = "right"; //$NON-NLS-0$
-                    this.renderDetailLineNumber(item, span);
                 }
                 break;
             case 1:
@@ -435,12 +439,29 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                     if (item.parentLocation) {
                         this.renderLocationElement(item, span);
                     }
+                    var button = _createElement("button", ["imageSprite", "core-sprite-delete", "dismissButton", "deleteSearchRowButton"], null, col); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					button.title = messages["Remove from search results"]; //$NON-NLS-0$
+                    button.addEventListener("click", function(){ //$NON-NLS-0$
+                    	var model = this.explorer.model;
+                    	model.removeChild(item.parent, item);
+                    	this.explorer.getNavHandler().refreshModel(this.explorer.getNavDict(), model, model.children);
+            			this.explorer.getNavHandler().cursorOn(null, true);
+            			tableRow.parentNode.removeChild(tableRow);
+            			
+            			if (item.children) {
+            				item.children.forEach(function(child){
+	            				var childRow = this.explorer.getRow(child);
+	            				childRow.parentNode.removeChild(childRow);
+	            			}, this);
+            			}
+            			
+            			//TODO update match count, maybe...
+                    }.bind(this));                    
                 } else {
-                    this.renderDetailElement(item, span);
-                    var iconSpan = _createSpan(null, this.getDetailIconId(item), span, null);
-                    var icon = _createSpan(null, null, iconSpan, null);
-                    icon.classList.add('imageSprite'); //$NON-NLS-0$
-                    icon.classList.add('core-sprite-none'); //$NON-NLS-0$
+					this.renderDetailLineNumber(item, span);
+                    span.classList.add("searchDetailLineNumber"); //$NON-NLS-0$
+                    
+                    this.renderDetailElement(item, col);
                 }
                 break;
         }
@@ -860,6 +881,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this.createTree(this._uiFactory ? this._uiFactory.getMatchDivID() : this.getParentDivId(), this.model, {
             selectionPolicy: "singleSelection", //$NON-NLS-0$
             indent: 0,
+            setFocus: false,
             onCollapse: function(model) {
                 that.onCollapse(model);
             }
@@ -1243,6 +1265,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 selectionPolicy: "singleSelection", //$NON-NLS-0$
                 indent: 0,
 				getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
+				setFocus: false,
                 onCollapse: function(model) {
                     that.onCollapse(model);
                 }
@@ -1278,6 +1301,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             selectionPolicy: "singleSelection", //$NON-NLS-0$
             getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
             indent: 0,
+            setFocus: false,
             onCollapse: function(model) {
                 that.onCollapse(model);
             }
@@ -1347,7 +1371,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         if(!modelToExpand){
 			modelToExpand = _validFiles(this.model).length > 0 ? _validFiles(this.model)[0] : null;
         }
-        this.getNavHandler().cursorOn(modelToExpand, true);
+        this.getNavHandler().cursorOn(modelToExpand, true, null, true);
         if (modelToExpand && detailIndex && detailIndex !== "none") { //$NON-NLS-0$
             this.myTree.expand(modelToExpand, function() {
                 this.onExpand(modelToExpand, detailIndex);
@@ -1406,8 +1430,8 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		//TODO: we need a better way to render the progress and allow user to be able to cancel the crawling search
 		var crawling = searchParams.regEx || searchParams.caseSensitive;
 		var crawler;
-		lib.empty(lib.node("pageNavigationActions")); //$NON-NLS-0$
-		lib.empty(lib.node("pageActions")); //$NON-NLS-0$
+//		lib.empty(lib.node("pageNavigationActions")); //$NON-NLS-0$
+//		lib.empty(lib.node("pageActions")); //$NON-NLS-0$
 		
 		lib.empty(resultsNode);
 		

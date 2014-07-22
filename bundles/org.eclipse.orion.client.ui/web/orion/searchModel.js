@@ -541,6 +541,14 @@ function(messages, Deferred, i18nUtil, mExplorer, mSearchUtils) {
         }
         return matchesReplaced;
     };
+    
+    SearchResultModel.prototype.removeChild = function(model, item) {
+        var index = model.children.indexOf(item);
+        if (-1 < index) {
+        	model.children.splice(index, 1);
+        	item.stale = true;
+        }
+    };
 
     SearchResultModel.prototype.constructor = SearchResultModel;
 

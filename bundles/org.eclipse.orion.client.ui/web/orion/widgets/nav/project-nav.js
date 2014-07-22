@@ -455,14 +455,16 @@ define([
 				toolbarNode: this.toolbarNode
 			});
 			this.explorer.display(this.project);
-			this.sidebar.hideToolbar();
+			//TODO do this in a less hackish way
+			this.toolbarNode.parentNode.classList.add("projectNavSidebarWrapper"); //$NON-NLS-0$
 		},
 		destroy: function() {
 			if (this.explorer) {
 				this.explorer.destroy();
 			}
 			this.explorer = null;
-			this.sidebar.showToolbar();
+			//TODO do this in a less hackish way
+			this.toolbarNode.parentNode.classList.remove("projectNavSidebarWrapper"); //$NON-NLS-0$
 		},
 		getProjectJson: function(metadata) {
 			function getJson(children) {

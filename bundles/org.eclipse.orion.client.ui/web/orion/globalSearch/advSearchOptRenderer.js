@@ -306,6 +306,18 @@ define([
 			document.getElementById("searchScopeSelectButton").title = messages["Choose a Folder"]; //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		
+		setSearchScope: function(targetFolder) { 
+			if (targetFolder && (targetFolder.Path || targetFolder.Location)) {
+				var location = targetFolder.Path || targetFolder.Location;
+				this._searchLocations = [location];
+			} else {
+				this._searchLocations = [this._rootURL];
+			}
+			
+			this._displaySelectedSearchScope();
+			this._searcher.setLocationbyURL(this._searchLocations[0]);
+		},
+		
 		_initSearchScope: function() {
 			var resource = mPageUtil.matchResourceParameters().resource;
 			this._rootURL = this.fileClient.fileServiceRootURL(resource);
@@ -321,23 +333,12 @@ define([
 			
 			this._searchScopeSelectButton = lib.$("#searchScopeSelectButton", this._parentDiv); //$NON-NLS-0$
 			
-			var searchScopeDialogCallback = function(targetFolder) { 
-				if (targetFolder && targetFolder.Location) {
-					this._searchLocations = [targetFolder.Location];
-				} else {
-					this._searchLocations = [this._rootURL];
-				}
-				
-				this._displaySelectedSearchScope();
-				this._searcher.setLocationbyURL(this._searchLocations[0]);
-			}.bind(this);
-			
 			this._searchScopeSelectButton.addEventListener("click", function(){ //$NON-NLS-0$
 				var searchScopeDialog = new DirectoryPrompterDialog.DirectoryPrompterDialog({
 					title: messages["Choose a Folder"], //$NON-NLS-0$
 					serviceRegistry: this._serviceRegistry,
 					fileClient: this.fileClient,				
-					func: searchScopeDialogCallback
+					func: this.setSearchScope.bind(this)
 				});
 				searchScopeDialog.show();
 			}.bind(this));

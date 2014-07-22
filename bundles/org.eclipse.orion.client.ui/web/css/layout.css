@@ -305,8 +305,8 @@ hard-coded numbers elsewhere.
 .sidebarWrapper > .sidebar {
 	position: relative;
 	left: 0;
-	top: 0;
-	height: calc(100% - 30px);
+	top: 5px;
+	height: calc(100% - 70px);
 	overflow-x: visible;
 }
 

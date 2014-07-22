@@ -4,20 +4,56 @@
 
 @import "../widgets/input/ComboTextInput.css";
 
-#resultsinnerTree.treetable td {
-	padding: 5px !important;
+.searchResultsWrapperDiv .treeTableRow > td {
+	padding: 3px;
+}
+
+.searchResultsWrapperDiv > b {
+	margin-left: 10px;
+}
+
+.searchWrapper {
+	border: 1px solid transparent;
+	border-bottom: none;
+	display: block;
+	position: relative;
+	z-index: 100;
+	white-space: nowrap;
+	width: calc(100% - 2px);
+}
+
+.searchWrapperActive {
+	background: whitesmoke;
+	border-color: rgb(222, 222, 222);
+	padding-bottom: 5px;
+}
+
+.searchWrapper > .comboTextInputWrapper {
+	margin: 5px 10px 0 10px;
+}
+
+.searchWrapper > .searchDismissButton {
+	display: none;
+	float: right;
+	margin: 0;
+	padding: 4px;
+	position: relative;
+}
+
+.searchWrapper.searchWrapperActive > .searchDismissButton {
+	display: inline-block;
 }
 
 .replaceWrapper {
-	display: inline-block;
+	display: block;
 	max-height: 50px; /* for transition */
-	overflow: hidden;
+	overflow: visible;
 	transition: max-height 0.2s ease;
 }
 
 .replaceWrapperHidden {
-	display: block !important; /* removes the need to also set the width to 0 */
 	max-height: 0; /* for transition */
+	overflow: hidden;
 }
 
 .fileNamePatternsTextInput {
@@ -110,35 +146,28 @@
 	vertical-align: baseline;
 }
 
-.commandButton.inlineSearchButton {
-	margin-right: 15px;
-	outline: none;
-	vertical-align: top;
-}
-
-.inlineSearchButton > .core-sprite-search {
+.searchButton > span {
 	font-size: 14px;
 }
 
-.commandButton.inlineSearchButton:focus {
-	background-color: rgb(221, 221, 221);
-	box-shadow: none;
+.commandButton.comboTextInputButton.searchButton {
+	padding: 3px 5px 5px 5px;
 }
 
-.commandButton.orionButton.inlineSearchButtonActive {
-	background-color: whitesmoke;
-	border-bottom-left-radius: 0;
-	border-bottom-right-radius: 0;
+.commandButton.comboTextInputButton.searchButton.isHidden {
+	padding: 3px 0 5px 0;
+}
+
+.replaceWrapper > .comboTextInputWrapper > .comboTextInputButton {
+	padding: 7px 10px;
 }
 
 .inlineSearchWrapperDiv {
 	background: whitesmoke;
 	display: block;
-	height: calc(100% - 28px);
 	opacity: 0;
 	overflow: hidden;
 	position: absolute;
-	top: 26px;
 	transition: opacity 0.2s ease, overflow 0s ease 0.2s, visibility 0s ease 0.2s;
 	visibility: hidden;
 	width: calc(100% - 2px); /* subtract border width */
@@ -147,10 +176,22 @@
 
 .isVisible {
 	border: 1px solid rgb(222, 222, 222);
+	border-top: none;
+	height: calc(100% - 68px); /* subtract top and border */
 	opacity: 1;
 	overflow: auto;
+	top: 67px;
 	transition-delay: 0s;
 	visibility: visible;
+}
+
+.projectNavSidebarWrapper > .sidebarToolbar > .inlineSearchWrapperDiv.isVisible {
+	top: 38px;
+	height: calc(100% - 40px);
+}
+
+.projectNavSidebarWrapper.sidebarWrapper > .sidebar {
+	height: calc(100% - 40px);
 }
 
 .fileNameSpan {
@@ -170,4 +211,42 @@
 	-webkit-user-select: text;
 	-moz-user-select: text;
 	user-select: text;
+}
+
+.deleteSearchRowButton {
+	margin-left: 10px !important;
+}
+
+.searchDetailRow {
+	background: white !important;
+}
+
+.searchDetailLineNumber {
+	margin-right: 4px;
+}
+
+.navlink.searchDetailLink {
+	vertical-align: baseline;
+}
+
+.searchWrapper:not(.searchWrapperActive) > .comboTextInputWrapper > .comboTextInputButton {
+	background-color: white;
+	border-color: white;
+}
+
+.searchWrapper:not(.searchWrapperActive) > .comboTextInputWrapper > .comboTextInputButton > span {
+	color: #aaa;
+}
+
+.searchWrapper > .comboTextInputWrapper > .recentEntryButton {
+	max-width: 25px;
+	transition: max-width 0.2s ease;
+}
+
+.searchWrapper:not(.searchWrapperActive) > .comboTextInputWrapper > .recentEntryButton {
+	max-width: 0;
+}
+
+.searchWrapperActive > .comboTextInputWrapper > .comboTextInputButton {
+	background-color: rgb(221, 221, 221);
 }
