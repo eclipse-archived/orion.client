@@ -49,6 +49,34 @@ define(['orion/plugin',
 	});
 	
 	/**
+	 * Create an object for the html template extension point
+	 */
+	function HtmlTemplateProvider() {}
+	
+	HtmlTemplateProvider.prototype.getTemplates = function() {
+		return {
+			title: "HTML Templates",
+			templates: htmlContentAssist.templates
+		};
+	};
+	
+	var htmlTemplateProvider = new HtmlTemplateProvider();
+	
+	/**
+	 * Create an object for the css template extension point
+	 */
+	function CssTemplateProvider() {}
+	
+	CssTemplateProvider.prototype.getTemplates = function() {
+		return {
+			title: "CSS Templates",
+			templates: cssContentAssist.templates
+		};
+	};
+	
+	var cssTemplateProvider = new CssTemplateProvider();
+	
+	/**
 	 * Register content assist providers
 	 */
 	provider.registerService("orion.edit.contentassist",
@@ -75,6 +103,8 @@ define(['orion/plugin',
 			name: "CSS rule outline",
 			contentType: ["text/css"]
 		});
+	provider.registerService("orion.editor.templates", cssTemplateProvider, {});
+	provider.registerService("orion.editor.templates", htmlTemplateProvider, {});
 		
 	/**
 	 * Register syntax styling

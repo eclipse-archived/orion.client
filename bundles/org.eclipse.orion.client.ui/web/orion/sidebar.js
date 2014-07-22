@@ -10,12 +10,12 @@
  *******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/littlelib',
+define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/templateExplorer', 'orion/webui/littlelib',
 		'orion/widgets/nav/mini-nav',
 		'orion/widgets/nav/project-nav',
 		'orion/globalCommands',
 		'i18n!orion/edit/nls/messages'],
-		function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages) {
+		function(objects, mCommands, mOutliner, mTemplateExplorer, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages) {
 
 	/**
 	 * @name orion.sidebar.Sidebar
@@ -27,6 +27,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 	 * @param {orion.fileClient.FileClient} params.fileClient
 	 * @param {orion.editor.InputManager} params.editorInputManager
 	 * @param {orion.outliner.OutlineService} params.outlineService
+	 * @param {orion.templates.TemplateExplorerService} params.templateExplorerService
 	 * @param {orion.progress.ProgressService} params.progressService
 	 * @param {orion.selection.Selection} params.selection
 	 * @param {orion.serviceregistry.ServiceRegistry} params.serviceRegistry
@@ -43,6 +44,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 		this.fileClient = params.fileClient;
 		this.editorInputManager = params.editorInputManager;
 		this.outlineService = params.outlineService;
+		this.templateExplorerService = params.templateExplorerService;
 		this.parentNode = lib.node(params.parent);
 		this.toolbarNode = lib.node(params.toolbar);
 		this.selection = params.selection;
@@ -70,6 +72,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			var fileClient = this.fileClient;
 			var editorInputManager = this.editorInputManager;
 			var outlineService = this.outlineService;
+			var templateExplorerService = this.templateExplorerService;
 			var parentNode = this.parentNode;
 			var progressService = this.progressService;
 			var selection = this.selection;
@@ -136,6 +139,22 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				progressService: progressService,
 				sidebar: this
 			});
+			
+			// TemplateExplorer is responsible for adding its view mode(s) to this sidebar
+			this.templateExplorer = new mTemplateExplorer.TemplateExplorer({
+				parent: parentNode,
+				toolbar: toolbarNode,
+				serviceRegistry: serviceRegistry,
+				contentTypeRegistry: contentTypeRegistry,
+				preferences: this.preferences,
+				templateExplorerService: templateExplorerService,
+				commandService: commandRegistry,
+				selectionService: selection,
+				inputManager: editorInputManager,
+				progressService: progressService,
+				sidebar: this
+			});
+			
 			this.setViewMode(this.defaultViewMode);
 		},
 		showToolbar: function() {
