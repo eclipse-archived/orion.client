@@ -50,4 +50,6 @@ filesets.forEach(function(fileset) {
 	task.addFileset(fileset);
 });
 task.setTodir(new Packages.java.io.File(todir));
+task.setOverwrite(true); // overwrite destination files, even if newer
+task.setVerbose(true);
 task.perform();
