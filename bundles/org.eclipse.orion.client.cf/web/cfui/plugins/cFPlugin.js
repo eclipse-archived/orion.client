@@ -495,13 +495,11 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 	var routesImpl = {
 		callback: function(args) {
 			return cFService.getRoutes().then(function(result) {
-				result = result.Routes;
-				
-				if (!result || result.length === 0) {
+				if (!result || !result.Routes || result.Routes.length === 0) {
 					return "No routes.";
 				}
 				var strResult = "\nhost\tdomain\tapps\n";
-				result.forEach(function(route) {
+				result.Routes.forEach(function(route) {
 					strResult += describeRoute(route);
 				});
 				return strResult;
@@ -514,6 +512,36 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 		routesImpl, {
 			name: "cfo routes",
 			description: "List all routes in the target space"
+		}
+	);
+	
+	/** Add cf create-route command **/
+	var createRouteImpl = {
+		callback: function(args, context) {
+			return cFService.createRoute(null, args.domain, args.hostname).then(function(result) {
+				if (!result || result.Type !== "Route") {
+					return "No routes found";
+				}
+				var strResult = "\nCreated " + result.Host + " at " + args.domain;
+				return strResult;
+			});
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		createRouteImpl, {
+			name: "cfo create-route",
+			description: "Create a url route in a space for later use",
+			parameters: [{
+				name: "domain",
+				type: "string",
+				description: "Domain"
+			}, {
+				name: "hostname",
+				type: "string",
+				description: "Hostname"
+			}]
 		}
 	);
 	

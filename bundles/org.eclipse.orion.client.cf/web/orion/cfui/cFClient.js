@@ -234,6 +234,18 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				return this._xhrV1("GET", url);
 			},
 			
+			createRoute: function(target, domainName, hostName) {
+				var routeObj = {
+					DomainName: domainName,
+					Host: hostName
+				};
+				
+				if (target)
+					routeObj.Target = target;
+				
+				return this._xhrV1("PUT", require.toUrl("cfapi/routes"), routeObj);
+			},
+			
 			deleteRoute: function(target, domainName, hostName) {
 				var routeObj = {
 					DomainName: domainName,
