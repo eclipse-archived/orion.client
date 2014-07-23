@@ -135,9 +135,13 @@ define([
 						len = node.properties.length;
 						for (idx = 0; idx < len; idx++) {
 							var prop = node.properties[idx];
-							if(this.thisCheck && prop.value && prop.value.type === Estraverse.Syntax.FunctionExpression) {
-								//tag it 
-								prop.value.isprop = true;
+							if (prop.value && prop.value.type === Estraverse.Syntax.FunctionExpression){
+								if(this.thisCheck) {
+									//tag it 
+									prop.value.isprop = true;
+								} else {
+									this.checkId(prop.value.id, false, true);
+								}
 							}
 							this.checkId(prop.key, true, true);
 							this.checkId(prop.value);

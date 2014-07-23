@@ -1984,6 +1984,22 @@ define([
 		});
 		
 		/**
+		 * Tests named function expression in object property
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439641
+		 */
+		it('test_namedFuncExpr6', function() {
+			editorContext.text = "var x = { a: function a() {} }; a();";
+			return occurrences.computeOccurrences(editorContext, setContext(11, 11)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:10, end:11}, {start:22, end:23}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
 		 * Tests throw statements
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438402
 		 */
