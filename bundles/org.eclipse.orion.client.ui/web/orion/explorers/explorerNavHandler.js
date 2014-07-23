@@ -100,6 +100,17 @@ exports.ExplorerNavHandler = (function() {
 		};
 		parentDiv.addEventListener("keydown", keyListener, false); //$NON-NLS-0$
 		this._listeners.push({type: "keydown", listener: keyListener}); //$NON-NLS-0$
+		var mouseListener = function (e) {
+			if(UiUtils.isFormElement(e.target)) {
+				// Not for us
+				return true;
+			}
+			if (e.shiftKey && self._shiftSelectionAnchor) {
+				lib.stop(e);
+			}
+		};
+		parentDiv.addEventListener("mousedown", mouseListener, false); //$NON-NLS-0$
+		this._listeners.push({type: "mousedown", listener: mouseListener}); //$NON-NLS-0$
 		var l1 = function (e) { 
 			if(self.explorer.onFocus){
 				self.explorer.onFocus(false);
