@@ -9,6 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
+/*global URL*/
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/objects',
@@ -158,7 +159,9 @@ define([
 			this.commandRegistry.destroy(this.menu);
 			this.commandRegistry.renderCommands("orion.mininav", this.menu, {}, "menu"); //$NON-NLS-1$ //$NON-NLS-0$
 			var dropdown = lib.$(".dropdownMenu", this.menu); //$NON-NLS-0$
-			dropdown.style.position = "fixed"; //ensures that dropdown isn't hidden by editor
+			if (dropdown) {
+				dropdown.style.position = "fixed"; //ensures that dropdown isn't hidden by editor					
+			}
 		},
 		/**
 		 * @param {Object|String} location The ChildrenLocation, or an object with a ChildrenLocation field.
