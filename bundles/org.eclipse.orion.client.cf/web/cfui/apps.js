@@ -11,10 +11,10 @@
 define(['require', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/commands', 'orion/keyBinding', 'orion/dialogs', 'orion/selection',
 		'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/links',
 		'orion/cfui/cFClient', 'orion/Deferred', 'cfui/autodeploy/widgets/CfLoginDialog',
-		'orion/section', 'orion/explorers/explorer', 'cfui/cfUtil', 'cfui/cfCommands'],
+		'orion/section', 'orion/explorers/explorer', 'cfui/cfUtil', 'cfui/cfCommands', 'orion/URITemplate', 'orion/PageLinks'],
 		function(require, lib, mBootstrap, mStatus, mProgress, CommandRegistry, Commands, KeyBinding, mDialogs, mSelection,
 			mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mLinks, 
-			mCFClient, Deferred, CfLoginDialog, mSection, mExplorer, mCfUtil, mCfCommands) {
+			mCFClient, Deferred, CfLoginDialog, mSection, mExplorer, mCfUtil, mCfCommands, URITemplate, PageLinks) {
 
 mBootstrap.startup().then(function(core) {
 	
@@ -75,6 +75,18 @@ mBootstrap.startup().then(function(core) {
 			} else {
 				progressService.setProgressResult(error);
 			}
+	}
+	
+	function getUrlLinkNode(url, name){
+		if(!name){
+			name = url;
+		}
+		var a = document.createElement("a");
+		a.target = "_new";
+		a.href = url.indexOf("://")<0 ? "http://" + url : url;
+		a.title = url;
+		a.appendChild(document.createTextNode(name));
+		return a;
 	}
 	
 	function displayOrgsAndSpaces(){
@@ -179,21 +191,6 @@ mBootstrap.startup().then(function(core) {
 		return 0;
 	};
 	
-	ApplicationsRenderer.prototype.getCellHeaderElement = function(col_no){
-		
-		var col = document.createElement("th"); //$NON-NLS-0$
-		var h2 = document.createElement("h2"); //$NON-NLS-0$
-		col.appendChild(h2);
-		switch(col_no){
-		case 0: 
-			h2.textContent = "Name";
-			return col;
-		case 1:
-			h2.textContent = "Status";
-			return col;
-		}
-	};
-	
 	ApplicationsRenderer.prototype.emptyCallback = function(bodyElement){
 		var tr = document.createElement("tr");
 		var td = document.createElement("td");
@@ -214,9 +211,10 @@ mBootstrap.startup().then(function(core) {
 		if(item.Type === "Route"){
 			switch (col_no) {
 				case 0:
-					val = item.host + "." + item.domain.name;
-					break;
+					span.appendChild(getUrlLinkNode(item.host + "." + item.domain.name));
+					return col;
 				case 1:
+				case 2:
 					val = "";
 					break;
 				default:
@@ -225,11 +223,45 @@ mBootstrap.startup().then(function(core) {
 		} else {
 			switch(col_no){
 				case 0:
-					this.getExpandImage(tableRow, span);				
+					this.getExpandImage(tableRow, span);
+					if(item.urls && item.urls.length>0){
+						span.appendChild(getUrlLinkNode(item.urls[0], item.name));
+						return col;
+					}
+					
 					val = item.name;
 					break;
 				case 1:
-					val = item.state;
+					var a = document.createElement("a");
+					a.target = "_new";
+					var uriTemplate = new URITemplate("{+OrionHome}/cfui/logs.html#{Name,Target*}");
+					a.href = uriTemplate.expand({OrionHome : PageLinks.getOrionHome(), Name: item.name, Target: item.parent.Target});
+					a.appendChild(document.createTextNode("Logs"));
+					span.appendChild(a);	
+					return col;
+				case 2:
+				col.classList.add("secondaryColumnRight");
+				if(item.state === "STARTED"){
+					span.className = "imageSprite core-sprite-applicationrunning";
+					span.title = (typeof item.instances !== "undefined" && typeof item.running_instances !== "undefined") ? ( item.running_instances + " of " + item.instances + " instances running") : "Started";
+					return col;
+				} else if(item.state==="STOPPED"){
+					span.className = "imageSprite core-sprite-applicationstopped";
+					span.title = (typeof item.instances !== "undefined" && typeof item.running_instances !== "undefined") ? ( item.running_instances + " of " + item.instances + " instances running") : "Stopped";
+					return col;
+				} else if(item.state==="NOT_DEPLOYED"){
+					span.className = "imageSprite core-sprite-applicationnotdeployed";
+					span.title = "Not deployed";
+					return col;
+				} else if(item.state==="PROGRESS"){
+					span.className = "imageSprite core-sprite-progress";
+					span.title = "Checking application state";
+					return col;
+				} else {
+					span.appendChild(document.createTextNode("State unknown"));
+					return col;
+				}
+					
 					break;
 				default:
 					return null;
@@ -240,8 +272,9 @@ mBootstrap.startup().then(function(core) {
 		return col;
 	};
 	
-	function ApplicationsModel(apps){
+	function ApplicationsModel(apps, target){
 		this.apps = apps;
+		this.apps.Target = target;
 	}
 	
 	ApplicationsModel.prototype = {
@@ -312,7 +345,7 @@ mBootstrap.startup().then(function(core) {
 			explorerParent.id = "applicationsSectionParent";
 			explorer.parent = explorerParent;
 				
-			var model = new ApplicationsModel(apps);
+			var model = new ApplicationsModel(apps, target);
 			
 			applicationsSection.embedExplorer(explorer);
 			
@@ -345,8 +378,8 @@ mBootstrap.startup().then(function(core) {
 	
 		switch (col_no) {
 			case 0:
-				val = item.Host + "." + item.DomainName;
-				break;
+				span.appendChild(getUrlLinkNode(item.Host + "." + item.DomainName));
+				return col;
 			default:
 				return null;
 		}
