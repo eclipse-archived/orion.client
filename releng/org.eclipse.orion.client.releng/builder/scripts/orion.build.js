@@ -125,7 +125,6 @@
             { name: "plugins/webEditingPlugin" },
             { name: "profile/user-list" },
             { name: "profile/userservicePlugin" },
-            { name: "search/search" },
             { name: "settings/settings" },
             { name: "shell/plugins/shellPagePlugin" },
             { name: "shell/shellPage" },
