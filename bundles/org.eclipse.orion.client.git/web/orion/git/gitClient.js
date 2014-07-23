@@ -992,7 +992,92 @@ eclipse.GitService = (function() {
 		
 		_handleGitServiceResponseError: function(deferred, error){
 			deferred.reject(error);
-		}
+		},
+		
+		doStashApply : function (location) {
+			var service = this;
+			
+			var clientDeferred = new Deferred();
+			xhr("POST", location, { 
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : 15000,
+				handleAs : "json", //$NON-NLS-0$
+				data: JSON.stringify({
+					"type": "apply" //$NON-NLS-0$
+				})
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		doStashCreate : function (location) {
+			var service = this;
+			
+			var clientDeferred = new Deferred();
+			xhr("POST", location, { 
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : 15000,
+				handleAs : "json", //$NON-NLS-0$
+				data: JSON.stringify({
+					"type": "create" //$NON-NLS-0$
+				})
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		doStashList : function(location) {
+			var service = this;
+			
+			var clientDeferred = new Deferred();
+			xhr("GET", location, { 
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : 15000,
+				handleAs : "json" //$NON-NLS-0$
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		doStashDrop : function(location) {
+			var service = this;
+			
+			var clientDeferred = new Deferred();
+			xhr("DELETE", location, { 
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				data:{},
+				timeout : 15000,
+				handleAs : "json" //$NON-NLS-0$
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		} 
+			
 	};
 	return GitService;
 }());
