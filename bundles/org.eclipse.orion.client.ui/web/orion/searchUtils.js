@@ -166,25 +166,6 @@ searchUtils.copySearchParams = function(searchParams, copyReplace) {
 	return result;	
 };
 
-searchUtils.generateSearchHref = function(options) {
-	var base =  require.toUrl("search/search.html"); //$NON-NLS-0$
-	var sParams = searchUtils.copySearchParams(options, true);
-	var searchLocation = sParams.resource;
-	sParams.resource = undefined;
-	var href;
-	if(typeof sParams.keyword !== "undefined"){ //$NON-NLS-0$
-		href = new URITemplate(base + "#{,resource,params*}").expand({ //$NON-NLS-0$
-			resource: searchLocation,
-			params: sParams
-		});
-	} else {
-		href = new URITemplate(base + "#{,resource}").expand({ //$NON-NLS-0$
-			resource: searchLocation
-		});
-	}
-	return href;
-};
-
 searchUtils.generateFindURLBinding = function(searchParams, inFileQuery, lineNumber, replaceStr, paramOnly) {
 	var params = {
 		find: inFileQuery.searchStr,
