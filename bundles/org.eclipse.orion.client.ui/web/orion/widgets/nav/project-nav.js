@@ -455,14 +455,14 @@ define([
 				toolbarNode: this.toolbarNode
 			});
 			this.explorer.display(this.project);
-			this.toolbarNode.classList.add("projectNavSidebarWrapper"); //$NON-NLS-0$
+			this.toolbarNode.parentNode.classList.add("projectNavSidebarWrapper"); //$NON-NLS-0$
 		},
 		destroy: function() {
 			if (this.explorer) {
 				this.explorer.destroy();
 			}
 			this.explorer = null;
-			this.toolbarNode.classList.remove("projectNavSidebarWrapper"); //$NON-NLS-0$
+			this.toolbarNode.parentNode.classList.remove("projectNavSidebarWrapper"); //$NON-NLS-0$
 		},
 		getProjectJson: function(metadata) {
 			function getJson(children) {
