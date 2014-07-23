@@ -98,6 +98,15 @@ define([
 				return that.incomingCommits = resp.Children;
 			});
 		},
+		_getStash: function() {
+			var that = this;
+			var repository = this.root.repository;
+			var stashLocation = repository.StashLocation;
+			
+			return that.progressService.progress(that.gitClient.doStashList(stashLocation), messages['Getting git stashed changes...']).then(function(resp) {
+				return that.stashedChanges = resp;
+			});
+		},
 		getLocalBranch: function() {
 			var ref = this.log ? this.log.toRef : this.currentBranch;
 			if (ref && ref.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
@@ -229,6 +238,9 @@ define([
 								},
 								{
 									Type: "Synchronized" //$NON-NLS-0$
+								},
+								{
+									Type: "Stash" //$NON-NLS-0$
 								}
 							]));
 						}	
@@ -309,6 +321,23 @@ define([
 				} else {
 					onComplete(that.processChildren(parentItem, []));
 				}
+			} else if (parentItem.Type === "Stash" ) {
+				return Deferred.when(that.stashedChanges || that._getStash(), function(stash) {
+					
+					var nextLocation = stash.NextLocation;
+					
+					var children = stash.Children;
+					
+					children.forEach(function(child,i) {
+						child.stashIndex = i;
+					});
+					
+					if (nextLocation) {
+						children.push({Type:"MoreCommits", NextLocation: nextLocation});
+					}
+					
+					onComplete(that.processChildren(parentItem,children));
+				});
 			} else if (parentItem.Type === "Commit") {  //$NON-NLS-0$
 				onComplete(that.processChildren(parentItem, [{Type: "CommitChanges"}]));  //$NON-NLS-0$
 			} else {
@@ -352,6 +381,7 @@ define([
 		this.incomingActionScope = "IncomingActions"; //$NON-NLS-0$
 		this.outgoingActionScope = "OutgoingActions"; //$NON-NLS-0$
 		this.syncActionScope = "SynchronizedActions"; //$NON-NLS-0$
+		this.stashActionScope = "StashActions";
 		this.createCommands();
 	}
 	GitCommitListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
@@ -494,6 +524,7 @@ define([
 			} else if (currentBranch && !this.simpleLog) {
 				var incomingActionScope = this.incomingActionScope;
 				var outgoingActionScope = this.outgoingActionScope;
+				var stashActionScope = this.stashActionScope;
 				
 				if (lib.node(actionsNodeScope)) {
 					commandService.destroy(actionsNodeScope);
@@ -538,6 +569,9 @@ define([
 
 				commandService.renderCommands(outgoingActionScope, outgoingActionScope, {LocalBranch: localBranch, RemoteBranch: remoteBranch}, this, "button"); //$NON-NLS-0$
 			}
+			
+			commandService.registerCommandContribution(stashActionScope, "eclipse.orion.git.dropStash", 1000);
+			commandService.renderCommands(stashActionScope, stashActionScope, { Clone: repository, Type:"Stash", stashRef : -1}, this, "button");
 		}
 	});
 	
@@ -637,7 +671,7 @@ define([
 						});
 						explorer2.display();
 					}, 0);
-				}  else if (item.Type !== "Commit") { //$NON-NLS-0$
+				} else if (item.Type !== "Commit") { //$NON-NLS-0$
 					if (item.Type !== "NoCommits") { //$NON-NLS-0$
 						sectionItem.className = "gitCommitSectionTableItem"; //$NON-NLS-0$
 						createExpand();
@@ -669,6 +703,7 @@ define([
 					slideoutDiv.innerHTML = slideoutFragment;
 					horizontalBox.appendChild(slideoutDiv);
 				} else {
+					var repository = explorer.model.root.repository;
 					createExpand();
 					sectionItem.className = "sectionTableItem"; //$NON-NLS-0$
 					detailsView = document.createElement("div"); //$NON-NLS-0$
@@ -692,7 +727,8 @@ define([
 					actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$
 					actionsArea.id = itemActionScope;
 					horizontalBox.appendChild(actionsArea);
-					explorer.commandService.renderCommands(itemActionScope, actionsArea, item, explorer, "tool"); //$NON-NLS-0$
+					item.Clone = repository;
+					explorer.commandService.renderCommands(itemActionScope, actionsArea, item, explorer, "button"); //$NON-NLS-0$
 				}
 
 				return td;
