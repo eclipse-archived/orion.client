@@ -217,14 +217,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             helper = this.explorer.model._provideSearchHelper();
         }
 		var params = helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, null, helper.params.replace, true) : null;
-		var link = null;
-		var folders = item.fullPathName.split("/");
-		var parentFolder = folders[folders.length - 1];
-		var parentSpan = document.createElement("span"); //$NON-NLS-0$
-		parentSpan.classList.add("fileParentSpan"); //$NON-NLS-0$
-		parentSpan.appendChild(document.createTextNode(".../" + parentFolder + "/")); //$NON-NLS-0$
-		
-		link = navigatorRenderer.createLink(null, 
+		var link = navigatorRenderer.createLink(null, 
 				{Location: item.location, Name: renderName}, 
 				this.explorer._commandService, 
 				this.explorer._contentTypeService,
@@ -233,11 +226,25 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 				params, 
 				{holderDom: this._lastFileIconDom});
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
+		
+		// create parent folder span and prepend to link
+		var scopeParams = this.explorer.model.getScopingParams(item);
+		var folders = scopeParams.name.split("/"); //$NON-NLS-0$
+		var parentFolder = folders[folders.length - 1];
+		var parentSpan = document.createElement("span"); //$NON-NLS-0$
+		parentSpan.classList.add("fileParentSpan"); //$NON-NLS-0$
+		if (folders.length > 1) {
+			parentSpan.appendChild(document.createTextNode(".../")); //$NON-NLS-0$			
+		}
+		parentSpan.appendChild(document.createTextNode(parentFolder + "/")); //$NON-NLS-0$
 		link.insertBefore(parentSpan, link.firstChild);
+		
+		//trigger a click on the span when the link is clicked
 		link.addEventListener("click", function(){ //$NON-NLS-0$
 			spanHolder.click();
 		});
 
+		// append link to parent span
         spanHolder.appendChild(link);
         spanHolder.classList.add("fileNameSpan"); //$NON-NLS-0$
     };
