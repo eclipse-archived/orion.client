@@ -1,0 +1,422 @@
+ /*******************************************************************************
+ * @license
+ * Licensed Materials - Property of IBM
+ * (c) Copyright IBM Corporation 2013. All Rights Reserved. 
+ * 
+ * Note to U.S. Government Users Restricted Rights:  Use, 
+ * duplication or disclosure restricted by GSA ADP Schedule 
+ * Contract with IBM Corp.
+ *******************************************************************************/
+ /*global define window document*/
+define(['require', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/commands', 'orion/keyBinding', 'orion/dialogs', 'orion/selection',
+		'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/links',
+		'orion/cfui/cFClient', 'orion/Deferred', 'cfui/autodeploy/widgets/CfLoginDialog',
+		'orion/section', 'orion/explorers/explorer', 'cfui/cfUtil', 'cfui/cfCommands'],
+		function(require, lib, mBootstrap, mStatus, mProgress, CommandRegistry, Commands, KeyBinding, mDialogs, mSelection,
+			mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mLinks, 
+			mCFClient, Deferred, CfLoginDialog, mSection, mExplorer, mCfUtil, mCfCommands) {
+
+mBootstrap.startup().then(function(core) {
+	
+	var serviceRegistry = core.serviceRegistry;
+	var preferences = core.preferences;
+	var pluginRegistry = core.pluginRegistry;
+
+	new mDialogs.DialogService(serviceRegistry);
+	var selection = new mSelection.Selection(serviceRegistry, "orion.CloudFoundry.selection");
+	var commandRegistry = new CommandRegistry.CommandRegistry({selection: selection});
+	var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
+	new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
+
+	// ...
+	var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
+	var fileClient = new mFileClient.FileClient(serviceRegistry);
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
+	var cFService = new mCFClient.CFService(serviceRegistry);
+		
+	mGlobalCommands.generateBanner("cfView", serviceRegistry, commandRegistry, preferences, searcher, {});
+	
+	mGlobalCommands.setPageTarget({task: 'Cloud Foundry Applications', serviceRegistry: serviceRegistry, commandService: commandRegistry});
+	
+	var orgsNode = document.getElementById("orgsNode");
+	var applicationsNode = document.getElementById("applicationsTable");
+	var orphanRoutesNode = document.getElementById("orphanRoutesTable");
+	
+	function promptLogin(cFService) {
+		var deferred = new Deferred();
+		function loginFunc(user, password){
+			progressService.showWhile(cFService.login(user, password), "Logging in to Cloud Foundry").then(function (result) {
+				deferred.resolve(result);					
+			}, function(error) {
+				deferred.reject(error);					
+			});
+		}
+		
+		(new CfLoginDialog({func: loginFunc})).show();
+		return deferred;
+	}
+	
+	function handleError(error){
+			if(error.responseText){
+				try{
+					error = JSON.parse(error.responseText);
+				} catch (e){
+					error = {Message: error.responseText, HttpCode: error.status}
+				}
+			}
+			if(error.HttpCode && error.HttpCode === 401){
+				promptLogin(cFService).then(
+					function(){
+						displayOrgsAndSpaces();
+					},
+					handleError
+				);
+			} else {
+				progressService.setProgressResult(error);
+			}
+	}
+	
+	function displayOrgsAndSpaces(){
+		progressService.showWhile(mCfUtil.getTarget(preferences), "Checking for Cloud Foundry settings").then(function(target){
+			progressService.showWhile(cFService.getOrgs(target), "Listing organizations").then(function(result){
+				
+				var table = document.createElement("table");
+				table.className = "centerTable";
+				var tr1 = document.createElement("tr");
+				table.appendChild(tr1);
+				
+					var td1 = document.createElement("td");
+					td1.className = "orgsLabel";
+					td1.id = "orgsLabel";
+					var label = document.createElement("label");
+					label.appendChild(document.createTextNode("Organization:"));
+					td1.appendChild(label);
+					tr1.appendChild(td1);
+
+					var td2 = document.createElement("td");
+					td2.className = "orgsSelect";
+					td2.id = "orgsDropdown";
+					var orgsDropdown = document.createElement("select");
+					result.Orgs.forEach(function(org){
+						var option = document.createElement("option");
+						option.appendChild(document.createTextNode(org.Name));
+						option.org = org;
+						orgsDropdown.appendChild(option);
+					});
+					
+					orgsDropdown.onchange = function(event){
+						var selectedOrg = event.target.selectedOptions[0].org;
+						loadTargets(selectedOrg);
+					};
+					
+					td2.appendChild(orgsDropdown);
+					tr1.appendChild(td2);
+					
+					var tr2 = document.createElement("tr");
+					table.appendChild(tr2);
+					
+					td1 = document.createElement("td");
+					td1.className = "orgsLabel";
+					td1.id = "spacesLabel";
+					var label = document.createElement("label");
+					label.appendChild(document.createTextNode("Space:"));
+					td1.appendChild(label);
+					tr2.appendChild(td1);
+
+					td2 = document.createElement("td");
+					td2.className = "orgsSelect";
+					td2.id = "spacesDropdown";
+					var spacesDropdown = document.createElement("select");
+					
+					if(result.Orgs && result.Orgs.length>0){
+						loadTargets(result.Orgs[0]);
+					}
+					
+					spacesDropdown.onchange = function(event){
+						var selectedSpace = event.target.selectedOptions[0].space;
+						target.Space = selectedSpace.Name;
+						target.Org = selectedSpace.Org.Name;
+						displayApplications(target);
+					};
+					
+					td2.appendChild(spacesDropdown);
+					tr2.appendChild(td2);
+					
+					function loadTargets(org){
+						org.Spaces.forEach(function(space){
+							var option = document.createElement("option");
+							space.Org = org;
+							option.appendChild(document.createTextNode(space.Name));
+							option.space = space;
+							spacesDropdown.appendChild(option);
+						});
+						if(org.Spaces.length > 0){
+							var selectedSpace = org.Spaces[0];
+							target.Space = selectedSpace.Name;
+							target.Org = selectedSpace.Org.Name
+							displayApplications(target);
+						}
+					}
+					orgsNode.appendChild(table);
+
+			}.bind(this),
+			function(error){
+				handleError(error);
+			});
+		}.bind(this),
+		function(error){
+			handleError(error);
+		});
+	}
+	
+	function ApplicationsRenderer (options) {
+		this._init(options);
+	}
+	ApplicationsRenderer.prototype = new mExplorer.SelectionRenderer(); 
+	ApplicationsRenderer.prototype.constructor = ApplicationsRenderer;
+	ApplicationsRenderer.prototype.getLabelColumnIndex = function() {
+		return 0;
+	};
+	
+	ApplicationsRenderer.prototype.getCellHeaderElement = function(col_no){
+		
+		var col = document.createElement("th"); //$NON-NLS-0$
+		var h2 = document.createElement("h2"); //$NON-NLS-0$
+		col.appendChild(h2);
+		switch(col_no){
+		case 0: 
+			h2.textContent = "Name";
+			return col;
+		case 1:
+			h2.textContent = "Status";
+			return col;
+		}
+	};
+	
+	ApplicationsRenderer.prototype.emptyCallback = function(bodyElement){
+		var tr = document.createElement("tr");
+		var td = document.createElement("td");
+		td.appendChild(document.createTextNode("You have no applications in this space"));
+		tr.appendChild(td);
+		bodyElement.appendChild(tr);
+	}
+	
+	ApplicationsRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		
+			var col = document.createElement("td"); //$NON-NLS-0$
+			var span = document.createElement("span"); //$NON-NLS-0$
+			span.id = tableRow.id+"navSpan"; //$NON-NLS-0$
+			col.appendChild(span);
+			span.className = "mainNavColumn singleNavColumn"; //$NON-NLS-0$
+			var val = "";
+		
+		if(item.Type === "Route"){
+			switch (col_no) {
+				case 0:
+					val = item.host + "." + item.domain.name;
+					break;
+				case 1:
+					val = "";
+					break;
+				default:
+					return null;
+			}
+		} else {
+			switch(col_no){
+				case 0:
+					this.getExpandImage(tableRow, span);				
+					val = item.name;
+					break;
+				case 1:
+					val = item.state;
+					break;
+				default:
+					return null;
+			}
+		}
+		
+		span.appendChild(document.createTextNode(val));
+		return col;
+	};
+	
+	function ApplicationsModel(apps){
+		this.apps = apps;
+	}
+	
+	ApplicationsModel.prototype = {
+		constructor: ApplicationsModel,
+		getRoot: function(onItem){
+			onItem(this.apps);
+		},
+		decorateChildren: function(item, children, type){
+			if(!children){
+				return;
+			}
+			children.forEach(function(child){
+				child.Type = type;
+				child.parent = item;
+			});
+		},
+		getChildren: function(item, onItem){
+			if(item.apps){
+				if(!item.children){
+					this.decorateChildren(item, item.apps, "App");
+					item.children = item.apps;
+				}
+				return onItem(item.apps);
+			}
+			if(!item.children){
+				this.decorateChildren(item, item.routes, "Route");
+				item.children = item.routes;
+			}
+			return onItem(item.routes);
+		},
+		getId: function(item){
+			if(!item){
+				return "rootApps";
+			}
+			return item.guid;
+		},
+		destroy: function(){}
+	};
+	
+	var explorer = new mExplorer.Explorer(
+			serviceRegistry,
+			selection,
+		new ApplicationsRenderer({checkbox: false, singleSelection: true,	treeTableClass: "sectionTreeTable",	cachePrefix: "CfExplorer"}),
+				commandRegistry);
+	
+	mCfCommands.createCfCommands(serviceRegistry, commandRegistry, explorer);
+
+	
+	
+	function displayApplications(target){
+		
+		lib.empty(applicationsNode);
+		lib.empty(orphanRoutesNode);
+		
+		var applicationsSection = new mSection.Section(applicationsNode, {
+							id: "applicationsSection", //$NON-NLS-0$
+							title: "Applications",
+							slideout: true,
+							canHide: false,
+							preferenceService: preferences,
+							keepHeader: true,
+							headerClass: ["sectionTreeTableHeader"]
+						}); 
+						
+		progressService.showWhile(cFService.getApps(target), "Listing applications").then(function(apps){
+			
+			var explorerParent = document.createElement("div");
+			explorerParent.id = "applicationsSectionParent";
+			explorer.parent = explorerParent;
+				
+			var model = new ApplicationsModel(apps);
+			
+			applicationsSection.embedExplorer(explorer);
+			
+			explorer.createTree(explorerParent, model, {});
+			
+			progressService.showWhile(cFService.getRoutes(target), "Loading routes").then(function(routes){
+				
+			displayOrphanRoutes(routes, apps);
+			
+			}, function(error){
+				handleError(error);
+			});
+		}, handleError);
+	}
+	
+	
+	function OrphanRoutesRenderer(options){
+		this._init(options);
+	}
+	OrphanRoutesRenderer.prototype = new mExplorer.SelectionRenderer(); 
+	OrphanRoutesRenderer.prototype.constructor = OrphanRoutesRenderer;
+	OrphanRoutesRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		
+		var col = document.createElement("td"); //$NON-NLS-0$
+		var span = document.createElement("span"); //$NON-NLS-0$
+		span.id = tableRow.id+"navSpan"; //$NON-NLS-0$
+		col.appendChild(span);
+		span.className = "mainNavColumn singleNavColumn"; //$NON-NLS-0$
+		var val = "";
+	
+		switch (col_no) {
+			case 0:
+				val = item.Host + "." + item.DomainName;
+				break;
+			default:
+				return null;
+		}
+		
+		span.appendChild(document.createTextNode(val));
+		return col;
+	};
+	
+	OrphanRoutesRenderer.prototype.emptyCallback = function(bodyElement){
+		var tr = document.createElement("tr");
+		var td = document.createElement("td");
+		td.appendChild(document.createTextNode("You have no orphan routes in this space"));
+		tr.appendChild(td);
+		bodyElement.appendChild(tr);
+	}
+	
+	var routesSelection = new mSelection.Selection(serviceRegistry, "orion.Routes.selection");
+	var routesExplorer = new mExplorer.Explorer(
+			serviceRegistry,
+			routesSelection,
+	new OrphanRoutesRenderer({checkbox: false, singleSelection: true,	treeTableClass: "sectionTreeTable",	cachePrefix: "OrphanRoutesExplorer"}),
+				commandRegistry);
+				
+	mCfCommands.createRoutesCommands(serviceRegistry, commandRegistry, routesExplorer);
+		
+	function displayOrphanRoutes(routes, apps){
+		
+		lib.empty(orphanRoutesNode);
+		
+		var orphanRoutesSection = new mSection.Section(orphanRoutesNode, {
+							id: "orphanRoutes", //$NON-NLS-0$
+							title: "Orphan Routes",
+							slideout: true,
+							canHide: false,
+							preferenceService: preferences,
+							keepHeader: true,
+							headerClass: ["sectionTreeTableHeader"]
+						});
+		
+		var explorerParent = document.createElement("div");
+		explorerParent.id = "orphanRoutesParent";
+		routesExplorer.parent = explorerParent;
+		
+		var orphanRoutes = [];
+		
+		if(routes && routes.Routes){
+			routes.Routes.forEach(function(route){
+				if(apps.apps.every(function(app){
+					return app.routes.every(function(appRoute){
+						return appRoute.guid !== route.Guid;
+					});
+				})){
+					 orphanRoutes.push(route);
+				}
+			});
+		}
+		
+		var routesModel = new mExplorer.ExplorerFlatModel(null, null, orphanRoutes);
+		routesModel.getId = function(item){return item.Guid;}
+		
+		orphanRoutesSection.embedExplorer(routesExplorer);
+		
+		routesExplorer.createTree(explorerParent, routesModel, {});
+		
+	}
+	
+	displayOrgsAndSpaces();
+	
+	});
+
+//end of define
+});
+

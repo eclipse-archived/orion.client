@@ -1,0 +1,31 @@
+@import "../../css/layout.css";
+@import "../../css/ide.css";
+@import "../../css/sections.css";
+@import "../../css/images.css";
+@import "../../css/theme.css";
+
+.orgsLabel {
+	color: #6d6d6d;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.orgsSelect{
+    padding-top: 4px;
+    padding-left: 15px;
+    text-align: right;
+}
+
+.orgsSelect select{
+	height: 24px;
+    width: 250px;
+}
+
+.centerTable{
+	margin-left: auto;
+    margin-right: auto;
+}
+
+#orgsNode{
+	text-align: center;
+}

@@ -1,0 +1,46 @@
+<!doctype html>
+<html style="height: 100%" >
+    <head>
+		<meta name="copyright" content="(c) Copyright IBM Corporation 2013. All Rights Reserved. " >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    	<title>Cloud Foundry Applications</title>
+		<link rel="stylesheet" type="text/css" href="css/cloudfoundry.css" />
+		<link rel="icon" href="/images/repository.png" type="image/png">
+		<script src="../requirejs/require.js"></script>
+		<script type="text/javascript">
+		require({
+		  baseUrl: '..',
+		
+		  // set the paths to our library packages
+		  packages: [],
+		
+		  paths: {
+		    text: 'requirejs/text',
+		    i18n: 'requirejs/i18n',
+		    domReady: 'requirejs/domReady'
+		  }
+		});
+		
+		require(["cfui/cloudfoundry"]);
+		</script>	 	
+ 	
+</head>
+
+	<body id="cfView" style="height: 100%;" class="claro orionPage">
+	<div id="sideMenu" class="sideMenu"></div>
+		<div id="pageContent" class="content-fixedHeight">
+			<div class="fixedToolbarHolder mainpane mainPanelLayout">
+				<div class="mainToolbar toolComposite" id="pageToolbar"></div>
+				<div id="mainNode" class="toolbarTarget pageLayoutTarget">
+					<div id="orgsNode" class="displayTable"></div>
+					<div id="applicationsTable" class="displayTable">
+					</div>
+					<div id="orphanRoutesTable" class="displayTable">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="footer-fixed-bottom footer" id="footer"></div>
+	</body>
+</html>
