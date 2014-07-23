@@ -20,8 +20,7 @@
 	margin: 4px;
 	float: left;
 	width: 95%; /* for older browsers */
-	width: -webkit-calc(100% - 8px);
-	width: calc(100% - 8px);
+	width: calc(100% - 12px);
 }
 
 .outlineRowMatchesFilter {
