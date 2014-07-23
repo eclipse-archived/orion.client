@@ -1,7 +1,7 @@
  /*******************************************************************************
  * @license
  * Licensed Materials - Property of IBM
- * (c) Copyright IBM Corporation 2013. All Rights Reserved. 
+ * (c) Copyright IBM Corporation 2014. All Rights Reserved. 
  * 
  * Note to U.S. Government Users Restricted Rights:  Use, 
  * duplication or disclosure restricted by GSA ADP Schedule 
@@ -58,23 +58,23 @@ mBootstrap.startup().then(function(core) {
 	}
 	
 	function handleError(error){
-			if(error.responseText){
-				try{
-					error = JSON.parse(error.responseText);
-				} catch (e){
-					error = {Message: error.responseText, HttpCode: error.status}
-				}
+		if(error.responseText){
+			try{
+				error = JSON.parse(error.responseText);
+			} catch (e){
+				error = {Message: error.responseText, HttpCode: error.status};
 			}
-			if(error.HttpCode && error.HttpCode === 401){
-				promptLogin(cFService).then(
-					function(){
-						displayOrgsAndSpaces();
-					},
-					handleError
-				);
-			} else {
-				progressService.setProgressResult(error);
-			}
+		}
+		if(error.HttpCode && error.HttpCode === 401){
+			promptLogin(cFService).then(
+				function(){
+					displayOrgsAndSpaces();
+				},
+				handleError
+			);
+		} else {
+			progressService.setProgressResult(error);
+		}
 	}
 	
 	function getUrlLinkNode(url, name){
@@ -166,7 +166,7 @@ mBootstrap.startup().then(function(core) {
 						if(org.Spaces.length > 0){
 							var selectedSpace = org.Spaces[0];
 							target.Space = selectedSpace.Name;
-							target.Org = selectedSpace.Org.Name
+							target.Org = selectedSpace.Org.Name;
 							displayApplications(target);
 						}
 					}
@@ -197,7 +197,7 @@ mBootstrap.startup().then(function(core) {
 		td.appendChild(document.createTextNode("You have no applications in this space"));
 		tr.appendChild(td);
 		bodyElement.appendChild(tr);
-	}
+	};
 	
 	ApplicationsRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		
@@ -322,8 +322,6 @@ mBootstrap.startup().then(function(core) {
 	
 	mCfCommands.createCfCommands(serviceRegistry, commandRegistry, explorer);
 
-	
-	
 	function displayApplications(target){
 		
 		lib.empty(applicationsNode);
@@ -353,7 +351,7 @@ mBootstrap.startup().then(function(core) {
 			
 			progressService.showWhile(cFService.getRoutes(target), "Loading routes").then(function(routes){
 				
-			displayOrphanRoutes(routes, apps);
+			displayOrphanRoutes(routes, apps, target);
 			
 			}, function(error){
 				handleError(error);
@@ -394,7 +392,7 @@ mBootstrap.startup().then(function(core) {
 		td.appendChild(document.createTextNode("You have no orphan routes in this space"));
 		tr.appendChild(td);
 		bodyElement.appendChild(tr);
-	}
+	};
 	
 	var routesSelection = new mSelection.Selection(serviceRegistry, "orion.Routes.selection");
 	var routesExplorer = new mExplorer.Explorer(
@@ -405,19 +403,23 @@ mBootstrap.startup().then(function(core) {
 				
 	mCfCommands.createRoutesCommands(serviceRegistry, commandRegistry, routesExplorer);
 		
-	function displayOrphanRoutes(routes, apps){
+	function displayOrphanRoutes(routes, apps, target){
 		
 		lib.empty(orphanRoutesNode);
-		
+			
 		var orphanRoutesSection = new mSection.Section(orphanRoutesNode, {
-							id: "orphanRoutes", //$NON-NLS-0$
-							title: "Orphan Routes",
-							slideout: true,
-							canHide: false,
-							preferenceService: preferences,
-							keepHeader: true,
-							headerClass: ["sectionTreeTableHeader"]
-						});
+			id: "orphanRoutes", //$NON-NLS-0$
+			title: "Orphan Routes",
+			slideout: true,
+			canHide: false,
+			preferenceService: preferences,
+			keepHeader: true,
+			headerClass: ["sectionTreeTableHeader"]
+		});
+		
+		var actionsNodeScope = orphanRoutesSection.actionsNode.id;
+		commandRegistry.registerCommandContribution(actionsNodeScope, "orion.cf.CreateRoute", 1000); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, target, this, "button"); //$NON-NLS-0$
 		
 		var explorerParent = document.createElement("div");
 		explorerParent.id = "orphanRoutesParent";
@@ -438,7 +440,7 @@ mBootstrap.startup().then(function(core) {
 		}
 		
 		var routesModel = new mExplorer.ExplorerFlatModel(null, null, orphanRoutes);
-		routesModel.getId = function(item){return item.Guid;}
+		routesModel.getId = function(item){return item.Guid;};
 		
 		orphanRoutesSection.embedExplorer(routesExplorer);
 		

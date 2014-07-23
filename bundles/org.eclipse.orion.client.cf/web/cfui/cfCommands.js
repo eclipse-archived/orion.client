@@ -12,7 +12,40 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry'], function(D
 	return {
 		createCfCommands: function(serviceRegistry, commandService, explorer){
 			
-			var progress = serviceRegistry.getService("orion.page.progress");
+			var progressService = serviceRegistry.getService("orion.page.progress");
+			var cfClient = serviceRegistry.getService("orion.cf.service");
+			
+			var createRouteParameters = new mCommandRegistry.ParametersDescription(
+					[new mCommandRegistry.CommandParameter("domain", "text", 'Domain:'),
+					 new mCommandRegistry.CommandParameter("host", "text", 'Host:')]);
+			
+			var createRouteCommand = new mCommands.Command({
+				name : "Create",
+				tooltip: "Create route",
+				id : "orion.cf.CreateRoute",
+				parameters: createRouteParameters,
+				
+				callback : function(data) {
+					var target = data.items;
+					
+					var domain = data.parameters.valueFor("domain");
+					var host = data.parameters.valueFor("host");
+					
+					progressService.showWhile(cfClient.createRoute(target, 
+							domain, host), "Creating route...").then(
+						function(jazzResp) {
+							explorer.changedItem();
+						}, function (error) {
+							exports.handleError(error, progressService);
+						}
+					);
+				},
+				visibleWhen : function(item) {
+					return true;
+				}
+			});
+			
+			commandService.addCommand(createRouteCommand);
 			
 			var deleteRouteCommand = new mCommands.Command({
 				name : "Delete",
