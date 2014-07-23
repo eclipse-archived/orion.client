@@ -17,9 +17,31 @@ define(["orion/editor/templates","orion/objects","orion/Deferred"], function(mTe
 	/**
 	 * @description Creates a new delegate to create keyword and template proposals
 	 */
-	function TemplateCollector(serviceRegistry, contentType){
+	function TemplateCollector(serviceRegistry, inputManager){
+		var self = this;
 		this.serviceRegistry = serviceRegistry;
-		this.contentType = contentType;
+		
+		inputManager.addEventListener("InputChanged", function() {
+			//workarounds
+			var contentType = inputManager.getContentType();
+			if ("text/plain" === contentType.id || "image" === contentType.id.substring(0,5)){
+				return;
+			}
+
+			// Avoid registering the same service multiple times
+			var id = "orion.templates." + contentType.id;  //$NON-NLS-0$
+			var registered = serviceRegistry.getServiceReferences("orion.edit.contentassist").some(function(service) {
+				return service.getProperty("id") === id;
+			});
+			if (registered) return;
+
+			serviceRegistry.registerService("orion.edit.contentassist", self, {
+				contentType: [contentType.id],  //$NON-NLS-0$
+				name: 'templateCollector',  //$NON-NLS-0$
+				id: id,
+			});
+		});
+		this.getTemplates();
 	}
 	
 	TemplateCollector.prototype = new mTemplates.TemplateContentAssist(null,[]);
@@ -40,7 +62,14 @@ define(["orion/editor/templates","orion/objects","orion/Deferred"], function(mTe
 		},
 		
 		/**
-		 * @description get the templates
+		 * @description set the content type to be returned
+		 */
+		setContentType : function(contentType){
+			this.contentType = contentType;
+		},
+		
+		/**
+		 * @description get the raw template objects
 		 * called by templateExplorer
 		 */
 		getTemplates: function() {
@@ -55,6 +84,7 @@ define(["orion/editor/templates","orion/objects","orion/Deferred"], function(mTe
 			return Deferred.all(deferredTemplates, function(error) {
 				console.error("error collecting the templates2: " + error.message);})
 			.then(function(templateObjectsArray) {
+				if (!self.contentType) return new Deferred().reject("Error collecting the templates. ContentType has not been set.");
 				templateObjectsArray.forEach(function(templateObjects){
 					if (!templateObjects) {
 						return;
@@ -93,6 +123,7 @@ define(["orion/editor/templates","orion/objects","orion/Deferred"], function(mTe
 				console.error("error collecting the templates: " + error.message);
 			})
 			.then( function(templateObjectsArray) {
+				if (!self.contentType) return new Deferred().reject("Error collecting the templates. ContentType has not been set.");
 				var collectedProposals = [];
 				templateObjectsArray.forEach(function(templateObjects) {
 					if (!templateObjects) {

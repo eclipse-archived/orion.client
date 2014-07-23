@@ -44,7 +44,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/templateExpl
 		this.fileClient = params.fileClient;
 		this.editorInputManager = params.editorInputManager;
 		this.outlineService = params.outlineService;
-		this.templateExplorerService = params.templateExplorerService;
+		this.templateCollector = params.templateCollector;
 		this.parentNode = lib.node(params.parent);
 		this.toolbarNode = lib.node(params.toolbar);
 		this.selection = params.selection;
@@ -72,7 +72,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/templateExpl
 			var fileClient = this.fileClient;
 			var editorInputManager = this.editorInputManager;
 			var outlineService = this.outlineService;
-			var templateExplorerService = this.templateExplorerService;
+			var templateCollector = this.templateCollector;
 			var parentNode = this.parentNode;
 			var progressService = this.progressService;
 			var selection = this.selection;
@@ -147,7 +147,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/templateExpl
 				serviceRegistry: serviceRegistry,
 				contentTypeRegistry: contentTypeRegistry,
 				preferences: this.preferences,
-				templateExplorerService: templateExplorerService,
+				templateCollector: templateCollector,
 				commandService: commandRegistry,
 				selectionService: selection,
 				inputManager: editorInputManager,

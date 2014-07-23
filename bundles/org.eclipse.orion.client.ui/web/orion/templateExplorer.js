@@ -132,56 +132,14 @@ define([
 	 		}
  		}
  		
- 		if (item.href) {
-			this._createLink(linkContents, item.href, contentsNode);
- 		} else if (item.line || item.column || item.start) {
- 			var href = new URITemplate("#{,resource,params*}").expand({resource: this.title, params: item}); //$NON-NLS-0$
-			this._createLink(linkContents, href, contentsNode);
- 			item.outlineLink = href;
- 		} else {
-			contentsNode.appendChild(linkContents); //$NON-NLS-0$
- 		}
+ 		contentsNode.appendChild(linkContents); //$NON-NLS-0$
  	};
-	
-	TemplateRenderer.prototype._createLink = function(contentsNode, href, parentNode) {
-		var link = document.createElement("a"); //$NON-NLS-0$
-		parentNode.appendChild(link);
-		
-		link.classList.add("navlinkonpage"); //$NON-NLS-0$
-		link.appendChild(contentsNode);
-		
-		// if a selection service has been specified, we will use it for link selection.
-		// Otherwise we assume following the href in the anchor tag is enough.
-		if (this.selectionService) {
-			link.style.cursor = "pointer"; //$NON-NLS-0$
-			link.addEventListener("click", function(event) { //$NON-NLS-0$
-				this._followLink(event, href);
-			}.bind(this), false);
-		} else {
-			// if there is no selection service, we rely on normal link following
-			link.href = href;	
-		}
-		
-		return link;
-	};
 	
 	//This is an optional function for explorerNavHandler. It performs an action when Enter is pressed on a table row.
     //The explorerNavHandler hooked up by the explorer will check if this function exists and call it on Enter key press.
     TemplateRenderer.prototype.performRowAction = function(event, item) {
-//		this._followLink(event, item.outlineLink);
+		// Invoke templates here?
     };
-    
-    TemplateRenderer.prototype._followLink = function(event, url) {
-		var selectionService = this.selectionService;
-		if (selectionService) {
-			if (mUIUtils.openInNewWindow(event)) {
-				mUIUtils.followLink(url, event);
-			} else {
-				selectionService.setSelections(url);
-			}
-		}
-    };
-	
 	
 	function TemplateExplorerWidget(serviceRegistry, selection, title, inputManager) {
 		/*	we intentionally do not do this:
@@ -397,20 +355,27 @@ define([
 		_init: function(options) {
 			var parent = lib.node(options.parent), toolbar = lib.node(options.toolbar);
 			if (!parent) { throw new Error("no parent"); } //$NON-NLS-0$
-			if (!options.templateExplorerService) {throw new Error("no template explorer service"); } //$NON-NLS-0$
+			if (!options.templateCollector) {throw new Error("no template collector"); } //$NON-NLS-0$
 			this._parent = parent;
 			this._toolbar = toolbar;
 			this._serviceRegistry = options.serviceRegistry;
 			this._contentTypeRegistry = options.contentTypeRegistry;
-			this._templateExplorerService = options.templateExplorerService;
+			this._templateCollector = options.templateCollector;
 			this._commandService = options.commandService;
 			this._selectionService = options.selectionService;
 			this._inputManager = options.inputManager;
 			this._sidebar = options.sidebar;
 			var _self = this;
+			//Add templateCollector
+			
+			_self._sidebar.addViewMode("templateExplorer", { //$NON-NLS-0$
+				label: "Templates", //$NON-NLS-0$
+				create: _self.createViewMode.bind(_self),
+				destroy: _self.destroyViewMode.bind(_self)
+			});
 
 			this._inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
-				_self.setContentType(event.contentType, event.location);
+				_self._templateCollector.setContentType(event.contentType, event.location);
 				if (_self._editor !== event.editor) {
 					if (_self._editor) {
 						_self._editor.removeEventListener("InputChanged", _self._editorListener); //$NON-NLS-0$
@@ -421,38 +386,38 @@ define([
 					}
 				}
 			});
-
-			Deferred.when(_self._templateExplorerService, function(service) {
-				service.addEventListener("templateExplorer", function(event) { //$NON-NLS-0$
-					_self.providerId = event.providerId;
-					_self._renderTemplateExplorer(event.templateExplorer, event.title);
-				});
-			});
 		},
-		/** Invokes the template explorer service to produce a templateExplorer */
+		/** Produce a templateExplorer */
 		generateTemplateExplorer: function() {
+			var _self = this;
+			var sidebar = this._sidebar;
+			var openTemplateExplorerCommand = new mCommands.Command({
+				name: "Open Template Explorer", //$NON-NLS-0$
+				id: "orion.openTemplateExplorer", //$NON-NLS-0$
+				callback: function () {
+					var mainSplitter = mGlobalCommands.getMainSplitter();
+					if (mainSplitter.splitter.isClosed()) {
+						mainSplitter.splitter.toggleSidePanel();
+					}
+					if (sidebar.getActiveViewModeId() !== "templateExplorer") {
+						sidebar.setViewMode("templateExplorer");
+					}
+					if (_self._filterInput) {
+						_self._previousActiveElement = document.activeElement;
+						_self._filterInput.select();
+					}
+				}
+			});
+			this._commandService.addCommand(openTemplateExplorerCommand);
+			this._commandService.registerCommandContribution(this._toolbar.id, "orion.openTemplateExplorer", 1, null, true, new KeyBinding.KeyBinding("O", true, false, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
+			this._commandService.renderCommands(this._toolbar.id, this._toolbar, {}, {}, "tool"); //$NON-NLS-0$
+			
+			sidebar.renderViewModeMenu();
+			
 			if (!this._isActive()) {
 				return;
 			}
-			// Bail we're in the process of looking up capable providers
-			if (this._providerLookup) {
-				return;
-			}
-			this._templateExplorerService.emitTemplateExplorer(this._inputManager);
-		},
-		setSelectedProvider: function(/** orion.serviceregistry.ServiceReference */ provider) {
-			this.providerId = provider.getProperty("id"); //$NON-NLS-0$
-			this.providerName = provider.getProperty("name"); //$NON-NLS-0$
-			this._templateExplorerService.setProvider(provider);
-		},
-		setTemplateExplorerProviders: function(providers) {
-			var oldProviders = this.templateExplorerProviders;
-			var isActive = this._isActive();
-			this.templateExplorerProviders = providers;
-			this._updateViewModes(oldProviders, this.templateExplorerProviders);
-			if (isActive) {
-				this._selectNewProvider();
-			}
+			this.emitTemplateExplorer(this._inputManager);
 		},
 		_renderTemplateExplorer: function(templateExplorerModel, title) {
 			var contentNode = this._parent;
@@ -465,86 +430,14 @@ define([
 				treeModel.doExpansions(this.explorer.myTree);
 			}
 		},
-		_selectNewProvider: function() {
-			var newProviders = this.templateExplorerProviders;
-			// If the currently selected provider is not among the new set of providers, pick another one
-			var _self = this, sidebar = _self._sidebar;
-			var isStaleProvider = newProviders.every(function(provider) {
-				return _self.providerId !== provider.getProperty("id"); //$NON-NLS-0$
-			});
-			if (isStaleProvider) {
-				var next = newProviders[0];
-				if (next) {
-					sidebar.setViewMode(this._viewModeId(next));
-				} else {
-					sidebar.setViewMode(sidebar.defaultViewMode);
-				}
-			}
-		},
-		/** @returns {String} view mode id for the templateExplorer provider */
-		_viewModeId: function(provider) {
-			return "templateExplorer." + provider.getProperty("id"); //$NON-NLS-1$ //$NON-NLS-0$
-		},
-		/**
-		 * @param {orion.serviceregistry.ServiceReference[]} oldProviders
-		 * @param {orion.serviceregistry.ServiceReference[]} newProviders
-		 */
-		_updateViewModes: function(oldProviders, newProviders) {
-			var _self = this;
-			if (oldProviders) {
-				oldProviders.forEach(function(provider) {
-					_self._sidebar.removeViewMode(_self._viewModeId(provider));
-				});
-			}
-			newProviders.forEach(function(provider) {
-				_self._sidebar.addViewMode(_self._viewModeId(provider), { //$NON-NLS-0$
-					label: provider.displayName || provider.getProperty("name") || (provider.name + provider.serviceId) || "undefined", //$NON-NLS-1$ //$NON-NLS-0$
-					create: _self.createViewMode.bind(_self, provider),
-					destroy: _self.destroyViewMode.bind(_self, provider)
-				});
-			});
-			
-			var sidebar = _self._sidebar;
-			this._commandService.unregisterCommandContribution(this._toolbar.id, "orion.openTemplateExplorer", null); //$NON-NLS-0$
-			
-			if (newProviders && newProviders[0]) {
-				var defaultTemplateExplorerId = _self._viewModeId(newProviders[0]);
-				var openTemplateExplorerCommand = new mCommands.Command({
-					name: "Open Template Explorer", //$NON-NLS-0$
-					id: "orion.openTemplateExplorer", //$NON-NLS-0$
-					callback: function () {
-						var mainSplitter = mGlobalCommands.getMainSplitter();
-						if (mainSplitter.splitter.isClosed()) {
-							mainSplitter.splitter.toggleSidePanel();
-						}
-						if (sidebar.getActiveViewModeId() !== defaultTemplateExplorerId) {
-							sidebar.setViewMode(defaultTemplateExplorerId);
-						}
-						if (_self._filterInput) {
-							_self._previousActiveElement = document.activeElement;
-							_self._filterInput.select();
-						}
-					}
-				});
-				this._commandService.addCommand(openTemplateExplorerCommand);
-				this._commandService.registerCommandContribution(this._toolbar.id, "orion.openTemplateExplorer", 1, null, true, new KeyBinding.KeyBinding("O", true, false, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
-				this._commandService.renderCommands(this._toolbar.id, this._toolbar, {}, {}, "tool"); //$NON-NLS-0$
-			}
-
-			sidebar.renderViewModeMenu();
-		},
 		_isActive: function() {
 			var viewModeId = this._sidebar.getActiveViewModeId();
 			if (!viewModeId) {
 				return false;
 			}
-			var _self = this;
-			return this.templateExplorerProviders && this.templateExplorerProviders.some(function(provider) {
-				return viewModeId === _self._viewModeId(provider);
-			});
+			return viewModeId === "templateExplorer";
 		},
 		createViewMode: function(provider) {
-			this.setSelectedProvider(provider);
 			this._createFilterInput();
 			this.generateTemplateExplorer();
 		},
@@ -609,6 +502,7 @@ define([
 		 * @param {String} title TODO this is deprecated, should be removed along with "pattern" property of template explorers.
 		 */
 		setContentType: function(fileContentType, title) {
+			//use templateCollector to set the proper templates for the file
 			var allTemplateExplorerProviders = this._serviceRegistry.getServiceReferences("orion.edit.templateExplorer"); //$NON-NLS-0$
 			var _self = this;
 			// Filter to capable providers
@@ -642,102 +536,54 @@ define([
 			});
 			Deferred.all(deferreds, function(error) { return error; }).then(function(){
 				_self._providerLookup = false;
-				_self._templateExplorerService.setTemplateExplorerProviders(filteredProviders);
-				_self.setTemplateExplorerProviders(filteredProviders);
 				_self.generateTemplateExplorer();
 			});
-		}
+		},
+		
+		emitTemplateExplorer: function(inputManager) {
+			var editor = inputManager.getEditor();
+			var title = editor.getTitle();
+			var contentType = inputManager.getContentType();
+			var editorContext = EditorContext.getEditorContext(this._serviceRegistry);
+			var templateExplorer = this.computeTemplateExplorer(editorContext, {contentType: contentType});
+			templateExplorer.then(this._renderTemplateExplorer.bind(this));
+		},
+		
+		computeTemplateExplorer : function(editorContext, options) {
+	    	var promisedTemplates = this._templateCollector.getTemplates();
+	    	return promisedTemplates.then(function(templates) {
+				var templateItems = [];
+		    	templates.forEach(function(template){
+		    		var pre = template.prefix || 'Undefined';
+		    		var index = -1;
+		    		templateItems.forEach(function(item, i){
+		    			if(item.label === pre){
+		    				index = i;
+		    			}
+		    		});
+		    		
+		    		var obj;
+		    		if(index === -1){
+		    			obj = {label: pre};
+		    			templateItems.push(obj);
+		    		} else{
+		    			obj = templateItems[index];
+		    		}
+		    		
+		    		if (obj.children)
+		    			obj.children.push({label: template.name, labelPost: template.description, template: template});
+		    		else
+		    			obj.children = [{label: template.name, labelPost: template.description, template: template}];
+		    	});
+		    	return new Deferred().resolve(templateItems);
+	    	});
+		},
 	};
 	TemplateExplorer.prototype.constructor = TemplateExplorer;
-	
-	/**
-	 * Constructs a new template explorer service. Clients should obtain a templateExplorer service by requesting
-	 * the service <code>orion.edit.templateExplorer</code> from the service registry. This service constructor
-	 * is only intended to be used by page service registry initialization code.
-	 * @name orion.templates.TemplateExplorerService
-	 * @class <code>TemplateExplorerService</code> dispatches an event when a templateExplorer for a resource is available.
-	 * Clients may listen to the service's <code>templateExplorer</code> event to receive notification when this occurs.
-	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry The service registry to use for obtaining
-	 * templateExplorer providers.
-	 * @param {orion.preferences.PreferencesService} options.preferences The preferences service to use.
-	 */
-	function TemplateExplorerService(options) {
-		this._serviceRegistry = options.serviceRegistry;
-		this._preferences = options.preferences;
-		EventTarget.attach(this);
-		this._serviceRegistration = this._serviceRegistry.registerService("orion.edit.templateExplorer", this); //$NON-NLS-0$
-		this._templateExplorerPref = this._preferences.getPreferences("/edit/templateExplorer"); //$NON-NLS-0$
-		this._provider = new Deferred();
-		this._providerResolved = false;
-
-		this.filteredProviders = [];
-		//this.setTemplateExplorerProviders(this.filteredProviders);
-	}
-	TemplateExplorerService.prototype = /** @lends orion.templates.TemplateExplorerService.prototype */ {
-		setTemplateExplorerProviders: function(/** orion.serviceregistry.ServiceReference[] */ providers) {
-			this.providers = providers;
-			// Check pref to see if user has chosen a preferred templateExplorer provider
-			var self = this;
-			Deferred.when(this._templateExplorerPref, function(pref) {
-				var provider;
-				for (var i=0; i < providers.length; i++) {
-					provider = providers[i];
-					if (pref.get("templateExplorerProvider") === providers[i].getProperty("id")) { //$NON-NLS-1$ //$NON-NLS-0$
-						break;
-					}
-				}
-				if (provider) {
-					self.setProvider(provider);
-				}
-			});
-		},
-		setProvider: function(/** orion.serviceregistry.ServiceReference */ provider) {
-			if (this._providerResolved) {
-				this._provider = new Deferred();
-			}
-			this._provider.resolve(provider);
-			this._providerResolved = true;
-			var id = provider.getProperty("id"); //$NON-NLS-0$
-			if (id) {
-				this._templateExplorerPref.then(function(pref) {
-					pref.put("templateExplorerProvider", id); //$NON-NLS-0$
-				});
-			}
-		},
-
-		getProvider: function() {
-			return this._provider.promise;
-		},
-		emitTemplateExplorer: function(inputManager) {
-			var self = this;
-			Deferred.when(this.getProvider(), function(provider) {
-				var editor = inputManager.getEditor(), title = editor.getTitle();
-				var serviceRegistry = self._serviceRegistry;
-				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				var templateExplorerProviderService = serviceRegistry.getService(provider);
-				var method, args;
-				if ((method = templateExplorerProviderService.computeTemplateExplorer)) {
-					var contentType = inputManager.getContentType();
-					args = [EditorContext.getEditorContext(serviceRegistry), {
-						contentType: contentType && contentType.id
-					}];
-				} else if ((method = templateExplorerProviderService.getTemplateExplorer)) {
-					args = [editor.getText(), title];
-				}
-				progress.progress(method.apply(templateExplorerProviderService, args), i18nUtil.formatMessage(messages["TemplateExplorerProgress"], title, provider.displayName)).then(function(templateExplorer) { //$NON-NLS-0$
-					if (templateExplorer) {
-						self.dispatchEvent({ type:"templateExplorer", templateExplorer: templateExplorer, title: title, providerId: provider.getProperty("id") }); //$NON-NLS-1$ //$NON-NLS-0$
-					}
-				});
-			});
-		}
-	};
-	TemplateExplorerService.prototype.constructor = TemplateExplorerService;
 	
 	//return module exports
 	return {
 		TemplateExplorer: TemplateExplorer,
-		TemplateExplorerService: TemplateExplorerService
 	};
 });
 

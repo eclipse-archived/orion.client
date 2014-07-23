@@ -135,7 +135,7 @@ define([
 
 	SimpleTemplateProvider.prototype.getTemplates = function(){
 	  var templates = {
-	    title: "Simple Templates",
+	    title: "Javascript Templates",
 	    templates: Templates.templates
 	  };
 	  return templates;
