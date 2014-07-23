@@ -98,7 +98,7 @@ define([
 		var splitted = message.split(/\r\n|\n/);
 		var iterator = 0;
 		
-		while(splitted.length > 0 && /^\s*$/.test(splitted[iterator])) {
+		while(splitted.length > 1 && /^\s*$/.test(splitted[iterator])) {
 			iterator++;
 		}
 		var maxMessageLength = 100;

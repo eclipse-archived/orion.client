@@ -992,7 +992,134 @@ eclipse.GitService = (function() {
 		
 		_handleGitServiceResponseError: function(deferred, error){
 			deferred.reject(error);
-		}
+		},
+		
+		/**
+		 * 
+		 * @param {String} location Location to send request to
+		 * @param {Object} options Additional options (e.g. applyIndex) for apply command
+		 * @returns {Deferred}
+		 */
+		doStashApply : function (location, options) {
+			var service = this;
+			
+			if (!options) options = {};
+			options.type = "apply"; //$NON-NLS-0$
+			
+			var clientDeferred = new Deferred();
+			xhr("POST", location, { //$NON-NLS-0$
+				headers : { 
+					"Orion-Version" : "1", //$NON-NLS-0$ //$NON-NLS-1$
+					"Content-Type" : contentType //$NON-NLS-0$
+				},
+				timeout : 15000,
+				handleAs : "json", //$NON-NLS-0$
+				data: JSON.stringify(options)
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		/**
+		 * 
+		 * @param {String} location Location to send request to
+		 * @param {Object} options Additional options (e.g. includeUntracked) for create command 
+		 * @returns {Deferred}
+		 */
+		doStashCreate : function (location, options) {
+			var service = this;
+			
+			if (!options) options = {};
+			options.type = "create"; //$NON-NLS-0$
+		
+			var clientDeferred = new Deferred();
+			xhr("POST", location, { //$NON-NLS-0$
+				headers : { 
+					"Orion-Version" : "1", //$NON-NLS-0$ //$NON-NLS-1$
+					"Content-Type" : contentType //$NON-NLS-0$
+				},
+				timeout : 15000,
+				handleAs : "json", //$NON-NLS-0$
+				data: JSON.stringify(options)
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		
+		/**
+		 * 
+		 * @param {String} location Location to send request to
+		 * @param {Object} pagination Can have page and pageSize set to determine pagination (both positive numbers)
+		 * @returns {Deferred}
+		 */
+		doStashList : function(location, pagination) {
+			var service = this;
+			
+			if (pagination) {
+				if (pagination.page && pagination.pageSize) {
+					location = location+"?page="+options.page+"&pageSize="+options.pageSize; //$NON-NLS-0$ //$NON-NLS-1$
+				} else if (pagination.page) {
+					location = location+"?page="+options.page; //$NON-NLS-0$
+				} else if (pagination.pageSize) {
+					location = location+"?pageSize="+options.pageSize; //$NON-NLS-0$
+				}
+			}
+			
+			var clientDeferred = new Deferred();
+			xhr("GET", location, { //$NON-NLS-0$
+				headers : { 
+					"Orion-Version" : "1", //$NON-NLS-0$ //$NON-NLS-1$
+					"Content-Type" : contentType //$NON-NLS-0$
+				},
+				timeout : 15000,
+				handleAs : "json" //$NON-NLS-0$
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		
+		/**
+		 * 
+		 * Performs stash drop. If no additional options are provided then drops the first stash ref available. 
+		 * Otherwise drops provided stash ref in dropRef or drops all if dropAll set to true
+		 * 
+		 * @param {String} location Location to send request to
+		 * @param {Object} options Can contain non-negative integer dropRef pointing to stash ref to or -1 to drop all.
+		 * @returns {Deferred}
+		 */
+		doStashDrop : function(location, options) {
+			var service = this;
+			
+			if (options && options.stashRef) location += "?dropIndex="+options.stashRef; //$NON-NLS-0$
+			
+			var clientDeferred = new Deferred();
+			xhr("DELETE", location, { //$NON-NLS-0$
+				headers : { 
+					"Orion-Version" : "1", //$NON-NLS-0$ //$NON-NLS-1$
+					"Content-Type" : contentType //$NON-NLS-0$
+				},
+				timeout : 15000,
+				handleAs : "json" //$NON-NLS-0$
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		} 
+			
 	};
 	return GitService;
 }());

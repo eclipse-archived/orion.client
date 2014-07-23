@@ -457,5 +457,19 @@ define({
 	"FileSelected": "${0} file selected",
 	"FilesSelected": "${0} files selected",
 	"CommitPush": "Commit and Push",
-	"Commits and pushes files to the default remote": "Commits and pushes files to the default remote"
+	"Commits and pushes files to the default remote": "Commits and pushes files to the default remote",
+	"Commit and push ${0} file(s)": "Commit and push ${0} file(s)",
+	"Commits and pushes files to the default remote": "Commits and pushes files to the default remote",
+	"Stash" : "Stash",
+	"Stashes all files from change list":"Stashes all files from change list",
+	"Apply":"Apply",
+	"Applies changes from selected stash entry":"Applies changes from selected stash entry",
+	"Drop":"Drop",
+	"Drops selected stash entries. If none are selected drops whole stash":"Drops selected stash entries. If none are selected drops whole stash",
+	"Stash operation performed successfully":"Stash operation performed successfully",
+	"Stash apply operation performed successfully. Working directory updated":"Stash apply operation performed successfully. Working directory updated",
+	"Stash drop operation performed succesfully. Dropped stash item ${0}":"Stash drop operation performed succesfully. Dropped stash item ${0}",
+	"Stash drop operation performed successfully. Dropped whole stash":"Stash drop operation performed successfully. Dropped whole stash",
+	"Stash":"Stash",
+	"Getting git stashed changes...":"Getting git stashed changes.."
 });
