@@ -13,9 +13,9 @@
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/commandRegistry', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 'orion/git/gitConfigPreference',
         'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
-        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks', 'orion/URITemplate','orion/git/logic/gitPush','orion/git/logic/gitCommit', 'orion/objects'], 
+        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks', 'orion/URITemplate','orion/git/logic/gitPush','orion/git/logic/gitCommit', 'orion/git/logic/gitStash','orion/git/logic/gitCommon','orion/objects'], 
         function(messages, require, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, mCompareUtils, GitPreferenceStorage, GitConfigPreference, mConfirmPush, mRemotePrompter,
-        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch, _, PageLinks, URITemplate, mGitPushLogic, mGitCommitLogic, objects) {
+        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch, _, PageLinks, URITemplate, mGitPushLogic, mGitCommitLogic, mGitStashLogic, mGitCommonLogic, objects) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -2856,12 +2856,16 @@ var exports = {};
 			commandService : commandService,
 		};
 		
+		var stashOptions = commitOptions;
+		
 		var pushLogic = mGitPushLogic(pushOptions);
 		var commitLogic = mGitCommitLogic(commitOptions);
+		var stashLogic = mGitStashLogic(stashOptions);
 		
 		var commitCallback = commitLogic.perform;
 		var displayErrorOnStatus = commitLogic.displayErrorOnStatus;
 		var pushCallback = pushLogic.perform;
+		var stashCreateCallback = stashLogic.performStashCreate;
 		
 		
 		var commitAndPushCommand = new mCommands.Command({
@@ -2907,6 +2911,25 @@ var exports = {};
 		});
 		
 		commandService.addCommand(commitAndPushCommand);
+		
+		var createStashCommand = new mCommands.Command({
+			name: "Stash",
+			tooltip: "Stash changes",
+			id: "eclipse.orion.git.createStash",
+			callback: function(data) {
+				stashCreateCallback(data).then(function(data) {
+					refresh();
+				},function(err) {
+					//
+				})
+			},
+			visibleWhen: function(item) {
+				return true;
+			}
+		});
+		
+		commandService.addCommand(createStashCommand);
+		
 	};
 	
 	
