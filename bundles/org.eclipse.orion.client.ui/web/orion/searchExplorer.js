@@ -885,58 +885,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._crawling = crawling;
     };
 
-    SearchResultExplorer.prototype.preview = function() {
-        var that = this;
-        this._commandService.openParameterCollector("pageActions", function(parentDiv) { //$NON-NLS-0$
-            // create replace text
-            var replaceStringDiv = _createElement('input', null, "globalSearchReplaceWith", parentDiv); //$NON-NLS-1$  //$NON-NLS-0$
-            replaceStringDiv.type = "text"; //$NON-NLS-0$
-            replaceStringDiv.name = "ReplaceWith:"; //$NON-NLS-0$
-            replaceStringDiv.placeholder = "Replace With"; //$NON-NLS-0$
-            replaceStringDiv.onkeydown = function(e) {
-                if (e.keyCode === 13 /*Enter*/ ) {
-                    var replaceInputDiv = lib.node("globalSearchReplaceWith"); //$NON-NLS-0$
-                    that._commandService.closeParameterCollector();
-                    return that._doPreview(replaceInputDiv.value);
-                }
-                if (e.keyCode === 27 /*ESC*/ ) {
-                    that._commandService.closeParameterCollector();
-                    return false;
-                }
-            };
-
-            // create the command span for Replace
-            _createElement('span', 'parameters', "globalSearchReplaceCommands", parentDiv); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-            return replaceStringDiv;
-        });
-
-        var replaceDiv = document.getElementById("globalSearchReplaceWith"); //$NON-NLS-0$
-        replaceDiv.value = this.model.defaultReplaceStr;
-        window.setTimeout(function() {
-            replaceDiv.select();
-            replaceDiv.focus();
-        }, 10);
-
-
-        var innerReplaceAllCommand = new mCommands.Command({
-            name: "Preview Changes", //$NON-NLS-0$
-            image: require.toUrl("images/replaceAll.gif"), //$NON-NLS-0$
-            id: "orion.globalSearch.innerReplaceAll", //$NON-NLS-0$
-            groupId: "orion.searchGroup", //$NON-NLS-0$
-            callback: function() {
-                var replaceInputDiv = lib.node("globalSearchReplaceWith"); //$NON-NLS-0$
-                that._commandService.closeParameterCollector();
-                return that._doPreview(replaceInputDiv.value);
-            }
-        });
-
-        this._commandService.addCommand(innerReplaceAllCommand);
-
-        // Register command contributions
-        this._commandService.registerCommandContribution("globalSearchReplaceCommands", "orion.globalSearch.innerReplaceAll", 1); //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.renderCommands("globalSearchReplaceCommands", "globalSearchReplaceCommands", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-    };
-
     SearchResultExplorer.prototype._fileExpanded = function(fileIndex, detailIndex) {
         var filItem = _validFiles(this.model)[fileIndex];
         if (detailIndex === null || detailIndex === undefined) {
@@ -960,40 +908,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             childrenNumber: 0,
             childDiv: null
         };
-    };
-
-    SearchResultExplorer.prototype._doPreview = function(replacingStr, all) {
-        if (!this.model._provideSearchHelper) {
-            return;
-        }
-        if (this.model._storeGlobalStatus) {
-            this.model._storeGlobalStatus(replacingStr);
-        }
-        var qParams = mSearchUtils.copySearchParams(this.model._provideSearchHelper().params, true);
-        qParams.replace = replacingStr;
-        if (all) {
-            qParams.start = 0;
-            qParams.rows = this.model.getPagingParams().totalNumber;
-        }
-        var href = mSearchUtils.generateSearchHref(qParams);
-        window.location.href = href;
-    };
-
-    SearchResultExplorer.prototype.searchAgain = function() {
-        if (!this.model._provideSearchHelper) {
-            return;
-        }
-        var qParams = mSearchUtils.copySearchParams(this.model._provideSearchHelper().params, true);
-        qParams.replace = null;
-        if (qParams.rows > this.defaulRows) {
-            qParams.rows = this.defaulRows;
-        }
-        var href = mSearchUtils.generateSearchHref(qParams);
-        if (href === window.location.href) {
-            window.location.reload();
-        } else {
-            window.location.href = href;
-        }
     };
 
     SearchResultExplorer.prototype.replaceAll = function() {
