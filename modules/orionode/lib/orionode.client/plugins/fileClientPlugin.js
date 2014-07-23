@@ -71,16 +71,12 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/nodeFileImpl" /*no
 	// note global
 	var workspaceBase = makeParentRelative(temp.href);
 
-	temp.href = "..";
-	var patternBase = makeParentRelative(temp.href);
-
-
 	var service = new FileServiceImpl(fileBase, workspaceBase);
 	//provider.registerService("orion.core.file", trace(service), {Name:'Orion Content', top:fileBase, pattern:patternBase});
 	provider.registerService("orion.core.file", service, {
 		Name: 'Orion Node Content',  // HACK  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386509
 		top: fileBase,
-		pattern: patternBase
+		pattern: [fileBase, workspaceBase]
 	});
 	provider.connect();
 });

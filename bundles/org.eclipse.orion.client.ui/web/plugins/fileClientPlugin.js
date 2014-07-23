@@ -71,9 +71,6 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", "domRea
 	// note global
 	var workspaceBase = makeParentRelative(temp.href);
 
-	temp.href = "..";
-	var patternBase = makeParentRelative(temp.href);
-
 	var service = new FileServiceImpl(fileBase, workspaceBase);
 	//provider.registerService("orion.core.file", trace(service), {Name:'Orion Content', top:fileBase, pattern:patternBase});
 	provider.registerService("orion.core.file", service, {
@@ -81,7 +78,7 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", "domRea
 		NameKey: 'Orion Content',
 		nls: 'orion/navigate/nls/messages',
 		top: fileBase,
-		pattern: patternBase
+		pattern: [fileBase, workspaceBase]
 	});
 	provider.connect();
 });
