@@ -13,9 +13,9 @@
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/commandRegistry', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 'orion/git/gitConfigPreference',
         'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
-        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks', 'orion/URITemplate','orion/git/logic/gitPush','orion/git/logic/gitCommit', 'orion/objects'], 
+        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks', 'orion/URITemplate','orion/git/logic/gitPush','orion/git/logic/gitCommit', 'orion/git/logic/gitStash','orion/git/logic/gitCommon','orion/objects'], 
         function(messages, require, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, mCompareUtils, GitPreferenceStorage, GitConfigPreference, mConfirmPush, mRemotePrompter,
-        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch, _, PageLinks, URITemplate, mGitPushLogic, mGitCommitLogic, objects) {
+        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch, _, PageLinks, URITemplate, mGitPushLogic, mGitCommitLogic, mGitStashLogic, mGitCommonLogic, objects) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -2856,13 +2856,22 @@ var exports = {};
 			commandService : commandService,
 		};
 		
+		var stashOptions = commitOptions;
+		
 		var pushLogic = mGitPushLogic(pushOptions);
 		var commitLogic = mGitCommitLogic(commitOptions);
+		var stashLogic = mGitStashLogic(stashOptions);
 		
 		var commitCallback = commitLogic.perform;
-		var displayErrorOnStatus = commitLogic.displayErrorOnStatus;
+		var displayErrorOnStatus = mGitCommonLogic.displayErrorOnStatus;
+		var displaySuccessOnStatus = mGitCommonLogic.displaySuccessOnStatus;
 		var pushCallback = pushLogic.perform;
 		
+		
+		var stashCreateCallback = stashLogic.performStashCreate;
+		var stashApplyCallback = stashLogic.performStashApply;
+		var stashDropCallback = stashLogic.performStashDrop;
+		var stashListCallback = stashLogic.performStashList;
 		
 		var commitAndPushCommand = new mCommands.Command({
 			name: messages["CommitPush"],
@@ -2907,6 +2916,75 @@ var exports = {};
 		});
 		
 		commandService.addCommand(commitAndPushCommand);
+		
+		var createStashCommand = new mCommands.Command({
+			name: messages["Stash"],
+			tooltip: messages["Stashes all files from change list"],
+			id: "eclipse.orion.git.createStash",
+			callback: function(data) {
+				stashCreateCallback(data).then(function(data) {
+					refresh();
+					displaySuccessOnStatus(messages["Stash operation performed successfully"],serviceRegistry);
+				},function(err) {
+					displayErrorOnStatus(err,serviceRegistry);
+				});
+			},
+			visibleWhen: function(item) {
+				return true;
+			}
+		});
+		
+		commandService.addCommand(createStashCommand);
+		
+		var applyStashCommand = new mCommands.Command({ 
+			name: messages["Stash apply"],
+			tooltip: messages["Applies changes from selected stash entry"],
+			id: "eclipse.orion.git.applyStash",
+			callback: function(data) {
+				stashApplyCallback(data).then(function(data) {
+					refresh();
+					displaySuccessOnStatus(messages["Stash apply operation performed successfully. Working directory updated"],serviceRegistry);
+				},function(err) {
+					displayErrorOnStatus(err,serviceRegistry);
+				});
+			},
+			visibleWhen: function(item) {
+				return true;
+			}
+			
+		});
+		
+		commandService.addCommand(applyStashCommand);
+		
+		var dropStashCommand = new mCommands.Command({ 
+			name: messages["Drop stash"],
+			tooltip: messages["Drops selected stash entries. If none are selected drops whole stash"],
+			id: "eclipse.orion.git.dropStash",
+			callback: function(data) {
+				
+				var itemToBeDropped = data.itemToBeDropped;
+				
+				stashDropCallback(data).then(function(data) {
+					refresh();
+					if (dropAll) {
+						displaySuccessOnStatus(messages["Stash drop operation performed successfully. Dropped whole stash"],serviceRegistry);
+					} else if (itemToBeDropped) {
+						displaySuccessOnStatus(i18nUtil.formatMessage(messages["Stash drop operation performed succesfully. Dropped stash item ${0}"],itemToBeDropped),serviceRegistry);
+					} else {
+						displaySuccessOnStatus(i18nUtil.formatMessage(messages["Stash drop operation performed succesfully. Dropped stash item ${0}"],0),serviceRegistry);
+					}
+				},function(err) {
+					displayErrorOnStatus(err,serviceRegistry);
+				});
+			},
+			visibleWhen: function(item) {
+				return true;
+			}
+			
+		});
+		
+		commandService.addCommand(dropStashCommand);
+		
 	};
 	
 	
