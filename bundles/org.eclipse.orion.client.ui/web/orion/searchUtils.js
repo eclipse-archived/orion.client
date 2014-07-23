@@ -48,25 +48,6 @@ function _generateSearchHelperRegEx(inFileQuery, searchParams, fromStart){
 	}
 }
 
-searchUtils.doSearch = function(searcher, serviceRegistry, searchStr, advOptions){
-	if (searcher) {
-		var newSearchStr = searchStr, commitSearch = true;
-		if(newSearchStr === "*"){ //$NON-NLS-0$
-			newSearchStr = "";
-		}
-		if(newSearchStr === ""){
-			commitSearch = advOptions && advOptions.type !== searchUtils.ALL_FILE_TYPE;
-		}
-		if (commitSearch) {
-			var searchParams = searcher.createSearchParams(newSearchStr, false, false, advOptions);
-			var href = searchUtils.generateSearchHref(searchParams);
-			window.location = href;
-		}
-	} else {
-		window.alert(messages["Can't search: no search service is available"]);
-	}
-};
-
 searchUtils.getSearchParams = function(searcher, searchStr, advOptions){
 	if (searcher) {
 		var newSearchStr = searchStr, commitSearch = true;
