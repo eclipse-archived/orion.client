@@ -8,8 +8,24 @@
  * Contract with IBM Corp.
  *******************************************************************************/
  /*global define*/
-define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry'], function(Deferred, mCommands, mCommandRegistry){
+ /*eshint-env browser, amd*/
+define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/EventTarget'],
+	function(Deferred, mCommands, mCommandRegistry, EventTarget){
+	
+	
+	var sharedEventDispatcher;
+	
+	
 	return {
+		
+		getEventDispatcher: function(){
+			if(!sharedEventDispatcher){
+				sharedEventDispatcher = new EventTarget();
+			}
+			return sharedEventDispatcher;
+			
+		},
+		
 		createCfCommands: function(serviceRegistry, commandService, explorer){
 			
 			var progressService = serviceRegistry.getService("orion.page.progress");
@@ -34,7 +50,9 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry'], function(D
 					progressService.showWhile(cfClient.createRoute(target, 
 							domain, host), "Creating route...").then(
 						function(jazzResp) {
-							explorer.changedItem();
+							if(sharedEventDispatcher){
+								sharedEventDispatcher.dispatchEvent({type: "create", newValue: jazzResp });
+							}
 						}, function (error) {
 							exports.handleError(error, progressService);
 						}
@@ -70,6 +88,36 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry'], function(D
 			});
 			
 			commandService.addCommand(deleteOrphanedRoutesCommand);
+
+			var stopAppCommand = new mCommands.Command({
+				name : "Stop",
+				tooltip: "Stop Application",
+				id : "orion.cf.StopApp",
+				
+				callback : function(data) {
+					var app = data.items;
+					if(Array.isArray(app)){
+						app = app[0];
+					}
+					app.state = "STOPPED";
+					if(sharedEventDispatcher){
+						sharedEventDispatcher.dispatchEvent({type: "update", newValue: app, oldValue: app });
+					}
+				},
+				visibleWhen : function(item) {
+					return false;
+					if(Array.isArray(item)){
+						if(item.length !== 1){
+							return false;
+						}
+						item = item[0];
+					}
+					
+					return item.Type === "App";
+				}
+			});
+			
+			commandService.addCommand(stopAppCommand);
 			
 			var deleteRouteCommand = new mCommands.Command({
 				name : "Delete",
@@ -82,7 +130,9 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry'], function(D
 					progressService.showWhile(cfClient.deleteRouteById(target, 
 						route.Guid), "Deleting route...").then(
 						function(jazzResp) {
-							explorer.changedItem();
+							if(sharedEventDispatcher){
+								sharedEventDispatcher.dispatchEvent({type: "delete", oldValue: route });
+							}
 						}, function (error) {
 							exports.handleError(error, progressService);
 						}
@@ -143,6 +193,10 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry'], function(D
 			commandService.addCommand(unmapRouteCommand);
 		},
 		createRoutesCommands: function(serviceRegistry, commandService, explorer){
+			
+		},
+		
+		registerModelListener: function(listener){
 			
 		}
 	};

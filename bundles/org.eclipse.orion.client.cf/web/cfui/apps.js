@@ -8,6 +8,7 @@
  * Contract with IBM Corp.
  *******************************************************************************/
  /*global define window document*/
+ /*eshint-env browser, amd*/
 define(['require', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/commands', 'orion/keyBinding', 'orion/dialogs', 'orion/selection',
 		'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/links',
 		'orion/cfui/cFClient', 'orion/Deferred', 'cfui/autodeploy/widgets/CfLoginDialog',
@@ -21,6 +22,7 @@ mBootstrap.startup().then(function(core) {
 	var serviceRegistry = core.serviceRegistry;
 	var preferences = core.preferences;
 	var pluginRegistry = core.pluginRegistry;
+
 
 	new mDialogs.DialogService(serviceRegistry);
 	var selection = new mSelection.Selection(serviceRegistry, "orion.CloudFoundry.selection");
@@ -42,6 +44,8 @@ mBootstrap.startup().then(function(core) {
 	var orgsNode = document.getElementById("orgsNode");
 	var applicationsNode = document.getElementById("applicationsTable");
 	var orphanRoutesNode = document.getElementById("orphanRoutesTable");
+	
+	var cfEventDispatcher = mCfCommands.getEventDispatcher()
 	
 	function promptLogin(cFService) {
 		var deferred = new Deferred();
@@ -319,6 +323,7 @@ mBootstrap.startup().then(function(core) {
 			selection,
 		new ApplicationsRenderer({checkbox: false, singleSelection: true,	treeTableClass: "sectionTreeTable",	cachePrefix: "CfExplorer"}),
 				commandRegistry);
+	explorer.events = ["update", "create", "delete"];
 	
 	mCfCommands.createCfCommands(serviceRegistry, commandRegistry, explorer);
 
@@ -338,6 +343,7 @@ mBootstrap.startup().then(function(core) {
 		}); 
 		
 		commandRegistry.registerCommandContribution("appLevelCommands", "orion.cf.UnmapRoute", 100);
+		commandRegistry.registerCommandContribution("appLevelCommands", "orion.cf.StopApp", 200);
 		
 		selection.addEventListener("selectionChanged", function(event){
 			var selections = event.selections;
@@ -350,15 +356,45 @@ mBootstrap.startup().then(function(core) {
 						
 		progressService.showWhile(cFService.getApps(target), "Listing applications").then(function(apps){
 			
+			if(explorer.cfEventListener){
+				explorer.events.forEach(function(eventType){
+					cfEventDispatcher.removeEventListener(eventType, explorer.cfEventListener);
+				});
+			}
+			
 			var explorerParent = document.createElement("div");
 			explorerParent.id = "applicationsSectionParent";
 			explorer.parent = explorerParent;
-				
+			explorer.cfEventListener = function(event){
+				if(event.oldValue && event.oldValue.Type !== "Route"){
+					for(var i=0; i<apps.apps.length; i++){
+						if(apps.apps[i].guid === event.oldValue.guid){
+							if(event.newValue){
+								apps.apps[i] = event.newValue;
+							} else {
+								apps.apps.splice(i, 1);
+							}
+							break;
+						}
+					}
+				} else if(event.newValue && event.newValue.Type !== "Route"){
+					apps.apps.push(event.newValue);
+				}
+				var model = new ApplicationsModel(apps, target);
+				this.createTree(explorerParent, model, {});
+			}.bind(explorer);
+			
 			var model = new ApplicationsModel(apps, target);
 			
 			applicationsSection.embedExplorer(explorer);
 			
+			
 			explorer.createTree(explorerParent, model, {});
+			
+			explorer.events.forEach(function(eventType){
+				cfEventDispatcher.addEventListener(eventType, explorer.cfEventListener);
+			});
+			
 			
 			progressService.showWhile(cFService.getRoutes(target), "Loading routes").then(function(routes){
 				
@@ -411,6 +447,7 @@ mBootstrap.startup().then(function(core) {
 			routesSelection,
 	new OrphanRoutesRenderer({checkbox: false, singleSelection: true,	treeTableClass: "sectionTreeTable",	cachePrefix: "OrphanRoutesExplorer"}),
 				commandRegistry);
+	routesExplorer.events = ["update", "create", "delete"];
 				
 	mCfCommands.createRoutesCommands(serviceRegistry, commandRegistry, routesExplorer);
 		
@@ -436,6 +473,12 @@ mBootstrap.startup().then(function(core) {
 		commandRegistry.registerCommandContribution("routeLevelCommands", "orion.cf.MapRoute", 100);
 		commandRegistry.registerCommandContribution("routeLevelCommands", "orion.cf.DeleteRoute", 200);
 		
+		if(routesExplorer.cfEventListener){
+				routesExplorer.events.forEach(function(eventType){
+					cfEventDispatcher.removeEventListener(eventType, routesExplorer.cfEventListener);
+				});
+			}
+		
 		routesSelection.addEventListener("selectionChanged", function(event){
 			var selections = event.selections;
 			var selectionActionsNode = orphanRoutesSection.selectionNode;
@@ -449,26 +492,52 @@ mBootstrap.startup().then(function(core) {
 		explorerParent.id = "orphanRoutesParent";
 		routesExplorer.parent = explorerParent;
 		
-		var orphanRoutes = [];
-		
-		if(routes && routes.Routes){
-			routes.Routes.forEach(function(route){
-				if(apps.apps.every(function(app){
-					return app.routes.every(function(appRoute){
-						return appRoute.guid !== route.Guid;
-					});
-				})){
-					 orphanRoutes.push(route);
+		routesExplorer.cfEventListener = function(event){
+			if(event.oldValue && event.oldValue.Type === "Route"){
+				for(var i=0; i<routes.Routes.length; i++){
+					if(routes.Routes[i].Guid === routes.Routes.Guid){
+						if(event.newValue){
+							routes.Routes[i] = event.newValue;
+						} else {
+							routes.Routes.splice(i, 1);
+						}
+						break;
+					}
 				}
-			});
-		}
+			} else if(event.newValue && event.newValue.Type === "Route"){
+				routes.Routes.push(event.newValue);
+			}
+			this.loadRoutes(routes, apps, target);
+		}.bind(routesExplorer);
+			
 		
-		var routesModel = new mExplorer.ExplorerFlatModel(null, null, orphanRoutes);
-		routesModel.getId = function(item){return item.Guid;};
+		routesExplorer.loadRoutes = function(routes, apps, target){
+			var orphanRoutes = [];
+			
+			if(routes && routes.Routes){
+				routes.Routes.forEach(function(route){
+					if(apps.apps.every(function(app){
+						return app.routes.every(function(appRoute){
+							return appRoute.guid !== route.Guid;
+						});
+					})){
+						 orphanRoutes.push(route);
+					}
+				});
+			}
+			
+			var routesModel = new mExplorer.ExplorerFlatModel(null, null, orphanRoutes);
+			routesModel.getId = function(item){return item.Guid;};		
+			routesExplorer.createTree(explorerParent, routesModel, {});
+		};
+		
 		
 		orphanRoutesSection.embedExplorer(routesExplorer);
+		routesExplorer.loadRoutes(routes, apps, target);
 		
-		routesExplorer.createTree(explorerParent, routesModel, {});
+		routesExplorer.events.forEach(function(eventType){
+			cfEventDispatcher.addEventListener(eventType, routesExplorer.cfEventListener);
+		});
 	}
 	
 	displayOrgsAndSpaces();
