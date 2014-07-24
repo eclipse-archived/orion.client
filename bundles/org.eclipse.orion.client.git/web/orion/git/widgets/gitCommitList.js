@@ -573,7 +573,7 @@ define([
 					return expandImage;
 				}
 				
-				var description, detailsView, actionsArea;
+				var detailsView, actionsArea;
 				var model = explorer.model;
 				if (item.Type === "MoreCommits") { //$NON-NLS-1$ //$NON-NLS-0$
 					td.classList.add("gitCommitListMore"); //$NON-NLS-0$
@@ -596,10 +596,12 @@ define([
 					var commitDetails = document.createElement("div"); //$NON-NLS-0$
 					var info = new mGitCommitInfo.GitCommitInfo({
 						parent: commitDetails,
+						tagsCommandHandler: explorer,
 						commit: commit,
 						showTags: false,
 						commitLink: false,
 						showMessage: false,
+						fullMessage: true,
 						showImage: false,
 						showAuthor: false,
 						showParentLink: false
@@ -674,64 +676,22 @@ define([
 				} else {
 					createExpand();
 					sectionItem.className = "sectionTableItem"; //$NON-NLS-0$
-					if (commit.AuthorImage) {
-						var authorImage = document.createElement("div"); //$NON-NLS-0$
-						authorImage.style["float"] = "left"; //$NON-NLS-1$ //$NON-NLS-0$
-						var image = new Image();
-						image.src = commit.AuthorImage;
-						image.name = commit.AuthorName;
-						image.className = "git-author-icon"; //$NON-NLS-0$
-						authorImage.appendChild(image);
-						horizontalBox.appendChild(authorImage);
-					}
-					
 					detailsView = document.createElement("div"); //$NON-NLS-0$
 					detailsView.className = "stretch"; //$NON-NLS-0$
 					horizontalBox.appendChild(detailsView);
-	
-					var titleLink;
-					if (explorer.showCommitLinks) {
-						titleLink = document.createElement("a"); //$NON-NLS-0$
-						titleLink.className = "navlinkonpage"; //$NON-NLS-0$
-						titleLink.href = require.toUrl(commitTemplate.expand({resource: commit.Location})); //$NON-NLS-0$
-					} else {
-						titleLink = document.createElement("span"); //$NON-NLS-0$
-						titleLink.className = "gitCommitTitle"; //$NON-NLS-0$
-					}
-					titleLink.textContent = util.trimCommitMessage(commit.Message);
-					detailsView.appendChild(titleLink);
-					
-					//Add the commit page link as the first grid of the row
-					mNavUtils.addNavGrid(this.explorer.getNavDict(), item, titleLink);
-					
-					var d = document.createElement("div"); //$NON-NLS-0$
-					detailsView.appendChild(d);
-	
-					description = document.createElement("div"); //$NON-NLS-0$
-					description.textContent = i18nUtil.formatMessage(messages["authored by 0 (1) on 2"], //$NON-NLS-0$
-									commit.AuthorName, commit.AuthorEmail, new Date(commit.Time).toLocaleString()); 
-					detailsView.appendChild(description);
-					
-					if (commit.Tags && commit.Tags.length) {
-						var tags = document.createElement("div"); //$NON-NLS-0$
-						tags.textContent = messages["Tags:"];
-						tags.className = "gitCommitListTagsTitle"; //$NON-NLS-0$
-						commit.Tags.forEach(function (tag) {
-							var tagSpan = document.createElement("span"); //$NON-NLS-0$
-							tagSpan.textContent = tag.Name;
-							tagSpan.className = "gitCommitListTag"; //$NON-NLS-0$
-							tags.appendChild(tagSpan);
-							
-							var tagSpanAction = document.createElement("span"); //$NON-NLS-0$
-							tagSpanAction.className = "core-sprite-close gitCommitListTagClose"; //$NON-NLS-0$
-							tagSpanAction.addEventListener("click", function(){ //$NON-NLS-0$
-								explorer.commandService.runCommand("eclipse.removeTag", tag, explorer); //$NON-NLS-0$
-							});
-							tagSpan.appendChild(tagSpanAction);
-						});
-						detailsView.appendChild(tags);
-					}
-					
+					var commitInfo = new mGitCommitInfo.GitCommitInfo({
+						parent: detailsView,
+						tagsCommandHandler: explorer,
+						commit: commit,
+						showTags: true,
+						showBranches: false,
+						commitLink: false,
+						showParentLink: false,
+						showCommitter: false,
+						showCommit: false,
+						simple: true,
+					});
+					commitInfo.display();
 					var itemActionScope = "itemLevelCommands"; //$NON-NLS-0$
 					actionsArea = document.createElement("ul"); //$NON-NLS-0$
 					actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$

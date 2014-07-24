@@ -184,6 +184,7 @@ define([
 						commit: commit,
 						showTags: false,
 						commitLink: false,
+						showMessage: false,
 						fullMessage: true
 					});
 					info.display();

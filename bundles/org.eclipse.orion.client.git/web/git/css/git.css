@@ -144,11 +144,37 @@ table .sectionTable {
 	background-color: #ffffff;
 }
 
-.gitCommitListTagsTitle {
+.gitCommitFullMessage {
+	margin-top: 5px;
+	margin-bottom: 5px;
+	padding: 2px;
+	white-space: pre-wrap;
+}
+
+.gitCommitBranchesTitle {
 	margin-right: 4px;
 }
 
-.gitCommitListTag {
+.gitCommitBranch {
+	border: 1px solid #ccc;
+	background-color: #eee;
+	border-radius: 4px;
+	display: inline-block;
+	margin-left: 2px;
+	margin-bottom: 1px;
+	padding-left: 2px;
+	padding-right: 2px;
+}
+
+.gitCommitTagsTitle {
+	margin-right: 4px;
+}
+
+.gitCommitSection {
+	padding-top: 15px;
+}
+
+.gitCommitTag {
 	border: 1px solid #ccc;
 	background-color: LemonChiffon;
 	border-radius: 4px;
@@ -157,8 +183,8 @@ table .sectionTable {
 	padding-left: 2px;
 }
 
-.gitCommitListTagClose {
-	padding: 0px;
+.gitCommitTagClose {
+	padding: 0;
 	padding-left: 5px;
 }
 
@@ -179,7 +205,7 @@ table .sectionTable {
 	width: 30px;
 	border: 1px solid lightGrey;
 	padding: 2px;
-	margin-right: 18px;
+	margin-right: 10px;
 }
 
 .git-author-icon-small {

@@ -26,20 +26,14 @@ define([
 	 * @class orion.git.GitCommitInfo
 	 */
 	function GitCommitInfo(options) {
-		this.parent = options.parent;
-		this.commit = options.commit;
-		this.showTags = options.showTags;
-		this.commitLink = options.commitLink;
-		this.showMessage = options.showMessage;
-		this.showImage = options.showImage;
-		this.showAuthor = options.showAuthor;
-		this.showCommitter = options.showCommitter;
-		this.showParentLink = options.showParentLink;
-		this.fullMessage = options.fullMessage;
+		objects.mixin(this, options);
 	}
 	
 	objects.mixin(GitCommitInfo.prototype, {
 		display: function(){
+			var that = this;
+			var commit = this.commit;
+			var section;
 		
 			function createInfo(parent, keys, values) {
 				keys = Array.isArray(keys) ? keys : [keys];
@@ -56,149 +50,159 @@ define([
 				return div;
 			}
 			
-			var commit = this.commit;
-			var tableNode = this.parent;
-			var fullMessage = this.fullMessage;
-			
-			var headerMessage;
-			var additionalOffset = 0;
-			
-			if(fullMessage){
-				headerMessage = commit.Message.split(/(\r?\n|$)/)[0].trim();
-				if (headerMessage.length > 100) {
-					var cutPoint = headerMessage.indexOf(" ", 90); //$NON-NLS-0$
-					headerMessage = headerMessage.substring(0, (cutPoint !== -1 ? cutPoint : 100)) + "...";
-					additionalOffset = 3;
-				}
-			} else {
-				headerMessage = util.trimCommitMessage(commit.Message);
+			function createSection(parent) {
+				var section = document.createElement("div"); //$NON-NLS-0$
+				if (!that.simple) section.classList.add("gitCommitSection"); //$NON-NLS-0$
+				parent.appendChild(section);
+				return section;
 			}
+			
+			function createImage(parent) {
+				if (that.showImage === undefined || that.showImage) {
+					if (commit.AuthorImage) {
+						var image = new Image();
+						image.src = commit.AuthorImage;
+						image.name = commit.AuthorName;
+						image.className = "git-author-icon"; //$NON-NLS-0$
+						image.style["float"] = "left"; //$NON-NLS-1$ //$NON-NLS-0$
+						parent.appendChild(image);
+					}
+				}
+			}
+			
+			var detailsDiv = document.createElement("div"); //$NON-NLS-0$
+			if (this.simple) {
+				detailsDiv.className = "stretch"; //$NON-NLS-0$
+			}
+			
+			if (this.simple) {
+				createImage(that.parent);
+			}
+
+			this.parent.appendChild(detailsDiv);
 	
-			if (this.showMessage === undefined || this.showMessage) {
+			var headerMessage = util.trimCommitMessage(commit.Message);
+			var displayMessage = this.showMessage === undefined || this.showMessage;
+			if (displayMessage) {
 				var link;
 				if (this.commitLink) {
 					link = document.createElement("a"); //$NON-NLS-0$
 					link.className = "navlinkonpage"; //$NON-NLS-0$
 					link.href = require.toUrl(commitTemplate.expand({resource: commit.Location}));
 				} else {
-					link = document.createElement("span"); //$NON-NLS-0$
+					link = document.createElement("div"); //$NON-NLS-0$
 					link.className = "gitCommitTitle"; //$NON-NLS-0$
 				}
 				link.appendChild(document.createTextNode(headerMessage));
-				tableNode.appendChild(link);
+				detailsDiv.appendChild(link);
 
-				var secondaryMessageLength = commit.Message.length - (headerMessage.length + additionalOffset);
-				if(fullMessage && secondaryMessageLength > 0){
-					var secondaryMessagePre = document.createElement("pre");
-					secondaryMessagePre.style.paddingBottom = "15px";
-					secondaryMessagePre.style.marginTop = "0px";
-					
-					var secondaryMessage = (additionalOffset > 0) ? "..." : "";
-					secondaryMessage += commit.Message.substring(headerMessage.length - additionalOffset);
-					secondaryMessagePre.appendChild(document.createTextNode(secondaryMessage));
-					tableNode.appendChild(secondaryMessagePre);
+			}
+			if (this.fullMessage && headerMessage.length < commit.Message.length) {
+				var fullMessage = document.createElement("div"); //$NON-NLS-0$
+				fullMessage.className = "gitCommitFullMessage"; //$NON-NLS-0$
+				if (this.simple) {
+					fullMessage.textContent = commit.Message;
+				} else {
+					var headerSpan = document.createElement("span"); //$NON-NLS-0$
+					headerSpan.className = "gitCommitTitle"; //$NON-NLS-0$
+					headerSpan.textContent = headerMessage;
+					fullMessage.appendChild(headerSpan);
+					var restSpan = document.createElement("span"); //$NON-NLS-0$
+					restSpan.textContent = commit.Message.substring(headerMessage.length);
+					fullMessage.appendChild(restSpan);
 				}
+				detailsDiv.appendChild(fullMessage);
 			}
 			
-			var textDiv = document.createElement("div"); //$NON-NLS-0$
-			textDiv.style.paddingTop = "15px"; //$NON-NLS-0$
-			tableNode.appendChild(textDiv);
-			
-			if (this.showImage === undefined || this.showImage) {
-				if (commit.AuthorImage) {
-					var image = new Image();
-					image.src = commit.AuthorImage;
-					image.name = commit.AuthorName;
-					image.className = "git-author-icon"; //$NON-NLS-0$
-					textDiv.appendChild(image);
-				}
-				
+			var displayAuthor = this.showAuthor === undefined || this.showAuthor;
+			var displayCommitter = this.showCommitter === undefined || this.showCommitter;
+			if (displayAuthor || displayCommitter) {
+				section = createSection(detailsDiv);
+			}
+			if (!this.simple) {
+				createImage(section);
+			}
+			if (displayAuthor) {
+				createInfo(detailsDiv, ["authoredby", "on"], [i18nUtil.formatMessage(messages["nameEmail"], commit.AuthorName,  commit.AuthorEmail), new Date(commit.Time).toLocaleString()]); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			
-			if (this.showAuthor === undefined || this.showAuthor) {
-				createInfo(textDiv, ["authoredby", "on"], [i18nUtil.formatMessage(messages["nameEmail"], commit.AuthorName,  commit.AuthorEmail), new Date(commit.Time).toLocaleString()]);
+			if (displayCommitter) {
+				createInfo(detailsDiv, "committedby", i18nUtil.formatMessage(messages["nameEmail"], commit.CommitterName, commit.CommitterEmail)); //$NON-NLS-0$
 			}
 			
-			if (this.showCommitter === undefined || this.showCommitter) {
-				createInfo(textDiv, "committedby", i18nUtil.formatMessage(messages["nameEmail"], commit.CommitterName, commit.CommitterEmail));
+			var displayCommit = this.showCommit === undefined || this.showCommit;
+			var displayParent = this.showParentLink === undefined || this.showParentLink;
+			if (displayCommit || displayParent) {
+				section = createSection(detailsDiv);
 			}
-			
-			if (this.showCommit === undefined || this.showCommit) {
-				var commitNameDiv = createInfo(textDiv, "commit:", commit.Name);  //$NON-NLS-0$
-				commitNameDiv.style.paddingTop = "15px"; //$NON-NLS-0$
+			if (displayCommit) {
+				createInfo(section, "commit:", commit.Name);  //$NON-NLS-0$
 			}
-			
-			if (this.showGerrit === undefined || this.showGerrit) {
-				var gerritFooter = util.getGerritFooter(commit.Message);
-		
-				if (gerritFooter.changeId) {
-					var changeIdDiv = createInfo(textDiv, "Change-Id: ", gerritFooter.changeId);  //$NON-NLS-0$
-					changeIdDiv.style.paddingTop = "15px"; //$NON-NLS-0$
-				}
-				
-				if (gerritFooter.signedOffBy) {
-					createInfo(textDiv, "Signed-off-by: ", gerritFooter.signedOffBy);
-				}
-			}
-			
-			if (this.showParentLink === undefined || this.showParentLink) {
+			if (displayParent) {
 				if (commit.Parents && commit.Parents.length > 0) {
 					var parentNode = document.createElement("div"); //$NON-NLS-0$
 					parentNode.textContent = messages["parent:"]; //$NON-NLS-0$
-					if (gerritFooter.signedOffBy || gerritFooter.changeId) parentNode.style.paddingTop = "15px"; //$NON-NLS-0$
 					var parentLink = document.createElement("a"); //$NON-NLS-0$
 					parentLink.className = "navlinkonpage"; //$NON-NLS-0$
 					parentLink.href = require.toUrl(commitTemplate.expand({resource: commit.Parents[0].Location}));
 					parentLink.textContent = commit.Parents[0].Name;
 					parentNode.appendChild(parentLink);
-					textDiv.appendChild(parentNode);
+					section.appendChild(parentNode);
+				}
+			}
+			
+			var gerritFooter = util.getGerritFooter(commit.Message);
+			if (this.showGerrit === undefined || this.showGerrit) {
+				if (gerritFooter.changeId || gerritFooter.signedOffBy) {
+					section = createSection(detailsDiv);
+				}
+				if (gerritFooter.changeId) {
+					createInfo(section, "Change-Id: ", gerritFooter.changeId);  //$NON-NLS-0$
+				}
+				if (gerritFooter.signedOffBy) {
+					createInfo(section, "Signed-off-by: ", gerritFooter.signedOffBy); //$NON-NLS-0$
 				}
 			}
 	
 			var displayBranches = (this.showBranches === undefined || this.showBranches) && commit.Branches && commit.Branches.length > 0;
 			var displayTags = this.showTags && commit.Tags && commit.Tags.length > 0;
-	
-			if (displayBranches) {
-				
-				var branchesSection = document.createElement("section"); //$NON-NLS-0$
-				branchesSection.style.paddingTop = "15px"; //$NON-NLS-0$
-				branchesSection.textContent = messages["branches: "]; //$NON-NLS-0$
-				textDiv.appendChild(branchesSection);
-				
-				var branchesList = document.createElement("div"); //$NON-NLS-0$
-				branchesSection.appendChild(branchesList);
-	
-				for (var i = 0; i < commit.Branches.length; ++i) {
-					var branchNameSpan = document.createElement("span"); //$NON-NLS-0$
-					branchNameSpan.style.paddingLeft = "10px"; //$NON-NLS-0$
-					branchNameSpan.textContent = commit.Branches[i].FullName;
-					branchNameSpan.className = "gitCommitInfoValue"; //$NON-NLS-0$
-					branchesList.appendChild(branchNameSpan);
-				}
+			if (displayBranches || displayTags) {
+				section = createSection(detailsDiv);
 			}
-	
+			if (displayBranches) {
+				var branches = document.createElement("div"); //$NON-NLS-0$
+				branches.textContent = messages["branches: "]; //$NON-NLS-0$
+				branches.className = "gitCommitBranchesTitle"; //$NON-NLS-0$
+				section.appendChild(branches);
+				commit.Branches.forEach(function (branch) {
+					var branchNameSpan = document.createElement("span"); //$NON-NLS-0$
+					var branchName = branch.FullName;
+					["refs/heads/", "refs/remotes/"].forEach(function(prefix) { //$NON-NLS-1$ //$NON-NLS-0$
+						if (branchName.indexOf(prefix) === 0) branchName = branchName.substring(prefix.length);
+					});
+					branchNameSpan.textContent = branchName;
+					branchNameSpan.className = "gitCommitBranch"; //$NON-NLS-0$
+					branches.appendChild(branchNameSpan);
+				});
+			}
 			if (displayTags) {
-				var div = document.createElement("div"); //$NON-NLS-0$
-				div.style.paddingTop = "15px"; //$NON-NLS-0$
-				textDiv.appendChild(div);
-				
-				var tagsSection = document.createElement("section"); //$NON-NLS-0$
-				textDiv.appendChild(tagsSection);
-				
-				var tagsNode = document.createElement("span"); //$NON-NLS-0$
-				tagsNode.textContent = messages["tags: "]; //$NON-NLS-0$
-				tagsSection.appendChild(tagsNode);
-				
-				var tagsList = document.createElement("div"); //$NON-NLS-0$
-				tagsSection.appendChild(tagsList);
-	
-				for (i = 0; i < commit.Tags.length; ++i) {
-					var tagNameSpan = document.createElement("span"); //$NON-NLS-0$
-					tagNameSpan.style.paddingLeft = "10px"; //$NON-NLS-0$
-					tagNameSpan.textContent = commit.Tags[i].Name;
-					tagNameSpan.className = "gitCommitInfoValue";
-					tagsList.appendChild(tagNameSpan);
-				}
+				var tags = document.createElement("div"); //$NON-NLS-0$
+				tags.textContent = messages["tags: "];
+				tags.className = "gitCommitTagsTitle"; //$NON-NLS-0$
+				commit.Tags.forEach(function (tag) {
+					var tagSpan = document.createElement("span"); //$NON-NLS-0$
+					tagSpan.textContent = tag.Name;
+					tagSpan.className = "gitCommitTag"; //$NON-NLS-0$
+					tags.appendChild(tagSpan);
+					
+					var tagSpanAction = document.createElement("span"); //$NON-NLS-0$
+					tagSpanAction.className = "core-sprite-close gitCommitTagClose"; //$NON-NLS-0$
+					tagSpanAction.addEventListener("click", function(){ //$NON-NLS-0$
+						that.tagsCommandHandler.commandService.runCommand("eclipse.removeTag", tag, that.tagsCommandHandler); //$NON-NLS-0$
+					});
+					tagSpan.appendChild(tagSpanAction);
+				});
+				section.appendChild(tags);
 			}
 		}
 	});
