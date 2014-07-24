@@ -421,6 +421,17 @@ mBootstrap.startup().then(function(core) {
 		commandRegistry.registerCommandContribution(actionsNodeScope, "orion.cf.CreateRoute", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, target, this, "button"); //$NON-NLS-0$
 		
+		commandRegistry.registerCommandContribution("itemLevelCommands", "orion.cf.DeleteRoute", 300);
+		
+		routesSelection.addEventListener("selectionChanged", function(event){
+			var selections = event.selections;
+			var selectionActionsNode = orphanRoutesSection.selectionNode;
+			lib.empty(selectionActionsNode);
+			if(selections && selections.length>=1){
+				commandRegistry.renderCommands("itemLevelCommands", selectionActionsNode.id, selections, this, "tool");
+			}
+		});
+				
 		var explorerParent = document.createElement("div");
 		explorerParent.id = "orphanRoutesParent";
 		routesExplorer.parent = explorerParent;
@@ -445,11 +456,9 @@ mBootstrap.startup().then(function(core) {
 		orphanRoutesSection.embedExplorer(routesExplorer);
 		
 		routesExplorer.createTree(explorerParent, routesModel, {});
-		
 	}
 	
 	displayOrgsAndSpaces();
-	
 	});
 
 //end of define

@@ -60,7 +60,12 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry'], function(D
 						item = [item];
 					}
 					
-					return item.Type === "Route";
+					for (var i = 0; i < item.length; i++) {
+					    if (!item[i].Type || item[i].Type !== "Route")
+					    	return false;
+					}
+					
+					return true;
 				}
 			});
 			
