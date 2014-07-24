@@ -185,6 +185,7 @@ define([
 						showTags: false,
 						commitLink: false,
 						showMessage: false,
+						onlyFullMessage: true,
 						fullMessage: true
 					});
 					info.display();
