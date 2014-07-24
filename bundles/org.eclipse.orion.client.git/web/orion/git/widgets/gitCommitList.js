@@ -43,7 +43,7 @@ define([
 		this.statusService = options.statusService;
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;
-		this.legacyLog = options.legacyLog;
+		this.simpleLog = options.simpleLog;
 		this.parentId = options.parentId;
 		this.logDeferred = new Deferred();
 	}
@@ -195,13 +195,13 @@ define([
 						repository.BranchesNoCommits = branches;
 						var localBranch = that.getLocalBranch();
 						var remoteBranch = that.getRemoteBranch();
-						if (localBranch && remoteBranch && !that.legacyLog) {
+						if (localBranch && remoteBranch && !that.simpleLog) {
 							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch against"], localBranch.Name));
 						} else if (remoteBranch || localBranch) {
 							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch"], (remoteBranch || localBranch).Name));
 						}
 						if (progress) progress.done();
-						if (that.legacyLog) {
+						if (that.simpleLog) {
 							return Deferred.when(that.log || that._getLog(), function(log) {
 								parentItem.log = log;
 								that.logDeferred.resolve(log);
@@ -352,7 +352,7 @@ define([
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;
 		this.statusService = options.statusService;
-		this.legacyLog = options.legacyLog;
+		this.simpleLog = options.simpleLog;
 		
 		this.incomingActionScope = "IncomingActions"; //$NON-NLS-0$
 		this.outgoingActionScope = "OutgoingActions"; //$NON-NLS-0$
@@ -408,7 +408,7 @@ define([
 				location: this.location,
 				handleError: this.handleError,
 				parentId: this.parentId,
-				legacyLog: this.legacyLog
+				simpleLog: this.simpleLog
 			});
 			this.createTree(this.parentId, model, {onComplete: function() {
 				that.status = model.status;
@@ -426,7 +426,7 @@ define([
 			return deferred;
 		},
 		expandSections: function(children) {
-			if (!this.legacyLog && !this.model.isRebasing() && children.length > 2) {
+			if (!this.simpleLog && !this.model.isRebasing() && children.length > 2) {
 				this.myTree.expand(this.model.getId(children[0]));
 				this.myTree.expand(this.model.getId(children[1]));
 				if (this.location) {
@@ -473,7 +473,7 @@ define([
 		},
 		fetch: function() {
 			var model = this.model;
-			if (model.tracksRemoteBranch() && !this.legacyLog && !model.isRebasing()) {
+			if (model.tracksRemoteBranch() && !this.simpleLog && !model.isRebasing()) {
 				var commandService = this.commandService;
 				var remoteBranch = model.getRemoteBranch();
 				var localBranch = model.getLocalBranch();
@@ -496,7 +496,7 @@ define([
 				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseSkipPatchCommand", 300); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseAbortCommand", 400); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.renderCommands(actionsNodeScope, actionsNodeScope, repository.status, this, "button"); //$NON-NLS-0$
-			} else if (currentBranch && !this.legacyLog) {
+			} else if (currentBranch && !this.simpleLog) {
 				var incomingActionScope = this.incomingActionScope;
 				var outgoingActionScope = this.outgoingActionScope;
 				

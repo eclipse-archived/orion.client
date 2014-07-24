@@ -304,7 +304,7 @@ define([
 								statusService: explorer.statusService,
 								parentId: horizontalBox,
 								location: item.parent.CommitLocation + "?page=1&pageSize=10", //$NON-NLS-0$
-								legacyLog: true,
+								simpleLog: true,
 								handleError: explorer.handleError,
 								root: {
 									Type: "CommitRoot", //$NON-NLS-0$
