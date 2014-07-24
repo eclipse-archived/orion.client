@@ -31,7 +31,6 @@ define([
 			var _self = this;
 			// Broadcast changes of our explorer root to the sidebarNavInputManager
 			this.addEventListener("rootChanged", function(event) { //$NON-NLS-0$
-				_self.sidebarNavInputManager.dispatchEvent(event);
 				_self.sidebarNavInputManager.dispatchEvent({type: "InputChanged", input: event.root.ChildrenLocation}); //$NON-NLS-0$
 			});
 			sidebarNavInputManager.setInput = function(input) {

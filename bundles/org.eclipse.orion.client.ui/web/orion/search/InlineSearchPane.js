@@ -331,7 +331,11 @@ define([
 			document.getElementById("searchScopeSelectButton").title = messages["Choose a Folder"]; //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		
-		setSearchScope: function(targetFolder) { 
+		setSearchScope: function(targetFolder) {
+			if (targetFolder && targetFolder.fileMetadata) {
+				targetFolder = targetFolder.fileMetadata;
+			}
+			
 			if (targetFolder && (targetFolder.Path || targetFolder.Location)) {
 				var location = targetFolder.Path || targetFolder.Location;
 				this._searchLocations = [location];

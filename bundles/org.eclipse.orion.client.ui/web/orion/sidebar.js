@@ -232,26 +232,9 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				fileClient: this.fileClient
 			});
 			
-			// set the scope to the target folder that is selected in the navigator pane
-			this._inlineSearchPane.addEventListener("open", function(){ //$NON-NLS-0$
-				var activeViewModeId = this.getActiveViewModeId();
-				var explorer = this.getViewMode(activeViewModeId).explorer;
-				if (explorer) {
-					var selectionService = explorer.selection;
-					var selections = selectionService.getSelections();
-					if (selections && selections[0] && (1 === selections.length)) {
-						var targetFolder = selections[0].Directory ? selections[0] : selections[0].parent;
-						this._inlineSearchPane.setSearchScope(targetFolder);	
-					} else {
-						// no selection or multiple selections, set the scope to the root
-						this._inlineSearchPane.setSearchScope(explorer.treeRoot);
-					}
-				} else {
-					var lastRoot = this.getViewMode(this.defaultViewMode).lastRoot;
-					this._inlineSearchPane.setSearchScope(lastRoot);
-					//TODO try to find a way to keep the previous scope from a project nav
-				}
-				
+			// set the scope to the explorer's root
+			this.sidebarNavInputManager.addEventListener("rootChanged", function(event){ //$NON-NLS-0$
+				this._inlineSearchPane.setSearchScope(event.root);
 			}.bind(this));
 			
 			this.toolbarNode.parentNode.addEventListener("scroll", function(){ //$NON-NLS-0$

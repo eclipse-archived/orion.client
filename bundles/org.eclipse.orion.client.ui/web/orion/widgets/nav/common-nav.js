@@ -80,6 +80,11 @@ define([
 			sidebarNavInputManager.reveal = function(metadata) {
 				_self.reveal(metadata);
 			};
+			
+			// Broadcast changes of our explorer root to the sidebarNavInputManager
+			this.addEventListener("rootChanged", function(event) { //$NON-NLS-0$
+				sidebarNavInputManager.dispatchEvent(event);
+			});
 		}
 		var dispatcher = this.modelEventDispatcher;
 		var onChange = this._modelListener = this.onFileModelChange.bind(this);

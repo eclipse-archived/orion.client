@@ -1022,16 +1022,11 @@ define([
 			this._lastPath = path;
 			var self = this;
 			if (force || (path !== this.treeRoot.Path)) {
-				return this.load(this.fileClient.loadWorkspace(path), messages["Loading "] + path).then(function(p) {
+				return this.load(this.fileClient.loadWorkspace(path), messages["Loading "] + path, postLoad).then(function(p) {
 					self.treeRoot.Path = path;
-					if (typeof postLoad === "function") { //$NON-NLS-0$
-						postLoad();
-					}
-					self.dispatchEvent({ type: "rootChanged", root: self.treeRoot }); //$NON-NLS-0$
 					return new Deferred().resolve(self.treeRoot);
 				}, function(err) {
 					self.treeRoot.Path = null;
-					self.dispatchEvent({ type: "rootChanged", root: self.treeRoot }); //$NON-NLS-0$
 					return new Deferred().reject(err);
 				});
 			}
@@ -1125,6 +1120,7 @@ define([
 						if (typeof self.onchange === "function") { //$NON-NLS-0$
 							self.onchange(self.treeRoot);
 						}
+						self.dispatchEvent({ type: "rootChanged", root: self.treeRoot }); //$NON-NLS-0$
 						return self.treeRoot;
 					});
 				},
@@ -1134,6 +1130,7 @@ define([
 					if (self.registry) {
 						self.registry.getService("orion.page.message").setProgressResult(error); //$NON-NLS-0$
 					}
+					self.dispatchEvent({ type: "rootChanged", root: self.treeRoot }); //$NON-NLS-0$
 					return new Deferred().reject(error);
 				}
 			);
