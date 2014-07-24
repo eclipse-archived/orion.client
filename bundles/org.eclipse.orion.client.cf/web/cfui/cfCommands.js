@@ -70,6 +70,44 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry'], function(D
 			});
 			
 			commandService.addCommand(deleteRouteCommand);
+			
+			var mapRouteCommand = new mCommands.Command({
+				name : "Map to app",
+				tooltip: "Add the route to an app",
+				id : "orion.cf.MapRoute",
+				
+				callback : function(data) {
+					var route = data.items;
+				},
+				visibleWhen : function(item) {
+					if(!Array.isArray(item)){
+						item = [item];
+					}
+					
+					return item.length === 1 && item[0].Type === "Route";
+				}
+			});
+			
+			commandService.addCommand(mapRouteCommand);
+			
+			var unmapRouteCommand = new mCommands.Command({
+				name : "Unmap from app",
+				tooltip: "Add the route from an app",
+				id : "orion.cf.UnmapRoute",
+				
+				callback : function(data) {
+					var route = data.items;
+				},
+				visibleWhen : function(item) {
+					if(!Array.isArray(item)){
+						item = [item];
+					}
+					
+					return item.length === 1 && item[0].Type === "Route";
+				}
+			});
+			
+			commandService.addCommand(unmapRouteCommand);
 		},
 		createRoutesCommands: function(serviceRegistry, commandService, explorer){
 			

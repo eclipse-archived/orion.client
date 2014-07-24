@@ -328,14 +328,25 @@ mBootstrap.startup().then(function(core) {
 		lib.empty(orphanRoutesNode);
 		
 		var applicationsSection = new mSection.Section(applicationsNode, {
-							id: "applicationsSection", //$NON-NLS-0$
-							title: "Applications",
-							slideout: true,
-							canHide: false,
-							preferenceService: preferences,
-							keepHeader: true,
-							headerClass: ["sectionTreeTableHeader"]
-						}); 
+			id: "applicationsSection", //$NON-NLS-0$
+			title: "Applications",
+			slideout: true,
+			canHide: false,
+			preferenceService: preferences,
+			keepHeader: true,
+			headerClass: ["sectionTreeTableHeader"]
+		}); 
+		
+		commandRegistry.registerCommandContribution("appLevelCommands", "orion.cf.UnmapRoute", 100);
+		
+		selection.addEventListener("selectionChanged", function(event){
+			var selections = event.selections;
+			var selectionActionsNode = applicationsSection.selectionNode;
+			lib.empty(selectionActionsNode);
+			if(selections && selections.length>=1){
+				commandRegistry.renderCommands("appLevelCommands", selectionActionsNode.id, selections, this, "tool");
+			}
+		});
 						
 		progressService.showWhile(cFService.getApps(target), "Listing applications").then(function(apps){
 			
@@ -421,14 +432,15 @@ mBootstrap.startup().then(function(core) {
 		commandRegistry.registerCommandContribution(actionsNodeScope, "orion.cf.CreateRoute", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, target, this, "button"); //$NON-NLS-0$
 		
-		commandRegistry.registerCommandContribution("itemLevelCommands", "orion.cf.DeleteRoute", 300);
+		commandRegistry.registerCommandContribution("routeLevelCommands", "orion.cf.MapRoute", 100);
+		commandRegistry.registerCommandContribution("routeLevelCommands", "orion.cf.DeleteRoute", 200);
 		
 		routesSelection.addEventListener("selectionChanged", function(event){
 			var selections = event.selections;
 			var selectionActionsNode = orphanRoutesSection.selectionNode;
 			lib.empty(selectionActionsNode);
 			if(selections && selections.length>=1){
-				commandRegistry.renderCommands("itemLevelCommands", selectionActionsNode.id, selections, this, "tool");
+				commandRegistry.renderCommands("routeLevelCommands", selectionActionsNode.id, selections, this, "tool");
 			}
 		});
 				
