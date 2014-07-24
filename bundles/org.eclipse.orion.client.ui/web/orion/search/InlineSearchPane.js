@@ -359,21 +359,12 @@ define([
 			this._searchScopeElementWrapper = lib.$("#searchScopeElementWrapper", this._searchOptWrapperDiv); //$NON-NLS-0$
 			this._searchScopeSelectButton = lib.$("#searchScopeSelectButton", this._searchOptWrapperDiv); //$NON-NLS-0$
 			
-			var directoryPrompterCallback = function(targetFolder) {
-				this.setSearchScope(targetFolder);
-				if (this._replaceBoxIsHidden()) {
-					this._submitSearch();
-				} else {
-					this._replacePreview();
-				}
-			}.bind(this);
-			
 			this._searchScopeSelectButton.addEventListener("click", function(){ //$NON-NLS-0$
 				var searchScopeDialog = new DirectoryPrompterDialog.DirectoryPrompterDialog({
 					title: messages["Choose a Folder"], //$NON-NLS-0$
 					serviceRegistry: this._serviceRegistry,
 					fileClient: this._fileClient,				
-					func: directoryPrompterCallback
+					func: this.setSearchScope.bind(this)
 				});
 				searchScopeDialog.show();
 			}.bind(this));
