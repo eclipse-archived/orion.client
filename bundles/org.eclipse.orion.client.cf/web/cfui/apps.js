@@ -326,6 +326,7 @@ mBootstrap.startup().then(function(core) {
 	explorer.events = ["update", "create", "delete"];
 	
 	mCfCommands.createCfCommands(serviceRegistry, commandRegistry, explorer);
+	mCfCommands.createRoutesCommands(serviceRegistry, commandRegistry, explorer);
 
 	function displayApplications(target){
 		

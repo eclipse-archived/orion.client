@@ -12,9 +12,7 @@
 define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/EventTarget'],
 	function(Deferred, mCommands, mCommandRegistry, EventTarget){
 	
-	
 	var sharedEventDispatcher;
-	
 	
 	return {
 		
@@ -23,10 +21,45 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 				sharedEventDispatcher = new EventTarget();
 			}
 			return sharedEventDispatcher;
-			
 		},
 		
 		createCfCommands: function(serviceRegistry, commandService, explorer){
+			
+			var progressService = serviceRegistry.getService("orion.page.progress");
+			var cfClient = serviceRegistry.getService("orion.cf.service");
+
+			var stopAppCommand = new mCommands.Command({
+				name : "Stop",
+				tooltip: "Stop Application",
+				id : "orion.cf.StopApp",
+				
+				callback : function(data) {
+					var app = data.items;
+					if(Array.isArray(app)){
+						app = app[0];
+					}
+					app.state = "STOPPED";
+					if(sharedEventDispatcher){
+						sharedEventDispatcher.dispatchEvent({type: "update", newValue: app, oldValue: app });
+					}
+				},
+				visibleWhen : function(item) {
+					return false;
+					if(Array.isArray(item)){
+						if(item.length !== 1){
+							return false;
+						}
+						item = item[0];
+					}
+					
+					return item.Type === "App";
+				}
+			});
+			
+			commandService.addCommand(stopAppCommand);
+		},
+		
+		createRoutesCommands: function(serviceRegistry, commandService, explorer){
 			
 			var progressService = serviceRegistry.getService("orion.page.progress");
 			var cfClient = serviceRegistry.getService("orion.cf.service");
@@ -161,6 +194,15 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 				
 				callback : function(data) {
 					var route = data.items;
+					
+//					progressService.showWhile(cfClient.mapRoute(target, 
+//						route.Guid), "Deleting route...").then(
+//						function(jazzResp) {
+//							explorer.changedItem();
+//						}, function (error) {
+//							exports.handleError(error, progressService);
+//						}
+//					);
 				},
 				visibleWhen : function(item) {
 					if(!Array.isArray(item)){
@@ -191,9 +233,6 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 			});
 			
 			commandService.addCommand(unmapRouteCommand);
-		},
-		createRoutesCommands: function(serviceRegistry, commandService, explorer){
-			
 		},
 		
 		registerModelListener: function(listener){

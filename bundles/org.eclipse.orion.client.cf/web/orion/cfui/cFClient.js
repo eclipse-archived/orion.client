@@ -278,7 +278,39 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 					url += "&Target=" + JSON.stringify(target);
 				
 				return this._xhrV1("DELETE", url);
-			}
+			},
+			
+			mapRoute: function(target, app, domainName, hostName) {
+				var mappingObj = {
+					App: app,
+					DomainName: domainName,
+					Host: hostName
+				};
+				
+				var url = require.toUrl("cfapi/routes");
+				url += "?Route=" + encodeURIComponent(JSON.stringify(routeObj));
+				
+				if (target)
+					url += "&Target=" + JSON.stringify(target);
+				
+				return this._xhrV1("DELETE", url);
+			},
+			
+			unmapRoute: function(target, app, domainName, hostName) {
+				var mappingObj = {
+					App: app,
+					DomainName: domainName,
+					Host: hostName
+				};
+				
+				var url = require.toUrl("cfapi/routes");
+				url += "?Route=" + encodeURIComponent(JSON.stringify(routeObj));
+				
+				if (target)
+					url += "&Target=" + JSON.stringify(target);
+				
+				return this._xhrV1("DELETE", url);
+			},
 		};
 		
 		return CFService;
