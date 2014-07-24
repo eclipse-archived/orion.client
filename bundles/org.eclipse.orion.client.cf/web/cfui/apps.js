@@ -430,6 +430,7 @@ mBootstrap.startup().then(function(core) {
 		
 		var actionsNodeScope = orphanRoutesSection.actionsNode.id;
 		commandRegistry.registerCommandContribution(actionsNodeScope, "orion.cf.CreateRoute", 1000); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution(actionsNodeScope, "orion.cf.DeleteOrphanedRoutes", 1100); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, target, this, "button"); //$NON-NLS-0$
 		
 		commandRegistry.registerCommandContribution("routeLevelCommands", "orion.cf.MapRoute", 100);

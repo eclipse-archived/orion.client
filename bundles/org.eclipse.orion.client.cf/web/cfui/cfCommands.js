@@ -47,6 +47,30 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry'], function(D
 			
 			commandService.addCommand(createRouteCommand);
 			
+			var deleteOrphanedRoutesCommand = new mCommands.Command({
+				name : "Delete All Unmapped",
+				tooltip: "Delete all unmapped routes",
+				id : "orion.cf.DeleteOrphanedRoutes",
+				
+				callback : function(data) {
+					var target = data.items;
+					
+					progressService.showWhile(cfClient.deleteOrphanedRoutes(target), 
+						"Deleteing all unmapped routes...").then(
+						function(jazzResp) {
+							explorer.changedItem();
+						}, function (error) {
+							exports.handleError(error, progressService);
+						}
+					);
+				},
+				visibleWhen : function(item) {
+					return true;
+				}
+			});
+			
+			commandService.addCommand(deleteOrphanedRoutesCommand);
+			
 			var deleteRouteCommand = new mCommands.Command({
 				name : "Delete",
 				tooltip: "Delete route",
@@ -54,6 +78,15 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry'], function(D
 				
 				callback : function(data) {
 					var route = data.items;
+					
+					progressService.showWhile(cfClient.deleteRouteById(target, 
+						route.Guid), "Deleting route...").then(
+						function(jazzResp) {
+							explorer.changedItem();
+						}, function (error) {
+							exports.handleError(error, progressService);
+						}
+					);
 				},
 				visibleWhen : function(item) {
 					if(!Array.isArray(item)){
