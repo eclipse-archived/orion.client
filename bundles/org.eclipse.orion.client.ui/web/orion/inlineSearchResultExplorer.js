@@ -230,12 +230,13 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		// create parent folder span and prepend to link
 		var scopeParams = this.explorer.model.getScopingParams(item);
 		var folders = scopeParams.name.split("/"); //$NON-NLS-0$
-		var parentFolder = folders[folders.length - 1];
 		var parentSpan = document.createElement("span"); //$NON-NLS-0$
 		parentSpan.classList.add("fileParentSpan"); //$NON-NLS-0$
 		if (folders.length > 1) {
 			parentSpan.appendChild(document.createTextNode(".../")); //$NON-NLS-0$			
 		}
+		var parentFolder = folders[folders.length - 1];
+		parentFolder = decodeURIComponent(parentFolder);
 		parentSpan.appendChild(document.createTextNode(parentFolder + "/")); //$NON-NLS-0$
 		link.insertBefore(parentSpan, link.firstChild);
 		
@@ -461,7 +462,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                     span = _createSpan(null, this.getLocationSpanId(item), col, null);
                     if (item.parentLocation) {
 						var scopeParams = this.explorer.model.getScopingParams(item);
-						tableRow.title = scopeParams.name + "/" + item.name; //$NON-NLS-0$
+						tableRow.title = decodeURI(scopeParams.name + "/" + item.name); //$NON-NLS-0$
                     }
                 } else {
                 	if (this.explorer.model.replaceMode()) {
