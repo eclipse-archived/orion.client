@@ -381,8 +381,8 @@ define({
 	"Skip Patch": "Skip Patch",
 	"Abort": "Abort",
 	"Abort Rebase": "Abort Rebase",
-	"Discard": "Discard ${0} file(s)",
-	"Ignore": "Ignore ${0} file(s)",
+	"Discard": "Discard",
+	"Ignore": "Ignore",
 	"Your changes to the selected files will be discarded and cannot be recovered.": "Your changes to the selected files will be discarded and cannot be recovered.",
 	"Getting git log": "Getting git log",
 	"Active Branch Log": "Git Log (Active Branch)",
@@ -454,6 +454,8 @@ define({
 	"Synchronized" : "History",
 	"NoBranch" : "No Branch",
 	"None": "None",
-	"Commit and push ${0} file(s)": "Commit and push ${0} file(s)",
+	"FileSelected": "${0} file selected",
+	"FilesSelected": "${0} files selected",
+	"CommitPush": "Commit and Push",
 	"Commits and pushes files to the default remote": "Commits and pushes files to the default remote"
 });

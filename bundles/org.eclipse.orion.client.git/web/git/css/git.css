@@ -45,6 +45,19 @@ table .sectionTable {
 	margin-bottom:-10px;
 }
 
+.gitChangeListSelectAll {
+	float: left;
+	padding-top: 2px;
+}
+
+.gitChangeListSelectionStatus {
+	overflow: hidden;
+	width: 80%;
+	float: left;
+	padding-top: 2px;
+	text-align: center;
+}
+
 .gitCommitInfoValue {
 	color: black;
 }

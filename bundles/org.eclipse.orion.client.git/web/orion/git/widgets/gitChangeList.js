@@ -290,6 +290,7 @@ define([
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;
 		this.explorerSelectionScope = "explorerSelection";  //$NON-NLS-0$
+		this.explorerSelectionStatus = "explorerSelectionStatus";  //$NON-NLS-0$
 		this.createSelection();
 		this.createCommands();
 		if (this.prefix !== "all") {
@@ -399,6 +400,11 @@ define([
 		
 			this.commandService.renderCommands(actionsNodeScope, actionsNodeScope, this, this, "button"); //$NON-NLS-0$	
 		},
+		updateSelectionStatus: function(selections) {
+			var count = selections ? selections.length : 0;
+			var msg = i18nUtil.formatMessage(messages[count === 1 ? "FileSelected" : "FilesSelected"], count);
+			this.explorerSelectionStatus.textContent = msg;
+		},
 		createCommands: function(){
 			if (this.prefix !== "all") {
 				return;
@@ -457,7 +463,8 @@ define([
 			});
 			
 			var precommitCommand = new mCommands.Command({
-				tooltip: messages["CommitTooltip"], //$NON-NLS-0$
+				name: messages['Commit'],
+				tooltip: messages["CommitTooltip"],
 				id: "eclipse.orion.git.precommitCommand", //$NON-NLS-0$
 				extraClass: "primaryButton", //$NON-NLS-0$
 				callback: function(data) {
@@ -472,16 +479,12 @@ define([
 					that.commandService.runCommand("eclipse.orion.git.commitCommand", data.items, data.handler, null, {name: name, amend: amend, changeId: changeId});
 				},
 				visibleWhen: function(item) {
-					var items = item;
-					if (!Array.isArray(items)) {
-						items = [items];
-					}
-					precommitCommand.name =  i18nUtil.formatMessage(messages['SmartCountCommit'], items.length);
 					return true;
 				}
 			});
 			
 			var precommitAndPushCommand = new mCommands.Command({
+				name: messages["CommitPush"],
 				tooltip: messages["Commits and pushes files to the default remote"],
 				id: "eclipse.orion.git.precommitAndPushCommand",
 				callback: function(data) {
@@ -498,11 +501,6 @@ define([
 					that.commandService.runCommand("eclipse.orion.git.commitAndPushCommand", data.items, data.handler, null, {name: name, amend: amend, changeId: changeId});
 				},
 				visibleWhen: function(item) {
-					var items = item;
-					if (!Array.isArray(items)) {
-						items = [items];
-					}
-					precommitAndPushCommand.name = i18nUtil.formatMessage(messages["Commit and push ${0} file(s)"], items.length);
 					return true;
 				}
 			});
@@ -525,12 +523,15 @@ define([
 						commandService.destroy(selectionTools);
 						commandService.renderCommands(section.selectionNode.id, selectionTools, event.selections, that, "button", {"Clone" : that.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
-					if (that.prefix === "all") {
+					if (that.prefix === "all") { //$NON-NLS-0$
 						var titleTools = section.titleActionsNode;
 						if (titleTools) {
 							commandService.destroy(titleTools);
 						}
 						commandService.renderCommands(titleTools.id, titleTools, that, that, "button"); //$NON-NLS-0$
+					}
+					if (that.explorerSelectionStatus) {
+						that.updateSelectionStatus(event.selections);
 					}
 				});
 				
@@ -641,11 +642,17 @@ define([
 						itemLabel = document.createElement("span"); //$NON-NLS-0$
 						itemLabel.textContent = item.name;
 						div.appendChild(itemLabel);
-					} else if (item.Type === "ExplorerSelection") {
+					} else if (item.Type === "ExplorerSelection") { //$NON-NLS-0$
 						td.colSpan = 2;
 						itemLabel = document.createElement("span"); //$NON-NLS-0$
+						itemLabel.className = "gitChangeListSelectAll"; //$NON-NLS-0$
 						itemLabel.textContent =  messages["SelectAll"];
 						div.appendChild(itemLabel);
+						
+						var selectionLabel = explorer.explorerSelectionStatus = document.createElement("div"); //$NON-NLS-0$
+						selectionLabel.className = "gitChangeListSelectionStatus"; //$NON-NLS-0$
+						explorer.updateSelectionStatus();
+						div.appendChild(selectionLabel);
 						
 						var actionsArea = document.createElement("div"); //$NON-NLS-0$
 						actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$

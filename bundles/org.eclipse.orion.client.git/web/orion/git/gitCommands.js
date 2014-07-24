@@ -2642,8 +2642,6 @@ var exports = {};
 				);
 			},
 			visibleWhen: function(item) {
-				var items = forceArray(item);
-				checkoutStagedCommand.name = i18nUtil.formatMessage(messages["Discard"], items.length);
 				return true;
 			}
 		});
@@ -2688,8 +2686,6 @@ var exports = {};
 				);
 			},
 			visibleWhen: function(item) {
-				var items = forceArray(item);
-				ignoreCommand.name = i18nUtil.formatMessage(messages["Ignore"], items.length);
 				return true;
 			}
 		});
@@ -2869,7 +2865,7 @@ var exports = {};
 		
 		
 		var commitAndPushCommand = new mCommands.Command({
-			name: messages["Commit and Push"],
+			name: messages["CommitPush"],
 			tooltip: messages["Commits and pushes files to the default remote"],
 			id: "eclipse.orion.git.commitAndPushCommand",
 			callback: function(data) {
