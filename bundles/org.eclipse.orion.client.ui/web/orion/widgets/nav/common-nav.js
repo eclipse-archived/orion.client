@@ -24,12 +24,10 @@ define([
 	'orion/selection',
 	'orion/URITemplate',
 	'orion/PageUtil',
-	'orion/webui/contextmenu',
-	'orion/search/InlineSearchPane',
-	'orion/commands'
+	'orion/webui/contextmenu'
 ], function(
 	messages, objects, lib, mExplorer, mNavigatorRenderer, mKeyBinding,
-	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, mContextMenu, InlineSearchPane, mCommands
+	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, mContextMenu
 ) {
 	var FileExplorer = mExplorer.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
@@ -102,7 +100,6 @@ define([
 		this.commandsRegistered = this.registerCommands();
 		
 		this._createContextMenu();
-		this._createInlineSearchPane();
 	}
 	CommonNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(CommonNavExplorer.prototype, /** @lends orion.sidebar.CommonNavExplorer.prototype */ {
@@ -389,6 +386,10 @@ define([
 			}
 		},
 		
+		getEditActionsScope: function() {
+			return this.editActionsScope;	
+		},
+		
 		getTreeRoot: function() {
 			return this.treeRoot;
 		},
@@ -454,59 +455,6 @@ define([
 			contextMenu.addEventListener("triggered", contextMenuTriggered); //$NON-NLS-0$
 			
 			this._contextMenu = contextMenu;
-		},
-		
-		_createInlineSearchPane: function() {
-			this._inlineSearchPane = new InlineSearchPane({
-				parentNode: this.toolbarNode,
-				serviceRegistry: this.serviceRegistry,
-				commandRegistry: this.commandRegistry,
-				fileClient: this.fileClient
-			});
-			
-			// set the scope to the target folder that is selected in the navigator pane
-			this._inlineSearchPane.addEventListener("open", function(){ //$NON-NLS-0$
-				var selectionService = this.selection;
-				var selections = selectionService.getSelections();
-				if (selections && (1 === selections.length)) {
-					if (selections[0]) {
-						var targetFolder = selections[0].Directory ? selections[0] : selections[0].parent;
-						this._inlineSearchPane.setSearchScope(targetFolder);	
-					}
-				} else {
-					// no selection or multiple selections, set the scope to the root
-					this._inlineSearchPane.setSearchScope(this.treeRoot);
-				}
-			}.bind(this));
-			
-			this.addEventListener("rootChanged", function(event) { //$NON-NLS-0$
-				this._inlineSearchPane.setSearchScope(event.root);
-			}.bind(this));
-			
-			this.toolbarNode.parentNode.addEventListener("scroll", function(){ //$NON-NLS-0$
-				if (this._inlineSearchPane.isVisible()) {
-					this.toolbarNode.parentNode.scrollTop = 0;
-				}
-			}.bind(this));
-			
-			var openSearchCommand = new mCommands.Command({
-				name: messages["Global Search"], //$NON-NLS-0$
-				id: "orion.openInlineSearchPane", //$NON-NLS-0$
-				visibleWhen: function() {
-					return true;
-				},
-				callback: function (data) {
-					var mainSplitter = mGlobalCommands.getMainSplitter();
-					if (mainSplitter.splitter.isClosed()) {
-						mainSplitter.splitter.toggleSidePanel();
-					}
-					this._inlineSearchPane.show();
-					this._inlineSearchPane.showSearchOptions();
-				}.bind(this)
-			});
-	
-			this.commandRegistry.addCommand(openSearchCommand);
-			this.commandRegistry.registerCommandContribution(this.editActionsScope, "orion.openInlineSearchPane", 100, "orion.menuBarEditGroup/orion.findGroup", false, new KeyBinding('h', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	});
 
