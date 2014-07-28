@@ -134,29 +134,30 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 		_generateChildren: function(children, indentLevel, referenceNode) {
 			for (var i=0; i<children.length; i++) {
 				var row = document.createElement(this._tableRowElement); //$NON-NLS-0$
-				row.id = this._treeModel.getId(children[i]);
-				row._depth = indentLevel;
-				// This is a perf problem and potential leak because we're bashing a dom node with
-				// a javascript object.  (Whereas above we are using simple numbers/strings). 
-				// We should consider an item map.
-				row._item = children[i];
-				this._renderer.render(children[i], row);
-				// generate an indent
-				var indent = this._indent * indentLevel;
-				row.childNodes[Math.min(row.childNodes.length - 1, this._labelColumnIndex)].style.paddingLeft = indent +"px";  //$NON-NLS-0$
-				
-				if (this._renderer.rowCallback) {
-					this._renderer.rowCallback(row, children[i]);
-				}
-				
+				this._generateRow(children[i], row, indentLevel, referenceNode);
 				if (referenceNode) {
 					this._bodyElement.insertBefore(row, referenceNode.nextSibling);
-					if (referenceNode) { //$NON-NLS-0$
-						referenceNode = row;
-					}
+					referenceNode = row;
 				} else {
 					this._bodyElement.appendChild(row);
 				}
+			}
+		},
+		
+		_generateRow: function(child, row, indentLevel) {
+			row.id = this._treeModel.getId(child);
+			row._depth = indentLevel;
+			// This is a perf problem and potential leak because we're bashing a dom node with
+			// a javascript object.  (Whereas above we are using simple numbers/strings). 
+			// We should consider an item map.
+			row._item = child;
+			this._renderer.render(child, row);
+			// generate an indent
+			var indent = this._indent * indentLevel;
+			row.childNodes[Math.min(row.childNodes.length - 1, this._labelColumnIndex)].style.paddingLeft = indent +"px";  //$NON-NLS-0$
+			this._renderer.updateExpandVisuals(row, row._expanded);
+			if (this._renderer.rowCallback) {
+				this._renderer.rowCallback(row, child);
 			}
 		},
 		
@@ -169,6 +170,13 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 		
 		getSelected: function() {
 			return this._renderer.getSelected();
+		},
+		
+		redraw: function(item) {
+			var itemId = this._treeModel.getId(item);
+			var row = lib.node(itemId);
+			lib.empty(row);
+			this._generateRow(item, row, row._depth);
 		},
 		
 		refresh: function(item, children, /* optional */ forceExpand) {
