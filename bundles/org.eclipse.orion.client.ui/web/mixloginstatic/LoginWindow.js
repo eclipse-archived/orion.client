@@ -166,6 +166,17 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 			}
 		}
 	}
+	
+	function createOAuthLink(openid) {
+		if (openid !== "" && openid !== null) {
+			var redirect = getRedirect();
+			if (redirect !== null && PageUtil.validateURLScheme(decodeURIComponent(redirect))) {
+				return "../login/oauth?oauth=google&redirect=" + redirect;
+			} else {
+				return "../login/oauth?oauth=google";
+			}
+		}
+	}
 
 	/* handleSelectionEvent - centralize decision making criteria for the key press,
 	   click, gesture etc that we respect as a user choice */
@@ -364,6 +375,12 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 			event.srcElement.click();
 		}
 	}
+	
+	function googleLoginPlus( event ){
+		if( handleSelectionEvent( event ) ){
+			event.srcElement.click();
+		}
+	}
 
 	domReady(function() {
 		addPersonaHandler(document.getElementById("personaLogin"));
@@ -532,6 +549,9 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		document.getElementById("googleLogin").href = createOpenIdLink("https://www.google.com/accounts/o8/id");
 		document.getElementById("googleLogin").addEventListener("keydown", googleLogin);
 
+		document.getElementById("googleLoginPlus").href = createOAuthLink("https://accounts.google.com/o/oauth2/auth");
+		document.getElementById("googleLoginPlus").addEventListener("keydown", googleLoginPlus);
+		
 		document.getElementById("orionLogin").addEventListener("click", revealLogin);
 		document.getElementById("orionLogin").onkeydown = revealLogin;
 
