@@ -175,23 +175,24 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 		if(!this.apps.apps){
 			this.apps.apps = [];
 		}
-				if(event.oldValue && event.oldValue.Type !== "Route"){
-					for(var i=0; i<this.apps.apps.length; i++){
-						if(this.apps.apps[i].guid === event.oldValue.guid){
-							if(event.newValue){
-								this.apps.apps[i] = event.newValue;
-							} else {
-								this.apps.apps.splice(i, 1);
-							}
-							break;
-						}
+		
+		if(event.oldValue && event.oldValue.Type !== "Route"){
+			for(var i=0; i<this.apps.apps.length; i++){
+				if(this.apps.apps[i].guid === event.oldValue.guid){
+					if(event.newValue){
+						this.apps.apps[i] = event.newValue;
+					} else {
+						this.apps.apps.splice(i, 1);
 					}
-				} else if(event.newValue && event.newValue.Type !== "Route"){
-					this.apps.apps.push(event.newValue);
+					break;
 				}
-				var model = new ApplicationsModel(this.apps, this.target);
-				this.createTree(this.parent, model, {});
 			}
+		} else if(event.newValue && event.newValue.Type !== "Route"){
+			this.apps.apps.push(event.newValue);
+		}
+		var model = new ApplicationsModel(this.apps, this.target);
+		this.createTree(this.parent, model, {});
+	};
 	
 	ApplicationsExplorer.prototype.loadApps = function(apps, target){
 		this.apps = apps;
@@ -318,7 +319,8 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 						return appRoute.guid !== route.Guid;
 					});
 				})){
-					 orphanRoutes.push(route);
+					route.target = target;
+					orphanRoutes.push(route);
 				}
 			});
 		}

@@ -603,35 +603,83 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 		}
 	);
 	
-	/** Add cf delete command **/
-	/** var deleteImpl = {
-		callback: function(args, context) {
-			return cFService.deleteApp(args.app, context.cwd).then(function(result) {
-				if (!result || !result.applications) {
-					return "No applications found";
-				}
-				var strResult = "";
-				result.applications.forEach(function(item) {
-					strResult += "\nDeleted " + item.name;
-				});
-				return strResult;
-			});
-		}
-	};
+	/** Add cf map-route command **/
+//	var mapRouteImpl = {
+//		callback: function(args, context) {
+//			return cFService.mapRoute(null, args.app, args.domain, args.hostname).then(function(result) {
+////				if (!result || !result.Routes) {
+////					return "No orphaned routes";
+////				}
+////				var strResult = "";
+////				result.Routes.forEach(function(item) {
+////					strResult += "\nDeleted " + item.Host + " at " + item.DomainName;
+////				});
+//				
+//				// TODO: make better handling
+//				return "Mapping added";
+//			});
+//		}
+//	};
+//	
+//	provider.registerServiceProvider(
+//		"orion.shell.command",
+//		mapRouteImpl, {
+//			name: "cfo map-routes",
+//			description: "Add a route to an app",
+//			parameters: [{
+//				name: "app",
+//				type: "string",
+//				description: "Application"
+//			}, {
+//				name: "domain",
+//				type: "string",
+//				description: "Domain"
+//			}, {
+//				name: "hostname",
+//				type: "string",
+//				description: "Hostname"
+//			}]
+//		}
+//	);
+//	
+//	/** Add cf unmap-route command **/
+//	var unmapRouteImpl = {
+//		callback: function(args, context) {
+//			return cFService.unmapRoute(null, args.app, args.domain, args.hostname).then(function(result) {
+////					if (!result || !result.Routes) {
+////						return "No orphaned routes";
+////					}
+////					var strResult = "";
+////					result.Routes.forEach(function(item) {
+////						strResult += "\nDeleted " + item.Host + " at " + item.DomainName;
+////					});
+//				
+//				// TODO: make better handling
+//				return "Mapping deleted";
+//			});
+//		}
+//	};
+//	
+//	provider.registerServiceProvider(
+//		"orion.shell.command",
+//		unmapRouteImpl, {
+//			name: "cfo unmap-routes",
+//			description: "Delete a route from an app",
+//			parameters: [{
+//				name: "app",
+//				type: "string",
+//				description: "Application"
+//			}, {
+//				name: "domain",
+//				type: "string",
+//				description: "Domain"
+//			}, {
+//				name: "hostname",
+//				type: "string",
+//				description: "Hostname"
+//			}]
+//		}
+//	);
 	
-	provider.registerServiceProvider(
-		"orion.shell.command",
-		deleteImpl, {
-			name: "cfo delete",
-			description: "Delete an application",
-			parameters: [{
-				name: "app",
-				type: "string",
-				description: "Application to delete",
-				defaultValue: null
-			}]
-		}
-	); **/
-
 	provider.connect();
 });

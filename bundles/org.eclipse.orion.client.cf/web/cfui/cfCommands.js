@@ -9,8 +9,8 @@
  *******************************************************************************/
  /*global define*/
  /*eshint-env browser, amd*/
-define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/EventTarget'],
-	function(Deferred, mCommands, mCommandRegistry, EventTarget){
+define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/EventTarget', 'orion/cfui/widgets/SelectAppDialog'],
+	function(Deferred, mCommands, mCommandRegistry, EventTarget, mSelectAppDialog){
 	
 	var sharedEventDispatcher;
 	
@@ -193,16 +193,33 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 				id : "orion.cf.MapRoute",
 				
 				callback : function(data) {
-					var route = data.items;
+					var route = data.items[0];
+					var target = route.target;
 					
-//					progressService.showWhile(cfClient.mapRoute(target, 
-//						route.Guid), "Deleting route...").then(
-//						function(jazzResp) {
-//							explorer.changedItem();
-//						}, function (error) {
-//							exports.handleError(error, progressService);
-//						}
-//					);
+					progressService.showWhile(cfClient.getApps(target), "Loading...").then(
+						function(result){
+							var dialog = new mSelectAppDialog.SelectAppDialog({
+								title: "Select Application",
+								cfClient: cfClient,
+								serviceRegistry: serviceRegistry,
+								apps: result.apps,
+								func: function(app) {
+									progressService.showWhile(cfClient.mapRoute(target, app.guid, 
+										route.Guid), "Mapping route to an app ...").then(
+										function(jazzResp) {
+											if(sharedEventDispatcher){
+												sharedEventDispatcher.dispatchEvent({type: "update", oldValue: route });
+											}
+										}, function (error) {
+											exports.handleError(error, progressService);
+										}
+									);
+								}
+							});
+							
+							dialog.show();
+						}
+					);
 				},
 				visibleWhen : function(item) {
 					if(!Array.isArray(item)){
@@ -217,11 +234,24 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 			
 			var unmapRouteCommand = new mCommands.Command({
 				name : "Unmap from app",
-				tooltip: "Add the route from an app",
+				tooltip: "Remove the route from an app",
 				id : "orion.cf.UnmapRoute",
 				
 				callback : function(data) {
-					var route = data.items;
+					var route = data.items[0];
+					var app = route.parent;
+					var target = app.parent.Target;
+					
+					progressService.showWhile(cfClient.unmapRoute(target, app.guid, 
+						route.Guid), "Removing route from an app ...").then(
+						function(jazzResp) {
+							if(sharedEventDispatcher){
+								sharedEventDispatcher.dispatchEvent({type: "update", oldValue: route });
+							}
+						}, function (error) {
+							exports.handleError(error, progressService);
+						}
+					);
 				},
 				visibleWhen : function(item) {
 					if(!Array.isArray(item)){

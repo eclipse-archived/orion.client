@@ -280,32 +280,16 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				return this._xhrV1("DELETE", url);
 			},
 			
-			mapRoute: function(target, app, domainName, hostName) {
-				var mappingObj = {
-					App: app,
-					DomainName: domainName,
-					Host: hostName
-				};
-				
-				var url = require.toUrl("cfapi/routes");
-				url += "?Route=" + encodeURIComponent(JSON.stringify(routeObj));
-				
+			mapRoute: function(target, appId, routeId) {
+				var url = require.toUrl("cfapi/apps/" + appId + "/routes/" + routeId);
 				if (target)
 					url += "&Target=" + JSON.stringify(target);
 				
-				return this._xhrV1("DELETE", url);
+				return this._xhrV1("PUT", url);
 			},
 			
-			unmapRoute: function(target, app, domainName, hostName) {
-				var mappingObj = {
-					App: app,
-					DomainName: domainName,
-					Host: hostName
-				};
-				
-				var url = require.toUrl("cfapi/routes");
-				url += "?Route=" + encodeURIComponent(JSON.stringify(routeObj));
-				
+			unmapRoute: function(target, appId, routeId) {
+				var url = require.toUrl("cfapi/apps/" + appId + "/routes/" + routeId);
 				if (target)
 					url += "&Target=" + JSON.stringify(target);
 				
