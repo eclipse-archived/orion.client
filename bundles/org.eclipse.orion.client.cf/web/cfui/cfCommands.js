@@ -59,7 +59,7 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 			commandService.addCommand(stopAppCommand);
 		},
 		
-		createRoutesCommands: function(serviceRegistry, commandService, explorer){
+		createRoutesCommands: function(serviceRegistry, commandService, explorer, refreshFunc){
 			
 			var progressService = serviceRegistry.getService("orion.page.progress");
 			var cfClient = serviceRegistry.getService("orion.cf.service");
@@ -109,7 +109,7 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 					progressService.showWhile(cfClient.deleteOrphanedRoutes(target), 
 						"Deleteing all unmapped routes...").then(
 						function(jazzResp) {
-							explorer.changedItem();
+							refreshFunc();
 						}, function (error) {
 							exports.handleError(error, progressService);
 						}
@@ -207,9 +207,12 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 									progressService.showWhile(cfClient.mapRoute(target, app.guid, 
 										route.Guid), "Mapping route to an app ...").then(
 										function(jazzResp) {
-											if(sharedEventDispatcher){
-												sharedEventDispatcher.dispatchEvent({type: "delete", oldValue: route });
-											}
+											refreshFunc();
+//											if(sharedEventDispatcher){
+//												var appRoutes = app.routes;
+//												app.routes.push(route);
+//												sharedEventDispatcher.dispatchEvent({type: "update", newValue: app });
+//											}
 										}, function (error) {
 											exports.handleError(error, progressService);
 										}
@@ -244,10 +247,14 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 					
 					progressService.showWhile(cfClient.unmapRoute(target, app.guid, 
 						route.guid), "Removing route from an app ...").then(
-						function(jazzResp) {							
-							if(sharedEventDispatcher){
-								sharedEventDispatcher.dispatchEvent({type: "create", newValue: route });
-							}
+						function(resp) {		
+							refreshFunc();
+//							if(sharedEventDispatcher){
+//								var appRoutes = app.routes;
+//								app.routes = [];
+//								
+//								sharedEventDispatcher.dispatchEvent({type: "update", newValue: app });
+//							}
 						}, function (error) {
 							exports.handleError(error, progressService);
 						}

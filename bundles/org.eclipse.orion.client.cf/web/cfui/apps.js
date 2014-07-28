@@ -84,8 +84,10 @@ mBootstrap.startup().then(function(core) {
 	
 	
 	function displayOrgsAndSpaces(){
+		lib.empty(orgsNode);
+		
 		progressService.showWhile(mCfUtil.getTarget(preferences), "Checking for Cloud Foundry settings").then(function(target){
-			progressService.showWhile(cFService.getOrgs(target), "Listing organizations").then(function(result){
+			progressService.showWhile(cFService.getOrgs(target), "Loading ...").then(function(result){
 				
 				var table = document.createElement("table");
 				table.className = "centerTable";
@@ -180,8 +182,8 @@ mBootstrap.startup().then(function(core) {
 	explorerParent.id = "applicationsSectionParent";
 	var explorer = new mCfExplorer.ApplicationsExplorer(serviceRegistry, selection,	commandRegistry, explorerParent);
 	
-	mCfCommands.createCfCommands(serviceRegistry, commandRegistry, explorer);
-	mCfCommands.createRoutesCommands(serviceRegistry, commandRegistry, explorer);
+	mCfCommands.createCfCommands(serviceRegistry, commandRegistry, explorer, displayOrgsAndSpaces);
+	mCfCommands.createRoutesCommands(serviceRegistry, commandRegistry, explorer, displayOrgsAndSpaces);
 
 	function displayApplications(target){
 		
@@ -210,7 +212,7 @@ mBootstrap.startup().then(function(core) {
 			}
 		});
 						
-		progressService.showWhile(cFService.getApps(target), "Listing applications").then(function(apps){
+		progressService.showWhile(cFService.getApps(target), "Loading ...").then(function(apps){
 			
 			explorer.destroyListeters();			
 			applicationsSection.embedExplorer(explorer);
@@ -218,7 +220,7 @@ mBootstrap.startup().then(function(core) {
 			
 			explorer.addListeters(cfEventDispatcher);
 			
-			progressService.showWhile(cFService.getRoutes(target), "Loading routes").then(function(routes){
+			progressService.showWhile(cFService.getRoutes(target), "Loading ...").then(function(routes){
 				
 			displayOrphanRoutes(routes, apps, target);
 			
@@ -234,7 +236,7 @@ mBootstrap.startup().then(function(core) {
 	var routesSelection = new mSelection.Selection(serviceRegistry, "orion.Routes.selection");
 	var routesExplorer = new mCfExplorer.OrphanRoutesExplorer(serviceRegistry, routesSelection, commandRegistry, routesParent);
 				
-	mCfCommands.createRoutesCommands(serviceRegistry, commandRegistry, routesExplorer);
+	mCfCommands.createRoutesCommands(serviceRegistry, commandRegistry, routesExplorer, displayOrgsAndSpaces);
 		
 	function displayOrphanRoutes(routes, apps, target){
 		
@@ -242,7 +244,7 @@ mBootstrap.startup().then(function(core) {
 			
 		var orphanRoutesSection = new mSection.Section(orphanRoutesNode, {
 			id: "orphanRoutes", //$NON-NLS-0$
-			title: "Orphan Routes",
+			title: "Unmapped Routes",
 			slideout: true,
 			canHide: false,
 			preferenceService: preferences,
