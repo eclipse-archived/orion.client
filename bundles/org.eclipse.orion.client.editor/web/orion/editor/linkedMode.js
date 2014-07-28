@@ -272,7 +272,7 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 				contentAssist.removeEventListener("Activating", this.linkedModeListener.onActivating); //$NON-NLS-0$
 				contentAssist.offset = undefined;
 				this.editor.reportStatus(messages.linkedModeExited, null, true);
-				if (escapePosition) {
+				if (escapePosition && model.escapePosition !== undefined) {
 					editor.setCaretOffset(model.escapePosition, false);
 				}
 			}
