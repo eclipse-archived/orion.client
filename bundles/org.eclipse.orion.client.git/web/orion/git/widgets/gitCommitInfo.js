@@ -97,7 +97,7 @@ define([
 				detailsDiv.appendChild(link);
 
 			}
-			if (this.fullMessage && (this.onlyFullMessage || headerMessage.length > commit.Message.length)) {
+			if (this.fullMessage && (this.onlyFullMessage || headerMessage.length < commit.Message.length)) {
 				var fullMessage = document.createElement("div"); //$NON-NLS-0$
 				fullMessage.className = "gitCommitFullMessage"; //$NON-NLS-0$
 				if (this.simple) {
