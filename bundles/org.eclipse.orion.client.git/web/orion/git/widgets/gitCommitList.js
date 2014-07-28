@@ -12,7 +12,6 @@
 /*eslint-env browser, amd*/
 
 define([
-	'require',
 	'i18n!git/nls/gitmessages',
 	'orion/git/widgets/gitChangeList',
 	'orion/git/widgets/gitCommitInfo',
@@ -20,16 +19,12 @@ define([
 	'orion/commands',
 	'orion/Deferred',
 	'orion/explorers/explorer',
-	'orion/URITemplate',
-	'orion/git/util',
 	'orion/commonHTMLFragments',
 	'orion/git/logic/gitPush',
 	'orion/i18nUtil',
-	'orion/explorers/navigationUtils',
 	'orion/webui/littlelib',
 	'orion/objects'
-], function(require, messages, mGitChangeList, mGitCommitInfo, mSection, mCommands, Deferred, mExplorer, URITemplate, util, mHTMLFragments, gitPush, i18nUtil, mNavUtils, lib, objects) {
-	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$
+], function(messages, mGitChangeList, mGitCommitInfo, mSection, mCommands, Deferred, mExplorer, mHTMLFragments, gitPush, i18nUtil, lib, objects) {
 
 	var pageSizeQuery = "?page=1&pageSize=20"; //$NON-NLS-0$
 
