@@ -466,6 +466,15 @@ a.loginwindow {
 	/* margin-top: 3px; */
 }
 
+.googleplusIcon{
+	background: url('../images/googleplus.png') no-repeat;
+	background-position: 0 0;
+	width: 50px;
+	height: 50px;
+	margin-left: 10px;
+	/* margin-top: 3px; */
+}
+
 .googleIcon:hover{
 	opacity:.6;
 }
