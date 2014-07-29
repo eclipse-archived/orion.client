@@ -272,7 +272,7 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 				contentAssist.removeEventListener("Activating", this.linkedModeListener.onActivating); //$NON-NLS-0$
 				contentAssist.offset = undefined;
 				this.editor.reportStatus(messages.linkedModeExited, null, true);
-				if (escapePosition && model.escapePosition !== undefined) {
+				if (escapePosition && typeof model.escapePosition === "number") { //$NON-NLS-0$
 					editor.setCaretOffset(model.escapePosition, false);
 				}
 			}
@@ -372,7 +372,7 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 				this._getModelPositions(all, model);
 				// Add escape position for all models
 				while (model) {
-					if (model.escapePosition !== undefined) {
+					if (typeof model.escapePosition === "number") { //$NON-NLS-0$
 						all.push({
 							escape: true,
 							model: model,
