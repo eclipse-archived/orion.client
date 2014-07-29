@@ -467,7 +467,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 } else {
                 	if (this.explorer.model.replaceMode()) {
                 		this.renderDetailLineNumber(item, col);
-                		item.indexInParent = item.parent.children.indexOf(item);
                 	}
                     this.renderDetailElement(item, col);
                 }
@@ -1159,8 +1158,18 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         if (!_onSameFile(this._currentPreviewModel, currentModel)) {
             this.buildPreview();
         }
-        if (this.compareView && (currentModel.type === "detail")) { //$NON-NLS-0$
-        	var changeIndex = currentModel.indexInParent;
+        if (this.compareView && (currentModel.type === "detail") && currentModel.checked) { //$NON-NLS-0$
+        	// Figure out change index. Unchecked elements are 
+        	// removed from diffs and must therefore be skipped.
+			var changeIndex = 0;
+			currentModel.parent.children.some(function(element){
+				if (currentModel === element) {
+					return true;
+				} else if (element.checked) {
+					changeIndex++;
+				}
+				return false;
+			}, this);
 		    this.compareView.gotoDiff(changeIndex);
         }
     };
@@ -1336,6 +1345,15 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             return;
         }
         this.getNavHandler().iterate(next, forceExpand, true);
+        
+        // skip unchecked matches in replace mode
+        if (this.model.replaceMode()) {
+        	var currentModel = this.getNavHandler().currentModel();
+        	while (currentModel && !currentModel.checked) {
+        		this.getNavHandler().iterate(next, forceExpand, true);
+        		currentModel = this.getNavHandler().currentModel();
+        	}
+        }
     };
 
 	InlineSearchResultExplorer.prototype._renderSearchResult = function(crawling, resultsNode, searchParams, jsonData, incremental) {
