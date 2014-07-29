@@ -165,7 +165,7 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 	ApplicationsExplorer.prototype = new mExplorer.Explorer();
 	ApplicationsExplorer.prototype.constructor = ApplicationsExplorer;
 	
-	ApplicationsExplorer.prototype.events = ["update", "create", "delete"];
+	ApplicationsExplorer.prototype.events = ["update", "create", "delete", "map", "unmap"];
 	
 	ApplicationsExplorer.prototype.expand = function(item){
 		if (this.myTree.isExpanded(item)) {
@@ -180,25 +180,47 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 			this.apps.Apps = [];
 		}
 		
-		if(event.oldValue && event.oldValue.Type !== "Route"){
+		if(event.type === "map" || event.type === "unmap"){
+			if(!event.app || !event.route){
+				return;
+			}
 			for(var i=0; i<this.apps.Apps.length; i++){
-				if(this.apps.Apps[i].Guid === event.oldValue.Guid){
-					if(event.newValue){
-						this.apps.Apps[i] = event.newValue;
+				if(this.apps.Apps[i].Guid === event.app.Guid){
+					var app = this.apps.Apps[i];
+					if(event.type === "unmap"){
+						for(var j=0; j<app.Routes.length; j++){
+							if(app.Routes[j].Guid === event.route.Guid){
+								app.Routes.splice(j, 1);
+								break;
+							}
+						}
 					} else {
-						this.apps.Apps.splice(i, 1);
+						app.Routes.push(event.route);
 					}
-					break;
 				}
 			}
-		} else if(event.newValue && event.newValue.Type !== "Route"){
-			this.apps.Apps.push(event.newValue);
+			
+		} else {
+			if(event.oldValue && event.oldValue.Type !== "Route"){
+				for(var i=0; i<this.apps.Apps.length; i++){
+					if(this.apps.Apps[i].Guid === event.oldValue.Guid){
+						if(event.newValue){
+							this.apps.Apps[i] = event.newValue;
+						} else {
+							this.apps.Apps.splice(i, 1);
+						}
+						break;
+					}
+				}
+			} else if(event.newValue && event.newValue.Type !== "Route"){
+				this.apps.Apps.push(event.newValue);
+			}
 		}
 		var model = new ApplicationsModel(this.apps, this.target);
 		this.createTree(this.parent, model, {});
 		if(event.expand){
 			setTimeout(function(){
-				this.expand(event.newValue);
+				this.expand(event.newValue || event.app);
 			}.bind(this), 5);
 		}
 	};
@@ -273,7 +295,7 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 	
 	OrphanRoutesExplorer.prototype = new mExplorer.Explorer();
 	OrphanRoutesExplorer.prototype.constructor = OrphanRoutesExplorer;
-	OrphanRoutesExplorer.prototype.events = ["update", "create", "delete"];
+	OrphanRoutesExplorer.prototype.events = ["update", "create", "delete", "map", "unmap"];
 	
 	var routesCfEventListenerRef;
 	
@@ -297,6 +319,29 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 			if(!this.routes.Routes){
 				this.routes.Routes = [];
 			}
+			
+			if(event.type === "map" || event.type === "unmap"){
+			if(!event.app || !event.route){
+				return;
+			}
+			for(var i=0; i<this.routes.Routes.length; i++){
+				if(this.routes.Routes[i].Guid === event.route.Guid){
+					var route = this.routes.Routes[i];
+					if(event.type === "unmap"){
+						for(var j=0; j<route.Apps.length; j++){
+							if(route.Apps[j].Guid === event.app.Guid){
+								route.Apps.splice(j, 1);
+								break;
+							}
+						}
+					} else {
+						route.Apps.push(event.app);
+					}
+				}
+			}
+			
+		} else {
+			
 			if(event.oldValue && event.oldValue.Type === "Route"){
 				for(var i=0; i<this.routes.Routes.length; i++){
 					if(this.routes.Routes[i].Guid === event.oldValue.Guid){
@@ -311,6 +356,7 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 			} else if(event.newValue && event.newValue.Type === "Route"){
 				this.routes.Routes.push(event.newValue);
 			}
+		}
 			this.loadRoutes(this.routes, this.target);
 		};
 	

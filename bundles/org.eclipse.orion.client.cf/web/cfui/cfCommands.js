@@ -147,31 +147,8 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 									progressService.showWhile(cfClient.mapRoute(target, app.Guid, 
 										route.Guid), "Mapping route to an app ...").then(
 										function(resp) {
-											if(resp.entity){
-												//TODO replace the hack below with commented lines when all formats are updated
-//												progressService.showWhile(cfClient.getApp(target, app.Name), "Updating application information for " + app.name).then(
-//													function(application){
-												progressService.showWhile(cfClient.getApps(target), "Updating application information for " + app.Name).then(
-													function(applications){
-														var application;
-														for(var i=0; i < applications.Apps.length; i++){
-															if(applications.Apps[i].guid === app.guid){
-																application = applications.Apps[i];
-															}
-														}
-														//endof hack
-														if(sharedEventDispatcher){
-															sharedEventDispatcher.dispatchEvent({type: "update", newValue: application, oldValue: app, expand: true });
-															//TODO remove when representation is unified
-															route.Type = "Route";
-															route.Guid = route.Guid || route.guid;
-															sharedEventDispatcher.dispatchEvent({type: "delete", oldValue: route });
-														}
-													}, 
-													function (error) {
-														exports.handleError(error, progressService);
-													}
-												);
+											if(sharedEventDispatcher){
+												sharedEventDispatcher.dispatchEvent({type: "map", app: app, route: route, expand: true });
 											} else {
 												refreshFunc();
 											}
@@ -209,34 +186,9 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 					
 					progressService.showWhile(cfClient.unmapRoute(target, app.Guid, 
 						route.Guid), "Removing route from an app ...").then(
-						function(resp) {		
-							if(resp.entity){
-							//TODO replace the hack below with commented lines when all formats are updated
-//								progressService.showWhile(cfClient.getApp(target, app.Name), "Updating application information for " + app.name).then(
-//								function(application){
-								progressService.showWhile(cfClient.getApps(target), "Updating application information for " + app.Name).then(
-									function(applications){
-										var application;
-										for(var i=0; i < applications.Apps.length; i++){
-											if(applications.Apps[i].guid === app.guid){
-												application = applications.Apps[i];
-											}
-										}
-										//endof hack
-										if(sharedEventDispatcher){
-											sharedEventDispatcher.dispatchEvent({type: "update", newValue: application, oldValue: app, expand: true });
-											//TODO remove when representation is unified
-											route.Type = "Route";
-											route.Guid = route.Guid || route.guid;
-											route.DomainName = route.DomainName || (route.domain ? route.domain.name : "");
-											route.Host = route.Host || route.host;
-											sharedEventDispatcher.dispatchEvent({type: "create", newValue: route });
-										}
-									}, 
-									function (error) {
-										exports.handleError(error, progressService);
-									}
-								);
+						function(resp) {
+							if(sharedEventDispatcher){
+								sharedEventDispatcher.dispatchEvent({type: "unmap", app: app, route: route, expand: true });
 							} else {
 								refreshFunc();
 							}
