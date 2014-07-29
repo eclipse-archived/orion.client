@@ -202,9 +202,9 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 								title: "Select Application",
 								cfClient: cfClient,
 								serviceRegistry: serviceRegistry,
-								apps: result.apps,
+								apps: result.Apps,
 								func: function(app) {
-									progressService.showWhile(cfClient.mapRoute(target, app.guid, 
+									progressService.showWhile(cfClient.mapRoute(target, app.Guid, 
 										route.Guid), "Mapping route to an app ...").then(
 										function(jazzResp) {
 											refreshFunc();
@@ -245,8 +245,8 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 					var app = route.parent;
 					var target = app.parent.Target;
 					
-					progressService.showWhile(cfClient.unmapRoute(target, app.guid, 
-						route.guid), "Removing route from an app ...").then(
+					progressService.showWhile(cfClient.unmapRoute(target, app.Guid, 
+						route.Guid), "Removing route from an app ...").then(
 						function(resp) {		
 							refreshFunc();
 //							if(sharedEventDispatcher){

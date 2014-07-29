@@ -291,27 +291,27 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 	
 	/** Add cf apps command **/
 	function describeApp(app) {
-		var name = app.name;
+		var name = app.Name;
 		var strResult = "\n" + name + "\t";
-		if (name.length <= 4) {
-			strResult += "\t";
-		}
-		strResult += app.state + "\t";
-		var runningInstances = app.runningInstances;
-		if (!runningInstances) {
-			runningInstances = 0;
-		}
-		var mem = app.memory;
-		strResult += runningInstances + " x " + mem + "M\t";
-		var url = app.urls[0];
-		strResult += "\t[" + url + "](http://" + url + ")";
+//		if (name.length <= 4) {
+//			strResult += "\t";
+//		}
+//		strResult += app.state + "\t";
+//		var runningInstances = app.runningInstances;
+//		if (!runningInstances) {
+//			runningInstances = 0;
+//		}
+//		var mem = app.memory;
+//		strResult += runningInstances + " x " + mem + "M\t";
+//		var url = app.urls[0];
+//		strResult += "\t[" + url + "](http://" + url + ")";
 		return strResult;
 	}
 	
 	var appsImpl = {
 		callback: function(args) {
 			return cFService.getApps().then(function(result) {
-				result = result.apps;
+				result = result.Apps;
 				
 				if (!result || result.length === 0) {
 					return "No applications.";

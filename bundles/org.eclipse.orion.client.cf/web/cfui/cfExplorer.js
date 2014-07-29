@@ -52,7 +52,7 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 		if(item.Type === "Route"){
 			switch (col_no) {
 				case 0:
-					span.appendChild(getUrlLinkNode(item.host + "." + item.domain.name));
+					span.appendChild(getUrlLinkNode(item.Host + "." + item.DomainName));
 					return col;
 				case 1:
 				case 2:
@@ -66,35 +66,35 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 				case 0:
 					this.getExpandImage(tableRow, span);
 					if(item.urls && item.urls.length>0){
-						span.appendChild(getUrlLinkNode(item.urls[0], item.name));
+						span.appendChild(getUrlLinkNode(item.urls[0], item.Name));
 						return col;
 					}
 					
-					val = item.name;
+					val = item.Name;
 					break;
 				case 1:
 					var a = document.createElement("a");
 					a.target = "_new";
 					var uriTemplate = new URITemplate("{+OrionHome}/cfui/logs.html#{Name,Target*}");
-					a.href = uriTemplate.expand({OrionHome : PageLinks.getOrionHome(), Name: item.name, Target: item.parent.Target});
+					a.href = uriTemplate.expand({OrionHome : PageLinks.getOrionHome(), Name: item.Name, Target: item.parent.Target});
 					a.appendChild(document.createTextNode("Logs"));
 					span.appendChild(a);	
 					return col;
 				case 2:
 				col.classList.add("secondaryColumnRight");
-				if(item.state === "STARTED"){
+				if(item.State === "STARTED"){
 					span.className = "imageSprite core-sprite-applicationrunning";
-					span.title = (typeof item.instances !== "undefined" && typeof item.running_instances !== "undefined") ? ( item.running_instances + " of " + item.instances + " instances running") : "Started";
+					span.title = (typeof item.Instances !== "undefined" && typeof item.RunningInstances !== "undefined") ? ( item.RunningInstances + " of " + item.Instances + " instances running") : "Started";
 					return col;
-				} else if(item.state==="STOPPED"){
+				} else if(item.State==="STOPPED"){
 					span.className = "imageSprite core-sprite-applicationstopped";
-					span.title = (typeof item.instances !== "undefined" && typeof item.running_instances !== "undefined") ? ( item.running_instances + " of " + item.instances + " instances running") : "Stopped";
+					span.title = (typeof item.Instances !== "undefined" && typeof item.RunningInstances !== "undefined") ? ( item.RunningInstances + " of " + item.Instances + " instances running") : "Stopped";
 					return col;
-				} else if(item.state==="NOT_DEPLOYED"){
+				} else if(item.State==="NOT_DEPLOYED"){
 					span.className = "imageSprite core-sprite-applicationnotdeployed";
 					span.title = "Not deployed";
 					return col;
-				} else if(item.state==="PROGRESS"){
+				} else if(item.State==="PROGRESS"){
 					span.className = "imageSprite core-sprite-progress";
 					span.title = "Checking application state";
 					return col;
@@ -133,24 +133,24 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 			});
 		},
 		getChildren: function(item, onItem){
-			if(item.apps){
+			if(item.Apps){
 				if(!item.children){
-					this.decorateChildren(item, item.apps, "App");
-					item.children = item.apps;
+					this.decorateChildren(item, item.Apps, "App");
+					item.children = item.Apps;
 				}
-				return onItem(item.apps);
+				return onItem(item.Apps);
 			}
 			if(!item.children){
-				this.decorateChildren(item, item.routes, "Route");
-				item.children = item.routes;
+				this.decorateChildren(item, item.Routes, "Route");
+				item.children = item.Routes;
 			}
-			return onItem(item.routes);
+			return onItem(item.Routes);
 		},
 		getId: function(item){
 			if(!item){
 				return "rootApps";
 			}
-			return item.guid;
+			return item.Guid;
 		},
 		destroy: function(){}
 	};
