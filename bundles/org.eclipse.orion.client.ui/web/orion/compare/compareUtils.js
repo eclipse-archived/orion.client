@@ -217,6 +217,20 @@ orion.compareUtils.mergeDiffBlocks = function(oldTextModel, newDiffBlocks, mappe
 	}
 };
 
+orion.compareUtils.convertMergedLineNumber = function(mapper, lineindex/*zero based*/){
+	var mapperItem = orion.compareUtils.lookUpMapper(mapper, 0, lineindex);
+	var returnValue = lineindex;
+	if(mapperItem.mapperIndex < 0){
+		return returnValue;
+	}
+	for(var i = 0; i < mapperItem.mapperIndex; i++){
+		if(mapper[i][2] !== 0) {
+			returnValue = returnValue + mapper[i][0];
+		}
+	}
+	return returnValue;
+};
+
 orion.compareUtils.generateCompareHref = function(diffLocation, options) {
 	var base =  require.toUrl("compare/compare.html"); //$NON-NLS-0$
 	if(!options.conflict){

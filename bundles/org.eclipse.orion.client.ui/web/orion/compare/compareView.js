@@ -735,6 +735,7 @@ exports.InlineCompareView = (function() {
 		if(typeof output !== "string"){ //$NON-NLS-0$
 			output = result.output;
 		}
+		this._mapper = result.mapper;
 		this._textView.getModel().setText(input);
 		//Merge the text with diff 
 		var rFeeder = new mDiffTreeNavigator.inlineDiffBlockFeeder(result.mapper, 1);
@@ -764,6 +765,11 @@ exports.InlineCompareView = (function() {
 	
 	InlineCompareView.prototype.gotoDiff = function(changeNumber){
 		this._diffNavigator.gotoChangeUsingIndex(changeNumber);
+	};
+	
+	InlineCompareView.prototype.gotoLine = function(lineNumber/*zero based*/){
+		var mergedNumber = mCompareUtils.convertMergedLineNumber(this._mapper, lineNumber);
+		this._editor.onGotoLine(mergedNumber, 0);
 	};
 	
 	return InlineCompareView;
