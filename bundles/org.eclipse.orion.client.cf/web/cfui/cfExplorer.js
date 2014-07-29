@@ -302,23 +302,18 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 			} else if(event.newValue && event.newValue.Type === "Route"){
 				this.routes.Routes.push(event.newValue);
 			}
-			this.loadRoutes(this.routes, this.apps, this.target);
+			this.loadRoutes(this.routes, this.target);
 		};
 	
-	OrphanRoutesExplorer.prototype.loadRoutes = function(routes, apps, target){
+	OrphanRoutesExplorer.prototype.loadRoutes = function(routes, target){
 		this.routes = routes;
-		this.apps = apps;
 		this.target = target;
 		
 		var orphanRoutes = [];
 			
 		if(routes && routes.Routes){
 			routes.Routes.forEach(function(route){
-				if(apps.apps.every(function(app){
-					return app.routes.every(function(appRoute){
-						return appRoute.guid !== route.Guid;
-					});
-				})){
+				if(!route.Apps || route.Apps.length == 0){
 					route.target = target;
 					orphanRoutes.push(route);
 				}
@@ -333,5 +328,5 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 	return {
 		ApplicationsExplorer: ApplicationsExplorer,
 		OrphanRoutesExplorer: OrphanRoutesExplorer
-	}
+	};
 });

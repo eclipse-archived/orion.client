@@ -273,7 +273,7 @@ mBootstrap.startup().then(function(core) {
 		
 		
 		orphanRoutesSection.embedExplorer(routesExplorer);
-		routesExplorer.loadRoutes(routes, apps, target);
+		routesExplorer.loadRoutes(routes, target);
 		routesExplorer.addListeters(cfEventDispatcher);
 	}
 	
