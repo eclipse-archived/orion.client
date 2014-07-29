@@ -90,6 +90,18 @@ define([
 				});
 			}
 			s += JSON.stringify(expected);
+			s += ',\n\t\t\t\tcomments: ';
+			expected = [];
+			for(i = 0; i < ast.comments.length; i++) {
+				var comment = ast.comments[i];
+				expected.push({
+					kind : comment.kind,
+					start : comment.range[0],
+					end : comment.range[1],
+					value : comment.value
+				});
+			}
+			s += JSON.stringify(expected);
 			console.log(s);
 		}
 		
@@ -169,6 +181,27 @@ define([
 						assert.equal(actual.lineNumber, expected.lineNumber, pf("Error %s has incorrect %s", i, "lineNumber"));
 					}
 					assert.equal(actual.message.replace(/^Line [0-9]*: /, ""), expected.message, pf("Error %s has incorrect %s", i, "message"));
+				});
+			}
+			//Check comments
+			var expectedComments = data.comments, actualComments = ast.comments;
+			if(expectedComments) {
+			    expectedComments = Array.isArray(expectedComments) ? expectedComments : [expectedComments];
+				assert.equal(actualComments.length, expectedComments.length, "Incorrect number of errors");
+				expectedComments.forEach(function(expected, i) {
+					var actual = actualComments[i];
+					if (typeof expected.value === "string") {
+						assert.equal(actual.value, expected.value, 'Expected comment has wrong value:\n'+expected.value);
+					}
+					if (typeof expected.kind === "string") {
+						assert.equal(actual.kind, expected.kind, 'Expected comment has wrong kind: '+expected.kind);
+					}
+					if (typeof expected.start === "number") {
+						assert.equal(actual.range[0], expected.start, 'Expected comment has wrong start: '+expected.start);
+					}
+					if (typeof expected.end === "number") {
+						assert.equal(actual.range[1], expected.end, 'Expected comment has wrong end: '+expected.end);
+					}
 				});
 			}
 		}
@@ -1660,6 +1693,66 @@ define([
 				nodes: [],
 				tokens: [{"type":"Keyword","range":[0,6],"value":"switch"},{"type":"Punctuator","range":[6,7],"value":"("},{"type":"Identifier","range":[7,10],"value":"foo"},{"type":"Punctuator","range":[10,11],"value":")"},{"type":"Punctuator","range":[12,13],"value":"{"},{"type":"Keyword","range":[14,18],"value":"case"},{"type":"Numeric","range":[19,20],"value":"1"},{"type":"Punctuator","range":[20,21],"value":":"},{"type":"Keyword","range":[22,25],"value":"var"},{"type":"Punctuator","range":[26,27],"value":"}"}],
 				errors: [{"lineNumber":1,"index":26,"message":"Unexpected token }","token":"}"},{"lineNumber":1,"index":27,"message":"Unexpected end of input"}]
+			});
+		});
+		
+		/**
+		 * Unclosed doc tag recovery
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440582
+		 * @since 7.0
+		 */
+		it('doc comment recovery 1', function() {
+			runTest({
+				source: "/*",
+				nodes: [],
+				tokens: [],
+				errors: [],
+				comments: [{"start":0,"end":2,"value":""}]
+			});
+		});
+		
+		/**
+		 * Unclosed doc tag recovery
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440582
+		 * @since 7.0
+		 */
+		it('doc comment recovery 2', function() {
+			runTest({
+				source: "/**",
+				nodes: [],
+				tokens: [],
+				errors: [],
+				comments: [{"start":0,"end":3,"value":"*"}]
+			});
+		});
+		
+		/**
+		 * Unclosed doc tag recovery
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440582
+		 * @since 7.0
+		 */
+		it('doc comment recovery 3', function() {
+			runTest({
+				source: "/** var foo = 10;",
+				nodes: [],
+				tokens: [],
+				errors: [],
+				comments: [{"start":0,"end":17,"value":"* var foo = 10;"}]
+			});
+		});
+		
+		/**
+		 * Unclosed doc tag recovery
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440582
+		 * @since 7.0
+		 */
+		it('doc comment recovery 4', function() {
+			runTest({
+				source: "var bar /* = 4;",
+				nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,15]},{"type":"VariableDeclarator","range":[4,7]},{"type":"Identifier","name":"bar","range":[4,7]}],
+				tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Identifier","range":[4,7],"value":"bar"}],
+				errors: [],
+				comments: [{"start":8,"end":15,"value":" = 4;"}]
 			});
 		});
 	});
