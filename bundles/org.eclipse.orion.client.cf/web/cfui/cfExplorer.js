@@ -134,16 +134,12 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 		},
 		getChildren: function(item, onItem){
 			if(item.Apps){
-				if(!item.children){
-					this.decorateChildren(item, item.Apps, "App");
-					item.children = item.Apps;
-				}
+				this.decorateChildren(item, item.Apps, "App");
+				item.children = item.Apps;
 				return onItem(item.Apps);
 			}
-			if(!item.children){
-				this.decorateChildren(item, item.Routes, "Route");
-				item.children = item.Routes;
-			}
+			this.decorateChildren(item, item.Routes, "Route");
+			item.children = item.Routes;
 			return onItem(item.Routes);
 		},
 		getId: function(item){
@@ -171,27 +167,40 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 	
 	ApplicationsExplorer.prototype.events = ["update", "create", "delete"];
 	
+	ApplicationsExplorer.prototype.expand = function(item){
+		if (this.myTree.isExpanded(item)) {
+			//do nothing
+		} else {
+			this.myTree.expand(this.model.getId(item));
+		}
+	}
+	
 	ApplicationsExplorer.prototype.cfEventListener = function(event){
-		if(!this.apps.apps){
-			this.apps.apps = [];
+		if(!this.apps.Apps){
+			this.apps.Apps = [];
 		}
 		
 		if(event.oldValue && event.oldValue.Type !== "Route"){
-			for(var i=0; i<this.apps.apps.length; i++){
-				if(this.apps.apps[i].guid === event.oldValue.guid){
+			for(var i=0; i<this.apps.Apps.length; i++){
+				if(this.apps.Apps[i].Guid === event.oldValue.Guid){
 					if(event.newValue){
-						this.apps.apps[i] = event.newValue;
+						this.apps.Apps[i] = event.newValue;
 					} else {
-						this.apps.apps.splice(i, 1);
+						this.apps.Apps.splice(i, 1);
 					}
 					break;
 				}
 			}
 		} else if(event.newValue && event.newValue.Type !== "Route"){
-			this.apps.apps.push(event.newValue);
+			this.apps.Apps.push(event.newValue);
 		}
 		var model = new ApplicationsModel(this.apps, this.target);
 		this.createTree(this.parent, model, {});
+		if(event.expand){
+			setTimeout(function(){
+				this.expand(event.newValue);
+			}.bind(this), 5);
+		}
 	};
 	
 	ApplicationsExplorer.prototype.loadApps = function(apps, target){
@@ -290,7 +299,7 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 			}
 			if(event.oldValue && event.oldValue.Type === "Route"){
 				for(var i=0; i<this.routes.Routes.length; i++){
-					if(this.routes.Routes[i].Guid === this.routes.Routes.Guid){
+					if(this.routes.Routes[i].Guid === event.oldValue.Guid){
 						if(event.newValue){
 							this.routes.Routes[i] = event.newValue;
 						} else {
