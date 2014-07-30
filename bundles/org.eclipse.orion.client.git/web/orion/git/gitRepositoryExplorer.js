@@ -169,6 +169,7 @@ exports.GitRepositoryExplorer = (function() {
 					that.statusDeferred = that.displayStatus(repositories[0]);
 					that.displayCommits(repositories[0]);
 					that.displayBranches(repositories[0]); //$NON-NLS-0$
+					that.displayStash(repositories[0]);
 					if (that.showTagsSeparately) {
 						that.displayTags(repositories[0]);
 					}
@@ -393,7 +394,7 @@ exports.GitRepositoryExplorer = (function() {
 			}
 		});
 		tagsNavigator.display();
-	};
+	}
 	
 	// Git Config
 	
