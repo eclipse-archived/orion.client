@@ -67,9 +67,10 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status'
 			// define the command contributions - where things appear, first
 			// the groups
 			commandRegistry.addCommandGroup("pageActions", "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution("pageActions", "eclipse.orion.git.cherryPick", 100, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution("pageActions", "eclipse.orion.git.revert", 101, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution("pageActions", "eclipse.orion.git.askForReviewCommand", 102, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("pageActions", "eclipse.orion.git.addTag", 100, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("pageActions", "eclipse.orion.git.cherryPick", 101, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("pageActions", "eclipse.orion.git.revert", 102, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("pageActions", "eclipse.orion.git.askForReviewCommand", 103, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(
 				"pageActions", "eclipse.orion.git.openCommitCommand", 102, "eclipse.gitGroup", true, new KeyBinding.KeyBinding('h', true, true)); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 

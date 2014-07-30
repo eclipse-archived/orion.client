@@ -16,15 +16,13 @@ define([
 	'i18n!git/nls/gitmessages',
 	'orion/section',
 	'orion/git/widgets/gitChangeList',
-	'orion/git/widgets/gitTagList',
 	'orion/git/widgets/gitCommitInfo',
-	'orion/explorers/explorer',
 	'orion/URITemplate',
 	'orion/PageUtil',
 	'orion/webui/littlelib',
 	'orion/globalCommands',
 	'orion/git/gitCommands'
-], function(require, messages, mSection, mGitChangeList, mGitTagList, mGitCommitInfo, mExplorer, URITemplate, PageUtil, lib, mGlobalCommands, mGitCommands) {
+], function(require, messages, mSection, mGitChangeList, mGitCommitInfo, URITemplate, PageUtil, lib, mGlobalCommands, mGitCommands) {
 			var exports = {};
 			var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 			exports.GitCommitExplorer = (function() {
@@ -108,7 +106,6 @@ define([
 														var repositories = resp.Children;
 														that.initTitleBar(commits[0], repositories[0]);
 														that.displayCommit(commits[0]);
-														that.displayTags(commits[0], repositories[0]);
 														that.displayDiffs(commits[0], repositories[0]);
 
 														commits[0].CloneLocation = repositories[0].Location;
@@ -181,48 +178,16 @@ define([
 
 					var info = new mGitCommitInfo.GitCommitInfo({
 						parent: detailsView,
+						tagsCommandHandler: this,
 						commit: commit,
-						showTags: false,
+						showTags: true,
 						commitLink: false,
 						showMessage: false,
 						onlyFullMessage: true,
 						fullMessage: true
 					});
 					info.display();
-					
 				};
-
-				// Git tags
-
-				GitCommitExplorer.prototype.displayTags = function(commit, repository) {
-					var tags = commit.Tags;
-
-					var tableNode = lib.node('table'); //$NON-NLS-0$
-
-					var titleWrapper = new mSection.Section(tableNode, { id : "tagSection", //$NON-NLS-0$
-						title : ((tags && tags.length > 0) ? messages["Tags:"] : messages["No Tags"]),
-						iconClass : [ "gitImageSprite", "git-sprite-tag" ], //$NON-NLS-1$ //$NON-NLS-0$
-						slideout : true,
-						content : '<div id="tagNode"></div>', //$NON-NLS-0$
-						canHide : true,
-						preferencesService : this.preferencesService
-					});
-
-					var tagsNavigator = new mGitTagList.GitTagListExplorer({
-						serviceRegistry: this.registry,
-						commandRegistry: this.commandService,
-						parentId:"tagNode",
-						actionScopeId: this.actionScopeId,
-						section: titleWrapper,
-						repository: repository,
-						mode: "full",
-						commit: commit
-					});
-					tagsNavigator.display();
-				};
-
-
-				// Git diffs
 
 				GitCommitExplorer.prototype.displayDiffs = function(commit, repository) {
 
