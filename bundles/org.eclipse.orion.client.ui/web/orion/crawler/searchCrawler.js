@@ -13,6 +13,7 @@
 define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils', 'orion/contentTypes', 'orion/Deferred'], 
 		function(messages, i18nUtil, mSearchUtils, mContentTypes, Deferred) {
 	
+	var _folderFilter = [".git"];
 	/**
 	 * SearchCrawler is an alternative when a file service does not provide the search API.
 	 * It assumes that the file client at least provides the fetchChildren and read APIs.
@@ -138,6 +139,10 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 		});
 	};
 	
+	SearchCrawler.prototype._contains = function(array, item){
+		return (array || []).indexOf(item) !== -1;
+	};
+	
 	SearchCrawler.prototype._sort = function(fileArray){
 		fileArray.sort(function(a, b) {
 			var n1, n2;
@@ -198,7 +203,7 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 		}
 		return (_this._progressService ? this._progressService.progress(_this.fileClient.fetchChildren(directoryLocation), "Crawling search for children of " + directoryLocation) : _this.fileClient.fetchChildren(directoryLocation)).then(function(children) { //$NON-NLS-0$
 			for (var i = 0; i < children.length ; i++){
-				if(children[i].Directory!==undefined && children[i].Directory===false){
+				if(children[i].Directory !== undefined && children[i].Directory === false){
 					if(_this._searchOnName){
 						results.push(_this._buildSingleSkeleton(children[i]));
 					} else if(_this._buildSkeletonOnly){
@@ -215,6 +220,8 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 				} else if (children[i].Location) {
 					if(_this._cancelled) {
 						break;
+					} else if(_this._contains(_folderFilter, children[i].Name)) {
+						continue;
 					} else {
 						var folderDeferred = _this._visitRecursively(children[i].ChildrenLocation);
 						results.push(folderDeferred);
