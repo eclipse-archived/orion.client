@@ -1172,8 +1172,10 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 					return false;
 				}, this);
 			    this.compareView.gotoDiff(changeIndex);
-			} else {//If the change is unchecked we just set the line as the current line in the editor
-			    this.compareView.gotoLine(currentModel.lineNumber - 1);
+			} else if (currentModel.lineNumber !== undefined) {//If the change is unchecked, scroll to the line and select the match
+				var startIndex = currentModel.matches[currentModel.matchNumber - 1].startIndex;
+				var endIndex = startIndex + currentModel.matches[currentModel.matchNumber - 1].length;
+			    this.compareView.gotoLine(currentModel.lineNumber - 1, startIndex, endIndex);
 			}
         }
     };

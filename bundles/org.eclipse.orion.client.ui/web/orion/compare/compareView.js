@@ -767,9 +767,16 @@ exports.InlineCompareView = (function() {
 		this._diffNavigator.gotoChangeUsingIndex(changeNumber);
 	};
 	
-	InlineCompareView.prototype.gotoLine = function(lineNumber/*zero based*/){
+	/**
+	 * Scrolls to the specified line and selects
+	 * the characters between start and end.
+	 * @param[in] lineNumber The 0 based line number to reveal.
+	 * @param[in] start The index at which the selection should start.
+	 * @param[in] end The index at which the selection should end.
+	 */
+	InlineCompareView.prototype.gotoLine = function(lineNumber/*zero based*/, start, end){
 		var mergedNumber = mCompareUtils.convertMergedLineNumber(this._mapper, lineNumber);
-		this._editor.onGotoLine(mergedNumber, 0);
+		this._editor.onGotoLine(mergedNumber, start, end);
 	};
 	
 	return InlineCompareView;
