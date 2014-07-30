@@ -201,17 +201,7 @@ define([
 								parentItem.log = log;
 								that.logDeferred.resolve(log);
 								var children = log.Children;
-								var fullList = parentItem.children;
-								if (fullList) {
-									var args = [fullList.length - 1, 1].concat(children);
-									Array.prototype.splice.apply(fullList, args);
-								} else {
-									fullList = children;
-								}
-								if (log.NextLocation) {
-									fullList.push({Type: "MoreCommits", NextLocation: log.NextLocation}); //$NON-NLS-0$
-								}
-								onComplete(that.processChildren(parentItem, fullList));
+								onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, log)));
 							}, function(error){
 								that.handleError(error);
 							});
@@ -251,7 +241,7 @@ define([
 					return Deferred.when(that.log || that._getLog(), function(log) {
 						var children = [];
 						if (log.toRef.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
-							children = log.Children;
+							children = that.processMoreChildren(parentItem, log.Children, log);
 						}
 						onComplete(that.processChildren(parentItem, children));
 					}, function(error){
@@ -269,7 +259,7 @@ define([
 					return Deferred.when(that.log || that._getLog(), function(log) {
 						var children = [];
 						if (log.toRef.Type === "Branch") { //$NON-NLS-0$
-							children = log.Children;
+							children = that.processMoreChildren(parentItem, log.Children, log);
 						} 
 						onComplete(that.processChildren(parentItem, children));
 					}, function(error){
@@ -289,17 +279,7 @@ define([
 									children.push(commit);
 								}
 							});
-							var fullList = parentItem.children;
-							if (fullList) {
-								var args = [fullList.length - 1, 1].concat(children);
-								Array.prototype.splice.apply(fullList, args);
-							} else {
-								fullList = children;
-							}
-							if (log.NextLocation) {
-								fullList.push({Type: "MoreCommits", NextLocation: log.NextLocation}); //$NON-NLS-0$
-							}
-							onComplete(that.processChildren(parentItem, fullList));
+							onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, log)));
 						}, function(error){
 							that.handleError(error);
 						});
@@ -317,6 +297,19 @@ define([
 		},
 		getId: function(/* item */ item){
 			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : ""); //$NON-NLS-0$
+		},
+		processMoreChildren: function(parentItem, children, item) {
+			var fullList = parentItem.children;
+			if (fullList) {
+				var args = [fullList.length - 1, 1].concat(children);
+				Array.prototype.splice.apply(fullList, args);
+			} else {
+				fullList = children;
+			}
+			if (item.NextLocation) {
+				fullList.push({Type: "MoreCommits", NextLocation: item.NextLocation}); //$NON-NLS-0$
+			}
+			return fullList;
 		},
 		processChildren: function(parentItem, items) {
 			if (items.length === 0) {
