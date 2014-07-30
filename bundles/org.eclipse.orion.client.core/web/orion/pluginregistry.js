@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010-2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -587,6 +587,20 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
         this.getState = function() {
             return _state;
         };
+        
+         /**
+         * @name orion.pluginregistry.Plugin#getProblemLoading
+         * @description Returns true if there was a problem loading this plug-in, false otherwise. This function is not API and may change in future releases.
+         * @private
+         * @function
+         * @returns {String} Return an true if there was a problem loading this plug-in.
+         */
+        this.getProblemLoading = function() {
+            if (_this._problemLoading){
+            	return true;
+            }
+            return false;
+        };
 
         this.start = function(optOptions) {
             if (_state === "uninstalled") {
@@ -638,9 +652,11 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                 }
                 return new Deferred().resolve();
             }
+            
             var deferredStateChange = new Deferred();
             _deferredStateChange = deferredStateChange;
             _state = "starting";
+            _this._problemLoading = null;
             _internalRegistry.dispatchEvent(new PluginEvent("starting", _this));
             _deferredLoad = new Deferred();
             _channel = _internalRegistry.connect(_url, _messageHandler, _parent);
@@ -663,6 +679,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                 _state = "resolved";
                 _deferredStateChange = null;
                 _internalRegistry.dispatchEvent(new PluginEvent("stopped", _this));
+                _this._problemLoading = true;
                 deferredStateChange.reject(new Error("Failed to load plugin: " + _url));
                 if (_this._default) {
                 	_lastModified = 0;
@@ -714,6 +731,8 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
         };
 
         _update = function(input) {
+        	_this.problemLoading = null;
+        	
             if (_state === "uninstalled") {
                 return new Deferred().reject(new Error("Plugin is uninstalled"));
             }
@@ -724,6 +743,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                     _persist();
                 }
                 return _internalRegistry.loadManifest(_url).then(_update, function() {
+                	_this._problemLoading = true;
                 	if (_this._default) {
                 		_lastModified = 0;
                 		_persist();
