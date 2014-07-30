@@ -8,17 +8,23 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*eslint-env browser, amd*/
-
-define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClient", "orion/ssh/sshTools",
- "orion/i18nUtil", "orion/Deferred", "orion/git/util", "orion/URL-shim", "domReady!"], 
-function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil, Deferred, mGitUtil) {
-	var temp = document.createElement('a');
-	temp.href = "../mixloginstatic/LoginWindow.html";
+/*eslint-env amd, browser*/
+/*global URL confirm*/
+define([
+	"orion/plugin",
+	"orion/xhr",
+	"orion/serviceregistry",
+	"orion/git/gitClient",
+	"orion/ssh/sshTools",
+	"orion/i18nUtil",
+	"orion/Deferred",
+	"orion/git/util",
+	"orion/URL-shim", // no exports
+], function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil, Deferred, mGitUtil) {
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
 	var gitClient = new mGitClient.GitService(serviceRegistry);
 	var sshService = new mSshTools.SshService(serviceRegistry);
-	var login = temp.href;
+	var login = new URL("../../mixloginstatic/LoginWindow.html", window.location.href).href;
 	var headers = {
 		name: "Orion Git Support",
 		version: "1.0",
@@ -238,8 +244,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		uriTemplate: "http://git.eclipse.org/c{+EclipseGitLocation}/commit/?id={+commitName}"
 	});
 
-	temp.href = "../../gitapi/diff/";
-	var base = temp.href;
+	var base = new URL("../../gitapi/diff/", window.location.href).href;
 	provider.registerService("orion.core.diff", {
 		getDiffContent: function(diffURI){	
 			var url = new URL(diffURI, window.location);
