@@ -1,0 +1,7 @@
+Code-Review+2: Maciej Bendkowski <maciej.bendkowski@pl.ibm.com>
+Verified+1: Maciej Bendkowski <maciej.bendkowski@pl.ibm.com>
+Submitted-by: Maciej Bendkowski <maciej.bendkowski@pl.ibm.com>
+Submitted-at: Wed, 30 Jul 2014 12:05:10 -0400
+Reviewed-on: https://git.eclipse.org/r/30746
+Project: orion/org.eclipse.orion.client
+Branch: refs/heads/bug359273
