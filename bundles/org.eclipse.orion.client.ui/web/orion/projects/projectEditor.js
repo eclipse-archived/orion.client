@@ -344,7 +344,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				a.target = "_new";
 				a.href = item.Url.indexOf("://")<0 ? "http://" + item.Url : item.Url;
 				a.title = item.Url;
-				a.appendChild(document.createTextNode(item.UrlTitle || item.Params.Name || "View App"));
+				a.appendChild(document.createTextNode(item.Url || item.Params.Name || "View App"));
 				td.appendChild(a);
 			}
 			return td;
