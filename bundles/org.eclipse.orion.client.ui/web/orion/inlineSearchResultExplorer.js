@@ -371,9 +371,16 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }
        
 		var params = helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, item.lineNumber, helper.params.replace, true) : null;
-		var name = null;
-		var link = navigatorRenderer.createLink(null, {Location: item.parent.location, Name: name}, this.explorer._commandService, this.explorer._contentTypeService,
-			this.explorer._openWithCommands, {id:this.getItemLinkId(item)}, params, {});
+		var name = item.parent.name;
+		var location = item.parent.location;
+		var link = navigatorRenderer.createLink(null, 
+			{Location: location, Name: name}, 
+			this.explorer._commandService, 
+			this.explorer._contentTypeService,
+			this.explorer._openWithCommands, 
+			{id:this.getItemLinkId(item)}, 
+			params, 
+			{});
         spanHolder.appendChild(link);
         link.classList.add("searchDetailLink"); //$NON-NLS-0$
        
