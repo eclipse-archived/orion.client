@@ -1158,19 +1158,23 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         if (!_onSameFile(this._currentPreviewModel, currentModel)) {
             this.buildPreview();
         }
-        if (this.compareView && (currentModel.type === "detail") && currentModel.checked) { //$NON-NLS-0$
-        	// Figure out change index. Unchecked elements are 
-        	// removed from diffs and must therefore be skipped.
-			var changeIndex = 0;
-			currentModel.parent.children.some(function(element){
-				if (currentModel === element) {
-					return true;
-				} else if (element.checked) {
-					changeIndex++;
-				}
-				return false;
-			}, this);
-		    this.compareView.gotoDiff(changeIndex);
+        if (this.compareView && (currentModel.type === "detail")) { //$NON-NLS-0$
+        	if(currentModel.checked) {//If the change is checked we highlight the pair of the diff
+	        	// Figure out change index. Unchecked elements are 
+	        	// removed from diffs and must therefore be skipped.
+				var changeIndex = 0;
+				currentModel.parent.children.some(function(element){
+					if (currentModel === element) {
+						return true;
+					} else if (element.checked) {
+						changeIndex++;
+					}
+					return false;
+				}, this);
+			    this.compareView.gotoDiff(changeIndex);
+			} else {//If the change is unchecked we just set the line as the current line in the editor
+			    this.compareView.gotoLine(currentModel.lineNumber - 1);
+			}
         }
     };
 
