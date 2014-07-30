@@ -344,11 +344,39 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 		}
 	};
 	
+	var displayErrorOnStatus = function(error, serviceRegistry) {
+		var display = {};
+		display.Severity = "Error"; //$NON-NLS-0$
+		display.HTML = false;
+		
+		try {
+			var resp = JSON.parse(error.responseText);
+			if (error.status === 401) {
+				display.HTML = true;
+				display.Message = "<span>"; //$NON-NLS-0$
+				display.Message += i18nUtil.formatMessage(messages["Authentication required for: ${0}. ${1} and re-try the request."], resp.label, "<a target=\"_blank\" href=\"" + resp.SignInLocation //$NON-NLS-1$ //$NON-NLS-0$
+				+ "\">" + messages["Login"] + "</a>") + "</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			} else {
+				display.Message = resp.DetailedMessage ? resp.DetailedMessage : (resp.Message ? resp.Message : messages["Problem while performing the action"]);
+			}
+		} catch (Exception) {
+			display.Message = messages["Problem while performing the action"];
+		}
+		
+		serviceRegistry.getService("orion.page.message").setProgressResult(display); 
+	};
+	
+	var displaySuccessOnStatus = function(message, serviceRegistry) {
+		serviceRegistry.getService("orion.page.message").setProgressResult(message); 
+	}
+	
 	return {
 		handleGitServiceResponse : handleGitServiceResponse,
 		handleProgressServiceResponse : handleProgressServiceResponse,
 		gatherSshCredentials : gatherSshCredentials,
 		handleSshAuthenticationError : handleSshAuthenticationError,
-		handleKnownHostsError : handleKnownHostsError
+		handleKnownHostsError : handleKnownHostsError,
+		displayErrorOnStatus : displayErrorOnStatus,
+		displaySuccessOnStatus : displaySuccessOnStatus
 	};
 });
