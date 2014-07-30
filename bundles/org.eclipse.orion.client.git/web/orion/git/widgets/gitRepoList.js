@@ -262,10 +262,9 @@ define([
 						if (!explorer.section) { //$NON-NLS-0$
 							tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 						} else {
+							var ellipses = "..."; //$NON-NLS-0$
 							description = repo.GitUrl ? messages["git url:"] + repo.GitUrl : messages["(no remote)"];
-							if (repo.Content) {
-								subDescription = messages["location: "] + repo.Content.Path;
-							}
+							subDescription = repo.Content ? messages["location: "] + repo.Content.Path : ellipses;
 							if (explorer.mode === "full"){ //$NON-NLS-0$
 								var status = repo.Status;
 								if (status) {
@@ -285,7 +284,8 @@ define([
 								}
 							}
 							if (repo.infoDeferred) {
-								title = repo.Name + " ..."; //$NON-NLS-0$
+								title = repo.Name + ellipses;
+								extraDescriptions.push(ellipses);
 								repo.infoDeferred.then(function() {
 									explorer.myTree.redraw(item);
 								});
