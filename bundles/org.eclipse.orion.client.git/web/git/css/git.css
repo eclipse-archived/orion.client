@@ -45,6 +45,10 @@ table .sectionTable {
 	margin-bottom:-10px;
 }
 
+.miniWrapper .sectionTableItem {
+	padding: 0;
+}
+
 .gitChangeListSelectAll {
 	float: left;
 	padding-top: 2px;
@@ -190,6 +194,19 @@ table .sectionTable {
 
 .gitCommitTitle {
 	font-weight: bold;
+}
+
+.gitRepoTitle {
+	font-weight: bold;
+}
+
+.gitRepoExtraDescription {
+	padding-top: 16px;
+	padding-left: 16px;
+}
+
+.gitRepoExtraDescriptionSection {
+	padding-top: 10px;
 }
 
 .gitAuthorImage {

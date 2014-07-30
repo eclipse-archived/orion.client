@@ -12,312 +12,337 @@
 /*eslint-env browser, amd*/
 
 define([
-	'require',
 	'i18n!git/nls/gitmessages',
-	'orion/Deferred',
+	'orion/keyBinding',
+	'orion/commandRegistry',
+	'orion/explorers/explorer',
 	'orion/URITemplate',
-	'orion/dynamicContent',
-	'orion/webui/littlelib',
-	'orion/section',
 	'orion/i18nUtil',
+	'orion/Deferred',
 	'orion/objects'
-], function(require, messages, Deferred, URITemplate, mDynamicContent, lib, mSection, i18nUtil, objects) {
+], function(messages, KeyBinding, mCommandRegistry, mExplorer, URITemplate, i18nUtil, Deferred, objects) {
 		
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
+
+	function GitRepoListModel(options) {
+		this.root = options.root;
+		this.registry = options.registry;
+		this.handleError = options.handleError;
+		this.section = options.section;
+		this.repositories = options.repositories;
+		this.progressService = options.progressService;
+		this.parentId = options.parentId;
+		this.fileClient = options.fileClient;
+		this.gitClient = options.gitClient;
+		this.mode = options.mode || "full"; //$NON-NLS-0$
+	}
+	GitRepoListModel.prototype = Object.create(mExplorer.Explorer.prototype);
+	objects.mixin(GitRepoListModel.prototype, /** @lends orion.git.GitRepoListModel.prototype */ {
+		destroy: function(){
+		},
+		getRoot: function(onItem){
+			onItem(this.root);
+		},
+		loadRepositoryInfo: function(repository) {
+			var that = this;
+			var deferred = new Deferred();
+			var mode = this.mode;
+			this.progressService.progress(this.fileClient.loadWorkspace(repository.ContentLocation + "?parts=meta"), "Loading workspace info").then(function(resp) {//$NON-NLS-1$ //$NON-NLS-0$
+				try {
+					repository.Content = {};
+					var path = "root / "; //$NON-NLS-0$
+					if (resp.Parents !== null) {
+						for (var i=resp.Parents.length; i>0; i--) {
+							path += resp.Parents[i-1].Name + " / "; //$NON-NLS-0$
+						}
+					}
+					path += resp.Name;
+					repository.Content.Path = path;
+					if (mode !== "full"){ //$NON-NLS-0$
+						deferred.resolve();
+						return;
+					}
+					
+					that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), "Getting status for " + repository.Name).then(function(resp) { //$NON-NLS-0$
+						try{
+							repository.Status = resp;
+							that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation), "Getting branches for " + repository.Name).then(function(resp){ //$NON-NLS-0$
+								try{
+									var branches = resp.Children || [];
+									var currentBranch;
+									for (var i=0; i<branches.length; i++){
+										if (branches[i].Current){
+											currentBranch = branches[i];
+											break;
+										}
+									}
+									if (!currentBranch || currentBranch.RemoteLocation[0] === null){
+										deferred.resolve();
+										return;
+									}
+									var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
+									if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
+										that.progressService.progress(that.gitClient.getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD"), "Getting incomming commits " + repository.Name).then(function(resp){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+											if(resp.Children === undefined) { repository.CommitsToPush = 0; }
+											else { repository.CommitsToPush = resp.Children.length; }
+											deferred.resolve();
+											return;
+										}, deferred.reject);
+									} else {
+										that.progressService.progress(that.gitClient.doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20"), "Getting outgoing commits " + repository.Name).then(function(resp){ //$NON-NLS-1$ //$NON-NLS-0$
+											if(resp.Children === undefined) { repository.CommitsToPush = 0; }
+											else { repository.CommitsToPush = resp.Children.length; }
+											deferred.resolve();
+											return;
+										}, deferred.reject);	
+									}
+								} catch(e){
+									deferred.reject();
+								}
+							}, deferred.reject);
+						} catch(e){
+							deferred.reject();
+						}
+					}, deferred.reject);
+				} catch(e){
+					deferred.reject(e);
+				}
+			}, deferred.reject);
+			return deferred;
+		},
+		getChildren: function(parentItem, onComplete){	
+			var that = this;
+			var progress, msg;
+			progress = this.section ? this.section.createProgressMonitor() : null;
+			msg = messages["Getting git repository details"];
+			if (progress) progress.begin(msg);
+			if (parentItem.children && !parentItem.more) {
+				onComplete(parentItem.children);
+			} else if (parentItem.Type === "RepoRoot") { //$NON-NLS-0$
+				var allInfoDeferreds = that.repositories.map(function(repo) {
+					return repo.infoDeferred = that.loadRepositoryInfo(repo);
+				});
+				function done() {
+					if (progress) progress.done();
+				}
+				Deferred.all(allInfoDeferreds).then(done, done);
+				onComplete(that.processChildren(parentItem, that.repositories));
+			} else {
+				onComplete([]);
+			}
+		},
+		processChildren: function(parentItem, children) {
+			children.forEach(function(item) {
+				item.parent = parentItem;
+			});
+			parentItem.children = children;
+			return children;
+		},
+		getId: function(/* item */ item){
+			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : ""); //$NON-NLS-0$
+		}
+	});
 	
 	/**
 	 * @class orion.git.GitRepoListExplorer
 	 * @extends orion.explorers.Explorer
 	 */
 	function GitRepoListExplorer(options) {
-		this.registry = options.serviceRegistry;
-		this.commandService = options.commandRegistry;
-		this.fileClient = options.fileClient,
-		this.gitClient = options.gitClient,
-		this.progressService = options.progressService,
+		this.checkbox = false;
+		var renderer = new GitRepoListRenderer({
+			registry: options.serviceRegistry,
+			commandService: options.commandRegistry,
+			actionScopeId: options.actionScopeId,
+			cachePrefix: options.prefix + "Navigator", //$NON-NLS-0$
+			checkbox: this.checkbox
+		}, this);
+		mExplorer.Explorer.call(this, options.serviceRegistry, options.selection, renderer, options.commandRegistry);	
 		this.parentId = options.parentId;
 		this.actionScopeId = options.actionScopeId;
 		this.repositories = options.repositories;
+		if (this.repositories) {
+			this.repositories.sort(function(repo1, repo2) {
+				return repo1.Name.localeCompare(repo2.Name);
+			});
+		}
 		this.mode = options.mode;
-		this.links = options.links;
-		this.loadingDeferred = options.loadingDeferred;
+		this.showLinks = options.showLinks;
+		this.section = options.section;
+		this.handleError = options.handleError;
+		this.gitClient = options.gitClient;
+		this.fileClient = options.fileClient;
+		this.progressService = options.progressService;
 	}
-	
-	objects.mixin(GitRepoListExplorer.prototype, {
-		/**
-		 * @name _repositorySorter
-		 * @description Simple function to sort repositories by name
-		 * @function
-		 * @private
-		 * @memberof GitRepositoryExplorer.prototype
-		 * @param {Object} The repository to compare to
-		 * @param {Object} The repository to compare
-		 * @since 5.0
-		 */
-		_repositorySorter: function(repo1, repo2) {
-			return repo1.Name.localeCompare(repo2.Name);
-		},
-		decorateRepository: function(repository){
-			var that = this;
+	GitRepoListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
+	objects.mixin(GitRepoListExplorer.prototype, /** @lends orion.git.GitRepoListExplorer.prototype */ {
+		changedItem: function(item) {
 			var deferred = new Deferred();
-			var mode = this.mode;
-			if(!mode){
-				mode = "full";
+			var model = this.model;
+			if (!item) {
+				model.getRoot(function(root) {
+					item = root;
+				});
 			}
-			
-			
-			this.progressService.progress(this.fileClient.loadWorkspace(repository.ContentLocation + "?parts=meta"), "Loading workspace info").then( //$NON-NLS-1$ //$NON-NLS-0$
-					function(resp){
-						try{
-							repository.Content = {};
-							
-							var path = "root / "; //$NON-NLS-0$
-							if (resp.Parents !== null)
-								for (var i=resp.Parents.length; i>0; i--){
-									path += resp.Parents[i-1].Name + " / "; //$NON-NLS-0$
-								}
-								
-							path += resp.Name;
-							repository.Content.Path = path;
-							
-							if (mode !== "full"){ //$NON-NLS-0$
-								deferred.resolve();
-								return;
-							}
-							
-							that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), "Getting status for " + repository.Name).then( //$NON-NLS-0$
-								function(resp){
-									try{
-										repository.Status = resp;
-			
-										that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation), "Getting branches for " + repository.Name).then( //$NON-NLS-0$
-											function(resp){
-												try{
-													var branches = resp.Children || [];
-													var currentBranch;
-													for (var i=0; i<branches.length; i++){
-														if (branches[i].Current){
-															currentBranch = branches[i];
-															break;
-														}
-													}
-													
-													if (!currentBranch || currentBranch.RemoteLocation[0] === null){
-														deferred.resolve();
-														return;
-													}
-													
-													var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
-													
-													if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
-														that.progressService.progress(that.gitClient.getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD"), "Getting incomming commits " + repository.Name).then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-															function(resp){
-																if(resp.Children === undefined) { repository.CommitsToPush = 0; }
-																else { repository.CommitsToPush = resp.Children.length; }
-																deferred.resolve();
-																return;
-															}, function(resp){
-																deferred.reject();
-																return;
-															}
-														);
-													} else {
-														that.progressService.progress(that.gitClient.doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20"), "Getting outgoing commits " + repository.Name).then(  //$NON-NLS-1$ //$NON-NLS-0$
-															function(resp){	
-																if(resp.Children === undefined) { repository.CommitsToPush = 0; }
-																else { repository.CommitsToPush = resp.Children.length; }
-																deferred.resolve();
-																return;
-															}, function(resp){
-																deferred.reject();
-																return;
-															}
-														);	
-													}
-												}catch(e){
-													deferred.reject();
-												}
-											}, function(resp){
-												deferred.reject();
-												return;
-											}
-										);
-									}catch(e){
-										deferred.reject();
-									}
-								}, function(resp){
-									deferred.reject();
-									return;
-								}	
-							);
-						}catch(e){
-							deferred.reject(e);
-						}
-					}, function(resp){
-						deferred.reject();
-						return;
-					 }
-				);
-			
+			var that = this;
+			model.getChildren(item, function(children) {
+				item.removeAll = true;
+				that.myTree.refresh.bind(that.myTree)(item, children, false);
+				deferred.resolve(children);
+			});
 			return deferred;
 		},
-		display: function(){
-			var that = this;
-			var repositories = this.repositories;
-			var mode = this.mode;
-			var links = this.links;
-			if(repositories) {
-				repositories.sort(that._repositorySorter);
-			}
-			var dynamicContentModel = new mDynamicContent.DynamicContentModel(repositories,
-				function(i){
-					return that.decorateRepository.bind(that)(repositories[i]);
+		display: function() {
+			var deferred = new Deferred();
+			var model = new GitRepoListModel({
+				root: {Type: "RepoRoot"}, //$NON-NLS-0$
+				registry: this.registry,
+				progressService: this.progressService,
+				gitClient: this.gitClient,
+				fileClient: this.fileClient,
+				section: this.section,
+				repositories: this.repositories,
+				mode: this.mode,
+				parentId: this.parentId,
+				handleError: this.handleError
+			});
+			this.createTree(this.parentId, model,{
+				onComplete: function() {
+					deferred.resolve();
 				}
-			);
-			
-			var dcExplorer = new mDynamicContent.DynamicContentExplorer(dynamicContentModel);
-			var repositoryRenderer = {
-			
-				initialRender : function(){
-					var tableNode = lib.node(that.parentId);	
-					if (!tableNode) {
-						return;
-					}
-					lib.empty(tableNode);
-					if(!repositories || repositories.length === 0){
-						var titleWrapper = new mSection.Section(tableNode, {
-							id: "repositorySection", //$NON-NLS-0$
-							title: "Repository",
-							iconClass: ["gitImageSprite", "git-sprite-repository"] //$NON-NLS-1$ //$NON-NLS-0$
-						});
-						titleWrapper.setTitle(mode === "full" ? messages["No Repositories"] : messages["Repository Not Found"]); //$NON-NLS-0$
-						that.loadingDeferred.resolve();
-						return;
-					}
-					
-				},
-				
-				cleanupRender : function(){
-					that.loadingDeferred.resolve();
-				},
-				
-				renderBeforeItemPopulation : function(i){
-					// Title area
-					var repoSection = document.createElement("div");
-					repoSection.className =  (that.mode === "mini" ? "miniWrapper" : "sectionWrapper") + " toolComposite";
-					lib.node("repositoryNode").appendChild(repoSection);
-					
-					var sectionAnchor = document.createElement("div");
-					sectionAnchor.className = "sectionAnchor sectionTitle layoutLeft";
-					repoSection.appendChild(sectionAnchor);
-					
-					var title = document.createElement("span");
-					sectionAnchor.appendChild(title);
-					
-					if (links){
-						var link = document.createElement("a");
-						link.href = require.toUrl(repoTemplate.expand({resource: repositories[i].Location}));
-						link.appendChild(document.createTextNode(repositories[i].Name));
-						title.appendChild(link);
-					} else { 
-						title.appendChild(document.createTextNode(repositories[i].Name)); 
-					}
-					
-					//create indicator
-					this.explorer.progressIndicators[i] = new this.explorer.progressIndicator(i, title);
-					
-					var actionsArea = document.createElement("div");
-					actionsArea.className = "layoutRight sectionActions";
-					actionsArea.id = "repositoryActionsArea";
-					repoSection.appendChild(actionsArea);
-					that.commandService.renderCommands(that.actionScopeId, actionsArea, repositories[i], that, mode === "full" ? "tool" : "button"); //$NON-NLS-0$
-						
-						
-					if (mode === "full"){
-						// Content area
-						var repoSectionContent = document.createElement("div");
-						repoSectionContent.className = "sectionTable sectionTableItem";
-						lib.node("repositoryNode").appendChild(repoSectionContent);
-												
-						var detailsView = document.createElement("div");
-						detailsView.className = "stretch";
-						repoSectionContent.appendChild(detailsView);
-						
-						var div = document.createElement("div");
-						detailsView.appendChild(div);
-						
-						var span = document.createElement("span");
-						span.textContent = (repositories[i].GitUrl ? messages["git url:"] + repositories[i].GitUrl : messages["(no remote)"]);
-						detailsView.appendChild(span);
-						
-						div = document.createElement("div");
-						detailsView.appendChild(div);
-						
-						span = document.createElement("span");
-						span.id = "location"+i;
-						detailsView.appendChild(span);
-		
-					
-						div = document.createElement("div");
-						div.style.paddingTop = "10px";
-						detailsView.appendChild(div);
-						
-						span = document.createElement("span");
-						span.id = "repositoryState"+i;
-						span.style.paddingLeft = "10px";
-						detailsView.appendChild(span);
-						
-						span = document.createElement("span");
-						span.id = "workspaceState"+i;
-						span.style.paddingLeft = "10px";
-						detailsView.appendChild(span);
-						
-						span = document.createElement("span");
-						span.id = "commitsState"+i;
-						span.style.paddingLeft = "10px";
-						detailsView.appendChild(span);
-					}
-				},
-				
-				renderAfterItemPopulation : function(i){
-					that.renderRepository(repositories[i], i, repositories.length, mode, links);
-				}
-			};
-			
-			dcExplorer.use(repositoryRenderer);
-			dcExplorer.render();
+			});
+			this.updateCommands();
+			return deferred;
 		},
-		renderRepository: function(repository, index, length, mode, links){
-			var locationnode = lib.node("location"+index);
-			if (!locationnode) {
-				return;
-			}
-			locationnode.textContent = messages["location: "] + repository.Content.Path;
-			var status = repository.Status;
-			
-			if (mode === "full"){ //$NON-NLS-0$
-				var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length + status.Missing.length;
-				var staged = status.Changed.length + status.Added.length + status.Removed.length;
+		isRowSelectable: function() {
+			return false;
+		},
+		updateCommands: function() {
+			var section = this.section;
+			if (!section) return;
+			var commandRegistry = this.commandService;
+			var actionsNodeScope = section.actionsNode.id;
+			commandRegistry.addCommandGroup(actionsNodeScope, "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.cloneGitRepository", 100, "eclipse.gitGroup", false, null, new mCommandRegistry.URLBinding("cloneGitRepository", "url")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.createGitProject", 300, "eclipse.gitGroup", true, null, new mCommandRegistry.URLBinding("createProjectContext", "name")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.initGitRepository", 200, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.openCommitCommand", 1000, "eclipse.gitGroup", true,  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				new KeyBinding.KeyBinding('h', true, true), new mCommandRegistry.URLBinding("openGitCommit", "commitName")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.repositories[0], this, "button"); //$NON-NLS-0$
+		}
+	});
+	
+	function GitRepoListRenderer(options) {
+		mExplorer.SelectionRenderer.apply(this, arguments);
+		this.registry = options.registry;
+	}
+	GitRepoListRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
+	objects.mixin(GitRepoListRenderer.prototype, {
+		getCellElement: function(col_no, item, tableRow){
+			var div, td;
+			switch (col_no) {
+				case 0:
+					var explorer = this.explorer;
+					var repo = item;
 				
-				var workspaceState = ((unstaged > 0 || staged > 0) 
-					? i18nUtil.formatMessage(messages["${0} file(s) to stage and ${1} file(s) to commit."], unstaged, staged)
-					: messages["Nothing to commit."]);
-				
-				
-				if (status.RepositoryState !== "SAFE"){
-					lib.node("repositoryState"+index).textContent = messages["Rebase in progress!"];
-				}
-				
-				lib.node("workspaceState"+index).textContent = workspaceState;
-				
-				var commitsState = repository.CommitsToPush;
-				lib.node("commitsState"+index).textContent = ((commitsState > 0) ? commitsState + messages[" commit(s) to push."] : messages["Nothing to push."]);	
+					td = document.createElement("td"); //$NON-NLS-0$
+					div = document.createElement("div"); //$NON-NLS-0$
+					div.className = "sectionTableItem"; //$NON-NLS-0$
+					td.appendChild(div);
+					var horizontalBox = document.createElement("div"); //$NON-NLS-0$
+					horizontalBox.style.overflow = "hidden"; //$NON-NLS-0$
+					div.appendChild(horizontalBox);	
+					
+					var actionsID, title, description, subDescription, extraDescriptions = [], titleClass = "", titleLink;
+					if (item.parent.Type === "RepoRoot") { //$NON-NLS-0$
+						if (explorer.showLinks) {
+							titleLink = require.toUrl(repoTemplate.expand({resource: repo.Location}));
+						} else {
+							titleClass = "gitRepoTitle"; //$NON-NLS-0$
+						}
+						if (!explorer.section) { //$NON-NLS-0$
+							tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
+						} else {
+							description = repo.GitUrl ? messages["git url:"] + repo.GitUrl : messages["(no remote)"];
+							if (repo.Content) {
+								subDescription = messages["location: "] + repo.Content.Path;
+							}
+							if (explorer.mode === "full"){ //$NON-NLS-0$
+								var status = repo.Status;
+								if (status) {
+									if (status.RepositoryState !== "SAFE"){ //$NON-NLS-0$
+										extraDescriptions.push(messages["Rebase in progress!"]);
+									}
+									
+									var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length + status.Missing.length;
+									var staged = status.Changed.length + status.Added.length + status.Removed.length;
+									extraDescriptions.push(((unstaged > 0 || staged > 0) 
+										? i18nUtil.formatMessage(messages["${0} file(s) to stage and ${1} file(s) to commit."], unstaged, staged)
+										: messages["Nothing to commit."]));
+								}
+								var commitsState = repo.CommitsToPush;
+								if (commitsState !== undefined) {
+									extraDescriptions.push(commitsState > 0 ? commitsState + messages[" commit(s) to push."] : messages["Nothing to push."]);
+								}
+							}
+							if (repo.infoDeferred) {
+								title = repo.Name + " ..."; //$NON-NLS-0$
+								repo.infoDeferred.then(function() {
+									explorer.myTree.redraw(item);
+								});
+								repo.infoDeferred = null;
+							}
+						}
+					}
+					
+					var detailsView = document.createElement("div"); //$NON-NLS-0$
+					detailsView.className = "stretch"; //$NON-NLS-0$
+					horizontalBox.appendChild(detailsView);
+					
+					var titleDiv = document.createElement(titleLink ? "a" : "span"); //$NON-NLS-1$ //$NON-NLS-0$
+					titleDiv.className = titleClass;
+					if (titleLink) {
+						titleDiv.href = titleLink;
+					}
+					titleDiv.textContent = title || item.Name;
+					detailsView.appendChild(titleDiv);
+					
+					var descriptionDiv = document.createElement("div"); //$NON-NLS-0$
+					if (description) {
+						descriptionDiv.textContent = description;
+					}
+					detailsView.appendChild(descriptionDiv);
+					
+					if (subDescription) {
+						var subDescriptionDiv = document.createElement("div"); //$NON-NLS-0$
+						subDescriptionDiv.textContent = subDescription;
+						detailsView.appendChild(subDescriptionDiv);
+					}
+					
+					if (extraDescriptions.length) {
+						var section = document.createElement("div"); //$NON-NLS-0$
+						section.className = "gitRepoExtraDescriptionSection"; //$NON-NLS-0$
+						detailsView.appendChild(section);						
+						extraDescriptions.forEach(function(extraDescription) {
+							var span = document.createElement("span"); //$NON-NLS-0$
+							span.className = "gitRepoExtraDescription"; //$NON-NLS-0$
+							span.textContent = extraDescription;
+							section.appendChild(span);
+						});
+					}
+
+					var actionsArea = document.createElement("div"); //$NON-NLS-0$
+					actionsArea.className = "sectionTableItemActions"; //$NON-NLS-0$
+					actionsArea.id = actionsID;
+					horizontalBox.appendChild(actionsArea);
+					this.commandService.renderCommands(this.actionScopeId, actionsArea, item, explorer, explorer.section ? "tool" : "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$	
+					return td;
 			}
 		}
 	});
 	
 	return {
-		GitRepoListExplorer: GitRepoListExplorer
+		GitRepoListExplorer: GitRepoListExplorer,
+		GitRepoListRenderer: GitRepoListRenderer
 	};
 
 });

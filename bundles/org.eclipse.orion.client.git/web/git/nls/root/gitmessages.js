@@ -145,6 +145,7 @@ define({
 	"Rendering ${0}": "Rendering ${0}",
 	"Configuration": "Configuration",
 	"Getting configuration of": "Getting configuration of ${0}",
+	"Getting git repository details": "Getting git repository details",
 	" - Git": " - Git",
 	"Repositories - Git": "Repositories - Git",
 	"Repository": "Repository",

@@ -10,12 +10,10 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
-var eclipse;
-
-define(['i18n!git/nls/gitmessages', 'require', 'orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/PageUtil', 'orion/keyBinding', 'orion/commandRegistry', 'orion/commands', 'orion/dialogs', 'orion/selection', 
+define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/PageUtil', 'orion/commandRegistry', 'orion/dialogs', 'orion/selection', 
         'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands',
         'orion/git/gitRepositoryExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links'], 
-		function(messages, require, mBrowserCompatibility, mBootstrap, mStatus, mProgress, PageUtil, KeyBinding, mCommandRegistry, mCommands, mDialogs, mSelection, 
+		function(mBrowserCompatibility, mBootstrap, mStatus, mProgress, PageUtil, mCommandRegistry, mDialogs, mSelection, 
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, 
 				mGitRepositoryExplorer, mGitCommands, mGitClient, mSshTools, mLinks) {
 
@@ -58,30 +56,10 @@ mBootstrap.startup().then(function(core) {
 	mGitCommands.createFileCommands(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$
 	mGitCommands.createGitClonesCommands(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", fileClient); //$NON-NLS-1$ //$NON-NLS-0$
 	mGitCommands.createGitStatusCommands(serviceRegistry, commandRegistry, explorer, true);
-	mGitCommands.createSharedCommands(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", fileClient);
-	
-	// define the command contributions - where things appear, first the groups
-	commandRegistry.addCommandGroup("pageActions", "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.addCommandGroup("pageActions", "eclipse.gitGroup", 200); //$NON-NLS-1$ //$NON-NLS-0$
-	
-	commandRegistry.registerCommandContribution("reposPageActions", "eclipse.cloneGitRepository", 100, "eclipse.gitGroup", false, null, new mCommandRegistry.URLBinding("cloneGitRepository", "url")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("reposPageActions", "eclipse.createGitProject", 300, "eclipse.gitGroup", true, null, new mCommandRegistry.URLBinding("createProjectContext", "name")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("reposPageActions", "eclipse.initGitRepository", 200, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	
-//	commandRegistry.registerCommandContribution("repoPageActions", "eclipse.orion.git.pull", 100, "eclipse.gitGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("repoPageActions", "eclipse.git.deleteClone", 200, "eclipse.gitGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-	
-	commandRegistry.registerCommandContribution("repoPageActions", "eclipse.orion.git.openCommitCommand", 1000, "eclipse.gitGroup", true,  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		new KeyBinding.KeyBinding('h', true, true), new mCommandRegistry.URLBinding("openGitCommit", "commitName")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	
-	//TODO: remove when getting rid of multi repos page
-	commandRegistry.registerCommandContribution("itemLevelCommandsMini", "eclipse.orion.git.applyPatch", 100); //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommandsMini", "eclipse.orion.git.pull", 200); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommandsMini", "eclipse.git.deleteClone", 300); //$NON-NLS-1$ //$NON-NLS-0$
-	
+	mGitCommands.createSharedCommands(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", fileClient); //$NON-NLS-1$ //$NON-NLS-0$
+
 	// object contributions
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.openCloneContent", 100); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.openGitLog", 100); //$NON-NLS-1$ //$NON-NLS-0$
+//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.openCloneContent", 100); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.pull", 200); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.removeBranch", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.checkoutTag", 0); //$NON-NLS-1$ //$NON-NLS-0$
@@ -101,26 +79,6 @@ mBootstrap.startup().then(function(core) {
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.addTag", 1); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.cherryPick", 2); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.revert", 3); //$NON-NLS-1$ //$NON-NLS-0$
-	
-	// page navigation contributions
-	commandRegistry.registerCommandContribution("pageNavigationActions", "eclipse.orion.git.previousTagPage", 1);
-	commandRegistry.registerCommandContribution("pageNavigationActions", "eclipse.orion.git.nextTagPage", 2);
-	
-	// add commands specific for the page	
-	var viewAllCommand = new mCommands.Command({
-		name : messages["View All"],
-		id : "eclipse.orion.git.repositories.viewAllCommand", //$NON-NLS-0$
-		hrefCallback : function(data) {
-			return require.toUrl(data.items.ViewAllLink);
-		},
-		visibleWhen : function(item) {
-		
-			this.name = item.ViewAllLabel;
-			this.tooltip = item.ViewAllTooltip;
-			return item.ViewAllLabel && item.ViewAllTooltip && item.ViewAllLink;
-		}
-	});
-	commandRegistry.addCommand(viewAllCommand);
 	
 	var params = PageUtil.matchResourceParameters();
 	if (typeof params["createProject.name"] === "undefined") { //$NON-NLS-0$
