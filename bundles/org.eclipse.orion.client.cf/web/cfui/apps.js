@@ -40,7 +40,7 @@ mBootstrap.startup().then(function(core) {
 		
 	mGlobalCommands.generateBanner("cfView", serviceRegistry, commandRegistry, preferences, searcher, {});
 	
-	mGlobalCommands.setPageTarget({task: 'Cloud Foundry Applications', serviceRegistry: serviceRegistry, commandService: commandRegistry});
+	mGlobalCommands.setPageTarget({task: 'Cloud Applications', serviceRegistry: serviceRegistry, commandService: commandRegistry});
 	
 	var orgsNode = document.getElementById("orgsNode");
 	var applicationsNode = document.getElementById("applicationsTable");
@@ -213,23 +213,24 @@ mBootstrap.startup().then(function(core) {
 		});
 						
 		progressService.showWhile(cFService.getApps(target), "Loading ...").then(function(apps){
+			apps = apps || {};
+			if (!apps.Apps)
+				apps.Apps = [];
 			
-			explorer.destroyListeters();			
+			explorer.destroyListeners();
 			applicationsSection.embedExplorer(explorer);
 			explorer.loadApps(apps, target);
+			explorer.addListeners(cfEventDispatcher);
 			
-			explorer.addListeters(cfEventDispatcher);
-			
-			progressService.showWhile(cFService.getRoutes(target), "Loading ...").then(function(routes){
-				
-			displayOrphanRoutes(routes, apps, target);
-			
-			}, function(error){
-				handleError(error);
-			});
+			progressService.showWhile(cFService.getRoutes(target), "Loading ...").then(
+				function(routes){
+					displayOrphanRoutes(routes, target);
+				}, function(error){
+					handleError(error);
+				}
+			);
 		}, handleError);
 	}
-	
 	
 	var routesParent = document.createElement("div");
 	routesParent.id = "orphanRoutesParent";
@@ -238,7 +239,7 @@ mBootstrap.startup().then(function(core) {
 				
 	mCfCommands.createRoutesCommands(serviceRegistry, commandRegistry, routesExplorer, displayOrgsAndSpaces);
 		
-	function displayOrphanRoutes(routes, apps, target){
+	function displayOrphanRoutes(routes, target){
 		
 		lib.empty(orphanRoutesNode);
 			
@@ -260,7 +261,7 @@ mBootstrap.startup().then(function(core) {
 		commandRegistry.registerCommandContribution("routeLevelCommands", "orion.cf.MapRoute", 100);
 		commandRegistry.registerCommandContribution("routeLevelCommands", "orion.cf.DeleteRoute", 200);
 		
-		routesExplorer.destroyListeters();
+		routesExplorer.destroyListeners();
 		
 		routesSelection.addEventListener("selectionChanged", function(event){
 			var selections = event.selections;
@@ -271,10 +272,9 @@ mBootstrap.startup().then(function(core) {
 			}
 		});
 		
-		
 		orphanRoutesSection.embedExplorer(routesExplorer);
 		routesExplorer.loadRoutes(routes, target);
-		routesExplorer.addListeters(cfEventDispatcher);
+		routesExplorer.addListeners(cfEventDispatcher);
 	}
 	
 	displayOrgsAndSpaces();

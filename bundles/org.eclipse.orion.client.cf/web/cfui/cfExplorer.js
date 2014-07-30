@@ -234,7 +234,7 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 	
 	var appsCfListenerRef;
 	
-	ApplicationsExplorer.prototype.destroyListeters = function(){
+	ApplicationsExplorer.prototype.destroyListeners = function(){
 		if(this.cfEventDispatcher && appsCfListenerRef){
 				this.events.forEach(function(eventType){
 					this.cfEventDispatcher.removeEventListener(eventType, appsCfListenerRef);
@@ -242,7 +242,7 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 			}
 	}
 	
-	ApplicationsExplorer.prototype.addListeters = function(cfEventDispatcher){
+	ApplicationsExplorer.prototype.addListeners = function(cfEventDispatcher){
 		this.cfEventDispatcher = cfEventDispatcher;
 		appsCfListenerRef = this.cfEventListener.bind(this)
 		this.events.forEach(function(eventType){
@@ -299,7 +299,7 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 	
 	var routesCfEventListenerRef;
 	
-	OrphanRoutesExplorer.prototype.destroyListeters = function(){
+	OrphanRoutesExplorer.prototype.destroyListeners = function(){
 		if(this.cfEventDispatcher && routesCfEventListenerRef){
 				this.events.forEach(function(eventType){
 					this.cfEventDispatcher.removeEventListener(eventType, routesCfEventListenerRef);
@@ -307,7 +307,7 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 			}
 	}
 	
-	OrphanRoutesExplorer.prototype.addListeters = function(cfEventDispatcher){
+	OrphanRoutesExplorer.prototype.addListeners = function(cfEventDispatcher){
 		this.cfEventDispatcher = cfEventDispatcher;
 		routesCfEventListenerRef = this.cfEventListener.bind(this);
 		this.events.forEach(function(eventType){
