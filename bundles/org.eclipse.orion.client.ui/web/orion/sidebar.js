@@ -250,12 +250,16 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 					return true;
 				},
 				callback: function (data) {
-					var mainSplitter = mGlobalCommands.getMainSplitter();
-					if (mainSplitter.splitter.isClosed()) {
-						mainSplitter.splitter.toggleSidePanel();
+					if (this._inlineSearchPane.isVisible()) {
+						this._inlineSearchPane.hide();
+					} else {
+						var mainSplitter = mGlobalCommands.getMainSplitter();
+						if (mainSplitter.splitter.isClosed()) {
+							mainSplitter.splitter.toggleSidePanel();
+						}
+						this._inlineSearchPane.show();
+						this._inlineSearchPane.showSearchOptions();	
 					}
-					this._inlineSearchPane.show();
-					this._inlineSearchPane.showSearchOptions();
 				}.bind(this)
 			});
 			

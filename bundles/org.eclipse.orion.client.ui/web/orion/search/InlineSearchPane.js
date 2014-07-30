@@ -322,7 +322,7 @@ define([
 			
 			this._toggleSearchOptionsLink = lib.$("#toggleSearchOptionsLink", this._parentNode); //$NON-NLS-0$
 			this._toggleSearchOptionsLink.addEventListener("click", this.showSearchOptions.bind(this)); //$NON-NLS-0$
-			this._toggleSearchOptionsLink.innerHTML = messages["Modify Search Parameters"]; //$NON-NLS-0$
+			this._toggleSearchOptionsLink.innerHTML = messages["^ Edit Search"]; //$NON-NLS-0$
 
 			if (this._replaceBoxIsHidden()) {
 	        	this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$	
