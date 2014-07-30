@@ -98,7 +98,8 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 				id : "orion.cf.DeleteRoute",
 				
 				callback : function(data) {
-					var route = data.items;
+					var route = data.items[0];
+					var target = route.target;
 					
 					progressService.showWhile(cfClient.deleteRouteById(target, 
 						route.Guid), "Deleting route...").then(
