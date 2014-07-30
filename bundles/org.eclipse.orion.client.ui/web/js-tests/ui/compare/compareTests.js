@@ -29,21 +29,13 @@ define([
 	// *************************************************************************
 	function _mapperPartialEqual(mapper, expectedMapper){
 		if(mapper.length !== expectedMapper.length){
-			throw new assert.AssertionError({
-				message :  "mapper failed at total length", //$NON-NLS-0$
-				expected : expectedMapper,
-				actual : mapper
-			});
+			assert.fail(mapper, expectedMapper, "mapper failed at total length "); //$NON-NLS-0$
 		}
 		for(var i = 0; i < mapper.length; i++ ){
 			for(var j= 0; j < 3; j++){
 				if(j < 2 || ( j === 2 && expectedMapper[i][j] < 1) ){
 					if(mapper[i][j] !== expectedMapper[i][j]){
-						throw new assert.AssertionError({
-							message :  "mapper failed at index " + i, //$NON-NLS-0$
-							expected : expectedMapper,
-							actual : mapper
-						});
+						assert.fail(mapper, expectedMapper, "mapper failed at index " + i); //$NON-NLS-0$
 					}
 				}
 			}
