@@ -199,6 +199,7 @@ define([
                     this.checkId(node.argument);
                     break;
                 case Estraverse.Syntax.LabeledStatement:
+               		this._enterScope(node);
                     this.checkId(node.label, true, false, true);
                     break;
                 case Estraverse.Syntax.ContinueStatement :
@@ -241,6 +242,15 @@ define([
 					case Estraverse.Syntax.ObjectExpression:
 						this.scopes.push({range: node.range, occurrences: [], kind:'o'});  //$NON-NLS-0$
 						// Skip object expressions that don't contain the selection
+						if(node.range[0] > this.context.start || node.range[1] < this.context.end) {
+							return true;
+						}						
+				}
+			} else if (this.labeledStatementCheck){
+				switch(node.type) {
+					case Estraverse.Syntax.LabeledStatement:
+						this.scopes.push({range: node.range, occurrences: [], kind:'ls'});  //$NON-NLS-0$
+						// Skip labelled loops that don't contain the selection
 						if(node.range[0] > this.context.start || node.range[1] < this.context.end) {
 							return true;
 						}						
@@ -292,6 +302,14 @@ define([
 				switch(node.type){
 					case Estraverse.Syntax.ObjectExpression:
 					case Estraverse.Syntax.Program:
+						if(this._popScope()) {
+							return Estraverse.VisitorOption.Break;
+						}
+						break;
+				}
+			} else if (this.labeledStatementCheck) {
+				switch(node.type){
+					case Estraverse.Syntax.LabeledStatement:
 						if(this._popScope()) {
 							return Estraverse.VisitorOption.Break;
 						}

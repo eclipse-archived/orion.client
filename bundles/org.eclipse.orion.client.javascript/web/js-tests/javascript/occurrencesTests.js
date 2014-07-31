@@ -2142,5 +2142,164 @@ define([
 			});
 		});		
 		
+		/**
+		 * Tests repeated labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementRepeat1', function() {
+			editorContext.text = "a: while(true){ break a; } a: while(true){ break a; }";
+			return occurrences.computeOccurrences(editorContext, setContext(0, 1)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:22, end:23}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests repeated labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementRepeat2', function() {
+			editorContext.text = "a: while(true){ break a; } a: while(true){ break a; }";
+			return occurrences.computeOccurrences(editorContext, setContext(23, 23)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:22, end:23}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests repeated labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementRepeat3', function() {
+			editorContext.text = "a: while(true){ break a; } a: while(true){ break a; }";
+			return occurrences.computeOccurrences(editorContext, setContext(27, 27)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:27, end:28}, {start:49, end:50}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests repeated labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementRepeat4', function() {
+			editorContext.text = "a: while(true){ break a; } a: while(true){ break a; }";
+			return occurrences.computeOccurrences(editorContext, setContext(49, 50)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:27, end:28}, {start:49, end:50}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests nested loop labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementNestedLoop1', function() {
+			editorContext.text = "a: while(true){ while(true) { break a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(0, 0)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:36, end:37}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests nested loop labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementNestedLoop2', function() {
+			editorContext.text = "a: while(true){ while(true) { break a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(37, 37)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:36, end:37}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests nested labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementNestedLabel1', function() {
+			editorContext.text = "a: while(true){ b: while(true) { if (true) { continue a; } else { continue b; } } }";
+			return occurrences.computeOccurrences(editorContext, setContext(0, 1)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:54, end:55}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests nested labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementNestedLabel2', function() {
+			editorContext.text = "a: while(true){ b: while(true) { if (true) { continue a; } else { continue b; } } }";
+			return occurrences.computeOccurrences(editorContext, setContext(54, 54)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:54, end:55}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests nested labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementNestedLabel3', function() {
+			editorContext.text = "a: while(true){ b: while(true) { if (true) { continue a; } else { continue b; } } }";
+			return occurrences.computeOccurrences(editorContext, setContext(16, 16)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:16, end:17}, {start:75, end:76}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests nested labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementNestedLabel4', function() {
+			editorContext.text = "a: while(true){ b: while(true) { if (true) { continue a; } else { continue b; } } }";
+			return occurrences.computeOccurrences(editorContext, setContext(75, 76)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:16, end:17}, {start:75, end:76}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
 	});
 });
