@@ -23,6 +23,7 @@ define([
 	 * @since 5.0
 	 */
 	function Visitor() {
+	    //constructor
 	}
 	
 	Objects.mixin(Visitor.prototype, /** @lends javascript.Visitor.prototype */ {
@@ -549,8 +550,10 @@ define([
 				var len = comments.length;
 				for(var i = 0; i < len; i++) {
 					var comment = comments[i];
-					if(comment.range[0] <= offset && comment.range[1] > offset) {
+					if(comment.range[0] < offset && comment.range[1] > offset) {
 						return comment;
+					} else if(offset === ast.range[1] && offset === comment.range[1]) {
+					   return comment;
 					} else if(comment.range[0] > offset) {
 						//we've passed the node
 						return null;

@@ -780,8 +780,8 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var comment = Finder.findComment(0, ast);
-					if(!comment) {
-						assert.fail("Should have found a comment");
+					if(comment) {
+						assert.fail("Should not have found a comment");
 					}
 				}
 				finally {
@@ -818,8 +818,8 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var comment = Finder.findComment(11, ast);
-					if(!comment) {
-						assert.fail("Should have found a comment");
+					if(comment) {
+						assert.fail("Should not have found a comment");
 					}
 				}
 				finally {
@@ -856,8 +856,8 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var comment = Finder.findComment(19, ast);
-					if(!comment) {
-						assert.fail("Should have found a comment");
+					if(comment) {
+						assert.fail("Should not have found a comment");
 					}
 				}
 				finally {
@@ -875,6 +875,25 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var comment = Finder.findComment(26, ast);
+					if(comment) {
+						assert.fail("Should not have found a comment");
+					}
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		});
+		
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440828
+		 * @since 7.0
+		 */
+		it('test_findComment7', function() {
+			var text = "/*";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var comment = Finder.findComment(2, ast);
 					if(!comment) {
 						assert.fail("Should have found a comment");
 					}
