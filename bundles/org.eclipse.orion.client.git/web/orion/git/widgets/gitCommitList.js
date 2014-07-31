@@ -398,19 +398,22 @@ define([
 				parentId: this.parentId,
 				simpleLog: this.simpleLog
 			});
-			this.createTree(this.parentId, model, {onComplete: function() {
-				that.status = model.status;
-				var fetched = function(){
-					that.model.getRoot(function(root) {
-						that.model.getChildren(root, function(children) {
-							that.expandSections(children);
+			this.createTree(this.parentId, model, {
+				selectionPolicy: this.selectionPolicy,
+				onComplete: function() {
+					that.status = model.status;
+					var fetched = function(){
+						that.model.getRoot(function(root) {
+							that.model.getChildren(root, function(children) {
+								that.expandSections(children);
+							});
 						});
-					});
-					that.updateCommands();
-					deferred.resolve(model.log);
-				};
-				that.fetch().then(fetched, fetched);
-			}});
+						that.updateCommands();
+						deferred.resolve(model.log);
+					};
+					that.fetch().then(fetched, fetched);
+				}
+			});
 			return deferred;
 		},
 		expandSections: function(children) {
@@ -423,7 +426,7 @@ define([
 			}
 		},
 		isRowSelectable: function() {
-			return false;
+			return !!this.selection;
 		},
 		createCommands: function() {
 			var that = this;

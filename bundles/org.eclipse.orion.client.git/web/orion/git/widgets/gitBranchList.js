@@ -179,7 +179,7 @@ define([
 			return deferred;
 		},
 		display: function() {
-			this.createTree(this.parentId, new GitBranchListModel({
+			var model = new GitBranchListModel({
 				root: this.root,
 				registry: this.registry,
 				progressService: this.progressService,
@@ -189,11 +189,14 @@ define([
 				showTags: this.showTags,
 				parentId: this.parentId,
 				handleError: this.handleError
-			}));
+			});
+			this.createTree(this.parentId, model, {
+				selectionPolicy: this.selectionPolicy
+			});
 			this.updateCommands();
 		},
 		isRowSelectable: function() {
-			return false;
+			return !!this.selection;
 		},
 		updateCommands: function() {
 			var root = this.root;

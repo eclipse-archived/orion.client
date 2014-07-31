@@ -205,7 +205,8 @@ define([
 				parentId: this.parentId,
 				handleError: this.handleError
 			});
-			this.createTree(this.parentId, model,{
+			this.createTree(this.parentId, model, {
+				selectionPolicy: this.selectionPolicy,
 				onComplete: function() {
 					deferred.resolve();
 				}
@@ -214,7 +215,7 @@ define([
 			return deferred;
 		},
 		isRowSelectable: function() {
-			return false;
+			return !!this.selection;
 		},
 		updateCommands: function() {
 			var section = this.section;

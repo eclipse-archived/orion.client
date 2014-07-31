@@ -45,7 +45,6 @@ exports.GitRepositoryExplorer = (function() {
 	 * @param options.progressService
 	 * @param options.preferencesService
 	 * @param options.statusService
-	 * @param options.selection
  	 * @param options.pageNavId
 	 * @param options.actionScopeId
 	 */
@@ -59,7 +58,6 @@ exports.GitRepositoryExplorer = (function() {
 		this.progressService = options.progressService;
 		this.preferencesService = options.preferencesService;
 		this.statusService = options.statusService;
-		this.selection = options.selection;
 		this.pageNavId = options.pageNavId;
 		this.actionScopeId = options.actionScopeId;
 		this.checkbox = false;
@@ -311,7 +309,6 @@ exports.GitRepositoryExplorer = (function() {
 		var explorer  = this.statusNavigator = new mGitChangeList.GitChangeListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
-			selection: this.stagedSelection,
 			parentId:"statusNode", //$NON-NLS-0$
 			prefix: "all", //$NON-NLS-0$
 			location: repository.StatusLocation,
@@ -343,7 +340,6 @@ exports.GitRepositoryExplorer = (function() {
 			gitClient: this.gitClient,
 			progressService: this.progressService,
 			statusService: this.statusService,
-			selection: this.selection,
 			actionScopeId: this.actionScopeId,
 			parentId:"commitNode", //$NON-NLS-0$
 			section: titleWrapper,

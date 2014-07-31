@@ -45,7 +45,6 @@ mBootstrap.startup().then(function(core) {
 		progressService: progress,
 		preferencesService: preferences,
 		statusService: statusService,
-		selection : null,
 		pageNavId: "pageNavigationActions", //$NON-NLS-0$
 		actionScopeId: "itemLevelCommands"  //$NON-NLS-0$
 	});
