@@ -1,18 +1,8 @@
-/* global module require exports define */
-(function(root, factory) {
-    if(typeof exports === 'object') {
-        module.exports = factory(require('./load-rules'), require, exports, module);
-    }
-    else if(typeof define === 'function' && define.amd) {
-        define(['./load-rules-async', 'require', 'exports', 'module'], factory);
-    }
-    else {
-        var req = function(id) {return root[id];},
-            exp = root,
-            mod = {exports: exp};
-        root.rules = factory(root.loadRules, req, exp, mod);
-    }
-}(this, function(loadRules, require, exports, module) {
+/* eslint-env amd */
+define([
+'./load-rules-async', 
+'exports', 
+], function(loadRules, exports) {
 /**
  * @fileoverview Defines a storage for rules.
  * @author Nicholas C. Zakas
@@ -82,4 +72,4 @@ exports.testClear = function() {
 load();
 
 return exports;
-}));
+});

@@ -1,18 +1,16 @@
-/* global module define exports require esprima */
-(function(root, factory) {
-    if(typeof exports === 'object') {
-        module.exports = factory(require('esprima'), require('estraverse'), require('escope'), require('../conf/environments'), require('./rules'), require('./util'), require('./rule-context'), require('events'), require, exports, module);
-    }
-    else if(typeof define === 'function' && define.amd) {
-        define(['esprima', 'estraverse', 'escope', 'eslint/conf/environments', './rules', './util', './rule-context', './events', 'require', 'exports', 'module'], factory);
-    }
-    else {
-        var req = function(id) {return root[id];},
-            exp = root,
-            mod = {exports: exp};
-        root.eslint = factory(root.esprima, root.estraverse, root.escope, root.environments, root.rules, root.util, root.RuleContext, root.events, req, exp, mod);
-    }
-}(this, function(esprima, estraverse, escope, environments, rules, util, RuleContext, events, require, exports, module) {
+/* eslint-env amd */
+define([
+'esprima', 
+'estraverse', 
+'escope', 
+'eslint/conf/environments', 
+'./rules', 
+'./util', 
+'./rule-context', 
+'./events', 
+'require', 
+'module'
+], function(esprima, estraverse, escope, environments, rules, util, RuleContext, events, require, module) {
 
 /**
  * @fileoverview Main ESLint object.
@@ -751,9 +749,7 @@ module.exports = (function() {
 
                     return parent && (parent.type !== "FunctionDeclaration") ? findJSDocComment(parent.leadingComments) : null;
                 }
-
-                // falls through
-
+            //$FALLTHROUGH$
             default:
                 return null;
         }
@@ -1037,4 +1033,4 @@ module.exports = (function() {
 }());
 
 return module.exports;
-}));
+});

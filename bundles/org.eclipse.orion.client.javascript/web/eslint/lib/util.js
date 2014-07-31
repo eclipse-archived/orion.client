@@ -1,18 +1,7 @@
-/* global exports module require define*/
-(function(root, factory) {
-    if(typeof exports === 'object') {
-        module.exports = factory(require, exports, module);
-    }
-    else if(typeof define === 'function' && define.amd) {
-        define(['require', 'exports', 'module'], factory);
-    }
-    else {
-        var req = function(id) {return root[id];},
-            exp = root,
-            mod = {exports: exp};
-        root.util = factory(req, exp, mod);
-    }
-}(this, function(require, exports, module) {
+/* eslint-env amd */
+define([
+'exports', 
+], function(exports) {
 /**
  * @fileoverview Common utilities.
  */
@@ -154,15 +143,17 @@ exports.createNewBuiltinRule = function(symbol, messageOrFunc, context) {
 				var badSymbol = symbols[index];
 				if (isBuiltin(callee)) {
 					// callee refers to the builtin `badSymbol`, so flag it
-					if (message)
+					if (message) {
 						context.report(callee, message);
-					else
+					}
+					else {
 						reportCallback(context, callee, badSymbol);
+					}
 				}
 			}
 		}
 	};
 };
 
-    return module.exports;
-}));
+    return exports;
+});
