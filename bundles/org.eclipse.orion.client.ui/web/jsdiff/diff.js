@@ -44,7 +44,7 @@ var JsDiff = (function() {
   fbDiff.prototype = {
       diff: function(oldString, newString) {
         // Handle the identity case (this is due to unrolling editLength == 0
-        if (newString == oldString) {
+        if (newString === oldString) {
           return [{ value: newString }];
         }
         if (!newString) {
@@ -139,7 +139,7 @@ var JsDiff = (function() {
         if (this.ignoreWhitespace && !reWhitespace.test(left) && !reWhitespace.test(right)) {
           return true;
         } else {
-          return left == right;
+          return left === right;
         }
       },
       join: function(left, right) {
@@ -164,7 +164,11 @@ var JsDiff = (function() {
   
   var LineDiff = new fbDiff();
   LineDiff.tokenize = function(value) {
-    return value.split(/^/m);
+    var result = value.split(/^/m);
+    if(result && result.length > 0 && !result[result.length - 1]) {
+    	result.pop();
+    }
+    return result;
   };
   
   return {
