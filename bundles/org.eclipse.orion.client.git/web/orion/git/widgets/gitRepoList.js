@@ -287,6 +287,7 @@ define([
 								title = repo.Name + ellipses;
 								extraDescriptions.push(ellipses);
 								repo.infoDeferred.then(function() {
+									if (explorer.destroyed) return;
 									explorer.myTree.redraw(item);
 								});
 								repo.infoDeferred = null;

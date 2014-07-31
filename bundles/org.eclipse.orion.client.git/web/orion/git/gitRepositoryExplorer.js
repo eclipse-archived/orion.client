@@ -94,6 +94,7 @@ exports.GitRepositoryExplorer = (function() {
 	
 	GitRepositoryExplorer.prototype.redisplay = function(processURLs) {
 		// make sure to have this flag
+		this.destroy();
 		if (processURLs === undefined) {
 			processURLs = true;
 		}
@@ -110,6 +111,33 @@ exports.GitRepositoryExplorer = (function() {
 			location = relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath; //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		this.display(location, processURLs);
+	};
+	
+	GitRepositoryExplorer.prototype.destroy = function() {
+		if (this.repoNavigator) {
+			this.repoNavigator.destroy();
+			this.repoNavigator = null;
+		}
+		if (this.branchesNavigator) {
+			this.branchesNavigator.destroy();
+			this.branchesNavigator = null;
+		}
+		if (this.statusNavigator) {
+			this.statusNavigator.destroy();
+			this.statusNavigator = null;
+		}
+		if (this.commitsNavigator) {
+			this.commitsNavigator.destroy();
+			this.commitsNavigator = null;
+		}
+		if (this.tagsNavigator) {
+			this.tagsNavigator.destroy();
+			this.tagsNavigator = null;
+		}
+		if (this.configNavigator) {
+			this.configNavigator.destroy();
+			this.configNavigator = null;
+		}
 	};
 	
 	GitRepositoryExplorer.prototype.display = function(location, processURLs) {
@@ -199,7 +227,6 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.displayRepositories = function(repositories, mode, links) {
-		
 		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
 		lib.empty(tableNode);
 		
@@ -222,7 +249,7 @@ exports.GitRepositoryExplorer = (function() {
 			tableNode.appendChild(contentParent);
 		}
 		
-		var repoNavigator = new mGitRepoList.GitRepoListExplorer({
+		var repoNavigator = this.repoNavigator = new mGitRepoList.GitRepoListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
 			fileClient: this.fileClient,
@@ -236,7 +263,7 @@ exports.GitRepositoryExplorer = (function() {
 			mode: mode,
 			showLinks: links,
 		});
-		repoNavigator.display().then(this.loadingDeferred.resolve, this.loadingDeferred.reject);
+		return repoNavigator.display().then(this.loadingDeferred.resolve, this.loadingDeferred.reject);
 	};
 	
 	GitRepositoryExplorer.prototype.displayBranches = function(repository) {
@@ -251,7 +278,7 @@ exports.GitRepositoryExplorer = (function() {
 			hidden: true,
 			preferenceService: this.preferencesService
 		});
-		var branchNavigator = new mGitBranchList.GitBranchListExplorer({
+		var branchNavigator = this.branchesNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
 			fileClient: this.fileClient,
@@ -267,7 +294,7 @@ exports.GitRepositoryExplorer = (function() {
 				repository: repository,
 			}
 		});
-		branchNavigator.display();
+		return branchNavigator.display();
 	};
 	
 	GitRepositoryExplorer.prototype.displayStatus = function(repository) {	
@@ -281,7 +308,7 @@ exports.GitRepositoryExplorer = (function() {
 			preferenceService: this.preferencesService
 		}); 
 		
-		var explorer  = new mGitChangeList.GitChangeListExplorer({
+		var explorer  = this.statusNavigator = new mGitChangeList.GitChangeListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
 			selection: this.stagedSelection,
@@ -309,7 +336,7 @@ exports.GitRepositoryExplorer = (function() {
 			preferenceService: this.preferencesService
 		}); 
 		
-		var explorer = new mGitCommitList.GitCommitListExplorer({
+		var explorer = this.commitsNavigator = new mGitCommitList.GitCommitListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
 			fileClient: this.fileClient,
@@ -326,8 +353,8 @@ exports.GitRepositoryExplorer = (function() {
 				repository: repository
 			}
 		});
-		this.statusDeferred.then(function() {
-			explorer.display();
+		return this.statusDeferred.then(function() {
+			return explorer.display();
 		});
 	};
 	
@@ -343,7 +370,7 @@ exports.GitRepositoryExplorer = (function() {
 			preferenceService : this.preferencesService
 		});
 
-		var tagsNavigator = new mGitBranchList.GitBranchListExplorer({
+		var tagsNavigator = this.tagsNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
 			fileClient: this.fileClient,
@@ -358,7 +385,7 @@ exports.GitRepositoryExplorer = (function() {
 				repository: repository,
 			}
 		});
-		tagsNavigator.display();
+		return tagsNavigator.display();
 	};
 	
 	GitRepositoryExplorer.prototype.displayConfig = function(repository, mode) {
@@ -373,7 +400,7 @@ exports.GitRepositoryExplorer = (function() {
 			preferenceService: this.preferencesService
 		});
 			
-		var configNavigator = new mGitConfigList.GitConfigListExplorer({
+		var configNavigator = this.configNavigator = new mGitConfigList.GitConfigListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
 			fileClient: this.fileClient,
@@ -389,7 +416,7 @@ exports.GitRepositoryExplorer = (function() {
 				mode: mode
 			}
 		});
-		configNavigator.display();
+		return configNavigator.display();
 	};
 	
 	return GitRepositoryExplorer;
