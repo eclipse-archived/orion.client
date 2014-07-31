@@ -1,5 +1,6 @@
 /*
-  Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
+  Copyright (C) 2012-2014 Yusuke Suzuki <utatane.tea@gmail.com>
+  Copyright (C) 2014 Dan Tao <daniel.tao@gmail.com>
   Copyright (C) 2013 Andrew Eisenberg <andrew@eisenberg.as>
 
   Redistribution and use in source and binary forms, with or without
@@ -23,7 +24,7 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/*jslint bitwise:true plusplus:true eqeq:true*/
+/*jslint bitwise:true plusplus:true eqeq:true nomen:true*/
 /*global doctrine:true, exports:true, parseTypeExpression:true, parseTop:true*/
 
 (function (exports) {
@@ -34,10 +35,11 @@
         CanAccessStringByIndex,
         typed,
         jsdoc,
-        isArray;
+        isArray,
+        hasOwnProperty;
 
     // Sync with package.json.
-    VERSION = '0.0.4';
+    VERSION = '0.5.1';
 
     // See also tools/generate-unicode-regex.py.
     Regex = {
@@ -57,6 +59,13 @@
             return Object.prototype.toString.call(ary) === '[object Array]';
         };
     }
+
+    hasOwnProperty = (function () {
+        var func = Object.prototype.hasOwnProperty;
+        return function hasOwnProperty(obj, name) {
+            return func.call(obj, name);
+        };
+    }());
 
     if (!CanAccessStringByIndex) {
         sliceSource = function sliceSource(source, index, last) {
@@ -118,12 +127,63 @@
         return '><(){}[],:*|?!='.indexOf(ch) === -1 && !isWhiteSpace(ch) && !isLineTerminator(ch);
     }
 
+    function isParamTitle(title) {
+        return title === 'param' || title === 'argument' || title === 'arg';
+    }
+
+    function isProperty(title) {
+        return title === 'property' || title === 'prop';
+    }
+
+    function isNameParameterRequired(title) {
+        return isParamTitle(title) || isProperty(title) || title === 'extends' || title === 'augments' ||
+            title === 'alias' || title === 'this' || title === 'mixes' || title === 'requires';
+    }
+
+    function isAllowedName(title) {
+        return isNameParameterRequired(title) || title === 'const' || title === 'constant';
+    }
+
+    function isAllowedNested(title) {
+        return isProperty(title) || isParamTitle(title);
+    }
+
+    function isTypeParameterRequired(title) {
+        return isParamTitle(title) || title === 'define' || title === 'enum' ||
+            title === 'implements' || title === 'return' ||
+            title === 'this' || title === 'type' || title === 'typedef' ||
+            title === 'returns' || isProperty(title);
+    }
+
+    // Consider deprecation instead using 'isTypeParameterRequired' and 'Rules' declaration to pick when a type is optional/required
+    // This would require changes to 'parseType'
+    function isAllowedType(title) {
+        return isTypeParameterRequired(title) || title === 'throws' || title === 'const' || title === 'constant' ||
+            title === 'namespace' || title === 'member' || title === 'var' || title === 'module' ||
+            title === 'constructor' || title === 'class';
+    }
+
+    function stringToArray(str) {
+        return str.split('');
+    }
+
+    function DoctrineError(message) {
+        this.name = 'DoctrineError';
+        this.message = message;
+    }
+    DoctrineError.prototype = new Error();
+    DoctrineError.prototype.constructor = DoctrineError;
+
+    function throwError(message) {
+        throw new DoctrineError(message);
+    }
+
     function assert(cond, text) { }
 
     if (VERSION.slice(-3) === 'dev') {
         assert = function assert(cond, text) {
             if (!cond) {
-                throw new Error(text);
+                throwError(text);
             }
         };
     }
@@ -147,7 +207,7 @@
             result,
             ch;
 
-        doc = doc.replace(/^\/\*\*/, '').replace(/\*\/$/, '');
+        doc = doc.replace(/^\/\*\*?/, '').replace(/\*\/$/, '');
         index = 0;
         len = doc.length;
         mode = BEFORE_STAR;
@@ -171,7 +231,7 @@
                 if (!isWhiteSpace(ch)) {
                     result += ch;
                 }
-                mode = AFTER_STAR;
+                mode = isLineTerminator(ch) ? BEFORE_STAR : AFTER_STAR;
                 break;
 
             case AFTER_STAR:
@@ -192,10 +252,10 @@
     (function (exports) {
         var Syntax,
             Token,
-            index,
-            previous,
             source,
             length,
+            index,
+            previous,
             token,
             value;
 
@@ -243,6 +303,24 @@
             STRING: 20,    // string
             NUMBER: 21,    // number
             EOF: 22
+        };
+
+        function Context(previous, index, token, value) {
+            this._previous = previous;
+            this._index = index;
+            this._token = token;
+            this._value = value;
+        }
+
+        Context.prototype.restore = function () {
+            previous = this._previous;
+            index = this._index;
+            token = this._token;
+            value = this._value;
+        };
+
+        Context.save = function () {
+            return new Context(previous, index, token, value);
         };
 
         function advance() {
@@ -351,7 +429,7 @@
             }
 
             if (quote !== '') {
-                throw 'unexpected quote';
+                throwError('unexpected quote');
             }
 
             value = str;
@@ -379,13 +457,13 @@
 
                         if (number.length <= 2) {
                             // only 0x
-                            throw 'unexpected token';
+                            throwError('unexpected token');
                         }
 
                         if (index < length) {
                             ch = source[index];
                             if (isIdentifierStart(ch)) {
-                                throw 'unexpected token';
+                                throwError('unexpected token');
                             }
                         }
                         value = parseInt(number, 16);
@@ -405,7 +483,7 @@
                         if (index < length) {
                             ch = source[index];
                             if (isIdentifierStart(ch) || isDecimalDigit(ch)) {
-                                throw 'unexpected token';
+                                throwError('unexpected token');
                             }
                         }
                         value = parseInt(number, 8);
@@ -413,7 +491,7 @@
                     }
 
                     if (isDecimalDigit(ch)) {
-                        throw 'unexpected token';
+                        throwError('unexpected token');
                     }
                 }
 
@@ -456,14 +534,14 @@
                         number += advance();
                     }
                 } else {
-                    throw 'unexpected token';
+                    throwError('unexpected token');
                 }
             }
 
             if (index < length) {
                 ch = source[index];
                 if (isIdentifierStart(ch)) {
-                    throw 'unexpected token';
+                    throwError('unexpected token');
                 }
             }
 
@@ -638,7 +716,7 @@
 
         function expect(target) {
             if (token !== target) {
-                throw 'unexpected token';
+                throwError('unexpected token');
             }
             next();
         }
@@ -717,7 +795,7 @@
                 return String(v);
             }
 
-            throw 'unexpected token';
+            throwError('unexpected token');
         }
 
         // FieldType :=
@@ -893,7 +971,7 @@
                     normal = false;
                 } else {
                     if (!normal) {
-                        throw 'unexpected token';
+                        throwError('unexpected token');
                     }
                 }
                 if (rest) {
@@ -980,6 +1058,7 @@
         //   | RecordType
         //   | ArrayType
         function parseBasicTypeExpression() {
+            var context;
             switch (token) {
             case Token.STAR:
                 consume(Token.STAR);
@@ -1011,14 +1090,19 @@
                     };
                 }
 
+                context = Context.save();
                 if (value === 'function') {
-                    return parseFunctionType();
+                    try {
+                        return parseFunctionType();
+                    } catch (e) {
+                        context.restore();
+                    }
                 }
 
                 return parseTypeName();
 
             default:
-                throw "unexpected token";
+                throwError("unexpected token");
             }
         }
 
@@ -1029,13 +1113,15 @@
         //   | BasicTypeExpression '?'
         //   | BasicTypeExpression '!'
         //   | '?'
+        //   | BasicTypeExpression '[]'
         function parseTypeExpression() {
             var expr;
 
             if (token === Token.QUESTION) {
                 consume(Token.QUESTION);
                 if (token === Token.COMMA || token === Token.EQUAL || token === Token.RBRACE ||
-                        token === Token.RPAREN || token === Token.PIPE || token === Token.EOF) {
+                        token === Token.RPAREN || token === Token.PIPE || token === Token.EOF ||
+                        token === Token.RBRACK) {
                     return {
                         type: Syntax.NullableLiteral
                     };
@@ -1072,6 +1158,19 @@
                     type: Syntax.NullableType,
                     expression: expr,
                     prefix: false
+                };
+            }
+
+            if (token === Token.LBRACK) {
+                consume(Token.LBRACK);
+                consume(Token.RBRACK, 'expected an array-style type declaration (' + value + '[])');
+                return {
+                    type: Syntax.TypeApplication,
+                    expression: {
+                        type: Syntax.NameExpression,
+                        name: 'Array'
+                    },
+                    applications: [expr]
                 };
             }
 
@@ -1157,7 +1256,7 @@
             }
 
             if (token !== Token.EOF) {
-                throw 'not reach to EOF';
+                throwError('not reach to EOF');
             }
 
             return expr;
@@ -1186,7 +1285,7 @@
             }
 
             if (token !== Token.EOF) {
-                throw 'not reach to EOF';
+                throwError('not reach to EOF');
             }
 
             return expr;
@@ -1343,7 +1442,7 @@
                 break;
 
             default:
-                throw new Error('Unknown type ' + node.type);
+                throwError('Unknown type ' + node.type);
             }
 
             return result;
@@ -1365,15 +1464,21 @@
     // JSDoc Tag Parser
 
     (function (exports) {
-        var index,
+        var Rules,
+            index,
+            lineNumber,
             length,
             source,
             recoverable,
-            sloppy;
+            sloppy,
+            strict;
 
         function advance() {
             var ch = source[index];
             index += 1;
+            if (isLineTerminator(ch)) {
+                lineNumber += 1;
+            }
             return ch;
         }
 
@@ -1396,6 +1501,7 @@
             while (last < length) {
                 ch = source[last];
                 if (isLineTerminator(ch)) {
+                    lineNumber += 1;
                     waiting = true;
                 } else if (waiting) {
                     if (ch === '@') {
@@ -1434,28 +1540,33 @@
 
             if (!direct) {
                 // type expression { is found
-                brace = 0;
+                brace = 1;
                 type = '';
                 while (index < last) {
                     ch = source[index];
                     if (isLineTerminator(ch)) {
-                        return;
-                    }
-                    if (ch === '}') {
-                        if (brace === 0) {
-                            advance();
-                            break;
-                        } else {
+                        advance();
+                    } else {
+                        if (ch === '}') {
                             brace -= 1;
+                            if (brace === 0) {
+                                advance();
+                                break;
+                            }
+                        } else if (ch === '{') {
+                            brace += 1;
                         }
-                    } else if (ch === '{') {
-                        brace += 1;
+                        type += advance();
                     }
-                    type += advance();
+                }
+
+                if (brace !== 0) {
+                    // braces is not balanced
+                    return throwError('Braces are not balanced');
                 }
 
                 try {
-                    if (title === 'param') {
+                    if (isParamTitle(title)) {
                         return typed.parseParamType(type);
                     }
                     return typed.parseType(type);
@@ -1464,163 +1575,458 @@
                     return;
                 }
             } else {
-                type = sliceSource(source, index, last);
-                try {
-                    if (title === 'param') {
-                        res = typed.parseParamType(type, { midstream: true });
-                    } else {
-                        res = typed.parseType(type, { midstream: true });
-                    }
-                    index += res.index;
-                    return res.expression;
-                } catch (e2) {
-                    // parse failed
-                    return;
-                }
+                return;
             }
         }
 
-        function parseName(last, allowBraces) {
-            var range, ch, name, i, len, useBraces;
+        function scanIdentifier(last) {
+            var identifier;
+            if (!isIdentifierStart(source[index])) {
+                return;
+            }
+            identifier = advance();
+            while (index < last && isIdentifierPart(source[index])) {
+                identifier += advance();
+            }
+            return identifier;
+        }
 
-            // skip white spaces
+        function skipWhiteSpace(last) {
             while (index < last && (isWhiteSpace(source[index]) || isLineTerminator(source[index]))) {
                 advance();
             }
+        }
+
+        function parseName(last, allowBrackets, allowNestedParams) {
+            var range, ch, name = '', i, len, useBrackets;
+
+            skipWhiteSpace(last);
 
             if (index >= last) {
                 return;
             }
 
+            if (allowBrackets && source[index] === '[') {
+                useBrackets = true;
+                name = advance();
+            }
+
             if (!isIdentifierStart(source[index])) {
-                if (allowBraces && source[index] === '[') {
-                    useBraces = true;
-                } else {
-                    return;
+                return;
+            }
+
+            name += scanIdentifier(last);
+
+            if (allowNestedParams) {
+                while (source[index] === '.') {
+                    name += '.';
+                    index += 1;
+                    name += scanIdentifier(last);
                 }
             }
 
-            name = advance();
+            if (useBrackets) {
+                // do we have a default value for this?
+                if (source[index] === '=') {
 
-            while (index < last) {
-                ch = source[index];
-                if (isWhiteSpace(ch) || isLineTerminator(ch)) {
-                    advance();
-                    break;
-                }
-                if (useBraces && source[index] === ']') {
+                    // consume the '='' symbol
                     name += advance();
-                    break;
+                    // scan in the default value
+                    while (index < last && source[index] !== ']') {
+                        name += advance();
+                    }
                 }
-                if (!isIdentifierPart(ch)) {
+
+                if (index >= last  || source[index] !== ']') {
+                    // we never found a closing ']'
                     return;
                 }
-                name += advance();
-            }
-            if (useBraces && source[index] === ']') {
+
+                // collect the last ']'
                 name += advance();
             }
 
             return name;
         }
 
-        function isTypeParameterRequired(title) {
-            return title === 'define' || title === 'enum' || title === 'extends' ||
-                title === 'implements' || title === 'param' || title === 'return' ||
-                title === 'this' || title === 'type' || title === 'typedef' ||
-                title === 'throws' || title === 'returns' || title === 'property' ||
-                title === 'augments';
-        }
-
-        function scanDescription() {
-            var description = '';
-            while (index < length && source[index] !== '@') {
-                description += advance();
-            }
-            return description;
-        }
-
-        function next() {
-            var tag, title, type, last, description, newType;
-            function addError(errorText) {
-                if (!tag.errors) {
-                    tag.errors = [];
-                }
-                tag.errors.push(errorText);
-            }
-
-            // skip to tag
+        function skipToTag() {
             while (index < length && source[index] !== '@') {
                 advance();
             }
             if (index >= length) {
-                return;
+                return false;
             }
-
             assert(source[index] === '@');
+            return true;
+        }
 
-            // scan title
-            title = scanTitle();
-
-            tag = {
+        function TagParser(options, title) {
+            this._options = options;
+            this._title = title;
+            this._tag = {
                 title: title,
                 description: null
             };
+            if (this._options.lineNumbers) {
+                this._tag.lineNumber = lineNumber;
+            }
+            this._last = 0;
+            // space to save special information for title parsers.
+            this._extra = { };
+        }
+
+        // addError(err, ...)
+        TagParser.prototype.addError = function addError(errorText) {
+            var args = Array.prototype.slice.call(arguments, 1),
+                msg = errorText.replace(
+                    /%(\d)/g,
+                    function (whole, index) {
+                        assert(index < args.length, 'Message reference must be in range');
+                        return args[index];
+                    }
+                );
+
+            if (!this._tag.errors) {
+                this._tag.errors = [];
+            }
+            if (strict) {
+                throwError(msg);
+            }
+            this._tag.errors.push(msg);
+            return recoverable;
+        };
+
+        TagParser.prototype.parseType = function () {
+            // type required titles
+            if (isTypeParameterRequired(this._title)) {
+                try {
+                    this._tag.type = parseType(this._title, this._last);
+                    if (!this._tag.type) {
+                        if (!isParamTitle(this._title)) {
+                            if (!this.addError("Missing or invalid tag type")) {
+                                return false;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    this._tag.type = null;
+                    if (!this.addError(error.message)) {
+                        return false;
+                    }
+                }
+            } else if (isAllowedType(this._title)) {
+                // optional types
+                try {
+                    this._tag.type = parseType(this._title, this._last);
+                } catch (e) {
+                    //For optional types, lets drop the thrown error when we hit the end of the file
+                }
+            }
+            return true;
+        };
+
+        TagParser.prototype._parseNamePath = function (optional) {
+            var name;
+            name = parseName(this._last, sloppy && isParamTitle(this._title), true);
+            if (!name) {
+                if (!optional) {
+                    if (!this.addError("Missing or invalid tag name")) {
+                        return false;
+                    }
+                }
+            }
+            this._tag.name = name;
+            return true;
+        };
+
+        TagParser.prototype.parseNamePath = function () {
+            return this._parseNamePath(false);
+        };
+
+        TagParser.prototype.parseNamePathOptional = function () {
+            return this._parseNamePath(true);
+        };
+
+
+        TagParser.prototype.parseName = function () {
+            var assign, name;
+
+            // param, property requires name
+            if (isAllowedName(this._title)) {
+                this._tag.name = parseName(this._last, sloppy && isParamTitle(this._title), isAllowedNested(this._title));
+                if (!this._tag.name) {
+                    if (!isNameParameterRequired(this._title)) {
+                        return true;
+                    }
+
+                    // it's possible the name has already been parsed but interpreted as a type
+                    // it's also possible this is a sloppy declaration, in which case it will be
+                    // fixed at the end
+                    if (isParamTitle(this._title) && this._tag.type.name) {
+                        this._extra.name = this._tag.type;
+                        this._tag.name = this._tag.type.name;
+                        this._tag.type = null;
+                    } else {
+                        if (!this.addError("Missing or invalid tag name")) {
+                            return false;
+                        }
+                    }
+                } else {
+                    name = this._tag.name;
+                    if (name.charAt(0) === '[' && name.charAt(name.length - 1) === ']') {
+                        // extract the default value if there is one
+                        // example: @param {string} [somebody=John Doe] description
+                        assign = name.substring(1, name.length - 1).split('=');
+                        if (assign[1]) {
+                            this._tag['default'] = assign[1];
+                        }
+                        this._tag.name = assign[0];
+
+                        // convert to an optional type
+                        if (this._tag.type.type !== "OptionalType") {
+                            this._tag.type = {
+                                type: "OptionalType",
+                                expression: this._tag.type
+                            };
+                        }
+                    }
+                }
+            }
+
+            return true;
+        };
+
+        TagParser.prototype.parseDescription = function parseDescription() {
+            var description = trim(sliceSource(source, index, this._last));
+            if (description) {
+                if ((/^-\s+/).test(description)) {
+                    description = description.substring(2);
+                }
+                this._tag.description = description;
+            }
+            return true;
+        };
+
+        TagParser.prototype.parseKind = function parseKind() {
+            var kind, kinds;
+            kinds = {
+                'class': true,
+                'constant': true,
+                'event': true,
+                'external': true,
+                'file': true,
+                'function': true,
+                'member': true,
+                'mixin': true,
+                'module': true,
+                'namespace': true,
+                'typedef': true
+            };
+            kind = trim(sliceSource(source, index, this._last));
+            this._tag.kind = kind;
+            if (!hasOwnProperty(kinds, kind)) {
+                if (!this.addError("Invalid kind name '%0'", kind)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        TagParser.prototype.parseAccess = function parseAccess() {
+            var access;
+            access = trim(sliceSource(source, index, this._last));
+            this._tag.access = access;
+            if (access !== 'private' && access !== 'protected' && access !== 'public') {
+                if (!this.addError("Invalid access name '%0'", access)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        TagParser.prototype.parseVariation = function parseVariation() {
+            var variation, text;
+            text = trim(sliceSource(source, index, this._last));
+            variation = parseFloat(text, 10);
+            this._tag.variation = variation;
+            if (isNaN(variation)) {
+                if (!this.addError("Invalid variation '%0'", text)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        TagParser.prototype.ensureEnd = function () {
+            var shouldBeEmpty = trim(sliceSource(source, index, this._last));
+            if (shouldBeEmpty) {
+                if (!this.addError("Unknown content '%0'", shouldBeEmpty)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        TagParser.prototype.epilogue = function epilogue() {
+            var description;
+
+            description = this._tag.description;
+            // un-fix potentially sloppy declaration
+            if (isParamTitle(this._title) && !this._tag.type && description && description.charAt(0) === '[') {
+                this._tag.type = this._extra.name;
+                this._tag.name = undefined;
+
+                if (!sloppy) {
+                    if (!this.addError("Missing or invalid tag name")) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        };
+
+        Rules = {
+            // http://usejsdoc.org/tags-access.html
+            'access': ['parseAccess'],
+            // http://usejsdoc.org/tags-alias.html
+            'alias': ['parseNamePath', 'ensureEnd'],
+            // http://usejsdoc.org/tags-augments.html
+            'augments': ['parseNamePath', 'ensureEnd'],
+            // http://usejsdoc.org/tags-constructor.html
+            'constructor': ['parseType', 'parseNamePathOptional', 'ensureEnd'],
+            // Synonym: http://usejsdoc.org/tags-constructor.html
+            'class': ['parseType', 'parseNamePathOptional', 'ensureEnd'],
+            // Synonym: http://usejsdoc.org/tags-extends.html
+            'extends': ['parseNamePath', 'ensureEnd'],
+            // http://usejsdoc.org/tags-deprecated.html
+            'deprecated': ['parseDescription'],
+            // http://usejsdoc.org/tags-global.html
+            'global': ['ensureEnd'],
+            // http://usejsdoc.org/tags-inner.html
+            'inner': ['ensureEnd'],
+            // http://usejsdoc.org/tags-instance.html
+            'instance': ['ensureEnd'],
+            // http://usejsdoc.org/tags-kind.html
+            'kind': ['parseKind'],
+            // http://usejsdoc.org/tags-mixes.html
+            'mixes': ['parseNamePath', 'ensureEnd'],
+            // http://usejsdoc.org/tags-mixin.html
+            'mixin': ['parseNamePathOptional', 'ensureEnd'],
+            // http://usejsdoc.org/tags-member.html
+            'member': ['parseType', 'parseNamePathOptional', 'ensureEnd'],
+            // http://usejsdoc.org/tags-method.html
+            'method': ['parseNamePathOptional', 'ensureEnd'],
+            // http://usejsdoc.org/tags-module.html
+            'module': ['parseType', 'parseNamePathOptional', 'ensureEnd'],
+            // Synonym: http://usejsdoc.org/tags-method.html
+            'func': ['parseNamePathOptional', 'ensureEnd'],
+            // Synonym: http://usejsdoc.org/tags-method.html
+            'function': ['parseNamePathOptional', 'ensureEnd'],
+            // Synonym: http://usejsdoc.org/tags-member.html
+            'var': ['parseType', 'parseNamePathOptional', 'ensureEnd'],
+            // http://usejsdoc.org/tags-name.html
+            'name': ['parseNamePath', 'ensureEnd'],
+            // http://usejsdoc.org/tags-namespace.html
+            'namespace': ['parseType', 'parseNamePathOptional', 'ensureEnd'],
+            // http://usejsdoc.org/tags-private.html
+            'private': ['ensureEnd'],
+            // http://usejsdoc.org/tags-protected.html
+            'protected': ['ensureEnd'],
+            // http://usejsdoc.org/tags-public.html
+            'public': ['ensureEnd'],
+            // http://usejsdoc.org/tags-readonly.html
+            'readonly': ['ensureEnd'],
+            // http://usejsdoc.org/tags-requires.html
+            'requires': ['parseNamePath', 'ensureEnd'],
+            // http://usejsdoc.org/tags-since.html
+            'since': ['parseDescription'],
+            // http://usejsdoc.org/tags-static.html
+            'static': ['ensureEnd'],
+            // http://usejsdoc.org/tags-summary.html
+            'summary': ['parseDescription'],
+            // http://usejsdoc.org/tags-this.html
+            'this': ['parseNamePath', 'ensureEnd'],
+            // http://usejsdoc.org/tags-todo.html
+            'todo': ['parseDescription'],
+            // http://usejsdoc.org/tags-variation.html
+            'variation': ['parseVariation'],
+            // http://usejsdoc.org/tags-version.html
+            'version': ['parseDescription']
+        };
+
+        TagParser.prototype.parse = function parse() {
+            var i, iz, sequences, method;
 
             // empty title
-            if (!title) {
-                addError("Missing or invalid title");
-                if (!recoverable) {
+            if (!this._title) {
+                if (!this.addError("Missing or invalid title")) {
                     return;
                 }
             }
 
-            // seek to content last index
-            last = seekContent(title);
+            // Seek to content last index.
+            this._last = seekContent(this._title);
 
-            // type required titles
-            if (isTypeParameterRequired(title)) {
-                tag.type = parseType(title, last);
-                if (!tag.type) {
-                    addError("Missing or invalid tag type");
-                    if (!recoverable) {
-                        return;
-                    }
+            if (hasOwnProperty(Rules, this._title)) {
+                sequences = Rules[this._title];
+            } else {
+                // default sequences
+                sequences = ['parseType', 'parseName', 'parseDescription', 'epilogue'];
+            }
+
+            for (i = 0, iz = sequences.length; i < iz; ++i) {
+                method = sequences[i];
+                if (!this[method]()) {
+                    return;
                 }
             }
 
-            // param, property requires name
-            if (title === 'param' || title === 'property') {
-                tag.name = parseName(last, sloppy && title === 'param');
-                if (!tag.name) {
-                    addError("Missing or invalid tag name");
-                    if (!recoverable) {
-                        return;
-                    }
-                } else {
-                    if (tag.name.charAt(0) === '[' && tag.name.charAt(tag.name.length - 1) === ']') {
-                        // convert to an optional type
-                        tag.name = tag.name.substring(1, tag.name.length - 1);
-                        newType = {
-                            type: "OptionalType",
-                            expression: tag.type
-                        };
-                        tag.type = newType;
-                    }
-                }
+            // Seek global index to end of this tag.
+            index = this._last;
+            return this._tag;
+        };
+
+        function parseTag(options) {
+            var title, parser;
+
+            // skip to tag
+            if (!skipToTag()) {
+                return;
             }
 
-            // slice description
-            description = trim(sliceSource(source, index, last));
-            if (description) {
-                tag.description = description;
-            }
-            index = last;
-            return tag;
+            // scan title
+            title = scanTitle();
+
+            // construct tag parser
+            parser = new TagParser(options, title);
+            return parser.parse();
         }
 
-        function stringToArray(str) {
-            return str.split('');
+        //
+        // Parse JSDoc
+        //
+
+        function scanJSDocDescription() {
+            var description = '', ch, atAllowed;
+
+            atAllowed = true;
+            while (index < length) {
+                ch = source[index];
+
+                if (atAllowed && ch === '@') {
+                    break;
+                }
+
+                if (isLineTerminator(ch)) {
+                    atAllowed = true;
+                } else if (atAllowed && !isWhiteSpace(ch)) {
+                    atAllowed = false;
+                }
+
+                description += advance();
+            }
+            return trim(description);
         }
 
         function parse(comment, options) {
@@ -1644,11 +2050,11 @@
                         if (typeof options.tags[i] === 'string') {
                             interestingTags[options.tags[i]] = true;
                         } else {
-                            throw new Error('Invalid "tags" parameter: ' + options.tags);
+                            throwError('Invalid "tags" parameter: ' + options.tags);
                         }
                     }
                 } else {
-                    throw new Error('Invalid "tags" parameter: ' + options.tags);
+                    throwError('Invalid "tags" parameter: ' + options.tags);
                 }
             }
 
@@ -1658,13 +2064,15 @@
 
             length = source.length;
             index = 0;
+            lineNumber = 0;
             recoverable = options.recoverable;
             sloppy = options.sloppy;
+            strict = options.strict;
 
-            description = trim(scanDescription());
+            description = scanJSDocDescription();
 
             while (true) {
-                tag = next();
+                tag = parseTag(options);
                 if (!tag) {
                     break;
                 }
@@ -1687,6 +2095,7 @@
     exports.parseParamType = typed.parseParamType;
     exports.unwrapComment = unwrapComment;
     exports.Syntax = shallowCopy(typed.Syntax);
+    exports.Error = DoctrineError;
     exports.type = {
         Syntax: exports.Syntax,
         parseType: typed.parseType,

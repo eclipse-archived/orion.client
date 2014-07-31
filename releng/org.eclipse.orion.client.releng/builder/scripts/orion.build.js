@@ -44,7 +44,8 @@
         estraverse: 'estraverse/estraverse',
         escope: 'escope/escope',
         logger: 'javascript/logger',
-        csslint: 'csslint/csslint'
+        csslint: 'csslint/csslint',
+        doctrine: 'doctrine/doctrine'
     },
     packages: [
         {

@@ -26,7 +26,8 @@ require.config({
 		esprima: "esprima/esprima",
 		estraverse: "estraverse/estraverse",
 		escope: "escope/escope",
-		logger: "javascript/logger"
+		logger: "javascript/logger",
+		doctrine: 'doctrine/doctrine'
 	},
 	packages: [
 		{

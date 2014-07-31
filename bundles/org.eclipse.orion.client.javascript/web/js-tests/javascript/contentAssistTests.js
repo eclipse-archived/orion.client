@@ -19,7 +19,7 @@ define([
 	'orion/Deferred',
 	'esprima',
 	'mocha/mocha', //mjust stay at the end, not a module
-	'doctrine/doctrine' //must stay at the end, does not export a module 
+	'doctrine' //must stay at the end, does not export a module 
 ], function(ContentAssist, chai, objects, Deferred, Esprima) {
 	var assert = chai.assert;
 
@@ -2676,7 +2676,9 @@ define([
 				"process.", ""
 			);
 			// just testing that we don't crash
-			return results.then(function () {});
+			return results.then(function () {
+			    //empty
+			});
 		});
 	
 		// node awareness
@@ -2787,7 +2789,7 @@ define([
 			// the basics
 			it("test simple jsdoc1", function() {
 				var results = computeContentAssist(
-					"/** @type Number*/\n" +
+					"/** @type {Number}*/\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2798,8 +2800,8 @@ define([
 			//jsdoc test
 			it("test simple jsdoc2", function() {
 				var results = computeContentAssist(
-					"/** @type String*/\n" +
-					"/** @type Number*/\n" +
+					"/** @type {String}*/\n" +
+					"/** @type {Number}*/\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2810,8 +2812,8 @@ define([
 			//jsdoc test
 			it("test simple jsdoc3", function() {
 				var results = computeContentAssist(
-					"/** @type Number*/\n" +
-					"/* @type String*/\n" +
+					"/** @type {Number}*/\n" +
+					"/* @type {String}*/\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2822,8 +2824,8 @@ define([
 			//jsdoc test
 			it("test simple jsdoc4", function() {
 				var results = computeContentAssist(
-					"/** @type Number*/\n" +
-					"// @type String\n" +
+					"/** @type {Number}*/\n" +
+					"// @type {String}\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2834,8 +2836,8 @@ define([
 			// This is actually a bug.  We incorrectly recognize //* comments as jsdoc coments
 			it("test simple jsdoc5", function() {
 				var results = computeContentAssist(
-					"/** @type Number*/\n" +
-					"//* @type String\n" +
+					"/** @type {Number}*/\n" +
+					"//* @type {String}\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2846,9 +2848,9 @@ define([
 			//jsdoc test
 			it("test simple jsdoc6", function() {
 				var results = computeContentAssist(
-					"/** @type String*/\n" +
+					"/** @type {String}*/\n" +
 					"var yy;\n" +
-					"/** @type Number*/\n" +
+					"/** @type {Number}*/\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2859,9 +2861,9 @@ define([
 			//jsdoc test
 			it("test simple jsdoc7", function() {
 				var results = computeContentAssist(
-					"/** @type String*/" +
+					"/** @type {String}*/" +
 					"var yy;" +
-					"/** @type Number*/" +
+					"/** @type {Number}*/" +
 					"var xx;x", "x"
 				);
 				return testProposals(results, [
@@ -2872,7 +2874,7 @@ define([
 			//jsdoc test
 			it("test simple jsdoc8", function() {
 				var results = computeContentAssist(
-					"/** @returns String\n@type Number*/\n" +
+					"/** @returns {String}\n@type {Number}*/\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2883,7 +2885,7 @@ define([
 			//jsdoc test
 			it("test simple jsdoc9", function() {
 				var results = computeContentAssist(
-					"/** @param String f\n@type Number*/\n" +
+					"/** @param {String} f\n@type {Number}*/\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2894,7 +2896,7 @@ define([
 			//jsdoc test
 			it("test simple jsdoc10", function() {
 				var results = computeContentAssist(
-					"/** @return Number*/\n" +
+					"/** @return {Number}*/\n" +
 					"var xx = function() { };\nx", "x"
 				);
 				return testProposals(results, [
@@ -2905,7 +2907,7 @@ define([
 			//jsdoc test
 			it("test simple jsdoc11", function() {
 				var results = computeContentAssist(
-					"/** @type String\n@return Number*/\n" +
+					"/** @type {String}\n@return {Number}*/\n" +
 					"var xx = function() { };\nx", "x"
 				);
 				return testProposals(results, [
@@ -2917,7 +2919,7 @@ define([
 			it("test simple jsdoc12", function() {
 				var results = computeContentAssist(
 					"var xx;\n" +
-					"/** @type String\n@return Number*/\n" +
+					"/** @type {String}\n@return {Number}*/\n" +
 					"xx = function() { };\nx", "x"
 				);
 				return testProposals(results, [
@@ -2937,7 +2939,7 @@ define([
 			//jsdoc test
 			it("test simple jsdoc15", function() {
 				var results = computeContentAssist(
-					"var xx;\n /** @param Number ss\n@return String*/\n xx = function(yy) { y };", "y", 69);
+					"var xx;\n /** @param {Number} ss\n@return {String}*/\n xx = function(yy) { y };", "y", 73);
 				return testProposals(results, [
 					["yy", "yy : {}"]
 				]);
@@ -2946,9 +2948,9 @@ define([
 			//jsdoc test
 			it("test simple jsdoc14", function() {
 				var results = computeContentAssist(
-					"/** @type Number*/\n" +
+					"/** @type {Number}*/\n" +
 					"var xx;\n" +
-					"/** @type String*/\n" +
+					"/** @type {String}*/\n" +
 					"xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -3315,7 +3317,7 @@ define([
 			it("test dotted constructor jsdoc type 1", function() {
 				var results = computeContentAssist(
 					"var obj = { Fun : function() {} };\n" +
-					"/** @type obj.Fun */ var xxx;\nxx", "xx");
+					"/** @type {obj.Fun} */ var xxx;\nxx", "xx");
 				return testProposals(results, [
 					["xxx", "xxx : obj.Fun"]
 				]);
@@ -3325,7 +3327,7 @@ define([
 			it("test dotted constructor jsdoc type 2", function() {
 				var results = computeContentAssist(
 					"var obj = { Fun : function() { this.yyy = 9; } };\n" +
-					"/** @type obj.Fun */ var xxx;\nxxx.yy", "yy");
+					"/** @type {obj.Fun} */ var xxx;\nxxx.yy", "yy");
 				return testProposals(results, [
 					["yyy", "yyy : Number"]
 				]);
@@ -3334,7 +3336,7 @@ define([
 			// arrays and array types
 			it("test array type1", function() {
 				var results = computeContentAssist(
-					"/** @type [Number] */ var xxx;\nxxx[0].toF", "toF");
+					"/** @type {[Number]} */ var xxx;\nxxx[0].toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
@@ -3342,7 +3344,7 @@ define([
 			it("test array type2", function() {
 				var results = computeContentAssist(
 					// ignoring the second type
-					"/** @type [Number,String] */ var xxx;\nxxx[0].toF", "toF");
+					"/** @type {[Number,String]} */ var xxx;\nxxx[0].toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
@@ -3350,7 +3352,7 @@ define([
 			it("test array type3", function() {
 				var results = computeContentAssist(
 					// ignoring the second type
-					"/** @type Array.<Number> */ var xxx;\nxxx[0].toF", "toF");
+					"/** @type {Array.<Number>} */ var xxx;\nxxx[0].toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
@@ -3358,7 +3360,7 @@ define([
 			it("test array type3a", function() {
 				var results = computeContentAssist(
 					// ignoring the second type
-					"/** @type [Number] */ var xxx;\nxxx[0].toF", "toF");
+					"/** @type {[Number]} */ var xxx;\nxxx[0].toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
@@ -3366,7 +3368,7 @@ define([
 			it("test array type4", function() {
 				var results = computeContentAssist(
 					// ignoring the second type
-					"/** @type Array.<{foo:Number}> */ var xxx;\nxxx[0].foo.toF", "toF");
+					"/** @type {Array.<{foo:Number}>} */ var xxx;\nxxx[0].foo.toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
@@ -3374,7 +3376,7 @@ define([
 			it("test array type5", function() {
 				var results = computeContentAssist(
 					// ignoring the second type
-					"/** @type Array.<Array.<Number>> */ var xxx;\nxxx[0][0].toF", "toF");
+					"/** @type {Array.<Array.<Number>>} */ var xxx;\nxxx[0][0].toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
@@ -3382,7 +3384,7 @@ define([
 			it("test array type6", function() {
 				var results = computeContentAssist(
 					// ignoring the second type
-					"/** @type Array.<Array.<Array.<Number>>> */ var xxx;\nxxx[0][0][bar].toF", "toF");
+					"/** @type {Array.<Array.<Array.<Number>>>} */ var xxx;\nxxx[0][0][bar].toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
