@@ -2046,5 +2046,101 @@ define([
 				}
 			});
 		});
+		
+		/**
+		 * Tests labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_labeledStatement1', function() {
+			editorContext.text = "var a = 9; a: while(a) { if(false) { var b = {}; b: for(var x in b) { if(b === null || x === null) { break b; } } continue a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(4, 5)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:20, end:21}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+
+		/**
+		 * Tests labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_labeledStatement2', function() {
+			editorContext.text = "var a = 9; a: while(a) { if(false) { var b = {}; b: for(var x in b) { if(b === null || x === null) { break b; } } continue a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(11, 12)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:11, end:12}, {start:123, end:124}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_labeledStatement3', function() {
+			editorContext.text = "var a = 9; a: while(a) { if(false) { var b = {}; b: for(var x in b) { if(b === null || x === null) { break b; } } continue a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(123, 124)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:11, end:12}, {start:123, end:124}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * Tests labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_labeledStatement4', function() {
+			editorContext.text = "var a = 9; a: while(a) { if(false) { var b = {}; b: for(var x in b) { if(b === null || x === null) { break b; } } continue a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(49, 50)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:49, end:50}, {start:107, end:108}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_labeledStatement5', function() {
+			editorContext.text = "var a = 9; a: while(a) { if(false) { var b = {}; b: for(var x in b) { if(b === null || x === null) { break b; } } continue a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(65, 66)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:41, end:42}, {start:65, end:66}, {start:73, end:74}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_labeledStatement6', function() {
+			editorContext.text = "var a = 9; a: while(a) { if(false) { var b = {}; b: for(var x in b) { if(b === null || x === null) { break b; } } continue a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(107, 108)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:49, end:50}, {start:107, end:108}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});		
+		
 	});
 });
