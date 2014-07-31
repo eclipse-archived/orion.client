@@ -23,6 +23,34 @@
 	margin-right: 8%;
 }
 
+.auxpane .sectionWrapper {
+	margin-left: 5px;
+	margin-right:5px;
+	margin-top: 1px;
+}
+
+.auxpane .sectionWrapper.sectionOpened {
+	background-color: grey;
+	color: white;
+}
+
+.auxpane .sectionTable {
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+}
+
+.mainpane .sectionWrapper {
+	margin-left: 3%;
+	margin-right: 3%;
+}
+
+.mainpane .sectionTable {
+	margin-left: 3%;
+	margin-right: 3%;
+	margin-bottom: 5px;
+}
+
 table .sectionWrapper {
 	margin-left: 0px;
 	margin-right: 0px;
@@ -33,6 +61,10 @@ table .sectionTable {
 	margin-right: 0px;
 	margin-bottom: 0px;
 	border-top: 1px solid #dadada;
+}
+
+.sidebar {
+	overflow: hidden;
 }
 
 .miniWrapper {
@@ -193,6 +225,11 @@ table .sectionTable {
 }
 
 .gitCommitTitle {
+	font-weight: bold;
+	max-width: 300px;
+}
+
+.gitBranchTitle {
 	font-weight: bold;
 }
 

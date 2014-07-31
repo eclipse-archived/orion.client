@@ -23,13 +23,43 @@ define([
 	'orion/PageUtil',
 	'orion/fileUtils',
 	'orion/globalCommands',
+	'orion/objects',
 	'orion/Deferred'
-], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mSection, lib, URITemplate, PageUtil, mFileUtils, mGlobalCommands, Deferred) {
+], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mSection, lib, URITemplate, PageUtil, mFileUtils, mGlobalCommands, objects, Deferred) {
 var exports = {};
 	
 var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 
 exports.GitRepositoryExplorer = (function() {
+	
+	
+	function Accordion(options) {
+		options = options || {};
+		this.parent = options.parent;
+		this.sections = [];
+	}
+	objects.mixin(Accordion.prototype, {
+		add: function(section) {
+			this.sections.push(section);
+			section.setOnExpandCollapse(this._expandCollapse.bind(this));
+		},
+		setDefaultSection: function(section) {
+			this.defaultSection = section;
+			section.setHidden(false);
+		},
+		_expandCollapse: function(isExpanded, section) {
+			if (this._ignoreExpand) return;
+			this._ignoreExpand = true;
+			var currentSection = this.currentSection = isExpanded ? section : this.defaultSection;
+			this.sections.forEach(function(s) {
+				s.setHidden(s !== currentSection);
+				var content = s.getContentElement();
+				content.style.maxHeight = "600px"; //$NON-NLS-0$
+				content.style.overflowY = "auto"; //$NON-NLS-0$
+			});
+			this._ignoreExpand = false;
+		}
+	});
 	
 	/**
 	 * Creates a new Git repository explorer.
@@ -139,6 +169,9 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.display = function(location, processURLs) {
+		
+		this.accordion = new Accordion();
+		
 		var that = this;
 		this.loadingDeferred = new Deferred();
 		if (processURLs){
@@ -167,10 +200,10 @@ exports.GitRepositoryExplorer = (function() {
 					repositories = resp.Children;
 					
 					that.initTitleBar(repositories[0]);
-					that.displayRepositories(repositories, "mini"); //$NON-NLS-0$
+					that.displayRepositories(repositories, "full"); //$NON-NLS-0$
 					that.statusDeferred = that.displayStatus(repositories[0]);
-					that.displayCommits(repositories[0]);
 					that.displayBranches(repositories[0]); //$NON-NLS-0$
+					that.displayCommits(repositories[0]);
 					if (that.showTagsSeparately) {
 						that.displayTags(repositories[0]);
 					}
@@ -181,6 +214,7 @@ exports.GitRepositoryExplorer = (function() {
 					that.initTitleBar(repositories);
 					that.displayRepositories(repositories, "full", true); //$NON-NLS-0$
 				}
+				
 			}, function(error){
 				that.handleError(error);
 			}
@@ -225,12 +259,12 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.displayRepositories = function(repositories, mode, links) {
-		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
+		var tableNode = lib.node( 'sidebar' ); //$NON-NLS-0$
 		lib.empty(tableNode);
 		
 		var titleWrapper;
 		if (mode !== "mini") { //$NON-NLS-0$
-			titleWrapper = new mSection.Section(tableNode, {
+			titleWrapper = this.repoSection = new mSection.Section(tableNode, {
 				id: "repoSection", //$NON-NLS-0$
 				title: messages["Repo"],
 				iconClass: ["gitImageSprite", "git-sprite-repository"], //$NON-NLS-1$ //$NON-NLS-0$
@@ -240,6 +274,8 @@ exports.GitRepositoryExplorer = (function() {
 				hidden: true,
 				preferenceService: this.preferencesService
 			});
+			this.accordion.add(titleWrapper);
+			this.accordion.setDefaultSection(titleWrapper);
 		} else {
 			var contentParent = document.createElement("div"); //$NON-NLS-0$
 			contentParent.className = "miniWrapper"; //$NON-NLS-0$
@@ -265,8 +301,8 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.displayBranches = function(repository) {
-		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
-		var titleWrapper = new mSection.Section(tableNode, {
+		var tableNode = lib.node( 'sidebar' ); //$NON-NLS-0$
+		var titleWrapper = this.branchesSection = new mSection.Section(tableNode, {
 			id: "branchSection", //$NON-NLS-0$
 			title: this.showTagsSeparately ? messages["Branches"] : messages['BranchesTags'],
 			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
@@ -276,6 +312,8 @@ exports.GitRepositoryExplorer = (function() {
 			hidden: true,
 			preferenceService: this.preferencesService
 		});
+		this.accordion.add(titleWrapper);
+
 		var branchNavigator = this.branchesNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
@@ -287,6 +325,7 @@ exports.GitRepositoryExplorer = (function() {
 			section: titleWrapper,
 			handleError: this.handleError.bind(this),
 			showTags: !this.showTagsSeparately,
+			showHistory: false,
 			root: {
 				Type: "RemoteRoot", //$NON-NLS-0$
 				repository: repository,
@@ -297,14 +336,15 @@ exports.GitRepositoryExplorer = (function() {
 	
 	GitRepositoryExplorer.prototype.displayStatus = function(repository) {	
 		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
-		var titleWrapper = new mSection.Section(tableNode, {
+		var titleWrapper = this.statusSection = new mSection.Section(tableNode, {
 			id: "statusSection", //$NON-NLS-0$
 			title: messages["ChangedFiles"],
 			slideout: true,
 			content: '<div id="statusNode"></div>', //$NON-NLS-0$
 			canHide: false,
 			preferenceService: this.preferencesService
-		}); 
+		});
+		this.accordion.add(titleWrapper);
 		
 		var explorer  = this.statusNavigator = new mGitChangeList.GitChangeListExplorer({
 			serviceRegistry: this.registry,
@@ -323,15 +363,17 @@ exports.GitRepositoryExplorer = (function() {
 	};
 
 	GitRepositoryExplorer.prototype.displayCommits = function(repository) {	
-		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
-		var titleWrapper = new mSection.Section(tableNode, {
+		var tableNode = lib.node( 'sidebar' ); //$NON-NLS-0$
+		var titleWrapper = this.commitsSection = new mSection.Section(tableNode, {
 			id: "commitSection", //$NON-NLS-0$
 			title: messages["Commits"],
 			slideout: true,
 			content: '<div id="commitNode"></div>', //$NON-NLS-0$
 			canHide: true,
 			preferenceService: this.preferencesService
-		}); 
+		});
+		this.accordion.add(titleWrapper);
+		this.accordion.setDefaultSection(titleWrapper);
 		
 		var explorer = this.commitsNavigator = new mGitCommitList.GitCommitListExplorer({
 			serviceRegistry: this.registry,
@@ -343,6 +385,7 @@ exports.GitRepositoryExplorer = (function() {
 			actionScopeId: this.actionScopeId,
 			parentId:"commitNode", //$NON-NLS-0$
 			section: titleWrapper,
+//			simpleLog: true,
 			handleError: this.handleError.bind(this),
 			root: {
 				Type: "CommitRoot", //$NON-NLS-0$
@@ -355,8 +398,8 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.displayTags = function(repository) {
-		var tableNode = lib.node("table"); //$NON-NLS-0$
-		var titleWrapper = new mSection.Section(tableNode, {
+		var tableNode = lib.node("sidebar"); //$NON-NLS-0$
+		var titleWrapper = this.tagsSection = new mSection.Section(tableNode, {
 			id : "tagSection", //$NON-NLS-0$
 			iconClass : ["gitImageSprite", "git-sprite-tag"], //$NON-NLS-1$ //$NON-NLS-0$
 			title : messages["Tags"],
@@ -365,6 +408,7 @@ exports.GitRepositoryExplorer = (function() {
 			hidden : true,
 			preferenceService : this.preferencesService
 		});
+		this.accordion.add(titleWrapper);
 
 		var tagsNavigator = this.tagsNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
@@ -385,8 +429,8 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.displayConfig = function(repository, mode) {
-		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
-		var titleWrapper = new mSection.Section(tableNode, {
+		var tableNode = lib.node( 'sidebar' ); //$NON-NLS-0$
+		var titleWrapper = this.configSection = new mSection.Section(tableNode, {
 			id: "configSection", //$NON-NLS-0$
 			title: messages['Configuration'] + (mode === "full" ? "" : " (user.*)"), //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
@@ -395,6 +439,7 @@ exports.GitRepositoryExplorer = (function() {
 			hidden: true,
 			preferenceService: this.preferencesService
 		});
+		this.accordion.add(titleWrapper);
 			
 		var configNavigator = this.configNavigator = new mGitConfigList.GitConfigListExplorer({
 			serviceRegistry: this.registry,

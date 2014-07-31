@@ -240,7 +240,7 @@ define([
 						horizontalBox.appendChild(expandContainer);
 					}
 					
-					var actionsID, title, description, subDescription, titleClass = "", titleLink;
+					var actionsID, title, description, subDescription, titleClass = "gitBranchTitle", titleLink; //$NON-NLS-0$
 					if (item.Type === "MoreBranches" || item.Type === "MoreTags") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						td.classList.add("gitCommitListMore"); //$NON-NLS-0$
 						td.textContent = i18nUtil.formatMessage(messages[item.Type], item.parent.Name);
@@ -267,7 +267,8 @@ define([
 						commit = branch.Commit.Children[0];
 						var tracksMessage = ((branch.RemoteLocation.length && branch.RemoteLocation.length === 1 && branch.RemoteLocation[0].Children.length && branch.RemoteLocation[0].Children.length === 1) ? 
 								i18nUtil.formatMessage(messages["tracks ${0}, "], branch.RemoteLocation[0].Children[0].Name) : messages["tracks no branch, "]);
-						description = tracksMessage + i18nUtil.formatMessage(messages["last modified ${0} by ${1}"], new Date(commit.Time).toLocaleString(), commit.AuthorName); //$NON-NLS-0$
+						description = tracksMessage;
+						subDescription = i18nUtil.formatMessage(messages["last modified ${0} by ${1}"], new Date(commit.Time).toLocaleString(), commit.AuthorName); //$NON-NLS-0$
 						actionsID = "branchActionsArea"; //$NON-NLS-0$
 					} else if (item.parent.Type === "TagRoot") { //$NON-NLS-0$
 						if (explorer.showHistory) createExpand();

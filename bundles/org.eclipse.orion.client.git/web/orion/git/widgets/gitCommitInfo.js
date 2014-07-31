@@ -123,11 +123,13 @@ define([
 				createImage(section);
 			}
 			if (displayAuthor) {
-				createInfo(detailsDiv, ["authoredby", "on"], [i18nUtil.formatMessage(messages["nameEmail"], commit.AuthorName,  commit.AuthorEmail), new Date(commit.Time).toLocaleString()]); //$NON-NLS-1$ //$NON-NLS-0$
+				var authorName = this.showAuthorEmail ? i18nUtil.formatMessage(messages["nameEmail"], commit.AuthorName, commit.AuthorEmail) : commit.AuthorName;
+				createInfo(detailsDiv, ["authoredby", "on"], [authorName, new Date(commit.Time).toLocaleString()]); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			
 			if (displayCommitter) {
-				createInfo(detailsDiv, "committedby", i18nUtil.formatMessage(messages["nameEmail"], commit.CommitterName, commit.CommitterEmail)); //$NON-NLS-0$
+				var committerName = this.showCommitterEmail ? i18nUtil.formatMessage(messages["nameEmail"], commit.CommitterName, commit.CommitterEmail) : commit.CommitterName;
+				createInfo(detailsDiv, "committedby", committerName); //$NON-NLS-0$
 			}
 			
 			var displayCommit = this.showCommit === undefined || this.showCommit;

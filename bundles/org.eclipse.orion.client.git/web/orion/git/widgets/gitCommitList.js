@@ -30,6 +30,7 @@ define([
 
 	function GitCommitListModel(options) {
 		this.root = options.root;
+		this.showCommitChanges = options.showCommitChanges;
 		this.section = options.section;
 		this.location = options.location;
 		this.handleError = options.handleError;
@@ -190,11 +191,11 @@ define([
 						repository.BranchesNoCommits = branches;
 						var localBranch = that.getLocalBranch();
 						var remoteBranch = that.getRemoteBranch();
-						if (localBranch && remoteBranch && !that.simpleLog) {
-							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch against"], localBranch.Name));
-						} else if (remoteBranch || localBranch) {
-							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch"], (remoteBranch || localBranch).Name));
-						}
+//						if (localBranch && remoteBranch && !that.simpleLog) {
+//							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch against"], localBranch.Name));
+//						} else if (remoteBranch || localBranch) {
+//							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch"], (remoteBranch || localBranch).Name));
+//						}
 						if (progress) progress.done();
 						if (that.simpleLog) {
 							return Deferred.when(that.log || that._getLog(), function(log) {
@@ -289,7 +290,7 @@ define([
 				} else {
 					onComplete(that.processChildren(parentItem, []));
 				}
-			} else if (parentItem.Type === "Commit") {  //$NON-NLS-0$
+			} else if (parentItem.Type === "Commit" && that.showCommitChanges) {  //$NON-NLS-0$
 				onComplete(that.processChildren(parentItem, [{Type: "CommitChanges"}]));  //$NON-NLS-0$
 			} else {
 				onComplete([]);
@@ -521,10 +522,10 @@ define([
 					commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.sync", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					commandService.renderCommands(actionsNodeScope, actionsNodeScope, {LocalBranch: localBranch, RemoteBranch: remoteBranch}, this, "button"); //$NON-NLS-0$
 				}
-				if (remoteBranch) {
-					commandService.registerCommandContribution(titleLeftActionsNodeScope, "eclipse.orion.git.commit.chooseBranch", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandService.renderCommands(titleLeftActionsNodeScope, titleLeftActionsNodeScope, remoteBranch, this, "button"); //$NON-NLS-0$
-				}
+//				if (remoteBranch) {
+//					commandService.registerCommandContribution(titleLeftActionsNodeScope, "eclipse.orion.git.commit.chooseBranch", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+//					commandService.renderCommands(titleLeftActionsNodeScope, titleLeftActionsNodeScope, remoteBranch, this, "button"); //$NON-NLS-0$
+//				}
 				commandService.addCommandGroup(outgoingActionScope, "eclipse.gitPushGroup", 1000, "Push", null, null, null, "Push", null, "eclipse.orion.git.push"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.push", 1100, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
 				commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushForce", 1200, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
@@ -665,7 +666,9 @@ define([
 					slideoutDiv.innerHTML = slideoutFragment;
 					horizontalBox.appendChild(slideoutDiv);
 				} else {
-					createExpand();
+					if (model.showCommitChanges) {
+						createExpand();
+					}
 					sectionItem.className = "sectionTableItem"; //$NON-NLS-0$
 					detailsView = document.createElement("div"); //$NON-NLS-0$
 					detailsView.className = "stretch"; //$NON-NLS-0$
@@ -683,12 +686,16 @@ define([
 						simple: true,
 					});
 					commitInfo.display();
-					var itemActionScope = "itemLevelCommands"; //$NON-NLS-0$
-					actionsArea = document.createElement("ul"); //$NON-NLS-0$
-					actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$
-					actionsArea.id = itemActionScope;
-					horizontalBox.appendChild(actionsArea);
-					explorer.commandService.renderCommands(itemActionScope, actionsArea, item, explorer, "tool"); //$NON-NLS-0$
+					
+					if (explorer.showCommitActions) {
+						var itemActionScope = "itemLevelCommands"; //$NON-NLS-0$
+						actionsArea = document.createElement("ul"); //$NON-NLS-0$
+						actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$
+						actionsArea.id = itemActionScope;
+						horizontalBox.appendChild(actionsArea);
+						explorer.commandService.renderCommands(itemActionScope, actionsArea, item, explorer, "tool"); //$NON-NLS-0$
+					}
+					
 				}
 
 				return td;

@@ -262,6 +262,19 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 				this._contentParent.appendChild(content);
 			}
 		},
+		
+		setHidden: function(hidden) {
+			if (this.hidden === hidden) return;
+			this._changeExpandedState();
+		},
+		
+		/**
+		 * 
+		 * @param {Function} func
+		 */
+		setOnExpandCollapse: function(func){
+			this._onExpandCollapse = func;
+		},
 
 		/**
 		 * @returns {DomNode} The dom node that holds the section contents.
@@ -439,6 +452,8 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 		_expand: function() {
 			this._contentParent.classList.remove("sectionClosed"); //$NON-NLS-0$
 			this.domNode.classList.remove("sectionClosed"); //$NON-NLS-0$
+			this._contentParent.classList.add("sectionOpened"); //$NON-NLS-0$
+			this.domNode.classList.add("sectionOpened"); //$NON-NLS-0$
 			this.hidden = false;
 		},
 		
@@ -446,6 +461,8 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 			this.hidden = true;
 			this._contentParent.classList.add("sectionClosed"); //$NON-NLS-0$
 			this.domNode.classList.add("sectionClosed"); //$NON-NLS-0$
+			this._contentParent.classList.remove("sectionOpened"); //$NON-NLS-0$
+			this.domNode.classList.remove("sectionOpened"); //$NON-NLS-0$
 		}
 	};
 	
