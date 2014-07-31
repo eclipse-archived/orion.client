@@ -5301,5 +5301,74 @@ define([
 			assertProposal('amqp', results);
 			assertProposal('with', results);
 		});
+		
+		/**
+		 * Tests the eslint* templates in source
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 */
+		it("test eslint* template 1", function() {
+			var results = computeContentAssist("es", "es", 2);
+			testProposals(results, [
+			     ['lint', 'eslint', 'ESLint rule enable / disable directive'],
+			     ['lint-disable', 'eslint-disable', 'ESLint rule disablement directive'],
+			     ['lint-enable', 'eslint-enable', 'ESLint rule enablement directive'],
+			     ['lint-env', 'eslint-env', 'ESLint environment directive']
+			     ]
+			);
+		});
+		
+		/**
+		 * Tests the eslint* templates in comments
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 */
+		it("test eslint* template 2", function() {
+			var results = computeContentAssist("/* es", "es", 5);
+			testProposals(results, [
+			     ['lint', 'eslint', 'ESLint rule enable / disable directive'],
+			     ['lint-disable', 'eslint-disable', 'ESLint rule disablement directive'],
+			     ['lint-enable', 'eslint-enable', 'ESLint rule enablement directive'],
+			     ['lint-env', 'eslint-env', 'ESLint environment directive']
+			     ]
+			);
+		});
+		
+		/**
+		 * Tests the eslint* templates in comments
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 */
+		it("test eslint* template 3", function() {
+			var results = computeContentAssist("/* es */", "es", 5);
+			testProposals(results, [
+			     ['lint', 'eslint', 'ESLint rule enable / disable directive'],
+			     ['lint-disable', 'eslint-disable', 'ESLint rule disablement directive'],
+			     ['lint-enable', 'eslint-enable', 'ESLint rule enablement directive'],
+			     ['lint-env', 'eslint-env', 'ESLint environment directive']
+			     ]
+			);
+		});
+		
+		/**
+		 * Tests the eslint* templates in comments
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 */
+		it("test eslint* template 4", function() {
+			var results = computeContentAssist("var f; /* es", "es", 12);
+			testProposals(results, [
+			     ['lint', 'eslint', 'ESLint rule enable / disable directive'],
+			     ['lint-disable', 'eslint-disable', 'ESLint rule disablement directive'],
+			     ['lint-enable', 'eslint-enable', 'ESLint rule enablement directive'],
+			     ['lint-env', 'eslint-env', 'ESLint environment directive']
+			     ]
+			);
+		});
+		
+		/**
+		 * Tests that no eslint* templates are in jsdoc comments
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 */
+		it("test eslint* template 5", function() {
+			var results = computeContentAssist("/** es", "es", 6);
+			testProposals(results, []);
+		});
 	});
 });
