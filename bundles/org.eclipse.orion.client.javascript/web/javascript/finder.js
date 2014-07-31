@@ -571,6 +571,8 @@ define([
 						return comment;
 					} else if(offset === ast.range[1] && offset === comment.range[1]) {
 					   return comment;
+					} else if(offset > ast.range[1] && offset <= comment.range[1]) {
+					    return comment;
 					} else if(comment.range[0] > offset) {
 						//we've passed the node
 						return null;
