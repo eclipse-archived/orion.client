@@ -34,7 +34,7 @@ define([
 		this.parentId = options.parentId;
 		this.fileClient = options.fileClient;
 		this.gitClient = options.gitClient;
-		this.mode = options.mode || "full"; //$NON-NLS-0$
+		this.mode = options.mode;
 	}
 	GitRepoListModel.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitRepoListModel.prototype, /** @lends orion.git.GitRepoListModel.prototype */ {
@@ -46,7 +46,6 @@ define([
 		loadRepositoryInfo: function(repository) {
 			var that = this;
 			var deferred = new Deferred();
-			var mode = this.mode;
 			this.progressService.progress(this.fileClient.loadWorkspace(repository.ContentLocation + "?parts=meta"), "Loading workspace info").then(function(resp) {//$NON-NLS-1$ //$NON-NLS-0$
 				try {
 					repository.Content = {};
@@ -58,9 +57,9 @@ define([
 					}
 					path += resp.Name;
 					repository.Content.Path = path;
-					if (mode !== "full"){ //$NON-NLS-0$
-						deferred.resolve();
-						return;
+					
+					if (that.mode !== "full"){ //$NON-NLS-0$
+						return deferred.resolve();
 					}
 					
 					that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), "Getting status for " + repository.Name).then(function(resp) { //$NON-NLS-0$
@@ -206,6 +205,7 @@ define([
 				handleError: this.handleError
 			});
 			this.createTree(this.parentId, model, {
+				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy,
 				onComplete: function() {
 					deferred.resolve();
@@ -233,8 +233,8 @@ define([
 	});
 	
 	function GitRepoListRenderer(options) {
+		options.cachePrefix = null; // do not persist table state
 		mExplorer.SelectionRenderer.apply(this, arguments);
-		this.registry = options.registry;
 	}
 	GitRepoListRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(GitRepoListRenderer.prototype, {
@@ -266,7 +266,7 @@ define([
 							var ellipses = "..."; //$NON-NLS-0$
 							description = repo.GitUrl ? messages["git url:"] + repo.GitUrl : messages["(no remote)"];
 							subDescription = repo.Content ? messages["location: "] + repo.Content.Path : ellipses;
-							if (explorer.mode === "full"){ //$NON-NLS-0$
+							if (explorer.mode === "full") { //$NON-NLS-0$
 								var status = repo.Status;
 								if (status) {
 									if (status.RepositoryState !== "SAFE"){ //$NON-NLS-0$
@@ -286,7 +286,7 @@ define([
 							}
 							if (repo.infoDeferred) {
 								title = repo.Name + ellipses;
-								extraDescriptions.push(ellipses);
+								if (explorer.mode === "full") extraDescriptions.push(ellipses); //$NON-NLS-0$
 								repo.infoDeferred.then(function() {
 									if (explorer.destroyed) return;
 									explorer.myTree.redraw(item);

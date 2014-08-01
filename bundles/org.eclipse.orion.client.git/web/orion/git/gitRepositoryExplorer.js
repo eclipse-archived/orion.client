@@ -17,7 +17,9 @@ define([
 	'orion/git/widgets/gitBranchList',
 	'orion/git/widgets/gitConfigList',
 	'orion/git/widgets/gitRepoList',
+	'orion/git/widgets/gitCommitInfo',
 	'orion/section',
+	'orion/selection',
 	'orion/webui/littlelib',
 	'orion/URITemplate',
 	'orion/PageUtil',
@@ -25,7 +27,7 @@ define([
 	'orion/globalCommands',
 	'orion/objects',
 	'orion/Deferred'
-], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mSection, lib, URITemplate, PageUtil, mFileUtils, mGlobalCommands, objects, Deferred) {
+], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mGitCommitInfo, mSection, mSelection, lib, URITemplate, PageUtil, mFileUtils, mGlobalCommands, objects, Deferred) {
 var exports = {};
 	
 var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
@@ -43,6 +45,12 @@ exports.GitRepositoryExplorer = (function() {
 			this.sections.push(section);
 			section.setOnExpandCollapse(this._expandCollapse.bind(this));
 		},
+		remove: function(section) {
+			var index = this.sections.indexOf(section);
+			if (index !== -1) {
+				this.sections.splice(index, 1);
+			}
+		},
 		setDefaultSection: function(section) {
 			this.defaultSection = section;
 			section.setHidden(false);
@@ -54,7 +62,7 @@ exports.GitRepositoryExplorer = (function() {
 			this.sections.forEach(function(s) {
 				s.setHidden(s !== currentSection);
 				var content = s.getContentElement();
-				content.style.maxHeight = "600px"; //$NON-NLS-0$
+				content.style.height = s !== currentSection ? 0 : "calc(100% - " + (44 * 4) + "px)"; //$NON-NLS-1$ //$NON-NLS-0$
 				content.style.overflowY = "auto"; //$NON-NLS-0$
 			});
 			this._ignoreExpand = false;
@@ -122,56 +130,152 @@ exports.GitRepositoryExplorer = (function() {
 	
 	GitRepositoryExplorer.prototype.redisplay = function(processURLs) {
 		// make sure to have this flag
-		this.destroy();
 		if (processURLs === undefined) {
 			processURLs = true;
 		}
 		var pageParams = PageUtil.matchResourceParameters();
-		var location = pageParams.resource;
-		if (!pageParams.resource) {
-			var path = this.defaultPath;
-			var relativePath = mFileUtils.makeRelative(path);
-			
-			//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
-			var gitapiCloneUrl = require.toUrl("gitapi/clone._"); //$NON-NLS-0$
-			gitapiCloneUrl = gitapiCloneUrl.substring(0, gitapiCloneUrl.length-2);
-			
-			location = relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath; //$NON-NLS-1$ //$NON-NLS-0$
-		}
-		this.display(location, processURLs);
+		var selection = pageParams.resource;
+		var path = this.defaultPath;
+		var relativePath = mFileUtils.makeRelative(path);
+		
+		//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
+		var gitapiCloneUrl = require.toUrl("gitapi/clone._"); //$NON-NLS-0$
+		gitapiCloneUrl = gitapiCloneUrl.substring(0, gitapiCloneUrl.length-2);
+		
+		var location = relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath; //$NON-NLS-1$ //$NON-NLS-0$
+		this.display(location, selection, processURLs);
 	};
 	
-	GitRepositoryExplorer.prototype.destroy = function() {
-		if (this.repoNavigator) {
-			this.repoNavigator.destroy();
-			this.repoNavigator = null;
+	GitRepositoryExplorer.prototype.destroyRepositories = function() {
+		if (this.repositoriesNavigator) {
+			this.repositoriesNavigator.destroy();
+			this.repositoriesNavigator = null;
 		}
+		if (this.repositoriesSection) {
+			this.accordion.remove(this.repositoriesSection);
+			this.repositoriesSection.destroy();
+			this.repositoriesSection = null;
+		}
+	};
+	
+	GitRepositoryExplorer.prototype.destroyBranches = function() {
 		if (this.branchesNavigator) {
 			this.branchesNavigator.destroy();
 			this.branchesNavigator = null;
 		}
+		if (this.branchesSection) {
+			this.accordion.remove(this.branchesSection);
+			this.branchesSection.destroy();
+			this.branchesSection = null;
+		}
+	};
+	
+	GitRepositoryExplorer.prototype.destroyStatus = function() {
 		if (this.statusNavigator) {
 			this.statusNavigator.destroy();
 			this.statusNavigator = null;
 		}
+		if (this.statusSection) {
+			this.statusSection.destroy();
+			this.statusSection = null;
+		}
+	};
+	
+	GitRepositoryExplorer.prototype.destroyCommits = function() {
 		if (this.commitsNavigator) {
 			this.commitsNavigator.destroy();
 			this.commitsNavigator = null;
 		}
-		if (this.tagsNavigator) {
-			this.tagsNavigator.destroy();
-			this.tagsNavigator = null;
+		if (this.commitsSection) {
+			this.accordion.remove(this.commitsSection);
+			this.commitsSection.destroy();
+			this.commitsSection = null;
 		}
+	};
+	
+	GitRepositoryExplorer.prototype.destroyTags = function() {
 		if (this.configNavigator) {
 			this.configNavigator.destroy();
 			this.configNavigator = null;
 		}
+		if (this.tagsSection) {
+			this.accordion.remove(this.tagsSection);
+			this.tagsSection.destroy();
+			this.tagsSection = null;
+		}
 	};
 	
-	GitRepositoryExplorer.prototype.display = function(location, processURLs) {
-		
+	GitRepositoryExplorer.prototype.destroyConfig = function() {
+		if (this.configNavigator) {
+			this.configNavigator.destroy();
+			this.configNavigator = null;
+		}
+		if (this.configSection) {
+			this.accordion.remove(this.configSection);
+			this.configSection.destroy();
+			this.configSection = null;
+		}
+	};
+
+	GitRepositoryExplorer.prototype.destroyDiffs = function() {
+		if (this.diffsNavigator) {
+			this.diffsNavigator.destroy();
+			this.diffsNavigator = null;
+		}
+		if (this.diffsSection) {
+			this.diffsSection.destroy();
+			this.diffsSection = null;
+		}
+	};
+
+	GitRepositoryExplorer.prototype.destroy = function() {
+		lib.empty(lib.node('sidebar')); //$NON-NLS-0$
+		lib.empty(lib.node('table')); //$NON-NLS-0$
+		this.destroyRepositories();
+		this.destroyBranches();
+		this.destroyCommits();
+		this.destroyStatus();
+		this.destroyTags();
+		this.destroyConfig();
+		this.destroyDiffs();
+	};
+	
+	GitRepositoryExplorer.prototype.setSelectedRepository = function(repository, force) {
+		if (!force && repository && repository === this.repository) return;
+		this.destroy();
+		this.repository = repository;
+		this.initTitleBar(repository || {});
+		this.displayRepositories(this.repositories, ""); //$NON-NLS-0$
+		if (repository) {
+			this.setSelectedCommit(this.commit);
+			this.displayBranches(repository); //$NON-NLS-0$
+			this.setSelectedRef(this.targetRef);
+			if (this.showTagsSeparately) {
+				this.displayTags(repository);
+			}
+			this.displayConfig(repository, "full"); //$NON-NLS-0$
+		}
+	};
+	
+	GitRepositoryExplorer.prototype.setSelectedRef = function(ref) {
+		this.targetRef = ref;
+		this.displayCommits(this.repository);
+	};
+	
+	GitRepositoryExplorer.prototype.setSelectedCommit = function(commit) {
+		this.commit = commit;
+		if (this.commit) {
+			this.displayCommit(this.commit);
+			this.displayDiffs(this.commit, this.repository);
+			this.statusDeferred = new Deferred().resolve(); //HACK
+		} else {
+			this.statusDeferred = this.displayStatus(this.repository);
+		}
+	};
+	
+	GitRepositoryExplorer.prototype.display = function(location, selection, processURLs) {
+		this.destroy();
 		this.accordion = new Accordion();
-		
 		var that = this;
 		this.loadingDeferred = new Deferred();
 		if (processURLs){
@@ -179,46 +283,20 @@ exports.GitRepositoryExplorer = (function() {
 				that.commandService.processURL(window.location.href);
 			});
 		}
-		this.progressService.progress(this.gitClient.getGitClone(location), messages["Getting git repository details"]).then(
-			function(resp){
-				
-				// render navigation commands
-				var pageNav = lib.node(that.pageNavId);
-				if(pageNav){
-					lib.empty(pageNav);
-					that.commandService.renderCommands(that.pageNavId, pageNav, resp, that, "button"); //$NON-NLS-0$
+		this.progressService.progress(this.gitClient.getGitClone(location), messages["Getting git repository details"]).then(function(resp){
+			var repositories = that.repositories = resp.Children || [];
+			var repository;
+			repositories.some(function(repo) {
+				if (repo.Location === selection) {
+					repository = repo;
+					return true;
 				}
-				if (!resp.Children) {
-					return;
-				}
-				
-				var repositories;
-				if (resp.Children.length === 0) {
-					that.initTitleBar({});
-					that.displayRepositories([], "full"); //$NON-NLS-0$
-				} else if (resp.Children.length && resp.Children.length === 1 && resp.Children[0].Type === "Clone") { //$NON-NLS-0$
-					repositories = resp.Children;
-					
-					that.initTitleBar(repositories[0]);
-					that.displayRepositories(repositories, "full"); //$NON-NLS-0$
-					that.statusDeferred = that.displayStatus(repositories[0]);
-					that.displayBranches(repositories[0]); //$NON-NLS-0$
-					that.displayCommits(repositories[0]);
-					if (that.showTagsSeparately) {
-						that.displayTags(repositories[0]);
-					}
-					that.displayConfig(repositories[0], "full"); //$NON-NLS-0$
-				} else if (resp.Children[0].Type === "Clone"){ //$NON-NLS-0$
-					repositories = resp.Children;
-					
-					that.initTitleBar(repositories);
-					that.displayRepositories(repositories, "full", true); //$NON-NLS-0$
-				}
-				
-			}, function(error){
-				that.handleError(error);
-			}
-		);
+				return false;
+			});
+			that.setSelectedRepository(repository);
+		}, function(error){
+			that.handleError(error);
+		});
 	};
 	
 	GitRepositoryExplorer.prototype.initTitleBar = function(resource, sectionName) {
@@ -259,31 +337,30 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.displayRepositories = function(repositories, mode, links) {
+		this.destroyRepositories();
 		var tableNode = lib.node( 'sidebar' ); //$NON-NLS-0$
-		lib.empty(tableNode);
+		var titleWrapper = this.repositoriesSection = new mSection.Section(tableNode, {
+			id: "repoSection", //$NON-NLS-0$
+			title: this.repository ? this.repository.Name : messages["Repo"],
+			iconClass: ["gitImageSprite", "git-sprite-repository"], //$NON-NLS-1$ //$NON-NLS-0$
+			slideout: true,
+			content: '<div id="repositoryNode"></div>', //$NON-NLS-0$
+			canHide: true,
+			hidden: true,
+			noTwistie: true,
+			preferenceService: this.preferencesService
+		});
+		this.accordion.add(titleWrapper);
+		this.accordion.setDefaultSection(titleWrapper);
 		
-		var titleWrapper;
-		if (mode !== "mini") { //$NON-NLS-0$
-			titleWrapper = this.repoSection = new mSection.Section(tableNode, {
-				id: "repoSection", //$NON-NLS-0$
-				title: messages["Repo"],
-				iconClass: ["gitImageSprite", "git-sprite-repository"], //$NON-NLS-1$ //$NON-NLS-0$
-				slideout: true,
-				content: '<div id="repositoryNode"></div>', //$NON-NLS-0$
-				canHide: true,
-				hidden: true,
-				preferenceService: this.preferencesService
-			});
-			this.accordion.add(titleWrapper);
-			this.accordion.setDefaultSection(titleWrapper);
-		} else {
-			var contentParent = document.createElement("div"); //$NON-NLS-0$
-			contentParent.className = "miniWrapper"; //$NON-NLS-0$
-			contentParent.innerHTML = '<div id="repositoryNode" class="mainPadding"></div>'; //$NON-NLS-0$
-			tableNode.appendChild(contentParent);
+		var selection = this.repositoriesSelection = new mSelection.Selection(this.registry, "orion.selection.repo"); //$NON-NLS-0$
+		if (this.repository) {
+			selection.setSelections(this.repository);
 		}
-		
-		var repoNavigator = this.repoNavigator = new mGitRepoList.GitRepoListExplorer({
+		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
+			window.location.hash = event.selection.Location;
+		}.bind(this));
+		var explorer = this.repositoriesNavigator = new mGitRepoList.GitRepoListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
 			fileClient: this.fileClient,
@@ -293,28 +370,40 @@ exports.GitRepositoryExplorer = (function() {
 			actionScopeId: this.actionScopeId,
 			handleError: this.handleError.bind(this),
 			section: titleWrapper,
+			selection: selection,
+			selectionPolicy: "singleSelection", //$NON-NLS-0$
 			repositories: repositories,
 			mode: mode,
 			showLinks: links,
 		});
-		return repoNavigator.display().then(this.loadingDeferred.resolve, this.loadingDeferred.reject);
+		return explorer.display().then(this.loadingDeferred.resolve, this.loadingDeferred.reject);
 	};
 	
 	GitRepositoryExplorer.prototype.displayBranches = function(repository) {
+		this.destroyBranches();
 		var tableNode = lib.node( 'sidebar' ); //$NON-NLS-0$
 		var titleWrapper = this.branchesSection = new mSection.Section(tableNode, {
 			id: "branchSection", //$NON-NLS-0$
-			title: this.showTagsSeparately ? messages["Branches"] : messages['BranchesTags'],
+			title: this.showTagsSeparately ? messages["Branches"] : (this.targetRef ? this.targetRef.Name : messages['BranchesTags']),
 			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="branchNode"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
+			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
 		this.accordion.add(titleWrapper);
 
-		var branchNavigator = this.branchesNavigator = new mGitBranchList.GitBranchListExplorer({
+		var selection = this.branchesSelection = new mSelection.Selection(this.registry, "orion.selection.ref"); //$NON-NLS-0$
+		if (this.targetRef) {
+			selection.setSelections(this.targetRef);
+		}
+		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
+			if (!event.selection || this.targetRef === event.selection) return;
+			this.setSelectedRef(event.selection);
+		}.bind(this));
+		var explorer = this.branchesNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
 			fileClient: this.fileClient,
@@ -323,6 +412,8 @@ exports.GitRepositoryExplorer = (function() {
 			parentId: "branchNode", //$NON-NLS-0$
 			actionScopeId: this.actionScopeId,
 			section: titleWrapper,
+			selection: selection,
+			selectionPolicy: "singleSelection", //$NON-NLS-0$
 			handleError: this.handleError.bind(this),
 			showTags: !this.showTagsSeparately,
 			showHistory: false,
@@ -331,10 +422,11 @@ exports.GitRepositoryExplorer = (function() {
 				repository: repository,
 			}
 		});
-		return branchNavigator.display();
+		return explorer.display();
 	};
 	
 	GitRepositoryExplorer.prototype.displayStatus = function(repository) {	
+		this.destroyStatus();
 		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
 		var titleWrapper = this.statusSection = new mSection.Section(tableNode, {
 			id: "statusSection", //$NON-NLS-0$
@@ -342,9 +434,9 @@ exports.GitRepositoryExplorer = (function() {
 			slideout: true,
 			content: '<div id="statusNode"></div>', //$NON-NLS-0$
 			canHide: false,
+			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
-		this.accordion.add(titleWrapper);
 		
 		var explorer  = this.statusNavigator = new mGitChangeList.GitChangeListExplorer({
 			serviceRegistry: this.registry,
@@ -363,18 +455,30 @@ exports.GitRepositoryExplorer = (function() {
 	};
 
 	GitRepositoryExplorer.prototype.displayCommits = function(repository) {	
+		this.destroyCommits();
 		var tableNode = lib.node( 'sidebar' ); //$NON-NLS-0$
 		var titleWrapper = this.commitsSection = new mSection.Section(tableNode, {
-			id: "commitSection", //$NON-NLS-0$
+			id: "commitsSection", //$NON-NLS-0$
 			title: messages["Commits"],
 			slideout: true,
-			content: '<div id="commitNode"></div>', //$NON-NLS-0$
+			content: '<div id="commitsNode"></div>', //$NON-NLS-0$
 			canHide: true,
+			noTwistie: true,
+			sibling: this.configSection ? this.configSection.domNode : null,
 			preferenceService: this.preferencesService
 		});
 		this.accordion.add(titleWrapper);
 		this.accordion.setDefaultSection(titleWrapper);
 		
+		var selection = this.commitsSelection = new mSelection.Selection(this.registry, "orion.selection.commit"); //$NON-NLS-0$
+		if (this.commit) {
+			selection.setSelections(this.commit);
+		}
+		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
+			if (this.commit === event.selection) return;
+			lib.empty(lib.node('table')); //$NON-NLS-0$
+			this.setSelectedCommit(event.selection);
+		}.bind(this));
 		var explorer = this.commitsNavigator = new mGitCommitList.GitCommitListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
@@ -383,9 +487,10 @@ exports.GitRepositoryExplorer = (function() {
 			progressService: this.progressService,
 			statusService: this.statusService,
 			actionScopeId: this.actionScopeId,
-			parentId:"commitNode", //$NON-NLS-0$
+			parentId:"commitsNode", //$NON-NLS-0$
 			section: titleWrapper,
-//			simpleLog: true,
+			selection: selection,
+			remoteBranch: this.targetRef,
 			handleError: this.handleError.bind(this),
 			root: {
 				Type: "CommitRoot", //$NON-NLS-0$
@@ -393,11 +498,14 @@ exports.GitRepositoryExplorer = (function() {
 			}
 		});
 		return this.statusDeferred.then(function() {
-			return explorer.display();
-		});
+			return explorer.display().then(function() {
+				this.branchesSection.setTitle(explorer.model.getRemoteBranch().Name);
+			}.bind(this));
+		}.bind(this));
 	};
 	
 	GitRepositoryExplorer.prototype.displayTags = function(repository) {
+		this.destroyTags();
 		var tableNode = lib.node("sidebar"); //$NON-NLS-0$
 		var titleWrapper = this.tagsSection = new mSection.Section(tableNode, {
 			id : "tagSection", //$NON-NLS-0$
@@ -406,11 +514,12 @@ exports.GitRepositoryExplorer = (function() {
 			content : '<div id="tagNode"></div>', //$NON-NLS-0$
 			canHide : true,
 			hidden : true,
+			noTwistie: true,
 			preferenceService : this.preferencesService
 		});
 		this.accordion.add(titleWrapper);
 
-		var tagsNavigator = this.tagsNavigator = new mGitBranchList.GitBranchListExplorer({
+		var explorer = this.tagsNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
 			fileClient: this.fileClient,
@@ -425,10 +534,76 @@ exports.GitRepositoryExplorer = (function() {
 				repository: repository,
 			}
 		});
-		return tagsNavigator.display();
+		return explorer.display();
+	};
+	
+	GitRepositoryExplorer.prototype.displayCommit = function(commit) {
+		var tableNode = lib.node('table'); //$NON-NLS-0$
+		var titleWrapper = this.commitSection = new mSection.Section(tableNode, {
+			id: "commitSection", //$NON-NLS-0$
+			title: messages['Commit Details'], //$NON-NLS-0$
+			slideout: true,
+			canHide: false,
+			preferenceService: this.preferencesService
+		});
+
+		var commandRegistry = this.commandService;
+		var actionsNodeScope = titleWrapper.actionsNode.id;
+		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.checkoutTag", 0); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.addTag", 1); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.cherryPick", 2); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.revert", 3); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, commit, this, "button"); //$NON-NLS-0$	
+
+		var info = new mGitCommitInfo.GitCommitInfo({
+			parent: titleWrapper.getContentElement(),
+			tagsCommandHandler: this,
+			commit: commit,
+			showTags: true,
+			commitLink: false,
+			showMessage: false,
+			showParentLink: false,
+			onlyFullMessage: true,
+			fullMessage: true
+		});
+		info.display();
+	};
+
+	GitRepositoryExplorer.prototype.displayDiffs = function(commit, repository) {
+		this.destroyDiffs();
+		var diffs = commit.Diffs;
+		diffs.forEach(function(item) {
+			var path = item.OldPath;
+			if (item.ChangeType === "ADD") { //$NON-NLS-0$
+				path = item.NewPath;
+			} 
+			item.name = path;
+			item.type = item.ChangeType;
+		});
+		var tableNode = lib.node('table'); //$NON-NLS-0$
+		var section = this.diffsSection = new mSection.Section(tableNode, { id : "diffSection", //$NON-NLS-0$
+			title : messages["Diffs"],
+			content : '<div id="diffNode"></div>', //$NON-NLS-0$
+			canHide : true,
+			preferencesService : this.preferencesService
+		});
+		
+		var explorer = this.diffsNavigator = new mGitChangeList.GitChangeListExplorer({
+			serviceRegistry: this.registry,
+			commandRegistry: this.commandService,
+			selection: null,
+			parentId:"diffNode", //$NON-NLS-0$
+			actionScopeId: "diffSectionItemActionArea", //$NON-NLS-0$
+			prefix: "diff", //$NON-NLS-0$
+			changes: diffs,
+			section: section,
+			repository: repository
+		});
+		explorer.display();
 	};
 	
 	GitRepositoryExplorer.prototype.displayConfig = function(repository, mode) {
+		this.destroyConfig();
 		var tableNode = lib.node( 'sidebar' ); //$NON-NLS-0$
 		var titleWrapper = this.configSection = new mSection.Section(tableNode, {
 			id: "configSection", //$NON-NLS-0$
@@ -437,6 +612,7 @@ exports.GitRepositoryExplorer = (function() {
 			content: '<div id="configNode" class="mainPadding"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
+			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
 		this.accordion.add(titleWrapper);

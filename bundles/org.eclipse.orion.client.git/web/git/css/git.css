@@ -30,14 +30,15 @@
 }
 
 .auxpane .sectionWrapper.sectionOpened {
-	background-color: grey;
-	color: white;
+	background-color: #cedce7;
+	color: gray;
 }
 
 .auxpane .sectionTable {
 	margin-left: 5px;
 	margin-right: 5px;
 	margin-bottom: 5px;
+	background-color: #fcfcfc;
 }
 
 .mainpane .sectionWrapper {
@@ -128,6 +129,10 @@ table .sectionTable {
 	width: calc(100% - 6px);
 	padding: 2px;
 	overflow: hidden;
+}
+
+#commitSectionContent {
+	padding: 10px;
 }
 
 .primaryButton {

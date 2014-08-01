@@ -334,20 +334,37 @@ define([
 		display: function() {
 			var that = this;
 			var deferred = new Deferred();
-			var model =  new GitChangeListModel({registry: this.registry, progress: this.progressService, prefix: this.prefix, location: this.location, repository: this.repository, handleError: this.handleError, changes: this.changes, gitClient: this.gitClient, progressService: this.progressService, section: this.section});
-			this.createTree(this.parentId, model, {onComplete: function() {
-				var model = that.model;
-				if (that.prefix === "all") {
-					that.updateCommands();
-					that.selection.setSelections(model._sortBlock(model.getGroups("staged")));
+			var model =  new GitChangeListModel({
+				registry: this.registry,
+				progress: this.progressService,
+				prefix: this.prefix,
+				location: this.location,
+				repository: this.repository,
+				handleError: this.handleError,
+				changes: this.changes,
+				gitClient: this.gitClient,
+				progressService: this.progressService,
+				section: this.section
+			});
+			this.createTree(this.parentId, model, {
+				setFocus: false, // do not steal focus on load
+				onComplete: function() {
+					var model = that.model;
+					if (that.prefix === "all") { //$NON-NLS-0$
+						that.updateCommands();
+						that.selection.setSelections(model._sortBlock(model.getGroups("staged"))); //$NON-NLS-0$
+					}
+					if (that.prefix === "diff") { //$NON-NLS-0$
+						that.updateCommands();
+					}
+					that.status = model.status;
+					deferred.resolve();
 				}
-				that.status = model.status;
-				deferred.resolve();
-			}});
+			});
 			return deferred;
 		},
 		isRowSelectable: function(modelItem) {
-			return this.prefix === "all" ? false : mGitUIUtil.isChange(modelItem);
+			return this.prefix === "all" ? false : mGitUIUtil.isChange(modelItem); //$NON-NLS-0$
 		},
 		getItemCount: function() {
 			var result = 0;
@@ -356,7 +373,7 @@ define([
 				model.getRoot(function(root) {
 					model.getChildren(root, function(children) {
 						// -1 for the commit message item
-						result = Math.max(0, children.length - 2);
+						result = Math.max(0, children.length - (model.prefix === "all" ? 2 : 0)); //$NON-NLS-0$
 					});
 				});
 			}
@@ -366,21 +383,21 @@ define([
 			mExplorer.createExplorerCommands(this.commandService);
 			var actionsNodeScope = this.section.actionsNode.id;
 			var selectionNodeScope = this.section.selectionNode.id;
-			var explorerSelectionScope = this.explorerSelectionScope;
+			var explorerSelectionScope = this.prefix === "all" ? this.explorerSelectionScope : actionsNodeScope; //$NON-NLS-0$
 			this.commandService.registerCommandContribution(explorerSelectionScope, "orion.explorer.expandAll", 200); //$NON-NLS-0$
 			this.commandService.registerCommandContribution(explorerSelectionScope, "orion.explorer.collapseAll", 300); //$NON-NLS-0$
-			if (this.prefix === "staged") {
+			if (this.prefix === "staged") { //$NON-NLS-0$
 				//this.commandService.addCommandGroup(actionsNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.commitCommand"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
 				//this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commitCommand", 100, "eclipse.gitCommitGroup"); //$NON-NLS-0$ 	550
-				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-0$ 
+				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-1$ //$NON-NLS-0$ 
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
 				this.commandService.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
-			} else if (this.prefix === "unstaged") {
+			} else if (this.prefix === "unstaged") { //$NON-NLS-0$
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showPatchCommand", 100); //$NON-NLS-0$
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.stageCommand", 200); //$NON-NLS-0$
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutCommand", 300); //$NON-NLS-0$
 				this.commandService.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.stageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
-			}  else if (this.prefix === "all") {
+			}  else if (this.prefix === "all") { //$NON-NLS-0$
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showStagedPatchCommand", 100); //$NON-NLS-0$
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 200); //$NON-NLS-0$
 //				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.ignoreCommand", 300); //$NON-NLS-0$
@@ -388,16 +405,14 @@ define([
 //				this.commandService.addCommandGroup(selectionNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.precommitCommand", "primaryButton"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitCommand", 300); //$NON-NLS-0$
 //				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-0$
-				
+				this.commandService.renderCommands(selectionNodeScope, selectionNodeScope, [], this, "button", {"Clone" : this.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
+
 				var node = lib.node(explorerSelectionScope);
 				if (node) {
 					this.commandService.destroy(node);
 					this.commandService.renderCommands(explorerSelectionScope, explorerSelectionScope, this, this, "button"); //$NON-NLS-0$	
 				}
-
-				this.commandService.renderCommands(selectionNodeScope, selectionNodeScope, [], this, "button", {"Clone" : this.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
 			}
-		
 			this.commandService.renderCommands(actionsNodeScope, actionsNodeScope, this, this, "button"); //$NON-NLS-0$	
 		},
 		updateSelectionStatus: function(selections) {
@@ -542,9 +557,9 @@ define([
 		}
 	});
 	
-	function GitChangeListRenderer(options, explorer) {
+	function GitChangeListRenderer(options) {
+		options.cachePrefix = null; // do not persist table state
 		mExplorer.SelectionRenderer.apply(this, arguments);
-		this.registry = options.registry;
 	}
 	GitChangeListRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(GitChangeListRenderer.prototype, {

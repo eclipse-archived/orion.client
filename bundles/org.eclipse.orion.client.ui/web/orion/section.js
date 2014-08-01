@@ -17,6 +17,7 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 	 * @name orion.widgets.Section
 	 * @class Generates a section
 	 * @param {DomNode} parent parent node
+	 * @param {DomNode} sibling if specified, the section will be inserted after the sibling
 	 * @param {String} options.id id of the section header
 	 * @param {String} options.title title (in HTML) of the section
 	 * @param {orion.preferences.PreferencesService} [options.preferenceService] used to store the hidden/shown state of the section if specified
@@ -29,6 +30,7 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 	 * @param {Boolean} [options.hidden] if true section will be hidden at first display
 	 * @param {Boolean} [options.useAuxStyle] if true the section will be styled for an auxiliary pane
 	 * @param {Boolean} [options.keepHeader] if true the embedded explorer will keep its header
+	 * @param {Boolean} [options.noTwisties] if true the twisties will not be displayed
 	 * @param {Function} [options.onExpandCollapse] a function that will be called when the expanded/collapsed state changes
 	 */
 	function Section(parent, options) {
@@ -54,20 +56,27 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 		// setting up the section
 		var wrapperClasses = options.useAuxStyle ? ["sectionWrapper", "sectionWrapperAux", "toolComposite"] : ["sectionWrapper", "toolComposite"]; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this.domNode = document.createElement("div"); //$NON-NLS-0$
-		parent.appendChild(this.domNode);
+		if (options.sibling) {
+			parent.insertBefore(this.domNode, options.sibling);
+		} else {
+			parent.appendChild(this.domNode);
+		}
 		for(var i=0; i<wrapperClasses.length; i++) {
 			this.domNode.classList.add(wrapperClasses[i]);
 		}
 		this.domNode.id = options.id;
 
 		// if canHide, add twistie and stuff...
+		this.canHide = options.canHide;
 		if(options.canHide){
-			this.twistie = document.createElement("span"); //$NON-NLS-0$
-			this.twistie.classList.add("modelDecorationSprite"); //$NON-NLS-0$
-			this.twistie.classList.add("layoutLeft"); //$NON-NLS-0$
-			this.twistie.classList.add("sectionTitleTwistie"); //$NON-NLS-0$
 			this.domNode.style.cursor = "pointer"; //$NON-NLS-0$
-			this.domNode.appendChild(this.twistie);
+			if (!options.noTwistie) {
+				this.twistie = document.createElement("span"); //$NON-NLS-0$
+				this.twistie.classList.add("modelDecorationSprite"); //$NON-NLS-0$
+				this.twistie.classList.add("layoutLeft"); //$NON-NLS-0$
+				this.twistie.classList.add("sectionTitleTwistie"); //$NON-NLS-0$
+				this.domNode.appendChild(this.twistie);
+			}
 			this.domNode.tabIndex = 0; //$NON-NLS-0$
 			this.domNode.addEventListener("click", function(evt) { //$NON-NLS-0$
 				if (evt.target === that.titleNode || evt.target === that.twistie || evt.target === that.domNode) {
@@ -176,7 +185,11 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 		this._contentParent.role = "region"; //$NON-NLS-0$
 		this._contentParent.classList.add("sectionTable"); //$NON-NLS-0$
 		this._contentParent.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
-		parent.appendChild(this._contentParent);
+		if (options.sibling) {
+			parent.insertBefore(this._contentParent, options.sibling);
+		} else {
+			parent.appendChild(this._contentParent);
+		}
 
 		if(options.content){
 			this.setContent(options.content);
@@ -217,6 +230,23 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 	}
 	
 	Section.prototype = /** @lends orion.widgets.Section.prototype */ {
+		
+		/**
+		 * Destroy the section by removing the title and content from the parent.
+		 */
+		destroy: function() {
+			var parent;
+			if (this.domNode) {
+				parent = this.domNode.parentNode;
+				if (parent) parent.removeChild(this.domNode);
+				this.domNode = null;
+			}
+			if (this._contentParent) {
+				parent = this._contentParent.parentNode;
+				if (parent) parent.removeChild(this._contentParent);
+				this._contentParent = null;
+			}
+		},
 			
 		/**
 		 * Changes the title of section
@@ -265,6 +295,7 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 		
 		setHidden: function(hidden) {
 			if (this.hidden === hidden) return;
+			if (!this.canHide) return;
 			this._changeExpandedState();
 		},
 		

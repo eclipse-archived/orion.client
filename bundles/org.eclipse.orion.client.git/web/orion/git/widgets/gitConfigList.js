@@ -70,7 +70,7 @@ define([
 			if (item.Type === "ConfigRoot") { //$NON-NLS-0$
 				return "ConfigRoot"; //$NON-NLS-0$
 			} else {
-				return item.Name;
+				return item.Key + item.Value;
 			}
 		}
 	});
@@ -94,10 +94,20 @@ define([
 	GitConfigListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitConfigListExplorer.prototype, /** @lends orion.git.GitConfigListExplorer.prototype */ {
 		display: function() {
-			this.createTree(this.parentId, new GitConfigListModel({root: this.root, registry: this.registry, progressService: this.progressService, gitClient: this.gitClient, section: this.section, handleError: this.handleError}));
+			var model = new GitConfigListModel({
+				root: this.root,
+				registry: this.registry,
+				progressService: this.progressService,
+				gitClient: this.gitClient,
+				section: this.section,
+				handleError: this.handleError
+			});
+			this.createTree(this.parentId, model, {
+				setFocus: false, // do not steal focus on load
+			});
 			this.updateCommands();
 		},
-		isRowSelectable: function(modelItem) {
+		isRowSelectable: function() {
 			return false;
 		},
 		updateCommands: function() {
@@ -116,7 +126,9 @@ define([
 		}
 	});
 	
-	function GitConfigListRenderer() {
+	function GitConfigListRenderer(options) {
+		options.setFocus = false;   // do not steal focus on load
+		options.cachePrefix = null; // do not persist table state
 		mExplorer.SelectionRenderer.apply(this, arguments);
 	}
 	GitConfigListRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
@@ -126,7 +138,13 @@ define([
 			var div, td;
 			td = document.createElement("td"); //$NON-NLS-0$
 			div = document.createElement("div"); //$NON-NLS-0$
-			div.style.overflow = "hidden"; //$NON-NLS-0$
+//			td.style.textOverflow = "ellipsis";
+//			td.style.overflow = "hidden";
+//			td.style.width = "200px";
+//			td.style.whiteSpace = "nowrap";
+//			td.style.padding = "10px";
+			
+//			div.style.overflow = "hidden"; //$NON-NLS-0$
 //			div.className = "sectionTableItem"; //$NON-NLS-0$
 			td.appendChild(div);
 			switch (col_no) {
@@ -141,6 +159,7 @@ define([
 					div.appendChild(valueSpan);
 					break;
 				case 2:
+//					td.style.width = "auto";
 					var actionsArea = document.createElement("ul"); //$NON-NLS-0$
 					actionsArea.className = "sectionTableItemActions layoutRight commandList"; //$NON-NLS-0$
 					actionsArea.id = "configActionsArea"; //$NON-NLS-0$

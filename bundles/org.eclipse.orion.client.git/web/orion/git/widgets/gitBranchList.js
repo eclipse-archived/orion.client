@@ -98,6 +98,9 @@ define([
 					if (that.showTags) {
 						remotes.push({Type: "TagRoot", Name: messages["tags"]}); //$NON-NLS-0$
 					}
+					remotes.forEach(function(item) {
+						item.selectable = false;
+					});
 					onComplete(that.processChildren(parentItem, remotes));
 					if (remotes.length === 0 && this.section){
 						this.section.setTitle(messages["No Remote Branches"]);
@@ -191,6 +194,7 @@ define([
 				handleError: this.handleError
 			});
 			this.createTree(this.parentId, model, {
+				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy
 			});
 			this.updateCommands();
@@ -212,8 +216,8 @@ define([
 	});
 	
 	function GitBranchListRenderer(options) {
+		options.cachePrefix = null; // do not persist table state
 		mExplorer.SelectionRenderer.apply(this, arguments);
-		this.registry = options.registry;
 	}
 	GitBranchListRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(GitBranchListRenderer.prototype, {
