@@ -20,11 +20,10 @@ define([
 	'orion/Deferred',
 	'orion/explorers/explorer',
 	'orion/commonHTMLFragments',
-	'orion/git/logic/gitPush',
 	'orion/i18nUtil',
 	'orion/webui/littlelib',
 	'orion/objects'
-], function(messages, mGitChangeList, mGitCommitInfo, mSection, mCommands, Deferred, mExplorer, mHTMLFragments, gitPush, i18nUtil, lib, objects) {
+], function(messages, mGitChangeList, mGitCommitInfo, mSection, mCommands, Deferred, mExplorer, mHTMLFragments, i18nUtil, lib, objects) {
 
 	var pageSizeQuery = "?page=1&pageSize=20"; //$NON-NLS-0$
 
@@ -212,18 +211,21 @@ define([
 								{
 									Type: "Outgoing", //$NON-NLS-0$
 									selectable: false,
+									isNotSelectable: true,
 									localBranch: localBranch,
 									remoteBranch: remoteBranch
 								},
 								{
 									Type: "Incoming", //$NON-NLS-0$
 									selectable: false,
+									isNotSelectable: true,
 									localBranch: localBranch,
 									remoteBranch: remoteBranch
 								},
 								{
 									Type: "Synchronized", //$NON-NLS-0$
-									selectable: false
+									selectable: false,
+									isNotSelectable: true,
 								}
 							]));
 						}	
@@ -312,13 +314,13 @@ define([
 				fullList = children;
 			}
 			if (item.NextLocation) {
-				fullList.push({Type: "MoreCommits", NextLocation: item.NextLocation, selectable: false}); //$NON-NLS-0$
+				fullList.push({Type: "MoreCommits", NextLocation: item.NextLocation, selectable: false, isNotSelectable: true}); //$NON-NLS-0$
 			}
 			return fullList;
 		},
 		processChildren: function(parentItem, items) {
 			if (items.length === 0) {
-				items = [{Type: "NoCommits", selectable: false}]; //$NON-NLS-0$
+				items = [{Type: "NoCommits", selectable: false, isNotSelectable: true}]; //$NON-NLS-0$
 			}
 			items.forEach(function(item) {
 				item.parent = parentItem;

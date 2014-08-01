@@ -100,6 +100,7 @@ define([
 					}
 					remotes.forEach(function(item) {
 						item.selectable = false;
+						item.isNotSelectable = true;
 					});
 					onComplete(that.processChildren(parentItem, remotes));
 					if (remotes.length === 0 && this.section){

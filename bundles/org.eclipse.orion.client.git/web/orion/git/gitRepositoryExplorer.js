@@ -255,6 +255,8 @@ exports.GitRepositoryExplorer = (function() {
 				this.displayTags(repository);
 			}
 			this.displayConfig(repository, "full"); //$NON-NLS-0$
+		} else {
+			this.accordion.setDefaultSection(this.repositoriesSection);
 		}
 	};
 	
@@ -352,7 +354,6 @@ exports.GitRepositoryExplorer = (function() {
 			preferenceService: this.preferencesService
 		});
 		this.accordion.add(titleWrapper);
-		this.accordion.setDefaultSection(titleWrapper);
 		
 		var selection = this.repositoriesSelection = new mSelection.Selection(this.registry, "orion.selection.repo"); //$NON-NLS-0$
 		if (this.repository) {
