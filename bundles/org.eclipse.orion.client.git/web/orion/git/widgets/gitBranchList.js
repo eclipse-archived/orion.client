@@ -58,7 +58,7 @@ define([
 						children = resp.Children || resp;
 					}
 					if (resp.NextLocation) {
-						children.push({Type: "MoreBranches", NextLocation: resp.NextLocation}); //$NON-NLS-0$
+						children.push({Type: "MoreBranches", NextLocation: resp.NextLocation, selectable: false, isNotSelectable: true}); //$NON-NLS-0$
 					}
 					if (progress) progress.done();
 					onComplete(that.processChildren(parentItem, children));
@@ -79,7 +79,7 @@ define([
 						children = resp.Children || resp;
 					}
 					if (resp.NextLocation) {
-						children.push({Type: "MoreTags", NextLocation: resp.NextLocation}); //$NON-NLS-0$
+						children.push({Type: "MoreTags", NextLocation: resp.NextLocation, selectable: false, isNotSelectable: true}); //$NON-NLS-0$
 					}
 					if (progress) progress.done();
 					onComplete(that.processChildren(parentItem, children));

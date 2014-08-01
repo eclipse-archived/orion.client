@@ -28,11 +28,8 @@ define([
 	'orion/objects',
 	'orion/Deferred'
 ], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mGitCommitInfo, mSection, mSelection, lib, URITemplate, PageUtil, mFileUtils, mGlobalCommands, objects, Deferred) {
-var exports = {};
 	
-var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
-
-exports.GitRepositoryExplorer = (function() {
+	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 
 	function Accordion(options) {
 		options = options || {};
@@ -342,8 +339,8 @@ exports.GitRepositoryExplorer = (function() {
 	
 	GitRepositoryExplorer.prototype.displayRepositories = function(repositories, mode, links) {
 		this.destroyRepositories();
-		var tableNode = lib.node( 'sidebar' ); //$NON-NLS-0$
-		var titleWrapper = this.repositoriesSection = new mSection.Section(tableNode, {
+		var parent = lib.node('sidebar'); //$NON-NLS-0$
+		var section = this.repositoriesSection = new mSection.Section(parent, {
 			id: "repoSection", //$NON-NLS-0$
 			title: this.repository ? this.repository.Name : messages["Repo"],
 			iconClass: ["gitImageSprite", "git-sprite-repository"], //$NON-NLS-1$ //$NON-NLS-0$
@@ -354,7 +351,7 @@ exports.GitRepositoryExplorer = (function() {
 			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
-		this.accordion.add(titleWrapper);
+		this.accordion.add(section);
 		
 		var selection = this.repositoriesSelection = new mSelection.Selection(this.registry, "orion.selection.repo"); //$NON-NLS-0$
 		if (this.repository) {
@@ -373,7 +370,7 @@ exports.GitRepositoryExplorer = (function() {
 			parentId: "repositoryNode", //$NON-NLS-0$
 			actionScopeId: this.actionScopeId,
 			handleError: this.handleError.bind(this),
-			section: titleWrapper,
+			section: section,
 			selection: selection,
 			selectionPolicy: "singleSelection", //$NON-NLS-0$
 			repositories: repositories,
@@ -385,8 +382,8 @@ exports.GitRepositoryExplorer = (function() {
 	
 	GitRepositoryExplorer.prototype.displayBranches = function(repository) {
 		this.destroyBranches();
-		var tableNode = lib.node( 'sidebar' ); //$NON-NLS-0$
-		var titleWrapper = this.branchesSection = new mSection.Section(tableNode, {
+		var parent = lib.node('sidebar'); //$NON-NLS-0$
+		var section = this.branchesSection = new mSection.Section(parent, {
 			id: "branchSection", //$NON-NLS-0$
 			title: this.showTagsSeparately ? messages["Branches"] : (this.targetRef ? this.targetRef.Name : messages['BranchesTags']),
 			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
@@ -397,7 +394,7 @@ exports.GitRepositoryExplorer = (function() {
 			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
-		this.accordion.add(titleWrapper);
+		this.accordion.add(section);
 
 		var selection = this.branchesSelection = new mSelection.Selection(this.registry, "orion.selection.ref"); //$NON-NLS-0$
 		if (this.targetRef) {
@@ -415,7 +412,7 @@ exports.GitRepositoryExplorer = (function() {
 			progressService: this.progressService,
 			parentId: "branchNode", //$NON-NLS-0$
 			actionScopeId: this.actionScopeId,
-			section: titleWrapper,
+			section: section,
 			selection: selection,
 			selectionPolicy: "singleSelection", //$NON-NLS-0$
 			handleError: this.handleError.bind(this),
@@ -431,8 +428,8 @@ exports.GitRepositoryExplorer = (function() {
 	
 	GitRepositoryExplorer.prototype.displayStatus = function(repository) {	
 		this.destroyStatus();
-		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
-		var titleWrapper = this.statusSection = new mSection.Section(tableNode, {
+		var parent = lib.node('table'); //$NON-NLS-0$
+		var section = this.statusSection = new mSection.Section(parent, {
 			id: "statusSection", //$NON-NLS-0$
 			title: messages["ChangedFiles"],
 			slideout: true,
@@ -449,7 +446,7 @@ exports.GitRepositoryExplorer = (function() {
 			prefix: "all", //$NON-NLS-0$
 			location: repository.StatusLocation,
 			repository: repository,
-			section: titleWrapper,
+			section: section,
 			editableInComparePage: true,
 			handleError: this.handleError.bind(this),
 			gitClient: this.gitClient,
@@ -460,8 +457,8 @@ exports.GitRepositoryExplorer = (function() {
 
 	GitRepositoryExplorer.prototype.displayCommits = function(repository) {	
 		this.destroyCommits();
-		var tableNode = lib.node( 'sidebar' ); //$NON-NLS-0$
-		var titleWrapper = this.commitsSection = new mSection.Section(tableNode, {
+		var parent = lib.node('sidebar'); //$NON-NLS-0$
+		var section = this.commitsSection = new mSection.Section(parent, {
 			id: "commitsSection", //$NON-NLS-0$
 			title: messages["Commits"],
 			slideout: true,
@@ -471,8 +468,8 @@ exports.GitRepositoryExplorer = (function() {
 			sibling: this.configSection ? this.configSection.domNode : null,
 			preferenceService: this.preferencesService
 		});
-		this.accordion.add(titleWrapper);
-		this.accordion.setDefaultSection(titleWrapper);
+		this.accordion.add(section);
+		this.accordion.setDefaultSection(section);
 		
 		var selection = this.commitsSelection = new mSelection.Selection(this.registry, "orion.selection.commit"); //$NON-NLS-0$
 		if (this.commit) {
@@ -492,7 +489,7 @@ exports.GitRepositoryExplorer = (function() {
 			statusService: this.statusService,
 			actionScopeId: this.actionScopeId,
 			parentId:"commitsNode", //$NON-NLS-0$
-			section: titleWrapper,
+			section: section,
 			selection: selection,
 			remoteBranch: this.targetRef,
 			handleError: this.handleError.bind(this),
@@ -510,8 +507,8 @@ exports.GitRepositoryExplorer = (function() {
 	
 	GitRepositoryExplorer.prototype.displayTags = function(repository) {
 		this.destroyTags();
-		var tableNode = lib.node("sidebar"); //$NON-NLS-0$
-		var titleWrapper = this.tagsSection = new mSection.Section(tableNode, {
+		var parent = lib.node("sidebar"); //$NON-NLS-0$
+		var section = this.tagsSection = new mSection.Section(parent, {
 			id : "tagSection", //$NON-NLS-0$
 			iconClass : ["gitImageSprite", "git-sprite-tag"], //$NON-NLS-1$ //$NON-NLS-0$
 			title : messages["Tags"],
@@ -521,7 +518,7 @@ exports.GitRepositoryExplorer = (function() {
 			noTwistie: true,
 			preferenceService : this.preferencesService
 		});
-		this.accordion.add(titleWrapper);
+		this.accordion.add(section);
 
 		var explorer = this.tagsNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
@@ -531,7 +528,7 @@ exports.GitRepositoryExplorer = (function() {
 			progressService: this.progressService,
 			parentId: "tagNode", //$NON-NLS-0$
 			actionScopeId: this.actionScopeId,
-			section: titleWrapper,
+			section: section,
 			handleError: this.handleError.bind(this),
 			root: {
 				Type: "TagRoot", //$NON-NLS-0$
@@ -542,8 +539,8 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.displayCommit = function(commit) {
-		var tableNode = lib.node('table'); //$NON-NLS-0$
-		var titleWrapper = this.commitSection = new mSection.Section(tableNode, {
+		var parent = lib.node('table'); //$NON-NLS-0$
+		var section = this.commitSection = new mSection.Section(parent, {
 			id: "commitSection", //$NON-NLS-0$
 			title: messages['Commit Details'], //$NON-NLS-0$
 			slideout: true,
@@ -552,7 +549,7 @@ exports.GitRepositoryExplorer = (function() {
 		});
 
 		var commandRegistry = this.commandService;
-		var actionsNodeScope = titleWrapper.actionsNode.id;
+		var actionsNodeScope = section.actionsNode.id;
 		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.checkoutTag", 0); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.addTag", 1); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.cherryPick", 2); //$NON-NLS-1$ //$NON-NLS-0$
@@ -560,7 +557,7 @@ exports.GitRepositoryExplorer = (function() {
 		commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, commit, this, "button"); //$NON-NLS-0$	
 
 		var info = new mGitCommitInfo.GitCommitInfo({
-			parent: titleWrapper.getContentElement(),
+			parent: section.getContentElement(),
 			tagsCommandHandler: this,
 			commit: commit,
 			showTags: true,
@@ -586,11 +583,11 @@ exports.GitRepositoryExplorer = (function() {
 			item.name = path;
 			item.type = item.ChangeType;
 		});
-		var tableNode = lib.node('table'); //$NON-NLS-0$
-		var section = this.diffsSection = new mSection.Section(tableNode, { id : "diffSection", //$NON-NLS-0$
+		var parent = lib.node('table'); //$NON-NLS-0$
+		var section = this.diffsSection = new mSection.Section(parent, { id : "diffSection", //$NON-NLS-0$
 			title : messages["Diffs"],
 			content : '<div id="diffNode"></div>', //$NON-NLS-0$
-			canHide : true,
+			canHide : false,
 			preferencesService : this.preferencesService
 		});
 		
@@ -610,8 +607,8 @@ exports.GitRepositoryExplorer = (function() {
 	
 	GitRepositoryExplorer.prototype.displayConfig = function(repository, mode) {
 		this.destroyConfig();
-		var tableNode = lib.node( 'sidebar' ); //$NON-NLS-0$
-		var titleWrapper = this.configSection = new mSection.Section(tableNode, {
+		var parent = lib.node('sidebar'); //$NON-NLS-0$
+		var section = this.configSection = new mSection.Section(parent, {
 			id: "configSection", //$NON-NLS-0$
 			title: messages['Configuration'] + (mode === "full" ? "" : " (user.*)"), //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
@@ -621,7 +618,7 @@ exports.GitRepositoryExplorer = (function() {
 			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
-		this.accordion.add(titleWrapper);
+		this.accordion.add(section);
 			
 		var configNavigator = this.configNavigator = new mGitConfigList.GitConfigListExplorer({
 			serviceRegistry: this.registry,
@@ -631,7 +628,7 @@ exports.GitRepositoryExplorer = (function() {
 			progressService: this.progressService,
 			parentId:"configNode", //$NON-NLS-0$
 			actionScopeId: this.actionScopeId,
-			section: titleWrapper,
+			section: section,
 			handleError: this.handleError.bind(this),
 			root: {
 				Type: "ConfigRoot", //$NON-NLS-0$
@@ -641,10 +638,8 @@ exports.GitRepositoryExplorer = (function() {
 		});
 		return configNavigator.display();
 	};
-	
-	return GitRepositoryExplorer;
-}());
 
-return exports;
-
+	return {
+		GitRepositoryExplorer: GitRepositoryExplorer
+	};
 });
