@@ -271,7 +271,7 @@ define([
 						}
 						commit = branch.Commit.Children[0];
 						var tracksMessage = ((branch.RemoteLocation.length && branch.RemoteLocation.length === 1 && branch.RemoteLocation[0].Children.length && branch.RemoteLocation[0].Children.length === 1) ? 
-								i18nUtil.formatMessage(messages["tracks ${0}, "], branch.RemoteLocation[0].Children[0].Name) : messages["tracks no branch, "]);
+								i18nUtil.formatMessage(messages["tracks"], branch.RemoteLocation[0].Children[0].Name) : messages["tracksNoBranch"]);
 						description = tracksMessage;
 						subDescription = i18nUtil.formatMessage(messages["last modified ${0} by ${1}"], new Date(commit.Time).toLocaleString(), commit.AuthorName); //$NON-NLS-0$
 						actionsID = "branchActionsArea"; //$NON-NLS-0$
