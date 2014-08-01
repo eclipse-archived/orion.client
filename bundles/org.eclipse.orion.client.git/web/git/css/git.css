@@ -39,6 +39,7 @@
 	margin-right: 5px;
 	margin-bottom: 5px;
 	background-color: #fcfcfc;
+	overflow-y: auto;
 }
 
 .mainpane .sectionWrapper {
@@ -66,6 +67,10 @@ table .sectionTable {
 
 .sidebar {
 	overflow: hidden;
+}
+
+.sidebarWrapper > .sidebar {
+	height: calc(100% - 5px);
 }
 
 .miniWrapper {

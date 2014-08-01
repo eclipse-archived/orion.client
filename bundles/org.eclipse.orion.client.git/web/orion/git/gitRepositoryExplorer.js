@@ -33,8 +33,7 @@ var exports = {};
 var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 
 exports.GitRepositoryExplorer = (function() {
-	
-	
+
 	function Accordion(options) {
 		options = options || {};
 		this.parent = options.parent;
@@ -59,11 +58,13 @@ exports.GitRepositoryExplorer = (function() {
 			if (this._ignoreExpand) return;
 			this._ignoreExpand = true;
 			var currentSection = this.currentSection = isExpanded ? section : this.defaultSection;
+			//TODO - calculate 44?
+			var height = "calc(100% - " + (44 * this.sections.length) + "px)"; //$NON-NLS-1$ //$NON-NLS-0$
 			this.sections.forEach(function(s) {
 				s.setHidden(s !== currentSection);
+				console.log(lib.bounds(s.domNode));
 				var content = s.getContentElement();
-				content.style.height = s !== currentSection ? 0 : "calc(100% - " + (44 * 4) + "px)"; //$NON-NLS-1$ //$NON-NLS-0$
-				content.style.overflowY = "auto"; //$NON-NLS-0$
+				content.style.height = s !== currentSection ? 0 : height;
 			});
 			this._ignoreExpand = false;
 		}
@@ -358,6 +359,7 @@ exports.GitRepositoryExplorer = (function() {
 			selection.setSelections(this.repository);
 		}
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
+			if (!event.selection) return;
 			window.location.hash = event.selection.Location;
 		}.bind(this));
 		var explorer = this.repositoriesNavigator = new mGitRepoList.GitRepoListExplorer({
@@ -563,6 +565,8 @@ exports.GitRepositoryExplorer = (function() {
 			commitLink: false,
 			showMessage: false,
 			showParentLink: false,
+			showAuthorEmail: true,
+			showCommitterEmail: true,
 			onlyFullMessage: true,
 			fullMessage: true
 		});
