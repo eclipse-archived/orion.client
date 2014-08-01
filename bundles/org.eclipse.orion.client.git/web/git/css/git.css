@@ -251,6 +251,15 @@ table .sectionTable {
 	padding-top: 10px;
 }
 
+.gitConfigKey {
+	font-weight: bold;
+}
+
+.gitConfigValue {
+	padding-left: 5px;
+	padding-top: 5px;
+}
+
 .gitAuthorImage {
 	border: 1px solid lightGrey;
 	padding: 2px;

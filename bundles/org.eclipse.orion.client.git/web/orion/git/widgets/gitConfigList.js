@@ -127,7 +127,6 @@ define([
 	});
 	
 	function GitConfigListRenderer(options) {
-		options.setFocus = false;   // do not steal focus on load
 		options.cachePrefix = null; // do not persist table state
 		mExplorer.SelectionRenderer.apply(this, arguments);
 	}
@@ -138,28 +137,19 @@ define([
 			var div, td;
 			td = document.createElement("td"); //$NON-NLS-0$
 			div = document.createElement("div"); //$NON-NLS-0$
-//			td.style.textOverflow = "ellipsis";
-//			td.style.overflow = "hidden";
-//			td.style.width = "200px";
-//			td.style.whiteSpace = "nowrap";
-//			td.style.padding = "10px";
-			
-//			div.style.overflow = "hidden"; //$NON-NLS-0$
-//			div.className = "sectionTableItem"; //$NON-NLS-0$
 			td.appendChild(div);
 			switch (col_no) {
 				case 0:
-					var keySpan = document.createElement("span"); //$NON-NLS-0$
-					keySpan.textContent = item.Key;
-					div.appendChild(keySpan);
+					var keyNode = document.createElement("div"); //$NON-NLS-0$
+					keyNode.className = "gitConfigKey"; //$NON-NLS-0$
+					keyNode.textContent = item.Key;
+					div.appendChild(keyNode);
+					var valueNode = document.createElement("div"); //$NON-NLS-0$
+					valueNode.className = "gitConfigValue"; //$NON-NLS-0$
+					valueNode.textContent = item.Value;
+					div.appendChild(valueNode);
 					break;
 				case 1:
-					var valueSpan = document.createElement("span"); //$NON-NLS-0$
-					valueSpan.textContent = item.Value;
-					div.appendChild(valueSpan);
-					break;
-				case 2:
-//					td.style.width = "auto";
 					var actionsArea = document.createElement("ul"); //$NON-NLS-0$
 					actionsArea.className = "sectionTableItemActions layoutRight commandList"; //$NON-NLS-0$
 					actionsArea.id = "configActionsArea"; //$NON-NLS-0$
