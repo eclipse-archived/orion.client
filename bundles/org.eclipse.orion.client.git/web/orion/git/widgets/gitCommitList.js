@@ -422,8 +422,7 @@ define([
 						that.updateCommands();
 						deferred.resolve(model.log);
 					};
-					//that.fetch().then(fetched, fetched);
-					fetched();
+					that.fetch().then(fetched, fetched);
 				}
 			});
 			return deferred;
@@ -462,9 +461,9 @@ define([
 		},
 		fetch: function() {
 			var model = this.model;
-			if (model.tracksRemoteBranch() && !this.simpleLog && !model.isRebasing()) {
+			var remoteBranch = model.getRemoteBranch();
+			if (model.tracksRemoteBranch() && !this.simpleLog && !model.isRebasing() && remoteBranch.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
 				var commandService = this.commandService;
-				var remoteBranch = model.getRemoteBranch();
 				var localBranch = model.getLocalBranch();
 				return commandService.runCommand("eclipse.orion.git.fetch", {LocalBranch: localBranch, RemoteBranch: remoteBranch, noAuth: true}, this); //$NON-NLS-0$
 			}

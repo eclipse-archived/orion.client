@@ -241,6 +241,7 @@ define([
 	
 	GitRepositoryExplorer.prototype.setSelectedRepository = function(repository, force) {
 		if (!force && repository && repository === this.repository) return;
+		this.commit = this.reference = null;
 		this.destroy();
 		this.repository = repository;
 		this.initTitleBar(repository || {});
@@ -248,7 +249,7 @@ define([
 		if (repository) {
 			this.setSelectedCommit(this.commit);
 			this.displayBranches(repository); //$NON-NLS-0$
-			this.setSelectedRef(this.targetRef);
+			this.setSelectedRef(this.reference);
 			if (this.showTagsSeparately) {
 				this.displayTags(repository);
 			}
@@ -259,7 +260,7 @@ define([
 	};
 	
 	GitRepositoryExplorer.prototype.setSelectedRef = function(ref) {
-		this.targetRef = ref;
+		this.reference = ref;
 		this.displayCommits(this.repository);
 	};
 	
@@ -387,7 +388,7 @@ define([
 		var parent = lib.node('sidebar'); //$NON-NLS-0$
 		var section = this.branchesSection = new mSection.Section(parent, {
 			id: "branchSection", //$NON-NLS-0$
-			title: this.showTagsSeparately ? messages["Branches"] : (this.targetRef ? this.targetRef.Name : messages['BranchesTags']),
+			title: this.showTagsSeparately ? messages["Branches"] : (this.reference ? this.reference.Name : messages['BranchesTags']),
 			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="branchNode"></div>', //$NON-NLS-0$
@@ -400,7 +401,7 @@ define([
 
 		var selection = this.branchesSelection = new mSelection.Selection(this.registry, "orion.selection.ref"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-			if (!event.selection || this.targetRef === event.selection) return;
+			if (!event.selection || this.reference === event.selection) return;
 			this.setSelectedRef(event.selection);
 		}.bind(this));
 		var explorer = this.branchesNavigator = new mGitBranchList.GitBranchListExplorer({
@@ -423,8 +424,8 @@ define([
 			}
 		});
 		return explorer.display().then(function() {
-			if (this.targetRef) {
-				explorer.select(this.targetRef);
+			if (this.reference) {
+				explorer.select(this.reference);
 			}
 		});
 	};
@@ -491,7 +492,7 @@ define([
 			parentId:"commitsNode", //$NON-NLS-0$
 			section: section,
 			selection: selection,
-			remoteBranch: this.targetRef,
+			remoteBranch: this.reference,
 			handleError: this.handleError.bind(this),
 			root: {
 				Type: "CommitRoot", //$NON-NLS-0$
