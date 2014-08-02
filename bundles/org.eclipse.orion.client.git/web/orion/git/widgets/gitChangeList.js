@@ -675,6 +675,8 @@ define([
 						div.appendChild(actionsArea);
 						explorer.commandService.renderCommands(actionsArea.id, actionsArea, explorer, explorer, "button"); //$NON-NLS-0$	
 					} else {
+						tableRow.classList.remove("selectableNavRow");
+						
 						// render the compare widget
 						td.colSpan = 2;
 						var actionsWrapper = document.createElement("div"); //$NON-NLS-0$

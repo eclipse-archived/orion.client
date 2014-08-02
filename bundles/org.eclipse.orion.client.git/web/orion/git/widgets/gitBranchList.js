@@ -21,6 +21,8 @@ define([
 	'orion/objects'
 ], function(messages, mGitCommitList, mExplorer, i18nUtil, Deferred, lib, objects) {
 
+	var queryPage = "?commits=1&page=1&pageSize=5"; //$NON-NLS-0$
+
 	function GitBranchListModel(options) {
 		this.root = options.root;
 		this.showHistory = options.showHistory === undefined || options.showHistory;
@@ -49,19 +51,10 @@ define([
 				progress = this.section && !parentItem.parent ? this.section.createProgressMonitor() : null;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], repository.Name);
 				if (progress) progress.begin(msg);
-				Deferred.when(repository.Branches || this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.BranchLocation + "?commits=1&page=1&pageSize=5"), msg), function(resp) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					var children = parentItem.children;
-					if (children) { //$NON-NLS-0$
-						var args = [children.length - 1, 1].concat(resp.Children || resp);
-						Array.prototype.splice.apply(children, args);
-					} else {
-						children = resp.Children || resp;
-					}
-					if (resp.NextLocation) {
-						children.push({Type: "MoreBranches", NextLocation: resp.NextLocation, selectable: false, isNotSelectable: true}); //$NON-NLS-0$
-					}
+				Deferred.when(repository.Branches || this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.BranchLocation + queryPage), msg), function(resp) {
 					if (progress) progress.done();
-					onComplete(that.processChildren(parentItem, children));
+					var children = resp.Children || resp;
+					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, resp, "MoreBranches"))); //$NON-NLS-0$
 				}, function(error){
 					if (progress) progress.done();
 					that.handleError(error);
@@ -70,19 +63,10 @@ define([
 				progress = this.section && !parentItem.parent  ? this.section.createProgressMonitor() : null;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], repository.Name);
 				if (progress) progress.begin(msg);
-				Deferred.when(repository.Branches || this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.TagLocation + "?commits=1&page=1&pageSize=5"), msg), function(resp) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					var children = parentItem.children;
-					if (children) { //$NON-NLS-0$
-						var args = [children.length - 1, 1].concat(resp.Children || resp);
-						Array.prototype.splice.apply(children, args);
-					} else {
-						children = resp.Children || resp;
-					}
-					if (resp.NextLocation) {
-						children.push({Type: "MoreTags", NextLocation: resp.NextLocation, selectable: false, isNotSelectable: true}); //$NON-NLS-0$
-					}
+				Deferred.when(repository.Branches || this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.TagLocation + queryPage), msg), function(resp) {
 					if (progress) progress.done();
-					onComplete(that.processChildren(parentItem, children));
+					var children = resp.Children || resp;
+					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, resp, "MoreTags"))); //$NON-NLS-0$
 				}, function(error){
 					if (progress) progress.done();
 					that.handleError(error);
@@ -133,6 +117,19 @@ define([
 			});
 			parentItem.children = children;
 			return children;
+		},
+		processMoreChildren: function(parentItem, children, item, type) {
+			var fullList = parentItem.children;
+			if (fullList) {
+				var args = [fullList.length - 1, 1].concat(children);
+				Array.prototype.splice.apply(fullList, args);
+			} else {
+				fullList = children;
+			}
+			if (item.NextLocation) {
+				fullList.push({Type: type, NextLocation: item.NextLocation, selectable: false, isNotSelectable: true}); //$NON-NLS-0$
+			}
+			return fullList;
 		},
 		getId: function(/* item */ item){
 			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : ""); //$NON-NLS-0$
