@@ -66,11 +66,15 @@ table .sectionTable {
 }
 
 .sidebar {
-	overflow: hidden;
+	overflow: visible;
 }
 
 .sidebarWrapper > .sidebar {
 	height: calc(100% - 5px);
+}
+
+.sidebarWrapper {
+	overflow: visible;
 }
 
 .miniWrapper {

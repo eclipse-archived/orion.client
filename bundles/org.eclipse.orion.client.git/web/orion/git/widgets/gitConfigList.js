@@ -15,12 +15,9 @@ define([
 	'i18n!git/nls/gitmessages',
 	'orion/explorers/explorer',
 	'orion/i18nUtil',
-	'orion/URITemplate',
 	'orion/objects'
-], function(messages, mExplorer, i18nUtil, URITemplate, objects) {
+], function(messages, mExplorer, i18nUtil, objects) {
 
-	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$		
-		
 	function GitConfigListModel(options) {
 		this.root = options.root;
 		this.registry = options.registry;
@@ -114,11 +111,6 @@ define([
 			var root = this.root;
 			var section = this.section;
 			var actionsNodeScope = section.actionsNode.id;
-			if (root.mode !== "full"/* && configurationEntries.length !== 0*/){ //$NON-NLS-0$
-				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
-				this.commandService.renderCommands(actionsNodeScope, actionsNodeScope, {"ViewAllLink":repoTemplate.expand({resource: root.repository.ConfigLocation}), "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all configuration entries"]}, this, "button"); //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			}
-		
 			if (root.mode === "full"){ //$NON-NLS-0$
 				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.addConfigEntryCommand", 1000); //$NON-NLS-0$
 				this.commandService.renderCommands(actionsNodeScope, actionsNodeScope, root.repository, this, "button"); //$NON-NLS-0$
