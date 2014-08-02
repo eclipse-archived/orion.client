@@ -183,6 +183,7 @@ define([
 			return deferred;
 		},
 		display: function() {
+			var deferred = new Deferred();
 			var model = new GitBranchListModel({
 				root: this.root,
 				registry: this.registry,
@@ -196,9 +197,13 @@ define([
 			});
 			this.createTree(this.parentId, model, {
 				setFocus: false, // do not steal focus on load
-				selectionPolicy: this.selectionPolicy
+				selectionPolicy: this.selectionPolicy,
+				onComplete: function() {
+					deferred.resolve();
+				}
 			});
 			this.updateCommands();
+			return deferred;
 		},
 		isRowSelectable: function() {
 			return !!this.selection;

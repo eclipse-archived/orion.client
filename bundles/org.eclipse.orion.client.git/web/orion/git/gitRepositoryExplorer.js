@@ -354,9 +354,6 @@ define([
 		this.accordion.add(section);
 		
 		var selection = this.repositoriesSelection = new mSelection.Selection(this.registry, "orion.selection.repo"); //$NON-NLS-0$
-		if (this.repository) {
-			selection.setSelections(this.repository);
-		}
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			if (!event.selection) return;
 			window.location.hash = event.selection.Location;
@@ -377,7 +374,12 @@ define([
 			mode: mode,
 			showLinks: links,
 		});
-		return explorer.display().then(this.loadingDeferred.resolve, this.loadingDeferred.reject);
+		return explorer.display().then(function() {
+			if (this.repository) {
+				explorer.select(this.repository);
+			}
+			this.loadingDeferred.resolve();
+		}.bind(this), this.loadingDeferred.reject);
 	};
 	
 	GitRepositoryExplorer.prototype.displayBranches = function(repository) {
@@ -397,9 +399,6 @@ define([
 		this.accordion.add(section);
 
 		var selection = this.branchesSelection = new mSelection.Selection(this.registry, "orion.selection.ref"); //$NON-NLS-0$
-		if (this.targetRef) {
-			selection.setSelections(this.targetRef);
-		}
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			if (!event.selection || this.targetRef === event.selection) return;
 			this.setSelectedRef(event.selection);
@@ -423,7 +422,11 @@ define([
 				repository: repository,
 			}
 		});
-		return explorer.display();
+		return explorer.display().then(function() {
+			if (this.targetRef) {
+				explorer.select(this.targetRef);
+			}
+		});
 	};
 	
 	GitRepositoryExplorer.prototype.displayStatus = function(repository) {	
@@ -472,9 +475,6 @@ define([
 		this.accordion.setDefaultSection(section);
 		
 		var selection = this.commitsSelection = new mSelection.Selection(this.registry, "orion.selection.commit"); //$NON-NLS-0$
-		if (this.commit) {
-			selection.setSelections(this.commit);
-		}
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			if (this.commit === event.selection) return;
 			lib.empty(lib.node('table')); //$NON-NLS-0$
@@ -501,6 +501,9 @@ define([
 		return this.statusDeferred.then(function() {
 			return explorer.display().then(function() {
 				this.branchesSection.setTitle(explorer.model.getRemoteBranch().Name);
+				if (this.commit) {
+					explorer.select(this.commit);
+				}
 			}.bind(this));
 		}.bind(this));
 	};
@@ -602,7 +605,7 @@ define([
 			section: section,
 			repository: repository
 		});
-		explorer.display();
+		return explorer.display();
 	};
 	
 	GitRepositoryExplorer.prototype.displayConfig = function(repository, mode) {

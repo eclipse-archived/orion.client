@@ -938,12 +938,7 @@ define([
 		 */
 		reveal: function(item, reroot) {
 			return this.showItem(item, reroot).then(function(result) {
-				var navHandler = this.getNavHandler();
-				if (navHandler) {
-					navHandler.cursorOn(result, true);
-					navHandler.setSelection(result);
-				}
-				return result;
+				this.select(result);
 			}.bind(this));
 		},
 
