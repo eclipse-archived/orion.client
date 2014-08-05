@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -32,7 +32,11 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/TextField
 
         postCreate: function(){
 			TextField.prototype.postCreate.call(this);
-            this.mylabel.textContent = this.fieldlabel + ':'; //$NON-NLS-0$
+			if(typeof this.fieldlabel === 'string' && this.fieldlabel.length > 0 && this.fieldlabel.charAt(this.fieldlabel.length-1) === ':') {
+			    this.mylabel.textContent = this.fieldlabel;
+			} else {
+                this.mylabel.textContent = this.fieldlabel + ':'; //$NON-NLS-0$
+            }
         }
     });
     return LabeledTextfield;
