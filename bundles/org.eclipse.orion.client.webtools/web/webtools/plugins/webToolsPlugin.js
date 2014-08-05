@@ -12,19 +12,20 @@
 /*eslint-env browser, amd*/
 define(['orion/plugin', 
 'webtools/htmlContentAssist', 
+'webtools/htmlOutliner',
 'orion/editor/stylers/text_html/syntax', 
 'webtools/cssContentAssist', 
 'webtools/cssValidator',
 'webtools/cssOutliner',
 'orion/editor/stylers/text_css/syntax'
-], function(PluginProvider, htmlContentAssist, mHTML, cssContentAssist, mCssValidator, mCssOutliner, mCSS) {
+], function(PluginProvider, htmlContentAssist, htmlOutliner, mHTML, cssContentAssist, mCssValidator, mCssOutliner, mCSS) {
 	/**
 	 * Plug-in headers
 	 */
 	var headers = {
 		name: "Orion Web Tools Support",
 		version: "1.0",
-		description: "This plug-in provides web language tools support for Orion, including HTML, CSS and Markdown."
+		description: "This plug-in provides web language tools support for Orion, including HTML and CSS."
 	};
 	var provider = new PluginProvider(headers);
 
@@ -64,14 +65,28 @@ define(['orion/plugin',
 			contentType: ["text/css"]
 		});
 
+	/**
+	 * Register validators
+	 */
 	provider.registerService("orion.edit.validator", new mCssValidator.CssValidator(),
 		{
 			contentType: ["text/css"]
 		});
+		
+		
+	/**
+	* Register outliners
+	*/
+	provider.registerService("orion.edit.outliner", new htmlOutliner.HtmlOutliner(), //$NON-NLS-0$
+		{
+			id: "orion.webtools.html.outliner",
+			name: 'HTML outline',
+			contentType: ["text/html"]
+		});
 	
 	provider.registerService("orion.edit.outliner", new mCssOutliner.CssOutliner(), 
 		{
-			id: "orion.outline.css.csslint",
+			id: "orion.outline.css.outliner",
 			name: "CSS rule outline",
 			contentType: ["text/css"]
 		});
