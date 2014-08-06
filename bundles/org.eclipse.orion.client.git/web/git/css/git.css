@@ -247,6 +247,11 @@ table .sectionTable {
 	max-width: 300px;
 }
 
+.gitStatusTitle {
+	font-weight: bold;
+	color: green;
+}
+
 .gitBranchTitle {
 	font-weight: bold;
 }

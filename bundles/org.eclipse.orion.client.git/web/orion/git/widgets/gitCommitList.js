@@ -192,7 +192,7 @@ define([
 						var localBranch = that.getLocalBranch();
 						var remoteBranch = that.getRemoteBranch();
 						if (localBranch && remoteBranch && !that.simpleLog) {
-							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch"], localBranch.Name, remoteBranch.Name));
+							if (section) section.setTitle(i18nUtil.formatMessage(messages["Changes for \"${0}\" branch"], localBranch.Name, remoteBranch.Name));
 						} else if (remoteBranch || localBranch) {
 							if (section) section.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch"], (remoteBranch || localBranch).Name));
 						}
@@ -208,6 +208,12 @@ define([
 							});
 						} else {
 							onComplete(that.processChildren(parentItem, [
+								{
+									Type: "Uncommited",  //$NON-NLS-0$
+									children: [
+										that.root.repository.status
+									]
+								},
 								{
 									Type: "Outgoing", //$NON-NLS-0$
 									selectable: false,
@@ -428,12 +434,10 @@ define([
 			return deferred;
 		},
 		expandSections: function(children) {
-			if (!this.simpleLog && !this.model.isRebasing() && children.length > 2) {
-				this.myTree.expand(this.model.getId(children[0]));
-				this.myTree.expand(this.model.getId(children[1]));
-//				if (this.location) {
-					this.myTree.expand(this.model.getId(children[2]));
-//				}
+			if (!this.simpleLog && !this.model.isRebasing()) {
+				for (var i = 0; i < children.length; i++) {
+					this.myTree.expand(this.model.getId(children[i]));
+				}
 			}
 		},
 		isRowSelectable: function() {
@@ -636,6 +640,17 @@ define([
 						});
 						explorer2.display();
 					}, 0);
+				}  else if (item.Type === "Status") { //$NON-NLS-0$
+					sectionItem.classList.add("sectionTableItem"); //$NON-NLS-0$
+						
+					detailsView = document.createElement("div"); //$NON-NLS-0$
+					detailsView.className = "stretch"; //$NON-NLS-0$
+					horizontalBox.appendChild(detailsView);
+					
+					var title = document.createElement("div"); //$NON-NLS-0$
+					title.textContent = messages["LocalChanges"];
+					title.classList.add("gitStatusTitle"); //$NON-NLS-0$
+					detailsView.appendChild(title);
 				}  else if (item.Type !== "Commit") { //$NON-NLS-0$
 					if (item.Type !== "NoCommits") { //$NON-NLS-0$
 						sectionItem.className = "gitCommitSectionTableItem"; //$NON-NLS-0$

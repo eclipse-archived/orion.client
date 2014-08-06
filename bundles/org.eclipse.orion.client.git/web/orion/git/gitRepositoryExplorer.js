@@ -268,7 +268,7 @@ define([
 	
 	GitRepositoryExplorer.prototype.setSelectedCommit = function(commit) {
 		this.commit = commit;
-		if (this.commit) {
+		if (this.commit && this.commit.Type === "Commit") { //$NON-NLS-0$
 			this.displayCommit(this.commit);
 			this.displayDiffs(this.commit, this.repository);
 			this.statusDeferred = new Deferred().resolve(); //HACK
@@ -466,7 +466,7 @@ define([
 		var parent = lib.node('sidebar'); //$NON-NLS-0$
 		var section = this.commitsSection = new mSection.Section(parent, {
 			id: "commitsSection", //$NON-NLS-0$
-			title: messages["Commits"],
+			title: messages["Diffs"],
 			slideout: true,
 			content: '<div id="commitsNode"></div>', //$NON-NLS-0$
 			canHide: true,
