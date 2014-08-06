@@ -453,7 +453,7 @@ define([
 				},
 				visibleWhen: function(item) {
 					simpleLogCommand.name = that.model.simpleLog ? "Show Local Changes" : "Show Log";
-					simpleLogCommand.tooltip = that.model.simpleLog ? "Compare target reference against action branch." : "Show target reference log.";
+					simpleLogCommand.tooltip = that.model.simpleLog ? "Show the history of the active branch against the selected branch." : "Show the history of the selected branch.";
 					return true;
 				}
 			});
