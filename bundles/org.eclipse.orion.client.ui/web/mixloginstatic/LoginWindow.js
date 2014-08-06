@@ -272,6 +272,16 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		}
 		document.getElementById("registerButton").focus();
 	}
+	
+	function hideLinkedRegistration() {
+		document.getElementById('createLinkedHeaderShown').style.visibility = 'hidden';
+		document.getElementById('orionOpen').style.visibility = '';
+
+		if (userCreationEnabled || registrationURI) {
+			document.getElementById('orionRegister').style.visibility = '';
+		}
+		document.getElementById("registerButton").focus();
+	}
 
 	function confirmCreateUser() {
 		if (!validatePassword()) {
@@ -308,6 +318,51 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		mypostrequest.send(parameters);
 	}
 
+	function confirmCreateLinkedUser(){
+		var login = document.getElementById("create_linked_login").value;
+		var email =  document.getElementById("create_linked_email").value;
+		var identifier = getParam("identifier");
+		var password = generateRandomPassword();
+		
+		var mypostrequest = new XMLHttpRequest();
+		mypostrequest.onreadystatechange = function() {
+			if (mypostrequest.readyState === 4) {
+				if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
+					if (!mypostrequest.responseText) {
+						return;
+					}
+					var responseObject = JSON.parse(mypostrequest.responseText);
+					showErrorMessage(responseObject.Message);
+					if(mypostrequest.status === 201){
+						hideLinkedRegistration();
+					}
+				} else {
+					confirmLogin(login, password);
+				}
+			}
+		};
+		var parameters = "login=" + encodeURIComponent(login) + "&password=" + encodeURIComponent(password) + "&identifier=" + encodeURIComponent(identifier) + "&email=" + encodeURIComponent(email);
+		mypostrequest.open("POST", "../users", true);
+		mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		mypostrequest.setRequestHeader("Orion-Version", "1");
+		mypostrequest.send(parameters);
+	}
+	
+	function generateRandomPassword() {
+		// Passwords are a mix of both alpha and non-alpha charaters
+		var aphaCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		var nonAlphaCharacters = "0123456789";
+		var minLength = 7;
+		var password = "";
+		for(var i = 0; i < minLength; i++) {
+			password += aphaCharacters.charAt(Math.floor(Math.random() * aphaCharacters.length));
+		}
+		for(var i = 0; i < minLength; i++) {
+			password += nonAlphaCharacters.charAt(Math.floor(Math.random() * nonAlphaCharacters.length));
+		}
+		return password;
+	}
+	
 	function revealRegistration( event ) {
 		// If registrationURI is set and userCreation is not, open the URI in a new window
 
@@ -328,6 +383,20 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		}
 	}
 
+	function showCreateUser( email, username ) {
+		// Hide stuff
+		document.getElementById('orionOpen').style.visibility = 'hidden';
+		document.getElementById('orionRegister').style.visibility = 'hidden';
+
+		document.getElementById('orionLoginForm').style.visibility = 'hidden';
+		document.getElementById('orionRegister').style.visibility = 'hidden';
+		// Show stuff
+		document.getElementById('createLinkedHeaderShown').style.visibility = '';
+		document.getElementById('create_linked_login').focus();
+		document.getElementById('create_linked_login').value = username;
+		document.getElementById('create_linked_email').value = email;
+	}
+	
 	function formatForNoUserCreation() {
 		document.getElementById('orionRegister').style.visibility = 'hidden';
 	}
@@ -392,6 +461,13 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 			showErrorMessage(errorMessage);
 		}
 
+		var oauth = getParam("oauth");
+		if (oauth) {
+			var email = getParam("email");
+			var username = getParam("username");
+			showCreateUser(email, username);
+		}
+		
 		var checkusersrequest = new XMLHttpRequest();
 		checkusersrequest.onreadystatechange = function() {
 			if (checkusersrequest.readyState === 4) {
@@ -544,7 +620,11 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		};
 
 		document.getElementById("hideRegisterButton").addEventListener("click", hideRegistration);
+		
+		document.getElementById("createLinkedButton").addEventListener("click", confirmCreateLinkedUser);
+		document.getElementById("hideLinkedRegisterButton").addEventListener("click", hideLinkedRegistration);
 
+		
 		// FIX the hrefs of the various forms here.
 		document.getElementById("googleLogin").href = createOpenIdLink("https://www.google.com/accounts/o8/id");
 		document.getElementById("googleLogin").addEventListener("keydown", googleLogin);

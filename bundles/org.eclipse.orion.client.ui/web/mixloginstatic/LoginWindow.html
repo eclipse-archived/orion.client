@@ -91,7 +91,29 @@ require(["mixloginstatic/LoginWindow"]);
 
 				</form>
 			</div>
+			<div class="orion-signup orion-signup-linked" id="createLinkedHeaderShown" style="visibility: hidden;">
+				<div id="orion-create-linked-header" class="orion-form-header">Create a linked account</div>
+				<form>
+					<div class="orion-register-input-holder">
+						<label>Username:</label>
+						<div style="padding-right: 5px;"></div>
+						<input type="text" class="orion-text-input" placeholder="username" title="Username" autocomplete="on" autofocus="autofocus" id="create_linked_login" spellcheck="false" autocapitalize="off">
+					</div>
+					<div class="orion-register-input-holder">
+						<label>Email:</label>
+						<div style="padding-right: 5px;"></div>
+						<input type="text" class="orion-text-input" placeholder="email" title="Email" autocomplete="on" name="email" id="create_linked_email" aria-required="true">
+					</div>
+					<div class="orion-login-button-holder">
+						<input id="createLinkedButton" type="button" class="orion-login-button" value="Sign up" tabindex="0">
+					</div>
+					<div style="padding-right: 5px;"></div>
+					<div class="orion-login-button-holder">
+						<input id="hideLinkedRegisterButton" type="button" class="orion-cancel-button" value="Cancel" tabindex="0">
+					</div>
 
+				</form>
+			</div>
 			<div class="orion-reset" id="orionReset" style="visibility: hidden;">
 				<div id="orion-reset-header" class="orion-form-header">Reset Orion account</div>
 				<div class="orion-reset-note">Provide your username or email to reset your password.</div>
