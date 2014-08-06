@@ -1183,7 +1183,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				var command;
 				var commandParams = {
 					name: deployService.name,
-					tooltip: deployService.tooltip,
+					tootlip: deployService.tooltip,
 					id: "orion.project.deploy." + deployService.id,
 					callback: function(data){
 						var selections = explorer.selection.getSelections();

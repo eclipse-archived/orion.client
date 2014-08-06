@@ -18,6 +18,7 @@
 		});
 
 		require(["cfui/plugins/cFDeployService", "../../orion/plugin.js"], function(cFDeployService, PluginProvider){
+			var deployService = new cFDeployService.DeployService();
 			
 			var headers = {
 				name: "Cloud Foundry Deploy",
@@ -26,9 +27,9 @@
 			};
 		
 			var provider = new PluginProvider(headers);
-
+			
 			provider.registerServiceProvider("orion.project.deploy",
-				new cFDeployService.DeployService(),
+				deployService,
 				{
 					name: "Deploy to Cloud Foundry",
 					id: "org.eclipse.orion.client.cf.deploy",
