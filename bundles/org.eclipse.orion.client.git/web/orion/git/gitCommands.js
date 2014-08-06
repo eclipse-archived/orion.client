@@ -2725,15 +2725,16 @@ var exports = {};
 			name: messages["Show Patch"],
 			tooltip: messages["Show checked changes as a patch"],
 			id: "eclipse.orion.git.showStagedPatchCommand", //$NON-NLS-0$
-			hrefCallback : function(data) {
+			callback : function(data) {
 				var items = forceArray(data.items);
 				
-			var url = data.userData.Clone.DiffLocation.replace("\/Default\/", "\/Cached\/") + "?parts=diff"; //$NON-NLS-0$
+				var url = data.userData.Clone.DiffLocation.replace("\/Default\/", "\/Cached\/") + "?parts=diff"; //$NON-NLS-0$
 				for (var i = 0; i < items.length; i++) {
 					url += "&Path="; //$NON-NLS-0$
 					url += items[i].name;
 				}
-				return url;
+				window.open(url);
+					
 			},
 			visibleWhen: function(item) {
 				var items = forceArray(item);
