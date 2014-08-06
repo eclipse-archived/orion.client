@@ -30,6 +30,8 @@ define([
 ], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mGitCommitInfo, mSection, mSelection, lib, URITemplate, PageUtil, mFileUtils, mGlobalCommands, objects, Deferred) {
 	
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
+	
+	var NO_TWISTIES = false;
 
 	function Accordion(options) {
 		options = options || {};
@@ -349,7 +351,7 @@ define([
 			content: '<div id="repositoryNode"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
-			noTwistie: true,
+			noTwistie: NO_TWISTIES,
 			preferenceService: this.preferencesService
 		});
 		this.accordion.add(section);
@@ -394,7 +396,7 @@ define([
 			content: '<div id="branchNode"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
-			noTwistie: true,
+			noTwistie: NO_TWISTIES,
 			preferenceService: this.preferencesService
 		});
 		this.accordion.add(section);
@@ -439,7 +441,7 @@ define([
 			slideout: true,
 			content: '<div id="statusNode"></div>', //$NON-NLS-0$
 			canHide: false,
-			noTwistie: true,
+			noTwistie: NO_TWISTIES,
 			preferenceService: this.preferencesService
 		});
 		
@@ -468,7 +470,7 @@ define([
 			slideout: true,
 			content: '<div id="commitsNode"></div>', //$NON-NLS-0$
 			canHide: true,
-			noTwistie: true,
+			noTwistie: NO_TWISTIES,
 			sibling: this.configSection ? this.configSection.domNode : null,
 			preferenceService: this.preferencesService
 		});
@@ -519,7 +521,7 @@ define([
 			content : '<div id="tagNode"></div>', //$NON-NLS-0$
 			canHide : true,
 			hidden : true,
-			noTwistie: true,
+			noTwistie: NO_TWISTIES,
 			preferenceService : this.preferencesService
 		});
 		this.accordion.add(section);
@@ -589,7 +591,7 @@ define([
 		});
 		var parent = lib.node('table'); //$NON-NLS-0$
 		var section = this.diffsSection = new mSection.Section(parent, { id : "diffSection", //$NON-NLS-0$
-			title : messages["Diffs"],
+			title : messages["ChangedFiles"],
 			content : '<div id="diffNode"></div>', //$NON-NLS-0$
 			canHide : false,
 			preferencesService : this.preferencesService
@@ -619,7 +621,7 @@ define([
 			content: '<div id="configNode" class="mainPadding"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
-			noTwistie: true,
+			noTwistie: NO_TWISTIES,
 			preferenceService: this.preferencesService
 		});
 		this.accordion.add(section);

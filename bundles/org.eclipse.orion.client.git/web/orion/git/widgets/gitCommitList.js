@@ -452,7 +452,7 @@ define([
 					data.handler.changedItem();
 				},
 				visibleWhen: function(item) {
-					simpleLogCommand.name = that.model.simpleLog ? "Show Active Branch" : "Show Target";
+					simpleLogCommand.name = that.model.simpleLog ? "Show Local Changes" : "Show Log";
 					simpleLogCommand.tooltip = that.model.simpleLog ? "Compare target reference against action branch." : "Show target reference log.";
 					return true;
 				}

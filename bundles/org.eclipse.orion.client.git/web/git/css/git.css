@@ -23,6 +23,10 @@
 	margin-right: 8%;
 }
 
+.auxpane {
+	overflow: visible;
+}
+
 .auxpane .sectionWrapper {
 	margin-left: 5px;
 	margin-right:5px;
