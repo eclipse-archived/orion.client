@@ -18,9 +18,10 @@ define([
 	"orion/ssh/sshTools",
 	"orion/i18nUtil",
 	"orion/Deferred",
+	"orion/git/GitFileImpl",
 	"orion/git/util",
 	"orion/URL-shim", // no exports
-], function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil, Deferred, mGitUtil) {
+], function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil, Deferred, GitFileImpl, mGitUtil) {
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
 	var gitClient = new mGitClient.GitService(serviceRegistry);
 	var sshService = new mSshTools.SshService(serviceRegistry);
@@ -242,6 +243,33 @@ define([
 		{source: "Name", variableName: "commitName"}
 		],
 		uriTemplate: "http://git.eclipse.org/c{+EclipseGitLocation}/commit/?id={+commitName}"
+	});
+	
+	var tryParentRelative = true;
+	function makeParentRelative(location) {
+		if (tryParentRelative) {
+			try {
+				if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
+					return location.substring(parent.location.href.indexOf(parent.location.host) + parent.location.host.length);
+				} else {
+					tryParentRelative = false;
+				}
+			} catch (e) {
+				tryParentRelative = false;
+			}
+		}
+		return location;
+	}
+	
+	var url = new URL(window.location.href);
+	temp.href = "../../gitapi/";
+	var gitBase = makeParentRelative(temp.href);
+	var service = new GitFileImpl();
+
+	provider.registerService("orion.core.file", service, {
+		Name: 'Git File System',
+		top: gitBase,
+		pattern: gitBase
 	});
 
 	var base = new URL("../../gitapi/diff/", window.location.href).href;
