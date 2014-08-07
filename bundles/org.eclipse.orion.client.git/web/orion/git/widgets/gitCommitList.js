@@ -700,6 +700,7 @@ define([
 						showParentLink: false,
 						showCommitter: false,
 						showCommit: false,
+						showGerrit: false,
 						simple: true,
 					});
 					commitInfo.display();
