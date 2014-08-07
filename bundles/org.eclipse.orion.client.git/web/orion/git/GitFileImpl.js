@@ -26,11 +26,10 @@ define(["orion/xhr","orion/encoding-shim", "orion/URL-shim"], function(xhr) {
 			if (fetchLocation.indexOf("?depth=") === -1) { //$NON-NLS-0$
 				fetchLocation += "?depth=1"; //$NON-NLS-0$
 			}
-			// console.log("get children");
-			return xhr("GET", fetchLocation,{
+			return xhr("GET", fetchLocation,{ //$NON-NLS-0$
 				headers: {
-					"Orion-Version": "1",
-					"Content-Type": "charset=UTF-8"
+					"Orion-Version": "1", //$NON-NLS-0$  //$NON-NLS-1$
+					"Content-Type": "charset=UTF-8" //$NON-NLS-0$  //$NON-NLS-1$
 				},
 				timeout: 15000
 			}).then(function(result) {
@@ -61,36 +60,36 @@ define(["orion/xhr","orion/encoding-shim", "orion/URL-shim"], function(xhr) {
 					Children: children
 				};
 				result.Parents = [];
-				result.Name = "/";
+				result.Name = "/"; //$NON-NLS-0$ 
 				return result;
 			})
 		},
 		createProject: function(url, projectName, serverPath, create) {
-			throw "Not supported";
+			throw "Not supported"; //$NON-NLS-0$ 
 		},
 		createFolder: function(parentLocation, folderName) {
-			throw "Not supported";
+			throw "Not supported"; //$NON-NLS-0$ 
 		},
 		createFile: function(parentLocation, fileName) {
-			throw "Not supported";
+			throw "Not supported"; //$NON-NLS-0$ 
 		},
 		deleteFile: function(location) {
-			throw "Not supported";
+			throw "Not supported"; //$NON-NLS-0$ 
 		},
 		moveFile: function(sourceLocation, targetLocation, name) {
-			throw "Not supported";
+			throw "Not supported"; //$NON-NLS-0$ 
 		},
 		copyFile: function(sourceLocation, targetLocation, name) {
-			throw "Not supported";
+			throw "Not supported"; //$NON-NLS-0$ 
 		},
 		read: function(location, isMetadata) {
 			var url = new URL(location, window.location);
 			if (isMetadata) {
-				url.query.set("parts", "meta");
+				url.query.set("parts", "meta"); //$NON-NLS-0$  //$NON-NLS-1$
 			}
 			return xhr("GET", url.href, {
 				timeout: 15000,
-				headers: { "Orion-Version": "1" },
+				headers: { "Orion-Version": "1" }, //$NON-NLS-0$  //$NON-NLS-1$
 				log: false
 			}).then(function(result) {
 				if (isMetadata) {
@@ -101,24 +100,24 @@ define(["orion/xhr","orion/encoding-shim", "orion/URL-shim"], function(xhr) {
 			});
 		},
 		write: function(location, contents, args) {
-			throw "Not supported";
+			throw "Not supported"; //$NON-NLS-0$ 
 		},
 		remoteImport: function(targetLocation, options) {
-			throw "Not supported";
+			throw "Not supported"; //$NON-NLS-0$ 
 		},
 		remoteExport: function(sourceLocation, options) {
-			throw "Not supported";
+			throw "Not supported"; //$NON-NLS-0$ 
 		},
 		readBlob: function(location) {
-			return xhr("GET", location, {
-				responseType: "arraybuffer",
+			return xhr("GET", location, { //$NON-NLS-0$ 
+				responseType: "arraybuffer", //$NON-NLS-0$ 
 				timeout: 15000
 			}).then(function(result) {
 				return result.response;
 			});
 		},
 		writeBlob: function(location, contents, args) {
-			throw "Not supported";
+			throw "Not supported"; //$NON-NLS-0$ 
 		}
 	};
 	GitFileImpl.prototype.constructor = GitFileImpl;
