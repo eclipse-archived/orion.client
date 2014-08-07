@@ -41,7 +41,9 @@ define({
 	"Diffs": "Changes",
 	"More": "More",
 	"MoreCommits": "More commits for \"${0}\"",
+	"MoreStashCommits" : "More stashed commits",
 	"MoreCommitsProgress": "Loading more commits for \"${0}\"...",
+	"MoreStashCommitsProgress": "Loading more stashed commits...",
 	"MoreBranches": "More branches for \"${0}\"",
 	"MoreBranchesProgress": "Loading more branches for \"${0}\"...",
 	"MoreTags": "More tags",
@@ -386,6 +388,7 @@ define({
 	"Ignore": "Ignore",
 	"Your changes to the selected files will be discarded and cannot be recovered.": "Your changes to the selected files will be discarded and cannot be recovered.",
 	"Getting git log": "Getting git log",
+	"Getting stashed changes...": "Getting stashed changes...",
 	"Active Branch Log": "Git Log (Active Branch)",
 	"Show the log for the active local branch": "Show the log for the active local branch",
 	"Remote Branch Log": "Git Log (Remote Branch)",
@@ -458,5 +461,10 @@ define({
 	"FileSelected": "${0} file selected",
 	"FilesSelected": "${0} files selected",
 	"CommitPush": "Commit and Push",
-	"Commits and pushes files to the default remote": "Commits and pushes files to the default remote"
+	"Commits and pushes files to the default remote": "Commits and pushes files to the default remote",
+	"Stash" : "Stash",
+	"Stash all current changes away" : "Stash all current changes away",
+	"Drop" : "Drop",
+	"Drop the commit from the stash list" : "Drop the commit from the stash list",
+	"Apply" : "Apply"
 });

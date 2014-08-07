@@ -170,7 +170,7 @@ exports.GitRepositoryExplorer = (function() {
 					that.displayRepositories(repositories, "mini"); //$NON-NLS-0$
 					that.statusDeferred = that.displayStatus(repositories[0]);
 					that.displayCommits(repositories[0]);
-					that.displayBranches(repositories[0]); //$NON-NLS-0$
+					that.displayBranches(repositories[0]);
 					if (that.showTagsSeparately) {
 						that.displayTags(repositories[0]);
 					}

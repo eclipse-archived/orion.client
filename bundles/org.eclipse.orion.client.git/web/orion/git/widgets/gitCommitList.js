@@ -98,6 +98,16 @@ define([
 				return that.incomingCommits = resp.Children;
 			});
 		},
+		_getStash: function() {
+			var that = this;
+			var repository = this.root.repository;
+			var stashLocation =  this.stashLocation || repository.StashLocation + pageSizeQuery;
+			return that.progressService.progress(that.gitClient.doStashList(stashLocation), messages["Getting stashed changes..."]).then(function(resp) {
+				return that.stashedChanges = resp;
+			}, function(error){
+				that.handleError(error);
+			});
+		}, 
 		getLocalBranch: function() {
 			var ref = this.log ? this.log.toRef : this.currentBranch;
 			if (ref && ref.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
@@ -219,6 +229,9 @@ define([
 								},
 								{
 									Type: "Synchronized" //$NON-NLS-0$
+								},
+								{
+									Type: "Stash" //$NON-NLS-0$
 								}
 							]));
 						}	
@@ -289,7 +302,13 @@ define([
 				} else {
 					onComplete(that.processChildren(parentItem, []));
 				}
-			} else if (parentItem.Type === "Commit") {  //$NON-NLS-0$
+			} else if (parentItem.Type === "Stash"){ //$NON-NLS-0$
+				return Deferred.when(that.stashedChanges || that._getStash(), function(stash) {
+					var children = stash.Children;
+					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, stash, "MoreStashCommits")));
+				});
+				
+			} else if (parentItem.Type === "Commit" || parentItem.Type === "StashCommit") {  //$NON-NLS-0$
 				onComplete(that.processChildren(parentItem, [{Type: "CommitChanges"}]));  //$NON-NLS-0$
 			} else {
 				onComplete([]);
@@ -298,7 +317,9 @@ define([
 		getId: function(/* item */ item){
 			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : ""); //$NON-NLS-0$
 		},
-		processMoreChildren: function(parentItem, children, item) {
+		processMoreChildren: function(parentItem, children, item, type) {
+			type = type || "MoreCommits"; /* use more commits by default */
+			
 			var fullList = parentItem.children;
 			if (fullList) {
 				var args = [fullList.length - 1, 1].concat(children);
@@ -307,7 +328,7 @@ define([
 				fullList = children;
 			}
 			if (item.NextLocation) {
-				fullList.push({Type: "MoreCommits", NextLocation: item.NextLocation}); //$NON-NLS-0$
+				fullList.push({Type: type, NextLocation: item.NextLocation}); //$NON-NLS-0$
 			}
 			return fullList;
 		},
@@ -345,6 +366,7 @@ define([
 		this.incomingActionScope = "IncomingActions"; //$NON-NLS-0$
 		this.outgoingActionScope = "OutgoingActions"; //$NON-NLS-0$
 		this.syncActionScope = "SynchronizedActions"; //$NON-NLS-0$
+		this.stashActionScope = "StashActions"; //$NON-NLS-0$
 		this.createCommands();
 	}
 	GitCommitListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
@@ -366,6 +388,7 @@ define([
 				item.children = null;
 			}
 			model.log = null;
+			model.stashedChanges = null;
 			model.logDeferred = new Deferred();
 			var progress = this.section ? this.section.createProgressMonitor() : null;
 			if (progress) progress.begin(messages["Getting git log"]);
@@ -490,6 +513,7 @@ define([
 			} else if (currentBranch && !this.simpleLog) {
 				var incomingActionScope = this.incomingActionScope;
 				var outgoingActionScope = this.outgoingActionScope;
+				var stashActionScope = this.stashActionScope;
 				
 				if (lib.node(actionsNodeScope)) {
 					commandService.destroy(actionsNodeScope);
@@ -581,6 +605,21 @@ define([
 						});
 					});
 					return td;
+				} else if (item.Type === "MoreStashCommits") { //$NON-NLS-1$ //$NON-NLS-0$
+					td.classList.add("gitCommitListMore"); //$NON-NLS-0$
+					var branch = model.getLocalBranch() || model.getRemoteBranch();
+					td.textContent = messages["MoreStashCommits"];
+					var listener;
+					td.addEventListener("click", listener = function() { //$NON-NLS-0$
+						td.removeEventListener("click", listener); //$NON-NLS-0$
+						td.textContent = messages["MoreStashCommitsProgress"];
+						model.stashLocation = item.NextLocation;
+						item.parent.more = true;
+						explorer.changedItem(item.parent).then(function() {
+							item.parent.more = false;
+						});
+					});
+					return td;
 				} else if (item.Type === "CommitChanges") { //$NON-NLS-0$
 					tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 					commit = item.parent;
@@ -633,7 +672,7 @@ define([
 						});
 						explorer2.display();
 					}, 0);
-				}  else if (item.Type !== "Commit") { //$NON-NLS-0$
+				}  else if (item.Type !== "Commit" && item.Type !== "StashCommit") { //$NON-NLS-0$
 					if (item.Type !== "NoCommits") { //$NON-NLS-0$
 						sectionItem.className = "gitCommitSectionTableItem"; //$NON-NLS-0$
 						createExpand();
@@ -689,6 +728,10 @@ define([
 					actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$
 					actionsArea.id = itemActionScope;
 					horizontalBox.appendChild(actionsArea);
+					
+					var repository = explorer.model.root.repository;
+					item.Clone = repository;
+					
 					explorer.commandService.renderCommands(itemActionScope, actionsArea, item, explorer, "tool"); //$NON-NLS-0$
 				}
 
