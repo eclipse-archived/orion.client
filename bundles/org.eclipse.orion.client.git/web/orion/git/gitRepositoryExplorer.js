@@ -500,6 +500,7 @@ define([
 			progressService: this.progressService
 		});
 		return explorer.display("/gitapi/tree/master" + repository.ContentLocation).then(function() {
+			explorer.myTree.expand(explorer.model.root);
 			if (this.treePath) {
 				explorer.select(this.treePath);
 			}
