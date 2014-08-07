@@ -280,6 +280,8 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil'
 			
 			providerElements.push(createProviderLink("Google OAuth", "../mixloginstatic/images/googleplus.png", confirmOAuth.bind(null, "google")));
 			
+			providerElements.push(createProviderLink("GitHub OAuth", "../mixloginstatic/images/GitHub-Mark-32px.png", confirmOAuth.bind(null, "github")));
+			
 			providerElements.push(createProviderLink("Mozilla Persona", "../mixloginstatic/images/persona.png",
 				alert.bind(null, "To link your account with a Persona, set your Orion email address above to match your Persona email address.")));
  

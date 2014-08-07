@@ -167,13 +167,13 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		}
 	}
 	
-	function createOAuthLink(openid) {
-		if (openid !== "" && openid !== null) {
+	function createOAuthLink(oauth) {
+		if (oauth !== "" && oauth !== null) {
 			var redirect = getRedirect();
 			if (redirect !== null && PageUtil.validateURLScheme(decodeURIComponent(redirect))) {
-				return "../login/oauth?oauth=google&redirect=" + redirect;
+				return "../login/oauth?oauth="+oauth+"&redirect=" + redirect;
 			} else {
-				return "../login/oauth?oauth=google";
+				return "../login/oauth?oauth="+oauth;
 			}
 		}
 	}
@@ -451,6 +451,12 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		}
 	}
 
+	function githubLogin( event ){
+		if( handleSelectionEvent( event ) ){
+			event.srcElement.click();
+		}
+	}
+	
 	domReady(function() {
 		addPersonaHandler(document.getElementById("personaLogin"));
 
@@ -629,8 +635,11 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		document.getElementById("googleLogin").href = createOpenIdLink("https://www.google.com/accounts/o8/id");
 		document.getElementById("googleLogin").addEventListener("keydown", googleLogin);
 
-		document.getElementById("googleLoginPlus").href = createOAuthLink("https://accounts.google.com/o/oauth2/auth");
+		document.getElementById("googleLoginPlus").href = createOAuthLink("google");
 		document.getElementById("googleLoginPlus").addEventListener("keydown", googleLoginPlus);
+		
+		document.getElementById("githubLogin").href = createOAuthLink("github");
+		document.getElementById("githubLogin").addEventListener("keydown", githubLogin);
 		
 		document.getElementById("orionLogin").addEventListener("click", revealLogin);
 		document.getElementById("orionLogin").onkeydown = revealLogin;
