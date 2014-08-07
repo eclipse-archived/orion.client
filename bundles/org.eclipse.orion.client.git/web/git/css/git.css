@@ -154,6 +154,10 @@ table .sectionTable {
 	border: 1px solid #7fa4c0 !important;
 }
 
+.gitNavColumn {
+	border-bottom: 0 !important;
+}
+
 .gitCommitListMore {
 	text-align: center;
 	font-size: 10pt;

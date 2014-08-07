@@ -61,7 +61,7 @@ define(["orion/xhr","orion/encoding-shim", "orion/URL-shim"], function(xhr) {
 					Children: children
 				};
 				result.Parents = [];
-				result.Name = "GitRoot";
+				result.Name = "/";
 				return result;
 			})
 		},

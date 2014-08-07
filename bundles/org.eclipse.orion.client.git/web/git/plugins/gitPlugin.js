@@ -261,9 +261,7 @@ define([
 		return location;
 	}
 	
-	var url = new URL(window.location.href);
-	temp.href = "../../gitapi/";
-	var gitBase = makeParentRelative(temp.href);
+	var gitBase = makeParentRelative(new URL("../../gitapi/", window.location.href).href);
 	var service = new GitFileImpl();
 
 	provider.registerService("orion.core.file", service, {

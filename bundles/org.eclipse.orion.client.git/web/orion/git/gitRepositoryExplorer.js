@@ -17,6 +17,7 @@ define([
 	'orion/git/widgets/gitBranchList',
 	'orion/git/widgets/gitConfigList',
 	'orion/git/widgets/gitRepoList',
+	'orion/git/widgets/gitFileList',
 	'orion/git/widgets/gitCommitInfo',
 	'orion/section',
 	'orion/selection',
@@ -27,7 +28,7 @@ define([
 	'orion/globalCommands',
 	'orion/objects',
 	'orion/Deferred'
-], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mGitCommitInfo, mSection, mSelection, lib, URITemplate, PageUtil, mFileUtils, mGlobalCommands, objects, Deferred) {
+], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mGitFileList, mGitCommitInfo, mSection, mSelection, lib, URITemplate, PageUtil, mFileUtils, mGlobalCommands, objects, Deferred) {
 	
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 	
@@ -171,6 +172,18 @@ define([
 		}
 	};
 	
+	GitRepositoryExplorer.prototype.destroyTree = function() {
+		if (this.treeNavigator) {
+			this.treeNavigator.destroy();
+			this.treeNavigator = null;
+		}
+		if (this.treeSection) {
+			this.accordion.remove(this.treeSection);
+			this.treeSection.destroy();
+			this.treeSection = null;
+		}
+	};
+	
 	GitRepositoryExplorer.prototype.destroyStatus = function() {
 		if (this.statusNavigator) {
 			this.statusNavigator.destroy();
@@ -234,6 +247,7 @@ define([
 		lib.empty(lib.node('table')); //$NON-NLS-0$
 		this.destroyRepositories();
 		this.destroyBranches();
+		this.destroyTree();
 		this.destroyCommits();
 		this.destroyStatus();
 		this.destroyTags();
@@ -250,7 +264,8 @@ define([
 		this.displayRepositories(this.repositories, ""); //$NON-NLS-0$
 		if (repository) {
 			this.setSelectedCommit(this.commit);
-			this.displayBranches(repository); //$NON-NLS-0$
+			this.displayBranches(repository); 
+			this.displayTree(repository);
 			this.setSelectedRef(this.reference);
 			if (this.showTagsSeparately) {
 				this.displayTags(repository);
@@ -275,6 +290,11 @@ define([
 		} else {
 			this.statusDeferred = this.displayStatus(this.repository);
 		}
+	};
+	
+	GitRepositoryExplorer.prototype.setSelectedPath = function(path) {
+		this.treePath = path;
+		this.displayCommits(this.repository);
 	};
 	
 	GitRepositoryExplorer.prototype.display = function(location, selection, processURLs) {
@@ -429,7 +449,61 @@ define([
 			if (this.reference) {
 				explorer.select(this.reference);
 			}
+		}.bind(this));
+	};
+	
+	GitRepositoryExplorer.prototype.calculateTreePath = function() {
+		var path = "";
+	 	if (this.treePath) {
+	 		var parents = this.treePath.Parents;
+	 		if (parents.length) {
+	 			path = this.treePath.Location.substring(parents[parents.length -1].Location.length);
+	 		}
+	 	}
+		return path;
+	};
+	
+	GitRepositoryExplorer.prototype.displayTree = function(repository) {	
+		this.destroyTree();
+		
+		var parent = lib.node('sidebar'); //$NON-NLS-0$
+		var section = this.treeSection = new mSection.Section(parent, {
+			id: "treeSection", //$NON-NLS-0$
+			title: "/" + this.calculateTreePath(),
+			iconClass: ["core-sprite-outline"], //$NON-NLS-0$
+			slideout: true,
+			content: '<div id="treeNode"></div>', //$NON-NLS-0$
+			canHide: true,
+			hidden: true,
+			noTwistie: NO_TWISTIES,
+			preferenceService: this.preferencesService
 		});
+		this.accordion.add(section);
+		
+		var selection = this.treeSelection = new mSelection.Selection(this.registry, "orion.selection.tree"); //$NON-NLS-0$
+		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
+			if (!event.selection || this.treePath === event.selection) return;
+			this.setSelectedPath(event.selection);
+			this.treeSection.setTitle("/" + this.calculateTreePath());
+		}.bind(this));
+		var explorer  = this.treeNavigator = new mGitFileList.GitFileListExplorer({
+			serviceRegistry: this.registry,
+			commandRegistry: this.commandService,
+			parentId:"treeNode", //$NON-NLS-0$
+			repository: repository,
+			fileClient: this.fileClient,
+			section: section,
+			selection: selection,
+			selectionPolicy: "singleSelection", //$NON-NLS-0$
+			handleError: this.handleError.bind(this),
+			gitClient: this.gitClient,
+			progressService: this.progressService
+		});
+		return explorer.display("/gitapi/tree/master" + repository.ContentLocation).then(function() {
+			if (this.treePath) {
+				explorer.select(this.treePath);
+			}
+		}.bind(this));
 	};
 	
 	GitRepositoryExplorer.prototype.displayStatus = function(repository) {	
@@ -495,6 +569,7 @@ define([
 			section: section,
 			selection: selection,
 			remoteBranch: this.reference,
+			repositoryPath: this.calculateTreePath(),
 			handleError: this.handleError.bind(this),
 			root: {
 				Type: "CommitRoot", //$NON-NLS-0$

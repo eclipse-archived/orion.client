@@ -184,7 +184,7 @@ exports.Explorer = (function() {
 				lib.empty(existing);
 			}
 			if (model){
-				model.rootId = treeId;
+				model.rootId = treeId + "Root";
 			}
 			this.model = model;
 			this._parentId = parentId;

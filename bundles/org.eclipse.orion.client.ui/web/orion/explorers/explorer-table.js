@@ -1093,6 +1093,7 @@ define([
 							deferred.resolve(tree);
 						},
 						navHandlerFactory: self.navHandlerFactory,
+						showRoot: self.showRoot,
 						setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), //$NON-NLS-0$
 						selectionPolicy: self.renderer.selectionPolicy, 
 						onCollapse: function(model) {

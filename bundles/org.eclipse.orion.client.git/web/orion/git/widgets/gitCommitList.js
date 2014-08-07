@@ -42,6 +42,7 @@ define([
 		this.parentId = options.parentId;
 		this.remoteBranch = options.remoteBranch;
 		this.logDeferred = new Deferred();
+		this.repositoryPath = options.repositoryPath || "";
 	}
 	GitCommitListModel.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitCommitListModel.prototype, /** @lends orion.git.GitCommitListModel.prototype */ {
@@ -66,7 +67,7 @@ define([
 		_getLog: function() {
 			var that = this;
 			var logMsg = that.location ? messages["Getting git log"] : i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], that.currentBranch.Name);
-			return that.progressService.progress(that.gitClient.doGitLog(that.location || (that.currentBranch.CommitLocation + pageSizeQuery)), logMsg).then(function(resp) {
+			return that.progressService.progress(that.gitClient.doGitLog(that.location || (that.currentBranch.CommitLocation + that.repositoryPath + pageSizeQuery)), logMsg).then(function(resp) {
 				if (that.location && resp.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
 					return that.progressService.progress(that.gitClient.doGitLog(resp.CommitLocation), logMsg).then(function(resp) { //$NON-NLS-0$
 						return that.log = resp;
@@ -356,6 +357,7 @@ define([
 		this.remoteBranch = options.remoteBranch;
 		this.simpleLog = options.simpleLog;
 		this.selectionPolicy = options.selectionPolicy;
+		this.repositoryPath = options.repositoryPath;
 		
 		this.incomingActionScope = "IncomingActions"; //$NON-NLS-0$
 		this.outgoingActionScope = "OutgoingActions"; //$NON-NLS-0$
@@ -411,6 +413,7 @@ define([
 				location: this.location,
 				handleError: this.handleError,
 				parentId: this.parentId,
+				repositoryPath: this.repositoryPath,
 				remoteBranch: this.remoteBranch,
 				simpleLog: this.simpleLog
 			});
@@ -450,9 +453,10 @@ define([
 			var simpleLogCommand = new mCommands.Command({
 				id: "eclipse.orion.git.commit.simpleLog", //$NON-NLS-0$
 				callback: function(data) {
-					that.model.simpleLog = !that.model.simpleLog;
+					var model = that.model;
+					model.simpleLog = !model.simpleLog;
 					that.simpleLog = !that.simpleLog;
-					that.model.location = that.simpleLog ? that.model.getRemoteBranch().CommitLocation : null;
+					model.location = that.simpleLog ? model.getRemoteBranch().CommitLocation + model.repositoryPath : null;
 					data.handler.changedItem();
 				},
 				visibleWhen: function(item) {
