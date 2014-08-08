@@ -243,6 +243,10 @@ table .sectionTable {
 	padding-top: 15px;
 }
 
+.sectionClosed .sectionActions {
+	display: none;
+}
+
 .gitCommitTag {
 	border: 1px solid #ccc;
 	background-color: LemonChiffon;
