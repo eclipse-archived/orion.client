@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	'orion/selection'], function(lib, mHTMLFragments, objects, Selection){
+define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	'orion/selection'], function(EventTarget, lib, mHTMLFragments, objects, Selection){
 	
 	/**
 	 * Generates a section
@@ -32,8 +32,13 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 	 * @param {Boolean} [options.keepHeader] if true the embedded explorer will keep its header
 	 * @param {Boolean} [options.noTwisties] if true the twisties will not be displayed
 	 * @param {Function} [options.onExpandCollapse] a function that will be called when the expanded/collapsed state changes
+	 *
+	 * @borrows orion.editor.EventTarget#addEventListener as #addEventListener
+	 * @borrows orion.editor.EventTarget#removeEventListener as #removeEventListener
+	 * @borrows orion.editor.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function Section(parent, options) {
+		EventTarget.attach(this);
 		
 		var that = this;
 		
@@ -478,6 +483,7 @@ define(['orion/webui/littlelib', 'orion/commonHTMLFragments', 'orion/objects', 	
 			if (this._onExpandCollapse) {
 				this._onExpandCollapse(isExpanded, this);
 			}
+			this.dispatchEvent({type: "toogle", isExpanded: isExpanded}); //$NON-NLS-0$
 		},
 		
 		_expand: function() {

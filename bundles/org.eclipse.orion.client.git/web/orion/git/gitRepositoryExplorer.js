@@ -513,11 +513,16 @@ define([
 			gitClient: this.gitClient,
 			progressService: this.progressService
 		});
-		return explorer.display("/gitapi/tree/master" + repository.ContentLocation).then(function() {
-			explorer.myTree.expand(explorer.model.root);
-			if (this.treePath) {
-				explorer.select(this.treePath);
-			}
+		section.addEventListener("toogle", function(e) { //$NON-NLS-0$
+			if (!e.isExpanded) return;
+			var model = this.commitsNavigator.model;
+			var location = (model.simpleLog ? model.getRemoteBranch() : model.getLocalBranch()).TreeLocation;
+			explorer.display(location).then(function() {
+				explorer.myTree.expand(explorer.model.root);
+				if (this.treePath) {
+					explorer.select(this.treePath);
+				}
+			}.bind(this));
 		}.bind(this));
 	};
 	
