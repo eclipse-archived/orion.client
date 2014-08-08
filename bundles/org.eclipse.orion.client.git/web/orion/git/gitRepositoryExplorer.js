@@ -410,7 +410,7 @@ define([
 		var parent = lib.node('sidebar'); //$NON-NLS-0$
 		var section = this.branchesSection = new mSection.Section(parent, {
 			id: "branchSection", //$NON-NLS-0$
-			title: this.showTagsSeparately ? messages["Branches"] : (this.reference ? this.reference.Name : messages['BranchesTags']),
+			title: " ", //$NON-NLS-0$
 			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="branchNode"></div>', //$NON-NLS-0$
@@ -452,6 +452,20 @@ define([
 		}.bind(this));
 	};
 	
+	GitRepositoryExplorer.prototype.setBranchesTitle = function() {
+		var title = this.showTagsSeparately ? messages["Branches"] : messages['BranchesTags'];
+		var explorer = this.commitsNavigator;
+		if (!explorer) return;
+		var localBranch = explorer.model.getLocalBranch();
+		var remoteBranch = explorer.model.getRemoteBranch();
+		if (localBranch || remoteBranch) {
+			title = localBranch.Name + " \u2794 " + remoteBranch.Name;  //$NON-NLS-0$
+		} else {
+			title = (localBranch || remoteBranch).Name;
+		}
+		this.branchesSection.setTitle(title);
+	};
+	
 	GitRepositoryExplorer.prototype.calculateTreePath = function() {
 		var path = "";
 	 	if (this.treePath) {
@@ -469,7 +483,7 @@ define([
 		var parent = lib.node('sidebar'); //$NON-NLS-0$
 		var section = this.treeSection = new mSection.Section(parent, {
 			id: "treeSection", //$NON-NLS-0$
-			title: "/" + this.calculateTreePath(),
+			title: "/" + this.calculateTreePath(), //$NON-NLS-0$
 			iconClass: ["core-sprite-outline"], //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="treeNode"></div>', //$NON-NLS-0$
@@ -484,7 +498,7 @@ define([
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			if (!event.selection || this.treePath === event.selection) return;
 			this.setSelectedPath(event.selection);
-			this.treeSection.setTitle("/" + this.calculateTreePath());
+			this.treeSection.setTitle("/" + this.calculateTreePath()); //$NON-NLS-0$
 		}.bind(this));
 		var explorer  = this.treeNavigator = new mGitFileList.GitFileListExplorer({
 			serviceRegistry: this.registry,
@@ -579,7 +593,7 @@ define([
 		});
 		return this.statusDeferred.then(function() {
 			return explorer.display().then(function() {
-				this.branchesSection.setTitle(explorer.model.getRemoteBranch().Name);
+				this.setBranchesTitle();
 				if (this.commit) {
 					explorer.select(this.commit);
 				}

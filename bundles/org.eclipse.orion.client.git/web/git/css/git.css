@@ -185,6 +185,11 @@ table .sectionTable {
 	overflow: hidden;
 }
 
+.sectionTitle {
+	font-size: 14px;
+	color: #444;
+}
+
 .gitCommitListLoaded {
 	border: 1px solid #ddd;
 }
