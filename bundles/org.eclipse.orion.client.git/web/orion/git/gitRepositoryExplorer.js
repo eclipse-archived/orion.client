@@ -377,9 +377,12 @@ define([
 		this.accordion.add(section);
 		
 		var selection = this.repositoriesSelection = new mSelection.Selection(this.registry, "orion.selection.repo"); //$NON-NLS-0$
-		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-			if (!event.selection) return;
-			window.location.hash = event.selection.Location;
+		section.addEventListener("toogle", function(e) { //$NON-NLS-0$
+			if (!e.isExpanded) {
+				var selected = selection.getSelection();
+				if (!selected) return;
+				window.location.hash = selected.Location;
+			}
 		}.bind(this));
 		var explorer = this.repositoriesNavigator = new mGitRepoList.GitRepoListExplorer({
 			serviceRegistry: this.registry,
@@ -422,9 +425,12 @@ define([
 		this.accordion.add(section);
 
 		var selection = this.branchesSelection = new mSelection.Selection(this.registry, "orion.selection.ref"); //$NON-NLS-0$
-		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-			if (!event.selection || this.reference === event.selection) return;
-			this.setSelectedRef(event.selection);
+		section.addEventListener("toogle", function(e) { //$NON-NLS-0$
+			if (!e.isExpanded) {
+				var selected = selection.getSelection();
+				if (!selected || this.reference === selected) return;
+				this.setSelectedRef(selected);
+			}
 		}.bind(this));
 		var explorer = this.branchesNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
