@@ -515,8 +515,14 @@ define([
 		});
 		section.addEventListener("toogle", function(e) { //$NON-NLS-0$
 			if (!e.isExpanded) return;
+			var location;
 			var model = this.commitsNavigator.model;
-			var location = (model.simpleLog ? model.getRemoteBranch() : model.getLocalBranch()).TreeLocation;
+			if (this.commit && this.commit.Type === "Commit") { //$NON-NLS-0$
+				location = this.commit.TreeLocation;
+			} else {
+				location = (model.simpleLog ? model.getRemoteBranch() : model.getLocalBranch()).TreeLocation;
+			}
+			if (!location) return;
 			explorer.display(location).then(function() {
 				explorer.myTree.expand(explorer.model.root);
 				if (this.treePath) {
