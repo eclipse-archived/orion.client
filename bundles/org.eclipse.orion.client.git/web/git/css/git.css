@@ -188,6 +188,7 @@ table .sectionTable {
 .sectionTitle {
 	font-size: 14px;
 	color: #444;
+	padding-bottom: 3px;
 }
 
 .gitCommitListLoaded {
@@ -245,6 +246,10 @@ table .sectionTable {
 
 .sectionClosed .sectionActions {
 	display: none;
+}
+
+.sectionClosed:hover .sectionActions {
+	display: block;
 }
 
 .gitCommitTag {
