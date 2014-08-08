@@ -211,6 +211,8 @@ define([
 							onComplete(that.processChildren(parentItem, [
 								{
 									Type: "Uncommited",  //$NON-NLS-0$
+									selectable: false,
+									isNotSelectable: true,
 									children: [
 										that.root.repository.status
 									]
