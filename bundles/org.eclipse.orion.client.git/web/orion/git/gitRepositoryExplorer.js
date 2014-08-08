@@ -495,11 +495,6 @@ define([
 		this.accordion.add(section);
 		
 		var selection = this.treeSelection = new mSelection.Selection(this.registry, "orion.selection.tree"); //$NON-NLS-0$
-		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-			if (!event.selection || this.treePath === event.selection) return;
-			this.setSelectedPath(event.selection);
-			this.treeSection.setTitle("/" + this.calculateTreePath()); //$NON-NLS-0$
-		}.bind(this));
 		var explorer  = this.treeNavigator = new mGitFileList.GitFileListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
@@ -514,21 +509,27 @@ define([
 			progressService: this.progressService
 		});
 		section.addEventListener("toogle", function(e) { //$NON-NLS-0$
-			if (!e.isExpanded) return;
-			var location;
-			var model = this.commitsNavigator.model;
-			if (this.commit && this.commit.Type === "Commit") { //$NON-NLS-0$
-				location = this.commit.TreeLocation;
-			} else {
-				location = (model.simpleLog ? model.getRemoteBranch() : model.getLocalBranch()).TreeLocation;
-			}
-			if (!location) return;
-			explorer.display(location).then(function() {
-				explorer.myTree.expand(explorer.model.root);
-				if (this.treePath) {
-					explorer.select(this.treePath);
+			if (e.isExpanded) {
+				var location;
+				var model = this.commitsNavigator.model;
+				if (this.commit && this.commit.Type === "Commit") { //$NON-NLS-0$
+					location = this.commit.TreeLocation;
+				} else {
+					location = (model.simpleLog ? model.getRemoteBranch() : model.getLocalBranch()).TreeLocation;
 				}
-			}.bind(this));
+				if (!location) return;
+				explorer.display(location).then(function() {
+					explorer.myTree.expand(explorer.model.root);
+					if (this.treePath) {
+						explorer.select(this.treePath);
+					}
+				}.bind(this));
+			} else {
+				var selected = selection.getSelection();
+				if (!selected || this.treePath === selected) return;
+				this.setSelectedPath(selected);
+				this.treeSection.setTitle("/" + this.calculateTreePath()); //$NON-NLS-0$
+			}
 		}.bind(this));
 	};
 	
