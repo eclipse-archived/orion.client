@@ -212,10 +212,7 @@ define([
 								{
 									Type: "Uncommited",  //$NON-NLS-0$
 									selectable: false,
-									isNotSelectable: true,
-									children: [
-										that.root.repository.status
-									]
+									isNotSelectable: true
 								},
 								{
 									Type: "Outgoing", //$NON-NLS-0$
@@ -246,6 +243,10 @@ define([
 					if (progress) progress.done();
 					that.handleError(error);
 				});
+			} else if (parentItem.Type === "Uncommited") { //$NON-NLS-0$
+				onComplete(that.processChildren(parentItem, [
+					that.root.repository.status
+				]));
 			} else if (parentItem.Type === "Incoming") { //$NON-NLS-0$
 				if (tracksRemoteBranch) {
 					Deferred.when(that.incomingCommits || that._getIncoming(), function(incomingCommits) {
