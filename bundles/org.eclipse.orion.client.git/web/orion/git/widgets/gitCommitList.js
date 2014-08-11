@@ -229,10 +229,11 @@ define([
 								},
 								{
 									Type: "Synchronized" //$NON-NLS-0$
-								},
+								}/*,
 								{
+									TODO: Remove stash references when the view gets stabilized
 									Type: "Stash" //$NON-NLS-0$
-								}
+								}*/
 							]));
 						}	
 					}, function(error){

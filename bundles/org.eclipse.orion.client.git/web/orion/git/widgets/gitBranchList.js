@@ -39,7 +39,7 @@ define([
 		getRoot: function(onItem){
 			onItem(this.root);
 		},
-		getChildren: function(parentItem, onComplete){	
+		getChildren: function(parentItem, onComplete){
 			var that = this;
 			var progress, msg;
 			var repository = parentItem.repository || parentItem.parent.repository;
@@ -98,6 +98,9 @@ define([
 					if (that.showTags) {
 						remotes.push({Type: "TagRoot", Name: messages["tags"]}); //$NON-NLS-0$
 					}
+					
+					remotes.push({Type: "StashesRoot", Name: messages["stashes"]});
+					
 					onComplete(that.processChildren(parentItem, remotes));
 					if (remotes.length === 0 && this.section){
 						this.section.setTitle(messages["No Remote Branches"]);
@@ -119,6 +122,8 @@ define([
 				});
 			} else if (this.showHistory && (parentItem.Type === "Branch" || parentItem.Type === "RemoteTrackingBranch" || parentItem.Type === "Tag")) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				onComplete(that.processChildren(parentItem, [{Type: "CommitList"}]));  //$NON-NLS-0$
+			} else if (parentItem.Type === "StashesRoot") { //$NON-NLS-0$
+				onComplete(that.processChildren(parentItem, [{Type: "StashList"}]));
 			} else {
 				onComplete([]);
 			}
@@ -241,7 +246,7 @@ define([
 					}
 					
 					var actionsID, title, description, subDescription, titleClass = "", titleLink;
-					if (item.Type === "MoreBranches" || item.Type === "MoreTags") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					if (item.Type === "MoreBranches" || item.Type === "MoreTags" || item.Type === "MoreStashes") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						td.classList.add("gitCommitListMore"); //$NON-NLS-0$
 						td.textContent = i18nUtil.formatMessage(messages[item.Type], item.parent.Name);
 						var listener;
@@ -277,7 +282,7 @@ define([
 						actionsID = "tagActionsArea"; //$NON-NLS-0$
 					} else if (item.parent.Type === "RemoteRoot") { //$NON-NLS-0$
 						createExpand();
-						if (item.Type !== "TagRoot") { //$NON-NLS-0$
+						if (item.Type !== "TagRoot" && item.Type !== "StashesRoot") { //$NON-NLS-0$
 							description = item.GitUrl || item.Description || item.parent.repository.ContentLocation;
 						}
 						actionsID = "remoteActionsArea"; //$NON-NLS-0$
@@ -307,6 +312,45 @@ define([
 								statusService: explorer.statusService,
 								parentId: horizontalBox,
 								location: item.parent.CommitLocation + "?page=1&pageSize=10", //$NON-NLS-0$
+								simpleLog: true,
+								handleError: explorer.handleError,
+								root: {
+									Type: "CommitRoot", //$NON-NLS-0$
+									repository: explorer.model.root.repository,
+									Name: item.parent.Name
+								}
+							});
+						
+							commitListExplorer.display().then(function() {
+								horizontalBox.classList.add("gitCommitListLoaded"); //$NON-NLS-0$
+								that.updateExpandVisuals(parentRow, true);
+							}, function() {
+								that.updateExpandVisuals(parentRow, true);
+							});
+						}, 0);
+						return td;
+					} else if (item.Type === "StashList") { //$NON-NLS-0$
+						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
+					
+						setTimeout(function() {
+							var parentRow = lib.node(explorer.model.getId(item.parent));
+							that.updateExpandVisuals(parentRow, "progress"); //$NON-NLS-0$
+							
+							var loading = document.createElement("div"); //$NON-NLS-0$
+							loading.textContent = messages["Loading..."];
+							loading.className = "gitLoading"; //$NON-NLS-0$
+							horizontalBox.appendChild(loading);
+
+							horizontalBox.id = "commitListContent" + item.parent.Name; //$NON-NLS-0$
+							var commitListExplorer = new mGitCommitList.GitCommitListExplorer({
+								serviceRegistry: explorer.registry,
+								commandRegistry: explorer.commandService,
+								fileClient: explorer.fileClient,
+								gitClient: explorer.gitClient,
+								progressService: explorer.progressService,
+								statusService: explorer.statusService,
+								parentId: horizontalBox,
+								location: explorer.model.root.repository.StashLocation + "?page=1&pageSize=10", //$NON-NLS-0$
 								simpleLog: true,
 								handleError: explorer.handleError,
 								root: {

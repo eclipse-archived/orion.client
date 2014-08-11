@@ -63,7 +63,7 @@ define({
 	"Date": "Date",
 	"Actions": "Actions",
 	"Branches": "Branches",
-	"BranchesTags": "Branches and Tags",
+	"BranchesTagsStashes": "Branches, Tags and Stashes",
 	"Tags": "Tags",
 	"Stage": "Stage",
 	"Unstaged removal": "Unstaged removal",
@@ -466,5 +466,8 @@ define({
 	"Stash all current changes away" : "Stash all current changes away",
 	"Drop" : "Drop",
 	"Drop the commit from the stash list" : "Drop the commit from the stash list",
-	"Apply" : "Apply"
+	"Apply" : "Apply",
+	"Pop Stash" : "Pop Stash",
+	"Apply the most recently stashed change to your active branch and drop it from the stashes" : "Apply the most recently stashed change to your active branch and drop it from the stashes",
+	"stashes" : "stashes"
 });

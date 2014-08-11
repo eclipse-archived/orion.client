@@ -2922,7 +2922,7 @@ var exports = {};
 				});
 			},
 			visibleWhen : function(item){
-				return item.Type === "Clone";
+				return true;
 			}
 		});
 		commandService.addCommand(createStashCommand);
@@ -2960,6 +2960,23 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(applyStashCommand);
+		
+		var popStashCommand = new mCommands.Command({
+			name : messages["Pop Stash"],
+			tooltip : messages["Apply the most recently stashed change to your active branch and drop it from the stashes"],
+			id : "eclipse.orion.git.popStash",
+			callback : function(data){
+				stashLogic.pop(data).then(function(resp){
+					refresh();
+				}, function(error){
+					displayErrorOnStatus(error);
+				});
+			},
+			visibleWhen : function(item){
+				return item.Type === "Clone";
+			}
+		});
+		commandService.addCommand(popStashCommand);
 	};
 
 }());

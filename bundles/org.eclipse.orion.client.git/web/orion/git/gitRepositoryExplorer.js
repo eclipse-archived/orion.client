@@ -268,7 +268,7 @@ exports.GitRepositoryExplorer = (function() {
 		var tableNode = lib.node( 'table' ); //$NON-NLS-0$
 		var titleWrapper = new mSection.Section(tableNode, {
 			id: "branchSection", //$NON-NLS-0$
-			title: this.showTagsSeparately ? messages["Branches"] : messages['BranchesTags'],
+			title: this.showTagsSeparately ? messages["Branches"] : messages['BranchesTagsStashes'],
 			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="branchNode"></div>', //$NON-NLS-0$
