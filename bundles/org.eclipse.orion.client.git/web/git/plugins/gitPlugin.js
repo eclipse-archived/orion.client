@@ -262,7 +262,7 @@ define([
 	}
 	
 	var gitBase = makeParentRelative(new URL("../../gitapi/", window.location.href).href);
-	var service = new GitFileImpl();
+	var service = new GitFileImpl(gitBase);
 
 	provider.registerService("orion.core.file", service, {
 		Name: 'Git File System',

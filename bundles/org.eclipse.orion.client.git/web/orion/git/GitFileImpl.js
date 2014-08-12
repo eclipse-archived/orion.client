@@ -11,16 +11,17 @@
 
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["orion/xhr","orion/encoding-shim", "orion/URL-shim"], function(xhr) {
+define(["orion/xhr", "orion/Deferred", "orion/encoding-shim", "orion/URL-shim"], function(xhr, Deferred) {
 	
-	function GitFileImpl() {
+	function GitFileImpl(fileBase) {
+		this.fileBase = fileBase;
 	}
 
 	GitFileImpl.prototype = {
 		fetchChildren: function(location) {
 			var fetchLocation = location;
 			if (fetchLocation===this.fileBase) {
-				return this.loadWorkspace(fetchLocation).then(function(jsondata) {return jsondata.Children || [];});
+				return new Deferred().resolve([]);
 			}
 			//If fetch location does not have ?depth=, then we need to add the depth parameter. Otherwise server will not return any children
 			if (fetchLocation.indexOf("?depth=") === -1) { //$NON-NLS-0$
@@ -41,8 +42,6 @@ define(["orion/xhr","orion/encoding-shim", "orion/URL-shim"], function(xhr) {
 			return this.loadWorkspace(this._repoURL);
 		},
 		loadWorkspace: function(location) {
-			var _this = this;
-			var url = new URL(location);
 			return this.fetchChildren(location).then(function(children) {
 				var result = {
 					Attributes: {
@@ -62,25 +61,25 @@ define(["orion/xhr","orion/encoding-shim", "orion/URL-shim"], function(xhr) {
 				result.Parents = [];
 				result.Name = "/"; //$NON-NLS-0$ 
 				return result;
-			})
+			});
 		},
 		createProject: function(url, projectName, serverPath, create) {
-			throw "Not supported"; //$NON-NLS-0$ 
+			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
 		createFolder: function(parentLocation, folderName) {
-			throw "Not supported"; //$NON-NLS-0$ 
+			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
 		createFile: function(parentLocation, fileName) {
-			throw "Not supported"; //$NON-NLS-0$ 
+			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
 		deleteFile: function(location) {
-			throw "Not supported"; //$NON-NLS-0$ 
+			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
 		moveFile: function(sourceLocation, targetLocation, name) {
-			throw "Not supported"; //$NON-NLS-0$ 
+			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
 		copyFile: function(sourceLocation, targetLocation, name) {
-			throw "Not supported"; //$NON-NLS-0$ 
+			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
 		read: function(location, isMetadata) {
 			var url = new URL(location, window.location);
@@ -100,13 +99,13 @@ define(["orion/xhr","orion/encoding-shim", "orion/URL-shim"], function(xhr) {
 			});
 		},
 		write: function(location, contents, args) {
-			throw "Not supported"; //$NON-NLS-0$ 
+			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
 		remoteImport: function(targetLocation, options) {
-			throw "Not supported"; //$NON-NLS-0$ 
+			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
 		remoteExport: function(sourceLocation, options) {
-			throw "Not supported"; //$NON-NLS-0$ 
+			throw new Error("Not supported"); //$NON-NLS-0$ 
 		},
 		readBlob: function(location) {
 			return xhr("GET", location, { //$NON-NLS-0$ 
@@ -117,7 +116,7 @@ define(["orion/xhr","orion/encoding-shim", "orion/URL-shim"], function(xhr) {
 			});
 		},
 		writeBlob: function(location, contents, args) {
-			throw "Not supported"; //$NON-NLS-0$ 
+			throw new Error("Not supported"); //$NON-NLS-0$ 
 		}
 	};
 	GitFileImpl.prototype.constructor = GitFileImpl;
