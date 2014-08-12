@@ -28,11 +28,7 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/Select'],
 
 		postCreate: function() {
 			Select.prototype.postCreate.call(this);
-			if(typeof this.fieldlabel === 'string' && this.fieldlabel.length > 0 && this.fieldlabel.charAt(this.fieldlabel.length-1) === ':') {
-			    this.mylabel.textContent = this.fieldlabel;
-			} else {
-			    this.mylabel.textContent = this.fieldlabel + ':'; //$NON-NLS-0$
-			}
+            this.mylabel.textContent = this.fieldlabel;
 		},
 
 		destroy: function() {
