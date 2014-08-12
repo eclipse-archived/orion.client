@@ -231,5 +231,7 @@ define({
 	"pluginStatusBroken": "This plug-in could not be loaded.",
 	"Website": "Website",
 	"License": "License",
-	"Login": "Login"
+	"Login": "Login",
+	'clearThemeAndEditorSettings.name': 'Clear themes and editor settings',  //$NON-NLS-0$  //$NON-NLS-1$
+	'clearThemeAndEditorSettings.tooltip': 'Clear all settings associated with editor themes and window themes'  //$NON-NLS-0$  //$NON-NLS-1$
 });
