@@ -118,7 +118,7 @@ define({
 	"Item": "Item",
 	"Git Config": "Git Config",
 	"Clear Git Credentials": "Clear Git Credentials",
-	"Enable Storage": "Enable Storage",
+	"Enable Storage": "Enable Storage:",
 	"Please be aware that your credentials will be stored persistently in the browser." : "Please be aware that your credentials will be stored persistently in the browser.",
 	"Do you wish to enable the Key Storage?" : "Do you wish to enable the Key Storage?",
 	"general": "General",
