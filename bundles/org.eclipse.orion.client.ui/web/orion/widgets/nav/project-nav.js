@@ -12,6 +12,7 @@
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/commands',
+	'orion/i18nUtil',
 	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/explorers/explorer-table',
@@ -21,7 +22,7 @@ define([
 	'orion/URITemplate',
 	'orion/Deferred'
 ], function(
-	messages, mCommands, objects, lib, mExplorer, mCommonNav, ProjectCommands,
+	messages, mCommands, i18nUtil, objects, lib, mExplorer, mCommonNav, ProjectCommands,
 	PageUtil, URITemplate, Deferred
 ) {
 	var CommonNavExplorer = mCommonNav.CommonNavExplorer;
@@ -345,7 +346,7 @@ define([
 				var nameText = item.Dependency ? item.Dependency.Name : (item.Project ? item.Project.Name : item.Name);
 				var itemNode = lib.$("a", col); //$NON-NLS-0$
 				if(item.disconnected){
-					nameText += " " + messages.disconnected; //$NON-NLS-0$
+					nameText = i18nUtil.formatMessage(messages.Disconnected, nameText);
 					itemNode.removeAttribute("href"); //$NON-NLS-0$
 				}
 				lib.empty(itemNode);

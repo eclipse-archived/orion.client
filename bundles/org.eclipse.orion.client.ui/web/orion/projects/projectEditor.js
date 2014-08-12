@@ -9,10 +9,20 @@
  ******************************************************************************/
  
 /*eslint-env browser, amd*/
-define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/objects',  'orion/projectCommands', 'orion/PageLinks', 'orion/explorers/explorer', 'orion/section'],
-	function(URITemplate, lib, Deferred, objects, mProjectCommands, PageLinks, mExplorer, mSection) {
+define([
+	'i18n!orion/edit/nls/messages',
+	'orion/i18nUtil',
+	'orion/URITemplate',
+	'orion/webui/littlelib',
+	'orion/Deferred',
+	'orion/objects',
+	'orion/projectCommands',
+	'orion/PageLinks',
+	'orion/explorers/explorer',
+	'orion/section'
+], function(messages, i18nUtil, URITemplate, lib, Deferred, objects, mProjectCommands, PageLinks, mExplorer, mSection) {
 	
-	var editTemplate = new URITemplate("./edit.html#{,resource,params*}"); //$NON-NLS-0$
+	var editTemplate = new URITemplate("./edit.html#{,resource,params*}");
 	
 	function ProjectInfoModel(project){
 		this.root = project;
@@ -28,9 +38,9 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 	ProjectInfoModel.prototype.getChildren = function(parent, onComplete){
 		if(parent === this.root){
 			onComplete([
-				{id: "Name", displayName: "Name", value: parent.Name, no: 1},
-				{id: "Description", displayName: "Description", value: parent.Description, no: 2},
-				{id: "Url", displayName: "Site", value: parent.Url, href: parent.Url, no: 3}
+				{id: "Name", displayName: messages.Name, value: parent.Name, no: 1},
+				{id: "Description", displayName: messages.Description, value: parent.Description, no: 2},
+				{id: "Url", displayName: messages.Site, value: parent.Url, href: parent.Url, no: 3}
 				]);
 		} else {
 			onComplete([]);
@@ -75,7 +85,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				
 				var urlSelector = document.createElement("div");
 				urlSelector.style.marginTop = "-15px";
-				urlSelector.title = "Click to edit";
+				urlSelector.title = messages.ClickEditLabel;
 				urlSelector.className = "discreetInput";
 				urlSelector.tabIndex = item.no;	//this is the same as the urlInput's tab index but they will never be visible at the same time
 				
@@ -257,7 +267,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			} else {
 				var name = item.Dependency.Name;
 				if(item.disconnected){
-					name += " (disconnected)";
+					name = i18nUtil.format(messages.Disconnected, name);
 				}
 				td.appendChild(document.createTextNode(name));
 			}
@@ -534,7 +544,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			
 			this.dependneciesListener = function(event){_self.dependenciesChanged.call(_self, event);};
 			this._dependenciesEventTypes = ["create", "delete"];
-			this._dependenciesEventTypes.forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
+			this._dependenciesEventTypes.forEach(function(eventType) {
 				_self.dependenciesDisplatcher.addEventListener(eventType, _self.dependneciesListener);
 			});
 
@@ -657,7 +667,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			}.bind(this);
 			
 			input.value = this.projectData[property] || "";
-			input.title = "Click to edit";
+			input.title = messages.ClickEditLabel;
 			input.className = "discreetInput";
 			input.tabIndex = String(tabIndex);
 						
@@ -679,7 +689,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		},
 		renderProjectInfo: function(parent, sectionName){
 			
-			var title = sectionName || "Project Information";
+			var title = sectionName || messages.ProjectInfo;
 			var projectInfoSection = new mSection.Section(parent, {id: "projectInfoSection", headerClass: ["sectionTreeTableHeader"], title: title, canHide: true});
 			var explorerParent = document.createElement("div");
 			explorerParent.id = "projectInformationNode";
@@ -760,7 +770,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				return;
 			}
 			lib.empty(this.configurationsParent);
-			this.launchCofunctionSectionsTitle = sectionName || "Deployment Information";
+			this.launchCofunctionSectionsTitle = sectionName || messages.DeployInfo;
 			var launchConfigurationSection = new mSection.Section(parent, {id: "projectLaunchConfigurationSection", headerClass: ["sectionTreeTableHeader"], title: this.launchCofunctionSectionsTitle, canHide: true});
 			var launchConfigurationParent = document.createElement("div");
 			launchConfigurationParent.id = "launchConfigurationsNode";
