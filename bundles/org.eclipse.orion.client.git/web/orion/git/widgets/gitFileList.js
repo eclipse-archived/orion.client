@@ -35,7 +35,6 @@ define([
 				registry: options.serviceRegistry,
 				commandService: options.commandRegistry,
 				actionScopeId: options.actionScopeId,
-				cachePrefix: "treeNavigator", //$NON-NLS-0$
 				checkbox: explorer.checkbox
 			}, explorer);
 			return renderer;
@@ -55,6 +54,8 @@ define([
 		},
 		display: function(location) {
 			return this.loadResourceList(location, true, null);
+		},
+		refreshSelection: function() {
 		},
 		isRowSelectable: function() {
 			return !!this.selection;
