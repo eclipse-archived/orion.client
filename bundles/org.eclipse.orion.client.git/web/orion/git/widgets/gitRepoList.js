@@ -62,9 +62,9 @@ define([
 						return deferred.resolve();
 					}
 					
-					that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), "Getting status for " + repository.Name).then(function(resp) { //$NON-NLS-0$
+					Deferred.when(repository.status, that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), "Getting status for " + repository.Name), function(resp) { //$NON-NLS-0$
 						try{
-							repository.Status = resp;
+							repository.status = repository.Status = resp;
 							that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation), "Getting branches for " + repository.Name).then(function(resp){ //$NON-NLS-0$
 								try{
 									var branches = resp.Children || [];

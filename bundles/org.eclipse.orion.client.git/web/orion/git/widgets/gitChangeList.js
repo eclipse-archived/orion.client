@@ -92,14 +92,12 @@ define([
 				var gitClient = this.gitClient;
 				var progress = this.section.createProgressMonitor();
 				progress.begin("Getting changes");
-				progressService.progress(gitClient.getGitStatus(location), messages['Loading...']).then( //$NON-NLS-0$
-				function(resp) {
+				Deferred.when(that.repository.status || progressService.progress(gitClient.getGitStatus(location), messages['Loading...']), function(resp) {//$NON-NLS-0$
 					if (resp.Type === "Status") { //$NON-NLS-0$
 						var status = that.status = that.items = resp;
 						Deferred.when(that.repository || progressService.progress(gitClient.getGitClone(status.CloneLocation), "Getting repository information"), //$NON-NLS-0$
 								function(resp) {
 									var repository = resp.Children ? resp.Children[0] : resp;
-									that.repository = repository;
 									repository.status = status;
 									progressService
 										.progress(
@@ -300,6 +298,7 @@ define([
 	GitChangeListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitChangeListExplorer.prototype, /** @lends orion.git.GitChangeListExplorer.prototype */ {
 		changedItem: function(items) {
+			this.model.repository.status = "";
 			var deferred = new Deferred();
 			if (this.prefix === "all") {
 				var parent = items[0].parent;
