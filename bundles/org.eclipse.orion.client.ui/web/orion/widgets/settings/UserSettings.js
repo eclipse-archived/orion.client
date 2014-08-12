@@ -104,7 +104,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 			this.linkedAccountSection = new mSection.Section(this.linkedSection, {
 				id: "linkedAccountSection", //$NON-NLS-0$
 				title: messages["Linked Accounts"],
-				content: '<div id="iFrameContent"></div>', //$NON-NLS-0$
+				content: '<div style="margin-left: 10px; margin-top: 17px;" id="iFrameContent"></div>', //$NON-NLS-0$
 				canHide: true,
 				useAuxStyle: true,
 				hidden: true,
