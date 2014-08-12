@@ -148,7 +148,7 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 					}, function(e){
 						if(e.JsonData && e.JsonData.error_code){
 							var err = e.JsonData;
-							if (err.error_code === "CF-InvalidAuthToken"){
+							if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){
 								var dialog = new CfLoginDialog({
 								title: "Login to " + target.Url,
 								func: function(login, password){
