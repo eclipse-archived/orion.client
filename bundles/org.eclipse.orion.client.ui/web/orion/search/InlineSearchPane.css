@@ -75,15 +75,23 @@
 }
 
 .searchWrapper > .searchDismissButton {
+	background-color: rgb(245, 245, 245);
+	border-radius: 0 3px 0 3px;
 	display: none;
-	float: right;
 	margin: 0;
+	opacity: 0.7;
 	padding: 4px;
-	position: relative;
+	position: absolute;
+	right: 0;
+	z-index: 1;
 }
 
 .searchWrapper.searchWrapperActive > .searchDismissButton {
 	display: inline-block;
+}
+
+.searchWrapper.searchWrapperActive > .searchDismissButton:hover {
+	opacity: 1;
 }
 
 .replaceWrapper {
