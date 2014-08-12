@@ -135,6 +135,7 @@ define([
 		if (processURLs === undefined) {
 			processURLs = true;
 		}
+		this.lastResource = null;
 		var pageParams = PageUtil.matchResourceParameters();
 		var selection = pageParams.resource;
 		var path = this.defaultPath;
@@ -257,7 +258,6 @@ define([
 	
 	GitRepositoryExplorer.prototype.setSelectedRepository = function(repository, force) {
 		if (!force && repository && repository === this.repository) return;
-		this.commit = this.reference = null;
 		this.destroy();
 		this.repository = repository;
 		this.initTitleBar(repository || {});
@@ -265,7 +265,6 @@ define([
 		if (repository) {
 			this.setSelectedCommit(this.commit);
 			this.displayBranches(repository); 
-			this.displayTree(repository);
 			this.setSelectedRef(this.reference);
 			if (this.showTagsSeparately) {
 				this.displayTags(repository);
@@ -278,6 +277,7 @@ define([
 	
 	GitRepositoryExplorer.prototype.setSelectedRef = function(ref) {
 		this.reference = ref;
+		this.displayTree(this.repository);
 		this.displayCommits(this.repository);
 	};
 	
@@ -297,10 +297,13 @@ define([
 		this.displayCommits(this.repository);
 	};
 	
-	GitRepositoryExplorer.prototype.display = function(location, selection, processURLs) {
+	GitRepositoryExplorer.prototype.display = function(location, resource, processURLs) {
+		if (this.lastResource === resource) return; //$NON-NLS-0$
+		this.lastResource = resource; //$NON-NLS-0$
 		this.destroy();
 		this.accordion = new Accordion();
 		var that = this;
+		this.commit = this.reference = this.repository = this.treePath = this.log = this.logLocation = null;
 		this.loadingDeferred = new Deferred();
 		if (processURLs){
 			this.loadingDeferred.then(function(){
@@ -308,16 +311,37 @@ define([
 			});
 		}
 		this.progressService.progress(this.gitClient.getGitClone(location), messages["Getting git repository details"]).then(function(resp){
-			var repositories = that.repositories = resp.Children || [];
-			var repository;
-			repositories.some(function(repo) {
-				if (repo.Location === selection) {
-					repository = repo;
-					return true;
-				}
-				return false;
-			});
-			that.setSelectedRepository(repository);
+			that.repositories = resp.Children || [];
+			if (resource) {
+				that.progressService.progress(that.gitClient.getGitClone(resource), messages["Getting git repository details"]).then(function(selection){
+					var repository;
+					if (selection.Type === "Clone") { //$NON-NLS-0$
+						repository = selection.Children[0];
+						that.setSelectedRepository(repository);
+					} else if (selection.CloneLocation) {
+						that.progressService.progress(that.gitClient.getGitClone(selection.CloneLocation), messages["Getting git repository details"]).then(function(clone){
+							if (selection.Type === "Commit") { //$NON-NLS-0$
+								that.log = selection;
+								that.logLocation = resource;
+								that.treePath = selection.RepositoryPath;
+								that.commit = selection.Children[0];
+							} else if (selection.Type === "Branch" || selection.Type === "RemoteTrackingBranch" || selection.Type === "Tag") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								that.reference = selection;
+							}
+							repository = clone.Children[0];
+							that.setSelectedRepository(repository);
+						}, function(error){
+							that.handleError(error);
+						});
+					} else {
+						that.setSelectedRepository();
+					}
+				}, function(error){
+					that.handleError(error);
+				});
+			} else {
+				that.setSelectedRepository();
+			}
 		}, function(error){
 			that.handleError(error);
 		});
@@ -380,8 +404,10 @@ define([
 		section.addEventListener("toogle", function(e) { //$NON-NLS-0$
 			if (!e.isExpanded) {
 				var selected = selection.getSelection();
-				if (!selected) return;
-				window.location.hash = selected.Location;
+				if (!selected || this.repository === selected) return;
+				this.commit = this.reference = this.log = this.logLocation = this.treePath = null;
+				this.setSelectedRepository(selected);
+				window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
 			}
 		}.bind(this));
 		var explorer = this.repositoriesNavigator = new mGitRepoList.GitRepoListExplorer({
@@ -429,7 +455,9 @@ define([
 			if (!e.isExpanded) {
 				var selected = selection.getSelection();
 				if (!selected || this.reference === selected) return;
+				this.commit = this.reference = this.log = this.logLocation = this.treePath = null;
 				this.setSelectedRef(selected);
+				window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
 			}
 		}.bind(this));
 		var explorer = this.branchesNavigator = new mGitBranchList.GitBranchListExplorer({
@@ -462,24 +490,29 @@ define([
 		var title = this.showTagsSeparately ? messages["Branches"] : messages['BranchesTags'];
 		var explorer = this.commitsNavigator;
 		if (!explorer) return;
-		var localBranch = explorer.model.getLocalBranch();
-		var remoteBranch = explorer.model.getRemoteBranch();
-		if (localBranch || remoteBranch) {
-			title = localBranch.Name + " \u2794 " + remoteBranch.Name;  //$NON-NLS-0$
+		var activeBranch = explorer.model.getActiveBranch();
+		var targetRef = explorer.model.getTargetReference();
+		if (activeBranch && targetRef) {
+			title = activeBranch.Name + " \u2794 " + targetRef.Name;  //$NON-NLS-0$
+			if (explorer.model.isNewBranch(targetRef)) {
+				title += messages[" [New branch]"];
+			}
 		} else {
-			title = (localBranch || remoteBranch).Name;
+			title = (activeBranch || targetRef).Name;
 		}
 		this.branchesSection.setTitle(title);
 	};
 	
 	GitRepositoryExplorer.prototype.calculateTreePath = function() {
 		var path = "";
-	 	if (this.treePath) {
-	 		var parents = this.treePath.Parents;
-	 		if (parents.length) {
-	 			path = this.treePath.Location.substring(parents[parents.length -1].Location.length);
-	 		}
-	 	}
+		if (typeof this.treePath === "string") { //$NON-NLS-0$
+			path = this.treePath;
+		} else if (this.treePath) {
+			var parents = this.treePath.Parents;
+			if (parents.length) {
+				path = this.treePath.Location.substring(parents[parents.length -1].Location.length);
+			}
+		}
 		return path;
 	};
 	
@@ -496,6 +529,7 @@ define([
 			canHide: true,
 			hidden: true,
 			noTwistie: NO_TWISTIES,
+			sibling: this.commitsSection ? this.commitsSection.domNode : null,
 			preferenceService: this.preferencesService
 		});
 		this.accordion.add(section);
@@ -521,7 +555,7 @@ define([
 				if (this.commit && this.commit.Type === "Commit") { //$NON-NLS-0$
 					location = this.commit.TreeLocation;
 				} else {
-					location = (model.simpleLog ? model.getRemoteBranch() : model.getLocalBranch()).TreeLocation;
+					location = (model.simpleLog ? model.getTargetReference() : model.getActiveBranch()).TreeLocation;
 				}
 				if (!location) return;
 				explorer.display(location).then(function() {
@@ -586,9 +620,11 @@ define([
 		
 		var selection = this.commitsSelection = new mSelection.Selection(this.registry, "orion.selection.commit"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-			if (this.commit === event.selection) return;
+			var selected = event.selection;
+			if (this.commit === selected) return;
 			lib.empty(lib.node('table')); //$NON-NLS-0$
-			this.setSelectedCommit(event.selection);
+			this.setSelectedCommit(selected);
+//			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
 		}.bind(this));
 		var explorer = this.commitsNavigator = new mGitCommitList.GitCommitListExplorer({
 			serviceRegistry: this.registry,
@@ -601,7 +637,10 @@ define([
 			parentId:"commitsNode", //$NON-NLS-0$
 			section: section,
 			selection: selection,
-			remoteBranch: this.reference,
+			targetRef: this.reference,
+			log: this.log,
+			location: this.logLocation,
+			simpleLog: !!this.log,
 			repositoryPath: this.calculateTreePath(),
 			handleError: this.handleError.bind(this),
 			root: {
@@ -612,9 +651,7 @@ define([
 		return this.statusDeferred.then(function() {
 			return explorer.display().then(function() {
 				this.setBranchesTitle();
-				if (this.commit) {
-					explorer.select(this.commit);
-				}
+				explorer.select(this.commit || repository.status);
 			}.bind(this));
 		}.bind(this));
 	};
@@ -664,10 +701,13 @@ define([
 
 		var commandRegistry = this.commandService;
 		var actionsNodeScope = section.actionsNode.id;
-		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.checkoutTag", 0); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.addTag", 1); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.cherryPick", 2); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.revert", 3); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.openGitCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.compareWithWorkingTree", 2); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.checkoutTag", 3); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.addTag", 4); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.cherryPick", 5); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.revert", 6); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.askForReviewCommand", 7); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, commit, this, "button"); //$NON-NLS-0$	
 
 		var info = new mGitCommitInfo.GitCommitInfo({

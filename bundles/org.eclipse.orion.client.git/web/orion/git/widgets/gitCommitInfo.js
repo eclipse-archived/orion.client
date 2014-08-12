@@ -20,7 +20,7 @@ define([
 	'orion/objects'
 ], function(require, messages, URITemplate, i18nUtil, util, objects) {
 	
-	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$	
+	var commitTemplate = new URITemplate("git/git-repository.html#{,resource,params*}?page=1"); //$NON-NLS-0$	
 	
 	/**
 	 * @class orion.git.GitCommitInfo

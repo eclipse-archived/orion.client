@@ -17,7 +17,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/section', 'orion/i18nUtil'
 	var exports = {};
 	
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
-	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$
+	var commitTemplate = new URITemplate("git/git-repository.html#{,resource,params*}?page=1"); //$NON-NLS-0$
 
 	exports.GitReviewRequestExplorer = (function() {
 

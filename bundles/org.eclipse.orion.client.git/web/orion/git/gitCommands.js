@@ -26,9 +26,9 @@ var exports = {};
 	var doOnce = false;
 	
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
-	var logTemplate = new URITemplate("git/git-log.html#{,resource,params*}?page=1"); //$NON-NLS-0$
-	var logTemplateNoPage = new URITemplate("git/git-log.html#{,resource,params*}"); //$NON-NLS-0$
-	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$
+	var logTemplate = new URITemplate("git/git-repository.html#{,resource,params*}?page=1"); //$NON-NLS-0$
+	var logTemplateNoPage = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
+	var commitTemplate = new URITemplate("git/git-repository.html#{,resource,params*}?page=1"); //$NON-NLS-0$
 	var editTemplate = new URITemplate("edit/edit.html#{,resource,params*}"); //$NON-NLS-0$
 	
 	exports.updateNavTools = function(registry, commandRegistry, explorer, toolbarId, selectionToolbarId, item, pageNavId) {
@@ -825,6 +825,19 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(compareWithWorkingTree);
+		
+		var showDiffCommand = new mCommands.Command({ 
+			name: messages["Working Directory Version"],
+			tooltip: messages["View the working directory version of the file"],
+			id: "eclipse.orion.git.diff.showCurrent", //$NON-NLS-0$
+			hrefCallback: function(data) {
+				return require.toUrl(editTemplate.expand({resource: data.items.ContentLocation}));
+			},
+			visibleWhen: function(item) {
+				return item.Type === "Diff"; //$NON-NLS-0$
+			}
+		});
+		commandService.addCommand(showDiffCommand);
 
 		var openGitCommit = new mCommands.Command({
 			name : messages["Open"],
@@ -1229,6 +1242,9 @@ var exports = {};
 		var pushCallbackGerrit = mGitPushLogic(objects.mixin(pushOptions, {tags: false, force: false, gerrit: true})).perform;
 		var pushVisibleWhen = function(item) {
 			if (item.LocalBranch && item.RemoteBranch) {
+				if (item.RemoteBranch.Type !== "RemoteTrackingBranch") { //$NON-NLS-0$
+					return false;
+				}
 				item = item.LocalBranch;
 			}
 			if (item.toRef)
@@ -1459,7 +1475,7 @@ var exports = {};
 			tooltip: messages["UndoTooltip"],
 			id : "eclipse.orion.git.undoCommit", //$NON-NLS-0$
 			callback: function(data) {
-				resetCallback(data, data.items.parent.remoteBranch.IndexLocation, "HEAD^", "SOFT", messages["UndoConfirm"]);
+				resetCallback(data, data.items.parent.targetRef.IndexLocation, "HEAD^", "SOFT", messages["UndoConfirm"]);
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Commit" && item.parent && item.parent.Type === "Outgoing" && item.parent.children && item.parent.children[0].Name === item.Name; //$NON-NLS-0$

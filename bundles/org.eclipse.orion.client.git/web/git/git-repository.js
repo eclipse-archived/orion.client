@@ -75,9 +75,13 @@ mBootstrap.startup().then(function(core) {
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.removeRemote", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.deleteConfigEntryCommand", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.editConfigEntryCommand", 200); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.addTag", 1); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.cherryPick", 2); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.revert", 3); //$NON-NLS-1$ //$NON-NLS-0$
+//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.openGitCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
+//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.compareWithWorkingTree", 2); //$NON-NLS-1$ //$NON-NLS-0$
+//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.addTag", 3); //$NON-NLS-1$ //$NON-NLS-0$
+//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.cherryPick", 4); //$NON-NLS-1$ //$NON-NLS-0$
+//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.revert", 5); //$NON-NLS-1$ //$NON-NLS-0$
+	
+	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showCurrent", 2000); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	var params = PageUtil.matchResourceParameters();
 	if (typeof params["createProject.name"] === "undefined") { //$NON-NLS-0$

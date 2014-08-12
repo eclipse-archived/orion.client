@@ -12,7 +12,7 @@
 
 define(['require', 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/webui/dialog', 'orion/URITemplate', 'orion/webui/littlelib'], function(require, messages, i18nUtil, Deferred, dialog, URITemplate, lib) {
 
-	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$
+	var commitTemplate = new URITemplate("git/git-repository.html#{,resource,params*}?page=1"); //$NON-NLS-0$
 	
 	/**
 	 * Usage:

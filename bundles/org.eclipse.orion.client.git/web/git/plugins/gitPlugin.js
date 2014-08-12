@@ -61,7 +61,7 @@ define([
 		validationProperties: [
 			{source: "Git:CommitLocation", variableName: "GitLogLocation"}
 		],
-		uriTemplate: "{+OrionHome}/git/git-log.html#{,GitLogLocation}?page=1",
+		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitLogLocation}?page=1",
 		forceSingleItem: true
 	});
 
@@ -74,7 +74,7 @@ define([
 			source: "Git:DefaultRemoteBranchLocation", 
 			variableName: "GitRemoteLocation"
 		}],
-		uriTemplate: "{+OrionHome}/git/git-log.html#{,GitRemoteLocation}?page=1",
+		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitRemoteLocation}?page=1",
 		forceSingleItem: true
 	});
 
@@ -125,7 +125,7 @@ define([
 			{source: "Clone:ActiveBranch", variableName: "GitBranchLocation"},
 			{source: "toRef:Type", match: "RemoteTrackingBranch"}
 		],
-		uriTemplate: "{+OrionHome}/git/git-log.html#{,GitBranchLocation}?page=1",
+		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitBranchLocation}?page=1",
 		forceSingleItem: true
 	});
 	
@@ -138,7 +138,7 @@ define([
 		validationProperties: [
 			{source: "toRef:RemoteLocation:0:Children:0:CommitLocation", variableName: "GitRemoteLocation"}
 		],
-		uriTemplate: "{+OrionHome}/git/git-log.html#{,GitRemoteLocation}?page=1",
+		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitRemoteLocation}?page=1",
 		forceSingleItem: true
 	});
 
