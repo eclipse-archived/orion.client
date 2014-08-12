@@ -43,6 +43,7 @@ define([
 		mExplorerTable.FileExplorer.call(this, options);	
 		this.actionScopeId = options.actionScopeId;
 		this.section = options.section;
+		this.selectionPolicy = options.selectionPolicy;
 		this.handleError = options.handleError;
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;

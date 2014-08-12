@@ -167,6 +167,7 @@ define([
 		this.mode = options.mode;
 		this.showLinks = options.showLinks;
 		this.section = options.section;
+		this.selectionPolicy = options.selectionPolicy;
 		this.handleError = options.handleError;
 		this.gitClient = options.gitClient;
 		this.fileClient = options.fileClient;

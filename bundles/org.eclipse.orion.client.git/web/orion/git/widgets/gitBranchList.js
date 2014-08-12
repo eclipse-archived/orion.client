@@ -157,6 +157,7 @@ define([
 		this.actionScopeId = options.actionScopeId;
 		this.root = options.root;
 		this.section = options.section;
+		this.selectionPolicy = options.selectionPolicy;
 		this.handleError = options.handleError;
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;
