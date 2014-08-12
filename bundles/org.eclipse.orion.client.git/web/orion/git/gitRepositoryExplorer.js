@@ -127,15 +127,17 @@ define([
 	
 	GitRepositoryExplorer.prototype.changedItem = function() {
 		// An item changed so we do not need to process any URLs
-		this.redisplay(false);
+		this.redisplay(false, true);
 	};
 	
-	GitRepositoryExplorer.prototype.redisplay = function(processURLs) {
+	GitRepositoryExplorer.prototype.redisplay = function(processURLs, force) {
 		// make sure to have this flag
 		if (processURLs === undefined) {
 			processURLs = true;
 		}
-		this.lastResource = null;
+		if (force) {
+			this.lastResource = null;
+		}
 		var pageParams = PageUtil.matchResourceParameters();
 		var selection = pageParams.resource;
 		var path = this.defaultPath;
@@ -401,14 +403,12 @@ define([
 		this.accordion.add(section);
 		
 		var selection = this.repositoriesSelection = new mSelection.Selection(this.registry, "orion.selection.repo"); //$NON-NLS-0$
-		section.addEventListener("toogle", function(e) { //$NON-NLS-0$
-			if (!e.isExpanded) {
-				var selected = selection.getSelection();
-				if (!selected || this.repository === selected) return;
-				this.commit = this.reference = this.log = this.logLocation = this.treePath = null;
-				this.setSelectedRepository(selected);
-				window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
-			}
+		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
+			var selected = e.selection;
+			if (!selected || this.repository === selected) return;
+			this.commit = this.reference = this.log = this.logLocation = this.treePath = null;
+			this.setSelectedRepository(selected);
+			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
 		}.bind(this));
 		var explorer = this.repositoriesNavigator = new mGitRepoList.GitRepoListExplorer({
 			serviceRegistry: this.registry,
@@ -451,14 +451,12 @@ define([
 		this.accordion.add(section);
 
 		var selection = this.branchesSelection = new mSelection.Selection(this.registry, "orion.selection.ref"); //$NON-NLS-0$
-		section.addEventListener("toogle", function(e) { //$NON-NLS-0$
-			if (!e.isExpanded) {
-				var selected = selection.getSelection();
-				if (!selected || this.reference === selected) return;
-				this.commit = this.reference = this.log = this.logLocation = this.treePath = null;
-				this.setSelectedRef(selected);
-				window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
-			}
+		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
+			var selected = e.selection;
+			if (!selected || this.reference === selected) return;
+			this.commit = this.reference = this.log = this.logLocation = this.treePath = null;
+			this.setSelectedRef(selected);
+			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
 		}.bind(this));
 		var explorer = this.branchesNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
@@ -564,12 +562,14 @@ define([
 						explorer.select(this.treePath);
 					}
 				}.bind(this));
-			} else {
-				var selected = selection.getSelection();
-				if (!selected || this.treePath === selected) return;
-				this.setSelectedPath(selected);
-				this.treeSection.setTitle("/" + this.calculateTreePath()); //$NON-NLS-0$
 			}
+		}.bind(this));
+
+		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
+			var selected = e.selection;
+			if (!selected || this.treePath === selected) return;
+			this.setSelectedPath(selected);
+			this.treeSection.setTitle("/" + this.calculateTreePath()); //$NON-NLS-0$
 		}.bind(this));
 	};
 	
