@@ -381,6 +381,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 			{id:this.getItemLinkId(item)}, 
 			params, 
 			{});
+		link.removeChild(link.firstChild); //remove file name from link
         spanHolder.appendChild(link);
         link.classList.add("searchDetailLink"); //$NON-NLS-0$
        
