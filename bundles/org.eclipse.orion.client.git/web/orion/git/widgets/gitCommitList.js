@@ -183,7 +183,12 @@ define([
 						if (activeBranch && targetRef && !that.simpleLog) {
 							if (section) section.setTitle(activeBranch.Name);
 						} else if (targetRef || activeBranch) {
-							if (section) section.setTitle((targetRef || activeBranch).Name);
+							var ref = targetRef || activeBranch;
+							var refName = ref.Name;
+							if (ref.Type === "Commit") { //$NON-NLS-0$
+								refName = refName.substring(0, 6);
+							}
+							if (section) section.setTitle(refName);
 						}
 						if (progress) progress.done();
 						if (that.simpleLog) {

@@ -491,7 +491,11 @@ define([
 		var activeBranch = explorer.model.getActiveBranch();
 		var targetRef = explorer.model.getTargetReference();
 		if (activeBranch && targetRef) {
-			title = activeBranch.Name + " \u2794 " + targetRef.Name;  //$NON-NLS-0$
+			var targetName = targetRef.Name;
+			if (targetRef.Type === "Commit") { //$NON-NLS-0$
+				targetName = targetName.substring(0, 6);
+			}
+			title = activeBranch.Name + " \u2794 " + targetName;  //$NON-NLS-0$
 			if (explorer.model.isNewBranch(targetRef)) {
 				title += messages[" [New branch]"];
 			}
