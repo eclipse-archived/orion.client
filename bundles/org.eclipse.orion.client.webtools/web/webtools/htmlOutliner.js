@@ -81,17 +81,17 @@ define("webtools/htmlOutliner", [ //$NON-NLS-0$
 				return false;
 			}
 			//skip formatting elements
-			if (node.name === "b" || node.name === "i" || node.name === "em") {
+			if (node.name === "b" || node.name === "i" || node.name === "em") { //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 				return true;
 			}
 	
 			//skip paragraphs and other blocks of formatted text
-			if (node.name === "p" || node.name === "tt" || node.name === "code" || node.name === "blockquote") {
+			if (node.name === "p" || node.name === "tt" || node.name === "code" || node.name === "blockquote") { //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				return true;
 			}
 	
 			//skip anchors
-			if (node.name === "a") {
+			if (node.name === "a") { //$NON-NLS-0$
 				return true;
 			}
 	
@@ -108,14 +108,14 @@ define("webtools/htmlOutliner", [ //$NON-NLS-0$
 		domToLabel: function(node) {
 			var label = node.name;
 			//include id if present
-			var match = /id=['"]\S*["']/.exec(node.raw);
+			var match = /id=['"]\S*["']/.exec(node.raw); //$NON-NLS-0$
 			if (match) {
-				label = label + " " + match[0];
+				label = label + " " + match[0]; //$NON-NLS-0$
 			}
 			//include class if present
-			match = /class=['"]\S*["']/.exec(node.raw);
+			match = /class=['"]\S*["']/.exec(node.raw); //$NON-NLS-0$
 			if (match) {
-				label = label + " " + match[0];
+				label = label + " " + match[0]; //$NON-NLS-0$
 			}
 			return label;
 		},
@@ -160,7 +160,7 @@ define("webtools/htmlOutliner", [ //$NON-NLS-0$
 		findBody: function(dom) {
 			//recursively walk the dom looking for a body element
 			for (var i = 0; i < dom.length; i++) {
-				if (dom[i].name === "body") {
+				if (dom[i].name === "body") { //$NON-NLS-0$
 					return dom[i].children;
 				}
 				if (dom[i].children) {

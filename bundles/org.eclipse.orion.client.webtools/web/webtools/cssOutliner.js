@@ -41,10 +41,10 @@ define("webtools/cssOutliner", [ //$NON-NLS-0$
 		 * @private
 		 */
 		_outlineRule: {
-			id: "css-outline",
-			name: "CSS outline",
-			desc: "CSS outline helper rule",
-			browsers: "All",
+			id: "css-outline", //$NON-NLS-0$
+			name: "CSS outline", //$NON-NLS-0$
+			desc: "CSS outline helper rule", //$NON-NLS-0$
+			browsers: "All", //$NON-NLS-0$
 			outline: [],
 			/**
 			 * @description API callback to start verifying
@@ -53,7 +53,7 @@ define("webtools/cssOutliner", [ //$NON-NLS-0$
 				this.outline = [];
 				// Pushes selector info into the outline
 				var that = this;
-				parser.addListener("startrule", function(event) {
+				parser.addListener("startrule", function(event) { //$NON-NLS-0$
 					var selectors = event.selectors;
 					if (selectors && selectors.length) {
 						var selectorText = [], line = null, col = null, length = null;
@@ -78,7 +78,7 @@ define("webtools/cssOutliner", [ //$NON-NLS-0$
 							selectorText.push(sel.text);
 						}
 						that.outline.push({
-							label: selectorText.join(", "),
+							label: selectorText.join(", "), //$NON-NLS-0$
 							line: line,
 							offset: col,
 							length: length

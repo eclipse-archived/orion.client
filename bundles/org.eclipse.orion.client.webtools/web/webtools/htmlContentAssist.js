@@ -123,7 +123,7 @@ define("webtools/htmlContentAssist", ['orion/editor/templates'], function(mTempl
 		templates.push({prefix: "<" + element, description: description, template: template}); //$NON-NLS-0$
 	}
 	templates.forEach(function(template){
-		template.contentType = 'text/html';
+		template.contentType = 'text/html'; //$NON-NLS-0$
 	});
 
 	/**
