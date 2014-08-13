@@ -11,8 +11,8 @@
 
 /*eslint-env browser,amd*/
 
-define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/serviceregistry', 'domReady!'],
-		function(messages, xhr, PluginProvider, CFClient, ServiceRegistry) {
+define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/serviceregistry', 'domReady!'],
+		function(xhr, PluginProvider, CFClient, ServiceRegistry) {
 
 	var temp = document.createElement('a');
 	var login = temp.href;
@@ -92,16 +92,18 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 	provider.registerService("orion.core.setting", null, {
 		settings: [{
 			pid: "org.eclipse.orion.client.cf.settings",
-			name: messages['Settings'],
-			category: messages['Cloud'],
+			nameKey: "Settings",
+			nls: "cfui/nls/messages",
+			category: "cloud",
+			categoryKey: "Cloud",
 			properties: [{
 				id: "targetUrl",
-				name: messages['API URL'],
+				nameKey: "API URL",
 				type: "string",
 				defaultValue: apiUrl
 			}, {
 				id: "manageUrl",
-				name: messages['Manage URL'],
+				nameKey: "Manage URL",
 				type: "string",
 				defaultValue: manageUrl
 			}]
