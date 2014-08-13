@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,6 +11,7 @@
 /*eslint-env amd, browser*/
 /*global URL confirm*/
 define([
+    'i18n!git/nls/gitmessages',
 	"orion/plugin",
 	"orion/xhr",
 	"orion/serviceregistry",
@@ -20,7 +21,7 @@ define([
 	"orion/Deferred",
 	"orion/git/util",
 	"orion/URL-shim", // no exports
-], function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil, Deferred, mGitUtil) {
+], function(messages, PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil, Deferred, mGitUtil) {
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
 	var gitClient = new mGitClient.GitService(serviceRegistry);
 	var sshService = new mSshTools.SshService(serviceRegistry);
@@ -435,10 +436,10 @@ define([
 		type: "git",
 		addParameters: [{id: "url", type: "url", name: "Url:"}],
 		optionalParameters: [{id: "sshuser", type: "text", name: "User Name:"}, {id: "sshpassword", type: "password", name: "Password:"},{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}],
-		addDependencyName: "Git Repository",
-		addDependencyTooltip: "Associate a git repository with this project.",
-		addProjectName: "Git Repository",
-		addProjectTooltip: "Create a project from a git repository.",
+		addDependencyName: messages['addDependencyName'],
+		addDependencyTooltip: messages['addDependencyTooltip'],
+		addProjectName: messages['addProjectName'],
+		addProjectTooltip: messages['addProjectTooltip'],
 		actionComment: "Cloning ${url}",
 		validationProperties: [
 			{source: "Git"} // alternate {soruce: "Children:[Name]", match: ".git"}

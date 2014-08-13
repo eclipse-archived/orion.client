@@ -469,5 +469,9 @@ define({
 	"Apply" : "Apply",
 	"Pop Stash" : "Pop Stash",
 	"Apply the most recently stashed change to your active branch and drop it from the stashes" : "Apply the most recently stashed change to your active branch and drop it from the stashes",
-	"stashes" : "stashes"
+	"stashes" : "stashes",
+	'addDependencyName': "Git Repository",  //$NON-NLS-0$  //$NON-NLS-1$
+	'addDependencyTooltip': "Associate a git repository with this project.",  //$NON-NLS-0$  //$NON-NLS-1$
+	'addProjectName': "Git Repository",  //$NON-NLS-0$  //$NON-NLS-1$
+	'addProjectTooltip': "Create a project from a git repository."  //$NON-NLS-0$  //$NON-NLS-1$
 });
