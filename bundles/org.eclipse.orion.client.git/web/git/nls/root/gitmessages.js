@@ -473,5 +473,7 @@ define({
 	'addDependencyName': "Git Repository",  //$NON-NLS-0$  //$NON-NLS-1$
 	'addDependencyTooltip': "Associate a git repository with this project.",  //$NON-NLS-0$  //$NON-NLS-1$
 	'addProjectName': "Git Repository",  //$NON-NLS-0$  //$NON-NLS-1$
-	'addProjectTooltip': "Create a project from a git repository."  //$NON-NLS-0$  //$NON-NLS-1$
+	'addProjectTooltip': "Create a project from a git repository.",  //$NON-NLS-0$  //$NON-NLS-1$
+	'fetchGroup': 'Fetch',  //$NON-NLS-0$  //$NON-NLS-1$
+	'pushGroup' : 'Push'  //$NON-NLS-0$  //$NON-NLS-1$
 });
