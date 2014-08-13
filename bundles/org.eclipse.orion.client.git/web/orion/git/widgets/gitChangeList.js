@@ -92,7 +92,8 @@ define([
 				var gitClient = this.gitClient;
 				var progress = this.section.createProgressMonitor();
 				progress.begin(messages["Getting changes"]);
-				Deferred.when(that.repository.status || progressService.progress(gitClient.getGitStatus(location), messages["Getting changes"]), function(resp) {//$NON-NLS-0$
+				var repository = that.repository;
+				Deferred.when(repository.status || (repository.status = progressService.progress(gitClient.getGitStatus(location), messages["Getting changes"])), function(resp) {//$NON-NLS-0$
 					var status = that.status = that.items = resp;
 					Deferred.when(that.repository || progressService.progress(gitClient.getGitClone(status.CloneLocation), messages["Getting git repository details"]), function(resp) {
 						var repository = resp.Children ? resp.Children[0] : resp;

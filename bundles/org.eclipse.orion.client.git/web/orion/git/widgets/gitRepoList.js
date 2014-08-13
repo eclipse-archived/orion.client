@@ -62,41 +62,38 @@ define([
 						return deferred.resolve();
 					}
 					
-					Deferred.when(repository.status, that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), "Getting status for " + repository.Name), function(resp) { //$NON-NLS-0$
+					Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(resp) {
 						try{
-							repository.status = repository.Status = resp;
-							that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation), "Getting branches for " + repository.Name).then(function(resp){ //$NON-NLS-0$
-								try{
-									var branches = resp.Children || [];
-									var currentBranch;
-									for (var i=0; i<branches.length; i++){
-										if (branches[i].Current){
-											currentBranch = branches[i];
-											break;
-										}
+							repository.status = resp;
+							var currentBranchMsg = i18nUtil.formatMessage(messages['GettingCurrentBranch'], repository.Name);
+							Deferred.when(repository.BranchesNoCommits || (repository.BranchesNoCommits = that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=0&page=1&pageSize=5"), currentBranchMsg)), function(resp) { //$NON-NLS-0$
+								var currentBranch, branches = resp.Children || resp;
+								repository.BranchesNoCommits = branches;
+								for (var i=0; i<branches.length; i++){
+									if (branches[i].Current){
+										currentBranch = branches[i];
+										break;
 									}
-									if (!currentBranch || currentBranch.RemoteLocation[0] === null){
+								}
+								if (!currentBranch || currentBranch.RemoteLocation[0] === null){
+									deferred.resolve();
+									return;
+								}
+								var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
+								if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
+									that.progressService.progress(that.gitClient.getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD"), "Getting incomming commits " + repository.Name).then(function(resp){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+										if(resp.Children === undefined) { repository.CommitsToPush = 0; }
+										else { repository.CommitsToPush = resp.Children.length; }
 										deferred.resolve();
 										return;
-									}
-									var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
-									if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
-										that.progressService.progress(that.gitClient.getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD"), "Getting incomming commits " + repository.Name).then(function(resp){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-											if(resp.Children === undefined) { repository.CommitsToPush = 0; }
-											else { repository.CommitsToPush = resp.Children.length; }
-											deferred.resolve();
-											return;
-										}, deferred.reject);
-									} else {
-										that.progressService.progress(that.gitClient.doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20"), "Getting outgoing commits " + repository.Name).then(function(resp){ //$NON-NLS-1$ //$NON-NLS-0$
-											if(resp.Children === undefined) { repository.CommitsToPush = 0; }
-											else { repository.CommitsToPush = resp.Children.length; }
-											deferred.resolve();
-											return;
-										}, deferred.reject);	
-									}
-								} catch(e){
-									deferred.reject();
+									}, deferred.reject);
+								} else {
+									that.progressService.progress(that.gitClient.doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20"), "Getting outgoing commits " + repository.Name).then(function(resp){ //$NON-NLS-1$ //$NON-NLS-0$
+										if(resp.Children === undefined) { repository.CommitsToPush = 0; }
+										else { repository.CommitsToPush = resp.Children.length; }
+										deferred.resolve();
+										return;
+									}, deferred.reject);	
 								}
 							}, deferred.reject);
 						} catch(e){
@@ -171,6 +168,7 @@ define([
 		this.handleError = options.handleError;
 		this.gitClient = options.gitClient;
 		this.fileClient = options.fileClient;
+		this.simgleRepository = options.simgleRepository;
 		this.progressService = options.progressService;
 	}
 	GitRepoListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
@@ -223,12 +221,18 @@ define([
 			if (!section) return;
 			var commandRegistry = this.commandService;
 			var actionsNodeScope = section.actionsNode.id;
-			commandRegistry.addCommandGroup(actionsNodeScope, "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.cloneGitRepository", 100, "eclipse.gitGroup", false, null, new mCommandRegistry.URLBinding("cloneGitRepository", "url")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.createGitProject", 300, "eclipse.gitGroup", true, null, new mCommandRegistry.URLBinding("createProjectContext", "name")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.initGitRepository", 200, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.openCommitCommand", 1000, "eclipse.gitGroup", true,  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				new KeyBinding.KeyBinding('h', true, true), new mCommandRegistry.URLBinding("openGitCommit", "commitName")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			if (this.simgleRepository) {
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.pull", 200); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 300); //$NON-NLS-1$ //$NON-NLS-0$
+//				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.git.deleteClone", 1000); //$NON-NLS-1$ //$NON-NLS-0$
+			} else {
+				commandRegistry.addCommandGroup(actionsNodeScope, "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.cloneGitRepository", 100, "eclipse.gitGroup", false, null, new mCommandRegistry.URLBinding("cloneGitRepository", "url")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.createGitProject", 300, "eclipse.gitGroup", true, null, new mCommandRegistry.URLBinding("createProjectContext", "name")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.initGitRepository", 200, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.openCommitCommand", 1000, "eclipse.gitGroup", true,  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					new KeyBinding.KeyBinding('h', true, true), new mCommandRegistry.URLBinding("openGitCommit", "commitName")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			}
 			commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.repositories[0], this, "button"); //$NON-NLS-0$
 		}
 	});
@@ -268,7 +272,7 @@ define([
 							description = repo.GitUrl ? messages["git url:"] + repo.GitUrl : messages["(no remote)"];
 							subDescription = repo.Content ? messages["location: "] + repo.Content.Path : ellipses;
 							if (explorer.mode === "full") { //$NON-NLS-0$
-								var status = repo.Status;
+								var status = repo.status;
 								if (status) {
 									if (status.RepositoryState !== "SAFE"){ //$NON-NLS-0$
 										extraDescriptions.push(messages["Rebase in progress!"]);
@@ -333,11 +337,13 @@ define([
 						});
 					}
 
-					var actionsArea = document.createElement("div"); //$NON-NLS-0$
-					actionsArea.className = "sectionTableItemActions"; //$NON-NLS-0$
-					actionsArea.id = actionsID;
-					horizontalBox.appendChild(actionsArea);
-					this.commandService.renderCommands(this.actionScopeId, actionsArea, item, explorer, explorer.section ? "tool" : "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$	
+					if (!explorer.simgleRepository) {
+						var actionsArea = document.createElement("div"); //$NON-NLS-0$
+						actionsArea.className = "sectionTableItemActions"; //$NON-NLS-0$
+						actionsArea.id = actionsID;
+						horizontalBox.appendChild(actionsArea);
+						this.commandService.renderCommands(this.actionScopeId, actionsArea, item, explorer, explorer.section ? "tool" : "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$	
+					}
 					return td;
 			}
 		}

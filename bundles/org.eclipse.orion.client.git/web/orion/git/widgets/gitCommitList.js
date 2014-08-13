@@ -155,8 +155,9 @@ define([
 				Deferred.when(parentItem.repository || that._getRepository(parentItem), function(repository) {
 					var currentBranchMsg = i18nUtil.formatMessage(messages['GettingCurrentBranch'], repository.Name);
 					if (progress) progress.worked(currentBranchMsg);
-					Deferred.when(repository.BranchesNoCommits || that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=0&page=1&pageSize=5"), currentBranchMsg), function(resp) { //$NON-NLS-0$
+					Deferred.when(repository.BranchesNoCommits || (repository.BranchesNoCommits = that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=0&page=1&pageSize=5"), currentBranchMsg)), function(resp) { //$NON-NLS-0$
 						var currentBranch, branches = resp.Children || resp;
+						repository.BranchesNoCommits = branches;
 						branches.some(function(branch) {
 							if (branch.Current) {
 								currentBranch = branch;
@@ -178,7 +179,6 @@ define([
 							return;
 						}
 						repository.ActiveBranch = currentBranch.CommitLocation;
-						repository.BranchesNoCommits = branches;
 						var activeBranch = that.getActiveBranch();
 						var targetRef = that.getTargetReference();
 						if (activeBranch && targetRef && !that.simpleLog) {
@@ -234,7 +234,7 @@ define([
 				});
 			} else if (parentItem.Type === "Uncommited") { //$NON-NLS-0$
 				var repository = that.root.repository;
-				Deferred.when(repository.status || that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Loading...'])).then(function(status) { //$NON-NLS-0$
+				Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
 					repository.status = status;
 					onComplete(that.processChildren(parentItem, [
 						status

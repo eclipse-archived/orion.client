@@ -223,6 +223,17 @@ define([
 		}
 	};
 	
+	GitRepositoryExplorer.prototype.destroyWorkingDirectory = function() {
+		if (this.workingDirNavigator) {
+			this.workingDirNavigator.destroy();
+			this.workingDirNavigator = null;
+		}
+		if (this.workingDirSection) {
+			this.workingDirSection.destroy();
+			this.workingDirSection = null;
+		}
+	};
+	
 	GitRepositoryExplorer.prototype.destroyConfig = function() {
 		if (this.configNavigator) {
 			this.configNavigator.destroy();
@@ -255,6 +266,7 @@ define([
 		this.destroyCommits();
 		this.destroyStatus();
 		this.destroyTags();
+		this.destroyWorkingDirectory();
 		this.destroyConfig();
 		this.destroyDiffs();
 	};
@@ -292,6 +304,7 @@ define([
 			this.statusDeferred = new Deferred().resolve(); //HACK
 		} else {
 			this.statusDeferred = this.displayStatus(this.repository);
+			this.displayWorkingDirectory(this.repository);
 		}
 	};
 	
@@ -623,7 +636,7 @@ define([
 		var selection = this.commitsSelection = new mSelection.Selection(this.registry, "orion.selection.commit"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			var selected = event.selection;
-			if (this.commit === selected) return;
+			if ((this.commit || repository.status) === selected) return;
 			lib.empty(lib.node('table')); //$NON-NLS-0$
 			this.setSelectedCommit(selected);
 //			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
@@ -689,6 +702,38 @@ define([
 			}
 		});
 		return explorer.display();
+	};
+	
+	GitRepositoryExplorer.prototype.displayWorkingDirectory = function(repository) {
+		this.destroyWorkingDirectory();
+		var parent = lib.node('table'); //$NON-NLS-0$
+		var section = this.workingDirSection = new mSection.Section(parent, {
+			id: "workingDirSection", //$NON-NLS-0$
+			title: messages['LocalChangesDetails'], //$NON-NLS-0$
+			slideout: true,
+			canHide: false,
+			sibling: this.statusSection ? this.statusSection.domNode : null,
+			preferenceService: this.preferencesService
+		});
+		
+		var explorer = this.workingDirNavigator = new mGitRepoList.GitRepoListExplorer({
+			serviceRegistry: this.registry,
+			commandRegistry: this.commandService,
+			fileClient: this.fileClient,
+			gitClient: this.gitClient,
+			progressService: this.progressService,
+			parentId: section.getContentElement(),
+			actionScopeId: this.actionScopeId,
+			handleError: this.handleError.bind(this),
+			section: section,
+			repositories: [repository],
+			mode: "full", //$NON-NLS-0$
+			simgleRepository: true,
+			showLinks: false,
+		});
+		return this.statusDeferred.then(function() {
+			return explorer.display();
+		});
 	};
 	
 	GitRepositoryExplorer.prototype.displayCommit = function(commit) {

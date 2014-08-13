@@ -457,6 +457,7 @@ define({
 	"Synchronized" : "History",
 	"Uncommited" : "Uncommited",
 	"LocalChanges" : "Working Directory Changes",
+	"LocalChangesDetails" : "Working Directory Details",
 	"NoBranch" : "No Branch",
 	"None": "None",
 	"FileSelected": "${0} file selected",

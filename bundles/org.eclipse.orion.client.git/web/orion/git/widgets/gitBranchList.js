@@ -51,7 +51,7 @@ define([
 				progress = this.section && !parentItem.parent ? this.section.createProgressMonitor() : null;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], repository.Name);
 				if (progress) progress.begin(msg);
-				Deferred.when(repository.Branches || this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.BranchLocation + queryPage), msg), function(resp) {
+				Deferred.when(this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.BranchLocation + queryPage), msg), function(resp) {
 					if (progress) progress.done();
 					var children = resp.Children || resp;
 					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, resp, "MoreBranches"))); //$NON-NLS-0$
@@ -63,7 +63,7 @@ define([
 				progress = this.section && !parentItem.parent  ? this.section.createProgressMonitor() : null;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], repository.Name);
 				if (progress) progress.begin(msg);
-				Deferred.when(repository.Branches || this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.TagLocation + queryPage), msg), function(resp) {
+				Deferred.when(this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.TagLocation + queryPage), msg), function(resp) {
 					if (progress) progress.done();
 					var children = resp.Children || resp;
 					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, resp, "MoreTags"))); //$NON-NLS-0$
