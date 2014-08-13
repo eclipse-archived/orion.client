@@ -29,5 +29,9 @@ define({
 	"Name": "Name",
 	"Actions": "Actions",
 	"Status": "Status",
-	"Scheduled": "Scheduled"
+	"Scheduled": "Scheduled",
+	"Recent operations": "Recent operations",
+	"All Operations": "All Operations",
+	"NoPageOps": "No operations running on this page.",
+	"NoOperations": "No operations running."
 });
