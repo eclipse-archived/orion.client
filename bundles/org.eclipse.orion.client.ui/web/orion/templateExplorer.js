@@ -379,7 +379,7 @@ define([
 			this._sidebar = options.sidebar;
 			var _self = this;
 			_self._sidebar.addViewMode(this.id, {
-				label: "Templates", //$NON-NLS-0$
+				label: messages['TemplateExplorerLabel'],
 				create: _self.createViewMode.bind(_self),
 				destroy: _self.destroyViewMode.bind(_self)
 			});
@@ -392,7 +392,7 @@ define([
 			var _self = this;
 			var sidebar = this._sidebar;
 			var openTemplateExplorerCommand = new mCommands.Command({
-				name: "Open Template Explorer", //$NON-NLS-0$
+				name: messages['OpenTemplateExplorer'],
 				id: "orion.openTemplateExplorer", //$NON-NLS-0$
 				callback: function () {
 					var mainSplitter = mGlobalCommands.getMainSplitter();

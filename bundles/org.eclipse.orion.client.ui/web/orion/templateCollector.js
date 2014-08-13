@@ -85,7 +85,7 @@ define(["orion/editor/templates","orion/objects","orion/Deferred"], function(mTe
 			return Deferred.all(deferredTemplates, function(error) {
 				console.error("error collecting the templates2: " + error.message);}) //$NON-NLS-0$
 			.then(function(templateObjectsArray) {
-				if (!self.contentType) return new Deferred().reject("Error collecting the templates. ContentType has not been set."); //$NON-NLS-0$
+				if (!self.contentType) return new Deferred().reject("Error collecting the templates: ContentType has not been set."); //$NON-NLS-0$
 				templateObjectsArray.forEach(function(templateObjects){
 					if (!templateObjects) {
 						return;
@@ -121,7 +121,7 @@ define(["orion/editor/templates","orion/objects","orion/Deferred"], function(mTe
 			}, this);
 			
 			return Deferred.all(deferredTemplates, function(error) {
-				console.error("error collecting the templates: " + error.message); //$NON-NLS-0$
+				console.error("Error collecting the templates: " + error.message); //$NON-NLS-0$
 			})
 			.then( function(templateObjectsArray) {
 				if (!self.contentType) return new Deferred().reject("Error collecting the templates. ContentType has not been set."); //$NON-NLS-0$
