@@ -140,6 +140,15 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             return th;
         }
     };
+    
+    SearchResultRenderer.prototype.getCheckboxColumn = function(item, tableRow){
+    	if (item.type === "file") { //$NON-NLS-0$
+    		return mExplorer.ExplorerRenderer.prototype.getCheckboxColumn.call(this, item, tableRow);
+    	} else {
+    		//detail row checkboxes should be placed in next column
+    		return document.createElement('td'); //$NON-NLS-0$
+    	}
+	};
 
     SearchResultRenderer.prototype.getCellHeaderElement = function(col_no) {
         return null;
@@ -439,8 +448,8 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         var span;
         switch (col_no) {
             case 0:
-                col = _createElement('td'); //$NON-NLS-0$
                 if (item.type === "file") { //$NON-NLS-0$
+                	col = _createElement('td'); //$NON-NLS-0$
                     col.noWrap = true;
                     span = _createSpan(null, this.getFileIconId(item), col, null);
                     this._lastFileIconDom = span;
@@ -453,7 +462,10 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                         this.getExpandImage(tableRow, span); //$NON-NLS-0$
                     }
                 } else {
-                	if (!this.explorer.model.replaceMode()) {
+                	if (this.explorer.model.replaceMode()) {
+                		col = mExplorer.ExplorerRenderer.prototype.getCheckboxColumn.call(this, item, tableRow);
+                	} else {
+                		col = _createElement('td'); //$NON-NLS-0$
                 		span = _createSpan(null, null, col, null);
                 		this.renderDetailLineNumber(item, span);
                 	}
