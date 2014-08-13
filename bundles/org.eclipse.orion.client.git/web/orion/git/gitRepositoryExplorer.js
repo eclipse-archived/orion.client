@@ -24,11 +24,12 @@ define([
 	'orion/webui/littlelib',
 	'orion/URITemplate',
 	'orion/PageUtil',
+	'orion/git/util',
 	'orion/fileUtils',
 	'orion/globalCommands',
 	'orion/objects',
 	'orion/Deferred'
-], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mGitFileList, mGitCommitInfo, mSection, mSelection, lib, URITemplate, PageUtil, mFileUtils, mGlobalCommands, objects, Deferred) {
+], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mGitFileList, mGitCommitInfo, mSection, mSelection, lib, URITemplate, PageUtil, util, mFileUtils, mGlobalCommands, objects, Deferred) {
 	
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 	
@@ -491,16 +492,13 @@ define([
 		var activeBranch = explorer.model.getActiveBranch();
 		var targetRef = explorer.model.getTargetReference();
 		if (activeBranch && targetRef) {
-			var targetName = targetRef.Name;
-			if (targetRef.Type === "Commit") { //$NON-NLS-0$
-				targetName = targetName.substring(0, 6);
-			}
+			var targetName =  util.shortenRefName(targetRef);
 			title = activeBranch.Name + " \u2794 " + targetName;  //$NON-NLS-0$
 			if (explorer.model.isNewBranch(targetRef)) {
 				title += messages[" [New branch]"];
 			}
 		} else {
-			title = (activeBranch || targetRef).Name;
+			title = util.shortenRefName(activeBranch || targetRef);
 		}
 		this.branchesSection.setTitle(title);
 	};

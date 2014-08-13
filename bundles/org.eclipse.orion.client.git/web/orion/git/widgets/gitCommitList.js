@@ -21,9 +21,10 @@ define([
 	'orion/explorers/explorer',
 	'orion/commonHTMLFragments',
 	'orion/i18nUtil',
+	'orion/git/util',
 	'orion/webui/littlelib',
 	'orion/objects'
-], function(messages, mGitChangeList, mGitCommitInfo, mSection, mCommands, Deferred, mExplorer, mHTMLFragments, i18nUtil, lib, objects) {
+], function(messages, mGitChangeList, mGitCommitInfo, mSection, mCommands, Deferred, mExplorer, mHTMLFragments, i18nUtil, util, lib, objects) {
 
 	var pageSizeQuery = "?page=1&pageSize=20"; //$NON-NLS-0$
 
@@ -183,12 +184,7 @@ define([
 						if (activeBranch && targetRef && !that.simpleLog) {
 							if (section) section.setTitle(activeBranch.Name);
 						} else if (targetRef || activeBranch) {
-							var ref = targetRef || activeBranch;
-							var refName = ref.Name;
-							if (ref.Type === "Commit") { //$NON-NLS-0$
-								refName = refName.substring(0, 6);
-							}
-							if (section) section.setTitle(refName);
+							if (section) section.setTitle(util.shortenRefName(targetRef || activeBranch));
 						}
 						if (progress) progress.done();
 						if (that.simpleLog) {

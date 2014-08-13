@@ -123,7 +123,7 @@ define([
 				if (++changeIdCount > 1) {
 					footer = {};
 					break;
-				};
+				}
 			} else if (!signedOffByPresent && splitted[i].indexOf(signedOffBy) === 0) {
 				footer.signedOffBy = splitted[i].substring(signedOffBy.length,splitted[i].length);
 				signedOffBy = true;
@@ -131,6 +131,14 @@ define([
 		}
 		
 		return footer;
+	}
+	
+	function shortenRefName(ref) {
+		var refName = ref.Name;
+		if (ref.Type === "Commit") { //$NON-NLS-0$
+			refName = refName.substring(0, 6);
+		}
+		return refName;
 	}
 
 	return {
@@ -141,6 +149,7 @@ define([
 		hasUnstagedChanges: hasUnstagedChanges,
 		parseSshGitUrl: parseSshGitUrl,
 		trimCommitMessage: trimCommitMessage,
+		shortenRefName: shortenRefName,
 		getGerritFooter: getGerritFooter
 	};
 });
