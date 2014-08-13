@@ -1,0 +1,9 @@
+Code-Review+2: Anthony Hunter <anthonyh@ca.ibm.com>
+Verified+1: Anthony Hunter <anthonyh@ca.ibm.com>
+Code-Review+1: Anton McConville <antonm@ca.ibm.com>
+Verified+1: Anton McConville <antonm@ca.ibm.com>
+Submitted-by: Anthony Hunter <anthonyh@ca.ibm.com>
+Submitted-at: Wed, 13 Aug 2014 14:56:09 -0400
+Reviewed-on: https://git.eclipse.org/r/31237
+Project: orion/org.eclipse.orion.client
+Branch: refs/heads/aidanr/login_auth_work
