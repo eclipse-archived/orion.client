@@ -17,8 +17,8 @@
 	background: whitesmoke;
 	border: 1px solid rgb(222, 222, 222);
 	border-radius: 0 5px 5px 0;
-	display: block;
-	overflow: hidden;
+	display: none;
+	overflow-x: auto; /*allow horiz scrollbar if search pane not wide enough*/
 	position: absolute;
 	top: 0;
 	width: 0;
@@ -26,6 +26,7 @@
 }
 
 .searchWrapperActive {
+	display: block;
 	height: calc(100% - 11px);
 	width: calc(100% - 2px);
 	transition: width 0.2s ease;
@@ -84,6 +85,13 @@
 	position: absolute;
 	right: 0;
 	z-index: 1;
+}
+
+.searchWrapper label {
+	-moz-user-select: -moz-none;
+	-ms-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
 }
 
 .searchWrapper.searchWrapperActive > .searchDismissButton {
@@ -148,7 +156,23 @@
 
 .searchOptionBlock {
 	margin: 15px 10px;
-	width: 254px;
+	min-width: 254px;
+	width: calc(100% - 20px);
+}
+
+.searchOption {
+	white-space: nowrap;
+}
+
+.oneLine {
+	white-space: nowrap;
+}
+.oneLine .searchOption {
+	display: inline-block;
+	margin-right: 40px;
+}
+.oneLine .searchOption:last-child {
+	margin: 0;
 }
 
 .searchLabel {
@@ -326,7 +350,7 @@
 	text-overflow: ellipsis;
 	vertical-align: middle;
 	white-space: nowrap;
-	width: calc(100% - 4px);
+	width: calc(100% - 5px); /*subtract margin to prevent overflow*/
 }
 
 .searchPageActions {
