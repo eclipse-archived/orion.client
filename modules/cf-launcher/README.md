@@ -20,13 +20,13 @@ set the prefix to something else.
    This is usually done by editing your app's `manifest.yml`. For example, if your `manifest.yml` has this command:
 
    ```
-   start: node server.js
+   command: node server.js
    ```
 
    You would change it to this:
 
    ```
-   start: node_modules/.bin/launcher -- node server.js
+   command: node_modules/.bin/launcher -- node server.js
    ```
 
 3. **Set a password**.
@@ -35,7 +35,7 @@ set the prefix to something else.
    The password can be provided as a command-line option (again, in your manifest.yml):
 
    ```
-   start: node_modules/.bin/launcher --password secretPassw0rd -- node server.js
+   command: node_modules/.bin/launcher --password secretPassw0rd -- node server.js
    ```
 
    Or you can set an environment variable named `LAUNCHER_PASSWORD` in your application environment. This is usually
