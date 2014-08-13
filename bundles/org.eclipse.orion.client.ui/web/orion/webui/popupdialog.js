@@ -61,7 +61,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 			range.selectNode(this.$parent);
 			var contentFragment = range.createContextualFragment(this.TEMPLATE);
 			if (this.messages) {
-				lib.processTextNodes(contentFragment, messages);
+				lib.processTextNodes(contentFragment, this.messages);
 			}
 			this.$parent.appendChild(contentFragment);
 			var tip = this._tooltip;
