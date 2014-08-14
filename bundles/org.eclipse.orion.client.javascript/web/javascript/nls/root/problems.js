@@ -26,10 +26,12 @@ define({
 	'no-new-object' : 'Use the object literal notation \'{}\' or Object.create(null).', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-wrappers' : 'Do not use \'${0}\' as a constructor.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-redeclare' : '\'${0}\' is already defined.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-undef' : '\'${0}\' is ${1}.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-undef-defined' : '\'${0}\' is undefined.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-undef-readonly': '\'${0}\' is readonly.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'no-unreachable' : 'Unreachable code.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-unused-params' : 'Parameter \'${0}\' is never used.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-unused-vars' : '\'${0}\' is ${1}.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-unused-vars-unused' : '\'${0}\' is unused.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-unused-vars-unread' : '\'${0}\' is unread.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-use-before-define': '\'${0}\' was used before it was defined.', //$NON-NLS-0$  //$NON-NLS-1$
 	'semi': 'Missing semicolon.', //$NON-NLS-0$  //$NON-NLS-1$
 	'throw-error': 'Throw an Error instead.', //$NON-NLS-0$  //$NON-NLS-1$
