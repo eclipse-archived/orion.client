@@ -235,5 +235,7 @@ define({
 	"License": "License",
 	"Login": "Login",
 	'clearThemeAndEditorSettings.name': 'Clear themes and editor settings',  //$NON-NLS-0$  //$NON-NLS-1$
-	'clearThemeAndEditorSettings.tooltip': 'Clear all settings associated with editor themes and window themes'  //$NON-NLS-0$  //$NON-NLS-1$
+	'clearThemeAndEditorSettings.tooltip': 'Clear all settings associated with editor themes and window themes',  //$NON-NLS-0$  //$NON-NLS-1$
+	"Settings": "Settings",
+
 });
