@@ -483,7 +483,7 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 			if (this._onExpandCollapse) {
 				this._onExpandCollapse(isExpanded, this);
 			}
-			this.dispatchEvent({type: "toogle", isExpanded: isExpanded}); //$NON-NLS-0$
+			this.dispatchEvent({type: "toggle", isExpanded: isExpanded}); //$NON-NLS-0$
 		},
 		
 		_expand: function() {

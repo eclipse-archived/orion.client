@@ -561,7 +561,7 @@ define([
 			gitClient: this.gitClient,
 			progressService: this.progressService
 		});
-		section.addEventListener("toogle", function(e) { //$NON-NLS-0$
+		section.addEventListener("toggle", function(e) { //$NON-NLS-0$
 			if (e.isExpanded) {
 				var location;
 				var model = this.commitsNavigator.model;
