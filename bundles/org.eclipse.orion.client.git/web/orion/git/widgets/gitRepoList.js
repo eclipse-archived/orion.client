@@ -337,7 +337,9 @@ define([
 						});
 					}
 
-					if (!explorer.simgleRepository) {
+					if (explorer.simgleRepository) {
+						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
+					} else {
 						var actionsArea = document.createElement("div"); //$NON-NLS-0$
 						actionsArea.className = "sectionTableItemActions"; //$NON-NLS-0$
 						actionsArea.id = actionsID;
