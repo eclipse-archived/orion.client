@@ -10,6 +10,7 @@
  ******************************************************************************/
  
 /*eslint-env browser, amd*/
+/*eslint no-unused-params:0*/
 
 define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialog', 'orion/URITemplate', 'require' ], function(messages, DirPrompter, dialog, URITemplate, require) {
 
@@ -32,7 +33,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 			+ '<label for="gitName" style="padding: 0 8px">${New folder:}</label>' + '<input id="gitName" value="">' + '</div>'
 
 			+ '<div style="padding: 8px">' + '<input id="isExistingProject" type="radio" name="isNewProject" value="existing"/>'
-			+ '<label for="gitPath" style="padding: 0 8px">${Existing directory:}</label>' + '<input id="gitPath" type="hidden" value="">'
+			+ '<label for="isExistingProject" style="padding: 0 8px">${Existing directory:}</label>' + '<input id="gitPath" type="hidden" value="">'
 			+ '<span id="shownGitPath" style="padding-right: 24px"></span>' + '<a id="changeGitPath" href="javascript:">${Change...}</a>' + '</div>'
 
 			+ '</span>';
@@ -54,15 +55,24 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 
 		this.buttons = [];
 
-		this.buttons.push({ callback : function() {
-			that.destroy();
-			that._execute();
-		},
-		text : messages['OK']
+		this.buttons.push({
+			callback: function() {
+				if (that.okbutton.disabled)
+					return; // don't run if dialog is not valid
+
+				that.destroy();
+				that._execute();
+			},
+			text : messages['OK'],
+			isDefault: true
 		});
 
-		// Start the dialog initialization.
+		// Initialize dialog & elements
 		this._initialize();
+
+		this.okbutton = this.$buttonContainer.querySelectorAll("button")[0]; //$NON-NLS-0$
+		this.okbutton.disabled = true;
+		this.okbutton.classList.add("disabled"); //$NON-NLS-0$
 	};
 
 	CloneGitRepositoryDialog.prototype._bindToDom = function(parent) {
@@ -71,6 +81,15 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 		if (this.url) {
 			this.$gitUrl.value = this.url;
 		}
+		this.$gitUrl.addEventListener("input", function() { //$NON-NLS-0$
+			var invalid = /^\s*$/.test(that.$gitUrl.value);
+			that.okbutton.disabled = invalid;
+			var cl = that.okbutton.classList;
+			if (invalid)
+				cl.add("disabled"); //$NON-NLS-0$
+			else
+				cl.remove("disabled"); //$NON-NLS-0$
+		});
 
 		if (this.advancedOnly) {
 			this.$basicPane.style.display = "none"; //$NON-NLS-0$
@@ -110,9 +129,11 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 	};
 
 	CloneGitRepositoryDialog.prototype._execute = function() {
-		if (this.func)
-			this.func(this.advancedOnly ? undefined : this.$gitUrl.value, (this.advancedShown && this.$isNewProject.checked) ? undefined : this.$gitPath.value,
-					(this.advancedShown && !this.$isNewProject.checked) ? undefined : this.$gitName.value);
+		this.func && this.func(
+			(this.advancedOnly ? undefined : this.$gitUrl.value),
+			(this.advancedShown && this.$isNewProject.checked) ? undefined : this.$gitPath.value,
+			(this.advancedShown && !this.$isNewProject.checked) ? undefined : this.$gitName.value
+		);
 	};
 
 	CloneGitRepositoryDialog.prototype._showAdvanced = function() {
