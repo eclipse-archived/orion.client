@@ -156,17 +156,6 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 
 	}
 
-	function createOpenIdLink(openid) {
-		if (openid !== "" && openid !== null) {
-			var redirect = getRedirect();
-			if (redirect !== null && PageUtil.validateURLScheme(decodeURIComponent(redirect))) {
-				return "../login/openid?openid=" + encodeURIComponent(openid) + "&redirect=" + redirect;
-			} else {
-				return "../login/openid?openid=" + encodeURIComponent(openid);
-			}
-		}
-	}
-	
 	function createOAuthLink(oauth) {
 		if (oauth !== "" && oauth !== null) {
 			var redirect = getRedirect();
@@ -272,7 +261,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		}
 		document.getElementById("registerButton").focus();
 	}
-	
+
 	function hideLinkedRegistration() {
 		document.getElementById('createLinkedHeaderShown').style.visibility = 'hidden';
 		document.getElementById('orionOpen').style.visibility = '';
@@ -323,7 +312,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		var email =  document.getElementById("create_linked_email").value;
 		var identifier = getParam("identifier");
 		var password = generateRandomPassword();
-		
+
 		var mypostrequest = new XMLHttpRequest();
 		mypostrequest.onreadystatechange = function() {
 			if (mypostrequest.readyState === 4) {
@@ -347,7 +336,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		mypostrequest.setRequestHeader("Orion-Version", "1");
 		mypostrequest.send(parameters);
 	}
-	
+
 	function generateRandomPassword() {
 		// Passwords are a mix of both alpha and non-alpha charaters
 		var aphaCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -362,7 +351,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		}
 		return password;
 	}
-	
+
 	function revealRegistration( event ) {
 		// If registrationURI is set and userCreation is not, open the URI in a new window
 
@@ -396,7 +385,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		document.getElementById('create_linked_login').value = username;
 		document.getElementById('create_linked_email').value = email;
 	}
-	
+
 	function formatForNoUserCreation() {
 		document.getElementById('orionRegister').style.visibility = 'hidden';
 	}
@@ -444,7 +433,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 			event.srcElement.click();
 		}
 	}
-	
+
 	function googleLoginPlus( event ){
 		if( handleSelectionEvent( event ) ){
 			event.srcElement.click();
@@ -456,7 +445,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 			event.srcElement.click();
 		}
 	}
-	
+
 	domReady(function() {
 		addPersonaHandler(document.getElementById("personaLogin"));
 
@@ -473,7 +462,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 			var username = getParam("username");
 			showCreateUser(email, username);
 		}
-		
+
 		var checkusersrequest = new XMLHttpRequest();
 		checkusersrequest.onreadystatechange = function() {
 			if (checkusersrequest.readyState === 4) {
@@ -610,21 +599,18 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		};
 
 		document.getElementById("hideRegisterButton").addEventListener("click", hideRegistration);
-		
+
 		document.getElementById("createLinkedButton").addEventListener("click", confirmCreateLinkedUser);
 		document.getElementById("hideLinkedRegisterButton").addEventListener("click", hideLinkedRegistration);
 
-		
-		// FIX the hrefs of the various forms here.
-		document.getElementById("googleLogin").href = createOpenIdLink("https://www.google.com/accounts/o8/id");
-		document.getElementById("googleLogin").addEventListener("keydown", googleLogin);
 
+		// FIX the hrefs of the various forms here.
 		document.getElementById("googleLoginPlus").href = createOAuthLink("google");
 		document.getElementById("googleLoginPlus").addEventListener("keydown", googleLoginPlus);
-		
+
 		document.getElementById("githubLogin").href = createOAuthLink("github");
 		document.getElementById("githubLogin").addEventListener("keydown", githubLogin);
-		
+
 		document.getElementById("orionLogin").addEventListener("click", revealLogin);
 		document.getElementById("orionLogin").onkeydown = revealLogin;
 
