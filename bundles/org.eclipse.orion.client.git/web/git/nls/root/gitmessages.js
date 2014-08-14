@@ -452,6 +452,7 @@ define({
 	"Sync" : "Sync",
 	"SyncTooltip" : "Fetch from the remote branch. Rebase your commits by removing them from the local branch, starting the local branch again based on the latest state of the remote branch and applying each commit to the updated local branch. Push commits and tags from your local branch into the remote branch.",
 	"NoCommits" : "No Changes",
+	"NoContent" : "No Content",
 	"Incoming" : "Incoming",
 	"Outgoing" : "Outgoing",
 	"Synchronized" : "History",

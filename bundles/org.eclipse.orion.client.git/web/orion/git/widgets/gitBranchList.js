@@ -17,11 +17,12 @@ define([
 	'orion/explorers/explorer',
 	'orion/i18nUtil',
 	'orion/Deferred',
+	'orion/git/util',
 	'orion/webui/littlelib',
 	'orion/objects'
-], function(messages, mGitCommitList, mExplorer, i18nUtil, Deferred, lib, objects) {
+], function(messages, mGitCommitList, mExplorer, i18nUtil, Deferred, util, lib, objects) {
 
-	var queryPage = "?commits=1&page=1&pageSize=5"; //$NON-NLS-0$
+	var pageQuery = "commits=1&page=1&pageSize=5"; //$NON-NLS-0$
 
 	function GitBranchListModel(options) {
 		this.root = options.root;
@@ -33,6 +34,7 @@ define([
 		this.progressService = options.progressService;
 		this.parentId = options.parentId;
 		this.gitClient = options.gitClient;
+		this.filterQuery = "";
 	}
 	GitBranchListModel.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitBranchListModel.prototype, /** @lends orion.git.GitBranchListModel.prototype */ {
@@ -51,7 +53,7 @@ define([
 				progress = this.section && !parentItem.parent ? this.section.createProgressMonitor() : null;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], repository.Name);
 				if (progress) progress.begin(msg);
-				Deferred.when(this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.BranchLocation + queryPage), msg), function(resp) {
+				Deferred.when(this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.BranchLocation + util.generateQuery([pageQuery, that.filterQuery])), msg), function(resp) {
 					if (progress) progress.done();
 					var children = resp.Children || resp;
 					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, resp, "MoreBranches"))); //$NON-NLS-0$
@@ -63,7 +65,7 @@ define([
 				progress = this.section && !parentItem.parent  ? this.section.createProgressMonitor() : null;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], repository.Name);
 				if (progress) progress.begin(msg);
-				Deferred.when(this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.TagLocation + queryPage), msg), function(resp) {
+				Deferred.when(this.progressService.progress(this.gitClient.getGitBranch(parentItem.location ? parentItem.location : repository.TagLocation + util.generateQuery([pageQuery, that.filterQuery])), msg), function(resp) {
 					if (progress) progress.done();
 					var children = resp.Children || resp;
 					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, resp, "MoreTags"))); //$NON-NLS-0$
@@ -98,7 +100,7 @@ define([
 				progress = this.section && !parentItem.parent  ? this.section.createProgressMonitor() : null;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], parentItem.Name);
 				if (progress) progress.begin(msg);
-				this.progressService.progress(this.gitClient.getGitRemote(parentItem.Location), msg).then(function (resp) {
+				this.progressService.progress(this.gitClient.getGitRemote(parentItem.Location + util.generateQuery([that.filterQuery])), msg).then(function (resp) {
 					if (progress) progress.done();
 					onComplete(that.processChildren(parentItem, resp.Children));
 				}, function(error){
@@ -112,6 +114,9 @@ define([
 			}
 		},
 		processChildren: function(parentItem, children) {
+			if (children.length === 0) {
+				children = [{Type: "NoContent", selectable: false, isNotSelectable: true}]; //$NON-NLS-0$
+			}
 			children.forEach(function(item) {
 				item.parent = parentItem;
 			});
@@ -173,12 +178,36 @@ define([
 				});
 			}
 			var that = this;
+			if (!item.more) {
+				item.children = null;
+			}
 			model.getChildren(item, function(children) {
 				item.removeAll = true;
 				that.myTree.refresh.bind(that.myTree)(item, children, false);
 				deferred.resolve(children);
 			});
 			return deferred;
+		},
+		createFilter: function() {
+			var filterDiv = document.createElement("div"); //$NON-NLS-0$
+			filterDiv.className = "gitFilterBox"; //$NON-NLS-0$
+			var filter = document.createElement("input"); //$NON-NLS-0$
+			filter.placeholder = messages["Filter items"];
+			filterDiv.appendChild(filter);
+			var sectionContent = this.section.getContentElement();
+			var branchNode = sectionContent.firstChild;
+			sectionContent.insertBefore(filterDiv, branchNode);
+			filter.addEventListener("keydown", function(event){ //$NON-NLS-0$
+				if (event.keyCode === 13) {
+					this.model.filterQuery = "filter=" + encodeURIComponent(filter.value); //$NON-NLS-0$
+					this.changedItem().then(function () {
+						if (this.model.filterQuery)
+						for (var i=0; i<this.model.root.children.length; i++) {
+							this.myTree.expand(this.model.root.children[i]); 
+						}
+					}.bind(this));
+				}
+			}.bind(this));
 		},
 		display: function() {
 			var deferred = new Deferred();
@@ -193,6 +222,7 @@ define([
 				parentId: this.parentId,
 				handleError: this.handleError
 			});
+			this.createFilter(this.parentId);
 			this.createTree(this.parentId, model, {
 				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy,
@@ -205,6 +235,8 @@ define([
 		},
 		isRowSelectable: function() {
 			return !!this.selection;
+		},
+		refreshSelection: function() {
 		},
 		updateCommands: function() {
 			var root = this.root;
@@ -263,6 +295,9 @@ define([
 							});
 						});
 						return td;
+					} else if (item.Type === "NoContent") { //$NON-NLS-0$
+						title = messages[item.Type];
+						titleClass = "";
 					} else if (item.parent.Type === "LocalRoot") { //$NON-NLS-0$
 						if (explorer.showHistory) createExpand();
 						var branch = item;

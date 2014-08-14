@@ -140,11 +140,20 @@ define([
 		}
 		return refName;
 	}
+	
+	function generateQuery(queries) {
+		var result = queries.join("&");  //$NON-NLS-0$
+		if (result.length) {
+			result = "?" + result;  //$NON-NLS-0$
+		}
+		return result;
+	}
 
 	return {
 		isStaged: isStaged,
 		isUnstaged: isUnstaged,
 		isChange: isChange,
+		generateQuery: generateQuery,
 		hasStagedChanges: hasStagedChanges,
 		hasUnstagedChanges: hasUnstagedChanges,
 		parseSshGitUrl: parseSshGitUrl,

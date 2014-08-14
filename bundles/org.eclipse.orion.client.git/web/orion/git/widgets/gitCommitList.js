@@ -26,7 +26,7 @@ define([
 	'orion/objects'
 ], function(messages, mGitChangeList, mGitCommitInfo, mSection, mCommands, Deferred, mExplorer, mHTMLFragments, i18nUtil, util, lib, objects) {
 
-	var pageSizeQuery = "?page=1&pageSize=20"; //$NON-NLS-0$
+	var pageQuery = "page=1&pageSize=20"; //$NON-NLS-0$
 
 	function GitCommitListModel(options) {
 		this.root = options.root;
@@ -45,6 +45,7 @@ define([
 		this.log = options.log;
 		this.logDeferred = new Deferred();
 		this.repositoryPath = options.repositoryPath || "";
+		this.filterQuery = "";
 	}
 	GitCommitListModel.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitCommitListModel.prototype, /** @lends orion.git.GitCommitListModel.prototype */ {
@@ -70,10 +71,10 @@ define([
 			var that = this;
 			var logMsg = that.location ? messages["Getting git log"] : i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], that.currentBranch.Name);
 			var ref = that.simpleLog ? that.getTargetReference() : that.getActiveBranch();
-			var location = parentItem.more ? parentItem.location : that.location || ((ref.CommitLocation || ref.Location) + that.repositoryPath + pageSizeQuery);
+			var location = parentItem.more ? parentItem.location : that.location || ((ref.CommitLocation || ref.Location) + that.repositoryPath + util.generateQuery([pageQuery, that.filterQuery]));
 			return that.progressService.progress(that.gitClient.doGitLog(location), logMsg).then(function(resp) {
 				if (that.location && resp.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
-					return that.progressService.progress(that.gitClient.doGitLog(resp.CommitLocation), logMsg).then(function(resp) { //$NON-NLS-0$
+					return that.progressService.progress(that.gitClient.doGitLog(resp.CommitLocation + that.repositoryPath + util.generateQuery([pageQuery, that.filterQuery])), logMsg).then(function(resp) { //$NON-NLS-0$
 						return that.log = resp;
 					}, function(error){
 						that.handleError(error);
@@ -90,7 +91,7 @@ define([
 			var targetRef = this.getTargetReference();
 			var location = (targetRef.CommitLocation || targetRef.Location) + (that.log ? that.log.RepositoryPath : "");
 			var id = activeBranch.Name;
-			return that.progressService.progress(that.gitClient.getLog(location + pageSizeQuery, id), messages['Getting outgoing commits']).then(function(resp) {
+			return that.progressService.progress(that.gitClient.getLog(location + util.generateQuery([pageQuery, that.filterQuery]), id), messages['Getting outgoing commits']).then(function(resp) {
 				return that.outgoingCommits = resp.Children;
 			});
 		},
@@ -100,7 +101,7 @@ define([
 			var targetRef = this.getTargetReference();
 			var location = activeBranch.CommitLocation + (that.log ? that.log.RepositoryPath : "");
 			var id = targetRef.Name;
-			return that.progressService.progress(that.gitClient.getLog(location + pageSizeQuery, id), messages['Getting git incoming changes...']).then(function(resp) {
+			return that.progressService.progress(that.gitClient.getLog(location + util.generateQuery([pageQuery, that.filterQuery]), id), messages['Getting git incoming changes...']).then(function(resp) {
 				return that.incomingCommits = resp.Children;
 			});
 		},
@@ -408,6 +409,27 @@ define([
 			});
 			return deferred;
 		},
+		createFilter: function() {
+			var filterDiv = document.createElement("div"); //$NON-NLS-0$
+			filterDiv.className = "gitFilterBox"; //$NON-NLS-0$
+			var filter = document.createElement("input"); //$NON-NLS-0$
+			filter.placeholder = messages["Filter items"];
+			filterDiv.appendChild(filter);
+			var sectionContent = this.section.getContentElement();
+			var branchNode = sectionContent.firstChild;
+			sectionContent.insertBefore(filterDiv, branchNode);
+			filter.addEventListener("keydown", function(event){ //$NON-NLS-0$
+				if (event.keyCode === 13) {
+					this.model.filterQuery = "filter=" + encodeURIComponent(filter.value); //$NON-NLS-0$
+					this.changedItem().then(function () {
+						if (this.model.filterQuery)
+						for (var i=0; i<this.model.root.children.length; i++) {
+							this.myTree.expand(this.model.root.children[i]); 
+						}
+					}.bind(this));
+				}
+			}.bind(this)); //$NON-NLS-0$
+		},
 		display: function() {
 			var that = this;
 			var deferred = new Deferred();
@@ -426,6 +448,7 @@ define([
 				targetRef: this.targetRef,
 				simpleLog: this.simpleLog
 			});
+			this.createFilter(this.parentId);
 			this.createTree(this.parentId, model, {
 				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy,
