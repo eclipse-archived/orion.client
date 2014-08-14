@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -144,5 +144,9 @@ define({
 	"basic": "Basic",
 	"createAnEmptyProject.": "Create an empty project.",
 	"sFTP": "SFTP",
-	"createAProjectFromAn": "Create a project from an SFTP site."
+	"createAProjectFromAn": "Create a project from an SFTP site.",
+	'readMeCommandName': 'Readme File',  //$NON-NLS-0$  //$NON-NLS-1$
+	'readMeCommandTooltip': 'Create a README.md file in this project',  //$NON-NLS-0$  //$NON-NLS-1$
+	'zipArchiveCommandName': 'Zip archive',  //$NON-NLS-0$  //$NON-NLS-1$
+	'zipArchiveCommandTooltip': 'Create a project from a local zip archive.'  //$NON-NLS-0$  //$NON-NLS-1$
 });

@@ -997,8 +997,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		
 		var readmeFilename = "README.md"; //$NON-NLS-0$
 		var addReadmeCommand = new mCommands.Command({
-			name: "Readme File", //$NON-NLS-0$
-			tooltip: "Create a README.md file in this project", //$NON-NLS-0$
+			name: messages["readMeCommandName"], //$NON-NLS-0$
+			tooltip: messages["readMeCommandTooltip"], //$NON-NLS-0$
 			id: "orion.project.create.readme", //$NON-NLS-0$
 			callback: function(data){
 				var item = forceSingleItem(data.items);
@@ -1068,8 +1068,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			commandService.addCommand(createBasicProjectCommand);
 				
 			var createZipProjectCommand = new mCommands.Command({
-			name: "Zip archive", //$NON-NLS-0$
-			tooltip: "Create a project from a local zip archive.", //$NON-NLS-0$
+			name: messages["zipArchiveCommandName"], //$NON-NLS-0$
+			tooltip: messages["zipArchiveCommandTooltip"], //$NON-NLS-0$
 			id: "orion.project.create.fromfile", //$NON-NLS-0$
 			callback: function(data){
 					var item = forceSingleItem(data.items);
