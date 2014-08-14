@@ -113,7 +113,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 			
 			
 			var iframe = this.iframe = document.createElement("iframe"); //$NON-NLS-0$
-			iframe.src = "../mixloginstatic/manageOpenids.html";
+			iframe.src = "../mixloginstatic/manageExternalIds.html";
 			iframe.style.border = "0";
 			iframe.style.width = "500px";
 			lib.node( 'iFrameContent' ).appendChild(iframe); //$NON-NLS-0$

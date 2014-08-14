@@ -2,13 +2,13 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<link rel="stylesheet" type="text/css" href="css/manageOpenids.css" />
+		<link rel="stylesheet" type="text/css" href="css/manageExternalIds.css" />
 		<script src="../requirejs/require.js"></script>
 		<script>
 		/*eslint-env browser, amd*/
 		require({
 		  baseUrl: '..',
-		
+
 		  // set the paths to our library packages
 		  packages: [],
 		  paths: {
@@ -17,13 +17,13 @@
 			  domReady: 'requirejs/domReady'
 		  }
 		});
-		
-		require(["mixloginstatic/manageOpenids"]);
+
+		require(["mixloginstatic/manageExternalIds"]);
 		</script>
 	</head>
-<body>
-	<div id="newOpenId">
-	</div>
-	<div id="openidList"></div>
-</body>
+	<body>
+		<div id="newExternalId">
+		</div>
+		<div id="externalIdList"></div>
+	</body>
 </html>
