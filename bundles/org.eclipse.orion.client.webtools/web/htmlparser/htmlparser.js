@@ -621,6 +621,8 @@ function HtmlBuilder (callback, options) {
             this._col += 7;
         } else if (node.type === Mode.CData) {
             this._col += 12;
+        } else if (node.type === Mode.Doctype) {
+        	this._col += 10;
         }
     };
 
