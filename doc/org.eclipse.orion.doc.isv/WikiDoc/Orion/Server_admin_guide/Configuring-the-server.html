@@ -105,13 +105,13 @@ jetty.ssl.protocol = SSLv3
 		<p>To configure the kind of authentication used by the server, set the <tt>orion.auth.name</tt> property in the 
 			<a href="#Server_configuration_file">server configuration file</a>. For example, the following line will configure the server to use simple form-based authentication:
 		</p>
-		<pre class="source-properties">orion.auth.name=FORM+OpenID
+		<pre class="source-properties">orion.auth.name=FORM+OAuth
 
 </pre>
 		<p>Valid values for this property are:</p>
 		<ul>
 			<li><code>Basic</code>: Basic HTTP authentication (not secure unless running on https)</li>
-			<li><code>FORM+OpenID</code>: User can select form-based authentication or OpenID authentication</li>
+			<li><code>FORM+OAuth</code>: User can select form-based authentication or OAuth authentication</li>
 		</ul>
 		<h2 id="Configuring_Mozilla_Persona_authentication">Configuring Mozilla Persona authentication</h2>
 		<p>Orion supports login using 

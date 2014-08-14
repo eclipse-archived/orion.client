@@ -14,18 +14,18 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil'
 	var lastHash;
 	var jsonData;
 
-	var loadAttachedOpenIds, loadUserData;
+	var loadAttachedExternalIds, loadUserData;
 
 	function removeOpenId(openid) {
 		if (confirm(i18nUtil.formatMessage(messages['ConfirmRemove'], [openid]))) {
-			var openids = jsonData.properties.openid.split('\n'); //$NON-NLS-0$
-			var newopenids = "";
+			var openids = jsonData.properties.openid.split('\n');
+			var newopenids = [];
 			for (var i = 0; i < openids.length; i++) {
 				if (openids[i] !== openid) {
-					newopenids += (openids[i] + '\n'); //$NON-NLS-0$
+					newopenids.push(openids[i]);
 				}
 			}
-			jsonData.properties.openid = newopenids;
+			jsonData.properties.openid = newopenids.join("\n");
 
 			xhr("PUT", jsonData.Location, { //$NON-NLS-0$
 				data: JSON.stringify(jsonData),
@@ -64,19 +64,19 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil'
 			});
 		}
 	}
-	
-	loadAttachedOpenIds = function(userjsonData) {
+
+	loadAttachedExternalIds = function(userjsonData) {
 		jsonData = userjsonData;
-		var list = lib.node("openidList"); //$NON-NLS-0$
+		var list = lib.node("externalIdList"); //$NON-NLS-0$
 		if (list.childNodes.length) {
 			/* there's already a table that is now to be replaced */
 			list.removeChild(list.childNodes[0]);
 		}
 		var table = document.createElement("table"); //$NON-NLS-0$
-		table.classList.add("manageOpenIdsTable"); //$NON-NLS-0$
+		table.classList.add("manageExternalIdsTable"); //$NON-NLS-0$
 		list.appendChild(table); //$NON-NLS-0$
 		if (jsonData.properties && (jsonData.properties.openid || jsonData.properties.oauth)) {
-	
+
 			var openids = jsonData.properties.openid ? jsonData.properties.openid.split('\n') : []; //$NON-NLS-0$
 			var oauths = jsonData.properties.oauth ? jsonData.properties.oauth.split('\n') : []; //$NON-NLS-0$
 			for (var i = openids.length - 1; i >= 0; i--) {
@@ -107,7 +107,7 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil'
 
 			for (var i = 0; i < openids.length; i++) {
 				var openid = openids[i];
-				addAuthenticationEntry(openid, removeOpenId);
+				addAuthenticationEntry(openid, i, table, removeOpenId);
 			}
 			for (var i = 0; i < oauths.length; i++) {
 				var oauth = oauths[i];
@@ -115,11 +115,11 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil'
 			}
 		}
 	};
-	
-	function addAuthenticationEntry(openid, i, table, removeFunction){
+
+	function addAuthenticationEntry(externalId, i, table, removeFunction){
 		var tr = document.createElement("tr"); //$NON-NLS-0$
 		tr.classList.add(i % 2 === 0 ? "lightTreeTableRow" : "darkTreeTableRow");  //$NON-NLS-1$ //$NON-NLS-0$
-		tr.classList.add("manageOpenIdRow"); //$NON-NLS-0$
+		tr.classList.add("manageExternalIdRow"); //$NON-NLS-0$
 		tr.style.verticalAlign = "baseline"; //$NON-NLS-0$
 		table.appendChild(tr);
 
@@ -127,27 +127,27 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil'
 		td.classList.add("navColumn"); //$NON-NLS-0$
 		tr.appendChild(td);
 		var span = document.createElement("span"); //$NON-NLS-0$
-		span.title = openid;
+		span.title = externalId;
 		td.appendChild(span);
-		var textNode = document.createTextNode(openid.length > 70 ? (openid.substring(0, 65) + "...") : openid);
+		var textNode = document.createTextNode(externalId.length > 70 ? (externalId.substring(0, 65) + "...") : externalId);
 		span.appendChild(textNode);
 
 		td = document.createElement("td"); //$NON-NLS-0$
 		td.classList.add("navColumn"); //$NON-NLS-0$
 		tr.appendChild(td);
 		var removeLink = document.createElement("a"); //$NON-NLS-0$
-		removeLink.classList.add("removeOpenId"); //$NON-NLS-0$
+		removeLink.classList.add("removeExternalId"); //$NON-NLS-0$
 		removeLink.id = "remlink" + i; //$NON-NLS-0$
 		removeLink.innerHTML = "Remove";
 		removeLink.style.visibility = "hidden"; //$NON-NLS-0$
-		removeLink.title = "Remove " + openid;
+		removeLink.title = "Remove " + externalId;
 		td.appendChild(removeLink);
 
-		removeLink.addEventListener("click", function(openid) { //$NON-NLS-0$
-			removeFunction(openid);
-		}.bind(this, openid));
+		removeLink.addEventListener("click", function(externalId) { //$NON-NLS-0$
+			removeFunction(externalId);
+		}.bind(this, externalId));
 	}
-	
+
 	loadUserData = function(userLocation){
 		xhr("GET", userLocation, { //$NON-NLS-0$
 			headers : {
@@ -155,51 +155,22 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil'
 			},
 			timeout : 15000
 		}).then(function(xhrResult) {
-			loadAttachedOpenIds(JSON.parse(xhrResult.response));
-		}, function(xhrResult) {
-			console.error(xhrResult.error);
-		});
-	 };
-	
-	function onHashChange(hash) {
-		if (lastHash === hash) {
-			return;
-		}
-	
-		loadUserData(hash);
-	
-		lastHash = hash;
-	}
-	
-	
-	// this function is directly invoked by ManageOpenidsServlet, must be global
-	window.handleOpenIDResponse = function(openid) {
-		var openids = jsonData.properties.openid ? jsonData.properties.openid.split('\n') : []; //$NON-NLS-0$
-		for (var i = 0; i < openids.length; i++) {
-			if (openids[i] === openid) {
-				return;
-			}
-		}
-	
-		if (!jsonData.properties.openid) {
-			jsonData.properties.openid = openid;
-		} else {
-			jsonData.properties.openid += '\n' + openid; //$NON-NLS-0$
-		}
-	
-		xhr("PUT", jsonData.Location, { //$NON-NLS-0$
-			data: JSON.stringify(jsonData),
-			headers: {
-				"Orion-Version": "1" //$NON-NLS-0$  //$NON-NLS-1$
-			},
-			timeout: 15000
-		}).then(function(xhrResult) {
-			loadUserData(jsonData.Location);
+			loadAttachedExternalIds(JSON.parse(xhrResult.response));
 		}, function(xhrResult) {
 			console.error(xhrResult.error);
 		});
 	};
-	
+
+	function onHashChange(hash) {
+		if (lastHash === hash) {
+			return;
+		}
+
+		loadUserData(hash);
+
+		lastHash = hash;
+	}
+
 	window.handleOAuthResponse = function(oauthid) {
 		var oauthids = jsonData.properties.oauth ? jsonData.properties.oauth.split('\n') : [];
 		for (var i = 0; i < oauthids.length; i++) {
@@ -207,13 +178,13 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil'
 				return;
 			}
 		}
-	
+
 		if (!jsonData.properties.oauth) {
 			jsonData.properties.oauth = oauthid;
 		} else {
 			jsonData.properties.oauth += '\n' + oauthid;
 		}
-	
+
 		xhr("PUT", jsonData.Location, { //$NON-NLS-0$
 			data: JSON.stringify(jsonData),
 			headers: {
@@ -226,16 +197,10 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil'
 			console.error(xhrResult.error);
 		});
 	};
-	
-	function confirmOpenId(openid) {
-		if (openid !== "" && openid !== null) {
-			window.open("../mixlogin/manageopenids/openid?openid=" + encodeURIComponent(openid), "openid_popup", "width=790,height=580");  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
-		}
-	}
-	
+
 	function confirmOAuth(oauth) {
 		if (oauth !== "" && oauth !== null) {
-			window.open("../mixlogin/manageopenids/oauth?oauth=" + encodeURIComponent(oauth), "oauth_popup", "width=790,height=580");
+			window.open("../mixlogin/manageoauth/oauth?oauth=" + encodeURIComponent(oauth), "oauth_popup", "width=790,height=580");
 		}
 	}
 
@@ -254,15 +219,31 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil'
 	}
 
 	function attachExternalAccountsHeader(){
-		var openIdContainer = document.getElementById("newOpenId"); //$NON-NLS-0$
+		var externalIdContainer = document.getElementById("newExternalId");
 		var h2 = document.createElement("h2"); //$NON-NLS-0$
 		h2.style.margin = "10px 5px 10px 0"; //$NON-NLS-0$
 		h2.style.cssFloat = "left";//$NON-NLS-0$
 		h2.id = "addExternalAccount";//$NON-NLS-0$
 		h2.innerHTML = messages["AddExternalAccount"];//$NON-NLS-0$
-		openIdContainer.appendChild(h2);
+		externalIdContainer.appendChild(h2);
 	}
-	
+
+	function attachExternalProviders(){
+		var providerElements = [];
+		// Add OAuth Providers
+		providerElements.push(createProviderLink("Google OAuth", "../mixloginstatic/images/googleplus.png", confirmOAuth.bind(null, "google")));
+		providerElements.push(createProviderLink("GitHub OAuth", "../mixloginstatic/images/GitHub-Mark-32px.png", confirmOAuth.bind(null, "github")));
+		// Add Mozilla Persona
+		providerElements.push(createProviderLink("Mozilla Persona", "../mixloginstatic/images/persona.png",
+				alert.bind(null, "To link your account with a Persona, set your Orion email address above to match your Persona email address.")));
+
+		var openIdContainer = document.getElementById("newExternalId");
+		providerElements.forEach(function(provider) {
+			openIdContainer.appendChild(provider);
+			openIdContainer.appendChild(document.createTextNode(" "));
+		});
+	}
+
 	// Page glue code starts here
 	window.addEventListener("hashchange", function() { //$NON-NLS-0$
 		onHashChange(window.location.hash.substring(1));
@@ -270,28 +251,5 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil'
 
 	onHashChange(window.location.hash.substring(1));
 	attachExternalAccountsHeader();
-
-	xhr("GET", "../mixlogin/manageopenids") //$NON-NLS-1$ //$NON-NLS-0$
-		.then(function(xhrResult) {
-			var providers = JSON.parse(xhrResult.response);
-			var providerElements = providers.map(function(provider) {
-				return createProviderLink(provider.Name, provider.Image, confirmOpenId.bind(null, provider.Url));
-			});
-			
-			providerElements.push(createProviderLink("Google OAuth", "../mixloginstatic/images/googleplus.png", confirmOAuth.bind(null, "google")));
-			
-			providerElements.push(createProviderLink("GitHub OAuth", "../mixloginstatic/images/GitHub-Mark-32px.png", confirmOAuth.bind(null, "github")));
-			
-			providerElements.push(createProviderLink("Mozilla Persona", "../mixloginstatic/images/persona.png",
-				alert.bind(null, "To link your account with a Persona, set your Orion email address above to match your Persona email address.")));
- 
-			
-			
-			var openIdContainer = document.getElementById("newOpenId");
-						
-			providerElements.forEach(function(provider) {
-				openIdContainer.appendChild(provider);
-				openIdContainer.appendChild(document.createTextNode(" ")); //$NON-NLS-0$
-			});
-		});
+	attachExternalProviders();
 });

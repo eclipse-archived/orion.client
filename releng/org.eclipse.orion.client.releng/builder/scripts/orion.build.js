@@ -97,7 +97,7 @@
             { name: "javascript/plugins/javascriptPluginLoader" },
             { name: "javascript/plugins/javascriptPlugin" },
             { name: "mixloginstatic/LoginWindow" },
-            { name: "mixloginstatic/manageOpenids" },
+            { name: "mixloginstatic/manageExternalIds" },
             { name: "operations/list" },
             { name: "plugins/GerritFilePlugin" },
             { name: "plugins/GitHubFilePlugin" },
