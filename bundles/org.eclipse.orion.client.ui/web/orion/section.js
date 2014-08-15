@@ -156,7 +156,7 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 		this.domNode.appendChild(this.titleLeftActionsNode);
 		
 		// add filter search box
-		var searchbox = document.createElement("div"); //$NON-NLS-0$
+		var searchbox = this.searchBox = document.createElement("div"); //$NON-NLS-0$
 		searchbox.id = options.id + "FilterSearchBox"; //$NON-NLS-0$
 		this.domNode.appendChild(searchbox);
 		

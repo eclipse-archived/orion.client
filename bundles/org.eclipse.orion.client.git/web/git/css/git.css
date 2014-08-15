@@ -27,6 +27,33 @@
 	overflow: visible;
 }
 
+#commitsSectionContent .sectionWrapper {
+	border-width: 0;
+	margin:0;
+	opacity: 1;
+}
+
+#commitsSectionContent .sectionWrapper.sectionClosed:hover {
+	box-shadow: initial;
+}
+
+#commitsSectionContent .sectionTitle {
+	min-width: 80px;
+	padding-left: 3px;
+}
+
+#commitsSectionContent .sectionTable {
+	border-width: 0;
+	margin: 0;
+	position: absolute;
+	width: 240px;
+	z-index: 200;
+	margin-top: -1px;
+	background-color: #b7cbdb;
+	border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
+}
+
 .mainToolbar .sectionWrapper {
 	margin-left: 0;
 	margin-right: 10px;
@@ -86,12 +113,6 @@
 	background-color: #b7cbdb;
 	color: gray;
 	border-bottom: 0;
-}
-
-.auxpane .XsectionTable.sectionOpened {
-	border-left: 5px solid #b7cbdb;
-	border-right: 5px solid #b7cbdb;
-	border-bottom: 5px solid #b7cbdb;
 }
 
 .auxpane .sectionTable {
@@ -424,7 +445,14 @@ table .sectionTable {
 	height: 25px;
 	padding-top: 5px;
 	padding-bottom: 5px;
+}
+
+.auxpane .gitFilterBox {
 	background-color: #b7cbdb;
+}
+
+.mainToolbar .gitFilterBox {
+	background-color: #eee;
 }
 
 /* sprites */

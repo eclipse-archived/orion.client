@@ -46,6 +46,8 @@ define([
 		this.logDeferred = new Deferred();
 		this.repositoryPath = options.repositoryPath || "";
 		this.filterQuery = "";
+		this.authorQuery = "";
+		this.committerQuery = "";
 	}
 	GitCommitListModel.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitCommitListModel.prototype, /** @lends orion.git.GitCommitListModel.prototype */ {
@@ -53,6 +55,9 @@ define([
 		},
 		getRoot: function(onItem){
 			onItem(this.root);
+		},
+		getQueries: function() {
+			return util.generateQuery([pageQuery, this.filterQuery, this.authorQuery, this.committerQuery]);
 		},
 		_getRepository: function(parentItem) {
 			var that = this;
@@ -71,10 +76,10 @@ define([
 			var that = this;
 			var logMsg = that.location ? messages["Getting git log"] : i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], that.currentBranch.Name);
 			var ref = that.simpleLog ? that.getTargetReference() : that.getActiveBranch();
-			var location = parentItem.more ? parentItem.location : that.location || ((ref.CommitLocation || ref.Location) + that.repositoryPath + util.generateQuery([pageQuery, that.filterQuery]));
+			var location = parentItem.more ? parentItem.location : that.location || ((ref.CommitLocation || ref.Location) + that.repositoryPath + that.getQueries());
 			return that.progressService.progress(that.gitClient.doGitLog(location), logMsg).then(function(resp) {
 				if (that.location && resp.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
-					return that.progressService.progress(that.gitClient.doGitLog(resp.CommitLocation + that.repositoryPath + util.generateQuery([pageQuery, that.filterQuery])), logMsg).then(function(resp) { //$NON-NLS-0$
+					return that.progressService.progress(that.gitClient.doGitLog(resp.CommitLocation + that.repositoryPath + that.getQueries(), logMsg)).then(function(resp) { //$NON-NLS-0$
 						return that.log = resp;
 					}, function(error){
 						that.handleError(error);
@@ -91,7 +96,7 @@ define([
 			var targetRef = this.getTargetReference();
 			var location = (targetRef.CommitLocation || targetRef.Location) + (that.log ? that.log.RepositoryPath : "");
 			var id = activeBranch.Name;
-			return that.progressService.progress(that.gitClient.getLog(location + util.generateQuery([pageQuery, that.filterQuery]), id), messages['Getting outgoing commits']).then(function(resp) {
+			return that.progressService.progress(that.gitClient.getLog(location + that.getQueries(), id), messages['Getting outgoing commits']).then(function(resp) {
 				return that.outgoingCommits = resp.Children;
 			});
 		},
@@ -101,7 +106,7 @@ define([
 			var targetRef = this.getTargetReference();
 			var location = activeBranch.CommitLocation + (that.log ? that.log.RepositoryPath : "");
 			var id = targetRef.Name;
-			return that.progressService.progress(that.gitClient.getLog(location + util.generateQuery([pageQuery, that.filterQuery]), id), messages['Getting git incoming changes...']).then(function(resp) {
+			return that.progressService.progress(that.gitClient.getLog(location + that.getQueries(), id), messages['Getting git incoming changes...']).then(function(resp) {
 				return that.incomingCommits = resp.Children;
 			});
 		},
@@ -410,25 +415,56 @@ define([
 			return deferred;
 		},
 		createFilter: function() {
-			var filterDiv = document.createElement("div"); //$NON-NLS-0$
-			filterDiv.className = "gitFilterBox"; //$NON-NLS-0$
-			var filter = document.createElement("input"); //$NON-NLS-0$
-			filter.placeholder = messages["Filter items"];
-			filterDiv.appendChild(filter);
-			var sectionContent = this.section.getContentElement();
-			var branchNode = sectionContent.firstChild;
-			sectionContent.insertBefore(filterDiv, branchNode);
-			filter.addEventListener("keydown", function(event){ //$NON-NLS-0$
-				if (event.keyCode === 13) {
-					this.model.filterQuery = "filter=" + encodeURIComponent(filter.value); //$NON-NLS-0$
-					this.changedItem().then(function () {
-						if (this.model.filterQuery)
-						for (var i=0; i<this.model.root.children.length; i++) {
-							this.myTree.expand(this.model.root.children[i]); 
+			if (!this.section) return;
+			var createSection = function (parent, sibling, title, query, canHide, dropdown, mainSection) {
+				var section = new mSection.Section(parent, {
+					id: title + "branchFilterSection", //$NON-NLS-0$
+					title: title,
+					canHide: canHide,
+					hidden: true,
+					sibling: sibling,
+					dropdown: dropdown,
+					noTwistie: dropdown,
+					preferenceService: this.preferencesService
+				});
+				section.domNode.classList.add("gitFilterBox"); //$NON-NLS-0$
+				var filter = document.createElement("input"); //$NON-NLS-0$
+				filter.className = "gitFilterInput"; //$NON-NLS-0$
+				filter.placeholder = messages["Filter " + query];
+				section.searchBox.appendChild(filter);
+				filter.addEventListener("keydown", function(event){ //$NON-NLS-0$
+					if (event.keyCode === 13) {
+						var prop = query + "Query"; //$NON-NLS-0$
+						this.model[prop] = filter.value ? query + "=" + encodeURIComponent(filter.value) : ""; //$NON-NLS-0$
+						this.changedItem().then(function () {
+							if (this.model[prop]) {
+								for (var i=0; i<this.model.root.children.length; i++) {
+									this.myTree.expand(this.model.root.children[i]); 
+								}
+							}
+						}.bind(this));
+						if (mainSection) {
+							lib.$(".gitFilterInput", mainSection.domNode).focus(); //$NON-NLS-0$
 						}
-					}.bind(this));
+						(mainSection || section).setHidden(true);
+					}
+					if (event.keyCode === 27) {
+						(mainSection || section).setHidden(true);
+					}
+					if (dropdown && event.keyCode === 9) {
+						section.setHidden(false);
+					}
+				}.bind(this));
+				if (dropdown) {
+					filter.addEventListener("focusin", function(){ //$NON-NLS-0$
+						section.setHidden(false);
+					});
 				}
-			}.bind(this)); //$NON-NLS-0$
+				return section;
+			}.bind(this);
+			var messageSection = createSection(this.section.getContentElement(), this.section.getContentElement().firstChild, messages["Message:"], "filter", true, true); //$NON-NLS-0$
+			createSection(messageSection.getContentElement(), messageSection.firstChild, messages["Author:"], "author", false, false, messageSection); //$NON-NLS-0$
+			createSection(messageSection.getContentElement(), messageSection.firstChild, messages["Committer:"], "committer", false, false, messageSection); //$NON-NLS-0$
 		},
 		display: function() {
 			var that = this;
