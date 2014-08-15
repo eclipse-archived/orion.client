@@ -31,6 +31,7 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 	 * @param {Boolean} [options.useAuxStyle] if true the section will be styled for an auxiliary pane
 	 * @param {Boolean} [options.keepHeader] if true the embedded explorer will keep its header
 	 * @param {Boolean} [options.noTwisties] if true the twisties will not be displayed
+	 * @param {Boolean} [options.dropdown] if true the section is dropdown
 	 * @param {Function} [options.onExpandCollapse] a function that will be called when the expanded/collapsed state changes
 	 *
 	 * @borrows orion.editor.EventTarget#addEventListener as #addEventListener
@@ -84,7 +85,7 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 			}
 			this.domNode.tabIndex = 0; //$NON-NLS-0$
 			this.domNode.addEventListener("click", function(evt) { //$NON-NLS-0$
-				if (evt.target === that.titleNode || evt.target === that.twistie || evt.target === that.domNode) {
+				if (evt.target === that.titleNode || evt.target === that.twistie || evt.target === that.domNode || evt.target === that._iconNode) {
 					that._changeExpandedState();
 				}
 			}, false);
@@ -96,7 +97,7 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 		}
 		var classes;
 		if(options.iconClass){
-			var icon = document.createElement("span"); //$NON-NLS-0$
+			var icon = this._iconNode = document.createElement("span"); //$NON-NLS-0$
 			icon.classList.add("sectionIcon"); //$NON-NLS-0$
 			this.domNode.appendChild(icon);
 			classes = Array.isArray(options.iconClass) ? options.iconClass : [options.iconClass];
@@ -206,28 +207,36 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 		this._preferenceService = options.preferenceService;
 		// initially style as hidden until we determine what needs to happen
 		this._collapse();
-		// should we consult a preference?
-		if (this._preferenceService) {
-			var self = this;
-			this._preferenceService.getPreferences("/window/views").then(function(prefs) {  //$NON-NLS-0$
-				var isExpanded = prefs.get(self.id);
-				
-				if (isExpanded === undefined){
-					// pref not found, check options
-					if (!options.hidden) {
+		if (!options.dropdown) {
+			// should we consult a preference?
+			if (this._preferenceService) {
+				var self = this;
+				this._preferenceService.getPreferences("/window/views").then(function(prefs) {  //$NON-NLS-0$
+					var isExpanded = prefs.get(self.id);
+					
+					if (isExpanded === undefined){
+						// pref not found, check options
+						if (!options.hidden) {
+							self._expand();
+						}
+					} else if (isExpanded) {
 						self._expand();
 					}
-				} else if (isExpanded) {
-					self._expand();
+					
+					self._updateExpandedState(false);
+				});
+			} else {
+				if (!options.hidden) {
+					this._expand();
 				}
-				
-				self._updateExpandedState(false);
-			});
-		} else {
-			if (!options.hidden) {
-				this._expand();
+				this._updateExpandedState(false);
 			}
-			this._updateExpandedState(false);
+		} else {
+			this._updateExpandedState(true);
+			this.dropdown = true;
+			lib.addAutoDismiss([this._contentParent, this.domNode], function () {
+				this.setHidden(true);
+			}.bind(this));
 		}
 		this._commandService = options.commandService;
 		this._lastMonitor = 0;
@@ -487,11 +496,40 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 		},
 		
 		_expand: function() {
+			this._positionDropdown();
 			this._contentParent.classList.remove("sectionClosed"); //$NON-NLS-0$
 			this.domNode.classList.remove("sectionClosed"); //$NON-NLS-0$
 			this._contentParent.classList.add("sectionOpened"); //$NON-NLS-0$
 			this.domNode.classList.add("sectionOpened"); //$NON-NLS-0$
 			this.hidden = false;
+		},
+		
+		_positionDropdown: function() {
+			if (!this.dropdown) return;
+			this._contentParent.style.left = "";
+			this._contentParent.style.top = "";
+			var bounds = lib.bounds(this.domNode);
+			var parentBounds = lib.bounds(this._boundingNode(this.domNode));
+			var bodyBounds = lib.bounds(document.body);
+			var contentBounds = lib.bounds(this._contentParent);
+			if (bounds.left + contentBounds.width > (bodyBounds.left + bodyBounds.width)) {
+				this._contentParent.style.left = (bounds.left  - parentBounds.left - contentBounds.width + bounds.width) + "px"; //$NON-NLS-0$
+			} else {
+				this._contentParent.style.left = (bounds.left - parentBounds.left) + "px"; //$NON-NLS-0$
+			}
+			this._contentParent.style.top = (bounds.top + bounds.height - parentBounds.top) + "px"; //$NON-NLS-0$
+		},
+		
+		_boundingNode: function(node) {
+			var style = window.getComputedStyle(node, null);
+			if (style === null) {
+				return node;
+			}
+			var position = style.getPropertyValue("position"); //$NON-NLS-0$
+			if (position === "absolute" || !node.parentNode || node === document.body) { //$NON-NLS-0$
+				return node;
+			}
+			return this._boundingNode(node.parentNode);
 		},
 		
 		_collapse: function() {

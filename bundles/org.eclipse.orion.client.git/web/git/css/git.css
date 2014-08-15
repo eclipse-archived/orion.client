@@ -27,6 +27,55 @@
 	overflow: visible;
 }
 
+.mainToolbar .sectionWrapper {
+	margin-left: 0;
+	margin-right: 10px;
+	margin-top: 6px;
+	width: auto;
+	float: left;
+	background-color: #ddd;
+	border: 1px solid #aaa;
+	border-radius: 4px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.mainToolbar .sectionWrapper.sectionOpened {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.mainToolbar .sectionTable {
+	margin-left: 0;
+	margin-right:0;
+	margin-top: 1px;
+	width: 40%;
+	position: absolute;
+	height: 300px;
+	min-width: 400px;
+	z-index: 200;
+	background-color: white;
+	overflow-y: auto;
+	border: 1px solid #aaa;
+}
+
+.mainToolbar {
+	height: 40px;
+}
+
+.innerPanels {
+	top: 40px;
+}
+
+.gitSectionLabel {
+	float: left;
+	font-weight: bold;
+	text-transform: uppercase;
+	font-size: 12px;
+	padding-top: 14px;
+	padding-right: 6px;
+}
+
 .auxpane .sectionWrapper {
 	margin-left: 5px;
 	margin-right:5px;
@@ -36,9 +85,10 @@
 .auxpane .sectionWrapper.sectionOpened {
 	background-color: #b7cbdb;
 	color: gray;
+	border-bottom: 0;
 }
 
-.auxpane .sectionTable.sectionOpened {
+.auxpane .XsectionTable.sectionOpened {
 	border-left: 5px solid #b7cbdb;
 	border-right: 5px solid #b7cbdb;
 	border-bottom: 5px solid #b7cbdb;
@@ -64,8 +114,8 @@
 	height: calc(100% - 35px);
 }
 
-.sectionWrapper.sectionOpened {
-	border-bottom: 0;
+.mainToolbar #configSection {
+	float: right;
 }
 
 .mainpane .sectionWrapper {
@@ -202,7 +252,7 @@ table .sectionTable {
 }
 
 .sectionTitle {
-	font-size: 14px;
+	font-size: 13px;
 	color: #444;
 	padding-bottom: 3px;
 }
@@ -264,8 +314,12 @@ table .sectionTable {
 	display: none;
 }
 
+.mainToolbar .sectionActions {
+	display: none;
+}
+
 .sectionClosed:hover .sectionActions {
-	display: block;
+	display: none;
 }
 
 .gitCommitTag {

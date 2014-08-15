@@ -141,6 +141,12 @@ define([
 		return refName;
 	}
 	
+	function shortenPath(path) {
+		var result = path.split('/').slice(-3); //$NON-NLS-0$
+		result = result.join("/"); //$NON-NLS-0$
+		return result.length < path.length ? "..." + result : path; //$NON-NLS-0$
+	}
+	
 	function generateQuery(queries) {
 		var result = queries.join("&");  //$NON-NLS-0$
 		if (result.length) {
@@ -159,6 +165,7 @@ define([
 		parseSshGitUrl: parseSshGitUrl,
 		trimCommitMessage: trimCommitMessage,
 		shortenRefName: shortenRefName,
+		shortenPath: shortenPath,
 		getGerritFooter: getGerritFooter
 	};
 });

@@ -153,6 +153,11 @@ define([
 	};
 	
 	GitRepositoryExplorer.prototype.destroyRepositories = function() {
+		if (this.repositoriesLabel) {
+			var parent = this.repositoriesLabel.parentNode;
+			if (parent) parent.removeChild(this.repositoriesLabel);
+			this.repositoriesLabel = null;
+		}
 		if (this.repositoriesNavigator) {
 			this.repositoriesNavigator.destroy();
 			this.repositoriesNavigator = null;
@@ -165,6 +170,11 @@ define([
 	};
 	
 	GitRepositoryExplorer.prototype.destroyBranches = function() {
+		if (this.branchesLabel) {
+			var parent = this.branchesLabel.parentNode;
+			if (parent) parent.removeChild(this.branchesLabel);
+			this.branchesLabel = null;
+		}
 		if (this.branchesNavigator) {
 			this.branchesNavigator.destroy();
 			this.branchesNavigator = null;
@@ -177,6 +187,11 @@ define([
 	};
 	
 	GitRepositoryExplorer.prototype.destroyTree = function() {
+		if (this.treeLabel) {
+			var parent = this.treeLabel.parentNode;
+			if (parent) parent.removeChild(this.treeLabel);
+			this.treeLabel = null;
+		}
 		if (this.treeNavigator) {
 			this.treeNavigator.destroy();
 			this.treeNavigator = null;
@@ -235,6 +250,11 @@ define([
 	};
 	
 	GitRepositoryExplorer.prototype.destroyConfig = function() {
+		if (this.configLabel) {
+			var parent = this.configLabel.parentNode;
+			if (parent) parent.removeChild(this.configLabel);
+			this.configLabel = null;
+		}
 		if (this.configNavigator) {
 			this.configNavigator.destroy();
 			this.configNavigator = null;
@@ -285,8 +305,6 @@ define([
 				this.displayTags(repository);
 			}
 			this.displayConfig(repository, "full"); //$NON-NLS-0$
-		} else {
-			this.accordion.setDefaultSection(this.repositoriesSection);
 		}
 	};
 	
@@ -400,9 +418,24 @@ define([
 		});
 	};
 	
+	GitRepositoryExplorer.prototype.createLabel = function(parent, str, sibling) {
+		var label = document.createElement("div"); //$NON-NLS-0$
+		label.className = "gitSectionLabel"; //$NON-NLS-0$
+		label.textContent = str;
+		if (sibling) {
+			parent.insertBefore(label, sibling);
+		} else {
+			parent.appendChild(label);
+		}
+		return label;
+	};
+	
 	GitRepositoryExplorer.prototype.displayRepositories = function(repositories, mode, links) {
 		this.destroyRepositories();
-		var parent = lib.node('sidebar'); //$NON-NLS-0$
+		var parent = lib.node('pageToolbar'); //$NON-NLS-0$
+		
+		this.repositoriesLabel = this.createLabel(parent, messages["Repository:"]);
+		
 		var section = this.repositoriesSection = new mSection.Section(parent, {
 			id: "repoSection", //$NON-NLS-0$
 			title: this.repository ? this.repository.Name : messages["Repo"],
@@ -411,10 +444,10 @@ define([
 			content: '<div id="repositoryNode"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
+			dropdown: true,
 			noTwistie: NO_TWISTIES,
 			preferenceService: this.preferencesService
 		});
-		this.accordion.add(section);
 		
 		var selection = this.repositoriesSelection = new mSelection.Selection(this.registry, "orion.selection.repo"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
@@ -450,19 +483,22 @@ define([
 	
 	GitRepositoryExplorer.prototype.displayBranches = function(repository) {
 		this.destroyBranches();
-		var parent = lib.node('sidebar'); //$NON-NLS-0$
+		var parent = lib.node('pageToolbar'); //$NON-NLS-0$
+		
+		this.branchesLabel = this.createLabel(parent, messages["Reference:"]);
+		
 		var section = this.branchesSection = new mSection.Section(parent, {
 			id: "branchSection", //$NON-NLS-0$
-			title: " ", //$NON-NLS-0$
+			title: "\u00A0", //$NON-NLS-0$
 			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="branchNode"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
+			dropdown: true,
 			noTwistie: NO_TWISTIES,
 			preferenceService: this.preferencesService
 		});
-		this.accordion.add(section);
 
 		var selection = this.branchesSelection = new mSelection.Selection(this.registry, "orion.selection.ref"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
@@ -532,20 +568,22 @@ define([
 	GitRepositoryExplorer.prototype.displayTree = function(repository) {	
 		this.destroyTree();
 		
-		var parent = lib.node('sidebar'); //$NON-NLS-0$
+		var parent = lib.node('pageToolbar'); //$NON-NLS-0$
+		
+		this.treeLabel = this.createLabel(parent, messages["Path:"]);
+		
 		var section = this.treeSection = new mSection.Section(parent, {
 			id: "treeSection", //$NON-NLS-0$
-			title: "/" + this.calculateTreePath(), //$NON-NLS-0$
+			title: util.shortenPath("/" + this.calculateTreePath()), //$NON-NLS-0$
 			iconClass: ["core-sprite-outline"], //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="treeNode"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
+			dropdown: true,
 			noTwistie: NO_TWISTIES,
-			sibling: this.commitsSection ? this.commitsSection.domNode : null,
 			preferenceService: this.preferencesService
 		});
-		this.accordion.add(section);
 		
 		var selection = this.treeSelection = new mSelection.Selection(this.registry, "orion.selection.tree"); //$NON-NLS-0$
 		var explorer  = this.treeNavigator = new mGitFileList.GitFileListExplorer({
@@ -584,7 +622,7 @@ define([
 			var selected = e.selection;
 			if (!selected || this.treePath === selected) return;
 			this.setSelectedPath(selected);
-			this.treeSection.setTitle("/" + this.calculateTreePath()); //$NON-NLS-0$
+			this.treeSection.setTitle(util.shortenPath("/" + this.calculateTreePath())); //$NON-NLS-0$
 		}.bind(this));
 	};
 	
@@ -626,8 +664,7 @@ define([
 			slideout: true,
 			content: '<div id="commitsNode"></div>', //$NON-NLS-0$
 			canHide: true,
-			noTwistie: NO_TWISTIES,
-			sibling: this.configSection ? this.configSection.domNode : null,
+			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
 		this.accordion.add(section);
@@ -808,18 +845,20 @@ define([
 	
 	GitRepositoryExplorer.prototype.displayConfig = function(repository, mode) {
 		this.destroyConfig();
-		var parent = lib.node('sidebar'); //$NON-NLS-0$
+		var parent = lib.node('pageToolbar'); //$NON-NLS-0$
+		
 		var section = this.configSection = new mSection.Section(parent, {
 			id: "configSection", //$NON-NLS-0$
-			title: messages['Configuration'] + (mode === "full" ? "" : " (user.*)"), //$NON-NLS-1$ //$NON-NLS-0$
+			title: "\u200B", //$NON-NLS-0$
+			iconClass: ["core-sprite-gear"], //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="configNode" class="mainPadding"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
-			noTwistie: NO_TWISTIES,
+			dropdown: true,
+			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
-		this.accordion.add(section);
 			
 		var configNavigator = this.configNavigator = new mGitConfigList.GitConfigListExplorer({
 			serviceRegistry: this.registry,
