@@ -191,7 +191,7 @@ module.exports = function(grunt) {
 			grunt.verbose.write("Got test result: ");
 			grunt.verbose.oklns(JSON.stringify(sauceResult));
 			var mochaResult = sauceResult.result,
-			   id = sauceResult.id,
+			   id = sauceResult.id;
 			if (!mochaResult)
 				throw new Error("Test " + id + " is missing 'result' field in response:\n" + JSON.stringify(sauceResult));
 			var testurl = mochaResult.url || "",
