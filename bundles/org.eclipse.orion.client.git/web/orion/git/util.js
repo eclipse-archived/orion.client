@@ -148,7 +148,7 @@ define([
 	}
 	
 	function generateQuery(queries) {
-		var result = queries.join("&");  //$NON-NLS-0$
+		var result = queries.filter(function(q) { return q; }).join("&");  //$NON-NLS-0$
 		if (result.length) {
 			result = "?" + result;  //$NON-NLS-0$
 		}
