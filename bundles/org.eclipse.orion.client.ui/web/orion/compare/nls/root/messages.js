@@ -41,5 +41,6 @@ define({
 	'fetchingFolder': 'Fetching folder: ${0}...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'readingFile': 'Reading file: ${0}...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'readingFileMetadata': 'Reading file metadata: ${0}...',  //$NON-NLS-0$  //$NON-NLS-1$
-	'comparingFile': 'Comparing: ${0}...'  //$NON-NLS-0$  //$NON-NLS-1$
+	'comparingFile': 'Comparing: ${0}...',  //$NON-NLS-0$  //$NON-NLS-1$
+	'compareTreeTitle': 'Compare Tree'  //$NON-NLS-0$  //$NON-NLS-1$
 });
