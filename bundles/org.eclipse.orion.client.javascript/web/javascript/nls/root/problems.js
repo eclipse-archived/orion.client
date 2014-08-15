@@ -10,6 +10,9 @@
 //NLS_CHARSET=UTF-8
 /*eslint-env amd */
 define({
+    'syntaxErrorIncomplete': 'Syntax error, incomplete statement.',  //$NON-NLS-0$  //$NON-NLS-1$
+    'syntaxErrorBadToken': 'Syntax error on token \'${0}\', delete this token.',  //$NON-NLS-0$  //$NON-NLS-1$
+    'eslintValidationFailure': 'ESLint failed to validate this file because an error occurred: ${0}',  //$NON-NLS-0$  //$NON-NLS-1$
 	'curly': 'Statement should be enclosed in braces.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'eqeqeq' : 'Expected \'${0}\' and instead saw \'${1}\'.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'missing-doc' : 'Missing documentation for function \'${0}\'.',  //$NON-NLS-0$  //$NON-NLS-1$
