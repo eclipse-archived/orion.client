@@ -1465,7 +1465,7 @@ var exports = {};
 				resetCallback(data, data.items.IndexLocation, data.items.Name, "HARD", messages["GitResetIndexConfirm"]);
 			},
 			visibleWhen : function(item) {
-				return item.Type === "RemoteTrackingBranch"; //$NON-NLS-0$
+				return item.Type === "RemoteTrackingBranch" || "Commit"; //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(resetIndexCommand);
