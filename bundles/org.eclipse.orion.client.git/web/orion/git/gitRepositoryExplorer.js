@@ -108,7 +108,7 @@ exports.GitRepositoryExplorer = (function() {
 			
 			location = relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath; //$NON-NLS-1$ //$NON-NLS-0$
 		}
-		this.display(location, processURLs);
+		this.display(location, pageParams.resource, processURLs);
 	};
 	
 	GitRepositoryExplorer.prototype.destroy = function() {
@@ -138,7 +138,7 @@ exports.GitRepositoryExplorer = (function() {
 		}
 	};
 	
-	GitRepositoryExplorer.prototype.display = function(location, processURLs) {
+	GitRepositoryExplorer.prototype.display = function(location, resource, processURLs) {
 		var that = this;
 		this.loadingDeferred = new Deferred();
 		if (processURLs){
@@ -163,7 +163,7 @@ exports.GitRepositoryExplorer = (function() {
 				if (resp.Children.length === 0) {
 					that.initTitleBar({});
 					that.displayRepositories([], "full"); //$NON-NLS-0$
-				} else if (resp.Children.length && resp.Children.length === 1 && resp.Children[0].Type === "Clone") { //$NON-NLS-0$
+				} else if (resp.Children.length && resp.Children.length === 1 && resp.Children[0].Type === "Clone" && resource) { //$NON-NLS-0$
 					repositories = resp.Children;
 					
 					that.initTitleBar(repositories[0]);
