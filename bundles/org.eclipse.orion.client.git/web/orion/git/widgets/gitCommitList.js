@@ -416,7 +416,8 @@ define([
 		},
 		createFilter: function() {
 			if (!this.section) return;
-			var createSection = function (parent, sibling, title, query, canHide, dropdown, mainSection) {
+			var sections = [], mainSection;
+			var createSection = function (parent, sibling, title, query, canHide, dropdown) {
 				var section = new mSection.Section(parent, {
 					id: title + "branchFilterSection", //$NON-NLS-0$
 					title: title,
@@ -431,25 +432,25 @@ define([
 				var filter = document.createElement("input"); //$NON-NLS-0$
 				filter.className = "gitFilterInput"; //$NON-NLS-0$
 				filter.placeholder = messages["Filter " + query];
+				section.query = query;
 				section.searchBox.appendChild(filter);
 				filter.addEventListener("keydown", function(event){ //$NON-NLS-0$
 					if (event.keyCode === 13) {
-						var prop = query + "Query"; //$NON-NLS-0$
-						this.model[prop] = filter.value ? query + "=" + encodeURIComponent(filter.value) : ""; //$NON-NLS-0$
+						sections.forEach(function(s) {
+							var prop = s.query + "Query"; //$NON-NLS-0$
+							var field = lib.$(".gitFilterInput", s.domNode); //$NON-NLS-0$
+							this.model[prop] = field.value ? s.query + "=" + encodeURIComponent(field.value) : ""; //$NON-NLS-0$
+						}.bind(this));
+						lib.$(".gitFilterInput", mainSection.domNode).focus(); //$NON-NLS-0$
+						(mainSection || section).setHidden(true);
 						this.changedItem().then(function () {
-							if (this.model[prop]) {
-								for (var i=0; i<this.model.root.children.length; i++) {
-									this.myTree.expand(this.model.root.children[i]); 
-								}
+							for (var i=0; i<this.model.root.children.length; i++) {
+								this.myTree.expand(this.model.root.children[i]); 
 							}
 						}.bind(this));
-						if (mainSection) {
-							lib.$(".gitFilterInput", mainSection.domNode).focus(); //$NON-NLS-0$
-						}
-						(mainSection || section).setHidden(true);
 					}
 					if (event.keyCode === 27) {
-						(mainSection || section).setHidden(true);
+						mainSection.setHidden(true);
 					}
 					if (dropdown && event.keyCode === 9) {
 						section.setHidden(false);
@@ -462,9 +463,12 @@ define([
 				}
 				return section;
 			}.bind(this);
-			var messageSection = createSection(this.section.getContentElement(), this.section.getContentElement().firstChild, messages["Message:"], "filter", true, true); //$NON-NLS-0$
-			createSection(messageSection.getContentElement(), messageSection.firstChild, messages["Author:"], "author", false, false, messageSection); //$NON-NLS-0$
-			createSection(messageSection.getContentElement(), messageSection.firstChild, messages["Committer:"], "committer", false, false, messageSection); //$NON-NLS-0$
+			var messageSection = mainSection = createSection(this.section.getContentElement(), this.section.getContentElement().firstChild, messages["Message:"], "filter", true, true); //$NON-NLS-0$
+			var authorSection = createSection(messageSection.getContentElement(), messageSection.firstChild, messages["Author:"], "author", false, false, messageSection); //$NON-NLS-0$
+			var committerSection = createSection(messageSection.getContentElement(), messageSection.firstChild, messages["Committer:"], "committer", false, false, messageSection); //$NON-NLS-0$
+			sections.push(messageSection);
+			sections.push(authorSection);
+			sections.push(committerSection);
 		},
 		display: function() {
 			var that = this;
