@@ -134,7 +134,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 	RemotePrompterDialog.prototype.TEMPLATE = '<div>'
 			+ '<div id="treeContentPane" style="width:25em; min-height: 25em; max-height: 30em; height: auto; overflow-y: auto; padding: 8px"></div>'
 			+ '<div id="newBranchPane" style="padding: 8px">' + '<label for="newBranch">${New Branch:}</label>'
-			+ '<input id="newBranch" value="" disabled=true/>' + '</div>' + '</div>';
+			+ '<input id="newBranch" style="width: 20em" value="" disabled=true/>' + '</div>' + '</div>';
 
 	RemotePrompterDialog.prototype._init = function(options) {
 		var that = this;
