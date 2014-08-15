@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -76,5 +76,8 @@ define({
 	"DeployInfo": "Deployment Information", //$NON-NLS-1$ //$NON-NLS-0$
 	"Name": "Name", //$NON-NLS-1$ //$NON-NLS-0$
 	"Description": "Description", //$NON-NLS-1$ //$NON-NLS-0$
-	"Site": "Site" //$NON-NLS-1$ //$NON-NLS-0$
+	"Site": "Site", //$NON-NLS-1$ //$NON-NLS-0$
+	'projectsSectionTitle': 'Projects',  //$NON-NLS-0$  //$NON-NLS-1$
+	'listingProjects': 'Listing projects...',  //$NON-NLS-0$  //$NON-NLS-1$
+	'gettingWorkspaceInfo': 'Getting workspace information...'  //$NON-NLS-0$  //$NON-NLS-1$
 });
