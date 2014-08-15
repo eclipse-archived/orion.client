@@ -237,5 +237,12 @@ define({
 	'clearThemeAndEditorSettings.name': 'Clear themes and editor settings',  //$NON-NLS-0$  //$NON-NLS-1$
 	'clearThemeAndEditorSettings.tooltip': 'Clear all settings associated with editor themes and window themes',  //$NON-NLS-0$  //$NON-NLS-1$
 	"Settings": "Settings",
-
+    'orionThemeName': 'Orion',  //$NON-NLS-0$  //$NON-NLS-1$
+    'orion2014ThemeName': 'Orion2014',  //$NON-NLS-0$  //$NON-NLS-1$
+    'greenZoneThemeName': 'Green Zone',  //$NON-NLS-0$  //$NON-NLS-1$
+    'prettyInPinkThemeName': 'Pretty In Pink',  //$NON-NLS-0$  //$NON-NLS-1$
+    'blueMondayThemeName': 'Blue Monday',  //$NON-NLS-0$  //$NON-NLS-1$
+    'vanillaSkiesThemeName': 'Vanilla Skies',  //$NON-NLS-0$  //$NON-NLS-1$
+    'beetlejuiceThemeName': 'Beetlejuice',  //$NON-NLS-0$  //$NON-NLS-1$
+    'redThemeName': 'Red'  //$NON-NLS-0$  //$NON-NLS-1$
 });
