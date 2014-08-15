@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -92,10 +92,8 @@ define({
 	"${0}. Try your search again.": "${0}. Try your search again.",
 	"Click or use delete key to delete the search term": "Click or use delete key to delete the search term",
 	"${0} matches": "${0} matches",
-	"Regular expression is off. You can click here or use options to turn it on for replacement - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>." : 
-	"Regular expression is off. You can click here or use options to turn it on for replacement - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>.",
-	"Regular expression is on. You can click here or use options to turn it off - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>." : 
-	"Regular expression is on. You can click here or use options to turn it off - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>.",
+	"regexOptionOff" : "Regular expressions are off. Click here or use the options to turn them on for replacement",
+	"regexOptionOn" : "Regular expressions are on. Click here or use the options to turn them off",
 	"Scope": "Scope",
 	"Show previous search terms": "Show previous search terms",
 	"Show previous replace terms": "Show previous replace terms",
