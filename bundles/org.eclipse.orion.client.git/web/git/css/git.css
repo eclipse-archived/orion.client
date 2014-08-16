@@ -54,6 +54,28 @@
 	border-bottom-right-radius: 3px;
 }
 
+.repoDropdownList {
+	height:calc(100% - 35px);
+	overflow-y:auto;
+}
+
+.branchDropdownList {
+	height:calc(100% - 70px);
+	overflow-y:auto;
+}
+
+.configDropdownList {
+	height:calc(100% - 35px);
+	overflow-y:auto;
+}
+
+.sectionDropdownActions {
+	height:25px;
+	background-color:#eee;
+	padding-top:6px;
+	padding-bottom:4px;
+}
+
 .mainToolbar .sectionWrapper {
 	margin-left: 0;
 	margin-right: 10px;
@@ -125,10 +147,6 @@
 .auxpane .selectionModelContainer {
 	height: 100%;
 	overflow-y: auto;
-}
-
-.auxpane #branchNode {
-	height: calc(100% - 35px);
 }
 
 .auxpane #commitsNode {

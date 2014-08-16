@@ -441,7 +441,7 @@ define([
 			title: this.repository ? this.repository.Name : messages["Repo"],
 			iconClass: ["gitImageSprite", "git-sprite-repository"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
-			content: '<div id="repositoryNode"></div>', //$NON-NLS-0$
+			content: '<div id="repositoryNode" class="repoDropdownList"></div><div id="dropdownRepositoryActionsNode" class="sectionDropdownActions"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
 			dropdown: true,
@@ -465,6 +465,7 @@ define([
 			progressService: this.progressService,
 			parentId: "repositoryNode", //$NON-NLS-0$
 			actionScopeId: this.actionScopeId,
+			sectionActionScodeId: "dropdownRepositoryActionsNode", //$NON-NLS-0$
 			handleError: this.handleError.bind(this),
 			section: section,
 			selection: selection,
@@ -492,7 +493,7 @@ define([
 			title: "\u00A0", //$NON-NLS-0$
 			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
-			content: '<div id="branchNode"></div>', //$NON-NLS-0$
+			content: '<div id="branchNode" class="branchDropdownList"></div><div id="dropdownBranchesActionsNode" class="sectionDropdownActions"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
 			dropdown: true,
@@ -516,6 +517,7 @@ define([
 			progressService: this.progressService,
 			parentId: "branchNode", //$NON-NLS-0$
 			actionScopeId: this.actionScopeId,
+			sectionActionScodeId: "dropdownBranchesActionsNode", //$NON-NLS-0$
 			section: section,
 			selection: selection,
 			selectionPolicy: "singleSelection", //$NON-NLS-0$
@@ -853,7 +855,7 @@ define([
 			title: "\u200B", //$NON-NLS-0$
 			iconClass: ["core-sprite-gear"], //$NON-NLS-0$
 			slideout: true,
-			content: '<div id="configNode" class="mainPadding"></div>', //$NON-NLS-0$
+			content: '<div id="configNode" class="configDropdownList mainPadding"></div><div id="dropdownConfigActionsNode" class="sectionDropdownActions"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
 			dropdown: true,
@@ -869,6 +871,7 @@ define([
 			progressService: this.progressService,
 			parentId:"configNode", //$NON-NLS-0$
 			actionScopeId: this.actionScopeId,
+			sectionActionScopeId: "dropdownConfigActionsNode", //$NON-NLS-0$
 			section: section,
 			handleError: this.handleError.bind(this),
 			root: {

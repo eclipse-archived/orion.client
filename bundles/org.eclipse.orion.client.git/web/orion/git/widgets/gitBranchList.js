@@ -160,6 +160,7 @@ define([
 		this.showTags = options.showTags;
 		this.parentId = options.parentId;
 		this.actionScopeId = options.actionScopeId;
+		this.sectionActionScodeId = options.sectionActionScodeId;
 		this.root = options.root;
 		this.section = options.section;
 		this.selectionPolicy = options.selectionPolicy;
@@ -242,7 +243,7 @@ define([
 			var root = this.root;
 			var section = this.section;
 			if (!section) return;
-			var actionsNodeScope = section.actionsNode.id;
+			var actionsNodeScope = this.sectionActionScodeId || section.actionsNode.id;
 			if (root.Type === "RemoteRoot") { //$NON-NLS-0$
 				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.addBranch", 200); //$NON-NLS-0$
 				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.addRemote", 100); //$NON-NLS-0$

@@ -155,6 +155,7 @@ define([
 		mExplorer.Explorer.call(this, options.serviceRegistry, options.selection, renderer, options.commandRegistry);	
 		this.parentId = options.parentId;
 		this.actionScopeId = options.actionScopeId;
+		this.sectionActionScodeId = options.sectionActionScodeId;
 		this.repositories = options.repositories;
 		if (this.repositories) {
 			this.repositories.sort(function(repo1, repo2) {
@@ -220,7 +221,7 @@ define([
 			var section = this.section;
 			if (!section) return;
 			var commandRegistry = this.commandService;
-			var actionsNodeScope = section.actionsNode.id;
+			var actionsNodeScope = this.sectionActionScodeId || section.actionsNode.id;
 			if (this.simgleRepository) {
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.pull", 200); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 300); //$NON-NLS-1$ //$NON-NLS-0$
