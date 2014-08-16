@@ -88,7 +88,7 @@ mBootstrap.startup().then(function(core) {
 		commandRegistry.processURL(window.location.href);
 	}
 	
-	progress.progress(fileClient.loadWorkspace(), "Loading default workspace").then(
+	progress.progress(fileClient.loadWorkspace("/file"), "Loading default workspace").then(
 		function(workspace){
 			explorer.setDefaultPath(workspace.Location);
 			

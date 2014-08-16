@@ -457,7 +457,7 @@ define([
 					}
 				}.bind(this));
 				if (dropdown) {
-					filter.addEventListener("focusin", function(){ //$NON-NLS-0$
+					filter.addEventListener("focus", function(){ //$NON-NLS-0$
 						section.setHidden(false);
 					});
 				}
