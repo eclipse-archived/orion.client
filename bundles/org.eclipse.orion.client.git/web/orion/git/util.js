@@ -151,6 +151,19 @@ define([
 		return result.length < path.length ? "..." + result : path; //$NON-NLS-0$
 	}
 	
+	function relativePath(treePath) {
+		var path = "";
+		if (typeof treePath === "string") { //$NON-NLS-0$
+			path = treePath;
+		} else if (treePath) {
+			var parents = treePath.Parents;
+			if (parents.length) {
+				path = treePath.Location.substring(parents[parents.length -1].Location.length);
+			}
+		}
+		return path;
+	}
+	
 	function generateQuery(queries) {
 		var result = queries.filter(function(q) { return q; }).join("&");  //$NON-NLS-0$
 		if (result.length) {
@@ -170,6 +183,7 @@ define([
 		trimCommitMessage: trimCommitMessage,
 		shortenRefName: shortenRefName,
 		shortenPath: shortenPath,
+		relativePath: relativePath,
 		getGerritFooter: getGerritFooter
 	};
 });

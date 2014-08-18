@@ -405,6 +405,7 @@ define({
 	"Filter filter" : "Filter message",
 	"Filter author" : "Filter author",
 	"Filter committer" : "Filter commiter",
+	"Filter path" : "Filter path",
 	"Filter remote branches" : "Filter remote branches",
 	"Getting remote branches" : "Getting remote branches ${0}",
 	"Getting branches" : "Getting branches ${0}",

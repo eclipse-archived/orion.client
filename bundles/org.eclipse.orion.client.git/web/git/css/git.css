@@ -27,33 +27,6 @@
 	overflow: visible;
 }
 
-#commitsSectionContent .sectionWrapper {
-	border-width: 0;
-	margin:0;
-	opacity: 1;
-}
-
-#commitsSectionContent .sectionWrapper.sectionClosed:hover {
-	box-shadow: initial;
-}
-
-#commitsSectionContent .sectionTitle {
-	min-width: 80px;
-	padding-left: 3px;
-}
-
-#commitsSectionContent .sectionTable {
-	border-width: 0;
-	margin: 0;
-	position: absolute;
-	width: 70%;
-	z-index: 200;
-	margin-top: -1px;
-	background-color: #b7cbdb;
-	border-bottom-left-radius: 3px;
-	border-bottom-right-radius: 3px;
-}
-
 .repoDropdownList {
 	height:calc(100% - 35px);
 	overflow-y:auto;
@@ -151,6 +124,54 @@
 
 .auxpane #commitsNode {
 	height: calc(100% - 35px);
+}
+
+.commitFilter.sectionWrapper {
+	border-width: 0;
+	margin:0;
+	opacity: 1;
+}
+
+.commitFilter.sectionWrapper.sectionClosed:hover {
+	box-shadow: initial;
+}
+
+.commitFilter .sectionTitle {
+	min-width: 80px;
+	padding-left: 3px;
+}
+
+.commitFilter input {
+	width: 200px;
+	padding-right: 22px;
+}
+
+.searchButton {
+	position: relative;
+	left: -28px;
+	top: -2px;
+	cursor: pointer;
+	outline: none;
+}
+
+.pathFilter.sectionTable.sectionOpened {
+	height: 300px;
+}
+
+.pathFilter.sectionTable.sectionClosed {
+	height: 0;
+}
+
+.commitFilter.sectionTable {
+	border-width: 0;
+	margin: 0;
+	position: absolute;
+	width: 80%;
+	z-index: 200;
+	margin-top: -1px;
+	background-color: #b7cbdb;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
 }
 
 .mainToolbar #configSection {

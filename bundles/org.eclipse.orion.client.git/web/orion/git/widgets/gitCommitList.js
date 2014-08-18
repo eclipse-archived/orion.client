@@ -14,8 +14,10 @@
 define([
 	'i18n!git/nls/gitmessages',
 	'orion/git/widgets/gitChangeList',
+	'orion/git/widgets/gitFileList',
 	'orion/git/widgets/gitCommitInfo',
 	'orion/section',
+	'orion/selection',
 	'orion/commands',
 	'orion/Deferred',
 	'orion/explorers/explorer',
@@ -24,7 +26,7 @@ define([
 	'orion/git/util',
 	'orion/webui/littlelib',
 	'orion/objects'
-], function(messages, mGitChangeList, mGitCommitInfo, mSection, mCommands, Deferred, mExplorer, mHTMLFragments, i18nUtil, util, lib, objects) {
+], function(messages, mGitChangeList, mGitFileList, mGitCommitInfo, mSection, mSelection, mCommands, Deferred, mExplorer, mHTMLFragments, i18nUtil, util, lib, objects) {
 
 	var pageQuery = "page=1&pageSize=20"; //$NON-NLS-0$
 
@@ -360,6 +362,7 @@ define([
 		this.handleError = options.handleError;
 		this.location = options.location;
 		this.gitClient = options.gitClient;
+		this.fileClient = options.fileClient;
 		this.progressService = options.progressService;
 		this.statusService = options.statusService;
 		this.targetRef = options.targetRef;
@@ -420,15 +423,28 @@ define([
 		createFilter: function() {
 			if (!this.section) return;
 			var sections = [], mainSection;
-			var createSection = function (parent, sibling, title, query, canHide, dropdown) {
+			var doFilter = function() {
+				sections.forEach(function(s) {
+					var prop = s.query + "Query"; //$NON-NLS-0$
+					var field = lib.$(".gitFilterInput", s.domNode); //$NON-NLS-0$
+					if (s.query === "path") { //$NON-NLS-0$
+						this.repositoryPath = this.model.repositoryPath = field.value;
+					} else {
+						this.model[prop] = field.value ? s.query + "=" + encodeURIComponent(field.value) : ""; //$NON-NLS-0$
+					}
+				}.bind(this));
+				mainSection.setHidden(true);
+				this.changedItem();
+			}.bind(this);
+			var createSection = function (parent, sibling, title, query, canHide, dropdown, noTwistie, expandOnFocus) {
 				var section = new mSection.Section(parent, {
-					id: title + "branchFilterSection", //$NON-NLS-0$
+					id: title + "commitFilterSection", //$NON-NLS-0$
 					title: title,
 					canHide: canHide,
 					hidden: true,
 					sibling: sibling,
 					dropdown: dropdown,
-					noTwistie: dropdown,
+					noTwistie: noTwistie,
 					preferenceService: this.preferencesService
 				});
 				section.domNode.classList.add("gitFilterBox"); //$NON-NLS-0$
@@ -439,35 +455,120 @@ define([
 				section.searchBox.appendChild(filter);
 				filter.addEventListener("keydown", function(event){ //$NON-NLS-0$
 					if (event.keyCode === 13) {
-						sections.forEach(function(s) {
-							var prop = s.query + "Query"; //$NON-NLS-0$
-							var field = lib.$(".gitFilterInput", s.domNode); //$NON-NLS-0$
-							this.model[prop] = field.value ? s.query + "=" + encodeURIComponent(field.value) : ""; //$NON-NLS-0$
-						}.bind(this));
-						lib.$(".gitFilterInput", mainSection.domNode).focus(); //$NON-NLS-0$
-						(mainSection || section).setHidden(true);
-						this.changedItem();
+						doFilter();
+						event.preventDefault();
 					}
 					if (event.keyCode === 27) {
 						mainSection.setHidden(true);
+						event.preventDefault();
 					}
 					if (dropdown && event.keyCode === 9) {
 						section.setHidden(false);
 					}
 				}.bind(this));
-				if (dropdown) {
+				var button = document.createElement("button"); //$NON-NLS-0$
+				button.tabIndex = -1;
+				button.className = "core-sprite-search searchButton"; //$NON-NLS-0$
+				section.searchBox.appendChild(button);
+				button.addEventListener("click", function(){ //$NON-NLS-0$
+					doFilter();
+				});
+				if (expandOnFocus) {
 					filter.addEventListener("focus", function(){ //$NON-NLS-0$
+						section.setHidden(false);
+					});
+					filter.addEventListener("click", function(){ //$NON-NLS-0$
 						section.setHidden(false);
 					});
 				}
 				return section;
 			}.bind(this);
-			var messageSection = mainSection = createSection(this.section.getContentElement(), this.section.getContentElement().firstChild, messages["Message:"], "filter", true, true); //$NON-NLS-0$
-			var authorSection = createSection(messageSection.getContentElement(), messageSection.firstChild, messages["Author:"], "author", false, false, messageSection); //$NON-NLS-0$
-			var committerSection = createSection(messageSection.getContentElement(), messageSection.firstChild, messages["Committer:"], "committer", false, false, messageSection); //$NON-NLS-0$
+			var content = this.section.getContentElement();
+			var messageSection = mainSection = createSection(content, content.firstChild, messages["Message:"], "filter", true, true, true, true); //$NON-NLS-0$
+			messageSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
+			messageSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
+			messageSection.addEventListener("toggle", function(event){ //$NON-NLS-0$
+				lib.$(".gitFilterInput", mainSection.domNode).focus(); //$NON-NLS-0$
+				if (event.isExpanded) {
+					sections.forEach(function(s) {
+						var field = lib.$(".gitFilterInput", s.domNode); //$NON-NLS-0$
+						if (s.query === "path") { //$NON-NLS-0$
+							field.value = this.repositoryPath;
+						} else {
+							var prop = s.query + "Query"; //$NON-NLS-0$
+							field.value = decodeURIComponent(this.model[prop].split("=")[1] || ""); //$NON-NLS-0$
+						}
+					}.bind(this));
+				} else {
+					sections.forEach(function(s) {
+						s.setHidden(true);
+					});
+				}
+			}.bind(this));
+			
+			var authorSection = createSection(messageSection.getContentElement(), null, messages["Author:"], "author", false, false); //$NON-NLS-0$
+			authorSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
+			authorSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
+			
+			var committerSection = createSection(messageSection.getContentElement(), null, messages["Committer:"], "committer", false, false); //$NON-NLS-0$
+			committerSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
+			committerSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
+			
+			var pathSection = createSection(messageSection.getContentElement(), null, messages["Path:"], "path", true, false, true, true); //$NON-NLS-0$
+			pathSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
+			pathSection.getContentElement().classList.add("pathFilter"); //$NON-NLS-0$
+			pathSection.domNode.tabIndex = -1;
+			var selection = this.treeSelection = new mSelection.Selection(this.registry, "orion.selection.commitTree"); //$NON-NLS-0$
+			var explorer  = this.treeNavigator = new mGitFileList.GitFileListExplorer({
+				serviceRegistry: this.registry,
+				commandRegistry: this.commandService,
+				parentId: pathSection.getContentElement(),
+				repository: this.root.repository,
+				fileClient: this.fileClient,
+				section: pathSection,
+				selection: selection,
+				selectionPolicy: "singleSelection", //$NON-NLS-0$
+				handleError: this.handleError.bind(this),
+				gitClient: this.gitClient,
+				progressService: this.progressService
+			});
+			pathSection.addEventListener("toggle", function(e) { //$NON-NLS-0$
+				if (e.isExpanded) {
+					var location;
+					var model = this.model;
+					var commit = this.selection && this.selection.getSelection();
+					if (commit && commit.Type === "Commit") { //$NON-NLS-0$
+						location = commit.TreeLocation;
+					} else {
+						location = (model.simpleLog ? model.getTargetReference() : model.getActiveBranch()).TreeLocation;
+					}
+					if (!location) return;
+					explorer.display(location).then(function() {
+						explorer.myTree.expand(explorer.model.root);
+					}.bind(this));
+				}
+			}.bind(this));
+			pathSection.getContentElement().addEventListener("keydown", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
+				if (event.keyCode === 13) {
+					doFilter();
+					event.preventDefault();
+				}
+				if (event.keyCode === 27) {
+					mainSection.setHidden(true);
+					event.preventDefault();
+				}
+			});
+			selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
+				var selected = e.selection;
+				if (!selected || this.treePath === selected) return;
+				var field = lib.$(".gitFilterInput", pathSection.domNode); //$NON-NLS-0$
+				field.value = util.relativePath(selected);
+			}.bind(this));
+			
 			sections.push(messageSection);
 			sections.push(authorSection);
 			sections.push(committerSection);
+			sections.push(pathSection);
 		},
 		display: function() {
 			var that = this;

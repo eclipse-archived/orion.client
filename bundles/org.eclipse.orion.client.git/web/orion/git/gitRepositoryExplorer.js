@@ -310,7 +310,7 @@ define([
 	
 	GitRepositoryExplorer.prototype.setSelectedRef = function(ref) {
 		this.reference = ref;
-		this.displayTree(this.repository);
+//		this.displayTree(this.repository);
 		this.displayCommits(this.repository);
 	};
 	
@@ -552,16 +552,7 @@ define([
 	};
 	
 	GitRepositoryExplorer.prototype.calculateTreePath = function() {
-		var path = "";
-		if (typeof this.treePath === "string") { //$NON-NLS-0$
-			path = this.treePath;
-		} else if (this.treePath) {
-			var parents = this.treePath.Parents;
-			if (parents.length) {
-				path = this.treePath.Location.substring(parents[parents.length -1].Location.length);
-			}
-		}
-		return path;
+		return util.relativePath(this.treePath);
 	};
 	
 	GitRepositoryExplorer.prototype.displayTree = function(repository) {	
