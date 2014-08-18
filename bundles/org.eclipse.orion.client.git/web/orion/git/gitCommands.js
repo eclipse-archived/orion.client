@@ -1462,7 +1462,17 @@ var exports = {};
 			imageClass: "git-sprite-reset", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			callback: function(data) {
-				resetCallback(data, data.items.IndexLocation, data.items.Name, "HARD", messages["GitResetIndexConfirm"]); //$NON-NLS-0$
+				var indexLocation = data.items.IndexLocation;
+				if (!indexLocation) {
+					var temp = data.items.parent;
+					while (temp) {
+						if (temp.repository) {
+							indexLocation = temp.repository.IndexLocation;
+						}
+						temp = temp.parent;
+					}
+				}
+				resetCallback(data, indexLocation, data.items.Name, "HARD", messages["GitResetIndexConfirm"]); //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
 				return item.Type === "RemoteTrackingBranch" || "Commit"; //$NON-NLS-1$ //$NON-NLS-0$
