@@ -292,8 +292,7 @@ input[type="button"]:active {
 }
 
 .orion-register-button:hover {
-	background:white;
-	color:#666;
+	opacity:.6;
 }
 
 .orion-cancel-button {
