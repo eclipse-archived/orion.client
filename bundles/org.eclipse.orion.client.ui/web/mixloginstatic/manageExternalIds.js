@@ -202,14 +202,14 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 		}
 	}
 
-	function createProviderLink(name, imageUrl, onclick) {
+	function createProviderLink(name, imageUrl, clazz, onclick) {
 		var img = document.createElement("img");
-		img.className = "loginWindow";
+		img.className = "loginWindow " + clazz;
 		img.id = img.alt = img.title = name;
 		img.src = imageUrl;
 
 		var a = document.createElement("a");
-		a.className = "loginWindow";
+		a.className = "loginWindow " + clazz;
 		a.onclick = onclick;
 		a.setAttribute("aria-labelledby", "addExternalAccount " + name);
 		a.appendChild(img);
@@ -229,10 +229,10 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 	function attachExternalProviders(){
 		var providerElements = [];
 		// Add OAuth Providers
-		providerElements.push(createProviderLink("Google OAuth", "../mixloginstatic/images/googleplus.png", confirmOAuth.bind(null, "google")));
-		providerElements.push(createProviderLink("GitHub OAuth", "../mixloginstatic/images/GitHub-Mark-32px.png", confirmOAuth.bind(null, "github")));
+		providerElements.push(createProviderLink("Google OAuth", "../mixloginstatic/images/googleplus.png", "", confirmOAuth.bind(null, "google")));
+		providerElements.push(createProviderLink("GitHub OAuth", "../mixloginstatic/images/GitHub-Mark-Light-32px.png", "githubImage", confirmOAuth.bind(null, "github")));
 		// Add Mozilla Persona
-		providerElements.push(createProviderLink("Mozilla Persona", "../mixloginstatic/images/persona.png",
+		providerElements.push(createProviderLink("Mozilla Persona", "../mixloginstatic/images/persona.png", "",
 				alert.bind(null, "To link your account with a Persona, set your Orion email address above to match your Persona email address.")));
 
 		var openIdContainer = document.getElementById("newExternalId");

@@ -74,3 +74,32 @@ img.loginWindow {
 .navColumn {
 	min-width: 150px;
 }
+
+a.loginWindow {
+	display: inline-block;
+	cursor: pointer;
+}
+
+a.loginWindow:hover {
+	opacity: .6;
+}
+
+a.loginWindow.githubImage {
+	height: 32px;
+	width: 32px;
+	background-color: #414142;
+	float: left;
+	margin-left: 5px;
+	margin-right: 5px;
+	border-radius: 1px;
+}
+
+img.loginWindow.githubImage {
+	height: 20px;
+	width: 20px;
+	position: relative;
+	top: 6px;
+	left: 6px;
+	margin-left: 0px;
+	margin-right: 0px;
+}
