@@ -479,6 +479,14 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		document.getElementById("registerButton").addEventListener("click", revealRegistration);
 		document.getElementById("registerButton").addEventListener("keydown", revealRegistration);
 
+		document.getElementById("create_login").addEventListener("keyup", function(event) {
+			if (event.keyCode === lib.KEY.ENTER) {
+				confirmCreateUser();
+			} else {
+				validatePassword();
+			}
+		});
+
 		document.getElementById("create_password").addEventListener("keyup", function(event) {
 			if (event.keyCode === lib.KEY.ENTER) {
 				confirmCreateUser();
@@ -488,6 +496,14 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		});
 
 		document.getElementById("create_passwordRetype").addEventListener("keyup", function(event) {
+			if (event.keyCode === lib.KEY.ENTER) {
+				confirmCreateUser();
+			} else {
+				validatePassword();
+			}
+		});
+
+		document.getElementById("create_email").addEventListener("keyup", function(event) {
 			if (event.keyCode === lib.KEY.ENTER) {
 				confirmCreateUser();
 			} else {
