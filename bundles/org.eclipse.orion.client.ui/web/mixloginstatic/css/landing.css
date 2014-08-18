@@ -475,12 +475,14 @@ a.loginwindow {
 }
 
 .githubIcon {
-	background: url('../images/GitHub-Mark-32px.png') no-repeat;
+	background: url('../images/GitHub-Mark-Light-32px.png') no-repeat;
 	background-position: center;
+	background-color: #414142;
 	width: 50px;
 	height: 50px;
+	float: left;
 	margin-left: 10px;
-	/* margin-top: 3px; */
+	border-radius: 2px;
 }
 
 .loginIcon:hover {
@@ -503,4 +505,13 @@ a.loginwindow {
 	text-indent: 100%;
 	white-space: nowrap;
 	overflow: hidden;
+	cursor: pointer;
 }
+
+.addSquareHere {
+	background: #414142;
+	margin-left: 10px;
+	width: 50px;
+	height: 50px;
+}
+
