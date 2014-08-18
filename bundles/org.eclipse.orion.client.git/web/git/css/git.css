@@ -23,6 +23,10 @@
 	margin-right: 8%;
 }
 
+.sectionTable td {
+	border-bottom: 0;
+}
+
 .auxpane {
 	overflow: visible;
 }
