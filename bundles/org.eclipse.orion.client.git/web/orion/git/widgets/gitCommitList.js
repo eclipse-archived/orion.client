@@ -630,9 +630,9 @@ define([
 					that.simpleLog = !that.simpleLog;
 					data.handler.changedItem();
 				},
-				visibleWhen: function(item) {
-					simpleLogCommand.name = that.model.simpleLog ? "Show Active Branch" : "Show Log";
-					simpleLogCommand.tooltip = that.model.simpleLog ? "Show the history of the active branch against the selected reference." : "Show the history of the selected reference.";
+				visibleWhen: function() {
+					simpleLogCommand.name = that.model.simpleLog ? messages["ShowActiveBranch"] : messages["ShowReference"];
+					simpleLogCommand.tooltip = that.model.simpleLog ? messages["ShowActiveBranchTooltip"] : messages["ShowReferenceTooltip"];
 					return true;
 				}
 			});
