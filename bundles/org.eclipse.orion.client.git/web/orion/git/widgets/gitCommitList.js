@@ -446,11 +446,7 @@ define([
 						}.bind(this));
 						lib.$(".gitFilterInput", mainSection.domNode).focus(); //$NON-NLS-0$
 						(mainSection || section).setHidden(true);
-						this.changedItem().then(function () {
-							for (var i=0; i<this.model.root.children.length; i++) {
-								this.myTree.expand(this.model.root.children[i]); 
-							}
-						}.bind(this));
+						this.changedItem();
 					}
 					if (event.keyCode === 27) {
 						mainSection.setHidden(true);
