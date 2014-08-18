@@ -14,8 +14,9 @@
  * Utility methods that do not have UI dependencies.
  */
 define([
+	'i18n!git/nls/gitmessages',
 	"orion/URL-shim"
-], function(_) {
+], function(messages) {
 
 	var interestedUnstagedGroup = ["Missing", "Modified", "Untracked", "Conflicting"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var interestedStagedGroup = ["Added", "Changed", "Removed"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -74,8 +75,8 @@ define([
 			/* try scp-like uri */
 			try {
 				/* [user@]host.xz:path/to/repo.git/ */
-				var scp = gitUrl.split(":");
-				var hostPart = scp[0].split("@");
+				var scp = gitUrl.split(":"); //$NON-NLS-0$
+				var hostPart = scp[0].split("@"); //$NON-NLS-0$
 				var host = hostPart.length > 1 ? hostPart[1] : hostPart[0];
 				return {
 					host : host,
@@ -137,6 +138,9 @@ define([
 		var refName = ref.Name;
 		if (ref.Type === "Commit") { //$NON-NLS-0$
 			refName = refName.substring(0, 6);
+		}
+		if (ref.Type === "RemoteTrackingBranch" && !ref.Id) { //$NON-NLS-0$
+			refName += messages[" [New branch]"];
 		}
 		return refName;
 	}

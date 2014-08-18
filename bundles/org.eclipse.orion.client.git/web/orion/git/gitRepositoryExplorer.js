@@ -545,9 +545,6 @@ define([
 		if (activeBranch && targetRef) {
 			var targetName =  util.shortenRefName(targetRef);
 			title = activeBranch.Name + " \u2794 " + targetName;  //$NON-NLS-0$
-			if (explorer.model.isNewBranch(targetRef)) {
-				title += messages[" [New branch]"];
-			}
 		} else {
 			title = util.shortenRefName(activeBranch || targetRef);
 		}

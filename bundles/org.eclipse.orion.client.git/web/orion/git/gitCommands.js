@@ -1457,15 +1457,15 @@ var exports = {};
 		
 		var resetIndexCommand = new mCommands.Command({
 			name : messages['Reset'],
-			tooltip: messages["Reset your active branch to the state of the selected branch. Discard all staged and unstaged changes."],
+			tooltip: messages["Reset your active branch to the state of the selected ref. Discard all staged and unstaged changes."],
 			id : "eclipse.orion.git.resetIndex", //$NON-NLS-0$
 			imageClass: "git-sprite-reset", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			callback: function(data) {
-				resetCallback(data, data.items.IndexLocation, data.items.Name, "HARD", messages["GitResetIndexConfirm"]);
+				resetCallback(data, data.items.IndexLocation, data.items.Name, "HARD", messages["GitResetIndexConfirm"]); //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
-				return item.Type === "RemoteTrackingBranch" || "Commit"; //$NON-NLS-0$
+				return item.Type === "RemoteTrackingBranch" || "Commit"; //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(resetIndexCommand);
