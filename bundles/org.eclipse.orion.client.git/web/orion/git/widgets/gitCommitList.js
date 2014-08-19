@@ -368,6 +368,7 @@ define([
 		this.targetRef = options.targetRef;
 		this.log = options.log;
 		this.simpleLog = options.simpleLog;
+		this.slideout = options.slideout;
 		this.selectionPolicy = options.selectionPolicy;
 		this.repositoryPath = options.repositoryPath;
 		
@@ -884,10 +885,12 @@ define([
 					horizontalBox.appendChild(actionsArea);
 					
 					horizontalBox.classList.add("toolComposite"); //$NON-NLS-0$
-					var slideoutFragment = mHTMLFragments.slideoutHTMLFragment(actionsArea.id);
-					var slideoutDiv = document.createElement("div"); //$NON-NLS-0$
-					slideoutDiv.innerHTML = slideoutFragment;
-					horizontalBox.appendChild(slideoutDiv);
+					if (explorer.slideout) {
+						var slideoutFragment = mHTMLFragments.slideoutHTMLFragment(actionsArea.id);
+						var slideoutDiv = document.createElement("div"); //$NON-NLS-0$
+						slideoutDiv.innerHTML = slideoutFragment;
+						horizontalBox.appendChild(slideoutDiv);
+					}
 				} else {
 					if (model.showCommitChanges) {
 						createExpand();

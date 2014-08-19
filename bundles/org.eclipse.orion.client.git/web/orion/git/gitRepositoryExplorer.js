@@ -660,7 +660,7 @@ define([
 		var section = this.commitsSection = new mSection.Section(parent, {
 			id: "commitsSection", //$NON-NLS-0$
 			title: messages["Diffs"],
-			slideout: true,
+			slideout: false,
 			content: '<div id="commitsNode"></div>', //$NON-NLS-0$
 			canHide: true,
 			noTwistie: true,
