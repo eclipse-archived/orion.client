@@ -298,7 +298,6 @@ define([
 		this.initTitleBar(repository || {});
 		this.displayRepositories(this.repositories, ""); //$NON-NLS-0$
 		if (repository) {
-			this.setSelectedCommit(this.commit);
 			this.displayBranches(repository); 
 			this.setSelectedRef(this.reference);
 			if (this.showTagsSeparately) {
@@ -311,10 +310,12 @@ define([
 	GitRepositoryExplorer.prototype.setSelectedRef = function(ref) {
 		this.reference = ref;
 //		this.displayTree(this.repository);
+		this.setSelectedCommit(this.commit);
 		this.displayCommits(this.repository);
 	};
 	
 	GitRepositoryExplorer.prototype.setSelectedCommit = function(commit) {
+		lib.empty(lib.node('table')); //$NON-NLS-0$
 		this.commit = commit;
 		if (this.commit && this.commit.Type === "Commit") { //$NON-NLS-0$
 			this.displayCommit(this.commit);
@@ -672,7 +673,6 @@ define([
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			var selected = event.selection;
 			if ((this.commit || repository.status) === selected) return;
-			lib.empty(lib.node('table')); //$NON-NLS-0$
 			this.setSelectedCommit(selected);
 //			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
 		}.bind(this));
