@@ -90,8 +90,12 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 				}
 			}, false);
 			this.domNode.addEventListener("keydown", function(evt) { //$NON-NLS-0$
-				if(evt.keyCode === lib.KEY.ENTER && (evt.target === that.domNode || evt.target === that.titleNode || evt.target === that.twistie)) {
-					that._changeExpandedState();
+				if (evt.target === that.domNode || evt.target === that.titleNode || evt.target === that.twistie) {
+					if(evt.keyCode === lib.KEY.ENTER) {
+						that._changeExpandedState();
+					} else if(evt.keyCode === lib.KEY.ESCAPE) {
+						that.setHidden(true);
+					}
 				}
 			}, false);
 		}
