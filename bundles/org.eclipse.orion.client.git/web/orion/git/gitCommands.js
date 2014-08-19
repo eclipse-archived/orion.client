@@ -564,7 +564,7 @@ var exports = {};
 				
 				var createBranchFunction = function(branchLocation, name) {
 					progress.progress(serviceRegistry.getService("orion.git.provider").addBranch(branchLocation, name), "Adding branch " + name).then(function() { //$NON-NLS-0$
-						explorer.changedItem(item);
+						refresh(data);
 					}, displayErrorOnStatus);
 				};
 				
@@ -595,10 +595,7 @@ var exports = {};
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete branch ${0}?"], item.Name))) {
 					progress.progress(serviceRegistry.getService("orion.git.provider").removeBranch(item.Location), "Removing branch " + item.Name).then(function() { //$NON-NLS-0$
-						if (explorer.changedItem)
-							explorer.changedItem(item.parent);
-						else if (explorer.displayBranches)
-							explorer.displayBranches(item.ParentLocation, null);
+						refresh(data);
 					}, displayErrorOnStatus);
 				}
 			},
@@ -655,7 +652,7 @@ var exports = {};
 				
 				var createRemoteFunction = function(remoteLocation, name, url) {
 					progress.progress(serviceRegistry.getService("orion.git.provider").addRemote(remoteLocation, name, url), "Adding remote " + remoteLocation).then(function() { //$NON-NLS-0$
-						explorer.changedItem(item);
+						refresh(data);
 					}, displayErrorOnStatus);
 				};
 				
@@ -686,7 +683,7 @@ var exports = {};
 				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete remote ${0}?"], item.Name))) {
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					progress.progress(serviceRegistry.getService("orion.git.provider").removeRemote(item.Location), "Removing remote " + item.Name).then(function() { //$NON-NLS-0$
-						explorer.changedItem(item.parent);
+						refresh(data);
 					}, displayErrorOnStatus);
 				}
 			},
@@ -1755,6 +1752,14 @@ var exports = {};
 
 	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
 		
+		var refresh = function(data) { 
+			if (data && data.handler.changedItem) {
+				data.handler.changedItem();
+			} else { 
+				explorer.changedItem(); 
+			}
+		};
+		
 		function displayErrorOnStatus(error) {
 			var display = {};
 			display.Severity = "Error"; //$NON-NLS-0$
@@ -1788,7 +1793,7 @@ var exports = {};
 				if (data.parameters.valueFor("key") && data.parameters.valueFor("value")){ //$NON-NLS-1$ //$NON-NLS-0$
 					progress.progress(gitService.addCloneConfigurationProperty(item.ConfigLocation, data.parameters.valueFor("key"), data.parameters.valueFor("value")), "Setting configuration propetry: " + data.parameters.valueFor("key")).then( //$NON-NLS-1$ //$NON-NLS-0$
 						function(jsonData){
-							explorer.changedItem(item);
+							refresh(data);
 						}, displayErrorOnStatus
 					);
 				}
@@ -1818,7 +1823,7 @@ var exports = {};
 				if (data.parameters.valueFor("value")){ //$NON-NLS-0$
 					progress.progress(gitService.editCloneConfigurationProperty(item.Location, data.parameters.valueFor("value")), "Editing configuration property " + item.Key).then( //$NON-NLS-0$
 						function(jsonData){
-							explorer.changedItem(item);
+							refresh(data);
 						}, displayErrorOnStatus
 					);
 				}
@@ -1841,7 +1846,7 @@ var exports = {};
 				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete ${0}?"], item.Key))) {
 					progress.progress(gitService.deleteCloneConfigurationProperty(item.Location), "Deleting configuration property " + item.Key).then(
 						function(jsonData) {
-							explorer.changedItem(item);
+							refresh(data);
 						}, displayErrorOnStatus
 					);
 				}

@@ -14,9 +14,10 @@
 define([
 	'i18n!git/nls/gitmessages',
 	'orion/explorers/explorer',
+	'orion/Deferred',
 	'orion/i18nUtil',
 	'orion/objects'
-], function(messages, mExplorer, i18nUtil, objects) {
+], function(messages, mExplorer, Deferred, i18nUtil, objects) {
 
 	function GitConfigListModel(options) {
 		this.root = options.root;
@@ -92,6 +93,25 @@ define([
 	}
 	GitConfigListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitConfigListExplorer.prototype, /** @lends orion.git.GitConfigListExplorer.prototype */ {
+		changedItem: function(item) {
+			var deferred = new Deferred();
+			var model = this.model;
+			if (!item) {
+				model.getRoot(function(root) {
+					item = root;
+				});
+			}
+			var that = this;
+			if (!item.more) {
+				item.children = null;
+			}
+			model.getChildren(item, function(children) {
+				item.removeAll = true;
+				that.myTree.refresh.bind(that.myTree)(item, children, false);
+				deferred.resolve(children);
+			});
+			return deferred;
+		},
 		display: function() {
 			var model = new GitConfigListModel({
 				root: this.root,
