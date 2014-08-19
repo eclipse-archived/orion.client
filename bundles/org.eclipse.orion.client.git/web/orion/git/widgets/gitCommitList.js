@@ -434,6 +434,8 @@ define([
 						this.model[prop] = field.value ? s.query + "=" + encodeURIComponent(field.value) : ""; //$NON-NLS-0$
 					}
 				}.bind(this));
+				ignoreFocus = true;
+				lib.$(".gitFilterInput", mainSection.domNode).focus(); //$NON-NLS-0$
 				mainSection.setHidden(true);
 				this.changedItem();
 			}.bind(this);
@@ -441,15 +443,26 @@ define([
 				var relatedTarget = e.relatedTarget || e.toElement;
 				function check(focus) {
 					if (!(lib.contains(mainSection.domNode, focus) || lib.contains(mainSection.getContentElement(), focus))) {
-						ignoreFocus = true;
 						mainSection.setHidden(true);
-						ignoreFocus = false;
 					}
 				}
 				if (relatedTarget) {
 					check(relatedTarget);
 				} else {
 					setTimeout(function () { check(document.activeElement); }, 0);
+				}
+			};
+			var keyHandler = function(event){ //$NON-NLS-0$
+				if (event.keyCode === lib.KEY.ENTER) {
+					doFilter();
+					event.preventDefault();
+				}
+				if (event.keyCode === lib.KEY.ESCAPE) {
+					mainSection.setHidden(true);
+					event.preventDefault();
+				}
+				if (event.keyCode === lib.KEY.DOWN) {
+					mainSection.setHidden(false);
 				}
 			};
 			var createSection = function (parent, sibling, title, query, canHide, dropdown, noTwistie, expandOnFocus) {
@@ -469,19 +482,7 @@ define([
 				filter.placeholder = messages["Filter " + query];
 				section.query = query;
 				section.searchBox.appendChild(filter);
-				filter.addEventListener("keydown", function(event){ //$NON-NLS-0$
-					if (event.keyCode === lib.KEY.ENTER) {
-						doFilter();
-						event.preventDefault();
-					}
-					if (event.keyCode === lib.KEY.ESCAPE) {
-						mainSection.setHidden(true);
-						event.preventDefault();
-					}
-					if (dropdown && ((event.keyCode === lib.KEY.TAB && !event.shiftKey) || event.keyCode === lib.KEY.DOWN)) {
-						section.setHidden(false);
-					}
-				}.bind(this));
+				filter.addEventListener("keydown", keyHandler); //$NON-NLS-0$
 				var button = document.createElement("button"); //$NON-NLS-0$
 				button.tabIndex = -1;
 				button.className = "core-sprite-search searchButton"; //$NON-NLS-0$
@@ -491,6 +492,10 @@ define([
 				});
 				if (expandOnFocus) {
 					filter.addEventListener("focus", function(){ //$NON-NLS-0$
+						if (ignoreFocus) {
+							ignoreFocus = false;
+							return;
+						}
 						section.setHidden(false);
 					});
 					filter.addEventListener("click", function(){ //$NON-NLS-0$
@@ -506,9 +511,6 @@ define([
 			messageSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
 			messageSection.domNode.tabIndex = -1;
 			messageSection.addEventListener("toggle", function(event){ //$NON-NLS-0$
-				if (!ignoreFocus) {
-					lib.$(".gitFilterInput", mainSection.domNode).focus(); //$NON-NLS-0$
-				}
 				if (event.isExpanded) {
 					sections.forEach(function(s) {
 						var field = lib.$(".gitFilterInput", s.domNode); //$NON-NLS-0$
@@ -568,16 +570,7 @@ define([
 					}.bind(this));
 				}
 			}.bind(this));
-			pathSection.getContentElement().addEventListener("keydown", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
-				if (event.keyCode === lib.KEY.ENTER) {
-					doFilter();
-					event.preventDefault();
-				}
-				if (event.keyCode === lib.KEY.ESCAPE) {
-					mainSection.setHidden(true);
-					event.preventDefault();
-				}
-			});
+			pathSection.getContentElement().addEventListener("keydown", keyHandler); //$NON-NLS-0$
 			pathSection.getContentElement().addEventListener("blur", blurHandler); //$NON-NLS-0$
 			selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 				var selected = e.selection;
