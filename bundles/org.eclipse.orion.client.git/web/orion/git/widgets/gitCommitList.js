@@ -757,26 +757,10 @@ define([
 			var explorer = this.explorer;
 			var commit = item;
 			switch(col_no){
-			case 0:	
-				var td = document.createElement("td"); //$NON-NLS-0$
-				var sectionItem = document.createElement("div"); //$NON-NLS-0$
-				td.appendChild(sectionItem);
-				var horizontalBox = document.createElement("div"); //$NON-NLS-0$
-				horizontalBox.classList.add("gitListCell"); //$NON-NLS-0$
-				sectionItem.appendChild(horizontalBox);	
-				var that = this;
-				function createExpand() {
-					var expandContainer = document.createElement("div"); //$NON-NLS-0$
-					expandContainer.style.display = "inline-block"; //$NON-NLS-0$
-					expandContainer.style.styleFloat = "left"; //$NON-NLS-0$
-					expandContainer.style.cssFloat = "left"; //$NON-NLS-0$
-					var expandImage = that.getExpandImage(tableRow, expandContainer);
-					horizontalBox.appendChild(expandContainer);
-					return expandImage;
-				}
-				
-				var detailsView, actionsArea, title;
+			case 0:
 				var model = explorer.model;
+				var td = document.createElement("td"); //$NON-NLS-0$
+
 				if (item.Type === "MoreCommits") { //$NON-NLS-1$ //$NON-NLS-0$
 					td.classList.add("gitCommitListMore"); //$NON-NLS-0$
 					var ref = model.simpleLog ? model.getTargetReference() : model.getActiveBranch();
@@ -795,7 +779,26 @@ define([
 						});
 					});
 					return td;
-				} else if (item.Type === "CommitChanges") { //$NON-NLS-0$
+				}
+
+				var sectionItem = document.createElement("div"); //$NON-NLS-0$
+				td.appendChild(sectionItem);
+				var horizontalBox = document.createElement("div"); //$NON-NLS-0$
+				horizontalBox.classList.add("gitListCell"); //$NON-NLS-0$
+				sectionItem.appendChild(horizontalBox);	
+				var that = this;
+				function createExpand() {
+					var expandContainer = document.createElement("div"); //$NON-NLS-0$
+					expandContainer.style.display = "inline-block"; //$NON-NLS-0$
+					expandContainer.style.styleFloat = "left"; //$NON-NLS-0$
+					expandContainer.style.cssFloat = "left"; //$NON-NLS-0$
+					var expandImage = that.getExpandImage(tableRow, expandContainer);
+					horizontalBox.appendChild(expandContainer);
+					return expandImage;
+				}
+				
+				var detailsView, actionsArea, title;
+				if (item.Type === "CommitChanges") { //$NON-NLS-0$
 					tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 					commit = item.parent;
 					var commitDetails = document.createElement("div"); //$NON-NLS-0$

@@ -259,25 +259,8 @@ define([
 			switch (col_no) {
 				case 0:
 					var commit, explorer = this.explorer;
-				
 					td = document.createElement("td"); //$NON-NLS-0$
-					div = document.createElement("div"); //$NON-NLS-0$
-					div.className = "sectionTableItem"; //$NON-NLS-0$
-					td.appendChild(div);
-					var horizontalBox = document.createElement("div"); //$NON-NLS-0$
-					horizontalBox.className = "gitListCell"; //$NON-NLS-0$
-					div.appendChild(horizontalBox);	
 					
-					var that = this;
-					function createExpand() {
-						var expandContainer = document.createElement("div"); //$NON-NLS-0$
-						expandContainer.style.display = "inline-block"; //$NON-NLS-0$
-						expandContainer.style.styleFloat = expandContainer.style.cssFloat = "left"; //$NON-NLS-0$
-						that.getExpandImage(tableRow, expandContainer);
-						horizontalBox.appendChild(expandContainer);
-					}
-					
-					var actionsID, title, description, subDescription, titleClass = "gitBranchTitle", titleLink; //$NON-NLS-0$
 					if (item.Type === "MoreBranches" || item.Type === "MoreTags") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						td.classList.add("gitCommitListMore"); //$NON-NLS-0$
 						var moreButton = document.createElement("button"); //$NON-NLS-0$
@@ -295,7 +278,26 @@ define([
 							});
 						});
 						return td;
-					} else if (item.Type === "NoContent") { //$NON-NLS-0$
+					}
+				
+					div = document.createElement("div"); //$NON-NLS-0$
+					div.className = "sectionTableItem"; //$NON-NLS-0$
+					td.appendChild(div);
+					var horizontalBox = document.createElement("div"); //$NON-NLS-0$
+					horizontalBox.className = "gitListCell"; //$NON-NLS-0$
+					div.appendChild(horizontalBox);	
+					
+					var that = this;
+					function createExpand() {
+						var expandContainer = document.createElement("div"); //$NON-NLS-0$
+						expandContainer.style.display = "inline-block"; //$NON-NLS-0$
+						expandContainer.style.styleFloat = expandContainer.style.cssFloat = "left"; //$NON-NLS-0$
+						that.getExpandImage(tableRow, expandContainer);
+						horizontalBox.appendChild(expandContainer);
+					}
+					
+					var actionsID, title, description, subDescription, titleClass = "gitBranchTitle", titleLink; //$NON-NLS-0$
+					if (item.Type === "NoContent") { //$NON-NLS-0$
 						title = messages[item.Type];
 						titleClass = "";
 					} else if (item.parent.Type === "LocalRoot") { //$NON-NLS-0$
