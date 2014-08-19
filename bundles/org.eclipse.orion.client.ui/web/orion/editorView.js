@@ -487,7 +487,8 @@ define([
 
 			var contextImpl = {};
 			var liveContextImpl = {};
-			[	
+			var msgService = serviceRegistry.getService("orion.page.message");
+			[
 				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-0$
 				"getSelection", "setSelection", //$NON-NLS-1$ //$NON-NLS-0$
 				"getText", "setText", //$NON-NLS-1$ //$NON-NLS-0$
@@ -501,6 +502,15 @@ define([
 			liveContextImpl["isDirty"] = editor.isDirty.bind(editor);
 			liveContextImpl.showMarkers = function(markers) {
 				serviceRegistry.getService("orion.core.marker")._setProblems(markers);
+			};
+			liveContextImpl.showProgressMessage = function (msg) {
+				msgService.setProgressMessage(msg);
+			};
+			liveContextImpl.showProgressResult = function (msg) {
+				msgService.setProgressResult(msg);
+			};
+			liveContextImpl.showProgressError = function (msg) {
+				msgService.setProgressResult({Severity: 'Error', Message: msg});
 			};
 			serviceRegistry.registerService("orion.edit.context", contextImpl, null); //$NON-NLS-0$
 			serviceRegistry.registerService("orion.edit.liveContext", liveContextImpl, null); //$NON-NLS-0$
