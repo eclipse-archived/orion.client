@@ -66,6 +66,7 @@ mBootstrap.startup().then(function(core) {
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.checkoutBranch", 200); //$NON-NLS-1$ //$NON-NLS-0$
 //	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.applyPatch", 300); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.git.deleteClone", 1000); //$NON-NLS-1$ //$NON-NLS-0$
+	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.fetchRemote", 500); //$NON-NLS-1$ //$NON-NLS-0$
 //	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.fetch", 500); //$NON-NLS-1$ //$NON-NLS-0$
 //	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.merge", 600); //$NON-NLS-1$ //$NON-NLS-0$
 //	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.mergeSquash", 700); //$NON-NLS-1$ //$NON-NLS-0$

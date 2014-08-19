@@ -177,6 +177,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 		redraw: function(item) {
 			var itemId = this._treeModel.getId(item);
 			var row = lib.node(itemId);
+			if (!row) return;
 			lib.empty(row);
 			this._generateRow(item, row, row._depth);
 		},

@@ -1007,6 +1007,28 @@ var exports = {};
 		});
 		commandService.addCommand(fetchCommand);
 
+		var fetchRemoteCommand = new mCommands.Command({
+			name: messages["Fetch"],
+			tooltip: messages["Fetch from the remote"],
+			imageClass: "git-sprite-fetch", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			id: "eclipse.orion.git.fetchRemote", //$NON-NLS-0$
+			callback: function(data) {
+				return fetchCallback(data, false).then(function() {
+					refresh(data);
+				});
+			},
+			visibleWhen: function(item) {
+				if (item.LocalBranch && item.RemoteBranch) {
+					item = item.RemoteBranch;
+				}
+				if (item.Type === "Remote") //$NON-NLS-0$
+					return true;
+				return false;
+			}
+		});
+		commandService.addCommand(fetchRemoteCommand);
+
 		var fetchForceCommand = new mCommands.Command({
 			name : messages["Force Fetch"],
 			imageClass: "git-sprite-fetch", //$NON-NLS-0$
