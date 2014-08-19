@@ -552,7 +552,7 @@ define([
 		var targetRef = explorer.model.getTargetReference();
 		if (activeBranch && targetRef) {
 			var targetName =  util.shortenRefName(targetRef);
-			title = activeBranch.Name + " \u2794 " + targetName;  //$NON-NLS-0$
+			title = activeBranch.Name + " => " + targetName;  //$NON-NLS-0$
 		} else {
 			title = util.shortenRefName(activeBranch || targetRef);
 		}
