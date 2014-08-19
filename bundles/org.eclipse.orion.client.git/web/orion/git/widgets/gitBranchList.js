@@ -84,10 +84,6 @@ define([
 					if (that.showTags) {
 						remotes.push({Type: "TagRoot", Name: messages["tags"]}); //$NON-NLS-0$
 					}
-					remotes.forEach(function(item) {
-						item.selectable = false;
-						item.isNotSelectable = true;
-					});
 					onComplete(that.processChildren(parentItem, remotes));
 					if (remotes.length === 0 && this.section){
 						this.section.setTitle(messages["No Remote Branches"]);

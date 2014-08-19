@@ -505,6 +505,14 @@ define([
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 			var selected = e.selection;
 			if (!selected || this.reference === selected) return;
+			switch (selected.Type) {
+				case "Branch": //$NON-NLS-0$
+				case "RemoteTrackingBranch": //$NON-NLS-0$
+				case "Tag": //$NON-NLS-0$
+					break;
+				default:
+					return;
+			}
 			this.commit = this.reference = this.log = this.logLocation = this.treePath = null;
 			this.setSelectedRef(selected);
 			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
