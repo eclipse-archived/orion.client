@@ -136,6 +136,10 @@
 	opacity: 1;
 }
 
+.commitFilter.sectionTable.sectionClosed {
+	visibility: hidden;
+}
+
 .commitFilter.sectionWrapper.sectionClosed:hover {
 	box-shadow: initial;
 }
@@ -156,6 +160,10 @@
 	top: -2px;
 	cursor: pointer;
 	outline: none;
+}
+
+.searchButton:hover {
+	color: #F58B0F;
 }
 
 .pathFilter.sectionTable.sectionOpened {
@@ -327,6 +335,17 @@ table .sectionTable {
 
 .gitCommitListSection {
 	background-color: #f4f4f4;
+}
+
+.gitListCell {
+	padding-top: 4px;
+	padding-bottom: 4px;
+	overflow: hidden;
+}
+
+.sectionTableItem {
+	padding-top: 2px;
+	padding-bottom: 2px;
 }
 
 .gitCommitListSectionTitle {

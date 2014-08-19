@@ -256,7 +256,7 @@ define([
 					div.className = "sectionTableItem"; //$NON-NLS-0$
 					td.appendChild(div);
 					var horizontalBox = document.createElement("div"); //$NON-NLS-0$
-					horizontalBox.style.overflow = "hidden"; //$NON-NLS-0$
+					horizontalBox.className = "gitListCell"; //$NON-NLS-0$
 					div.appendChild(horizontalBox);	
 					
 					var actionsID, title, description, subDescription, extraDescriptions = [], titleClass = "", titleLink;

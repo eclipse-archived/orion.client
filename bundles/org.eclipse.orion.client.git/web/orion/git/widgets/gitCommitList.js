@@ -423,6 +423,7 @@ define([
 		createFilter: function() {
 			if (!this.section) return;
 			var sections = [], mainSection;
+			var ignoreFocus = false;
 			var doFilter = function() {
 				sections.forEach(function(s) {
 					var prop = s.query + "Query"; //$NON-NLS-0$
@@ -454,15 +455,15 @@ define([
 				section.query = query;
 				section.searchBox.appendChild(filter);
 				filter.addEventListener("keydown", function(event){ //$NON-NLS-0$
-					if (event.keyCode === 13) {
+					if (event.keyCode === lib.KEY.ENTER) {
 						doFilter();
 						event.preventDefault();
 					}
-					if (event.keyCode === 27) {
+					if (event.keyCode === lib.KEY.ESCAPE) {
 						mainSection.setHidden(true);
 						event.preventDefault();
 					}
-					if (dropdown && event.keyCode === 9) {
+					if (dropdown && ((event.keyCode === lib.KEY.TAB && !event.shiftKey) || event.keyCode === lib.KEY.DOWN)) {
 						section.setHidden(false);
 					}
 				}.bind(this));
@@ -481,14 +482,24 @@ define([
 						section.setHidden(false);
 					});
 				}
+				filter.addEventListener("blur", function(e){ //$NON-NLS-0$
+					if (!lib.contains(parent, e.relatedTarget)) {
+						ignoreFocus = true;
+						mainSection.setHidden(true);
+						ignoreFocus = false;
+					}
+				});
 				return section;
 			}.bind(this);
 			var content = this.section.getContentElement();
 			var messageSection = mainSection = createSection(content, content.firstChild, messages["Message:"], "filter", true, true, true, true); //$NON-NLS-0$
 			messageSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			messageSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
+			messageSection.domNode.tabIndex = -1;
 			messageSection.addEventListener("toggle", function(event){ //$NON-NLS-0$
-				lib.$(".gitFilterInput", mainSection.domNode).focus(); //$NON-NLS-0$
+				if (!ignoreFocus) {
+					lib.$(".gitFilterInput", mainSection.domNode).focus(); //$NON-NLS-0$
+				}
 				if (event.isExpanded) {
 					sections.forEach(function(s) {
 						var field = lib.$(".gitFilterInput", s.domNode); //$NON-NLS-0$
@@ -549,13 +560,20 @@ define([
 				}
 			}.bind(this));
 			pathSection.getContentElement().addEventListener("keydown", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
-				if (event.keyCode === 13) {
+				if (event.keyCode === lib.KEY.ENTER) {
 					doFilter();
 					event.preventDefault();
 				}
-				if (event.keyCode === 27) {
+				if (event.keyCode === lib.KEY.ESCAPE) {
 					mainSection.setHidden(true);
 					event.preventDefault();
+				}
+			});
+			pathSection.getContentElement().addEventListener("blur", function(e){ //$NON-NLS-0$
+				if (!lib.contains(mainSection.getContentElement(), e.relatedTarget)) {
+					ignoreFocus = true;
+					mainSection.setHidden(true);
+					ignoreFocus = false;
 				}
 			});
 			selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
@@ -744,7 +762,7 @@ define([
 				var sectionItem = document.createElement("div"); //$NON-NLS-0$
 				td.appendChild(sectionItem);
 				var horizontalBox = document.createElement("div"); //$NON-NLS-0$
-				horizontalBox.style.overflow = "hidden"; //$NON-NLS-0$
+				horizontalBox.classList.add("gitListCell"); //$NON-NLS-0$
 				sectionItem.appendChild(horizontalBox);	
 				var that = this;
 				function createExpand() {
@@ -762,11 +780,14 @@ define([
 				if (item.Type === "MoreCommits") { //$NON-NLS-1$ //$NON-NLS-0$
 					td.classList.add("gitCommitListMore"); //$NON-NLS-0$
 					var ref = model.simpleLog ? model.getTargetReference() : model.getActiveBranch();
-					td.textContent = i18nUtil.formatMessage(messages[item.Type], ref ? ref.Name : model.root.Name);
+					var moreButton = document.createElement("button"); //$NON-NLS-0$
+					moreButton.className = "commandButton"; //$NON-NLS-0$
+					moreButton.textContent = i18nUtil.formatMessage(messages[item.Type], ref ? ref.Name : model.root.Name);
+					td.appendChild(moreButton);
 					var listener;
-					td.addEventListener("click", listener = function() { //$NON-NLS-0$
-						td.removeEventListener("click", listener); //$NON-NLS-0$
-						td.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], ref ? ref.Name : model.root.Name);
+					moreButton.addEventListener("click", listener = function() { //$NON-NLS-0$
+						moreButton.removeEventListener("click", listener); //$NON-NLS-0$
+						moreButton.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], ref ? ref.Name : model.root.Name);
 						item.parent.location = item.NextLocation;
 						item.parent.more = true;
 						explorer.changedItem(item.parent).then(function() {

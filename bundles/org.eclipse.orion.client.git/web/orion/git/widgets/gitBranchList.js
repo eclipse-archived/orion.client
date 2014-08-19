@@ -269,7 +269,7 @@ define([
 					div.className = "sectionTableItem"; //$NON-NLS-0$
 					td.appendChild(div);
 					var horizontalBox = document.createElement("div"); //$NON-NLS-0$
-					horizontalBox.style.overflow = "hidden"; //$NON-NLS-0$
+					horizontalBox.className = "gitListCell"; //$NON-NLS-0$
 					div.appendChild(horizontalBox);	
 					
 					var that = this;
@@ -284,11 +284,14 @@ define([
 					var actionsID, title, description, subDescription, titleClass = "gitBranchTitle", titleLink; //$NON-NLS-0$
 					if (item.Type === "MoreBranches" || item.Type === "MoreTags") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						td.classList.add("gitCommitListMore"); //$NON-NLS-0$
-						td.textContent = i18nUtil.formatMessage(messages[item.Type], item.parent.Name);
+						var moreButton = document.createElement("button"); //$NON-NLS-0$
+						moreButton.className = "commandButton"; //$NON-NLS-0$
+						moreButton.textContent = i18nUtil.formatMessage(messages[item.Type], item.parent.Name);
+						td.appendChild(moreButton);
 						var listener;
-						td.addEventListener("click", listener = function() { //$NON-NLS-0$
-							td.removeEventListener("click", listener); //$NON-NLS-0$
-							td.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], item.parent.Name);
+						moreButton.addEventListener("click", listener = function() { //$NON-NLS-0$
+							moreButton.removeEventListener("click", listener); //$NON-NLS-0$
+							moreButton.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], item.parent.Name);
 							item.parent.location = item.NextLocation;
 							item.parent.more = true;
 							explorer.changedItem(item.parent).then(function() {
