@@ -437,6 +437,21 @@ define([
 				mainSection.setHidden(true);
 				this.changedItem();
 			}.bind(this);
+			var blurHandler = function(e) {
+				var relatedTarget = e.relatedTarget || e.toElement;
+				function check(focus) {
+					if (!(lib.contains(mainSection.domNode, focus) || lib.contains(mainSection.getContentElement(), focus))) {
+						ignoreFocus = true;
+						mainSection.setHidden(true);
+						ignoreFocus = false;
+					}
+				}
+				if (relatedTarget) {
+					check(relatedTarget);
+				} else {
+					setTimeout(function () { check(document.activeElement); }, 0);
+				}
+			};
 			var createSection = function (parent, sibling, title, query, canHide, dropdown, noTwistie, expandOnFocus) {
 				var section = new mSection.Section(parent, {
 					id: title + "commitFilterSection", //$NON-NLS-0$
@@ -482,13 +497,7 @@ define([
 						section.setHidden(false);
 					});
 				}
-				filter.addEventListener("blur", function(e){ //$NON-NLS-0$
-					if (!lib.contains(parent, e.relatedTarget)) {
-						ignoreFocus = true;
-						mainSection.setHidden(true);
-						ignoreFocus = false;
-					}
-				});
+				filter.addEventListener("blur", blurHandler); //$NON-NLS-0$
 				return section;
 			}.bind(this);
 			var content = this.section.getContentElement();
@@ -569,13 +578,7 @@ define([
 					event.preventDefault();
 				}
 			});
-			pathSection.getContentElement().addEventListener("blur", function(e){ //$NON-NLS-0$
-				if (!lib.contains(mainSection.getContentElement(), e.relatedTarget)) {
-					ignoreFocus = true;
-					mainSection.setHidden(true);
-					ignoreFocus = false;
-				}
-			});
+			pathSection.getContentElement().addEventListener("blur", blurHandler); //$NON-NLS-0$
 			selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 				var selected = e.selection;
 				if (!selected || this.treePath === selected) return;
