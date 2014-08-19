@@ -288,10 +288,6 @@ table .sectionTable {
 	overflow: hidden;
 }
 
-#commitSectionContent {
-	padding: 10px;
-}
-
 .primaryButton {
 	background-color: #7fa4c0 !important;
 	color: white !important;
@@ -391,18 +387,6 @@ table .sectionTable {
 
 .gitCommitSection {
 	padding-top: 15px;
-}
-
-.sectionClosed .sectionActions {
-	display: none;
-}
-
-.mainToolbar .sectionActions {
-	display: none;
-}
-
-.sectionClosed:hover .sectionActions {
-	display: none;
 }
 
 .gitCommitTag {

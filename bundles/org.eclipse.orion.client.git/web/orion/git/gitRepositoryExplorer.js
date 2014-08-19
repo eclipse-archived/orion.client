@@ -632,7 +632,7 @@ define([
 			title: messages["ChangedFiles"],
 			slideout: true,
 			content: '<div id="statusNode"></div>', //$NON-NLS-0$
-			canHide: false,
+			canHide: true,
 			noTwistie: NO_TWISTIES,
 			preferenceService: this.preferencesService
 		});
@@ -746,7 +746,7 @@ define([
 			id: "workingDirSection", //$NON-NLS-0$
 			title: messages['LocalChangesDetails'], //$NON-NLS-0$
 			slideout: true,
-			canHide: false,
+			canHide: true,
 			sibling: this.statusSection ? this.statusSection.domNode : null,
 			preferenceService: this.preferencesService
 		});
@@ -776,8 +776,9 @@ define([
 		var section = this.commitSection = new mSection.Section(parent, {
 			id: "commitSection", //$NON-NLS-0$
 			title: messages['Commit Details'], //$NON-NLS-0$
+			content : '<div id="commitNode" class="sectionTableItem"></div>', //$NON-NLS-0$
 			slideout: true,
-			canHide: false,
+			canHide: true,
 			preferenceService: this.preferencesService
 		});
 
@@ -794,7 +795,7 @@ define([
 		commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, commit, this, "button"); //$NON-NLS-0$	
 
 		var info = new mGitCommitInfo.GitCommitInfo({
-			parent: section.getContentElement(),
+			parent: lib.node("commitNode"), //$NON-NLS-0$
 			tagsCommandHandler: this,
 			commit: commit,
 			showTags: true,
@@ -824,7 +825,7 @@ define([
 		var section = this.diffsSection = new mSection.Section(parent, { id : "diffSection", //$NON-NLS-0$
 			title : messages["ChangedFiles"],
 			content : '<div id="diffNode"></div>', //$NON-NLS-0$
-			canHide : false,
+			canHide : true,
 			preferencesService : this.preferencesService
 		});
 		
