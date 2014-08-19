@@ -400,6 +400,7 @@ define([
 				command.onClick = onClick;
 				element.addEventListener("click", function(e) { //$NON-NLS-0$
 					onClick.call(commandInvocation.handler, commandInvocation);
+					lib.stop(e);
 				}, false);
 			}
 		}
