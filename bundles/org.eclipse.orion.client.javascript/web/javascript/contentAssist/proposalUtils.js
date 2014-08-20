@@ -15,6 +15,59 @@
 define(function() {
 
 	return {
+	    
+	    /**
+    	 * @name getPrefix
+    	 * @description computes the pprefix to use during content assist, performs special computation for jsdoc and
+    	 * block comments that allow chars normal JS does not
+    	 * @function
+    	 * @param {String} buffer
+    	 * @param {Number} offset
+    	 * @param {Object} context
+    	 * @param {String} kind
+    	 * @returns {String} The prefix to use
+    	 */
+    	getPrefix: function getPrefix(buffer, offset, context, kind) {
+		    var prefix = context.prefix;
+		    if(typeof prefix === 'string' && typeof context.line === 'string') {
+		        switch(kind) {
+		            case 'doc':
+		            case 'jsdoc': {
+		                var index = context.offset-1;
+		                var word = '', char = buffer.charAt(index);
+		                //do an initial check before looping + regex'ing
+		                if(char === '{') {
+        		            return null;
+        		        }
+        		        if(char === '*') {
+    		                return word;
+    		            }
+    		            if(char === '@') {
+        		            return '@';
+        		        }
+		                while(index >= 0 && /\S/.test(char)) {
+		                    word = char+word;
+		                    if(char === '@') {
+		                        //we want the prefix to include the '@'
+            		            return word;
+            		        }
+		                    index--;
+		                    char = buffer.charAt(index);
+		                    if(char === '*') {
+		                        // we don't want the prefix to include the '*'
+        		                return word;
+        		            }
+        		            if(char === '{') {
+        		                return null;
+        		            }
+		                }
+                        return word;        		        
+		            }
+		        }
+		    }
+		    return prefix;
+		},
+	    
 		/**
 		 * @description Match ignoring case and checking camel case.
 		 * @function

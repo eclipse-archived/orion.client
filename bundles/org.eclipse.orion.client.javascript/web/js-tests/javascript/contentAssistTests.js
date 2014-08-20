@@ -5370,5 +5370,143 @@ define([
 			var results = computeContentAssist("/** es", "es", 6);
 			testProposals(results, []);
 		});
+		
+		/**
+		 * Tests that eslint* templates will be proposed further in comment with no content beforehand
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint* template 6", function() {
+			var results = computeContentAssist("/* \n\n es", "es", 10);
+			testProposals(results, [
+			     ['lint', 'eslint', 'ESLint rule enable / disable directive'],
+			     ['lint-disable', 'eslint-disable', 'ESLint rule disablement directive'],
+			     ['lint-enable', 'eslint-enable', 'ESLint rule enablement directive'],
+			     ['lint-env', 'eslint-env', 'ESLint environment directive']
+			     ]);
+		});
+		
+		/**
+		 * Tests that no eslint* templates are in comments after other content
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint* template 7", function() {
+			var results = computeContentAssist("/* foo \n\n es", "es", 10);
+			testProposals(results, []);
+		});
+		
+		/**
+		 * Tests that no eslint* templates are proposed when there is already one
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint* template 8", function() {
+			var results = computeContentAssist("/* eslint ", "es", 10);
+			assertNoProposal('eslint', results);
+			assertNoProposal('eslint-env', results);
+		});
+		
+		/**
+		 * Tests that no eslint* templates are proposed when there is already one
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint* template 9", function() {
+			var results = computeContentAssist("/* eslint ", "eslint", 9);
+            testProposals(results, [
+			     ['lint', 'eslint', 'ESLint rule enable / disable directive'],
+			     ['lint-disable', 'eslint-disable', 'ESLint rule disablement directive'],
+			     ['lint-enable', 'eslint-enable', 'ESLint rule enablement directive'],
+			     ['lint-env', 'eslint-env', 'ESLint environment directive']
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint-env environs are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint-env proposals 1", function() {
+			var results = computeContentAssist("/* eslint-env ", "", 14);
+			testProposals(results, [
+			     ['amd', 'amd', 'ESLint environment name'],
+			     ['browser', 'browser', 'ESLint environment name'],
+			     ['mocha', 'mocha', 'ESLint environment name'],
+			     ['node', 'node', 'ESLint environment name']
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint-env environs are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint-env proposals 2", function() {
+			var results = computeContentAssist("/* eslint-env a", "a", 15);
+			testProposals(results, [
+			     ['md', 'amd', 'ESLint environment name'],
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint rules are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint rule proposals 1", function() {
+			var results = computeContentAssist("/* eslint c", "c", 11);
+			testProposals(results, [
+			     ['urly', 'curly', 'ESLint rule name']
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint rules are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint rule proposals 2", function() {
+			var results = computeContentAssist("/* eslint no-js", "no-js", 15);
+			testProposals(results, [
+			     ['lint', 'no-jslint', 'ESLint rule name'],
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint rules are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint rule proposals 3", function() {
+			var results = computeContentAssist("/* eslint-enable no-js", "no-js", 22);
+			testProposals(results, [
+			     ['lint', 'no-jslint', 'ESLint rule name'],
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint rules are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint rule proposals 4", function() {
+			var results = computeContentAssist("/* eslint-disable no-js", "no-js", 23);
+			testProposals(results, [
+			     ['lint', 'no-jslint', 'ESLint rule name'],
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint rules are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint rule proposals 5", function() {
+			var results = computeContentAssist("/* eslint-enable no-jslint, c", "c", 29);
+			testProposals(results, [
+			     ['urly', 'curly', 'ESLint rule name']
+			     ]);
+		});
 	});
 });
