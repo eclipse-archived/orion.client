@@ -252,8 +252,9 @@ define([
 			var commandRegistry = this.commandService;
 			var actionsNodeScope = this.sectionActionScodeId || section.actionsNode.id;
 			if (this.simgleRepository) {
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.pull", 200); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 300); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.popStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 200); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.pull", 300); //$NON-NLS-1$ //$NON-NLS-0$
 //				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.git.deleteClone", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
 				commandRegistry.addCommandGroup(actionsNodeScope, "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$

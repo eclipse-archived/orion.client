@@ -62,7 +62,7 @@ mBootstrap.startup().then(function(core) {
 //	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.pull", 200); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.applyStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.dropStash", 200); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.popStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
+//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.popStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.removeBranch", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.removeRemoteBranch", 1000); //$NON-NLS-1$ //$NON-NLS-0$
