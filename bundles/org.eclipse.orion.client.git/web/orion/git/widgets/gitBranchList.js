@@ -29,6 +29,7 @@ define([
 		this.root = options.root;
 		this.showHistory = options.showHistory === undefined || options.showHistory;
 		this.showTags = options.showTags === undefined || options.showTags;
+		this.showStashes = options.showStashes === undefined || options.showStashes;
 		this.registry = options.registry;
 		this.handleError = options.handleError;
 		this.section = options.section;
@@ -62,6 +63,17 @@ define([
 					if (progress) progress.done();
 					that.handleError(error);
 				});
+			} else if (parentItem.Type === "StashRoot") { //$NON-NLS-0$
+				progress = this.section && !parentItem.parent  ? this.section.createProgressMonitor() : null;
+				msg = messages["Getting stashed changes..."];
+				if (progress) progress.begin(msg);
+				return that.progressService.progress(that.gitClient.doStashList(parentItem.location ? parentItem.location : repository.StashLocation + util.generateQuery([pageQuery, that.filterQuery])), msg).then(function(resp) {
+					if (progress) progress.done();
+					var children = resp.Children || resp;
+					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, resp, "MoreStashes"))); //$NON-NLS-0$
+				}, function(error){
+					that.handleError(error);
+				});
 			} else if (parentItem.Type === "TagRoot") { //$NON-NLS-0$
 				progress = this.section && !parentItem.parent  ? this.section.createProgressMonitor() : null;
 				msg = i18nUtil.formatMessage(messages["Getting remote branches"], repository.Name);
@@ -85,9 +97,9 @@ define([
 					if (that.showTags) {
 						remotes.push({Type: "TagRoot", Name: messages["tags"]}); //$NON-NLS-0$
 					}
-					
-					remotes.push({Type: "StashesRoot", Name: messages["stashes"]});
-					
+					if (that.showStashes) {
+						remotes.push({Type: "StashRoot", Name: messages["stashes"]}); //$NON-NLS-0$
+					}
 					onComplete(that.processChildren(parentItem, remotes));
 				}, function(error){
 					if (progress) progress.done();
@@ -104,10 +116,8 @@ define([
 					if (progress) progress.done();
 					that.handleError(error);
 				});
-			} else if (this.showHistory && (parentItem.Type === "Branch" || parentItem.Type === "RemoteTrackingBranch" || parentItem.Type === "Tag")) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			} else if (this.showHistory && (parentItem.Type === "Branch" || parentItem.Type === "RemoteTrackingBranch" || parentItem.Type === "Tag" || parentItem.Type === "StashCommit")) { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				onComplete(that.processChildren(parentItem, [{Type: "CommitList"}]));  //$NON-NLS-0$
-			} else if (parentItem.Type === "StashesRoot") { //$NON-NLS-0$
-				onComplete(that.processChildren(parentItem, [{Type: "StashList"}]));
 			} else {
 				onComplete([]);
 			}
@@ -314,9 +324,13 @@ define([
 //						description = util.trimCommitMessage(commit.Message);
 //						subDescription = i18nUtil.formatMessage(messages["authored by 0 (1) on 2"], commit.AuthorName, commit.AuthorEmail, new Date(commit.Time).toLocaleString()); //$NON-NLS-0$
 						actionsID = "tagActionsArea"; //$NON-NLS-0$
+					} else if (item.parent.Type === "StashRoot") { //$NON-NLS-0$
+						if (explorer.showHistory) createExpand();
+						commit = item;
+						title = i18nUtil.formatMessage(messages["stashIndex"], item.parent.children.indexOf(item), item.Message); //$NON-NLS-0$
 					} else if (item.parent.Type === "RemoteRoot") { //$NON-NLS-0$
 						createExpand();
-						if (item.Type !== "TagRoot" && item.Type !== "StashesRoot") { //$NON-NLS-0$
+						if (item.Type !== "TagRoot" && item.Type !== "StashRoot") { //$NON-NLS-1$ //$NON-NLS-0$
 							description = item.GitUrl || item.Description || item.parent.repository.ContentLocation;
 						}
 						actionsID = "remoteActionsArea"; //$NON-NLS-0$
@@ -345,46 +359,7 @@ define([
 								progressService: explorer.progressService,
 								statusService: explorer.statusService,
 								parentId: horizontalBox,
-								location: item.parent.CommitLocation + "?page=1&pageSize=10", //$NON-NLS-0$
-								simpleLog: true,
-								handleError: explorer.handleError,
-								root: {
-									Type: "CommitRoot", //$NON-NLS-0$
-									repository: explorer.model.root.repository,
-									Name: item.parent.Name
-								}
-							});
-						
-							commitListExplorer.display().then(function() {
-								horizontalBox.classList.add("gitCommitListLoaded"); //$NON-NLS-0$
-								that.updateExpandVisuals(parentRow, true);
-							}, function() {
-								that.updateExpandVisuals(parentRow, true);
-							});
-						}, 0);
-						return td;
-					} else if (item.Type === "StashList") { //$NON-NLS-0$
-						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
-					
-						setTimeout(function() {
-							var parentRow = lib.node(explorer.model.getId(item.parent));
-							that.updateExpandVisuals(parentRow, "progress"); //$NON-NLS-0$
-							
-							var loading = document.createElement("div"); //$NON-NLS-0$
-							loading.textContent = messages["Loading..."];
-							loading.className = "gitLoading"; //$NON-NLS-0$
-							horizontalBox.appendChild(loading);
-
-							horizontalBox.id = "commitListContent" + item.parent.Name; //$NON-NLS-0$
-							var commitListExplorer = new mGitCommitList.GitCommitListExplorer({
-								serviceRegistry: explorer.registry,
-								commandRegistry: explorer.commandService,
-								fileClient: explorer.fileClient,
-								gitClient: explorer.gitClient,
-								progressService: explorer.progressService,
-								statusService: explorer.statusService,
-								parentId: horizontalBox,
-								location: explorer.model.root.repository.StashLocation + "?page=1&pageSize=10", //$NON-NLS-0$
+								location: (item.parent.CommitLocation || item.parent.Location) + "?page=1&pageSize=10", //$NON-NLS-0$
 								simpleLog: true,
 								handleError: explorer.handleError,
 								root: {

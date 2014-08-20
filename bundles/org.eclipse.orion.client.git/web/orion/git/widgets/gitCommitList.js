@@ -115,16 +115,6 @@ define([
 				return that.incomingCommits = resp.Children;
 			});
 		},
-		_getStash: function() {
-			var that = this;
-			var repository = this.root.repository;
-			var stashLocation =  this.stashLocation || repository.StashLocation + pageSizeQuery;
-			return that.progressService.progress(that.gitClient.doStashList(stashLocation), messages["Getting stashed changes..."]).then(function(resp) {
-				return that.stashedChanges = resp;
-			}, function(error){
-				that.handleError(error);
-			});
-		}, 
 		getActiveBranch: function() {
 			return this.currentBranch;
 		},
@@ -242,13 +232,7 @@ define([
 									Type: "Synchronized", //$NON-NLS-0$
 									selectable: false,
 									isNotSelectable: true,
-								}/*,
-								{
-									TODO: Remove stash references when the view gets stabilized
-									Type: "Stash" //$NON-NLS-0$
-									selectable: false,
-									isNotSelectable: true,
-								}*/
+								}
 							]));
 						}	
 					}, function(error){
@@ -329,11 +313,6 @@ define([
 				} else {
 					onComplete(that.processChildren(parentItem, []));
 				}
-			} else if (parentItem.Type === "Stash") { //$NON-NLS-0$
-				return Deferred.when(that.stashedChanges || that._getStash(), function(stash) {
-					var children = stash.Children;
-					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, stash, "MoreStashCommits"))); //$NON-NLS-0$
-				});
 			} else if ((parentItem.Type === "Commit" || parentItem.Type === "StashCommit")  && that.showCommitChanges) { //$NON-NLS-1$ //$NON-NLS-0$
 				onComplete(that.processChildren(parentItem, [{Type: "CommitChanges"}]));  //$NON-NLS-0$
 			} else {
@@ -398,7 +377,6 @@ define([
 		this.incomingActionScope = "IncomingActions"; //$NON-NLS-0$
 		this.outgoingActionScope = "OutgoingActions"; //$NON-NLS-0$
 		this.syncActionScope = "SynchronizedActions"; //$NON-NLS-0$
-		this.stashActionScope = "StashActions"; //$NON-NLS-0$
 
 		if (this.selection) {
 			this.selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
@@ -423,7 +401,6 @@ define([
 				model.incomingCommits = model.outgoingCommits = null;
 			}
 			model.log = null;
-			model.stashedChanges = null;
 			model.logDeferred = new Deferred();
 			if (item.more) {
 			} else {
@@ -725,7 +702,6 @@ define([
 			if (currentBranch && !this.simpleLog) {
 				var incomingActionScope = this.incomingActionScope;
 				var outgoingActionScope = this.outgoingActionScope;
-				var stashActionScope = this.stashActionScope;
 				
 				if (lib.node(actionsNodeScope)) {
 					commandService.destroy(actionsNodeScope);
@@ -783,21 +759,17 @@ define([
 				var model = explorer.model;
 				var td = document.createElement("td"); //$NON-NLS-0$
 
-				if (item.Type === "MoreCommits" || item.Type === "MoreStashCommits") { //$NON-NLS-1$ //$NON-NLS-0$
+				if (item.Type === "MoreCommits") { //$NON-NLS-1$ //$NON-NLS-0$
 					td.classList.add("gitCommitListMore"); //$NON-NLS-0$
 					var ref = model.simpleLog ? model.getTargetReference() : model.getActiveBranch();
 					var moreButton = document.createElement("button"); //$NON-NLS-0$
 					moreButton.className = "commandButton"; //$NON-NLS-0$
-					moreButton.textContent = item.Type === "MoreStashCommits" ? //$NON-NLS-0$
-						messages["MoreStashCommits"] :
-						i18nUtil.formatMessage(messages[item.Type], ref ? ref.Name : model.root.Name);
+					moreButton.textContent = i18nUtil.formatMessage(messages[item.Type], ref ? ref.Name : model.root.Name);
 					td.appendChild(moreButton);
 					var listener;
 					moreButton.addEventListener("click", listener = function() { //$NON-NLS-0$
 						moreButton.removeEventListener("click", listener); //$NON-NLS-0$
-						moreButton.textContent = item.Type === "MoreStashCommits" ? //$NON-NLS-0$
-							messages["MoreStashCommitsProgress"] :
-							i18nUtil.formatMessage(messages[item.Type + "Progress"], ref ? ref.Name : model.root.Name);
+						moreButton.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], ref ? ref.Name : model.root.Name);
 						item.parent.location = item.NextLocation;
 						item.parent.more = true;
 						explorer.changedItem(item.parent).then(function() {

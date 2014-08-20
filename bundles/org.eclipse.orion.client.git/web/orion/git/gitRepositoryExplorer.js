@@ -517,6 +517,7 @@ define([
 				case "Branch": //$NON-NLS-0$
 				case "RemoteTrackingBranch": //$NON-NLS-0$
 				case "Tag": //$NON-NLS-0$
+				case "StashCommit": //$NON-NLS-0$
 					break;
 				default:
 					return;

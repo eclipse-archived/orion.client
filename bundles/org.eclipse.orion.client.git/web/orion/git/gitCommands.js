@@ -2973,6 +2973,7 @@ var exports = {};
 		
 		var dropStashCommand = new mCommands.Command({
 			name : messages["Drop"],
+			imageClass: "core-sprite-delete", //$NON-NLS-0$
 			tooltip : messages["Drop the commit from the stash list"],
 			id : "eclipse.orion.git.dropStash",
 			callback : function(data){

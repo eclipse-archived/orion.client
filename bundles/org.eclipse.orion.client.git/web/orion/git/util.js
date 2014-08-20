@@ -15,8 +15,9 @@
  */
 define([
 	'i18n!git/nls/gitmessages',
+	'orion/i18nUtil',
 	"orion/URL-shim"
-], function(messages) {
+], function(messages, i18nUtil) {
 
 	var interestedUnstagedGroup = ["Missing", "Modified", "Untracked", "Conflicting"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var interestedStagedGroup = ["Added", "Changed", "Removed"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -136,6 +137,9 @@ define([
 	
 	function shortenRefName(ref) {
 		var refName = ref.Name;
+		if (ref.Type === "StashCommit") { //$NON-NLS-0$
+			refName = i18nUtil.formatMessage(messages["stashIndex"], ref.parent.children.indexOf(ref), refName.substring(0, 6)); //$NON-NLS-0$
+		}
 		if (ref.Type === "Commit") { //$NON-NLS-0$
 			refName = refName.substring(0, 6);
 		}
