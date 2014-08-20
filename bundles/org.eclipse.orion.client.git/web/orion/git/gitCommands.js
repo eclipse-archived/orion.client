@@ -2883,7 +2883,14 @@ var exports = {};
 	
 	exports.createSharedCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
 		
-		var refresh = function() { explorer.changedItem(); }; //used both as confirm and remotePrompter dialogs callback
+		//used both as confirm and remotePrompter dialogs callback
+		var refresh = function(data) { 
+			if (data && data.handler.changedItem) {
+				data.handler.changedItem();
+			} else { 
+				explorer.changedItem(); 
+			}
+		};
 		
 		var pushOptions = {
 			serviceRegistry : serviceRegistry,
@@ -2978,7 +2985,7 @@ var exports = {};
 			id : "eclipse.orion.git.dropStash",
 			callback : function(data){
 				stashLogic.drop(data).then(function(resp){
-					refresh();
+					refresh(data);
 				}, function(error){
 					displayErrorOnStatus(error);
 				});
