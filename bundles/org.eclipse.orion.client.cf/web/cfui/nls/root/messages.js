@@ -16,5 +16,16 @@ define({
 	'API URL':'API URL:',
 	'Manage URL':'Manage URL:',
 	'Settings':'Settings',
-	'Cloud':'Cloud'
+	'Cloud':'Cloud',
+	'deploy.chooseSpace':'Choose Space To Deploy',
+	'deploy.gettingSpaces':'Getting spaces...',
+	'deploy.deploying':'Deploying...',
+	'deploy.org':'Organization:',
+	'deploy.setUpYourCloud':'Set up your Cloud. Go to [Settings](${0}).',
+	'deploy.user':'User:',
+	'deploy.password':'Password:',
+	'deploy.enterCredentials':'Please enter your Cloud credentials below to authorize deployment.',
+	'deploy.noSpaces':'No spaces found in this organization.',
+	/* ${0} is the CF space, ${1} is the CF organization */
+	'deploy.spaceOrg':'${0} (${1})'
 });
