@@ -201,6 +201,7 @@ define([
 			return deferred;
 		},
 		display: function() {
+			var that = this;
 			var deferred = new Deferred();
 			var model = new GitRepoListModel({
 				root: {Type: "RepoRoot"}, //$NON-NLS-0$
@@ -219,10 +220,10 @@ define([
 				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy,
 				onComplete: function() {
+					that.updateCommands();
 					deferred.resolve();
 				}
 			});
-			this.updateCommands();
 			return deferred;
 		},
 		isRowSelectable: function() {
@@ -245,7 +246,7 @@ define([
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.openCommitCommand", 1000, "eclipse.gitGroup", true,  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					new KeyBinding.KeyBinding('h', true, true), new mCommandRegistry.URLBinding("openGitCommit", "commitName")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
-			commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.repositories[0], this, "button"); //$NON-NLS-0$
+			commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.model.repositories[0], this, "button"); //$NON-NLS-0$
 		}
 	});
 	

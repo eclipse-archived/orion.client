@@ -300,10 +300,12 @@ define([
 				}
 			}
 		}
-		this.destroy();
 		this.repository = repository;
 		this.initTitleBar(repository || {});
-		this.displayRepositories(this.repositories, ""); //$NON-NLS-0$
+		if (repository) {
+			this.repositoriesNavigator.select(this.repository);
+			this.repositoriesSection.setTitle(repository.Name);
+		}
 		if (repository) {
 			this.displayBranches(repository); 
 			this.setSelectedRef(this.reference);
@@ -353,8 +355,8 @@ define([
 			});
 		}
 		this.repositoriesLocation = location;
-		this.progressService.progress(this.gitClient.getGitClone(location), messages["Getting git repository details"]).then(function(resp){
-			that.repositories = resp.Children || [];
+		this.destroy();
+		this.displayRepositories(location, "").then(function() {
 			if (resource) {
 				that.progressService.progress(that.gitClient.getGitClone(resource), messages["Getting git repository details"]).then(function(selection){
 					var repository;
@@ -439,7 +441,7 @@ define([
 		return label;
 	};
 	
-	GitRepositoryExplorer.prototype.displayRepositories = function(repositories, mode, links) {
+	GitRepositoryExplorer.prototype.displayRepositories = function(location, mode, links) {
 		this.destroyRepositories();
 		var parent = lib.node('pageToolbar'); //$NON-NLS-0$
 		
@@ -447,7 +449,7 @@ define([
 		
 		var section = this.repositoriesSection = new mSection.Section(parent, {
 			id: "repoSection", //$NON-NLS-0$
-			title: this.repository ? this.repository.Name : messages["Repo"],
+			title: messages["Repo"],
 			iconClass: ["gitImageSprite", "git-sprite-repository"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="repositoryNode" class="repoDropdownList"></div><div id="dropdownRepositoryActionsNode" class="sectionDropdownActions"></div>', //$NON-NLS-0$
@@ -476,18 +478,14 @@ define([
 			actionScopeId: this.actionScopeId,
 			sectionActionScodeId: "dropdownRepositoryActionsNode", //$NON-NLS-0$
 			handleError: this.handleError.bind(this),
-			location: this.repositoriesLocation,
+			location: location || this.repositoriesLocation,
 			section: section,
 			selection: selection,
 			selectionPolicy: "singleSelection", //$NON-NLS-0$
-			repositories: repositories,
 			mode: mode,
 			showLinks: links,
 		});
 		return explorer.display().then(function() {
-			if (this.repository) {
-				explorer.select(this.repository);
-			}
 			this.loadingDeferred.resolve();
 		}.bind(this), this.loadingDeferred.reject);
 	};
