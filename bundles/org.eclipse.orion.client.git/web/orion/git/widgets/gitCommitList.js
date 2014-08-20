@@ -115,6 +115,16 @@ define([
 				return that.incomingCommits = resp.Children;
 			});
 		},
+		_getStash: function() {
+			var that = this;
+			var repository = this.root.repository;
+			var stashLocation =  this.stashLocation || repository.StashLocation + pageSizeQuery;
+			return that.progressService.progress(that.gitClient.doStashList(stashLocation), messages["Getting stashed changes..."]).then(function(resp) {
+				return that.stashedChanges = resp;
+			}, function(error){
+				that.handleError(error);
+			});
+		}, 
 		getActiveBranch: function() {
 			return this.currentBranch;
 		},
@@ -232,7 +242,13 @@ define([
 									Type: "Synchronized", //$NON-NLS-0$
 									selectable: false,
 									isNotSelectable: true,
-								}
+								}/*,
+								{
+									TODO: Remove stash references when the view gets stabilized
+									Type: "Stash" //$NON-NLS-0$
+									selectable: false,
+									isNotSelectable: true,
+								}*/
 							]));
 						}	
 					}, function(error){
@@ -313,7 +329,12 @@ define([
 				} else {
 					onComplete(that.processChildren(parentItem, []));
 				}
-			} else if (parentItem.Type === "Commit" && that.showCommitChanges) {  //$NON-NLS-0$
+			} else if (parentItem.Type === "Stash") { //$NON-NLS-0$
+				return Deferred.when(that.stashedChanges || that._getStash(), function(stash) {
+					var children = stash.Children;
+					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, stash, "MoreStashCommits"))); //$NON-NLS-0$
+				});
+			} else if ((parentItem.Type === "Commit" || parentItem.Type === "StashCommit")  && that.showCommitChanges) { //$NON-NLS-1$ //$NON-NLS-0$
 				onComplete(that.processChildren(parentItem, [{Type: "CommitChanges"}]));  //$NON-NLS-0$
 			} else {
 				onComplete([]);
@@ -322,7 +343,9 @@ define([
 		getId: function(/* item */ item){
 			return this.parentId + (item.Name ? item.Name : "") + (item.Type ? item.Type : ""); //$NON-NLS-0$
 		},
-		processMoreChildren: function(parentItem, children, item) {
+		processMoreChildren: function(parentItem, children, item, type) {
+			type = type || "MoreCommits"; //$NON-NLS-0$ /* use more commits by default */
+			
 			var fullList = parentItem.children;
 			if (fullList) {
 				var args = [fullList.length - 1, 1].concat(children);
@@ -331,7 +354,7 @@ define([
 				fullList = children;
 			}
 			if (item.NextLocation) {
-				fullList.push({Type: "MoreCommits", NextLocation: item.NextLocation, selectable: false, isNotSelectable: true}); //$NON-NLS-0$
+				fullList.push({Type: type, NextLocation: item.NextLocation, selectable: false, isNotSelectable: true}); //$NON-NLS-0$
 			}
 			return fullList;
 		},
@@ -375,13 +398,13 @@ define([
 		this.incomingActionScope = "IncomingActions"; //$NON-NLS-0$
 		this.outgoingActionScope = "OutgoingActions"; //$NON-NLS-0$
 		this.syncActionScope = "SynchronizedActions"; //$NON-NLS-0$
-		
+		this.stashActionScope = "StashActions"; //$NON-NLS-0$
+
 		if (this.selection) {
 			this.selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 				this.updateSelectionCommands(e.selections);
 			}.bind(this));
 		}
-		
 		this.createCommands();
 	}
 	GitCommitListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
@@ -400,6 +423,7 @@ define([
 				model.incomingCommits = model.outgoingCommits = null;
 			}
 			model.log = null;
+			model.stashedChanges = null;
 			model.logDeferred = new Deferred();
 			if (item.more) {
 			} else {
@@ -701,6 +725,7 @@ define([
 			if (currentBranch && !this.simpleLog) {
 				var incomingActionScope = this.incomingActionScope;
 				var outgoingActionScope = this.outgoingActionScope;
+				var stashActionScope = this.stashActionScope;
 				
 				if (lib.node(actionsNodeScope)) {
 					commandService.destroy(actionsNodeScope);
@@ -716,7 +741,7 @@ define([
 				var activeBranch = model.getActiveBranch();
 				var targetRef = model.getTargetReference();
 				if (tracksRemoteBranch) {
-					commandService.addCommandGroup(incomingActionScope, "eclipse.gitFetchGroup", 500, "Fetch", null, null, null, "Fetch", null, "eclipse.orion.git.fetch"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandService.addCommandGroup(incomingActionScope, "eclipse.gitFetchGroup", 500, messages['fetchGroup'], null, null, null, "Fetch", null, "eclipse.orion.git.fetch"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.fetch", 100, "eclipse.gitFetchGroup"); //$NON-NLS-0$ //$NON-NLS-1$
 					commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.fetchForce", 200, "eclipse.gitFetchGroup"); //$NON-NLS-0$ //$NON-NLS-1$
 					
@@ -731,7 +756,7 @@ define([
 					commandService.renderCommands(actionsNodeScope, actionsNodeScope, {LocalBranch: activeBranch, RemoteBranch: targetRef}, this, "button"); //$NON-NLS-0$
 				}
 
-				commandService.addCommandGroup(outgoingActionScope, "eclipse.gitPushGroup", 1000, "Push", null, null, null, "Push", null, "eclipse.orion.git.push"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				commandService.addCommandGroup(outgoingActionScope, "eclipse.gitPushGroup", 1000, messages['pushGroup'], null, null, null, "Push", null, "eclipse.orion.git.push"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.push", 1100, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
 				commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushForce", 1200, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
 				commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushBranch", 1300, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
@@ -758,17 +783,21 @@ define([
 				var model = explorer.model;
 				var td = document.createElement("td"); //$NON-NLS-0$
 
-				if (item.Type === "MoreCommits") { //$NON-NLS-1$ //$NON-NLS-0$
+				if (item.Type === "MoreCommits" || item.Type === "MoreStashCommits") { //$NON-NLS-1$ //$NON-NLS-0$
 					td.classList.add("gitCommitListMore"); //$NON-NLS-0$
 					var ref = model.simpleLog ? model.getTargetReference() : model.getActiveBranch();
 					var moreButton = document.createElement("button"); //$NON-NLS-0$
 					moreButton.className = "commandButton"; //$NON-NLS-0$
-					moreButton.textContent = i18nUtil.formatMessage(messages[item.Type], ref ? ref.Name : model.root.Name);
+					moreButton.textContent = item.Type === "MoreStashCommits" ? //$NON-NLS-0$
+						messages["MoreStashCommits"] :
+						i18nUtil.formatMessage(messages[item.Type], ref ? ref.Name : model.root.Name);
 					td.appendChild(moreButton);
 					var listener;
 					moreButton.addEventListener("click", listener = function() { //$NON-NLS-0$
 						moreButton.removeEventListener("click", listener); //$NON-NLS-0$
-						moreButton.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], ref ? ref.Name : model.root.Name);
+						moreButton.textContent = item.Type === "MoreStashCommits" ? //$NON-NLS-0$
+							messages["MoreStashCommitsProgress"] :
+							i18nUtil.formatMessage(messages[item.Type + "Progress"], ref ? ref.Name : model.root.Name);
 						item.parent.location = item.NextLocation;
 						item.parent.more = true;
 						explorer.changedItem(item.parent).then(function() {
@@ -793,6 +822,7 @@ define([
 					horizontalBox.appendChild(expandContainer);
 					return expandImage;
 				}
+				var repository = explorer.model.root.repository;
 				
 				var detailsView, actionsArea, title;
 				if (item.Type === "CommitChanges") { //$NON-NLS-0$
@@ -814,7 +844,6 @@ define([
 					info.display();
 					horizontalBox.appendChild(commitDetails);
 
-					var repository = explorer.model.root.repository;
 					setTimeout(function() {
 						var diffs = commit.Diffs;
 
@@ -858,7 +887,7 @@ define([
 					title.textContent = messages["LocalChanges"];
 					title.classList.add("gitStatusTitle"); //$NON-NLS-0$
 					detailsView.appendChild(title);
-				}  else if (item.Type !== "Commit") { //$NON-NLS-0$
+				}  else if (item.Type !== "Commit" && item.Type !== "StashCommit") { //$NON-NLS-1$ //$NON-NLS-0$
 					if (item.Type !== "NoCommits") { //$NON-NLS-0$
 						sectionItem.className = "gitCommitSectionTableItem"; //$NON-NLS-0$
 						createExpand();
@@ -919,6 +948,9 @@ define([
 					actionsArea.className = "layoutRight commandList"; //$NON-NLS-0$
 					actionsArea.id = itemActionScope;
 					horizontalBox.appendChild(actionsArea);
+					
+					item.Clone = repository;
+					
 					explorer.commandService.renderCommands(itemActionScope, actionsArea, item, explorer, "tool"); //$NON-NLS-0$
 				}
 

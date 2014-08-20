@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -58,7 +58,7 @@ define({
 	"LocalEditorSettings": "Local Editor Settings", //$NON-NLS-1$ //$NON-NLS-0$
 	"NoProject": "${0} is not a project. To convert it to a project use ${1}.", //$NON-NLS-1$ //$NON-NLS-0$
 	"NoProjects": "There are no projects in your workspace. Use the ${0} menu to create projects.", //$NON-NLS-1$ //$NON-NLS-0$
-	"disconnected": "(disconnected)", //$NON-NLS-1$ //$NON-NLS-0$
+	"Disconnected": "${0} (disconnected)", //$NON-NLS-1$ //$NON-NLS-0$
 	"ChooseFS": "Choose Filesystem", //$NON-NLS-1$ //$NON-NLS-0$
 	"ChooseFSTooltip": "Choose the filesystem you want to view.", //$NON-NLS-1$ //$NON-NLS-0$
 	"FSTitle": "${0} (${1})", //$NON-NLS-1$ //$NON-NLS-0$
@@ -70,5 +70,14 @@ define({
 	"OpenRelated": "Open Related", //$NON-NLS-1$ //$NON-NLS-0$
 	"Dependency": "Dependency", //$NON-NLS-1$ //$NON-NLS-0$
 	"UnnamedCommand": "Unnamed", //$NON-NLS-1$ //$NON-NLS-0$
-	"Global Search": "Global Search..." //$NON-NLS-1$ //$NON-NLS-0$
+	"Global Search": "Global Search...", //$NON-NLS-1$ //$NON-NLS-0$
+	"ClickEditLabel": "Click to edit", //$NON-NLS-1$ //$NON-NLS-0$
+	"ProjectInfo": "Project Information", //$NON-NLS-1$ //$NON-NLS-0$
+	"DeployInfo": "Deployment Information", //$NON-NLS-1$ //$NON-NLS-0$
+	"Name": "Name", //$NON-NLS-1$ //$NON-NLS-0$
+	"Description": "Description", //$NON-NLS-1$ //$NON-NLS-0$
+	"Site": "Site", //$NON-NLS-1$ //$NON-NLS-0$
+	'projectsSectionTitle': 'Projects',  //$NON-NLS-0$  //$NON-NLS-1$
+	'listingProjects': 'Listing projects...',  //$NON-NLS-0$  //$NON-NLS-1$
+	'gettingWorkspaceInfo': 'Getting workspace information...'  //$NON-NLS-0$  //$NON-NLS-1$
 });

@@ -880,6 +880,145 @@ eclipse.GitService = (function() {
 			return clientDeferred;
 		},
 		
+		/**
+		 * Performs git stash create
+		 * @param gitStashLocation
+		 * @param indexMessage [optional)
+		 * @param workingDirectoryMessage [optional]
+		 * @param includeUntracked [optional]
+		 * @returns {Deferred}
+		 */
+		doStashCreate : function(gitStashLocation, indexMessage, workingDirectoryMessage, includeUntracked){
+			var service = this;
+			
+			var payload = {};
+			if(indexMessage != null) /* note that undefined == null */
+				payload.IndexMessage = indexMessage;
+			
+			if(workingDirectoryMessage != null) /* note that undefined == null */
+				payload.WorkingDirectoryMessage = workingDirectoryMessage;
+			
+			if(includeUntracked === true)
+				payload.IncludeUntracked = true;
+			
+			var clientDeferred = new Deferred();
+			xhr("POST", gitStashLocation, {
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : 15000,
+				handleAs : "json", //$NON-NLS-0$
+				data: JSON.stringify(payload)
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		
+		/**
+		 * Performs git stash pop
+		 * @param gitStashLocation
+		 * @returns {Deferred}
+		 */
+		doStashPop : function(gitStashLocation){
+			var service = this;
+			
+			var clientDeferred = new Deferred();
+			xhr("PUT", gitStashLocation, {
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : 15000,
+				handleAs : "json" //$NON-NLS-0$
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		
+		/**
+		 * Performs git stash apply on the given change
+		 * @param gitStashApplyLocation /gitapi/stash/<changeRev>/(..)
+		 * @returns {Deferred}
+		 */
+		doStashApply : function(gitStashApplyLocation){
+			var service = this;
+			
+			var clientDeferred = new Deferred();
+			xhr("PUT", gitStashApplyLocation, {
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : 15000,
+				handleAs : "json" //$NON-NLS-0$
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		
+		/**
+		 * Performs git stash list
+		 * @param gitStashLocation
+		 * @returns {Deferred}
+		 */
+		doStashList : function(gitStashLocation){
+			var service = this;
+			
+			var clientDeferred = new Deferred();
+			xhr("GET", gitStashLocation, {
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : 15000,
+				handleAs : "json" //$NON-NLS-0$
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		
+		/**
+		 * Performs git stash drop on the given change
+		 * @param gitStashDropLocation /gitapi/stash/<changeRev>/(..)
+		 * @returns {Deferred}
+		 */
+		doStashDrop : function(gitStashDropLocation){
+			var service = this;
+			
+			var clientDeferred = new Deferred();
+			xhr("DELETE", gitStashDropLocation, {
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : 15000,
+				handleAs : "json" //$NON-NLS-0$
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		
 		addCloneConfigurationProperty: function(location, newKey, newValue){
 			var service = this;
 			

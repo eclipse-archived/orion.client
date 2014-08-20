@@ -13,9 +13,10 @@
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/commandRegistry', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 'orion/git/gitConfigPreference',
         'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
-        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks', 'orion/URITemplate','orion/git/logic/gitPush','orion/git/logic/gitCommit', 'orion/objects'], 
+        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks',
+        'orion/URITemplate','orion/git/logic/gitPush', 'orion/git/logic/gitStash', 'orion/git/logic/gitCommit', 'orion/objects'], 
         function(messages, require, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, mCompareUtils, GitPreferenceStorage, GitConfigPreference, mConfirmPush, mRemotePrompter,
-        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch, _, PageLinks, URITemplate, mGitPushLogic, mGitCommitLogic, objects) {
+        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch, _, PageLinks, URITemplate, mGitPushLogic, mGitStashLogic, mGitCommitLogic, objects) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -551,7 +552,7 @@ var exports = {};
 		});
 		commandService.addCommand(checkoutBranchCommand);
 
-		var branchNameParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:')]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var branchNameParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Name:'])]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		var addBranchCommand = new mCommands.Command({
 			name: messages["New Branch"],
@@ -638,8 +639,8 @@ var exports = {};
 		});
 		commandService.addCommand(removeRemoteBranchCommand);
 
-		var addRemoteParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:'),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		                                                               		new mCommandRegistry.CommandParameter('url', 'url', 'Url:')]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var addRemoteParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Name:']),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		                                                               		new mCommandRegistry.CommandParameter('url', 'url', messages['URL:'])]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var addRemoteCommand = new mCommands.Command({
 			name: messages["New Remote"],
@@ -2678,7 +2679,7 @@ var exports = {};
 								messages['Resetting local changes']);
 							return deferred.then(
 								function(jsonData){
-									newLook? data.handler.changedItem(items) : explorer.changedItem(items);
+									explorer.changedItem(items);
 								}, displayErrorOnStatus
 							);
 						});				
@@ -2769,15 +2770,16 @@ var exports = {};
 			name: messages["Show Patch"],
 			tooltip: messages["Show checked changes as a patch"],
 			id: "eclipse.orion.git.showStagedPatchCommand", //$NON-NLS-0$
-			hrefCallback : function(data) {
+			callback : function(data) {
 				var items = forceArray(data.items);
 				
-			var url = data.userData.Clone.DiffLocation.replace("\/Default\/", "\/Cached\/") + "?parts=diff"; //$NON-NLS-0$
+				var url = data.userData.Clone.DiffLocation.replace("\/Default\/", "\/Cached\/") + "?parts=diff"; //$NON-NLS-0$
 				for (var i = 0; i < items.length; i++) {
 					url += "&Path="; //$NON-NLS-0$
 					url += items[i].name;
 				}
-				return url;
+				window.open(url);
+					
 			},
 			visibleWhen: function(item) {
 				var items = forceArray(item);
@@ -2901,6 +2903,7 @@ var exports = {};
 		};
 		
 		var pushLogic = mGitPushLogic(pushOptions);
+		var stashLogic = mGitStashLogic(pushOptions);
 		var commitLogic = mGitCommitLogic(commitOptions);
 		
 		var commitCallback = commitLogic.perform;
@@ -2949,12 +2952,76 @@ var exports = {};
 				return true;
 			}
 		});
-		
 		commandService.addCommand(commitAndPushCommand);
+		
+		var createStashCommand = new mCommands.Command({
+			name : messages["Stash"],
+			tooltip : messages["Stash all current changes away"],
+			id : "eclipse.orion.git.createStash",
+			callback : function(data){
+				stashLogic.stashAll(data).then(function(resp){
+					refresh();
+				}, function(error){
+					displayErrorOnStatus(error);
+				});
+			},
+			visibleWhen : function(item){
+				return true;
+			}
+		});
+		commandService.addCommand(createStashCommand);
+		
+		var dropStashCommand = new mCommands.Command({
+			name : messages["Drop"],
+			tooltip : messages["Drop the commit from the stash list"],
+			id : "eclipse.orion.git.dropStash",
+			callback : function(data){
+				stashLogic.drop(data).then(function(resp){
+					refresh();
+				}, function(error){
+					displayErrorOnStatus(error);
+				});
+			},
+			visibleWhen : function(item){
+				return item.Type === "StashCommit";
+			}
+		});
+		commandService.addCommand(dropStashCommand);
+		
+		var applyStashCommand = new mCommands.Command({
+			name : messages["Apply"],
+			tooltip : messages["Apply the change introduced by the commit to your active branch"],
+			id : "eclipse.orion.git.applyStash",
+			callback : function(data){
+				stashLogic.apply(data).then(function(resp){
+					refresh();
+				}, function(error){
+					displayErrorOnStatus(error);
+				});
+			},
+			visibleWhen : function(item){
+				return item.Type === "StashCommit";
+			}
+		});
+		commandService.addCommand(applyStashCommand);
+		
+		var popStashCommand = new mCommands.Command({
+			name : messages["Pop Stash"],
+			tooltip : messages["Apply the most recently stashed change to your active branch and drop it from the stashes"],
+			id : "eclipse.orion.git.popStash",
+			callback : function(data){
+				stashLogic.pop(data).then(function(resp){
+					refresh();
+				}, function(error){
+					displayErrorOnStatus(error);
+				});
+			},
+			visibleWhen : function(item){
+				return item.Type === "Clone";
+			}
+		});
+		commandService.addCommand(popStashCommand);
 	};
-	
-	
-	
 
 }());
 

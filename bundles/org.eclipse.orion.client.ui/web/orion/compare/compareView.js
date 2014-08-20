@@ -1,4 +1,4 @@
-/*******************************************************************************
+    /*******************************************************************************
  * @license
  * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
@@ -750,6 +750,7 @@ exports.InlineCompareView = (function() {
 		if(this.options.commandProvider){
 			this.options.commandProvider.renderCommands(this);
 		}
+		this.removeRulers();
 		this.addRulers();
 		var drawLine = this._textView.getTopIndex() ;
 		this._textView.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);

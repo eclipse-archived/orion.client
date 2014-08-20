@@ -328,14 +328,15 @@ define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/ob
 			
 			for (var i=0; i<settings.length; i++) {
 				var sectionId = idPrefix + 'section' + i; //$NON-NLS-0$
-				var section = this._makeSection(parent, sectionId, settings[i], settings[i].getName() ? settings[i].getName() : ""); //$NON-NLS-0$
+				var setting = settings[i];
+				var section = this._makeSection(parent, sectionId, setting, setting.getName() || "Unnamed");
 				// Add a class name based on the category (all settings on the page have the same category currently)
-				if(settings[i].category){
-					section.getContentElement().classList.add(settings[i].category + "SettingsTable"); //$NON-NLS-0$
+				if(setting.category){
+					section.getContentElement().classList.add(setting.category + "SettingsTable"); //$NON-NLS-0$
 				}
 				
 				this.explorer = new SettingsListExplorer(serviceRegistry);
-				this.explorer.createTree(section.getContentElement().id, new mExplorer.SimpleFlatModel([settings[i]], 'setting-', //$NON-NLS-0$
+				this.explorer.createTree(section.getContentElement().id, new mExplorer.SimpleFlatModel([setting], 'setting-', //$NON-NLS-0$
 					function(item) {
 						return item.getPid();
 					}),

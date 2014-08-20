@@ -11,11 +11,13 @@
  *******************************************************************************/
 /*eslint-env amd*/
 define([
+    'i18n!javascript/nls/problems',
+    'orion/i18nUtil',
 	"eslint",
 	"orion/objects",
 	"javascript/astManager",
 	"javascript/finder"
-], function(eslint, Objects, ASTManager, Finder) {
+], function(messages, i18nUtil, eslint, Objects, ASTManager, Finder) {
 	// Should have a better way of keeping this up-to-date with ./load-rules-async.js
 	var config = {
 		// 0:off, 1:warning, 2:error
@@ -131,7 +133,7 @@ define([
 			}
 		}
 		var prob = {
-		    descriptionKey: e.ruleId,
+		    descriptionKey: (e.args && e.args.nls ? e.args.nls : e.ruleId),
 		    descriptionArgs: e.args,
 			description: e.message,
 			severity: getSeverity(e),
@@ -179,10 +181,10 @@ define([
 					if(error.type) {
 						switch(error.type) {
 							case ASTManager.ErrorTypes.Unexpected:
-								error.message = msg = "Syntax error on token '"+token.value+"', delete this token.";
+								error.message = msg = i18nUtil.formatMessage(messages['syntaxErrorBadToken'], token.value);
 								break;
 							case ASTManager.ErrorTypes.EndOfInput:
-								error.message = "Syntax error, incomplete statement.";
+								error.message = messages['syntaxErrorIncomplete'];
 								break;
 						}
 					}
@@ -247,7 +249,7 @@ define([
 				if(parseErrors.length < 1) {
 					eslintErrors.push({
 						start: 0,
-						message: "ESLint failed to validate this file because an error occurred: " + e.toString(),
+						message: i18nUtil.formatMessage(messages['eslintValidationFailure'], e.toString()),
 						severity: "error" //$NON-NLS-0$
 					});
 				}

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -36,5 +36,11 @@ define({
 	"Sort by folders": "Sort by folders",
 	"Line 0 : Col 0": "Line 0 : Col 0",
 	"No Matching DiffService for location:": "No Matching DiffService for location:",
-	"${0} files compared. The two folders are identical.": "${0} files compared. The two folders are identical."
+	"${0} files compared. The two folders are identical.": "${0} files compared. The two folders are identical.",
+	'generatingTreeResult': 'Generating compare tree result...',  //$NON-NLS-0$  //$NON-NLS-1$
+	'fetchingFolder': 'Fetching folder: ${0}...',  //$NON-NLS-0$  //$NON-NLS-1$
+	'readingFile': 'Reading file: ${0}...',  //$NON-NLS-0$  //$NON-NLS-1$
+	'readingFileMetadata': 'Reading file metadata: ${0}...',  //$NON-NLS-0$  //$NON-NLS-1$
+	'comparingFile': 'Comparing: ${0}...',  //$NON-NLS-0$  //$NON-NLS-1$
+	'compareTreeTitle': 'Compare Tree'  //$NON-NLS-0$  //$NON-NLS-1$
 });

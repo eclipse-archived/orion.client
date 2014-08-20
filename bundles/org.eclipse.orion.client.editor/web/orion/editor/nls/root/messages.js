@@ -197,7 +197,7 @@ define({
 	"regex": "/.*/", //$NON-NLS-1$ //$NON-NLS-0$
 	"wholeWord": "\\b", //$NON-NLS-1$ //$NON-NLS-0$
 	"caseInsensitiveTooltip": "Toggle Case Insensitive", //$NON-NLS-1$ //$NON-NLS-0$
-	"regexTooltip": "Toogle Regex", //$NON-NLS-1$ //$NON-NLS-0$
+	"regexTooltip": "Toggle Regex", //$NON-NLS-1$ //$NON-NLS-0$
 	"wholeWordTooltip": "Toggle Whole Word", //$NON-NLS-1$ //$NON-NLS-0$
 	"closeTooltip": "Close", //$NON-NLS-1$ //$NON-NLS-0$
 

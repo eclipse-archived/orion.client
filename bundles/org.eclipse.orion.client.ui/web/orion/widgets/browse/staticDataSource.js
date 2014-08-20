@@ -21,10 +21,12 @@ define([
 	"orion/editor/stylers/text_x-php/syntax",
 	"orion/editor/stylers/text_x-python/syntax",
 	"orion/editor/stylers/text_x-ruby/syntax",
+	"orion/editor/stylers/text_x-go/syntax",
+	"orion/editor/stylers/text_x-objective-c/syntax",
 	'orion/editor/stylers/application_x-ejs/syntax',
 	'orion/editor/stylers/application_xml/syntax',
 	'orion/editor/stylers/text_x-yaml/syntax',
-], function(Deferred, mStyler, mJS, mCss, mHtml, mJson, mPhp, mPython, mRuby, mEJS, mXml, mYaml) {
+], function(Deferred, mStyler, mJS, mCss, mHtml, mJson, mPhp, mPython, mRuby, mGo, mObjectiveC, mEJS, mXml, mYaml) {
 	var ContentTypes = [{	id: "text/plain",
 			name: "Text",
 			extension: ["txt"],
@@ -80,6 +82,16 @@ define([
 			"extends": "text/plain",
 			name: "Ruby",
 			extension: ["rb", "rbx", "rjs", "Rakefile", "rake", "cgi", "fcgi", "gemspec", "irbrc", "capfile", "ru", "prawn", "Gemfile", "Guardfile", "Vagrantfile", "Appraisals", "Rantfile"]
+		},
+		{	id: "text/x-go",
+			name: "Go",
+			extension: ["go"],
+			"extends": "text/plain"
+		},
+		{	id: "text/x-objective-c",
+			"extends": "text/plain",
+			name: "Objective-C",
+			extension: ["m", "mm", "h"]
 		},
 		{	id: "text/x-php",
 			"extends": "text/plain",
@@ -200,6 +212,12 @@ define([
 						break;
 					case "text/x-ruby": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mRuby.grammars, "orion.rb"); //$NON-NLS-0$
+						break;
+					case "text/x-go": //$NON-NLS-0$
+						stylerAdapter = new mStyler.createPatternBasedAdapter(mGo.grammars, "orion.go"); //$NON-NLS-0$
+						break;
+					case "text/x-objective-c": //$NON-NLS-0$
+						stylerAdapter = new mStyler.createPatternBasedAdapter(mObjectiveC.grammars, "orion.objectiveC"); //$NON-NLS-0$
 						break;
 					case "text/x-php": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mPhp.grammars, "orion.php"); //$NON-NLS-0$

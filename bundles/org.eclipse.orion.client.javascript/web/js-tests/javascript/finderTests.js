@@ -905,6 +905,63 @@ define([
 		});
 		
 		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440920
+		 * @since 7.0
+		 */
+		it('test_findComment8', function() {
+			var text = "var f; /*";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var comment = Finder.findComment(9, ast);
+					if(!comment) {
+						assert.fail("Should have found a comment");
+					}
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		});
+		
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440920
+		 * @since 7.0
+		 */
+		it('test_findComment9', function() {
+			var text = "/* var f;";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var comment = Finder.findComment(9, ast);
+					if(!comment) {
+						assert.fail("Should have found a comment");
+					}
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		});
+		
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440920
+		 * @since 7.0
+		 */
+		it('test_findComment10', function() {
+			var text = "var b; /* var f;";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var comment = Finder.findComment(16, ast);
+					if(!comment) {
+						assert.fail("Should have found a comment");
+					}
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		});
+		
+		/**
 		 * Find a token with a bogus offset
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
 		 */

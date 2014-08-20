@@ -136,7 +136,7 @@ define([
 	
 				window.addEventListener("hashchange", _self.processHash.bind(_self)); //$NON-NLS-0$
 	
-				mGlobalCommands.setPageTarget({task: 'Settings', serviceRegistry: _self.registry, commandService: _self.commandService});
+				mGlobalCommands.setPageTarget({task: messages['Settings'], serviceRegistry: _self.registry, commandService: _self.commandService});
 			});
 		},
 		

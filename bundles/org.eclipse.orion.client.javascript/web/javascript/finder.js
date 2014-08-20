@@ -32,6 +32,7 @@ define([
 		context: null,
 		thisCheck: false,
 		objectPropCheck: false,
+		labeledStatementCheck: false,
 		
 		/**
 		 * @name enter
@@ -194,10 +195,19 @@ define([
 				case Estraverse.Syntax.WithStatement:
                     this.checkId(node.object);
                     break;
-                case Estraverse.Syntax.ThrowStatement: {
+                case Estraverse.Syntax.ThrowStatement:
                     this.checkId(node.argument);
                     break;
-                }
+                case Estraverse.Syntax.LabeledStatement:
+               		this._enterScope(node);
+                    this.checkId(node.label, true, false, true);
+                    break;
+                case Estraverse.Syntax.ContinueStatement :
+                    this.checkId(node.label, false, false, true);
+                    break;
+                case Estraverse.Syntax.BreakStatement:
+                    this.checkId(node.label, false, false, true);
+                    break;
 			}
 		},
 		
@@ -232,6 +242,15 @@ define([
 					case Estraverse.Syntax.ObjectExpression:
 						this.scopes.push({range: node.range, occurrences: [], kind:'o'});  //$NON-NLS-0$
 						// Skip object expressions that don't contain the selection
+						if(node.range[0] > this.context.start || node.range[1] < this.context.end) {
+							return true;
+						}						
+				}
+			} else if (this.labeledStatementCheck){
+				switch(node.type) {
+					case Estraverse.Syntax.LabeledStatement:
+						this.scopes.push({range: node.range, occurrences: [], kind:'ls'});  //$NON-NLS-0$
+						// Skip labelled loops that don't contain the selection
 						if(node.range[0] > this.context.start || node.range[1] < this.context.end) {
 							return true;
 						}						
@@ -288,6 +307,14 @@ define([
 						}
 						break;
 				}
+			} else if (this.labeledStatementCheck) {
+				switch(node.type){
+					case Estraverse.Syntax.LabeledStatement:
+						if(this._popScope()) {
+							return Estraverse.VisitorOption.Break;
+						}
+						break;
+				}
 			} else {
 				switch(node.type) {
 					case Estraverse.Syntax.FunctionExpression:
@@ -334,34 +361,42 @@ define([
 		 * @param {Object} node The AST node we are inspecting
 		 * @param {Boolean} candefine If the given node can define the word we are looking for
 		 * @param {Boolean} isObjectProp Whether the given node is only an occurrence if we are searching for object property occurrences
+		 * @param {Boolean} isLabeledStatement Whether the given node is only an occurrence if we are searching for labeled statements
 		 * @returns {Boolean} <code>true</code> if we should skip the next nodes, <code>false</code> otherwise
 		 */
-		checkId: function(node, candefine, isObjectProp) {
-			if (!this.thisCheck && ((!isObjectProp && !this.objectPropCheck) || (isObjectProp && this.objectPropCheck))){
-				if (node && node.type === Estraverse.Syntax.Identifier) {
-					if (node.name === this.context.word) {
-						var scope = this.scopes[this.scopes.length-1]; // Always will have at least the program scope
-						if(candefine) {
-							if(this.defscope) {
-								// Re-defining, we want the last defining node previous to the selection, skip any future re-defines
-								if(node.range[0] > this.context.start) {
-									return true;
-								} else {
-									// Occurrences collected for the previous define are now invalid, fall through to mark this occurrence
-									this.occurrences = [];
-									scope.occurrences = [];
-								}
-							}
-							//does the scope enclose it?
-							if(scope && (scope.range[0] <= this.context.start) && (scope.range[1] >= this.context.end)) {
-								this.defscope = scope;
+		checkId: function(node, candefine, isObjectProp, isLabeledStatement) {
+			if (this.thisCheck){
+				return false;
+			}
+			if ((isObjectProp && !this.objectPropCheck) || (!isObjectProp && this.objectPropCheck)){
+				return false;
+			}
+			if ((isLabeledStatement && !this.labeledStatementCheck) || (!isLabeledStatement && this.labeledStatementCheck)){
+				return false;
+			}			
+			if (node && node.type === Estraverse.Syntax.Identifier) {
+				if (node.name === this.context.word) {
+					var scope = this.scopes[this.scopes.length-1]; // Always will have at least the program scope
+					if(candefine) {
+						if(this.defscope) {
+							// Re-defining, we want the last defining node previous to the selection, skip any future re-defines
+							if(node.range[0] > this.context.start) {
+								return true;
+							} else {
+								// Occurrences collected for the previous define are now invalid, fall through to mark this occurrence
+								this.occurrences = [];
+								scope.occurrences = [];
 							}
 						}
-						scope.occurrences.push({
-							start: node.range[0],
-							end: node.range[1]
-						});
+						//does the scope enclose it?
+						if(scope && (scope.range[0] <= this.context.start) && (scope.range[1] >= this.context.end)) {
+							this.defscope = scope;
+						}
 					}
+					scope.occurrences.push({
+						start: node.range[0],
+						end: node.range[1]
+					});
 				}
 			}
 			return false;
@@ -554,6 +589,8 @@ define([
 						return comment;
 					} else if(offset === ast.range[1] && offset === comment.range[1]) {
 					   return comment;
+					} else if(offset > ast.range[1] && offset <= comment.range[1]) {
+					    return comment;
 					} else if(comment.range[0] > offset) {
 						//we've passed the node
 						return null;
@@ -754,18 +791,24 @@ define([
 				this.visitor.leave = this.visitor.leave.bind(this.visitor);
 			}
 			
-			// See if a 'this' keyword was selected
-			this.visitor.thisCheck = context.token && context.token.type === Estraverse.Syntax.ThisExpression;
-			
-			// See if an object property key is selected (or a usage of an object property such as this.prop())
-			this.visitor.objectPropCheck = false;
-			var parent = context.token.parent ? context.token.parent : (context.token.parents && context.token.parents.length > 0 ? context.token.parents[context.token.parents.length-1] : null);
-			if (parent && parent.type === Estraverse.Syntax.Property){
-				this.visitor.objectPropCheck = context.token === parent.key;
-			} else if (parent && (parent.type === Estraverse.Syntax.MemberExpression && parent.object && parent.object.type === Estraverse.Syntax.ThisExpression)){
-				this.visitor.objectPropCheck = true;
+			if (context.token){
+				var parent = context.token.parent ? context.token.parent : (context.token.parents && context.token.parents.length > 0 ? context.token.parents[context.token.parents.length-1] : null);
+				
+				// See if a 'this' keyword was selected
+				this.visitor.thisCheck = context.token.type === Estraverse.Syntax.ThisExpression;
+				
+				// See if an object property key is selected (or a usage of an object property such as this.prop())
+				this.visitor.objectPropCheck = false;
+				if (parent && parent.type === Estraverse.Syntax.Property){
+					this.visitor.objectPropCheck = context.token === parent.key;
+				} else if (parent && (parent.type === Estraverse.Syntax.MemberExpression && parent.object && parent.object.type === Estraverse.Syntax.ThisExpression)){
+					this.visitor.objectPropCheck = true;
+				}
+				
+				// See if a labeled statement is selected
+				this.visitor.labeledStatementCheck = parent && (parent.type === Estraverse.Syntax.LabeledStatement || parent.type === Estraverse.Syntax.ContinueStatement || parent.type === Estraverse.Syntax.BreakStatement);
 			}
-			
+				
 			this.visitor.context = context;
 			return this.visitor;			
 		}

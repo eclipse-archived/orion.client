@@ -394,6 +394,7 @@ define([
 			} else {
 				this._hideReplaceField();
 			}
+			this._searchTextInputBox.focus();
 			this._searchResultExplorer.initCommands();
 		},
 		

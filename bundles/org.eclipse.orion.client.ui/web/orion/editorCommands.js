@@ -285,11 +285,11 @@ define([
 
 			// page navigation commands (go to line)
 			var lineParameter = new mCommandRegistry.ParametersDescription(
-				[new mCommandRegistry.CommandParameter('line', 'number', 'Line:')], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				[new mCommandRegistry.CommandParameter('line', 'number', messages.gotoLinePrompt)], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				{hasOptionalParameters: false},
 				function() {
 					var line = editor.getModel().getLineAtOffset(editor.getCaretOffset()) + 1;
-					return [new mCommandRegistry.CommandParameter('line', 'number', 'Line:', line.toString())]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					return [new mCommandRegistry.CommandParameter('line', 'number', messages.gotoLinePrompt, line.toString())]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			);
 			

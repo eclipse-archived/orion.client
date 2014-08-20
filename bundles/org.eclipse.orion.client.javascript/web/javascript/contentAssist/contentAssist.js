@@ -11,7 +11,6 @@
  *	 Andrew Eisenberg (VMware) - implemented visitor pattern
  *   IBM Corporation - Various improvements
  ******************************************************************************/
-/*global doctrine */
 /*eslint-env amd */
 define([
 	'javascript/contentAssist/typeEnvironment',  //$NON-NLS-0$
@@ -39,7 +38,7 @@ define([
  	
 	TemplateProvider.prototype = new mTemplates.TemplateContentAssist(JSSyntax.keywords, []);
 	Objects.mixin(TemplateProvider.prototype, {
-		uninterestingChars: ":!#$^&*.?<>", //$NON-NLS-0$
+		uninterestingChars: ":!#$^&.?<>", //$NON-NLS-0$
 		/**
 		 * @description Override from TemplateContentAssist
 		 */
@@ -105,7 +104,7 @@ define([
 		 * @since 7.0
 		 */
 		fixPrefix: function(kind, prefix, context, buffer) {
-		    if(kind === 'doc' && typeof prefix === 'string' && typeof context.line === 'string') {
+		    if(kind === 'jsdoc' && typeof prefix === 'string' && typeof context.line === 'string') {
 		        if(buffer.charAt(context.offset-1) === '{') {
 		            return null;
 		        }
@@ -332,7 +331,7 @@ define([
 		 */
 		_createDocProposals: function(context, kind, buffer, env, ast) {
 		    var proposals = [];
-		    if(kind.kind === 'doc') {
+		    if(kind.kind === 'jsdoc') {
     		    var offset = context.offset > context.prefix.length ? context.offset-context.prefix.length-1 : 0;
     		    switch(buffer.charAt(offset)) {
     		        case '{': {
@@ -358,6 +357,7 @@ define([
     		            }
     		            break; */
     		        }
+    		        case '*':
     		        case ' ': {
     		            var node = Finder.findNode(kind.node.range[1], ast, {parents:true, next:true});
         	               if(node) {
@@ -510,7 +510,7 @@ define([
 		 * @param {Object} visited Those types visited thus far while computing proposals (to detect cycles)
 		 */
 		_createInferredProposals: function(targetTypeName, env, kind, context, buffer, replaceStart, proposals, relevance, visited) {
-		    if(kind === 'doc') {
+		    if(kind === 'jsdoc' || kind === 'doc') {
     	        return;
 		    } 
 			var type = env.lookupQualifiedType(targetTypeName);
@@ -779,10 +779,16 @@ define([
 		 */
 		_getCompletionContext: function(ast, offset, contents) {
 		    var comment = Finder.findComment(offset, ast);
-		    if(comment) {
-		        if(offset > comment.range[0]+2 && (comment.type === 'Block' && offset < comment.range[1]-2)) {
-		          return {kind:'doc', node: comment};
+		    if(comment && comment.type === 'Block') {
+		        var start  = comment.range[0];
+		        if(contents.charAt(start) === '/' && contents.charAt(start+1) === '*') {
+                    if(contents.charAt(start+2) === '*' && offset > start+2) { // must be past the second '*'
+                        return {kind:'jsdoc', node: comment};  
+                    } else if(offset > start+1) { //must be past the '*'
+    		            return {kind:'doc', node: comment};
+    		        }
 		        }
+		        return null;
 		    }
 			var parents = [];
 			Estraverse.traverse(ast, {

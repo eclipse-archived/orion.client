@@ -385,8 +385,6 @@ define([
 			this.commandService.registerCommandContribution(explorerSelectionScope, "orion.explorer.expandAll", 200); //$NON-NLS-0$
 			this.commandService.registerCommandContribution(explorerSelectionScope, "orion.explorer.collapseAll", 300); //$NON-NLS-0$
 			if (this.prefix === "staged") { //$NON-NLS-0$
-				//this.commandService.addCommandGroup(actionsNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.commitCommand"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
-				//this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commitCommand", 100, "eclipse.gitCommitGroup"); //$NON-NLS-0$ 	550
 				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-1$ //$NON-NLS-0$ 
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
 				this.commandService.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
@@ -398,11 +396,12 @@ define([
 			}  else if (this.prefix === "all") { //$NON-NLS-0$
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showStagedPatchCommand", 100); //$NON-NLS-0$
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 200); //$NON-NLS-0$
-//				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.ignoreCommand", 300); //$NON-NLS-0$
-				
+
 //				this.commandService.addCommandGroup(selectionNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.precommitCommand", "primaryButton"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
 				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitCommand", 300); //$NON-NLS-0$
 //				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-0$
+				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precreateStashCommand", 300); //$NON-NLS-0$
+				this.commandService.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitCommand", 400); //$NON-NLS-0$
 				this.commandService.renderCommands(selectionNodeScope, selectionNodeScope, [], this, "button", {"Clone" : this.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
 
 				var node = lib.node(explorerSelectionScope);
@@ -496,6 +495,20 @@ define([
 				}
 			});
 			
+			var precreateStashCommand = new mCommands.Command({
+				name: messages["Stash"],
+				tooltip: messages["Stash all current changes away"],
+				id: "eclipse.orion.git.precreateStashCommand", //$NON-NLS-0$
+				callback: function(data) {
+					var name = that.messageTextArea.value.trim();
+					that.commandService.runCommand("eclipse.orion.git.createStash", data.items, 
+							data.handler, null, {name: name});
+				},
+				visibleWhen: function(item) {
+					return true;
+				}
+			});
+			
 			var precommitAndPushCommand = new mCommands.Command({
 				name: messages["CommitPush"],
 				tooltip: messages["Commits and pushes files to the default remote"],
@@ -522,6 +535,7 @@ define([
 			this.commandService.addCommand(selectAllCommand);
 			this.commandService.addCommand(deselectAllCommand);
 			this.commandService.addCommand(precommitAndPushCommand);
+			this.commandService.addCommand(precreateStashCommand);
 		},
 		createSelection: function(){
 			if (!this.selection) {
