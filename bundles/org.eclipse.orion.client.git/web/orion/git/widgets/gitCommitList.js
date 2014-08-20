@@ -192,10 +192,12 @@ define([
 						repository.ActiveBranch = currentBranch.CommitLocation;
 						var activeBranch = that.getActiveBranch();
 						var targetRef = that.getTargetReference();
-						if (activeBranch && targetRef && !that.simpleLog) {
-							if (section) section.setTitle(activeBranch.Name);
-						} else if (targetRef || activeBranch) {
-							if (section) section.setTitle(util.shortenRefName(targetRef || activeBranch));
+						if (section) {
+							if (that.simpleLog && targetRef) {
+								section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef)));
+							} else {
+								section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], util.shortenRefName(activeBranch)));
+							}
 						}
 						if (progress) progress.done();
 						if (that.simpleLog) {
