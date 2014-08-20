@@ -18,9 +18,10 @@ define([
 	'orion/explorers/explorer',
 	'orion/URITemplate',
 	'orion/i18nUtil',
+	'orion/git/uiUtil',
 	'orion/Deferred',
 	'orion/objects'
-], function(messages, KeyBinding, mCommandRegistry, mExplorer, URITemplate, i18nUtil, Deferred, objects) {
+], function(messages, KeyBinding, mCommandRegistry, mExplorer, URITemplate, i18nUtil, uiUtil, Deferred, objects) {
 		
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 
@@ -135,6 +136,15 @@ define([
 			}
 		},
 		processChildren: function(parentItem, children) {
+			var filter = this.filterQuery;
+			if (filter) {
+				children = children.filter(function(item) {
+					return item.Name.indexOf(filter) !== -1;
+				});
+			}
+			if (children.length === 0) {
+				children = [{Type: "NoContent", selectable: false, isNotSelectable: true}]; //$NON-NLS-0$
+			}
 			children.forEach(function(item) {
 				item.parent = parentItem;
 			});
@@ -200,6 +210,12 @@ define([
 			});
 			return deferred;
 		},
+		createFilter: function() {
+			uiUtil.createFilter(this.section, messages["Filter items"],  function(value) {
+				this.model.filterQuery = value;
+				this.changedItem();
+			}.bind(this));
+		},
 		display: function() {
 			var that = this;
 			var deferred = new Deferred();
@@ -216,6 +232,7 @@ define([
 				parentId: this.parentId,
 				handleError: this.handleError
 			});
+			this.createFilter();
 			this.createTree(this.parentId, model, {
 				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy,
@@ -272,7 +289,9 @@ define([
 					div.appendChild(horizontalBox);	
 					
 					var actionsID, title, description, subDescription, extraDescriptions = [], titleClass = "", titleLink;
-					if (item.parent.Type === "RepoRoot") { //$NON-NLS-0$
+					if (item.Type === "NoContent") { //$NON-NLS-0$
+						title = messages[item.Type];
+					} else if (item.parent.Type === "RepoRoot") { //$NON-NLS-0$
 						if (explorer.showLinks) {
 							titleLink = require.toUrl(repoTemplate.expand({resource: repo.Location}));
 						} else {

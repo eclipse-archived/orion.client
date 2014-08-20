@@ -32,7 +32,7 @@
 }
 
 .repoDropdownList {
-	height:calc(100% - 35px);
+	height:calc(100% - 70px);
 	overflow-y:auto;
 }
 

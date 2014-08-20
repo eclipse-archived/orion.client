@@ -86,9 +86,6 @@ define([
 						remotes.push({Type: "TagRoot", Name: messages["tags"]}); //$NON-NLS-0$
 					}
 					onComplete(that.processChildren(parentItem, remotes));
-					if (remotes.length === 0 && this.section){
-						this.section.setTitle(messages["No Remote Branches"]);
-					}
 				}, function(error){
 					if (progress) progress.done();
 					that.handleError(error);

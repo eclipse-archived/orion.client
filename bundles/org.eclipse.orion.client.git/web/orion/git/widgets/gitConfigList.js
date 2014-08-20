@@ -27,6 +27,7 @@ define([
 		this.section = options.section;
 		this.progressService = options.progressService;
 		this.gitClient = options.gitClient;
+		this.filterQuery = this.root.mode === "full" ? "" : "user."; //$NON-NLS-1$ //$NON-NLS-0$
 	}
 	GitConfigListModel.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitConfigListModel.prototype, /** @lends orion.git.GitConfigListModel.prototype */ {
@@ -45,13 +46,8 @@ define([
 				this.progressService.progress(this.gitClient.getGitCloneConfig(parentItem.repository.ConfigLocation), msg).then( function(resp){
 					progress.worked("Rendering configuration"); //$NON-NLS-0$
 					var configurationEntries = resp.Children;
-					var filteredConfig = [];
-					for(var i=0; i<configurationEntries.length ;i++){
-						if (parentItem.mode === "full" || configurationEntries[i].Key.indexOf("user.") !== -1) //$NON-NLS-1$ //$NON-NLS-0$
-							filteredConfig.push(configurationEntries[i]);
-					}
 					progress.done();
-					onComplete(that.processChildren(parentItem, filteredConfig));
+					onComplete(that.processChildren(parentItem, configurationEntries));
 				}, function(error){
 					progress.done();
 					that.handleError(error);
@@ -123,12 +119,7 @@ define([
 		createFilter: function() {
 			uiUtil.createFilter(this.section, messages["Filter items"],  function(value) {
 				this.model.filterQuery = value;
-				this.changedItem().then(function () {
-					if (this.model.filterQuery)
-					for (var i=0; i<this.model.root.children.length; i++) {
-						this.myTree.expand(this.model.root.children[i]); 
-					}
-				}.bind(this));
+				this.changedItem();
 			}.bind(this));
 		},
 		display: function() {
