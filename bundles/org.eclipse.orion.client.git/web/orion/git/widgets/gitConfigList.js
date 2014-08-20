@@ -16,8 +16,9 @@ define([
 	'orion/explorers/explorer',
 	'orion/Deferred',
 	'orion/i18nUtil',
+	'orion/git/uiUtil',
 	'orion/objects'
-], function(messages, mExplorer, Deferred, i18nUtil, objects) {
+], function(messages, mExplorer, Deferred, i18nUtil, uiUtil, objects) {
 
 	function GitConfigListModel(options) {
 		this.root = options.root;
@@ -44,18 +45,13 @@ define([
 				this.progressService.progress(this.gitClient.getGitCloneConfig(parentItem.repository.ConfigLocation), msg).then( function(resp){
 					progress.worked("Rendering configuration"); //$NON-NLS-0$
 					var configurationEntries = resp.Children;
-					
-					if (configurationEntries.length === 0){
-						that.section.setTitle("No Configuration"); //$NON-NLS-0$
-					}
-					
 					var filteredConfig = [];
 					for(var i=0; i<configurationEntries.length ;i++){
 						if (parentItem.mode === "full" || configurationEntries[i].Key.indexOf("user.") !== -1) //$NON-NLS-1$ //$NON-NLS-0$
 							filteredConfig.push(configurationEntries[i]);
 					}
 					progress.done();
-					onComplete(filteredConfig);
+					onComplete(that.processChildren(parentItem, filteredConfig));
 				}, function(error){
 					progress.done();
 					that.handleError(error);
@@ -64,12 +60,24 @@ define([
 				onComplete([]);
 			}
 		},
-		getId: function(/* item */ item){
-			if (item.Type === "ConfigRoot") { //$NON-NLS-0$
-				return "ConfigRoot"; //$NON-NLS-0$
-			} else {
-				return item.Key + item.Value;
+		processChildren: function(parentItem, children) {
+			var filter = this.filterQuery;
+			if (filter) {
+				children = children.filter(function(item) {
+					return item.Key.indexOf(filter) !== -1;
+				});
 			}
+			if (children.length === 0) {
+				children = [{Type: "NoContent", selectable: false, isNotSelectable: true}]; //$NON-NLS-0$
+			}
+			children.forEach(function(item) {
+				item.parent = parentItem;
+			});
+			parentItem.children = children;
+			return children;
+		},
+		getId: function(/* item */ item){
+			return item.Key ? item.Key + item.Value : item.Type;
 		}
 	});
 	
@@ -112,6 +120,17 @@ define([
 			});
 			return deferred;
 		},
+		createFilter: function() {
+			uiUtil.createFilter(this.section, messages["Filter items"],  function(value) {
+				this.model.filterQuery = value;
+				this.changedItem().then(function () {
+					if (this.model.filterQuery)
+					for (var i=0; i<this.model.root.children.length; i++) {
+						this.myTree.expand(this.model.root.children[i]); 
+					}
+				}.bind(this));
+			}.bind(this));
+		},
 		display: function() {
 			var model = new GitConfigListModel({
 				root: this.root,
@@ -121,6 +140,7 @@ define([
 				section: this.section,
 				handleError: this.handleError
 			});
+			this.createFilter();
 			this.createTree(this.parentId, model, {
 				setFocus: false, // do not steal focus on load
 			});
@@ -147,11 +167,20 @@ define([
 	GitConfigListRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(GitConfigListRenderer.prototype, {
 		getCellElement: function(col_no, item, tableRow){
-			if (col_no > 2) return null;
+			if (col_no > 1) return null;
 			var div, td;
 			td = document.createElement("td"); //$NON-NLS-0$
 			div = document.createElement("div"); //$NON-NLS-0$
 			td.appendChild(div);
+			
+			if (item.Type === "NoContent") { //$NON-NLS-0$
+				if (col_no > 0) return null;
+				var noContent = document.createElement("div"); //$NON-NLS-0$
+				noContent.textContent = messages[item.Type];
+				div.appendChild(noContent);
+				return td;
+			}
+			
 			switch (col_no) {
 				case 0:
 					var keyNode = document.createElement("div"); //$NON-NLS-0$

@@ -42,7 +42,7 @@
 }
 
 .configDropdownList {
-	height:calc(100% - 35px);
+	height:calc(100% - 70px);
 	overflow-y:auto;
 }
 
@@ -81,7 +81,6 @@
 	min-width: 400px;
 	z-index: 200;
 	background-color: white;
-	overflow-y: auto;
 	border: 1px solid #aaa;
 }
 
@@ -149,7 +148,7 @@
 	padding-left: 3px;
 }
 
-.commitFilter input {
+.gitFilterBox input {
 	width: 200px;
 	padding-right: 22px;
 }
@@ -223,20 +222,6 @@ table .sectionTable {
 
 .sidebarWrapper {
 	overflow: visible;
-}
-
-.miniWrapper {
-	margin-left: 8%;
-	margin-right: 8%;
-	font-size:16px;
-	color: #777;
-	overflow: hidden;
-	margin-top:10px;
-	margin-bottom:-10px;
-}
-
-.miniWrapper .sectionTableItem {
-	padding: 0;
 }
 
 .gitChangeListSelectAll {

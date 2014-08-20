@@ -18,9 +18,10 @@ define([
 	'orion/i18nUtil',
 	'orion/Deferred',
 	'orion/git/util',
+	'orion/git/uiUtil',
 	'orion/webui/littlelib',
 	'orion/objects'
-], function(messages, mGitCommitList, mExplorer, i18nUtil, Deferred, util, lib, objects) {
+], function(messages, mGitCommitList, mExplorer, i18nUtil, Deferred, util, uiUtil, lib, objects) {
 
 	var pageQuery = "commits=1&page=1&pageSize=5"; //$NON-NLS-0$
 
@@ -186,24 +187,14 @@ define([
 			return deferred;
 		},
 		createFilter: function() {
-			var filterDiv = document.createElement("div"); //$NON-NLS-0$
-			filterDiv.className = "gitFilterBox"; //$NON-NLS-0$
-			var filter = document.createElement("input"); //$NON-NLS-0$
-			filter.placeholder = messages["Filter items"];
-			filterDiv.appendChild(filter);
-			var sectionContent = this.section.getContentElement();
-			var branchNode = sectionContent.firstChild;
-			sectionContent.insertBefore(filterDiv, branchNode);
-			filter.addEventListener("keydown", function(event){ //$NON-NLS-0$
-				if (event.keyCode === 13) {
-					this.model.filterQuery = "filter=" + encodeURIComponent(filter.value); //$NON-NLS-0$
-					this.changedItem().then(function () {
-						if (this.model.filterQuery)
-						for (var i=0; i<this.model.root.children.length; i++) {
-							this.myTree.expand(this.model.root.children[i]); 
-						}
-					}.bind(this));
-				}
+			uiUtil.createFilter(this.section, messages["Filter items"],  function(value) {
+				this.model.filterQuery = "filter=" + encodeURIComponent(value); //$NON-NLS-0$
+				this.changedItem().then(function () {
+					if (this.model.filterQuery)
+					for (var i=0; i<this.model.root.children.length; i++) {
+						this.myTree.expand(this.model.root.children[i]); 
+					}
+				}.bind(this));
 			}.bind(this));
 		},
 		display: function() {
@@ -219,7 +210,7 @@ define([
 				parentId: this.parentId,
 				handleError: this.handleError
 			});
-			this.createFilter(this.parentId);
+			this.createFilter();
 			this.createTree(this.parentId, model, {
 				setFocus: false, // do not steal focus on load
 				selectionPolicy: this.selectionPolicy,
