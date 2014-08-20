@@ -861,6 +861,14 @@ define([
 					title.textContent = messages["LocalChanges"];
 					title.classList.add("gitStatusTitle"); //$NON-NLS-0$
 					detailsView.appendChild(title);
+					
+					var status = item;
+					var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length + status.Missing.length;
+					var staged = status.Changed.length + status.Added.length + status.Removed.length;
+					var changed = staged + unstaged;
+					var description = document.createElement("div"); //$NON-NLS-0$
+					description.textContent = i18nUtil.formatMessage(messages[changed === 1 ? 'FileChanged' : "FilesChanged"], changed);
+					detailsView.appendChild(description);
 				}  else if (item.Type !== "Commit" && item.Type !== "StashCommit") { //$NON-NLS-1$ //$NON-NLS-0$
 					if (item.Type !== "NoCommits") { //$NON-NLS-0$
 						sectionItem.className = "gitCommitSectionTableItem"; //$NON-NLS-0$

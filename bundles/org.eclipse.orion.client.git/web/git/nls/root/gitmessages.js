@@ -485,6 +485,8 @@ define({
 	"None": "None",
 	"FileSelected": "${0} file selected",
 	"FilesSelected": "${0} files selected",
+	"FileChanged": "${0} file changed",
+	"FilesChanged": "${0} files changed",
 	"CommitPush": "Commit and Push",
 	"Commits and pushes files to the default remote": "Commits and pushes files to the default remote",
 	"Stash" : "Stash",
