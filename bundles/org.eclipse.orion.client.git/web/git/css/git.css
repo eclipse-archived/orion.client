@@ -49,7 +49,8 @@
 .sectionDropdownActions {
 	height:25px;
 	background-color:#eee;
-	padding-top:6px;
+	padding-top:5px;
+	border-top: 1px solid #cacaca;
 	padding-bottom:4px;
 }
 
@@ -476,6 +477,7 @@ table .sectionTable {
 	height: 25px;
 	padding-top: 5px;
 	padding-bottom: 5px;
+	border-bottom: 1px solid #cacaca;
 }
 
 .auxpane .gitFilterBox {
