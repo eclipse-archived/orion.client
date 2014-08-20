@@ -1974,9 +1974,7 @@ var exports = {};
 									messages["Cloning repository: "] + gitUrl);
 							deferred.then(function(jsonData, secondArg) {
 								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
-									if (explorer.changedItem) {
-										explorer.changedItem();
-									}
+									refresh(data);
 								}, func, messages['Clone Git Repository']);
 							}, function(jsonData, secondArg) {
 								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Clone Git Repository']);
@@ -2027,9 +2025,7 @@ var exports = {};
 									messages["Cloning repository: "] + gitUrl);
 							deferred.then(function(jsonData, secondArg) {
 								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
-									if (explorer.changedItem) {
-										explorer.changedItem();
-									}
+									refresh(data);
 								}, func, messages['Clone Git Repository']);
 							}, function(jsonData, secondArg) {
 								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Clone Git Repository']);
@@ -2198,9 +2194,7 @@ var exports = {};
 									messages["Initializing repository: "] + name);
 							deferred.then(function(jsonData, secondArg){
 								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData){
-									if(explorer.changedItem) {
-										explorer.changedItem();
-									}
+									refresh(data);
 								}, func, messages["Init Git Repository"]);
 							}, function(jsonData, secondArg) {
 								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Init Git Repository']);
@@ -2248,8 +2242,8 @@ var exports = {};
 							progress.progress(gitService.removeGitRepository(item[i].Location), "Removing repository " + item.Name).then(
 									function(jsonData){
 										alreadyDeleted++;
-										if(alreadyDeleted >= item.length && explorer.changedItem){
-											explorer.changedItem();
+										if(alreadyDeleted >= item.length){
+											refresh(data);
 										}
 									}, displayErrorOnStatus);
 						}
@@ -2258,10 +2252,7 @@ var exports = {};
 					if(confirm(i18nUtil.formatMessage(messages['Are you sure you want to delete ${0}?'], item.Name)))
 						progress.progress(gitService.removeGitRepository(item.Location), "Removing repository " + item.Name).then(
 							function(jsonData){
-								if(explorer.changedItem){
-									window.location = require.toUrl(repoTemplate.expand({})); //reset the location
-									explorer.changedItem();
-								}
+								refresh(data);
 							},
 							displayErrorOnStatus);
 				}

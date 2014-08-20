@@ -29,6 +29,7 @@ define([
 		this.registry = options.registry;
 		this.handleError = options.handleError;
 		this.section = options.section;
+		this.location = options.location;
 		this.repositories = options.repositories;
 		this.progressService = options.progressService;
 		this.parentId = options.parentId;
@@ -115,14 +116,20 @@ define([
 			if (parentItem.children && !parentItem.more) {
 				onComplete(parentItem.children);
 			} else if (parentItem.Type === "RepoRoot") { //$NON-NLS-0$
-				var allInfoDeferreds = that.repositories.map(function(repo) {
-					return repo.infoDeferred = that.loadRepositoryInfo(repo);
-				});
-				function done() {
+				Deferred.when (this.repositories || this.progressService.progress(this.gitClient.getGitClone(that.location), messages["Getting git repository details"]), function(resp){
+					var repositories = that.repositories = resp.Children || resp;
+					var allInfoDeferreds = repositories.map(function(repo) {
+						return repo.infoDeferred = that.loadRepositoryInfo(repo);
+					});
+					function done() {
+						if (progress) progress.done();
+					}
+					Deferred.all(allInfoDeferreds).then(done, done);
+					onComplete(that.processChildren(parentItem, repositories));
+				}, function(error){
 					if (progress) progress.done();
-				}
-				Deferred.all(allInfoDeferreds).then(done, done);
-				onComplete(that.processChildren(parentItem, that.repositories));
+					that.handleError(error);
+				});
 			} else {
 				onComplete([]);
 			}
@@ -130,6 +137,9 @@ define([
 		processChildren: function(parentItem, children) {
 			children.forEach(function(item) {
 				item.parent = parentItem;
+			});
+			children.sort(function(repo1, repo2) {
+				return repo1.Name.localeCompare(repo2.Name);
 			});
 			parentItem.children = children;
 			return children;
@@ -157,13 +167,9 @@ define([
 		this.actionScopeId = options.actionScopeId;
 		this.sectionActionScodeId = options.sectionActionScodeId;
 		this.repositories = options.repositories;
-		if (this.repositories) {
-			this.repositories.sort(function(repo1, repo2) {
-				return repo1.Name.localeCompare(repo2.Name);
-			});
-		}
 		this.mode = options.mode;
 		this.showLinks = options.showLinks;
+		this.location = options.location;
 		this.section = options.section;
 		this.selectionPolicy = options.selectionPolicy;
 		this.handleError = options.handleError;
@@ -183,8 +189,12 @@ define([
 				});
 			}
 			var that = this;
+			if (!item.more) {
+				that.repositories = model.repositories = item.children = null;
+			}
 			model.getChildren(item, function(children) {
 				item.removeAll = true;
+				that.repositories = children;
 				that.myTree.refresh.bind(that.myTree)(item, children, false);
 				deferred.resolve(children);
 			});
@@ -200,6 +210,7 @@ define([
 				fileClient: this.fileClient,
 				section: this.section,
 				repositories: this.repositories,
+				location: this.location,
 				mode: this.mode,
 				parentId: this.parentId,
 				handleError: this.handleError

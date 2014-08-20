@@ -292,7 +292,14 @@ define([
 	};
 	
 	GitRepositoryExplorer.prototype.setSelectedRepository = function(repository, force) {
-		if (!force && repository && repository === this.repository) return;
+		if (!force) {
+			if (repository === this.repository) return;
+			if (repository && this.repository) {
+				if (repository.Location === this.repository.Location) {
+					return;
+				}
+			}
+		}
 		this.destroy();
 		this.repository = repository;
 		this.initTitleBar(repository || {});
@@ -345,6 +352,7 @@ define([
 				that.commandService.processURL(window.location.href);
 			});
 		}
+		this.repositoriesLocation = location;
 		this.progressService.progress(this.gitClient.getGitClone(location), messages["Getting git repository details"]).then(function(resp){
 			that.repositories = resp.Children || [];
 			if (resource) {
@@ -468,6 +476,7 @@ define([
 			actionScopeId: this.actionScopeId,
 			sectionActionScodeId: "dropdownRepositoryActionsNode", //$NON-NLS-0$
 			handleError: this.handleError.bind(this),
+			location: this.repositoriesLocation,
 			section: section,
 			selection: selection,
 			selectionPolicy: "singleSelection", //$NON-NLS-0$
