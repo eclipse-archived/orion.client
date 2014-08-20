@@ -440,7 +440,10 @@ parseStatement: true, parseSourceElement: true */
                 ++index;
                 lineStart = index;
                 if (index >= length) {
-                    throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                    if(typeof extra.errors === 'undefined') {
+                        //will be handled blelow
+                        throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                    }
                 }
             } else if (ch === 42) {
                 // Block comment ends with '*/' (char #42, char #47).
@@ -463,7 +466,7 @@ parseStatement: true, parseSourceElement: true */
             }
         }
         //RECOVERY mrennie
-        if(index === length) {
+        if(index >= length && extra.comments) {
             //ran off the end of the file - the whole thing is a comment
             loc.end = {
                 line: lineNumber,
@@ -471,6 +474,7 @@ parseStatement: true, parseSourceElement: true */
             };
             comment = source.slice(start+2, index);
             addComment('Block', comment, start, index, loc);
+            throwErrorTolerant({}, Messages.UnexpectedToken, 'ILLEGAL');
         } else {
             throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
         }
