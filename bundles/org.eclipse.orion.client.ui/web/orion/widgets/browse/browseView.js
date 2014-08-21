@@ -329,11 +329,11 @@ define([
 							if(this.breadCrumbInHeader) {
 								bcNodeContainer.classList.add("breadCrumbContainerInHeader"); 
 								titleNode.appendChild(bcNodeContainer);
-								this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 150/*branch selector width*/ - 50);
+								this.breadCrumbMaker(bcNode);
 							} else {
 								bcNodeContainer.classList.add("breadCrumbContainer"); 
 								this.sectionContents.appendChild(bcNodeContainer);
-								this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 5);
+								this.breadCrumbMaker(bcNode);
 							}
 						}
 						//Render the branch level commit information 

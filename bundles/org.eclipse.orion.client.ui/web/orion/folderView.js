@@ -71,9 +71,6 @@ define([
 		 * override NavigatorRenderer's prototype
 		 */
 		getCellHeaderElement: function(col_no) {
-			if(this.explorer.breadCrumbMaker) {
-				return null;
-			}
 			var td;
 			if (col_no === 0) {
 				td = document.createElement("th"); //$NON-NLS-0$
@@ -121,7 +118,6 @@ define([
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.editorInputManager = options.editorInputManager;
 		this.readonly = options.readonly;
-		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.clickHandler = options.clickHandler;
 		this.treeRoot = {};
 		this.parent = lib.node(options.parentId);	
@@ -197,7 +193,6 @@ define([
 		this.editorView = options.editorView;
 		this._maxEditorHeight = options.maxEditorHeight;
 		this.imageView = options.imageView;
-		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.clickHandler = options.clickHandler;
 		this._init();
 	}
@@ -311,7 +306,6 @@ define([
 									view: this,
 									readonly: this.readonly,
 									menuBar: this.menuBar,
-									breadCrumbMaker: this.breadCrumbMaker,
 									clickHandler: this.clickHandler,
 									serviceRegistry: this.serviceRegistry,
 									fileClient: this.fileClient,
@@ -322,15 +316,6 @@ define([
 								foldersSection.embedExplorer(this.folderNavExplorer);
 								this.folderNavExplorer.setCommandsVisible(this._isCommandsVisible());
 								this.folderNavExplorer.loadRoot(this._metadata);
-							}
-							if(this.breadCrumbMaker) {
-								var tileNode = foldersSection.getTitleElement();
-								if(tileNode) {
-									lib.empty(tileNode);
-									var bcNode = document.createElement("div"); //$NON-NLS-0$
-									tileNode.appendChild(bcNode);
-									this.breadCrumbMaker(bcNode, foldersSection.getHeaderElement().offsetWidth - 24);
-								}
 							}
 						}
 					} else if(sectionName === "readme"){ //$NON-NLS-0$

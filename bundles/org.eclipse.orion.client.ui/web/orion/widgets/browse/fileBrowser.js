@@ -463,7 +463,7 @@ define([
 			}
 			return this._currentEditorView;
 		},
-		_breadCrumbMaker: function(bcContainer, maxLength){
+		_breadCrumbMaker: function(bcContainer){
 			this._renderBreadCrumb({
 				task: "Browse", //$NON-NLS-0$
 				name: this._breadCrumbName,
@@ -471,8 +471,7 @@ define([
 				breadCrumbContainer: bcContainer,
 				makeBreadcrumbLink: function(segment, folderLocation, folder) {this._makeBreadCrumbLink(segment, folderLocation, folder);}.bind(this),
 				makeBreadcrumFinalLink: false,
-				fileClient: this._fileClient,
-				maxLength: maxLength
+				fileClient: this._fileClient
 			});
 		},
 		
@@ -543,9 +542,11 @@ define([
 					//TODO: We need a better way to show the root of a repo
 					//bcRootName = "Branch Root(" + this._branchSelector.getActiveResource().Name + ")";
 				}
-				new mBreadcrumbs.BreadCrumbs({
+				if (this._currentBreadcrumb) {
+					this._currentBreadcrumb.destroy();
+				}
+				this._currentBreadcrumb = new mBreadcrumbs.BreadCrumbs({
 					container: locationNode,
-					maxLength: options.maxLength,
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
 					workspaceRootSegmentName: bcRootName,
@@ -625,7 +626,7 @@ define([
 					fileService: this._fileClient,
 					snippetShareOptions: this.snippetShareOptions,
 					//clickHandler: function(location) {this.refresh(location);}.bind(this),
-					breadCrumbMaker: this.snippetShareOptions ? null: function(bcContainer, maxLength) {this._breadCrumbMaker(bcContainer, maxLength);}.bind(this)
+					breadCrumbMaker: this.snippetShareOptions ? null: function(bcContainer) {this._breadCrumbMaker(bcContainer);}.bind(this)
 				};
 				if (!metadata.Directory) {
 					if(this.shareSnippetHandler) {

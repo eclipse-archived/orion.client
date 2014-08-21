@@ -110,11 +110,24 @@ a:hover {
 
 /* Breadcrumbs */
 
+.breadcrumbContainer {
+	align-items: baseline;
+	display: inline-flex;
+	justify-content: center;
+	margin-right: 0;
+	overflow: hidden;
+	visibility: visible;
+	width: 100%;
+}
+
 .breadcrumb {
-	font-size: 8pt;
-	text-decoration: none;
 	color: #333;
+	flex-grow: 0;
+	font-size: 8pt;
+	overflow: hidden;
 	padding-top: 2px;
+	text-decoration: none;
+	text-overflow: ellipsis;
 }
 
 a.breadcrumb:hover {
@@ -129,10 +142,12 @@ a.breadcrumb:hover {
 } */
 
 .breadcrumbSeparator {
-	font-size: 8pt;
-	text-decoration: none;
 	color: #333;
+	flex-shrink: 0;
+	font-size: 8pt;
 	font-weight: bold;
+	margin: 2px;
+	text-decoration: none;
 }
 
 .currentLocation {
@@ -145,13 +160,26 @@ a.breadcrumb:hover {
 	white-space:nowrap;
 }
 
+div.currentLocation {
+	width: 100%;
+}
+
+.breadcrumbContainer > .currentLocation {
+	margin: 0;
+}
+
 a.currentLocation:hover {
 	font-weight: bold;
 	font-size: 8pt;
 	color: #F58B0F;
  	text-decoration: none;
 	border-bottom: 1px dotted;
- }
+}
+
+a.breadcrumb.currentLocation {
+	font-weight: bold;
+	margin: 0;
+}
 
 .auxpane {
 	border: 0;
