@@ -10,12 +10,47 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/PageUtil', 'orion/commandRegistry', 'orion/dialogs', 'orion/selection', 
-        'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands',
-        'orion/git/gitRepositoryExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links'], 
-		function(mBrowserCompatibility, mBootstrap, mStatus, mProgress, PageUtil, mCommandRegistry, mDialogs, mSelection, 
-				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, 
-				mGitRepositoryExplorer, mGitCommands, mGitClient, mSshTools, mLinks) {
+define([
+	'orion/browserCompatibility',
+	'i18n!git/nls/gitmessages',
+	'orion/bootstrap',
+	'orion/status',
+	'orion/progress',
+	'orion/PageUtil',
+	'orion/commandRegistry',
+	'orion/dialogs',
+	'orion/selection',
+	'orion/fileClient',
+	'orion/operationsClient',
+	'orion/searchClient',
+	'orion/globalCommands',
+	'orion/git/gitRepositoryExplorer',
+	'orion/git/gitCommands',
+	'orion/git/gitClient',
+	'orion/ssh/sshTools',
+	'orion/fileUtils',
+	'orion/links'
+], function(
+	mBrowserCompatibility,
+	messages,
+	mBootstrap,
+	mStatus,
+	mProgress,
+	PageUtil,
+	mCommandRegistry,
+	mDialogs,
+	mSelection,
+	mFileClient,
+	mOperationsClient,
+	mSearchClient,
+	mGlobalCommands,
+	mGitRepositoryExplorer,
+	mGitCommands,
+	mGitClient,
+	mSshTools,
+	mFileUtils,
+	mLinks
+) {
 
 mBootstrap.startup().then(function(core) {
 	var serviceRegistry = core.serviceRegistry;
@@ -90,33 +125,35 @@ mBootstrap.startup().then(function(core) {
 	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showCurrent", 2000); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	var params = PageUtil.matchResourceParameters();
-	if (typeof params["createProject.name"] === "undefined") { //$NON-NLS-0$
+	if (params["createProject.name"] === undefined) { //$NON-NLS-0$
 		commandRegistry.processURL(window.location.href);
 	}
 	
-	progress.progress(fileClient.loadWorkspace("/file"), "Loading default workspace").then(
-		function(workspace){
-			explorer.setDefaultPath(workspace.Location);
-			
-			var projectDescription = {};
-			for(var k in params){
-				if (k.indexOf("createProject") != -1){
-					projectDescription[k.replace("createProject.", "")] = params[k];
-				}
+	function loadWorspace() {
+		return progress.progress(fileClient.loadWorkspace(mFileUtils.makeRelative("/file")), messages["Loading default workspace"]); //$NON-NLS-0$
+	}
+	
+	loadWorspace().then(function(workspace){
+		explorer.setDefaultPath(workspace.Location);
+		
+		var projectDescription = {};
+		for(var k in params){
+			if (k.indexOf("createProject") !== -1){ //$NON-NLS-0$
+				projectDescription[k.replace("createProject.", "")] = params[k]; //$NON-NLS-0$
 			}
+		}
 
-			commandRegistry.runCommand("eclipse.createGitProject", {url: params["cloneGit"], projectDescription: projectDescription}, null, null);
-			
-			if (typeof params["createProject.name"] === "undefined") { //$NON-NLS-0$
-				explorer.redisplay();
-			}
-		}	
-	);	
+		commandRegistry.runCommand("eclipse.createGitProject", {url: params["cloneGit"], projectDescription: projectDescription}, null, null); //$NON-NLS-1$ //$NON-NLS-0$
+		
+		if (params["createProject.name"] === undefined) { //$NON-NLS-0$
+			explorer.redisplay();
+		}
+	});	
 	
 	// previously saved resource value
 	var previousResourceValue = params.resource;
 	
-	window.addEventListener("hashchange", function() {
+	window.addEventListener("hashchange", function() { //$NON-NLS-0$
 		// make sure to close all parameter collectors
 		commandRegistry.closeParameterCollector();
 		
@@ -126,15 +163,12 @@ mBootstrap.startup().then(function(core) {
 		if(previousResourceValue !== resource){
 			previousResourceValue = resource;
 		
-			progress.progress(fileClient.loadWorkspace(), "Loading default workspace").then(
-				function(workspace){
-					explorer.setDefaultPath(workspace.Location);
-					explorer.redisplay();
-				}	
-			);	
+			loadWorspace().then(function(workspace){
+				explorer.setDefaultPath(workspace.Location);
+				explorer.redisplay();
+			});
 		}
 	}, false);
-		
 });
 
 //end of define
