@@ -142,7 +142,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
     
     SearchResultRenderer.prototype.getCheckboxColumn = function(item, tableRow){
-    	if (item.type === "file") { //$NON-NLS-0$
+    	if (!this.explorer.model.replaceMode() || (item.type === "file")) { //$NON-NLS-0$
     		return mExplorer.ExplorerRenderer.prototype.getCheckboxColumn.call(this, item, tableRow);
     	} else {
     		//detail row checkboxes should be placed in next column
