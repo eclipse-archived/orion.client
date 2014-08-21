@@ -465,6 +465,7 @@ define([
 			var selected = e.selection;
 			if (!selected || this.repository === selected) return;
 			this.commit = this.reference = this.log = this.logLocation = this.treePath = null;
+			section.setHidden(true);
 			this.setSelectedRepository(selected);
 			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
 		}.bind(this));
@@ -523,6 +524,7 @@ define([
 					return;
 			}
 			this.commit = this.reference = this.log = this.logLocation = this.treePath = null;
+			section.setHidden(true);
 			this.setSelectedRef(selected);
 			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
 		}.bind(this));
