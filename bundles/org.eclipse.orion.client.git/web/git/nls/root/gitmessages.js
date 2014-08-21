@@ -379,6 +379,7 @@ define({
 	"Resetting local changes": "Resetting local changes",
 	"Checkout files, discarding all changes": "Checkout files, discarding all changes",
 	"Show Patch": "Show Patch",
+	"Loading default workspace": "Loading default workspace",
 	"Show workspace changes as a patch": "Show workspace changes as a patch",
 	"Show checked changes as a patch": "Show checked changes as a patch",
 	"Continue": "Continue",
