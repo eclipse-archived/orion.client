@@ -89,7 +89,7 @@ mBootstrap.startup().then(function(core) {
 	// define commands
 	mGitCommands.createFileCommands(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$
 	mGitCommands.createGitClonesCommands(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", fileClient); //$NON-NLS-1$ //$NON-NLS-0$
-	mGitCommands.createGitStatusCommands(serviceRegistry, commandRegistry, explorer, true);
+	mGitCommands.createGitStatusCommands(serviceRegistry, commandRegistry, explorer);
 	mGitCommands.createSharedCommands(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", fileClient); //$NON-NLS-1$ //$NON-NLS-0$
 
 	// object contributions

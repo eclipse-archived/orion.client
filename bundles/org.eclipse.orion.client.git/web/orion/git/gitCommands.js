@@ -1384,70 +1384,6 @@ var exports = {};
 		});
 		commandService.addCommand(pushBranchForceCommand);
 
-		var previousLogPage = new mCommands.Command({
-			name : messages["< Previous Page"],
-			tooltip: messages["Show previous page of git log"],
-			id : "eclipse.orion.git.previousLogPage", //$NON-NLS-0$
-			hrefCallback : function(data) {
-				return require.toUrl(logTemplateNoPage.expand({resource: data.items.PreviousLocation}));
-			},
-			visibleWhen : function(item) {
-				if(item.Type === "RemoteTrackingBranch" || (item.toRef && item.toRef.Type === "Branch") || item.RepositoryPath !== null){ //$NON-NLS-1$ //$NON-NLS-0$
-					return item.PreviousLocation !== undefined;
-				}
-				return false;
-			}
-		});
-		commandService.addCommand(previousLogPage);
-
-		var nextLogPage = new mCommands.Command({
-			name : messages["Next Page >"],
-			tooltip: messages["Show next page of git log"],
-			id : "eclipse.orion.git.nextLogPage", //$NON-NLS-0$
-			hrefCallback : function(data) {
-				return require.toUrl(logTemplateNoPage.expand({resource: data.items.NextLocation}));
-			},
-			visibleWhen : function(item) {
-				if(item.Type === "RemoteTrackingBranch" ||(item.toRef && item.toRef.Type === "Branch") || item.RepositoryPath !== null){ //$NON-NLS-1$ //$NON-NLS-0$
-					return item.NextLocation !== undefined;
-				}
-				return false;
-			}
-		});
-		commandService.addCommand(nextLogPage);
-		
-		var previousTagPage = new mCommands.Command({
-			name : messages["< Previous Page"],
-			tooltip : messages["Show previous page of git tags"],
-			id : "eclipse.orion.git.previousTagPage", //$NON-NLS-0$
-			hrefCallback : function(data) {
-				return require.toUrl(repoTemplate.expand({resource: data.items.PreviousLocation}));
-			},
-			visibleWhen : function(item){
-				if(item.Type === "Tag"){ //$NON-NLS-0$
-					return item.PreviousLocation !== undefined;
-				}
-				return false;
-			}
-		});
-		commandService.addCommand(previousTagPage);
-		
-		var nextTagPage = new mCommands.Command({
-			name : messages["Next Page >"],
-			tooltip : messages["Show next page of git tags"],
-			id : "eclipse.orion.git.nextTagPage", //$NON-NLS-0$
-			hrefCallback : function(data){
-				return require.toUrl(repoTemplate.expand({resource: data.items.NextLocation}));
-			},
-			visibleWhen : function(item){
-				if(item.Type === "Tag"){ //$NON-NLS-0$
-					return item.NextLocation !== undefined;
-				}
-				return false;
-			}
-		});
-		commandService.addCommand(nextTagPage);
-
 		var resetCallback = function(data, location, refId, mode, message) {
 			var item = data.items;
 			if(confirm(i18nUtil.formatMessage(message, refId))) { //$NON-NLS-0$
@@ -2414,9 +2350,15 @@ var exports = {};
 		commandService.addCommand(openCommitCommand);
 	};
 
-	exports.createGitStatusCommands = function(serviceRegistry, commandService, explorer, newLook) {
+	exports.createGitStatusCommands = function(serviceRegistry, commandService, explorer) {
 		
-		var refresh = function() { explorer.changedItem(); }
+		var refresh = function(data, items) { 
+			if (data && data.handler.changedItem) {
+				data.handler.changedItem(items);
+			} else { 
+				explorer.changedItem(items); 
+			}
+		};
 		
 		var commitOptions = {
 			serviceRegistry : serviceRegistry,
@@ -2437,8 +2379,8 @@ var exports = {};
 		var stageCommand = new mCommands.Command({
 			name: messages['Stage'],
 			tooltip: messages['Stage the change'],
-			imageClass: newLook ? "core-sprite-check" : "git-sprite-stage", //$NON-NLS-0$ //$NON-NLS-1$
-			spriteClass: newLook ? "commandSprite" : "gitCommandSprite", //$NON-NLS-0$ //$NON-NLS-1$
+			imageClass: "git-sprite-stage", //$NON-NLS-0$ //$NON-NLS-1$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$ //$NON-NLS-1$
 			id: "eclipse.orion.git.stageCommand", //$NON-NLS-0$
 			callback: function(data) {
 				var items = forceArray(data.items);
@@ -2453,7 +2395,7 @@ var exports = {};
 						messages["Staging changes"]);
 					deferred.then(
 						function(jsonData){
-							newLook? data.handler.changedItem(items) : explorer.changedItem(items);
+							refresh(data, items);
 						}, displayErrorOnStatus
 					);
 				} else {
@@ -2468,7 +2410,7 @@ var exports = {};
 						"Staging changes");
 					deferred.then( //$NON-NLS-0$
 						function(jsonData){
-							newLook? data.handler.changedItem(items) : explorer.changedItem(items);
+							refresh(data. items);
 						}, displayErrorOnStatus
 					);
 				}			
@@ -2516,13 +2458,13 @@ var exports = {};
 		var unstageCommand = new mCommands.Command({
 			name: messages['Unstage'],
 			tooltip: messages['Unstage the change'],
-			imageClass: newLook ? "core-sprite-check_on" : "git-sprite-unstage", //$NON-NLS-0$  //$NON-NLS-1$
-			spriteClass: newLook ?  "commandSprite" : "gitCommandSprite", //$NON-NLS-0$ //$NON-NLS-1$
+			imageClass: "git-sprite-unstage", //$NON-NLS-0$  //$NON-NLS-1$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$ //$NON-NLS-1$
 			id: "eclipse.orion.git.unstageCommand", //$NON-NLS-0$
 			callback: function(data) {
 				doUnstage(data).then(
 					function(items){
-						newLook? data.handler.changedItem(items) : explorer.changedItem(items);
+						refresh(data, items);
 					}, displayErrorOnStatus
 				);
 			},
@@ -2542,8 +2484,8 @@ var exports = {};
 		commandService.addCommand(unstageCommand);
 		
 		var commitCommand = new mCommands.Command({
-			name: newLook ? messages["SmartCommit"] : messages["Commit"], //$NON-NLS-0$
-			tooltip: newLook ? "" : messages["Commit"], //$NON-NLS-0$
+			name: messages["Commit"], //$NON-NLS-0$
+			tooltip: messages["Commit"], //$NON-NLS-0$
 			id: "eclipse.orion.git.commitCommand", //$NON-NLS-0$
 			callback: function(data) {
 				commitCallback(data).then(function() {
@@ -2724,7 +2666,7 @@ var exports = {};
 							messages['Resetting local changes']);
 						
 						return deferred.then(function(jsonData){
-							newLook? data.handler.changedItem(items) : explorer.changedItem(items);
+							refresh(data, items);
 						}, displayErrorOnStatus);
 						
 					}, displayErrorOnStatus
