@@ -130,7 +130,7 @@ mBootstrap.startup().then(function(core) {
 	}
 	
 	function loadWorspace() {
-		return progress.progress(fileClient.loadWorkspace(mFileUtils.makeRelative("/file")), messages["Loading default workspace"]); //$NON-NLS-0$
+		return progress.progress(fileClient.loadWorkspace(mFileUtils.makeParentRelative("../file")), messages["Loading default workspace"]); //$NON-NLS-0$
 	}
 	
 	loadWorspace().then(function(workspace){
