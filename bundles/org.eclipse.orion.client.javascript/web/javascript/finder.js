@@ -483,8 +483,16 @@ define([
 							} else {
 							    if(next) {
 							        found = node;
+							        if(parents) {
+    									parents.push(node);
+    								}
 							    }
-								return Estraverse.VisitorOption.Break;
+							    if(found.type !== Estraverse.Syntax.Program) {
+							        //we don't want to find the next node as the program root
+							        //if program has no children it will be returned on the next pass
+							        //https://bugs.eclipse.org/bugs/show_bug.cgi?id=442411
+								    return Estraverse.VisitorOption.Break;
+								}
 							}
 						}
 					},

@@ -292,6 +292,107 @@ define([
 			
 		});
 		/**
+		 * Tests finding the next node from a given node offset
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=442411
+		 * @since 7.0
+		 */
+		it('test_findNodeNext1', function() {
+			editorContext.text = "/** */ function  F1(p1, p2) {}";
+			return astManager.getAST(editorContext).then(function(ast) {
+			    try {
+    				var node = Finder.findNode(6, ast, {parents:true, next:true});
+    				if(!node) {
+    					assert.fail("Should have found a node");
+    				}
+    				else {
+    					assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
+    					assert.equal(node.parents.length, 1, 'Should have found one parent');
+    					assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the first parent');
+    				}
+				}
+        		finally {
+        			tearDown();
+        		}
+			});
+			
+		});
+		/**
+		 * Tests finding the next node from a given node offset
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=442411
+		 * @since 7.0
+		 */
+		it('test_findNodeNext2', function() {
+			editorContext.text = "/** */ /** */ function  F1(p1, p2) {}";
+			return astManager.getAST(editorContext).then(function(ast) {
+			    try {
+    				var node = Finder.findNode(6, ast, {parents:true, next:true});
+    				if(!node) {
+    					assert.fail("Should have found a node");
+    				}
+    				else {
+    					assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
+    					assert.equal(node.parents.length, 1, 'Should have found one parent');
+    					assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the first parent');
+    				}
+				}
+        		finally {
+        			tearDown();
+        		}
+			});
+			
+		});
+		/**
+		 * Tests finding the next node from a given node offset
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=442411
+		 * @since 7.0
+		 */
+		it('test_findNodeNext3', function() {
+			editorContext.text = "function  F1(p1, p2) {}";
+			return astManager.getAST(editorContext).then(function(ast) {
+			    try {
+    				var node = Finder.findNode(6, ast, {parents:true, next:true});
+    				if(!node) {
+    					assert.fail("Should have found a node");
+    				}
+    				else {
+    					assert.equal(node.type, 'Identifier', 'Should have found an Identifier node');
+    					assert.equal(node.parents.length, 2, 'Should have found two parent');
+    					assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the second parent');
+    					assert.equal(node.parents[1].type, 'FunctionDeclaration', 'Should have found the parent FunctionDeclaration node as the first parent');
+    				}
+				}
+        		finally {
+        			tearDown();
+        		}
+			});
+			
+		});
+		
+		/**
+		 * Tests finding the next node from a given node offset
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=442411
+		 * @since 7.0
+		 */
+		it('test_findNodeNext3', function() {
+			editorContext.text = "/** */ ";
+			return astManager.getAST(editorContext).then(function(ast) {
+			    try {
+    				var node = Finder.findNode(6, ast, {parents:true, next:true});
+    				if(!node) {
+    					assert.fail("Should have found a node");
+    				}
+    				else {
+    					assert.equal(node.type, 'Program', 'Should have found the Program node');
+    				}
+				}
+        		finally {
+        			tearDown();
+        		}
+			});
+			
+		});
+		
+		/**
 		 * Find a token in a broken AST
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
