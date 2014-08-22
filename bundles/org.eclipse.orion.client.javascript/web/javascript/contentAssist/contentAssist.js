@@ -450,6 +450,7 @@ define([
     								relevance: 100,
     								name: rulekey,
     								description: ' - '+(rule.description ? rule.description : 'ESLint rule name'),
+    								prefix: context.prefix,
     								style: 'emphasis',
     								overwrite: true
     						    });
