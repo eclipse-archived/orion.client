@@ -22,12 +22,11 @@ define(function() {
     	 * block comments that allow chars normal JS does not
     	 * @function
     	 * @param {String} buffer
-    	 * @param {Number} offset
     	 * @param {Object} context
     	 * @param {String} kind
     	 * @returns {String} The prefix to use
     	 */
-    	getPrefix: function getPrefix(buffer, offset, context, kind) {
+    	getPrefix: function getPrefix(buffer, context, kind) {
 		    var prefix = context.prefix;
 		    if(typeof prefix === 'string' && typeof context.line === 'string') {
 		        switch(kind) {
@@ -36,12 +35,9 @@ define(function() {
 		                var index = context.offset-1;
 		                var word = '', char = buffer.charAt(index);
 		                //do an initial check before looping + regex'ing
-		                if(char === '{') {
-        		            return null;
+		                if('{*,'.indexOf(char) > -1) {
+        		            return word;
         		        }
-        		        if(char === '*') {
-    		                return word;
-    		            }
     		            if(char === '@') {
         		            return '@';
         		        }
@@ -53,12 +49,9 @@ define(function() {
             		        }
 		                    index--;
 		                    char = buffer.charAt(index);
-		                    if(char === '*') {
+		                    if('{*,'.indexOf(char) > -1) {
 		                        // we don't want the prefix to include the '*'
         		                return word;
-        		            }
-        		            if(char === '{') {
-        		                return null;
         		            }
 		                }
                         return word;        		        

@@ -59,7 +59,7 @@ define([
 			name: "eslint-disable",  //$NON-NLS-0$
 			nodes: {top:false, member:false, prop:false, doc:true},
 			description: " - ESLint rule disablement directive", //$NON-NLS-0$
-			template: "eslint-disable ${rule-d} ${cursor}" //$NON-NLS-0$  
+			template: "eslint-disable ${rule-id} ${cursor}" //$NON-NLS-0$  
 	    },
 	    {
 	        prefix: "@author", //$NON-NLS-0$

@@ -39,6 +39,7 @@ define([
  	}
  	
 	TemplateProvider.prototype = new mTemplates.TemplateContentAssist(JSSyntax.keywords, []);
+	
 	Objects.mixin(TemplateProvider.prototype, {
 		uninterestingChars: ":!#$^&.?<>", //$NON-NLS-0$
 		/**
@@ -136,11 +137,6 @@ define([
 		},
 		
 		/**
-		 * @description override
-		 */
-		
-		
-		/**
 		 * @name _looselyMatches
 		 * @description Returns if the template applies to more than a simple prefix match
 		 * @function
@@ -160,7 +156,7 @@ define([
     		        var line = context.line.slice(0, (len > -1 ? len : 0)).trim();
     		        if(kind.kind === 'jsdoc') {
     		            // don't propose tag templates when one exists already on the same line
-    		            return !/^[\*]\s*[@]/ig.test(line);
+    		            return !/^[\/]?[\*]+\s*[@]/ig.test(line);
     		        } 
 		        }
 		        if(kind.kind === 'doc') {
@@ -208,7 +204,7 @@ define([
 		initialize: function() {
 		    //override
 		},
-
+        
 		/**
 		 * @description Implements the Orion content assist API v4.0
 		 */
@@ -271,7 +267,7 @@ define([
 			// note that if selection has length > 0, then just ignore everything past the start
 			var completionKind = this._getCompletionContext(ast, offset, buffer);
 			if (completionKind) {
-			    context.prefix = proposalUtils.getPrefix(buffer, offset, context, completionKind.kind);
+			    context.prefix = proposalUtils.getPrefix(buffer, context, completionKind.kind);
 				var self = this;
 				return typeEnv.createEnvironment({
 					buffer: buffer,
@@ -443,16 +439,17 @@ define([
 	            if(comment) {
     	            if(/^(?:\/\*)?\s*eslint(?:-enable|-disable)?\s+/gi.test(context.line)) {
     	                //eslint eslint-enable eslint-disable
-    	                var rules = Object.keys(Rules()).sort();
-    	                var len = rules.length;
-    	                for(i = 0; i < len; i++) {
-    	                    var rule = rules[i];
-                            if(proposalUtils.looselyMatches(context.prefix, rule)) { 
-                               proposals.push({
-    								proposal: rule.slice(context.prefix.length),
+    	                var rules = Rules.getRules();
+    	                var rulekeys = Object.keys(rules).sort();
+    	                for(i = 0; i < rulekeys.length; i++) {
+    	                    var rulekey = rulekeys[i];
+                            if(proposalUtils.looselyMatches(context.prefix, rulekey)) {
+                                var rule = rules[rulekey];
+                                proposals.push({
+    								proposal: rulekey,
     								relevance: 100,
-    								name: rule,
-    								description: ' - ESLint rule name',
+    								name: rulekey,
+    								description: ' - '+(rule.description ? rule.description : 'ESLint rule name'),
     								style: 'emphasis',
     								overwrite: true
     						    });

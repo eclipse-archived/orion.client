@@ -2,7 +2,7 @@
 define([
 './load-rules-async', 
 'exports', 
-], function(loadRules, exports) {
+], function(Rules, exports) {
 /**
  * @fileoverview Defines a storage for rules.
  * @author Nicholas C. Zakas
@@ -38,7 +38,7 @@ exports.define = define;
  * @returns {void}
  */
 function load(rulesDir) {
-    var newRules = loadRules(rulesDir);
+    var newRules = Rules.getESLintRules(rulesDir);
     Object.keys(newRules).forEach(function(ruleId) {
         define(ruleId, newRules[ruleId]);
     });

@@ -126,7 +126,7 @@ define([
 			name: 'contentAssist',  //$NON-NLS-0$
 			id: "orion.edit.contentassist.javascript",  //$NON-NLS-0$
 			charTriggers: "[.]",  //$NON-NLS-0$
-			excludedStyles: "(comment.*|string.*)"  //$NON-NLS-0$
+			excludedStyles: "(string.*)"  //$NON-NLS-0$
 	});
 
 	/**
