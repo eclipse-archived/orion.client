@@ -319,16 +319,22 @@ define([
 	GitRepositoryExplorer.prototype.setSelectedRef = function(ref) {
 		this.reference = ref;
 //		this.displayTree(this.repository);
-		this.setSelectedCommit(this.commit);
+		this.setSelectedChanges(this.changes);
 		this.displayCommits(this.repository);
 	};
 	
-	GitRepositoryExplorer.prototype.setSelectedCommit = function(commit) {
+	GitRepositoryExplorer.prototype.setSelectedChanges = function(changes) {
 		lib.empty(lib.node('table')); //$NON-NLS-0$
-		this.commit = commit;
-		if (this.commit && this.commit.Type === "Commit") { //$NON-NLS-0$
-			this.displayCommit(this.commit);
-			this.displayDiffs(this.commit, this.repository);
+		this.changes = changes = changes || (this.repository.status ? [this.repository.status] : []);
+		if (changes.length === 2 && changes[0].Type === "Commit" && changes[1].Type === "Commit") {
+			this.gitClient.getDiff(changes[0].DiffLocation, changes[1].Name).then(function(resp) {
+				this.gitClient.doGitDiff(resp.Location + "?parts=diffs").then(function(resp1) {
+					this.displayDiffs(resp1, this.repository);
+				}.bind(this));
+			}.bind(this));
+		} else if (changes.length === 1 && this.changes[0] && this.changes[0].Type === "Commit") {
+			this.displayCommit(this.changes[0]);
+			this.displayDiffs(this.changes[0], this.repository);
 			this.statusDeferred = new Deferred().resolve(); //HACK
 		} else {
 			this.statusDeferred = this.displayStatus(this.repository);
@@ -347,7 +353,7 @@ define([
 		this.destroy();
 		this.accordion = new Accordion();
 		var that = this;
-		this.commit = this.reference = this.repository = this.treePath = this.log = this.logLocation = null;
+		this.changes = this.reference = this.repository = this.treePath = this.log = this.logLocation = null;
 		this.loadingDeferred = new Deferred();
 		if (processURLs){
 			this.loadingDeferred.then(function(){
@@ -369,7 +375,7 @@ define([
 								that.log = selection;
 								that.logLocation = resource;
 								that.treePath = selection.RepositoryPath;
-								that.commit = selection.Children[0];
+								that.changes = [selection.Children[0]];
 							} else if (selection.Type === "Branch" || selection.Type === "RemoteTrackingBranch" || selection.Type === "Tag") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 								that.reference = selection;
 							}
@@ -464,7 +470,7 @@ define([
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 			var selected = e.selection;
 			if (!selected || this.repository === selected) return;
-			this.commit = this.reference = this.log = this.logLocation = this.treePath = null;
+			this.changes = this.reference = this.log = this.logLocation = this.treePath = null;
 			section.setHidden(true);
 			this.setSelectedRepository(selected);
 			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
@@ -523,7 +529,7 @@ define([
 				default:
 					return;
 			}
-			this.commit = this.reference = this.log = this.logLocation = this.treePath = null;
+			this.changes = this.reference = this.log = this.logLocation = this.treePath = null;
 			section.setHidden(true);
 			this.setSelectedRef(selected);
 			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
@@ -612,8 +618,8 @@ define([
 			if (e.isExpanded) {
 				var location;
 				var model = this.commitsNavigator.model;
-				if (this.commit && this.commit.Type === "Commit") { //$NON-NLS-0$
-					location = this.commit.TreeLocation;
+				if (this.changes && this.changes.length === 1 && this.changes[0].Type === "Commit") { //$NON-NLS-0$
+					location = this.changes.TreeLocation;
 				} else {
 					location = (model.simpleLog ? model.getTargetReference() : model.getActiveBranch()).TreeLocation;
 				}
@@ -664,6 +670,34 @@ define([
 		return explorer.display();
 	};
 
+	function compare(s1, s2) {
+		if (s1 === s2) { return true; }
+		if (s1 && !s2 || !s1 && s2) { return false; }
+		if ((s1 && s1.constructor === String) || (s2 && s2.constructor === String)) { return false; }
+		if (s1 instanceof Array || s2 instanceof Array) {
+			if (!(s1 instanceof Array && s2 instanceof Array)) { return false; }
+			if (s1.length !== s2.length) { return false; }
+			for (var i = 0; i < s1.length; i++) {
+				if (!compare(s1[i], s2[i])) {
+					return false;
+				}
+			}
+			return true;
+		}
+		if (!(s1 instanceof Object) || !(s2 instanceof Object)) { return false; }
+		var p;
+		for (p in s1) {
+			if (s1.hasOwnProperty(p)) {
+				if (!s2.hasOwnProperty(p)) { return false; }
+				if (!compare(s1[p], s2[p])) {return false; }
+			}
+		}
+		for (p in s2) {
+			if (!s1.hasOwnProperty(p)) { return false; }
+		}
+		return true;
+	}
+
 	GitRepositoryExplorer.prototype.displayCommits = function(repository) {	
 		this.destroyCommits();
 		var parent = lib.node('sidebar'); //$NON-NLS-0$
@@ -681,9 +715,9 @@ define([
 		
 		var selection = this.commitsSelection = new mSelection.Selection(this.registry, "orion.selection.commit"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-			var selected = event.selection;
-			if ((this.commit || repository.status) === selected) return;
-			this.setSelectedCommit(selected);
+			var selected = event.selections;
+			if (compare(this.changes, selected)) return;
+			this.setSelectedChanges(selected);
 //			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
 		}.bind(this));
 		var explorer = this.commitsNavigator = new mGitCommitList.GitCommitListExplorer({
@@ -711,7 +745,13 @@ define([
 		return this.statusDeferred.then(function() {
 			return explorer.display().then(function() {
 				this.setBranchesTitle();
-				explorer.select(this.commit || repository.status);
+				if (this.changes) {
+					this.changes.forEach(function(c) {
+						explorer.select(c);
+					});
+				} else {
+					explorer.select(repository.status);
+				}
 			}.bind(this));
 		}.bind(this));
 	};
@@ -822,7 +862,7 @@ define([
 
 	GitRepositoryExplorer.prototype.displayDiffs = function(commit, repository) {
 		this.destroyDiffs();
-		var diffs = commit.Diffs;
+		var diffs = commit.Diffs || commit.Children;
 		diffs.forEach(function(item) {
 			var path = item.OldPath;
 			if (item.ChangeType === "ADD") { //$NON-NLS-0$

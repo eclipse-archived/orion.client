@@ -556,6 +556,26 @@ eclipse.GitService = (function() {
 			return clientDeferred;
 		},
 		
+		doGitDiff : function(gitDiffURI) {
+			var service = this;
+			
+			var clientDeferred = new Deferred();
+			xhr("GET", gitDiffURI, { 
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : contentType
+				},
+				timeout : 15000,
+				handleAs : "json" //$NON-NLS-0$
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+
+			return clientDeferred;
+		},
+		
 		doFetch : function(gitRemoteBranchURI, force, gitSshUsername, gitSshPassword, gitSshKnownHost, gitPrivateKey, gitPassphrase) {
 			var service = this;
 			
