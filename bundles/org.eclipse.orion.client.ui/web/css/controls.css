@@ -935,8 +935,8 @@ textarea.parameterInput {
 	border-bottom-left-radius: 3px;
 	border-bottom-right-radius: 3px;
 	border-color:#dadada;
-	-webkit-transition: all 0.1s ease;
-	transition: all 0.1s ease;
+	-webkit-transition: all 0.1s ease, left 0;
+	transition: all 0.1s ease, left 0;
 	-webkit-transform-origin: top;
 	-ms-transform-origin: top;
 	transform-origin: top;

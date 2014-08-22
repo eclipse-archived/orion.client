@@ -510,8 +510,6 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 		
 		_positionDropdown: function() {
 			if (!this.dropdown) return;
-			this._contentParent.style.left = "";
-			this._contentParent.style.top = "";
 			var bounds = lib.bounds(this.domNode);
 			var parentBounds = lib.bounds(this._boundingNode(this.domNode));
 			var bodyBounds = lib.bounds(document.body);
