@@ -326,20 +326,21 @@ define([
 	GitRepositoryExplorer.prototype.setSelectedChanges = function(changes) {
 		lib.empty(lib.node('table')); //$NON-NLS-0$
 		this.changes = changes = changes || (this.repository.status ? [this.repository.status] : []);
-		if (changes.length === 2 && changes[0].Type === "Commit" && changes[1].Type === "Commit") {
-			this.gitClient.getDiff(changes[0].DiffLocation, changes[1].Name).then(function(resp) {
-				this.gitClient.doGitDiff(resp.Location + "?parts=diffs").then(function(resp1) {
-					this.displayDiffs(resp1, this.repository);
-				}.bind(this));
-			}.bind(this));
-		} else if (changes.length === 1 && this.changes[0] && this.changes[0].Type === "Commit") {
+		if (changes.length === 2) {
+			if (changes[0].Type === "Commit" && changes[1].Type === "Commit") { //$NON-NLS-1$ //$NON-NLS-0$
+				this.displayDiffs(this.repository, null, changes[0].DiffLocation, changes[1].Name);
+			} else {
+				this.displayDiffs(this.repository, null, changes[0].Type === "Status" ? changes[1].DiffLocation : changes[0].DiffLocation); //$NON-NLS-0$
+			}
+			return;
+		} else if (changes.length === 1 && this.changes[0] && this.changes[0].Type === "Commit") { //$NON-NLS-0$
 			this.displayCommit(this.changes[0]);
-			this.displayDiffs(this.changes[0], this.repository);
+			this.displayDiffs(this.repository, this.changes[0].Diffs);
 			this.statusDeferred = new Deferred().resolve(); //HACK
-		} else {
-			this.statusDeferred = this.displayStatus(this.repository);
-			this.displayWorkingDirectory(this.repository);
+			return;
 		}
+		this.statusDeferred = this.displayStatus(this.repository);
+		this.displayWorkingDirectory(this.repository);
 	};
 	
 	GitRepositoryExplorer.prototype.setSelectedPath = function(path) {
@@ -659,7 +660,6 @@ define([
 			commandRegistry: this.commandService,
 			parentId:"statusNode", //$NON-NLS-0$
 			prefix: "all", //$NON-NLS-0$
-			location: repository.StatusLocation,
 			repository: repository,
 			section: section,
 			editableInComparePage: true,
@@ -835,7 +835,7 @@ define([
 		var commandRegistry = this.commandService;
 		var actionsNodeScope = section.actionsNode.id;
 		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.openGitCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.compareWithWorkingTree", 2); //$NON-NLS-1$ //$NON-NLS-0$
+//		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.compareWithWorkingTree", 2); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.checkoutTag", 3); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.resetIndex", 4); //$NON-NLS-0$
 		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.addTag", 5); //$NON-NLS-1$ //$NON-NLS-0$
@@ -860,17 +860,8 @@ define([
 		info.display();
 	};
 
-	GitRepositoryExplorer.prototype.displayDiffs = function(commit, repository) {
+	GitRepositoryExplorer.prototype.displayDiffs = function(repository, diffs, location, commitName) {
 		this.destroyDiffs();
-		var diffs = commit.Diffs || commit.Children;
-		diffs.forEach(function(item) {
-			var path = item.OldPath;
-			if (item.ChangeType === "ADD") { //$NON-NLS-0$
-				path = item.NewPath;
-			} 
-			item.name = path;
-			item.type = item.ChangeType;
-		});
 		var parent = lib.node('table'); //$NON-NLS-0$
 		var section = this.diffsSection = new mSection.Section(parent, { id : "diffSection", //$NON-NLS-0$
 			title : messages["ChangedFiles"],
@@ -886,9 +877,14 @@ define([
 			parentId:"diffNode", //$NON-NLS-0$
 			actionScopeId: "diffSectionItemActionArea", //$NON-NLS-0$
 			prefix: "diff", //$NON-NLS-0$
+			repository: repository,
 			changes: diffs,
+			location: location,
+			commitName: commitName,
 			section: section,
-			repository: repository
+			gitClient: this.gitClient,
+			progressService: this.progressService,
+			handleError: this.handleError.bind(this)
 		});
 		return explorer.display();
 	};

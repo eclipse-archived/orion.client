@@ -54,6 +54,7 @@ define([
 		this.registry = options.registry;
 		this.prefix = options.prefix;
 		this.location = options.location;
+		this.commitName = options.commitName;
 		this.repository = options.repository;
 		this.handleError = options.handleError;
 		this.changes = options.changes;
@@ -78,21 +79,60 @@ define([
 					return interestedUnstagedGroup;
 			}
 		},
-		getChildren: function(parentItem, onComplete){	
-			if (parentItem instanceof Array && parentItem.length > 0) {
-				onComplete(parentItem);
+		_processDiffs: function(diffs) {
+			diffs.forEach(function(item) {
+				var path = item.OldPath;
+				if (item.ChangeType === "ADD") { //$NON-NLS-0$
+					path = item.NewPath;
+				} 
+				item.name = path;
+				item.type = item.ChangeType;
+			});
+			return diffs;
+		},
+		processChildren: function(parentItem, children) {
+			parentItem.children = children;
+			children.forEach(function(child) {
+				child.parent = parentItem;
+			});
+			return children;
+		},
+		getChildren: function(parentItem, onComplete){
+			if (parentItem.children) {
+				onComplete(parentItem.children);
+			} else if (parentItem instanceof Array && parentItem.length > 0) {
+				onComplete(this._processDiffs(parentItem));
 			} else if (parentItem.Type === "Root") { //$NON-NLS-0$
 				var that = this;
-				if (parentItem.children) {
-					onComplete(parentItem.children);
-					return;
-				}
-				var location = this.location;
+				var location = this.location; 
 				var progressService = this.progressService;
 				var gitClient = this.gitClient;
 				var progress = this.section.createProgressMonitor();
 				progress.begin(messages["Getting changes"]);
 				var repository = that.repository;
+				if (location) {
+					function doDiff(loc) {
+						gitClient.doGitDiff(loc + "?parts=diffs").then(function(resp) { //$NON-NLS-0$
+							progress.done();
+							onComplete(that.processChildren(parentItem, that._processDiffs(resp.Children)));
+						}, function(error) {
+							progress.done();
+							that.handleError(error);
+						});
+					}
+					if (this.commitName) {
+						gitClient.getDiff(location, this.commitName).then(function(resp) {
+							doDiff(resp.Location);
+						}, function(error) {
+							progress.done();
+							that.handleError(error);
+						});
+					} else {
+						doDiff(location);
+					}
+					return;
+				}
+				location = repository.StatusLocation;
 				Deferred.when(repository.status || (repository.status = progressService.progress(gitClient.getGitStatus(location), messages["Getting changes"])), function(resp) {//$NON-NLS-0$
 					var status = that.status = that.items = resp;
 					Deferred.when(that.repository || progressService.progress(gitClient.getGitClone(status.CloneLocation), messages["Getting git repository details"]), function(resp) {
@@ -108,19 +148,15 @@ define([
 								if (config[i].Key === "user.name" || config[i].Key === "user.email") //$NON-NLS-1$ //$NON-NLS-0$
 									status.Clone.Config.push(config[i]);
 							}
-							var children = parentItem.children = that._sortBlock(that.getGroups(that.prefix));
+							var children = that._sortBlock(that.getGroups(that.prefix));
 							if (that.prefix === "all") { //$NON-NLS-0$
 								if (children.length > 0) {
 									children.unshift({Type: "ExplorerSelection", selectable: true}); //$NON-NLS-0$
 								}
 								children.unshift({Type: "CommitMsg", selectable: false}); //$NON-NLS-0$
 							}
-							children.forEach(function(child) {
-								child.parent = parentItem;
-							});
-							
 							progress.done();
-							onComplete(children);
+							onComplete(that.processChildren(parentItem, children));
 						}, function(error) {
 							progress.done();
 							that.handleError(error);
@@ -281,6 +317,7 @@ define([
 		this.changes = options.changes;
 		this.section = options.section;
 		this.location = options.location;
+		this.commitName = options.commitName;
 		this.repository = options.repository;
 		this.editableInComparePage = options.editableInComparePage;
 		this.handleError = options.handleError;
@@ -337,6 +374,7 @@ define([
 				progress: this.progressService,
 				prefix: this.prefix,
 				location: this.location,
+				commitName: this.commitName,
 				repository: this.repository,
 				handleError: this.handleError,
 				changes: this.changes,
