@@ -819,16 +819,6 @@ define([
 					horizontalBox.appendChild(commitDetails);
 
 					setTimeout(function() {
-						var diffs = commit.Diffs;
-
-						diffs.forEach(function(item) {
-							var path = item.OldPath;
-							if (item.ChangeType === "ADD") { //$NON-NLS-0$
-								path = item.NewPath;
-							} 
-							item.name = path;
-							item.type = item.ChangeType;
-						});
 						var titleWrapper = new mSection.Section(horizontalBox, {
 							id: "commitdDiffSection" + commit.Name, //$NON-NLS-0$
 							title: messages["ChangedFiles"],
@@ -843,7 +833,7 @@ define([
 							parentId: titleWrapper.getContentElement(), 
 							actionScopeId: "diffSectionItemActionArea", //$NON-NLS-0$
 							prefix: "diff", //$NON-NLS-0$
-							changes: diffs,
+							changes: commit.Diffs,
 							location: repository.StatusLocation,
 							repository: repository,
 							section: titleWrapper
