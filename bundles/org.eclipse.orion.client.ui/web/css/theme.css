@@ -474,6 +474,7 @@ a.breadcrumb.currentLocation {
 .dropdownMenu > li {
 	min-width: 120px;
 	display: flex;
+	display: -webkit-flex; /* Safari */
 }
 
 .dropdownMenu > li > a, .dropdownMenu > li > span {
