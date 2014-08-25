@@ -66,7 +66,8 @@ hard-coded numbers elsewhere.
 	-webkit-box-flex:1;
 	-webkit-box-ordinal-group: 1;
     
-    width: 40px;
+    border-right:1px solid #ddd;
+    width: 39px;
 }
 
 .bannerMiddleArea{
@@ -731,8 +732,8 @@ hard-coded numbers elsewhere.
 }
 
 .userMenu > .userTrigger {
-	margin-top: -3px;
-	padding: 11px 12px;
+	margin-top: -4px;
+	padding: 13px 11px;
 	border-left: 1px solid #ddd !important;
 }
 
