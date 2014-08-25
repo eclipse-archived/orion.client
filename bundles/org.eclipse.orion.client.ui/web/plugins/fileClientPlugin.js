@@ -78,6 +78,7 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", "domRea
 		NameKey: 'Orion Content',
 		nls: 'orion/navigate/nls/messages',
 		top: fileBase,
+		ranking: -1,
 		pattern: [fileBase, workspaceBase]
 	});
 	provider.connect();

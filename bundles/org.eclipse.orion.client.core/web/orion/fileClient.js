@@ -91,6 +91,11 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 				}
 			}
 		}
+		_references.sort(function (ref1, ref2) {
+			var ranking1 = ref1.getProperty("ranking") || 0;
+			var ranking2 = ref2.getProperty("ranking")  || 0;
+			return ranking1 - ranking2;
+		});
 		var _patterns = [];
 		var _services = [];
 		var _names = [];
