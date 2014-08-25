@@ -15,6 +15,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		this.node = node || document.createElement("div"); //$NON-NLS-0$
 		this.node.innerHTML = this.templateString;
 		this.textfield = lib.$(".setting-control", this.node); //$NON-NLS-0$
+		this.postChange = options.postChange;
 	}
 	objects.mixin(TextField.prototype, {
 		 templateString: '<input type="text" class="setting-control" name="myname"/>', //$NON-NLS-0$
@@ -82,6 +83,10 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 			}
 		
 			this.setStorageItem( this.category, this.item, this.element, value, this.ui );
+			
+			if (this.postChange) {
+				this.postChange();
+			}
 		}
 	});
 	return TextField;

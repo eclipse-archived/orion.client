@@ -16,6 +16,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		this.node = node || document.createElement('div'); //$NON-NLS-0$
 		this.node.innerHTML = this.templateString;
 		this.checkbox = lib.$('.setting-control', this.node); //$NON-NLS-0$
+		this.postChange = options.postChange;
 	}
 	objects.mixin(Checkbox.prototype, {
 		templateString: '' +  //$NON-NLS-0$
@@ -59,6 +60,9 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
         change: function(){
             var value = this.checkbox.value;
             this.setStorageItem( value );
+            if (this.postChange) {
+				this.postChange();
+			}
         },
         
         postCreate: function(){
