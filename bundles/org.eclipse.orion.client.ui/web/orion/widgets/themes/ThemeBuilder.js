@@ -67,7 +67,6 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         init();
 
         var commandTemplate = '<div id="commandButtons">' +
-            '<div id="revertCommands" class="layoutRight sectionActions"></div>' +
             '<div id="userCommands" class="layoutRight sectionActions"></div>' +
             '</div>';
 
@@ -76,26 +75,6 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
         this.commandService = args.commandService;
         this.preferences = args.preferences;
-
-        var revertCommand = new mCommands.Command({
-            name: messages["Cancel"],
-            tooltip: messages["Revert Theme"],
-            id: "orion.reverttheme", //$NON-NLS-0$
-            callback: function(data) {
-                this.revert(data.items);
-            }.bind(this)
-
-        });
-
-        var updateCommand = new mCommands.Command({
-            name: messages["Update"],
-            tooltip: messages["Update Theme"],
-            id: "orion.applytheme", //$NON-NLS-0$
-            callback: function(data) {
-                this.apply(data.items);
-            }.bind(this)
-
-        });
 
         var guideCommand = new mCommands.Command({
             name: messages["Show Guide"],
@@ -126,12 +105,6 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
         this.commandService.addCommand(guideCommand);
         this.commandService.registerCommandContribution('themeCommands', "orion.checkGuide", 1); //$NON-NLS-1$ //$NON-NLS-0$
-
-        this.commandService.addCommand(revertCommand);
-        this.commandService.registerCommandContribution('themeCommands', "orion.reverttheme", 2); //$NON-NLS-1$ //$NON-NLS-0$
-
-        this.commandService.addCommand(updateCommand);
-        this.commandService.registerCommandContribution('themeCommands', "orion.applytheme", 3); //$NON-NLS-1$ //$NON-NLS-0$
 
         this.commandService.addCommand(exportCommand);
         this.commandService.registerCommandContribution('themeCommands', "orion.exportTheme", 5); //$NON-NLS-1$ //$NON-NLS-0$
@@ -803,6 +776,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         this.settings.fontSize = {
             value: size
         };
+        this.apply();
     }
 
     ThemeBuilder.prototype.selectFontSize = selectFontSize;
@@ -980,7 +954,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
             this.addThemePicker(themeStyles);
         }.bind(this));
 
-        this.commandService.renderCommands('themeCommands', document.getElementById(this.toolbarId || "revertCommands"), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
+		this.commandService.renderCommands('themeCommands', document.getElementById(this.toolbarId || "userCommands"), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$	
     }
 
     ThemeBuilder.prototype.renderData = renderData;
@@ -988,6 +962,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
     function selectTheme(name) {
         this.preferences.getTheme(function(themeStyles) {
             this.select(name, themeStyles.styles);
+            this.apply();
         }.bind(this));
     }
 
