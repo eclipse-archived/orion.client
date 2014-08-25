@@ -241,7 +241,6 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 
 			var fields = [], subSection, options, set, select;
 			var themePreferences = this.themePreferences;
-			var editorThemeWidget = this.editorThemeWidget;
 			if (!this.local && this.editorThemeWidget) {
 				this.editorThemeSection = new mSection.Section(this.sections, {
 					id: "editorThemeSettings", //$NON-NLS-0$
@@ -266,10 +265,13 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 						}
 						options.push(set);
 					}
-					fields.push(select = this.themeSelect = new LabeledSelect( {fieldlabel:messages.Theme, options:options}));
-					select.setStorageItem = function(name) {
-						themePreferences.setTheme(name);
-					};
+					select = this.themeSelect = new LabeledSelect( 
+						{	fieldlabel:messages.Theme, 
+							options:options,
+							postChange: themePreferences.setTheme.bind(themePreferences)
+						}
+					);
+					fields.push(select);
 				}
 				if (prefs.fontSizeVisible && (!this.local || prefs.fontSizeLocalVisible)) {
 					var fontSize = themeStyles.style.fontSize;
@@ -284,10 +286,13 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 						}
 						options.push(set);
 					}
-					fields.push(select = this.sizeSelect = new LabeledSelect( {fieldlabel:messages["Font Size"], options:options}));
-					select.setStorageItem = function(size) {
-						themePreferences.setFontSize(size);
-					};
+					select = this.sizeSelect = new LabeledSelect( 
+						{	fieldlabel:messages["Font Size"], 
+							options:options,
+							postChange: themePreferences.setFontSize.bind(themePreferences)
+						}
+					);
+					fields.push(select);
 				}
 				if (!this.local && fields.length > 0) {
 					subSection = new Subsection( {sectionName:messages.Theme, parentNode: this.editorThemeSection.getContentElement(), children: fields} );
@@ -330,8 +335,8 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 									options = {};
 									options.local = this.local;
 									options.fieldlabel = messages[property];
+									options.postChange = this.update.bind(this);
 									fields.push(info.widget = info.create(property, options, prefs, this));
-									info.widget.setStorageItem = this.update.bind(this);
 								}
 							}
 							if (!this.local && fields.length > 0) {
@@ -347,9 +352,6 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			if (this.local) {
 				fields.forEach(function(child) {
 					this.sections.appendChild( child.node );
-					if (!child.hasOwnProperty("setStorageItem")) { //$NON-NLS-0$
-						child.setStorageItem = this.update.bind(this);
-					}
 					child.show();
 				}.bind(this));
 			}

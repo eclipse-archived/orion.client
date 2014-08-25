@@ -805,9 +805,9 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         var container = document.getElementById('sizecontainer');
         container.appendChild(newdiv);
         this.sizeSelect = new Select({
-            options: options
+            options: options,
+            postChange: this.selectFontSize.bind(this)
         }, newdiv);
-        this.sizeSelect.setStorageItem = this.selectFontSize.bind(this);
         this.sizeSelect.show();
     }
 
@@ -838,9 +838,9 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
         if (!this.sizeSelect) {
             this.sizeSelect = new Select({
-                options: options
+                options: options,
+                postChange: this.selectFontSize.bind(this)
             }, picker);
-            this.sizeSelect.setStorageItem = this.selectFontSize.bind(this);
             this.sizeSelect.show();
         }
     }
@@ -874,9 +874,9 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
         if (!this.themeSelect) {
             this.themeSelect = new Select({
-                options: options
+                options: options,
+                postChange: this.selectTheme.bind(this)
             }, picker);
-            this.themeSelect.setStorageItem = this.selectTheme.bind(this);
             this.themeSelect.show();
 
             var saver = document.getElementById('themesaver');
@@ -920,9 +920,9 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
             picker.appendChild(newdiv);
             this.themeSelect = new Select({
-                options: options
+                options: options,
+                postChange: this.selectTheme.bind(this)
             }, newdiv);
-            this.themeSelect.setStorageItem = this.selectTheme.bind(this);
             this.themeSelect.show();
         }
     }

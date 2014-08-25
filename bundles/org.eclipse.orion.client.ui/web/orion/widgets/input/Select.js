@@ -19,7 +19,6 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		this.node = node || document.createElement("div"); //$NON-NLS-0$
 		this.node.innerHTML = this.templateString;
 		this.select = lib.$(".setting-control", this.node); //$NON-NLS-0$
-		this.postChange = params.postChange;
 	}
 	objects.mixin(Select.prototype, {
 		templateString: '<select class="setting-control" id="selection"></select>', //$NON-NLS-0$
@@ -49,10 +48,6 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 				this.node = this.select = null;
 			}
 		},
-
-		setStorageItem : function(){
-			// to be overridden with a choice of function to store the picked color
-		},
 		
 		getSelected : function(){
 			return this.select.value;
@@ -81,17 +76,8 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		},
 	
 		change : function change(){
-		
-			var value = this.select.value;
-			
-			if( this.category ){
-				this.setStorageItem( this.category, this.item, this.element, value, this.ui );
-			}else{
-				this.setStorageItem( value );
-			}
-			
 			if (this.postChange) {
-				this.postChange();
+				this.postChange(this.select.value);
 			}
 		}
 	});
