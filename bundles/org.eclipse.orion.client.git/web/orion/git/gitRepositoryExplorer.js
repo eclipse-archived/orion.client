@@ -71,7 +71,35 @@ define([
 			this._ignoreExpand = false;
 		}
 	});
-	
+
+	function compare(s1, s2) {
+		if (s1 === s2) { return true; }
+		if (s1 && !s2 || !s1 && s2) { return false; }
+		if ((s1 && s1.constructor === String) || (s2 && s2.constructor === String)) { return false; }
+		if (s1 instanceof Array || s2 instanceof Array) {
+			if (!(s1 instanceof Array && s2 instanceof Array)) { return false; }
+			if (s1.length !== s2.length) { return false; }
+			for (var i = 0; i < s1.length; i++) {
+				if (!compare(s1[i], s2[i])) {
+					return false;
+				}
+			}
+			return true;
+		}
+		if (!(s1 instanceof Object) || !(s2 instanceof Object)) { return false; }
+		var p;
+		for (p in s1) {
+			if (s1.hasOwnProperty(p)) {
+				if (!s2.hasOwnProperty(p)) { return false; }
+				if (!compare(s1[p], s2[p])) {return false; }
+			}
+		}
+		for (p in s2) {
+			if (!s1.hasOwnProperty(p)) { return false; }
+		}
+		return true;
+	}
+
 	/**
 	 * Creates a new Git repository explorer.
 	 * @class Git repository explorer
@@ -293,12 +321,7 @@ define([
 	
 	GitRepositoryExplorer.prototype.setSelectedRepository = function(repository, force) {
 		if (!force) {
-			if (repository === this.repository) return;
-			if (repository && this.repository) {
-				if (repository.Location === this.repository.Location) {
-					return;
-				}
-			}
+			if (compare(this.repository, repository)) return;
 		}
 		this.repository = repository;
 		this.initTitleBar(repository || {});
@@ -308,7 +331,7 @@ define([
 		}
 		if (repository) {
 			this.displayBranches(repository); 
-			this.setSelectedRef(this.reference);
+			this.setSelectedReference(this.reference);
 			if (this.showTagsSeparately) {
 				this.displayTags(repository);
 			}
@@ -316,7 +339,7 @@ define([
 		}
 	};
 	
-	GitRepositoryExplorer.prototype.setSelectedRef = function(ref) {
+	GitRepositoryExplorer.prototype.setSelectedReference = function(ref) {
 		this.reference = ref;
 //		this.displayTree(this.repository);
 		this.setSelectedChanges(this.changes);
@@ -470,7 +493,7 @@ define([
 		var selection = this.repositoriesSelection = new mSelection.Selection(this.registry, "orion.selection.repo"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 			var selected = e.selection;
-			if (!selected || this.repository === selected) return;
+			if (!selected || compare(this.repository, selected)) return;
 			this.changes = this.reference = this.log = this.logLocation = this.treePath = null;
 			section.setHidden(true);
 			this.setSelectedRepository(selected);
@@ -520,7 +543,7 @@ define([
 		var selection = this.branchesSelection = new mSelection.Selection(this.registry, "orion.selection.ref"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 			var selected = e.selection;
-			if (!selected || this.reference === selected) return;
+			if (!selected || compare(this.reference, selected)) return;
 			switch (selected.Type) {
 				case "Branch": //$NON-NLS-0$
 				case "RemoteTrackingBranch": //$NON-NLS-0$
@@ -532,7 +555,7 @@ define([
 			}
 			this.changes = this.reference = this.log = this.logLocation = this.treePath = null;
 			section.setHidden(true);
-			this.setSelectedRef(selected);
+			this.setSelectedReference(selected);
 			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
 		}.bind(this));
 		var explorer = this.branchesNavigator = new mGitBranchList.GitBranchListExplorer({
@@ -636,7 +659,7 @@ define([
 
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 			var selected = e.selection;
-			if (!selected || this.treePath === selected) return;
+			if (!selected || compare(this.treePath, selected)) return;
 			this.setSelectedPath(selected);
 			this.treeSection.setTitle(util.shortenPath("/" + this.calculateTreePath())); //$NON-NLS-0$
 		}.bind(this));
@@ -669,34 +692,6 @@ define([
 		});
 		return explorer.display();
 	};
-
-	function compare(s1, s2) {
-		if (s1 === s2) { return true; }
-		if (s1 && !s2 || !s1 && s2) { return false; }
-		if ((s1 && s1.constructor === String) || (s2 && s2.constructor === String)) { return false; }
-		if (s1 instanceof Array || s2 instanceof Array) {
-			if (!(s1 instanceof Array && s2 instanceof Array)) { return false; }
-			if (s1.length !== s2.length) { return false; }
-			for (var i = 0; i < s1.length; i++) {
-				if (!compare(s1[i], s2[i])) {
-					return false;
-				}
-			}
-			return true;
-		}
-		if (!(s1 instanceof Object) || !(s2 instanceof Object)) { return false; }
-		var p;
-		for (p in s1) {
-			if (s1.hasOwnProperty(p)) {
-				if (!s2.hasOwnProperty(p)) { return false; }
-				if (!compare(s1[p], s2[p])) {return false; }
-			}
-		}
-		for (p in s2) {
-			if (!s1.hasOwnProperty(p)) { return false; }
-		}
-		return true;
-	}
 
 	GitRepositoryExplorer.prototype.displayCommits = function(repository) {	
 		this.destroyCommits();

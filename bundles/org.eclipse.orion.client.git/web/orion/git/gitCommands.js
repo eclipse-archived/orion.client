@@ -12,11 +12,11 @@
 /*eslint-env browser, amd*/
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/commandRegistry', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 'orion/git/gitConfigPreference',
-        'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
-        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks',
+        'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
+        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks',
         'orion/URITemplate','orion/git/logic/gitPush', 'orion/git/logic/gitStash', 'orion/git/logic/gitCommit', 'orion/objects'], 
-        function(messages, require, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, mCompareUtils, GitPreferenceStorage, GitConfigPreference, mConfirmPush, mRemotePrompter,
-        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch, _, PageLinks, URITemplate, mGitPushLogic, mGitStashLogic, mGitCommitLogic, objects) {
+        function(messages, require, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, mCompareUtils, GitPreferenceStorage, GitConfigPreference,
+        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mApplyPatch, _, PageLinks, URITemplate, mGitPushLogic, mGitStashLogic, mGitCommitLogic, objects) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -26,9 +26,7 @@ var exports = {};
 (function() {
 	var doOnce = false;
 	
-	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 	var logTemplate = new URITemplate("git/git-repository.html#{,resource,params*}?page=1"); //$NON-NLS-0$
-	var logTemplateNoPage = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 	var commitTemplate = new URITemplate("git/git-repository.html#{,resource,params*}?page=1"); //$NON-NLS-0$
 	var editTemplate = new URITemplate("edit/edit.html#{,resource,params*}"); //$NON-NLS-0$
 	
