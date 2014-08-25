@@ -16,14 +16,14 @@
 	margin: 0;
 	border: 0;
 	background-color: white;
-	height: 16px;
-	padding: 10px 3px 6px 2px;
 	display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
 	display: -ms-flexbox;     /* TWEENER - IE 10 */
 	display: -webkit-flex;     /* NEW - Chrome */
 	display: flex; 
 	white-space: nowrap;
 	border-bottom: 1px solid #ddd;
+	height: 36px;
+	padding: 0;
 }
 
 
@@ -114,6 +114,11 @@ a:hover {
 	align-items: baseline;
 	display: inline-flex;
 	justify-content: center;
+	
+	-webkit-align-items: baseline;		/* Safari */
+	display: -webkit-inline-flex;		/* Safari */
+	-webkit-justify-content: center;	/* Safari */
+	
 	margin-right: 0;
 	overflow: hidden;
 	visibility: visible;
@@ -161,7 +166,15 @@ a.breadcrumb:hover {
 }
 
 div.currentLocation {
+	align-items: center;
+	display: flex;
+	height: 36px;
+	justify-content: center;
 	width: 100%;
+	
+	-webkit-align-items: center;		/* Safari */
+	display: -webkit-flex;				/* Safari */
+	-webkit-justify-content: center;	/* Safari */
 }
 
 .breadcrumbContainer > .currentLocation {

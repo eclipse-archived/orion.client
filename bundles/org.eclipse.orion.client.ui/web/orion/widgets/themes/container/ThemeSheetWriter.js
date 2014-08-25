@@ -56,10 +56,6 @@ define(['orion/widgets/themes/ThemeClass'],
 			topRowBanner.style.border = '0';
 			topRowBanner.style.backgroundColor = this.navbar;
 //			topRowBanner.style.background = 'linear-gradient(to bottom, #959595 0%,#0d0d0d 46%,#010101 50%,#0a0a0a 53%,#1b1b1b 100%)';
-			topRowBanner.style.height = '16px';
-			topRowBanner.style.padding = '10px';
-			topRowBanner.style.paddingLeft = '6px';
-			topRowBanner.style.paddingRight = '2px';
 			/* topRowBanner.style.borderBottom = '1px solid #dddddd'; */
 			topRowBanner.style.borderBottom = "none";
 			topRowBanner.style.boxShadow = "0 2px 2px 0 rgba(0, 0, 0, 0.1),0 1px 0 0 rgba(0, 0, 0, 0.1)";
