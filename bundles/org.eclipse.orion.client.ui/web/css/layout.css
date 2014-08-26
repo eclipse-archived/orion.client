@@ -250,6 +250,15 @@ hard-coded numbers elsewhere.
 	height: 100%;
 }
 
+.generalAnimation {
+	-webkit-transition: all 0.5s ease;
+	-moz-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+	transition: all 0.5s ease;
+	z-index: 50;
+    overflow: auto;
+}
+
 .sidePanelLayoutAnimation {
 	-webkit-transition: width 0.5s ease;
 	-moz-transition: width 0.5s ease;
