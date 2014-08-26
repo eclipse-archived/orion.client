@@ -73,11 +73,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		
 		change: function(){
 			if (this.postChange) {
-				var value;
-				if( this.selection && this.selection.value ){
-					value = this.selection.value;
-				}
-				this.postChange(value);
+				this.postChange(this.textfield.value);
 			}
 		}
 	});
