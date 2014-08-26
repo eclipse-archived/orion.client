@@ -235,6 +235,16 @@ a.currentLocation:hover {
 	border-bottom: 1px dotted;
 }
 
+div.currentLocation {
+	height: 22px;
+}
+
+.breadcrumbContainer {
+	margin: 0 4px; 
+	justify-content: flex-start;
+	-webkit-justify-content: flex-start;
+}
+
 .breadcrumbContainer > .currentLocation {
 	overflow: hidden;
 	text-overflow: ellipsis;
