@@ -43,6 +43,9 @@ define(['orion/Deferred', 'orion/URITemplate', 'orion/PageLinks'], function(Defe
 				}
 			);
 			return deferred;
+		},
+	getLoginMessage: function(manageUrl){
+			return "Please enter your IBM id below to authorize deployment to Cloud Foundry.";
 		}
 	};
 });

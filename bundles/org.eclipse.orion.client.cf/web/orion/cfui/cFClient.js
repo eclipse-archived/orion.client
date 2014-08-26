@@ -150,7 +150,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 			
 			// Apps CF v2 operations
 			
-			pushApp: function(target, name, contentLocation) {
+			pushApp: function(target, name, contentLocation, manifest, saveManifest) {
 				var pushReq = {};
 				
 				if (name)
@@ -161,6 +161,12 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				
 				if (target)
 					pushReq.Target = target;
+				
+				if(manifest)
+					pushReq.Manifest = manifest;
+				
+				if(saveManifest)
+					pushReq.Persist = saveManifest;
 				
 				return this._xhrV1("PUT", require.toUrl("cfapi/apps"), pushReq);
 			},
@@ -234,6 +240,15 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				return this._xhrV1("GET", url);
 			},
 			
+			getServices: function(target) {
+				var url = require.toUrl("cfapi/services");
+				
+				if (target)
+					url += "?Target=" + JSON.stringify(target);
+				
+				return this._xhrV1("GET", url);
+			},
+			
 			createRoute: function(target, domainName, hostName) {
 				var routeObj = {
 					DomainName: domainName,
@@ -295,6 +310,10 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				
 				return this._xhrV1("DELETE", url);
 			},
+			getManifestInfo: function(relFilePath){
+				var url = require.toUrl("cfapi/manifests" + relFilePath);
+				return this._xhrV1("GET", url);
+			}
 		};
 		
 		return CFService;
