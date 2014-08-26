@@ -755,6 +755,18 @@ table .sectionTable {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.git-sprite-undo-commit{
+	font-size: 16px;
+	line-height: 14px;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';	
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
 .git-sprite-incoming-commit{
 	font-size: 16px;
 	line-height: normal;
@@ -831,3 +843,4 @@ table .sectionTable {
 .git-sprite-outgoing-commit:before{ content:'\0056'; }
 .git-sprite-conflict-file:before{ content: '\2B0C'; } 
 .git-sprite-branch-active:before{ content: '\0059'; }
+.git-sprite-undo-commit:before{ content: '\0036'; }
