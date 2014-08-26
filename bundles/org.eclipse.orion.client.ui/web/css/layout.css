@@ -250,6 +250,15 @@ hard-coded numbers elsewhere.
 	height: 100%;
 }
 
+.generalAnimation {
+	-webkit-transition: all 0.5s ease;
+	-moz-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+	transition: all 0.5s ease;
+	z-index: 50;
+    overflow: auto;
+}
+
 .sidePanelLayoutAnimation {
 	-webkit-transition: width 0.5s ease;
 	-moz-transition: width 0.5s ease;
@@ -382,25 +391,31 @@ hard-coded numbers elsewhere.
    display: none;
 }
 
+./* 
+ * NOTE: Please don't apply margin values to the splitter as the splitter.js
+ * code doen't take them into account during its layout
+ */
 .splitLayout {
 	position: absolute;
 	left: 33%;  /* override this value if you want a different proportion of the two split panes */
 	height: 100%;
 	z-index: 50;
 	width: 10px;
-	margin-right: 3px;
 	cursor: e-resize;
 	overflow: hidden;
 	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
 }
 
+/* 
+ * NOTE: Please don't apply margin values to the splitter as the splitter.js
+ * code doen't take them into account during its layout
+ */
 .splitVerticalLayout {
 	position: absolute;
 	top: 33%;  /* override this value if you want a different proportion of the two split panes */
 	width: 100%;
 	z-index: 50;
 	height: 10px;
-	margin-bottom: 3px;
 	cursor: n-resize;
 	overflow: hidden;
 	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
