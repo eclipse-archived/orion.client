@@ -1646,7 +1646,7 @@ var exports = {};
 			name : messages["Revert"],
 			tooltip: messages["Revert changes introduced by the commit into your active branch"],
 			id : "eclipse.orion.git.revert", //$NON-NLS-0$
-			imageClass: "git-sprite-reset", //$NON-NLS-0$ //TODO: Change to custom revert icon when provided
+			imageClass: "git-sprite-revert", //$NON-NLS-0$ //TODO: Change to custom revert icon when provided
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
