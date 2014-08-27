@@ -74,14 +74,21 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			function setValid(valid){
 				if(valid){
 					okButton.classList.remove("disabled");
+					nextButton.classList.remove("disabled");
 				} else {
 					okButton.classList.add("disabled");
+					nextButton.classList.add("disabled");
 				}
 				okButton.disabled = !valid;
+				nextButton.disabled = !valid;
 			}
 						
 			var validate = function() {
 				if(!selection){
+					setValid(false);
+					return;
+				}
+				if(!appsInput.value){
 					setValid(false);
 					return;
 				}
@@ -90,7 +97,11 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						setValid(false);
 						return;
 					}
-					setValid(true);
+					if(appsInput.value){
+						setValid(true);
+					} else {
+						setValid(true);
+					}
 				});
 			};
 			
@@ -463,10 +474,12 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						appsDropdown = document.createElement("select");
 						document.getElementById("name").appendChild(appsInput);
 						document.getElementById("name").appendChild(appsDropdown);
+						appsInput.onkeyup = validate;
 						
 						appsDropdown.onchange = function(event){
 							if(appsDropdown.value){
 								appsInput.value = appsDropdown.value;
+								validate();
 							}
 						};
 						
@@ -521,12 +534,12 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 	    		document.getElementById("servicesLabel").appendChild(document.createTextNode("All Services:"));
 	    		servicesDropdown = document.createElement("select");
 	    		servicesDropdown.size = 8;
-	    		servicesDropdown.multiple="multiple"
+	    		servicesDropdown.multiple="multiple";
 		    	document.getElementById("servicesDropdown").appendChild(servicesDropdown);
 		    	
 		    	document.getElementById("servicesAdded").appendChild(document.createTextNode("Application Services:"));
 	    		servicesList = document.createElement("select");
-	    		servicesList.multiple="multiple"
+	    		servicesList.multiple="multiple";
 	    		servicesList.size = 8;
 		    	document.getElementById("servicesList").appendChild(servicesList);
 		    	
