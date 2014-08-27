@@ -539,6 +539,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(removeButton);
 		    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(addButton);
 		    	
+		    	page2shown = true;
+		    	
 		    	addButton.addEventListener('click', function(){
 		    		for(var i=servicesDropdown.options.length-1; i>=0; i--){
 		    			var option = servicesDropdown.options[i];
@@ -560,8 +562,18 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 					});
 					
 				if(manifestInfo.services){
+					if(!Array.isArray(manifestInfo.services)){
+						if(typeof manifestInfo.services === "object"){
+							manifestInfo.services = Object.keys(manifestInfo.services);
+						} else {
+							manifestInfo.services = [];
+						}
+					}
 	    			manifestInfo.services.forEach(function(serviceName){
 		    			var serviceOption = document.createElement("option");
+		    			if(typeof serviceName !== "string"){
+		    				return;
+		    			}
 						serviceOption.appendChild(document.createTextNode(serviceName));
 						serviceOption.service = serviceName;
 						serviceOption.id = "service_" + serviceName;
@@ -593,7 +605,6 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    		});
 		    		
 		    	}, postError);
-		    	page2shown = true;
 		    }
 		    
 		   function displayPage3(){
