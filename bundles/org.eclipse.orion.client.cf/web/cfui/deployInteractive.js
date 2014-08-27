@@ -46,6 +46,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			var instances;
 			var buildpack;
 			var memory;
+			var memoryUnit;
 			var timeout;
 			var deployResourceJSON = JSON.parse(deployResource);
 			var relativeFilePath = new URL(deployResourceJSON.ContentLocation).href;
@@ -212,7 +213,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				}
 				if(memory){
 					if(memory.value){
-						manifestContents.applications[0].memory = memory.value;
+						manifestContents.applications[0].memory = memory.value + memoryUnit.value;
 					} else {
 						delete manifestContents.applications[0].memory;
 					}
@@ -647,18 +648,45 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    	document.getElementById("buildpack").appendChild(buildpack);
 		    	document.getElementById("memoryLabel").appendChild(document.createTextNode("Memory:"));
 		    	memory = document.createElement("input");
+		    	memory.id = "memoryInput";
+		    	memory.type = "number";
+		    	memory.min = "0";
+		    	memoryUnit = document.createElement("select");
+		    	memoryUnit.id = "memoryUnit";
+				var option = document.createElement("option");
+				option.appendChild(document.createTextNode("MB"));
+				option.value = "MB";
+				memoryUnit.appendChild(option);
+				option = document.createElement("option");
+				option.appendChild(document.createTextNode("GB"));
+				option.value = "GB";
+				memoryUnit.appendChild(option);
 		    	if(manifestInfo.memory){
-		    		memory.value = manifestInfo.memory;
+		    		if(manifestInfo.memory.toUpperCase().indexOf("M")>0 || manifestInfo.memory.toUpperCase().indexOf("G")>0){
+		    			var indexOfUnit = manifestInfo.memory.toUpperCase().indexOf("M") > 0 ? manifestInfo.memory.toUpperCase().indexOf("M") : manifestInfo.memory.toUpperCase().indexOf("G");
+						memory.value = manifestInfo.memory.substring(0, indexOfUnit);
+						var unit = manifestInfo.memory.substring(indexOfUnit).toUpperCase();
+						if(unit.trim().length === 1){
+							unit += "B";
+						}
+						memoryUnit.value = unit;
+		    		}
 		    	}
 		    	document.getElementById("memory").appendChild(memory);
+		    	document.getElementById("memory").appendChild(memoryUnit);
+		    	
 		    	document.getElementById("instancesLabel").appendChild(document.createTextNode("Instances:"));
 		    	instances = document.createElement("input");
+		    	instances.type = "number";
+		    	instances.min = "0";
 		    	if(manifestInfo.instances){
 		    		instances.value = manifestInfo.instances;
 		    	}
 		    	document.getElementById("instances").appendChild(instances);
-		    	document.getElementById("timeoutLabel").appendChild(document.createTextNode("Timeout:"));
+		    	document.getElementById("timeoutLabel").appendChild(document.createTextNode("Timeout (sec):"));
 		    	timeout = document.createElement("input");
+		    	timeout.type = "number";
+		    	timeout.min = "0";
 		    	if(manifestInfo.timeout){
 		    		timeout.value = manifestInfo.timeout;
 		    	}

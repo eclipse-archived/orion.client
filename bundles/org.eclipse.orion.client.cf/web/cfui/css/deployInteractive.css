@@ -140,3 +140,22 @@ select{
 	margin: 0;
 	cursor: pointer;
 }
+
+#memoryInput{
+	margin-right: 5px;
+    width: 195px;
+}
+
+#memoryUnit{
+	width: 50px;
+}
+
+input[type='number'] {
+    -moz-appearance:textfield;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
