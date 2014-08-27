@@ -244,5 +244,6 @@ define({
     'blueMondayThemeName': 'Blue Monday',  //$NON-NLS-0$  //$NON-NLS-1$
     'vanillaSkiesThemeName': 'Vanilla Skies',  //$NON-NLS-0$  //$NON-NLS-1$
     'beetlejuiceThemeName': 'Beetlejuice',  //$NON-NLS-0$  //$NON-NLS-1$
-    'redThemeName': 'Red'  //$NON-NLS-0$  //$NON-NLS-1$
+    'redThemeName': 'Red',  //$NON-NLS-0$  //$NON-NLS-1$
+    "${0} settings successfully updated.": "${0} settings successfully updated."
 });

@@ -323,11 +323,12 @@ define([
 			}
 
 			var settingsInCategory = this.settingsRegistry.getSettings(category).sort(settingsCompare);
+			var title = this.settingsRegistry.getCategoryLabel(category) || messages[category] || category;
 			this.pluginSettingsWidget = new SettingsList({
 				parent: this.table,
 				serviceRegistry: this.registry,
 				settings: settingsInCategory,
-				title: messages[category] || category
+				title: title
 			});
 		},
 
