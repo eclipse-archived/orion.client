@@ -851,6 +851,34 @@ table .sectionTable {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.git-sprite-branch-active-tag{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
+	padding-right:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.git-sprite-branch-active-branch{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
+	padding-right:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
 .git-sprite-conflict-file{
 	font-size: 24px;
 	line-height: normal;
@@ -887,4 +915,8 @@ table .sectionTable {
 .git-sprite-outgoing-commit:before{ content:'\0056'; }
 .git-sprite-conflict-file:before{ content: '\2B0C'; } 
 .git-sprite-branch-active:before{ content: '\0059'; }
+.git-sprite-branch-active-tag:before{ content: '\0059'; }
+.git-sprite-branch-active-tag:after{ content: '\0047'; }
+.git-sprite-branch-active-branch:before{ content: '\0059'; }
+.git-sprite-branch-active-branch:after{ content: '\006E'; }
 .git-sprite-undo-commit:before{ content: '\0036'; }

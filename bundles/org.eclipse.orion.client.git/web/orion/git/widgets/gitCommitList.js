@@ -686,14 +686,27 @@ define([
 				id: "eclipse.orion.git.commit.simpleLog", //$NON-NLS-0$
 				callback: function(data) {
 					var model = that.model;
-					model.simpleLog = !model.simpleLog;
-					that.simpleLog = !that.simpleLog;
+					model.simpleLog = that.simpleLog = !simpleLogCommand.checked;
 					data.handler.changedItem();
 				},
+				type: "toggle", //$NON-NLS-0$
 				visibleWhen: function() {
 					simpleLogCommand.name = that.model.simpleLog ? messages["ShowActiveBranch"] : messages["ShowReference"];
-					simpleLogCommand.imageClass = that.model.simpleLog ? "git-sprite-branch-active" : "git-sprite-branch";
+					var targetRef = that.model.getTargetReference();
+					var imgClass;
+					switch (targetRef.Type) {
+						case "Tag": //$NON-NLS-0$ 
+							imgClass = "git-sprite-branch-active-tag"; //$NON-NLS-0$
+							break;
+						case "Branch": //$NON-NLS-0$
+						case "RemoteTrackingBranch": //$NON-NLS-0$
+						default:
+							imgClass = "git-sprite-branch-active-branch"; //$NON-NLS-0$
+							
+					}
+					simpleLogCommand.imageClass = imgClass;
 					simpleLogCommand.tooltip = that.model.simpleLog ? messages["ShowActiveBranchTooltip"] : messages["ShowReferenceTooltip"];
+					simpleLogCommand.checked = !that.model.simpleLog;
 					return true;
 				}
 			});

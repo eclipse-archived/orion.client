@@ -355,6 +355,82 @@ a.breadcrumb.currentLocation {
 	border: 1px solid #ccc;
 }
 
+/* toggle */
+
+.orionToggle {
+	position: relative;
+	width: auto;
+}
+
+.orionToggleCheck {
+ 	display: none;
+}
+
+.orionToggleLabel {
+	display: block; 
+	overflow: hidden; 
+	cursor: pointer;
+	border: 1px solid #aaa; 
+	border-radius: 6px;
+}
+
+.orionToggleInner {
+	display: block; 
+	width: 200%; 
+	margin-left: -100%;
+	-moz-transition: margin 0.3s ease-in 0s; 
+	-webkit-transition: margin 0.3s ease-in 0s;
+	-o-transition: margin 0.3s ease-in 0s; 
+	transition: margin 0.3s ease-in 0s;
+}
+
+.orionToggleInner:before, .orionToggleInner:after {
+	display: block; 
+	float: left; 
+	width: 50%; 
+	padding: 0;
+	padding-bottom: 2px;
+	-moz-box-sizing: border-box; 
+	-webkit-box-sizing: border-box; 
+	box-sizing: border-box;
+}
+
+.orionToggleInner:before {
+	padding-left: 2px;
+	background-color: #eee;
+}
+
+.orionToggleInner:after {
+	padding-right: 2px;
+	background-color: #eee;
+	text-align: right;
+}
+
+.orionToggleSwitch {
+	display: block; 
+	width: calc(50% - 2px); 
+	margin: 0;
+	background: #ddd;
+	border: 1px solid #aaa; 
+	border-radius: 6px;
+	position: absolute; 
+	top: 0; 
+	bottom: 0; 
+	right: calc(50% + 2px); 
+	-moz-transition: all 0.3s ease-in 0s;
+	-webkit-transition: all 0.3s ease-in 0s;
+	-o-transition: all 0.3s ease-in 0s; 
+	transition: all 0.3s ease-in 0s; 
+}
+
+.orionToggleCheck:checked + .orionToggleLabel .orionToggleInner {
+	margin-left: 0;
+}
+
+.orionToggleCheck:checked + .orionToggleLabel .orionToggleSwitch {
+	right: 0px; 
+}
+
 /* should be used in conjunction with .commandButton when a tool has no icon. */
 .commandMissingImageButton {
 	font-weight: bold;
