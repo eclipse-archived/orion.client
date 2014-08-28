@@ -424,6 +424,10 @@ table .sectionTable {
 	padding-left: 5px;
 }
 
+.gitCommitTagClose:hover {
+	color: #F58B0F;
+}
+
 .gitCommitTitle {
 	font-weight: bold;
 }
