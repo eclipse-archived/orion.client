@@ -120,7 +120,7 @@ define([
 				}.bind(this);
 			}
 			
-			if (!this._onRecentEntryDelete) {
+			if (this._onRecentEntryDelete === undefined) {
 				this._onRecentEntryDelete = function(item, evtTarget) {
 					var recentEntryArray = this.getRecentEntryArray();
 					
