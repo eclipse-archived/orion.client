@@ -106,6 +106,7 @@ define([
 				that.changedItem();
 				break;
 			case "cherrypick": //$NON-NLS-0$
+			default:
 				that.changedItem();
 				break;
 			}
