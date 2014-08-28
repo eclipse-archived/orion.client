@@ -248,6 +248,9 @@ define([
 	};
 	
 	GitRepositoryExplorer.prototype.setSelectedRepository = function(repository, force) {
+		if (!repository && this.repositoriesNavigator && this.repositoriesNavigator.model) {
+			repository = this.repositoriesNavigator.model.repositories[0];
+		}
 		if (!force) {
 			if (compare(this.repository, repository)) return;
 		}
@@ -341,28 +344,9 @@ define([
 	GitRepositoryExplorer.prototype.initTitleBar = function(resource, sectionName) {
 		var item = {};
 		var task = messages.Repo;
-		var repository;
-		if (resource && resource.Type === "Clone" && sectionName){ //$NON-NLS-0$
-			repository = resource;
-			item.Name = sectionName;
-			item.Parents = [];
-			item.Parents[0] = {};
-			item.Parents[0].Name = repository.Name;
-			item.Parents[0].Location = repository.Location;
-			item.Parents[0].ChildrenLocation = repository.Location;
-			item.Parents[1] = {};
-			item.Parents[1].Name = task;
-			task = sectionName;
-		} else if (resource && resource.Type === "Clone") { //$NON-NLS-0$
-			repository = resource;
-			item.Name = repository.Name;
-			item.Parents = [];
-			item.Parents[0] = {};
-			item.Parents[0].Name = task;
-		} else {
-			item.Name = task;
-		}
-		
+		var repository = resource;
+		item.Name = messages["Git"];
+		item.Parents = [];
 		mGlobalCommands.setPageTarget({
 			task: task,
 			target: repository,
