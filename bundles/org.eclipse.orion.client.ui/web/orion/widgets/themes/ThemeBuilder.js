@@ -10,9 +10,10 @@
 /*eslint-env browser, amd*/
 
 define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegistry', 'orion/webui/littlelib',
-    'orion/widgets/themes/ThemeComponent', 'orion/widgets/input/Select', 'orion/widgets/input/TextField'],
+    'orion/widgets/themes/ThemeComponent', 'orion/widgets/input/Select', 'orion/widgets/input/TextField',
+    'orion/i18nUtil'],
 
-function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextField) {
+function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextField, i18nUtil) {
 
     var TOP = 10;
     var LEFT = 10;
@@ -63,7 +64,10 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         this.themeData = args.themeData;
 
         this.toolbarId = args.toolbarId;
-
+        
+        this.serviceRegistry = args.serviceRegistry;
+        this.messageService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+        
         init();
 
         var commandTemplate = '<div id="commandButtons">' +
@@ -662,7 +666,9 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
     }
 
     ThemeBuilder.prototype.drawOutlineData = drawOutlineData;
-
+	
+	var successMessage = i18nUtil.formatMessage(messages["${0} settings successfully updated."], messages["Theme"]); //$NON-NLS-1$ //$NON-NLS-0$
+	
     function apply(data) {
 
         /* New Theme defined */
@@ -719,6 +725,8 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
             lib.node('pickercontainer').style.display = '';
             this.updateThemePicker(themename, styles);
             this.AUTONAME = false;
+            
+            this.messageService.setProgressResult(successMessage);
         }.bind(this));
     }
 

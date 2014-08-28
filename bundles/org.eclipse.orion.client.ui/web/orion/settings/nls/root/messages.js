@@ -183,7 +183,7 @@ define({
 	"contentAssistAutoTrigger": "Show Content Assist automatically:",
 	"Editor preferences updated": "Editor preferences updated",
 	"Editor defaults restored": "Editor defaults restored",
-	"Theme": "Theme:",
+	"Theme": "Theme",
 	"Font Size": "Font Size:",
 	"New Theme Name:": "New Theme Name:",
 	"Font Size:": "Font Size:",

@@ -178,7 +178,7 @@ define([
 			var containerTheme = new containerThemeData.ThemeData();
 			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, containerTheme);
 		
-			this.themeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: containerTheme });
+			this.themeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: containerTheme, serviceRegistry: this.registry });
 			
 			lib.empty(this.table);
 
@@ -207,7 +207,7 @@ define([
 			var editorTheme = new editorThemeData.ThemeData();
 			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, editorTheme);
 			
-			var editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme, toolbarId: 'editorThemeSettingsToolActionsArea'}); //$NON-NLS-0$
+			var editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme, toolbarId: 'editorThemeSettingsToolActionsArea', serviceRegistry: this.registry}); //$NON-NLS-0$
 				
 			var command = { name:messages.Import, tip:messages['Import a theme'], id:0, callback: editorTheme.importTheme.bind(editorTheme) };
 			editorThemeWidget.addAdditionalCommand( command );
