@@ -156,6 +156,7 @@ define([
 	 */
 	function GitBranchListExplorer(options) {
 		var renderer = new GitBranchListRenderer({
+			noRowHighlighting: true,
 			registry: options.serviceRegistry,
 			commandService: options.commandRegistry,
 			actionScopeId: options.actionScopeId,

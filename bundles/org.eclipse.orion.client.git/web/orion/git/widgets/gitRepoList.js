@@ -166,6 +166,7 @@ define([
 	function GitRepoListExplorer(options) {
 		this.checkbox = false;
 		var renderer = new GitRepoListRenderer({
+			noRowHighlighting: true,
 			registry: options.serviceRegistry,
 			commandService: options.commandRegistry,
 			actionScopeId: options.actionScopeId,

@@ -82,7 +82,14 @@ define([
 	 * @extends orion.explorers.Explorer
 	 */
 	function GitConfigListExplorer(options) {
-		var renderer = new GitConfigListRenderer({registry: options.serviceRegistry, commandService: options.commandRegistry, actionScopeId: options.actionScopeId, cachePrefix: options.prefix + "Navigator", checkbox: false}, this); //$NON-NLS-0$
+		var renderer = new GitConfigListRenderer({
+			noRowHighlighting: true,
+			registry: options.serviceRegistry,
+			commandService: options.commandRegistry,
+			actionScopeId: options.actionScopeId,
+			cachePrefix: options.prefix + "Navigator", //$NON-NLS-0$
+			checkbox: false
+		}, this);
 		mExplorer.Explorer.call(this, options.serviceRegistry, options.selection, renderer, options.commandRegistry);	
 		this.checkbox = false;
 		this.parentId = options.parentId;

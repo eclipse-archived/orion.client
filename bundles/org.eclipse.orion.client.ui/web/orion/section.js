@@ -238,7 +238,8 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 		} else {
 			this._updateExpandedState(true);
 			this.dropdown = true;
-			lib.addAutoDismiss([this._contentParent, this.domNode], function () {
+			this.positionNode = options.positionNode;
+			lib.addAutoDismiss([this._contentParent, this.positionNode || this.domNode], function () {
 				this.setHidden(true);
 			}.bind(this));
 		}
@@ -510,7 +511,7 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 		
 		_positionDropdown: function() {
 			if (!this.dropdown) return;
-			var bounds = lib.bounds(this.domNode);
+			var bounds = lib.bounds(this.positionNode || this.domNode);
 			var parentBounds = lib.bounds(this._boundingNode(this.domNode));
 			var bodyBounds = lib.bounds(document.body);
 			var contentBounds = lib.bounds(this._contentParent);

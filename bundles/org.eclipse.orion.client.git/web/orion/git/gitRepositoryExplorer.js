@@ -17,8 +17,6 @@ define([
 	'orion/git/widgets/gitBranchList',
 	'orion/git/widgets/gitConfigList',
 	'orion/git/widgets/gitRepoList',
-	'orion/git/widgets/gitFileList',
-	'orion/git/widgets/gitCommitInfo',
 	'orion/section',
 	'orion/selection',
 	'orion/webui/littlelib',
@@ -27,51 +25,12 @@ define([
 	'orion/git/util',
 	'orion/fileUtils',
 	'orion/globalCommands',
-	'orion/objects',
+	'orion/git/gitCommands',
 	'orion/Deferred'
-], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mGitFileList, mGitCommitInfo, mSection, mSelection, lib, URITemplate, PageUtil, util, mFileUtils, mGlobalCommands, objects, Deferred) {
+], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mSection, mSelection, lib, URITemplate, PageUtil, util, mFileUtils, mGlobalCommands, mGitCommands, Deferred) {
 	
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 	
-	var NO_TWISTIES = false;
-
-	function Accordion(options) {
-		options = options || {};
-		this.parent = options.parent;
-		this.sections = [];
-	}
-	objects.mixin(Accordion.prototype, {
-		add: function(section) {
-			this.sections.push(section);
-			section.setOnExpandCollapse(this._expandCollapse.bind(this));
-		},
-		remove: function(section) {
-			var index = this.sections.indexOf(section);
-			if (index !== -1) {
-				this.sections.splice(index, 1);
-			}
-		},
-		setDefaultSection: function(section) {
-			this.defaultSection = section;
-			section.setHidden(false);
-		},
-		_expandCollapse: function(isExpanded, section) {
-			if (this._ignoreExpand) return;
-			this._ignoreExpand = true;
-			var currentSection = this.currentSection = isExpanded ? section : this.defaultSection;
-			var h = 0;
-			this.sections.forEach(function(s) {
-				h += lib.bounds(s.domNode).height + 6;//TODO - calculate the padding/margin around section
-			});
-			this.sections.forEach(function(s) {
-				s.setHidden(s !== currentSection);
-				var content = s.getContentElement();
-				content.style.height = s !== currentSection ? 0 : "calc(100% - " + h + "px)"; //$NON-NLS-1$ //$NON-NLS-0$
-			});
-			this._ignoreExpand = false;
-		}
-	});
-
 	function compare(s1, s2) {
 		if (s1 === s2) { return true; }
 		if (s1 && !s2 || !s1 && s2) { return false; }
@@ -130,6 +89,27 @@ define([
 		this.pageNavId = options.pageNavId;
 		this.actionScopeId = options.actionScopeId;
 		this.checkbox = false;
+		
+		var that = this;
+		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", function(event) { //$NON-NLS-0$
+			switch (event.action) {
+			case "checkout": //$NON-NLS-0$
+				if (that.repository) {
+					window.location.href = require.toUrl(repoTemplate.expand({resource: that.lastResource = that.repository.Location}));
+				}
+				that.changedItem();
+				break;
+			case "deleteClone": //$NON-NLS-0$
+				if (that.repository && event.items.some(function(repo) { return repo.Location === that.repository.Location; })) {
+					window.location.href = require.toUrl(repoTemplate.expand({resource: that.lastResource = ""}));
+				}
+				that.changedItem();
+				break;
+			case "cherrypick": //$NON-NLS-0$
+				that.changedItem();
+				break;
+			}
+		});
 	}
 	
 	GitRepositoryExplorer.prototype.handleError = function(error) {
@@ -191,7 +171,6 @@ define([
 			this.repositoriesNavigator = null;
 		}
 		if (this.repositoriesSection) {
-			this.accordion.remove(this.repositoriesSection);
 			this.repositoriesSection.destroy();
 			this.repositoriesSection = null;
 		}
@@ -208,26 +187,8 @@ define([
 			this.branchesNavigator = null;
 		}
 		if (this.branchesSection) {
-			this.accordion.remove(this.branchesSection);
 			this.branchesSection.destroy();
 			this.branchesSection = null;
-		}
-	};
-	
-	GitRepositoryExplorer.prototype.destroyTree = function() {
-		if (this.treeLabel) {
-			var parent = this.treeLabel.parentNode;
-			if (parent) parent.removeChild(this.treeLabel);
-			this.treeLabel = null;
-		}
-		if (this.treeNavigator) {
-			this.treeNavigator.destroy();
-			this.treeNavigator = null;
-		}
-		if (this.treeSection) {
-			this.accordion.remove(this.treeSection);
-			this.treeSection.destroy();
-			this.treeSection = null;
 		}
 	};
 	
@@ -248,47 +209,17 @@ define([
 			this.commitsNavigator = null;
 		}
 		if (this.commitsSection) {
-			this.accordion.remove(this.commitsSection);
 			this.commitsSection.destroy();
 			this.commitsSection = null;
 		}
 	};
 	
-	GitRepositoryExplorer.prototype.destroyTags = function() {
-		if (this.configNavigator) {
-			this.configNavigator.destroy();
-			this.configNavigator = null;
-		}
-		if (this.tagsSection) {
-			this.accordion.remove(this.tagsSection);
-			this.tagsSection.destroy();
-			this.tagsSection = null;
-		}
-	};
-	
-	GitRepositoryExplorer.prototype.destroyWorkingDirectory = function() {
-		if (this.workingDirNavigator) {
-			this.workingDirNavigator.destroy();
-			this.workingDirNavigator = null;
-		}
-		if (this.workingDirSection) {
-			this.workingDirSection.destroy();
-			this.workingDirSection = null;
-		}
-	};
-	
 	GitRepositoryExplorer.prototype.destroyConfig = function() {
-		if (this.configLabel) {
-			var parent = this.configLabel.parentNode;
-			if (parent) parent.removeChild(this.configLabel);
-			this.configLabel = null;
-		}
 		if (this.configNavigator) {
 			this.configNavigator.destroy();
 			this.configNavigator = null;
 		}
 		if (this.configSection) {
-			this.accordion.remove(this.configSection);
 			this.configSection.destroy();
 			this.configSection = null;
 		}
@@ -310,11 +241,8 @@ define([
 		lib.empty(lib.node('table')); //$NON-NLS-0$
 		this.destroyRepositories();
 		this.destroyBranches();
-		this.destroyTree();
 		this.destroyCommits();
 		this.destroyStatus();
-		this.destroyTags();
-		this.destroyWorkingDirectory();
 		this.destroyConfig();
 		this.destroyDiffs();
 	};
@@ -331,17 +259,13 @@ define([
 		}
 		if (repository) {
 			this.displayBranches(repository); 
-			this.setSelectedReference(this.reference);
-			if (this.showTagsSeparately) {
-				this.displayTags(repository);
-			}
 			this.displayConfig(repository, "full"); //$NON-NLS-0$
+			this.setSelectedReference(this.reference);
 		}
 	};
 	
 	GitRepositoryExplorer.prototype.setSelectedReference = function(ref) {
 		this.reference = ref;
-//		this.displayTree(this.repository);
 		this.setSelectedChanges(this.changes);
 		this.displayCommits(this.repository);
 	};
@@ -357,25 +281,17 @@ define([
 			}
 			return;
 		} else if (changes.length === 1 && this.changes[0] && this.changes[0].Type === "Commit") { //$NON-NLS-0$
-			this.displayCommit(this.changes[0]);
-			this.displayDiffs(this.repository, this.changes[0].Diffs);
+			this.displayDiffs(this.repository, this.changes[0]);
 			this.statusDeferred = new Deferred().resolve(); //HACK
 			return;
 		}
 		this.statusDeferred = this.displayStatus(this.repository);
-		this.displayWorkingDirectory(this.repository);
 	};
-	
-	GitRepositoryExplorer.prototype.setSelectedPath = function(path) {
-		this.treePath = path;
-		this.displayCommits(this.repository);
-	};
-	
+
 	GitRepositoryExplorer.prototype.display = function(location, resource, processURLs) {
 		if (this.lastResource === resource) return; //$NON-NLS-0$
 		this.lastResource = resource; //$NON-NLS-0$
 		this.destroy();
-		this.accordion = new Accordion();
 		var that = this;
 		this.changes = this.reference = this.repository = this.treePath = this.log = this.logLocation = null;
 		this.loadingDeferred = new Deferred();
@@ -480,13 +396,13 @@ define([
 		var section = this.repositoriesSection = new mSection.Section(parent, {
 			id: "repoSection", //$NON-NLS-0$
 			title: messages["Repo"],
-			iconClass: ["gitImageSprite", "git-sprite-repository"], //$NON-NLS-1$ //$NON-NLS-0$
+//			iconClass: ["gitImageSprite", "git-sprite-repository"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="repositoryNode" class="repoDropdownList"></div><div id="dropdownRepositoryActionsNode" class="sectionDropdownActions"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
 			dropdown: true,
-			noTwistie: NO_TWISTIES,
+			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
 		
@@ -530,13 +446,13 @@ define([
 		var section = this.branchesSection = new mSection.Section(parent, {
 			id: "branchSection", //$NON-NLS-0$
 			title: "\u00A0", //$NON-NLS-0$
-			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
+//			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="branchNode" class="branchDropdownList"></div><div id="dropdownBranchesActionsNode" class="sectionDropdownActions"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
 			dropdown: true,
-			noTwistie: NO_TWISTIES,
+			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
 
@@ -599,82 +515,17 @@ define([
 		}
 		this.branchesSection.setTitle(title);
 	};
-	
-	GitRepositoryExplorer.prototype.calculateTreePath = function() {
-		return util.relativePath(this.treePath);
-	};
-	
-	GitRepositoryExplorer.prototype.displayTree = function(repository) {	
-		this.destroyTree();
-		
-		var parent = lib.node('pageToolbar'); //$NON-NLS-0$
-		
-		this.treeLabel = this.createLabel(parent, messages["Path:"]);
-		
-		var section = this.treeSection = new mSection.Section(parent, {
-			id: "treeSection", //$NON-NLS-0$
-			title: util.shortenPath("/" + this.calculateTreePath()), //$NON-NLS-0$
-			iconClass: ["core-sprite-outline"], //$NON-NLS-0$
-			slideout: true,
-			content: '<div id="treeNode"></div>', //$NON-NLS-0$
-			canHide: true,
-			hidden: true,
-			dropdown: true,
-			noTwistie: NO_TWISTIES,
-			preferenceService: this.preferencesService
-		});
-		
-		var selection = this.treeSelection = new mSelection.Selection(this.registry, "orion.selection.tree"); //$NON-NLS-0$
-		var explorer  = this.treeNavigator = new mGitFileList.GitFileListExplorer({
-			serviceRegistry: this.registry,
-			commandRegistry: this.commandService,
-			parentId:"treeNode", //$NON-NLS-0$
-			repository: repository,
-			fileClient: this.fileClient,
-			section: section,
-			selection: selection,
-			selectionPolicy: "singleSelection", //$NON-NLS-0$
-			handleError: this.handleError.bind(this),
-			gitClient: this.gitClient,
-			progressService: this.progressService
-		});
-		section.addEventListener("toggle", function(e) { //$NON-NLS-0$
-			if (e.isExpanded) {
-				var location;
-				var model = this.commitsNavigator.model;
-				if (this.changes && this.changes.length === 1 && this.changes[0].Type === "Commit") { //$NON-NLS-0$
-					location = this.changes.TreeLocation;
-				} else {
-					location = (model.simpleLog ? model.getTargetReference() : model.getActiveBranch()).TreeLocation;
-				}
-				if (!location) return;
-				explorer.display(location).then(function() {
-					explorer.myTree.expand(explorer.model.root);
-					if (this.treePath) {
-						explorer.select(this.treePath);
-					}
-				}.bind(this));
-			}
-		}.bind(this));
 
-		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
-			var selected = e.selection;
-			if (!selected || compare(this.treePath, selected)) return;
-			this.setSelectedPath(selected);
-			this.treeSection.setTitle(util.shortenPath("/" + this.calculateTreePath())); //$NON-NLS-0$
-		}.bind(this));
-	};
-	
 	GitRepositoryExplorer.prototype.displayStatus = function(repository) {	
 		this.destroyStatus();
 		var parent = lib.node('table'); //$NON-NLS-0$
 		var section = this.statusSection = new mSection.Section(parent, {
 			id: "statusSection", //$NON-NLS-0$
-			title: messages["ChangedFiles"],
+			title: messages["WorkingDirChanges"],
 			slideout: true,
 			content: '<div id="statusNode"></div>', //$NON-NLS-0$
-			canHide: true,
-			noTwistie: NO_TWISTIES,
+			canHide: false,
+			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
 		
@@ -701,12 +552,10 @@ define([
 			title: messages["Diffs"],
 			slideout: false,
 			content: '<div id="commitsNode"></div>', //$NON-NLS-0$
-			canHide: true,
+			canHide: false,
 			noTwistie: true,
 			preferenceService: this.preferencesService
 		});
-		this.accordion.add(section);
-		this.accordion.setDefaultSection(section);
 		
 		var selection = this.commitsSelection = new mSelection.Selection(this.registry, "orion.selection.commit"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
@@ -730,7 +579,6 @@ define([
 			log: this.log,
 			location: this.logLocation,
 			simpleLog: !!this.log,
-			repositoryPath: this.calculateTreePath(),
 			handleError: this.handleError.bind(this),
 			root: {
 				Type: "CommitRoot", //$NON-NLS-0$
@@ -740,7 +588,7 @@ define([
 		return this.statusDeferred.then(function() {
 			return explorer.display().then(function() {
 				this.setBranchesTitle();
-				if (this.changes) {
+				if (this.changes && this.changes.length) {
 					this.changes.forEach(function(c) {
 						explorer.select(c);
 					});
@@ -750,121 +598,19 @@ define([
 			}.bind(this));
 		}.bind(this));
 	};
-	
-	GitRepositoryExplorer.prototype.displayTags = function(repository) {
-		this.destroyTags();
-		var parent = lib.node("sidebar"); //$NON-NLS-0$
-		var section = this.tagsSection = new mSection.Section(parent, {
-			id : "tagSection", //$NON-NLS-0$
-			iconClass : ["gitImageSprite", "git-sprite-tag"], //$NON-NLS-1$ //$NON-NLS-0$
-			title : messages["Tags"],
-			content : '<div id="tagNode"></div>', //$NON-NLS-0$
-			canHide : true,
-			hidden : true,
-			noTwistie: NO_TWISTIES,
-			preferenceService : this.preferencesService
-		});
-		this.accordion.add(section);
 
-		var explorer = this.tagsNavigator = new mGitBranchList.GitBranchListExplorer({
-			serviceRegistry: this.registry,
-			commandRegistry: this.commandService,
-			fileClient: this.fileClient,
-			gitClient: this.gitClient,
-			progressService: this.progressService,
-			parentId: "tagNode", //$NON-NLS-0$
-			actionScopeId: this.actionScopeId,
-			section: section,
-			handleError: this.handleError.bind(this),
-			root: {
-				Type: "TagRoot", //$NON-NLS-0$
-				repository: repository,
-			}
-		});
-		return explorer.display();
-	};
-	
-	GitRepositoryExplorer.prototype.displayWorkingDirectory = function(repository) {
-		this.destroyWorkingDirectory();
-		var parent = lib.node('table'); //$NON-NLS-0$
-		var section = this.workingDirSection = new mSection.Section(parent, {
-			id: "workingDirSection", //$NON-NLS-0$
-			title: messages['LocalChangesDetails'], //$NON-NLS-0$
-			slideout: true,
-			canHide: true,
-			sibling: this.statusSection ? this.statusSection.domNode : null,
-			preferenceService: this.preferencesService
-		});
-		
-		var explorer = this.workingDirNavigator = new mGitRepoList.GitRepoListExplorer({
-			serviceRegistry: this.registry,
-			commandRegistry: this.commandService,
-			fileClient: this.fileClient,
-			gitClient: this.gitClient,
-			progressService: this.progressService,
-			parentId: section.getContentElement(),
-			actionScopeId: this.actionScopeId,
-			handleError: this.handleError.bind(this),
-			section: section,
-			repositories: [repository],
-			mode: "full", //$NON-NLS-0$
-			simgleRepository: true,
-			showLinks: false,
-		});
-		return this.statusDeferred.then(function() {
-			return explorer.display();
-		});
-	};
-	
-	GitRepositoryExplorer.prototype.displayCommit = function(commit) {
-		var parent = lib.node('table'); //$NON-NLS-0$
-		var section = this.commitSection = new mSection.Section(parent, {
-			id: "commitSection", //$NON-NLS-0$
-			title: messages['Commit Details'], //$NON-NLS-0$
-			content : '<div id="commitNode" class="sectionTableItem"></div>', //$NON-NLS-0$
-			slideout: true,
-			canHide: true,
-			preferenceService: this.preferencesService
-		});
-
-		var commandRegistry = this.commandService;
-		var actionsNodeScope = section.actionsNode.id;
-		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.openGitCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
-//		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.compareWithWorkingTree", 2); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.checkoutTag", 3); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.resetIndex", 4); //$NON-NLS-0$
-		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.addTag", 5); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.cherryPick", 6); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.revert", 7); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.askForReviewCommand", 8); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, commit, this, "button"); //$NON-NLS-0$	
-
-		var info = new mGitCommitInfo.GitCommitInfo({
-			parent: lib.node("commitNode"), //$NON-NLS-0$
-			tagsCommandHandler: this,
-			commit: commit,
-			showTags: true,
-			commitLink: false,
-			showMessage: false,
-			showParentLink: false,
-			showAuthorEmail: true,
-			showCommitterEmail: true,
-			onlyFullMessage: true,
-			fullMessage: true
-		});
-		info.display();
-	};
-
-	GitRepositoryExplorer.prototype.displayDiffs = function(repository, diffs, location, commitName) {
+	GitRepositoryExplorer.prototype.displayDiffs = function(repository, commit, location, commitName) {
 		this.destroyDiffs();
 		var parent = lib.node('table'); //$NON-NLS-0$
-		var section = this.diffsSection = new mSection.Section(parent, { id : "diffSection", //$NON-NLS-0$
-			title : messages["ChangedFiles"],
+		var section = this.diffsSection = new mSection.Section(parent, {
+			id : "diffSection", //$NON-NLS-0$
+			title : messages["CommitChanges"],
 			content : '<div id="diffNode"></div>', //$NON-NLS-0$
 			canHide : true,
+			noTwistie: true,
 			preferencesService : this.preferencesService
 		});
-		
+
 		var explorer = this.diffsNavigator = new mGitChangeList.GitChangeListExplorer({
 			serviceRegistry: this.registry,
 			commandRegistry: this.commandService,
@@ -873,7 +619,8 @@ define([
 			actionScopeId: "diffSectionItemActionArea", //$NON-NLS-0$
 			prefix: "diff", //$NON-NLS-0$
 			repository: repository,
-			changes: diffs,
+			commit: commit,
+			changes: commit ? commit.Diffs : null,
 			location: location,
 			commitName: commitName,
 			section: section,
