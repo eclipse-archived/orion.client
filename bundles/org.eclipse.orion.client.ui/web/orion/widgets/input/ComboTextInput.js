@@ -110,7 +110,11 @@ define([
 		_initializeCompletion: function() {
 			this._localStorageKey = this._domNodeId + "LocalStorageKey"; //$NON-NLS-0$
 			
-			if (!this._defaultRecentEntryProposalProvider) {
+			var forceShowRecentEntryButton = false;
+			
+			if (this._defaultRecentEntryProposalProvider) {
+				forceShowRecentEntryButton = true;
+			} else {
 				this._defaultRecentEntryProposalProvider = function(uiCallback) {
 					var recentEntryArray = this.getRecentEntryArray();
 					if (!recentEntryArray) {
@@ -163,7 +167,7 @@ define([
 			}.bind(this)); //$NON-NLS-0$
 
 			var recentEntryArray = this.getRecentEntryArray();
-			if (recentEntryArray && 0 < recentEntryArray.length) {
+			if (forceShowRecentEntryButton || (recentEntryArray && (0 < recentEntryArray.length)) ) {
 				this._showRecentEntryButton();
 			} else {
 				this._hideRecentEntryButton();
