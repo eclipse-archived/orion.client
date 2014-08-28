@@ -414,6 +414,10 @@ div.page section:last-child {
 	color: #222;
 }
 
+.setting-control[readonly="true"] {
+	background-color: #f4f4f4;
+}
+
 .overlay{
     position: absolute;
     top: 0; left: 0; bottom: 0; right: 0;
