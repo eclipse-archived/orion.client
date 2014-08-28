@@ -892,9 +892,54 @@ table .sectionTable {
 	background: none;
 	border: none;
 	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.git-sprite-save-patch{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
+	padding-right:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.git-sprite-stash-changes{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
+	padding-right:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.git-sprite-pop-changes{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
+	padding-right:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-apply-patch:before{ content:'\0057'; }
+.git-sprite-save-patch:before{ content:'\0037'; }
 .git-sprite-cherry-pick:before{ content:'\0058'; }
 .git-sprite-pull:before{ content:'\0063'; }
 .git-sprite-repository:before{ content:'\0065'; }
@@ -924,3 +969,6 @@ table .sectionTable {
 .git-sprite-branch-active-branch:before{ content: '\0059'; }
 .git-sprite-branch-active-branch:after{ content: '\006E'; }
 .git-sprite-undo-commit:before{ content: '\0036'; }
+.git-sprite-view-stash:before{ content: '\0030'; }
+.git-sprite-stash-changes:before{ content: '\0038'; }
+.git-sprite-pop-changes:before{ content: '\0039'; }
