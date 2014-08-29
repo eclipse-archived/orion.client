@@ -28,11 +28,11 @@
 .mainToolbar .sectionWrapper {
 	margin-left: 0;
 	margin-right: 10px;
-	margin-top: 6px;
+	margin-top: 10px;
 	width: auto;
 	float: left;
-	background-color: #ddd;
-	border: 1px solid #aaa;
+	background-color: #FFF;
+	border: 1px solid #DDD;
 	border-radius: 4px;
 	padding-top: 2px;
 	padding-bottom: 2px;
@@ -57,11 +57,11 @@
 }
 
 .mainToolbar {
-	height: 40px;
+	height: 50px;
 }
 
 .innerPanels {
-	top: 40px;
+	top: 50px;
 }
 
 .gitSectionLabel {
@@ -69,23 +69,23 @@
 	font-weight: bold;
 	text-transform: uppercase;
 	font-size: 12px;
-	padding-top: 14px;
+	padding-top: 19px;
 	padding-right: 6px;
 }
 
 .sidebar > .sectionWrapper {
-	margin-left: 5px;
+	margin-left: 15px;
 	margin-right:5px;
 	margin-top: 0;
 	height: 25px;
 }
 
 .sidebar .sectionWrapper.sectionOpened {
-	background-color: #f4f4f4;
+	background-color: white;
 }
 
 .sidebar > .sectionTable {
-	margin-left: 5px;
+	margin-left: 15px;
 	margin-right: 5px;
 	margin-bottom: 0;
 	background-color: #fcfcfc;
@@ -185,6 +185,7 @@
 
 .mainToolbar #configSection {
 	float: right;
+	padding-top: 4px;
 } 
 
 .mainToolbar #configSection:not(:hover):not(.sectionOpened) {
@@ -197,6 +198,7 @@
 	margin-right: 0;
 	margin-top: 0;
 	height: 25px;
+	background:white;
 }
 
 .mainpane .sectionTable {
@@ -304,7 +306,12 @@ table .sectionTable {
 .gitCommitMore {
 	padding: 0;
 	margin: 0;
-	opacity: 0.3;
+	opacity: 0.6;
+	border: none;
+	background: #FFF;
+	font-weight: bold;
+	padding-top: 5px;
+	color: #FF4500;
 }
 
 .gitListCell:hover .gitCommitMore {
@@ -337,10 +344,10 @@ table .sectionTable {
 }
 
 .sectionTitle {
-	font-size: 13px;
-	color: #444;
+	font-size: 12px;
+	color: #333;
 	padding-bottom: 3px;
-}
+	}
 
 .gitCommitListLoaded {
 	border: 1px solid #ddd;
@@ -351,7 +358,7 @@ table .sectionTable {
 }
 
 .gitListCell {
-	padding-top: 4px;
+	padding-top: 6px;
 	padding-bottom: 4px;
 	overflow: hidden;
 }
@@ -431,6 +438,8 @@ table .sectionTable {
 
 .gitCommitTitle {
 	font-weight: bold;
+	padding-bottom: 5px;
+	color: #555;
 }
 
 .gitStatusTitle {
@@ -552,7 +561,7 @@ table .sectionTable {
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555555;
+	color: #333333;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
