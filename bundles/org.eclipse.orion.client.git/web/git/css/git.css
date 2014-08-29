@@ -274,11 +274,12 @@ table .sectionTable {
 }
 
 .gitCommitMessage .gitCommitMessageTopRow {
-	width: calc(100% - 6px);
-	background-color: white;
-	padding: 0px;
+	width: calc(100% - 26px);
+	background-color: #FFF;
+	padding: 5px;
+	margin: 10px;
 	border-radius: 5px;
-	border: 1px solid #ddd;
+	border: 1px solid #FED2C2;
 }
 
 .gitCommitMessage .gitCommitMessageTopRow.invalidCommitMessage {
