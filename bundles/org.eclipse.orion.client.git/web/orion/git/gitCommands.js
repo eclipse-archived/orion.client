@@ -2574,8 +2574,7 @@ var exports = {};
 		var checkoutCommand = new mCommands.Command({
 			name: messages['Checkout'],
 			tooltip: messages["Checkout all the selected files, discarding all changes"],
-			imageClass: "git-sprite-checkout", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			imageClass: "core-sprite-delete", //$NON-NLS-0$
 			id: "eclipse.orion.git.checkoutCommand", //$NON-NLS-0$
 			callback: function(data) {				
 				var items = forceArray(data.items);
@@ -2626,8 +2625,7 @@ var exports = {};
 		var checkoutStagedCommand = new mCommands.Command({
 			name: messages['Discard'],
 			tooltip: messages["Checkout all the selected files, discarding all changes"],
-			imageClass: "git-sprite-checkout", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			imageClass: "core-sprite-delete", //$NON-NLS-0$
 			id: "eclipse.orion.git.checkoutStagedCommand", //$NON-NLS-0$
 			callback: function(data) {				
 				var dialog = serviceRegistry.getService("orion.page.dialog"); //$NON-NLS-0$
@@ -2713,6 +2711,8 @@ var exports = {};
 		
 		var showPatchCommand = new mCommands.Command({
 			name: messages["Show Patch"],
+			imageClass: "git-sprite-save-patch", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			tooltip: messages["Show workspace changes as a patch"],
 			id: "eclipse.orion.git.showPatchCommand", //$NON-NLS-0$
 			hrefCallback : function(data) {
@@ -2742,6 +2742,8 @@ var exports = {};
 		
 		var showStagedPatchCommand = new mCommands.Command({
 			name: messages["Show Patch"],
+			imageClass: "git-sprite-save-patch", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			tooltip: messages["Show checked changes as a patch"],
 			id: "eclipse.orion.git.showStagedPatchCommand", //$NON-NLS-0$
 			callback : function(data) {
@@ -2938,6 +2940,8 @@ var exports = {};
 		
 		var createStashCommand = new mCommands.Command({
 			name : messages["Stash"],
+			imageClass: "git-sprite-stash-changes", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			tooltip : messages["Stash all current changes away"],
 			id : "eclipse.orion.git.createStash",
 			callback : function(data){
@@ -2990,6 +2994,8 @@ var exports = {};
 		
 		var popStashCommand = new mCommands.Command({
 			name : messages["Pop Stash"],
+			imageClass: "git-sprite-pop-changes", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			tooltip : messages["Apply the most recently stashed change to your active branch and drop it from the stashes"],
 			id : "eclipse.orion.git.popStash",
 			callback : function(data){

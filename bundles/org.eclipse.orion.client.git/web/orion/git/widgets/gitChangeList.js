@@ -446,14 +446,14 @@ define([
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 200); //$NON-NLS-1$ //$NON-NLS-0$
 
 				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showStagedPatchCommand", 100); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 200); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precreateStashCommand", 300); //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precreateStashCommand", 200); //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 300); //$NON-NLS-0$
 				
 //				commandRegistry.addCommandGroup(selectionNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.precommitCommand", "primaryButton"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
 //				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitCommand", 400); //$NON-NLS-0$
 
-				commandRegistry.renderCommands(selectionNodeScope, selectionNodeScope, [], this, "button", {Clone : this.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.renderCommands(selectionNodeScope, selectionNodeScope, [], this, "tool", {Clone : this.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.model ? this.model.repository : this, this, "tool"); //$NON-NLS-0$	
 			} else if (this.prefix === "diff" && this.commit) { //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.openGitCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
@@ -562,6 +562,8 @@ define([
 			
 			var precreateStashCommand = new mCommands.Command({
 				name: messages["Stash"],
+				imageClass: "git-sprite-stash-changes", //$NON-NLS-0$
+				spriteClass: "gitCommandSprite", //$NON-NLS-0$
 				tooltip: messages["Stash all current changes away"],
 				id: "eclipse.orion.git.precreateStashCommand", //$NON-NLS-0$
 				callback: function(data) {
@@ -613,7 +615,7 @@ define([
 				this.selection.addEventListener("selectionChanged", this._selectionListener =  function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 					if (selectionTools) {
 						commandService.destroy(selectionTools);
-						commandService.renderCommands(selectionTools.id, selectionTools, event.selections, that, "button", {"Clone" : that.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
+						commandService.renderCommands(selectionTools.id, selectionTools, event.selections, that, "tool", {"Clone" : that.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					if (that.prefix === "all") { //$NON-NLS-0$
 						var titleTools = section.titleActionsNode;
