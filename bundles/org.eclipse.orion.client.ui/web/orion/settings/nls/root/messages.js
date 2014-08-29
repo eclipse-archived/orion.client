@@ -237,6 +237,14 @@ define({
 	'clearThemeAndEditorSettings.name': 'Clear themes and editor settings',  //$NON-NLS-0$  //$NON-NLS-1$
 	'clearThemeAndEditorSettings.tooltip': 'Clear all settings associated with editor themes and window themes',  //$NON-NLS-0$  //$NON-NLS-1$
 	"Settings": "Settings",
+	'eclipseThemeName': 'Eclipse',  //$NON-NLS-0$ //$NON-NLS-1$
+	'prospectoThemeName': 'Prospecto',  //$NON-NLS-0$ //$NON-NLS-1$
+	'blueThemeName': 'Blue',  //$NON-NLS-0$  //$NON-NLS-1$
+	'ambienceThemeName': 'Ambience',  //$NON-NLS-0$ //$NON-NLS-1$
+	'tierraThemeName': 'Tierra',  //$NON-NLS-0$  //$NON-NLS-1$
+	'nimbusThemeName': 'Nimbus',  //$NON-NLS-0$ //$NON-NLS-1$
+	'adelanteThemeName': 'Adelante',  //$NON-NLS-0$ //$NON-NLS-1$
+	'raspberryPiThemeName': 'Raspberry Pi',  //$NON-NLS-0$ //$NON-NLS-1$
     'orionThemeName': 'Orion',  //$NON-NLS-0$  //$NON-NLS-1$
     'orion2014ThemeName': 'Orion2014',  //$NON-NLS-0$  //$NON-NLS-1$
     'greenZoneThemeName': 'Green Zone',  //$NON-NLS-0$  //$NON-NLS-1$
