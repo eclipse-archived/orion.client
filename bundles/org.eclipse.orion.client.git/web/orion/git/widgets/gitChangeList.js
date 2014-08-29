@@ -652,7 +652,7 @@ define([
 					div.className = "sectionTableItem"; //$NON-NLS-0$
 					td.appendChild(div);
 					if (item.Type === "CommitMsg") { //$NON-NLS-0$
-						tableRow.classList.add("gitCommitListSection"); //$NON-NLS-0$
+						tableRow.classList.add("gitCommitMessageSection"); //$NON-NLS-0$
 						var outerDiv = document.createElement("div"); //$NON-NLS-0$
 						outerDiv.id = "gitCommitMessage"; //$NON-NLS-0$
 						outerDiv.className = "gitCommitMessage toolComposite"; //$NON-NLS-0$

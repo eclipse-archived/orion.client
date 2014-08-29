@@ -269,6 +269,10 @@ table .sectionTable {
 	font-weight: bold;
 }
 
+.gitCommitMessageSection {
+	background-color: #FEF3EF;
+}
+
 .gitCommitMessage .gitCommitMessageTopRow {
 	width: calc(100% - 6px);
 	background-color: white;
