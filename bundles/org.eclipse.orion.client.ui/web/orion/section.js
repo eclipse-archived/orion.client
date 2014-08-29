@@ -239,7 +239,14 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 			this._updateExpandedState(true);
 			this.dropdown = true;
 			this.positionNode = options.positionNode;
-			lib.addAutoDismiss([this._contentParent, this.positionNode || this.domNode], function () {
+			lib.addAutoDismiss([this._contentParent, this.positionNode || this.domNode], function (event) {
+				var temp = event.target;
+				while (temp) {
+					if (temp.classList && temp.classList.contains("tooltipContainer")) { //$NON-NLS-0$
+						return;
+					}
+					temp = temp.parentNode;
+				}
 				this.setHidden(true);
 			}.bind(this));
 		}

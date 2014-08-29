@@ -192,7 +192,7 @@ define([
 					break;
 				case 1:
 					var actionsArea = document.createElement("ul"); //$NON-NLS-0$
-					actionsArea.className = "sectionTableItemActions layoutRight commandList"; //$NON-NLS-0$
+					actionsArea.className = "sectionTableItemActions layoutRight commandList toolComposite"; //$NON-NLS-0$
 					actionsArea.id = "configActionsArea"; //$NON-NLS-0$
 					div.appendChild(actionsArea);
 					this.commandService.renderCommands(this.actionScopeId, actionsArea, item, this.explorer, "tool"); //$NON-NLS-0$

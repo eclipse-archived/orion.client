@@ -383,7 +383,7 @@ define([
 			title: messages["Repo"],
 //			iconClass: ["gitImageSprite", "git-sprite-repository"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
-			content: '<div id="repositoryNode" class="repoDropdownList"></div><div id="dropdownRepositoryActionsNode" class="sectionDropdownActions"></div>', //$NON-NLS-0$
+			content: '<div id="repositoryNode" class="repoDropdownList"></div><div id="dropdownRepositoryActionsNode" class="sectionDropdownActions toolComposite"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
 			dropdown: true,
@@ -433,7 +433,7 @@ define([
 			title: "\u00A0", //$NON-NLS-0$
 //			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
-			content: '<div id="branchNode" class="branchDropdownList"></div><div id="dropdownBranchesActionsNode" class="sectionDropdownActions"></div>', //$NON-NLS-0$
+			content: '<div id="branchNode" class="branchDropdownList"></div><div id="dropdownBranchesActionsNode" class="sectionDropdownActions toolComposite"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
 			dropdown: true,
@@ -625,7 +625,7 @@ define([
 			title: "\u200B", //$NON-NLS-0$
 			iconClass: ["core-sprite-gear"], //$NON-NLS-0$
 			slideout: true,
-			content: '<div id="configNode" class="configDropdownList mainPadding"></div><div id="dropdownConfigActionsNode" class="sectionDropdownActions"></div>', //$NON-NLS-0$
+			content: '<div id="configNode" class="configDropdownList mainPadding"></div><div id="dropdownConfigActionsNode" class="sectionDropdownActions toolComposite"></div>', //$NON-NLS-0$
 			canHide: true,
 			hidden: true,
 			dropdown: true,
