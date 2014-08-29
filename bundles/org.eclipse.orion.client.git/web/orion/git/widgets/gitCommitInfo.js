@@ -99,9 +99,12 @@ define([
 					link = document.createElement("div"); //$NON-NLS-0$
 					link.className = "gitCommitTitle"; //$NON-NLS-0$
 				}
-				link.appendChild(document.createTextNode(headerMessage));
+				var text = headerMessage;
+				if (headerMessage.length < commit.Message.length) {
+					 text += "..."; //$NON-NLS-0$
+				}
+				link.appendChild(document.createTextNode(text));
 				detailsDiv.appendChild(link);
-
 			}
 			if (this.fullMessage && (this.onlyFullMessage || headerMessage.length < commit.Message.length)) {
 				var fullMessage = document.createElement("div"); //$NON-NLS-0$

@@ -104,7 +104,7 @@ define([
 			iterator++;
 		}
 		var maxMessageLength = 100;
-		if (splitted[iterator].length > maxMessageLength) return splitted[iterator].substring(0,maxMessageLength)+'...'; //$NON-NLS-0$
+		if (splitted[iterator].length > maxMessageLength) return splitted[iterator].substring(0,maxMessageLength);
 		return splitted[iterator];
 	}
 	
