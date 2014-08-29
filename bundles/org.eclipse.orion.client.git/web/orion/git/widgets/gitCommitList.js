@@ -615,6 +615,9 @@ define([
 				filter: doFilter,
 				clear: doClear
 			}, explorer, "button"); //$NON-NLS-0$
+			[].forEach.call(lib.$$(".orionButton", filterActions), function(b) { //$NON-NLS-0$
+				b.addEventListener("blur", blurHandler); //$NON-NLS-0$
+			});
 
 			sections.push(messageSection);
 			sections.push(authorSection);
