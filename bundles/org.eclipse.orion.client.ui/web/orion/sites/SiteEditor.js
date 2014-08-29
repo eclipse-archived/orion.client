@@ -38,7 +38,7 @@ ConvertToSelfHostingDialog.prototype = new Dialog();
 objects.mixin(ConvertToSelfHostingDialog.prototype, {
 	TEMPLATE: ConvertToSelfHostingDialogTemplate,
 	_init: function(options) {
-		this.title = options.title || messages['Convert to Self-Hosting']; //$NON-NLS-1$
+		this.title = options.title || messages['ConvertToSelfHostingTitle']; //$NON-NLS-1$
 		this.buttons = [{ text: messages['OK'], callback: this.okButtonClicked.bind(this) }];
 		this.modal = true;
 		this.folders = this.selfHostingConfig.folders;
