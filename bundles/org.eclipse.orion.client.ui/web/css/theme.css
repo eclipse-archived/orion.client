@@ -96,7 +96,7 @@ a:hover {
 }
 
 .navRow > td:first-child {
-	border-left: 6px solid transparent;
+	/* border-left: 6px solid transparent; THIS CAUSES PIXELATION PROBLEMS! */
 }
 
 .navRow.checkedRow > td:first-child {

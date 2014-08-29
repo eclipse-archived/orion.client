@@ -445,6 +445,7 @@ table .sectionTable {
 .gitStatusTitle {
 	font-weight: bold;
 	color: green;
+	padding-bottom:5px;
 }
 
 .gitBranchTitle {
