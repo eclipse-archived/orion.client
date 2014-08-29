@@ -42,25 +42,19 @@ define(["orion/xhr", "orion/Deferred", "orion/encoding-shim", "orion/URL-shim"],
 			return this.loadWorkspace(this._repoURL);
 		},
 		loadWorkspace: function(location) {
-			return this.fetchChildren(location).then(function(children) {
-				var result = {
-					Attributes: {
-						Archive: false,
-						Hidden: false,
-						ReadOnly: true,
-						SymLink: false
-					},
-					Location: location,
-					Name: null,
-					Length: 0,
-					LocalTimeStamp: 0,
-					Directory: true,
-					ChildrenLocation: location,
-					Children: children
-				};
-				result.Parents = [];
-				result.Name = "/"; //$NON-NLS-0$ 
-				return result;
+			if (location === "/gitapi/") {
+				location += "tree/";
+			}
+			
+			return xhr("GET", location,{ //$NON-NLS-0$
+				headers: {
+					"Orion-Version": "1", //$NON-NLS-0$  //$NON-NLS-1$
+					"Content-Type": "charset=UTF-8" //$NON-NLS-0$  //$NON-NLS-1$
+				},
+				timeout: 15000
+			}).then(function(result) {
+				var jsonData = result.response ? JSON.parse(result.response) : {};
+				return jsonData || {};
 			});
 		},
 		createProject: function(url, projectName, serverPath, create) {
