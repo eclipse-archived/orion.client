@@ -2301,5 +2301,53 @@ define([
 				}
 			});
 		});
+		
+		/**
+		 * Tests global usage
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=429173
+		 */
+		it('test_global1', function() {
+			editorContext.text = "(function() { window.alert('hi'); }()); window.setTimeout(); window.confirm('florp');";
+			return occurrences.computeOccurrences(editorContext, setContext(14, 14)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:14, end:20}, {start:40, end:46}, {start: 61, end: 67}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests global usage
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=429173
+		 */
+		it('test_global2', function() {
+			editorContext.text = "(function() { window.alert('hi'); }()); window.setTimeout(); window.confirm('florp');";
+			return occurrences.computeOccurrences(editorContext, setContext(40, 41)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:14, end:20}, {start:40, end:46}, {start: 61, end: 67}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests global usage
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=429173
+		 */
+		it('test_global3', function() {
+			editorContext.text = "(function() { window.alert('hi'); }()); window.setTimeout(); window.confirm('florp');";
+			return occurrences.computeOccurrences(editorContext, setContext(61, 62)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:14, end:20}, {start:40, end:46}, {start: 61, end: 67}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
 	});
 });

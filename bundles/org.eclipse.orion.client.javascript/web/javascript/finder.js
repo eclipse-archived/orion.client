@@ -28,6 +28,7 @@ define([
 	
 	Objects.mixin(Visitor.prototype, /** @lends javascript.Visitor.prototype */ {
 		occurrences: [],
+		globals: [],
 		scopes: [],
 		context: null,
 		thisCheck: false,
@@ -48,8 +49,8 @@ define([
 			switch(node.type) {
 				case Estraverse.Syntax.Program:
 					this.occurrences = [];
+					this.globals = [];
 					this.scopes = [{range: node.range, occurrences: [], kind:'p'}];   //$NON-NLS-0$
-					this.defnode = null;
 					this.defscope = null;
 					break;
 				case Estraverse.Syntax.FunctionDeclaration:
@@ -318,12 +319,27 @@ define([
 			} else {
 				switch(node.type) {
 					case Estraverse.Syntax.FunctionExpression:
-					case Estraverse.Syntax.FunctionDeclaration:
-					case Estraverse.Syntax.Program:
-						if(this._popScope()) {
+					case Estraverse.Syntax.FunctionDeclaration: {
+					    if(this._popScope()) {
 							return Estraverse.VisitorOption.Break;
 						}
 						break;
+					}
+					case Estraverse.Syntax.Program: {
+					    this._popScope(); // pop the last scope
+					    //we are leaving the AST, add the occurrences if we never found a defining scope
+					   if(!this.defscope && this.globals) {
+					       this.occurrences = [];
+					       var that = this;
+						   this.globals.forEach(function(scope) {
+						       var occ = scope.occurrences;
+                               for(var i = 0; i < occ.length; i++) {
+                                  that.occurrences.push(occ[i]); 
+                               }						        
+						   });
+						}
+						break;
+					}
 				}
 			}
 		},
@@ -348,6 +364,8 @@ define([
 					//we just popped out of the scope the node was defined in, we can quit
 					return true;
 				}
+			} else {
+			    this.globals.push(scope);
 			}
 			return false;
 		},
