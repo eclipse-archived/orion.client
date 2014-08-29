@@ -113,10 +113,10 @@
 	margin-left: 10px;
 	margin-right: 10px;
 	position: absolute;
-	width: calc(100% - 34px);
+	width: calc(100% - 42px);
 	z-index: 200;
 	margin-top: -1px;
-	background-color: #f4f4f4;
+	background-color: white;
 	border-bottom-left-radius: 8px;
 	border-bottom-right-radius: 8px;
 }
@@ -543,7 +543,7 @@ table .sectionTable {
 }
 
 .sidebar .gitFilterBox {
-	background-color: #f4f4f4;
+	background-color: white;
 }
 
 .mainToolbar .gitFilterBox {
