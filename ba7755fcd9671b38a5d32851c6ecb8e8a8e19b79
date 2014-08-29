@@ -1,0 +1,7 @@
+Code-Review+2: Ken Walker <Ken_Walker@ca.ibm.com>
+Verified+1: Ken Walker <Ken_Walker@ca.ibm.com>
+Submitted-by: Ken Walker <Ken_Walker@ca.ibm.com>
+Submitted-at: Fri, 29 Aug 2014 14:01:04 -0400
+Reviewed-on: https://git.eclipse.org/r/32552
+Project: orion/org.eclipse.orion.client
+Branch: refs/heads/aidanr/login_auth_work
