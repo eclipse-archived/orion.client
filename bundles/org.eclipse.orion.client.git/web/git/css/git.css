@@ -308,7 +308,7 @@ table .sectionTable {
 	margin: 0;
 	opacity: 0.6;
 	border: none;
-	background: #FFF;
+	background: transparent;
 	font-weight: bold;
 	padding-top: 5px;
 	color: #FF4500;
