@@ -11,11 +11,10 @@
 
 /*eslint-env browser, amd*/
 
-define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/webui/littlelib', 'persona/include'], function(domReady, xhr, PageUtil, PageLinks, lib) {
+define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/webui/littlelib'], function(domReady, xhr, PageUtil, PageLinks, lib) {
 	var userCreationEnabled;
 	var registrationURI;
 	var forceUserEmail;
-	var personaLoginClicked = false;
 
 	function getParam(key) {
 		var regex = new RegExp('[\\?&]' + key + '=([^&#]*)');
@@ -181,38 +180,6 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		event.stopPropagation();
 
 		return outcome;
-	}
-
-	function personaLogin( event ) {
-		if( handleSelectionEvent( event ) ){
-			personaLoginClicked = true;
-			navigator.id.request();
-		}
-	}
-
-	function addPersonaHandler(button) {
-		var currentUser = null;
-		navigator.id.watch({
-			loggedInUser: currentUser,
-			onlogin: function(assertion) {
-				if (personaLoginClicked) {
-					xhr("POST", "../login/persona", {
-						headers: {
-							"Content-type": "application/x-www-form-urlencoded",
-							"Orion-Version": "1"
-						},
-						data: "assertion=" + encodeURIComponent(assertion)
-					}).then(function() {
-						finishLogin();
-					}, function(error) {
-						showErrorMessage(JSON.parse(error.responseText).error);
-					});
-				}
-			},
-			onlogout: function() {
-				// TODO
-			}
-		});
 	}
 
 	function confirmLogin(login, password) {
@@ -447,7 +414,6 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 	}
 
 	domReady(function() {
-		addPersonaHandler(document.getElementById("personaLogin"));
 
 		var error = getParam("error");
 		if (error) {
@@ -613,9 +579,6 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 
 		document.getElementById("orionLogin").addEventListener("click", revealLogin);
 		document.getElementById("orionLogin").onkeydown = revealLogin;
-
-		document.getElementById("personaLogin").onclick = personaLogin;
-		document.getElementById("personaLogin").onkeydown = personaLogin;
 
 		document.getElementById("cancelResetButton").onclick = hideResetUser;
 
