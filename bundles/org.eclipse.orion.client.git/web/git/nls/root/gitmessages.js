@@ -165,7 +165,7 @@ define({
 	"${0} file(s) to stage and ${1} file(s) to commit.": "${0} file(s) to stage and ${1} file(s) to commit.",
 	"Nothing to commit.": "Nothing to commit.",
 	"Nothing to push.": "Nothing to push.",
-	" commit(s) to push.": " commit(s) to push.",
+	"NCommitsToPush": "${0} commit(s) to push.",
 	"You have no changes to commit.": "You have no changes to commit.",
 	"You have changes to commit in your workspace!": "You have changes to commit in your workspace!",
 	"Rebase in progress!": "Rebase in progress!",

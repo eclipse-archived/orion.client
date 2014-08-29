@@ -320,7 +320,7 @@ define([
 								}
 								var commitsState = repo.CommitsToPush;
 								if (commitsState !== undefined) {
-									extraDescriptions.push(commitsState > 0 ? commitsState + messages[" commit(s) to push."] : messages["Nothing to push."]);
+									extraDescriptions.push(commitsState > 0 ? i18nUtil.formatMessage(messages["NCommitsToPush"], commitsState) : messages["Nothing to push."]);
 								}
 							}
 							if (repo.infoDeferred) {
