@@ -342,12 +342,14 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		if (evt.input === null || evt.input === undefined) {
 			name = lastRoot ? lastRoot.Name : "";
 			target = lastRoot;
+		} else if (target && !target.Parents) {//If the target is file system root then we use the file service name
+			name = fileClient.fileServiceName(target.Location);
 		}
 		// Exclude the "Show current folder" command: it's useless on editor page with built-in nav.
 		// TODO the command exclusions should be an API and specified by individual pages (page links)?
 		mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({
-			task: "Editor", //$NON-NLS-0$
+			task: messages["Editor"],
 			name: name,
 			target: target,
 			makeAlternate: function() {
