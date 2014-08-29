@@ -421,20 +421,6 @@ a.loginwindow {
 	box-shadow: 0 1px 0 rgba(0, 0, 0, .1);
 }
 
-.personaIcon {
-	background: url('../images/persona.png') no-repeat;
-	/* background-position: 0 -809px; */
-	width: 70px;
-	height: 50px;
-	/* margin-top: 6px; */
-	opacity: 1;
-	margin-left: 10px;
-}
-
-.personaIcon:hover {
-	opacity: 0.6;
-}
-
 .openIdIcon {
 	background: url('../images/openid.png') no-repeat;
 	/* background-position: 0 -80px; */

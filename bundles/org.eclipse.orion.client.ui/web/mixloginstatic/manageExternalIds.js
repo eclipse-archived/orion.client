@@ -234,9 +234,6 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil'
 		// Add OAuth Providers
 		providerElements.push(createProviderLink("Google OAuth", "../mixloginstatic/images/googleplus.png", "", confirmOAuth.bind(null, "google")));
 		providerElements.push(createProviderLink("GitHub OAuth", "../mixloginstatic/images/GitHub-Mark-Light-32px.png", "githubImage", confirmOAuth.bind(null, "github")));
-		// Add Mozilla Persona
-		providerElements.push(createProviderLink("Mozilla Persona", "../mixloginstatic/images/persona.png", "",
-				alert.bind(null, "To link your account with a Persona, set your Orion email address above to match your Persona email address.")));
 
 		var openIdContainer = document.getElementById("newExternalId");
 		providerElements.forEach(function(provider) {
