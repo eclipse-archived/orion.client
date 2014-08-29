@@ -565,7 +565,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			}
 			textView.setCaretOffset(caretOffset, show, callback);
 		},
-	
+
+		/**
+		 * @private
+		 */
 		setText: function(text, start, end) {
 			var textView = this._textView;
 			var model = textView.getModel();
