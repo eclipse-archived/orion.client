@@ -19,7 +19,7 @@
 
 .sectionDropdownActions {
 	height:25px;
-	background-color:#eee;
+	background-color: #f4f4f4;
 	padding-top:5px;
 	border-top: 1px solid #cacaca;
 	padding-bottom:4px;
@@ -41,6 +41,10 @@
 .mainToolbar .sectionWrapper.sectionOpened {
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
+}
+
+.mainToolbar .sectionTable.sectionClosed {
+	visibility: hidden;
 }
 
 .mainToolbar .sectionTable {
@@ -444,6 +448,7 @@ table .sectionTable {
 .gitCommitTitle {
 	font-weight: bold;
 	padding-bottom: 5px;
+	word-break: break-all;
 	color: #555;
 }
 
@@ -471,11 +476,12 @@ table .sectionTable {
 }
 
 .gitConfigKey {
+	padding-left: 5px;
 	font-weight: bold;
 }
 
 .gitConfigValue {
-	padding-left: 5px;
+	padding-left: 10px;
 	padding-top: 5px;
 }
 
@@ -547,7 +553,7 @@ table .sectionTable {
 }
 
 .mainToolbar .gitFilterBox {
-	background-color: #eee;
+	background-color: #f4f4f4;
 }
 
 /* sprites */
