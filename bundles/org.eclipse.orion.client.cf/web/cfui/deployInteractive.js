@@ -3,8 +3,8 @@
 var uiTestFunc = null;
 
 define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection',
-	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences', 'cfui/cfUtil', 'orion/objects'], 
-		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, URITemplate, PageLinks, Preferences, mCfUtil, objects) {
+	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences', 'cfui/cfUtil', 'orion/objects', 'orion/widgets/input/ComboTextInput'], 
+		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, URITemplate, PageLinks, Preferences, mCfUtil, objects, ComboTextInput) {
 
 	var cloudManageUrl;
 	
@@ -356,7 +356,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 					function(result2){
 						hideMessage();
 															
-						document.getElementById("orgsLabel").appendChild(document.createTextNode("Organization:"));
+						document.getElementById("orgsLabel").appendChild(document.createTextNode("Organization*:"));
 	
 						orgsDropdown = document.createElement("select");
 						result2.Orgs.forEach(function(org){
@@ -391,7 +391,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						selection = new mSelection.Selection(serviceRegistry, "orion.Spaces.selection"); //$NON-NLS-0$
 						selection.addEventListener("selectionChanged", validate);
 	
-							document.getElementById("spacesLabel").appendChild(document.createTextNode("Space:"));
+							document.getElementById("spacesLabel").appendChild(document.createTextNode("Space*:"));
 	
 							spacesDropdown = document.createElement("select");
 							
@@ -442,62 +442,87 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 								});
 						}
 						
+						var appsList = [];
+						var appsDeferred;
 						function loadApplications(target){
-							lib.empty(appsDropdown);
-							cFService.getApps(target).then(function(apps){
+							appsDeferred = cFService.getApps(target);
+							appsDeferred.then(function(apps){
+								appsList = [];
 								if(apps.Apps){
 									apps.Apps.forEach(function(app){
-										var option = document.createElement("option");
-										option.appendChild(document.createTextNode(app.Name));
-										appsDropdown.appendChild(option);
+										appsList.push(app.Name);
 									});
 								}
 							});
 						}
 						
+						var routesList = [];
+						var routesDeferred;
 						function loadHosts(target){
-							cFService.getRoutes(target).then(function(routes){
+							routesDeferred = cFService.getRoutes(target);
+							routesDeferred.then(function(routes){
 								if(routes.Routes){
+									routesList = [];
 									routes.Routes.forEach(function(route){
-										var option = document.createElement("option");
-										option.appendChild(document.createTextNode(route.Host));
-										hostDropdown.appendChild(option);
+										routesList.push(route.Host);
 									});
 								}
 							});							
 						}
 						
-						document.getElementById("nameLabel").appendChild(document.createTextNode("Application Name:"));
-						appsInput = document.createElement("input");
+						document.getElementById("nameLabel").appendChild(document.createTextNode("Application Name*:"));
+						
+						appsDropdown = new ComboTextInput({
+							id: "applicationNameTextInput", //$NON-NLS-0$
+							parentNode: document.getElementById("name"),
+							insertBeforeNode: this._replaceWrapper,
+							hasButton: false,
+							hasInputCompletion: true,
+							serviceRegistry: this._serviceRegistry,
+							defaultRecentEntryProposalProvider: function(onItem){
+								appsDeferred.then(function(){
+									var ret = [];
+									appsList.forEach(function(app){
+										if(!app) return;
+										ret.push({type: "proposal", label: app, value: app});
+									});
+									onItem(ret);									
+								});
+							}
+						});
+						
+						appsInput= appsDropdown.getTextInputNode();						
+						appsInput.onkeyup = validate;
+						appsInput.addEventListener("focus", validate);
+						
 						if(manifestInfo.name){
 							appsInput.value = manifestInfo.name;
 						}
-						appsDropdown = document.createElement("select");
-						document.getElementById("name").appendChild(appsInput);
-						document.getElementById("name").appendChild(appsDropdown);
-						appsInput.onkeyup = validate;
-						
-						appsDropdown.onchange = function(event){
-							if(appsDropdown.value){
-								appsInput.value = appsDropdown.value;
-								validate();
-							}
-						};
 						
 						document.getElementById("hostLabel").appendChild(document.createTextNode("Host:"));
-						hostInput = document.createElement("input");
-						hostInput.value = manifestInfo.host || manifestInfo.name || "";
-							
-						hostDropdown = document.createElement("select");
-						document.getElementById("host").appendChild(hostInput);
-						document.getElementById("host").appendChild(hostDropdown);
 						
-						hostDropdown.onchange = function(event){
-							if(hostDropdown.value){
-								hostInput.value = hostDropdown.value;
+						
+						hostDropdown = new ComboTextInput({
+							id: "applicationRouteTextInput", //$NON-NLS-0$
+							parentNode: document.getElementById("host"),
+							insertBeforeNode: this._replaceWrapper,
+							hasButton: false,
+							hasInputCompletion: true,
+							serviceRegistry: this._serviceRegistry,
+							defaultRecentEntryProposalProvider: function(onItem){
+								routesDeferred.then(function(){
+									var ret = [];
+									routesList.forEach(function(route){
+										if(!route) return;
+										ret.push({type: "proposal", label: route, value: route});
+									});
+									onItem(ret);
+								});
 							}
-						};
+						});
 						
+						hostInput = hostDropdown.getTextInputNode();
+						hostInput.value = manifestInfo.host || manifestInfo.name || "";
 						
 						var manifestElement = document.getElementById("manifest");
 						saveManifestCheckbox = document.createElement("input");
@@ -532,7 +557,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    	nextButton.style.display = "";
 		    	if(page2shown) return;
 	    		document.getElementById("allServicesLabel").appendChild(document.createTextNode("Add services from the list."));
-	    		document.getElementById("servicesLabel").appendChild(document.createTextNode("All Services:"));
+	    		document.getElementById("servicesLabel").appendChild(document.createTextNode("Existing Services:"));
 	    		servicesDropdown = document.createElement("select");
 	    		servicesDropdown.size = 8;
 	    		servicesDropdown.multiple="multiple";
@@ -575,15 +600,20 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						}
 					});
 					
+				var services = manifestInfo.services;
 				if(manifestInfo.services){
-					if(!Array.isArray(manifestInfo.services)){
-						if(typeof manifestInfo.services === "object"){
-							manifestInfo.services = Object.keys(manifestInfo.services);
+					if(!Array.isArray(services)){
+						if(typeof services === "object"){
+							services = Object.keys(services);
+							if(services.lengh > 0){
+								document.getElementById("allServicesLabel").appendChild(document.createElement("br"));
+								document.getElementById("allServicesLabel").appendChild(document.createTextNode("Convert my manifest.yml file to v6"));
+							}
 						} else {
-							manifestInfo.services = [];
+							services = [];
 						}
 					}
-	    			manifestInfo.services.forEach(function(serviceName){
+	    			services.forEach(function(serviceName){
 		    			var serviceOption = document.createElement("option");
 		    			if(typeof serviceName !== "string"){
 		    				return;
@@ -596,13 +626,13 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 	    		}
 	    		
 	    		showMessage("Loading services...");
-		    	cFService.getServices(target).then(function(services){
+		    	cFService.getServices(target).then(function(servicesResp){
 		    		hideMessage();
 		    		var servicesToChooseFrom = [];
 		    		
-					if(services.Children){
-						services.Children.forEach(function(service){
-							if(manifestInfo.services && manifestInfo.services.some(function(manService){return manService === service.Name;})){
+					if(servicesResp.Children){
+						servicesResp.Children.forEach(function(service){
+							if(services && services.some(function(manService){return manService === service.Name;})){
 								
 							} else {
 								servicesToChooseFrom.push(service.Name);

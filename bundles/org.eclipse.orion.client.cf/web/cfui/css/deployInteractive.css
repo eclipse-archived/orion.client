@@ -35,27 +35,35 @@ html, body {
 select{
 	height: 24px;
     width: 250px;
+    border: 1px solid #bbb;
 }
 
 .selectCell input {
     height: 24px;
     width: 250px;
+    margin-left: 0;
+    border: 1px solid #bbb;
 }
 
-.hintedInput input{
-    border: 0 none;
-    height: 20px;
-    margin: 2px;
+.comboTextInputWrapper{
+	height: 24px;
+    width: 250px;
+    border: 1px solid #bbb;
+}
+
+.comboTextInputField {
+	width: 220px !important;
+	height: 24px;
     text-align: left;
-    overflow: hidden;
-    position: absolute;
-    width: 230px;
-    z-index: 7;
+    margin-right: 0;
+    border: 0px  !important;
 }
 
-.hintedInput select{
-    overflow: hidden;
-    z-index: 6;
+.recentEntryButton {
+    margin-left: 0;	
+    height: 22px;
+    background: none repeat scroll 0 0 #fff;
+    width: 25px;
 }
 
 .formTable{
