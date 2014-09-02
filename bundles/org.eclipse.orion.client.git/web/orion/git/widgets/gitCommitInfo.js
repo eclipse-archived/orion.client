@@ -20,7 +20,7 @@ define([
 	'orion/objects'
 ], function(require, messages, URITemplate, i18nUtil, util, objects) {
 	
-	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$	
+	var commitTemplate = new URITemplate("git/git-repository.html#{,resource,params*}?page=1"); //$NON-NLS-0$	
 	
 	/**
 	 * @class orion.git.GitCommitInfo
@@ -40,7 +40,9 @@ define([
 				values = Array.isArray(values) ? values : [values];
 				var div = document.createElement("div"); //$NON-NLS-0$
 				for (var i = 0; i < keys.length; i++) {
-					div.appendChild(document.createTextNode(messages[keys[i]]));
+					if (keys[i]) {
+						div.appendChild(document.createTextNode(messages[keys[i]]));
+					}
 					var span = document.createElement("span"); //$NON-NLS-0$
 					span.className = "gitCommitInfoValue"; //$NON-NLS-0$
 					span.appendChild(document.createTextNode(values[i])); //$NON-NLS-0$  //$NON-NLS-1$
@@ -64,22 +66,26 @@ define([
 						image.src = commit.AuthorImage;
 						image.name = commit.AuthorName;
 						image.className = "git-author-icon"; //$NON-NLS-0$
-						image.style["float"] = "left"; //$NON-NLS-1$ //$NON-NLS-0$
+						if (commit.incoming) image.classList.add("incoming"); //$NON-NLS-0$
+						if (commit.outgoing) image.classList.add("outgoing"); //$NON-NLS-0$
 						parent.appendChild(image);
 					}
 				}
 			}
 			
-			var detailsDiv = document.createElement("div"); //$NON-NLS-0$
-			if (this.simple) {
-				detailsDiv.className = "stretch"; //$NON-NLS-0$
-			}
+			var table = document.createElement("table"); //$NON-NLS-0$
+			var tableBody = document.createElement("tbody"); //$NON-NLS-0$
+			var row = document.createElement("tr"); //$NON-NLS-0$
+			tableBody.appendChild(row);
+			table.appendChild(tableBody);
 			
-			if (this.simple) {
-				createImage(that.parent);
-			}
-
-			this.parent.appendChild(detailsDiv);
+			var imageDiv = document.createElement("td"); //$NON-NLS-0$
+			imageDiv.className = "gitCommitImageCell"; //$NON-NLS-0$
+			row.appendChild(imageDiv);
+			createImage(imageDiv);
+			var detailsDiv = document.createElement("td"); //$NON-NLS-0$
+			detailsDiv.className = "gitCommitDetailsCell"; //$NON-NLS-0$
+			row.appendChild(detailsDiv);
 	
 			var headerMessage = util.trimCommitMessage(commit.Message);
 			var displayMessage = this.showMessage === undefined || this.showMessage;
@@ -93,11 +99,14 @@ define([
 					link = document.createElement("div"); //$NON-NLS-0$
 					link.className = "gitCommitTitle"; //$NON-NLS-0$
 				}
-				link.appendChild(document.createTextNode(headerMessage));
+				var text = headerMessage;
+				if (headerMessage.length < commit.Message.length) {
+					 text += "..."; //$NON-NLS-0$
+				}
+				link.appendChild(document.createTextNode(text));
 				detailsDiv.appendChild(link);
-
 			}
-			if (this.fullMessage && (this.onlyFullMessage || headerMessage.length > commit.Message.length)) {
+			if (this.fullMessage && (this.onlyFullMessage || headerMessage.length < commit.Message.length)) {
 				var fullMessage = document.createElement("div"); //$NON-NLS-0$
 				fullMessage.className = "gitCommitFullMessage"; //$NON-NLS-0$
 				if (this.simple) {
@@ -119,15 +128,14 @@ define([
 			if (displayAuthor || displayCommitter) {
 				section = createSection(detailsDiv);
 			}
-			if (!this.simple) {
-				createImage(section);
-			}
 			if (displayAuthor) {
-				createInfo(detailsDiv, ["authoredby", "on"], [i18nUtil.formatMessage(messages["nameEmail"], commit.AuthorName,  commit.AuthorEmail), new Date(commit.Time).toLocaleString()]); //$NON-NLS-1$ //$NON-NLS-0$
+				var authorName = this.showAuthorEmail ? i18nUtil.formatMessage(messages["nameEmail"], commit.AuthorName, commit.AuthorEmail) : commit.AuthorName;
+				createInfo(detailsDiv, ["", "on"], [authorName, new Date(commit.Time).toLocaleString()]); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			
 			if (displayCommitter) {
-				createInfo(detailsDiv, "committedby", i18nUtil.formatMessage(messages["nameEmail"], commit.CommitterName, commit.CommitterEmail)); //$NON-NLS-0$
+				var committerName = this.showCommitterEmail ? i18nUtil.formatMessage(messages["nameEmail"], commit.CommitterName, commit.CommitterEmail) : commit.CommitterName;
+				createInfo(detailsDiv, "committedby", committerName); //$NON-NLS-0$
 			}
 			
 			var displayCommit = this.showCommit === undefined || this.showCommit;
@@ -204,6 +212,17 @@ define([
 				});
 				section.appendChild(tags);
 			}
+			
+			if (this.showMore) {
+				var actions = document.createElement("div"); //$NON-NLS-0$
+				var moreButton = this.moreButton = document.createElement("button"); //$NON-NLS-0$
+				moreButton.className = "gitCommitMore"; //$NON-NLS-0$
+				moreButton.textContent = commit.full ? messages["less"] : messages["more"];
+				actions.appendChild(moreButton);
+				detailsDiv.appendChild(actions);
+			}
+			
+			that.parent.appendChild(table);
 		}
 	});
 	

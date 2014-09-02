@@ -30,13 +30,14 @@ var todir = attributes.get("todir");
 if (!buildFile || !todir)
 	throw new Error("Missing attribute");
 	
-var bundles = orion.build.getBuildObject(buildFile).bundles || [];
-if (!bundles.length)
+var buildConfigBundles = orion.build.getBuildObject(buildFile).bundles || [];
+if (!buildConfigBundles.length)
 	self.log("No bundles found in build file " + buildFile, Project.MSG_WARN);
 
 // Create a fileset for every bundle's web/ folder
-var buildConfig = orion.build.getBuildObject(buildFile);
-var filesets = orion.build.getBundles(buildConfig).map(function(bundle) {
+var buildConfig = orion.build.getBuildObject(buildFile),
+    bundles = orion.build.getBundles(buildConfig);
+var filesets = bundles.map(function(bundle) {
 	var fileset = project.createDataType("fileset");
 	fileset.setDir(bundle.web);
 	fileset.setIncludes("**");
@@ -44,12 +45,13 @@ var filesets = orion.build.getBundles(buildConfig).map(function(bundle) {
 	return fileset;
 });
 
-// Copy all the filesets to the `todir`
-var task = project.createTask("copy");
-filesets.forEach(function(fileset) {
+// Execute a <copy> task for each fileset
+filesets.forEach(function(fileset, i) {
+	self.log("About to stage bundle " + bundles[i].web);
+	var task = project.createTask("copy");
 	task.addFileset(fileset);
+	task.setTodir(new Packages.java.io.File(todir));
+	task.setOverwrite(true); // overwrite destination files, even if newer
+	task.setVerbose(true);
+	task.perform();
 });
-task.setTodir(new Packages.java.io.File(todir));
-task.setOverwrite(true); // overwrite destination files, even if newer
-task.setVerbose(true);
-task.perform();

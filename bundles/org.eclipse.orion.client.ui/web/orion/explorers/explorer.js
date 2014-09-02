@@ -184,7 +184,7 @@ exports.Explorer = (function() {
 				lib.empty(existing);
 			}
 			if (model){
-				model.rootId = treeId;
+				model.rootId = treeId + "Root";
 			}
 			this.model = model;
 			this._parentId = parentId;
@@ -220,6 +220,14 @@ exports.Explorer = (function() {
 		
 		getNavDict: function(){
 			return this._navDict;
+		},
+		
+		select: function(item) {
+			var navHandler = this.getNavHandler();
+			if (navHandler) {
+				navHandler.cursorOn(item, true);
+				navHandler.setSelection(item);
+			}
 		},
 		
 		refreshSelection: function(){

@@ -114,14 +114,13 @@
 .core-sprite-silhouette{
 	font-size: 16px;
 	line-height: 14px;
-	vertical-align:middle;
+	vertical-align: top;
 	color: #333333;
 	font-family: 'Orion Icon Font';
 	padding: 0;
 	background: none;
 	border: none;
 	margin: 0;
-	margin-top: -3px;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }

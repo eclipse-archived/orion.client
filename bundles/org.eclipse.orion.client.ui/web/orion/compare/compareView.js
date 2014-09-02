@@ -1,4 +1,4 @@
-/*******************************************************************************
+    /*******************************************************************************
  * @license
  * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
@@ -735,6 +735,7 @@ exports.InlineCompareView = (function() {
 		if(typeof output !== "string"){ //$NON-NLS-0$
 			output = result.output;
 		}
+		this._mapper = result.mapper;
 		this._textView.getModel().setText(input);
 		//Merge the text with diff 
 		var rFeeder = new mDiffTreeNavigator.inlineDiffBlockFeeder(result.mapper, 1);
@@ -749,6 +750,7 @@ exports.InlineCompareView = (function() {
 		if(this.options.commandProvider){
 			this.options.commandProvider.renderCommands(this);
 		}
+		this.removeRulers();
 		this.addRulers();
 		var drawLine = this._textView.getTopIndex() ;
 		this._textView.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
@@ -764,6 +766,18 @@ exports.InlineCompareView = (function() {
 	
 	InlineCompareView.prototype.gotoDiff = function(changeNumber){
 		this._diffNavigator.gotoChangeUsingIndex(changeNumber);
+	};
+	
+	/**
+	 * Scrolls to the specified line and selects
+	 * the characters between start and end.
+	 * @param[in] lineNumber The 0 based line number to reveal.
+	 * @param[in] start The index at which the selection should start.
+	 * @param[in] end The index at which the selection should end.
+	 */
+	InlineCompareView.prototype.gotoLine = function(lineNumber/*zero based*/, start, end){
+		var mergedNumber = mCompareUtils.convertMergedLineNumber(this._mapper, lineNumber);
+		this._editor.onGotoLine(mergedNumber, start, end);
 	};
 	
 	return InlineCompareView;

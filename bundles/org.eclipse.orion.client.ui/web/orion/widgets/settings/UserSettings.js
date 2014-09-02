@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -23,25 +23,25 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 		// TODO these should be real Orion sections, not fake DIVs
 		templateString: '' +  //$NON-NLS-0$
 				'<div>' +  //$NON-NLS-0$
-					'<div class="sectionWrapper toolComposite">' +
-						'<div class="sectionAnchor sectionTitle layoutLeft">${User Profile}</div>' + 
-						'<div id="userCommands" class="layoutRight sectionActions"></div>' +
+					'<div class="sectionWrapper toolComposite">' +  //$NON-NLS-0$
+						'<div class="sectionAnchor sectionTitle layoutLeft">${User Profile}</div>' +   //$NON-NLS-0$
+						'<div id="userCommands" class="layoutRight sectionActions"></div>' +  //$NON-NLS-0$
 					'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
 					'<div class="sectionTable sections">' + //$NON-NLS-0$
 					
 					'</div>' + //$NON-NLS-0$
-					'<div></div>' +
+					'<div></div>' +  //$NON-NLS-0$
 					
 				'</div>' + //$NON-NLS-0$
 				
-				'<div class="linkedSection"></div>',
+				'<div class="linkedSection"></div>',  //$NON-NLS-0$
 
 		createElements: function() {
 			this.node.innerHTML = this.templateString;
 			lib.processTextNodes(this.node, messages);
 			
-			this.sections = lib.$('.sections', this.node);
-			this.linkedSection = lib.$('.linkedSection', this.node);
+			this.sections = lib.$('.sections', this.node);  //$NON-NLS-0$
+			this.linkedSection = lib.$('.linkedSection', this.node);  //$NON-NLS-0$
 			
 			this.createSections();
 		},
@@ -56,21 +56,23 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 		
 		createSections: function(){
 			
+			var saveFunction = this.update.bind(this);
+			
 			/* - account ----------------------------------------------------- */
 			this.accountFields = [
-				new LabeledTextfield( {fieldlabel:messages['Username'], editmode:'readonly'}),
-				new LabeledTextfield( {fieldlabel:messages['Full Name']}),
-				new LabeledTextfield( {fieldlabel:messages['Email Address']}),
-				new LabeledCheckbox( {fieldlabel: messages['Email Confirmed'], editmode:'readonly'})
+				new LabeledTextfield( {fieldlabel:messages['Username'], editmode:'readonly', postChange: saveFunction}),  //$NON-NLS-0$
+				new LabeledTextfield( {fieldlabel:messages['Full Name'], postChange: saveFunction}),
+				new LabeledTextfield( {fieldlabel:messages['Email Address'], postChange: saveFunction}),
+				new LabeledCheckbox( {fieldlabel: messages['Email Confirmed'], editmode:'readonly', postChange: saveFunction})  //$NON-NLS-0$
 			];
 			var accountSubsection = new Subsection( {sectionName: messages['Account'], parentNode: this.sections, children: this.accountFields} );
 			accountSubsection.show();
 
 			/* - password ---------------------------------------------------- */
 			this.passwordFields = [
-				new LabeledTextfield( {fieldlabel:messages['Current Password'], inputType:'password'} ), //$NON-NLS-1$
-				new LabeledTextfield( {fieldlabel:messages['New Password'], inputType:'password'} ), //$NON-NLS-1$
-				new LabeledTextfield( {fieldlabel:messages['Verify Password'], inputType:'password'} ) //$NON-NLS-1$
+				new LabeledTextfield( {fieldlabel:messages['Current Password'], inputType:'password'} ), //$NON-NLS-1$  //$NON-NLS-0$
+				new LabeledTextfield( {fieldlabel:messages['New Password'], inputType:'password'} ), //$NON-NLS-1$  //$NON-NLS-0$
+				new LabeledTextfield( {fieldlabel:messages['Verify Password'], inputType:'password', postChange: saveFunction} ) //$NON-NLS-1$  //$NON-NLS-0$
 			];
 			var passwordSection = new Subsection( {sectionName:messages['Password'], parentNode: this.sections, children: this.passwordFields } );
 			passwordSection.show();
@@ -79,7 +81,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 			var deleteCommand = new mCommands.Command({
 				name: messages["Delete"],
 				tooltip: messages["DeleteUser"],
-				id: "orion.deleteprofile", //$NON-NLS0$
+				id: "orion.deleteprofile",  //$NON-NLS-0$
 				callback: function(){
 					this.deleteUser();
 				}
@@ -87,24 +89,13 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 			
 			this.commandService.addCommand(deleteCommand);
 			this.commandService.registerCommandContribution('profileCommands', "orion.deleteprofile", 3); //$NON-NLS-1$ //$NON-NLS-0$
-			
-			var updateCommand = new mCommands.Command({
-				name: messages["Update"],
-				tooltip: messages["Update Profile Settings"],
-				id: "orion.updateprofile", //$NON-NLS-0$
-				callback: function(data){
-					this.update(data.items);
-				}.bind(this)
-			});
-			
-			this.commandService.addCommand(updateCommand);
-			this.commandService.registerCommandContribution('profileCommands', "orion.updateprofile", 3); //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.renderCommands('profileCommands', lib.node( 'userCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
+
+			this.commandService.renderCommands('profileCommands', lib.node( 'userCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$  //$NON-NLS-2$		
 			
 			this.linkedAccountSection = new mSection.Section(this.linkedSection, {
 				id: "linkedAccountSection", //$NON-NLS-0$
 				title: messages["Linked Accounts"],
-				content: '<div id="iFrameContent"></div>', //$NON-NLS-0$
+				content: '<div style="margin-left: 10px; margin-top: 17px;" id="iFrameContent"></div>', //$NON-NLS-0$
 				canHide: true,
 				useAuxStyle: true,
 				hidden: true,
@@ -113,7 +104,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 			
 			
 			var iframe = this.iframe = document.createElement("iframe"); //$NON-NLS-0$
-			iframe.src = "../mixloginstatic/manageExternalIds.html";
+			iframe.src = "../mixloginstatic/manageExternalIds.html"; //$NON-NLS-0$
 			iframe.style.border = "0";
 			iframe.style.width = "500px";
 			lib.node( 'iFrameContent' ).appendChild(iframe); //$NON-NLS-0$
@@ -128,7 +119,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 	deleteUser: function(){
 		if(confirm(messages["DeleteUserComfirmation"])){			
 			var userService = this.userService; //$NON-NLS-0$
-			userService.deleteUser("/users/" + this.username).then(function(jsonData) {
+			userService.deleteUser("/users/" + this.username).then(function(jsonData) {  //$NON-NLS-0$
 				window.location.reload();
 			}, function(jsonData) {
 				alert(jsonData.Message);
@@ -136,7 +127,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 		}
 	},
 	
-	update: function(data){
+	update: function(){
 			
 			var authenticationIds = [];
 			
@@ -146,35 +137,33 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 			
 			var userService = this.userService;
 			
-			var settingsWidget = this;
-			
 			var userdata = {};
 			
-			userdata.login = settingsWidget.accountFields[0].getValue();
-			userdata.Name = settingsWidget.accountFields[1].getValue();
-			userdata.email = settingsWidget.accountFields[2].getValue();
+			userdata.login = this.accountFields[0].getValue();
+			userdata.Name = this.accountFields[1].getValue();
+			userdata.email = this.accountFields[2].getValue();
 			
-			var pword = settingsWidget.passwordFields[1].getValue();
-			var pwordRetype = settingsWidget.passwordFields[2].getValue();
+			var pword = this.passwordFields[1].getValue();
+			var pwordRetype = this.passwordFields[2].getValue();
 
-			if( pword.length > 0 ){
+			if( pword.length > 0 || pwordRetype.length > 0){
 			
 				if( pword !== pwordRetype ){
-					messageService.setProgressResult( 'New password, and retyped password do not match' );
+					messageService.setProgressResult( {Message: messages['UserSettings.PasswordsDoNotMatch'], Severity: 'Error'} ); //$NON-NLS-1$ //$NON-NLS-0$
 					
 					this.dispatch = false;
 					
 				}else{
 				
-					if( settingsWidget.passwordFields[0].getValue().length > 0 ){
-						userdata.oldPassword = settingsWidget.passwordFields[0].getValue();
+					if( this.passwordFields[0].getValue().length > 0 ){
+						userdata.oldPassword = this.passwordFields[0].getValue();
 						userdata.password = pword;
 						userdata.passwordRetype = pwordRetype;
 					
 						this.dispatch = true;
 					
 					}else{
-						messageService.setProgressResult( 'Need to type your current password' );
+						messageService.setProgressResult( {Message: messages['UserSettings.TypeCurrentPassword'], Severity: 'Warning'} ); //$NON-NLS-1$ //$NON-NLS-0$
 					
 						this.dispatch = false;
 					}		
@@ -190,29 +179,26 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 					authService.getKey().then(function(key){
 						authenticationIds.push(key);
 						authService.getUser().then(function(jsonData){
-						
-							var data = jsonData;
-							
 							var b = userService.updateUserInfo(jsonData.Location, userdata).then( function(args){
 								if(args){
 									messageService.setProgressResult(args);
 								}else{
 									messageService.setProgressResult( messages['User profile data successfully updated.'] );
 								}
-
-								// TODO: don't reach into User Menu internals for this. Should dispatch a service event instead, etc.
-//								if( userdata.Name ){
-//									var userMenu = lib.node( 'userTrigger' ); //$NON-NLS-0$
-//									if (userMenu) {
-//										userMenu.replaceChild(document.createTextNode(userdata.Name), userMenu.firstChild);
-//									}
-//								}
 							}, function(error){
 								messageService.setProgressResult(error);
 							});
 						});
 					});
 				}	
+			} else {
+				// There was an issue with the password modification attempt
+				// Reset all password fields and focus on first one
+				this.passwordFields.forEach(function(passwordField){
+					passwordField.setValue(""); //$NON-NLS-0$
+				});
+
+				this.passwordFields[0].textfield.focus();
 			}
 		},
 		
@@ -242,8 +228,16 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 						var b = userService.getUserInfo(jsonData.Location).then( function( accountData ){
 							settingsWidget.username = accountData.login;
 							settingsWidget.accountFields[0].setValue( accountData.login );
-							settingsWidget.accountFields[1].setValue( accountData.Name );
-							settingsWidget.accountFields[2].setValue( accountData.email );
+							if (accountData.Name){
+								settingsWidget.accountFields[1].setValue( accountData.Name );
+							} else {
+								settingsWidget.accountFields[1].setValue( '' );
+							}
+							if (accountData.email){
+								settingsWidget.accountFields[2].setValue( accountData.email );
+							} else {
+								settingsWidget.accountFields[2].setValue( '' );
+							}
 							settingsWidget.accountFields[3].setChecked( accountData.emailConfirmed );
 						});
 						

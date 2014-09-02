@@ -140,6 +140,15 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             return th;
         }
     };
+    
+    SearchResultRenderer.prototype.getCheckboxColumn = function(item, tableRow){
+    	if (!this.explorer.model.replaceMode() || (item.type === "file")) { //$NON-NLS-0$
+    		return mExplorer.ExplorerRenderer.prototype.getCheckboxColumn.call(this, item, tableRow);
+    	} else {
+    		//detail row checkboxes should be placed in next column
+    		return document.createElement('td'); //$NON-NLS-0$
+    	}
+	};
 
     SearchResultRenderer.prototype.getCellHeaderElement = function(col_no) {
         return null;
@@ -371,9 +380,17 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }
        
 		var params = helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, item.lineNumber, helper.params.replace, true) : null;
-		var name = null;
-		var link = navigatorRenderer.createLink(null, {Location: item.parent.location, Name: name}, this.explorer._commandService, this.explorer._contentTypeService,
-			this.explorer._openWithCommands, {id:this.getItemLinkId(item)}, params, {});
+		var name = item.parent.name;
+		var location = item.parent.location;
+		var link = navigatorRenderer.createLink(null, 
+			{Location: location, Name: name}, 
+			this.explorer._commandService, 
+			this.explorer._contentTypeService,
+			this.explorer._openWithCommands, 
+			{id:this.getItemLinkId(item)}, 
+			params, 
+			{});
+		link.removeChild(link.firstChild); //remove file name from link
         spanHolder.appendChild(link);
         link.classList.add("searchDetailLink"); //$NON-NLS-0$
        
@@ -431,8 +448,8 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         var span;
         switch (col_no) {
             case 0:
-                col = _createElement('td'); //$NON-NLS-0$
                 if (item.type === "file") { //$NON-NLS-0$
+                	col = _createElement('td'); //$NON-NLS-0$
                     col.noWrap = true;
                     span = _createSpan(null, this.getFileIconId(item), col, null);
                     this._lastFileIconDom = span;
@@ -445,7 +462,10 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                         this.getExpandImage(tableRow, span); //$NON-NLS-0$
                     }
                 } else {
-                	if (!this.explorer.model.replaceMode()) {
+                	if (this.explorer.model.replaceMode()) {
+                		col = mExplorer.ExplorerRenderer.prototype.getCheckboxColumn.call(this, item, tableRow);
+                	} else {
+                		col = _createElement('td'); //$NON-NLS-0$
                 		span = _createSpan(null, null, col, null);
                 		this.renderDetailLineNumber(item, span);
                 	}
@@ -467,7 +487,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 } else {
                 	if (this.explorer.model.replaceMode()) {
                 		this.renderDetailLineNumber(item, col);
-                		item.indexInParent = item.parent.children.indexOf(item);
                 	}
                     this.renderDetailElement(item, col);
                 }
@@ -1160,8 +1179,24 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             this.buildPreview();
         }
         if (this.compareView && (currentModel.type === "detail")) { //$NON-NLS-0$
-        	var changeIndex = currentModel.indexInParent;
-		    this.compareView.gotoDiff(changeIndex);
+        	if(currentModel.checked) {//If the change is checked we highlight the pair of the diff
+	        	// Figure out change index. Unchecked elements are 
+	        	// removed from diffs and must therefore be skipped.
+				var changeIndex = 0;
+				currentModel.parent.children.some(function(element){
+					if (currentModel === element) {
+						return true;
+					} else if (element.checked) {
+						changeIndex++;
+					}
+					return false;
+				}, this);
+			    this.compareView.gotoDiff(changeIndex);
+			} else if (currentModel.lineNumber !== undefined) {//If the change is unchecked, scroll to the line and select the match
+				var startIndex = currentModel.matches[currentModel.matchNumber - 1].startIndex;
+				var endIndex = startIndex + currentModel.matches[currentModel.matchNumber - 1].length;
+			    this.compareView.gotoLine(currentModel.lineNumber - 1, startIndex, endIndex);
+			}
         }
     };
 
@@ -1336,6 +1371,15 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             return;
         }
         this.getNavHandler().iterate(next, forceExpand, true);
+        
+        // skip unchecked matches in replace mode
+        if (this.model.replaceMode()) {
+        	var currentModel = this.getNavHandler().currentModel();
+        	while (currentModel && !currentModel.checked) {
+        		this.getNavHandler().iterate(next, forceExpand, true);
+        		currentModel = this.getNavHandler().currentModel();
+        	}
+        }
     };
 
 	InlineSearchResultExplorer.prototype._renderSearchResult = function(crawling, resultsNode, searchParams, jsonData, incremental) {

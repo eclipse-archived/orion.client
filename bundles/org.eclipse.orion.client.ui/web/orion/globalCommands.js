@@ -357,6 +357,8 @@ define([
 		}
 	}
 
+	var currentBreadcrumb = null;
+	
 	/**
 	 * Set the target of the page so that common infrastructure (breadcrumbs, related menu, etc.) can be added for the page.
 	 * @name orion.globalCommands#setPageTarget
@@ -427,8 +429,11 @@ define([
 		var locationNode = options.breadCrumbContainer ? lib.node(options.breadCrumbContainer) : lib.node("location"); //$NON-NLS-0$
 		if (locationNode) {
 			lib.empty(locationNode);
+			if (currentBreadcrumb) {
+				currentBreadcrumb.destroy();
+			}
 			if (options.staticBreadcrumb) {
-				new mBreadcrumbs.BreadCrumbs({
+				currentBreadcrumb = new mBreadcrumbs.BreadCrumbs({
 					container: locationNode,
 					rootSegmentName: breadcrumbRootName
 				});	
@@ -436,7 +441,7 @@ define([
 				var fileClient = serviceRegistry && new mFileClient.FileClient(serviceRegistry);
 				var resource = options.breadcrumbTarget || options.target;
 				var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
-				new mBreadcrumbs.BreadCrumbs({
+				currentBreadcrumb = new mBreadcrumbs.BreadCrumbs({
 					container: locationNode,
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,

@@ -10,9 +10,10 @@
 /*eslint-env browser, amd*/
 
 define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegistry', 'orion/webui/littlelib',
-    'orion/widgets/themes/ThemeComponent', 'orion/widgets/input/Select', 'orion/widgets/input/TextField'],
+    'orion/widgets/themes/ThemeComponent', 'orion/widgets/input/Select', 'orion/widgets/input/TextField',
+    'orion/i18nUtil'],
 
-function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextField) {
+function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextField, i18nUtil) {
 
     var TOP = 10;
     var LEFT = 10;
@@ -63,11 +64,13 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         this.themeData = args.themeData;
 
         this.toolbarId = args.toolbarId;
-
+        
+        this.serviceRegistry = args.serviceRegistry;
+        this.messageService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+        
         init();
 
         var commandTemplate = '<div id="commandButtons">' +
-            '<div id="revertCommands" class="layoutRight sectionActions"></div>' +
             '<div id="userCommands" class="layoutRight sectionActions"></div>' +
             '</div>';
 
@@ -76,26 +79,6 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
         this.commandService = args.commandService;
         this.preferences = args.preferences;
-
-        var revertCommand = new mCommands.Command({
-            name: messages["Cancel"],
-            tooltip: messages["Revert Theme"],
-            id: "orion.reverttheme", //$NON-NLS-0$
-            callback: function(data) {
-                this.revert(data.items);
-            }.bind(this)
-
-        });
-
-        var updateCommand = new mCommands.Command({
-            name: messages["Update"],
-            tooltip: messages["Update Theme"],
-            id: "orion.applytheme", //$NON-NLS-0$
-            callback: function(data) {
-                this.apply(data.items);
-            }.bind(this)
-
-        });
 
         var guideCommand = new mCommands.Command({
             name: messages["Show Guide"],
@@ -126,12 +109,6 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
         this.commandService.addCommand(guideCommand);
         this.commandService.registerCommandContribution('themeCommands', "orion.checkGuide", 1); //$NON-NLS-1$ //$NON-NLS-0$
-
-        this.commandService.addCommand(revertCommand);
-        this.commandService.registerCommandContribution('themeCommands', "orion.reverttheme", 2); //$NON-NLS-1$ //$NON-NLS-0$
-
-        this.commandService.addCommand(updateCommand);
-        this.commandService.registerCommandContribution('themeCommands', "orion.applytheme", 3); //$NON-NLS-1$ //$NON-NLS-0$
 
         this.commandService.addCommand(exportCommand);
         this.commandService.registerCommandContribution('themeCommands', "orion.exportTheme", 5); //$NON-NLS-1$ //$NON-NLS-0$
@@ -689,7 +666,9 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
     }
 
     ThemeBuilder.prototype.drawOutlineData = drawOutlineData;
-
+	
+	var successMessage = i18nUtil.formatMessage(messages["${0} settings successfully updated."], messages["Theme"]); //$NON-NLS-1$ //$NON-NLS-0$
+	
     function apply(data) {
 
         /* New Theme defined */
@@ -746,6 +725,8 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
             lib.node('pickercontainer').style.display = '';
             this.updateThemePicker(themename, styles);
             this.AUTONAME = false;
+            
+            this.messageService.setProgressResult(successMessage);
         }.bind(this));
     }
 
@@ -803,6 +784,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         this.settings.fontSize = {
             value: size
         };
+        this.apply();
     }
 
     ThemeBuilder.prototype.selectFontSize = selectFontSize;
@@ -831,9 +813,9 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         var container = document.getElementById('sizecontainer');
         container.appendChild(newdiv);
         this.sizeSelect = new Select({
-            options: options
+            options: options,
+            postChange: this.selectFontSize.bind(this)
         }, newdiv);
-        this.sizeSelect.setStorageItem = this.selectFontSize.bind(this);
         this.sizeSelect.show();
     }
 
@@ -864,9 +846,9 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
         if (!this.sizeSelect) {
             this.sizeSelect = new Select({
-                options: options
+                options: options,
+                postChange: this.selectFontSize.bind(this)
             }, picker);
-            this.sizeSelect.setStorageItem = this.selectFontSize.bind(this);
             this.sizeSelect.show();
         }
     }
@@ -900,9 +882,9 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
         if (!this.themeSelect) {
             this.themeSelect = new Select({
-                options: options
+                options: options,
+                postChange: this.selectTheme.bind(this)
             }, picker);
-            this.themeSelect.setStorageItem = this.selectTheme.bind(this);
             this.themeSelect.show();
 
             var saver = document.getElementById('themesaver');
@@ -946,9 +928,9 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
             picker.appendChild(newdiv);
             this.themeSelect = new Select({
-                options: options
+                options: options,
+                postChange: this.selectTheme.bind(this)
             }, newdiv);
-            this.themeSelect.setStorageItem = this.selectTheme.bind(this);
             this.themeSelect.show();
         }
     }
@@ -980,7 +962,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
             this.addThemePicker(themeStyles);
         }.bind(this));
 
-        this.commandService.renderCommands('themeCommands', document.getElementById(this.toolbarId || "revertCommands"), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
+		this.commandService.renderCommands('themeCommands', document.getElementById(this.toolbarId || "userCommands"), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$	
     }
 
     ThemeBuilder.prototype.renderData = renderData;
@@ -988,6 +970,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
     function selectTheme(name) {
         this.preferences.getTheme(function(themeStyles) {
             this.select(name, themeStyles.styles);
+            this.apply();
         }.bind(this));
     }
 

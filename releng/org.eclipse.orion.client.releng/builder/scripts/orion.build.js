@@ -44,7 +44,8 @@
         estraverse: 'estraverse/estraverse',
         escope: 'escope/escope',
         logger: 'javascript/logger',
-        csslint: 'csslint/csslint'
+        csslint: 'csslint/csslint',
+        doctrine: 'doctrine/doctrine'
     },
     packages: [
         {
@@ -83,6 +84,7 @@
     modules: (function() {
         var modules = [
             { name: "index" },
+            { name: "cfui/apps" },
             { name: "cfui/logs" },
             { name: "cfui/plugins/cFDeployService" },
             { name: "cfui/plugins/cFPlugin" },
@@ -90,10 +92,7 @@
             { name: "edit/content/imageViewerPlugin" },
             { name: "edit/content/jsonEditorPlugin" },
             { name: "edit/edit" },
-            { name: "git/git-commit" },
-            { name: "git/git-log" },
             { name: "git/git-repository" },
-            { name: "git/git-status" },
             { name: "git/plugins/gitPlugin" },
             { name: "javascript/plugins/javascriptPluginLoader" },
             { name: "javascript/plugins/javascriptPlugin" },

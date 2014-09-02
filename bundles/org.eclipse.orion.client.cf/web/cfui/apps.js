@@ -11,7 +11,7 @@
  /*eshint-env browser, amd*/
 define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',
  	'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient',
- 	'orion/globalCommands', 'orion/links', 'orion/cfui/cFClient', 'orion/Deferred', 'cfui/autodeploy/widgets/CfLoginDialog',
+ 	'orion/globalCommands', 'orion/links', 'orion/cfui/cFClient', 'orion/Deferred', 'orion/cfui/widgets/CfLoginDialog',
 	'orion/section', 'cfui/cfUtil', 'cfui/cfCommands', 'cfui/cfExplorer'],
 		function(lib, mBootstrap, mStatus, mProgress, CommandRegistry,
 			mDialogs, mSelection, mFileClient, mOperationsClient, mSearchClient,
@@ -40,7 +40,7 @@ mBootstrap.startup().then(function(core) {
 		
 	mGlobalCommands.generateBanner("cfView", serviceRegistry, commandRegistry, preferences, searcher, {});
 	
-	mGlobalCommands.setPageTarget({task: 'Cloud Foundry Applications', serviceRegistry: serviceRegistry, commandService: commandRegistry});
+	mGlobalCommands.setPageTarget({task: 'Cloud Applications', serviceRegistry: serviceRegistry, commandService: commandRegistry});
 	
 	var orgsNode = document.getElementById("orgsNode");
 	var applicationsNode = document.getElementById("applicationsTable");
@@ -48,10 +48,12 @@ mBootstrap.startup().then(function(core) {
 	
 	var cfEventDispatcher = mCfCommands.getEventDispatcher();
 	
+	var _target;
+	
 	function promptLogin(cFService) {
 		var deferred = new Deferred();
 		function loginFunc(user, password){
-			progressService.showWhile(cFService.login(user, password), "Logging in to Cloud Foundry").then(function (result) {
+			progressService.showWhile(cFService.login(_target.Url, user, password), "Logging in to Cloud Foundry").then(function (result) {
 				deferred.resolve(result);					
 			}, function(error) {
 				deferred.reject(error);					
@@ -62,7 +64,7 @@ mBootstrap.startup().then(function(core) {
 		return deferred;
 	}
 	
-	function handleError(error){
+	function handleError(error, url){
 		if(error.responseText){
 			try{
 				error = JSON.parse(error.responseText);
@@ -71,7 +73,7 @@ mBootstrap.startup().then(function(core) {
 			}
 		}
 		if(error.HttpCode && error.HttpCode === 401){
-			promptLogin(cFService).then(
+			promptLogin(cFService, url).then(
 				function(){
 					displayOrgsAndSpaces();
 				},
@@ -87,6 +89,8 @@ mBootstrap.startup().then(function(core) {
 		lib.empty(orgsNode);
 		
 		progressService.showWhile(mCfUtil.getTarget(preferences), "Checking for Cloud Foundry settings").then(function(target){
+			_target = target;
+			
 			progressService.showWhile(cFService.getOrgs(target), "Loading ...").then(function(result){
 				
 				var table = document.createElement("table");
@@ -213,23 +217,24 @@ mBootstrap.startup().then(function(core) {
 		});
 						
 		progressService.showWhile(cFService.getApps(target), "Loading ...").then(function(apps){
+			apps = apps || {};
+			if (!apps.Apps)
+				apps.Apps = [];
 			
-			explorer.destroyListeters();			
+			explorer.destroyListeners();
 			applicationsSection.embedExplorer(explorer);
 			explorer.loadApps(apps, target);
+			explorer.addListeners(cfEventDispatcher);
 			
-			explorer.addListeters(cfEventDispatcher);
-			
-			progressService.showWhile(cFService.getRoutes(target), "Loading ...").then(function(routes){
-				
-			displayOrphanRoutes(routes, apps, target);
-			
-			}, function(error){
-				handleError(error);
-			});
+			progressService.showWhile(cFService.getRoutes(target), "Loading ...").then(
+				function(routes){
+					displayOrphanRoutes(routes, target);
+				}, function(error){
+					handleError(error);
+				}
+			);
 		}, handleError);
 	}
-	
 	
 	var routesParent = document.createElement("div");
 	routesParent.id = "orphanRoutesParent";
@@ -238,7 +243,7 @@ mBootstrap.startup().then(function(core) {
 				
 	mCfCommands.createRoutesCommands(serviceRegistry, commandRegistry, routesExplorer, displayOrgsAndSpaces);
 		
-	function displayOrphanRoutes(routes, apps, target){
+	function displayOrphanRoutes(routes, target){
 		
 		lib.empty(orphanRoutesNode);
 			
@@ -260,7 +265,7 @@ mBootstrap.startup().then(function(core) {
 		commandRegistry.registerCommandContribution("routeLevelCommands", "orion.cf.MapRoute", 100);
 		commandRegistry.registerCommandContribution("routeLevelCommands", "orion.cf.DeleteRoute", 200);
 		
-		routesExplorer.destroyListeters();
+		routesExplorer.destroyListeners();
 		
 		routesSelection.addEventListener("selectionChanged", function(event){
 			var selections = event.selections;
@@ -271,10 +276,9 @@ mBootstrap.startup().then(function(core) {
 			}
 		});
 		
-		
 		orphanRoutesSection.embedExplorer(routesExplorer);
-		routesExplorer.loadRoutes(routes, apps, target);
-		routesExplorer.addListeters(cfEventDispatcher);
+		routesExplorer.loadRoutes(routes, target);
+		routesExplorer.addListeners(cfEventDispatcher);
 	}
 	
 	displayOrgsAndSpaces();

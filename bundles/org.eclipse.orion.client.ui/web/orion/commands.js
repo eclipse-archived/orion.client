@@ -352,9 +352,10 @@ define([
 
 	function createCommandItem(parent, command, commandInvocation, id, keyBinding, useImage, callback) {
 		var element;
+		var clickTarget;
 		useImage = useImage || (!command.name && command.hasImage());
 		if (command.hrefCallback) {
-			element = document.createElement("a"); //$NON-NLS-0$
+			element = clickTarget = document.createElement("a"); //$NON-NLS-0$
 			element.id = id;
 			if (useImage && command.hasImage()) {
 				_addImageToElement(command, element, id);
@@ -373,33 +374,64 @@ define([
 				element.href = "#"; //$NON-NLS-0$
 			}
 		} else {
-			element = document.createElement("button"); //$NON-NLS-0$
-			element.className = "orionButton"; //$NON-NLS-0$
-			if (command.extraClass) {
-				element.classList.add(command.extraClass);
-			}
-			if (useImage) {
-				if (command.hasImage()) {
-					_addImageToElement(command, element, id);
-					// ensure there is accessible text describing this image
-					if (command.name) {
-						element.setAttribute("aria-label", command.name); //$NON-NLS-0$
+			if (command.type === "toggle") { //$NON-NLS-0$
+				element = document.createElement("div"); //$NON-NLS-0$
+				element.className = "orionToggle"; //$NON-NLS-0$
+				var input = clickTarget = document.createElement("input"); //$NON-NLS-0$
+				input.type = "checkbox"; //$NON-NLS-0$
+				input.className = "orionToggleCheck"; //$NON-NLS-0$
+				input.id = "orionToggleCheck" + command.id; //$NON-NLS-0$
+				element.appendChild(input);
+				var label = document.createElement("label"); //$NON-NLS-0$
+				label.className = "orionToggleLabel"; //$NON-NLS-0$
+				label.setAttribute("for", input.id); //$NON-NLS-0$  
+				var span1 = document.createElement("span"); //$NON-NLS-0$
+				span1.className = "orionToggleInner"; //$NON-NLS-0$
+				var span2 = document.createElement("span"); //$NON-NLS-0$
+				span2.className = "orionToggleSwitch"; //$NON-NLS-0$
+				label.appendChild(span1);
+				label.appendChild(span2);
+				element.appendChild(label);
+
+				input.checked = command.checked;
+				span1.classList.add(command.imageClass);
+			} else {
+				element = clickTarget = document.createElement("button"); //$NON-NLS-0$
+				element.className = "orionButton"; //$NON-NLS-0$
+				if (command.extraClass) {
+					element.classList.add(command.extraClass);
+				}
+				if (useImage) {
+					if (command.hasImage()) {
+						_addImageToElement(command, element, id);
+						// ensure there is accessible text describing this image
+						if (command.name) {
+							element.setAttribute("aria-label", command.name); //$NON-NLS-0$
+						}
+					} else {
+						element.classList.add("commandButton"); //$NON-NLS-0$
+						element.classList.add("commandMissingImageButton"); //$NON-NLS-0$
+						element.appendChild(document.createTextNode(command.name));
 					}
 				} else {
 					element.classList.add("commandButton"); //$NON-NLS-0$
-					element.classList.add("commandMissingImageButton"); //$NON-NLS-0$
-					element.appendChild(document.createTextNode(command.name));
+					var text = document.createTextNode(command.name);
+					element.appendChild(text);
 				}
-			} else {
-				element.classList.add("commandButton"); //$NON-NLS-0$
-				var text = document.createTextNode(command.name);
-				element.appendChild(text);
 			}
 			var onClick = callback || command.callback;
 			if (onClick) {
 				command.onClick = onClick;
-				element.addEventListener("click", function(e) { //$NON-NLS-0$
-					onClick.call(commandInvocation.handler, commandInvocation);
+				clickTarget.addEventListener("click", function(e) { //$NON-NLS-0$
+					if (command.type === "toggle") { //$NON-NLS-0$
+						window.setTimeout(function() {
+							command.checked = input.checked;
+							onClick.call(commandInvocation.handler, commandInvocation);
+						}, 300);
+					} else {
+						onClick.call(commandInvocation.handler, commandInvocation);
+					}
+					e.stopPropagation();
 				}, false);
 			}
 		}
@@ -634,6 +666,8 @@ define([
 			this.visibleWhen = options.visibleWhen;
 			this.parameters = options.parameters;  // only used when a command is used in the command registry. 
 			this.isEditor = options.isEditor;
+			this.type = options.type;
+			this.checked = options.checked;
 		},
 		
 		/**

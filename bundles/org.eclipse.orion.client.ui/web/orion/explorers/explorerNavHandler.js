@@ -603,7 +603,11 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		onClick: function(model, mouseEvt)	{
-			if (this._selectionPolicy === "readonlySelection" || this.isDisabled(this.getRowDiv(model))) {
+			if(mouseEvt && UiUtils.isFormElement(mouseEvt.target)) {
+				// Not for us
+				return true;
+			}
+			if (this._selectionPolicy === "readonlySelection" || this.isDisabled(this.getRowDiv(model))) { //$NON-NLS-0$
 				lib.stop(mouseEvt);
 			} else {
 				var twistieSpan = lib.node(this.explorer.renderer.expandCollapseImageId(this.model.getId(model)));

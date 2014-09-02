@@ -20,7 +20,7 @@ other utility functions related to types.
 define([
 'javascript/contentAssist/proposalUtils',
 'logger',
-'doctrine/doctrine' //stays last, exports into global scope
+'doctrine' //stays last, exports into global scope
 ], function(proposalUtils, Logger) {
 	/**
 	 * @description Doctrine closure compiler style type objects
@@ -342,7 +342,7 @@ define([
 					return result;
 				}
 				try {
-					var rawresult = doctrine.parse("/*" + commentText + "*/", {unwrap : true, tags : ['param', 'type', 'return']});
+					var rawresult = doctrine.parse(commentText, {recoverable:true, unwrap : true, tags : ['param', 'type', 'return']});
 					// transform result into something more manageable
 					var rawtags = rawresult.tags;
 					if (rawtags) {

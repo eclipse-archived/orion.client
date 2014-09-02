@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -155,7 +155,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			// generate an indent
 			var indent = this._indent * indentLevel;
 			row.childNodes[Math.min(row.childNodes.length - 1, this._labelColumnIndex)].style.paddingLeft = indent +"px";  //$NON-NLS-0$
-			this._renderer.updateExpandVisuals(row, row._expanded);
+			if(this._renderer.updateExpandVisuals) {
+			    this._renderer.updateExpandVisuals(row, row._expanded);
+			}
 			if (this._renderer.rowCallback) {
 				this._renderer.rowCallback(row, child);
 			}
@@ -175,6 +177,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 		redraw: function(item) {
 			var itemId = this._treeModel.getId(item);
 			var row = lib.node(itemId);
+			if (!row) return;
 			lib.empty(row);
 			this._generateRow(item, row, row._depth);
 		},
@@ -200,15 +203,21 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 						this._removeChildRows(parentId);
 						if(children){
 							row._expanded = true;
-							this._renderer.updateExpandVisuals(row, true);
+							if(this._renderer.updateExpandVisuals) {
+							    this._renderer.updateExpandVisuals(row, true);
+							}
 							this._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
 							this._rowsChanged();
 						} else {
 							tree = this;
-							this._renderer.updateExpandVisuals(row, "progress"); //$NON-NLS-0$
+							if(this._renderer.updateExpandVisuals) {
+							    this._renderer.updateExpandVisuals(row, "progress"); //$NON-NLS-0$
+							}
 							children = this._treeModel.getChildren(row._item, function(children) {
 								if (tree.destroyed) { return; }
-								tree._renderer.updateExpandVisuals(row, true);
+								if(tree._renderer.updateExpandVisuals) {
+								    tree._renderer.updateExpandVisuals(row, true);
+								}
 								if (!row._expanded) {
 									row._expanded = true;
 									tree._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
@@ -217,7 +226,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 							});
 						}
 					} else {
-						this._renderer.updateExpandVisuals(row, false);
+					    if(this._renderer.updateExpandVisuals) {
+						     this._renderer.updateExpandVisuals(row, false);
+						}
 					}
 				} else {
 					// the item wasn't found.  We could refresh the root here, but for now
@@ -267,10 +278,14 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 					}
 					return;
 				}
-				this._renderer.updateExpandVisuals(row, "progress"); //$NON-NLS-0$
+				if(this._renderer.updateExpandVisuals) {
+				    this._renderer.updateExpandVisuals(row, "progress"); //$NON-NLS-0$
+				}
 				this._treeModel.getChildren(row._item, function(children) {
 					if (tree.destroyed) { return; }
-					tree._renderer.updateExpandVisuals(row, true);
+					if(tree._renderer.updateExpandVisuals) {
+					   tree._renderer.updateExpandVisuals(row, true);
+					}
 					if (!row._expanded) {
 						row._expanded = true;
 						tree._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
@@ -334,7 +349,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 					return;
 				}
 				row._expanded = false;
-				this._renderer.updateExpandVisuals(row, false);
+				if(this._renderer.updateExpandVisuals) {
+				    this._renderer.updateExpandVisuals(row, false);
+				}
 				this._removeChildRows(id);
 				this._rowsChanged();
 			}

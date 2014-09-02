@@ -41,11 +41,11 @@ define(['require', 'i18n!orion/sites/nls/messages', 'orion/bootstrap', 'orion/st
 					item.Parents[0] = {};
 					item.Parents[0].Name = messages["Sites"];
 					item.Parents[0].Location = "";
-					mGlobalCommands.setPageTarget({task: "Edit Site", target: site, breadcrumbTarget: item,
+					mGlobalCommands.setPageTarget({task: messages["Edit Site"], target: site, breadcrumbTarget: item,
 						makeBreadcrumbLink: function(seg, location){
 							seg.href = require.toUrl("sites/sites.html"); //$NON-NLS-0$
 						},
-						serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandRegistry
+						serviceRegistry: serviceRegistry, fileService: fileClient, commandService: commandRegistry
 					});
 					mGlobalCommands.setDirtyIndicator(widget.isDirty());
 				}

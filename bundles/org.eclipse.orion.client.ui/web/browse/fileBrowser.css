@@ -111,15 +111,13 @@
 
 .breadCrumbContainer {
 	border-bottom: 1px solid;
-	margin-top: 1px;
-	padding-left: 4px;
-	padding-top: 5px;
-	width: 100%;
 	height: 22px;
 	border-color: #dadada;
 	-webkit-box-sizing: initial !important;
 	box-sizing: initial !important;
 	/*background: none repeat scroll 0 0 #f7f7f7;*/
+	padding: 4px;
+	width: calc(100% - 8px); /* subtract padding */
 }
 
 .commitInfoContainer {
@@ -235,6 +233,21 @@ a.currentLocation:hover {
 	color: #F58B0F;
  	text-decoration: none;
 	border-bottom: 1px dotted;
+}
+
+div.currentLocation {
+	height: 22px;
+}
+
+.breadcrumbContainer {
+	margin: 0 4px; 
+	justify-content: flex-start;
+	-webkit-justify-content: flex-start;
+}
+
+.breadcrumbContainer > .currentLocation {
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .binaryViewTable {

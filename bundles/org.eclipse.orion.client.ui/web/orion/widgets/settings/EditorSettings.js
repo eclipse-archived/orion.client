@@ -30,7 +30,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 	var localIndicatorClass = "setting-local-indicator"; //$NON-NLS-0$
 	var on = "on"; //$NON-NLS-0$
 	var off = "off"; //$NON-NLS-0$
-	function addLocalIndicator(widget, property, info, options, prefs) {
+	function addLocalIndicator(widget, property, info, options, prefs, editorSettings) {
 		if (!options.local) {
 			var indicator = document.createElement("span"); //$NON-NLS-0$
 			indicator.classList.add(localIndicatorClass);
@@ -44,6 +44,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					indicator.classList.add(off);
 					indicator.classList.remove(on);
 				}
+				editorSettings.update();
 			});
 			var label = lib.$("label", widget.node); //$NON-NLS-0$
 			label.parentNode.insertBefore(indicator, label);
@@ -51,16 +52,16 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		return widget;
 	}
 
-	function createBooleanProperty(property, options, prefs) {
-		return addLocalIndicator(new LabeledCheckbox(options), property, this, options, prefs);
+	function createBooleanProperty(property, options, prefs, editorSettings) {
+		return addLocalIndicator(new LabeledCheckbox(options), property, this, options, prefs, editorSettings);
 	}
 
-	function createIntegerProperty(property, options, prefs) {
+	function createIntegerProperty(property, options, prefs, editorSettings) {
 		options.inputType = "integer"; //$NON-NLS-0$
-		return addLocalIndicator(new LabeledTextfield(options), property, this, options, prefs);
+		return addLocalIndicator(new LabeledTextfield(options), property, this, options, prefs, editorSettings);
 	}
 
-	function createSelectProperty(property, options, prefs) {
+	function createSelectProperty(property, options, prefs, editorSettings) {
 		var keys = this.values;
 		options.options = [];
 		for( var i= 0; i < keys.length; i++ ){
@@ -74,7 +75,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			}
 			options.options.push(set);
 		}
-		return addLocalIndicator(new LabeledSelect(options), property, this, options, prefs);
+		return addLocalIndicator(new LabeledSelect(options), property, this, options, prefs, editorSettings);
 	}
 
 	function validateIntegerProperty(property, prefs) {
@@ -264,10 +265,13 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 						}
 						options.push(set);
 					}
-					fields.push(select = this.themeSelect = new LabeledSelect( {fieldlabel:messages.Theme, options:options}));
-					select.setStorageItem = function(name) {
-						themePreferences.setTheme(name);
-					};
+					select = this.themeSelect = new LabeledSelect( 
+						{	fieldlabel:messages.Theme, 
+							options:options,
+							postChange: themePreferences.setTheme.bind(themePreferences)
+						}
+					);
+					fields.push(select);
 				}
 				if (prefs.fontSizeVisible && (!this.local || prefs.fontSizeLocalVisible)) {
 					var fontSize = themeStyles.style.fontSize;
@@ -282,10 +286,13 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 						}
 						options.push(set);
 					}
-					fields.push(select = this.sizeSelect = new LabeledSelect( {fieldlabel:messages["Font Size"], options:options}));
-					select.setStorageItem = function(size) {
-						themePreferences.setFontSize(size);
-					};
+					select = this.sizeSelect = new LabeledSelect( 
+						{	fieldlabel:messages["Font Size"], 
+							options:options,
+							postChange: themePreferences.setFontSize.bind(themePreferences)
+						}
+					);
+					fields.push(select);
 				}
 				if (!this.local && fields.length > 0) {
 					subSection = new Subsection( {sectionName:messages.Theme, parentNode: this.editorThemeSection.getContentElement(), children: fields} );
@@ -328,7 +335,8 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 									options = {};
 									options.local = this.local;
 									options.fieldlabel = messages[property];
-									fields.push(info.widget = info.create(property, options, prefs));
+									options.postChange = this.update.bind(this);
+									fields.push(info.widget = info.create(property, options, prefs, this));
 								}
 							}
 							if (!this.local && fields.length > 0) {
@@ -344,9 +352,6 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			if (this.local) {
 				fields.forEach(function(child) {
 					this.sections.appendChild( child.node );
-					if (!child.hasOwnProperty("setStorageItem")) { //$NON-NLS-0$
-						child.setStorageItem = this.update.bind(this);
-					}
 					child.show();
 				}.bind(this));
 			}
@@ -364,18 +369,6 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			this.commandService.addCommand(restoreCommand);
 			this.commandService.registerCommandContribution('restoreEditorSettingCommand', "orion.restoreeditorsettings", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.renderCommands('restoreEditorSettingCommand', toolbar, this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
-			var updateCommand = new commands.Command({
-				name: messages.Update,
-				tooltip: messages["Update Editor Settings"],
-				id: "orion.updateeditorsettings", //$NON-NLS-0$
-				callback: function(data){
-					this.update(data.items);
-				}.bind(this)
-			});
-			this.commandService.addCommand(updateCommand);
-			this.commandService.registerCommandContribution('editorSettingCommand', "orion.updateeditorsettings", 1); //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.renderCommands('editorSettingCommand', toolbar, this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		valueChanged: function() {
 			var currentPrefs = {};

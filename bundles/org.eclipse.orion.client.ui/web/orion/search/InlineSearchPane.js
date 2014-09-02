@@ -105,6 +105,7 @@ define([
 				resource = resource.concat(searchLocation);
 			}, this);
 			
+			this._correctFileNamePatternsInputValue();
 			var fileNamePatternsArray = mSearchUtils.getFileNamePatternsArray(this._fileNamePatternsBox.getTextInputValue());
 			var replaceValue = this._replaceBox.getTextInputValue() || undefined;
 			
@@ -292,12 +293,21 @@ define([
 			}.bind(this));
 			
 			this._fileNamePatternsTextInput.addEventListener("blur", function(){ //$NON-NLS-0$
-				var inputValue = this._fileNamePatternsBox.getTextInputValue();
-				if (inputValue) {
-					var correctedPatternArray = mSearchUtils.getFileNamePatternsArray(inputValue);
-					this._fileNamePatternsBox.setTextInputValue(correctedPatternArray.join(", ")); //$NON-NLS-0$
-				}
+				this._correctFileNamePatternsInputValue();
 				this._fileNamePatternsHint.classList.remove("fileNamePatternsHintVisible"); //$NON-NLS-0$
+			}.bind(this));
+			
+			this._fileNamePatternsTextInput.addEventListener("keydown", function(e) { //$NON-NLS-0$
+				var keyCode= e.charCode || e.keyCode;
+				// Execute search if user hits Enter
+				if (keyCode === lib.KEY.ENTER) {
+					this._fileNamePatternsTextInput.blur();
+					if (this._replaceBoxIsHidden()) {
+						this._submitSearch();
+					} else {
+						this._replacePreview();
+					}
+				} 
 			}.bind(this));
 	    },
 	    
@@ -312,7 +322,7 @@ define([
 			
 			this._toggleSearchOptionsLink = lib.$("#toggleSearchOptionsLink", this._parentNode); //$NON-NLS-0$
 			this._toggleSearchOptionsLink.addEventListener("click", this.showSearchOptions.bind(this)); //$NON-NLS-0$
-			this._toggleSearchOptionsLink.innerHTML = messages["Modify Search Parameters"]; //$NON-NLS-0$
+			this._toggleSearchOptionsLink.innerHTML = messages["^ Edit Search"]; //$NON-NLS-0$
 
 			if (this._replaceBoxIsHidden()) {
 	        	this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$	
@@ -384,6 +394,7 @@ define([
 			} else {
 				this._hideReplaceField();
 			}
+			this._searchTextInputBox.focus();
 			this._searchResultExplorer.initCommands();
 		},
 		
@@ -456,6 +467,14 @@ define([
 				locationElement.appendChild(document.createTextNode(scopeString));
 				scopeElementWrapper.appendChild(locationElement);	
 			}, this);
+		},
+		
+		_correctFileNamePatternsInputValue: function() {
+			var inputValue = this._fileNamePatternsBox.getTextInputValue();
+			if (inputValue) {
+				var correctedPatternArray = mSearchUtils.getFileNamePatternsArray(inputValue);
+				this._fileNamePatternsBox.setTextInputValue(correctedPatternArray.join(", ")); //$NON-NLS-0$
+			}
 		},
 		
 		getSearchResultsTitleDiv: function() {

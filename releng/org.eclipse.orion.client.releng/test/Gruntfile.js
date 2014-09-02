@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint node:true*/
+/*eslint-env node*/
 /*
  * Script for running Orion mocha tests at Sauce Labs. This launches a mini Orion web server (using connect)
  * that hosts the client code. Then Sauce Labs API is called, passing the URLs of test pages on the web
@@ -191,8 +191,10 @@ module.exports = function(grunt) {
 			grunt.verbose.write("Got test result: ");
 			grunt.verbose.oklns(JSON.stringify(sauceResult));
 			var mochaResult = sauceResult.result,
-			   id = sauceResult.id,
-			   testurl = mochaResult.url || "",
+			   id = sauceResult.id;
+			if (!mochaResult)
+				throw new Error("Test " + id + " is missing 'result' field in response:\n" + JSON.stringify(sauceResult));
+			var testurl = mochaResult.url || "",
 			   gzippedXml = mochaResult.xunit,
 			   filename = "TEST-" + testurl.replace(/[^A-Za-z0-9_\-]/g, "_") + "_" + id + ".xml";
 			if (/experienced an error/.test(sauceResult.message))
@@ -219,7 +221,7 @@ module.exports = function(grunt) {
 				deferred.resolve();
 			});
 		} catch (e) {
-			grunt.warn(e);
+			grunt.warn(e && e.stack);
 			deferred.reject(e);
 		}
 	}

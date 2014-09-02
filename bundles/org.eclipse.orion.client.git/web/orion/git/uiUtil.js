@@ -21,6 +21,33 @@ define([
 ], function(mCompareCommands, mResourceComparer, lib, mGitUtil) {
 	var exports = Object.create(mGitUtil); // extend util
 
+	function createFilter(section, msg, callback) {
+		var filterDiv = document.createElement("div"); //$NON-NLS-0$
+		filterDiv.className = "gitFilterBox"; //$NON-NLS-0$
+		var filter = document.createElement("input"); //$NON-NLS-0$
+		filter.placeholder = msg;
+		filterDiv.appendChild(filter);
+		var button = document.createElement("button"); //$NON-NLS-0$
+		button.tabIndex = -1;
+		button.className = "core-sprite-search searchButton"; //$NON-NLS-0$
+		filterDiv.appendChild(button);
+		var doFilter = function() {
+			callback(filter.value);
+		};
+		button.addEventListener("click", function(){ //$NON-NLS-0$
+			doFilter();
+		});
+		var sectionContent = section.getContentElement();
+		sectionContent.insertBefore(filterDiv, sectionContent.firstChild);
+		filter.addEventListener("keydown", function(event) { //$NON-NLS-0$
+			if (event.keyCode === 13) {
+				doFilter();
+			}
+		});
+		return filter;
+	}
+	exports.createFilter = createFilter;
+
 	/**
 	 * Create an embedded toggleable compare widget inside a given DIV.
 	 * @param {Object} serviceRegistry The serviceRegistry.

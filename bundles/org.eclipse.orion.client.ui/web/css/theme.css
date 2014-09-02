@@ -16,14 +16,14 @@
 	margin: 0;
 	border: 0;
 	background-color: white;
-	height: 16px;
-	padding: 10px 3px 6px 2px;
 	display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
 	display: -ms-flexbox;     /* TWEENER - IE 10 */
 	display: -webkit-flex;     /* NEW - Chrome */
 	display: flex; 
 	white-space: nowrap;
 	border-bottom: 1px solid #ddd;
+	height: 36px;
+	padding: 0;
 }
 
 
@@ -96,7 +96,7 @@ a:hover {
 }
 
 .navRow > td:first-child {
-	border-left: 6px solid transparent;
+	/* border-left: 6px solid transparent; THIS CAUSES PIXELATION PROBLEMS! */
 }
 
 .navRow.checkedRow > td:first-child {
@@ -110,11 +110,29 @@ a:hover {
 
 /* Breadcrumbs */
 
+.breadcrumbContainer {
+	align-items: baseline;
+	display: inline-flex;
+	justify-content: center;
+	
+	-webkit-align-items: baseline;		/* Safari */
+	display: -webkit-inline-flex;		/* Safari */
+	-webkit-justify-content: center;	/* Safari */
+	
+	margin-right: 0;
+	overflow: hidden;
+	visibility: visible;
+	width: 100%;
+}
+
 .breadcrumb {
-	font-size: 8pt;
-	text-decoration: none;
 	color: #333;
+	flex-grow: 0;
+	font-size: 8pt;
+	overflow: hidden;
 	padding-top: 2px;
+	text-decoration: none;
+	text-overflow: ellipsis;
 }
 
 a.breadcrumb:hover {
@@ -129,10 +147,12 @@ a.breadcrumb:hover {
 } */
 
 .breadcrumbSeparator {
-	font-size: 8pt;
-	text-decoration: none;
 	color: #333;
+	flex-shrink: 0;
+	font-size: 8pt;
 	font-weight: bold;
+	margin: 2px;
+	text-decoration: none;
 }
 
 .currentLocation {
@@ -145,13 +165,34 @@ a.breadcrumb:hover {
 	white-space:nowrap;
 }
 
+div.currentLocation {
+	align-items: center;
+	display: flex;
+	height: 36px;
+	justify-content: center;
+	width: 100%;
+	
+	-webkit-align-items: center;		/* Safari */
+	display: -webkit-flex;				/* Safari */
+	-webkit-justify-content: center;	/* Safari */
+}
+
+.breadcrumbContainer > .currentLocation {
+	margin: 0;
+}
+
 a.currentLocation:hover {
 	font-weight: bold;
 	font-size: 8pt;
 	color: #F58B0F;
  	text-decoration: none;
 	border-bottom: 1px dotted;
- }
+}
+
+a.breadcrumb.currentLocation {
+	font-weight: bold;
+	margin: 0;
+}
 
 .auxpane {
 	border: 0;
@@ -166,7 +207,7 @@ a.currentLocation:hover {
 
 .mainToolbar {
  	background: #eeeeee;
- 	padding-left: 5px;
+ 	padding-left: 2px;
  	padding-right: 5px;
 	/* border-bottom: 1px solid #ebebeb; */
 	/* padding-left:50px; */
@@ -314,6 +355,82 @@ a.currentLocation:hover {
 	border: 1px solid #ccc;
 }
 
+/* toggle */
+
+.orionToggle {
+	position: relative;
+	width: auto;
+}
+
+.orionToggleCheck {
+ 	display: none;
+}
+
+.orionToggleLabel {
+	display: block; 
+	overflow: hidden; 
+	cursor: pointer;
+	border: 1px solid #aaa; 
+	border-radius: 6px;
+}
+
+.orionToggleInner {
+	display: block; 
+	width: 200%; 
+	margin-left: -100%;
+	-moz-transition: margin 0.3s ease-in 0s; 
+	-webkit-transition: margin 0.3s ease-in 0s;
+	-o-transition: margin 0.3s ease-in 0s; 
+	transition: margin 0.3s ease-in 0s;
+}
+
+.orionToggleInner:before, .orionToggleInner:after {
+	display: block; 
+	float: left; 
+	width: 50%; 
+	padding: 0;
+	padding-bottom: 2px;
+	-moz-box-sizing: border-box; 
+	-webkit-box-sizing: border-box; 
+	box-sizing: border-box;
+}
+
+.orionToggleInner:before {
+	padding-left: 2px;
+	background-color: #eee;
+}
+
+.orionToggleInner:after {
+	padding-right: 2px;
+	background-color: #eee;
+	text-align: right;
+}
+
+.orionToggleSwitch {
+	display: block; 
+	width: calc(50% - 2px); 
+	margin: 0;
+	background: #ddd;
+	border: 1px solid #aaa; 
+	border-radius: 6px;
+	position: absolute; 
+	top: 0; 
+	bottom: 0; 
+	right: calc(50% + 2px); 
+	-moz-transition: all 0.3s ease-in 0s;
+	-webkit-transition: all 0.3s ease-in 0s;
+	-o-transition: all 0.3s ease-in 0s; 
+	transition: all 0.3s ease-in 0s; 
+}
+
+.orionToggleCheck:checked + .orionToggleLabel .orionToggleInner {
+	margin-left: 0;
+}
+
+.orionToggleCheck:checked + .orionToggleLabel .orionToggleSwitch {
+	right: 0px; 
+}
+
 /* should be used in conjunction with .commandButton when a tool has no icon. */
 .commandMissingImageButton {
 	font-weight: bold;
@@ -433,6 +550,7 @@ a.currentLocation:hover {
 .dropdownMenu > li {
 	min-width: 120px;
 	display: flex;
+	display: -webkit-flex; /* Safari */
 }
 
 .dropdownMenu > li > a, .dropdownMenu > li > span {

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -55,7 +55,7 @@ define([
 
 		var eclipse = new StyleSet();
 
-		eclipse.name = 'Eclipse';
+		eclipse.name = messages['eclipseThemeName'];
 		eclipse.annotationRuler = 'white';
 		eclipse.background = 'white';
 		eclipse.comment = 'green';
@@ -79,7 +79,7 @@ define([
 
 		var prospecto = new StyleSet();
 
-		prospecto.name = 'Prospecto';
+		prospecto.name = messages['prospectoThemeName'];
 		prospecto.annotationRuler = 'white';
 		prospecto.background = 'white';
 		prospecto.comment = '#3C802C';
@@ -104,7 +104,7 @@ define([
 
 		var blue = new StyleSet();
 
-		blue.name = 'Blue';
+		blue.name = messages['blueThemeName'];
 		blue.annotationRuler = 'lavender';
 		blue.background = 'aliceBlue';
 		blue.comment = 'indigo';
@@ -128,7 +128,7 @@ define([
 
 		var ambience = new StyleSet();
 
-		ambience.name = 'Ambience';
+		ambience.name = messages['ambienceThemeName'];
 		ambience.annotationRuler = '#3D3D3D';
 		ambience.background = 'darkgrey';
 		ambience.comment = 'mediumslateblue';
@@ -152,7 +152,7 @@ define([
 
 		var tierra = new StyleSet();
 
-		tierra.name = 'Tierra';
+		tierra.name = messages['tierraThemeName'];
 		tierra.annotationRuler = 'moccasin';
 		tierra.background = 'lemonchiffon';
 		tierra.comment = 'darkseagreen';
@@ -176,7 +176,7 @@ define([
 
 		var nimbus = new StyleSet();
 
-		nimbus.name = 'Nimbus';
+		nimbus.name = messages['nimbusThemeName'];
 		nimbus.annotationRuler = '#232323';
 		nimbus.background = '#333333';
 		nimbus.comment = 'darkseagreen';
@@ -200,7 +200,7 @@ define([
 
 		var adelante = new StyleSet();
 
-		adelante.name = 'Adelante';
+		adelante.name = messages['adelanteThemeName'];
 		adelante.annotationRuler = '#E2D2B2';
 		adelante.background = '#F1E7C8';
 		adelante.comment = '#5D774E';
@@ -224,7 +224,7 @@ define([
 
 		var raspberry = new StyleSet();
 
-		raspberry.name = 'Raspberry Pi';
+		raspberry.name = messages['raspberryPiThemeName'];
 		raspberry.annotationRuler = 'seashell';
 		raspberry.background = 'seashell';
 		raspberry.comment = '#66B32F';

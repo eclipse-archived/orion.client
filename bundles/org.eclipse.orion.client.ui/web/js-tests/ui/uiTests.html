@@ -15,12 +15,14 @@
 	});
 	require(["mocha/sauce"], function(mocha) {
 		mocha.setup("bdd");
+
+		// The commented-out test cases below need to be converted to use Mocha.
 		require([
 //			"js-tests/ui/asyncStyler/test.html",
 //			"js-tests/ui/charDiff/test.html",
 //			"js-tests/ui/commands/test.html",
 //			"js-tests/ui/commonjs-unittesting/test.html",
-//			"js-tests/ui/compare/test.html",
+			"js-tests/ui/compare/compareTests",
 //			"js-tests/ui/contentTypes/contentTypesTests.html",
 //			"js-tests/ui/dispatcher/editDispatcherTests.html",
 //			"js-tests/ui/encoding/test.html",

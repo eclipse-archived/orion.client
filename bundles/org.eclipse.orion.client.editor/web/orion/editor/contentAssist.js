@@ -166,7 +166,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			}
 			
 			if (proposal.overwrite) {
-				start = this.getPrefixStart(model, mapStart);
+			    if(typeof proposal.prefix === 'string') {
+			        start = mapStart-proposal.prefix.length;
+			    } else {
+				    start = this.getPrefixStart(model, mapStart);
+				}
 			}
 
 			var data = {
@@ -363,8 +367,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					model = model.getBaseModel();
 				}
 				var prefixStart = this.getPrefixStart(model, this._initialCaretOffset);
-				var prefixText = this.textView.getText(prefixStart, this._initialCaretOffset);
-				
+				var defaultPrefix = this.textView.getText(prefixStart, this._initialCaretOffset);
+				var prefixText = defaultPrefix;
 				// filter proposals based on prefixes and _filterText
 				var proposals = []; //array of arrays of proposals
 				this._computedProposals.forEach(function(proposalArray) {
@@ -373,7 +377,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 							if (!proposal) {
 								return false;
 							}
-							
+							if(typeof proposal.prefix === 'string') {
+							    prefixText = proposal.prefix;
+							} else {
+							    prefixText = defaultPrefix;
+							}
 							if ((STYLES[proposal.style] === STYLES.hr)
 								|| (STYLES[proposal.style] === STYLES.noemphasis_title)) {
 								return true;

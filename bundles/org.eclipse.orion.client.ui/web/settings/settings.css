@@ -282,9 +282,7 @@ div.page section:last-child {
 
 .plugin-entry {
 	border-bottom: solid 1px #EEE;
-	padding-bottom: 10px;
-
-	padding: 15px 10px 15px 10px;
+	padding: 10px 10px 10px 10px;
 }
 
 .plugin-icon {
@@ -343,6 +341,12 @@ div.page section:last-child {
 	position:relative;
 }
 
+.plugin-status {
+	font-size: 11px;
+	white-space: normal;
+	color: #b94a48;
+}
+
 .plugin-description {
 	font-size: 11px;
 	white-space: normal;
@@ -360,7 +364,7 @@ div.page section:last-child {
 	clear: left;
 	outline: none;
 	line-height:14px;
-	padding-top: 10px;
+	padding-top: 5px;
 }
 
 .serviceCount {
@@ -408,6 +412,10 @@ div.page section:last-child {
 	border-radius: 3px;
 	font-size:12px;
 	color: #222;
+}
+
+.setting-control[readonly="true"] {
+	background-color: #f4f4f4;
 }
 
 .overlay{

@@ -103,7 +103,7 @@ define([
 					tags: 'validation javascript js nls'.split(' '),
 					properties: [
 						{	id: 'enabled',
-							name: 'Warn on unexternalized strings',
+							name: 'Warn on unexternalized strings:',
 							defaultValue: true,
 							type: 'boolean'
 						}

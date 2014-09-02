@@ -27,36 +27,6 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 			
 			var progressService = serviceRegistry.getService("orion.page.progress");
 			var cfClient = serviceRegistry.getService("orion.cf.service");
-
-			var stopAppCommand = new mCommands.Command({
-				name : "Stop",
-				tooltip: "Stop Application",
-				id : "orion.cf.StopApp",
-				
-				callback : function(data) {
-					var app = data.items;
-					if(Array.isArray(app)){
-						app = app[0];
-					}
-					app.state = "STOPPED";
-					if(sharedEventDispatcher){
-						sharedEventDispatcher.dispatchEvent({type: "update", newValue: app, oldValue: app });
-					}
-				},
-				visibleWhen : function(item) {
-					return false;
-					if(Array.isArray(item)){
-						if(item.length !== 1){
-							return false;
-						}
-						item = item[0];
-					}
-					
-					return item.Type === "App";
-				}
-			});
-			
-			commandService.addCommand(stopAppCommand);
 		},
 		
 		createRoutesCommands: function(serviceRegistry, commandService, explorer, refreshFunc){
@@ -121,36 +91,6 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 			});
 			
 			commandService.addCommand(deleteOrphanedRoutesCommand);
-
-			var stopAppCommand = new mCommands.Command({
-				name : "Stop",
-				tooltip: "Stop Application",
-				id : "orion.cf.StopApp",
-				
-				callback : function(data) {
-					var app = data.items;
-					if(Array.isArray(app)){
-						app = app[0];
-					}
-					app.state = "STOPPED";
-					if(sharedEventDispatcher){
-						sharedEventDispatcher.dispatchEvent({type: "update", newValue: app, oldValue: app });
-					}
-				},
-				visibleWhen : function(item) {
-					return false;
-					if(Array.isArray(item)){
-						if(item.length !== 1){
-							return false;
-						}
-						item = item[0];
-					}
-					
-					return item.Type === "App";
-				}
-			});
-			
-			commandService.addCommand(stopAppCommand);
 			
 			var deleteRouteCommand = new mCommands.Command({
 				name : "Delete",
@@ -158,7 +98,8 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 				id : "orion.cf.DeleteRoute",
 				
 				callback : function(data) {
-					var route = data.items;
+					var route = data.items[0];
+					var target = route.target;
 					
 					progressService.showWhile(cfClient.deleteRouteById(target, 
 						route.Guid), "Deleting route...").then(
@@ -202,17 +143,16 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 								title: "Select Application",
 								cfClient: cfClient,
 								serviceRegistry: serviceRegistry,
-								apps: result.apps,
+								apps: result.Apps,
 								func: function(app) {
-									progressService.showWhile(cfClient.mapRoute(target, app.guid, 
+									progressService.showWhile(cfClient.mapRoute(target, app.Guid, 
 										route.Guid), "Mapping route to an app ...").then(
-										function(jazzResp) {
-											refreshFunc();
-//											if(sharedEventDispatcher){
-//												var appRoutes = app.routes;
-//												app.routes.push(route);
-//												sharedEventDispatcher.dispatchEvent({type: "update", newValue: app });
-//											}
+										function(resp) {
+											if(sharedEventDispatcher){
+												sharedEventDispatcher.dispatchEvent({type: "map", app: app, route: route, expand: true });
+											} else {
+												refreshFunc();
+											}
 										}, function (error) {
 											exports.handleError(error, progressService);
 										}
@@ -245,16 +185,14 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 					var app = route.parent;
 					var target = app.parent.Target;
 					
-					progressService.showWhile(cfClient.unmapRoute(target, app.guid, 
-						route.guid), "Removing route from an app ...").then(
-						function(resp) {		
-							refreshFunc();
-//							if(sharedEventDispatcher){
-//								var appRoutes = app.routes;
-//								app.routes = [];
-//								
-//								sharedEventDispatcher.dispatchEvent({type: "update", newValue: app });
-//							}
+					progressService.showWhile(cfClient.unmapRoute(target, app.Guid, 
+						route.Guid), "Removing route from an app ...").then(
+						function(resp) {
+							if(sharedEventDispatcher){
+								sharedEventDispatcher.dispatchEvent({type: "unmap", app: app, route: route, expand: true });
+							} else {
+								refreshFunc();
+							}
 						}, function (error) {
 							exports.handleError(error, progressService);
 						}

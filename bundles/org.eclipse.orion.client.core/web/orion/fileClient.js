@@ -91,6 +91,11 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 				}
 			}
 		}
+		_references.sort(function (ref1, ref2) {
+			var ranking1 = ref1.getProperty("ranking") || 0;
+			var ranking2 = ref2.getProperty("ranking")  || 0;
+			return ranking1 - ranking2;
+		});
 		var _patterns = [];
 		var _services = [];
 		var _names = [];
@@ -154,11 +159,19 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 				Name: _references[j].getProperty("Name")		 //$NON-NLS-0$
 			};
 
-			var patternString = _references[j].getProperty("pattern") || _references[j].getProperty("top").replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1"); //$NON-NLS-1$ //$NON-NLS-0$
-			if (patternString[0] !== "^") { //$NON-NLS-0$
-				patternString = "^" + patternString; //$NON-NLS-0$
+			var patternStringArray = _references[j].getProperty("pattern") || _references[j].getProperty("top").replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1"); //$NON-NLS-1$ //$NON-NLS-0$
+			if (!Array.isArray(patternStringArray)) {
+				patternStringArray = [patternStringArray];
 			}
-			_patterns[j] = new RegExp(patternString);			
+			var patterns = [];
+			for (var k = 0; k < patternStringArray.length; k++) {
+				var patternString = patternStringArray[k];
+				if (patternString[0] !== "^") { //$NON-NLS-0$
+					patternString = "^" + patternString; //$NON-NLS-0$
+				}
+				patterns.push(new RegExp(patternString));
+			}
+			_patterns[j] = patterns;			
 			_services[j] = serviceRegistry.getService(_references[j]);
 			_names[j] = _references[j].getProperty("Name"); //$NON-NLS-0$
 			
@@ -179,8 +192,10 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 				return _services[0] ? 0 : -1;
 			}
 			for(var i = 0; i < _patterns.length; ++i) {
-				if (_patterns[i].test(location)) {
-					return i;
+				for (var j = 0; j < _patterns[i].length; j++) {
+					if (_patterns[i][j].test(location)) {
+						return i;
+					}
 				}
 			}
 			throw messages['No Matching FileService for location:'] + location;

@@ -1,26 +1,216 @@
-.incomingCommitsdRow {
+.auxpane {
+	overflow: visible;
+}
+
+.repoDropdownList {
+	height:calc(100% - 70px);
+	overflow-y:auto;
+}
+
+.branchDropdownList {
+	height:calc(100% - 70px);
+	overflow-y:auto;
+}
+
+.configDropdownList {
+	height:calc(100% - 70px);
+	overflow-y:auto;
+}
+
+.sectionDropdownActions {
+	height:25px;
+	background-color: #f4f4f4;
+	padding-top:5px;
+	border-top: 1px solid #cacaca;
+	padding-bottom:4px;
+}
+
+.mainToolbar .sectionWrapper {
+	margin-left: 0;
+	margin-right: 10px;
+	margin-top: 10px;
+	width: auto;
+	float: left;
+	background-color: #FFF;
+	border: 1px solid #DDD;
+	border-radius: 4px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.mainToolbar .sectionWrapper.sectionOpened {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.mainToolbar .sectionTable.sectionClosed {
+	visibility: hidden;
+}
+
+.mainToolbar .sectionTable {
+	margin-left: 0;
+	margin-right:0;
+	margin-top: 1px;
+	width: 40%;
+	position: absolute;
+	height: 300px;
+	min-width: 400px;
+	z-index: 200;
+	background-color: white;
+	border: 1px solid #aaa;
+}
+
+.mainToolbar {
+	height: 50px;
+}
+
+.innerPanels {
+	top: 50px;
+}
+
+.gitSectionLabel {
+	float: left;
 	font-weight: bold;
+	text-transform: uppercase;
+	font-size: 12px;
+	padding-top: 19px;
+	padding-right: 6px;
 }
 
-.outgoingCommitsdRow {
-	font-weight: bold;
+.sidebar > .sectionWrapper {
+	margin-left: 15px;
+	margin-right:5px;
+	margin-top: 0;
+	height: 25px;
 }
 
-.incomingCommitsdRow div {
-	background: url(../images/incoming-commit.png);
-	background-repeat: no-repeat;
-	background-position: left top; 
+.sidebar .sectionWrapper.sectionOpened {
+	background-color: white;
 }
 
-.outgoingCommitsdRow div {
-	background: url(../images/outgoing-commit.png);
-	background-repeat: no-repeat;
-	background-position: left top; 
+.sidebar > .sectionTable {
+	margin-left: 15px;
+	margin-right: 5px;
+	margin-bottom: 0;
+	background-color: #fcfcfc;
+	height: calc(100% - 45px);
+	overflow-y: auto;
 }
 
-.sectionTable {
-	margin-left: 8%;
-	margin-right: 8%;
+.sidebar .selectionModelContainer {
+	height: 100%;
+}
+
+.mainpane .selectionModelContainer {
+	height: 100%;
+}
+
+.commitFilterHeader.sectionWrapper {
+	border-width: 0;
+	padding: 0;
+	margin: 0;
+	height: 0;
+}
+
+.commitFilterHeader.sectionTable {
+	margin: 0;
+	margin-left: 10px;
+	margin-right: 10px;
+	position: absolute;
+	width: calc(100% - 42px);
+	z-index: 200;
+	margin-top: -1px;
+	background-color: white;
+	border-bottom-left-radius: 8px;
+	border-bottom-right-radius: 8px;
+}
+
+.commitFilterHeader.sectionTable.sectionClosed {
+	visibility: hidden;
+}
+
+.commitFilter.sectionWrapper {
+	border-width: 0;
+	padding-bottom: 0px;
+	padding-left: 15px;
+	padding-top: 5px;
+	margin: 0;
+	opacity: 1;
+}
+
+.commitFilter.sectionWrapper.sectionClosed:hover {
+	box-shadow: initial;
+}
+
+.commitFilter .sectionTitle {
+	min-width: 80px;
+	padding-left: 3px;
+}
+
+.commitFilterActions {
+	padding: 5px;
+	overflow: hidden;
+}
+
+.pathFilter.sectionTable.sectionOpened {
+	height: 300px;
+	margin-top: 5px;
+	margin-right: 5px;
+	margin-left: 5px;
+	background-color: white;
+	border-top: 1px solid #ddd;
+	overflow-y: auto;
+}
+
+.pathFilter.sectionTable.sectionClosed {
+	height: 0;
+}
+
+.mainToolbar .gitFilterBox input {
+	width: 200px;
+	padding-right: 22px;
+}
+
+.auxpane .gitFilterBox input {
+	width: 60%;
+}
+
+.searchButton {
+	position: relative;
+	left: -28px;
+	top: -2px;
+	cursor: pointer;
+	outline: none;
+}
+
+.searchButton:hover {
+	color: #F58B0F;
+}
+
+.mainToolbar #configSection {
+	float: right;
+	padding-top: 4px;
+} 
+
+.mainToolbar #configSection:not(:hover):not(.sectionOpened) {
+	border-color: transparent;
+	background: transparent;
+}
+
+.mainpane .sectionWrapper {
+	margin-left: 0;
+	margin-right: 0;
+	margin-top: 0;
+	height: 25px;
+	background:white;
+}
+
+.mainpane .sectionTable {
+	margin-left: 0;
+	margin-right: 0;
+	margin-bottom: 0;
+	height: calc(100% - 40px);
+	overflow-y: auto;
 }
 
 table .sectionWrapper {
@@ -35,27 +225,40 @@ table .sectionTable {
 	border-top: 1px solid #dadada;
 }
 
-.miniWrapper {
-	margin-left: 8%;
-	margin-right: 8%;
-	font-size:16px;
-	color: #777;
-	overflow: hidden;
-	margin-top:10px;
-	margin-bottom:-10px;
+.workingTarget {
+	top: 0;
+	box-shadow: none;
+	overflow: visible;
+}
+
+.sidebar {
+	overflow: visible;
+}
+
+.sidebarWrapper > .sidebar {
+	height: calc(100% - 5px);
+}
+
+.sidebarWrapper {
+	overflow: visible;
 }
 
 .gitChangeListSelectAll {
 	float: left;
-	padding-top: 2px;
+	padding-top: 3px;
 }
 
 .gitChangeListSelectionStatus {
 	overflow: hidden;
 	width: 80%;
-	float: left;
-	padding-top: 2px;
 	text-align: center;
+	float: left;
+	padding-top: 3px;
+}
+
+.gitChangeListChangedStatus {
+	float: left;
+	padding-top: 3px;
 }
 
 .gitCommitInfoValue {
@@ -70,12 +273,17 @@ table .sectionTable {
 	font-weight: bold;
 }
 
+.gitCommitMessageSection {
+	background-color: #FEF3EF;
+}
+
 .gitCommitMessage .gitCommitMessageTopRow {
-	width: calc(100% - 6px);
-	background-color: white;
-	padding: 0px;
+	width: calc(100% - 26px);
+	background-color: #FFF;
+	padding: 5px;
+	margin: 10px;
 	border-radius: 5px;
-	border: 1px solid #ddd;
+	border: 1px solid #FED2C2;
 }
 
 .gitCommitMessage .gitCommitMessageTopRow.invalidCommitMessage {
@@ -100,6 +308,29 @@ table .sectionTable {
 	border: 1px solid #7fa4c0 !important;
 }
 
+.gitNavColumn {
+	border-bottom: 0 !important;
+}
+
+.gitCommitMore {
+	padding: 0;
+	margin: 0;
+	opacity: 0.6;
+	border: none;
+	background: transparent;
+	font-weight: bold;
+	padding-top: 5px;
+	color: #FF4500;
+}
+
+.gitListCell:hover .gitCommitMore {
+	opacity: 1;
+}
+
+.gitCommitMore:focus {
+	opacity: 1;
+}
+
 .gitCommitListMore {
 	text-align: center;
 	font-size: 10pt;
@@ -117,9 +348,15 @@ table .sectionTable {
 
 .gitCommitMessage .gitCommitMessageExplorerRow {
 	width: calc(100% - 6px);
-	padding: 0px;
+	padding: 0;
 	overflow: hidden;
 }
+
+.sectionTitle {
+	font-size: 12px;
+	color: #333;
+	padding-bottom: 3px;
+	}
 
 .gitCommitListLoaded {
 	border: 1px solid #ddd;
@@ -127,6 +364,17 @@ table .sectionTable {
 
 .gitCommitListSection {
 	background-color: #f4f4f4;
+}
+
+.gitListCell {
+	padding-top: 6px;
+	padding-bottom: 4px;
+	overflow: hidden;
+}
+
+.sectionTableItem {
+	padding-top: 2px;
+	padding-bottom: 2px;
 }
 
 .gitCommitListSectionTitle {
@@ -140,14 +388,19 @@ table .sectionTable {
 	padding: 2px;
 }
 
+.sectionTable .gitCommitImageCell {
+	vertical-align: top;
+}
+
+.sectionTable .gitCommitDetailsCell {
+	vertical-align: top;
+}
+
 .gitCommitListNoCommit {
 	background-color: #ffffff;
 }
 
 .gitCommitFullMessage {
-	margin-top: 5px;
-	margin-bottom: 5px;
-	padding: 2px;
 	white-space: pre-wrap;
 }
 
@@ -188,8 +441,48 @@ table .sectionTable {
 	padding-left: 5px;
 }
 
+.gitCommitTagClose:hover {
+	color: #F58B0F;
+}
+
 .gitCommitTitle {
 	font-weight: bold;
+	padding-bottom: 5px;
+	word-break: break-all;
+	color: #555;
+}
+
+.gitStatusTitle {
+	font-weight: bold;
+	color: green;
+	padding-bottom:5px;
+}
+
+.gitBranchTitle {
+	font-weight: bold;
+}
+
+.gitRepoTitle {
+	font-weight: bold;
+}
+
+.gitRepoExtraDescription {
+	padding-top: 16px;
+	padding-left: 16px;
+}
+
+.gitRepoExtraDescriptionSection {
+	padding-top: 10px;
+}
+
+.gitConfigKey {
+	padding-left: 5px;
+	font-weight: bold;
+}
+
+.gitConfigValue {
+	padding-left: 10px;
+	padding-top: 5px;
 }
 
 .gitAuthorImage {
@@ -206,6 +499,14 @@ table .sectionTable {
 	border: 1px solid lightGrey;
 	padding: 2px;
 	margin-right: 10px;
+}
+
+.git-author-icon.incoming {
+	background-color: #99ccff;
+}
+
+.git-author-icon.outgoing {
+	background-color: #f8c199;
 }
 
 .git-author-icon-small {
@@ -239,6 +540,22 @@ table .sectionTable {
 	background:white;
 }
 
+.gitFilterBox {
+	width: 100%;
+	height: 25px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	border-bottom: 1px solid #cacaca;
+}
+
+.sidebar .gitFilterBox {
+	background-color: white;
+}
+
+.mainToolbar .gitFilterBox {
+	background-color: #f4f4f4;
+}
+
 /* sprites */
 .gitCommandSprite {
 	display: inline-block;
@@ -256,7 +573,7 @@ table .sectionTable {
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555555;
+	color: #333333;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -470,6 +787,18 @@ table .sectionTable {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.git-sprite-revert{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';	
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
 .git-sprite-open{
 	font-size: 16px;
 	line-height: normal;
@@ -483,6 +812,20 @@ table .sectionTable {
 }
 
 .git-sprite-unstage{
+	font-size: 16px;
+	line-height: 14px;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';	
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.git-sprite-undo-commit{
+	padding-top: 3px;
+	padding-bottom: 2px;
 	font-size: 16px;
 	line-height: 14px;
 	vertical-align:middle;
@@ -534,6 +877,34 @@ table .sectionTable {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.git-sprite-branch-active-tag{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
+	padding-right:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.git-sprite-branch-active-branch{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
+	padding-right:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
 .git-sprite-conflict-file{
 	font-size: 24px;
 	line-height: normal;
@@ -543,9 +914,51 @@ table .sectionTable {
 	background: none;
 	border: none;
 	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.git-sprite-save-patch{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.git-sprite-stash-changes{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.git-sprite-pop-changes{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-apply-patch:before{ content:'\0057'; }
+.git-sprite-save-patch:before{ content:'\0037'; }
 .git-sprite-cherry-pick:before{ content:'\0058'; }
 .git-sprite-pull:before{ content:'\0063'; }
 .git-sprite-repository:before{ content:'\0065'; }
@@ -562,10 +975,19 @@ table .sectionTable {
 .git-sprite-merge-squash:before{ content:'\0068'; }
 .git-sprite-rebase:before{ content:'\0067'; }
 .git-sprite-compare:before{ content:'\0046'; }
-.git-sprite-reset:before{ content:'\0066'; }
+.git-sprite-reset:before{ content:'\006A'; }
+.git-sprite-revert:before{ content:'\0066'; }
 .git-sprite-open:before{ content:'\0075'; }
 .git-sprite-unstage:before{ content:'\0070'; }
 .git-sprite-incoming-commit:before{ content:'\0055'; }
 .git-sprite-outgoing-commit:before{ content:'\0056'; }
 .git-sprite-conflict-file:before{ content: '\2B0C'; } 
 .git-sprite-branch-active:before{ content: '\0059'; }
+.git-sprite-branch-active-tag:before{ content: '\0059'; }
+.git-sprite-branch-active-tag:after{ content: '\0047'; }
+.git-sprite-branch-active-branch:before{ content: '\0059'; }
+.git-sprite-branch-active-branch:after{ content: '\006E'; }
+.git-sprite-undo-commit:before{ content: '\0036'; }
+.git-sprite-view-stash:before{ content: '\0030'; }
+.git-sprite-stash-changes:before{ content: '\0038'; }
+.git-sprite-pop-changes:before{ content: '\0039'; }

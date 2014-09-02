@@ -1,0 +1,19 @@
+body {
+	padding-top: 70px;
+}
+.app-state {
+	font-weight: bold;
+}
+.templates {
+	display: none;
+}
+.container-narrow {
+	margin: 0 auto;
+	max-width: 900px;
+}
+.log {
+	display: block;
+	white-space: pre;
+	font-family: "Consolas", "Monaco", "Vera Mono", "Lucida Console", monospace;
+	max-height: 500px;
+}

@@ -11,7 +11,6 @@
  *     IBM Corporation - Various improvements
  ******************************************************************************/
 /*eslint-env amd, node, mocha*/
-/*global doctrine*/
 define([
 	'javascript/contentAssist/typesFromIndexFile',
 	'javascript/contentAssist/typeEnvironment',

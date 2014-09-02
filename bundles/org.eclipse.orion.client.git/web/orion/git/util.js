@@ -14,8 +14,10 @@
  * Utility methods that do not have UI dependencies.
  */
 define([
+	'i18n!git/nls/gitmessages',
+	'orion/i18nUtil',
 	"orion/URL-shim"
-], function(_) {
+], function(messages, i18nUtil) {
 
 	var interestedUnstagedGroup = ["Missing", "Modified", "Untracked", "Conflicting"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var interestedStagedGroup = ["Added", "Changed", "Removed"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -74,8 +76,8 @@ define([
 			/* try scp-like uri */
 			try {
 				/* [user@]host.xz:path/to/repo.git/ */
-				var scp = gitUrl.split(":");
-				var hostPart = scp[0].split("@");
+				var scp = gitUrl.split(":"); //$NON-NLS-0$
+				var hostPart = scp[0].split("@"); //$NON-NLS-0$
 				var host = hostPart.length > 1 ? hostPart[1] : hostPart[0];
 				return {
 					host : host,
@@ -102,7 +104,7 @@ define([
 			iterator++;
 		}
 		var maxMessageLength = 100;
-		if (splitted[iterator].length > maxMessageLength) return splitted[iterator].substring(0,maxMessageLength)+'...'; //$NON-NLS-0$
+		if (splitted[iterator].length > maxMessageLength) return splitted[iterator].substring(0,maxMessageLength);
 		return splitted[iterator];
 	}
 	
@@ -123,7 +125,7 @@ define([
 				if (++changeIdCount > 1) {
 					footer = {};
 					break;
-				};
+				}
 			} else if (!signedOffByPresent && splitted[i].indexOf(signedOffBy) === 0) {
 				footer.signedOffBy = splitted[i].substring(signedOffBy.length,splitted[i].length);
 				signedOffBy = true;
@@ -132,15 +134,60 @@ define([
 		
 		return footer;
 	}
+	
+	function shortenRefName(ref) {
+		var refName = ref.Name;
+		if (ref.Type === "StashCommit") { //$NON-NLS-0$
+			refName = i18nUtil.formatMessage(messages["stashIndex"], ref.parent.children.indexOf(ref), refName.substring(0, 6)); //$NON-NLS-0$
+		}
+		if (ref.Type === "Commit") { //$NON-NLS-0$
+			refName = refName.substring(0, 6);
+		}
+		if (ref.Type === "RemoteTrackingBranch" && !ref.Id) { //$NON-NLS-0$
+			refName += messages[" [New branch]"];
+		}
+		return refName;
+	}
+	
+	function shortenPath(path) {
+		var result = path.split('/').slice(-3); //$NON-NLS-0$
+		result = result.join("/"); //$NON-NLS-0$
+		return result.length < path.length ? "..." + result : path; //$NON-NLS-0$
+	}
+	
+	function relativePath(treePath) {
+		var path = "";
+		if (typeof treePath === "string") { //$NON-NLS-0$
+			path = treePath;
+		} else if (treePath) {
+			var parents = treePath.Parents;
+			if (parents.length) {
+				path = treePath.Location.substring(parents[parents.length -1].Location.length);
+			}
+		}
+		return path;
+	}
+	
+	function generateQuery(queries) {
+		var result = queries.filter(function(q) { return q; }).join("&");  //$NON-NLS-0$
+		if (result.length) {
+			result = "?" + result;  //$NON-NLS-0$
+		}
+		return result;
+	}
 
 	return {
 		isStaged: isStaged,
 		isUnstaged: isUnstaged,
 		isChange: isChange,
+		generateQuery: generateQuery,
 		hasStagedChanges: hasStagedChanges,
 		hasUnstagedChanges: hasUnstagedChanges,
 		parseSshGitUrl: parseSshGitUrl,
 		trimCommitMessage: trimCommitMessage,
+		shortenRefName: shortenRefName,
+		shortenPath: shortenPath,
+		relativePath: relativePath,
 		getGerritFooter: getGerritFooter
 	};
 });

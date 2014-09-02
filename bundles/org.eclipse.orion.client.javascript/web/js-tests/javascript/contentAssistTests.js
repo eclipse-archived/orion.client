@@ -19,7 +19,7 @@ define([
 	'orion/Deferred',
 	'esprima',
 	'mocha/mocha', //mjust stay at the end, not a module
-	'doctrine/doctrine' //must stay at the end, does not export a module 
+	'doctrine' //must stay at the end, does not export a module 
 ], function(ContentAssist, chai, objects, Deferred, Esprima) {
 	var assert = chai.assert;
 
@@ -2676,7 +2676,9 @@ define([
 				"process.", ""
 			);
 			// just testing that we don't crash
-			return results.then(function () {});
+			return results.then(function () {
+			    //empty
+			});
 		});
 	
 		// node awareness
@@ -2787,7 +2789,7 @@ define([
 			// the basics
 			it("test simple jsdoc1", function() {
 				var results = computeContentAssist(
-					"/** @type Number*/\n" +
+					"/** @type {Number}*/\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2798,8 +2800,8 @@ define([
 			//jsdoc test
 			it("test simple jsdoc2", function() {
 				var results = computeContentAssist(
-					"/** @type String*/\n" +
-					"/** @type Number*/\n" +
+					"/** @type {String}*/\n" +
+					"/** @type {Number}*/\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2810,8 +2812,8 @@ define([
 			//jsdoc test
 			it("test simple jsdoc3", function() {
 				var results = computeContentAssist(
-					"/** @type Number*/\n" +
-					"/* @type String*/\n" +
+					"/** @type {Number}*/\n" +
+					"/* @type {String}*/\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2822,8 +2824,8 @@ define([
 			//jsdoc test
 			it("test simple jsdoc4", function() {
 				var results = computeContentAssist(
-					"/** @type Number*/\n" +
-					"// @type String\n" +
+					"/** @type {Number}*/\n" +
+					"// @type {String}\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2834,8 +2836,8 @@ define([
 			// This is actually a bug.  We incorrectly recognize //* comments as jsdoc coments
 			it("test simple jsdoc5", function() {
 				var results = computeContentAssist(
-					"/** @type Number*/\n" +
-					"//* @type String\n" +
+					"/** @type {Number}*/\n" +
+					"//* @type {String}\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2846,9 +2848,9 @@ define([
 			//jsdoc test
 			it("test simple jsdoc6", function() {
 				var results = computeContentAssist(
-					"/** @type String*/\n" +
+					"/** @type {String}*/\n" +
 					"var yy;\n" +
-					"/** @type Number*/\n" +
+					"/** @type {Number}*/\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2859,9 +2861,9 @@ define([
 			//jsdoc test
 			it("test simple jsdoc7", function() {
 				var results = computeContentAssist(
-					"/** @type String*/" +
+					"/** @type {String}*/" +
 					"var yy;" +
-					"/** @type Number*/" +
+					"/** @type {Number}*/" +
 					"var xx;x", "x"
 				);
 				return testProposals(results, [
@@ -2872,7 +2874,7 @@ define([
 			//jsdoc test
 			it("test simple jsdoc8", function() {
 				var results = computeContentAssist(
-					"/** @returns String\n@type Number*/\n" +
+					"/** @returns {String}\n@type {Number}*/\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2883,7 +2885,7 @@ define([
 			//jsdoc test
 			it("test simple jsdoc9", function() {
 				var results = computeContentAssist(
-					"/** @param String f\n@type Number*/\n" +
+					"/** @param {String} f\n@type {Number}*/\n" +
 					"var xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -2894,7 +2896,7 @@ define([
 			//jsdoc test
 			it("test simple jsdoc10", function() {
 				var results = computeContentAssist(
-					"/** @return Number*/\n" +
+					"/** @return {Number}*/\n" +
 					"var xx = function() { };\nx", "x"
 				);
 				return testProposals(results, [
@@ -2905,7 +2907,7 @@ define([
 			//jsdoc test
 			it("test simple jsdoc11", function() {
 				var results = computeContentAssist(
-					"/** @type String\n@return Number*/\n" +
+					"/** @type {String}\n@return {Number}*/\n" +
 					"var xx = function() { };\nx", "x"
 				);
 				return testProposals(results, [
@@ -2917,7 +2919,7 @@ define([
 			it("test simple jsdoc12", function() {
 				var results = computeContentAssist(
 					"var xx;\n" +
-					"/** @type String\n@return Number*/\n" +
+					"/** @type {String}\n@return {Number}*/\n" +
 					"xx = function() { };\nx", "x"
 				);
 				return testProposals(results, [
@@ -2937,7 +2939,7 @@ define([
 			//jsdoc test
 			it("test simple jsdoc15", function() {
 				var results = computeContentAssist(
-					"var xx;\n /** @param Number ss\n@return String*/\n xx = function(yy) { y };", "y", 69);
+					"var xx;\n /** @param {Number} ss\n@return {String}*/\n xx = function(yy) { y };", "y", 73);
 				return testProposals(results, [
 					["yy", "yy : {}"]
 				]);
@@ -2946,9 +2948,9 @@ define([
 			//jsdoc test
 			it("test simple jsdoc14", function() {
 				var results = computeContentAssist(
-					"/** @type Number*/\n" +
+					"/** @type {Number}*/\n" +
 					"var xx;\n" +
-					"/** @type String*/\n" +
+					"/** @type {String}*/\n" +
 					"xx;\nx", "x"
 				);
 				return testProposals(results, [
@@ -3315,7 +3317,7 @@ define([
 			it("test dotted constructor jsdoc type 1", function() {
 				var results = computeContentAssist(
 					"var obj = { Fun : function() {} };\n" +
-					"/** @type obj.Fun */ var xxx;\nxx", "xx");
+					"/** @type {obj.Fun} */ var xxx;\nxx", "xx");
 				return testProposals(results, [
 					["xxx", "xxx : obj.Fun"]
 				]);
@@ -3325,7 +3327,7 @@ define([
 			it("test dotted constructor jsdoc type 2", function() {
 				var results = computeContentAssist(
 					"var obj = { Fun : function() { this.yyy = 9; } };\n" +
-					"/** @type obj.Fun */ var xxx;\nxxx.yy", "yy");
+					"/** @type {obj.Fun} */ var xxx;\nxxx.yy", "yy");
 				return testProposals(results, [
 					["yyy", "yyy : Number"]
 				]);
@@ -3334,7 +3336,7 @@ define([
 			// arrays and array types
 			it("test array type1", function() {
 				var results = computeContentAssist(
-					"/** @type [Number] */ var xxx;\nxxx[0].toF", "toF");
+					"/** @type {[Number]} */ var xxx;\nxxx[0].toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
@@ -3342,7 +3344,7 @@ define([
 			it("test array type2", function() {
 				var results = computeContentAssist(
 					// ignoring the second type
-					"/** @type [Number,String] */ var xxx;\nxxx[0].toF", "toF");
+					"/** @type {[Number,String]} */ var xxx;\nxxx[0].toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
@@ -3350,7 +3352,7 @@ define([
 			it("test array type3", function() {
 				var results = computeContentAssist(
 					// ignoring the second type
-					"/** @type Array.<Number> */ var xxx;\nxxx[0].toF", "toF");
+					"/** @type {Array.<Number>} */ var xxx;\nxxx[0].toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
@@ -3358,7 +3360,7 @@ define([
 			it("test array type3a", function() {
 				var results = computeContentAssist(
 					// ignoring the second type
-					"/** @type [Number] */ var xxx;\nxxx[0].toF", "toF");
+					"/** @type {[Number]} */ var xxx;\nxxx[0].toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
@@ -3366,7 +3368,7 @@ define([
 			it("test array type4", function() {
 				var results = computeContentAssist(
 					// ignoring the second type
-					"/** @type Array.<{foo:Number}> */ var xxx;\nxxx[0].foo.toF", "toF");
+					"/** @type {Array.<{foo:Number}>} */ var xxx;\nxxx[0].foo.toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
@@ -3374,7 +3376,7 @@ define([
 			it("test array type5", function() {
 				var results = computeContentAssist(
 					// ignoring the second type
-					"/** @type Array.<Array.<Number>> */ var xxx;\nxxx[0][0].toF", "toF");
+					"/** @type {Array.<Array.<Number>>} */ var xxx;\nxxx[0][0].toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
@@ -3382,7 +3384,7 @@ define([
 			it("test array type6", function() {
 				var results = computeContentAssist(
 					// ignoring the second type
-					"/** @type Array.<Array.<Array.<Number>>> */ var xxx;\nxxx[0][0][bar].toF", "toF");
+					"/** @type {Array.<Array.<Array.<Number>>>} */ var xxx;\nxxx[0][0][bar].toF", "toF");
 				return testProposals(results, [
 					["toFixed(digits)", "toFixed(digits) : String"]
 				]);
@@ -5298,6 +5300,213 @@ define([
 			var results = computeContentAssist("var foo = 10;\n ", "", 15);
 			assertProposal('amqp', results);
 			assertProposal('with', results);
+		});
+		
+		/**
+		 * Tests the eslint* templates in source
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 */
+		it("test eslint* template 1", function() {
+			var results = computeContentAssist("es", "es", 2);
+			testProposals(results, [
+			     ['lint', 'eslint', 'ESLint rule enable / disable directive'],
+			     ['lint-disable', 'eslint-disable', 'ESLint rule disablement directive'],
+			     ['lint-enable', 'eslint-enable', 'ESLint rule enablement directive'],
+			     ['lint-env', 'eslint-env', 'ESLint environment directive']
+			     ]
+			);
+		});
+		
+		/**
+		 * Tests the eslint* templates in comments
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 */
+		it("test eslint* template 2", function() {
+			var results = computeContentAssist("/* es", "es", 5);
+			testProposals(results, [
+			     ['lint', 'eslint', 'ESLint rule enable / disable directive'],
+			     ['lint-disable', 'eslint-disable', 'ESLint rule disablement directive'],
+			     ['lint-enable', 'eslint-enable', 'ESLint rule enablement directive'],
+			     ['lint-env', 'eslint-env', 'ESLint environment directive']
+			     ]
+			);
+		});
+		
+		/**
+		 * Tests the eslint* templates in comments
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 */
+		it("test eslint* template 3", function() {
+			var results = computeContentAssist("/* es */", "es", 5);
+			testProposals(results, [
+			     ['lint', 'eslint', 'ESLint rule enable / disable directive'],
+			     ['lint-disable', 'eslint-disable', 'ESLint rule disablement directive'],
+			     ['lint-enable', 'eslint-enable', 'ESLint rule enablement directive'],
+			     ['lint-env', 'eslint-env', 'ESLint environment directive']
+			     ]
+			);
+		});
+		
+		/**
+		 * Tests the eslint* templates in comments
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 */
+		it("test eslint* template 4", function() {
+			var results = computeContentAssist("var f; /* es", "es", 12);
+			testProposals(results, [
+			     ['lint', 'eslint', 'ESLint rule enable / disable directive'],
+			     ['lint-disable', 'eslint-disable', 'ESLint rule disablement directive'],
+			     ['lint-enable', 'eslint-enable', 'ESLint rule enablement directive'],
+			     ['lint-env', 'eslint-env', 'ESLint environment directive']
+			     ]
+			);
+		});
+		
+		/**
+		 * Tests that no eslint* templates are in jsdoc comments
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 */
+		it("test eslint* template 5", function() {
+			var results = computeContentAssist("/** es", "es", 6);
+			testProposals(results, []);
+		});
+		
+		/**
+		 * Tests that eslint* templates will be proposed further in comment with no content beforehand
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint* template 6", function() {
+			var results = computeContentAssist("/* \n\n es", "es", 10);
+			testProposals(results, [
+			     ['lint', 'eslint', 'ESLint rule enable / disable directive'],
+			     ['lint-disable', 'eslint-disable', 'ESLint rule disablement directive'],
+			     ['lint-enable', 'eslint-enable', 'ESLint rule enablement directive'],
+			     ['lint-env', 'eslint-env', 'ESLint environment directive']
+			     ]);
+		});
+		
+		/**
+		 * Tests that no eslint* templates are in comments after other content
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint* template 7", function() {
+			var results = computeContentAssist("/* foo \n\n es", "es", 10);
+			testProposals(results, []);
+		});
+		
+		/**
+		 * Tests that no eslint* templates are proposed when there is already one
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint* template 8", function() {
+			var results = computeContentAssist("/* eslint ", "es", 10);
+			assertNoProposal('eslint', results);
+			assertNoProposal('eslint-env', results);
+		});
+		
+		/**
+		 * Tests that no eslint* templates are proposed when there is already one
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint* template 9", function() {
+			var results = computeContentAssist("/* eslint ", "eslint", 9);
+            testProposals(results, [
+			     ['lint', 'eslint', 'ESLint rule enable / disable directive'],
+			     ['lint-disable', 'eslint-disable', 'ESLint rule disablement directive'],
+			     ['lint-enable', 'eslint-enable', 'ESLint rule enablement directive'],
+			     ['lint-env', 'eslint-env', 'ESLint environment directive']
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint-env environs are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint-env proposals 1", function() {
+			var results = computeContentAssist("/* eslint-env ", "", 14);
+			testProposals(results, [
+			     ['amd', 'amd', 'ESLint environment name'],
+			     ['browser', 'browser', 'ESLint environment name'],
+			     ['mocha', 'mocha', 'ESLint environment name'],
+			     ['node', 'node', 'ESLint environment name']
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint-env environs are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint-env proposals 2", function() {
+			var results = computeContentAssist("/* eslint-env a", "a", 15);
+			testProposals(results, [
+			     ['md', 'amd', 'ESLint environment name'],
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint rules are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint rule proposals 1", function() {
+			var results = computeContentAssist("/* eslint c", "c", 11);
+			testProposals(results, [
+			     ['urly', 'curly', 'ESLint rule name']
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint rules are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint rule proposals 2", function() {
+			var results = computeContentAssist("/* eslint no-js", "no-js", 15);
+			testProposals(results, [
+			     ['lint', 'no-jslint', 'ESLint rule name'],
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint rules are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint rule proposals 3", function() {
+			var results = computeContentAssist("/* eslint-enable no-js", "no-js", 22);
+			testProposals(results, [
+			     ['lint', 'no-jslint', 'ESLint rule name'],
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint rules are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint rule proposals 4", function() {
+			var results = computeContentAssist("/* eslint-disable no-js", "no-js", 23);
+			testProposals(results, [
+			     ['lint', 'no-jslint', 'ESLint rule name'],
+			     ]);
+		});
+		
+		/**
+		 * Tests that eslint rules are proposed
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440569
+		 * @since 7.0
+		 */
+		it("test eslint rule proposals 5", function() {
+			var results = computeContentAssist("/* eslint-enable no-jslint, c", "c", 29);
+			testProposals(results, [
+			     ['urly', 'curly', 'ESLint rule name']
+			     ]);
 		});
 	});
 });

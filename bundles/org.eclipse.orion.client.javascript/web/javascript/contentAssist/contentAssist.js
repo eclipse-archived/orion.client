@@ -11,7 +11,6 @@
  *	 Andrew Eisenberg (VMware) - implemented visitor pattern
  *   IBM Corporation - Various improvements
  ******************************************************************************/
-/*global doctrine */
 /*eslint-env amd */
 define([
 	'javascript/contentAssist/typeEnvironment',  //$NON-NLS-0$
@@ -26,9 +25,11 @@ define([
 	'estraverse',  //$NON-NLS-0$
 	'javascript/contentAssist/indexer',  //$NON-NLS-0$
 	'javascript/finder',
-	'javascript/signatures'
+	'javascript/signatures',
+	'eslint/load-rules-async',
+	'eslint/conf/environments'
 ], function(typeEnv, typeInf, typeUtils, proposalUtils, mTemplates, JSSyntax, Templates, Deferred, Objects, Estraverse, Indexer,
-            Finder, Signatures) {
+            Finder, Signatures, Rules, ESLintEnv) {
 
 	/**
 	 * @description Creates a new delegate to create keyword and template proposals
@@ -38,8 +39,9 @@ define([
  	}
  	
 	TemplateProvider.prototype = new mTemplates.TemplateContentAssist(JSSyntax.keywords, []);
+	
 	Objects.mixin(TemplateProvider.prototype, {
-		uninterestingChars: ":!#$^&*.?<>", //$NON-NLS-0$
+		uninterestingChars: ":!#$^&.?<>", //$NON-NLS-0$
 		/**
 		 * @description Override from TemplateContentAssist
 		 */
@@ -97,65 +99,83 @@ define([
 		},
 		
 		/**
-		 * @description Corrects the prefix to include the starting '@' symbol when completing doc
-		 * @param {String} kind
-		 * @param {String} prefix
-		 * @param {Object} context
-		 * @param {Object} buffer 
-		 * @since 7.0
-		 */
-		fixPrefix: function(kind, prefix, context, buffer) {
-		    if(kind === 'doc' && typeof prefix === 'string' && typeof context.line === 'string') {
-		        if(buffer.charAt(context.offset-1) === '{') {
-		            return null;
-		        }
-		        if(buffer.charAt(context.offset-prefix.length-1) === '@') {
-		            return '@'+prefix;
-		        }
-		    }
-		    return prefix;
-		},
-		
-		/**
 		 * @description override
 		 */
-		getTemplateProposals: function(prefix, offset, context, completionKind, buffer) {
+		getTemplateProposals: function(prefix, offset, context, completionKind) {
 			var proposals = [];
-			var newprefix = this.fixPrefix(completionKind.kind, prefix, context, buffer);
-			if(newprefix != null && typeof newprefix !== 'undefined') {
-    			var templates = Templates.getTemplatesForKind(completionKind.kind); //this.getTemplates();
-    			for (var t = 0; t < templates.length; t++) {
-    				var template = templates[t];
-    				if (template.match(newprefix)) {
-    					var proposal = template.getProposal(newprefix, offset, context);
-    					this.removePrefix(newprefix, proposal);
-    					proposals.push(proposal);
-    				}
-    			}
-    			
-    			if (0 < proposals.length) {
-    				//sort the proposals by name
-    				proposals.sort(function(p1, p2) {
-    					if (p1.name < p2.name) {
-    						return -1;
-    					}
-    					if (p1.name > p2.name) {
-    						return 1;
-    					}
-    					return 0;
-    				});
-    				// if any templates were added to the list of 
-    				// proposals, add a title as the first element
-    				proposals.splice(0, 0, {
-    					proposal: '',
-    					description: 'Templates', //$NON-NLS-0$
-    					style: 'noemphasis_title', //$NON-NLS-0$
-    					unselectable: true
-    				});
-    			}
+			var templates = Templates.getTemplatesForKind(completionKind.kind); //this.getTemplates();
+			for (var t = 0; t < templates.length; t++) {
+				var template = templates[t];
+				if (this._looselyMatches(template, prefix, completionKind, context)) {
+					var proposal = template.getProposal(prefix, offset, context);
+					this.removePrefix(prefix, proposal);
+					proposals.push(proposal);
+				}
+			}
+			
+			if (0 < proposals.length) {
+				//sort the proposals by name
+				proposals.sort(function(p1, p2) {
+					if (p1.name < p2.name) {
+						return -1;
+					}
+					if (p1.name > p2.name) {
+						return 1;
+					}
+					return 0;
+				});
+				// if any templates were added to the list of 
+				// proposals, add a title as the first element
+				proposals.splice(0, 0, {
+					proposal: '',
+					description: 'Templates', //$NON-NLS-0$
+					style: 'noemphasis_title', //$NON-NLS-0$
+					unselectable: true
+				});
 			}
 			return proposals;
 		},
+		
+		/**
+		 * @name _looselyMatches
+		 * @description Returns if the template applies to more than a simple prefix match
+		 * @function
+		 * @private
+		 * @param {TemplateProvider.Template} template
+		 * @param {String} prefix 
+		 * @param {String} kind
+		 * @param {Object} context
+		 * @returns {Boolean} If the template / context / kind is allowed
+		 * @since 7.0
+		 */
+		_looselyMatches: function _looselyMatches(template, prefix, kind, context) {
+		    if(template.match(prefix)) {
+		        //must match the prefix always
+		        if(typeof context.line !== 'undefined') {
+    		        var len = context.line.length - (typeof prefix !== 'undefined' ? prefix.length : 0);
+    		        var line = context.line.slice(0, (len > -1 ? len : 0)).trim();
+    		        if(kind.kind === 'jsdoc') {
+    		            // don't propose tag templates when one exists already on the same line
+    		            return !/^[\/]?[\*]+\s*[@]/ig.test(line);
+    		        } 
+		        }
+		        if(kind.kind === 'doc') {
+		            var comment = kind.node.value.trim();
+		            if(comment) {
+		                var idx = context.offset - prefix.length - kind.node.range[0];
+		                if(idx > -1) {
+		                    var val = /^(eslint-\w+|eslint?)(\s|$)/ig.exec(comment.slice(0, idx));
+    		                if(val) {
+    	                        //nothing else is allowed in the directives - eslint won't parse it
+    	                        return false;
+    		                }
+		                } 
+		            }
+		        }
+		        return true;
+		    }
+		    return false;
+		}
 	});
 
 	/**
@@ -184,7 +204,7 @@ define([
 		initialize: function() {
 		    //override
 		},
-
+        
 		/**
 		 * @description Implements the Orion content assist API v4.0
 		 */
@@ -247,6 +267,7 @@ define([
 			// note that if selection has length > 0, then just ignore everything past the start
 			var completionKind = this._getCompletionContext(ast, offset, buffer);
 			if (completionKind) {
+			    context.prefix = proposalUtils.getPrefix(buffer, context, completionKind.kind);
 				var self = this;
 				return typeEnv.createEnvironment({
 					buffer: buffer,
@@ -320,7 +341,7 @@ define([
 		_createTemplateProposals: function(context, completionKind, buffer) {
 			if((typeof context.template === 'undefined' || context.template) && 
 					this.provider.isValid(context.prefix, buffer, context.offset, context)) {
-				return this.provider.getTemplateProposals(context.prefix, context.offset, context, completionKind, buffer);
+				return this.provider.getTemplateProposals(context.prefix, context.offset, context, completionKind);
 			}
 			return [];
 		},
@@ -332,7 +353,7 @@ define([
 		 */
 		_createDocProposals: function(context, kind, buffer, env, ast) {
 		    var proposals = [];
-		    if(kind.kind === 'doc') {
+		    if(kind.kind === 'jsdoc') {
     		    var offset = context.offset > context.prefix.length ? context.offset-context.prefix.length-1 : 0;
     		    switch(buffer.charAt(offset)) {
     		        case '{': {
@@ -340,7 +361,7 @@ define([
     		            break;
     		        }
     		        case '.': {
-    		            //TODO re-write the infferenncing code to only pick out 'typed' proposals - we 
+    		            //TODO re-write the inferencing code to only pick out 'typed' proposals - we 
     		            //only want non-functions here
     		            return [];
     		            /*var idx = offset-1;
@@ -358,6 +379,7 @@ define([
     		            }
     		            break; */
     		        }
+    		        case '*':
     		        case ' ': {
     		            var node = Finder.findNode(kind.node.range[1], ast, {parents:true, next:true});
         	               if(node) {
@@ -412,7 +434,47 @@ define([
         	               }
     		        }
     		    }
-	        }
+	        } else if(kind.kind === 'doc') {
+	            var comment = kind.node.value.trim();
+	            if(comment) {
+    	            if(/^(?:\/\*)?\s*eslint(?:-enable|-disable)?\s+/gi.test(context.line)) {
+    	                //eslint eslint-enable eslint-disable
+    	                var rules = Rules.getRules();
+    	                var rulekeys = Object.keys(rules).sort();
+    	                for(i = 0; i < rulekeys.length; i++) {
+    	                    var rulekey = rulekeys[i];
+                            if(proposalUtils.looselyMatches(context.prefix, rulekey)) {
+                                var rule = rules[rulekey];
+                                proposals.push({
+    								proposal: rulekey,
+    								relevance: 100,
+    								name: rulekey,
+    								description: ' - '+(rule.description ? rule.description : 'ESLint rule name'),
+    								prefix: context.prefix,
+    								style: 'emphasis',
+    								overwrite: true
+    						    });
+    					    }
+    	                }
+    	            } else if(/^(?:\/\*)?\s*eslint-env\s+/gi.test(context.line)) {
+    	                //eslint-env (comma-separated list)
+    	                var keys = Object.keys(ESLintEnv).sort();
+    	                for(i = 0; i < keys.length; i++) {
+    	                    var key = keys[i];
+    	                    if(key !== 'builtin' && proposalUtils.looselyMatches(context.prefix, key)) {
+    	                        proposals.push({
+    								proposal: key,
+    								relevance: 100,
+    								name: key,
+    								description: ' - ESLint environment name',
+    								style: 'emphasis',
+    								overwrite: true
+    						    });
+    	                    }
+    	                }
+    	            }
+	            }
+            }
 	        return proposals;
 		},
 		
@@ -510,7 +572,7 @@ define([
 		 * @param {Object} visited Those types visited thus far while computing proposals (to detect cycles)
 		 */
 		_createInferredProposals: function(targetTypeName, env, kind, context, buffer, replaceStart, proposals, relevance, visited) {
-		    if(kind === 'doc') {
+		    if(kind === 'jsdoc' || kind === 'doc') {
     	        return;
 		    } 
 			var type = env.lookupQualifiedType(targetTypeName);
@@ -779,10 +841,16 @@ define([
 		 */
 		_getCompletionContext: function(ast, offset, contents) {
 		    var comment = Finder.findComment(offset, ast);
-		    if(comment) {
-		        if(offset > comment.range[0]+2 && (comment.type === 'Block' && offset < comment.range[1]-2)) {
-		          return {kind:'doc', node: comment};
+		    if(comment && comment.type === 'Block') {
+		        var start  = comment.range[0];
+		        if(contents.charAt(start) === '/' && contents.charAt(start+1) === '*') {
+                    if(contents.charAt(start+2) === '*' && offset > start+2) { // must be past the second '*'
+                        return {kind:'jsdoc', node: comment};  
+                    } else if(offset > start+1) { //must be past the '*'
+    		            return {kind:'doc', node: comment};
+    		        }
 		        }
+		        return null;
 		    }
 			var parents = [];
 			Estraverse.traverse(ast, {

@@ -38,10 +38,6 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 			}
 		},
 
-		setStorageItem: function(){
-			// to be overridden with a choice of function to store the picked color
-		},
-		
 		width: function( value ){
 			this.textfield.style.width = value ;
 		},
@@ -76,12 +72,9 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
         },
 		
 		change: function(){
-			var value;
-			if( this.selection && this.selection.value ){
-				value = this.selection.value;
+			if (this.postChange) {
+				this.postChange(this.textfield.value);
 			}
-		
-			this.setStorageItem( this.category, this.item, this.element, value, this.ui );
 		}
 	});
 	return TextField;

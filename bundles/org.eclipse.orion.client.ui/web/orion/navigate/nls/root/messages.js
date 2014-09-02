@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -35,7 +35,7 @@ define({
 	"Create a zip file of the folder contents and download it": "Create a zip file of the folder contents and download it",
 	"New File": "File",
 	"Create a new file": "Create a new file",
-	"Name:" : "Name:",
+	"Name:": "Name:",
 	"New Folder": "Folder",
 	"Folder name:": "Folder name:",
 	"Create a new folder": "Create a new folder",
@@ -98,12 +98,12 @@ define({
 	"Actions": "Actions",
 	"Orion Content": "Orion Content",
 	" is not supported in this file system": " is not supported in this file system",
-	"Create new content" : "Create new content",
-	"Import from HTTP..." : "HTTP",
-	"File URL:" : "File URL:",
-	"Import a file from a URL and optionally unzip it" : "Import a file from a URL and optionally unzip it",
-	"Unzip *.zip files:" : "Unzip *.zip files:",
-	"Extracted from:" : "Extracted from:",
+	"Create new content": "Create new content",
+	"Import from HTTP...": "HTTP",
+	"File URL:": "File URL:",
+	"Import a file from a URL and optionally unzip it": "Import a file from a URL and optionally unzip it",
+	"Unzip *.zip files:": "Unzip *.zip files:",
+	"Extracted from:": "Extracted from:",
 	"Did not drop ${0}.  Folder drop is not supported in this browser.": "Did not drop ${0}.  Folder drop is not supported in this browser.",
 	"You cannot copy files directly into the workspace.  Create a folder first.": "You cannot copy files directly into the workspace.  Create a folder first.",
 	"Unzip ${0}?": "Unzip ${0}?",
@@ -117,5 +117,36 @@ define({
 	"Download": "Download",
 	"Download_tooltips": "Download the file contents as the displayed name",
 	"Downloading...": "Reading file contents...",
-	"Download not supported": "Contents download is not supported in this browser."
+	"Download not supported": "Contents download is not supported in this browser.",
+	"gettingContentFrom": "Getting content from ",
+	"deployTo": "Deploy to ",
+	"deploy": "Deploy ",
+	"connect": "Connect",
+	"fetchContent": "Fetch content",
+	"fetchContentOf": "Fetch content of ",
+	"disconnectFromProject": "Disconnect from project",
+	"doNotTreatThisFolder": "Do not treat this folder as a part of the project",
+	"checkStatus": "Check status",
+	"checkApplicationStatus": "Check application status",
+	"checkApplicationState": "Check application state",
+	"stop": "Stop",
+	"start": "Start",
+	"stopApplication": "Stop application",
+	"startApplication": "Start application",
+	"manage": "Manage",
+	"manageThisApplicationOnRemote": "Manage this application on remote server",
+	"deployThisApplicationAgain": "Deploy this application again",
+	"associatedFolder": "Associated Folder",
+	"associateAFolderFromThe": "Associate a folder from the workspace with this project.",
+	"convertToProject": "Convert to project",
+	"convertThisFolderIntoA": "Convert this folder into a project",
+	"thisFolderIsAProject": "This folder is a project already.",
+	"basic": "Basic",
+	"createAnEmptyProject.": "Create an empty project.",
+	"sFTP": "SFTP",
+	"createAProjectFromAn": "Create a project from an SFTP site.",
+	'readMeCommandName': 'Readme File',  //$NON-NLS-0$  //$NON-NLS-1$
+	'readMeCommandTooltip': 'Create a README.md file in this project',  //$NON-NLS-0$  //$NON-NLS-1$
+	'zipArchiveCommandName': 'Zip archive',  //$NON-NLS-0$  //$NON-NLS-1$
+	'zipArchiveCommandTooltip': 'Create a project from a local zip archive.'  //$NON-NLS-0$  //$NON-NLS-1$
 });

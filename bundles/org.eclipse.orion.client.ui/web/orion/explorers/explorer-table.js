@@ -938,12 +938,7 @@ define([
 		 */
 		reveal: function(item, reroot) {
 			return this.showItem(item, reroot).then(function(result) {
-				var navHandler = this.getNavHandler();
-				if (navHandler) {
-					navHandler.cursorOn(result, true);
-					navHandler.setSelection(result);
-				}
-				return result;
+				this.select(result);
 			}.bind(this));
 		},
 
@@ -1098,6 +1093,7 @@ define([
 							deferred.resolve(tree);
 						},
 						navHandlerFactory: self.navHandlerFactory,
+						showRoot: self.showRoot,
 						setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), //$NON-NLS-0$
 						selectionPolicy: self.renderer.selectionPolicy, 
 						onCollapse: function(model) {

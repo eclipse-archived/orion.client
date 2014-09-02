@@ -173,7 +173,7 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 								});
 							} else if (error.JsonData && error.JsonData.error_code) {
 								var err = error.JsonData;
-								if (err.error_code === "CF-InvalidAuthToken"){
+								if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){
 									error.Retry = {
 										parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
 									};
@@ -185,9 +185,9 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 						}
 					);
 				} else {
-					deferred.resolve({UriTemplate: "{+OrionHome}/cfui/deploy.html#" + encodeURIComponent(JSON.stringify({ContentLocation: project.ContentLocation, AppPath: appPath})), 
+					deferred.resolve({UriTemplate: "{+OrionHome}/cfui/deployInteractive.html#" + encodeURIComponent(JSON.stringify({ContentLocation: project.ContentLocation, AppPath: appPath})), 
 						Width: "400px", 
-						Height: "270px",
+						Height: "350px",
 						UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate"});
 				}
 			},
@@ -234,7 +234,7 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 								});
 							} else if (error.JsonData && error.JsonData.error_code) {
 								var err = error.JsonData;
-								if (err.error_code === "CF-InvalidAuthToken"){
+								if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){
 									error.Retry = {
 										parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
 									};
@@ -267,7 +267,7 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 								});
 							} else if (error.JsonData && error.JsonData.error_code) {
 								var err = error.JsonData;
-								if (err.error_code === "CF-InvalidAuthToken"){
+								if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){
 									error.Retry = {
 										parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
 									};
@@ -303,7 +303,7 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 								});
 							} else if (error.JsonData && error.JsonData.error_code) {
 								var err = error.JsonData;
-								if (err.error_code === "CF-InvalidAuthToken"){
+								if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){
 									error.Retry = {
 										parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
 									};

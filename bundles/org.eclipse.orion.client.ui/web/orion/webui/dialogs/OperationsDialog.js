@@ -24,19 +24,19 @@ function(messages, require, lib, popupdialog, mOperationsCommands) {
 	}
 	
 	OperationsDialog.prototype = new popupdialog.PopupDialog();
-
+	OperationsDialog.prototype.messages = messages;
+	
 	OperationsDialog.prototype.TEMPLATE = 
 		'<table style="width: 360px;"><tr>' + //$NON-NLS-0$
-			'<td><h2>Recent operations</h2></td>' + //$NON-NLS-0$
-			'<td style="text-align: right;"><a id="allOperationsLink" class="navlinkonpage">All Operations</a></td>' + //$NON-NLS-0$
+			'<td><h2>${Recent operations}</h2></td>' + //$NON-NLS-0$
+			'<td style="text-align: right;"><a id="allOperationsLink" class="navlinkonpage">${All Operations}</a></td>' + //$NON-NLS-0$
 		'</tr></table>' + //$NON-NLS-0$
 		'<div id="operationsExist">' + //$NON-NLS-0$
-			'<div style="padding-left: 7px" id="myOperationsListEmpty">No operations running on this page.</div>' + //$NON-NLS-0$
+			'<div style="padding-left: 7px" id="myOperationsListEmpty">${NoPageOps}</div>' + //$NON-NLS-0$
 			'<table id="myOperationsList" style="display: none;"></table>' + //$NON-NLS-0$
 		'</div>' + //$NON-NLS-0$
-		'<div style="padding-left: 7px" id="operationsDontExist">No operations running.</div>'; //$NON-NLS-0$
-
-
+		'<div style="padding-left: 7px" id="operationsDontExist">${NoOperations}</div>'; //$NON-NLS-0$
+	
 	OperationsDialog.prototype._init = function(options) {
 		this._myOperations = [];
 		this._operationsDeferreds = [];

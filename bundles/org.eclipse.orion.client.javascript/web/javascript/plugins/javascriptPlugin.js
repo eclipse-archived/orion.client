@@ -53,17 +53,17 @@ define([
 	provider.registerService("orion.core.contenttype", {}, { //$NON-NLS-0$
 		contentTypes: [
 			{	id: "application/javascript", //$NON-NLS-0$
-				"extends": "text/plain", //$NON-NLS-0$
+				"extends": "text/plain", //$NON-NLS-0$ //$NON-NLS-1$
 				name: "JavaScript", //$NON-NLS-0$
 				extension: ["js"], //$NON-NLS-0$
 				imageClass: "file-sprite-javascript modelDecorationSprite" //$NON-NLS-0$
 			}, {id: "application/json", //$NON-NLS-0$
-				"extends": "text/plain", //$NON-NLS-0$
+				"extends": "text/plain", //$NON-NLS-0$ //$NON-NLS-1$
 				name: "JSON", //$NON-NLS-0$
 				extension: ["json", "pref"], //$NON-NLS-0$ //$NON-NLS-1$
 				imageClass: "file-sprite-javascript modelDecorationSprite" //$NON-NLS-0$
 			}, {id: "application/x-ejs", //$NON-NLS-0$
-				"extends": "text/plain", //$NON-NLS-0$
+				"extends": "text/plain", //$NON-NLS-0$ //$NON-NLS-1$
 				name: "Embedded Javascript", //$NON-NLS-0$
 				extension: ["ejs"], //$NON-NLS-0$
 				imageClass: "file-sprite-javascript modelDecorationSprite" //$NON-NLS-0$
@@ -126,15 +126,15 @@ define([
 			name: 'contentAssist',  //$NON-NLS-0$
 			id: "orion.edit.contentassist.javascript",  //$NON-NLS-0$
 			charTriggers: "[.]",  //$NON-NLS-0$
-			excludedStyles: "(comment.*|string.*)"  //$NON-NLS-0$
-	});	
+			excludedStyles: "(string.*)"  //$NON-NLS-0$
+	});
 
 	/**
 	 * Register the ESLint validator
 	 */
 	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new EslintValidator(astManager),  //$NON-NLS-0$  //$NON-NLS-1$
 		{
-			contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$
+			contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$ //$NON-NLS-1$
 			nls: 'javascript/nls/problems',  //$NON-NLS-0$
 			pid: 'eslint.config'  //$NON-NLS-0$
 		});

@@ -1,18 +1,6 @@
-/* global module require define exports */
-(function(root, factory) {
-    if(typeof exports === 'object') {
-        module.exports = factory(require, exports, module);
-    }
-    else if(typeof define === 'function' && define.amd) {
-        define(['require', 'exports', 'module'], factory);
-    }
-    else {
-        var req = function(id) {return root[id];},
-            exp = root,
-            mod = {exports: exp};
-        root.ruleContext = factory(req, exp, mod);
-    }
-}(this, function(require, exports, module) {
+/* eslint-env amd */
+define([
+], function() {
 /**
  * @fileoverview RuleContext utility for rules
  * @author Nicholas C. Zakas
@@ -86,7 +74,7 @@ function RuleContext(ruleId, eslint, severity, options) {
      * @param {Object} related Optional related token or node.
      * @returns {void}
      */
-    this.report = function(node, location, message, opts, related) {
+    this.report = function(node, location, message, opts, /*ORION*/related) {
         eslint.report(ruleId, severity, node, location, message, opts, related);
     };
 
@@ -96,8 +84,6 @@ RuleContext.prototype = {
     constructor: RuleContext
 };
 
-module.exports = RuleContext;
-
- return module.exports;
-}));
+ return RuleContext;
+});
 

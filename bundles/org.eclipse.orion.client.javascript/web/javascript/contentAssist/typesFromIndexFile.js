@@ -21,7 +21,7 @@ define([
 	'javascript/contentAssist/indexFiles/nodeIndex',
 	'javascript/contentAssist/typeUtils',
 	'orion/Deferred',
-	'doctrine/doctrine' //stays last, exports into global scope
+	'doctrine' //stays last, exports into global scope
 ], function (BrowserIndex, Ecma5Index, NodeIndex, typeUtils, Deferred) {
 
 	/**
@@ -35,7 +35,9 @@ define([
 	 * Global is the type of the global variable.  This can 
 	 * vary based on what libraries are being used
 	 */
-	var Global = function () {};
+	var Global = function () {
+	    //constructor
+	};
 	var globalPrototype = {};
 	Global.prototype = globalPrototype;
 
@@ -165,7 +167,7 @@ define([
 			}
 		}
 		return { args: result, remaining: leftToParse.slice(1,leftToParse.length) };
-	};
+	}
 	
 	/**
 	 * @description Converts the Tern-formatted signature to a Closure-formatted one
@@ -228,7 +230,7 @@ define([
 				} else if (p === "!url" || p === "!stdProto" || p === "!effects" || p === "!doc") {
 					// do nothing for now
 				} else if (p[0] === '!') {
-					throw "didn't handle special property " + p;
+					throw new Error("didn't handle special property " + p);
 				} else if (p === "prototype") {
 					propInfo.$$prototype = _definitionForType(typeInfo, type[p]);
 					// we set the $$newtype to be the same as the $$prototype.
@@ -310,7 +312,7 @@ define([
 				// don't understand this; treat it as Object for now
 				return new typeUtils.Definition("Object");
 			} else if (type.slice(0,1) === "!") {
-				throw "unhandled special case " + type;
+				throw new Error("unhandled special case " + type);
 			}
 			if (type.indexOf(".") !== -1) {
 				// replace with ".." to avoid conflicting with "." syntax
@@ -343,7 +345,7 @@ define([
 				} else {
 					// don't overwrite property info with empty types
 					if (typeInfo[newTypeName]) {
-						throw "type " + newTypeName + " defined twice in index file";
+						throw new Error("type " + newTypeName + " defined twice in index file");
 					}
 					// mark as built-in so not mucked up by inference
 					parsed.propInfo.$$isBuiltin = true;
@@ -488,8 +490,9 @@ define([
 	 * @returns The types.
 	 */
 	function getGlobalsAndTypes(libName, indexData) {
-		if (!libName || !indexData)
+		if (!libName || !indexData) {
 			throw new Error("Missing parameter");
+		}
 		// check the cache
 		var globalsAndTypes = parsedIndexFileCache[libName];
 		if (!globalsAndTypes) {

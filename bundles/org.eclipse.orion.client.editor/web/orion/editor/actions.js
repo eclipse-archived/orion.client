@@ -883,6 +883,14 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			 */
 			var proposal = event.data.proposal;
 
+			// If escapePosition is not provided, positioned the cursor at the end of the inserted text 
+			function escapePosition() {
+				if (typeof proposal.escapePosition === "number") { //$NON-NLS-0$
+					return proposal.escapePosition;
+				}
+				return event.data.start + proposal.proposal.length;
+			}
+
 			//if the proposal specifies linked positions, build the model and enter linked mode
 			if (proposal.positions && proposal.positions.length > 0 && this.linkedMode) {
 				var positionGroups = [];
@@ -896,14 +904,14 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				}
 				this.linkedMode.enterLinkedMode({
 					groups: positionGroups,
-					escapePosition: proposal.escapePosition
+					escapePosition: escapePosition()
 				});
 			} else if (proposal.groups && proposal.groups.length > 0 && this.linkedMode) {
 				this.linkedMode.enterLinkedMode({
 					groups: proposal.groups,
-					escapePosition: proposal.escapePosition
+					escapePosition: escapePosition()
 				});
-			} else if (proposal.escapePosition) {
+			} else if (typeof proposal.escapePosition === "number") { //$NON-NLS-0$
 				//we don't want linked mode, but there is an escape position, so just set cursor position
 				var textView = this.editor.getTextView();
 				textView.setCaretOffset(proposal.escapePosition);

@@ -33,7 +33,7 @@ define(['orion/uiUtils', 'orion/explorers/explorer', 'orion/webui/dialog', 'orio
 			this.getExpandImage(tableRow, span);
 			span.appendChild(document.createTextNode("Root"));
 		} else {
-			span.appendChild(document.createTextNode(item.name)); 
+			span.appendChild(document.createTextNode(item.Name)); 
 		}
 	};
 
@@ -93,8 +93,8 @@ define(['orion/uiUtils', 'orion/explorers/explorer', 'orion/webui/dialog', 'orio
 		};
 		
 		myTreeModel.getId = function(/* item */ item){
-			if (item.guid) {
-				var result = item.guid;
+			if (item.Guid) {
+				var result = item.Guid;
 				// remove all non valid chars to make a dom id. 
 				return result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
 			}

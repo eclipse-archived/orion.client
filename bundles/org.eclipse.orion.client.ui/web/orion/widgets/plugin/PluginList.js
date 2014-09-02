@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -282,7 +282,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			});			
 			this.commandService.addCommand(enablePluginCommand);
 			this.commandService.registerCommandContribution("pluginCommand", "orion.enablePlugin", 4); //$NON-NLS-1$ //$NON-NLS-0$
-
 		
 			var list = this.pluginList;
 		
@@ -295,18 +294,67 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			var plugins = this.settings.pluginRegistry.getPlugins();
 			this.pluginTitle.textContent = messages['Plugins'];
 			this.pluginCount.textContent = plugins.length;
-
+			
+			for (var i=0; i<plugins.length; i++) {
+				if (defaultPluginURLs[plugins[i].getLocation()]) {
+					plugins[i].isDefaultPlugin = true;
+				}
+			}			
+			plugins.sort(this._sortPlugins); 
+			
 			// TODO maybe this should only be done once
 			this.explorer = new PluginListExplorer(this.commandService);
 			this.pluginListTree = this.explorer.createTree(this.pluginList.id, new mExplorer.SimpleFlatModel(plugins, "plugin", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
 				return item.getLocation();
-			}), { setFocus: false });
+			}), { /*setFocus: false,*/ noSelection: true});
 
 //			for( var p = 0; p < plugins.length; p++ ){
 //				var pluginEntry = new PluginEntry( {plugin: plugins[p], commandService:this.commandService}  );
 //				list.appendChild( pluginEntry.node );
 //				pluginEntry.show();
 //			}
+		},
+		
+		/**
+		 * @name _sortPlugins
+		 * @description sorts plugins by state, then default config, then name
+		 * @function
+		 * @private
+		 * @param a first object to compare
+		 * @param b second object to return
+		 * @returns -1 for a first, 1 for b first, 0 if equals
+		 */
+		_sortPlugins: function(a, b) {
+			var aState = a.getState();
+			var bState = b.getState();
+			var aHeaders = a.getHeaders();
+			var bHeaders = b.getHeaders();
+
+			if (a.getProblemLoading() && !b.getProblemLoading()){
+				return -1;
+			}
+			if (b.getProblemLoading() && !a.getProblemLoading()){
+				return 1;
+			}
+			
+			if (b.isDefaultPlugin && !a.isDefaultPlugin){
+				return -1;
+			}
+			if (a.isDefaultPlugin && !b.isDefaultPlugin){
+				return 1;
+			}
+			
+			if (!aHeaders || !aHeaders.name){
+				return -1;
+			}
+			if (!bHeaders || !bHeaders.name){
+				return 1;
+			}
+			var n1 = aHeaders.name && aHeaders.name.toLowerCase();
+			var n2 = bHeaders.name && bHeaders.name.toLowerCase();
+			if (n1 < n2) { return -1; }
+			if (n1 > n2) { return 1; }
+			return 0;
 		},
 				
 		pluginURLFocus: function(){

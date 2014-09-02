@@ -206,7 +206,7 @@ textarea.parameterInput {
 .navColumn {
 	min-width: 150px;
 	vertical-align: baseline;
-	padding: 2px;
+	padding: 5px;
 }
 
 .navColumnNoIcon {
@@ -614,7 +614,6 @@ textarea.parameterInput {
 }
 
 .treetable {
-	border-collapse: collapse;
 	border-spacing: 0;
 	width:100%;
 }
@@ -857,7 +856,6 @@ textarea.parameterInput {
 
 .navigationBreadcrumb{
 	font-family: sans-serif;
-	padding-bottom:5px;
 }
 
 .currentLocation{
@@ -936,8 +934,8 @@ textarea.parameterInput {
 	border-bottom-left-radius: 3px;
 	border-bottom-right-radius: 3px;
 	border-color:#dadada;
-	-webkit-transition: all 0.1s ease;
-	transition: all 0.1s ease;
+	-webkit-transition: all 0.1s ease, left 0;
+	transition: all 0.1s ease, left 0;
 	-webkit-transform-origin: top;
 	-ms-transform-origin: top;
 	transform-origin: top;

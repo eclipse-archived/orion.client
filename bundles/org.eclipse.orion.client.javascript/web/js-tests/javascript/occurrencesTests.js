@@ -2046,5 +2046,308 @@ define([
 				}
 			});
 		});
+		
+		/**
+		 * Tests labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_labeledStatement1', function() {
+			editorContext.text = "var a = 9; a: while(a) { if(false) { var b = {}; b: for(var x in b) { if(b === null || x === null) { break b; } } continue a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(4, 5)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}, {start:20, end:21}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+
+		/**
+		 * Tests labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_labeledStatement2', function() {
+			editorContext.text = "var a = 9; a: while(a) { if(false) { var b = {}; b: for(var x in b) { if(b === null || x === null) { break b; } } continue a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(11, 12)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:11, end:12}, {start:123, end:124}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_labeledStatement3', function() {
+			editorContext.text = "var a = 9; a: while(a) { if(false) { var b = {}; b: for(var x in b) { if(b === null || x === null) { break b; } } continue a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(123, 124)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:11, end:12}, {start:123, end:124}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * Tests labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_labeledStatement4', function() {
+			editorContext.text = "var a = 9; a: while(a) { if(false) { var b = {}; b: for(var x in b) { if(b === null || x === null) { break b; } } continue a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(49, 50)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:49, end:50}, {start:107, end:108}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_labeledStatement5', function() {
+			editorContext.text = "var a = 9; a: while(a) { if(false) { var b = {}; b: for(var x in b) { if(b === null || x === null) { break b; } } continue a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(65, 66)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:41, end:42}, {start:65, end:66}, {start:73, end:74}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=436728
+		 */
+		it('test_labeledStatement6', function() {
+			editorContext.text = "var a = 9; a: while(a) { if(false) { var b = {}; b: for(var x in b) { if(b === null || x === null) { break b; } } continue a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(107, 108)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:49, end:50}, {start:107, end:108}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});		
+		
+		/**
+		 * Tests repeated labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementRepeat1', function() {
+			editorContext.text = "a: while(true){ break a; } a: while(true){ break a; }";
+			return occurrences.computeOccurrences(editorContext, setContext(0, 1)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:22, end:23}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests repeated labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementRepeat2', function() {
+			editorContext.text = "a: while(true){ break a; } a: while(true){ break a; }";
+			return occurrences.computeOccurrences(editorContext, setContext(23, 23)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:22, end:23}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests repeated labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementRepeat3', function() {
+			editorContext.text = "a: while(true){ break a; } a: while(true){ break a; }";
+			return occurrences.computeOccurrences(editorContext, setContext(27, 27)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:27, end:28}, {start:49, end:50}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests repeated labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementRepeat4', function() {
+			editorContext.text = "a: while(true){ break a; } a: while(true){ break a; }";
+			return occurrences.computeOccurrences(editorContext, setContext(49, 50)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:27, end:28}, {start:49, end:50}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests nested loop labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementNestedLoop1', function() {
+			editorContext.text = "a: while(true){ while(true) { break a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(0, 0)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:36, end:37}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests nested loop labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementNestedLoop2', function() {
+			editorContext.text = "a: while(true){ while(true) { break a; } }";
+			return occurrences.computeOccurrences(editorContext, setContext(37, 37)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:36, end:37}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests nested labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementNestedLabel1', function() {
+			editorContext.text = "a: while(true){ b: while(true) { if (true) { continue a; } else { continue b; } } }";
+			return occurrences.computeOccurrences(editorContext, setContext(0, 1)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:54, end:55}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests nested labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementNestedLabel2', function() {
+			editorContext.text = "a: while(true){ b: while(true) { if (true) { continue a; } else { continue b; } } }";
+			return occurrences.computeOccurrences(editorContext, setContext(54, 54)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:54, end:55}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests nested labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementNestedLabel3', function() {
+			editorContext.text = "a: while(true){ b: while(true) { if (true) { continue a; } else { continue b; } } }";
+			return occurrences.computeOccurrences(editorContext, setContext(16, 16)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:16, end:17}, {start:75, end:76}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests nested labeled statements
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440928
+		 */
+		it('test_labeledStatementNestedLabel4', function() {
+			editorContext.text = "a: while(true){ b: while(true) { if (true) { continue a; } else { continue b; } } }";
+			return occurrences.computeOccurrences(editorContext, setContext(75, 76)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:16, end:17}, {start:75, end:76}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests global usage
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=429173
+		 */
+		it('test_global1', function() {
+			editorContext.text = "(function() { window.alert('hi'); }()); window.setTimeout(); window.confirm('florp');";
+			return occurrences.computeOccurrences(editorContext, setContext(14, 14)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:14, end:20}, {start:40, end:46}, {start: 61, end: 67}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests global usage
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=429173
+		 */
+		it('test_global2', function() {
+			editorContext.text = "(function() { window.alert('hi'); }()); window.setTimeout(); window.confirm('florp');";
+			return occurrences.computeOccurrences(editorContext, setContext(40, 41)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:14, end:20}, {start:40, end:46}, {start: 61, end: 67}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests global usage
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=429173
+		 */
+		it('test_global3', function() {
+			editorContext.text = "(function() { window.alert('hi'); }()); window.setTimeout(); window.confirm('florp');";
+			return occurrences.computeOccurrences(editorContext, setContext(61, 62)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:14, end:20}, {start:40, end:46}, {start: 61, end: 67}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
 	});
 });

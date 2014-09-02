@@ -11,5 +11,10 @@
 //NLS_CHARSET=UTF-8
 /*eslint-env browser, amd*/
 define({
-	"AddExternalAccount" : "Add external account:"	
+	"ExternalAccounts" : "Linked accounts:",
+	"AddExternalAccount" : "Add linked account:",
+	"ConfirmRemove" : "Are you sure you want to remove ${0} from the list of your external accounts?",
+	"Remove" : "Remove",
+	"RemoveExternalAccount" : "Remove ${0}",
+	"AddPersona" : "To link your account with a Persona, set your Orion email address above to match your Persona email address."
 });
