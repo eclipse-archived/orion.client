@@ -442,12 +442,12 @@ define([
 				commandRegistry.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.stageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
 			}  else if (this.prefix === "all") { //$NON-NLS-0$
 			
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 100); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.popStash", 200); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 300); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.popStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.precreateStashCommand", 200); //$NON-NLS-0$
 
 				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showStagedPatchCommand", 100); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precreateStashCommand", 200); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 300); //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 200); //$NON-NLS-0$
 				
 //				commandRegistry.addCommandGroup(selectionNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.precommitCommand", "primaryButton"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
 //				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-0$
