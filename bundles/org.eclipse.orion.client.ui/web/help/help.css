@@ -1,0 +1,32 @@
+@import "../css/layout.css";
+@import "../css/ide.css";
+@import "../css/images.css";
+@import "../css/theme.css";
+@import "../orion/search/InlineSearchPane.css";
+
+html,body {
+	height: 100%;
+}
+
+.selected {
+	font-weight: bold;
+}
+
+.workingTarget {
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+}
+
+.searchSectionLabel {
+	float: left;
+	margin-top: 14px;
+}
+
+.searchSectionText {
+	margin-top: 10px;
+}
+
+.searchSectionButton {
+	margin-top: 14px;
+}
