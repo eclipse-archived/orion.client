@@ -11,13 +11,11 @@
  *******************************************************************************/
 /*eslint-env amd*/
 define([
-    'i18n!javascript/nls/problems',
-    'orion/i18nUtil',
 	"eslint",
 	"orion/objects",
 	"javascript/astManager",
 	"javascript/finder"
-], function(messages, i18nUtil, eslint, Objects, ASTManager, Finder) {
+], function(eslint, Objects, ASTManager, Finder) {
 	// Should have a better way of keeping this up-to-date with ./load-rules-async.js
 	var config = {
 		// 0:off, 1:warning, 2:error
@@ -181,10 +179,12 @@ define([
 					if(error.type) {
 						switch(error.type) {
 							case ASTManager.ErrorTypes.Unexpected:
-								error.message = msg = i18nUtil.formatMessage(messages['syntaxErrorBadToken'], token.value);
+								error.args = {0: token.value, nls: "syntaxErrorBadToken"}; //$NON-NLS-0$
+								error.message = msg = error.args.nls;
 								break;
 							case ASTManager.ErrorTypes.EndOfInput:
-								error.message = messages['syntaxErrorIncomplete'];
+								error.args = {nls: "syntaxErrorIncomplete"}; //$NON-NLS-0$
+								error.message = error.args.nls;
 								break;
 						}
 					}
@@ -205,7 +205,7 @@ define([
 		computeProblems: function(editorContext, context) {
 			var _self = this;
 			switch(context.contentType) {
-				case 'text/html': 
+				case 'text/html': //$NON-NLS-0$
 					return editorContext.getText().then(function(text) {
 						var blocks = Finder.findScriptBlocks(text);
 						var len = blocks.length;
@@ -225,7 +225,7 @@ define([
 						}
 						return {problems: allproblems};
 					});
-				case 'application/javascript': 
+				case 'application/javascript': //$NON-NLS-0$
 					return this.astManager.getAST(editorContext).then(function(ast) {
 						return _self._validateAst(ast);
 					});
@@ -249,7 +249,7 @@ define([
 				if(parseErrors.length < 1) {
 					eslintErrors.push({
 						start: 0,
-						message: i18nUtil.formatMessage(messages['eslintValidationFailure'], e.toString()),
+						args: {0: e.toString(), nls: "eslintValidationFailure" }, //$NON-NLS-0$
 						severity: "error" //$NON-NLS-0$
 					});
 				}
