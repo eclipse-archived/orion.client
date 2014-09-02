@@ -10,7 +10,14 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 /*global confirm*/
-define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil', "orion/webui/littlelib", "domReady!"], function(messages, xhr, i18nUtil, lib) {
+define([
+	"i18n!orion/mixloginstatic/nls/messages",
+	"orion/bootstrap",
+	"orion/xhr",
+	'orion/i18nUtil',
+	"orion/webui/littlelib",
+	"domReady!"
+], function(messages, mBootstrap, xhr, i18nUtil, lib) {
 	var lastHash;
 	var jsonData;
 
@@ -190,7 +197,7 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr",  'orion/i18nUtil'
 		h2.innerHTML = messages["AddExternalAccount"];//$NON-NLS-0$
 		openIdContainer.appendChild(h2);
 	}
-	
+
 	// Page glue code starts here
 	window.addEventListener("hashchange", function() { //$NON-NLS-0$
 		onHashChange(window.location.hash.substring(1));
