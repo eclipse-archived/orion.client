@@ -49,9 +49,7 @@ function parseBooleanConfig(string) {
             value = name.substring(pos + 1, name.length);
             name = name.substring(0, pos);
         }
-
         items[name] = (value === "true");
-
     });
     return items;
 }
@@ -67,7 +65,6 @@ function parseJsonConfig(string) {
     try {
         items = JSON.parse("{" + string + "}");
     } catch(e) { }
-
     return items;
 }
 
@@ -98,13 +95,12 @@ function parseListConfig(string) {
 function getVariable(scope, name) {
     var variable = null;
     scope.variables.some(function(v) {
-        if (v.name === name) {
+    if (v.name === name) {
             variable = v;
             return true;
         } else {
             return false;
         }
-
     });
     return variable;
 }
@@ -122,30 +118,20 @@ function addDeclaredGlobals(program, globalScope, config) {
     var declaredGlobals = {},
         explicitGlobals = {},
         builtin = environments.builtin;
-
-    Object.keys(builtin).forEach(function(name) {
-        declaredGlobals[name] = builtin[name];
-    });
-
+    /*ORION*/
+    util.assign(declaredGlobals, builtin);
     Object.keys(config.env).forEach(function (name) {
         if (config.env[name]) {
             var environmentGlobals = environments[name] && environments[name].globals;
             if (environmentGlobals) {
-                Object.keys(environmentGlobals).forEach(function(name) {
-                    declaredGlobals[name] = environmentGlobals[name];
-                });
+                /*ORION*/
+                util.assign(declaredGlobals, environmentGlobals);
             }
         }
     });
-
-    Object.keys(config.globals).forEach(function(name) {
-        declaredGlobals[name] = config.globals[name];
-    });
-
-    Object.keys(config.astGlobals).forEach(function(name) {
-        explicitGlobals[name] = config.astGlobals[name];
-    });
-
+    /*ORION*/
+    util.assign(declaredGlobals, config.globals);
+    util.assign(explicitGlobals, config.astGlobals);
     Object.keys(declaredGlobals).forEach(function(name) {
         var variable = getVariable(globalScope, name);
         if (!variable) {
@@ -155,7 +141,7 @@ function addDeclaredGlobals(program, globalScope, config) {
         }
         variable.writeable = declaredGlobals[name];
     });
-
+    
     Object.keys(explicitGlobals).forEach(function(name) {
         var variable = getVariable(globalScope, name);
         if (!variable) {
@@ -176,7 +162,6 @@ function addDeclaredGlobals(program, globalScope, config) {
  * @returns {void}
  */
 function disableReporting(reportingConfig, start, rules) {
-
     if (rules.length) {
         rules.forEach(function(rule){
             reportingConfig.push({
@@ -219,7 +204,6 @@ function enableReporting(reportingConfig, start, rules) {
             if (prevStart && prevStart !== reportingConfig[i].start) {
                 break;
             }
-
             if (!reportingConfig[i].end) {
                 reportingConfig[i].end = start;
                 prevStart = reportingConfig[i].start;
@@ -246,35 +230,31 @@ function modifyConfigsFromComments(ast, config, reportingConfig) {
         env: {}
     };
     var commentRules = {};
-
+    
     ast.comments.forEach(function(comment) {
         if (comment.type === "Block") {
-
+    
             var value = comment.value.trim();
             var match = /^(eslint-\w+|eslint|globals?)(\s|$)/.exec(value);
-
+    
             if (match) {
                 value = value.substring(match.index + match[1].length);
-
+    
                 switch (match[1]) {
                     case "globals":
                     case "global":
                         util.mixin(commentConfig.astGlobals, parseBooleanConfig(value));
                         break;
-
-                    case "eslint-env":
+                     case "eslint-env":
                         util.mixin(commentConfig.env, parseListConfig(value));
                         break;
-
-                    case "eslint-disable":
+                     case "eslint-disable":
                         disableReporting(reportingConfig, comment.loc.start, Object.keys(parseListConfig(value)));
                         break;
-
-                    case "eslint-enable":
+                     case "eslint-enable":
                         enableReporting(reportingConfig, comment.loc.start, Object.keys(parseListConfig(value)));
                         break;
-
-                    case "eslint":
+                     case "eslint":
                         var items = parseJsonConfig(value);
                         Object.keys(items).forEach(function(name) {
                             var ruleValue = items[name];
@@ -283,13 +263,13 @@ function modifyConfigsFromComments(ast, config, reportingConfig) {
                             }
                         });
                         break;
-
+    
                     //no default
                 }
             }
         }
     });
-
+    
     // apply environment rules before user rules
     Object.keys(commentConfig.env).forEach(function (name) {
         var environmentRules = environments[name] && environments[name].rules;
@@ -298,7 +278,7 @@ function modifyConfigsFromComments(ast, config, reportingConfig) {
         }
     });
     util.mixin(commentConfig.rules, commentRules);
-
+    
     util.mergeConfigs(config, commentConfig);
 }
 
@@ -310,9 +290,7 @@ function modifyConfigsFromComments(ast, config, reportingConfig) {
  * @returns {boolean}          True if message should be ignored, false otherwise
  */
 function isDisabledByReportingConfig(reportingConfig, ruleId, location) {
-
     for (var i = 0, c = reportingConfig.length; i < c; i++) {
-
         var ignore = reportingConfig[i];
         if ((!ignore.rule || ignore.rule === ruleId) &&
             (location.line > ignore.start.line || (location.line === ignore.start.line && location.column >= ignore.start.column)) &&
@@ -320,7 +298,6 @@ function isDisabledByReportingConfig(reportingConfig, ruleId, location) {
                 return true;
         }
     }
-
     return false;
 }
 
@@ -330,10 +307,8 @@ function isDisabledByReportingConfig(reportingConfig, ruleId, location) {
  * @returns {Object}        Processed config
  */
 function prepareConfig(config) {
-
     config.globals = config.globals || config.global || {};
     delete config.global;
-
     var copiedRules = {};
     if (typeof config.rules === "object") {
         Object.keys(config.rules).forEach(function(k){
@@ -345,7 +320,6 @@ function prepareConfig(config) {
             }
         });
     }
-
     return {
         rules: copiedRules,
         globals: util.mergeConfigs({}, config.globals),
@@ -363,130 +337,129 @@ function prepareConfig(config) {
  */
 module.exports = (function() {
 
-    var api = Object.create(new EventEmitter()),
-        messages = [],
-        currentText = null,
-        currentConfig = null,
-        currentTokens = null,
-        currentScopes = null,
-        currentFilename = null,
-        controller = null,
-        reportingConfig = [],
-        commentLocsEnter = [],
-        commentLocsExit = [];
+var api = Object.create(new EventEmitter()),
+    messages = [],
+    currentText = null,
+    currentTextLines = [],
+    currentConfig = null,
+    currentTokens = null,
+    currentScopes = null,
+    currentFilename = null,
+    controller = null,
+    reportingConfig = [],
+    commentLocsEnter = [],
+    commentLocsExit = [];
 
-    /**
-     * Parses text into an AST. Moved out here because the try-catch prevents
-     * optimization of functions, so it's best to keep the try-catch as isolated
-     * as possible
-     * @param {string} text The text to parse.
-     * @returns {ASTNode} The AST if successful or null if not.
-     * @private
+/**
+ * Parses text into an AST. Moved out here because the try-catch prevents
+ * optimization of functions, so it's best to keep the try-catch as isolated
+ * as possible
+ * @param {string} text The text to parse.
+ * @returns {ASTNode} The AST if successful or null if not.
+ * @private
+ */
+function parse(text) {
+    /*
+     * Check for parsing errors first. If there's a parsing error, nothing
+     * else can happen. However, a parsing error does not throw an error
+     * from this method - it's just considered a fatal error message, a
+     * problem that ESLint identified just like any other.
      */
-    function parse(text) {
-        /*
-         * Check for parsing errors first. If there's a parsing error, nothing
-         * else can happen. However, a parsing error does not throw an error
-         * from this method - it's just considered a fatal error message, a
-         * problem that ESLint identified just like any other.
-         */
-        try {
-            return esprima.parse(text, {
-                loc: true,
-                range: true,
-                raw: true,
-                tokens: true,
-                comment: true,
-                attachComment: true
-            });
-        } catch (ex) {
+    try {
+        return esprima.parse(text, {
+            loc: true,
+            range: true,
+            raw: true,
+            tokens: true,
+            comment: true,
+            attachComment: true
+        });
+    } catch (ex) {
 
-            messages.push({
-                fatal: true,
+        messages.push({
+            fatal: true,
+             // messages come as "Line X: Unexpected token foo", so strip off leading part
+            message: ex.message.substring(ex.message.indexOf(":") + 1).trim(),
 
-                // messages come as "Line X: Unexpected token foo", so strip off leading part
-                message: ex.message.substring(ex.message.indexOf(":") + 1).trim(),
+            line: ex.lineNumber,
+            column: ex.column
+        });
 
-                line: ex.lineNumber,
-                column: ex.column
-            });
-
-            return null;
-        }
+        return null;
     }
+}
 
-    /**
-     * Check collection of comments to prevent double event for comment as
-     * leading and trailing, then emit event if passing
-     * @param {ASTNode[]} comments Collection of comment nodes
-     * @param {Object[]} locs List of locations of previous comment nodes
-     * @param {string} eventName Event name postfix
-     * @returns {void}
-     */
-    function emitComments(comments, locs, eventName) {
-
-        if (comments.length) {
-            comments.forEach(function(node) {
-                if (locs.indexOf(node.loc) >= 0) {
-                    locs.splice(locs.indexOf(node.loc), 1);
-                } else {
-                    locs.push(node.loc);
-                    api.emit(node.type + eventName, node);
-                }
-            });
-        }
+/**
+ * Check collection of comments to prevent double event for comment as
+ * leading and trailing, then emit event if passing
+ * @param {ASTNode[]} comments Collection of comment nodes
+ * @param {Object[]} locs List of locations of previous comment nodes
+ * @param {string} eventName Event name postfix
+ * @returns {void}
+ */
+function emitComments(comments, locs, eventName) {
+    if (comments.length) {
+        comments.forEach(function(node) {
+            if (locs.indexOf(node.loc) >= 0) {
+                locs.splice(locs.indexOf(node.loc), 1);
+            } else {
+                locs.push(node.loc);
+                api.emit(node.type + eventName, node);
+            }
+        });
     }
+}
 
-    /**
-     * Shortcut to check and emit enter of comment nodes
-     * @param {ASTNode[]} comments Collection of comment nodes
-     * @returns {void}
-     */
-    function emitCommentsEnter(comments) {
-        emitComments(comments, commentLocsEnter, "Comment");
-    }
+/**
+ * Shortcut to check and emit enter of comment nodes
+ * @param {ASTNode[]} comments Collection of comment nodes
+ * @returns {void}
+ */
+function emitCommentsEnter(comments) {
+    emitComments(comments, commentLocsEnter, "Comment");
+}
 
-    /**
-     * Shortcut to check and emit exit of comment nodes
-     * @param {ASTNode[]} comments Collection of comment nodes
-     * @returns {void}
-     */
-    function emitCommentsExit(comments) {
-        emitComments(comments, commentLocsExit, "Comment:exit");
-    }
+/**
+ * Shortcut to check and emit exit of comment nodes
+ * @param {ASTNode[]} comments Collection of comment nodes
+ * @returns {void}
+ */
+function emitCommentsExit(comments) {
+    emitComments(comments, commentLocsExit, "Comment:exit");
+}
 
-    /**
-     * Get the severity level of a rule (0 - none, 1 - warning, 2 - error)
-     * Returns 0 if the rule config is not valid (an Array or a number)
-     * @param {Array|number} ruleConfig rule configuration
-     * @returns {number} 0, 1, or 2, indicating rule severity
-     */
-    function getRuleSeverity(ruleConfig) {
-        if (typeof ruleConfig === "number") {
-            return ruleConfig;
-        } else if (Array.isArray(ruleConfig)) {
-            return ruleConfig[0];
-        } else {
-            return 0;
-        }
+/**
+ * Get the severity level of a rule (0 - none, 1 - warning, 2 - error)
+ * Returns 0 if the rule config is not valid (an Array or a number)
+ * @param {Array|number} ruleConfig rule configuration
+ * @returns {number} 0, 1, or 2, indicating rule severity
+ */
+function getRuleSeverity(ruleConfig) {
+    if (typeof ruleConfig === "number") {
+        return ruleConfig;
+    } else if (Array.isArray(ruleConfig)) {
+        return ruleConfig[0];
+    } else {
+        return 0;
     }
+}
 
-    /**
-     * Get the options for a rule (not including severity), if any
-     * @param {Array|number} ruleConfig rule configuration
-     * @returns {Array} of rule options, empty Array if none
-     */
-    function getRuleOptions(ruleConfig) {
-        if (Array.isArray(ruleConfig)) {
-            return ruleConfig.slice(1);
-        } else {
-            return [];
-        }
+/**
+ * Get the options for a rule (not including severity), if any
+ * @param {Array|number} ruleConfig rule configuration
+ * @returns {Array} of rule options, empty Array if none
+ */
+function getRuleOptions(ruleConfig) {
+    if (Array.isArray(ruleConfig)) {
+        return ruleConfig.slice(1);
+    } else {
+        return [];
     }
+}
 
     // set unlimited listeners (see https://github.com/eslint/eslint/issues/524)
     api.setMaxListeners(0);
-
+    
     /**
      * Resets the internal state of the object.
      * @returns {void}
@@ -496,6 +469,7 @@ module.exports = (function() {
         messages = [];
         currentConfig = null;
         currentText = null;
+        currentTextLines = [];
         currentTokens = null;
         currentScopes = null;
         controller = null;
@@ -503,10 +477,10 @@ module.exports = (function() {
         commentLocsEnter = [];
         commentLocsExit = [];
     };
-
+    
     /**
      * Verifies the text against the rules specified by the second argument.
-     * @param {Object} text The JavaScript text or the cached AST to verify.
+     * @param {string} text The JavaScript text to verify.
      * @param {Object} config An object whose keys specify the rules to use.
      * @param {string=} filename The optional filename of the file being checked.
      *      If this is not set, the filename will default to '<input>' in the rule context.
@@ -514,38 +488,39 @@ module.exports = (function() {
      *      Mostly useful for testing purposes.
      * @returns {Object[]} The results as an array of messages or null if no messages.
      */
-    api.verify = function(textOrAST, config, filename, saveState) {
-
+    api.verify = function(text, config, filename, saveState) {
+    
         // set the current parsed filename
         currentFilename = filename;
-
+    
         if (!saveState) {
             this.reset();
         }
-        
-        var ast = (textOrAST && typeof textOrAST === "object") ? textOrAST : ast = parse(textOrAST);
-
+        /*ORION*/
+        var ast = (text && typeof text === "object") ? text : ast = parse(text.replace(/^(#![^\r\n]+[\r\n]+)/, "//$1"));
+    
         //if Esprima failed to parse the file, there's no sense in setting up rules
         if (ast) {
             // process initial config to make it safe to extend
             config = prepareConfig(config);
-
+    
             // parse global comments and modify config
             modifyConfigsFromComments(ast, config, reportingConfig);
-
+    
             // enable appropriate rules
             Object.keys(config.rules).filter(function(key) {
                 return getRuleSeverity(config.rules[key]) > 0;
             }).forEach(function(key) {
+    
                 var ruleCreator = rules.get(key),
                     severity = getRuleSeverity(config.rules[key]),
                     options = getRuleOptions(config.rules[key]),
                     rule;
-
+    
                 if (ruleCreator) {
                     try {
                         rule = ruleCreator(new RuleContext(key, api, severity, options));
-
+    
                         // add all the node types as listeners
                         Object.keys(rule).forEach(function(nodeType) {
                             api.on(nodeType, rule[nodeType]);
@@ -554,20 +529,30 @@ module.exports = (function() {
                         ex.message = "Error while loading rule '" + key + "': " + ex.message;
                         throw ex;
                     }
-
+    
                 } else {
                     throw new Error("Definition for rule '" + key + "' was not found.");
                 }
             });
-
+    
             // save config so rules can access as necessary
             currentConfig = config;
-            currentText = textOrAST && typeof textOrAST === "string" ? textOrAST : null;
+            currentText = text && typeof text === "string" ? text : null; /*ORION*/
             controller = new estraverse.Controller();
-
+    
             // gather data that may be needed by the rules
-            currentScopes = escope.analyze(ast, {ignoreEval: true}).scopes;
-
+            currentScopes = escope.analyze(ast, { ignoreEval: true }).scopes;
+    
+            /*
+             * Split text here into array of lines so
+             * it's not being done repeatedly
+             * by individual rules.
+             */
+            //currentTextLines = currentText.split(/\r?\n/g); /*ORION*/
+    
+            // Freezing so array isn't accidentally changed by a rule.
+            //Object.freeze(currentTextLines); /*ORION*/
+    
             /* get all tokens from the ast and store them as a hashtable to
              * improve traversal speed when wanting to find tokens for a given
              * node
@@ -576,10 +561,10 @@ module.exports = (function() {
             ast.tokens.forEach(function(token) {
                 currentTokens[token.range[0]] = token;
             });
-
+    
             // augment global scope with declared global variables
             addDeclaredGlobals(ast, currentScopes[0], currentConfig);
-
+    
             /*
              * Each node has a type property. Whenever a particular type of node is found,
              * an event is fired. This allows any listeners to automatically be informed
@@ -587,29 +572,29 @@ module.exports = (function() {
              */
             controller.traverse(ast, {
                 enter: function(node, parent) {
-
+    
                     var comments = api.getComments(node);
-
+    
                     emitCommentsEnter(comments.leading);
                     node.parent = parent;
                     api.emit(node.type, node);
                     emitCommentsEnter(comments.trailing);
                 },
                 leave: function(node) {
-
+    
                     var comments = api.getComments(node);
-
+    
                     emitCommentsExit(comments.trailing);
                     api.emit(node.type + ":exit", node);
                     emitCommentsExit(comments.leading);
                 }
             });
-
+    
         }
-
+    
         return messages;
     };
-
+    
     /**
      * Reports a message from one of the rules.
      * @param {string} ruleId The ID of the rule causing the message.
@@ -624,39 +609,41 @@ module.exports = (function() {
      * @param {Object} related Optional related token or node that the rule wishes to point out.
      * @returns {void}
      */
-    api.report = function(ruleId, severity, node, location, message, opts, related) {
-
+    api.report = function(ruleId, severity, node, location, message, opts, /*ORION*/related) {
+    
         if (typeof location === "string") {
-            related = opts; //mrennie Orion
+        	related = opts; /*ORION*/
             opts = message;
             message = location;
             location = node.loc.start;
         }
-
-       /* Object.keys(opts || {}).forEach(function (key) {
-            var rx = new RegExp("\$\{" + escapeRegExp(key) + "\}", "g");
+        /*ORION*/
+        /*Object.keys(opts || {}).forEach(function (key) {
+            var rx = new RegExp("{{" + escapeRegExp(key) + "}}", "g");
             message = message.replace(rx, opts[key]);
-        });
-        */
-		message = message.replace(/\$\{([^\}]+)\}/g, function(str, key) {
+        });*/
+    
+        message = message.replace(/\$\{([^\}]+)\}/g, function(str, key) {
 			return opts[key];
 		});
 		
         if (isDisabledByReportingConfig(reportingConfig, ruleId, location)) {
             return;
         }
-
+    
         messages.push({
             ruleId: ruleId,
             severity: severity,
             node: node,
             message: message,
-            args: opts, //mrennie Orion
+            line: location.line,
+            column: location.column,
             source: api.getSource(node),
-            related: typeof related !== "undefined" ? related : null
+            args: opts, /*ORION*/
+            related: typeof related !== "undefined" ? related : null /*ORION*/
         });
     };
-
+    
     /**
      * Gets the source code for the given node.
      * @param {ASTNode=} node The AST node to get the text for.
@@ -671,19 +658,25 @@ module.exports = (function() {
         } else {
             return currentText;
         }
-
     };
-
+    
+    /**
+     * Gets the entire source text split into an array of lines.
+     * @returns {Array} The source text as an array of lines.
+     */
+    api.getSourceLines = function() {
+        return currentTextLines;
+    };
+    
     /**
      * Gets all comments for the given node.
      * @param {ASTNode} node The AST node to get the comments for.
      * @returns {Object} The list of comments indexed by their position.
      */
     api.getComments = function(node) {
-
         var leadingComments = node.leadingComments || [],
             trailingComments = node.trailingComments || [];
-
+    
         /*
          * Esprima adds a "comments" array on Program nodes rather than
          * leadingComments/trailingComments. Comments are only left in the
@@ -694,13 +687,13 @@ module.exports = (function() {
                 leadingComments = node.comments;
             }
         }
-
+    
         return {
             leading: leadingComments,
             trailing: trailingComments
         };
     };
-
+    
     /**
      * Retrieves the JSDoc comment for a given node.
      * @param {ASTNode} node The AST node to get the comment for.
@@ -708,10 +701,9 @@ module.exports = (function() {
      *      given node or null if not found.
      */
     api.getJSDocComment = function(node) {
-
         var parent = node.parent,
             line = node.loc.start.line;
-
+    
         /**
          * Finds a JSDoc comment node in an array of comment nodes.
          * @param {ASTNode[]} comments The array of comment nodes to search.
@@ -719,11 +711,10 @@ module.exports = (function() {
          * @private
          */
         function findJSDocComment(comments) {
-
             if (comments) {
                 for (var i = comments.length - 1; i >= 0; i--) {
                     if (comments[i].type === "Block" && comments[i].value.charAt(0) === "*") {
-
+    
                         if (line - comments[i].loc.end.line <= 1) {
                             return comments[i];
                         } else {
@@ -732,29 +723,29 @@ module.exports = (function() {
                     }
                 }
             }
-
+    
             return null;
         }
-
+    
         switch (node.type) {
             case "FunctionDeclaration":
                 return findJSDocComment(node.leadingComments);
-
+    
             case "FunctionExpression":
-
+    
                 if (parent.type !== "CallExpression" || parent.callee !== node) {
                     while (parent && !parent.leadingComments && parent.type !== "FunctionExpression" && parent.type !== "FunctionDeclaration") {
                         parent = parent.parent;
                     }
-
+    
                     return parent && (parent.type !== "FunctionDeclaration") ? findJSDocComment(parent.leadingComments) : null;
                 }
             //$FALLTHROUGH$
             default:
                 return null;
-        }
+         }
     };
-
+    
     /**
      * Gets a number of tokens that precede a given node's tokens in the token stream.
      * @param {ASTNode} node The AST node.
@@ -772,7 +763,7 @@ module.exports = (function() {
         }
         return beforeTokens;
     };
-
+    
     /**
      * Gets the token that precedes a given node's tokens in the token stream.
      * @param {ASTNode} node The AST node.
@@ -790,7 +781,7 @@ module.exports = (function() {
             }
         }
     };
-
+    
     /**
      * Gets a number of tokens that precede a given node's tokens in the token stream.
      * @param {ASTNode} node The AST node.
@@ -810,7 +801,7 @@ module.exports = (function() {
         }
         return afterTokens;
     };
-
+    
     /**
      * Gets the token that follows a given node's tokens in the token stream.
      * @param {ASTNode} node The AST node.
@@ -828,7 +819,7 @@ module.exports = (function() {
             }
         }
     };
-
+    
     /**
      * Gets all tokens that are related to the given node.
      * @param {ASTNode} node The AST node.
@@ -848,10 +839,10 @@ module.exports = (function() {
             } else {
                 ++cursor;
             }
-        }
+         }
         return beforeTokens.concat(tokens, afterTokens);
     };
-
+    
     /**
      * Gets the first `count` tokens of the given node's token stream.
      * @param {ASTNode} node The AST node.
@@ -871,7 +862,7 @@ module.exports = (function() {
         }
         return tokens;
     };
-
+    
     /**
      * Gets the first token of the given node's token stream.
      * @param {ASTNode} node The AST node.
@@ -889,7 +880,7 @@ module.exports = (function() {
             }
         }
     };
-
+    
     /**
      * Gets the last `count` tokens of the given node.
      * @param {ASTNode} node The AST node.
@@ -907,7 +898,7 @@ module.exports = (function() {
         }
         return tokens;
     };
-
+    
     /**
      * Gets the last token of the given node's token stream.
      * @param {ASTNode} node The AST node.
@@ -925,7 +916,7 @@ module.exports = (function() {
             }
         }
     };
-
+    
     /**
      * Gets nodes that are ancestors of current node.
      * @returns {ASTNode[]} Array of objects representing ancestors.
@@ -933,8 +924,8 @@ module.exports = (function() {
     api.getAncestors = function() {
         return controller.parents();
     };
-
-
+    
+    
     /**
      * Gets the scope for the current node.
      * @returns {Object} An object representing the current node's scope.
@@ -942,19 +933,19 @@ module.exports = (function() {
     api.getScope = function() {
         var parents = controller.parents().reverse(),
             innerBlock = null;
-
+    
         // Don't do this for Program nodes - they have no parents
         if (parents.length) {
-
+    
             // if current node is function declaration, add it to the list
             var current = controller.current();
             if (current.type === "FunctionDeclaration" || current.type === "FunctionExpression") {
                 parents.splice(0, 0, current);
             }
-
+    
             // Ascend the current node's parents
             for (var i = 0; i < parents.length; i++) {
-
+    
                 // The first node that requires a scope is the node that will be
                 // our current node's innermost scope.
                 if (escope.Scope.isScopeRequired(parents[i])) {
@@ -962,22 +953,22 @@ module.exports = (function() {
                     break;
                 }
             }
-
+    
             // Loop through the scopes returned by escope to find the innermost
             // scope and return that scope.
             for (var j = 0; j < currentScopes.length; j++) {
                 if (innerBlock.type === currentScopes[j].block.type &&
                     innerBlock.range[0] === currentScopes[j].block.range[0] &&
                     innerBlock.range[1] === currentScopes[j].block.range[1]) {
-
+    
                     // Escope returns two similar scopes for named functional
                     // expression, we should take the last
                     if ((innerBlock.type === "FunctionExpression" && innerBlock.id && innerBlock.id.name)) {
-
+    
                         var nextScope = currentScopes[j + 1];
                         return nextScope;
                     }
-
+    
                     return currentScopes[j];
                 }
             }
@@ -985,7 +976,7 @@ module.exports = (function() {
             return currentScopes[0];    // global scope
         }
     };
-
+    
     /**
      * Gets the filename for the currently parsed source.
      * @returns {string} The filename associated with the source being parsed.
@@ -998,7 +989,7 @@ module.exports = (function() {
             return "<input>";
         }
     };
-
+    
     /**
      * Defines a new linting rule.
      * @param {string} ruleId A unique rule identifier
@@ -1008,7 +999,7 @@ module.exports = (function() {
     var defineRule = api.defineRule = function(ruleId, ruleModule) {
         rules.define(ruleId, ruleModule);
     };
-
+    
     /**
      * Defines many new linting rules.
      * @param {object} rules map from unique rule identifier to rule
@@ -1019,7 +1010,7 @@ module.exports = (function() {
             defineRule(ruleId, rules[ruleId]);
         });
     };
-
+    
     /**
      * Gets the default eslint configuration.
      * @returns {Object} Object mapping rule IDs to their default configurations
@@ -1027,7 +1018,7 @@ module.exports = (function() {
     api.defaults = function() {
         return require("../conf/eslint.json");
     };
-
+    
     return api;
 
 }());

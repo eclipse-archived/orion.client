@@ -74,7 +74,7 @@ function RuleContext(ruleId, eslint, severity, options) {
      * @param {Object} related Optional related token or node.
      * @returns {void}
      */
-    this.report = function(node, location, message, opts, related) {
+    this.report = function(node, location, message, opts, /*ORION*/related) {
         eslint.report(ruleId, severity, node, location, message, opts, related);
     };
 
