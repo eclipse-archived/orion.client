@@ -125,5 +125,6 @@ define({
 	"table (${0})": "table (${0})",
 	"text": "text",
 	"title (optional)": "title (optional)",
-	"url": "url"
+	"url": "url",
+	"TogglePaneOrientationTooltip": "Toggle split pane orientation"
 });

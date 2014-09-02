@@ -204,5 +204,31 @@ define(['orion/plugin', 'orion/i18nUtil', 'i18n!orion/nls/messages'], function (
 		contentType: ["text/x-markdown"] //$NON-NLS-0$
 	});
 
+	provider.registerService("orion.edit.command", { //$NON-NLS-0$
+		execute : function(editorContext, context) {
+			editorContext.invokeAction("insertLinePrefix", false, {linePrefix: ">"}); //$NON-NLS-1$ //$NON-NLS-0$
+			return null;
+		}
+	}, {
+		id: "orion.editor.markdown.insertBlockquote", //$NON-NLS-0$
+		name: "Insert blockquote", //$NON-NLS-0$
+		key: ["i", true], //$NON-NLS-0$
+		tooltip: "Insert blockquote tooltip",
+		contentType: ["text/x-markdown"] //$NON-NLS-0$
+	});
+
+	provider.registerService("orion.edit.command", { //$NON-NLS-0$
+		execute : function(editorContext, context) {
+			editorContext.invokeAction("removeLinePrefix", false, {linePrefix: ">"}); //$NON-NLS-1$ //$NON-NLS-0$
+			return null;
+		}
+	}, {
+		id: "orion.editor.markdown.removeBlockquote", //$NON-NLS-0$
+		name: "Remove blockquote", //$NON-NLS-0$
+		key: [">", true], //$NON-NLS-0$
+		tooltip: "Remove blockquote tooltip",
+		contentType: ["text/x-markdown"] //$NON-NLS-0$
+	});
+
 	provider.connect();
 });
