@@ -10,7 +10,11 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['orion/Deferred', 'orion/extensionCommands'], function(Deferred, mExtensionCommands){
+define([
+	'orion/Deferred',
+	'orion/extensionCommands',
+	'orion/i18nUtil',
+], function(Deferred, mExtensionCommands, i18nUtil){
 
 	function _toJSON(text) {
 		try {
@@ -219,12 +223,14 @@ define(['orion/Deferred', 'orion/extensionCommands'], function(Deferred, mExtens
 						}
 						deferred.reject(dependency.Location + " could not be found in your workspace");
 			}, function(error){deferred.reject(error);});
-		} else {
-			var handler = this.getProjectHandler(dependency.Type);
+			return deferred;
+		}
+		return this.getProjectHandler(dependency.Type).then(function(handler) {
 			if(handler===null){
 				deferred.reject(dependency.Type + " is not supported.");
 				return deferred;
 			}
+
 			var validator;
 			if(handler.validationProperties){
 				validator = mExtensionCommands._makeValidator(handler, this.serviceRegistry, []);
@@ -256,8 +262,8 @@ define(['orion/Deferred', 'orion/extensionCommands'], function(Deferred, mExtens
 					}
 				});
 			}, deferred.reject);
-		}
-		return deferred;
+			return deferred;
+		}.bind(this));
 	},
 	/**
 		* @param {Object} projectMetadata Project metadata
@@ -437,26 +443,64 @@ define(['orion/Deferred', 'orion/extensionCommands'], function(Deferred, mExtens
 			}
 		}
 	},
-	
+
 	_getProjectHandlerService: function(serviceReference){
+		/*
+		Expected properties:
+		id
+		addParameters || addParamethers
+		optionalParameters || optionalParamethers
+		addDependencyName{Key}
+		addDependencyTooltip{Key}
+		type
+		actionComment
+		addProjectName{Key}
+		addProjectTooltip{Key}
+		validationProperties
+		nls
+		*/
 		var service = this.serviceRegistry.getService(serviceReference);
-		service.id = serviceReference.getProperty("id");
-		service.addParameters =  serviceReference.getProperty("addParameters") || serviceReference.getProperty("addParamethers");
-		service.optionalParameters = serviceReference.getProperty("optionalParameters") || serviceReference.getProperty("optionalParamethers");
-		service.addDependencyName =  serviceReference.getProperty("addDependencyName");
-		service.addDependencyTooltip = serviceReference.getProperty("addDependencyTooltip");
-		service.type = serviceReference.getProperty("type");
-		service.actionComment = serviceReference.getProperty("actionComment");
-		service.addProjectName = serviceReference.getProperty("addProjectName");
-		service.addProjectTooltip = serviceReference.getProperty("addProjectTooltip");
-		service.validationProperties = serviceReference.getProperty("validationProperties");
+		serviceReference.getPropertyKeys().forEach(function(key) {
+			service[key] = serviceReference.getProperty(key);
+		});
+		// Canonicalize legacy names
+		service.addParameters = service.addParameters || service.addParamethers;
+		service.optionalParameters = service.optionalParameters || service.optionalParamethers;
+		delete service.addParamethers;
+		delete service.optionalParamethers;
 		return service;
 	},
-	
+
+	/**
+	 * @returns {orion.Promise} A promise resolving to the project handler, with any i18n'able fields
+	 * set to their translated values.
+	 */
+	_translateProjectHandler: function(handler) {
+		if (!handler.nls) {
+			return new Deferred().resolve(handler);
+		}
+		return i18nUtil.getMessageBundle(handler.nls).then(function(messages) {
+			var suffixLength = "Key".length; // $NON-NLS-0$
+			Object.keys(handler).filter(RegExp.prototype.test.bind(/Key$/)).forEach(function(key) {
+				var baseName = key.substring(0, key.length - suffixLength);
+				handler[baseName] = messages[handler[key]] || key;
+				delete handler[key]; // handler.Foo is translated so we don't need handler.FooKey
+			});
+			return handler;
+		}, function() {
+			// Failure loading messages, return as-is
+			return handler;
+		});
+	},
+
+	/**
+	 * @returns {orion.Promise} A promise resolving to the handler (the returned handler is localized)
+	 */
 	getProjectHandler: function(type){
 		for(var i=0; i<this.allProjectHandlersReferences.length; i++){
 			if(this.allProjectHandlersReferences[i].getProperty("type") === type){
-				return this._getProjectHandlerService(this.allProjectHandlersReferences[i]);
+				var handler = this._getProjectHandlerService(this.allProjectHandlersReferences[i]);
+				return this._translateProjectHandler(handler);
 			}
 		}
 	},
