@@ -216,48 +216,39 @@ define([
 								that.handleError(error);
 							});
 						} else {
-							onComplete(that.processChildren(parentItem, [
-								{
-									Type: "Uncommited",  //$NON-NLS-0$
-									selectable: false,
-									isNotSelectable: true
-								},
-								{
-									Type: "Outgoing", //$NON-NLS-0$
-									selectable: false,
-									isNotSelectable: true,
-									activeBranch: activeBranch,
-									targetRef: targetRef
-								},
-								{
-									Type: "Incoming", //$NON-NLS-0$
-									selectable: false,
-									isNotSelectable: true,
-									activeBranch: activeBranch,
-									targetRef: targetRef
-								},
-								{
-									Type: "Synchronized", //$NON-NLS-0$
-									selectable: false,
-									isNotSelectable: true,
-								}
-							]));
+							Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
+								repository.status = status;
+								onComplete(that.processChildren(parentItem, [
+									status,
+									{
+										Type: "Outgoing", //$NON-NLS-0$
+										selectable: false,
+										isNotSelectable: true,
+										activeBranch: activeBranch,
+										targetRef: targetRef
+									},
+									{
+										Type: "Incoming", //$NON-NLS-0$
+										selectable: false,
+										isNotSelectable: true,
+										activeBranch: activeBranch,
+										targetRef: targetRef
+									},
+									{
+										Type: "Synchronized", //$NON-NLS-0$
+										selectable: false,
+										isNotSelectable: true,
+									}
+								]));
+							}, function(error){
+								if (progress) progress.done();
+								that.handleError(error);
+							});
 						}	
 					}, function(error){
 						if (progress) progress.done();
 						that.handleError(error);
 					});
-				}, function(error){
-					if (progress) progress.done();
-					that.handleError(error);
-				});
-			} else if (parentItem.Type === "Uncommited") { //$NON-NLS-0$
-				var repository = that.root.repository;
-				Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
-					repository.status = status;
-					onComplete(that.processChildren(parentItem, [
-						status
-					]));
 				}, function(error){
 					if (progress) progress.done();
 					that.handleError(error);
@@ -934,8 +925,15 @@ define([
 						explorer2.display();
 					}, 0);
 				}  else if (item.Type === "Status") { //$NON-NLS-0$
+				
+					var image = document.createElement("span"); //$NON-NLS-0$
+					image.className = "core-sprite-folder gitStatusIcon"; //$NON-NLS-0$
+					horizontalBox.appendChild(image);
+				
 					sectionItem.classList.add("sectionTableItem"); //$NON-NLS-0$
 					tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
+					tableRow.classList.add("gitStatusSection"); //$NON-NLS-0$
+					td.classList.add("gitStatusCell"); //$NON-NLS-0$
 						
 					detailsView = document.createElement("div"); //$NON-NLS-0$
 					detailsView.className = "stretch"; //$NON-NLS-0$

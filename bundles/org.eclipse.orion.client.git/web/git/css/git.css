@@ -452,6 +452,22 @@ table .sectionTable {
 	color: #555;
 }
 
+.gitStatusIcon {
+	font-size: 25px;
+	float: left;
+	position: relative;
+	height: 30px;
+	vertical-align: text-top;
+	width: 30px;
+	padding: 6px;
+	margin-right: 6px;
+	margin-top: 5px;
+}
+
+.gitStatusSection .sectionTableItem {
+	padding-left: 24px;
+}
+
 .gitStatusTitle {
 	font-weight: bold;
 	color: green;
