@@ -13,6 +13,7 @@
 
 define([
 	'i18n!git/nls/gitmessages',
+	'orion/keyBinding',
 	'orion/git/widgets/gitChangeList',
 	'orion/git/widgets/gitFileList',
 	'orion/git/widgets/gitCommitInfo',
@@ -27,7 +28,7 @@ define([
 	'orion/git/util',
 	'orion/webui/littlelib',
 	'orion/objects'
-], function(messages, mGitChangeList, mGitFileList, mGitCommitInfo, mSection, mSelection, mCommands, Deferred, mExplorer, mHTMLFragments, mGitCommands, i18nUtil, util, lib, objects) {
+], function(messages, KeyBinding, mGitChangeList, mGitFileList, mGitCommitInfo, mSection, mSelection, mCommands, Deferred, mExplorer, mHTMLFragments, mGitCommands, i18nUtil, util, lib, objects) {
 
 	var pageQuery = "page=1&pageSize=20"; //$NON-NLS-0$
 
@@ -51,6 +52,7 @@ define([
 		this.filterQuery = "";
 		this.authorQuery = "";
 		this.committerQuery = "";
+		this.sha1Query = "";
 	}
 	GitCommitListModel.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitCommitListModel.prototype, /** @lends orion.git.GitCommitListModel.prototype */ {
@@ -60,7 +62,7 @@ define([
 			onItem(this.root);
 		},
 		getQueries: function() {
-			return util.generateQuery([pageQuery, this.filterQuery, this.authorQuery, this.committerQuery]);
+			return util.generateQuery([pageQuery, this.filterQuery, this.authorQuery, this.committerQuery, this.sha1Query]);
 		},
 		_getRepository: function(parentItem) {
 			var that = this;
@@ -552,18 +554,22 @@ define([
 			}.bind(this));
 
 			content = mainSection.getContentElement();
-			var messageSection = createSection(content, null, messages["Message:"], "filter", false, false, false, false, true); //$NON-NLS-0$
+			var messageSection = createSection(content, null, messages["Message:"], "filter"); //$NON-NLS-0$
 			messageSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			messageSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
 
-			var authorSection = createSection(content, null, messages["Author:"], "author", false, false); //$NON-NLS-0$
+			var authorSection = createSection(content, null, messages["Author:"], "author"); //$NON-NLS-0$
 			authorSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			authorSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
-			
-			var committerSection = createSection(content, null, messages["Committer:"], "committer", false, false); //$NON-NLS-0$
+
+			var committerSection = createSection(content, null, messages["Committer:"], "committer"); //$NON-NLS-0$
 			committerSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			committerSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
-			
+
+			var sha1Section = createSection(content, null, messages["SHA1:"], "sha1"); //$NON-NLS-0$
+			sha1Section.domNode.classList.add("commitFilter"); //$NON-NLS-0$
+			sha1Section.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
+
 			var pathSection = createSection(content, null, messages["Path:"], "path", true, false, true, true); //$NON-NLS-0$
 			pathSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			pathSection.getContentElement().classList.add("pathFilter"); //$NON-NLS-0$
@@ -628,6 +634,7 @@ define([
 			sections.push(messageSection);
 			sections.push(authorSection);
 			sections.push(committerSection);
+			sections.push(sha1Section);
 			sections.push(pathSection);
 		},
 		display: function() {
@@ -727,6 +734,7 @@ define([
 				imageClass: "core-sprite-search", //$NON-NLS-0$
 				callback: function(data) {
 					if (data) this.filterSection.setHidden(!this.filterSection.hidden);
+					data.domNode.focus();
 				},
 				visibleWhen: function() {
 					return true;
@@ -800,7 +808,7 @@ define([
 				return;
 			}
 			
-			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.toggleFilter", 20); //$NON-NLS-0$
+			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.toggleFilter", 20, null, false, new KeyBinding.KeyBinding('h', true, true)); //$NON-NLS-0$
 			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.simpleLog", 50); //$NON-NLS-0$
 			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.sync", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
