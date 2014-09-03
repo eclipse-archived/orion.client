@@ -431,6 +431,15 @@ define([
 			commandRegistry.registerCommandContribution(explorerSelectionScope, "orion.explorer.collapseAll", 300); //$NON-NLS-0$
 			
 			var node;
+			node = lib.node(actionsNodeScope);
+			if (node) {
+				this.commandService.destroy(node);
+			}
+			node = lib.node(selectionNodeScope);
+			if (node) {
+				this.commandService.destroy(node);
+			}
+
 			if (this.prefix === "staged") { //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-1$ //$NON-NLS-0$ 
 				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
@@ -465,11 +474,7 @@ define([
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.revert", 7); //$NON-NLS-1$ //$NON-NLS-0$
 //				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.askForReviewCommand", 8); //$NON-NLS-1$ //$NON-NLS-0$
 
-				node = lib.node(actionsNodeScope);
-				if (node) {
-					this.commandService.destroy(node);
-					commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.commit, this, "tool"); //$NON-NLS-0$
-				}
+				commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.commit, this, "tool"); //$NON-NLS-0$
 			}
 			node = lib.node(explorerSelectionScope);
 			if (node) {

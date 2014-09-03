@@ -2441,6 +2441,7 @@ var exports = {};
 					deferred.then(
 						function(jsonData){
 							refresh(data, items);
+							dispatchModelEventOn({type: "modelChanged", action: "stage"});
 						}, displayErrorOnStatus
 					);
 				} else {
@@ -2456,6 +2457,7 @@ var exports = {};
 					deferred.then( //$NON-NLS-0$
 						function(jsonData){
 							refresh(data, items);
+							dispatchModelEventOn({type: "modelChanged", action: "stage"});
 						}, displayErrorOnStatus
 					);
 				}			
@@ -2510,6 +2512,7 @@ var exports = {};
 				doUnstage(data).then(
 					function(items){
 						refresh(data, items);
+						dispatchModelEventOn({type: "modelChanged", action: "unstage"});
 					}, displayErrorOnStatus
 				);
 			},

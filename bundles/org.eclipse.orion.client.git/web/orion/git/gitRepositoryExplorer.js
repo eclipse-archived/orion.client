@@ -105,6 +105,9 @@ define([
 				}
 				that.changedItem();
 				break;
+			case "stage": //$NON-NLS-0$
+			case "unstage": //$NON-NLS-0$
+				break;
 			case "cherrypick": //$NON-NLS-0$
 			default:
 				that.changedItem();

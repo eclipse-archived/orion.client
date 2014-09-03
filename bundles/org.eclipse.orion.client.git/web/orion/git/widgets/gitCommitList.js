@@ -22,11 +22,12 @@ define([
 	'orion/Deferred',
 	'orion/explorers/explorer',
 	'orion/commonHTMLFragments',
+	'orion/git/gitCommands',
 	'orion/i18nUtil',
 	'orion/git/util',
 	'orion/webui/littlelib',
 	'orion/objects'
-], function(messages, mGitChangeList, mGitFileList, mGitCommitInfo, mSection, mSelection, mCommands, Deferred, mExplorer, mHTMLFragments, i18nUtil, util, lib, objects) {
+], function(messages, mGitChangeList, mGitFileList, mGitCommitInfo, mSection, mSelection, mCommands, Deferred, mExplorer, mHTMLFragments, mGitCommands, i18nUtil, util, lib, objects) {
 
 	var pageQuery = "page=1&pageSize=20"; //$NON-NLS-0$
 
@@ -389,10 +390,24 @@ define([
 				this.updateSelectionCommands(e.selections);
 			}.bind(this));
 		}
+		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
+			switch (event.action) {
+			case "stage": //$NON-NLS-0$
+			case "unstage": //$NON-NLS-0$
+				Deferred.when(this.model.root.repository.status, function(status) {
+					this.myTree.redraw(status);
+				}.bind(this));
+				break;
+			}
+		}.bind(this));
 		this.createCommands();
 	}
 	GitCommitListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitCommitListExplorer.prototype, /** @lends orion.git.GitCommitListExplorer.prototype */ {
+		destroy: function(){
+			mGitCommands.getModelEventDispatcher().removeEventListener("modelChanged", this._modelListener); //$NON-NLS-0$
+			mExplorer.Explorer.prototype.destroy.call(this);
+		},
 		changedItem: function(item) {
 			var deferred = new Deferred();
 			var that = this;
