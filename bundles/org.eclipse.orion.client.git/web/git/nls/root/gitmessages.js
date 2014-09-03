@@ -14,7 +14,7 @@
 define({
 	"Compare": "Compare",
 	"View the side-by-side compare": "View the side-by-side compare",
-	"Working Directory Version": "Working Directory Version",
+	"Working Directory Version": "Open Working Directory",
 	"Working Directory": "Working Directory",
 	"View the working directory version of the file": "View the working directory version of the file",
 	"Loading...": "Loading...",
@@ -295,6 +295,8 @@ define({
 	"Compare With Each Other": "Compare With Each Other",
 	"Compare With Working Tree": "Compare With Working Tree",
 	"Open": "Open",
+	"OpenCommitVersion": "Open Commit",
+	"ViewCommitVersionTip": "View the committed version of the file",
 	"Fetch": "Fetch",
 	"Fetch from the remote": "Fetch from the remote",
 	"Password:": "Password:",

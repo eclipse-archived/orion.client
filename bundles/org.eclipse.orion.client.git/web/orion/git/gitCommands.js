@@ -871,13 +871,26 @@ var exports = {};
 			imageClass: "git-sprite-open", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			hrefCallback: function(data) {
-				return require.toUrl(editTemplate.expand({resource: data.items.ContentLocation}));
+				return require.toUrl(editTemplate.expand({resource: data.items.TreeLocation}));
 			},
 			visibleWhen : function(item) {
-				return item.Type === "Commit" && item.ContentLocation != null && !explorer.isDirectory; //$NON-NLS-0$
+				return item.Type === "Commit" && item.TreeLocation; //$NON-NLS-0$ 
 			}
 		});
 		commandService.addCommand(openGitCommit);
+		
+		var openGitDiff = new mCommands.Command({
+			name : messages["OpenCommitVersion"],  //$NON-NLS-0$
+			id : "eclipse.openGitDiff", //$NON-NLS-0$
+			tooltip: messages["ViewCommitVersionTip"], //$NON-NLS-0$
+			hrefCallback: function(data) {
+				return require.toUrl(editTemplate.expand({resource: data.items.TreeLocation}));
+			},
+			visibleWhen : function(item) {
+				return item.Type === "Diff" && item.TreeLocation; //$NON-NLS-0$ 
+			}
+		});
+		commandService.addCommand(openGitDiff);
 		
 		var fetchCallback = function(data, force, confirmMsg) {
 			var d = new Deferred();
