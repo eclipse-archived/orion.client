@@ -10,9 +10,9 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commandRegistry', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
+define(['i18n!orion/compare/nls/messages', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commandRegistry', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
 		'orion/contentTypes', 'orion/PageUtil', 'orion/compare/compareTreeExplorer'],
-		function(mBootstrap, mStatus, mProgress, mOperationsClient, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mContentTypes, PageUtil, mCompareTreeExplorer) {
+		function(messages, mBootstrap, mStatus, mProgress, mOperationsClient, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mContentTypes, PageUtil, mCompareTreeExplorer) {
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
@@ -33,6 +33,9 @@ define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsCl
 			var compareParams = PageUtil.matchResourceParameters();
 			var compareTreeExplorer = new mCompareTreeExplorer.CompareTreeExplorer(serviceRegistry, "compare-tree-results", commandRegistry); //$NON-NLS-0$
 			compareTreeExplorer.startup(compareParams);
+			mGlobalCommands.setPageTarget({
+				task: messages.compareTreeTitle
+			});
 		};
 		startWidget();
 		// every time the user manually changes the hash, we need to reastart the compare widget.

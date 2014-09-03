@@ -11,7 +11,6 @@
 /*eslint-env amd, browser*/
 /*global URL confirm*/
 define([
-    'i18n!git/nls/gitmessages',
 	"orion/plugin",
 	"orion/xhr",
 	"orion/serviceregistry",
@@ -22,7 +21,7 @@ define([
 	"orion/git/GitFileImpl",
 	"orion/git/util",
 	"orion/URL-shim", // no exports
-], function(messages, PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil, Deferred, GitFileImpl, mGitUtil) {
+], function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil, Deferred, GitFileImpl, mGitUtil) {
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
 	var gitClient = new mGitClient.GitService(serviceRegistry);
 	var sshService = new mSshTools.SshService(serviceRegistry);
@@ -462,10 +461,11 @@ define([
 		type: "git",
 		addParameters: [{id: "url", type: "url", name: "Url:"}],
 		optionalParameters: [{id: "sshuser", type: "text", name: "User Name:"}, {id: "sshpassword", type: "password", name: "Password:"},{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}],
-		addDependencyName: messages['addDependencyName'],
-		addDependencyTooltip: messages['addDependencyTooltip'],
-		addProjectName: messages['addProjectName'],
-		addProjectTooltip: messages['addProjectTooltip'],
+		nls: "git/nls/gitmessages",
+		addDependencyNameKey: "addDependencyName",
+		addDependencyTooltipKey: "addDependencyTooltip",
+		addProjectNameKey: "addProjectName",
+		addProjectTooltipKey: "addProjectTooltip",
 		actionComment: "Cloning ${url}",
 		validationProperties: [
 			{source: "Git"} // alternate {soruce: "Children:[Name]", match: ".git"}

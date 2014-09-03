@@ -12,17 +12,17 @@
 
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
+define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
 		"orion/shell/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
 		"orion/i18nUtil", "orion/extensionCommands", "orion/contentTypes", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
 		"orion/status", "orion/progress", "orion/operationsClient", "shell/resultWriters", "orion/URL-shim"],
-	function(require, messages, mBrowserCompatibility, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
+	function(require, messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
 		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, PageUtil, URITemplate, Deferred, mStatus, mProgress,
 		mOperationsClient, mResultWriters, _) {
 
 	var shellPageFileService, fileClient, commandRegistry, output, fileType;
 	var hashUpdated = false;
-	var contentTypeService, serviceRegistry;
+	var serviceRegistry;
 	var pluginRegistry, pluginType, preferences, serviceElementCounter = 0;
 
 	var ROOT_ORIONCONTENT = new URL(require.toUrl("file"), window.location.href).pathname; //$NON-NLS-0$
@@ -1053,7 +1053,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 		});
 
 		/* initialize the editors cache (used by some of the built-in commands */
-		contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
+		var contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		mExtensionCommands.createOpenWithCommands(serviceRegistry, contentTypeService, commandRegistry);
 
 		/* add types contributed through the plug-in API */

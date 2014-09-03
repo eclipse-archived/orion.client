@@ -159,6 +159,8 @@ define([
 		nameKey: "Help",
 		nls: "orion/widgets/nls/messages",
 		uriTemplate: require.toUrl("help/index.jsp"),
+//		nls: "orion/help/nls/messages",
+//		uriTemplate: "{+OrionHome}/help/help.html",
 		category: "user.0"
 	});
 	

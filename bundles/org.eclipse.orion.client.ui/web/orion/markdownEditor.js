@@ -185,10 +185,8 @@ define([
 							if (!--stack) {
 								break;
 							}
-						} else {
-							/* an in-between token */
-							index = this._advanceIndex(text, tokens[j], index);
 						}
+						index = this._advanceIndex(text, tokens[j], index);
 						j++;
 					}
 
@@ -239,10 +237,8 @@ define([
 							if (!--stack) {
 								break;
 							}
-						} else {
-							/* an in-between token */
-							index = this._advanceIndex(text, tokens[j], index);
 						}
+						index = this._advanceIndex(text, tokens[j], index);
 						j++;
 					}
 
@@ -1219,7 +1215,7 @@ define([
 			this._rootDiv.appendChild(this._previewWrapperDiv);
 			
 			this._previewDiv = document.createElement("div"); //$NON-NLS-0$
-			this._previewDiv.id = ID_PREVIEW; //$NON-NLS-0$
+			this._previewDiv.id = ID_PREVIEW;
 			this._previewDiv.classList.add("orionMarkdown"); //$NON-NLS-0$
 			this._previewWrapperDiv.appendChild(this._previewDiv);
 
@@ -1242,6 +1238,10 @@ define([
 			}
 
 			BaseEditor.prototype.install.call(this);
+		},
+		togglePaneOrientation: function() {
+			this._splitter.setOrientation(
+				this._splitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL ? mSplitter.ORIENTATION_HORIZONTAL : mSplitter.ORIENTATION_VERTICAL);
 		},
 		uninstall: function() {
 			this._styler.destroy();
@@ -1459,6 +1459,21 @@ define([
 			"orion.menuBarToolsGroup",
 			false,
 			new mKeyBinding.KeyBinding("G", true, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
+
+		ID = "markdown.toggle.orientation"; //$NON-NLS-0$
+		var toggleOrientationCommand = new mCommands.Command({
+			tooltip: messages["TogglePaneOrientationTooltip"],
+			imageClass: "core-sprite-start", //$NON-NLS-0$
+   			id: ID,
+			visibleWhen: function() {
+				return !!this._options;
+			}.bind(this),
+			callback: function(/*data*/) {
+				this.editor.togglePaneOrientation();
+			}.bind(this)
+		});
+//		options.commandRegistry.addCommand(toggleOrientationCommand);
+//		options.commandRegistry.registerCommandContribution("settingsActions", ID, 1, null, false); //$NON-NLS-0$
 	}
 	MarkdownEditorView.prototype = {
 		create: function() {

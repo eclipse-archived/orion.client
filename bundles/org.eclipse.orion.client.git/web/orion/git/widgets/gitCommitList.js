@@ -13,6 +13,7 @@
 
 define([
 	'i18n!git/nls/gitmessages',
+	'orion/keyBinding',
 	'orion/git/widgets/gitChangeList',
 	'orion/git/widgets/gitFileList',
 	'orion/git/widgets/gitCommitInfo',
@@ -22,11 +23,12 @@ define([
 	'orion/Deferred',
 	'orion/explorers/explorer',
 	'orion/commonHTMLFragments',
+	'orion/git/gitCommands',
 	'orion/i18nUtil',
 	'orion/git/util',
 	'orion/webui/littlelib',
 	'orion/objects'
-], function(messages, mGitChangeList, mGitFileList, mGitCommitInfo, mSection, mSelection, mCommands, Deferred, mExplorer, mHTMLFragments, i18nUtil, util, lib, objects) {
+], function(messages, KeyBinding, mGitChangeList, mGitFileList, mGitCommitInfo, mSection, mSelection, mCommands, Deferred, mExplorer, mHTMLFragments, mGitCommands, i18nUtil, util, lib, objects) {
 
 	var pageQuery = "page=1&pageSize=20"; //$NON-NLS-0$
 
@@ -50,6 +52,7 @@ define([
 		this.filterQuery = "";
 		this.authorQuery = "";
 		this.committerQuery = "";
+		this.sha1Query = "";
 	}
 	GitCommitListModel.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitCommitListModel.prototype, /** @lends orion.git.GitCommitListModel.prototype */ {
@@ -59,7 +62,7 @@ define([
 			onItem(this.root);
 		},
 		getQueries: function() {
-			return util.generateQuery([pageQuery, this.filterQuery, this.authorQuery, this.committerQuery]);
+			return util.generateQuery([pageQuery, this.filterQuery, this.authorQuery, this.committerQuery, this.sha1Query]);
 		},
 		_getRepository: function(parentItem) {
 			var that = this;
@@ -216,48 +219,39 @@ define([
 								that.handleError(error);
 							});
 						} else {
-							onComplete(that.processChildren(parentItem, [
-								{
-									Type: "Uncommited",  //$NON-NLS-0$
-									selectable: false,
-									isNotSelectable: true
-								},
-								{
-									Type: "Outgoing", //$NON-NLS-0$
-									selectable: false,
-									isNotSelectable: true,
-									activeBranch: activeBranch,
-									targetRef: targetRef
-								},
-								{
-									Type: "Incoming", //$NON-NLS-0$
-									selectable: false,
-									isNotSelectable: true,
-									activeBranch: activeBranch,
-									targetRef: targetRef
-								},
-								{
-									Type: "Synchronized", //$NON-NLS-0$
-									selectable: false,
-									isNotSelectable: true,
-								}
-							]));
+							Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
+								repository.status = status;
+								onComplete(that.processChildren(parentItem, [
+									status,
+									{
+										Type: "Outgoing", //$NON-NLS-0$
+										selectable: false,
+										isNotSelectable: true,
+										activeBranch: activeBranch,
+										targetRef: targetRef
+									},
+									{
+										Type: "Incoming", //$NON-NLS-0$
+										selectable: false,
+										isNotSelectable: true,
+										activeBranch: activeBranch,
+										targetRef: targetRef
+									},
+									{
+										Type: "Synchronized", //$NON-NLS-0$
+										selectable: false,
+										isNotSelectable: true,
+									}
+								]));
+							}, function(error){
+								if (progress) progress.done();
+								that.handleError(error);
+							});
 						}	
 					}, function(error){
 						if (progress) progress.done();
 						that.handleError(error);
 					});
-				}, function(error){
-					if (progress) progress.done();
-					that.handleError(error);
-				});
-			} else if (parentItem.Type === "Uncommited") { //$NON-NLS-0$
-				var repository = that.root.repository;
-				Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
-					repository.status = status;
-					onComplete(that.processChildren(parentItem, [
-						status
-					]));
 				}, function(error){
 					if (progress) progress.done();
 					that.handleError(error);
@@ -398,10 +392,24 @@ define([
 				this.updateSelectionCommands(e.selections);
 			}.bind(this));
 		}
+		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
+			switch (event.action) {
+			case "stage": //$NON-NLS-0$
+			case "unstage": //$NON-NLS-0$
+				Deferred.when(this.model.root.repository.status, function(status) {
+					this.myTree.redraw(status);
+				}.bind(this));
+				break;
+			}
+		}.bind(this));
 		this.createCommands();
 	}
 	GitCommitListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitCommitListExplorer.prototype, /** @lends orion.git.GitCommitListExplorer.prototype */ {
+		destroy: function(){
+			mGitCommands.getModelEventDispatcher().removeEventListener("modelChanged", this._modelListener); //$NON-NLS-0$
+			mExplorer.Explorer.prototype.destroy.call(this);
+		},
 		changedItem: function(item) {
 			var deferred = new Deferred();
 			var that = this;
@@ -546,18 +554,22 @@ define([
 			}.bind(this));
 
 			content = mainSection.getContentElement();
-			var messageSection = createSection(content, null, messages["Message:"], "filter", false, false, false, false, true); //$NON-NLS-0$
+			var messageSection = createSection(content, null, messages["Message:"], "filter"); //$NON-NLS-0$
 			messageSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			messageSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
 
-			var authorSection = createSection(content, null, messages["Author:"], "author", false, false); //$NON-NLS-0$
+			var authorSection = createSection(content, null, messages["Author:"], "author"); //$NON-NLS-0$
 			authorSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			authorSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
-			
-			var committerSection = createSection(content, null, messages["Committer:"], "committer", false, false); //$NON-NLS-0$
+
+			var committerSection = createSection(content, null, messages["Committer:"], "committer"); //$NON-NLS-0$
 			committerSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			committerSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
-			
+
+			var sha1Section = createSection(content, null, messages["SHA1:"], "sha1"); //$NON-NLS-0$
+			sha1Section.domNode.classList.add("commitFilter"); //$NON-NLS-0$
+			sha1Section.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
+
 			var pathSection = createSection(content, null, messages["Path:"], "path", true, false, true, true); //$NON-NLS-0$
 			pathSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			pathSection.getContentElement().classList.add("pathFilter"); //$NON-NLS-0$
@@ -622,6 +634,7 @@ define([
 			sections.push(messageSection);
 			sections.push(authorSection);
 			sections.push(committerSection);
+			sections.push(sha1Section);
 			sections.push(pathSection);
 		},
 		display: function() {
@@ -721,6 +734,7 @@ define([
 				imageClass: "core-sprite-search", //$NON-NLS-0$
 				callback: function(data) {
 					if (data) this.filterSection.setHidden(!this.filterSection.hidden);
+					data.domNode.focus();
 				},
 				visibleWhen: function() {
 					return true;
@@ -794,7 +808,7 @@ define([
 				return;
 			}
 			
-			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.toggleFilter", 20); //$NON-NLS-0$
+			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.toggleFilter", 20, null, false, new KeyBinding.KeyBinding('h', true, true)); //$NON-NLS-0$
 			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commit.simpleLog", 50); //$NON-NLS-0$
 			commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.sync", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
@@ -934,8 +948,15 @@ define([
 						explorer2.display();
 					}, 0);
 				}  else if (item.Type === "Status") { //$NON-NLS-0$
+				
+					var image = document.createElement("span"); //$NON-NLS-0$
+					image.className = "core-sprite-folder gitStatusIcon"; //$NON-NLS-0$
+					horizontalBox.appendChild(image);
+				
 					sectionItem.classList.add("sectionTableItem"); //$NON-NLS-0$
 					tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
+					tableRow.classList.add("gitStatusSection"); //$NON-NLS-0$
+					td.classList.add("gitStatusCell"); //$NON-NLS-0$
 						
 					detailsView = document.createElement("div"); //$NON-NLS-0$
 					detailsView.className = "stretch"; //$NON-NLS-0$
@@ -949,9 +970,10 @@ define([
 					var status = item;
 					var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length + status.Missing.length;
 					var staged = status.Changed.length + status.Added.length + status.Removed.length;
+					var changed = unstaged + staged;
 					var description = document.createElement("div"); //$NON-NLS-0$
 					description.textContent = unstaged > 0 || staged > 0
-							? i18nUtil.formatMessage(messages["${0} file(s) to stage and ${1} file(s) to commit."], unstaged, staged)
+							? i18nUtil.formatMessage(messages["FilesChangedVsReadyToCommit"], changed, messages[changed === 1 ? "file" : "files"], staged, messages[staged === 1 ? "file" : "files"])
 							: messages["Nothing to commit."];
 					detailsView.appendChild(description);
 				} else if (item.Type !== "Commit" && item.Type !== "StashCommit") { //$NON-NLS-1$ //$NON-NLS-0$

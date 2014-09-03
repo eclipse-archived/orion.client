@@ -895,6 +895,11 @@ define([
 					if (!row) {
 						return this.changedItem(parent, true).then(function() {
 							var row = this.getRow(item);
+							if (!row) {
+								parent.children.unshift(item);
+								this.myTree.refresh(parent, parent.children, false);
+								row = this.getRow(item);	
+							}
 							return row ? row._item : new Deferred().reject();
 						}.bind(this));
 					}
@@ -929,7 +934,16 @@ define([
 			}.bind(this), deferred.reject);
 			return deferred;
 		},
-
+		
+		/**
+		 * Create and return the row for the given item
+		 * @param {Object} The parent of the row.
+		 * @param {Object} The contents of the row.
+		 */
+		insertMissingItem: function(parent, item) {
+			return null;
+		},
+		
 		/**
 		 * Shows and selects the given item.
 		 * @param {Object} The item to be revealed.

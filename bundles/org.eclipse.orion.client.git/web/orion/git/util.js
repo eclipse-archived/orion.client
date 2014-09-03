@@ -161,8 +161,8 @@ define([
 			path = treePath;
 		} else if (treePath) {
 			var parents = treePath.Parents;
-			if (parents.length) {
-				path = treePath.Location.substring(parents[parents.length -1].Location.length);
+			if (parents.length > 1) {
+				path = treePath.Location.substring(parents[parents.length -2].Location.length);
 			}
 		}
 		return path;

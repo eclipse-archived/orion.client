@@ -50,10 +50,15 @@ define([
 				name: "sh",
 				extension: ["sh"]
 			},
+			{	id: "application/pdf",
+				"extends": "application/browser-renderable",
+				name: "PDF",
+				extension: ["pdf"]
+			},
 			// binary files
 			{	id: "application/octet-stream",
 				name: "octet-stream",
-				extension: ["exe", "bin", "doc", "ppt", "pdf"]
+				extension: ["exe", "bin", "doc", "ppt"]
 			},
 			{	id: "application/zip",
 				"extends": "application/octet-stream",

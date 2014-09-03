@@ -431,6 +431,15 @@ define([
 			commandRegistry.registerCommandContribution(explorerSelectionScope, "orion.explorer.collapseAll", 300); //$NON-NLS-0$
 			
 			var node;
+			node = lib.node(actionsNodeScope);
+			if (node) {
+				this.commandService.destroy(node);
+			}
+			node = lib.node(selectionNodeScope);
+			if (node) {
+				this.commandService.destroy(node);
+			}
+
 			if (this.prefix === "staged") { //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.commitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-1$ //$NON-NLS-0$ 
 				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
@@ -442,12 +451,12 @@ define([
 				commandRegistry.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.stageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
 			}  else if (this.prefix === "all") { //$NON-NLS-0$
 			
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 100); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.popStash", 200); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 300); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.popStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.precreateStashCommand", 200); //$NON-NLS-0$
 
 				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showStagedPatchCommand", 100); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precreateStashCommand", 200); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 300); //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 200); //$NON-NLS-0$
 				
 //				commandRegistry.addCommandGroup(selectionNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.precommitCommand", "primaryButton"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
 //				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-0$
@@ -456,20 +465,17 @@ define([
 				commandRegistry.renderCommands(selectionNodeScope, selectionNodeScope, [], this, "tool", {Clone : this.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.model ? this.model.repository : this, this, "tool"); //$NON-NLS-0$	
 			} else if (this.prefix === "diff" && this.commit) { //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.openGitCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.checkoutCommit", 2); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.undoCommit", 3); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.resetIndex", 4); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.addTag", 5); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.cherryPick", 6); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.revert", 7); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.checkoutCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.undoCommit", 2); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.resetIndex", 3); //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.addTag", 4); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.cherryPick", 5); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.revert", 6); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.openGitCommit", 7); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.showCommitPatchCommand", 8); //$NON-NLS-1$ //$NON-NLS-0$
 //				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.askForReviewCommand", 8); //$NON-NLS-1$ //$NON-NLS-0$
 
-				node = lib.node(actionsNodeScope);
-				if (node) {
-					this.commandService.destroy(node);
-					commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.commit, this, "tool"); //$NON-NLS-0$
-				}
+				commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.commit, this, "tool"); //$NON-NLS-0$
 			}
 			node = lib.node(explorerSelectionScope);
 			if (node) {
