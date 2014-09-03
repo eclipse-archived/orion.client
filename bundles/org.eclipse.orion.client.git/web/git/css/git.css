@@ -274,7 +274,7 @@ table .sectionTable {
 }
 
 .gitCommitMessageSection {
-	background-color: #FEF3EF;
+	background-color: #F3FAF5;
 }
 
 .gitCommitMessage .gitCommitMessageTopRow {
@@ -283,7 +283,7 @@ table .sectionTable {
 	padding: 5px;
 	margin: 10px;
 	border-radius: 5px;
-	border: 1px solid #FED2C2;
+	border: 1px solid #b2cfb9;
 }
 
 .gitCommitMessage .gitCommitMessageTopRow.invalidCommitMessage {
@@ -464,6 +464,12 @@ table .sectionTable {
 	padding-right: 6px;
 	margin-right: 10px;
 	margin-top: 5px;
+	color:#637367;
+}
+
+.gitStatusSection{
+	background: #F3FAF5;
+	color:#8AA190;
 }
 
 .gitStatusSection .sectionTableItem {
@@ -472,7 +478,7 @@ table .sectionTable {
 
 .gitStatusTitle {
 	font-weight: bold;
-	color: green;
+	color: #637367;
 	padding-bottom:5px;
 }
 
