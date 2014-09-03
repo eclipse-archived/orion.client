@@ -3,8 +3,9 @@
 var uiTestFunc = null;
 
 define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection',
-	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences', 'cfui/cfUtil', 'orion/objects', 'orion/widgets/input/ComboTextInput'], 
-		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, URITemplate, PageLinks, Preferences, mCfUtil, objects, ComboTextInput) {
+	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences', 'cfui/cfUtil', 'orion/objects', 'orion/widgets/input/ComboTextInput',
+	'orion/webui/Wizard'], 
+		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, URITemplate, PageLinks, Preferences, mCfUtil, objects, ComboTextInput, Wizard) {
 
 	var cloudManageUrl;
 	
@@ -21,16 +22,10 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			document.getElementById('title').appendChild(document.createTextNode("Configure Application Deployment")); //$NON-NLS-1$//$NON-NLS-0$
 			var msgContainer = document.getElementById('messageContainer'); //$NON-NLS-0$
 			var msgLabel = document.getElementById('messageLabel'); //$NON-NLS-0$
-			var msgNode;
-			var okButton = document.getElementById('okbutton'); //$NON-NLS-0$
-			var page1 = document.getElementById('page1'); //$NON-NLS-0$
-			var page2 = document.getElementById('page2'); //$NON-NLS-0$
-			var page3 = document.getElementById('page3'); //$NON-NLS-0$
-			var nextButton = document.getElementById('nextButton');
-			var backButton = document.getElementById('backButton');
-			var page1shown = false;
-			var page2shown = false;
-			var page3shown = false;
+			var page1;
+			var page2;
+			var page3;
+			var commonPane;
 			var target;
 			var orgsDropdown;
 			var spacesDropdown;
@@ -72,43 +67,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			
 			var selection;
 			
-			function setValid(valid){
-				if(valid){
-					okButton.classList.remove("disabled");
-					nextButton.classList.remove("disabled");
-				} else {
-					okButton.classList.add("disabled");
-					nextButton.classList.add("disabled");
-				}
-				okButton.disabled = !valid;
-				nextButton.disabled = !valid;
-			}
-						
-			var validate = function() {
-				if(!selection){
-					setValid(false);
-					return;
-				}
-				if(!appsInput.value){
-					setValid(false);
-					return;
-				}
-				selection.getSelection(function(selection) {
-					if(selection===null || selection.length===0){
-						setValid(false);
-						return;
-					}
-					if(appsInput.value){
-						setValid(true);
-					} else {
-						setValid(true);
-					}
-				});
-			};
-			
 			showMessage("Loading deployment settings...");
-			validate();
-			
 			
 			// register hacked pref service
 			
@@ -170,64 +129,58 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 					 source: "org.eclipse.orion.client.cf.deploy.uritemplate", cancelled: true}), "*");
 			};
 			
-			var getManifestInfo = function(){
+			var getManifestInfo = function(results){
 				var ret = objects.clone(manifestContents);
 				if(!manifestContents.applications.length>0){
 					manifestContents.applications.push({});
 				}
-				if(appsInput && appsInput.value){
-					manifestContents.applications[0].name = appsInput.value;
+				if(results.name){
+					manifestContents.applications[0].name = results.name;
 				}
-				if(hostInput && hostInput.value){
-					manifestContents.applications[0].host = hostInput.value;
+				if(results.host){
+					manifestContents.applications[0].host = results.host;
 				}
-				if(servicesList){
-					var services = [];
-					for(var i=0; i<servicesList.options.length; i++){
-						services.push(servicesList.options[i].value);
-					}
-					if(services.length>0){
-						manifestContents.applications[0].services = services;
-					}
+				if(results.services){
+					manifestContents.applications[0].services = results.services;
 				}
-				if(command){
-					if(command.value){
-						manifestContents.applications[0].command = command.value;
+				if(typeof results.command === "string"){
+					if(results.command){
+						manifestContents.applications[0].command = results.command;
 					} else {
 						delete manifestContents.applications[0].command;
 					}
 				}
-				if(path){
-					if(path.value){
-						manifestContents.applications[0].path = path.value;
+				if(typeof results.path === "string"){
+					if(results.path){
+						manifestContents.applications[0].path = results.path;
 					} else {
 						delete manifestContents.applications[0].path;
 					}
 				}
-				if(buildpack){
-					if(buildpack.value){
-						manifestContents.applications[0].buildpack = buildpack.value;
+				if(typeof results.buildpack === "string"){
+					if(results.buildpack){
+						manifestContents.applications[0].buildpack = results.buildpack;
 					} else {
 						delete manifestContents.applications[0].buildpack;
 					}
 				}
-				if(memory){
-					if(memory.value){
-						manifestContents.applications[0].memory = memory.value + memoryUnit.value;
+				if(typeof results.memory === "string"){
+					if(results.memory){
+						manifestContents.applications[0].memory = results.memory;
 					} else {
 						delete manifestContents.applications[0].memory;
 					}
 				}
-				if(instances){
-					if(instances.value){
-						manifestContents.applications[0].instances = instances.value;
+				if(typeof results.instances !== "undefined"){
+					if(results.instances){
+						manifestContents.applications[0].instances = results.instances;
 					} else {
 						delete manifestContents.applications[0].instances;
 					}
 				}
-				if(timeout){
-					if(timeout.value){
-						manifestContents.applications[0].timeout = timeout.value;
+				if(typeof results.timeout !== "undefined"){
+					if(results.timeout){
+						manifestContents.applications[0].timeout = results.timeout;
 					} else {
 						delete manifestContents.applications[0].timeout;
 					}
@@ -235,9 +188,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				return ret;
 			};
 			
-			var doAction = function() {
+			var doAction = function(results) {
 				showMessage("Deploying...");
-				setValid(false);
 				selection.getSelection(
 					function(selection) {
 						if(selection===null || selection.length===0){
@@ -254,7 +206,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						
 						var editLocation = new URL("../edit/edit.html#" + deployResourceJSON.ContentLocation, window.location.href);
 						
-						var manifest = getManifestInfo();
+						var manifest = getManifestInfo(results);
 						
 						cFService.pushApp(selection, null, decodeURIComponent(deployResourceJSON.ContentLocation + deployResourceJSON.AppPath), manifest, saveManifestCheckbox.checked).then(
 							function(result){
@@ -290,27 +242,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				);
 			};
 			
-			function nextPage(){
-				if(page1.style.display === "block" && page2.style.display === "none"){
-					displayPage2();
-				} else if(page1.style.display === "none" && page2.style.display === "block"){
-					displayPage3();
-				}
-			}
-			
-			function backPage(){
- 				if(page1.style.display === "none" && page2.style.display === "block"){
- 					displayPage1();
- 				} else  if(page2.style.display === "none" && page3.style.display === "block"){
- 					displayPage2();
- 				}
-			}
-
-			document.getElementById('okbutton').addEventListener('click', doAction); //$NON-NLS-1$ //$NON-NLS-0$
 			document.getElementById('closeDialog').addEventListener('click', closeFrame); //$NON-NLS-1$ //$NON-NLS-0$
-			document.getElementById('cancelButton').addEventListener('click', closeFrame); //$NON-NLS-1$ //$NON-NLS-0$
-			nextButton.addEventListener('click', nextPage); //$NON-NLS-1$ //$NON-NLS-0$
-			backButton.addEventListener('click', backPage); //$NON-NLS-1$ //$NON-NLS-0$
 			 
 			// allow frame to be dragged by title bar
 			var that=this;
@@ -344,218 +276,281 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				});
 		    });
 		    
-		    function displayPage1(){
-		    	page1.style.display = "block";
-		    	page2.style.display = "none";
-		    	page3.style.display = "none";
-		    	backButton.style.display = "none";
-		    	nextButton.style.display = "";
-		    	if(page1shown) return;
-				cloudManageUrl = target.ManageUrl;
-				cFService.getOrgs(target).then(
-					function(result2){
-						hideMessage();
-															
-						document.getElementById("orgsLabel").appendChild(document.createTextNode("Organization*:"));
-	
-						orgsDropdown = document.createElement("select");
-						result2.Orgs.forEach(function(org){
-							var option = document.createElement("option");
-							option.appendChild(document.createTextNode(org.Name));
-							option.org = org;
-							orgsDropdown.appendChild(option);
-						});
-						
-						orgsDropdown.onchange = function(event){
-							var selectedOrg = event.target.value;
-							loadTargets(selectedOrg);
-						};
-						
-						document.getElementById("orgs").appendChild(orgsDropdown);
-															
-						var targets = {};
-						result2.Orgs.forEach(function(org){
-							targets[org.Name] = [];
-							if (org.Spaces)
-								org.Spaces.forEach(function(space){
-									var newTarget = {};
-									newTarget.Url = target.Url;
-									if (cloudManageUrl)
-										newTarget.ManageUrl = cloudManageUrl;
-									newTarget.Org = org.Name;
-									newTarget.Space = space.Name;
-									targets[org.Name].push(newTarget);
-								});
-						});
-						
-						selection = new mSelection.Selection(serviceRegistry, "orion.Spaces.selection"); //$NON-NLS-0$
-						selection.addEventListener("selectionChanged", validate);
-	
-							document.getElementById("spacesLabel").appendChild(document.createTextNode("Space*:"));
-	
-							spacesDropdown = document.createElement("select");
+		    commonPane = new Wizard.WizardPage({
+		    	template: '<div class="manifest formTable" id="manifest"></div>',
+		    	render: function(){
+		    		var manifestElement = document.getElementById("manifest");
+					saveManifestCheckbox = document.createElement("input");
+					saveManifestCheckbox.type = "checkbox";
+					saveManifestCheckbox.id = "saveManifest";
+					saveManifestCheckbox.checked = "checked";
+					manifestElement.appendChild(saveManifestCheckbox);
+					var label = document.createElement("label");
+					label.className = "manifestLabel";
+					label.appendChild(document.createTextNode("Save to manifest file: "));
+					var manifestFolder = deployResourceJSON.AppPath || "";
+					manifestFolder = manifestFolder.substring(0, manifestFolder.lastIndexOf("/")+1);
+					label.appendChild(document.createTextNode("/" + manifestFolder + "manifest.yml"));
+					manifestElement.appendChild(label);
+		    	},
+		    	getResults: function(){
+		    		var ret = {}
+		    		ret.saveManifest = saveManifestCheckbox.checked;
+		    		return ret;
+		    	}
+		    });
+		    
+		    page1 = new Wizard.WizardPage({
+		    	template: "<table class=\"formTable\">"+
+				"<tr>"+
+					"<td id=\"orgsLabel\" class=\"label\"></td>"+
+					"<td id=\"orgs\" class=\"selectCell\"></td>"+
+				"</tr>"+
+				"<tr>"+
+					"<td id=\"spacesLabel\" class=\"label\"></td>"+
+					"<td id=\"spaces\" class=\"selectCell\"></td>"+
+				"</tr>"+
+				"<tr>"+
+					"<td id=\"nameLabel\" class=\"label\"></td>"+
+					"<td id=\"name\" class=\"selectCell\"></td>"+
+				"</tr>"+
+				"<tr>"+
+					"<td id=\"hostLabel\" class=\"label\"></td>"+
+					"<td id=\"host\" class=\"selectCell\"></td>"+
+				"</tr>"+
+			"</table>",
+				render: function(){
+					this.wizard.validate();
+					cloudManageUrl = target.ManageUrl;
+					cFService.getOrgs(target).then(
+						function(result2){
+							hideMessage();
+																
+							document.getElementById("orgsLabel").appendChild(document.createTextNode("Organization*:"));
+		
+							orgsDropdown = document.createElement("select");
+							result2.Orgs.forEach(function(org){
+								var option = document.createElement("option");
+								option.appendChild(document.createTextNode(org.Name));
+								option.org = org;
+								orgsDropdown.appendChild(option);
+							});
 							
-							function setSelection(){
-								if(!spacesDropdown.value){
-									selection.setSelections();
-								} else {
-									var orgTargets = targets[orgsDropdown.value];
-									if(!orgTargets){
+							orgsDropdown.onchange = function(event){
+								var selectedOrg = event.target.value;
+								loadTargets(selectedOrg);
+							};
+							
+							document.getElementById("orgs").appendChild(orgsDropdown);
+																
+							var targets = {};
+							result2.Orgs.forEach(function(org){
+								targets[org.Name] = [];
+								if (org.Spaces)
+									org.Spaces.forEach(function(space){
+										var newTarget = {};
+										newTarget.Url = target.Url;
+										if (cloudManageUrl)
+											newTarget.ManageUrl = cloudManageUrl;
+										newTarget.Org = org.Name;
+										newTarget.Space = space.Name;
+										targets[org.Name].push(newTarget);
+									});
+							});
+							
+							selection = new mSelection.Selection(serviceRegistry, "orion.Spaces.selection"); //$NON-NLS-0$
+							selection.addEventListener("selectionChanged", function(){this.validate()}.bind(this.wizard));
+		
+								document.getElementById("spacesLabel").appendChild(document.createTextNode("Space*:"));
+		
+								spacesDropdown = document.createElement("select");
+								
+								function setSelection(){
+									if(!spacesDropdown.value){
 										selection.setSelections();
 									} else {
-										for(var i=0; i<orgTargets.length; i++){
-											if(orgTargets[i].Space == spacesDropdown.value){
-												selection.setSelections(orgTargets[i]);
-												break;
+										var orgTargets = targets[orgsDropdown.value];
+										if(!orgTargets){
+											selection.setSelections();
+										} else {
+											for(var i=0; i<orgTargets.length; i++){
+												if(orgTargets[i].Space == spacesDropdown.value){
+													selection.setSelections(orgTargets[i]);
+													break;
+												}
 											}
 										}
 									}
 								}
-							}
+								
+								spacesDropdown.onchange = function(event){
+									setSelection();
+									selection.getSelection(
+										function(selection) {
+											loadApplications(selection);
+											loadHosts(selection);
+										});
+								};
+																						
+								document.getElementById("spaces").appendChild(spacesDropdown);
 							
-							spacesDropdown.onchange = function(event){
+							function loadTargets(org){
+								
+								var targetsToDisplay = targets[org];
+								lib.empty(spacesDropdown);
+								targetsToDisplay.forEach(function(target){
+									var option = document.createElement("option");
+									option.appendChild(document.createTextNode(target.Space));
+									option.target = target;
+									spacesDropdown.appendChild(option);
+								});
 								setSelection();
 								selection.getSelection(
 									function(selection) {
 										loadApplications(selection);
 										loadHosts(selection);
 									});
-							};
-																					
-							document.getElementById("spaces").appendChild(spacesDropdown);
-						
-						function loadTargets(org){
+							}
 							
-							var targetsToDisplay = targets[org];
-							lib.empty(spacesDropdown);
-							targetsToDisplay.forEach(function(target){
-								var option = document.createElement("option");
-								option.appendChild(document.createTextNode(target.Space));
-								option.target = target;
-								spacesDropdown.appendChild(option);
-							});
-							setSelection();
-							selection.getSelection(
-								function(selection) {
-									loadApplications(selection);
-									loadHosts(selection);
-								});
-						}
-						
-						var appsList = [];
-						var appsDeferred;
-						function loadApplications(target){
-							appsDeferred = cFService.getApps(target);
-							appsDeferred.then(function(apps){
-								appsList = [];
-								if(apps.Apps){
-									apps.Apps.forEach(function(app){
-										appsList.push(app.Name);
-									});
+							var appsList = [];
+							var appsDeferred;
+							function loadApplications(target){
+								appsDeferred = cFService.getApps(target);
+								appsDeferred.then(function(apps){
+									appsList = [];
+									if(apps.Apps){
+										apps.Apps.forEach(function(app){
+											appsList.push(app.Name);
+										});
+									}
+								}.bind(this));
+							}
+							
+							var routesList = [];
+							var routesDeferred;
+							function loadHosts(target){
+								routesDeferred = cFService.getRoutes(target);
+								routesDeferred.then(function(routes){
+									if(routes.Routes){
+										routesList = [];
+										routes.Routes.forEach(function(route){
+											routesList.push(route.Host);
+										});
+									}
+								}.bind(this));							
+							}
+							
+							document.getElementById("nameLabel").appendChild(document.createTextNode("Application Name*:"));
+							
+							appsDropdown = new ComboTextInput({
+								id: "applicationNameTextInput", //$NON-NLS-0$
+								parentNode: document.getElementById("name"),
+								insertBeforeNode: this._replaceWrapper,
+								hasButton: false,
+								hasInputCompletion: true,
+								serviceRegistry: this._serviceRegistry,
+								defaultRecentEntryProposalProvider: function(onItem){
+									appsDeferred.then(function(){
+										var ret = [];
+										appsList.forEach(function(app){
+											if(!app) return;
+											ret.push({type: "proposal", label: app, value: app});
+										});
+										onItem(ret);									
+									}.bind(this));
 								}
 							});
-						}
-						
-						var routesList = [];
-						var routesDeferred;
-						function loadHosts(target){
-							routesDeferred = cFService.getRoutes(target);
-							routesDeferred.then(function(routes){
-								if(routes.Routes){
-									routesList = [];
-									routes.Routes.forEach(function(route){
-										routesList.push(route.Host);
-									});
+							
+							appsInput= appsDropdown.getTextInputNode();						
+							appsInput.onkeyup = function(){this.validate()}.bind(this.wizard);
+							appsInput.addEventListener("focus",function(){this.validate()}.bind(this.wizard));
+							
+							if(manifestInfo.name){
+								appsInput.value = manifestInfo.name;
+							}
+							
+							document.getElementById("hostLabel").appendChild(document.createTextNode("Host:"));
+							
+							
+							hostDropdown = new ComboTextInput({
+								id: "applicationRouteTextInput", //$NON-NLS-0$
+								parentNode: document.getElementById("host"),
+								insertBeforeNode: this._replaceWrapper,
+								hasButton: false,
+								hasInputCompletion: true,
+								serviceRegistry: this._serviceRegistry,
+								defaultRecentEntryProposalProvider: function(onItem){
+									routesDeferred.then(function(){
+										var ret = [];
+										routesList.forEach(function(route){
+											if(!route) return;
+											ret.push({type: "proposal", label: route, value: route});
+										});
+										onItem(ret);
+									}.bind(this));
 								}
-							});							
+							});
+							
+							hostInput = hostDropdown.getTextInputNode();
+							hostInput.value = manifestInfo.host || manifestInfo.name || "";
+							
+							loadTargets(orgsDropdown.value);
+							
+						}.bind(this), function(error){
+							postError(error);
 						}
-						
-						document.getElementById("nameLabel").appendChild(document.createTextNode("Application Name*:"));
-						
-						appsDropdown = new ComboTextInput({
-							id: "applicationNameTextInput", //$NON-NLS-0$
-							parentNode: document.getElementById("name"),
-							insertBeforeNode: this._replaceWrapper,
-							hasButton: false,
-							hasInputCompletion: true,
-							serviceRegistry: this._serviceRegistry,
-							defaultRecentEntryProposalProvider: function(onItem){
-								appsDeferred.then(function(){
-									var ret = [];
-									appsList.forEach(function(app){
-										if(!app) return;
-										ret.push({type: "proposal", label: app, value: app});
-									});
-									onItem(ret);									
-								});
-							}
-						});
-						
-						appsInput= appsDropdown.getTextInputNode();						
-						appsInput.onkeyup = validate;
-						appsInput.addEventListener("focus", validate);
-						
-						if(manifestInfo.name){
-							appsInput.value = manifestInfo.name;
-						}
-						
-						document.getElementById("hostLabel").appendChild(document.createTextNode("Host:"));
-						
-						
-						hostDropdown = new ComboTextInput({
-							id: "applicationRouteTextInput", //$NON-NLS-0$
-							parentNode: document.getElementById("host"),
-							insertBeforeNode: this._replaceWrapper,
-							hasButton: false,
-							hasInputCompletion: true,
-							serviceRegistry: this._serviceRegistry,
-							defaultRecentEntryProposalProvider: function(onItem){
-								routesDeferred.then(function(){
-									var ret = [];
-									routesList.forEach(function(route){
-										if(!route) return;
-										ret.push({type: "proposal", label: route, value: route});
-									});
-									onItem(ret);
-								});
-							}
-						});
-						
-						hostInput = hostDropdown.getTextInputNode();
-						hostInput.value = manifestInfo.host || manifestInfo.name || "";
-						
-						var manifestElement = document.getElementById("manifest");
-						saveManifestCheckbox = document.createElement("input");
-						saveManifestCheckbox.type = "checkbox";
-						saveManifestCheckbox.id = "saveManifest";
-						saveManifestCheckbox.checked = "checked";
-						manifestElement.appendChild(saveManifestCheckbox);
-						var label = document.createElement("label");
-						label.className = "manifestLabel";
-						label.appendChild(document.createTextNode("Save to manifest file: "));
-						var manifestFolder = deployResourceJSON.AppPath || "";
-						manifestFolder = manifestFolder.substring(0, manifestFolder.lastIndexOf("/")+1);
-						label.appendChild(document.createTextNode("/" + manifestFolder + "manifest.yml"));
-						manifestElement.appendChild(label);
-						
-						loadTargets(orgsDropdown.value);
-						
-						
-						
-					}, function(error){
-						postError(error);
+					);
+			    },
+			    validate: function(setValid) {
+					if(!selection){
+						setValid(false);
+						return;
 					}
-				);
-				page1shown = true;
-		    }
+					if(!appsInput.value){
+						setValid(false);
+						return;
+					}
+					selection.getSelection(function(selection) {
+						if(selection===null || selection.length===0){
+							setValid(false);
+							return;
+						}
+						if(appsInput.value){
+							setValid(true);
+						} else {
+							setValid(true);
+						}
+					});
+				},
+				getResults: function(){
+					var res = {};
+					if(appsInput && appsInput.value){
+						res.name = appsInput.value;
+					}
+					if(hostInput && hostInput.value){
+						res.host = hostInput.value;
+					}
+					return res;
+				}
+			});
 		    
-		    function displayPage2(){
-		    	page1.style.display = "none";
-		    	page2.style.display = "block";
-		    	page3.style.display = "none";
-		    	backButton.style.display = "";
-		    	nextButton.style.display = "";
-		    	if(page2shown) return;
+		page2 = new Wizard.WizardPage({
+			template:'<table class="formTable">'+
+				'<tr>'+
+					'<td id="allServicesLabel" class="label" colspan="3"></td>'+
+				'</tr>'+
+				'<tr>'+
+					'<td id="servicesLabel" class="label"></td>'+
+					'<td id="servicesLabel">&nbsp;</td>'+
+					'<td id="servicesAdded" class="label"></td>'+
+				'</tr>'+
+				'<tr>'+
+					'<td id="servicesDropdown" class="listCell"></td>'+
+					'<td id="servicesAddRemoveButtonsCol" class="listCell"></td>'+
+					'<td id="servicesList" class="listCell"></td>'+
+				'</tr>'+
+			'</table>',
+			render: function(){
 	    		document.getElementById("allServicesLabel").appendChild(document.createTextNode("Add services from the list."));
 	    		document.getElementById("servicesLabel").appendChild(document.createTextNode("Existing Services:"));
 	    		servicesDropdown = document.createElement("select");
@@ -577,8 +572,6 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    	removeButton.appendChild(document.createTextNode("<"));
 		    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(removeButton);
 		    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(addButton);
-		    	
-		    	page2shown = true;
 		    	
 		    	addButton.addEventListener('click', function(){
 		    		for(var i=servicesDropdown.options.length-1; i>=0; i--){
@@ -648,81 +641,137 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						servicesDropdown.appendChild(serviceOption);
 		    		});
 		    		
-		    	}, postError);
+		    	}.bind(this), postError);
+		    },
+		    getResults: function(){
+		    	var ret = {};
+		    	if(servicesList){
+					var services = [];
+					for(var i=0; i<servicesList.options.length; i++){
+						services.push(servicesList.options[i].value);
+					}
+					ret.services = services;
+				}
+				return ret;
 		    }
+		    });
 		    
-		   function displayPage3(){
-		    	page1.style.display = "none";
-		    	page2.style.display = "none";
-		    	page3.style.display = "block";
-		    	backButton.style.display = "";
-		    	nextButton.style.display = "none";
-		    	if(page3shown) return;
-		    	document.getElementById("commandLabel").appendChild(document.createTextNode("Command:"));
-		    	command = document.createElement("input");
-		    	if(manifestInfo.command){
-		    		command.value = manifestInfo.command;
-		    	}
-		    	document.getElementById("command").appendChild(command);
-		    	document.getElementById("pathLabel").appendChild(document.createTextNode("Path:"));
-		    	path = document.createElement("input");
-		    	if(manifestInfo.path){
-		    		path.value = manifestInfo.path;
-		    	}
-		    	document.getElementById("path").appendChild(path);
-		    	document.getElementById("buildpackLabel").appendChild(document.createTextNode("Buildpack Url:"));
-		    	buildpack = document.createElement("input");
-		    	if(manifestInfo.buildpack){
-		    		buildpack.value = manifestInfo.buildpack;
-		    	}
-		    	document.getElementById("buildpack").appendChild(buildpack);
-		    	document.getElementById("memoryLabel").appendChild(document.createTextNode("Memory:"));
-		    	memory = document.createElement("input");
-		    	memory.id = "memoryInput";
-		    	memory.type = "number";
-		    	memory.min = "0";
-		    	memoryUnit = document.createElement("select");
-		    	memoryUnit.id = "memoryUnit";
-				var option = document.createElement("option");
-				option.appendChild(document.createTextNode("MB"));
-				option.value = "MB";
-				memoryUnit.appendChild(option);
-				option = document.createElement("option");
-				option.appendChild(document.createTextNode("GB"));
-				option.value = "GB";
-				memoryUnit.appendChild(option);
-		    	if(manifestInfo.memory){
-		    		if(manifestInfo.memory.toUpperCase().indexOf("M")>0 || manifestInfo.memory.toUpperCase().indexOf("G")>0){
-		    			var indexOfUnit = manifestInfo.memory.toUpperCase().indexOf("M") > 0 ? manifestInfo.memory.toUpperCase().indexOf("M") : manifestInfo.memory.toUpperCase().indexOf("G");
-						memory.value = manifestInfo.memory.substring(0, indexOfUnit);
-						var unit = manifestInfo.memory.substring(indexOfUnit).toUpperCase();
-						if(unit.trim().length === 1){
-							unit += "B";
-						}
-						memoryUnit.value = unit;
-		    		}
-		    	}
-		    	document.getElementById("memory").appendChild(memory);
-		    	document.getElementById("memory").appendChild(memoryUnit);
-		    	
-		    	document.getElementById("instancesLabel").appendChild(document.createTextNode("Instances:"));
-		    	instances = document.createElement("input");
-		    	instances.type = "number";
-		    	instances.min = "0";
-		    	if(manifestInfo.instances){
-		    		instances.value = manifestInfo.instances;
-		    	}
-		    	document.getElementById("instances").appendChild(instances);
-		    	document.getElementById("timeoutLabel").appendChild(document.createTextNode("Timeout (sec):"));
-		    	timeout = document.createElement("input");
-		    	timeout.type = "number";
-		    	timeout.min = "0";
-		    	if(manifestInfo.timeout){
-		    		timeout.value = manifestInfo.timeout;
-		    	}
-		    	document.getElementById("timeout").appendChild(timeout);
-		    	page3shown = true;
-		    }
+		    
+		     page3 = new Wizard.WizardPage({
+		    	template: '<table class="formTable">'+
+				'<tr>'+
+					'<td id="commandLabel" class="label"></td>'+
+					'<td id="command" class="selectCell"></td>'+
+				'</tr>'+
+				'<tr>'+
+					'<td id="pathLabel" class="label"></td>'+
+					'<td id="path" class="selectCell"></td>'+
+				'</tr>'+
+				'<tr>'+
+					'<td id="buildpackLabel" class="label"></td>'+
+					'<td id="buildpack" class="selectCell"></td>'+
+				'</tr>'+
+				'<tr>'+
+					'<td id="memoryLabel" class="label"></td>'+
+					'<td id="memory" class="selectCell"></td>'+
+				'</tr>'+
+				'<tr>'+
+					'<td id="instancesLabel" class="label"></td>'+
+					'<td id="instances" class="selectCell"></td>'+
+				'</tr>'+
+				'<tr>'+
+					'<td id="timeoutLabel" class="label"></td>'+
+					'<td id="timeout" class="selectCell"></td>'+
+				'</tr>'+
+			'</table>',
+		    	render: function(){
+			    	document.getElementById("commandLabel").appendChild(document.createTextNode("Command:"));
+			    	command = document.createElement("input");
+			    	if(manifestInfo.command){
+			    		command.value = manifestInfo.command;
+			    	}
+			    	document.getElementById("command").appendChild(command);
+			    	document.getElementById("pathLabel").appendChild(document.createTextNode("Path:"));
+			    	path = document.createElement("input");
+			    	if(manifestInfo.path){
+			    		path.value = manifestInfo.path;
+			    	}
+			    	document.getElementById("path").appendChild(path);
+			    	document.getElementById("buildpackLabel").appendChild(document.createTextNode("Buildpack Url:"));
+			    	buildpack = document.createElement("input");
+			    	if(manifestInfo.buildpack){
+			    		buildpack.value = manifestInfo.buildpack;
+			    	}
+			    	document.getElementById("buildpack").appendChild(buildpack);
+			    	document.getElementById("memoryLabel").appendChild(document.createTextNode("Memory:"));
+			    	memory = document.createElement("input");
+			    	memory.id = "memoryInput";
+			    	memory.type = "number";
+			    	memory.min = "0";
+			    	memoryUnit = document.createElement("select");
+			    	memoryUnit.id = "memoryUnit";
+					var option = document.createElement("option");
+					option.appendChild(document.createTextNode("MB"));
+					option.value = "MB";
+					memoryUnit.appendChild(option);
+					option = document.createElement("option");
+					option.appendChild(document.createTextNode("GB"));
+					option.value = "GB";
+					memoryUnit.appendChild(option);
+			    	if(manifestInfo.memory){
+			    		if(manifestInfo.memory.toUpperCase().indexOf("M")>0 || manifestInfo.memory.toUpperCase().indexOf("G")>0){
+			    			var indexOfUnit = manifestInfo.memory.toUpperCase().indexOf("M") > 0 ? manifestInfo.memory.toUpperCase().indexOf("M") : manifestInfo.memory.toUpperCase().indexOf("G");
+							memory.value = manifestInfo.memory.substring(0, indexOfUnit);
+							var unit = manifestInfo.memory.substring(indexOfUnit).toUpperCase();
+							if(unit.trim().length === 1){
+								unit += "B";
+							}
+							memoryUnit.value = unit;
+			    		}
+			    	}
+			    	document.getElementById("memory").appendChild(memory);
+			    	document.getElementById("memory").appendChild(memoryUnit);
+			    	
+			    	document.getElementById("instancesLabel").appendChild(document.createTextNode("Instances:"));
+			    	instances = document.createElement("input");
+			    	instances.type = "number";
+			    	instances.min = "0";
+			    	if(manifestInfo.instances){
+			    		instances.value = manifestInfo.instances;
+			    	}
+			    	document.getElementById("instances").appendChild(instances);
+			    	document.getElementById("timeoutLabel").appendChild(document.createTextNode("Timeout (sec):"));
+			    	timeout = document.createElement("input");
+			    	timeout.type = "number";
+			    	timeout.min = "0";
+			    	if(manifestInfo.timeout){
+			    		timeout.value = manifestInfo.timeout;
+			    	}
+			    	document.getElementById("timeout").appendChild(timeout);
+			    },
+			    getResults: function(){
+			    var ret = {};
+			    if(command){
+			    	ret.command = command.value;
+			    }
+			    if(buildpack){
+					ret.buildpack = buildpack.value;
+				}
+				if(memory){
+					ret.memory = memory.value ? memory.value + memoryUnit.value : "";
+				}
+				if(instances){
+					ret.instances = instances.value;
+				}
+				if(timeout){
+					ret.timeout = timeout.value;
+				}
+				if(path){
+					ret.path = path.value;
+				}
+		    	return ret;
+			    }
+		    });
 
 		    //
 		    function loadScreen(){
@@ -733,12 +782,20 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						getTarget(cFService, config, preferences).then(
 							function(targetResp){
 								target = targetResp;
-								displayPage1();
+								var wizard = new Wizard.Wizard({
+									parent: "wizard",
+									pages: [page1, page2, page3],
+									commonPane: commonPane,
+									onSubmit: doAction,
+									onCancel: closeFrame,
+									buttonNames: {ok: "Deploy"},
+									size: {width: "370px", height: "180px"}
+								});
 							}, function(error){
 								postError(error);
 							}
 						);
-					}
+					}.bind(this)
 				);
 			}
 			
@@ -748,7 +805,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			    	manifestInfo = manifestResponse.Contents.applications[0];
 				}
 		    	loadScreen();
-		    }, loadScreen);
+		    }.bind(this), loadScreen);
 			
 		}
 	);
