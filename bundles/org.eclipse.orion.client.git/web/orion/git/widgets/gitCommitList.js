@@ -947,9 +947,10 @@ define([
 					var status = item;
 					var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length + status.Missing.length;
 					var staged = status.Changed.length + status.Added.length + status.Removed.length;
+					var changed = unstaged + staged;
 					var description = document.createElement("div"); //$NON-NLS-0$
 					description.textContent = unstaged > 0 || staged > 0
-							? i18nUtil.formatMessage(messages["${0} file(s) to stage and ${1} file(s) to commit."], unstaged, staged)
+							? i18nUtil.formatMessage(messages["FilesChangedVsReadyToCommit"], changed, messages[changed === 1 ? "file" : "files"], staged, messages[staged === 1 ? "file" : "files"])
 							: messages["Nothing to commit."];
 					detailsView.appendChild(description);
 				} else if (item.Type !== "Commit" && item.Type !== "StashCommit") { //$NON-NLS-1$ //$NON-NLS-0$

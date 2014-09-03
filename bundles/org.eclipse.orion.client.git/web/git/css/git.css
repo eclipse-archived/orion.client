@@ -453,14 +453,16 @@ table .sectionTable {
 }
 
 .gitStatusIcon {
-	font-size: 25px;
+	font-size: 30px;
 	float: left;
 	position: relative;
 	height: 30px;
 	vertical-align: text-top;
 	width: 30px;
-	padding: 6px;
-	margin-right: 6px;
+	padding: 2px;
+	padding-left: 6px;
+	padding-right: 6px;
+	margin-right: 10px;
 	margin-top: 5px;
 }
 
