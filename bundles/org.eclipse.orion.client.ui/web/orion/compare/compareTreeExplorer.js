@@ -13,7 +13,13 @@
 define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/fileClient', 'orion/commands', 
 		'orion/explorers/navigationUtils', 'orion/crawler/searchCrawler', 'orion/compare/compareUtils', 'orion/searchUtils', 'orion/selection'], 
 		function(messages, require, lib, i18nUtil, mExplorer, mFileClient, mCommands, mNavUtils, mSearchCrawler, mCompareUtils, mSearchUtils, mSelection) {
-
+	var _DEBUG_ = false;
+	function _logInfo(info) {
+		if(_DEBUG_) {
+			window.console.log(info);
+		}
+	}
+	
 	function _empty(nodeToEmpty){
 		var node = lib.node(nodeToEmpty);
 		if(node){
@@ -209,15 +215,15 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 	};
 	
 	CompareTreeExplorer.prototype._compareHitTest = function(files, OveralIndex) {
-		console.log("compare hit testing on: " + OveralIndex ); //$NON-NLS-0$
-		console.log(files[0].URL );
-		console.log(files[1].URL);
+		_logInfo("compare hit testing on: " + OveralIndex ); //$NON-NLS-0$
+		_logInfo(files[0].URL );
+		_logInfo(files[1].URL);
 		if(files[1].Content !== files[0].Content){
 			this._compareResults.push({type: "modified", fileURL: files[0].URL, fileURLBase: files[1].URL, name: files[0].name}); //$NON-NLS-0$
 			this._renderUI();		
-			console.log("Different files..." ); //$NON-NLS-0$
+			_logInfo("Different files..." ); //$NON-NLS-0$
 		} else {
-			console.log("Same files..." ); //$NON-NLS-0$
+			_logInfo("Same files..." ); //$NON-NLS-0$
 		}
 		files[1].Content = null;
 		files[0].Content = null;
@@ -235,7 +241,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 			    var textBold = _createElement('b', null, null, parentNode); //$NON-NLS-1$ //$NON-NLS-0$
 			    _place(document.createTextNode(message), textBold, "only"); //$NON-NLS-0$
 			}
-			console.log("completed compare"); //$NON-NLS-0$
+			_logInfo("completed compare"); //$NON-NLS-0$
 			this.reportStatus("");	
 		} else {
 			this.reportStatus(i18nUtil.formatMessage(messages['comparingFile'], this._sameFiles[currentIndex].fileNew.Location)); //$NON-NLS-0$
@@ -262,7 +268,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 				}
 			}.bind(this),
 			function(error) {
-				console.error("Error loading file metadata: status " + error.status); //$NON-NLS-0$
+				window.console.error("Error loading file metadata: status " + error.status); //$NON-NLS-0$
 				if(index === (this._compareResults.length-1)){
 					if(onComplete){
 						onComplete();
@@ -278,7 +284,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 
 	CompareTreeExplorer.prototype._getChildrenLocation =  function(locations, index, onComplete){
 		if(!this._fileClient){
-			console.log("A file client is needed for getting file content"); //$NON-NLS-0$
+			_logInfo("A file client is needed for getting file content"); //$NON-NLS-0$
 			return;
 		}
 		var that = this;
@@ -301,7 +307,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 
 	CompareTreeExplorer.prototype._getFileContent = function(files, currentIndex, OveralIndex) {
 		if(!this._fileClient){
-			console.log("A file client is needed for getting file content"); //$NON-NLS-0$
+			_logInfo("A file client is needed for getting file content"); //$NON-NLS-0$
 			return;
 		}
 		var that = this;
