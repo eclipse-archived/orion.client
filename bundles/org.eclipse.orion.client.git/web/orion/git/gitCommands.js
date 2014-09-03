@@ -868,6 +868,7 @@ var exports = {};
 		var openGitCommit = new mCommands.Command({
 			name : messages["Open"],
 			id : "eclipse.openGitCommit", //$NON-NLS-0$
+			tooltip: messages["OpenGitCommitTip"], //$NON-NLS-0$
 			imageClass: "git-sprite-open", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			hrefCallback: function(data) {
@@ -2756,31 +2757,53 @@ var exports = {};
 		
 		commandService.addCommand(showPatchCommand);
 		
+		var showPatchCallback = function(data) {
+			var items = forceArray(data.items);
+			var url;
+			if (data.userData && data.userData.Clone && data.userData.Clone.DiffLocation) {
+				url = data.userData.Clone.DiffLocation.replace("\/Default\/", "\/Cached\/") + "?parts=diff"; //$NON-NLS-0$
+				for (var i = 0; i < items.length; i++) {
+					url += "&Path="; //$NON-NLS-0$
+					url += items[i].name;
+				}
+			} else if (data.items && data.items.Diffs) {
+				var baseLocation = data.items.Diffs[0].DiffLocation;
+				var newPath = data.items.Diffs[0].NewPath;
+				url = baseLocation.substring(0, baseLocation.length - newPath.length);
+				url += "?parts=diff";  //$NON-NLS-0$
+				for (var i = 0; i < data.items.Diffs.length; i++) {
+					url += "&Path="; //$NON-NLS-0$
+					url += data.items.Diffs[i].NewPath;
+				}
+			}
+			window.open(url);
+		};
+			
 		var showStagedPatchCommand = new mCommands.Command({
 			name: messages["Show Patch"],
 			imageClass: "git-sprite-save-patch", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			tooltip: messages["Show checked changes as a patch"],
 			id: "eclipse.orion.git.showStagedPatchCommand", //$NON-NLS-0$
-			callback : function(data) {
-				var items = forceArray(data.items);
-				
-				var url = data.userData.Clone.DiffLocation.replace("\/Default\/", "\/Cached\/") + "?parts=diff"; //$NON-NLS-0$
-				for (var i = 0; i < items.length; i++) {
-					url += "&Path="; //$NON-NLS-0$
-					url += items[i].name;
-				}
-				window.open(url);
-					
-			},
+			callback: showPatchCallback,
 			visibleWhen: function(item) {
-//				var items = forceArray(item);
-//				return items.length !== 0;
 				return true;
 			}
 		});
-		
 		commandService.addCommand(showStagedPatchCommand);
+		
+		var showCommitPatchCommand = new mCommands.Command({
+			name: messages["Show Patch"],
+			imageClass: "git-sprite-save-patch", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			tooltip: messages["ShowCommitPatchTip"],
+			id: "eclipse.orion.git.showCommitPatchCommand", //$NON-NLS-0$
+			callback: showPatchCallback,
+			visibleWhen: function(item) {
+				return true;
+			}
+		});
+		commandService.addCommand(showCommitPatchCommand);
 		
 		// Rebase commands
 		
