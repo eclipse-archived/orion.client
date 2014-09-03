@@ -35,7 +35,7 @@ define(
 			CommitDialog.prototype._init = function(options) {
 				var that = this;
 
-				this.title = messages["Commit Changes"];
+				this.title = messages["CommitChangesDialog"];
 				this.modal = true;
 				this.messages = messages;
 				this.options = options;

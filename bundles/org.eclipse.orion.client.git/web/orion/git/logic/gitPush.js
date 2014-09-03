@@ -55,7 +55,7 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/git/widgets/Co
 				};
 						
 				var dialog = new mRemotePrompter.RemotePrompterDialog({
-					title: messages["Choose Branch"],
+					title: messages["ChooseBranchDialog"],
 					serviceRegistry: serviceRegistry,
 					gitClient: gitService,
 					closeCallback: function() {
@@ -273,7 +273,7 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/git/widgets/Co
 									}
 
 									var dialog = new mConfirmPush.ConfirmPushDialog({
-										title: messages["Choose Branch"],
+										title: messages["ChooseBranchDialog"],
 										serviceRegistry: serviceRegistry,
 										gitClient: gitService,
 										moreCallback: function() {

@@ -41,7 +41,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 	CloneGitRepositoryDialog.prototype._init = function(options) {
 		var that = this;
 
-		this.title = options.title ? options.title : messages["Clone Git Repository"];
+		this.title = options.title ? options.title : messages["CloneGitRepositoryDialog"];
 		this.modal = true;
 		this.messages = messages;
 
@@ -174,7 +174,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 
 		this.$isExistingProject.checked = true;
 
-		var dialog = new DirPrompter.DirectoryPrompterDialog({ title : messages["Choose a Folder"],
+		var dialog = new DirPrompter.DirectoryPrompterDialog({ title : messages["ChooseFolderDialog"],
 		serviceRegistry : this.serviceRegistry,
 		fileClient : this.fileClient,
 		func : function(targetFolder) {

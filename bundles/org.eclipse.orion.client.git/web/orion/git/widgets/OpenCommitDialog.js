@@ -32,7 +32,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred
 	OpenCommitDialog.prototype._init = function(options) {
 		var that = this;
 
-		this.title = options.title || messages["Find Commit"];
+		this.title = options.title || messages["OpenCommitDialog"];
 		this.modal = true;
 		this.messages = messages;
 

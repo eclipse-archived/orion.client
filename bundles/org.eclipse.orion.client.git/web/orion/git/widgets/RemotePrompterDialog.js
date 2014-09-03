@@ -139,7 +139,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 	RemotePrompterDialog.prototype._init = function(options) {
 		var that = this;
 
-		this.title = options.title || messages['Choose a Folder'];
+		this.title = options.title || messages["ChooseBranchDialog"];
 		this.modal = true;
 		this.messages = messages;
 		this.func = options.func;
