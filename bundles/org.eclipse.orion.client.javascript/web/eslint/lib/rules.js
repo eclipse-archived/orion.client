@@ -38,6 +38,7 @@ exports.define = define;
  * @returns {void}
  */
 function load(rulesDir) {
+    /*ORION*/
     var newRules = Rules.getESLintRules(rulesDir);
     Object.keys(newRules).forEach(function(ruleId) {
         define(ruleId, newRules[ruleId]);

@@ -9,21 +9,10 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env amd, node */
-(function(root, factory) {
-	if(typeof exports === 'object') {  //$NON-NLS-0$
-		module.exports = factory(require, exports, module);
-	}
-	else if(typeof define === 'function' && define.amd) {  //$NON-NLS-0$
-		define(['require', 'exports', 'module', 'logger'], factory);
-	}
-	else {
-		var req = function(id) {return root[id];},
-			exp = root,
-			mod = {exports: exp};
-		root.rules.noundef = factory(req, exp, mod);
-	}
-}(this, function(require, exports, module, Logger) {
+/*eslint-env amd */
+define([
+'logger'
+], function(Logger) {
 	/**
 	 * @description gets the operator token
 	 * @param {Object} context The eslint context
@@ -53,14 +42,7 @@
 		return false;
 	}
 
-	/**
-	 * @name module.exports
-	 * @description Rule exports
-	 * @function
-	 * @param context
-	 * @returns {Object} AST nodes to lint
-	 */
-	module.exports = function(context) {
+	return function(context) {
 		"use strict";  //$NON-NLS-0$
 		return {
 			/**
@@ -90,5 +72,4 @@
 			}
 		};
 	};
-	return module.exports;
-}));
+});

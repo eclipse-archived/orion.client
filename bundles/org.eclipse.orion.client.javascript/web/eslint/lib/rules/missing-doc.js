@@ -9,35 +9,17 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env amd, node */
+/*eslint-env amd */
 /**
  * Rule configuration is passed in context.options[0] which should be an object.
  * Settings are:
  * * context.options[0].expr If the value of this field is a number > 0, FunctionExpressions are checked
  * * context.options[0].decl If the value of this field is a number > 0, FunctionDeclarations are checked
  */
-(function(root, factory) {
-	if(typeof exports === 'object') {  //$NON-NLS-0$
-		module.exports = factory(require, exports, module);
-	}
-	else if(typeof define === 'function' && define.amd) {  //$NON-NLS-0$
-		define(['require', 'exports', 'module', 'logger'], factory);
-	}
-	else {
-		var req = function(id) {return root[id];},
-			exp = root,
-			mod = {exports: exp};
-		root.rules.noundef = factory(req, exp, mod);
-	}
-}(this, function(require, exports, module, Logger) {
-	/**
-	 * @name module.exports
-	 * @description Rule exports
-	 * @function
-	 * @param context
-	 * @returns {Object} Rule exports
-	 */
-	module.exports = function(context) {
+define([
+'logger'
+], function(Logger) {
+	return function(context) {
 		"use strict";  //$NON-NLS-0$
 
 		var config = (context.options && context.options[0]) || {},
@@ -117,5 +99,4 @@
 			"ExpressionStatement": checkDoc  //$NON-NLS-0$
 		};
 	};
-	return module.exports;
-}));
+});
