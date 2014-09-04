@@ -126,5 +126,8 @@ define({
 	"text": "text",
 	"title (optional)": "title (optional)",
 	"url": "url",
-	"TogglePaneOrientationTooltip": "Toggle split pane orientation"
+	"TogglePaneOrientationTooltip": "Toggle split pane orientation",
+	"CtrlKey": "Ctrl",
+	"ShiftKey": "Shift",
+	"AltKey": "Alt"
 });

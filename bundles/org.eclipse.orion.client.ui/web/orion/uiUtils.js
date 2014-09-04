@@ -9,14 +9,17 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/webui/littlelib'], function(lib) {
-                
+define([
+	'i18n!orion/nls/messages',
+	'orion/webui/littlelib'
+], function(messages, lib) {
+
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 * @class This class contains static utility methods.
 	 * @name orion.uiUtils
 	 */
-	
+
 	function getUserKeyStrokeString(binding) {
 		var userString = "";
 		var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
@@ -35,15 +38,13 @@ define(['orion/webui/littlelib'], function(lib) {
 				userString+= "\u2318"; //Command //$NON-NLS-0$
 			}
 		} else {
-			if (binding.mod1) {
-				userString+= "Ctrl+"; //$NON-NLS-0$
-			}
-			if (binding.mod2) {
-				userString+= "Shift+"; //$NON-NLS-0$
-			}
-			if (binding.mod3) {
-				userString+= "Alt+"; //$NON-NLS-0$
-			}
+			var PLUS = "+"; //$NON-NLS-0$;
+			if (binding.mod1)
+				userString += messages.CtrlKey + PLUS;
+			if (binding.mod2)
+				userString += messages.ShiftKey + PLUS;
+			if (binding.mod3)
+				userString += messages.AltKey + PLUS;
 		}
 		
 		if (binding.alphaKey) {
