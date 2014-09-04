@@ -599,46 +599,84 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.core-sprite-hamburger:before{ content:'\0041'; }
-.core-sprite-gear:before{ content:'\0042'; }
-.core-sprite-silhouette:before{ content:'\0043'; float: right;}
-.core-sprite-wrench:before{ content:'\0044'; }
-.core-sprite-addcontent:before{ content:'\0045'; }
-.core-sprite-go-up:before{ content:'\0049'; }
-.core-sprite-outline:before{ content:'\006B'; }
-.core-sprite-openarrow:before{ content:'\006D'; }
-.core-sprite-closedarrow:before{ content:'\006C'; }
-.core-sprite-delete:before{ content:'\006F'; }
-.core-sprite-refresh:before{ content:'\006A'; }
-.core-sprite-expandAll:before{ content:'\0051'; }
-.core-sprite-collapseAll:before{ content:'\0052'; }
-.core-sprite-folder:before{ content:'\0050'; }
-.core-sprite-file:before{ content:'\004A'; }
-.core-sprite-edit:before{ content:'\0048'; }
-.core-sprite-move-down:before{ content:'\0054'; }
-.core-sprite-move-up:before{ content:'\0053'; }
-.core-sprite-close:before{ content:'\006F'; }
-.core-sprite-leftarrow:before{content:'\0055';}
-.core-sprite-rightarrow:before{content:'\0056';}
-.core-sprite-deploy:before{content:'\0077';}
-.core-sprite-warning:before{content:'\0079';}
-.core-sprite-error:before{content:'\007A';}
-.core-sprite-repository:before{ content:'\0065'; }
-.core-sprite-sites:before{ content:'\0033'; }
-.core-sprite-shell:before{ content:'\0073'; }
-.core-sprite-search:before{ content:'\0032'; }
-.core-sprite-git-logo:before{ content:'\0034'; }
-.core-sprite-delta:before{ content:'\0035'; }
+.core-sprite-printer{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-vertical-split{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-horizontal-split{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+.core-sprite-hamburger:before{ content:'\E000'; }
+.core-sprite-gear:before{ content:'\E001'; }
+.core-sprite-silhouette:before{ content:'\E003'; float: right;}
+.core-sprite-wrench:before{ content:'\E004'; }
+.core-sprite-addcontent:before{ content:'\E004'; }
+.core-sprite-go-up:before{ content:'\E009'; }
+.core-sprite-outline:before{ content:'\E026'; }
+.core-sprite-openarrow:before{ content:'\E028'; }
+.core-sprite-closedarrow:before{ content:'\E027'; }
+.core-sprite-delete:before{ content:'\E02A'; }
+.core-sprite-refresh:before{ content:'\E025'; }
+.core-sprite-expandAll:before{ content:'\E011'; }
+.core-sprite-collapseAll:before{ content:'\E012'; }
+.core-sprite-folder:before{ content:'\E010'; }
+.core-sprite-file:before{ content:'\E00A'; }
+.core-sprite-edit:before{ content:'\E008'; }
+.core-sprite-move-down:before{ content:'\E014'; }
+.core-sprite-move-up:before{ content:'\E013'; }
+.core-sprite-close:before{ content:'\E02A'; }
+.core-sprite-leftarrow:before{content:'\E015';}
+.core-sprite-rightarrow:before{content:'\E016';}
+.core-sprite-deploy:before{content:'\E032';}
+.core-sprite-warning:before{content:'\E033';}
+.core-sprite-error:before{content:'\E034';}
+.core-sprite-repository:before{ content:'\E020'; }
+.core-sprite-sites:before{ content:'\E03A'; }
+.core-sprite-shell:before{ content:'\E02E'; }
+.core-sprite-search:before{ content:'\E037'; }
+.core-sprite-git-logo:before{ content:'\E03B'; }
+.core-sprite-delta:before{ content:'\E03C'; }
 .core-sprite-blank-menu-item:before{ content:'\0079'; }
+.core-sprite-printer:before{ content:'\E040'; }
+.core-sprite-vertical-split:before{ content:'\E041'; }
+.core-sprite-horizontal-split:before{ content:'\E042'; }
 
 /* icons for file types - possibly more to come - at least one for images */ 
 
-.file-sprite-javascript:before{ content:'\004D'; }
-.file-sprite-css:before{ content:'\004C'; }
-.file-sprite-xml:before{ content:'\004E'; }
-.file-sprite-html:before{ content:'\004F'; }
-.file-sprite-text:before{ content:'\004B'; }
-.file-sprite-image:before{ content:'\0076'; }
+.file-sprite-javascript:before{ content:'\E00D'; }
+.file-sprite-css:before{ content:'\E00C'; }
+.file-sprite-xml:before{ content:'\E00E'; }
+.file-sprite-html:before{ content:'\E00F'; }
+.file-sprite-text:before{ content:'\E00B'; }
+.file-sprite-image:before{ content:'\E031'; }
 
 .file-sprite-javascript:hover{
 	text-decoration:none;
@@ -648,10 +686,3 @@
 
 .core-sprite-openarrow:before{ content:'\25BE'; }
 .core-sprite-closedarrow:before{ content:'\25B8'; } */
-
-
-
-
-
-
-
