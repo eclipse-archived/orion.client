@@ -76,5 +76,6 @@ define({
 	"Mappings": "Mappings",
 	// The create button will be inserted into the following text
 	"SitesExplorer.NoSitesText" : "You have no sites. Click ${0} to create a site.",
-	"Edit Site": "Edit Site"
+	"Edit Site": "Edit Site",
+	"SiteTitleFormat": "${0} - ${1}" //${0} represents the site location; ${1} represents the title "Edit Site"
 });

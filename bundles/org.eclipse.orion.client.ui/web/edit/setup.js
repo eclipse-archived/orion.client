@@ -351,6 +351,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		mGlobalCommands.setPageTarget({
 			task: messages["Editor"],
 			name: name,
+			title: i18nUtil.formatMessage(messages["EditorTitleFormat"], name, messages["Editor"]),
 			target: target,
 			makeAlternate: function() {
 				if (metadata && metadata.parent) {

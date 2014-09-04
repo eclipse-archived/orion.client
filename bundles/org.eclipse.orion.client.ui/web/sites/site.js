@@ -11,10 +11,10 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 /*global confirm*/
-define(['require', 'i18n!orion/sites/nls/messages', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 
+define(['require', 'i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 
 	'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteClient', 'orion/sites/siteCommands',
 	'orion/PageUtil', 'orion/sites/SiteEditor'], 
-	function(require, messages, mBootstrap, mStatus, mProgress, mCommandRegistry, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteClient, mSiteCommands, PageUtil, SiteEditor) {
+	function(require, messages, i18nUtil, mBootstrap, mStatus, mProgress, mCommandRegistry, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteClient, mSiteCommands, PageUtil, SiteEditor) {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
@@ -42,6 +42,7 @@ define(['require', 'i18n!orion/sites/nls/messages', 'orion/bootstrap', 'orion/st
 					item.Parents[0].Name = messages["Sites"];
 					item.Parents[0].Location = "";
 					mGlobalCommands.setPageTarget({task: messages["Edit Site"], target: site, breadcrumbTarget: item,
+						title: i18nUtil.formatMessage(messages["SiteTitleFormat"], site.Name, messages["Edit Site"]),
 						makeBreadcrumbLink: function(seg, location){
 							seg.href = require.toUrl("sites/sites.html"); //$NON-NLS-0$
 						},
