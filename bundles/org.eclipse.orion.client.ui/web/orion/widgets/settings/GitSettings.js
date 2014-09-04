@@ -22,7 +22,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 
 		// TODO these should be real Orion sections, not fake DIVs
 		templateString: '' +  //$NON-NLS-0$
-				'<div>' +  //$NON-NLS-0$
 					'<div class="sectionWrapper toolComposite">' +
 						'<div class="sectionAnchor sectionTitle layoutLeft">${Git Settings}</div>' + 
 						'<div id="userCommands" class="layoutRight sectionActions"></div>' +
@@ -30,21 +29,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					'<div class="sections sectionTable">' + //$NON-NLS-0$
 					
 					'</div>' + //$NON-NLS-0$
-					'<div></div>' +
 					
-				'</div>' + //$NON-NLS-0$
-				
-				'<div>' +  //$NON-NLS-0$
 					'<div class="sectionWrapper toolComposite">' +
 						'<div class="sectionAnchor sectionTitle layoutLeft">${Git Credentials Storage}</div>' + 
 						'<div id="gitCommands" class="layoutRight sectionActions"></div>' +
 					'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
 					'<div class="gitSections sectionTable">' + //$NON-NLS-0$
 					
-					'</div>' + //$NON-NLS-0$
-					'<div></div>' +
-					
-				'</div>', //$NON-NLS-0$
+					'</div>', //$NON-NLS-0$
 
 		createElements: function() {
 			this.node.innerHTML = this.templateString;

@@ -245,7 +245,6 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				this.editorThemeSection = new mSection.Section(this.sections, {
 					id: "editorThemeSettings", //$NON-NLS-0$
 					title: messages.EditorThemes,
-					canHide: true,
 					slideout: true
 				});
 
@@ -308,7 +307,6 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 						sectionWidget = new mSection.Section(this.sections, {
 							id: section,
 							title: messages[section],
-							canHide: true,
 							slideout: true
 						});
 						var infoText = document.createElement("div"); //$NON-NLS-0$
