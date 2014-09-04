@@ -1426,7 +1426,18 @@ var exports = {};
 		});
 		commandService.addCommand(pushBranchForceCommand);
 
-		var resetCallback = function(data, location, refId, mode, message) {
+		var resetCallback = function(data, refId, mode, message) {
+			var location = data.items.IndexLocation;
+			if (!location) {
+				var temp = data.items.parent;
+				while (temp) {
+					if (temp.repository) {
+						location = temp.repository.IndexLocation;
+					}
+					temp = temp.parent;
+				}
+			}
+				
 			var item = data.items;
 			if(confirm(i18nUtil.formatMessage(message, refId))) { //$NON-NLS-0$
 				var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
@@ -1460,17 +1471,7 @@ var exports = {};
 			imageClass: "git-sprite-reset", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			callback: function(data) {
-				var indexLocation = data.items.IndexLocation;
-				if (!indexLocation) {
-					var temp = data.items.parent;
-					while (temp) {
-						if (temp.repository) {
-							indexLocation = temp.repository.IndexLocation;
-						}
-						temp = temp.parent;
-					}
-				}
-				resetCallback(data, indexLocation, data.items.Name, "HARD", messages["GitResetIndexConfirm"]); //$NON-NLS-0$
+				resetCallback(data, data.items.Name, "HARD", messages["GitResetIndexConfirm"]); //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
 				return item.Type === "RemoteTrackingBranch" || "Commit"; //$NON-NLS-1$ //$NON-NLS-0$
@@ -1485,7 +1486,7 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.undoCommit", //$NON-NLS-0$
 			callback: function(data) {
-				resetCallback(data, data.items.parent.targetRef.IndexLocation, "HEAD^", "SOFT", messages["UndoConfirm"]);
+				resetCallback(data, "HEAD^", "SOFT", messages["UndoConfirm"]);
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Commit" && item.parent && item.parent.Type === "Outgoing" && item.parent.children && item.parent.children[0].Name === item.Name; //$NON-NLS-0$
