@@ -140,7 +140,7 @@ define([
 				}
 			} else {
 				var ref = this.currentBranch;
-				result = ref.RemoteLocation[0] && ref.RemoteLocation[0].Children[ref.RemoteLocation[0].Children.length - 1];
+				result = ref && ref.RemoteLocation[0] && ref.RemoteLocation[0].Children[ref.RemoteLocation[0].Children.length - 1];
 			}
 			this.targetRef = result;
 			return result;

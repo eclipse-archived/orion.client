@@ -498,6 +498,8 @@ define([
 		if (activeBranch && targetRef) {
 			var targetName =  util.shortenRefName(targetRef);
 			title = activeBranch.Name + " => " + targetName;  //$NON-NLS-0$
+		} else if (!activeBranch && !targetRef) {
+			title = messages["NoBranch"];
 		} else {
 			title = util.shortenRefName(activeBranch || targetRef);
 		}
