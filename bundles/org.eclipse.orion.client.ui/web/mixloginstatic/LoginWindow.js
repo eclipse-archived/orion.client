@@ -395,19 +395,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		hideErrorMessage();
 	}
 
-	function googleLogin( event ){
-		if( handleSelectionEvent( event ) ){
-			event.srcElement.click();
-		}
-	}
-
-	function googleLoginPlus( event ){
-		if( handleSelectionEvent( event ) ){
-			event.srcElement.click();
-		}
-	}
-
-	function githubLogin( event ){
+	function clickElement( event ){
 		if( handleSelectionEvent( event ) ){
 			event.srcElement.click();
 		}
@@ -470,7 +458,8 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		checkemailrequest.send();
 
 		xhr("GET", "../server-status.json", { //$NON-NLS-0$
-			timeout: 15000
+			timeout: 15000,
+			responseType: "json"
 		}).then(function(result) {
 			var results = JSON.parse(result.response);
 			var messages = results.messages;
@@ -588,10 +577,10 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 
 		// FIX the hrefs of the various forms here.
 		document.getElementById("googleLoginPlus").href = createOAuthLink("google");
-		document.getElementById("googleLoginPlus").addEventListener("keydown", googleLoginPlus);
+		document.getElementById("googleLoginPlus").addEventListener("keydown", clickElement);
 
 		document.getElementById("githubLogin").href = createOAuthLink("github");
-		document.getElementById("githubLogin").addEventListener("keydown", githubLogin);
+		document.getElementById("githubLogin").addEventListener("keydown", clickElement);
 
 		document.getElementById("orionLogin").addEventListener("click", revealLogin);
 		document.getElementById("orionLogin").onkeydown = revealLogin;
