@@ -229,7 +229,7 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 	function attachExternalProviders(){
 		var providerElements = [];
 		// Add OAuth Providers
-		providerElements.push(createProviderLink("Google OAuth", "../mixloginstatic/images/googleplus.png", "", confirmOAuth.bind(null, "google")));
+		providerElements.push(createProviderLink("Google OAuth", "../mixloginstatic/images/google.png", "", confirmOAuth.bind(null, "google")));
 		providerElements.push(createProviderLink("GitHub OAuth", "../mixloginstatic/images/GitHub-Mark-Light-32px.png", "githubImage", confirmOAuth.bind(null, "github")));
 
 		var openIdContainer = document.getElementById("newExternalId");
