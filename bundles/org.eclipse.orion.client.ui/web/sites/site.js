@@ -41,8 +41,10 @@ define(['require', 'i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/boo
 					item.Parents[0] = {};
 					item.Parents[0].Name = messages["Sites"];
 					item.Parents[0].Location = "";
-					mGlobalCommands.setPageTarget({task: messages["Edit Site"], target: site, breadcrumbTarget: item,
-						title: i18nUtil.formatMessage(messages["SiteTitleFormat"], site.Name, messages["Edit Site"]),
+					mGlobalCommands.setPageTarget({
+						task: messages["Edit Site"],
+						target: site,
+						breadcrumbTarget: item,
 						makeBreadcrumbLink: function(seg, location){
 							seg.href = require.toUrl("sites/sites.html"); //$NON-NLS-0$
 						},

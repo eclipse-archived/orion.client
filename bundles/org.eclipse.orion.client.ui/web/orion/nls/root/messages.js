@@ -129,5 +129,6 @@ define({
 	"TogglePaneOrientationTooltip": "Toggle split pane orientation",
 	"CtrlKey": "Ctrl",
 	"ShiftKey": "Shift",
-	"AltKey": "Alt"
+	"AltKey": "Alt",
+	"PageTitleFormat": "${0} - ${1}" // ${0} is the file or resource being edited; ${1} is the task (eg. "Editor")
 });

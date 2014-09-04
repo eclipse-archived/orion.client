@@ -79,6 +79,5 @@ define({
 	"Site": "Site", //$NON-NLS-1$ //$NON-NLS-0$
 	'projectsSectionTitle': 'Projects',  //$NON-NLS-0$  //$NON-NLS-1$
 	'listingProjects': 'Listing projects...',  //$NON-NLS-0$  //$NON-NLS-1$
-	'gettingWorkspaceInfo': 'Getting workspace information...',  //$NON-NLS-0$  //$NON-NLS-1$
-	"EditorTitleFormat": "${0} - ${1}" //${0} represents the file or folder location; ${1} represents the title "Editor"
+	'gettingWorkspaceInfo': 'Getting workspace information...'  //$NON-NLS-0$  //$NON-NLS-1$
 });
