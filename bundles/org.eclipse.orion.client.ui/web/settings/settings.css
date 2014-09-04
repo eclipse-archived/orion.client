@@ -39,7 +39,8 @@
 
 .categoriesContainer {
 	height: calc(100% - 84px);
-	top: 39px;
+	position: relative;
+	top: 0;
 }
 
 .navbar {
@@ -141,10 +142,10 @@
 }
 
 .setting-row {
-	color: #222;
 	border-bottom: 1px solid whiteSmoke;
-	display: -webkit-box;
-	display: -moz-box;
+	color: #222;
+	display: flex;
+	display: -webkit-flex;				/* Safari */
 	margin-top: 17px;
 	padding-bottom: 20px;
 	width: 100%;
@@ -558,4 +559,5 @@ div.page section:last-child {
 	background: white;
 	border-bottom-left-radius: 3px;
 	border-bottom-right-radius: 3px;
+	overflow-y: auto;
 }

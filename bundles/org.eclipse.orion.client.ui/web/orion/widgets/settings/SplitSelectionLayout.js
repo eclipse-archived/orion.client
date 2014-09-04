@@ -35,11 +35,9 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects) {
 	}
 	objects.mixin(SplitSelectionLayout.prototype, /** @lends orion.widgets.settings.SplitSelectionLayout.prototype */ {
 		categoriesTemplateString: '' + //$NON-NLS-0$
-			'<div id="categories" class="categories">' +  //$NON-NLS-0$
 				'<div id="categoryNode" class="sidePanelMargins">' + //$NON-NLS-0$
 					'<ul class="navbar" role="tablist" aria-labelledby="content-title"></ul>' +  //$NON-NLS-0$
-				'</div>' + //$NON-NLS-0$
-			'</div>', //$NON-NLS-0$
+				'</div>', //$NON-NLS-0$
 		contentTemplateString: '' + //$NON-NLS-0$
 			'<div class="settings" role="tabpanel">' + //$NON-NLS-0$
 			'	<div class="split-selection-table"></div>' + //$NON-NLS-0$
