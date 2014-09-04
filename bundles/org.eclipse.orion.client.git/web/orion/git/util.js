@@ -175,11 +175,16 @@ define([
 		}
 		return result;
 	}
+	
+	function isNewBranch(branch) {
+		return branch.Type === "RemoteTrackingBranch" && !branch.Id; //$NON-NLS-0$
+	}
 
 	return {
 		isStaged: isStaged,
 		isUnstaged: isUnstaged,
 		isChange: isChange,
+		isNewBranch: isNewBranch,
 		generateQuery: generateQuery,
 		hasStagedChanges: hasStagedChanges,
 		hasUnstagedChanges: hasUnstagedChanges,

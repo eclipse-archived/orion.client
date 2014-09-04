@@ -159,7 +159,7 @@ define([
 			return repository && repository.status && repository.status.RepositoryState === "REBASING_INTERACTIVE"; //$NON-NLS-0$
 		},
 		isNewBranch: function(branch) {
-			return branch.Type === "RemoteTrackingBranch" && !branch.Id; //$NON-NLS-0$
+			return util.isNewBranch(branch);
 		},
 		getChildren: function(parentItem, onComplete) {
 			var that = this;
