@@ -359,7 +359,24 @@ define(["orion/util"], function(util) {
 		INSERT: 45,
 		DEL: 46
 	};
-		
+	/**
+	 * Maps a <code>keyCode</code> to <tt>KEY</tt> name. This is the inverse of {@link orion.webui.littlelib.KEY}.
+	 * @name orion.webui.littlelib.KEYCODE
+	 * @static
+	 */
+	var KEY_CODE = Object.create(null);
+	Object.keys(KEY).forEach(function(name) {
+		KEY_CODE[KEY[name]] = name;
+	});
+
+	/**
+	 * @param {Number} keyCode
+	 * @returns The name of the <code>lib.KEY</code> entry for keyCode, or null.
+	 */
+	function keyName(keyCode) {
+		return KEY_CODE[keyCode] || null;
+	}
+
 	//return module exports
 	return {
 		$: $,
@@ -377,6 +394,7 @@ define(["orion/util"], function(util) {
 		addAutoDismiss: addAutoDismiss,
 		setFramesEnabled: setFramesEnabled,
 		removeAutoDismiss: removeAutoDismiss,
-		KEY: KEY
+		keyName: keyName,
+		KEY: KEY,
 	};
 });
