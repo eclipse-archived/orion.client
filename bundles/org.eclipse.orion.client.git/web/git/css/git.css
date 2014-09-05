@@ -981,6 +981,20 @@ table .sectionTable {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.git-sprite-commit{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+
 .git-sprite-apply-patch:before{ content:'\E017'; }
 .git-sprite-save-patch:before{ content:'\E018'; }
 .git-sprite-cherry-pick:before{ content:'\E019'; }
@@ -1015,3 +1029,4 @@ table .sectionTable {
 .git-sprite-view-stash:before{ content: '\E035'; }
 .git-sprite-stash-changes:before{ content: '\E03E'; }
 .git-sprite-pop-changes:before{ content: '\E03F'; }
+.git-sprite-commit:before{ content: '\E045'; }
