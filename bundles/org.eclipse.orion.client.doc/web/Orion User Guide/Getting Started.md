@@ -18,7 +18,7 @@ On your first visit to the login page, you can sign in using either of these way
 
 * Sign in using the username and password of your Orion account.
 * Sign in using a Mozilla Persona. To do this, your Persona email address must be the same as the email address you chose when creating your Orion account. You can sign up for a Persona [here](https://persona.org).
-* Sign in with a linked Google account. To link a Google account, use Orion's Settings page.
+* Sign in with a linked Google account. To link a Google account, use Orion's [Settings page](http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Settings_page "Orion/Documentation/User_Guide/Reference/Settings_page").
 
 If you are accessing a server other than OrionHub or localhost, the server administrator may have disallowed you from creating an account on the Login Page. In that case, you'll have to ask the server administrator to create one for you.
 
