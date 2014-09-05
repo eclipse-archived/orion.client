@@ -151,8 +151,7 @@ define([
 					return false;
 				}
 			}
-			var ref = this.currentBranch;
-			return ref && ref.RemoteLocation && ref.RemoteLocation.length === 1 && ref.RemoteLocation[0].Children.length === 1;
+			return util.tracksRemoteBranch(this.currentBranch);
 		},
 		isRebasing: function() {
 			var repository = this.root.repository;

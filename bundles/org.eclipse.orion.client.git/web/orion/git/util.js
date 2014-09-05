@@ -177,14 +177,19 @@ define([
 	}
 	
 	function isNewBranch(branch) {
-		return branch.Type === "RemoteTrackingBranch" && !branch.Id; //$NON-NLS-0$
+		return branch && branch.Type === "RemoteTrackingBranch" && !branch.Id; //$NON-NLS-0$
 	}
-
+	
+	function tracksRemoteBranch(branch) {
+		return branch && branch.RemoteLocation && !isNewBranch(branch.RemoteLocation[0].Children[0]);
+	}
+	
 	return {
 		isStaged: isStaged,
 		isUnstaged: isUnstaged,
 		isChange: isChange,
 		isNewBranch: isNewBranch,
+		tracksRemoteBranch: tracksRemoteBranch,
 		generateQuery: generateQuery,
 		hasStagedChanges: hasStagedChanges,
 		hasUnstagedChanges: hasUnstagedChanges,
