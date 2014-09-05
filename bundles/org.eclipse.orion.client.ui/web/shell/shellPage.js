@@ -1068,11 +1068,11 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 		}
 
 		/* add commands contributed through the plug-in API */
-		var allReferences = serviceRegistry.getServiceReferences("orion.shell.command"); //$NON-NLS-0$
+		allReferences = serviceRegistry.getServiceReferences("orion.shell.command"); //$NON-NLS-0$
 		var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-		for (var i = 0; i < allReferences.length; ++i) {
-			var ref = allReferences[i];
-			var service = serviceRegistry.getService(ref);
+		for (i = 0; i < allReferences.length; ++i) {
+			ref = allReferences[i];
+			service = serviceRegistry.getService(ref);
 			if (service) {
 				var OUTPUT_STRING = "output"; //$NON-NLS-0$
 				parameters = ref.getProperty("parameters") || []; //$NON-NLS-0$
