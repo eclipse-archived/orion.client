@@ -12,10 +12,8 @@ html,body {
 	font-weight: bold;
 }
 
-.workingTarget {
-	overflow: hidden;
-	padding: 0;
-	margin: 0;
+.searchSectionButton {
+	margin-top: 14px;
 }
 
 .searchSectionLabel {
@@ -27,6 +25,12 @@ html,body {
 	margin-top: 10px;
 }
 
-.searchSectionButton {
-	margin-top: 14px;
+.sidebarWrapper > .sidebar {
+	height: 100%;
+}
+
+.workingTarget {
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
 }
