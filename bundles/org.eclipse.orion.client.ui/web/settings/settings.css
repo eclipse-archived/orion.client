@@ -511,6 +511,11 @@ div.page section:last-child {
 	display: inline-block;
 }
 
+.caption {
+	display: block;
+	margin-top: -10px;
+}
+
 .themepicker, .fontsizepicker, .colorfield, .themesaver {
 	display: inline-block;
 }

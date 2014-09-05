@@ -146,6 +146,8 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
     ThemeBuilder.prototype.template = '<div id="themeContainer">' +
         '<canvas id="orionui" width="800" height="380""></canvas>' +
+        '<div id="helpcaption" class="settingsLabel caption">' + messages["clickDiagram"] +
+        '</div>' +
         '<div id="pickercontainer" style="display:block;">' +
         '<span class="settingsLabel">' + messages["Theme:"] +
         '</span>' +
@@ -526,9 +528,6 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
                 count++;
             }
         }
-
-        Component.drawText(ctx, messages.clickDiagram, LEFT + 5 + x, labely + 50, 'bold 8pt sans-serif', '#cc0000');
-        Component.drawText(ctx, messages.clickUpdate, LEFT + 5 + x, labely + 65, 'bold 8pt sans-serif', '#cc0000');
 
         var stringcontainer = document.getElementById('stringcontainer');
         stringcontainer.style.display = 'none';
