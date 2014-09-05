@@ -387,8 +387,8 @@ define([
 						} 
 						if(error.JsonData.Host){
 							error.Retry = {
-								addParameters : [{id: "sshuser", type: "text", name: "User Name:"}, {id: "sshpassword", type: "password", name: "Password:"}],
-								optionalParameters: [{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}]
+								addParameters : [{id: "sshuser", type: "text", nameKey: "User Name:"}, {id: "sshpassword", type: "password", nameKey: "Password:"}],
+								optionalParameters: [{id: "sshprivateKey", type: "textarea", nameKey: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", nameKey: "Ssh Passphrase:"}]
 							};
 							deferred.reject(error);
 							return;
@@ -459,8 +459,8 @@ define([
 	}, {
 		id: "orion.git.projecthandler",
 		type: "git",
-		addParameters: [{id: "url", type: "url", name: "Url:"}],
-		optionalParameters: [{id: "sshuser", type: "text", name: "User Name:"}, {id: "sshpassword", type: "password", name: "Password:"},{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}],
+		addParameters: [{id: "url", type: "url", nameKey: "Url:"}],
+		optionalParameters: [{id: "sshuser", type: "text", nameKey: "User Name:"}, {id: "sshpassword", type: "password", nameKey: "Password:"},{id: "sshprivateKey", type: "textarea", nameKey: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", nameKey: "Ssh Passphrase:"}],
 		nls: "git/nls/gitmessages",
 		addDependencyNameKey: "addDependencyName",
 		addDependencyTooltipKey: "addDependencyTooltip",

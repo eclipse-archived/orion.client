@@ -481,6 +481,26 @@ define([
 		return service;
 	},
 
+	
+	_translateKeys: function(target, messages) {
+		var isI18nKey = RegExp.prototype.test.bind(/Key$/);
+		Object.keys(target).filter(isI18nKey).forEach(function(key) {
+			var translated = messages[target[key]],
+			    baseName = key.substring(0, key.length - "Key".length), //$NON-NLS-0$
+			    fallback = target[baseName] || key;
+			target[baseName] = translated || fallback;
+			delete target[key]; // target.F is translated so delete target.FKey
+		});
+	},
+	
+	_translateParamArray: function(parameters, messages) {
+		if( Array.isArray(parameters)) {
+			parameters.forEach(function(parameters) {
+				this._translateKeys(parameters, messages);
+			}.bind(this));
+		}
+	},
+	
 	/**
 	 * Translates service's i18nable fields. A field F is i18nable if there's another field named FKey,
 	 * giving the message key to use for translating F. `service.nls` gives the message bundle path.
@@ -489,19 +509,14 @@ define([
 	 * @returns {orion.Promise} A promise resolving to the service, after its i18nable fields are translated.
 	 */
 	_nlsService: function(service) {
+		var _this = this;
 		function replaceNlsFields(target, messages) {
 			messages = messages || {};
-			var isI18nKey = RegExp.prototype.test.bind(/Key$/);
-			Object.keys(target).filter(isI18nKey).forEach(function(key) {
-				var translated = messages[target[key]],
-				    baseName = key.substring(0, key.length - "Key".length), //$NON-NLS-0$
-				    fallback = target[baseName] || key;
-				target[baseName] = translated || fallback;
-				delete target[key]; // target.F is translated so delete target.FKey
-			});
+			_this._translateKeys(target, messages);
+			_this._translateParamArray(target.addParameters, messages);
+			_this._translateParamArray(target.optionalParameters, messages);
 			return target;
 		}
-
 		var loadMessages = service.nls ? i18nUtil.getMessageBundle(service.nls) : new Deferred().resolve();
 		var nlsService = replaceNlsFields.bind(null, service);
 		return loadMessages.then(nlsService, nlsService);
