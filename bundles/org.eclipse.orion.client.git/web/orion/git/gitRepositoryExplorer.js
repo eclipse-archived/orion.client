@@ -616,7 +616,7 @@ define([
 			id : "diffSection", //$NON-NLS-0$
 			title : messages["CommitChanges"],
 			content : '<div id="diffNode"></div>', //$NON-NLS-0$
-			canHide : true,
+			canHide : false,
 			noTwistie: true,
 			preferencesService : this.preferencesService
 		});
