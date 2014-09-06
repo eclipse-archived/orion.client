@@ -261,6 +261,37 @@ table .sectionTable {
 	padding-top: 3px;
 }
 
+.gitChangeListInputLabel {
+	padding-left: 10px;
+	font-size: 12px;
+}
+
+.gitChangeListCheckLabel {
+	padding-right: 10px;
+	font-size: 12px;
+}
+
+.gitChangeListInput {
+	width: 200px;
+	font-size: 12px;
+}
+
+.gitChangeListCheck {
+	margin-top: 10px;
+}
+
+.gitChangeListGroup {
+	margin-top: 10px;
+}
+
+.gitChangeListGroupContent {
+	border: 1px solid #b2cfb9;
+	border-radius: 5px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	margin-top: 3px;
+}
+
 .gitCommitInfoValue {
 	color: black;
 }
@@ -281,12 +312,18 @@ table .sectionTable {
 	width: calc(100% - 26px);
 	background-color: #FFF;
 	padding: 5px;
+	padding-bottom: 0;
 	margin: 10px;
+	margin-bottom: 0;
 	border-radius: 5px;
 	border: 1px solid #b2cfb9;
 }
 
-.gitCommitMessage .gitCommitMessageTopRow.invalidCommitMessage {
+.gitCommitMessage .gitCommitMessageTopRow.invalidParam {
+	background-color: rgba(255, 0, 0, 0.1);
+}
+
+.gitCommitMessage input.invalidParam {
 	background-color: rgba(255, 0, 0, 0.1);
 }
 
@@ -297,8 +334,10 @@ table .sectionTable {
 }
 
 .gitCommitMessage .gitCommitMessageBottomRow {
-	width: calc(100% - 6px);
+	width: calc(100% - 20px);
 	padding: 2px;
+	margin-left: 10px;
+	margin-right: 10px;
 	overflow: hidden;
 }
 
@@ -319,7 +358,8 @@ table .sectionTable {
 	border: none;
 	background: transparent;
 	font-weight: bold;
-	padding-top: 5px;
+	margin-top: 5px;
+	margin-right: 5px;
 	color: #FF4500;
 }
 
@@ -356,7 +396,7 @@ table .sectionTable {
 	font-size: 12px;
 	color: #333;
 	padding-bottom: 3px;
-	}
+}
 
 .gitCommitListLoaded {
 	border: 1px solid #ddd;
