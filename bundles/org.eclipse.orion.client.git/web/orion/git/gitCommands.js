@@ -856,8 +856,7 @@ var exports = {};
 			name : messages["Open"],
 			id : "eclipse.openGitCommit", //$NON-NLS-0$
 			tooltip: messages["OpenGitCommitTip"], //$NON-NLS-0$
-			imageClass: "git-sprite-open", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			imageClass: "core-sprite-outline", //$NON-NLS-0$
 			hrefCallback: function(data) {
 				return require.toUrl(editTemplate.expand({resource: data.items.TreeLocation}));
 			},
