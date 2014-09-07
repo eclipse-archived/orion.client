@@ -713,6 +713,9 @@ define([
 						case "Tag": //$NON-NLS-0$ 
 							imgClass = "git-sprite-branch-active-tag"; //$NON-NLS-0$
 							break;
+						case "Commit": //$NON-NLS-0$ 
+							imgClass = "git-sprite-branch-active-commit"; //$NON-NLS-0$
+							break;
 						case "Branch": //$NON-NLS-0$
 						case "RemoteTrackingBranch": //$NON-NLS-0$
 						default:
