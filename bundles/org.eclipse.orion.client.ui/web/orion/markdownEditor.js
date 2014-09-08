@@ -32,6 +32,7 @@ define([
 	var markedOutputLink = marked.InlineLexer.prototype.outputLink;
 	var imgCount = 0;
 	var markedOptions = marked.parse.defaults;
+	var toggleOrientationCommand;
 	markedOptions.sanitize = true;
 	markedOptions.tables = true;
 
@@ -929,7 +930,7 @@ define([
 						link.href = linkURL.href;
 					}
 				} catch(e) {
-					console.log(e); // best effort
+					window.console.log(e); // best effort
 				}				
 			}
 			return markedOutputLink.call(this, cap, link);
@@ -1057,6 +1058,8 @@ define([
 		this._settingsListener = function(e) {
 			var orientation = e.newSettings.splitOrientation === "horizontal" ? mSplitter.ORIENTATION_HORIZONTAL : mSplitter.ORIENTATION_VERTICAL; //$NON-NLS-0$
 			this._splitter.setOrientation(orientation);
+			toggleOrientationCommand.checked = orientation === mSplitter.ORIENTATION_HORIZONTAL;
+
 			/*
 			 * If this is the initial retrieval of these settings then the root
 			 * and splitter elements likely need to have their visibilities updated.
@@ -1167,6 +1170,9 @@ define([
 
 	MarkdownEditor.prototype = Object.create(BaseEditor.prototype);
 	objects.mixin(MarkdownEditor.prototype, /** @lends orion.edit.MarkdownEditor.prototype */ {
+		getPaneOrientation: function() {
+			return this._splitter.getOrientation();
+		},
 		initSourceEditor: function() {
 			var editor = this._editorView.editor;
 			var textView = editor.getTextView();
@@ -1240,8 +1246,8 @@ define([
 			BaseEditor.prototype.install.call(this);
 		},
 		togglePaneOrientation: function() {
-			this._splitter.setOrientation(
-				this._splitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL ? mSplitter.ORIENTATION_HORIZONTAL : mSplitter.ORIENTATION_VERTICAL);
+			var orientation = this._splitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL ? mSplitter.ORIENTATION_HORIZONTAL : mSplitter.ORIENTATION_VERTICAL;
+			this._splitter.setOrientation(orientation);
 		},
 		uninstall: function() {
 			this._styler.destroy();
@@ -1461,19 +1467,20 @@ define([
 			new mKeyBinding.KeyBinding("G", true, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
 
 		ID = "markdown.toggle.orientation"; //$NON-NLS-0$
-		var toggleOrientationCommand = new mCommands.Command({
-			tooltip: messages["TogglePaneOrientationTooltip"],
-			imageClass: "core-sprite-start", //$NON-NLS-0$
+		toggleOrientationCommand = new mCommands.Command({
    			id: ID,
+			callback: function(/*data*/) {
+				this.editor.togglePaneOrientation();
+			}.bind(this),
+			type: "toggle", //$NON-NLS-0$
+			imageClass: "core-sprite-split-pane-orientation", //$NON-NLS-0$
+			tooltip: messages["TogglePaneOrientationTooltip"],
 			visibleWhen: function() {
 				return !!this._options;
 			}.bind(this),
-			callback: function(/*data*/) {
-				this.editor.togglePaneOrientation();
-			}.bind(this)
 		});
-//		options.commandRegistry.addCommand(toggleOrientationCommand);
-//		options.commandRegistry.registerCommandContribution("settingsActions", ID, 1, null, false); //$NON-NLS-0$
+		options.commandRegistry.addCommand(toggleOrientationCommand);
+		options.commandRegistry.registerCommandContribution("settingsActions", ID, 1, null, false); //$NON-NLS-0$
 	}
 	MarkdownEditorView.prototype = {
 		create: function() {

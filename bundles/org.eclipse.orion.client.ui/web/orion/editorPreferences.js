@@ -78,9 +78,7 @@ define([], function() {
 		keyBindings: "Default",
 		keyBindingsVisible: true,
 		keyBindingsLocalVisible: true,
-		splitOrientation: "horizontal",
-		splitOrientationVisible: true,
-		splitOrientationLocalVisible: true
+		splitOrientation: "horizontal"
 	};
 
 	function EditorPreferences(preferences, callback) {

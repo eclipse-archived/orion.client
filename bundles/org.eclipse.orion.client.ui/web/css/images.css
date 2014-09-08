@@ -611,7 +611,7 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.core-sprite-vertical-split{
+.core-sprite-split-pane-orientation{
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
@@ -623,17 +623,6 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.core-sprite-horizontal-split{
-	font-size: 16px;
-	line-height: normal;
-	vertical-align:middle;
-	color: #555;
-	font-family: 'Orion Icon Font';
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
 .core-sprite-hamburger:before{ content:'\E000'; }
 .core-sprite-gear:before{ content:'\E001'; }
 .core-sprite-silhouette:before{ content:'\E003'; float: right;}
@@ -666,8 +655,8 @@
 .core-sprite-delta:before{ content:'\E03C'; }
 .core-sprite-blank-menu-item:before{ content:'\0079'; }
 .core-sprite-printer:before{ content:'\E040'; }
-.core-sprite-vertical-split:before{ content:'\E041'; }
-.core-sprite-horizontal-split:before{ content:'\E042'; }
+.core-sprite-split-pane-orientation:before{ content:'\E041'; }
+.core-sprite-split-pane-orientation:after{ content:'\E042'; }
 
 /* icons for file types - possibly more to come - at least one for images */ 
 
