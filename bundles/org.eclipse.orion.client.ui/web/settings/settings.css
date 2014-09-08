@@ -191,6 +191,7 @@
 	width: 200px;
 	min-width: 30%;
 	display: inline-block;
+	vertical-align: top;
 }
 
 .setting-repository-label {
@@ -206,12 +207,11 @@
 .setting-local-indicator {
 	cursor: pointer;
 	display: inline-block;
-	margin: 2px;
-	margin-right: 4px;
+	margin: 3px 4px 2px 2px;
 	width: 6px;
 	height: 6px;
 	border-radius: 4px;
-	vertical-align: middle;
+	vertical-align: top;
 }
 
 .setting-local-indicator.on {
@@ -442,7 +442,7 @@ div.page section:last-child {
 	display: inline-block;
 	width: 200px;
 	padding: 4px;
-	margin: 0;
+	margin: -5px 0 0 0; /*not great*/
 	background-color: white;
 	border: 1px solid #CCC;
 	border-radius: 3px;
