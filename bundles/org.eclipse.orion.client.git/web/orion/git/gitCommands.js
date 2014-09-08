@@ -595,7 +595,7 @@ var exports = {};
 				}
 			},
 			visibleWhen: function(item) {
-				return item.Type === "Branch" || item.Type === "RemoteTrackingBranch"; //$NON-NLS-1$ //$NON-NLS-0$
+				return item.Type === "Branch" || (item.Type === "RemoteTrackingBranch" && item.Id); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(checkoutBranchCommand);
@@ -682,7 +682,7 @@ var exports = {};
 				});
 			},
 			visibleWhen: function(item) {
-				return item.Type === "RemoteTrackingBranch"; //$NON-NLS-0$
+				return item.Type === "RemoteTrackingBranch" && item.Id; //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(removeRemoteBranchCommand);
@@ -1009,7 +1009,7 @@ var exports = {};
 			if (item.LocalBranch && item.RemoteBranch) {
 				item = item.RemoteBranch;
 			}
-			if (item.Type === "RemoteTrackingBranch") //$NON-NLS-0$
+			if (item.Type === "RemoteTrackingBranch" && item.Id) //$NON-NLS-0$
 				return true;
 			if (item.Type === "Remote") //$NON-NLS-0$
 				return true;
@@ -1133,7 +1133,7 @@ var exports = {};
 				});
 			},
 			visibleWhen : function(item) {
-				if (item.Type === "RemoteTrackingBranch") //$NON-NLS-0$
+				if (item.Type === "RemoteTrackingBranch" && item.Id) //$NON-NLS-0$
 					return true;
 				if (item.Type === "Branch" && !item.Current) //$NON-NLS-0$
 					return true;
@@ -1191,7 +1191,7 @@ var exports = {};
 				});
 			},
 			visibleWhen : function(item) {
-				if (item.Type === "RemoteTrackingBranch") //$NON-NLS-0$
+				if (item.Type === "RemoteTrackingBranch" && item.Id) //$NON-NLS-0$
 					return true;
 				if (item.Type === "Branch" && !item.Current) //$NON-NLS-0$
 					return true;
@@ -1272,7 +1272,7 @@ var exports = {};
 					messages["starting the active branch again based on the latest state of '"] + item.Name + "' " +  //$NON-NLS-1$
 					messages["and applying each commit again to the updated active branch."];
 
-				return item.Type === "RemoteTrackingBranch" || (item.Type === "Branch" && !item.Current); //$NON-NLS-1$ //$NON-NLS-0$
+				return (item.Type === "RemoteTrackingBranch" && item.Id) || (item.Type === "Branch" && !item.Current); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(rebaseCommand);
@@ -1460,7 +1460,7 @@ var exports = {};
 				resetCallback(data, data.items.Name, "HARD", messages["GitResetIndexConfirm"]); //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
-				return item.Type === "RemoteTrackingBranch" || "Commit"; //$NON-NLS-1$ //$NON-NLS-0$
+				return (item.Type === "RemoteTrackingBranch"  && item.Id) || item.Type === "Branch" || item.Type === "Commit"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(resetIndexCommand);
@@ -1472,7 +1472,7 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.undoCommit", //$NON-NLS-0$
 			callback: function(data) {
-				resetCallback(data, "HEAD^", "SOFT", messages["UndoConfirm"]);
+				resetCallback(data, "HEAD^", "SOFT", messages["UndoConfirm"]); //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Commit" && item.parent && item.parent.Type === "Outgoing" && item.parent.children && item.parent.children[0].Name === item.Name; //$NON-NLS-0$
