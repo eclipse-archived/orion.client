@@ -778,6 +778,7 @@ define([
 							// need it after all, which could cause layout to change.
 							var defaultInvocation;
 							if(contribution.defaultActionId){
+								contribution.pretendDefaultActionId = contribution.defaultActionId === true;
 								var defaultChild = self._commandList[contribution.defaultActionId];
 								if(defaultChild && (defaultChild.visibleWhen ? defaultChild.visibleWhen(items) : true)){
 									defaultInvocation = new Commands.CommandInvocation(handler, items, userData, defaultChild, self);
