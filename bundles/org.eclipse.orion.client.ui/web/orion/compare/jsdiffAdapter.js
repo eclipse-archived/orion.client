@@ -22,7 +22,8 @@ orion.JSDiffAdapter = (function() {
 	 * @name orion.JSDiffAdapter
 	 * 
 	 */
-	function JSDiffAdapter() {
+	function JSDiffAdapter(ignoreWhitespace) {
+		this._ignoreWhitespace = ignoreWhitespace;
 	}
 	
 	JSDiffAdapter.prototype = {
@@ -40,7 +41,7 @@ orion.JSDiffAdapter = (function() {
 			var newLineAtEndOld = (splitOld[splitOld.length-1] === "");
 			var newLineAtEndNew = (splitNew[splitNew.length-1] === "");
 			
-			var diff = JsDiff.diffLines(oldStr, newStr);
+			var diff = JsDiff.diffLines(oldStr, newStr, this._ignoreWhitespace);
 			var map = [];
 			var changContents = [];
 			var linesAdded = 0;
@@ -127,7 +128,7 @@ orion.JSDiffAdapter = (function() {
 		},
 		
 		adaptCharDiff : function(oldStr, newStr, word) {
-			var diff = word ? JsDiff.diffWords(oldStr, newStr) : JsDiff.diffChars(oldStr, newStr);
+			var diff = word ? JsDiff.diffWords(oldStr, newStr, this._ignoreWhitespace) : JsDiff.diffChars(oldStr, newStr, this._ignoreWhitespace);
 			var map = [];
 			var oldStart = 0;
 			var newStart = 0;

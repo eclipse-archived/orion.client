@@ -42,8 +42,9 @@ var JsDiff = (function() {
     this.ignoreWhitespace = ignoreWhitespace;
   };
   fbDiff.prototype = {
-      diff: function(oldString, newString) {
-        // Handle the identity case (this is due to unrolling editLength == 0
+      diff: function(oldString, newString, ignoreWhitespace) {
+     	this.ignoreWhitespace = ignoreWhitespace;
+       // Handle the identity case (this is due to unrolling editLength == 0
         if (newString === oldString) {
           return [{ value: newString }];
         }
@@ -139,7 +140,7 @@ var JsDiff = (function() {
         if (this.ignoreWhitespace && !reWhitespace.test(left) && !reWhitespace.test(right)) {
           return true;
         } else {
-          return left === right;
+          return this._equals(left, right);
         }
       },
       join: function(left, right) {
@@ -156,10 +157,16 @@ var JsDiff = (function() {
   WordDiff.tokenize = function(value) {
     return removeEmpty(value.split(/(\s+|\b)/));
   };
+  WordDiff._equals = function(left, right) {
+    return left === right;
+  };
   
   var CssDiff = new fbDiff(true);
   CssDiff.tokenize = function(value) {
     return removeEmpty(value.split(/([{}:;,]|\s+)/));
+  };
+  CssDiff._equals = function(left, right) {
+    return left === right;
   };
   
   var LineDiff = new fbDiff();
@@ -170,11 +177,19 @@ var JsDiff = (function() {
     }
     return result;
   };
+  LineDiff._equals = function(left, right) {
+  	if(this.ignoreWhitespace) {
+	  	var newLeft = left.replace(/^\s+|\s+$|\s+(?=\s)/g, "");
+	 	var newRight = right.replace(/^\s+|\s+$|\s+(?=\s)/g, "");
+    	return newLeft === newRight;
+    }
+    return left === right;
+  };
   
   return {
-    diffChars: function(oldStr, newStr) { return CharDiff.diff(oldStr, newStr); },
-    diffWords: function(oldStr, newStr) { return WordDiff.diff(oldStr, newStr); },
-    diffLines: function(oldStr, newStr) { return LineDiff.diff(oldStr, newStr); },
+    diffChars: function(oldStr, newStr, ignoreWhitespace) { return CharDiff.diff(oldStr, newStr, ignoreWhitespace); },
+    diffWords: function(oldStr, newStr, ignoreWhitespace) { return WordDiff.diff(oldStr, newStr, ignoreWhitespace); },
+    diffLines: function(oldStr, newStr, ignoreWhitespace) { return LineDiff.diff(oldStr, newStr, ignoreWhitespace); },
 
     diffCss: function(oldStr, newStr) { return CssDiff.diff(oldStr, newStr); },
 

@@ -239,7 +239,7 @@ exports.DiffTreeNavigator = (function() {
 			this.initAll(this._charOrWordDiff);
 		},
 		
-		renderAnnotations: function(){
+		renderAnnotations: function(ignoreWhitespace){
 			var i;
 			for(i = 0; i < this.editorWrapper.length; i++){
 				this.editorWrapper[i].annoTypes = [];
@@ -268,7 +268,7 @@ exports.DiffTreeNavigator = (function() {
 				this.replaceAllAnnotations(true, 1, "word", true, []); //$NON-NLS-0$
 				return;
 			}
-			var adapter = new mJSDiffAdapter.JSDiffAdapter();
+			var adapter = new mJSDiffAdapter.JSDiffAdapter(ignoreWhitespace);
 			for(i = 0; i < oldDiffBlocks.length; i++){
 				var diffBlockModel = this.generatePairBlockAnnotations(this._root, i);
 				this._root.children.push(diffBlockModel);

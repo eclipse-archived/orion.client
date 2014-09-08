@@ -38,6 +38,7 @@ var exports = {};
 exports.CompareView = (function() {
 	function CompareView () {
 		this._diffParser = new mDiffParser.DiffParser();
+		this._ignoreWhitespace = false;
 	}
 	CompareView.prototype = {
 		/** @private */
@@ -59,7 +60,7 @@ exports.CompareView = (function() {
 				return {delim:delim , mapper:this.options.mapper, output: this.options.newFile.Content, diffArray:this.options.diffArray};
 			}
 			if(typeof output === "string" && typeof input === "string"){ //$NON-NLS-1$ //$NON-NLS-0$
-				var adapter = new mJSDiffAdapter.JSDiffAdapter();
+				var adapter = new mJSDiffAdapter.JSDiffAdapter(this._ignoreWhitespace);
 				var maps = adapter.adapt(input, output, delim);
 				if(this.options.toggler){
 					this.options.mapper = maps.mapper;
@@ -117,12 +118,12 @@ exports.CompareView = (function() {
 					promises.push(wrapper.highlighter.highlight(wrapper.target.fileName, wrapper.target.contentType, wrapper.target.editor));
 				}.bind(this));
 				Deferred.all(promises, function(error) { return {_error: error}; }).then(function(promises){
-					this._diffNavigator.renderAnnotations();
+					this._diffNavigator.renderAnnotations(this._ignoreWhitespace);
 					this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 				}.bind(this));
 			} else {//render all the diff annotations directly
 				window.setTimeout(function () {
-					this._diffNavigator.renderAnnotations();
+					this._diffNavigator.renderAnnotations(this._ignoreWhitespace);
 					this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 				}.bind(this), 50);
 			}
