@@ -160,7 +160,8 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 		if (item.LocalBranch && item.RemoteBranch) {
 			item = item.LocalBranch;
 		}
-		if(item.RemoteLocation !== undefined){ repository = item.RemoteLocation[0].GitUrl; }
+		if (data.items.RemoteBranch && data.items.RemoteBranch.GitUrl) { repository = data.items.RemoteBranch.GitUrl; }
+		else if(item.RemoteLocation !== undefined){ repository = item.RemoteLocation[0].GitUrl; }
 		else if(item.GitUrl !== undefined) { repository = item.GitUrl; }
 		else if(item.errorData !== undefined) { repository = item.errorData.Url; }
 		else if(item.toRef !== undefined) { repository = item.toRef.RemoteLocation[0].GitUrl; }

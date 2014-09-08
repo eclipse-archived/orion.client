@@ -175,7 +175,12 @@ var exports = {};
 		var repository;
 		
 		//TODO This should be somehow unified
-		if(item.GitUrl !== undefined) { repository = item.GitUrl; }
+		var origItem = item;
+		if (item.LocalBranch && item.RemoteBranch) {
+			item = item.LocalBranch;
+		}
+		if (origItem.RemoteBranch && origItem.RemoteBranch.GitUrl) { repository = origItem.RemoteBranch.GitUrl; }
+		else if(item.GitUrl !== undefined) { repository = item.GitUrl; }
 		else if(item.errorData !== undefined) { repository = item.errorData.Url; }
 		else if(item.toRef !== undefined) { repository = item.toRef.RemoteLocation[0].GitUrl; }
 		else if(item.RemoteLocation !== undefined){ repository = item.RemoteLocation[0].GitUrl; }
@@ -281,7 +286,8 @@ var exports = {};
 			item = item.LocalBranch;
 		}
 		//TODO This should be somehow unified
-		if(item.RemoteLocation !== undefined){ repository = item.RemoteLocation[0].GitUrl; }
+		if (item.RemoteBranch && item.RemoteBranch.GitUrl) { repository = item.RemoteBranch.GitUrl; }
+		else if(item.RemoteLocation !== undefined){ repository = item.RemoteLocation[0].GitUrl; }
 		else if(item.GitUrl !== undefined) { repository = item.GitUrl; }
 		else if(item.errorData !== undefined) { repository = item.errorData.Url; }
 		else if(item.toRef !== undefined) { repository = item.toRef.RemoteLocation[0].GitUrl; }

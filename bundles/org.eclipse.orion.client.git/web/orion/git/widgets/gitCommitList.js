@@ -839,7 +839,6 @@ define([
 				commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.mergeSquash", 350); //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.rebase", 200); //$NON-NLS-0$
 				commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.resetIndex", 400); //$NON-NLS-0$
-				targetRef.GitUrl = activeBranch.RemoteLocation[0].GitUrl;
 				commandService.renderCommands(incomingActionScope, incomingActionScope, targetRef, this, "tool"); //$NON-NLS-0$
 
 				commandService.addCommandGroup(outgoingActionScope, "eclipse.gitPushGroup", 1000, messages['pushGroup'], null, null, null, "Push", null, "eclipse.orion.git.push"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
