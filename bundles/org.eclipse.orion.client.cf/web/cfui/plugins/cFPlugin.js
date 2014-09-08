@@ -583,6 +583,38 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		}
 	);
 	
+	/** Add cf logs command **/
+	var appLogsImpl = {
+		callback: function(args, context) {
+			return cFService.getLogz(null, args.app).then(function(result) {
+				var messages = result.Messages;
+				
+				if (!messages || messages.length === 0) {
+					return "No recent logs.";
+				}
+				var strResult = "";
+				messages.forEach(function(message) {
+					strResult += "\n" + message;
+				});
+				return strResult;
+			});
+		}
+	};
+	
+	/*provider.registerServiceProvider(
+		"orion.shell.command",
+		appLogsImpl, {
+			name: "cfo logs",
+			description: "Show recent logs for an app",
+			parameters: [{
+				name: "app",
+				type: "string",
+				description: "Application to show logs for",
+				defaultValue: null
+			}]
+		}
+	);*/
+	
 	/* Add a manifest editor content assist */
 	provider.registerServiceProvider("orion.edit.contentAssist",
 		mManifestEditor.contentAssistImpl, {

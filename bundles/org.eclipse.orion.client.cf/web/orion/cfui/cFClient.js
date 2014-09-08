@@ -310,10 +310,23 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				
 				return this._xhrV1("DELETE", url);
 			},
+			
 			getManifestInfo: function(relFilePath){
 				var url = require.toUrl("cfapi/manifests" + relFilePath);
 				return this._xhrV1("GET", url);
-			}
+			},
+			
+			getLogz: function(target, appName){
+				if(!appName){
+					var deferred = new Deferred();
+					deferred.reject("App name is missing");
+				}
+				var url = require.toUrl("cfapi/logz/" + appName);
+				if(target){
+					url += ("?Target=" + JSON.stringify(target));
+				}
+				return this._xhrV1("GET", url);
+			},
 		};
 		
 		return CFService;
