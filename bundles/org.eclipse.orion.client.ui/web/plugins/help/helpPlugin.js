@@ -19,7 +19,7 @@ define(["require", "orion/plugin", "orion/Deferred", "plugins/help/helpFileServi
 	var helpFileService = new mHelpFileService.HelpFileService();
 	var serviceImpl = helpFileService;
 	var properties = {
-		location: "{+OrionHome}/Orion User Guide" //$NON-NLS-0$
+		location: "{+OrionHome}/Orion User Guide/Getting Started.md" //$NON-NLS-0$
 	};
 	provider.registerService("orion.help.pages", serviceImpl, properties); //$NON-NLS-0$
 	provider.connect();
