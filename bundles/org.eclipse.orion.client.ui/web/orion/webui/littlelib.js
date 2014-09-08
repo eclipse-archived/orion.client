@@ -361,8 +361,7 @@ define(["orion/util"], function(util) {
 	};
 	/**
 	 * Maps a <code>keyCode</code> to <tt>KEY</tt> name. This is the inverse of {@link orion.webui.littlelib.KEY}.
-	 * @name orion.webui.littlelib.KEYCODE
-	 * @static
+	 * @private
 	 */
 	var KEY_CODE = Object.create(null);
 	Object.keys(KEY).forEach(function(name) {
