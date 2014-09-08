@@ -841,15 +841,22 @@ define([
 		 */
 		_getCompletionContext: function(ast, offset, contents) {
 		    var comment = Finder.findComment(offset, ast);
-		    if(comment && comment.type === 'Block') {
-		        var start  = comment.range[0];
-		        if(contents.charAt(start) === '/' && contents.charAt(start+1) === '*') {
-                    if(contents.charAt(start+2) === '*' && offset > start+2) { // must be past the second '*'
-                        return {kind:'jsdoc', node: comment};  
-                    } else if(offset > start+1) { //must be past the '*'
-    		            return {kind:'doc', node: comment};
-    		        }
+		    if(comment) {
+		        switch(comment.type) {
+		            case 'Block': {
+		                var start  = comment.range[0];
+        		        if(contents.charAt(start) === '/' && contents.charAt(start+1) === '*') {
+                            if(contents.charAt(start+2) === '*' && offset > start+2) { // must be past the second '*'
+                                return {kind:'jsdoc', node: comment};  
+                            } else if(offset > start+1) { //must be past the '*'
+                		            return {kind:'doc', node: comment};
+                		        }
+        		        }
+		            }
+		            //$FALLTHROUGH$
+		            default: return null;
 		        }
+		        
 		        return null;
 		    }
 			var parents = [];
