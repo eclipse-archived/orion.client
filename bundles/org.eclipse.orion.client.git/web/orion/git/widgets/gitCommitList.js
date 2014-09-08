@@ -140,7 +140,7 @@ define([
 				}
 			} else {
 				var ref = this.currentBranch;
-				result = ref.RemoteLocation[0] && ref.RemoteLocation[0].Children[ref.RemoteLocation[0].Children.length - 1];
+				result = ref && ref.RemoteLocation[0] && ref.RemoteLocation[0].Children[ref.RemoteLocation[0].Children.length - 1];
 			}
 			this.targetRef = result;
 			return result;
@@ -151,15 +151,14 @@ define([
 					return false;
 				}
 			}
-			var ref = this.currentBranch;
-			return ref && ref.RemoteLocation && ref.RemoteLocation.length === 1 && ref.RemoteLocation[0].Children.length === 1;
+			return util.tracksRemoteBranch(this.currentBranch);
 		},
 		isRebasing: function() {
 			var repository = this.root.repository;
 			return repository && repository.status && repository.status.RepositoryState === "REBASING_INTERACTIVE"; //$NON-NLS-0$
 		},
 		isNewBranch: function(branch) {
-			return branch.Type === "RemoteTrackingBranch" && !branch.Id; //$NON-NLS-0$
+			return util.isNewBranch(branch);
 		},
 		getChildren: function(parentItem, onComplete) {
 			var that = this;
@@ -714,6 +713,9 @@ define([
 						case "Tag": //$NON-NLS-0$ 
 							imgClass = "git-sprite-branch-active-tag"; //$NON-NLS-0$
 							break;
+						case "Commit": //$NON-NLS-0$ 
+							imgClass = "git-sprite-branch-active-commit"; //$NON-NLS-0$
+							break;
 						case "Branch": //$NON-NLS-0$
 						case "RemoteTrackingBranch": //$NON-NLS-0$
 						default:
@@ -723,7 +725,7 @@ define([
 					simpleLogCommand.imageClass = imgClass;
 					simpleLogCommand.tooltip = that.model.simpleLog ? messages["ShowActiveBranchTooltip"] : messages["ShowReferenceTooltip"];
 					simpleLogCommand.checked = !that.model.simpleLog;
-					return true;
+					return !that.model.isRebasing();
 				}
 			});
 			commandService.addCommand(simpleLogCommand);
@@ -737,7 +739,7 @@ define([
 					data.domNode.focus();
 				},
 				visibleWhen: function() {
-					return true;
+					return !that.model.isRebasing();
 				}
 			});
 			commandService.addCommand(filterCommand);
@@ -800,7 +802,6 @@ define([
 			}
 
 			if (!currentBranch && model.isRebasing()) {
-				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.resetCommand", 100); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseContinueCommand", 200); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseSkipPatchCommand", 300); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.rebaseAbortCommand", 400); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

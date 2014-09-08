@@ -52,8 +52,7 @@ define({
 	"Add the file to this site": "Add the file to this site",
 	"View": "View",
 	"View the file on the site": "View the file on the site",
-	// The url of the site will be inserted as a link
-	"Started" : "Started at ${0}",
+	"Started" : "Started at ${0}", // ${0} is replaced by the URL of the site
 	"Unknown": "Unknown",
 	"Name": "Name",
 	"Actions": "Actions",
@@ -74,7 +73,6 @@ define({
 	"Stopped" : "Stopped",
 	"Sites": "Sites",
 	"Mappings": "Mappings",
-	// The create button will be inserted into the following text
-	"SitesExplorer.NoSitesText" : "You have no sites. Click ${0} to create a site.",
+	"SitesExplorer.NoSitesText" : "You have no sites. Click ${0} to create a site.", // ${0} is replaced by create button.
 	"Edit Site": "Edit Site"
 });

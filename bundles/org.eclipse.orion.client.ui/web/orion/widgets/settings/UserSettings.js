@@ -22,26 +22,19 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 
 		// TODO these should be real Orion sections, not fake DIVs
 		templateString: '' +  //$NON-NLS-0$
-				'<div>' +  //$NON-NLS-0$
 					'<div class="sectionWrapper toolComposite">' +  //$NON-NLS-0$
 						'<div class="sectionAnchor sectionTitle layoutLeft">${User Profile}</div>' +   //$NON-NLS-0$
 						'<div id="userCommands" class="layoutRight sectionActions"></div>' +  //$NON-NLS-0$
 					'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
 					'<div class="sectionTable sections">' + //$NON-NLS-0$
 					
-					'</div>' + //$NON-NLS-0$
-					'<div></div>' +  //$NON-NLS-0$
-					
-				'</div>' + //$NON-NLS-0$
-				
-				'<div class="linkedSection"></div>',  //$NON-NLS-0$
+					'</div>', //$NON-NLS-0$
 
 		createElements: function() {
 			this.node.innerHTML = this.templateString;
 			lib.processTextNodes(this.node, messages);
 			
 			this.sections = lib.$('.sections', this.node);  //$NON-NLS-0$
-			this.linkedSection = lib.$('.linkedSection', this.node);  //$NON-NLS-0$
 			
 			this.createSections();
 		},
@@ -92,13 +85,12 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 
 			this.commandService.renderCommands('profileCommands', lib.node( 'userCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$  //$NON-NLS-2$		
 			
-			this.linkedAccountSection = new mSection.Section(this.linkedSection, {
+			this.linkedAccountSection = new mSection.Section(this.node, {
 				id: "linkedAccountSection", //$NON-NLS-0$
 				title: messages["Linked Accounts"],
 				content: '<div style="margin-left: 10px; margin-top: 17px;" id="iFrameContent"></div>', //$NON-NLS-0$
-				canHide: true,
+				canHide: false,
 				useAuxStyle: true,
-				hidden: true,
 				slideout: true
 			});
 			
@@ -207,6 +199,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 			
 			this.userService = this.registry.getService("orion.core.user"); //$NON-NLS-0$
 			
+			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
+			
 			var authenticationIds = [];
 			
 			var authServices = this.registry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
@@ -222,9 +216,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 				authService.getKey().then(function(key){
 					authenticationIds.push(key);
 					authService.getUser().then(function(jsonData){
-					
-						var data = jsonData;
-						
+
 						var b = userService.getUserInfo(jsonData.Location).then( function( accountData ){
 							settingsWidget.username = accountData.login;
 							settingsWidget.accountFields[0].setValue( accountData.login );
@@ -239,6 +231,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 								settingsWidget.accountFields[2].setValue( '' );
 							}
 							settingsWidget.accountFields[3].setChecked( accountData.emailConfirmed );
+						}, function(error) {
+							messageService.setProgressResult(error);
 						});
 						
 						settingsWidget.setHash( settingsWidget.iframe, jsonData.Location );	
@@ -251,7 +245,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 		destroy: function() {
 			if (this.node) {
 				lib.empty(this.node);
-				this.node = this.sections = this.linkedSection = null;
+				this.node = this.sections = null;
 			}
 		}
 	});

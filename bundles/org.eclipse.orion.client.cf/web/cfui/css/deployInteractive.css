@@ -4,6 +4,7 @@
 @import "../../css/images.css";
 @import "../../css/theme.css";
 @import "../../css/progress.css";
+@import "../../css/wizard.css";
 
 html, body {
     min-width: 350px;
@@ -117,31 +118,6 @@ select{
     overflow: hidden;
     padding-left: 5px;
     text-align: center;
-}
-
-.manifestInformation {
-	font-size: 14px;
-	padding: 40px 2px;
-}
-
-.manifest{
- 	padding: 10px 20px;
-}
-
-.buttonRow {
-    bottom: 20px;
-    position: absolute;
-    right: 20px;
-}
-
-.buttonRow .deployButton{
-	background-color: #7fa4c0 !important;
-    border: 1px solid #7fa4c0 !important;
-    color: white !important;
-}
-
-.buttonRow button:not(:last-child){
-	margin-right: 12px;	
 }
 
 .dialogTitle .closeDialog {

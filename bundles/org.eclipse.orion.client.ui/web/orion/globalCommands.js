@@ -16,12 +16,13 @@ define([
 		'orion/webui/splitter', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/contentTypes', 'orion/keyAssist',
 		'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
 		'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html',
-		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html', 
-		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu', 'orion/objects'
+		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html',
+		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu', 'orion/objects', 'orion/i18nUtil',
 	],
 	function (messages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands, 
 		mBreadcrumbs, lib, mSplitter, mDropdown, mTooltip, mContentTypes, mKeyAssist, mThemePreferences, mThemeData, Deferred,
-		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, util, mCustomGlobalCommands, mFileClient, SideMenu, objects) {
+		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, util, mCustomGlobalCommands, mFileClient,
+		SideMenu, objects, i18nUtil) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 *
@@ -419,7 +420,7 @@ define([
 		title = options.title;
 		if (!title) {
 			if (name) {
-				title = name + " - " + options.task; //$NON-NLS-0$
+				title = i18nUtil.formatMessage(messages["PageTitleFormat"], name, options.task); //$NON-NLS-0$
 			} else {
 				title = options.task;
 			}

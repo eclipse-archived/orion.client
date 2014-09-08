@@ -31,10 +31,11 @@
 			provider.registerServiceProvider("orion.project.deploy",
 				deployService,
 				{
-					name: "Deploy to Cloud Foundry",
 					id: "org.eclipse.orion.client.cf.deploy",
 					deployTypes: ["Cloud Foundry"],
-					tooltip: "Deploy application in cloud.",
+					nls: "cfui/nls/messages",
+					nameKey: "deploy.cf",
+					tooltipKey: "deploy.cf.tooltip",
 					validationProperties: [{source: "NoShow" }],
 					logLocationTemplate: "{+OrionHome}/cfui/logs.html#{Name,Target*}",
 					priorityForDefault: 9

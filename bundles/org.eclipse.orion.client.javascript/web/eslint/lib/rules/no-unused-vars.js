@@ -9,19 +9,11 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env amd, node */
+/*eslint-env amd */
 define([
-'module', 
 'logger'
-], function(module, Logger) {
-	/**
-	 * @name module.exports
-	 * @description Rule exports
-	 * @function
-	 * @param context
-	 * @returns {Object} Rule exports
-	 */
-	module.exports = function(context) {
+], function(Logger) {
+	return function(context) {
 		"use strict";  //$NON-NLS-0$
 
 		function isRead(ref) {
@@ -78,5 +70,4 @@ define([
 			"FunctionExpression": check  //$NON-NLS-0$
 		};
 	};
-	return module.exports;
 });

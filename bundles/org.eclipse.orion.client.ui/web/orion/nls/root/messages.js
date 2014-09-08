@@ -126,5 +126,22 @@ define({
 	"text": "text",
 	"title (optional)": "title (optional)",
 	"url": "url",
-	"TogglePaneOrientationTooltip": "Toggle split pane orientation"
+	"TogglePaneOrientationTooltip": "Toggle split pane orientation",
+	"PageTitleFormat": "${0} - ${1}", // ${0} is the file or resource being edited; ${1} is the task (eg. "Editor")
+	// Display names for keys:
+	"KeyCTRL": "Ctrl",
+	"KeySHIFT": "Shift",
+	"KeyALT": "Alt",
+	"KeyBKSPC": "Backspace",
+	"KeyDEL": "Del",
+	"KeyEND": "End",
+	"KeyENTER": "Enter",
+	"KeyESCAPE": "Esc",
+	"KeyHOME": "Home",
+	"KeyINSERT": "Ins",
+	"KeyPAGEDOWN": "Page Down",
+	"KeyPAGEUP": "Page Up",
+	"KeySPACE": "Space",
+	"KeyTAB": "Tab",
+	// End key names
 });

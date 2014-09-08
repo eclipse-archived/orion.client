@@ -9,30 +9,12 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env amd, node */
-(function(root, factory) {
-	if(typeof exports === 'object') {  //$NON-NLS-0$
-		module.exports = factory(require, exports, module, require('../util')); //$NON-NLS-0$
-	}
-	else if(typeof define === 'function' && define.amd) { //$NON-NLS-0$
-		define(['require', 'exports', 'module', '../util'], factory);
-	}
-	else {
-		var req = function(id) {return root[id];},
-			exp = root,
-			mod = {exports: exp};
-		root.rules.noundef = factory(req, exp, mod);
-	}
-}(this, function(require, exports, module, util) {
+/*eslint-env amd */
+define([
+'../util'
+], function(util) {
 
-	/**
-	 * @name module.exports
-	 * @description Rule exports
-	 * @function
-	 * @param context
-	 * @returns {Object} Rule exports
-	 */
-	module.exports = function(context) {
+	return function(context) {
 
 		var wrappers = ["String", "Number", "Math", "Boolean", "JSON"]; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
@@ -40,6 +22,4 @@
 			context.report(node, "Do not use '${0}' as a constructor.", [symbol]); //$NON-NLS-1$
 		}, context);
 	};
-
-	return module.exports;
-}));
+});

@@ -17,6 +17,8 @@ define({
 	'Manage URL':'Manage URL:',
 	'Settings':'Settings',
 	'Cloud':'Cloud',
+	'deploy.cf': 'Deploy to Cloud Foundry',
+	'deploy.cf.tooltip': 'Deploy application in cloud.',
 	'deploy.chooseSpace':'Choose Space To Deploy',
 	'deploy.gettingSpaces':'Getting spaces...',
 	'deploy.deploying':'Deploying...',

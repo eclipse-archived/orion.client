@@ -11,12 +11,34 @@
 
 /*eslint-env browser, amd*/
 
-define(['i18n!git/nls/gitmessages', 'require', 'orion/EventTarget', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/commandRegistry', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 'orion/git/gitConfigPreference',
-        'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
-        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks',
-        'orion/URITemplate','orion/git/logic/gitPush', 'orion/git/logic/gitStash', 'orion/git/logic/gitCommit', 'orion/objects'], 
-        function(messages, require, EventTarget, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, mCompareUtils, GitPreferenceStorage, GitConfigPreference,
-        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mApplyPatch, _, PageLinks, URITemplate, mGitPushLogic, mGitStashLogic, mGitCommitLogic, objects) {
+define([
+	'i18n!git/nls/gitmessages',
+	'require',
+	'orion/EventTarget',
+	'orion/Deferred',
+	'orion/i18nUtil',
+	'orion/webui/littlelib',
+	'orion/commands',
+	'orion/commandRegistry',
+	'orion/git/util',
+	'orion/compare/compareUtils',
+	'orion/git/gitPreferenceStorage',
+	'orion/git/gitConfigPreference',
+	'orion/git/widgets/ReviewRequestDialog',
+	'orion/git/widgets/CloneGitRepositoryDialog',
+	'orion/git/widgets/GitCredentialsDialog',
+	'orion/git/widgets/ApplyPatchDialog',
+	'orion/PageLinks',
+	'orion/URITemplate',
+	'orion/git/logic/gitPush',
+	'orion/git/logic/gitStash',
+	'orion/git/logic/gitCommit',
+	'orion/objects',
+	'orion/URL-shim'
+], function(
+	messages, require, EventTarget, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, mCompareUtils, GitPreferenceStorage,
+	GitConfigPreference, mReviewRequest, mCloneGitRepository, mGitCredentials, mApplyPatch, PageLinks, URITemplate, mGitPushLogic, 
+	mGitStashLogic, mGitCommitLogic, objects) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -26,8 +48,6 @@ var exports = {};
 (function() {
 	var doOnce = false;
 	
-	var logTemplate = new URITemplate("git/git-repository.html#{,resource,params*}?page=1"); //$NON-NLS-0$
-	var commitTemplate = new URITemplate("git/git-repository.html#{,resource,params*}?page=1"); //$NON-NLS-0$
 	var editTemplate = new URITemplate("edit/edit.html#{,resource,params*}"); //$NON-NLS-0$
 	
 	var sharedModelEventDispatcher;
@@ -770,39 +790,6 @@ var exports = {};
 		});
 		commandService.addCommand(pullCommand);
 
-		var openGitLog = new mCommands.Command({
-			name : messages["Git Log"],
-			tooltip: messages["Open the log for the branch"],
-			id : "eclipse.openGitLog", //$NON-NLS-0$
-			hrefCallback : function(data) {
-				var item = data.items;
-				return require.toUrl(logTemplate.expand({resource: item.CommitLocation}));
-			},
-			visibleWhen : function(item) {
-				return item.Type === "Branch" || item.Type === "RemoteTrackingBranch"; //$NON-NLS-1$ //$NON-NLS-0$
-			}
-		});
-		commandService.addCommand(openGitLog);
-
-		var openGitLogAll = new mCommands.Command({
-			name : messages['Git Log'],
-			tooltip: messages["Open the log for the repository"],
-			id : "eclipse.openGitLogAll", //$NON-NLS-0$
-			imageClass: "git-sprite-log", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
-			hrefCallback : function(data) {
-				var item = data.items;
-				return require.toUrl(logTemplate.expand({resource: item.CommitLocation}));
-			},
-			visibleWhen : function(item) {
-				// show only for a repo
-				if (!item.CommitLocation || !item.StatusLocation)
-					return false;
-				return true;
-			}
-		});
-		commandService.addCommand(openGitLogAll);
-		
 		var openCloneContent = new mCommands.Command({
 			name : messages["ShowInEditor"],
 			tooltip: messages["ShowInEditorTooltip"],
@@ -869,8 +856,7 @@ var exports = {};
 			name : messages["Open"],
 			id : "eclipse.openGitCommit", //$NON-NLS-0$
 			tooltip: messages["OpenGitCommitTip"], //$NON-NLS-0$
-			imageClass: "git-sprite-open", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			imageClass: "core-sprite-outline", //$NON-NLS-0$
 			hrefCallback: function(data) {
 				return require.toUrl(editTemplate.expand({resource: data.items.TreeLocation}));
 			},
@@ -1426,7 +1412,18 @@ var exports = {};
 		});
 		commandService.addCommand(pushBranchForceCommand);
 
-		var resetCallback = function(data, location, refId, mode, message) {
+		var resetCallback = function(data, refId, mode, message) {
+			var location = data.items.IndexLocation;
+			if (!location) {
+				var temp = data.items.parent;
+				while (temp) {
+					if (temp.repository) {
+						location = temp.repository.IndexLocation;
+					}
+					temp = temp.parent;
+				}
+			}
+				
 			var item = data.items;
 			if(confirm(i18nUtil.formatMessage(message, refId))) { //$NON-NLS-0$
 				var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
@@ -1460,17 +1457,7 @@ var exports = {};
 			imageClass: "git-sprite-reset", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			callback: function(data) {
-				var indexLocation = data.items.IndexLocation;
-				if (!indexLocation) {
-					var temp = data.items.parent;
-					while (temp) {
-						if (temp.repository) {
-							indexLocation = temp.repository.IndexLocation;
-						}
-						temp = temp.parent;
-					}
-				}
-				resetCallback(data, indexLocation, data.items.Name, "HARD", messages["GitResetIndexConfirm"]); //$NON-NLS-0$
+				resetCallback(data, data.items.Name, "HARD", messages["GitResetIndexConfirm"]); //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
 				return item.Type === "RemoteTrackingBranch" || "Commit"; //$NON-NLS-1$ //$NON-NLS-0$
@@ -1485,7 +1472,7 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.undoCommit", //$NON-NLS-0$
 			callback: function(data) {
-				resetCallback(data, data.items.parent.targetRef.IndexLocation, "HEAD^", "SOFT", messages["UndoConfirm"]);
+				resetCallback(data, "HEAD^", "SOFT", messages["UndoConfirm"]);
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Commit" && item.parent && item.parent.Type === "Outgoing" && item.parent.children && item.parent.children[0].Name === item.Name; //$NON-NLS-0$
@@ -2308,92 +2295,6 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(applyPatchCommand);
-		
-		var openCommitParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("commitName", "text", messages["Commit name:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
-		
-		var openCommitCommand = new mCommands.Command({
-			name : messages["Open Commit"],
-			tooltip: messages["Open the commit with the given name"],
-			id : "eclipse.orion.git.openCommitCommand", //$NON-NLS-0$
-			imageClass: "git-sprite-apply-patch", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
-			parameters: openCommitParameters,
-			callback: function(data) {
-				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				var findCommitLocation = function (repositories, commitName, deferred) {
-					if (deferred == null)
-						deferred = new Deferred();
-					
-					if (repositories.length > 0) {
-						commitName = data.parameters.valueFor("commitName"); //$NON-NLS-0$
-						var repository = repositories[0];
-						var segment = "/commit/"; //$NON-NLS-0$
-						var location = repository.CommitLocation;
-						var index = location.indexOf(segment) + segment.length;
-						var prefix = location.substring(0, index);
-						var sufix = location.substring(index - 1);
-						location = prefix + commitName + sufix + "?page=1&pageSize=1"; //$NON-NLS-0$
-						progress.progress(serviceRegistry.getService("orion.git.provider").doGitLog( //$NON-NLS-0$
-							location, null, null, messages['Looking for the commit']), "Looking for commit " + commitName).then( //$NON-NLS-0$
-							function(resp){
-								deferred.resolve(resp.Children[0].Location);
-							},
-							function(error) {
-								findCommitLocation(repositories.slice(1), commitName, deferred);
-							}
-						);
-					} else {
-						deferred.reject();
-					}
-					
-					return deferred;
-				};
-				
-				var openCommit = function(repositories) {
-					if (data.parameters.optionsRequested) {
-						new mOpenCommit.OpenCommitDialog(
-							{repositories: repositories, serviceRegistry: serviceRegistry, commitName: data.parameters.valueFor("commitName")} //$NON-NLS-0$
-						).show();
-					} else {
-						serviceRegistry.getService("orion.page.message").setProgressMessage(messages['Looking for the commit']); //$NON-NLS-0$
-						findCommitLocation(repositories, data.parameters.valueFor("commitName")).then( //$NON-NLS-0$
-							function(commitLocation){
-								if(commitLocation){
-									var commitPageURL = require.toUrl(commitTemplate.expand({resource: commitLocation})); //$NON-NLS-0$
-									window.open(commitPageURL);
-								}
-								serviceRegistry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$
-							}, function () {
-								var display = [];
-								display.Severity = "warning"; //$NON-NLS-0$
-								display.HTML = false;
-								display.Message = messages["No commits found"];
-								serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-							}
-						);
-					}	
-				};
-
-				if (data.items.Type === "Clone") { //$NON-NLS-0$
-					var repositories = [data.items];
-					openCommit(repositories);
-				} else if (data.items.CloneLocation){
-					progress.progress(serviceRegistry.getService("orion.git.provider").getGitClone(data.items.CloneLocation), "Getting git repository details").then( //$NON-NLS-0$
-						function(jsonData){
-							var repositories = jsonData.Children;
-							openCommit(repositories);
-						}
-					);
-				} else {
-					var repositories = data.items;
-					openCommit(repositories);
-				}
-			},
-			visibleWhen : function(item) {
-				return item.Type === "Clone" || item.CloneLocation || (item.length > 1 && item[0].Type === "Clone") ; //$NON-NLS-1$ //$NON-NLS-0$
-			}
-		});
-		commandService.addCommand(openCommitCommand);
 	};
 
 	exports.createGitStatusCommands = function(serviceRegistry, commandService, explorer) {
@@ -2914,8 +2815,6 @@ var exports = {};
 			explorer : explorer,
 			toolbarId : toolbarId,
 			tags : true,
-			confirmDialogCloseCallback : refresh,
-			remotePrompterDialogCloseCallback : refresh,
 			sshCredentialsDialogCloseCallback : refresh,
 			sshSlideoutCloseCallback : refresh,
 		};

@@ -30,7 +30,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog' ], function(messages, 
 	ApplyPatchDialog.prototype._init = function(options) {
 		var that = this;
 
-		this.title = messages["Apply Patch"];
+		this.title = messages["ApplyPatchDialog"];
 		this.modal = true;
 		this.messages = messages;
 		this.options = options;

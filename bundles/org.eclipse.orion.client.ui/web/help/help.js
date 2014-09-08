@@ -12,13 +12,13 @@
 
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/searchClient",
-		"orion/globalCommands", "orion/URITemplate", "orion/Deferred", "marked/marked", "orion/webui/littlelib","orion/objects",
-		"orion/explorers/explorer", "orion/contentTypes", "orion/status", "orion/operationsClient", "orion/commands", "orion/widgets/input/ComboTextInput", "orion/inlineSearchResultExplorer"],
-	function(require, messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, URITemplate, Deferred, marked,
-				lib, objects, mExplorer, mContentTypes, mStatus, mOperationsClient, mCommands, ComboTextInput, InlineSearchResultExplorer) {
+define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/globalCommands", "orion/URITemplate",
+		"orion/Deferred", "marked/marked", "orion/webui/littlelib","orion/objects", "orion/explorers/explorer", "orion/contentTypes",
+		"orion/status", "orion/operationsClient", "orion/commands", "orion/PageLinks"],
+	function(require, messages, mBootstrap, mCommandRegistry, mGlobalCommands, URITemplate, Deferred, marked,
+				lib, objects, mExplorer, mContentTypes, mStatus, mOperationsClient, mCommands, PageLinks) {
 
-	var fileClient, progress, contentTypeService, statusService;
+	var serviceRegistry, progress, contentTypeService, statusService;
 	var helpModel;
 	var output, tableTree;
 	var selectedItem;
@@ -27,11 +27,8 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 	var imageCounter = 0;
 	var outputCSSloaded = false;
 
-	var searchResultExplorer, searchResultsTitle, searchWrapper, searchResultsWrapper, searchBox;
-
 	var itemCache = {};
 	var imageCache = {};
-	var rootCreationListeners = [];
 
 	var ATTRIBUTE_ORIGINAL_HREF = "orionHref"; //$NON-NLS-0$
 	var PREFIX_RELATIVE_IMAGE = "_help_img_"; //$NON-NLS-0$
@@ -39,16 +36,16 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 	var RELATIVE_IMAGE_REGEX = new RegExp("^" + PREFIX_RELATIVE_IMAGE); //$NON-NLS-0$
 	var RELATIVE_LINK_REGEX = new RegExp("^" + PREFIX_RELATIVE_LINK); //$NON-NLS-0$
 	var FILENAME_REGEX = /^(.*)\.(\w+)(?:[\?#]|$)/i;
+	var HTML_EXTENSION_REGEX = /^html?$/i;
 	var LINK_START_REGEX = /<a/;
 	var TAG_END_REGEX = /(?=>$)/;
 	var ABOUT_BLANK = "about:blank"; //$NON-NLS-0$
 	var HASH = "#"; //$NON-NLS-0$
-	var HIDDEN = "_"; //$NON-NLS-0$
 	var SEPARATOR = "/"; //$NON-NLS-0$
+	var ROOT_FILENODE = {Directory: true, Location: "/dev/null", Name: "<root>"}; //$NON-NLS-1$ //$NON-NLS-0$
 
-	var MINIMUM_HEADER_LEVEL = 2, MAXIMUM_HEADER_LEVEL = 4;
+	var MINIMUM_HEADER_LEVEL = 2, MAXIMUM_HEADER_LEVEL = 3;
 	var HEADER_REGEX = new RegExp("^H([" + MINIMUM_HEADER_LEVEL + "-" + MAXIMUM_HEADER_LEVEL + "])$"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	var ROOT_FOLDER = "/help/Documentation"; //$NON-NLS-0$
 	var TEMPLATE = new URITemplate(require.toUrl("help/help.html") + "#{,resource}"); //$NON-NLS-1$ //$NON-NLS-0$
 
 	function displayErrorStatus(error) {
@@ -95,6 +92,13 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		return result;
 	}
 
+	function getFileClient(item) {
+		while (!item.service && item.parent) {
+			item = item.parent;
+		}
+		return item.service;
+	}
+
 	function getItem(id) {
 		return itemCache[id];
 	}
@@ -129,7 +133,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 
 	var customRenderer = new marked.Renderer();
 	customRenderer.image = function(href, title, altText) {
-		if (href.indexOf(":") === -1 && fileClient.readBlob) { //$NON-NLS-0$
+		if (href.indexOf(":") === -1) { //$NON-NLS-0$
 			var targetURL = href;
 			href = "";
 			/*
@@ -170,30 +174,27 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 
 	var HelpModel = (function() {
 		function HelpModel() {
+			this._root = createItem(ROOT_FILENODE);
 		}
 		HelpModel.prototype = {
 			getRoot: function(onItem) {
-				if (this._root) {
-					onItem(this._root);
-					return;
-				}
-
-				rootCreationListeners.push(onItem);
-				if (rootCreationListeners.length > 1) {
-					/* root item is already being retrieved */
-					return;
-				}
-
-				(progress ? progress.progress(fileClient.read(ROOT_FOLDER, true), "Retrieving " + ROOT_FOLDER) : fileClient.read(ROOT_FOLDER, true)).then( //$NON-NLS-0$
-					function(node) {
-						this._root = createItem(node);
-						rootCreationListeners.forEach(function(fn) {
-							fn(this._root);							
-						}.bind(this));
-						rootCreationListeners = [];
-					}.bind(this),
-					displayErrorStatus
-				);
+				onItem(this._root);
+//				rootCreationListeners.push(onItem);
+//				if (rootCreationListeners.length > 1) {
+//					/* root item is already being retrieved */
+//					return;
+//				}
+//				this._root = createItem();
+//				(progress ? progress.progress(fileClient.read(ROOT_FOLDER, true), "Retrieving " + ROOT_FOLDER) : fileClient.read(ROOT_FOLDER, true)).then( //$NON-NLS-0$
+//					function(node) {
+//						this._root = createItem(node);
+//						rootCreationListeners.forEach(function(fn) {
+//							fn(this._root);							
+//						}.bind(this));
+//						rootCreationListeners = [];
+//					}.bind(this),
+//					displayErrorStatus
+//				);
 			},
 			getChildren: function(parentItem, onComplete) {
 				if (parentItem.children) {
@@ -201,29 +202,32 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 					return;
 				}
 
+				if (parentItem.fileNode === ROOT_FILENODE) {
+					this._getRootPages(parentItem).then(
+						function(children) {
+							parentItem.children = children;
+							onComplete(children);
+						}
+					);
+					return;
+				}
+
 				var location = parentItem.fileNode.Location;
 				if (parentItem.fileNode.Directory) {
+					var fileClient = getFileClient(parentItem);
+					if (!fileClient.fetchChildren) {
+						parentItem.children = [];
+						onComplete(parentItem.children);
+						return;
+					}
 					(progress ? progress.progress(fileClient.fetchChildren(location), "Retrieving children " + location) : fileClient.fetchChildren(location)).then( //$NON-NLS-0$
 						function(childNodes) {
 							var children = [];
 							childNodes.forEach(function(node) {
-								if (node.Name.charAt(0) !== HIDDEN) {
-									var item = createItem(node);
-									item.parent = parentItem;
-									children.push(item);
-								}
+								var item = createItem(node);
+								item.parent = parentItem;
+								children.push(item);
 							}.bind(this));
-							children.sort(function(a,b) {
-//								if (a.fileNode.Directory !== b.fileNode.Directory) {
-//									return a.fileNode.Directory ? -1 : 1;
-//								}
-								var name1 = a.title && a.title.toLowerCase();
-								var name2 = b.title && b.title.toLowerCase();
-								if (name1 < name2) {
-									return -1;
-								}
-								return name1 > name2 ? 1 : 0;
-							});
 							parentItem.children = children;
 							onComplete(children);
 						}.bind(this),
@@ -270,7 +274,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 				}.bind(this);
 
 				var computeChildren = function(parentItem) {
-					/* only displayed html documents have their contents parsed for TOC entries */
+					/* only displayed html (markdown) content is parsed for TOC entries */
 					if (parentItem.content.nodeName === "#document") { //$NON-NLS-0$
 						var children = computeAnchorChildren(parentItem);
 					} else {
@@ -283,13 +287,12 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 				if (parentItem.content) {
 					onComplete(computeChildren(parentItem));
 				} else {
-					retrieveContent(parentItem.fileNode).then(
+					retrieveContent(parentItem).then(
 						function(content) {
 							parentItem.content = content;
 							onComplete(computeChildren(parentItem));
 						},
-						function(error) {
-							displayErrorStatus(error);
+						function(/*error*/) {
 							onComplete([]);
 						}
 					);
@@ -297,6 +300,47 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			},
 			getId: function(item) {
 				return item.id;
+			},
+			_getRootPages: function(parentItem) {
+				var result = new Deferred();
+				var children = [];
+				var refs = serviceRegistry.getServiceReferences("orion.help.pages"); //$NON-NLS-0$
+				var taskCount = refs.length;
+				if (!taskCount) {
+					result.resolve(children);
+					return result;
+				}
+
+				var taskComplete = function() {
+					if (!--taskCount) {
+						result.resolve(children);
+					}
+				};
+				var orionHome = {OrionHome: PageLinks.getOrionHome()};
+				for (var i = 0; i < refs.length; ++i) {
+					var ref = refs[i];
+					var service = serviceRegistry.getService(ref);
+					var rootLocation = ref.getProperty("location"); //$NON-NLS-0$
+					if (service.read && rootLocation) {
+						(function(service, location) {
+							location = new URITemplate(location).expand(orionHome);
+							service.read(location, true).then(
+								function(node) {
+									var item = createItem(node);
+									item.parent = parentItem;
+									item.service = service;
+									children.push(item);
+									taskComplete();
+								},
+								taskComplete
+							);
+						})(service, rootLocation);
+					} else {
+						/* skip this plugin since it failed to provide either a read implementation or a location value */
+						taskComplete();
+					}
+				}
+				return result;
 			}
 		};
 		return HelpModel;
@@ -348,7 +392,8 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 
 	function clickListener(event) {
 		var pageHash = window.location.hash;
-		var itemId = new URL(event.target.href).hash;
+		var target = new URL(event.target.href);
+		var itemId = target.hash;
 
 		/*
 		 * The following manual check for a navigate within the same page is done
@@ -356,7 +401,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		 * item selection otherwise.  This workaround is not needed on Chrome or
 		 * Firefox, but still runs on them to maintain consistency.
 		 */
-		if (window.location.origin === event.target.origin) {
+		if (window.location.origin === target.origin) {
 			event.preventDefault();
 			window.location.hash = itemId;
 			return;
@@ -467,8 +512,8 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			hash = hash.substring(1); /* remove leading '#' */
 			index = hash.indexOf(HASH);
 		}
-		var location = index === -1 ? hash : hash.substring(0, index);
-		var anchor = index === -1 ? null : hash.substring(index + 1);
+//		var location = index === -1 ? hash : hash.substring(0, index);
+//		var anchor = index === -1 ? null : hash.substring(index + 1);
 		var item = getItem(hash);
 		if (item) {
 			/* the hash corresponds to a page in the TOC */
@@ -486,37 +531,37 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		 * hash at load time).  If the hash is resolved to point at a valid resource then create
 		 * the item for it and select it in the TOC if it should have an entry there.
 		 */
-		(progress ? progress.progress(fileClient.read(location, true), "Retrieving " + location) : fileClient.read(location, true)).then( //$NON-NLS-0$
-			function(node) {
-				if (node.Directory) {
-					item = createItem(node, undefined, undefined, true);
-					helpModel.getChildren(item, function() {
-						setOutput(item).then(
-							function() {
-								selectInTOC(item);
-							}
-						);
-					});
-				} else {
-					/*
-					 * The hash points at a valid resource, so display it and select its item in
-					 * the TOC if appropriate.
-					 */
-					retrieveContent(node).then(
-						function(content) {
-							item = createItem(node, content, anchor, true);
-							setOutput(item).then(
-								function() {
-									selectInTOC(item);
-								}
-							);
-						},
-						displayErrorStatus
-					);
-				}
-			}.bind(this),
-			displayErrorStatus
-		);
+//		(progress ? progress.progress(fileClient.read(location, true), "Retrieving " + location) : fileClient.read(location, true)).then( //$NON-NLS-0$
+//			function(node) {
+//				if (node.Directory) {
+//					item = createItem(node, undefined, undefined, true);
+//					helpModel.getChildren(item, function() {
+//						setOutput(item).then(
+//							function() {
+//								selectInTOC(item);
+//							}
+//						);
+//					});
+//				} else {
+//					/*
+//					 * The hash points at a valid resource, so display it and select its item in
+//					 * the TOC if appropriate.
+//					 */
+//					retrieveContent(node).then(
+//						function(content) {
+//							item = createItem(node, content, anchor, true);
+//							setOutput(item).then(
+//								function() {
+//									selectInTOC(item);
+//								}
+//							);
+//						},
+//						displayErrorStatus
+//					);
+//				}
+//			}.bind(this),
+//			displayErrorStatus
+//		);
 	}
 
 	function outputData(item) {
@@ -526,26 +571,17 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 	function outputHTML(item) {
 		var outputDocument = output.contentDocument;
 		if (!selectedItem || selectedItem.fileNode.Location !== item.fileNode.Location) {
-
-			/*
-			 * The output is being cleared, so revoke existing data URLs that were allocated
-			 * for displaying its images since they are no longer valid.
-			 */
-			var keys = Object.keys(imageCache);
-			keys.forEach(function(current) {
-				URL.revokeObjectURL(imageCache[current]);
-			});
-			imageCache = {};
-
 			outputDocument.body.scrollTop = 0;
 			outputDocument.body.style = "";
+			/* it's safe to use innerHTML here because the HTML content was generated from sanitized markdown */
 			outputDocument.childNodes[0].innerHTML = item.content.documentElement.innerHTML;
 
-			var adjustScrollTop = false;
 			var link = outputDocument.createElement("link"); //$NON-NLS-0$
 			link.href = require.toUrl("help/help.css"); //$NON-NLS-0$
 			link.rel = "stylesheet"; //$NON-NLS-0$
 			link.type = "text/css"; //$NON-NLS-0$
+
+			var adjustScrollTop = false;
 			if (item.anchor) {
 				anchorElement = outputDocument.getElementById(item.anchor);
 			}
@@ -559,48 +595,55 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			outputDocument.head.appendChild(link);
 			outputDocument.body.classList.add("orionMarkdown"); //$NON-NLS-0$
 
-			var elements = outputDocument.getElementsByTagName("IMG"); //$NON-NLS-0$
-			for (var i = 0; i < elements.length; i++) {
-				var current = elements[i];
-				if (RELATIVE_IMAGE_REGEX.test(current.id)) {
-					var dataURL = imageCache[current.id];
-					if (dataURL) {
-						current.src = dataURL;
-					} else {
-						(function(element) {
-							var href = normalize(element.getAttribute(ATTRIBUTE_ORIGINAL_HREF), item.fileNode.Location);
-							fileClient.readBlob(href).then(
-								function(bytes) {
-									var match = href.match(FILENAME_REGEX);
-									var mimeType = match ? "image/" + match[2] : "image/png"; //$NON-NLS-1$ //$NON-NLS-0$
-									dataURL = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
-									imageCache[element.id] = dataURL;
+			var fileClient = getFileClient(item);
+			if (fileClient.readBlob) {
+				var elements = outputDocument.getElementsByTagName("IMG"); //$NON-NLS-0$
+				for (var i = 0; i < elements.length; i++) {
+					var current = elements[i];
+					if (RELATIVE_IMAGE_REGEX.test(current.id)) {
+						var bytes = imageCache[current.id];
+						if (bytes) {
+							var href = normalize(current.getAttribute(ATTRIBUTE_ORIGINAL_HREF), item.fileNode.Location);
+							var match = href.match(FILENAME_REGEX);
+							var mimeType = match ? "image/" + match[2] : "image/png"; //$NON-NLS-1$ //$NON-NLS-0$
+							var dataURL = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
+							current.src = dataURL;
+						} else {
+							(function(element) {
+								var href = normalize(element.getAttribute(ATTRIBUTE_ORIGINAL_HREF), item.fileNode.Location);
+								fileClient.readBlob(href).then(
+									function(bytes) {
+										imageCache[element.id] = bytes;
+										var match = href.match(FILENAME_REGEX);
+										var mimeType = match ? "image/" + match[2] : "image/png"; //$NON-NLS-1$ //$NON-NLS-0$
+										dataURL = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
 
-									if (!adjustScrollTop || !anchorElement || anchorElement.offsetTop < element.offsetTop) {
-										/* do not need to treat the image load specially */
-										element.src = dataURL;
-									} else {
-										/*
-										 * Image is above the anchor element and the final page styling has been applied,
-										 * so must adjust the scrollTop to keep the viewport steady.
-										 */
-										var newImage = new Image();
-										newImage.src = dataURL;
-										newImage.onload = function() {
-											newImage.onload = null;
-											if (!element.parentElement) {
-												return; /* page has likely been unloaded */
-											}
-											element.parentElement.replaceChild(newImage, element);
-											outputDocument.body.scrollTop = anchorElement.offsetTop;
-										};
+										if (!adjustScrollTop || !anchorElement || anchorElement.offsetTop < element.offsetTop) {
+											/* do not need to treat the image load specially */
+											element.src = dataURL;
+										} else {
+											/*
+											 * Image is above the anchor element and the final page styling has been applied,
+											 * so must adjust the scrollTop to keep the viewport steady.
+											 */
+											var newImage = new Image();
+											newImage.src = dataURL;
+											newImage.onload = function() {
+												newImage.onload = null;
+												if (!element.parentElement) {
+													return; /* page has likely been unloaded */
+												}
+												element.parentElement.replaceChild(newImage, element);
+												outputDocument.body.scrollTop = anchorElement.offsetTop;
+											};
+										}
+									},
+									function(/*error*/) {
+										/* image load failed, don't display error text, image will be missing in output */
 									}
-								},
-								function(/*error*/) {
-									/* image load failed, don't display error text, image will be missing in output */
-								}
-							);
-						})(current);
+								);
+							})(current);
+						}
 					}
 				}
 			}
@@ -646,24 +689,24 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		link.type = "text/css"; //$NON-NLS-0$
 		link.onload = function() {
 			link.onload = null;
-			var h1 = outputDocument.createElement("h1"); //$NON-NLS-0$
-			h1.textContent = item.title;
-			outputBody.appendChild(h1);
-			var h3 = outputDocument.createElement("h3"); //$NON-NLS-0$
-			h3.textContent = messages.Contents;
-			outputBody.appendChild(h3);
-			var ul = outputDocument.createElement("ul"); //$NON-NLS-0$
-			outputBody.appendChild(ul);
+			var titleElement = outputDocument.createElement("h1"); //$NON-NLS-0$
+			titleElement.textContent = item.title;
+			outputBody.appendChild(titleElement);
+			var contentsElement = outputDocument.createElement("h2"); //$NON-NLS-0$
+			contentsElement.textContent = messages.Contents;
+			outputBody.appendChild(contentsElement);
+			var listElement = outputDocument.createElement("ul"); //$NON-NLS-0$
+			outputBody.appendChild(listElement);
 
 			var displayChildren = function(children) {
 				children.forEach(function(current) {
-					var li = outputDocument.createElement("li"); //$NON-NLS-0$
-					ul.appendChild(li);
+					var itemElement = outputDocument.createElement("li"); //$NON-NLS-0$
+					listElement.appendChild(itemElement);
 					var link = createLink(current, current.id, outputDocument);
-					li.appendChild(link);
+					itemElement.appendChild(link);
 				});
 			};
-	
+
 			if (item.children) {
 				displayChildren(item.children);
 			} else {
@@ -674,29 +717,25 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		outputBody.classList.add("orionMarkdown"); //$NON-NLS-0$
 	}
 
-	function retrieveContent(node) {
+	function retrieveContent(item) {
+		var node = item.fileNode;
 		var location = node.Location;
 		var result = new Deferred();
 		var match = location.match(FILENAME_REGEX);
 		if (match) {
-			if (match[2] === "html" || match[2] === "md" || !fileClient.readBlob) {
+			var fileClient = getFileClient(item);
+			if (match[2] === "md") { //$NON-NLS-0$
 				(progress ? progress.progress(fileClient.read(location, false), "Retrieving " + location) : fileClient.read(location, false)).then( //$NON-NLS-0$
 					function(content) {
-						if (match[2] === "html") {
-							var html = content;
-						} else if (match[2] === "md") {
-							html = "<html><body>" + marked(content, markedOptions) + "</body></html>";
-						}
-
-						if (html) {
-				            content = document.implementation.createHTMLDocument("");
-				            content.documentElement.innerHTML = html;
-						}
+						var html = "<html><body>" + marked(content, markedOptions) + "</body></html>"; //$NON-NLS-1$ //$NON-NLS-0$
+			            content = document.implementation.createHTMLDocument("");
+						/* it's safe to use innerHTML here because the HTML content was generated from sanitized markdown */
+			            content.documentElement.innerHTML = html;
 						result.resolve(content);
 					}.bind(this),
 					result.reject
 				);
-			} else {
+			} else if (fileClient.readBlob && !HTML_EXTENSION_REGEX.test(match[2])) { /* treat as binary */
 				(progress ? progress.progress(fileClient.readBlob(location), "Retrieving " + location) : fileClient.readBlob(location)).then( //$NON-NLS-0$
 					function(bytes) {
 						Deferred.when(contentTypeService.getFileContentType(node), function(contentType) {
@@ -707,70 +746,69 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 					},
 					result.reject
 				);
+			} else {
+				result.resolve("");
 			}
 		}
 		return result;
 	}
 
-	function selectInTOC(item) {
-		var segments = item.fileNode.Location.substring(ROOT_FOLDER.length + 1).split(SEPARATOR);
-		for (var i = 0; i < segments.length; i++) {
-			if (!segments[i].length) {
-				segments.splice(i--, 1); /* remove empty segment, adjust i accordingly */
-			} else if (segments[i].charAt(0) === HIDDEN) {
-				/* an ancestor of item's path is hidden, do not attempt to show/select it */
-				return;
-			}
-		}
-		if (item.anchor) {
-			segments.push(HASH + item.anchor);
-		}
-
-		/* find the item that's closest to the targeted item */
-		var foundItem;
-		var idString = ROOT_FOLDER;
-		for (i = 0; i < segments.length; i++) {
-			if (segments[i].indexOf(HASH)) {
-				idString += SEPARATOR + segments[i]; /* typical case */
-			} else {
-				idString += segments[i]; /* anchor segment */
-			}
-			var test = getItem(idString);
-			if (test && test.parent) {
-				foundItem = test;
-			} else {
-				break;
-			}
-		}
-		if (i === segments.length) {
-			/* full item ancestory is already created, so just select the item */
-			selectItem(foundItem);
-			return;
-		}
-
-		var loadItem = function(parentItem, remainingSegments) {
-			helpModel.getChildren(parentItem, function() {
-				var id = parentItem.id + (remainingSegments[0].indexOf(HASH) ? SEPARATOR + remainingSegments[0] : remainingSegments[0]);
-				var item = getItem(id);
-				if (item) {
-					if (remainingSegments.length === 1) {
-						selectItem(item);
-					} else {
-						loadItem(item, remainingSegments.slice(1));
-					}
-				}
-			});
-		};
-
-		if (!foundItem) {
-			/* root item has not been created yet */
-			helpModel.getRoot(function(rootItem) {
-				loadItem(rootItem, segments);
-			});
-		} else {
-			loadItem(foundItem, segments.slice(i));
-		}
-	}
+//	function selectInTOC(item) {
+//		var segments = item.fileNode.Location.substring(ROOT_FOLDER.length + 1).split(SEPARATOR);
+//		for (var i = 0; i < segments.length; i++) {
+//			if (!segments[i].length) {
+//				segments.splice(i--, 1); /* remove empty segment, adjust i accordingly */
+//			}
+//		}
+//		if (item.anchor) {
+//			segments.push(HASH + item.anchor);
+//		}
+//
+//		/* find the item that's closest to the targeted item */
+//		var foundItem;
+//		var idString = ROOT_FOLDER;
+//		for (i = 0; i < segments.length; i++) {
+//			if (segments[i].indexOf(HASH)) {
+//				idString += SEPARATOR + segments[i]; /* typical case */
+//			} else {
+//				idString += segments[i]; /* anchor segment */
+//			}
+//			var test = getItem(idString);
+//			if (test && test.parent) {
+//				foundItem = test;
+//			} else {
+//				break;
+//			}
+//		}
+//		if (i === segments.length) {
+//			/* full item ancestory is already created, so just select the item */
+//			selectItem(foundItem);
+//			return;
+//		}
+//
+//		var loadItem = function(parentItem, remainingSegments) {
+//			helpModel.getChildren(parentItem, function() {
+//				var id = parentItem.id + (remainingSegments[0].indexOf(HASH) ? SEPARATOR + remainingSegments[0] : remainingSegments[0]);
+//				var item = getItem(id);
+//				if (item) {
+//					if (remainingSegments.length === 1) {
+//						selectItem(item);
+//					} else {
+//						loadItem(item, remainingSegments.slice(1));
+//					}
+//				}
+//			});
+//		};
+//
+//		if (!foundItem) {
+//			/* root item has not been created yet */
+//			helpModel.getRoot(function(rootItem) {
+//				loadItem(rootItem, segments);
+//			});
+//		} else {
+//			loadItem(foundItem, segments.slice(i));
+//		}
+//	}
 
 	function setOutput(item) {
 		var result = new Deferred();
@@ -818,31 +856,14 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		return result;
 	}
 
-	function searchButtonListener() {
-		helpModel.getRoot(function(root) {
-			var searchParams = {
-				resource: root.fileNode.Location,
-				keyword: searchBox.getTextInputValue(),
-				sort: "Path asc",
-				rows: 100,
-				start: 0
-			};
-
-			searchWrapper.classList.add("searchWrapperActive"); //$NON-NLS-0$
-			searchResultExplorer.runSearch(searchParams, searchResultsWrapper);
-		});
-	}
-
 	mBootstrap.startup().then(function(core) {
-		var serviceRegistry = core.serviceRegistry;
-		fileClient = new mFileClient.FileClient(serviceRegistry);
+		serviceRegistry = core.serviceRegistry;
 		progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		var commandRegistry = new mCommandRegistry.CommandRegistry({});
 		contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
-		mGlobalCommands.generateBanner("orion-helpPage", serviceRegistry, commandRegistry, core.preferences, searcher); //$NON-NLS-0$
+		mGlobalCommands.generateBanner("orion-helpPage", serviceRegistry, commandRegistry, core.preferences); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({task: messages.Help, serviceRegistry: serviceRegistry, commandService: commandRegistry});
 
 		var sideBar = lib.node("sidebar"); //$NON-NLS-0$
@@ -858,81 +879,9 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		output.style.height = "100%"; //$NON-NLS-0$
 		outputDiv.appendChild(output);
 
-//		var label = document.createElement("div"); //$NON-NLS-0$
-//		label.className = "searchSectionLabel"; //$NON-NLS-0$
-//		label.textContent = "Search:";
-//		parent.appendChild(label);
-//		var text = document.createElement("input"); //$NON-NLS-0$
-//		text.className = "searchSectionText"; //$NON-NLS-0$
-//		parent.appendChild(text);
-//		var button = document.createElement("button"); //$NON-NLS-0$
-//		button.textContent = "Go";//$NON-NLS-0$
-//		button.className = "searchSectionButton"; //$NON-NLS-0$
-//		parent.appendChild(text);
-
-		if (false) {
-			searchResultExplorer = new InlineSearchResultExplorer(
-				serviceRegistry,
-				commandRegistry,
-				{
-					getSearchResultsTitleDiv: function() {
-						return searchResultsTitle;
-					}
-				});
-			
-			searchWrapper = document.createElement("div"); //$NON-NLS-0$
-			searchWrapper.classList.add("searchWrapper"); //$NON-NLS-0$
-			sideBar.appendChild(searchWrapper);
-			
-			var dismissButton = document.createElement("button"); //$NON-NLS-0$
-			dismissButton.classList.add("imageSprite"); //$NON-NLS-0$
-			dismissButton.classList.add("core-sprite-close"); //$NON-NLS-0$
-			dismissButton.classList.add("dismissButton"); //$NON-NLS-0$
-			dismissButton.classList.add("searchDismissButton"); //$NON-NLS-0$
-			dismissButton.addEventListener("click", function(/*e*/) {
-				searchWrapper.classList.remove("searchWrapperActive"); //$NON-NLS-0$
-			});
-			searchWrapper.appendChild(dismissButton);
-			
-			searchResultsTitle = document.createElement("div"); //$NON-NLS-0$
-			searchResultsTitle.classList.add("searchResultsTitle"); //$NON-NLS-0$
-			searchWrapper.appendChild(searchResultsTitle);
-
-			searchResultsWrapper = document.createElement("div"); //$NON-NLS-0$
-			searchResultsWrapper.id = "helpSearchResultsWrapper"; //$NON-NLS-0$
-			searchResultsWrapper.classList.add("searchResultsWrapperDiv"); //$NON-NLS-0$
-			searchResultsWrapper.classList.add("selectionModelContainer"); //$NON-NLS-0$
-			searchWrapper.appendChild(searchResultsWrapper);
-
-			var parent = lib.node('pageToolbar'); //$NON-NLS-0$
-			searchBox = new ComboTextInput({
-				id: "helpSearchInput", //$NON-NLS-0$
-				parentNode: parent,
-				hasButton: true,
-				buttonClickListener: searchButtonListener,
-				serviceRegistry: serviceRegistry
-			});
-	
-			var searchButtonSpan = document.createElement("span"); //$NON-NLS-0$
-			searchButtonSpan.classList.add("core-sprite-search"); //$NON-NLS-0$
-			var searchButton = searchBox.getButton();
-			searchButton.classList.add("searchButton"); //$NON-NLS-0$
-			searchButton.appendChild(searchButtonSpan);
-			var searchTextInputBox = searchBox.getTextInputNode();
-			searchTextInputBox.placeholder = /*messages[*/"Search"/*])*/; //$NON-NLS-0$
-	
-			var resultsButton = document.createElement("button"); //$NON-NLS-0$
-			resultsButton.classList.add("core-sprite-rightarrow"); //$NON-NLS-0$
-			parent.appendChild(resultsButton);
-			resultsButton.title = /*messages[*/"Show Search Results"/*])*/; //$NON-NLS-0$
-			resultsButton.addEventListener("click", function(/*e*/) { //$NON-NLS-0$
-				searchWrapper.classList.add("searchWrapperActive"); //$NON-NLS-0$
-			});
-		}
-
 		var ID_PRINT = "orion.help.print"; //$NON-NLS-0$
 		var printCommand = new mCommands.Command({
-			imageClass: "core-sprite-stop", //$NON-NLS-0$
+			imageClass: "core-sprite-printer", //$NON-NLS-0$
 			tooltip: messages.Print,
 			id: ID_PRINT,
 			callback: function(/*data*/) {
@@ -956,6 +905,17 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		var hash = window.location.hash;
 		if (hash) {
 			hashChanged(hash);
+		} else {
+			var outputDocument = output.contentDocument;
+			var html = "<html><body>" + marked(messages.introMarkdown, markedOptions) + "</body></html>"; //$NON-NLS-1$ //$NON-NLS-0$
+			/* it's safe to use innerHTML here because the HTML content was generated from sanitized markdown */
+			outputDocument.childNodes[0].innerHTML = html;
+			var link = outputDocument.createElement("link"); //$NON-NLS-0$
+			link.href = require.toUrl("help/help.css"); //$NON-NLS-0$
+			link.rel = "stylesheet"; //$NON-NLS-0$
+			link.type = "text/css"; //$NON-NLS-0$
+			outputDocument.head.appendChild(link);
+			outputDocument.body.classList.add("orionMarkdown"); //$NON-NLS-0$
 		}
 	});
 });

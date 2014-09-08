@@ -10,13 +10,10 @@
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env mocha, node, amd*/
-(function(root, factory) {
-	if (typeof exports === "object") {//$NON-NLS-0$
-		module.exports = factory(require, exports, module, require("assert"), require("../../lib/util"));
-	} else if(typeof define === "function" && define.amd) {//$NON-NLS-0$
-		define(["require", "exports", "module", "chai/chai", "eslint/util"], factory);
-	}
-}(this, function(require, exports, module, assert, util) {
+define([
+"chai/chai", 
+"eslint/util"
+], function(assert, util) {
 	assert = assert.assert /*chai*/ || assert;
 
 	describe("ESLint Util Tests", function() {
@@ -41,4 +38,4 @@
 		});
 	});
 
-}));
+});

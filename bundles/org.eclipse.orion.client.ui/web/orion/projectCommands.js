@@ -1042,7 +1042,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			name: messages["basic"],
 			tooltip: messages["createAnEmptyProject."],
 			id: "orion.project.create.basic",
-			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", "Name: ")]),
+			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", messages["Name:"])]),
 			callback: function(data){
 					var name = data.parameters.valueFor("name");
 					if(!name){
@@ -1147,8 +1147,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				name: messages["sFTP"],
 				tooltip: messages["createAProjectFromAn"],
 				id: "orion.project.create.sftp",
-				parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:'),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		                                                               		new mCommandRegistry.CommandParameter('url', 'url', 'Url:')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Name:']),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		                                                               		new mCommandRegistry.CommandParameter('url', 'url', messages['Url:'])]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				callback: function(data){
 						var name = data.parameters.valueFor("name");
 						if(!name){

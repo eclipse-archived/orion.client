@@ -30,7 +30,7 @@ define([], function() {
 		node.classList.add('setting-row'); //$NON-NLS-0$
 		node.setAttribute('role', 'region'); //$NON-NLS-1$ //$NON-NLS-0$
 		node.setAttribute('aria-labelledby', 'Navigation-header'); //$NON-NLS-1$ //$NON-NLS-0$
-		var titleNode = document.createElement('h3'); //$NON-NLS-0$
+		var titleNode = document.createElement('div'); //$NON-NLS-0$
 		titleNode.classList.add('setting-header'); //$NON-NLS-0$
 		titleNode.textContent = sectionName;
 		var content = document.createElement('div'); //$NON-NLS-0$

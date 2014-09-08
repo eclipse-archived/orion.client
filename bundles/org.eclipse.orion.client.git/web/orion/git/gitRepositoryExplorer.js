@@ -345,7 +345,7 @@ define([
 		});
 	};
 	
-	GitRepositoryExplorer.prototype.initTitleBar = function(resource, sectionName) {
+	GitRepositoryExplorer.prototype.initTitleBar = function(resource) {
 		var item = {};
 		var task = messages.Repo;
 		var repository = resource;
@@ -454,13 +454,31 @@ define([
 				case "Tag": //$NON-NLS-0$
 				case "StashCommit": //$NON-NLS-0$
 					break;
+				case "Remote": //$NON-NLS-0$
+					var activeBranch = this.commitsNavigator.model.getActiveBranch();
+					if (!activeBranch) return;
+					var newBranch;
+					for (var i = 0; i < activeBranch.RemoteLocation.length; i++) {
+						if (selected.Location === activeBranch.RemoteLocation[i].Location) {
+							var children = activeBranch.RemoteLocation[i].Children;
+							newBranch = children[children.length - 1];
+							break;
+						}
+					}
+					if (util.isNewBranch(newBranch)) {
+						selected = newBranch;
+						break;
+					}
+					return;
 				default:
 					return;
 			}
 			this.changes = this.reference = this.log = this.logLocation = this.treePath = null;
 			section.setHidden(true);
 			this.setSelectedReference(selected);
-			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
+			if (!util.isNewBranch(selected)) {
+				window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
+			}
 		}.bind(this));
 		var explorer = this.branchesNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
@@ -498,6 +516,10 @@ define([
 		if (activeBranch && targetRef) {
 			var targetName =  util.shortenRefName(targetRef);
 			title = activeBranch.Name + " => " + targetName;  //$NON-NLS-0$
+		} else if (!activeBranch && !targetRef) {
+			title = messages["NoActiveBranch"] + " => " + messages["NoRef"];  //$NON-NLS-0$
+		} else if (!activeBranch && targetRef) {
+			title = messages["NoActiveBranch"] + " => " +  util.shortenRefName(targetRef);  //$NON-NLS-0$
 		} else {
 			title = util.shortenRefName(activeBranch || targetRef);
 		}
@@ -594,7 +616,7 @@ define([
 			id : "diffSection", //$NON-NLS-0$
 			title : messages["CommitChanges"],
 			content : '<div id="diffNode"></div>', //$NON-NLS-0$
-			canHide : true,
+			canHide : false,
 			noTwistie: true,
 			preferencesService : this.preferencesService
 		});

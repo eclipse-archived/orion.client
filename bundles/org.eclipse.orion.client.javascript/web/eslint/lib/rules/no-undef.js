@@ -9,15 +9,11 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env amd, node */
+/*eslint-env amd */
 define([
-'module', 
 'logger'
-], function(module, Logger) {
-    //------------------------------------------------------------------------------
-    // Helpers
-    //------------------------------------------------------------------------------
-
+], function(Logger) {
+    
     function isImplicitGlobal(variable) {
         return variable.defs.every(function(def) {
             return def.type === "ImplicitGlobalVariable";  //$NON-NLS-0$
@@ -45,11 +41,7 @@ define([
         return declaredGlobal;
     }
     
-    //------------------------------------------------------------------------------
-    // Rule Definition
-    //------------------------------------------------------------------------------
-
-    module.exports = function(context) {
+    return function(context) {
     
         "use strict";  //$NON-NLS-0$
     
@@ -82,6 +74,4 @@ define([
         };
     
     };
-
-    return module.exports;
 });

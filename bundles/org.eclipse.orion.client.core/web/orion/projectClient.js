@@ -25,6 +25,16 @@ define([
 	}
 
 	/**
+	 * @param {Object} target
+	 * @param {orion.serviceregistry.ServiceReference} serviceReference
+	 */
+	function mixinProperties(target, serviceReference) {
+		serviceReference.getPropertyKeys().forEach(function(key) {
+			target[key] = serviceReference.getProperty(key);
+		});
+	}
+
+	/**
 	 * Creates a new project client.
 	 * @class Project client provides client-side API to handle projects based on given file client.
 	 * @name orion.projectClient.ProjectClient
@@ -392,6 +402,11 @@ define([
 	
 	_getProjectDeployService: function(serviceReference){
 		var service = this.serviceRegistry.getService(serviceReference);
+		mixinProperties(service, serviceReference);
+		/*
+		Expected properties:
+		id, nls, name{Key}, tooltip{Key}, parameters, optionalParameters, validationProperties, logLocationTemplate
+		*/
 		service.id = serviceReference.getProperty("id");
 		service.name = serviceReference.getProperty("name");
 		service.tooltip = serviceReference.getProperty("tooltip");
@@ -424,45 +439,40 @@ define([
 		}
 		return types;
 	},
-	
+
 	getProjectDelpoyService: function(serviceId, type){
-		for(var i=0; i<this.allProjectDeployReferences.length; i++){
-			if(this.allProjectDeployReferences[i].getProperty("id") === serviceId){
-				return this._getProjectDeployService(this.allProjectDeployReferences[i]);
+		var foundRef;
+		// Find by id
+		this.allProjectDeployReferences.some(function(serviceRef) {
+			if(serviceRef.getProperty("id") === serviceId){
+				return (foundRef = serviceRef); // break
 			}
-		}
+			return false;
+		});
 		if(type){
-			for(var i=0; i<this.allProjectDeployReferences.length; i++){
-				var deployTypes = this.allProjectDeployReferences[i].getProperty("deployTypes");
-				if(!deployTypes){
-					continue;
+			// Find by type
+			this.allProjectDeployReferences.some(function(serviceRef) {
+				if ((serviceRef.getProperty("deployTypes") || []).indexOf(type) !== -1) {
+					return (foundRef = serviceRef); // break
 				}
-				if(deployTypes.some(function(typeFromService){return type === typeFromService;})){
-					return this._getProjectDeployService(this.allProjectDeployReferences[i]);
-				}
-			}
+				return false;
+			});
 		}
+		return this._nlsService(this._getProjectDeployService(foundRef));
 	},
 
 	_getProjectHandlerService: function(serviceReference){
 		/*
 		Expected properties:
-		id
-		addParameters || addParamethers
-		optionalParameters || optionalParamethers
-		addDependencyName{Key}
-		addDependencyTooltip{Key}
-		type
-		actionComment
-		addProjectName{Key}
-		addProjectTooltip{Key}
-		validationProperties
-		nls
+		id, nls, type,
+		addParameters || addParamethers,
+		optionalParameters || optionalParamethers,
+		addDependencyName{Key}, addDependencyTooltip{Key}, addProjectName{Key} addProjectTooltip{Key},
+		actionComment, validationProperties
 		*/
 		var service = this.serviceRegistry.getService(serviceReference);
-		serviceReference.getPropertyKeys().forEach(function(key) {
-			service[key] = serviceReference.getProperty(key);
-		});
+		mixinProperties(service, serviceReference);
+
 		// Canonicalize legacy names
 		service.addParameters = service.addParameters || service.addParamethers;
 		service.optionalParameters = service.optionalParameters || service.optionalParamethers;
@@ -471,26 +481,45 @@ define([
 		return service;
 	},
 
-	/**
-	 * @returns {orion.Promise} A promise resolving to the project handler, with any i18n'able fields
-	 * set to their translated values.
-	 */
-	_translateProjectHandler: function(handler) {
-		if (!handler.nls) {
-			return new Deferred().resolve(handler);
-		}
-		return i18nUtil.getMessageBundle(handler.nls).then(function(messages) {
-			var suffixLength = "Key".length; // $NON-NLS-0$
-			Object.keys(handler).filter(RegExp.prototype.test.bind(/Key$/)).forEach(function(key) {
-				var baseName = key.substring(0, key.length - suffixLength);
-				handler[baseName] = messages[handler[key]] || key;
-				delete handler[key]; // handler.Foo is translated so we don't need handler.FooKey
-			});
-			return handler;
-		}, function() {
-			// Failure loading messages, return as-is
-			return handler;
+	
+	_translateKeys: function(target, messages) {
+		var isI18nKey = RegExp.prototype.test.bind(/Key$/);
+		Object.keys(target).filter(isI18nKey).forEach(function(key) {
+			var translated = messages[target[key]],
+			    baseName = key.substring(0, key.length - "Key".length), //$NON-NLS-0$
+			    fallback = target[baseName] || key;
+			target[baseName] = translated || fallback;
+			delete target[key]; // target.F is translated so delete target.FKey
 		});
+	},
+	
+	_translateParamArray: function(parameters, messages) {
+		if( Array.isArray(parameters)) {
+			parameters.forEach(function(parameters) {
+				this._translateKeys(parameters, messages);
+			}.bind(this));
+		}
+	},
+	
+	/**
+	 * Translates service's i18nable fields. A field F is i18nable if there's another field named FKey,
+	 * giving the message key to use for translating F. `service.nls` gives the message bundle path.
+	 *
+	 * @param {Object} service
+	 * @returns {orion.Promise} A promise resolving to the service, after its i18nable fields are translated.
+	 */
+	_nlsService: function(service) {
+		var _this = this;
+		function replaceNlsFields(target, messages) {
+			messages = messages || {};
+			_this._translateKeys(target, messages);
+			_this._translateParamArray(target.addParameters, messages);
+			_this._translateParamArray(target.optionalParameters, messages);
+			return target;
+		}
+		var loadMessages = service.nls ? i18nUtil.getMessageBundle(service.nls) : new Deferred().resolve();
+		var nlsService = replaceNlsFields.bind(null, service);
+		return loadMessages.then(nlsService, nlsService);
 	},
 
 	/**
@@ -500,7 +529,7 @@ define([
 		for(var i=0; i<this.allProjectHandlersReferences.length; i++){
 			if(this.allProjectHandlersReferences[i].getProperty("type") === type){
 				var handler = this._getProjectHandlerService(this.allProjectHandlersReferences[i]);
-				return this._translateProjectHandler(handler);
+				return this._nlsService(handler);
 			}
 		}
 	},

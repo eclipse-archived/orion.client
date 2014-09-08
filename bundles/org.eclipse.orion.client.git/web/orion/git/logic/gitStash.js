@@ -11,9 +11,7 @@
 
 /*eslint-env browser, amd*/
 
-define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/Deferred','orion/git/widgets/CommitDialog', 
-        'orion/git/logic/gitCommon', 'orion/i18nUtil', 'orion/webui/littlelib'],
-        function(messages,mCommandRegistry,Deferred,mCommit,mGitCommon,i18nUtil, lib) {
+define(['orion/Deferred'], function(Deferred) {
 	
 	/**
 	 * Acts as a factory for stash related functions.
@@ -22,12 +20,11 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/Deferred','ori
 	return function(dependencies) {
 		
 		var serviceRegistry = dependencies.serviceRegistry;
-		var commandService = dependencies.commandService;
 		
 		var performStashAll = function(data) {
 			
 			var d = new Deferred();
-			var gitService = serviceRegistry.getService("orion.git.provider");
+			var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 			var item = data.items.status || data.handler.status || data.items;
 			var gitStashLocation = item.Clone.StashLocation;
 	
@@ -51,7 +48,7 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/Deferred','ori
 		var performDrop = function(data) {
 			
 			var d = new Deferred();
-			var gitService = serviceRegistry.getService("orion.git.provider");
+			var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 			var item = data.items.status || data.handler.status || data.items;
 			var dropLocation = item.DropLocation;
 
@@ -67,7 +64,7 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/Deferred','ori
 		var performApply = function(data) {
 			
 			var d = new Deferred();
-			var gitService = serviceRegistry.getService("orion.git.provider");
+			var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 			var item = data.items.status || data.handler.status || data.items;
 			var applyLocation = item.ApplyLocation;
 
@@ -83,7 +80,7 @@ define(['i18n!git/nls/gitmessages','orion/commandRegistry','orion/Deferred','ori
 		var performPop = function(data) {
 			
 			var d = new Deferred();
-			var gitService = serviceRegistry.getService("orion.git.provider");
+			var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 			var item = data.items.status || data.handler.status || data.items;
 			var gitStashLocation = item.Clone.StashLocation;
 

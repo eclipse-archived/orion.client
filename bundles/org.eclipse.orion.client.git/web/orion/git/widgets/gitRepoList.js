@@ -13,15 +13,15 @@
 
 define([
 	'i18n!git/nls/gitmessages',
-	'orion/keyBinding',
 	'orion/commandRegistry',
 	'orion/explorers/explorer',
 	'orion/URITemplate',
 	'orion/i18nUtil',
 	'orion/git/uiUtil',
+	'orion/git/util',
 	'orion/Deferred',
 	'orion/objects'
-], function(messages, KeyBinding, mCommandRegistry, mExplorer, URITemplate, i18nUtil, uiUtil, Deferred, objects) {
+], function(messages, mCommandRegistry, mExplorer, URITemplate, i18nUtil, uiUtil, util, Deferred, objects) {
 		
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 
@@ -81,8 +81,7 @@ define([
 									deferred.resolve();
 									return;
 								}
-								var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
-								if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
+								if (util.tracksRemoteBranch(currentBranch) && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
 									that.progressService.progress(that.gitClient.getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD"), "Getting incomming commits " + repository.Name).then(function(resp){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 										if(resp.Children === undefined) { repository.CommitsToPush = 0; }
 										else { repository.CommitsToPush = resp.Children.length; }
@@ -262,8 +261,6 @@ define([
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.cloneGitRepository", 100, "eclipse.gitGroup", false, null, new mCommandRegistry.URLBinding("cloneGitRepository", "url")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.createGitProject", 300, "eclipse.gitGroup", true, null, new mCommandRegistry.URLBinding("createProjectContext", "name")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.initGitRepository", 200, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-//				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.openCommitCommand", 1000, "eclipse.gitGroup", true,  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-//					new KeyBinding.KeyBinding('h', true, true), new mCommandRegistry.URLBinding("openGitCommit", "commitName")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.model.repositories[0], this, "button"); //$NON-NLS-0$
 		}

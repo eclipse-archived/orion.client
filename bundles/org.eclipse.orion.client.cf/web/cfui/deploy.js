@@ -312,13 +312,13 @@ define(['i18n!cfui/nls/messages', 'orion/i18nUtil', "orion/bootstrap", "orion/xh
 					return;
 				} else {
 					var error = {};
-					var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()}); //$NON-NLS-0$
+					var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=cloud").expand({OrionHome : PageLinks.getOrionHome()}); //$NON-NLS-0$
 					error.Message = i18nUtil.formatMessage(messages['deploy.setUpYourCloud'], cloudSettingsPageUrl); 
 					error.Severity = "Warning"; //$NON-NLS-0$
 					deferred.reject(error);
 				}
 			}, function(error){
-				var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()}); //$NON-NLS-0$
+				var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=cloud").expand({OrionHome : PageLinks.getOrionHome()}); //$NON-NLS-0$
 				error.Message = i18nUtil.formatMessage(messages['deploy.setUpYourCloud'], cloudSettingsPageUrl); 
 				error.Severity = "Warning"; //$NON-NLS-0$
 				deferred.reject(error);
@@ -352,7 +352,7 @@ define(['i18n!cfui/nls/messages', 'orion/i18nUtil', "orion/bootstrap", "orion/xh
 				error.Message = messages["deploy.enterCredentials"];
 			
 			} else if (err.error_code === "CF-TargetNotSet"){ //$NON-NLS-0$
-				var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()}); //$NON-NLS-0$
+				var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=cloud").expand({OrionHome : PageLinks.getOrionHome()}); //$NON-NLS-0$
 				error.Message = i18nUtil.formatMessage(messages['deploy.setUpYourCloud'], cloudSettingsPageUrl); 
 			}
 		}

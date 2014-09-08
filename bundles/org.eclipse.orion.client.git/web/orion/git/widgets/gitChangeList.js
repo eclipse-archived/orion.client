@@ -343,9 +343,8 @@ define([
 			var deferred = new Deferred();
 			if (this.prefix === "all") { //$NON-NLS-0$
 				var parent = items[0].parent;
-				var name = this.messageTextArea.value;
-				var amend = this.amendCheck.checked;
-				var changeId = this.changeIDCheck.checked;
+				var commitInfo = this.getCommitInfo();
+				var moreVisible = this.getMoreVisible();
 				var that = this;
 				parent.children = parent.Children = null;
 				this.model.getChildren(parent, function(children) {
@@ -355,9 +354,8 @@ define([
 						return that.model.isStaged(item.type);
 					});
 					that.selection.setSelections(selection);
-					that.messageTextArea.value = name;
-					that.amendCheck.checked = amend;
-					that.changeIDCheck.checked = changeId;
+					that.setMoreVisible(moreVisible);
+					that.setCommitInfo(commitInfo);
 					deferred.resolve(children);
 				});
 			} else {
@@ -407,6 +405,10 @@ define([
 		isRowSelectable: function(modelItem) {
 			return this.prefix === "all" ? false : mGitUIUtil.isChange(modelItem); //$NON-NLS-0$
 		},
+		isRebasing: function() {
+			var repository = this.model.repository;
+			return repository && repository.status && repository.status.RepositoryState === "REBASING_INTERACTIVE"; //$NON-NLS-0$
+		},
 		getItemCount: function() {
 			var result = 0;
 			var model = this.model;
@@ -450,20 +452,21 @@ define([
 				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutCommand", 300); //$NON-NLS-0$
 				commandRegistry.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.stageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
 			}  else if (this.prefix === "all") { //$NON-NLS-0$
-			
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 300); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.popStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.precreateStashCommand", 200); //$NON-NLS-0$
-
-				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showStagedPatchCommand", 100); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 200); //$NON-NLS-0$
-				
-//				commandRegistry.addCommandGroup(selectionNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.precommitCommand", "primaryButton"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
-//				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitCommand", 400); //$NON-NLS-0$
-
-				commandRegistry.renderCommands(selectionNodeScope, selectionNodeScope, [], this, "tool", {Clone : this.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.model ? this.model.repository : this, this, "tool"); //$NON-NLS-0$	
+				if (!this.isRebasing()) {
+					commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 300); //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.popStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.precreateStashCommand", 200); //$NON-NLS-0$
+	
+					commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.showStagedPatchCommand", 100); //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.checkoutStagedCommand", 200); //$NON-NLS-0$
+					
+	//				commandRegistry.addCommandGroup(selectionNodeScope, "eclipse.gitCommitGroup", 1000, "Commit", null, null, null, "Commit", null, "eclipse.orion.git.precommitCommand", "primaryButton"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 	549
+	//				commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitAndPushCommand", 200, "eclipse.gitCommitGroup"); //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(selectionNodeScope, "eclipse.orion.git.precommitCommand", 400); //$NON-NLS-0$
+	
+					commandRegistry.renderCommands(selectionNodeScope, selectionNodeScope, [], this, "tool", {Clone : this.model.repository}); //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, this.model ? this.model.repository : this, this, "tool"); //$NON-NLS-0$	
+				}
 			} else if (this.prefix === "diff" && this.commit) { //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.checkoutCommit", 1); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.undoCommit", 2); //$NON-NLS-1$ //$NON-NLS-0$
@@ -497,7 +500,7 @@ define([
 				tooltip : messages["Select all"],
 				imageClass : "core-sprite-check", //$NON-NLS-0$
 				id: "orion.explorer.selectAllCommandChangeList", //$NON-NLS-0$
-				visibleWhen : function(item) {
+				visibleWhen : function() {
 					var result = false;
 					that.model.getRoot(function(root) {
 						if (root.children) {
@@ -509,7 +512,7 @@ define([
 					});
 					return result;
 				},
-				callback : function(data) {
+				callback : function() {
 					that.model.getRoot(function(root) {
 						var selection = root.children.filter(function(item) {
 							return !that.model.isStaged(item.type) && mGitUtil.isChange(item);
@@ -523,7 +526,7 @@ define([
 				tooltip : messages["Deselect all"],
 				imageClass : "core-sprite-check_on", //$NON-NLS-0$
 				id: "orion.explorer.deselectAllCommandChangeList", //$NON-NLS-0$
-				visibleWhen : function(item) {
+				visibleWhen : function() {
 					var result = false;
 					that.model.getRoot(function(root) {
 						if (root.children && root.children.length > 1) {
@@ -535,7 +538,7 @@ define([
 					});
 					return result;
 				},
-				callback : function(data) {
+				callback : function() {
 					that.model.getRoot(function(root) {
 						var selection = root.children.filter(function(item) {
 							return that.model.isStaged(item.type);
@@ -551,17 +554,11 @@ define([
 				id: "eclipse.orion.git.precommitCommand", //$NON-NLS-0$
 				extraClass: "primaryButton", //$NON-NLS-0$
 				callback: function(data) {
-					var name = that.messageTextArea.value.trim();
-					if (!name) {
-						that.messageTextArea.parentNode.classList.add("invalidCommitMessage"); //$NON-NLS-0$
-						that.messageTextArea.select();
-						return;
-					}
-					var amend = that.amendCheck.checked;
-					var changeId = that.changeIDCheck.checked;
-					that.commandService.runCommand("eclipse.orion.git.commitCommand", data.items, data.handler, null, {name: name, amend: amend, changeId: changeId}); //$NON-NLS-0$
+					var info = that.getCommitInfo(true);
+					if (!info) return;
+					that.commandService.runCommand("eclipse.orion.git.commitCommand", data.items, data.handler, null, info); //$NON-NLS-0$
 				},
-				visibleWhen: function(item) {
+				visibleWhen: function() {
 					return true;
 				}
 			});
@@ -574,10 +571,9 @@ define([
 				id: "eclipse.orion.git.precreateStashCommand", //$NON-NLS-0$
 				callback: function(data) {
 					var name = that.messageTextArea.value.trim();
-					that.commandService.runCommand("eclipse.orion.git.createStash", data.items, 
-							data.handler, null, {name: name});
+					that.commandService.runCommand("eclipse.orion.git.createStash", data.items, data.handler, null, {name: name}); //$NON-NLS-0$
 				},
-				visibleWhen: function(item) {
+				visibleWhen: function() {
 					return true;
 				}
 			});
@@ -587,19 +583,11 @@ define([
 				tooltip: messages["Commits and pushes files to the default remote"],
 				id: "eclipse.orion.git.precommitAndPushCommand", //$NON-NLS-0$
 				callback: function(data) {
-					var name = that.messageTextArea.value.trim();
-					if (!name) {
-						that.messageTextArea.parentNode.classList.add("invalidCommitMessage"); //$NON-NLS-0$
-						that.messageTextArea.select();
-						return;
-					}
-					var amend = that.amendCheck.checked;
-					var changeId = that.changeIDCheck.checked;
-					data.items = {};
-					data.items.Clone = data.userData.Clone;
-					that.commandService.runCommand("eclipse.orion.git.commitAndPushCommand", data.items, data.handler, null, {name: name, amend: amend, changeId: changeId}); //$NON-NLS-0$
+					var info = that.getCommitInfo(true);
+					if (!info) return;
+					that.commandService.runCommand("eclipse.orion.git.commitAndPushCommand", data.items, data.handler, null, info); //$NON-NLS-0$
 				},
-				visibleWhen: function(item) {
+				visibleWhen: function() {
 					return true;
 				}
 			});
@@ -675,43 +663,144 @@ define([
 						textArea.placeholder = messages["SmartCommit"];
 						textArea.classList.add("parameterInput"); //$NON-NLS-0$
 						textArea.addEventListener("keyup", function() { //$NON-NLS-0$
-							textArea.parentNode.classList.remove("invalidCommitMessage"); //$NON-NLS-0$
+							textArea.parentNode.classList.remove("invalidParam"); //$NON-NLS-0$
 						});
 						topRow.appendChild(textArea);
-						
+
 						var bottomRow = document.createElement("div"); //$NON-NLS-0$
 						bottomRow.className = "gitCommitMessageBottomRow"; //$NON-NLS-0$
 
 						var bottomRight = document.createElement("span"); //$NON-NLS-0$
-						bottomRight.className = "layoutRight parameters"; //$NON-NLS-0$
+						bottomRight.className = "layoutRight"; //$NON-NLS-0$
 						bottomRow.appendChild(bottomRight);
+
+						var bottomLeft = document.createElement("span"); //$NON-NLS-0$
+						bottomLeft.className = "layoutLeft"; //$NON-NLS-0$
+						bottomRow.appendChild(bottomLeft);
 						
-						var amendCheck = explorer.amendCheck = document.createElement("input"); //$NON-NLS-0$
-						amendCheck.type = "checkbox"; //$NON-NLS-0$
-						amendCheck.id = "amendparameterCollector"; //$NON-NLS-0$
-						var listener = gitCommit({serviceRegistry: explorer.registry, commandService: explorer.commandService}).amendEventListener;
-						amendCheck.addEventListener(listener.event, function(evt){
-							return listener.handler(evt, explorer);
-						}, listener.capture);
-						bottomRight.appendChild(amendCheck);
+						function createInput(parent, id, key, placeholderKey, value, isCheck) {
+							var div = document.createElement("span"); //$NON-NLS-0$
+							var label = document.createElement("label"); //$NON-NLS-0$
+							label.classList.add(isCheck ? "gitChangeListCheckLabel" : "gitChangeListInputLabel"); //$NON-NLS-1$ //$NON-NLS-0$
+							label.setAttribute("for", id); //$NON-NLS-0$
+							label.textContent = messages[key];
+							var input = document.createElement("input"); //$NON-NLS-0$
+							if (isCheck) input.type = "checkbox"; //$NON-NLS-0$
+							if (value) input.value = value;
+							input.classList.add(isCheck ? "gitChangeListCheck" : "gitChangeListInput"); //$NON-NLS-1$ //$NON-NLS-0$
+							if (placeholderKey) input.placeholder = messages[placeholderKey];
+							input.id = id;
+							input.addEventListener("input", function() { //$NON-NLS-0$
+								if (input.value) input.classList.remove("invalidParam"); //$NON-NLS-0$
+							});
+							div.appendChild(!isCheck ? label : input);
+							div.appendChild(isCheck ? label : input);
+							parent.appendChild(div);
+							return input;
+						}
 						
-						var amendLabel = document.createElement("label"); //$NON-NLS-0$
-						amendLabel.classList.add("parameterInput"); //$NON-NLS-0$
-						amendLabel.setAttribute("for", amendCheck.id); //$NON-NLS-0$
-						amendLabel.textContent = messages['SmartAmend'];
-						bottomRight.appendChild(amendLabel);
+						function createGroup(parent, key) {
+							var div = document.createElement("div"); //$NON-NLS-0$
+							div.classList.add("gitChangeListGroup"); //$NON-NLS-0$
+							var label = document.createElement("div"); //$NON-NLS-0$
+							label.textContent = messages[key];
+							label.classList.add("gitChangeListInputLabel"); //$NON-NLS-0$
+							div.appendChild(label);
+							var content = document.createElement("div"); //$NON-NLS-0$
+							content.classList.add("gitChangeListGroupContent"); //$NON-NLS-0$
+							div.appendChild(content);
+							parent.appendChild(div);
+							return content;
+						}
+
+						var commitLogic = gitCommit({serviceRegistry: explorer.registry, commandService: explorer.commandService});
+						var config = commitLogic.getGitCloneConfig(explorer.model.status.Clone.Config);
 						
-						var changeIDCheck = explorer.changeIDCheck = document.createElement("input"); //$NON-NLS-0$
-						changeIDCheck.type = "checkbox"; //$NON-NLS-0$
-						changeIDCheck.id = "changeIDparameterCollector"; //$NON-NLS-0$
-						bottomRight.appendChild(changeIDCheck);
+						var amendCheck = explorer.amendCheck = createInput(bottomLeft, "amendCheck", "SmartAmend", null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						explorer.changeIDCheck = createInput(bottomLeft, "changeIDCheck", 'SmartChangeId', null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						amendCheck.addEventListener("change", function() { //$NON-NLS-0$
+							if (amendCheck.checked) {
+								commitLogic.getAmendMessage(explorer.model.repository.CommitLocation).then(function(msg) {
+									textArea.value = msg;
+									textArea.parentNode.classList.remove("invalidParam"); //$NON-NLS-0$
+								});
+							} else {
+								textArea.value = "";
+							}
+						});
 						
-						var changeIDLabel = document.createElement("label"); //$NON-NLS-0$
-						changeIDLabel.classList.add("parameterInput"); //$NON-NLS-0$
-						changeIDLabel.setAttribute("for", changeIDCheck.id); //$NON-NLS-0$
-						changeIDLabel.textContent = messages['SmartChangeId'];
-						bottomRight.appendChild(changeIDLabel);
-							
+						var moreDiv = document.createElement("div"); //$NON-NLS-0$
+						bottomLeft.appendChild(moreDiv);
+						
+						var div1Content = createGroup(moreDiv, "Author:"); //$NON-NLS-0$
+						explorer.authorNameInput = createInput(div1Content, "authorNameInput", "Name:", "AuthorNamePlaceholder", config.AuthorName); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						explorer.authorEmailInput = createInput(div1Content, "authorEmailInput", "Email:", "AuthorEmailPlaceholder", config.AuthorEmail); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+						var div2Content = createGroup(moreDiv, "Committer:"); //$NON-NLS-0$
+						explorer.committerNameInput = createInput(div2Content, "committerNameInput", "Name:", "CommitterNamePlaceholder", config.CommitterName); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						explorer.committerEmailInput = createInput(div2Content, "committerEmailInput", "Email:", "CommitterEmailPlaceholder", config.CommitterEmail); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						explorer.persistCheck = createInput(div2Content, "persitCheck", "Save", null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+						var more;
+						explorer.setMoreVisible = function (visible) {
+							if (visible) {
+								moreDiv.style.display = "block"; //$NON-NLS-0$
+								more.textContent = messages["less"];
+							} else {
+								moreDiv.style.display = "none"; //$NON-NLS-0$
+								more.textContent = messages["more"];
+							}
+						};
+						explorer.getMoreVisible = function() {
+							return moreDiv.style.display !== "none"; //$NON-NLS-0$
+						};
+						explorer.getCommitInfo = function (check) {
+							function checkParam (node, invalidNode, show) {
+								if (!check) return true;
+								if (!node.value.trim()) {
+									(invalidNode || node).classList.add("invalidParam"); //$NON-NLS-0$
+									if (show) explorer.setMoreVisible(true);
+									node.select();
+									return false;
+								}
+								(invalidNode || node).classList.remove("invalidParam"); //$NON-NLS-0$
+								return true;
+							}
+							if (!checkParam(explorer.messageTextArea, explorer.messageTextArea.parentNode)) return null;
+							if (!checkParam(explorer.authorNameInput, null, true)) return null;
+							if (!checkParam(explorer.authorEmailInput, null, true)) return null;
+							if (!checkParam(explorer.committerNameInput, null, true)) return null;
+							if (!checkParam(explorer.committerEmailInput, null, true)) return null;
+							return {
+								Message: explorer.messageTextArea.value.trim(),
+								Amend: explorer.amendCheck.checked,
+								ChangeId: explorer.changeIDCheck.checked,
+								AuthorName: explorer.authorNameInput.value.trim(),
+								AuthorEmail: explorer.authorEmailInput.value.trim(),
+								CommitterName: explorer.committerNameInput.value.trim(),
+								CommitterEmail: explorer.committerEmailInput.value.trim(),
+								persist: explorer.persistCheck.checked,
+							};
+						};
+						explorer.setCommitInfo = function (info) {
+							explorer.messageTextArea.value = info.Message;
+							explorer.amendCheck.checked = info.Amend;
+							explorer.changeIDCheck.checked = info.ChangeId;
+							explorer.authorNameInput.value = info.AuthorName;
+							explorer.authorEmailInput.value = info.AuthorEmail;
+							explorer.committerNameInput.value = info.CommitterName;
+							explorer.committerEmailInput.value = info.CommitterEmail;
+							explorer.persistCheck.checked = info.persist;
+						};
+						
+						more = document.createElement("button"); //$NON-NLS-0$
+						more.classList.add("gitCommitMore"); //$NON-NLS-0$
+						bottomRight.appendChild(more);
+						more.addEventListener("click", function(){ //$NON-NLS-0$
+							explorer.setMoreVisible(!explorer.getMoreVisible());
+						});
+						explorer.setMoreVisible(false);
+
 						outerDiv.appendChild(topRow);
 						outerDiv.appendChild(bottomRow);
 						div.appendChild(outerDiv);

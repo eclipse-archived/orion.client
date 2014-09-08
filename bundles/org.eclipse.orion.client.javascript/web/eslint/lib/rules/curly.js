@@ -9,29 +9,11 @@
  * Contributors:
  *	 IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env amd, node */
-(function(root, factory) {
-	if(typeof exports === 'object') {  //$NON-NLS-0$
-		module.exports = factory(require, exports, module);
-	}
-	else if(typeof define === 'function' && define.amd) {  //$NON-NLS-0$
-		define(['require', 'exports', 'module', 'logger'], factory);
-	}
-	else {
-		var req = function(id) {return root[id];},
-			exp = root,
-			mod = {exports: exp};
-		root.rules.noundef = factory(req, exp, mod);
-	}
-}(this, function(require, exports, module, Logger) {
-	/**
-	 * @name module.exports
-	 * @description Exported rule
-	 * @function
-	 * @param context
-	 * @returns {Object} Exported AST nodes to lint
-	 */
-	module.exports = function(context) {
+/*eslint-env amd */
+define([
+'logger'
+],  function(Logger) {
+	return function(context) {
 		"use strict";  //$NON-NLS-0$
 		
 		/**
@@ -68,5 +50,4 @@
 			'ForInStatement' : checkBlock
 		};
 	};
-	return module.exports;
-}));
+});
