@@ -717,6 +717,9 @@ define([
 						case "Commit": //$NON-NLS-0$ 
 							imgClass = "git-sprite-branch-active-commit"; //$NON-NLS-0$
 							break;
+						case "StashCommit": //$NON-NLS-0$ 
+							imgClass = "git-sprite-branch-active-stash"; //$NON-NLS-0$
+							break;
 						case "Branch": //$NON-NLS-0$
 						case "RemoteTrackingBranch": //$NON-NLS-0$
 						default:
