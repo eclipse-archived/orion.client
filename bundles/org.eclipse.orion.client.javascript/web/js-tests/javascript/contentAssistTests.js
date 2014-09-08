@@ -5508,5 +5508,55 @@ define([
 			     ['urly', 'curly', 'ESLint rule name']
 			     ]);
 		});
+		
+		/**
+		 * Tests line comments that have 
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
+		 * @since 7.0
+		 */
+		it("test line comment 1", function() {
+			var results = computeContentAssist("//  ", "", 4);
+			testProposals(results, []);
+		});
+		
+		/**
+		 * Tests line comments that have 
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
+		 * @since 7.0
+		 */
+		it("test line comment 2", function() {
+			var results = computeContentAssist("// foo ", "", 3);
+			testProposals(results, []);
+		});
+		
+		/**
+		 * Tests line comments that have 
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
+		 * @since 7.0
+		 */
+		it("test line comment 3", function() {
+			var results = computeContentAssist("// foo ", "", 7);
+			testProposals(results, []);
+		});
+		
+		/**
+		 * Tests line comments that have 
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
+		 * @since 7.0
+		 */
+		it("test line comment 4", function() {
+			var results = computeContentAssist("// cur ", "c", 4);
+			testProposals(results, []);
+		});
+		
+		/**
+		 * Tests line comments that have 
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
+		 * @since 7.0
+		 */
+		it("test line comment 5", function() {
+			var results = computeContentAssist("// es ", "es", 5);
+			testProposals(results, []);
+		});
 	});
 });

@@ -292,7 +292,11 @@ define([
 			this.statusDeferred = new Deferred().resolve(); //HACK
 			return;
 		}
-		this.statusDeferred = this.displayStatus(this.repository);
+		this.statusDeferred = this.displayStatus(this.repository).then(function() {
+			if (changes.length === 0) {
+				this.changes = [this.repository.status];
+			}
+		}.bind(this));
 	};
 
 	GitRepositoryExplorer.prototype.display = function(location, resource, processURLs) {
