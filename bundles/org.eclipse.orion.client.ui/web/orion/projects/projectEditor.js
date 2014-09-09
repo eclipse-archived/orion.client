@@ -537,7 +537,7 @@ define([
 			this.dependenciesDisplatcher = mProjectCommands.getDependencyDispatcher();
 			var _self = this;
 			this.launchConfigurationListener = function(event){_self.launchConfigurationChanged.call(_self, event);};
-			this._launchConfigurationEventTypes = ["create", "delete", "changeState"];
+			this._launchConfigurationEventTypes = ["create", "delete", "changeState", "deleteAll"];
 			this._launchConfigurationEventTypes.forEach(function(eventType) {
 				_self.launchConfigurationDispatcher.addEventListener(eventType, _self.launchConfigurationListener);
 			});
@@ -803,6 +803,21 @@ define([
 					this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle);
 					return;
 				}
+			} else if(event.type === "delete"){
+				if(!event.oldValue){
+					return;
+				}
+				for(var i=0; i<this.configurations.length; i++){
+					var configuration = this.configurations[i];
+					if((configuration.Name === event.oldValue.Name && configuration.ServiceId === event.oldValue.ServiceId) || (configuration.File && event.oldValue.File && (configuration.File.Location === event.oldValue.File.Location))){
+						this.configurations.splice(i, 1);
+						this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle);
+						return;
+					}
+				}
+			} else if(event.type === "deleteAll"){
+				this.configurations = [];
+				this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle);
 			}
 		},
 		destroy: function(){

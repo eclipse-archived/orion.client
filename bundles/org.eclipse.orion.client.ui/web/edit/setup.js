@@ -443,7 +443,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
 		sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$
 		sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
-			if (evt.newValue) {
+			if (evt.newValue && !evt.ignoreRedirect) {
 				window.location = uriTemplate.expand({resource: evt.newValue.Location});
 			}
 		});

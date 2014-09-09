@@ -548,8 +548,13 @@ define([
 	
 	_getLaunchConfigurationsDir: function(projectMetadata, create){
 		var deferred = new Deferred();
-		if(projectMetadata.ContentLocation) {
-			this.fileClient.fetchChildren(projectMetadata.ContentLocation).then(function(children){
+		var fetchLocation = projectMetadata.ContentLocation;
+		if(fetchLocation) {
+			if (fetchLocation.indexOf("?depth=") === -1) { //$NON-NLS-0$
+				fetchLocation += "?depth=1"; //$NON-NLS-0$
+			}
+			this.fileClient.read(fetchLocation, true).then(function(projectDir){
+				var children = projectDir.Children;
 				for(var i=0; i<children.length; i++){
 					if(children[i].Name && children[i].Name===this._launchConfigurationsDir){
 						deferred.resolve(children[i]);
@@ -557,7 +562,11 @@ define([
 					}
 				}
 				if(create){
-					this.fileClient.createFolder(projectMetadata.ContentLocation, this._launchConfigurationsDir).then(deferred.resolve, deferred.reject);
+					this.fileClient.createFolder(projectMetadata.ContentLocation, this._launchConfigurationsDir).then(
+						function(result){
+							result.parent = projectDir;
+							deferred.resolve(result);
+						}, deferred.reject);
 				} else {
 					deferred.resolve(null);
 				}
@@ -579,13 +588,16 @@ define([
 				var readConfigurationDeferreds = [];
 				for(var i=0; i<launchConfMeta.Children.length; i++){
 					var def = new Deferred();
+					var file = launchConfMeta.Children[i];
 					readConfigurationDeferreds.push(def);
-					(function(def){
-					this.fileClient.read(launchConfMeta.Children[i].Location).then(function(launchConf){
+					(function(def, file){
+					this.fileClient.read(file.Location).then(function(launchConf){
 						try{
 							launchConf = JSON.parse(launchConf);
 							launchConf.Name = launchConf.Name || launchConfMeta.Name.replace(".launch", "");
 							launchConf.project = projectMetadata;
+							launchConf.File = file;
+							launchConf.File.parent = launchConfMeta;
 							def.resolve(launchConf);
 						} catch(e){
 							console.error(e);
@@ -595,7 +607,7 @@ define([
 						console.error(e);
 						def.resolve();
 					});
-					}).bind(this)(def);
+					}).bind(this)(def, file);
 				}
 				Deferred.all(readConfigurationDeferreds).then(function(result){
 					if(!result || !result.length){
@@ -652,6 +664,8 @@ define([
 //						if(window.confirm("Launch configuration " + configurationFile + " already exists, do you want to replace it?")){
 							this.fileClient.write(launchConfDir.Children[i].Location, JSON.stringify(launchConfigurationEnry)).then(
 							function(){
+								launchConfigurationEnry.File = launchConfDir.Children[i];
+								launchConfigurationEnry.File.parent = launchConfDir;
 								deferred.resolve(launchConfigurationEnry);
 							}, deferred.reject);
 							return;
@@ -662,8 +676,11 @@ define([
 					}
 				}
 				this.fileClient.createFile(launchConfDir.Location, configurationFile).then(function(result){
+					delete launchConfigurationEnry.File;
 					this.fileClient.write(result.Location, JSON.stringify(launchConfigurationEnry)).then(
 					function(){
+						launchConfigurationEnry.File = result;
+						launchConfigurationEnry.File.parent = launchConfDir;
 						deferred.resolve(launchConfigurationEnry);
 					}, deferred.reject);
 				}.bind(this), deferred.reject);

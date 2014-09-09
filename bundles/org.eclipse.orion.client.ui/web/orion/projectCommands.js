@@ -81,6 +81,18 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		}
 		return sharedLaunchConfigurationDispatcher;
 	};
+	
+	var fileDispatcher = FileCommands.getModelEventDispatcher();
+	
+	fileDispatcher.addEventListener("delete", function(event){
+		if(sharedLaunchConfigurationDispatcher){
+			if(event.parent && event.parent.Name === "launchConfigurations"){
+				sharedLaunchConfigurationDispatcher.dispatchEvent({type: "delete", oldValue: {File: event.oldValue}});
+			} else if(event.oldValue && event.oldValue.Name === "launchConfigurations"){
+				sharedLaunchConfigurationDispatcher.dispatchEvent({type: "deleteAll"});
+			}
+		}
+	});
 
 	
 	function localHandleStatus(status, allowHTML, context) {
@@ -108,6 +120,10 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					if(sharedLaunchConfigurationDispatcher){
 						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
 					}
+					if(configuration.File.parent.parent){
+						fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent.parent, newValue: configuration.File.parent, ignoreRedirect: true});
+					}
+					fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent, newValue: configuration.File, ignoreRedirect: true});
 					displayDeployResult(progress, status, context);
 				}, context.errorHandler
 			);
@@ -212,6 +228,10 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 							if(sharedLaunchConfigurationDispatcher){
 								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration});
 							}
+							if(configuration.File.parent.parent){
+								fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent.parent, newValue: configuration.File.parent, ignoreRedirect: true});
+							}
+							fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent, newValue: configuration.File, ignoreRedirect: true});
 							displayDeployResult(progress, result, context);
 						}, context.errorHandler
 					);
@@ -505,6 +525,10 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 											if(sharedLaunchConfigurationDispatcher){
 												sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
 											}
+											if(configuration.File.parent.parent){
+												fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent.parent, newValue: configuration.File.parent, ignoreRedirect: true});
+											}
+											fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent, newValue: configuration.File, ignoreRedirect: true});
 										}, errorHandler
 									);
 								}

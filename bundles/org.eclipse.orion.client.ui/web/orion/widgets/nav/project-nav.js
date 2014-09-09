@@ -258,16 +258,21 @@ define([
 								return;
 							}
 							_self.selection.getSelections(function(selections){
+								if(event.type === "deleteAll"){
+									_self.treeRoot.Project.launchConfigurations = [];
+									doUpdateForLaunchConfigurations.apply(_self, [_self.treeRoot.Project.launchConfigurations]);
+									return;
+								}
 								if(event.oldValue){
 									for(var i=0; i<_self.treeRoot.Project.launchConfigurations.length; i++){
 										var lConf = _self.treeRoot.Project.launchConfigurations[i];
-										if(lConf.Name === event.oldValue.Name && lConf.ServiceId === event.oldValue.ServiceId){
+										if((lConf.Name === event.oldValue.Name && lConf.ServiceId === event.oldValue.ServiceId) || (lConf.File && event.oldValue.File && (lConf.File.Location === event.oldValue.File.Location))){
 											if(event.newValue){
 												_self.treeRoot.Project.launchConfigurations[i] = event.newValue;
 												doUpdateForLaunchConfigurations.apply(_self, [_self.treeRoot.Project.launchConfigurations, selections]);
 												return;
 											}
-											_self.treeRoot.Project.launchConfigurations[i].splice(i, 1);
+											_self.treeRoot.Project.launchConfigurations.splice(i, 1);
 											break;
 										}
 									}
@@ -278,7 +283,7 @@ define([
 								doUpdateForLaunchConfigurations.apply(_self, [_self.treeRoot.Project.launchConfigurations]);
 							});
 						};
-						this._launchConfigurationEventTypes = ["create", "delete", "changedDefault"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						this._launchConfigurationEventTypes = ["create", "delete", "changedDefault", "deleteAll"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						this._launchConfigurationEventTypes.forEach(function(eventType) {
 							_self.launchConfigurationDispatcher.addEventListener(eventType, _self.launchConfigurationListener);
 						});
