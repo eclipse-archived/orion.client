@@ -71,9 +71,9 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
             }
         },
 		
-		change: function(){
+		change: function(event){
 			if (this.postChange) {
-				this.postChange(this.textfield.value);
+				this.postChange(this.textfield.value, event);
 			}
 		}
 	});

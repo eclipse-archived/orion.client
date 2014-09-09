@@ -454,6 +454,12 @@ div.page section:last-child {
 	background-color: #f4f4f4;
 }
 
+.setting-control-error {
+	background: #f2dede;
+	border: 1px solid #b94a48;
+	outline: none;
+}
+
 .overlay{
     position: absolute;
     top: 0; left: 0; bottom: 0; right: 0;

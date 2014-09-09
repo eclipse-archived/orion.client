@@ -10,8 +10,17 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', 'orion/webui/littlelib', 'orion/objects', 'orion/widgets/settings/Subsection', 'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledCheckbox'
-		], function(messages, mCommands, mSection, lib, objects, Subsection, LabeledTextfield, LabeledCheckbox) {
+define([
+	'i18n!orion/settings/nls/messages', 
+	'orion/commands', 
+	'orion/section', 
+	'orion/webui/littlelib', 
+	'orion/objects', 
+	'orion/widgets/settings/Subsection', 
+	'orion/widgets/input/LabeledTextfield', 
+	'orion/widgets/input/LabeledCheckbox',
+	'orion/webui/tooltip'
+], function(messages, mCommands, mSection, lib, objects, Subsection, LabeledTextfield, LabeledCheckbox, mTooltip) {
 
 	function UserSettings(options, node) {
 		objects.mixin(this, options);
@@ -49,26 +58,34 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 		
 		createSections: function(){
 			
-			var saveFunction = this.update.bind(this);
+			var updateAccountFunction = this.updateAccount.bind(this);
+			var updatePasswordFunction = this.updatePassword.bind(this);
 			
 			/* - account ----------------------------------------------------- */
 			this.accountFields = [
-				new LabeledTextfield( {fieldlabel:messages['Username'], editmode:'readonly', postChange: saveFunction}),  //$NON-NLS-0$
-				new LabeledTextfield( {fieldlabel:messages['Full Name'], postChange: saveFunction}),
-				new LabeledTextfield( {fieldlabel:messages['Email Address'], postChange: saveFunction}),
-				new LabeledCheckbox( {fieldlabel: messages['Email Confirmed'], editmode:'readonly', postChange: saveFunction})  //$NON-NLS-0$
+				new LabeledTextfield( {fieldlabel:messages['Username'], editmode:'readonly'}),  //$NON-NLS-0$
+				new LabeledTextfield( {fieldlabel:messages['Full Name'], postChange: updateAccountFunction}),
+				new LabeledTextfield( {fieldlabel:messages['Email Address'], postChange: updateAccountFunction}),
+				new LabeledCheckbox( {fieldlabel: messages['Email Confirmed'], editmode:'readonly'})  //$NON-NLS-0$
 			];
 			var accountSubsection = new Subsection( {sectionName: messages['Account'], parentNode: this.sections, children: this.accountFields} );
 			accountSubsection.show();
 
 			/* - password ---------------------------------------------------- */
 			this.passwordFields = [
-				new LabeledTextfield( {fieldlabel:messages['Current Password'], inputType:'password'} ), //$NON-NLS-1$  //$NON-NLS-0$
-				new LabeledTextfield( {fieldlabel:messages['New Password'], inputType:'password'} ), //$NON-NLS-1$  //$NON-NLS-0$
-				new LabeledTextfield( {fieldlabel:messages['Verify Password'], inputType:'password', postChange: saveFunction} ) //$NON-NLS-1$  //$NON-NLS-0$
+				new LabeledTextfield( {fieldlabel:messages['Current Password'], inputType:'password', postChange: updatePasswordFunction} ), //$NON-NLS-1$  //$NON-NLS-0$
+				new LabeledTextfield( {fieldlabel:messages['New Password'], inputType:'password', postChange: updatePasswordFunction} ), //$NON-NLS-1$  //$NON-NLS-0$
+				new LabeledTextfield( {fieldlabel:messages['Verify Password'], inputType:'password', postChange: updatePasswordFunction} ) //$NON-NLS-1$  //$NON-NLS-0$
 			];
 			var passwordSection = new Subsection( {sectionName:messages['Password'], parentNode: this.sections, children: this.passwordFields } );
 			passwordSection.show();
+			
+			this._passwordTooltip = new mTooltip.Tooltip({
+				node: this.passwordFields[1].textfield,
+				text: messages['UserSettings.PasswordRules'],
+				trigger: 'focus', //$NON-NLS-0$
+				position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			});
 
 			this.username = "";
 			var deleteCommand = new mCommands.Command({
@@ -108,90 +125,157 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 			}
 		},
 		
-	deleteUser: function(){
-		if(confirm(messages["DeleteUserComfirmation"])){			
-			var userService = this.userService; //$NON-NLS-0$
-			userService.deleteUser("/users/" + this.username).then(function(jsonData) {  //$NON-NLS-0$
-				window.location.reload();
-			}, function(jsonData) {
-				alert(jsonData.Message);
-			});
-		}
-	},
-	
-	update: function(){
-			
+		deleteUser: function(){
+			if(confirm(messages["DeleteUserComfirmation"])){			
+				var userService = this.userService; //$NON-NLS-0$
+				userService.deleteUser("/users/" + this.username).then(function(jsonData) {  //$NON-NLS-0$
+					window.location.reload();
+				}, function(jsonData) {
+					alert(jsonData.Message);
+				});
+			}
+		},
+		
+		updateAccount: function(){
 			var authenticationIds = [];
-			
 			var authServices = this.registry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
-			
 			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-			
 			var userService = this.userService;
-			
 			var userdata = {};
 			
 			userdata.login = this.accountFields[0].getValue();
 			userdata.Name = this.accountFields[1].getValue();
 			userdata.email = this.accountFields[2].getValue();
 			
-			var pword = this.passwordFields[1].getValue();
-			var pwordRetype = this.passwordFields[2].getValue();
-
-			if( pword.length > 0 || pwordRetype.length > 0){
-			
-				if( pword !== pwordRetype ){
-					messageService.setProgressResult( {Message: messages['UserSettings.PasswordsDoNotMatch'], Severity: 'Error'} ); //$NON-NLS-1$ //$NON-NLS-0$
-					
-					this.dispatch = false;
-					
-				}else{
-				
-					if( this.passwordFields[0].getValue().length > 0 ){
-						userdata.oldPassword = this.passwordFields[0].getValue();
-						userdata.password = pword;
-						userdata.passwordRetype = pwordRetype;
-					
-						this.dispatch = true;
-					
-					}else{
-						messageService.setProgressResult( {Message: messages['UserSettings.TypeCurrentPassword'], Severity: 'Warning'} ); //$NON-NLS-1$ //$NON-NLS-0$
-					
-						this.dispatch = false;
-					}		
-				}
-			}
-			
-			if( this.dispatch === true ){
-			
-				for(var i=0; i<authServices.length; i++){
-					var servicePtr = authServices[i];
-					var authService = this.registry.getService(servicePtr);		
+			for(var i=0; i<authServices.length; i++){
+				var servicePtr = authServices[i];
+				var authService = this.registry.getService(servicePtr);		
 	
-					authService.getKey().then(function(key){
-						authenticationIds.push(key);
-						authService.getUser().then(function(jsonData){
-							var b = userService.updateUserInfo(jsonData.Location, userdata).then( function(args){
-								if(args){
-									messageService.setProgressResult(args);
-								}else{
-									messageService.setProgressResult( messages['User profile data successfully updated.'] );
-								}
-							}, function(error){
-								messageService.setProgressResult(error);
-							});
+				authService.getKey().then(function(key){
+					authenticationIds.push(key);
+					authService.getUser().then(function(jsonData){
+						userService.updateUserInfo(jsonData.Location, userdata).then( function(args){
+							if(args){
+								messageService.setProgressResult(args);
+							}else{
+								messageService.setProgressResult( messages['User profile data successfully updated.'] );
+							}
+						}, function(error){
+							messageService.setProgressResult(error);
 						});
 					});
-				}	
-			} else {
-				// There was an issue with the password modification attempt
-				// Reset all password fields and focus on first one
-				this.passwordFields.forEach(function(passwordField){
-					passwordField.setValue(""); //$NON-NLS-0$
 				});
-
-				this.passwordFields[0].textfield.focus();
 			}
+		},
+			
+		updatePassword: function(value, event){
+			var authenticationIds = [];
+			var authServices = this.registry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
+			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
+			var userService = this.userService;
+			var userdata = {};
+			
+			if (!value) {
+				//user deleted input from field, remove any error state and do nothing else
+				event.target.classList.remove("setting-control-error"); //$NON-NLS-0$
+				return;
+			}
+			
+			var currentPassword = this.passwordFields[0].getValue();
+			var newPassword = this.passwordFields[1].getValue();
+			var newPasswordRetype = this.passwordFields[2].getValue();
+			
+			var currentPasswordTextField = this.passwordFields[0].textfield;
+			var newPasswordTextField = this.passwordFields[1].textfield;
+			var newPasswordRetypeTextField = this.passwordFields[2].textfield;
+			var validNewPassword = true;
+			
+			if (event.target === newPasswordTextField) {
+				validNewPassword = this._verifyPassword(newPassword);
+			}
+			
+			if (validNewPassword) {
+				if (newPassword && newPasswordRetype) {
+					if (newPassword === newPasswordRetype) {
+						if(currentPassword.length > 0){
+							userdata.oldPassword = currentPassword;
+							userdata.password = newPassword;
+							userdata.passwordRetype = newPasswordRetype;
+						
+							//dispatch passwords to user service
+							authServices.forEach(function(servicePtr) {
+								var authService = this.registry.getService(servicePtr);
+								var passwordFields = this.passwordFields;
+								authService.getKey().then(function(key){
+									authenticationIds.push(key);
+									authService.getUser().then(function(jsonData){
+										userService.updateUserInfo(jsonData.Location, userdata).then( function(args){
+											if(args){
+												messageService.setProgressResult(args);
+											} else {
+												messageService.setProgressResult( messages['User profile data successfully updated.'] ); //$NON-NLS-0$
+												currentPasswordTextField.classList.remove("setting-control-error"); //$NON-NLS-0$
+												passwordFields.forEach(function(passwordField){
+													passwordField.setValue(""); //$NON-NLS-0$
+												});
+											}
+										}, function(jsonError){
+											var errorObject = JSON.parse(jsonError);
+											if (errorObject && (400 === errorObject.HttpCode)) {
+												//wrong current password
+												setTimeout(function(){
+													currentPasswordTextField.select();
+													currentPasswordTextField.focus();
+													currentPasswordTextField.classList.add("setting-control-error"); //$NON-NLS-0$
+												}, 100);
+											}
+											messageService.setProgressResult(jsonError);
+										});
+									});
+								});
+							}, this);
+						} else {
+							messageService.setProgressResult( {Message: messages['UserSettings.TypeCurrentPassword'], Severity: 'Warning'} ); //$NON-NLS-1$ //$NON-NLS-0$
+							setTimeout(function(){
+								currentPasswordTextField.focus();
+							}.bind(this), 100);
+						}
+						newPasswordTextField.classList.remove("setting-control-error"); //$NON-NLS-0$
+						newPasswordRetypeTextField.classList.remove("setting-control-error"); //$NON-NLS-0$
+					} else {
+						messageService.setProgressResult( {Message: messages['UserSettings.PasswordsDoNotMatch'], Severity: 'Error'} ); //$NON-NLS-1$ //$NON-NLS-0$
+						setTimeout(function(){
+							newPasswordRetypeTextField.select();
+							newPasswordRetypeTextField.focus();
+						}.bind(this), 100);
+						newPasswordTextField.classList.add("setting-control-error"); //$NON-NLS-0$
+						newPasswordRetypeTextField.classList.add("setting-control-error"); //$NON-NLS-0$
+					}
+				} else {
+					event.target.classList.remove("setting-control-error"); //$NON-NLS-0$
+				}
+			} else {
+				event.target.classList.add("setting-control-error"); //$NON-NLS-0$
+				setTimeout(function(){
+					event.target.select();
+					event.target.focus();
+				}.bind(this), 100);
+			}
+		},
+		
+		_verifyPassword: function(password) {
+			var passwordIsValid = true;
+			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
+			
+			if (password.length < 8) {
+				passwordIsValid = false;
+				messageService.setProgressResult( {Message: messages['UserSettings.InvalidPasswordLength'], Severity: 'Error'} ); //$NON-NLS-1$ //$NON-NLS-0$
+			} else if (!/[a-zA-Z]+/.test(password) || !/[^a-zA-Z]+/.test(password)) {
+				passwordIsValid = false;
+				messageService.setProgressResult( {Message: messages['UserSettings.InvalidPasswordAlpha'], Severity: 'Error'} ); //$NON-NLS-1$ //$NON-NLS-0$
+			}
+			
+			return passwordIsValid;
 		},
 		
 		show:function(){
@@ -246,6 +330,10 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/section', '
 			if (this.node) {
 				lib.empty(this.node);
 				this.node = this.sections = null;
+			}
+			if (this._passwordTooltip) {
+				this._passwordTooltip.destroy();
+				this._passwordTooltip = null;
 			}
 		}
 	});
