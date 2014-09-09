@@ -23,7 +23,7 @@ define([
 	'orion/objects'
 ], function(messages, mGitCommitList, mExplorer, i18nUtil, Deferred, util, uiUtil, lib, objects) {
 
-	var pageQuery = "commits=1&page=1&pageSize=5"; //$NON-NLS-0$
+	var pageQuery = "commits=0&page=1&pageSize=100"; //$NON-NLS-0$
 
 	function GitBranchListModel(options) {
 		this.root = options.root;
