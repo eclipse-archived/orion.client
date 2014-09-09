@@ -755,7 +755,7 @@ define([
 				tooltip: messages["System Config Tooltip"],
 				id: "orion.configDetailsPage", //$NON-NLS-0$
 				hrefCallback: function () {
-					return require.toUrl("help/about.html"); //$NON-NLS-0$
+					return require.toUrl("about/about.html"); //$NON-NLS-0$
 				}
 			});
 	
