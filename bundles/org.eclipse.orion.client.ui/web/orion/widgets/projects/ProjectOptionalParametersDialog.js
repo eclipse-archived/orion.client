@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/webui/littlelib', 'orion/webui/dialog'],
-function(lib, dialog){
+define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui/dialog'],
+function(messages, lib, dialog){
 	
 	function ProjectOptionalParametersDialog(options) {
 		this._init(options);
@@ -27,7 +27,7 @@ function(lib, dialog){
 		this._data = options.data;
 		this._idPrefix = "ParamInput_";
 		this.modal = true;
-		this.buttons = [{text: 'OK', isDefault: true, callback: this.done.bind(this)}]; 
+		this.buttons = [{text: messages['OK'], isDefault: true, callback: this.done.bind(this)}]; 
 		this.customFocus = true;
 		this._func = options.func;
 		this._initialize();
