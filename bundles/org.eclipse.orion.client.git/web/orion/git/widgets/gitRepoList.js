@@ -68,15 +68,8 @@ define([
 						try{
 							repository.status = resp;
 							var currentBranchMsg = i18nUtil.formatMessage(messages['GettingCurrentBranch'], repository.Name);
-							Deferred.when(repository.BranchesNoCommits || (repository.BranchesNoCommits = that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=0&page=1&pageSize=5"), currentBranchMsg)), function(resp) { //$NON-NLS-0$
-								var currentBranch, branches = resp.Children || resp;
-								repository.BranchesNoCommits = branches;
-								for (var i=0; i<branches.length; i++){
-									if (branches[i].Current){
-										currentBranch = branches[i];
-										break;
-									}
-								}
+							that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=0&page=1&pageSize=1"), currentBranchMsg).then(function(resp) { //$NON-NLS-0$
+								var currentBranch = resp.Children[0];
 								if (!currentBranch || currentBranch.RemoteLocation[0] === null){
 									deferred.resolve();
 									return;

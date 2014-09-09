@@ -175,16 +175,8 @@ define([
 				Deferred.when(parentItem.repository || that._getRepository(parentItem), function(repository) {
 					var currentBranchMsg = i18nUtil.formatMessage(messages['GettingCurrentBranch'], repository.Name);
 					if (progress) progress.worked(currentBranchMsg);
-					Deferred.when(repository.BranchesNoCommits || (repository.BranchesNoCommits = that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=0&page=1&pageSize=5"), currentBranchMsg)), function(resp) { //$NON-NLS-0$
-						var currentBranch, branches = resp.Children || resp;
-						repository.BranchesNoCommits = branches;
-						branches.some(function(branch) {
-							if (branch.Current) {
-								currentBranch = branch;
-								return true;
-							}
-							return false;
-						});
+					that.progressService.progress(that.gitClient.getGitBranch(repository.BranchLocation + "?commits=0&page=1&pageSize=1"), currentBranchMsg).then(function(resp) { //$NON-NLS-0$
+						var currentBranch = resp.Children[0];
 						that.currentBranch = currentBranch;
 						if (!that.currentBranch && that.isRebasing()) {
 							if (section) section.setTitle(messages["RebaseProgress"]);
