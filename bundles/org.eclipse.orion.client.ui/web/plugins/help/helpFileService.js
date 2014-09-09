@@ -100,7 +100,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 				headers: { "Orion-Version": "1" }, //$NON-NLS-1$ //$NON-NLS-0$
 				log: false
 			}).then(function(result) {
-				if (isMetadata) {
+				if (false && isMetadata) { // TODO temporary workaround
 					return result.response ? JSON.parse(result.response) : null;
 				} else {
 					return result.response;

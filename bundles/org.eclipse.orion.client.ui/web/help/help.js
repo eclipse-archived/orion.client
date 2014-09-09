@@ -324,16 +324,19 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 					if (service.read && rootLocation) {
 						(function(service, location) {
 							location = new URITemplate(location).expand(orionHome);
-							service.read(location, true).then(
-								function(node) {
+							// TODO temporary workaround
+							var lastIndex = location.lastIndexOf("/");
+							var node = {Location: location, Name: "Getting Started.md"/*location.substring(lastIndex)*/, Directory: false};
+//							service.read(location, true).then(
+//								function(node) {
 									var item = createItem(node);
 									item.parent = parentItem;
 									item.service = service;
 									children.push(item);
 									taskComplete();
-								},
-								taskComplete
-							);
+//								},
+//								taskComplete
+//							);
 						})(service, rootLocation);
 					} else {
 						/* skip this plugin since it failed to provide either a read implementation or a location value */
