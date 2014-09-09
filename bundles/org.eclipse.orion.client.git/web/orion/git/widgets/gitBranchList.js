@@ -322,9 +322,11 @@ define([
 						actionsID = "branchActionsArea"; //$NON-NLS-0$
 					} else if (item.parent.Type === "TagRoot") { //$NON-NLS-0$
 						if (explorer.showHistory) createExpand();
-						commit = item.Commit.Children[0];
-//						description = util.trimCommitMessage(commit.Message);
-//						subDescription = i18nUtil.formatMessage(messages["authored by 0 (1) on 2"], commit.AuthorName, commit.AuthorEmail, new Date(commit.Time).toLocaleString()); //$NON-NLS-0$
+						if (item.Commit) {
+							commit = item.Commit.Children[0];
+//							description = util.trimCommitMessage(commit.Message);
+//							subDescription = i18nUtil.formatMessage(messages["authored by 0 (1) on 2"], commit.AuthorName, commit.AuthorEmail, new Date(commit.Time).toLocaleString()); //$NON-NLS-0$
+						}
 						actionsID = "tagActionsArea"; //$NON-NLS-0$
 					} else if (item.parent.Type === "StashRoot") { //$NON-NLS-0$
 						if (explorer.showHistory) createExpand();
