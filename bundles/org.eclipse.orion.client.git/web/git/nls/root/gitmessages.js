@@ -533,5 +533,5 @@ define({
 	'pushGroup' : 'Push',  //$NON-NLS-0$  //$NON-NLS-1$
 	'Url:' : 'Url:', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Private Key:' : 'Ssh Private Key:', //$NON-NLS-0$  //$NON-NLS-1$
-	'Ssh Passphrase' : 'Ssh Passphrase' //$NON-NLS-0$  //$NON-NLS-1$
+	'Ssh Passphrase:' : 'Ssh Passphrase:' //$NON-NLS-0$  //$NON-NLS-1$
 });
