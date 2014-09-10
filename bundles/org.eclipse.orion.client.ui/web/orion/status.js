@@ -280,7 +280,13 @@ define([
 				node.appendChild(span);
 			} else {
 				// msg is text. parse Markdown-style links
-				var chunks = URLUtil.detectValidURL(msg), msgNode;
+				var chunks, msgNode;
+				try {
+					chunks = URLUtil.detectValidURL(msg);
+				} catch (e) {
+					// Invalid markdown. As punishment, we treat it as plain text
+					chunks = null;
+				}
 				if (chunks) {
 					msgNode = document.createDocumentFragment();
 					URLUtil.processURLSegments(msgNode, chunks);

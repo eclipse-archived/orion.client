@@ -23,7 +23,7 @@ define({
 	'deploy.gettingSpaces':'Getting spaces...',
 	'deploy.deploying':'Deploying...',
 	'deploy.org':'Organization:',
-	'deploy.setUpYourCloud':'Set up your Cloud. Go to [Settings](${0}).',
+	'deploy.setUpYourCloud':'Set up your Cloud. Go to [Settings](${0}).', // Must be valid Markdown
 	'deploy.user':'User:',
 	'deploy.password':'Password:',
 	'deploy.enterCredentials':'Please enter your Cloud credentials below to authorize deployment.',
