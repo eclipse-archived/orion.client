@@ -41,8 +41,8 @@ define("orion/editor/stylers/lib/syntax", [], function() { //$NON-NLS-0$
 					name: "punctuation.section.parens.end" //$NON-NLS-0$
 				},
 				doc_block: {
-					begin: {match: "/\\*\\*", literal: "/**"}, //$NON-NLS-0$
-					end: {match: "\\*/", literal: "*/"}, //$NON-NLS-0$
+					begin: {match: "/\\*\\*", literal: "/**"}, //$NON-NLS-1$ //$NON-NLS-0$
+					end: {match: "\\*/", literal: "*/"}, //$NON-NLS-1$ //$NON-NLS-0$
 					name: "comment.block.documentation", //$NON-NLS-0$
 					patterns: [
 						{
@@ -90,7 +90,7 @@ define("orion/editor/stylers/lib/syntax", [], function() { //$NON-NLS-0$
 			id: "orion.c-like", //$NON-NLS-0$
 			repository: {
 				comment_singleLine: {
-					match: {match: "//.*", literal: "//"}, //$NON-NLS-0$
+					match: {match: "//.*", literal: "//"}, //$NON-NLS-1$ //$NON-NLS-0$
 					name: "comment.line.double-slash", //$NON-NLS-0$
 					patterns: [
 						{
@@ -99,8 +99,8 @@ define("orion/editor/stylers/lib/syntax", [], function() { //$NON-NLS-0$
 					]
 				},
 				comment_block: {
-					begin: {match: "/\\*", literal: "/*"}, //$NON-NLS-0$
-					end: {match: "\\*/", literal: "*/"}, //$NON-NLS-0$ 
+					begin: {match: "/\\*", literal: "/*"}, //$NON-NLS-1$ //$NON-NLS-0$
+					end: {match: "\\*/", literal: "*/"}, //$NON-NLS-1$ //$NON-NLS-0$ 
 					name: "comment.block", //$NON-NLS-0$
 					patterns: [
 						{
