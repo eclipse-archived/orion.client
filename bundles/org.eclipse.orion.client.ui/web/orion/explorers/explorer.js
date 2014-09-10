@@ -501,6 +501,7 @@ exports.ExplorerRenderer = (function() {
 				}
 				if (!tableRow) return;
 				var expandImage = lib.node(self.expandCollapseImageId(tableRow.id));
+				if (!expandImage) return;
 				if (expandImage !== target) {
 					if (UiUtils.isFormElement(target)) {
 						return;
