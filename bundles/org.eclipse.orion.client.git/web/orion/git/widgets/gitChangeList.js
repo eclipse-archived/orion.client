@@ -867,6 +867,8 @@ define([
 						actionsWrapper.style.overflow = "hidden"; //$NON-NLS-0$
 						div.appendChild(actionsWrapper);
 
+						var prefix = explorer.prefix + item.parent.name + item.parent.type;
+
 						var compareWidgetActionWrapper = document.createElement("ul"); //$NON-NLS-0$
 						compareWidgetActionWrapper.className = "layoutRight commandList"; //$NON-NLS-0$
 						compareWidgetActionWrapper.id = prefix + "CompareWidgetActionWrapper"; //$NON-NLS-0$
@@ -874,10 +876,8 @@ define([
 						
 						diffActionWrapper = document.createElement("ul"); //$NON-NLS-0$
 						diffActionWrapper.className = "layoutRight commandList"; //$NON-NLS-0$
-						var prefix = explorer.prefix + item.parent.name + item.parent.type;
 						diffActionWrapper.id = prefix + "DiffActionWrapperChange"; //$NON-NLS-0$
 						actionsWrapper.appendChild(diffActionWrapper);
-
 	
 						var diffContainer = document.createElement("div"); //$NON-NLS-0$
 						diffContainer.id = "diffArea_" + item.DiffLocation; //$NON-NLS-0$
