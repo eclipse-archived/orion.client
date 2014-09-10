@@ -863,8 +863,7 @@ define([
 						// render the compare widget
 						td.colSpan = 2;
 						var actionsWrapper = document.createElement("div"); //$NON-NLS-0$
-						actionsWrapper.className = "sectionExplorerActions"; //$NON-NLS-0$
-						actionsWrapper.style.overflow = "hidden"; //$NON-NLS-0$
+						actionsWrapper.className = "gitChangeListCompareActions"; //$NON-NLS-0$LS-0$
 						div.appendChild(actionsWrapper);
 
 						var prefix = explorer.prefix + item.parent.name + item.parent.type;
@@ -880,9 +879,8 @@ define([
 						actionsWrapper.appendChild(diffActionWrapper);
 	
 						var diffContainer = document.createElement("div"); //$NON-NLS-0$
+						diffContainer.className = "gitChangeListCompare"; //$NON-NLS-0$
 						diffContainer.id = "diffArea_" + item.DiffLocation; //$NON-NLS-0$
-						diffContainer.style.height = "420px"; //$NON-NLS-0$
-						diffContainer.style.border = "1px solid lightgray"; //$NON-NLS-0$
 						div.appendChild(diffContainer);
 	
 						navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;

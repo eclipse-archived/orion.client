@@ -298,6 +298,17 @@ table .sectionTable {
 	margin-top: 3px;
 }
 
+.gitChangeListCompare {
+	height: 420px;
+	border: 1px solid lightgray;
+	margin-right: 10px;
+}
+
+.gitChangeListCompareActions {
+	overflow: hidden;
+	padding: 5px;
+}
+
 .gitCommitInfoValue {
 	color: black;
 }
