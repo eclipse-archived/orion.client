@@ -85,7 +85,7 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 			}
 			this.domNode.tabIndex = 0; //$NON-NLS-0$
 			this.domNode.addEventListener("click", function(evt) { //$NON-NLS-0$
-				if (evt.target === that.titleNode || evt.target === that.twistie || evt.target === that.domNode || evt.target === that._iconNode) {
+				if (evt.target === that.titleNode || evt.target === that.twistie || evt.target === that.domNode || evt.target === that._iconNode || evt.target === that.dropdownArrow) {
 					that._changeExpandedState();
 				}
 			}, false);
@@ -158,6 +158,15 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 		this.titleLeftActionsNode.classList.add("layoutLeft"); //$NON-NLS-0$
 		this.titleLeftActionsNode.classList.add("sectionActions"); //$NON-NLS-0$
 		this.domNode.appendChild(this.titleLeftActionsNode);
+		
+		if (options.dropdown) {
+			this.dropdownArrow = document.createElement("div"); //$NON-NLS-0$
+			this.dropdownArrow.classList.add("modelDecorationSprite"); //$NON-NLS-0$
+			this.dropdownArrow.classList.add("layoutLeft"); //$NON-NLS-0$
+			this.dropdownArrow.classList.add("sectionDropdownArrow"); //$NON-NLS-0$
+			this.dropdownArrow.classList.add(this._expandImageClass);
+			this.domNode.appendChild(this.dropdownArrow);
+		}
 		
 		// add filter search box
 		var searchbox = this.searchBox = document.createElement("div"); //$NON-NLS-0$
