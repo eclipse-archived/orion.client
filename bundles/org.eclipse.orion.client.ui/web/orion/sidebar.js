@@ -232,9 +232,10 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				fileClient: this.fileClient
 			});
 			
+			this._lastSearchRoot = null;
 			// set the scope to the explorer's root
 			this.sidebarNavInputManager.addEventListener("rootChanged", function(event){ //$NON-NLS-0$
-				this._inlineSearchPane.setSearchScope(event.root);
+				this._lastSearchRoot = event.root;
 			}.bind(this));
 			
 			this.toolbarNode.parentNode.addEventListener("scroll", function(){ //$NON-NLS-0$
@@ -242,6 +243,25 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 					this.toolbarNode.parentNode.scrollTop = 0;
 				}
 			}.bind(this));
+			
+			var searchInFolderCommand = new mCommands.Command({
+				name: messages["searchInFolder"], //$NON-NLS-0$
+				id: "orion.searchInFolder", //$NON-NLS-0$
+				visibleWhen: function(item) {
+					if (Array.isArray(item)) {
+						if(item.length === 1 && item[0].Directory){
+							return true;
+						}
+					}
+					return false;
+				},
+				callback: function (data) {
+					var item = data.items[0];
+					this._inlineSearchPane.setSearchScope(item);
+					this._inlineSearchPane.show();
+					this._inlineSearchPane.showSearchOptions();	
+				}.bind(this)
+			});
 			
 			var openSearchCommand = new mCommands.Command({
 				name: messages["Global Search"], //$NON-NLS-0$
@@ -257,6 +277,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 						if (mainSplitter.splitter.isClosed()) {
 							mainSplitter.splitter.toggleSidePanel();
 						}
+						this._inlineSearchPane.setSearchScope(this._lastSearchRoot); //reset search scope
 						this._inlineSearchPane.show();
 						this._inlineSearchPane.showSearchOptions();	
 					}
@@ -267,8 +288,15 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			var explorer = this.getViewMode(activeViewModeId).explorer;
 			var editActionsScope = explorer.getEditActionsScope();
 	
+			this.commandRegistry.addCommand(searchInFolderCommand);
 			this.commandRegistry.addCommand(openSearchCommand);
+			
+			this.commandRegistry.registerCommandContribution(editActionsScope, "orion.searchInFolder", 99, "orion.menuBarEditGroup/orion.findGroup");  //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandRegistry.registerCommandContribution(editActionsScope, "orion.openInlineSearchPane", 100, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('h', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+ 		},
+ 		getInlineSearchPane: function() {
+ 			return this._inlineSearchPane;
  		}
 	});
 

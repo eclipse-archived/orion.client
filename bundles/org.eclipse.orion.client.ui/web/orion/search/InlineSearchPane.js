@@ -48,6 +48,7 @@ define([
 			this._searchWrapper = lib.$(".searchWrapper", this._parentNode); //$NON-NLS-0$
 			
 			this._focusOnTextInput = function(){
+				this._searchTextInputBox.select();
 				this._searchTextInputBox.focus();
 			}.bind(this);
 			
@@ -353,7 +354,7 @@ define([
 				this._searchLocations = [this._rootURL];
 			}
 			
-			if (targetFolder.Location) {
+			if (targetFolder && targetFolder.Location) {
 				this._searcher.setLocationByMetaData(targetFolder);
 			} else {
 				this._searcher.setLocationbyURL(this._searchLocations[0]);

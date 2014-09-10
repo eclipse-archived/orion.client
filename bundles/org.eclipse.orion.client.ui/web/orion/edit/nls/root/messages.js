@@ -31,7 +31,7 @@ define({
 	"Reading": "Reading ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"readonly": "Read Only.", //$NON-NLS-1$ //$NON-NLS-0$
 	"saveFile": "Save this file", //$NON-NLS-1$ //$NON-NLS-0$
-	"gotoLine": "Go to Line...", //$NON-NLS-1$ //$NON-NLS-0$
+	"gotoLine": "Go to line...", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLineTooltip": "Go to specified line number", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLinePrompt": "Go to line:", //$NON-NLS-1$ //$NON-NLS-0$
 	"Undo": "Undo", //$NON-NLS-1$ //$NON-NLS-0$
@@ -66,10 +66,11 @@ define({
 	"Deploy As": "Deploy As", //$NON-NLS-1$ //$NON-NLS-0$
 	"Import": "Import", //$NON-NLS-1$ //$NON-NLS-0$
 	"Export": "Export", //$NON-NLS-1$ //$NON-NLS-0$
-	"OpenWith": "Open With", //$NON-NLS-1$ //$NON-NLS-0$
-	"OpenRelated": "Open Related", //$NON-NLS-1$ //$NON-NLS-0$
+	"OpenWith": "Open with", //$NON-NLS-1$ //$NON-NLS-0$
+	"OpenRelated": "Open related", //$NON-NLS-1$ //$NON-NLS-0$
 	"Dependency": "Dependency", //$NON-NLS-1$ //$NON-NLS-0$
 	"UnnamedCommand": "Unnamed", //$NON-NLS-1$ //$NON-NLS-0$
+	"searchInFolder": "Search in folder...",  //$NON-NLS-1$ //$NON-NLS-0$
 	"Global Search": "Global Search...", //$NON-NLS-1$ //$NON-NLS-0$
 	"ClickEditLabel": "Click to edit", //$NON-NLS-1$ //$NON-NLS-0$
 	"ProjectInfo": "Project Information", //$NON-NLS-1$ //$NON-NLS-0$
