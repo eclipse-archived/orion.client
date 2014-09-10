@@ -2,8 +2,8 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
 <svg xmlns="http://www.w3.org/2000/svg">
 <metadata>
-Created by FontPrep 20130207 at Fri Sep  5 16:24:34 2014
- By Anton McConville
+Created by FontPrep 20130207 at Wed Sep 10 14:59:27 2014
+ By antonm
 copyright missing
 </metadata>
 <defs>
@@ -16,10 +16,10 @@ copyright missing
     panose-1="0 0 5 0 0 0 0 0 0 0"
     ascent="1664"
     descent="-384"
-    bbox="-0.450704 -424 2076 1664"
+    bbox="-0.450704 -424 2076 1666"
     underline-thickness="100"
     underline-position="-100"
-    unicode-range="U+E000-E045"
+    unicode-range="U+E000-E046"
   />
 <missing-glyph horiz-adv-x="1000" 
 d="M100 1210v-1020l340 510zM160 100h680l-340 510zM560 700l340 -510v1020zM500 790l340 510h-680zM0 0v1400h1000v-1400h-1000z" />
@@ -38,7 +38,7 @@ q13 -3 47 -26l24 -16q21 -14 23 -16l292 282l182 -182l-282 -282q4 -8 20 -31t21 -31
     <glyph glyph-name="uniE003" unicode="&#xe003;" 
 d="M1024 664q-186 0 -317 131t-131 317t131 317t317 131t317 -131t131 -317t-131 -317t-317 -131zM726 316h596q272 0 435 -141t163 -457h-1792q0 316 163 457t435 141z" />
     <glyph glyph-name="uniE004" unicode="&#xe004;" 
-d="M1444 520q-98 0 -196 38l-732 -718q-72 -72 -167 -81t-155 50t-51 152t83 165l732 718q-40 90 -40 190q0 214 154 365t372 151q130 0 242 -58t184 -158h-338l-140 -240l140 -240h402q-56 -148 -190 -241t-300 -93z" />
+d="M2046 1050q0 -254 -179 -434t-435 -180q-124 0 -234 46l-858 -858q-18 -18 -42 6l-282 282q-22 22 -6 40l856 856q-50 116 -50 242q0 254 180 435t436 181q102 0 212 -40l-264 -266q-38 -38 -38 -90t38 -90l180 -182q38 -38 91 -38t91 38l264 266q40 -102 40 -214z" />
     <glyph glyph-name="uniE005" unicode="&#xe005;" 
 d="M1152 512h512v256h-512v512h-256v-512h-512v-256h512v-512h256v512zM0 -384v2048h2048v-2048h-2048z" />
     <glyph glyph-name="uniE006" unicode="&#xe006;" 
@@ -189,5 +189,7 @@ q370 0 633 263t263 633t-263 633t-633 263t-633 -263t-263 -633t263 -633t633 -263zM
 d="M1152 812h-256v256h256v-256zM1152 172h-256v512h256v-512zM1024 -256q370 0 633 263t263 633t-263 633t-633 263t-633 -263t-263 -633t263 -633t633 -263zM1024 1664q424 0 724 -300t300 -724t-300 -724t-724 -300t-724 300t-300 724t300 724t724 300z" />
     <glyph glyph-name="uniE045" unicode="&#xe045;" 
 d="M1024 384q106 0 181 75t75 181t-75 181t-181 75t-181 -75t-75 -181t75 -181t181 -75zM1920 768v-256h-400q-42 -166 -181 -275t-315 -109t-315 109t-181 275h-400v256h400q42 166 181 275t315 109t315 -109t181 -275h400z" />
+    <glyph glyph-name="uniE046" unicode="&#xe046;" 
+d="M896 896h-256v-1024h256v1024zM1408 896h-256v-1024h256v1024zM1664 -256h-1280v1280h1280v-1280zM768 1280h512v128h-512v-128zM1408 1536v-256h384v-128h-1536v128h384v256h768z" />
   </font>
 </defs></svg>
