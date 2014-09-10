@@ -371,6 +371,7 @@ define([
 		this.targetRef = options.targetRef;
 		this.log = options.log;
 		this.simpleLog = options.simpleLog;
+		this.autoFetch = options.autoFetch;
 		this.slideout = options.slideout;
 		this.selectionPolicy = options.selectionPolicy;
 		this.repositoryPath = options.repositoryPath || "";
@@ -768,7 +769,7 @@ define([
 		fetch: function() {
 			var model = this.model;
 			var targetRef = model.getTargetReference();
-			if (model.tracksRemoteBranch() && !this.simpleLog && !model.isRebasing() && targetRef.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
+			if (this.autoFetch && model.tracksRemoteBranch() && !this.simpleLog && !model.isRebasing() && targetRef.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
 				var commandService = this.commandService;
 				var activeBranch = model.getActiveBranch();
 				return commandService.runCommand("eclipse.orion.git.fetch", {LocalBranch: activeBranch, RemoteBranch: targetRef, noAuth: true}, this); //$NON-NLS-0$

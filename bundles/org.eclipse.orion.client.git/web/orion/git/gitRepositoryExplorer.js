@@ -602,12 +602,14 @@ define([
 			log: this.log,
 			location: this.logLocation,
 			simpleLog: !!this.log,
+			autoFetch: this.autoFetch === undefined || this.autoFetch,
 			handleError: this.handleError.bind(this),
 			root: {
 				Type: "CommitRoot", //$NON-NLS-0$
 				repository: repository
 			}
 		});
+		this.autoFetch = false;
 		return this.statusDeferred.then(function() {
 			return explorer.display().then(function() {
 				if (this.changes && this.changes.length) {
