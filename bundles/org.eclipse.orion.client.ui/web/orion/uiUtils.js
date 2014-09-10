@@ -303,6 +303,7 @@ define([
 	 * @returns {Boolean}
 	 */
 	function isFormElement(element) {
+		if (!element || !element.tagName) return false;
 		switch (element.tagName.toLowerCase()) {
 			case "button": //$NON-NLS-0$
 			case "fieldset": //$NON-NLS-0$
@@ -319,7 +320,7 @@ define([
 			case "textarea": //$NON-NLS-0$
 				return true;
 		}
-		return false;
+		return element.parentNode && isFormElement(element.parentNode);
 	}
 
 	//return module exports
