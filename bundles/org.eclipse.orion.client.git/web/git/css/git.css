@@ -1075,8 +1075,8 @@ table .sectionTable {
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.git-sprite-apply-patch:before{ content:'\E017'; }
-.git-sprite-save-patch:before{ content:'\E018'; }
+.git-sprite-apply-patch:before{ content:'\E048'; }
+.git-sprite-save-patch:before{ content:'\E047'; }
 .git-sprite-cherry-pick:before{ content:'\E019'; }
 .git-sprite-pull:before{ content:'\E01E'; }
 .git-sprite-repository:before{ content:'\E020'; }
