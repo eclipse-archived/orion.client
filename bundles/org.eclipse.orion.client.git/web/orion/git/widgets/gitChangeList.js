@@ -864,22 +864,25 @@ define([
 						td.colSpan = 2;
 						var actionsWrapper = document.createElement("div"); //$NON-NLS-0$
 						actionsWrapper.className = "sectionExplorerActions"; //$NON-NLS-0$
+						actionsWrapper.style.overflow = "hidden"; //$NON-NLS-0$
 						div.appendChild(actionsWrapper);
 
-						diffActionWrapper = document.createElement("span"); //$NON-NLS-0$
+						var compareWidgetActionWrapper = document.createElement("ul"); //$NON-NLS-0$
+						compareWidgetActionWrapper.className = "layoutRight commandList"; //$NON-NLS-0$
+						compareWidgetActionWrapper.id = prefix + "CompareWidgetActionWrapper"; //$NON-NLS-0$
+						actionsWrapper.appendChild(compareWidgetActionWrapper);
+						
+						diffActionWrapper = document.createElement("ul"); //$NON-NLS-0$
+						diffActionWrapper.className = "layoutRight commandList"; //$NON-NLS-0$
 						var prefix = explorer.prefix + item.parent.name + item.parent.type;
 						diffActionWrapper.id = prefix + "DiffActionWrapperChange"; //$NON-NLS-0$
 						actionsWrapper.appendChild(diffActionWrapper);
 
-						var compareWidgetActionWrapper = document.createElement("span"); //$NON-NLS-0$
-						compareWidgetActionWrapper.id = prefix + "CompareWidgetActionWrapper"; //$NON-NLS-0$
-						actionsWrapper.appendChild(compareWidgetActionWrapper);
 	
 						var diffContainer = document.createElement("div"); //$NON-NLS-0$
 						diffContainer.id = "diffArea_" + item.DiffLocation; //$NON-NLS-0$
 						diffContainer.style.height = "420px"; //$NON-NLS-0$
 						diffContainer.style.border = "1px solid lightgray"; //$NON-NLS-0$
-						diffContainer.style.overflow = "hidden"; //$NON-NLS-0$
 						div.appendChild(diffContainer);
 	
 						navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;

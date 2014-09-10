@@ -254,7 +254,7 @@ exports.ResourceComparer = (function() {
 							if (toolbar) {	
 								that._commandService.destroy(toolbar);
 								var editorIndex = this._editorIndex;
-								that._commandService.renderCommands(toolbar.id, toolbar, that._compareView.getWidget().getEditors()[editorIndex], that._compareView.getWidget().getEditors()[editorIndex], "button"); //$NON-NLS-0$
+								that._commandService.renderCommands(toolbar.id, toolbar, that._compareView.getWidget().getEditors()[editorIndex], that._compareView.getWidget().getEditors()[editorIndex], "tool"); //$NON-NLS-0$
 							}
 							if(metadata){
 								this.setTitle(metadata.Location, metadata);
@@ -348,7 +348,7 @@ exports.ResourceComparer = (function() {
 				var openComparePageCommand = new mCommands.Command({
 					tooltip : messages["Open the compare page"],
 					name: messages["Compare"],
-					//imageClass : "core-sprite-link", //$NON-NLS-0$
+					imageClass : "git-sprite-compare", //$NON-NLS-0$
 					id: "orion.compare.openComparePage", //$NON-NLS-0$
 					groupId: "orion.compareGroup", //$NON-NLS-0$
 					visibleWhen: function(item) {

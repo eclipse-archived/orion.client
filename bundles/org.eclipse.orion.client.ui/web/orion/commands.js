@@ -427,7 +427,7 @@ define([
 						window.setTimeout(function() {
 							command.checked = input.checked;
 							onClick.call(commandInvocation.handler, commandInvocation);
-						}, 300);
+						}, 310);
 					} else {
 						onClick.call(commandInvocation.handler, commandInvocation);
 					}

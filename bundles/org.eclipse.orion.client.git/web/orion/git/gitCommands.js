@@ -494,6 +494,7 @@ var exports = {};
 			name: messages["Working Directory Version"],
 			tooltip: messages["View the working directory version of the file"],
 			id: "eclipse.orion.git.diff.showCurrent", //$NON-NLS-0$
+			imageClass: "core-sprite-edit",  //$NON-NLS-0$
 			hrefCallback: function(data) {
 				return require.toUrl(editTemplate.expand({resource: data.items.ContentLocation}));
 			},
@@ -521,6 +522,7 @@ var exports = {};
 			name : messages["OpenCommitVersion"],  //$NON-NLS-0$
 			id : "eclipse.openGitDiff", //$NON-NLS-0$
 			tooltip: messages["ViewCommitVersionTip"], //$NON-NLS-0$
+			imageClass: "core-sprite-outline",  //$NON-NLS-0$
 			hrefCallback: function(data) {
 				return require.toUrl(editTemplate.expand({resource: data.items.TreeLocation}));
 			},
