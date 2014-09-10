@@ -10,8 +10,14 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/webui/treetable', 'orion/explorers/explorerNavHandler', 'orion/commands'], 
-function(messages, lib, mTreeTable, mNavHandler, mCommands){
+define([
+	'i18n!orion/nls/messages',
+	'orion/webui/littlelib',
+	'orion/webui/treetable',
+	'orion/explorers/explorerNavHandler',
+	'orion/uiUtils',
+	'orion/commands'
+], function(messages, lib, mTreeTable, mNavHandler, UiUtils, mCommands){
 
 var exports = {};
 
@@ -171,7 +177,7 @@ exports.Explorer = (function() {
 		 * @param {Object} options optional parameters of the tree(custom indent, onCollapse callback)
 		 */
 		createTree: function (parentId, model, options){
-			parentId = typeof parentId === "string" ? parentId : (parentId.id || parentId);
+			parentId = typeof parentId === "string" ? parentId : (parentId.id || parentId); //$NON-NLS-0$
 			if(this.selection) {
 				this.selection.setSelections([]);
 			}
@@ -184,7 +190,7 @@ exports.Explorer = (function() {
 				lib.empty(existing);
 			}
 			if (model){
-				model.rootId = treeId + "Root";
+				model.rootId = treeId + "Root"; //$NON-NLS-0$
 			}
 			this.model = model;
 			this._parentId = parentId;
@@ -265,7 +271,7 @@ exports.Explorer = (function() {
 				return;
 			}
 			if(!this.getNavHandler()){
-				if (options && options.navHandlerFactory && typeof options.navHandlerFactory.createNavHandler === "function") {
+				if (options && options.navHandlerFactory && typeof options.navHandlerFactory.createNavHandler === "function") { //$NON-NLS-0$
 					this._navHandler = options.navHandlerFactory.createNavHandler(this, this._navDict, options);
 				} else {
 					var getChildrenFunc = options ? options.getChildrenFunc : null;
@@ -485,7 +491,43 @@ exports.ExplorerRenderer = (function() {
 				tableNode.classList.add(this._treeTableClass); 
 			}
 			this.renderTableHeader(tableNode);
-
+			var self = this;
+			tableNode.onclick = function(evt) {
+				var target = evt.target;
+				var tableRow = target;
+				while (tableRow) {
+					if (tableRow._item) break;
+					tableRow = tableRow.parentNode;
+				}
+				if (!tableRow) return;
+				var expandImage = lib.node(self.expandCollapseImageId(tableRow.id));
+				if (expandImage !== target) {
+					if (UiUtils.isFormElement(target)) {
+						return;
+					}
+				}
+				if (!self.explorer.getNavHandler().isDisabled(tableRow)) {
+					self.tableTree.toggle(tableRow.id);
+					var expanded = self.tableTree.isExpanded(tableRow.id);
+					if (expanded) {
+						self._expanded.push(tableRow.id);
+						if (self.explorer.postUserExpand) {
+							self.explorer.postUserExpand(tableRow.id);
+						}
+					} else {
+						for (var i in self._expanded) {
+							if (self._expanded[i] === tableRow.id) {
+								self._expanded.splice(i, 1);
+								break;
+							}
+						}
+					}
+					var prefPath = self._getUIStatePreferencePath();
+					if (prefPath && window.sessionStorage) {
+						self._storeExpansions(prefPath);
+					}
+				}
+			};
 		},
 		getActionsColumn: function(item, tableRow, renderType, columnClass, renderAsGrid){
 			renderType = renderType || "tool"; //$NON-NLS-0$
@@ -689,31 +731,6 @@ exports.ExplorerRenderer = (function() {
 				decorateImage.classList.add(spriteClass || "imageSprite"); //$NON-NLS-0$
 				decorateImage.classList.add(decorateImageClass);
 			}
-			var self = this;
-			// TODO should really avoid creating 1 listener per expandImage here
-			expandImage.onclick = function(evt) {
-				if (!self.explorer.getNavHandler().isDisabled(tableRow)) {
-					self.tableTree.toggle(tableRow.id);
-					var expanded = self.tableTree.isExpanded(tableRow.id);
-					if (expanded) {
-						self._expanded.push(tableRow.id);
-						if (self.explorer.postUserExpand) {
-							self.explorer.postUserExpand(tableRow.id);
-						}
-					} else {
-						for (var i in self._expanded) {
-							if (self._expanded[i] === tableRow.id) {
-								self._expanded.splice(i, 1);
-								break;
-							}
-						}
-					}
-					var prefPath = self._getUIStatePreferencePath();
-					if (prefPath && window.sessionStorage) {
-						self._storeExpansions(prefPath);
-					}
-				}
-			};
 			return expandImage;
 		},
 		
