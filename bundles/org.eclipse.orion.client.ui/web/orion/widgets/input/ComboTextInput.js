@@ -245,9 +245,15 @@ define([
 				}
 				
 				var indexOfElement = this._getIndexOfValue(recentEntryArray, value); //check if a duplicate entry exists
-				if (-1 === indexOfElement) {
-					//no duplicate entry found, add new entry to array
-					recentEntryArray.push({
+				if (0 !== indexOfElement) {
+					// element is either not in array, or not in first position
+					if (-1 !== indexOfElement) {
+						// element is in array, remove it because we want to add it to beginning
+						recentEntryArray.splice(indexOfElement, 1);
+					}
+					
+					//add new entry to beginning of array
+					recentEntryArray.unshift({
 						type: "proposal", //$NON-NLS-0$
 						label: value, 
 						value: value
