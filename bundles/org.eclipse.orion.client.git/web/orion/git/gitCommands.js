@@ -288,7 +288,7 @@ var exports = {};
 		var removeBranchCommand = new mCommands.Command({
 			name: messages["Delete"], // "Delete Branch"
 			tooltip: messages["Delete the local branch from the repository"],
-			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.removeBranch", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
@@ -308,7 +308,7 @@ var exports = {};
 		var removeRemoteBranchCommand = new mCommands.Command({
 			name: messages['Delete'], // "Delete Remote Branch",
 			tooltip: messages["Delete the remote tracking branch from the repository"],
-			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.removeRemoteBranch", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
@@ -376,7 +376,7 @@ var exports = {};
 		var removeRemoteCommand = new mCommands.Command({
 			name: messages['Delete'], // "Delete Remote",
 			tooltip: messages["Delete the remote from the repository"],
-			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.removeRemote", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
@@ -1165,7 +1165,7 @@ var exports = {};
 		var removeTagCommand = new mCommands.Command({
 			name: messages['Delete'],
 			tooltip: messages["Delete the tag from the repository"],
-			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.removeTag", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
@@ -1458,7 +1458,7 @@ var exports = {};
 		var deleteConfigEntryCommand = new mCommands.Command({
 			name: messages['Delete'],
 			tooltip: messages["Delete the configuration entry"],
-			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.orion.git.deleteConfigEntryCommand", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
@@ -1847,7 +1847,7 @@ var exports = {};
 		var deleteCommand = new mCommands.Command({
 			name: messages['Delete'], // "Delete Repository"
 			tooltip: messages["Delete the repository"],
-			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.git.deleteClone", //$NON-NLS-0$
 			visibleWhen: function(item) {
 				return item.Type === "Clone";
@@ -2143,7 +2143,7 @@ var exports = {};
 		var checkoutCommand = new mCommands.Command({
 			name: messages['Checkout'],
 			tooltip: messages["Checkout all the selected files, discarding all changes"],
-			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.orion.git.checkoutCommand", //$NON-NLS-0$
 			callback: function(data) {				
 				var items = forceArray(data.items);
@@ -2194,7 +2194,7 @@ var exports = {};
 		var checkoutStagedCommand = new mCommands.Command({
 			name: messages['Discard'],
 			tooltip: messages["Checkout all the selected files, discarding all changes"],
-			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.orion.git.checkoutStagedCommand", //$NON-NLS-0$
 			callback: function(data) {				
 				var dialog = serviceRegistry.getService("orion.page.dialog"); //$NON-NLS-0$
@@ -2548,7 +2548,7 @@ var exports = {};
 		
 		var dropStashCommand = new mCommands.Command({
 			name : messages["Drop"],
-			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			tooltip : messages["Drop the commit from the stash list"],
 			id : "eclipse.orion.git.dropStash",
 			callback : function(data){
