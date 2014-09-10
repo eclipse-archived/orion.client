@@ -159,7 +159,7 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 		this.titleLeftActionsNode.classList.add("sectionActions"); //$NON-NLS-0$
 		this.domNode.appendChild(this.titleLeftActionsNode);
 		
-		if (options.dropdown) {
+		if (options.dropdown && !options.noArrow) {
 			this.dropdownArrow = document.createElement("div"); //$NON-NLS-0$
 			this.dropdownArrow.classList.add("modelDecorationSprite"); //$NON-NLS-0$
 			this.dropdownArrow.classList.add("layoutLeft"); //$NON-NLS-0$

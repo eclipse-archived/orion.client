@@ -666,6 +666,7 @@ define([
 			hidden: true,
 			dropdown: true,
 			noTwistie: true,
+			noArrow: true,
 			preferenceService: this.preferencesService
 		});
 			
