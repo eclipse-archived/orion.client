@@ -151,6 +151,51 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 			
 	};
 	
+	var getDefaultSshOptions = function(serviceRegistry, item, authParameters){
+		var def = new Deferred();
+		var sshService = serviceRegistry.getService("orion.net.ssh"); //$NON-NLS-0$
+		var sshUser =  authParameters && !authParameters.optionsRequested ? authParameters.valueFor("sshuser") : ""; //$NON-NLS-0$
+		var sshPassword = authParameters && !authParameters.optionsRequested ? authParameters.valueFor("sshpassword") : ""; //$NON-NLS-0$
+		
+		var repository;
+		
+		//TODO This should be somehow unified
+		var origItem = item;
+		if (item.LocalBranch && item.RemoteBranch) {
+			item = item.LocalBranch;
+		}
+		if (origItem.RemoteBranch && origItem.RemoteBranch.GitUrl) { repository = origItem.RemoteBranch.GitUrl; }
+		else if(item.GitUrl !== undefined) { repository = item.GitUrl; }
+		else if(item.errorData !== undefined) { repository = item.errorData.Url; }
+		else if(item.toRef !== undefined) { repository = item.toRef.RemoteLocation[0].GitUrl; }
+		else if(item.RemoteLocation !== undefined){ repository = item.RemoteLocation[0].GitUrl; }
+
+		if(!repository){
+			def.resolve({
+						knownHosts: "",
+						gitSshUsername: sshUser,
+						gitSshPassword: sshPassword,
+						gitPrivateKey: "",
+						gitPassphrase: ""
+			});
+			
+			return def;
+		}
+
+		var repositoryURL = mGitUtil.parseSshGitUrl(repository);
+		sshService.getKnownHostCredentials(repositoryURL.host, repositoryURL.port).then(function(knownHosts){
+			def.resolve({
+						knownHosts: knownHosts,
+						gitSshUsername: sshUser,
+						gitSshPassword: sshPassword,
+						gitPrivateKey: "",
+						gitPassphrase: ""
+			});
+		});
+		
+		return def;
+	};
+	
 	var gatherSshCredentials = function(serviceRegistry, data, title, closeCallback){
 		var def = new Deferred();
 		var repository;
@@ -333,7 +378,7 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 				}
 			default:
 				var display = [];
-				display.Severity = "Error"; //$NON-NLS-0$
+				display.Severity = jsonData.Severity || "Error"; //$NON-NLS-0$
 				display.HTML = false;
 				display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
 				serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
@@ -349,6 +394,7 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 		handleGitServiceResponse : handleGitServiceResponse,
 		handleProgressServiceResponse : handleProgressServiceResponse,
 		gatherSshCredentials : gatherSshCredentials,
+		getDefaultSshOptions : getDefaultSshOptions,
 		handleSshAuthenticationError : handleSshAuthenticationError,
 		handleKnownHostsError : handleKnownHostsError
 	};
