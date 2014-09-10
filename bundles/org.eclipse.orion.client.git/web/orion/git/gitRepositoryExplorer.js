@@ -571,6 +571,14 @@ define([
 			preferenceService: this.preferencesService
 		});
 		
+		// Set the branches section title when the active and target references are available
+		var that = this;
+		var oldSetTitle = section.setTitle;
+		section.setTitle = function(str) {
+			oldSetTitle.call(section, str);
+			that.setBranchesTitle();
+		};
+		
 		var selection = this.commitsSelection = new mSelection.Selection(this.registry, "orion.selection.commit"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			var selected = event.selections;
@@ -601,7 +609,6 @@ define([
 		});
 		return this.statusDeferred.then(function() {
 			return explorer.display().then(function() {
-				this.setBranchesTitle();
 				if (this.changes && this.changes.length) {
 					this.changes.forEach(function(c) {
 						explorer.select(c);
