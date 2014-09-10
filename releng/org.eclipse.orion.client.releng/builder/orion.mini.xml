@@ -254,6 +254,7 @@
 						</fileset>
 					</sort>
 				</classpath>
+				<jvmarg value="-Xss1024k" />
 				<!-- JavaScript language version -->
 				<arg value="-version" />
 				<arg value="180" />
@@ -281,6 +282,7 @@
 						</fileset>
 					</sort>
 				</classpath>
+				<jvmarg value="-Xss1024k" />
 				<!-- JavaScript language version -->
 				<arg value="-version" />
 				<arg value="180" />
