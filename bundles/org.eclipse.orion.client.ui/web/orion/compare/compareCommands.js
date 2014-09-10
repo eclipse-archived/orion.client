@@ -72,6 +72,23 @@ exports.CompareCommandFactory = (function() {
 				callback : function(data) {
 					data.items.copyToRight();
 			}});
+			var ignoreWhitespaceCommand = new mCommands.Command({
+				tooltip : messages["IgnoreWhitespaceTooltip"],
+				name: messages["IgnoreWhitespace"],
+				imageClass : "compare-sprite-ignore-whitespace", //$NON-NLS-0$
+				id: "orion.compare.ignoreWhitespace", //$NON-NLS-0$
+				groupId: "orion.compareGroup", //$NON-NLS-0$
+				type: "toggle",
+				visibleWhen: function(item) {
+					var isWhitespaceIgnored = item.isWhitespaceIgnored();
+					ignoreWhitespaceCommand.checked = isWhitespaceIgnored;
+					ignoreWhitespaceCommand.name = isWhitespaceIgnored ? messages["UseWhitespace"] : messages["IgnoreWhitespace"];
+					ignoreWhitespaceCommand.tooltip = isWhitespaceIgnored ? messages["UseWhitespaceTooltip"] :  messages["IgnoreWhitespaceTooltip"];
+					return !item.options.diffContent/* && !item.isWhitespaceIgnored()*/;
+				},
+				callback : function(data) {
+					data.items.ignoreWhitespace(ignoreWhitespaceCommand.checked);
+			}});
 			var toggleInline2WayCommand = new mCommands.Command({
 				tooltip : messages["Switch to unified diff"],
 				name: messages["Unified"],
@@ -80,16 +97,18 @@ exports.CompareCommandFactory = (function() {
 				groupId: "orion.compareGroup", //$NON-NLS-0$
 				type: "toggle",
 				visibleWhen: function(item) {
+					if(!item.options.toggler) {
+						return false;
+					}
 					var is2Way = item.options.toggler.getWidget().type === "twoWay";
 					toggleInline2WayCommand.checked = !is2Way;
 					toggleInline2WayCommand.name = is2Way ? messages["Unified"] : messages["Side by side"];
 					toggleInline2WayCommand.tooltip = is2Way ? messages["Switch to unified diff"] :  messages["Switch to side by side diff"];
-					return item.options.toggler;
+					return true;
 				},
 				callback : function(data) {
 					data.items.options.toggler.toggle();
 			}});
-			
 			var nextDiffCommand = new mCommands.Command({
 				name: messages["Next diff block"],
 				tooltip : messages["Next diff block"],
@@ -140,6 +159,7 @@ exports.CompareCommandFactory = (function() {
 			}});
 			commandService.addCommand(copyToLeftCommand);
 			commandService.addCommand(copyToRightCommand);
+			commandService.addCommand(ignoreWhitespaceCommand);
 			commandService.addCommand(toggleInline2WayCommand);
 			commandService.addCommand(nextDiffCommand);
 			commandService.addCommand(prevDiffCommand);
@@ -159,6 +179,7 @@ exports.CompareCommandFactory = (function() {
 				commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, true, new mKeyBinding.KeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
 				commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, true, new mKeyBinding.KeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
 			}
+			commandService.registerCommandContribution(commandSpanId, "orion.compare.ignoreWhitespace", 116); //$NON-NLS-0$
 		},
 		
 		renderCommands: function(compareWidget){

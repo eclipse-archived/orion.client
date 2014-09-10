@@ -42,5 +42,9 @@ define({
 	'readingFile': 'Reading file: ${0}...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'readingFileMetadata': 'Reading file metadata: ${0}...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'comparingFile': 'Comparing: ${0}...',  //$NON-NLS-0$  //$NON-NLS-1$
-	'compareTreeTitle': 'Compare Folders'  //$NON-NLS-0$  //$NON-NLS-1$
+	'compareTreeTitle': 'Compare Folders',  //$NON-NLS-0$  //$NON-NLS-1$
+	'IgnoreWhitespace': 'Ignore white space', //$NON-NLS-0$  //$NON-NLS-1$
+	'IgnoreWhitespaceTooltip': 'Ignore white space where applicable', //$NON-NLS-0$  //$NON-NLS-1$
+	'UseWhitespace': 'Use white space', //$NON-NLS-0$  //$NON-NLS-1$
+	'UseWhitespaceTooltip': 'Compare white space where applicable' //$NON-NLS-0$  //$NON-NLS-1$
 });

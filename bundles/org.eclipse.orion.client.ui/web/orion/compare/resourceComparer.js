@@ -91,14 +91,14 @@ exports.DefaultDiffProvider = (function() {
 					return;
 				}
 				var that = this;
-				return that._diffProvider.getDiffContent(resource).then(function(jsonData, secondArg) {
-					if (that._hasConflicts) {
+				if(that._hasConflicts) {
+					return that._diffProvider.getDiffContent(resource).then(function(jsonData, secondArg) {
 						that._diffContent = jsonData.split("diff --git")[1]; //$NON-NLS-0$
-					} else {
-						that._diffContent = jsonData;
-					}
+						return that._resolveComplexFileURL(resource);
+					}, function(){});
+				} else {// We do not need to get diff contents from server if there is no conflicts. We use client side diff here.
 					return that._resolveComplexFileURL(resource);
-				}, function(){});
+				}
 			}
 		}
 	};

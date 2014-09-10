@@ -250,3 +250,20 @@
 .compare-sprite-inline-2way:before{ content: '\E01A'; }
 .compare-sprite-inline-2way:after{ content: '\E029'; }
 
+.compare-sprite-ignore-whitespace{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
+	padding-right:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.compare-sprite-ignore-whitespace:before{ content: '\E01A'; }
+.compare-sprite-ignore-whitespace:after{ content: '\E029'; }
+

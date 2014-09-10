@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['jsdiff/diff'], function(JsDiff) {
+define(['jsdiff/diff'], function(mJsDiff) {
 
 var orion = orion || {};
 
@@ -41,7 +41,7 @@ orion.JSDiffAdapter = (function() {
 			var newLineAtEndOld = (splitOld[splitOld.length-1] === "");
 			var newLineAtEndNew = (splitNew[splitNew.length-1] === "");
 			
-			var diff = JsDiff.diffLines(oldStr, newStr, this._ignoreWhitespace);
+			var diff = mJsDiff.diffLines(oldStr, newStr, this._ignoreWhitespace);
 			var map = [];
 			var changContents = [];
 			var linesAdded = 0;
@@ -128,7 +128,7 @@ orion.JSDiffAdapter = (function() {
 		},
 		
 		adaptCharDiff : function(oldStr, newStr, word) {
-			var diff = word ? JsDiff.diffWords(oldStr, newStr, this._ignoreWhitespace) : JsDiff.diffChars(oldStr, newStr, this._ignoreWhitespace);
+			var diff = word ? mJsDiff.diffWords(oldStr, newStr, this._ignoreWhitespace) : mJsDiff.diffChars(oldStr, newStr, this._ignoreWhitespace);
 			var map = [];
 			var oldStart = 0;
 			var newStart = 0;

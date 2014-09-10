@@ -426,6 +426,9 @@ exports.DiffTreeNavigator = (function() {
 				return {};
 			}
 			var cursor = this.iterator.cursor();
+			if(!cursor){
+				return {};
+			}
 			if(cursor.type === "block"){ //$NON-NLS-0$
 				return {block: cursor.index+1};
 			} else {
