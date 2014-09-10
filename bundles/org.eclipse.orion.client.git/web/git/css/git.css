@@ -25,6 +25,11 @@
 	padding-bottom:4px;
 }
 
+
+.sectionDropdownArrow {
+	margin-top: 2px;
+}
+
 .mainToolbar .sectionWrapper {
 	margin-left: 0;
 	margin-right: 10px;
