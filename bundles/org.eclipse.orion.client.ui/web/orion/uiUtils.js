@@ -297,12 +297,13 @@ define([
 	}
 
 	/**
-	 * Returns whether <code>element</code> is an HTML5 form element.
+	 * Returns whether <code>element</code> or its parent is an HTML5 form element.
 	 * @param {Element} element
+	 * @param {Element} parentLimit
 	 * @function
 	 * @returns {Boolean}
 	 */
-	function isFormElement(element) {
+	function isFormElement(element, parentLimit) {
 		if (!element || !element.tagName) return false;
 		switch (element.tagName.toLowerCase()) {
 			case "button": //$NON-NLS-0$
@@ -320,7 +321,8 @@ define([
 			case "textarea": //$NON-NLS-0$
 				return true;
 		}
-		return element.parentNode && isFormElement(element.parentNode);
+		if (element.parentNode === parentLimit) return false;
+		return element.parentNode && isFormElement(element.parentNode, parentLimit);
 	}
 
 	//return module exports

@@ -495,7 +495,7 @@ exports.ExplorerRenderer = (function() {
 			tableNode.onclick = function(evt) {
 				var target = evt.target;
 				var tableRow = target;
-				while (tableRow) {
+				while (tableRow !== tableNode) {
 					if (tableRow._item) break;
 					tableRow = tableRow.parentNode;
 				}
@@ -503,7 +503,8 @@ exports.ExplorerRenderer = (function() {
 				var expandImage = lib.node(self.expandCollapseImageId(tableRow.id));
 				if (!expandImage) return;
 				if (expandImage !== target) {
-					if (UiUtils.isFormElement(target)) {
+					var item = tableRow._item;
+					if (UiUtils.isFormElement(target, tableRow)) {
 						return;
 					}
 				}
