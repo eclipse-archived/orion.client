@@ -1015,10 +1015,12 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				if (offset < blockStart) {
 					this._stylerAdapter.parse(text.substring(offset - start, blockStart - start), offset, block, styles);
 					styles.forEach(function(current) {
-						if (current.style.indexOf(bracketMatch.beginName) === 0) {
-							result.push(current.start + 1);
-						} else if (current.style.indexOf(bracketMatch.endName) === 0) {
-							result.push(-(current.start + 1));
+						if (current.style) {
+							if (current.style.indexOf(bracketMatch.beginName) === 0) {
+								result.push(current.start + 1);
+							} else if (current.style.indexOf(bracketMatch.endName) === 0) {
+								result.push(-(current.start + 1));
+							}
 						}
 					});
 					styles = [];
