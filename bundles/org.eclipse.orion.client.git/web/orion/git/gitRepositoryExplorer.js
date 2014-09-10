@@ -304,7 +304,7 @@ define([
 		this.lastResource = resource; //$NON-NLS-0$
 		this.destroy();
 		var that = this;
-		this.changes = this.reference = this.repository = this.treePath = this.log = this.logLocation = null;
+		this.changes = this.reference = this.repository = this.log = null;
 		this.loadingDeferred = new Deferred();
 		if (processURLs){
 			this.loadingDeferred.then(function(){
@@ -324,8 +324,6 @@ define([
 						that.progressService.progress(that.gitClient.getGitClone(selection.CloneLocation), messages["Getting git repository details"]).then(function(clone){
 							if (selection.Type === "Commit") { //$NON-NLS-0$
 								that.log = selection;
-								that.logLocation = resource;
-								that.treePath = selection.RepositoryPath;
 								that.changes = [selection.Children[0]];
 							} else if (selection.Type === "Branch" || selection.Type === "RemoteTrackingBranch" || selection.Type === "Tag") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 								that.reference = selection;
@@ -403,7 +401,7 @@ define([
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 			var selected = e.selection;
 			if (!selected || compare(this.repository, selected)) return;
-			this.changes = this.reference = this.log = this.logLocation = this.treePath = null;
+			this.changes = this.reference = this.log = null;
 			section.setHidden(true);
 			this.setSelectedRepository(selected);
 			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
@@ -478,7 +476,7 @@ define([
 				default:
 					return;
 			}
-			this.changes = this.reference = this.log = this.logLocation = this.treePath = null;
+			this.changes = this.reference = this.log = null;
 			section.setHidden(true);
 			this.setSelectedReference(selected);
 			if (!util.isNewBranch(selected)) {
@@ -600,7 +598,6 @@ define([
 			selection: selection,
 			targetRef: this.reference,
 			log: this.log,
-			location: this.logLocation,
 			simpleLog: !!this.log,
 			autoFetch: this.autoFetch === undefined || this.autoFetch,
 			handleError: this.handleError.bind(this),

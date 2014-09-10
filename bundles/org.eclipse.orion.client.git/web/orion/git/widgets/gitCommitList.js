@@ -36,7 +36,6 @@ define([
 		this.root = options.root;
 		this.showCommitChanges = options.showCommitChanges;
 		this.section = options.section;
-		this.location = options.location;
 		this.handleError = options.handleError;
 		this.repository = options.repository;
 		this.progressService = options.progressService;
@@ -46,9 +45,10 @@ define([
 		this.simpleLog = options.simpleLog;
 		this.parentId = options.parentId;
 		this.targetRef = options.targetRef;
-		this.log = options.log;
 		this.logDeferred = new Deferred();
-		this.repositoryPath = options.repositoryPath || "";
+		this.log = options.log;
+		this.location = options.location || (this.log && this.log.Location.substring(0, this.log.Location.length - this.log.RepositoryPath.length)) || "";
+		this.repositoryPath = options.repositoryPath || (this.log && this.log.RepositoryPath) || "";
 		this.filterQuery = "";
 		this.authorQuery = "";
 		this.committerQuery = "";
@@ -84,7 +84,7 @@ define([
 			if (that.isNewBranch(ref)) {
 				ref = that.getActiveBranch();
 			}
-			var location = parentItem.more ? parentItem.location : that.location || ((ref.CommitLocation || ref.Location) + that.repositoryPath + that.getQueries());
+			var location = parentItem.more ? parentItem.location : ((that.location || ref.CommitLocation || ref.Location) + that.repositoryPath + that.getQueries());
 			return that.progressService.progress(that.gitClient.doGitLog(location), logMsg).then(function(resp) {
 				if (that.location && resp.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
 					return that.progressService.progress(that.gitClient.doGitLog(resp.CommitLocation + that.repositoryPath + that.getQueries(), logMsg)).then(function(resp) { //$NON-NLS-0$
@@ -533,7 +533,7 @@ define([
 					sections.forEach(function(s) {
 						var field = lib.$(".gitFilterInput", s.domNode); //$NON-NLS-0$
 						if (s.query === "path") { //$NON-NLS-0$
-							field.value = this.repositoryPath;
+							field.value = this.model.repositoryPath;
 						} else {
 							var prop = s.query + "Query"; //$NON-NLS-0$
 							field.value = decodeURIComponent(this.model[prop].split("=")[1] || ""); //$NON-NLS-0$
