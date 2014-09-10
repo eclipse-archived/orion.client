@@ -259,6 +259,8 @@ define({
 	"OK": "OK",
 	"Clear": "Clear",
 	"Filter": "Filter",
+	"FilterCommits": "Filter Commits",
+	"FilterCommitsTip": "Toggles the filter commits panel",
 	" [New branch]": " [New branch]",
 	"Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}.": "Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}.",
 	"Link Repository": "Link Repository",

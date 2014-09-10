@@ -728,7 +728,8 @@ define([
 			
 			var filterCommand = new mCommands.Command({
 				id: "eclipse.orion.git.commit.toggleFilter", //$NON-NLS-0$
-				name: messages["Filter"],
+				name: messages["FilterCommits"],
+				tooltip: messages["FilterCommitsTip"],
 				imageClass: "core-sprite-search", //$NON-NLS-0$
 				callback: function(data) {
 					if (data) this.filterSection.setHidden(!this.filterSection.hidden);

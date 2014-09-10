@@ -355,6 +355,7 @@ define([
 		var repository = resource;
 		item.Name = messages["Git"];
 		item.Parents = [];
+		mGitCommands.updateNavTools(this.registry, this.commandService, this, "pageActions", "selectionTools", this.repository, this.pageNavId)
 		mGlobalCommands.setPageTarget({
 			task: task,
 			target: repository,
