@@ -284,10 +284,10 @@ define([
 				try {
 					chunks = URLUtil.detectValidURL(msg);
 				} catch (e) {
-					// Invalid markdown. As punishment, we treat it as plain text
-					chunks = null;
+					// Contained a corrupt URL
+					chunks = [];
 				}
-				if (chunks) {
+				if (chunks.length) {
 					msgNode = document.createDocumentFragment();
 					URLUtil.processURLSegments(msgNode, chunks);
 					// All status links open in new window
