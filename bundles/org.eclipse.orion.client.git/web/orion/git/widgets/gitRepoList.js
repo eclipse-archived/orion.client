@@ -131,7 +131,7 @@ define([
 			var filter = this.filterQuery;
 			if (filter) {
 				children = children.filter(function(item) {
-					return item.Name.indexOf(filter) !== -1;
+					return item.Name.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
 				});
 			}
 			if (children.length === 0) {

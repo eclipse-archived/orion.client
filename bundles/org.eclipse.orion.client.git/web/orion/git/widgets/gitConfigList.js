@@ -60,7 +60,7 @@ define([
 			var filter = this.filterQuery;
 			if (filter) {
 				children = children.filter(function(item) {
-					return item.Key.indexOf(filter) !== -1;
+					return item.Key.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
 				});
 			}
 			if (children.length === 0) {
