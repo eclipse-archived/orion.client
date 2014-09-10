@@ -113,6 +113,7 @@
             { name: "plugins/languages/php/phpPlugin" },
             { name: "plugins/languages/python/pythonPlugin" },
             { name: "plugins/languages/ruby/rubyPlugin" },
+            { name: "plugins/languages/swift/swiftPlugin" },
             { name: "plugins/languages/xml/xmlPlugin" },
             { name: "plugins/languages/xquery/xqueryPlugin" },
             { name: "plugins/languages/yaml/yamlPlugin" },
