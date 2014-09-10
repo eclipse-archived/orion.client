@@ -437,7 +437,7 @@ define([
 		
 		var section = this.branchesSection = new mSection.Section(parent, {
 			id: "branchSection", //$NON-NLS-0$
-			title: "\u00A0", //$NON-NLS-0$
+			title: this.previousBranchTitle || "\u00A0", //$NON-NLS-0$
 //			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="branchNode" class="branchDropdownList"></div><div id="dropdownBranchesActionsNode" class="sectionDropdownActions toolComposite"></div>', //$NON-NLS-0$
@@ -527,7 +527,7 @@ define([
 		} else {
 			title = util.shortenRefName(activeBranch || targetRef);
 		}
-		this.branchesSection.setTitle(title);
+		this.branchesSection.setTitle(this.previousBranchTitle = title);
 	};
 
 	GitRepositoryExplorer.prototype.displayStatus = function(repository) {	
