@@ -504,6 +504,9 @@ exports.ExplorerRenderer = (function() {
 				if (!expandImage) return;
 				if (expandImage !== target) {
 					var item = tableRow._item;
+					if (self.explorer.isRowSelectable(item)) {
+						if (item.selectable === undefined || item.selectable) return;
+					}
 					if (UiUtils.isFormElement(target, tableRow)) {
 						return;
 					}
