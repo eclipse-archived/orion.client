@@ -112,6 +112,8 @@ var exports = {};
 	exports.handleProgressServiceResponse = mGitCommitLogic.handleProgressServiceResponse;
 
 	exports.gatherSshCredentials = mGitCommonLogic.gatherSshCredentials;
+
+	exports.getDefaultSshOptions = mGitCommonLogic.getDefaultSshOptions;
 	
 	exports.handleGitServiceResponse = mGitCommonLogic.handleGitServiceResponse;
 	
