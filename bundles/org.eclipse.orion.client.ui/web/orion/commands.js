@@ -381,6 +381,9 @@ define([
 				input.type = "checkbox"; //$NON-NLS-0$
 				input.className = "orionToggleCheck"; //$NON-NLS-0$
 				input.id = "orionToggleCheck" + command.id; //$NON-NLS-0$
+				if(parent.id) {
+					input.id = input.id + parent.id;
+				}
 				element.appendChild(input);
 				var label = document.createElement("label"); //$NON-NLS-0$
 				label.className = "orionToggleLabel"; //$NON-NLS-0$
