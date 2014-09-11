@@ -107,8 +107,6 @@ var exports = {};
 
 	exports.handleSshAuthenticationError = mGitCommonLogic.handleSshAuthenticationError;
 
-	exports.getDefaultSshOptions = mGitCommonLogic.getDefaultSshOptions;
-
 	exports.handleProgressServiceResponse = mGitCommonLogic.handleProgressServiceResponse;
 
 	exports.gatherSshCredentials = mGitCommonLogic.gatherSshCredentials;
@@ -1012,7 +1010,7 @@ var exports = {};
 						&& item.toRef.RemoteLocation[0].IsGerrit;
 				else
 					// for action in the repo view
-					return item.Type === "Branch" && item.Current && item.RemoteLocation && item.RemoteLocation[0].IsGerrit; //$NON-NLS-0$
+					return item.Type === "Branch" && item.Current && item.RemoteLocation && item.RemoteLocation[0] && item.RemoteLocation[0].IsGerrit; //$NON-NLS-0$
 
 			}
 		});

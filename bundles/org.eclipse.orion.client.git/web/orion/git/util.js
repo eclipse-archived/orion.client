@@ -181,7 +181,7 @@ define([
 	}
 	
 	function tracksRemoteBranch(branch) {
-		return branch && branch.RemoteLocation && !isNewBranch(branch.RemoteLocation[0].Children[0]);
+		return branch && branch.RemoteLocation && branch.RemoteLocation[0] && !isNewBranch(branch.RemoteLocation[0].Children[0]);
 	}
 	
 	return {

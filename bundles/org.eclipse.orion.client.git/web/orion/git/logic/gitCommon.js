@@ -13,6 +13,7 @@
  */
 
 /*eslint-env browser, amd*/
+/*global confirm */
 
 define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orion/git/widgets/GitCredentialsDialog','orion/Deferred','i18n!git/nls/gitmessages'],
 		function(mGitUtil,i18nUtil,GitPreferenceStorage,mGitCredentials,Deferred,messages) {
@@ -29,12 +30,10 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 		}
 		json.HttpCode = response.status;
 		return json;
-	};
+	}
 	
 	function translateGitStatusMessages(message){
-		if (message === "REJECTED_NONFASTFORWARD")
-			return messages["REJECTED_NONFASTFORWARD"];
-		return message;
+		return messages[message] || message;
 	}
 	
 	var handleKnownHostsError = function(serviceRegistry, errorData, options, func){
@@ -52,7 +51,7 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 			var sshService = serviceRegistry.getService("orion.net.ssh"); //$NON-NLS-0$
 			sshService.addKnownHost(hostCredentials).then(function(knownHosts){ //$NON-NLS-1$ //$NON-NLS-0$
 				options.knownHosts = knownHosts;
-				if(typeof options.failedOperation !== "undefined"){
+				if(options.failedOperation !== undefined){
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					progress.removeOperation(options.failedOperation);
 				}
@@ -78,20 +77,18 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 			credentialsDialog.show();
 		};
 		
-		if((options.gitSshUsername && options.gitSshUsername!=="") ||
-			(options.gitSshPassword && options.gitSshPassword!=="") ||
-			(options.gitPrivateKey && options.gitPrivateKey!=="")){
+		if(options.gitSshUsername || options.gitSshPassword || options.gitPrivateKey){
 			failure();
 		} else {
 			var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
 			gitPreferenceStorage.get(repository).then(
 				function(credentials){
-					if(credentials.gitPrivateKey !== "" || credentials.gitSshUsername !== "" || credentials.gitSshPassword !== ""){
-						if(typeof options.failedOperation !== "undefined"){
+					if(credentials.gitPrivateKey || credentials.gitSshUsername || credentials.gitSshPassword){
+						if(options.failedOperation !== undefined){
 							var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 							progress.removeOperation(options.failedOperation);
 						}
-						func({knownHosts: options.knownHosts, gitSshUsername: credentials.gitSshUsername, gitSshPassword: credentials.gitSshPassword, gitPrivateKey: credentials.gitPrivateKey, gitPassphrase: credentials.gitPassphrase}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						func({knownHosts: options.knownHosts, gitSshUsername: credentials.gitSshUsername, gitSshPassword: credentials.gitSshPassword, gitPrivateKey: credentials.gitPrivateKey, gitPassphrase: credentials.gitPassphrase});
 						return;
 					}
 					
@@ -136,8 +133,9 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 					sshCallback(jsonData);
 					return;
 				}
+				//$FALLTHROUGH$
 			default:
-				var display = [];
+				var display = {};
 				display.Severity = jsonData.Severity || "Error"; //$NON-NLS-0$
 				display.HTML = false;
 				display.Message = translateGitStatusMessages(jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message);
@@ -151,25 +149,26 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 			
 	};
 	
+	var getGitUrl = function(item) {
+		//TODO This should be somehow unified
+		if (item.RemoteBranch) return item.RemoteBranch.GitUrl;
+		if (item.LocalBranch) {
+			item = item.LocalBranch;
+		}
+		else if (item.GitUrl) { return item.GitUrl; }
+		else if (item.errorData) { return item.errorData.Url; }
+		else if (item.RemoteLocation){ return item.RemoteLocation[0].GitUrl; }
+		else if (item.toRef) { return item.toRef.RemoteLocation[0].GitUrl; }
+		return null;
+	};
+	
 	var getDefaultSshOptions = function(serviceRegistry, item, authParameters){
 		var def = new Deferred();
 		var sshService = serviceRegistry.getService("orion.net.ssh"); //$NON-NLS-0$
 		var sshUser =  authParameters && !authParameters.optionsRequested ? authParameters.valueFor("sshuser") : ""; //$NON-NLS-0$
 		var sshPassword = authParameters && !authParameters.optionsRequested ? authParameters.valueFor("sshpassword") : ""; //$NON-NLS-0$
 		
-		var repository;
-		
-		//TODO This should be somehow unified
-		var origItem = item;
-		if (item.LocalBranch && item.RemoteBranch) {
-			item = item.LocalBranch;
-		}
-		if (origItem.RemoteBranch && origItem.RemoteBranch.GitUrl) { repository = origItem.RemoteBranch.GitUrl; }
-		else if(item.GitUrl !== undefined) { repository = item.GitUrl; }
-		else if(item.errorData !== undefined) { repository = item.errorData.Url; }
-		else if(item.toRef !== undefined) { repository = item.toRef.RemoteLocation[0].GitUrl; }
-		else if(item.RemoteLocation !== undefined){ repository = item.RemoteLocation[0].GitUrl; }
-
+		var repository = getGitUrl(item);
 		if(!repository){
 			def.resolve({
 						knownHosts: "",
@@ -198,20 +197,8 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 	
 	var gatherSshCredentials = function(serviceRegistry, data, title, closeCallback){
 		var def = new Deferred();
-		var repository;
-		
-		//TODO This should be somehow unified
-		var item = data.items;
-		if (item.LocalBranch && item.RemoteBranch) {
-			item = item.LocalBranch;
-		}
-		if (data.items.RemoteBranch && data.items.RemoteBranch.GitUrl) { repository = data.items.RemoteBranch.GitUrl; }
-		else if(item.RemoteLocation !== undefined){ repository = item.RemoteLocation[0].GitUrl; }
-		else if(item.GitUrl !== undefined) { repository = item.GitUrl; }
-		else if(item.errorData !== undefined) { repository = item.errorData.Url; }
-		else if(item.toRef !== undefined) { repository = item.toRef.RemoteLocation[0].GitUrl; }
-
-		var sshService = serviceRegistry.getService("orion.net.ssh");
+		var repository = getGitUrl(data.items);
+		var sshService = serviceRegistry.getService("orion.net.ssh"); //$NON-NLS-0$
 		var repositoryURL = mGitUtil.parseSshGitUrl(repository);
 
 		var triggerCallback = function(sshObject){
@@ -244,7 +231,7 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 				
 				sshService.addKnownHost(hostCredentials).then( //$NON-NLS-1$ //$NON-NLS-0$
 					function(){
-						if(data.sshObject && (data.sshObject.gitSshUsername!=="" || data.sshObject.gitSshPassword!=="" || data.sshObject.gitPrivateKey!=="")){
+						if(data.sshObject && (data.sshObject.gitSshUsername || data.sshObject.gitSshPassword || data.sshObject.gitPrivateKey)){
 							triggerCallback({
 								gitSshUsername: "",
 								gitSshPassword: "",
@@ -270,22 +257,22 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 					}
 				);
 			} else {
-				if (typeof(closeCallback) === 'function') closeCallback();
+				if (typeof(closeCallback) === 'function') closeCallback(); //$NON-NLS-0$
 			}
 			return def;
 		}
 		
 		var failure = function(){
 			if (!data.parameters && !data.optionsRequested){
-				triggerCallback({gitSshUsername: "", gitSshPassword: "", gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				triggerCallback(data.sshObject || {gitSshUsername: "", gitSshPassword: "", gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				return;
 			}
 		
 			// try to gather creds from the slideout first
 			if (data.parameters && !data.optionsRequested) {
-				var sshUser = (data.parameters && data.parameters.valueFor("sshuser")) ? data.parameters.valueFor("sshuser") : data.errorData.User; //$NON-NLS-0$
-				var sshPassword = data.parameters ? data.parameters.valueFor("sshpassword") : "";	 //$NON-NLS-0$
-				var saveCredentials = (data.parameters && data.parameters.valueFor("saveCredentials")) ? data.parameters.valueFor("saveCredentials") : false;
+				var sshUser = (data.parameters && data.parameters.valueFor("sshuser")) || data.errorData.User; //$NON-NLS-0$
+				var sshPassword = data.parameters && data.parameters.valueFor("sshpassword") || "";	 //$NON-NLS-0$
+				var saveCredentials = data.parameters && data.parameters.valueFor("saveCredentials"); //$NON-NLS-0$
 				
 				var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
 				if(saveCredentials){
@@ -317,13 +304,13 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 			return;
 		};
 
-		if(data.sshObject && (data.sshObject.gitSshUsername!=="" || data.sshObject.gitSshPassword!=="" || data.sshObject.gitPrivateKey!=="")){
+		if(data.sshObject && (data.sshObject.gitSshUsername || data.sshObject.gitSshPassword || data.sshObject.gitPrivateKey)){
 			failure();
 		} else {
 			var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
 			gitPreferenceStorage.get(repository).then(
 				function(credentials){
-					if(credentials.gitPrivateKey !== "" || credentials.gitSshUsername !== "" || credentials.gitSshPassword !== ""){
+					if(credentials.gitPrivateKey || credentials.gitSshUsername || credentials.gitSshPassword){
 						triggerCallback(credentials);
 						return;
 					}
@@ -365,7 +352,6 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 						options.failedOperation = jsonData.failedOperation;
 					}
 					handleKnownHostsError(serviceRegistry, jsonData.JsonData, options, callee);
-					return;
 				} else if(jsonData.JsonData && jsonData.JsonData.Host){
 					if(jsonData.JsonData){
 						options.errordata = jsonData.JsonData;
@@ -374,10 +360,10 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 						options.failedOperation = jsonData.failedOperation;
 					}
 					handleSshAuthenticationError(serviceRegistry, jsonData.JsonData, options, callee, title);
-					return;
 				}
+				return;
 			default:
-				var display = [];
+				var display = {};
 				display.Severity = jsonData.Severity || "Error"; //$NON-NLS-0$
 				display.HTML = false;
 				display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
