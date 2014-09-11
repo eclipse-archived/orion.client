@@ -582,7 +582,6 @@ var exports = {};
 				}
 			};
 			
-			// HACK wrap logic into function
 			var fetchLogic = function(){
 				if (commandInvocation.parameters && commandInvocation.parameters.optionsRequested){
 					commandInvocation.parameters = null;
@@ -637,24 +636,7 @@ var exports = {};
 				);
 			};
 			
-			//TODO HACK remoteTrackingBranch does not provide git url - we have to collect manually
-			if(!commandInvocation.items.GitUrl){
-				// have to determine manually
-				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
-				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				progress.progress(gitService.getGitRemote(path), "Getting remote details " + name).then(
-					function(resp){
-						progress.progress(gitService.getGitClone(resp.CloneLocation), "Getting git repository information " + resp.Name).then(
-							function(resp){
-								commandInvocation.items.GitUrl = resp.Children[0].GitUrl;
-								fetchLogic();
-							}, displayErrorOnStatus
-						);
-					}, displayErrorOnStatus
-				);
-			} else {
-				fetchLogic();
-			}
+			fetchLogic();
 			return d;
 		};
 		var fetchVisibleWhen = function(item) {
