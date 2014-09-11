@@ -89,14 +89,6 @@ define([
 					});
 				}
 				
-				if (categories.showThemeSettings === undefined || categories.showThemeSettings) {
-					_self.settingsCategories.push({
-						id: "themeBuilder", //$NON-NLS-0$
-						textContent: messages["UI Theme"],
-						show: _self.showThemeBuilder
-					});
-				}
-
 				if (categories.showPluginSettings === undefined || categories.showPluginSettings) {
 					_self.settingsCategories.push({
 						id: "plugins", //$NON-NLS-0$
@@ -163,29 +155,6 @@ define([
 			} );
 			
 			window.setTimeout(function() {this.commandService.processURL(window.location.href);}.bind(this), 0);
-		},
-		
-		showThemeBuilder: function(id){
-		
-			this.selectCategory(id);
-			
-			this.updateToolbar(id);
-		
-			if(this.themeWidget) {
-				this.themeWidget.destroy();
-			}
-			
-			var containerTheme = new containerThemeData.ThemeData();
-			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, containerTheme);
-		
-			this.themeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: containerTheme, serviceRegistry: this.registry });
-			
-			lib.empty(this.table);
-
-			var themeNode = document.createElement('div'); //$NON-NLS-0$
-			this.table.appendChild(themeNode);
-
-			this.themeWidget.renderData( themeNode, 'INITIALIZE' );
 		},
 		
 		showEditor: function(id){

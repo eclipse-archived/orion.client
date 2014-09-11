@@ -190,7 +190,6 @@ define({
 	"Font Size": "Font Size:",
 	"New Theme Name:": "New Theme Name:",
 	"Font Size:": "Font Size:",
-	"UI Theme": "UI Theme",
 	"Navigation Bar": "Navigation Bar",
 	"Navigation Text": "Navigation Text",
 	"Search Box": "Search Box",
