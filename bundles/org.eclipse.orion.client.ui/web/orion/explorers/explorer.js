@@ -495,7 +495,7 @@ exports.ExplorerRenderer = (function() {
 			tableNode.onclick = function(evt) {
 				var target = evt.target;
 				var tableRow = target;
-				while (tableRow !== tableNode) {
+				while (tableRow && tableRow !== tableNode) {
 					if (tableRow._item) break;
 					tableRow = tableRow.parentNode;
 				}
