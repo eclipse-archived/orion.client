@@ -505,6 +505,7 @@ define({
 	"Path:" : "Path:",
 	"LocalChanges" : "Working Directory Changes",
 	"LocalChangesDetails" : "Working Directory Details",
+	"CompareChanges" : "Compare (${0} => ${1})",
 	"NoBranch" : "No Branch",
 	"NoActiveBranch" : "No Active Branch",
 	"NoRef" : "No Selected Reference",

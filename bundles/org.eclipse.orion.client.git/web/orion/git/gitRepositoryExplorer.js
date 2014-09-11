@@ -24,10 +24,11 @@ define([
 	'orion/PageUtil',
 	'orion/git/util',
 	'orion/fileUtils',
+	'orion/i18nUtil',
 	'orion/globalCommands',
 	'orion/git/gitCommands',
 	'orion/Deferred'
-], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mSection, mSelection, lib, URITemplate, PageUtil, util, mFileUtils, mGlobalCommands, mGitCommands, Deferred) {
+], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mSection, mSelection, lib, URITemplate, PageUtil, util, mFileUtils, i18nUtil, mGlobalCommands, mGitCommands, Deferred) {
 	
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 	
@@ -279,16 +280,21 @@ define([
 	
 	GitRepositoryExplorer.prototype.setSelectedChanges = function(changes) {
 		lib.empty(lib.node('table')); //$NON-NLS-0$
+		var title;
 		this.changes = changes = changes || (this.repository.status ? [this.repository.status] : []);
 		if (changes.length === 2) {
 			if (changes[0].Type === "Commit" && changes[1].Type === "Commit") { //$NON-NLS-1$ //$NON-NLS-0$
-				this.displayDiffs(this.repository, null, changes[0].DiffLocation, changes[1].Name);
+				title = i18nUtil.formatMessage(messages["CompareChanges"], util.shortenRefName(changes[0]), util.shortenRefName(changes[1]));
+				this.displayDiffs(this.repository, null, changes[0].DiffLocation, changes[1].Name, title);
 			} else {
-				this.displayDiffs(this.repository, null, changes[0].Type === "Status" ? changes[1].DiffLocation : changes[0].DiffLocation); //$NON-NLS-0$
+				var status = changes[0].Type === "Status"; //$NON-NLS-0$
+				title = i18nUtil.formatMessage(messages["CompareChanges"], util.shortenRefName(changes[status ? 1 : 0]), messages["Working Directory"]); 
+				this.displayDiffs(this.repository, null, status ? changes[1].DiffLocation : changes[0].DiffLocation, null, title);
 			}
 			return;
 		} else if (changes.length === 1 && this.changes[0] && this.changes[0].Type === "Commit") { //$NON-NLS-0$
-			this.displayDiffs(this.repository, this.changes[0]);
+			title = i18nUtil.formatMessage(messages[changes[0].Type + ' (${0})'], util.shortenRefName(changes[0])); //$NON-NLS-0$
+			this.displayDiffs(this.repository, changes[0], null, null, title);
 			this.statusDeferred = new Deferred().resolve(); //HACK
 			return;
 		}
@@ -353,7 +359,7 @@ define([
 		var repository = resource;
 		item.Name = messages["Git"];
 		item.Parents = [];
-		mGitCommands.updateNavTools(this.registry, this.commandService, this, "pageActions", "selectionTools", this.repository, this.pageNavId)
+		mGitCommands.updateNavTools(this.registry, this.commandService, this, "pageActions", "selectionTools", this.repository, this.pageNavId); //$NON-NLS-1$ //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({
 			task: task,
 			target: repository,
@@ -620,12 +626,12 @@ define([
 		}.bind(this));
 	};
 
-	GitRepositoryExplorer.prototype.displayDiffs = function(repository, commit, location, commitName) {
+	GitRepositoryExplorer.prototype.displayDiffs = function(repository, commit, location, commitName, title) {
 		this.destroyDiffs();
 		var parent = lib.node('table'); //$NON-NLS-0$
 		var section = this.diffsSection = new mSection.Section(parent, {
 			id : "diffSection", //$NON-NLS-0$
-			title : messages["CommitChanges"],
+			title : title || messages["CommitChanges"],
 			content : '<div id="diffNode"></div>', //$NON-NLS-0$
 			canHide : false,
 			noTwistie: true,

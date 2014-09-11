@@ -26,7 +26,6 @@ define([
 	'orion/git/gitConfigPreference',
 	'orion/git/widgets/ReviewRequestDialog',
 	'orion/git/widgets/CloneGitRepositoryDialog',
-	'orion/git/widgets/GitCredentialsDialog',
 	'orion/git/widgets/ApplyPatchDialog',
 	'orion/PageLinks',
 	'orion/URITemplate',
@@ -38,7 +37,7 @@ define([
 	'orion/URL-shim'
 ], function(
 	messages, require, EventTarget, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, mCompareUtils, GitPreferenceStorage,
-	GitConfigPreference, mReviewRequest, mCloneGitRepository, mGitCredentials, mApplyPatch, PageLinks, URITemplate, mGitCommonLogic, mGitPushLogic, 
+	GitConfigPreference, mReviewRequest, mCloneGitRepository, mApplyPatch, PageLinks, URITemplate, mGitCommonLogic, mGitPushLogic, 
 	mGitStashLogic, mGitCommitLogic, objects) {
 
 /**
