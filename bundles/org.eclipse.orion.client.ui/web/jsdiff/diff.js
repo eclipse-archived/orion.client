@@ -152,6 +152,9 @@ var JsDiff = (function() {
   };
   
   var CharDiff = new fbDiff();
+  CharDiff._equals = function(left, right) {
+    return left === right;
+  };
   
   var WordDiff = new fbDiff(false);
   WordDiff.tokenize = function(value) {
