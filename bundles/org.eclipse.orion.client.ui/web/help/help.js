@@ -103,6 +103,14 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		return itemCache[id];
 	}
 
+	function pageHash() {
+		/* Similar to PageUtil.hash, but handles the possibility of multiple hashes in the url */
+
+		/* See https://bugzilla.mozilla.org/show_bug.cgi?id=483304 */
+		var index = window.location.href.indexOf("#"); //$NON-NLS-0$
+		return index === -1 ? "" : window.location.href.substring(index);
+	}
+
 	function normalize(path, base) {
 		if (base) {
 			var index = base.lastIndexOf(SEPARATOR);
@@ -198,7 +206,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			},
 			getChildren: function(parentItem, onComplete) {
 				if (parentItem.children) {
-					onComplete(parentItem.children);
+					onComplete ? onComplete(parentItem.children) : null;
 					return;
 				}
 
@@ -206,7 +214,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 					this._getRootPages(parentItem).then(
 						function(children) {
 							parentItem.children = children;
-							onComplete(children);
+							onComplete ? onComplete(children) : null;
 						}
 					);
 					return;
@@ -217,7 +225,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 					var fileClient = getFileClient(parentItem);
 					if (!fileClient.fetchChildren) {
 						parentItem.children = [];
-						onComplete(parentItem.children);
+						onComplete ? onComplete(parentItem.children) : null;
 						return;
 					}
 					(progress ? progress.progress(fileClient.fetchChildren(location), "Retrieving children " + location) : fileClient.fetchChildren(location)).then( //$NON-NLS-0$
@@ -229,11 +237,11 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 								children.push(item);
 							}.bind(this));
 							parentItem.children = children;
-							onComplete(children);
+							onComplete ? onComplete(children) : null;
 						}.bind(this),
 						function(error) {
 							displayErrorStatus(error);
-							onComplete([]);
+							onComplete ? onComplete([]) : null;
 						}
 					);
 					return;
@@ -372,14 +380,16 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 				selectedItem.selected = false;
 				var element = lib.node(selectedItem.id);
 				if (element) {
-					element.classList.remove("selected"); //$NON-NLS-0$
+					element = lib.$(".navbar-item", element); //$NON-NLS-0$
+					element.classList.remove("navbar-item-selected"); //$NON-NLS-0$
 				}
 			}
 			selectedItem = item;
 			selectedItem.selected = true;
 			element = lib.node(item.id);
 			if (element) {
-				element.classList.add("selected"); //$NON-NLS-0$
+				element = lib.$(".navbar-item", element); //$NON-NLS-0$
+				element.classList.add("navbar-item-selected"); //$NON-NLS-0$
 			}
 		}
 
@@ -394,8 +404,12 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 	}
 
 	function clickListener(event) {
-		var pageHash = window.location.hash;
-		var target = new URL(event.target.href);
+		var href = event.target.getAttribute("href"); //$NON-NLS-0$
+		if (!href) {
+			var element = lib.$(".targetSelector", event.target); //$NON-NLS-0$
+			href = element.getAttribute("href"); //$NON-NLS-0$
+		}
+		var target = new URL(href, window.location.href);
 		var itemId = target.hash;
 
 		/*
@@ -410,7 +424,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			return;
 		}
 
-		if (itemId !== pageHash) {
+		if (itemId !== pageHash()) {
 			/* selection will be updated in the subsequent hashchange event */
 			return;
 		}
@@ -433,7 +447,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		result.target = "_top"; //$NON-NLS-0$
 		return result;
 	}
-	
+
 	function HelpExplorer(options) {
 		var renderer = new HelpRenderer({
 			registry: options.registry,
@@ -477,33 +491,21 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 				return null;
 			}
 
+			if (!item.children) {
+				helpModel.getChildren(item);
+			}
 			var td = document.createElement("td"); //$NON-NLS-0$
-			var div = document.createElement("div"); //$NON-NLS-0$
-			td.appendChild(div);
-			if (item.children) {
-				if (item.children.length) {
-					this.getExpandImage(tableRow, div);
-				}
-			} else {
-				helpModel.getChildren(item, function(children) {
-					if (children.length) {
-						var temp = document.createElement("div"); //$NON-NLS-0$
-						this.getExpandImage(tableRow, temp);
-						div.insertBefore(temp.lastElementChild, div.firstElementChild);
-					}
-				}.bind(this));
-			}
-
-			var link = createLink(item, tableRow.id, document);
-			div.appendChild(link);
-			link.addEventListener("click", clickListener); //$NON-NLS-0$
-
-			td.classList.add("treeTableRow"); //$NON-NLS-0$
-			td.classList.add("helpItem"); //$NON-NLS-0$
+			td.classList.add("navbar-item"); //$NON-NLS-0$
 			if (item.selected) {
-				tableRow.classList.add("selected"); //$NON-NLS-0$
+				td.classList.add("navbar-item-selected"); //$NON-NLS-0$
 			}
 
+			var span = document.createElement("span"); //$NON-NLS-0$
+			span.appendChild(document.createTextNode(item.title));
+			var href = TEMPLATE.expand({resource: tableRow.id});
+			span.setAttribute("href", href); //$NON-NLS-0$
+			span.classList.add("targetSelector"); //$NON-NLS-0$
+			td.appendChild(span);
 			return td;
 		}
 	});
@@ -874,6 +876,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 
 		var treeDiv = document.createElement("div"); //$NON-NLS-0$
 		treeDiv.style.overflow = "auto"; //$NON-NLS-0$
+		treeDiv.addEventListener("click", clickListener); //$NON-NLS-0$
 		sideBar.appendChild(treeDiv);
 
 		output = document.createElement("iframe"); //$NON-NLS-0$
@@ -902,23 +905,39 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		}).display();
 		
 		window.addEventListener("hashchange", function(/*event*/) { //$NON-NLS-0$
-			hashChanged(window.location.hash);
+			hashChanged(pageHash());
 		});
 
-		var hash = window.location.hash;
+		var hash = pageHash();
 		if (hash) {
 			hashChanged(hash);
 		} else {
-			var outputDocument = output.contentDocument;
-			var html = "<html><body>" + marked(messages.introMarkdown, markedOptions) + "</body></html>"; //$NON-NLS-1$ //$NON-NLS-0$
-			/* it's safe to use innerHTML here because the HTML content was generated from sanitized markdown */
-			outputDocument.childNodes[0].innerHTML = html;
-			var link = outputDocument.createElement("link"); //$NON-NLS-0$
-			link.href = require.toUrl("help/help.css"); //$NON-NLS-0$
-			link.rel = "stylesheet"; //$NON-NLS-0$
-			link.type = "text/css"; //$NON-NLS-0$
-			outputDocument.head.appendChild(link);
-			outputDocument.body.classList.add("orionMarkdown"); //$NON-NLS-0$
+			var doit = function() {
+				var outputDocument = output.contentDocument;
+				var html = marked(messages.introMarkdown, markedOptions);
+				var link = outputDocument.createElement("link"); //$NON-NLS-0$
+				link.href = require.toUrl("help/help.css"); //$NON-NLS-0$
+				link.rel = "stylesheet"; //$NON-NLS-0$
+				link.type = "text/css"; //$NON-NLS-0$
+				link.onload = function() {
+					link.onload = null;
+					/* it's safe to use innerHTML here because the HTML content was generated from sanitized markdown */
+					outputDocument.body.innerHTML = html;
+				};
+				outputDocument.body.classList.add("orionMarkdown"); //$NON-NLS-0$
+				outputDocument.head.appendChild(link);
+			};
+
+			if (output.contentDocument.readyState === "complete") { //$NON-NLS-0$
+				doit(); /* typical case on Chrome */
+			} else {
+				/* typical case on Firefox and IE */
+				output.contentWindow.onload = function() {
+					output.contentWindow.onload = null;
+					doit();
+				};
+			}
 		}
 	});
 });
+
