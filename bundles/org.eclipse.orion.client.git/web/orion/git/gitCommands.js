@@ -2049,7 +2049,8 @@ var exports = {};
 			id: "eclipse.orion.git.commitCommand", //$NON-NLS-0$
 			callback: function(data) {
 				commitCallback(data).then(function() {
-					refresh();
+					refresh(data);
+					dispatchModelEventOn({type: "modelChanged", action: "commit"}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen: function() {

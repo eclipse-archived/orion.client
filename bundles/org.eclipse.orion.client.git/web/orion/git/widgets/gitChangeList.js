@@ -342,7 +342,7 @@ define([
 			this.model.repository.status = "";
 			var deferred = new Deferred();
 			if (this.prefix === "all") { //$NON-NLS-0$
-				var parent = items[0].parent;
+				var parent = this.model.root;
 				var commitInfo = this.getCommitInfo();
 				var moreVisible = this.getMoreVisible();
 				var that = this;
