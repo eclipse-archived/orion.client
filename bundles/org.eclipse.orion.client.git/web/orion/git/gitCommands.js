@@ -103,13 +103,13 @@ var exports = {};
 		}
 	};
 
-	exports.handleKnownHostsError = mGitCommitLogic.handleKnownHostsError;
+	exports.handleKnownHostsError = mGitCommonLogic.handleKnownHostsError;
 
-	exports.handleSshAuthenticationError = mGitCommitLogic.handleSshAuthenticationError;
+	exports.handleSshAuthenticationError = mGitCommonLogic.handleSshAuthenticationError;
 
-	exports.getDefaultSshOptions = mGitCommitLogic.getDefaultSshOptions;
+	exports.getDefaultSshOptions = mGitCommonLogic.getDefaultSshOptions;
 
-	exports.handleProgressServiceResponse = mGitCommitLogic.handleProgressServiceResponse;
+	exports.handleProgressServiceResponse = mGitCommonLogic.handleProgressServiceResponse;
 
 	exports.gatherSshCredentials = mGitCommonLogic.gatherSshCredentials;
 
