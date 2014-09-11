@@ -582,6 +582,7 @@ exports.ExplorerRenderer = (function() {
 				check.addEventListener("click", function(evt) { //$NON-NLS-0$
 					var newValue = evt.target.checked ? false : true;
 					self.onCheck(tableRow, evt.target, newValue, true, false, item);
+					lib.stop(evt);
 				}, false);
 				return checkColumn;
 			}
