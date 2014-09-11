@@ -1901,6 +1901,7 @@ var exports = {};
 							display.HTML = false;
 							display.Message = message;
 							messageService.setProgressResult(display); //$NON-NLS-0$
+							dispatchModelEventOn({type: "modelChanged", action: "applyPatch"});  //$NON-NLS-1$  //$NON-NLS-0$
 							return;
 						}
 					} catch (e){

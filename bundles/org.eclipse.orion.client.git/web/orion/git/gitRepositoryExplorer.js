@@ -106,6 +106,11 @@ define([
 				}
 				that.changedItem();
 				break;
+			case "applyPatch": //$NON-NLS-0$
+				that.repository.status = null;
+				that.changes = null;
+				that.setSelectedChanges(that.changes);
+				break;
 			case "stage": //$NON-NLS-0$
 			case "unstage": //$NON-NLS-0$
 				break;
