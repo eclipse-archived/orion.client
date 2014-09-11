@@ -785,7 +785,6 @@ define([
 			if (lib.node(selectionNodeScope)) {
 				commandService.destroy(selectionNodeScope);
 			}
-//			commandService.registerCommandContribution(selectionNodeScope, "eclipse.compareGitCommits", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.renderCommands(selectionNodeScope, selectionNodeScope, items, this, "button"); //$NON-NLS-0$
 		},
 		updateCommands: function() {
