@@ -293,15 +293,15 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 				};
 
 				if (parentItem.content) {
-					onComplete(computeChildren(parentItem));
+					onComplete ? onComplete(computeChildren(parentItem)) : null;
 				} else {
 					retrieveContent(parentItem).then(
 						function(content) {
 							parentItem.content = content;
-							onComplete(computeChildren(parentItem));
+							onComplete ? onComplete(computeChildren(parentItem)) : null;
 						},
 						function(/*error*/) {
-							onComplete([]);
+							onComplete ? onComplete([]) : null;
 						}
 					);
 				}
