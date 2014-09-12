@@ -1360,10 +1360,13 @@ var exports = {};
 				var item = data.items;
 				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				if (data.parameters.valueFor("key") && data.parameters.valueFor("value")){ //$NON-NLS-1$ //$NON-NLS-0$
-					progress.progress(gitService.addCloneConfigurationProperty(item.ConfigLocation, data.parameters.valueFor("key"), data.parameters.valueFor("value")), "Setting configuration propetry: " + data.parameters.valueFor("key")).then( //$NON-NLS-1$ //$NON-NLS-0$
+				var key = data.parameters.valueFor("key"); //$NON-NLS-0$
+				var value = data.parameters.valueFor("value"); //$NON-NLS-0$
+				if (key && value){
+					var msg = i18nUtil.formatMessage(messages["AddingConfig"], key, value);
+					progress.progress(gitService.addCloneConfigurationProperty(item.ConfigLocation, key, value), msg).then(
 						function(){
-							refresh(data);
+							dispatchModelEventOn({type: "modelChanged", action: "addConfig", key: key, value: value}); //$NON-NLS-1$ //$NON-NLS-0$
 						}, displayErrorOnStatus
 					);
 				}
@@ -1390,10 +1393,13 @@ var exports = {};
 				var item = data.items;
 				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				if (data.parameters.valueFor("value")){ //$NON-NLS-0$
-					progress.progress(gitService.editCloneConfigurationProperty(item.Location, data.parameters.valueFor("value")), "Editing configuration property " + item.Key).then( //$NON-NLS-0$
+				var key = item.Key;
+				var value = data.parameters.valueFor("value"); //$NON-NLS-0$
+				if (value){ //$NON-NLS-0$
+					var msg = i18nUtil.formatMessage(messages["EditingConfig"], key, value);
+					progress.progress(gitService.editCloneConfigurationProperty(item.Location, value), msg).then(
 						function(){
-							refresh(data);
+							dispatchModelEventOn({type: "modelChanged", action: "editConfig", key: key, value: value}); //$NON-NLS-1$ //$NON-NLS-0$
 						}, displayErrorOnStatus
 					);
 				}
@@ -1413,10 +1419,13 @@ var exports = {};
 				var item = data.items;
 				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete ${0}?"], item.Key))) {
-					progress.progress(gitService.deleteCloneConfigurationProperty(item.Location), "Deleting configuration property " + item.Key).then(
+				var key = item.Key;
+				var value = item.Value;
+				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete ${0}?"], key))) {
+					var msg = i18nUtil.formatMessage(messages["DeletingConfig"], key);
+					progress.progress(gitService.deleteCloneConfigurationProperty(item.Location), msg).then(
 						function() {
-							refresh(data);
+							dispatchModelEventOn({type: "modelChanged", action: "deleteConfig", key: key, value: value}); //$NON-NLS-1$ //$NON-NLS-0$
 						}, displayErrorOnStatus
 					);
 				}

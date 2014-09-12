@@ -15,10 +15,11 @@ define([
 	'i18n!git/nls/gitmessages',
 	'orion/explorers/explorer',
 	'orion/Deferred',
+	'orion/git/gitCommands',
 	'orion/i18nUtil',
 	'orion/git/uiUtil',
 	'orion/objects'
-], function(messages, mExplorer, Deferred, i18nUtil, uiUtil, objects) {
+], function(messages, mExplorer, Deferred, mGitCommands, i18nUtil, uiUtil, objects) {
 
 	function GitConfigListModel(options) {
 		this.root = options.root;
@@ -101,9 +102,25 @@ define([
 		this.handleError = options.handleError;
 		this.progressService = options.progressService;
 		this.gitClient = options.gitClient;
+		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
+			switch (event.action) {
+			case "addConfig": //$NON-NLS-0$
+			case "editConfig": //$NON-NLS-0$
+			case "deleteConfig": //$NON-NLS-0$
+				this.changedItem();
+				break;
+			}
+		}.bind(this));
 	}
 	GitConfigListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitConfigListExplorer.prototype, /** @lends orion.git.GitConfigListExplorer.prototype */ {
+		destroy: function() {
+			if (this._modelListener) {
+				mGitCommands.getModelEventDispatcher().removeEventListener("modelChanged", this._modelListener); //$NON-NLS-0$
+				this._modelListener = null;
+			}
+			mExplorer.Explorer.prototype.destroy.call(this);
+		},
 		changedItem: function(item) {
 			var deferred = new Deferred();
 			var model = this.model;
