@@ -32,7 +32,7 @@ define([
 	
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 	
-	function compare(s1, s2) {
+	function compare(s1, s2, props) {
 		if (s1 === s2) { return true; }
 		if (s1 && !s2 || !s1 && s2) { return false; }
 		if ((s1 && s1.constructor === String) || (s2 && s2.constructor === String)) { return false; }
@@ -48,16 +48,22 @@ define([
 		}
 		if (!(s1 instanceof Object) || !(s2 instanceof Object)) { return false; }
 		var p;
-		for (p in s1) {
+		for (p in (props || s1)) {
 			if (s1.hasOwnProperty(p)) {
 				if (!s2.hasOwnProperty(p)) { return false; }
 				if (!compare(s1[p], s2[p])) {return false; }
 			}
 		}
-		for (p in s2) {
-			if (!s1.hasOwnProperty(p)) { return false; }
+		if (!props) {
+			for (p in s2) {
+				if (!s1.hasOwnProperty(p)) { return false; }
+			}
 		}
 		return true;
+	}
+	
+	function compareLocation(s1, s2) {
+		return compare(s1, s2, {Location: ""});
 	}
 
 	/**
@@ -262,7 +268,7 @@ define([
 			repository = this.repositoriesNavigator.model.repositories[0];
 		}
 		if (!force) {
-			if (compare(this.repository, repository)) return;
+			if (compareLocation(this.repository, repository)) return;
 		}
 		this.repository = repository;
 		this.initTitleBar(repository || {});
@@ -411,7 +417,7 @@ define([
 		var selection = this.repositoriesSelection = new mSelection.Selection(this.registry, "orion.selection.repo"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 			var selected = e.selection;
-			if (!selected || compare(this.repository, selected)) return;
+			if (!selected || compareLocation(this.repository, selected)) return;
 			this.changes = this.reference = this.log = null;
 			section.setHidden(true);
 			this.setSelectedRepository(selected);
@@ -461,7 +467,7 @@ define([
 		var selection = this.branchesSelection = new mSelection.Selection(this.registry, "orion.selection.ref"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 			var selected = e.selection;
-			if (!selected || compare(this.reference, selected)) return;
+			if (!selected || compareLocation(this.reference, selected)) return;
 			switch (selected.Type) {
 				case "Branch": //$NON-NLS-0$
 				case "RemoteTrackingBranch": //$NON-NLS-0$
@@ -592,7 +598,7 @@ define([
 		var selection = this.commitsSelection = new mSelection.Selection(this.registry, "orion.selection.commit"); //$NON-NLS-0$
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			var selected = event.selections;
-			if (compare(this.changes, selected)) return;
+			if (compareLocation(this.changes, selected)) return;
 			this.setSelectedChanges(selected);
 //			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
 		}.bind(this));
@@ -620,6 +626,9 @@ define([
 		this.autoFetch = false;
 		return this.statusDeferred.then(function() {
 			return explorer.display().then(function() {
+				if (!this.reference) {
+					this.reference = this.commitsNavigator.model.getTargetReference();
+				}
 				if (this.changes && this.changes.length) {
 					this.changes.forEach(function(c) {
 						explorer.select(c);
