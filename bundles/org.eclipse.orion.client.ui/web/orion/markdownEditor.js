@@ -1056,17 +1056,6 @@ define([
 		}.bind(this);
 
 		this._settingsListener = function(e) {
-			var orientation = e.newSettings.splitOrientation === "horizontal" ? mSplitter.ORIENTATION_HORIZONTAL : mSplitter.ORIENTATION_VERTICAL; //$NON-NLS-0$
-			this._splitter.setOrientation(orientation);
-			toggleOrientationCommand.checked = orientation === mSplitter.ORIENTATION_HORIZONTAL;
-
-			/*
-			 * If this is the initial retrieval of these settings then the root
-			 * and splitter elements likely need to have their visibilities updated.
-			 */
-			this._rootDiv.style.visibility = "visible"; //$NON-NLS-0$
-			this._splitterDiv.style.visibility = "visible"; //$NON-NLS-0$
-
 			this._styler.setTabsVisible(e.newSettings.showTabs);
 			this._styler.setSpacesVisible(e.newSettings.showSpaces);
 		}.bind(this);
@@ -1226,22 +1215,15 @@ define([
 			this._previewWrapperDiv.appendChild(this._previewDiv);
 
 			this._editorView.addEventListener("Settings", this._settingsListener); //$NON-NLS-0$
-			var settings = this._editorView.getSettings();
 
 			this._splitter = new mSplitter.Splitter({
 				node: this._splitterDiv,
 				sidePanel: this._editorDiv,
 				mainPanel: this._previewWrapperDiv,
 				toggle: true,
-				closeReversely: true,
-				vertical: settings && settings.splitOrientation === "vertical" //$NON-NLS-0$
+				closeReversely: true
 			});
-
-			if (!settings) {
-				/* hide the content until the split orientation setting has been retrieved */
-				this._rootDiv.style.visibility = "hidden"; //$NON-NLS-0$
-				this._splitterDiv.style.visibility = "hidden"; //$NON-NLS-0$
-			}
+			toggleOrientationCommand.checked = this._splitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL;
 
 			BaseEditor.prototype.install.call(this);
 		},
