@@ -21,10 +21,11 @@ define([
 	'orion/webui/tooltip',
 	'orion/selection',
 	'orion/webui/littlelib',
+	'orion/git/gitCommands',
 	'orion/commands',
 	'orion/git/logic/gitCommit',
 	'orion/objects'
-], function(messages, i18nUtil, Deferred, mExplorer, mGitUIUtil, mGitUtil, mTooltip, mSelection , lib, mCommands, gitCommit, objects) {
+], function(messages, i18nUtil, Deferred, mExplorer, mGitUIUtil, mGitUtil, mTooltip, mSelection , lib, mGitCommands, mCommands, gitCommit, objects) {
 	
 	var interestedUnstagedGroup = [ "Missing", "Modified", "Untracked", "Conflicting" ]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var interestedStagedGroup = [ "Added", "Changed", "Removed" ]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -335,6 +336,17 @@ define([
 		if (this.prefix !== "all") { //$NON-NLS-0$
 			this.updateCommands();
 		}
+		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
+			switch (event.action) {
+			case "commit": //$NON-NLS-0$
+			case "reset": //$NON-NLS-0$
+			case "applyPatch":  //$NON-NLS-0$
+			case "stage": //$NON-NLS-0$
+			case "unstage": //$NON-NLS-0$
+				this.changedItem(event.items);
+				break;
+			}
+		}.bind(this));
 	}
 	GitChangeListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitChangeListExplorer.prototype, /** @lends orion.git.GitChangeListExplorer.prototype */ {
@@ -364,10 +376,15 @@ define([
 			return deferred;
 		},
 		destroy: function() {
+			if (this._modelListener) {
+				mGitCommands.getModelEventDispatcher().removeEventListener("modelChanged", this._modelListener); //$NON-NLS-0$
+				this._modelListener = null;
+			}
 			if (this._selectionListener) {
 				this.selection.removeEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
 				this._selectionListener = null;
 			}
+			mExplorer.Explorer.prototype.destroy.call(this);
 		},
 		display: function() {
 			var that = this;

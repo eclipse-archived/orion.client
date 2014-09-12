@@ -388,6 +388,7 @@ define([
 		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
 			switch (event.action) {
 			case "commit": //$NON-NLS-0$
+			case "reset": //$NON-NLS-0$
 				this.changedItem();
 				break;
 			case "applyPatch":  //$NON-NLS-0$

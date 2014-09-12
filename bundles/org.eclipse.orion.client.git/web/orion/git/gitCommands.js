@@ -1031,20 +1031,20 @@ var exports = {};
 				}
 			}
 				
-			var item = data.items;
 			if(confirm(i18nUtil.formatMessage(message, refId))) { //$NON-NLS-0$
 				var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				var deferred = progress.progress(service.resetIndex(location, refId, mode), "Resetting git index for " + refId);
+				var msg = i18nUtil.formatMessage(messages["Resetting git index for ${0}"], refId);
+				var deferred = progress.progress(service.resetIndex(location, refId, mode), msg);
 				progressService.createProgressMonitor(deferred, messages["Resetting index..."]);
 				deferred.then(
-					function(result){
+					function(){
 						var display = {};
 						display.Severity = "Info"; //$NON-NLS-0$
 						display.HTML = false;
-						display.Message = "Ok"; //$NON-NLS-0$
-						explorer.changedItem(item);
+						display.Message = messages["OK"];
+						dispatchModelEventOn({type: "modelChanged", action: "reset", mode: mode}); //$NON-NLS-1$ //$NON-NLS-0$
 						progressService.setProgressResult(display);
 					}, function (error){
 						var display = {};
@@ -1056,7 +1056,7 @@ var exports = {};
 				);
 			}
 		};
-		
+
 		var resetIndexCommand = new mCommands.Command({
 			name : messages['Reset'],
 			tooltip: messages["Reset your active branch to the state of the selected ref. Discard all staged and unstaged changes."],
@@ -1139,7 +1139,6 @@ var exports = {};
 		commandService.addCommand(removeTagCommand);
 		
 		var notificationParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('reviewer', 'text', messages["Reviewer name"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
-		
 
 		var askForReviewCommand = new mCommands.Command({
 			name : messages["Ask for review"],
@@ -1820,7 +1819,7 @@ var exports = {};
 									function(){
 										alreadyDeleted++;
 										if(alreadyDeleted >= item.length){
-											dispatchModelEventOn({type: "modelChanged", action: "deleteClone", items: item}); //$NON-NLS-1$ //$NON-NLS-0$
+										dispatchModelEventOn({type: "modelChanged", action: "deleteClone", items: item}); //$NON-NLS-1$ //$NON-NLS-0$
 										}
 									}, displayErrorOnStatus);
 						}
@@ -1952,8 +1951,7 @@ var exports = {};
 						messages["Staging changes"]);
 					deferred.then(
 						function(){
-							refresh(data, items);
-							dispatchModelEventOn({type: "modelChanged", action: "stage"}); //$NON-NLS-1$ //$NON-NLS-0$
+							dispatchModelEventOn({type: "modelChanged", action: "stage", items: items}); //$NON-NLS-1$ //$NON-NLS-0$
 						}, displayErrorOnStatus
 					);
 				} else {
@@ -1968,8 +1966,7 @@ var exports = {};
 						messages["Staging changes"]);
 					deferred.then( //$NON-NLS-0$
 						function(){
-							refresh(data, items);
-							dispatchModelEventOn({type: "modelChanged", action: "stage"}); //$NON-NLS-1$ //$NON-NLS-0$
+							dispatchModelEventOn({type: "modelChanged", action: "stage", items: items}); //$NON-NLS-1$ //$NON-NLS-0$
 						}, displayErrorOnStatus
 					);
 				}			
@@ -2023,8 +2020,7 @@ var exports = {};
 			callback: function(data) {
 				doUnstage(data).then(
 					function(items){
-						refresh(data, items);
-						dispatchModelEventOn({type: "modelChanged", action: "unstage"}); //$NON-NLS-1$ //$NON-NLS-0$
+						dispatchModelEventOn({type: "modelChanged", action: "unstage", items: items}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus
 				);
 			},
@@ -2049,7 +2045,6 @@ var exports = {};
 			id: "eclipse.orion.git.commitCommand", //$NON-NLS-0$
 			callback: function(data) {
 				commitCallback(data).then(function() {
-					refresh(data);
 					dispatchModelEventOn({type: "modelChanged", action: "commit"}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
