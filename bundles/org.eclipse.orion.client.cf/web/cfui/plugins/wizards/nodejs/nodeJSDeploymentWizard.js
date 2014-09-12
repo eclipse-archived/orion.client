@@ -313,6 +313,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    			
 		    			var messageDiv = document.getElementById("planMessage");
 			    		messageDiv.innerHTML = message;
+		    		}, function(error){
+		    			postError(error);
 		    		});
 		    	},
 		    	validate: function(setValid){
@@ -805,6 +807,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				configAdmin.getConfiguration("app.settings").then(
 					function(config) {
 						 // get target and app, then do push and open application
+						
 						getTarget(cFService, config, preferences).then(
 							function(targetResp){
 								target = targetResp;
