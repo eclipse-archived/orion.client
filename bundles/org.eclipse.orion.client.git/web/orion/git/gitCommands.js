@@ -2488,7 +2488,7 @@ var exports = {};
 			id : "eclipse.orion.git.createStash", //$NON-NLS-0$
 			callback : function(data){
 				stashLogic.stashAll(data).then(function(){
-					refresh();
+					dispatchModelEventOn({type: "modelChanged", action: "stash"}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function(error){
 					displayErrorOnStatus(error);
 				});
@@ -2506,7 +2506,7 @@ var exports = {};
 			id : "eclipse.orion.git.dropStash", //$NON-NLS-0$
 			callback : function(data){
 				stashLogic.drop(data).then(function(){
-					refresh(data);
+					dispatchModelEventOn({type: "modelChanged", action: "dropStash"}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function(error){
 					displayErrorOnStatus(error);
 				});
@@ -2523,7 +2523,7 @@ var exports = {};
 			id : "eclipse.orion.git.applyStash", //$NON-NLS-0$
 			callback : function(data){
 				stashLogic.apply(data).then(function(){
-					refresh();
+					dispatchModelEventOn({type: "modelChanged", action: "applyStash"}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function(error){
 					displayErrorOnStatus(error);
 				});
@@ -2542,7 +2542,7 @@ var exports = {};
 			id : "eclipse.orion.git.popStash", //$NON-NLS-0$
 			callback : function(data){
 				stashLogic.pop(data).then(function(){
-					refresh();
+					dispatchModelEventOn({type: "modelChanged", action: "popStash"}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function(error){
 					displayErrorOnStatus(error);
 				});

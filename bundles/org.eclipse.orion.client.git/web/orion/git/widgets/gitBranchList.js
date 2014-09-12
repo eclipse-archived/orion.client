@@ -96,10 +96,10 @@ define([
 					var remotes = resp.Children;
 					remotes.unshift({Type: "LocalRoot", Name: messages["Local"]}); //$NON-NLS-0$
 					if (that.showTags) {
-						remotes.push({Type: "TagRoot", Name: messages["tags"]}); //$NON-NLS-0$
+						remotes.push(that.tagRoot = {Type: "TagRoot", Name: messages["tags"]}); //$NON-NLS-0$
 					}
 					if (that.showStashes) {
-						remotes.push({Type: "StashRoot", Name: messages["stashes"]}); //$NON-NLS-0$
+						remotes.push(that.stashRoot = {Type: "StashRoot", Name: messages["stashes"]}); //$NON-NLS-0$
 					}
 					onComplete(that.processChildren(parentItem, remotes));
 				}, function(error){
@@ -181,10 +181,13 @@ define([
 		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
 			switch (event.action) {
 			case "addTag": //$NON-NLS-0$
-				this.changedItem();
-				break;
 			case "removeTag": //$NON-NLS-0$
-				this.changedItem(event.tag.parent);
+				this.changedItem(this.model.tagRoot);
+				break;
+			case "stash": //$NON-NLS-0$
+			case "dropStash": //$NON-NLS-0$
+			case "popStash": //$NON-NLS-0$
+				this.changedItem(this.model.stashRoot);
 				break;
 			}
 		}.bind(this));

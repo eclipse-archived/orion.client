@@ -111,18 +111,6 @@ define([
 				that.changes = null;
 				that.setSelectedChanges(that.changes);
 				break;
-			case "addTag": //$NON-NLS-0$
-			case "removeTag": //$NON-NLS-0$
-			case "stage": //$NON-NLS-0$
-			case "unstage": //$NON-NLS-0$
-			case "commit": //$NON-NLS-0$
-			case "reset": //$NON-NLS-0$
-			case "checkoutFiles": //$NON-NLS-0$
-				break;
-			case "cherrypick": //$NON-NLS-0$
-			default:
-				that.changedItem();
-				break;
 			}
 		});
 	}

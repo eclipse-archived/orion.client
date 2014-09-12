@@ -406,6 +406,9 @@ define([
 			case "applyPatch":  //$NON-NLS-0$
 			case "stage": //$NON-NLS-0$
 			case "unstage": //$NON-NLS-0$
+			case "stash": //$NON-NLS-0$
+			case "popStash": //$NON-NLS-0$
+			case "applyStash": //$NON-NLS-0$
 				Deferred.when(this.model.root.repository.status, function(status) {
 					this.myTree.redraw(status);
 				}.bind(this));
