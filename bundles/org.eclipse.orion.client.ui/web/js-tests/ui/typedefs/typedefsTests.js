@@ -27,7 +27,7 @@ define([
 		};
 	}
 
-	describe("Test typedefs", function() {
+	describe("Typedefs", function() {
 		it("getTypeDef", function() {
 			var result = setup(), serviceRegistry = result.serviceRegistry, typeDefRegistry = result.typeDefRegistry;
 			serviceRegistry.registerService("orion.core.typedef", {}, { id: "foo", defs: "myTypeDef" });
@@ -96,14 +96,17 @@ define([
 				return new Deferred().resolve();
 			});
 		});
-		it.skip("serviceRegistrationRequiredProperties", function() {
-			var result = setup(), serviceRegistry = result.serviceRegistry;
-			assert.throws(function() {
-				serviceRegistry.registerService("orion.core.typedef", {}, { id: "foo" });
-			}, null, "Missing 'defs' should throw");
-			assert.throws(function() {
-				serviceRegistry.registerService("orion.core.typedef", {}, { defs: "myTypeDef" });
-			}, null, "Missing 'id' should throw");
+		it("serviceRegistrationRequiredProperties", function() {
+			var result = setup(), serviceRegistry = result.serviceRegistry, typeDefRegistry = result.typeDefRegistry;
+
+			// These registrations should both be rejected due to missing properties. Ideally we would use
+			// assert.throws() here, but errors are are swallowed by the ServiceRegistry's internal EventDispatcher.
+			serviceRegistry.registerService("orion.core.typedef", {}, { id: "foo" });
+			serviceRegistry.registerService("orion.core.typedef", {}, { defs: "myTypeDef" });
+			
+			assert.equal(typeDefRegistry.getTypeDef("foo"), null);
+			var all = typeDefRegistry.getAllProperties();
+			assert.deepEqual(Object.keys(all), []);
 		});
 	});
 });

@@ -14,7 +14,7 @@ define(["require", "orion/Deferred", "orion/bootstrap", "chai/chai", "orion/i18n
 	var I18N_PLUGIN = "orion/i18n";
 	var locale = typeof navigator === "undefined" ? "root" : (navigator.language || navigator.userLanguage || "root").toLowerCase();
 
-	describe("Test I18n", function() {
+	describe("I18n", function() {
 		it("I18n", function() {
 			var name = "test/i18n/nls/message1";
 			define(name, [], {
@@ -96,137 +96,148 @@ define(["require", "orion/Deferred", "orion/bootstrap", "chai/chai", "orion/i18n
 				assert.equal(messages.test, "test-" + locale);
 			});
 		});
-	
-		it.skip("I18nMasterService", function() {
-			var name = "test/i18n/nls/message4";
-	
-			var d = new Deferred();
-			bootstrap.startup().then(function(core) {
-				core.serviceRegistry.registerService("orion.i18n.message", {
-					getMessageBundle: function() {
-						return {
-							root: {
-								test: "test"
-							}
-						};
-					}
-				}, {
-					name: name
-				});
-	
-				i18nUtil.getMessageBundle(name).then(function(messages) {
-					d.resolve(messages);
-				});
-			});
-			return d.then(function(messages) {
-				assert.equal(messages.test, "test");
-			});
-		});
-	
-		it.skip("I18nMasterAndAdditionalService", function() {
-			var name = "test/i18n/nls/message5";
-			var serviceName = "test/i18n/nls/" + locale + "/message5";
-	
-			var d = new Deferred();
-			bootstrap.startup().then(function(core) {
-				core.serviceRegistry.registerService("orion.i18n.message", {
-					getMessageBundle: function() {
-						return {
-							root: {
-								test: "test"
-							}
-						};
-					}
-				}, {
-					name: name
-				});
-	
-				core.serviceRegistry.registerService("orion.i18n.message", {
-					getMessageBundle: function() {
-						return {
-							test: "test-" + locale
-						};
-					}
-				}, {
-					name: serviceName
-				});
-	
-				i18nUtil.getMessageBundle(name).then(function(messages) {
-					d.resolve(messages);
-				});
-			});
-			return d.then(function(messages) {
-				assert.equal(messages.test, "test-" + locale);
-			});
-		});
-	
-		it.skip("I18nNoMasterAndAdditionalService", function() {
-			var name = "test/i18n/nls/message6";
-			var serviceName = "test/i18n/nls/" + locale + "/message6";
-	
-			var d = new Deferred();
-			bootstrap.startup().then(function(core) {
-	
-				core.serviceRegistry.registerService("orion.i18n.message", {
-					getMessageBundle: function() {
-						return {
-							test: "test-" + locale
-						};
-					}
-				}, {
-					name: serviceName
-				});
-	
-				i18nUtil.getMessageBundle(name).then(function(messages) {
-					d.resolve(messages);
-				});
-			});
-			return d.then(function(messages) {
-				assert.equal(messages.test, "test-" + locale);
-			});
-		});
+
+		/**
+		 * Master tests are skipped.
+		 * 
+		 * For i18nUtil to load a master bundle "test/i18n/nls/messageN" it waits for the locale bundle
+		 * "test/i18n/nls/{locale}/messageN" to time out first. Waiting on that timeout would slow down the
+		 * test suite unacceptably.
+		 * 
+		 * Instead i18nUtil should be configured with a mock AMD loader.
+		 */
+		describe.skip("Master service", function() {
+			it("I18nMasterService", function() {
+				var name = "test/i18n/nls/message4";
 		
-		it.skip("I18nNoMasterAndRootService", function() {
-			var name = "test/i18n/nls/message7";
-			var serviceName = "test/i18n/nls/" + "root" + "/message7";
-	
-			var d = new Deferred();
-			bootstrap.startup().then(function(core) {
-	
-				core.serviceRegistry.registerService("orion.i18n.message", {
-					getMessageBundle: function() {
-						return {
-							test: "test-" + locale
-						};
-					}
-				}, {
-					name: serviceName
-				});
-	
-				i18nUtil.getMessageBundle(name).then(function(messages) {
-					d.resolve(messages);
-				});
-			});
-			return d.then(function(messages) {
-				assert.equal(messages.test, "test-" + locale);
-			});
-		});
+				var d = new Deferred();
+				bootstrap.startup().then(function(core) {
+					core.serviceRegistry.registerService("orion.i18n.message", {
+						getMessageBundle: function() {
+							return {
+								root: {
+									test: "test"
+								}
+							};
+						}
+					}, {
+						name: name
+					});
 		
-		it.skip("I18nMasterAndAdditionalServiceFromPlugin", function() {
-			var name = "test/i18n/nls/message8";
-	
-			var d = new Deferred();
-			bootstrap.startup().then(function(core) {
-				core.pluginRegistry.installPlugin("i18n/testPlugin.html").then(function(plugin) {
 					i18nUtil.getMessageBundle(name).then(function(messages) {
-						plugin.uninstall();
 						d.resolve(messages);
 					});
 				});
+				return d.then(function(messages) {
+					assert.equal(messages.test, "test");
+				});
 			});
-			return d.then(function(messages) {
-				assert.equal(messages.test, "test-" + locale);
+		
+			it("I18nMasterAndAdditionalService", function() {
+				var name = "test/i18n/nls/message5";
+				var serviceName = "test/i18n/nls/" + locale + "/message5";
+		
+				var d = new Deferred();
+				bootstrap.startup().then(function(core) {
+					core.serviceRegistry.registerService("orion.i18n.message", {
+						getMessageBundle: function() {
+							return {
+								root: {
+									test: "test"
+								}
+							};
+						}
+					}, {
+						name: name
+					});
+		
+					core.serviceRegistry.registerService("orion.i18n.message", {
+						getMessageBundle: function() {
+							return {
+								test: "test-" + locale
+							};
+						}
+					}, {
+						name: serviceName
+					});
+		
+					i18nUtil.getMessageBundle(name).then(function(messages) {
+						d.resolve(messages);
+					});
+				});
+				return d.then(function(messages) {
+					assert.equal(messages.test, "test-" + locale);
+				});
 			});
-		});
+		
+			it("I18nNoMasterAndAdditionalService", function() {
+				var name = "test/i18n/nls/message6";
+				var serviceName = "test/i18n/nls/" + locale + "/message6";
+		
+				var d = new Deferred();
+				bootstrap.startup().then(function(core) {
+		
+					core.serviceRegistry.registerService("orion.i18n.message", {
+						getMessageBundle: function() {
+							return {
+								test: "test-" + locale
+							};
+						}
+					}, {
+						name: serviceName
+					});
+		
+					i18nUtil.getMessageBundle(name).then(function(messages) {
+						d.resolve(messages);
+					});
+				});
+				return d.then(function(messages) {
+					assert.equal(messages.test, "test-" + locale);
+				});
+			});
+			
+			it("I18nNoMasterAndRootService", function() {
+				var name = "test/i18n/nls/message7";
+				var serviceName = "test/i18n/nls/" + "root" + "/message7";
+		
+				var d = new Deferred();
+				bootstrap.startup().then(function(core) {
+		
+					core.serviceRegistry.registerService("orion.i18n.message", {
+						getMessageBundle: function() {
+							return {
+								test: "test-" + locale
+							};
+						}
+					}, {
+						name: serviceName
+					});
+		
+					i18nUtil.getMessageBundle(name).then(function(messages) {
+						d.resolve(messages);
+					});
+				});
+				return d.then(function(messages) {
+					assert.equal(messages.test, "test-" + locale);
+				});
+			});
+			
+			it("I18nMasterAndAdditionalServiceFromPlugin", function() {
+				var name = "test/i18n/nls/message8";
+		
+				var d = new Deferred();
+				bootstrap.startup().then(function(core) {
+					core.pluginRegistry.installPlugin("i18n/testPlugin.html").then(function(plugin) {
+						i18nUtil.getMessageBundle(name).then(function(messages) {
+							plugin.uninstall();
+							d.resolve(messages);
+						});
+					});
+				});
+				return d.then(function(messages) {
+					assert.equal(messages.test, "test-" + locale);
+				});
+			});
+		}); // Master Service
 	});
 });
