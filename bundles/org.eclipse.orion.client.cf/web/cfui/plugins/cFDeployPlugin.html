@@ -17,31 +17,33 @@
 		  }
 		});
 
-		require(["cfui/plugins/cFDeployService", "../../orion/plugin.js"], function(cFDeployService, PluginProvider){
-			var deployService = new cFDeployService.DeployService();
+		require(["orion/Deferred", "cfui/plugins/cFDeployService", "../../orion/plugin.js"], function(Deferred, cFDeployService, PluginProvider){
 			
-			var headers = {
-				name: "Cloud Foundry Deploy",
-				version: "1.0",
-				description: "This plugin integrates with Cloud Foundry."
-			};
-		
-			var provider = new PluginProvider(headers);
-			
-			provider.registerServiceProvider("orion.project.deploy",
-				deployService,
-				{
-					id: "org.eclipse.orion.client.cf.deploy",
-					deployTypes: ["Cloud Foundry"],
-					nls: "cfui/nls/messages",
-					nameKey: "deploy.cf",
-					tooltipKey: "deploy.cf.tooltip",
-					validationProperties: [{source: "NoShow" }],
-					logLocationTemplate: "{+OrionHome}/cfui/logs.html#{Name,Target*}",
-					priorityForDefault: 9
-				});
+			cFDeployService.then(function(Service){
+				var deployService = new Service.DeployService();
+				var headers = {
+					name: "Cloud Foundry Deploy",
+					version: "1.0",
+					description: "This plugin integrates with Cloud Foundry."
+				};
 				
-			provider.connect();
+				var provider = new PluginProvider(headers);
+					
+				provider.registerServiceProvider("orion.project.deploy",
+					deployService,
+					{
+						id: "org.eclipse.orion.client.cf.deploy",
+						deployTypes: ["Cloud Foundry"],
+						nls: "cfui/nls/messages",
+						nameKey: "deploy.cf",
+						tooltipKey: "deploy.cf.tooltip",
+						validationProperties: [{source: "NoShow" }],
+						logLocationTemplate: "{+OrionHome}/cfui/logs.html#{Name,Target*}",
+						priorityForDefault: 9
+					});
+						
+				provider.connect();
+			});
 		});
 		</script>
 </head>

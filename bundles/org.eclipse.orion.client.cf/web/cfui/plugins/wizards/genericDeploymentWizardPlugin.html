@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2014." >
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script src="../../../requirejs/require.js"></script>
+	<script type="text/javascript">
+		/*eslint-env browser, amd*/
+		require({
+		  baseUrl: '../../../',
+		  // set the paths to our library packages
+		  packages: [],
+		  paths: {
+		    text: 'requirejs/text',
+		    i18n: 'requirejs/i18n',
+		    domReady: 'requirejs/domReady'
+		  }
+		});
+
+		require(["../../../orion/plugin.js"], function(PluginProvider){
+			
+			var headers = {
+				name : "Cloud Foundry Generic Deployment Wizard",
+				version : "1.0",
+				description : "This plugin provides a generic deployment wizard integrating with Cloud Foundry."
+			};
+			
+			function GenericDeploymentWizard(){};
+			GenericDeploymentWizard.prototype = {
+				constructor : GenericDeploymentWizard,
+				
+				getInitializationParameters : function(){
+					return {
+						LocationTemplate : "{+OrionHome}/cfui/plugins/wizards/generic/genericDeploymentWizard.html",
+						Width : "400px",
+						Height : "350px"
+					};
+				}
+			};
+			
+			var genericDeploymentWizard = new GenericDeploymentWizard();
+			
+			var provider = new PluginProvider(headers);
+			provider.registerServiceProvider("orion.project.deploy.wizard",
+				genericDeploymentWizard, {
+					id : "org.eclipse.orion.client.cf.wizard.generic"
+				});
+			
+			provider.connect();
+		});
+		</script>
+</head>
+<body>
+</body>
+</html>

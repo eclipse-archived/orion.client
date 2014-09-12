@@ -1,0 +1,34 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="genericDeploymentWizard.css" />
+	<script src="../../../../requirejs/require.js"></script>
+	<script type="text/javascript">
+	/*global require*/
+		require({
+		  baseUrl: '../../../../',
+		  packages: [],
+		  paths: {
+			i18n: 'requirejs/i18n',
+			domReady: 'requirejs/domReady',
+			text: 'requirejs/text'
+		  }
+		});
+		require(["cfui/plugins/wizards/generic/genericDeploymentWizard"]);
+	</script>
+</head>
+<body id="deployBody" class="dialogFrame">
+
+	<div class="dialogTitle" id="titleBar">
+		<span id="title" class="dialogTitleText layoutLeft">
+		</span>
+		<button aria-label="Close" class="dismissButton layoutRight core-sprite-close imageSprite closeDialog" id="closeDialog">
+		</button>
+	</div>
+	
+	<div>
+		<div id="messageContainer" class="messageContainer"><span id="messageLabel" class="messageLabel"></span></div>
+		<div id="wizard"></div>
+	</div>
+	
+</body>
+</html>

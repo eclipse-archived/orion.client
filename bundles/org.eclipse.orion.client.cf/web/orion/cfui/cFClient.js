@@ -316,6 +316,11 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				return this._xhrV1("GET", url);
 			},
 			
+			getDeploymentPlans: function(relFilePath){
+				var url = require.toUrl("cfapi/plans" + relFilePath);
+				return this._xhrV1("GET", url);
+			},
+			
 			getLogz: function(target, appName){
 				if(!appName){
 					var deferred = new Deferred();

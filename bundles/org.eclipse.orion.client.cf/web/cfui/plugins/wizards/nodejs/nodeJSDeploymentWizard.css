@@ -1,0 +1,150 @@
+@import "../../../../css/layout.css";
+@import "../../../../css/ide.css";
+@import "../../../../css/sections.css";
+@import "../../../../css/images.css";
+@import "../../../../css/theme.css";
+@import "../../../../css/progress.css";
+@import "../../../../css/wizard.css";
+
+html, body {
+    min-width: 350px;
+    overflow: hidden;
+}
+
+.dialogFrame {
+	background-color: #fdfdfd;
+}
+
+#messageArea{
+	display: table-cell;
+    width: calc(100% - 16px);
+}
+
+#messageRow{
+    background: none repeat scroll 0 0 #FFFFFF;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.098), 0 1px 0 0 rgba(0, 0, 0, 0.098);
+    height: 25px;
+    padding: 3px 5px 2px 9px;
+	display: table;
+    width: calc(100% - 15px);
+}
+
+.Spaces{
+	width: 100%;
+}
+
+select{
+	height: 24px;
+    width: 250px;
+    border: 1px solid #bbb;
+}
+
+.selectCell input {
+    height: 24px;
+    width: 250px;
+    margin-left: 0;
+    border: 1px solid #bbb;
+}
+
+.comboTextInputWrapper{
+	height: 24px;
+    width: 250px;
+    border: 1px solid #bbb;
+}
+
+.comboTextInputField {
+	width: 220px !important;
+	height: 24px;
+    text-align: left;
+    margin-right: 0;
+    border: 0px  !important;
+}
+
+.recentEntryButton {
+    margin-left: 0;	
+    height: 22px;
+    background: none repeat scroll 0 0 #fff;
+    width: 25px;
+}
+
+.formTable{
+	font-family: Arial,sans-serif;
+	font-size: 14px;
+	width: 100%;
+}
+
+.selectCell {
+    padding-top: 4px;
+    text-align: left;
+}
+
+.listCell select {
+	height: inherit;
+	width: 160px;
+}
+
+#servicesAddRemoveButtonsCol{
+	text-align: center;
+	vertical-align: middle;
+}
+
+.messageContainer {
+	display: none;
+	padding-top: 2px;
+	position: absolute;
+	text-align: center;
+	width: 100%;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+    background-color: #dff0d8;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    margin-left: 10%;
+    margin-right: auto;
+    width: 80%;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-top: 5px;
+}
+
+.messageContainer.showing {
+	display: block;	
+	transition: top 0.7s ease 0s;
+}
+
+.messageLabel {
+    color: #468847;
+    float: left;
+    max-height: 1000px;
+    overflow: hidden;
+    padding-left: 5px;
+    text-align: center;
+}
+
+.dialogTitle .closeDialog {
+	margin: 0;
+	cursor: pointer;
+}
+
+#memoryInput{
+	margin-right: 5px;
+    width: 195px;
+}
+
+#memoryUnit{
+	width: 50px;
+}
+
+input[type='number'] {
+    -moz-appearance:textfield;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+.deployMessage {
+	margin: 0 auto;
+	width: 90%;
+}
