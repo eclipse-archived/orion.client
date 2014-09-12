@@ -378,6 +378,7 @@ table .sectionTable {
 	margin-top: 5px;
 	margin-right: 5px;
 	color: #FF4500;
+	cursor: pointer;
 }
 
 .gitListCell:hover .gitCommitMore {
