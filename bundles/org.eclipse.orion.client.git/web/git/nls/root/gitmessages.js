@@ -92,6 +92,7 @@ define({
 	" Amend": " Amend", //$NON-NLS-0$  //$NON-NLS-1$
 	"Rebase in progress. Choose action:": "Rebase in progress. Choose action:", //$NON-NLS-0$  //$NON-NLS-1$
 	"RebaseProgress": "Rebase in progress", //$NON-NLS-0$  //$NON-NLS-1$
+	"RebaseTip": "Rebase your commits by removing them from the active branch, starting the active branch again based on the latest state of \"${0}\" and applying each commit again to the updated active branch.", //$NON-NLS-0$  //$NON-NLS-1$
 	"RebasingRepo": "Rebasing git repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"AddingConfig": "Adding git configuration property: key=${0} value=${1}", //$NON-NLS-0$  //$NON-NLS-1$
 	"EditingConfig": "Editing git configuration property: key=${0}", //$NON-NLS-0$  //$NON-NLS-1$
@@ -136,6 +137,8 @@ define({
 	"UndoTooltip": "Revert this commit, keeping all changed files and not making any changes to the working directory.", //$NON-NLS-0$  //$NON-NLS-1$
 	"UndoConfirm": "The content of your active branch will be replaced with ${0}. All changes in the commit and working directory will be kept. Are you sure?", //$NON-NLS-0$  //$NON-NLS-1$
 	"Reset": "Reset", //$NON-NLS-0$  //$NON-NLS-1$
+	"ResetConfirm": "All unstaged and staged changes in the working directory and index will be discarded and cannot be recovered.\n\nAre you sure you want to continue?", //$NON-NLS-0$  //$NON-NLS-1$
+	"CheckoutConfirm" : "Your changes to the selected files will be discarded and cannot be recovered.\n\nAre you sure you want to continue?", //$NON-NLS-0$  //$NON-NLS-1$
 	"Reset the branch, discarding all staged and unstaged changes": "Reset the branch, discarding all staged and unstaged changes", //$NON-NLS-0$  //$NON-NLS-1$
 	"All unstaged and staged changes in the working directory and index will be discarded and cannot be recovered.": "All unstaged and staged changes in the working directory and index will be discarded and cannot be recovered.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Are you sure you want to continue?": "Are you sure you want to continue?", //$NON-NLS-0$  //$NON-NLS-1$
@@ -294,7 +297,7 @@ define({
 	"Are you sure you want to delete branch ${0}?": "Are you sure you want to delete branch ${0}?", //$NON-NLS-0$  //$NON-NLS-1$
 	"Delete the remote tracking branch from the repository": "Delete the remote tracking branch from the repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"Are you sure?": "Are you sure?", //$NON-NLS-0$  //$NON-NLS-1$
-	"You're going to delete remote branch ${0} and push the change.": "You're going to delete remote branch ${0} and push the change.", //$NON-NLS-0$  //$NON-NLS-1$
+	"RemoveRemoteBranchConfirm": "You're going to delete remote branch \"${0}\" and push the change.\n\nAre you sure?", //$NON-NLS-0$  //$NON-NLS-1$
 	"Removing remote branch: ": "Removing remote branch: ", //$NON-NLS-0$  //$NON-NLS-1$
 	"Delete Remote Branch": "Delete Remote Branch", //$NON-NLS-0$  //$NON-NLS-1$
 	"New Remote": "New Remote", //$NON-NLS-0$  //$NON-NLS-1$
@@ -456,6 +459,9 @@ define({
 	"Filter path" : "Filter path", //$NON-NLS-0$  //$NON-NLS-1$
 	"Filter remote branches" : "Filter remote branches", //$NON-NLS-0$  //$NON-NLS-1$
 	"Getting remote branches" : "Getting remote branches ${0}", //$NON-NLS-0$  //$NON-NLS-1$
+	"Getting remote details": "Getting remote details: ${0}", //$NON-NLS-0$  //$NON-NLS-1$
+	"PatchApplied": "Patch applied successfully", //$NON-NLS-0$  //$NON-NLS-1$
+	"PatchFailed": "Apply patch failed. ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Getting branches" : "Getting branches ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Paste link in email or IM" : "Paste link in email or IM", //$NON-NLS-0$  //$NON-NLS-1$
 	"Show Commit in GitHub" : "Show Commit in GitHub", //$NON-NLS-0$  //$NON-NLS-1$

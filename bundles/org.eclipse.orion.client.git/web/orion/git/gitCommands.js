@@ -307,7 +307,7 @@ var exports = {};
 			callback: function(data) {
 				var item = data.items;
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				if(confirm(i18nUtil.formatMessage(messages["You're going to delete remote branch ${0} and push the change."], item.Name)+"\n\n" + messages["Are you sure?"])) //$NON-NLS-1$
+				if(confirm(i18nUtil.formatMessage(messages["RemoveRemoteBranchConfirm"], item.Name))) //$NON-NLS-1$
 				exports.getDefaultSshOptions(serviceRegistry, item).then(function(options){
 					var func = arguments.callee;
 					var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
@@ -722,6 +722,7 @@ var exports = {};
 					progressService.setProgressResult(display);
 					dispatchModelEventOn({type: "modelChanged", action: "merge", item: item}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function (error, ioArgs) {
+					error = null;//hide warning
 					var display = {};
 					display.Severity = "Error"; //$NON-NLS-0$
 					display.HTML = true;
@@ -780,6 +781,7 @@ var exports = {};
 					progressService.setProgressResult(display);
 					dispatchModelEventOn({type: "modelChanged", action: "mergeSquash", item: item}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function (error, ioArgs) {
+					error = null;//hide warning
 					var display = [];
 					display.Severity = "Error"; //$NON-NLS-0$
 					display.HTML = true;
@@ -867,10 +869,7 @@ var exports = {};
 				});
 			},
 			visibleWhen : function(item) {
-				this.tooltip = messages["Rebase your commits by removing them from the active branch, "] +
-					messages["starting the active branch again based on the latest state of '"] + item.Name + "' " +  //$NON-NLS-1$
-					messages["and applying each commit again to the updated active branch."];
-
+				this.tooltip = i18nUtil.formatMessage(messages["RebaseTip"], item.Name);
 				return (item.Type === "RemoteTrackingBranch" && item.Id) || (item.Type === "Branch" && !item.Current); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		});
@@ -1679,7 +1678,8 @@ var exports = {};
 												function(jsonData) {
 												exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 													function() {
-														progress.progress(gitService.getGitRemote(remoteToFetch.Location), "Getting remote details " + name).then(
+														msg = i18nUtil.formatMessage(messages["Getting remote details"], name);
+														progress.progress(gitService.getGitRemote(remoteToFetch.Location), msg).then(
 															function(){
 																explorer.changedItem(item);
 															}, displayErrorOnStatus
@@ -1835,43 +1835,25 @@ var exports = {};
 					var message;
 					try{
 						var jsonResult = JSON.parse(result);
-						if(jsonResult.JsonData && jsonResult.JsonData.modifiedFieles){
-							message = "Patch applied, files modified: ";
-							var isFirst = true;
-							for(var i=0; i<jsonResult.JsonData.modifiedFieles.length; i++){
-								if(!isFirst){
-									message+=", ";
-								}
-								message+=jsonResult.JsonData.modifiedFieles[i];
-								isFirst = false;
-							}
-							
-							var display = [];
+						if(jsonResult.JsonData){
+							var display = {};
 							display.Severity = "Info"; //$NON-NLS-0$
 							display.HTML = false;
-							display.Message = message;
+							display.Message = messages["PatchApplied"];
 							messageService.setProgressResult(display); //$NON-NLS-0$
 							dispatchModelEventOn({type: "modelChanged", action: "applyPatch"});  //$NON-NLS-1$  //$NON-NLS-0$
 							return;
 						}
 					} catch (e){
 					}
-					message = "Patch applied";
+					message = messages["PatchApplied"];
 					messageService.setMessage(message);
 				}, function(error){
 					var jsonError = JSON.parse(error);
-					var message = "Apply patch failed.";
-					if(jsonError.DetailedMessage){
-						message += " "; 
-						message += jsonError.DetailedMessage;
-					} else if(jsonError.Message){
-						message += " "; 
-						message += jsonError.Message;
-					}
-					var display = [];
+					var display = {};
 					display.Severity = "Error"; //$NON-NLS-0$
 					display.HTML = false;
-					display.Message = message;
+					display.Message = i18nUtil.formatMessage(messages["PatchFailed"], jsonError.DetailedMessage || jsonError.Message || "");
 					messageService.setProgressResult(display); //$NON-NLS-0$
 				});
 			},
@@ -1882,7 +1864,7 @@ var exports = {};
 		commandService.addCommand(applyPatchCommand);
 	};
 
-	exports.createGitStatusCommands = function(serviceRegistry, commandService, explorer) {
+	exports.createGitStatusCommands = function(serviceRegistry, commandService) {
 		var commitOptions = {
 			serviceRegistry : serviceRegistry,
 			commandService : commandService,
@@ -2032,8 +2014,7 @@ var exports = {};
 				var item = data.items;
 				
 				var dialog = serviceRegistry.getService("orion.page.dialog"); //$NON-NLS-0$
-				dialog.confirm(messages['All unstaged and staged changes in the working directory and index will be discarded and cannot be recovered.']+"\n" + //$NON-NLS-1$
-					messages['Are you sure you want to continue?'],
+				dialog.confirm(messages['ResetConfirm'],
 					function(doit) {
 						if (!doit) {
 							return;
@@ -2072,8 +2053,7 @@ var exports = {};
 				var items = forceArray(data.items);
 				
 				var dialog = serviceRegistry.getService("orion.page.dialog"); //$NON-NLS-0$
-				dialog.confirm(messages["Your changes to the selected files will be discarded and cannot be recovered."] + "\n" + //$NON-NLS-1$
-					messages['Are you sure you want to continue?'],
+				dialog.confirm(messages["CheckoutConfirm"],
 					function(doit) {
 						if (!doit) {
 							return;
@@ -2121,8 +2101,7 @@ var exports = {};
 			id: "eclipse.orion.git.checkoutStagedCommand", //$NON-NLS-0$
 			callback: function(data) {				
 				var dialog = serviceRegistry.getService("orion.page.dialog"); //$NON-NLS-0$
-				dialog.confirm(messages["Your changes to the selected files will be discarded and cannot be recovered."] + "\n" + //$NON-NLS-1$
-					messages['Are you sure you want to continue?'],
+				dialog.confirm(messages["CheckoutConfirm"],
 					function(doit) {
 						if (!doit) {
 							return;
