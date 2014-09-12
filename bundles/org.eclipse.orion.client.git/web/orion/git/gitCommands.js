@@ -265,7 +265,7 @@ var exports = {};
 				var createBranchFunction = function(branchLocation, name) {
 					var addMsg = i18nUtil.formatMessage(messages["Adding branch ${0}..."], name);
 					progress.progress(serviceRegistry.getService("orion.git.provider").addBranch(branchLocation, name), addMsg).then(function() { //$NON-NLS-0$
-						refresh(data);
+						dispatchModelEventOn({type: "modelChanged", action: "addBranch", branch: name}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
 				};
 				
@@ -297,7 +297,7 @@ var exports = {};
 				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete branch ${0}?"], item.Name))) {
 					var msg = i18nUtil.formatMessage(messages["Removing branch ${0}..."], item.Name);
 					progress.progress(serviceRegistry.getService("orion.git.provider").removeBranch(item.Location), msg).then(function() { //$NON-NLS-0$
-						refresh(data);
+						dispatchModelEventOn({type: "modelChanged", action: "removeBranch", branch: item}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
 				}
 			},
@@ -327,7 +327,7 @@ var exports = {};
 					deferred.then(function(remoteJsonData) {
 						exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry, function(jsonData) {
 							if (!jsonData || jsonData.Result.Severity === "Ok") //$NON-NLS-0$
-								refresh(data);
+								dispatchModelEventOn({type: "modelChanged", action: "removeBranch", branch: item}); //$NON-NLS-1$ //$NON-NLS-0$
 						}, func, messages["Delete Remote Branch"]);
 					}, function(jsonData) {
 						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Removing remote branch: '] + item.Name);
@@ -355,7 +355,7 @@ var exports = {};
 				var createRemoteFunction = function(remoteLocation, name, url) {
 					var msg = i18nUtil.formatMessage(messages["Adding remote ${0}..."], remoteLocation);
 					progress.progress(serviceRegistry.getService("orion.git.provider").addRemote(remoteLocation, name, url), msg).then(function() { //$NON-NLS-0$
-						refresh(data);
+						dispatchModelEventOn({type: "modelChanged", action: "addRemote", remote: name}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
 				};
 				
@@ -387,7 +387,7 @@ var exports = {};
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					var msg = i18nUtil.formatMessage(messages["Removing remote ${0}..."], item.Name);
 					progress.progress(serviceRegistry.getService("orion.git.provider").removeRemote(item.Location), msg).then(function() { //$NON-NLS-0$
-						refresh(data);
+						dispatchModelEventOn({type: "modelChanged", action: "removeRemote", remote: item}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
 				}
 			},

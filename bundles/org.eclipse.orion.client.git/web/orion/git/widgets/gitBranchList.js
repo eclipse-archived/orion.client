@@ -94,7 +94,7 @@ define([
 				this.progressService.progress(this.gitClient.getGitRemote(parentItem.repository.RemoteLocation), msg).then(function (resp) {
 					if (progress) progress.done();
 					var remotes = resp.Children;
-					remotes.unshift({Type: "LocalRoot", Name: messages["Local"]}); //$NON-NLS-0$
+					remotes.unshift(that.localRoot = {Type: "LocalRoot", Name: messages["Local"]}); //$NON-NLS-0$
 					if (that.showTags) {
 						remotes.push(that.tagRoot = {Type: "TagRoot", Name: messages["tags"]}); //$NON-NLS-0$
 					}
@@ -180,14 +180,25 @@ define([
 		this.progressService = options.progressService;
 		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
 			switch (event.action) {
+			case "addBranch": //$NON-NLS-0$
+				this.changedItem(this.model.localRoot, true);
+				break;
+			case "removeBranch": //$NON-NLS-0$
+				var local = event.branch.Type === "Branch"; //$NON-NLS-0$
+				this.changedItem(local ? this.model.localRoot : null, local);
+				break;
+			case "addRemote": //$NON-NLS-0$
+			case "removeRemote": //$NON-NLS-0$
+				this.changedItem(); //$NON-NLS-0$
+				break;
 			case "addTag": //$NON-NLS-0$
 			case "removeTag": //$NON-NLS-0$
-				this.changedItem(this.model.tagRoot);
+				this.changedItem(this.model.tagRoot, true);
 				break;
 			case "stash": //$NON-NLS-0$
 			case "dropStash": //$NON-NLS-0$
 			case "popStash": //$NON-NLS-0$
-				this.changedItem(this.model.stashRoot);
+				this.changedItem(this.model.stashRoot, true);
 				break;
 			}
 		}.bind(this));
@@ -198,7 +209,7 @@ define([
 			mGitCommands.getModelEventDispatcher().removeEventListener("modelChanged", this._modelListener); //$NON-NLS-0$
 			mExplorer.Explorer.prototype.destroy.call(this);
 		},
-		changedItem: function(item) {
+		changedItem: function(item, forceExpand) {
 			var deferred = new Deferred();
 			var model = this.model;
 			if (!item) {
@@ -212,7 +223,7 @@ define([
 			}
 			model.getChildren(item, function(children) {
 				item.removeAll = true;
-				that.myTree.refresh.bind(that.myTree)(item, children, false);
+				that.myTree.refresh.bind(that.myTree)(item, children, forceExpand);
 				deferred.resolve(children);
 			});
 			return deferred;
