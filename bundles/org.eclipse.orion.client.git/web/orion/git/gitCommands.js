@@ -117,14 +117,6 @@ var exports = {};
 	
 	exports.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 
-		var refresh = function(data) { 
-			if (data && data.handler.changedItem) {
-				data.handler.changedItem();
-			} else { 
-				explorer.changedItem(); 
-			}
-		};
-		
 		function displayErrorOnStatus(error) {
 			var display = {};
 			display.Severity = "Error"; //$NON-NLS-0$
@@ -424,7 +416,7 @@ var exports = {};
 					pullDeferred.then(function(jsonData) {
 						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {
 							if (item.Type === "Clone") { //$NON-NLS-0$
-								explorer.changedItem(item);
+								dispatchModelEventOn({type: "modelChanged", action: "pull", item: item}); //$NON-NLS-1$ //$NON-NLS-0$
 							}
 						}, func, "Pull Git Repository"); //$NON-NLS-0$
 					}, function(jsonData) {
@@ -432,7 +424,7 @@ var exports = {};
 							jsonData.failedOperation = pullOperationLocation;
 						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, 
 							function() {
-								explorer.changedItem(item);
+								dispatchModelEventOn({type: "modelChanged", action: "pull", item: item}); //$NON-NLS-1$ //$NON-NLS-0$
 							}, func, messages["Pull Git Repository"]);
 					}, function(operation){
 						pullOperationLocation = operation.Location;
@@ -631,7 +623,7 @@ var exports = {};
 			id: "eclipse.orion.git.fetch", //$NON-NLS-0$
 			callback: function(data) {
 				return fetchCallback(data, false).then(function() {
-					refresh(data);
+					dispatchModelEventOn({type: "modelChanged", action: "fetch", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen: fetchVisibleWhen
@@ -646,7 +638,7 @@ var exports = {};
 			id: "eclipse.orion.git.fetchRemote", //$NON-NLS-0$
 			callback: function(data) {
 				return fetchCallback(data, false).then(function() {
-					refresh(data);
+					dispatchModelEventOn({type: "modelChanged", action: "fetch", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen: function(item) {
@@ -669,7 +661,7 @@ var exports = {};
 			callback: function(data) {
 				var confirm = messages["You're going to override content of the remote tracking branch. This can cause the branch to lose commits."]+"\n\n"+messages['Are you sure?']; //$NON-NLS-0$
 				fetchCallback(data, true, confirm).then(function() {
-					refresh(data);
+					dispatchModelEventOn({type: "modelChanged", action: "fetch", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen : fetchVisibleWhen
@@ -728,14 +720,14 @@ var exports = {};
 					}
 
 					progressService.setProgressResult(display);
-					explorer.changedItem(item);
+					dispatchModelEventOn({type: "modelChanged", action: "merge", item: item}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function (error, ioArgs) {
 					var display = {};
 					display.Severity = "Error"; //$NON-NLS-0$
 					display.HTML = true;
 					display.Message = "<span>" + JSON.stringify(ioArgs.xhr.responseText).DetailedMessage  + "</span>"; //$NON-NLS-1$ //$NON-NLS-0$
 					serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-					explorer.changedItem(item);
+					dispatchModelEventOn({type: "modelChanged", action: "merge", item: item, failed: true}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen : function(item) {
@@ -786,7 +778,7 @@ var exports = {};
 					}
 
 					progressService.setProgressResult(display);
-					explorer.changedItem(item);
+					dispatchModelEventOn({type: "modelChanged", action: "mergeSquash", item: item}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function (error, ioArgs) {
 					var display = [];
 					display.Severity = "Error"; //$NON-NLS-0$
@@ -794,7 +786,7 @@ var exports = {};
 					display.Message = "<span>" + JSON.stringify(ioArgs.xhr.responseText).DetailedMessage + ".</span>"; //$NON-NLS-1$ //$NON-NLS-0$
 					
 					serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-					explorer.changedItem(item);
+					dispatchModelEventOn({type: "modelChanged", action: "mergeSquash", item: item, failed: true}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen : function(item) {
@@ -869,9 +861,9 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			callback: function(data) {
 				rebaseCallback(data).then(function() {
-					refresh(data);
+					dispatchModelEventOn({type: "modelChanged", action: "rebase", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function() {
-					refresh();
+					dispatchModelEventOn({type: "modelChanged", action: "rebase", item: data.items, failed: true}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen : function(item) {
@@ -921,10 +913,10 @@ var exports = {};
 				return fetchCallback(data).then(function() {
 					return rebaseCallback(data).then(function() {
 						return pushCallbackTags(data).then(function() {
-							refresh(data);
+							dispatchModelEventOn({type: "modelChanged", action: "sync", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
 						});
 					}, function() {
-						refresh();
+						dispatchModelEventOn({type: "modelChanged", action: "rebase", item: data.items, failed: true}); //$NON-NLS-1$ //$NON-NLS-0$
 					});
 				});
 			},
@@ -940,7 +932,7 @@ var exports = {};
 			id : "eclipse.orion.git.push", //$NON-NLS-0$
 			callback: function(data) {
 				pushCallbackTags(data).then(function() {
-					refresh(data);
+					dispatchModelEventOn({type: "modelChanged", action: "push", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen: pushVisibleWhen
@@ -955,7 +947,7 @@ var exports = {};
 			id : "eclipse.orion.git.pushBranch", //$NON-NLS-0$
 			callback:  function(data) {
 				pushCallbackNoTags(data).then(function() {
-					refresh(data);
+					dispatchModelEventOn({type: "modelChanged", action: "push", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen: pushVisibleWhen
@@ -970,7 +962,7 @@ var exports = {};
 			id : "eclipse.orion.git.pushToGerrit", //$NON-NLS-0$
 			callback:  function(data) {
 				pushCallbackGerrit(data).then(function() {
-					refresh(data);
+					dispatchModelEventOn({type: "modelChanged", action: "push", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen: function(item) {
@@ -997,7 +989,7 @@ var exports = {};
 			id : "eclipse.orion.git.pushForce", //$NON-NLS-0$
 			callback: function(data) {
 				pushCallbackTagsForce(data).then(function() {
-					refresh(data);
+					dispatchModelEventOn({type: "modelChanged", action: "push", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen: pushVisibleWhen
@@ -1012,7 +1004,7 @@ var exports = {};
 			id : "eclipse.orion.git.pushForceBranch", //$NON-NLS-0$
 			callback: function(data) {
 				pushCallbackNoTagsForce(data).then(function() {
-					refresh(data);
+					dispatchModelEventOn({type: "modelChanged", action: "push", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen: pushVisibleWhen
@@ -2071,7 +2063,7 @@ var exports = {};
 							messages["Resetting local changes"]);
 						deferred.then(
 							function(){
-								explorer.changedItem(item);
+								dispatchModelEventOn({type: "modelChanged", action: "reset", mode: "HARD"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							}, displayErrorOnStatus
 						);		
 					}
@@ -2118,7 +2110,7 @@ var exports = {};
 							messages['Resetting local changes']);
 						deferred.then(
 							function(){
-								explorer.changedItem(items);
+								dispatchModelEventOn({type: "modelChanged", action: "checkoutFile", items: items}); //$NON-NLS-1$ //$NON-NLS-0$
 							}, displayErrorOnStatus
 						);				
 					}
@@ -2311,7 +2303,7 @@ var exports = {};
 			var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 			
-			var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").doRebase(HeadLocation, "", action), "Rebasing git repository"); //$NON-NLS-0$ 
+			var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").doRebase(HeadLocation, "", action), messages["RebasingRepo"]); //$NON-NLS-1$ //$NON-NLS-0$ 
 			progressService.createProgressMonitor(
 				deferred,
 				action);
@@ -2322,23 +2314,19 @@ var exports = {};
 						display.Severity = "Ok"; //$NON-NLS-0$
 						display.HTML = false;
 						display.Message = jsonData.Result;
-						
 						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-						explorer.changedItem({});
 					} else if (jsonData.Result === "STOPPED") { //$NON-NLS-0$
 						display.Severity = "Warning"; //$NON-NLS-0$
 						display.HTML = false;
 						display.Message = jsonData.Result + messages['. Repository still contains conflicts.'];
-						
 						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-						explorer.changedItem({});
 					} else if (jsonData.Result === "FAILED_UNMERGED_PATHS") { //$NON-NLS-0$
 						display.Severity = "Error"; //$NON-NLS-0$
 						display.HTML = false;
 						display.Message = jsonData.Result + messages['. Repository contains unmerged paths. Resolve conflicts first.'];
-						
 						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 					}
+					dispatchModelEventOn({type: "modelChanged", action: "rebase", rebaseAction: action, result: jsonData.Result, failed: display.Severity !== "Ok"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					
 				}, displayErrorOnStatus
 			);

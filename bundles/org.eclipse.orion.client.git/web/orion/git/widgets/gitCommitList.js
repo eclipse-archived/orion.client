@@ -399,6 +399,13 @@ define([
 				}
 				this.changedItem(parent);
 				break;
+			case "fetch": //$NON-NLS-0$
+			case "push": //$NON-NLS-0$
+			case "pull": //$NON-NLS-0$
+			case "sync": //$NON-NLS-0$
+			case "rebase": //$NON-NLS-0$
+			case "merge": //$NON-NLS-0$
+			case "mergeSquash": //$NON-NLS-0$
 			case "commit": //$NON-NLS-0$
 			case "reset": //$NON-NLS-0$
 				this.changedItem();

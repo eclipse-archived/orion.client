@@ -92,6 +92,7 @@ define({
 	" Amend": " Amend", //$NON-NLS-0$  //$NON-NLS-1$
 	"Rebase in progress. Choose action:": "Rebase in progress. Choose action:", //$NON-NLS-0$  //$NON-NLS-1$
 	"RebaseProgress": "Rebase in progress", //$NON-NLS-0$  //$NON-NLS-1$
+	"RebasingRepo": "Rebasing git repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"RebaseProgressDetails": "Rebasing branch.\n\n\tUse Continue after merging the conflicts and selecting all files;\n\tSkip to bypass the current patch;\n\tAbort to end the rebase at any time.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Committer name:": "Committer name:", //$NON-NLS-0$  //$NON-NLS-1$
 	"email:": "email:", //$NON-NLS-0$  //$NON-NLS-1$

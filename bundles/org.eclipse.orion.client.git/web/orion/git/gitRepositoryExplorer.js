@@ -94,6 +94,13 @@ define([
 		var that = this;
 		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", function(event) { //$NON-NLS-0$
 			switch (event.action) {
+			case "rebase": //$NON-NLS-0$
+			case "merge": //$NON-NLS-0$
+			case "mergeSquash": //$NON-NLS-0$
+				if (event.failed || event.rebaseAction) {
+					that.changedItem();
+				}
+				break;
 			case "checkout": //$NON-NLS-0$
 				if (that.repository) {
 					window.location.href = require.toUrl(repoTemplate.expand({resource: that.lastResource = that.repository.Location}));
