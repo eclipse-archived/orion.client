@@ -912,8 +912,18 @@ var exports = {};
 			callback: function(data) {
 				return fetchCallback(data).then(function() {
 					return rebaseCallback(data).then(function() {
-						return pushCallbackTags(data).then(function() {
-							dispatchModelEventOn({type: "modelChanged", action: "sync", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
+						var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+						var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+						var item = data.items;
+						progressService.progress(service.getLog(item.RemoteBranch.CommitLocation, item.LocalBranch.Name), messages['Getting outgoing commits']).then(function(resp) {
+							var done = function() {
+								dispatchModelEventOn({type: "modelChanged", action: "sync", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
+							};
+							if (resp.Children.length > 0) {
+								return pushCallbackTags(data).then(done);
+							} else {
+								done();
+							}
 						});
 					}, function() {
 						dispatchModelEventOn({type: "modelChanged", action: "rebase", item: data.items, failed: true}); //$NON-NLS-1$ //$NON-NLS-0$
