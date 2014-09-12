@@ -31,7 +31,7 @@ define(["chai/chai", "orion/encoding-shim"/*"domReady!"*/], function(chai) {
 
 
 	describe("Test Encoding", function() {
-		it("Basic", function() {
+		it.skip("Basic", function() {
 			var encoder = new TextEncoder();
 			var encoded = encoder.encode(bigtest);
 			
@@ -52,7 +52,7 @@ define(["chai/chai", "orion/encoding-shim"/*"domReady!"*/], function(chai) {
 		});
 		
 		
-		it("uriBasic", function() {
+		it.skip("uriBasic", function() {
 			function encode_utf8(s) {
 			  return unescape(encodeURIComponent(s));
 			}
