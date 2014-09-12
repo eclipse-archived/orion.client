@@ -415,14 +415,16 @@ a.breadcrumb.currentLocation {
 	display: block; 
 	overflow: hidden; 
 	cursor: pointer;
-	border: 1px solid #aaa; 
-	border-radius: 6px;
+	border: 1px solid #CCC; 
+	border-radius: 3px;
+	height:20px;
 }
 
 .orionSwitchInner {
 	display: block; 
 	width: 200%; 
 	margin-left: -100%;
+	margin-top:-1px;
 	text-align: left;
 	-moz-transition: margin 0.3s ease-in 0s; 
 	-webkit-transition: margin 0.3s ease-in 0s;
@@ -442,12 +444,13 @@ a.breadcrumb.currentLocation {
 }
 
 .orionSwitchInner:before {
-	padding-left: 2px;
+	padding-left: 3px;
+	padding-right:2px;
 	background-color: #eee;
 }
 
 .orionSwitchInner:after {
-	padding-right: 2px;
+	padding-right: 3px;
 	background-color: #eee;
 	text-align: right;
 }
@@ -457,8 +460,8 @@ a.breadcrumb.currentLocation {
 	width: calc(50% - 2px); 
 	margin: 0;
 	background: #ddd;
-	border: 1px solid #aaa; 
-	border-radius: 6px;
+	border: 1px solid #CDCDCD; 
+	border-radius: 3px;
 	position: absolute; 
 	top: 0; 
 	bottom: 0; 
