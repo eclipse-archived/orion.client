@@ -88,8 +88,14 @@ define([
 
 			this.$splitter.classList.add("split"); //$NON-NLS-0$
 			
-			// Initialize for the currnet orientation / collapse direction
-			var orientation = options.vertical ? ORIENTATION_VERTICAL : ORIENTATION_HORIZONTAL;
+			// Initialize for the current orientation / collapse direction
+			var orientationStr = localStorage.getItem(this._prefix+"/orientation"); //$NON-NLS-0$
+			if (orientationStr) {
+				var orientation = orientationStr === "vertical" ? ORIENTATION_VERTICAL : ORIENTATION_HORIZONTAL; //$NON-NLS-0$
+			} else {
+				orientation = options.vertical ? ORIENTATION_VERTICAL : ORIENTATION_HORIZONTAL;
+			}
+
 			this.setOrientation(orientation);
 			
 			if (util.isIOS || util.isAndroid) {
@@ -119,6 +125,11 @@ define([
 
 			this._vertical = vertical;
 
+			// Store the orientation
+			var orientationStr = this._vertical ? "vertical" : "horizontal"; //$NON-NLS-1$ //$NON-NLS-0$
+			localStorage.setItem(this._prefix+"/orientation", orientationStr); //$NON-NLS-0$
+
+			// Set up the CSS styling
 			this.$splitter.style.position = "absolute"; //$NON-NLS-0$
 			this.$trailing.style.position = "absolute"; //$NON-NLS-0$
 			this.$leading.style.position = "absolute"; //$NON-NLS-0$
