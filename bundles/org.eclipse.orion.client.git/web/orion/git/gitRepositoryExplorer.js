@@ -107,11 +107,11 @@ define([
 				}
 				that.changedItem();
 				break;
-			case "deleteClone": //$NON-NLS-0$
+			case "removeClone": //$NON-NLS-0$
 				if (that.repository && event.items.some(function(repo) { return repo.Location === that.repository.Location; })) {
 					window.location.href = require.toUrl(repoTemplate.expand({resource: that.lastResource = ""}));
+					that.changedItem();
 				}
-				that.changedItem();
 				break;
 			case "applyPatch": //$NON-NLS-0$
 				that.repository.status = null;

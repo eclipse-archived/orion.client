@@ -20,8 +20,9 @@ define([
 	'orion/git/uiUtil',
 	'orion/git/util',
 	'orion/Deferred',
+	'orion/git/gitCommands',
 	'orion/objects'
-], function(messages, mCommandRegistry, mExplorer, URITemplate, i18nUtil, uiUtil, util, Deferred, objects) {
+], function(messages, mCommandRegistry, mExplorer, URITemplate, i18nUtil, uiUtil, util, Deferred, mGitCommands, objects) {
 		
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 
@@ -180,9 +181,24 @@ define([
 		this.fileClient = options.fileClient;
 		this.simgleRepository = options.simgleRepository;
 		this.progressService = options.progressService;
+		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
+			switch (event.action) {
+			case "addClone": //$NON-NLS-0$
+			case "removeClone": //$NON-NLS-0$
+				this.changedItem();
+				break;
+			}
+		}.bind(this));
 	}
 	GitRepoListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitRepoListExplorer.prototype, /** @lends orion.git.GitRepoListExplorer.prototype */ {
+		destroy: function() {
+			if (this._modelListener) {
+				mGitCommands.getModelEventDispatcher().removeEventListener("modelChanged", this._modelListener); //$NON-NLS-0$
+				this._modelListener = null;
+			}
+			mExplorer.Explorer.prototype.destroy.call(this);
+		},
 		changedItem: function(item) {
 			var deferred = new Deferred();
 			var model = this.model;
