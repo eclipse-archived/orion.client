@@ -11,11 +11,10 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 define([
-	'require',
 	'orion/PageLinks',
 	'orion/plugin',
 	'orion/URITemplate'
-], function(require, PageLinks, PluginProvider, URITemplate) {
+], function(PageLinks, PluginProvider, URITemplate) {
 	var serviceImpl = { /* All data is in properties */ };
 
 	var headers = {
@@ -157,7 +156,7 @@ define([
 	provider.registerService("orion.page.link.user", null, {
 		id: "orion.help",
 		nameKey: "Help",
-		nls: "orion/help/nls/messages",
+		nls: "orion/widgets/nls/messages",
 		uriTemplate: "{+OrionHome}/help/help.html",
 		category: "user.0"
 	});
