@@ -13,8 +13,9 @@ define([
 	'chai/chai',
 	'orion/contentTypes',
 	'orion/serviceregistry',
-	'orion/Deferred'
-], function(chai, mContentTypes, mServiceRegistry, Deferred) {
+	'orion/Deferred',
+	'orion/objects',
+], function(chai, mContentTypes, mServiceRegistry, Deferred, objects) {
 	var assert = chai.assert;
 	var ServiceRegistry = mServiceRegistry.ServiceRegistry;
 	var ContentTypeRegistry = mContentTypes.ContentTypeRegistry;
@@ -38,8 +39,8 @@ define([
 	}
 
 	/**
-	 * @param {Boolean} [useServiceRegistry=true] true: use Service Registry to construct the ContentTypeRegistry. false:
-	 * use array of content type data.
+	 * @param {Boolean} [useServiceRegistry=true] true: use Service Registry to construct the ContentTypeRegistry.
+	 * false: use array of content type data.
 	 * @param {Function} testbody
 	 */
 	function _withTestData(useServiceRegistry, testbody) {
@@ -78,39 +79,22 @@ define([
 		contentTypeService = new ContentTypeRegistry(dataSource);
 		testbody(serviceRegistry, contentTypeService, basicTypes);
 	}
-	var tests = {};
-	/**
-	 * Constructs a "with serviceRegistry" and "without serviceRegistry" test.
-	 * @param {Function} testBody should call `this.withTestData` to perform its setup, or check `this.useServiceRegistry`
-	 * to see what kind of test it should be running.
-	 */
-	function makeTests(tests, basename, testBody) {
-		it("test_" + basename, testBody.bind({
-			useServiceRegistry: true,
-			withTestData: _withTestData.bind(null, true)
-		}));
-		it("test_" + basename + "_no_serviceRegistry", testBody.bind({
-			useServiceRegistry: false,
-			withTestData: _withTestData.bind(null, false)
-		}));
-	}
 
-	describe("Content Types Test", function() {
-		it("new_ContentTypeRegistry", function() {
-			assert.throws(function() { new ContentTypeRegistry(); });
-			assert.throws(function() { new ContentTypeRegistry(null); });
-			assert.throws(function() { new ContentTypeRegistry("zzzz"); });
-		});
-	
-		makeTests(tests, "getContentTypes", function() {
+	/*
+	 * Common test data for constructing the 'with' and 'without' ServiceRegistry cases.
+	 * Each test function should call `this.withTestData` to perform its setup, or check 
+	 * `this.useServiceRegistry` to see what kind of test it should be running.
+	 */
+	var testData = {
+		getContentTypes: function() {
 			this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 				contentTypeService.getContentTypes().every(function(type, i) {
 					assertContentTypesEqual(basicTypes[i], type);
 				});
 			});
-		});
-	
-		makeTests(tests, "getContentTypesMap", function() {
+		},
+
+		getContentTypesMap: function() {
 			this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 				var map = contentTypeService.getContentTypesMap();
 				Object.keys(map).forEach(function(contentTypeId) {
@@ -125,17 +109,17 @@ define([
 					assertContentTypesEqual(type, map[contentTypeId]);
 				});
 			});
-		});
-	
-		makeTests(tests, "getContentType", function() {
+		},
+
+		getContentType: function() {
 			this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 				basicTypes.forEach(function(contentType) {
 					assertContentTypesEqual(contentType, contentTypeService.getContentType(contentType.id));
 				});
 			});
-		});
-	
-		makeTests(tests, "getFileContentType", function() {
+		},
+
+		getFileContentType: function() {
 			this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 				var fileMetadata1 = {
 					Name: "aaaaaaaaaaa"
@@ -154,18 +138,18 @@ define([
 				assertContentTypesEqual(contentTypeService.getFileContentType(fileMetadata3), basicTypes[2]);
 				assertContentTypesEqual(contentTypeService.getFileContentType(fileMetadata4), basicTypes[3], "filename match beats extension match");
 			});
-		});
-	
-		makeTests(tests, "getFilenameContentType", function() {
+		},
+
+		getFilenameContentType: function() {
 			this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 				assertContentTypesEqual(contentTypeService.getFilenameContentType("aaaaaaa"), null, "No content type for unrecognized file");
 				assertContentTypesEqual(contentTypeService.getFilenameContentType("test.file.xml"), basicTypes[2]);
 				assertContentTypesEqual(contentTypeService.getFilenameContentType("test.file.txt"), basicTypes[2]);
 				assertContentTypesEqual(contentTypeService.getFilenameContentType("build.xml"), basicTypes[3], "filename match beats extension match");
 			});
-		});
-	
-		makeTests(tests, "isExtensionOf", function() {
+		},
+
+		isExtensionOf: function() {
 			this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 				function assertIsExtensionOf(typeA, typeB, expected, msg) {
 					// Test calling both by ContentType object and by String ID:
@@ -176,26 +160,26 @@ define([
 				assertIsExtensionOf(basicTypes[1], basicTypes[0], true, "Basic 1 extends Basic 0");
 				assertIsExtensionOf(basicTypes[2], basicTypes[0], false);
 				assertIsExtensionOf(basicTypes[3], basicTypes[0], false);
-	
+
 				assertIsExtensionOf(basicTypes[0], basicTypes[1], false);
 				assertIsExtensionOf(basicTypes[1], basicTypes[1], true);
 				assertIsExtensionOf(basicTypes[2], basicTypes[1], false);
 				assertIsExtensionOf(basicTypes[3], basicTypes[1], false);
-	
+
 				assertIsExtensionOf(basicTypes[0], basicTypes[2], false);
 				assertIsExtensionOf(basicTypes[1], basicTypes[2], false);
 				assertIsExtensionOf(basicTypes[2], basicTypes[2], true);
 				assertIsExtensionOf(basicTypes[3], basicTypes[2], false);
-	
+
 				assertIsExtensionOf(basicTypes[0], basicTypes[3], false);
 				assertIsExtensionOf(basicTypes[1], basicTypes[3], false);
 				assertIsExtensionOf(basicTypes[2], basicTypes[3], false);
 				assertIsExtensionOf(basicTypes[3], basicTypes[3], true);
 			});
-		});
-	
+		},
+
 		// Note this one does not call `withTestData`
-		tests.test_isExtensionOf_bad = function() {
+		isExtensionOf_bad: function() {
 			var bad = {
 				id: 'orion/test4',
 				name: 'Bad',
@@ -212,33 +196,33 @@ define([
 				contentTypeService = new ContentTypeRegistry([ bad ]);
 			}
 			Deferred.when(contentTypeService.isExtensionOf(bad, bad)).then(assert.fail);
-		};
-	
-		makeTests(tests, "isSomeExtensionOf", function() {
+		},
+
+		isSomeExtensionOf: function() {
 			this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 				function assertIsSomeExtensionOf(type, types, expected, msg) {
 					assert.equal(contentTypeService.isSomeExtensionOf(type, types), expected, msg);
 					var typeIds = types.map(function(type) { return type.id; });
 					assert.equal(contentTypeService.isSomeExtensionOf(type.id, typeIds), expected, msg);
 				}
-	
+
 				assertIsSomeExtensionOf(basicTypes[0], basicTypes, true);
 				assertIsSomeExtensionOf(basicTypes[1], basicTypes, true);
 				assertIsSomeExtensionOf(basicTypes[2], basicTypes, true);
 				assertIsSomeExtensionOf(basicTypes[3], basicTypes, true);
-	
+
 				assertIsSomeExtensionOf(basicTypes[0], [ basicTypes[0] ], true);
 				assertIsSomeExtensionOf(basicTypes[1], [ basicTypes[0] ], true);
 				assertIsSomeExtensionOf(basicTypes[2], [ basicTypes[0] ], false);
 				assertIsSomeExtensionOf(basicTypes[3], [ basicTypes[0] ], false);
-	
+
 				assertIsSomeExtensionOf(basicTypes[1], [ basicTypes[0], basicTypes[2] ], true);
-	
+
 				assertIsSomeExtensionOf(basicTypes[3], [], false);
 			});
-		});
-	
-		makeTests(tests, "extensionsCaseMismatch", function() {
+		},
+
+		extensionsCaseMismatch: function() {
 			this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 				var type1 = contentTypeService.getFilenameContentType('test.TXT');
 				var type2 = contentTypeService.getFilenameContentType('test.txt');
@@ -246,9 +230,9 @@ define([
 				assertContentTypesEqual(type1, type2);
 				assertContentTypesEqual(type2, type3);
 			});
-		});
-	
-		makeTests(tests, "image", function() {
+		},
+
+		image: function() {
 			this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 				var type4;
 				contentTypeService.getContentTypes().some(function(ct) {
@@ -260,6 +244,54 @@ define([
 				assert.equal(type4.image, 'http://example.org/foo.png');
 				assert.equal(type4.imageClass, 'imageFoo');
 			});
+		},
+	};
+
+	/**
+	 * Constructs a "with serviceRegistry" and "without serviceRegistry" test.
+	 * @param {Function} callback
+	 */
+	function forEachTestData(callback) {
+		Object.keys(testData).forEach(function(name) {
+			var testBody = testData[name];
+			callback(name, testBody);
+		});
+	}
+
+	describe("Content Types", function() {
+		it("new ContentTypeRegistry", function() {
+			assert.throws(function() { new ContentTypeRegistry(); });
+			assert.throws(function() { new ContentTypeRegistry(null); });
+			assert.throws(function() { new ContentTypeRegistry("zzzz"); });
+		});
+
+		/**
+		 * Create tests that construct ContentTypesRegistry with a service registry.
+		 */
+		describe("with ServiceRegistry", function() {
+			forEachTestData(function(basename, testBody) {
+				var boundBody = testBody.bind({
+					useServiceRegistry: true,
+					withTestData: _withTestData.bind(null, true)
+				});
+				boundBody.toString = Function.prototype.toString.bind(testBody); // show original source
+				it(basename, boundBody);
+			});
+		});
+
+		/**
+		 * Create tests that construct ContentTypesRegistry with static data, no service registry.
+		 */
+		describe("no ServiceRegistry", function() {
+			forEachTestData(function(basename, testBody) {
+				var boundBody = testBody.bind({
+					useServiceRegistry: false,
+					withTestData: _withTestData.bind(null, false)
+				});
+				boundBody.toString = Function.prototype.toString.bind(testBody);
+				it(basename + " no ServiceRegistry", boundBody);
+			});
 		});
 	});
+
 });
