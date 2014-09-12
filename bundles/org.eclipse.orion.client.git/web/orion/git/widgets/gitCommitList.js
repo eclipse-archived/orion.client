@@ -387,6 +387,18 @@ define([
 		}
 		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
 			switch (event.action) {
+			case "addTag": //$NON-NLS-0$
+				this.changedItem(event.commit.parent);
+				break;
+			case "removeTag": //$NON-NLS-0$
+				var parent = event.tag.parent;
+				if (parent && parent.Type === "Commit") { //$NON-NLS-0$
+					parent = parent.parent;
+				} else {
+					parent = null;
+				}
+				this.changedItem(parent);
+				break;
 			case "commit": //$NON-NLS-0$
 			case "reset": //$NON-NLS-0$
 				this.changedItem();
@@ -420,6 +432,12 @@ define([
 			
 			if (item.Type === "CommitRoot") { //$NON-NLS-0$
 				model.incomingCommits = model.outgoingCommits = null;
+			}
+			if (item.Type === "Outgoing") { //$NON-NLS-0$
+				model.outgoingCommits = null;
+			}
+			if (item.Type === "Incoming") { //$NON-NLS-0$
+				model.incomingCommits = null;
 			}
 			model.log = null;
 			model.logDeferred = new Deferred();

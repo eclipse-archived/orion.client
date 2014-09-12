@@ -275,8 +275,10 @@ define({
 	"Adding remote ${0}...": "Adding remote ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Removing remote ${0}...": "Removing remote ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Removing repository ${0}": "Removing repository ${0}", //$NON-NLS-0$  //$NON-NLS-1$
+	"Adding tag {$0}": "Adding tag {$0}", //$NON-NLS-0$  //$NON-NLS-1$
+	"Removing tag {$0}": "Removing tag {$0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Merging ${0}": "Merging ${0}", //$NON-NLS-0$  //$NON-NLS-1$
-	'Unstaging changes' : 'Unstaging changes',
+	'Unstaging changes' : 'Unstaging changes', //$NON-NLS-0$  //$NON-NLS-1$
 	"Checking out branch ${0}...": "Checking out branch ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Branch checked out.": "Branch checked out.", //$NON-NLS-0$  //$NON-NLS-1$
 	"New Branch": "New Branch", //$NON-NLS-0$  //$NON-NLS-1$

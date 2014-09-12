@@ -198,6 +198,7 @@ define([
 				tags.textContent = messages["tags: "];
 				tags.className = "gitCommitTagsTitle"; //$NON-NLS-0$
 				commit.Tags.forEach(function (tag) {
+					tag.parent = commit;
 					var tagSpan = document.createElement("span"); //$NON-NLS-0$
 					tagSpan.textContent = tag.Name;
 					tagSpan.className = "gitCommitTag"; //$NON-NLS-0$

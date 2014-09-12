@@ -1101,8 +1101,9 @@ var exports = {};
 				
 				var createTagFunction = function(commitLocation, tagName) {
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					progress.progress(serviceRegistry.getService("orion.git.provider").doAddTag(commitLocation, tagName), "Adding tag " + tagName).then(function() { //$NON-NLS-0$
-						explorer.changedItem(item);
+					var msg = i18nUtil.formatMessage(messages["Adding tag {$0}"], tagName);
+					progress.progress(serviceRegistry.getService("orion.git.provider").doAddTag(commitLocation, tagName), msg).then(function() { //$NON-NLS-0$
+						dispatchModelEventOn({type: "modelChanged", action: "addTag", commit: item, tag: tagName}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
 				};
 				
@@ -1127,8 +1128,9 @@ var exports = {};
 				var item = data.items;
 				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete tag ${0}?"], item.Name))) {
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					progress.progress(serviceRegistry.getService("orion.git.provider").doRemoveTag(item.Location), "Removing tag " + item.Name).then(function() { //$NON-NLS-0$
-						explorer.changedItem(item.parent);
+					var msg = i18nUtil.formatMessage(messages["Removing tag {$0}"], item.Name);
+					progress.progress(serviceRegistry.getService("orion.git.provider").doRemoveTag(item.Location), msg).then(function() { //$NON-NLS-0$
+						dispatchModelEventOn({type: "modelChanged", action: "removeTag", tag: item}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
 				}
 			},

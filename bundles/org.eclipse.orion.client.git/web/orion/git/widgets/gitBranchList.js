@@ -19,9 +19,10 @@ define([
 	'orion/Deferred',
 	'orion/git/util',
 	'orion/git/uiUtil',
+	'orion/git/gitCommands',
 	'orion/webui/littlelib',
 	'orion/objects'
-], function(messages, mGitCommitList, mExplorer, i18nUtil, Deferred, util, uiUtil, lib, objects) {
+], function(messages, mGitCommitList, mExplorer, i18nUtil, Deferred, util, uiUtil, mGitCommands, lib, objects) {
 
 	var pageQuery = "commits=0&page=1&pageSize=100"; //$NON-NLS-0$
 
@@ -177,9 +178,23 @@ define([
 		this.handleError = options.handleError;
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;
+		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
+			switch (event.action) {
+			case "addTag": //$NON-NLS-0$
+				this.changedItem();
+				break;
+			case "removeTag": //$NON-NLS-0$
+				this.changedItem(event.tag.parent);
+				break;
+			}
+		}.bind(this));
 	}
 	GitBranchListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitBranchListExplorer.prototype, /** @lends orion.git.GitBranchListExplorer.prototype */ {
+		destroy: function(){
+			mGitCommands.getModelEventDispatcher().removeEventListener("modelChanged", this._modelListener); //$NON-NLS-0$
+			mExplorer.Explorer.prototype.destroy.call(this);
+		},
 		changedItem: function(item) {
 			var deferred = new Deferred();
 			var model = this.model;
