@@ -75,7 +75,7 @@ exports.CompareCommandFactory = (function() {
 			var ignoreWhitespaceCommand = new mCommands.Command({
 				tooltip : messages["IgnoreWhitespaceTooltip"],
 				name: messages["IgnoreWhitespace"],
-				imageClass : "compare-sprite-ignore-whitespace", //$NON-NLS-0$
+				imageClass : "core-sprite-whitespace", //$NON-NLS-0$
 				id: "orion.compare.ignoreWhitespace", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
 				type: "toggle",
@@ -95,7 +95,7 @@ exports.CompareCommandFactory = (function() {
 				imageClass : "compare-sprite-inline-2way", //$NON-NLS-0$
 				id: "orion.compare.toggleInline2Way", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
-				type: "toggle",
+				type: "switch",
 				visibleWhen: function(item) {
 					if(!item.options.toggler) {
 						return false;
@@ -179,7 +179,7 @@ exports.CompareCommandFactory = (function() {
 				commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, true, new mKeyBinding.KeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
 				commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, true, new mKeyBinding.KeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
 			}
-			commandService.registerCommandContribution(commandSpanId, "orion.compare.ignoreWhitespace", 116); //$NON-NLS-0$
+			commandService.registerCommandContribution(commandSpanId, "orion.compare.ignoreWhitespace", 109); //$NON-NLS-0$
 		},
 		
 		renderCommands: function(compareWidget){

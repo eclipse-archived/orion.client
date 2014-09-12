@@ -731,7 +731,7 @@ define([
 					model.simpleLog = that.simpleLog = !simpleLogCommand.checked;
 					data.handler.changedItem();
 				},
-				type: "toggle", //$NON-NLS-0$
+				type: "switch", //$NON-NLS-0$
 				visibleWhen: function() {
 					simpleLogCommand.name = that.model.simpleLog ? messages["ShowActiveBranch"] : messages["ShowReference"];
 					var targetRef = that.model.getTargetReference();

@@ -354,6 +354,27 @@ define([
 		var element;
 		var clickTarget;
 		useImage = useImage || (!command.name && command.hasImage());
+		
+		var renderButton = function() {
+				if (useImage) {
+					if (command.hasImage()) {
+						_addImageToElement(command, element, id);
+						// ensure there is accessible text describing this image
+						if (command.name) {
+							element.setAttribute("aria-label", command.name); //$NON-NLS-0$
+						}
+					} else {
+						element.classList.add("commandButton"); //$NON-NLS-0$
+						element.classList.add("commandMissingImageButton"); //$NON-NLS-0$
+						element.appendChild(document.createTextNode(command.name));
+					}
+				} else {
+					element.classList.add("commandButton"); //$NON-NLS-0$
+					var text = document.createTextNode(command.name);
+					element.appendChild(text);
+				}
+		};
+		
 		if (command.hrefCallback) {
 			element = clickTarget = document.createElement("a"); //$NON-NLS-0$
 			element.id = id;
@@ -374,65 +395,70 @@ define([
 				element.href = "#"; //$NON-NLS-0$
 			}
 		} else {
-			if (command.type === "toggle") { //$NON-NLS-0$
+			if (command.type === "switch") { //$NON-NLS-0$
 				element = document.createElement("div"); //$NON-NLS-0$
-				element.className = "orionToggle"; //$NON-NLS-0$
+				element.className = "orionSwitch"; //$NON-NLS-0$
 				var input = clickTarget = document.createElement("input"); //$NON-NLS-0$
 				input.type = "checkbox"; //$NON-NLS-0$
-				input.className = "orionToggleCheck"; //$NON-NLS-0$
-				input.id = "orionToggleCheck" + command.id; //$NON-NLS-0$
+				input.className = "orionSwitchCheck"; //$NON-NLS-0$
+				input.id = "orionSwitchCheck" + command.id; //$NON-NLS-0$
 				if(parent.id) {
 					input.id = input.id + parent.id;
 				}
 				element.appendChild(input);
 				var label = document.createElement("label"); //$NON-NLS-0$
-				label.className = "orionToggleLabel"; //$NON-NLS-0$
+				label.className = "orionSwitchLabel"; //$NON-NLS-0$
 				label.setAttribute("for", input.id); //$NON-NLS-0$  
 				var span1 = document.createElement("span"); //$NON-NLS-0$
-				span1.className = "orionToggleInner"; //$NON-NLS-0$
+				span1.className = "orionSwitchInner"; //$NON-NLS-0$
 				var span2 = document.createElement("span"); //$NON-NLS-0$
-				span2.className = "orionToggleSwitch"; //$NON-NLS-0$
+				span2.className = "orionSwitchSwitch"; //$NON-NLS-0$
 				label.appendChild(span1);
 				label.appendChild(span2);
 				element.appendChild(label);
 
 				input.checked = command.checked;
 				span1.classList.add(command.imageClass);
+			} else if (command.type === "toggle") {  //$NON-NLS-0$
+				element = clickTarget = document.createElement("button"); //$NON-NLS-0$
+				element.className = "orionButton"; //$NON-NLS-0$
+				element.classList.add(command.checked ? "orionToggleOn" : "orionToggleOff");  //$NON-NLS-1$ //$NON-NLS-0$
+				element.id = "orionToggle" + command.id; //$NON-NLS-0$
+				if(parent.id) {
+					element.id = element.id + parent.id;
+				}
+				renderButton();
 			} else {
 				element = clickTarget = document.createElement("button"); //$NON-NLS-0$
 				element.className = "orionButton"; //$NON-NLS-0$
 				if (command.extraClass) {
 					element.classList.add(command.extraClass);
 				}
-				if (useImage) {
-					if (command.hasImage()) {
-						_addImageToElement(command, element, id);
-						// ensure there is accessible text describing this image
-						if (command.name) {
-							element.setAttribute("aria-label", command.name); //$NON-NLS-0$
-						}
-					} else {
-						element.classList.add("commandButton"); //$NON-NLS-0$
-						element.classList.add("commandMissingImageButton"); //$NON-NLS-0$
-						element.appendChild(document.createTextNode(command.name));
-					}
-				} else {
-					element.classList.add("commandButton"); //$NON-NLS-0$
-					var text = document.createTextNode(command.name);
-					element.appendChild(text);
-				}
+				renderButton();
 			}
 			var onClick = callback || command.callback;
 			if (onClick) {
+				var done = function() {onClick.call(commandInvocation.handler, commandInvocation);};
 				command.onClick = onClick;
 				clickTarget.addEventListener("click", function(e) { //$NON-NLS-0$
-					if (command.type === "toggle") { //$NON-NLS-0$
-						window.setTimeout(function() {
+					if (command.type === "switch" || command.type === "toggle") { //$NON-NLS-0$
+						if (command.type === "toggle") { //$NON-NLS-0$
+							command.checked = !command.checked;
+							if (command.checked) {
+								element.classList.remove("orionPushToggleOff"); //$NON-NLS-0$
+								element.classList.add("orionPushToggleOn"); //$NON-NLS-0$
+								element.classList.add("orionToggleAnimate"); //$NON-NLS-0$
+							} else {
+								element.classList.remove("orionPushToggleOn"); //$NON-NLS-0$
+								element.classList.add("orionPushToggleOff"); //$NON-NLS-0$
+								element.classList.add("orionToggleAnimate"); //$NON-NLS-0$
+							}
+						}else {
 							command.checked = input.checked;
-							onClick.call(commandInvocation.handler, commandInvocation);
-						}, 310);
+						}
+						window.setTimeout(done, 310);
 					} else {
-						onClick.call(commandInvocation.handler, commandInvocation);
+						done();
 					}
 					e.stopPropagation();
 				}, false);

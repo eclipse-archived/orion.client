@@ -1454,7 +1454,7 @@ define([
 			callback: function(/*data*/) {
 				this.editor.togglePaneOrientation();
 			}.bind(this),
-			type: "toggle", //$NON-NLS-0$
+			type: "switch", //$NON-NLS-0$
 			imageClass: "core-sprite-split-pane-orientation", //$NON-NLS-0$
 			tooltip: messages["TogglePaneOrientationTooltip"],
 			visibleWhen: function() {
