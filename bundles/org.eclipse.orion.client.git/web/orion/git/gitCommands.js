@@ -696,14 +696,14 @@ var exports = {};
 							var isFirstPath = true;
 							for(var path in result.FailingPaths){
 								if(!isFirstPath){
-									paths+=", ";
+									paths+=", "; //$NON-NLS-0$
 								}
 								isFirstPath = false;
 								paths+=path;
 							}
 							if(!isFirstPath){
 								display.Severity = "Error"; //$NON-NLS-0$
-								display.Message+= ". " + i18nUtil.formatMessage(messages['Failing paths: ${0}'], paths);
+								display.Message+= ". " + i18nUtil.formatMessage(messages['Failing paths: ${0}'], paths); //$NON-NLS-0$
 							}
 						}
 						display.Message += "</span>"; //$NON-NLS-0$
@@ -1221,7 +1221,8 @@ var exports = {};
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 				var headLocation = item.Location.replace(item.Name, "HEAD"); //$NON-NLS-0$
-				progress.progress(service.doCherryPick(headLocation, item.Name), "Cherry picking " + item.Name).then(function(jsonData) {
+				var msg = i18nUtil.formatMessage(messages["CherryPicking"], item.Name);
+				progress.progress(service.doCherryPick(headLocation, item.Name), msg).then(function(jsonData) {
 					var display = {};
 					if (jsonData.Result === "OK") { //$NON-NLS-0$
 						// operation succeeded
@@ -1238,7 +1239,7 @@ var exports = {};
 					else if (jsonData.Result === "CONFLICTING") { //$NON-NLS-0$
 						display.Severity = "Warning"; //$NON-NLS-0$
 						display.HTML = true;
-						display.Message = "<span>" + jsonData.Result + messages[". Some conflicts occurred"] +"</span>"; //$NON-NLS-0$
+						display.Message = "<span>" + jsonData.Result + messages[". Some conflicts occurred"] +"</span>"; //$NON-NLS-1$ //$NON-NLS-0$
 					} else if (jsonData.Result === "FAILED") { //$NON-NLS-0$
 						display.Severity = "Error"; //$NON-NLS-0$
 						display.HTML = true;
@@ -1248,14 +1249,14 @@ var exports = {};
 							var isFirstPath = true;
 							for(var path in jsonData.FailingPaths){
 								if(!isFirstPath){
-									paths+=", ";
+									paths+=", "; //$NON-NLS-0$
 								}
 								isFirstPath = false;
 								paths +=path;
 							}
 							if(!isFirstPath){
-								display.Message+= ". " + i18nUtil.formatMessage(messages['Failing paths: ${0}'], paths);
-								}
+								display.Message+= ". " + i18nUtil.formatMessage(messages['Failing paths: ${0}'], paths); //$NON-NLS-0$
+							}
 						}
 						display.Message += "</span>"; //$NON-NLS-0$
 					}
@@ -1287,7 +1288,8 @@ var exports = {};
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 				var headLocation = item.Location.replace(item.Name, "HEAD"); //$NON-NLS-0$
-				progress.progress(service.doRevert(headLocation, item.Name), "Reverting " + item.Name).then(function(jsonData) {
+				var msg = i18nUtil.formatMessage(messages["RevertingCommit"], item.Name);
+				progress.progress(service.doRevert(headLocation, item.Name), msg).then(function(jsonData) {
 					var display = [];
 					if (jsonData.Result === "OK") { //$NON-NLS-0$
 						// operation succeeded
@@ -1321,6 +1323,7 @@ var exports = {};
 	
 
 	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
+		toolbarId = selectionTools = null;//make warning go away
 
 		function displayErrorOnStatus(error) {
 			var display = {};

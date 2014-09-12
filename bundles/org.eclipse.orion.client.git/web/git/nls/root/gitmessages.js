@@ -375,6 +375,8 @@ define({
 	"Delete the tag from the repository": "Delete the tag from the repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"Are you sure you want to delete tag ${0}?": "Are you sure you want to delete tag ${0}?", //$NON-NLS-0$  //$NON-NLS-1$
 	"Cherry-Pick": "Cherry-Pick", //$NON-NLS-0$  //$NON-NLS-1$
+	"CherryPicking": "Cherry Picking commit: ${0}", //$NON-NLS-0$  //$NON-NLS-1$
+	"RevertingCommit": "Reverting commit: ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Apply the change introduced by the commit to your active branch": "Apply the change introduced by the commit to your active branch", //$NON-NLS-0$  //$NON-NLS-1$
 	"Nothing changed.": "Nothing changed.", //$NON-NLS-0$  //$NON-NLS-1$
 	". Some conflicts occurred": ". Some conflicts occurred.", //$NON-NLS-0$  //$NON-NLS-1$
