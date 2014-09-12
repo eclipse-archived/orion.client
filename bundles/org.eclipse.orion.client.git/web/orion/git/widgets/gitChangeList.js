@@ -343,10 +343,11 @@ define([
 			case "applyPatch":  //$NON-NLS-0$
 			case "stage": //$NON-NLS-0$
 			case "unstage": //$NON-NLS-0$
-			case "checkoutFiles": //$NON-NLS-0$
+			case "checkoutFile": //$NON-NLS-0$
 			case "stash": //$NON-NLS-0$
 			case "applyStash": //$NON-NLS-0$
 			case "popStash": //$NON-NLS-0$
+			case "ignoreFile": //$NON-NLS-0$
 				this.changedItem(event.items);
 				break;
 			}

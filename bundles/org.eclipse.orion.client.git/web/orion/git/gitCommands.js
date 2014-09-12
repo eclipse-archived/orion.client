@@ -1908,15 +1908,6 @@ var exports = {};
 	};
 
 	exports.createGitStatusCommands = function(serviceRegistry, commandService, explorer) {
-		
-		var refresh = function(data, items) { 
-			if (data && data.handler.changedItem) {
-				data.handler.changedItem(items);
-			} else { 
-				explorer.changedItem(items); 
-			}
-		};
-		
 		var commitOptions = {
 			serviceRegistry : serviceRegistry,
 			commandService : commandService,
@@ -2177,7 +2168,7 @@ var exports = {};
 								messages['Resetting local changes']);
 							return deferred.then(
 								function(){
-									dispatchModelEventOn({type: "modelChanged", action: "checkoutFiles", paths: paths}); //$NON-NLS-1$ //$NON-NLS-0$
+									dispatchModelEventOn({type: "modelChanged", action: "checkoutFile", items: items}); //$NON-NLS-1$ //$NON-NLS-0$
 								}, displayErrorOnStatus
 							);
 						});				
@@ -2222,7 +2213,7 @@ var exports = {};
 							messages['Resetting local changes']);
 						
 						return deferred.then(function(){
-							refresh(data, items);
+							dispatchModelEventOn({type: "modelChanged", action: "ignoreFile", items: items}); //$NON-NLS-1$ //$NON-NLS-0$
 						}, displayErrorOnStatus);
 						
 					}, displayErrorOnStatus
