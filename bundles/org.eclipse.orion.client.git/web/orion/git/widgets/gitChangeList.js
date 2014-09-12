@@ -343,6 +343,7 @@ define([
 			case "applyPatch":  //$NON-NLS-0$
 			case "stage": //$NON-NLS-0$
 			case "unstage": //$NON-NLS-0$
+			case "checkoutFiles": //$NON-NLS-0$
 				this.changedItem(event.items);
 				break;
 			}

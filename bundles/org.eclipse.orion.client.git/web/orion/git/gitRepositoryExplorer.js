@@ -115,6 +115,7 @@ define([
 			case "unstage": //$NON-NLS-0$
 			case "commit": //$NON-NLS-0$
 			case "reset": //$NON-NLS-0$
+			case "checkoutFiles": //$NON-NLS-0$
 				break;
 			case "cherrypick": //$NON-NLS-0$
 			default:

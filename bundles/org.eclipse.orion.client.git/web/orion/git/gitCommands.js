@@ -2175,7 +2175,7 @@ var exports = {};
 								messages['Resetting local changes']);
 							return deferred.then(
 								function(){
-									explorer.changedItem(items);
+									dispatchModelEventOn({type: "modelChanged", action: "checkoutFiles", paths: paths}); //$NON-NLS-1$ //$NON-NLS-0$
 								}, displayErrorOnStatus
 							);
 						});				
