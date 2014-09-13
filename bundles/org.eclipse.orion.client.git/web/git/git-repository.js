@@ -63,8 +63,6 @@ mBootstrap.startup().then(function(core) {
 	var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 	var progress = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 	var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	
-	// ...
 	var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
 	var gitClient = new mGitClient.GitService(serviceRegistry);
 	var fileClient = new mFileClient.FileClient(serviceRegistry);
@@ -91,37 +89,6 @@ mBootstrap.startup().then(function(core) {
 	mGitCommands.createGitClonesCommands(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", fileClient); //$NON-NLS-1$ //$NON-NLS-0$
 	mGitCommands.createGitStatusCommands(serviceRegistry, commandRegistry, explorer);
 	mGitCommands.createSharedCommands(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", fileClient); //$NON-NLS-1$ //$NON-NLS-0$
-
-	// object contributions
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.openCloneContent", 100); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.pull", 200); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.applyStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.dropStash", 200); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.popStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
-	
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.removeBranch", 1000); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.removeRemoteBranch", 1000); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.checkoutTag", 200); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.removeTag", 1000); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.checkoutBranch", 200); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.applyPatch", 200); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.git.deleteClone", 1000); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.fetchRemote", 500); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.fetch", 500); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.merge", 600); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.mergeSquash", 700); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.rebase", 700); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.resetIndex", 800); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.undoCommit", 100); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.removeRemote", 1000); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.deleteConfigEntryCommand", 1000); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.editConfigEntryCommand", 200); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.addTag", 3); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.cherryPick", 4); //$NON-NLS-1$ //$NON-NLS-0$
-//	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.revert", 5); //$NON-NLS-1$ //$NON-NLS-0$
-	
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.openGitDiff", 2000); //$NON-NLS-1$ //$NON-NLS-0$
-	commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showCurrent", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	var params = PageUtil.matchResourceParameters();
 	if (params["createProject.name"] === undefined) { //$NON-NLS-0$

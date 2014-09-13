@@ -168,9 +168,12 @@ define([
 			var root = this.root;
 			var section = this.section;
 			var actionsNodeScope = this.sectionActionScopeId || section.actionsNode.id;
+			var commandRegistry = this.commandService;
+			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.deleteConfigEntryCommand", 1000); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.editConfigEntryCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
 			if (root.mode === "full"){ //$NON-NLS-0$
-				this.commandService.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.addConfigEntryCommand", 1000); //$NON-NLS-0$
-				this.commandService.renderCommands(actionsNodeScope, actionsNodeScope, root.repository, this, "button"); //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.addConfigEntryCommand", 1000); //$NON-NLS-0$
+				commandRegistry.renderCommands(actionsNodeScope, actionsNodeScope, root.repository, this, "button"); //$NON-NLS-0$
 			}
 		}
 	});

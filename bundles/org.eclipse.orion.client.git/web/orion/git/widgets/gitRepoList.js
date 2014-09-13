@@ -179,7 +179,7 @@ define([
 		this.handleError = options.handleError;
 		this.gitClient = options.gitClient;
 		this.fileClient = options.fileClient;
-		this.simgleRepository = options.simgleRepository;
+		this.singleRepository = options.singleRepository;
 		this.progressService = options.progressService;
 		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
 			switch (event.action) {
@@ -260,11 +260,12 @@ define([
 			if (!section) return;
 			var commandRegistry = this.commandService;
 			var actionsNodeScope = this.sectionActionScodeId || section.actionsNode.id;
-			if (this.simgleRepository) {
+//			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.pull", 100); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.git.deleteClone", 200); //$NON-NLS-1$ //$NON-NLS-0$
+			if (this.singleRepository) {
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.popStash", 100); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.applyPatch", 200); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.orion.git.pull", 300); //$NON-NLS-1$ //$NON-NLS-0$
-//				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.git.deleteClone", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
 				commandRegistry.addCommandGroup(actionsNodeScope, "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(actionsNodeScope, "eclipse.cloneGitRepository", 100, "eclipse.gitGroup", false, null, new mCommandRegistry.URLBinding("cloneGitRepository", "url")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -377,7 +378,7 @@ define([
 						});
 					}
 
-					if (explorer.simgleRepository) {
+					if (explorer.singleRepository) {
 						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 					} else {
 						var actionsArea = document.createElement("div"); //$NON-NLS-0$
