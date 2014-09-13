@@ -497,6 +497,7 @@ table .sectionTable {
 .gitCommitTagClose {
 	padding: 0;
 	padding-left: 5px;
+	cursor: pointer;
 }
 
 .gitCommitTagClose:hover {
