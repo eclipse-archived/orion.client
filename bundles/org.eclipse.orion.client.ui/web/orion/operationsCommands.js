@@ -68,7 +68,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/co
 		
 			var removeCompletedOperationsCommand = new mCommands.Command({
 				name : messages["Remove Completed"],
-				tooltip : messages["Remove all completed operations"],
+				tooltip : messages["rmCompleted"],
 				id : "eclipse.removeCompletedOperations", //$NON-NLS-0$
 				callback : function(data) {
 					operationsClient.removeCompletedOperations().then(function(item){
@@ -83,7 +83,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/co
 			
 			var removeOperationCommand = new mCommands.Command({
 				name : messages["Remove"],
-				tooltip : messages["Remove operations from the operations list."],
+				tooltip : messages["rmFromOpList"],
 				imageClass: "core-sprite-delete", //$NON-NLS-0$
 				id : "eclipse.removeOperation", //$NON-NLS-0$
 				callback : function(data) {
@@ -108,7 +108,7 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/co
 			
 			var cancelOperationCommand = new mCommands.Command({
 				name : messages["Cancel"],
-				tooltip : messages["Cancel operations from the operations list."],
+				tooltip : messages["CancelOp"],
 				imageClass: "core-sprite-stop", //$NON-NLS-0$
 				id : "eclipse.cancelOperation", //$NON-NLS-0$
 				callback : function(data) {

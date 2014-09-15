@@ -96,8 +96,7 @@ function(messages, Deferred, mGitCommon, i18nUtil) {
 				if (error.status === 401) {
 					display.HTML = true;
 					display.Message = "<span>"; //$NON-NLS-0$
-					display.Message += i18nUtil.formatMessage(messages["Authentication required for: ${0}. ${1} and re-try the request."], resp.label, "<a target=\"_blank\" href=\"" + resp.SignInLocation //$NON-NLS-1$ //$NON-NLS-0$
-					+ "\">" + messages["Login"] + "</a>") + "</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					display.Message += i18nUtil.formatMessage("Authentication required for: ${0}. <a target=\"_blank\" href=\"${1}\">${2}</a> and re-try the request. </span>", resp.label, resp.SignInLocation, messages["Login"]); //$NON-NLS-0$
 				} else {
 					display.Message = resp.DetailedMessage ? resp.DetailedMessage : (resp.Message ? resp.Message : messages["Problem while performing the action"]);
 				}

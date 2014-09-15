@@ -24,7 +24,7 @@ define({
 	"Enable the site configuration to launch an Orion server running your local client code": "Enable the site configuration to launch an Orion server running your local client code",
 	"Save": "Save",
 	"Save the site configuration": "Save the site configuration",
-	"Choose folder...": "Choose folder\u2026",
+	"ChooseFolder": "Choose folder\u2026",
 	"ConvertToSelfHostingTitle": "Locate Required Folders",
 	"SelectRequiredFoldersSingle": "Locate the following required folder in your workspace.",
 	"SelectRequiredFolders": "Locate the following required folders in your workspace.",

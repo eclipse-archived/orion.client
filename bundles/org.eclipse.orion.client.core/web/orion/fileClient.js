@@ -21,7 +21,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 	function _doServiceCall(fileService, funcName, funcArgs) {
 		//if the function is not implemented in the file service, we throw an exception to the caller
 		if(!fileService[funcName]){
-			throw funcName + messages[" is not supported in this file system"];
+			throw funcName + messages["NotSupportFileSystem"];
 		}
 		return fileService[funcName].apply(fileService, funcArgs);
 	}
@@ -29,11 +29,11 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 	function _copy(sourceService, sourceLocation, targetService, targetLocation) {
 		
 		if (!sourceService.readBlob) {
-			throw messages["source file service does not support binary read"];
+			throw messages["SrcNotSupportBinRead"];
 		}
 
 		if (!targetService.writeBlob) {
-			throw messages["target file service does not support binary write"];
+			throw messages["TargetNotSupportBinWrite"];
 		}
 	
 		if (sourceLocation[sourceLocation.length -1] !== "/") { //$NON-NLS-0$

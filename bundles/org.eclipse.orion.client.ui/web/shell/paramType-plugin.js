@@ -172,7 +172,7 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/shell/Shell", "orion/
 					status = mShell.CompletionStatus.PARTIAL;
 				} else {
 					status = mShell.CompletionStatus.ERROR;
-					message = i18nUtil.formatMessage(messages["'${0}' is not valid"], string);
+					message = i18nUtil.formatMessage(messages["notValid"], string);
 				}
 				return {
 					value: exactMatch ? exactMatch.value : undefined,

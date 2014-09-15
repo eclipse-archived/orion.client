@@ -574,7 +574,7 @@ define([
 					if (entry.isFile) {
 						// can't drop files directly into workspace.
 						if (targetIsRoot){ //$NON-NLS-0$
-							internalErrorHandler(messages["You cannot copy files directly into the workspace.  Create a folder first."]); //$NON-NLS-0$
+							internalErrorHandler(messages["CreateFolderErr"]); //$NON-NLS-0$
 						} else {
 							entry.file(function(file) {
 								if (deferredWrapper) {
@@ -583,7 +583,7 @@ define([
 									var unzip = file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name)); //$NON-NLS-1$ //$NON-NLS-0$
 									var handlers = {
 										error: function(event) {
-											var errorMessage = messages["Uploading the following file failed: "] + file.name;
+											var errorMessage = messages["UploadingFileErr"] + file.name;
 											if (statusService) {
 												statusService.setProgressResult({Severity: "Error", Message: errorMessage}); //$NON-NLS-0$ 
 											} else {
@@ -682,9 +682,9 @@ define([
 							// The File API in HTML5 doesn't specify a way to check explicitly (when this code was written).
 							// see http://www.w3.org/TR/FileAPI/#file
 							if (!file.size && !file.type) {
-								errorHandler(i18nUtil.formatMessage(messages["Did not drop ${0}.  Folder drop is not supported in this browser."], file.name)); //$NON-NLS-0$
+								errorHandler(i18nUtil.formatMessage(messages["FolderDropNotSupported"], file.name)); //$NON-NLS-0$
 							} else if (mFileUtils.isAtRoot(item.Location)){ //$NON-NLS-0$
-								errorHandler(messages["You cannot copy files directly into the workspace.  Create a folder first."]); //$NON-NLS-0$ 
+								errorHandler(messages["CreateFolderErr"]); //$NON-NLS-0$ 
 							} else {
 								explorer._uploadFile(item, file, true);
 							}
@@ -741,7 +741,7 @@ define([
 							this.changedItem(targetItem);
 						}.bind(this),
 						error: function(event) {
-							var errorMessage = messages["Uploading the following file failed: "] + file.name; //$NON-NLS-0$
+							var errorMessage = messages["UploadingFileErr"] + file.name; //$NON-NLS-0$
 							if (statusService) {
 								statusService.setProgressResult({Severity: "Error", Message: errorMessage});	//$NON-NLS-0$ 
 							} else {

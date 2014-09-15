@@ -277,7 +277,7 @@ define([
 					onDelete: function(item, evtTarget) {
 						this._removeRecentSearch(item, evtTarget);
 					}.bind(this),
-					deleteToolTips: messages['Click or use delete key to delete the search term']
+					deleteToolTips: messages['DeleteSearchTrmMsg']
 				});
 	    	}
 	    },

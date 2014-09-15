@@ -83,7 +83,7 @@ define([
 	provider.registerService('orion.navigate.command', null, {
 		id: 'orion.nonnls.externalize',
 		nameKey: 'Strings Xtrnalizr',
-		tooltipKey: 'Externalize Strings from JavaScript files in this folder',
+		tooltipKey: 'Externalize strings',
 		nls: 'orion/navigate/nls/messages',
 		forceSingleItem: true,
 		validationProperties:

@@ -235,7 +235,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 			if(this._compareResults.length > 0){
 				this._loadOneFileMetaData(0,function(){that._renderUI(); that._addOptions();});
 			} else {
-				var message = i18nUtil.formatMessage(messages["${0} files compared. The two folders are identical."], this._totalFiles);
+				var message = i18nUtil.formatMessage(messages["NoFoldersIdentical"], this._totalFiles);
 			    var parentNode = lib.node(this.parentId);
 			    parentNode.textContent = "";
 			    var textBold = _createElement('b', null, null, parentNode); //$NON-NLS-1$ //$NON-NLS-0$
