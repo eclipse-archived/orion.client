@@ -107,7 +107,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 	function _doServiceCall(fileService, funcName, funcArgs) {
 		//if the function is not implemented in the file service, we throw an exception to the caller
 		if(!fileService[funcName]){
-			throw funcName + messages[" is not supported in this file system"];
+			throw i18nUtil("${0} is not supported in this file system", funcName);
 		}
 		return fileService[funcName].apply(fileService, funcArgs);
 	}

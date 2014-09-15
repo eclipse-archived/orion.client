@@ -70,7 +70,7 @@ define(['i18n!orion/compare/nls/messages', 'orion/Deferred'], function(messages,
 					return _services[i];
 				}
 			}
-			throw messages["No Matching DiffService for location:"] + location;
+			throw messages["NoDiffServiceLocationMatched"] + location;
 		};
 	}
 

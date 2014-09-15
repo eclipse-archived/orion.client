@@ -322,7 +322,7 @@ define([
 									var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length + status.Missing.length;
 									var staged = status.Changed.length + status.Added.length + status.Removed.length;
 									extraDescriptions.push(((unstaged > 0 || staged > 0) 
-										? i18nUtil.formatMessage(messages["${0} file(s) to stage and ${1} file(s) to commit."], unstaged, staged)
+										? i18nUtil.formatMessage(messages["NumFilesStageAndCommit"], unstaged, staged)
 										: messages["Nothing to commit."]));
 								}
 								var commitsState = repo.CommitsToPush;

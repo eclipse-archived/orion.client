@@ -334,7 +334,7 @@ exports.ResourceComparer = (function() {
 			if(cmdProvider && cmdProvider.getOptions().commandSpanId) {
 				var commandSpanId = cmdProvider.getOptions().commandSpanId;
 				var generateLinkCommand = new mCommands.Command({
-					tooltip : messages["Generate link of the current diff"],
+					tooltip : messages["GenerateCurDiffLink"],
 					name: messages["Generate Link"],
 					//imageClass : "core-sprite-link", //$NON-NLS-0$
 					id: "orion.compare.generateLink", //$NON-NLS-0$

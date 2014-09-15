@@ -171,7 +171,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/PageUtil', 'orion/objects', '
 				}
 			}
 			
-			this.pluginDescription.textContent = headers.description || messages['A plugin for Orion'];
+			this.pluginDescription.textContent = headers.description || messages['OrionPlugin'];
 
 			// Additional Links
 			if (headers.website) {
