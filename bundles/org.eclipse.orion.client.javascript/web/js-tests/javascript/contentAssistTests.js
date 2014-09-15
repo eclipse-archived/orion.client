@@ -5510,7 +5510,7 @@ define([
 		});
 		
 		/**
-		 * Tests line comments that have 
+		 * Tests line comments
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
 		 * @since 7.0
 		 */
@@ -5520,7 +5520,7 @@ define([
 		});
 		
 		/**
-		 * Tests line comments that have 
+		 * Tests line comments
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
 		 * @since 7.0
 		 */
@@ -5530,7 +5530,7 @@ define([
 		});
 		
 		/**
-		 * Tests line comments that have 
+		 * Tests line comments
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
 		 * @since 7.0
 		 */
@@ -5540,7 +5540,7 @@ define([
 		});
 		
 		/**
-		 * Tests line comments that have 
+		 * Tests line comments
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
 		 * @since 7.0
 		 */
@@ -5550,12 +5550,42 @@ define([
 		});
 		
 		/**
-		 * Tests line comments that have 
+		 * Tests line comments
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=443521
 		 * @since 7.0
 		 */
 		it("test line comment 5", function() {
 			var results = computeContentAssist("// es ", "es", 5);
+			testProposals(results, []);
+		});
+		
+		/**
+		 * Tests line comments
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444001
+		 * @since 7.0
+		 */
+		it("test line comment 6", function() {
+			var results = computeContentAssist("// .", "", 4);
+			testProposals(results, []);
+		});
+		
+		/**
+		 * Tests line comments
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444001
+		 * @since 7.0
+		 */
+		it("test line comment 7", function() {
+			var results = computeContentAssist("// . es", "", 4);
+			testProposals(results, []);
+		});
+		
+		/**
+		 * Tests line comments
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444001
+		 * @since 7.0
+		 */
+		it("test line comment 8", function() {
+			var results = computeContentAssist("// es .", "", 7);
 			testProposals(results, []);
 		});
 	});
