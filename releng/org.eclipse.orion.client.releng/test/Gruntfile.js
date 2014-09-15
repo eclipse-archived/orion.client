@@ -137,8 +137,8 @@ module.exports = function(grunt) {
 		!(pkg.browsers) && grunt.fatal("Required property `browsers` not found in package.json");
 		grunt.verbose.write("OK");
 	});
-	// Workaround for https://github.com/axemclion/grunt-saucelabs/issues/116
 	grunt.registerTask("wait", "Wait for exit", function() {
+		allTestsComplete = true;
 		if (grunt.config.get("quit")) {
 			grunt.verbose.writeln("'wait' task exiting...");
 		} else {
