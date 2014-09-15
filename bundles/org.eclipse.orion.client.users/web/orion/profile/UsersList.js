@@ -174,7 +174,7 @@ eclipse.UsersRenderer = (function() {
 			var diskUsageTextContent = '\u00a0'; //$NON-NLS-0$
 			if (diskUsage !== " ") {
 				var diskUsageTimestamp = item.diskUsageTimestamp ? new Date(parseInt(item.diskUsageTimestamp, 10)).toLocaleString() : '\u00a0'; //$NON-NLS-0$
-				diskUsageTextContent = i18nUtil.formatMessage(messages["${0} ( last calculated ${1} )"], diskUsage, diskUsageTimestamp); //$NON-NLS-1$ //$NON-NLS-0$
+				diskUsageTextContent = i18nUtil.formatMessage(messages["A(lastCalculated B)"], diskUsage, diskUsageTimestamp); //$NON-NLS-1$ //$NON-NLS-0$
 			};
 			td.textContent = diskUsageTextContent;
 			return td;

@@ -62,7 +62,7 @@ searchUtils.getSearchParams = function(searcher, searchStr, advOptions){
 			return searchParams;
 		}
 	} else {
-		window.alert(messages["Can't search: no search service is available"]);
+		window.alert(messages["NoSearchAvailableErr"]);
 	}
 	
 	return null;

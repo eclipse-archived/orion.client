@@ -110,20 +110,20 @@ function(messages, require, lib, popupdialog, mOperationsCommands) {
 			switch (operation.type) {
 				case "Warning": //$NON-NLS-0$
 					operationIcon.classList.add("core-sprite-warning"); //$NON-NLS-0$
-					operationIcon.setAttribute("aria-label", messages["Operation resulted in a warning."]); //$NON-NLS-0$
+					operationIcon.setAttribute("aria-label", messages["OpWarning"]); //$NON-NLS-0$
 					break;
 				case "error": //$NON-NLS-0$
 					operationIcon.classList.add("core-sprite-error"); //$NON-NLS-0$
-					operationIcon.setAttribute("aria-label", messages["Operation resulted in an error."]); //$NON-NLS-0$
+					operationIcon.setAttribute("aria-label", messages["OpErr"]); //$NON-NLS-0$
 					break;
 				case "loadstart":
 				case "progress":
 					operationIcon.classList.add("core-sprite-start"); //$NON-NLS-0$
-					operationIcon.setAttribute("aria-label", messages["Operation is running."]); //$NON-NLS-0$
+					operationIcon.setAttribute("aria-label", messages["OpRunning"]); //$NON-NLS-0$
 					break;
 				case "abort":
 					operationIcon.classList.add("core-sprite-stop"); //$NON-NLS-0$
-					operationIcon.setAttribute("aria-label", messages["Operation is canceled."]); //$NON-NLS-0$
+					operationIcon.setAttribute("aria-label", messages["OpCancelled"]); //$NON-NLS-0$
 					break;
 				case "load":
 				case "loadend":

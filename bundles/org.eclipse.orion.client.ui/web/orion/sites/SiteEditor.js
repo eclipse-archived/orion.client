@@ -311,7 +311,7 @@ objects.mixin(SiteEditor.prototype, {
 			choices.push({}); // Separator
 		}
 		choices.push({
-			name: messages["Choose folder..."],
+			name: messages["ChooseFolder"],
 			imageClass: "core-sprite-folder", //$NON-NLS-0$
 			callback: function() {
 				var dialog = new DirPrompter.DirectoryPrompterDialog({
