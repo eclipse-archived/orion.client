@@ -339,7 +339,7 @@ a.breadcrumb.currentLocation {
 	vertical-align: baseline;
 	cursor: pointer;
 	display: inline-block;
-	padding: 1px;
+	padding: 3px;
 	padding-top:0;
 	padding-bottom: 3px;
 	-webkit-touch-callout: none;
@@ -359,7 +359,7 @@ a.breadcrumb.currentLocation {
 
 .orionToggleOff {
 	color: #222;
-	border-radius: 2px;
+	border-radius: 3px;
 	vertical-align:middle;
 	-webkit-animation-duration: .3s; 
 	animation-duration: .3s; 
@@ -371,9 +371,9 @@ a.breadcrumb.currentLocation {
 
 .orionToggleOn {
 	color: #222;
-	border: 1px solid #aaa; 
-	background-color: #ddd;
-	border-radius: 2px;
+	background-color: whitesmoke;
+	border-radius: 3px;
+	box-shadow: inset 1px 1px 2px 1px rgba(0,0,0,0.3);
 	vertical-align:middle;
 	-webkit-animation-duration: .3s; 
 	animation-duration: .3s; 
@@ -381,6 +381,16 @@ a.breadcrumb.currentLocation {
 	animation-fill-mode: both; 
 	-webkit-animation-timing-function: linear; 
 	animation-timing-function: linear; 
+}
+
+.orionToggleOn:hover {
+	background: white;
+	box-shadow: inset 0 0 1px 1px rgba(0,0,0,0.2);
+}
+
+.orionToggleOff:hover {
+	background: whitesmoke;
+	box-shadow: inset 0 0 1px 1px rgba(0,0,0,0.2);
 }
 
 .orionToggleAnimate {
