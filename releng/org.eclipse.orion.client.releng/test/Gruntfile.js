@@ -152,15 +152,21 @@ module.exports = function(grunt) {
 	grunt.registerTask("default", "test");
 
 	/**
-	 * Fixes up the <testsuite> name
+	 * For Jenkins to parse out nice packages instead of (root), we have to add classname="packageName.className"
+	 * to the <testsuite> element, and prefix it onto every <testcase>'s @classname.
 	 * @param {String} xml The xunit test result
-	 * @returns {String} The test result with platform info and test URL prepended onto the testsuite name
+	 * @returns {String} The test result, fixed up
 	 */
 	function nicerName(xml, sauceResult, testUrl) {
-		return xml.replace(/<testsuite\s+name="([^"]+)"/, function(match, oldName) {
-			var newName = oldName + " - " + testUrl + " - " + sauceResult.platform.join(" ");
-			return "<testsuite name=\"" + newName + "\"";
-		});
+		function sanitize(s) {
+			return s.replace(/[^A-Za-z0-9_\.]/g, "_");
+		}
+		testUrl = testUrl.replace(/(^\/)|(\.html$)/g, "");
+		var platform = sanitize(sauceResult.platform.join(" ")),
+		    packageName = sanitize(fmt("%s.%s", platform, testUrl));
+		return xml
+			.replace(/(<testsuite\s+name="[^"]+")/g, fmt("$1 classname=\"%s\"", packageName))
+			.replace(/<testcase classname="([^"]+)"/g, fmt("<testcase classname=\"%s.$1\"", packageName));
 	}
 
 	/**
