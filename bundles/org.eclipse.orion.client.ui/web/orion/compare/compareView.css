@@ -247,6 +247,6 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.compare-sprite-inline-2way:before{ content: '\E01A'; }
+.compare-sprite-inline-2way:before{ content: '\E04C'; }
 .compare-sprite-inline-2way:after{ content: '\E04A'; }
 
