@@ -29,7 +29,7 @@ define([
 		filterDiv.appendChild(filter);
 		var button = document.createElement("button"); //$NON-NLS-0$
 		button.tabIndex = -1;
-		button.className = "core-sprite-search searchButton"; //$NON-NLS-0$
+		button.className = "core-sprite-filter searchButton"; //$NON-NLS-0$
 		filterDiv.appendChild(button);
 		var doFilter = function() {
 			callback(filter.value);
