@@ -1027,7 +1027,10 @@ define([
 						case "Incoming":  //$NON-NLS-0$
 						case "Outgoing":  //$NON-NLS-0$
 							Deferred.when(model.syncCommits || model._getSync(), function(syncCommits) {
-								title.textContent =  i18nUtil.formatMessage(messages[item.Type + "WithCount"], item.Type === "Outgoing" ? syncCommits.AheadCount : syncCommits.BehindCount); //$NON-NLS-0$  //$NON-NLS-1$
+								var count = item.Type === "Outgoing" ? syncCommits.AheadCount : syncCommits.BehindCount; //$NON-NLS-0$
+								if (count !== undefined) {
+									title.textContent =  i18nUtil.formatMessage(messages[item.Type + "WithCount"], count); //$NON-NLS-0$
+								}
 							});
 							break;
 						default:
