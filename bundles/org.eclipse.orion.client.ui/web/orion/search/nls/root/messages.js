@@ -103,5 +103,7 @@ define({
 	"Choose a Folder": "Choose a Folder",
 	"Remove from search results": "Remove from search results",
 	"^ Edit Search": "^ Edit Search",
-	"Preview: " : "Preview: "
+	"Preview: " : "Preview: ",
+	"fullPath": "Show Full Path",
+	"toggleFullPath": "Show/hide full path"
 });

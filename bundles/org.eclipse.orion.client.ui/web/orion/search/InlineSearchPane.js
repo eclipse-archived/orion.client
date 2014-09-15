@@ -35,6 +35,7 @@ define([
 		this._serviceRegistry = options.serviceRegistry;
 		this._commandRegistry = options.commandRegistry;
 		this._fileClient = options.fileClient;
+		this._preferences = options.preferences;
 		this._initialize();
 	}
 
@@ -68,7 +69,7 @@ define([
 			this._replaceCompareDiv = lib.node("replaceCompareDiv"); //$NON-NLS-0$
 
 			this._searcher = new mSearchClient.Searcher({serviceRegistry: this._serviceRegistry, commandService: this._commandRegistry, fileService: this._fileClient});
-			this._searchResultExplorer = new InlineSearchResultExplorer(this._serviceRegistry, this._commandRegistry, this);
+			this._searchResultExplorer = new InlineSearchResultExplorer(this._serviceRegistry, this._commandRegistry, this, this._preferences);
 			this._render();
 		},
 		

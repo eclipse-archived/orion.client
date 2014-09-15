@@ -64,11 +64,11 @@
 }
 
 .searchWrapper.searchOptionsHidden > .searchResultsWrapperDiv{
-	height: calc(100% - 76px);
+	height: calc(100% - 78px);
 }
 
 .replaceModeActive > .searchResultsWrapperDiv {
-	height: calc(100% - 220px - 60px - 38px); /* subtract height of search options and replace box */
+	height: calc(100% - 220px - 60px - 40px); /* subtract height of search options and replace box */
 }
 
 .searchWrapper > .comboTextInputWrapper {
@@ -148,6 +148,7 @@
 
 .toggleSearchOptionsLink {
 	margin: 5px;
+	white-space: nowrap;
 }
 
 .searchMainOptionBlock {
@@ -252,18 +253,64 @@
 	height: calc(100% - 14px);
 }
 
-.fileNameSpan {
-	display: inline-block;
-	font-weight: bold;
+.filePathSpan {
+	display: inline-flex;
+	display: -webkit-inline-flex;		/* Safari */
 	outline: none;
 	padding: 2px;
 	vertical-align: middle;
+	width: 100%;
+}
+
+.filePathSpan > a.navlink {
+	align-items: baseline;
+	-webkit-align-items: baseline;		/* Safari */
+	display: inline-flex;
+	display: -webkit-inline-flex;		/* Safari */
+	padding: 2px 10px 2px 2px;
+}
+
+.fullPathSpan {
+	color: #666 !important;
+	display: none;
+	flex-grow: 0;
+	flex-shrink: 2;
+	font-size: 8pt; 
+	font-weight: normal;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.showFullPath .fullPathSpan {
+	display: inline-block;
+	min-width: 20px;
+}
+
+.fileNameSpan {
+	flex-grow: 0;
+	flex-shrink: 0;
+	font-weight: bold;
+	margin-right: 5px;
 }
 
 .fileParentSpan {
 	color: #666 !important;
+	flex-grow: 0;
+	flex-shrink: 0;
 	font-size: 8pt; 
 	font-weight: normal;
+}
+
+.ellipsisSpan {
+	color: #666 !important;
+	flex-grow: 0;
+	flex-shrink: 0;
+	font-size: 8pt; 
+	font-weight: normal;
+}
+
+.showFullPath .ellipsisSpan {
+	display: none;
 }
 
 .replaceFileNameSpan {
@@ -356,8 +403,40 @@
 .searchPageActions {
 	display: block;
 	margin: 5px 0;
+	white-space: nowrap;
 }
 
 .searchPageActions > .orionButton > .core-sprite-move-down, .searchPageActions > .orionButton > .core-sprite-move-up {
 	padding-left: 0;
+}
+
+.sprite-toggle-full-path {
+	font-size: 15px;
+	font-weight: bold;
+	line-height: normal;
+	vertical-align:middle;
+	color: #777;
+	padding-right:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.orionToggleInner.sprite-toggle-full-path:before{
+	content: '/*/';
+	padding-bottom: 0;
+	padding-left: 3px;
+}
+.orionToggleInner.sprite-toggle-full-path:after{
+	content: '.../';
+	padding-bottom: 0;
+	padding-right: 3px;
+}
+
+.orionToggle {
+	display: inline-block;
+	margin-bottom: 3px;
+	vertical-align: bottom;
 }

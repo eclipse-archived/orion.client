@@ -182,16 +182,25 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     	}
     	return renderName;
     };
+    
+    SearchResultRenderer.prototype._getFileNameElement = function(item) {
+    	var renderName = this._getFileRenderName(item);
+    	var fileSpan = document.createElement("span"); //$NON-NLS-0$
+    	
+    	fileSpan.classList.add("fileNameSpan"); //$NON-NLS-0$
+		fileSpan.appendChild(document.createTextNode(renderName));
+		
+		return fileSpan;
+    };
 
     SearchResultRenderer.prototype.replaceFileElement = function(item) {
-		var renderName = this._getFileRenderName(item);
 		if(item.totalMatches) {
+			var fileNameElement = this._getFileNameElement(item);
 			var linkDiv = lib.node(this.getItemLinkId(item));
-			var parentSpan = linkDiv.firstElementChild;
-			lib.empty(linkDiv);
-			linkDiv.appendChild(parentSpan);
-			linkDiv.appendChild(document.createTextNode(renderName));
+			linkDiv.removeChild(linkDiv.lastElementChild);
+			linkDiv.appendChild(fileNameElement);
 	    } else {
+	    	var renderName = this._getFileRenderName(item);
 			item.stale = true;
 			this.staleFileElement(item, renderName);
 	    }
@@ -220,14 +229,14 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }
     };
 
-    SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, renderName) {
+    SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder) {
         var helper = null;
         if (this.explorer.model._provideSearchHelper) {
             helper = this.explorer.model._provideSearchHelper();
         }
 		var params = helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, null, helper.params.replace, true) : null;
 		var link = navigatorRenderer.createLink(null, 
-				{Location: item.location, Name: renderName}, 
+				{Location: item.location}, 
 				this.explorer._commandService, 
 				this.explorer._contentTypeService,
 				this.explorer._openWithCommands, 
@@ -236,18 +245,35 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 				{holderDom: this._lastFileIconDom});
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		
-		// create parent folder span and prepend to link
 		var scopeParams = this.explorer.model.getScopingParams(item);
-		var folders = scopeParams.name.split("/"); //$NON-NLS-0$
+		var folders = decodeURIComponent(scopeParams.name).split("/"); //$NON-NLS-0$
+		var parentFolder = folders.pop();
+		parentFolder = parentFolder;
+		
+		if (0 < folders.length) {
+			var fullPathSpan = document.createElement("span"); //$NON-NLS-0$
+			fullPathSpan.classList.add("fullPathSpan"); //$NON-NLS-0$
+			
+			var fullPathText = folders.join("/"); //$NON-NLS-0$
+			
+			fullPathSpan.appendChild(document.createTextNode(fullPathText + "/")); //$NON-NLS-0$
+			link.appendChild(fullPathSpan);
+			
+			var ellipsisSpan = document.createElement("span"); //$NON-NLS-0$
+			ellipsisSpan.classList.add("ellipsisSpan"); //$NON-NLS-0$
+			ellipsisSpan.appendChild(document.createTextNode(".../")); //$NON-NLS-0$
+			link.appendChild(ellipsisSpan);
+		}
+				
+		// create a direct parent folder span and prepend to link		
 		var parentSpan = document.createElement("span"); //$NON-NLS-0$
 		parentSpan.classList.add("fileParentSpan"); //$NON-NLS-0$
-		if (folders.length > 1) {
-			parentSpan.appendChild(document.createTextNode(".../")); //$NON-NLS-0$			
-		}
-		var parentFolder = folders[folders.length - 1];
-		parentFolder = decodeURIComponent(parentFolder);
 		parentSpan.appendChild(document.createTextNode(parentFolder + "/")); //$NON-NLS-0$
-		link.insertBefore(parentSpan, link.firstChild);
+		link.appendChild(parentSpan);
+				
+		var fileSpan = this._getFileNameElement(item);
+		link.appendChild(fileSpan);
+				
 		
 		//trigger a click on the span when the link is clicked
 		link.addEventListener("click", function(){ //$NON-NLS-0$
@@ -256,7 +282,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 
 		// append link to parent span
         spanHolder.appendChild(link);
-        spanHolder.classList.add("fileNameSpan"); //$NON-NLS-0$
+        spanHolder.classList.add("filePathSpan"); //$NON-NLS-0$
     };
 
     SearchResultRenderer.prototype.generateContextTip = function(detailModel) {
@@ -475,8 +501,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 				col = _createElement('td'); //$NON-NLS-0$
                 if (item.type === "file") { //$NON-NLS-0$
                 	span = _createSpan(null, this.getFileSpanId(item), col, null);
-                    var renderName = this._getFileRenderName(item);
-                    this.renderFileElement(item, span, renderName);
+                    this.renderFileElement(item, span);
                     
                     //render file location
                     span = _createSpan(null, this.getLocationSpanId(item), col, null);
@@ -636,13 +661,14 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
      * Creates a new search result explorer.
      * @name orion.InlineSearchResultExplorer
      */
-    function InlineSearchResultExplorer(registry, commandService, inlineSearchPane) {
+    function InlineSearchResultExplorer(registry, commandService, inlineSearchPane, preferences) {
         this.registry = registry;
         this._commandService = commandService;
         this.fileClient = new mFileClient.FileClient(this.registry);
         this.defaulRows = 40;
 		this._contentTypeService = new mContentTypes.ContentTypeRegistry(this.registry);
 		this._inlineSearchPane = inlineSearchPane;
+		this._preferences = preferences;
 		
 		this.selection = new mSelection.Selection(this.registry, "inlineSearchResultExplorerSelection"); //$NON-NLS-0$
 		var selectionListener = function(event) {
@@ -655,7 +681,16 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		}.bind(this);
 		this.selection.addEventListener("selectionChanged", selectionListener); //$NON-NLS-0$
 		
-        this.declareCommands();
+		var gotPreferences = this._preferences.getPreferences("/inlineSearchPane").then(function(prefs) { //$NON-NLS-0$
+			var show = prefs.get("showFullPath"); //$NON-NLS-0$
+			if (show === undefined) {
+				show = false;
+				prefs.put("showFullPath", show); //$NON-NLS-0$
+			}
+			this._shouldShowFullPath = show;
+		}.bind(this));
+		
+        gotPreferences.then(this.declareCommands.bind(this));
     }
 
     InlineSearchResultExplorer.prototype = new mExplorer.Explorer();
@@ -669,6 +704,11 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     InlineSearchResultExplorer.prototype.setResult = function(parentNode, model) {
         var that = this;
         this.parentNode = parentNode;
+        if (this._shouldShowFullPath) { //$NON-NLS-0$
+        	this.parentNode.classList.add("showFullPath"); //$NON-NLS-0$
+        } else {
+        	this.parentNode.classList.remove("showFullPath"); //$NON-NLS-0$
+        }
         this.model = model;
         if (this.model.replaceMode()) {
             this._hasCheckedItems = true;
@@ -741,13 +781,32 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 that.gotoNext(false, true);
             }
         });
+        
+        var toggleFullPathCommand = new mCommands.Command({
+        	name: messages["fullPath"], //$NON-NLS-0$
+            tooltip: messages["toggleFullPath"], //$NON-NLS-0$
+            imageClass : "sprite-toggle-full-path", //$NON-NLS-0$
+            id: "orion.search.toggleFullPath", //$NON-NLS-0$
+            groupId: "orion.searchGroup", //$NON-NLS-0$
+            type: "toggle", //$NON-NLS-0$
+            checked: this._shouldShowFullPath,
+            visibleWhen: function(item) {
+                return true;
+            },
+            callback: function() {
+                that.toggleFullPath();
+                //TODO toggle tooltip
+            }
+        });
+        
         this._commandService.addCommand(nextResultCommand);
         this._commandService.addCommand(prevResultCommand);
-
         this._commandService.addCommand(replaceAllCommand);
+        this._commandService.addCommand(toggleFullPathCommand);
+        
         this._commandService.addCommandGroup("searchPageActions", "orion.searchActions.unlabeled", 200); //$NON-NLS-1$ //$NON-NLS-0$
         
-         mExplorer.createExplorerCommands(this._commandService, function(item) {
+        mExplorer.createExplorerCommands(this._commandService, function(item) {
 			var emptyKeyword = false;
 			if(that.model._provideSearchHelper && that.model._provideSearchHelper().params.keyword === ""){
 				emptyKeyword = true;
@@ -756,11 +815,11 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         });
         
         this._commandService.registerCommandContribution("searchPageActions", "orion.globalSearch.replaceAll", 1); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-        
         this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.expandAll", 2); //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.collapseAll", 3); //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("searchPageActions", "orion.search.nextResult", 4); //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("searchPageActions", "orion.search.prevResult", 5); //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.search.toggleFullPath", 6); //$NON-NLS-1$ //$NON-NLS-0$
     };
 
     InlineSearchResultExplorer.prototype._checkStale = function(model) {
@@ -1380,6 +1439,19 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         		currentModel = this.getNavHandler().currentModel();
         	}
         }
+    };
+    
+    InlineSearchResultExplorer.prototype.toggleFullPath = function() {
+    	this._preferences.getPreferences("/inlineSearchPane").then(function(prefs) { //$NON-NLS-0$
+			var show = !prefs.get("showFullPath"); //$NON-NLS-0$
+			if (show) { //$NON-NLS-0$
+	        	this.parentNode.classList.add("showFullPath"); //$NON-NLS-0$
+	        } else {
+	        	this.parentNode.classList.remove("showFullPath"); //$NON-NLS-0$
+	        }
+	        prefs.put("showFullPath", show); //$NON-NLS-0$
+			this._shouldShowFullPath = show;
+		}.bind(this));
     };
 
 	InlineSearchResultExplorer.prototype._renderSearchResult = function(crawling, resultsNode, searchParams, jsonData, incremental) {

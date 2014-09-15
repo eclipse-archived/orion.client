@@ -229,7 +229,8 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				parentNode: this.toolbarNode.parentNode,
 				serviceRegistry: this.serviceRegistry,
 				commandRegistry: this.commandRegistry,
-				fileClient: this.fileClient
+				fileClient: this.fileClient,
+				preferences: this.preferences
 			});
 			
 			this._lastSearchRoot = null;
