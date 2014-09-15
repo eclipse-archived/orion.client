@@ -57,56 +57,59 @@ define(["require", "orion/Deferred", "orion/bootstrap", "chai/chai", "orion/i18n
 				assert.ok(messages.test === "test");
 			});
 		});
-	
-		it("I18nService", function() {
-			var name = "test/i18n/nls/message3";
-			var serviceName = "test/i18n/nls/" + locale + "/message3";
-	
-			var d = new Deferred();
-			bootstrap.startup().then(function(core) {
-				core.serviceRegistry.registerService("orion.i18n.message", {
-					getMessageBundle: function() {
-						return {
-							test: "test-" + locale
-						};
-					}
-				}, {
-					name: serviceName
-				});
-	
-				define(name, [I18N_PLUGIN + "!" + name], function(bundle) {
-					var result = {
-						root: {
-							test: "test"
-						}
-					};
-					Object.keys(bundle).forEach(function(key) {
-						if (typeof result[key] === 'undefined') {
-							result[key] = bundle[key];
-						}
-					});
-					return result;
-				});
-	
-				require(["i18n!" + name], function(messages) {
-					d.resolve(messages);
-				});
-			});
-			return d.then(function(messages) {
-				assert.equal(messages.test, "test-" + locale);
-			});
-		});
+
 
 		/**
-		 * Master tests are skipped.
+		 * These tests are skipped for 2 reasons:
 		 * 
-		 * For i18nUtil to load a master bundle "test/i18n/nls/messageN" it waits for the locale bundle
-		 * "test/i18n/nls/{locale}/messageN" to time out first. Waiting on that timeout would slow down the
-		 * test suite unacceptably.
+		 * i) bootstrap#startup() hangs the test, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=444131
 		 * 
-		 * Instead i18nUtil should be configured with a mock AMD loader.
+		 * ii) The *Master* tests use i18nUtil to load a master bundle `test/i18n/nls/messageN`. For this to
+		 * happen, i18nUtil first waits for a timeout from the locale bundle `test/i18n/nls/{locale}/messageN`.
+		 * Waiting on that timeout would slow down the test suite unacceptably.
+		 * 
+		 * TODO mock out the AMD loader and bootstrap.js, then try these tests again.
 		 */
-		describe.skip("Master service", function() {
+		describe.skip("I18n service", function() {
+			it.skip("I18nService", function() {
+				var name = "test/i18n/nls/message3";
+				var serviceName = "test/i18n/nls/" + locale + "/message3";
+		
+				var d = new Deferred();
+				bootstrap.startup().then(function(core) {
+					core.serviceRegistry.registerService("orion.i18n.message", {
+						getMessageBundle: function() {
+							return {
+								test: "test-" + locale
+							};
+						}
+					}, {
+						name: serviceName
+					});
+		
+					define(name, [I18N_PLUGIN + "!" + name], function(bundle) {
+						var result = {
+							root: {
+								test: "test"
+							}
+						};
+						Object.keys(bundle).forEach(function(key) {
+							if (typeof result[key] === 'undefined') {
+								result[key] = bundle[key];
+							}
+						});
+						return result;
+					});
+		
+					require(["i18n!" + name], function(messages) {
+						d.resolve(messages);
+					});
+				});
+				return d.then(function(messages) {
+					assert.equal(messages.test, "test-" + locale);
+				});
+			});
+
 			it("I18nMasterService", function() {
 				var name = "test/i18n/nls/message4";
 		
