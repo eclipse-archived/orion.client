@@ -11,7 +11,7 @@
  *******************************************************************************/
  
 /*eslint-env browser, amd*/
-define(['orion/compare/builder/compare'],   
+define(['compare/builder/compare'],   
  
 function(Compare) {
 	var document = window.document;
@@ -49,7 +49,7 @@ function(Compare) {
         }
     };
 	
-	var compare = new Compare(options, "compareCmdDiv", "twoWay", true/*toggleable*/); //$NON-NLS-1$ //$NON-NLS-0$
+	var compare = new Compare(options, "compareCmdDiv", "twoWay", true, "toggleCmd"); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	function getFile(file) {
 		try {
