@@ -782,19 +782,19 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             }
         });
         
-        var toggleFullPathCommand = new mCommands.Command({
+        var switchFullPathCommand = new mCommands.Command({
         	name: messages["fullPath"], //$NON-NLS-0$
-            tooltip: messages["toggleFullPath"], //$NON-NLS-0$
-            imageClass : "sprite-toggle-full-path", //$NON-NLS-0$
-            id: "orion.search.toggleFullPath", //$NON-NLS-0$
+            tooltip: messages["switchFullPath"], //$NON-NLS-0$
+            imageClass : "sprite-switch-full-path", //$NON-NLS-0$
+            id: "orion.search.switchFullPath", //$NON-NLS-0$
             groupId: "orion.searchGroup", //$NON-NLS-0$
-            type: "toggle", //$NON-NLS-0$
+            type: "switch", //$NON-NLS-0$
             checked: this._shouldShowFullPath,
             visibleWhen: function(item) {
                 return true;
             },
             callback: function() {
-                that.toggleFullPath();
+                that.switchFullPath();
                 //TODO toggle tooltip
             }
         });
@@ -802,7 +802,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._commandService.addCommand(nextResultCommand);
         this._commandService.addCommand(prevResultCommand);
         this._commandService.addCommand(replaceAllCommand);
-        this._commandService.addCommand(toggleFullPathCommand);
+        this._commandService.addCommand(switchFullPathCommand);
         
         this._commandService.addCommandGroup("searchPageActions", "orion.searchActions.unlabeled", 200); //$NON-NLS-1$ //$NON-NLS-0$
         
@@ -819,7 +819,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._commandService.registerCommandContribution("searchPageActions", "orion.explorer.collapseAll", 3); //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("searchPageActions", "orion.search.nextResult", 4); //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("searchPageActions", "orion.search.prevResult", 5); //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("searchPageActions", "orion.search.toggleFullPath", 6); //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("searchPageActions", "orion.search.switchFullPath", 6); //$NON-NLS-1$ //$NON-NLS-0$
     };
 
     InlineSearchResultExplorer.prototype._checkStale = function(model) {
@@ -1441,7 +1441,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }
     };
     
-    InlineSearchResultExplorer.prototype.toggleFullPath = function() {
+    InlineSearchResultExplorer.prototype.switchFullPath = function() {
     	this._preferences.getPreferences("/inlineSearchPane").then(function(prefs) { //$NON-NLS-0$
 			var show = !prefs.get("showFullPath"); //$NON-NLS-0$
 			if (show) { //$NON-NLS-0$

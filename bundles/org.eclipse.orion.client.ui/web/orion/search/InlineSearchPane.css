@@ -410,7 +410,7 @@
 	padding-left: 0;
 }
 
-.sprite-toggle-full-path {
+.sprite-switch-full-path {
 	font-size: 15px;
 	font-weight: bold;
 	line-height: normal;
@@ -424,19 +424,19 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.orionToggleInner.sprite-toggle-full-path:before{
+.orionSwitchInner.sprite-switch-full-path:before{
 	content: '/*/';
-	padding-bottom: 0;
-	padding-left: 3px;
+	padding-top: 2px;
+	padding-left: 4px;
 }
-.orionToggleInner.sprite-toggle-full-path:after{
+.orionSwitchInner.sprite-switch-full-path:after{
 	content: '.../';
-	padding-bottom: 0;
-	padding-right: 3px;
+	padding-top: 2px;
+	padding-right: 4px;
 }
 
-.orionToggle {
+.orionSwitch {
 	display: inline-block;
-	margin-bottom: 3px;
+	margin-bottom: 1px;
 	vertical-align: bottom;
 }

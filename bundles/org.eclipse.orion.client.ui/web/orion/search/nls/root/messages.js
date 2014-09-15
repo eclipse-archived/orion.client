@@ -105,5 +105,5 @@ define({
 	"^ Edit Search": "^ Edit Search",
 	"Preview: " : "Preview: ",
 	"fullPath": "Show Full Path",
-	"toggleFullPath": "Show/hide full path"
+	"switchFullPath": "Show/hide full path"
 });
