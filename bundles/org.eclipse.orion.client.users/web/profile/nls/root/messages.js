@@ -53,5 +53,5 @@ define({
 	"Create" : "Create",
 	"Set Password" : "Set Password",
 	"Permission to view user list denied." : "Permission to view user list denied.",
-	"${0} ( last calculated ${1} )" : "${0} ( last calculated ${1} )"
+	"A(lastCalculated B)" : "${0} ( last calculated ${1} )"
 });

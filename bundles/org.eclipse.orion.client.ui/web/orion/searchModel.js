@@ -297,10 +297,10 @@ function(messages, Deferred, i18nUtil, mExplorer, mSearchUtils) {
                 var endNumber = startNumber + pagingParams.numberOnPage - 1;
                 headerStr = "";
                 if (!this.replaceMode()) {
-                    headerStr = i18nUtil.formatMessage(messages["Files ${0} of ${1} matching ${2}"],
+                    headerStr = i18nUtil.formatMessage(messages["FilesAofBmatchingC"],
                     startNumber + "-" + endNumber, pagingParams.totalNumber, this._searchHelper.displayedSearchTerm); //$NON-NLS-0$
                 } else {
-                    headerStr = i18nUtil.formatMessage(messages["Replace ${0} with ${1} for files ${2} of ${3}"],
+                    headerStr = i18nUtil.formatMessage(messages["ReplaceAwithBforCofD"],
                     this._searchHelper.displayedSearchTerm,
                     this._searchHelper.params.replace,
                     startNumber + "-" + endNumber, //$NON-NLS-0$
@@ -503,7 +503,7 @@ function(messages, Deferred, i18nUtil, mExplorer, mSearchUtils) {
                    if (error.status === 412) {
                        reportList.push({
                            model: fileItem,
-                           message: messages["Resource has been changed by others."],
+                           message: messages["ResourceChanged."],
                            matchesReplaced: matchesReplaced,
                            status: "failed" //$NON-NLS-0$
                        });

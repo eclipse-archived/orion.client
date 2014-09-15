@@ -106,7 +106,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					var gitPreferenceStorage = new GitPreferenceStorage(that.registry);
 					gitPreferenceStorage.remove(repository).then(
 						function(){
-							messageService.setProgressResult(i18nUtil.formatMessage(messages["Deleted git credentials for ${0}"], [repository]));
+							messageService.setProgressResult(i18nUtil.formatMessage(messages["DeletedGitMsg"], [repository]));
 							that.gitCredentialsFields[keyIndex+1].destroy();
 						}
 					);
@@ -138,7 +138,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 			gitConfigPreference.setConfig({GitMail: this.gitFields[0].getValue(),	GitName: this.gitFields[1].getValue()}).then(
 				function(){
-					messageService.setProgressResult( messages['Git user data successfully updated.'] );
+					messageService.setProgressResult( messages['GitUsrUpdateSuccess'] );
 				}
 			);
 		},
@@ -149,11 +149,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			// git authentication update
 			var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
 			if( this.gitCredentialsFields[0].isChecked() ){
-				var confirmMessage = messages["Please be aware that your credentials will be stored persistently in the browser."] + '\n' + messages["Do you wish to enable the Key Storage?"];
+				var confirmMessage = messages["BrowserCredStoreMsg"] + '\n' + messages["AskEnableKeyStorage"];
 				if(window.confirm(confirmMessage)){
 					gitPreferenceStorage.enable().then(
 						function(){
-							messageService.setProgressResult( messages['Git Credentials successfully updated.'] );
+							messageService.setProgressResult( messages['GitCredsUpdateSuccess'] );
 						}
 					);
 				} else {
@@ -163,7 +163,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			} else {
 				gitPreferenceStorage.disable().then(
 					function(){
-						messageService.setProgressResult( messages['Git Credentials successfully updated.'] );
+						messageService.setProgressResult( messages['GitCredsUpdateSuccess'] );
 					}
 				);
 			}

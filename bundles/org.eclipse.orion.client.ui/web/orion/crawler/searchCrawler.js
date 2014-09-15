@@ -166,7 +166,7 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 	SearchCrawler.prototype._HandleStatus = function(error){
 		if(this._statusService && error.name === "Cancel") { //$NON-NLS-0$
 			console.log("Crawling search cancelled. Deferred array length : " + this._deferredArray.length); //$NON-NLS-0$
-			this._statusService.setProgressResult({Message: messages["Search cancelled by user"], Severity: "Warning"}); //$NON-NLS-0$
+			this._statusService.setProgressResult({Message: messages["searchCancelled"], Severity: "Warning"}); //$NON-NLS-0$
 		}
 	};
 		
@@ -274,7 +274,7 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 		if(this.searchHelper.params.keyword === ""){
 			this._reportSingleHit(fileObj);
 			if(this._statusService) {
-				this._statusService.setProgressResult({Message: i18nUtil.formatMessage(messages["${0} files found out of ${1}"], this._hitCounter, this._totalCounter)});
+				this._statusService.setProgressResult({Message: i18nUtil.formatMessage(messages["filesFound"], this._hitCounter, this._totalCounter)});
 			}
 		} else {
 			return (self._progressService ? self._progressService.progress(self.fileClient.read(fileObj.Location), "Reading file " + fileObj.Location) : self.fileClient.read(fileObj.Location)).then(function(jsonData) { //$NON-NLS-0$
@@ -282,7 +282,7 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 						self._reportSingleHit(fileObj);
 					}
 					if(self._statusService) {
-						self._statusService.setProgressResult({Message: i18nUtil.formatMessage(messages["${0} files found out of ${1}"], self._hitCounter, self._totalCounter)}, messages["Cancel"]);
+						self._statusService.setProgressResult({Message: i18nUtil.formatMessage(messages["filesFound"], self._hitCounter, self._totalCounter)}, messages["Cancel"]);
 					}
 				},
 				function(error) {

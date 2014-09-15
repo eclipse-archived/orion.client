@@ -83,15 +83,15 @@ function(messages, lib, mOperationsDialog) {
 					this._switchIconTo("running"); //$NON-NLS-0$
 					break;
 				case "warning": //$NON-NLS-0$
-					this._progressPane.title = messages["Some operations finished with warning"];
-					this._progressPane.alt = messages['Some operations finished with warning'];
-					this._progressPane.setAttribute("aria-valuetext", messages['Some operations finished with warning']); //$NON-NLS-0$
+					this._progressPane.title = messages["SomeOpWarning"];
+					this._progressPane.alt = messages['SomeOpWarning'];
+					this._progressPane.setAttribute("aria-valuetext", messages['SomeOpWarning']); //$NON-NLS-0$
 					this._switchIconTo("warning"); //$NON-NLS-0$
 					break;
 				case "error": //$NON-NLS-0$
-					this._progressPane.title = messages["Some operations finished with error"];
-					this._progressPane.alt = messages['Some operations finished with error'];
-					this._progressPane.setAttribute("aria-valuetext", messages['Some operations finished with error']); //$NON-NLS-0$
+					this._progressPane.title = messages["SomeOpErr"];
+					this._progressPane.alt = messages['SomeOpErr'];
+					this._progressPane.setAttribute("aria-valuetext", messages['SomeOpErr']); //$NON-NLS-0$
 					this._switchIconTo("error"); //$NON-NLS-0$
 					break;
 				default:

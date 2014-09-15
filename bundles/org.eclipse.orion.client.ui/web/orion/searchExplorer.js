@@ -587,7 +587,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                             statusMessage = item.message;
                             break;
                         case "pass": //$NON-NLS-0$
-                            statusMessage = item.model.totalMatches ? i18nUtil.formatMessage(messages["${0} out of ${1}  matches replaced."], item.matchesReplaced, item.model.totalMatches) : item.message;
+                            statusMessage = item.model.totalMatches ? i18nUtil.formatMessage(messages["matchesReplacedMsg"], item.matchesReplaced, item.model.totalMatches) : item.message;
                             break;
                     }
                     var td = _createElement('td', "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-0$
@@ -1347,7 +1347,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 	        }
 			var message = messages["No matches"];
 			if(this.model._provideSearchHelper){
-				message = i18nUtil.formatMessage(messages["No matches found for ${0}"], this.model._provideSearchHelper().displayedSearchTerm);
+				message = i18nUtil.formatMessage(messages["NoMatchFound"], this.model._provideSearchHelper().displayedSearchTerm);
 			}
 		    this.parentNode.textContent = "";
 		    var textBold = _createElement('b', null, null, this.parentNode); //$NON-NLS-1$ //$NON-NLS-0$
