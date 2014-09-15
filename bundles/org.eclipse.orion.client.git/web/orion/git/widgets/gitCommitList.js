@@ -137,6 +137,9 @@ define([
 			}
 			return util.tracksRemoteBranch(this.currentBranch);
 		},
+		isFiltered: function() {
+			return this.filterQuery || this.authorQuery || this.committerQuery || this.sha1Query || this.repositoryPath;
+		},
 		isRebasing: function() {
 			var repository = this.root.repository;
 			return repository && repository.status && repository.status.RepositoryState === "REBASING_INTERACTIVE"; //$NON-NLS-0$
@@ -765,12 +768,12 @@ define([
 				id: "eclipse.orion.git.commit.toggleFilter", //$NON-NLS-0$
 				name: messages["FilterCommits"],
 				tooltip: messages["FilterCommitsTip"],
-				imageClass: "core-sprite-search", //$NON-NLS-0$
 				callback: function(data) {
 					if (data) this.filterSection.setHidden(!this.filterSection.hidden);
 					data.domNode.focus();
 				},
 				visibleWhen: function() {
+					filterCommand.imageClass = that.model.isFiltered() ? "core-sprite-show-filtered" : "core-sprite-filter"; //$NON-NLS-1$ //$NON-NLS-0$
 					return !that.model.isRebasing();
 				}
 			});
