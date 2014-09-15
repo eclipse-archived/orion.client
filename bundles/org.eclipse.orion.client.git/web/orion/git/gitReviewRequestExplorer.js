@@ -130,7 +130,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/section', 'orion/i18nUtil'
 					lib.node("moreOptionsDiv").style.display = " none ";
 					
 					var text = i18nUtil.formatMessage(messages["You are reviewing contribution ${0} from ${1}"], params[1], params[2]);
-					var text2 = messages["Unfortunately the commit can not be found in your workspace. To see it try one of the following: "];
+					var text2 = messages["CommitNotFoundInWorkspace"];
 					lib.node("moreOptionsDiv").textContent = messages["To review the commit you can also:"];
 					
 					var description = document.createElement("span");

@@ -66,7 +66,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		}
 		this._searchRenderer = options.searchRenderer;
 		if (!this._searchRenderer || typeof(this._searchRenderer.makeRenderFunction) !== "function") { //$NON-NLS-0$
-			throw new Error(messages['Missing required argument: searchRenderer']);
+			throw new Error(messages['MissingSearchRenderer']);
 		}
 		this._initialize();
 	};
@@ -224,7 +224,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 			var renderFunction = this._searchRenderer.makeRenderFunction(this._contentTypeService, this.$results, false, this.decorateResult.bind(this));
 			this.currentSearch = renderFunction;
 			var div = document.createElement("div"); //$NON-NLS-0$
-			div.appendChild(document.createTextNode(this._nameSearch ? messages['Searching...'] : util.formatMessage(messages["Searching for occurrences of"], text)));
+			div.appendChild(document.createTextNode(this._nameSearch ? messages['Searching...'] : util.formatMessage(messages["SearchOccurences"], text)));
 			lib.empty(this.$results);
 			this.$results.appendChild(div);
 			this._searcher.search(searchParams, keyword.folderKeyword, function() {

@@ -50,8 +50,8 @@ exports.CompareCommandFactory = (function() {
 				return;
 			}
 			var copyToLeftCommand = new mCommands.Command({
-				name : messages["Copy current change from right to left"],
-				tooltip : messages["Copy current change from right to left"],
+				name : messages["CpCurChangeRightToLeft"],
+				tooltip : messages["CpCurChangeRightToLeft"],
 				imageClass : "core-sprite-leftarrow", //$NON-NLS-0$
 				id: "orion.compare.copyToLeft", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
@@ -62,8 +62,8 @@ exports.CompareCommandFactory = (function() {
 					data.items.copyToLeft();
 			}});
 			var copyToRightCommand = new mCommands.Command({
-				name : messages["Copy current change from left to right"],
-				tooltip : messages["Copy current change from left to right"],
+				name : messages["CpCurChangeLeftToRight"],
+				tooltip : messages["CpCurChangeLeftToRight"],
 				imageClass : "core-sprite-rightarrow", //$NON-NLS-0$
 				id: "orion.compare.copyToRight", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$

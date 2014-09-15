@@ -143,7 +143,7 @@ define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/ob
 		this.node = parentNode;
 		this.config = this.defaultConfig = null;
 		this.messageService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-		this.updateMessage = i18nUtil.formatMessage(messages["${0} settings successfully updated."], this.categoryTitle);
+		this.updateMessage = i18nUtil.formatMessage(messages["SettingUpdateSuccess"], this.categoryTitle);
 	};
 	objects.mixin(PropertiesWidget.prototype, { //$NON-NLS-0$
 		createElements: function() {

@@ -11,13 +11,13 @@
 //NLS_CHARSET=UTF-8
 /*eslint-env browser, amd*/
 define({
-	"Copy current change from right to left": "Copy current change from right to left",
-	"Copy current change from left to right": "Copy current change from left to right",
+	"CpCurChangeRightToLeft": "Copy current change from right to left",
+	"CpCurChangeLeftToRight": "Copy current change from left to right",
 	"Switch to unified diff": "Switch to unified diff",
 	"Unified": "Unified",
 	"Switch to side by side diff": "Switch to side by side diff",
 	"Side by side": "Side by side",
-	"Generate link of the current diff": "Generate link of the current diff",
+	"GenerateCurDiffLink": "Generate link of the current diff",
 	"Generate Link": "Generate Link",
 	"Next diff block": "Next diff block",
 	"Previous diff block": "Previous diff block",
@@ -35,8 +35,8 @@ define({
 	"Options": "Options",
 	"Sort by folders": "Sort by folders",
 	"Line 0 : Col 0": "Line 0 : Col 0",
-	"No Matching DiffService for location:": "No Matching DiffService for location:",
-	"${0} files compared. The two folders are identical.": "${0} files compared. The two folders are identical.",
+	"NoDiffServiceLocationMatched": "No Matching DiffService for location:",
+	"NoFoldersIdentical": "${0} files compared. The two folders are identical.",
 	'generatingTreeResult': 'Generating compare result...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'fetchingFolder': 'Fetching folder: ${0}...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'readingFile': 'Reading file: ${0}...',  //$NON-NLS-0$  //$NON-NLS-1$

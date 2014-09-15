@@ -113,7 +113,7 @@ define([
 			var targetRef = this.getTargetReference();
 			var location = (activeBranch.CommitLocation || activeBranch.Location) + that.repositoryPath  + that.getQueries();
 			var id = targetRef.Name;
-			return that.progressService.progress(that.gitClient.getLog(location, id), messages['Getting git incoming changes...']).then(function(resp) {
+			return that.progressService.progress(that.gitClient.getLog(location, id), messages['GetGitIncomingMsg']).then(function(resp) {
 				return that.incomingCommits = resp;
 			});
 		},
@@ -1137,7 +1137,7 @@ define([
 				noCommit.appendChild(title);
 				
 				var description = document.createElement("div"); //$NON-NLS-0$
-				description.textContent = messages["You have no outgoing or incoming commits."];
+				description.textContent = messages["NoOutgoingIncomingCommits"];
 				noCommit.appendChild(description);
 			}
 			

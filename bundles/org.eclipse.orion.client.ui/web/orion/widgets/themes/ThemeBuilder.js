@@ -666,7 +666,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
     ThemeBuilder.prototype.drawOutlineData = drawOutlineData;
 	
-	var successMessage = i18nUtil.formatMessage(messages["${0} settings successfully updated."], messages["Theme"]); //$NON-NLS-1$ //$NON-NLS-0$
+	var successMessage = i18nUtil.formatMessage(messages["SettingUpdateSuccess"], messages["Theme"]); //$NON-NLS-1$ //$NON-NLS-0$
 	
     function apply(data) {
 

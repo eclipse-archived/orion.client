@@ -127,8 +127,7 @@ var exports = {};
 				if (error.status === 401) {
 					display.HTML = true;
 					display.Message = "<span>"; //$NON-NLS-0$
-					display.Message += i18nUtil.formatMessage(messages["Authentication required for: ${0}. ${1} and re-try the request."], resp.label, "<a target=\"_blank\" href=\"" + resp.SignInLocation //$NON-NLS-1$ //$NON-NLS-0$
-					+ "\">" + messages["Login"] + "</a>") + "</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					display.Message += i18nUtil.formatMessage("Authentication required for: ${0}. <a target=\"_blank\" href=\"${1}\">${2}</a> and re-try the request. </span>", resp.label, resp.SignInLocation, messages["Login"]); //$NON-NLS-0$
 				} else {
 					display.Message = resp.DetailedMessage ? resp.DetailedMessage : (resp.Message ? resp.Message : messages["Problem while performing the action"]);
 				}
@@ -187,7 +186,7 @@ var exports = {};
 
 		var checkoutBranchCommand = new mCommands.Command({
 			name: messages['Checkout'],
-			tooltip: messages["Checkout the branch or corresponding local branch and make it active. If the remote tracking branch does not have a corresponding local branch, the local branch will be created first."],
+			tooltip: messages["CheckoutBranchMsg"],
 			imageClass: "git-sprite-checkout", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id: "eclipse.checkoutBranch", //$NON-NLS-0$
@@ -286,8 +285,8 @@ var exports = {};
 			callback: function(data) {
 				var item = data.items;
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete branch ${0}?"], item.Name))) {
-					var msg = i18nUtil.formatMessage(messages["Removing branch ${0}..."], item.Name);
+				if (confirm(i18nUtil.formatMessage(messages["DelBrConfirm"], item.Name))) {
+ 					var msg = i18nUtil.formatMessage(messages["Removing branch ${0}..."], item.Name);
 					progress.progress(serviceRegistry.getService("orion.git.provider").removeBranch(item.Location), msg).then(function() { //$NON-NLS-0$
 						dispatchModelEventOn({type: "modelChanged", action: "removeBranch", branch: item}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
@@ -453,8 +452,8 @@ var exports = {};
 		commandService.addCommand(openCloneContent);
 
 		var showDiffCommand = new mCommands.Command({ 
-			name: messages["Working Directory Version"],
-			tooltip: messages["View the working directory version of the file"],
+			name: messages["WorkingDirVer"],
+			tooltip: messages["ViewWorkingDirVer"],
 			id: "eclipse.orion.git.diff.showCurrent", //$NON-NLS-0$
 			imageClass: "core-sprite-edit",  //$NON-NLS-0$
 			hrefCallback: function(data) {
@@ -665,10 +664,10 @@ var exports = {};
 			name : messages["Force Fetch"],
 			imageClass: "git-sprite-fetch", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
-			tooltip: messages["Fetch from the remote branch into your remote tracking branch overriding its current content"],
+			tooltip: messages["FetchRemoteBranch"],
 			id : "eclipse.orion.git.fetchForce", //$NON-NLS-0$
 			callback: function(data) {
-				var confirm = messages["You're going to override content of the remote tracking branch. This can cause the branch to lose commits."]+"\n\n"+messages['Are you sure?']; //$NON-NLS-0$
+				var confirm = messages["OverrideContentRemoteTrackingBr"]+"\n\n"+messages['Are you sure?']; //$NON-NLS-0$
 				fetchCallback(data, true, confirm).then(function() {
 					dispatchModelEventOn({type: "modelChanged", action: "fetch", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
@@ -679,7 +678,7 @@ var exports = {};
 
 		var mergeCommand = new mCommands.Command({
 			name : messages["Merge"],
-			tooltip: messages["Merge the content from the branch to your active branch"],
+			tooltip: messages["MergeContentFrmBr"],
 			imageClass: "git-sprite-merge", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.merge", //$NON-NLS-0$
@@ -865,7 +864,7 @@ var exports = {};
 
 		var rebaseCommand = new mCommands.Command({
 			name : messages["Rebase"],
-			tooltip: messages["Rebase your commits by removing them from the active branch, starting the active branch again based on the latest state of the selected branch "] +
+			tooltip: messages["RebaseCommitsMsg"] +
 					"and applying each commit again to the updated active branch.", //$NON-NLS-0$
 			id : "eclipse.orion.git.rebase", //$NON-NLS-0$
 			imageClass: "git-sprite-rebase", //$NON-NLS-0$
@@ -944,7 +943,7 @@ var exports = {};
 		
 		var pushCommand = new mCommands.Command({
 			name : messages["Push All"],
-			tooltip: messages["Push commits and tags from your local branch into the remote branch"],
+			tooltip: messages["PushCommitsTagsFrmLocal"],
 			imageClass: "git-sprite-push", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.push", //$NON-NLS-0$
@@ -959,7 +958,7 @@ var exports = {};
 		
 		var pushBranchCommand = new mCommands.Command({
 			name : messages["Push Branch"],
-			tooltip: messages["Push commits without tags from your local branch into the remote branch"],
+			tooltip: messages["PushCommitsWithoutTags"],
 			imageClass: "git-sprite-push", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.pushBranch", //$NON-NLS-0$
@@ -1001,7 +1000,7 @@ var exports = {};
 
 		var pushForceCommand = new mCommands.Command({
 			name : messages["Force Push All"],
-			tooltip: messages["Push commits and tags from your local branch into the remote branch overriding its current content"],
+			tooltip: messages["PushCommitsTagsFrmLocalBr"],
 			imageClass: "git-sprite-push", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.pushForce", //$NON-NLS-0$
@@ -1016,7 +1015,7 @@ var exports = {};
 		
 		var pushBranchForceCommand = new mCommands.Command({
 			name : messages["Force Push Branch"],
-			tooltip: messages["Push commits without tags from your local branch into the remote branch overriding its current content"],
+			tooltip: messages["PushCommitsWithoutTagsOverridingCurrentContent"],
 			imageClass: "git-sprite-push", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.pushForceBranch", //$NON-NLS-0$
@@ -1069,7 +1068,7 @@ var exports = {};
 
 		var resetIndexCommand = new mCommands.Command({
 			name : messages['Reset'],
-			tooltip: messages["Reset your active branch to the state of the selected ref. Discard all staged and unstaged changes."],
+			tooltip: messages["ResetActiveBr"],
 			id : "eclipse.orion.git.resetIndex", //$NON-NLS-0$
 			imageClass: "git-sprite-reset", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
@@ -2016,7 +2015,7 @@ var exports = {};
 
 		var resetCommand = new mCommands.Command({
 			name: messages['Reset'],
-			tooltip: messages['Reset the branch, discarding all staged and unstaged changes'],
+			tooltip: messages['ResetBranchDiscardChanges'],
 			imageClass: "core-sprite-refresh", //$NON-NLS-0$
 			id: "eclipse.orion.git.resetCommand", //$NON-NLS-0$
 			callback: function(data) {
@@ -2055,8 +2054,8 @@ var exports = {};
 
 		var checkoutCommand = new mCommands.Command({
 			name: messages['Checkout'],
-			tooltip: messages["Checkout all the selected files, discarding all changes"],
-			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
+			tooltip: messages["CheckoutSelectedFiles"],
+ 			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.orion.git.checkoutCommand", //$NON-NLS-0$
 			callback: function(data) {				
 				var items = forceArray(data.items);
@@ -2105,8 +2104,8 @@ var exports = {};
 		
 		var checkoutStagedCommand = new mCommands.Command({
 			name: messages['Discard'],
-			tooltip: messages["Checkout all the selected files, discarding all changes"],
-			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
+			tooltip: messages["CheckoutSelectedFiles"],
+ 			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.orion.git.checkoutStagedCommand", //$NON-NLS-0$
 			callback: function(data) {				
 				var dialog = serviceRegistry.getService("orion.page.dialog"); //$NON-NLS-0$
@@ -2147,7 +2146,7 @@ var exports = {};
 
 		var ignoreCommand = new mCommands.Command({
 			name: messages["Ignore"],
-			tooltip: messages["Add all the selected files to .gitignore file(s)"],
+			tooltip: messages["AddFilesToGitignore"],
 			imageClass: "git-sprite-checkout", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id: "eclipse.orion.git.ignoreCommand", //$NON-NLS-0$
@@ -2289,13 +2288,13 @@ var exports = {};
 					} else if (jsonData.Result === "STOPPED") { //$NON-NLS-0$
 						display.Severity = "Warning"; //$NON-NLS-0$
 						display.HTML = false;
-						display.Message = jsonData.Result + messages['. Repository still contains conflicts.'];
-						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+						display.Message = jsonData.Result + messages['RepoConflict'];
+ 						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 					} else if (jsonData.Result === "FAILED_UNMERGED_PATHS") { //$NON-NLS-0$
 						display.Severity = "Error"; //$NON-NLS-0$
 						display.HTML = false;
-						display.Message = jsonData.Result + messages['. Repository contains unmerged paths. Resolve conflicts first.'];
-						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+						display.Message = jsonData.Result + messages['RepoUnmergedPathResolveConflict'];
+ 						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 					}
 					dispatchModelEventOn({type: "modelChanged", action: "rebase", rebaseAction: action, result: jsonData.Result, failed: display.Severity !== "Ok"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					
