@@ -14,7 +14,20 @@ define(["require", "orion/Deferred", "orion/bootstrap", "chai/chai", "orion/i18n
 	var I18N_PLUGIN = "orion/i18n";
 	var locale = typeof navigator === "undefined" ? "root" : (navigator.language || navigator.userLanguage || "root").toLowerCase();
 
-	describe("I18n", function() {
+	/**
+	 * i18n tests are skipped for 2 reasons:
+	 * 
+	 * i) bootstrap#startup() hangs the test, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=444131
+	 * Note that this method is invoked indirectly by orion/i18n.js whenever a i18n! dependency is loaded,
+	 * so we can't run any of the tests in this file.
+	 *
+	 * ii) Moreover, the *Master* tests use i18nUtil to load a master bundle `test/i18n/nls/messageN`. For this
+	 * to happen, i18nUtil first waits for a timeout from the locale bundle `test/i18n/nls/{locale}/messageN`.
+	 * Waiting on that timeout would slow down the test suite unacceptably.
+	 * 
+	 * TODO mock out the AMD loader and bootstrap.js, then try these tests again.
+	 */
+	describe.skip("I18n", function() {
 		it("I18n", function() {
 			var name = "test/i18n/nls/message1";
 			define(name, [], {
@@ -58,20 +71,8 @@ define(["require", "orion/Deferred", "orion/bootstrap", "chai/chai", "orion/i18n
 			});
 		});
 
-
-		/**
-		 * These tests are skipped for 2 reasons:
-		 * 
-		 * i) bootstrap#startup() hangs the test, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=444131
-		 * 
-		 * ii) The *Master* tests use i18nUtil to load a master bundle `test/i18n/nls/messageN`. For this to
-		 * happen, i18nUtil first waits for a timeout from the locale bundle `test/i18n/nls/{locale}/messageN`.
-		 * Waiting on that timeout would slow down the test suite unacceptably.
-		 * 
-		 * TODO mock out the AMD loader and bootstrap.js, then try these tests again.
-		 */
-		describe.skip("I18n service", function() {
-			it.skip("I18nService", function() {
+		describe("I18n service", function() {
+			it("I18nService", function() {
 				var name = "test/i18n/nls/message3";
 				var serviceName = "test/i18n/nls/" + locale + "/message3";
 		
