@@ -897,7 +897,12 @@ define([
 						compareWidgetActionWrapper.className = "layoutRight commandList"; //$NON-NLS-0$
 						compareWidgetActionWrapper.id = prefix + "CompareWidgetActionWrapper"; //$NON-NLS-0$
 						actionsWrapper.appendChild(compareWidgetActionWrapper);
-						
+
+						var compareWidgetLeftActionWrapper = document.createElement("ul"); //$NON-NLS-0$
+						compareWidgetLeftActionWrapper.className = "layoutLeft commandList"; //$NON-NLS-0$
+						compareWidgetLeftActionWrapper.id = prefix + "CompareWidgetLeftActionWrapper"; //$NON-NLS-0$
+						actionsWrapper.appendChild(compareWidgetLeftActionWrapper);
+
 						diffActionWrapper = document.createElement("ul"); //$NON-NLS-0$
 						diffActionWrapper.className = "layoutRight commandList"; //$NON-NLS-0$
 						diffActionWrapper.id = prefix + "DiffActionWrapperChange"; //$NON-NLS-0$
@@ -925,7 +930,9 @@ define([
 									explorer.commandService.renderCommands("itemLevelCommands", diffActionWrapper.id, item.parent, explorer, "tool", false, gridHolder); //$NON-NLS-1$ //$NON-NLS-0$
 								},
 								before : true
-							}
+							},
+							null,
+							compareWidgetLeftActionWrapper.id
 						);
 					}
 					return td;
