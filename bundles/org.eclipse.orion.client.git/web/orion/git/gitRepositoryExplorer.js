@@ -679,7 +679,7 @@ define([
 		var section = this.configSection = new mSection.Section(parent, {
 			id: "configSection", //$NON-NLS-0$
 			title: "\u200B", //$NON-NLS-0$
-			iconClass: ["core-sprite-gear"], //$NON-NLS-0$
+			iconClass: ["core-sprite-wrench"], //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="configNode" class="configDropdownList mainPadding"></div><div id="dropdownConfigActionsNode" class="sectionDropdownActions toolComposite"></div>', //$NON-NLS-0$
 			canHide: true,
