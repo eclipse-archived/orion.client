@@ -125,19 +125,8 @@ define([
 			if (this.targetRef) {
 				return this.targetRef;
 			}
-			var result;
-			if (this.log) {
-				if (this.log && !this.log.toRef) {
-					result = this.log.Children[0];
-				} else {
-					result = this.log.toRef;
-				}
-			} else {
-				var ref = this.currentBranch;
-				result = ref && ref.RemoteLocation[0] && ref.RemoteLocation[0].Children[ref.RemoteLocation[0].Children.length - 1];
-			}
-			this.targetRef = result;
-			return result;
+			var ref = this.currentBranch;
+			return ref && ref.RemoteLocation[0] && ref.RemoteLocation[0].Children[ref.RemoteLocation[0].Children.length - 1];
 		},
 		tracksRemoteBranch: function(){
 			if (this.targetRef) {
@@ -746,6 +735,7 @@ define([
 				visibleWhen: function() {
 					simpleLogCommand.name = that.model.simpleLog ? messages["ShowActiveBranch"] : messages["ShowReference"];
 					var targetRef = that.model.getTargetReference();
+					if (!targetRef) return false;
 					var imgClass;
 					switch (targetRef.Type) {
 						case "Tag": //$NON-NLS-0$ 
