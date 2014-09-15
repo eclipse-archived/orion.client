@@ -14,7 +14,7 @@
  * that hosts the client code. Then Sauce Labs API is called, passing the URLs of test pages on the web
  * server. Sauce loads the URLs in various browsers. This script captures the test results.
  * 
- * The caller can obtain test results by GET /testresults. If tests are not complete, 404 will be 
+ * Clients obtain test results by GET /testresults. If tests are not complete, 404 will be 
  * returned. Once complete, a zip file containing all results will be returned.
  *
  * Each test page needs to use Orion's mocha wrapper (see `sauce.js`) to integrate with this script.
@@ -42,9 +42,11 @@ module.exports = function(grunt) {
 	var _path = require("path"),
 	    _url = require("url"),
 	    archiver = require("archiver"),
-	    Q = require("q"),
+	    fmt = require("util").format,
+	    nodeutil = require("util"),
 	    zlib = require("zlib"),
 	    util = require(orionClient + "modules/orionode/build/utils")(grunt);
+
 	var config = util.loadBuildConfig(orionClient + "/releng/org.eclipse.orion.client.releng/builder/scripts/orion.build.js"),
 	    bundles = util.parseBundles(config, { orionClient: orionClient }),
 	    pkg = grunt.file.readJSON(packageRoot + "package.json"),
@@ -54,22 +56,6 @@ module.exports = function(grunt) {
 	// Track the tests that have finished so far
 	var allTestsComplete = false,
 	    testFilenames = [];
-	var testPromises = {
-		index: 0,
-		deferreds: (function() {
-			var a = [], testCount = pkg.browsers.length * pkg.urls.length;
-			for (var i=0; i < testCount; i++)
-				a.push(Q.defer());
-			return a;
-		}()),
-		next: function() {
-			return this.deferreds[this.index++] || null;
-		}
-	};
-	var allTests = Q.allSettled(testPromises.deferreds.map(function(d) { return d.promise; }))
-		.then(function() {
-			allTestsComplete = true;
-		});
 
 	grunt.initConfig({
 		pkg: pkg,
@@ -116,7 +102,8 @@ module.exports = function(grunt) {
 					browsers: pkg.browsers,
 					testname: env.BUILD_NAME || "mocha client",
 					tags: [env.BUILD_TAG || "master"],
-					onTestComplete: onTestComplete
+					onTestComplete: onTestComplete,
+					maxRetries: 1, // retry once on timeout
 				}
 			}
 		},
@@ -152,15 +139,12 @@ module.exports = function(grunt) {
 	});
 	// Workaround for https://github.com/axemclion/grunt-saucelabs/issues/116
 	grunt.registerTask("wait", "Wait for exit", function() {
-		var done = this.async();
-		allTests.then(function() {
-			if (grunt.config.get("quit")) {
-				grunt.verbose.writeln("'wait' task exiting...");
-				done();
-			} else {
-				grunt.verbose.writeln("waiting forever...");
-			}
-		});
+		if (grunt.config.get("quit")) {
+			grunt.verbose.writeln("'wait' task exiting...");
+		} else {
+			grunt.verbose.writeln("waiting forever...");
+			this.async(); // returns a function that we never call
+		}
 	});
 	grunt.registerTask("server", ["curl", "connect"]);
 	grunt.registerTask("sauce", ["check", "saucelabs-mocha", "wait"]);
@@ -180,50 +164,48 @@ module.exports = function(grunt) {
 	}
 
 	/**
-	 * Called per browser, per test page, after a test job is complete.
+	 * Called per browser, per test page, after a test job is complete. Not called for a job that times out.
 	 * @param {Object} sauceResults The job result object returned from Sauce Labs.
+	 * @param {Function} callback Async CB to be invoked as callback(err, passOrFail) when done
 	 */
-	function onTestComplete(sauceResult) {
-		//var done = this.async(); // TODO
-		grunt.verbose.writeln("onTestComplete #" + testPromises.index);
-		var deferred = testPromises.next();
-		try {
-			grunt.verbose.write("Got test result: ");
-			grunt.verbose.oklns(JSON.stringify(sauceResult));
-			var mochaResult = sauceResult.result,
-			   id = sauceResult.id;
-			if (!mochaResult)
-				throw new Error("Test " + id + " is missing 'result' field in response:\n" + JSON.stringify(sauceResult));
-			var testurl = mochaResult.url || "",
-			   gzippedXml = mochaResult.xunit,
-			   filename = "TEST-" + testurl.replace(/[^A-Za-z0-9_\-]/g, "_") + "_" + id + ".xml";
-			if (/experienced an error/.test(sauceResult.message))
-				throw new Error(sauceResult.message);
-			if (!testurl)
-				throw new Error("Test " + id + " did not return its url. Ensure it is using sauce.js");
-			if (!gzippedXml)
-				throw new Error("Test " + testurl + " did not return an xunit result. Ensure it is using sauce.js.");
-			grunt.verbose.write("Inflating compressed xunit result...");
-			zlib.gunzip(new Buffer(gzippedXml, "base64"), function(err, buffer) {
-				if (err) {
-					grunt.warn(err);
-					deferred.reject(err);
-				}
-				grunt.verbose.ok();
-				var xunitReport = buffer.toString("utf8");
-				grunt.verbose.write("Replacing xunit testsuite name" + "...");
-				xunitReport = nicerName(xunitReport, sauceResult, testurl);
-				grunt.verbose.ok();
-
-				grunt.file.write(_path.join(results, filename), xunitReport);
-				testFilenames.push(filename);
-				grunt.verbose.ok();
-				deferred.resolve();
-			});
-		} catch (e) {
+	function onTestComplete(sauceResult, callback) {
+		function error(msgOrError) {
+			var e = nodeutil.isError(msgOrError) ? msgOrError : new Error(msgOrError);
 			grunt.warn(e && e.stack);
-			deferred.reject(e);
+			callback(e);
 		}
+		grunt.verbose.write("Got test result: ");
+		grunt.verbose.oklns(JSON.stringify(sauceResult));
+		var mochaResult = sauceResult.result,
+		   id = sauceResult.id;
+		if (!mochaResult)
+			throw new Error(fmt("Test %s is missing 'result' field in response:\n%s", id, JSON.stringify(sauceResult)));
+		var testurl = mochaResult.url || "",
+		   gzippedXml = mochaResult.xunit,
+		   filename = fmt("TEST-%s_%s.xml", testurl.replace(/[^A-Za-z0-9_\-]/g, "_"), id);
+		if (/experienced an error/.test(sauceResult.message))
+			error(sauceResult.message);
+		if (!testurl)
+			error(fmt("Test %s did not return its url. Ensure it is using sauce.js", id));
+		if (!gzippedXml)
+			error(fmt("Test %s did not return an xunit result. Ensure it is using sauce.js.", testurl));
+
+		grunt.verbose.write("Inflating compressed xunit result...");
+		zlib.gunzip(new Buffer(gzippedXml, "base64"), function(e, buffer) {
+			if (e) {
+				error(e);
+			}
+			grunt.verbose.ok();
+			var xunitReport = buffer.toString("utf8");
+			grunt.verbose.write("Replacing xunit testsuite name...");
+			xunitReport = nicerName(xunitReport, sauceResult, testurl);
+			grunt.verbose.ok();
+
+			grunt.file.write(_path.join(results, filename), xunitReport);
+			testFilenames.push(filename);
+			grunt.verbose.ok();
+			callback(undefined, true /*job pass*/);
+		});
 	}
 
 	// Middleware for delivering all test results as a zip.
@@ -250,7 +232,7 @@ module.exports = function(grunt) {
 			archive.finalize();
 			res.on("close", grunt.warn.bind(grunt));
 			res.on("finish", function() {
-				grunt.verbose.writeln("Sent result zip (" + archive.pointer() + " bytes)");
+				grunt.verbose.writeln(fmt("Sent result zip (%s bytes)", archive.pointer()));
 			});
 		} catch(e) {
 			grunt.warn(e);
