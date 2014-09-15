@@ -492,6 +492,34 @@ describe("compare", function() {
 				mergedFile
 			);
 		});
+		/*
+		 * Changing the middle line in a file with 3 lines with last line delimeter (old file + new file)
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=444185
+		 */
+		it("merge inline text model -- 11 (bug 444185)", function() { //$NON-NLS-0$
+			var oldFile = "11\n" +  //$NON-NLS-0$
+			  "22\n" +  //$NON-NLS-0$
+			  "33\n" +  //$NON-NLS-0$
+			  "44";
+			var newFile = "111\n" +  //$NON-NLS-0$
+			  "22\n" +  //$NON-NLS-0$
+			  "33\n" +  //$NON-NLS-0$
+			  "44\n" + //$NON-NLS-0$;
+			  "55\n" + //$NON-NLS-0$;
+			  "";
+			var mergedFile = "11\n" +  //$NON-NLS-0$
+			  "111\n" +  //$NON-NLS-0$
+			  "22\n" +  //$NON-NLS-0$
+			  "33\n" +  //$NON-NLS-0$
+			  "44\n" + //$NON-NLS-0$;
+			  "44\n" + //$NON-NLS-0$;
+			  "55\n\n" + //$NON-NLS-0$;
+			  "";
+			testMergeDiffBlocks(
+				{oldFile: {Content: oldFile}, newFile: {Content: newFile}},
+				mergedFile
+			);
+		});
 	}); // describe('basic')
 
 }); //describe('compare')
