@@ -501,7 +501,7 @@ define([
 				if (relatedTarget) {
 					check(relatedTarget);
 				} else {
-					setTimeout(function () { check(document.activeElement); }, 0);
+					setTimeout(function () { check(document.activeElement); }, 10);
 				}
 			};
 			var keyHandler = function(event){ //$NON-NLS-0$
