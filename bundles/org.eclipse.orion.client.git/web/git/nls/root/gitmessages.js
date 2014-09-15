@@ -513,6 +513,8 @@ define({
 	"NoContent" : "No Content", //$NON-NLS-0$  //$NON-NLS-1$
 	"Incoming" : "Incoming", //$NON-NLS-0$  //$NON-NLS-1$
 	"Outgoing" : "Outgoing", //$NON-NLS-0$  //$NON-NLS-1$
+	"IncomingWithCount" : "Incoming (${0})", //$NON-NLS-0$  //$NON-NLS-1$
+	"OutgoingWithCount" : "Outgoing (${0})", //$NON-NLS-0$  //$NON-NLS-1$
 	"Synchronized" : "History", //$NON-NLS-0$  //$NON-NLS-1$
 	"Uncommited" : "Uncommited", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repository:" : "Repository:", //$NON-NLS-0$  //$NON-NLS-1$

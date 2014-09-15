@@ -45,7 +45,6 @@ define([
 		this.simpleLog = options.simpleLog;
 		this.parentId = options.parentId;
 		this.targetRef = options.targetRef;
-		this.logDeferred = new Deferred();
 		this.log = options.log;
 		this.location = options.location || (this.log && this.log.Location.substring(0, this.log.Location.length - this.log.RepositoryPath.length)) || "";
 		this.repositoryPath = options.repositoryPath || (this.log && this.log.RepositoryPath) || "";
@@ -61,8 +60,8 @@ define([
 		getRoot: function(onItem){
 			onItem(this.root);
 		},
-		getQueries: function() {
-			return util.generateQuery([pageQuery, this.filterQuery, this.authorQuery, this.committerQuery, this.sha1Query]);
+		getQueries: function(extraQuery) {
+			return util.generateQuery([pageQuery, this.filterQuery, this.authorQuery, this.committerQuery, this.sha1Query, extraQuery]);
 		},
 		_getRepository: function(parentItem) {
 			var that = this;
@@ -116,6 +115,16 @@ define([
 			var id = targetRef.Name;
 			return that.progressService.progress(that.gitClient.getLog(location, id), messages['Getting git incoming changes...']).then(function(resp) {
 				return that.incomingCommits = resp;
+			});
+		},
+		_getSync: function() {
+			var that = this;
+			var activeBranch = this.getActiveBranch();
+			var targetRef = this.getTargetReference();
+			var location = (targetRef.CommitLocation || targetRef.Location) + that.repositoryPath  + that.getQueries("mergeBase=true");
+			var id = activeBranch.Name;
+			return that.progressService.progress(that.gitClient.getLog(location, id), messages["Getting git log"]).then(function(resp) {
+				return that.syncCommits = resp;
 			});
 		},
 		getActiveBranch: function() {
@@ -190,7 +199,6 @@ define([
 						if (that.simpleLog) {
 							return Deferred.when(that.log || that._getLog(parentItem), function(log) {
 								parentItem.log = log;
-								that.logDeferred.resolve(log);
 								var children = log.Children.slice(0);
 								onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, log)));
 							}, function(error){
@@ -247,7 +255,6 @@ define([
 				} else {
 					return Deferred.when(that.log || that._getLog(parentItem), function(log) {
 						that.log = parentItem.log = log;
-						that.logDeferred.resolve(log);
 						var children = [];
 						if (log.toRef.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
 							log.Children.forEach(function(commit) {
@@ -273,7 +280,6 @@ define([
 				} else {
 					return Deferred.when(that.log || that._getLog(parentItem), function(log) {
 						that.log = parentItem.log = log;
-						that.logDeferred.resolve(log);
 						var children = [];
 						if (log.toRef.Type === "Branch") { //$NON-NLS-0$
 							log.Children.forEach(function(commit) {
@@ -288,22 +294,9 @@ define([
 				}
 			} else if (parentItem.Type === "Synchronized") { //$NON-NLS-0$
 				if (tracksRemoteBranch) {
-					return Deferred.when(that.log || that._getLog(parentItem), function(log) {
-						that.log = parentItem.log = log;
-						that.logDeferred.resolve(log);
-						var remoteBranch = log.toRef && log.toRef.Type === "RemoteTrackingBranch"; //$NON-NLS-0$
-						Deferred.when(remoteBranch ? that.incomingCommits || that._getIncoming() : that.outgoingCommits || that._getOutgoing(), function(filterCommits) {
-							var children = [];
-							log.Children.forEach(function(commit) {
-								if (!filterCommits.Children.some(function(com) { return com.Name === commit.Name; })) {
-									children.push(commit);
-								}
-							});
-							onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, log)));
-						}, function(error){
-							that.handleError(error);
-						});
-					}, function(error){
+					return Deferred.when(parentItem.more ? that._getLog(parentItem) : that.syncCommits || that._getSync(), function(syncCommits) {
+						onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, syncCommits.Children.slice(0), syncCommits)));
+					}, function(error) {
 						that.handleError(error);
 					});
 				} else {
@@ -444,7 +437,7 @@ define([
 			}
 			
 			if (item.Type === "CommitRoot") { //$NON-NLS-0$
-				model.incomingCommits = model.outgoingCommits = null;
+				model.syncCommits = model.incomingCommits = model.outgoingCommits = null;
 			}
 			if (item.Type === "Outgoing") { //$NON-NLS-0$
 				model.outgoingCommits = null;
@@ -452,10 +445,11 @@ define([
 			if (item.Type === "Incoming") { //$NON-NLS-0$
 				model.incomingCommits = null;
 			}
+			if (item.Type === "Synchronized") { //$NON-NLS-0$
+				model.syncCommits = null;
+			}
 			model.log = null;
-			model.logDeferred = new Deferred();
-			if (item.more) {
-			} else {
+			if (!item.more) {
 				item.children = null;
 			}
 			var progress = this.section ? this.section.createProgressMonitor() : null;
@@ -1029,6 +1023,16 @@ define([
 					
 					title = document.createElement("div"); //$NON-NLS-0$
 					title.textContent = messages[item.Type];
+					switch (item.Type) {
+						case "Incoming":  //$NON-NLS-0$
+						case "Outgoing":  //$NON-NLS-0$
+							Deferred.when(model.syncCommits || model._getSync(), function(syncCommits) {
+								title.textContent =  i18nUtil.formatMessage(messages[item.Type + "WithCount"], item.Type === "Outgoing" ? syncCommits.AheadCount : syncCommits.BehindCount); //$NON-NLS-0$  //$NON-NLS-1$
+							});
+							break;
+						default:
+							title.textContent = messages[item.Type];
+					}
 					if (item.Type !== "NoCommits") { //$NON-NLS-0$
 						title.classList.add("gitCommitListSectionTitle"); //$NON-NLS-0$
 					}
