@@ -30,7 +30,6 @@ define([], function() {
 			return;
 		}
 		domNodeWrapperList.push({domNode: domNode});
-		domNode.tabIndex = -1;
 		domNode.style.outline = "none"; //$NON-NLS-0$
 	}
                 
