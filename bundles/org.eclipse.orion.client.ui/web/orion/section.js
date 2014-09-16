@@ -93,6 +93,10 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 				if (evt.target === that.domNode || evt.target === that.titleNode || evt.target === that.twistie) {
 					if(evt.keyCode === lib.KEY.ENTER) {
 						that._changeExpandedState();
+					} else if(evt.keyCode === lib.KEY.DOWN && that.dropdown) {
+						that.setHidden(false);
+					} else if(evt.keyCode === lib.KEY.UP && that.dropdown) {
+						that.setHidden(true);
 					} else if(evt.keyCode === lib.KEY.ESCAPE) {
 						that.setHidden(true);
 					}
