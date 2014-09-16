@@ -235,9 +235,7 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects){
 			this.wizard = wizard;
 			var parent = document.createElement("div");
 			parent.id = "page_" + page_no;
-			var range = document.createRange();
-			var contentFragment = range.createContextualFragment(this.TEMPLATE);
-			parent.appendChild(contentFragment);
+			parent.innerHTML = this.TEMPLATE;
 			return parent;
 		},
 		render: function(){
