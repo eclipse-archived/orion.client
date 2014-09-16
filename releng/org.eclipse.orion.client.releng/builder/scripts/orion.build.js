@@ -65,6 +65,7 @@
         "${orionClient}/bundles/org.eclipse.orion.client.ui",
         "${orionClient}/bundles/org.eclipse.orion.client.editor",
         "${orionClient}/bundles/org.eclipse.orion.client.git",
+        "${orionClient}/bundles/org.eclipse.orion.client.help",
         "${orionClient}/bundles/org.eclipse.orion.client.javascript",
         "${orionClient}/bundles/org.eclipse.orion.client.webtools",
         "${orionClient}/bundles/org.eclipse.orion.client.users"
