@@ -931,7 +931,7 @@ define([
 								},
 								before : true
 							},
-							null,
+							undefined,
 							compareWidgetLeftActionWrapper.id
 						);
 					}
