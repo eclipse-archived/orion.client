@@ -397,6 +397,7 @@ define([
 		} else {
 			if (command.type === "switch") { //$NON-NLS-0$
 				element = document.createElement("div"); //$NON-NLS-0$
+				element.tabIndex = 0;
 				element.className = "orionSwitch"; //$NON-NLS-0$
 				var input = clickTarget = document.createElement("input"); //$NON-NLS-0$
 				input.type = "checkbox"; //$NON-NLS-0$
@@ -416,6 +417,11 @@ define([
 				label.appendChild(span1);
 				label.appendChild(span2);
 				element.appendChild(label);
+				element.addEventListener("keydown", function(e) { //$NON-NLS-0$
+					if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
+						input.click();
+					}
+				}, false);
 
 				input.checked = command.checked;
 				span1.classList.add(command.imageClass);
@@ -441,7 +447,7 @@ define([
 				var done = function() {onClick.call(commandInvocation.handler, commandInvocation);};
 				command.onClick = onClick;
 				clickTarget.addEventListener("click", function(e) { //$NON-NLS-0$
-					if (command.type === "switch" || command.type === "toggle") { //$NON-NLS-0$
+					if (command.type === "switch" || command.type === "toggle") { //$NON-NLS-1$ //$NON-NLS-0$
 						if (command.type === "toggle") { //$NON-NLS-0$
 							command.checked = !command.checked;
 							if (command.checked) {
