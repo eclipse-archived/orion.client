@@ -105,7 +105,7 @@
             { name: "plugins/authenticationPlugin" },
             { name: "plugins/fileClientPlugin" },
             { name: "plugins/gitBlamePlugin" },
-            { name: "plugins/help/helpPlugin" },
+            { name: "plugins/helpPlugin" },
             { name: "plugins/jslintPlugin" },
             { name: "plugins/languages/arduino/arduinoPlugin" },
             { name: "plugins/languages/c/cPlugin" },
