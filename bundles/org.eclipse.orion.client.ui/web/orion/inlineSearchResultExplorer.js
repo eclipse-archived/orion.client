@@ -781,7 +781,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             type: "switch", //$NON-NLS-0$
             checked: this._shouldShowFullPath,
             visibleWhen: function(item) {
-                return true;
+                return !that._reporting && (that.getItemCount() > 0);
             },
             callback: function() {
                 that.switchFullPath();
