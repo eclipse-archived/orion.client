@@ -351,36 +351,37 @@ define(['orion/widgets/themes/ThemeClass'],
 		ThemeSheetWriter.prototype.render = render;
 		
 		function getSheet( settings ){
-		
-			if( settings.navbar.value ){	
-				this.navbar = settings.navbar.value;
-				this.button = settings.button.value;
-				this.location = settings.location.value;
-				this.selection = settings.selection.value;
-				this.sidepanel = settings.sidepanel.value;
-				this.mainpanel = settings.mainpanel.value;
-				this.navtext = settings.navtext.value;
-				this.search = settings.search.value;
-				this.content = settings.content.value;
-				this.toolpanel = settings.toolpanel.value;
-				this.bannerProgress = settings.bannerProgress.value;
-			}else{
-				this.navbar = settings.navbar;
-				this.button = settings.button;
-				this.location = settings.location;
-				this.selection = settings.selection;
-				this.sidepanel = settings.sidepanel;
-				this.mainpanel = settings.mainpanel;
-				this.navtext = settings.navtext;
-				this.search = settings.search;
-				this.content = settings.content;
-				this.toolpanel = settings.toolpanel;
-				this.bannerProgress = settings.bannerProgress;
-			}
-			
-			var sheet = this.writeNavigationStyle() + this.writeLocationStyle() + this.writeMainStyle() + this.writeButtonStyle();
-			
-			return sheet;
+			//TODO - temporarily disabled
+			return "";
+//			if( settings.navbar.value ){	
+//				this.navbar = settings.navbar.value;
+//				this.button = settings.button.value;
+//				this.location = settings.location.value;
+//				this.selection = settings.selection.value;
+//				this.sidepanel = settings.sidepanel.value;
+//				this.mainpanel = settings.mainpanel.value;
+//				this.navtext = settings.navtext.value;
+//				this.search = settings.search.value;
+//				this.content = settings.content.value;
+//				this.toolpanel = settings.toolpanel.value;
+//				this.bannerProgress = settings.bannerProgress.value;
+//			}else{
+//				this.navbar = settings.navbar;
+//				this.button = settings.button;
+//				this.location = settings.location;
+//				this.selection = settings.selection;
+//				this.sidepanel = settings.sidepanel;
+//				this.mainpanel = settings.mainpanel;
+//				this.navtext = settings.navtext;
+//				this.search = settings.search;
+//				this.content = settings.content;
+//				this.toolpanel = settings.toolpanel;
+//				this.bannerProgress = settings.bannerProgress;
+//			}
+//			
+//			var sheet = this.writeNavigationStyle() + this.writeLocationStyle() + this.writeMainStyle() + this.writeButtonStyle();
+//			
+//			return sheet;
 		}
 		
 		ThemeSheetWriter.prototype.getSheet = getSheet;

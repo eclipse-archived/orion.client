@@ -654,7 +654,7 @@ table .sectionTable {
 
 .git-sprite-apply-patch{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #333333;
 	font-family: 'Orion Icon Font';
@@ -666,7 +666,7 @@ table .sectionTable {
 
 .git-sprite-repository{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -679,7 +679,7 @@ table .sectionTable {
 
 .git-sprite-pull{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -691,7 +691,7 @@ table .sectionTable {
 
 .git-sprite-remote{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -703,7 +703,7 @@ table .sectionTable {
 
 .git-sprite-checkout{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -715,7 +715,7 @@ table .sectionTable {
 
 .git-sprite-fetch{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -727,7 +727,7 @@ table .sectionTable {
 
 .git-sprite-tag{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -739,7 +739,7 @@ table .sectionTable {
 
 .git-sprite-branch{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -751,7 +751,7 @@ table .sectionTable {
 
 .git-sprite-stage{
 	font-size: 16px;
-	line-height: 14px;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';
@@ -763,7 +763,7 @@ table .sectionTable {
 
 .git-sprite-addition{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';
@@ -776,7 +776,7 @@ table .sectionTable {
 
 .git-sprite-file{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';
@@ -788,7 +788,7 @@ table .sectionTable {
 
 .git-sprite-removal{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -800,7 +800,7 @@ table .sectionTable {
 
 .git-sprite-merge{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -812,7 +812,7 @@ table .sectionTable {
 
 .git-sprite-merge-squash{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -824,7 +824,7 @@ table .sectionTable {
 
 .git-sprite-rebase{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -836,7 +836,7 @@ table .sectionTable {
 
 .git-sprite-cherry-pick{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -848,7 +848,7 @@ table .sectionTable {
 
 .git-sprite-compare{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -860,7 +860,7 @@ table .sectionTable {
 
 .git-sprite-reset{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -872,7 +872,7 @@ table .sectionTable {
 
 .git-sprite-revert{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -884,7 +884,7 @@ table .sectionTable {
 
 .git-sprite-open{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -896,7 +896,7 @@ table .sectionTable {
 
 .git-sprite-unstage{
 	font-size: 16px;
-	line-height: 14px;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';	
@@ -922,7 +922,7 @@ table .sectionTable {
 
 .git-sprite-incoming-commit{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #333;
 	font-family: 'Orion Icon Font';	
@@ -935,7 +935,7 @@ table .sectionTable {
 
 .git-sprite-outgoing-commit{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #333;
 	font-family: 'Orion Icon Font';	
@@ -948,7 +948,7 @@ table .sectionTable {
 
 .git-sprite-branch-active{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #333;
 	font-family: 'Orion Icon Font';	
@@ -962,7 +962,7 @@ table .sectionTable {
 
 .git-sprite-branch-active-tag{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 20px;
 	vertical-align:middle;
 	color: #333;
 	font-family: 'Orion Icon Font';	
@@ -976,7 +976,7 @@ table .sectionTable {
 
 .git-sprite-branch-active-branch{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 20px;
 	vertical-align:middle;
 	color: #333;
 	font-family: 'Orion Icon Font';	
@@ -990,7 +990,7 @@ table .sectionTable {
 
 .git-sprite-branch-active-commit{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 20px;
 	vertical-align:middle;
 	color: #333;
 	font-family: 'Orion Icon Font';	
@@ -1004,7 +1004,7 @@ table .sectionTable {
 
 .git-sprite-branch-active-stash{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 20px;
 	vertical-align:middle;
 	color: #333;
 	font-family: 'Orion Icon Font';	
@@ -1031,7 +1031,7 @@ table .sectionTable {
 
 .git-sprite-save-patch{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #333;
 	font-family: 'Orion Icon Font';	
@@ -1044,7 +1044,7 @@ table .sectionTable {
 
 .git-sprite-stash-changes{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #333;
 	font-family: 'Orion Icon Font';	
@@ -1057,7 +1057,7 @@ table .sectionTable {
 
 .git-sprite-pop-changes{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #333;
 	font-family: 'Orion Icon Font';	
@@ -1070,7 +1070,7 @@ table .sectionTable {
 
 .git-sprite-commit{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #333;
 	font-family: 'Orion Icon Font';	
@@ -1083,7 +1083,7 @@ table .sectionTable {
 
 .git-sprite-stash{
 	font-size: 16px;
-	line-height: normal;
+	line-height: 18px;
 	vertical-align:middle;
 	color: #333;
 	font-family: 'Orion Icon Font';	

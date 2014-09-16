@@ -295,10 +295,11 @@ a.breadcrumb.currentLocation {
 	text-align: center;
 	vertical-align: baseline;
     display: inline-block;
-    padding: 2px 6px 3px;
+    padding: 4px 6px;
     border-radius: 1px;
     line-height: 12px;
-	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;  /* to override user agent stylesheet */
+    font-size: 9pt;
+	font-family: Lucida Grande,Tahoma,sans-serif; /* to override user agent stylesheet */
 	margin: 0;  /* to override user agent stylesheet */
 }
 
@@ -339,9 +340,8 @@ a.breadcrumb.currentLocation {
 	vertical-align: baseline;
 	cursor: pointer;
 	display: inline-block;
-	padding: 3px;
-	padding-top:0;
-	padding-bottom: 3px;
+	padding: 2px;
+	padding-top: 0;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
