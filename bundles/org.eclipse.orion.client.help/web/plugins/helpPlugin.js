@@ -9,17 +9,20 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(["require", "orion/plugin", "orion/Deferred", "plugins/help/helpFileService"], function(require, PluginProvider, Deferred, mHelpFileService) {
+define(["orion/plugin", "help/helpService"], function(PluginProvider, mHelpService) {
 	var provider = new PluginProvider({
 		name: "Help Plugin", //$NON-NLS-0$
 		version: "1.0", //$NON-NLS-0$
-		description: "Help Plugin" //$NON-NLS-0$
+		description: "Help plugin that contributes Orion's Help content" //$NON-NLS-0$
 	});
 
-	var helpFileService = new mHelpFileService.HelpFileService();
-	var serviceImpl = helpFileService;
+	var serviceImpl = new mHelpService.HelpService();
 	var properties = {
-		location: "{+OrionHome}/Orion User Guide/Getting Started.md" //$NON-NLS-0$
+		root: {
+			Location: "/helpContent/Orion User Guide/Getting Started.md", //$NON-NLS-0$
+			Name: "Getting Started",
+			Directory: false
+		}
 	};
 	provider.registerService("orion.help.pages", serviceImpl, properties); //$NON-NLS-0$
 	provider.connect();

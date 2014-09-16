@@ -103,7 +103,7 @@
 
 	<modules>
 		<module>bundles/org.eclipse.orion.client.core</module>
-		<module>bundles/org.eclipse.orion.client.doc</module>
+		<module>bundles/org.eclipse.orion.client.help</module>
 		<module>bundles/org.eclipse.orion.client.editor</module>
 		<module>bundles/org.eclipse.orion.client.webtools</module>
 		<module>bundles/org.eclipse.orion.client.javascript</module>

@@ -12,7 +12,7 @@ Once you have successfully set up an account, you can proceed to the next step.
 
 When you attempt to access a page that requires logging in, you'll be redirected to the Login Page and prompted for credentials.
 
-![Login Page](_images/Orion-0-3-login.png "Login Page")
+![Login Page](images/Orion-0-3-login.png "Login Page")
 
 On your first visit to the login page, you can sign in using either of these ways:
 
@@ -30,17 +30,17 @@ In Orion, each user has a virtual root folder where various folders and files ca
 
 ###Creating folders and files
 
-First, make sure you're at the [Navigator page](http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Navigator_page "Orion/Documentation/User_Guide/Reference/Navigator_page") by clicking the "hamburger" menu (![&quot;Hamburger&quot; menu](_images/Orion-hamburger-invert.png "&quot;Hamburger&quot; menu")) , and then clicking **Navigator**. The Navigator is the primary place where your files and folders will be shown. Because you haven't created any files or folders yet, the navigator is initially empty:
+First, make sure you're at the [Navigator page](http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Navigator_page "Orion/Documentation/User_Guide/Reference/Navigator_page") by clicking the "hamburger" menu (![&quot;Hamburger&quot; menu](images/Orion-hamburger-invert.png "&quot;Hamburger&quot; menu")) , and then clicking **Navigator**. The Navigator is the primary place where your files and folders will be shown. Because you haven't created any files or folders yet, the navigator is initially empty:
 
-![Orion Navigator, initial state](_images/Orion-navinitial.png "Orion Navigator, initial state")
+![Orion Navigator, initial state](images/Orion-navinitial.png "Orion Navigator, initial state")
 
-To start working with files and folders in Orion, create a folder by clicking the ![&quot;New&quot; menu](_images/Orion-new-menu.png "&quot;New&quot; menu") menu and clicking **New Folder**:
+To start working with files and folders in Orion, create a folder by clicking the ![&quot;New&quot; menu](images/Orion-new-menu.png "&quot;New&quot; menu") menu and clicking **New Folder**:
 
-![Navigator Toolbar](_images/Orion-navbreadcommands.png "Navigator Toolbar")
+![Navigator Toolbar](images/Orion-navbreadcommands.png "Navigator Toolbar")
 
 To navigate, you can either expand the folders in-place (using the &#9658; twisties), or you can click on the folder's name to drill into that folder. After you have drilled into a folder, you can navigate back up using the breadcrumb at the top of the page (pictured below). You can also use your browser's **Back** button, or a keyboard command (Alt+&#8593;) to navigate up.
 
-![Navigator Breadcrumbs](_images/Orion-navbreadcrumb.png "Navigator Breadcrumbs")
+![Navigator Breadcrumbs](images/Orion-navbreadcrumb.png "Navigator Breadcrumbs")
 
 ###Using the common banner
 
@@ -52,37 +52,37 @@ In the center of the banner, you'll find the **breadcrumb**, and the name of the
 
 Below the banner, the content of the page appears. The page toolbar contains commands. The commands act upon the current folder (unless you've made a selection in the file tree).
 
-![Common Banner](_images/Orion-topbanner.png "Common Banner")
+![Common Banner](images/Orion-topbanner.png "Common Banner")
 
 Here is a picture of the banner with the navigation and user menus expanded, to show the various links they offer:
 
-![Common banner with menus expanded](_images/Orion-banner-expanded.png "Common banner with menus expanded")
+![Common banner with menus expanded](images/Orion-banner-expanded.png "Common banner with menus expanded")
 
-The **New** menu (![New menu](_images/Orion-new-menu.png "New menu")) contains commands for creating new files or folders, and the **Actions** menu (![Actions menu](_images/Orion-actions-menu.png "Actions menu")) contains commands that apply to existing files or folders. The Go Up command lets you navigate up to the parent folder.
+The **New** menu (![New menu](images/Orion-new-menu.png "New menu")) contains commands for creating new files or folders, and the **Actions** menu (![Actions menu](images/Orion-actions-menu.png "Actions menu")) contains commands that apply to existing files or folders. The Go Up command lets you navigate up to the parent folder.
 
 Files and folders may be selected by clicking their row in the tree, or by using the Ctrl and arrow keys on the keyboard. Once a selection has been made, the Actions menu will show commands that operate on the selected items (such as move, copy, and delete). If you have not made a selection, the Actions menu will show commands that act upon the folder you're currently viewing.
 
-![Navigator actions](_images/Orion-navactions.png "Navigator actions")
+![Navigator actions](images/Orion-navactions.png "Navigator actions")
 
 ###Importing folders and files
 
 There are many ways to import your files into Orion. You can upload a zip file, import via SFTP, or clone a Git repository.
 
-![Import files](_images/Orion-navimport.png "Import files")
+![Import files](images/Orion-navimport.png "Import files")
 
 To import files from your local file system into Orion, select one or more files on your computer and simply drag them into the file tree. You can also drag Zip files into the navigator. Orion will ask you if you want to unzip the folder. This is convenient for backing up and restoring your work.
 
-![Import by drag and drop](_images/Orion-navimport-dnd.png "Import by drag and drop")
+![Import by drag and drop](images/Orion-navimport-dnd.png "Import by drag and drop")
 
 If your browser supports it, you can even drag and drop an entire folder from your OS file explorer into Orion:
 
-![Drag and drop a folder](_images/Orion-navimport-dnd-folder.png "Drag and drop a folder")
+![Drag and drop a folder](images/Orion-navimport-dnd-folder.png "Drag and drop a folder")
 
 ###Exporting folders and files
 
 When you have worked with your code on Orion and are ready to export your work back to your local workstation, navigate to the folder you wish to export and choose the **Export as Zip** link.
 
-![Export as zip](_images/Orion-navexport.png "Export as zip")
+![Export as zip](images/Orion-navexport.png "Export as zip")
 
 The contents of the folder will be placed in a zip file, and that zip file will be downloaded using your browser's download manager.
 
@@ -94,7 +94,7 @@ The editing page shows a small tree of your files in the left-hand pane. Like it
 
 ###JavaScript development
 
-If you are working with JavaScript (a *.js file), the editor will syntax highlight your code. Orion provides an outline of your JS functions: click the View Options (![View options](_images/Orion-view-options.png "View options")) menu to switch between the file tree and the outline.
+If you are working with JavaScript (a *.js file), the editor will syntax highlight your code. Orion provides an outline of your JS functions: click the View Options (![View options](images/Orion-view-options.png "View options")) menu to switch between the file tree and the outline.
 
 Orion also shows markers for problem areas in your code. Integration with existing web tools is an important goal in Orion, so we have implemented a plug-in that runs [JSLint](http://www.jslint.com/) on JavaScript files in order to produce the outline and problem markers.  The familiar Eclipse problem UI is used to display the problems in the editor. You'll see problem markers beside each offending line of code in the left-hand ruler, red underlining under the problematic text, and overview problem markers to the right-hand side of the editor. These last markers allow you to navigate quickly to a problem in a part of the file that's not currently displayed.
 
@@ -102,7 +102,7 @@ The editor will also match brackets when you click next to a bracket, perform au
 
 Orion allows multiple kinds of code outline views to be plugged in. For example you can install the [nonymous plugin](http://johnjbarton.github.com/outliner/nonymousPlugin.html) that provides a hierarchical JavaScript outline view and an advanced way of naming anonymous JavaScript functions. If you have multiple outline views installed, the View Options menu at the top of the outline pane allows you to switch between them.
 
-![Editing JavaScript screenshot](_images/Orion-editjs.png "Editing JavaScript screenshot") 
+![Editing JavaScript screenshot](images/Orion-editjs.png "Editing JavaScript screenshot") 
 
 ###Firebug Integration
 
@@ -112,13 +112,13 @@ The Orion server is Firebug-savvy, so that recent alpha versions of Firebug, tog
 
 Syntax highlighting of CSS files is also supported. Orion uses CSSLint to validate and check for problems in CSS files. An outline view is also provided, which shows the list of rules in your file and allows you to quickly navigate between them. As a proof of concept, Orion provides a very simple form of content assist. In Orion, our goal is to provide the plug-in points for things like content assist and outlining, allowing plug-in developers to enhance the functionality.  For now, Orion supplies a content assist based on CSS keyword proposals.  We hope to integrate existing source code analysis tools as plug-ins to enhance content assist support, outlining, and problem identification for many kinds of files.
 
-![Editing CSS screenshot](_images/Orion-editcss.png "Editing CSS screenshot")
+![Editing CSS screenshot](images/Orion-editcss.png "Editing CSS screenshot")
 
 ###HTML development
 
 A simple HTML outline is provided, based on DOM ids.  Syntax highlighting is also available for HTML files.
 
-![Editing HTML screenshot](_images/Orion-edithtml.png "Editing HTML screenshot")
+![Editing HTML screenshot](images/Orion-edithtml.png "Editing HTML screenshot")
 
 ###Java development
 
@@ -128,7 +128,7 @@ Java syntax highlighting is also supported.  However, we have not implemented an
 
 We've also implemented pluggable editor actions which allow third-party developers to extend the behavior of the Orion editor on the fly. For example, we've developed an Orion plug-in based on [the JSBeautifier code formatter](http://jsbeautifier.org) so that source code can be easily beautified. The plug-in is located at [https://orion-plugins.googlecode.com/git/0.5/plugins/beautify/jsbeautify.html](https://orion-plugins.googlecode.com/git/0.5/plugins/beautify/jsbeautify.html). Once the plug-in is installed, reload an Orion editor to see a new command appear beside rest of the editor commands. 
 
-![Plugins can contribute commands to the editor](_images/Orion-editorplugin.png "Plugins can contribute commands to the editor")
+![Plugins can contribute commands to the editor](images/Orion-editorplugin.png "Plugins can contribute commands to the editor")
 
 ##Searching
 
@@ -142,7 +142,7 @@ The search page is designed to perform a search for content inside your files. T
 * In the pages that focus on a single directory (for example, the Editor page), clicking Navigation Menu &gt; Related Links &gt; **Scope Search** will bring up a search page that's scoped to the current directory. Only files under the selected directory will be searched.
 * You can also access the scoped directory search by selecting any directory in the file navigator and going to Actions menu (gear menu) &gt; Scope Search.
 
-![Search page](_images/Orion-search-page-overall.png "Search page")
+![Search page](images/Orion-search-page-overall.png "Search page")
 
 Once the [Search page](Reference/Search Results page.md "Orion/Documentation/Orion User Guide/Reference/Search Results page") is loaded, you can start to search on all criteria available on the left hand side of the page. Search results are displayed on the right-hand side.
 
@@ -150,43 +150,43 @@ Once the [Search page](Reference/Search Results page.md "Orion/Documentation/Ori
 
 The **Find File Named** dialog can be opened by pressing **Ctrl+Shift+F** on your keyboard. This dialog lets you search for a file by name. Simple wildcard characters are supported.
 
-![Open resource dialog](_images/Orion-findFileName-overal.png "Open resource dialog")
+![Open resource dialog](images/Orion-findFileName-overal.png "Open resource dialog")
 
 ###Searching inside the editor
 
 You can also perform a global search on a highlighted phrase from inside the editor using the **Ctrl + H** shortcut. You can also type other keywords to search the file contents on-the-fly.
 
-![Global search in editor](_images/Orion-searchineditor-overall.png "Global search in editor")
+![Global search in editor](images/Orion-searchineditor-overall.png "Global search in editor")
 
 A nice side effect of editing source code in browser pages is being able to use browser mechanisms, such as the history, to quickly find files. If you find yourself working in the same handful of files, opening a new browser tab and typing in the filename will quickly get you there.
 
-![Using the browser history to find files](_images/Orion-browserbar.png "Using the browser history to find files")
+![Using the browser history to find files](images/Orion-browserbar.png "Using the browser history to find files")
 
 ##Working with git
 
 We intend to provide many different kinds of plug-ins for integrating Orion into open source and proprietary version control systems.  Our first example in this area is a UI for working with [Git](http://git-scm.com/) repositories. For files and folders that are managed in a Git repository, you will see a menu allowing you to navigate to various Git views dealing with the file or folder:
 
-![Git commands are in the actions menu](_images/Orion-gitmenu.png "Git commands are in the actions menu")
+![Git commands are in the actions menu](images/Orion-gitmenu.png "Git commands are in the actions menu")
 
 The Related pages menu will also give you contextually appropriate links to various Git pages, including the top-level of your Git repository.
 
-![Git commands in the Related pages menu](_images/Orion-relatedpages-git.png "Git commands in the Related pages menu")
+![Git commands in the Related pages menu](images/Orion-relatedpages-git.png "Git commands in the Related pages menu")
 
 The **Git Status** page shows you all the files in your git repository that have changed, and allows you to stage, unstage, and commit changes. You can multi-select files to stage/unstage/commit using shift or ctrl.
 
-![Git status page](_images/Orion-status-page-overview.png "Git status page")
+![Git status page](images/Orion-status-page-overview.png "Git status page")
 
 Click the twistie arrow next to a changed file to show a comparison of what changed in the file.
 
-![Git status compare](_images/Orion-git-status-compare.png "Git status compare")
+![Git status compare](images/Orion-git-status-compare.png "Git status compare")
 
 If you prefer, you can view the changes in a side-by-side comparison:
 
-![Side by side compare](_images/Orion-gitsidebyside.png "Side by side compare")
+![Side by side compare](images/Orion-gitsidebyside.png "Side by side compare")
 
 The [Git Status page](Reference/Git Status page.md "Orion/Documentation/Orion User Guide/Reference/Git Status page") shows also a list of recent commits on the active branch. You may open the [Git Log page](Reference/Git Log page.md "Orion/Documentation/Orion User Guide/Reference/Git Log page") by clicking the **Complete Log** button and see the full list of commits on that branch. Click on a commit in the log page to open the [Git Commit page](Reference/Git Commit page.md "Orion/Documentation/Orion User Guide/Reference/Git Commit page") for complete information about that commit.
 
-![Git log overview](_images/Orion-git-log-overview.png "Git log overview")
+![Git log overview](images/Orion-git-log-overview.png "Git log overview")
 
 You can also open the [Compare page](Reference/Compare page.md "Orion/Documentation/Orion User Guide/Reference/Compare page") for each change in the selected commit.
 
@@ -198,19 +198,19 @@ Note that if you are running your own server, and you wish to set up hosting on 
 
 You create a site by clicking the **Create Site** button and supplying a name for your site. Your new site will appear and you should fill in the path mappings for your project.  In this example the "My Work" project has an index.html in the root so just a basic path is required to mount that project at the root. Once done that step you select "Save". You have the option of starting the server from this page or refreshing the list of sites page to see your new site.
 
-![Sites page](_images/Orion-sites.png "Sites page")
+![Sites page](images/Orion-sites.png "Sites page")
 
 Assuming you are at the sites page you can click the **Start** button to start the site. The result will be similar to the following image, showing the site running and the URL showing where the site can be accessed.
 
-![A started site](_images/Orion-site-started.png "A started site")
+![A started site](images/Orion-site-started.png "A started site")
 
 Upon visiting the site's URL, success! — We see the listing of the "My Work" directory we added.
 
-![Site showing files](_images/Orion-site-dir-index.png "Site showing files")
+![Site showing files](images/Orion-site-dir-index.png "Site showing files")
 
 Now browse to index.html:
 
-![Site on Orion server](_images/Orion-site-landingpage.png "Site on Orion server")
+![Site on Orion server](images/Orion-site-landingpage.png "Site on Orion server")
 
 At this point, we can do incremental development by using the Orion editor to change the files in our "My Work" folder, and then simply reloading the site page to see the changes.
 
@@ -220,7 +220,7 @@ Orion allows developers to build plug-ins that add behavior to Orion pages. Let'
 
 To see what plug-ins are installed in your Orion system, open the [Settings page](Reference/Settings page.md "Orion/Documentation/Orion User Guide/Reference/Settings_page") from the **Options** menu at the top right of the Orion banner (next to the user name). Then click the **Plugins** category on the left-hand side of the screen.
 
-![Plugin page](_images/Orion-pluginregistry.png "Plugin page")
+![Plugin page](images/Orion-pluginregistry.png "Plugin page")
 
 The Plugins page shows what plug-ins you have installed, and allows you to install, reload, or remove plugins. You can see that several plugins that provide Orion functionality, such as file management, user management, Git, JSLint, are already installed. Plugins extend Orion by implementing new behaviors, or *extensions* to the system. Places where "extensions" may be contributed are often called *extension points*.
 
@@ -230,11 +230,11 @@ The [orion.navigate.command](http://wiki.eclipse.org/Orion/Documentation/Develop
 
 A sample plug-in that demonstrates the different kinds of commands you can contribute is located at [http://orionhub.org/plugins/sampleCommandsPlugin.html](http://orionhub.org/plugins/sampleCommandsPlugin.html). On the Plugins page, you can click on **Install** and paste or type this URL into the text area and press **Submit**.  When you reload the Navigator page, you will see new commands in the item action menu.
 
-![New commands in the action menu](_images/Orion-sampleCommands.png "New commands in the action menu")
+![New commands in the action menu](images/Orion-sampleCommands.png "New commands in the action menu")
 
 The "Bulk item command" can act on more than one item, so it will appear in the Actions menu when you select more than one item in the navigator.
 
-![New commands in the section menu](_images/Orion-sampleSelectionCommands.png "New commands in the section menu")
+![New commands in the section menu](images/Orion-sampleSelectionCommands.png "New commands in the section menu")
 
 ###Learning more
 

@@ -20,7 +20,7 @@ define([], function() {
 	var SELF_HOSTING_TEMPLATE = [
 		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.ui/web/index.html" },
 		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.ui/web" },
-		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.doc/web" },
+		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.help/web" },
 		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.users/web" },
 		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.core/web" },
 		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.editor/web" },

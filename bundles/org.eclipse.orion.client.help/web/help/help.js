@@ -14,9 +14,9 @@
 /*global URL*/
 define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/globalCommands", "orion/URITemplate",
 		"orion/Deferred", "marked/marked", "orion/webui/littlelib","orion/objects", "orion/explorers/explorer", "orion/contentTypes",
-		"orion/status", "orion/operationsClient", "orion/commands", "orion/PageLinks"],
+		"orion/status", "orion/operationsClient", "orion/commands"],
 	function(require, messages, mBootstrap, mCommandRegistry, mGlobalCommands, URITemplate, Deferred, marked,
-				lib, objects, mExplorer, mContentTypes, mStatus, mOperationsClient, mCommands, PageLinks) {
+		lib, objects, mExplorer, mContentTypes, mStatus, mOperationsClient, mCommands) {
 
 	var serviceRegistry, progress, contentTypeService, statusService;
 	var helpModel;
@@ -35,7 +35,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 	var PREFIX_RELATIVE_LINK = "_help_a_"; //$NON-NLS-0$
 	var RELATIVE_IMAGE_REGEX = new RegExp("^" + PREFIX_RELATIVE_IMAGE); //$NON-NLS-0$
 	var RELATIVE_LINK_REGEX = new RegExp("^" + PREFIX_RELATIVE_LINK); //$NON-NLS-0$
-	var FILENAME_REGEX = /^(.*)\.(\w+)(?:[\?#]|$)/i;
+	var FILENAME_REGEX = /^([^?#]*)\.([^.?#]+)/i;
 	var HTML_EXTENSION_REGEX = /^html?$/i;
 	var LINK_START_REGEX = /<a/;
 	var TAG_END_REGEX = /(?=>$)/;
@@ -75,8 +75,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			var element = content.getElementById(anchor);
 			var title = element.textContent;
 		} else {
-			var match = FILENAME_REGEX.exec(node.Name);
-			title = match ? match[1] : node.Name;
+			title = node.Name;
 		}
 
 		var result = itemCache[id] || {};
@@ -92,7 +91,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		return result;
 	}
 
-	function getFileClient(item) {
+	function getPluginService(item) {
 		while (!item.service && item.parent) {
 			item = item.parent;
 		}
@@ -152,7 +151,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		}
 		var result = marked.Renderer.prototype.image.call(this, href, title, altText);
 		if (id) {
-			result = result.replace(TAG_END_REGEX, ' id="' + id + '" ' + ATTRIBUTE_ORIGINAL_HREF + '="' + targetURL + '"'); //$NON-NLS-1$ //$NON-NLS-0$			
+			result = result.replace(TAG_END_REGEX, ' id="' + id + '" ' + ATTRIBUTE_ORIGINAL_HREF + '="' + targetURL + '"'); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		return result;
 	};
@@ -193,7 +192,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 //					return;
 //				}
 //				this._root = createItem();
-//				(progress ? progress.progress(fileClient.read(ROOT_FOLDER, true), "Retrieving " + ROOT_FOLDER) : fileClient.read(ROOT_FOLDER, true)).then( //$NON-NLS-0$
+//				(progress ? progress.progress(pluginService.read(ROOT_FOLDER, true), "Retrieving " + ROOT_FOLDER) : pluginService.read(ROOT_FOLDER, true)).then( //$NON-NLS-0$
 //					function(node) {
 //						this._root = createItem(node);
 //						rootCreationListeners.forEach(function(fn) {
@@ -220,30 +219,31 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 					return;
 				}
 
-				var location = parentItem.fileNode.Location;
 				if (parentItem.fileNode.Directory) {
-					var fileClient = getFileClient(parentItem);
-					if (!fileClient.fetchChildren) {
+					var pluginService = getPluginService(parentItem);
+					if (!pluginService.fetchChildren) {
 						parentItem.children = [];
 						onComplete ? onComplete(parentItem.children) : null;
 						return;
 					}
-					(progress ? progress.progress(fileClient.fetchChildren(location), "Retrieving children " + location) : fileClient.fetchChildren(location)).then( //$NON-NLS-0$
-						function(childNodes) {
-							var children = [];
-							childNodes.forEach(function(node) {
-								var item = createItem(node);
-								item.parent = parentItem;
-								children.push(item);
-							}.bind(this));
-							parentItem.children = children;
-							onComplete ? onComplete(children) : null;
-						}.bind(this),
-						function(error) {
-							displayErrorStatus(error);
-							onComplete ? onComplete([]) : null;
-						}
-					);
+					(progress ?
+						progress.progress(pluginService.fetchChildren(parentItem.fileNode), "Retrieving children " + parentItem.fileNode.Location) : //$NON-NLS-0$
+						pluginService.fetchChildren(parentItem.fileNode)).then(
+							function(childNodes) {
+								var children = [];
+								childNodes.forEach(function(node) {
+									var item = createItem(node);
+									item.parent = parentItem;
+									children.push(item);
+								}.bind(this));
+								parentItem.children = children;
+								onComplete ? onComplete(children) : null;
+							}.bind(this),
+							function(error) {
+								displayErrorStatus(error);
+								onComplete ? onComplete([]) : null;
+							}
+						);
 					return;
 				}
 
@@ -324,28 +324,16 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 						result.resolve(children);
 					}
 				};
-				var orionHome = {OrionHome: PageLinks.getOrionHome()};
 				for (var i = 0; i < refs.length; ++i) {
 					var ref = refs[i];
 					var service = serviceRegistry.getService(ref);
-					var rootLocation = ref.getProperty("location"); //$NON-NLS-0$
-					if (service.read && rootLocation) {
-						(function(service, location) {
-							location = new URITemplate(location).expand(orionHome);
-							// TODO temporary workaround
-							var lastIndex = location.lastIndexOf("/");
-							var node = {Location: location, Name: "Getting Started.md"/*location.substring(lastIndex)*/, Directory: false};
-//							service.read(location, true).then(
-//								function(node) {
-									var item = createItem(node);
-									item.parent = parentItem;
-									item.service = service;
-									children.push(item);
-									taskComplete();
-//								},
-//								taskComplete
-//							);
-						})(service, rootLocation);
+					var root = ref.getProperty("root"); //$NON-NLS-0$
+					if (root && service.read) {
+						var item = createItem(root);
+						item.parent = parentItem;
+						item.service = service;
+						children.push(item);
+						taskComplete();
 					} else {
 						/* skip this plugin since it failed to provide either a read implementation or a location value */
 						taskComplete();
@@ -414,13 +402,29 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 
 		/*
 		 * The following manual check for a navigate within the same page is done
-		 * to workaround an IE behaviour that causes a page reload on every TOC
+		 * to work around an IE behaviour that causes a page reload on every TOC
 		 * item selection otherwise.  This workaround is not needed on Chrome or
 		 * Firefox, but still runs on them to maintain consistency.
 		 */
 		if (window.location.origin === target.origin) {
 			event.preventDefault();
-			window.location.hash = itemId;
+			if (window.location.href === target.href) {
+				/*
+				 * The current selection is being re-selected, which will not cause a
+				 * hash change, so handle it manually here (selecting the item again
+				 * should collapse it if it has children).
+				 */
+				itemId = decodeURIComponent(itemId);
+				if (!itemId.indexOf(HASH)) {
+					itemId = itemId.substring(1); /* remove leading '#' */
+				}
+				var item = getItem(itemId);
+				if (item) {
+					selectItem(item);
+				}
+			} else {
+				window.location.hash = itemId;
+			}
 			return;
 		}
 
@@ -536,7 +540,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		 * hash at load time).  If the hash is resolved to point at a valid resource then create
 		 * the item for it and select it in the TOC if it should have an entry there.
 		 */
-//		(progress ? progress.progress(fileClient.read(location, true), "Retrieving " + location) : fileClient.read(location, true)).then( //$NON-NLS-0$
+//		(progress ? progress.progress(pluginService.read(location, true), "Retrieving " + location) : pluginService.read(location, true)).then( //$NON-NLS-0$
 //			function(node) {
 //				if (node.Directory) {
 //					item = createItem(node, undefined, undefined, true);
@@ -600,47 +604,50 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			outputDocument.head.appendChild(link);
 			outputDocument.body.classList.add("orionMarkdown"); //$NON-NLS-0$
 
-			var fileClient = getFileClient(item);
-			if (fileClient.readBlob) {
+			var pluginService = getPluginService(item);
+			if (pluginService.readBlob) {
 				var elements = outputDocument.getElementsByTagName("IMG"); //$NON-NLS-0$
 				for (var i = 0; i < elements.length; i++) {
 					var current = elements[i];
 					if (RELATIVE_IMAGE_REGEX.test(current.id)) {
 						var bytes = imageCache[current.id];
 						if (bytes) {
-							var href = normalize(current.getAttribute(ATTRIBUTE_ORIGINAL_HREF), item.fileNode.Location);
-							var match = href.match(FILENAME_REGEX);
-							var mimeType = match ? "image/" + match[2] : "image/png"; //$NON-NLS-1$ //$NON-NLS-0$
-							var dataURL = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
-							current.src = dataURL;
+							var match = current.getAttribute(ATTRIBUTE_ORIGINAL_HREF).match(FILENAME_REGEX);
+							if (match) {
+								var mimeType = "image/" + match[2]; //$NON-NLS-0$
+								var dataURL = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
+								current.src = dataURL;
+							}
 						} else {
 							(function(element) {
-								var href = normalize(element.getAttribute(ATTRIBUTE_ORIGINAL_HREF), item.fileNode.Location);
-								fileClient.readBlob(href).then(
+								var filename = element.getAttribute(ATTRIBUTE_ORIGINAL_HREF);
+								pluginService.readBlob(item.fileNode, filename).then(
 									function(bytes) {
 										imageCache[element.id] = bytes;
-										var match = href.match(FILENAME_REGEX);
-										var mimeType = match ? "image/" + match[2] : "image/png"; //$NON-NLS-1$ //$NON-NLS-0$
-										dataURL = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
-
-										if (!adjustScrollTop || !anchorElement || anchorElement.offsetTop < element.offsetTop) {
-											/* do not need to treat the image load specially */
-											element.src = dataURL;
-										} else {
-											/*
-											 * Image is above the anchor element and the final page styling has been applied,
-											 * so must adjust the scrollTop to keep the viewport steady.
-											 */
-											var newImage = new Image();
-											newImage.src = dataURL;
-											newImage.onload = function() {
-												newImage.onload = null;
-												if (!element.parentElement) {
-													return; /* page has likely been unloaded */
-												}
-												element.parentElement.replaceChild(newImage, element);
-												outputDocument.body.scrollTop = anchorElement.offsetTop;
-											};
+										var match = filename.match(FILENAME_REGEX);
+										if (match) {
+											var mimeType = match ? "image/" + match[2] : "image/png"; //$NON-NLS-1$ //$NON-NLS-0$
+											dataURL = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
+	
+											if (!adjustScrollTop || !anchorElement || anchorElement.offsetTop < element.offsetTop) {
+												/* do not need to treat the image load specially */
+												element.src = dataURL;
+											} else {
+												/*
+												 * Image is above the anchor element and the final page styling has been applied,
+												 * so must adjust the scrollTop to keep the viewport steady.
+												 */
+												var newImage = new Image();
+												newImage.src = dataURL;
+												newImage.onload = function() {
+													newImage.onload = null;
+													if (!element.parentElement) {
+														return; /* page has likely been unloaded */
+													}
+													element.parentElement.replaceChild(newImage, element);
+													outputDocument.body.scrollTop = anchorElement.offsetTop;
+												};
+											}
 										}
 									},
 									function(/*error*/) {
@@ -658,7 +665,11 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			for (i = 0; i < elements.length; i++) {
 				current = elements[i];
 				if (RELATIVE_LINK_REGEX.test(current.id)) {
-					var hash = normalize(current.getAttribute("href"), item.fileNode.Location); //$NON-NLS-0$
+					if (pluginService.resolveURL) {
+						var hash = pluginService.resolveURL(item.fileNode, current.getAttribute("href")); //$NON-NLS-0$
+					} else {
+						hash = normalize(current.getAttribute("href"), item.fileNode.Location); //$NON-NLS-0$
+					}
 					current.href = TEMPLATE.expand({resource: hash});
 				}
 			}
@@ -674,7 +685,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			}
 		}
 	}
-	
+
 	function outputTOC(item) {
 		var outputDocument = output.contentDocument;
 		var outputBody = outputDocument.body;
@@ -724,13 +735,12 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 
 	function retrieveContent(item) {
 		var node = item.fileNode;
-		var location = node.Location;
 		var result = new Deferred();
-		var match = location.match(FILENAME_REGEX);
+		var match = node.Location.match(FILENAME_REGEX);
 		if (match) {
-			var fileClient = getFileClient(item);
-			if (match[2] === "md") { //$NON-NLS-0$
-				(progress ? progress.progress(fileClient.read(location, false), "Retrieving " + location) : fileClient.read(location, false)).then( //$NON-NLS-0$
+			var pluginService = getPluginService(item);
+			if (match[2].toLowerCase() === "md") { //$NON-NLS-0$
+				(progress ? progress.progress(pluginService.read(node), "Retrieving " + node.Location) : pluginService.read(node)).then( //$NON-NLS-0$
 					function(content) {
 						var html = "<html><body>" + marked(content, markedOptions) + "</body></html>"; //$NON-NLS-1$ //$NON-NLS-0$
 			            content = document.implementation.createHTMLDocument("");
@@ -740,10 +750,15 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 					}.bind(this),
 					result.reject
 				);
-			} else if (fileClient.readBlob && !HTML_EXTENSION_REGEX.test(match[2])) { /* treat as binary */
-				(progress ? progress.progress(fileClient.readBlob(location), "Retrieving " + location) : fileClient.readBlob(location)).then( //$NON-NLS-0$
+			} else if (pluginService.readBlob && !HTML_EXTENSION_REGEX.test(match[2])) { /* treat as binary */
+				(progress ? progress.progress(pluginService.readBlob(node), "Retrieving " + node.Location) : pluginService.readBlob(node)).then( //$NON-NLS-0$
 					function(bytes) {
-						Deferred.when(contentTypeService.getFileContentType(node), function(contentType) {
+						/*
+						 * contentTypeService expects node.Name to be a filename with an extension, so
+						 * create a temporary node that satisfies this to determine the file type
+						 */
+						var tempNode = {Name: node.Location};
+						Deferred.when(contentTypeService.getFileContentType(tempNode), function(contentType) {
 							var mimeType = contentType ? contentType.id : "text/plain"; //$NON-NLS-0$
 							var content = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
 							result.resolve(content);

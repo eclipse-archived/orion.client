@@ -17,7 +17,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.eclipse.orion</groupId>
-	<artifactId>org.eclipse.orion.client.doc</artifactId>
+	<artifactId>org.eclipse.orion.client.help</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 

@@ -5,7 +5,7 @@
 		"edit/content/imageViewerPlugin.html":true,
 		"edit/content/jsonEditorPlugin.html":true,
 		"plugins/webEditingPlugin.html":true,
-		"plugins/help/helpPlugin.html": true,
+		"plugins/helpPlugin.html": true,
 		"plugins/languages/arduino/arduinoPlugin.html":true,
 		"plugins/languages/c/cPlugin.html":true,
 		"plugins/languages/cpp/cppPlugin.html":true,

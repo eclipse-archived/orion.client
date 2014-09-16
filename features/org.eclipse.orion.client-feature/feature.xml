@@ -82,7 +82,7 @@
          version="0.0.0"/>
 
    <plugin
-         id="org.eclipse.orion.client.doc"
+         id="org.eclipse.orion.client.help"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
