@@ -5,7 +5,7 @@
 @import "../widgets/input/ComboTextInput.css";
 
 .searchResultsWrapperDiv .treeTableRow > td {
-	padding: 3px;
+	padding: 0 3px;
 	overflow: hidden;
 }
 
@@ -257,7 +257,7 @@
 	display: inline-flex;
 	display: -webkit-inline-flex;		/* Safari */
 	outline: none;
-	padding: 2px;
+	padding: 0 2px;
 	vertical-align: middle;
 	width: 100%;
 }
@@ -267,7 +267,8 @@
 	-webkit-align-items: baseline;		/* Safari */
 	display: inline-flex;
 	display: -webkit-inline-flex;		/* Safari */
-	padding: 2px 10px 2px 2px;
+	padding: 7px 10px 7px 2px;
+	width: 100%;
 }
 
 .fullPathSpan {
@@ -327,7 +328,9 @@
 }
 
 .navlink.searchDetailLink {
+	padding: 5px 0;
 	vertical-align: baseline;
+	width: 100%;
 }
 
 /* search match occurrences */

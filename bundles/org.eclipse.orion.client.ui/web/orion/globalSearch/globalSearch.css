@@ -9,6 +9,7 @@
 
 .search_primaryColumn {
 	padding-left: 0 !important;
+	padding-top: 3px !important;
 	vertical-align: top;
 	white-space: nowrap;
 	width: 38px;

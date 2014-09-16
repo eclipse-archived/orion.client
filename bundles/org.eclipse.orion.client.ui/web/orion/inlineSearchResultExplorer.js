@@ -15,11 +15,11 @@
 define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 
 	'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/compare/compareView', 
 	'orion/highlight', 'orion/explorers/navigationUtils', 'orion/webui/tooltip', 'orion/explorers/navigatorRenderer', 'orion/extensionCommands',
-	'orion/searchModel', 'orion/crawler/searchCrawler', 'orion/selection'
+	'orion/searchModel', 'orion/crawler/searchCrawler'
 ],
 function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClient, mCommands, 
 	mSearchUtils, mCompareView, mHighlight, mNavUtils, mTooltip, 
-	navigatorRenderer, extensionCommands, mSearchModel, mSearchCrawler, mSelection
+	navigatorRenderer, extensionCommands, mSearchModel, mSearchCrawler
 ) {
     /* Internal wrapper functions*/
     function _empty(nodeToEmpty) {
@@ -273,12 +273,11 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 				
 		var fileSpan = this._getFileNameElement(item);
 		link.appendChild(fileSpan);
-				
-		
-		//trigger a click on the span when the link is clicked
+
+		//trigger a click on the span when the link is clicked to set the selection cursor
 		link.addEventListener("click", function(){ //$NON-NLS-0$
 			spanHolder.click();
-		});
+		}.bind(this));
 
 		// append link to parent span
         spanHolder.appendChild(link);
@@ -420,10 +419,12 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         spanHolder.appendChild(link);
         link.classList.add("searchDetailLink"); //$NON-NLS-0$
        
-       mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
-        _connect(link, "click", function() { //$NON-NLS-0$
-            that.explorer.getNavHandler().cursorOn(item);
+       	mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
+       	//trigger a click on the span when the link is clicked to set the selection cursor
+       	_connect(link, "click", function() { //$NON-NLS-0$
+       		spanHolder.click();
         });
+        
         var span = _createElement('span', null, null, link); //$NON-NLS-0$
         return span;
     };
@@ -669,17 +670,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		this._contentTypeService = new mContentTypes.ContentTypeRegistry(this.registry);
 		this._inlineSearchPane = inlineSearchPane;
 		this._preferences = preferences;
-		
-		this.selection = new mSelection.Selection(this.registry, "inlineSearchResultExplorerSelection"); //$NON-NLS-0$
-		var selectionListener = function(event) {
-			if (event.selections && event.selections[0]) {
-				var link = lib.node(this.renderer.getItemLinkId(event.selections[0]));
-				if (link) {
-					window.location = link.href;
-				}
-			}
-		}.bind(this);
-		this.selection.addEventListener("selectionChanged", selectionListener); //$NON-NLS-0$
 		
 		var gotPreferences = this._preferences.getPreferences("/inlineSearchPane").then(function(prefs) { //$NON-NLS-0$
 			var show = prefs.get("showFullPath"); //$NON-NLS-0$
