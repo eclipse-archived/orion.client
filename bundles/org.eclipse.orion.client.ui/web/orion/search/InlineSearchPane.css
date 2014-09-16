@@ -115,7 +115,7 @@
 }
 
 .fileNamePatternsTextInput {
-	min-width: 218px;
+	min-width: 219px;
 }
 
 .fileNamePatternsHint {
@@ -170,7 +170,7 @@
 }
 .oneLine .searchOption {
 	display: inline-block;
-	margin-right: 40px;
+	margin-right: 28px;
 }
 .oneLine .searchOption:last-child {
 	margin: 0;
@@ -199,7 +199,7 @@
 
 .searchScopeElementWrapper {
 	display: inline-block;
-	width: 222px;
+	width: 224px;
 }
 
 .searchScopeElement {
