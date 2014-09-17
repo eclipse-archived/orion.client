@@ -294,7 +294,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 					manifestElement.appendChild(label);
 		    	},
 		    	getResults: function(){
-		    		var ret = {}
+		    		var ret = {};
 		    		ret.saveManifest = saveManifestCheckbox.checked;
 		    		return ret;
 		    	}
@@ -302,22 +302,22 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    
 		    page1 = new Wizard.WizardPage({
 		    	template: "<table class=\"formTable\">"+
-				"<tr>"+
-					"<td id=\"orgsLabel\" class=\"label\"></td>"+
-					"<td id=\"orgs\" class=\"selectCell\"></td>"+
-				"</tr>"+
-				"<tr>"+
-					"<td id=\"spacesLabel\" class=\"label\"></td>"+
-					"<td id=\"spaces\" class=\"selectCell\"></td>"+
-				"</tr>"+
-				"<tr>"+
-					"<td id=\"nameLabel\" class=\"label\"></td>"+
-					"<td id=\"name\" class=\"selectCell\"></td>"+
-				"</tr>"+
-				"<tr>"+
-					"<td id=\"hostLabel\" class=\"label\"></td>"+
-					"<td id=\"host\" class=\"selectCell\"></td>"+
-				"</tr>"+
+					"<tr>"+
+						"<td id=\"orgsLabel\" class=\"label\"></td>"+
+						"<td id=\"orgs\" class=\"selectCell\"></td>"+
+					"</tr>"+
+					"<tr>"+
+						"<td id=\"spacesLabel\" class=\"label\"></td>"+
+						"<td id=\"spaces\" class=\"selectCell\"></td>"+
+					"</tr>"+
+					"<tr>"+
+						"<td id=\"nameLabel\" class=\"label\"></td>"+
+						"<td id=\"name\" class=\"selectCell\"></td>"+
+					"</tr>"+
+					"<tr>"+
+						"<td id=\"hostLabel\" class=\"label\"></td>"+
+						"<td id=\"host\" class=\"selectCell\"></td>"+
+					"</tr>"+
 			"</table>",
 				render: function(){
 					this.wizard.validate();
@@ -325,7 +325,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 					cFService.getOrgs(target).then(
 						function(result2){
 							hideMessage();
-																
+							
 							document.getElementById("orgsLabel").appendChild(document.createTextNode("Organization*:"));
 		
 							orgsDropdown = document.createElement("select");
@@ -359,7 +359,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 							});
 							
 							selection = new mSelection.Selection(serviceRegistry, "orion.Spaces.selection"); //$NON-NLS-0$
-							selection.addEventListener("selectionChanged", function(){this.validate()}.bind(this.wizard));
+							selection.addEventListener("selectionChanged", function(){this.validate();}.bind(this.wizard));
 		
 								document.getElementById("spacesLabel").appendChild(document.createTextNode("Space*:"));
 		
@@ -462,8 +462,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 							});
 							
 							appsInput= appsDropdown.getTextInputNode();						
-							appsInput.onkeyup = function(){this.validate()}.bind(this.wizard);
-							appsInput.addEventListener("focus",function(){this.validate()}.bind(this.wizard));
+							appsInput.onkeyup = function(){this.validate();}.bind(this.wizard);
+							appsInput.addEventListener("focus",function(){this.validate();}.bind(this.wizard));
 							
 							if(manifestInfo.name){
 								appsInput.value = manifestInfo.name;
@@ -775,27 +775,21 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 
 		    //
 		    function loadScreen(){
-				var configAdmin = serviceRegistry.getService('orion.cm.configadmin'); //$NON-NLS-0$
-				configAdmin.getConfiguration("app.settings").then(
-					function(config) {
-						 // get target and app, then do push and open application
-						getTarget(cFService, config, preferences).then(
-							function(targetResp){
-								target = targetResp;
-								var wizard = new Wizard.Wizard({
-									parent: "wizard",
-									pages: [page1, page2, page3],
-									commonPane: commonPane,
-									onSubmit: doAction,
-									onCancel: closeFrame,
-									buttonNames: {ok: "Deploy"},
-									size: {width: "370px", height: "180px"}
-								});
-							}, function(error){
-								postError(error);
-							}
-						);
-					}.bind(this)
+				getTarget(cFService, preferences).then(
+					function(targetResp){
+						target = targetResp;
+						var wizard = new Wizard.Wizard({
+							parent: "wizard",
+							pages: [page1, page2, page3],
+							commonPane: commonPane,
+							onSubmit: doAction,
+							onCancel: closeFrame,
+							buttonNames: {ok: "Deploy"},
+							size: {width: "370px", height: "180px"}
+						});
+					}, function(error){
+						postError(error);
+					}
 				);
 			}
 			
@@ -810,8 +804,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		}
 	);
 	
-	// make sure target is set and it matches the url in settings
-	function getTarget(cFService, config, preferences) {
+	function getTarget(cFService, preferences) {
 		return mCfUtil.getTarget(preferences);
 	}
 
@@ -824,7 +817,6 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 	function postError(error) {
 		if(error.Message){
 			if (error.Message.indexOf("The host is taken")===0){
-//				error.Message = error.Message.replace("The host is taken", "The Bluemix route");
 				error.Message = "The host is already in use by another application. Please check the host/domain in the manifest file.";
 			}
 		}
