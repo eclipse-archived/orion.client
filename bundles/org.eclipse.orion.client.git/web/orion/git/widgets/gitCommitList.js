@@ -121,7 +121,7 @@ define([
 			var that = this;
 			var activeBranch = this.getActiveBranch();
 			var targetRef = this.getTargetReference();
-			var location = (targetRef.CommitLocation || targetRef.Location) + that.repositoryPath  + that.getQueries("mergeBase=true");
+			var location = (targetRef.CommitLocation || targetRef.Location) + that.repositoryPath  + that.getQueries("mergeBase=true"); //$NON-NLS-0$
 			var id = activeBranch.Name;
 			return that.progressService.progress(that.gitClient.getLog(location, id), messages["Getting git log"]).then(function(resp) {
 				return that.syncCommits = resp;
@@ -1026,15 +1026,15 @@ define([
 					switch (item.Type) {
 						case "Incoming":  //$NON-NLS-0$
 						case "Outgoing":  //$NON-NLS-0$
-							Deferred.when(model.syncCommits || model._getSync(), function(syncCommits) {
-								var count = item.Type === "Outgoing" ? syncCommits.AheadCount : syncCommits.BehindCount; //$NON-NLS-0$
-								if (count !== undefined) {
-									title.textContent =  i18nUtil.formatMessage(messages[item.Type + "WithCount"], count); //$NON-NLS-0$
-								}
-							});
+							if (model.tracksRemoteBranch()) {
+								Deferred.when(model.syncCommits || model._getSync(), function(syncCommits) {
+									var count = item.Type === "Outgoing" ? syncCommits.AheadCount : syncCommits.BehindCount; //$NON-NLS-0$
+									if (count !== undefined) {
+										title.textContent =  i18nUtil.formatMessage(messages[item.Type + "WithCount"], count); //$NON-NLS-0$
+									}
+								});
+							}
 							break;
-						default:
-							title.textContent = messages[item.Type];
 					}
 					if (item.Type !== "NoCommits") { //$NON-NLS-0$
 						title.classList.add("gitCommitListSectionTitle"); //$NON-NLS-0$
