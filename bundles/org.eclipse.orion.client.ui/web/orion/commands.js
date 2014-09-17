@@ -148,7 +148,7 @@ define([
 				} else {
 					// CTRL or ALT combinations are not characters, however both of them together (CTRL+ALT)
 					// are the Alt Gr key on some keyboards.  See Eclipse bug 20953. If together, they might
-					// be a character.
+					// be a character. However there aren't usually any commands associated with Alt Gr keys.
 					if (e.ctrlKey && !e.altKey) {
 						// special case for select all, cut, copy, paste, and undo.  
 						if (!e.shiftKey && (e.keyCode === 65 || e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 88 || e.keyCode === 90)) {
@@ -157,6 +157,9 @@ define([
 						return false;
 					}
 					if (e.altKey && !e.ctrlKey) {
+						return false;
+					}
+					if (e.ctrlKey && e.altKey){
 						return false;
 					}
 				}
