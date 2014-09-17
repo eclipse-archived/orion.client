@@ -16,9 +16,10 @@ define(["orion/xhr", "orion/URL-shim"], function(xhr) { //$NON-NLS-1$ //$NON-NLS
 	var FILENAME_REGEX = /^(.*)\.(\w+)(?:[\?#]|$)/i;
 
 	/*
-	 * A basic Help service implementation, requires targetted folders to contain a
-	 * "toc" file that lists the contained files and folders to be displayed in Help's
-	 * Table of Contents.
+	 * A basic Help service implementation.  A plugin wishing to contribute subitems
+	 * to its main entry in the Table of Contents does so by providing a "toc" file
+	 * in each folder that lists the names of its contained files and folders to be
+	 * included.
 	 */
 	function HelpServiceImpl() {
 	}
@@ -38,18 +39,24 @@ define(["orion/xhr", "orion/URL-shim"], function(xhr) { //$NON-NLS-1$ //$NON-NLS
 					"Content-Type": "charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				timeout: 15000
-			}).then(function(result) {
-				var segments = result.response.split("\n"); //$NON-NLS-0$
-				var children = [];
-				segments.forEach(function(current) {
-					if (current) {
-						var match = FILENAME_REGEX.exec(current);
-						var childURL = new URL(current, objectUrl);
-						children.push({Name: match ? match[1] : current, Location: childURL.href, Directory: !match});
-					}
-				});
-				return children;
-			});
+			}).then(
+				function(result) {
+					var segments = result.response.split("\n"); //$NON-NLS-0$
+					var children = [];
+					segments.forEach(function(current) {
+						if (current) {
+							var match = FILENAME_REGEX.exec(current);
+							var childURL = new URL(current, objectUrl);
+							children.push({Name: match ? match[1] : current, Location: childURL.href, Directory: !match});
+						}
+					});
+					return children;
+				},
+				function(/*error*/) {
+					/* treat failure to find toc file as no children */
+					return [];
+				}
+			);
 		},
 
 		/**
