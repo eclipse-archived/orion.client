@@ -54,6 +54,9 @@ define([
 				this.location = this.log.Children[0].Location.substring(0, this.log.Children[0].Location.length - this.log.RepositoryPath.length) || "";
 			}
 		}
+		if (!this.targetRef && this.log) {
+			this.targetRef = this.log.toRef || this.log.Children[0];
+		}
 		this.repositoryPath = options.repositoryPath || (this.log && this.log.RepositoryPath) || "";
 		this.filterQuery = "";
 		this.authorQuery = "";
@@ -141,13 +144,6 @@ define([
 			if (this.targetRef) {
 				return this.targetRef;
 			}
-			if (this.log) {
-				if (this.log.toRef) {
-					return this.log.toRef;
-				} else {
-					return this.log.Children[0];
-				}
-			}
 			var ref = this.currentBranch;
 			return ref && ref.RemoteLocation[0] && ref.RemoteLocation[0].Children[ref.RemoteLocation[0].Children.length - 1];
 		},
@@ -209,22 +205,19 @@ define([
 							return;
 						}
 						repository.ActiveBranch = currentBranch.CommitLocation;
-						var setTitle = function() {
-							var activeBranch = that.getActiveBranch();
-							var targetRef = that.getTargetReference();
-							if (section) {
-								if (that.simpleLog && targetRef) {
-									section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef)));
-								} else {
-									section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], util.shortenRefName(activeBranch)));
-								}
+						var activeBranch = that.getActiveBranch();
+						var targetRef = that.getTargetReference();
+						if (section) {
+							if (that.simpleLog && targetRef) {
+								section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef)));
+							} else {
+								section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], util.shortenRefName(activeBranch)));
 							}
-						};
+						}
 						if (progress) progress.done();
 						if (that.simpleLog) {
-							return getSimpleLog().then(setTitle);
+							return getSimpleLog();
 						} else {
-							setTitle();
 							return Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
 								repository.status = status;
 								onComplete(that.processChildren(parentItem, [
