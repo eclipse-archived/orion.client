@@ -158,7 +158,16 @@ define([
 		},
 		getChildren: function(parentItem, onComplete) {
 			var that = this;
-			var tracksRemoteBranch = this.tracksRemoteBranch();
+			var tracksRemoteBranch = this.tracksRemoteBranch(), targetRef;
+			var getSimpleLog = function() {
+				return Deferred.when(that.log || that._getLog(parentItem), function(log) {
+					parentItem.log = log;
+					var children = log.Children.slice(0);
+					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, log)));
+				}, function(error){
+					that.handleError(error);
+				});
+			};
 			if (parentItem instanceof Array && parentItem.length > 0) {
 				onComplete(parentItem);
 			} else if (parentItem.children && !parentItem.more) {
@@ -187,7 +196,7 @@ define([
 						}
 						repository.ActiveBranch = currentBranch.CommitLocation;
 						var activeBranch = that.getActiveBranch();
-						var targetRef = that.getTargetReference();
+						targetRef = that.getTargetReference();
 						if (section) {
 							if (that.simpleLog && targetRef) {
 								section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef)));
@@ -197,13 +206,7 @@ define([
 						}
 						if (progress) progress.done();
 						if (that.simpleLog) {
-							return Deferred.when(that.log || that._getLog(parentItem), function(log) {
-								parentItem.log = log;
-								var children = log.Children.slice(0);
-								onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, log)));
-							}, function(error){
-								that.handleError(error);
-							});
+							getSimpleLog();
 						} else {
 							Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
 								repository.status = status;
@@ -268,6 +271,7 @@ define([
 					});
 				}
 			} else if (parentItem.Type === "Outgoing") { //$NON-NLS-0$
+				targetRef = that.getTargetReference();
 				if (tracksRemoteBranch) {
 					return Deferred.when(parentItem.more ? that._getLog(parentItem) : that.outgoingCommits || that._getOutgoing(), function(outgoingCommits) {
 						outgoingCommits.Children.forEach(function(commit) {
@@ -277,7 +281,7 @@ define([
 					}, function(error){
 						that.handleError(error);
 					});
-				} else {
+				} else if (targetRef) {
 					return Deferred.when(that.log || that._getLog(parentItem), function(log) {
 						that.log = parentItem.log = log;
 						var children = [];
@@ -291,14 +295,19 @@ define([
 					}, function(error){
 						that.handleError(error);
 					});
+				} else {
+					onComplete(that.processChildren(parentItem, []));
 				}
 			} else if (parentItem.Type === "Synchronized") { //$NON-NLS-0$
+				targetRef = that.getTargetReference();
 				if (tracksRemoteBranch) {
 					return Deferred.when(parentItem.more ? that._getLog(parentItem) : that.syncCommits || that._getSync(), function(syncCommits) {
 						onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, syncCommits.Children.slice(0), syncCommits)));
 					}, function(error) {
 						that.handleError(error);
 					});
+				} else if (!targetRef) {
+					getSimpleLog();
 				} else {
 					onComplete(that.processChildren(parentItem, []));
 				}
