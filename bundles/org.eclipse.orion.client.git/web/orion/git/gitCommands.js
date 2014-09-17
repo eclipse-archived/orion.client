@@ -503,10 +503,16 @@ var exports = {};
 
 			var item = data.items;
 			var noAuth = false;
-			if (item.LocalBranch && item.RemoteBranch) {
+			if (item.LocalBranch && item.Remote) {
 				noAuth = item.noAuth;
-				item = item.RemoteBranch;
+				item = item.Remote;
 			}
+			
+			if (item.Remote) {
+				noAuth = item.noAuth;
+				item = item.Remote;
+			}
+			
 			var path = item.Location;
 			var name = item.Name;
 			var commandInvocation = data;
@@ -603,8 +609,8 @@ var exports = {};
 			return d;
 		};
 		var fetchVisibleWhen = function(item) {
-			if (item.LocalBranch && item.RemoteBranch) {
-				item = item.RemoteBranch;
+			if (item.LocalBranch && item.Remote) {
+				item = item.Remote;
 			}
 			if (item.Type === "RemoteTrackingBranch" && item.Id) //$NON-NLS-0$
 				return true;
@@ -642,8 +648,11 @@ var exports = {};
 				});
 			},
 			visibleWhen: function(item) {
-				if (item.LocalBranch && item.RemoteBranch) {
-					item = item.RemoteBranch;
+				if (item.LocalBranch && item.Remote) {
+					item = item.Remote;
+				}
+				if (item.Remote) {
+					item = item.Remote;
 				}
 				if (item.Type === "Remote") //$NON-NLS-0$
 					return true;
@@ -806,8 +815,8 @@ var exports = {};
 		var rebaseCallback = function(data) {
 			var d = new Deferred();
 			var item = data.items;
-			if (item.LocalBranch && item.RemoteBranch) {
-				item = item.RemoteBranch;
+			if (item.LocalBranch && item.Remote) {
+				item = item.Remote;
 			}
 			var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
@@ -887,8 +896,8 @@ var exports = {};
 		var pushCallbackNoTagsForce = mGitPushLogic(objects.mixin(pushOptions, {tags: false, force: true})).perform;
 		var pushCallbackGerrit = mGitPushLogic(objects.mixin(pushOptions, {tags: false, force: false, gerrit: true})).perform;
 		var pushVisibleWhen = function(item) {
-			if (item.LocalBranch && item.RemoteBranch) {
-				if (item.RemoteBranch.Type !== "RemoteTrackingBranch") { //$NON-NLS-0$
+			if (item.LocalBranch && item.Remote) {
+				if (item.Remote.Type !== "RemoteTrackingBranch") { //$NON-NLS-0$
 					return false;
 				}
 				item = item.LocalBranch;
@@ -914,7 +923,7 @@ var exports = {};
 						var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 						var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 						var item = data.items;
-						progressService.progress(service.getLog(item.RemoteBranch.CommitLocation, item.LocalBranch.Name), messages['Getting outgoing commits']).then(function(resp) {
+						progressService.progress(service.getLog(item.Remote.CommitLocation, item.LocalBranch.Name), messages['Getting outgoing commits']).then(function(resp) {
 							var done = function() {
 								dispatchModelEventOn({type: "modelChanged", action: "sync", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
 							};
@@ -975,7 +984,7 @@ var exports = {};
 				});
 			},
 			visibleWhen: function(item) {
-				if (item.LocalBranch && item.RemoteBranch) {
+				if (item.LocalBranch && item.Remote) {
 					item = item.LocalBranch;
 				}
 				if (item.toRef)
@@ -2400,7 +2409,7 @@ var exports = {};
 								data.parameters = undefined;
 								
 								data.items.LocalBranch = currentBranch;
-								data.items.RemoteBranch = currentBranch.RemoteLocation[0].Children[0];
+								data.items.Remote = currentBranch.RemoteLocation[0].Children[0];
 								
 								pushCallback(data).then(function() {
 									refresh();

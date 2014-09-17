@@ -68,8 +68,10 @@ define([
 				}
 			
 				var item = data.items;
-				if (item.LocalBranch && item.RemoteBranch) {
-					itemTargetBranch = item.RemoteBranch;
+				if (item.Remote) {
+					itemTargetBranch = item.Remote;
+				}
+				if (item.LocalBranch) {
 					item = item.LocalBranch;
 				}
 				if (item.toRef) {

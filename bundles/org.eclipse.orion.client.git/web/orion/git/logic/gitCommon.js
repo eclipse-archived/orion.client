@@ -151,7 +151,7 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 	
 	var getGitUrl = function(item) {
 		//TODO This should be somehow unified
-		if (item.RemoteBranch) return item.RemoteBranch.GitUrl;
+		if (item.Remote) return item.Remote.GitUrl;
 		if (item.LocalBranch) {
 			item = item.LocalBranch;
 		}

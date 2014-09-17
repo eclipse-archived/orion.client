@@ -808,11 +808,18 @@ define([
 		},
 		fetch: function() {
 			var model = this.model;
-			var targetRef = model.getTargetReference();
-			if (this.autoFetch && model.tracksRemoteBranch() && !this.simpleLog && !model.isRebasing() && targetRef.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
+			var activeBranch = model.getActiveBranch();
+			if (this.autoFetch && !this.model.isRebasing() && activeBranch) {
+				var remotes = [];
 				var commandService = this.commandService;
-				var activeBranch = model.getActiveBranch();
-				return commandService.runCommand("eclipse.orion.git.fetch", {LocalBranch: activeBranch, RemoteBranch: targetRef, noAuth: true}, this); //$NON-NLS-0$
+				if (activeBranch.RemoteLocation) {
+					activeBranch.RemoteLocation.forEach(function (remote) {
+						if (remote) {
+							remotes.push(commandService.runCommand("eclipse.orion.git.fetchRemote", {Remote: remote, noAuth: true}, this));  //$NON-NLS-0$
+						}
+					});
+					if (remotes.length) return Deferred.all(remotes);
+				}
 			}
 			return new Deferred().resolve();
 		},
@@ -881,9 +888,9 @@ define([
 				commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushForceBranch", 1400, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
 				commandService.registerCommandContribution(outgoingActionScope, "eclipse.orion.git.pushToGerrit", 1500, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
 
-				commandService.renderCommands(outgoingActionScope, outgoingActionScope, {LocalBranch: activeBranch, RemoteBranch: targetRef}, this, "tool"); //$NON-NLS-0$
+				commandService.renderCommands(outgoingActionScope, outgoingActionScope, {LocalBranch: activeBranch, Remote: targetRef}, this, "tool"); //$NON-NLS-0$
 			}
-			commandService.renderCommands(actionsNodeScope, actionsNodeScope, {LocalBranch: activeBranch, RemoteBranch: targetRef}, this, "tool"); //$NON-NLS-0$
+			commandService.renderCommands(actionsNodeScope, actionsNodeScope, {LocalBranch: activeBranch, Remote: targetRef}, this, "tool"); //$NON-NLS-0$
 		}
 	});
 	
