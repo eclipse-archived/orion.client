@@ -263,24 +263,48 @@ define([
 		this.destroyDiffs();
 	};
 	
+	
 	GitRepositoryExplorer.prototype.setSelectedRepository = function(repository, force) {
+		var that = this;
+		var setRepoSelection =  function(repository, force) {
+			if (!force) {
+				if (compareLocation(that.repository, repository)) return;
+			}
+			that.repository = repository;
+			that.initTitleBar(repository || {});
+			if (repository) {
+				that.preferencesService.getPreferences("/git/settings").then(function(prefs) {  //$NON-NLS-0$
+					prefs.put("lastRepo", {Location: that.repository.Location});  //$NON-NLS-0$
+				});
+				that.repositoriesNavigator.select(that.repository);
+				that.repositoriesSection.setTitle(repository.Name);
+				that.displayBranches(repository); 
+				that.displayConfig(repository, "full"); //$NON-NLS-0$
+				that.setSelectedReference(that.reference);
+			}
+		};
+	
 		if (!repository && this.repositoriesNavigator && this.repositoriesNavigator.model) {
-			repository = this.repositoriesNavigator.model.repositories[0];
+			this.preferencesService.getPreferences("/git/settings").then(function(prefs) {  //$NON-NLS-0$
+				var lastRepo = prefs.get("lastRepo"); //$NON-NLS-0$
+				if (lastRepo) {
+					that.repositoriesNavigator.model.repositories.some(function(repo){
+						if (repo.Location === lastRepo.Location) {
+							repository = repo;
+							return true;
+						}
+						return false;
+					});
+				}
+				if (!repository) {
+					repository = that.repositoriesNavigator.model.repositories[0];
+				}
+				setRepoSelection (repository, force);
+			});
+		} else {
+			setRepoSelection (repository, force);
 		}
-		if (!force) {
-			if (compareLocation(this.repository, repository)) return;
-		}
-		this.repository = repository;
-		this.initTitleBar(repository || {});
-		if (repository) {
-			this.repositoriesNavigator.select(this.repository);
-			this.repositoriesSection.setTitle(repository.Name);
-		}
-		if (repository) {
-			this.displayBranches(repository); 
-			this.displayConfig(repository, "full"); //$NON-NLS-0$
-			this.setSelectedReference(this.reference);
-		}
+		
 	};
 	
 	GitRepositoryExplorer.prototype.setSelectedReference = function(ref) {
