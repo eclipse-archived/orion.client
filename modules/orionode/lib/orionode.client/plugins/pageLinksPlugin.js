@@ -128,7 +128,7 @@ define([
 		id: "orion.help",
 		nameKey: "Help",
 		nls: "orion/widgets/nls/messages",
-		uriTemplate: 'http://wiki.eclipse.org/Orion/Getting_Started_with_Orion_node',
+		uriTemplate: "{+OrionHome}/help/help.html",
 		category: "user.0"
 	});
 
