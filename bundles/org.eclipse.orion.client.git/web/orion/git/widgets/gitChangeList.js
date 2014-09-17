@@ -339,12 +339,13 @@ define([
 		mGitCommands.getModelEventDispatcher().addEventListener("modelChanged", this._modelListener = function(event) { //$NON-NLS-0$
 			switch (event.action) {
 			case "commit": //$NON-NLS-0$
+			case "stash": //$NON-NLS-0$
+				this.messageTextArea.value = ""; //$FALLTHROUGH$
 			case "reset": //$NON-NLS-0$
 			case "applyPatch":  //$NON-NLS-0$
 			case "stage": //$NON-NLS-0$
 			case "unstage": //$NON-NLS-0$
 			case "checkoutFile": //$NON-NLS-0$
-			case "stash": //$NON-NLS-0$
 			case "applyStash": //$NON-NLS-0$
 			case "popStash": //$NON-NLS-0$
 			case "ignoreFile": //$NON-NLS-0$
