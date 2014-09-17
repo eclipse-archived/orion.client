@@ -46,7 +46,14 @@ define([
 		this.parentId = options.parentId;
 		this.targetRef = options.targetRef;
 		this.log = options.log;
-		this.location = options.location || (this.log && this.log.Location.substring(0, this.log.Location.length - this.log.RepositoryPath.length)) || "";
+		this.location = options.location;
+		if (!this.location && this.log) {
+			if (this.log.toRef) {
+				this.location = this.log.Location.substring(0, this.log.Location.length - this.log.RepositoryPath.length) || "";
+			} else {
+				this.location = this.log.Children[0].Location.substring(0, this.log.Children[0].Location.length - this.log.RepositoryPath.length) || "";
+			}
+		}
 		this.repositoryPath = options.repositoryPath || (this.log && this.log.RepositoryPath) || "";
 		this.filterQuery = "";
 		this.authorQuery = "";
@@ -134,6 +141,13 @@ define([
 			if (this.targetRef) {
 				return this.targetRef;
 			}
+			if (this.log) {
+				if (this.log.toRef) {
+					return this.log.toRef;
+				} else {
+					return this.log.Children[0];
+				}
+			}
 			var ref = this.currentBranch;
 			return ref && ref.RemoteLocation[0] && ref.RemoteLocation[0].Children[ref.RemoteLocation[0].Children.length - 1];
 		},
@@ -158,10 +172,10 @@ define([
 		},
 		getChildren: function(parentItem, onComplete) {
 			var that = this;
-			var tracksRemoteBranch = this.tracksRemoteBranch(), targetRef;
+			var tracksRemoteBranch = this.tracksRemoteBranch();
 			var getSimpleLog = function() {
 				return Deferred.when(that.log || that._getLog(parentItem), function(log) {
-					parentItem.log = log;
+					that.log = parentItem.log = log;
 					var children = log.Children.slice(0);
 					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, log)));
 				}, function(error){
@@ -195,20 +209,23 @@ define([
 							return;
 						}
 						repository.ActiveBranch = currentBranch.CommitLocation;
-						var activeBranch = that.getActiveBranch();
-						targetRef = that.getTargetReference();
-						if (section) {
-							if (that.simpleLog && targetRef) {
-								section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef)));
-							} else {
-								section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], util.shortenRefName(activeBranch)));
+						var setTitle = function() {
+							var activeBranch = that.getActiveBranch();
+							var targetRef = that.getTargetReference();
+							if (section) {
+								if (that.simpleLog && targetRef) {
+									section.setTitle(i18nUtil.formatMessage(messages[targetRef.Type + ' (${0})'], util.shortenRefName(targetRef)));
+								} else {
+									section.setTitle(i18nUtil.formatMessage(messages['Active Branch (${0})'], util.shortenRefName(activeBranch)));
+								}
 							}
-						}
+						};
 						if (progress) progress.done();
 						if (that.simpleLog) {
-							getSimpleLog();
+							return getSimpleLog().then(setTitle);
 						} else {
-							Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
+							setTitle();
+							return Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
 								repository.status = status;
 								onComplete(that.processChildren(parentItem, [
 									status,
@@ -216,15 +233,15 @@ define([
 										Type: "Outgoing", //$NON-NLS-0$
 										selectable: false,
 										isNotSelectable: true,
-										activeBranch: activeBranch,
-										targetRef: targetRef
+										activeBranch: that.getActiveBranch(),
+										targetRef: that.getTargetReference()
 									},
 									{
 										Type: "Incoming", //$NON-NLS-0$
 										selectable: false,
 										isNotSelectable: true,
-										activeBranch: activeBranch,
-										targetRef: targetRef
+										activeBranch: that.getActiveBranch(),
+										targetRef: that.getTargetReference()
 									},
 									{
 										Type: "Synchronized", //$NON-NLS-0$
@@ -271,7 +288,6 @@ define([
 					});
 				}
 			} else if (parentItem.Type === "Outgoing") { //$NON-NLS-0$
-				targetRef = that.getTargetReference();
 				if (tracksRemoteBranch) {
 					return Deferred.when(parentItem.more ? that._getLog(parentItem) : that.outgoingCommits || that._getOutgoing(), function(outgoingCommits) {
 						outgoingCommits.Children.forEach(function(commit) {
@@ -281,7 +297,7 @@ define([
 					}, function(error){
 						that.handleError(error);
 					});
-				} else if (targetRef) {
+				} else if (that.getTargetReference()) {
 					return Deferred.when(that.log || that._getLog(parentItem), function(log) {
 						that.log = parentItem.log = log;
 						var children = [];
@@ -299,14 +315,13 @@ define([
 					onComplete(that.processChildren(parentItem, []));
 				}
 			} else if (parentItem.Type === "Synchronized") { //$NON-NLS-0$
-				targetRef = that.getTargetReference();
 				if (tracksRemoteBranch) {
 					return Deferred.when(parentItem.more ? that._getLog(parentItem) : that.syncCommits || that._getSync(), function(syncCommits) {
 						onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, syncCommits.Children.slice(0), syncCommits)));
 					}, function(error) {
 						that.handleError(error);
 					});
-				} else if (!targetRef) {
+				} else if (!that.getTargetReference()) {
 					getSimpleLog();
 				} else {
 					onComplete(that.processChildren(parentItem, []));
