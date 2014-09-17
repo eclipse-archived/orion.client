@@ -29,6 +29,8 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 
 	var itemCache = {};
 	var imageCache = {};
+	var itemCreationListeners = {};
+	var childFetchListeners = {};
 
 	var ATTRIBUTE_ORIGINAL_HREF = "orionHref"; //$NON-NLS-0$
 	var PREFIX_RELATIVE_IMAGE = "_help_img_"; //$NON-NLS-0$
@@ -48,20 +50,10 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 	var HEADER_REGEX = new RegExp("^H([" + MINIMUM_HEADER_LEVEL + "-" + MAXIMUM_HEADER_LEVEL + "])$"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var TEMPLATE = new URITemplate(require.toUrl("help/help.html") + "#{,resource}"); //$NON-NLS-1$ //$NON-NLS-0$
 
-	function displayErrorStatus(error) {
-		if (!error.responseText) {
-			error.Severity = "Error"; //$NON-NLS-0$
-			if (error.status === 0) {
-				error.Message = messages.noResponse;
-			} else {
-				try {
-					error.Message = JSON.stringify(error);
-				} catch (e) {
-					error.Message = messages.unknownError;
-				}
-			}
-		}
-		statusService.setProgressResult(error);
+	function addItemCreationListener(location, fn) {
+		var listeners = itemCreationListeners[location] || [];
+		listeners.push(fn);
+		itemCreationListeners[location] = listeners;
 	}
 
 	function createItem(node, content, anchor, dontCache) {
@@ -87,8 +79,30 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 
 		if (!dontCache) {
 			itemCache[id] = result;
+			if (itemCreationListeners[id]) {
+				itemCreationListeners[id].forEach(function(current) {
+					current(result);
+				});
+				delete itemCreationListeners[id];
+			}
 		}
 		return result;
+	}
+
+	function displayErrorStatus(error) {
+		if (!error.responseText) {
+			error.Severity = "Error"; //$NON-NLS-0$
+			if (error.status === 0) {
+				error.Message = messages.noResponse;
+			} else {
+				try {
+					error.Message = JSON.stringify(error);
+				} catch (e) {
+					error.Message = messages.unknownError;
+				}
+			}
+		}
+		statusService.setProgressResult(error);
 	}
 
 	function getPluginService(item) {
@@ -186,22 +200,6 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		HelpModel.prototype = {
 			getRoot: function(onItem) {
 				onItem(this._root);
-//				rootCreationListeners.push(onItem);
-//				if (rootCreationListeners.length > 1) {
-//					/* root item is already being retrieved */
-//					return;
-//				}
-//				this._root = createItem();
-//				(progress ? progress.progress(pluginService.read(ROOT_FOLDER, true), "Retrieving " + ROOT_FOLDER) : pluginService.read(ROOT_FOLDER, true)).then( //$NON-NLS-0$
-//					function(node) {
-//						this._root = createItem(node);
-//						rootCreationListeners.forEach(function(fn) {
-//							fn(this._root);							
-//						}.bind(this));
-//						rootCreationListeners = [];
-//					}.bind(this),
-//					displayErrorStatus
-//				);
 			},
 			getChildren: function(parentItem, onComplete) {
 				if (parentItem.children) {
@@ -210,20 +208,42 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 				}
 
 				if (parentItem.fileNode === ROOT_FILENODE) {
-					this._getRootPages(parentItem).then(
-						function(children) {
-							parentItem.children = children;
-							onComplete ? onComplete(children) : null;
-						}
-					);
+					var children = this._getRootPages(parentItem);
+					parentItem.children = children;
+					onComplete ? onComplete(children) : null;
+					children.forEach(function(current) {
+						this.getChildren(current);
+					}.bind(this));
 					return;
 				}
+
+				var listeners = childFetchListeners[parentItem];
+				if (listeners === undefined) {
+					listeners = [];
+					var doFetch = true;
+				}
+				if (onComplete) {
+					listeners.push(onComplete);
+				}
+				childFetchListeners[parentItem] = listeners;
+				if (!doFetch) {
+					/* this fetch is already pending from another request, don't initiate a redundant one */
+					return;
+				}
+
+				var notifyListeners = function(children) {
+					listeners = childFetchListeners[parentItem];
+					listeners.forEach(function(current) {
+						current(children);
+					});
+					delete childFetchListeners[parentItem];
+				};
 
 				if (parentItem.fileNode.Directory) {
 					var pluginService = getPluginService(parentItem);
 					if (!pluginService.fetchChildren) {
 						parentItem.children = [];
-						onComplete ? onComplete(parentItem.children) : null;
+						notifyListeners(parentItem.children);
 						return;
 					}
 					(progress ?
@@ -237,11 +257,14 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 									children.push(item);
 								}.bind(this));
 								parentItem.children = children;
-								onComplete ? onComplete(children) : null;
+								notifyListeners(children);
+								children.forEach(function(current) {
+									this.getChildren(current);
+								}.bind(this));
 							}.bind(this),
 							function(error) {
 								displayErrorStatus(error);
-								onComplete ? onComplete([]) : null;
+								notifyListeners([]);
 							}
 						);
 					return;
@@ -293,15 +316,15 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 				};
 
 				if (parentItem.content) {
-					onComplete ? onComplete(computeChildren(parentItem)) : null;
+					notifyListeners(computeChildren(parentItem));
 				} else {
 					retrieveContent(parentItem).then(
 						function(content) {
 							parentItem.content = content;
-							onComplete ? onComplete(computeChildren(parentItem)) : null;
+							notifyListeners(computeChildren(parentItem));
 						},
 						function(/*error*/) {
-							onComplete ? onComplete([]) : null;
+							notifyListeners([]);
 						}
 					);
 				}
@@ -310,20 +333,8 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 				return item.id;
 			},
 			_getRootPages: function(parentItem) {
-				var result = new Deferred();
-				var children = [];
+				var result = [];
 				var refs = serviceRegistry.getServiceReferences("orion.help.pages"); //$NON-NLS-0$
-				var taskCount = refs.length;
-				if (!taskCount) {
-					result.resolve(children);
-					return result;
-				}
-
-				var taskComplete = function() {
-					if (!--taskCount) {
-						result.resolve(children);
-					}
-				};
 				for (var i = 0; i < refs.length; ++i) {
 					var ref = refs[i];
 					var service = serviceRegistry.getService(ref);
@@ -332,11 +343,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 						var item = createItem(root);
 						item.parent = parentItem;
 						item.service = service;
-						children.push(item);
-						taskComplete();
-					} else {
-						/* skip this plugin since it failed to provide either a read implementation or a location value */
-						taskComplete();
+						result.push(item);
 					}
 				}
 				return result;
@@ -392,6 +399,9 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 	}
 
 	function clickListener(event) {
+		/* ensure that this selection does not get overridden by a page retrieval in progress */
+		itemCreationListeners = {};
+
 		var href = event.target.getAttribute("href"); //$NON-NLS-0$
 		if (!href) {
 			var element = lib.$(".targetSelector", event.target); //$NON-NLS-0$
@@ -437,7 +447,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			itemId = itemId.substring(1); /* remove leading '#' */
 		}
 		itemId = decodeURIComponent(itemId);
-		var item = getItem(itemId);
+		item = getItem(itemId);
 		if (item) {
 			selectItem(item);
 		}
@@ -495,9 +505,6 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 				return null;
 			}
 
-			if (!item.children) {
-				helpModel.getChildren(item);
-			}
 			var td = document.createElement("td"); //$NON-NLS-0$
 			td.classList.add("navbar-item"); //$NON-NLS-0$
 			if (item.selected) {
@@ -521,56 +528,36 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			hash = hash.substring(1); /* remove leading '#' */
 			index = hash.indexOf(HASH);
 		}
-//		var location = index === -1 ? hash : hash.substring(0, index);
-//		var anchor = index === -1 ? null : hash.substring(index + 1);
-		var item = getItem(hash);
-		if (item) {
-			/* the hash corresponds to a page in the TOC */
+
+		var doit = function(item) {
 			setOutput(item).then(
 				function() {
 					selectItem(item);
 				}
 			);
+		};
+		var item = getItem(hash);
+		if (item) {
+			/* the hash corresponds to a page in the TOC */
+			doit(item);
 			return;
 		}
 
 		/*
-		 * The hash does not have a TOC entry, so it either is not intended to appear there or
-		 * has not loaded yet (the latter is often the case if the help page is seeded with the
-		 * hash at load time).  If the hash is resolved to point at a valid resource then create
-		 * the item for it and select it in the TOC if it should have an entry there.
+		 * The hash does not have a TOC entry, so it either is invalid or has not loaded
+		 * yet (the latter is often the case if the help page is seeded with the hash at
+		 * load time).  If the hash is resolved to point at a valid item then display
+		 * its contents and select it in the TOC.
 		 */
-//		(progress ? progress.progress(pluginService.read(location, true), "Retrieving " + location) : pluginService.read(location, true)).then( //$NON-NLS-0$
-//			function(node) {
-//				if (node.Directory) {
-//					item = createItem(node, undefined, undefined, true);
-//					helpModel.getChildren(item, function() {
-//						setOutput(item).then(
-//							function() {
-//								selectInTOC(item);
-//							}
-//						);
-//					});
-//				} else {
-//					/*
-//					 * The hash points at a valid resource, so display it and select its item in
-//					 * the TOC if appropriate.
-//					 */
-//					retrieveContent(node).then(
-//						function(content) {
-//							item = createItem(node, content, anchor, true);
-//							setOutput(item).then(
-//								function() {
-//									selectInTOC(item);
-//								}
-//							);
-//						},
-//						displayErrorStatus
-//					);
-//				}
-//			}.bind(this),
-//			displayErrorStatus
-//		);
+		addItemCreationListener(hash, function(item) {
+			if (item.fileNode.Directory) {
+				helpModel.getChildren(item, function(/*children*/) {
+					doit(item);
+				});
+			} else {
+				doit(item); /* file content should already be retrieved */
+			}
+		});
 	}
 
 	function outputData(item) {
@@ -714,20 +701,14 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			var listElement = outputDocument.createElement("ul"); //$NON-NLS-0$
 			outputBody.appendChild(listElement);
 
-			var displayChildren = function(children) {
+			helpModel.getChildren(item, function(children) {
 				children.forEach(function(current) {
 					var itemElement = outputDocument.createElement("li"); //$NON-NLS-0$
 					listElement.appendChild(itemElement);
 					var link = createLink(current, current.id, outputDocument);
 					itemElement.appendChild(link);
 				});
-			};
-
-			if (item.children) {
-				displayChildren(item.children);
-			} else {
-				helpModel.getChildren(item, displayChildren);
-			}
+			});
 		};
 		outputDocument.head.appendChild(link);
 		outputBody.classList.add("orionMarkdown"); //$NON-NLS-0$
@@ -772,63 +753,6 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 		}
 		return result;
 	}
-
-//	function selectInTOC(item) {
-//		var segments = item.fileNode.Location.substring(ROOT_FOLDER.length + 1).split(SEPARATOR);
-//		for (var i = 0; i < segments.length; i++) {
-//			if (!segments[i].length) {
-//				segments.splice(i--, 1); /* remove empty segment, adjust i accordingly */
-//			}
-//		}
-//		if (item.anchor) {
-//			segments.push(HASH + item.anchor);
-//		}
-//
-//		/* find the item that's closest to the targeted item */
-//		var foundItem;
-//		var idString = ROOT_FOLDER;
-//		for (i = 0; i < segments.length; i++) {
-//			if (segments[i].indexOf(HASH)) {
-//				idString += SEPARATOR + segments[i]; /* typical case */
-//			} else {
-//				idString += segments[i]; /* anchor segment */
-//			}
-//			var test = getItem(idString);
-//			if (test && test.parent) {
-//				foundItem = test;
-//			} else {
-//				break;
-//			}
-//		}
-//		if (i === segments.length) {
-//			/* full item ancestory is already created, so just select the item */
-//			selectItem(foundItem);
-//			return;
-//		}
-//
-//		var loadItem = function(parentItem, remainingSegments) {
-//			helpModel.getChildren(parentItem, function() {
-//				var id = parentItem.id + (remainingSegments[0].indexOf(HASH) ? SEPARATOR + remainingSegments[0] : remainingSegments[0]);
-//				var item = getItem(id);
-//				if (item) {
-//					if (remainingSegments.length === 1) {
-//						selectItem(item);
-//					} else {
-//						loadItem(item, remainingSegments.slice(1));
-//					}
-//				}
-//			});
-//		};
-//
-//		if (!foundItem) {
-//			/* root item has not been created yet */
-//			helpModel.getRoot(function(rootItem) {
-//				loadItem(rootItem, segments);
-//			});
-//		} else {
-//			loadItem(foundItem, segments.slice(i));
-//		}
-//	}
 
 	function setOutput(item) {
 		var result = new Deferred();
