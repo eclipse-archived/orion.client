@@ -1100,8 +1100,8 @@ table .sectionTable {
 .git-sprite-pull:before{ content:'\E01E'; }
 .git-sprite-repository:before{ content:'\E020'; }
 .git-sprite-remote:before{ content:'\E020'; }
-.git-sprite-checkout:before{ content:'\E01F'; }
-.git-sprite-fetch:before{ content:'\E01D'; }
+.git-sprite-checkout:before{ content:'\E01D'; }
+.git-sprite-fetch:before{ content:'\E01F'; }
 .git-sprite-tag:before{ content:'\E007'; }
 .git-sprite-branch:before{ content:'\E029'; }
 .git-sprite-stage:before{ content:'\E02D'; }
