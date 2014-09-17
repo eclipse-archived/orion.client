@@ -226,15 +226,11 @@ define([
 										Type: "Outgoing", //$NON-NLS-0$
 										selectable: false,
 										isNotSelectable: true,
-										activeBranch: that.getActiveBranch(),
-										targetRef: that.getTargetReference()
 									},
 									{
 										Type: "Incoming", //$NON-NLS-0$
 										selectable: false,
 										isNotSelectable: true,
-										activeBranch: that.getActiveBranch(),
-										targetRef: that.getTargetReference()
 									},
 									{
 										Type: "Synchronized", //$NON-NLS-0$
