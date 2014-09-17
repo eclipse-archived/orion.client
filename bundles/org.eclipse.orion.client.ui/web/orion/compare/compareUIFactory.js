@@ -72,7 +72,7 @@ orion.TwoWayCompareUIFactory = (function() {
 			var leftPane = lib.$(".leftPanelLayout", this._topWidgetDiv); //$NON-NLS-0$
 			var rightPane = lib.$(".rightPanelLayout", this._topWidgetDiv); //$NON-NLS-0$
 			if (splitNode && leftPane && rightPane) {
-				this._splitter = new mSplitter.Splitter({node: splitNode, sidePanel: leftPane, mainPanel: rightPane});
+				this._splitter = new mSplitter.Splitter({node: splitNode, sidePanel: leftPane, mainPanel: rightPane, proportional: true});
 			}
 		},
 				
