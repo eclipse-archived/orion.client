@@ -514,9 +514,10 @@ define([
 			}
 		},
 		updateSelectionStatus: function(selections) {
+			if (!selections) selections = this.selection.getSelections();
 			var count = selections ? selections.length : 0;
 			var msg = i18nUtil.formatMessage(messages[count === 1 ? "FileSelected" : "FilesSelected"], count);
-			if (!count && this.messageTextArea.value) {
+			if (!count && this.messageTextArea.value && !this.amendCheck.checked) {
 				this.explorerSelectionStatus.classList.add("invalidFileCount"); //$NON-NLS-0$
 			} else {
 				this.explorerSelectionStatus.classList.remove("invalidFileCount"); //$NON-NLS-0$
@@ -696,9 +697,7 @@ define([
 						textArea.classList.add("parameterInput"); //$NON-NLS-0$
 						textArea.addEventListener("keyup", function() { //$NON-NLS-0$
 							textArea.parentNode.classList.remove("invalidParam"); //$NON-NLS-0$
-							if (explorer.prefix === "all") { //$NON-NLS-0$
-								explorer.updateSelectionStatus(explorer.selection.getSelections());
-							}
+							explorer.updateSelectionStatus();
 						});
 						topRow.appendChild(textArea);
 
@@ -763,6 +762,7 @@ define([
 							} else {
 								textArea.value = "";
 							}
+							explorer.updateSelectionStatus();
 						});
 						
 						var moreDiv = document.createElement("div"); //$NON-NLS-0$
