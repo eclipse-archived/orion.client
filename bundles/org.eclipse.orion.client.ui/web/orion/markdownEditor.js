@@ -284,6 +284,11 @@ define([
 						start = this._getLineStart(text, index); /* backtrack to start of line */
 						newlines = tokens[i].text.match(this._newlineRegex);
 						end = this._getLineEnd(text, index, model, newlines ? newlines.length : 0);
+						this._whitespaceRegex.lastIndex = end;
+						match = this._whitespaceRegex.exec(text);
+						if (match && match.index === end) {
+							end += match[0].length;
+						}
 						name = "markup.raw.code.markdown"; //$NON-NLS-0$
 					}
 
@@ -861,7 +866,7 @@ define([
 	};
 
 	var _imageCache = {};
-	
+
 	function filterOutputLink(resourceURL, fileClient, isRelative) {
 		return function(cap, link) {
 			if (link.href.indexOf(":") === -1) { //$NON-NLS-0$

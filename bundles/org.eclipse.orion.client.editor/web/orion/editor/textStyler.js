@@ -1250,7 +1250,12 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				 * text whose styling may be affected by this model change.
 				 */
 				if (!blockExtended && parentBlock) {
-					/* verify that ancestorBlock's start and end matches are not affected by this change */
+					/* verify that ancestorBlock's start and end bounds are not affected by this change */
+					if (changeCount < 0 && ancestorBlock.end - start <= -changeCount) {
+						/* the end bound has definitely been affected, no verifyBlock() required, move up to the parent */
+						ancestorBlock = parentBlock;
+						continue;
+					}
 					text = baseModel.getText(ancestorBlock.start, Math.min(charCount, ancestorBlock.end + changeCount + 1));
 					if (!this._stylerAdapter.verifyBlock(baseModel, text, ancestorBlock, changeCount)) {
 						ancestorBlock = parentBlock;
