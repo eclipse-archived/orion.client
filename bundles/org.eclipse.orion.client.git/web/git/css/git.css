@@ -302,6 +302,7 @@ table .sectionTable {
 	height: 420px;
 	border: 1px solid lightgray;
 	margin-right: 10px;
+	min-height: 50px;
 }
 
 .gitChangeListCompareActions {
