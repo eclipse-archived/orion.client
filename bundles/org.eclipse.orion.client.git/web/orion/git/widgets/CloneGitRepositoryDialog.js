@@ -71,8 +71,10 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 		this._initialize();
 
 		this.okbutton = this.$buttonContainer.querySelectorAll("button")[0]; //$NON-NLS-0$
-		this.okbutton.disabled = true;
-		this.okbutton.classList.add("disabled"); //$NON-NLS-0$
+		if (!this.advancedOnly) {
+			this.okbutton.disabled = true;
+			this.okbutton.classList.add("disabled"); //$NON-NLS-0$
+		}
 	};
 
 	CloneGitRepositoryDialog.prototype._bindToDom = function(parent) {
