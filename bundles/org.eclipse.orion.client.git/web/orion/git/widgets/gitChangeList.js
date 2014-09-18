@@ -515,6 +515,11 @@ define([
 		updateSelectionStatus: function(selections) {
 			var count = selections ? selections.length : 0;
 			var msg = i18nUtil.formatMessage(messages[count === 1 ? "FileSelected" : "FilesSelected"], count);
+			if (!count && this.messageTextArea.value) {
+				this.explorerSelectionStatus.classList.add("invalidFileCount"); //$NON-NLS-0$
+			} else {
+				this.explorerSelectionStatus.classList.remove("invalidFileCount"); //$NON-NLS-0$
+			}
 			this.explorerSelectionStatus.textContent = msg;
 		},
 		createCommands: function(){
@@ -690,6 +695,9 @@ define([
 						textArea.classList.add("parameterInput"); //$NON-NLS-0$
 						textArea.addEventListener("keyup", function() { //$NON-NLS-0$
 							textArea.parentNode.classList.remove("invalidParam"); //$NON-NLS-0$
+							if (explorer.prefix === "all") { //$NON-NLS-0$
+								explorer.updateSelectionStatus(explorer.selection.getSelections());
+							}
 						});
 						topRow.appendChild(textArea);
 
@@ -746,7 +754,8 @@ define([
 						explorer.changeIDCheck = createInput(bottomLeft, "changeIDCheck", 'SmartChangeId', null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						amendCheck.addEventListener("change", function() { //$NON-NLS-0$
 							if (amendCheck.checked) {
-								commitLogic.getAmendMessage(explorer.model.repository.CommitLocation).then(function(msg) {
+								var repository = explorer.model.repository;
+								commitLogic.getAmendMessage(repository.ActiveBranch || repository.CommitLocation).then(function(msg) {
 									textArea.value = msg;
 									textArea.parentNode.classList.remove("invalidParam"); //$NON-NLS-0$
 								});

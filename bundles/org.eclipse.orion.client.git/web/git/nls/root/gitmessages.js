@@ -545,6 +545,7 @@ define({
 	"FilesChanged": "${0} files changed", //$NON-NLS-0$  //$NON-NLS-1$
 	"file": "file", //$NON-NLS-0$  //$NON-NLS-1$
 	"files": "files", //$NON-NLS-0$  //$NON-NLS-1$
+	"EmptyCommitWarning": "The commit is empty", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilesChangedVsReadyToCommit": "${0} ${1} changed. ${2} ${3} ready to commit.", //$NON-NLS-0$  //$NON-NLS-1$
 	"CommitPush": "Commit and Push", //$NON-NLS-0$  //$NON-NLS-1$
 	"Commits and pushes files to the default remote": "Commits and pushes files to the default remote", //$NON-NLS-0$  //$NON-NLS-1$
