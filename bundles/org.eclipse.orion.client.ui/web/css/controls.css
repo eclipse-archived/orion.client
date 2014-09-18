@@ -258,7 +258,7 @@ textarea.parameterInput {
 .selectionCheckmarkSprite {
 	display: inline-block; 
 	vertical-align: middle; 
-	background-image: url(../images/core_sprites.png);
+	background: url(../images/core_sprites.png) no-repeat top left;
 	padding: 4px;
 	padding-left: 8px;
 	padding-right: 8px;
@@ -268,7 +268,7 @@ textarea.parameterInput {
 .modelDecorationSprite { 
 	display: inline-block; 
 	vertical-align: middle; 
-	background-image: url(../images/core_sprites.png);
+	background: url(../images/core_sprites.png) no-repeat top left;
 	margin-left: 8px;
 	padding-right: 8px;
 	margin-right: 8px;
@@ -277,7 +277,7 @@ textarea.parameterInput {
 .advancedSearchDecorationSprite { 
 	display: inline-block; 
 	vertical-align: middle; 
-	background-image: url(../images/core_sprites.png);
+	background: url(../images/core_sprites.png) no-repeat top left;
 	margin-left: 0px;
 	padding-right: 0px;
 }
