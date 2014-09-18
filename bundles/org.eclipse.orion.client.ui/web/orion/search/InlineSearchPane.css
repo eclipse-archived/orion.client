@@ -277,6 +277,8 @@
 	display: none;
 	flex-grow: 0;
 	flex-shrink: 2;
+	-webkit-flex-grow: 0;		/* Safari */
+	-webkit-flex-shrink: 2;		/* Safari */
 	font-size: 8pt; 
 	font-weight: normal;
 	overflow: hidden;
@@ -291,6 +293,8 @@
 .fileNameSpan {
 	flex-grow: 0;
 	flex-shrink: 0;
+	-webkit-flex-grow: 0;		/* Safari */
+	-webkit-flex-shrink: 0;		/* Safari */
 	font-weight: bold;
 	margin-right: 5px;
 }
@@ -299,6 +303,8 @@
 	color: #666 !important;
 	flex-grow: 0;
 	flex-shrink: 0;
+	-webkit-flex-grow: 0;		/* Safari */
+	-webkit-flex-shrink: 0;		/* Safari */
 	font-size: 8pt; 
 	font-weight: normal;
 }
@@ -307,6 +313,8 @@
 	color: #666 !important;
 	flex-grow: 0;
 	flex-shrink: 0;
+	-webkit-flex-grow: 0;		/* Safari */
+	-webkit-flex-shrink: 0;		/* Safari */
 	font-size: 8pt; 
 	font-weight: normal;
 }
@@ -459,6 +467,8 @@
 	color: green;
 	flex-grow: 0;
 	flex-shrink: 0;
+	-webkit-flex-grow: 0;		/* Safari */
+	-webkit-flex-shrink: 0;		/* Safari */
 	font-size: 14px;
 	font-weight: bold;
 	height: auto;
@@ -472,6 +482,8 @@
 .replacementStatusSpan {
 	flex-grow: 0;
 	flex-shrink: 0;
+	-webkit-flex-grow: 0;		/* Safari */
+	-webkit-flex-shrink: 0;		/* Safari */
 	white-space: nowrap;
 }
 

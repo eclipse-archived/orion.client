@@ -128,6 +128,7 @@ a:hover {
 .breadcrumb {
 	color: #333;
 	flex-grow: 0;
+	-webkit-flex-grow: 0;		/* Safari */
 	font-size: 8pt;
 	overflow: hidden;
 	padding-top: 2px;
@@ -149,6 +150,7 @@ a.breadcrumb:hover {
 .breadcrumbSeparator {
 	color: #333;
 	flex-shrink: 0;
+	-webkit-flex-shrink: 0;		/* Safari */
 	font-size: 8pt;
 	font-weight: bold;
 	margin: 2px;

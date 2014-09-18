@@ -202,13 +202,20 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
             this._finalSegment = seg;
             
     		this._finalSegment.style.flexShrink = "0"; //$NON-NLS-0$
-            
+    		if (undefined !== this._finalSegment.style.webkitFlexShrink) {
+    			this._finalSegment.style.webkitFlexShrink = "0"; //$NON-NLS-0$
+    		}
+    		
             // iterate through breadcrumb nodes and add flexShrink to them
             var children = this.crumbs.childNodes;
             for (var i = 0 ; i < (children.length - 1) ; i++) {
             	if (children[i].classList.contains("breadcrumb")) { //$NON-NLS-0$
+            		var flexShrink = ((children.length - 1 - i) * 100);
             		// segments closer to root should shrink more than ones closer to current location
-            		children[i].style.flexShrink = "" + ((children.length - 1 - i) * 100); //$NON-NLS-0$
+            		children[i].style.flexShrink = "" + flexShrink; //$NON-NLS-0$
+            		if (undefined !== children[i].style.webkitFlexShrink) {
+		    			children[i].style.webkitFlexShrink = "" + flexShrink; //$NON-NLS-0$
+		    		}
             	}
             }
             
@@ -248,9 +255,15 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         	if (this.crumbs.parentNode) {
         		if (this._finalSegment) {
             		this._finalSegment.style.flexShrink = "0"; //$NON-NLS-0$
+            		if (undefined !== this._finalSegment.style.webkitFlexShrink) {
+		    			this._finalSegment.style.webkitFlexShrink = "0"; //$NON-NLS-0$
+		    		}
             		
             		if (this.crumbs.offsetWidth < this.crumbs.scrollWidth) {
             			this._finalSegment.style.flexShrink = "1"; //$NON-NLS-0$
+            			if (undefined !== this._finalSegment.style.webkitFlexShrink) {
+            				this._finalSegment.style.webkitFlexShrink = "1"; //$NON-NLS-0$
+            			}
             		}
             	}
         	} else {
