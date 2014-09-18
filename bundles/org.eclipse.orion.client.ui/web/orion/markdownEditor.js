@@ -1223,7 +1223,7 @@ define([
 				toggle: true,
 				closeReversely: true
 			});
-			toggleOrientationCommand.checked = this._splitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL;
+			toggleOrientationCommand.checked = this._splitter.getOrientation() === mSplitter.ORIENTATION_HORIZONTAL;
 
 			BaseEditor.prototype.install.call(this);
 		},
