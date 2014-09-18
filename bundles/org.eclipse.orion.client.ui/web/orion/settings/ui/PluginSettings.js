@@ -334,10 +334,12 @@ define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/ob
 			for (var i=0; i<settings.length; i++) {
 				var sectionId = idPrefix + 'section' + i; //$NON-NLS-0$
 				var setting = settings[i];
-				var section = this._makeSection(parent, sectionId, setting, setting.getName() || "Unnamed");
+				var section = this._makeSection(parent, sectionId, setting, setting.getName() || "Unnamed"); //$NON-NLS-0$
 				// Add a class name based on the category (all settings on the page have the same category currently)
 				if(setting.category){
-					section.getContentElement().classList.add(setting.category + "SettingsTable"); //$NON-NLS-0$
+					// This does not match the full spec of legal class names, but we avoid categories breaking the UI, Bug 444194
+					var className = setting.category.replace(/[^_0-9a-zA-Z-]/gi, '-') + "SettingsTable"; //$NON-NLS-0$ //$NON-NLS-1$
+					section.getContentElement().classList.add(className);
 				}
 				
 				this.explorer = new SettingsListExplorer(serviceRegistry, categoryTitle);
