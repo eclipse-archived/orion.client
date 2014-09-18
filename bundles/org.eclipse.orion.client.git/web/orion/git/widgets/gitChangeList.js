@@ -329,6 +329,7 @@ define([
 		this.handleError = options.handleError;
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;
+		this.preferencesService = options.preferencesService;
 		this.explorerSelectionScope = "explorerSelection";  //$NON-NLS-0$
 		this.explorerSelectionStatus = "explorerSelectionStatus";  //$NON-NLS-0$
 		this.createSelection();
@@ -943,7 +944,8 @@ define([
 									before : true
 								},
 								undefined,
-								compareWidgetLeftActionWrapper.id
+								compareWidgetLeftActionWrapper.id,
+								explorer.preferencesService
 							);
 						}.bind(this), 0);
 					}

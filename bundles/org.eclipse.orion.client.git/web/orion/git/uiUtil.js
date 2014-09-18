@@ -61,40 +61,60 @@ define([
 	 * @param {String} compareTo Optional. If the resource parameter is a simple file URL then this can be used as the second file URI to compare with.
 	 * @param {String} toggleCommandSpanId Optional. The id of the DIV where the "toggle" command will be rendered. If this parameter is defined, the "toggle" command will ONLY be rendered in this DIV.
 	 */
-	function createCompareWidget(serviceRegistry, commandService, resource, hasConflicts, parentDivId, commandSpanId, editableInComparePage, gridRenderer, compareTo, toggleCommandSpanId) {
+	function createCompareWidget(serviceRegistry, commandService, resource, hasConflicts, parentDivId, commandSpanId, editableInComparePage, gridRenderer, compareTo, toggleCommandSpanId, preferencesService) {
+			var setCompareSelection = function(diffProvider, cmdProvider, ignoreWhitespace, type) {
+				var comparerOptions = {
+				toggleable: true,
+				type: type, //$NON-NLS-0$ //From user preference
+				ignoreWhitespace: ignoreWhitespace,//From user reference
+				readonly: true,
+				hasConflicts: hasConflicts,
+				diffProvider: diffProvider,
+				resource: resource,
+				compareTo: compareTo,
+				editableInComparePage: editableInComparePage
+			};
+			var viewOptions = {
+				parentDivId: parentDivId,
+				commandProvider: cmdProvider
+			};
+			var comparer = new mResourceComparer.ResourceComparer(serviceRegistry, commandService, comparerOptions, viewOptions);
+			comparer.start().then(function(maxHeight) {
+				var vH = 420;
+				if (maxHeight < vH) {
+					vH = maxHeight;
+				}
+				var diffContainer = lib.node(parentDivId);
+				diffContainer.style.height = vH + "px"; //$NON-NLS-0$
+			});
+		};
+		
 		var diffProvider = new mResourceComparer.DefaultDiffProvider(serviceRegistry);
 		var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: commandSpanId, toggleCommandSpanId: toggleCommandSpanId, gridRenderer: gridRenderer});
-		cmdProvider.addEventListener("compareConfigChanged", function(e) { //$NON-NLS-0$
-			if(e.name === "mode") {
-				//TODO: use e.value as the compareOptions.type, e.g. "inline" or "twoWay"
-			} else if(e.name === "ignoreWhiteSpace") {
-				//TODO: use e.value as the compareOptions.type, e.g. "inline" or "twoWay"
-			}
-		}.bind(this));
-		var comparerOptions = {
-			toggleable: true,
-			type: "inline", //$NON-NLS-0$ //From user preference
-			ignoreWhitespace: false,//From user reference
-			readonly: true,
-			hasConflicts: hasConflicts,
-			diffProvider: diffProvider,
-			resource: resource,
-			compareTo: compareTo,
-			editableInComparePage: editableInComparePage
-		};
-		var viewOptions = {
-			parentDivId: parentDivId,
-			commandProvider: cmdProvider
-		};
-		var comparer = new mResourceComparer.ResourceComparer(serviceRegistry, commandService, comparerOptions, viewOptions);
-		comparer.start().then(function(maxHeight) {
-			var vH = 420;
-			if (maxHeight < vH) {
-				vH = maxHeight;
-			}
-			var diffContainer = lib.node(parentDivId);
-			diffContainer.style.height = vH + "px"; //$NON-NLS-0$
-		});
+		var ignoreWhitespace = false;
+		var mode = "inline";  //$NON-NLS-0$
+		if (preferencesService) {
+			cmdProvider.addEventListener("compareConfigChanged", function(e) { //$NON-NLS-0$
+				preferencesService.getPreferences("/git/compareSettings").then(function(prefs) {  //$NON-NLS-0$
+					switch (e.name) {
+						case "mode":  //$NON-NLS-0$
+							prefs.put("mode", e.value);  //$NON-NLS-0$
+						break;
+						case "ignoreWhiteSpace":  //$NON-NLS-0$
+							prefs.put("ignoreWhitespace", e.value);  //$NON-NLS-0$
+						break;
+					}
+				});
+			}.bind(this));
+			preferencesService.getPreferences("/git/compareSettings").then(function(prefs) {  //$NON-NLS-0$
+				ignoreWhitespace = prefs.get("ignoreWhitespace") || ignoreWhitespace; //$NON-NLS-0$
+				mode =  prefs.get("mode") || mode; //$NON-NLS-0$
+				setCompareSelection(diffProvider, cmdProvider, ignoreWhitespace, mode);
+			});
+		} else {
+			setCompareSelection(diffProvider, cmdProvider, ignoreWhitespace, mode);
+		}
+	
 	}
 	
 	//return module exports

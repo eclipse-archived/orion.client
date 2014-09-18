@@ -593,7 +593,8 @@ define([
 			editableInComparePage: true,
 			handleError: this.handleError.bind(this),
 			gitClient: this.gitClient,
-			progressService: this.progressService
+			progressService: this.progressService,
+			preferencesService: this.preferencesService
 		});
 		return explorer.display();
 	};
@@ -691,6 +692,7 @@ define([
 			section: section,
 			gitClient: this.gitClient,
 			progressService: this.progressService,
+			preferencesService : this.preferencesService,
 			handleError: this.handleError.bind(this)
 		});
 		return explorer.display();
