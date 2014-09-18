@@ -11,8 +11,8 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['i18n!orion/compare/nls/messages', 'orion/commands', 'orion/keyBinding', 'orion/webui/littlelib'], 
-function(messages, mCommands, mKeyBinding, lib) {
+define(['i18n!orion/compare/nls/messages', 'orion/commands', 'orion/keyBinding', 'orion/webui/littlelib', 'orion/EventTarget'], 
+function(messages, mCommands, mKeyBinding, lib, EventTarget) {
 
 var exports = {};
 /**
@@ -23,6 +23,7 @@ var exports = {};
  */
 exports.CompareCommandFactory = (function() {
 	function CompareCommandFactory(options){
+		EventTarget.attach(this);
 		this.setOptions(options, true);
 	}	
 	CompareCommandFactory.prototype = {
@@ -89,7 +90,8 @@ exports.CompareCommandFactory = (function() {
 				},
 				callback : function(data) {
 					data.items.ignoreWhitespace(ignoreWhitespaceCommand.checked);
-			}});
+					this.dispatchEvent({type:"ignoreWhiteSpaceChanged", ignored: ignoreWhitespaceCommand.checked}); //$NON-NLS-0$
+			}.bind(this)});
 			var toggleInline2WayCommand = new mCommands.Command({
 				tooltip : messages["Switch to unified diff"],
 				name: messages["Unified"],
@@ -109,7 +111,8 @@ exports.CompareCommandFactory = (function() {
 				},
 				callback : function(data) {
 					data.items.options.toggler.toggle();
-			}});
+					this.dispatchEvent({type:"compareModeChanged", mode: data.items.options.toggler.getWidget().type}); //$NON-NLS-0$
+			}.bind(this)});
 			var nextDiffCommand = new mCommands.Command({
 				name: messages["Next diff block"],
 				tooltip : messages["Next diff block"],
