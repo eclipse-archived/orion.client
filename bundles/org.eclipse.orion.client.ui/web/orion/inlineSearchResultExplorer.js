@@ -161,15 +161,22 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }, 10);
     };
 
-    SearchResultRenderer.prototype.staleFileElement = function(item, displayName) {
+    SearchResultRenderer.prototype.staleFileElement = function(item) {
         if (item.stale) {
-            var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
-            mNavUtils.removeNavGrid(navGridHolder, lib.node(this.getItemLinkId(item)));
-            var span = lib.node(this.getFileSpanId(item));
+        	// replace file icon and twistie with a warning icon
+        	var span = lib.node(this.getFileIconId(item));
             _empty(span);
-            _place(document.createTextNode(displayName ? displayName : this.explorer.model.getFileName(item)), span, "last"); //$NON-NLS-0$
-            span = lib.node(this.getFileIconId(item));
-            _empty(span);
+            span.classList.add("imageSprite"); //$NON-NLS-0$
+            span.classList.add("core-sprite-warning"); //$NON-NLS-0$
+            span.classList.add("staleSearchResultIcon"); //$NON-NLS-0$
+            
+            // add tooltip to warning icon
+            this.explorer.staleTooltips.push(new mTooltip.Tooltip({
+	            node: span,
+	            showDelay: 0,
+	            position: ["above", "right", "below"],
+	            text: messages["staleFileTooltip"]
+	        }));
         }
     };
     
@@ -200,9 +207,8 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 			linkDiv.removeChild(linkDiv.lastElementChild);
 			linkDiv.appendChild(fileNameElement);
 	    } else {
-	    	var renderName = this._getFileRenderName(item);
 			item.stale = true;
-			this.staleFileElement(item, renderName);
+			this.staleFileElement(item);
 	    }
     };
 
@@ -663,6 +669,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		this._contentTypeService = new mContentTypes.ContentTypeRegistry(this.registry);
 		this._inlineSearchPane = inlineSearchPane;
 		this._preferences = preferences;
+		this.staleTooltips = [];
 		
 		var gotPreferences = this._preferences.getPreferences("/inlineSearchPane").then(function(prefs) { //$NON-NLS-0$
 			var show = prefs.get("showFullPath"); //$NON-NLS-0$
@@ -1449,6 +1456,14 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		var foundValidHit = false;
 		var resultLocation = [];
 		lib.empty(lib.node(resultsNode));
+		
+		// cleanup dead tooltips
+		var deadTooltip = this.staleTooltips.pop();
+		while (deadTooltip) {
+			deadTooltip.destroy();
+			deadTooltip = this.staleTooltips.pop();
+		}
+		
 		if (jsonData.response.numFound > 0) {
 			for (var i=0; i < jsonData.response.docs.length; i++) {
 				var hit = jsonData.response.docs[i];

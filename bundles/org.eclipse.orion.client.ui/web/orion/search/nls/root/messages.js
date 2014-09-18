@@ -105,5 +105,6 @@ define({
 	"^ Edit Search": "^ Edit Search",
 	"Preview: " : "Preview: ",
 	"fullPath": "Show Full Path",
-	"switchFullPath": "Show/hide full path"
+	"switchFullPath": "Show/hide full path",
+	"staleFileTooltip": "Oops! This file was modified after the search index was last computed and no longer contains the search term."
 });
