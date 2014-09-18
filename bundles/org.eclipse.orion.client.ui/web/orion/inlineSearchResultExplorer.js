@@ -229,10 +229,10 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }
     };
 
-    SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder) {
+    SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, resultModel) {
         var helper = null;
-        if (this.explorer.model._provideSearchHelper) {
-            helper = this.explorer.model._provideSearchHelper();
+        if (resultModel._provideSearchHelper) {
+            helper = resultModel._provideSearchHelper();
         }
 		var params = helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, null, helper.params.replace, true) : null;
 		var link = navigatorRenderer.createLink(null, 
@@ -240,12 +240,12 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 				this.explorer._commandService, 
 				this.explorer._contentTypeService,
 				this.explorer._openWithCommands, 
-				{id:this.getItemLinkId(item)}, 
+				{id:this.getItemLinkId && this.getItemLinkId(item)}, 
 				params, 
 				{holderDom: this._lastFileIconDom});
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		
-		var scopeParams = this.explorer.model.getScopingParams(item);
+		var scopeParams = resultModel.getScopingParams(item);
 		var folders = decodeURIComponent(scopeParams.name).split("/"); //$NON-NLS-0$
 		var parentFolder = folders.pop();
 		parentFolder = parentFolder;
@@ -277,7 +277,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		//trigger a click on the span when the link is clicked to set the selection cursor
 		link.addEventListener("click", function(){ //$NON-NLS-0$
 			spanHolder.click();
-		}.bind(this));
+		});
 
 		// append link to parent span
         spanHolder.appendChild(link);
@@ -502,10 +502,9 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 				col = _createElement('td'); //$NON-NLS-0$
                 if (item.type === "file") { //$NON-NLS-0$
                 	span = _createSpan(null, this.getFileSpanId(item), col, null);
-                    this.renderFileElement(item, span);
+                    this.renderFileElement(item, span, this.explorer.model);
                     
                     //render file location
-                    span = _createSpan(null, this.getLocationSpanId(item), col, null);
                     if (item.parentLocation) {
 						var scopeParams = this.explorer.model.getScopingParams(item);
 						tableRow.title = decodeURI(scopeParams.name + "/" + item.name); //$NON-NLS-0$
@@ -564,76 +563,70 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 h2 = _createElement('h2', null, null, th); //$NON-NLS-0$
                 h2.textContent = messages["Files replaced"];
                 break;
-            case 1:
-                th = _createElement('th', "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-0$
-                h2 = _createElement('h2', null, null, th); //$NON-NLS-0$
-                h2.textContent = messages["Status"];
-                break;
         }
         return th;
     };
 
     SearchReportRenderer.prototype.getCellElement = function(col_no, item, tableRow) {
+    	var td = null;
         switch (col_no) {
             case 0:
-                var col = _createElement('td', "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-0$
-                var span = _createElement('span', "primaryColumn", null, col); //$NON-NLS-1$ //$NON-NLS-0$
-
-                _place(document.createTextNode(item.model.fullPathName + "/" + this.explorer.resultModel.getFileName(item.model)), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
-                _connect(span, "click", function() { //$NON-NLS-0$
-                    window.open(item.model.linkLocation);
-                });
-                _connect(span, "mouseover", function() { //$NON-NLS-0$
-                    span.style.cursor = "pointer"; //$NON-NLS-0$
-                });
-                _connect(span, "mouseout", function() { //$NON-NLS-0$
-                    span.style.cursor = "default"; //$NON-NLS-0$
-                });
-                return col;
-            case 1:
-                var statusMessage;
+                td = _createElement("td", "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-0$
+                
+                var fileSpan = _createSpan(null, null, td, null);
+                SearchResultRenderer.prototype.renderFileElement.call(this, item.model, fileSpan, this.explorer.resultModel);
+                
+                //render file location
+                var scopeParams = this.explorer.resultModel.getScopingParams(item.model);
+				tableRow.title = decodeURI(scopeParams.name + "/" + item.model.name); //$NON-NLS-0$
+                
                 if (item.status) {
-                    var td = _createElement('td', "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-0$
-                    
-                    var operationIcon = _createElement('span', null, null, td); //$NON-NLS-1$ //$NON-NLS-0$
-	                operationIcon.classList.add('imageSprite'); //$NON-NLS-0$
-	                if (item.status) {
-	                    switch (item.status) {
-	                        case "warning": //$NON-NLS-0$
-	                            operationIcon.classList.add('core-sprite-warning'); //$NON-NLS-0$
-	                            break;
-	                        case "failed": //$NON-NLS-0$
-	                            operationIcon.classList.add('core-sprite-error'); //$NON-NLS-0$
-	                            break;
-	                        case "pass": //$NON-NLS-0$
-	                            operationIcon.classList.add('core-sprite-ok'); //$NON-NLS-0$
-	                            break;
-	                    }
-	                }
+                	var statusMessage;
+                	var linkNode = lib.$(".navlink", fileSpan); //$NON-NLS-0$
+                	var operationIcon = document.createElement("span"); //$NON-NLS-0$
+	                operationIcon.classList.add("imageSprite"); //$NON-NLS-0$
 	                
-	                switch (item.status) {
+                    switch (item.status) {
                         case "warning": //$NON-NLS-0$
-                            //intentional fall-through
+                            operationIcon.classList.add("core-sprite-warning"); //$NON-NLS-0$
+                            statusMessage = item.message;
+                            break;
                         case "failed": //$NON-NLS-0$
+                            operationIcon.classList.add("core-sprite-error"); //$NON-NLS-0$
                             statusMessage = item.message;
                             break;
                         case "pass": //$NON-NLS-0$
-                            statusMessage = item.model.totalMatches ? i18nUtil.formatMessage(messages["${0} out of ${1}  matches replaced."], item.matchesReplaced, item.model.totalMatches) : item.message; //$NON-NLS-0$
+                            operationIcon.classList.add("core-sprite-ok"); //$NON-NLS-0$
+                            statusMessage = item.model.totalMatches ? i18nUtil.formatMessage(messages["${0} out of ${1}  matches replaced"], item.matchesReplaced, item.model.totalMatches) : item.message; //$NON-NLS-0$
                             break;
                     }
-                    td.appendChild(document.createTextNode(statusMessage));
                     
-                    return td;
+                    linkNode.insertBefore(operationIcon, linkNode.firstElementChild);
+
+                    var statusMessageSpan = _createElement("span", "replacementStatusSpan", null, linkNode); //$NON-NLS-1$ //$NON-NLS-0$
+                    statusMessageSpan.appendChild(document.createTextNode("(" + statusMessage + ")")); //$NON-NLS-1$ //$NON-NLS-0$
                 }
         }
+        return td;
+    };
+    
+    SearchReportRenderer.prototype._getFileRenderName = function(item) {
+    	return this.explorer.resultModel.getFileName(item);
+    };
+    
+    SearchReportRenderer.prototype._getFileNameElement = function(item) {
+    	return SearchResultRenderer.prototype._getFileNameElement.call(this, item);
     };
 
     SearchReportRenderer.prototype.constructor = SearchReportRenderer;
 
-    function SearchReportExplorer(parentId, reportList, resultModel) {
+    function SearchReportExplorer(parentId, reportList, resultModel, commandService, contentTypeService, openWithCommands) {
         this.parentId = parentId;
         this.reportList = reportList;
         this.resultModel = resultModel;
+        this._commandService = commandService;
+        this._contentTypeService = contentTypeService;
+        this._openWithCommands = openWithCommands;
         this.renderer = new SearchReportRenderer({
             checkbox: false
         }, this);
@@ -781,7 +774,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             type: "switch", //$NON-NLS-0$
             checked: this._shouldShowFullPath,
             visibleWhen: function(item) {
-                return !that._reporting && (that.getItemCount() > 0);
+                return (that.getItemCount() > 0);
             },
             callback: function() {
                 that.switchFullPath();
@@ -888,16 +881,23 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 
     InlineSearchResultExplorer.prototype.replaceAll = function() {
         var reportList = [];
-        var that = this;
         this._reporting = true;
         this.initCommands();
         this.reportStatus(messages["Writing files..."]);
         this.model.writeReplacedContents(reportList).then(function(modellist) {
-            _empty(that.getParentDivId());
-            var reporter = new SearchReportExplorer(that.getParentDivId(), reportList, that.model);
+            _empty(this.getParentDivId());
+            var reporter = new SearchReportExplorer(
+            	this.getParentDivId(), 
+            	reportList, 
+            	this.model, 
+            	this._commandService, 
+            	this._contentTypeService, 
+            	this._openWithCommands
+            );
             reporter.report();
-            that.reportStatus("");
-        });
+            this._inlineSearchPane.hideReplacePreview();
+            this.reportStatus("");
+        }.bind(this));
     };
 
     InlineSearchResultExplorer.prototype.toggleCompare = function(show) {
@@ -1224,6 +1224,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
 
     InlineSearchResultExplorer.prototype.onReplaceCursorChanged = function(prevModel, currentModel) {
+    	this._inlineSearchPane.showReplacePreview();
         if (!_onSameFile(this._currentPreviewModel, currentModel)) {
             this.buildPreview();
         }
@@ -1233,7 +1234,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 	        	// removed from diffs and must therefore be skipped.
 				var changeIndex = 0;
 				currentModel.parent.children.some(function(element){
-					if (currentModel === element) {
+					if (currentModel.location === element.location) {
 						return true;
 					} else if (element.checked) {
 						changeIndex++;
@@ -1456,8 +1457,12 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 						foundValidHit = true;
 					}
 					var loc = hit.Location;
-					resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, path: hit.Path ? hit.Path : loc, name: hit.Name, lastModified: hit.LastModified}); //$NON-NLS-1$ //$NON-NLS-0$
-					
+					var path = hit.Path;
+					if (!path) {
+						var rootURL = this.fileClient.fileServiceRootURL(loc);
+						path = loc.substring(rootURL.length); //remove file service root from path
+					}
+					resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, path: path, name: hit.Name, lastModified: hit.LastModified}); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 		}

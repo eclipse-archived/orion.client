@@ -80,10 +80,6 @@ define([
 		show: function() {
 			this._previousActiveElement = document.activeElement;
 			
-			if (!this._replaceBoxIsHidden()) {
-				this._showReplacePreview();
-			}
-			
 			this._searchWrapper.classList.add("searchWrapperActive"); //$NON-NLS-0$
 			window.setTimeout(this._focusOnTextInput, 100);
 			
@@ -93,7 +89,7 @@ define([
 		hide: function() {
 			this._searchWrapper.classList.remove("searchWrapperActive"); //$NON-NLS-0$
 			
-			this._hideReplacePreview();
+			this.hideReplacePreview();
 
 			this._previousActiveElement = null;			
 		},
@@ -415,7 +411,6 @@ define([
 			this._replaceWrapper.classList.remove("replaceWrapperHidden"); //$NON-NLS-0$
 			this._searchWrapper.classList.add("replaceModeActive"); //$NON-NLS-0$
 			this._toggleReplaceLink.innerHTML = messages["Hide Replace"]; //$NON-NLS-0$
-			this._showReplacePreview();
 		},
 		
 		_hideReplaceField: function() {
@@ -423,15 +418,15 @@ define([
 			this._replaceWrapper.classList.add("replaceWrapperHidden"); //$NON-NLS-0$
 			this._searchWrapper.classList.remove("replaceModeActive"); //$NON-NLS-0$
 			this._toggleReplaceLink.innerHTML = messages["Show Replace"]; //$NON-NLS-0$
-			this._hideReplacePreview();
+			this.hideReplacePreview();
 		},
 		
-		_showReplacePreview: function() {
+		showReplacePreview: function() {
 			this._replaceCompareTitleDiv.classList.add("replaceCompareTitleDivVisible"); //$NON-NLS-0$
 			this._replaceCompareDiv.classList.add("replaceCompareDivVisible"); //$NON-NLS-0$
 		},
 		
-		_hideReplacePreview: function() {
+		hideReplacePreview: function() {
 			this._replaceCompareTitleDiv.classList.remove("replaceCompareTitleDivVisible"); //$NON-NLS-0$
 			this._replaceCompareDiv.classList.remove("replaceCompareDivVisible"); //$NON-NLS-0$
 		},

@@ -46,7 +46,7 @@ define({
 	"Search again in this folder with \"${0}\"": "Search again in this folder with \"${0}\"",
 	"Files replaced": "Files replaced",
 	"Status": "Status",
-	"${0} out of ${1}  matches replaced.": "${0} out of ${1}  matches replaced.",
+	"${0} out of ${1}  matches replaced": "${0} out of ${1}  matches replaced",
 	"Replace all matches with...": "Replace all matches with...",
 	"Apply Changes": "Replace Selected",
 	"Replace all selected matches": "Replace all selected matches",

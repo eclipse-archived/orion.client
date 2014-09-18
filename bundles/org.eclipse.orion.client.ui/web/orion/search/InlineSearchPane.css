@@ -259,6 +259,7 @@
 	outline: none;
 	padding: 0 2px;
 	vertical-align: middle;
+	white-space: nowrap;
 	width: 100%;
 }
 
@@ -442,4 +443,34 @@
 	display: inline-block;
 	margin-bottom: 1px;
 	vertical-align: bottom;
+}
+
+.treeTableRow > td.search_report {
+	padding: 2px 0;
+	width: 100%;
+}
+
+.filePathSpan > .navlink > .imageSprite {
+	padding: 0 5px;
+}
+
+.filePathSpan > .navlink > .core-sprite-ok {
+	background-position: 0;
+	color: green;
+	flex-grow: 0;
+	flex-shrink: 0;
+	font-size: 14px;
+	font-weight: bold;
+	height: auto;
+	width: auto;
+}
+
+.filePathSpan > .navlink > .core-sprite-ok:before {
+	content: '\2713'; /* check mark */
+}
+
+.replacementStatusSpan {
+	flex-grow: 0;
+	flex-shrink: 0;
+	white-space: nowrap;
 }
