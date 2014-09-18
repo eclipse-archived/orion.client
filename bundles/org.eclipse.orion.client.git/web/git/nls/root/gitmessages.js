@@ -522,10 +522,15 @@ define({
 	"Author:" : "Author:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Committer:" : "Committer:", //$NON-NLS-0$  //$NON-NLS-1$
 	"SHA1:" : "SHA1:", //$NON-NLS-0$  //$NON-NLS-1$
-	"ShowActiveBranch" : "Show Active Branch", //$NON-NLS-0$  //$NON-NLS-1$
-	"ShowReference": "Show Reference", //$NON-NLS-0$  //$NON-NLS-1$
-	"ShowActiveBranchTooltip": "Show the history of the active branch against the selected reference.", //$NON-NLS-0$  //$NON-NLS-1$
-	"ShowReferenceTooltip": "Show the history of the selected reference.", //$NON-NLS-0$  //$NON-NLS-1$
+	"ShowActiveBranchCmd" : "Show Active Branch", //$NON-NLS-0$  //$NON-NLS-1$
+	"ShowReferenceCmd": "Show Reference", //$NON-NLS-0$  //$NON-NLS-1$
+	"ShowReferenceTip": "View the history of ${1} \"${2}\"", //$NON-NLS-0$  //$NON-NLS-1$
+	"ShowActiveBranchTip": "View the history of \"${0}\" relative to ${1} \"${2}\"", //$NON-NLS-0$  //$NON-NLS-1$
+	"CommitType": "commit",
+	"BranchType": "branch",
+	"RemoteTrackingBranchType": "remote branch",
+	"TagType": "tag",
+	"StashCommitType": "stash",
 	"Path:" : "Path:", //$NON-NLS-0$  //$NON-NLS-1$
 	"LocalChanges" : "Working Directory Changes", //$NON-NLS-0$  //$NON-NLS-1$
 	"LocalChangesDetails" : "Working Directory Details", //$NON-NLS-0$  //$NON-NLS-1$

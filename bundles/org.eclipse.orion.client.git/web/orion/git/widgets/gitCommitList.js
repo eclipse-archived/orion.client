@@ -743,7 +743,7 @@ define([
 				},
 				type: "switch", //$NON-NLS-0$
 				visibleWhen: function() {
-					simpleLogCommand.name = that.model.simpleLog ? messages["ShowActiveBranch"] : messages["ShowReference"];
+					simpleLogCommand.name = that.model.simpleLog ? messages["ShowActiveBranchCmd"] : messages["ShowReferenceCmd"];
 					var targetRef = that.model.getTargetReference();
 					if (!targetRef) return false;
 					var imgClass;
@@ -764,7 +764,8 @@ define([
 							
 					}
 					simpleLogCommand.imageClass = imgClass;
-					simpleLogCommand.tooltip = that.model.simpleLog ? messages["ShowActiveBranchTooltip"] : messages["ShowReferenceTooltip"];
+					var activeBranch = that.model.getActiveBranch();
+					simpleLogCommand.tooltip = i18nUtil.formatMessage(messages[that.model.simpleLog ? "ShowActiveBranchTip" : "ShowReferenceTip"], activeBranch.Name, messages[targetRef.Type + "Type"], targetRef.Name);
 					simpleLogCommand.checked = !that.model.simpleLog;
 					return !that.model.isRebasing();
 				}
