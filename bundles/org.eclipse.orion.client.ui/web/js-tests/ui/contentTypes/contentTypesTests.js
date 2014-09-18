@@ -61,12 +61,20 @@ define([
 			}, {
 				id: 'orion/test3',
 				name: 'Basic 3',
-				filename: ['build.xml']
+				filename: ['garbage', 'build.xml']
 			}, {
 				id: 'orion/test4',
 				name: 'Basic 4',
 				image: 'http://example.org/foo.png',
 				imageClass: 'imageFoo'
+			}, {
+				id: 'orion/test5',
+				name: 'Basic 5',
+				extension: ['file.xml']
+			}, {
+				id: 'orion/test6',
+				name: 'Basic 6',
+				filename: ['exactfilematch', 'exactfilenamematch']
 			} ];
 		if (useServiceRegistry) {
 			dataSource = serviceRegistry = new ServiceRegistry();
@@ -122,30 +130,41 @@ define([
 		getFileContentType: function() {
 			this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 				var fileMetadata1 = {
-					Name: "aaaaaaaaaaa"
+					Name: "zzzdoesnotmatchanythingzzz"
 				},
 				fileMetadata2 = {
-					Name: "test.file.xml"
+					Name: "test.foo.xml"
 				},
 				fileMetadata3 = {
 					Name: "test.file.txt"
 				},
 				fileMetadata4 = {
 					Name: "build.xml"
+				},
+				fileMetadata5 = {
+					Name: "test.file.xml"
+				},
+				fileMetadata6 = {
+					Name: "exactfilenamematch"
 				};
+				
 				assertContentTypesEqual(contentTypeService.getFileContentType(fileMetadata1), null, "No content type for unrecognized file");
-				assertContentTypesEqual(contentTypeService.getFileContentType(fileMetadata2), basicTypes[2]);
-				assertContentTypesEqual(contentTypeService.getFileContentType(fileMetadata3), basicTypes[2]);
-				assertContentTypesEqual(contentTypeService.getFileContentType(fileMetadata4), basicTypes[3], "filename match beats extension match");
+				assertContentTypesEqual(contentTypeService.getFileContentType(fileMetadata2), basicTypes[2], "Extension match");
+				assertContentTypesEqual(contentTypeService.getFileContentType(fileMetadata3), basicTypes[2], "Extension match");
+				assertContentTypesEqual(contentTypeService.getFileContentType(fileMetadata4), basicTypes[3], "Filename match beats extension match");
+				assertContentTypesEqual(contentTypeService.getFileContentType(fileMetadata5), basicTypes[5], "Filename match");
+				assertContentTypesEqual(contentTypeService.getFileContentType(fileMetadata6), basicTypes[6], "Extension match takes longest extension");
 			});
 		},
 
 		getFilenameContentType: function() {
 			this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
-				assertContentTypesEqual(contentTypeService.getFilenameContentType("aaaaaaa"), null, "No content type for unrecognized file");
-				assertContentTypesEqual(contentTypeService.getFilenameContentType("test.file.xml"), basicTypes[2]);
-				assertContentTypesEqual(contentTypeService.getFilenameContentType("test.file.txt"), basicTypes[2]);
-				assertContentTypesEqual(contentTypeService.getFilenameContentType("build.xml"), basicTypes[3], "filename match beats extension match");
+				assertContentTypesEqual(contentTypeService.getFilenameContentType("zzzdoesnotmatchanythingzzz"), null, "No content type for unrecognized file");
+				assertContentTypesEqual(contentTypeService.getFilenameContentType("test.foo.xml"), basicTypes[2], "Extension match");
+				assertContentTypesEqual(contentTypeService.getFilenameContentType("test.file.txt"), basicTypes[2], "Extension match");
+				assertContentTypesEqual(contentTypeService.getFilenameContentType("build.xml"), basicTypes[3], "Filename match beats extension match");
+				assertContentTypesEqual(contentTypeService.getFilenameContentType("test.file.xml"), basicTypes[5], "Filename match");
+				assertContentTypesEqual(contentTypeService.getFilenameContentType("exactfilenamematch"), basicTypes[6], "Extension match takes longest extension");
 			});
 		},
 
