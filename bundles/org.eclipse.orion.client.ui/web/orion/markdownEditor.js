@@ -673,28 +673,28 @@ define([
 			 * in response (instead its bounds were simply adjusted).  As a result the marked
 			 * token will now be stale.  Detect this case and update the token here.
 			 */
-			if (e.old.length === 1 && e.new.length === 1 && e.old[0].elementId === e.new[0].elementId) {
+			if (e.oldBlocks.length === 1 && e.newBlocks.length === 1 && e.oldBlocks[0].elementId === e.newBlocks[0].elementId) {
 				/*
 				 * A change in the root block only occurs when whitespace beyond the last block is
 				 * added/deleted, because the marked lexer groups all other whitespace occurrences
 				 * into adjacent blocks.  If this is a change in the root block then just return,
 				 * there's nothing to do here.
 				 */
-				if (!e.new[0].parent) {
+				if (!e.newBlocks[0].parent) {
 					return;
 				}
 
-				var recomputedBlocks = this.computeBlocks(this.model, this.model.getText(e.old[0].start, e.old[0].end), e.old[0].parent, e.old[0].start);
-				this._adoptTokens(e.new[0], recomputedBlocks[0]);
+				var recomputedBlocks = this.computeBlocks(this.model, this.model.getText(e.oldBlocks[0].start, e.oldBlocks[0].end), e.oldBlocks[0].parent, e.oldBlocks[0].start);
+				this._adoptTokens(e.newBlocks[0], recomputedBlocks[0]);
 			}
 
 			var oldBlocksIndex = 0, parentElement, i, j, children = [];
-			if (e.old.length) {
-				var currentElement = document.getElementById(e.old[0].elementId);
+			if (e.oldBlocks.length) {
+				var currentElement = document.getElementById(e.oldBlocks[0].elementId);
 				parentElement = currentElement.parentElement;
 			} else {
-				if (e.new.length) {
-					parentElement = document.getElementById(e.new[0].parent.elementId);
+				if (e.newBlocks.length) {
+					parentElement = document.getElementById(e.newBlocks[0].parent.elementId);
 				}
 				if (!parentElement) {
 					parentElement = document.getElementById(ID_PREVIEW);
@@ -702,21 +702,21 @@ define([
 			}
 			for (i = 0; i < parentElement.children.length; i++) {
 				if (!currentElement || parentElement.children[i].id === currentElement.id) {
-					for (j = i; j < i + e.old.length; j++) {
+					for (j = i; j < i + e.oldBlocks.length; j++) {
 						children.push(parentElement.children[j]);
 					}
 					break;
 				}
 			}
 
-			e.new.forEach(function(current) {
+			e.newBlocks.forEach(function(current) {
 				/* create a new div with content corresponding to this block */
 				var newElement = document.createElement("div"); //$NON-NLS-0$
 				this._generateHTML(newElement, current);
 
 				/* try to find an existing old block and DOM element corresponding to the current new block */
-				for (i = oldBlocksIndex; i < e.old.length; i++) {
-					if (e.old[i].elementId === current.elementId) {
+				for (i = oldBlocksIndex; i < e.oldBlocks.length; i++) {
+					if (e.oldBlocks[i].elementId === current.elementId) {
 						/*
 						 * Found it.  If any old blocks have been passed over during this search
 						 * then remove their elements from the DOM as they no longer exist.
@@ -733,7 +733,7 @@ define([
 					}
 				}
 
-				if (i === e.old.length) {
+				if (i === e.oldBlocks.length) {
 					/*
 					 * An existing block was not found, so there is not an existing corresponding
 					 * DOM element to reuse.  Create one now.
@@ -756,7 +756,7 @@ define([
 			}.bind(this));
 
 			/* all new blocks have been processed, so remove all remaining old elements that were not reused */
-			for (i = e.old.length - 1; oldBlocksIndex <= i; i--) {
+			for (i = e.oldBlocks.length - 1; oldBlocksIndex <= i; i--) {
 				parentElement.removeChild(children[i]);
 			}
 		},
