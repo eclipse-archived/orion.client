@@ -73,7 +73,7 @@ define([
 		}.bind(this));
 		var comparerOptions = {
 			toggleable: true,
-			type: "twoWay", //$NON-NLS-0$ //From user preference
+			type: "inline", //$NON-NLS-0$ //From user preference
 			ignoreWhitespace: false,//From user reference
 			readonly: true,
 			hasConflicts: hasConflicts,
