@@ -916,25 +916,27 @@ define([
 	
 						navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 						var hasConflict = item.parent.type === "Conflicting"; //$NON-NLS-0$
-						mGitUIUtil.createCompareWidget(
-							explorer.registry,
-							explorer.commandService,
-							item.DiffLocation,
-							hasConflict,
-							diffContainer,
-							compareWidgetActionWrapper.id,
-							explorer.editableInComparePage ? !this.explorer.model.isStaged(item.parent.type) : false,
-							{
-								navGridHolder : navGridHolder,
-								additionalCmdRender : function(gridHolder) {
-									explorer.commandService.destroy(diffActionWrapper.id);
-									explorer.commandService.renderCommands("itemLevelCommands", diffActionWrapper.id, item.parent, explorer, "tool", false, gridHolder); //$NON-NLS-1$ //$NON-NLS-0$
+						window.setTimeout(function() {
+							mGitUIUtil.createCompareWidget(
+								explorer.registry,
+								explorer.commandService,
+								item.DiffLocation,
+								hasConflict,
+								diffContainer,
+								compareWidgetActionWrapper.id,
+								explorer.editableInComparePage ? !this.explorer.model.isStaged(item.parent.type) : false,
+								{
+									navGridHolder : navGridHolder,
+									additionalCmdRender : function(gridHolder) {
+										explorer.commandService.destroy(diffActionWrapper.id);
+										explorer.commandService.renderCommands("itemLevelCommands", diffActionWrapper.id, item.parent, explorer, "tool", false, gridHolder); //$NON-NLS-1$ //$NON-NLS-0$
+									},
+									before : true
 								},
-								before : true
-							},
-							undefined,
-							compareWidgetLeftActionWrapper.id
-						);
+								undefined,
+								compareWidgetLeftActionWrapper.id
+							);
+						}.bind(this), 0);
 					}
 					return td;
 			}

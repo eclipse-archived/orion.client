@@ -90,7 +90,7 @@ exports.CompareCommandFactory = (function() {
 				},
 				callback : function(data) {
 					data.items.ignoreWhitespace(ignoreWhitespaceCommand.checked);
-					this.dispatchEvent({type:"ignoreWhiteSpaceChanged", ignored: ignoreWhitespaceCommand.checked}); //$NON-NLS-0$
+					this.dispatchEvent({type:"compareConfigChanged", name: "ignoreWhiteSpace", value: ignoreWhitespaceCommand.checked}); //$NON-NLS-0$
 			}.bind(this)});
 			var toggleInline2WayCommand = new mCommands.Command({
 				tooltip : messages["Switch to unified diff"],
@@ -111,7 +111,7 @@ exports.CompareCommandFactory = (function() {
 				},
 				callback : function(data) {
 					data.items.options.toggler.toggle();
-					this.dispatchEvent({type:"compareModeChanged", mode: data.items.options.toggler.getWidget().type}); //$NON-NLS-0$
+					this.dispatchEvent({type:"compareConfigChanged", name: "mode", value: data.items.options.toggler.getWidget().type}); //$NON-NLS-0$
 			}.bind(this)});
 			var nextDiffCommand = new mCommands.Command({
 				name: messages["Next diff block"],

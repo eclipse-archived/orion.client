@@ -133,6 +133,7 @@ exports.ResourceComparer = (function() {
 		} else {
 			this._compareView = new mCompareView.TwoWayCompareView(viewOptions);
 		}
+		this._compareView.getWidget().setOptions({ignoreWhitespace: options.ignoreWhitespace});
 		this._compareView.getWidget().setOptions({extCmdHolder: this});
 		if(!viewOptions.highlighters){
 			this._compareView.getWidget().setOptions({highlighters: [new CompareStyler(serviceRegistry), new CompareStyler(serviceRegistry)]});

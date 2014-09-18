@@ -64,12 +64,17 @@ define([
 	function createCompareWidget(serviceRegistry, commandService, resource, hasConflicts, parentDivId, commandSpanId, editableInComparePage, gridRenderer, compareTo, toggleCommandSpanId) {
 		var diffProvider = new mResourceComparer.DefaultDiffProvider(serviceRegistry);
 		var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: commandSpanId, toggleCommandSpanId: toggleCommandSpanId, gridRenderer: gridRenderer});
-		cmdProvider.addEventListener("compareModeChanged", function(e) { //$NON-NLS-0$
-			//TODO: use e.mode as the compareOptions.type, e.g. "inline" or "twoWay"
+		cmdProvider.addEventListener("compareConfigChanged", function(e) { //$NON-NLS-0$
+			if(e.name === "mode") {
+				//TODO: use e.value as the compareOptions.type, e.g. "inline" or "twoWay"
+			} else if(e.name === "ignoreWhiteSpace") {
+				//TODO: use e.value as the compareOptions.type, e.g. "inline" or "twoWay"
+			}
 		}.bind(this));
 		var comparerOptions = {
 			toggleable: true,
-			type: "inline", //$NON-NLS-0$
+			type: "twoWay", //$NON-NLS-0$ //From user preference
+			ignoreWhitespace: false,//From user reference
 			readonly: true,
 			hasConflicts: hasConflicts,
 			diffProvider: diffProvider,
