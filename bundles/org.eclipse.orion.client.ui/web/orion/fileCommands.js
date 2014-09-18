@@ -426,7 +426,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 								var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 								var message = i18nUtil.formatMessage(isCopy ? messages["Copying ${0}"] : messages["Moving ${0}"], item.Location);
 								if (isCopy && item.parent && item.parent.Location === location) {
-									newName = window.prompt(i18nUtil.formatMessage(messages["Enter a new name for '${0}'"], item.Name), i18nUtil.formatMessage(messages["Copy of ${0}"], item.Name));
+									newName = window.prompt(i18nUtil.formatMessage(messages["EnterName"], item.Name), i18nUtil.formatMessage(messages["Copy of ${0}"], item.Name));
 									// user cancelled?  don't copy this one
 									if (!newName) {
 										location = null;
@@ -513,7 +513,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			if (proposedPaths.length > 0) {
 				choices.push({});  //separator
 			}
-			choices.push({name: messages["Choose folder..."], callback: prompt});
+			choices.push({name: messages["ChooseFolder"], callback: prompt});
 			return choices;
 		}
 
@@ -659,7 +659,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 
 		var renameCommand = new mCommands.Command({
 				name: messages["Rename"],
-				tooltip: messages["Rename the selected files or folders"],
+				tooltip: messages["RenameFilesFolders"],
 				imageClass: "core-sprite-rename", //$NON-NLS-0$
 				id: "eclipse.renameResource", //$NON-NLS-0$
 				visibleWhen: function(item) {
@@ -698,8 +698,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		
 		var contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		var compareWithEachOtherCommand = new mCommands.Command({
-				name: messages["Compare with each other"],
-				tooltip: messages["Compare the selected 2 files with each other"],
+				name: messages["CompareEach"],
+				tooltip: messages["Compare 2 files"],
 				id: "eclipse.compareWithEachOther", //$NON-NLS-0$
 				visibleWhen: function(item) {
 					if (!explorer || !explorer.isCommandsVisible()) {
@@ -730,7 +730,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		
 		var compareWithCommand = new mCommands.Command({
 			name : messages["Compare with..."],
-			tooltip: messages["Compare the selected folder with a specified folder"], 
+			tooltip: messages["CompareFolders"], 
 			id: "eclipse.compareWith", //$NON-NLS-0$
 			visibleWhen: function(item) {
 				if (!explorer || !explorer.isCommandsVisible()) {
@@ -792,7 +792,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			visibleWhen: oneOrMoreFilesOrFolders,
 			callback: function(data) {
 				var items = Array.isArray(data.items) ? data.items : [data.items];
-				var confirmMessage = items.length === 1 ? i18nUtil.formatMessage(messages["Are you sure you want to delete '${0}'?"], items[0].Name) : i18nUtil.formatMessage(messages["Are you sure you want to delete these ${0} items?"], items.length);
+				var confirmMessage = items.length === 1 ? i18nUtil.formatMessage(messages["DeleteTrg"], items[0].Name) : i18nUtil.formatMessage(messages["delete item msg"], items.length);
 				serviceRegistry.getService("orion.page.dialog").confirm(confirmMessage,  //$NON-NLS-0$
 					function(doit) {
 						if (!doit) {
@@ -848,8 +848,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		commandService.addCommand(deleteCommand);
 	
 		var downloadCommand = new mCommands.Command({
-			name: messages["Export as zip"],
-			tooltip: messages["Create a zip file of the folder contents and download it"],
+			name: messages["Zip"],
+			tooltip: messages["ZipDL"],
 			imageClass: "core-sprite-exportzip", //$NON-NLS-0$
 			id: "eclipse.downloadFile", //$NON-NLS-0$
 			visibleWhen: function(item) {
@@ -970,7 +970,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 
 		var importZipURLCommand = new mCommands.Command({
 			name: messages["Import from HTTP..."],
-			tooltip: messages["Import a file from a URL and optionally unzip it"],
+			tooltip: messages["ImportURL"],
 			id: "orion.importZipURL", //$NON-NLS-0$
 			parameters: zipURLParameters,
 			callback: function(data) {
@@ -996,7 +996,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 			name: messages["New Folder"],
 			imageClass: "core-sprite-new_folder", //$NON-NLS-0$
 			tooltip: messages["Create an empty folder"],
-			description: messages["Create an empty folder on the Orion server.  You can import, upload, or create content in the editor."],
+			description: messages["CreateEmptyMsg"],
 			id: "orion.new.project", //$NON-NLS-0$
 			callback: function(data) {
 				var item;
@@ -1018,8 +1018,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		
 		var linkProjectCommand = new mCommands.Command({
 			name: messages["Link to Server"],
-			tooltip: messages["Link to existing content on the server"],
-			description: messages["Create a folder that links to an existing folder on the server."],
+			tooltip: messages["LinkContent"],
+			description: messages["CreateLinkedFolder"],
 			imageClass: "core-sprite-link", //$NON-NLS-0$
 			id: "orion.new.linkProject", //$NON-NLS-0$
 			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Name:'], messages['New Folder']), new mCommandRegistry.CommandParameter('url', 'url', messages['Server path:'], '')]), //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -1035,7 +1035,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				if (data.parameters && data.parameters.valueFor('name') && data.parameters.valueFor('url')) { //$NON-NLS-1$ //$NON-NLS-0$
 					createFunction(data.parameters.valueFor('name'), data.parameters.valueFor('url')); //$NON-NLS-1$ //$NON-NLS-0$
 				} else {
-					errorHandler(messages["The name and server location were not specified."]);
+					errorHandler(messages["NameLocationNotClear"]);
 				}
 			},
 			visibleWhen: canCreateProject
@@ -1044,7 +1044,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		
 		var goUpCommand = new mCommands.Command({
 			name: messages["Go Up"],
-			tooltip: messages["Move up to the parent folder"],
+			tooltip: messages["GoUpToParent"],
 			imageClass: "core-sprite-go-up", //$NON-NLS-0$
 //			addImageClassToElement: true,
 			id: "eclipse.upFolder", //$NON-NLS-0$
@@ -1065,7 +1065,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 
 		var goIntoCommand = new mCommands.Command({
 			name: messages["Go Into"],
-			tooltip: messages["Move into the selected folder"],
+			tooltip: messages["GoSelectedFolder"],
 			imageClass: "core-sprite-go-down", //$NON-NLS-0$
 			id: "eclipse.downFolder", //$NON-NLS-0$
 			callback: function(data) {
@@ -1088,7 +1088,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					
 		var importCommand = new mCommands.Command({
 			name : messages["File or zip archive"],
-			tooltip: messages["Import a file or zip archive from your local file system"],
+			tooltip: messages["ImportLcFile"],
 			imageClass: "core-sprite-importzip", //$NON-NLS-0$
 			id: "orion.import", //$NON-NLS-0$
 			callback : function(data) {
@@ -1119,7 +1119,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 	
 		var importSFTPCommand = new mCommands.Command({
 			name : messages["SFTP from..."],
-			tooltip: messages["Copy files and folders from a specified SFTP connection"],
+			tooltip: messages["CpyFrmSftp"],
 			imageClass: "core-sprite-transferin", //$NON-NLS-0$
 			id: "orion.importSFTP", //$NON-NLS-0$
 			callback : function(data) {
@@ -1146,7 +1146,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 	
 		var exportSFTPCommand = new mCommands.Command({
 			name : messages["SFTP to..."],
-			tooltip: messages["Copy files and folders to a specified SFTP location"],
+			tooltip: messages["CpyToSftp"],
 			imageClass: "core-sprite-transferout", //$NON-NLS-0$
 			id: "eclipse.exportSFTPCommand", //$NON-NLS-0$
 			callback : function(data) {
@@ -1192,7 +1192,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		
 		var moveCommand = new mCommands.Command({
 			name : messages["Move to"],
-			tooltip: messages["Move files and folders to a new location"],
+			tooltip: messages["MvToLocation"],
 			id: "eclipse.moveFile", //$NON-NLS-0$
 			choiceCallback: function(items, userData) {
 				return makeMoveCopyTargetChoices(items, userData, false);
