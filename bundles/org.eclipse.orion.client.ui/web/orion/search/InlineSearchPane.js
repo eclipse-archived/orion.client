@@ -223,8 +223,12 @@ define([
 				}
 				var keyCode= e.charCode || e.keyCode;
 				if (keyCode === lib.KEY.ENTER) {
-					this._submitSearch();
 					this._searchTextInputBox.blur();
+					if (this._replaceBoxIsHidden()) {
+						this._submitSearch();
+					} else {
+						this._replacePreview();
+					}
 				} else if (keyCode === lib.KEY.ESCAPE) {
 					if (this._previousActiveElement) {
 						if (this._previousActiveElement === this._searchTextInputBox) {
