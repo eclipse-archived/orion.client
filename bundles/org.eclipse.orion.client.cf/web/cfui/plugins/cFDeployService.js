@@ -11,9 +11,9 @@
 
 /*eslint-env browser,amd*/
 
-define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/serviceregistry', 
+define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil', 'orion/URITemplate', 'orion/serviceregistry', 
         'orion/preferences', 'orion/PageLinks', 'orion/xhr'],
-        function(mBootstrap, Deferred, CFClient, URITemplate, ServiceRegistry, mPreferences, PageLinks, xhr){
+        function(mBootstrap, Deferred, CFClient, mCfUtil, URITemplate, ServiceRegistry, mPreferences, PageLinks, xhr){
 	
 	var deferred = new Deferred();
 	mBootstrap.startup().then(function(core){
@@ -82,23 +82,9 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/URITe
 				
 			_getDefaultTarget: function(){
 				var deferred = new Deferred();
-				preferences.getPreferences('/cm/configurations').then(
-					function(settings){
-						var cloud = settings.get("org.eclipse.orion.client.cf.settings");
-						if (cloud && cloud.targetUrl){
-							var target = {};
-							target.Url = cloud.targetUrl;
-							if (cloud.manageUrl)
-								target.ManageUrl = cloud.manageUrl;
-							if (cloud.org)
-								target.Org = cloud.org;
-							if (cloud.space)
-								target.Space = cloud.space;
-							deferred.resolve(target);
-						} else {
-							deferred.resolve(null);
-						}
-					}, function(error){
+				mCfUtil.getTarget(preferences).then(
+					deferred.resolve,
+					function(error){
 						deferred.resolve(null);
 					}
 				);
