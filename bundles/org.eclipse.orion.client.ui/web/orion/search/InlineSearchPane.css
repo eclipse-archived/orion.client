@@ -127,6 +127,7 @@
 	opacity: 0;
 	text-align: center;
 	transition: opacity 0.1s ease;
+	width: 252px;
 }
 
 .fileNamePatternsHintVisible {
