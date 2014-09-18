@@ -603,7 +603,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                             break;
                         case "pass": //$NON-NLS-0$
                             operationIcon.classList.add("core-sprite-ok"); //$NON-NLS-0$
-                            statusMessage = item.model.totalMatches ? i18nUtil.formatMessage(messages["${0} out of ${1}  matches replaced"], item.matchesReplaced, item.model.totalMatches) : item.message; //$NON-NLS-0$
+                            statusMessage = item.model.totalMatches ? i18nUtil.formatMessage(messages["matchesReplacedMsg"], item.matchesReplaced, item.model.totalMatches) : item.message; //$NON-NLS-0$
                             break;
                     }
                     

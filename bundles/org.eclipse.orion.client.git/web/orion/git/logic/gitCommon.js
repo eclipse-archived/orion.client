@@ -37,7 +37,7 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 	}
 	
 	var handleKnownHostsError = function(serviceRegistry, errorData, options, func){
-		if(confirm(i18nUtil.formatMessage(messages["Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}."],
+		if(confirm(i18nUtil.formatMessage(messages["AddKeyToHostContinueOp"],
 				errorData.KeyType, errorData.Host, errorData.HostFingerprint))){
 			
 			var hostURL = mGitUtil.parseSshGitUrl(errorData.Url);
@@ -218,7 +218,7 @@ define(['orion/git/util','orion/i18nUtil','orion/git/gitPreferenceStorage','orio
 		
 		// if this is a known hosts error, show a prompt always
 		if (errorData && errorData.HostKey) {
-			if(confirm(i18nUtil.formatMessage(messages['Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}.'],
+			if(confirm(i18nUtil.formatMessage(messages['AddKeyToHostContinueOp'],
 					errorData.KeyType, errorData.Host, errorData.HostFingerprint))){
 				
 				var hostURL = mGitUtil.parseSshGitUrl(errorData.Url);

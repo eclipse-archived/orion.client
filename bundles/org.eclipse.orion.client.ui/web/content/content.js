@@ -61,7 +61,7 @@ define([
 					// expected error - HTTP 412 Precondition Failed 
 					// occurs when file is out of sync with the server
 					if (error.status === 412) {
-						var forceSave = window.confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
+						var forceSave = window.confirm(messages["ResrcOutOfSync"]);
 						if (forceSave) {
 							// repeat save operation, but without ETag 
 							progressService.progress(fileClient.write(targetMetadata.Location, contents), "Saving file " + targetMetadata.Location).then(
@@ -166,7 +166,7 @@ define([
 				var parent = lib.node("delegatedContent"); //$NON-NLS-0$
 				lib.empty(parent);
 				var message = document.createElement("div"); //$NON-NLS-0$
-				message.appendChild(document.createTextNode(messages["Plugin content could not be found"]));
+				message.appendChild(document.createTextNode(messages["PluginContentNotFound"]));
 				parent.appendChild(message);
 			}
 		}
@@ -182,7 +182,7 @@ define([
 					if (data.shellService) {
 						if (data.sourceLocation) {
 							saveFileContents(fileClient, fileMetadata, {sourceLocation: data.sourceLocation}, function() {
-								if (window.confirm(messages["Content has been saved.  Click OK to go to the navigator, Cancel to keep editing."])) {
+								if (window.confirm(messages["ContentSavedMsg"])) {
 									// go to the navigator
 									window.location.href = orionHome + "/edit/edit.html#" + fileMetadata.Parents[0].ChildrenLocation; //$NON-NLS-0$
 								} else {

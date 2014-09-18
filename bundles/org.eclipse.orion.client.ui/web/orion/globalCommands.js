@@ -12,17 +12,16 @@
 /*eslint-env browser, amd*/
 define([
 		'i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/EventTarget', 'orion/commands',
-		'orion/parameterCollectors', 'orion/extensionCommands', 'orion/breadcrumbs', 'orion/webui/littlelib',
+		'orion/parameterCollectors', 'orion/extensionCommands', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/i18nUtil',
 		'orion/webui/splitter', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/contentTypes', 'orion/keyAssist',
 		'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
 		'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html',
 		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html',
-		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu', 'orion/objects', 'orion/i18nUtil',
+		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu', 'orion/objects'
 	],
 	function (messages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands, 
-		mBreadcrumbs, lib, mSplitter, mDropdown, mTooltip, mContentTypes, mKeyAssist, mThemePreferences, mThemeData, Deferred,
-		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, util, mCustomGlobalCommands, mFileClient,
-		SideMenu, objects, i18nUtil) {
+		mBreadcrumbs, lib, i18nUtil, mSplitter, mDropdown, mTooltip, mContentTypes, mKeyAssist, mThemePreferences, mThemeData, Deferred,
+		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, util, mCustomGlobalCommands, mFileClient, SideMenu, objects) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 *
@@ -110,7 +109,7 @@ define([
 
 	function startProgressService(serviceRegistry) {
 		var progressPane = lib.node("progressPane"); //$NON-NLS-0$
-		progressPane.setAttribute("aria-label", messages['Operations - Press spacebar to show current operations']); //$NON-NLS-1$ //$NON-NLS-0$
+		progressPane.setAttribute("aria-label", messages['OpPressSpaceMsg']); //$NON-NLS-1$ //$NON-NLS-0$
 		var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		if (progressService) {
 			progressService.init.bind(progressService)("progressPane"); //$NON-NLS-0$
@@ -562,7 +561,7 @@ define([
 		var parent = lib.node(parentId);
 
 		if (!parent) {
-			throw messages["could not find banner parent, id was "] + parentId;
+			throw i18nUtil.formatMessage("could not find banner parent, id was ${0}", parentId);
 		}
 		// place the HTML fragment for the header.
 		var range = document.createRange();
@@ -693,8 +692,8 @@ define([
 		};
 
 		var openResourceCommand = new mCommands.Command({
-			name: messages["Find File Named..."],
-			tooltip: messages["Choose a file by name and open an editor on it"],
+			name: messages["FindFile"],
+			tooltip: messages["ChooseFileOpenEditor"],
 			id: "orion.openResource", //$NON-NLS-0$
 			callback: function (data) {
 				openResourceDialog(searcher, serviceRegistry);
@@ -742,7 +741,7 @@ define([
 			// Toggle trim command
 			var toggleBanner = new mCommands.Command({
 				name: messages["Toggle banner and footer"],
-				tooltip: messages["Hide or show the page banner and footer"],
+				tooltip: messages["HideShowBannerFooter"],
 				id: "orion.toggleTrim", //$NON-NLS-0$
 				callback: toggleBannerFunc
 			});
@@ -781,7 +780,7 @@ define([
 			});
 			var keyAssistCommand = new mCommands.Command({
 				name: messages["Show Keys"],
-				tooltip: messages["Show a list of all the keybindings on this page"],
+				tooltip: messages["ShowAllKeyBindings"],
 				id: "orion.keyAssist", //$NON-NLS-0$
 				callback: function () {
 					if (keyAssist.isVisible()) {

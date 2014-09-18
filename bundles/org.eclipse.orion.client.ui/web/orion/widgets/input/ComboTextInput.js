@@ -157,7 +157,7 @@ define([
 				group: this._domNodeId + "InputCompletion", //$NON-NLS-0$
 				extendedProvider: this._extendedRecentEntryProposalProvider, 
 				onDelete: this._onRecentEntryDelete,
-				deleteToolTips: messages["Click or use delete key to delete the search term"] //$NON-NLS-0$
+				deleteToolTips: messages["DeleteSearchTrmMsg"] //$NON-NLS-0$
 			});
 			
 			this._recentEntryButton.addEventListener("click", function(event){ 
