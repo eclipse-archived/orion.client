@@ -805,7 +805,15 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 	);
 	
 	function getTarget(cFService, preferences) {
-		return mCfUtil.getTarget(preferences);
+		var deferred = new Deferred();
+		mCfUtil.getTargets(preferences).then(
+			function(targets){
+				deferred.resolve(targets[0]);
+			}, function(error){
+				deferred.reject(error);
+			}
+		);
+		return deferred;
 	}
 
 	function postMsg(status) {

@@ -29,7 +29,7 @@ define([
 
 	return {
 		// make sure target is set and it matches the url in settings
-		getTarget : function(preferences) {
+		getTargets : function(preferences) {
 			return preferences.getPreferences('/cm/configurations').then(function(settings){
 				var cloud = settings.get("org.eclipse.orion.client.cf.settings");
 				if (cloud && cloud.targetUrl){
@@ -37,11 +37,7 @@ define([
 					target.Url = cloud.targetUrl;
 					if (cloud.manageUrl)
 						target.ManageUrl = cloud.manageUrl;
-					if (cloud.org)
-						target.Org = cloud.org;
-					if (cloud.space)
-						target.Space = cloud.space;
-					return target;
+					return [target];
 				}
 				return handleNoCloud();
 			}, handleNoCloud);

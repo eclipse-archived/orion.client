@@ -88,10 +88,10 @@ mBootstrap.startup().then(function(core) {
 	function displayOrgsAndSpaces(){
 		lib.empty(orgsNode);
 		
-		progressService.showWhile(mCfUtil.getTarget(preferences), "Checking for Cloud Foundry settings").then(function(target){
-			_target = target;
+		progressService.showWhile(mCfUtil.getTargets(preferences), "Checking for Cloud Foundry settings").then(function(targets){
+			_target = targets[0];
 			
-			progressService.showWhile(cFService.getOrgs(target), "Loading ...").then(function(result){
+			progressService.showWhile(cFService.getOrgs(_target), "Loading ...").then(function(result){
 				
 				var table = document.createElement("table");
 				table.className = "centerTable";
@@ -147,9 +147,9 @@ mBootstrap.startup().then(function(core) {
 					
 					spacesDropdown.onchange = function(event){
 						var selectedSpace = event.target.selectedOptions[0].space;
-						target.Space = selectedSpace.Name;
-						target.Org = selectedSpace.Org.Name;
-						displayApplications(target);
+						_target.Space = selectedSpace.Name;
+						_target.Org = selectedSpace.Org.Name;
+						displayApplications(_target);
 					};
 					
 					td2.appendChild(spacesDropdown);
@@ -165,9 +165,9 @@ mBootstrap.startup().then(function(core) {
 						});
 						if(org.Spaces.length > 0){
 							var selectedSpace = org.Spaces[0];
-							target.Space = selectedSpace.Name;
-							target.Org = selectedSpace.Org.Name;
-							displayApplications(target);
+							_target.Space = selectedSpace.Name;
+							_target.Org = selectedSpace.Org.Name;
+							displayApplications(_target);
 						}
 					}
 					orgsNode.appendChild(table);

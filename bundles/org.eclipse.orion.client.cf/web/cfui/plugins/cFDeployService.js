@@ -82,9 +82,10 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 				
 			_getDefaultTarget: function(){
 				var deferred = new Deferred();
-				mCfUtil.getTarget(preferences).then(
-					deferred.resolve,
-					function(error){
+				mCfUtil.getTargets(preferences).then(
+					function(targets){
+						deferred.resolve(targets[0]);
+					}, function(error){
 						deferred.resolve(null);
 					}
 				);
