@@ -21,7 +21,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 	function _doServiceCall(fileService, funcName, funcArgs) {
 		//if the function is not implemented in the file service, we throw an exception to the caller
 		if(!fileService[funcName]){
-			throw funcName + messages["NotSupportFileSystem"];
+			throw i18nUtil.formatMessage(messages["NotSupportFileSystem"], funcName);
 		}
 		return fileService[funcName].apply(fileService, funcArgs);
 	}
@@ -198,7 +198,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 					}
 				}
 			}
-			throw messages['No Matching FileService for location:'] + location;
+			throw i18nUtil.formatMessage(messages['NoFileSrv'], location);
 		};
 		
 		this._getService = function(location) {
