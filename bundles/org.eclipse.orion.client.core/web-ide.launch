@@ -23,6 +23,7 @@
 <setEntry value="org.eclipse.orion.client.feature:default"/>
 <setEntry value="org.eclipse.orion.server.authentication.feature:default"/>
 <setEntry value="org.eclipse.orion.server.feature:default"/>
+<setEntry value="org.eclipse.orion.server.hosting.feature:default"/>
 <setEntry value="org.eclipse.orion.server.jetty.feature:default"/>
 <setEntry value="org.eclipse.orion.server.search.feature:default"/>
 </setAttribute>
