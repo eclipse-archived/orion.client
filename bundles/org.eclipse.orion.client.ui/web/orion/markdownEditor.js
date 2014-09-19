@@ -401,6 +401,18 @@ define([
 		getBracketMatch: function(/*block, text*/) {
 			return null;
 		},
+		getElementByIdentifier: function(id, rootNode) {
+			return lib.$("." + id, rootNode); //$NON-NLS-0$
+		},
+		getElementIdentifier: function(element) {
+			var classList = element.classList;
+			for (var i = 0; i < classList.length; i++) {
+				if (classList[i] !== this._markdownSelected) {
+					return classList[i];
+				}
+			}
+			return "";
+		},
 		initialPopulatePreview: function() {
 			/* hack, see the explaination in MarkdownEditor.initSourceEditor() */
 			var rootBlock = this._styler.getRootBlock();
@@ -620,16 +632,12 @@ define([
 						processParentTokens(accumulatedParentTokens);
 						accumulatedParentTokens = [];
 					}
-					
+
 					/* now process the child block */
 					var newElement = document.createElement("div"); //$NON-NLS-0$
 					this._generateHTML(newElement, current);
 					newElement = newElement.children[0] || newElement;
-					if (!newElement.id) {
-						newElement.id = current.elementId; /* typical */
-					} else {
-						this._renameBlock(current, newElement.id); /* header element */
-					}
+					this._setElementIdentifier(newElement, current.elementId);
 					rootElement.children[0].appendChild(newElement);
 				}
 			}.bind(this));
@@ -695,18 +703,18 @@ define([
 
 			var oldBlocksIndex = 0, parentElement, i, j, children = [];
 			if (e.oldBlocks.length) {
-				var currentElement = document.getElementById(e.oldBlocks[0].elementId);
+				var currentElement = this.getElementByIdentifier(e.oldBlocks[0].elementId);
 				parentElement = currentElement.parentElement;
 			} else {
 				if (e.newBlocks.length) {
-					parentElement = document.getElementById(e.newBlocks[0].parent.elementId);
+					parentElement = this.getElementByIdentifier(e.newBlocks[0].parent.elementId);
 				}
 				if (!parentElement) {
 					parentElement = document.getElementById(ID_PREVIEW);
 				}
 			}
 			for (i = 0; i < parentElement.children.length; i++) {
-				if (!currentElement || parentElement.children[i].id === currentElement.id) {
+				if (!currentElement || this.getElementIdentifier(parentElement.children[i]) === e.oldBlocks[0].elementId) {
 					for (j = i; j < i + e.oldBlocks.length; j++) {
 						children.push(parentElement.children[j]);
 					}
@@ -733,7 +741,6 @@ define([
 						oldBlocksIndex = i + 1;
 
 						this._updateNode(element, newElement.children[0] || newElement);
-						element.id = (newElement.children[0] || newElement).id;
 						break;
 					}
 				}
@@ -751,12 +758,7 @@ define([
 					} else {
 						parentElement.appendChild(element);
 					}
-				}
-
-				if (!element.id) {
-					element.id = current.elementId; /* typical */
-				} else {
-					this._renameBlock(current, element.id); /* header element */
+					this._setElementIdentifier(element, current.elementId);
 				}
 			}.bind(this));
 
@@ -765,10 +767,9 @@ define([
 				parentElement.removeChild(children[i]);
 			}
 		},
-		_renameBlock: function(block, id) {
-			delete this._blocksCache[block.elementId];
-			block.elementId = id;
-			this._blocksCache[id] = block;
+		_setElementIdentifier: function(element, id) {
+			var isSelected = element.className.indexOf(this._markdownSelected) !== -1;
+			element.className = id + (isSelected ? " " + this._markdownSelected : ""); //$NON-NLS-0$
 		},
 		_updateMatch: function(match, text, matches, minimumIndex) {
 			match.pattern.regex.lastIndex = minimumIndex;
@@ -788,6 +789,8 @@ define([
 			if (targetNode.nodeName !== newNode.nodeName) {
 				/* node types do not match, must replace the target node in the parent */
 				targetNode.parentElement.replaceChild(newNode, targetNode);
+				/* retain the targetNode's identifier in its replacement */
+				this._setElementIdentifier(newNode, this.getElementIdentifier(targetNode));
 				return;
 			}
 			
@@ -1020,7 +1023,7 @@ define([
 		    var selectionPercentageWithinElement = (e.clientY - elementBounds.top) / (elementBounds.bottom - elementBounds.top);
 
 			var textView = this._editorView.editor.getTextView();
-			var block = this._stylerAdapter.getBlockWithId(target.id);
+			var block = this._stylerAdapter.getBlockWithId(this._stylerAdapter.getElementIdentifier(target));
 			var projectionModel = textView.getModel();
 			var projectionBlockStart = projectionModel.mapOffset(block.start, true);
 			while (projectionBlockStart === -1) {
@@ -1100,14 +1103,14 @@ define([
 			charIndex = textView.getModel().mapOffset(charIndex);
 
 			var block = this._styler.getBlockAtIndex(charIndex);
-			var element = document.getElementById(block.elementId);
+			var element = this._stylerAdapter.getElementByIdentifier(block.elementId);
 			while (!element) {
 				if (!block.parent) {
 					/* have reached the root block */
 					break;
 				}
 				block = block.parent;
-				element = document.getElementById(block.elementId);
+				element = this._stylerAdapter.getElementByIdentifier(block.elementId);
 			}
 			this._alignPreviewOnSourceBlock(block, charIndex);
 		}.bind(this);
@@ -1117,14 +1120,14 @@ define([
 			var selectionIndex = model.mapOffset(e.newValue.start);
 			var block = this._styler.getBlockAtIndex(selectionIndex);
 
-			var element = document.getElementById(block.elementId);
+			var element = this._stylerAdapter.getElementByIdentifier(block.elementId);
 			while (!element) {
 				if (!block.parent) {
 					/* have reached the root block */
 					break;
 				}
 				block = block.parent;
-				element = document.getElementById(block.elementId);
+				element = this._stylerAdapter.getElementByIdentifier(block.elementId);
 			}
 
 			if (this._selectedElement && this._selectedElement !== element) {
@@ -1250,7 +1253,7 @@ define([
 		_alignPreviewOnSourceBlock: function(block, selectionIndex) {
 			var textView = this._editorView.editor.getTextView();
 			var projectionModel = textView.getModel();
-			var element = document.getElementById(block.elementId);
+			var element = this._stylerAdapter.getElementByIdentifier(block.elementId);
 			if (element) {
 				var projectionBlockStart = projectionModel.mapOffset(block.start, true);
 				var projectionBlockEnd = projectionModel.mapOffset(block.end, true);
@@ -1311,14 +1314,14 @@ define([
 				var elementAlignY = elementTop + element.offsetHeight * selectionPercentageWithinBlock;
 			} else {
 				if (childIndex < subBlocks.length) {
-					var nextElement = document.getElementById(subBlocks[childIndex].elementId);
+					var nextElement = this._stylerAdapter.getElementByIdentifier(subBlocks[childIndex].elementId);
 					var nextElementTop = nextElement.getBoundingClientRect().top;
 				} else {
 					/* beyond end of last block */
 					nextElementTop = previewBounds.bottom;
 				}
 				if (childIndex) {
-					var previousElement = document.getElementById(subBlocks[childIndex - 1].elementId);
+					var previousElement = this._stylerAdapter.getElementByIdentifier(subBlocks[childIndex - 1].elementId);
 					var previousElementBottom = previousElement.getBoundingClientRect().bottom;
 				} else {
 					previousElementBottom = 0;
@@ -1341,15 +1344,14 @@ define([
 			while (siblingUpdated) {
 				siblingUpdated = false;
 				if (nextSibling) {
-					/* header elements are detected separately because their element id's are generated by marked */
-					if (!nextSibling.id.indexOf(ID_PREFIX) || this._headerTagRegex.test(nextSibling.nodeName)) {
+					if (!this._stylerAdapter.getElementIdentifier(nextSibling).indexOf(ID_PREFIX)) {
 						return nextSibling;
 					}
 					nextSibling = nextSibling.nextElementSibling;
 					siblingUpdated = true;
 				}
 				if (previousSibling) {
-					if (!previousSibling.id.indexOf(ID_PREFIX) || this._headerTagRegex.test(previousSibling.nodeName)) {
+					if (!this._stylerAdapter.getElementIdentifier(previousSibling).indexOf(ID_PREFIX)) {
 						return previousSibling;
 					}
 					previousSibling = previousSibling.previousElementSibling;
@@ -1422,7 +1424,6 @@ define([
 			this._ignoreEditorScrollsCounter = Infinity;
 			this._scrollSourceAnimation.play();	
 		},
-		_headerTagRegex: /^H[123456]$/,
 		_markdownSelected: "markdownSelected", //$NON-NLS-0$
 		_selectedBlock: null
 	});
