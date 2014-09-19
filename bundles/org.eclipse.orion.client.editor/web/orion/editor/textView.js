@@ -2998,6 +2998,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (util.isFirefox < 13 && e.which === 1) {
 				this._clientDiv.contentEditable = true;
 				(this._overlayDiv || this._clientDiv).draggable = false;
+			}
+			if (util.isFirefox && e.which === 1) {
 				
 				/*
 				* Bug in Firefox.  For some reason, Firefox stops showing the caret
