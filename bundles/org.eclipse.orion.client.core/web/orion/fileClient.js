@@ -21,7 +21,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 	function _doServiceCall(fileService, funcName, funcArgs) {
 		//if the function is not implemented in the file service, we throw an exception to the caller
 		if(!fileService[funcName]){
-			throw i18nUtil.formatMessage(messages["NotSupportFileSystem"], funcName);
+			throw new Error(i18nUtil.formatMessage(messages["NotSupportFileSystem"], funcName));
 		}
 		return fileService[funcName].apply(fileService, funcArgs);
 	}
@@ -29,11 +29,11 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 	function _copy(sourceService, sourceLocation, targetService, targetLocation) {
 		
 		if (!sourceService.readBlob) {
-			throw messages["SrcNotSupportBinRead"];
+			throw new Error(messages["SrcNotSupportBinRead"]);
 		}
 
 		if (!targetService.writeBlob) {
-			throw messages["TargetNotSupportBinWrite"];
+			throw new Error(messages["TargetNotSupportBinWrite"]);
 		}
 	
 		if (sourceLocation[sourceLocation.length -1] !== "/") { //$NON-NLS-0$
@@ -198,7 +198,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 					}
 				}
 			}
-			throw i18nUtil.formatMessage(messages['NoFileSrv'], location);
+			throw new Error(i18nUtil.formatMessage(messages['NoFileSrv'], location));
 		};
 		
 		this._getService = function(location) {
