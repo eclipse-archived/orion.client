@@ -280,6 +280,9 @@ define([
 			var pos = localStorage.getItem(this._prefix+this._offsetStorageLabel);
 			if (pos) {
 				this._offset = parseInt(pos, 10);
+				if (this._proportional) {
+					this._offset = Math.max(0, Math.min(100 - this._splitterSize, this._offset));
+				}
 			} else {
 				// Use the current splitter location
 				var rect = lib.bounds(this.$splitter);
@@ -290,12 +293,12 @@ define([
 		_adjustSplitterSize: function() {
 			// Size in pixels
 			var rect = lib.bounds(this.$splitter);
-			this._spltterSize = rect[this._widthHeight];
+			this._splitterSize = rect[this._widthHeight];
 			
 			// Make proportional if necessary
 			if (this._proportional) {
 				var pRect = lib.bounds(this.$splitter.parentNode);
-				this._spltterSize = this._spltterSize / (pRect[this._widthHeight] / 100);
+				this._splitterSize = this._splitterSize / (pRect[this._widthHeight] / 100);
 			}			
 		},
 		
@@ -307,7 +310,7 @@ define([
 		_adjustOffset: function(newOffset) {
 			var parentRect = lib.bounds(this.$splitter.parentNode);
 			if (this._collapseTrailing) {
-				var adjustment = newOffset + this._spltterSize;
+				var adjustment = newOffset + this._splitterSize;
 				newOffset = parentRect[this._widthHeight] - (adjustment - parentRect[this._topLeft]);
 			} else {
 				newOffset = newOffset - parentRect[this._topLeft];
@@ -330,10 +333,10 @@ define([
 			if (!this._collapseTrailing) {
 				this.$splitter.style[this._topLeft] = this._offset + suffix;
 				this.$leading.style[this._widthHeight] = this._offset + suffix;
-				this.$trailing.style[this._topLeft] = (this._offset + this._spltterSize) + suffix;
+				this.$trailing.style[this._topLeft] = (this._offset + this._splitterSize) + suffix;
 			} else {
 				this.$splitter.style[this._bottomRight] = this._offset + suffix;
-				this.$leading.style[this._bottomRight] = (this._offset + this._spltterSize) + suffix;
+				this.$leading.style[this._bottomRight] = (this._offset + this._splitterSize) + suffix;
 				this.$trailing.style[this._widthHeight] = this._offset + suffix;
 			}
 		},
