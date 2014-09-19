@@ -841,21 +841,21 @@ exports.SelectionRenderer = (function(){
 		tableRow.classList.add("treeTableRow"); //$NON-NLS-0$
 
 	
-		if (item.selectable === undefined || item.selectable) {
-			var navDict = this.explorer.getNavDict();
-			if(navDict){
-				if (this.explorer.selectionPolicy !== "cursorOnly") { //$NON-NLS-0$
-					tableRow.classList.add("selectableNavRow"); //$NON-NLS-0$
-				}
-				
-				navDict.addRow(item, tableRow);
-				var self = this;
-				tableRow.addEventListener("click", function(evt) { //$NON-NLS-0$
-					if(self.explorer.getNavHandler()){
-						self.explorer.getNavHandler().onClick(item, evt);
-					}
-				}, false);
+		var navDict = this.explorer.getNavDict();
+		if(navDict){
+			if (this.explorer.selectionPolicy !== "cursorOnly") { //$NON-NLS-0$
+				tableRow.classList.add("selectableNavRow"); //$NON-NLS-0$
 			}
+			
+			navDict.addRow(item, tableRow);
+			var self = this;
+			tableRow.addEventListener("click", function(evt) { //$NON-NLS-0$
+				if(self.explorer.getNavHandler()){
+					self.explorer.getNavHandler().onClick(item, evt);
+				}
+			}, false);
+		}
+		if (item.selectable === undefined || item.selectable) {
 			var checkColumn = this.getCheckboxColumn(item, tableRow);
 			if(checkColumn) {
 				checkColumn.classList.add('checkColumn'); //$NON-NLS-0$

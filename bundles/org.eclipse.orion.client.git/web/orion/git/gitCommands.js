@@ -457,10 +457,19 @@ var exports = {};
 			id: "eclipse.orion.git.diff.showCurrent", //$NON-NLS-0$
 			imageClass: "core-sprite-edit",  //$NON-NLS-0$
 			hrefCallback: function(data) {
-				return require.toUrl(editTemplate.expand({resource: data.items.ContentLocation}));
+				return require.toUrl(editTemplate.expand({resource: data.items.ContentLocation || data.items.location}));
 			},
 			visibleWhen: function(item) {
-				return item.Type === "Diff"; //$NON-NLS-0$
+				switch (item.type) {
+				case "Modified": //$NON-NLS-0$
+				case "Untracked": //$NON-NLS-0$
+				case "Conflicting": //$NON-NLS-0$
+				case "Added": //$NON-NLS-0$
+				case "Changed": //$NON-NLS-0$
+					return !!item.location;
+				}
+				
+				return item.Type === "Diff" && !!item.ContentLocation; //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(showDiffCommand);
