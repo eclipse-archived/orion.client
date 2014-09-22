@@ -151,11 +151,11 @@ var SyntaxChecker = (function () {
     
     			// Range check
     			if (typeof problem.line === "number") {//$NON-NLS-0$
-    				// start, end are line offsets (1-based)
+    				// start, end are line offsets: 1-based in range [1 .. length+1]
     				var lineLength = model.getLine(problem.line - 1, false).length;
-    				problem.start = clamp(problem.start, 1, lineLength - 1); // leave room for end
+    				problem.start = clamp(problem.start, 1, lineLength);
     				problem.end = (typeof problem.end === "number") ? problem.end : -1; //$NON-NLS-0$
-    				problem.end = clamp(problem.end, problem.start + 1, lineLength);
+    				problem.end = clamp(problem.end, problem.start + 1, lineLength + 1);
     
     				// TODO probably need similar workaround for bug 423482 here
     			} else {
