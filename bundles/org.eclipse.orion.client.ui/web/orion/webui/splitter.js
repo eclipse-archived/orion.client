@@ -347,8 +347,8 @@ define([
 				this._adjustToOffset();
 			}
 			
-			this._notifyResizeListeners(self.$trailing);
-			this._notifyResizeListeners(self.$leading);
+			this._notifyResizeListeners(this.$trailing);
+			this._notifyResizeListeners(this.$leading);
 		},
 
 		_notifyResizeListeners: function(node) {
