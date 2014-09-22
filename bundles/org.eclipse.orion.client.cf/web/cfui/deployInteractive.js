@@ -140,7 +140,11 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 					manifestContents.applications[0].host = results.host;
 				}
 				if(results.services){
-					manifestContents.applications[0].services = results.services;
+					if(results.services.length === 0){
+						delete manifestContents.applications[0].services;
+					} else {
+						manifestContents.applications[0].services = results.services;
+					}
 				}
 				if(typeof results.command === "string"){
 					if(results.command){
