@@ -50,6 +50,34 @@ define(['orion/plugin',
 	});
 	
 	/**
+	 * Create an object for the html template extension point
+	 */
+	function HtmlTemplateProvider() {}
+	
+	HtmlTemplateProvider.prototype.getTemplates = function() {
+		return {
+			title: "HTML Templates", //$NON-NLS-0$
+			templates: htmlContentAssist.templates
+		};
+	};
+	
+	var htmlTemplateProvider = new HtmlTemplateProvider();
+	
+	/**
+	 * Create an object for the css template extension point
+	 */
+	function CssTemplateProvider() {}
+	
+	CssTemplateProvider.prototype.getTemplates = function() {
+		return {
+			title: "CSS Templates", //$NON-NLS-0$
+			templates: cssContentAssist.templates
+		};
+	};
+	
+	var cssTemplateProvider = new CssTemplateProvider();
+	
+	/**
 	 * Register content assist providers
 	 */
 	provider.registerService("orion.edit.contentassist", //$NON-NLS-0$
@@ -94,6 +122,8 @@ define(['orion/plugin',
 			nameKey: 'cssOutline', //$NON-NLS-0$
 			contentType: ["text/css"] //$NON-NLS-0$
 		});
+	provider.registerService("orion.edit.templates", cssTemplateProvider, {}); //$NON-NLS-0$
+	provider.registerService("orion.edit.templates", htmlTemplateProvider, {}); //$NON-NLS-0$
 		
 	/**
 	 * Register syntax styling

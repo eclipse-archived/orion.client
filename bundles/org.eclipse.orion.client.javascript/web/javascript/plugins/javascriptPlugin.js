@@ -24,6 +24,7 @@ define([
 	'javascript/contentAssist/indexFiles/expressIndex',
 	'javascript/contentAssist/indexFiles/amqpIndex',
 	'javascript/contentAssist/contentAssist',
+	'javascript/contentAssist/templates',
 	'javascript/validator',
 	'javascript/occurrences',
 	'javascript/outliner',
@@ -35,8 +36,8 @@ define([
 	'orion/editor/stylers/application_schema_json/syntax',
 	'orion/editor/stylers/application_x-ejs/syntax'
 ], function(Esprima, ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
-			EslintValidator, Occurrences, Outliner,	PluginProvider, Util, GenerateDocCommand, mJS, mJSON, mJSONSchema, mEJS) {
-
+			Templates, EslintValidator, Occurrences, Outliner, PluginProvider, Util, GenerateDocCommand, mJS, mJSON, mJSONSchema, mEJS) {
+	
 	/**
 	 * Plug-in headers
 	 */
@@ -128,6 +129,20 @@ define([
 			charTriggers: "[.]",  //$NON-NLS-0$
 			excludedStyles: "(string.*)"  //$NON-NLS-0$
 	});
+	
+	//wrap the templates in a simple templateProvider object
+	function SimpleTemplateProvider(){}
+	SimpleTemplateProvider.prototype.getTemplates = function(){
+		var templates = {
+			title: "Javascript Templates", //$NON-NLS-0$
+			templates: Templates.templates
+		};
+		return templates;
+	};
+	
+	var simpleTemplateProvider = new SimpleTemplateProvider();
+	
+	provider.registerService("orion.edit.templates", simpleTemplateProvider, {}); //$NON-NLS-0$
 
 	/**
 	 * Register the ESLint validator
@@ -333,7 +348,7 @@ define([
 	});
 	for (var current in newGrammars) {
 	    if (newGrammars.hasOwnProperty(current)) {
-   			provider.registerService("orion.edit.highlighter", {}, newGrammars[current]);
+   			provider.registerService("orion.edit.highlighter", {}, newGrammars[current]); //$NON-NLS-0$
   		}
     }
 
