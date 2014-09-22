@@ -148,7 +148,11 @@ orion.JSDiffAdapter = (function() {
 						charsRemoved = 0;
 					}
 					newStart += current.value.length;
-					oldStart += current.value.length;
+					if(current.helperValue) {
+						oldStart += current.helperValue.length;
+					} else {
+						oldStart += current.value.length;
+					}
 				} else if (current.added) {
 					charsAdded += current.value.length;
 				} else {
