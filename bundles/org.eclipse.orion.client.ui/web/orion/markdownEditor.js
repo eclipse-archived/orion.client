@@ -33,11 +33,11 @@ define([
 	var imgCount = 0;
 	var markedOptions = marked.parse.defaults;
 	var toggleOrientationCommand;
+	var previewDiv;
 	markedOptions.sanitize = true;
 	markedOptions.tables = true;
 
 	var ID_PREFIX = "_orionMDBlock"; //$NON-NLS-0$
-	var ID_PREVIEW = "_previewDiv"; //$NON-NLS-0$
 
 	var MarkdownStylingAdapter = function(model, resource, fileClient) {
 		this.model = model;
@@ -402,7 +402,7 @@ define([
 			return null;
 		},
 		getElementByIdentifier: function(id, rootNode) {
-			return lib.$("." + id, rootNode); //$NON-NLS-0$
+			return lib.$("." + id, rootNode || previewDiv); //$NON-NLS-0$
 		},
 		getElementIdentifier: function(element) {
 			var classList = element.classList;
@@ -710,7 +710,7 @@ define([
 					parentElement = this.getElementByIdentifier(e.newBlocks[0].parent.elementId);
 				}
 				if (!parentElement) {
-					parentElement = document.getElementById(ID_PREVIEW);
+					parentElement = previewDiv;
 				}
 			}
 			for (i = 0; i < parentElement.children.length; i++) {
@@ -1180,7 +1180,7 @@ define([
 			this._editorView.editor.getTextView().addEventListener("Scroll", this._sourceScrollListener); //$NON-NLS-0$
 			this._editorView.editor.getTextView().addEventListener("Selection", this._sourceSelectionListener); //$NON-NLS-0$
 			this._splitter.addEventListener("resize", this._splitterResizeListener); //$NON-NLS-0$
-			this._previewDiv.addEventListener("click", this._previewClickListener); //$NON-NLS-0$
+			previewDiv.addEventListener("click", this._previewClickListener); //$NON-NLS-0$
 
 			/*
 			 * If the model already has content then it is being shared with a previous
@@ -1217,10 +1217,9 @@ define([
 			this._previewWrapperDiv.style.overflowY = "auto"; //$NON-NLS-0$
 			this._rootDiv.appendChild(this._previewWrapperDiv);
 			
-			this._previewDiv = document.createElement("div"); //$NON-NLS-0$
-			this._previewDiv.id = ID_PREVIEW;
-			this._previewDiv.classList.add("orionMarkdown"); //$NON-NLS-0$
-			this._previewWrapperDiv.appendChild(this._previewDiv);
+			previewDiv = document.createElement("div"); //$NON-NLS-0$
+			previewDiv.classList.add("orionMarkdown"); //$NON-NLS-0$
+			this._previewWrapperDiv.appendChild(previewDiv);
 
 			this._editorView.addEventListener("Settings", this._settingsListener); //$NON-NLS-0$
 
@@ -1246,7 +1245,7 @@ define([
 			textView.removeEventListener("Scroll", this._sourceScrollListener); //$NON-NLS-0$
 			textView.removeEventListener("Selection", this._sourceSelectionListener); //$NON-NLS-0$
 			this._splitter.removeEventListener("resize", this._splitterResizeListener); //$NON-NLS-0$
-			this._previewDiv.removeEventListener("click", this._previewClickListener); //$NON-NLS-0$
+			previewDiv.removeEventListener("click", this._previewClickListener); //$NON-NLS-0$
 			lib.empty(this._parent);
 			BaseEditor.prototype.uninstall.call(this);
 		},
@@ -1332,7 +1331,7 @@ define([
 			this._scrollPreviewDiv(elementAlignY - sourceRelativeY);
 		},
 		_findNearestBlockElement: function(element) {
-			if (element.id === ID_PREVIEW) {
+			if (element === previewDiv) {
 				/* have reached the preview root, do not look any farther */
 				return null;
 			}
