@@ -117,31 +117,30 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 			deploy: function(project, launchConf) {
 				var that = this;
 				var deferred = new Deferred();
-					
-				this._getDefaultTarget().then(
-					function(defaultTarget){
-						var params = launchConf.Params || {};
-						
-						var target = params.Target || defaultTarget;
-						var appName = params.Name;
-						var appPath = launchConf.Path;
-						
-						if(params.user && params.password){
-							cFService.login(target.Url, params.user, params.password).then(
-								function(result){
-									that._deploy(project, target, appName, appPath, deferred);
-								}, function(error){
-									error.Retry = {
-										parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
-									};
-									deferred.reject(error);
-								}
-							);
-						} else {
+
+				var params = launchConf.Params || {};
+				var target = params.Target;
+				if (!target && params.url){
+					target = {};
+					target.Url = params.url;
+				}
+				var appName = params.Name;
+				var appPath = launchConf.Path;
+				
+				if(params.user && params.password){
+					cFService.login(target.Url, params.user, params.password).then(
+						function(result){
 							that._deploy(project, target, appName, appPath, deferred);
+						}, function(error){
+							error.Retry = {
+								parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
+							};
+							deferred.reject(error);
 						}
-					}
-				);
+					);
+				} else {
+					that._deploy(project, target, appName, appPath, deferred);
+				}
 
 				return deferred;
 			},
