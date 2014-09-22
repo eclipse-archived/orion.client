@@ -238,7 +238,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 									Message: "See Manual Deployment Information in the [root folder page](" + editLocation.href + ") to view and manage [" + launchConfName + "](" + result.ManageUrl + ")"
 								});
 							}, function(error){
-								postError(error, selection.getSelection());
+								postError(error, selection);
 							}
 						);
 					}
@@ -344,6 +344,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						cloudsDropdown.onchange = function(event){
 							lib.empty(orgsDropdown);
 							lib.empty(spacesDropdown);
+							setSelection();
 							var selectedCloud = _clouds[event.target.selectedIndex];
 							loadTargets(selectedCloud);
 						};
