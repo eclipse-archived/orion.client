@@ -36,13 +36,17 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		return item;
 	}
 	
-	function getCommandParameters(mainParams, optionalParams){
+	function getCommandParameters(mainParams, optionalParams, hiddenParams){
 		if(!mainParams){
 			return null;
 		}
 		var paramDescps = [];
 		for(var i=0; i<mainParams.length; i++){
-			paramDescps.push(new mCommandRegistry.CommandParameter(mainParams[i].id, mainParams[i].type, mainParams[i].name));
+			if(mainParams[i].hidden){
+				hiddenParams[mainParams[i].id] = mainParams[i].value; 
+			} else {
+				paramDescps.push(new mCommandRegistry.CommandParameter(mainParams[i].id, mainParams[i].type, mainParams[i].name));
+			}
 		}
 		return new mCommandRegistry.ParametersDescription(paramDescps, {hasOptionalParameters: !!optionalParams, optionalParams: optionalParams});
 	}
@@ -246,8 +250,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					if(error.forceShowMessage){
 						context.errorHandler(error);
 					}
-					context.data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters);
 					context.data.oldParams = enhansedLaunchConf.Params;
+					context.data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters, context.data.oldParams);
 					context.commandService.collectParameters(context.data);
 				} else {
 					context.errorHandler(error);
