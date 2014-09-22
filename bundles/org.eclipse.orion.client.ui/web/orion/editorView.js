@@ -46,7 +46,7 @@ define([
 	mEmacs, mVI, mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands, mGlobalCommands,
 	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
-	mMarkOccurrences, mSyntaxchecker, mLiveEditor,
+	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
 	mKeyBinding, mUIUtils, util, objects
 ) {
 
@@ -438,11 +438,11 @@ define([
 				localSettings = new EditorSettings({local: true, editor: editor, themePreferences: themePreferences, preferences: editorPreferences});
 			}
 
-			var liveEditSession = new mLiveEditor.LiveEditSession(serviceRegistry, editor);
+			var liveEditSession = new LiveEditSession(serviceRegistry, editor);
 			inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 				var textView = editor.getTextView();
 				if (textView) {
-					liveEditSession.start(inputManager.getContentType(), event.title, event.contents);
+					liveEditSession.start(inputManager.getContentType(), event.title);
 					textView.setOptions(this.updateViewOptions(this.settings));
 					this.syntaxHighlighter.setup(event.contentType, editor.getTextView(), editor.getAnnotationModel(), event.title, true).then(function() {
 						this.updateStyler(this.settings);
