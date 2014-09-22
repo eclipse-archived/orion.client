@@ -363,8 +363,8 @@ a.breadcrumb.currentLocation {
 	color: #222;
 	border-radius: 3px;
 	vertical-align:middle;
-	-webkit-animation-duration: .3s; 
-	animation-duration: .3s; 
+	-webkit-animation-duration: .2s; 
+	animation-duration: .2s; 
 	-webkit-animation-fill-mode: both; 
 	animation-fill-mode: both; 
 	-webkit-animation-timing-function: linear; 
@@ -377,8 +377,8 @@ a.breadcrumb.currentLocation {
 	border-radius: 3px;
 	box-shadow: inset 1px 1px 2px 1px rgba(0,0,0,0.3);
 	vertical-align:middle;
-	-webkit-animation-duration: .3s; 
-	animation-duration: .3s; 
+	-webkit-animation-duration: .2s; 
+	animation-duration: .2s; 
 	-webkit-animation-fill-mode: both; 
 	animation-fill-mode: both; 
 	-webkit-animation-timing-function: linear; 
@@ -438,10 +438,10 @@ a.breadcrumb.currentLocation {
 	margin-left: -100%;
 	margin-top:-1px;
 	text-align: left;
-	-moz-transition: margin 0.3s ease-in 0s; 
-	-webkit-transition: margin 0.3s ease-in 0s;
-	-o-transition: margin 0.3s ease-in 0s; 
-	transition: margin 0.3s ease-in 0s;
+	-moz-transition: margin 0.2s ease-in 0s; 
+	-webkit-transition: margin 0.2s ease-in 0s;
+	-o-transition: margin 0.2s ease-in 0s; 
+	transition: margin 0.2s ease-in 0s;
 }
 
 .orionSwitchInner:before, .orionSwitchInner:after {
@@ -478,10 +478,10 @@ a.breadcrumb.currentLocation {
 	top: 0; 
 	bottom: 0; 
 	right: calc(50% + 2px); 
-	-moz-transition: all 0.3s ease-in 0s;
-	-webkit-transition: all 0.3s ease-in 0s;
-	-o-transition: all 0.3s ease-in 0s; 
-	transition: all 0.3s ease-in 0s; 
+	-moz-transition: all 0.2s ease-in 0s;
+	-webkit-transition: all 0.2s ease-in 0s;
+	-o-transition: all 0.2s ease-in 0s; 
+	transition: all 0.2s ease-in 0s; 
 }
 
 .orionSwitchCheck:checked + .orionSwitchLabel .orionSwitchInner {

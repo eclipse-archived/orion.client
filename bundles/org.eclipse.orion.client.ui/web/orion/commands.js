@@ -454,18 +454,18 @@ define([
 						if (command.type === "toggle") { //$NON-NLS-0$
 							command.checked = !command.checked;
 							if (command.checked) {
-								element.classList.remove("orionPushToggleOff"); //$NON-NLS-0$
-								element.classList.add("orionPushToggleOn"); //$NON-NLS-0$
+								element.classList.remove("orionToggleOff"); //$NON-NLS-0$
+								element.classList.add("orionToggleOn"); //$NON-NLS-0$
 								element.classList.add("orionToggleAnimate"); //$NON-NLS-0$
 							} else {
-								element.classList.remove("orionPushToggleOn"); //$NON-NLS-0$
-								element.classList.add("orionPushToggleOff"); //$NON-NLS-0$
+								element.classList.remove("orionToggleOn"); //$NON-NLS-0$
+								element.classList.add("orionToggleOff"); //$NON-NLS-0$
 								element.classList.add("orionToggleAnimate"); //$NON-NLS-0$
 							}
 						}else {
 							command.checked = input.checked;
 						}
-						window.setTimeout(done, 310);
+						window.setTimeout(done, 250);
 					} else {
 						done();
 					}
