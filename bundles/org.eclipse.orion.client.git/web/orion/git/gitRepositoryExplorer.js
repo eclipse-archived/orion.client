@@ -119,6 +119,16 @@ define([
 					that.changedItem();
 				}
 				break;
+			case "removeBranch": //$NON-NLS-0$
+			case "removeRemote": //$NON-NLS-0$
+			case "removeTag": //$NON-NLS-0$
+			case "dropStash": //$NON-NLS-0$
+				var ref = event.branch || event.tag || event.remote || event.stash;
+				if (that.reference && ref && ref.Location === that.reference.Location) {
+					window.location.href = require.toUrl(repoTemplate.expand({resource: that.lastResource = that.repository.Location}));
+					that.changedItem();
+				}
+				break;
 			case "applyPatch": //$NON-NLS-0$
 				that.repository.status = null;
 				that.changes = null;

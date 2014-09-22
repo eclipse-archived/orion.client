@@ -2464,7 +2464,7 @@ var exports = {};
 			id : "eclipse.orion.git.dropStash", //$NON-NLS-0$
 			callback : function(data){
 				stashLogic.drop(data).then(function(){
-					dispatchModelEventOn({type: "modelChanged", action: "dropStash"}); //$NON-NLS-1$ //$NON-NLS-0$
+					dispatchModelEventOn({type: "modelChanged", action: "dropStash", stash: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function(error){
 					displayErrorOnStatus(error);
 				});
