@@ -36,7 +36,7 @@ define(['orion/Deferred'], function(Deferred) {
 			}
 
 			/* TODO: Distinguish between index and working directory messages */
-			gitService.doStashCreate(gitStashLocation, name, name).then(function(resp){
+			gitService.doStashCreate(gitStashLocation, name, name, true).then(function(resp){
 				d.resolve(data);
 			}, function(error){
 				d.reject(error);
