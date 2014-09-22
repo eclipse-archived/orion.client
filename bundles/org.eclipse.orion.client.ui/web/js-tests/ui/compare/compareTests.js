@@ -42,10 +42,10 @@ define([
 		}
 	}
 
-	function _generateMapper(input, output, diff){
+	function _generateMapper(input, output, diff, ignoreWS){
 		var delim = "\n"; //$NON-NLS-0$
 		if(typeof output === "string" && typeof input === "string"){ //$NON-NLS-1$ //$NON-NLS-0$
-			var adapter = new mJSDiffAdapter.JSDiffAdapter();
+			var adapter = new mJSDiffAdapter.JSDiffAdapter(ignoreWS);
 			var maps = adapter.adapt(input, output, delim);
 			return {delim:delim , mapper:maps.mapper, output: output, diffArray:maps.changContents};
 		} else {
@@ -77,6 +77,14 @@ define([
 		return (array || []).indexOf(item) !== -1;
 	}
 	
+	function testIgnoreWSDiffBlocks (options, expectedMapping, ignoreWS){
+		var input = options.input;
+		var output = options.output;
+
+		var result = _generateMapper(input, output, null, ignoreWS);
+		_mapperPartialEqual(result.mapper, expectedMapping);
+	}
+
 	// *************************************************************************
 	// Mocha tests begin
 	// *************************************************************************
@@ -521,6 +529,74 @@ describe("compare", function() {
 			);
 		});
 	}); // describe('basic')
+	
+	describe("Ignore Whitespace", function() { //$NON-NLS-0$
+		it("Ignore Whitespace case 1", function() { //$NON-NLS-0$
+			var newString =  
+			 	   "\t\taaa\n" +
+			 	   "\t\tbbb\n" +
+			 	   "\t\tccc\n" +
+			 	   "";
+			var oldString =  
+			 	   "\taaa\n" +
+			 	   "\tbbb\n" +
+			 	   "\tccc\n" +
+			 	   "";			
+			var expetedMapNormal =
+				[[3, 3, 1],
+				 [1, 1, 0]
+				];
+			var expetedMapWS =
+				[[4, 4, 0]
+				];
+			testIgnoreWSDiffBlocks({input: oldString, output: newString}, expetedMapNormal);
+			testIgnoreWSDiffBlocks({input: oldString, output: newString}, expetedMapWS, true);
+		});
+		it("Ignore Whitespace case 2", function() { //$NON-NLS-0$
+			var newString =  
+			 	   "\t\t aaa\n" +
+			 	   "\t\tbbb \n" +
+			 	   "\t\t ccc\n" +
+			 	   "";
+			var oldString =  
+			 	   "\taaa\n" +
+			 	   "\tbbb  \n" +
+			 	   "\tccc\n" +
+			 	   "";			
+			var expetedMapNormal =
+				[[3, 3, 1],
+				 [1, 1, 0]
+				];
+			var expetedMapWS =
+				[[4, 4, 0]
+				];
+			testIgnoreWSDiffBlocks({input: oldString, output: newString}, expetedMapNormal);
+			testIgnoreWSDiffBlocks({input: oldString, output: newString}, expetedMapWS, true);
+		});
+		it("Ignore Whitespace case 3", function() { //$NON-NLS-0$
+			var newString =  
+			 	   "\t\t aaa\n" +
+			 	   "\t\tbbbb \n" +
+			 	   "\t\t ccc\n" +
+			 	   "";
+			var oldString =  
+			 	   "\taaa\n" +
+			 	   "\tbbb  \n" +
+			 	   "\tccc\n" +
+			 	   "";			
+			var expetedMapNormal =
+				[[3, 3, 1],
+				 [1, 1, 0]
+				];
+			var expetedMapWS =
+				[[1, 1, 0],
+				 [1, 1, 1],
+				 [2, 2, 0]
+				];
+			testIgnoreWSDiffBlocks({input: oldString, output: newString}, expetedMapNormal);
+			testIgnoreWSDiffBlocks({input: oldString, output: newString}, expetedMapWS, true);
+		});
+	}); // describe('Ignore Whitespace')
 
 }); //describe('compare')
 

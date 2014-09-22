@@ -11,12 +11,18 @@
 /*eslint-env browser, amd, mocha*/
 define(["chai/chai", "orion/compare/jsdiffAdapter"], function(chai, mJSDiffAdapter) {
 	var assert = chai.assert;
-	var adapter = new mJSDiffAdapter.JSDiffAdapter();
+	var adapterNormal = new mJSDiffAdapter.JSDiffAdapter();
+	var adapterWS = new mJSDiffAdapter.JSDiffAdapter(true);
 	/**
 	 * Basic test function.
 	 */
 	function testCharDiff(oldString, newString, expetedMap, word) {
-		var map =  adapter.adaptCharDiff(oldString, newString, word);
+		var map =  adapterNormal.adaptCharDiff(oldString, newString, word);
+		assert.deepEqual(map, expetedMap);
+	}
+	function testCharDiffWS(oldString, newString, expetedMap, ignore) {
+		var adapter = ignore ? adapterWS : adapterNormal;
+		var map =  adapter.adaptCharDiff(oldString, newString, true);
 		assert.deepEqual(map, expetedMap);
 	}
 	/* 
@@ -333,6 +339,95 @@ define(["chai/chai", "orion/compare/jsdiffAdapter"], function(chai, mJSDiffAdapt
 				 [43, 46, 44, 47]
 				];
 			testCharDiff(oldString, newString,expetedMap);
+		});
+
+// Ignore white space WORD level testting		
+		/**
+		 * Test simple case.
+		 */
+		it("testIgnoreWhitespaceWORDLevel 1", function() {
+			var newString =  
+			 	   "\t\tcc\n" +
+			 	   "";
+			var oldString =  
+			 	   "\tcc\n" +
+			 	   "";
+			var expetedMapNormal =
+				[[0, 2, 0, 1]
+				];
+			var expetedMapWS =
+				[];
+			testCharDiffWS(oldString, newString, expetedMapNormal);
+			testCharDiffWS(oldString, newString, expetedMapWS, true);
+		});
+	
+		/**
+		 * Test simple case.
+		 */
+		it("testIgnoreWhitespaceWORDLevel 2", function() {
+			var newString =  
+			 	   "\t\tcc aaa\n" +
+			 	   "";
+			var oldString =  
+			 	   "\tcc bbb\n" +
+			 	   "";
+			var expetedMapNormal =
+				[[0, 2, 0, 1],
+				 [5, 8, 4, 7]
+				];
+			var expetedMapWS =
+				[[5, 8, 4, 7]
+				];
+			testCharDiffWS(oldString, newString, expetedMapNormal);
+			testCharDiffWS(oldString, newString, expetedMapWS, true);
+		});
+	
+		/**
+		 * Test simple case.
+		 */
+		it("testIgnoreWhitespaceWORDLevel 3", function() {
+			var newString =  
+			 	   "\t\tcc  aaa\n" +
+			 	   "";
+			var oldString =  
+			 	   "\tcc bbb\n" +
+			 	   "";
+			var expetedMapNormal =
+				[[0, 2, 0, 1],
+				 [4, 9, 3, 7]
+				];
+			var expetedMapWS =
+				[[6, 9, 4, 7]
+				];
+			testCharDiffWS(oldString, newString, expetedMapNormal);
+			testCharDiffWS(oldString, newString, expetedMapWS, true);
+		});
+	
+		/**
+		 * Test complex case.
+		 */
+		it("testIgnoreWhitespaceWORDLevel 4", function() {
+			var newString =  
+			 	   "\t\tcc  aaa\n" +
+			 	   "\t\tddd\n" +
+			 	   "\t\teee\n" +
+			 	   "";
+			var oldString =  
+			 	   "\tcc bbb\n" +
+			 	   "\tdd\n" +
+			 	   "\tee\n" +
+			 	   "";
+			var expetedMapNormal =
+				[[0, 2, 0, 1],
+				 [4, 21, 3, 15]
+				];
+			var expetedMapWS =
+				[[6, 9, 4, 7],
+				 [12, 15, 9, 11],
+				 [18, 21, 13, 15]
+				];
+			testCharDiffWS(oldString, newString, expetedMapNormal);
+			testCharDiffWS(oldString, newString, expetedMapWS, true);
 		});
 	});
 });
