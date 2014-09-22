@@ -821,13 +821,7 @@ define([
 			serviceRegistry.registerService("orion.cm.managedservice", //$NON-NLS-0$
 				{
 					updated: function (properties) {
-						var target;
-						if (properties && properties["links.newtab"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
-							target = properties["links.newtab"] ? "_blank" : "_self"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						} else {
-							target = "_self"; //$NON-NLS-0$
-						}
-						setTarget(target);
+						setTarget("_self"); //$NON-NLS-0$
 					}
 				}, {
 					pid: "nav.config" //$NON-NLS-0$

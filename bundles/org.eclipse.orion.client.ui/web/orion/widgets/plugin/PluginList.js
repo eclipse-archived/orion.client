@@ -122,14 +122,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'require', 'orion/
 			this.render();
 
 			this.registry.registerService("orion.cm.managedservice", //$NON-NLS-0$
-				{	updated: function(properties) {
-						var target;
-						if (properties && properties["links.newtab"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
-							target = properties["links.newtab"] ? "_blank" : "_self"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						} else {
-							target = "_self"; //$NON-NLS-0$
-						}
-						_this.setTarget(target);
+				{	updated: function() {
+						_this.setTarget("_self"); //$NON-NLS-0$
 					}.bind(this)
 				}, {pid: "nav.config"}); //$NON-NLS-0$
 		},

@@ -503,24 +503,5 @@ searchUtils.path2FolderName = function(filePath, fileName, keepTailSlash){
 	return filePath.substring(0, filePath.length - encodeURIComponent(fileName).length - tail);
 };
 
-searchUtils.getOpenSearchPref = function(serviceRegistry, callback){
-	serviceRegistry.getService("orion.core.preference").getPreferences("/cm/configurations").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-		var properties = prefs.get("nav.config"); //$NON-NLS-0$
-		var openInNewTab;
-		if (properties && properties["links.newtab"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
-			openInNewTab = properties["links.newtab"] ? true : false; //$NON-NLS-0$ 
-		} else {
-			openInNewTab = false;
-		}
-		callback(openInNewTab);
-	});
-};
-
-searchUtils.setOpenSearchPref = function(serviceRegistry, openInNewTab){
-	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-		prefs.put("openSearchPref", {"openInNewTab": openInNewTab}); //$NON-NLS-1$ //$NON-NLS-0$
-	});
-};
-
 return searchUtils;
 });
