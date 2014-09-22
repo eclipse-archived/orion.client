@@ -47,7 +47,7 @@ define([
 		}
 		
 		var defaultFont = '"Consolas", "Monaco", "Vera Mono", monospace';
-		var defaultFontSize = '10pt';
+		var defaultFontSize = '12px';
 
 		function ThemeData() {
 

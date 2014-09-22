@@ -266,16 +266,20 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				if (prefs.fontSizeVisible && (!this.local || prefs.fontSizeLocalVisible)) {
 					var fontSize = themeStyles.style.fontSize;
 					options = [];
-					for( var size = 8; size < 19; size++ ){
-						set = {
-							value: size + 'pt', //$NON-NLS-0$
-							label: size + 'pt' //$NON-NLS-0$
-						};
-						if( set.label === fontSize ){
-							set.selected = true;
+					function fontSizes(unit) {
+						for( var size = 8; size < 19; size++ ){
+							set = {
+								value: size + unit,
+								label: size + unit
+							};
+							if( set.label === fontSize ){
+								set.selected = true;
+							}
+							options.push(set);
 						}
-						options.push(set);
 					}
+					fontSizes("px"); //$NON-NLS-0$
+					fontSizes("pt"); //$NON-NLS-0$
 					select = this.sizeSelect = new LabeledSelect( 
 						{	fieldlabel:messages["Font Size"], 
 							options:options,
