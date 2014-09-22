@@ -444,7 +444,14 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$
 		sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
 			if (evt.newValue && !evt.ignoreRedirect) {
-				window.location = uriTemplate.expand({resource: evt.newValue.Location});
+				var item = evt.newValue;
+				var openWithCommand = mExtensionCommands.getOpenWithCommand(commandRegistry, evt.newValue);
+				if (openWithCommand) {
+					var href = openWithCommand.hrefCallback({items: item});
+				} else {
+					href = uriTemplate.expand({resource: evt.newValue.Location});
+				}
+				window.location = href;
 			}
 		});
 	
