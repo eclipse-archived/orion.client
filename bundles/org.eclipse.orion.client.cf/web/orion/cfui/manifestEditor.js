@@ -308,6 +308,8 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation', 'orion/cfui
 				var missingCommand = false; /* true */
 				var missingApplications = false; /* true */
 				
+				var applicationsLine = -1;
+				
 				for(var i=0; i<lines.length; ++i){
 					
 					var line = lines[i];
@@ -331,67 +333,13 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation', 'orion/cfui
 						});
 					}
 					
-					/* check for incorrect memory units */
-					if(/^ *memory: .*/.test(line) && !/^ *memory: [1-9][0-9]*(MB|GB|M|G)\s*$/.test(line)){
-						
-						var match = line.match(/^ */);
-						var start = match !== null ? match[0].length + 1 : 1;
-						
-						problems.push({
-							description : "Invalid memory unit",
-							line : lineNumber,
-							start : start,
-							end : line.length + 1
-						});
-					}
-					
-					/* check for incorrect instances value */
-					if(/^ *instances: .*/.test(line) && !/^ *instances: [1-9][0-9]*\s*$/.test(line)){
-						
-						var match = line.match(/^ */);
-						var start = match !== null ? match[0].length + 1 : 1;
-						
-						problems.push({
-							description : "Invalid application instances",
-							line : lineNumber,
-							start : start,
-							end : line.length + 1
-						});
-					}
-					
-					/* check for incorrect timeout value */
-					if(/^ *timeout: .*/.test(line) && !/^ *timeout: [1-9][0-9]*\s*$/.test(line)){
-						
-						var match = line.match(/^ */);
-						var start = match !== null ? match[0].length + 1 : 1;
-						
-						problems.push({
-							description : "Invalid application start timeout",
-							line : lineNumber,
-							start : start,
-							end : line.length + 1
-						});
-					}
-					
-					/* check for incorrect no-route value */
-					if(/^ *no-route: .*/.test(line) && !/^ *no-route: true\s*$/.test(line)){
-						
-						var match = line.match(/^ */);
-						var start = match !== null ? match[0].length + 1 : 1;
-						
-						problems.push({
-							description : "Invalid no-route property",
-							line : lineNumber,
-							start : start,
-							end : line.length + 1
-						});
-					}
-					
 					if(/^ *command: .*/.test(line))
 						missingCommand = false;
 						
-					if(/^ *applications:.*/.test(line))
+					if(/^ *applications:.*/.test(line)){
 						missingApplications = false;
+						applicationsLine = lineNumber;
+					}
 				}
 				
 				if(missingCommand && !missingApplications){
@@ -407,14 +355,37 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation', 'orion/cfui
 					var d = new Deferred();
 					
 					cfService.getManifestInfo(settings.filePath).then(function(resp){
+						
 						/* nothing to do */
 						d.resolve({ problems : problems });
-					}, function(error){
 						
-						problems.push({
-							description : error.Message,
-							start : 0
-						});
+					}, function(error){
+						if(error.JsonData){
+							
+							/* got error details */
+							var details = error.JsonData;
+							var errorLine = details.Line || applicationsLine;
+							
+							if(errorLine > 0){
+								problems.push({
+									description : details.Message,
+									line : errorLine,
+									start : 1,
+									end : lines[errorLine - 1].length + 1
+								});
+							} else {
+								problems.push({
+									description : details.Message,
+									start: 0
+								});
+							}
+							
+						} else {
+							problems.push({
+								description : error.Message,
+								start : 0
+							});
+						}
 						
 						d.resolve({ problems : problems });
 					});
