@@ -365,6 +365,10 @@ table .sectionTable {
 	background-color: rgba(255, 0, 0, 0.1);
 }
 
+.gitFilterInput.invalidParam {
+	background-color: rgba(255, 0, 0, 0.1);
+}
+
 .invalidFileCount {
 	color: rgba(255, 0, 0, 1);
 }
