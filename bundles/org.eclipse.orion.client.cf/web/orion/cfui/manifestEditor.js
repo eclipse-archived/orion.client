@@ -303,10 +303,10 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation', 'orion/cfui
 			return editorContext.getText().then(function(contents){
 				var lines = contents.split(/\r?\n/);
 				
-				/* missing command property should
-				 * indicate a manifest warning */
-				var missingCommand = true;
-				var missingApplications = true;
+				/* TODO: Turn into a configurable setting */
+				/* missing command property should indicate a manifest warning */
+				var missingCommand = false; /* true */
+				var missingApplications = false; /* true */
 				
 				for(var i=0; i<lines.length; ++i){
 					
