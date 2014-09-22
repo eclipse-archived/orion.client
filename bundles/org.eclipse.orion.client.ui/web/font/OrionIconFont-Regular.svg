@@ -2,8 +2,8 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
 <svg xmlns="http://www.w3.org/2000/svg">
 <metadata>
-Created by FontPrep 20130207 at Mon Sep 15 13:42:34 2014
- By antonm
+Created by FontPrep 20130207 at Mon Sep 22 14:41:50 2014
+ By Anton McConville
 copyright missing
 </metadata>
 <defs>
@@ -173,9 +173,9 @@ d="M1356 -112l-552 956l-552 -956h1104zM1514 -112h314l-788 1366l-158 -274zM16 -24
     <glyph glyph-name="uniE03D" unicode="&#xe03d;" 
 d="M760 -198l466 466l-558 558l-466 -466zM760 -384l-744 744l1304 1304l744 -744z" />
     <glyph glyph-name="uniE03E" unicode="&#xe03e;" 
-d="M896 1152v512h256v-512h384l-512 -512l-512 512h384zM384 128v256h1280v-256h-1280zM1664 -384h-1280v256h1280v-256z" />
+d="M1152 128v-512h-256v512h-384l512 512l512 -512h-384zM384 1152h1280v-256h-1280v256zM1664 1664v-256h-1280v256h1280z" />
     <glyph glyph-name="uniE03F" unicode="&#xe03f;" 
-d="M1152 640h-256v512h-384l512 512l512 -512h-384v-512zM384 128v256h1280v-256h-1280zM1664 -384h-1280v256h1280v-256z" />
+d="M1152 640v-512h384l-512 -512l-512 512h384v512h256zM384 1152h1280v-256h-1280v256zM1664 1664v-256h-1280v256h1280z" />
     <glyph glyph-name="uniE040" unicode="&#xe040;" 
 d="M768 384h512v-128h-512v128zM768 128h512v-128h-512v128zM1536 256h256v640h-1536v-640h256v384h1024v-384zM640 -128h768v640h-768v-640zM1536 1408h-1024v-256h1024v256zM1664 1536v-384h256v-1024h-384v-384h-1024v384h-384v1024h256v384h1280z" />
     <glyph glyph-name="uniE041" unicode="&#xe041;" 
