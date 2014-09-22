@@ -403,14 +403,15 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 	var startImpl = {
 		callback: function(args, context) {
 			return cFService.startApp(null, args.app, context.cwd).then(function(result) {
-				if (!result || !result.entity) {
+				if (!result || !result['0']) {
 					return "Application not found";
 				}
-				var app = result.entity;
-				if (app.state === "STARTED"){
-					return "Application " + app.name + " started";
+				
+				var app = result['0'];
+				if (app.state === "RUNNING"){
+					return "Application " + args.app + " started";
 				} else {
-					return "Problems while starting application " + app.name;
+					return "Problems while starting application " + args.app;
 				}
 			});
 		}
