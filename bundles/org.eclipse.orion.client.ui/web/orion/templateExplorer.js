@@ -31,8 +31,8 @@ define([
 	
 	function insertTemplate(templateProposal, editor){
 		var contentAssist = editor.getContentAssist();
-		var offset = editor.getCaretOffset();
-		var sel = editor.getSelection();
+		var offset = editor.getTextView().getCaretOffset();
+		var sel = editor.getTextView().getSelection();
 		var selectionStart = Math.min(sel.start, sel.end);			
 		contentAssist._initialCaretOffset = Math.min(offset, selectionStart);
 		contentAssist.apply(templateProposal);
@@ -84,6 +84,16 @@ define([
 					.replace(/>/g, '&gt;'); //$NON-NLS-0$
 		}
 		
+		function getIndentation(editor, offset){
+			var model = editor.getModel(), mapOffset = offset;
+			var line = model.getLine(model.getLineAtOffset(mapOffset));
+			var index = 0;
+			while (index < line.length && /\s/.test(line.charAt(index))) {
+				index++;
+			}
+			return line.substring(0, index); 
+		}
+		
 		if (!(item.children)) {
 			var previewNode = document.createElement("div"); //$NON-NLS-0$
 			var escapedString = htmlEscape(item.template.template);
@@ -102,7 +112,15 @@ define([
 				event.cancelBubble=true;
 				var editor = _self.inputManager.getEditor();
 				var offset = editor.getCaretOffset();
-				var proposal = item.template.getProposal("",offset,{});
+				var indentation = getIndentation(editor, offset);
+				var options = editor.getTextView().getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
+				var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
+				var param = {
+					indentation : indentation,
+					delimiter : editor.getModel().getLineDelimiter(),
+					tab : tab
+				};
+				var proposal = item.template.getProposal("",offset,param);
 				insertTemplate(proposal, editor);
 			};
 		}
