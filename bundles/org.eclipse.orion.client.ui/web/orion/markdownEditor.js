@@ -416,7 +416,7 @@ define([
 		initialPopulatePreview: function() {
 			/* hack, see the explaination in MarkdownEditor.initSourceEditor() */
 			var rootBlock = this._styler.getRootBlock();
-			this._onBlocksChanged({old: [], new: rootBlock.getBlocks()});
+			this._onBlocksChanged({oldBlocks: [], newBlocks: rootBlock.getBlocks()});
 		},
 		parse: function(text, offset, block, _styles /*, ignoreCaptures*/) {
 			if (!block.typeId) {
