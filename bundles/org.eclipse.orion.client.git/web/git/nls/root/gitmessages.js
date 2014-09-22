@@ -245,6 +245,8 @@ define({
 	"Filter": "Filter", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilterCommits": "Filter Commits", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilterCommitsTip": "Toggles the filter commits panel", //$NON-NLS-0$  //$NON-NLS-1$
+	"MaximizeCmd": "Maximize", //$NON-NLS-0$  //$NON-NLS-1$
+	"MaximizeTip": "Toggles the maximize state of the editor", //$NON-NLS-0$  //$NON-NLS-1$
 	" [New branch]": " [New branch]", //$NON-NLS-0$  //$NON-NLS-1$
 	"AddKeyToHostContinueOp": "Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}.",
  	"Link Repository": "Link Repository", //$NON-NLS-0$  //$NON-NLS-1$

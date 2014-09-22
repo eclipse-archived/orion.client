@@ -25,6 +25,33 @@
 	padding-bottom:4px;
 }
 
+.sectionTableItem {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.gitChangeListCompare {
+	height: 420px;
+	border: 1px solid lightgray;
+	margin-right: 10px;
+	min-height: 50px;
+}
+
+.gitChangeListCompareMaximized {
+	position: absolute;
+	top: 1px;
+	left: 1px;
+	width: calc(100% - 14px);
+	height: calc(100% - 14px);
+	background-color: white;
+	padding-bottom: 10px;
+	z-index: 100;
+}
+
+.gitChangeListCompareContainerMaximized {
+	margin-right: 1px;
+	height: calc(100% - 30px);
+}
 
 .sectionDropdownArrow {
 	margin-left: 3px;
@@ -298,13 +325,6 @@ table .sectionTable {
 	margin-top: 3px;
 }
 
-.gitChangeListCompare {
-	height: 420px;
-	border: 1px solid lightgray;
-	margin-right: 10px;
-	min-height: 50px;
-}
-
 .gitChangeListCompareActions {
 	overflow: hidden;
 	padding: 5px;
@@ -433,11 +453,6 @@ table .sectionTable {
 	padding-top: 6px;
 	padding-bottom: 4px;
 	overflow: hidden;
-}
-
-.sectionTableItem {
-	padding-top: 2px;
-	padding-bottom: 2px;
 }
 
 .gitCommitListSectionTitle {

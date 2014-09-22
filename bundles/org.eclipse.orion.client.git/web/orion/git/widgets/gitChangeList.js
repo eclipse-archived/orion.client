@@ -581,6 +581,33 @@ define([
 				}
 			});
 			
+			var toggleMaximizeCommand = new mCommands.Command({
+				name: messages['MaximizeCmd'],
+				tooltip: messages["MaximizeTip"],
+				id: "eclipse.orion.git.toggleMaximizeCommand", //$NON-NLS-0$
+				imageClass: "git-sprite-open", //$NON-NLS-0$
+				spriteClass: "gitCommandSprite", //$NON-NLS-0$
+				type: "toggle", //$NON-NLS-0$
+				callback: function(data) {
+					var diffContainer = lib.node(data.handler.options.parentDivId);
+					diffContainer.style.height = ""; //$NON-NLS-0$
+					var div = diffContainer.parentNode;
+					if (div.classList.contains("gitChangeListCompareMaximized")) { //$NON-NLS-0$
+						div.classList.remove("gitChangeListCompareMaximized"); //$NON-NLS-0$
+						diffContainer.classList.remove("gitChangeListCompareContainerMaximized"); //$NON-NLS-0$
+					} else {
+						div.classList.add("gitChangeListCompareMaximized"); //$NON-NLS-0$
+						diffContainer.classList.add("gitChangeListCompareContainerMaximized"); //$NON-NLS-0$
+					}
+					data.handler._editors.forEach(function(editor) {
+						editor.resize();
+					});
+				},
+				visibleWhen: function() {
+					return true;
+				}
+			});
+			
 			var precommitCommand = new mCommands.Command({
 				name: messages['Commit'],
 				tooltip: messages["CommitTooltip"],
@@ -628,6 +655,7 @@ define([
 			this.commandService.addCommand(precommitCommand);
 			this.commandService.addCommand(selectAllCommand);
 			this.commandService.addCommand(deselectAllCommand);
+			this.commandService.addCommand(toggleMaximizeCommand);
 			this.commandService.addCommand(precommitAndPushCommand);
 			this.commandService.addCommand(precreateStashCommand);
 		},
@@ -918,7 +946,8 @@ define([
 						diffActionWrapper.className = "layoutRight commandList"; //$NON-NLS-0$
 						diffActionWrapper.id = prefix + "DiffActionWrapperChange"; //$NON-NLS-0$
 						actionsWrapper.appendChild(diffActionWrapper);
-	
+						explorer.commandService.registerCommandContribution(prefix + "CompareWidgetLeftActionWrapper", "eclipse.orion.git.toggleMaximizeCommand", 1000); //$NON-NLS-1$ //$NON-NLS-0$
+
 						var diffContainer = document.createElement("div"); //$NON-NLS-0$
 						diffContainer.className = "gitChangeListCompare"; //$NON-NLS-0$
 						diffContainer.id = "diffArea_" + item.DiffLocation; //$NON-NLS-0$
