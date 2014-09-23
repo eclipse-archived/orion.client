@@ -436,8 +436,8 @@ define({
 	"Filter author" : "Filter author", //$NON-NLS-0$  //$NON-NLS-1$
 	"Filter committer" : "Filter commiter", //$NON-NLS-0$  //$NON-NLS-1$
 	"Filter sha1" : "Filter sha1", //$NON-NLS-0$  //$NON-NLS-1$
-	"Filter fromDate" : "Filter from date (YYYY-MM-DD or relative)", //$NON-NLS-0$  //$NON-NLS-1$
-	"Filter toDate" : "Filter to date (YYYY-MM-DD or relative)", //$NON-NLS-0$  //$NON-NLS-1$
+	"Filter fromDate" : "Filter from date YYYY-MM-DD or N(h d w m y)", //$NON-NLS-0$  //$NON-NLS-1$
+	"Filter toDate" : "Filter to date YYYY-MM-DD or N(h d w m y)", //$NON-NLS-0$  //$NON-NLS-1$
 	"Filter path" : "Filter path", //$NON-NLS-0$  //$NON-NLS-1$
 	"Filter remote branches" : "Filter remote branches", //$NON-NLS-0$  //$NON-NLS-1$
 	"Getting remote branches" : "Getting remote branches ${0}", //$NON-NLS-0$  //$NON-NLS-1$
