@@ -196,6 +196,15 @@ define([
 					match = this._newlineRegex.exec(text);
 					if (match) {
 						index = match.index + match[0].length;
+
+						if (name === "markup.list.markdown") { //$NON-NLS-0$
+							/* for lists claim whitespace that starts the next line */
+							this._spacesAndTabsRegex.lastIndex = index;
+							match = this._spacesAndTabsRegex.exec(text);
+							if (match && match.index === index) {
+								index += match[0].length;
+							}
+						}
 					}
 
 					/* compute the block's contentStart bound */
@@ -537,9 +546,9 @@ define([
 				match = this._hrRegex.exec(text);
 				index = match.index + match[0].length;
 			} else if (token.type === "space") { //$NON-NLS-0$
-//				this._newlineRegex.lastIndex = index;
-//				match = this._newlineRegex.exec(text);
-//				index = match.index + match[0].length;
+				this._newlineRegex.lastIndex = index;
+				match = this._newlineRegex.exec(text);
+				index = match.index + match[0].length;
 			} else if (token.type === "table") { //$NON-NLS-0$
 				segments = token.header.slice();
 				token.cells.forEach(function(current) {
@@ -865,6 +874,7 @@ define([
 		_htmlNewlineRegex: /\n\s*\S[\s\S]*$/g,
 		_newlineRegex: /\n/g,
 		_orderedListRegex: /\d+\.[ \t]/g,
+		_spacesAndTabsRegex: /[ \t]*/g,
 		_whitespaceRegex: /\s+/g
 	};
 
