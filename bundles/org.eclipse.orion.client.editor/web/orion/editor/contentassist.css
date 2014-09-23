@@ -107,8 +107,10 @@
 
 .cloneWrapper {
 	display: block;
+	height: 0;			/* this node should not be visible */
 	overflow: visible;
-	z-index: 1000; /* must be greater than .contentassist z-index */
+	width: 0;			/* this node should not be visible */
+	z-index: 1000; /* must be greater than .contentassist z-index so that child node is above .contentassist */
 }
 
 .contentassist.cloneWrapper:hover {
