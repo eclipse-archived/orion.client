@@ -1334,7 +1334,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 			}
 			var offsetInLine = result - lineStart;
-			c = lineText.charCodeAt(offsetInLine);
+			var c = lineText.charCodeAt(offsetInLine);
 			// Handle Unicode surrogates
 			if (0xDC00 <= c && c <= 0xDFFF) {
 				if (offsetInLine > 0) {
