@@ -3012,7 +3012,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				this._ignoreBlur = false;
 			}
 		},
-		_handleBlur: function (e) {
+		_handleBlur: function () {
 			this._cancelCheckSelection();
 			if (this._ignoreBlur) { return; }
 			this._commitIME();
@@ -3245,7 +3245,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (e.preventDefault) { e.preventDefault(); }
 			return false;
 		},
-		_handleFocus: function (e) {
+		_handleFocus: function () {
 			this._hasFocus = true;
 			if (util.isIOS && this._lastTouchOffset !== undefined) {
 				this.setCaretOffset(this._lastTouchOffset, true);
@@ -3860,7 +3860,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				return false;
 			}
 		},
-		_handleResize: function (e) {
+		_handleResize: function () {
 			var newWidth = this._rootDiv.clientWidth;
 			var newHeight = this._rootDiv.clientHeight;
 			if (this._rootWidth !== newWidth || this._rootHeight !== newHeight) {
@@ -4054,7 +4054,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 			}, 100);
 		},
-		_handleSelectionChange: function (e) {
+		_handleSelectionChange: function () {
 			if (this._imeOffset !== -1) {
 				return;
 			}
@@ -4683,7 +4683,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			return true;
 		},
-		_doSelectAll: function (args) {
+		_doSelectAll: function () {
 			var model = this._model;
 			var selection = this._getSelection();
 			selection.setCaret(0);
@@ -4691,7 +4691,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._setSelection(selection, false);
 			return true;
 		},
-		_doTab: function (args) {
+		_doTab: function () {
 			if (!this._tabMode || this._readonly) { return; }
 			var text = "\t"; //$NON-NLS-0$
 			if (this._expandTab) {
@@ -4705,20 +4705,20 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._doContent(text);
 			return true;
 		},
-		_doShiftTab: function (args) {
+		_doShiftTab: function () {
 			if (!this._tabMode || this._readonly) { return; }
 			return true;
 		},
-		_doOverwriteMode: function (args) {
+		_doOverwriteMode: function () {
 			if (this._readonly) { return; }
 			this.setOptions({overwriteMode: !this.getOptions("overwriteMode")}); //$NON-NLS-0$
 			return true;
 		},
-		_doTabMode: function (args) {
+		_doTabMode: function () {
 			this._tabMode = !this._tabMode;
 			return true;
 		},
-		_doWrapMode: function (args) {
+		_doWrapMode: function () {
 			this.setOptions({wrapMode: !this.getOptions("wrapMode")}); //$NON-NLS-0$
 			return true;
 		},
@@ -5020,23 +5020,23 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				"deleteWordNext": {defaultHandler: function(data) {return self._doDelete(merge(data,{unit:"word"}));}, actionDescription: {name: messages.deleteWordNext}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"deleteLineStart": {defaultHandler: function(data) {return self._doBackspace(merge(data,{unit: "line"}));}, actionDescription: {name: messages.deleteLineStart}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"deleteLineEnd": {defaultHandler: function(data) {return self._doDelete(merge(data,{unit: "line"}));}, actionDescription: {name: messages.deleteLineEnd}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"tab": {defaultHandler: function(data) {return self._doTab();}, actionDescription: {name: messages.tab}}, //$NON-NLS-0$
-				"shiftTab": {defaultHandler: function(data) {return self._doShiftTab();}, actionDescription: {name: messages.shiftTab}}, //$NON-NLS-0$
-				"enter": {defaultHandler: function(data) {return self._doEnter();}, actionDescription: {name: messages.enter}}, //$NON-NLS-0$
+				"tab": {defaultHandler: function(data) {return self._doTab(merge(data,{}));}, actionDescription: {name: messages.tab}}, //$NON-NLS-0$
+				"shiftTab": {defaultHandler: function(data) {return self._doShiftTab(merge(data,{}));}, actionDescription: {name: messages.shiftTab}}, //$NON-NLS-0$
+				"enter": {defaultHandler: function(data) {return self._doEnter(merge(data,{}));}, actionDescription: {name: messages.enter}}, //$NON-NLS-0$
 				"enterNoCursor": {defaultHandler: function(data) {return self._doEnter(merge(data,{noCursor:true}));}, actionDescription: {name: messages.enterNoCursor}}, //$NON-NLS-0$
-				"selectAll": {defaultHandler: function(data) {return self._doSelectAll();}, actionDescription: {name: messages.selectAll}}, //$NON-NLS-0$
-				"copy": {defaultHandler: function(data) {return self._doCopy();}, actionDescription: {name: messages.copy}}, //$NON-NLS-0$
-				"cut": {defaultHandler: function(data) {return self._doCut();}, actionDescription: {name: messages.cut}}, //$NON-NLS-0$
-				"paste": {defaultHandler: function(data) {return self._doPaste();}, actionDescription: {name: messages.paste}}, //$NON-NLS-0$
+				"selectAll": {defaultHandler: function(data) {return self._doSelectAll(merge(data,{}));}, actionDescription: {name: messages.selectAll}}, //$NON-NLS-0$
+				"copy": {defaultHandler: function(data) {return self._doCopy(merge(data,{}));}, actionDescription: {name: messages.copy}}, //$NON-NLS-0$
+				"cut": {defaultHandler: function(data) {return self._doCut(merge(data,{}));}, actionDescription: {name: messages.cut}}, //$NON-NLS-0$
+				"paste": {defaultHandler: function(data) {return self._doPaste(merge(data,{}));}, actionDescription: {name: messages.paste}}, //$NON-NLS-0$
 				
 				"uppercase": {defaultHandler: function(data) {return self._doCase(merge(data,{type: "upper"}));}, actionDescription: {name: messages.uppercase}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"lowercase": {defaultHandler: function(data) {return self._doCase(merge(data,{type: "lower"}));}, actionDescription: {name: messages.lowercase}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"capitalize": {defaultHandler: function(data) {return self._doCase(merge(data,{unit: "word", type: "capitalize"}));}, actionDescription: {name: messages.capitalize}}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				"reversecase": {defaultHandler: function(data) {return self._doCase(merge(data,{type: "reverse"}));}, actionDescription: {name: messages.reversecase}}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				
-				"toggleOverwriteMode": {defaultHandler: function(data) {return self._doOverwriteMode();}, actionDescription: {name: messages.toggleOverwriteMode}}, //$NON-NLS-0$
-				"toggleTabMode": {defaultHandler: function(data) {return self._doTabMode();}, actionDescription: {name: messages.toggleTabMode}}, //$NON-NLS-0$
-				"toggleWrapMode": {defaultHandler: function(data) {return self._doWrapMode();}, actionDescription: {name: messages.toggleWrapMode}} //$NON-NLS-0$
+				"toggleOverwriteMode": {defaultHandler: function(data) {return self._doOverwriteMode(merge(data,{}));}, actionDescription: {name: messages.toggleOverwriteMode}}, //$NON-NLS-0$
+				"toggleTabMode": {defaultHandler: function(data) {return self._doTabMode(merge(data,{}));}, actionDescription: {name: messages.toggleTabMode}}, //$NON-NLS-0$
+				"toggleWrapMode": {defaultHandler: function(data) {return self._doWrapMode(merge(data,{}));}, actionDescription: {name: messages.toggleWrapMode}} //$NON-NLS-0$
 			};
 		},
 		_createRulerParent: function(document, className) {
@@ -5636,7 +5636,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._model.addEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-0$
 			
 			this._themeListener = {
-				onChanged: function(themeChangedEvent) {
+				onChanged: function() {
 					self._setThemeClass(self._themeClass);
 				}
 			};
@@ -5651,7 +5651,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			handlers.push({target: window, type: "resize", handler: function(e) { return self._handleResize(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "blur", handler: function(e) { return self._handleBlur(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "focus", handler: function(e) { return self._handleFocus(e ? e : window.event);}}); //$NON-NLS-0$
-			handlers.push({target: viewDiv, type: "focus", handler: function(e) { clientDiv.focus(); }}); //$NON-NLS-0$
+			handlers.push({target: viewDiv, type: "focus", handler: function() { clientDiv.focus(); }}); //$NON-NLS-0$
 			handlers.push({target: viewDiv, type: "scroll", handler: function(e) { return self._handleScroll(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "textInput", handler: function(e) { return self._handleTextInput(e ? e : window.event); }}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "keydown", handler: function(e) { return self._handleKeyDown(e ? e : window.event);}}); //$NON-NLS-0$
@@ -5752,7 +5752,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (typeof(parent) === "string") { //$NON-NLS-0$
 				parent = (options.document || document).getElementById(parent);
 			}
-			if (!parent) { throw "no parent"; } //$NON-NLS-0$
+			if (!parent) { throw new Error("no parent"); } //$NON-NLS-0$
 			options.parent = parent;
 			options.model = options.model || new mTextModel.TextModel();
 			var defaultOptions = this._defaultOptions();
