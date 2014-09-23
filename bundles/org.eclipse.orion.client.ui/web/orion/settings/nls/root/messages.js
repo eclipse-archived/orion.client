@@ -74,7 +74,7 @@ define({
 	"Linked Accounts": "Linked Accounts",
 	"Git Email Address": "Git Email Address:",
 	"Git Username": "Git Username:",
-	"Git Credentials Storage": "Git Credentials Storage:",
+	"Git Credentials Storage": "Git Credentials Storage",
 	"Update": "Update",
 	"Update Profile Settings": "Update Profile Settings",
 	"Update Git User Settings": "Update Git User Settings",

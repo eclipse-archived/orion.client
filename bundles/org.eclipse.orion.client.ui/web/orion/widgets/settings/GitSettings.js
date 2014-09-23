@@ -27,15 +27,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						'<div id="userCommands" class="layoutRight sectionActions"></div>' +
 					'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
 					'<div class="sections sectionTable">' + //$NON-NLS-0$
-					
-					'</div>' + //$NON-NLS-0$
-					
-					'<div class="sectionWrapper toolComposite">' +
-						'<div class="sectionAnchor sectionTitle layoutLeft">${Git Credentials Storage}</div>' + 
-						'<div id="gitCommands" class="layoutRight sectionActions"></div>' +
-					'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
-					'<div class="gitSections sectionTable">' + //$NON-NLS-0$
-					
 					'</div>', //$NON-NLS-0$
 
 		createElements: function() {
@@ -43,7 +34,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			lib.processTextNodes(this.node, messages);
 			
 			this.sections = lib.$('.sections', this.node);
-			this.gitSections = lib.$('.gitSections', this.node);
 			
 			this.createSections();
 		},
@@ -83,7 +73,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			];
 			var gitSection = new Subsection( {sectionName:messages["Git Config"], parentNode: this.sections, children: this.gitFields } );
 			gitSection.show();
-						
+			
 			//--------- git credentials -------------------------------
 			this.gitCredentialsFields = [ new LabeledCheckbox( 
 				{	fieldlabel:messages["Enable Storage"], 
@@ -126,7 +116,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						that.gitCredentialsFields.push(labeledCommand);
 					}
 					
-					gitCredentialsSection = new Subsection( {sectionName:"", parentNode: that.gitSections, children: that.gitCredentialsFields} );
+					gitCredentialsSection = new Subsection( {sectionName: messages["Git Credentials Storage"], parentNode: that.sections, children: that.gitCredentialsFields} ); //$NON-NLS-0$
 					gitCredentialsSection.show();		
 				}
 			);
@@ -190,7 +180,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		destroy: function() {
 			if (this.node) {
 				lib.empty(this.node);
-				this.node = this.sections = this.gitSections = null;
+				this.node = this.sections = null;
 			}
 		}
 	});
