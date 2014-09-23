@@ -153,7 +153,6 @@ define([
 		this.actionScopeId = options.actionScopeId;
 		
 		this._init(options);
-		this.target = "_self"; //$NON-NLS-0$
 	}
 	NavigatorRenderer.prototype = new mExplorer.SelectionRenderer(); 
 
@@ -226,16 +225,6 @@ define([
 			var th = document.createElement("th"); //$NON-NLS-0$
 			th.style.height = "8px"; //$NON-NLS-0$
 		}
-	};
-
-	/**
-	 * Sets the link target to be used for file links.
-	 * @name orion.explorer.NavigatorRenderer#setTarget
-	 * @function
-	 * @param {String} target The target (eg. "new", "_self").
-	 */
-	NavigatorRenderer.prototype.setTarget = function(target){
-		this.target = target;
 	};
 		
 	/**
@@ -343,7 +332,7 @@ define([
 				if (!this.openWithCommands) {
 					this.openWithCommands = mExtensionCommands.getOpenWithCommands(this.commandService);
 				}
-				itemNode = createLink("", item, this.commandService, this.contentTypeService, this.openWithCommands, { target: this.target }, null, null, this);
+				itemNode = createLink("", item, this.commandService, this.contentTypeService, this.openWithCommands, null, null, null, this);
 				span.appendChild(itemNode); //$NON-NLS-0$
 			}
 			if (itemNode) {

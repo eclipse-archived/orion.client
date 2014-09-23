@@ -120,12 +120,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'require', 'orion/
 				this.pluginSectionHeader.appendChild(slideoutFragment);
 			}
 			this.render();
-
-			this.registry.registerService("orion.cm.managedservice", //$NON-NLS-0$
-				{	updated: function() {
-						_this.setTarget("_self"); //$NON-NLS-0$
-					}.bind(this)
-				}, {pid: "nav.config"}); //$NON-NLS-0$
 		},
 
 		updateToolbar: function(id){

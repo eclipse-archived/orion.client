@@ -808,29 +808,6 @@ define([
 			commandRegistry.processURL(window.location.href);
 		}, false);
 
-		function setTarget(target) {
-			target = target;
-
-			var nodes = lib.$$array(".targetSelector"); //$NON-NLS-0$
-			for (var i = 0; i < nodes.length; i++) {
-				nodes[i].target = target;
-			}
-		}
-
-		function readTargetPreference(serviceRegistry) {
-			serviceRegistry.registerService("orion.cm.managedservice", //$NON-NLS-0$
-				{
-					updated: function (properties) {
-						setTarget("_self"); //$NON-NLS-0$
-					}
-				}, {
-					pid: "nav.config" //$NON-NLS-0$
-				}); //$NON-NLS-0$
-		}
-		window.setTimeout(function () {
-			readTargetPreference(serviceRegistry);
-		}, 0);
-
 		customGlobalCommands.afterGenerateBanner.apply(this, arguments);
 	}
 
