@@ -15,8 +15,9 @@
 define({
 	'API URL':'API URL:',
 	'Manage URL':'Manage URL:',
-	'Settings':'Settings',
+	'URLs':'URLs',
 	'Cloud':'Cloud',
+	'Cloud Foundry':'Cloud Foundry',
 	'deploy.cf': 'Deploy to Cloud Foundry',
 	'deploy.cf.tooltip': 'Deploy application in cloud.',
 	'deploy.chooseSpace':'Choose Space To Deploy',
