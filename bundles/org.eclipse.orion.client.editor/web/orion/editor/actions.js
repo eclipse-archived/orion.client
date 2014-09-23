@@ -1084,8 +1084,8 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				selEnd = selection.end + (l * (lastLine - firstLine + 1));
 			}
 			this.endUndo();
-			textView.setRedraw(true);
 			editor.setSelection(selStart, selEnd);
+			textView.setRedraw(true);
 			return true;
 		},
 		trimTrailingWhitespaces: function() {
@@ -1117,8 +1117,8 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				}
 			}
 			editor.getUndoStack().endCompoundChange();
-			editor.getTextView().setRedraw(true);
 			editor.setSelection(selection.start, selection.end, false);
+			editor.getTextView().setRedraw(true);
 		},
 		startUndo: function() {
 			if (this.undoStack) {
