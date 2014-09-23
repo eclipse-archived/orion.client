@@ -610,11 +610,45 @@ define([
 			};
 			
 			var createDateQuery = function() {
-				return this.value ? this.key + "=" + new Date(this.value).getTime() : ""; //$NON-NLS-0$ 
+				return this.value ? this.key + "=" + new Date(this.calcDate ? this.calcDate : this.value).getTime() : ""; //$NON-NLS-0$ 
+			};
+			
+			var calculateDate = function(date) {
+				var relativePattern = /^([1-9][0-9]*)([hdwmy])$|^([N|n]ow)$/;
+				var result = relativePattern.exec(date);
+				if (result) {
+					var number = result[1];
+					var type = result[2];
+					var now = result[3];
+					if (number && type) {
+						var tempDate = new Date();
+						switch (type) {
+							case "h":  //$NON-NLS-0$
+								date = tempDate.setHours(tempDate.getHours() - number);
+								break;
+							case "d":  //$NON-NLS-0$
+								date = tempDate.setDate(tempDate.getDate() - number);
+								break;
+							case "w":  //$NON-NLS-0$
+								date = tempDate.setDate(tempDate.getDate() - (number*7));
+								break;
+							case "m":  //$NON-NLS-0$
+								date = tempDate.setMonth(tempDate.getMonth() - number);
+								break;
+							case "y":  //$NON-NLS-0$
+								date = tempDate.setFullYear(tempDate.getFullYear() - number);
+								break;
+						}
+					} else if (now) {
+						date = new Date();
+					}
+				}
+				return date;
 			};
 			
 			var isValidDate = function(date) {
-				var d = new Date(date);
+				this.calcDate = calculateDate(date);
+				var d = new Date(this.calcDate);
 				return !isNaN(d.valueOf());
 			};
 			
@@ -635,11 +669,11 @@ define([
 			sha1Section.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			sha1Section.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
 			
-			var fromDateSection = createSection(content, null, messages["fromDate:"],  {key: "fromDate", createQuery: createDateQuery, isValid: isValidDate}); //$NON-NLS-0$
+			var fromDateSection = createSection(content, null, messages["fromDate:"],  {key: "fromDate", createQuery: createDateQuery, isValid: isValidDate, calcDate: ""}); //$NON-NLS-0$
 			fromDateSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			fromDateSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
 			
-			var toDateSection = createSection(content, null, messages["toDate:"],  {key: "toDate", createQuery: createDateQuery, isValid: isValidDate}); //$NON-NLS-0$
+			var toDateSection = createSection(content, null, messages["toDate:"],  {key: "toDate", createQuery: createDateQuery, isValid: isValidDate, calcDate: ""}); //$NON-NLS-0$
 			toDateSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			toDateSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
 			var that = this;
