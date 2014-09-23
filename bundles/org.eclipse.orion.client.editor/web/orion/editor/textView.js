@@ -4659,7 +4659,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var lineCount = model.getLineCount();
 			var clientHeight = this._getClientHeight();
 			var lineHeight = this._getLineHeight();
-			var verticalMaximum = lineCount * lineHeight;
+			var verticalMaximum = this._lineHeight ? this._scrollHeight : lineCount * lineHeight;
 			var verticalScrollOffset = this._getScroll().y;
 			var pixel;
 			switch (type) {
@@ -7048,6 +7048,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				/* Get the left scroll after setting the width of the scrollDiv as this can change the horizontal scroll offset. */
 				scroll = this._getScroll(false);
 			}
+			this._scrollHeight = scrollHeight;
 			if (this._vScrollDiv) {
 				var trackHeight = clientHeight - 8;
 				var thumbHeight = Math.max(15, Math.ceil(Math.min(1, trackHeight / (scrollHeight + viewPad.top + viewPad.bottom)) * trackHeight));
