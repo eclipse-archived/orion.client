@@ -115,6 +115,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 			},
 			
 			deploy: function(project, launchConf) {
+				console.log(launchConf);
 				var that = this;
 				var deferred = new Deferred();
 
@@ -126,6 +127,12 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 				}
 				var appName = params.Name;
 				var appPath = launchConf.Path;
+				
+				/* TODO: Move to server side */
+				if(launchConf.ManageUrl){
+					var manageURL = new URL(launchConf.ManageUrl);
+					target.ManageUrl = manageURL.origin;
+				}
 				
 				if(params.user && params.password){
 					cFService.login(target.Url, params.user, params.password).then(
@@ -149,9 +156,10 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 				if (target && appName){
 					cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath)).then(
 						function(result){
-							deferred.resolve({
-								CheckState: true
-							});
+							
+							var editLocation = new URL("../edit/edit.html#" + project.ContentLocation, window.location.href);
+							deferred.resolve(mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation));
+							
 						}, function(error){
 							if (error.HttpCode === 404){
 								deferred.resolve({

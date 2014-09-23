@@ -650,34 +650,38 @@ define([
 			ManageUrl: manageUrl,
 			Path: path
 		};
+		
 		if(urlTitle){
 			launchConfigurationEnry.UrlTitle= urlTitle;
 		}
+		
 		if(deployType){
 			launchConfigurationEnry.Type = deployType;
 		}
+		
 		this._getLaunchConfigurationsDir(projectMetadata, true).then(function(launchConfDir){
 			if(launchConfDir.Children){
 				for(var i=0; i<launchConfDir.Children.length; i++){
 					if(launchConfDir.Children[i].Name === configurationFile){
-//not sure if we won't need this later, see Bug 428460						
-//						if(window.confirm("Launch configuration " + configurationFile + " already exists, do you want to replace it?")){
-							this.fileClient.write(launchConfDir.Children[i].Location, JSON.stringify(launchConfigurationEnry)).then(
+						//not sure if we won't need this later, see Bug 428460						
+						//if(window.confirm("Launch configuration " + configurationFile + " already exists, do you want to replace it?")){
+							
+							this.fileClient.write(launchConfDir.Children[i].Location, JSON.stringify(launchConfigurationEnry, null, 2)).then(
 							function(){
 								launchConfigurationEnry.File = launchConfDir.Children[i];
 								launchConfigurationEnry.File.parent = launchConfDir;
 								deferred.resolve(launchConfigurationEnry);
 							}, deferred.reject);
 							return;
-//						} else {
-//							deferred.reject("Launch configuration already exists");
-//							return;
-//						}
+						//						} else {
+						//deferred.reject("Launch configuration already exists");
+						//return;
+						//}
 					}
 				}
 				this.fileClient.createFile(launchConfDir.Location, configurationFile).then(function(result){
 					delete launchConfigurationEnry.File;
-					this.fileClient.write(result.Location, JSON.stringify(launchConfigurationEnry)).then(
+					this.fileClient.write(result.Location, JSON.stringify(launchConfigurationEnry, null, 2)).then(
 					function(){
 						launchConfigurationEnry.File = result;
 						launchConfigurationEnry.File.parent = launchConfDir;

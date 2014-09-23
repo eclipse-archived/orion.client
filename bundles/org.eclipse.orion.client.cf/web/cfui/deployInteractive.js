@@ -213,30 +213,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						
 						cFService.pushApp(selection, null, decodeURIComponent(deployResourceJSON.ContentLocation + deployResourceJSON.AppPath), manifest, saveManifestCheckbox.checked).then(
 							function(result){
-								var appName = result.App.name || result.App.entity.name;
-								var host = (result.Route !== undefined ? (result.Route.host || result.Route.entity.host) : undefined);
-								var launchConfName = appName + " on " + result.Target.Space.Name + " / " + result.Target.Org.Name;
-								postMsg({
-									CheckState: true,
-									ToSave: {
-										ConfigurationName: launchConfName,
-										Parameters: {
-											Target: {
-												Url: result.Target.Url,
-												Org: result.Target.Org.Name,
-												Space: result.Target.Space.Name
-											},
-											Name: appName,
-											Timeout: (result.Timeout !== undefined) ? result.Timeout : undefined
-										},
-										Url: (result.Route !== undefined) ? "http://" + host + "." + result.Domain : undefined,
-										UrlTitle: (result.Route !== undefined) ? appName : undefined,
-										Type: "Cloud Foundry",
-										ManageUrl: result.ManageUrl,
-										Path: deployResourceJSON.AppPath
-									},
-									Message: "See Manual Deployment Information in the [root folder page](" + editLocation.href + ") to view and manage [" + launchConfName + "](" + result.ManageUrl + ")"
-								});
+								postMsg(mCfUtil.prepareLaunchConfigurationContent(result, deployResourceJSON.AppPath, editLocation));
 							}, function(error){
 								postError(error, selection);
 							}

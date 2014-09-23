@@ -42,8 +42,43 @@ define([
 				return handleNoCloud();
 			}, handleNoCloud);
 		},
+		
 		getLoginMessage: function(/*manageUrl*/){
 			return messages["deploy.enterCredentials"];
+		},
+		
+		prepareLaunchConfigurationContent : function(resp, appPath, editLocation){
+			var appName = resp.App.name || resp.App.entity.name;
+			var launchConfName = appName + " on " + resp.Target.Space.Name + " / " + resp.Target.Org.Name;
+			
+			var host, url, urlTitle;
+			if(resp.Route !== undefined){
+				host = resp.Route.host || resp.Route.entity.host;
+				url = "http://" + host + "." + resp.Domain;
+				urlTitle = appName;
+			}
+			
+			return {
+				CheckState: true,
+				ToSave: {
+					ConfigurationName: launchConfName,
+					Parameters: {
+						Target: {
+							Url: resp.Target.Url,
+							Org: resp.Target.Org.Name,
+							Space: resp.Target.Space.Name
+						},
+						Name: appName,
+						Timeout: resp.Timeout
+					},
+					Url: url,
+					UrlTitle: urlTitle,
+					Type: "Cloud Foundry",
+					ManageUrl: resp.ManageUrl,
+					Path: appPath
+				},
+				Message: "See Manual Deployment Information in the [root folder page](" + editLocation.href + ") to view and manage [" + launchConfName + "](" + resp.ManageUrl + ")"
+			};
 		}
 	};
 });
