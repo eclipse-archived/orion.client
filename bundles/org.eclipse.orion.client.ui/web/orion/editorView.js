@@ -486,34 +486,24 @@ define([
 			});
 
 			var contextImpl = {};
-			var liveContextImpl = {};
-			var msgService = serviceRegistry.getService("orion.page.message");
 			[
 				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-0$
 				"getSelection", "setSelection", //$NON-NLS-1$ //$NON-NLS-0$
 				"getText", "setText", //$NON-NLS-1$ //$NON-NLS-0$
 				"getLineAtOffset", //$NON-NLS-0$
-				"getLineStart" //$NON-NLS-0$
+				"getLineStart", //$NON-NLS-0$
+				"isDirty", //$NON-NLS-0$.
+				"markClean", //$NON-NLS-0$.
 			].forEach(function(method) {
 				contextImpl[method] = editor[method].bind(editor);
-				liveContextImpl[method] = editor[method].bind(editor);
 			});
-			liveContextImpl["markClean"] = editor.markClean.bind(editor);
-			liveContextImpl["isDirty"] = editor.isDirty.bind(editor);
-			liveContextImpl.showMarkers = function(markers) {
-				serviceRegistry.getService("orion.core.marker")._setProblems(markers);
+			contextImpl.showMarkers = function(markers) {
+				serviceRegistry.getService("orion.core.marker")._setProblems(markers); //$NON-NLS-0$
 			};
-			liveContextImpl.showProgressMessage = function (msg) {
-				msgService.setProgressMessage(msg);
-			};
-			liveContextImpl.showProgressResult = function (msg) {
-				msgService.setProgressResult(msg);
-			};
-			liveContextImpl.showProgressError = function (msg) {
-				msgService.setProgressResult({Severity: 'Error', Message: msg});
-			};
+			// Forward status from plugin to orion.page.message
+			contextImpl.setStatus = mEditorCommands.handleStatusMessage.bind(null, serviceRegistry);
 			serviceRegistry.registerService("orion.edit.context", contextImpl, null); //$NON-NLS-0$
-			serviceRegistry.registerService("orion.edit.liveContext", liveContextImpl, null); //$NON-NLS-0$
+
 			if(this.editorPreferences) {
 				this.editorPreferences.getPrefs(this.updateSettings.bind(this));
 			}
