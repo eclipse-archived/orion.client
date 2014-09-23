@@ -158,7 +158,7 @@ define([
 							if(args){
 								messageService.setProgressResult(args);
 							}else{
-								messageService.setProgressResult( messages['User profile data successfully updated.'] );
+								messageService.setProgressResult( messages["UsrProfileUpdateSuccess"] ); //$NON-NLS-0$
 							}
 						}, function(error){
 							messageService.setProgressResult(error);
