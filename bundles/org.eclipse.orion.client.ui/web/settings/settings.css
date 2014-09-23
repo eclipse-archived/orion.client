@@ -179,12 +179,12 @@
 	vertical-align: middle;
 }
 
-.setting-property {
-	margin: 10px 0;
+.setting-content > div {
+	margin-bottom: 15px;
 }
 
-.setting-content > div:first-child > .setting-property {
-	margin-top: 0;
+.setting-content > div:last-child {
+	margin-bottom: 0;
 }
 
 .setting-label {

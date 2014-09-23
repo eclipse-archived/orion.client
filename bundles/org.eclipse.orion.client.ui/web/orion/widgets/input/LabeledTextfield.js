@@ -16,7 +16,7 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/TextField
 		this.mylabel = lib.$(".setting-label", this.node); //$NON-NLS-0$
 	}
 	objects.mixin(LabeledTextfield.prototype, TextField.prototype, {
-		templateString: '<div class="setting-property">' +  //$NON-NLS-0$
+		templateString: '<div>' +  //$NON-NLS-0$
 							'<label>' + //$NON-NLS-0$
 								'<span class="setting-label"></span>' + //$NON-NLS-0$
 								'<input class="setting-control" type="text" />' + //$NON-NLS-0$
