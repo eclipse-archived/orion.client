@@ -61,6 +61,8 @@ define({
 	"Message": "Message", //$NON-NLS-0$  //$NON-NLS-1$
 	"Author": "Author", //$NON-NLS-0$  //$NON-NLS-1$
 	"Date": "Date", //$NON-NLS-0$  //$NON-NLS-1$
+	"fromDate:": "Start Date:", //$NON-NLS-0$  //$NON-NLS-1$
+	"toDate:": "End Date:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Actions": "Actions", //$NON-NLS-0$  //$NON-NLS-1$
 	"Branches": "Branches", //$NON-NLS-0$  //$NON-NLS-1$
 	"Tags": "Tags", //$NON-NLS-0$  //$NON-NLS-1$
@@ -79,7 +81,7 @@ define({
 	"Commit message": "Commit message", //$NON-NLS-0$  //$NON-NLS-1$
 	"Commit": "Commit", //$NON-NLS-0$  //$NON-NLS-1$
 	"CommitTooltip": "Commit the selected files with the given message.", //$NON-NLS-0$  //$NON-NLS-1$
-	"AuthMsgLink":"Authentication required for: ${0}. <a target=\"_blank\" href=\"${1}\">${2}</a> and re-try the request. </span>",
+	"AuthMsgLink":"Authentication required for: ${0}. <a target=\"_blank\" href=\"${1}\">${2}</a> and re-try the request. </span>", //$NON-NLS-0$  //$NON-NLS-1$
 	"SmartCommit": "Enter the commit message", //$NON-NLS-0$  //$NON-NLS-1$
 	"SmartCountCommit": "Commit ${0} file(s)", //$NON-NLS-0$  //$NON-NLS-1$
 	"Amend last commit": "Amend last commit", //$NON-NLS-0$  //$NON-NLS-1$
@@ -103,13 +105,13 @@ define({
 	"Recent commits on": "Recent commits on", //$NON-NLS-0$  //$NON-NLS-1$
 	"Git Status": "Git Status", //$NON-NLS-0$  //$NON-NLS-1$
 	"Go to Git Status": "Open the Git Status page for the repository containing this file or folder.", //$NON-NLS-0$  //$NON-NLS-1$
-	"GetGitIncomingMsg": "Getting git incoming changes...",
+	"GetGitIncomingMsg": "Getting git incoming changes...", //$NON-NLS-0$  //$NON-NLS-1$
 	"Checkout": "Checkout", //$NON-NLS-0$  //$NON-NLS-1$
 	"Checking out...": "Checking out...", //$NON-NLS-0$  //$NON-NLS-1$
 	"Stage the change": "Stage the change", //$NON-NLS-0$  //$NON-NLS-1$
 	"Staging...": "Staging...", //$NON-NLS-0$  //$NON-NLS-1$
-	"CheckoutSelectedFiles": "Checkout all the selected files, discarding all changes",
-	"AddFilesToGitignore" : "Add all the selected files to .gitignore file(s)",
+	"CheckoutSelectedFiles": "Checkout all the selected files, discarding all changes", //$NON-NLS-0$  //$NON-NLS-1$
+	"AddFilesToGitignore" : "Add all the selected files to .gitignore file(s)", //$NON-NLS-0$  //$NON-NLS-1$
 	"Writing .gitignore rules" : "Writing .gitignore rules", //$NON-NLS-0$  //$NON-NLS-1$ 
 	"Save Patch": "Save Patch", //$NON-NLS-0$  //$NON-NLS-1$
 	"Unstage the change": "Unstage the change", //$NON-NLS-0$  //$NON-NLS-1$
@@ -120,9 +122,9 @@ define({
 	"Reset": "Reset", //$NON-NLS-0$  //$NON-NLS-1$
 	"ResetConfirm": "All unstaged and staged changes in the working directory and index will be discarded and cannot be recovered.\n\nAre you sure you want to continue?", //$NON-NLS-0$  //$NON-NLS-1$
 	"CheckoutConfirm" : "Your changes to the selected files will be discarded and cannot be recovered.\n\nAre you sure you want to continue?", //$NON-NLS-0$  //$NON-NLS-1$
-	"ResetBranchDiscardChanges": "Reset the branch, discarding all staged and unstaged changes",
-	"ChangesIndexDiscardedMsg": "All unstaged and staged changes in the working directory and index will be discarded and cannot be recovered.",
-	"ContinueMsg": "Are you sure you want to continue?",
+	"ResetBranchDiscardChanges": "Reset the branch, discarding all staged and unstaged changes", //$NON-NLS-0$  //$NON-NLS-1$
+	"ChangesIndexDiscardedMsg": "All unstaged and staged changes in the working directory and index will be discarded and cannot be recovered.", //$NON-NLS-0$  //$NON-NLS-1$
+	"ContinueMsg": "Are you sure you want to continue?", //$NON-NLS-0$  //$NON-NLS-1$
 	"Resetting local changes...": "Resetting local changes...", //$NON-NLS-0$  //$NON-NLS-1$
 	"Continue rebase...": "Continue rebase...", //$NON-NLS-0$  //$NON-NLS-1$
 	"Skipping patch...": "Skipping patch...", //$NON-NLS-0$  //$NON-NLS-1$
@@ -135,8 +137,8 @@ define({
 	"Committing...": "Committing...", //$NON-NLS-0$  //$NON-NLS-1$
 	"The author name is required.": "The author name is required.", //$NON-NLS-0$  //$NON-NLS-1$
 	"The author mail is required.": "The author mail is required.", //$NON-NLS-0$  //$NON-NLS-1$
-	"RepoConflict": ". Repository still contains conflicts.",
-	"RepoUnmergedPathResolveConflict": ". Repository contains unmerged paths. Resolve conflicts first.",
+	"RepoConflict": ". Repository still contains conflicts.", //$NON-NLS-0$  //$NON-NLS-1$
+	"RepoUnmergedPathResolveConflict": ". Repository contains unmerged paths. Resolve conflicts first.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Rendering ${0}": "Rendering ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Configuration": "Configuration", //$NON-NLS-0$  //$NON-NLS-1$
 	"Getting configuration of": "Getting configuration of ${0}", //$NON-NLS-0$  //$NON-NLS-1$
@@ -151,7 +153,7 @@ define({
 	"Loading repositories": "Loading repositories", //$NON-NLS-0$  //$NON-NLS-1$
 	"(no remote)": "(no remote)", //$NON-NLS-0$  //$NON-NLS-1$
 	"location: ": "location: ", //$NON-NLS-0$  //$NON-NLS-1$
-	"NumFilesStageAndCommit": "${0} file(s) to stage and ${1} file(s) to commit.",
+	"NumFilesStageAndCommit": "${0} file(s) to stage and ${1} file(s) to commit.", //$NON-NLS-0$  //$NON-NLS-1$
  	"Nothing to commit.": "Nothing to commit.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Nothing to push.": "Nothing to push.", //$NON-NLS-0$  //$NON-NLS-1$
 	"NCommitsToPush": "${0} commit(s) to push.", //$NON-NLS-0$  //$NON-NLS-1$
@@ -171,7 +173,7 @@ define({
 	"Rendering commits": "Rendering commits", //$NON-NLS-0$  //$NON-NLS-1$
 	"Getting outgoing commits": "Getting outgoing commits", //$NON-NLS-0$  //$NON-NLS-1$
 	"The branch is up to date.": "The branch is up to date.", //$NON-NLS-0$  //$NON-NLS-1$
-	"NoOutgoingIncomingCommits": "You have no outgoing or incoming commits.",
+	"NoOutgoingIncomingCommits": "You have no outgoing or incoming commits.", //$NON-NLS-0$  //$NON-NLS-1$
  	") by ": ") by ", //$NON-NLS-0$  //$NON-NLS-1$
 	" (SHA ": " (SHA ", //$NON-NLS-0$  //$NON-NLS-1$
 	"Getting tags": "Getting tags", //$NON-NLS-0$  //$NON-NLS-1$
@@ -248,14 +250,14 @@ define({
 	"MaximizeCmd": "Maximize", //$NON-NLS-0$  //$NON-NLS-1$
 	"MaximizeTip": "Toggles the maximize state of the editor", //$NON-NLS-0$  //$NON-NLS-1$
 	" [New branch]": " [New branch]", //$NON-NLS-0$  //$NON-NLS-1$
-	"AddKeyToHostContinueOp": "Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}.",
+	"AddKeyToHostContinueOp": "Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}.", //$NON-NLS-0$  //$NON-NLS-1$
  	"Link Repository": "Link Repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"Folder name:": "Folder name:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repository was linked to ": "Repository was linked to ", //$NON-NLS-0$  //$NON-NLS-1$
 	"CheckoutCommitTooltip": "Checkout this commit, creating a local branch based on its contents.", //$NON-NLS-0$  //$NON-NLS-1$
 	"CheckoutTagTooltip": "Checkout this tag, creating a local branch based on its contents.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Checking out ${0}": "Checking out ${0}", //$NON-NLS-0$  //$NON-NLS-1$
-	"CheckoutBranchMsg": "Checkout the branch or corresponding local branch and make it active. If the remote tracking branch does not have a corresponding local branch, the local branch will be created first.",
+	"CheckoutBranchMsg": "Checkout the branch or corresponding local branch and make it active. If the remote tracking branch does not have a corresponding local branch, the local branch will be created first.", //$NON-NLS-0$  //$NON-NLS-1$
  	"Checking out branch...": "Checking out branch", //$NON-NLS-0$  //$NON-NLS-1$
 	"Adding branch ${0}...": "Adding branch ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Removing branch ${0}...": "Removing branch ${0}", //$NON-NLS-0$  //$NON-NLS-1$
@@ -273,7 +275,7 @@ define({
 	"Branch name": "Branch name", //$NON-NLS-0$  //$NON-NLS-1$
 	"Delete": "Delete", //$NON-NLS-0$  //$NON-NLS-1$
 	"Delete the local branch from the repository": "Delete the local branch from the repository", //$NON-NLS-0$  //$NON-NLS-1$
-	"DelBrConfirm": "Are you sure you want to delete branch ${0}?",
+	"DelBrConfirm": "Are you sure you want to delete branch ${0}?", //$NON-NLS-0$  //$NON-NLS-1$
 	"Delete the remote tracking branch from the repository": "Delete the remote tracking branch from the repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"Are you sure?": "Are you sure?", //$NON-NLS-0$  //$NON-NLS-1$
 	"RemoveRemoteBranchConfirm": "You're going to delete remote branch \"${0}\" and push the change.\n\nAre you sure?", //$NON-NLS-0$  //$NON-NLS-1$
@@ -296,7 +298,7 @@ define({
 	"Open the status for the repository": "Open the status for the repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"ShowInEditor": "Show in Editor", //$NON-NLS-0$  //$NON-NLS-1$
 	"ShowInEditorTooltip": "Show the repository folder in the editor", //$NON-NLS-0$  //$NON-NLS-1$
-	"CompareEach": "Compare With Each Other",
+	"CompareEach": "Compare With Each Other", //$NON-NLS-0$  //$NON-NLS-1$
  	"Compare With Working Tree": "Compare With Working Tree", //$NON-NLS-0$  //$NON-NLS-1$
 	"Open": "Open", //$NON-NLS-0$  //$NON-NLS-1$
 	"OpenGitCommitTip": "View the tree for this commit", //$NON-NLS-0$  //$NON-NLS-1$
@@ -308,37 +310,37 @@ define({
 	"User Name:": "User Name:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Fetching remote: ": "Fetching remote: ", //$NON-NLS-0$  //$NON-NLS-1$
 	"Force Fetch": "Force Fetch", //$NON-NLS-0$  //$NON-NLS-1$
-	"FetchRemoteBranch": "Fetch from the remote branch into your remote tracking branch overriding its current content",
-	"OverrideContentRemoteTrackingBr": "You're going to override content of the remote tracking branch. This can cause the branch to lose commits.",
+	"FetchRemoteBranch": "Fetch from the remote branch into your remote tracking branch overriding its current content", //$NON-NLS-0$  //$NON-NLS-1$
+	"OverrideContentRemoteTrackingBr": "You're going to override content of the remote tracking branch. This can cause the branch to lose commits.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Merge": "Merge", //$NON-NLS-0$  //$NON-NLS-1$
-	"MergeContentFrmBr": "Merge the content from the branch to your active branch",
+	"MergeContentFrmBr": "Merge the content from the branch to your active branch", //$NON-NLS-0$  //$NON-NLS-1$
  	". Go to ${0}.": ". Go to ${0}.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Git Status page": "Git Status page", //$NON-NLS-0$  //$NON-NLS-1$
 	"Rebase": "Rebase", //$NON-NLS-0$  //$NON-NLS-1$
-	"RebaseCommitsMsg": "Rebase your commits by removing them from the active branch, starting the active branch again based on the latest state of the selected branch ",
+	"RebaseCommitsMsg": "Rebase your commits by removing them from the active branch, starting the active branch again based on the latest state of the selected branch ", //$NON-NLS-0$  //$NON-NLS-1$
  	"Rebase on top of ": "Rebase on top of ", //$NON-NLS-0$  //$NON-NLS-1$
 	"RebaseSTOPPED": ". Some conflicts occurred. Please resolve them and continue, skip patch or abort rebasing.", //$NON-NLS-0$  //$NON-NLS-1$
 	"RebaseFAILED_WRONG_REPOSITORY_STATE": ". Repository state is invalid (i.e. already during rebasing).", //$NON-NLS-0$  //$NON-NLS-1$
 	"RebaseFAILED_UNMERGED_PATHS": ". Repository contains unmerged paths.", //$NON-NLS-0$  //$NON-NLS-1$
 	"RebaseFAILED_PENDING_CHANGES": ". Repository contains pending changes. Please commit or stash them.", //$NON-NLS-0$  //$NON-NLS-1$
 	"RebaseUNCOMMITTED_CHANGES": ". There are uncommitted changes.", //$NON-NLS-0$  //$NON-NLS-1$
-	"RebaseCommitsByRmvingThem": "Rebase your commits by removing them from the active branch, ",
-	"StartActiveBranch": "starting the active branch again based on the latest state of '",
-	"ApplyEachCommitAgain": "and applying each commit again to the updated active branch.",
+	"RebaseCommitsByRmvingThem": "Rebase your commits by removing them from the active branch, ", //$NON-NLS-0$  //$NON-NLS-1$
+	"StartActiveBranch": "starting the active branch again based on the latest state of '", //$NON-NLS-0$  //$NON-NLS-1$
+	"ApplyEachCommitAgain": "and applying each commit again to the updated active branch.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Push All": "Push All", //$NON-NLS-0$  //$NON-NLS-1$
-	"PushCommitsTagsFrmLocal": "Push commits and tags from your local branch into the remote branch",
+	"PushCommitsTagsFrmLocal": "Push commits and tags from your local branch into the remote branch", //$NON-NLS-0$  //$NON-NLS-1$
  	"Push Branch": "Push Branch", //$NON-NLS-0$  //$NON-NLS-1$
- 	"PushCommitsWithoutTags": "Push commits without tags from your local branch into the remote branch",
+ 	"PushCommitsWithoutTags": "Push commits without tags from your local branch into the remote branch", //$NON-NLS-0$  //$NON-NLS-1$
  	"Push for Review": "Push for Review", //$NON-NLS-0$  //$NON-NLS-1$
 	"Push commits to Gerrit Code Review": "Push commits to Gerrit Code Review", //$NON-NLS-0$  //$NON-NLS-1$
 	"Force Push Branch": "Force Push Branch", //$NON-NLS-0$  //$NON-NLS-1$
-	"PushCommitsWithoutTagsOverridingCurrentContent": "Push commits without tags from your local branch into the remote branch overriding its current content",
+	"PushCommitsWithoutTagsOverridingCurrentContent": "Push commits without tags from your local branch into the remote branch overriding its current content", //$NON-NLS-0$  //$NON-NLS-1$
  	"Pushing remote: ": "Pushing remote: ", //$NON-NLS-0$  //$NON-NLS-1$
 	"ChooseBranchDialog": "Choose Branch", //$NON-NLS-0$  //$NON-NLS-1$
 	"Choose the remote branch.": "Choose the remote branch.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Force Push All": "Force Push All", //$NON-NLS-0$  //$NON-NLS-1$
-	"PushCommitsTagsFrmLocalBr": "Push commits and tags from your local branch into the remote branch overriding its current content",
-	"OverrideContentOfRemoteBr": "You're going to override content of the remote branch. This can cause the remote repository to lose commits.",
+	"PushCommitsTagsFrmLocalBr": "Push commits and tags from your local branch into the remote branch overriding its current content", //$NON-NLS-0$  //$NON-NLS-1$
+	"OverrideContentOfRemoteBr": "You're going to override content of the remote branch. This can cause the remote repository to lose commits.", //$NON-NLS-0$  //$NON-NLS-1$
 	"< Previous Page": "< Previous Page", //$NON-NLS-0$  //$NON-NLS-1$
 	"Show previous page of git log": "Show previous page of git log", //$NON-NLS-0$  //$NON-NLS-1$
 	"Show previous page of git tags" : "Show previous page of git tags", //$NON-NLS-0$  //$NON-NLS-1$
@@ -346,7 +348,7 @@ define({
 	"Show next page of git log": "Show next page of git log", //$NON-NLS-0$  //$NON-NLS-1$
 	"Show next page of git tags" : "Show next page of git tags", //$NON-NLS-0$  //$NON-NLS-1$
 	"Push from your local branch into the selected remote branch": "Push from your local branch into the selected remote branch", //$NON-NLS-0$  //$NON-NLS-1$
-	"ResetActiveBr": "Reset your active branch to the state of this reference. Discard all staged and unstaged changes.",
+	"ResetActiveBr": "Reset your active branch to the state of this reference. Discard all staged and unstaged changes.", //$NON-NLS-0$  //$NON-NLS-1$
  	"GitResetIndexConfirm": "The content of your active branch will be replaced with ${0}. All unstaged and staged changes will be discarded and cannot be recovered. Are you sure?", //$NON-NLS-0$  //$NON-NLS-1$
 	"Resetting index...": "Resetting index...", //$NON-NLS-0$  //$NON-NLS-1$
 	"Resetting git index for ${0}" : "Resetting git index for ${0}", //$NON-NLS-0$  //$NON-NLS-1$
@@ -407,7 +409,7 @@ define({
 	"Abort Rebase": "Abort Rebase", //$NON-NLS-0$  //$NON-NLS-1$
 	"Discard": "Discard", //$NON-NLS-0$  //$NON-NLS-1$
 	"Ignore": "Ignore", //$NON-NLS-0$  //$NON-NLS-1$
-	"ChangesSelectedFilesDiscard": "Your changes to the selected files will be discarded and cannot be recovered.",
+	"ChangesSelectedFilesDiscard": "Your changes to the selected files will be discarded and cannot be recovered.", //$NON-NLS-0$  //$NON-NLS-1$
  	"Getting git log": "Getting git log", //$NON-NLS-0$  //$NON-NLS-1$
 	"Getting stashed changes...": "Getting stashed changes...", //$NON-NLS-0$  //$NON-NLS-1$
 	"Active Branch (${0})": "Active Branch (${0})", //$NON-NLS-0$  //$NON-NLS-1$
@@ -465,7 +467,7 @@ define({
 	"Create new repository" : "Create new repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"Attach the remote to one of your existing repositories" : "Attach the remote to one of your existing repositories", //$NON-NLS-0$  //$NON-NLS-1$
 	"You are reviewing contribution ${0} from ${1}" : "You are reviewing contribution ${0} from ${1}", //$NON-NLS-0$  //$NON-NLS-1$
-	"CommitNotFoundInWorkspace" : "Unfortunately the commit can not be found in your workspace. To see it try one of the following: ",
+	"CommitNotFoundInWorkspace" : "Unfortunately the commit can not be found in your workspace. To see it try one of the following: ", //$NON-NLS-0$  //$NON-NLS-1$
  	"To review the commit you can also:" : "To review the commit you can also:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Contribution Review Request for ${0} on ${1}" : "Contribution Review Request for ${0} on ${1}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Failing paths: ${0}": "Failing paths: ${0}", //$NON-NLS-0$  //$NON-NLS-1$
@@ -481,7 +483,7 @@ define({
 	"Login": "Login", //$NON-NLS-0$  //$NON-NLS-1$
 	"Authentication required for: ${0}. ${1} and re-try the request.": "Authentication required for: ${0}. ${1} and re-try the request.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Save":"Save", //$NON-NLS-0$  //$NON-NLS-1$
-	"Remember my committer name and email:":"Remember my committer name and email:",
+	"Remember my committer name and email:":"Remember my committer name and email:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Successfully edited ${0} to have value ${1}":"Successfully edited ${0} to have value ${1}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Successfully added ${0} with value ${1}":"Successfully added ${0} with value ${1}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Signed-off-by: ":"Signed-off-by: ", //$NON-NLS-0$  //$NON-NLS-1$
@@ -507,11 +509,11 @@ define({
 	"ShowReferenceCmd": "Show Reference", //$NON-NLS-0$  //$NON-NLS-1$
 	"ShowReferenceTip": "View the history of ${1} \"${2}\"", //$NON-NLS-0$  //$NON-NLS-1$
 	"ShowActiveBranchTip": "View the history of \"${0}\" relative to ${1} \"${2}\"", //$NON-NLS-0$  //$NON-NLS-1$
-	"CommitType": "commit",
-	"BranchType": "branch",
-	"RemoteTrackingBranchType": "remote branch",
-	"TagType": "tag",
-	"StashCommitType": "stash",
+	"CommitType": "commit", //$NON-NLS-0$  //$NON-NLS-1$
+	"BranchType": "branch", //$NON-NLS-0$  //$NON-NLS-1$
+	"RemoteTrackingBranchType": "remote branch", //$NON-NLS-0$  //$NON-NLS-1$
+	"TagType": "tag", //$NON-NLS-0$  //$NON-NLS-1$
+	"StashCommitType": "stash", //$NON-NLS-0$  //$NON-NLS-1$
 	"Path:" : "Path:", //$NON-NLS-0$  //$NON-NLS-1$
 	"LocalChanges" : "Working Directory Changes", //$NON-NLS-0$  //$NON-NLS-1$
 	"LocalChangesDetails" : "Working Directory Details", //$NON-NLS-0$  //$NON-NLS-1$

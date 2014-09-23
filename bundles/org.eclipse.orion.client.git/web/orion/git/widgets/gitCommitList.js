@@ -520,7 +520,7 @@ define([
 			var blurHandler = function(e) {
 				var relatedTarget = e.relatedTarget || e.toElement;
 				function check(focus) {
-					if (!(lib.contains(mainSection.domNode, focus) || lib.contains(mainSection.getContentElement(), focus))) {
+					if (!(focus === document.body || lib.contains(mainSection.domNode, focus) || lib.contains(mainSection.getContentElement(), focus))) {
 						mainSection.setHidden(true);
 					}
 				}
@@ -616,7 +616,7 @@ define([
 			var isValidDate = function(date) {
 				var d = new Date(date);
 				return !isNaN(d.valueOf());
-			}
+			};
 			
 			content = mainSection.getContentElement();
 			var messageSection = createSection(content, null, messages["Message:"], {key: "filter", createQuery: createStringQuery}); //$NON-NLS-0$
@@ -635,20 +635,20 @@ define([
 			sha1Section.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			sha1Section.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
 			
-			var fromDateSection = createSection(content, null, "Start Date",  {key: "fromDate", createQuery: createDateQuery, isValid: isValidDate}); //$NON-NLS-0$
+			var fromDateSection = createSection(content, null, messages["fromDate:"],  {key: "fromDate", createQuery: createDateQuery, isValid: isValidDate}); //$NON-NLS-0$
 			fromDateSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			fromDateSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
 			
-			var toDateSection = createSection(content, null, "End Date",  {key: "toDate", createQuery: createDateQuery, isValid: isValidDate}); //$NON-NLS-0$
+			var toDateSection = createSection(content, null, messages["toDate:"],  {key: "toDate", createQuery: createDateQuery, isValid: isValidDate}); //$NON-NLS-0$
 			toDateSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			toDateSection.getContentElement().classList.add("commitFilter"); //$NON-NLS-0$
 			var that = this;
 			var pathSection = createSection(content, null, messages["Path:"],  {
-				key: "path",
+				key: "path", //$NON-NLS-0$
 				createQuery: function() {return "";}, 
 				getValue: function() {return that.model.repositoryPath;}, 
 				setValue: function(s) {that.repositoryPath = that.model.repositoryPath = s;}
-			}, true, false, true, true); //$NON-NLS-0$
+			}, true, false, true, true);
 			pathSection.domNode.classList.add("commitFilter"); //$NON-NLS-0$
 			pathSection.getContentElement().classList.add("pathFilter"); //$NON-NLS-0$
 			pathSection.domNode.tabIndex = -1;
