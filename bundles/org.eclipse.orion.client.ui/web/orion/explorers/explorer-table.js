@@ -209,18 +209,6 @@ define([
 		if (parent) {
 			parent.addEventListener("click", this._clickListener); //$NON-NLS-0$
 		}
-
-		// Same tab/new tab setting
-		var renderer = this.renderer;
-		if (this.registry) {
-			this.registry.registerService("orion.cm.managedservice", //$NON-NLS-0$
-				{	updated: function(properties) {
-						if (renderer.setTarget) {
-							renderer.setTarget("_self"); //$NON-NLS-0$
-						}
-					}
-				}, {pid: "nav.config"}); //$NON-NLS-0$
-		}
 	}
 	
 	var dragStartTarget, dropEffect;
