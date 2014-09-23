@@ -11,8 +11,8 @@
 /*eslint-env amd, browser*/
 define([
 	'orion/Deferred',
-	'orion/edit/liveEditorContext'
-], function(Deferred, LiveEditorContext) {
+	'orion/edit/editorContext'
+], function(Deferred, EditorContext) {
 
 	var resource;
 	var services = [];
@@ -87,11 +87,11 @@ define([
 								title: title
 							};
 							services.push(service);
-							var editorContext = LiveEditorContext.getEditorContext(serviceRegistry);
+							var editorContext = EditorContext.getEditorContext(serviceRegistry);
 							return service.startEdit(editorContext, context);
 						}
 					});
-						
+
 					/*previousEditSession =*/ Deferred.all(editSessionPromises, handleError);
 				});
 			}
