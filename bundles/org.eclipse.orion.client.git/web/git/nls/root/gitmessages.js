@@ -417,6 +417,8 @@ define({
 	"Tag (${0})": "Tag (${0})", //$NON-NLS-0$  //$NON-NLS-1$
 	"Commit (${0})": "Commit (${0})", //$NON-NLS-0$  //$NON-NLS-1$
 	"StashCommit (${0})": "Stash (${0})", //$NON-NLS-0$  //$NON-NLS-1$
+	"WIPStash": "WIP on ${0}: ${1}", //$NON-NLS-0$  //$NON-NLS-1$
+	"IndexStash": "index on ${0}: ${1}", //$NON-NLS-0$  //$NON-NLS-1$
 	"RemoteTrackingBranch (${0})": "Remote Branch (${0})", //$NON-NLS-0$  //$NON-NLS-1$
 	"Active Branch Log": "Git Log (Active Branch)", //$NON-NLS-0$  //$NON-NLS-1$
 	"Show the log for the active local branch": "Show the log for the active local branch", //$NON-NLS-0$  //$NON-NLS-1$

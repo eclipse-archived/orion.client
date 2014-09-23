@@ -11,7 +11,12 @@
 
 /*eslint-env browser, amd*/
 
-define(['orion/Deferred'], function(Deferred) {
+define([
+	'i18n!git/nls/gitmessages',
+	'orion/Deferred', 
+	'orion/i18nUtil'
+], function(
+	messages, Deferred, i18nUtil) {
 	
 	/**
 	 * Acts as a factory for stash related functions.
@@ -35,8 +40,14 @@ define(['orion/Deferred'], function(Deferred) {
 				name = undefined;
 			}
 
+			var wip, index;
+			wip = index = name;
+			if (name && name.length > 0) {
+				wip = i18nUtil.formatMessage(messages["WIPStash"], data.items.CurrentBranch.Name, name);
+				index = i18nUtil.formatMessage(messages["IndexStash"], data.items.CurrentBranch.Name, name);
+			}
 			/* TODO: Distinguish between index and working directory messages */
-			gitService.doStashCreate(gitStashLocation, name, name, true).then(function(resp){
+			gitService.doStashCreate(gitStashLocation, index, wip, true).then(function(resp){
 				d.resolve(data);
 			}, function(error){
 				d.reject(error);

@@ -207,6 +207,7 @@ define([
 							return;
 						}
 						repository.ActiveBranch = currentBranch.CommitLocation;
+						repository.CurrentBranch = currentBranch;
 						var activeBranch = that.getActiveBranch();
 						var targetRef = that.getTargetReference();
 						if (section) {
