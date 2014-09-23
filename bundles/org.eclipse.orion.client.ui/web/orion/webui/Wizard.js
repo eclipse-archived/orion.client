@@ -133,7 +133,7 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects){
 			} else {
 				button.classList.add("disabled");
 			}
-			button.diabled = !enabled;
+			button.disabled = !enabled;
 		},
 		next: function(){
 			if(this.currentPage<(this.pages.length - 1)){
