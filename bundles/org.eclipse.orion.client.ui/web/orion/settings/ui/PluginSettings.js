@@ -321,7 +321,7 @@ define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/ob
 	SettingsList.prototype = {
 		_makeSection: function(parent, sectionId, setting, title) {
 			var section = new Section(parent, { id: sectionId, title: title, useAuxStyle: true,
-				canHide: true});
+				canHide: false});
 			return section;
 		},
 		destroy: function() {
