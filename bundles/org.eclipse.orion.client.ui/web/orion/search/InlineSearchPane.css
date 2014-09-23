@@ -438,8 +438,14 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.searchPageActions > .orionSwitch {
+	display: inline-block;
+	margin-bottom: 1px;
+	vertical-align: bottom;
+}
+
 .orionSwitchInner.sprite-switch-full-path:before{
-	content: '/*/';
+	content: '\002f*\002f'; /* forward slash * forward slash, using unicode value to avoid CSS minification bug */
 	padding-top: 2px;
 	padding-left: 4px;
 }
@@ -447,12 +453,6 @@
 	content: '.../';
 	padding-top: 2px;
 	padding-right: 4px;
-}
-
-.orionSwitch {
-	display: inline-block;
-	margin-bottom: 1px;
-	vertical-align: bottom;
 }
 
 .treeTableRow > td.search_report {
