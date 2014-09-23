@@ -115,7 +115,6 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 			},
 			
 			deploy: function(project, launchConf) {
-				console.log(launchConf);
 				var that = this;
 				var deferred = new Deferred();
 
