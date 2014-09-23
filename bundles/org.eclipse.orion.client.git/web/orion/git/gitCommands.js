@@ -2484,6 +2484,7 @@ var exports = {};
 					dispatchModelEventOn({type: "modelChanged", action: "applyStash"}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function(error){
 					displayErrorOnStatus(error);
+					dispatchModelEventOn({type: "modelChanged", action: "applyStash", failed: true}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen : function(item){
@@ -2503,6 +2504,7 @@ var exports = {};
 					dispatchModelEventOn({type: "modelChanged", action: "popStash"}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function(error){
 					displayErrorOnStatus(error);
+					dispatchModelEventOn({type: "modelChanged", action: "popStash", failed: true}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			},
 			visibleWhen : function(item){
