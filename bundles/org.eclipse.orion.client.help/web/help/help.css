@@ -3,7 +3,6 @@
 @import "../css/images.css";
 @import "../css/theme.css";
 @import "../settings/settings.css"; /* temporary */
-@import "../orion/search/InlineSearchPane.css";
 
 html,body {
 	height: 100%;
