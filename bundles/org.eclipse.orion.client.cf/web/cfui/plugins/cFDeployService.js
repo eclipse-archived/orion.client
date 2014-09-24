@@ -80,16 +80,8 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 				
 			constructor: DeployService,
 				
-			_getDefaultTarget: function(){
-				var deferred = new Deferred();
-				mCfUtil.getTargets(preferences).then(
-					function(targets){
-						deferred.resolve(targets[0]);
-					}, function(error){
-						deferred.resolve(null);
-					}
-				);
-				return deferred;
+			_getTargets: function(){
+				return mCfUtil.getTargets(preferences);
 			},
 			
 			getDeployProgressMessage: function(project, launchConf){
