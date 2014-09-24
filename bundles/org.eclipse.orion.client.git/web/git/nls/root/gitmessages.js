@@ -96,6 +96,7 @@ define({
 	"AddClone": "Cloning repository: =${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"RebaseProgressDetails": "Rebasing branch.\n\n\tUse Continue after merging the conflicts and selecting all files;\n\tSkip to bypass the current patch;\n\tAbort to end the rebase at any time.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Committer name:": "Committer name:", //$NON-NLS-0$  //$NON-NLS-1$
+	"Name:": "Name:", //$NON-NLS-0$  //$NON-NLS-1$
 	"email:": "email:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Email:": "Email:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Author name: ": "Author name: ", //$NON-NLS-0$  //$NON-NLS-1$
