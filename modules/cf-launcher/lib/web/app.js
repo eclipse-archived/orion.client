@@ -14,17 +14,16 @@ var bodyParser = require("body-parser"),
     express = require("express"),
     flash = require("connect-flash"),
     http = require("http"),
-    httpProxy = require("http-proxy"),
     path = require("path"),
     sessions = require("client-sessions"),
     nodeurl = require("url"),
-    nodeutil = require("util"),
     appControl = require("./appctl"),
     ProcessManager = require("../proc"),
+    ProxyManager = require("./proxy"),
     util = require("../util");
 
 var moduleDir = path.join(__dirname, "..", "..");
-var PROXY_ERR = "Error proxying to %s. Check application logs.";
+
 
 function startProcesses(appName, appCommand, port_app, port_debug) {
 	var procman = new ProcessManager();
@@ -40,62 +39,32 @@ function createProxyApp(options) {
 		.string("appName")
 		.string("urlPrefix")
 		.optString("password") // password is optional
-		.numbery("port")
-		.numbery("debugPort")
-		.numbery("appPort");
+		.numbery("port");
 
 	var appCommand = options.appCommand,
 	    appName = options.appName,
 	    launcherPrefix = "/" + options.urlPrefix,
 	    password = options.password,
 	    port = options.port,
-	    port_debug = options.debugPort,
-	    port_app = options.appPort,
 	    useAuth = (typeof options.password === "string");
-	var procman;
 
 	util.log("Password %s", (useAuth ? "set" : "not set"));
 	util.log("Application command line: %s", appCommand);
 	util.log("VCAP_APP_PORT: %s", port);
-	util.log("Application port: %s", port_app);
-	util.log("Debug UI port: %s", port_debug);
 	util.log("Launcher URL prefix: %s", launcherPrefix);
 	util.log();
 
-	procman = startProcesses(appName, appCommand, port_app, port_debug);
-
-	// Create proxies: one for proxying to node-inspector server..
-	var debugProxy = new httpProxy.createProxyServer({
-		target: {
-			protocol: "http:",
-			hostname: "localhost",
-//			pathname: "/debug", // TODO get node-inspector UI to work at the root instead
-//			query: { port: util.V8_DEBUG_PORT },
-			port: port_debug
-		}
-	}),
-	// ..another for proxying to the user app
-	targetProxy = new httpProxy.createProxyServer({
-		target: {
-			hostname: "localhost",
-			port: port_app
-		}
+	// Create proxies, start app & inspector
+	var proxyman = new ProxyManager(port);
+	var proxies = proxyman.createProxies({
+		target: {},
+		inspector: {},
 	});
-
-	debugProxy.on("error", function(err, socket, res) {
-		util.log("Error proxying to debugger: %s", err);
-		if (res.writeHead)
-			res.send(500, nodeutil.format(PROXY_ERR, "debugger"));
-		else if (socket.close)
-			socket.close();
-	});
-	targetProxy.on("error", function(err, socket, res) {
-		util.log("Error proxying to %s: %s", appName, err);
-		if (res.writeHead)
-			res.send(500, nodeutil.format(PROXY_ERR, appName));
-		else if (socket.close)
-			socket.close();
-	});
+	var inspector = proxies.inspector,
+	    target = proxies.target;
+	var procman = startProcesses(appName, appCommand, target.port, inspector.port);
+	util.log("[Internal] Application port: %s", target.port);
+	util.log("[Internal] node-inspector port: %s", inspector.port);
 
 	// ===================================================================
 	// Setup authentication and client-side session.
@@ -158,8 +127,8 @@ function createProxyApp(options) {
 	});
 	launcherApp.use(appPrefix, appControl(procman, appName));
 	launcherApp.use("/", express.static(path.join(moduleDir, "public")));
-	//launcherApp.use("/tty", function(req, res) {res.end("not implemented")});
-	launcherApp.use(debugProxy.web.bind(debugProxy));
+//	launcherApp.use("/tty", <insert tty here>);
+	launcherApp.use(inspector.proxy.web.bind(inspector.proxy));
 
 	// ===================================================================
 	var app = express();
@@ -178,15 +147,15 @@ function createProxyApp(options) {
 	app.use(function(req, res/*, next*/) {
 		if (procman.get(appName).state !== ProcessManager.State.STOP) {
 			// App is running, proxy the request to it
-			targetProxy.web(req, res);
+			target.proxy.web(req, res);
 		} else {
 			// App not running, redirect user to launcher for convenience
 			res.redirect(303, launcherPrefix);
 		}
 	});
 	return {
-		targetProxy: debugProxy,
-		debugProxy: debugProxy,
+		targetProxy: target.proxy,  // this used to be inspector.proxy!! yikes..
+		inspectorProxy: inspector.proxy,
 		serverApp: app,
 		processManager: procman,
 		sessionMiddleware: sessionMiddleware,
@@ -198,9 +167,7 @@ function createProxyApp(options) {
  * @param {String} options.appName
  * @param {String[]} options.appCommand
  * @param {String} options.urlPrefix
- * @param {Number} options.port
- * @param {Number} options.port_app
- * @param {Number} options.port_debug
+ * @param {Number} options.port Port we should listen on.
  */
 function startServer(options) {
 	var launcherPrefix = options.urlPrefix,
@@ -208,7 +175,7 @@ function startServer(options) {
 
 	var result = createProxyApp(options),
 	    targetProxy = result.targetProxy,
-	    debugProxy = result.debugProxy,
+	    inspectorProxy = result.inspectorProxy,
 	    serverApp = result.serverApp,
 	    processManager = result.processManager,
 	    sessionMiddleware = result.sessionMiddleware,
@@ -227,7 +194,7 @@ function startServer(options) {
 		if (segs[1] === "ws") {
 			sessionMiddleware(req, {}, function(err) {
 				if (isLoggedIn(req))
-					return debugProxy.ws(req, socket, head);
+					return inspectorProxy.ws(req, socket, head);
 				util.log("Rejected unauthenticated access to node-inspector from %s", req.ip);
 				return socket.destroy();
 			});

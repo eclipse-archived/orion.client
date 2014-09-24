@@ -37,9 +37,7 @@ exports.run = function(args) {
 		appName:    appenv.name, // name of the user app
 		urlPrefix:  urlPrefix,
 		password:   password,
-		port:       appenv.port,
-		debugPort:  util.port(appenv.port + 1),
-		appPort:    util.port(appenv.port + 2),
+		port:       appenv.port
 	});
 	srv.once("initialized", function() {
 		util.log("Visit %s to start debugging your app.",  appenv.url + "/" + urlPrefix);

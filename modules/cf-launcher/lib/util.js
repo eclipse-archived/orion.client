@@ -66,10 +66,3 @@ utils.log = function(/*message, replacements*/) {
 	debug(nodeutil.format.apply(nodeutil, arguments));
 };
 
-// Helper to get a port within the "safe" range [minPort, portCount-1]. Note that minPort
-// should always be > V8_DEBUG_PORT
-var portCount = 65536,
-    minPort = 8000;
-utils.port = function(n) {
-	return n >= portCount ? n : (n % portCount) + minPort;
-};
