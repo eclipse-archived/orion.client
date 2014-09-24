@@ -19,7 +19,7 @@ define(["orion/plugin", "help/helpService"], function(PluginProvider, mHelpServi
 	var serviceImpl = new mHelpService.HelpService();
 	var properties = {
 		root: {
-			Location: "/helpContent/Orion User Guide/Getting Started.md", //$NON-NLS-0$
+			Location: "../helpContent/Orion User Guide/Getting Started.md", //$NON-NLS-0$
 			Name: "Getting Started",
 			Directory: false
 		}
