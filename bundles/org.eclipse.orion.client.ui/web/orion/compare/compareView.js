@@ -327,6 +327,9 @@ exports.TwoWayCompareView = (function() {
 	TwoWayCompareView.prototype = new exports.CompareView();
 	
 	TwoWayCompareView.prototype.initEditors = function(initString){
+		if(this.options.preInitFunc) {
+			this.options.preInitFunc();
+		}
 		this._editors = [];//this._editors[0] represents the right side editor. this._editors[1] represents the left side editor
 		//Create editor on the right side
 		this._editors.push(this._createEditor(initString, this._uiFactory.getEditorParentDiv(false), this._uiFactory.getStatusDiv(false), this.options.oldFile));
@@ -533,7 +536,7 @@ exports.TwoWayCompareView = (function() {
 		}
 	};
 	
-	TwoWayCompareView.prototype.refresh = function(refreshEditors, generateMapper){	
+	TwoWayCompareView.prototype.refresh = function(refreshEditors, generateMapper, refreshingEditorIndex){	
 		if(this._imageMode){
 			if(this.options.commandProvider){
 				this.options.commandProvider.renderCommands(this);
@@ -562,8 +565,16 @@ exports.TwoWayCompareView = (function() {
 		this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editors[0], this._editors[1], rFeeder, lFeeder, this._overviewRuler, this._curveRuler); //$NON-NLS-1$ //$NON-NLS-0$
 		this._curveRuler.init(result.mapper ,this._editors[1], this._editors[0], this._diffNavigator);
 		if(refreshEditors) {
-			this._editors[1].setInput(this.options.newFile.Name, null, output);
-			this._editors[0].setInput(this.options.oldFile.Name, null, input);
+			if(typeof refreshingEditorIndex === "number") {
+				if(refreshingEditorIndex === 1) {
+					this._editors[1].setInput(this.options.newFile.Name, null, output);
+				} else {
+					this._editors[0].setInput(this.options.oldFile.Name, null, input);
+				}
+			} else {
+				this._editors[1].setInput(this.options.newFile.Name, null, output);
+				this._editors[0].setInput(this.options.oldFile.Name, null, input);
+			}
 		}
 		this._initSyntaxHighlighter([{fileName: this.options.newFile.Name, contentType: this.options.newFile.Type, editor: this._editors[1]},
 									 {fileName: this.options.oldFile.Name, contentType: this.options.oldFile.Type, editor: this._editors[0]}]);
@@ -802,10 +813,11 @@ exports.InlineCompareView = (function() {
  * @name orion.compare.toggleableCompareView
  */
 exports.toggleableCompareView = (function() {
-	function toggleableCompareView(startWith, options) {
+	function toggleableCompareView(startWith, options, _inputChanged) {
 		if(options){
 			options.toggler = this;
 		}
+		this._inputChanged = _inputChanged;
 		if(startWith === "inline"){ //$NON-NLS-0$
 			this._widget = new exports.InlineCompareView(options);
 		} else {
@@ -842,6 +854,9 @@ exports.toggleableCompareView = (function() {
 				this._widget.initEditors();
 			}
 			this._widget.refresh(true);
+			if(this._widget.type === "twoWay" && this._inputChanged) {
+				this._inputChanged();
+			}
 		},
 		
 		getWidget: function() {

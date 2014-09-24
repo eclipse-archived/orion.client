@@ -141,10 +141,10 @@ define([
 		 * Creates the common text editing commands.  Also generates commands for any installed plug-ins that
 		 * contribute editor actions.  
 		 */
-		generateSimpleEditorCommands: function(editor, saveCmdId) {
+		generateSimpleEditorCommands: function(editor, saveCmdId, saveCmdVisibleFunc) {
 			if (!this.isReadOnly) {
 				this._generateUndoStackCommands(editor);
-				this._generateSaveCommand(editor, saveCmdId);
+				this._generateSaveCommand(editor, saveCmdId, saveCmdVisibleFunc);
 			}
 			this._generateSearchFilesCommand(editor);
 			this._generateGotoLineCommnand(editor);
@@ -271,7 +271,7 @@ define([
 				this.commandService.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.searchFiles", 1, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding("h", true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
-		_generateSaveCommand: function(editor, saveCmdId) {
+		_generateSaveCommand: function(editor, saveCmdId, saveCmdVisibleFunc) {
 			var self = this;
 			var cmdId = saveCmdId ? saveCmdId : "orion.save"; //$NON-NLS-0$
 			var saveCommand = new mCommands.Command({
@@ -279,6 +279,9 @@ define([
 				tooltip: messages.saveFile,
 				id: cmdId,
 				visibleWhen: function() {
+					if(saveCmdVisibleFunc) {
+						return saveCmdVisibleFunc();
+					}
 					if (!editor.installed || self.inputManager.getReadOnly()) {
 						return false;
 					}

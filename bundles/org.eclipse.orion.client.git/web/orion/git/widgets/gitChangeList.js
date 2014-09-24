@@ -969,12 +969,15 @@ define([
 									additionalCmdRender : function(gridHolder) {
 										explorer.commandService.destroy(diffActionWrapper.id);
 										explorer.commandService.renderCommands("itemLevelCommands", diffActionWrapper.id, item.parent, explorer, "tool", false, gridHolder); //$NON-NLS-1$ //$NON-NLS-0$
+										explorer.commandService.renderCommands(diffActionWrapper.id, diffActionWrapper.id, item.parent, explorer, "tool", false, gridHolder); //$NON-NLS-0$
 									},
 									before : true
 								},
 								undefined,
 								compareWidgetLeftActionWrapper.id,
-								explorer.preferencesService
+								explorer.preferencesService,
+								item.parent.Type === "Diff" ? null : diffActionWrapper.id,//saveCmdContainerId
+								item.parent.Type === "Diff" ? null : "compare.save." + item.DiffLocation //saveCmdId
 							);
 						}.bind(this), 0);
 					}
