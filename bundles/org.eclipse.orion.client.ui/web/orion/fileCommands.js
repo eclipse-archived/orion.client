@@ -105,14 +105,17 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				req.addEventListener("loadend", handlers.loadend, false);
 			}
 		}
-		
-		req.open('post', force ? targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")>0 ? "&force=true" : "?force=true") : targetFolder.ImportLocation, true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+		req.open('post', targetFolder.ImportLocation, true);
 		req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
 		req.setRequestHeader("Slug", form.encodeSlug(file.name)); //$NON-NLS-0$
+
+		var xferOptions = force ? "overwrite-older": "no-overwrite";
 		// TODO if we want to unzip zip files, don't use this...
 		if (!unzip) {
-			req.setRequestHeader("X-Xfer-Options", "raw"); //$NON-NLS-1$ //$NON-NLS-0$
+			 xferOptions += "," + "raw";
 		}
+		req.setRequestHeader("X-Xfer-Options", xferOptions); //$NON-NLS-1$
 		req.setRequestHeader("Content-Type", "application/octet-stream"); //$NON-NLS-0$
 		req.onreadystatechange = function(state) {
 			if(req.readyState === 4) {
