@@ -975,9 +975,9 @@ define([
 								},
 								undefined,
 								compareWidgetLeftActionWrapper.id,
-								explorer.preferencesService,
+								explorer.preferencesService/*,
 								item.parent.Type === "Diff" ? null : diffActionWrapper.id,//saveCmdContainerId
-								item.parent.Type === "Diff" ? null : "compare.save." + item.DiffLocation //saveCmdId
+								item.parent.Type === "Diff" ? null : "compare.save." + item.DiffLocation //saveCmdId*/
 							);
 						}.bind(this), 0);
 					}
