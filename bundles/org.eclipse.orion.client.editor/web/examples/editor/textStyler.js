@@ -380,7 +380,7 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 			case "js": keywords = JS_KEYWORDS; break; //$NON-NLS-0$
 			case "css": keywords = CSS_KEYWORDS; break; //$NON-NLS-0$
 		}
-		this.whitespacesVisible = this.spacesVisible = this.tabsVisible = false;
+		this.whitespacesVisible = false;
 		this.detectHyperlinks = true;
 		this.highlightCaretLine = false;
 		this.foldingEnabled = true;
@@ -457,18 +457,6 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 			if (redraw) {
 				this.view.redraw();
 			}
-		},
-		setTabsVisible: function(visible) {
-			if (this.tabsVisible === visible) { return; }
-			this.tabsVisible = visible;
-			this.setWhitespacesVisible(this.tabsVisible || this.spacesVisible, false);
-			this.view.redraw();
-		},
-		setSpacesVisible: function(visible) {
-			if (this.spacesVisible === visible) { return; }
-			this.spacesVisible = visible;
-			this.setWhitespacesVisible(this.tabsVisible || this.spacesVisible, false);
-			this.view.redraw();
 		},
 		setDetectHyperlinks: function(enabled) {
 			this.detectHyperlinks = enabled;
@@ -648,12 +636,12 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 						this._parseComment(scanner.getData(), tokenStart, styles, multiCommentStyle, token);
 						continue;
 					case WHITE_TAB:
-						if (this.whitespacesVisible && this.tabsVisible) {
+						if (this.whitespacesVisible) {
 							style = tabStyle;
 						}
 						break;
 					case WHITE_SPACE:
-						if (this.whitespacesVisible && this.spacesVisible) {
+						if (this.whitespacesVisible) {
 							style = spaceStyle;
 						}
 						break;
@@ -671,12 +659,12 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 				var style = s;
 				switch (token) {
 					case WHITE_TAB:
-						if (this.whitespacesVisible && this.tabsVisible) {
+						if (this.whitespacesVisible) {
 							style = tabStyle;
 						}
 						break;
 					case WHITE_SPACE:
-						if (this.whitespacesVisible && this.spacesVisible) {
+						if (this.whitespacesVisible) {
 							style = spaceStyle;
 						}
 						break;
@@ -708,12 +696,12 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 				var style = s;
 				switch (token) {
 					case WHITE_TAB:
-						if (this.whitespacesVisible && this.tabsVisible) {
+						if (this.whitespacesVisible) {
 							style = tabStyle;
 						}
 						break;
 					case WHITE_SPACE:
-						if (this.whitespacesVisible && this.spacesVisible) {
+						if (this.whitespacesVisible) {
 							style = spaceStyle;
 						}
 						break;

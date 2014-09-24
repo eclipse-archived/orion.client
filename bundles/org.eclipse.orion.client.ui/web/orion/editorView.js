@@ -202,11 +202,8 @@ define([
 		updateStyler: function(prefs) {
 			var styler = this.syntaxHighlighter.getStyler();
 			if (styler) {
-				if (styler.setTabsVisible) {
-					styler.setTabsVisible(prefs.showTabs);
-				}
-				if (styler.setSpacesVisible) {
-					styler.setSpacesVisible(prefs.showSpaces);
+				if (styler.setWhitespacesVisible) {
+					styler.setWhitespacesVisible(prefs.showWhitespaces, true);
 				}
 			}
 		},

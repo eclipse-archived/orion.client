@@ -810,7 +810,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 	};
 
 	function TextStyler(view, annotationModel, stylerAdapter) {
-		this._whitespacesVisible = this._spacesVisible = this._tabsVisible = false;
+		this._whitespacesVisible = false;
 		this._highlightCaretLine = false;
 		this._foldingEnabled = true;
 		this._detectTasks = true;
@@ -925,18 +925,6 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		},
 		setHighlightCaretLine: function(highlight) {
 			this._highlightCaretLine = highlight;
-		},
-		setSpacesVisible: function(visible) {
-			if (this._spacesVisible === visible) { return; }
-			this._spacesVisible = visible;
-			this.setWhitespacesVisible(this._tabsVisible || this._spacesVisible, false);
-			this._view.redraw();
-		},
-		setTabsVisible: function(visible) {
-			if (this._tabsVisible === visible) { return; }
-			this._tabsVisible = visible;
-			this.setWhitespacesVisible(this._tabsVisible || this._spacesVisible, false);
-			this._view.redraw();
 		},
 		setWhitespacesVisible: function(visible, redraw) {
 			if (this._whitespacesVisible === visible) { return; }
@@ -1203,7 +1191,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			return styles;
 		},
 		_isRenderingWhitespace: function() {
-			return this._whitespacesVisible && (this._tabsVisible || this._spacesVisible);
+			return this._whitespacesVisible;
 		},
 		_onDestroy: function() {
 			this.destroy();
@@ -1219,12 +1207,8 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				}
 			});
 			if (this._isRenderingWhitespace()) {
-				if (this._spacesVisible) {
-					this._spliceStyles(this._spacePattern, e.ranges, e.lineText, e.lineStart);
-				}
-				if (this._tabsVisible) {
-					this._spliceStyles(this._tabPattern, e.ranges, e.lineText, e.lineStart);
-				}
+				this._spliceStyles(this._spacePattern, e.ranges, e.lineText, e.lineStart);
+				this._spliceStyles(this._tabPattern, e.ranges, e.lineText, e.lineStart);
 			}
 		},
 		_onModelChanged: function(e) {

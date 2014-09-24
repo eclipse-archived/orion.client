@@ -1074,8 +1074,7 @@ define([
 		}.bind(this);
 
 		this._settingsListener = function(e) {
-			this._styler.setTabsVisible(e.newSettings.showTabs);
-			this._styler.setSpacesVisible(e.newSettings.showSpaces);
+			this._styler.setWhitespacesVisible(e.newSettings.showWhitespaces, true);
 		}.bind(this);
 
 		this._sourceScrollListener = function(e) {
@@ -1204,8 +1203,7 @@ define([
 			}
 
 			var settings = this._editorView.getSettings();
-			this._styler.setTabsVisible(settings.showTabs);
-			this._styler.setSpacesVisible(settings.showSpaces);
+			this._styler.setWhitespacesVisible(settings.showWhitespaces, true);
 		},
 		install: function() {
 			this._rootDiv = document.createElement("div"); //$NON-NLS-0$

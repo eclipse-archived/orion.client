@@ -148,10 +148,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				}
 			},
 			whitespaces: {
-				showTabs: {
-					create: createBooleanProperty
-				},
-				showSpaces: {
+				showWhitespaces: {
 					create: createBooleanProperty
 				}
 			},
