@@ -123,6 +123,12 @@ define({
 	"title (optional)": "title (optional)",
 	"url": "url",
 	"TogglePaneOrientationTooltip": "Toggle split pane orientation",
+	"WarningHeaderTooDeep": "Header level cannot exceed 6",
+	"WarningUnorderedListItem": "Unordered list item within ordered list",
+	"WarningOrderedListItem": "Ordered list item within unordered list",
+	"WarningOrderedListShouldStartAt1": "The first item in an ordered list should have index 1",
+	"WarningLinkHasNoText": "Link has no text",
+	"WarningLinkHasNoURL": "Link has no URL",
 	"PageTitleFormat": "${0} - ${1}", // ${0} is the file or resource being edited; ${1} is the task (eg. "Editor")
 	// Display names for keys:
 	"KeyCTRL": "Ctrl",

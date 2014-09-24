@@ -16,6 +16,7 @@ define([
 	'marked/marked',
 	'orion/commands',
 	'orion/keyBinding',
+	'orion/editor/annotations',
 	'orion/editor/editor',
 	'orion/editor/textStyler',
 	'orion/editor/util',
@@ -25,7 +26,7 @@ define([
 	'orion/URITemplate',
 	'orion/webui/splitter',
 	'orion/URL-shim'
-], function(i18nUtil, messages, marked, mCommands, mKeyBinding, mEditor, mTextStyler, mTextUtil, mFileCommands, objects, lib, URITemplate, mSplitter) {
+], function(i18nUtil, messages, marked, mCommands, mKeyBinding, mAnnotations, mEditor, mTextStyler, mTextUtil, mFileCommands, objects, lib, URITemplate, mSplitter) {
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	var extensionRegex = /\.([0-9a-z]+)(?:[\?#]|$)/i;
@@ -73,7 +74,7 @@ define([
 				/* parent is a block other than the root block */
 				if (block.typeId !== "markup.quote.markdown" && //$NON-NLS-0$
 					block.typeId !== "markup.list.markdown" && //$NON-NLS-0$
-					block.typeId !== "markup.list.item.markdown") { //$NON-NLS-0$
+					block.typeId !== this._TYPEID_LISTITEM) {
 						/* no other kinds of blocks have sub-blocks, so just return */
 						return result;
 				}
@@ -109,7 +110,7 @@ define([
 						contentEnd: lineEnd,
 						end: end
 					};
-					name = "markup.heading.markdown"; //$NON-NLS-0$
+					name = this._TYPEID_HEADING;
 					contentToken = tokens[i];
 					index = end;
 				} else if (tokens[i].type === "paragraph" || tokens[i].type === "text") { //$NON-NLS-1$ //$NON-NLS-0$
@@ -154,7 +155,7 @@ define([
 						contentEnd: end,
 						end: end
 					};
-					name = "markup.other.paragraph.markdown"; //$NON-NLS-0$
+					name = this._TYPEID_PARAGRAPH;
 					index = end;
 				} else if (tokens[i].type === "blockquote_start" || tokens[i].type === "list_start") { //$NON-NLS-1$ //$NON-NLS-0$
 					/*
@@ -273,7 +274,7 @@ define([
 						end: index
 					};
 
-					name = "markup.list.item.markdown"; //$NON-NLS-0$
+					name = this._TYPEID_LISTITEM;
 					startToken = tokens[i];
 					endToken = tokens[j];
 					seedTokens = tokens.slice(i + 1, j);
@@ -338,7 +339,7 @@ define([
 						 * in a list item).  Create a text token with the table's text to be used by the parent
 						 * block.
 						 */
-						name = "markup.other.paragraph.markdown"; //$NON-NLS-0$
+						name = this._TYPEID_PARAGRAPH;
 						parentTokens = [{type: "text", text: text.substring(index, end)}]; //$NON-NLS-0$
 					}
 					index = end;
@@ -349,7 +350,7 @@ define([
 						contentEnd: index,
 						end: index
 					};
-					name = "markup.other.paragraph.markdown"; //$NON-NLS-0$
+					name = this._TYPEID_PARAGRAPH;
 					parentTokens = [tokens[i]];
 				}
 
@@ -485,9 +486,11 @@ define([
 		setStyler: function(styler) {
 			if (this._styler) {
 				this._styler.removeEventListener("BlocksChanged", this._onBlocksChanged); //$NON-NLS-0$
+				this._styler.removeAnnotationProvider(this._annotationProvider);
 			}
 			this._styler = styler;
 			styler.addEventListener("BlocksChanged", this._onBlocksChanged.bind(this)); //$NON-NLS-0$
+			styler.addAnnotationProvider(this._annotationProvider.bind(this));
 		},
 		setView: function(view) {
 			this._view = view;
@@ -567,9 +570,132 @@ define([
 			}
 			return index;
 		},
+		_annotationProvider: function(annotationModel, baseModel, block, start, end, _remove, _add) {
+			var iter = annotationModel.getAnnotations(block.start, block.end);
+			while (iter.hasNext()) {
+				var annotation = iter.next();
+				if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_WARNING) {
+					_remove.push(annotation);
+				}
+			}
+			this._computeAnnotations(annotationModel, baseModel, block, start, end, _add);
+		},
+		_computeAnnotations: function(annotationModel, baseModel, block, start, end, _add) {
+			if (block.start <= end && start <= block.end) {
+				if (block.typeId === this._TYPEID_HEADING) {
+					if (block.tokens[0].depth === 6) {
+						var text = baseModel.getText(block.start, block.contentStart);
+						var match = this._leadingHashesRegex.exec(text);
+						if (match && match[0].length > 6) {
+							var annotation = mAnnotations.AnnotationType.createAnnotation(
+								mAnnotations.AnnotationType.ANNOTATION_WARNING,
+								block.start,
+								block.start + match[0].length,
+								messages.WarningHeaderTooDeep);
+						}
+					}
+				} else if (block.typeId === this._TYPEID_LISTITEM) {
+					text = baseModel.getText(block.start, block.contentStart + 1);
+					this._orderedListRegex.lastIndex = 0;
+					var itemIsOrdered = this._orderedListRegex.test(text);
+					var listIsOrdered = block.parent.startToken.ordered;
+					if (itemIsOrdered !== listIsOrdered) {
+						annotation = mAnnotations.AnnotationType.createAnnotation(
+							mAnnotations.AnnotationType.ANNOTATION_WARNING,
+							block.start,
+							block.contentStart,
+							itemIsOrdered ? messages.WarningOrderedListItem : messages.WarningUnorderedListItem);
+					} else {
+						if (listIsOrdered && block.parent.getBlocks()[0] === block && text.indexOf("1.")) { //$NON-NLS-0$
+							annotation = mAnnotations.AnnotationType.createAnnotation(
+								mAnnotations.AnnotationType.ANNOTATION_WARNING,
+								block.start,
+								block.contentStart,
+								messages.WarningOrderedListShouldStartAt1);
+						}
+					}
+				} else if (block.typeId === this._TYPEID_PARAGRAPH) {
+					text = baseModel.getText(block.start, block.end);
+					var linkTokens = this._extractLinks(text);
+//					var links;
+					linkTokens.forEach(function(current) {
+						var linkStart = block.start + current.index;
+						if (!current.match[1]) {
+							annotation = mAnnotations.AnnotationType.createAnnotation(
+								mAnnotations.AnnotationType.ANNOTATION_WARNING,
+								linkStart,
+								linkStart + current.match[0].length,
+								messages.WarningLinkHasNoText);
+						} else {
+							if (current.pattern === marked.InlineLexer.rules.link) {
+								if (!current.match[2]) {
+									annotation = mAnnotations.AnnotationType.createAnnotation(
+										mAnnotations.AnnotationType.ANNOTATION_WARNING,
+										linkStart,
+										linkStart + current.match[0].length,
+										messages.WarningLinkHasNoURL);
+								}
+							} else {
+								/* reflink */
+								// TODO need to react to ref definition changes
+//								if (!links) {
+//									var currentBlock = block;
+//									while (currentBlock) {
+//										if (currentBlock.links) {
+//											links = currentBlock.links;
+//											break;
+//										}
+//										currentBlock = currentBlock.parent;
+//									}
+//								}
+//								var refName = current.match[2] || current.match[1];
+//								if (!(links && links[refName])) {
+//									annotation = mAnnotations.AnnotationType.createAnnotation(
+//										mAnnotations.AnnotationType.ANNOTATION_WARNING,
+//										linkStart,
+//										linkStart + current.match[0].length,
+//										"Undefined link reference: " + refName);
+//								}
+							}
+						}
+					});
+				}
+				if (annotation) {
+					_add.push(annotation);
+				}
+			}
+
+			block.getBlocks().forEach(function(current) {
+				this._computeAnnotations(annotationModel, baseModel, current, start, end, _add);
+			}.bind(this));
+		},
+		_extractLinks: function(text) {
+			var result = [];
+			var textIndex = 0;
+			this._linkDetectRegex.lastIndex = 0;
+			var potentialLinkMatch = this._linkDetectRegex.exec(text);
+			while (potentialLinkMatch) {
+				if (potentialLinkMatch.index) {
+					textIndex += potentialLinkMatch.index;
+					text = text.substring(potentialLinkMatch.index);
+				}
+				var pattern = marked.InlineLexer.rules.link;
+				var match = pattern.exec(text);
+				if (!match) {
+					pattern = marked.InlineLexer.rules.reflink;
+					match = pattern.exec(text);
+				}
+				if (match) {
+					result.push({match: match, index: textIndex, pattern: pattern});
+				}
+				this._linkDetectRegex.lastIndex = match ? match[0].length : 1;
+				potentialLinkMatch = this._linkDetectRegex.exec(text);
+			}
+			return result;
+		},
 		_generateHTML: function(rootElement, block) {
 			if (!block.startToken && !block.tokens) {
-				return;	/* likely a block with only tokens for its parent */
+				return;	 /* likely a block with only tokens for its parent */
 			}
 
 			var links = {};
@@ -865,6 +991,9 @@ define([
 		},
 		_CR: "\r", //$NON-NLS-0$
 		_NEWLINE: "\n", //$NON-NLS-0$
+		_TYPEID_HEADING: "markup.heading.markdown", //$NON-NLS-0$
+		_TYPEID_LISTITEM: "markup.list.item.markdown", //$NON-NLS-0$
+		_TYPEID_PARAGRAPH: "markup.other.paragraph.markdown", //$NON-NLS-0$
 		_atxDetectRegex: /\s*#/g,
 		_blockquoteRemoveMarkersRegex: /^[ \t]*>[ \t]?/gm,
 		_blockquoteStartRegex: /[ \t]*>[ \t]?/g,
@@ -872,6 +1001,8 @@ define([
 		_elementCounter: 0,
 		_hrRegex: /([ \t]*[-*_]){3,}/g,
 		_htmlNewlineRegex: /\n\s*\S[\s\S]*$/g,
+		_leadingHashesRegex: /^#*/,
+		_linkDetectRegex: /!?\[/g,
 		_newlineRegex: /\n/g,
 		_orderedListRegex: /\d+\.[ \t]/g,
 		_spacesAndTabsRegex: /[ \t]*/g,
