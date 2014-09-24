@@ -671,6 +671,139 @@ define([
 		},
 		
 		/**
+		 * Object of search kinds
+		 */
+		SearchOptions: {
+		    FUNCTION_DECLARATION: 0,
+		    IDENTIFIER: 1
+		},
+		
+		/**
+		 * @name findDeclaration
+		 * @description Will attempt to find the declaration of the node at the given
+		 * offset. If it cannot be computed <code>null</code> is returned.
+		 * @function
+		 * @param {Number} offset The offset into the source file
+		 * @param {Object} ast The AST to search
+		 * @param {Object} options The options to search with
+		 * @returns {Object|null} Return the found declaration AST node or <code>null</code>
+		 * @since 7.0
+		 */
+		findDeclaration: function findDeclaration(offset, ast, options) {
+		    //TODO for now do a lookup from the AST, this function will ultimately delegate
+		    //to whatever ENV we use 
+		    var id = options.id;
+		    if(!id) {
+		        return null;
+		    }
+		    var kind = options.kind;
+		    if(typeof(kind) === 'undefined') {
+		        return null;
+		    }
+		    this._declFinder.offset = offset;
+		    this._declFinder.id = id;
+		    this._declFinder.kind = kind;
+		    this._declFinder.enter = this._declFinder.enter.bind(this._declFinder);
+		    this._declFinder.leave = this._declFinder.leave.bind(this._declFinder);
+		    Estraverse.traverse(ast, this._declFinder);
+		    var scope = this._declFinder.scopes.pop();
+		    while(scope) {
+		        var decl = scope.decls.pop();
+		        if(decl) {
+		            return decl;
+		        }
+		        scope = this._declFinder.scopes.pop();
+		    }
+		    return null;
+		},
+		
+		/**
+		 * An AST visitor to find a declaration of a certain type
+		 * @since 7.0
+		 */
+		_declFinder: {
+		    enter: function(node) {
+		         switch(node.type) {
+		             case 'Program': {
+		                 this.scopes = [];
+		                 this.decl = null;
+		                 this.offsetscope = null;
+		                 this.scopes.push({type: node.type, range: node.range, decls: []});
+		                 break;
+		             }
+		             case 'FunctionDeclaration': {
+		                 if(this.offsetscope) {
+		                     return Estraverse.VisitorOption.Skip;
+		                 }
+		                 if(this._checkScope(node)) {
+		                     return Estraverse.VisitorOption.Break;
+		                 }
+		                 if(this.kind === Finder.SearchOptions.FUNCTION_DECLARATION && 
+		                          node.id && node.id.name === this.id) {
+		                      this._pushDecl(node);
+		                 }
+		                 this.scopes.push({type: node.type, range: node.range, decls: []});
+		                 break;
+		             }
+		             case 'FunctionExpression': {
+		                 if(this.offsetscope) {
+		                     return Estraverse.VisitorOption.Skip;
+		                 }
+		                 if(this._checkScope(node)) {
+		                     return Estraverse.VisitorOption.Break;
+		                 }
+		                 this.scopes.push({type: node.type, range: node.range, decls: []});
+		                 break;
+		             }
+		             case 'VariableDeclarator': {
+		                 if(this.kind === Finder.SearchOptions.IDENTIFIER && 
+		                          node.id && node.id.name === this.id) {
+		                    this._pushDecl(node);
+                	            if(this.offsetscope) {
+                	                return Estraverse.VisitorOption.Break;
+                	            }
+		                 }
+		                 break;
+		             }
+		             default: {
+		                 if(this._checkScope(node)) {
+		                     return Estraverse.VisitorOption.Break;
+		                 }
+		             }
+		         }
+		         
+	        },
+	        leave: function(node) {
+	            switch(node.type) {
+	                case 'FunctionDeclaration': 
+	                case 'FunctionExpression': {
+	                    if(this.offsetscope && this.offsetscope.decls.length > 0) {
+	                        return Estraverse.VisitorOption.Break;
+	                    }
+	                    if(node.range[1] <= this.offset) {
+	                       this.scopes.pop();
+	                    }
+	                    break;
+	                }
+	            }
+	        },
+	        _checkScope: function(node) {
+	            if(!this.offsetscope && node.range[0] > this.offset) {
+		             //we found the node, if there are decls stop
+		             this.offsetscope = this.scopes[this.scopes.length-1];
+		             if(this.offsetscope.decls.length > 0) {
+		                 return true;
+		             }
+                 }
+                 return false;
+	        },
+	        _pushDecl: function _checkDecl(node) {
+	            var scope = this.scopes[this.scopes.length-1];
+	            scope.decls.push(node);
+	        }
+		},
+		
+		/**
 		 * @description Finds all of the block comments in an HTML file
 		 * @function
 		 * @public

@@ -26,6 +26,7 @@ define([
 	'javascript/contentAssist/contentAssist',
 	'javascript/validator',
 	'javascript/occurrences',
+	'javascript/hover',
 	'javascript/outliner',
 	'orion/plugin',
 	'orion/util',
@@ -35,7 +36,7 @@ define([
 	'orion/editor/stylers/application_schema_json/syntax',
 	'orion/editor/stylers/application_x-ejs/syntax'
 ], function(Esprima, ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
-			EslintValidator, Occurrences, Outliner,	PluginProvider, Util, GenerateDocCommand, mJS, mJSON, mJSONSchema, mEJS) {
+			EslintValidator, Occurrences, Hover, Outliner,	PluginProvider, Util, GenerateDocCommand, mJS, mJSON, mJSONSchema, mEJS) {
 
 	/**
 	 * Plug-in headers
@@ -116,6 +117,16 @@ define([
 	 */
 	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(astManager),  //$NON-NLS-0$
 		{
+			contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
+	});
+	
+	/**
+	 * Register the hover support
+	 */
+	provider.registerService("orion.edit.hover", new Hover.JavaScriptHover(astManager),  //$NON-NLS-0$
+		{
+		    tipTitle: 'JavaScript',
+		    name: 'JavaScript Hover Provider',
 			contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
 	});
 	
