@@ -192,12 +192,12 @@ exports.ResourceComparer = (function() {
 				//Create the right hand side input manager
 				if(!this._checkReadonly(this.options.readonlyRight)) {
 					this._inputManagers[0].manager = this._createInputManager();
-					this._initInputManager(this._inputManagers[0].manager, 0, this.options.saveRight ? this.options.saveRight.saveCmdContainerId : this._compareView.getWidget()._uiFactory.getActionDivId(), !!this.options.saveRight);
+					this._initInputManager(this._inputManagers[0].manager, 0, this.options.saveRight ? this.options.saveRight.saveCmdContainerId : this._compareView.getWidget()._uiFactory.getActionDivId(), !!this.options.saveRight, this.options.saveRight ? this.options.saveRight.titleId : null);
 				}
 				//Create the left hand side input manager
 				if(!this._checkReadonly(this.options.readonly, true)) {
 					this._inputManagers[1].manager =  this._createInputManager();
-					this._initInputManager(this._inputManagers[1].manager, 1, this.options.saveLeft ? this.options.saveLeft.saveCmdContainerId : this._compareView.getWidget()._uiFactory.getActionDivId(true), !!this.options.saveLeft);
+					this._initInputManager(this._inputManagers[1].manager, 1, this.options.saveLeft ? this.options.saveLeft.saveCmdContainerId : this._compareView.getWidget()._uiFactory.getActionDivId(true), !!this.options.saveLeft, this.options.saveLeft ? this.options.saveLeft.titleId : null);
 				}
 			}
 			var that = this;
@@ -225,13 +225,14 @@ exports.ResourceComparer = (function() {
 				}
 			}.bind(this));
 		},
-		_initInputManager: function(inputManger, editorIndex, actionBarId, embedded){
+		_initInputManager: function(inputManger, editorIndex, actionBarId, embedded, titleId){
 			var that = this;
 			objects.mixin(inputManger, {
 				filePath: "",
 				_editorIndex: editorIndex,
 				_actionBarId: actionBarId,
 				embedded: embedded,
+				titleId: titleId,
 				getInput: function() {
 					return this.filePath;
 				},
@@ -239,12 +240,27 @@ exports.ResourceComparer = (function() {
 				setDirty: function(dirty) {
 					var editors = that._compareView.getWidget().getEditors();
 					var checkedDirty = dirty;
-					if(editors && editors.length === 2){
-						checkedDirty = editors[0].isDirty() || editors[1].isDirty();
-					}
-					mGlobalCommands.setDirtyIndicator(checkedDirty);
-					if(that._compareView.getWidget().refreshTitle){
-						that._compareView.getWidget().refreshTitle(this._editorIndex, dirty);
+					if(!this.embedded) {
+						if(editors && editors.length === 2){
+							checkedDirty = editors[0].isDirty() || editors[1].isDirty();
+						}
+						mGlobalCommands.setDirtyIndicator(checkedDirty);
+						if(that._compareView.getWidget().refreshTitle){
+							that._compareView.getWidget().refreshTitle(this._editorIndex, dirty);
+						}
+					} else if(this.titleId) {
+						var titleNode = lib.node(this.titleId);
+						if(!titleNode) {
+							return;
+						}
+						//lib.empty(titleNode);
+						var label = titleNode.textContent;
+						if(label) {
+							if (label.charAt(label.length -1) === '*') { //$NON-NLS-0$
+								label = label.substring(0, label.length-1);
+							}
+							titleNode.textContent = checkedDirty ? label + "*" : label;
+						}
 					}
 				},
 				

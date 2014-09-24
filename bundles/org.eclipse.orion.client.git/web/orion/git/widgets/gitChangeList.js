@@ -894,6 +894,7 @@ define([
 	
 						itemLabel = document.createElement("span"); //$NON-NLS-0$
 						itemLabel.textContent = item.name;
+						itemLabel.id = explorer.prefix + item.name + item.type + "FileItemId"; //$NON-NLS-0$
 						div.appendChild(itemLabel);
 					} else if (item.Type === "ExplorerSelection") { //$NON-NLS-0$
 						td.colSpan = 2;
@@ -975,9 +976,10 @@ define([
 								},
 								undefined,
 								compareWidgetLeftActionWrapper.id,
-								explorer.preferencesService/*,
+								explorer.preferencesService,
 								item.parent.Type === "Diff" ? null : diffActionWrapper.id,//saveCmdContainerId
-								item.parent.Type === "Diff" ? null : "compare.save." + item.DiffLocation //saveCmdId*/
+								item.parent.Type === "Diff" ? null : "compare.save." + item.DiffLocation, //saveCmdId
+								explorer.prefix + item.parent.name + item.parent.type + "FileItemId" //$NON-NLS-0$ //The compare widget title where the dirty indicator can be inserted
 							);
 						}.bind(this), 0);
 					}
