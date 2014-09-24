@@ -602,7 +602,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		}
 	};
 	
-	/*provider.registerServiceProvider(
+	provider.registerServiceProvider(
 		"orion.shell.command",
 		appLogsImpl, {
 			name: "cfo logs",
@@ -614,7 +614,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 				defaultValue: null
 			}]
 		}
-	);*/
+	);
 	
 	/* Add a manifest editor content assist */
 	provider.registerServiceProvider("orion.edit.contentAssist",
