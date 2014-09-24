@@ -250,7 +250,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 			if(content.actions && content.actions.length>0) {
 				var breadcrumbTarget = 	{};
 				breadcrumbTarget.Parents = [];
-				breadcrumbTarget.Name = profile.lastJSON.Name && profile.lastJSON.Name.replace(/^\s+|\s+$/g,"")!=="" ? profile.lastJSON.Name : profile.lastJSON.login; //$NON-NLS-0$
+				breadcrumbTarget.Name = profile.lastJSON.FullName && profile.lastJSON.FullName.replace(/^\s+|\s+$/g,"")!=="" ? profile.lastJSON.FullName : profile.lastJSON.login; //$NON-NLS-0$
 				mGlobalCommands.setPageTarget({task: "User Profile", breadcrumbTarget: breadcrumbTarget}); //$NON-NLS-0$
 			
 				this.commandService.destroy(this.pageActionsPlaceholder);
