@@ -111,7 +111,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 			var formData = {
 				login : userInfo.login,
 				password : userInfo.password,
-				email: userInfo.email
+				Email: userInfo.Email
 			};
 			return xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {

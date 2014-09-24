@@ -144,8 +144,8 @@ define([
 			var userdata = {};
 			
 			userdata.login = this.accountFields[0].getValue();
-			userdata.Name = this.accountFields[1].getValue();
-			userdata.email = this.accountFields[2].getValue();
+			userdata.FullName = this.accountFields[1].getValue();
+			userdata.Email = this.accountFields[2].getValue();
 			
 			for(var i=0; i<authServices.length; i++){
 				var servicePtr = authServices[i];
@@ -304,13 +304,13 @@ define([
 						var b = userService.getUserInfo(jsonData.Location).then( function( accountData ){
 							settingsWidget.username = accountData.login;
 							settingsWidget.accountFields[0].setValue( accountData.login );
-							if (accountData.Name){
-								settingsWidget.accountFields[1].setValue( accountData.Name );
+							if (accountData.FullName){
+								settingsWidget.accountFields[1].setValue( accountData.FullName );
 							} else {
 								settingsWidget.accountFields[1].setValue( '' );
 							}
-							if (accountData.email){
-								settingsWidget.accountFields[2].setValue( accountData.email );
+							if (accountData.Email){
+								settingsWidget.accountFields[2].setValue( accountData.Email );
 							} else {
 								settingsWidget.accountFields[2].setValue( '' );
 							}

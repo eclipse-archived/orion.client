@@ -51,8 +51,8 @@ define(["orion/plugin", "profile/UsersService", "domReady!"], function(PluginPro
 			"sections" : [
                             {"id": "personalInformation", "name" : "Personal Information", "data" :[
                                                                                                     {"type": "TextBox", "props": {"id": "pi_login", "readOnly" : false, "name" : "login"}, "label": "Login:"},
-                                                                                                    {"type": "TextBox", "props": {"id": "pi_name", "readOnly" : false,  "name" : "Name"}, "label" : "Name:"},
-                                                                                                  	 {"type": "TextBox", "props": {"id": "pi_email", "readOnly" : false, "name" : "email"}, "label" : "Email:"},
+                                                                                                    {"type": "TextBox", "props": {"id": "pi_name", "readOnly" : false,  "name" : "FullName"}, "label" : "Name:"},
+                                                                                                  	 {"type": "TextBox", "props": {"id": "pi_email", "readOnly" : false, "name" : "Email"}, "label" : "Email:"},
                                                                                                   	 {"type": "CheckBox", "props": {"id": "pi_emailConfirmed", "readOnly" : true, "name" : "emailConfirmed"}, "label" : "Email confirmed:"},
                                                                                                     {"type": "DateLong", "props": {"id": "pi_lastLogin", "name" : "LastLogInTimestamp"}, "label" : "Last login:	"},
                                                                                                   	 {"type": "Text", "props": {"id": "pi_diskUsage", "name" : "diskUsage"}, "label" : "Disk Usage:	"},

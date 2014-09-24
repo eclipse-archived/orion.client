@@ -56,7 +56,7 @@ define(['i18n!profile/nls/messages', 'orion/webui/dialog'], function(messages, d
 		this.registry.getService("orion.core.user").createUser({
 			login: dialog.$userName.value,
 			password: dialog.$password.value,
-			email: dialog.$email.value
+			Email: dialog.$email.value
 		}).then(dialog.func, function(response) { //$NON-NLS-0$
 			console.info(response);
 			var message = response.Message;
