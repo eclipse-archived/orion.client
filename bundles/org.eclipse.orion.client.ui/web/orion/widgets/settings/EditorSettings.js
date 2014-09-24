@@ -226,73 +226,10 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		},
 		createSections: function() {
 			var prefs = this.oldPrefs;
-
 			var fields = [], subSection, options, set, select;
-			var themePreferences = this.themePreferences;
-			if (!this.local && this.editorThemeWidget) {
-				this.editorThemeSection = new mSection.Section(this.sections, {
-					id: "editorThemeSettings", //$NON-NLS-0$
-					title: messages.EditorThemes,
-					slideout: true
-				});
-
-				this.editorThemeWidget.renderData( this.editorThemeSection.getContentElement(), 'INITIALIZE' ); //$NON-NLS-0$
-			} else {
-				var themeStyles = this.oldThemeStyles;
-				if (prefs.themeVisible && (!this.local || prefs.themeLocalVisible)) {
-					var styles = themeStyles.styles;
-					options = [];
-					for( var theme= 0; theme < styles.length; theme++ ){
-						set = {
-							value: styles[theme].name,
-							label: styles[theme].name
-						};
-						if( styles[theme].name === themeStyles.style.name ){
-							set.selected = true;
-						}
-						options.push(set);
-					}
-					select = this.themeSelect = new LabeledSelect( 
-						{	fieldlabel:messages.Theme, 
-							options:options,
-							postChange: themePreferences.setTheme.bind(themePreferences)
-						}
-					);
-					fields.push(select);
-				}
-				if (prefs.fontSizeVisible && (!this.local || prefs.fontSizeLocalVisible)) {
-					var fontSize = themeStyles.style.fontSize;
-					options = [];
-					function fontSizes(unit) {
-						for( var size = 8; size < 19; size++ ){
-							set = {
-								value: size + unit,
-								label: size + unit
-							};
-							if( set.label === fontSize ){
-								set.selected = true;
-							}
-							options.push(set);
-						}
-					}
-					fontSizes("px"); //$NON-NLS-0$
-					fontSizes("pt"); //$NON-NLS-0$
-					select = this.sizeSelect = new LabeledSelect( 
-						{	fieldlabel:messages["Font Size"], 
-							options:options,
-							postChange: themePreferences.setFontSize.bind(themePreferences)
-						}
-					);
-					fields.push(select);
-				}
-				if (!this.local && fields.length > 0) {
-					subSection = new Subsection( {sectionName:messages.Theme, parentNode: this.editorThemeSection.getContentElement(), children: fields} );
-					subSection.show();
-					fields = [];
-				}
-			}
-
 			var sectionWidget, subsectionWidget;
+			var themePreferences = this.themePreferences;
+			
 			for (var section in sections) {
 				if (sections.hasOwnProperty(section)) {
 					if (!this.local) {
@@ -336,6 +273,69 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 							}
 						}
 					}
+				}
+			}
+
+			if (!this.local && this.editorThemeWidget) {
+				this.editorThemeSection = new mSection.Section(this.sections, {
+					id: "editorThemeSettings", //$NON-NLS-0$
+					title: messages.EditorThemes,
+					slideout: true
+				});
+
+				this.editorThemeWidget.renderData( this.editorThemeSection.getContentElement(), 'INITIALIZE' ); //$NON-NLS-0$
+			} else {
+				var themeStyles = this.oldThemeStyles;
+				if (prefs.fontSizeVisible && (!this.local || prefs.fontSizeLocalVisible)) {
+					var fontSize = themeStyles.style.fontSize;
+					options = [];
+					function fontSizes(unit) {
+						for( var size = 8; size < 19; size++ ){
+							set = {
+								value: size + unit,
+								label: size + unit
+							};
+							if( set.label === fontSize ){
+								set.selected = true;
+							}
+							options.push(set);
+						}
+					}
+					fontSizes("px"); //$NON-NLS-0$
+					fontSizes("pt"); //$NON-NLS-0$
+					select = this.sizeSelect = new LabeledSelect( 
+						{	fieldlabel:messages["Font Size"], //$NON-NLS-0$
+							options:options,
+							postChange: themePreferences.setFontSize.bind(themePreferences)
+						}
+					);
+					fields.unshift(select);
+				}
+				if (prefs.themeVisible && (!this.local || prefs.themeLocalVisible)) {
+					var styles = themeStyles.styles;
+					options = [];
+					for( var theme= 0; theme < styles.length; theme++ ){
+						set = {
+							value: styles[theme].name,
+							label: styles[theme].name
+						};
+						if( styles[theme].name === themeStyles.style.name ){
+							set.selected = true;
+						}
+						options.push(set);
+					}
+					select = this.themeSelect = new LabeledSelect( 
+						{	fieldlabel:messages.Theme, 
+							options:options,
+							postChange: themePreferences.setTheme.bind(themePreferences)
+						}
+					);
+					fields.unshift(select);
+				}
+				if (!this.local && fields.length > 0) {
+					subSection = new Subsection( {sectionName:messages.Theme, parentNode: this.editorThemeSection.getContentElement(), children: fields} );
+					subSection.show();
+					fields = [];
 				}
 			}
 
