@@ -98,6 +98,7 @@
 .contentassist .cloneProposal {
 	box-shadow: rgba(0, 0, 0, 0.9) 2px 2px 8px;
 	position: fixed;
+	visibility: visible;
 	z-index: 1000; /* must be greater than .contentassist z-index */
 }
 
@@ -109,6 +110,7 @@
 	display: block;
 	height: 0;			/* this node should not be visible */
 	overflow: visible;
+	visibility: hidden; /* this node should not be visible */
 	width: 0;			/* this node should not be visible */
 	z-index: 1000; /* must be greater than .contentassist z-index so that child node is above .contentassist */
 }
