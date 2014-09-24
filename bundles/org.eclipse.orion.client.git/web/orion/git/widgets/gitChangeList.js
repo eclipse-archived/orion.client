@@ -599,7 +599,7 @@ define([
 						div.classList.add("gitChangeListCompareMaximized"); //$NON-NLS-0$
 						diffContainer.classList.add("gitChangeListCompareContainerMaximized"); //$NON-NLS-0$
 					}
-					data.handler._editors.forEach(function(editor) {
+					(data.handler._editors || [data.handler._editor]).forEach(function(editor) {
 						editor.resize();
 					});
 				},
