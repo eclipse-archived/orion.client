@@ -59,7 +59,7 @@
 		<property name="bundle.fullpath" location="${bundle}" />
 		<property name="out.fullpath" location="${out}" />
 
-		<!-- For each JS file in this bundle we need 3 optimized files: {foo}.js, {foo}.js.map, {foo}.js.src
+		<!-- For each JS file in this bundle we need 3 optimized files: {foo}.js, {foo}.js.map, {foo}.js.src.js
 		We build the list of JS files from ${bundle}, but the actual optimized files are in ${out}. So we
 		construct a set of relative paths to the optimized files, which we can apply against ${out} later.
 		-->
@@ -74,7 +74,7 @@
 				<compositemapper>
 					<identitymapper />
 					<globmapper from="*" to="*.map" />
-					<globmapper from="*" to="*.src" />
+					<globmapper from="*" to="*.src.js" />
 				</compositemapper>
 			</chainedmapper>
 		</pathconvert>
