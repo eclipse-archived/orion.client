@@ -461,8 +461,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 			timeout: 15000,
 			responseType: "json"
 		}).then(function(result) {
-			var results = JSON.parse(result.response);
-			var messages = results.messages;
+			var messages = result.response.messages;
 			if (messages.length > 0) {
 				var currentDate = new Date();
 				var startDate = new Date(messages[0].startdate);
