@@ -103,20 +103,18 @@ define([
 
 				// Add plugin-contributed extension categories
 				var settingsRegistry = _self.settingsRegistry;
-				settingsRegistry.getCategories().map(function(category, i) {
+				var pluginCategories = settingsRegistry.getCategories().map(function(category) {
 					return {
-						category: category,
-						label: settingsRegistry.getCategoryLabel(category) || messages[category] || category
-					};
-				}).sort(function byLabel(a, b) {
-					return a.label.localeCompare(b.label);
-				}).forEach(function(currData) {
-					var category = currData.category;
-					_self.settingsCategories.push({
 						id: category,
-						textContent: currData.label,
+						textContent: settingsRegistry.getCategoryLabel(category) || messages[category] || category,
 						show: _self.showPluginSettings.bind(_self, category)
-					});
+					};
+				});
+				_self.settingsCategories = _self.settingsCategories.concat(pluginCategories);
+				
+				// Sort all categories alphabetically by their title
+				_self.settingsCategories.sort(function(a, b) {
+					return a.textContent.localeCompare(b.textContent);
 				});
 
 				_self.itemToIndexMap = {};
