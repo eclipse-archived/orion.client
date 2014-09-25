@@ -116,6 +116,8 @@ CompareStyler.prototype = {
 									 false /*bug 378193*/);
 	}
 };
+var SAVE_EMBEDDED = false;
+SAVE_EMBEDDED = (new URL(window.location.href).query.get("save") === "true");
 
 exports.ResourceComparer = (function() {
 	function ResourceComparer (serviceRegistry, commandRegistry, options, viewOptions) {
@@ -163,8 +165,14 @@ exports.ResourceComparer = (function() {
 		},
 		_checkReadonly: function(readonlyFlag, isLeft){
 			if(isLeft){//Legacy: If not defined, left side readonly is false
+				if(this.options.saveLeft && !SAVE_EMBEDDED) {
+					return true;
+				}
 				return typeof readonlyFlag === "undefined" ? false : readonlyFlag; //$NON-NLS-0$
 			} else {//Legacy: If not defined, right side readonly is true
+				if(this.options.saveRight && !SAVE_EMBEDDED) {
+					return true;
+				}
 				return typeof readonlyFlag === "undefined" ? true : readonlyFlag; //$NON-NLS-0$
 			}
 		},

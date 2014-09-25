@@ -31,7 +31,6 @@ define([
 	var interestedStagedGroup = [ "Added", "Changed", "Removed" ]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var allGroups = interestedUnstagedGroup.concat(interestedStagedGroup);
 	var conflictType = "Conflicting"; //$NON-NLS-0$
-	var SAVE_ENABLED = true;
 	function isConflict(type) {
 		return type === conflictType;
 	}
@@ -977,9 +976,9 @@ define([
 								undefined,
 								compareWidgetLeftActionWrapper.id,
 								explorer.preferencesService,
-								SAVE_ENABLED ? (item.parent.Type === "Diff" ? null : diffActionWrapper.id) : null,//saveCmdContainerId
-								SAVE_ENABLED ? (item.parent.Type === "Diff" ? null : "compare.save." + item.DiffLocation) : null, //saveCmdId
-								SAVE_ENABLED ? (item.parent.Type === "Diff" ? null : explorer.prefix + item.parent.name + item.parent.type + "FileItemId") : null //$NON-NLS-0$ //The compare widget title where the dirty indicator can be inserted
+								item.parent.Type === "Diff" ? null : diffActionWrapper.id,//saveCmdContainerId
+								item.parent.Type === "Diff" ? null : "compare.save." + item.DiffLocation, //saveCmdId
+								item.parent.Type === "Diff" ? null : explorer.prefix + item.parent.name + item.parent.type + "FileItemId" //$NON-NLS-0$ //The compare widget title where the dirty indicator can be inserted
 							);
 						}.bind(this), 0);
 					}
