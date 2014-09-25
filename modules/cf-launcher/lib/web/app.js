@@ -20,6 +20,7 @@ var bodyParser = require("body-parser"),
     appControl = require("./appctl"),
     ProcessManager = require("../proc"),
     ProxyManager = require("./proxy"),
+    tty = require("./tty"),
     util = require("../util");
 
 var moduleDir = path.join(__dirname, "..", "..");
@@ -59,10 +60,12 @@ function createProxyApp(options) {
 	var proxies = proxyman.createProxies({
 		target: {},
 		inspector: {},
+		tty: { ws: true, },
 	});
 	var inspector = proxies.inspector,
 	    target = proxies.target;
 	var procman = startProcesses(appName, appCommand, target.port, inspector.port);
+	var ttyServer = tty.createServer({ port: proxies.tty.port }).listen();
 	util.log("[Internal] Application port: %s", target.port);
 	util.log("[Internal] node-inspector port: %s", inspector.port);
 
@@ -127,7 +130,9 @@ function createProxyApp(options) {
 	});
 	launcherApp.use(appPrefix, appControl(procman, appName));
 	launcherApp.use("/", express.static(path.join(moduleDir, "public")));
-//	launcherApp.use("/tty", <insert tty here>);
+	launcherApp.use("/tty/", function(req, res) {
+		proxies.tty.proxy.web(req, res);
+	});
 	launcherApp.use(inspector.proxy.web.bind(inspector.proxy));
 
 	// ===================================================================
@@ -154,8 +159,7 @@ function createProxyApp(options) {
 		}
 	});
 	return {
-		targetProxy: target.proxy,  // this used to be inspector.proxy!! yikes..
-		inspectorProxy: inspector.proxy,
+		proxies: proxies,
 		serverApp: app,
 		processManager: procman,
 		sessionMiddleware: sessionMiddleware,
@@ -174,31 +178,44 @@ function startServer(options) {
 	    port = options.port;
 
 	var result = createProxyApp(options),
-	    targetProxy = result.targetProxy,
-	    inspectorProxy = result.inspectorProxy,
+	    proxies = result.proxies,
 	    serverApp = result.serverApp,
 	    processManager = result.processManager,
 	    sessionMiddleware = result.sessionMiddleware,
 	    isLoggedIn = result.isLoggedIn;
 
 	var server = http.createServer(serverApp);
-	// Listen to the `upgrade` event and proxy the WebSocket requests as well.
+	// Listen to `upgrade` event and proxy incoming WebSocket requests to either inspector, tty, or user app.
+	// TODO: clean this up -- there has to be a better way
 	server.on("upgrade", function(req, socket, head) {
 		var url = req._parsedUrl || nodeurl.parse(req.url);
 		var segs = url.pathname.split("/").slice(1), rootSegment = segs[0];
 		if (rootSegment !== launcherPrefix)
-			return targetProxy.ws(req, socket, head);
+			return proxies.target.proxy.ws(req, socket, head); // not for us, send to user app
 
-		// node-inspector makes a websocket connection to "/launcher/ws?", which we handle here.
-		// Only authenticated users can talk to the inspector.
+		// At this point we know the request is for something in the launcher, either inspector or TTY
+		var destinationProxy;
 		if (segs[1] === "ws") {
-			sessionMiddleware(req, {}, function(err) {
-				if (isLoggedIn(req))
-					return inspectorProxy.ws(req, socket, head);
-				util.log("Rejected unauthenticated access to node-inspector from %s", req.ip);
-				return socket.destroy();
-			});
+			// node-inspector makes a ws connection to "ws://[whatever]/launcher/ws?", which we catch here.
+			destinationProxy = proxies.inspector.proxy;
+		} else if (segs[1] === "tty") {
+			// Hack: we have a url like /launcher/tty/socket.io?foo but tty.js is expecting /socket.io?foo
+			// so chop off the leading 2 segments and shove the result back into req.url before proxying
+			// TODO try http-proxy forward or forwardPath
+			url.pathname = "/" + segs.slice(2).join("/");
+			req._parsedUrl = url;
+			req.url = nodeurl.format(url);
+			util.log("TTY.js-bound URL rewritten to: " + nodeurl.format(req.url));
+			destinationProxy = proxies.tty.proxy;
 		}
+		// Check login
+		sessionMiddleware(req, {}, function(err) {
+			if (isLoggedIn(req)) {
+				return destinationProxy.ws(req, socket, head);
+			}
+			util.log("Rejected unauthenticated websocket access from %s", req.ip);
+			return socket.destroy();
+		});
 	});
 	processManager.on("debuggerListening", function() {
 		server.emit("initialized");

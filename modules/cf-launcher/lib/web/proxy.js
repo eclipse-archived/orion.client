@@ -25,7 +25,8 @@ function ProxyManager(basePort) {
 	this.nextPort = basePort + 1;
 }
 /**
- * @param {Object} setup A map of <tt>name</tt> to <tt>{ port: Number?, ws: Boolean? }</tt>.
+ * @param {Object} setup A map of <tt>name</tt> to <tt>{Object}</tt>, the value is passed to 
+ * httpProxy.createProxyServer().
  * @returns {Object} A map of <tt>name</tt> to {@link ProxyConfig}
  */
 ProxyManager.prototype.createProxies = function(setup) {
@@ -33,15 +34,12 @@ ProxyManager.prototype.createProxies = function(setup) {
 	var result = Object.create(null);
 	Object.keys(setup).forEach(function(name) {
 		var config = setup[name] || {},
-		    port = (typeof config.port === "number" ? config.port : that.nextPort++);
+		    port = that.nextPort++;
 
-		var proxy = new httpProxy.createProxyServer({
-			target: {
-				hostname: "localhost",
-				port: port,
-				ws: !!(config.ws),
-			}
-		});
+		config.target = config.target || {};
+		config.target.hostname = "127.0.0.1"; // localhost
+		config.target.port = port;
+		var proxy = new httpProxy.createProxyServer(config);
 		proxy.on("error", function(err, socket, res) {
 			util.log("Error proxying to %s: %s", name, err);
 			if (res.writeHead)

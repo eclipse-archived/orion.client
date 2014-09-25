@@ -38,7 +38,8 @@
     "node-inspector": "~0.7.4",
     "minimist": "~0.2.0",
     "debug": "~1.0.2",
-    "split": "~0.3.0"
+    "split": "~0.3.0",
+    "tty.js": "~0.2.13"
   },
   "devDependencies": {
     "mocha": "~1.20.1"
