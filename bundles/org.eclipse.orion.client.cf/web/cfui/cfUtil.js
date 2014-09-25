@@ -82,6 +82,62 @@ define([
 				},
 				Message: "See Manual Deployment Information in the [root folder page](" + editLocation.href + ") to view and manage [" + launchConfName + "](" + resp.ManageUrl + ")"
 			};
+		},
+		
+		/* ===== WIZARD COMMUNICATION HELPERS ===== */
+		
+		/**
+		 * Posts the given status message.
+		 */
+		defaultPostMsg : function(status){
+			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
+				 source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
+				 status: status}), "*");
+		},
+		
+		/**
+		 * Posts the given given error.
+		 */
+		defaultPostError : function(error, target){
+			if (error.Message && error.Message.indexOf("The host is taken") === 0)
+				error.Message = "The host is already in use by another application. Please check the host/domain in the manifest file.";
+			
+			if (error.HttpCode === 404){
+				
+				error = {
+					State: "NOT_DEPLOYED",
+					Message: error.Message
+				};
+				
+			} else if (error.JsonData && error.JsonData.error_code) {
+				var err = error.JsonData;
+				if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){
+					
+					error.Retry = {
+						parameters: [{id: "user", type: "text", name: "ID:"}, {id: "password", type: "password", name: "Password:"}, {id: "url", hidden: true, value: target.Url}]
+					};
+					
+					error.forceShowMessage = true;
+					error.Severity = "Info";
+					error.Message = mCfUtil.getLoginMessage(target.ManageUrl);
+				
+				} else if (err.error_code === "CF-TargetNotSet"){
+					var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=cloud").expand({OrionHome : PageLinks.getOrionHome()});
+					error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+				}
+			}
+			
+			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
+				 source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
+				 status: error}), "*");
+		},
+		
+		/**
+		 *  Posts to close the plugin frame.
+		 */
+		defaultCloseFrame : function(){
+			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
+				 source: "org.eclipse.orion.client.cf.deploy.uritemplate", cancelled: true}), "*");
 		}
 	};
 });
