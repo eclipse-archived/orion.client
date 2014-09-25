@@ -186,6 +186,7 @@ define([
 			editor.setLineNumberRulerVisible(prefs.lineNumberRuler);
 			editor.setFoldingRulerVisible(prefs.foldingRuler);
 			editor.setOverviewRulerVisible(prefs.overviewRuler);
+			editor.setZoomRulerVisible(prefs.zoomRuler);
 			if (this.renderToolbars) {
 				this.renderToolbars(inputManager.getFileMetadata());
 			}
@@ -195,7 +196,7 @@ define([
 			}
 
 			this.dispatchEvent({
-				type: "Settings",
+				type: "Settings", //$NON-NLS-0$
 				newSettings: this.settings
 			});
 		},
@@ -418,6 +419,7 @@ define([
 				textDNDFactory: new mEditorFeatures.TextDNDFactory(),
 				annotationFactory: new mEditorFeatures.AnnotationFactory(),
 				foldingRulerFactory: new mEditorFeatures.FoldingRulerFactory(),
+				zoomRulerFactory: new mEditorFeatures.ZoomRulerFactory(),
 				lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
 				contentAssistFactory: contentAssistFactory,
 				keyBindingFactory: keyBindingFactory,

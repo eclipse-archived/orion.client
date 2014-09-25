@@ -13,6 +13,29 @@
 .ruler.overview {
 	width: 14px;
 }
+.ruler.zoom {
+	width: 100px;
+	height: 100%;
+	border-right: 1px solid #eaeaea;
+}
+
+.rulerZoomWindow {
+	background-color: rgba(0, 0, 0, 0.1);
+	position: absolute;
+	width: 100%;
+	border-radius: 3px;
+	z-index: 100;
+	pointer-events: none;
+}
+
+.textviewZoom {
+	font-size: 2px !important;
+	cursor: pointer;
+}
+
+.textviewZoom .textviewContent {
+	cursor: pointer;
+}
 
 /* Styles for the line number ruler */
 .rulerLines {

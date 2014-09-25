@@ -189,6 +189,9 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				},
 				overviewRuler: {
 					create: createBooleanProperty
+				},
+				zoomRuler: {
+					create: createBooleanProperty
 				}
 			},
 			languageTools: {

@@ -65,6 +65,8 @@ define([], function() {
 		foldingRulerVisible: true,
 		overviewRuler: true,
 		overviewRulerVisible: true,
+		zoomRuler: true,
+		zoomRulerVisible: true,
 		showWhitespaces: false,
 		showWhitespacesVisible: true,
 		wordWrap: false,

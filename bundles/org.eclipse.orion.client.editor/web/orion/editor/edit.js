@@ -179,6 +179,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	 * @property {Boolean} [showAnnotationRuler=true] whether or not the annotation ruler is shown.
 	 * @property {Boolean} [showOverviewRuler=true] whether or not the overview ruler is shown.
 	 * @property {Boolean} [showFoldingRuler=true] whether or not the folding ruler is shown.
+	 * @property {Boolean} [showZoomRuler=false] whether or not the zoom ruler is shown.
 	 * @property {Boolean} [noFocus=false] whether or not to focus the editor on creation.
 	 * @property {Number} [firstLineIndex=1] the line index displayed for the first line of text.
 	 */
@@ -340,6 +341,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		editor.setLineNumberRulerVisible(options.showLinesRuler === undefined || options.showLinesRuler);
 		editor.setAnnotationRulerVisible(options.showAnnotationRuler === undefined || options.showFoldingRuler);
 		editor.setOverviewRulerVisible(options.showOverviewRuler === undefined || options.showOverviewRuler);
+		editor.setZoomRulerVisible(options.showZoomRuler === undefined || options.showZoomRuler);
 		editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
 		editor.setInput(options.title, null, contents, false, options.noFocus);
 		

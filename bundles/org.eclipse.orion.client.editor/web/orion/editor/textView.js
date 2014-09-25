@@ -1442,7 +1442,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Number} [index=length] the ruler index.
 		 */
 		addRuler: function (ruler, index) {
-			ruler.setView(this);
 			var rulers = this._rulers;
 			if (index !== undefined) {
 				var i, sideIndex;
@@ -1457,6 +1456,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				rulers.push(ruler);
 			}
 			this._createRuler(ruler, index);
+			ruler.setView(this);
 			this._update();
 		},
 		computeSize: function() {
@@ -2715,8 +2715,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {orion.editor.TextModel} model the text model of the view.
 		 */
 		setModel: function(model) {
-			if (!model) { return; }
 			if (model === this._model) { return; }
+			model = model || new mTextModel.TextModel();
 			this._model.removeEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-0$
 			this._model.removeEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-0$
 			var oldLineCount = this._model.getLineCount();
@@ -3519,6 +3519,14 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 			}
 			this._commitIME();
+			if (this.isListening("MouseDown")) { //$NON-NLS-0$
+				var mouseEvent = this._createMouseEvent("MouseDown", e); //$NON-NLS-0$
+				this.onMouseDown(mouseEvent);
+				if (mouseEvent.defaultPrevented) {
+					e.preventDefault();
+					return;
+				}
+			}
 
 			var button = e.which; // 1 - left, 2 - middle, 3 - right
 			if (!button) { 
@@ -3545,14 +3553,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					this._clickCount++;
 				} else {
 					this._clickCount = 1;
-				}
-			}
-			if (this.isListening("MouseDown")) { //$NON-NLS-0$
-				var mouseEvent = this._createMouseEvent("MouseDown", e); //$NON-NLS-0$
-				this.onMouseDown(mouseEvent);
-				if (mouseEvent.defaultPrevented) {
-					e.preventDefault();
-					return;
 				}
 			}
 			if (button === 1) {
@@ -3589,7 +3589,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var inClient = this._isClientDiv(e);
 			if (this.isListening("MouseMove")) { //$NON-NLS-0$
 				if (inClient){
-					this.onMouseMove(this._createMouseEvent("MouseMove", e)); //$NON-NLS-0$
+					var mouseEvent = this._createMouseEvent("MouseMove", e); //$NON-NLS-0$
+					this.onMouseMove(mouseEvent);
+					if (mouseEvent.defaultPrevented) {
+						e.preventDefault();
+						return;
+					}
 				}
 			}
 			if (this._dropTarget) {
@@ -3699,7 +3704,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var left = e.which ? e.button === 0 : e.button === 1;
 			if (this.isListening("MouseUp")) { //$NON-NLS-0$
 				if (this._isClientDiv(e) || (left && this._isMouseDown)) {
-					this.onMouseUp(this._createMouseEvent("MouseUp", e)); //$NON-NLS-0$
+					var mouseEvent = this._createMouseEvent("MouseUp", e); //$NON-NLS-0$
+					this.onMouseUp(mouseEvent);
+					if (mouseEvent.defaultPrevented) {
+						e.preventDefault();
+						return;
+					}
 				}
 			}
 			if (this._linksVisible) {
@@ -4884,7 +4894,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var rect1 = div1.getBoundingClientRect();
 			var rect2 = div2.getBoundingClientRect();
 			var scrollWidth = 0;
-			if (!this._singleMode) {
+			if (!this._singleMode && !this._noScroll) {
 				div1.style.overflow = 'hidden'; //$NON-NLS-0$
 				div2.style.height = "200px"; //$NON-NLS-0$
 				var w1 = div1.clientWidth;
@@ -5064,6 +5074,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			var div = util.createElement(rulerParent.ownerDocument, "div"); //$NON-NLS-0$
 			div._ruler = ruler;
+			ruler.node = div;
 			div.rulerChanged = true;
 			div.style.position = "relative"; //$NON-NLS-0$
 			div.style.cssFloat = "left"; //$NON-NLS-0$
@@ -5250,6 +5261,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				tabSize: {value: 8, update: this._setTabSize},
 				expandTab: {value: false, update: null},
 				singleMode: {value: false, update: this._setSingleMode},
+				noScroll: {value: false, update: this._setNoScroll},
 				overwriteMode: { value: false, update: this._setOverwriteMode },
 				blockCursorVisible: { value: false, update: this._setBlockCursor},
 				marginOffset: {value: 0, update: this._setMarginOffset},
@@ -6526,6 +6538,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._updateOverflow();
 			this._updateStyle(init);
 		},
+		_setNoScroll: function (noScroll, init) {
+			this._noScroll = noScroll;
+			this._updateOverflow();
+			this._updateStyle(init);
+		},
 		_setTabSize: function (tabSize, init) {
 			this._tabSize = tabSize;
 			this._customTabSize = undefined;
@@ -6989,7 +7006,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				scrollDiv.style.height = scrollHeight + "px"; //$NON-NLS-0$
 				
 				clientWidth = this._getClientWidth();
-				if (!this._singleMode && !this._wrapMode) {
+				if (!this._singleMode && !this._wrapMode && !this._noScroll) {
 					var clientHeightNoScroll = clientHeight, clientHeightScroll = clientHeight;
 					var oldHScroll = viewDiv.style.overflowX === "scroll"; //$NON-NLS-0$
 					if (oldHScroll) {
@@ -7149,7 +7166,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		},
 		_updateOverflow: function() {
 			var viewDiv = this._viewDiv;
-			if (this._wrapMode) {
+			if (this._noScroll) {
+				viewDiv.style.overflow = "hidden"; //$NON-NLS-0$
+			} else if (this._wrapMode) {
 				viewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
 				viewDiv.style.overflowY = "scroll"; //$NON-NLS-0$
 			} else {
@@ -7164,15 +7183,19 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var div = divRuler.firstChild;
 			while (div) {
 				var ruler = div._ruler;
-				var offset = lineHeight;
 				var overview = ruler.getOverview();
+				if (div.rulerChanged) {
+					applyStyle(ruler.getRulerStyle(), div);
+				}
+				if (overview === "fixed") { //$NON-NLS-0$
+					div = div.nextSibling;
+					continue;
+				}
+				var offset = lineHeight;
 				if (overview === "page") { offset += this._topIndexY; } //$NON-NLS-0$
 				div.style.top = -offset + "px"; //$NON-NLS-0$
 				div.style.height = (rootHeight + offset) + "px"; //$NON-NLS-0$
 				
-				if (div.rulerChanged) {
-					applyStyle(ruler.getRulerStyle(), div);
-				}
 				
 				var widthDiv;
 				var child = div.firstChild;

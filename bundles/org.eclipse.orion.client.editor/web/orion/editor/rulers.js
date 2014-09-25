@@ -10,7 +10,79 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/annotations', 'orion/editor/tooltip', 'orion/util'], function(messages, mAnnotations, mTooltip, util) { //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/rulers", [
+	'i18n!orion/editor/nls/messages',
+	'orion/editor/textView', //$NON-NLS-0$
+	'orion/editor/annotations',
+	'orion/editor/tooltip', 
+	'orion/objects', //$NON-NLS-0$
+	'orion/util'
+], function(messages, mTextView, mAnnotations, mTooltip, objects, util) {
+
+	function BaseRuler (rulerLocation, rulerOverview, rulerStyle) {
+		this._location = rulerLocation || "left"; //$NON-NLS-0$
+		this._overview = rulerOverview || "page"; //$NON-NLS-0$
+		this._rulerStyle = rulerStyle;
+		this._view = null;
+	}
+	BaseRuler.prototype = /** @lends orion.editor.BaseRuler.prototype */ {
+		/**
+		 * Returns the ruler location.
+		 *
+		 * @returns {String} the ruler location, which is either "left" or "right" or "margin".
+		 *
+		 * @see orion.editor.Ruler#getOverview
+		 */
+		getLocation: function() {
+			return this._location;
+		},
+		/**
+		 * Returns the ruler overview type.
+		 *
+		 * @returns {String} the overview type, which is either "page" or "document" or "fixed".
+		 *
+		 * @see orion.editor.Ruler#getLocation
+		 */
+		getOverview: function() {
+			return this._overview;
+		},
+		/**
+		 * Returns the style information for the ruler.
+		 *
+		 * @returns {orion.editor.Style} the style information.
+		 */
+		getRulerStyle: function() {
+			return this._rulerStyle;
+		},
+		/**
+		 * Returns the text view.
+		 *
+		 * @returns {orion.editor.TextView} the text view.
+		 *
+		 * @see orion.editor.Ruler#setView
+		 */
+		getView: function() {
+			return this._view;
+		},
+		/**
+		 * Sets the view for the ruler.
+		 * <p>
+		 * This method is called by the text view when the ruler
+		 * is added to the view.
+		 * </p>
+		 *
+		 * @param {orion.editor.TextView} view the text view.
+		 */
+		setView: function (view) {
+			if (this._onTextModelChanged && this._view) {
+				this._view.removeEventListener("ModelChanged", this._listener.onTextModelChanged); //$NON-NLS-0$
+			}
+			this._view = view;
+			if (this._onTextModelChanged && this._view) {
+				this._view.addEventListener("ModelChanged", this._listener.onTextModelChanged); //$NON-NLS-0$
+			}
+		},
+	};
 
 	/**
 	 * Constructs a new ruler. 
@@ -48,10 +120,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 	 * @borrows orion.editor.AnnotationTypeList#removeAnnotationType as #removeAnnotationType
 	 */
 	function Ruler (annotationModel, rulerLocation, rulerOverview, rulerStyle) {
-		this._location = rulerLocation || "left"; //$NON-NLS-0$
-		this._overview = rulerOverview || "page"; //$NON-NLS-0$
-		this._rulerStyle = rulerStyle;
-		this._view = null;
+		BaseRuler.call(this, rulerLocation, rulerOverview, rulerStyle);
 		var self = this;
 		this._listener = {
 			onTextModelChanged: function(e) {
@@ -63,7 +132,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		};
 		this.setAnnotationModel(annotationModel);
 	}
-	Ruler.prototype = /** @lends orion.editor.Ruler.prototype */ {
+	Ruler.prototype = objects.mixin(new BaseRuler(), /** @lends orion.editor.Ruler.prototype */ {
 		/**
 		 * Returns the annotations for a given line range merging multiple
 		 * annotations when necessary.
@@ -128,44 +197,6 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 			return this._annotationModel;
 		},
 		/**
-		 * Returns the ruler location.
-		 *
-		 * @returns {String} the ruler location, which is either "left" or "right".
-		 *
-		 * @see orion.editor.Ruler#getOverview
-		 */
-		getLocation: function() {
-			return this._location;
-		},
-		/**
-		 * Returns the ruler overview type.
-		 *
-		 * @returns {String} the overview type, which is either "page" or "document".
-		 *
-		 * @see orion.editor.Ruler#getLocation
-		 */
-		getOverview: function() {
-			return this._overview;
-		},
-		/**
-		 * Returns the style information for the ruler.
-		 *
-		 * @returns {orion.editor.Style} the style information.
-		 */
-		getRulerStyle: function() {
-			return this._rulerStyle;
-		},
-		/**
-		 * Returns the text view.
-		 *
-		 * @returns {orion.editor.TextView} the text view.
-		 *
-		 * @see orion.editor.Ruler#setView
-		 */
-		getView: function() {
-			return this._view;
-		},
-		/**
 		 * Returns the widest annotation which determines the width of the ruler.
 		 * <p>
 		 * If the ruler does not have a fixed width it should provide the widest
@@ -221,24 +252,6 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		 */
 		setMultiAnnotationOverlay: function(annotation) {
 			this._multiAnnotationOverlay = annotation;
-		},
-		/**
-		 * Sets the view for the ruler.
-		 * <p>
-		 * This method is called by the text view when the ruler
-		 * is added to the view.
-		 * </p>
-		 *
-		 * @param {orion.editor.TextView} view the text view.
-		 */
-		setView: function (view) {
-			if (this._onTextModelChanged && this._view) {
-				this._view.removeEventListener("ModelChanged", this._listener.onTextModelChanged); //$NON-NLS-0$
-			}
-			this._view = view;
-			if (this._onTextModelChanged && this._view) {
-				this._view.addEventListener("ModelChanged", this._listener.onTextModelChanged); //$NON-NLS-0$
-			}
 		},
 		/**
 		 * This event is sent when the user clicks a line annotation.
@@ -527,7 +540,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 			}
 			annotationModel.replaceAnnotations(null, add);
 		}
-	};
+	});
 	mAnnotations.AnnotationTypeList.addMixin(Ruler.prototype);
 
 	/**
@@ -800,11 +813,122 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		}
 	};
 	
+
+	/**
+	 * Constructs a new zoom ruler. 
+	 *
+	 * @param {String} [rulerLocation="left"] the location for the ruler.
+	 * @param {orion.editor.Style} [rulerStyle=undefined] the style for the ruler.
+	 *
+	 * @augments orion.editor.Ruler
+	 * @class This objects implements an overview ruler.
+	 *
+	 * <p><b>See:</b><br/>
+	 * {@link orion.editor.AnnotationRuler} <br/>
+	 * {@link orion.editor.Ruler} 
+	 * </p>
+	 * @name orion.editor.OverviewRuler
+	 */
+	var ZoomRuler = function(rulerLocation, rulerStyle) {
+		BaseRuler.call(this, rulerLocation, "fixed", rulerStyle); //$NON-NLS-0$
+	};
+	
+	ZoomRuler.prototype = objects.mixin(new BaseRuler(), {
+		setView: function (view) {
+			this._destroy();
+			BaseRuler.prototype.setView.call(this, view);
+			this._create();
+		},
+		_create: function() {
+			var textView = this.getView();
+			if (!textView) return;
+			var options = textView.getOptions();
+			options.parent = this.node;
+			var rulerTheme = "textviewZoom"; //$NON-NLS-0$
+			var theme = options.themeClass;
+			if (theme) {
+				theme = theme.replace(rulerTheme, "");
+				if (theme) { theme = " " + theme; } //$NON-NLS-0$
+				theme = rulerTheme + theme;
+			} else {
+				theme = rulerTheme;
+			}
+			options.themeClass = theme;
+			options.noScroll = true;
+			options.readonly = true;
+			var zoomView = this._zoomView = new mTextView.TextView(options);
+			zoomView._clientDiv.contentEditable = false;
+			zoomView.setModel(textView.getModel());
+			var document = textView.getOptions("parent").ownerDocument; //$NON-NLS-0$
+			var windowDiv = this._windowDiv = util.createElement(document, "div"); //$NON-NLS-0$
+			windowDiv.className ="rulerZoomWindow"; //$NON-NLS-0$
+			this.node.appendChild(windowDiv);
+			var that = this;
+			function updateScroll(scroll) {
+				var clientHeight = textView.getClientArea().height;
+				var zoomHeight = zoomView.getClientArea().height;
+				var scrollY = zoomView.getLinePixel(textView.getLineIndex(scroll.y + clientHeight / 2));
+				var topIndex = textView.getTopIndex();
+				var bottomIndex = textView.getBottomIndex();
+				var topPixel = zoomView.getLinePixel(topIndex);
+				var bottomPixel = zoomView.getLinePixel(bottomIndex);
+				zoomView.setTopPixel(scrollY - zoomHeight / 2);
+				topPixel = zoomView.convert({y: topPixel}, "document", "page").y; //$NON-NLS-1$ //$NON-NLS-0$
+				bottomPixel = zoomView.convert({y: bottomPixel}, "document", "page").y; //$NON-NLS-1$ //$NON-NLS-0$
+				windowDiv.style.top = (topPixel - that.node.getBoundingClientRect().top) + "px"; //$NON-NLS-0$
+				windowDiv.style.height = (bottomPixel - topPixel) + "px"; //$NON-NLS-0$
+			}
+			textView.addEventListener("Scroll", this._scrollListener = function(event) { //$NON-NLS-0$
+				updateScroll(event.newValue);
+			});
+			//TODO need to find a better way of sharing the styler for multiple views
+			zoomView.addEventListener("LineStyle", this._lineListener = function(e) { //$NON-NLS-0$
+				textView.onLineStyle(e);
+			});
+			zoomView.addEventListener("Selection", function(event) { //$NON-NLS-0$
+				textView.setSelection(event.newValue.start, event.newValue.end, 0.5);
+			});
+			zoomView.addEventListener("MouseDown", function(event) { //$NON-NLS-0$
+				var offset = zoomView.getOffsetAtLocation(event.x, event.y);
+				textView.setSelection(offset, offset, 0.5);
+				event.event.stopPropagation();
+				event.preventDefault();				
+			});
+			zoomView.addEventListener("MouseUp", function(event) { //$NON-NLS-0$
+				event.event.stopPropagation();
+				event.preventDefault();				
+			});
+			zoomView.addEventListener("MouseMove", function(event) { //$NON-NLS-0$
+				event.event.stopPropagation();
+				event.preventDefault();				
+			});
+			(document.defaultView || document.parentWindow).setTimeout(function() {
+				updateScroll({y: textView.getTopPixel()});
+			}, 0);
+		},
+		_destroy: function() {
+			if (this._scrollListener) {
+				var textView = this.getView();
+				textView.removeEventListener("Scroll", this._scrollListener); //$NON-NLS-0$
+				this._scrollListener = null;
+			}
+			var zoomView = this._zoomView;
+			if (zoomView) {
+				zoomView.removeEventListener("LineStyle", this._lineListener); //$NON-NLS-0$
+				zoomView.setModel(null);
+				zoomView.destroy();
+				this._zoomView = null;
+			}
+		}
+	});
+	
 	return {
+		BaseRuler: BaseRuler,
 		Ruler: Ruler,
 		AnnotationRuler: AnnotationRuler,
 		LineNumberRuler: LineNumberRuler,
 		OverviewRuler: OverviewRuler,
-		FoldingRuler: FoldingRuler
+		FoldingRuler: FoldingRuler,
+		ZoomRuler: ZoomRuler,
 	};
 });

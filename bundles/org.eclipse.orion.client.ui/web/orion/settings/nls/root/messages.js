@@ -161,6 +161,7 @@ define({
 	"lineNumberRuler": "Show Line Number Ruler:",
 	"foldingRuler": "Show Folding Ruler:",
 	"overviewRuler": "Show Overview Ruler:",
+	"zoomRuler": "Show Zoom Ruler:",
 	"whitespaces": "White Spaces",
 	"wrapping": "Wrapping",
 	"wordWrap": "Word Wrap:",

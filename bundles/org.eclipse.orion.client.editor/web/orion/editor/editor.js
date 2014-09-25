@@ -263,6 +263,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	 * @param {Object} options.domNode
 	 * @param {Object} options.keyBindingFactory
 	 * @param {Object} options.lineNumberRulerFactory
+	 * @param {Object} options.zoomRulerFactory
 	 * @param {Object} options.foldingRulerFactory
 	 * @param {Object} options.statusReporter
 	 * @param {Object} options.textViewFactory
@@ -276,6 +277,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		this._undoStackFactory = options.undoStackFactory;
 		this._textDNDFactory = options.textDNDFactory;
 		this._annotationFactory = options.annotationFactory;
+		this._zoomRulerFactory = options.zoomRulerFactory;
 		this._foldingRulerFactory = options.foldingRulerFactory;
 		this._lineNumberRulerFactory = options.lineNumberRulerFactory;
 		this._contentAssistFactory = options.contentAssistFactory;
@@ -286,6 +288,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		this._annotationRuler = null;
 		this._lineNumberRuler = null;
 		this._overviewRuler = null;
+		this._zoomRuler = null;
 		this._foldingRuler = null;
 		this._contentAssist = null;
 	}
@@ -298,7 +301,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			BaseEditor.prototype.destroy.call(this);
 			this._textViewFactory = this._undoStackFactory = this._textDNDFactory = 
 			this._annotationFactory = this._foldingRulerFactory = this._lineNumberRulerFactory = 
-			this._contentAssistFactory = this._keyBindingFactory = null;
+			this._contentAssistFactory = this._keyBindingFactory = this._zoomRulerFactory = null;
 		},
 		/**
 		 * Returns the annotation model of the editor. 
@@ -347,6 +350,14 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 */
 		getLineNumberRuler: function() {
 			return this._lineNumberRuler;
+		},
+		/**
+		 * Returns the zoom ruler of the editor. 
+		 *
+		 * @returns {orion.editor.LineNumberRuler}
+		 */
+		getZoomRuler: function() {
+			return this._zoomRuler;
 		},
 		/**
 		 * Returns the base text model of this editor.
@@ -489,6 +500,22 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				textView.addRuler(this._overviewRuler);
 			} else {
 				textView.removeRuler(this._overviewRuler);
+			}
+		},
+		/**
+		 * Sets whether the zoom ruler is visible.
+		 *
+		 * @param {Boolean} visible <code>true</code> to show ruler, <code>false</code> otherwise
+		 */
+		setZoomRulerVisible: function(visible, force) {
+			if (this._zoomRulerVisible === visible && !force) { return; }
+			this._zoomRulerVisible = visible;
+			if (!this._zoomRuler) { return; }
+			var textView = this._textView;
+			if (visible) {
+				textView.addRuler(this._zoomRuler, 0);
+			} else {
+				textView.removeRuler(this._zoomRuler);
 			}
 		},
 		
@@ -850,6 +877,11 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				this.setOverviewRulerVisible(this._overviewRulerVisible || this._overviewRulerVisible === undefined, true);
 			}
 			
+			if (this._zoomRulerFactory) {
+				this._zoomRuler = this._zoomRulerFactory.createZoomRuler(this._annotationModel);
+				this.setZoomRulerVisible(this._zoomRulerVisible || this._zoomRulerVisible === undefined, true);
+			}
+			
 			if (this._lineNumberRulerFactory) {
 				this._lineNumberRuler = this._lineNumberRulerFactory.createLineNumberRuler(this._annotationModel);
 				this._lineNumberRuler.addAnnotationType(AT.ANNOTATION_CURRENT_BLAME);
@@ -890,10 +922,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			}
 			this._textView = this._undoStack = this._textDND = this._contentAssist = 
 				this._listener = this._annotationModel = this._annotationStyler =
-				this._annotationRuler = this._overviewRuler = this._lineNumberRuler =
+				this._annotationRuler = this._overviewRuler = this._zoomRuler = this._lineNumberRuler =
 				this._foldingRuler = this._currentLineAnnotation = this._title = null;
 			this._dirty = false;
-			this._foldingRulerVisible = this._overviewRulerVisible =
+			this._foldingRulerVisible = this._overviewRulerVisible = this._zoomRulerVisible =
 				this._lineNumberRulerVisible = this._annotationRulerVisible = undefined;
 			
 			var textViewUninstalledEvent = {
