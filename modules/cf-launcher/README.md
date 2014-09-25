@@ -1,9 +1,9 @@
 # cf-launcher #
-A harness for your [Cloud Foundry](http://cloudfoundry.org/) application that makes debugging a bit easier.
+A harness for Node.js [Cloud Foundry](http://cloudfoundry.org/) applications that makes debugging a bit easier.
 
 cf-launcher wraps a simple web UI around your app, adding a [visual debugger](https://github.com/node-inspector/node-inspector),
-and the ability to kill or restart your app right from the web, no CF commands necessary. If your app crashes or fails to start,
-the console output viewer shows you what happened.
+a [shell](https://www.npmjs.org/package/tty.js), and the ability to kill or restart your app process right from the web.
+If your app crashes or fails to start, the console output viewer shows you what happened.
 
 The launcher UI takes over a single URL prefix in your application's URL space: `/launcher`. If your app needs `/launcher`, you can
 set the prefix to something else.
@@ -54,7 +54,7 @@ set the prefix to something else.
    you provided earlier, and you're all set.
 
 
-## Usage
+## Command-line usage
 
 	cf-launcher [options] -- [COMMAND]
 
@@ -75,6 +75,12 @@ Optional. Gives the URL prefix reserved by cf-launcher. Defaults to `urlprefix=l
  (The DEBUG variable can enable debugging for multiple libraries simultaneously. See [debug](https://www.npmjs.org/package/debug) for details.)
 
 * The `PASSWORD` environment variable gives the password used to log in to cf-launcher.
+
+## User interface
+Once you've logged in, you're taken to a landing page that shows the status of your app, and the stdout/stderr log. Use the tabs
+on the top banner to access the debugger and shell.
+
+![screenshot](http://i.imgur.com/YH0kJqu.png)
 
 ## Uninstallation ##
 When your app is ready for production, you should uninstall cf-launcher.
