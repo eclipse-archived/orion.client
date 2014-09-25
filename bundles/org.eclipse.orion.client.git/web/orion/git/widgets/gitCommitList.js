@@ -220,23 +220,24 @@ define([
 						}
 						if (progress) progress.done();
 						if (that.simpleLog) {
+							that.outgoingItem = that.incomingItem = that.syncItem = null;
 							return getSimpleLog();
 						} else {
 							return Deferred.when(repository.status || (repository.status = that.progressService.progress(that.gitClient.getGitStatus(repository.StatusLocation), messages['Getting changes'])), function(status) { //$NON-NLS-0$
 								repository.status = status;
 								onComplete(that.processChildren(parentItem, [
 									status,
-									{
+									that.outgoingItem = {
 										Type: "Outgoing", //$NON-NLS-0$
 										selectable: false,
 										isNotSelectable: true,
 									},
-									{
+									that.incomingItem = {
 										Type: "Incoming", //$NON-NLS-0$
 										selectable: false,
 										isNotSelectable: true,
 									},
-									{
+									that.syncItem = {
 										Type: "Synchronized", //$NON-NLS-0$
 										selectable: false,
 										isNotSelectable: true,
@@ -431,9 +432,12 @@ define([
 			case "rebase": //$NON-NLS-0$
 			case "merge": //$NON-NLS-0$
 			case "mergeSquash": //$NON-NLS-0$
-			case "commit": //$NON-NLS-0$
 			case "reset": //$NON-NLS-0$
 				this.changedItem();
+				break;
+			case "commit": //$NON-NLS-0$
+			case "revert": //$NON-NLS-0$
+				this.changedItem(this.model.outgoingItem);
 				break;
 			case "applyPatch":  //$NON-NLS-0$
 			case "stage": //$NON-NLS-0$
