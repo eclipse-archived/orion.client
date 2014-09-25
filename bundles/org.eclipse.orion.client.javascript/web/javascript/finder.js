@@ -52,11 +52,16 @@ define([
 					this.globals = [];
 					this.scopes = [{range: node.range, occurrences: [], kind:'p'}];   //$NON-NLS-0$
 					this.defscope = null;
+					this.skipScope = null;
 					break;
 				case Estraverse.Syntax.FunctionDeclaration:
 					this.checkId(node.id, true);
-					//we want the parent scope for a declaration, otherwise we leave it right away
 					this._enterScope(node);
+					if (this.skipScope){
+						// If the function decl was a redefine, checkId may set skipScope and we can skip processing the contents
+						return Estraverse.VisitorOption.Skip;
+					}
+					
 					if (node.params) {
 						len = node.params.length;
 						for (idx = 0; idx < len; idx++) {
@@ -230,7 +235,7 @@ define([
 						break;
 					case Estraverse.Syntax.FunctionExpression:
 						if (!node.isprop){
-							this.scopes.push({range: node.range, occurrences: [], kind:'fe'});  //$NON-NLS-0$
+							this.scopes.push({range: node.body.range, occurrences: [], kind:'fe'});  //$NON-NLS-0$
 							// If the outer scope has the selected 'this' we can skip the inner scope
 							if (this.defscope){
 								return true;
@@ -267,7 +272,15 @@ define([
 						break;
 				}
 				if (kind){
-					this.scopes.push({range: node.range, occurrences: [], kind:kind});	
+					// Include the params and body in the scope, but not the identifier
+					var rng = node.range[0];
+					if (node.body){
+						rng = node.body.range[0];
+					}
+					if (node.params && (node.params.length > 0)){
+						rng = node.params[0].range[0];
+					}
+					this.scopes.push({range: [rng,node.range[1]], occurrences: [], kind:kind});	
 				}
 			}
 			return false;
@@ -353,6 +366,14 @@ define([
 		 */
 		_popScope: function() {
 			var scope = this.scopes.pop();
+			
+			if (this.skipScope){
+				if (this.skipScope === scope){
+					this.skipScope = null;
+				}
+				return false;
+			}
+			
 			var len = scope.occurrences.length;
 			var i;
 			if(this.defscope) {
@@ -383,6 +404,9 @@ define([
 		 * @returns {Boolean} <code>true</code> if we should skip the next nodes, <code>false</code> otherwise
 		 */
 		checkId: function(node, candefine, isObjectProp, isLabeledStatement) {
+			if (this.skipScope){
+				return true;
+			}
 			if (this.thisCheck){
 				return false;
 			}
@@ -396,18 +420,26 @@ define([
 				if (node.name === this.context.word) {
 					var scope = this.scopes[this.scopes.length-1]; // Always will have at least the program scope
 					if(candefine) {
+						// Check if we are redefining
 						if(this.defscope) {
-							// Re-defining, we want the last defining node previous to the selection, skip any future re-defines
-							if(node.range[0] > this.context.start) {
-								return true;
+							if((scope.range[0] <= this.context.start) && (scope.range[1] >= this.context.end)) {
+								// Selection inside this scope, use this scope as the defining scope
+								this.occurrences = []; // Clear any occurrences in sibling scopes
+								this.defscope = scope;
+								scope.occurrences.push({
+									start: node.range[0],
+									end: node.range[1]
+								});
+								return false;
 							} else {
-								// Occurrences collected for the previous define are now invalid, fall through to mark this occurrence
-								this.occurrences = [];
-								scope.occurrences = [];
+								// Selection belongs to an outside scope so use the outside definition
+								scope.occurrences = []; // Clear any occurrences we have found in this scope
+								this.skipScope = scope;  // Skip this scope and all inner scopes
+								return true;  // Where possible we short circuit checking this scope
 							}
 						}
 						//does the scope enclose it?
-						if(scope && (scope.range[0] <= this.context.start) && (scope.range[1] >= this.context.end)) {
+						if((scope.range[0] <= this.context.start) && (scope.range[1] >= this.context.end)) {
 							this.defscope = scope;
 						}
 					}
