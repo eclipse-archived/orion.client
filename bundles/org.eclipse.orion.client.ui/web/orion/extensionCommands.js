@@ -300,7 +300,18 @@ define(["orion/Deferred", "orion/commands", "orion/contentTypes", "orion/URITemp
 					}
 				}
 			}
-			// now content types
+			
+			// Check content type validation
+			if (!validator.info.contentType && !validator.info.excludedContentTypes){
+				// Validation doesn't care about content type
+				return true;
+			}
+			
+			if (item.Directory){
+				// Directories don't have content types so we can't validate against it.
+				return false;
+			}
+			
 			var showCommand = true;
 			var contentType = contentTypes ? mContentTypes.getFilenameContentType(item.Name, contentTypes) : null;
 			contentType = contentType || {
