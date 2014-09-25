@@ -110,8 +110,8 @@ exports.CompareCommandFactory = (function() {
 					return true;
 				},
 				callback : function(data) {
+					this.dispatchEvent({type:"compareConfigChanged", name: "mode", value: data.items.options.toggler.getWidget().type === "twoWay" ? "inline" : "twoWay"}); //$NON-NLS-0$
 					data.items.options.toggler.toggle();
-					this.dispatchEvent({type:"compareConfigChanged", name: "mode", value: data.items.options.toggler.getWidget().type}); //$NON-NLS-0$
 			}.bind(this)});
 			var nextDiffCommand = new mCommands.Command({
 				name: messages["Next diff block"],

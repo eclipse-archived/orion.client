@@ -130,8 +130,20 @@ exports.ResourceComparer = (function() {
 		this.setOptions(options, true);
 		this._inputManagers = [];
 		viewOptions.preInitFunc = function () {this._initInputManagers();}.bind(this);
+		viewOptions.postInitFunc = function () {
+			this._inputManagers.forEach(function(inputManager) {
+				if(inputManager.manager){
+					var editor = this._compareView.getWidget().getEditors()[inputManager.manager._editorIndex];
+					editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
+						inputManager.manager.setDirty(editor.isDirty());
+					});
+				}
+			}.bind(this));
+		}.bind(this);
 		if(options.toggleable) {
-			this._compareView = new mCompareView.toggleableCompareView(options.type === "inline" ? "inline" : "twoWay", viewOptions, function() {this._inputChanged();}.bind(this)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this._compareView = new mCompareView.toggleableCompareView(options.type === "inline" ? "inline" : "twoWay", viewOptions,  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this._inputChanged.bind(this),
+			this.save.bind(this));
 		} else if(options.type === "inline") { //$NON-NLS-0$
 			this._compareView = new mCompareView.inlineCompareView(viewOptions);
 		} else {
@@ -150,14 +162,6 @@ exports.ResourceComparer = (function() {
 		}
 		this.initExtCmds();
 		this._compareView.getWidget().initEditors( messages['fetching...']);
-		this._inputManagers.forEach(function(inputManager) {
-			if(inputManager.manager){
-				var editor = this._compareView.getWidget().getEditors()[inputManager.manager._editorIndex];
-				editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
-					inputManager.manager.setDirty(editor.isDirty());
-				});
-			}
-		}.bind(this));
 	}
 	ResourceComparer.prototype = {
 		_clearOptions: function(){
@@ -230,6 +234,11 @@ exports.ResourceComparer = (function() {
 						return keyBindings;
 					};
 					this._getFileOptions(inputManager.manager._editorIndex).keyBindingFactory = keyBindingFactory;
+					/*
+					var editor = inputManager.manager.getEditor();
+					editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
+						inputManager.manager.setDirty(editor.isDirty());
+					});*/
 				}
 			}.bind(this));
 		},
@@ -434,11 +443,23 @@ exports.ResourceComparer = (function() {
 			this._inputManagers.forEach(function(inputManager) {
 				if(inputManager.manager){
 					var fileOptions = that._getFileOptions(inputManager.manager._editorIndex);
-					var editor = that._compareView.getWidget().getEditors()[inputManager.manager._editorIndex];
+					var editor = inputManager.manager.getEditor();
 					inputManager.manager.filePath = fileOptions.URL;
 					inputManager.manager.setInput(fileOptions.URL , editor);
 				}
 			});
+	    },
+	    save: function() {
+		    var promises = [];
+			this._inputManagers.forEach(function(inputManager) {
+				if(inputManager.manager){
+					var editor = inputManager.manager.getEditor();
+					if(editor.isDirty()) {
+						promises.push(inputManager.manager.save());
+					}
+				}
+			});
+			return Deferred.all(promises);
 	    },
 		start: function(){
 			if(this.options.resource){

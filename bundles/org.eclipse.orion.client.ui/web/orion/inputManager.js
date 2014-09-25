@@ -372,6 +372,7 @@ define([
 					self.afterSave();
 				}
 				self._saving = false;
+				return new Deferred().resolve(result);
 			}
 			function errorHandler(error) {
 				self.reportStatus("");
@@ -379,7 +380,7 @@ define([
 				self._saving = false;
 				self._errorSaving = true;
 			}
-			def.then(successHandler, function(error) {
+			return def.then(successHandler, function(error) {
 				// expected error - HTTP 412 Precondition Failed
 				// occurs when file is out of sync with the server
 				if (error.status === 412) {
@@ -390,7 +391,7 @@ define([
 						if (progress) {
 							def = progress.progress(def, i18nUtil.formatMessage(messages.savingFile, input));
 						}
-						def.then(successHandler, errorHandler);
+						return def.then(successHandler, errorHandler);
 					} else {
 						self._saving = false;
 					}

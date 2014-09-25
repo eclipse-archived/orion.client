@@ -339,6 +339,9 @@ exports.TwoWayCompareView = (function() {
 		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler("right", {styleClass: "ruler overview"} , null, //$NON-NLS-1$ //$NON-NLS-0$
                 function(lineIndex, ruler){this._diffNavigator.matchPositionFromOverview(lineIndex);}.bind(this));
 		//If either editor is dirty, popup the warning message.
+		if(this.options.postInitFunc) {
+			this.options.postInitFunc();
+		}
 		window.onbeforeunload = function() {
 			if(this._editors) {
 				var dirty = this._editors.some(function(editor) {
@@ -813,11 +816,12 @@ exports.InlineCompareView = (function() {
  * @name orion.compare.toggleableCompareView
  */
 exports.toggleableCompareView = (function() {
-	function toggleableCompareView(startWith, options, _inputChanged) {
+	function toggleableCompareView(startWith, options, inputChanged, onSave) {
 		if(options){
 			options.toggler = this;
 		}
-		this._inputChanged = _inputChanged;
+		this._inputChanged = inputChanged;
+		this._onSave = onSave;
 		if(startWith === "inline"){ //$NON-NLS-0$
 			this._widget = new exports.InlineCompareView(options);
 		} else {
@@ -834,13 +838,7 @@ exports.toggleableCompareView = (function() {
 			this._widget.initImageMode();
 		},
 	
-		toggle: function(){
-			var options = this._widget.options;
-			if(!this._imageMode){
-				var diffPos = this._widget.getCurrentDiffPos();
-				options.blockNumber = diffPos.block;
-				options.changeNumber = diffPos.change;
-			}
+		_toggle: function(options) {
 			this._widget.destroy();
 			lib.empty(lib.node(options.parentDivId));
 			if(this._widget.type === "inline"){ //$NON-NLS-0$
@@ -857,6 +855,26 @@ exports.toggleableCompareView = (function() {
 			if(this._widget.type === "twoWay" && this._inputChanged) {
 				this._inputChanged();
 			}
+		},
+		
+		toggle: function(){
+			var options = this._widget.options;
+			if(!this._imageMode){
+				var diffPos = this._widget.getCurrentDiffPos();
+				options.blockNumber = diffPos.block;
+				options.changeNumber = diffPos.change;
+			}
+			if(this._widget.type === "twoWay" && this._onSave){ //$NON-NLS-0$
+				this._onSave().then(function(result) {
+					this._toggle(options);
+				}.bind(this));
+			} else {
+				this._toggle(options);
+			}
+		},
+		
+		destroy: function(){
+			this._widget.destroy();
 		},
 		
 		getWidget: function() {
