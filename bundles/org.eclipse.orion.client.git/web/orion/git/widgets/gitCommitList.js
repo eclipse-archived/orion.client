@@ -176,6 +176,7 @@ define([
 					that.log = parentItem.log = log;
 					var children = log.Children.slice(0);
 					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, log)));
+					return log;
 				}, function(error){
 					that.handleError(error);
 				});
@@ -285,6 +286,9 @@ define([
 						outgoingCommits.Children.forEach(function(commit) {
 							commit.outgoing = true;
 						});
+						if (outgoingCommits.Children[0]) {
+							outgoingCommits.Children[0].top = true;
+						}
 						onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, outgoingCommits.Children.slice(0), outgoingCommits)));
 					}, function(error){
 						that.handleError(error);
@@ -297,6 +301,9 @@ define([
 							log.Children.forEach(function(commit) {
 								commit.outgoing = true;
 							});
+							if (log.Children[0]) {
+								log.Children[0].top = true;
+							}
 							children = that.processMoreChildren(parentItem, log.Children.slice(0), log);
 						} 
 						onComplete(that.processChildren(parentItem, children));
@@ -309,12 +316,19 @@ define([
 			} else if (parentItem.Type === "Synchronized") { //$NON-NLS-0$
 				if (tracksRemoteBranch) {
 					return Deferred.when(parentItem.more ? that._getLog(parentItem) : that.syncCommits || that._getSync(), function(syncCommits) {
+						syncCommits.Children.forEach(function(commit) {
+							commit.history = true;
+						});
 						onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, syncCommits.Children.slice(0), syncCommits)));
 					}, function(error) {
 						that.handleError(error);
 					});
 				} else if (!that.getTargetReference()) {
-					getSimpleLog();
+					getSimpleLog().then(function(syncCommits){
+						syncCommits.Children.forEach(function(commit) {
+							commit.history = true;
+						});					
+					});
 				} else {
 					onComplete(that.processChildren(parentItem, []));
 				}
@@ -962,7 +976,6 @@ define([
 				commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.merge", 300); //$NON-NLS-0$
 				commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.mergeSquash", 350); //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.rebase", 200); //$NON-NLS-0$
-				commandService.registerCommandContribution(incomingActionScope, "eclipse.orion.git.resetIndex", 400); //$NON-NLS-0$
 				commandService.renderCommands(incomingActionScope, incomingActionScope, targetRef, this, "tool"); //$NON-NLS-0$
 
 				commandService.addCommandGroup(outgoingActionScope, "eclipse.gitPushGroup", 1000, messages['pushGroup'], null, null, null, "Push", null, "eclipse.orion.git.push"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

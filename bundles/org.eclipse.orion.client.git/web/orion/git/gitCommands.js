@@ -179,7 +179,10 @@ var exports = {};
 			parameters: checkoutNameParameters,
 			callback: checkoutCallback,
 			visibleWhen: function(item){
-				return item.Type === "Commit"; //$NON-NLS-0$
+				if (item.outgoing && item.top) {
+					return false;
+				};
+				return item.Type === "Commit";	//$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(checkoutCommitCommand);
@@ -1085,6 +1088,9 @@ var exports = {};
 				resetCallback(data, data.items.Name, "HARD", messages["GitResetIndexConfirm"]); //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
+				if (item.outgoing && item.top) {
+					return false;
+				}
 				return (item.Type === "RemoteTrackingBranch"  && item.Id) || item.Type === "Branch" || item.Type === "Commit"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		});
@@ -1298,6 +1304,9 @@ var exports = {};
 
 			},
 			visibleWhen : function(item) {
+				if (item.outgoing || item.history) {
+					return false;
+				}
 				return item.Type === "Commit"; //$NON-NLS-0$
 			}
 		});
@@ -1341,6 +1350,9 @@ var exports = {};
 
 			},
 			visibleWhen : function(item) {
+				if (item.outgoing && item.top) {
+					return false;
+				}
 				return item.Type === "Commit"; //$NON-NLS-0$
 			}
 		});
