@@ -76,8 +76,8 @@ define(['i18n!orion/compare/nls/messages', 'orion/Deferred'], function(messages,
 
 	DiffProvider.prototype = /** @lends orion.compare.DiffProvider.prototype */
 	{
-		getDiffContent: function(diffURI){
-			return _doServiceCall(this._getService(diffURI), "getDiffContent", arguments); //$NON-NLS-0$
+		getDiffContent: function(diffURI, options){
+			return _doServiceCall(this._getService(diffURI, options), "getDiffContent", arguments); //$NON-NLS-0$
 		},
 		getDiffFileURI: function(diffURI){
 			return _doServiceCall(this._getService(diffURI), "getDiffFileURI", arguments); //$NON-NLS-0$

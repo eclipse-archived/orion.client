@@ -92,6 +92,7 @@ exports.DefaultDiffProvider = (function() {
 				}
 				var that = this;
 				if(that._hasConflicts) {
+					//that._diffProvider.getDiffContent(resource, {ignoreWS: "true"/"false"})
 					return that._diffProvider.getDiffContent(resource).then(function(jsonData, secondArg) {
 						that._diffContent = jsonData.split("diff --git")[1]; //$NON-NLS-0$
 						return that._resolveComplexFileURL(resource);

@@ -272,9 +272,14 @@ define([
 
 	var base = new URL("../../gitapi/diff/", window.location.href).href;
 	provider.registerService("orion.core.diff", {
-		getDiffContent: function(diffURI){	
+		getDiffContent: function(diffURI, options){	
 			var url = new URL(diffURI, window.location);
 			url.query.set("parts", "diff");
+			if (options && typeof options === "object") {
+				Object.keys(options).forEach(function(param) {
+					url.query.set(param, options[param]);
+				});
+			}
 			return xhr("GET", url.href, {
 				headers: {
 					"Orion-Version": "1"
