@@ -220,7 +220,7 @@ define([
 				editorActions.sort(function (a, b) {
 					return textView.getActionDescription(a).name.localeCompare(textView.getActionDescription(b).name);
 				});
-				keyAssist.createHeader(messages["Editor"]);
+				keyAssist.createHeader(messages["Editor"]); //$NON-NLS-0$
 				var execute = function (actionID) {
 					return function () {
 						textView.focus();
@@ -344,7 +344,7 @@ define([
 
 				return keyBindings;
 			};
-
+			
 			// Content Assist
 			var setContentAssistProviders = function(editor, contentAssist, event) {
 				// Content assist is about to be activated; set its providers.
@@ -382,7 +382,7 @@ define([
 				// Produce a bound EditorContext that contentAssist can invoke with no knowledge of ServiceRegistry.
 				var boundEditorContext = {};
 				Object.keys(EditorContext).forEach(function(key) {
-					if (typeof EditorContext[key] === "function") {
+					if (typeof EditorContext[key] === "function") { //$NON-NLS-0$
 						boundEditorContext[key] = EditorContext[key].bind(null, serviceRegistry);
 					}
 				});

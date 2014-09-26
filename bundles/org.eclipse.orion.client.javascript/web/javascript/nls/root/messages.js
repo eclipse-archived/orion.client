@@ -15,6 +15,10 @@ define({
 	'ignore' : 'Ignore',  //$NON-NLS-0$  //$NON-NLS-1$
 	'sourceOutline' : 'Source Outline', //$NON-NLS-0$  //$NON-NLS-1$
 	'sourceOutlineTitle': 'JavaScript source outline',  //$NON-NLS-0$  //$NON-NLS-1$
+	'templateOutline' : 'Templates via outline', //$NON-NLS-0$  //$NON-NLS-1$
+	'templateOutlineTitle' : 'Templates outline', //$NON-NLS-0$  //$NON-NLS-1$
+	'templateExplorer' : 'Templates', //$NON-NLS-0$  //$NON-NLS-1$
+	'templateExplorerTitle' : 'Templates explorer', //$NON-NLS-0$  //$NON-NLS-1$
 	'contentAssist' : 'JavaScript content assist', //$NON-NLS-0$  //$NON-NLS-1$
 	'eslintValidator' : 'JavaScript Validator', //$NON-NLS-0$  //$NON-NLS-1$
 	'missingCurly' : 'Statements not enclosed in braces:', //$NON-NLS-0$  //$NON-NLS-1$

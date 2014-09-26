@@ -229,6 +229,9 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
 			template: prop + ": ${width:" + fromJSON(widths) + "}px ${style:" + fromJSON(borderStyles) + "} ${color:" + fromJSON(colorValues) + "};" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		});
 	}
+	templates.forEach(function(template){
+		template.contentType = 'text/css';
+	});
 
 	/**
 	 * @name orion.editor.CssContentAssistProvider
@@ -236,7 +239,7 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
 	 */
 	function CssContentAssistProvider() {
 	}
-	CssContentAssistProvider.prototype = new mTemplates.TemplateContentAssist(mCSS.keywords, templates);
+	CssContentAssistProvider.prototype = new mTemplates.TemplateContentAssist(mCSS.keywords, null);
 	
 	CssContentAssistProvider.prototype.getPrefix = function(buffer, offset, context) {
 		var index = offset;
@@ -247,6 +250,7 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
 	};
 
 	return {
-		CssContentAssistProvider: CssContentAssistProvider
+		CssContentAssistProvider: CssContentAssistProvider,
+		templates: templates
 	};
 });
