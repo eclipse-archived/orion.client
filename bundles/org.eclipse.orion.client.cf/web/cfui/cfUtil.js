@@ -28,7 +28,6 @@ define([
 	}
 
 	return {
-		// make sure target is set and it matches the url in settings
 		getTargets : function(preferences) {
 			return preferences.getPreferences('/cm/configurations').then(function(settings){
 				var cloud = settings.get("org.eclipse.orion.client.cf.settings");
@@ -41,6 +40,10 @@ define([
 				}
 				return handleNoCloud();
 			}, handleNoCloud);
+		},
+		
+		getDefaultTarget: function(resource){
+			return {};
 		},
 		
 		getLoginMessage: function(/*manageUrl*/){

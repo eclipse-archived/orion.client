@@ -4,8 +4,9 @@ var uiTestFunc = null;
 
 define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection',
 	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences', 'cfui/cfUtil', 'orion/objects', 'orion/widgets/input/ComboTextInput',
-	'orion/webui/Wizard'], 
-		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, URITemplate, PageLinks, Preferences, mCfUtil, objects, ComboTextInput, Wizard) {
+	'orion/webui/Wizard', 'orion/fileClient'], 
+		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, URITemplate, PageLinks, 
+				Preferences, mCfUtil, objects, ComboTextInput, Wizard, mFileClient) {
 	
 	mBootstrap.startup().then(
 		function(core) {
@@ -25,6 +26,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			var page3;
 			var commonPane;
 			var _clouds;
+			var _defaultTarget;
 			var cloudsDropdown;
 			var orgsDropdown;
 			var spacesDropdown;
@@ -121,6 +123,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			// This is code to ensure the first visit to orion works
 			// we read settings and wait for the plugin registry to fully startup before continuing
 			var preferences = new Preferences.PreferencesService(serviceRegistry);
+			
+			var fileClient = new mFileClient.FileClient(serviceRegistry);
 			
 			// cancel button
 			var closeFrame = function() {
@@ -316,6 +320,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 							var option = document.createElement("option");
 							option.appendChild(document.createTextNode(cloud.Name || cloud.Url));
 							option.cloud = cloud;
+							if (_defaultTarget && _defaultTarget.Url === cloud.Url)
+								option.selected = "selected";
 							cloudsDropdown.appendChild(option);
 						});
 						cloudsDropdown.onchange = function(event){
@@ -384,6 +390,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 									var option = document.createElement("option");
 									option.appendChild(document.createTextNode(org.Name));
 									option.org = org;
+									if (_defaultTarget && _defaultTarget.OrgId === org.Guid)
+										option.selected = "selected";
 									orgsDropdown.appendChild(option);
 									
 									targets[org.Name] = [];
@@ -395,12 +403,13 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 												newTarget.ManageUrl = target.ManageUrl;
 											newTarget.Org = org.Name;
 											newTarget.Space = space.Name;
+											newTarget.SpaceId = space.Guid;
 											targets[org.Name].push(newTarget);
 										});
 									}
 								});
 
-								loadSpaces(orgs.Orgs[0].Name);
+								loadSpaces(orgsDropdown.value);
 								hideMessage();
 							}, function(error){
 								postError(error, target);
@@ -415,6 +424,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 							var option = document.createElement("option");
 							option.appendChild(document.createTextNode(target.Space));
 							option.target = target;
+							if (_defaultTarget && _defaultTarget.SpaceId === target.SpaceId)
+								option.selected = "selected";
 							spacesDropdown.appendChild(option);
 						});
 						setSelection();
@@ -508,8 +519,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 					hostInput = hostDropdown.getTextInputNode();
 					hostInput.value = manifestInfo.host || manifestInfo.name || "";
 					
-					loadTargets(_clouds[0]);
-
+					var selectedCloud = _clouds[cloudsDropdown.selectedIndex];
+					loadTargets(selectedCloud);
 			    },
 			    validate: function(setValid) {
 					if(!selection){
@@ -789,9 +800,10 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 
 		    //
 		    function loadScreen(){
-				getTargets(cFService, preferences).then(
-					function(clouds){
-						_clouds = clouds;
+				Deferred.all([getTargets(cFService, preferences), getDefaultTarget(fileClient, deployResourceJSON)]).then(
+					function(results){
+						_clouds = results[0];
+						_defaultTarget = results[1];
 						var wizard = new Wizard.Wizard({
 							parent: "wizard",
 							pages: [page1, page2, page3],
@@ -806,7 +818,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 					}
 				);
 			}
-			
+		    
 			cFService.getManifestInfo(relativeFilePath).then(function(manifestResponse){
 				if(manifestResponse.Type === "Manifest" && manifestResponse.Contents && manifestResponse.Contents.applications && manifestResponse.Contents.applications.length > 0){				
 					manifestContents = manifestResponse.Contents;
@@ -816,6 +828,24 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    }.bind(this), loadScreen);
 		}
 	);
+	
+	function getDefaultTarget(fileClient, deployResourceJSON) {
+		var clientDeferred = new Deferred();
+		fileClient.read(deployResourceJSON.ContentLocation, true).then(
+			function(result){
+				mCfUtil.getDefaultTarget(result).then(
+					clientDeferred.resolve,
+					function(error){
+						clientDeferred.resolve({});
+					}
+				);
+			},
+			function(error){
+				clientDeferred.resolve({});
+			}
+		);
+		return clientDeferred;
+	}
 	
 	function getTargets(cFService, preferences) {
 		return mCfUtil.getTargets(preferences);
