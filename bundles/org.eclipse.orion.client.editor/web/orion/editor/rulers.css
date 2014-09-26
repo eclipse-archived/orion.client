@@ -18,6 +18,14 @@
 	height: 100%;
 }
 
+/* Styles for the line number ruler */
+.rulerLines {
+	color: silver;
+}
+.rulerLines.even
+.rulerLines.odd {
+}
+
 .rulerZoomWindow {
 	background-color: rgba(0, 0, 0, 0.1);
 	border: 1px solid #eee;
@@ -37,10 +45,10 @@
 	cursor: pointer;
 }
 
-/* Styles for the line number ruler */
-.rulerLines {
-	color: silver;
+.textviewZoom .punctuation.separator.tab {
+	background-image: none;
 }
-.rulerLines.even
-.rulerLines.odd {
+
+.textviewZoom .punctuation.separator.space {
+	background-image: none;
 }
