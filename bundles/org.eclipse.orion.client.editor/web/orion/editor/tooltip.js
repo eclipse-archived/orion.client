@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -16,8 +16,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 	'orion/editor/textModel', //$NON-NLS-0$
 	'orion/editor/projectionTextModel', //$NON-NLS-0$
 	'orion/editor/util', //$NON-NLS-0$
+	'orion/Deferred', //$NON-NLS-0$
+	'marked/marked', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mTextView, mTextModel, mProjectionTextModel, textUtil, util) {
+], function(messages, mTextView, mTextModel, mProjectionTextModel, textUtil, Deferred, Markdown, util) {
 
 	/** @private */
 	function Tooltip (view) {
@@ -187,14 +189,19 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		show: function(autoHide) {
 			if (!this._target) { return; }
 			var info = this._target.getTooltipInfo();
+
 			if (!info) { return; }
 			var tooltipDiv = this._tooltipDiv, tooltipContents = this._tooltipContents;
 			tooltipDiv.style.left = tooltipDiv.style.right = tooltipDiv.style.width = tooltipDiv.style.height = 
 				tooltipContents.style.width = tooltipContents.style.height = "auto"; //$NON-NLS-0$
+			var tooltipDoc = tooltipDiv.ownerDocument;
+			var documentElement = tooltipDoc.documentElement;
+			
 			var contents = info.contents;
 			if (contents instanceof Array) {
-				contents = this._getAnnotationContents(contents);
+				contents = this._getAnnotationContents(contents);			
 			}
+			
 			if (typeof contents === "string") { //$NON-NLS-0$
 				tooltipContents.innerHTML = contents;
 			} else if (this._isNode(contents)) {
@@ -227,10 +234,43 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				tooltipContents.style.width = size.width + "px"; //$NON-NLS-0$
 				tooltipContents.style.height = size.height + "px"; //$NON-NLS-0$
 				contentsView.resize();
-			} else {
+			} else if (!info.deferredInfo) {
 				return;
 			}
-			var documentElement = tooltipDiv.ownerDocument.documentElement;
+			
+			var deferredInfo = info.deferredInfo;
+			if (deferredInfo) {
+				deferredInfo.forEach(function(tipSection) {
+					tipSection.promise.then(function (data) {
+						if (data) {
+							switch(data.type) {
+								case 'markdown': {
+									var sectionDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
+									sectionDiv.innerHTML = (data.title ? Markdown(data.title) : tipSection.title);
+									tooltipContents.appendChild(sectionDiv);
+									var divResult = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
+									divResult.innerHTML = Markdown(data.hover);
+									sectionDiv.appendChild(divResult);
+								}
+								default: {
+									var sectionDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
+									sectionDiv.appendChild(tooltipDoc.createTextNode(tipSection.title));
+									tooltipContents.appendChild(sectionDiv);
+									
+									var divResult = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
+									divResult.appendChild(tooltipDoc.createTextNode(data));
+									sectionDiv.appendChild(divResult);
+								}
+							}
+							// Ensure that the tooltip is visible
+							tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
+						}
+					}, function(err) {
+						console.error("Huh!!!");
+					});
+				});
+			}
+			
 			if (info.anchor === "right") { //$NON-NLS-0$
 				var right = documentElement.clientWidth - info.x;
 				tooltipDiv.style.right = right + "px"; //$NON-NLS-0$
@@ -248,7 +288,12 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			tooltipDiv.style.top = top + "px"; //$NON-NLS-0$
 			tooltipDiv.style.maxHeight = (documentElement.clientHeight - top - 10) + "px"; //$NON-NLS-0$
 			tooltipDiv.style.opacity = "1"; //$NON-NLS-0$
-			tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
+			
+			// Delay the showing of a tootip with no 'static' contents
+			if (contents) {
+				tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
+			}
+			
 			if (autoHide) {
 				var self = this;
 				var window = this._getWindow();
