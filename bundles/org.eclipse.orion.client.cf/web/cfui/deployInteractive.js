@@ -314,7 +314,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 					
 					// clouds field
 					if (_clouds.length > 1){
-						document.getElementById("cloudsLabel").appendChild(document.createTextNode("Cloud*:"));
+						document.getElementById("cloudsLabel").appendChild(document.createTextNode("Location*:"));
 						cloudsDropdown = document.createElement("select");
 						_clouds.forEach(function(cloud){
 							var option = document.createElement("option");
@@ -333,7 +333,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						};
 						document.getElementById("clouds").appendChild(cloudsDropdown);
 					} else {
-						document.getElementById("cloudsLabel").appendChild(document.createTextNode("Cloud:"));
+						document.getElementById("cloudsLabel").appendChild(document.createTextNode("Location:"));
 						document.getElementById("clouds").appendChild(document.createTextNode(_clouds[0].Name || _clouds[0].Url));
 					}
 
