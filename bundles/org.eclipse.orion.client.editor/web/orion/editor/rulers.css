@@ -16,14 +16,14 @@
 .ruler.zoom {
 	width: 100px;
 	height: 100%;
-	border-right: 1px solid #eaeaea;
 }
 
 .rulerZoomWindow {
 	background-color: rgba(0, 0, 0, 0.1);
+	border: 1px solid #eee;
 	position: absolute;
-	width: 100%;
-	border-radius: 3px;
+	width: calc(100% - 3px);
+	border-radius: 5px;
 	z-index: 100;
 	pointer-events: none;
 }

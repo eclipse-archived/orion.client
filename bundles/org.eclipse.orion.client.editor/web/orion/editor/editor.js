@@ -513,7 +513,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			if (!this._zoomRuler) { return; }
 			var textView = this._textView;
 			if (visible) {
-				textView.addRuler(this._zoomRuler, 0);
+				textView.addRuler(this._zoomRuler);
 			} else {
 				textView.removeRuler(this._zoomRuler);
 			}
