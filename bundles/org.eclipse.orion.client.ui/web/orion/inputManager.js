@@ -174,16 +174,6 @@ define([
 					}.bind(this));
 				}
 			} else {
-				//TODO this URL parsing to retrieve the should be done in the server side.
-				//TODO /gitapi/commit URLs are not supported be the orion file client.
-				var metadataURI = resource;
-				if (metadataURI.indexOf("/gitapi/commit/") === 0) { //$NON-NLS-0$
-					var start = metadataURI.indexOf("/file"); //$NON-NLS-0$
-					var end = metadataURI.indexOf("?", start); //$NON-NLS-0$
-					if (end === -1) { end = metadataURI.length; }
-					metadataURI = metadataURI.substring(start, end);
-					this._readonly = true;
-				}
 				var progressTimeout = window.setTimeout(function() {
 					progressTimeout = null;
 					this.reportStatus(i18nUtil.formatMessage(messages.Fetching, fileURI));
@@ -207,9 +197,9 @@ define([
 				}.bind(this);
 				this._acceptPatch = null;
 				// Read metadata
-				progress(this._read(metadataURI, true), messages.ReadingMetadata, metadataURI).then(function(metadata) {
+				progress(this._read(resource, true), messages.ReadingMetadata, resource).then(function(metadata) {
 					if(!metadata) {
-						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, metadataURI)});
+						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, resource)});
 					} else if (metadata.Directory) {
 						// Fetch children
 						Deferred.when(metadata.Children || progress(fileClient.fetchChildren(metadata.ChildrenLocation), messages.Reading, fileURI), function(contents) {
