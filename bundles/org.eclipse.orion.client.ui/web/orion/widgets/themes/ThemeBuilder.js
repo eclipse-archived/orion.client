@@ -788,60 +788,33 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
     ThemeBuilder.prototype.selectFontSize = selectFontSize;
 
-    function updateFontSizePicker(selected) {
-
-        var options = [];
-
-        for (var size = 8; size < 19; size++) {
-
-            var set = {
-                value: size + 'pt',
-                label: size + 'pt'
-            };
-
-            if (size === selected) {
-                set.selected = 'true';
-            }
-
-            options.push(set);
-        }
-
-        this.sizeSelect.destroy();
-        var newdiv = document.createElement('div');
-        newdiv.id = 'fontsizepicker';
-        var container = document.getElementById('sizecontainer');
-        container.appendChild(newdiv);
-        this.sizeSelect = new Select({
-            options: options,
-            postChange: this.selectFontSize.bind(this)
-        }, newdiv);
-        this.sizeSelect.show();
-    }
-
-    ThemeBuilder.prototype.updateFontSizePicker = updateFontSizePicker;
-
     function addFontSizePicker(themeStyles) {
 
         var currentFont = themeStyles.style.fontSize;
 
-        var container = document.getElementById('sizecontainer');
         var picker = document.getElementById('fontsizepicker');
 
         var options = [];
 
-        for (var size = 8; size < 19; size++) {
+        function fontSizes(unit) {
 
-            var set = {
-                value: size + 'pt',
-                label: size + 'pt'
-            };
+            for (var size = 8; size < 19; size++) {
 
-            if (set.value === currentFont) {
-                set.selected = 'true';
+                var set = {
+                    value: size + unit,
+                    label: size + unit
+                };
+
+                if (set.value === currentFont) {
+                    set.selected = true;
+                }
+
+                options.push(set);
             }
-
-            options.push(set);
         }
+        
+        fontSizes("px");
+        fontSizes("pt");
 
         if (!this.sizeSelect) {
             this.sizeSelect = new Select({
