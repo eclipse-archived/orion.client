@@ -340,7 +340,9 @@ define([
 			switch (event.action) {
 			case "commit": //$NON-NLS-0$
 			case "stash": //$NON-NLS-0$
-				this.messageTextArea.value = ""; //$FALLTHROUGH$
+				if (this.messageTextArea) {
+					this.messageTextArea.value = ""; //$FALLTHROUGH$
+				}
 			case "reset": //$NON-NLS-0$
 			case "applyPatch":  //$NON-NLS-0$
 			case "stage": //$NON-NLS-0$
