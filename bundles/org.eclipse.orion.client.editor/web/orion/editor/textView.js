@@ -3754,6 +3754,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_handleMouseWheel: function (e) {
+			if (this._noScroll) return;
 			var lineHeight = this._getLineHeight();
 			var pixelX = 0, pixelY = 0;
 			// Note: On the Mac the correct behaviour is to scroll by pixel.
