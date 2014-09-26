@@ -149,6 +149,11 @@
 	padding: 6px 4px 0;
 }
 
+.parameterMessage {
+	max-width: 400px;
+	padding: 6px 4px;
+}
+
 /* button contained in a slideout next to parameter fields */
 .parameterInlineButton {
 	vertical-align: baseline;

@@ -183,8 +183,15 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 						lib.stop(event);
 					}
 				};
-				
 				var parameters = commandInvocation.parameters;
+				
+				if (parameters.message) {
+					var label = document.createElement("div"); //$NON-NLS-0$
+					label.classList.add("parameterMessage"); //$NON-NLS-0$
+					label.textContent = parameters.message;
+					parameterArea.appendChild(label);
+				}
+				
 				parameters.forEach(function(parm) {
 					var field = parameters.getParameterElement ? parameters.getParameterElement(parm, parameterArea) : null;
 					var label = null;
@@ -292,10 +299,13 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 					finish(self);
 				}, false);
 				
-				var close = makeButton(null, parentDismiss);
+				var name = parameters.getCancelName ? parameters.getCancelName(commandInvocation) : null;
+				var close = makeButton(name, parentDismiss);
 				close.id = "closebox"; //$NON-NLS-0$
-				close.classList.add("imageSprite"); //$NON-NLS-0$
-				close.classList.add("core-sprite-close"); //$NON-NLS-0$
+				if (!name) {				
+					close.classList.add("imageSprite"); //$NON-NLS-0$
+					close.classList.add("core-sprite-close"); //$NON-NLS-0$
+				}
 				close.title = messages['Close'];
 				close.addEventListener("click", function(event) { //$NON-NLS-0$
 					localClose();

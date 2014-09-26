@@ -1202,6 +1202,8 @@ define([
 		this.clientCollect = options && options.clientCollect;
 		this.getParameterElement = options && options.getParameterElement;
 		this.getSubmitName = options && options.getSubmitName;
+		this.getCancelName = options && options.getCancelName;
+		this.message = options && options.message;
 	}
 	ParametersDescription.prototype = /** @lends orion.commands.ParametersDescription.prototype */ {	
 	
@@ -1311,6 +1313,7 @@ define([
 			var copy = new ParametersDescription(parameters, this._options, this.getParameters);
 			// this value may have changed since the options
 			copy.clientCollect = this.clientCollect;
+			copy.message = this.message;
 			return copy;
 			
 		 },

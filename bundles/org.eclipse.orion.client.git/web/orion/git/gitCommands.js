@@ -1040,7 +1040,7 @@ var exports = {};
 		});
 		commandService.addCommand(pushBranchForceCommand);
 
-		var resetCallback = function(data, refId, mode, message) {
+		var resetCallback = function(data, refId, mode) {
 			var location = data.items.IndexLocation;
 			if (!location) {
 				var temp = data.items.parent;
@@ -1052,31 +1052,33 @@ var exports = {};
 				}
 			}
 				
-			if(confirm(i18nUtil.formatMessage(message, refId))) { //$NON-NLS-0$
-				var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
-				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				var msg = i18nUtil.formatMessage(messages["Resetting git index for ${0}"], refId);
-				var deferred = progress.progress(service.resetIndex(location, refId, mode), msg);
-				progressService.createProgressMonitor(deferred, messages["Resetting index..."]);
-				deferred.then(
-					function(){
-						var display = {};
-						display.Severity = "Info"; //$NON-NLS-0$
-						display.HTML = false;
-						display.Message = messages["OK"];
-						dispatchModelEventOn({type: "modelChanged", action: "reset", mode: mode}); //$NON-NLS-1$ //$NON-NLS-0$
-						progressService.setProgressResult(display);
-					}, function (error){
-						var display = {};
-						display.Severity = "Error"; //$NON-NLS-0$
-						display.HTML = false;
-						display.Message = error.message;
-						progressService.setProgressResult(display);
-					}
-				);
-			}
+			var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+			var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+			var msg = i18nUtil.formatMessage(messages["Resetting git index for ${0}"], refId);
+			var deferred = progress.progress(service.resetIndex(location, refId, mode), msg);
+			progressService.createProgressMonitor(deferred, messages["Resetting index..."]);
+			deferred.then(
+				function(){
+					var display = {};
+					display.Severity = "Info"; //$NON-NLS-0$
+					display.HTML = false;
+					display.Message = messages["OK"];
+					dispatchModelEventOn({type: "modelChanged", action: "reset", mode: mode}); //$NON-NLS-1$ //$NON-NLS-0$
+					progressService.setProgressResult(display);
+				}, function (error){
+					var display = {};
+					display.Severity = "Error"; //$NON-NLS-0$
+					display.HTML = false;
+					display.Message = error.message;
+					progressService.setProgressResult(display);
+				}
+			);
 		};
+
+		var okCancelOptions = {getSubmitName: function(){return messages.OK;}, getCancelName: function(){return messages.Cancel;}};
+		
+		var resetParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('soft', 'boolean', messages.KeepWorkDir)], objects.mixin({}, okCancelOptions)); //$NON-NLS-1$ //$NON-NLS-0$
 
 		var resetIndexCommand = new mCommands.Command({
 			name : messages['Reset'],
@@ -1084,17 +1086,21 @@ var exports = {};
 			id : "eclipse.orion.git.resetIndex", //$NON-NLS-0$
 			imageClass: "git-sprite-reset", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			parameters: resetParameters,
 			callback: function(data) {
-				resetCallback(data, data.items.Name, "HARD", messages["GitResetIndexConfirm"]); //$NON-NLS-0$
+				resetCallback(data, data.items.Name, data.parameters.valueFor("soft") ? "SOFT" : "HARD"); //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
 				if (item.outgoing && item.top) {
 					return false;
 				}
+				resetParameters.message = i18nUtil.formatMessage(messages.GitResetIndexConfirm, mGitUtil.shortenRefName(item), messages.KeepWorkDir);
 				return (item.Type === "RemoteTrackingBranch"  && item.Id) || item.Type === "Branch" || item.Type === "Commit"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(resetIndexCommand);
+
+		var undoParameters = new mCommandRegistry.ParametersDescription([],objects.mixin({}, okCancelOptions)); //$NON-NLS-1$ //$NON-NLS-0$
 
 		var undoCommand = new mCommands.Command({
 			name : messages['Undo'],
@@ -1102,10 +1108,12 @@ var exports = {};
 			imageClass: "git-sprite-undo-commit", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.undoCommit", //$NON-NLS-0$
+			parameters: undoParameters,
 			callback: function(data) {
-				resetCallback(data, "HEAD^", "SOFT", messages["UndoConfirm"]); //$NON-NLS-1$ //$NON-NLS-0$
+				resetCallback(data, "HEAD^", "SOFT"); //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
+				undoParameters.message  = i18nUtil.formatMessage(messages.UndoConfirm, mGitUtil.shortenRefName(item));
 				return item.Type === "Commit" && item.parent && item.parent.Type === "Outgoing" && item.parent.children && item.parent.children[0].Name === item.Name; //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		});
