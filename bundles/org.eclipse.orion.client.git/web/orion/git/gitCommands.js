@@ -1312,7 +1312,7 @@ var exports = {};
 
 			},
 			visibleWhen : function(item) {
-				if (item.outgoing || item.history) {
+				if (item.outgoing) {
 					return false;
 				}
 				return item.Type === "Commit"; //$NON-NLS-0$
