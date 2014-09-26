@@ -15,9 +15,8 @@ define([
 'orion/objects',
 'javascript/finder',
 'javascript/signatures',
-'marked/marked',
 'doctrine'
-], function(Objects, Finder, Signatures, Marked) {
+], function(Objects, Finder, Signatures) {
 	
 	/**
 	 * @name javascript.JavaScriptHover
@@ -45,7 +44,7 @@ define([
 		computeHoverInfo: function computeHover(editorContext, ctxt) {
 		    var that = this;
 			return this.astManager.getAST(editorContext).then(function(ast) {
-			    var node = Finder.findNode(ctxt.index, ast, {parents:true});
+			    var node = Finder.findNode(ctxt.offset, ast, {parents:true});
 			    if(node) {
 			        switch(node.type) {
 			            case 'Identifier': {
@@ -273,7 +272,7 @@ define([
 		        //add on the wad of text for now
 		        hover += comment;
 		    }
-		    return {hover: Marked(hover), title: Marked(title)};
+		    return {hover: hover, title: title, type:'markdown'};
 		},
 		
 		/**
