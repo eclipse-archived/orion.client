@@ -410,7 +410,7 @@ define([
 			});
 			this.createTree(this.parentId, model, {
 				setFocus: false, // do not steal focus on load
-				onComplete: function() {
+				onComplete: function(tree) {
 					var model = that.model;
 					if (that.prefix === "all") { //$NON-NLS-0$
 						that.updateCommands();
@@ -420,10 +420,33 @@ define([
 						that.updateCommands();
 					}
 					that.status = model.status;
+					var children = [];
+					that.model.getRoot(function(root) {
+						that.model.getChildren(root, function(c) {
+							children = c;
+						});
+					});
+					if (that._getDiffCount(children) === 1) {
+						that.expandSections(tree, children).then(function() {
+							deferred.resolve();
+						});
+						return;
+					}
 					deferred.resolve();
 				}
 			});
 			return deferred;
+		},
+		expandSections: function(tree, children) {
+			var deferreds = [];
+			for (var i = 0; i < children.length; i++) {
+				var deferred = new Deferred();
+				deferreds.push(deferred);
+				tree.expand(this.model.getId(children[i]), function (d) {
+					d.resolve();
+				}, [deferred]);
+			}
+			return Deferred.all(deferreds);
 		},
 		isRowSelectable: function(modelItem) {
 			return this.prefix === "all" ? false : mGitUIUtil.isChange(modelItem); //$NON-NLS-0$
@@ -436,14 +459,18 @@ define([
 			var result = 0;
 			var model = this.model;
 			if (model) {
+				var that = this;
 				model.getRoot(function(root) {
 					model.getChildren(root, function(children) {
-						// -1 for the commit message item
-						result = Math.max(0, children.length - (model.prefix === "all" ? 2 : 0)); //$NON-NLS-0$
+						result = that._getDiffCount(children);
 					});
 				});
 			}
 			return result;
+		},
+		_getDiffCount: function(children) {
+			// -2 for the commit message item and explorer selection
+			return Math.max(0, children.length - (this.model.prefix === "all" ? 2 : 1)); //$NON-NLS-0$
 		},
 		updateCommands: function() {
 			mExplorer.createExplorerCommands(this.commandService);
