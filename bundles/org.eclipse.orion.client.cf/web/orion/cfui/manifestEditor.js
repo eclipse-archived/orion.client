@@ -313,6 +313,8 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation', 'orion/cfui
 				for(var i=0; i<lines.length; ++i){
 					
 					var line = lines[i];
+					line = line.split('#')[0]; /* bear in-line comments */
+					
 					var lineNumber = i + 1; /* start with 1 */
 					
 					/* empty lines are fine */
