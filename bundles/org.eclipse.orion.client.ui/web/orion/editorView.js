@@ -339,6 +339,16 @@ define([
 					return true;
 				});
 				
+				textView.setKeyBinding(new mKeyBinding.KeyStroke('z', true, false, true), "toggleZoomRuler"); //$NON-NLS-1$ //$NON-NLS-0$
+				textView.setAction("toggleZoomRuler", function() { //$NON-NLS-0$
+					if (!self.settings.zoomRulerVisible) return false;
+					self.settings.zoomRuler = !self.settings.zoomRuler;
+					if(editorPreferences) {
+						editorPreferences.setPrefs(self.settings);
+					}
+					return true;
+				}, {name: messages.toggleZoomRuler});
+				
 				self.vi = self.emacs = null;
 				self.updateKeyMode(self.settings, textView);
 

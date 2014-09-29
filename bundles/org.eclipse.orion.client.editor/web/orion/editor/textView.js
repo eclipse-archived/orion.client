@@ -3910,7 +3910,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				} else {
 					this._update();
 				}
-				this.dispatchEvent({type: "Resize"});
+				this.dispatchEvent({type: "Resize"}); //$NON-NLS-0$
 			}
 		},
 		_handleRulerEvent: function (e) {

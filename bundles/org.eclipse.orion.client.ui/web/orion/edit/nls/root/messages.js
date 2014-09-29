@@ -31,6 +31,7 @@ define({
 	"Reading": "Reading ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"readonly": "Read Only.", //$NON-NLS-1$ //$NON-NLS-0$
 	"saveFile": "Save this file", //$NON-NLS-1$ //$NON-NLS-0$
+	"toggleZoomRuler": "Toggle Zoom Ruler", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLine": "Go to line...", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLineTooltip": "Go to specified line number", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLinePrompt": "Go to line:", //$NON-NLS-1$ //$NON-NLS-0$
