@@ -2349,6 +2349,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		onMouseOut: function(mouseEvent) {
 			return this.dispatchEvent(mouseEvent);
 		},
+		onOptions: function(optionsEvent) {
+			return this.dispatchEvent(optionsEvent);
+		},
 		/**
 		 * @class This is the event sent when the selection changes in the text view.
 		 * <p>
@@ -2533,6 +2536,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					}
 				}
 			}
+			this.dispatchEvent({type: "Redraw", startLine: startLine, endLine: endLine, ruler: ruler}); //$NON-NLS-0$
 			this._queueUpdate();
 		},
 		/**
@@ -2770,6 +2774,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					this["_" + option] = clone(newValue); //$NON-NLS-0$
 				}
 			}
+			this.onOptions({type: "Options", options: options});
 		},
 		/**
 		 * @class This object describes the selection show options.
@@ -3905,6 +3910,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				} else {
 					this._update();
 				}
+				this.dispatchEvent({type: "Resize"});
 			}
 		},
 		_handleRulerEvent: function (e) {
@@ -4910,19 +4916,24 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				right: rect1.right - rect2.right,
 				bottom: rect1.bottom - rect2.bottom
 			};
-			var wrapWidth = 0, marginWidth = 0;
+			var wrapWidth = 0, marginWidth = 0, charWidth = 0;
 			if (!invalid) {
-				if (this._wrapOffset || this._marginOffset) {
+				if (this._wrapMode) {
 					div1 = util.createElement(document, "div"); //$NON-NLS-0$
 					div1.style.position = "fixed"; //$NON-NLS-0$
 					div1.style.left = "-1000px"; //$NON-NLS-0$
-					div1.innerHTML = new Array(this._wrapOffset + 1 + (util.isWebkit ? 0 : 1)).join(" "); //$NON-NLS-0$
 					parent.appendChild(div1);
+					div1.innerHTML = new Array(2).join("a"); //$NON-NLS-0$
 					rect1 = div1.getBoundingClientRect();
-					wrapWidth = Math.ceil(rect1.right - rect1.left);
-					div1.innerHTML = new Array(this._marginOffset + 1).join(" "); //$NON-NLS-0$
-					rect2 = div1.getBoundingClientRect();
-					marginWidth = Math.ceil(rect2.right - rect2.left);
+					charWidth = Math.ceil(rect1.right - rect1.left);
+					if (this._wrapOffset || this._marginOffset) {
+						div1.innerHTML = new Array(this._wrapOffset + 1 + (util.isWebkit ? 0 : 1)).join(" "); //$NON-NLS-0$
+						rect1 = div1.getBoundingClientRect();
+						wrapWidth = Math.ceil(rect1.right - rect1.left);
+						div1.innerHTML = new Array(this._marginOffset + 1).join(" "); //$NON-NLS-0$
+						rect2 = div1.getBoundingClientRect();
+						marginWidth = Math.ceil(rect2.right - rect2.left);
+					}
 					parent.removeChild(div1);
 				}
 			}
@@ -4934,6 +4945,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				scrollWidth: scrollWidth,
 				wrapWidth: wrapWidth,
 				marginWidth: marginWidth,
+				charWidth: charWidth,
 				invalid: invalid
 			};
 		},
@@ -5305,6 +5317,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (this._updateTimer) {
 				window.clearTimeout(this._updateTimer);
 				this._updateTimer = null;
+			}
+			if (this._calculateLHTimer) {
+				window.clearTimeout(this._calculateLHTimer);
+				this._calculateLHTimer = null;
 			}
 			
 			var rootDiv = this._rootDiv;

@@ -842,20 +842,23 @@ define("orion/editor/rulers", [
 		_create: function() {
 			var textView = this.getView();
 			if (!textView) return;
-			var options = textView.getOptions();
-			options.parent = this.node;
-			var rulerTheme = "textviewZoom"; //$NON-NLS-0$
-			var theme = options.themeClass;
-			if (theme) {
-				theme = theme.replace(rulerTheme, "");
-				if (theme) { theme = " " + theme; } //$NON-NLS-0$
-				theme = rulerTheme + theme;
-			} else {
-				theme = rulerTheme;
+			function getOptions(options) {
+				var rulerTheme = "textviewZoom"; //$NON-NLS-0$
+				var theme = options.themeClass;
+				if (theme) {
+					theme = theme.replace(rulerTheme, "");
+					if (theme) { theme = " " + theme; } //$NON-NLS-0$
+					theme = rulerTheme + theme;
+				} else {
+					theme = rulerTheme;
+				}
+				options.themeClass = theme;
+				options.noScroll = true;
+				options.readonly = true;
+				return options;
 			}
-			options.themeClass = theme;
-			options.noScroll = true;
-			options.readonly = true;
+			var options = getOptions(textView.getOptions());
+			options.parent = this.node;
 			var zoomView = this._zoomView = new mTextView.TextView(options);
 			zoomView._clientDiv.contentEditable = false;
 			zoomView.setModel(textView.getModel());
@@ -878,10 +881,39 @@ define("orion/editor/rulers", [
 				windowDiv.style.top = (topPixel - that.node.getBoundingClientRect().top) + "px"; //$NON-NLS-0$
 				windowDiv.style.height = (bottomPixel - topPixel) + "px"; //$NON-NLS-0$
 			}
+			function updateWidth(options) {
+				var width;
+				if (options.wrapMode && !options.wrapOffset && textView._metrics.charWidth) {
+					var div1 = util.createElement(document, "div"); //$NON-NLS-0$
+					div1.style.position = "fixed"; //$NON-NLS-0$
+					div1.style.left = "-1000px"; //$NON-NLS-0$
+					zoomView._clientDiv.appendChild(div1);
+					div1.innerHTML = new Array(Math.ceil(textView.getClientArea().width / textView._metrics.charWidth) + 1).join("a"); //$NON-NLS-0$
+					var rect1 = div1.getBoundingClientRect();
+					width = Math.min(150, Math.ceil(rect1.right - rect1.left)) + "px"; //$NON-NLS-0$
+				} else {
+					width = "";
+				}
+				var oldWidth = that.node.style.width;
+				that.node.style.width = width;
+				return oldWidth !== width;
+			}
 			textView.addEventListener("Scroll", this._scrollListener = function(event) { //$NON-NLS-0$
 				updateScroll(event.newValue);
 			});
-			//TODO need to find a better way of sharing the styler for multiple views
+			textView.addEventListener("Resize", this._resizeListener = function() { //$NON-NLS-0$
+				updateWidth(zoomView.getOptions());
+			});
+			textView.addEventListener("Redraw", this._redrawListener = function(event) { //$NON-NLS-0$
+				if (!event.ruler) {
+					zoomView.redrawLines(event.startLine, event.endLine);
+				}
+			});
+			textView.addEventListener("Options", this._optionsListener = function(event) { //$NON-NLS-0$
+				var options = getOptions(event.options);
+				zoomView.setOptions(options);
+				updateWidth(zoomView.getOptions());
+			});
 			zoomView.addEventListener("LineStyle", this._lineListener = function(e) { //$NON-NLS-0$
 				textView.onLineStyle(e);
 			});
@@ -892,25 +924,31 @@ define("orion/editor/rulers", [
 				var offset = zoomView.getOffsetAtLocation(event.x, event.y);
 				textView.setSelection(offset, offset, 0.5);
 				event.event.stopPropagation();
-				event.preventDefault();				
+				event.preventDefault();
 			});
 			zoomView.addEventListener("MouseUp", function(event) { //$NON-NLS-0$
 				event.event.stopPropagation();
-				event.preventDefault();				
+				event.preventDefault();
 			});
 			zoomView.addEventListener("MouseMove", function(event) { //$NON-NLS-0$
 				event.event.stopPropagation();
-				event.preventDefault();				
+				event.preventDefault();
 			});
 			(document.defaultView || document.parentWindow).setTimeout(function() {
 				updateScroll({y: textView.getTopPixel()});
 			}, 0);
 		},
 		_destroy: function() {
-			if (this._scrollListener) {
-				var textView = this.getView();
+			var textView = this.getView();
+			if (textView) {
 				textView.removeEventListener("Scroll", this._scrollListener); //$NON-NLS-0$
 				this._scrollListener = null;
+				textView.removeEventListener("Resize", this._resizeListener); //$NON-NLS-0$
+				this._resizeListener = null;
+				textView.removeEventListener("Redraw", this._redrawListener); //$NON-NLS-0$
+				this._redrawListener = null;
+				textView.removeEventListener("Options", this._optionsListener); //$NON-NLS-0$
+				this._optionsListener = null;
 			}
 			var zoomView = this._zoomView;
 			if (zoomView) {
