@@ -236,6 +236,7 @@ define({
 	'clearThemeAndEditorSettings.tooltip': 'Clear all settings associated with editor themes and window themes',  //$NON-NLS-0$  //$NON-NLS-1$
 	"Settings": "Settings",
 	'eclipseThemeName': 'Eclipse',  //$NON-NLS-0$ //$NON-NLS-1$
+	'darkerThemeName': 'Dark',  //$NON-NLS-0$ //$NON-NLS-1$
 	'prospectoThemeName': 'Prospecto',  //$NON-NLS-0$ //$NON-NLS-1$
 	'blueThemeName': 'Blue',  //$NON-NLS-0$  //$NON-NLS-1$
 	'ambienceThemeName': 'Ambience',  //$NON-NLS-0$ //$NON-NLS-1$

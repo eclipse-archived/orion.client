@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013,2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -186,6 +186,7 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 			
 			//From annotations.css
 			defineRule("annotationLine.currentLine", settings.currentLine, true); //$NON-NLS-0$
+			defineRule("annotationRange.writeOccurrence", settings.writeOccurrence, true); //$NON-NLS-0$
 			
 			//From textstyler.css
 			defineRule("entity-name-tag", settings.keyword, false); //$NON-NLS-0$
@@ -196,6 +197,7 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 			defineRule("string", settings.string, false); //$NON-NLS-0$\
 			defineRule("constant", settings.constant, false); //$NON-NLS-0$
 			defineRule("comment", settings.comment, false); //$NON-NLS-0$
+			defineRule("tag", settings.tag, false); //$NON-NLS-0$
 			defineRule("comment.block.documentation", settings.comment, false); //$NON-NLS-0$
 			defineRule("keyword.other.documentation.markup", settings.comment, false); //$NON-NLS-0$
 			defineRule("keyword.other.documentation.markup", settings.comment, false); //$NON-NLS-0$

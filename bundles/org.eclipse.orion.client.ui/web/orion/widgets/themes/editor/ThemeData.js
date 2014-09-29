@@ -102,6 +102,31 @@ define([
 
 		this.styles.push(prospecto);
 
+		var darker = new StyleSet();
+
+		darker.name = messages['darkerThemeName'];
+		darker.annotationRuler = '272822';
+		darker.background = '#272822';
+		darker.comment = '#75715E';
+		darker.keyword = '#52E3F6';
+		darker.text = 'white';
+		darker.string = '#ECE47E';
+		darker.overviewRuler = '#272822';
+		darker.lineNumberOdd = '#999999';
+		darker.lineNumberEven = '#999999';
+		darker.lineNumber = '#999999';
+		darker.currentLine = '#5B5A4E';
+		darker.tag = 'greenyellow';
+		darker.attribute = '#CFBFAD';
+		darker.fontFamily = defaultFont;
+		darker.fontSize = defaultFontSize;
+		darker.rightRuler = 'black';
+		darker.leftRuler = 'black';
+		darker.constant = '#C48CFF';
+		darker.writeOccurrence = 'steelblue';
+
+		this.styles.push(darker);
+
 		var blue = new StyleSet();
 
 		blue.name = messages['blueThemeName'];
@@ -195,6 +220,7 @@ define([
 		nimbus.fontFamily = defaultFont;
 		nimbus.fontSize = defaultFontSize;
 		nimbus.constant = '#01B199';
+		nimbus.writeOccurrence = 'steelblue';
 
 		this.styles.push(nimbus);
 
