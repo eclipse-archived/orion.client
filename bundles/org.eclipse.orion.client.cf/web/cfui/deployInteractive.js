@@ -4,9 +4,9 @@ var uiTestFunc = null;
 
 define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection',
 	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences', 'cfui/cfUtil', 'orion/objects', 'orion/widgets/input/ComboTextInput',
-	'orion/webui/Wizard', 'orion/fileClient'], 
+	'orion/webui/Wizard', 'orion/fileClient', 'orion/urlUtils'], 
 		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, URITemplate, PageLinks, 
-				Preferences, mCfUtil, objects, ComboTextInput, Wizard, mFileClient) {
+				Preferences, mCfUtil, objects, ComboTextInput, Wizard, mFileClient, URLUtil) {
 	
 	mBootstrap.startup().then(
 		function(core) {
@@ -21,6 +21,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			document.getElementById('title').appendChild(document.createTextNode("Configure Application Deployment")); //$NON-NLS-1$//$NON-NLS-0$
 			var msgContainer = document.getElementById('messageContainer'); //$NON-NLS-0$
 			var msgLabel = document.getElementById('messageLabel'); //$NON-NLS-0$
+			var msgText = document.getElementById('messageText'); //$NON-NLS-0$
+			var msgButton = document.getElementById('messageButton');
 			var page1;
 			var page2;
 			var page3;
@@ -55,14 +57,52 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			}
 			var manifestContents = {applications: [{}]};
 			var manifestInfo = {};
+			
+			function parseMessage(msg){
+				var chunks, msgNode;
+				try {
+					chunks = URLUtil.detectValidURL(msg);
+				} catch (e) {
+					// Contained a corrupt URL
+					chunks = [];
+				}
+				if (chunks.length) {
+					msgNode = document.createDocumentFragment();
+					URLUtil.processURLSegments(msgNode, chunks);
+					// All status links open in new window
+					Array.prototype.forEach.call(lib.$$("a", msgNode), function(link) { //$NON-NLS-0$
+						link.target = "_blank"; //$NON-NLS-0$
+					});
+				}
+				return msgNode || document.createTextNode(msg);
+			}
 
 			function showMessage(message){
-				msgLabel.appendChild(document.createTextNode(message));
+				msgLabel.classList.remove("errorMessage");
+				msgContainer.classList.remove("errorMessage");
+				lib.empty(msgText);
+				msgText.style.width = "100%";
+				msgText.appendChild(parseMessage(message));
+				msgButton.className = "";
+				msgContainer.classList.add("showing"); //$NON-NLS-0$
+			}
+			
+			function showError(message){
+				msgLabel.classList.add("errorMessage");
+				msgContainer.classList.add("errorMessage");
+				lib.empty(msgText);
+				msgText.style.width = "calc(100% - 10px)";
+				msgText.appendChild(parseMessage(message.Message || message));
+				lib.empty(msgButton);
+				msgButton.className = "dismissButton core-sprite-close imageSprite";
+				msgButton.onclick = hideMessage;
 				msgContainer.classList.add("showing"); //$NON-NLS-0$
 			}
 			
 			function hideMessage(){
-				lib.empty(msgLabel);
+				msgLabel.classList.remove("errorMessage");
+				msgContainer.classList.remove("errorMessage");
+				lib.empty(msgText);
 				msgContainer.classList.remove("showing"); //$NON-NLS-0$
 			}
 			
@@ -219,7 +259,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 							function(result){
 								postMsg(mCfUtil.prepareLaunchConfigurationContent(result, deployResourceJSON.AppPath, editLocation));
 							}, function(error){
-								postError(error, selection);
+								handleError(error, selection, true);
 							}
 						);
 					}
@@ -412,7 +452,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 								loadSpaces(orgsDropdown.value);
 								hideMessage();
 							}, function(error){
-								postError(error, target);
+								handleError(error, target, false, function(){loadTargets(target);});
 							}
 						);
 					}
@@ -664,7 +704,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			    		});
 		    		}.bind(this), 
 		    		function(error){
-		    			postError(error, selection.getSelection());
+		    			handleError(error, selection.getSelection());
 		    		}.bind(this)
 		    	);
 		    },
@@ -811,25 +851,15 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 							onSubmit: doAction,
 							onCancel: closeFrame,
 							buttonNames: {ok: "Deploy"},
-							size: {width: "370px", height: "180px"}
+							size: {width: "420px", height: "180px"}
 						});
 					}, function(error){
-						postError(error);
+						handleError(error, null, true);
 					}
 				);
 			}
-		    
-			cFService.getManifestInfo(relativeFilePath).then(function(manifestResponse){
-				if(manifestResponse.Type === "Manifest" && manifestResponse.Contents && manifestResponse.Contents.applications && manifestResponse.Contents.applications.length > 0){				
-					manifestContents = manifestResponse.Contents;
-			    	manifestInfo = manifestResponse.Contents.applications[0];
-				}
-		    	loadScreen();
-		    }.bind(this), loadScreen);
-		}
-	);
-	
-	function getDefaultTarget(fileClient, deployResourceJSON) {
+			
+				function getDefaultTarget(fileClient, deployResourceJSON) {
 		var clientDeferred = new Deferred();
 		fileClient.read(deployResourceJSON.ContentLocation, true).then(
 			function(result){
@@ -852,7 +882,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			 status: status}), "*");
 	}
 	
-	function postError(error, target) {
+	function handleError(error, target, post, retryFunc) {
+		error.Severity = "Error";
 		if(error.Message){
 			if (error.Message.indexOf("The host is taken")===0){
 				error.Message = "The host is already in use by another application. Please check the host/domain in the manifest file.";
@@ -862,7 +893,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		if (error.HttpCode === 404){
 			error = {
 				State: "NOT_DEPLOYED",
-				Message: error.Message
+				Message: error.Message,
+				Severity: "Error"
 			};
 		} else if (error.JsonData && error.JsonData.error_code) {
 			var err = error.JsonData;
@@ -880,10 +912,82 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
 			}
 		}
-		
-		window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-			 source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
-			 status: error}), "*");
+		if(post){
+			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
+				 source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
+				 status: error}), "*");
+		} else {
+			showError(error);
+			
+			if(error.Retry && error.Retry.parameters){
+				var fields = document.createElement("div");
+				var paramInputs = {};
+				function submitParams(){
+					var params = {};
+					for(var i=0; i<error.Retry.parameters.length; i++){
+						var param = error.Retry.parameters[i];
+						if(param.hidden){
+							params[param.id] = param.value;
+						} else {
+							params[param.id] = paramInputs[param.id].value;
+						}
+					}
+					if(params.url && params.user && params.password){
+						showMessage("Logging in to " + params.url + "...");
+						cFService.login(params.url, params.user, params.password).then(function(result){
+							hideMessage();
+							if(retryFunc){
+								retryFunc(result);
+							}
+						}, function(newError){
+							hideMessage();
+							if(newError.HttpCode === 401){
+								handleError(error, target, post, retryFunc);
+							} else {
+								handleError(newError, target, post, retryFunc);
+							}
+						});
+					}
+				}
+				fields.className = "retryFields";
+				for(var i=0; i<error.Retry.parameters.length; i++){
+					var param = error.Retry.parameters[i];
+					if(param.hidden){
+						continue;
+					}
+					var label = document.createElement("label");
+					label.appendChild(document.createTextNode(param.name));
+					var input = document.createElement("input");
+					input.type = param.type;
+					input.id = param.id;
+					input.onkeydown = function(event){
+						if(event.keyCode === 13){
+							submitParams();
+						} else if(event.keyCode === 27) {
+							hideMessage();
+						}
+					}
+					paramInputs[param.id] = input;
+					fields.appendChild(label);
+					fields.appendChild(input);
+				}
+				var submitButton = document.createElement("button");
+				submitButton.appendChild(document.createTextNode("Submit"));
+				submitButton.onclick = submitParams;
+				fields.appendChild(submitButton);
+				msgText.appendChild(fields);
+			}
+		}
 	}
-
+		    
+			cFService.getManifestInfo(relativeFilePath).then(function(manifestResponse){
+				if(manifestResponse.Type === "Manifest" && manifestResponse.Contents && manifestResponse.Contents.applications && manifestResponse.Contents.applications.length > 0){				
+					manifestContents = manifestResponse.Contents;
+			    	manifestInfo = manifestResponse.Contents.applications[0];
+				}
+		    	loadScreen();
+		    }.bind(this), loadScreen);
+		}
+	);
+	
 });

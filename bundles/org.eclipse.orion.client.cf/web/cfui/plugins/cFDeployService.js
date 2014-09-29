@@ -178,7 +178,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 						
 						/* old-style interactive deploy */
 						deferred.resolve({UriTemplate: "{+OrionHome}/cfui/deployInteractive.html#" + encodeURIComponent(JSON.stringify({ContentLocation: project.ContentLocation, AppPath: appPath})), 
-							Width: "400px", 
+							Width: "450px", 
 							Height: "350px",
 							UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate"});
 						
