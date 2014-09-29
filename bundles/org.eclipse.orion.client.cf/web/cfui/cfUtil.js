@@ -43,7 +43,9 @@ define([
 		},
 		
 		getDefaultTarget: function(resource){
-			return {};
+			var clientDeferred = new Deferred();
+			clientDeferred.resolve({});
+			return clientDeferred;
 		},
 		
 		getLoginMessage: function(/*manageUrl*/){

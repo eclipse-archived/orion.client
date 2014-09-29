@@ -519,7 +519,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 					hostInput = hostDropdown.getTextInputNode();
 					hostInput.value = manifestInfo.host || manifestInfo.name || "";
 					
-					var selectedCloud = _clouds[cloudsDropdown.selectedIndex];
+					var selectedCloud = _clouds[_clouds.lenght > 1 ? cloudsDropdown.selectedIndex : 0];
 					loadTargets(selectedCloud);
 			    },
 			    validate: function(setValid) {
@@ -835,14 +835,9 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			function(result){
 				mCfUtil.getDefaultTarget(result).then(
 					clientDeferred.resolve,
-					function(error){
-						clientDeferred.resolve({});
-					}
+					clientDeferred.reject
 				);
-			},
-			function(error){
-				clientDeferred.resolve({});
-			}
+			}, clientDeferred.reject
 		);
 		return clientDeferred;
 	}
