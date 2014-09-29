@@ -119,8 +119,6 @@ define([
 
 				_self.itemToIndexMap = {};
 				_self.toolbar = lib.node( _self.pageActions );
-	
-				_self.manageDefaultData(prefs);
 				
 				_self.drawUserInterface();
 	
@@ -133,24 +131,27 @@ define([
 		processHash: function() {
 			var pageParams = PageUtil.matchResourceParameters();
 			
-			var container = this;
-			
 			this.preferences.getPreferences('/settingsContainer').then(function(prefs){
 
 				var selection = prefs.get( 'selection' );
 
 				var category = pageParams.category || selection; //$NON-NLS-0$
 
-				if(container.selectedCategory){
-					if( container.selectedCategory.id === category){
+				if(this.selectedCategory){
+					if( this.selectedCategory.id === category){
 						//No need to reselect the category
 						return;
 					}
 				}
-
-				container.showByCategory(category);
 				
-			} );
+				if (!category) {
+					// no selection exists, select the first one
+					category = this.settingsCategories[0].id;
+				}
+
+				this.showByCategory(category);
+				
+			}.bind(this) );
 			
 			window.setTimeout(function() {this.commandService.processURL(window.location.href);}.bind(this), 0);
 		},
@@ -385,13 +386,6 @@ define([
 		
 		handleError: function( error ){
 			console.log( error );
-		},
-
-		manageDefaultData: function(prefs) {
-			var selection = prefs.get( 'selection' );
-			if (!selection) {
-				prefs.put( 'selection', 'userSettings' );
-			}
 		}
 	});
 	return SettingsContainer;
