@@ -54,11 +54,12 @@
 }
 
 .keyword.operator, .keyword-operator {
-	color: #ddd;
+	color: #CC4C07;
+	font-weight: bold;
 }
 
 .keyword {
-	color: #CC4C07;
+	color: #9F4177;
 	font-weight: bold;
 }
 

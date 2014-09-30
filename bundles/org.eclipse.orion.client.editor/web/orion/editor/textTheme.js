@@ -137,7 +137,7 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 			if (settings.fontSize) {
 				result.push("\tfont-size: " + settings.fontSize + ";"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
-			if (settings.fontSize) {			
+			if (settings.text) {			
 				result.push("\tcolor: " + settings.text + ";"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			result.push("}"); //$NON-NLS-0$
@@ -193,7 +193,8 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 			defineRule("entity-other-attribute-name", settings.attribute, false); //$NON-NLS-0$
 			defineRule("string-quoted", settings.string, false); //$NON-NLS-0$
 			defineRule("meta.annotation.currentLine", settings.currentLine, true); //$NON-NLS-0$
-			defineRule("keyword", settings.keyword, false); //$NON-NLS-0$
+			defineRule("keyword.operator", settings["keyword.operator"] || settings.keyword, false); //$NON-NLS-0$
+			defineRule("keyword.control", settings["keyword.control"] || settings.keyword, false); //$NON-NLS-0$
 			defineRule("string", settings.string, false); //$NON-NLS-0$\
 			defineRule("constant", settings.constant, false); //$NON-NLS-0$
 			defineRule("comment", settings.comment, false); //$NON-NLS-0$

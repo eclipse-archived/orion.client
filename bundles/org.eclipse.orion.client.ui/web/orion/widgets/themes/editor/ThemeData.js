@@ -83,7 +83,8 @@ define([
 		prospecto.annotationRuler = 'white';
 		prospecto.background = 'white';
 		prospecto.comment = '#3C802C';
-		prospecto.keyword = '#CC4C07';
+		prospecto['keyword.control'] = '#CC4C07';
+		prospecto['keyword.operator'] = '#9F4177';
 		prospecto.text = '#333';
 		prospecto.string = '#446FBD';
 		prospecto.overviewRuler = 'white';
