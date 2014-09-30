@@ -105,12 +105,12 @@ define([
 		var darker = new StyleSet();
 
 		darker.name = messages['darkerThemeName'];
-		darker.annotationRuler = '272822';
+		darker.annotationRuler = '#272822';
 		darker.background = '#272822';
 		darker.comment = '#75715E';
 		darker.keyword = '#52E3F6';
-		darker.text = 'white';
-		darker.string = '#ECE47E';
+		darker.text = '#F8F8F2';
+		darker.string = '#F0E383';
 		darker.overviewRuler = '#272822';
 		darker.lineNumberOdd = '#999999';
 		darker.lineNumberEven = '#999999';
@@ -120,8 +120,8 @@ define([
 		darker.attribute = '#CFBFAD';
 		darker.fontFamily = defaultFont;
 		darker.fontSize = defaultFontSize;
-		darker.rightRuler = 'black';
-		darker.leftRuler = 'black';
+		darker.rightRuler = '#272822';
+		darker.leftRuler = '#272822';
 		darker.constant = '#C48CFF';
 		darker.writeOccurrence = 'steelblue';
 
