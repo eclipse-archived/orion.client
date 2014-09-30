@@ -1737,6 +1737,18 @@ define([
 //			assert.equal(blocks.length, 1, "Should have found 1 script block");
 			assert.equal(blocks.length, 0, "We don't currently support both type and language attributes on a script tag (Bug 437957)");
 		});
+		
+		/**
+		 * Tests the support for finding declarations
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
+		 */
+		it('test_findDeclaration1', function() {
+			var text = "<!DOCTYPE html><head><script type=\"text/javascript\" language=\"BLARGH\">function f() {}</script>\n</head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			// If we have both attributes, the regex will always take the last matching 
+//			assert.equal(blocks.length, 1, "Should have found 1 script block");
+			assert.equal(blocks.length, 0, "We don't currently support both type and language attributes on a script tag (Bug 437957)");
+		});
 
 	});
 });

@@ -1797,5 +1797,117 @@ define([
 				comments: [{"start":7,"end":12,"value":" \n\n"}]
 			});
 		});
+		
+		/**
+		 * Incomplete '`' tokens
+		 * 
+		 * Since we have no taken-based recovery this test throws an exception that is normally caught by the 
+		 * AST manager
+		 * 
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444885
+		 * @since 7.0
+		 */
+		it('Incomplete tick 1', function() {
+		    try {
+    			runTest({
+    				source: "`",
+                    nodes: [],
+    				tokens: [],
+    				errors: [{"lineNumber":1,"index":0,"message":"Unexpected token ILLEGAL","token":"`"}],
+    				comments: [] 
+    			});
+			} catch(ex) {
+			    assert.equal(ex.lineNumber, 1, "The exception line number is not correct");
+			    assert.equal(ex.index, 0, 'The exception index is not correct');
+			    assert.equal(ex.message, "Line 1: Unexpected token ILLEGAL", 'The exception message is not correct');
+			    assert.equal(ex.token, "`", 'The exception token is not correct');
+			}
+		});
+		
+		/**
+		 * incomplete '`' tokens
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444885
+		 * @since 7.0
+		 */
+		it('Incomplete tick 2', function() {
+			runTest({
+				source: "function f() { var x;` }",
+                nodes: [{"type":"FunctionDeclaration","range":[13,22]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[23,22]},{"type":"VariableDeclaration","kind":"var","range":[15,22]},{"type":"VariableDeclarator","range":[19,20]},{"type":"Identifier","name":"x","range":[19,20]}],
+				tokens: [{"type":"Keyword","range":[0,8],"value":"function"},{"type":"Identifier","range":[9,10],"value":"f"},{"type":"Punctuator","range":[10,11],"value":"("},{"type":"Punctuator","range":[11,12],"value":")"},{"type":"Punctuator","range":[13,14],"value":"{"},{"type":"Keyword","range":[15,18],"value":"var"},{"type":"Identifier","range":[19,20],"value":"x"},{"type":"Punctuator","range":[20,21],"value":";"}],
+				errors: [{"lineNumber":1,"index":21,"message":"Unexpected token ILLEGAL","token":"`"}],
+				comments: []
+			});
+		});
+		
+		/**
+		 * Incomplete '`' tokens
+		 * 
+		 * Since we have no taken-based recovery this test throws an exception that is normally caught by the 
+		 * AST manager
+		 * 
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444885
+		 * @since 7.0
+		 */
+		it('Incomplete tick 3', function() {
+		    try {
+    			runTest({
+    				source: "function f() {` }",
+                    nodes: [],
+    				tokens: [],
+    				errors: [{"lineNumber":1,"index":14,"message":"Unexpected token ILLEGAL","token":"`"}],
+    				comments: []
+    			});
+			} catch(ex) {
+			    assert.equal(ex.lineNumber, 1, "The exception line number is not correct");
+			    assert.equal(ex.index, 14, 'The exception index is not correct');
+			    assert.equal(ex.message, "Line 1: Unexpected token ILLEGAL", 'The exception message is not correct');
+			    assert.equal(ex.token, "`", 'The exception token is not correct');
+			}
+		});
+		
+		/**
+		 * incomplete '/' tokens
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444885
+		 * @since 7.0
+		 */
+		it('Incomplete regex 1', function() {
+			runTest({
+				source: "/",
+                nodes: [{"type":"ExpressionStatement","range":[0,1]}],
+				tokens: [{"type":"Punctuator","range":[0,1],"value":"/"}],
+				errors: [{"lineNumber":1,"index":1,"message":"Invalid regular expression: missing /"},{"lineNumber":1,"index":0,"message":"Unexpected token /","token":"/"}],
+				comments: []
+			});
+		});
+		
+		/**
+		 * incomplete '/' tokens
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444885
+		 * @since 7.0
+		 */
+		it('Incomplete regex 2', function() {
+			runTest({
+				source: "function f() { var x;/ }",
+                nodes: [{"type":"FunctionDeclaration","range":[0,22]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[13,22]},{"type":"VariableDeclaration","kind":"var","range":[15,21]},{"type":"VariableDeclarator","range":[19,20]},{"type":"Identifier","name":"x","range":[19,20]},{"type":"ExpressionStatement","range":[21,24]},{"type":"ExpressionStatement","range":[23,24]}],
+				tokens: [{"type":"Keyword","range":[0,8],"value":"function"},{"type":"Identifier","range":[9,10],"value":"f"},{"type":"Punctuator","range":[10,11],"value":"("},{"type":"Punctuator","range":[11,12],"value":")"},{"type":"Punctuator","range":[13,14],"value":"{"},{"type":"Keyword","range":[15,18],"value":"var"},{"type":"Identifier","range":[19,20],"value":"x"},{"type":"Punctuator","range":[20,21],"value":";"},{"type":"Punctuator","range":[21,22],"value":"/"},{"type":"Punctuator","range":[23,24],"value":"}"}],
+				errors: [{"lineNumber":1,"index":24,"message":"Invalid regular expression: missing /"},{"lineNumber":1,"index":21,"message":"Unexpected token /","token":"/"},{"lineNumber":1,"index":23,"message":"Unexpected token }","token":"}"}],
+				comments: []
+			});
+		});
+		
+		/**
+		 * incomplete '/' tokens
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=444885
+		 * @since 7.0
+		 */
+		it('Incomplete regex 3', function() {
+			runTest({
+				source: "function f() { var x; }/",
+                nodes: [{"type":"FunctionDeclaration","range":[0,23]},{"type":"Identifier","name":"f","range":[9,10]},{"type":"BlockStatement","range":[13,23]},{"type":"VariableDeclaration","kind":"var","range":[15,21]},{"type":"VariableDeclarator","range":[19,20]},{"type":"Identifier","name":"x","range":[19,20]},{"type":"ExpressionStatement","range":[23,24]}],
+				tokens: [{"type":"Keyword","range":[0,8],"value":"function"},{"type":"Identifier","range":[9,10],"value":"f"},{"type":"Punctuator","range":[10,11],"value":"("},{"type":"Punctuator","range":[11,12],"value":")"},{"type":"Punctuator","range":[13,14],"value":"{"},{"type":"Keyword","range":[15,18],"value":"var"},{"type":"Identifier","range":[19,20],"value":"x"},{"type":"Punctuator","range":[20,21],"value":";"},{"type":"Punctuator","range":[22,23],"value":"}"},{"type":"Punctuator","range":[23,24],"value":"/"}],
+				errors: [{"lineNumber":1,"index":24,"message":"Invalid regular expression: missing /"},{"lineNumber":1,"index":23,"message":"Unexpected token /","token":"/"}],
+				comments: []
+			});
+		});
 	});
 });

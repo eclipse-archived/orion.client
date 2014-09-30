@@ -166,7 +166,14 @@ define([
 					else if(ast.tokens.length > 0) {
 						//error object did not contain the token infos, try to find it
 						token = Finder.findToken(error.index, ast.tokens);	
-					} 
+					} else {
+					    //no tokens means something bad happened, just forward the parse error
+					    //with some infos tacked on
+					    error.start = 0;
+					    error.end = 0;
+					    error.args = {0: error.message, nls: 'esprimaParseFailure'};
+					    errors.push(error);
+					}
 					if(!token) {
 						//failed to compute it, continue
 						continue;

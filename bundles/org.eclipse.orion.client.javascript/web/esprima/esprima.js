@@ -195,7 +195,7 @@ parseStatement: true, parseSourceElement: true */
         StrictLHSPostfix:  'Postfix increment/decrement may not have eval or arguments operand in strict mode',
         StrictLHSPrefix:  'Prefix increment/decrement may not have eval or arguments operand in strict mode',
         StrictReservedWord:  'Use of future reserved word in strict mode',
-        //mrennie https://bugs.eclipse.org/bugs/show_bug.cgi?id=432956
+        //ORION https://bugs.eclipse.org/bugs/show_bug.cgi?id=432956
         MissingToken: 'Missing expected \'%0\''
     };
 
@@ -465,7 +465,7 @@ parseStatement: true, parseSourceElement: true */
                 ++index;
             }
         }
-        //RECOVERY mrennie
+        //ORION
         if(index >= length && extra.comments) {
             //ran off the end of the file - the whole thing is a comment
             loc.end = {
@@ -551,7 +551,7 @@ parseStatement: true, parseSourceElement: true */
         return String.fromCharCode(code);
     }
 
-	//mrennie https://bugs.eclipse.org/bugs/show_bug.cgi?id=433893
+	//ORION https://bugs.eclipse.org/bugs/show_bug.cgi?id=433893
     function getEscapedIdentifier() {
         var ch, id;
 
@@ -816,8 +816,9 @@ parseStatement: true, parseSourceElement: true */
                 range: [start, index]
             };
         }
-
-        throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+        ++index;
+        //ORION we want know which token is bad, provide line no, range, value
+        throwError({lineNumber: lineNumber, range: [start, index], value: source.slice(start, index)}, Messages.UnexpectedToken, 'ILLEGAL');
     }
 
     // 7.8.3 Numeric Literals
@@ -1038,7 +1039,7 @@ parseStatement: true, parseSourceElement: true */
         }
 
         if (quote !== '') {
-           //mrennie https://bugs.eclipse.org/bugs/show_bug.cgi?id=433709
+           //ORION https://bugs.eclipse.org/bugs/show_bug.cgi?id=433709
             throwErrorTolerant({}, Messages.UnexpectedToken, 'ILLEGAL');
         }
 
@@ -1055,7 +1056,7 @@ parseStatement: true, parseSourceElement: true */
     function scanRegExp() {
         var str, ch, start, pattern, flags, value, classMarker = false, restore, terminated = false;
 
-        lookahead = null;
+        //ORION lookahead = null;
         skipComment();
 
         start = index;
@@ -1449,7 +1450,7 @@ parseStatement: true, parseSourceElement: true */
         },
 
         markEndIf: function (node) {
-            // mamacdon: in tolerant mode, node passed to the delegate may be null
+            // ORION: in tolerant mode, node passed to the delegate may be null
             if (!node || node.range || node.loc) {
                 if (extra.loc) {
                     state.markerStack.pop();
@@ -1834,8 +1835,7 @@ parseStatement: true, parseSourceElement: true */
         if (typeof token.lineNumber === 'number') {
             error = new Error('Line ' + token.lineNumber + ': ' + msg);
             error.index = token.range[0];
-            // mamacdon a09739e
-            // mamacdon @ 1.0.0 esprima.js:1198
+            // ORION
             error.end = token.range[1];
             error.token = token.value;
             error.lineNumber = token.lineNumber;
@@ -1905,7 +1905,7 @@ parseStatement: true, parseSourceElement: true */
         }
     }
 	
-	//mrennie quietly notify about a missing token
+	//ORION quietly notify about a missing token
 	function expectTolerant(value) {
 		if(extra.errors) {
 			var token = lookahead;
@@ -2097,13 +2097,13 @@ parseStatement: true, parseSourceElement: true */
                 }
                 return delegate.markEnd(delegate.createProperty('set', key, value));
             }
-            //mrennie https://bugs.eclipse.org/bugs/show_bug.cgi?id=432956
+            //ORION https://bugs.eclipse.org/bugs/show_bug.cgi?id=432956
             return recoverProperty(token, id);
         }
         if (token.type === Token.EOF || token.type === Token.Punctuator) {
             throwUnexpected(token);
         } else {
-        	//mrennie https://bugs.eclipse.org/bugs/show_bug.cgi?id=432956
+        	//ORION https://bugs.eclipse.org/bugs/show_bug.cgi?id=432956
             return recoverProperty(token, parseObjectPropertyKey());
         }
     }
@@ -2112,7 +2112,7 @@ parseStatement: true, parseSourceElement: true */
 	 * @description Recover an object property or ignore it
 	 * @private
 	 * @param {Object} prev The previous token from the stream
-	 * @author mrennie
+	 * @author ORION
 	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=432956
 	 */
 	function recoverProperty(prev, id) {
@@ -2169,7 +2169,7 @@ parseStatement: true, parseSourceElement: true */
 
         while (!match('}')) {
             property = parseObjectProperty();
-            //mrennie https://bugs.eclipse.org/bugs/show_bug.cgi?id=432956
+            //ORION https://bugs.eclipse.org/bugs/show_bug.cgi?id=432956
 			if(!property) {
 				continue;
 			}
@@ -2851,7 +2851,7 @@ parseStatement: true, parseSourceElement: true */
         expectSkipTo(')', '{');
 
         consequent = parseStatement();
-        // mamacdon 853a9865: required because of the check in wrapTracking that returns nothing if node is undefined
+        // ORION 853a9865: required because of the check in wrapTracking that returns nothing if node is undefined
 		// TODO: delegate handles tracking now, check if this test is still needed
         if (!consequent) {
             consequent = null;
@@ -3363,7 +3363,8 @@ parseStatement: true, parseSourceElement: true */
         expr = parseExpression();
 
         // 12.12 Labelled Statements
-        if (expr && (expr.type === Syntax.Identifier) && match(':')) { // mamacdon 1420b19
+        // ORION 1420b19
+        if (expr && (expr.type === Syntax.Identifier) && match(':')) { 
             lex();
 
             key = '$' + expr.name;
@@ -3935,7 +3936,7 @@ parseStatement: true, parseSourceElement: true */
         } catch (e) {
             throw e;
         } finally {
-			// mamacdon unpatch
+			// O unpatch
         	if (typeof extra.errors !== 'undefined') {
         		parseStatement = extra.parseStatement;
         		parseExpression = extra.parseExpression;
