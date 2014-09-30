@@ -200,7 +200,7 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 			defineRule("tag", settings.tag, false); //$NON-NLS-0$
 			defineRule("comment.block.documentation", settings.comment, false); //$NON-NLS-0$
 			defineRule("keyword.other.documentation.markup", settings.comment, false); //$NON-NLS-0$
-			defineRule("keyword.other.documentation.markup", settings.comment, false); //$NON-NLS-0$
+			defineRule("heading.markdown", settings.mdheading, false); //$NON-NLS-0$
 
 			return result.join("\n"); //$NON-NLS-0$
 		},

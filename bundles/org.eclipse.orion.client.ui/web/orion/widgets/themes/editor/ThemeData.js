@@ -124,6 +124,7 @@ define([
 		darker.leftRuler = '#272822';
 		darker.constant = '#C48CFF';
 		darker.writeOccurrence = 'steelblue';
+		darker.mdheading = 'skyblue';
 
 		this.styles.push(darker);
 
