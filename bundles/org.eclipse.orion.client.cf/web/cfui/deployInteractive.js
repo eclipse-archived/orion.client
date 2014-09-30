@@ -515,6 +515,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						hasButton: false,
 						hasInputCompletion: true,
 						serviceRegistry: this._serviceRegistry,
+						onRecentEntryDelete: null,
 						defaultRecentEntryProposalProvider: function(onItem){
 							appsDeferred.then(function(){
 								var ret = [];
@@ -544,6 +545,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						hasButton: false,
 						hasInputCompletion: true,
 						serviceRegistry: this._serviceRegistry,
+						onRecentEntryDelete: null,
 						defaultRecentEntryProposalProvider: function(onItem){
 							routesDeferred.then(function(){
 								var ret = [];
