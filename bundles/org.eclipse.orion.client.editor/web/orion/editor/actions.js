@@ -647,6 +647,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var editor = this.editor;
 			var textView = editor.getTextView();
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			if (textView.getOptions("singleMode")) { return false; } //$NON-NLS-0$
 			var selection = editor.getSelection();
 			if (selection.start === selection.end) {
 				var model = editor.getModel();

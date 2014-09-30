@@ -4425,6 +4425,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return true;
 		},
 		_doEnter: function (args) {
+			if (this._singleMode) return true;
 			var model = this._model;
 			var selection = this._getSelection();
 			this._doContent(model.getLineDelimiter()); 
@@ -4918,24 +4919,22 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			};
 			var wrapWidth = 0, marginWidth = 0, charWidth = 0;
 			if (!invalid) {
-				if (this._wrapMode) {
-					div1 = util.createElement(document, "div"); //$NON-NLS-0$
-					div1.style.position = "fixed"; //$NON-NLS-0$
-					div1.style.left = "-1000px"; //$NON-NLS-0$
-					parent.appendChild(div1);
-					div1.innerHTML = new Array(2).join("a"); //$NON-NLS-0$
+				div1 = util.createElement(document, "div"); //$NON-NLS-0$
+				div1.style.position = "fixed"; //$NON-NLS-0$
+				div1.style.left = "-1000px"; //$NON-NLS-0$
+				parent.appendChild(div1);
+				div1.innerHTML = new Array(2).join("a"); //$NON-NLS-0$
+				rect1 = div1.getBoundingClientRect();
+				charWidth = Math.ceil(rect1.right - rect1.left);
+				if (this._wrapOffset || this._marginOffset) {
+					div1.innerHTML = new Array(this._wrapOffset + 1 + (util.isWebkit ? 0 : 1)).join(" "); //$NON-NLS-0$
 					rect1 = div1.getBoundingClientRect();
-					charWidth = Math.ceil(rect1.right - rect1.left);
-					if (this._wrapOffset || this._marginOffset) {
-						div1.innerHTML = new Array(this._wrapOffset + 1 + (util.isWebkit ? 0 : 1)).join(" "); //$NON-NLS-0$
-						rect1 = div1.getBoundingClientRect();
-						wrapWidth = Math.ceil(rect1.right - rect1.left);
-						div1.innerHTML = new Array(this._marginOffset + 1).join(" "); //$NON-NLS-0$
-						rect2 = div1.getBoundingClientRect();
-						marginWidth = Math.ceil(rect2.right - rect2.left);
-					}
-					parent.removeChild(div1);
+					wrapWidth = Math.ceil(rect1.right - rect1.left);
+					div1.innerHTML = new Array(this._marginOffset + 1).join(" "); //$NON-NLS-0$
+					rect2 = div1.getBoundingClientRect();
+					marginWidth = Math.ceil(rect2.right - rect2.left);
 				}
+				parent.removeChild(div1);
 			}
 			return {
 				lineHeight: lineHeight,
