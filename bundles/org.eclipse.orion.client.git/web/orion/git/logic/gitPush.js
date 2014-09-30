@@ -33,8 +33,7 @@ define([
 		var commandService = dependencies.commandService;
 		var tags = dependencies.tags;
 		var force = dependencies.force;
-		var gerrit = dependencies.gerrit;
-		
+
 		//Callbacks
 		var sshCredentialsCallback = dependencies.sshCredentialsDialogCloseCallback;
 		var sshSlideoutCallback = dependencies.sshSlideoutCloseCallback;

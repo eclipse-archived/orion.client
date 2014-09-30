@@ -905,7 +905,6 @@ var exports = {};
 		var pushCallbackNoTags = mGitPushLogic(objects.mixin(pushOptions, {tags: false, force: false})).perform;
 		var pushCallbackTagsForce = mGitPushLogic(objects.mixin(pushOptions, {tags: true, force: true})).perform;
 		var pushCallbackNoTagsForce = mGitPushLogic(objects.mixin(pushOptions, {tags: false, force: true})).perform;
-		var pushCallbackGerrit = mGitPushLogic(objects.mixin(pushOptions, {tags: false, force: false, gerrit: true})).perform;
 		var pushVisibleWhen = function(item) {
 			if (item.LocalBranch && item.Remote) {
 				if (item.Remote.Type !== "RemoteTrackingBranch") { //$NON-NLS-0$
@@ -982,33 +981,6 @@ var exports = {};
 			visibleWhen: pushVisibleWhen
 		});
 		commandService.addCommand(pushBranchCommand);
-
-		var pushToGerritCommand = new mCommands.Command({
-			name : messages["Push for Review"],
-			tooltip: messages["Push commits to Gerrit Code Review"],
-			imageClass: "git-sprite-push", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
-			id : "eclipse.orion.git.pushToGerrit", //$NON-NLS-0$
-			callback:  function(data) {
-				pushCallbackGerrit(data).then(function() {
-					dispatchModelEventOn({type: "modelChanged", action: "push", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
-				});
-			},
-			visibleWhen: function(item) {
-				if (item.LocalBranch && item.Remote) {
-					item = item.LocalBranch;
-				}
-				if (item.toRef)
-					// for action in the git log
-					return item.RepositoryPath === "" && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation //$NON-NLS-0$
-						&& item.toRef.RemoteLocation[0].IsGerrit;
-				else
-					// for action in the repo view
-					return item.Type === "Branch" && item.Current && item.RemoteLocation && item.RemoteLocation[0] && item.RemoteLocation[0].IsGerrit; //$NON-NLS-0$
-
-			}
-		});
-		commandService.addCommand(pushToGerritCommand);
 
 		var pushForceCommand = new mCommands.Command({
 			name : messages["Force Push All"],
