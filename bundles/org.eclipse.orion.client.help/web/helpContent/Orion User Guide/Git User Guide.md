@@ -2,24 +2,66 @@
 
 The Orion Git page has been designed to offer the most common Git functionality on a single page.This guide will describe the main features of the page along with a step by step guide to  common Git operations.
 
+![Git Page](git_images/gitPage.png "Git Page")
+
+Fig 1. Git Page in Orion 7.0
 # Git Page Structure
 
 The Git page is a selection driven master-detail page. You select a repo, you select a branch (or accept the default branch selected) and, along with your current changes, the page will display the changes for the branch.
 
-The page is made up of 3 main sections:
+The page is made up of 3 main sections - the context bar, the changes section and the changes details section. The 5 second summary for each of these sections:
 
-* context bar
-* changes section
-* changes detail sections
+** [Context Bar](#Context-Bar) **
+* used for working with repos and references (branches, tags and stashes)
 
+* set/edit additional git config options
 
-<Pic>
+** Changes Section **
+
+* displays info about changes for the chosen repo and reference
+
+* actions for fetching and pushing changes 
+
+** Changes Detail Section **
+
+* displays current working directory changes
+
+* actions for working with working directory changes
+
+* displays the contents of changes for the chosen reference
+
+* actions for working with a particular change
+
+![Git Sections](git_images/gitSections.png "Git Sections")
+
+Fig 2. Main sections of git page
 
 ## Context Bar
 
-The context bar
+The context bar controls what gets displayed in the changes sections. Let's take a look at what's in each dropdown.
 
 ### Repository
+
+The repository dropdown displays all of the git repos that you currently have in your workspace.
+
+The repository dropdown lets you:
+
+* clone a repo
+
+* create a new repo
+
+* select an existing repo (with filter support)
+
+* delete an existing repo
+
+
+![Git Repo Dropdown](git_images/gitContextRepo.png "Git Repo Dropdown")
+
+Fig 3. Git repository dropdown menu
+
+#### Clone a New Repo
+
+To clone a new repo, click on the ***Clone Repository*** button.
 
 ### References
 
