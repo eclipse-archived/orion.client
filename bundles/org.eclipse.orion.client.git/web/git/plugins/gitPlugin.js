@@ -65,33 +65,6 @@ define([
 		forceSingleItem: true
 	});
 
-	provider.registerService("orion.navigate.command", {}, {
-		nameKey: "Git Remote",
-		id: "eclipse.git.remote",
-		tooltipKey: "Go to Git Remote",
-		nls: "git/nls/gitmessages",
-		validationProperties: [{
-			source: "Git:DefaultRemoteBranchLocation", 
-			variableName: "GitRemoteLocation"
-		}],
-		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitRemoteLocation}?page=1",
-		forceSingleItem: true
-	});
-
-	// orion.navigate.command for Git Repository -- applies to File objects
-	provider.registerService("orion.navigate.command", null, {
-		id: "eclipse.git.repository",
-		nameKey: "Git Repository",
-		tooltipKey: "Go to the git repository",
-		nls: "git/nls/gitmessages",
-		category: "git",
-		validationProperties: [{
-			source: "Git:CloneLocation",
-			variableName: "GitRepoLocation"
-		}],
-		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitRepoLocation}"
-	});
-	
 	provider.registerService("orion.core.content", null, {
 		id: "orion.content.gitClone",
 		nls: "git/nls/gitmessages",
