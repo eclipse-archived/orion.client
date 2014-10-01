@@ -307,9 +307,12 @@ define(["orion/Deferred", "orion/commands", "orion/contentTypes", "orion/URITemp
 				return true;
 			}
 			
-			// Directories don't have content types so don't validate
-			// However */* is a special case used by openWithCommand that applies to directories (Bug 445677)
-			if (item.Directory && (!validator.info.contentType || validator.info.contentType.indexOf('*/*') === -1)){
+			// Directories don't match any content types except */*
+			if (item.Directory) {
+				// */* is a special case used by openWithCommand that applies to directories (Bug 445677)
+				if (validator.info.contentType && validator.info.contentType.indexOf('*/*') >= 0){
+					return true;
+				}
 				return false;
 			}
 			
