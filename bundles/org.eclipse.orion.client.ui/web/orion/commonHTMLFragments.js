@@ -11,8 +11,8 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['orion/webui/littlelib', 'text!orion/banner/slideout.html'], 
-        function(lib, SlideoutTemplate){
+define(['orion/webui/littlelib', 'text!orion/banner/CommandSlideout.html'], 
+        function(lib, CommandSlideoutTemplate){
         
 	/**
 	 * This module contains dynamic HTML fragments that depend on client information.
@@ -21,7 +21,7 @@ define(['orion/webui/littlelib', 'text!orion/banner/slideout.html'],
 
 	function slideoutHTMLFragment(idPrefix) { 
 		var tempDiv = document.createElement("div"); //$NON-NLS-0$
-		tempDiv.innerHTML = SlideoutTemplate;
+		tempDiv.innerHTML = CommandSlideoutTemplate;
 		
 		// replacing generic id's with prefixed id's
 		var node = lib.$("#slideContainer", tempDiv); //$NON-NLS-0$
