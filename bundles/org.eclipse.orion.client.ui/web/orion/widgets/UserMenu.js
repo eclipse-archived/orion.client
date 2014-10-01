@@ -13,9 +13,8 @@ define([
 	'i18n!orion/widgets/nls/messages',
 	'orion/webui/littlelib',
 	'orion/PageLinks',
-	'orion/widgets/userAssistance/UATaskPanel',
 	'orion/webui/dropdown'
-], function(messages, lib, PageLinks, UATaskPanel, Dropdown) {
+], function(messages, lib, PageLinks, Dropdown) {
 	
 	function UserMenu(options) {
 		this._displaySignOut = true;
@@ -174,15 +173,6 @@ define([
 					getCategory(0).appendChild(keyAssist);
 				}
 
-				// TODO need i18n on this eventually
-				var getStartedServiceRef = serviceRegistry.getServiceReferences("orion.page.getstarted")[0]; //$NON-NLS-0$
-				if (getStartedServiceRef) {
-					var data = getStartedServiceRef.getProperty("data"); //$NON-NLS-0$
-					var startElement = this._makeMenuItem("Getting Started", this.getStartedDialog.bind(this, data));
-					var getStarted = startElement.parentNode;
-					getCategory(0).appendChild(getStarted);
-				}
-
 				// Add categories to _dropdownNode
 				var _self = this;
 				categories.sort(function(a, b) { return a - b; }).forEach(function(category, i) {
@@ -203,10 +193,6 @@ define([
 					}
 				}
 			}.bind(this));
-		},
-		
-		getStartedDialog: function(getStartedData){
-			new UATaskPanel( null, true, getStartedData );
 		},
 		
 		setKeyAssist: function(keyAssistFunction){
