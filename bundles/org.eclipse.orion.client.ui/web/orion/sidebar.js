@@ -16,8 +16,9 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 		'orion/globalCommands',
 		'i18n!orion/edit/nls/messages',
 		'orion/search/InlineSearchPane',
-		'orion/keyBinding'],
-		function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages, InlineSearchPane, mKeyBinding) {
+		'orion/keyBinding',
+		'orion/webui/Slideout'],
+		function(objects, mCommands, mOutliner, lib, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages, InlineSearchPane, mKeyBinding, mSlideout) {
 
 	/**
 	 * @name orion.sidebar.Sidebar
@@ -140,6 +141,8 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			});
 			this.setViewMode(this.defaultViewMode);
 			
+			this._slideout = new mSlideout.Slideout(this.toolbarNode.parentNode);
+			
 			this._createInlineSearchPane();
 		},
 		showToolbar: function() {
@@ -225,8 +228,8 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			this.commandRegistry.renderCommands(switcher.id, switcher, null, this, "button"); //$NON-NLS-0$
 		},
 		_createInlineSearchPane: function() {
-			this._inlineSearchPane = new InlineSearchPane({
-				parentNode: this.toolbarNode.parentNode,
+			this._inlineSearchPane = new InlineSearchPane(this._slideout,
+			{
 				serviceRegistry: this.serviceRegistry,
 				commandRegistry: this.commandRegistry,
 				fileClient: this.fileClient,

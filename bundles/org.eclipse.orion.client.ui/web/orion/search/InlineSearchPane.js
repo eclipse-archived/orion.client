@@ -8,61 +8,57 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define URL window document*/
-/*jslint browser:true sub:true*/
+/*eslint-env browser, amd*/
 define([
 	'orion/objects',
 	'orion/webui/littlelib',
 	'text!orion/search/InlineSearchPane.html',
 	'orion/searchClient',
 	'orion/inlineSearchResultExplorer',
-	'orion/EventTarget',
 	'orion/searchUtils',
 	'orion/Deferred', 
 	'orion/webui/dialogs/DirectoryPrompterDialog',
 	'orion/widgets/input/ComboTextInput',
-	'i18n!orion/search/nls/messages'
+	'i18n!orion/search/nls/messages',
+	'orion/webui/Slideout'
 ], function(
 	objects, lib, InlineSearchPaneTemplate, mSearchClient, InlineSearchResultExplorer, 
-	EventTarget, mSearchUtils, Deferred, DirectoryPrompterDialog, ComboTextInput, messages
+	mSearchUtils, Deferred, DirectoryPrompterDialog, ComboTextInput, messages, mSlideout
 ) {
+	var SlideoutViewMode = mSlideout.SlideoutViewMode;
 	/**
-	 * @param {DOMNode} options.parentNode
+	 * @param {orion.webui.Slideout} slideout
+	 * @param {Object} options
 	 */
-	function InlineSearchPane(options) {
-		EventTarget.attach(this);
-		this._parentNode = options.parentNode;
+	function InlineSearchPane(slideout, options) {
+		SlideoutViewMode.call(this, slideout);
 		this._serviceRegistry = options.serviceRegistry;
 		this._commandRegistry = options.commandRegistry;
 		this._fileClient = options.fileClient;
 		this._preferences = options.preferences;
 		this._initialize();
 	}
+	InlineSearchPane.prototype = Object.create(SlideoutViewMode.prototype);
+	InlineSearchPane.prototype.constructor = InlineSearchPane;
 
 	objects.mixin(InlineSearchPane.prototype, /** @lends orion.search.InlineSearchPane.prototype */ {
 		_initialize: function() {
+			this._searchWrapper = document.createElement("div"); //$NON-NLS-0$
 			var range = document.createRange();
-			range.selectNode(this._parentNode);
+			range.selectNode(this._slideout.getContentNode());
 			var domNodeFragment = range.createContextualFragment(InlineSearchPaneTemplate);
-			this._parentNode.appendChild(domNodeFragment);
-			
-			this._searchWrapper = lib.$(".searchWrapper", this._parentNode); //$NON-NLS-0$
+			this._searchWrapper.appendChild(domNodeFragment);
+			this._searchWrapper.classList.add("searchWrapper"); //$NON-NLS-0$
 			
 			this._focusOnTextInput = function(){
 				this._searchTextInputBox.select();
 				this._searchTextInputBox.focus();
 			}.bind(this);
-			
-			this._dismissButton = lib.$(".dismissButton", this._parentNode); //$NON-NLS-0$
-			this._dismissButton.addEventListener("click", function(){ //$NON-NLS-0$
-				this.hide();
-			}.bind(this));
-			
-			this._replaceWrapper = document.getElementById("replaceWrapper"); //$NON-NLS-0$
-			
-			this._searchOptWrapperDiv = lib.$(".searchOptWrapperDiv", this._parentNode); //$NON-NLS-0$
-			this._searchResultsTitle = lib.$(".searchResultsTitle", this._parentNode); //$NON-NLS-0$
-			this._searchResultsWrapperDiv = lib.$(".searchResultsWrapperDiv", this._parentNode); //$NON-NLS-0$
+
+			this._replaceWrapper = lib.$(".replaceWrapper", this._searchWrapper); //$NON-NLS-0$
+			this._searchOptWrapperDiv = lib.$(".searchOptWrapperDiv", this._searchWrapper); //$NON-NLS-0$
+			this._searchResultsTitle = lib.$(".searchResultsTitle", this._searchWrapper); //$NON-NLS-0$
+			this._searchResultsWrapperDiv = lib.$(".searchResultsWrapperDiv", this._searchWrapper); //$NON-NLS-0$
 			this._searchResultsWrapperDiv.id = "inlineSearchResultsWrapper";
 			
 			this._replaceCompareTitleDiv = lib.node("replaceCompareTitleDiv"); //$NON-NLS-0$
@@ -74,24 +70,21 @@ define([
 		},
 		
 		isVisible: function() {
-			return this._searchWrapper.classList.contains("searchWrapperActive"); //$NON-NLS-0$
+			return this._slideout.isVisible() && (this === this._slideout.getCurrentViewMode());
 		},
 				
 		show: function() {
-			this._previousActiveElement = document.activeElement;
-			
-			this._searchWrapper.classList.add("searchWrapperActive"); //$NON-NLS-0$
+			SlideoutViewMode.prototype.show.call(this);
 			window.setTimeout(this._focusOnTextInput, 100);
-			
-			this.dispatchEvent({type: "open"});
 		},
 		
 		hide: function() {
-			this._searchWrapper.classList.remove("searchWrapperActive"); //$NON-NLS-0$
-			
+			SlideoutViewMode.prototype.hide.call(this);
 			this.hideReplacePreview();
-
-			this._previousActiveElement = null;			
+		},
+		
+		getWrapperNode: function() {
+			return this._searchWrapper;
 		},
 		
 		getOptions: function(){
@@ -185,7 +178,7 @@ define([
 				});
 			}.bind(this);
 			
-			var searchBoxParentNode = lib.$(".searchMainOptionBlock", this._parentNode); //$NON-NLS-0$
+			var searchBoxParentNode = lib.$(".searchMainOptionBlock", this._searchWrapper); //$NON-NLS-0$
 			
 			var searchButtonListener = function() {
 				if (!this.isVisible()) {
@@ -230,11 +223,11 @@ define([
 						this._replacePreview();
 					}
 				} else if (keyCode === lib.KEY.ESCAPE) {
-					if (this._previousActiveElement) {
-						if (this._previousActiveElement === this._searchTextInputBox) {
+					if (this._slideout.getPreviousActiveElement()) {
+						if (this._slideout.getPreviousActiveElement() === this._searchTextInputBox) {
 							this._searchTextInputBox.blur();
 						} else {
-							this._previousActiveElement.focus();
+							this._slideout.getPreviousActiveElement().focus();
 						}
 						this.hide();
 					}
@@ -271,7 +264,7 @@ define([
 	    },
 	    
 	    _initFileNamePatternsBox: function() {
-			this._fileNamePatternsHint = document.getElementById("fileNamePatternsHint"); //$NON-NLS-0$
+			this._fileNamePatternsHint = lib.$(".fileNamePatternsHint", this._searchWrapper); //$NON-NLS-0$
 			
 			this._fileNamePatternsBox = new ComboTextInput({
 				id: "fileNamePatternsInput", //$NON-NLS-0$
@@ -318,11 +311,11 @@ define([
 			this._initReplaceBox();
 			this._initFileNamePatternsBox();
 			
-			this._caseSensitiveCB = lib.$("#advSearchCaseSensitive", this._parentNode); //$NON-NLS-0$
-			this._regExCB = lib.$("#advSearchRegEx", this._parentNode); //$NON-NLS-0$
-			this._toggleReplaceLink = lib.$("#toggleReplaceLink", this._parentNode); //$NON-NLS-0$
+			this._caseSensitiveCB = lib.$("#advSearchCaseSensitive", this._searchWrapper); //$NON-NLS-0$
+			this._regExCB = lib.$("#advSearchRegEx", this._searchWrapper); //$NON-NLS-0$
+			this._toggleReplaceLink = lib.$("#toggleReplaceLink", this._searchWrapper); //$NON-NLS-0$
 			
-			this._toggleSearchOptionsLink = lib.$("#toggleSearchOptionsLink", this._parentNode); //$NON-NLS-0$
+			this._toggleSearchOptionsLink = lib.$("#toggleSearchOptionsLink", this._searchWrapper); //$NON-NLS-0$
 			this._toggleSearchOptionsLink.addEventListener("click", this.showSearchOptions.bind(this)); //$NON-NLS-0$
 			this._toggleSearchOptionsLink.innerHTML = messages["^ Edit Search"]; //$NON-NLS-0$
 
@@ -336,11 +329,11 @@ define([
 		
 		_initHTMLLabels: function(){
 			this._replaceCompareTitleDiv.innerHTML = messages["Preview: "]; //$NON-NLS-0$
-			document.getElementById("advSearchCaseSensitiveLabel").appendChild(document.createTextNode(messages["Case sensitive"])); //$NON-NLS-1$ //$NON-NLS-0$
-			document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expression"])); //$NON-NLS-1$ //$NON-NLS-0$
-			document.getElementById("searchScopeLabel").appendChild(document.createTextNode(messages["Scope"])); //$NON-NLS-1$ //$NON-NLS-0$
-			document.getElementById("fileNamePatternsLabel").appendChild(document.createTextNode(messages["File name patterns (comma-separated)"])); //$NON-NLS-1$ //$NON-NLS-0$
-			document.getElementById("searchScopeSelectButton").title = messages["Choose a Folder"]; //$NON-NLS-1$ //$NON-NLS-0$
+			lib.$("#advSearchCaseSensitiveLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Case sensitive"])); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.$("#advSearchRegExLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Regular expression"])); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.$("#searchScopeLabel", this._searchWrapper).appendChild(document.createTextNode(messages["Scope"])); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.$("#fileNamePatternsLabel", this._searchWrapper).appendChild(document.createTextNode(messages["File name patterns (comma-separated)"])); //$NON-NLS-1$ //$NON-NLS-0$
+			lib.$("#searchScopeSelectButton", this._searchWrapper).title = messages["Choose a Folder"]; //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		
 		setSearchScope: function(targetFolder) {
