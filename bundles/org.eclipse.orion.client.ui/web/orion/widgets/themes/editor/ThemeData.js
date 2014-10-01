@@ -116,7 +116,7 @@ define([
 		darker.lineNumberOdd = '#999999';
 		darker.lineNumberEven = '#999999';
 		darker.lineNumber = '#999999';
-		darker.currentLine = '#5B5A4E';
+		darker.currentLine = '#32322A';
 		darker.tag = 'greenyellow';
 		darker.attribute = '#CFBFAD';
 		darker.fontFamily = defaultFont;
@@ -126,6 +126,8 @@ define([
 		darker.constant = '#C48CFF';
 		darker.writeOccurrence = 'steelblue';
 		darker.mdheading = 'skyblue';
+		darker['keyword.control'] = 'orangered';
+		darker['keyword.operator'] = '#52E3F6';
 
 		this.styles.push(darker);
 
