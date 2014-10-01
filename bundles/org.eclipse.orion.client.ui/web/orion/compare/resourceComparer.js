@@ -130,8 +130,8 @@ exports.ResourceComparer = (function() {
 		this._progress = this._registry.getService("orion.page.progress"); //$NON-NLS-0$
 		this.setOptions(options, true);
 		this._inputManagers = [];
-		viewOptions.preInitFunc = function () {this._initInputManagers();}.bind(this);
-		viewOptions.postInitFunc = function () {
+		viewOptions.preCreate = this._initInputManagers.bind(this);
+		viewOptions.postCreate = function () {
 			this._inputManagers.forEach(function(inputManager) {
 				if(inputManager.manager){
 					var editor = this._compareView.getWidget().getEditors()[inputManager.manager._editorIndex];
@@ -141,16 +141,17 @@ exports.ResourceComparer = (function() {
 				}
 			}.bind(this));
 		}.bind(this);
+		viewOptions.onInputChanged = this._inputChanged.bind(this);
+		viewOptions.onSave = this.save.bind(this);
 		if(options.toggleable) {
-			this._compareView = new mCompareView.toggleableCompareView(options.type === "inline" ? "inline" : "twoWay", viewOptions,  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			this._inputChanged.bind(this),
-			this.save.bind(this));
+			this._compareView = new mCompareView.toggleableCompareView(options.type === "inline" ? "inline" : "twoWay", viewOptions); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		} else if(options.type === "inline") { //$NON-NLS-0$
 			this._compareView = new mCompareView.inlineCompareView(viewOptions);
 		} else {
 			this._compareView = new mCompareView.TwoWayCompareView(viewOptions);
 		}
 		this._compareView.getWidget().setOptions({ignoreWhitespace: options.ignoreWhitespace});
+		this._compareView.getWidget().setOptions({titleIds: this.options.saveLeft ? this.options.saveLeft.titleIds : null });
 		this._compareView.getWidget().setOptions({extCmdHolder: this});
 		if(!viewOptions.highlighters){
 			this._compareView.getWidget().setOptions({highlighters: [new CompareStyler(serviceRegistry), new CompareStyler(serviceRegistry)]});
@@ -205,12 +206,12 @@ exports.ResourceComparer = (function() {
 				//Create the right hand side input manager
 				if(!this._checkReadonly(this.options.readonlyRight)) {
 					this._inputManagers[0].manager = this._createInputManager();
-					this._initInputManager(this._inputManagers[0].manager, 0, this.options.saveRight ? this.options.saveRight.saveCmdContainerId : this._compareView.getWidget()._uiFactory.getActionDivId(), !!this.options.saveRight, this.options.saveRight ? this.options.saveRight.titleId : null);
+					this._initInputManager(this._inputManagers[0].manager, 0, this.options.saveRight ? this.options.saveRight.saveCmdContainerId : this._compareView.getWidget()._uiFactory.getActionDivId(), !!this.options.saveRight);
 				}
 				//Create the left hand side input manager
 				if(!this._checkReadonly(this.options.readonly, true)) {
 					this._inputManagers[1].manager =  this._createInputManager();
-					this._initInputManager(this._inputManagers[1].manager, 1, this.options.saveLeft ? this.options.saveLeft.saveCmdContainerId : this._compareView.getWidget()._uiFactory.getActionDivId(true), !!this.options.saveLeft, this.options.saveLeft ? this.options.saveLeft.titleId : null);
+					this._initInputManager(this._inputManagers[1].manager, 1, this.options.saveLeft ? this.options.saveLeft.saveCmdContainerId : this._compareView.getWidget()._uiFactory.getActionDivId(true), !!this.options.saveLeft);
 				}
 			}
 			var that = this;
@@ -235,22 +236,16 @@ exports.ResourceComparer = (function() {
 						return keyBindings;
 					};
 					this._getFileOptions(inputManager.manager._editorIndex).keyBindingFactory = keyBindingFactory;
-					/*
-					var editor = inputManager.manager.getEditor();
-					editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
-						inputManager.manager.setDirty(editor.isDirty());
-					});*/
 				}
 			}.bind(this));
 		},
-		_initInputManager: function(inputManger, editorIndex, actionBarId, embedded, titleId){
+		_initInputManager: function(inputManger, editorIndex, actionBarId, embedded){
 			var that = this;
 			objects.mixin(inputManger, {
 				filePath: "",
 				_editorIndex: editorIndex,
 				_actionBarId: actionBarId,
 				embedded: embedded,
-				titleId: titleId,
 				getInput: function() {
 					return this.filePath;
 				},
@@ -266,8 +261,16 @@ exports.ResourceComparer = (function() {
 						if(that._compareView.getWidget().refreshTitle){
 							that._compareView.getWidget().refreshTitle(this._editorIndex, dirty);
 						}
-					} else if(this.titleId) {
-						var titleNode = lib.node(this.titleId);
+					} else if(that._compareView.getWidget().options.titleIds && that._compareView.getWidget().options.titleIds.length > 0) {
+						var titleNode;
+						if(that._compareView.getWidget().options.maximized && that._compareView.getWidget().options.titleIds.length === 2) {
+							titleNode = lib.node(that._compareView.getWidget().options.titleIds[1]);
+							if(titleNode) {
+								titleNode.textContent = that._compareView.getWidget().options.maximized && dirty ? "*" : "";
+							}
+						}
+						
+						titleNode = lib.node(that._compareView.getWidget().options.titleIds[0]);
 						if(!titleNode) {
 							return;
 						}
@@ -333,12 +336,14 @@ exports.ResourceComparer = (function() {
 					} 
 				},
 				
-				afterSave: function(){
+				postSave: function(closing){
 					var editors = that._compareView.getWidget().getEditors();
 					var newContents = editors[this._editorIndex].getTextView().getText();
 					var fileObj = that._getFileOptions(this._editorIndex);
 					fileObj.Content = newContents;
-					that._compareView.getWidget().refresh(true, true, this.embedded ? null : this._editorIndex);
+					if(!closing) {
+						that._compareView.getWidget().refresh(true, true, this.embedded ? null : this._editorIndex);
+					}
 				}
 			});
 		},
@@ -450,18 +455,36 @@ exports.ResourceComparer = (function() {
 				}
 			});
 	    },
-	    save: function() {
-		    var promises = [];
-			this._inputManagers.forEach(function(inputManager) {
-				if(inputManager.manager){
-					var editor = inputManager.manager.getEditor();
-					if(editor.isDirty()) {
-						promises.push(inputManager.manager.save());
+	    save: function(doSave) {
+			if(doSave) {
+			   	var promises = [];
+				this._inputManagers.forEach(function(inputManager) {
+					if(inputManager.manager){
+						var editor = inputManager.manager.getEditor();
+						if(editor.isDirty()) {
+							promises.push(inputManager.manager.save(true));
+						}
 					}
-				}
-			});
-			return Deferred.all(promises);
+				});
+				return Deferred.all(promises);
+			} else {
+				this._inputManagers.forEach(function(inputManager) {
+					if(inputManager.manager){
+						var editor = inputManager.manager.getEditor();
+						if(editor.isDirty()) {
+							inputManager.manager.setDirty(false);
+						}
+					}
+				});
+				return new Deferred().resolve(true);
+			}
 	    },
+		isDirty: function(){
+			return this._compareView.isDirty();
+		},
+		destroy: function(){
+			this._compareView.destroy();
+		},
 		start: function(){
 			if(this.options.resource){
 				if(!this.options.diffProvider){
@@ -494,7 +517,7 @@ exports.ResourceComparer = (function() {
 						var filesToLoad = ( viewOptions.diffContent ? [viewOptions.oldFile/*, viewOptions.newFile*/] : [viewOptions.oldFile, viewOptions.newFile]); 
 						return that._getFilesContents(filesToLoad).then( function(){
 							var viewHeight = that._compareView.getWidget().refresh(true);
-							this._inputChanged();
+							that._inputChanged();							
 							return new Deferred().resolve(viewHeight);
 						}.bind(that));
 					}

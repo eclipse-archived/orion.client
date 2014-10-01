@@ -209,6 +209,7 @@ exports.Explorer = (function() {
 				renderer: this.renderer,
 				showRoot: options ? !!options.showRoot : false,  
 				indent: options ? options.indent: undefined,
+				preCollapse: options ? options.preCollapse: undefined,
 				onCollapse: options ? options.onCollapse: undefined,
 				navHandlerFactory: options ? options.navHandlerFactory: undefined,
 				tableElement: options ? options.tableElement : undefined,
@@ -332,7 +333,13 @@ exports.createExplorerCommands = function(commandService, visibleWhen) {
 			return isVisible(item);
 		},
 		callback : function(data) {
-			data.items.collapseAll();
+			if(typeof data.items.preCollapseAll === "function") { //$NON-NLS-0$
+				data.items.preCollapseAll().then(function (){
+					data.items.collapseAll();
+				});
+			} else {
+				data.items.collapseAll();
+			}
 	}});
 	commandService.addCommand(expandAllCommand);
 	commandService.addCommand(collapseAllCommand);

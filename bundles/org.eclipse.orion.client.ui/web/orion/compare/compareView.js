@@ -327,8 +327,8 @@ exports.TwoWayCompareView = (function() {
 	TwoWayCompareView.prototype = new exports.CompareView();
 	
 	TwoWayCompareView.prototype.initEditors = function(initString){
-		if(this.options.preInitFunc) {
-			this.options.preInitFunc();
+		if(this.options.preCreate) {
+			this.options.preCreate();
 		}
 		this._editors = [];//this._editors[0] represents the right side editor. this._editors[1] represents the left side editor
 		//Create editor on the right side
@@ -339,17 +339,12 @@ exports.TwoWayCompareView = (function() {
 		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler("right", {styleClass: "ruler overview"} , null, //$NON-NLS-1$ //$NON-NLS-0$
                 function(lineIndex, ruler){this._diffNavigator.matchPositionFromOverview(lineIndex);}.bind(this));
 		//If either editor is dirty, popup the warning message.
-		if(this.options.postInitFunc) {
-			this.options.postInitFunc();
+		if(this.options.postCreate) {
+			this.options.postCreate();
 		}
 		window.onbeforeunload = function() {
-			if(this._editors) {
-				var dirty = this._editors.some(function(editor) {
-						return editor.isDirty();
-				});
-				if(dirty){
-					return messages["There are unsaved changes."];
-				}
+			if(this.isDirty()) {
+				return messages["There are unsaved changes."];
 			}
 		}.bind(this);
 	};
@@ -518,7 +513,16 @@ exports.TwoWayCompareView = (function() {
 		return editor;
 	};
 
-	TwoWayCompareView.prototype.destroy = function(){
+	TwoWayCompareView.prototype.isDirty = function(){
+		if(this._editors){
+			return this._editors.some(function(editor) {
+				return editor.isDirty();
+			});
+		}
+		return false;
+	};
+	
+	TwoWayCompareView.prototype._destroy = function(){
 		if(this._editors){
 			this._diffNavigator.destroy();
 			this._editors.forEach(function(editor) {
@@ -526,6 +530,10 @@ exports.TwoWayCompareView = (function() {
 			});
 			this._uiFactory.destroy();
 		}
+	};
+	
+	TwoWayCompareView.prototype.destroy = function(){
+		this._destroy();		
 	};
 
 	TwoWayCompareView.prototype.addRulers = function(){
@@ -551,15 +559,10 @@ exports.TwoWayCompareView = (function() {
 				});
 			});
 		}
+		var result = this._generateMapper(generateMapper, this.options.oldFile.Content, this.options.newFile.Content, this.options.diffContent, this.options.hasConflicts, !this.options.toggler);
 		var input = this.options.oldFile.Content;
 		var output = this.options.newFile.Content;
-		var diff = this.options.diffContent;
-		
-		var result;
-		if(typeof output === "string") { //$NON-NLS-0$
-			result = this._generateMapper(generateMapper, input , output, diff , this.options.hasConflicts);
-		} else {
-			result = this._generateMapper(generateMapper, input , output, diff , this.options.hasConflicts);
+		if(typeof output !== "string"){ //$NON-NLS-0$
 			output = result.output;
 		}
 		
@@ -661,6 +664,10 @@ exports.InlineCompareView = (function() {
 		}
 	};
 
+	InlineCompareView.prototype.isDirty = function(){
+		return false;
+	};
+
 	InlineCompareView.prototype.destroy = function(){
 		if(this._textView){
 			this._diffNavigator.destroy();
@@ -669,6 +676,9 @@ exports.InlineCompareView = (function() {
 	};
 
 	InlineCompareView.prototype.initEditors = function(initString){
+		if(this.options.preCreate) {
+			this.options.preCreate();
+		}
 		var parentDiv = lib.node(this._editorDiv);
 		var textViewFactory = function(){
 			var textView = new mTextView.TextView({
@@ -750,16 +760,9 @@ exports.InlineCompareView = (function() {
 				});
 			});
 		}
-		var input = this.options.oldFile.Content;
-		var output = this.options.newFile.Content;
-		var diff = this.options.diffContent;
-
-		var result = this._generateMapper(generateMapper, input, output, diff, this.options.hasConflicts, !this.options.toggler);
-		if(typeof output !== "string"){ //$NON-NLS-0$
-			output = result.output;
-		}
+		var result = this._generateMapper(generateMapper, this.options.oldFile.Content, this.options.newFile.Content, this.options.diffContent, this.options.hasConflicts, !this.options.toggler);
 		this._mapper = result.mapper;
-		this._textView.getModel().setText(input);
+		this._textView.getModel().setText(this.options.oldFile.Content);
 		//Merge the text with diff 
 		var rFeeder = new mDiffTreeNavigator.inlineDiffBlockFeeder(result.mapper, 1);
 		var lFeeder = new mDiffTreeNavigator.inlineDiffBlockFeeder(result.mapper, 0);
@@ -816,12 +819,10 @@ exports.InlineCompareView = (function() {
  * @name orion.compare.toggleableCompareView
  */
 exports.toggleableCompareView = (function() {
-	function toggleableCompareView(startWith, options, inputChanged, onSave) {
+	function toggleableCompareView(startWith, options) {
 		if(options){
 			options.toggler = this;
 		}
-		this._inputChanged = inputChanged;
-		this._onSave = onSave;
 		if(startWith === "inline"){ //$NON-NLS-0$
 			this._widget = new exports.InlineCompareView(options);
 		} else {
@@ -852,8 +853,8 @@ exports.toggleableCompareView = (function() {
 				this._widget.initEditors();
 			}
 			this._widget.refresh(true);
-			if(this._widget.type === "twoWay" && this._inputChanged) {
-				this._inputChanged();
+			if(options.onInputChanged && this._widget.type === "twoWay") {
+				options.onInputChanged();
 			}
 		},
 		
@@ -864,8 +865,9 @@ exports.toggleableCompareView = (function() {
 				options.blockNumber = diffPos.block;
 				options.changeNumber = diffPos.change;
 			}
-			if(this._widget.type === "twoWay" && this._onSave){ //$NON-NLS-0$
-				this._onSave().then(function(result) {
+			var doSave = this.isDirty() && window.confirm(messages.confirmUnsavedChanges);
+			if(options.onSave) {
+				options.onSave(doSave).then(function() {
 					this._toggle(options);
 				}.bind(this));
 			} else {
@@ -873,8 +875,12 @@ exports.toggleableCompareView = (function() {
 			}
 		},
 		
+		isDirty: function() {
+			return this._widget.isDirty();
+		},
+		
 		destroy: function(){
-			this._widget.destroy();
+			return this._widget.destroy();
 		},
 		
 		getWidget: function() {

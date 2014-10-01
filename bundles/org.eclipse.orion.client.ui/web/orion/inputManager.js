@@ -307,7 +307,7 @@ define([
 				this.editor.reportStatus(msg);
 			}
 		},
-		save: function() {
+		save: function(closing) {
 			if (this._saving) { return; }
 			var editor = this.getEditor();
 			if (!editor || !editor.isDirty() || this.getReadOnly()) { return; }
@@ -358,8 +358,8 @@ define([
 				if (failedSaving && statusService) {
 					statusService.setProgressResult({Message:messages.Saved, Severity:"Normal"}); //$NON-NLS-0$
 				}
-				if (self.afterSave) {
-					self.afterSave();
+				if (self.postSave) {
+					self.postSave(closing);
 				}
 				self._saving = false;
 				return new Deferred().resolve(result);

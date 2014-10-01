@@ -554,5 +554,6 @@ define({
 	'pushGroup' : 'Push',  //$NON-NLS-0$  //$NON-NLS-1$
 	'Url:' : 'Url:', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Private Key:' : 'Ssh Private Key:', //$NON-NLS-0$  //$NON-NLS-1$
-	'Ssh Passphrase:' : 'Ssh Passphrase:' //$NON-NLS-0$  //$NON-NLS-1$
+	'Ssh Passphrase:' : 'Ssh Passphrase:', //$NON-NLS-0$  //$NON-NLS-1$
+	'confirmUnsavedChanges': 'There are unsaved changes. Do you want to save them?' //$NON-NLS-1$ //$NON-NLS-0$
 });

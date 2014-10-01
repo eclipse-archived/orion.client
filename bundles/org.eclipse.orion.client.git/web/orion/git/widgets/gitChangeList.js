@@ -394,6 +394,37 @@ define([
 			}
 			mExplorer.Explorer.prototype.destroy.call(this);
 		},
+		//This function is called when any of the compare widgets in the explorer are hooked up and need to be unhooked
+		saveAll: function() {
+			if(!this.model.root) {
+				return new Deferred().resolve();
+			}
+			var modelList = this.model.root.children || this.model.root.Children;
+			if(!modelList) {
+				return new Deferred().resolve();
+			}
+			var isDirty = modelList.some( function(child) {
+				if(child.children && child.children.length === 1 && child.children[0].resourceComparer && child.children[0].resourceComparer.isDirty()) {
+					return true;
+				}
+			});
+			if(isDirty) {
+				var doSave = window.confirm(messages.confirmUnsavedChanges);
+				var promises = [];
+				modelList.forEach( function(child) {
+					if(child.children && child.children.length === 1 && child.children[0].resourceComparer && child.children[0].resourceComparer.isDirty() && child.children[0].resourceComparer.save) {
+						promises.push(child.children[0].resourceComparer.save(doSave));
+					}
+				});				
+				return Deferred.all(promises);
+			} else {
+				return new Deferred().resolve();
+			}
+		},
+		//This function is called when the collapseAll command is excuted.
+		preCollapseAll: function() {
+			return this.saveAll();
+		},
 		display: function() {
 			var that = this;
 			var deferred = new Deferred();
@@ -412,6 +443,13 @@ define([
 			});
 			this.createTree(this.parentId, model, {
 				setFocus: false, // do not steal focus on load
+				preCollapse: function(rowItem) {
+					if(rowItem && rowItem.children && rowItem.children.length === 1 && rowItem.children[0].resourceComparer) {
+						var doSave = rowItem.children[0].resourceComparer.isDirty() && window.confirm(messages.confirmUnsavedChanges);
+						return rowItem.children[0].resourceComparer.save(doSave);
+					}
+					return new Deferred().resolve();
+				},
 				onComplete: function(tree) {
 					var model = that.model;
 					if (that.prefix === "all") { //$NON-NLS-0$
@@ -618,6 +656,7 @@ define([
 				callback: function(data) {
 					var diffContainer = lib.node(data.handler.options.parentDivId);
 					diffContainer.style.height = ""; //$NON-NLS-0$
+					var maximized = false;
 					var div = diffContainer.parentNode;
 					if (div.classList.contains("gitChangeListCompareMaximized")) { //$NON-NLS-0$
 						div.classList.remove("gitChangeListCompareMaximized"); //$NON-NLS-0$
@@ -625,6 +664,14 @@ define([
 					} else {
 						div.classList.add("gitChangeListCompareMaximized"); //$NON-NLS-0$
 						diffContainer.classList.add("gitChangeListCompareContainerMaximized"); //$NON-NLS-0$
+						maximized = true;
+					}
+					data.handler.options.maximized = maximized;
+					if(data.handler.options.titleIds && data.handler.options.titleIds.length === 2) {
+						var dirtyIndicator = lib.node(data.handler.options.titleIds[1]); //$NON-NLS-0$
+						if ( dirtyIndicator) {
+							dirtyIndicator.textContent = data.handler.isDirty() && maximized ? "*" : "";
+						}
 					}
 					(data.handler._editors || [data.handler._editor]).forEach(function(editor) {
 						editor.resize();
@@ -969,7 +1016,11 @@ define([
 						compareWidgetLeftActionWrapper.className = "layoutLeft commandList"; //$NON-NLS-0$
 						compareWidgetLeftActionWrapper.id = prefix + "CompareWidgetLeftActionWrapper"; //$NON-NLS-0$
 						actionsWrapper.appendChild(compareWidgetLeftActionWrapper);
-
+						var dirtyindicator = document.createElement("span"); //$NON-NLS-0$
+						dirtyindicator.className = "layoutLeft"; //$NON-NLS-0$
+						dirtyindicator.id = prefix + "DirtyId"; //$NON-NLS-0$
+						actionsWrapper.appendChild(dirtyindicator);
+						
 						diffActionWrapper = document.createElement("ul"); //$NON-NLS-0$
 						diffActionWrapper.className = "layoutRight commandList"; //$NON-NLS-0$
 						diffActionWrapper.id = prefix + "DiffActionWrapperChange"; //$NON-NLS-0$
@@ -1006,7 +1057,12 @@ define([
 								explorer.preferencesService,
 								item.parent.Type === "Diff" ? null : diffActionWrapper.id,//saveCmdContainerId
 								item.parent.Type === "Diff" ? null : "compare.save." + item.DiffLocation, //saveCmdId
-								item.parent.Type === "Diff" ? null : explorer.prefix + item.parent.name + item.parent.type + "FileItemId" //$NON-NLS-0$ //The compare widget title where the dirty indicator can be inserted
+								//We pass an array of two title Ids here in order for the resource comparer to render the dirty indicator optionally
+								//If the widget is not maximized, the dirty indicator, if any, is rendered at the end of the file name
+								//If the widget is maximized, as the file name is not visible, the "*" is rendered right beside the left hand action wrapper
+								item.parent.Type === "Diff" ? null : [explorer.prefix + item.parent.name + item.parent.type + "FileItemId", dirtyindicator.id],//$NON-NLS-0$ //The compare widget title where the dirty indicator can be inserted
+								//We need to attach the compare widget reference to the model. Also we need the widget to be destroy when the model is destroyed.
+								item
 							);
 						}.bind(this), 0);
 					}
@@ -1014,20 +1070,22 @@ define([
 			}
 		},
 		onCheckedFunc: function(rowId, checked, manually, item) {
-			if (item.Type === "ExplorerSelection") { //$NON-NLS-0$
-				if (checked) {
-					this.explorer.commandService.runCommand("orion.explorer.selectAllCommandChangeList", this.explorer, this.explorer); //$NON-NLS-0$
+			this.explorer.saveAll().then(function() {
+				if (item.Type === "ExplorerSelection") { //$NON-NLS-0$
+					if (checked) {
+						this.explorer.commandService.runCommand("orion.explorer.selectAllCommandChangeList", this.explorer, this.explorer); //$NON-NLS-0$
+					} else {
+						this.explorer.commandService.runCommand("orion.explorer.deselectAllCommandChangeList", this.explorer, this.explorer); //$NON-NLS-0$
+					}
 				} else {
-					this.explorer.commandService.runCommand("orion.explorer.deselectAllCommandChangeList", this.explorer, this.explorer); //$NON-NLS-0$
+					//stage or unstage
+					if (checked) {
+						this.explorer.commandService.runCommand("eclipse.orion.git.stageCommand", [item], this.explorer); //$NON-NLS-0$
+					} else {
+						this.explorer.commandService.runCommand("eclipse.orion.git.unstageCommand", [item], this.explorer); //$NON-NLS-0$
+					}
 				}
-			} else {
-				//stage or unstage
-				if (checked) {
-					this.explorer.commandService.runCommand("eclipse.orion.git.stageCommand", [item], this.explorer); //$NON-NLS-0$
-				} else {
-					this.explorer.commandService.runCommand("eclipse.orion.git.unstageCommand", [item], this.explorer); //$NON-NLS-0$
-				}
-			}
+			}.bind(this));
 		}, 
 		getCheckedFunc: function(item){
 			if (item.Type === "ExplorerSelection") { //$NON-NLS-0$

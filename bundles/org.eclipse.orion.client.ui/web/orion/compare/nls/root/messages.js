@@ -46,5 +46,6 @@ define({
 	'IgnoreWhitespace': 'Ignore white space', //$NON-NLS-0$  //$NON-NLS-1$
 	'IgnoreWhitespaceTooltip': 'Ignore white space where applicable', //$NON-NLS-0$  //$NON-NLS-1$
 	'UseWhitespace': 'Use white space', //$NON-NLS-0$  //$NON-NLS-1$
-	'UseWhitespaceTooltip': 'Compare white space where applicable' //$NON-NLS-0$  //$NON-NLS-1$
+	'UseWhitespaceTooltip': 'Compare white space where applicable', //$NON-NLS-0$  //$NON-NLS-1$
+	'confirmUnsavedChanges': 'There are unsaved changes. Do you want to save them?' //$NON-NLS-1$ //$NON-NLS-0$
 });

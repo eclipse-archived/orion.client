@@ -67,6 +67,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			this._renderer = options.renderer;
 			this._showRoot = options.showRoot === undefined ? false : options.showRoot;
 			this._indent = options.indent === undefined ? 16 : options.indent;
+			this._preCollapse = options.preCollapse;
 			this._onCollapse = options.onCollapse;
 			this._labelColumnIndex = options.labelColumnIndex === undefined ? 0 : options.labelColumnIndex;
 			this._id = options.id === undefined ? "treetable" : options.id; //$NON-NLS-0$
@@ -93,6 +94,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 		
 		destroy: function() {
 			this.destroyed = true;
+			this._removeAllRows();
 		},
 		
 		_generate: function(children, indentLevel) {
@@ -250,7 +252,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			var row = lib.node(id);
 			if (row) {
 				if (row._expanded) {
-					this.collapse(id);
+					this.collapse(id, true);
 				}
 				else {
 					this.expand(id);
@@ -330,6 +332,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			}
 			for (var j=0; j<toRemove.length; j++) {
 				var child = toRemove[j];
+				if(child &&  child._item && typeof child._item.destroy === "function") { //$NON-NLS-0$
+					child._item.destroy();
+				}
 				child.parentNode.removeChild(child);
 			}
 		},
@@ -337,26 +342,43 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 		_removeAllRows: function() {
 			var rows = lib.$$array(".treeTableRow", this._parent); //$NON-NLS-0$
 			for (var j=0; j<rows.length; j++) {
+				if(rows[j] &&  rows[j]._item && typeof rows[j]._item.destroy === "function") { //$NON-NLS-0$
+					rows[j]._item.destroy();
+				}
 				rows[j].parentNode.removeChild(rows[j]);
 			}
 		},
 		
-		collapse: function(itemOrId) {
+		_collapse : function(id, row) {
+			row._expanded = false;
+			if(this._renderer.updateExpandVisuals) {
+			    this._renderer.updateExpandVisuals(row, false);
+			}
+			this._removeChildRows(id);
+			this._rowsChanged();
+			if(this._onCollapse){
+				this._onCollapse(row._item);
+			}
+		},
+		
+		collapse: function(itemOrId, byToggle) {
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId); //$NON-NLS-0$
 			var row = lib.node(id);
 			if (row) {
 				if (!row._expanded) {
 					return;
 				}
-				row._expanded = false;
-				if(this._renderer.updateExpandVisuals) {
-				    this._renderer.updateExpandVisuals(row, false);
+				if(byToggle && this._preCollapse){
+					this._preCollapse(row._item).then(function(result) {
+						if(result) {
+							this._collapse(id, row);
+						} else {
+							return;
+						}
+					}.bind(this));
+				} else {
+					this._collapse(id, row);
 				}
-				this._removeChildRows(id);
-				this._rowsChanged();
-			}
-			if(this._onCollapse){
-				this._onCollapse(row._item);
 			}
 		},
 		

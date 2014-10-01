@@ -61,8 +61,8 @@ define([
 	 * @param {String} compareTo Optional. If the resource parameter is a simple file URL then this can be used as the second file URI to compare with.
 	 * @param {String} toggleCommandSpanId Optional. The id of the DIV where the "toggle" command will be rendered. If this parameter is defined, the "toggle" command will ONLY be rendered in this DIV.
 	 */
-	function createCompareWidget(serviceRegistry, commandService, resource, hasConflicts, parentDivId, commandSpanId, editableInComparePage, gridRenderer, compareTo, toggleCommandSpanId, preferencesService, saveCmdContainerId, saveCmdId, titleId) {
-			var setCompareSelection = function(diffProvider, cmdProvider, ignoreWhitespace, type) {
+	function createCompareWidget(serviceRegistry, commandService, resource, hasConflicts, parentDivId, commandSpanId, editableInComparePage, gridRenderer, compareTo, toggleCommandSpanId, preferencesService, saveCmdContainerId, saveCmdId, titleIds, containerModel) {
+		var setCompareSelection = function(diffProvider, cmdProvider, ignoreWhitespace, type) {
 				var comparerOptions = {
 				toggleable: true,
 				type: type, //$NON-NLS-0$ //From user preference
@@ -72,7 +72,7 @@ define([
 				diffProvider: diffProvider,
 				resource: resource,
 				compareTo: compareTo,
-				saveLeft: {	saveCmdContainerId: saveCmdContainerId, saveCmdId: saveCmdId, titleId: titleId},
+				saveLeft: {	saveCmdContainerId: saveCmdContainerId, saveCmdId: saveCmdId, titleIds: titleIds},
 				editableInComparePage: editableInComparePage
 			};
 			var viewOptions = {
@@ -80,6 +80,12 @@ define([
 				commandProvider: cmdProvider
 			};
 			var comparer = new mResourceComparer.ResourceComparer(serviceRegistry, commandService, comparerOptions, viewOptions);
+			if(containerModel) {
+				containerModel.resourceComparer = comparer;
+				containerModel.destroy = function() {
+					this.resourceComparer.destroy();
+				};
+			}
 			comparer.start().then(function(maxHeight) {
 				var vH = 420;
 				if (maxHeight < vH) {
@@ -115,7 +121,6 @@ define([
 		} else {
 			setCompareSelection(diffProvider, cmdProvider, ignoreWhitespace, mode);
 		}
-	
 	}
 	
 	//return module exports
