@@ -47,7 +47,7 @@ define('javascript/contentAssist/indexFiles/ecma5Index', [
 					"!type": "Boolean"
 				},
 				"lastIndex": {
-					"!type": "Boolean"
+					"!type": "Number"
 				},
 				"exec": {
 					"!type": "fn(str: String) -> [String]"

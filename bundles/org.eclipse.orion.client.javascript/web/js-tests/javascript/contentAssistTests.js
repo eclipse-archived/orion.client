@@ -5588,5 +5588,27 @@ define([
 			var results = computeContentAssist("// es .", "", 7);
 			testProposals(results, []);
 		});
+		
+		/**
+		 * Tests RegExp proposals
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426733
+		 * @since 7.0
+		 */
+		it("test RegExp literal 1", function() {
+			var results = computeContentAssist("/^.*/.t", "t", 6);
+			testProposals(results, [
+			['est', 'test : Boolean']]);
+		});
+		
+		/**
+		 * Tests RegExp proposals
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426733
+		 * @since 7.0
+		 */
+		it("test RegExp literal 2", function() {
+			var results = computeContentAssist("/^.*/.e", "e", 7);
+			testProposals(results, [
+			['xec', 'exec : Array.<String>']]);
+		});
 	});
 });

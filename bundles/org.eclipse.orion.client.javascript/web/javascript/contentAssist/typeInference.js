@@ -1159,8 +1159,15 @@ define([
 				// inside of an array access
 				node.extras.inferredTypeObj = typeUtils.NUMBER_TYPE;
 			} else {
-				var oftype = (typeof node.value);
-				node.extras.inferredTypeObj = typeUtils.createNameType(oftype[0].toUpperCase() + oftype.substring(1, oftype.length));
+			    var val = /^\[object\s(\S*)\]$/.exec(Object.prototype.toString.call(node.value));
+			    if(val) {
+			        //works for built-in types
+			        node.extras.inferredTypeObj = typeUtils.createNameType(val[1]);
+			    } else {
+			        //fall back to 'Object'
+				    var oftype = (typeof node.value);
+				    node.extras.inferredTypeObj = typeUtils.createNameType(oftype[0].toUpperCase() + oftype.substring(1, oftype.length));
+				}
 			}
 			break;
 

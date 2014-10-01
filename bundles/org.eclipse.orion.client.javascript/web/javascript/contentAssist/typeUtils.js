@@ -749,7 +749,7 @@ define([
 		BOOLEAN_TYPE: createNameType("Boolean"),
 		STRING_TYPE: createNameType("String"),
 		ARRAY_TYPE: createNameType("Array"),
-		FUNCTION_TYPE: createNameType("Function")	
+		FUNCTION_TYPE: createNameType("Function")
 	};
 	
 });
