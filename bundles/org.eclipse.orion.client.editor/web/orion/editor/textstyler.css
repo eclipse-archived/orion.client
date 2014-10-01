@@ -16,7 +16,7 @@
 
 .entity.name.function, .entity.name.type, .entity-name-function, .entity-name-type {
 	font-weight: bold;
-	color: #3f7f7f;
+	color: #67BBB8;
 }
 
 .entity.name, .entity-name-tag {
@@ -146,7 +146,7 @@
 }
 
 .variable.parameter, .variable-parameter {
-	color: black;
+	color: #D1416F;
 }
 
 .variable.language, .variable-language {

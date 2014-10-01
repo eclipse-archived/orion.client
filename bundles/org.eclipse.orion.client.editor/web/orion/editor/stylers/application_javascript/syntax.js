@@ -66,6 +66,7 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 			},
 			{include: "orion.lib#doc_block"}, //$NON-NLS-0$
 			{include: "orion.c-like#comment_block"}, //$NON-NLS-0$
+			{include: "#jsFunctionDef"}, //$NON-NLS-0$
 			{include: "orion.lib#brace_open"}, //$NON-NLS-0$
 			{include: "orion.lib#brace_close"}, //$NON-NLS-0$
 			{include: "orion.lib#bracket_open"}, //$NON-NLS-0$
@@ -90,7 +91,29 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 				match: "\\bthis\\b", //$NON-NLS-0$
 				name: "variable.language.js" //$NON-NLS-0$
 			},
-		]
+		],
+		repository: {
+			jsFunctionDef: {
+				/*
+				 * http://stackoverflow.com/questions/2008279/validate-a-javascript-function-name/2008444#2008444
+				 * was referenced in the composition of the "begin" pattern below.
+				 */
+				begin: "(function)(\\s+[_$a-zA-Z\\xA0-\\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*)?\\s*\\(", //$NON-NLS-0$
+				end: "\\)", //$NON-NLS-0$
+				captures: {
+					1: {name: "keyword.operator.js"}, //$NON-NLS-0$
+					2: {name: "entity.name.function.js"} //$NON-NLS-0$
+				},
+				patterns: [
+					{include: "orion.c-like#comment_singleLine"}, //$NON-NLS-0$
+					{include: "orion.c-like#comment_block"}, //$NON-NLS-0$
+					{
+						match: "[^\\s,]+", //$NON-NLS-0$
+						name: "variable.parameter.js" //$NON-NLS-0$
+					}
+				]
+			}
+		}
 	});
 
 	return {
