@@ -5,4 +5,3 @@ Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: bundle
 Bundle-SymbolicName: org.eclipse.orion.doc.isv;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Eclipse-BundleShape: dir
