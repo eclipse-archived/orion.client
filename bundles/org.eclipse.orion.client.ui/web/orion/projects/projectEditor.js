@@ -816,7 +816,12 @@ define([
 					}
 				}
 			} else if(event.type === "deleteAll"){
-				this.configurations = [];
+				for(var i=this.configurations.length-1; i>=0; i--){
+					var configuration = this.configurations[i];
+					if(configuration.File){
+						this.configurations.splice(i, 1);
+					}
+				}
 				this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle);
 			}
 		},

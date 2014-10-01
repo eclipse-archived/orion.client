@@ -132,6 +132,14 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				}, context.errorHandler
 			);
 		} else {
+			if(status.Saved){
+				context.projectClient.formLaunchConfiguration(status.Saved.ConfigurationName, context.deployService.id, status.Saved.Parameters, status.Saved.Url, status.Saved.ManageUrl, status.Saved.Path, status.Saved.UrlTitle, status.Saved.Type).then(function(configuration){
+					storeLastDeployment(context.project.Name, context.deployService, configuration);
+					if(sharedLaunchConfigurationDispatcher){
+						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
+					}
+				});
+			}
 			displayDeployResult(progress, status, context);
 		}
 	}
@@ -240,6 +248,14 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 						}, context.errorHandler
 					);
 				} else {
+					if(result.Saved){
+						context.projectClient.formLaunchConfiguration(result.Saved.ConfigurationName, context.deployService.id, result.Saved.Parameters, result.Saved.Url, result.Saved.ManageUrl, result.Saved.Path, result.Saved.UrlTitle, result.Saved.Type).then(function(configuration){
+							storeLastDeployment(context.project.Name, context.deployService, configuration);
+							if(sharedLaunchConfigurationDispatcher){
+								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
+							}							
+						});
+					}
 					storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
 				}
 				
@@ -535,6 +551,13 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 											fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent, newValue: configuration.File, ignoreRedirect: true});
 										}, errorHandler
 									);
+								} else if (result.Saved) {
+									context.projectClient.formLaunchConfiguration(result.Saved.ConfigurationName, context.deployService.id, result.Saved.Parameters, result.Saved.Url, result.Saved.ManageUrl, result.Saved.Path, result.Saved.UrlTitle, result.Saved.Type).then(function(configuration){
+										storeLastDeployment(context.project.Name, context.deployService, configuration);
+										if(sharedLaunchConfigurationDispatcher){
+											sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
+										}
+									});
 								}
 							}, function(error){
 								if(error.Retry){

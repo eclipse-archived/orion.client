@@ -579,6 +579,33 @@ define([
 	
 	getProjectLaunchConfigurations: function(projectMetadata){
 		var deferred = new Deferred();
+		var pluginDeferred = new Deferred();
+		var readPluginInfoDeferreds = [];
+		this.allProjectDeployReferences.forEach(function(deployServiceRef){
+			var deployService = this._getProjectDeployService(deployServiceRef);
+			if(deployService.getLaunchConfigurations){
+				readPluginInfoDeferreds.push(deployService.getLaunchConfigurations(projectMetadata).then(function(lConfs){
+					for(var i=0; i<lConfs.length; i++){
+						var lConf = lConfs[i];
+						lConfs[i] = this.formLaunchConfiguration(lConf.ConfigurationName, deployService.id, lConf.Parameters, lConf.Url, lConf.ManageUrl, lConf.Path, lConf.UrlTitle, lConf.Type);
+					}
+					return lConfs;
+				}.bind(this)));
+			}
+		}.bind(this));
+		
+		Deferred.all(readPluginInfoDeferreds).then(function(result){
+			if(!result || !result.length){
+				pluginDeferred.resolve([]);
+				return;
+			}
+			var results = [];
+			result.forEach(function(lcs){
+				results = results.concat(lcs);
+			});
+			pluginDeferred.resolve(results);
+		});
+		
 		this._getLaunchConfigurationsDir(projectMetadata).then(function(launchConfMeta){
 			if(!launchConfMeta){
 				deferred.resolve([]);
@@ -630,18 +657,30 @@ define([
 				}.bind(this), deferred.reject);
 			}	
 		}.bind(this), deferred.reject);
+		
+		var combinedResult = new Deferred();
+		
+		Deferred.all([deferred, pluginDeferred]).then(function(results){
+			var allRes = [];
+			results[0].forEach(function(res){
+				for(var i=0; i<results[1].length; i++){
+					res1 = results[1][i];
+					if(res1.Name === res.Name && res1.ServiceId === res.ServiceId){
+						res1 = results[1].splice(i, 1);
+						allRes.push(objects.mixin(res, res1));
+						return;
+					}
+				}
+				allRes.push(res);
+			});
+			allRes = allRes.concat(results[1]);
+			combinedResult.resolve(allRes);
+		});
 
-		return deferred;
+		return combinedResult;
 	},
 	
-	saveProjectLaunchConfiguration: function(projectMetadata, configurationName, serviceId, params, url, manageUrl, path, urlTitle, deployType){
-		var deferred = new Deferred();
-		var configurationFile = configurationName;
-		configurationFile = configurationFile.replace(/\ /g,' ');
-		configurationFile = configurationFile.replace(/[^\w\d\s]/g, '');
-		if(configurationFile.indexOf(".launch")<0){
-			configurationFile+=".launch";
-		}
+	formLaunchConfiguration: function(configurationName, serviceId, params, url, manageUrl, path, urlTitle, deployType){
 		var launchConfigurationEnry = {
 			Name: configurationName,
 			ServiceId: serviceId,
@@ -658,6 +697,18 @@ define([
 		if(deployType){
 			launchConfigurationEnry.Type = deployType;
 		}
+		return launchConfigurationEnry;
+	},
+	
+	saveProjectLaunchConfiguration: function(projectMetadata, configurationName, serviceId, params, url, manageUrl, path, urlTitle, deployType){
+		var deferred = new Deferred();
+		var configurationFile = configurationName;
+		configurationFile = configurationFile.replace(/\ /g,' ');
+		configurationFile = configurationFile.replace(/[^\w\d\s]/g, '');
+		if(configurationFile.indexOf(".launch")<0){
+			configurationFile+=".launch";
+		}
+		var launchConfigurationEnry = this.formLaunchConfiguration(configurationName, serviceId, params, url, manageUrl, path, urlTitle, deployType);
 		
 		this._getLaunchConfigurationsDir(projectMetadata, true).then(function(launchConfDir){
 			if(launchConfDir.Children){
