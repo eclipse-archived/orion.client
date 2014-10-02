@@ -24,10 +24,8 @@ define([
 	'orion/git/util',
 	'orion/git/gitPreferenceStorage',
 	'orion/git/gitConfigPreference',
-	'orion/git/widgets/ReviewRequestDialog',
 	'orion/git/widgets/CloneGitRepositoryDialog',
 	'orion/git/widgets/ApplyPatchDialog',
-	'orion/PageLinks',
 	'orion/URITemplate',
 	'orion/git/logic/gitCommon',
 	'orion/git/logic/gitPush',
@@ -37,7 +35,7 @@ define([
 	'orion/URL-shim'
 ], function(
 	messages, require, EventTarget, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, GitPreferenceStorage,
-	GitConfigPreference, mReviewRequest, mCloneGitRepository, mApplyPatch, PageLinks, URITemplate, mGitCommonLogic, mGitPushLogic, 
+	GitConfigPreference, mCloneGitRepository, mApplyPatch, URITemplate, mGitCommonLogic, mGitPushLogic, 
 	mGitStashLogic, mGitCommitLogic, objects) {
 
 /**
@@ -181,7 +179,7 @@ var exports = {};
 			visibleWhen: function(item){
 				if (item.outgoing && item.top) {
 					return false;
-				};
+				}
 				return item.Type === "Commit";	//$NON-NLS-0$
 			}
 		});
@@ -1060,7 +1058,7 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			parameters: resetParameters,
 			callback: function(data) {
-				resetCallback(data, data.items.Name, data.parameters.valueFor("soft") ? "SOFT" : "HARD"); //$NON-NLS-0$
+				resetCallback(data, data.items.Name, data.parameters.valueFor("soft") ? "SOFT" : "HARD"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
 				if (item.outgoing && item.top) {
@@ -1144,8 +1142,6 @@ var exports = {};
 		});
 		commandService.addCommand(removeTagCommand);
 		
-		var notificationParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('reviewer', 'text', messages["Reviewer name"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
-
 		var cherryPickCommand = new mCommands.Command({
 			name : messages["Cherry-Pick"],
 			tooltip: messages["Apply the change introduced by the commit to your active branch"],
@@ -1403,20 +1399,21 @@ var exports = {};
 						var func = arguments.callee;
 						var gitConfigPreference = new GitConfigPreference(serviceRegistry);
 						
-						serviceRegistry.getService("orion.page.message").setProgressMessage("Your project is being set up. This may take a minute...");
+						serviceRegistry.getService("orion.page.message").setProgressMessage(messages.ProjectSetup); //$NON-NLS-0$
 						gitConfigPreference.getConfig().then(function(userInfo){
-							var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
-									options.gitPrivateKey, options.gitPassphrase, userInfo, true), "Cloning repository " + name);
-							deferred.then(function(jsonData, secondArg) {
+							var msg = i18nUtil.formatMessage(messages["AddClone"], name);
+							var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts,
+									options.gitPrivateKey, options.gitPassphrase, userInfo, true), msg);
+							deferred.then(function(jsonData) {
 								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
 									gitService.getGitClone(jsonData.Location).then(
 										function(repoJson){
 											var pDescContent = "";
 											for(var k in item.projectDescription){
-												pDescContent += k + "=" + item.projectDescription[k] + "\n";
+												pDescContent += k + "=" + item.projectDescription[k] + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
 											}
 
-											fileClient.write(repoJson.Children[0].ContentLocation + '.git/.projectInfo', pDescContent).then(
+											fileClient.write(repoJson.Children[0].ContentLocation + '.git/.projectInfo', pDescContent).then( //$NON-NLS-0$
 												function(){
 													var editLocation = require.toUrl(editTemplate.expand({resource: repoJson.Children[0].ContentLocation}));
 													window.location = editLocation;
@@ -1425,7 +1422,7 @@ var exports = {};
 										}
 									);
 								}, func, messages['Clone Git Repository']);
-							}, function(jsonData, secondArg) {
+							}, function(jsonData) {
 								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Clone Git Repository']);
 							});
 						});
@@ -1433,7 +1430,8 @@ var exports = {};
 				};
 				
 				if (item.url && item.projectDescription.name){
-					serviceRegistry.getService("orion.page.message").setProgressMessage("Looking for project " + item.projectDescription.name);
+					var msg = i18nUtil.formatMessage(messages["AddClone"], item.projectDescription.name);
+					serviceRegistry.getService("orion.page.message").setProgressMessage(msg); //$NON-NLS-0$
 					fileClient.loadWorkspace().then(function(projects){
 						for(var i=0; i<projects.Children.length; ++i){
 							var p = projects.Children[i];
@@ -1446,12 +1444,12 @@ var exports = {};
 													resource: repoJson.Children[0].ContentLocation
 												}));
 											} else {
-												console.info("Folder project is used");
+//												console.info("Folder project is used");
 											}
 										}
 									);
 								} else {
-									console.info("Folder project is used");
+//									console.info("Folder project is used");
 								}
 								return;
 							}

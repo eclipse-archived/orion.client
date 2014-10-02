@@ -93,7 +93,7 @@ define({
 	"AddingConfig": "Adding git configuration property: key=${0} value=${1}", //$NON-NLS-0$  //$NON-NLS-1$
 	"EditingConfig": "Editing git configuration property: key=${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"DeletingConfig": "Deleting git configuration property: key=${0}", //$NON-NLS-0$  //$NON-NLS-1$
-	"AddClone": "Cloning repository: =${0}", //$NON-NLS-0$  //$NON-NLS-1$
+	"AddClone": "Cloning repository: ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"RebaseProgressDetails": "Rebasing branch.\n\n\tUse Continue after merging the conflicts and selecting all files;\n\tSkip to bypass the current patch;\n\tAbort to end the rebase at any time.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Committer name:": "Committer name:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Name:": "Name:", //$NON-NLS-0$  //$NON-NLS-1$
@@ -357,6 +357,8 @@ define({
 	"Resetting git index for ${0}" : "Resetting git index for ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Tag": "Tag", //$NON-NLS-0$  //$NON-NLS-1$
 	"Create a tag for the commit": "Create a tag for the commit", //$NON-NLS-0$  //$NON-NLS-1$
+	"ProjectSetup": "Your project is being set up. This may take a minute...", //$NON-NLS-0$  //$NON-NLS-1$
+	"LookingForProject": "Looking for project: ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Tag name": "Tag name", //$NON-NLS-0$  //$NON-NLS-1$
 	"Delete the tag from the repository": "Delete the tag from the repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"Are you sure you want to delete tag ${0}?": "Are you sure you want to delete tag ${0}?", //$NON-NLS-0$  //$NON-NLS-1$
