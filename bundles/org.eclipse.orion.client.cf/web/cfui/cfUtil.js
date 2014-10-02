@@ -56,11 +56,10 @@ define([
 			var appName = resp.App.name || resp.App.entity.name;
 			var launchConfName = appName + " on " + resp.Target.Space.Name + " / " + resp.Target.Org.Name;
 			
-			var host, url, urlTitle;
+			var host, url;
 			if(resp.Route !== undefined){
 				host = resp.Route.host || resp.Route.entity.host;
 				url = "http://" + host + "." + resp.Domain;
-				urlTitle = appName;
 			}
 			
 			return {
@@ -77,7 +76,6 @@ define([
 						Timeout: resp.Timeout
 					},
 					Url: url,
-					UrlTitle: urlTitle,
 					Type: "Cloud Foundry",
 					ManageUrl: resp.ManageUrl,
 					Path: appPath
@@ -121,7 +119,7 @@ define([
 					
 					error.forceShowMessage = true;
 					error.Severity = "Info";
-					error.Message = mCfUtil.getLoginMessage(target.ManageUrl);
+					error.Message = this.getLoginMessage(target.ManageUrl);
 				
 				} else if (err.error_code === "CF-TargetNotSet"){
 					var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=cloud").expand({OrionHome : PageLinks.getOrionHome()});
