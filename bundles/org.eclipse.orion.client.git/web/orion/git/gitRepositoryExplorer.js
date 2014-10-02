@@ -519,20 +519,6 @@ define([
 							break;
 						}
 					}
-					if (!newBranch) {
-						var fullName = selected.IsGerrit ? "refs/for/" + activeBranch.Name : "refs/remotes/" + selected.Name + "/" + activeBranch.Name;
-						var name = selected.IsGerrit ? selected.Name + "/for/" + activeBranch.Name : selected.Name + "/" + activeBranch.Name;
-						var location = selected.Location.split("/");
-						location.splice(4, 0, encodeURIComponent(encodeURIComponent(fullName)));
-						location = location.join("/");
-						newBranch = {
-							Name: name,
-							FullName: fullName,
-							Type: "RemoteTrackingBranch",
-							GitUrl: selected.GitUrl,
-							Location: location
-						};
-					}
 					if (util.isNewBranch(newBranch)) {
 						selected = newBranch;
 						break;
