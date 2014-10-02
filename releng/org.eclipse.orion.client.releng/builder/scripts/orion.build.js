@@ -96,6 +96,7 @@
             { name: "edit/edit" },
             { name: "git/git-repository" },
             { name: "git/plugins/gitPlugin" },
+            { name: "help/help" },
             { name: "javascript/plugins/javascriptPluginLoader" },
             { name: "javascript/plugins/javascriptPlugin" },
             { name: "mixloginstatic/LoginWindow" },
