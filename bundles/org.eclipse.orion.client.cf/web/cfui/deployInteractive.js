@@ -952,14 +952,19 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 					}
 				}
 				fields.className = "retryFields";
+				var firstField;
 				for(var i=0; i<error.Retry.parameters.length; i++){
 					var param = error.Retry.parameters[i];
 					if(param.hidden){
 						continue;
 					}
+					var div = document.createElement("div");
 					var label = document.createElement("label");
 					label.appendChild(document.createTextNode(param.name));
 					var input = document.createElement("input");
+					if(i===0){
+						firstField = input;
+					}
 					input.type = param.type;
 					input.id = param.id;
 					input.onkeydown = function(event){
@@ -970,14 +975,18 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						}
 					}
 					paramInputs[param.id] = input;
-					fields.appendChild(label);
-					fields.appendChild(input);
+					div.appendChild(label);
+					div.appendChild(input);
+					fields.appendChild(div);
 				}
 				var submitButton = document.createElement("button");
 				submitButton.appendChild(document.createTextNode("Submit"));
 				submitButton.onclick = submitParams;
 				fields.appendChild(submitButton);
 				msgText.appendChild(fields);
+				if(firstField){
+					firstField.focus();
+				}
 			}
 		}
 	}

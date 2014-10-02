@@ -123,6 +123,7 @@ select{
 
 .retryFields{
 	margin-top: 5px;
+	text-align: right;
 }
 
 .retryFields label {
