@@ -45,6 +45,10 @@
 	cursor: pointer;
 }
 
+.textviewZoom .textviewScroll {
+	padding: 1px;
+}
+
 .textviewZoom .punctuation.separator.tab {
 	background-image: none;
 }
