@@ -112,7 +112,8 @@ define([
 				if (progress) progress.begin(msg);
 				this.progressService.progress(this.gitClient.getGitRemote(parentItem.Location + util.generateQuery([that.filterQuery])), msg).then(function (resp) {
 					if (progress) progress.done();
-					onComplete(that.processChildren(parentItem, resp.Children));
+					var children = resp.Children || resp;
+					onComplete(that.processChildren(parentItem, that.processMoreChildren(parentItem, children, resp, "MoreBranches"))); //$NON-NLS-0$
 				}, function(error){
 					if (progress) progress.done();
 					that.handleError(error);
