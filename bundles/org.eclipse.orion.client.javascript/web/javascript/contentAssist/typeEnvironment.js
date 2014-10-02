@@ -136,6 +136,9 @@ define([
 		// routine to lookup a member name of a type that follows the prototype chain
 		// to search for the member
 		function innerLookup(env, name, type, includeDefinition, visited) {
+		    if(!type) {
+		        return null;
+		    }
 			var res = type[name];
 
 			var proto = type.$$proto;

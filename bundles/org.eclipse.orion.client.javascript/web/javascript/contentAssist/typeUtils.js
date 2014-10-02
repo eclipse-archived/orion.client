@@ -500,10 +500,15 @@ define([
 						if (allTypes[name]) {
 							return { type: 'NameExpression', name: name };
 						} else {
-							var capType = name[0].toUpperCase() + name.substring(1);
-							if (allTypes[capType]) {
-								return { type: 'NameExpression', name: capType };
-							}
+						    //may have been a proto lookup i.e. Connection..prototype
+						    var names = name.split('..');
+						    if(names.length === 2 && names[1] === 'prototype') {
+						        return {type: 'NameExpression', name: names[0]};
+						    }
+						}
+						var capType = name[0].toUpperCase() + name.substring(1);
+						if (allTypes[capType]) {
+							return { type: 'NameExpression', name: capType };
 						}
 					}
 					return THE_UNKNOWN_TYPE;

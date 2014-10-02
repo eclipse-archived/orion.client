@@ -576,6 +576,9 @@ define([
     	        return;
 		    } 
 			var type = env.lookupQualifiedType(targetTypeName);
+			if(!type) {
+			    return;
+			}
 			var proto = type.$$proto;
 			if (!relevance) {
 				relevance = 100;

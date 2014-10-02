@@ -4994,6 +4994,105 @@ define([
 	
 		});
 		
+		/**
+		 * Tests mysql index
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+		 * @since 7.0
+		 */
+		it("test mysql index 1", function() {
+			var results = computeContentAssist("require('mysql').createP", "createP", 24);
+			testProposals(results, [
+			     ['ool', 'createPool(config) : Pool'],
+			     ['oolCluster', 'createPoolCluster(config) : PoolCluster']
+			]);
+		});
+		
+		/**
+		 * Tests mysql index
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+		 * @since 7.0
+		 */
+		it("test mysql index 2", function() {
+			var results = computeContentAssist("require('mysql').createC", "createC", 25);
+			testProposals(results, [
+			     ['onnection', 'createConnection(config) : Connection']
+			]);
+		});
+		
+		/**
+		 * Tests mysql index
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+		 * @since 7.0
+		 */
+		it("test mysql index 3", function() {
+			var results = computeContentAssist("require('mysql').createQ", "createQ", 25);
+			testProposals(results, [
+			     ['uery', 'createQuery(sql, values, cb) : Query']
+			]);
+		});
+		
+		/**
+		 * Tests mysql index for indirect proposals
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+		 * @since 7.0
+		 */
+		it("test mysql index 4", function() {
+			var results = computeContentAssist("require('mysql').createQuery(null,null,null).sta", "sta", 47);
+			testProposals(results, [
+			     ['rt', 'start()']
+			]);
+		});
+		
+		/**
+		 * Tests redis index indirect proposals
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+		 * @since 7.0
+		 */
+		it("test redis index 1", function() {
+			var results = computeContentAssist("require('redis').createClient(null, null, null).a", "a", 49);
+			testProposals(results, [
+			     ['uth', 'auth()'],
+			     ['UTH', 'AUTH()']
+			]);
+		});
+		
+		/**
+		 * Tests redis index 
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+		 * @since 7.0
+		 */
+		it("test redis index 2", function() {
+			var results = computeContentAssist("require('redis').c", "c", 18);
+			testProposals(results, [
+			     ['reateClient', 'createClient(port_arg, host_arg, options)']
+			]);
+		});
+		
+		/**
+		 * Tests pg index indirect proposals
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+		 * @since 7.0
+		 */
+		it("test pg index 1", function() {
+			var results = computeContentAssist("require('redis').createClient(null, null, null).a", "a", 18);
+			testProposals(results, [
+			     ['uth', 'auth()'],
+			     ['UTH', 'AUTH()']
+			]);
+		});
+		
+		/**
+		 * Tests redis index 
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426486
+		 * @since 7.0
+		 */
+		it("test pg index 2", function() {
+			var results = computeContentAssist("require('require('pg').Cl", "Cl", 16);
+			testProposals(results, [
+			     ['ient', 'Client(config)']
+			]);
+		});
+		
 		//TESTS FOR JSDOC CONTENT ASSIST
 		
 		/**
