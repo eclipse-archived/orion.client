@@ -19,8 +19,9 @@ define([
 	'orion/projectCommands',
 	'orion/PageLinks',
 	'orion/explorers/explorer',
-	'orion/section'
-], function(messages, i18nUtil, URITemplate, lib, Deferred, objects, mProjectCommands, PageLinks, mExplorer, mSection) {
+	'orion/section',
+	'orion/webui/tooltip'
+], function(messages, i18nUtil, URITemplate, lib, Deferred, objects, mProjectCommands, PageLinks, mExplorer, mSection, mTooltip) {
 	
 	var editTemplate = new URITemplate("./edit.html#{,resource,params*}");
 	
@@ -349,11 +350,19 @@ define([
 		}
 		if(col_no===1){
 			var td = document.createElement("td");
+			if(tableRow.urlTooltip){
+				tableRow.urlTooltip.destroy();
+				delete tableRow.urlTooltip;
+			}
 			if(item.Url){
 				var a = document.createElement("a");
 				a.target = "_new";
 				a.href = item.Url.indexOf("://")<0 ? "http://" + item.Url : item.Url;
-				a.title = item.Url;
+				tableRow.urlTooltip = new mTooltip.Tooltip({
+					node: a,
+					text: item.Url,
+					position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				});
 				a.appendChild(document.createTextNode(item.Url || item.Params.Name || "View App"));
 				td.appendChild(a);
 			}
@@ -400,6 +409,10 @@ define([
 			if(item.status && item.status.CheckState === true){
 				delete item.status;
 			} else if(item.status){
+				if(tableRow.statusTooltip){
+					tableRow.statusTooltip.destroy();
+					delete tableRow.statusTooltip;
+				}
 				if(item.status.error && item.status.error.Retry){
 					item.parametersRequested = item.status.error.Retry.parameters;
 					item.optionalParameters = item.status.error.Retry.optionalParameters;
@@ -407,37 +420,61 @@ define([
 				} else if(item.status.error){
 					var span = document.createElement("span");
 					span.appendChild(document.createTextNode("Error"));
-					span.title = item.status.error.Message;
+					tableRow.statusTooltip = new mTooltip.Tooltip({
+						node: span,
+						text: item.status.error.Message,
+						position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});
 					td.appendChild(span);
 					return td;
 				} else if(item.status.State === "STARTED"){
 					var span = document.createElement("span");
 					span.className = "imageSprite core-sprite-applicationrunning";
-					span.title = item.status.Message || "Started";
+					tableRow.statusTooltip = new mTooltip.Tooltip({
+						node: span,
+						text: item.status.Message || "Started",
+						position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});
 					td.appendChild(span);
 					return td;
 				} else if(item.status.State==="STOPPED"){
 					var span = document.createElement("span");
 					span.className = "imageSprite core-sprite-applicationstopped";
-					span.title = item.status.Message || "Stopped";
+					tableRow.statusTooltip = new mTooltip.Tooltip({
+						node: span,
+						text: item.status.Message || "Stopped",
+						position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});
 					td.appendChild(span);
 					return td;
 				} else if(item.status.State==="NOT_DEPLOYED"){
 					var span = document.createElement("span");
 					span.className = "imageSprite core-sprite-applicationnotdeployed";
-					span.title = item.status.Message || "Not deployed";
+					tableRow.statusTooltip = new mTooltip.Tooltip({
+						node: span,
+						text: item.status.Message || "Not deployed",
+						position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});
 					td.appendChild(span);
 					return td;
 				} else if(item.status.State==="PROGRESS"){
 					var span = document.createElement("span");
 					span.className = "imageSprite core-sprite-progress";
-					span.title = "Checking application state";
+					tableRow.statusTooltip = new mTooltip.Tooltip({
+						node: span,
+						text: "Checking application state",
+						position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});
 					td.appendChild(span);
 					return td;
 				} else {
 					var span = document.createElement("span");
 					span.appendChild(document.createTextNode("State unknown"));
-					span.title = item.status.Message;
+					tableRow.statusTooltip = new mTooltip.Tooltip({
+						node: span,
+						text: item.status.Message,
+						position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});
 					td.appendChild(span);
 					return td;
 				}
@@ -769,6 +806,21 @@ define([
 				}.bind(this));
 				return;
 			}
+			
+			//Destroy tooptips for app status
+			if(lib.$(".sectionTreeTable", this.configurationsParent) || lib.$(".treetable", this.configurationsParent)) { //$NON-NLS-1$ //$NON-NLS-0$
+				lib.$$array(".treeTableRow", this.configurationsParent).forEach(function(tableRow, i) { //$NON-NLS-0$
+					if(tableRow.statusTooltip){
+						tableRow.statusTooltip.destroy();
+						delete tableRow.statusTooltip;
+					}
+					if(tableRow.urlTooltip){
+						tableRow.urlTooltip.destroy();
+						delete tableRow.urlTooltip;
+					}
+				});
+			}
+			
 			lib.empty(this.configurationsParent);
 			this.launchCofunctionSectionsTitle = sectionName || messages.DeployInfo;
 			var launchConfigurationSection = new mSection.Section(parent, {id: "projectLaunchConfigurationSection", headerClass: ["sectionTreeTableHeader"], title: this.launchCofunctionSectionsTitle, canHide: true});
