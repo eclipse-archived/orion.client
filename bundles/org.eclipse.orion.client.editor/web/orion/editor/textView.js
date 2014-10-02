@@ -27,6 +27,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 	function getWindow(document) {
 		return document.defaultView || document.parentWindow;
 	}
+	function newArray(length) {
+		return new Array(length);
+	}
 	var addHandler = textUtil.addEventListener;
 	var removeHandler = textUtil.removeEventListener;
 	/** @private */
@@ -730,7 +733,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var rects, newRects, rect, i;
 			if (!element._rectsCache) {
 				rects = element.getClientRects();
-				newRects = new Array(rects.length);
+				newRects = newArray(rects.length);
 				for (i = 0; i<rects.length; i++) {
 					rect = newRects[i] = new TextRect(rects[i]);
 					rect.left -= parentRect.left;
@@ -2774,7 +2777,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					this["_" + option] = clone(newValue); //$NON-NLS-0$
 				}
 			}
-			this.onOptions({type: "Options", options: options});
+			this.onOptions({type: "Options", options: options}); //$NON-NLS-0$
 		},
 		/**
 		 * @class This object describes the selection show options.
@@ -2901,13 +2904,15 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * </p>
 		 *
 		 * @param {Number} topIndex the index of the top line.
+		 * @param {Function} [callback] if callback is specified and <code>scrollAnimation</code> is not zero, view scrolling is animated and
+		 *					the callback is called when the animation is done. Otherwise, callback is callback right away.
 		 *
 		 * @see orion.editor.TextView#getBottomIndex
 		 * @see orion.editor.TextView#getTopIndex
 		 */
-		setTopIndex: function(topIndex) {
+		setTopIndex: function(topIndex, callback) {
 			if (!this._clientDiv) { return; }
-			this._scrollView(0, this._getLinePixel(Math.max(0, topIndex)) - this._getScroll().y);
+			this._scrollViewAnimated(0, this._getLinePixel(Math.max(0, topIndex)) - this._getScroll().y, callback);
 		},
 		/**
 		 * Sets the top pixel.
@@ -2918,14 +2923,16 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * </p>
 		 *
 		 * @param {Number} pixel the top pixel.
+		 * @param {Function} [callback] if callback is specified and <code>scrollAnimation</code> is not zero, view scrolling is animated and
+		 *					the callback is called when the animation is done. Otherwise, callback is callback right away.
 		 *
 		 * @see orion.editor.TextView#getBottomPixel
 		 * @see orion.editor.TextView#getTopPixel
 		 * @see orion.editor.TextView#convert
 		 */
-		setTopPixel: function(pixel) {
+		setTopPixel: function(pixel, callback) {
 			if (!this._clientDiv) { return; }
-			this._scrollView(0, Math.max(0, pixel) - this._getScroll().y);
+			this._scrollViewAnimated(0, Math.max(0, pixel) - this._getScroll().y, callback);
 		},
 		/**
 		 * Scrolls the selection into view if needed.
@@ -4718,7 +4725,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				var lineIndex = model.getLineAtOffset(caret);
 				var lineStart = model.getLineStart(lineIndex);
 				var spaces = this._tabSize - ((caret - lineStart) % this._tabSize);
-				text = (new Array(spaces + 1)).join(" "); //$NON-NLS-0$
+				text = (newArray(spaces + 1)).join(" "); //$NON-NLS-0$
 			}
 			this._doContent(text);
 			return true;
@@ -4923,14 +4930,14 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				div1.style.position = "fixed"; //$NON-NLS-0$
 				div1.style.left = "-1000px"; //$NON-NLS-0$
 				parent.appendChild(div1);
-				div1.innerHTML = new Array(2).join("a"); //$NON-NLS-0$
+				div1.innerHTML = newArray(2).join("a"); //$NON-NLS-0$
 				rect1 = div1.getBoundingClientRect();
 				charWidth = Math.ceil(rect1.right - rect1.left);
 				if (this._wrapOffset || this._marginOffset) {
-					div1.innerHTML = new Array(this._wrapOffset + 1 + (util.isWebkit ? 0 : 1)).join(" "); //$NON-NLS-0$
+					div1.innerHTML = newArray(this._wrapOffset + 1 + (util.isWebkit ? 0 : 1)).join(" "); //$NON-NLS-0$
 					rect1 = div1.getBoundingClientRect();
 					wrapWidth = Math.ceil(rect1.right - rect1.left);
-					div1.innerHTML = new Array(this._marginOffset + 1).join(" "); //$NON-NLS-0$
+					div1.innerHTML = newArray(this._marginOffset + 1).join(" "); //$NON-NLS-0$
 					rect2 = div1.getBoundingClientRect();
 					marginWidth = Math.ceil(rect2.right - rect2.left);
 				}
@@ -5941,7 +5948,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				child = this._getLineNext(child);
 			}
 			if (this._lineHeight) {
-				var args = [startLine, removedLineCount].concat(new Array(addedLineCount));
+				var args = [startLine, removedLineCount].concat(newArray(addedLineCount));
 				Array.prototype.splice.apply(this._lineHeight, args);
 			}
 			if (!this._wrapMode) {
@@ -5974,7 +5981,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						this._lineHeight[i] = undefined;
 					}
 				} else {
-					this._lineHeight = new Array(this._model.getLineCount());
+					this._lineHeight = newArray(this._model.getLineCount());
 				}
 				this._calculateLineHeightTimer();
 			} else {
