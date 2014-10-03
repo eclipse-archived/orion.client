@@ -390,7 +390,7 @@ define([
 					}
 					var type = this.lookupQualifiedType(this.scope(target), true);
 					// do not allow augmenting built in types
-					if (!type.$$isBuiltin) {
+					if (type && !type.$$isBuiltin) {
 						// if new type name is not more general than old type, do not replace
 						if (typeContainsProperty(type, name) && typeUtils.leftTypeIsMoreGeneral(typeObj, type[name].typeObj, this)) {
 							// do nuthin
