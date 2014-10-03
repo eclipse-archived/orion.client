@@ -36,6 +36,7 @@
 		"shell/plugins/shellPagePlugin.html":true,
 		"plugins/gitBlamePlugin.html" :true,
 		"cfui/plugins/cFPlugin.html":true,
-		"cfui/plugins/cFDeployPlugin.html":true
+		"cfui/plugins/cFDeployPlugin.html":true,
+		"cfui/plugins/wizards/genericDeploymentWizardPlugin.html":true
 	}
 }
