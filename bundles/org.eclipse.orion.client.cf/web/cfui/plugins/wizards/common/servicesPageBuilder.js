@@ -31,6 +31,7 @@ define(['orion/webui/Wizard'], function(mWizard){
 			
 			this._showMessage = options.showMessage;
 			this._hideMessage = options.hideMessage;
+			this._handleError = options.handleError;
 			this._postError = options.postError;
 		},
 			
@@ -157,7 +158,7 @@ define(['orion/webui/Wizard'], function(mWizard){
 				    	});
 				    	
 			    	}, function(error){
-			    		self._postError(error, self._targetSelection.getSelection());
+			    		self._handleError(error, self._targetSelection.getSelection());
 			    	});
 			    },
 			    

@@ -116,7 +116,10 @@ define(['orion/objects', 'cfui/cfUtil'], function(objects, mCfUtil){
 					var launchConfigurationContent = mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation);
 					postMsg(launchConfigurationContent);
 					
-				}, postError);
+				}, function(error){
+					postError(error, selection);
+				});
+				
 			}, postError);
 		};
 	}

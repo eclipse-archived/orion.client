@@ -6,6 +6,7 @@
 @import "../../../../css/progress.css";
 @import "../../../../css/wizard.css";
 
+
 html, body {
     min-width: 350px;
     overflow: hidden;
@@ -29,31 +30,42 @@ html, body {
     width: calc(100% - 15px);
 }
 
+#messageButton{
+	right: -7px;
+    margin-top: 1px;
+    position: absolute;
+    top: 0;
+}
+
 .Spaces{
 	width: 100%;
 }
 
 select{
 	height: 24px;
-    width: 250px;
+    width: 290px;
     border: 1px solid #bbb;
 }
 
 .selectCell input {
     height: 24px;
-    width: 250px;
+    width: 290px;
     margin-left: 0;
     border: 1px solid #bbb;
 }
 
 .comboTextInputWrapper{
 	height: 24px;
-    width: 250px;
+    width: 290px;
     border: 1px solid #bbb;
 }
 
+.comboTextInputWrapper input{
+	font-size: inherit;	
+}
+
 .comboTextInputField {
-	width: 220px !important;
+	width: 260px !important;
 	height: 24px;
     text-align: left;
     margin-right: 0;
@@ -80,7 +92,7 @@ select{
 
 .listCell select {
 	height: inherit;
-	width: 160px;
+	width: 190px;
 }
 
 #servicesAddRemoveButtonsCol{
@@ -93,14 +105,13 @@ select{
 	padding-top: 2px;
 	position: absolute;
 	text-align: center;
-	width: 100%;
     box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
     background-color: #dff0d8;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-    margin-left: 10%;
+    margin-left: 5%;
     margin-right: auto;
-    width: 80%;
+    width: 90%;
     padding-bottom: 5px;
     padding-left: 5px;
     padding-top: 5px;
@@ -109,6 +120,55 @@ select{
 .messageContainer.showing {
 	display: block;	
 	transition: top 0.7s ease 0s;
+}
+
+.retryFields{
+	margin-top: 5px;
+	text-align: right;
+}
+
+.retryFields label {
+	margin-left: 5px;	
+}
+
+.errorMessage input{
+	border-color: #eed3d7 !important;
+}
+
+.errorMessage button{
+	color: #b94a48 !important;
+}
+
+.errorMessage button:hover{
+	color: #FFFFFF !important;
+}
+
+.messageContainer.errorMessage{
+	background-color: #f2dede !important;
+    border: 1px solid #eed3d7 !important;
+}
+
+.errorMessage, .errorMessage a{
+    color: #b94a48 !important;
+}
+
+.messageLabel a{
+	color: #b94a48;
+	text-decoration: underline;
+}
+
+.messageLabel button{
+	border: none;
+	border-radius: 5px;
+	background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
+	color: #b94a48;
+	font-family: Arial,Helvetica,Myriad,Tahoma,clean,sans-serif,Lucida Sans Unicode,Lucida Grande,Verdana;
+    font-size: 9pt;
+    cursor: pointer;
+}
+
+.messageLabel button:hover{
+	color: #FFFFFF;
 }
 
 .messageLabel {
@@ -127,7 +187,7 @@ select{
 
 #memoryInput{
 	margin-right: 5px;
-    width: 195px;
+    width: 235px;
 }
 
 #memoryUnit{

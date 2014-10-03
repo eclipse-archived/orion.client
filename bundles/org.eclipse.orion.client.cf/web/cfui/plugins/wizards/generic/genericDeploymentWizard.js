@@ -11,10 +11,10 @@
 /*global parent window document define orion setTimeout*/
 
 define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection',
-	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences', 'cfui/cfUtil', 'orion/objects', 'orion/widgets/input/ComboTextInput',
+	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'orion/objects', 'orion/widgets/input/ComboTextInput',
 	'orion/webui/Wizard', 'cfui/plugins/wizards/common/deploymentLogic', 'cfui/plugins/wizards/common/commonPaneBuilder', 'cfui/plugins/wizards/common/corePageBuilder', 
 	'cfui/plugins/wizards/common/servicesPageBuilder', 'cfui/plugins/wizards/common/additionalParamPageBuilder'], 
-		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, URITemplate, PageLinks, Preferences, mCfUtil, objects, ComboTextInput, Wizard,
+		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, URITemplate, PageLinks, Preferences, mFileClient, mCfUtil, objects, ComboTextInput, Wizard,
 				mDeploymentLogic, mCommonPaneBuilder, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder) {
 
 	var cloudManageUrl;
@@ -24,21 +24,64 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 	var postError = mCfUtil.defaultPostError;
 	var closeFrame = mCfUtil.defaultCloseFrame;
 	
+	/* default utils */
+	var parseMessage = mCfUtil.defaultParseMessage;
+	
 	/* status messages */
 	function showMessage(message){
-		document.getElementById('messageLabel').appendChild(document.createTextNode(message));
-		document.getElementById('messageContainer').classList.add("showing"); //$NON-NLS-0$
+		document.getElementById('messageLabel').classList.remove("errorMessage");
+		document.getElementById('messageContainer').classList.remove("errorMessage");
+		lib.empty(document.getElementById('messageText'));
+		
+		document.getElementById('messageText').style.width = "100%";
+		document.getElementById('messageText').appendChild(parseMessage(message));
+		
+		document.getElementById('messageButton').className = "";
+		document.getElementById('messageContainer').classList.add("showing");
 	}
 	
 	function hideMessage(){
-		lib.empty(document.getElementById('messageLabel'));
-		document.getElementById('messageContainer').classList.remove("showing"); //$NON-NLS-0$
+		document.getElementById('messageLabel').classList.remove("errorMessage");
+		document.getElementById('messageContainer').classList.remove("errorMessage");
+		lib.empty(document.getElementById('messageText'));
+		document.getElementById('messageContainer').classList.remove("showing");
+	}
+	
+	function showError(message){
+		document.getElementById('messageLabel').classList.add("errorMessage");
+		document.getElementById('messageContainer').classList.add("errorMessage");
+		lib.empty(document.getElementById('messageText'));
+		
+		document.getElementById('messageText').style.width = "calc(100% - 10px)";
+		document.getElementById('messageText').appendChild(parseMessage(message.Message || message));
+		lib.empty(document.getElementById('messageButton'));
+		
+		document.getElementById('messageButton').className = "dismissButton core-sprite-close imageSprite";
+		document.getElementById('messageButton').onclick = hideMessage;
+		document.getElementById('messageContainer').classList.add("showing");
+	}
+	
+	function _getDefaultTarget(fileClient, resource) {
+		var clientDeferred = new Deferred();
+		fileClient.read(resource.ContentLocation, true).then(
+			function(result){
+				mCfUtil.getDefaultTarget(result).then(
+					clientDeferred.resolve,
+					clientDeferred.reject
+				);
+			}, clientDeferred.reject
+		);
+		
+		return clientDeferred;
 	}
 	
 	mBootstrap.startup().then(function(core) {
 		
 		/* set up initial message */
 		document.getElementById('title').appendChild(document.createTextNode("Configure Application Deployment")); //$NON-NLS-1$//$NON-NLS-0$
+		
+		var msgText = document.getElementById('messageText'); //$NON-NLS-0$
+		var msgButton = document.getElementById('messageButton'); //$NON-NLS-0$
 		
 		/* allow the frame to be closed */
 		document.getElementById('closeDialog').addEventListener('click', closeFrame); //$NON-NLS-1$ //$NON-NLS-0$
@@ -103,21 +146,42 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			relativeFilePath = relativeFilePath.substring(orionHomeUrl.pathname.length);
 			
 		var preferences = new Preferences.PreferencesService(serviceRegistry);
+		var fileClient = new mFileClient.FileClient(serviceRegistry);
+		
+		/* built-in wizard error handler */
+		var handleError = mCfUtil.buildDefaultErrorHandler({
+			cFService : cfService,
+			showMessage : showMessage,
+			hideMessage : hideMessage,
+			showError : showError,
+			render : function(fields){
+				document.getElementById('messageText').appendChild(fields);
+			}
+		});
 		
 		/* deployment plan */
 		var plan = resource.Plan;
 		var manifestApplication = plan.Manifest.applications[0];
 		
-		mCfUtil.getTargets(preferences).then(function(clouds){
+		Deferred.all([
+		     
+		     mCfUtil.getTargets(preferences),
+		     _getDefaultTarget(fileClient, resource)
+		     
+		]).then(function(results){
+			
+			var clouds = results[0];
+			var defaultTarget = results[1];
 			
 			/* init common pane builder */
 			var commonPaneBuilder = new mCommonPaneBuilder.CommonPaneBuilder({
 		    	AppPath : resource.AppPath /* relative application path */
 		    });
-		    
+			
 			/* init core page builder */
 		    var corePageBuilder = new mCorePageBuilder.CorePageBuilder({
 		    	Clouds : clouds,
+		    	DefaultTarget : defaultTarget,
 		    	
 		    	ManifestApplication : manifestApplication,
 		    	serviceRegistry : serviceRegistry,
@@ -125,9 +189,10 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    	
 		    	showMessage : showMessage,
 		    	hideMessage : hideMessage,
+		    	handleError : handleError,
 		    	postError : postError
 		    });
-		    
+			
 		    /* init services page builder */
 		    var servicesPageBuilder = new mServicesPageBuilder.ServicesPageBuilder({
 		    	ManifestServices : manifestApplication.services,
@@ -139,6 +204,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    	
 		    	showMessage : showMessage,
 		    	hideMessage : hideMessage,
+		    	handleError : handleError,
 		    	postError : postError
 		    });
 		    
@@ -159,7 +225,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				commonPane: commonPane,
 				onCancel: closeFrame,
 				buttonNames: { ok: "Deploy" },
-				size: { width: "370px", height: "180px" },
+				size: { width: "420px", height: "180px" },
 				onSubmit: mDeploymentLogic.buildDeploymentTrigger({
 					
 					showMessage : showMessage,
@@ -190,7 +256,6 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			    	AppPath : resource.AppPath
 				})
 			});
-			
 		}, postError);
 	});
 });

@@ -28,13 +28,15 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 		_init : function(options){
 			
 			this._clouds = options.Clouds || [];
+			this._defaultTarget = options.DefaultTarget;
 			this._manifestApplication = options.ManifestApplication;
 			this._serviceRegistry = options.serviceRegistry;
 			this._cfService = options.CFService;
 			
 			this._showMessage = options.showMessage;
 			this._hideMessage = options.hideMessage;
-			this._postError = options.postError;
+			this._handleError = options.handleError;
+			this._postError = options.postError;		
 			
 			/* application list */
 			this._appsList = [];
@@ -80,6 +82,9 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 					option.appendChild(document.createTextNode(org.Name));
 					option.org = org;
 					
+					if (self._defaultTarget && self._defaultTarget.OrgId === org.Guid)
+						option.selected = "selected";
+					
 					self._orgsDropdown.appendChild(option);
 					self._targets[org.Name] = [];
 					
@@ -92,16 +97,17 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 							
 							newTarget.Org = org.Name;
 							newTarget.Space = space.Name;
+							newTarget.SpaceId = space.Guid;
 							self._targets[org.Name].push(newTarget);
 						});
 					}
 				});
-
-				self._loadSpaces(orgs.Orgs[0].Name);
+				
+				self._loadSpaces(self._orgsDropdown.value);
 				self._hideMessage();
 				
 			}, function(error){
-				self._postError(error, target);
+				self._handleError(error, target, function(){ self._loadTargets(target); });
 			});
 		},
 		
@@ -115,6 +121,10 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 				var option = document.createElement("option");
 				option.appendChild(document.createTextNode(target.Space));
 				option.target = target;
+				
+				if (self._defaultTarget && self._defaultTarget.SpaceId === target.SpaceId)
+					option.selected = "selected";
+				
 				self._spacesDropdown.appendChild(option);
 			});
 			
@@ -191,13 +201,17 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 					
 					/* render the clouds field */
 					if (self._clouds.length > 1){
-						document.getElementById("cloudsLabel").appendChild(document.createTextNode("Cloud*:"));
+						document.getElementById("cloudsLabel").appendChild(document.createTextNode("Target*:"));
 						self._cloudsDropdown = document.createElement("select");
 						
 						self._clouds.forEach(function(cloud){
 							var option = document.createElement("option");
 							option.appendChild(document.createTextNode(cloud.Name || cloud.Url));
 							option.cloud = cloud;
+							
+							if (self._defaultTarget && self._defaultTarget.Url === cloud.Url)
+								option.selected = "selected";
+							
 							self._cloudsDropdown.appendChild(option);
 						});
 						
@@ -213,7 +227,7 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 						document.getElementById("clouds").appendChild(self._cloudsDropdown);
 						
 					} else {
-						document.getElementById("cloudsLabel").appendChild(document.createTextNode("Cloud:"));
+						document.getElementById("cloudsLabel").appendChild(document.createTextNode("Target:"));
 						document.getElementById("clouds").appendChild(document.createTextNode(self._clouds[0].Name || self._clouds[0].Url));
 					}
 	
@@ -252,6 +266,7 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 						hasButton: false,
 						hasInputCompletion: true,
 						serviceRegistry: this._serviceRegistry,
+						onRecentEntryDelete: null,
 						defaultRecentEntryProposalProvider: function(onItem){
 							self._appsDeferred.then(function(){
 								
@@ -286,6 +301,7 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 						hasButton: false,
 						hasInputCompletion: true,
 						serviceRegistry: this._serviceRegistry,
+						onRecentEntryDelete: null,
 						defaultRecentEntryProposalProvider: function(onItem){
 							self._routesDeferred.then(function(){
 								
@@ -306,7 +322,9 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 					
 					self._hostInput = self._hostDropdown.getTextInputNode();
 					self._hostInput.value = self._manifestApplication.host || self._manifestApplication.name || "";
-					self._loadTargets(self._clouds[0]);
+					
+					var selectedCloud = self._clouds[self._clouds.length > 1 ? self._cloudsDropdown.selectedIndex : 0];
+					self._loadTargets(selectedCloud);
 			    },
 			    
 			    validate: function(setValid) {

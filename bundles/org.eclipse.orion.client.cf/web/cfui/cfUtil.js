@@ -9,13 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser,amd*/
-define([
-	'i18n!cfui/nls/messages',
-	'orion/Deferred',
-	'orion/i18nUtil',
-	'orion/URITemplate',
-	'orion/PageLinks',
-], function(messages, Deferred, i18nUtil, URITemplate, PageLinks){
+define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URITemplate',
+	'orion/PageLinks', 'orion/urlUtils', 'orion/webui/littlelib'], 
+	function(messages, Deferred, i18nUtil, URITemplate, PageLinks, URLUtil, lib){
 
 	function handleNoCloud(error) {
 		error = error || {};
@@ -84,7 +80,7 @@ define([
 			};
 		},
 		
-		/* ===== WIZARD COMMUNICATION HELPERS ===== */
+		/* ===== WIZARD HELPERS ===== */
 		
 		/**
 		 * Posts the given status message.
@@ -96,9 +92,11 @@ define([
 		},
 		
 		/**
-		 * Posts the given given error.
+		 * Decorates the given error object.
 		 */
-		defaultPostError : function(error, target){
+		defaultDecorateError : function(error, target){
+			error.Severity = "Error";
+			
 			if (error.Message && error.Message.indexOf("The host is taken") === 0)
 				error.Message = "The host is already in use by another application. Please check the host/domain in the manifest file.";
 			
@@ -106,7 +104,8 @@ define([
 				
 				error = {
 					State: "NOT_DEPLOYED",
-					Message: error.Message
+					Message: error.Message,
+					Severity: "Error"
 				};
 				
 			} else if (error.JsonData && error.JsonData.error_code) {
@@ -127,9 +126,113 @@ define([
 				}
 			}
 			
+			return error;
+		},
+		
+		/**
+		 * Posts the given given error.
+		 */
+		defaultPostError : function(error, target){
+			error = this.defaultDecorateError(error, target);
 			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-				 source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
-				 status: error}), "*");
+				source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
+				status: error}), "*");
+		},
+		
+		/**
+		 * Builds a default error handler which handles the given error
+		 * in the wizard without communication with the parent window.
+		 */
+		buildDefaultErrorHandler : function(options){
+			var cFService = options.cFService;
+			
+			var showMessage = options.showMessage;
+			var hideMessage = options.hideMessage;
+			var showError = options.showError;
+			
+			var render = options.render;
+			
+			var self = this;
+			var handleError = function(error, target, retryFunc){
+				error = self.defaultDecorateError(error, target);
+				showError(error);
+				
+				if(error.Retry && error.Retry.parameters){
+					
+					var paramInputs = {};
+					function submitParams(){
+						
+						var params = {};
+						error.Retry.parameters.forEach(function(param){
+							if(param.hidden)
+								params[param.id] = param.value;
+							else
+								params[param.id] = paramInputs[param.id].value;
+						});
+						
+						/* handle login errors */
+						if(params.url && params.user && params.password){
+							showMessage("Logging in to " + params.url + "...");
+							cFService.login(params.url, params.user, params.password).then(function(result){
+								
+								hideMessage();
+								if(retryFunc)
+									retryFunc(result);
+								
+							}, function(newError){
+								hideMessage();
+								if(newError.HttpCode === 401)
+									handleError(error, target, retryFunc);
+								else
+									handleError(newError, target, retryFunc);
+							});
+						}
+					}
+					
+					var fields = document.createElement("div");
+					fields.className = "retryFields";
+					var firstField;
+					
+					error.Retry.parameters.forEach(function(param, i){
+						if(!param.hidden){
+							
+							var div = document.createElement("div");
+							var label = document.createElement("label");
+							label.appendChild(document.createTextNode(param.name));
+							
+							var input = document.createElement("input");
+							if(i===0)
+								firstField = input;
+							
+							input.type = param.type;
+							input.id = param.id;
+							input.onkeydown = function(event){
+								if(event.keyCode === 13)
+									submitParams();
+								else if(event.keyCode === 27)
+									hideMessage();
+							}
+							
+							paramInputs[param.id] = input;
+							div.appendChild(label);
+							div.appendChild(input);
+							fields.appendChild(div);
+						}
+					});
+					
+					var submitButton = document.createElement("button");
+					submitButton.appendChild(document.createTextNode("Submit"));
+					submitButton.onclick = submitParams;
+					
+					fields.appendChild(submitButton);
+					render(fields);
+					
+					if(firstField)
+						firstField.focus();
+				}
+			};
+			
+			return handleError;
 		},
 		
 		/**
@@ -138,6 +241,31 @@ define([
 		defaultCloseFrame : function(){
 			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
 				 source: "org.eclipse.orion.client.cf.deploy.uritemplate", cancelled: true}), "*");
+		},
+		
+		/**
+		 * Parses the given message creating a decorated UI.
+		 */
+		defaultParseMessage : function(msg){
+			var chunks, msgNode;
+			try {
+				chunks = URLUtil.detectValidURL(msg);
+			} catch (e) {
+				/* contained a corrupt URL */
+				chunks = [];
+			}
+			
+			if (chunks.length) {
+				msgNode = document.createDocumentFragment();
+				URLUtil.processURLSegments(msgNode, chunks);
+				
+				/* all status links open in new window */
+				Array.prototype.forEach.call(lib.$$("a", msgNode), function(link) { //$NON-NLS-0$
+					link.target = "_blank"; //$NON-NLS-0$
+				});
+			}
+			
+			return msgNode || document.createTextNode(msg);
 		}
 	};
 });
