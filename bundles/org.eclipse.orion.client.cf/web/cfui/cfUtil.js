@@ -211,7 +211,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 									submitParams();
 								else if(event.keyCode === 27)
 									hideMessage();
-							}
+							};
 							
 							paramInputs[param.id] = input;
 							div.appendChild(label);
