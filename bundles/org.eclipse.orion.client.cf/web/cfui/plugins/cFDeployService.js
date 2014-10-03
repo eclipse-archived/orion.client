@@ -119,12 +119,6 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 				var appName = params.Name;
 				var appPath = launchConf.Path;
 				
-				/* TODO: Move to server side */
-				if(launchConf.ManageUrl){
-					var manageURL = new URL(launchConf.ManageUrl);
-					target.ManageUrl = manageURL.origin;
-				}
-				
 				if(params.user && params.password){
 					cFService.login(target.Url, params.user, params.password).then(
 						function(result){
