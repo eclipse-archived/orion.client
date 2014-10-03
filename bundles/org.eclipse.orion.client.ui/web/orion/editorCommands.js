@@ -26,6 +26,7 @@ define([
 	'orion/extensionCommands',
 	'orion/contentTypes',
 	'orion/searchUtils',
+	'orion/objects',
 	'orion/PageUtil',
 	'orion/PageLinks',
 	'orion/editor/annotations',
@@ -33,7 +34,7 @@ define([
 	'orion/regex',
 	'orion/util',
 	'orion/edit/editorContext'
-], function(messages, i18nUtil, lib, openResource, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, mPageUtil, PageLinks, mAnnotations, blamer, regex, util, EditorContext) {
+], function(messages, i18nUtil, lib, openResource, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, blamer, regex, util, EditorContext) {
 
 	var exports = {};
 	
@@ -514,7 +515,7 @@ define([
 			var actionReferences = serviceRegistry.getServiceReferences("orion.edit.command"); //$NON-NLS-0$
 			var inputManager = this.inputManager;
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-			var handleStatus = handleStatusMessage.bind(serviceRegistry);
+			var handleStatus = handleStatusMessage.bind(null, serviceRegistry);
 			var makeCommand = function(info, service, options) {
 				var commandVisibleWhen = options.visibleWhen;
 				options.visibleWhen = function(item) {
@@ -560,9 +561,17 @@ define([
 							contentType: inputManager.getContentType(),
 							input: inputManager.getInput()
 						};
-						// Hook up delegated UI and Status handling
 						var editorContext = EditorContext.getEditorContext(serviceRegistry);
-						editorContext.openDelegatedUI = createDelegatedUI;
+						// Hook up delegated UI and Status handling
+						editorContext.openDelegatedUI = function(/*options, ..*/) {
+							var options = arguments[0];
+							options = options || {};
+							options.done = processEditorResult;
+							options.status = handleStatus;
+							options.params = options.params || {};
+							objects.mixin(options.params, inputManager.getFileMetadata());
+							createDelegatedUI.apply(null, Array.prototype.slice.call(arguments));
+						};
 						editorContext.setStatus = handleStatus;
 
 						serviceCall = service.execute(editorContext, context);
