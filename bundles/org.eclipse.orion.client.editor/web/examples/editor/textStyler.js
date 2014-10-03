@@ -47,9 +47,9 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 	var singleCommentStyle = {styleClass: "comment"}; //$NON-NLS-0$
 	var multiCommentStyle = {styleClass: "comment"}; //$NON-NLS-0$
 	var docCommentStyle = {styleClass: "comment block documentation"}; //$NON-NLS-0$
-	var htmlMarkupStyle = {styleClass: "keyword other documentation markup"}; //$NON-NLS-0$
+	var htmlMarkupStyle = {styleClass: "meta documentation tag"}; //$NON-NLS-0$
 	var tasktagStyle = {styleClass: "keyword other documentation task"}; //$NON-NLS-0$
-	var doctagStyle = {styleClass: "keyword other documentation tag"}; //$NON-NLS-0$
+	var doctagStyle = {styleClass: "meta documentation annotation"}; //$NON-NLS-0$
 	var stringStyle = {styleClass: "string"}; //$NON-NLS-0$
 	var numberStyle = {styleClass: "constant numeric"}; //$NON-NLS-0$
 	var keywordStyle = {styleClass: "keyword"}; //$NON-NLS-0$

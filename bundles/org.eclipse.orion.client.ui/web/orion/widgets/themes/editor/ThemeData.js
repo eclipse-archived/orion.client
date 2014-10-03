@@ -53,227 +53,1248 @@ define([
 
 		this.styles = [];
 
-		var eclipse = new StyleSet();
+		var eclipse = {
+			name: messages["eclipseThemeName"],
+			className: "eclipse", //$NON-NLS-0$
+			styles: {
+				eclipse: {
+					color: "darkSlateGray", //$NON-NLS-0$
+					fontFamily: defaultFont,
+					fontSize: defaultFontSize,
+					/* from textview.css */
+					textview: {
+						backgroundColor: "white", //$NON-NLS-0$
+					}
+				},
 
-		eclipse.name = messages['eclipseThemeName'];
-		eclipse.annotationRuler = 'white';
-		eclipse.background = 'white';
-		eclipse.comment = 'green';
-		eclipse.keyword = '#7f0055';
-		eclipse.text = 'darkSlateGray';
-		eclipse.string = 'blue';
-		eclipse.overviewRuler = 'white';
-		eclipse.lineNumberOdd = '#444';
-		eclipse.lineNumberEven = '#444';
-		eclipse.lineNumber = '#444';
-		eclipse.currentLine = '#EAF2FE';
-		eclipse.constant = 'blue';
-		eclipse.tag = 'darkorange';
-		eclipse.attribute = 'cadetBlue';
-		eclipse.fontFamily = defaultFont;
-		eclipse.fontSize = defaultFontSize;
-		eclipse.rightRuler = '#DDDDDD';
-		eclipse.leftRuler = '#DDDDDD'; 
+				/* from textview.css */
+				textviewRightRuler: {
+					borderLeft: "1px solid #DDDDDD", //$NON-NLS-0$
+				},
+				textviewLeftRuler: {
+					borderRight: "1px solid #DDDDDD" //$NON-NLS-0$
+				},
 
+				/* from rulers.css */
+				ruler: {
+					backgroundColor: "white" //$NON-NLS-0$
+				},
+				rulerLines: {
+					color: "#444", //$NON-NLS-0$
+				},
+
+				/* from annotations.css */
+				annotationLine: {
+					currentLine: {
+						backgroundColor: "#EAF2FE" //$NON-NLS-0$
+					}
+				},
+
+				/* from textstyler.css */
+				comment: {
+					color: "green", //$NON-NLS-0$
+				},
+				constant: {
+					color: "blue" //$NON-NLS-0$
+				},
+				entity: {
+					name: {
+						color: "#98937B", //$NON-NLS-0$
+						"function": { //$NON-NLS-0$
+							fontWeight: "bold", //$NON-NLS-0$
+							color: "#67BBB8" //$NON-NLS-0$
+						}
+					}
+				},
+				keyword: {
+					control: {
+						color: "#7F0055", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					operator: {
+						color: "#7F0055", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						documentation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						}
+					}
+				},
+				markup: {
+					bold: {
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					heading: {
+						color: "blue" //$NON-NLS-0$
+					},
+					italic: {
+						fontStyle: "italic" //$NON-NLS-0$
+					},
+					list: {
+						color: "#CC4C07" //$NON-NLS-0$
+					},
+					other: {
+						separator: {
+							color: "#00008F" //$NON-NLS-0$
+						},
+						strikethrough: {
+							textDecoration: "line-through" //$NON-NLS-0$
+						},
+						table: {
+							color: "#3C802C" //$NON-NLS-0$
+						}
+					},
+					quote: {
+						color: "#446FBD" //$NON-NLS-0$
+					},
+					raw: {
+						fontFamily: "monospace" //$NON-NLS-0$
+					},
+					underline: {
+						link: {
+							textDecoration: "underline" //$NON-NLS-0$
+						}
+					}
+				},
+				meta: {
+					documentation: {
+						annotation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						},
+						tag: {
+							color: "#7F7F9F" //$NON-NLS-0$
+						}
+					},
+					tag: {
+						color: "darkorange" //$NON-NLS-0$
+					}
+				},
+				string: {
+					color: "blue" //$NON-NLS-0$
+				},
+				variable: {
+					language: {
+						color: "#7F0055", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						color: "#E038AD" //$NON-NLS-0$
+					},
+					parameter: {
+						color: "#D1416F" //$NON-NLS-0$
+					}
+				}
+			}
+		};		
 		this.styles.push(eclipse);
 
-		var prospecto = new StyleSet();
+		var prospecto = {
+			name: messages["prospectoThemeName"],
+			className: "prospecto", //$NON-NLS-0$
+			styles: {
+				prospecto: {
+					color: "#333", //$NON-NLS-0$
+					fontFamily: defaultFont,
+					fontSize: defaultFontSize,
+					/* from textview.css */
+					textview: {
+						backgroundColor: "white", //$NON-NLS-0$
+					}
+				},
 
-		prospecto.name = messages['prospectoThemeName'];
-		prospecto.annotationRuler = 'white';
-		prospecto.background = 'white';
-		prospecto.comment = '#3C802C';
-		prospecto['keyword.control'] = '#CC4C07';
-		prospecto['keyword.operator'] = '#9F4177';
-		prospecto.text = '#333';
-		prospecto.string = '#446FBD';
-		prospecto.overviewRuler = 'white';
-		prospecto.lineNumberOdd = '#CCCCCC';
-		prospecto.lineNumberEven = '#CCCCCC';
-		prospecto.lineNumber = '#CCCCCC';
-		prospecto.currentLine = '#EAF2FE';
-		prospecto.tag = '#CC4C07';
-		prospecto.attribute = 'cadetBlue';
-		prospecto.fontFamily = defaultFont;
-		prospecto.fontSize = defaultFontSize;
-		prospecto.rightRuler = '#EEEEEE';
-		prospecto.leftRuler = '#EEEEEE';
-		prospecto.constant = 'darkOrchid';
+				/* from textview.css */
+				textviewRightRuler: {
+					borderLeft: "1px solid #EEEEEE", //$NON-NLS-0$
+				},
+				textviewLeftRuler: {
+					borderRight: "1px solid #EEEEEE" //$NON-NLS-0$
+				},
 
+				/* from rulers.css */
+				ruler: {
+					backgroundColor: "white" //$NON-NLS-0$
+				},
+				rulerLines: {
+					color: "#CCCCCC", //$NON-NLS-0$
+				},
 
+				/* from annotations.css */
+				annotationLine: {
+					currentLine: {
+						backgroundColor: "#EAF2FE" //$NON-NLS-0$
+					}
+				},
+
+				/* from textstyler.css */
+				comment: {
+					color: "#3C802C", //$NON-NLS-0$
+				},
+				constant: {
+					color: "darkOrchid" //$NON-NLS-0$
+				},
+				entity: {
+					name: {
+						color: "#98937B", //$NON-NLS-0$
+						"function": { //$NON-NLS-0$
+							fontWeight: "bold", //$NON-NLS-0$
+							color: "#67BBB8" //$NON-NLS-0$
+						}
+					}
+				},
+				keyword: {
+					control: {
+						color: "#CC4C07", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					operator: {
+						color: "#9F4177", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						documentation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						}
+					}
+				},
+				markup: {
+					bold: {
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					heading: {
+						color: "blue" //$NON-NLS-0$
+					},
+					italic: {
+						fontStyle: "italic" //$NON-NLS-0$
+					},
+					list: {
+						color: "#CC4C07" //$NON-NLS-0$
+					},
+					other: {
+						separator: {
+							color: "#00008F" //$NON-NLS-0$
+						},
+						strikethrough: {
+							textDecoration: "line-through" //$NON-NLS-0$
+						},
+						table: {
+							color: "#3C802C" //$NON-NLS-0$
+						}
+					},
+					quote: {
+						color: "#446FBD" //$NON-NLS-0$
+					},
+					raw: {
+						fontFamily: "monospace" //$NON-NLS-0$
+					},
+					underline: {
+						link: {
+							textDecoration: "underline" //$NON-NLS-0$
+						}
+					}
+				},
+				meta: {
+					documentation: {
+						annotation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						},
+						tag: {
+							color: "#7F7F9F" //$NON-NLS-0$
+						}
+					},
+					tag: {
+						color: "#CC4C07" //$NON-NLS-0$
+					}
+				},
+				string: {
+					color: "#446FBD" //$NON-NLS-0$
+				},
+				variable: {
+					language: {
+						color: "#7F0055", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						color: "#E038AD" //$NON-NLS-0$
+					},
+					parameter: {
+						color: "#D1416F" //$NON-NLS-0$
+					}
+				}
+			}
+		};
 		this.styles.push(prospecto);
 
-		var darker = new StyleSet();
+		var darker = {
+			name: messages["darkerThemeName"],
+			className: "darker", //$NON-NLS-0$
+			styles: {
+				darker: {
+					color: "#F8F8F2", //$NON-NLS-0$
+					fontFamily: defaultFont,
+					fontSize: defaultFontSize,
+					/* from textview.css */
+					textview: {
+						backgroundColor: "#272822", //$NON-NLS-0$
+					}
+				},
+				
+				/* from textview.css */
+				textviewRightRuler: {
+					borderLeft: "1px solid #272822", //$NON-NLS-0$
+				},
+				textviewLeftRuler: {
+					borderRight: "1px solid #272822" //$NON-NLS-0$
+				},
 
-		darker.name = messages['darkerThemeName'];
-		darker.annotationRuler = '#272822';
-		darker.background = '#272822';
-		darker.comment = '#75715E';
-		darker.keyword = '#52E3F6';
-		darker.text = '#F8F8F2';
-		darker.string = '#F0E383';
-		darker.overviewRuler = '#272822';
-		darker.lineNumberOdd = '#999999';
-		darker.lineNumberEven = '#999999';
-		darker.lineNumber = '#999999';
-		darker.currentLine = '#32322A';
-		darker.tag = 'greenyellow';
-		darker.attribute = '#CFBFAD';
-		darker.fontFamily = defaultFont;
-		darker.fontSize = defaultFontSize;
-		darker.rightRuler = '#272822';
-		darker.leftRuler = '#272822';
-		darker.constant = '#C48CFF';
-		darker.writeOccurrence = 'steelblue';
-		darker.mdheading = 'skyblue';
-		darker['keyword.control'] = 'orangered';
-		darker['keyword.operator'] = '#52E3F6';
+				/* from rulers.css */
+				ruler: {
+					backgroundColor: "#272822" //$NON-NLS-0$
+				},
+				rulerLines: {
+					color: "#999999", //$NON-NLS-0$
+				},
 
+				/* from annotations.css */
+				annotationLine: {
+					currentLine: {
+						backgroundColor: "#32322A" //$NON-NLS-0$
+					}
+				},
+				annotationRange: {
+					writeOccurrence: {
+						backgroundColor: "steelblue" //$NON-NLS-0$
+					}
+				},
+
+				/* from textstyler.css */
+				comment: {
+					color: "#75715E", //$NON-NLS-0$
+				},
+				constant: {
+					color: "#C48CFF" //$NON-NLS-0$
+				},
+				entity: {
+					name: {
+						color: "#98937B", //$NON-NLS-0$
+						"function": { //$NON-NLS-0$
+							fontWeight: "bold", //$NON-NLS-0$
+							color: "#67BBB8" //$NON-NLS-0$
+						}
+					}
+				},
+				keyword: {
+					control: {
+						color: "orangered", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					operator: {
+						color: "#52E3F6", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						documentation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						}
+					}
+				},
+				markup: {
+					bold: {
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					heading: {
+						color: "skyblue" //$NON-NLS-0$
+					},
+					italic: {
+						fontStyle: "italic" //$NON-NLS-0$
+					},
+					list: {
+						color: "#CC4C07" //$NON-NLS-0$
+					},
+					other: {
+						separator: {
+							color: "#00008F" //$NON-NLS-0$
+						},
+						strikethrough: {
+							textDecoration: "line-through" //$NON-NLS-0$
+						},
+						table: {
+							color: "#3C802C" //$NON-NLS-0$
+						}
+					},
+					quote: {
+						color: "#446FBD" //$NON-NLS-0$
+					},
+					raw: {
+						fontFamily: "monospace" //$NON-NLS-0$
+					},
+					underline: {
+						link: {
+							textDecoration: "underline" //$NON-NLS-0$
+						}
+					}
+				},
+				meta: {
+					documentation: {
+						annotation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						},
+						tag: {
+							color: "#7F7F9F" //$NON-NLS-0$
+						}
+					},
+					tag: {
+						color: "greenyellow" //$NON-NLS-0$
+					}
+				},
+				string: {
+					color: "#F0E383" //$NON-NLS-0$
+				},
+				variable: {
+					language: {
+						color: "#7F0055", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						color: "#E038AD" //$NON-NLS-0$
+					},
+					parameter: {
+						color: "#D1416F" //$NON-NLS-0$
+					}
+				}
+			}
+		};		
 		this.styles.push(darker);
 
-		var blue = new StyleSet();
+		var blue = {
+			name: messages["blueThemeName"],
+			className: "blue", //$NON-NLS-0$
+			styles: {
+				blue: {
+					color: "navy", //$NON-NLS-0$
+					fontFamily: defaultFont,
+					fontSize: defaultFontSize,
+					/* from textview.css */
+					textview: {
+						backgroundColor: "aliceBlue", //$NON-NLS-0$
+					}
+				},
 
-		blue.name = messages['blueThemeName'];
-		blue.annotationRuler = 'lavender';
-		blue.background = 'aliceBlue';
-		blue.comment = 'indigo';
-		blue.keyword = 'cornFlowerBlue';
-		blue.text = 'navy';
-		blue.string = 'cornFlowerBlue';
-		blue.overviewRuler = 'lavender';
-		blue.lineNumberOdd = 'darkSlateGray';
-		blue.lineNumberEven = 'darkSlateGray';
-		blue.lineNumber = 'darkSlateGray';
-		blue.currentLine = 'white';
-		blue.tag = 'cornFlowerBlue';
-		blue.attribute = 'cadetBlue';
-		blue.rightRuler = 'white';
-		blue.leftRuler = 'white';
-		blue.fontFamily = defaultFont;
-		blue.fontSize = defaultFontSize;
-		blue.constant = 'blue';
+				/* from textview.css */
+				textviewRightRuler: {
+					borderLeft: "1px solid white", //$NON-NLS-0$
+				},
+				textviewLeftRuler: {
+					borderRight: "1px solid white" //$NON-NLS-0$
+				},
 
+				/* from rulers.css */
+				ruler: {
+					backgroundColor: "lavender" //$NON-NLS-0$
+				},
+				rulerLines: {
+					color: "darkSlateGray", //$NON-NLS-0$
+				},
+
+				/* from annotations.css */
+				annotationLine: {
+					currentLine: {
+						backgroundColor: "white" //$NON-NLS-0$
+					}
+				},
+
+				/* from textstyler.css */
+				comment: {
+					color: "indigo", //$NON-NLS-0$
+				},
+				constant: {
+					color: "blue" //$NON-NLS-0$
+				},
+				entity: {
+					name: {
+						color: "#98937B", //$NON-NLS-0$
+						"function": { //$NON-NLS-0$
+							fontWeight: "bold", //$NON-NLS-0$
+							color: "#67BBB8" //$NON-NLS-0$
+						}
+					}
+				},
+				keyword: {
+					control: {
+						color: "cornFlowerBlue", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					operator: {
+						color: "cornFlowerBlue", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						documentation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						}
+					}
+				},
+				markup: {
+					bold: {
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					heading: {
+						color: "blue" //$NON-NLS-0$
+					},
+					italic: {
+						fontStyle: "italic" //$NON-NLS-0$
+					},
+					list: {
+						color: "#CC4C07" //$NON-NLS-0$
+					},
+					other: {
+						separator: {
+							color: "#00008F" //$NON-NLS-0$
+						},
+						strikethrough: {
+							textDecoration: "line-through" //$NON-NLS-0$
+						},
+						table: {
+							color: "#3C802C" //$NON-NLS-0$
+						}
+					},
+					quote: {
+						color: "#446FBD" //$NON-NLS-0$
+					},
+					raw: {
+						fontFamily: "monospace" //$NON-NLS-0$
+					},
+					underline: {
+						link: {
+							textDecoration: "underline" //$NON-NLS-0$
+						}
+					}
+				},
+				meta: {
+					documentation: {
+						annotation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						},
+						tag: {
+							color: "#7F7F9F" //$NON-NLS-0$
+						}
+					},
+					tag: {
+						color: "cornFlowerBlue" //$NON-NLS-0$
+					}
+				},
+				string: {
+					color: "cornFlowerBlue" //$NON-NLS-0$
+				},
+				variable: {
+					language: {
+						color: "#7F0055", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						color: "#E038AD" //$NON-NLS-0$
+					},
+					parameter: {
+						color: "#D1416F" //$NON-NLS-0$
+					}
+				}
+			}
+		};
 		this.styles.push(blue);
 
-		var ambience = new StyleSet();
+		var ambience = {
+			name: messages["ambienceThemeName"],
+			className: "ambience", //$NON-NLS-0$
+			styles: {
+				ambience: {
+					color: "darkseagreen", //$NON-NLS-0$
+					fontFamily: defaultFont,
+					fontSize: defaultFontSize,
+					/* from textview.css */
+					textview: {
+						backgroundColor: "darkgrey", //$NON-NLS-0$
+					}
+				},
 
-		ambience.name = messages['ambienceThemeName'];
-		ambience.annotationRuler = '#3D3D3D';
-		ambience.background = 'darkgrey';
-		ambience.comment = 'mediumslateblue';
-		ambience.keyword = 'cornFlowerBlue';
-		ambience.text = 'darkseagreen';
-		ambience.string = 'lightcoral';
-		ambience.overviewRuler = 'white';
-		ambience.lineNumberOdd = 'black';
-		ambience.lineNumberEven = 'black';
-		ambience.lineNumber = 'black';
-		ambience.currentLine = 'lightcyan';
-		ambience.tag = 'cornFlowerBlue';
-		ambience.attribute = 'cadetBlue';
-		ambience.rightRuler = '#baa289';
-		ambience.leftRuler = '#baa289';
-		ambience.fontFamily = defaultFont;
-		ambience.fontSize = defaultFontSize;
-		ambience.constant = 'blue';
+				/* from textview.css */
+				textviewRightRuler: {
+					borderLeft: "1px solid #BAA289", //$NON-NLS-0$
+				},
+				textviewLeftRuler: {
+					borderRight: "1px solid #BAA289" //$NON-NLS-0$
+				},
 
+				/* from rulers.css */
+				ruler: {
+					backgroundColor: "#3D3D3D", //$NON-NLS-0$
+					overview: {
+						backgroundColor: "white" //$NON-NLS-0$
+					}
+				},
+				rulerLines: {
+					color: "black", //$NON-NLS-0$
+				},
+
+				/* from annotations.css */
+				annotationLine: {
+					currentLine: {
+						backgroundColor: "lightcyan" //$NON-NLS-0$
+					}
+				},
+
+				/* from textstyler.css */
+				comment: {
+					color: "mediumslateblue", //$NON-NLS-0$
+				},
+				constant: {
+					color: "blue" //$NON-NLS-0$
+				},
+				entity: {
+					name: {
+						color: "#98937B", //$NON-NLS-0$
+						"function": { //$NON-NLS-0$
+							fontWeight: "bold", //$NON-NLS-0$
+							color: "#67BBB8" //$NON-NLS-0$
+						}
+					}
+				},
+				keyword: {
+					control: {
+						color: "cornFlowerBlue", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					operator: {
+						color: "cornFlowerBlue", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						documentation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						}
+					}
+				},
+				markup: {
+					bold: {
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					heading: {
+						color: "blue" //$NON-NLS-0$
+					},
+					italic: {
+						fontStyle: "italic" //$NON-NLS-0$
+					},
+					list: {
+						color: "#CC4C07" //$NON-NLS-0$
+					},
+					other: {
+						separator: {
+							color: "#00008F" //$NON-NLS-0$
+						},
+						strikethrough: {
+							textDecoration: "line-through" //$NON-NLS-0$
+						},
+						table: {
+							color: "#3C802C" //$NON-NLS-0$
+						}
+					},
+					quote: {
+						color: "#446FBD" //$NON-NLS-0$
+					},
+					raw: {
+						fontFamily: "monospace" //$NON-NLS-0$
+					},
+					underline: {
+						link: {
+							textDecoration: "underline" //$NON-NLS-0$
+						}
+					}
+				},
+				meta: {
+					documentation: {
+						annotation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						},
+						tag: {
+							color: "#7F7F9F" //$NON-NLS-0$
+						}
+					},
+					tag: {
+						color: "cornFlowerBlue" //$NON-NLS-0$
+					}
+				},
+				string: {
+					color: "lightcoral" //$NON-NLS-0$
+				},
+				variable: {
+					language: {
+						color: "#7F0055", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						color: "#E038AD" //$NON-NLS-0$
+					},
+					parameter: {
+						color: "#D1416F" //$NON-NLS-0$
+					}
+				}
+			}
+		};
 		this.styles.push(ambience);
 
-		var tierra = new StyleSet();
+		var tierra = {
+			name: messages["tierraThemeName"],
+			className: "tierra", //$NON-NLS-0$
+			styles: {
+				tierra: {
+					color: "#555555", //$NON-NLS-0$
+					fontFamily: defaultFont,
+					fontSize: defaultFontSize,
+					/* from textview.css */
+					textview: {
+						backgroundColor: "lemonchiffon", //$NON-NLS-0$
+					}
+				},
 
-		tierra.name = messages['tierraThemeName'];
-		tierra.annotationRuler = 'moccasin';
-		tierra.background = 'lemonchiffon';
-		tierra.comment = 'darkseagreen';
-		tierra.keyword = 'darkred';
-		tierra.text = '#555555';
-		tierra.string = 'orangered';
-		tierra.overviewRuler = 'moccasin';
-		tierra.lineNumberOdd = 'chocolate';
-		tierra.lineNumberEven = 'chocolate';
-		tierra.lineNumber = 'chocolate';
-		tierra.currentLine = '#baa289';
-		tierra.tag = 'darkred';
-		tierra.attribute = 'cadetBlue';
-		tierra.rightRuler = '#baa289';
-		tierra.leftRuler = '#baa289';
-		tierra.fontFamily = defaultFont;
-		tierra.fontSize = defaultFontSize;
-		tierra.constant = 'blue';
+				/* from textview.css */
+				textviewRightRuler: {
+					borderLeft: "1px solid #BAA289", //$NON-NLS-0$
+				},
+				textviewLeftRuler: {
+					borderRight: "1px solid #BAA289" //$NON-NLS-0$
+				},
 
+				/* from rulers.css */
+				ruler: {
+					backgroundColor: "moccasin" //$NON-NLS-0$
+				},
+				rulerLines: {
+					color: "chocolate", //$NON-NLS-0$
+				},
+
+				/* from annotations.css */
+				annotationLine: {
+					currentLine: {
+						backgroundColor: "#BAA289" //$NON-NLS-0$
+					}
+				},
+
+				/* from textstyler.css */
+				comment: {
+					color: "darkseagreen", //$NON-NLS-0$
+				},
+				constant: {
+					color: "blue" //$NON-NLS-0$
+				},
+				entity: {
+					name: {
+						color: "#98937B", //$NON-NLS-0$
+						"function": { //$NON-NLS-0$
+							fontWeight: "bold", //$NON-NLS-0$
+							color: "#67BBB8" //$NON-NLS-0$
+						}
+					}
+				},
+				keyword: {
+					control: {
+						color: "darkred", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					operator: {
+						color: "darkred", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						documentation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						}
+					}
+				},
+				markup: {
+					bold: {
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					heading: {
+						color: "blue" //$NON-NLS-0$
+					},
+					italic: {
+						fontStyle: "italic" //$NON-NLS-0$
+					},
+					list: {
+						color: "#CC4C07" //$NON-NLS-0$
+					},
+					other: {
+						separator: {
+							color: "#00008F" //$NON-NLS-0$
+						},
+						strikethrough: {
+							textDecoration: "line-through" //$NON-NLS-0$
+						},
+						table: {
+							color: "#3C802C" //$NON-NLS-0$
+						}
+					},
+					quote: {
+						color: "#446FBD" //$NON-NLS-0$
+					},
+					raw: {
+						fontFamily: "monospace" //$NON-NLS-0$
+					},
+					underline: {
+						link: {
+							textDecoration: "underline" //$NON-NLS-0$
+						}
+					}
+				},
+				meta: {
+					documentation: {
+						annotation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						},
+						tag: {
+							color: "#7F7F9F" //$NON-NLS-0$
+						}
+					},
+					tag: {
+						color: "darkred" //$NON-NLS-0$
+					}
+				},
+				string: {
+					color: "orangered" //$NON-NLS-0$
+				},
+				variable: {
+					language: {
+						color: "#7F0055", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						color: "#E038AD" //$NON-NLS-0$
+					},
+					parameter: {
+						color: "#D1416F" //$NON-NLS-0$
+					}
+				}
+			}
+		};
 		this.styles.push(tierra);
 
-		var nimbus = new StyleSet();
 
-		nimbus.name = messages['nimbusThemeName'];
-		nimbus.annotationRuler = '#232323';
-		nimbus.background = '#333333';
-		nimbus.comment = 'darkseagreen';
-		nimbus.keyword = 'darkorange';
-		nimbus.text = '#DDDDDD';
-		nimbus.string = 'cornflowerblue';
-		nimbus.overviewRuler = '#232323';
-		nimbus.lineNumberOdd = '#555555';
-		nimbus.lineNumberEven = '#555555';
-		nimbus.lineNumber = '#555555';
-		nimbus.currentLine = 'dimgrey';
-		nimbus.tag = 'darkorange';
-		nimbus.attribute = 'cadetBlue';
-		nimbus.rightRuler = '#3a3a3a';
-		nimbus.leftRuler = '#3a3a3a';
-		nimbus.fontFamily = defaultFont;
-		nimbus.fontSize = defaultFontSize;
-		nimbus.constant = '#01B199';
-		nimbus.writeOccurrence = 'steelblue';
+		var nimbus = {
+			name: messages["nimbusThemeName"],
+			className: "nimbus", //$NON-NLS-0$
+			styles: {
+				nimbus: {
+					color: "#DDDDDD", //$NON-NLS-0$
+					fontFamily: defaultFont,
+					fontSize: defaultFontSize,
+					/* from textview.css */
+					textview: {
+						backgroundColor: "#333333", //$NON-NLS-0$
+					}
+				},
 
+				/* from textview.css */
+				textviewRightRuler: {
+					borderLeft: "1px solid #3A3A3A", //$NON-NLS-0$
+				},
+				textviewLeftRuler: {
+					borderRight: "1px solid #3A3A3A" //$NON-NLS-0$
+				},
+
+				/* from rulers.css */
+				ruler: {
+					backgroundColor: "#232323" //$NON-NLS-0$
+				},
+				rulerLines: {
+					color: "#555555", //$NON-NLS-0$
+				},
+
+				/* from annotations.css */
+				annotationLine: {
+					currentLine: {
+						backgroundColor: "dimgrey" //$NON-NLS-0$
+					}
+				},
+				annotationRange: {
+					writeOccurrence: {
+						backgroundColor: "steelblue" //$NON-NLS-0$
+					}
+				},
+
+				/* from textstyler.css */
+				comment: {
+					color: "darkseagreen", //$NON-NLS-0$
+				},
+				constant: {
+					color: "#01B199" //$NON-NLS-0$
+				},
+				entity: {
+					name: {
+						color: "#98937B", //$NON-NLS-0$
+						"function": { //$NON-NLS-0$
+							fontWeight: "bold", //$NON-NLS-0$
+							color: "#67BBB8" //$NON-NLS-0$
+						}
+					}
+				},
+				keyword: {
+					control: {
+						color: "darkorange", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					operator: {
+						color: "darkorange", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						documentation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						}
+					}
+				},
+				markup: {
+					bold: {
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					heading: {
+						color: "blue" //$NON-NLS-0$
+					},
+					italic: {
+						fontStyle: "italic" //$NON-NLS-0$
+					},
+					list: {
+						color: "#CC4C07" //$NON-NLS-0$
+					},
+					other: {
+						separator: {
+							color: "#00008F" //$NON-NLS-0$
+						},
+						strikethrough: {
+							textDecoration: "line-through" //$NON-NLS-0$
+						},
+						table: {
+							color: "#3C802C" //$NON-NLS-0$
+						}
+					},
+					quote: {
+						color: "#446FBD" //$NON-NLS-0$
+					},
+					raw: {
+						fontFamily: "monospace" //$NON-NLS-0$
+					},
+					underline: {
+						link: {
+							textDecoration: "underline" //$NON-NLS-0$
+						}
+					}
+				},
+				meta: {
+					documentation: {
+						annotation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						},
+						tag: {
+							color: "#7F7F9F" //$NON-NLS-0$
+						}
+					},
+					tag: {
+						color: "darkorange" //$NON-NLS-0$
+					}
+				},
+				string: {
+					color: "cornflowerblue" //$NON-NLS-0$
+				},
+				variable: {
+					language: {
+						color: "#7F0055", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						color: "#E038AD" //$NON-NLS-0$
+					},
+					parameter: {
+						color: "#D1416F" //$NON-NLS-0$
+					}
+				}
+			}
+		};
 		this.styles.push(nimbus);
 
-		var adelante = new StyleSet();
+		var adelante = {
+			name: messages["adelanteThemeName"],
+			className: "adelante", //$NON-NLS-0$
+			styles: {
+				adelante: {
+					color: "dimgray", //$NON-NLS-0$
+					fontFamily: defaultFont,
+					fontSize: defaultFontSize,
+					/* from textview.css */
+					textview: {
+						backgroundColor: "#F1E7C8", //$NON-NLS-0$
+					}
+				},
 
-		adelante.name = messages['adelanteThemeName'];
-		adelante.annotationRuler = '#E2D2B2';
-		adelante.background = '#F1E7C8';
-		adelante.comment = '#5D774E';
-		adelante.keyword = '#AF473B';
-		adelante.text = 'dimgray';
-		adelante.string = '#DE5D3B';
-		adelante.overviewRuler = '#E2D2B2';
-		adelante.lineNumberOdd = '#AF473B';
-		adelante.lineNumberEven = '#AF473B';
-		adelante.lineNumber = '#AF473B';
-		adelante.currentLine = '#9e937b';
-		adelante.tag = '#AF473B';
-		adelante.attribute = 'cadetBlue';
-		adelante.rightRuler = '#9e937b';
-		adelante.leftRuler = '#9e937b';
-		adelante.fontFamily = defaultFont;
-		adelante.fontSize = defaultFontSize;
-		adelante.constant = 'blue';
+				/* from textview.css */
+				textviewRightRuler: {
+					borderLeft: "1px solid #9E937B", //$NON-NLS-0$
+				},
+				textviewLeftRuler: {
+					borderRight: "1px solid #9E937B" //$NON-NLS-0$
+				},
 
+				/* from rulers.css */
+				ruler: {
+					backgroundColor: "#E2D2B2" //$NON-NLS-0$
+				},
+				rulerLines: {
+					color: "#AF473B", //$NON-NLS-0$
+				},
+
+				/* from annotations.css */
+				annotationLine: {
+					currentLine: {
+						backgroundColor: "#9E937B" //$NON-NLS-0$
+					}
+				},
+
+				/* from textstyler.css */
+				comment: {
+					color: "#5D774E", //$NON-NLS-0$
+				},
+				constant: {
+					color: "blue" //$NON-NLS-0$
+				},
+				entity: {
+					name: {
+						color: "#98937B", //$NON-NLS-0$
+						"function": { //$NON-NLS-0$
+							fontWeight: "bold", //$NON-NLS-0$
+							color: "#67BBB8" //$NON-NLS-0$
+						}
+					}
+				},
+				keyword: {
+					control: {
+						color: "#AF473B", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					operator: {
+						color: "#AF473B", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						documentation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						}
+					}
+				},
+				markup: {
+					bold: {
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					heading: {
+						color: "blue" //$NON-NLS-0$
+					},
+					italic: {
+						fontStyle: "italic" //$NON-NLS-0$
+					},
+					list: {
+						color: "#CC4C07" //$NON-NLS-0$
+					},
+					other: {
+						separator: {
+							color: "#00008F" //$NON-NLS-0$
+						},
+						strikethrough: {
+							textDecoration: "line-through" //$NON-NLS-0$
+						},
+						table: {
+							color: "#3C802C" //$NON-NLS-0$
+						}
+					},
+					quote: {
+						color: "#446FBD" //$NON-NLS-0$
+					},
+					raw: {
+						fontFamily: "monospace" //$NON-NLS-0$
+					},
+					underline: {
+						link: {
+							textDecoration: "underline" //$NON-NLS-0$
+						}
+					}
+				},
+				meta: {
+					documentation: {
+						annotation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						},
+						tag: {
+							color: "#7F7F9F" //$NON-NLS-0$
+						}
+					},
+					tag: {
+						color: "#AF473B" //$NON-NLS-0$
+					}
+				},
+				string: {
+					color: "#DE5D3B" //$NON-NLS-0$
+				},
+				variable: {
+					language: {
+						color: "#7F0055", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						color: "#E038AD" //$NON-NLS-0$
+					},
+					parameter: {
+						color: "#D1416F" //$NON-NLS-0$
+					}
+				}
+			}
+		};
 		this.styles.push(adelante);
 
-		var raspberry = new StyleSet();
+		var raspberry = {
+			name: messages["raspberryPiThemeName"],
+			className: "raspberry", //$NON-NLS-0$
+			styles: {
+				raspberry: {
+					color: "dimgray", //$NON-NLS-0$
+					fontFamily: defaultFont,
+					fontSize: defaultFontSize,
+					/* from textview.css */
+					textview: {
+						backgroundColor: "seashell", //$NON-NLS-0$
+					}
+				},
 
-		raspberry.name = messages['raspberryPiThemeName'];
-		raspberry.annotationRuler = 'seashell';
-		raspberry.background = 'seashell';
-		raspberry.comment = '#66B32F';
-		raspberry.keyword = '#E73E36';
-		raspberry.text = 'dimgray';
-		raspberry.string = 'darkorange';
-		raspberry.overviewRuler = 'seashell';
-		raspberry.lineNumberOdd = '#f6b8b6';
-		raspberry.lineNumberEven = '#f6b8b6';
-		raspberry.lineNumber = '#E73E36';
-		raspberry.currentLine = '#F5B1AE';
-		raspberry.tag = '#E73E36';
-		raspberry.attribute = 'cadetBlue';
-		raspberry.rightRuler = '#fbdfde';
-		raspberry.leftRuler = '#fbdfde';
-		raspberry.fontFamily = defaultFont;
-		raspberry.fontSize = defaultFontSize;
-		raspberry.constant = 'blue';
+				/* from textview.css */
+				textviewRightRuler: {
+					borderLeft: "1px solid #FBDFDE", //$NON-NLS-0$
+				},
+				textviewLeftRuler: {
+					borderRight: "1px solid #FBDFDE" //$NON-NLS-0$
+				},
 
+				/* from rulers.css */
+				ruler: {
+					backgroundColor: "seashell" //$NON-NLS-0$
+				},
+				rulerLines: {
+					color: "#E73E36", //$NON-NLS-0$
+					even: {
+						color: "#F6B8B6", //$NON-NLS-0$
+					},
+					odd: {
+						color: "#F6B8B6", //$NON-NLS-0$
+					}
+				},
+
+				/* from annotations.css */
+				annotationLine: {
+					currentLine: {
+						backgroundColor: "#F5B1AE" //$NON-NLS-0$
+					}
+				},
+
+				/* from textstyler.css */
+				comment: {
+					color: "#66B32F", //$NON-NLS-0$
+				},
+				constant: {
+					color: "blue" //$NON-NLS-0$
+				},
+				entity: {
+					name: {
+						color: "#98937B", //$NON-NLS-0$
+						"function": { //$NON-NLS-0$
+							fontWeight: "bold", //$NON-NLS-0$
+							color: "#67BBB8" //$NON-NLS-0$
+						}
+					}
+				},
+				keyword: {
+					control: {
+						color: "#E73E36", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					operator: {
+						color: "#E73E36", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						documentation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						}
+					}
+				},
+				markup: {
+					bold: {
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					heading: {
+						color: "blue" //$NON-NLS-0$
+					},
+					italic: {
+						fontStyle: "italic" //$NON-NLS-0$
+					},
+					list: {
+						color: "#CC4C07" //$NON-NLS-0$
+					},
+					other: {
+						separator: {
+							color: "#00008F" //$NON-NLS-0$
+						},
+						strikethrough: {
+							textDecoration: "line-through" //$NON-NLS-0$
+						},
+						table: {
+							color: "#3C802C" //$NON-NLS-0$
+						}
+					},
+					quote: {
+						color: "#446FBD" //$NON-NLS-0$
+					},
+					raw: {
+						fontFamily: "monospace" //$NON-NLS-0$
+					},
+					underline: {
+						link: {
+							textDecoration: "underline" //$NON-NLS-0$
+						}
+					}
+				},
+				meta: {
+					documentation: {
+						annotation: {
+							color: "#7F9FBF" //$NON-NLS-0$
+						},
+						tag: {
+							color: "#7F7F9F" //$NON-NLS-0$
+						}
+					},
+					tag: {
+						color: "#E73E36" //$NON-NLS-0$
+					}
+				},
+				string: {
+					color: "darkorange" //$NON-NLS-0$
+				},
+				variable: {
+					language: {
+						color: "#7F0055", //$NON-NLS-0$
+						fontWeight: "bold" //$NON-NLS-0$
+					},
+					other: {
+						color: "#E038AD" //$NON-NLS-0$
+					},
+					parameter: {
+						color: "#D1416F" //$NON-NLS-0$
+					}
+				}
+			}
+		};
 		this.styles.push(raspberry);
 
 		}
@@ -719,14 +1740,14 @@ define([
 		ThemeData.prototype.parseToXML = parseToXML;
 		
 		function selectFontSize( size ){
-			console.log( 'fontsize: ' + size );
+			window.console.log( 'fontsize: ' + size );
 		}
 		
 		ThemeData.prototype.selectFontSize = selectFontSize;
 		
 		function importTheme(data){
-			console.log( 'import theme' );
-			console.log( data );
+			window.console.log( 'import theme' );
+			window.console.log( data );
 			
 			var body = data.parameters.valueFor("name");
 				
@@ -752,7 +1773,7 @@ define([
 		
 		ThemeData.prototype.importTheme = importTheme;
 		
-		function processSettings( settings, preferences ){
+		function processSettings(settings, preferences){
 			var themeClass = "editorTheme";
 			var theme = mTextTheme.TextTheme.getTheme();
 			theme.setThemeClass(themeClass, theme.buildStyleSheet(themeClass, settings));

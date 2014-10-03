@@ -47,10 +47,10 @@ define("orion/editor/stylers/lib/syntax", [], function() { //$NON-NLS-0$
 					patterns: [
 						{
 							match: "@(?:(?!\\*/)\\S)*", //$NON-NLS-0$
-							name: "keyword.other.documentation.tag" //$NON-NLS-0$
+							name: "meta.documentation.annotation" //$NON-NLS-0$
 						}, {
 							match: "\\<\\S*\\>", //$NON-NLS-0$
-							name: "keyword.other.documentation.markup" //$NON-NLS-0$
+							name: "meta.documentation.tag" //$NON-NLS-0$
 						}, {
 							match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)", //$NON-NLS-0$
 							name: "meta.annotation.task.todo", //$NON-NLS-0$

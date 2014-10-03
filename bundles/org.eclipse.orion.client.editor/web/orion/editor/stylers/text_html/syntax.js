@@ -22,8 +22,8 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 				begin: "(?i)(<style)([^>]*)(>)", //$NON-NLS-0$
 				end: "(?i)(</style>)", //$NON-NLS-0$
 				captures: {
-					1: {name: "entity.name.tag.html"}, //$NON-NLS-0$
-					3: {name: "entity.name.tag.html"} //$NON-NLS-0$
+					1: {name: "meta.tag.html"}, //$NON-NLS-0$
+					3: {name: "meta.tag.html"} //$NON-NLS-0$
 				},
 				contentName: "source.css.embedded.html", //$NON-NLS-0$
 				patterns: [
@@ -33,7 +33,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 				begin: "(?i)<script\\s*>|<script\\s.*?(?:language\\s*=\\s*(['\"])javascript\\1|type\\s*=\\s*(['\"])(?:text|application)/(?:javascript|ecmascript)\\2).*?>", //$NON-NLS-0$
 				end: "(?i)</script>", //$NON-NLS-0$
 				captures: {
-					0: {name: "entity.name.tag.html"} //$NON-NLS-0$
+					0: {name: "meta.tag.html"} //$NON-NLS-0$
 				},
 				contentName: "source.js.embedded.html", //$NON-NLS-0$
 				patterns: [
