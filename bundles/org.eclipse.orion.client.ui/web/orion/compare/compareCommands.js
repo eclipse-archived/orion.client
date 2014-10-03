@@ -11,8 +11,8 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['i18n!orion/compare/nls/messages', 'orion/commands', 'orion/keyBinding', 'orion/webui/littlelib', 'orion/EventTarget'], 
-function(messages, mCommands, mKeyBinding, lib, EventTarget) {
+define(['i18n!orion/compare/nls/messages', 'orion/commands', 'orion/Deferred', 'orion/keyBinding', 'orion/webui/littlelib', 'orion/EventTarget'], 
+function(messages, mCommands, Deferred, mKeyBinding, lib, EventTarget) {
 
 var exports = {};
 /**
@@ -108,6 +108,17 @@ exports.CompareCommandFactory = (function() {
 					toggleInline2WayCommand.name = is2Way ? messages["Unified"] : messages["Side by side"];
 					toggleInline2WayCommand.tooltip = is2Way ? messages["Switch to unified diff"] :  messages["Switch to side by side diff"];
 					return true;
+				},
+				preCallback: function(data) {
+					var widget = data.handler.getWidget();
+					if(typeof widget.options.onSave === "function" && widget.isDirty()) { //$NON-NLS-0$
+						var doSave = window.confirm(messages.confirmUnsavedChanges);
+						if(!doSave) {
+							return new Deferred().resolve();
+						}
+						return widget.options.onSave(doSave);
+					}
+					return new Deferred().resolve(true);
 				},
 				callback : function(data) {
 					this.dispatchEvent({type:"compareConfigChanged", name: "mode", value: data.items.options.toggler.getWidget().type === "twoWay" ? "inline" : "twoWay"}); //$NON-NLS-0$

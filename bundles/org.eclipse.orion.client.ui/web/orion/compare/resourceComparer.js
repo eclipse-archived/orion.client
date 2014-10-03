@@ -468,15 +468,7 @@ exports.ResourceComparer = (function() {
 				});
 				return Deferred.all(promises);
 			} else {
-				this._inputManagers.forEach(function(inputManager) {
-					if(inputManager.manager){
-						var editor = inputManager.manager.getEditor();
-						if(editor.isDirty()) {
-							inputManager.manager.setDirty(false);
-						}
-					}
-				});
-				return new Deferred().resolve(true);
+				return new Deferred().resolve();
 			}
 	    },
 		isDirty: function(){

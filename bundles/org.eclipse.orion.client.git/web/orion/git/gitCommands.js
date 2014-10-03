@@ -63,6 +63,15 @@ var exports = {};
 		}
 	}
 	
+	function preCallback(action, data) {
+		var evt = {type: "modelChanging", action: action};
+		dispatchModelEventOn(evt); //$NON-NLS-1$ //$NON-NLS-0$
+		if(evt.preCallback) {
+			return evt.preCallback();
+		}
+		return  new Deferred().resolve(true);
+	}
+	
 	exports.updateNavTools = function(registry, commandRegistry, explorer, toolbarId, selectionToolbarId, item, pageNavId) {
 		var toolbar = lib.node(toolbarId);
 		if (toolbar) {
@@ -1617,6 +1626,9 @@ var exports = {};
 			id : "eclipse.orion.git.applyPatch", //$NON-NLS-0$
 			imageClass: "git-sprite-apply-patch", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			preCallback: function(data) {
+				return preCallback("applyPatch", data);
+			},
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
 				var deferred = new Deferred();
@@ -1789,6 +1801,9 @@ var exports = {};
 			name: messages["Commit"], //$NON-NLS-0$
 			tooltip: messages["Commit"], //$NON-NLS-0$
 			id: "eclipse.orion.git.commitCommand", //$NON-NLS-0$
+			preCallback: function(data) {
+				return preCallback("commit", data);
+			},
 			callback: function(data) {
 				commitCallback(data).then(function() {
 					dispatchModelEventOn({type: "modelChanged", action: "commit"}); //$NON-NLS-1$ //$NON-NLS-0$
@@ -1806,6 +1821,9 @@ var exports = {};
 			tooltip: messages['ResetBranchDiscardChanges'],
 			imageClass: "core-sprite-refresh", //$NON-NLS-0$
 			id: "eclipse.orion.git.resetCommand", //$NON-NLS-0$
+			preCallback: function(data) {
+				return preCallback("reset", data);
+			},
 			callback: function(data) {
 				var item = data.items;
 				
@@ -1845,6 +1863,9 @@ var exports = {};
 			tooltip: messages["CheckoutSelectedFiles"],
  			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.orion.git.checkoutCommand", //$NON-NLS-0$
+			preCallback: function(data) {
+				return preCallback("checkoutFile", data);
+			},
 			callback: function(data) {				
 				var items = forceArray(data.items);
 				
@@ -1895,6 +1916,9 @@ var exports = {};
 			tooltip: messages["CheckoutSelectedFiles"],
  			imageClass: "core-sprite-trashcan", //$NON-NLS-0$
 			id: "eclipse.orion.git.checkoutStagedCommand", //$NON-NLS-0$
+			preCallback: function(data) {
+				return preCallback("checkoutFile", data);
+			},
 			callback: function(data) {				
 				var dialog = serviceRegistry.getService("orion.page.dialog"); //$NON-NLS-0$
 				dialog.confirm(messages["CheckoutConfirm"],
@@ -1938,6 +1962,9 @@ var exports = {};
 			imageClass: "git-sprite-checkout", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id: "eclipse.orion.git.ignoreCommand", //$NON-NLS-0$
+			preCallback: function(data) {
+				return preCallback("ignoreFile", data);
+			},
 			callback: function(data) {
 				
 				var items = data.items;
@@ -2223,6 +2250,9 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			tooltip : messages["Stash all current changes away"],
 			id : "eclipse.orion.git.createStash", //$NON-NLS-0$
+			preCallback: function(data) {
+				return preCallback("stash", data);
+			},
 			callback : function(data){
 				stashLogic.stashAll(data).then(function(){
 					dispatchModelEventOn({type: "modelChanged", action: "stash"}); //$NON-NLS-1$ //$NON-NLS-0$
@@ -2258,6 +2288,9 @@ var exports = {};
 			name : messages["Apply"],
 			tooltip : messages["Apply the change introduced by the commit to your active branch"],
 			id : "eclipse.orion.git.applyStash", //$NON-NLS-0$
+			preCallback: function(data) {
+				return preCallback("applyStash", data);
+			},
 			callback : function(data){
 				stashLogic.apply(data).then(function(){
 					dispatchModelEventOn({type: "modelChanged", action: "applyStash"}); //$NON-NLS-1$ //$NON-NLS-0$
@@ -2278,6 +2311,9 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			tooltip : messages["Apply the most recently stashed change to your active branch and drop it from the stashes"],
 			id : "eclipse.orion.git.popStash", //$NON-NLS-0$
+			preCallback: function(data) {
+				return preCallback("popStash", data);
+			},
 			callback : function(data){
 				stashLogic.pop(data).then(function(){
 					dispatchModelEventOn({type: "modelChanged", action: "popStash"}); //$NON-NLS-1$ //$NON-NLS-0$

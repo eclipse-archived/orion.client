@@ -355,6 +355,22 @@ define([
 				break;
 			}
 		}.bind(this));
+		mGitCommands.getModelEventDispatcher().addEventListener("modelChanging", this._modelChangingListener = function(event) { //$NON-NLS-0$
+			switch (event.action) {
+			case "commit": //$NON-NLS-0$
+			case "stash": //$NON-NLS-0$
+			case "reset": //$NON-NLS-0$
+			case "applyPatch":  //$NON-NLS-0$
+			//case "stage": //$NON-NLS-0$
+			//case "unstage": //$NON-NLS-0$
+			case "checkoutFile": //$NON-NLS-0$
+			case "applyStash": //$NON-NLS-0$
+			case "popStash": //$NON-NLS-0$
+			case "ignoreFile": //$NON-NLS-0$
+				event.preCallback = this.unhookCompareWidget.bind(this);
+				break;
+			}
+		}.bind(this));
 	}
 	GitChangeListExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(GitChangeListExplorer.prototype, /** @lends orion.git.GitChangeListExplorer.prototype */ {
@@ -388,6 +404,10 @@ define([
 				mGitCommands.getModelEventDispatcher().removeEventListener("modelChanged", this._modelListener); //$NON-NLS-0$
 				this._modelListener = null;
 			}
+			if (this._modelChangingListener) {
+				mGitCommands.getModelEventDispatcher().removeEventListener("modelChanged", this._modelChangingListener); //$NON-NLS-0$
+				this._modelChangingListener = null;
+			}
 			if (this._selectionListener) {
 				this.selection.removeEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
 				this._selectionListener = null;
@@ -395,13 +415,13 @@ define([
 			mExplorer.Explorer.prototype.destroy.call(this);
 		},
 		//This function is called when any of the compare widgets in the explorer are hooked up and need to be unhooked
-		saveAll: function() {
+		unhookCompareWidget: function() {
 			if(!this.model.root) {
-				return new Deferred().resolve();
+				return new Deferred().resolve(true);
 			}
 			var modelList = this.model.root.children || this.model.root.Children;
 			if(!modelList) {
-				return new Deferred().resolve();
+				return new Deferred().resolve(true);
 			}
 			var isDirty = modelList.some( function(child) {
 				if(child.children && child.children.length === 1 && child.children[0].resourceComparer && child.children[0].resourceComparer.isDirty()) {
@@ -410,6 +430,9 @@ define([
 			});
 			if(isDirty) {
 				var doSave = window.confirm(messages.confirmUnsavedChanges);
+				if(!doSave) {
+					return new Deferred().resolve();
+				}
 				var promises = [];
 				modelList.forEach( function(child) {
 					if(child.children && child.children.length === 1 && child.children[0].resourceComparer && child.children[0].resourceComparer.isDirty() && child.children[0].resourceComparer.save) {
@@ -418,12 +441,12 @@ define([
 				});				
 				return Deferred.all(promises);
 			} else {
-				return new Deferred().resolve();
+				return new Deferred().resolve(true);
 			}
 		},
 		//This function is called when the collapseAll command is excuted.
 		preCollapseAll: function() {
-			return this.saveAll();
+			return this.unhookCompareWidget();
 		},
 		display: function() {
 			var that = this;
@@ -445,10 +468,13 @@ define([
 				setFocus: false, // do not steal focus on load
 				preCollapse: function(rowItem) {
 					if(rowItem && rowItem.children && rowItem.children.length === 1 && rowItem.children[0].resourceComparer) {
-						var doSave = rowItem.children[0].resourceComparer.isDirty() && window.confirm(messages.confirmUnsavedChanges);
+						if(!rowItem.children[0].resourceComparer.isDirty()) {
+							return new Deferred().resolve(true);
+						}
+						var doSave = window.confirm(messages.confirmUnsavedChanges);
 						return rowItem.children[0].resourceComparer.save(doSave);
 					}
-					return new Deferred().resolve();
+					return new Deferred().resolve(true);
 				},
 				onComplete: function(tree) {
 					var model = that.model;
@@ -1070,7 +1096,10 @@ define([
 			}
 		},
 		onCheckedFunc: function(rowId, checked, manually, item) {
-			this.explorer.saveAll().then(function() {
+			this.explorer.unhookCompareWidget().then(function(result) {
+				if(!result) {
+					return;
+				}
 				if (item.Type === "ExplorerSelection") { //$NON-NLS-0$
 					if (checked) {
 						this.explorer.commandService.runCommand("orion.explorer.selectAllCommandChangeList", this.explorer, this.explorer); //$NON-NLS-0$

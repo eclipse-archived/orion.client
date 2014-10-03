@@ -450,24 +450,45 @@ define([
 				var done = function() {onClick.call(commandInvocation.handler, commandInvocation);};
 				command.onClick = onClick;
 				clickTarget.addEventListener("click", function(e) { //$NON-NLS-0$
+					var onClickThen;
 					if (command.type === "switch" || command.type === "toggle") { //$NON-NLS-1$ //$NON-NLS-0$
-						if (command.type === "toggle") { //$NON-NLS-0$
-							command.checked = !command.checked;
-							if (command.checked) {
-								element.classList.remove("orionToggleOff"); //$NON-NLS-0$
-								element.classList.add("orionToggleOn"); //$NON-NLS-0$
-								element.classList.add("orionToggleAnimate"); //$NON-NLS-0$
-							} else {
-								element.classList.remove("orionToggleOn"); //$NON-NLS-0$
-								element.classList.add("orionToggleOff"); //$NON-NLS-0$
-								element.classList.add("orionToggleAnimate"); //$NON-NLS-0$
+						onClickThen = function (doIt) {
+							if (command.type === "toggle") { //$NON-NLS-0$
+								if(doIt) {
+									command.checked = !command.checked;
+								}
+								if (command.checked) {
+									element.classList.remove("orionToggleOff"); //$NON-NLS-0$
+									element.classList.add("orionToggleOn"); //$NON-NLS-0$
+									element.classList.add("orionToggleAnimate"); //$NON-NLS-0$
+								} else {
+									element.classList.remove("orionToggleOn"); //$NON-NLS-0$
+									element.classList.add("orionToggleOff"); //$NON-NLS-0$
+									element.classList.add("orionToggleAnimate"); //$NON-NLS-0$
+								}
+							}else {
+								if(doIt) {
+									command.checked = input.checked;
+								} else {
+									input.checked = !input.checked;
+								}
 							}
-						}else {
-							command.checked = input.checked;
-						}
-						window.setTimeout(done, 250);
+							if(doIt) {
+								window.setTimeout(done, 250);
+							}
+						};
 					} else {
-						done();
+						onClickThen = function (doIt) { if(doIt) {
+								done();
+							}
+						};
+					}
+					if(command.preCallback) {
+						command.preCallback(commandInvocation).then( function(doIt) {
+							onClickThen(doIt);
+						});
+					} else {
+						onClickThen(true);
 					}
 					e.stopPropagation();
 				}, false);
@@ -690,6 +711,7 @@ define([
 			this.name = options.name;
 			this.tooltip = options.tooltip;
 			this.callback = options.callback; // optional callback that should be called when command is activated (clicked)
+			this.preCallback = options.preCallback; // optional callback that should be called when command is activated (clicked)
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
 														// A choice is an object with a name, callback, and optional image

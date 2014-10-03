@@ -334,7 +334,10 @@ exports.createExplorerCommands = function(commandService, visibleWhen) {
 		},
 		callback : function(data) {
 			if(typeof data.items.preCollapseAll === "function") { //$NON-NLS-0$
-				data.items.preCollapseAll().then(function (){
+				data.items.preCollapseAll().then(function (result){
+					if(!result) {
+						return;
+					}
 					data.items.collapseAll();
 				});
 			} else {
