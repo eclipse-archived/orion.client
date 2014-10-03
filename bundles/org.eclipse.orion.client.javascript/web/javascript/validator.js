@@ -135,9 +135,17 @@ define([
 		    descriptionArgs: e.args,
 			description: e.message,
 			severity: getSeverity(e),
-			start: start,
-			end: end
 		};
+		if(typeof(start) !== 'undefined') {
+		    prob.start = start;
+		    prob.end = end;
+		} else if(typeof(e.lineNumber) !== 'undefined') {
+		    prob.line = e.lineNumber;
+		    prob.start = e.column;
+		} else {
+		    prob.start = 0;
+		    prob.end = 0;
+		}
 		if(e.opts && e.opts.args) {
 		    prob.problemArgs = e.opts.args;
 		}
@@ -166,17 +174,6 @@ define([
 					else if(ast.tokens.length > 0) {
 						//error object did not contain the token infos, try to find it
 						token = Finder.findToken(error.index, ast.tokens);	
-					} else {
-					    //no tokens means something bad happened, just forward the parse error
-					    //with some infos tacked on
-					    error.start = 0;
-					    error.end = 0;
-					    error.args = {0: error.message, nls: 'esprimaParseFailure'};
-					    errors.push(error);
-					}
-					if(!token) {
-						//failed to compute it, continue
-						continue;
 					}
 					var msg = error.message;
 					if(errorMap[error.index] === msg) {
@@ -186,16 +183,27 @@ define([
 					if(error.type) {
 						switch(error.type) {
 							case ASTManager.ErrorTypes.Unexpected:
-								error.args = {0: token.value, nls: "syntaxErrorBadToken"}; //$NON-NLS-0$
-								error.message = msg = error.args.nls;
+							    if(token) {
+    								error.args = {0: token.value, nls: "syntaxErrorBadToken"}; //$NON-NLS-0$
+    								error.message = msg = error.args.nls;
+								}
 								break;
 							case ASTManager.ErrorTypes.EndOfInput:
 								error.args = {nls: "syntaxErrorIncomplete"}; //$NON-NLS-0$
 								error.message = error.args.nls;
 								break;
 						}
+					} else if(!token) {
+					    //an untyped error with no tokens, report the failure
+					    error.args = {0: error.message, nls: 'esprimaParseFailure'};
+					    error.message = error.args.nls;
+					    //use the line number / column
+				       delete error.start;
+				       delete error.end;
 					}
-					error.node = token;
+					if(token) {
+					   error.node = token;
+					}
 					errors.push(error);
 				}
 			}
