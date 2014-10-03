@@ -10,11 +10,10 @@
  ******************************************************************************/
 /*global parent window document define orion setTimeout*/
 
-define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection',
-	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'orion/objects', 'orion/widgets/input/ComboTextInput', 'orion/i18nUtil',
+define(["orion/bootstrap", 'orion/Deferred', 'orion/selection', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'cfui/plugins/wizards/common/errorUtils', 'orion/i18nUtil',
 	'orion/webui/Wizard', 'cfui/plugins/wizards/common/deploymentLogic', 'cfui/plugins/wizards/common/commonPaneBuilder', 'cfui/plugins/wizards/common/corePageBuilder', 
 	'cfui/plugins/wizards/common/servicesPageBuilder', 'cfui/plugins/wizards/common/additionalParamPageBuilder'], 
-		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, URITemplate, PageLinks, Preferences, mFileClient, mCfUtil, objects, ComboTextInput, i18nUtil, Wizard,
+		function(mBootstrap, Deferred, mSelection, CFClient, PageUtil, PageLinks, Preferences, mFileClient, mCfUtil, mErrorUtils, i18nUtil, Wizard,
 				mDeploymentLogic, mCommonPaneBuilder, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder) {
 	
 	/* plugin-host communication */
@@ -22,43 +21,10 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 	var postError = mCfUtil.defaultPostError;
 	var closeFrame = mCfUtil.defaultCloseFrame;
 	
-	/* default utils */
-	var parseMessage = mCfUtil.defaultParseMessage;
-	
 	/* status messages */
-	/* status messages */
-	function showMessage(message){
-		document.getElementById('messageLabel').classList.remove("errorMessage");
-		document.getElementById('messageContainer').classList.remove("errorMessage");
-		lib.empty(document.getElementById('messageText'));
-		
-		document.getElementById('messageText').style.width = "100%";
-		document.getElementById('messageText').appendChild(parseMessage(message));
-		
-		document.getElementById('messageButton').className = "";
-		document.getElementById('messageContainer').classList.add("showing");
-	}
-	
-	function hideMessage(){
-		document.getElementById('messageLabel').classList.remove("errorMessage");
-		document.getElementById('messageContainer').classList.remove("errorMessage");
-		lib.empty(document.getElementById('messageText'));
-		document.getElementById('messageContainer').classList.remove("showing");
-	}
-	
-	function showError(message){
-		document.getElementById('messageLabel').classList.add("errorMessage");
-		document.getElementById('messageContainer').classList.add("errorMessage");
-		lib.empty(document.getElementById('messageText'));
-		
-		document.getElementById('messageText').style.width = "calc(100% - 10px)";
-		document.getElementById('messageText').appendChild(parseMessage(message.Message || message));
-		lib.empty(document.getElementById('messageButton'));
-		
-		document.getElementById('messageButton').className = "dismissButton core-sprite-close imageSprite";
-		document.getElementById('messageButton').onclick = hideMessage;
-		document.getElementById('messageContainer').classList.add("showing");
-	}
+	var showMessage = mErrorUtils.defaultShowMessage;
+	var hideMessage = mErrorUtils.defaultHideMessage;
+	var showError = mErrorUtils.defaultShowError;
 	
 	function _getDefaultTarget(fileClient, resource) {
 		var clientDeferred = new Deferred();
