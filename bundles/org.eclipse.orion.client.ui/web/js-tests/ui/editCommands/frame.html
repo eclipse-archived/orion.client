@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<title>Delegated UI test fame</title>
+</head>
+<body>
+<script>
+	/*eslint-env browser*/
+	/*global console */
+
+	function parseQuery() {
+		var query = window.location.search.substr(1).split("&");
+		var params = Object.create(null);
+		for (var i=0; i < query.length; i++) {
+			var name = query[i], match = /(.*)=(.*)$/.exec(name);
+			if (match) {
+				params[match[1]] = match[2];
+			} else {
+				params[name] = null;
+			}
+		}
+		return params;
+	}
+
+	var params = parseQuery();
+	var action = params.action, source = params.source;
+	if (action === "status") {
+		window.parent.postMessage(JSON.stringify({
+			pageService: "orion.page.delegatedUI",
+			source: source,
+			Status: {
+				Message: params.message
+			}
+		}), "*");
+	} else if (action === "close") {
+		window.parent.postMessage(JSON.stringify({
+			pageService: "orion.page.delegatedUI",
+			source: source,
+			cancelled: true
+		}), "*");
+	}
+</script>
+</body>
+</html>

@@ -236,6 +236,19 @@ define([
 		getText: function(start, end) {
 			return this._model.getText(start, end);
 		},
+		setSelection: function (start, end, show, callback) {
+			var caret = start > end;
+			if (caret) {
+				var tmp = start;
+				start = end;
+				end = tmp;
+			}
+			var charCount = this._model.getCharCount();
+			start = Math.max(0, Math.min (start, charCount));
+			end = Math.max(0, Math.min (end, charCount));
+			var selection = new Selection(start, end, caret);
+			this._setSelection(selection, show === undefined || show, true, callback);
+		},
 		setText: function(text, start, end) {
 			var reset = start === undefined && end === undefined;
 			if (start === undefined) { start = 0; }
