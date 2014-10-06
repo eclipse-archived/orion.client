@@ -355,7 +355,7 @@ define([
 				break;
 			}
 		}.bind(this));
-		mGitCommands.getModelEventDispatcher().addEventListener("modelChanging", this._modelChangingListener = function(event) { //$NON-NLS-0$
+		mGitCommands.getModelEventDispatcher().addEventListener("stateChanging", this._modelChangingListener = function(event) { //$NON-NLS-0$
 			switch (event.action) {
 			case "commit": //$NON-NLS-0$
 			case "stash": //$NON-NLS-0$
@@ -367,6 +367,7 @@ define([
 			case "applyStash": //$NON-NLS-0$
 			case "popStash": //$NON-NLS-0$
 			case "ignoreFile": //$NON-NLS-0$
+			case "selectionChanged": //$NON-NLS-0$
 				event.preCallback = this.unhookCompareWidget.bind(this);
 				break;
 			}

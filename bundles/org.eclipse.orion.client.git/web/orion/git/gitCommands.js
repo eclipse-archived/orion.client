@@ -64,13 +64,17 @@ var exports = {};
 	}
 	
 	function preCallback(action, data) {
-		var evt = {type: "modelChanging", action: action};
+		var evt = {type: "stateChanging", action: action};
 		dispatchModelEventOn(evt); //$NON-NLS-1$ //$NON-NLS-0$
 		if(evt.preCallback) {
 			return evt.preCallback();
 		}
 		return  new Deferred().resolve(true);
 	}
+	
+	exports.preStateChanged = function() {
+		return preCallback("selectionChanged");
+	};
 	
 	exports.updateNavTools = function(registry, commandRegistry, explorer, toolbarId, selectionToolbarId, item, pageNavId) {
 		var toolbar = lib.node(toolbarId);

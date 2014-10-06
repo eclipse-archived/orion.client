@@ -846,11 +846,19 @@ exports.SelectionRenderer = (function(){
 		}
 	};
 	
+	SelectionRenderer.prototype.initRow = function(item, tableRow) {
+		var self = this;
+		tableRow.addEventListener("click", function(evt) { //$NON-NLS-0$
+			if(self.explorer.getNavHandler()){
+				self.explorer.getNavHandler().onClick(item, evt);
+			}
+		}, false);
+	};
+	
 	SelectionRenderer.prototype.renderRow = function(item, tableRow) {
 		tableRow.verticalAlign = "baseline"; //$NON-NLS-0$
 		tableRow.classList.add("treeTableRow"); //$NON-NLS-0$
 
-	
 		var navDict = this.explorer.getNavDict();
 		if(navDict){
 			if (this.explorer.selectionPolicy !== "cursorOnly") { //$NON-NLS-0$
@@ -858,12 +866,6 @@ exports.SelectionRenderer = (function(){
 			}
 			
 			navDict.addRow(item, tableRow);
-			var self = this;
-			tableRow.addEventListener("click", function(evt) { //$NON-NLS-0$
-				if(self.explorer.getNavHandler()){
-					self.explorer.getNavHandler().onClick(item, evt);
-				}
-			}, false);
 		}
 		if (item.selectable === undefined || item.selectable) {
 			var checkColumn = this.getCheckboxColumn(item, tableRow);

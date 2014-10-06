@@ -452,10 +452,16 @@ define([
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 			var selected = e.selection;
 			if (!selected || compareLocation(this.repository, selected)) return;
-			this.changes = this.reference = this.log = null;
-			section.setHidden(true);
-			this.setSelectedRepository(selected);
-			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
+			mGitCommands.preStateChanged().then(function(doIt) {
+				if(doIt) {
+					this.changes = this.reference = this.log = null;
+					section.setHidden(true);
+					this.setSelectedRepository(selected);
+					window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
+				} else {
+					return;
+				}
+			}.bind(this));
 		}.bind(this));
 		var explorer = this.repositoriesNavigator = new mGitRepoList.GitRepoListExplorer({
 			serviceRegistry: this.registry,
@@ -502,37 +508,43 @@ define([
 		selection.addEventListener("selectionChanged", function(e) { //$NON-NLS-0$
 			var selected = e.selection;
 			if (!selected || compareLocation(this.reference, selected)) return;
-			switch (selected.Type) {
-				case "Branch": //$NON-NLS-0$
-				case "RemoteTrackingBranch": //$NON-NLS-0$
-				case "Tag": //$NON-NLS-0$
-				case "StashCommit": //$NON-NLS-0$
-					break;
-				case "Remote": //$NON-NLS-0$
-					var activeBranch = this.commitsNavigator.model.getActiveBranch();
-					if (!activeBranch) return;
-					var newBranch;
-					for (var i = 0; i < activeBranch.RemoteLocation.length; i++) {
-						if (selected.Location === activeBranch.RemoteLocation[i].Location) {
-							var children = activeBranch.RemoteLocation[i].Children;
-							newBranch = children[children.length - 1];
+			mGitCommands.preStateChanged().then(function(doIt) {
+				if(doIt) {
+					switch (selected.Type) {
+						case "Branch": //$NON-NLS-0$
+						case "RemoteTrackingBranch": //$NON-NLS-0$
+						case "Tag": //$NON-NLS-0$
+						case "StashCommit": //$NON-NLS-0$
 							break;
-						}
+						case "Remote": //$NON-NLS-0$
+							var activeBranch = this.commitsNavigator.model.getActiveBranch();
+							if (!activeBranch) return;
+							var newBranch;
+							for (var i = 0; i < activeBranch.RemoteLocation.length; i++) {
+								if (selected.Location === activeBranch.RemoteLocation[i].Location) {
+									var children = activeBranch.RemoteLocation[i].Children;
+									newBranch = children[children.length - 1];
+									break;
+								}
+							}
+							if (util.isNewBranch(newBranch)) {
+								selected = newBranch;
+								break;
+							}
+							return;
+						default:
+							return;
 					}
-					if (util.isNewBranch(newBranch)) {
-						selected = newBranch;
-						break;
+					this.changes = this.reference = this.log = null;
+					section.setHidden(true);
+					this.setSelectedReference(selected);
+					if (!util.isNewBranch(selected)) {
+						window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
 					}
+				} else {
 					return;
-				default:
-					return;
-			}
-			this.changes = this.reference = this.log = null;
-			section.setHidden(true);
-			this.setSelectedReference(selected);
-			if (!util.isNewBranch(selected)) {
-				window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
-			}
+				}
+			}.bind(this));
 		}.bind(this));
 		var explorer = this.branchesNavigator = new mGitBranchList.GitBranchListExplorer({
 			serviceRegistry: this.registry,
@@ -634,8 +646,14 @@ define([
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			var selected = event.selections;
 			if (compareLocation(this.changes, selected)) return;
-			this.setSelectedChanges(selected);
-//			window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
+			mGitCommands.preStateChanged().then(function(doIt) {
+				if(doIt) {
+					this.setSelectedChanges(selected);
+//					window.location.href = require.toUrl(repoTemplate.expand({resource: this.lastResource = selected.Location}));
+				} else {
+					return;
+				}
+			}.bind(this));
 		}.bind(this));
 		var explorer = this.commitsNavigator = new mGitCommitList.GitCommitListExplorer({
 			serviceRegistry: this.registry,
