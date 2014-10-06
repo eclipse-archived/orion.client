@@ -81,7 +81,7 @@ exports.DefaultDiffProvider = (function() {
 			}, function(){});
 		},
 		
-		resolveDiff: function(resource, compareTo, hasConflicts) {
+		resolveDiff: function(resource, compareTo, hasConflicts, ignoreWhitespace) {
 			this._hasConflicts = hasConflicts;
 			if(compareTo){
 				return this._resolveTwoFiles(compareTo, resource);
@@ -91,15 +91,15 @@ exports.DefaultDiffProvider = (function() {
 					return;
 				}
 				var that = this;
-				if(that._hasConflicts) {
-					//that._diffProvider.getDiffContent(resource, {ignoreWS: "true"/"false"})
-					return that._diffProvider.getDiffContent(resource).then(function(jsonData, secondArg) {
+				var ignoreWS = ignoreWhitespace ? "true" : "false";
+				return that._diffProvider.getDiffContent(resource, {ignoreWS: ignoreWS}).then(function(jsonData) {
+					if (that._hasConflicts) {
 						that._diffContent = jsonData.split("diff --git")[1]; //$NON-NLS-0$
-						return that._resolveComplexFileURL(resource);
-					}, function(){});
-				} else {// We do not need to get diff contents from server if there is no conflicts. We use client side diff here.
+					} else {
+						that._diffContent = jsonData;
+					}
 					return that._resolveComplexFileURL(resource);
-				}
+				}, function(){});
 			}
 		}
 	};
@@ -151,6 +151,8 @@ exports.ResourceComparer = (function() {
 			this._compareView = new mCompareView.TwoWayCompareView(viewOptions);
 		}
 		this._compareView.getWidget().setOptions({ignoreWhitespace: options.ignoreWhitespace});
+		this._compareView.getWidget().setOptions({diffProvider: options.diffProvider});
+		this._compareView.getWidget().setOptions({resource: options.resource});
 		this._compareView.getWidget().setOptions({titleIds: this.options.saveLeft ? this.options.saveLeft.titleIds : null });
 		this._compareView.getWidget().setOptions({extCmdHolder: this});
 		if(!viewOptions.highlighters){
@@ -342,7 +344,20 @@ exports.ResourceComparer = (function() {
 					var fileObj = that._getFileOptions(this._editorIndex);
 					fileObj.Content = newContents;
 					if(!closing) {
-						that._compareView.getWidget().refresh(true, true, this.embedded ? null : this._editorIndex);
+						var options = that._compareView.getWidget().options;
+						if(options.diffProvider) {
+							var ignoreWS = options.ignoreWhitespace ? "true" : "false";
+							options.diffProvider._diffProvider.getDiffContent(options.resource, {ignoreWS: ignoreWS}).then(function(jsonData) {
+								if (options.hasConflicts) {
+									options.diffContent = jsonData.split("diff --git")[1]; //$NON-NLS-0$
+								} else {
+									options.diffContent = jsonData;
+								}
+								that._compareView.getWidget().refresh(true, true, this.embedded ? null : this._editorIndex);
+							}.bind(this), function(){});
+						} else {
+							that._compareView.getWidget().refresh(true, true, this.embedded ? null : this._editorIndex);
+						}
 					}
 				}
 			});
@@ -484,7 +499,7 @@ exports.ResourceComparer = (function() {
 					return;
 				}
 				var that = this;
-				return that.options.diffProvider.resolveDiff(that.options.resource, that.options.compareTo, that.options.hasConflicts).then( function(diffParam){
+				return that.options.diffProvider.resolveDiff(that.options.resource, that.options.compareTo, that.options.hasConflicts, that.options.ignoreWhitespace).then( function(diffParam){
 					if(diffParam.oldFile) {
 						diffParam.oldFile.readonly = that._compareView.getWidget().options.oldFile.readonly;
 					}
@@ -506,7 +521,7 @@ exports.ResourceComparer = (function() {
 							return new Deferred().resolve(height + 5);
 						});
 					} else {
-						var filesToLoad = ( viewOptions.diffContent ? [viewOptions.oldFile/*, viewOptions.newFile*/] : [viewOptions.oldFile, viewOptions.newFile]); 
+						var filesToLoad = ( viewOptions.diffContent ? [viewOptions.oldFile, viewOptions.newFile] : [viewOptions.oldFile, viewOptions.newFile]); 
 						return that._getFilesContents(filesToLoad).then( function(){
 							var viewHeight = that._compareView.getWidget().refresh(true);
 							that._inputChanged();							

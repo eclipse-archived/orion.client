@@ -58,7 +58,7 @@ exports.CompareView = (function() {
 			if(this.options.mapper && this.options.toggler && !forceGenerate){
 				return {delim:delim , mapper:this.options.mapper, output: this.options.newFile.Content, diffArray:this.options.diffArray};
 			}
-			if(typeof output === "string" && typeof input === "string"){ //$NON-NLS-1$ //$NON-NLS-0$
+			if(!this.options.diffProvider && typeof output === "string" && typeof input === "string"){ //$NON-NLS-1$ //$NON-NLS-0$
 				var adapter = new mJSDiffAdapter.JSDiffAdapter(this.isWhitespaceIgnored());
 				var maps = adapter.adapt(input, output, delim);
 				if(this.options.toggler){
@@ -68,14 +68,14 @@ exports.CompareView = (function() {
 				}
 				return {delim:delim , mapper:maps.mapper, output: output, diffArray:maps.changContents};
 			} else {
-				var result = this._diffParser.parse(input, diff, detectConflicts ,doNotBuildNewFile);
+				var result = this._diffParser.parse(input, diff, detectConflicts ,true/*doNotBuildNewFile*/);
 				var diffArray = this._diffParser.getDiffArray();
 				if(this.options.toggler){
 					this.options.mapper = result.mapper;
-					this.options.newFile.Content = result.outPutFile;
+					this.options.newFile.Content = output/*result.outPutFile*/;
 					this.options.diffArray = diffArray;
 				}
-				return {delim:delim , mapper:result.mapper, output: result.outPutFile, diffArray:diffArray};
+				return {delim:delim , mapper:result.mapper, output: output/*result.outPutFile*/, diffArray:diffArray};
 			}
 		},
 		/** @private */
@@ -133,8 +133,21 @@ exports.CompareView = (function() {
 		},
 		
 		ignoreWhitespace: function(ignore) {
-			this.getWidget().options.ignoreWhitespace = ignore;
-			this.getWidget().refresh(true, true);
+			var options = this.getWidget().options;
+			options.ignoreWhitespace = ignore;
+			if(options.diffProvider) {
+				var ignoreWS = ignore ? "true" : "false";
+				options.diffProvider._diffProvider.getDiffContent(options.resource, {ignoreWS: ignoreWS}).then(function(jsonData) {
+					if (options.hasConflicts) {
+						options.diffContent = jsonData.split("diff --git")[1]; //$NON-NLS-0$
+					} else {
+						options.diffContent = jsonData;
+					}
+					this.getWidget().refresh(true, true);
+				}.bind(this), function(){});
+			} else {
+				this.getWidget().refresh(true, true);
+			}
 		},
 		
 		/**
@@ -865,14 +878,7 @@ exports.toggleableCompareView = (function() {
 				options.blockNumber = diffPos.block;
 				options.changeNumber = diffPos.change;
 			}
-			var doSave = this.isDirty() && window.confirm(messages.confirmUnsavedChanges);
-			if(options.onSave) {
-				options.onSave(doSave).then(function() {
-					this._toggle(options);
-				}.bind(this));
-			} else {
-				this._toggle(options);
-			}
+			this._toggle(options);
 		},
 		
 		isDirty: function() {

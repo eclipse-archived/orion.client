@@ -86,7 +86,18 @@ exports.CompareCommandFactory = (function() {
 					ignoreWhitespaceCommand.checked = isWhitespaceIgnored;
 					ignoreWhitespaceCommand.name = isWhitespaceIgnored ? messages["UseWhitespace"] : messages["IgnoreWhitespace"];
 					ignoreWhitespaceCommand.tooltip = isWhitespaceIgnored ? messages["UseWhitespaceTooltip"] :  messages["IgnoreWhitespaceTooltip"];
-					return !item.options.diffContent/* && !item.isWhitespaceIgnored()*/;
+					return true;
+				},
+				preCallback: function(data) {
+					var widget = data.handler.getWidget();
+					if(typeof widget.options.onSave === "function" && widget.isDirty()) { //$NON-NLS-0$
+						var doSave = window.confirm(messages.confirmUnsavedChanges);
+						if(!doSave) {
+							return new Deferred().resolve();
+						}
+						return widget.options.onSave(doSave);
+					}
+					return new Deferred().resolve(true);
 				},
 				callback : function(data) {
 					data.items.ignoreWhitespace(ignoreWhitespaceCommand.checked);
