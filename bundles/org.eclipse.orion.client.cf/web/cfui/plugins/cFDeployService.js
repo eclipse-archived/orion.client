@@ -168,7 +168,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 					
 					/* find out if any deployment wizards are plugged in */
 					var wizardReferences = serviceRegistry.getServiceReferences("orion.project.deploy.wizard");
-					if(wizardReferences.length === 0){
+					if(true || wizardReferences.length === 0){ /* TODO: Temporary stability fix */
 						
 						/* old-style interactive deploy */
 						deferred.resolve({UriTemplate: "{+OrionHome}/cfui/deployInteractive.html#" + encodeURIComponent(JSON.stringify({ContentLocation: project.ContentLocation, AppPath: appPath})), 
