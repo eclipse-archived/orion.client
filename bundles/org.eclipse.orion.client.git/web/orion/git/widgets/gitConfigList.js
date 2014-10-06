@@ -46,7 +46,17 @@ define([
 				progress.begin(msg);
 				this.progressService.progress(this.gitClient.getGitCloneConfig(parentItem.repository.ConfigLocation), msg).then( function(resp){
 					progress.worked("Rendering configuration"); //$NON-NLS-0$
-					var configurationEntries = resp.Children;
+					var children = [];
+					resp.Children.forEach(function(entry) {
+						if (entry.Value && entry.Value.length > 1) {
+							for (var i =0; i<entry.Value.length; i++) {
+								children.push(objects.mixin({index: i}, entry));							
+							}
+						} else if (entry.Value) {
+							children.push(entry);
+						}
+					});
+					var configurationEntries = children;
 					progress.done();
 					onComplete(that.processChildren(parentItem, configurationEntries));
 				}, function(error){
@@ -73,8 +83,8 @@ define([
 			parentItem.children = children;
 			return children;
 		},
-		getId: function(/* item */ item){
-			return item.Key ? item.Key + item.Value : item.Type;
+		getId: function(item){
+			return (item.Key ? item.Key + item.Value : item.Type) + (item.index !== undefined ? item.index : "");
 		}
 	});
 	
@@ -204,10 +214,13 @@ define([
 					var keyNode = document.createElement("div"); //$NON-NLS-0$
 					keyNode.className = "gitConfigKey"; //$NON-NLS-0$
 					keyNode.textContent = item.Key;
+					if (item.index !== undefined) {
+						keyNode.textContent += "[" + item.index + "]"; //$NON-NLS-0$ //$NON-NLS-1$
+					}	
 					div.appendChild(keyNode);
 					var valueNode = document.createElement("div"); //$NON-NLS-0$
 					valueNode.className = "gitConfigValue"; //$NON-NLS-0$
-					valueNode.textContent = item.Value;
+					valueNode.textContent = item.Value[item.index || 0];
 					div.appendChild(valueNode);
 					break;
 				case 1:

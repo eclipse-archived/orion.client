@@ -1324,7 +1324,7 @@ var exports = {};
 			var items = commandInvocation.items;
 			var val;
 			if(items) {
-				val = items.Value;
+				val = items.Value[items.index || 0];
 			}
 			return [new mCommandRegistry.CommandParameter('value', 'text', messages['Value:'], val)]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		});
@@ -1343,7 +1343,8 @@ var exports = {};
 				var value = data.parameters.valueFor("value"); //$NON-NLS-0$
 				if (value){ //$NON-NLS-0$
 					var msg = i18nUtil.formatMessage(messages["EditingConfig"], key, value);
-					progress.progress(gitService.editCloneConfigurationProperty(item.Location, value), msg).then(
+					item.Value[item.index] = value;
+					progress.progress(gitService.editCloneConfigurationProperty(item.Location, item.Value), msg).then(
 						function(){
 							dispatchModelEventOn({type: "modelChanged", action: "editConfig", key: key, value: value}); //$NON-NLS-1$ //$NON-NLS-0$
 						}, displayErrorOnStatus
@@ -1369,7 +1370,8 @@ var exports = {};
 				var value = item.Value;
 				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete ${0}?"], key))) {
 					var msg = i18nUtil.formatMessage(messages["DeletingConfig"], key);
-					progress.progress(gitService.deleteCloneConfigurationProperty(item.Location), msg).then(
+					var query = item.index !== undefined ? "?index=" + item.index : ""; //$NON-NLS-0$
+					progress.progress(gitService.deleteCloneConfigurationProperty(item.Location + query), msg).then(
 						function() {
 							dispatchModelEventOn({type: "modelChanged", action: "deleteConfig", key: key, value: value}); //$NON-NLS-1$ //$NON-NLS-0$
 						}, displayErrorOnStatus
