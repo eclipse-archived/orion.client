@@ -9,8 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser,amd*/
-define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URITemplate', 'orion/PageLinks'], 
-	function(messages, Deferred, i18nUtil, URITemplate, PageLinks){
+define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URITemplate',
+	'orion/PageLinks', 'orion/urlUtils', 'orion/webui/littlelib'], 
+	function(messages, Deferred, i18nUtil, URITemplate, PageLinks, URLUtil, lib){
 
 	function handleNoCloud(error) {
 		error = error || {};
@@ -240,6 +241,31 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 		defaultCloseFrame : function(){
 			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
 				 source: "org.eclipse.orion.client.cf.deploy.uritemplate", cancelled: true}), "*");
+		},
+		
+		/**
+		 * Parses the given message creating a decorated UI.
+		 */
+		defaultParseMessage : function(msg){
+			var chunks, msgNode;
+			try {
+				chunks = URLUtil.detectValidURL(msg);
+			} catch (e) {
+				/* contained a corrupt URL */
+				chunks = [];
+			}
+			
+			if (chunks.length) {
+				msgNode = document.createDocumentFragment();
+				URLUtil.processURLSegments(msgNode, chunks);
+				
+				/* all status links open in new window */
+				Array.prototype.forEach.call(lib.$$("a", msgNode), function(link) { //$NON-NLS-0$
+					link.target = "_blank"; //$NON-NLS-0$
+				});
+			}
+			
+			return msgNode || document.createTextNode(msg);
 		}
 	};
 });
