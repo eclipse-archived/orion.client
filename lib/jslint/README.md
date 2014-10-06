@@ -26,6 +26,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
  * jslint - 2010-04-06 -- (Eclipse CQ 4050)
  * jslint - 2010-12-14 -- (Eclipse CQ 4745)
+ * jslint - 2011-01-09 -- (Eclipse CQ 8747)
  * jslint - 2011-12-21 -- (Eclipse CQ 5959)
 
 
