@@ -44,8 +44,12 @@ define([
 	objects.mixin(InlineSearchPane.prototype, /** @lends orion.search.InlineSearchPane.prototype */ {
 		_initialize: function() {
 			this._searchWrapper = document.createElement("div"); //$NON-NLS-0$
+			
+			this._slideout.getContentNode().appendChild(this._searchWrapper); // temporarily add wrapper node to DOM to get around Safari fussiness
+			
 			var range = document.createRange();
 			range.selectNode(this._slideout.getContentNode());
+						
 			var domNodeFragment = range.createContextualFragment(InlineSearchPaneTemplate);
 			this._searchWrapper.appendChild(domNodeFragment);
 			this._searchWrapper.classList.add("searchWrapper"); //$NON-NLS-0$
@@ -66,7 +70,11 @@ define([
 
 			this._searcher = new mSearchClient.Searcher({serviceRegistry: this._serviceRegistry, commandService: this._commandRegistry, fileService: this._fileClient});
 			this._searchResultExplorer = new InlineSearchResultExplorer(this._serviceRegistry, this._commandRegistry, this, this._preferences);
-			this._render();
+			
+			this._initControls();
+			this._initHTMLLabels();
+			
+			this._slideout.getContentNode().removeChild(this._searchWrapper); // detach wrapper now that initialization is done, see getContentNode().appendChild() call above
 		},
 		
 		isVisible: function() {
@@ -110,12 +118,7 @@ define([
 			        resource: resource
 			};
 		},
-		
-		_render: function(){
-			this._initControls();
-			this._initHTMLLabels();
-		},
-		
+				
 		_submitSearch: function(){
 			var options = this.getOptions();
 			options.replace = null;
