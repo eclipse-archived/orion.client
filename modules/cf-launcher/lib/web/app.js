@@ -18,6 +18,7 @@ var bodyParser = require("body-parser"),
     sessions = require("client-sessions"),
     nodeurl = require("url"),
     appControl = require("./appctl"),
+    dav = require("./dav"),
     ProcessManager = require("../proc"),
     ProxyManager = require("./proxy"),
     tty = require("./tty"),
@@ -60,12 +61,14 @@ function createProxyApp(options) {
 	var proxies = proxyman.createProxies({
 		target: {},
 		inspector: {},
+		dav: {},
 		tty: { ws: true, },
 	});
 	var inspector = proxies.inspector,
 	    target = proxies.target;
 	var procman = startProcesses(appName, appCommand, target.port, inspector.port);
 	var ttyServer = tty.createServer({ port: proxies.tty.port }).listen();
+	var davServer = dav.createServer(proxies.dav.port, password);
 	util.log("[Internal] Application port: %s", target.port);
 	util.log("[Internal] node-inspector port: %s", inspector.port);
 
@@ -115,6 +118,10 @@ function createProxyApp(options) {
 		util.log("Logout %s", req.ip);
 		req.session.reset();
 		res.redirect("login");
+	});
+	// jsDAV supplies its own auth, so it goes outside the session check
+	launcherApp.use("/dav/", function(req, res) {
+		proxies.dav.proxy.web(req, res);
 	});
 	launcherApp.use(function(req, res, next) {
 		if (isLoggedIn(req))
@@ -194,18 +201,17 @@ function startServer(options) {
 			return proxies.target.proxy.ws(req, socket, head); // not for us, send to user app
 
 		// At this point we know the request is for something in the launcher, either inspector or TTY
-		var destinationProxy;
-		if (segs[1] === "ws") {
+		var service = segs[1], destinationProxy;
+		if (service === "ws") {
 			// node-inspector makes a ws connection to "ws://[whatever]/launcher/ws?", which we catch here.
 			destinationProxy = proxies.inspector.proxy;
-		} else if (segs[1] === "tty") {
+		} else if (service === "tty") {
 			// Hack: we have a url like /launcher/tty/socket.io?foo but tty.js is expecting /socket.io?foo
 			// so chop off the leading 2 segments and shove the result back into req.url before proxying
 			// TODO try http-proxy forward or forwardPath
 			url.pathname = "/" + segs.slice(2).join("/");
 			req._parsedUrl = url;
 			req.url = nodeurl.format(url);
-			util.log("TTY.js-bound URL rewritten to: " + nodeurl.format(req.url));
 			destinationProxy = proxies.tty.proxy;
 		}
 		// Check login
