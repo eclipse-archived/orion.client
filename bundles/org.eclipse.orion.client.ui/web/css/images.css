@@ -693,6 +693,18 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.core-sprite-eraser{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
 .core-sprite-hamburger:before{ content:'\E000'; }
 .core-sprite-gear:before{ content:'\E001'; }
 .core-sprite-silhouette:before{ content:'\E003'; float: right;}
@@ -733,6 +745,7 @@
 .core-sprite-compare-inline:before{ content:'\E04C'; }
 .core-sprite-filter:before{ content:'\E04D'; }
 .core-sprite-show-filtered:before{ content:'\E04E'; }
+.core-sprite-eraser:before{ content:'\E03D'; }
 
 /* icons for file types - possibly more to come - at least one for images */ 
 
