@@ -33,6 +33,13 @@ define([
 		filterDiv.appendChild(button);
 		var doFilter = function() {
 			callback(filter.value);
+			if (filter.value) {
+				button.classList.remove("core-sprite-filter"); //$NON-NLS-0$
+				button.classList.add("core-sprite-show-filtered"); //$NON-NLS-0$
+			} else {
+				button.classList.remove("core-sprite-show-filtered"); //$NON-NLS-0$
+				button.classList.add("core-sprite-filter"); //$NON-NLS-0$
+			}
 		};
 		button.addEventListener("click", function(){ //$NON-NLS-0$
 			doFilter();
