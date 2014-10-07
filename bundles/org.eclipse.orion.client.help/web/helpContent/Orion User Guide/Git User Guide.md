@@ -182,5 +182,40 @@ Hit **Push** to push your new branch to your remote.
 
 ## Git filesystem
 
+## Working with Gerrit
+
+The Git page currently allows users to *push* and *fetch* patches from a Gerrit. The following steps assumes that you already have a properly configured Gerrit server running somewhere and you have setup your account properly and can already push patches to Gerrit. 
+
+### Adding a Remote
+ 
+The first thing you need to do is add a Gerrit remote to an existing repo. This can be done from the References dropdown. For the purpose of this example, we will be setting up a remote to allow us to push patches for the Orion client project.
+
+<pic>
+
+### Editing Git Config entry
+
+Next thing to do is to edit your new remote fetch config entry to add the appopriate refspecs for pushing to Gerrit/getting patch sets. To do this:
+
+1. Click on the config wrench - and find your new fetch key (hint: you can use the filter, just type 'fetch' anh hit enter)
+2. You need to add the following entries to the fetch key (you can alter the value of the existing key and create a **New Configuration Entry** the same name for the other value).
+
+		+refs/heads/*:refs/remotes/<NAME OF REMOTE>/for/*
+		+refs/changes/*:refs/remotes/<NAME OF REMOTE>/changes/*
+		
+
+Note that if you know the change id of the patch you are interested in reviewing, you can just enter it instead of *. For example, if you want to take a look at change id 34154, you can enter:
+
+		+refs/changes/54/34154/*refs/remotes/<NAME OF REMOTE>/changes/54/34154/*
+		
+<pic>
+
+### Fetching Branches and Commits
+
+
+
+
+		
+		     
+
 
 
