@@ -1343,7 +1343,7 @@ var exports = {};
 				var value = data.parameters.valueFor("value"); //$NON-NLS-0$
 				if (value){ //$NON-NLS-0$
 					var msg = i18nUtil.formatMessage(messages["EditingConfig"], key, value);
-					item.Value[item.index] = value;
+					item.Value[item.index || 0] = value;
 					progress.progress(gitService.editCloneConfigurationProperty(item.Location, item.Value), msg).then(
 						function(){
 							dispatchModelEventOn({type: "modelChanged", action: "editConfig", key: key, value: value}); //$NON-NLS-1$ //$NON-NLS-0$
