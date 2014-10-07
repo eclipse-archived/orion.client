@@ -12,12 +12,13 @@
 /*eslint-env browser, amd*/
 define("orion/editor/rulers", [
 	'i18n!orion/editor/nls/messages',
-	'orion/editor/textView', //$NON-NLS-0$
+	'orion/editor/textView',
 	'orion/editor/annotations',
 	'orion/editor/tooltip', 
-	'orion/objects', //$NON-NLS-0$
+	'orion/objects',
+	'orion/editor/util',
 	'orion/util'
-], function(messages, mTextView, mAnnotations, mTooltip, objects, util) {
+], function(messages, mTextView, mAnnotations, mTooltip, objects, textUtil, util) {
 
 	function BaseRuler (rulerLocation, rulerOverview, rulerStyle) {
 		this._location = rulerLocation || "left"; //$NON-NLS-0$
@@ -866,13 +867,15 @@ define("orion/editor/rulers", [
 			var windowDiv = this._windowDiv = util.createElement(document, "div"); //$NON-NLS-0$
 			windowDiv.className ="rulerZoomWindow"; //$NON-NLS-0$
 			this.node.appendChild(windowDiv);
+			var border = parseInt(textUtil.getNodeStyle(windowDiv, "border-top-width", 0)) + //$NON-NLS-0$
+					parseInt(textUtil.getNodeStyle(windowDiv, "border-bottom-width", 0)); //$NON-NLS-0$
 			var that = this;
 			function updateWindow(scroll, p) {
 				var top = scroll.y * p.zoomFactor;
 				var height = p.clientHeight * p.zoomFactor;
 				top = zoomView.convert({y: top}, "document", "page").y; //$NON-NLS-1$ //$NON-NLS-0$
 				windowDiv.style.top = (top - that.node.getBoundingClientRect().top) + "px"; //$NON-NLS-0$
-				windowDiv.style.height = height + "px"; //$NON-NLS-0$
+				windowDiv.style.height = (height - border) + "px"; //$NON-NLS-0$
 			}
 			function getProps() {
 				var padding = textView._metrics.viewPadding;

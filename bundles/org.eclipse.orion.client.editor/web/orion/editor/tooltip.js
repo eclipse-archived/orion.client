@@ -362,23 +362,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 		},
 		_getNodeStyle: function(node, prop, defaultValue) {
-			var value;
-			if (node) {
-				value = node.style[prop];
-				if (!value) {
-					if (node.currentStyle) {
-						var index = 0, p = prop;
-						while ((index = p.indexOf("-", index)) !== -1) { //$NON-NLS-0$
-							p = p.substring(0, index) + p.substring(index + 1, index + 2).toUpperCase() + p.substring(index + 2);
-						}
-						value = node.currentStyle[p];
-					} else {
-						var css = node.ownerDocument.defaultView.getComputedStyle(node, null);
-						value = css ? css.getPropertyValue(prop) : null;
-					}
-				}
-			}
-			return value || defaultValue;
+			return textUtil.getNodeStyle(node, prop, defaultValue);
 		},
 		_isNode: function (obj) {
 			return typeof Node === "object" ? obj instanceof Node : //$NON-NLS-0$
