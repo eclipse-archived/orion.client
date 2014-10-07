@@ -46,7 +46,7 @@
 }
 
 .textviewZoom .textviewScroll {
-	padding: 1px;
+	padding: 0;
 }
 
 .textviewZoom .punctuation.separator.tab {

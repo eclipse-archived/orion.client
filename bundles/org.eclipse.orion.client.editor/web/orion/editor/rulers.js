@@ -881,11 +881,13 @@ define("orion/editor/rulers", [
 				windowDiv.style.height = (bottomPixel - topPixel) + "px"; //$NON-NLS-0$
 			}
 			function getProps() {
+				var padding = textView._metrics.viewPadding;
 				var lineHeight = textView.getLineHeight();
 				var zoomLineHeight = zoomView.getLineHeight();
-				var zoomFactor = zoomLineHeight / lineHeight;
 				var lineCount = textView.getModel().getLineCount();
 				var documentHeight = textView._lineHeight ? textView._scrollHeight : lineCount * lineHeight;
+				var zoomDocumentHeight = zoomView._lineHeight ? zoomView._scrollHeight : lineCount * zoomLineHeight;
+				var zoomFactor = zoomDocumentHeight / documentHeight;
 				var clientHeight = textView.getClientArea().height;
 				var windowHeight = clientHeight * zoomFactor;
 				var scrollWidth = textView._metrics.scrollWidth;
@@ -894,12 +896,13 @@ define("orion/editor/rulers", [
 					documentHeight: documentHeight,
 					clientHeight: clientHeight,
 					scrollWidth: scrollWidth,
-					windowHeight: windowHeight
+					windowHeight: windowHeight,
+					padding: padding
 				};
 			}
 			function toZoom(scroll) {
 				var p = getProps();
-				return scroll.y * (p.zoomFactor + (p.windowHeight - p.clientHeight - (p.scrollWidth * 2)) / p.documentHeight);
+				return scroll.y * (p.zoomFactor + (p.windowHeight - p.clientHeight - p.scrollWidth + p.padding.top + p.padding.bottom) / p.documentHeight);
 			}
 			function updateScrollRelative(scroll) {
 				var y = toZoom(scroll);
@@ -914,6 +917,7 @@ define("orion/editor/rulers", [
 				updateWindow();
 			}
 			function updateScroll(scroll) {
+				scroll = scroll || {y: textView.getTopPixel()};
 				if (that.centered) {
 					updateScrollCentered(scroll);
 				} else {
@@ -942,6 +946,7 @@ define("orion/editor/rulers", [
 			});
 			textView.addEventListener("Resize", this._resizeListener = function() { //$NON-NLS-0$
 				updateWidth(zoomView.getOptions());
+				updateScroll();
 			});
 			textView.addEventListener("Redraw", this._redrawListener = function(event) { //$NON-NLS-0$
 				if (!event.ruler) {
@@ -989,7 +994,7 @@ define("orion/editor/rulers", [
 				event.preventDefault();
 			});
 			(document.defaultView || document.parentWindow).setTimeout(function() {
-				updateScroll({y: textView.getTopPixel()});
+				updateScroll();
 			}, 0);
 		},
 		_destroy: function() {
