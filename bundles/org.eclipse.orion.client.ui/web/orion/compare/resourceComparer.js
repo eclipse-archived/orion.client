@@ -345,7 +345,7 @@ exports.ResourceComparer = (function() {
 					fileObj.Content = newContents;
 					if(!closing) {
 						var options = that._compareView.getWidget().options;
-						if(options.diffProvider) {
+						if(options.diffProvider && options.diffContent) {
 							var ignoreWS = options.ignoreWhitespace ? "true" : "false";
 							options.diffProvider._diffProvider.getDiffContent(options.resource, {ignoreWS: ignoreWS}).then(function(jsonData) {
 								if (options.hasConflicts) {

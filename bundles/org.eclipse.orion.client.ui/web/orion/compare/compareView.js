@@ -58,7 +58,7 @@ exports.CompareView = (function() {
 			if(this.options.mapper && this.options.toggler && !forceGenerate){
 				return {delim:delim , mapper:this.options.mapper, output: this.options.newFile.Content, diffArray:this.options.diffArray};
 			}
-			if(!this.options.diffProvider && typeof output === "string" && typeof input === "string"){ //$NON-NLS-1$ //$NON-NLS-0$
+			if(!diff && typeof output === "string" && typeof input === "string"){ //$NON-NLS-1$ //$NON-NLS-0$
 				var adapter = new mJSDiffAdapter.JSDiffAdapter(this.isWhitespaceIgnored());
 				var maps = adapter.adapt(input, output, delim);
 				if(this.options.toggler){
@@ -135,7 +135,7 @@ exports.CompareView = (function() {
 		ignoreWhitespace: function(ignore) {
 			var options = this.getWidget().options;
 			options.ignoreWhitespace = ignore;
-			if(options.diffProvider) {
+			if(options.diffProvider && options.diffContent) {
 				var ignoreWS = ignore ? "true" : "false";
 				options.diffProvider._diffProvider.getDiffContent(options.resource, {ignoreWS: ignoreWS}).then(function(jsonData) {
 					if (options.hasConflicts) {
