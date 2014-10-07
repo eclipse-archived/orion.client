@@ -888,16 +888,18 @@ define("orion/editor/rulers", [
 				var documentHeight = textView._lineHeight ? textView._scrollHeight : lineCount * lineHeight;
 				var clientHeight = textView.getClientArea().height;
 				var windowHeight = clientHeight * zoomFactor;
+				var scrollWidth = textView._metrics.scrollWidth;
 				return {
 					zoomFactor: zoomFactor,
 					documentHeight: documentHeight,
 					clientHeight: clientHeight,
+					scrollWidth: scrollWidth,
 					windowHeight: windowHeight
 				};
 			}
 			function toZoom(scroll) {
 				var p = getProps();
-				return scroll.y * (p.zoomFactor + (p.windowHeight - p.clientHeight) / p.documentHeight);
+				return scroll.y * (p.zoomFactor + (p.windowHeight - p.clientHeight - (p.scrollWidth * 2)) / p.documentHeight);
 			}
 			function updateScrollRelative(scroll) {
 				var y = toZoom(scroll);
