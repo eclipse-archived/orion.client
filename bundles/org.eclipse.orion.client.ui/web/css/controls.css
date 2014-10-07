@@ -1036,6 +1036,10 @@ textarea.parameterInput {
 	position: relative;
 }
 
+.orionMarkdown h2 {
+	font-size: initial;
+}
+
 .orionMarkdown img {
 	max-width: 100%;
 }
