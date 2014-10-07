@@ -512,13 +512,12 @@ define([
 			// Forward status from plugin to orion.page.message
 			contextImpl.setStatus = mEditorCommands.handleStatusMessage.bind(null, serviceRegistry);
 			serviceRegistry.registerService("orion.edit.context", contextImpl, null); //$NON-NLS-0$
-
-			if(this.editorPreferences) {
-				this.editorPreferences.getPrefs(this.updateSettings.bind(this));
-			}
 		},
 		create: function() {
 			this.editor.install();
+			if(this.editorPreferences) {
+				this.editorPreferences.getPrefs(this.updateSettings.bind(this));
+			}
 		},
 		destroy: function() {
 			this.editor.uninstall();
