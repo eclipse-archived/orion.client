@@ -73,7 +73,7 @@ define("orion/editor/factories", [ //$NON-NLS-0$
 	}
 	ZoomRulerFactory.prototype = {
 		createZoomRuler: function(annotationModel) {
-			return new mRulers.ZoomRuler("right", {styleClass: "ruler zoom"}); //$NON-NLS-1$ //$NON-NLS-0$
+			return new mRulers.ZoomRuler("innerRight", {styleClass: "ruler zoom"}); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	};
 	exports.ZoomRulerFactory = ZoomRulerFactory;

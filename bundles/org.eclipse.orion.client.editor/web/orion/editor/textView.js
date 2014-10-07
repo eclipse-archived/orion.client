@@ -3531,14 +3531,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 			}
 			this._commitIME();
-			if (this.isListening("MouseDown")) { //$NON-NLS-0$
-				var mouseEvent = this._createMouseEvent("MouseDown", e); //$NON-NLS-0$
-				this.onMouseDown(mouseEvent);
-				if (mouseEvent.defaultPrevented) {
-					e.preventDefault();
-					return;
-				}
-			}
 
 			var button = e.which; // 1 - left, 2 - middle, 3 - right
 			if (!button) { 
@@ -3565,6 +3557,14 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					this._clickCount++;
 				} else {
 					this._clickCount = 1;
+				}
+			}
+			if (this.isListening("MouseDown")) { //$NON-NLS-0$
+				var mouseEvent = this._createMouseEvent("MouseDown", e); //$NON-NLS-0$
+				this.onMouseDown(mouseEvent);
+				if (mouseEvent.defaultPrevented) {
+					e.preventDefault();
+					return;
 				}
 			}
 			if (button === 1) {
@@ -3600,7 +3600,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (this._animation) { return; }
 			var inClient = this._isClientDiv(e);
 			if (this.isListening("MouseMove")) { //$NON-NLS-0$
-				if (inClient){
+				if (inClient || this._isMouseDown){
 					var mouseEvent = this._createMouseEvent("MouseMove", e); //$NON-NLS-0$
 					this.onMouseMove(mouseEvent);
 					if (mouseEvent.defaultPrevented) {
@@ -3720,6 +3720,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					this.onMouseUp(mouseEvent);
 					if (mouseEvent.defaultPrevented) {
 						e.preventDefault();
+						this._isMouseDown = false;
 						return;
 					}
 				}
@@ -5146,7 +5147,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var rightDiv = this._createRulerParent(document, "textviewRightRuler"); //$NON-NLS-0$
 			this._rightDiv = rightDiv;
 			rightDiv.style.right = "0px"; //$NON-NLS-0$
-				
+
+			var innerRightDiv = this._createRulerParent(document, "textviewInnerRightRuler"); //$NON-NLS-0$
+			this._innerRightDiv = innerRightDiv;
+			innerRightDiv.style.zIndex = "1"; //$NON-NLS-0$
+
 			var scrollDiv = util.createElement(document, "div"); //$NON-NLS-0$
 			this._scrollDiv = scrollDiv;
 			scrollDiv.style.margin = "0px"; //$NON-NLS-0$
@@ -5346,6 +5351,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._overlayDiv = null;
 			this._leftDiv = null;
 			this._rightDiv = null;
+			this._innerRightDiv = null;
 			this._marginDiv = null;
 			this._cursorDiv = null;
 			this._vScrollDiv = null;
@@ -5414,9 +5420,18 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var viewPad = this._getViewPadding();
 			return Math.max(0, this._viewDiv.clientHeight - viewPad.top - viewPad.bottom);
 		},
+		_getInnerRightWidth: function() {
+			var innerRightWidth = 0;
+			if (this._innerRightDiv) {
+				var innerRightRect = this._innerRightDiv.getBoundingClientRect();
+				innerRightWidth = innerRightRect.right - innerRightRect.left;
+			}
+			return innerRightWidth;
+		},
 		_getClientWidth: function() {
 			var viewPad = this._getViewPadding();
-			return Math.max(0, this._viewDiv.clientWidth - viewPad.left - viewPad.right);
+			var innerRightWidth = this._getInnerRightWidth();
+			return Math.max(0, this._viewDiv.clientWidth - viewPad.left - viewPad.right - innerRightWidth);
 		},
 		_getClipboardText: function (event, handler) {
 			var delimiter = this._model.getLineDelimiter();
@@ -5629,6 +5644,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			switch (ruler.getLocation()) {
 				case "left": return this._leftDiv; //$NON-NLS-0$
 				case "right": return this._rightDiv; //$NON-NLS-0$
+				case "innerRight": return this._innerRightDiv; //$NON-NLS-0$
 				case "margin": return this._marginDiv; //$NON-NLS-0$
 			}
 			return null;
@@ -5750,6 +5766,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 
 			this._hookRulerEvents(this._leftDiv, handlers);
 			this._hookRulerEvents(this._rightDiv, handlers);
+			this._hookRulerEvents(this._innerRightDiv, handlers);
 			this._hookRulerEvents(this._marginDiv, handlers);
 			
 			for (var i=0; i<handlers.length; i++) {
@@ -7009,6 +7026,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				// Update rulers
 				this._updateRuler(this._leftDiv, topIndex, lineEnd, rootHeight);
 				this._updateRuler(this._rightDiv, topIndex, lineEnd, rootHeight);
+				this._updateRuler(this._innerRightDiv, topIndex, lineEnd, rootHeight);
 				this._updateRuler(this._marginDiv, topIndex, lineEnd, rootHeight);
 				
 				leftWidth = 0;
@@ -7073,7 +7091,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						width = this._metrics.wrapWidth;
 					}
 				} else {
-					width = Math.max(this._maxLineWidth, width);
+					width = Math.max(this._maxLineWidth + this._getInnerRightWidth(), width);
 				}
 				/*
 				* Except by IE 8 and earlier, all other browsers are not allocating enough space for the right padding 
@@ -7087,6 +7105,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 				/* Get the left scroll after setting the width of the scrollDiv as this can change the horizontal scroll offset. */
 				scroll = this._getScroll(false);
+
+				var innerRightDiv = this._innerRightDiv;
+				if (innerRightDiv) {
+					innerRightDiv.style.right = rightWidth + (viewDiv.style.overflowY === "scroll" ? this._metrics.scrollWidth : 0) + "px"; //$NON-NLS-1$ //$NON-NLS-0$
+					innerRightDiv.style.bottom = (viewDiv.style.overflowX === "scroll" ? scrollbarWidth : 0) + "px"; //$NON-NLS-1$ //$NON-NLS-0$
+				}
 			}
 			this._scrollHeight = scrollHeight;
 			if (this._vScrollDiv) {

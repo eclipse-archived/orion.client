@@ -839,6 +839,9 @@ define("orion/editor/rulers", [
 			BaseRuler.prototype.setView.call(this, view);
 			this._create();
 		},
+		setCentered: function(centered) {
+			this.centered = centered;
+		},
 		_create: function() {
 			var textView = this.getView();
 			if (!textView) return;
@@ -867,19 +870,53 @@ define("orion/editor/rulers", [
 			windowDiv.className ="rulerZoomWindow"; //$NON-NLS-0$
 			this.node.appendChild(windowDiv);
 			var that = this;
-			function updateScroll(scroll) {
-				var clientHeight = textView.getClientArea().height;
-				var zoomHeight = zoomView.getClientArea().height;
-				var scrollY = zoomView.getLinePixel(textView.getLineIndex(scroll.y + clientHeight / 2));
-				var topIndex = textView.getTopIndex();
-				var bottomIndex = textView.getBottomIndex();
+			function updateWindow() {
+				var topIndex = that.topIndex = textView.getTopIndex();
+				var bottomIndex = that.bottomIndex = textView.getBottomIndex();
 				var topPixel = zoomView.getLinePixel(topIndex);
 				var bottomPixel = zoomView.getLinePixel(bottomIndex);
-				zoomView.setTopPixel(scrollY - zoomHeight / 2);
 				topPixel = zoomView.convert({y: topPixel}, "document", "page").y; //$NON-NLS-1$ //$NON-NLS-0$
 				bottomPixel = zoomView.convert({y: bottomPixel}, "document", "page").y; //$NON-NLS-1$ //$NON-NLS-0$
 				windowDiv.style.top = (topPixel - that.node.getBoundingClientRect().top) + "px"; //$NON-NLS-0$
 				windowDiv.style.height = (bottomPixel - topPixel) + "px"; //$NON-NLS-0$
+			}
+			function getProps() {
+				var lineHeight = textView.getLineHeight();
+				var zoomLineHeight = zoomView.getLineHeight();
+				var zoomFactor = zoomLineHeight / lineHeight;
+				var lineCount = textView.getModel().getLineCount();
+				var documentHeight = textView._lineHeight ? textView._scrollHeight : lineCount * lineHeight;
+				var clientHeight = textView.getClientArea().height;
+				var windowHeight = clientHeight * zoomFactor;
+				return {
+					zoomFactor: zoomFactor,
+					documentHeight: documentHeight,
+					clientHeight: clientHeight,
+					windowHeight: windowHeight
+				};
+			}
+			function toZoom(scroll) {
+				var p = getProps();
+				return scroll.y * (p.zoomFactor + (p.windowHeight - p.clientHeight) / p.documentHeight);
+			}
+			function updateScrollRelative(scroll) {
+				var y = toZoom(scroll);
+				zoomView.setTopPixel(y);
+				updateWindow();
+			}
+			function updateScrollCentered(scroll) {
+				var clientHeight = textView.getClientArea().height;
+				var zoomHeight = zoomView.getClientArea().height;
+				var scrollY = zoomView.getLinePixel(textView.getLineIndex(scroll.y + clientHeight / 2));
+				zoomView.setTopPixel(scrollY - zoomHeight / 2);
+				updateWindow();
+			}
+			function updateScroll(scroll) {
+				if (that.centered) {
+					updateScrollCentered(scroll);
+				} else {
+					updateScrollRelative(scroll);
+				}
 			}
 			function updateWidth(options) {
 				var width;
@@ -922,15 +959,30 @@ define("orion/editor/rulers", [
 			});
 			zoomView.addEventListener("MouseDown", function(event) { //$NON-NLS-0$
 				var offset = zoomView.getOffsetAtLocation(event.x, event.y);
-				textView.setSelection(offset, offset, 0.5);
+				var lineIndex = textView.getModel().getLineAtOffset(offset);
+				if (that.topIndex <= lineIndex && lineIndex <= that.bottomIndex) {
+					var e = event.event;
+					that.mouseDown = e.which ? e.button === 0 : e.button === 1;
+					that.delta = e.clientY -
+						zoomView.convert({y: zoomView.getLinePixel(textView.getTopIndex())}, "document", "page").y + //$NON-NLS-1$ //$NON-NLS-0$
+						that.node.getBoundingClientRect().top;
+				} else {
+					textView.setSelection(offset, offset, 0.5, function() {});
+				}
 				event.event.stopPropagation();
 				event.preventDefault();
 			});
 			zoomView.addEventListener("MouseUp", function(event) { //$NON-NLS-0$
+				that.mouseDown = false;
 				event.event.stopPropagation();
 				event.preventDefault();
 			});
 			zoomView.addEventListener("MouseMove", function(event) { //$NON-NLS-0$
+				if (that.mouseDown) {
+					var p = getProps();
+					var thumbPos = Math.min(p.clientHeight - p.windowHeight, Math.max(0, event.event.clientY - that.delta));
+					textView.setTopPixel(thumbPos * (p.documentHeight - p.clientHeight) / (p.clientHeight - p.windowHeight));
+				}
 				event.event.stopPropagation();
 				event.preventDefault();
 			});

@@ -22,6 +22,11 @@
 	border-left: 1px solid #eaeaea;
 }
 
+.textviewInnerRightRuler {
+	border-left: 1px solid #eaeaea;
+	background-color: white;
+}
+
 .textviewMarginRuler {
 	border-left: 1px solid #eaeaea;
 }
