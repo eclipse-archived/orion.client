@@ -211,6 +211,15 @@ Note that if you know the change id of the patch you are interested in reviewing
 
 ### Fetching Branches and Commits
 
+Once the config entries are set, you can fetch the branches and change sets.
+
+1. Expand the References dropdown and click on the Fetch action.
+2. When the action finishes you will be able to see all available change sets and branches.
+
+<pic>
+
+
+
 
 
 
