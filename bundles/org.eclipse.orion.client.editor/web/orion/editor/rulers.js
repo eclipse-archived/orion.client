@@ -839,9 +839,6 @@ define("orion/editor/rulers", [
 			BaseRuler.prototype.setView.call(this, view);
 			this._create();
 		},
-		setCentered: function(centered) {
-			this.centered = centered;
-		},
 		_create: function() {
 			var textView = this.getView();
 			if (!textView) return;
@@ -870,15 +867,12 @@ define("orion/editor/rulers", [
 			windowDiv.className ="rulerZoomWindow"; //$NON-NLS-0$
 			this.node.appendChild(windowDiv);
 			var that = this;
-			function updateWindow() {
-				var topIndex = that.topIndex = textView.getTopIndex();
-				var bottomIndex = that.bottomIndex = textView.getBottomIndex();
-				var topPixel = zoomView.getLinePixel(topIndex);
-				var bottomPixel = zoomView.getLinePixel(bottomIndex);
-				topPixel = zoomView.convert({y: topPixel}, "document", "page").y; //$NON-NLS-1$ //$NON-NLS-0$
-				bottomPixel = zoomView.convert({y: bottomPixel}, "document", "page").y; //$NON-NLS-1$ //$NON-NLS-0$
-				windowDiv.style.top = (topPixel - that.node.getBoundingClientRect().top) + "px"; //$NON-NLS-0$
-				windowDiv.style.height = (bottomPixel - topPixel) + "px"; //$NON-NLS-0$
+			function updateWindow(scroll, p) {
+				var top = scroll.y * p.zoomFactor;
+				var height = p.clientHeight * p.zoomFactor;
+				top = zoomView.convert({y: top}, "document", "page").y; //$NON-NLS-1$ //$NON-NLS-0$
+				windowDiv.style.top = (top - that.node.getBoundingClientRect().top) + "px"; //$NON-NLS-0$
+				windowDiv.style.height = height + "px"; //$NON-NLS-0$
 			}
 			function getProps() {
 				var padding = textView._metrics.viewPadding;
@@ -900,29 +894,15 @@ define("orion/editor/rulers", [
 					padding: padding
 				};
 			}
-			function toZoom(scroll) {
-				var p = getProps();
+			function toZoom(scroll, p) {
 				return scroll.y * (p.zoomFactor + (p.windowHeight - p.clientHeight - p.scrollWidth + p.padding.top + p.padding.bottom) / p.documentHeight);
-			}
-			function updateScrollRelative(scroll) {
-				var y = toZoom(scroll);
-				zoomView.setTopPixel(y);
-				updateWindow();
-			}
-			function updateScrollCentered(scroll) {
-				var clientHeight = textView.getClientArea().height;
-				var zoomHeight = zoomView.getClientArea().height;
-				var scrollY = zoomView.getLinePixel(textView.getLineIndex(scroll.y + clientHeight / 2));
-				zoomView.setTopPixel(scrollY - zoomHeight / 2);
-				updateWindow();
 			}
 			function updateScroll(scroll) {
 				scroll = scroll || {y: textView.getTopPixel()};
-				if (that.centered) {
-					updateScrollCentered(scroll);
-				} else {
-					updateScrollRelative(scroll);
-				}
+				var p = getProps();
+				var y = toZoom(scroll, p);
+				zoomView.setTopPixel(y);
+				updateWindow(scroll, p);
 			}
 			function updateWidth(options) {
 				var width;
