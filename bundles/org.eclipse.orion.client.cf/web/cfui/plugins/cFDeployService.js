@@ -168,7 +168,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 					
 					/* find out if any deployment wizards are plugged in */
 					var wizardReferences = serviceRegistry.getServiceReferences("orion.project.deploy.wizard");
-					if(true || wizardReferences.length === 0){ /* TODO: Temporary stability fix */
+					if(wizardReferences.length === 0){
 						
 						/* old-style interactive deploy */
 						deferred.resolve({UriTemplate: "{+OrionHome}/cfui/deployInteractive.html#" + encodeURIComponent(JSON.stringify({ContentLocation: project.ContentLocation, AppPath: appPath})), 
@@ -194,8 +194,11 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 							/* find feasible deployments */
 							var feasibleDeployments = [];
 							plans.forEach(function(plan){
-								var wizard = wizardReferences.find(function(ref){
-									return ref.getProperty("id") === plan.Wizard;
+								
+								var wizard;
+								wizardReferences.forEach(function(ref){
+									if(ref.getProperty("id") === plan.Wizard && !wizard)
+										wizard = ref;
 								});
 								
 								if(wizard){
@@ -244,8 +247,10 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 									});
 								} else {
 									/* TODO: Support this case in wizards */
-									var generic = feasibleDeployments.find(function(deployment){
-										return deployment.plan.ApplicationType === "generic";
+									var generic;
+									feasibleDeployments.forEach(function(deployment){
+										if(deployment.plan.ApplicationType === "generic" && !generic)
+											generic = deployment;
 									});
 									
 									deployment.wizard.getInitializationParameters().then(function(initParams){

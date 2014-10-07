@@ -24,6 +24,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 	}
 
 	return {
+		
 		getTargets : function(preferences) {
 			return preferences.getPreferences('/cm/configurations').then(function(settings){
 				var cloud = settings.get("org.eclipse.orion.client.cf.settings");
@@ -80,17 +81,6 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 			};
 		},
 		
-		/* ===== WIZARD HELPERS ===== */
-		
-		/**
-		 * Posts the given status message.
-		 */
-		defaultPostMsg : function(status){
-			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-				 source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
-				 status: status}), "*");
-		},
-		
 		/**
 		 * Decorates the given error object.
 		 */
@@ -130,16 +120,6 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 		},
 		
 		/**
-		 * Posts the given given error.
-		 */
-		defaultPostError : function(error, target){
-			error = this.defaultDecorateError(error, target);
-			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-				source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
-				status: error}), "*");
-		},
-		
-		/**
 		 * Builds a default error handler which handles the given error
 		 * in the wizard without communication with the parent window.
 		 */
@@ -149,7 +129,6 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 			var showMessage = options.showMessage;
 			var hideMessage = options.hideMessage;
 			var showError = options.showError;
-			
 			var render = options.render;
 			
 			var self = this;
@@ -233,39 +212,6 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 			};
 			
 			return handleError;
-		},
-		
-		/**
-		 *  Posts to close the plugin frame.
-		 */
-		defaultCloseFrame : function(){
-			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-				 source: "org.eclipse.orion.client.cf.deploy.uritemplate", cancelled: true}), "*");
-		},
-		
-		/**
-		 * Parses the given message creating a decorated UI.
-		 */
-		defaultParseMessage : function(msg){
-			var chunks, msgNode;
-			try {
-				chunks = URLUtil.detectValidURL(msg);
-			} catch (e) {
-				/* contained a corrupt URL */
-				chunks = [];
-			}
-			
-			if (chunks.length) {
-				msgNode = document.createDocumentFragment();
-				URLUtil.processURLSegments(msgNode, chunks);
-				
-				/* all status links open in new window */
-				Array.prototype.forEach.call(lib.$$("a", msgNode), function(link) { //$NON-NLS-0$
-					link.target = "_blank"; //$NON-NLS-0$
-				});
-			}
-			
-			return msgNode || document.createTextNode(msg);
 		}
 	};
 });

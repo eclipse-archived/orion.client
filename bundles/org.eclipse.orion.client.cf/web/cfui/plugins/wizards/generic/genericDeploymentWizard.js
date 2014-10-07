@@ -11,67 +11,21 @@
 /*global parent window document define orion setTimeout*/
 
 define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection',
-	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'orion/objects', 'orion/widgets/input/ComboTextInput',
+	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'cfui/plugins/wizards/common/wizardUtils', 'orion/objects', 'orion/widgets/input/ComboTextInput',
 	'orion/webui/Wizard', 'cfui/plugins/wizards/common/deploymentLogic', 'cfui/plugins/wizards/common/commonPaneBuilder', 'cfui/plugins/wizards/common/corePageBuilder', 
 	'cfui/plugins/wizards/common/servicesPageBuilder', 'cfui/plugins/wizards/common/additionalParamPageBuilder'], 
-		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, URITemplate, PageLinks, Preferences, mFileClient, mCfUtil, objects, ComboTextInput, Wizard,
+		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, URITemplate, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, objects, ComboTextInput, Wizard,
 				mDeploymentLogic, mCommonPaneBuilder, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder) {
 	
 	/* plugin-host communication */
-	var postMsg = mCfUtil.defaultPostMsg;
-	var postError = mCfUtil.defaultPostError;
-	var closeFrame = mCfUtil.defaultCloseFrame;
+	var postMsg = mWizardUtils.defaultPostMsg;
+	var postError = mWizardUtils.defaultPostError;
+	var closeFrame = mWizardUtils.defaultCloseFrame;
 	
 	/* default utils */
-	var parseMessage = mCfUtil.defaultParseMessage;
-	
-	/* status messages */
-	function showMessage(message){
-		document.getElementById('messageLabel').classList.remove("errorMessage");
-		document.getElementById('messageContainer').classList.remove("errorMessage");
-		lib.empty(document.getElementById('messageText'));
-		
-		document.getElementById('messageText').style.width = "100%";
-		document.getElementById('messageText').appendChild(parseMessage(message));
-		
-		document.getElementById('messageButton').className = "";
-		document.getElementById('messageContainer').classList.add("showing");
-	}
-	
-	function hideMessage(){
-		document.getElementById('messageLabel').classList.remove("errorMessage");
-		document.getElementById('messageContainer').classList.remove("errorMessage");
-		lib.empty(document.getElementById('messageText'));
-		document.getElementById('messageContainer').classList.remove("showing");
-	}
-	
-	function showError(message){
-		document.getElementById('messageLabel').classList.add("errorMessage");
-		document.getElementById('messageContainer').classList.add("errorMessage");
-		lib.empty(document.getElementById('messageText'));
-		
-		document.getElementById('messageText').style.width = "calc(100% - 10px)";
-		document.getElementById('messageText').appendChild(parseMessage(message.Message || message));
-		lib.empty(document.getElementById('messageButton'));
-		
-		document.getElementById('messageButton').className = "dismissButton core-sprite-close imageSprite";
-		document.getElementById('messageButton').onclick = hideMessage;
-		document.getElementById('messageContainer').classList.add("showing");
-	}
-	
-	function _getDefaultTarget(fileClient, resource) {
-		var clientDeferred = new Deferred();
-		fileClient.read(resource.ContentLocation, true).then(
-			function(result){
-				mCfUtil.getDefaultTarget(result).then(
-					clientDeferred.resolve,
-					clientDeferred.reject
-				);
-			}, clientDeferred.reject
-		);
-		
-		return clientDeferred;
-	}
+	var showMessage = mWizardUtils.defaultShowMessage;
+	var hideMessage = mWizardUtils.defaultHideMessage;
+	var showError = mWizardUtils.defaultShowError;
 	
 	mBootstrap.startup().then(function(core) {
 		
@@ -82,46 +36,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		document.getElementById('closeDialog').addEventListener('click', closeFrame); //$NON-NLS-1$ //$NON-NLS-0$
 		 
 		/* allow frame to be dragged by title bar */
-		var that = this;
-		var iframe = window.frameElement;
-	    setTimeout(function(){
-	    	
-			var titleBar = document.getElementById('titleBar');
-			titleBar.addEventListener('mousedown', function(e) {
-				that._dragging = true;
-				if (titleBar.setCapture) {
-					titleBar.setCapture();
-				}
-				
-				that.start = {
-					screenX: e.screenX,
-					screenY: e.screenY
-				};
-			});
-			
-			titleBar.addEventListener('mousemove', function(e) {
-				if (that._dragging) {
-					var dx = e.screenX - that.start.screenX;
-					var dy = e.screenY - that.start.screenY;
-					
-					that.start.screenX = e.screenX;
-					that.start.screenY = e.screenY;
-					
-					var x = parseInt(iframe.style.left) + dx;
-					var y = parseInt(iframe.style.top) + dy;
-					
-					iframe.style.left = x+"px";
-					iframe.style.top = y+"px";
-				}
-			});
-			
-			titleBar.addEventListener('mouseup', function(e) {
-				that._dragging = false;
-				if (titleBar.releaseCapture) {
-					titleBar.releaseCapture();
-				}
-			});
-	    });
+		mWizardUtils.makeDraggable(this);
 			
 		var pageParams = PageUtil.matchResourceParameters();
 		var resourceString = decodeURIComponent(pageParams.resource);
@@ -161,7 +76,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		Deferred.all([
 		     
 		     mCfUtil.getTargets(preferences),
-		     _getDefaultTarget(fileClient, resource)
+		     mWizardUtils.getDefaultTarget(fileClient, resource)
 		     
 		]).then(function(results){
 			
