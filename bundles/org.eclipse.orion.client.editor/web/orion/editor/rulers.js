@@ -873,6 +873,8 @@ define("orion/editor/rulers", [
 			function updateWindow(scroll, p) {
 				var top = scroll.y * p.zoomFactor;
 				var height = p.clientHeight * p.zoomFactor;
+				that.top = top;
+				that.bottom = top + height;
 				top = zoomView.convert({y: top}, "document", "page").y; //$NON-NLS-1$ //$NON-NLS-0$
 				windowDiv.style.top = (top - that.node.getBoundingClientRect().top) + "px"; //$NON-NLS-0$
 				windowDiv.style.height = (height - border) + "px"; //$NON-NLS-0$
@@ -949,8 +951,7 @@ define("orion/editor/rulers", [
 			});
 			zoomView.addEventListener("MouseDown", function(event) { //$NON-NLS-0$
 				var offset = zoomView.getOffsetAtLocation(event.x, event.y);
-				var lineIndex = textView.getModel().getLineAtOffset(offset);
-				if (that.topIndex <= lineIndex && lineIndex <= that.bottomIndex) {
+				if (that.top <= event.y && event.y <= that.bottom) {
 					var e = event.event;
 					that.mouseDown = e.which ? e.button === 0 : e.button === 1;
 					that.delta = e.clientY -
