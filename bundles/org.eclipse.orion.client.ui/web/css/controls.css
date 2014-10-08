@@ -677,11 +677,11 @@ textarea.parameterInput {
 }
 
 .treeIterationCursorRow {
-	background-color: #f3f6fe;
+	background-color: white;
 }
 
 .treeIterationCursorRow_Dotted {
-	background-color: #f3f6fe;
+	background-color: white;
 }
 
 .searchCmdGroupMargin {
