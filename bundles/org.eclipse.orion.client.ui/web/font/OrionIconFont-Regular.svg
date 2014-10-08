@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
 <svg xmlns="http://www.w3.org/2000/svg">
 <metadata>
-Created by FontPrep 20130207 at Mon Sep 22 14:41:50 2014
+Created by FontPrep 20130207 at Wed Oct  8 10:26:45 2014
  By Anton McConville
 copyright missing
 </metadata>
@@ -19,7 +19,7 @@ copyright missing
     bbox="-0.450704 -424 2076 1666"
     underline-thickness="100"
     underline-position="-100"
-    unicode-range="U+E000-E04E"
+    unicode-range="U+E000-E052"
   />
 <missing-glyph horiz-adv-x="1000" 
 d="M100 1210v-1020l340 510zM160 100h680l-340 510zM560 700l340 -510v1020zM500 790l340 510h-680zM0 0v1400h1000v-1400h-1000z" />
@@ -212,5 +212,12 @@ d="M1736 878l-72 -72l-290 290l290 290l72 -74l-218 -216zM1664 128h-640v128h640v-1
 d="M1664 1280h-1280l128 -256l128 -86l384 -426l384 426l128 86zM128 1536h1792v-384l-640 -640v-128l-128 -512l-384 -128v768l-640 640v384z" />
     <glyph glyph-name="uniE04E" unicode="&#xe04e;" 
 d="M2048 0q0 -132 -94 -226t-226 -94t-226 94t-94 226t94 226t226 94t226 -94t94 -226zM1536 1344h-1280l128 -256l128 -86l384 -426l384 426l128 86zM0 1600h1792v-384l-640 -640v-128l-128 -512l-384 -128v768l-640 640v384z" />
+    <glyph glyph-name="uniE050" unicode="&#xe050;" 
+d="M1720 1336l200 -198l-1194 -1196l-598 598l200 200l398 -398z" />
+    <glyph glyph-name="uniE051" unicode="&#xe051;" 
+d="M1152 -352h-256v128h256v-128zM1280 -96h-512v128h512v-128zM1152 288v210q166 42 275 180t109 314q0 212 -150 362t-362 150t-362 -150t-150 -362q0 -176 109 -314t275 -180v-210h256zM1024 1632q266 0 453 -187t187 -453q0 -194 -106 -352t-278 -234v-246h-512v246
+q-172 76 -278 234t-106 352q0 266 187 453t453 187z" />
+    <glyph glyph-name="uniE052" unicode="&#xe052;" 
+d="M384 0v256h1280v-256h-1280zM384 384v256h1280v-256h-1280zM128 -256h1792v1408l-384 384h-128v-640h-1024v640h-256v-1792zM1280 1024v512h-384v-512h384zM0 1664h1536l512 -512v-1536h-2048v2048z" />
   </font>
 </defs></svg>
