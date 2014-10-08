@@ -63,7 +63,6 @@ define({
 	"UserSettings.InvalidPasswordAlpha" : "Password must contain at least one alpha character and one non alpha character",
 	"UserSettings.PasswordRules" : "Password must be at least 8 characters long and contain at least one alpha character and one non alpha character",
 	"Password": "Password",
-	"OpenId": "OpenId",
 	"AOL": "AOL",
 	"Yahoo": "Yahoo",
 	"Google": "Google",

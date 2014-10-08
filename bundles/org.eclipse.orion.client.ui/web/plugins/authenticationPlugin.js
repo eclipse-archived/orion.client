@@ -62,11 +62,11 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 			});
 		},
 		getAuthForm: function(notify) {
-			return qualifyURL(notify ? ('../mixloginstatic/LoginWindow.html?redirect=' + encodeURIComponent(notify) + '&key=FORMOpenIdUser') : '../mixloginstatic/LoginWindow.html');
+			return qualifyURL(notify ? ('../mixloginstatic/LoginWindow.html?redirect=' + encodeURIComponent(notify) + '&key=FORMOAuthUser') : '../mixloginstatic/LoginWindow.html');
 		},
 
 		getKey: function() {
-			return "FORMOpenIdUser";
+			return "FORMOAuthUser";
 		},
 
 		getLabel: function() {
@@ -74,7 +74,7 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 		}
 	};
 	var serviceProps = {
-		name: "FORM+OpenId"
+		name: "FORM+OAuth"
 	};
 	provider.registerService("orion.core.auth", serviceImpl, serviceProps);
 	provider.connect();

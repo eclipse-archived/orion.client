@@ -119,12 +119,6 @@ define([
 			lib.node( 'iFrameContent' ).appendChild(iframe); //$NON-NLS-0$
 		},
 		
-		confirmOpenId: function(openid){
-			if (openid !== "" && openid !== null) {
-				this.win = window.open( "../mixlogin/manageopenids/openid?openid=" + encodeURIComponent(openid),"openid_popup", "width=790,height=580" ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			}
-		},
-		
 		deleteUser: function(){
 			if(confirm(messages["DeleteUserComfirmation"])){			
 				var userService = this.userService; //$NON-NLS-0$

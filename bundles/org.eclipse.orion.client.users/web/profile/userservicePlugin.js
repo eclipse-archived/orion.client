@@ -64,7 +64,7 @@ define(["orion/plugin", "profile/UsersService", "domReady!"], function(PluginPro
    				  	                                                                                            {"type": "TextBox", "props": {"id": "git_name", "readOnly" : false, "name" : "GitName"}, "label" : "Git Name:"}
    				  	                                                                                            ]
    				  	        },
-                          {"id": "openids", "name": "Manage External Accounts", "type": "iframe", "data" : {"src": "../mixloginstatic/manageExternalIds.html"}}
+                          {"id": "oauthids", "name": "Manage External Accounts", "type": "iframe", "data" : {"src": "../mixloginstatic/manageExternalIds.html"}}
                             ]
 		};
 

@@ -16,30 +16,6 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 
 	var loadAttachedExternalIds, loadUserData;
 
-	function removeOpenId(openid) {
-		if (confirm("Are you sure you want to remove " + openid + " from the list of your external accounts?")) {
-			var openids = jsonData.properties.openid.split('\n');
-			var newopenids = [];
-			for (var i = 0; i < openids.length; i++) {
-				if (openids[i] !== openid) {
-					newopenids.push(openids[i]);
-				}
-			}
-			jsonData.properties.openid = newopenids.join("\n");
-
-			xhr("PUT", jsonData.Location, { //$NON-NLS-0$
-				data: JSON.stringify(jsonData),
-				headers: {
-					"Orion-Version": "1"
-				},
-				timeout: 15000
-			}).then(function(xhrResult) {
-				loadUserData(jsonData.Location);
-			}, function(xhrResult) {
-				console.error(xhrResult.error);
-			});
-		}
-	}
 	function removeOAuth(oauth) {
 		if (confirm("Are you sure you want to remove " + oauth + " from the list of your external accounts?")) {
 			var oauths = jsonData.properties.oauth.split('\n');
@@ -75,22 +51,16 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 		var table = document.createElement("table"); //$NON-NLS-0$
 		table.classList.add("manageExternalIdsTable"); //$NON-NLS-0$
 		list.appendChild(table); //$NON-NLS-0$
-		if (jsonData.properties && (jsonData.properties.openid || jsonData.properties.oauth)) {
+		if (jsonData.properties && jsonData.properties.oauth) {
 
-			var openids = jsonData.properties.openid ? jsonData.properties.openid.split('\n') : []; //$NON-NLS-0$
 			var oauths = jsonData.properties.oauth ? jsonData.properties.oauth.split('\n') : []; //$NON-NLS-0$
-			for (var i = openids.length - 1; i >= 0; i--) {
-				if (openids[i] === "") {
-					openids.splice(i, 1);
-				}
-			}
 			for (var i = oauths.length - 1; i >= 0; i--) {
 				if (oauths[i] === "") {
 					oauths.splice(i, 1);
 				}
 			}
 
-			if (openids.length || oauths.length) {
+			if (oauths.length) {
 				var thead = document.createElement("thead"); //$NON-NLS-0$
 				thead.classList.add("navTableHeading"); //$NON-NLS-0$
 				table.appendChild(thead);
@@ -103,10 +73,6 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 				tr.appendChild(td);
 			}
 
-			for (var i = 0; i < openids.length; i++) {
-				var openid = openids[i];
-				addAuthenticationEntry(openid, i, table, removeOpenId);
-			}
 			for (var i = 0; i < oauths.length; i++) {
 				var oauth = oauths[i];
 				addAuthenticationEntry(oauth, i, table, removeOAuth);
@@ -232,10 +198,10 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 		providerElements.push(createProviderLink("Google OAuth", "../mixloginstatic/images/google.png", "", confirmOAuth.bind(null, "google")));
 		providerElements.push(createProviderLink("GitHub OAuth", "../mixloginstatic/images/GitHub-Mark-Light-32px.png", "githubImage", confirmOAuth.bind(null, "github")));
 
-		var openIdContainer = document.getElementById("newExternalId");
+		var oauthContainer = document.getElementById("newExternalId");
 		providerElements.forEach(function(provider) {
-			openIdContainer.appendChild(provider);
-			openIdContainer.appendChild(document.createTextNode(" "));
+			oauthContainer.appendChild(provider);
+			oauthContainer.appendChild(document.createTextNode(" "));
 		});
 	}
 

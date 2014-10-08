@@ -421,15 +421,6 @@ a.loginwindow {
 	box-shadow: 0 1px 0 rgba(0, 0, 0, .1);
 }
 
-.openIdIcon {
-	background: url('../images/openid.png') no-repeat;
-	/* background-position: 0 -80px; */
-	width: 50px;
-	height: 50px;
-	/* margin-top:2px; */
-	margin-left: 10px;
-}
-
 .orionLoginIcon {
 	background: url('../images/oriongrey.png') no-repeat;
 	/* background-position: 0 -80px; */
