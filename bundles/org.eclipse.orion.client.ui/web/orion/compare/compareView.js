@@ -12,6 +12,7 @@
 /*eslint-env browser, amd*/
 define(['i18n!orion/compare/nls/messages',
 		'orion/Deferred',
+		'orion/EventTarget',
 		'orion/webui/littlelib',
 		'orion/compare/diffParser',
 		'orion/compare/compareRulers',
@@ -23,7 +24,7 @@ define(['i18n!orion/compare/nls/messages',
         'orion/compare/compareUtils',
         'orion/compare/jsdiffAdapter',
         'orion/compare/diffTreeNavigator'],
-function(messages, Deferred, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mKeyBinding, mTextView,
+function(messages, Deferred, mEventTarget, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mKeyBinding, mTextView,
 		 mCompareUIFactory, mCompareUtils, mJSDiffAdapter, mDiffTreeNavigator,  mTextMateStyler, mHtmlGrammar, mTextStyler) {
 var exports = {};
 /**
@@ -37,6 +38,7 @@ var exports = {};
  */
 exports.CompareView = (function() {
 	function CompareView () {
+		mEventTarget.attach(this);
 		this._diffParser = new mDiffParser.DiffParser();
 	}
 	CompareView.prototype = {
@@ -119,11 +121,13 @@ exports.CompareView = (function() {
 				Deferred.all(promises, function(error) { return {_error: error}; }).then(function(promises){
 					this._diffNavigator.renderAnnotations(this.isWhitespaceIgnored());
 					this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
+					this.dispatchEvent({type: "contentLoaded"});
 				}.bind(this));
 			} else {//render all the diff annotations directly
 				window.setTimeout(function () {
 					this._diffNavigator.renderAnnotations(this.isWhitespaceIgnored());
 					this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
+					this.dispatchEvent({type: "contentLoaded"});
 				}.bind(this), 50);
 			}
 		},
@@ -315,6 +319,8 @@ exports.CompareView = (function() {
  */
 exports.TwoWayCompareView = (function() {
 	function TwoWayCompareView(options) {
+		exports.CompareView.call(this, options);
+
 		this.setOptions(options, true);
 		//Init the diff navigator that controls the navigation on both block and word level.
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
@@ -337,7 +343,7 @@ exports.TwoWayCompareView = (function() {
 		}
 		this._curveRuler = new mCompareRulers.CompareCurveRuler(this._uiFactory.getDiffCanvasDiv());
 	}
-	TwoWayCompareView.prototype = new exports.CompareView();
+	TwoWayCompareView.prototype = Object.create(exports.CompareView.prototype);
 	
 	TwoWayCompareView.prototype.initEditors = function(initString){
 		if(this.options.preCreate) {
@@ -628,6 +634,32 @@ exports.TwoWayCompareView = (function() {
 			}
 		}
 	};
+	/**
+	 * Scrolls to the specified line and selects
+	 * the characters between start and end.
+	 * @param[in] lineNumber The 0 based line number to reveal.
+	 * @param[in] optional start The index at which the selection should start.
+	 * @param[in] optional end The index at which the selection should end.
+	 * @param[in] optional callback The callback function after the line is moved.
+	 */
+	TwoWayCompareView.prototype.gotoLine = function(lineNumber/*zero based*/, start, end, callback){
+		if(typeof start !== "number") {
+			start = 0;
+		}
+		var gotoLineCallback = function() {
+			callback(lineNumber);
+		}.bind(this);
+		this._editors[1].onGotoLine(lineNumber, start, end, gotoLineCallback);
+	};
+	TwoWayCompareView.prototype.getMainEditor = function(){
+		if(this._editors) {
+			return this._editors[1];
+		}
+		return null;
+	};
+	TwoWayCompareView.prototype.getLineNumber = function(lineNumber){
+		return lineNumber;
+	};
 	return TwoWayCompareView;
 }());
 
@@ -641,6 +673,7 @@ exports.TwoWayCompareView = (function() {
  */
 exports.InlineCompareView = (function() {
 	function InlineCompareView(options) {
+		exports.CompareView.call(this, options);
 		this.setOptions(options, true);
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
 		this.type = "inline"; //$NON-NLS-0$
@@ -649,7 +682,7 @@ exports.InlineCompareView = (function() {
 		}
 		this._editorDiv = this.options.parentDivId;
 	}
-	InlineCompareView.prototype = new exports.CompareView();
+	InlineCompareView.prototype = Object.create(exports.CompareView.prototype);
 	
 	InlineCompareView.prototype.addRulers = function(){
 		if(this._textView && !this._hasRuler){
@@ -811,12 +844,29 @@ exports.InlineCompareView = (function() {
 	 * Scrolls to the specified line and selects
 	 * the characters between start and end.
 	 * @param[in] lineNumber The 0 based line number to reveal.
-	 * @param[in] start The index at which the selection should start.
-	 * @param[in] end The index at which the selection should end.
+	 * @param[in] optional start The index at which the selection should start.
+	 * @param[in] optional end The index at which the selection should end.
+	 * @param[in] optional callback The callback function after the line is moved.
 	 */
-	InlineCompareView.prototype.gotoLine = function(lineNumber/*zero based*/, start, end){
+	InlineCompareView.prototype.gotoLine = function(lineNumber/*zero based*/, start, end, callback){
+		if(typeof start !== "number") {
+			start = 0;
+		}
 		var mergedNumber = mCompareUtils.convertMergedLineNumber(this._mapper, lineNumber);
-		this._editor.onGotoLine(mergedNumber, start, end);
+		var gotoLineCallback = function() {
+			callback(mergedNumber);
+		}.bind(this);
+		this._editor.onGotoLine(mergedNumber, start, end, gotoLineCallback);
+	};
+	InlineCompareView.prototype.getMainEditor = function(){
+		if(this._editor) {
+			return this._editor;
+		}
+		return null;
+	};
+	InlineCompareView.prototype.getLineNumber = function(lineNumber){
+		var mergedNumber = mCompareUtils.convertMergedLineNumber(this._mapper, lineNumber);
+		return mergedNumber;
 	};
 	
 	return InlineCompareView;
