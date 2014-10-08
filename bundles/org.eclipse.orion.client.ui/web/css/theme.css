@@ -553,7 +553,8 @@ a.breadcrumb.currentLocation {
 }
 
 .dropdownArrowRight {
-	float: right;
+	flex-grow: 0;
+	-webkit-flex-grow: 0;		/* Safari */
 	font-size: 12px;
 }
 
@@ -633,7 +634,10 @@ a.breadcrumb.currentLocation {
 }
 
 .dropdownMenuItem, .dropdownMenuItem a {
-	display: inline-block;
+	align-content: stretch;
+	-webkit-align-content: stretch;		/* Safari */
+	display: inline-flex;
+	display: -webkit-inline-flex;		/* Safari */
 	vertical-align: middle;
 	color: #555 !important;
 	padding: 3px 3px 3px 5px;
@@ -660,14 +664,16 @@ a.breadcrumb.currentLocation {
 
 .dropdownMenuItem .dropdownKeyBinding {
 	color: grey !important; /* !important to override .dropdownMenuItem */
-	float: right;
+	flex-grow: 0;
+	-webkit-flex-grow: 0;		/* Safari */
 	font-size: 11px;
 	padding-left: 15px;
 	padding-right: 10px;
 }
 
 .dropdownMenuItem .dropdownCommandName {
-	float: left;
+	flex-grow: 1;
+	-webkit-flex-grow: 1;		/* Safari */
 	text-decoration: inherit; /* inherit hover decoration when inside an <a> */
 }
 

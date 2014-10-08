@@ -124,10 +124,24 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				toolbarNode: toolbarNode,
 				sidebar: this
 			});
-
+			
+			this._slideout = new mSlideout.Slideout(this.toolbarNode.parentNode);
+			
+			// add Slideout menu group to View menu
+			commandRegistry.addCommandGroup(switcherNode.id, 
+				"orion.slideoutMenuGroup", //$NON-NLS-0$
+				3, 
+				messages["Slideout"], //$NON-NLS-0$
+				"orion.menuBarViewGroup", //$NON-NLS-0$
+				null, 
+				null, 
+				null, 
+				"dropdownSelection"); //$NON-NLS-0$
+			
+			
 			// Outliner is responsible for adding its view mode(s) to this sidebar
-			this.outliner = new mOutliner.Outliner({
-				parent: parentNode,
+			this.outliner = new mOutliner.Outliner(this._slideout,
+			{
 				toolbar: toolbarNode,
 				serviceRegistry: serviceRegistry,
 				contentTypeRegistry: contentTypeRegistry,
@@ -137,11 +151,10 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				selectionService: selection,
 				inputManager: editorInputManager,
 				progressService: progressService,
-				sidebar: this
+				sidebar: this,
+				switcherNode: switcherNode
 			});
 			this.setViewMode(this.defaultViewMode);
-			
-			this._slideout = new mSlideout.Slideout(this.toolbarNode.parentNode);
 			
 			this._createInlineSearchPane();
 		},

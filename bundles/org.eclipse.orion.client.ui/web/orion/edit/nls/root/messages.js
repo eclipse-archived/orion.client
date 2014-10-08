@@ -45,6 +45,7 @@ define({
 	"View": "View", //$NON-NLS-1$ //$NON-NLS-0$
 	"SidePanel": "Side Panel", //$NON-NLS-1$ //$NON-NLS-0$
 	"SidePanelTooltip": "Choose what to show in the side panel.", //$NON-NLS-1$ //$NON-NLS-0$
+	"Slideout": "Slideout", //$NON-NLS-1$ //$NON-NLS-0$
 	"Actions": "Actions", //$NON-NLS-1$ //$NON-NLS-0$
 	"Navigator": "Navigator", //$NON-NLS-1$ //$NON-NLS-0$
 	"FolderNavigator": "Folder Navigator", //$NON-NLS-1$ //$NON-NLS-0$
