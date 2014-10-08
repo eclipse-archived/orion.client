@@ -1518,7 +1518,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @see orion.editor.TextView#setTopPixel
 		 */
 		convert: function(rect, from, to) {
-			if (!this._clientDiv) { return; }
+			if (!this._clientDiv) { return rect; }
 			var scroll = this._getScroll();
 			var viewPad = this._getViewPadding();
 			var viewRect = this._viewDiv.getBoundingClientRect();
