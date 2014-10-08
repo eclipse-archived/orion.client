@@ -214,9 +214,77 @@ Note that if you know the change id of the patch you are interested in reviewing
 Once the config entries are set, you can fetch the branches and change sets.
 
 1. Expand the References dropdown and click on the Fetch action.
+
 2. When the action finishes you will be able to see all available change sets and branches.
 
 <pic>
+
+
+### Getting changes into Gerrit
+
+We'll now take a look at two sample workflows for getting changes into Gerrit, one for simple changes and one for more complex changes. These are by no means the only way of working with Gerrit but just illustrate two different approaches one can take.
+
+The starting point for both of these workflows is that you have your Gerrit account correctly configured (you can push to Gerrit), and that you have your Gerrit remote configured , with the proper config entries (see above section).
+
+#### Simple Changes
+
+For this workflow, we just want to make a small change on a branch (we will use master in this example).
+
+1. Checkout the branch you want to make the change for (see the section 'Checking Out a Branch')
+
+2. Make the change(s) and test...
+
+3. When the changes are ready to go, enter a commit message and check the  ***'Add Change-ID to message'***
+
+4. From the References dropdown, select the **<REMOTE>/for/<BRANCHNAME>** that you want to push to. For example, if you have named your remote "gerrit" and you your change is meant for the master branch, you would select "gerrit/for/master".
+
+5. When you are ready to push, do a fetch and rebase to make sure you are up to date with the remote branch.
+ 
+6. When you are up to date with the **<REMOTE>/for/<BRANCHNAME>** remote, you can Push. You will get an UP_TO_DATE message.
+ 
+7. Logging into the Gerrit UI, you will be able to see your commit under the My Changes section.
+
+	<pic>
+
+#### Complex Changes
+
+### Updating changes in Gerrit
+
+You can update a new version of a Gerrit patch - you just need to know the patch number:
+
+1. Type in the number in the References dropdown filter. If the change doesn't show up under your Gerrit remote, you might need to do a fetch (or check that your number is correct).
+
+2. Select the patch revision you want (if there are more than 1) and click checkout to check it out as a local branch.
+
+3. Make your changes and when you are ready to push, select your files, check the "Amend Previous Commit" box and hit Commit.
+
+4. Switch to the for/ branch you are targeting and hit push.
+
+5. You should now be able to see your patch changes in the Gerrit UI.
+
+### Reviewing changes from Gerrit
+
+Given that you have a Gerrit patch number, you are able to inspect the patch within Orion. To do this:
+
+1. First update your Gerrit remote. From the Reference dropdown, click on the fetch next to the remote.
+
+	<pic>
+
+2. Type the patch number into the filter box. You should see something like: 
+
+		<REMOTE>/changes/<some number>/<patch number>/<revision number>
+
+3. Depending on the number of revisions that have been submitted, you might have more than one entry listed. You are free to inspect any version.
+
+4. Make sure that you have the appropriate local branch checked out. For example, if the Gerrit patch is intended for master, make sure you have master checkout as your local branch.
+
+5. The patch will appear as an incoming change. You can then do a rebase/merge into your master branch to run it etc.
+
+	<pic>
+
+6. To get rid ot the patch, you can just reset your branch to the previous entry in the history, by selecting it and clicking on the Reset button in the Changes detail section.
+	
+	<pic>
 
 
 
