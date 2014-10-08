@@ -561,7 +561,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 					hostInput = hostDropdown.getTextInputNode();
 					hostInput.value = manifestInfo.host || manifestInfo.name || "";
 					
-					var selectedCloud = _clouds[_clouds.lenght > 1 ? cloudsDropdown.selectedIndex : 0];
+					var selectedCloud = _clouds[_clouds.length > 1 ? cloudsDropdown.selectedIndex : 0];
 					loadTargets(selectedCloud);
 			    },
 			    validate: function(setValid) {
