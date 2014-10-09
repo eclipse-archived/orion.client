@@ -269,6 +269,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	 * @param {Object} options.textViewFactory
 	 * @param {Object} options.undoStackFactory
 	 * @param {Object} options.textDNDFactory
+	 * @param {Object} options.hoverFactory
 	 */
 	function Editor(options) {
 		options = options || {};
@@ -282,6 +283,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		this._lineNumberRulerFactory = options.lineNumberRulerFactory;
 		this._contentAssistFactory = options.contentAssistFactory;
 		this._keyBindingFactory = options.keyBindingFactory;
+		this._hoverFactory = options.hoverFactory;
 		
 		this._annotationStyler = null;
 		this._annotationModel = null;
@@ -301,7 +303,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			BaseEditor.prototype.destroy.call(this);
 			this._textViewFactory = this._undoStackFactory = this._textDNDFactory = 
 			this._annotationFactory = this._foldingRulerFactory = this._lineNumberRulerFactory = 
-			this._contentAssistFactory = this._keyBindingFactory = this._zoomRulerFactory = null;
+			this._contentAssistFactory = this._keyBindingFactory = this._hoverFactory = this._zoomRulerFactory = null;
 		},
 		/**
 		 * Returns the annotation model of the editor. 
@@ -657,14 +659,25 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			offset = this.mapOffset(offset);
 			var annotations = annotationStyler.getAnnotationsByType(annotationModel, offset, offset + 1);
 			var rangeAnnotations = [];
+			var annotationMsgs = [];
 			for (var i = 0; i < annotations.length; i++) {
 				if (annotations[i].rangeStyle) {
 					rangeAnnotations.push(annotations[i]);
+					annotationMsgs.push(annotations[i].title);
 				}
 			}
-			if (rangeAnnotations.length === 0) { return null; }
+			
+			var deferredInfo;
+			if (this._hover) {
+				var context = {offset: offset, 
+								annotations: annotationMsgs};
+				deferredInfo = this._hover.computeHoverInfo(context);
+			}
+			
+			if (rangeAnnotations.length === 0 && deferredInfo.length === 0) { return null; }
 			var pt = textView.convert({x: x, y: y}, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
 			var info = {
+				deferredInfo: deferredInfo,
 				contents: rangeAnnotations,
 				anchor: "left", //$NON-NLS-0$
 				x: pt.x + 10,
@@ -727,6 +740,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			if (this._contentAssistFactory) {
 				var contentAssistMode = this._contentAssistFactory.createContentAssistMode(this);
 				this._contentAssist = contentAssistMode.getContentAssist();
+			}
+			
+			if (this._hoverFactory) {
+				this._hover = this._hoverFactory.createHover(this);
 			}
 			
 			var editor = this, textView = this._textView;
