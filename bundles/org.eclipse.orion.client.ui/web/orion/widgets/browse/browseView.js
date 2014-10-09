@@ -273,6 +273,7 @@ define([
 									range.selectNode(dropdownHolder);
 									var infoFragment = range.createContextualFragment(handler.popupTemplate);
 									dropdownHolder.appendChild(infoFragment);
+									handler.init();
 									var infoDropDown = new mDropdown.Dropdown({
 										triggerNode: lib.node(handler.triggerNodeId), 
 										dropdown: lib.node(handler.dropdownNodeId)
@@ -355,6 +356,18 @@ define([
 							this.editorView.create();
 							this.resetTextModel = this.snippetShareOptions && this.snippetShareOptions.e ? true : false;
 							var textView = this.editorView.editor.getTextView();
+							var shareCodeTrigger = lib.node("orion.browse.shareCodeTrigger");
+							if(shareCodeTrigger) {
+								textView.addEventListener("Selection", this._editorViewSelectionChangedListener = function(evt){ //$NON-NLS-0$
+									if(evt.newValue){
+										if(evt.newValue.start !== evt.newValue.end){
+											shareCodeTrigger.style.display = "";
+										} else {
+											shareCodeTrigger.style.display = "none";
+										}
+									}
+								}.bind(this)); 
+							}
 							textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
 								var textModel = textView.getModel();
 								if(this.resetTextModel) {
@@ -483,7 +496,11 @@ define([
 		},
 		destroy: function() {
 			if(this.editorView) {
-				this.editorView. editor.getTextView().getModel().removeEventListener("Changed", this._editorViewModelChangedListener); //$NON-NLS-0$
+				this.editorView.editor.getTextView().getModel().removeEventListener("Changed", this._editorViewModelChangedListener); //$NON-NLS-0$
+				if(this._editorViewSelectionChangedListener) {
+					this.editorView.editor.getTextView().removeEventListener("Selection", this._editorViewSelectionChangedListener); //$NON-NLS-0$
+					this._editorViewSelectionChangedListener = null;
+				}
 				this.editorView.destroy();
 				this.editor = null;
 			}

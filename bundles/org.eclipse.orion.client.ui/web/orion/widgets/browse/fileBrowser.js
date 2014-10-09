@@ -32,6 +32,7 @@ define([
 	'text!orion/widgets/browse/repoAndBaseUrlTrigger.html',
 	'text!orion/widgets/browse/repoUrlTrigger.html',
 	'text!orion/widgets/browse/shareSnippetTrigger.html',
+	'text!orion/widgets/browse/shareCodeTrigger.html',
 	'orion/commands',
 	'orion/webui/littlelib',
 	'orion/i18nUtil',
@@ -42,7 +43,7 @@ define([
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector,
 	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, 
-	EventTarget, RepoAndBaseURLTriggerTemplate, RepoURLTriggerTemplate, ShareSnippetTriggerTemplate, mCommands, lib, i18nUtil, mFileDownloader, util, xhr
+	EventTarget, RepoAndBaseURLTriggerTemplate, RepoURLTriggerTemplate, ShareSnippetTriggerTemplate, ShareCodeTriggerTemplate, mCommands, lib, i18nUtil, mFileDownloader, util, xhr
 ) {
 	
 	function ResourceChangeHandler() {
@@ -117,6 +118,8 @@ define([
 			});
 		}.bind(this);
 		
+		this.init = function() {
+		};
 		this.getTextAreaValue = function() {
 			if(this.baseURL) {
 				var found = this.repoURL.match(/\/([^\/]+)\/([^\/]+)$/);
@@ -140,6 +143,8 @@ define([
 		this.popupTemplate = ShareSnippetTriggerTemplate;
 		this.tags = '<div id="${0}"></div><link rel="stylesheet" type="text/css" href="${1}"/><script src="${2}"></script>' +
 					'<script> orion.browse.browser("${3}","${4}",${5},null,{maxL:20,oHref:"${6}",fURI:"${7}",s:${8},e:${9}});</script>';
+		this.init = function() {
+		};
 		this.getTextAreaValue = function() {
 			if(this.textView) {
 				var snippetContainerId = "snippet_container_" + Math.floor((Math.random()*1000000)+1);
@@ -150,19 +155,48 @@ define([
 					start = selection.start;
 					end = selection.end;
 				}
-				var originalHref = new URITemplate("#{,resource,params*}").expand({resource:this.currentSnippetURI, params: {start: start, end: end}});
+				var originalHref = new URITemplate("#{,resource,params*}").expand({resource:this.currentResourceURI, params: {start: start, end: end}});
 				var url = new URL(window.location.href);
 				url.hash = originalHref;
 				var base = this.widgetSource.base ? '"' + this.widgetSource.base + '"' : 'null';
 	
             	var tagString = i18nUtil.formatMessage(this.tags, snippetContainerId, this.widgetSource.css, this.widgetSource.js, snippetContainerId, 
-            										   this.widgetSource.repo, base, url.href, this.currentSnippetURI, start, end);
+            										   this.widgetSource.repo, base, url.href, this.currentResourceURI, start, end);
 				return new Deferred().resolve(tagString);
 			}
 			return new Deferred().resolve("Nothing to share");
 		}.bind(this);
 	}
 	
+	function shareCodeHandler(){
+		this.triggerNodeId = "orion.browse.shareCodeTrigger";
+		this.dropdownNodeId = "orion.browse.shareCodeDropdown";
+		this.popupTextAreaId = "orion.browse.shareCodeInput";
+		this.popupTemplate = ShareCodeTriggerTemplate;
+		this.init = function() {
+			var node = lib.node(this.triggerNodeId);
+			if(node) {
+				node.style.display = "none";
+			}
+		};
+		this.getTextAreaValue = function() {
+			if(this.textView) {
+				var selection = this.textView.getSelection();
+				var textModel = this.textView.getModel();
+				var startL = 1;
+				var endL = 1;
+				if(textModel && selection.start !== selection.end) {
+					startL = textModel.getLineAtOffset(selection.start) + 1;
+					endL = textModel.getLineAtOffset(selection.end) + 1;
+				}
+				var originalHref = new URITemplate("#{,resource,params*}").expand({resource:this.currentResourceURI, params: {startL: startL, endL: endL}});
+				var url = new URL(window.location.href);
+				url.hash = originalHref;
+				return new Deferred().resolve(url.href);
+			}
+			return new Deferred().resolve("Nothing to share");
+		}.bind(this);
+	}
 	/**
 	 * @class This object describes the options for the readonly file system browser.
 	 * <p>
@@ -188,6 +222,7 @@ define([
 	 */
 	function FileBrowser(options) {
 		var url = new URL(window.location.href);
+		this.shareCode = false;
 		this.shareSnippet = url.query.get("shareSnippet") === "true" && options.widgetSource;
 		if(this.shareSnippet) {
 			this.widgetSource = options.widgetSource;
@@ -303,6 +338,9 @@ define([
 		startup: function(serviceRegistry) {
 			if(serviceRegistry) {
 				this._fileClient = new mFileClient.FileClient(serviceRegistry);	
+			}
+			if(this.shareCode) {
+				this.shareCodeHandler = new shareCodeHandler(this.widgetSource);
 			}
 			if(this.shareSnippet) {
 				this.shareSnippetHandler = new shareSnippetHandler(this.widgetSource);
@@ -565,9 +603,13 @@ define([
 			return workspaceRootURL;
 		},
 		onTextViewCreated: function(textView) {
+			if(this.shareCodeHandler) {
+				this.shareCodeHandler.textView = textView;
+				this.shareCodeHandler.currentResourceURI = (this._currentURI && this._currentURI.length > 0) ? this._currentURI : "";
+			}
 			if(this.shareSnippetHandler) {
 				this.shareSnippetHandler.textView = textView;
-				this.shareSnippetHandler.currentSnippetURI = (this._currentURI && this._currentURI.length > 0) ? this._currentURI : "";
+				this.shareSnippetHandler.currentResourceURI = (this._currentURI && this._currentURI.length > 0) ? this._currentURI : "";
 			}
 			if(!this.snippetShareOptions) {
 				var editorParams = PageUtil.matchResourceParameters();
@@ -636,6 +678,9 @@ define([
 					if(!cType) {//The content type is not registered
 						if(this._inputManager._unknownContentTypeAsText) {//If we treate 
 							browseViewOptons.editorView = this._editorView;
+							if(this.shareCodeHandler) {
+								browseViewOptons.infoDropDownHandlers.unshift(this.shareCodeHandler);
+							}
 							if(this.shareSnippetHandler) {
 								browseViewOptons.infoDropDownHandlers.unshift(this.shareSnippetHandler);
 							}
@@ -659,6 +704,9 @@ define([
 						browseViewOptons.isMarkdownView = true;
 					} else if(!mContentTypes.isImage(cType)) {
 						browseViewOptons.editorView = this._editorView;
+						if(this.shareCodeHandler) {
+							browseViewOptons.infoDropDownHandlers.unshift(this.shareCodeHandler);
+						}
 						if(this.shareSnippetHandler) {
 							browseViewOptons.infoDropDownHandlers.unshift(this.shareSnippetHandler);
 						}
