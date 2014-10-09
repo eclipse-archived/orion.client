@@ -19,6 +19,7 @@ define([
 	'orion/editor/textModel',
 	'orion/editor/projectionTextModel',
 	'orion/editor/editorFeatures',
+	'orion/hover',
 	'orion/editor/contentAssist',
 	'orion/editor/emacs',
 	'orion/editor/vi',
@@ -42,7 +43,7 @@ define([
 	'orion/objects'
 ], function(
 	messages,
-	mEditor, mEventTarget, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mContentAssist,
+	mEditor, mEventTarget, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mHoverFactory, mContentAssist,
 	mEmacs, mVI, mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands, mGlobalCommands,
 	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
@@ -431,6 +432,7 @@ define([
 				foldingRulerFactory: new mEditorFeatures.FoldingRulerFactory(),
 				zoomRulerFactory: new mEditorFeatures.ZoomRulerFactory(),
 				lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
+				hoverFactory: new mHoverFactory.HoverFactory(serviceRegistry, inputManager),
 				contentAssistFactory: contentAssistFactory,
 				keyBindingFactory: keyBindingFactory,
 				statusReporter: this.statusReporter,
