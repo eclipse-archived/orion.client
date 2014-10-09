@@ -1098,26 +1098,32 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				return !hasReadMe;
 			}
 		});
-		
+
 		commandService.addCommand(addReadmeCommand);
-		
+
+		function createProject (name, item){
+			fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+				progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name}), messages["Creating project "] + name).then(function(project){
+					dispatchNewProject(workspace, project);
+				}, function(error){
+					errorHandler(error);
+				});
+			});
+		}
+
 		var createBasicProjectCommand = new mCommands.Command({
 			name: messages["basic"],
 			tooltip: messages["createAnEmptyProject."],
 			id: "orion.project.create.basic",
 			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", messages["Name:"])]),
-			callback: function(data){
-					var name = data.parameters.valueFor("name");
-					if(!name){
-						return;
-					}
-					var item = forceSingleItem(data.items);
-					fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
-						progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name}), messages["Creating project "] + name).then(function(project){
-							dispatchNewProject(workspace, project);
-						});
-					});
-				},
+			callback: function(data) {
+				var name = data.parameters.valueFor("name");
+				if(!name){
+					return;
+				}
+				var item = forceSingleItem(data.items);
+				createProject(name, data);
+			},
 			visibleWhen: function(item) {
 					if (!explorer || !explorer.isCommandsVisible()) {
 						return false;
@@ -1143,43 +1149,38 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					var projectNameDialog = new PromptDialog.PromptDialog({
 						title: messages["Enter project name:"] //$NON-NLS-0$
 					});
-					
 					// add listener which uses project name entered by user to create a new project
 					projectNameDialog.addEventListener("ok", function(event) { //$NON-NLS-0$
 						var projectName = event.value;
-						fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
-							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: projectName}), messages["Creating project "] + projectName).then(function(projectInfo){ //$NON-NLS-0$
-								progress.progress(fileClient.read(projectInfo.ContentLocation, true)).then(function(projectMetadata){
-									
-									explorer.changedItem(workspace, true).then(function(newWorkspace){ //force workspace reload
-										var children = newWorkspace.Children;
-										// find the item that represents the newly created project
-										var projectItem = null;
-										children.some(function(child){
-											if (child.Location === projectMetadata.Location) {
-												projectItem = child;
-												return true;
-											}
-											return false;
-										});
-										// upload files selected by user into newly created project
-										if (projectItem) {
-											if (fileInput.files && fileInput.files.length > 0) {
-												for (var i = 0; i < fileInput.files.length; i++) {
-													explorer._uploadFile(projectItem, fileInput.files.item(i), true);
-												}
-											}
-										}
-									});
-									
-								}, errorHandler);
-							}, errorHandler);
-						}, errorHandler);
+						var handleOpen = function (event) {
+							if (projectName == event.item.Name && fileInput.files && fileInput.files.length > 0) {
+								for (var i = 0; i < fileInput.files.length; i++) {
+									explorer._uploadFile(event.item, fileInput.files.item(i), false);
+								}
+								explorer.sidebarNavInputManager.removeEventListener("projectOpened", handleOpen); //$NON-NLS-0$
+							}
+						};
+						// Add listener to wait for the project to open
+						explorer.sidebarNavInputManager.addEventListener("projectOpened", handleOpen); //$NON-NLS-0$
+						createProject(projectName, item);
 					});
 					
 					var changeListener = function(){
 						if (fileInput.files && fileInput.files.length > 0) {
-							projectNameDialog.show();	// ask user for project name
+							var isZip = true;
+							var notZipNames = '';
+							// Simple check if file is zip format
+							var zipFileTypes = ['application/octet-stream', 'multipart/x-zip', 'application/zip', 'application/zip-compressed', 'application/x-zip-compressed'];
+							for (var i = 0; i < fileInput.files.length; i++) {
+								var fileType = fileInput.files[i].type;
+								if(zipFileTypes.indexOf(fileType) == -1) {
+									isZip = false;
+									notZipNames += '\"' + fileInput.files[i].name + '\"';
+								}
+							}
+							if(isZip || window.confirm(i18nUtil.formatMessage(messages["notZip"], notZipNames))){
+								projectNameDialog.show();	// ask user for project name
+							}
 						}
 
 						fileInput.removeEventListener("change", changeListener);	

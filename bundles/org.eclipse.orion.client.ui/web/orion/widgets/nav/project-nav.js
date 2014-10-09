@@ -148,6 +148,8 @@ define([
 				projectData.fileMetadata = fileMetadata;
 				return CommonNavExplorer.prototype.display.call(this, projectData, redisplay).then(function() {
 					return this.expandItem(fileMetadata);
+				}.bind(this)).then(function () {
+					this.sidebarNavInputManager.dispatchEvent({type:"projectDisplayed", item: fileMetadata}); //$NON-NLS-0$
 				}.bind(this));
 			}.bind(this));
 		},
@@ -412,6 +414,13 @@ define([
 						}
 					}
 				});
+				var handleDisplay = function (event) {
+					if(event.item == metadata) {
+						sidebar.sidebarNavInputManager.removeEventListener("projectDisplayed", handleDisplay); //$NON-NLS-0$
+						sidebar.sidebarNavInputManager.dispatchEvent({type:"projectOpened", item: metadata}); //$NON-NLS-0$
+					}
+				};
+				sidebar.sidebarNavInputManager.addEventListener("projectDisplayed", handleDisplay);
 			}
 		}
 		this.editorInputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
