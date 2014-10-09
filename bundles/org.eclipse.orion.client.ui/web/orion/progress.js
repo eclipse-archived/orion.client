@@ -26,7 +26,11 @@ function(messages, lib, mOperationsDialog) {
 		});
 		
 		this._progressPane.addEventListener("click", function(evt) {  //$NON-NLS-0$
-			that._operationsDialog.show();
+			if (that._operationsDialog.isShowing()) {
+				that._operationsDialog.hide();
+			} else {
+				that._operationsDialog.show();
+			}
 		});
 		
 		this._operationsDialog.setOperations(null, null); // initialize

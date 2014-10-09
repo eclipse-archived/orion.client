@@ -239,10 +239,17 @@ define(['orion/webui/littlelib'], function(lib) {
 		},
 		
 		/**
+		 * @return True if this tooltip is visible, false otherwise
+		 */
+		isShowing: function() {
+			return this._tip && this._tip.classList.contains("tooltipShowing"); //$NON-NLS-0$
+		},
+		
+		/**
 		 * Show the tooltip.
 		 */			
 		show: function() {
-			if (this._tip && this._tip.classList.contains("tooltipShowing")) { //$NON-NLS-0$
+			if (this.isShowing()) { //$NON-NLS-0$
 				return;
 			}
 			if (this._timeout) {
@@ -280,7 +287,7 @@ define(['orion/webui/littlelib'], function(lib) {
 				window.clearTimeout(this._timeout);
 				this._timeout = null;
 			}
-			if (!this._tip || !this._tip.classList.contains("tooltipShowing")) { //$NON-NLS-0$
+			if (!this.isShowing()) { //$NON-NLS-0$
 				return;
 			}
 			if (hideDelay === undefined) {

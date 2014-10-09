@@ -119,6 +119,13 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		 */
 		show: function() {
 			this._tooltip.show();
+		},
+		
+		/**
+		 * @return True if this dialog is visible, false otherwise
+		 */
+		isShowing: function() {
+			return this._tooltip.isShowing(); //$NON-NLS-0$
 		}
 	};
 	
