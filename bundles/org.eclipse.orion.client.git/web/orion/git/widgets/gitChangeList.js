@@ -1082,7 +1082,7 @@ define([
 								undefined,
 								compareWidgetLeftActionWrapper.id,
 								explorer.preferencesService,
-								item.parent.Type === "Diff" ? null : diffActionWrapper.id,//saveCmdContainerId
+								item.parent.Type === "Diff" ? null : compareWidgetLeftActionWrapper.id,//saveCmdContainerId
 								item.parent.Type === "Diff" ? null : "compare.save." + item.DiffLocation, //saveCmdId
 								//We pass an array of two title Ids here in order for the resource comparer to render the dirty indicator optionally
 								//If the widget is not maximized, the dirty indicator, if any, is rendered at the end of the file name

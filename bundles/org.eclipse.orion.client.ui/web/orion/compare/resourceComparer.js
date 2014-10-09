@@ -117,8 +117,8 @@ CompareStyler.prototype = {
 									 false /*bug 378193*/);
 	}
 };
-var SAVE_EMBEDDED = false;
-SAVE_EMBEDDED = (new URL(window.location.href).query.get("save") === "true");
+var SAVE_EMBEDDED = true;
+//SAVE_EMBEDDED = (new URL(window.location.href).query.get("save") === "true");
 
 exports.ResourceComparer = (function() {
 	function ResourceComparer (serviceRegistry, commandRegistry, options, viewOptions) {
@@ -234,7 +234,7 @@ exports.ResourceComparer = (function() {
 						});
 						var saveCmdId = inputManager.manager._editorIndex === 1 ? (that.options.saveLeft ? that.options.saveLeft.saveCmdId : "orion.compare.save.left") : 
 													(that.options.saveRight ? that.options.saveRight.saveCmdId : "orion.compare.save.right"); //$NON-NLS-1$ //$NON-NLS-0$
-						commandGenerator.generateSimpleEditorCommands(editor, saveCmdId, function() {return that._saveCmdVisible()});
+						commandGenerator.generateSimpleEditorCommands(editor, saveCmdId, function() {return that._saveCmdVisible();}, 2000);
 						return keyBindings;
 					};
 					this._getFileOptions(inputManager.manager._editorIndex).keyBindingFactory = keyBindingFactory;

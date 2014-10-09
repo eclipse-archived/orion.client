@@ -142,10 +142,10 @@ define([
 		 * Creates the common text editing commands.  Also generates commands for any installed plug-ins that
 		 * contribute editor actions.  
 		 */
-		generateSimpleEditorCommands: function(editor, saveCmdId, saveCmdVisibleFunc) {
+		generateSimpleEditorCommands: function(editor, saveCmdId, saveCmdVisibleFunc, saveCommandOrderNumber) {
 			if (!this.isReadOnly) {
 				this._generateUndoStackCommands(editor);
-				this._generateSaveCommand(editor, saveCmdId, saveCmdVisibleFunc);
+				this._generateSaveCommand(editor, saveCmdId, saveCmdVisibleFunc, saveCommandOrderNumber);
 			}
 			this._generateSearchFilesCommand(editor);
 			this._generateGotoLineCommnand(editor);
@@ -272,12 +272,13 @@ define([
 				this.commandService.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.searchFiles", 1, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding("h", true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
-		_generateSaveCommand: function(editor, saveCmdId, saveCmdVisibleFunc) {
+		_generateSaveCommand: function(editor, saveCmdId, saveCmdVisibleFunc, commandOrderNumber) {
 			var self = this;
 			var cmdId = saveCmdId ? saveCmdId : "orion.save"; //$NON-NLS-0$
 			var saveCommand = new mCommands.Command({
 				name: messages.Save,
 				tooltip: messages.saveFile,
+				imageClass : "core-sprite-save", //$NON-NLS-0$
 				id: cmdId,
 				visibleWhen: function() {
 					if(saveCmdVisibleFunc) {
@@ -294,7 +295,7 @@ define([
 				}
 			});
 			this.commandService.addCommand(saveCommand);
-			this.commandService.registerCommandContribution(this.saveToolbarId || this.toolbarId, cmdId, 1, this.saveToolbarId ? "orion.menuBarFileGroup/orion.saveGroup" : null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(this.saveToolbarId || this.toolbarId, cmdId, typeof commandOrderNumber === "number" ? commandOrderNumber : 1, this.saveToolbarId ? "orion.menuBarFileGroup/orion.saveGroup" : null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			// Add key binding to editor so that the user agent save dialog does not show when auto save is enabled
 			if (editor.getTextView && editor.getTextView()) {
