@@ -583,11 +583,13 @@ and (max-device-width : 1024px)  {
 }
 
 .sideMenuList{
-	margin: 0;
-	padding: 0;
 	display:inline-block !important;
-	width: 100%;
+	height: calc(100% - 2px);
+	margin: 0;
+	overflow-y: hidden;
+	padding: 0;
 	text-align: center;
+	width: 100%;
 }
 
 .sideMenuItem{
@@ -601,6 +603,35 @@ and (max-device-width : 1024px)  {
 .sideMenuItem:hover, .sideMenuItem.expanded {
 	text-decoration:none;
 	color:white !important;
+}
+
+.sideMenu:hover > .sideMenuScrollButton {
+	opacity: 1;
+}
+
+.sideMenuScrollButton {
+	background-color: rgba(0,0,0,0.5) !important;
+	color: white !important;
+	cursor: pointer;
+	display: none;
+	height: 19px;
+	opacity: 0.5;
+	position: absolute;
+	width: 100%;
+	z-index: 100;
+}
+
+.sideMenuScrollButton.visible {
+	display: block;
+}
+
+.sideMenuTopScrollButton {
+	-webkit-transform: rotate(180deg);		/* Safari */
+	transform: rotate(180deg);
+}
+
+.sideMenuBottomScrollButton {
+	bottom: 0;
 }
 
 /* icon links */

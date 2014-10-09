@@ -112,6 +112,7 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 
 				var sideMenuList = document.createElement("ul"); //$NON-NLS-0$
 				sideMenuList.classList.add("sideMenuList"); //$NON-NLS-0$
+				this._sideMenuList = sideMenuList;
 
 				this._categoryInfos.forEach(function(categoryInfo) {
 					var listItem = document.createElement('li'); //$NON-NLS-0$
@@ -138,10 +139,60 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 					sideMenuList.appendChild(listItem);
 					this._categorizedAnchors[categoryInfo.id] = anchor;
 				}, this);
+				
+				// create top scroll button
+				this._topScrollButton = document.createElement("button"); //$NON-NLS-0$
+				this._topScrollButton.classList.add("sideMenuScrollButton"); //$NON-NLS-0$
+				this._topScrollButton.classList.add("sideMenuTopScrollButton"); //$NON-NLS-0$
+				this._topScrollButton.classList.add("core-sprite-openarrow"); //$NON-NLS-0$
+								
+				this._topScrollButton.addEventListener("mousedown", function(){ //$NON-NLS-0$
+					if (this._activeScrollInterval) {
+						window.clearInterval(this._activeScrollInterval);
+					}
+					this._activeScrollInterval = window.setInterval(this._scrollUp.bind(this), 10);
+				}.bind(this));
+				this._topScrollButton.addEventListener("mouseup", function(){ //$NON-NLS-0$
+					if (this._activeScrollInterval) {
+						window.clearInterval(this._activeScrollInterval);
+						this._activeScrollInterval = null;
+					}
+				}.bind(this));
+				
+				// create bottom scroll button
+				this._bottomScrollButton = document.createElement("button"); //$NON-NLS-0$
+				this._bottomScrollButton.classList.add("sideMenuScrollButton"); //$NON-NLS-0$
+				this._bottomScrollButton.classList.add("sideMenuBottomScrollButton"); //$NON-NLS-0$
+				this._bottomScrollButton.classList.add("core-sprite-openarrow"); //$NON-NLS-0$
+				
+				this._bottomScrollButton.addEventListener("mousedown", function(){ //$NON-NLS-0$
+					if (this._activeScrollInterval) {
+						window.clearInterval(this._activeScrollInterval);
+					}
+					this._activeScrollInterval = window.setInterval(this._scrollDown.bind(this), 10);
+				}.bind(this));
+				this._bottomScrollButton.addEventListener("mouseup", function(){ //$NON-NLS-0$
+					if (this._activeScrollInterval) {
+						window.clearInterval(this._activeScrollInterval);
+						this._activeScrollInterval = null;
+					}
+				}.bind(this));
+				
+				// add resize listener to window to update the scroll button visibility if necessary
+				window.addEventListener("resize", function(){ //$NON-NLS-0$
+					this._updateScrollButtonVisibility();
+				}.bind(this));
 
 				this._updateCategoryAnchors();
 				this._show = function() {
+					this._parentNode.appendChild(this._topScrollButton);
 					this._parentNode.appendChild(sideMenuList);
+					this._parentNode.appendChild(this._bottomScrollButton);
+					var activeLink = lib.$(".sideMenuItemActive", this._parentNode); //$NON-NLS-0$
+					if (activeLink && activeLink.scrollIntoView) {
+						activeLink.scrollIntoView();
+					}
+					this._updateScrollButtonVisibility();
 					this._show = SideMenu.prototype._show;
 				};				
 				window.setTimeout(function() {
@@ -170,6 +221,37 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 				this._parentNode.style.width = SIDE_MENU_OPEN_WIDTH;
 				this._contentNode.style.left = SIDE_MENU_OPEN_WIDTH;
 			}
+		},
+		_updateScrollButtonVisibility: function() {
+			if (this._sideMenuList.scrollHeight > this._sideMenuList.offsetHeight) {
+				if (0 < this._sideMenuList.scrollTop) {
+					// show up arrow
+					this._topScrollButton.classList.add("visible"); //$NON-NLS-0$
+				} else {
+					// hide up arrow
+					this._topScrollButton.classList.remove("visible"); //$NON-NLS-0$
+				}
+				
+				if (this._sideMenuList.scrollHeight > (this._sideMenuList.scrollTop + this._sideMenuList.offsetHeight)) {
+					// show bottom arrow
+					this._bottomScrollButton.classList.add("visible"); //$NON-NLS-0$
+				} else {
+					// hide bottom arrow
+					this._bottomScrollButton.classList.remove("visible"); //$NON-NLS-0$
+				}
+			} else {
+				// no overflow, hide both arrows
+				this._topScrollButton.classList.remove("visible"); //$NON-NLS-0$
+				this._bottomScrollButton.classList.remove("visible"); //$NON-NLS-0$
+			}
+		},
+		_scrollDown: function(){
+			this._sideMenuList.scrollTop = this._sideMenuList.scrollTop + 1;
+			this._updateScrollButtonVisibility();
+		},
+		_scrollUp: function() {
+			this._sideMenuList.scrollTop = this._sideMenuList.scrollTop - 1;
+			this._updateScrollButtonVisibility();
 		},
 		hide: function() {
 			localStorage.setItem(LOCAL_STORAGE_NAME, CLOSED_STATE);
