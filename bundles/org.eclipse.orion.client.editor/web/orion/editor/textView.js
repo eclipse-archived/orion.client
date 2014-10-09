@@ -7290,6 +7290,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					applyStyle(ruler.getRulerStyle(), div);
 				}
 				if (overview === "fixed") { //$NON-NLS-0$
+					div.rulerChanged = false;
 					div = div.nextSibling;
 					continue;
 				}
