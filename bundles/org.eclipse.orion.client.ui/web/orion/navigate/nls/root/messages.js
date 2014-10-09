@@ -144,5 +144,6 @@ define({
 	'readMeCommandTooltip': 'Create a README.md file in this project',  //$NON-NLS-0$  //$NON-NLS-1$
 	'zipArchiveCommandName': 'Zip archive',  //$NON-NLS-0$  //$NON-NLS-1$
 	'zipArchiveCommandTooltip': 'Create a project from a local zip archive.',  //$NON-NLS-0$  //$NON-NLS-1$
-	'Url:': 'Url:'  //$NON-NLS-0$  //$NON-NLS-1$
+	'Url:': 'Url:',  //$NON-NLS-0$  //$NON-NLS-1$
+	'notZip' : 'Files are not zip files: ${0}. Continue import?' //$NON-NLS-0$  //$NON-NLS-1$
 });
