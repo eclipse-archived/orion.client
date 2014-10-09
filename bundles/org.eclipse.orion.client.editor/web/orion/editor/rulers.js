@@ -896,6 +896,7 @@ define("orion/editor/rulers", [
 				return {
 					zoomFactor: zoomFactor,
 					documentHeight: documentHeight,
+					zoomDocumentHeight: zoomDocumentHeight,
 					clientHeight: clientHeight,
 					zoomClientHeight: zoomClientHeight,
 					scrollWidth: scrollWidth,
@@ -953,8 +954,8 @@ define("orion/editor/rulers", [
 			zoomView.addEventListener("Selection", function(event) { //$NON-NLS-0$
 				textView.setSelection(event.newValue.start, event.newValue.end, 0.5);
 			});
-			function down(event, clientY) {
-				if (that.top <= event.y && event.y <= that.bottom) {
+			function down(event, clientY, touch) {
+				if (touch || (that.top <= event.y && event.y <= that.bottom)) {
 					that.mouseDown = true;
 					that.delta = clientY - windowDiv.getBoundingClientRect().top + that.node.getBoundingClientRect().top;
 				} else {
@@ -969,30 +970,51 @@ define("orion/editor/rulers", [
 				if (that.mouseDown) {
 					var p = getProps();
 					var thumbPos = Math.min(p.zoomClientHeight - p.windowHeight, Math.max(0, clientY - that.delta));
-					textView.setTopPixel(thumbPos * (p.documentHeight - p.clientHeight) / (p.zoomClientHeight - p.windowHeight));
+					textView.setTopPixel(thumbPos * (p.documentHeight - p.clientHeight) / Math.min(p.zoomDocumentHeight, p.zoomClientHeight - p.windowHeight));
 				}
 			}
 			function stop(event) {
 				event.preventDefault();
 			}
 			if (util.isIOS || util.isAndroid) {
+				windowDiv.addEventListener("touchstart", function(event) { //$NON-NLS-0$
+					var touches = event.touches;
+					if (touches.length === 1) {
+						down(event, event.touches[0].clientY, true);
+						event.preventDefault();
+					}
+				});
+				windowDiv.addEventListener("touchend", function(event) { //$NON-NLS-0$
+					var touches = event.touches;
+					if (touches.length === 0) {
+						up(event);
+					}
+				});
+				windowDiv.addEventListener("touchmove", function(event) { //$NON-NLS-0$
+					var touches = event.touches;
+					if (touches.length === 1) {
+						move(event.touches[0].clientY);
+					}
+				});
 				zoomView.addEventListener("TouchStart", function(event) { //$NON-NLS-0$
 					if (event.touchCount === 1) {
 						down(event, event.event.touches[0].clientY);
 						stop(event);
 					}
 				});
-				zoomView.addEventListener("TouchEnd", function(event) { //$NON-NLS-0$
-					if (event.touchCount === 0) {
-						up(event);
-					}
-				});
-				zoomView.addEventListener("TouchMove", function(event) { //$NON-NLS-0$
-					if (event.touchCount === 1) {
-						move(event.event.touches[0].clientY);
-					}
-				});
+//				windowDiv.style.pointerEvents = "none"; //$NON-NLS-0$
+//				zoomView.addEventListener("TouchEnd", function(event) { //$NON-NLS-0$
+//					if (event.touchCount === 0) {
+//						up(event);
+//					}
+//				});
+//				zoomView.addEventListener("TouchMove", function(event) { //$NON-NLS-0$
+//					if (event.touchCount === 1) {
+//						move(event.event.touches[0].clientY);
+//					}
+//				});
 			} else {
+				windowDiv.style.pointerEvents = "none"; //$NON-NLS-0$
 				zoomView.addEventListener("MouseDown", function(event) { //$NON-NLS-0$
 					var e = event.event;
 					if (e.which ? e.button === 0 : e.button === 1) {

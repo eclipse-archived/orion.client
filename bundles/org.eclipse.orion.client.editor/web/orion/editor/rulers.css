@@ -34,7 +34,6 @@
 	width: calc(100% - 4px);
 	border-radius: 5px;
 	z-index: 100;
-	pointer-events: none;
 }
 
 .textviewZoom {

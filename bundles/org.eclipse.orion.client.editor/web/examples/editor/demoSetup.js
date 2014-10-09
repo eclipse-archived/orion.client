@@ -223,7 +223,7 @@ define(["require",
 		
 		view.marginLines = new mRulers.LineNumberRuler(annotationModel, "margin", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-		view.zoomRuler = new mRulers.ZoomRuler("innerRight", {styleClass: "ruler zoom"}); //$NON-NLS-1$ //$NON-NLS-0$
+		view.zoomRuler = new mRulers.ZoomRuler(util.isIOS || util.isAndroid ? "right" : "innerRight", {styleClass: "ruler zoom"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		if (foldingEnabled) {
 			var foldingRuler = view.folding = new mRulers.FoldingRuler(annotationModel, "left", {styleClass: "ruler folding"}); //$NON-NLS-1$ //$NON-NLS-0$
