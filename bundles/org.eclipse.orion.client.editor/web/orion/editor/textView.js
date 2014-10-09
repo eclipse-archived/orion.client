@@ -2352,6 +2352,15 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		onMouseOut: function(mouseEvent) {
 			return this.dispatchEvent(mouseEvent);
 		},
+		onTouchStart: function(touchEvent) {
+			return this.dispatchEvent(touchEvent);
+		},
+		onTouchMove: function(touchEvent) {
+			return this.dispatchEvent(touchEvent);
+		},
+		onTouchEnd: function(touchEvent) {
+			return this.dispatchEvent(touchEvent);
+		},
 		onOptions: function(optionsEvent) {
 			return this.dispatchEvent(optionsEvent);
 		},
@@ -3712,6 +3721,19 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 			};
 		},
+		_createTouchEvent: function(type, e) {
+			var pt = e.touches.length ? this.convert({x: e.touches[0].clientX, y: e.touches[0].clientY}, "page", "document") : {}; //$NON-NLS-1$ //$NON-NLS-0$
+			return {
+				type: type,
+				event: e,
+				touchCount: e.touches.length,
+				x: pt.x,
+				y: pt.y,
+				preventDefault: function() {
+					this.defaultPrevented = true;
+				}
+			};
+		},
 		_handleMouseUp: function (e) {
 			var left = e.which ? e.button === 0 : e.button === 1;
 			if (this.isListening("MouseUp")) { //$NON-NLS-0$
@@ -4152,6 +4174,17 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			e.preventDefault();
 		},
 		_handleTouchStart: function (e) {
+			if (this.isListening("TouchStart")) { //$NON-NLS-0$
+				var touchEvent = this._createTouchEvent("TouchStart", e); //$NON-NLS-0$
+				this.onTouchStart(touchEvent);
+				if (touchEvent.defaultPrevented) {
+					e.preventDefault();
+					return;
+				}
+				if (this._noScroll) {
+					return;
+				}
+			}
 			this._commitIME();
 			var window = this._getWindow();
 			if (this._touchScrollTimer) {
@@ -4183,6 +4216,17 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_handleTouchMove: function (e) {
+			if (this.isListening("TouchMove")) { //$NON-NLS-0$
+				var touchEvent = this._createTouchEvent("TouchMove", e); //$NON-NLS-0$
+				this.onTouchMove(touchEvent);
+				if (touchEvent.defaultPrevented) {
+					e.preventDefault();
+					return;
+				}
+				if (this._noScroll) {
+					return;
+				}
+			}
 			var touches = e.touches;
 			if (touches.length === 1) {
 				var touch = touches[0];
@@ -4228,6 +4272,17 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_handleTouchEnd: function (e) {
+			if (this.isListening("TouchEnd")) { //$NON-NLS-0$
+				var touchEvent = this._createTouchEvent("TouchEnd", e); //$NON-NLS-0$
+				this.onTouchEnd(touchEvent);
+				if (touchEvent.defaultPrevented) {
+					e.preventDefault();
+					return;
+				}
+				if (this._noScroll) {
+					return;
+				}
+			}
 			var touches = e.touches;
 			if (touches.length === 0) {
 				this._touching = false;

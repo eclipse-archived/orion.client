@@ -876,31 +876,35 @@ define("orion/editor/rulers", [
 				that.top = top;
 				that.bottom = top + height;
 				top = zoomView.convert({y: top}, "document", "page").y; //$NON-NLS-1$ //$NON-NLS-0$
-				windowDiv.style.top = (top - that.node.getBoundingClientRect().top) + "px"; //$NON-NLS-0$
+				top = top - that.node.getBoundingClientRect().top;
+				windowDiv.style.top = top + "px"; //$NON-NLS-0$
 				windowDiv.style.height = (height - border) + "px"; //$NON-NLS-0$
 			}
 			function getProps() {
 				var padding = textView._metrics.viewPadding;
+				var zoomPadding = textView._metrics.viewPadding;
 				var lineHeight = textView.getLineHeight();
 				var zoomLineHeight = zoomView.getLineHeight();
 				var lineCount = textView.getModel().getLineCount();
 				var documentHeight = textView._lineHeight ? textView._scrollHeight : lineCount * lineHeight;
 				var zoomDocumentHeight = zoomView._lineHeight ? zoomView._scrollHeight : lineCount * zoomLineHeight;
 				var zoomFactor = zoomDocumentHeight / documentHeight;
-				var clientHeight = textView.getClientArea().height;
+				var clientHeight = textView.getClientArea().height + padding.top + padding.bottom;
+				var zoomClientHeight = zoomView.getClientArea().height + zoomPadding.top + zoomPadding.bottom;
 				var windowHeight = clientHeight * zoomFactor;
 				var scrollWidth = textView._metrics.scrollWidth;
 				return {
 					zoomFactor: zoomFactor,
 					documentHeight: documentHeight,
 					clientHeight: clientHeight,
+					zoomClientHeight: zoomClientHeight,
 					scrollWidth: scrollWidth,
 					windowHeight: windowHeight,
 					padding: padding
 				};
 			}
 			function toZoom(scroll, p) {
-				return scroll.y * (p.zoomFactor + (p.windowHeight - p.clientHeight - p.scrollWidth + p.padding.top + p.padding.bottom) / p.documentHeight);
+				return scroll.y * (p.zoomFactor + (p.windowHeight - p.clientHeight - p.scrollWidth) / p.documentHeight);
 			}
 			function updateScroll(scroll) {
 				scroll = scroll || {y: textView.getTopPixel()};
@@ -949,34 +953,62 @@ define("orion/editor/rulers", [
 			zoomView.addEventListener("Selection", function(event) { //$NON-NLS-0$
 				textView.setSelection(event.newValue.start, event.newValue.end, 0.5);
 			});
-			zoomView.addEventListener("MouseDown", function(event) { //$NON-NLS-0$
-				var offset = zoomView.getOffsetAtLocation(event.x, event.y);
+			function down(event, clientY) {
 				if (that.top <= event.y && event.y <= that.bottom) {
-					var e = event.event;
-					that.mouseDown = e.which ? e.button === 0 : e.button === 1;
-					that.delta = e.clientY -
-						zoomView.convert({y: zoomView.getLinePixel(textView.getTopIndex())}, "document", "page").y + //$NON-NLS-1$ //$NON-NLS-0$
-						that.node.getBoundingClientRect().top;
+					that.mouseDown = true;
+					that.delta = clientY - windowDiv.getBoundingClientRect().top + that.node.getBoundingClientRect().top;
 				} else {
+					var offset = zoomView.getOffsetAtLocation(event.x, event.y);
 					textView.setSelection(offset, offset, 0.5, function() {});
 				}
-				event.event.stopPropagation();
-				event.preventDefault();
-			});
-			zoomView.addEventListener("MouseUp", function(event) { //$NON-NLS-0$
+			}
+			function up() {
 				that.mouseDown = false;
-				event.event.stopPropagation();
-				event.preventDefault();
-			});
-			zoomView.addEventListener("MouseMove", function(event) { //$NON-NLS-0$
+			}
+			function move(clientY) {
 				if (that.mouseDown) {
 					var p = getProps();
-					var thumbPos = Math.min(p.clientHeight - p.windowHeight, Math.max(0, event.event.clientY - that.delta));
-					textView.setTopPixel(thumbPos * (p.documentHeight - p.clientHeight) / (p.clientHeight - p.windowHeight));
+					var thumbPos = Math.min(p.zoomClientHeight - p.windowHeight, Math.max(0, clientY - that.delta));
+					textView.setTopPixel(thumbPos * (p.documentHeight - p.clientHeight) / (p.zoomClientHeight - p.windowHeight));
 				}
-				event.event.stopPropagation();
+			}
+			function stop(event) {
 				event.preventDefault();
-			});
+			}
+			if (util.isIOS || util.isAndroid) {
+				zoomView.addEventListener("TouchStart", function(event) { //$NON-NLS-0$
+					if (event.touchCount === 1) {
+						down(event, event.event.touches[0].clientY);
+						stop(event);
+					}
+				});
+				zoomView.addEventListener("TouchEnd", function(event) { //$NON-NLS-0$
+					if (event.touchCount === 0) {
+						up(event);
+					}
+				});
+				zoomView.addEventListener("TouchMove", function(event) { //$NON-NLS-0$
+					if (event.touchCount === 1) {
+						move(event.event.touches[0].clientY);
+					}
+				});
+			} else {
+				zoomView.addEventListener("MouseDown", function(event) { //$NON-NLS-0$
+					var e = event.event;
+					if (e.which ? e.button === 0 : e.button === 1) {
+						down(event, e.clientY);
+					}
+					stop(event);
+				});
+				zoomView.addEventListener("MouseUp", function(event) { //$NON-NLS-0$
+					up(event);
+					stop(event);
+				});
+				zoomView.addEventListener("MouseMove", function(event) { //$NON-NLS-0$
+					move(event.event.clientY);
+					stop(event);
+				});
+			}
 			(document.defaultView || document.parentWindow).setTimeout(function() {
 				updateScroll();
 			}, 0);
