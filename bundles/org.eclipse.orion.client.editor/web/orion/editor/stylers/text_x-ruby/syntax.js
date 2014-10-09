@@ -17,9 +17,9 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 		"case", "class", "catch", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"def", "defined?", "do", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"else", "elsif", "END", "end", "ensure", "extend", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"false", "for", "if", "fail", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"false", "for", "fail", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"gem", //$NON-NLS-0$
-		"in", "include", "initialize", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"if", "in", "include", "initialize", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"load",  "loop", "lambda", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"module", "module_function", //$NON-NLS-1$ //$NON-NLS-0$
 		"new", "next", "nil", "not", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
