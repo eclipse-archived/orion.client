@@ -272,6 +272,14 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				} else {
 					context.errorHandler(error);
 					storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
+					if((error.State || error.CheckState)){
+						context.launchConfiguration.status = error;
+					} else {
+						delete context.launchConfiguration.status;
+					}
+					if(sharedLaunchConfigurationDispatcher){
+						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration});
+					}
 				}
 			});
 		}
