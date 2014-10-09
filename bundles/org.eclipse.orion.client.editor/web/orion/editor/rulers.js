@@ -574,7 +574,7 @@ define("orion/editor/rulers", [
 		var result = Ruler.prototype.getAnnotations.call(this, startLine, endLine);
 		var model = this._view.getModel();
 		for (var lineIndex = startLine; lineIndex < endLine; lineIndex++) {
-			var style = lineIndex & 1 ? this._oddStyle : this._evenStyle;
+			var style = (lineIndex - this._firstLine) & 1 ? this._oddStyle : this._evenStyle;
 			var mapLine = lineIndex;
 			if (model.getBaseModel) {
 				var lineStart = model.getLineStart(mapLine);
