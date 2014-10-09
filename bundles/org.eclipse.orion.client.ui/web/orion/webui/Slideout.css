@@ -2,20 +2,27 @@
 	background: whitesmoke;
 	border: 1px solid rgb(222, 222, 222);
 	border-radius: 0 5px 5px 0;
-	display: none;
+	height: calc(100% - 11px);
 	overflow-x: auto; /*allow horiz scrollbar if pane not wide enough*/
 	overflow-y: hidden;
 	position: absolute;
 	top: 0;
-	transition: width 0.2s ease;
-	width: 0;
+	-webkit-transform: translateX(-100%);		/* Safari */
+	transform: translateX(-100%);
+	transition: -webkit-transform 0.2s ease; 	/* Safari*/
+	transition: transform 0.2s ease;
+	visibility: visible;
+	width: calc(100% - 2px);
 	z-index: 100;
 }
 
 .slideoutWrapperVisible {
-	display: block;
-	height: calc(100% - 11px);
-	width: calc(100% - 2px);
+	-webkit-transform: translateX(0);	/* Safari */
+	transform: translateX(0);
+}
+
+.slideoutNoVisibility {
+	visibility: hidden !important; /* this class is separate because it is applied after the transition duration */
 }
 
 .slideoutWrapper > .slideoutDismissButton {
