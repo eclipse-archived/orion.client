@@ -17,8 +17,7 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 	var DEFAULT_STATE = OPEN_STATE;
 	var SIDE_MENU_OPEN_WIDTH = "40px";
 	var TRANSITION_DURATION_MS = 301; /* this should always be greater than the duration of the left transition of .content-fixedHeight */
-	var SETTINGS_CATEGORY_ID = "settings"; //$NON-NLS-0$
-	
+
 	function SideMenu(parentNode, contentNode) {
 		this._parentNode = lib.node(parentNode);
 		if (!this._parentNode) {
@@ -41,14 +40,7 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 		constructor: SideMenu.prototype.constructor,
 		// Should only be called once
 		setCategories: function(categories) {
-			this._settingsCategory = categories.getCategory(SETTINGS_CATEGORY_ID); //$NON-NLS-0$
-			
-			var categoryIds = categories.getCategoryIDs();
-			var indexOfSettings = categoryIds.indexOf(SETTINGS_CATEGORY_ID); //$NON-NLS-0$
-			
-			categoryIds.splice(indexOfSettings, 1); //remove settings id from array
-			
-			this._categoryInfos = categoryIds.map(function(catId) {
+			this._categoryInfos = categories.getCategoryIDs().map(function(catId) {
 				return categories.getCategory(catId);
 			}).sort(function(c1, c2) {
 				var o1 = c1.order || 100;
@@ -120,71 +112,36 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 
 				var sideMenuList = document.createElement("ul"); //$NON-NLS-0$
 				sideMenuList.classList.add("sideMenuList"); //$NON-NLS-0$
-				this._sideMenuList = sideMenuList;
 
 				this._categoryInfos.forEach(function(categoryInfo) {
-					this._renderListItem(categoryInfo, sideMenuList);
+					var listItem = document.createElement('li'); //$NON-NLS-0$
+					listItem.classList.add("sideMenuItem"); //$NON-NLS-0$
+					listItem.classList.add("sideMenu-notification"); //$NON-NLS-0$
+					if (this._currentCategory === categoryInfo.id) {
+						listItem.classList.add("sideMenuItemActive");
+					}
+					listItem.categoryId = categoryInfo.id;
+					listItem.categoryName = categoryInfo.textContent || categoryInfo.id;
+					var anchor = document.createElement("a"); //$NON-NLS-0$
+					anchor.classList.add("submenu-trigger"); // styling
+					if (typeof categoryInfo.imageDataURI === "string" && categoryInfo.imageDataURI.indexOf("data:image") === 0) {
+						var img = document.createElement("img");
+						img.width = "16";
+						img.height = "16";
+						img.src = categoryInfo.imageDataURI;
+						anchor.appendChild(img);
+					} else {
+						var imageClass = categoryInfo.imageClass || "core-sprite-blank-menu-item";
+						anchor.classList.add(imageClass);
+					}
+					listItem.appendChild(anchor);
+					sideMenuList.appendChild(listItem);
+					this._categorizedAnchors[categoryInfo.id] = anchor;
 				}, this);
-				
-				var settingsList = document.createElement("ul"); //$NON-NLS-0$
-				settingsList.classList.add("sideMenuList"); //$NON-NLS-0$
-				settingsList.classList.add("settingsList"); //$NON-NLS-0$
-				this._renderListItem(this._settingsCategory, settingsList);
-				
-				// create top scroll button
-				this._topScrollButton = document.createElement("button"); //$NON-NLS-0$
-				this._topScrollButton.classList.add("sideMenuScrollButton"); //$NON-NLS-0$
-				this._topScrollButton.classList.add("sideMenuTopScrollButton"); //$NON-NLS-0$
-				this._topScrollButton.classList.add("core-sprite-openarrow"); //$NON-NLS-0$
-								
-				this._topScrollButton.addEventListener("mousedown", function(){ //$NON-NLS-0$
-					if (this._activeScrollInterval) {
-						window.clearInterval(this._activeScrollInterval);
-					}
-					this._activeScrollInterval = window.setInterval(this._scrollUp.bind(this), 10);
-				}.bind(this));
-				this._topScrollButton.addEventListener("mouseup", function(){ //$NON-NLS-0$
-					if (this._activeScrollInterval) {
-						window.clearInterval(this._activeScrollInterval);
-						this._activeScrollInterval = null;
-					}
-				}.bind(this));
-				
-				// create bottom scroll button
-				this._bottomScrollButton = document.createElement("button"); //$NON-NLS-0$
-				this._bottomScrollButton.classList.add("sideMenuScrollButton"); //$NON-NLS-0$
-				this._bottomScrollButton.classList.add("sideMenuBottomScrollButton"); //$NON-NLS-0$
-				this._bottomScrollButton.classList.add("core-sprite-openarrow"); //$NON-NLS-0$
-				
-				this._bottomScrollButton.addEventListener("mousedown", function(){ //$NON-NLS-0$
-					if (this._activeScrollInterval) {
-						window.clearInterval(this._activeScrollInterval);
-					}
-					this._activeScrollInterval = window.setInterval(this._scrollDown.bind(this), 10);
-				}.bind(this));
-				this._bottomScrollButton.addEventListener("mouseup", function(){ //$NON-NLS-0$
-					if (this._activeScrollInterval) {
-						window.clearInterval(this._activeScrollInterval);
-						this._activeScrollInterval = null;
-					}
-				}.bind(this));
-				
-				// add resize listener to window to update the scroll button visibility if necessary
-				window.addEventListener("resize", function(){ //$NON-NLS-0$
-					this._updateScrollButtonVisibility();
-				}.bind(this));
 
 				this._updateCategoryAnchors();
 				this._show = function() {
-					this._parentNode.appendChild(this._topScrollButton);
 					this._parentNode.appendChild(sideMenuList);
-					this._parentNode.appendChild(this._bottomScrollButton);
-					this._parentNode.appendChild(settingsList);
-					var activeLink = lib.$(".sideMenuItemActive", this._parentNode);
-					if (activeLink && activeLink.scrollIntoView) {
-						activeLink.scrollIntoView();
-					}
-					this._updateScrollButtonVisibility();
 					this._show = SideMenu.prototype._show;
 				};				
 				window.setTimeout(function() {
@@ -213,62 +170,6 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 				this._parentNode.style.width = SIDE_MENU_OPEN_WIDTH;
 				this._contentNode.style.left = SIDE_MENU_OPEN_WIDTH;
 			}
-		},
-		_renderListItem: function(categoryInfo, sideMenuList) {
-			var listItem = document.createElement('li'); //$NON-NLS-0$
-			listItem.classList.add("sideMenuItem"); //$NON-NLS-0$
-			listItem.classList.add("sideMenu-notification"); //$NON-NLS-0$
-			if (this._currentCategory === categoryInfo.id) {
-				listItem.classList.add("sideMenuItemActive");
-			}
-			listItem.categoryId = categoryInfo.id;
-			listItem.categoryName = categoryInfo.textContent || categoryInfo.id;
-			var anchor = document.createElement("a"); //$NON-NLS-0$
-			anchor.classList.add("submenu-trigger"); // styling
-			if (typeof categoryInfo.imageDataURI === "string" && categoryInfo.imageDataURI.indexOf("data:image") === 0) {
-				var img = document.createElement("img");
-				img.width = "16";
-				img.height = "16";
-				img.src = categoryInfo.imageDataURI;
-				anchor.appendChild(img);
-			} else {
-				var imageClass = categoryInfo.imageClass || "core-sprite-blank-menu-item";
-				anchor.classList.add(imageClass);
-			}
-			listItem.appendChild(anchor);
-			sideMenuList.appendChild(listItem);
-			this._categorizedAnchors[categoryInfo.id] = anchor;
-		},
-		_updateScrollButtonVisibility: function() {
-			if (this._sideMenuList.scrollHeight > this._sideMenuList.offsetHeight) {
-				if (0 < this._sideMenuList.scrollTop) {
-					// show up arrow
-					this._topScrollButton.classList.add("visible"); //$NON-NLS-0$
-				} else {
-					// hide up arrow
-					this._topScrollButton.classList.remove("visible"); //$NON-NLS-0$
-				}
-				
-				if (this._sideMenuList.scrollHeight > (this._sideMenuList.scrollTop + this._sideMenuList.offsetHeight)) {
-					// show bottom arrow
-					this._bottomScrollButton.classList.add("visible"); //$NON-NLS-0$
-				} else {
-					// hide bottom arrow
-					this._bottomScrollButton.classList.remove("visible"); //$NON-NLS-0$
-				}
-			} else {
-				// no overflow, hide both arrows
-				this._topScrollButton.classList.remove("visible"); //$NON-NLS-0$
-				this._bottomScrollButton.classList.remove("visible"); //$NON-NLS-0$
-			}
-		},
-		_scrollDown: function(){
-			this._sideMenuList.scrollTop = this._sideMenuList.scrollTop + 1;
-			this._updateScrollButtonVisibility();
-		},
-		_scrollUp: function() {
-			this._sideMenuList.scrollTop = this._sideMenuList.scrollTop - 1;
-			this._updateScrollButtonVisibility();
 		},
 		hide: function() {
 			localStorage.setItem(LOCAL_STORAGE_NAME, CLOSED_STATE);

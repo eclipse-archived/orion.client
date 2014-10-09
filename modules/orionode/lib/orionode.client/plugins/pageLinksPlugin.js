@@ -47,7 +47,8 @@ define([
 		id: "settings",
 		nameKey: "Settings",
 		nls: "orion/widgets/nls/messages",
-		imageClass: "core-sprite-gear"
+		imageClass: "core-sprite-gear",
+		order: 60
 	});
 
 	// Primary navigation links
