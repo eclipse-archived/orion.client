@@ -136,7 +136,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 		_generateChildren: function(children, indentLevel, referenceNode) {
 			for (var i=0; i<children.length; i++) {
 				var row = document.createElement(this._tableRowElement); //$NON-NLS-0$
-				this._renderer.initRow(children[i], row);
+				if(this._renderer && typeof this._renderer.initSelectableRow === "function") { //$NON-NLS-0$
+					this._renderer.initSelectableRow(children[i], row);
+				}
 				this._generateRow(children[i], row, indentLevel, referenceNode);
 				if (referenceNode) {
 					this._bodyElement.insertBefore(row, referenceNode.nextSibling);

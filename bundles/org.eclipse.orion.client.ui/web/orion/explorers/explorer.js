@@ -846,7 +846,7 @@ exports.SelectionRenderer = (function(){
 		}
 	};
 	
-	SelectionRenderer.prototype.initRow = function(item, tableRow) {
+	SelectionRenderer.prototype.initSelectableRow = function(item, tableRow) {
 		var self = this;
 		tableRow.addEventListener("click", function(evt) { //$NON-NLS-0$
 			if(self.explorer.getNavHandler()){
