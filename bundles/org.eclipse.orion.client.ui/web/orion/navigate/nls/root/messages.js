@@ -107,7 +107,8 @@ define({
 	"Cancel upload": "Cancel upload",
 	"UploadingFileErr": "Uploading the following file failed: ",
 	"Enter project name:": "Enter project name:",
-	"Creating project ": "Creating project ",
+	"Create new project" : "Create new project",
+	"Creating project ${0}": "Creating project ${0}",
 	"NoFile": "Use the ${0} menu to create new files and folders. Click a file to start coding.",
 	"Download": "Download",
 	"Download_tooltips": "Download the file contents as the displayed name",
@@ -144,5 +145,7 @@ define({
 	'readMeCommandTooltip': 'Create a README.md file in this project',  //$NON-NLS-0$  //$NON-NLS-1$
 	'zipArchiveCommandName': 'Zip archive',  //$NON-NLS-0$  //$NON-NLS-1$
 	'zipArchiveCommandTooltip': 'Create a project from a local zip archive.',  //$NON-NLS-0$  //$NON-NLS-1$
-	'Url:': 'Url:'  //$NON-NLS-0$  //$NON-NLS-1$
+	'Url:': 'Url:',  //$NON-NLS-0$  //$NON-NLS-1$
+	'notZip' : 'The following files are not zip files: ${0}. Would you like to continue the import?', //$NON-NLS-0$  //$NON-NLS-1$
+	'notZipMultiple' : 'There are multiple non-zip files being uploaded. Would you like to continue the import?' //$NON-NLS-0$  //$NON-NLS-1$
 });
