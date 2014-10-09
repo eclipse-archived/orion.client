@@ -1284,7 +1284,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 									}
 								}
 								if (prompt) {
-									name = window.prompt(i18nUtil.formatMessage(messages['Enter a new name for \'${0}\''], selectedItem.Name), i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name));
+									name = window.prompt(i18nUtil.formatMessage(messages['EnterName'], selectedItem.Name), i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name));
 									// user cancelled?  don't copy this one
 									if (!name) {
 										location = null;
