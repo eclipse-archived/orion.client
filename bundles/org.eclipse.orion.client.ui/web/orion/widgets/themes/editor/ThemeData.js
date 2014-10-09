@@ -40,12 +40,6 @@ define([
 		
 		}
 		
-		function multiply(a,b){
-			var resultString = 'Result:';
-			var result = a*b;
-			return resultString + result;
-		}
-		
 		var defaultFont = '"Consolas", "Monaco", "Vera Mono", monospace';
 		var defaultFontSize = '12px';
 
@@ -57,15 +51,11 @@ define([
 			name: messages["eclipseThemeName"],
 			className: "eclipse", //$NON-NLS-0$
 			styles: {
-				eclipse: {
-					color: "darkSlateGray", //$NON-NLS-0$
-					fontFamily: defaultFont,
-					fontSize: defaultFontSize,
-					/* from textview.css */
-					textview: {
-						backgroundColor: "white", //$NON-NLS-0$
-					}
-				},
+				/* top-level properties */
+				backgroundColor: "white", //$NON-NLS-0$
+				color: "darkSlateGray", //$NON-NLS-0$
+				fontFamily: defaultFont,
+				fontSize: defaultFontSize,
 
 				/* from textview.css */
 				textviewRightRuler: {
@@ -103,6 +93,11 @@ define([
 						"function": { //$NON-NLS-0$
 							fontWeight: "bold", //$NON-NLS-0$
 							color: "#67BBB8" //$NON-NLS-0$
+						}
+					},
+					other: {
+						"attribute-name": { //$NON-NLS-0$
+							color: "cadetBlue" //$NON-NLS-0$
 						}
 					}
 				},
@@ -173,6 +168,13 @@ define([
 				string: {
 					color: "blue" //$NON-NLS-0$
 				},
+				support: {
+					type: {
+						propertyName: {
+							color: "#7F0055" //$NON-NLS-0$
+						}
+					}
+				},
 				variable: {
 					language: {
 						color: "#7F0055", //$NON-NLS-0$
@@ -193,15 +195,11 @@ define([
 			name: messages["prospectoThemeName"],
 			className: "prospecto", //$NON-NLS-0$
 			styles: {
-				prospecto: {
-					color: "#333", //$NON-NLS-0$
-					fontFamily: defaultFont,
-					fontSize: defaultFontSize,
-					/* from textview.css */
-					textview: {
-						backgroundColor: "white", //$NON-NLS-0$
-					}
-				},
+				/* top-level properties */
+				backgroundColor: "white", //$NON-NLS-0$
+				color: "#333", //$NON-NLS-0$
+				fontFamily: defaultFont,
+				fontSize: defaultFontSize,
 
 				/* from textview.css */
 				textviewRightRuler: {
@@ -239,6 +237,11 @@ define([
 						"function": { //$NON-NLS-0$
 							fontWeight: "bold", //$NON-NLS-0$
 							color: "#67BBB8" //$NON-NLS-0$
+						}
+					},
+					other: {
+						"attribute-name": { //$NON-NLS-0$
+							color: "cadetBlue" //$NON-NLS-0$
 						}
 					}
 				},
@@ -309,6 +312,13 @@ define([
 				string: {
 					color: "#446FBD" //$NON-NLS-0$
 				},
+				support: {
+					type: {
+						propertyName: {
+							color: "#9F4177" //$NON-NLS-0$
+						}
+					}
+				},
 				variable: {
 					language: {
 						color: "#7F0055", //$NON-NLS-0$
@@ -329,15 +339,11 @@ define([
 			name: messages["darkerThemeName"],
 			className: "darker", //$NON-NLS-0$
 			styles: {
-				darker: {
-					color: "#F8F8F2", //$NON-NLS-0$
-					fontFamily: defaultFont,
-					fontSize: defaultFontSize,
-					/* from textview.css */
-					textview: {
-						backgroundColor: "#272822", //$NON-NLS-0$
-					}
-				},
+				/* top-level properties */
+				backgroundColor: "#272822", //$NON-NLS-0$
+				color: "#F8F8F2", //$NON-NLS-0$
+				fontFamily: defaultFont,
+				fontSize: defaultFontSize,
 				
 				/* from textview.css */
 				textviewRightRuler: {
@@ -380,6 +386,11 @@ define([
 						"function": { //$NON-NLS-0$
 							fontWeight: "bold", //$NON-NLS-0$
 							color: "#67BBB8" //$NON-NLS-0$
+						}
+					},
+					other: {
+						"attribute-name": { //$NON-NLS-0$
+							color: "#CFBFAD" //$NON-NLS-0$
 						}
 					}
 				},
@@ -450,6 +461,13 @@ define([
 				string: {
 					color: "#F0E383" //$NON-NLS-0$
 				},
+				support: {
+					type: {
+						propertyName: {
+							color: "#52E3F6" //$NON-NLS-0$
+						}
+					}
+				},
 				variable: {
 					language: {
 						color: "#7F0055", //$NON-NLS-0$
@@ -470,15 +488,11 @@ define([
 			name: messages["blueThemeName"],
 			className: "blue", //$NON-NLS-0$
 			styles: {
-				blue: {
-					color: "navy", //$NON-NLS-0$
-					fontFamily: defaultFont,
-					fontSize: defaultFontSize,
-					/* from textview.css */
-					textview: {
-						backgroundColor: "aliceBlue", //$NON-NLS-0$
-					}
-				},
+				/* top-level properties */
+				backgroundColor: "aliceBlue", //$NON-NLS-0$
+				color: "navy", //$NON-NLS-0$
+				fontFamily: defaultFont,
+				fontSize: defaultFontSize,
 
 				/* from textview.css */
 				textviewRightRuler: {
@@ -516,6 +530,11 @@ define([
 						"function": { //$NON-NLS-0$
 							fontWeight: "bold", //$NON-NLS-0$
 							color: "#67BBB8" //$NON-NLS-0$
+						}
+					},
+					other: {
+						"attribute-name": { //$NON-NLS-0$
+							color: "cadetBlue" //$NON-NLS-0$
 						}
 					}
 				},
@@ -586,6 +605,13 @@ define([
 				string: {
 					color: "cornFlowerBlue" //$NON-NLS-0$
 				},
+				support: {
+					type: {
+						propertyName: {
+							color: "cornFlowerBlue" //$NON-NLS-0$
+						}
+					}
+				},
 				variable: {
 					language: {
 						color: "#7F0055", //$NON-NLS-0$
@@ -606,15 +632,11 @@ define([
 			name: messages["ambienceThemeName"],
 			className: "ambience", //$NON-NLS-0$
 			styles: {
-				ambience: {
-					color: "darkseagreen", //$NON-NLS-0$
-					fontFamily: defaultFont,
-					fontSize: defaultFontSize,
-					/* from textview.css */
-					textview: {
-						backgroundColor: "darkgrey", //$NON-NLS-0$
-					}
-				},
+				/* top-level properties */
+				backgroundColor: "darkgrey", //$NON-NLS-0$
+				color: "darkseagreen", //$NON-NLS-0$
+				fontFamily: defaultFont,
+				fontSize: defaultFontSize,
 
 				/* from textview.css */
 				textviewRightRuler: {
@@ -655,6 +677,11 @@ define([
 						"function": { //$NON-NLS-0$
 							fontWeight: "bold", //$NON-NLS-0$
 							color: "#67BBB8" //$NON-NLS-0$
+						}
+					},
+					other: {
+						"attribute-name": { //$NON-NLS-0$
+							color: "cadetBlue" //$NON-NLS-0$
 						}
 					}
 				},
@@ -725,6 +752,13 @@ define([
 				string: {
 					color: "lightcoral" //$NON-NLS-0$
 				},
+				support: {
+					type: {
+						propertyName: {
+							color: "cornFlowerBlue" //$NON-NLS-0$
+						}
+					}
+				},
 				variable: {
 					language: {
 						color: "#7F0055", //$NON-NLS-0$
@@ -745,15 +779,11 @@ define([
 			name: messages["tierraThemeName"],
 			className: "tierra", //$NON-NLS-0$
 			styles: {
-				tierra: {
-					color: "#555555", //$NON-NLS-0$
-					fontFamily: defaultFont,
-					fontSize: defaultFontSize,
-					/* from textview.css */
-					textview: {
-						backgroundColor: "lemonchiffon", //$NON-NLS-0$
-					}
-				},
+				/* top-level properties */
+				backgroundColor: "lemonchiffon", //$NON-NLS-0$
+				color: "#555555", //$NON-NLS-0$
+				fontFamily: defaultFont,
+				fontSize: defaultFontSize,
 
 				/* from textview.css */
 				textviewRightRuler: {
@@ -791,6 +821,11 @@ define([
 						"function": { //$NON-NLS-0$
 							fontWeight: "bold", //$NON-NLS-0$
 							color: "#67BBB8" //$NON-NLS-0$
+						}
+					},
+					other: {
+						"attribute-name": { //$NON-NLS-0$
+							color: "cadetBlue" //$NON-NLS-0$
 						}
 					}
 				},
@@ -861,6 +896,13 @@ define([
 				string: {
 					color: "orangered" //$NON-NLS-0$
 				},
+				support: {
+					type: {
+						propertyName: {
+							color: "darkred" //$NON-NLS-0$
+						}
+					}
+				},
 				variable: {
 					language: {
 						color: "#7F0055", //$NON-NLS-0$
@@ -882,15 +924,11 @@ define([
 			name: messages["nimbusThemeName"],
 			className: "nimbus", //$NON-NLS-0$
 			styles: {
-				nimbus: {
-					color: "#DDDDDD", //$NON-NLS-0$
-					fontFamily: defaultFont,
-					fontSize: defaultFontSize,
-					/* from textview.css */
-					textview: {
-						backgroundColor: "#333333", //$NON-NLS-0$
-					}
-				},
+				/* top-level properties */
+				backgroundColor: "#333333", //$NON-NLS-0$
+				color: "#DDDDDD", //$NON-NLS-0$
+				fontFamily: defaultFont,
+				fontSize: defaultFontSize,
 
 				/* from textview.css */
 				textviewRightRuler: {
@@ -933,6 +971,11 @@ define([
 						"function": { //$NON-NLS-0$
 							fontWeight: "bold", //$NON-NLS-0$
 							color: "#67BBB8" //$NON-NLS-0$
+						}
+					},
+					other: {
+						"attribute-name": { //$NON-NLS-0$
+							color: "cadetBlue" //$NON-NLS-0$
 						}
 					}
 				},
@@ -1003,6 +1046,13 @@ define([
 				string: {
 					color: "cornflowerblue" //$NON-NLS-0$
 				},
+				support: {
+					type: {
+						propertyName: {
+							color: "darkorange" //$NON-NLS-0$
+						}
+					}
+				},
 				variable: {
 					language: {
 						color: "#7F0055", //$NON-NLS-0$
@@ -1023,15 +1073,11 @@ define([
 			name: messages["adelanteThemeName"],
 			className: "adelante", //$NON-NLS-0$
 			styles: {
-				adelante: {
-					color: "dimgray", //$NON-NLS-0$
-					fontFamily: defaultFont,
-					fontSize: defaultFontSize,
-					/* from textview.css */
-					textview: {
-						backgroundColor: "#F1E7C8", //$NON-NLS-0$
-					}
-				},
+				/* top-level properties */
+				backgroundColor: "#F1E7C8", //$NON-NLS-0$
+				color: "dimgray", //$NON-NLS-0$
+				fontFamily: defaultFont,
+				fontSize: defaultFontSize,
 
 				/* from textview.css */
 				textviewRightRuler: {
@@ -1069,6 +1115,11 @@ define([
 						"function": { //$NON-NLS-0$
 							fontWeight: "bold", //$NON-NLS-0$
 							color: "#67BBB8" //$NON-NLS-0$
+						}
+					},
+					other: {
+						"attribute-name": { //$NON-NLS-0$
+							color: "cadetBlue" //$NON-NLS-0$
 						}
 					}
 				},
@@ -1139,6 +1190,13 @@ define([
 				string: {
 					color: "#DE5D3B" //$NON-NLS-0$
 				},
+				support: {
+					type: {
+						propertyName: {
+							color: "#AF473B" //$NON-NLS-0$
+						}
+					}
+				},
 				variable: {
 					language: {
 						color: "#7F0055", //$NON-NLS-0$
@@ -1159,15 +1217,11 @@ define([
 			name: messages["raspberryPiThemeName"],
 			className: "raspberry", //$NON-NLS-0$
 			styles: {
-				raspberry: {
-					color: "dimgray", //$NON-NLS-0$
-					fontFamily: defaultFont,
-					fontSize: defaultFontSize,
-					/* from textview.css */
-					textview: {
-						backgroundColor: "seashell", //$NON-NLS-0$
-					}
-				},
+				/* top-level properties */
+				backgroundColor: "seashell", //$NON-NLS-0$
+				color: "dimgray", //$NON-NLS-0$
+				fontFamily: defaultFont,
+				fontSize: defaultFontSize,
 
 				/* from textview.css */
 				textviewRightRuler: {
@@ -1211,6 +1265,11 @@ define([
 						"function": { //$NON-NLS-0$
 							fontWeight: "bold", //$NON-NLS-0$
 							color: "#67BBB8" //$NON-NLS-0$
+						}
+					},
+					other: {
+						"attribute-name": { //$NON-NLS-0$
+							color: "cadetBlue" //$NON-NLS-0$
 						}
 					}
 				},
@@ -1281,6 +1340,13 @@ define([
 				string: {
 					color: "darkorange" //$NON-NLS-0$
 				},
+				support: {
+					type: {
+						propertyName: {
+							color: "#E73E36" //$NON-NLS-0$
+						}
+					}
+				},
 				variable: {
 					language: {
 						color: "#7F0055", //$NON-NLS-0$
@@ -1334,33 +1400,23 @@ define([
 		var TOP = dataset.top;
 
 		dataset.shapes = [{
-			type: 'TEXT',
-			name: messages["Line Numbers"],
-			label: '1',
-			x: LEFT + 20,
-			y: TOP + 20,
-			fill: 'darkSlateGray',
-			family: 'lineNumber',
-			font: '9pt sans-serif'
-		},
-		{
 			type: 'RECTANGLE',
 			name: messages.Background,
 			x: LEFT + 46,
 			y: TOP,
 			width: 290,
 			height: dataset.height,
-			family: 'background',
+			family: 'backgroundColor',
 			fill: 'white'
 		},
 		{
 			type: 'TEXT',
-			name: messages.Strings,
+			name: messages.SingleQuotedStrings,
 			label: "'text/javascript'",
 			x: LEFT + 134,
 			y: TOP + 20,
 			fill: 'darkorange',
-			family: 'string',
+			family: 'string.quoted.single',
 			font: '9pt sans-serif'
 		},
 		
@@ -1371,7 +1427,7 @@ define([
 			x: LEFT + 124,
 			y: TOP + 20,
 			fill: 'darkSlateGray',
-			family: 'text',
+			family: 'color',
 			font: '9pt sans-serif'
 		},
 
@@ -1383,18 +1439,18 @@ define([
 			y: TOP + 87,
 			width: 290,
 			height: 18,
-			family: 'currentLine',
+			family: 'annotationLine.currentLine',
 			fill: '#eaf2fd'
 		},
 		
 		{
 			type: 'TEXT',
-			name: messages["HTML Attribute"],
+			name: messages["Attribute Names"],
 			label: 'type',
 			x: LEFT + 98,
 			y: TOP + 20,
 			fill: 'darkGray',
-			family: 'attribute',
+			family: 'entity.other.attribute-name',
 			font: '9pt sans-serif'
 		},
 		
@@ -1405,78 +1461,120 @@ define([
 			y: TOP,
 			width: 14,
 			height: dataset.height,
-			family: 'overviewRuler',
+			family: 'ruler.overview',
 			fill: 'white'
 		},	
 		{
 			type: 'TEXT',
-			name: messages.Comments,
+			name: messages.BlockComments,
 			label: '/* comment */',
 			x: LEFT + 75,
 			y: TOP + 40,
 			fill: 'darkSeaGreen',
-			family: 'comment',
+			family: 'comment.block',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages["HTML Tag"],
+			name: messages["Tags"],
 			label: '<script',
 			x: LEFT + 55,
 			y: TOP + 20,
 			fill: 'darkorange',
-			family: 'keyword',
+			family: 'meta.tag',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages["HTML Tag"],
+			name: messages["Tags"],
 			label: '>',
 			x: LEFT + 213,
 			y: TOP + 20,
 			fill: 'darkorange',
-			family: 'keyword',
+			family: 'meta.tag',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages.Strings,
-			label: '\'Result\'',
+			name: messages.DoubleQuotedStrings,
+			label: '"Result"',
 			x: LEFT + 164,
 			y: TOP + 80,
 			fill: 'cornflowerBlue',
-			family: 'string',
+			family: 'string.quoted.double',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: messages.LineComments,
+			label: '// $NON-NLS-0$',
+			x: LEFT + 224,
+			y: TOP + 80,
+			fill: 'cornflowerBlue',
+			family: 'comment.line',
+			font: '9pt sans-serif'
+		},
+		
+		
+		{
+			type: 'TEXT',
+			name: messages.FunctionNames,
+			label: 'area',
+			x: LEFT + 120,
+			y: TOP + 60,
+			fill: 'darkSlateGray',
+			family: 'entity.name.function',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
 			name: messages.Foreground,
-			label: 'multiply(a,b){',
-			x: LEFT + 120,
+			label: '(',
+			x: LEFT + 148,
 			y: TOP + 60,
 			fill: 'darkSlateGray',
-			family: 'text',
+			family: 'color',
 			font: '9pt sans-serif'
 		},
-		
 		{
 			type: 'TEXT',
-			name: messages.Keywords,
+			name: messages.Parameters,
+			label: 'rad',
+			x: LEFT + 152,
+			y: TOP + 60,
+			fill: 'darkSlateGray',
+			family: 'variable.parameter',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: messages.Foreground,
+			label: ') {',
+			x: LEFT + 170,
+			y: TOP + 60,
+			fill: 'darkSlateGray',
+			family: 'color',
+			font: '9pt sans-serif'
+		},
+
+		{
+			type: 'TEXT',
+			name: messages.OperatorKeywords,
 			label: 'function',
 			x: LEFT + 75,
 			y: TOP + 60,
 			fill: 'darkorange',
-			family: 'keyword',
+			family: 'keyword.operator',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages.Keywords,
+			name: messages.OperatorKeywords,
 			label: 'var',
 			x: LEFT + 95,
 			y: TOP + 80,
 			fill: 'darkorange',
-			family: 'keyword',
+			family: 'keyword.operator',
 			font: '9pt sans-serif'
 		},
 		{
@@ -1486,7 +1584,7 @@ define([
 			x: LEFT + 115,
 			y: TOP + 80,
 			fill: 'darkSlateGray',
-			family: 'text',
+			family: 'color',
 			font: '9pt sans-serif'
 		},
 		{
@@ -1496,47 +1594,67 @@ define([
 			x: LEFT + 205,
 			y: TOP + 80,
 			fill: 'darkSlateGray',
-			family: 'text',
+			family: 'color',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages.Keywords,
+			name: messages.OperatorKeywords,
 			label: 'var',
 			x: LEFT + 95,
 			y: TOP + 100,
 			fill: 'darkorange',
-			family: 'keyword',
+			family: 'keyword.operator',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
 			name: messages.Foreground,
-			label: 'result = a*b;',
+			label: 'result = Math.pi * Math.pow(rad,',
 			x: LEFT + 115,
 			y: TOP + 100,
 			fill: 'darkSlateGray',
-			family: 'text',
+			family: 'color',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages.Keywords,
+			name: messages["DecimalNumbers"],
+			label: '2',
+			x: LEFT + 288,
+			y: TOP + 100,
+			fill: 'darkSlateGray',
+			family: 'constant.numeric',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: messages.Foreground,
+			label: ');',
+			x: LEFT + 295,
+			y: TOP + 100,
+			fill: 'darkSlateGray',
+			family: 'color',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: messages.ControlKeywords,
 			label: 'return',
 			x: LEFT + 95,
 			y: TOP + 120,
 			fill: 'darkorange',
-			family: 'keyword',
+			family: 'keyword.control',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
 			name: messages.Foreground,
 			label: 'output + result;',
-			x: LEFT + 135,
+			x: LEFT + 132,
 			y: TOP + 120,
 			fill: 'darkSlateGray',
-			family: 'text',
+			family: 'color',
 			font: '9pt sans-serif'
 		},
 		{
@@ -1546,137 +1664,137 @@ define([
 			x: LEFT + 75,
 			y: TOP + 140,
 			fill: 'darkSlateGray',
-			family: 'text',
+			family: 'color',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages["HTML Tag"],
+			name: messages["Tags"],
 			label: '</script>',
 			x: LEFT + 55,
 			y: TOP + 160,
 			fill: 'darkorange',
-			family: 'keyword',
+			family: 'meta.tag',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages["HTML Tag"],
+			name: messages["Tags"],
 			label: '<style',
 			x: LEFT + 55,
 			y: TOP + 200,
 			fill: 'darkorange',
-			family: 'keyword',
+			family: 'meta.tag',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages["HTML Attribute"],
+			name: messages["Attribute Names"],
 			label: 'type',
-			x: LEFT + 95,
+			x: LEFT + 93,
 			y: TOP + 200,
 			fill: 'darkGray',
-			family: 'attribute',
+			family: 'entity.other.attribute-name',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
 			name: messages.Foreground,
 			label: '=',
-			x: LEFT + 121,
+			x: LEFT + 119,
 			y: TOP + 200,
 			fill: 'darkSlateGray',
-			family: 'text',
+			family: 'color',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages.Strings,
+			name: messages.SingleQuotedStrings,
 			label: "'text/css'",
-			x: LEFT + 131,
+			x: LEFT + 129,
 			y: TOP + 200,
 			fill: 'darkorange',
-			family: 'string',
+			family: 'string.quoted.single',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages["HTML Tag"],
+			name: messages["Tags"],
 			label: '>',
-			x: LEFT + 180,
+			x: LEFT + 178,
 			y: TOP + 200,
 			fill: 'darkorange',
-			family: 'keyword',
+			family: 'meta.tag',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages["CSS Class Name"],
-			label: '.some-class',
+			name: messages.Foreground,
+			label: '.some-class {',
 			x: LEFT + 75,
 			y: TOP + 220,
 			fill: 'darkorange',
-			family: 'keyword',
+			family: 'color',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages["CSS Class Name"],
-			label: '{',
-			x: LEFT + 145,
-			y: TOP + 220,
-			fill: 'darkSlateGray',
-			family: 'text',
-			font: '9pt sans-serif'
-		},
-		{
-			type: 'TEXT',
-			name: messages["CSS Attribute"],
-			label: 'color:',
+			name: messages["Property Names"],
+			label: 'color',
 			x: LEFT + 95,
 			y: TOP + 240,
 			fill: 'darkSlateGray',
-			family: 'text',
+			family: 'support.type.propertyName',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages["CSS Value"],
+			name: messages.Foreground,
+			label: ':',
+			x: LEFT + 122,
+			y: TOP + 240,
+			fill: 'darkSlateGray',
+			family: 'color',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: messages.HexNumber,
 			label: '#123456',
 			x: LEFT + 130,
 			y: TOP + 240,
 			fill: 'darkSlateGray',
-			family: 'string',
+			family: 'constant.numeric.hex',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages["CSS Text"],
+			name: messages.Foreground,
 			label: ';',
 			x: LEFT + 180,
 			y: TOP + 240,
 			fill: 'darkSlateGray',
-			family: 'text',
+			family: 'color',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages["CSS Class Name"],
+			name: messages.Foreground,
 			label: '}',
 			x: LEFT + 75,
 			y: TOP + 260,
 			fill: 'darkSlateGray',
-			family: 'text',
+			family: 'color',
 			font: '9pt sans-serif'
 		},
 		{
 			type: 'TEXT',
-			name: messages["HTML Tag"],
+			name: messages["Tags"],
 			label: '</style>',
 			x: LEFT + 55,
 			y: TOP + 280,
 			fill: 'darkorange',
-			family: 'keyword',
+			family: 'meta.tag',
 			font: '9pt sans-serif'
 		},
 		/* <style type='text/css'></style> */
@@ -1687,19 +1805,20 @@ define([
 			y: TOP,
 			width: 46,
 			height: dataset.height,
-			family: 'annotationRuler',
+			family: 'ruler.annotations',
 			fill: 'white'
 		}];
 
 		for (var line = 0; line < 16; line++) {
+			var isOdd = (line + 1) % 2 === 1;
 			dataset.shapes.push({
 				type: 'TEXT',
-				name: messages["Line Numbers"],
+				name: isOdd ? messages["Odd Line Numbers"] : messages["Even Line Numbers"],
 				label: line + 1,
 				x: LEFT + 20,
 				y: TOP + (20 * line) + 20,
 				fill: 'darkSlateGray',
-				family: 'lineNumber',
+				family: isOdd ? 'rulerLines.odd' : 'rulerLines.even',
 				font: '9pt sans-serif'
 			});
 		}
@@ -1707,74 +1826,63 @@ define([
 		return dataset;
 	}
 		
-		function parseToXML ( text ) {
-		      try {
-		        var xml = null;
-		        
-		        if ( window.DOMParser ) {
-		
-		          var parser = new DOMParser();
-		          xml = parser.parseFromString( text, "text/xml" );
-		          
-		          var found = xml.getElementsByTagName( "parsererror" );
-		
-		          if ( !found || !found.length || !found[ 0 ].childNodes.length ) {
-		            return xml;
-		          }
-		
-		          return null;
-		        } else {
-		
-		          xml = new ActiveXObject( "Microsoft.XMLDOM" );
-		
-		          xml.async = false;
-		          xml.loadXML( text );
-		
-		          return xml;
-		        }
-		      } catch ( e ) {
-		        // suppress
-		      }
-		 }
-		 
+		function parseToXML(text) {
+			try {
+				var parser = new DOMParser();
+				var xml = parser.parseFromString(text, "text/xml"); //$NON-NLS-0$
+				var found = xml.getElementsByTagName("parsererror"); //$NON-NLS-0$
+				if (!found || !found.length || !found[0].childNodes.length) {
+					return xml;
+				}
+			} catch (e) { /* suppress */ }
+			return null;
+		}
+
 		ThemeData.prototype.parseToXML = parseToXML;
 		
-		function selectFontSize( size ){
-			window.console.log( 'fontsize: ' + size );
+		function selectFontSize(size) {
+			window.console.log("fontsize: " + size ); //$NON-NLS-0$
 		}
 		
 		ThemeData.prototype.selectFontSize = selectFontSize;
 		
-		function importTheme(data){
-			window.console.log( 'import theme' );
-			window.console.log( data );
-			
-			var body = data.parameters.valueFor("name");
+		function importTheme(data) {
+			var body = data.parameters.valueFor("name"); //$NON-NLS-0$
+			var xml = this.parseToXML(body);
+			if (xml) {
+				/* old-style theme definition */
+				var newStyle = new StyleSet();
 				
-			var xml = this.parseToXML( body );
-			
-			var newStyle = new StyleSet();
-			
-			newStyle.name = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
-			newStyle.annotationRuler = xml.getElementsByTagName("background")[0].attributes[0].value; 
-			newStyle.background = xml.getElementsByTagName("background")[0].attributes[0].value;
-			newStyle.comment = xml.getElementsByTagName("singleLineComment")[0].attributes[0].value;
-			newStyle.keyword = xml.getElementsByTagName("keyword")[0].attributes[0].value;
-			newStyle.text = xml.getElementsByTagName("foreground")[0].attributes[0].value;
-			newStyle.string = xml.getElementsByTagName("string")[0].attributes[0].value;
-			newStyle.overviewRuler = xml.getElementsByTagName("background")[0].attributes[0].value;
-			newStyle.lineNumberOdd = xml.getElementsByTagName("lineNumber")[0].attributes[0].value;
-			newStyle.lineNumberEven = xml.getElementsByTagName("lineNumber")[0].attributes[0].value;
-			newStyle.lineNumber = xml.getElementsByTagName("lineNumber")[0].attributes[0].value;
-			newStyle.currentLine = xml.getElementsByTagName("selectionBackground")[0].attributes[0].value;
-			
-			data.items.addTheme( newStyle );
+				newStyle.name = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
+				newStyle.annotationRuler = xml.getElementsByTagName("background")[0].attributes[0].value; 
+				newStyle.background = xml.getElementsByTagName("background")[0].attributes[0].value;
+				newStyle.comment = xml.getElementsByTagName("singleLineComment")[0].attributes[0].value;
+				newStyle.keyword = xml.getElementsByTagName("keyword")[0].attributes[0].value;
+				newStyle.text = xml.getElementsByTagName("foreground")[0].attributes[0].value;
+				newStyle.string = xml.getElementsByTagName("string")[0].attributes[0].value;
+				newStyle.overviewRuler = xml.getElementsByTagName("background")[0].attributes[0].value;
+				newStyle.lineNumberOdd = xml.getElementsByTagName("lineNumber")[0].attributes[0].value;
+				newStyle.lineNumberEven = xml.getElementsByTagName("lineNumber")[0].attributes[0].value;
+				newStyle.lineNumber = xml.getElementsByTagName("lineNumber")[0].attributes[0].value;
+				newStyle.currentLine = xml.getElementsByTagName("selectionBackground")[0].attributes[0].value;
+			} else {
+				/* parsing the data as xml failed, now try the new-style theme definition (JSON) */
+				try {
+					newStyle = JSON.parse(body);
+				} catch (e) {}
+			}
+
+			if (newStyle) {
+				data.items.addTheme(newStyle);
+			} else {
+				// TODO no
+			}
 		}
 		
 		ThemeData.prototype.importTheme = importTheme;
 		
-		function processSettings(settings, preferences){
-			var themeClass = "editorTheme";
+		function processSettings(settings, preferences) {
+			var themeClass = "editorTheme"; //$NON-NLS-0$
 			var theme = mTextTheme.TextTheme.getTheme();
 			theme.setThemeClass(themeClass, theme.buildStyleSheet(themeClass, settings));
 		}
@@ -1783,7 +1891,7 @@ define([
 
 		ThemeData.prototype.getViewData = getViewData;
 
-		return{
+		return {
 			ThemeData:ThemeData,
 			getStyles:getStyles
 		};

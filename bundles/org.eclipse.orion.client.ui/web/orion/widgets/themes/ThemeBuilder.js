@@ -20,7 +20,6 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
     var UI_SIZE = 350;
 
     var SELECTED_ZONE = null;
-    var OVERVIEW = true;
     var INITIALIZE = true;
     var OUTLINEDATA = false;
     var ARCS = true;
@@ -30,7 +29,6 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
     var ctx = null;
 
     var over = null;
-    var settings = [];
 
     var colorFieldId;
 
@@ -55,11 +53,9 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
     Family.prototype.name = familyname;
     Family.prototype.value = familyvalue;
 
-    var newExportThemeNameParameter = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Theme name:'], messages['yourTheme'])]); //$NON-NLS-1$ //$NON-NLS-0$
-
     function ThemeBuilder(args) {
 
-        this.settings = [];
+        this.settings = {};
 
         this.themeData = args.themeData;
 
@@ -80,35 +76,12 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         this.commandService = args.commandService;
         this.preferences = args.preferences;
 
-        var guideCommand = new mCommands.Command({
-            name: messages["Show Guide"],
-            tooltip: messages["Check Guide"],
-            id: "orion.checkGuide", //$NON-NLS-0$
-            callback: function(data) {
-                this.guide(data.items);
-            }.bind(this)
-
-        });
-
         var exportCommand = new mCommands.Command({
             name: messages.Export,
             tooltip: messages['Export a theme'],
             id: "orion.exportTheme", //$NON-NLS-0$
-            parameters: newExportThemeNameParameter,
-            callback: function(data) {
-                var themeName;
-                if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
-                    themeName = data.parameters.valueFor('name'); //$NON-NLS-0$
-                } else {
-                    themeName = 'yourTheme'; //$NON-NLS-0$
-                }
-                this.exportTheme(data.items, themeName);
-            }.bind(this)
-
+            callback: exportTheme
         });
-
-        this.commandService.addCommand(guideCommand);
-        this.commandService.registerCommandContribution('themeCommands', "orion.checkGuide", 1); //$NON-NLS-1$ //$NON-NLS-0$
 
         this.commandService.addCommand(exportCommand);
         this.commandService.registerCommandContribution('themeCommands', "orion.exportTheme", 5); //$NON-NLS-1$ //$NON-NLS-0$
@@ -122,22 +95,16 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
             zones[SELECTED_ZONE.id].fill = newcolor;
             this.themebuilder.updateFamily(zones[SELECTED_ZONE.id].family, newcolor);
-            OVERVIEW = false;
             this.themebuilder.refresh();
             zones[SELECTED_ZONE.id].glow(UI_SIZE, TOP);
             this.themebuilder.drawPicker(ctx, zones[SELECTED_ZONE.id]);
-
-            lib.node('pickercontainer').style.display = 'none';
-            lib.node('savecontainer').style.display = '';
-            lib.node('stringcontainer').style.display = '';
+			this.revealSaveContainer();
         }
     }
 
     ThemeBuilder.prototype.applyColor = applyColor;
 
     ThemeBuilder.prototype.colorFieldId = colorFieldId;
-
-    ThemeBuilder.prototype.settings = settings;
 
     var AUTONAME = false;
 
@@ -157,6 +124,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         '<span class="settingsLabel">' + messages["New Theme Name:"] +
         '</span>' +
         '<div id="themesaver" class="themesaver"></div>' +
+        '<button id="saveButton" class="orionButton commandButton commandMargins">' + 'Save' + "</button>" + 
         '</div>' +
         '<div id="sizecontainer">' +
         '<span class="settingsLabel">' + messages["Font Size:"] +
@@ -167,7 +135,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         '<span>' + messages["OR HEX:"] +
         '</span>' +
         '<div id="colorstring" class="colorfield"></div>' +
-        '<button class="commandButton" style="padding:5px;font-size:9pt;" type="button" id="colorButton">' + messages["Ok"] +
+        '<button class="orionButton commandButton commandMargins" type="button" id="colorButton">' + messages["Ok"] +
         '</button>' +
         '</div>' +
         '</div>';
@@ -228,11 +196,11 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
     function clear() {
         if (ctx) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            var w = canvas.width;
-            var h = canvas.height;
-            canvas.width = w;
-            canvas.height = h;
+            canvas.width = canvas.width;
+            canvas.height = canvas.height;
         }
+        var stringcontainer = lib.node('stringcontainer');
+        stringcontainer.style.display = 'none';
     }
 
     ThemeBuilder.prototype.clear = clear;
@@ -243,21 +211,17 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         if (OUTLINEDATA === true) {
             this.drawOutlineData();
         }
+        
+        this.sizeSelect.setSelection(this.settings.fontSize ? this.settings.fontSize.value : this.rootTheme.styles.fontSize);
     }
 
     ThemeBuilder.prototype.refresh = refresh;
 
     function getCoordinates(e) {
-
-        var x, y;
-
         var rect = canvas.getBoundingClientRect();
-        x = e.clientX - rect.left;
-        y = e.clientY - rect.top;
-
         return {
-            x: x,
-            y: y
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
         };
     }
 
@@ -282,23 +246,21 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         }
     }
 
-    function mouseUp(e) {
+    function mouseUp(/*e*/) {
         canvas.style.cursor = "";
     }
 
     function updateFamily(family, fill) {
-        for (var z = 0; z < zones.length; z++) {
-            if (zones[z].family) {
-                if (zones[z].family === family) {
-                    zones[z].fill = fill;
-                }
+        zones.forEach(function(zone) {
+            if (zone.family === family) {
+                zone.fill = fill;
+            }
+        });
 
-                for (var s in this.settings) {
-                    if (this.settings[s].name === family) {
-                        this.settings[s].value = fill;
-                        break;
-                    }
-                }
+        for (var s in this.settings) {
+            if (this.settings[s].name === family) {
+                this.settings[s].value = fill;
+                break;
             }
         }
     }
@@ -361,8 +323,6 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
     function mouseDown(e) {
 
-        OVERVIEW = false;
-
         var coordinates = getCoordinates(e);
 
         var x = coordinates.x;
@@ -388,24 +348,16 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
                 }
             }
 
-            if (over.length > 0) {
-                OVERVIEW = true;
-            } else {
-                OVERVIEW = false;
-            }
-
             switch (over[smallest].type) {
 
                 case 'ELLIPSE':
                     zones[SELECTED_ZONE.id].fill = over[smallest].fill;
                     this.updateFamily(zones[SELECTED_ZONE.id].family, over[smallest].fill);
-                    OVERVIEW = false;
                     this.refresh();
                     zones[SELECTED_ZONE.id].glow(UI_SIZE, TOP);
                     this.drawPicker(ctx, zones[SELECTED_ZONE.id]);
 
-                    lib.node('pickercontainer').style.display = 'none';
-                    lib.node('savecontainer').style.display = '';
+                    this.revealSaveContainer();
 
                     if (this.AUTONAME === false) {
                         var currentTheme = this.themeSelect.getSelected();
@@ -450,91 +402,6 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
     ThemeBuilder.prototype.familyShown = familyShown;
 
-    function overview(ctx, components) {
-
-        var x = UI_SIZE + 40;
-        var padding = 6;
-        var families = [];
-        var labely = 0;
-
-        var count = 0;
-
-        for (var c = 0; c < components.length; c++) {
-
-            var component = components[c];
-
-            if (familyShown(families, component.family) === false && component.description) {
-
-                labely = TOP + 10 + (count * 28);
-
-                var originx = Math.floor(component.x - padding + (component.width + (2 * padding)) / 2);
-                var originy = Math.floor(component.y - padding + (component.height + (2 * padding)) / 2);
-
-                var color = 'rgba(187,0,0,0.7)';
-                switch (component.family) {
-
-                    case 'background':
-
-                        /* This is a hack to stop lines overlapping - ideally this software needs a layout
-								routine. Not pleased to do this. */
-
-                        ctx.beginPath();
-                        ctx.moveTo(originx + 70 + 0.5, labely - 4 + 0.5);
-                        ctx.lineTo(UI_SIZE + 50 + 0.5, labely - 4 + 0.5);
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = 1;
-                        ctx.stroke();
-
-                        Component.drawArc(ctx, originx + 70, labely - 4, 3, 0, 2 * Math.PI, false, null, color);
-
-                        break;
-
-
-                    case 'Side':
-
-                        ctx.beginPath();
-                        ctx.moveTo(originx + 30 + 0.5, labely - 4 + 0.5);
-                        ctx.lineTo(UI_SIZE + 50 + 0.5, labely - 4 + 0.5);
-                        ctx.strokeStyle = 'rgba(187,0,0,0.7)';
-                        ctx.lineWidth = 1;
-                        ctx.stroke();
-
-                        Component.drawArc(ctx, originx + 30, labely - 4, 3, 0, 2 * Math.PI, false, null, color);
-
-                        break;
-
-                    default:
-
-                        ctx.moveTo(originx + 0.5, originy + 0.5);
-                        ctx.lineTo(originx + 0.5, labely - 4 + 0.5);
-                        ctx.lineTo(UI_SIZE + 50 + 0.5, labely - 4 + 0.5);
-                        ctx.strokeStyle = 'rgba(187,0,0,0.7)';
-                        ctx.lineWidth = 1;
-                        ctx.stroke();
-
-                        Component.drawArc(ctx, originx, originy, 3, 0, 2 * Math.PI, false, null, color);
-
-                        break;
-                }
-
-                ctx.globalAlpha = 1;
-
-                Component.drawText(ctx, component.description, LEFT + 5 + x, labely, 'bold 8pt sans-serif', '#333');
-
-                if (component.family) {
-                    families.push(component.family);
-                }
-
-                count++;
-            }
-        }
-
-        var stringcontainer = document.getElementById('stringcontainer');
-        stringcontainer.style.display = 'none';
-    }
-
-    ThemeBuilder.prototype.overview = overview;
-
     function getCurrentSettings() {
         return this.settings;
     }
@@ -544,7 +411,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
     function addData(data) {
 
-        this.settings = [];
+        this.settings = {};
 
         var defaultValue;
 
@@ -658,21 +525,17 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
                 }
             }
         }
-
-        if (OVERVIEW) {
-            overview(ctx, zones);
-        }
     }
 
     ThemeBuilder.prototype.drawOutlineData = drawOutlineData;
 	
 	var successMessage = i18nUtil.formatMessage(messages["SettingUpdateSuccess"], messages["Theme"]); //$NON-NLS-1$ //$NON-NLS-0$
 	
-    function apply(data) {
+    function apply() {
 
         /* New Theme defined */
         this.preferences.getTheme(function(themeStyles) {
-            var themename = this.settings.name;
+            var themeName = this.settings.name;
 
             var styles = themeStyles.styles;
 
@@ -711,18 +574,14 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
                     styles.push(newtheme);
                 }
 
-                themename = name;
+                themeName = name;
 
                 themesaver.firstChild.value = '';
             }
 
-            this.preferences.setTheme(themename, styles);
-            if (this.settings.fontSize) {
-                this.preferences.setFontSize(this.settings.fontSize.value);
-            }
-            lib.node('savecontainer').style.display = 'none';
-            lib.node('pickercontainer').style.display = '';
-            this.updateThemePicker(themename, styles);
+            this.preferences.setTheme(themeName, styles);
+            this.hideSaveContainer();
+            this.updateThemePicker(themeName, styles);
             this.AUTONAME = false;
             
             this.messageService.setProgressResult(successMessage);
@@ -731,39 +590,40 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
     ThemeBuilder.prototype.apply = apply;
 
-    function revert(data) {
-        this.guide();
-        lib.node('pickercontainer').style.display = '';
-        lib.node('savecontainer').style.display = 'none';
-        this.AUTONAME = false;
-    }
-
-    ThemeBuilder.prototype.revert = revert;
-
-    function guide(data) {
-        this.refresh();
-        OVERVIEW = true;
-        data = this.themeData.getViewData();
-        this.drawOutlineData(data);
-        lib.node('stringcontainer').style.display = 'none';
-    }
-
-    ThemeBuilder.prototype.guide = guide;
-
     function select(name, styles) {
+		var getValue = function(styles, name, atRoot) {
+			if (atRoot) {
+				/* special cases, the default foreground and background colors */
+				if (name === "color" || name === "backgroundColor") { //$NON-NLS-0$
+					return styles[name];
+				}
+			}
+
+			var index = name.indexOf("."); //$NON-NLS-0$
+			if (index !== -1) {
+				var firstSegment = name.substring(0, index);
+				var subStyles = styles[firstSegment];
+				if (subStyles) {
+					var subName = name.substring(index + 1);
+					var subResult = getValue(subStyles, subName, false);
+					if (subResult) {
+						return subResult;
+					}
+				}
+				name = firstSegment;
+			}
+			return styles[name] ? styles[name].color || styles[name].backgroundColor : "";
+		};
 
         for (var theme = 0; theme < styles.length; theme++) {
-
             var style = styles[theme];
-
             if (style.name === name) {
-
+            	this.rootTheme = style;
+            	this.settings.fontSize = null;
                 this.settings.name = name;
-
                 for (var setting in this.settings) {
-                    if (setting !== 'name') {
-                        var item = this.settings[setting].name;
-                        this.settings[setting].value = style[item];
+                    if (setting !== "name" && setting !== "fontSize") { //$NON-NLS-0$
+						this.settings[setting].value = getValue(style.styles, this.settings[setting].name, true);
                     }
                 }
                 break;
@@ -771,9 +631,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         }
 
         clear();
-
         init();
-
         this.refresh();
     }
 
@@ -783,7 +641,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         this.settings.fontSize = {
             value: size
         };
-        this.apply();
+        this.revealSaveContainer();
     }
 
     ThemeBuilder.prototype.selectFontSize = selectFontSize;
@@ -950,11 +808,26 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
     function addTheme(style) {
         this.preferences.getTheme(function(themeStyles) {
-            var themename = style.name;
-            themeStyles.styles.push(style);
-            this.preferences.setTheme(themename, themeStyles.styles);
-            this.select(themename, themeStyles.styles);
-            this.updateThemePicker(themename, themeStyles.styles);
+            var themeName = style.name;
+
+            /*
+             * If a theme with the same name already exists then update its styles,
+             * otherwise just add the whole style.
+             */
+            for (var i = 0; i < themeStyles.styles.length; i++) {
+            	if (themeStyles.styles[i].name === themeName) {
+            		var found = true;
+            		themeStyles.styles[i].styles = style.styles;
+            		break;
+            	}
+            }
+            if (!found) {
+            	themeStyles.styles.push(style);
+            }
+
+            this.preferences.setTheme(themeName, themeStyles.styles);
+            this.select(themeName, themeStyles.styles);
+            this.updateThemePicker(themeName, themeStyles.styles);
         }.bind(this));
     }
 
@@ -979,50 +852,83 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         }
     };
 
+	function hideSaveContainer() {
+        lib.node('pickercontainer').style.display = '';
+        lib.node('savecontainer').style.display = 'none';
+	}
+	ThemeBuilder.prototype.hideSaveContainer = hideSaveContainer;
 
-    function exportTheme(data, themeName) {
-        var dat = {};
-        for (var z in zones) {
-            if (!zones[z].paintchip) {
-                console.log(zones[z]);
-                var zone = zones[z];
-                if (zone.family === 'lineNumber' && !dat.hasOwnProperty('lineNumber')) {
-                    dat.lineNumber = zone.fill;
-                } else if (zone.family === 'background' && !dat.hasOwnProperty('background')) {
-                    dat.background = zone.fill;
-                } else if (zone.family === 'string' && !dat.hasOwnProperty('string')) {
-                    dat.string = zone.fill;
-                } else if (zone.family === 'text' && !dat.hasOwnProperty('text')) {
-                    dat.foreground = zone.fill;
-                } else if (zone.family === 'currentLine' && !dat.hasOwnProperty('currentLine')) {
-                    dat.selectionBackground = zone.fill;
-                } else if (zone.family === 'comment' && !dat.hasOwnProperty('comment')) {
-                    dat.singleLineComment = zone.fill;
-                } else if (zone.family === 'keyword' && !dat.hasOwnProperty('keyword')) {
-                    dat.keyword = zone.fill;
-                } else if (zone.family === 'overviewRuler' && !dat.hasOwnProperty('overviewRuler')) {
-                    dat.overviewRuler = zone.fill;
-                } else if (zone.family === 'annotationRuler' && !dat.hasOwnProperty('annotationRuler')) {
-                    dat.annotationRuler = zone.fill;
-                } else if (zone.family === 'attribute' && !dat.hasOwnProperty('attribute')) {
-                    dat.attribute = zone.fill;
-                }
-            }
-        }
-        dat.themeName = themeName;
-        // During import, a color of background is used for both overviewRuler, anntationRuler. Export them for future enhancement.
-        // During import, attribute is not handled. Export it for future enhancement.
-        var currentStyle = '<colorTheme id="0" name="#themeName"><background color="#background"/><singleLineComment color="#singleLineComment"/>' +
-            '<keyword color="#keyword"/><foreground color="#foreground"/><string color="#string"/><lineNumber color="#lineNumber"/><selectionBackground color="#selectionBackground"/>' +
-            '<overviewRuler color="#overviewRuler"/><annotationRuler color="#annotationRuler"/><attribute color="#attribute"/>' +
-            '</colorTheme>';
-        for (var key in dat) {
-            currentStyle = currentStyle.replace('#' + key, dat[key]);
-        }
-        window.alert(currentStyle);
+	function revealSaveContainer() {
+		var saveContainer = lib.node('savecontainer');
+        if (saveContainer.style.display === 'none') {
+	        var currentTheme = this.themeSelect.getSelected();
+	        this.themeSaver.setValue(currentTheme);
+	        lib.node('pickercontainer').style.display = 'none';
+	        saveContainer.style.display = '';
+	        var saveButton = lib.node('saveButton');
+       		saveButton.onclick = this.saveTheme.bind(this);
+	    }
+	}
+	ThemeBuilder.prototype.revealSaveContainer = revealSaveContainer;
+
+    function exportTheme() {
+    	var result = this.resolveThemeSettings();
+        window.alert(JSON.stringify(result));
     }
 
     ThemeBuilder.prototype.exportTheme = exportTheme;
+
+    function saveTheme() {
+    	var result = this.resolveThemeSettings();
+    	var name = this.themeSaver.getValue();
+    	result.name = name;
+    	result.className = name;
+        this.addTheme(result);
+		this.hideSaveContainer();
+		this.themeSaver.setValue("");
+		this.messageService.setProgressResult(successMessage);
+    }
+    ThemeBuilder.prototype.saveTheme = saveTheme;
+
+    function resolveThemeSettings() {
+    	var updateValue = function(segments, styles, value, isBackground, atRoot) {
+    		if (atRoot && segments.length === 1 && (segments[0] === "color" || segments[0] === "backgroundColor")) {
+    			var style = styles;
+    		} else {
+				style = styles[segments[0]];
+			}
+
+			if (!style) {
+				style = {};
+				styles[segments[0]] = style;
+			}
+    		if (segments.length === 1) {
+    			if (isBackground) {
+    				style.backgroundColor = value;
+    			} else {
+    				style.color = value;
+    			}
+    		} else {
+    			updateValue(segments.slice(1), style, value, isBackground, false);
+    		}
+    	};
+
+    	var result = this.rootTheme;
+        for (var z in zones) {
+            if (!zones[z].paintchip) {
+            	var segments = zones[z].family.split("."); //$NON-NLS-0$
+            	updateValue(segments, result.styles, zones[z].fill, zones[z].type === "RECTANGLE", true);
+            }
+        }
+
+        /* handle fontSize setting specially since it's not included in the visual model */
+        if (this.settings.fontSize) {
+        	result.styles.fontSize = this.settings.fontSize.value;
+        }
+
+        return result;
+    }
+    ThemeBuilder.prototype.resolveThemeSettings = resolveThemeSettings;
 
     return ThemeBuilder;
 });

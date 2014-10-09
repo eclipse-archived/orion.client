@@ -82,7 +82,7 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/lib/syntax
 			},
 			{			
 				match: "(?:-webkit-|-moz-|-ms-|-o-|\\b)(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control.css" //$NON-NLS-0$
+				name: "support.type.propertyName.css" //$NON-NLS-0$
 			}
 		],
 		repository: {

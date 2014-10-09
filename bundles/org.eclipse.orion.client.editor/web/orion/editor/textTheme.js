@@ -146,7 +146,7 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 					}
 				});
 				if (localResult.length) {
-					result.push(ancestors + " {"); //$NON-NLS-0$
+					result.push(ancestors + (isTopLevel ? ".textview" : "") + " {"); //$NON-NLS-0$
 					result.push.apply(result, localResult);
 					result.push("}"); //$NON-NLS-0$
 				}
