@@ -330,10 +330,22 @@ define([
 		this.commandService = options.commandRegistry;
 		this.actionScopeId = options.actionScopeId;
 		this.projectClient = options.projectClient;
+		this.emptyMessage = options.emptyMessage;
 	}
 	
 	LaunchConfigurationRenderer.prototype = new mExplorer.SelectionRenderer();
 	LaunchConfigurationRenderer.prototype.constructor = LaunchConfigurationRenderer;
+	
+	LaunchConfigurationRenderer.prototype.emptyCallback = function(bodyElement) {
+		var tr = document.createElement("tr");
+		var td = document.createElement("td");
+		var emptyMessage = document.createElement("div");
+		emptyMessage.classList.add("noFile");
+		emptyMessage.textContent = this.emptyMessage || "No project deployment information";
+		td.appendChild(emptyMessage);
+		tr.appendChild(td);
+		bodyElement.appendChild(tr);
+	};
 	
 	LaunchConfigurationRenderer.prototype.getCellHeaderElement = function(col_no){
 	};
@@ -605,7 +617,7 @@ define([
 			this.node.className = "orionProject";				
 			this.projectData = projectData;
 			
-			function renderSections(sectionsOrder, sectionNames){
+			function renderSections(sectionsOrder, sectionNames, emptyMessages){
 				sectionNames = sectionNames || {};
 				sectionsOrder.forEach(function(sectionName){
 					var span;
@@ -613,7 +625,7 @@ define([
 						case "projectInfo":
 							span = document.createElement("span");
 							this.node.appendChild(span);
-							this.renderProjectInfo(span, sectionNames[sectionName]);
+							this.renderProjectInfo(span, sectionNames[sectionName], emptyMessages[sectionName]);
 							break;
 						case "additionalInfo":
 							span = document.createElement("span");
@@ -623,13 +635,13 @@ define([
 						case "deployment":
 							span = document.createElement("span");
 							this.node.appendChild(span);
-							this.renderLaunchConfigurations(span, null, sectionNames[sectionName]);
+							this.renderLaunchConfigurations(span, null, sectionNames[sectionName], emptyMessages[sectionName]);
 							break;
 						case "dependencies":
 							span = document.createElement("span");
 							span.id = "projectDependenciesNode";
 							this.node.appendChild(span);
-							this.renderDependencies(span, sectionNames[sectionName]);
+							this.renderDependencies(span, sectionNames[sectionName], emptyMessages[sectionName]);
 							break;
 					}
 				}.bind(this));
@@ -639,9 +651,10 @@ define([
 			this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){
 				sectionsOrder = sectionsOrderPrefs.get("projectView") || sectionsOrder;
 				var sectionsNames = sectionsOrderPrefs.get("projectViewNames") || [];
-				renderSections.apply(this, [sectionsOrder, sectionsNames]);
+				var emptyMessages = sectionsOrderPrefs.get("emptyMessages") || [];
+				renderSections.apply(this, [sectionsOrder, sectionsNames, emptyMessages]);
 			}.bind(this), function(error){
-				renderSections.apply(this, [sectionsOrder, {}]);
+				renderSections.apply(this, [sectionsOrder, {}, {}]);
 				window.console.error(error);
 			}.bind(this));
 			
@@ -794,15 +807,33 @@ define([
 			dependenciesExplorer.createTree(dependenciesParent, new DependenciesModel(this.projectData, this.projectClient),  {indent: '8px', noSelection: true});
 			
 		},
-		renderLaunchConfigurations: function(parent, configurations, sectionName){
+		renderLaunchConfigurations: function(parent, configurations, sectionName, emptyMessage){
 			this.configurationsParent = parent;
+			this.configurationsEmptyMessage = emptyMessage;
+			
+			if(emptyMessage || (configurations && configurations.length > 0)){
+				lib.empty(this.configurationsParent);
+				this.launchCofunctionSectionsTitle = sectionName || messages.DeployInfo;
+				var launchConfigurationSection = new mSection.Section(parent, {id: "projectLaunchConfigurationSection", headerClass: ["sectionTreeTableHeader"], title: this.launchCofunctionSectionsTitle, canHide: true});
+				var launchConfigurationParent = document.createElement("div");
+				launchConfigurationParent.id = "launchConfigurationsNode";
+			}
+			
 			if(!configurations){
+				var progressMonitor;
+				if(launchConfigurationSection){
+					progressMonitor = launchConfigurationSection.createProgressMonitor();
+					progressMonitor.begin("Loading...");
+				}
 				this.projectClient.getProjectLaunchConfigurations(this.projectData).then(function(configurations){
+					if(progressMonitor){
+						progressMonitor.done();
+					}
 					this.configurations = configurations;
-					if(!configurations || configurations.length === 0){
+					if(!emptyMessage && (!configurations || configurations.length === 0)){
 						return;
 					}
-					this.renderLaunchConfigurations(parent, configurations, sectionName);
+					this.renderLaunchConfigurations(parent, configurations, sectionName, emptyMessage);
 				}.bind(this));
 				return;
 			}
@@ -821,17 +852,13 @@ define([
 				});
 			}
 			
-			lib.empty(this.configurationsParent);
-			this.launchCofunctionSectionsTitle = sectionName || messages.DeployInfo;
-			var launchConfigurationSection = new mSection.Section(parent, {id: "projectLaunchConfigurationSection", headerClass: ["sectionTreeTableHeader"], title: this.launchCofunctionSectionsTitle, canHide: true});
-			var launchConfigurationParent = document.createElement("div");
-			launchConfigurationParent.id = "launchConfigurationsNode";
 			var launchConfigurationRenderer = new LaunchConfigurationRenderer({
 				checkbox: false,
 				treeTableClass: "sectionTreeTable",
 				commandRegistry: this.commandRegistry,
 				actionScopeId:  this.launchConfigurationActions,
-				projectClient: this.projectClient
+				projectClient: this.projectClient,
+				emptyMessage: emptyMessage
 			}, this);
 			var launchConfigurationExplorer = new LaunchConfigurationExplorer(this.serviceRegistry, null, launchConfigurationRenderer, this.commandRegistry, this.launchConfigurationActions);
 			launchConfigurationSection.embedExplorer(launchConfigurationExplorer, launchConfigurationParent);
@@ -846,13 +873,13 @@ define([
 					var configuration = this.configurations[i];
 					if(configuration.Name === event.newValue.Name && configuration.ServiceId === event.newValue.ServiceId){
 						this.configurations[i] = event.newValue;
-						this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle);
+						this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle, this.configurationsEmptyMessage);
 						return;
 					}
 				}
 				if(event.type === "create"){
 					this.configurations.push(event.newValue);
-					this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle);
+					this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle, this.configurationsEmptyMessage);
 					return;
 				}
 			} else if(event.type === "delete"){
@@ -863,7 +890,7 @@ define([
 					var configuration = this.configurations[i];
 					if((configuration.Name === event.oldValue.Name && configuration.ServiceId === event.oldValue.ServiceId) || (configuration.File && event.oldValue.File && (configuration.File.Location === event.oldValue.File.Location))){
 						this.configurations.splice(i, 1);
-						this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle);
+						this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle, this.configurationsEmptyMessage);
 						return;
 					}
 				}
@@ -874,7 +901,7 @@ define([
 						this.configurations.splice(i, 1);
 					}
 				}
-				this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle);
+				this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle, this.configurationsEmptyMessage);
 			}
 		},
 		destroy: function(){
