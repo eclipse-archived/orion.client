@@ -10,18 +10,23 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
-define([], function() {
+define(['orion/Deferred'], function(Deferred) {
 
 	function ThemePreferences(preferences, themeData) {
 		this._preferences = preferences;
 		this._themeData = themeData;
 		var themeInfo = themeData.getThemeStorageInfo();
 		this._themeVersion = themeInfo.version;
+		var that = this;
 		var storageKey = preferences.listenForChangedSettings(themeInfo.storage, 2, function(e) {
 			if (e.key === storageKey) {
-				this.apply();
+				Deferred.when(that._themePreferences, function(prefs) {
+					// Need to sync because the memory cached is out of date.
+					prefs.sync().then(function() { that.apply(); });
+				});
 			}
-		}.bind(this));
+		});
+		this._themePreferences = this._preferences.getPreferences(themeInfo.storage, 2);
 	}
 	
 	ThemePreferences.prototype = /** @lends orion.editor.ThemePreferences.prototype */ {
@@ -58,7 +63,7 @@ define([], function() {
 		getTheme: function(callback) {
 			var themeData = this._themeData;
 			var themeInfo = themeData.getThemeStorageInfo();
-			this._preferences.getPreferences(themeInfo.storage, 2).then(function(prefs) {
+			Deferred.when(this._themePreferences, function(prefs) {
 				this._initialize(themeInfo, themeData, prefs);
 				var selected = JSON.parse(prefs.get('selected')); //$NON-NLS-0$
 				var styles = JSON.parse(prefs.get(themeInfo.styleset)), style;
@@ -79,7 +84,7 @@ define([], function() {
 		setTheme: function(name, styles) {
 			var themeData = this._themeData;
 			var themeInfo = themeData.getThemeStorageInfo();
-			this._preferences.getPreferences(themeInfo.storage, 2).then(function(prefs) {
+			Deferred.when(this._themePreferences, function(prefs) {
 				this._initialize(themeInfo, themeData, prefs);
 				var selected = JSON.parse(prefs.get('selected')); //$NON-NLS-0$
 				if (!name) {
@@ -98,13 +103,13 @@ define([], function() {
 						break;
 					}	
 				}
-				prefs.put('version', this._themeVersion);
+				prefs.put('version', this._themeVersion); //$NON-NLS-0$
 			}.bind(this));
 		},
 		setFontSize: function(size) {
 			var themeData = this._themeData;
 			var themeInfo = themeData.getThemeStorageInfo();
-			this._preferences.getPreferences(themeInfo.storage, 2).then(function(prefs) {
+			Deferred.when(this._themePreferences, function(prefs) {
 				this._initialize(themeInfo, themeData, prefs);
 				var selected = JSON.parse(prefs.get('selected')); //$NON-NLS-0$
 				var styles = JSON.parse(prefs.get(themeInfo.styleset)), style;
