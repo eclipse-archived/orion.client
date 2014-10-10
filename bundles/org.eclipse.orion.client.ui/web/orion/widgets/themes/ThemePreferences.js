@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors:  IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
@@ -28,7 +28,7 @@ define(['orion/Deferred'], function(Deferred) {
 		});
 		this._themePreferences = this._preferences.getPreferences(themeInfo.storage, 2);
 	}
-	
+
 	ThemePreferences.prototype = /** @lends orion.editor.ThemePreferences.prototype */ {
 		_initialize: function(themeInfo, themeData, prefs) {
 			var styles, selected;
@@ -47,10 +47,10 @@ define(['orion/Deferred'], function(Deferred) {
 
 			if (!styles){
 				styles = themeData.getStyles();
-				prefs.put(themeInfo.styleset, JSON.stringify(styles)); 
+				prefs.put(themeInfo.styleset, JSON.stringify(styles));
 			}
 			if (!selected || selected[themeInfo.selectedKey] === undefined) {
-				selected = selected || {}; 
+				selected = selected || {};
 				selected[themeInfo.selectedKey] = themeInfo.defaultTheme;
 				prefs.put('selected', JSON.stringify(selected)); //$NON-NLS-0$
 			}
@@ -67,7 +67,7 @@ define(['orion/Deferred'], function(Deferred) {
 				this._initialize(themeInfo, themeData, prefs);
 				var selected = JSON.parse(prefs.get('selected')); //$NON-NLS-0$
 				var styles = JSON.parse(prefs.get(themeInfo.styleset)), style;
-				if (styles) {	
+				if (styles) {
 					for (var i = 0; i < styles.length; i++ ){
 						if( styles[i].name === selected[themeInfo.selectedKey] ){
 							style = styles[i];
@@ -93,7 +93,7 @@ define(['orion/Deferred'], function(Deferred) {
 				selected[themeInfo.selectedKey] = name;
 				prefs.put('selected', JSON.stringify(selected)); //$NON-NLS-0$
 				if (styles) {
-					prefs.put(themeInfo.styleset, JSON.stringify(styles)); 
+					prefs.put(themeInfo.styleset, JSON.stringify(styles));
 				} else {
 					styles = JSON.parse(prefs.get(themeInfo.styleset));
 				}
@@ -101,7 +101,7 @@ define(['orion/Deferred'], function(Deferred) {
 					if (styles[i].name === selected[themeInfo.selectedKey]) {
 						themeData.processSettings(styles[i]);
 						break;
-					}	
+					}
 				}
 				prefs.put('version', this._themeVersion); //$NON-NLS-0$
 			}.bind(this));
@@ -113,13 +113,12 @@ define(['orion/Deferred'], function(Deferred) {
 				this._initialize(themeInfo, themeData, prefs);
 				var selected = JSON.parse(prefs.get('selected')); //$NON-NLS-0$
 				var styles = JSON.parse(prefs.get(themeInfo.styleset)), style;
-				if (styles) {	
+				if (styles) {
 					for( var s = 0; s < styles.length; s++ ){
-						styles[s].fontSize = size;
+						styles[s].styles.fontSize = size;
 						if( styles[s].name ===  selected[themeInfo.selectedKey] ){
 							style = styles[s];
 						}
-						
 					}
 				}
 				prefs.put(themeInfo.styleset , JSON.stringify(styles));

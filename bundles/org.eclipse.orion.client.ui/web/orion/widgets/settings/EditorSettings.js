@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
@@ -232,7 +232,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			var fields = [], subSection, options, set, select;
 			var sectionWidget, subsectionWidget;
 			var themePreferences = this.themePreferences;
-			
+
 			for (var section in sections) {
 				if (sections.hasOwnProperty(section)) {
 					if (!this.local) {
@@ -290,7 +290,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			} else {
 				var themeStyles = this.oldThemeStyles;
 				if (prefs.fontSizeVisible && (!this.local || prefs.fontSizeLocalVisible)) {
-					var fontSize = themeStyles.style.fontSize;
+					var fontSize = themeStyles.style.styles.fontSize;
 					options = [];
 					function fontSizes(unit) {
 						for( var size = 8; size < 19; size++ ){
@@ -306,7 +306,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					}
 					fontSizes("px"); //$NON-NLS-0$
 					fontSizes("pt"); //$NON-NLS-0$
-					select = this.sizeSelect = new LabeledSelect( 
+					select = this.sizeSelect = new LabeledSelect(
 						{	fieldlabel:messages["Font Size"], //$NON-NLS-0$
 							options:options,
 							postChange: themePreferences.setFontSize.bind(themePreferences)
@@ -327,8 +327,8 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 						}
 						options.push(set);
 					}
-					select = this.themeSelect = new LabeledSelect( 
-						{	fieldlabel:messages.Theme, 
+					select = this.themeSelect = new LabeledSelect(
+						{	fieldlabel:messages.Theme,
 							options:options,
 							postChange: themePreferences.setTheme.bind(themePreferences)
 						}
