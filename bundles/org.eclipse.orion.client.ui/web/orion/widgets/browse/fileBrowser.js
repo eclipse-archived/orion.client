@@ -222,7 +222,7 @@ define([
 	 */
 	function FileBrowser(options) {
 		var url = new URL(window.location.href);
-		this.shareCode = false;
+		this.shareCode = true;
 		this.shareSnippet = url.query.get("shareSnippet") === "true" && options.widgetSource;
 		if(this.shareSnippet) {
 			this.widgetSource = options.widgetSource;
@@ -610,13 +610,6 @@ define([
 			if(this.shareSnippetHandler) {
 				this.shareSnippetHandler.textView = textView;
 				this.shareSnippetHandler.currentResourceURI = (this._currentURI && this._currentURI.length > 0) ? this._currentURI : "";
-			}
-			if(!this.snippetShareOptions) {
-				var editorParams = PageUtil.matchResourceParameters();
-				if(editorParams && editorParams.end && editorParams.end !== editorParams.start) {
-					window.setTimeout(function() {
-						textView.setSelection(editorParams.start, editorParams.end, true);}, 500);
-				}
 			}
 		},
 		_isBrowserRenderable: function(cType) {

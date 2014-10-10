@@ -25,6 +25,14 @@ define([
 	mEditor, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, 
 	mEditorPreferences, mThemePreferences, mThemeData, objects
 ) {
+	function parseNumericParams(input, params) {
+		for (var i = 0; i < params.length; i++) {
+			var param = params[i];
+			if (input[param]) {
+				input[param] = parseInt(input[param], 10);
+			}
+		}
+	}
 	/**
 	 * Constructs a new ReadonlyEditorView object.
 	 *
@@ -97,6 +105,30 @@ define([
 				}
 			}
 		},
+		updateAnnotation: function(editor, startIndex, endIndex, highlightRange) {
+ 		 	var annotationModel = editor.getAnnotationModel();
+  		 	if(!annotationModel){
+		 		return;
+ 		 	}
+ 		 	//Get the line styler inside the editor
+		 	var annoStyler = editor.getAnnotationStyler();
+ 		 	
+ 		 	//Add your annotation type to the editor 
+ 		 	annoStyler.addAnnotationType("orion.widget.readonly.snippet");
+  		 	//Add and/or remove your annotation models
+ 		 	//The first param is an array of the annotations you want to remove
+ 		 	//The second param is an array of the annotations you want to add
+ 		 	annotationModel.replaceAnnotations([], [{
+	 		 	start: startIndex,
+	 		 	end: endIndex,
+	 		 	title: "",
+	 		 	type: "orion.widget.readonly.snippet",
+	 		 	html: "",
+	 		 	rangeStyle: !highlightRange ? null : {styleClass: "snippetBlock"}, //The line style in the editor
+	 		 	lineStyle: highlightRange ? null : {styleClass: "snippetBlock"} //The line style in the editor
+ 		 	}]);
+	 	},
+		
 		_init: function() {
 			var editorPreferences = null;
 			if(this.preferences) {
@@ -135,6 +167,33 @@ define([
 				domNode: editorDomNode
 			});
 			editor.id = "orion.editor"; //$NON-NLS-0$
+			var that = this;
+			editor.processParameters = function(params) {
+				parseNumericParams(params, ["start", "end", "startL", "endL"]); //$NON-NLS-1$ //$NON-NLS-0$
+				var textView = editor.getTextView();
+				var textModel = textView.getModel();
+				var start = -1, end = -1, highlightRange = false;
+				if(typeof(params.startL) === "number" && typeof(params.endL) === "number") {  //$NON-NLS-1$ //$NON-NLS-0$
+	 		 		start = textModel.getLineStart(params.startL - 1);
+	 		 		end = textModel.getLineEnd(params.endL - 1);
+				} else if(typeof(params.start) === "number" && typeof(params.end) === "number") {  //$NON-NLS-1$ //$NON-NLS-0$
+	 		 		start = params.start;
+	 		 		end = params.end;
+	 		 		//highlightRange = true;
+	 		 	}
+				if(start < 0 || end < 0) {
+					return;
+				}
+				that.updateAnnotation(editor, start, end, highlightRange);
+				this.moveSelection(start, start, function(){
+					var lineIndex = textModel.getLineAtOffset(start);
+					if(lineIndex > 0) {
+						lineIndex--;
+					}
+					var line = textView._getLineNode(lineIndex);
+					line.scrollIntoView(true);
+				}, false);
+			};
 			inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 				var textView = editor.getTextView();
 				if (textView) {

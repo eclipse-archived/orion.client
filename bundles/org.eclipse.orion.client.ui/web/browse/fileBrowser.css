@@ -1,4 +1,3 @@
-
 @import "../css/layout.css";
 
 @import "../css/controls.css";
@@ -14,6 +13,8 @@
 @import "../font/font.css";
 
 @import "widgetCommon.css";
+
+@import "fileBrowserAnnotation.css";
 
 .localBreadCrumb{
 	border: 1px solid;
