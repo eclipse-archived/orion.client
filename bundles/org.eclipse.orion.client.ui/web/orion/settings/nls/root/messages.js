@@ -257,5 +257,7 @@ define({
     'vanillaSkiesThemeName': 'Vanilla Skies',  //$NON-NLS-0$  //$NON-NLS-1$
     'beetlejuiceThemeName': 'Beetlejuice',  //$NON-NLS-0$  //$NON-NLS-1$
     'redThemeName': 'Red',  //$NON-NLS-0$  //$NON-NLS-1$
-    "SettingUpdateSuccess": "${0} settings successfully updated."
+    "SettingUpdateSuccess": "${0} settings successfully updated.",
+    "buttonSave": "Save",
+    "buttonRevert": " Revert"
 });

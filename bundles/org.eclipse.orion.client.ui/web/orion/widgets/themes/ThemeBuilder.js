@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
@@ -116,7 +116,8 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
         '<span class="settingsLabel">' + messages["New Theme Name:"] +
         '</span>' +
         '<div id="themesaver" class="themesaver"></div>' +
-        '<button id="saveButton" class="orionButton commandButton commandMargins">' + 'Save' + "</button>" +
+        '<button id="saveButton" class="orionButton commandButton commandMargins">' + messages["buttonSave"] + "</button>" +
+        '<button id="revertButton" class="orionButton commandButton commandMargins">' + messages["buttonRevert"] + "</button>" +
         '</div>' +
         '<div id="sizecontainer">' +
         '<span class="settingsLabel">' + messages["Font Size:"] +
@@ -735,19 +736,20 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 
 	function hideSaveContainer() {
         lib.node('pickercontainer').style.display = '';
-        lib.node('savecontainer').style.display = 'none';
+        lib.node('savecontainer').style.display = 'none'; //$NON-NLS-0$
+        this.themeSaver.setValue("");
 	}
 	ThemeBuilder.prototype.hideSaveContainer = hideSaveContainer;
 
 	function revealSaveContainer() {
-		var saveContainer = lib.node('savecontainer');
-        if (saveContainer.style.display === 'none') {
+		var saveContainer = lib.node('savecontainer'); //$NON-NLS-0$
+        if (saveContainer.style.display === 'none') { //$NON-NLS-0$
 	        var currentTheme = this.themeSelect.getSelected();
 	        this.themeSaver.setValue(currentTheme);
-	        lib.node('pickercontainer').style.display = 'none';
+	        lib.node('pickercontainer').style.display = 'none'; //$NON-NLS-1$ //$NON-NLS-0$
 	        saveContainer.style.display = '';
-	        var saveButton = lib.node('saveButton');
-       		saveButton.onclick = this.saveTheme.bind(this);
+	        lib.node('saveButton').onclick = this.saveTheme.bind(this); //$NON-NLS-0$
+	        lib.node('revertButton').onclick = this.revertTheme.bind(this); //$NON-NLS-0$
 	    }
 	}
 	ThemeBuilder.prototype.revealSaveContainer = revealSaveContainer;
@@ -758,6 +760,12 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
     }
     ThemeBuilder.prototype.exportTheme = exportTheme;
 
+    function revertTheme() {
+		this.hideSaveContainer();
+		this.select(this.rootTheme.name, [this.rootTheme]);
+    }
+    ThemeBuilder.prototype.revertTheme = revertTheme;
+
     function saveTheme() {
     	var result = this.resolveThemeSettings();
     	var name = this.themeSaver.getValue();
@@ -765,7 +773,6 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
     	result.className = name;
         this.addTheme(result);
 		this.hideSaveContainer();
-		this.themeSaver.setValue("");
 		this.messageService.setProgressResult(successMessage);
     }
     ThemeBuilder.prototype.saveTheme = saveTheme;
