@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*eslint-env browser, amd*/
+/*eslint-env amd, browser, mocha*/
 define([
 	'orion/Deferred',
 	'chai/chai',
@@ -22,6 +22,226 @@ define([
 		ContentAssistMode = mContentAssist.ContentAssistMode,
 	    TextModel = mTextModel.TextModel,
 	    MockTextView = mMockTextView.MockTextView;
+
+	describe("Content Assist framework", function() {
+		describe("ContentAssist", function() {
+			it("#getProviders(), #setProviders()", function() {
+				withData(function(view, contentAssist) {
+					var p1 = { computeContentAssist: function() {} };
+					var p2 = {
+						id: "test.provider2", provider: { computeContentAssist: function() {} }
+					};
+					contentAssist.setProviders([p1, p2]);
+					var providers = contentAssist.getProviders();
+					assert.equal(providers.length, 2);
+					assert.equal(providers[0].provider, p1); // p1 should have been wrapped into a provider info
+					assert.equal(providers[1], p2); // p2 should have been returned as-is
+				});
+			});
+			// Make sure we can't mutate the backing array of content assist providers from outside
+			it("mutating #getProviders() array should not affect backing store", function() {
+				withData(function(view, contentAssist) {
+					var p1 = { computeContentAssist: function() {} },
+					    providersIn = [p1];
+					contentAssist.setProviders(providersIn);
+					providersIn.pop();
+					assert.equal(contentAssist.getProviders().length, 1, "Mutation does not change backing array");
+					contentAssist.getProviders().pop();
+					assert.equal(contentAssist.getProviders().length, 1, "Mutation does not change backing array");
+				});
+			});
+		});
+
+		describe("provider", function() {
+			// Test that the provider having charTriggers leads to automatic invocation of that provider
+			it("should be auto invoked when it has 'charTriggers'", function() {
+				var d = new Deferred();
+				withData(function(view, contentAssist) {
+					var p1 = {
+							id: "p1",
+							charTriggers: /</,
+							provider : {
+								computeContentAssist: function() {
+									d.resolve("we were invoked");
+								}
+							}
+					};
+					contentAssist.setProviders([p1]);
+					contentAssist.setAutoTriggerEnabled(true);
+					setEditorContextProvider(contentAssist);
+					view._handleKeyPress(createKeyPressEvent('<'));
+				});
+				return d;
+			});
+			it("should have its #computeProposals() invoked", function() {
+				var text = 'this is the first line\nthis is the second line@@@';
+				return assertProviderInvoked(text, function(getProposalsFunction) {
+					return {
+						computeProposals: getProposalsFunction
+					};
+				});
+			});
+			// Tests that 'getProposals' works as an alias of 'computeProposals' (backwards compatibility)
+			it("should have its #getProposals() invoked", function() {
+				var text = 'this is the first line\nthis is the second line@@@';
+				return assertProviderInvoked(text, function(getProposalsFunction) {
+					return {
+						getProposals: getProposalsFunction
+					};
+				});
+			});
+			it("should have its #computeContentAssist() called", function() {
+				return assertProviderInvoked_v4("line1\nline@@@2", function(checkParamsCallback) {
+					return {
+						computeContentAssist: checkParamsCallback
+					};
+				});
+			});
+			// Tests that contentAssist.initialize() calls each provider's initialize method
+			it("should have its #initialize() called", function() {
+				withData(function(view, contentAssist) {
+					var d1 = new Deferred(), d2 = new Deferred();
+					var provider1 = {
+						initialize: d1.resolve.bind(d1),
+						computeContentAssist: function() {}
+					},
+					provider2 = {
+						initialize: d2.resolve.bind(d2),
+						computeContentAssist: function() {}
+					};
+					contentAssist.setProviders([provider1, provider2]);
+					contentAssist.initialize();
+					return Deferred.all([d1, d2]);
+				});
+			});
+			// Test that some provider throwing or rejecting does not prevent other providers from being invoked.
+			it("should be able to throw/reject without affecting other providers", function() {
+				var d1 = new Deferred(),
+				    d2 = new Deferred(),
+				    d3 = new Deferred();
+				withData(function(view, contentAssist) {
+					contentAssist.setProviders([
+						{
+							computeProposals: function() {
+								d1.resolve();
+								throw new Error('i threw');
+							}
+						},
+						{
+							computeProposals: function() {
+								d2.resolve();
+								return new Deferred().reject(new Error('i rejected'));
+							}
+						},
+						{
+							computeProposals: function() {
+								d3.resolve();
+							}
+						}
+					]);
+					contentAssist.activate();
+				});
+				return Deferred.all([d1, d2, d3]);
+			});
+		}); // Provider
+
+		describe("Events", function() {
+			// Tests that Activating, Deactivating events are fired as expected.
+			it("should emit Activating, Deactivating", function() {
+				var d1 = new Deferred(),
+				    d2 = new Deferred(),
+				    deferred = Deferred.all([d1, d2]);
+				withData(function(view, contentAssist) {
+					setText(view, 'fizz bu');
+					contentAssist.addEventListener('Activating', function(event) {
+						d1.resolve();
+					});
+					contentAssist.activate();
+					d1.then(function() {
+						contentAssist.addEventListener('Deactivating', function(event) {
+							d2.resolve();
+						});
+						contentAssist.deactivate();
+					});
+		
+				});
+				return deferred;
+			});
+			// Tests that ProposalsComputed, ProposalsApplied events are fired as expected.
+			it("should emit ProposalsComputed, ProposalsApplied", function() {
+				var d1 = new Deferred(),
+				    d2 = new Deferred(),
+				    deferred = Deferred.all([d1, d2]);
+				withData(function(view, contentAssist) {
+					setText(view, 'foo@@@baz');
+					var proposal = {proposal: ' bar ', description: 'Metasyntactic variable completion'};
+					contentAssist.setProviders([
+						{	computeProposals: function() {
+								return [proposal];
+							}
+						}
+					]);
+					contentAssist.addEventListener('ProposalsComputed', function(event) {
+						try {
+							var numUnselectable = event.data.proposals.reduce(function(previous, current){
+								if (current.unselectable) {
+									previous++;
+								}
+								return previous;
+							}, 0);
+							assert.strictEqual(1, event.data.proposals.length - numUnselectable, 'Got right # of proposals');
+							assert.deepEqual(event.data.proposals[0], proposal);
+							d1.resolve();
+						} catch (e) { d1.reject(e); }
+					});
+					contentAssist.activate();
+					d1.then(function() {
+						contentAssist.addEventListener('ProposalApplied', function(event) {
+							try {
+								assert.deepEqual(event.data.proposal, proposal, 'Applied proposal matches what we provided');
+								assert.strictEqual(view.getText(), 'foo bar baz', 'Proposal was applied to TextView');
+								d2.resolve();
+							} catch (e) { d2.reject(e); }
+						});
+						contentAssist.activate();
+						contentAssist.apply(proposal);
+					});
+				});
+				return deferred;
+			});
+		}); // Events
+
+		describe("filtering", function() {
+			// Tests that active ContentAssist will not call providers as we type but rather
+			// will filter the proposals itself.
+			it("with 0ms delay", function() {
+				return filterTestImpl(0);
+			});
+			// Tests that content assist filtering will behave as expected if a 
+			// delay is introduced between the sequence of events
+			it("with 20ms delay", function() {
+				return filterTestImpl(20);
+			});
+			it("with 50ms delay", function() {
+				return filterTestImpl(50);
+			});
+			it("Test filtering 2", function() {
+				return testFiltering2();
+			});
+		});
+
+// TODO Test ContentAssistMode
+//	tests.testContentAssistMode = function() {
+//		// lineUp lineDown enter selection
+//	};
+
+	}); //describe(Content Assist framework)
+
+	/*****************************************************************************
+	 *
+	 * Test helpers
+	 *
+	 *****************************************************************************/
 
 	function getNewView() {
 		return new MockTextView({parent: document.createElement("div")});
@@ -153,76 +373,12 @@ define([
 		return deferred;
 	}
 
-	var tests = {};
+	/*****************************************************************************
+	 * 
+	 * Filtering helpers
+	 * 
+	 *****************************************************************************/
 
-	tests.test_getsetProviders = function() {
-		withData(function(view, contentAssist) {
-			var p1 = { computeContentAssist: function() {} };
-			var p2 = {
-				id: "test.provider2", provider: { computeContentAssist: function() {} }
-			};
-			contentAssist.setProviders([p1, p2]);
-			var providers = contentAssist.getProviders();
-			assert.equal(providers.length, 2);
-			assert.equal(providers[0].provider, p1); // p1 should have been wrapped into a provider info
-			assert.equal(providers[1], p2); // p2 should have been returned as-is
-		});
-	};
-
-	// Make sure we can't mutate the backing array of content assist providers from outside
-	tests.test_getProviders_mutate = function() {
-		withData(function(view, contentAssist) {
-			var p1 = { computeContentAssist: function() {} },
-			    providersIn = [p1];
-			contentAssist.setProviders(providersIn);
-			providersIn.pop();
-			assert.equal(contentAssist.getProviders().length, 1, "Mutation does not change backing array");
-			contentAssist.getProviders().pop();
-			assert.equal(contentAssist.getProviders().length, 1, "Mutation does not change backing array");
-		});
-	};
-
-	// Test that the provider having charTriggers leads to automatic invocation of that provider
-	tests.test_charTriggers = function() {
-		var d = new Deferred();
-		withData(function(view, contentAssist) {
-			var p1 = {
-					id: "p1",
-					charTriggers: /</,
-					provider : {
-						computeContentAssist: function() {
-							d.resolve("we were invoked");
-						}
-					}
-			};
-			contentAssist.setProviders([p1]);
-			contentAssist.setAutoTriggerEnabled(true);
-			setEditorContextProvider(contentAssist);
-			view._handleKeyPress(createKeyPressEvent('<'));
-		});
-		return d;
-	};
-
-	// Tests that ContentAssist calls a provider's computeProposals() method with the expected parameters.
-	tests.testComputeProposals = function() {
-		var text = 'this is the first line\nthis is the second line@@@';
-		return assertProviderInvoked(text, function(getProposalsFunction) {
-			return {
-				computeProposals: getProposalsFunction
-			};
-		});
-	};
-
-	// Tests that 'getProposals' works as an alias of 'computeProposals' (backwards compatibility)
-	tests.testGetProposals = function() {
-		var text = 'this is the first line\nthis is the second line@@@';
-		return assertProviderInvoked(text, function(getProposalsFunction) {
-			return {
-				getProposals: getProposalsFunction
-			};
-		});
-	};
-	
 	function filterTestImpl(delayMS) {
 		var init = new Deferred(),
 			first = new Deferred(),
@@ -336,27 +492,8 @@ define([
 		});
 		return deferred;
 	}
-	
-	
-	// Tests that active ContentAssist will not call providers as we type but rather
-	// will filter the proposals itself.
-	tests.testFiltering = function() {
-		return filterTestImpl(0);
-	};
-	
-	// Tests that content assist filtering will behave as expected if a 
-	// delay is introduced between the sequence of events
-	tests.testFilteringWith200MSDelay = function() {
-		return filterTestImpl(200);
-	};
-	
-	// Tests that content assist filtering will behave as expected if a 
-	// delay is introduced between the sequence of events
-	tests.testFilteringWith500MSDelay = function() {
-		return filterTestImpl(500);
-	};
-	
-	tests.testFiltering2 = function() {
+
+	function testFiltering2() {
 		var init = new Deferred(),
 			first = new Deferred(),
 		    second = new Deferred(),
@@ -371,7 +508,7 @@ define([
 		contentAssistWidget.selectNode = function(){}; //override selectNode() since we aren't testing it here
 		// creating a mode so that deactivation is triggered by it
 		var contentAssistMode = new ContentAssistMode(contentAssist, contentAssistWidget);
-		var delayMS = 100;
+		var delayMS = 10;
 		
 		setText(view, 'foo @@@');
 		var expectedText = "foo ";
@@ -513,134 +650,6 @@ define([
 		});
 		
 		return deferred;
-	};
+	}
 
-	// Tests that Activating, Deactivating events are fired as expected.
-	tests.testEvents1 = function() {
-		var d1 = new Deferred(),
-		    d2 = new Deferred(),
-		    deferred = Deferred.all([d1, d2]);
-		withData(function(view, contentAssist) {
-			setText(view, 'fizz bu');
-			contentAssist.addEventListener('Activating', function(event) {
-				d1.resolve();
-			});
-			contentAssist.activate();
-			d1.then(function() {
-				contentAssist.addEventListener('Deactivating', function(event) {
-					d2.resolve();
-				});
-				contentAssist.deactivate();
-			});
-
-		});
-		return deferred;
-	};
-
-	// Tests that ProposalsComputed, ProposalsApplied events are fired as expected.
-	tests.testEvents2 = function() {
-		var d1 = new Deferred(),
-		    d2 = new Deferred(),
-		    deferred = Deferred.all([d1, d2]);
-		withData(function(view, contentAssist) {
-			setText(view, 'foo@@@baz');
-			var proposal = {proposal: ' bar ', description: 'Metasyntactic variable completion'};
-			contentAssist.setProviders([
-				{	computeProposals: function() {
-						return [proposal];
-					}
-				}
-			]);
-			contentAssist.addEventListener('ProposalsComputed', function(event) {
-				try {
-					var numUnselectable = event.data.proposals.reduce(function(previous, current){
-						if (current.unselectable) {
-							previous++;
-						}
-						return previous;
-					}, 0);
-					assert.strictEqual(1, event.data.proposals.length - numUnselectable, 'Got right # of proposals');
-					assert.deepEqual(event.data.proposals[0], proposal);
-					d1.resolve();
-				} catch (e) { d1.reject(e); }
-			});
-			contentAssist.activate();
-			d1.then(function() {
-				contentAssist.addEventListener('ProposalApplied', function(event) {
-					try {
-						assert.deepEqual(event.data.proposal, proposal, 'Applied proposal matches what we provided');
-						assert.strictEqual(view.getText(), 'foo bar baz', 'Proposal was applied to TextView');
-						d2.resolve();
-					} catch (e) { d2.reject(e); }
-				});
-				contentAssist.activate();
-				contentAssist.apply(proposal);
-			});
-		});
-		return deferred;
-	};
-
-	// Test that some provider throwing or rejecting does not prevent other providers from being invoked.
-	tests.testErrorHandling = function() {
-		var d1 = new Deferred(),
-		    d2 = new Deferred(),
-		    d3 = new Deferred();
-		withData(function(view, contentAssist) {
-			contentAssist.setProviders([
-				{
-					computeProposals: function() {
-						d1.resolve();
-						throw new Error('i threw');
-					}
-				},
-				{
-					computeProposals: function() {
-						d2.resolve();
-						return new Deferred().reject(new Error('i rejected'));
-					}
-				},
-				{
-					computeProposals: function() {
-						d3.resolve();
-					}
-				}
-			]);
-			contentAssist.activate();
-		});
-		return Deferred.all([d1, d2, d3]);
-	};
-
-	// Tests that content assist calls a provider's computeContentAssist function with the expected parameters.
-	tests.test_computeContentAssist = function() {
-		return assertProviderInvoked_v4("line1\nline@@@2", function(checkParamsCallback) {
-			return {
-				computeContentAssist: checkParamsCallback
-			};
-		});
-	};
-
-	// Tests that contentAssist.initialize() calls each provider's initialize method
-	tests.test_initialize = function() {
-		withData(function(view, contentAssist) {
-			var d1 = new Deferred(), d2 = new Deferred();
-			var provider1 = {
-				initialize: d1.resolve.bind(d1),
-				computeContentAssist: function() {}
-			},
-			provider2 = {
-				initialize: d2.resolve.bind(d2),
-				computeContentAssist: function() {}
-			};
-			contentAssist.setProviders([provider1, provider2]);
-			contentAssist.initialize();
-			return Deferred.all([d1, d2]);
-		});
-	};
-
-	// TODO Test ContentAssistMode
-//	tests.testContentAssistMode = function() {
-//		// lineUp lineDown enter selection
-//	};
-
-	return tests;
-});
+}); //define

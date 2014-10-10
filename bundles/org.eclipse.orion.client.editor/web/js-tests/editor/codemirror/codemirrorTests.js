@@ -9,10 +9,14 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 
-/*eslint-env browser, amd*/
+/*eslint-env amd, browser, mocha*/
 
-define(["chai/chai", "orion/editor/textModel", "orion/editor/annotations", "orion/editor/mirror"],
-		function(chai, mTextModel, mAnnotations, mMirror) {
+define([
+	"chai/chai",
+	"orion/editor/textModel",
+	"orion/editor/annotations",
+	"orion/editor/mirror"
+], function(chai, mTextModel, mAnnotations, mMirror) {
 	var assert = chai.assert;
 	var tests = {};
 	
@@ -38,14 +42,16 @@ define(["chai/chai", "orion/editor/textModel", "orion/editor/annotations", "orio
 	};
 	
 	// ************************************************************************************************
-	tests["test CodeMirror - 1"] = function() {
-		var view = new MockTextView();
-		var codeMirror = new mMirror.Mirror();
-		var annotationModel = new mAnnotations.AnnotationModel(view.getModel());
-		codeMirror.defineMode("test", SampleMode);
-		var styler = new mMirror.CodeMirrorStyler(view, codeMirror, annotationModel);
-		assert.ok(styler);
-	};
+	describe("CodeMirror styler", function() {
+		it("should create a styler with a mode", function() {
+			var view = new MockTextView();
+			var codeMirror = new mMirror.Mirror();
+			var annotationModel = new mAnnotations.AnnotationModel(view.getModel());
+			codeMirror.defineMode("test", SampleMode);
+			var styler = new mMirror.CodeMirrorStyler(view, codeMirror, annotationModel);
+			assert.ok(styler);
+		});
+	});
 	
 	return tests;
 });
