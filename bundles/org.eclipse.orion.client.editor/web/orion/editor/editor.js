@@ -667,14 +667,16 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				}
 			}
 			
-			var deferredInfo;
+			var deferredInfo = [];
 			if (this._hover) {
 				var context = {offset: offset, 
 								annotations: annotationMsgs};
 				deferredInfo = this._hover.computeHoverInfo(context);
 			}
 			
-			if (rangeAnnotations.length === 0 && deferredInfo.length === 0) { return null; }
+			if (rangeAnnotations.length === 0 && deferredInfo.length === 0) {
+				return null;
+			}
 			var pt = textView.convert({x: x, y: y}, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
 			var info = {
 				deferredInfo: deferredInfo,
