@@ -16,24 +16,17 @@ define ([
 	'orion/edit/editorContext'//$NON-NLS-0$
 ], function(Markdown, EditorContext) {
 
-	function Hover(editor, inputManager, serviceRegistry) {
+	function Hover(editor, hoverFactory) {
 		this.editor = editor;
-		this.inputManager = inputManager;
-		this.serviceRegistry = serviceRegistry;
-		
-		// Filter the plugins based on contentType...
-		this.filterHoverPlugins();
-
-		// Track changes to the input type and re-filter
-		this.inputManager.addEventListener("InputChanged", function() { //$NON-NLS-0$
-			this.filterHoverPlugins();
-		}.bind(this));
+		this.hoverFactory = hoverFactory;
+		this.inputManager = hoverFactory.inputManager;
+		this.serviceRegistry = hoverFactory.serviceRegistry;
 	}
 	
 	Hover.prototype = {
 		computeHoverInfo: function (context) {
 			var hoverInfo = [];
-			this._applicableProviders.forEach(function(provider) {
+			this.hoverFactory._applicableProviders.forEach(function(provider) {
 				var providerImpl = this.serviceRegistry.getService(provider);
 				if (providerImpl.computeHoverInfo) {
 					var editorContext = EditorContext.getEditorContext(this.serviceRegistry);
@@ -45,20 +38,6 @@ define ([
 			}.bind(this));
 
 			return hoverInfo;
-		},
-	
-		filterHoverPlugins: function () {
-			this._applicableProviders = [];
-			var infoProviders = this.serviceRegistry.getServiceReferences("orion.edit.hover"); //$NON-NLS-0$
-			for (var i = 0; i < infoProviders.length; i++) {
-				var providerRef = infoProviders[i];
-				if (providerRef._properties.contentType) {
-					var validTypes = providerRef._properties.contentType;
-					if (validTypes.indexOf(this.inputManager._contentType.id) !== -1) {
-						this._applicableProviders.push(providerRef);
-					}
-				}
-			}
 		}
 	};
 
@@ -69,10 +48,33 @@ define ([
 	function HoverFactory(serviceRegistry, inputManager) {
 		this.serviceRegistry = serviceRegistry;
 		this.inputManager = inputManager;
+		
+		// Filter the plugins based on contentType...
+		this.filterHoverPlugins();
+
+		// Track changes to the input type and re-filter
+		this.inputManager.addEventListener("InputChanged", function() { //$NON-NLS-0$
+			this.filterHoverPlugins();
+		}.bind(this));
 	}
 	HoverFactory.prototype = {
 		createHover: function(editor) {
-			return new Hover(editor, this.inputManager, this.serviceRegistry);
+			return new Hover(editor, this);
+		},
+	
+		filterHoverPlugins: function () {
+			this._applicableProviders = [];
+			var infoProviders = this.serviceRegistry.getServiceReferences("orion.edit.hover"); //$NON-NLS-0$
+			for (var i = 0; i < infoProviders.length; i++) {
+				var providerRef = infoProviders[i];
+				var contentType = this.inputManager.getContentType();
+				if (providerRef._properties.contentType && contentType) {
+					var validTypes = providerRef._properties.contentType;
+					if (validTypes.indexOf(contentType.id) !== -1) {
+						this._applicableProviders.push(providerRef);
+					}
+				}
+			}
 		}
 	};
 
