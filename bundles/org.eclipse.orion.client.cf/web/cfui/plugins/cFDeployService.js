@@ -86,10 +86,10 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 			
 			getDeployProgressMessage: function(project, launchConf){
 				var message = "Deploying application to Cloud Foundry: ";
-				if(launchConf.Name){
-					return message + " " + launchConf.Name;
+				if(launchConf.ConfigurationName){
+					return message + " " + launchConf.ConfigurationName;
 				}
-				var params = launchConf.Params || {};
+				var params = launchConf.Parameters || {};
 				var appName = params.Name;
 				if(!appName){
 					var manifestFolder = params.AppPath || "";
@@ -110,7 +110,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 				var that = this;
 				var deferred = new Deferred();
 
-				var params = launchConf.Params || {};
+				var params = launchConf.Parameters || {};
 				var target = params.Target;
 				if (!target && params.url){
 					target = {};

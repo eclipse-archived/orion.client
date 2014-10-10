@@ -196,92 +196,96 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration });
 		}
 		if(context.deployService.getDeployProgressMessage){
-			context.deployService.getDeployProgressMessage(context.project, enhansedLaunchConf).then(function(message){
-				deploy(message);
-			}.bind(this), function(){
-				deploy(context.deployService.name + " in progress");
+			context.projectClient.formPluginLaunchConfiguration(enhansedLaunchConf).then(function(pluginLaunchConf){
+				context.deployService.getDeployProgressMessage(context.project, pluginLaunchConf).then(function(message){
+					deploy(message);
+				}.bind(this), function(){
+					deploy(context.deployService.name + " in progress");
+				}.bind(this));				
 			}.bind(this));
 		} else {
 			deploy(context.deployService.name + " in progress");
 		}
 		
 		function deploy(progressMessage){
-			progress.showWhile(context.deployService.deploy(context.project, enhansedLaunchConf), progressMessage, true).then(function(result){
-				if(!result){
-					return;
-				}
-				
-				if (result.UriTemplate) {
-				    var options = {};
-					options.uriTemplate = result.UriTemplate;
-					options.width = result.Width;
-					options.height = result.Height;
-					options.id = result.UriTemplateId || context.deployService.id; 
-					context.oldParams = enhansedLaunchConf.Params;
-					options.done = function(status){
-						localHandleStatus(status, null, context);
-					};
-					options.status = function(status){localHandleStatus(status, null, context);};
-					mEditorCommands.createDelegatedUI(options);
-					return;
-				}
-	
-				if(context.launchConfiguration && (result.State || result.CheckState)){
-					context.launchConfiguration.status = result;
-					if(sharedLaunchConfigurationDispatcher){
-						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration});
+			context.projectClient.formPluginLaunchConfiguration(enhansedLaunchConf).then(function(pluginLaunchConf){			
+				progress.showWhile(context.deployService.deploy(context.project, pluginLaunchConf), progressMessage, true).then(function(result){
+					if(!result){
+						return;
 					}
-				}
-				
-				if(result.ToSave){
-					progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, result.ToSave.ConfigurationName, context.deployService.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path, result.ToSave.Type), "Saving configuration").then(
-						function(configuration){
-							storeLastDeployment(context.project.Name, context.deployService, configuration);
-							if(sharedLaunchConfigurationDispatcher){
-								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration});
-							}
-							if(configuration.File.parent.parent){
-								fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent.parent, newValue: configuration.File.parent, ignoreRedirect: true});
-							}
-							fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent, newValue: configuration.File, ignoreRedirect: true});
-							displayDeployResult(progress, result, context);
-						}, context.errorHandler
-					);
-				} else {
-					if(result.Saved){
-						context.projectClient.formLaunchConfiguration(result.Saved.ConfigurationName, context.deployService.id, result.Saved.Parameters, result.Saved.Url, result.Saved.ManageUrl, result.Saved.Path, result.Saved.Type).then(function(configuration){
-							storeLastDeployment(context.project.Name, context.deployService, configuration);
-							if(sharedLaunchConfigurationDispatcher){
-								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
-							}							
-						});
+					
+					if (result.UriTemplate) {
+					    var options = {};
+						options.uriTemplate = result.UriTemplate;
+						options.width = result.Width;
+						options.height = result.Height;
+						options.id = result.UriTemplateId || context.deployService.id; 
+						context.oldParams = enhansedLaunchConf.Params;
+						options.done = function(status){
+							localHandleStatus(status, null, context);
+						};
+						options.status = function(status){localHandleStatus(status, null, context);};
+						mEditorCommands.createDelegatedUI(options);
+						return;
 					}
-					storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
-				}
-				
-				displayDeployResult(progress, result, context);
-				
-			}, function(error){
-				if(error.Retry && error.Retry.parameters){
-					if(error.forceShowMessage){
-						context.errorHandler(error);
+		
+					if(context.launchConfiguration && (result.State || result.CheckState)){
+						context.launchConfiguration.status = result;
+						if(sharedLaunchConfigurationDispatcher){
+							sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration});
+						}
 					}
-					context.data.oldParams = enhansedLaunchConf.Params;
-					context.data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters, context.data.oldParams);
-					context.commandService.collectParameters(context.data);
-				} else {
-					context.errorHandler(error);
-					storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
-					if((error.State || error.CheckState)){
-						context.launchConfiguration.status = error;
+					
+					if(result.ToSave){
+						progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, result.ToSave.ConfigurationName, context.deployService.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path, result.ToSave.Type), "Saving configuration").then(
+							function(configuration){
+								storeLastDeployment(context.project.Name, context.deployService, configuration);
+								if(sharedLaunchConfigurationDispatcher){
+									sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration});
+								}
+								if(configuration.File.parent.parent){
+									fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent.parent, newValue: configuration.File.parent, ignoreRedirect: true});
+								}
+								fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent, newValue: configuration.File, ignoreRedirect: true});
+								displayDeployResult(progress, result, context);
+							}, context.errorHandler
+						);
 					} else {
-						delete context.launchConfiguration.status;
+						if(result.Saved){
+							context.projectClient.formLaunchConfiguration(result.Saved.ConfigurationName, context.deployService.id, result.Saved.Parameters, result.Saved.Url, result.Saved.ManageUrl, result.Saved.Path, result.Saved.Type).then(function(configuration){
+								storeLastDeployment(context.project.Name, context.deployService, configuration);
+								if(sharedLaunchConfigurationDispatcher){
+									sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
+								}							
+							});
+						}
+						storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
 					}
-					if(sharedLaunchConfigurationDispatcher){
-						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration});
+					
+					displayDeployResult(progress, result, context);
+					
+				}, function(error){
+					if(error.Retry && error.Retry.parameters){
+						if(error.forceShowMessage){
+							context.errorHandler(error);
+						}
+						context.data.oldParams = enhansedLaunchConf.Params;
+						context.data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters, context.data.oldParams);
+						context.commandService.collectParameters(context.data);
+					} else {
+						context.errorHandler(error);
+						storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
+						if((error.State || error.CheckState)){
+							context.launchConfiguration.status = error;
+						} else {
+							delete context.launchConfiguration.status;
+						}
+						if(sharedLaunchConfigurationDispatcher){
+							sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration});
+						}
 					}
-				}
-			});
+				});
+			}.bind(this));
 		}
 	}
 	

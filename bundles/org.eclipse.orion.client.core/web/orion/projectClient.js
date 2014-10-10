@@ -665,7 +665,7 @@ define([
 			
 			var lConfs = [];
 			results.forEach(function(lc){
-				lConfs.push(this.formPluginLaunchConfiguration(lc.Name, lc.ServiceId, lc.Params, lc.Url, lc.ManageUrl, lc.Path, lc.Type, lc.File));
+				lConfs.push(this.formPluginLaunchConfiguration(lc));
 			}.bind(this));
 			
 			var tempDef = new Deferred();
@@ -698,7 +698,10 @@ define([
 		}
 		return launchConfigurationEnry;
 	},
-	formPluginLaunchConfiguration: function(configurationName, serviceId, params, url, manageUrl, path, deployType, file){
+	formPluginLaunchConfiguration: function(lc){
+		return this._formPluginLaunchConfiguration(lc.Name, lc.ServiceId, lc.Params, lc.Url, lc.ManageUrl, lc.Path, lc.Type, lc.File)
+	},
+	_formPluginLaunchConfiguration: function(configurationName, serviceId, params, url, manageUrl, path, deployType, file){
 		return {
 			ConfigurationName: configurationName,
 			Parameters: params,
