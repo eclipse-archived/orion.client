@@ -27,13 +27,15 @@ define(['orion/Deferred', 'cfui/cfUtil',  'orion/urlUtils', 'orion/webui/littlel
 		},
 		
 		/**
-		 * Posts the given given error.
+		 * Builds the post error.
 		 */
-		defaultPostError : function(error, target){
-			error = this.defaultDecorateError(error, target);
-			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-				source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
-				status: error}), "*");
+		buildDefaultPostError : function(defaultDecorateError){
+			return function(error, target){
+				error = defaultDecorateError(error, target);
+				window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
+					source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
+					status: error}), "*");
+			};
 		},
 		
 		/**

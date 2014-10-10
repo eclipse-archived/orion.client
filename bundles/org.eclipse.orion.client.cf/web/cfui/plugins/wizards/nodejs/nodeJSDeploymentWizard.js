@@ -19,7 +19,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 	
 	/* plugin-host communication */
 	var postMsg = mWizardUtils.defaultPostMsg;
-	var postError = mWizardUtils.defaultPostError;
+	var defaultDecorateError = mCfUtil.defaultDecorateError;
+	var postError = mWizardUtils.buildDefaultPostError(defaultDecorateError);
 	var closeFrame = mWizardUtils.defaultCloseFrame;
 	
 	/* default utils */
