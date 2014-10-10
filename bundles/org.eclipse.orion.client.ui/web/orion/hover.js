@@ -16,24 +16,20 @@ define ([
 	'orion/edit/editorContext'//$NON-NLS-0$
 ], function(Markdown, EditorContext) {
 
-	function Hover(editor, inputManager, serviceRegistry) {
+	function Hover(editor, hoverFactory) {
 		this.editor = editor;
-		this.inputManager = inputManager;
-		this.serviceRegistry = serviceRegistry;
+		this.hoverFactory = hoverFactory;
+		this.inputManager = hoverFactory.inputManager;
+		this.serviceRegistry = hoverFactory.serviceRegistry;
 		
 		// Filter the plugins based on contentType...
-		this.filterHoverPlugins();
-
-		// Track changes to the input type and re-filter
-		this.inputManager.addEventListener("InputChanged", function() { //$NON-NLS-0$
-			this.filterHoverPlugins();
-		}.bind(this));
+		hoverFactory.filterHoverPlugins();
 	}
 	
 	Hover.prototype = {
 		computeHoverInfo: function (context) {
 			var hoverInfo = [];
-			this._applicableProviders.forEach(function(provider) {
+			this.hoverFactory._applicableProviders.forEach(function(provider) {
 				var providerImpl = this.serviceRegistry.getService(provider);
 				if (providerImpl.computeHoverInfo) {
 					var editorContext = EditorContext.getEditorContext(this.serviceRegistry);
@@ -45,6 +41,25 @@ define ([
 			}.bind(this));
 
 			return hoverInfo;
+		}
+	};
+
+	function renderMarkDown(markDown) {
+		return Markdown(markDown);
+	}
+	
+	function HoverFactory(serviceRegistry, inputManager) {
+		this.serviceRegistry = serviceRegistry;
+		this.inputManager = inputManager;
+
+		// Track changes to the input type and re-filter
+		this.inputManager.addEventListener("InputChanged", function() { //$NON-NLS-0$
+			this.filterHoverPlugins();
+		}.bind(this));
+	}
+	HoverFactory.prototype = {
+		createHover: function(editor) {
+			return new Hover(editor, this);
 		},
 	
 		filterHoverPlugins: function () {
@@ -59,20 +74,6 @@ define ([
 					}
 				}
 			}
-		}
-	};
-
-	function renderMarkDown(markDown) {
-		return Markdown(markDown);
-	}
-	
-	function HoverFactory(serviceRegistry, inputManager) {
-		this.serviceRegistry = serviceRegistry;
-		this.inputManager = inputManager;
-	}
-	HoverFactory.prototype = {
-		createHover: function(editor) {
-			return new Hover(editor, this.inputManager, this.serviceRegistry);
 		}
 	};
 
