@@ -187,7 +187,7 @@ define([
 				var endL = 1;
 				if(textModel && selection.start !== selection.end) {
 					startL = textModel.getLineAtOffset(selection.start) + 1;
-					endL = textModel.getLineAtOffset(selection.end) + 1;
+					endL = textModel.getLineAtOffset(selection.end -1) + 1;
 				}
 				var originalHref = new URITemplate("#{,resource,params*}").expand({resource:this.currentResourceURI, params: {startL: startL, endL: endL}});
 				var url = new URL(window.location.href);

@@ -185,11 +185,12 @@ define([
 					return;
 				}
 				that.updateAnnotation(editor, start, end, highlightRange);
-				this.moveSelection(start, start, function(){
-					var lineIndex = textModel.getLineAtOffset(start);
-					if(lineIndex > 0) {
-						lineIndex--;
-					}
+				var lineIndex = textModel.getLineAtOffset(start);
+				if(lineIndex > 0) {
+					lineIndex--;
+				}
+				var moveTo = textModel.getLineEnd(lineIndex);
+				this.moveSelection(moveTo, moveTo, function(){
 					var line = textView._getLineNode(lineIndex);
 					line.scrollIntoView(true);
 				}, false);
