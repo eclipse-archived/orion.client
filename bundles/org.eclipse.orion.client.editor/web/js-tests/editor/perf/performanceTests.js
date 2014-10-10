@@ -10,12 +10,11 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd, mocha*/
-
+/*global console*/
 define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferred) {
-
 	function log() {
-		if (window.log) {
-			window.log.apply(this, arguments);
+		if (typeof console !== "undefined" && console.log) {
+			console.log.apply(console, Array.prototype.slice.call(arguments));
 		}
 	}
 	
@@ -58,7 +57,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 
 	describe("Performance Tests", function() {
 		// These are heavy duty tests -- use a long timeout for each test.
-		this.timeout(40000);
+		this.timeout(30000);
 
 		before(function() {
 			var body = document.getElementsByTagName("body")[0];
@@ -71,17 +70,19 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 				divParent.style.height = "800px";
 				body.appendChild(divParent);
 			}
-			// Set the Mocha UI element to display:none so it doesn't affect our performance tests
+			// Set the Mocha UI element to display:none just in case its styling affects our test times
 			document.getElementById("mocha").classList.add("hide");
 		});
 
 		after(function() {
-			// Remove editor parent node, and show the Mocha UI again
 			var divParent = document.getElementById("divParent");
-			divParent.parentNode.removeChild(divParent);
+			if (divParent) {
+				divParent.parentNode.removeChild(divParent);
+			}
+			// Show Mocha UI again
 			document.getElementById("mocha").classList.remove("hide");
 		});
-
+		
 		it("PageDown", function() {
 			return doAction("pageDown");
 		});
@@ -106,7 +107,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 		it("SelectLineUp", function() {
 			return doAction("selectLineUp", 300);
 		});
-		
+
 		it("CaretUpDown", function() {
 			var d = new Deferred();
 			var buffer = "", i;
@@ -118,7 +119,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 				buffer += "var id; function() {return 30;} var foo; ";
 			}
 	
-			var max = 50;
+			var max = 25;
 			var view = setupView(buffer, "js");
 			var start = new Date().getTime();
 			var caretLine = 0;
@@ -149,7 +150,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 				buffer += "var id; function() {return 30;} var foo; ";
 			}
 	
-			var max = 10;
+			var max = 5;
 			var view = setupView(buffer, "js");
 			var start = new Date().getTime();
 			function t() {
@@ -173,7 +174,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 				buffer += "var id; function() {return 30;} var foo; ";
 			}
 	
-			var max = 10;
+			var max = 5;
 			var view = setupView(buffer, "js");
 			var start = new Date().getTime();
 			function t() {
@@ -194,11 +195,11 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 		it("ChangeText", function() {
 			var d = new Deferred();
 			var buffer = "", i;
-			for (i = 0; i < 1024;i++) {
+			for (i = 0; i < 512;i++) {
 				buffer += "var id; function() {return 30;} var foo; ";
 			}
 	
-			var max = 10;
+			var max = 5;
 			var view = setupView(buffer, "js");
 			var offset = 8, insert = false;
 			var start = new Date().getTime();
@@ -232,7 +233,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 				buffer += "var id; function() {return 30;} var foo; ";
 			}
 	
-			var max = 30;
+			var max = 15;
 			var view = setupView(buffer, "js");
 			var start = new Date().getTime();
 			var caret = buffer.indexOf("{"), initialCaret = caret;
@@ -256,7 +257,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 			t();
 			return d;
 		});
-		
+
 		it("ScrollLeft", function() {
 			var d = new Deferred();
 			var buffer = "";
@@ -282,6 +283,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 			t();
 			return d;
 		});
+
 		it("GetLocationAtOffset", function() {
 			var d = new Deferred();
 			var count = 10;
