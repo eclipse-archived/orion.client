@@ -131,7 +131,7 @@
 
 										<!-- Wait for the tests to finish -->
 										<echo message="Waiting for ${test.results.url} to become available..." />
-										<waitfor maxwait="10" maxwaitunit="minute" checkevery="30" checkeveryunit="second">
+										<waitfor maxwait="15" maxwaitunit="minute" checkevery="30" checkeveryunit="second">
 											<http url="${test.results.url}"/>
 										</waitfor>
 

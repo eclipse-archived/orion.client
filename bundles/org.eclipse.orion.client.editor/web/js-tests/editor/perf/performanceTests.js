@@ -70,7 +70,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 				divParent.style.height = "800px";
 				body.appendChild(divParent);
 			}
-			// Set the Mocha UI element to display:none just in case its styling affects our test times
+			// Set the Mocha UI element to display:none just in case its style/position affects our test times
 			document.getElementById("mocha").classList.add("hide");
 		});
 
@@ -82,30 +82,37 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 			// Show Mocha UI again
 			document.getElementById("mocha").classList.remove("hide");
 		});
-		
-		it("PageDown", function() {
-			return doAction("pageDown");
+
+		describe("Page", function() {
+			var count = 40;
+			it("PageDown", function() {
+				return doAction("pageDown", count);
+			});
+			it("SelectPageDown", function() {
+				return doAction("selectPageDown", count);
+			});
+			it("PageUp", function() {
+				return doAction("pageUp", count);
+			});
+			it("SelectPageUp", function() {
+				return doAction("selectPageUp", count);
+			});
 		});
-		it("SelectPageDown", function() {
-			return doAction("selectPageDown");
-		});
-		it("PageUp", function() {
-			return doAction("pageUp");
-		});
-		it("SelectPageUp", function() {
-			return doAction("selectPageUp");
-		});
-		it("LineDown", function() {
-			return doAction("lineDown", 300);
-		});
-		it("SelectLineDown", function() {
-			return doAction("selectLineDown", 300);
-		});
-		it("LineUp", function() {
-			return doAction("lineUp", 300);
-		});
-		it("SelectLineUp", function() {
-			return doAction("selectLineUp", 300);
+
+		describe("Line", function() {
+			var count = 300;
+			it("LineDown", function() {
+				return doAction("lineDown", count);
+			});
+			it("SelectLineDown", function() {
+				return doAction("selectLineDown", count);
+			});
+			it("LineUp", function() {
+				return doAction("lineUp", count);
+			});
+			it("SelectLineUp", function() {
+				return doAction("selectLineUp", count);
+			});
 		});
 
 		it("CaretUpDown", function() {
@@ -264,7 +271,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 			for (var i = 0; i < 1000;i++) {
 				buffer += "var id; function() {return 30;} var foo; ";
 			}
-			var max = 256;
+			var max = 128;
 			var view = setupView(buffer, "js");
 			var start = new Date().getTime();
 			var hscroll = -1;
@@ -338,7 +345,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 		});
 		it("GetOffsetAtLocation", function() {
 			var d = new Deferred();
-			var count = 100;
+			var count = 15;
 			var buffer = "";
 			for (var i = 0; i < 3;i++) {
 				buffer += "var nada for nada function " + i + " ";
@@ -364,7 +371,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 		});
 		it("GetOffsetAtLocationStyled", function() {
 			var d = new Deferred();
-			var count = 100;
+			var count = 15;
 			var buffer = "";
 			for (var i = 0; i < 3;i++) {
 				buffer += "var nada for nada function " + i + " ";
