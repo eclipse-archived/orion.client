@@ -82,8 +82,11 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 					option.appendChild(document.createTextNode(org.Name));
 					option.org = org;
 					
-					if (self._defaultTarget && self._defaultTarget.OrgId === org.Guid)
+					if (self._defaultTarget && (self._defaultTarget.OrgId === org.Guid
+							|| self._defaultTarget.Org === org.Name)){
 						option.selected = "selected";
+						self._defaultTarget.OrgName = org.Name;
+					}
 					
 					self._orgsDropdown.appendChild(option);
 					self._targets[org.Name] = [];
@@ -122,8 +125,11 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 				option.appendChild(document.createTextNode(target.Space));
 				option.target = target;
 				
-				if (self._defaultTarget && self._defaultTarget.SpaceId === target.SpaceId)
+				if (self._defaultTarget && (self._defaultTarget.SpaceId === target.SpaceId
+						|| self._defaultTarget.SpaceName === target.Space)){
 					option.selected = "selected";
+					self._defaultTarget.SpaceName = target.Space;
+				}
 				
 				self._spacesDropdown.appendChild(option);
 			});
