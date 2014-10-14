@@ -139,7 +139,7 @@ define([
 			
 			userdata.login = this.accountFields[0].getValue();
 			userdata.FullName = this.accountFields[1].getValue();
-			userdata.Email = this.accountFields[2].getValue();
+			userdata.email = this.accountFields[2].getValue();
 			
 			for(var i=0; i<authServices.length; i++){
 				var servicePtr = authServices[i];
@@ -303,8 +303,8 @@ define([
 							} else {
 								settingsWidget.accountFields[1].setValue( '' );
 							}
-							if (accountData.Email){
-								settingsWidget.accountFields[2].setValue( accountData.Email );
+							if (accountData.email){
+								settingsWidget.accountFields[2].setValue( accountData.email );
 							} else {
 								settingsWidget.accountFields[2].setValue( '' );
 							}
