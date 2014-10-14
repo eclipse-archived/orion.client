@@ -10,66 +10,146 @@
  ******************************************************************************/
 /*eslint-env browser, amd, mocha*/
 define([
-	'js-tests/editor/mockEditor',
 	'chai/chai',
+	'js-tests/editor/mockEditor',
+	'orion/contentTypes',
 	'orion/Deferred',
 	'orion/edit/dispatcher',
-	'orion/contentTypes',
+	'orion/EventTarget',
 	'orion/serviceregistry'
-], function(MockEditor, chai, Deferred, mDispatcher, mContentTypes, mServiceRegistry) {
-	var assert = chai.assert;
+], function(chai, MockEditor, mContentTypes, Deferred, mDispatcher, EventTarget, mServiceRegistry) {
+	var assert = chai.assert,
+	    MIME_FOO = "text/foo",
+	    MIME_BAR = "text/bar",
+	    MIME_BAZ = "text/baz";
+	
+	var serviceRegistry, contentTypeRegistry, editor, inputManager, dispatcher;
 
+	/**
+	 * Creates the test dependencies. Registers some sample ContentTypes.
+	 */
 	function setup() {
-		var serviceRegistry = new mServiceRegistry.ServiceRegistry(),
-		    editor = new MockEditor();
-		var inputManager = {
-			getContentType: function() {
-				return this.contentType;
-			},
-			setContentType: function(value) {
-				this.contentType = value;
-			}
-		};
+		serviceRegistry = new mServiceRegistry.ServiceRegistry();
+		editor = new MockEditor();
+		inputManager = new MockInputManager();
 		editor.install();
 		serviceRegistry.registerService("orion.core.contenttype", {}, {
 			contentTypes:[
-				{ id: "text/foo" },
-				{ id: "text/bar" }
+				{ id: MIME_FOO },
+				{ id: MIME_BAR }
 			]
 		});
-		return {
-			contentTypeRegistry: new mContentTypes.ContentTypeRegistry(serviceRegistry),
-			dispatcher: new mDispatcher.Dispatcher(serviceRegistry, editor, inputManager),
-			inputManager: inputManager,
-			editor: editor,
-			serviceRegistry: serviceRegistry
-		};
+		contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
+		dispatcher = new mDispatcher.Dispatcher(serviceRegistry, contentTypeRegistry, editor, inputManager);
+	}
+
+	function MockInputManager() {
+		EventTarget.attach(this);
+	}
+	MockInputManager.prototype.getContentType = function() {
+		return this.contentType;
+	};
+	/**
+	 * Dispatches an InputChanged event, then sets the editor input to the new text.
+	 * @see orion.editor.InputManager#_setInputContents
+	 */
+	MockInputManager.prototype._setInputContents = function(newContentTypeId, contents) {
+		this.contentType = contentTypeRegistry.getContentType(newContentTypeId);
+		this.dispatchEvent({
+			type: "InputChanged",
+			contentType: this.contentType,
+			contents: contents,
+		});
+
+		if (typeof contents === "string") {
+			editor.setInput("fake title", null, contents);
+		}
+	};
+
+	function registerOrionEditModelService(impl, contentTypes) {
+		serviceRegistry.registerService("orion.edit.model", impl, {
+			contentType: Array.isArray(contentTypes) ? contentTypes : [contentTypes],
+		});
 	}
 
 	describe("EditDispatcher Test", function() {
+		beforeEach(setup);
+
 		/**
 		 * Tests that the initial text of the editor is supplied to the orion.edit.model service
 		 * via an onModelChanging event.
 		 */
-		it("onModelChanging_method_called", function() {
-			var result = setup(),
-			    contentTypeRegistry = result.contentTypeRegistry,
-			    editor = result.editor,
-			    inputManager = result.inputManager,
-			    serviceRegistry = result.serviceRegistry;
+		it("should call #onModelChanging() with initial text", function() {
 			var d = new Deferred();
-			inputManager.setContentType(contentTypeRegistry.getContentType("text/foo"));
-			serviceRegistry.registerService("orion.edit.model", {
-					onModelChanging: function(event) {
-						assert.equal(event.text, "hi");
-						d.resolve();
-					}
-				}, {
-					contentType: ["text/foo"],
-				});
-			editor.setText("hi");
+			registerOrionEditModelService({
+				onModelChanging: function(event) {
+					assert.equal(event.text, "hi");
+					d.resolve();
+				}
+			}, MIME_FOO);
+			inputManager._setInputContents(MIME_FOO, "hi");
 			return d;
 		});
+		it("should update listeners after inputManager's InputChanged", function() {
+			var fooCall = 0,
+			    barCall = 0;
+			registerOrionEditModelService({
+				onModelChanging: function(/*event*/) {
+					fooCall++;
+				}
+			}, MIME_FOO);
+			registerOrionEditModelService({
+				onModelChanging: function(/*event*/) {
+					barCall++;
+				}
+			}, MIME_BAR);
+
+			// Input Change -- should call foo's listener
+			inputManager._setInputContents(MIME_FOO, "a");
+			assert.equal(fooCall, 1, "foo listener called after InputChanged");
+			assert.equal(barCall, 0, "bar listener not called yet");
+
+			// InputChange -- should call bar's listener
+			inputManager._setInputContents(MIME_BAR, "b");
+			assert.equal(barCall, 1, "bar listener called after InputChanged");
+		});
+		// Test for Case 1 of https://bugs.eclipse.org/bugs/show_bug.cgi?id=445559
+		it("should not call listener for the wrong content type", function() {
+			var fooCall = 0,
+			    barCall = 0;
+			registerOrionEditModelService({
+				onModelChanging: function(/*event*/) {
+					fooCall++;
+				}
+			}, MIME_FOO);
+			registerOrionEditModelService({
+				onModelChanging: function(/*event*/) {
+					barCall++;
+				}
+			}, MIME_BAR);
+
+			inputManager._setInputContents(MIME_FOO, "a");
+			inputManager._setInputContents(MIME_BAR, "b");
+			inputManager._setInputContents(MIME_BAZ, "c");
+			assert.equal(fooCall, 1, "foo listener called only once");
+			assert.equal(barCall, 1, "bar listener called only once");
+		});
+		// Test for Case 2 of https://bugs.eclipse.org/bugs/show_bug.cgi?id=445559
+		it("should not call listener for the wrong content type when switching files with _setInputContents", function() {
+			// Open an unknown content type
+			// Switch to text/foo via _setInputContents
+			// foo listener should be called exactly once
+			var fooCall = 0;
+			registerOrionEditModelService({
+				onModelChanging: function(/*event*/) {
+					fooCall++;
+				}
+			}, MIME_FOO);
+
+			inputManager._setInputContents("bogus/bogus", "a");
+			assert.equal(fooCall, 0, "foo listener not called");
+			inputManager._setInputContents(MIME_FOO, "b");
+			assert.equal(fooCall, 1, "foo listener called exactly once");
+		});
 	});
-	// TODO test: listeners should be refreshed after input manager's content type changes
 });

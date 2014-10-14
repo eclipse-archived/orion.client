@@ -444,7 +444,7 @@ define([
 				this.showSelection(params.start, params.end, params.line, params.offset, params.length);
 			};
 
-			this.dispatcher = new mDispatcher.Dispatcher(this.serviceRegistry, editor, inputManager);
+			this.dispatcher = new mDispatcher.Dispatcher(this.serviceRegistry, this.contentTypeRegistry, editor, inputManager);
 			if(themePreferences && editorPreferences){
 				localSettings = new EditorSettings({local: true, editor: editor, themePreferences: themePreferences, preferences: editorPreferences});
 			}

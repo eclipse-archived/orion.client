@@ -140,6 +140,9 @@ define([
 			this._model = null;
 			this.lineStyles = null;
 		},
+		focus: function() {
+			// noop
+		},
 		/**
 		 * Method for testing line style.
 		 * @returns {Object} The output argument from onLineStyle for the given line, or <code>null</code>. When an object is
