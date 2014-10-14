@@ -129,244 +129,237 @@ define(['orion/plugin',
 					category: "css",  //$NON-NLS-0$
 					properties: [
 						{
-							id: "validate-adjoining-classes", //$NON-NLS-0$
+							id: "validate_adjoining_classes", //$NON-NLS-0$
 							nameKey: "adjoining-classes", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-box-model", //$NON-NLS-0$
+							id: "validate_box_model", //$NON-NLS-0$
 							nameKey: "box-model", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-box-sizing", //$NON-NLS-0$
+							id: "validate_box_sizing", //$NON-NLS-0$
 							nameKey: "box-sizing", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-bulletproof-font-face", //$NON-NLS-0$
+							id: "validate_bulletproof_font_face", //$NON-NLS-0$
 							nameKey: "bulletproof-font-face", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-compatible-vendor-prefixes", //$NON-NLS-0$
+							id: "validate_compatible_vendor_prefixes", //$NON-NLS-0$
 							nameKey: "compatible-vendor-prefixes", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-display-property-grouping", //$NON-NLS-0$
+							id: "validate_display_property_grouping", //$NON-NLS-0$
 							nameKey: "display-property-grouping", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},{
-							id: "validate-duplicate-background-images", //$NON-NLS-0$
+							id: "validate_duplicate_background_images", //$NON-NLS-0$
 							nameKey: "duplicate-background-images", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-duplicate-properties", //$NON-NLS-0$
+							id: "validate_duplicate_properties", //$NON-NLS-0$
 							nameKey: "duplicate-properties", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-empty-rules", //$NON-NLS-0$
+							id: "validate_empty_rules", //$NON-NLS-0$
 							nameKey: "empty-rules", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-errors", //$NON-NLS-0$
-							nameKey: "errors", //$NON-NLS-0$
-							type: "number", //$NON-NLS-0$
-							defaultValue: error, //$NON-NLS-0$
-							options: severities //$NON-NLS-0$
-						},
-						{
-							id: "validate-fallback-colors", //$NON-NLS-0$
+							id: "validate_fallback_colors", //$NON-NLS-0$
 							nameKey: "fallback-colors", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-floats", //$NON-NLS-0$
+							id: "validate_floats", //$NON-NLS-0$
 							nameKey: "floats", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-font-faces", //$NON-NLS-0$
+							id: "validate_font_faces", //$NON-NLS-0$
 							nameKey: "font-faces", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-font-sizes", //$NON-NLS-0$
+							id: "validate_font_sizes", //$NON-NLS-0$
 							nameKey: "font-sizes", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-gradients", //$NON-NLS-0$
+							id: "validate_gradients", //$NON-NLS-0$
 							nameKey: "gradients", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-ids", //$NON-NLS-0$
+							id: "validate_ids", //$NON-NLS-0$
 							nameKey: "ids", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-imports", //$NON-NLS-0$
+							id: "validate_imports", //$NON-NLS-0$
 							nameKey: "import", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-important", //$NON-NLS-0$
+							id: "validate_important", //$NON-NLS-0$
 							nameKey: "important", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-known-properties", //$NON-NLS-0$
+							id: "validate_known_properties", //$NON-NLS-0$
 							nameKey: "known-properties", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-outline-none", //$NON-NLS-0$
+							id: "validate_outline_none", //$NON-NLS-0$
 							nameKey: "outline-none", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-overqualified-elements", //$NON-NLS-0$
+							id: "validate_overqualified_elements", //$NON-NLS-0$
 							nameKey: "overqualified-elements", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-qualified-headings", //$NON-NLS-0$
+							id: "validate_qualified_headings", //$NON-NLS-0$
 							nameKey: "qualified-headings", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-regex-selectors", //$NON-NLS-0$
+							id: "validate_regex_selectors", //$NON-NLS-0$
 							nameKey: "regex-selectors", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-rules-count", //$NON-NLS-0$
+							id: "validate_rules_count", //$NON-NLS-0$
 							nameKey: "rules-count", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-selector-max-approaching", //$NON-NLS-0$
+							id: "validate_selector_max_approaching", //$NON-NLS-0$
 							nameKey: "selector-max-approaching", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-selector-max", //$NON-NLS-0$
+							id: "validate_selector_max", //$NON-NLS-0$
 							nameKey: "selector-max", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-shorthand", //$NON-NLS-0$
+							id: "validate_shorthand", //$NON-NLS-0$
 							nameKey: "shorthand", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-star-property-hack", //$NON-NLS-0$
+							id: "validate_star_property_hack", //$NON-NLS-0$
 							nameKey: "star-property-hack", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-text-indent", //$NON-NLS-0$
+							id: "validate_text_indent", //$NON-NLS-0$
 							nameKey: "text-indent", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-underscore-property-hack", //$NON-NLS-0$
+							id: "validate_underscore_property_hack", //$NON-NLS-0$
 							nameKey: "underscore-property-hack", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-unique-headings", //$NON-NLS-0$
+							id: "validate_unique_headings", //$NON-NLS-0$
 							nameKey: "unique-headings", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-universal-selector", //$NON-NLS-0$
+							id: "validate_universal_selector", //$NON-NLS-0$
 							nameKey: "universal-selector", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-unqualified-attributes", //$NON-NLS-0$
+							id: "validate_unqualified_attributes", //$NON-NLS-0$
 							nameKey: "unqualified-attributes", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-vendor-prefix", //$NON-NLS-0$
+							id: "validate_vendor_prefix", //$NON-NLS-0$
 							nameKey: "vendor-prefix", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
-							id: "validate-zero-units", //$NON-NLS-0$
+							id: "validate_zero_units", //$NON-NLS-0$
 							nameKey: "zero-units", //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$

@@ -29,7 +29,6 @@ define({
 	'duplicate-background-images': 'Disallow duplicate background images:', //$NON-NLS-0$  //$NON-NLS-1$
 	'duplicate-properties': 'Disallow duplicate properties:', //$NON-NLS-0$  //$NON-NLS-1$
 	'empty-rules': 'Disallow empty rules:', //$NON-NLS-0$  //$NON-NLS-1$
-	'errors': 'Parsing errors:', //$NON-NLS-0$  //$NON-NLS-1$
 	'fallback-colors': 'Require fallback colors:', //$NON-NLS-0$  //$NON-NLS-1$
 	'floats': 'Disallow too many floats:', //$NON-NLS-0$  //$NON-NLS-1$
 	'font-faces': 'Don\'t use too many web fonts:', //$NON-NLS-0$  //$NON-NLS-1$

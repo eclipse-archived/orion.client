@@ -30,7 +30,6 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 			"duplicate-background-images" : 1, //$NON-NLS-0$
 			"duplicate-properties" : 1, //$NON-NLS-0$
 			"empty-rules" : 1, //$NON-NLS-0$
-			"errors" : 2, //$NON-NLS-0$
 			"fallback-colors" : 1, //$NON-NLS-0$
 			"floats" : 1, //$NON-NLS-0$
 			"font-faces" : 1, //$NON-NLS-0$
@@ -57,6 +56,17 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 			"vendor-prefix" : 1, //$NON-NLS-0$
 			"zero-units" : 1 //$NON-NLS-0$
 		},
+		
+		/**
+		 * @name getRuleSet
+		 * @description Returns an editable ruleset to pass into verify() based on values set in the config settings
+		 * @function
+		 * @returns {Object} A ruleset based on the config settings
+		 */
+		getRuleSet: function(){
+			return JSON.parse( JSON.stringify( this.rules ) );
+		},
+		
 		/**
 		 * @description Sets the given rule to the given enabled value
 		 * @function
@@ -92,26 +102,6 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 	function CssValidator() {
 	}
 
-	/**
-	 * @description Converts the configuration rule for the given csslint problem message 
-	 * 				to an Orion problem severity. One of 'warning', 'error'.  Will return null
-	 * 				if the problem should be skipped ('ignore')
-	 * @public
-	 * @param {Object} prob The problem object
-	 * @returns {String} the severity string
-	 */
-	function getSeverity(message) {
-		var val = 2;
-		var ruleConfig = config.rules[message.rule.id];
-		val = ruleConfig;
-		switch (val) {
-			case 0: return null;
-			case 1: return "warning"; //$NON-NLS-0$
-			case 2: return "error"; //$NON-NLS-0$
-		}
-		return message.type;
-	}
-
 	Objects.mixin(CssValidator.prototype, /** @lends webtools.CssValidator.prototype*/ {
 		
 		/**
@@ -138,23 +128,20 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 		 */
 		_computeProblems: function(contents) {
 			// TODO We should build a ruleset to pass into verify to ignore certain rules rather than filtering after the operation
-			var cssResult = csslint.verify(contents),
+			var cssResult = csslint.verify(contents, config.getRuleSet()),
 			    messages = cssResult.messages,
 			    problems = [];
 			for (var i=0; i < messages.length; i++) {
 				var message = messages[i];
 				if (message.line) {
-					var severity = getSeverity(message);
-					if (severity !== null){
-						var problem = {
-							description: message.message,
-							line: message.line,
-							start: message.col,
-							end: message.col + message.evidence.length,
-							severity: severity
-						};
-						problems.push(problem);
-					}
+					var problem = {
+						description: message.message,
+						line: message.line,
+						start: message.col,
+						end: message.col + message.evidence.length,
+						severity: message.type
+					};
+					problems.push(problem);
 				}
 			}
 			return {problems: problems};
@@ -172,40 +159,39 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 			}
 			// TODO these option -> setting mappings are becoming hard to manage
 			// And they must be kept in sync with webToolsPlugin.js
-			config.setOption("adjoining-classes", properties.validate-adjoining-classes); //$NON-NLS-0$
-			config.setOption("box-model", properties.validate-box-model); //$NON-NLS-0$
-			config.setOption("box-sizing", properties.validate-box-sizing); //$NON-NLS-0$
-			config.setOption("compatible-vendor-prefixes", properties.validate-compatible-vendor-prefixes); //$NON-NLS-0$
-			config.setOption("display-property-grouping", properties.validate-display-property-grouping); //$NON-NLS-0$
-			config.setOption("duplicate-background-images", properties.validate-duplicate-background-images); //$NON-NLS-0$
-			config.setOption("duplicate-properties", properties.validate-duplicate-properties); //$NON-NLS-0$
-			config.setOption("empty-rules", properties.validate-empty-rules); //$NON-NLS-0$
-			config.setOption("errors", properties.validate-errors); //$NON-NLS-0$
-			config.setOption("fallback-colors", properties.validate-fallback-colors); //$NON-NLS-0$
-			config.setOption("floats", properties.validate-floats); //$NON-NLS-0$
-			config.setOption("font-faces", properties.validate-font-faces); //$NON-NLS-0$
-			config.setOption("font-sizes", properties.validate-font-sizes); //$NON-NLS-0$
-			config.setOption("gradients", properties.validate-gradients); //$NON-NLS-0$
-			config.setOption("ids", properties.validate-ids); //$NON-NLS-0$
-			config.setOption("import", properties.validate-imports); //$NON-NLS-0$ // import is restricted key word
-			config.setOption("important", properties.validate-important); //$NON-NLS-0$
-			config.setOption("known-properties", properties.validate-known-properties); //$NON-NLS-0$
-			config.setOption("outline-none", properties.validate-outline-none); //$NON-NLS-0$
-			config.setOption("overqualified-elements", properties.validate-overqualified-elements); //$NON-NLS-0$
-			config.setOption("qualified-headings", properties.validate-qualified-headings); //$NON-NLS-0$
-			config.setOption("regex-selectors", properties.validate-regex-selectors); //$NON-NLS-0$
-			config.setOption("rules-count", properties.validate-rules-count); //$NON-NLS-0$
-			config.setOption("selector-max-approaching", properties.validate-selector-max-approaching); //$NON-NLS-0$
-			config.setOption("selector-max", properties.validate-selector-max); //$NON-NLS-0$
-			config.setOption("shorthand", properties.validate-shorthand); //$NON-NLS-0$
-			config.setOption("star-property-hack", properties.validate-star-property-hack); //$NON-NLS-0$
-			config.setOption("text-indent", properties.validate-text-indent); //$NON-NLS-0$
-			config.setOption("underscore-property-hack", properties.validate-underscore-property-hack); //$NON-NLS-0$
-			config.setOption("unique-headings", properties.validate-unique-headings); //$NON-NLS-0$
-			config.setOption("universal-selector", properties.validate-universal-selector); //$NON-NLS-0$
-			config.setOption("unqualified-attributes", properties.validate-unqualified-attributes); //$NON-NLS-0$
-			config.setOption("vendor-prefix", properties.validate-vendor-prefix); //$NON-NLS-0$
-			config.setOption("zero-units", properties.validate-zero-units); //$NON-NLS-0$
+			config.setOption("adjoining-classes", properties.validate_adjoining_classes); //$NON-NLS-0$
+			config.setOption("box-model", properties.validate_box_model); //$NON-NLS-0$
+			config.setOption("box-sizing", properties.validate_box_sizing); //$NON-NLS-0$
+			config.setOption("compatible-vendor-prefixes", properties.validate_compatible_vendor_prefixes); //$NON-NLS-0$
+			config.setOption("display-property-grouping", properties.validate_display_property_grouping); //$NON-NLS-0$
+			config.setOption("duplicate-background-images", properties.validate_duplicate_background_images); //$NON-NLS-0$
+			config.setOption("duplicate-properties", properties.validate_duplicate_properties); //$NON-NLS-0$
+			config.setOption("empty-rules", properties.validate_empty_rules); //$NON-NLS-0$
+			config.setOption("fallback-colors", properties.validate_fallback_colors); //$NON-NLS-0$
+			config.setOption("floats", properties.validate_floats); //$NON-NLS-0$
+			config.setOption("font-faces", properties.validate_font_faces); //$NON-NLS-0$
+			config.setOption("font-sizes", properties.validate_font_sizes); //$NON-NLS-0$
+			config.setOption("gradients", properties.validate_gradients); //$NON-NLS-0$
+			config.setOption("ids", properties.validate_ids); //$NON-NLS-0$
+			config.setOption("import", properties.validate_imports); //$NON-NLS-0$ // import is restricted key word
+			config.setOption("important", properties.validate_important); //$NON-NLS-0$
+			config.setOption("known-properties", properties.validate_known_properties); //$NON-NLS-0$
+			config.setOption("outline-none", properties.validate_outline_none); //$NON-NLS-0$
+			config.setOption("overqualified-elements", properties.validate_overqualified_elements); //$NON-NLS-0$
+			config.setOption("qualified-headings", properties.validate_qualified_headings); //$NON-NLS-0$
+			config.setOption("regex-selectors", properties.validate_regex_selectors); //$NON-NLS-0$
+			config.setOption("rules-count", properties.validate_rules_count); //$NON-NLS-0$
+			config.setOption("selector-max-approaching", properties.validate_selector_max_approaching); //$NON-NLS-0$
+			config.setOption("selector-max", properties.validate_selector_max); //$NON-NLS-0$
+			config.setOption("shorthand", properties.validate_shorthand); //$NON-NLS-0$
+			config.setOption("star-property-hack", properties.validate_star_property_hack); //$NON-NLS-0$
+			config.setOption("text-indent", properties.validate_text_indent); //$NON-NLS-0$
+			config.setOption("underscore-property-hack", properties.validate_underscore_property_hack); //$NON-NLS-0$
+			config.setOption("unique-headings", properties.validate_unique_headings); //$NON-NLS-0$
+			config.setOption("universal-selector", properties.validate_universal_selector); //$NON-NLS-0$
+			config.setOption("unqualified-attributes", properties.validate_unqualified_attributes); //$NON-NLS-0$
+			config.setOption("vendor-prefix", properties.validate_vendor_prefix); //$NON-NLS-0$
+			config.setOption("zero-units", properties.validate_zero_units); //$NON-NLS-0$
 		}
 	});
 	
