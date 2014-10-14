@@ -43,32 +43,22 @@ function(messages, Deferred, mGitCommon, i18nUtil) {
 		var setGitCloneConfig = function(key,value,location) {
 			var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 			var deferred = new Deferred();
-			gitService.addCloneConfigurationProperty(location, key, value).then(function() { deferred.resolve(); },
-				function(err) {
-					if(err.status === 409) { // when confing entry is already defined we have to edit it
-						var configDeffered = gitService.getGitCloneConfig(location);
-						configDeffered.then(function(config){
-							if(config.Children){
-								for(var i=0; i<config.Children.length; i++){
-									if(config.Children[i].Key===key){
-										var locationToUpdate = config.Children[i].Location;
-										gitService.editCloneConfigurationProperty(locationToUpdate,value).then(
-											function(){ deferred.resolve(); },
-											function(err) {
-												deferred.reject(err);
-											}
-										);
-									break;
-								}
-							}
+			gitService.getGitCloneConfig(location).then(function(config){
+				var found = false;
+				if(config.Children){
+					for(var i=0; i<config.Children.length; i++){
+						if(config.Children[i].Key===key){
+							found = true;
+							var locationToUpdate = config.Children[i].Location;
+							gitService.editCloneConfigurationProperty(locationToUpdate,value).then(deferred.resolve, deferred.reject);
+							break;
 						}
-					}, function(err) {
-						deferred.reject(err);
-					});
-					} else {
-						deferred.reject(err);
- 					}
-			});
+					}
+				} 
+				if (!found) {
+					gitService.addCloneConfigurationProperty(location, key, value).then(deferred.resolve, deferred.reject);
+				}
+			}, deferred.reject);
 			return deferred;
 		};
 		
