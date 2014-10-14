@@ -83,7 +83,7 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 					option.org = org;
 					
 					if (self._defaultTarget && (self._defaultTarget.OrgId === org.Guid
-							|| self._defaultTarget.Org === org.Name)){
+							|| self._defaultTarget.OrgName === org.Name)){
 						option.selected = "selected";
 						self._defaultTarget.OrgName = org.Name;
 					}
