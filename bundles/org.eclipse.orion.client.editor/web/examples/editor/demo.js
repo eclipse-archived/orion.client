@@ -12,10 +12,13 @@
  *******************************************************************************/
  
 /*eslint-env browser, amd*/
+/*global mocha*/
 
-define(['examples/editor/demoSetup', 'tests/editor/test-performance', 'orion/util'],   
- 
-function(mSetup, mTestPerformance, util) {
+define([
+	'examples/editor/demoSetup',
+	'js-tests/editor/perf/performanceTests',
+	'orion/util',
+], function(mSetup, mTestPerformance, util) {
 	
 	/** Console */
 	var document = window.document;
@@ -227,14 +230,14 @@ function(mSetup, mTestPerformance, util) {
 		mSetup.destroyView();
 	}
 	tests.testDestroyTest = destroyTest;
-	
+
+	// Grab perf tests out of the global `mocha` object
+	mocha.suite.eachTest(function(test) {
+		tests["test" + test.title] = test.fn;
+	});
+
 	var prefix = "test"; //$NON-NLS-0$
 	var property, option;
-	for (property in mTestPerformance) {
-		if (property.indexOf(prefix) === 0) {
-			tests[property] = mTestPerformance[property];
-		}
-	}
 	for (property in tests) {
 		if (tests.hasOwnProperty(property)) {
 			option = util.createElement(document, "option"); //$NON-NLS-0$

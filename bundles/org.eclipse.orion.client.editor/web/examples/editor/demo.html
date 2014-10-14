@@ -10,17 +10,25 @@
 <!-- Note if running this standalone you will need to copy requirejs from bundles/org.eclipse.orion.client.core/web/ -->
 <script src="../../requirejs/require.js"></script>
 <script type="text/javascript">
-	/*eslint-env browser, amd*/
+	/*eslint-env browser, amd */
+	/*global mocha*/
 	require({
 	  baseUrl: '../..',
 	  paths: {
 		  text: 'requirejs/text',
 		  i18n: 'requirejs/i18n',
 		  tests: 'js-tests',
-		  domReady: 'requirejs/domReady'
+		  domReady: 'requirejs/domReady',
+//		  mocha: 'mocha/mocha',
 	  }
 	});
-	require(["examples/editor/demo"]);
+
+	// Load mocha first
+	require(["mocha/mocha"], function() {
+		mocha.setup("bdd");
+		require(["examples/editor/demo"]);
+	});
+//	require(["examples/editor/demo"]);
 </script>
 </head>
 <body spellcheck="false" style="display:none;">
