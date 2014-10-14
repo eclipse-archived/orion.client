@@ -13,7 +13,9 @@
 /*global console*/
 define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(mSetup, Deferred, util) {
 	function log() {
-		if (typeof console !== "undefined" && console.log) {
+		if (typeof window.log !== "undefined") {
+			window.log.apply(this, arguments);
+		} else if (typeof console !== "undefined" && console.log) {
 			console.log.apply(console, Array.prototype.slice.call(arguments));
 		}
 	}
