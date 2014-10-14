@@ -11,7 +11,7 @@
 
 /*eslint-env browser, amd, mocha*/
 /*global console*/
-define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferred) {
+define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(mSetup, Deferred, util) {
 	function log() {
 		if (typeof console !== "undefined" && console.log) {
 			console.log.apply(console, Array.prototype.slice.call(arguments));
@@ -265,7 +265,9 @@ define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferre
 			return d;
 		});
 
-		it("ScrollLeft", function() {
+		var testFunc = util.isIE ? it.skip.bind(it) : it;
+		// Skip ScrollLeft in IE since it's simply too slow: ~5 seconds *per call* to #getHorizontalPixel()
+		testFunc("ScrollLeft", function() {
 			var d = new Deferred();
 			var buffer = "";
 			for (var i = 0; i < 1000;i++) {
