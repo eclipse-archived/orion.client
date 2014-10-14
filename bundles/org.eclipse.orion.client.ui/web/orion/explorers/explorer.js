@@ -725,6 +725,10 @@ exports.ExplorerRenderer = (function() {
 				expandImage.classList.remove(this._progressImageClass);
 				expandImage.classList.add(isExpanded === "progress" ? this._progressImageClass : isExpanded ? this._expandImageClass : this._collapseImageClass); //$NON-NLS-0$
 			}
+			if (tableRow) {
+				tableRow.classList.remove("expanded");
+				if(isExpanded) tableRow.classList.add("expanded");
+			}
 		},
 
 		/**

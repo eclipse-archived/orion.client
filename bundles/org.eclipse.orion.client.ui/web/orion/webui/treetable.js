@@ -159,6 +159,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			this._renderer.render(child, row);
 			// generate an indent
 			var indent = this._indent * indentLevel;
+			row.classList.add("level"+indentLevel);
 			row.childNodes[Math.min(row.childNodes.length - 1, this._labelColumnIndex)].style.paddingLeft = indent +"px";  //$NON-NLS-0$
 			if(this._renderer.updateExpandVisuals) {
 			    this._renderer.updateExpandVisuals(row, row._expanded);

@@ -621,8 +621,8 @@ textarea.parameterInput {
 
 .miniNavTreeTable {
 	border-spacing: 0;
-	width:100%;
-	padding-left:10px;
+	width: 100%;
+	background-color: white;
 }
 
 .secondaryColumn {
@@ -1025,6 +1025,10 @@ textarea.parameterInput {
 
 .searchOutlineContainer .filesystemSwitcher .dropdownMenu {
 	position: fixed;
+}
+
+ul.filesystemSwitcher.commandList.pageActions {
+	margin-top: 6px;
 }
 
 .orionMarkdown {

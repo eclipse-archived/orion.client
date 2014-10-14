@@ -227,8 +227,8 @@ a.breadcrumb.currentLocation {
 	display: inline-block;
 	font-weight: bold;
 	margin-left: 10px;
-	margin-top: 4px;
-	margin-bottom: 8px;
+	margin-top: 10px;
+	margin-bottom: 5px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -251,6 +251,9 @@ a.breadcrumb.currentLocation {
 	display: block;
 	max-width: 100%;
 	white-space: nowrap;
+	background-color: white;
+	border: 1px solid lightgrey;
+	margin-left: 10px;
 }
 
 .sidebarToolbar {

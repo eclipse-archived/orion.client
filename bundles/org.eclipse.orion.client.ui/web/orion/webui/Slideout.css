@@ -2,7 +2,7 @@
 	background: whitesmoke;
 	border: 1px solid rgb(222, 222, 222);
 	border-radius: 0 5px 5px 0;
-	height: calc(100% - 11px);
+	height: calc(100% - 4px);
 	overflow-x: auto; /*allow horiz scrollbar if pane not wide enough*/
 	overflow-y: hidden;
 	position: absolute;
@@ -23,6 +23,9 @@
 
 .slideoutNoVisibility {
 	visibility: hidden !important; /* this class is separate because it is applied after the transition duration */
+	display: block;
+	height: calc(100% - 4px);
+	width: calc(100% - 2px);
 }
 
 .slideoutWrapper > .slideoutDismissButton {

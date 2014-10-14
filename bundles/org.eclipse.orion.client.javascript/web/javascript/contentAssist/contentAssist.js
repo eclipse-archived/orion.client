@@ -102,6 +102,7 @@ define([
 		 * @description override
 		 */
 		getTemplateProposals: function(prefix, offset, context, completionKind) {
+			if ( completionKind.kind === 'top') { return []; }  // Allows templateCollector to handle top-level templates
 			var proposals = [];
 			var templates = Templates.getTemplatesForKind(completionKind.kind); //this.getTemplates();
 			for (var t = 0; t < templates.length; t++) {

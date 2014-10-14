@@ -329,10 +329,18 @@ hard-coded numbers elsewhere.
 	min-width:140px;
 }
 
+#sidebar {
+	background-color: white;
+	border: 1px solid #dadada;
+	margin-left: 10px;
+	width: calc(100% - 12px);
+}
 .sidebarWrapper {
 	overflow-x: auto;
-	overflow-y: hidden;
+	overflow-y: auto;
 	min-width: 0;
+	margin-top: 2px;
+	height: calc(100% - 9px);
 }
 
 .sidebarWrapper > .sidebar {

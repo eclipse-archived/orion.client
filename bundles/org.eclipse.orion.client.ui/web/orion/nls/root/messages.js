@@ -88,6 +88,7 @@ define({
 	"Generate a sample plugin for integrating with Orion.": "Generate a sample plugin for integrating with Orion.",
 	"Browser": "Web Browser",
 	"OutlineProgress": "Getting outline for ${0} from ${1}",
+	"TemplateExplorerProgress": "Getting templates for ${0} from ${1}",
 	"UnknownError": "An unknown error occurred.",
 	"UnknownWarning": "An unknown warning occurred.",
 	"Filter": "Filter (* = any string, ? = any character)",

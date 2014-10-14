@@ -20,7 +20,6 @@ function(Compare) {
 	var bCompare = document.getElementById("doCompare"); //$NON-NLS-0$
 	var bLoadSample = document.getElementById("loadSample"); //$NON-NLS-0$
 	var bAnimateDiffs = document.getElementById("animateDiffs"); //$NON-NLS-0$
-	
 	var bCompareType = document.getElementById("compareTypeSelect"); //$NON-NLS-0$
 	var bContentTypeTD = document.getElementById("contentTypes"); //$NON-NLS-0$
 	var bContentType = document.getElementById("contentTypeSelect"); //$NON-NLS-0$
