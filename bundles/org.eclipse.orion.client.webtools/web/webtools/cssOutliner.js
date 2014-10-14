@@ -12,9 +12,9 @@
 /*eslint-env browser, amd*/
 /*global CSSLint*/
 define("webtools/cssOutliner", [ //$NON-NLS-0$
-	'orion/objects', //$NON-NLS-0$
-	'csslint' //must go at the end, provides global object not amd module //$NON-NLS-0$
-], function(Objects) {
+	'csslint', //$NON-NLS-0$
+	'orion/objects' //$NON-NLS-0$
+], function(csslint, Objects) {
 
 	/**
 	 * @description Creates a new validator
@@ -23,7 +23,7 @@ define("webtools/cssOutliner", [ //$NON-NLS-0$
 	 * @since 6.0
 	 */
 	function CssOutliner() {
-		CSSLint.addRule(CssOutliner.prototype._outlineRule);
+		csslint.addRule(CssOutliner.prototype._outlineRule);
 	}
 
 	Objects.mixin(CssOutliner.prototype, /** @lends webtools.CssOutliner.prototype*/ {
@@ -32,7 +32,7 @@ define("webtools/cssOutliner", [ //$NON-NLS-0$
 		 * @descripton API callback to compute the outline
 		 */
 		getOutline: function(contents, title) {
-			CSSLint.verify(contents);
+			csslint.verify(contents);
 			return this._outlineRule.outline;
 		},
 		

@@ -165,7 +165,7 @@ define([
 					nls: 'javascript/nls/messages',  //$NON-NLS-0$
 					nameKey: 'eslintValidator',  //$NON-NLS-0$
 					tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
-					category: "validation",  //$NON-NLS-0$
+					category: "java script",  //$NON-NLS-0$
 					properties: [
 						{
 							id: "no-new-array", //$NON-NLS-0$

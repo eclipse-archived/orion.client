@@ -83,8 +83,7 @@ define([
 	}
 	
 	/**
-	 * @description Converts the configuration rule value to an eslint string. One of 'warning', 'error', 'ignore'
-	 * @public
+	 * @description Converts the configuration rule value to an Orion problem severity string. One of 'warning', 'error'.
 	 * @param {Object} prob The problem object
 	 * @returns {String} the severity string
 	 */

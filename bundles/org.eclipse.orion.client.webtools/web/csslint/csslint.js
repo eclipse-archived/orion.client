@@ -1,7 +1,11 @@
+/* eslint-disable  */
+/* eslint-env amd */
+define('csslint', [
+], function() {
+
 /*!
 CSSLint
 Copyright (c) 2013 Nicole Sullivan and Nicholas C. Zakas. All rights reserved.
-
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -23,7 +27,7 @@ THE SOFTWARE.
 */
 /* Build: v0.10.0 15-August-2013 01:07:22 */
 var exports = exports || {};
-var CSSLint = (function(){
+var cssLint = (function(){
 /*!
 Parser-Lib
 Copyright (c) 2009-2011 Nicholas C. Zakas. All rights reserved.
@@ -119,7 +123,7 @@ EventTarget.prototype = {
     },
 
     /**
-     * Removes a listener for a given event type.
+     * vs a listener for a given event type.
      * @param {String} type The type of event to remove a listener from.
      * @param {Function} listener The function to remove from the event.
      * @return {void}
@@ -2459,7 +2463,7 @@ Parser.prototype = function(){
                 var tokenStream = this._tokenStream,
                     value       = "";
 
-                //verify that this is a namespace prefix
+                //va that this is a namespace prefix
                 if (tokenStream.LA(1) === Tokens.PIPE || tokenStream.LA(2) === Tokens.PIPE){
 
                     if(tokenStream.match([Tokens.IDENT, Tokens.STAR])){
@@ -9257,3 +9261,6 @@ CSSLint.addFormatter({
 });
 return CSSLint;
 })();
+
+return cssLint;
+});
