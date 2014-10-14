@@ -40,4 +40,5 @@ define({
 	'semi': 'Missing semicolon.', //$NON-NLS-0$  //$NON-NLS-1$
 	'throw-error': 'Throw an Error instead.', //$NON-NLS-0$  //$NON-NLS-1$
 	'use-isnan': 'Use the isNaN function to compare with NaN.', //$NON-NLS-0$  //$NON-NLS-1$
+	'valid-typeof' : 'Invalid typeof comparison.',  //$NON-NLS-0$ //$NON-NLS-1$
 });

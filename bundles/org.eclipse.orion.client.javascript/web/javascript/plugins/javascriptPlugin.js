@@ -219,6 +219,12 @@ define([
 							defaultValue: error,
 							options: severities
 						},
+						{	id: "validate_typeof",  //$NON-NLS-0$
+							nameKey: 'validTypeof',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: error,
+							options: severities
+						},
 						{	id: "validate_use_before_define",  //$NON-NLS-0$
 							nameKey: 'useBeforeDefine',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
