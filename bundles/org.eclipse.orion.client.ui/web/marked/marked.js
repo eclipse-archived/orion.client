@@ -372,6 +372,14 @@ Lexer.prototype.token = function(src, top, bq) {
         href: cap[2],
         title: cap[3]
       };
+
+      /* the following line is added by Orion (14/10/2014) */
+      this.tokens.push({
+        type: 'def',
+        href: cap[2],
+        title: cap[3]
+      });
+
       continue;
     }
 
@@ -781,6 +789,11 @@ Renderer.prototype.blockquote = function(quote) {
   return '<blockquote>\n' + quote + '</blockquote>\n';
 };
 
+/* the following function definition is added by Orion (14/10/2014) */
+Renderer.prototype.def = function(href, title) {
+  return '';
+};
+
 Renderer.prototype.html = function(html) {
   return html;
 };
@@ -966,6 +979,14 @@ Parser.prototype.tok = function() {
     case 'space': {
       return '';
     }
+
+    /* the following case is added by Orion (14/10/2014) */
+    case 'def': {
+      return this.renderer.def(
+        this.token.href,
+        this.token.title);
+    }
+
     case 'hr': {
       return this.renderer.hr();
     }

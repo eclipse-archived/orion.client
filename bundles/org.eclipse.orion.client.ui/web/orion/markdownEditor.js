@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Copyright (c) 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
@@ -156,6 +156,27 @@ define([
 						end: end
 					};
 					name = this._TYPEID_PARAGRAPH;
+					index = end;
+				} else if (tokens[i].type === "def") { //$NON-NLS-0$
+					newlineCount = 0;
+					if (tokens[i].title) {
+						var titleIndex = text.indexOf(tokens[i].title, index + 1);
+						var substring = text.substring(index, titleIndex);
+						match = substring.match(this._newlineRegex);
+						if (match) {
+							newlineCount = match.length;
+						}
+					}
+					end = this._getLineEnd(text, index, model, newlineCount);
+
+					contentToken = tokens[i];
+					bounds = {
+						start: index,
+						contentStart: index,
+						contentEnd: end,
+						end: end
+					};
+					name = "meta.link.reference.def.markdown"; //$NON-NLS-0$
 					index = end;
 				} else if (tokens[i].type === "blockquote_start" || tokens[i].type === "list_start") { //$NON-NLS-1$ //$NON-NLS-0$
 					/*
@@ -318,7 +339,7 @@ define([
 						contentEnd: end,
 						end: end
 					};
-					name = "markup.other.separator.markdown"; //$NON-NLS-0$ 
+					name = "markup.other.separator.markdown"; //$NON-NLS-0$
 					contentToken = tokens[i];
 					index = end;
 				} else if (tokens[i].type === "table") { //$NON-NLS-0$
@@ -727,8 +748,8 @@ define([
 				return; /* should not happen */
 			}
 
-			/* a container block (a list, list item or blockquote) */				
-			
+			/* a container block (a list, list item or blockquote) */
+
 			parseTokens = [block.startToken, block.endToken];
 			parseTokens.links = links;
 			rootElement.innerHTML = marked.Parser.parse(parseTokens, markedOptions);
@@ -745,7 +766,7 @@ define([
 				var createdNodes = tempElement.children[0].childNodes;
 				while (createdNodes.length) {
 					rootElement.children[0].appendChild(createdNodes[0]);
-				}				
+				}
 			}.bind(this);
 
 			/*
@@ -761,7 +782,7 @@ define([
 					accumulatedParentTokens = accumulatedParentTokens.concat(current.parentTokens);
 				} else {
 					/* a child block with its own content tokens */
-					
+
 					/* first flush accumulated parent tokens */
 					if (accumulatedParentTokens.length) {
 						processParentTokens(accumulatedParentTokens);
@@ -776,7 +797,7 @@ define([
 					rootElement.children[0].appendChild(newElement);
 				}
 			}.bind(this));
-			
+
 			/* flush any remaining parent tokens */
 			if (accumulatedParentTokens.length) {
 				processParentTokens(accumulatedParentTokens);
@@ -928,7 +949,7 @@ define([
 				this._setElementIdentifier(newNode, this.getElementIdentifier(targetNode));
 				return;
 			}
-			
+
 			/* modify the existing node */
 
 			if (newNode.nodeName === "#text") { //$NON-NLS-0$
@@ -1030,8 +1051,8 @@ define([
 					if (cap[0][0] !== '!') { //$NON-NLS-0$
 						/*
 						 * TODO: should not need to remove the URL hash to create a link that opens in the markdown editor
-						 * 
-						 * eg.- http://...,editor=orion.editor.markdown#hash works fine, but uriTemplate generates 
+						 *
+						 * eg.- http://...,editor=orion.editor.markdown#hash works fine, but uriTemplate generates
 						 * http://...#hash,editor=orion.editor.markdown for this, which does not work.  Since the
 						 * markdown editor does not currently acknowledge hashes, removing it here does not hurt anything.
 						 * However if the editor began opening to hashes then this would be removing a valuable piece
@@ -1074,13 +1095,13 @@ define([
 										}
 									}.bind(this));
 							}.bind(this))(id, linkURL.href);
-							return "<img id='" + id + "' src=''>";	//$NON-NLS-1$ //$NON-NLS-0$			
+							return "<img id='" + id + "' src=''>";	//$NON-NLS-1$ //$NON-NLS-0$
 						}
 						link.href = linkURL.href;
 					}
 				} catch(e) {
 					window.console.log(e); // best effort
-				}				
+				}
 			}
 			return markedOutputLink.call(this, cap, link);
 		};
@@ -1103,7 +1124,7 @@ define([
 			/*
 			 * The file creation succeeded, so send a "create" notification so that
 			 * listeners like the navigator will update.
-			 */			
+			 */
 			var dispatcher = mFileCommands.getModelEventDispatcher();
 			if (dispatcher && typeof dispatcher.dispatchEvent === "function") { //$NON-NLS-0$
 				dispatcher.dispatchEvent({type: "create", parent: file.Parents[0]}); //$NON-NLS-0$
@@ -1344,18 +1365,18 @@ define([
 			this._parent.appendChild(this._rootDiv);
 
 			this._editorDiv = document.createElement("div"); //$NON-NLS-0$
-			this._rootDiv.appendChild(this._editorDiv);	
+			this._rootDiv.appendChild(this._editorDiv);
 			this._editorView.setParent(this._editorDiv);
 
 			this._splitterDiv = document.createElement("div"); //$NON-NLS-0$
 			this._splitterDiv.id = "orion.markdown.editor.splitter";
-			this._rootDiv.appendChild(this._splitterDiv);			
+			this._rootDiv.appendChild(this._splitterDiv);
 
 			this._previewWrapperDiv = document.createElement("div"); //$NON-NLS-0$
 			this._previewWrapperDiv.style.overflowX = "hidden"; //$NON-NLS-0$
 			this._previewWrapperDiv.style.overflowY = "auto"; //$NON-NLS-0$
 			this._rootDiv.appendChild(this._previewWrapperDiv);
-			
+
 			previewDiv = document.createElement("div"); //$NON-NLS-0$
 			previewDiv.classList.add("orionMarkdown"); //$NON-NLS-0$
 			this._previewWrapperDiv.appendChild(previewDiv);
@@ -1527,7 +1548,7 @@ define([
 				}.bind(this)
 			});
 
-			this._scrollPreviewAnimation.play();	
+			this._scrollPreviewAnimation.play();
 		},
 		_scrollSourceEditor: function(top) {
 			if (this._scrollSourceAnimation) {
@@ -1535,7 +1556,7 @@ define([
 				this._scrollSourceAnimation = null;
 			}
 
-			var textView = this._editorView.editor.getTextView(); 
+			var textView = this._editorView.editor.getTextView();
 			var pixelY = top - textView.getTopPixel();
 			if (!pixelY) {
 				return;
@@ -1560,7 +1581,7 @@ define([
 			});
 
 			this._ignoreEditorScrollsCounter = Infinity;
-			this._scrollSourceAnimation.play();	
+			this._scrollSourceAnimation.play();
 		},
 		_markdownSelected: "markdownSelected", //$NON-NLS-0$
 		_selectedBlock: null
