@@ -57,6 +57,158 @@ define(['orion/Deferred'], function(Deferred) {
 			// prefs have now been updated
 			prefs.put('version', this._themeVersion); //$NON-NLS-0$
 		},
+		_convertThemeStylesToHierarchicalFormat: function(styles) {
+			return {
+				name: styles.name,
+				className: styles.name,
+				styles: {
+					/* top-level properties */
+					backgroundColor: styles.background,
+					color: styles.text,
+					fontFamily: styles.fontFamily,
+					fontSize: styles.fontSize,
+
+					/* from textview.css */
+					textviewRightRuler: {
+						borderLeft: "1px solid " + styles.annotationRuler //$NON-NLS-0$
+					},
+					textviewLeftRuler: {
+						borderRight: "1px solid " + styles.annotationRuler //$NON-NLS-0$
+					},
+
+					/* from rulers.css */
+					ruler: {
+						backgroundColor: styles.annotationRuler,
+						overview: {
+							backgroundColor: styles.overviewRuler
+						}
+					},
+					rulerLines: {
+						even: {
+							color: styles.lineNumberEven
+						},
+						odd: {
+							color: styles.lineNumberOdd
+						}
+					},
+
+					/* from annotations.css */
+					annotationLine: {
+						currentLine: {
+							backgroundColor: styles.currentLine
+						}
+					},
+
+					/* from textstyler.css */
+					comment: {
+						color: styles.comment
+					},
+					constant: {
+						color: "blue" //$NON-NLS-0$
+					},
+					entity: {
+						name: {
+							color: "#98937B", //$NON-NLS-0$
+							"function": { //$NON-NLS-0$
+								fontWeight: "bold", //$NON-NLS-0$
+								color: "#67BBB8" //$NON-NLS-0$
+							}
+						},
+						other: {
+							"attribute-name": { //$NON-NLS-0$
+								color: styles.attribute
+							}
+						}
+					},
+					keyword: {
+						control: {
+							color: styles.keyword,
+							fontWeight: "bold" //$NON-NLS-0$
+						},
+						operator: {
+							color: styles.keyword,
+							fontWeight: "bold" //$NON-NLS-0$
+						},
+						other: {
+							documentation: {
+								color: "#7F9FBF" //$NON-NLS-0$
+							}
+						}
+					},
+					markup: {
+						bold: {
+							fontWeight: "bold" //$NON-NLS-0$
+						},
+						heading: {
+							color: "blue" //$NON-NLS-0$
+						},
+						italic: {
+							fontStyle: "italic" //$NON-NLS-0$
+						},
+						list: {
+							color: "#CC4C07" //$NON-NLS-0$
+						},
+						other: {
+							separator: {
+								color: "#00008F" //$NON-NLS-0$
+							},
+							strikethrough: {
+								textDecoration: "line-through" //$NON-NLS-0$
+							},
+							table: {
+								color: "#3C802C" //$NON-NLS-0$
+							}
+						},
+						quote: {
+							color: "#446FBD" //$NON-NLS-0$
+						},
+						raw: {
+							fontFamily: "monospace" //$NON-NLS-0$
+						},
+						underline: {
+							link: {
+								textDecoration: "underline" //$NON-NLS-0$
+							}
+						}
+					},
+					meta: {
+						documentation: {
+							annotation: {
+								color: "#7F9FBF" //$NON-NLS-0$
+							},
+							tag: {
+								color: "#7F7F9F" //$NON-NLS-0$
+							}
+						},
+						tag: {
+							color: styles.tag
+						}
+					},
+					string: {
+						color: styles.string
+					},
+					support: {
+						type: {
+							propertyName: {
+								color: "#7F0055" //$NON-NLS-0$
+							}
+						}
+					},
+					variable: {
+						language: {
+							color: "#7F0055", //$NON-NLS-0$
+							fontWeight: "bold" //$NON-NLS-0$
+						},
+						other: {
+							color: "#E038AD" //$NON-NLS-0$
+						},
+						parameter: {
+							color: "#D1416F" //$NON-NLS-0$
+						}
+					}
+				}
+			};
+		},
 		apply: function() {
 			this.setTheme();
 		},
@@ -68,8 +220,17 @@ define(['orion/Deferred'], function(Deferred) {
 				var selected = JSON.parse(prefs.get('selected')); //$NON-NLS-0$
 				var styles = JSON.parse(prefs.get(themeInfo.styleset)), style;
 				if (styles) {
-					for (var i = 0; i < styles.length; i++ ){
-						if( styles[i].name === selected[themeInfo.selectedKey] ){
+					/*
+					 * Convert the read theme info into the new supported format if the
+					 * old format is detected.
+					 */
+					if (styles.length && styles[0].keyword) { /* indicates old format */
+						for (var i = 0; i < styles.length; i++) {
+							styles[i] = this._convertThemeStylesToHierarchicalFormat(styles[i]);
+						}
+					}
+					for (i = 0; i < styles.length; i++) {
+						if (styles[i].name === selected[themeInfo.selectedKey]) {
 							style = styles[i];
 							break;
 						}
