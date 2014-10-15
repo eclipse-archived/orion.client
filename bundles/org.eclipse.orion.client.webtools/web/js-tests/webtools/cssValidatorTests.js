@@ -16,7 +16,7 @@ define([
 	'mocha/mocha' // no exports
 ], function(chai, Deferred, CssValidator) {
 	var assert = chai.assert;
-	var validator = new CssValidator.CssValidator();
+	var validator = new CssValidator();
 
 	describe("CSS validator", function() {
 		var context = {
