@@ -64,6 +64,10 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 			for(var i=0; i<orgTargets.length; i++){
 				if(orgTargets[i].Space == self._spacesDropdown.value){
 					self._selection.setSelections(orgTargets[i]);
+					self._defaultTarget.OrgId = null;
+					self._defaultTarget.OrgName = orgTargets[i].Org;
+					self._defaultTarget.SpaceId = null;
+					self._defaultTarget.SpaceName = orgTargets[i].Space;
 					return;
 				}
 			}
