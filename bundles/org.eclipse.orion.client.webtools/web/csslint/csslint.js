@@ -6445,7 +6445,7 @@ var CSSLint = (function(){
 
     var rules           = [],
         formatters      = [],
-        embeddedRuleset = /\/\*csslint([^\*]*)\*\//,
+        embeddedRuleset = /\/\*\s*csslint([^\*]*)\*\//, // Edited to allow whitespace before csslint, see CSSLint issue #549
         api             = new parserlib.util.EventTarget();
 
     api.version = "0.10.0";

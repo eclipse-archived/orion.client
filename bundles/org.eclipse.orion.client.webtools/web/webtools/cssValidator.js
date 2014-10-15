@@ -64,6 +64,7 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 		 * @returns {Object} A ruleset based on the config settings
 		 */
 		getRuleSet: function(){
+			// TODO Versions of CSSLint >0.10.0 create a copy of the ruleset inside verify (CSSLint Issue 458)
 			return JSON.parse( JSON.stringify( this.rules ) );
 		},
 		
@@ -127,7 +128,6 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 		 * @returns {Array} The problem array
 		 */
 		_computeProblems: function(contents) {
-			// TODO We should build a ruleset to pass into verify to ignore certain rules rather than filtering after the operation
 			var cssResult = csslint.verify(contents, config.getRuleSet()),
 			    messages = cssResult.messages,
 			    problems = [];
