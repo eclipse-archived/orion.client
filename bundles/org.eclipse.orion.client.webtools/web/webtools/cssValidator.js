@@ -16,7 +16,7 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 	'orion/objects' //$NON-NLS-0$
 ], function(csslint, Objects) {
 
-	// TODO How to keep this list up to date with rules definitions and settings options
+	// TODO How to keep this list up to date with rules definitions, settings options and content assist
 	var config = {
 		// Define the default values for the rules
 		// 0:off, 1:warning, 2:error

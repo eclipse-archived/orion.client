@@ -115,6 +115,55 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
 			"inherit" //$NON-NLS-0$
 		]
 	};
+	var csslintRules = {
+		type: "link", //$NON-NLS-0$
+		values: [
+			"adjoining-classes", //$NON-NLS-0$
+			"box-model", //$NON-NLS-0$
+			"box-sizing", //$NON-NLS-0$
+			"bulletproof-font-face", //$NON-NLS-0$
+			"compatible-vendor-prefixes", //$NON-NLS-0$
+			"display-property-grouping", //$NON-NLS-0$
+			"duplicate-background-images", //$NON-NLS-0$
+			"duplicate-properties", //$NON-NLS-0$
+			"empty-rules", //$NON-NLS-0$
+			"fallback-colors", //$NON-NLS-0$
+			"floats", //$NON-NLS-0$
+			"font-faces", //$NON-NLS-0$
+			"font-sizes", //$NON-NLS-0$
+			"gradients", //$NON-NLS-0$
+			"ids", //$NON-NLS-0$
+			"import", //$NON-NLS-0$
+			"important", //$NON-NLS-0$
+			"known-properties", //$NON-NLS-0$
+			"outline-none", //$NON-NLS-0$
+			"overqualified-elements", //$NON-NLS-0$
+			"qualified-headings", //$NON-NLS-0$
+			"regex-selectors", //$NON-NLS-0$
+			"rules-count", //$NON-NLS-0$
+			"selector-max-approaching", //$NON-NLS-0$
+			"selector-max", //$NON-NLS-0$
+			"shorthand", //$NON-NLS-0$
+			"star-property-hack", //$NON-NLS-0$
+			"text-indent", //$NON-NLS-0$
+			"underscore-property-hack", //$NON-NLS-0$
+			"unique-headings", //$NON-NLS-0$
+			"universal-selector", //$NON-NLS-0$
+			"unqualified-attributes", //$NON-NLS-0$
+			"vendor-prefix", //$NON-NLS-0$
+			"zero-units" //$NON-NLS-0$
+		],
+	};
+	var severityValues = {
+		type: "link", //$NON-NLS-0$
+		values: [
+			"false", //$NON-NLS-0$
+			"true", //$NON-NLS-0$
+			"0", //$NON-NLS-0$
+			"1", //$NON-NLS-0$
+			"2" //$NON-NLS-0$
+		]
+	};
 	
 	function fromJSON(o) {
 		return JSON.stringify(o).replace("}", "\\}"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -152,11 +201,17 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
 			template: "rgb(${red},${green},${blue});" //$NON-NLS-0$
 		},
 		{
-			prefix: "@", //$NON-NLS-0$
+			prefix: "@import", //$NON-NLS-0$
 			description: "import - import style sheet",
 			template: "@import \"${uri}\";" //$NON-NLS-0$
+		},
+		{
+			prefix: "csslint", //$NON-NLS-0$
+			description: "csslint - add embedded rule severity", //$NON-NLS-0$
+			template: "\/*csslint ${:" + fromJSON(csslintRules) + "}: ${a:" + fromJSON(severityValues) + "} *\/" //$NON-NLS-0$  // Template suggestions use colon location to separate positions making the 'a' necessary
 		}
 	];
+	
 	var valuesProperties = [
 		{prop: "display", values: displayValues}, //$NON-NLS-0$
 		{prop: "overflow", values: overflowValues}, //$NON-NLS-0$
@@ -243,7 +298,7 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
 		while (index && /[A-Za-z\-\@]/.test(buffer.charAt(index - 1))) {
 			index--;
 		}
-		return index ? buffer.substring(index, offset) : "";
+		return index >= 0 ? buffer.substring(index, offset) : "";
 	};
 
 	return {
