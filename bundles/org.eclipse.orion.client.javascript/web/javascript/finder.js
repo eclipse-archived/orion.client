@@ -72,11 +72,11 @@ define([
 					}
 					break;
 				case Estraverse.Syntax.FunctionExpression:
+					if(this._enterScope(node)) {
+						return Estraverse.VisitorOption.Skip;
+					}
 					this.checkId(node.id, true); // Function expressions can be named expressions
 					if (node.params) {
-						if(this._enterScope(node)) {
-							return Estraverse.VisitorOption.Skip;
-						}
 						len = node.params.length;
 						for (idx = 0; idx < len; idx++) {
 							if(this.checkId(node.params[idx], true)) {
@@ -263,24 +263,30 @@ define([
 				}
 			} else {
 				var kind;
+				var rangeStart = node.range[0];
+				if (node.body){
+					rangeStart = node.body.range[0];
+				}
 				switch(node.type) {
 					case Estraverse.Syntax.FunctionDeclaration:
 						kind = 'fd';  //$NON-NLS-0$
+						// Include the params and body in the scope, but not the identifier
+						if (node.params && (node.params.length > 0)){
+							rangeStart = node.params[0].range[0];
+						}
 						break;
 					case Estraverse.Syntax.FunctionExpression:
 						kind = 'fe';  //$NON-NLS-0$
+						// Include the params, body and identifier (if available) See Bug 447413
+						if (node.id) {
+							rangeStart = node.id.range[0];
+						} else if (node.params && (node.params.length > 0)){
+							rangeStart = node.params[0].range[0];
+						}
 						break;
 				}
 				if (kind){
-					// Include the params and body in the scope, but not the identifier
-					var rng = node.range[0];
-					if (node.body){
-						rng = node.body.range[0];
-					}
-					if (node.params && (node.params.length > 0)){
-						rng = node.params[0].range[0];
-					}
-					this.scopes.push({range: [rng,node.range[1]], occurrences: [], kind:kind});	
+					this.scopes.push({range: [rangeStart,node.range[1]], occurrences: [], kind:kind});	
 				}
 			}
 			return false;

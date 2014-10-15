@@ -1378,10 +1378,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438317
 		 */
 		it('test_redefineScopesFuncExpr1', function() {
-			editorContext.text = "var a = function reDef() { var b = function reDef(){}; }; reDef();";
+			editorContext.text = "var a = function reDef() { var b = function reDef(){}; };";
 			return occurrences.computeOccurrences(editorContext, setContext(17, 17)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:17, end:22}, {start:58, end:63}]);
+					assertOccurrences(results, [{start:17, end:22}]);
 				}
 				finally {
 					tearDown();
@@ -1394,7 +1394,7 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438317
 		 */
 		it('test_redefineScopesFuncExpr2', function() {
-			editorContext.text = "var a = function reDef() { var b = function reDef(){}; }; reDef();";
+			editorContext.text = "var a = function reDef() { var b = function reDef(){}; };";
 			return occurrences.computeOccurrences(editorContext, setContext(44, 44)).then(function(results) {
 				try {
 					assertOccurrences(results, [{start:44, end:49}]);
@@ -1407,13 +1407,14 @@ define([
 		
 		/**
 		 * Tests that occurrences with redefines are only marked inside appropriate scopes
+		 * As the selected 'reDef' isn't defined in the program scope, we assume it belongs to the global scope
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438317
 		 */
 		it('test_redefineScopesFuncExpr3', function() {
 			editorContext.text = "var a = function reDef() { var b = function reDef(){}; }; reDef();";
 			return occurrences.computeOccurrences(editorContext, setContext(63, 63)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:17, end:22}, {start:58, end:63}]);
+					assertOccurrences(results, [{start:17, end:22}, {start:44, end:49}, {start:58, end:63}]);
 				}
 				finally {
 					tearDown();
@@ -2068,7 +2069,7 @@ define([
 			editorContext.text = "var a; log(a); var x = function a(){ log(a); var y = function a(){ log(a); }; };";
 			return occurrences.computeOccurrences(editorContext, setContext(11, 11)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:4, end:5}, {start:11, end:12},  {start:32, end:33}]);
+					assertOccurrences(results, [{start:4, end:5}, {start:11, end:12}]);
 				}
 				finally {
 					tearDown();
@@ -2084,7 +2085,7 @@ define([
 			editorContext.text = "var a; log(a); var x = function a(){ log(a); var y = function a(){ log(a); }; };";
 			return occurrences.computeOccurrences(editorContext, setContext(32, 32)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:4, end:5}, {start:11, end:12},  {start:32, end:33}]);
+					assertOccurrences(results, [{start:32, end:33}, {start:41, end:42}]);
 				}
 				finally {
 					tearDown();
@@ -2100,7 +2101,7 @@ define([
 			editorContext.text = "var a; log(a); var x = function a(){ log(a); var y = function a(){ log(a); }; };";
 			return occurrences.computeOccurrences(editorContext, setContext(41, 42)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:41, end:42}, {start:62, end:63}, {start:71, end:72}]);
+					assertOccurrences(results, [{start:32, end:33}, {start:41, end:42}]);
 				}
 				finally {
 					tearDown();
@@ -2117,7 +2118,7 @@ define([
 			editorContext.text = "var a; log(a); var x = function a(){ log(a); var y = function a(){ log(a); }; };";
 			return occurrences.computeOccurrences(editorContext, setContext(63, 63)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:41, end:42}, {start:62, end:63}, {start:71, end:72}]);
+					assertOccurrences(results, [{start:62, end:63}, {start:71, end:72}]);
 				}
 				finally {
 					tearDown();
@@ -2133,7 +2134,7 @@ define([
 			editorContext.text = "var a; log(a); var x = function a(){ log(a); var y = function a(){ log(a); }; };";
 			return occurrences.computeOccurrences(editorContext, setContext(72, 72)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:41, end:42}, {start:62, end:63}, {start:71, end:72}]);
+					assertOccurrences(results, [{start:62, end:63}, {start:71, end:72}]);
 				}
 				finally {
 					tearDown();
