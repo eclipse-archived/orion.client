@@ -21,7 +21,7 @@ define([
 ], function(Validator, chai, Deferred, Esprima, ASTManager) {
 	var assert = chai.assert;
 
-	describe('Content Assist Tests', function() {
+	describe('Validator Tests', function() {
 		
 		/**
 		 * @description Sets up the test

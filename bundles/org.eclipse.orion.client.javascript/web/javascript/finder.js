@@ -530,6 +530,10 @@ define([
 					 */
 					enter: function(node) {
 						if(node.type && node.range) {
+						    if(!next && node.type === Estraverse.Syntax.Program && offset < node.range[0]) {
+						        //https://bugs.eclipse.org/bugs/show_bug.cgi?id=447454
+						        return Estraverse.VisitorOption.Break;
+						    }
 							//only check nodes that are typed, we don't care about any others
 							if(node.range[0] <= offset) {
 								found = node;
