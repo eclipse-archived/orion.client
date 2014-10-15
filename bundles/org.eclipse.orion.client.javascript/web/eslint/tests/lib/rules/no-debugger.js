@@ -10,13 +10,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env amd, node, mocha*/
-(function(root, factory) {
-	if (typeof exports === "object") {//$NON-NLS-0$
-		module.exports = factory(require, exports, module, require("assert"), require("../../../lib/eslint"));
-	} else if(typeof define === "function" && define.amd) { //$NON-NLS-0$
-		define(["require", "exports", "module", "chai/chai", "eslint"], factory);
-	}
-}(this, function(require, exports, module, assert, eslint) {
+define([
+"chai/chai", 
+"eslint"
+], function(assert, eslint) {
 	assert = assert.assert /*chai*/ || assert;
 
 	var RULE_ID = "no-debugger";
@@ -95,4 +92,4 @@
 			assert.equal(messages[0].node.type, "DebuggerStatement");
 		});
 	});
-}));
+});
