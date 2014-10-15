@@ -219,7 +219,7 @@ Once the config entries are set, you can fetch the branches and change sets.
 
 <pic>
 
-You can also fetch from the Incoming section in the Commits area.
+You can also fetch changes from the Incoming section in the Commits area.
 
 <pic>
 
