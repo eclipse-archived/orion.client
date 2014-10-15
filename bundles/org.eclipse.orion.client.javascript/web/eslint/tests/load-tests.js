@@ -42,7 +42,8 @@ define([
 'eslint/tests/lib/rules/no-fallthrough',
 'eslint/tests/lib/rules/no-jslint',
 'eslint/tests/lib/rules/no-empty-block',
-'eslint/tests/lib/rules/valid-typeof'
+'eslint/tests/lib/rules/valid-typeof',
+'eslint/tests/lib/rules/no-sparse-arrays'
 ], function() {
 	// exports are ignored
 });

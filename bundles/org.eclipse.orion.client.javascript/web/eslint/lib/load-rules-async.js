@@ -38,11 +38,12 @@ define([
 	'eslint/rules/no-fallthrough',
 	'eslint/rules/no-jslint',
 	'eslint/rules/no-empty-block',
-	'eslint/rules/valid-typeof'
+	'eslint/rules/valid-typeof',
+	'eslint/rules/no-sparse-arrays'
 ], function(curly, eqeqeq, missing_doc, new_parens, no_debugger, no_dupe_keys, no_eval,
 		no_extra_semi, no_new_array, no_new_func, no_new_object, no_new_wrappers, no_redeclare,
 		no_undef, no_unused_params, no_unused_vars, no_use_before_define, semi, throw_error, use_isnan,
-		no_unreachable, no_fallthrough, no_jslint, no_empty_block, valid_typeof) {
+		no_unreachable, no_fallthrough, no_jslint, no_empty_block, valid_typeof, no_sparse_arrays) {
 		    
      var rules = {
         "curly" : {rule: curly, description: 'Require curly braces for all control statements'},
@@ -69,7 +70,8 @@ define([
 		'no-fallthrough' : {rule: no_fallthrough, description: 'Warn when a switch case falls through'},
 		'no-jslint': {rule: no_jslint, description: 'Warn when the jslint/jshint directive is used'},
 		'no-empty-block' : {rule: no_empty_block, description: 'Warn when a code block is empty'},
-		'valid-typeof' : {rule: valid_typeof, description: 'Warn when incorrectly comparing the result of a typeof expression'}
+		'valid-typeof' : {rule: valid_typeof, description: 'Warn when incorrectly comparing the result of a typeof expression'},
+		'no-sparse-arrays': {rule: no_sparse_arrays, description: 'Warn when sparse arrays are defined'}
     };
     
     /**

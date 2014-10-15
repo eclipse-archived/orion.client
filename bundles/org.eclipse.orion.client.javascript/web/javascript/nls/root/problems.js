@@ -30,6 +30,7 @@ define({
 	'no-new-object' : 'Use the object literal notation \'{}\' or Object.create(null).', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-wrappers' : 'Do not use \'${0}\' as a constructor.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-redeclare' : '\'${0}\' is already defined.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-sparse-arrays': 'Sparse array declarations should be avoided.',  //$NON-NLS-0$ //$NON-NLS-1$
 	'no-undef-defined' : '\'${0}\' is undefined.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-undef-readonly': '\'${0}\' is readonly.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'no-unreachable' : 'Unreachable code.', //$NON-NLS-0$  //$NON-NLS-1$

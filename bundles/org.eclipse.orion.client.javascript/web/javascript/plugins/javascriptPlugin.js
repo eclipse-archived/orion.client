@@ -165,7 +165,7 @@ define([
 					nls: 'javascript/nls/messages',  //$NON-NLS-0$
 					nameKey: 'eslintValidator',  //$NON-NLS-0$
 					tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
-					category: "java script",  //$NON-NLS-0$
+					category: "javascript",  //$NON-NLS-0$
 					properties: [
 						{
 							id: "no-new-array", //$NON-NLS-0$
@@ -265,6 +265,12 @@ define([
 							nameKey: 'docFuncExpr',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
 							defaultValue: ignore,
+							options: severities
+						},
+						{	id: "validate_no_sparse_arrays",  //$NON-NLS-0$
+							nameKey: 'noSparseArrays',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: warning,
 							options: severities
 						},
 						{	id: "validate_curly",  //$NON-NLS-0$

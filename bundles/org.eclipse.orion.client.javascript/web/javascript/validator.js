@@ -44,7 +44,8 @@ define([
 			'no-unreachable': 2,  //$NON-NLS-0$
 			'no-fallthrough' : 2,  //$NON-NLS-0$
 			'no-empty-block' : 0,  //$NON-NLS-0$
-			'valid-typeof': 2  //$NON-NLS-0$
+			'valid-typeof': 2,  //$NON-NLS-0$
+			'no-sparse-arrays': 1  //$NON-NLS-0$
 		},
 		/**
 		 * @description Sets the given rule to the given enabled value
@@ -341,6 +342,7 @@ define([
 			config.setOption("no-jslint", properties.validate_no_jslint); //$NON-NLS-0$
 			config.setOption("no-empty-block", properties.validate_no_empty_block); //$NON-NLS-0$
 			config.setOption("valid-typeof", properties.validate_typeof); //$NON-NLS-0$
+			config.setOption("no-sparse-arrays", properties.validate_no_sparse_arrays); //$NON-NLS-0$
 		}
 	});
 	return ESLintValidator;

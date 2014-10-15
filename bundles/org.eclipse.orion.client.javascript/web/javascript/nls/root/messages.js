@@ -44,5 +44,6 @@ define({
 	'throwError': 'Non-Error used in \'throw\':',  //$NON-NLS-0$  //$NON-NLS-1$
 	'generateDocName' : 'Generate Element Comment',  //$NON-NLS-0$  //$NON-NLS-1$
 	'generateDocTooltip' : 'Generate a JSDoc-like comment for the selected JavaScript element',  //$NON-NLS-0$  //$NON-NLS-1$
-	'validTypeof': 'Invalid \'typeof\' comparison'  //$NON-NLS-0$ //$NON-NLS-1$
+	'validTypeof': 'Invalid \'typeof\' comparison',  //$NON-NLS-0$ //$NON-NLS-1$
+	'noSparseArrays': 'Sparse array declarations', //$NON-NLS-0$ //$NON-NLS-1$
 });
