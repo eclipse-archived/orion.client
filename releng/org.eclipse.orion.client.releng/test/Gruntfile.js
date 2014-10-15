@@ -39,8 +39,8 @@
 module.exports = function(grunt) {
 	var orionClient = __dirname + "/",
 		packageRoot = __dirname + "/";
-	var _path = require("path"),
-	    _url = require("url"),
+	var nodePath = require("path"),
+	    nodeUrl = require("url"),
 	    archiver = require("archiver"),
 	    fmt = require("util").format,
 	    nodeutil = require("util"),
@@ -59,7 +59,7 @@ module.exports = function(grunt) {
 
 	grunt.initConfig({
 		pkg: pkg,
-		buildId: env.BUILD_ID || new Date().toISOString(),
+		buildId: env.JOB_NAME ? nodeutil.format("%s #%s", env.JOB_NAME, env.BUILD_NUMBER) : new Date().toISOString(),
 		protocol: "http",
 		hostname: env.VCAP_APP_HOST || "127.0.0.1",
 		port: env.VCAP_APP_PORT || 9999,
@@ -89,23 +89,11 @@ module.exports = function(grunt) {
 		curl: {
 			long: {
 				src: "https://raw.githubusercontent.com/nodeca/pako/master/dist/pako.js",
-				dest: _path.join(orionClient, "bundles/org.eclipse.orion.client.core/web/pako/pako.js")
+				dest: nodePath.join(orionClient, "bundles/org.eclipse.orion.client.core/web/pako/pako.js")
 			}
 		},
 		"saucelabs-mocha": {
-			all: {
-				options: {
-					// `urls` is set later
-					tunneled: "<%= tunnel %>",
-					tunnelTimeout: 10,
-					build: pkg.buildId,
-					browsers: pkg.browsers,
-					testname: env.BUILD_NAME || "mocha client",
-					tags: [env.BUILD_TAG || "master"],
-					onTestComplete: onTestComplete,
-					maxRetries: 1, // retry once on timeout
-				}
-			}
+			// Will be filled in dynamically
 		},
 	});
 
@@ -116,15 +104,27 @@ module.exports = function(grunt) {
 		}
 	});
 
-	// Configure tasks
-	grunt.config("saucelabs-mocha.all.options.urls", pkg.urls.map(function(url) {
-		return _url.format({
+	// Inject an individual target under 'saucelabs-mocha' for each suite.
+	pkg.urls.forEach(function(url) {
+		var suiteURL = nodeUrl.format({
 			protocol: grunt.config.get("protocol"),
 			hostname: grunt.config.get("appHostname"),
 			port: grunt.config.get("appPort"),
 			pathname: url
 		});
-	}));
+		var suiteURLShort = url.replace(/\./g, "_") ;
+		grunt.config("saucelabs-mocha." + suiteURLShort + ".options", {
+			tunneled: grunt.config.get("tunnel"),
+			tunnelTimeout: 10,
+			build: grunt.config.get("buildId"),
+			browsers: pkg.browsers,
+			tags: [env.BUILD_TAG || "master"], // FIXME tags seem to be ignored
+			onTestComplete: onTestComplete,
+			maxRetries: 1, // retry once on timeout
+			testname: suiteURLShort,
+			urls: [suiteURL],
+		});
+	});
 
 	// Register tasks
 	grunt.registerTask("check", "Check prerequisites", function() {
@@ -207,7 +207,7 @@ module.exports = function(grunt) {
 			xunitReport = nicerName(xunitReport, sauceResult, testurl);
 			grunt.verbose.ok();
 
-			grunt.file.write(_path.join(results, filename), xunitReport);
+			grunt.file.write(nodePath.join(results, filename), xunitReport);
 			testFilenames.push(filename);
 			grunt.verbose.ok();
 			callback(undefined, true /*job pass*/);
