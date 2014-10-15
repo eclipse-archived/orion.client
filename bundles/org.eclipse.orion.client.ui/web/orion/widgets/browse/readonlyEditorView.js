@@ -186,10 +186,10 @@ define([
 				}
 				that.updateAnnotation(editor, start, end, highlightRange);
 				var lineIndex = textModel.getLineAtOffset(start);
+				var moveTo = textModel.getLineStart(lineIndex);
 				if(lineIndex > 0) {
 					lineIndex--;
 				}
-				var moveTo = textModel.getLineEnd(lineIndex);
 				this.moveSelection(moveTo, moveTo, function(){
 					var line = textView._getLineNode(lineIndex);
 					line.scrollIntoView(true);
