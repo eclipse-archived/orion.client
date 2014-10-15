@@ -457,7 +457,7 @@ define([
 			}
 			var messageContent = document.createElement("div");
 			var segments = mUrlUtils.detectValidURL(message);
-			if (segments) {
+			if (segments && segments.length > 0) {
 				mUrlUtils.processURLSegments(messageContent, segments);				
 			} else {
 				messageContent.appendChild(document.createTextNode(message));
