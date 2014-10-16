@@ -333,6 +333,7 @@ define({
 	"Push All": "Push All", //$NON-NLS-0$  //$NON-NLS-1$
 	"PushCommitsTagsFrmLocal": "Push commits and tags from your local branch into the remote branch", //$NON-NLS-0$  //$NON-NLS-1$
  	"Push Branch": "Push Branch", //$NON-NLS-0$  //$NON-NLS-1$
+ 	"PushResult": "Push Result:", //$NON-NLS-0$  //$NON-NLS-1$
  	"PushCommitsWithoutTags": "Push commits without tags from your local branch into the remote branch", //$NON-NLS-0$  //$NON-NLS-1$
  	"Push for Review": "Push for Review", //$NON-NLS-0$  //$NON-NLS-1$
 	"Push commits to Gerrit Code Review": "Push commits to Gerrit Code Review", //$NON-NLS-0$  //$NON-NLS-1$
@@ -495,7 +496,7 @@ define({
 	"Successfully added ${0} with value ${1}":"Successfully added ${0} with value ${1}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Signed-off-by: ":"Signed-off-by: ", //$NON-NLS-0$  //$NON-NLS-1$
 	"Change-Id: ":"Change-Id: ", //$NON-NLS-0$  //$NON-NLS-1$
-	"REJECTED_NONFASTFORWARD":"Push is non-fastforward and was rejected. Use Fetch to see new commits that must be merged.", //$NON-NLS-0$  //$NON-NLS-1$
+	"Push_REJECTED_NONFASTFORWARD":"Push is non-fastforward and was rejected. Use Fetch to see new commits that must be merged.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Commit and Push" : "Commit and Push", //$NON-NLS-0$  //$NON-NLS-1$
 	"Sync" : "Sync", //$NON-NLS-0$  //$NON-NLS-1$
 	"SyncTooltip" : "Fetch from the remote branch. Rebase your commits by removing them from the local branch, starting the local branch again based on the latest state of the remote branch and applying each commit to the updated local branch. Push commits and tags from your local branch into the remote branch.", //$NON-NLS-0$  //$NON-NLS-1$

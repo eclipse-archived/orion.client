@@ -139,6 +139,26 @@ define([
 						function(jsonData){
 							handleGitServiceResponse(jsonData, serviceRegistry, 
 								function() {
+									if (!jsonData.HttpCode) {
+										var display = {};
+										display.HTML = true;
+										display.Severity = jsonData.Severity || "Error"; //$NON-NLS-0$
+										var result = jsonData.Updates.length ? "<b>" +  messages["PushResult"] + "</b>\n" : ""; //$NON-NLS-0$ //$NON-NLS-1$
+										result += "<table class=\"gitPushUpdates\">"; //$NON-NLS-0$
+										jsonData.Updates.forEach(function (update) {
+											var message = update.Message || messages["Push_" + update.Result] || "";
+											result += "<tr>"; //$NON-NLS-0$
+											result += "<td>[" +  update.Result +"]</td><td><b>" + update.LocalName + " => " + update.RemoteName + "</b></td><td>" + message + "</td>"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+											result += "</tr>"; //$NON-NLS-0$
+										});
+										result += "</table>"; //$NON-NLS-0$
+										if (jsonData.Message) {
+											result +=  "<pre class=\"gitPushMessage\">" + jsonData.Message + "</pre>"|| ""; //$NON-NLS-0$ //$NON-NLS-1$
+										}
+										display.Message = "<span class=\"gitPushResult\">" + result + "</span>"; //$NON-NLS-0$ //$NON-NLS-1$
+										serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+									} 
+									
 									if (itemTargetBranch && !itemTargetBranch.Id) {
 										gitService.getGitBranch(itemTargetBranch.Location).then(function(remote) {
 											objects.mixin(itemTargetBranch, remote);
