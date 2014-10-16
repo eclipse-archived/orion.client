@@ -18,7 +18,7 @@ define([
 	var assert = chai.assert;
 	var validator = new CssValidator();
 
-	describe("CSS validator", function() {
+	describe("CSS Validator Tests", function() {
 		var context = {
 			text: "",
 			/**
@@ -35,18 +35,277 @@ define([
 		beforeEach(function() {
 			context.text = "";
 		});
+		
+		
+		/**
+    	 * @name assertProblems
+    	 * @description Compares the computed problem set against the expected ones
+    	 * @param {Array.<orion.Problem>} computed The computed set of problems
+    	 * @param {Array.<Object>} expected The expected set of problems
+    	 */
+    	function assertProblems(computed, expected) {
+    	    var problems = computed.problems;
+    	    assert.equal(problems.length, expected.length, "The wrong number of problems was computed");
+    	    for(var i = 0; i < problems.length; i++) {
+    	        var pb = problems[i];
+    	        var expb = expected[i];
+    	        assert.equal(pb.start, expb.start, "Wrong problem start");
+    	        assert.equal(pb.end, expb.end, "Wrong problem end");
+    	        assert.equal(pb.line, expb.line, "Wrong problem line number");
+    	        assert.equal(pb.description, expb.description, "Wrong problem message");
+    	        assert.equal(pb.severity, expb.severity, "Wrong problem severity");
+    	        if(pb.descriptionArgs) {
+    	            assert(expb.descriptionArgs, "Missing expected description arguments");
+    	            assert.equal(pb.descriptionArgs.nls, expb.descriptionArgs.nls, "Missing NLS description argument key");
+    	        }
+    	    }
+	    }
 
 		/**
-		 * Tests a bad property decl
+		 * Test common csslint problems. Tests a bad property decl
 		 */
-		it("should flag a bad property decl", function(/*done*/) {
+		it("Test common csslint problems: unknown property", function(/*done*/) {
 			context.text = "h1:{f: 22px}";
 			return validator.computeProblems(context).then(function(result) {
-				var problems = result.problems;
-				assert(problems != null, 'There should be CSS problems');
-				assert(problems.length === 1, 'There should only be one CSS problem');
-				assert.equal(problems[0].description, 'Unknown property \'f\'.', 'problem text is wrong');
+				assertProblems(result, [
+				    {start: 5,
+				     end: 17,
+				     line: 1,
+				     severity: 'warning',
+				     description: 'Unknown property \'f\'.',
+				    }
+				]);
 			});
 		});
+		
+		/**
+		 * Test common csslint problems. Tests a duplicate property
+		 * TODO This problem will extend to the end of the line, including any whitespace
+		 */
+		it("Test common csslint problems: duplicate property", function(/*done*/) {
+			context.text = "h2:{border: 0; border: 0;}";
+			return validator.computeProblems(context).then(function(result) {
+				assertProblems(result, [
+				    {start: 16,
+				     end: 42,
+				     line: 1,
+				     severity: 'warning',
+				     description: 'Duplicate property \'border\' found.',
+				    }
+				]);
+			});
+		});
+		
+		/**
+		 * Test common csslint problems. Tests an empty rule
+		 */
+		it("Test common csslint problems: empty rule", function(/*done*/) {
+			context.text = "h3:{}";
+			return validator.computeProblems(context).then(function(result) {
+				assertProblems(result, [
+				    {start: 1,
+				     end: 6,
+				     line: 1,
+				     severity: 'warning',
+				     description: 'Rule is empty.',
+				    }
+				]);
+			});
+		});
+		
+		/**
+		 * Test csslint parsing errors. Missing end of rule brace
+		 * TODO csslint returns two identical parsing errors in this case
+		 */
+		it("Test csslint parsing errors: Missing end of rule brace", function(/*done*/) {
+			context.text = "h3:{";
+			return validator.computeProblems(context).then(function(result) {
+				assertProblems(result, [
+				    {start: 5,
+				     end: 9,
+				     line: 1,
+				     severity: 'error',
+				     description: 'Expected RBRACE at line 1, col 5.',
+				    },
+				    {start: 5,
+				     end: 9,
+				     line: 1,
+				     severity: 'error',
+				     description: 'Expected RBRACE at line 1, col 5.',
+				    }
+				]);
+			});
+		});
+		
+		/**
+		 * Test csslint parsing errors. Unexpected brace token
+		 */
+		it("Test csslint parsing errors: Unexpected brace token", function(/*done*/) {
+			context.text = "h3:{border: 0}}";
+			return validator.computeProblems(context).then(function(result) {
+				assertProblems(result, [
+				    {start: 15,
+				     end: 30,
+				     line: 1,
+				     severity: 'error',
+				     description: 'Unexpected token \'}\' at line 1, col 15.',
+				    }
+				]);
+			});
+		});	
+		
+		/**
+		 * Test csslint parsing errors. Fatal error missing string
+		 */
+		it("Test csslint parsing errors: Fatal error missing string", function(/*done*/) {
+			context.text = "@import ;";
+			return validator.computeProblems(context).then(function(result) {
+				assertProblems(result, [
+				    {start: 9,
+				     end: 18,
+				     line: 1,
+				     severity: 'error',
+				     description: 'Fatal error, cannot continue: Expected STRING at line 1, col 9.',
+				    }
+				]);
+			});
+		});	
+		
+		/**
+		 * Test embedded rulset. False to ignore
+		 */
+		it("Test embedded ruleset: False to ignore", function(/*done*/) {
+			context.text = "/*csslint empty-rules:false*/\nh3:{}";
+			return validator.computeProblems(context).then(function(result) {
+				assertProblems(result, []);
+			});
+		});	
+		
+		/**
+		 * Test embedded rulset. True to error
+		 */
+		it("Test embedded ruleset: True to error", function(/*done*/) {
+			context.text = "/*csslint empty-rules:true*/\nh3:{}";
+			return validator.computeProblems(context).then(function(result) {
+				assertProblems(result, [
+				    {start: 1,
+				     end: 6,
+				     line: 2,
+				     severity: 'error',
+				     description: 'Rule is empty.',
+				    }
+				]);
+			});
+		});	
+		
+		/**
+		 * Test embedded rulset. 0 to ignore
+		 */
+		it("Test embedded ruleset: 0 to ignore", function(/*done*/) {
+			context.text = "/*csslint empty-rules:0*/\nh3:{}";
+			return validator.computeProblems(context).then(function(result) {
+				assertProblems(result, []);
+			});
+		});	
+		
+		/**
+		 * Test embedded rulset. 1 to warn
+		 */
+		it("Test embedded ruleset: 1 to warn", function(/*done*/) {
+			context.text = "/*csslint empty-rules:1*/\nh3:{}";
+			return validator.computeProblems(context).then(function(result) {
+				assertProblems(result, [
+				    {start: 1,
+				     end: 6,
+				     line: 2,
+				     severity: 'warning',
+				     description: 'Rule is empty.',
+				    }
+				]);
+			});
+		});	
+		
+		/**
+		 * Test embedded rulset. 2 to error
+		 */
+		it("Test embedded ruleset: 2 to error", function(/*done*/) {
+			context.text = "/*csslint empty-rules:2*/\nh3:{}";
+			return validator.computeProblems(context).then(function(result) {
+				assertProblems(result, [
+				    {start: 1,
+				     end: 6,
+				     line: 2,
+				     severity: 'error',
+				     description: 'Rule is empty.',
+				    }
+				]);
+			});
+		});	
+		
+		/**
+		 * Test embedded rulset. Allow whitespace
+		 */
+		it("Test embedded ruleset: Allow whitespace", function(/*done*/) {
+			context.text = "/*       csslint empty-rules:2      */\nh3:{}";
+			return validator.computeProblems(context).then(function(result) {
+				assertProblems(result, [
+				    {start: 1,
+				     end: 6,
+				     line: 2,
+				     severity: 'error',
+				     description: 'Rule is empty.',
+				    }
+				]);
+			});
+		});	
+		
+		/**
+		 * Test embedded rulset. Allow multiple rules
+		 */
+		it("Test embedded ruleset: Allow multiple rules", function(/*done*/) {
+			context.text = "/*csslint empty-rules:2,duplicate-properties:true*/\nh1:{}\nh2:{border: 0; border: 0}";
+			return validator.computeProblems(context).then(function(result) {
+				assertProblems(result, [
+				    {start: 1,
+				     end: 6,
+				     line: 2,
+				     severity: 'error',
+				     description: 'Rule is empty.',
+				    },
+				    {start: 16,
+				     end: 41,
+				     line: 3,
+				     severity: 'error',
+				     description: 'Duplicate property \'border\' found.',
+				    }
+				]);
+			});
+		});
+		
+		/**
+		 * Test embedded rulset. Ignore multiple embedded rulesets
+		 */
+		it("Test embedded ruleset: Ignore multiple embedded rulesets", function(/*done*/) {
+			context.text = "/*csslint empty-rules:2*/\n/*duplicate-properties:true*/\nh1:{}\nh2:{border: 0; border: 0}";
+			return validator.computeProblems(context).then(function(result) {
+				assertProblems(result, [
+				    {start: 1,
+				     end: 6,
+				     line: 3,
+				     severity: 'error',
+				     description: 'Rule is empty.',
+				    },
+				    {start: 16,
+				     end: 41,
+				     line: 4,
+				     severity: 'warning',
+				     description: 'Duplicate property \'border\' found.',
+				    }
+				]);
+			});
+		});
+		
+		// TODO Tests for user settings and that embedded rulesets override user settings
+		
 	});
 });
