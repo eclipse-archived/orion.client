@@ -31,8 +31,7 @@ define ([
 				if (providerImpl && providerImpl.computeHoverInfo) {
 					var editorContext = EditorContext.getEditorContext(this.serviceRegistry);
 					var promise = providerImpl.computeHoverInfo(editorContext, context);
-					hoverInfo.push({title: provider._properties.tipTitle,
-									promise: promise,
+					hoverInfo.push({promise: promise,
 									renderMarkDown: renderMarkDown});
 				}
 			}.bind(this));

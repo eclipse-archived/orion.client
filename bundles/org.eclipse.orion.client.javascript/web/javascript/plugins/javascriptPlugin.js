@@ -125,7 +125,6 @@ define([
 	 */
 	provider.registerService("orion.edit.hover", new Hover.JavaScriptHover(astManager),  //$NON-NLS-0$
 		{
-		    tipTitle: 'JavaScript',
 		    name: 'JavaScript Hover Provider',
 			contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
 	});
