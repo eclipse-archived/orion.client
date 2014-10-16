@@ -28,12 +28,6 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 	var hideMessage = mWizardUtils.defaultHideMessage;
 	var showError = mWizardUtils.defaultShowError;
 	
-	/* generates a random cf-launcher authentication password */
-	function getRandomPassword(length){
-		length = length || 8;
-		return Math.random().toString(36).slice(-length);
-	}
-	
 	mBootstrap.startup().then(function(core) {
 		
 		/* set up initial message */
@@ -94,8 +88,12 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				});
 				
 			}, function(error){
+				
 				if(clouds.length === 0)
-					return d.reject(error);
+					return d.reject({
+						error: error,
+						target: target
+					});
 				
 				var dp = getDefaultNonEmptyTarget(clouds);
 				dp.then(d.resolve, d.reject);
@@ -198,13 +196,13 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    			
 		    			var message = "<p>Click <b>\"Deploy\"</b> to proceed or <b>\"Next\"</b> to change the deployment parameters.</p>";
 		    			
-		    			/*var message = i18nUtil.formatMessage(messageTemplate, manifestApplication.name,
-		    					space.Name, org.Name, defaultTarget.Name || defaultTarget.Url || target.Name || target.Url);*/
-		    			
 		    			var messageDiv = document.getElementById("confirmationMessage");
 			    		messageDiv.innerHTML = message;
 		    			
 		    		}, function(err){
+		    			
+		    			var error = err.error;
+		    			var target = err.target;
 		    			handleError(error, target, function(){ return page0.render(); });
 		    		});
 		    	},
@@ -265,9 +263,6 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    var page2 = servicesPageBuilder.build();
 		    var page3 = additionalParamPageBuilder.build();
 		    
-		    /* shared instance of random cf-launcher password */
-		    var _cfLauncherPassword;
-		    
 			var wizard = new Wizard.Wizard({
 				parent: "wizard",
 				pages: [page0, page1, page2, page3],
@@ -285,6 +280,12 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						
 						if(corePageBuilder._spacesDropdown)
 							corePageBuilder._spacesDropdown.disabled = true;
+						
+						if(debugPaneBuilder._cfLauncherPassword)
+							debugPaneBuilder._cfLauncherPassword.disabled = true;
+						
+						if(debugPaneBuilder._cfLauncherURLPrefix)
+							debugPaneBuilder._cfLauncherURLPrefix.disabled = true;
 					},
 					
 					postMsg : postMsg,
@@ -323,19 +324,15 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			    		var instrumentation = {};
 			    		var app = manifest.applications[0];
 			    		
-			    		_cfLauncherPassword = getRandomPassword();
-			    		var command = i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} -- ${1}", _cfLauncherPassword, app.command);
+			    		var password = debugPaneBuilder._cfLauncherPassword.value;
+			    		var userURLPrefix = debugPaneBuilder._cfLauncherURLPrefix.value;
+			    		
+			    		var command = userURLPrefix ?
+			    				i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} --urlprefix ${1} -- ${2}", password, userURLPrefix, app.command)
+			    				: i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} -- ${1}", password, app.command);
+			    		
 			    		instrumentation.command = command;
 			    		return instrumentation;
-			    	},
-			    	
-			    	successCallback : function(){
-			    		var checkbox = debugPaneBuilder._debugCheckbox;
-			    		var debugEnabled = checkbox ? checkbox.checked : false;
-			    		if(!debugEnabled)
-			    			return;
-			    		
-			    		alert(i18nUtil.formatMessage("Cf-launcher password: ${0}", _cfLauncherPassword));
 			    	},
 			    	
 			    	Manifest : plan.Manifest,

@@ -117,9 +117,6 @@ define(['orion/objects', 'cfui/cfUtil'], function(objects, mCfUtil){
 				var editLocation = new URL("../edit/edit.html#" + contentLocation, window.location.href);
 				cfService.pushApp(selection, null, decodeURIComponent(contentLocation + appPath), manifest, saveManifest, packager, instrumentation).then(function(result){
 					
-					if(options.successCallback)
-						options.successCallback();
-					
 					var launchConfigurationContent = mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation);
 					postMsg(launchConfigurationContent);
 					

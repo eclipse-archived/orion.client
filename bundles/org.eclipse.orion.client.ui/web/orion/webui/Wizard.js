@@ -183,9 +183,10 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects){
 				if(setValid) setValid(valid);
 			}.bind(this));
 			if(this.commonPane){
+				var self = this;
 				this.commonPane.validate(function(valid){
 					if(!valid){
-						this._setButtonEnabled(this.okButton, false);						
+						self._setButtonEnabled(self.okButton, false);						
 					}
 				});
 			}

@@ -32,9 +32,32 @@ define(['orion/webui/Wizard'], function(mWizard){
 			
 			var self = this;
 			return new mWizard.WizardPage({
-		    	template: '<div class="manifest formTable" id="debug"></div><div class="manifest formTable" id="manifest"></div>',
+		    	template: '<div class="manifest formTable" id="debug"></div>' +
+		    		'<table class="formTable">'+
+						'<tr>'+
+							'<td id="cfPasswordLabel" class="label"></td>'+
+							'<td id="cfPassword" class="selectCell"></td>'+
+						'</tr>'+
+						'<tr>'+
+							'<td id="cfUrlPrefixLabel" class="label"></td>'+
+							'<td id="cfUrlPrefix" class="selectCell"></td>'+
+						'</tr>'+
+					'</table>' +
+					'<div class="manifest formTable" id="manifest"></div>',
+					
+				validate: function(callback){
+					var checkbox = self._debugCheckbox;
+			    	var debugEnabled = checkbox ? checkbox.checked : false;
+					if(!debugEnabled)
+						return callback(true);
+						
+					var cfLauncherPassword = self._cfLauncherPassword.value;
+					return callback(cfLauncherPassword && cfLauncherPassword.length > 0);
+				},
+		    		
 		    	render: function(){
 		    		
+		    		var gandalfthewhite = this.wizard;
 		    		var manifestElement = document.getElementById("manifest");
 		    		var saveManifestCheckbox = document.createElement("input");
 		    		
@@ -64,13 +87,54 @@ define(['orion/webui/Wizard'], function(mWizard){
 					
 					var label = document.createElement("label");
 					label.className = "manifestLabel";
-					label.innerHTML = "Debug with <a href=\"https://www.npmjs.org/package/cf-launcher\">cf-launcher</a>";
+					label.innerHTML = "Debug with <a href=\"https://www.npmjs.org/package/cf-launcher\">cf-launcher</a>:";
 					debugElement.appendChild(label);
+					
+					var cfPasswordLabel = document.getElementById("cfPasswordLabel");
+					var passwordLabel = document.createTextNode("Password: ");
+					cfPasswordLabel.appendChild(passwordLabel);
+					
+					var cfPassword = document.getElementById("cfPassword");
+					var passwordInput = document.createElement("input");
+					self._cfLauncherPassword = passwordInput;
+					
+					passwordInput.type = "password";
+					passwordInput.disabled = true;
+					passwordInput.placeholder = "Required to prevent random access to cf-launcher";
+					cfPassword.appendChild(passwordInput);
+					
+					var cfUrlPrefixLabel = document.getElementById("cfUrlPrefixLabel");
+					var urlLabel = document.createTextNode("URL Prefix: ");
+					cfUrlPrefixLabel.appendChild(urlLabel);
+					
+					var cfUrlPrefix = document.getElementById("cfUrlPrefix");
+					
+					var urlInput = document.createElement("input");
+					self._cfLauncherURLPrefix = urlInput;
+					
+					urlInput.placeholder = "Leave blank for default /launcher";
+					urlInput.disabled = true;
+					
+					cfUrlPrefix.appendChild(urlInput);
+					
+					debugCheckbox.addEventListener("change", function(){
+						var enable = !debugCheckbox.checked;
+						passwordInput.disabled = enable;
+						urlInput.disabled = enable;
+						
+						gandalfthewhite.validate();
+					});
+					
+					passwordInput.addEventListener("keyup", function(){
+						gandalfthewhite.validate();
+					});
 		    	},
 		    	
 	    	getResults: function(){
 		    		return {
-		    			saveManifest : self._saveManifestCheckbox.checked
+		    			saveManifest : self._saveManifestCheckbox.checked,
+		    			cfLauncherPassword : self._cfLauncherPassword.value,
+		    			cfLauncherURLPrefix : self._cfLauncherURLPrefix.value
 		    		};
 		    	}
 		    });
