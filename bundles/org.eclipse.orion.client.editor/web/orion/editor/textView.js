@@ -5476,10 +5476,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return Math.max(0, this._viewDiv.clientHeight - viewPad.top - viewPad.bottom);
 		},
 		_getInnerRightWidth: function() {
-			var innerRightWidth = 0;
-			if (this._innerRightDiv) {
+			var innerRightWidth = this._innerRightDiv.rulerWidth;
+			if (innerRightWidth === undefined) {
 				var innerRightRect = this._innerRightDiv.getBoundingClientRect();
-				innerRightWidth = innerRightRect.right - innerRightRect.left;
+				this._innerRightDiv.rulerWidth = innerRightWidth = innerRightRect.right - innerRightRect.left;
 			}
 			return innerRightWidth;
 		},
@@ -7288,6 +7288,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				var overview = ruler.getOverview();
 				if (div.rulerChanged) {
 					applyStyle(ruler.getRulerStyle(), div);
+					divRuler.rulerWidth = undefined;
 				}
 				if (overview === "fixed") { //$NON-NLS-0$
 					div.rulerChanged = false;
