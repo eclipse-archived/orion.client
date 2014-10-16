@@ -272,7 +272,7 @@ define([
 		        //add on the wad of text for now
 		        hover += comment;
 		    }
-		    return {hover: hover, title: title, type:'markdown'};
+		    return {content: hover, title: title, type:'markdown'};
 		},
 		
 		/**

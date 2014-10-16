@@ -241,38 +241,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				deferredInfo.forEach(function(tipSection) {
 					tipSection.promise.then(function (data) {
 						if (data) {
-						    var sectionDiv = null;
-						    var divResult = null;
-							switch(data.type) {
-								case 'markdown': {
-									sectionDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
-									sectionDiv.innerHTML = (data.title ? tipSection.renderMarkDown(data.title) : tipSection.title);
-									tooltipContents.appendChild(sectionDiv);
-									divResult = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
-									divResult.innerHTML = tipSection.renderMarkDown(data.hover);
-									sectionDiv.appendChild(divResult);
-									break;
-								}
-								case 'proposal': {
-									sectionDiv = util.createElement(tooltipDoc, "button"); //$NON-NLS-0$
-									sectionDiv.textContent = (data.title ? data.title : tipSection.title);
-									tooltipContents.appendChild(sectionDiv);
-									
-									sectionDiv.addEventListener("click", function(e) {
-										self._view.setText(data.text, data.start, data.end);
-									});
-									break;
-								}
-								default: {
-									sectionDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
-									var title = data.title ? data.title : tipSection.title;
-									sectionDiv.innerHTML = title;
-									tooltipContents.appendChild(sectionDiv);
-									divResult = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
-									divResult.appendChild(tooltipDoc.createTextNode(data.hover));
-									sectionDiv.appendChild(divResult);
-								}
+							if (data.content) {
+								self._renderContent(tooltipDoc, tooltipContents, data, tipSection);
 							}
+
 							// Ensure that the tooltip is visible
 							tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
 						}
@@ -320,6 +292,53 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 						self._hide();
 					}, self._fadeDelay / 10);
 				}, self._autoHideDelay);
+			}
+		},
+		_renderContent: function(tooltipDoc, tooltipContents, data, tipSection) {
+		    var sectionDiv = null;
+		    var divResult = null;
+
+			// render the title, if any
+			if (data.title) {
+				sectionDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
+				sectionDiv.innerHTML = tipSection.renderMarkDown(data.title);
+				tooltipContents.appendChild(sectionDiv);
+			}
+							
+			switch(data.type) {
+				case 'markdown': {
+					if (data.content) {
+						divResult = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
+						divResult.innerHTML = tipSection.renderMarkDown(data.content);
+						sectionDiv.appendChild(divResult);
+					}
+					break;
+				}
+				case 'proposal': {
+						var params = data.content;
+						sectionDiv = util.createElement(tooltipDoc, "button"); //$NON-NLS-0$
+						sectionDiv.textContent = params.label;
+						tooltipContents.appendChild(sectionDiv);
+						
+						var self = this;
+						sectionDiv.addEventListener("click", function() {
+							self._view.setText(params.text, params.start, params.end);
+							self._hide();
+						});
+					break;
+				}
+				default: {
+					if (data.title) {
+						sectionDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
+						sectionDiv.textContent = data.title;
+					}
+					if (data.content) {
+						tooltipContents.appendChild(sectionDiv);
+						divResult = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
+						divResult.appendChild(tooltipDoc.createTextNode(data.content));
+						sectionDiv.appendChild(divResult);
+					}
+				}
 			}
 		},
 		_getAnnotationContents: function(annotations) {
