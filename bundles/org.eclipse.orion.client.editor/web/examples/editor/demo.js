@@ -233,7 +233,7 @@ define([
 
 	// Grab perf tests out of the global `mocha` object
 	mocha.suite.eachTest(function(test) {
-		tests["test" + test.title] = test.fn;
+		tests["test" + test.title] = test.fn; //$NON-NLS-0$
 	});
 
 	var prefix = "test"; //$NON-NLS-0$
