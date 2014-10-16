@@ -53,12 +53,16 @@ define(["orion/plugin", 'orion/editor/textModel'], function(PluginProvider, Text
 			}
 			if (curIndex > lineStart) {
 				var zeroIndex = curIndex;
-				return  {title: 'Remove unit specification', 
+				return  {
 					type: 'proposal',
-					text: '',
-					start: zeroIndex+1,
-					end: semiIndex};
-					}
+					content: {
+							label: 'Remove unit specification', 
+							text: '',
+							start: zeroIndex+1,
+							end: semiIndex
+						}
+					};
+			}
 		}
 		return null;
 	}
@@ -75,11 +79,15 @@ define(["orion/plugin", 'orion/editor/textModel'], function(PluginProvider, Text
 
 		var endIndex = this.textModel.getLineAtOffset(curIndex);
 		var end = this.textModel.getLineEnd(endIndex, true);
-		return  {title: 'Remove Rule', 
+		return  {
 			type: 'proposal',
-			text: '',
-			start: lineStart,
-			end: end};
+			content: {
+					label: 'Remove Rule', 
+					text: '',
+					start: lineStart,
+					end: end
+				}
+			};
 	}
 
 
@@ -90,7 +98,6 @@ define(["orion/plugin", 'orion/editor/textModel'], function(PluginProvider, Text
 	};
 	var properties = {
 		name: "Hover Help",
-		tipTitle: "Auto Correct",
 		contentType: ["text/css"]
 	};
 	provider.registerService("orion.edit.hover", serviceImpl, //$NON-NLS-0$
