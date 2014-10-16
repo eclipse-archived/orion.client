@@ -28,7 +28,7 @@ define ([
 			var hoverInfo = [];
 			this.hoverFactory._applicableProviders.forEach(function(provider) {
 				var providerImpl = this.serviceRegistry.getService(provider);
-				if (providerImpl.computeHoverInfo) {
+				if (providerImpl && providerImpl.computeHoverInfo) {
 					var editorContext = EditorContext.getEditorContext(this.serviceRegistry);
 					var promise = providerImpl.computeHoverInfo(editorContext, context);
 					hoverInfo.push({title: provider._properties.tipTitle,
