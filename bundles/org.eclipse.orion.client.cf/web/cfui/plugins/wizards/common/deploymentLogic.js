@@ -111,8 +111,15 @@ define(['orion/objects', 'cfui/cfUtil'], function(objects, mCfUtil){
 				disableUI();
 				
 				var manifest = _getManifestApplication(userManifest, results);
+				var instrumentation = options.getManifestInstrumentation ? options.getManifestInstrumentation(manifest) : null;
+				var packager = options.getPackager ? options.getPackager() : null;
+				
 				var editLocation = new URL("../edit/edit.html#" + contentLocation, window.location.href);
-				cfService.pushApp(selection, null, decodeURIComponent(contentLocation + appPath), manifest, saveManifest).then(function(result){
+				cfService.pushApp(selection, null, decodeURIComponent(contentLocation + appPath), manifest, saveManifest, packager, instrumentation).then(function(result){
+					
+					if(options.successCallback)
+						options.successCallback();
+					
 					var launchConfigurationContent = mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation);
 					postMsg(launchConfigurationContent);
 					

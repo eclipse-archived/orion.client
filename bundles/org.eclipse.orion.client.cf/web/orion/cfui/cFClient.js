@@ -150,7 +150,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 			
 			// Apps CF v2 operations
 			
-			pushApp: function(target, name, contentLocation, manifest, saveManifest) {
+			pushApp: function(target, name, contentLocation, manifest, saveManifest, packager, instrumentation) {
 				var pushReq = {};
 				
 				if (name)
@@ -167,6 +167,12 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				
 				if(saveManifest)
 					pushReq.Persist = saveManifest;
+				
+				if(packager)
+					pushReq.Packager = packager;
+				
+				if(instrumentation)
+					pushReq.Instrumentation = instrumentation;
 				
 				return this._xhrV1("PUT", require.toUrl("cfapi/apps"), pushReq);
 			},
