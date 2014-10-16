@@ -772,6 +772,7 @@ define([
 						}
 						var addotopnalInfoSection = new mSection.Section(parent, {id: cat.Name + "Section", headerClass: ["sectionTreeTableHeader"], title: cat.Name, canHide: true});
 						var explorerParent = document.createElement("div");
+						explorerParent.id = cat.Name + "Table";
 						var additionalInfoRenderer = new AdditionalInfoRenderer({
 							treeTableClass: "sectionTreeTable",
 							checkbox: false
