@@ -32,6 +32,39 @@ orion.JSDiffAdapter = (function() {
 			return (current.value === lineDelim && lastLineEnding !== lineDelim);
 		},
 		
+		/**
+		 * @class This object describes a mapper item representing a diff block, which is an array of 3 numbers.
+		 * @name orion.diff.mapperItem
+		 *
+		 * @property {number} mapperItem[0] the number of lines in the new version of the string.
+		 * @property {number} mapperItem[1] the number of lines in the old version of the string.
+		 * @property {number} mapperItem[2] the number that indicates the state of the diff block:
+		 *     <ul>
+		 *       <li> 0  - the diff block represents same lines on both side. mapperItem[0] and mapperItem[1] should be identical to represent the number of the same lines</li>
+		 *       <li> -1 - the diff block represents that the new version has deleted lines. mapperItem[0] should be 0 and mapperItem[1] should represent the line number that was deleted</li>
+		 *       <li> >0 - the diff block represents that the new version has added linies and the old version has deleted lines, if any. mapperItem[0] should be greater than 0 and mapperItem[1] should represent the line number that was deleted</li>
+		 *     </ul>
+		 */
+		/**
+		 * @class This object describes the result of the adapt call.
+		 * @name orion.diff.jsdiff.result
+		 *
+		 * @property {array of orion.diff.mapperItem} mapper the array of diff blocks.
+		 * E.G.
+		 * [0, 1, -1],
+		 * [2, 2, 0],
+		 * [2, 0, 1],
+		 * [4, 4, 0],
+		 * @property {array of String} changContents the array of strings that represents all the added lines in the new version of the compare string.
+		 */
+		/**
+		 * Returns the mapper object representing diff between two versions of a string.
+		 *
+		 * @param {String} oldStr the old version of the string
+		 * @param {String} newStr the new version of the string
+		 * @param {String} lineDelim optional the line delimeter of the string
+		 * @returns {orion.diff.jsdiff.result} the result
+		 */
 		adapt: function(oldStr, newStr, lineDelim){
 			if(!lineDelim){
 				lineDelim = "\n"; //$NON-NLS-0$
