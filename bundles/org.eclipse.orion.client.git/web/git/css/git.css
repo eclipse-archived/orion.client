@@ -127,7 +127,7 @@
 	margin-bottom: 0;
 	background-color: #fcfcfc;
 	height: calc(100% - 45px);
-	overflow-y: auto;
+	overflow: auto;
 }
 
 .sidebar .selectionModelContainer {
