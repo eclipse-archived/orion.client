@@ -951,9 +951,6 @@ define("orion/editor/rulers", [
 			zoomView.addEventListener("LineStyle", this._lineListener = function(e) { //$NON-NLS-0$
 				textView.onLineStyle(e);
 			});
-			zoomView.addEventListener("Selection", function(event) { //$NON-NLS-0$
-				textView.setSelection(event.newValue.start, event.newValue.end, 0.5);
-			});
 			function down(event, clientY, touch) {
 				if (touch || (that.top <= event.y && event.y <= that.bottom)) {
 					that.mouseDown = true;
