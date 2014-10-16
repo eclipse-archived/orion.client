@@ -152,8 +152,9 @@ module.exports = function(grunt) {
 	grunt.registerTask("default", "test");
 
 	/**
-	 * For Jenkins to parse out nice packages instead of (root), we have to add classname="packageName.className"
-	 * to the <testsuite> element, and prefix it onto every <testcase>'s @classname.
+	 * For Hudson to parse out nice packages instead of (root), we have to add classname="packageName.className"
+	 * to the <testsuite> element, and prefix the "packageName." onto every <testcase>'s @classname. We also strip
+	 * out some problematic characters from the original classnames: [#?.]
 	 * @param {String} xml The xunit test result
 	 * @returns {String} The test result, fixed up
 	 */
@@ -166,7 +167,9 @@ module.exports = function(grunt) {
 		    packageName = sanitize(fmt("%s.%s", platform, testUrl));
 		return xml
 			.replace(/(<testsuite\s+name="[^"]+")/g, fmt("$1 classname=\"%s\"", packageName))
-			.replace(/<testcase classname="([^"]+)"/g, fmt("<testcase classname=\"%s.$1\"", packageName));
+			.replace(/<testcase classname="([^"]+)"/g, function(match, className) {
+				return fmt("<testcase classname=\"%s.%s\"", packageName, className.replace(/[#?.]/g, "_"));
+			});
 	}
 
 	/**
