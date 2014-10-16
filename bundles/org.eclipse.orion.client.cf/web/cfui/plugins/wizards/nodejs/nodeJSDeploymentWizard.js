@@ -80,6 +80,30 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		var plan = resource.Plan;
 		var manifestApplication = plan.Manifest.applications[0];
 		
+		function getDefaultNonEmptyTarget(clouds){
+			var d = new Deferred();
+			
+			var target = clouds[0];
+			clouds = clouds.length === 1 ? [] : clouds.slice(1);
+			
+			cfService.getOrgs(target).then(function(resp){
+				
+				d.resolve({
+					resp: resp,
+					target: target
+				});
+				
+			}, function(error){
+				if(clouds.length === 0)
+					return d.reject(error);
+				
+				var dp = getDefaultNonEmptyTarget(clouds);
+				dp.then(d.resolve, d.reject);
+			});
+			
+			return d;
+		}
+		
 		Deferred.all([
 		 		     
 		     mCfUtil.getTargets(preferences),
@@ -119,10 +143,13 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    	
 		    	render: function(){
 		    		this.wizard.validate();
-		    		var target = clouds[0];
 		    		
 		    		showMessage("Preparing deployment settings...");
-		    		cfService.getOrgs(target).then(function(resp){
+		    		getDefaultNonEmptyTarget(clouds).then(function(nonEmpty){
+		    			
+		    			var resp = nonEmpty.resp;
+		    			var target = nonEmpty.target;
+		    			
 		    			hideMessage();
 		    			
 		    			var org = resp.Orgs[0];
@@ -176,8 +203,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    			
 		    			var messageDiv = document.getElementById("confirmationMessage");
 			    		messageDiv.innerHTML = message;
-			    		
-		    		}, function(error){
+		    			
+		    		}, function(err){
 		    			handleError(error, target, function(){ return page0.render(); });
 		    		});
 		    	},
