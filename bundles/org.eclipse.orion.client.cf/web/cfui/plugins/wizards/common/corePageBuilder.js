@@ -195,6 +195,7 @@ define(['orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wi
 						"<td id=\"spacesLabel\" class=\"label\"></td>"+
 						"<td id=\"spaces\" class=\"selectCell\"></td>"+
 					"</tr>"+
+					"<tr class=\"rowSeparator\"></tr>" +
 					"<tr>"+
 						"<td id=\"nameLabel\" class=\"label\"></td>"+
 						"<td id=\"name\" class=\"selectCell\"></td>"+

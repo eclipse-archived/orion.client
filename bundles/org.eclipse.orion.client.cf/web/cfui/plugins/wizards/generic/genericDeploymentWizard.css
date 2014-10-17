@@ -1,93 +1,99 @@
 @import "../../../../css/layout.css";
+
 @import "../../../../css/ide.css";
+
 @import "../../../../css/sections.css";
+
 @import "../../../../css/images.css";
+
 @import "../../../../css/theme.css";
+
 @import "../../../../css/progress.css";
+
 @import "../../../../css/wizard.css";
 
-
 html, body {
-    min-width: 350px;
-    overflow: hidden;
+	min-width: 350px;
+	overflow: hidden;
 }
 
 .dialogFrame {
 	background-color: #fdfdfd;
 }
 
-#messageArea{
+#messageArea {
 	display: table-cell;
-    width: calc(100% - 16px);
+	width: calc(100% - 16px);
 }
 
-#messageRow{
-    background: none repeat scroll 0 0 #FFFFFF;
-    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.098), 0 1px 0 0 rgba(0, 0, 0, 0.098);
-    height: 25px;
-    padding: 3px 5px 2px 9px;
+#messageRow {
+	background: none repeat scroll 0 0 #FFFFFF;
+	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.098), 0 1px 0 0
+		rgba(0, 0, 0, 0.098);
+	height: 25px;
+	padding: 3px 5px 2px 9px;
 	display: table;
-    width: calc(100% - 15px);
+	width: calc(100% - 15px);
 }
 
-#messageButton{
+#messageButton {
 	right: -7px;
-    margin-top: 1px;
-    position: absolute;
-    top: 0;
+	margin-top: 1px;
+	position: absolute;
+	top: 0;
 }
 
-.Spaces{
+.Spaces {
 	width: 100%;
 }
 
-select{
+select {
 	height: 24px;
-    width: 290px;
-    border: 1px solid #bbb;
+	width: 290px;
+	border: 1px solid #bbb;
 }
 
 .selectCell input {
-    height: 24px;
-    width: 290px;
-    margin-left: 0;
-    border: 1px solid #bbb;
-}
-
-.comboTextInputWrapper{
 	height: 24px;
-    width: 290px;
-    border: 1px solid #bbb;
+	width: 290px;
+	margin-left: 0;
+	border: 1px solid #bbb;
 }
 
-.comboTextInputWrapper input{
-	font-size: inherit;	
+.comboTextInputWrapper {
+	height: 24px;
+	width: 290px;
+	border: 1px solid #bbb;
+}
+
+.comboTextInputWrapper input {
+	font-size: inherit;
 }
 
 .comboTextInputField {
 	width: 260px !important;
 	height: 24px;
-    text-align: left;
-    margin-right: 0;
-    border: 0px  !important;
+	text-align: left;
+	margin-right: 0;
+	border: 0px !important;
 }
 
 .recentEntryButton {
-    margin-left: 0;	
-    height: 22px;
-    background: none repeat scroll 0 0 #fff;
-    width: 25px;
+	margin-left: 0;
+	height: 22px;
+	background: none repeat scroll 0 0 #fff;
+	width: 25px;
 }
 
-.formTable{
-	font-family: Arial,sans-serif;
+.formTable {
+	font-family: Arial, sans-serif;
 	font-size: 14px;
 	width: 100%;
 }
 
 .selectCell {
-    padding-top: 4px;
-    text-align: left;
+	padding-top: 4px;
+	text-align: left;
 }
 
 .listCell select {
@@ -95,7 +101,7 @@ select{
 	width: 190px;
 }
 
-#servicesAddRemoveButtonsCol{
+#servicesAddRemoveButtonsCol {
 	text-align: center;
 	vertical-align: middle;
 }
@@ -105,79 +111,80 @@ select{
 	padding-top: 2px;
 	position: absolute;
 	text-align: center;
-    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
-    background-color: #dff0d8;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
-    margin-left: 5%;
-    margin-right: auto;
-    width: 90%;
-    padding-bottom: 5px;
-    padding-left: 5px;
-    padding-top: 5px;
+	box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+	background-color: #dff0d8;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+	margin-left: 5%;
+	margin-right: auto;
+	width: 90%;
+	padding-bottom: 5px;
+	padding-left: 5px;
+	padding-top: 5px;
 }
 
 .messageContainer.showing {
-	display: block;	
+	display: block;
 	transition: top 0.7s ease 0s;
 }
 
-.retryFields{
+.retryFields {
 	margin-top: 5px;
 	text-align: right;
 }
 
 .retryFields label {
-	margin-left: 5px;	
+	margin-left: 5px;
 }
 
-.errorMessage input{
+.errorMessage input {
 	border-color: #eed3d7 !important;
 }
 
-.errorMessage button{
+.errorMessage button {
 	color: #b94a48 !important;
 }
 
-.errorMessage button:hover{
+.errorMessage button:hover {
 	color: #FFFFFF !important;
 }
 
-.messageContainer.errorMessage{
+.messageContainer.errorMessage {
 	background-color: #f2dede !important;
-    border: 1px solid #eed3d7 !important;
+	border: 1px solid #eed3d7 !important;
 }
 
-.errorMessage, .errorMessage a{
-    color: #b94a48 !important;
+.errorMessage, .errorMessage a {
+	color: #b94a48 !important;
 }
 
-.messageLabel a{
+.messageLabel a {
 	color: #b94a48;
 	text-decoration: underline;
 }
 
-.messageLabel button{
+.messageLabel button {
 	border: none;
 	border-radius: 5px;
 	background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
 	color: #b94a48;
-	font-family: Arial,Helvetica,Myriad,Tahoma,clean,sans-serif,Lucida Sans Unicode,Lucida Grande,Verdana;
-    font-size: 9pt;
-    cursor: pointer;
+	font-family: Arial, Helvetica, Myriad, Tahoma, clean, sans-serif,
+		Lucida Sans Unicode, Lucida Grande, Verdana;
+	font-size: 9pt;
+	cursor: pointer;
 }
 
-.messageLabel button:hover{
+.messageLabel button:hover {
 	color: #FFFFFF;
 }
 
 .messageLabel {
-    color: #468847;
-    float: left;
-    max-height: 1000px;
-    overflow: hidden;
-    padding-left: 5px;
-    text-align: center;
+	color: #468847;
+	float: left;
+	max-height: 1000px;
+	overflow: hidden;
+	padding-left: 5px;
+	text-align: center;
 }
 
 .dialogTitle .closeDialog {
@@ -185,21 +192,25 @@ select{
 	cursor: pointer;
 }
 
-#memoryInput{
+#memoryInput {
 	margin-right: 5px;
-    width: 235px;
+	width: 235px;
 }
 
-#memoryUnit{
+#memoryUnit {
 	width: 50px;
 }
 
 input[type='number'] {
-    -moz-appearance:textfield;
+	-moz-appearance: textfield;
 }
 
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button
+	{
 	-webkit-appearance: none;
 	margin: 0;
+}
+
+.rowSeparator {
+	height: 20px;
 }

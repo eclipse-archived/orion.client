@@ -58,11 +58,11 @@ define(['orion/webui/Wizard'], function(mWizard){
 				
 				render: function(){
 					
-		    		document.getElementById("allServicesLabel").appendChild(document.createTextNode("Add services from the list."));
+		    		document.getElementById("allServicesLabel").appendChild(document.createTextNode("Bind services from the list."));
 		    		document.getElementById("servicesLabel").appendChild(document.createTextNode("Existing Services:"));
 		    		
 		    		self._servicesDropdown = document.createElement("select");
-		    		self._servicesDropdown.size = 8;
+		    		self._servicesDropdown.size = 7;
 		    		self._servicesDropdown.multiple="multiple";
 			    	
 		    		document.getElementById("servicesDropdown").appendChild(self._servicesDropdown);
@@ -70,7 +70,7 @@ define(['orion/webui/Wizard'], function(mWizard){
 			    	document.getElementById("servicesAdded").appendChild(document.createTextNode("Application Services:"));
 			    	self._servicesList = document.createElement("select");
 			    	self._servicesList.multiple="multiple";
-			    	self._servicesList.size = 8;
+			    	self._servicesList.size = 7;
 		    		
 			    	document.getElementById("servicesList").appendChild(self._servicesList);
 			    	
