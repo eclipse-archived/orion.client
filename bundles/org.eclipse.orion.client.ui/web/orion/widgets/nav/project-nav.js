@@ -250,7 +250,9 @@ define([
 						var _self = this;
 						this.launchConfigurationDispatcher = ProjectCommands.getLaunchConfigurationDispatcher();
 						this.launchConfigurationListener = function(event){
-							if(event.type === "changedDefault"){ //$NON-NLS-0$
+							if(event.type === "changedVisibility"){
+								_self.updateCommands.apply(_self, selections);
+							} if(event.type === "changedDefault"){ //$NON-NLS-0$
 								var defaultCommand = ProjectCommands.getDefaultLaunchCommand(_self.treeRoot.Project.Name);
 								if (defaultCommand) {
 									_self.defaultDeployCommand = _self.commandRegistry.findCommand(defaultCommand);
@@ -290,7 +292,7 @@ define([
 								doUpdateForLaunchConfigurations.apply(_self, [_self.treeRoot.Project.launchConfigurations]);
 							});
 						};
-						this._launchConfigurationEventTypes = ["create", "delete", "changedDefault", "deleteAll"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						this._launchConfigurationEventTypes = ["create", "delete", "changedDefault", "deleteAll", "changedVisibility"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						this._launchConfigurationEventTypes.forEach(function(eventType) {
 							_self.launchConfigurationDispatcher.addEventListener(eventType, _self.launchConfigurationListener);
 						});
