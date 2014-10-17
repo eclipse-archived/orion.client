@@ -5147,6 +5147,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (rulerParent !== this._marginDiv || this._marginOffset) {
 				rulerParent.style.display = "block"; //$NON-NLS-0$
 			}
+			rulerParent.rulerWidth = undefined;
 			var div = util.createElement(rulerParent.ownerDocument, "div"); //$NON-NLS-0$
 			div._ruler = ruler;
 			ruler.node = div;
@@ -5362,6 +5363,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						if (rulerParent.children.length === 0 && (rulerParent !== this._marginDiv || !this._marginOffset)) {
 							rulerParent.style.display = "none"; //$NON-NLS-0$
 						}
+						rulerParent.rulerWidth = undefined;
 						break;
 					}
 					div = div.nextSibling;
