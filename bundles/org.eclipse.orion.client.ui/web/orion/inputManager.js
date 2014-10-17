@@ -313,9 +313,11 @@ define([
 			this._savingDeferred = new Deferred();
 			this._saving = true;
 			function done(result) {
-				self._savingDeferred.resolve(result);
+				var deferred = self._savingDeferred;
+				deferred.resolve(result);
 				self._savingDeferred = null;
 				self._saving = false;
+				return deferred;
 			}
 			var editor = this.getEditor();
 			if (!editor || !editor.isDirty() || this.getReadOnly()) { return done(); }
@@ -367,13 +369,13 @@ define([
 				if (self.postSave) {
 					self.postSave(closing);
 				}
-				done();
+				return done(result);
 			}
 			function errorHandler(error) {
 				self.reportStatus("");
 				handleError(statusService, error);
 				self._errorSaving = true;
-				done();
+				return done();
 			}
 			def.then(successHandler, function(error) {
 				// expected error - HTTP 412 Precondition Failed
@@ -388,7 +390,7 @@ define([
 						}
 						def.then(successHandler, errorHandler);
 					} else {
-						done();
+						return done();
 					}
 				} else {
 					// unknown error
