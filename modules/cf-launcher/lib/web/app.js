@@ -10,6 +10,7 @@
  *******************************************************************************/
 /*eslint-env node*/
 var bodyParser = require("body-parser"),
+    cfAppEnv = require("cfenv").getAppEnv(),
     compression = require("compression"),
     express = require("express"),
     flash = require("connect-flash"),
@@ -123,12 +124,15 @@ function createProxyApp(options) {
 	launcherApp.use("/dav/", function(req, res) {
 		proxies.dav.proxy.web(req, res);
 	});
+	// CSS resources can be accessed without session
+	launcherApp.use("/css", express.static(path.join(moduleDir, "public/css")));
 	launcherApp.use(function(req, res, next) {
 		if (isLoggedIn(req))
 				return next();
 		res.redirect(launcherPrefix + "/login");
 	});
-	// Routes below this point require a valid session
+	// ---> Routes below this point require a valid session <---
+	launcherApp.use("/", express.static(path.join(moduleDir, "public")));
 	launcherApp.all(appPrefix, function(req, res, next) {
 		// Redirect /apps to /apps. This would be better in appctrl.js
 		if (req.originalUrl.slice(-1) !== "/")
@@ -136,9 +140,14 @@ function createProxyApp(options) {
 		else next();
 	});
 	launcherApp.use(appPrefix, appControl(procman, appName));
-	launcherApp.use("/", express.static(path.join(moduleDir, "public")));
 	launcherApp.use("/tty/", function(req, res) {
 		proxies.tty.proxy.web(req, res);
+	});
+	launcherApp.use("/help/dav", function(req, res) {
+		res.render("help_dav.ejs", {
+			url: cfAppEnv.url + launcherPrefix + "/dav",
+			password: password
+		});
 	});
 	launcherApp.use(inspector.proxy.web.bind(inspector.proxy));
 

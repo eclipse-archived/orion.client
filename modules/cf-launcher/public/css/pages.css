@@ -17,3 +17,21 @@ body {
 	font-family: "Consolas", "Monaco", "Vera Mono", "Lucida Console", monospace;
 	max-height: 500px;
 }
+.spoiler {
+	background-color: black;
+	color: black;
+	padding-left: 10px;
+	padding-right: 10px;
+	display: inline-block;
+	min-width: 6em;
+	text-align: center;
+}
+.spoiler:hover {
+	color: white;
+}
+.davsetup td {
+	padding-top: 8px;
+}
+.davsetup td:nth-child(2) {
+	padding-left: 20px;
+}

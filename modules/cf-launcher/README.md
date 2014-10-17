@@ -97,6 +97,10 @@ For detailed setup instructions, see:
 * [OS X](http://support.apple.com/kb/PH13859)
 * [Linux](http://doc.owncloud.org/server/6.0/user_manual/files/files.html#linux)
 
+Note: we've encountered certain Cloud Foundry fabrics that block WebDAV requests at the network level. If you have problems
+connecting with WebDAV, deploy a [test application](https://github.com/mamacdon/propfind) on your CF fabric to verify that
+it supports DAV requests.
+
 ## Uninstallation ##
 When your app is ready for production, you should uninstall cf-launcher.
 
