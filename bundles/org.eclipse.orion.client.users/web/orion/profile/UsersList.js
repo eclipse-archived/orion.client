@@ -162,7 +162,7 @@ eclipse.UsersRenderer = (function() {
 			return this.getActionsColumn(item, tableRow, null, null, true);
 		case 2:
 			td = document.createElement("td"); //$NON-NLS-0$
-			td.textContent = item.Name ? item.Name : " "; //$NON-NLS-0$
+			td.textContent = item.FullName ? item.FullName : " "; //$NON-NLS-0$
 			return td;
 		case 3:
 			td = document.createElement("td"); //$NON-NLS-0$
