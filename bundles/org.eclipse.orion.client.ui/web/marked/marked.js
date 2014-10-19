@@ -376,6 +376,7 @@ Lexer.prototype.token = function(src, top, bq) {
       /* the following line is added by Orion (14/10/2014) */
       this.tokens.push({
         type: 'def',
+        id: cap[1].toLowerCase(),
         href: cap[2],
         title: cap[3]
       });
@@ -790,7 +791,7 @@ Renderer.prototype.blockquote = function(quote) {
 };
 
 /* the following function definition is added by Orion (14/10/2014) */
-Renderer.prototype.def = function(href, title) {
+Renderer.prototype.def = function(id, href, title) {
   return '';
 };
 
@@ -983,6 +984,7 @@ Parser.prototype.tok = function() {
     /* the following case is added by Orion (14/10/2014) */
     case 'def': {
       return this.renderer.def(
+        this.token.id,
         this.token.href,
         this.token.title);
     }

@@ -30,15 +30,81 @@ define([
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	var extensionRegex = /\.([0-9a-z]+)(?:[\?#]|$)/i;
+	var linkDetectRegex = /!?\[/g;
 	var markedOutputLink = marked.InlineLexer.prototype.outputLink;
 	var imgCount = 0;
-	var markedOptions = marked.parse.defaults;
 	var toggleOrientationCommand;
 	var previewDiv;
+
+	var ATTRIBUTE_REFID = "refId"; //$NON-NLS-0$
+	var ID_PREFIX = "_orionMDBlock"; //$NON-NLS-0$
+	var PLACEHOLDER_URL = "about:blank"; //$NON-NLS-0$
+	var REFLINKID_PREAMBLE = "?orionMDRefLinkID:"; //$NON-NLS-0$
+
+	var refLinkIDRegex = /\?orionMDRefLinkID:([^"]+")/g;
+
+	/*
+	 * Define the marked options, including a custom renderer for list items and paragraphs that:
+	 *
+	 * 1. converts unresolved ref links into html links pointing at about:blank
+	 * 2. adds a "refId" attribute to all ref links (used for updating rendered links
+	 * and images in response to link definition changes)
+	 */
+	var customRenderer = new marked.Renderer();
+	customRenderer.listitem = function(text) {
+		var result = marked.Renderer.prototype.listitem.call(this, text);
+		return processRefLinks(result);
+	};
+	customRenderer.paragraph = function(text) {
+		var result = marked.Renderer.prototype.paragraph.call(this, text);
+		return processRefLinks(result);
+	};
+	var markedOptions = marked.parse.defaults;
 	markedOptions.sanitize = true;
 	markedOptions.tables = true;
+	markedOptions.renderer = customRenderer;
 
-	var ID_PREFIX = "_orionMDBlock"; //$NON-NLS-0$
+	function extractLinks(text, linkPatterns) {
+		var result = [];
+		var textIndex = 0;
+		linkDetectRegex.lastIndex = 0;
+		var potentialLinkMatch = linkDetectRegex.exec(text);
+		while (potentialLinkMatch) {
+			if (potentialLinkMatch.index) {
+				textIndex += potentialLinkMatch.index;
+				text = text.substring(potentialLinkMatch.index);
+			}
+			for (var i = 0; i < linkPatterns.length; i++) {
+				var match = linkPatterns[i].exec(text);
+				if (match) {
+					break;
+				}
+			}
+			if (match) {
+				result.push({match: match, index: textIndex, pattern: linkPatterns[i]});
+			}
+			linkDetectRegex.lastIndex = match ? match[0].length : 1;
+			potentialLinkMatch = linkDetectRegex.exec(text);
+		}
+		return result;
+	}
+
+	function processRefLinks(string) {
+		/* add ref ids on successfully-resolved ref links */
+		string = string.replace(refLinkIDRegex, function(match, p1) {
+			return '" ' + ATTRIBUTE_REFID + '="' + p1 + '"'; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		});
+
+		/* replace unsuccessfully-resolved ref links with html links with ref ids */
+		var linkMatches = extractLinks(string, [marked.InlineLexer.rules.reflink]);
+		for (var i = linkMatches.length - 1; i >= 0; i--) {
+			var match = linkMatches[i];
+			var linkContent = '<a href="' + PLACEHOLDER_URL + '" ' + ATTRIBUTE_REFID + '="' + (match.match[2] || match.match[1]) + '">' + match.match[1] + "</a>"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			string = string.substring(0, match.index) + linkContent + string.substring(match.index + match.match[0].length);
+		}
+
+		return string;
+	}
 
 	var MarkdownStylingAdapter = function(model, resource, fileClient) {
 		this.model = model;
@@ -400,12 +466,6 @@ define([
 				}
 			}
 
-			if (tokens.links && Object.keys(tokens.links).length) {
-				block.links = tokens.links;
-			} /*else {
-				block.links = undefined;
-			}*/
-
 			return result;
 		},
 		computeStyle: function(/*block, model, offset*/) {
@@ -425,6 +485,16 @@ define([
 		},
 		getBlockStartStyle: function(/*block, text, index, _styles*/) {
 			return null;
+		},
+		getBlockForElement: function(element) {
+			if (element === previewDiv) {
+				return null;
+			}
+			var id = this.getElementIdentifier(element);
+			if (id) {
+				return this.getBlockWithId(id);
+			}
+			return this.getBlockForElement(element.parentElement);
 		},
 		getBlockWithId: function(elementId) {
 			return this._blocksCache[elementId];
@@ -637,9 +707,8 @@ define([
 					}
 				} else if (block.typeId === this._TYPEID_PARAGRAPH) {
 					text = baseModel.getText(block.start, block.end);
-					var linkTokens = this._extractLinks(text);
-//					var links;
-					linkTokens.forEach(function(current) {
+					var linkMatches = extractLinks(text, [marked.InlineLexer.rules.link, marked.InlineLexer.rules.reflink]);
+					linkMatches.forEach(function(current) {
 						var linkStart = block.start + current.index;
 						if (!current.match[1]) {
 							annotation = mAnnotations.AnnotationType.createAnnotation(
@@ -690,43 +759,9 @@ define([
 				this._computeAnnotations(annotationModel, baseModel, current, start, end, _add);
 			}.bind(this));
 		},
-		_extractLinks: function(text) {
-			var result = [];
-			var textIndex = 0;
-			this._linkDetectRegex.lastIndex = 0;
-			var potentialLinkMatch = this._linkDetectRegex.exec(text);
-			while (potentialLinkMatch) {
-				if (potentialLinkMatch.index) {
-					textIndex += potentialLinkMatch.index;
-					text = text.substring(potentialLinkMatch.index);
-				}
-				var pattern = marked.InlineLexer.rules.link;
-				var match = pattern.exec(text);
-				if (!match) {
-					pattern = marked.InlineLexer.rules.reflink;
-					match = pattern.exec(text);
-				}
-				if (match) {
-					result.push({match: match, index: textIndex, pattern: pattern});
-				}
-				this._linkDetectRegex.lastIndex = match ? match[0].length : 1;
-				potentialLinkMatch = this._linkDetectRegex.exec(text);
-			}
-			return result;
-		},
 		_generateHTML: function(rootElement, block) {
 			if (!block.startToken && !block.tokens) {
 				return;	 /* likely a block with only tokens for its parent */
-			}
-
-			var links = {};
-			var current = block;
-			while (current) {
-				if (current.links) {
-					links = current.links;
-					break;
-				}
-				current = current.parent;
 			}
 
 			/*
@@ -739,7 +774,7 @@ define([
 				 * removes each token from the array as it is processed
 				 */
 				var parseTokens = block.tokens.slice();
-				parseTokens.links = links;
+				parseTokens.links = this._linkDefs;
 				rootElement.innerHTML = marked.Parser.parse(parseTokens, markedOptions);
 				return;
 			}
@@ -751,7 +786,7 @@ define([
 			/* a container block (a list, list item or blockquote) */
 
 			parseTokens = [block.startToken, block.endToken];
-			parseTokens.links = links;
+			parseTokens.links = this._linkDefs;
 			rootElement.innerHTML = marked.Parser.parse(parseTokens, markedOptions);
 
 			var processParentTokens = function(parentTokens) {
@@ -760,7 +795,7 @@ define([
 				 * context to marked) and the tokens being contributed from child blocks.
 				 */
 				parseTokens = [block.startToken].concat(parentTokens).concat(block.endToken);
-				parseTokens.links = links;
+				parseTokens.links = this._linkDefs;
 				var tempElement = document.createElement("div"); //$NON-NLS-0$
 				tempElement.innerHTML = marked.Parser.parse(parseTokens, markedOptions);
 				var createdNodes = tempElement.children[0].childNodes;
@@ -854,13 +889,116 @@ define([
 				}
 
 				var recomputedBlocks = this.computeBlocks(this.model, this.model.getText(e.oldBlocks[0].start, e.oldBlocks[0].end), e.oldBlocks[0].parent, e.oldBlocks[0].start);
-				this._adoptTokens(e.newBlocks[0], recomputedBlocks[0]);
+				if (e.newBlocks[0].tokens && e.newBlocks[0].tokens[0].type === "def") { //$NON-NLS-0$
+					/*
+					 * e.oldBlocks[0] and e.newBlocks[0] are identical block objects.  For ref link
+					 * definitions specifically this identity match must be broken because the old
+					 * block values are still needed for updating existing references throughout the
+					 * document.
+					 */
+					e.newBlocks[0] = recomputedBlocks[0];
+					var elementId = e.oldBlocks[0].elementId;
+					e.newBlocks[0].elementId = elementId;
+
+					/*
+					 * since the old and new blocks no longer have the same identity the old block must
+					 * be replaced by the new block in the parent block and in the blocks table.
+					 */
+					var parent = e.newBlocks[0].parent;
+					var siblings = parent.getBlocks();
+					for (var i = 0; i < siblings.length; i++) {
+						if (siblings[i].elementId === elementId) {
+							siblings[i] = e.newBlocks[0];
+							break;
+						}
+					}
+					this._blocksCache[elementId] = e.newBlocks[0];
+				} else {
+					this._adoptTokens(e.newBlocks[0], recomputedBlocks[0]);
+				}
 			}
 
-			var oldBlocksIndex = 0, parentElement, i, j, children = [];
+			/* compute the set of ref link definition changes in these blocks */
+			var oldBlockRefs = {};
+			e.oldBlocks.forEach(function(current) {
+				var token = current.tokens ? current.tokens[0] : null;
+				if (token && token.type === "def") { //$NON-NLS-0$
+					oldBlockRefs[token.id] = token;
+				}
+			});
+			var refChanges = {};
+			e.newBlocks.forEach(function(current) {
+				var token = current.tokens ? current.tokens[0] : null;
+				if (token && token.type === "def") { //$NON-NLS-0$
+
+					/* help our marked custom renderers to determine the ref ids for resolved ref links */
+					token.href += REFLINKID_PREAMBLE + token.id;
+
+					if (!oldBlockRefs[token.id]) {
+						/* a new definition */
+						refChanges[token.id] = [null, token];
+					} else {
+						if (oldBlockRefs[token.id].href !== token.href || oldBlockRefs[token.id].title !== token.title) {
+							/* a change to an old definition's href and/or title */
+							refChanges[token.id] = [oldBlockRefs[token.id], token];
+						}
+						delete oldBlockRefs[token.id];
+					}
+				}
+			});
+			for (var key in oldBlockRefs) {
+				var current = oldBlockRefs[key];
+				/* an old definition that no longer exists */
+				refChanges[current.id] = [current, null];
+			}
+
+			/* update the master set of ref link definitions based on these changes */
+			for (key in refChanges) {
+				current = refChanges[key];
+				if (!current[1]) {
+					/* an old definition that no longer exists */
+					delete this._linkDefs[key];
+				} else {
+					/* either a new definition or a change to a definition's href and/or title */
+					this._linkDefs[key] = current[1];
+				}
+			}
+
+			/* regenerate blocks throughout the document that are affected by these ref link definition changes */
+			if (Object.keys(refChanges).length) {
+				var affectedBlocks = [];
+				var allLinks = previewDiv.getElementsByTagName("a"); //$NON-NLS-0$
+				for (i = 0; i < allLinks.length; i++) {
+					var refId = allLinks[i].getAttribute(ATTRIBUTE_REFID);
+					if (refId) {
+						if (refChanges[refId]) {
+							affectedBlocks.push(this.getBlockForElement(allLinks[i]));
+						}
+					}
+				}
+				var allImages = previewDiv.getElementsByTagName("img"); //$NON-NLS-0$
+				for (i = 0; i < allImages.length; i++) {
+					refId = allImages[i].getAttribute(ATTRIBUTE_REFID);
+					if (refId) {
+						if (refChanges[refId]) {
+							affectedBlocks.push(this.getBlockForElement(allImages[i]));
+						}
+					}
+				}
+				affectedBlocks.forEach(function(current) {
+					/* create a new div with content corresponding to this block */
+					var newElement = document.createElement("div"); //$NON-NLS-0$
+					this._generateHTML(newElement, current);
+					var element = this.getElementByIdentifier(current.elementId);
+					newElement.children[0].className = element.className;
+					element.parentElement.replaceChild(newElement.children[0], element);
+				}.bind(this));
+			}
+
+			var oldBlocksIndex = 0, children = [];
 			if (e.oldBlocks.length) {
 				var currentElement = this.getElementByIdentifier(e.oldBlocks[0].elementId);
-				parentElement = currentElement.parentElement;
+				var parentElement = currentElement.parentElement;
 			} else {
 				if (e.newBlocks.length) {
 					parentElement = this.getElementByIdentifier(e.newBlocks[0].parent.elementId);
@@ -871,7 +1009,7 @@ define([
 			}
 			for (i = 0; i < parentElement.children.length; i++) {
 				if (!currentElement || this.getElementIdentifier(parentElement.children[i]) === e.oldBlocks[0].elementId) {
-					for (j = i; j < i + e.oldBlocks.length; j++) {
+					for (var j = i; j < i + e.oldBlocks.length; j++) {
 						children.push(parentElement.children[j]);
 					}
 					break;
@@ -962,6 +1100,9 @@ define([
 				}
 			} else if (newNode.nodeName === "TH" || newNode.nodeName === "TD") { //$NON-NLS-1$ //$NON-NLS-0$
 				targetNode.style.textAlign = newNode.style.textAlign;
+			} else if (newNode.nodeName === "A") { //$NON-NLS-0$
+				targetNode.href = newNode.href;
+				targetNode.title = newNode.title;
 			}
 
 			var targetNodesIndex = 0;
@@ -1023,7 +1164,7 @@ define([
 		_hrRegex: /([ \t]*[-*_]){3,}/g,
 		_htmlNewlineRegex: /\n\s*\S[\s\S]*$/g,
 		_leadingHashesRegex: /^#*/,
-		_linkDetectRegex: /!?\[/g,
+		_linkDefs: {},
 		_newlineRegex: /\n/g,
 		_orderedListRegex: /\d+\.[ \t]/g,
 		_spacesAndTabsRegex: /[ \t]*/g,

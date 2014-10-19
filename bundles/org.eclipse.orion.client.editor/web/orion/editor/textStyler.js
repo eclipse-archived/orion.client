@@ -80,7 +80,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			while (matches.length > 0) {
 				var current = matches[0];
 				matches.splice(0,1);
-	
+
 				if (endIndex < current.result.index) {
 					break;
 				}
@@ -344,7 +344,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 					this._updateMatch(current, text, matches, index);
 					continue;
 				}
-	
+
 				/* apply the style */
 				var start = current.result.index;
 				var end, result;
@@ -376,13 +376,13 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 					}
 					this._mergeStyles(tokenStyle, substyles, _styles);
 				} else {	/* pattern defined by a "begin/end" pair */
-					/* 
+					/*
 					 * If the end match contains a capture reference (eg.- "\1") then update
 					 * its regex with the resolved capture values from the begin match.
 					 */
 					var endRegex = current.pattern.regexEnd;
 					endRegex = this._substituteCaptureValues(endRegex, current.result);
-	
+
 					result = this._findMatch(endRegex, text, current.result.index + current.result[0].length);
 					if (!result) {
 						this._eolRegex.lastIndex = 0;
@@ -399,7 +399,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				regex.lastIndex = regex.oldLastIndex;
 			});
 		},
-		setStyler: function(/*styler*/) {	
+		setStyler: function(/*styler*/) {
 		},
 		verifyBlock: function(baseModel, text, ancestorBlock, changeCount) {
 			var result = null;
@@ -490,11 +490,11 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			 * significantly faster than exec().  If a match is found then the regex's lastIndex is reverted to
 			 * its pre-test() value, and exec() is then invoked on it in order to get the match details.
 			 */
-	
+
 			var index = startIndex;
 			var initialLastIndex = regex.lastIndex;
 			this._linebreakRegex.lastIndex = startIndex;
-	
+
 			var currentLine = this._linebreakRegex.exec(text);
 			/*
 			 * Processing of the first line is treated specially, as it may not start at the beginning of a logical line, but
@@ -549,7 +549,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				_styles.push({start: offset, end: offset + result[0].length, style: captures[0].name});
 				return;
 			}
-	
+
 			var stringIndex = 0;
 			for (var i = 1; i < result.length; i++) {
 				if (result[i]) {
@@ -1047,7 +1047,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			var lineIndex = model.getLineAtOffset(offset);
 			var lineEnd = model.getLineEnd(lineIndex);
 			var text = model.getText(offset, lineEnd);
-			
+
 			var bracketMatch = this._stylerAdapter.getBracketMatch(block, text);
 			if (!bracketMatch) { return -1; }
 
@@ -1314,7 +1314,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 
 					/*
 					 * ancestorBlock's end match is no longer valid because it is being spanned by a block from
-					 * within.  Attempt to find a subsequent sibling block with the same type, as its end match 
+					 * within.  Attempt to find a subsequent sibling block with the same type, as its end match
 					 * will serve as the end match for this spanning block as well.
 					 */
 					if (newBlocks.length && this._stylerAdapter.blockSpansBeyondEnd(newBlocks[newBlocks.length - 1])) {
@@ -1348,7 +1348,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 					}
 				}
 
-				/* 
+				/*
 				 * The end block's end bound is spanned by a block from within, so move up to the ancestor
 				 * block, or extend end to the end of the content if already at the root-level block.
 				 */
