@@ -65,7 +65,13 @@ define([
 			if(!results) {
 				assert.ok(false, "The occurrence array cannot be null");
 			}
-			assert.equal(results.length, expected.length, "The wrong number of occurrences was returned");
+			var foundOccurrences = '';
+			for (var l=0; l<results.length; l++) {
+				if (results[l]){
+					foundOccurrences += results[l].start + '-' + results[l].end + ', ';
+				}
+			}
+			assert.equal(results.length, expected.length, "The wrong number of occurrences was returned. Expected: " + listOccurrences(expected) + " Returned: " + listOccurrences(results));
 			for(var i = 0; i < expected.length; i++) {
 				//for each expected result try to find it in the results, and remove it if it is found
 				for(var j = 0; j < results.length; j++) {
@@ -79,9 +85,28 @@ define([
 			}
 			for(var k = 0; k < results.length; k++) {
 				if(results[k]) {
-					assert.ok(false, "Found an unknown occurrence: [start "+results[k].start+"][end "+results[k].end+"]");
+					assert.ok(false, "Found an unknown occurrence: [start "+results[k].start+"][end "+results[k].end+"]. Expected: " + listOccurrences(expected) + " Returned: " + listOccurrences(results));
 				}
 			}
+		}
+		
+		/**
+		 * @name getResultsOccurrences
+		 * @description Returns a string listing the found occurrences
+		 * @param results the array results to create the string from
+		 * @returns returns string with list of results
+		 */
+		function listOccurrences(occurrences){
+			var foundOccurrences = '';
+			for (var i=0; i<occurrences.length; i++) {
+				if (occurrences[i]){
+					foundOccurrences += occurrences[i].start + '-' + occurrences[i].end;
+					if (i < (occurrences.length-1)){
+						foundOccurrences += ', ';
+					}
+				}
+			}
+			return foundOccurrences;
 		}
 		
 		/**
@@ -2503,6 +2528,108 @@ define([
 			return occurrences.computeOccurrences(editorContext, setContext(61, 62)).then(function(results) {
 				try {
 					assertOccurrences(results, [{start:14, end:20}, {start:40, end:46}, {start: 61, end: 67}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests usage inside of a non-defining scope
+		 * Everything should be marked, no matter which is selected
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=445410
+		 */
+		it('test_nonDefiningScope1', function() {
+			editorContext.text = "f(); function g(){ f(); } function f(){} function h(){ f(); } f();";
+			return occurrences.computeOccurrences(editorContext, setContext(1,1)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:19, end:20}, {start: 35, end: 36}, {start: 55, end: 56}, {start: 62, end: 63}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests usage inside of a non-defining scope
+		 * Everything should be marked, no matter which is selected
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=445410
+		 */
+		it('test_nonDefiningScope2', function() {
+			editorContext.text = "f(); function g(){ f(); } function f(){} function h(){ f(); } f();";
+			return occurrences.computeOccurrences(editorContext, setContext(20,20)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:19, end:20}, {start: 35, end: 36}, {start: 55, end: 56}, {start: 62, end: 63}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests usage inside of a non-defining scope
+		 * Everything should be marked, no matter which is selected
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=445410
+		 */
+		it('test_nonDefiningScope3', function() {
+			editorContext.text = "f(); function g(){ f(); } function f(){} function h(){ f(); } f();";
+			return occurrences.computeOccurrences(editorContext, setContext(35,35)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:19, end:20}, {start: 35, end: 36}, {start: 55, end: 56}, {start: 62, end: 63}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests usage inside of a non-defining scope
+		 * Everything should be marked, no matter which is selected
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=445410
+		 */
+		it('test_nonDefiningScope4', function() {
+			editorContext.text = "f(); function g(){ f(); } function f(){} function h(){ f(); } f();";
+			return occurrences.computeOccurrences(editorContext, setContext(55,55)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:19, end:20}, {start: 35, end: 36}, {start: 55, end: 56}, {start: 62, end: 63}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests usage inside of a non-defining scope
+		 * Everything should be marked, no matter which is selected
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=445410
+		 */
+		it('test_nonDefiningScope5', function() {
+			editorContext.text = "f(); function g(){ f(); } function f(){} function h(){ f(); } f();";
+			return occurrences.computeOccurrences(editorContext, setContext(62,63)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:0, end:1}, {start:19, end:20}, {start: 35, end: 36}, {start: 55, end: 56}, {start: 62, end: 63}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests usage inside of a non-defining scope and that it doesn't conflict with the global occurrence list
+		 * Everything should be marked, no matter which is selected
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=445410
+		 */
+		it('test_nonDefiningScopeNonGlobal', function() {
+			editorContext.text = "function a() { f(); function g(){ f(); } function f(){} function h(){ f(); } f(); }";
+			return occurrences.computeOccurrences(editorContext, setContext(78,78)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:15, end:16}, {start:34, end:35}, {start: 50, end: 51}, {start: 70, end: 71}, {start: 77, end: 78}]);
 				}
 				finally {
 					tearDown();

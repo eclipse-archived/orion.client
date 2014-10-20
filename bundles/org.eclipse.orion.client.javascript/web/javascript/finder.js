@@ -28,7 +28,6 @@ define([
 	
 	Objects.mixin(Visitor.prototype, /** @lends javascript.Visitor.prototype */ {
 		occurrences: [],
-		globals: [],
 		scopes: [],
 		context: null,
 		thisCheck: false,
@@ -49,7 +48,6 @@ define([
 			switch(node.type) {
 				case Estraverse.Syntax.Program:
 					this.occurrences = [];
-					this.globals = [];
 					this.scopes = [{range: node.range, occurrences: [], kind:'p'}];   //$NON-NLS-0$
 					this.defscope = null;
 					this.skipScope = null;
@@ -346,17 +344,6 @@ define([
 					}
 					case Estraverse.Syntax.Program: {
 					    this._popScope(); // pop the last scope
-					    //we are leaving the AST, add the occurrences if we never found a defining scope
-					   if(!this.defscope && this.globals) {
-					       this.occurrences = [];
-					       var that = this;
-						   this.globals.forEach(function(scope) {
-						       var occ = scope.occurrences;
-                               for(var i = 0; i < occ.length; i++) {
-                                  that.occurrences.push(occ[i]); 
-                               }						        
-						   });
-						}
 						break;
 					}
 				}
@@ -381,7 +368,7 @@ define([
 			}
 			
 			var len = scope.occurrences.length;
-			var i;
+			var i, j;
 			if(this.defscope) {
 				for(i = 0; i < len; i++) {
 					this.occurrences.push(scope.occurrences[i]);
@@ -392,7 +379,18 @@ define([
 					return true;
 				}
 			} else {
-			    this.globals.push(scope);
+				if (this.scopes.length > 0){
+					// We popped out of a scope but don't know where the define is, treat the occurrences like they belong to the outer scope (Bug 445410)
+					for (j=0; j< len; j++) {
+						this.scopes[this.scopes.length - 1].occurrences.push(scope.occurrences[j]);
+					}
+				} else {
+					// We are leaving the AST, add the occurrences if we never found a defining scope
+					this.occurrences = [];
+					for (j=0; j< len; j++) {
+						this.occurrences.push(scope.occurrences[j]);
+					}
+				}
 			}
 			return false;
 		},
