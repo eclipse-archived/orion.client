@@ -40,7 +40,8 @@ define([
 	'orion/keyBinding',
 	'orion/uiUtils',
 	'orion/util',
-	'orion/objects'
+	'orion/objects',
+	'orion/gitDiffAnnotation'
 ], function(
 	messages,
 	mEditor, mEventTarget, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mHoverFactory, mContentAssist,
@@ -48,7 +49,7 @@ define([
 	mSearcher, mEditorCommands, mGlobalCommands,
 	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
 	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
-	mKeyBinding, mUIUtils, util, objects
+	mKeyBinding, mUIUtils, util, objects, mGitDiffAnnotation
 ) {
 
 	function parseNumericParams(input, params) {
@@ -465,6 +466,29 @@ define([
 				} else {
 					liveEditSession.start();					
 				}
+				
+				// Git Diff service - displays the git diff annotations on the editor on save
+				var gitDiffAnnotation = new mGitDiffAnnotation.GitDiffAnnotation(serviceRegistry, editor);
+				
+				
+				var occurrenceTimer;
+				var self = this;
+				var changeListener = function(e) {
+					if (occurrenceTimer) {
+						window.clearTimeout(occurrenceTimer);
+					}
+					occurrenceTimer = window.setTimeout(function() {
+						occurrenceTimer = null;
+				        inputManager.save().then(function(){
+				        	gitDiffAnnotation.showAnnotations(inputManager);
+				        });
+	        
+					}, 500);
+				};
+				
+				editor.getTextView().addEventListener("ModelChanged", changeListener);
+				
+				
 			}.bind(this));
 			inputManager.addEventListener("Saving", function(event) { //$NON-NLS-0$
 				if (self.settings.trimTrailingWhiteSpace) {
@@ -495,7 +519,6 @@ define([
 					editor.reportStatus(messages.readonly, "error"); //$NON-NLS-0$
 				}
 			});
-
 			var contextImpl = {};
 			[
 				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-0$
