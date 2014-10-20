@@ -28,7 +28,6 @@
     function PluginProvider(headers) {
         var _headers = headers;
         var _connected = false;
-        var _target = null;
 
         var _currentMessageId = 0;
         var _currentObjectId = 0;
@@ -38,6 +37,15 @@
         var _responseReferences = {};
         var _objectReferences = {};
         var _serviceReferences = {};
+        
+        var _target = null;
+        if (typeof(window) === "undefined") { //$NON-NLS-0$
+            _target = self;
+        } else if (window !== window.parent) {
+            _target = window.parent;
+        } else if (window.opener !== null) {
+            _target = window.opener;
+        }        
 
         function _publish(message) {
             if (_target) {
@@ -52,6 +60,10 @@
             }
         }
         var _notify = _publish;
+      	var message = {
+	    	method: "loading", //$NON-NLS-0$
+	    };
+	    _publish(message);
 
         function _getPluginData() {
             var services = [];
@@ -172,7 +184,7 @@
                     params[i] = obj;
                 }
             });
-            var response = typeof messageId === undefined ? null : {
+            var response = typeof messageId === "undefined" ? null : {
                 id: messageId,
                 result: null,
                 error: null
@@ -313,19 +325,12 @@
                 }
                 return;
             }
-
-            if (typeof(window) === "undefined") { //$NON-NLS-0$
-                _target = self;
-            } else if (window !== window.parent) {
-                _target = window.parent;
-            } else if (window.opener !== null) {
-                _target = window.opener;
-            } else {
-                if (errback) {
-                    errback("No valid plugin target");
-                }
-                return;
-            }
+            if (!_target) {
+            	if (errback) {
+            		errback("No valid plugin target");
+            	}
+            	return;
+            }           
             addEventListener("message", _handleMessage, false); //$NON-NLS-0$
             var message = {
                 method: "plugin", //$NON-NLS-0$
@@ -345,7 +350,8 @@
                 _connected = false;
             }
             // Note: re-connecting is not currently supported
-        };
+        };            
     }
+    
     return PluginProvider;
 }));

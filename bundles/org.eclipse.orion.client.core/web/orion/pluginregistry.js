@@ -363,6 +363,8 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                         if (response && method === "progress" && response.progress) {
                             response.progress.apply(response, params);
                         }
+                    } else if ("loading" in message) {
+                        _channel.loading();
                     } else {
                         if ("plugin" === message.method) { //$NON-NLS-0$
                         	_channel.connected();
@@ -961,6 +963,10 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                 channel.target = iframe.contentWindow;
                 channel.connected = function() {
                 	clearTimeout(loadTimeout);
+                };
+                channel.loading = function() {
+                	clearTimeout(loadTimeout);
+                	loadTimeout = setTimeout(sendTimeout.bind(null, "Plugin handshake timeout for: " + url), 60000);
                 };
                 channel.close = function() {
                     clearTimeout(loadTimeout);
