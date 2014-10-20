@@ -74,13 +74,13 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		var plan = resource.Plan;
 		var manifestApplication = plan.Manifest.applications[0];
 		
+		showMessage("Loading deployment settings...");
+		
 		Deferred.all([
-		     
 		     mCfUtil.getTargets(preferences),
 		     mWizardUtils.getDefaultTarget(fileClient, resource)
-		     
 		]).then(function(results){
-			
+			hideMessage();
 			var clouds = results[0];
 			var defaultTarget = results[1];
 			
