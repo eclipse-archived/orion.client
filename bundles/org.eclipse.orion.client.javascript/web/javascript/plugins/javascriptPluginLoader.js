@@ -27,12 +27,12 @@ define([
 	}
 
 	if (!useWorker) {
-		// Non-worker case
-		require(["javascript/plugins/javascriptPlugin"]);
+		// Non-worker case.
+		require(["javascript/plugins/javascriptBootstrap"]);
 		return;
 	}
 
-	// Worker case. Talk directly to the framework message plumbing
+	// Worker case. Talk directly to the framework message plumbing.
 	var framework;
 	if (window !== window.parent) {
 		framework = window.parent;
@@ -46,7 +46,7 @@ define([
 	addEventListener("message", onFrameworkMessage);
 
 	// Start the worker
-	var worker = new Worker(new URL("javascriptWorker.js", window.location.href).href);
+	var worker = new Worker(new URL("javascriptBootstrap.js", window.location.href).href);
 	worker.addEventListener("message", onWorkerMessage);
 	worker.addEventListener("error", onWorkerError);
 
