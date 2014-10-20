@@ -5491,7 +5491,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return Math.max(0, this._viewDiv.clientWidth - viewPad.left - viewPad.right - innerRightWidth);
 		},
 		_getClipboardText: function (event, handler) {
-			var delimiter = this._model.getLineDelimiter();
+			var delimiter = this._singleMode ? "" : this._model.getLineDelimiter();
 			var clipboadText, text;
 			// IE
 			var window = this._getWindow();
