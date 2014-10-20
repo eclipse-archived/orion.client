@@ -2027,6 +2027,70 @@ define([
 		});
 		
 		/**
+		 * Tests computing occurrences for a named func expression inside an object property (and that params are skipped)
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439641
+		 */
+		it('test_object_properties_named_expressions1', function() {
+			editorContext.text = "var a={ f: function f(p1, p2) {}, g: function g() { this.f(); } }; f();";
+			return occurrences.computeOccurrences(editorContext, setContext(9, 9)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:8, end:9}, {start:20, end:21}, {start:57, end:58}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for a named func expression inside an object property (and that params are skipped)
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439641
+		 */
+		it('test_object_properties_named_expressions2', function() {
+			editorContext.text = "var a={ f: function f(p1, p2) {}, g: function g() { this.f(); } }; f();";
+			return occurrences.computeOccurrences(editorContext, setContext(20, 20)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:8, end:9}, {start:20, end:21}, {start:57, end:58}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for a named func expression inside an object property (and that params are skipped)
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439641
+		 */
+		it('test_object_properties_named_expressions3', function() {
+			editorContext.text = "var a={ f: function f(p1, p2) {}, g: function g() { this.f(); } }; f();";
+			return occurrences.computeOccurrences(editorContext, setContext(57, 58)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:8, end:9}, {start:20, end:21}, {start:57, end:58}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for a named func expression inside an object property (and that params are skipped)
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439641
+		 */
+		it('test_object_properties_named_expressions4', function() {
+			editorContext.text = "var a={ f: function f(p1, p2) {p1++;}, g: function g() { this.f(); } }; f();";
+			return occurrences.computeOccurrences(editorContext, setContext(23, 23)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:22, end:24}, {start:31, end:33}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
 		 * Tests whether occurrences finds and selects the correct token/word/node
 		 */
 		it('test_punctuators_1A', function() {

@@ -996,12 +996,17 @@ define([
 				// See if a 'this' keyword was selected
 				this.visitor.thisCheck = context.token.type === Estraverse.Syntax.ThisExpression;
 				
-				// See if an object property key is selected (or a usage of an object property such as this.prop())
+				// See if an object property key is selected (or a usage of an object property such as this.prop()) (or a named function expression as the child of a property)
 				this.visitor.objectPropCheck = false;
 				if (parent && parent.type === Estraverse.Syntax.Property){
 					this.visitor.objectPropCheck = context.token === parent.key;
 				} else if (parent && (parent.type === Estraverse.Syntax.MemberExpression && parent.object && parent.object.type === Estraverse.Syntax.ThisExpression)){
 					this.visitor.objectPropCheck = true;
+				} else if (parent && parent.type === Estraverse.Syntax.FunctionExpression && context.token.parents.length > 1 && context.token.parents[context.token.parents.length-2].type === Estraverse.Syntax.Property){
+					// Both the name and the params have the same parent
+					if (parent.id && parent.id.range === context.token.range){
+						this.visitor.objectPropCheck = true;
+					}
 				}
 				
 				// See if a labeled statement is selected
