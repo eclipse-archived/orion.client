@@ -30,10 +30,8 @@ define([
 		this.gitClient = options.gitClient;
 		this.filterQuery = this.root.mode === "full" ? "" : "user."; //$NON-NLS-1$ //$NON-NLS-0$
 	}
-	GitConfigListModel.prototype = Object.create(mExplorer.Explorer.prototype);
+	GitConfigListModel.prototype = Object.create(mExplorer.ExplorerModel.prototype);
 	objects.mixin(GitConfigListModel.prototype, /** @lends orion.git.GitConfigListModel.prototype */ {
-		destroy: function(){
-		},
 		getRoot: function(onItem){
 			onItem(this.root);
 		},

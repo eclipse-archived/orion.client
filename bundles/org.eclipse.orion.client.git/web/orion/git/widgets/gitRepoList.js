@@ -39,10 +39,8 @@ define([
 		this.gitClient = options.gitClient;
 		this.mode = options.mode;
 	}
-	GitRepoListModel.prototype = Object.create(mExplorer.Explorer.prototype);
+	GitRepoListModel.prototype = Object.create(mExplorer.ExplorerModel.prototype);
 	objects.mixin(GitRepoListModel.prototype, /** @lends orion.git.GitRepoListModel.prototype */ {
-		destroy: function(){
-		},
 		getRoot: function(onItem){
 			onItem(this.root);
 		},

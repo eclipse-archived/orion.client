@@ -62,10 +62,8 @@ define([
 		this.progressService = options.progressService;
 		this.section = options.section;
 	}
-	GitChangeListModel.prototype = Object.create(mExplorer.Explorer.prototype);
+	GitChangeListModel.prototype = Object.create(mExplorer.ExplorerModel.prototype);
 	objects.mixin(GitChangeListModel.prototype, /** @lends orion.git.GitChangeListModel.prototype */ {
-		destroy: function(){
-		},
 		getRoot: function(onItem){
 			onItem(this.changes || (this.root || (this.root = {Type: "Root"}))); //$NON-NLS-0$
 		},

@@ -39,10 +39,8 @@ define([
 		this.gitClient = options.gitClient;
 		this.filterQuery = "";
 	}
-	GitBranchListModel.prototype = Object.create(mExplorer.Explorer.prototype);
+	GitBranchListModel.prototype = Object.create(mExplorer.ExplorerModel.prototype);
 	objects.mixin(GitBranchListModel.prototype, /** @lends orion.git.GitBranchListModel.prototype */ {
-		destroy: function(){
-		},
 		getRoot: function(onItem){
 			onItem(this.root);
 		},

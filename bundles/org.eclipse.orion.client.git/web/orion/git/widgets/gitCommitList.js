@@ -65,10 +65,8 @@ define([
 		this.fromDateQuery = "";
 		this.toDateQuery = "";
 	}
-	GitCommitListModel.prototype = Object.create(mExplorer.Explorer.prototype);
+	GitCommitListModel.prototype = Object.create(mExplorer.ExplorerModel.prototype);
 	objects.mixin(GitCommitListModel.prototype, /** @lends orion.git.GitCommitListModel.prototype */ {
-		destroy: function(){
-		},
 		getRoot: function(onItem){
 			onItem(this.root);
 		},
