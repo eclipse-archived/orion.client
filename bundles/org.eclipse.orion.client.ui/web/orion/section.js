@@ -522,10 +522,14 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 		
 		_expand: function() {
 			this._positionDropdown();
-			this._contentParent.classList.remove("sectionClosed"); //$NON-NLS-0$
-			this.domNode.classList.remove("sectionClosed"); //$NON-NLS-0$
-			this._contentParent.classList.add("sectionOpened"); //$NON-NLS-0$
-			this.domNode.classList.add("sectionOpened"); //$NON-NLS-0$
+			if (this._contentParent) {
+				this._contentParent.classList.remove("sectionClosed"); //$NON-NLS-0$
+				this._contentParent.classList.add("sectionOpened"); //$NON-NLS-0$
+			}
+			if (this.domNode) {
+				this.domNode.classList.remove("sectionClosed"); //$NON-NLS-0$
+				this.domNode.classList.add("sectionOpened"); //$NON-NLS-0$
+			}
 			this.hidden = false;
 		},
 		
@@ -557,10 +561,14 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 		
 		_collapse: function() {
 			this.hidden = true;
-			this._contentParent.classList.add("sectionClosed"); //$NON-NLS-0$
-			this.domNode.classList.add("sectionClosed"); //$NON-NLS-0$
-			this._contentParent.classList.remove("sectionOpened"); //$NON-NLS-0$
-			this.domNode.classList.remove("sectionOpened"); //$NON-NLS-0$
+			if (this._contentParent) {
+				this._contentParent.classList.add("sectionClosed"); //$NON-NLS-0$
+				this._contentParent.classList.remove("sectionOpened"); //$NON-NLS-0$
+			}
+			if (this.domNode) {
+				this.domNode.classList.add("sectionClosed"); //$NON-NLS-0$
+				this.domNode.classList.remove("sectionOpened"); //$NON-NLS-0$
+			}
 		}
 	};
 	
