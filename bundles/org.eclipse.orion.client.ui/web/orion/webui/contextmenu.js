@@ -35,6 +35,7 @@ define([
 	}
 	
 	ContextMenu.prototype = Object.create(Dropdown.prototype);
+	ContextMenu.prototype.constructor = ContextMenu;
 	
 	objects.mixin(ContextMenu.prototype, /** @lends orion.webui.contextmenu.ContextMenu.prototype */ {
 			
@@ -49,9 +50,6 @@ define([
 			this._boundContextMenuCloser = this._contextMenuCloser.bind(this);
 			this._triggerNode.addEventListener("contextmenu", this._boundcontextmenuEventHandler, true); //$NON-NLS-0$
 			window.addEventListener("contextmenu", this._boundContextMenuCloser, false); //$NON-NLS-0$
-			
-			//clicking on the trigger node should close the context menu
-			this._triggerNode.addEventListener("click",  this._boundContextMenuCloser, false);//$NON-NLS-0$
 		},
 		
 		 _contextMenuCloser: function(event){
@@ -67,7 +65,20 @@ define([
 		},		
 	});
 	
-	ContextMenu.prototype.constructor = ContextMenu;
+	// overrides Dropdown.protoype.open
+	ContextMenu.prototype.open = function(event) {
+		//clicking on the trigger node should close the context menu
+		this._triggerNode.addEventListener("click",  this._boundContextMenuCloser, false);//$NON-NLS-0$
+		
+		return Dropdown.prototype.open.call(this, event); //call function in super class
+	};
+	
+	// overrides Dropdown.protoype.close
+	ContextMenu.prototype.close = function(restoreFocus) {
+		this._triggerNode.removeEventListener("click",  this._boundContextMenuCloser, false); //$NON-NLS-0$
+		
+		return Dropdown.prototype.close.call(this, restoreFocus); //call function in super class
+	};
 	
 	// overrides Dropdown.protoype._positionDropdown
 	ContextMenu.prototype._positionDropdown = function(mouseEvent) {

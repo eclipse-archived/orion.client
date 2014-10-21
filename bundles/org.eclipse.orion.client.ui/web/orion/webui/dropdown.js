@@ -80,23 +80,32 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			}
 			if (!this._triggerNode) { throw "no dom node for dropdown trigger found"; } //$NON-NLS-0$
 			
+			var triggerClickHandler = function(event) {
+				var actionTaken = false;
+				
+				if (this._triggerNode.classList.contains("dropdownMenuItem")) { //$NON-NLS-0$
+					// if the trigger is a dropdownMenuItem we only want it to open the submenu
+					actionTaken = this.open(event);
+				} else {
+					actionTaken = this.toggle(event);
+				}
+				
+				if (actionTaken) {
+					lib.stop(event);
+				}
+			}.bind(this);
+			
 			if (!options.skipTriggerEventListeners) {
-				var self = this;
-				// click on trigger opens.
-				this._triggerNode.addEventListener("click", function(event) { //$NON-NLS-0$
-					if (self.toggle(event))  {
-						lib.stop(event);
-					}
-				}, false);
-					
+				// click on trigger opens or toggles.
+				this._triggerNode.addEventListener("click", triggerClickHandler, false); //$NON-NLS-0$
+
 				// if trigger node is not key enabled...
 				if (this._triggerNode.tagName.toLowerCase() === "span") { //$NON-NLS-0$
 					this._triggerNode.addEventListener("keydown", function(event) { //$NON-NLS-0$
 						if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.SPACE) {
-							self.toggle();
-							lib.stop(event);
+							triggerClickHandler(event);
 						}
-					}, false);
+					}.bind(this), false);
 				}
 			}
 						
@@ -145,17 +154,15 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 				}
 				var items = this.getItems();
 				if (items.length > 0) {
-					if (!this._hookedAutoDismiss) {
-						if (this._boundAutoDismiss) {
-							lib.removeAutoDismiss(this._boundAutoDismiss);
-						} else {
-							this._boundAutoDismiss = this._autoDismiss.bind(this);
-						}
-						// add auto dismiss.  Clicking anywhere but trigger or a submenu item means close.
-						var submenuNodes = lib.$$array(".dropdownSubMenu", this._dropdownNode); //$NON-NLS-0$
-						lib.addAutoDismiss([this._triggerNode].concat(submenuNodes), this._boundAutoDismiss);
-						this._hookedAutoDismiss = true;
-					}
+					if (this._boundAutoDismiss) {
+						lib.removeAutoDismiss(this._boundAutoDismiss);
+					} 
+					this._boundAutoDismiss = this._autoDismiss.bind(this);
+
+					// add auto dismiss.  Clicking anywhere but trigger or a submenu item means close.
+					var submenuNodes = lib.$$array(".dropdownSubMenu", this._dropdownNode); //$NON-NLS-0$
+					lib.addAutoDismiss([this._triggerNode].concat(submenuNodes), this._boundAutoDismiss);
+
 					this._triggerNode.classList.add("dropdownTriggerOpen"); //$NON-NLS-0$
 					if (this._selectionClass) {
 						this._triggerNode.classList.add(this._selectionClass);
@@ -265,6 +272,11 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					this._selectedItem.classList.remove("dropdownMenuItemSelected"); //$NON-NLS-0$		
 					this._selectedItem = null;	
 				}
+				
+				if (this._boundAutoDismiss) {
+					lib.removeAutoDismiss(this._boundAutoDismiss);
+					this._boundAutoDismiss = null;
+				} 
 				actionTaken = true;
 			}
 			return actionTaken;
@@ -315,8 +327,6 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 					item.parentNode.removeChild(item);
 				}
 			});
-			
-			this._hookedAutoDismiss = false; //the autoDismiss nodes need to be recalculated
 		},
 		
 		 
@@ -411,6 +421,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 			this.empty();
 			if (this._boundAutoDismiss) {
 				lib.removeAutoDismiss(this._boundAutoDismiss);
+				this._boundAutoDismiss = null;
 			}
 		},
 		
