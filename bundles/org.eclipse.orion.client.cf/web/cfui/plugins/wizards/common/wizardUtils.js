@@ -171,6 +171,40 @@ define(['orion/Deferred', 'cfui/cfUtil',  'orion/urlUtils', 'orion/webui/littlel
 					}
 				});
 		    });
+		},
+		
+		/**
+		 * Summons the available clouds with the
+		 * default one if present.
+		 */
+		loadClouds : function(options){
+			options = options || {};
+			
+			var message = options.message || "Loading deployment settings...";
+			var showMessage = options.showMessage;
+			var hideMessage = options.hideMessage;
+			
+			var preferences = options.preferences;
+			var fileClient = options.fileClient;
+			var resource = options.resource;
+			
+			var d = new Deferred();
+			showMessage(message);
+			
+			Deferred.all([
+			     mCfUtil.getTargets(preferences),
+			 	 WizardUtils.getDefaultTarget(fileClient, resource)
+			 ]).then(function(results){
+				 
+				 hideMessage();
+				 d.resolve({
+					 clouds : results[0],
+					 defaultTarget : results[1]
+				 });
+				 
+			 }, d.reject);
+			
+			return d;
 		}
 	};
 	

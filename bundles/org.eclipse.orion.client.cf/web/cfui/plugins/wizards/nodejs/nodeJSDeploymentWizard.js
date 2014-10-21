@@ -10,11 +10,11 @@
  ******************************************************************************/
 /*global parent window document define orion setTimeout*/
 
-define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection', 'orion/i18nUtil',
-	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'cfui/plugins/wizards/common/wizardUtils', 'orion/objects', 'orion/widgets/input/ComboTextInput', 'orion/i18nUtil',
+define(["orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection', 'orion/i18nUtil',
+	 'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'cfui/plugins/wizards/common/wizardUtils',
 	'orion/webui/Wizard', 'cfui/plugins/wizards/common/deploymentLogic', 'cfui/plugins/wizards/common/debugPaneBuilder', 'cfui/plugins/wizards/common/corePageBuilder', 
 	'cfui/plugins/wizards/common/servicesPageBuilder', 'cfui/plugins/wizards/common/additionalParamPageBuilder'], 
-		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, i18nUtil, URITemplate, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, objects, ComboTextInput, i18nUtil, Wizard,
+		function(mBootstrap, Deferred, CFClient, PageUtil, mSelection, i18nUtil, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, Wizard,
 				mDeploymentLogic, mDebugPaneBuilder, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder) {
 	
 	/* plugin-host communication */
@@ -102,15 +102,16 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			return d;
 		}
 		
-		Deferred.all([
-		 		     
-		     mCfUtil.getTargets(preferences),
-		     mWizardUtils.getDefaultTarget(fileClient, resource)
-		 		     
-		]).then(function(results){
+		mWizardUtils.loadClouds({
+			showMessage : showMessage,
+			hideMessage : hideMessage,
+			preferences : preferences,
+			fileClient : fileClient,
+			resource : resource
+		}).then(function(resp){
 			
-			var clouds = results[0];
-			var defaultTarget = results[1];
+			var clouds = resp.clouds;
+			var defaultTarget = resp.defaultTarget;
 			
 			/* welcome page */
 			var defaultSelection;
@@ -263,7 +264,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		    var page2 = servicesPageBuilder.build();
 		    var page3 = additionalParamPageBuilder.build();
 		    
-			var wizard = new Wizard.Wizard({
+			new Wizard.Wizard({
 				parent: "wizard",
 				pages: [page0, page1, page2, page3],
 				commonPane: commonPane,
@@ -340,7 +341,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			    	AppPath : resource.AppPath
 				})
 			});
-		    
+			
 		}, postError);
 	});
 });
