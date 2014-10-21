@@ -13,11 +13,11 @@ define([
 	"chai/chai",
 	"orion/Deferred",
 	"orion/xhr",
-	"orion/editor/eventTarget",
-	"mocha/mocha"
-], function(chai, Deferred, xhr, mEventTarget) {
+	"orion/EventTarget",
+	"orion/xsrfUtils",
+	"mocha/mocha", // no exports, must come last
+], function(chai, Deferred, xhr, EventTarget, xsrfUtils) {
 	var assert = chai.assert;
-	var EventTarget = mEventTarget.EventTarget;
 
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=400017
 	var hasReadyStateOpenedBug = (function() {
@@ -56,6 +56,8 @@ define([
 	 * supported XHR features of the browser running the test as closely as possible.
 	 */
 	function MockXMLHttpRequest() {
+		EventTarget.attach(this);
+
 		// Does browser understand timeout?
 		if (typeof new XMLHttpRequest().timeout === 'number') {
 			Object.defineProperty(this, 'timeout', {
@@ -192,7 +194,6 @@ define([
 			}
 		}
 	};
-	EventTarget.addMixin(MockXMLHttpRequest.prototype);
 
 	/** A mock XHR request that succeeds. */
 	function OkXhr() {
@@ -205,7 +206,7 @@ define([
 			}, 75);
 		};
 	}
-	OkXhr.prototype = new MockXMLHttpRequest();
+	OkXhr.prototype = Object.create(MockXMLHttpRequest.prototype);
 
 	/** A mock XHR request that 404s. */
 	function FailXhr() {
@@ -218,7 +219,7 @@ define([
 			}, 100);
 		};
 	}
-	FailXhr.prototype = new MockXMLHttpRequest();
+	FailXhr.prototype = Object.create(MockXMLHttpRequest.prototype);
 
 	/** A mock XHR request that 404s. */
 	function AbortXhr() {
@@ -232,7 +233,7 @@ define([
 			}, 100);
 		};
 	}
-	AbortXhr.prototype = new MockXMLHttpRequest();
+	AbortXhr.prototype = Object.create(MockXMLHttpRequest.prototype);
 
 
 	function succeed(/*result*/) {
@@ -405,6 +406,56 @@ define([
 					}
 					assert.fail(error);
 				});
+			});
+		});
+		describe("xsrf", function() {
+			var XSRF_TOKEN = xsrfUtils.XSRF_TOKEN;
+			var oldCookie;
+			var i = 0;
+			beforeEach(function() {
+				// Cache the pre-test value of XSRF cookie
+				document.cookie.split(";").some(function(cookie) {
+					var pos = cookie.indexOf("=");
+					if (cookie.substring(0, pos) === XSRF_TOKEN) {
+						oldCookie = cookie.substring(pos + 1);
+						return true;
+					}
+				});
+				// Set XSRF cookie to a known value for testing
+				document.cookie = XSRF_TOKEN + "=testing" + (i++);
+			});
+			afterEach(function() {
+				// Restore the cookie back to its original pre-test value
+				if (typeof oldCookie === "string") {
+					document.cookie = XSRF_TOKEN + "=" + oldCookie;
+				} else {
+					// Remove the cookie
+					document.cookie = XSRF_TOKEN + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+				}
+			});
+
+			it("should send xsrf header", function() {
+				var d = new Deferred();
+				var headerCheckerXhr = new MockXMLHttpRequest();
+				headerCheckerXhr.send = function() {
+					var headers = this._getRequestHeaders();
+					assert.property(headers, XSRF_TOKEN);
+					assert.equal(headers[XSRF_TOKEN], "testing0", "Value equals the '" + XSRF_TOKEN + "' cookie");
+					d.resolve();
+				};
+				xhr("GET", "/", null, headerCheckerXhr);
+				return d;
+			});
+			it("should NOT send xsrf header on cross-origin request", function() {
+				var d = new Deferred();
+				var headerCheckerXhr = new MockXMLHttpRequest();
+				headerCheckerXhr.send = function() {
+					var headers = this._getRequestHeaders();
+					assert.notProperty(headers, XSRF_TOKEN);
+					d.resolve();
+				};
+				xhr("GET", "http://example.org/", null, headerCheckerXhr);
+				return d;
 			});
 		});
 	});
