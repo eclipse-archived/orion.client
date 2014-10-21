@@ -563,5 +563,10 @@ define([
 				return promise;
 			});
 		});
+
+		// TODO need a test for this but there is no easy way to observe the behavior from outside
+//		it("should send 'loading' upon creating PluginProvider", function() {
+//			//
+//		});
 	}); // pluginregistry
 });

@@ -363,7 +363,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                         if (response && method === "progress" && response.progress) {
                             response.progress.apply(response, params);
                         }
-                    } else if ("loading" in message) {
+                    } else if ("loading" === message.method) {
                         _channel.loading();
                     } else {
                         if ("plugin" === message.method) { //$NON-NLS-0$
