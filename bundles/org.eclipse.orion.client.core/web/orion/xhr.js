@@ -10,12 +10,16 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-
+/*global URL*/
 /**
  * @name orion.xhr
  * @namespace Provides a promise-based API to {@link XMLHttpRequest}.
  */
-define(['orion/Deferred','orion/xsrfUtils'], function(Deferred, xsrfUtils) {
+define([
+	'orion/Deferred',
+	'orion/xsrfUtils',
+	'orion/URL-shim', // no exports, must come last
+], function(Deferred, xsrfUtils) {
 
 	/**
 	 * @name orion.xhr.Result
@@ -61,6 +65,10 @@ define(['orion/Deferred','orion/xsrfUtils'], function(Deferred, xsrfUtils) {
 		return result;
 	}
 
+	function isSameOrigin(url) {
+		return new URL(location.href).origin === new URL(url, location.href).origin;
+	}
+
 	/**
 	 * Wrapper for {@link XMLHttpRequest} that returns a promise.
 	 * @name xhr
@@ -89,7 +97,9 @@ define(['orion/Deferred','orion/xsrfUtils'], function(Deferred, xsrfUtils) {
 		var xhr = (arguments.length > 3 && arguments[3]) ? arguments[3] : new XMLHttpRequest(); //$NON-NLS-0$
 		var d = new Deferred();
 		var headers = options.headers || {};
-		xsrfUtils.setNonceHeader(headers);
+		if (isSameOrigin(url)) {
+			xsrfUtils.setNonceHeader(headers);
+		}
 		var log = options.log || false;
 		var data;
 		if (typeof headers['X-Requested-With'] === 'undefined') { //$NON-NLS-1$ //$NON-NLS-0$
