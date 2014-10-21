@@ -129,6 +129,7 @@ define({
 	"WarningOrderedListShouldStartAt1": "The first item in an ordered list should have index 1",
 	"WarningLinkHasNoText": "Link has no text",
 	"WarningLinkHasNoURL": "Link has no URL",
+	"WarningUndefinedLinkId": "Undefined link ID: ${0}",
 	"PageTitleFormat": "${0} - ${1}", // ${0} is the file or resource being edited; ${1} is the task (eg. "Editor")
 	// Display names for keys:
 	"KeyCTRL": "Ctrl",

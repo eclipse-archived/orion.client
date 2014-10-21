@@ -887,6 +887,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				this._view = null;
 			}
 		},
+		getAnnotationModel: function() {
+			return this._annotationModel;
+		},
 		getBlockAtIndex: function(index) {
 			return this._findBlock(this._rootBlock, index);
 		},
@@ -919,6 +922,13 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				block = block.parent;
 			}
 			return result;
+		},
+		getTextModel: function() {
+			var model = this._view.getModel();
+			if (model.getBaseModel) {
+				model = model.getBaseModel();
+			}
+			return model;
 		},
 		removeAnnotationProvider: function(value) {
 			if (typeof value !== "function") { //$NON-NLS-0$

@@ -678,11 +678,11 @@ define([
 						var text = baseModel.getText(block.start, block.contentStart);
 						var match = this._leadingHashesRegex.exec(text);
 						if (match && match[0].length > 6) {
-							var annotation = mAnnotations.AnnotationType.createAnnotation(
+							_add.push(mAnnotations.AnnotationType.createAnnotation(
 								mAnnotations.AnnotationType.ANNOTATION_WARNING,
 								block.start,
 								block.start + match[0].length,
-								messages.WarningHeaderTooDeep);
+								messages.WarningHeaderTooDeep));
 						}
 					}
 				} else if (block.typeId === this._TYPEID_LISTITEM) {
@@ -691,18 +691,18 @@ define([
 					var itemIsOrdered = this._orderedListRegex.test(text);
 					var listIsOrdered = block.parent.startToken.ordered;
 					if (itemIsOrdered !== listIsOrdered) {
-						annotation = mAnnotations.AnnotationType.createAnnotation(
+						_add.push(mAnnotations.AnnotationType.createAnnotation(
 							mAnnotations.AnnotationType.ANNOTATION_WARNING,
 							block.start,
 							block.contentStart,
-							itemIsOrdered ? messages.WarningOrderedListItem : messages.WarningUnorderedListItem);
+							itemIsOrdered ? messages.WarningOrderedListItem : messages.WarningUnorderedListItem));
 					} else {
 						if (listIsOrdered && block.parent.getBlocks()[0] === block && text.indexOf("1.")) { //$NON-NLS-0$
-							annotation = mAnnotations.AnnotationType.createAnnotation(
+							_add.push(mAnnotations.AnnotationType.createAnnotation(
 								mAnnotations.AnnotationType.ANNOTATION_WARNING,
 								block.start,
 								block.contentStart,
-								messages.WarningOrderedListShouldStartAt1);
+								messages.WarningOrderedListShouldStartAt1));
 						}
 					}
 				} else if (block.typeId === this._TYPEID_PARAGRAPH) {
@@ -711,47 +711,33 @@ define([
 					linkMatches.forEach(function(current) {
 						var linkStart = block.start + current.index;
 						if (!current.match[1]) {
-							annotation = mAnnotations.AnnotationType.createAnnotation(
+							_add.push(mAnnotations.AnnotationType.createAnnotation(
 								mAnnotations.AnnotationType.ANNOTATION_WARNING,
 								linkStart,
 								linkStart + current.match[0].length,
-								messages.WarningLinkHasNoText);
+								messages.WarningLinkHasNoText));
 						} else {
 							if (current.pattern === marked.InlineLexer.rules.link) {
 								if (!current.match[2]) {
-									annotation = mAnnotations.AnnotationType.createAnnotation(
+									_add.push(mAnnotations.AnnotationType.createAnnotation(
 										mAnnotations.AnnotationType.ANNOTATION_WARNING,
 										linkStart,
 										linkStart + current.match[0].length,
-										messages.WarningLinkHasNoURL);
+										messages.WarningLinkHasNoURL));
 								}
 							} else {
-								/* reflink */
-								// TODO need to react to ref definition changes
-//								if (!links) {
-//									var currentBlock = block;
-//									while (currentBlock) {
-//										if (currentBlock.links) {
-//											links = currentBlock.links;
-//											break;
-//										}
-//										currentBlock = currentBlock.parent;
-//									}
-//								}
-//								var refName = current.match[2] || current.match[1];
-//								if (!(links && links[refName])) {
-//									annotation = mAnnotations.AnnotationType.createAnnotation(
-//										mAnnotations.AnnotationType.ANNOTATION_WARNING,
-//										linkStart,
-//										linkStart + current.match[0].length,
-//										"Undefined link reference: " + refName);
-//								}
+								/* reference link */
+								var refId = current.match[2] || current.match[1];
+								if (!this._linkDefs[refId]) {
+									_add.push(mAnnotations.AnnotationType.createAnnotation(
+										mAnnotations.AnnotationType.ANNOTATION_WARNING,
+										linkStart,
+										linkStart + current.match[0].length,
+										i18nUtil.formatMessage(messages.WarningUndefinedLinkId, refId)));
+								}
 							}
 						}
-					});
-				}
-				if (annotation) {
-					_add.push(annotation);
+					}.bind(this));
 				}
 			}
 
@@ -985,14 +971,25 @@ define([
 						}
 					}
 				}
+
+				var add = [], remove = [];
+				var annotationModel = this._styler.getAnnotationModel();
+				var baseModel = this._styler.getTextModel();
 				affectedBlocks.forEach(function(current) {
-					/* create a new div with content corresponding to this block */
+					/* regenerate the preview div corresponding to this block */
 					var newElement = document.createElement("div"); //$NON-NLS-0$
 					this._generateHTML(newElement, current);
 					var element = this.getElementByIdentifier(current.elementId);
 					newElement.children[0].className = element.className;
 					element.parentElement.replaceChild(newElement.children[0], element);
+					/* recompute the block's annotations */
+					if (annotationModel) {
+						this._annotationProvider(annotationModel, baseModel, current, current.start, current.end, remove, add);
+					}
 				}.bind(this));
+				if (remove.length || add.length) {
+					annotationModel.replaceAnnotations(remove, add);
+				}
 			}
 
 			var oldBlocksIndex = 0, children = [];
