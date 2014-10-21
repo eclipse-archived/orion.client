@@ -276,16 +276,16 @@ exports.ExplorerNavHandler = (function() {
 		
 		setSelection: function(model, toggling, shiftSelectionAnchor){
 			if(this._selectionPolicy === "readonlySelection"){
-				return;
+				return false;
 			}
 			if(this._selectionPolicy === "cursorOnly"){ //$NON-NLS-0$
 				if(toggling && this.explorer.renderer._useCheckboxSelection){
 					this._checkRow(model,true);
 				}
-				return;
+				return false;
 			}
 			if(!this._isRowSelectable(model)){
-				return;
+				return false;
 			}
 			if(!toggling || this._selectionPolicy === "singleSelection"){//$NON-NLS-0$
 				this._clearSelection(true);
@@ -310,6 +310,7 @@ exports.ExplorerNavHandler = (function() {
 				this.explorer.renderer.storeSelections();
 				this.explorer.selection.setSelections(this._selections);		
 			}
+			return true;
 		},
 		
 		moveColumn: function(model, offset){
@@ -734,8 +735,9 @@ exports.ExplorerNavHandler = (function() {
 
 		//Space key toggles the check box on the current row if the renderer uses check box
 		onSpace: function(e) {
-			this.setSelection(this.currentModel(), true, true);
-			e.preventDefault();
+			if(this.setSelection(this.currentModel(), true, true)) {
+				e.preventDefault();
+			}
 		},
 		
 		//Enter key simulates a href call if the current row has an href link rendered. The render has to provide the getRowActionElement function that returns the href DIV.
