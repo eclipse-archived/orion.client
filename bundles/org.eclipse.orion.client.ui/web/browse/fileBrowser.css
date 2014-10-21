@@ -199,6 +199,7 @@
 }
 
 .dropdownMenuItem, .dropdownMenuItem a {
+	padding-right: 20px;
 	color: #444 !important;
 	-webkit-box-sizing: initial !important;
 	box-sizing: initial !important;
