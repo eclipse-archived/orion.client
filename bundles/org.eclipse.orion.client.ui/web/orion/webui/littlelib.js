@@ -314,6 +314,26 @@ define(["orion/util"], function(util) {
 	}
 	
 	/**
+	 * Returns the parent of the node that has the vertical scroll bar.
+	 * 
+	 * @name orion.webui.littlelib.getOffsetParent
+	 * @function
+	 * @static
+	 * @param {Element} node The node to lookup the offset parent
+	 */
+	function getOffsetParent(node) {
+		var offsetParent = node.parentNode, documentElement = document.documentElement;
+		while (offsetParent && offsetParent !== documentElement) {
+			var style = window.getComputedStyle(offsetParent, null);
+			if (!style) { break; }
+			var overflow = style.getPropertyValue("overflow-y"); //$NON-NLS-0$
+			if (overflow === "auto" || overflow === "scroll") { break; } //$NON-NLS-1$ //$NON-NLS-0$
+			offsetParent = offsetParent.parentNode;
+		}
+		return offsetParent;
+	}
+	
+	/**
 	 * Cancels the default behavior of an event and stops its propagation.
 	 * @name orion.webui.littlelib.stop
 	 * @function
@@ -392,6 +412,7 @@ define(["orion/util"], function(util) {
 		processDOMNodes: processDOMNodes,
 		addAutoDismiss: addAutoDismiss,
 		setFramesEnabled: setFramesEnabled,
+		getOffsetParent: getOffsetParent,
 		removeAutoDismiss: removeAutoDismiss,
 		keyName: keyName,
 		KEY: KEY,

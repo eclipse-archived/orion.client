@@ -446,14 +446,7 @@ exports.ExplorerNavHandler = (function() {
 			this.toggleCursor(currentModel, true);
 			var currentRowDiv = this.getRowDiv();
 			if(currentRowDiv && !noScroll) {
-				var offsetParent = currentRowDiv.parentNode, documentElement = document.documentElement;
-				while (offsetParent && offsetParent !== documentElement) {
-					var style = window.getComputedStyle(offsetParent, null);
-					if (!style) { break; }
-					var overflow = style.getPropertyValue("overflow-y"); //$NON-NLS-0$
-					if (overflow === "auto" || overflow === "scroll") { break; } //$NON-NLS-1$ //$NON-NLS-0$
-					offsetParent = offsetParent.parentNode;
-				}
+				var offsetParent = lib.getOffsetParent(currentRowDiv.parentNode);
 				if (offsetParent) {
 					var visible = true;
 					if(currentRowDiv.offsetTop <= offsetParent.scrollTop){

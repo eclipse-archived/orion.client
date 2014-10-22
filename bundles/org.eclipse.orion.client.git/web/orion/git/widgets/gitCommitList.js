@@ -1027,7 +1027,10 @@ define([
 						moreButton.textContent = i18nUtil.formatMessage(messages[item.Type + "Progress"], ref ? ref.Name : model.root.Name);
 						item.parent.location = item.NextLocation;
 						item.parent.more = true;
+						var offsetParent = lib.getOffsetParent(td);
+						var scrollTop = offsetParent ? offsetParent.scrollTop : 0;
 						explorer.changedItem(item.parent).then(function() {
+							if (offsetParent) offsetParent.scrollTop = scrollTop;
 							item.parent.more = false;
 						});
 					});
