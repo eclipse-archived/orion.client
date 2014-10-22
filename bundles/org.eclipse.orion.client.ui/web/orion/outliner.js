@@ -26,6 +26,8 @@ define([
 	'orion/webui/Slideout'
 ], function(objects, messages, Deferred, lib, mUIUtils, mExplorer, mCommands, URITemplate, EventTarget, i18nUtil, EditorContext, KeyBinding, mGlobalCommands, mSlideout) {
 
+	var OUTLINE_TIMEOUT_MS = 2 * 60 * 1000; // determines how many milliseconds we will wait for the outline service to compute and return an outline before considering it timed out
+	
 	function OutlineRenderer (options, explorer, title, selectionService) {
 		this.explorer = explorer;
 		this._init(options);
@@ -418,6 +420,17 @@ define([
 			spinner.classList.add("core-sprite-progress"); //$NON-NLS-0$
 			this._outlineNode.appendChild(spinner);
 			
+			if (this._outlineTimeout) {
+				window.clearTimeout(this._outlineTimeout);
+			}
+			this._outlineTimeout = window.setTimeout(function() {
+				lib.empty(this._outlineNode);
+				var span = document.createElement("span"); //$NON-NLS-0$
+				span.appendChild(document.createTextNode(messages["outlineTimeout"])); //$NON-NLS-0$
+				span.classList.add("outlineTimeoutSpan"); //$NON-NLS-0$
+				this._outlineNode.appendChild(span);
+			}.bind(this), OUTLINE_TIMEOUT_MS);
+			
 			// Bail we're in the process of looking up capable providers
 			if (this._providerLookup) {
 				return;
@@ -439,6 +452,10 @@ define([
 			}
 		},
 		_renderOutline: function(outlineModel, title) {
+			if (this._outlineTimeout) {
+				window.clearTimeout(this._outlineTimeout);
+				this._outlineTimeout = null;
+			}
 			lib.empty(this._outlineNode);
 			outlineModel = outlineModel instanceof Array ? outlineModel : [outlineModel];
 			if (outlineModel) {

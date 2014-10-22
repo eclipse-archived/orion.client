@@ -46,6 +46,13 @@
 	width: 16px; /*16px standard indent*/
 }
 
+.outlineTimeoutSpan {
+	color: red;
+	display: inline-block;
+	margin: 10px 6px;
+	position: relative;
+}
+
 .findOptionsDiv {
 	display: inline-block;
 	margin: 0;
