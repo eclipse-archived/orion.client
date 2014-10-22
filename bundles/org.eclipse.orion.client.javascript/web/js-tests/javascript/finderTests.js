@@ -135,81 +135,65 @@ define([
 			assert.equal(word, null, 'Should have found no word');
 		});
 		it('test_findNode1', function() {
-			try {
-				editorContext.text = "function  F1(p1, p2) {\n"+
-					"\tvar out = p1;\n"+
-					"};";
-				return astManager.getAST(editorContext).then(function(ast) {
-					var node = Finder.findNode(9, ast);
-					if(!node) {
-						assert.fail("Should have found a node");
-					}
-					else {
-						assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
-					}
-				});
-			}
-			finally {
-				tearDown();
-			}
+			after(tearDown);
+			editorContext.text = "function  F1(p1, p2) {\n"+
+				"\tvar out = p1;\n"+
+				"};";
+			return astManager.getAST(editorContext).then(function(ast) {
+				var node = Finder.findNode(9, ast);
+				if(!node) {
+					assert.fail("Should have found a node");
+				}
+				else {
+					assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
+				}
+			});
 		});
 		it('test_findNode2', function() {
-			try {
-				editorContext.text = "function  F1(p1, p2) {\n"+
-					"\tvar out = p1;\n"+
-					"};";
-				return astManager.getAST(editorContext).then(function(ast) {
-					var node = Finder.findNode(12, ast);
-					if(!node) {
-						assert.fail("Should have found a node");
-					}
-					else {
-						assert.equal(node.type, 'Identifier', 'Should have found a Identifier node');
-					}
-				});
-			}
-			finally {
-				tearDown();
-			}
+			after(tearDown);
+			editorContext.text = "function  F1(p1, p2) {\n"+
+				"\tvar out = p1;\n"+
+				"};";
+			return astManager.getAST(editorContext).then(function(ast) {
+				var node = Finder.findNode(12, ast);
+				if(!node) {
+					assert.fail("Should have found a node");
+				}
+				else {
+					assert.equal(node.type, 'Identifier', 'Should have found a Identifier node');
+				}
+			});
 		});
 		it('test_findNode3', function() {
-			try {
-				editorContext.text = "function  F1(p1, p2) {\n"+
-					"\tvar out = p1;\n"+
-					"};";
-				return astManager.getAST(editorContext).then(function(ast) {
-					var node = Finder.findNode(14, ast);
-					if(!node) {
-						assert.fail("Should have found a node");
-					}
-					else {
-						assert.equal(node.type, 'Identifier', 'Should have found a Identifier node');
-					}
-				});
-			}
-			finally {
-				tearDown();
-			}
+			after(tearDown);
+			editorContext.text = "function  F1(p1, p2) {\n"+
+				"\tvar out = p1;\n"+
+				"};";
+			return astManager.getAST(editorContext).then(function(ast) {
+				var node = Finder.findNode(14, ast);
+				if(!node) {
+					assert.fail("Should have found a node");
+				}
+				else {
+					assert.equal(node.type, 'Identifier', 'Should have found a Identifier node');
+				}
+			});
 		});
 		
 		it('test_findNode4', function() {
-			try {
-				editorContext.text = "function  F1(p1, p2) {\n"+
-					"\tvar out = p1;\n"+
-					"};";
-				return astManager.getAST(editorContext).then(function(ast) {
-					var node = Finder.findNode(28, ast);
-					if(!node) {
-						assert.fail("Should have found a node");
-					}
-					else {
-						assert.equal(node.type, 'Identifier', 'Should have found a Identifier node');
-					}
-				});
-			}
-			finally {
-				tearDown();
-			}
+			after(tearDown);
+			editorContext.text = "function  F1(p1, p2) {\n"+
+				"\tvar out = p1;\n"+
+				"};";
+			return astManager.getAST(editorContext).then(function(ast) {
+				var node = Finder.findNode(28, ast);
+				if(!node) {
+					assert.fail("Should have found a node");
+				}
+				else {
+					assert.equal(node.type, 'Identifier', 'Should have found a Identifier node');
+				}
+			});
 		});
 		
 		/**

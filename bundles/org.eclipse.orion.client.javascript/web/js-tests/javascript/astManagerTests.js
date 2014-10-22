@@ -57,58 +57,44 @@ define([
 			};
 		}
 	
-		/**
-		 * Executes a testcase, `func` with the global esprima replaced by `mockEsprima`
-		 * @param {Object} mockEsprima
-		 * @param {Function} func
-		 * @returns {Object|orion.Promise}
-		 */
-		function withMockEsprima(mockEsprima, func) {
-			var savedEsprima = (typeof esprima !== "undefined") ? esprima : undefined;
-			var reset = function() {
-				esprima = savedEsprima;
-			};
-			esprima = mockEsprima;
-			var result, async;
-			try {
-				result = func();
-				if (typeof result.then === "function") {
-					async = true;
-					return result.then(function(val) {
-						reset();
-						return new Deferred().resolve(val);
-					}, function(err) {
-						reset();
-						return new Deferred().reject(err);
-					});
-				}
-			} finally {
-				if (!async) {
-					reset();
-				}
-			}
-		}
-		
 		it("test get AST", function() {
 			var result = setup(),
 			    astManager = result.astManager,
 			    editorContext = result.editorContext,
 			    mockEsprima = result.mockEsprima;
 	
-			return withMockEsprima(mockEsprima, function() {
-				mockEsprima._setAST("this is the AST");
-				return astManager.getAST(editorContext).then(function(ast) {
-					assert.equal(ast, "this is the AST");
-				});
+			mockEsprima._setAST("this is the AST");
+			return astManager.getAST(editorContext).then(function(ast) {
+				assert.equal(ast, "this is the AST");
 			});
 		});
-		it("test AST cache is used", function() {
-			var result = setup(),
-			    astManager = result.astManager,
-			    editorContext = result.editorContext,
-			    mockEsprima = result.mockEsprima;
-	
-			return withMockEsprima(mockEsprima, function() {
+		describe("cache", function() {
+			it("should not hit cache when file metadata is not known", function() {
+				var result = setup(),
+				    astManager = result.astManager,
+				    editorContext = result.editorContext,
+				    mockEsprima = result.mockEsprima;
+		
+				var i = 0;
+				mockEsprima.parse = function() {
+					return "AST callcount " + (i++);
+				};
+				return astManager.getAST(editorContext).then(function(ast) {
+					assert.equal(ast, "AST callcount 0");
+					return astManager.getAST(editorContext).then(function(ast) {
+						assert.equal(ast, "AST callcount 1");
+					});
+				});
+			});
+			it("should hit cache when metadata is known and Location matches", function() {
+				var result = setup(),
+				    astManager = result.astManager,
+				    editorContext = result.editorContext,
+				    mockEsprima = result.mockEsprima;
+				editorContext.getFileMetadata = function() {
+					return new Deferred().resolve({ location: "foo.js" });
+				};
+
 				var i = 0;
 				mockEsprima.parse = function() {
 					return "AST callcount " + (i++);
@@ -120,14 +106,35 @@ define([
 					});
 				});
 			});
-		});
-		it("test AST cache is invalidated", function() {
-			var result = setup(),
-			    astManager = result.astManager,
-			    editorContext = result.editorContext,
-			    mockEsprima = result.mockEsprima;
-	
-			return withMockEsprima(mockEsprima, function() {
+			it("should NOT hit cache when metadata is known and Location does not match", function() {
+				var result = setup(),
+				    astManager = result.astManager,
+				    editorContext = result.editorContext,
+				    mockEsprima = result.mockEsprima;
+
+				var i = 0;
+				mockEsprima.parse = function() {
+					return "AST callcount " + (i++);
+				};
+				editorContext.getFileMetadata = function() {
+					return new Deferred().resolve({ location: "foo" });
+				};
+				return astManager.getAST(editorContext).then(function(ast) {
+					assert.equal(ast, "AST callcount 0");
+					editorContext.getFileMetadata = function() {
+						return new Deferred().resolve({ location: "bar" });
+					};
+					return astManager.getAST(editorContext).then(function(ast) {
+						assert.equal(ast, "AST callcount 1");
+					});
+				});
+			});
+			it("should invalidate cache on #updated()", function() {
+				var result = setup(),
+				    astManager = result.astManager,
+				    editorContext = result.editorContext,
+				    mockEsprima = result.mockEsprima;
+
 				var i = 0;
 				mockEsprima.parse = function() {
 					return "AST callcount " + (i++);
@@ -148,16 +155,14 @@ define([
 			    editorContext = result.editorContext,
 			    mockEsprima = result.mockEsprima;
 	
-			return withMockEsprima(mockEsprima, function() {
-				var error = new Error("Game over man");
-				mockEsprima.parse = function() {
-					throw error;
-				};
-				return astManager.getAST(editorContext).then(function(ast) {
-					assert.ok(ast);
-					assert.equal(ast.type, "Program");
-					assert.equal(ast.errors[0].message, error.message);
-				});
+			var error = new Error("Game over man");
+			mockEsprima.parse = function() {
+				throw error;
+			};
+			return astManager.getAST(editorContext).then(function(ast) {
+				assert.ok(ast);
+				assert.equal(ast.type, "Program");
+				assert.equal(ast.errors[0].message, error.message);
 			});
 		});
 	});
