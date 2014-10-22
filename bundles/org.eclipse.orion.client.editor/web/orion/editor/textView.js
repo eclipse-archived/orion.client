@@ -13,15 +13,16 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/textView", [ //$NON-NLS-0$
+define("orion/editor/textView", [  //$NON-NLS-0$
 	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
 	'orion/editor/textModel', //$NON-NLS-0$
 	'orion/editor/keyModes', //$NON-NLS-0$
 	'orion/editor/eventTarget', //$NON-NLS-0$
 	'orion/editor/textTheme', //$NON-NLS-0$
 	'orion/editor/util', //$NON-NLS-0$
-	'orion/util' //$NON-NLS-0$
-], function(messages, mTextModel, mKeyModes, mEventTarget, mTextTheme, textUtil, util) {
+	'orion/util', //$NON-NLS-0$
+	'orion/metrics' //$NON-NLS-0$
+], function(messages, mTextModel, mKeyModes, mEventTarget, mTextTheme, textUtil, util, mMetrics) {
 
 	/** @private */
 	function getWindow(document) {
@@ -2083,6 +2084,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (!this._clientDiv) { return; }
 			var action = this._actions[actionID];
 			if (action) {
+				if (action.actionDescription && action.actionDescription.track) {
+					mMetrics.logEvent("editor", "action invoked", action.actionDescription.name || actionID); //$NON-NLS-1$ //$NON-NLS-0$
+				}
 				if (!defaultAction && action.handler) {
 					if (action.handler(actionOptions)) {
 						return true;

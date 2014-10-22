@@ -19,8 +19,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
 	'orion/editor/util', //$NON-NLS-0$
 	'orion/util', //$NON-NLS-0$
-	'orion/webui/littlelib' //$NON-NLS-0$
-], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, textUtil, util, lib) {
+	'orion/webui/littlelib', //$NON-NLS-0$
+	'orion/metrics' //$NON-NLS-0$
+], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, textUtil, util, lib, mMetrics) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -137,7 +138,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				self.activate();
 			}
 			return true;
-		}, {name: messages.contentAssist});
+		}, {name: messages.contentAssist, track: true});
 	}
 	ContentAssist.prototype = /** @lends orion.editor.ContentAssist.prototype */ {
 		/**
@@ -189,6 +190,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				}
 			}
 			this.dispatchEvent({type: "ProposalApplied", data: data}); //$NON-NLS-0$
+			mMetrics.logEvent("editor", "content assist proposal applied"); //$NON-NLS-1$ //$NON-NLS-0$
 			return true;
 		},
 		activate: function(providers, autoTriggered) {

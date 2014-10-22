@@ -40,7 +40,8 @@ define([
 	'orion/keyBinding',
 	'orion/uiUtils',
 	'orion/util',
-	'orion/objects'
+	'orion/objects',
+	'orion/metrics'
 ], function(
 	messages,
 	mEditor, mEventTarget, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mHoverFactory, mContentAssist,
@@ -48,7 +49,7 @@ define([
 	mSearcher, mEditorCommands, mGlobalCommands,
 	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
 	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
-	mKeyBinding, mUIUtils, util, objects
+	mKeyBinding, mUIUtils, util, objects, mMetrics
 ) {
 
 	function parseNumericParams(input, params) {
@@ -453,6 +454,7 @@ define([
 			inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 				var textView = editor.getTextView();
 				if (textView) {
+					mMetrics.logEvent("editor", "editor opened", event.contentType.name); //$NON-NLS-1$ //$NON-NLS-0$
 					liveEditSession.start(inputManager.getContentType(), event.title);
 					textView.setOptions(this.updateViewOptions(this.settings));
 					this.syntaxHighlighter.setup(event.contentType, editor.getTextView(), editor.getAnnotationModel(), event.title, true).then(function() {

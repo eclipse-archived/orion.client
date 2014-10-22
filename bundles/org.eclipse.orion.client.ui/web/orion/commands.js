@@ -728,6 +728,7 @@ define([
 			this.isEditor = options.isEditor;
 			this.type = options.type;
 			this.checked = options.checked;
+			this.track = options.track;
 		},
 		
 		/**

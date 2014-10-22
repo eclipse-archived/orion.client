@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2011, 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -17,11 +17,11 @@ define([
 		'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
 		'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html',
 		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html',
-		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu', 'orion/objects'
+		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu', 'orion/objects', "orion/metrics"
 	],
-	function (messages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands, 
+	function (messages, require, commonHTML, KeyBinding, EventTarget, mCommands, mParameterCollectors, mExtensionCommands,
 		mBreadcrumbs, lib, i18nUtil, mSplitter, mDropdown, mTooltip, mContentTypes, mKeyAssist, mThemePreferences, mThemeData, Deferred,
-		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, util, mCustomGlobalCommands, mFileClient, SideMenu, objects) {
+		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, util, mCustomGlobalCommands, mFileClient, SideMenu, objects, mMetrics) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 *
@@ -55,7 +55,7 @@ define([
 			/*
 			 * To add user name call: setUserName(serviceRegistry, dropdownTrigger);
 			 */
-			
+
 			var userTrigger = document.getElementById('userTrigger');
 			userTrigger.classList.add("imageSprite");
 			userTrigger.classList.add("core-sprite-silhouette");
@@ -87,7 +87,7 @@ define([
 
 				this.sideMenu = new SideMenu(sideMenuParent, lib.node("pageContent")); //$NON-NLS-0$
 				nav.addEventListener("click", this.sideMenu.toggle.bind(this.sideMenu)); //$NON-NLS-0$
-				
+
 				var sideMenuToggle = lib.node("sideMenuToggle"); //$NON-NLS-0$
 				if (sideMenuToggle) {
 					sideMenuToggle.addEventListener("click", this.sideMenu.toggle.bind(this.sideMenu)); //$NON-NLS-0$
@@ -128,8 +128,8 @@ define([
 		authenticationIds = [];
 
 		var menuGenerator = customGlobalCommands.createMenuGenerator.apply(this, arguments);
-		
-		if (!menuGenerator) { return; } 
+
+		if (!menuGenerator) { return; }
 
 		for (var i = 0; i < authServices.length; i++) {
 			var servicePtr = authServices[i];
@@ -290,11 +290,11 @@ define([
 					deferredCommandItems.push(commandItem(relatedLink, commandOptionsPromise, null));
 				}
 			});
-			
+
 			function continueOnError(error) {
 				return error;
 			}
-			
+
 			Deferred.all(deferredCommandItems, continueOnError).then(function(commandItems) {
 				commandItems.sort(function(a, b) {
 					return a.command.name.localeCompare(b.command.name);
@@ -358,7 +358,7 @@ define([
 	}
 
 	var currentBreadcrumb = null;
-	
+
 	/**
 	 * Set the target of the page so that common infrastructure (breadcrumbs, related menu, etc.) can be added for the page.
 	 * @name orion.globalCommands#setPageTarget
@@ -367,7 +367,7 @@ define([
 	 * @param {Object} options The target options object.
 	 * @param {String} options.task the name of the user task that the page represents.
 	 * @param {Object} options.target the metadata describing the page resource target. Optional.
-	 * @param {String|DomNode} options.breadCrumbContainer the dom node or id of the bread crumb container. Optional. If not defined, 'location' is used as 
+	 * @param {String|DomNode} options.breadCrumbContainer the dom node or id of the bread crumb container. Optional. If not defined, 'location' is used as
 	 * the bread crumb container id, which is always in the page banner.
 	 * @param {String} options.name the name of the resource that is showing on the page. Optional. If a target parameter is supplied, the
 	 * target metadata name will be used if a name is not specified in the options.
@@ -436,7 +436,7 @@ define([
 				currentBreadcrumb = new mBreadcrumbs.BreadCrumbs({
 					container: locationNode,
 					rootSegmentName: breadcrumbRootName
-				});	
+				});
 			} else {
 				var fileClient = serviceRegistry && new mFileClient.FileClient(serviceRegistry);
 				var resource = options.breadcrumbTarget || options.target;
@@ -449,7 +449,7 @@ define([
 					workspaceRootURL: workspaceRootURL,
 					makeFinalHref: options.makeBreadcrumFinalLink,
 					makeHref: options.makeBreadcrumbLink
-				});	
+				});
 			}
 		}
 	}
@@ -529,23 +529,23 @@ define([
 	function getMainSplitter() {
 		return mainSplitter;
 	}
-	
+
 	var keyAssist = null;
 	function getKeyAssist() {
 		return keyAssist;
 	}
-	
+
 	var globalEventTarget = new EventTarget();
 	function getGlobalEventTarget() {
 		return globalEventTarget;
 	}
-	
+
 	/**
 	 * Generates the banner at the top of a page.
 	 *
 	 * @name orion.globalCommands#generateBanner
 	 * @function
-	 * 
+	 *
 	 * @param parentId
 	 * @param serviceRegistry
 	 * @param commandRegistry
@@ -556,6 +556,8 @@ define([
 	 * @param {Boolean} closeSplitter true to make the splitter's initial state "closed".
 	 */
 	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, closeSplitter) {
+		mMetrics.init();
+
 		new mThemePreferences.ThemePreferences(prefsService, new mThemeData.ThemeData()).apply();
 
 		var parent = lib.node(parentId);
@@ -601,7 +603,7 @@ define([
 				staticBanner.style.MozBoxSizing = "border-box"; //$NON-NLS-0$
 			}
 		}
-		
+
 		var footer = lib.node("footer"); //$NON-NLS-0$
 		if (footer) {
 			footer.innerHTML = FooterTemplate;
@@ -730,7 +732,7 @@ define([
 			getGlobalEventTarget().dispatchEvent({type: "toggleTrim", maximized: !maximized}); //$NON-NLS-0$
 			return true;
 		};
-			
+
 
 		var noTrim = window.orionNoTrim || false;
 		if (noTrim) {
@@ -747,7 +749,7 @@ define([
 			});
 			commandRegistry.addCommand(toggleBanner);
 			commandRegistry.registerCommandContribution("globalActions", "orion.toggleTrim", 100, null, true, new KeyBinding.KeyBinding("m", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			
+
 			// Open configuration page, Ctrl+Shift+F1
 			var configDetailsCommand = new mCommands.Command({
 				name: messages["System Configuration Details"],
@@ -757,10 +759,10 @@ define([
 					return require.toUrl("about/about.html"); //$NON-NLS-0$
 				}
 			});
-	
+
 			commandRegistry.addCommand(configDetailsCommand);
 			commandRegistry.registerCommandContribution("globalActions", "orion.configDetailsPage", 100, null, true, new KeyBinding.KeyBinding(112, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	
+
 			// Background Operations Page, Ctrl+Shift+O
 			var operationsCommand = new mCommands.Command({
 				name: messages["Background Operations"],
@@ -770,10 +772,10 @@ define([
 					return require.toUrl("operations/list.html"); //$NON-NLS-0$
 				}
 			});
-	
+
 			commandRegistry.addCommand(operationsCommand);
 			commandRegistry.registerCommandContribution("globalActions", "orion.backgroundOperations", 100, null, true, new KeyBinding.KeyBinding('o', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	
+
 			// Key assist
 			keyAssist = new mKeyAssist.KeyAssistPanel({
 				commandRegistry: commandRegistry
@@ -793,12 +795,12 @@ define([
 			});
 			commandRegistry.addCommand(keyAssistCommand);
 			commandRegistry.registerCommandContribution("globalActions", "orion.keyAssist", 100, null, true, new KeyBinding.KeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
-	
+
 			renderGlobalCommands(commandRegistry);
 
 			generateUserInfo(serviceRegistry, keyAssistCommand.callback);
 		}
-		
+
 
 		// now that footer containing progress pane is added
 		startProgressService(serviceRegistry);
