@@ -74,7 +74,7 @@ define([
 				toggleable: true,
 				type: type, //$NON-NLS-0$ //From user preference
 				ignoreWhitespace: ignoreWhitespace,//From user reference
-				readonly: !saveCmdContainerId,
+				readonly: !saveCmdContainerId || !editableInComparePage,
 				hasConflicts: hasConflicts,
 				diffProvider: diffProvider,
 				resource: resource,
