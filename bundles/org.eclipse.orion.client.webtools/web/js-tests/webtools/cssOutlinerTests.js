@@ -43,8 +43,8 @@ define([
 			if(!element.line) {
 				assert.fail("The outlined element must have a line number");
 			}
-			if(!element.offset) {
-				assert.fail("The outlied element must have an offset");
+			if(element.offset < 0) {
+				assert.fail("The outlined element must have a valid offset");
 			}
 			assert.equal(element.label, label, "The label is not the same");
 			assert.equal(element.length, length, "The length is not the same");
@@ -59,7 +59,7 @@ define([
 			if(!outline || outline.length < 1) {
 				assert.fail("There should be one outline element");
 			}
-			assertElement(outline[0], ".simple", 6, 1, 1);
+			assertElement(outline[0], ".simple", 7, 1, 0);
 		});
 		
 		it('test_simpleContent', function() {
@@ -69,7 +69,7 @@ define([
 			if(!outline || outline.length < 1) {
 				assert.fail("There should be one outline element");
 			}
-			assertElement(outline[0], ".simpleContent", 13, 1, 1);
+			assertElement(outline[0], ".simpleContent", 14, 1, 0);
 		});
 		
 		it('test_simpleWhitespace', function() {
@@ -79,7 +79,7 @@ define([
 			if(!outline || outline.length < 1) {
 				assert.fail("There should be one outline element");
 			}
-			assertElement(outline[0], ".simpleWhitespace", 16, 1, 7);
+			assertElement(outline[0], ".simpleWhitespace", 17, 1, 6);
 		});
 		
 		it('test_simpleComment', function() {
@@ -89,7 +89,7 @@ define([
 			if(!outline || outline.length < 1) {
 				assert.fail("There should be one outline element");
 			}
-			assertElement(outline[0], ".simpleComment", 13, 4, 1);
+			assertElement(outline[0], ".simpleComment", 14, 4, 0);
 		});
 		
 		it('test_simpleContentNoSemiColon', function() {
@@ -99,7 +99,7 @@ define([
 			if(!outline || outline.length < 1) {
 				assert.fail("There should be one outline element");
 			}
-			assertElement(outline[0], ".simpleContentNoSemiColon", 24, 1, 1);
+			assertElement(outline[0], ".simpleContentNoSemiColon", 25, 1, 0);
 		});
 		
 		it('test_simpleID', function() {
@@ -109,7 +109,7 @@ define([
 			if(!outline || outline.length < 1) {
 				assert.fail("There should be one outline element");
 			}
-			assertElement(outline[0], "#simpleID", 8, 1, 1);
+			assertElement(outline[0], "#simpleID", 9, 1, 0);
 		});
 		
 		it('test_multiNoSymbol', function() {
@@ -120,7 +120,7 @@ define([
 				assert.fail("There should be one outline element");
 			}
 			// TODO cssLint returns text with three spaces for unknown reason
-			assertElement(outline[0], ".multi   .multi2", 5, 1, 1);
+			assertElement(outline[0], ".multi   .multi2", 6, 1, 0);
 		});
 		
 		it('test_multiSymbol', function() {
@@ -130,7 +130,7 @@ define([
 			if(!outline || outline.length < 1) {
 				assert.fail("There should be one outline element");
 			}
-			assertElement(outline[0], ".multiSym, .multi2", 8, 1, 1);
+			assertElement(outline[0], ".multiSym, .multi2", 9, 1, 0);
 		});
 /*		
 		it('test_', function() {

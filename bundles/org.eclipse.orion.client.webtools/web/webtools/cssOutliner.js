@@ -62,18 +62,16 @@ define("webtools/cssOutliner", [ //$NON-NLS-0$
 							if (sel.parts && sel.parts.length > 0){
 								var part = sel.parts[0]; // We want to check instanceof SelectorPart, but it is not API
 								if (line === null) { line = part.line; }
-								if (col === null) { col = part.col; }
+								if (col === null) { col = part.col-1; }
 								if (length === null){
 									length = part.text.length;
-									if (length > 0){ length--; /*length range is inclusive*/}
 								}
 							}
 							// If no valid parts found, just use the entire selector text
 							if (line === null) { line = sel.line; }
-							if (col === null) { col = sel.col; }
+							if (col === null) { col = sel.col-1; }
 							if (length === null) {
 								length = sel.text.length;
-								if (length > 0){ length--; /*length range is inclusive*/}
 							}
 							selectorText.push(sel.text);
 						}
