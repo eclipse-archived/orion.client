@@ -1009,7 +1009,7 @@ define([
 				var td = document.createElement("td"); //$NON-NLS-0$
 
 				if (item.Type === "MoreCommits") { //$NON-NLS-1$ //$NON-NLS-0$
-					td.classList.add("gitCommitListMore"); //$NON-NLS-0$
+					td.classList.add("gitListMore"); //$NON-NLS-0$
 					var ref = model.simpleLog ? model.getTargetReference() : model.getActiveBranch();
 					var moreText;
 					if (item.parent.Type === "Incoming" || item.parent.Type === "Outgoing") { //$NON-NLS-1$ //$NON-NLS-0$

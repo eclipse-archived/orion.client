@@ -44,6 +44,8 @@ define({
 	"more": "more ...", //$NON-NLS-0$  //$NON-NLS-1$
 	"less": "less ...", //$NON-NLS-0$  //$NON-NLS-1$
 	"More": "More", //$NON-NLS-0$  //$NON-NLS-1$
+	"MoreFiles" : "More Files", //$NON-NLS-0$  //$NON-NLS-1$
+	"MoreFilesProgress": "Loading more files...", //$NON-NLS-0$  //$NON-NLS-1$
 	"MoreCommits": "More commits for \"${0}\"", //$NON-NLS-0$  //$NON-NLS-1$
 	"MoreCommitsProgress": "Loading more commits for \"${0}\"...", //$NON-NLS-0$  //$NON-NLS-1$
 	"MoreBranches": "More branches for \"${0}\"", //$NON-NLS-0$  //$NON-NLS-1$

@@ -304,7 +304,7 @@ define([
 					td = document.createElement("td"); //$NON-NLS-0$
 					
 					if (item.Type === "MoreBranches" || item.Type === "MoreTags" || item.Type === "MoreStashes") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						td.classList.add("gitCommitListMore"); //$NON-NLS-0$
+						td.classList.add("gitListMore"); //$NON-NLS-0$
 						var moreButton = document.createElement("button"); //$NON-NLS-0$
 						moreButton.className = "commandButton"; //$NON-NLS-0$
 						moreButton.textContent = i18nUtil.formatMessage(messages[item.Type], item.parent.Name);

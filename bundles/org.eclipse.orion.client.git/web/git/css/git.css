@@ -434,19 +434,11 @@ table .sectionTable {
 	opacity: 1;
 }
 
-.gitCommitListMore {
+.gitListMore {
 	text-align: center;
 	font-size: 10pt;
 	font-weight: bold;
 	padding: 10px;
-}
-
-.gitTagListMore {
-	text-align: center;
-	font-size: 10pt;
-	font-weight: bold;
-	color: gray;
-	padding: 6px;
 }
 
 .gitCommitMessage .gitCommitMessageExplorerRow {

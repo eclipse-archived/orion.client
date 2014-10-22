@@ -70,7 +70,7 @@ define([
 						if (commit.incoming) image.classList.add("incoming"); //$NON-NLS-0$
 						if (commit.outgoing) {
 							image.classList.add("outgoing"); //$NON-NLS-0$
-							if (!commit.Diffs || !commit.Diffs.length) {
+							if (!commit.Diffs || !commit.Diffs.Children || !commit.Diffs.Children.length) {
 								image.classList.add("invalid"); //$NON-NLS-0$
 								var badgeDiv = document.createElement("div"); //$NON-NLS-0$
 								badgeDiv.title = messages["EmptyCommitWarning"];
