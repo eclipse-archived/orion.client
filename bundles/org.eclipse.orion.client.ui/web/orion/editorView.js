@@ -498,7 +498,7 @@ define([
 				}
 			});
 
-			var contextImpl = {};
+			var contextImpl = Object.create(null);
 			[
 				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-0$
 				"getSelection", "setSelection", //$NON-NLS-1$ //$NON-NLS-0$
@@ -512,6 +512,27 @@ define([
 			});
 			contextImpl.showMarkers = function(markers) {
 				serviceRegistry.getService("orion.core.marker")._setProblems(markers); //$NON-NLS-0$
+			};
+			/**
+			 * @since 7.0
+			 */
+			contextImpl.getFileMetadata = function() {
+				var meta = self.inputManager.getFileMetadata();
+				if(meta) {
+					var data = Object.create(null);
+					data.name = meta.Name;
+					data.location = meta.Location;
+					var type = self.inputManager.getContentType();
+					if(type) {
+						data.contentType = Object.create(null);
+						data.contentType.id = type.id;
+						data.contentType.name = type.name;
+						data.contentType.imageClass = type.imageClass;
+						data.contentType.extension = type.extension;
+					}
+					return data;
+				}
+				return null;
 			};
 			// Forward status from plugin to orion.page.message
 			contextImpl.setStatus = mEditorCommands.handleStatusMessage.bind(null, serviceRegistry);
