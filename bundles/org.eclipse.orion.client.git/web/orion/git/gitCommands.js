@@ -649,6 +649,7 @@ var exports = {};
 			imageClass: "git-sprite-fetch", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id: "eclipse.orion.git.fetch", //$NON-NLS-0$
+			track: true,
 			callback: function(data) {
 				return fetchCallback(data, false).then(function() {
 					dispatchModelEventOn({type: "modelChanged", action: "fetch", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
@@ -705,6 +706,7 @@ var exports = {};
 			imageClass: "git-sprite-merge", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.merge", //$NON-NLS-0$
+			track: true,
 			callback: function(data) {
 				var item = data.items;
 				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
@@ -892,6 +894,7 @@ var exports = {};
 			id : "eclipse.orion.git.rebase", //$NON-NLS-0$
 			imageClass: "git-sprite-rebase", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			track: true,
 			callback: function(data) {
 				rebaseCallback(data).then(function() {
 					dispatchModelEventOn({type: "modelChanged", action: "rebase", item: data.items}); //$NON-NLS-1$ //$NON-NLS-0$
@@ -938,6 +941,7 @@ var exports = {};
 //			imageClass: "git-sprite-push", //$NON-NLS-0$
 //			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.sync", //$NON-NLS-0$
+			track: true,
 			callback: function(data) {
 				return fetchCallback(data).then(function() {
 					return rebaseCallback(data).then(function() {
