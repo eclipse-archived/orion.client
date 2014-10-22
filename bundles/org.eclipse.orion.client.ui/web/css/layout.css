@@ -584,7 +584,7 @@ and (max-device-width : 1024px)  {
 
 .sideMenuList{
 	display:inline-block !important;
-	height: calc(100% - 2px);
+	height: calc(100% - 4px);
 	margin: 0;
 	overflow-y: hidden;
 	padding: 0;
