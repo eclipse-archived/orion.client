@@ -40,7 +40,8 @@ define([
 	'orion/keyBinding',
 	'orion/uiUtils',
 	'orion/util',
-	'orion/objects'
+	'orion/objects',
+	'orion/diffService'
 ], function(
 	messages,
 	mEditor, mEventTarget, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mHoverFactory, mContentAssist,
@@ -48,7 +49,7 @@ define([
 	mSearcher, mEditorCommands, mGlobalCommands,
 	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
 	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
-	mKeyBinding, mUIUtils, util, objects
+	mKeyBinding, mUIUtils, util, objects, mDiffService
 ) {
 
 	function parseNumericParams(input, params) {
@@ -134,7 +135,7 @@ define([
 			return this.settings;
 		},
 		setParent: function(parent) {
-			this._parent = parent;	
+			this._parent = parent;
 		},
 		updateSourceCodeActions: function(prefs, sourceCodeActions) {
 			if (sourceCodeActions) {
@@ -193,7 +194,7 @@ define([
 			}
 			this.markOccurrences.setOccurrencesVisible(prefs.showOccurrences);
 			if (editor.getContentAssist()) {
-				editor.getContentAssist().setAutoTriggerEnabled(prefs.contentAssistAutoTrigger);	
+				editor.getContentAssist().setAutoTriggerEnabled(prefs.contentAssistAutoTrigger);
 			}
 
 			this.dispatchEvent({
@@ -253,7 +254,7 @@ define([
 							binding = scopes[scopedBinding][k];
 							keyAssist.createItem(binding.bindingString, binding.name, binding.execute);
 						}
-					}	
+					}
 				}
 			}
 		},
@@ -339,7 +340,7 @@ define([
 					}
 					return true;
 				});
-				
+
 				textView.setKeyBinding(new mKeyBinding.KeyStroke('z', true, false, true), "toggleZoomRuler"); //$NON-NLS-1$ //$NON-NLS-0$
 				textView.setAction("toggleZoomRuler", function() { //$NON-NLS-0$
 					if (!self.settings.zoomRulerVisible) return false;
@@ -349,7 +350,7 @@ define([
 					}
 					return true;
 				}, {name: messages.toggleZoomRuler});
-				
+
 				self.vi = self.emacs = null;
 				self.updateKeyMode(self.settings, textView);
 
@@ -373,15 +374,15 @@ define([
 							var id = serviceRef.getProperty("service.id").toString();  //$NON-NLS-0$
 							var charTriggers = serviceRef.getProperty("charTriggers"); //$NON-NLS-0$
 							var excludedStyles = serviceRef.getProperty("excludedStyles");  //$NON-NLS-0$
-							
+
 							if (charTriggers) {
 								charTriggers = new RegExp(charTriggers);
 							}
-							
+
 							if (excludedStyles) {
 								excludedStyles = new RegExp(excludedStyles);
 							}
-							
+
 							return {provider: service, id: id, charTriggers: charTriggers, excludedStyles: excludedStyles};
 						}
 						return null;
@@ -389,7 +390,7 @@ define([
 						return !!providerInfo;
 					});
 				}
-				
+
 				// Produce a bound EditorContext that contentAssist can invoke with no knowledge of ServiceRegistry.
 				var boundEditorContext = {};
 				Object.keys(EditorContext).forEach(function(key) {
@@ -403,17 +404,17 @@ define([
 				contentAssist.setProgress(progress);
 				contentAssist.setStyleAccessor(self.getStyleAccessor());
 			};
-			
+
 			var contentAssistFactory = readonly ? null : {
 				createContentAssistMode: function(editor) {
 					var contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
-					
+
 					contentAssist.addEventListener("Activating", setContentAssistProviders.bind(null, editor, contentAssist)); //$NON-NLS-0$
 					var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist"); //$NON-NLS-0$
 					var result = new mContentAssist.ContentAssistMode(contentAssist, widget);
 					contentAssist.setMode(result);
-					
-					// preload content assist plugins to reduce the delay 
+
+					// preload content assist plugins to reduce the delay
 					// that happens when a user first triggers content assist
 					setContentAssistProviders(editor, contentAssist);
 					contentAssist.initialize();
@@ -463,7 +464,7 @@ define([
 						}
 					}.bind(this));
 				} else {
-					liveEditSession.start();					
+					liveEditSession.start();
 				}
 			}.bind(this));
 			inputManager.addEventListener("Saving", function(event) { //$NON-NLS-0$
@@ -471,7 +472,11 @@ define([
 					editor.getTextView().invokeAction("trimTrailingWhitespaces"); //$NON-NLS-0$
 				}
 			});
-			
+
+			var diffService = serviceRegistry.getService("orion.edit.diff"); //$NON-NLS-0$
+			if(diffService) {
+				mDiffService.diffService(serviceRegistry, inputManager, editor);
+			}
 			var markerService = serviceRegistry.getService("orion.core.marker"); //$NON-NLS-0$
 			if(markerService) {
 				markerService.addEventListener("problemsChanged", function(event) { //$NON-NLS-0$
@@ -487,7 +492,7 @@ define([
 			var markOccurrences = this.markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, inputManager, editor);
 			markOccurrences.setOccurrencesVisible(this.settings.occurrencesVisible);
 			markOccurrences.findOccurrences();
-			
+
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
@@ -495,7 +500,6 @@ define([
 					editor.reportStatus(messages.readonly, "error"); //$NON-NLS-0$
 				}
 			});
-
 			var contextImpl = {};
 			[
 				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-0$
