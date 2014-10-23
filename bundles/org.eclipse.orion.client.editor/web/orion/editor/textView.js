@@ -1661,22 +1661,40 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		 *       <li>"deleteNext" - deletes the charecter following the caret</li>
 		 *       <li>"deleteWordPrevious" - deletes the word preceding the caret</li>
 		 *       <li>"deleteWordNext" - deletes the word following the caret</li>
+		 *       <li>"deleteLineStart" - deletes characteres to the beginning of the line</li>
+		 *       <li>"deleteLineEnd" - deletes characteres to the end of the line</li>
 		 *       <li>"tab" - inserts a tab character at the caret</li>
 		 *       <li>"shiftTab" - noop</li>
-		 *       <li>"toggleTabMode" - toggles tab mode.</li>
-		 *       <li>"toggleWrapMode" - toggles wrap mode.</li>
-		 *       <li>"toggleOverwriteMode" - toggles overwrite mode.</li>
 		 *       <li>"enter" - inserts a line delimiter at the caret</li>
+		 *       <li>"uppercase" - upper case the text at the caret</li>
+		 *       <li>"lowercase" - lower case the text at the caret</li>
+		 *       <li>"capitalize" - capitilize case the text at the caret</li>
+		 *       <li>"reversecase" - reverse the case the text at the caret</li>
 		 *     </ul>
-		 *   <li>Clipboard actions.</li>
+		 *   <li>Clipboard actions. These actions modify the view text as well</li>
 		 *     <ul>
 		 *       <li>"copy" - copies the selected text to the clipboard</li>
 		 *       <li>"cut" - copies the selected text to the clipboard and deletes the selection</li>
 		 *       <li>"paste" - replaces the selected text with the clipboard contents</li>
 		 *     </ul>
+		 *   <li>Scrolling actions.</li>
+		 *     <ul>
+		 *       <li>"scrollLineUp" - scrolls the view up by one line</li>
+		 *       <li>"scrollLineDown" - scrolls the view down by one line</li>
+		 *       <li>"scrollPageUp" - scrolls the view up by one page</li>
+		 *       <li>"scrollPageDown" - scrolls the view down by one page</li>
+		 *       <li>"scrollTextStart" - scrolls the view to the beginning of the document</li>
+		 *       <li>"scrollTextEnd" - scrolls the view to the end of the document</li>
+		 *     </ul>
+		 *   <li>Mode actions.</li>
+		 *     <ul>
+		 *       <li>"toggleTabMode" - toggles tab mode.</li>
+		 *       <li>"toggleWrapMode" - toggles wrap mode.</li>
+		 *       <li>"toggleOverwriteMode" - toggles overwrite mode.</li>
+		 *     </ul>
 		 * </ul>
 		 * </p>
-		 *
+		 * 
 		 * @param {Boolean} [defaultAction=false] whether or not the predefined actions are included.
 		 * @returns {String[]} an array of action IDs defined in the text view.
 		 *
