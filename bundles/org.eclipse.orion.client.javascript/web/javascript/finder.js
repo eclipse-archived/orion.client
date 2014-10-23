@@ -445,6 +445,11 @@ define([
 						//does the scope enclose it?
 						if((scope.range[0] <= this.context.start) && (scope.range[1] >= this.context.end)) {
 							this.defscope = scope;
+						} else {
+							// Selection belongs to an outside scope so use the outside definition (Bug 447962)
+							scope.occurrences = [];
+							this.skipScope = scope;
+							return true;
 						}
 					}
 					scope.occurrences.push({
@@ -887,8 +892,8 @@ define([
 					// The token ignores punctuators, but the node is required for context
 					// TODO Look for a more efficient way to move between node/token, see Bug 436191
 					var node = this.findNode(ctxt.selection.start, ast, {parents: true});
-					if (token.range[0] >= node.range[0] && token.range[1] <= node.range[1]){
-						if(!this._skip(node)) {
+					if(!this._skip(node)) {
+						if (token.range[0] >= node.range[0] && token.range[1] <= node.range[1]){
 							var context = {
 								start: ctxt.selection.start,
 								end: ctxt.selection.end,

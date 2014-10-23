@@ -1433,13 +1433,81 @@ define([
 		/**
 		 * Tests that occurrences with redefines are only marked inside appropriate scopes
 		 * As the selected 'reDef' isn't defined in the program scope, we assume it belongs to the global scope
-		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438317
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=447962
 		 */
 		it('test_redefineScopesFuncExpr3', function() {
 			editorContext.text = "var a = function reDef() { var b = function reDef(){}; }; reDef();";
 			return occurrences.computeOccurrences(editorContext, setContext(63, 63)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:17, end:22}, {start:44, end:49}, {start:58, end:63}]);
+					assertOccurrences(results, [{start:58, end:63}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests that occurrences with redefines are only marked inside appropriate scopes
+		 * As the selected 'reDef' isn't defined in the program scope, we assume it belongs to the global scope
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=447962
+		 */
+		it('test_redefineScopesFuncExprVar1', function() {
+			editorContext.text = "var a = function reDef(){ reDef(); }; var reDef; reDef();";
+			return occurrences.computeOccurrences(editorContext, setContext(17, 17)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:17, end:22}, {start:26, end:31}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests that occurrences with redefines are only marked inside appropriate scopes
+		 * As the selected 'reDef' isn't defined in the program scope, we assume it belongs to the global scope
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=447962
+		 */
+		it('test_redefineScopesFuncExprVar2', function() {
+			editorContext.text = "var a = function reDef(){ reDef(); }; var reDef; reDef();";
+			return occurrences.computeOccurrences(editorContext, setContext(27, 29)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:17, end:22}, {start:26, end:31}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests that occurrences with redefines are only marked inside appropriate scopes
+		 * As the selected 'reDef' isn't defined in the program scope, we assume it belongs to the global scope
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=447962
+		 */
+		it('test_redefineScopesFuncExprVar3', function() {
+			editorContext.text = "var a = function reDef(){ reDef(); }; var reDef; reDef();";
+			return occurrences.computeOccurrences(editorContext, setContext(47, 47)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:42, end:47}, {start:49, end:54}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests that occurrences with redefines are only marked inside appropriate scopes
+		 * As the selected 'reDef' isn't defined in the program scope, we assume it belongs to the global scope
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=447962
+		 */
+		it('test_redefineScopesFuncExprVar4', function() {
+			editorContext.text = "var a = function reDef(){ reDef(); }; var reDef; reDef();";
+			return occurrences.computeOccurrences(editorContext, setContext(49, 54)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:42, end:47}, {start:49, end:54}]);
 				}
 				finally {
 					tearDown();
