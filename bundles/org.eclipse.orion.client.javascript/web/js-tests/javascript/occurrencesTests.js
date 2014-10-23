@@ -1303,6 +1303,102 @@ define([
 		});
 		
 		/**
+		 * Tests when a redefine happens with occurrences in sibling scopes
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448535
+		 */
+		it('test_redefineSiblingScopes1', function() {
+			editorContext.text = "var reDef; reDef(); function g(){ reDef(); } function reDef(){} function h(){ reDef(); } var reDef;";
+			return occurrences.computeOccurrences(editorContext, setContext(4, 4)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:9}, {start:11, end:16}, {start:34, end:39}, {start:54, end:59}, {start:78, end:83}, {start:93, end:98}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests when a redefine happens with occurrences in sibling scopes
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448535
+		 */
+		it('test_redefineSiblingScopes2', function() {
+			editorContext.text = "var reDef; reDef(); function g(){ reDef(); } function reDef(){} function h(){ reDef(); } var reDef;";
+			return occurrences.computeOccurrences(editorContext, setContext(11, 12)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:9}, {start:11, end:16}, {start:34, end:39}, {start:54, end:59}, {start:78, end:83}, {start:93, end:98}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests when a redefine happens with occurrences in sibling scopes
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448535
+		 */
+		it('test_redefineSiblingScopes3', function() {
+			editorContext.text = "var reDef; reDef(); function g(){ reDef(); } function reDef(){} function h(){ reDef(); } var reDef;";
+			return occurrences.computeOccurrences(editorContext, setContext(34, 39)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:9}, {start:11, end:16}, {start:34, end:39}, {start:54, end:59}, {start:78, end:83}, {start:93, end:98}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests when a redefine happens with occurrences in sibling scopes
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448535
+		 */
+		it('test_redefineSiblingScopes4', function() {
+			editorContext.text = "var reDef; reDef(); function g(){ reDef(); } function reDef(){} function h(){ reDef(); } var reDef;";
+			return occurrences.computeOccurrences(editorContext, setContext(59, 59)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:9}, {start:11, end:16}, {start:34, end:39}, {start:54, end:59}, {start:78, end:83}, {start:93, end:98}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests when a redefine happens with occurrences in sibling scopes
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448535
+		 */
+		it('test_redefineSiblingScopes5', function() {
+			editorContext.text = "var reDef; reDef(); function g(){ reDef(); } function reDef(){} function h(){ reDef(); } var reDef;";
+			return occurrences.computeOccurrences(editorContext, setContext(78, 78)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:9}, {start:11, end:16}, {start:34, end:39}, {start:54, end:59}, {start:78, end:83}, {start:93, end:98}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests when a redefine happens with occurrences in sibling scopes
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448535
+		 */
+		it('test_redefineSiblingScopes6', function() {
+			editorContext.text = "var reDef; reDef(); function g(){ reDef(); } function reDef(){} function h(){ reDef(); } var reDef;";
+			return occurrences.computeOccurrences(editorContext, setContext(94, 98)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:9}, {start:11, end:16}, {start:34, end:39}, {start:54, end:59}, {start:78, end:83}, {start:93, end:98}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
 		 * Tests that occurrences with redefines are only marked inside appropriate scopes
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=438317
 		 */

@@ -369,7 +369,8 @@ define([
 			
 			var len = scope.occurrences.length;
 			var i, j;
-			if(this.defscope) {
+			// Move all occurrences into the defining scope in case an inner scope redefines (Bug 448535)
+			if(this.defscope && this.defscope === scope) {
 				for(i = 0; i < len; i++) {
 					this.occurrences.push(scope.occurrences[i]);
 				}
