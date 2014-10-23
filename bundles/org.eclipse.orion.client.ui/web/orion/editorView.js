@@ -454,7 +454,7 @@ define([
 			inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 				var textView = editor.getTextView();
 				if (textView) {
-					mMetrics.logEvent("editor", "editor opened", event.contentType.name); //$NON-NLS-1$ //$NON-NLS-0$
+					mMetrics.logEvent("editor", "editor opened", event.contentType.id); //$NON-NLS-1$ //$NON-NLS-0$
 					liveEditSession.start(inputManager.getContentType(), event.title);
 					textView.setOptions(this.updateViewOptions(this.settings));
 					this.syntaxHighlighter.setup(event.contentType, editor.getTextView(), editor.getAnnotationModel(), event.title, true).then(function() {

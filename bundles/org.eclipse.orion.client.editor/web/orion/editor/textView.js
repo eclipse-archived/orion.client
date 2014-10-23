@@ -2103,7 +2103,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var action = this._actions[actionID];
 			if (action) {
 				if (action.actionDescription && action.actionDescription.track) {
-					mMetrics.logEvent("editor", "action invoked", action.actionDescription.name || actionID); //$NON-NLS-1$ //$NON-NLS-0$
+					mMetrics.logEvent("editor", "action invoked", actionID); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				if (!defaultAction && action.handler) {
 					if (action.handler(actionOptions)) {
