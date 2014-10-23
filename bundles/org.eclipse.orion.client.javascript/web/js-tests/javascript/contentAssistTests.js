@@ -29,12 +29,14 @@ define([
 		 * @returns {Object} The AST
 		 */
 		function parseFull(contents) {
-			return Esprima.parse(contents, {
+			var ast = Esprima.parse(contents, {
 						range: true,
 						tolerant: true,
 						comment: true,
 						tokens: true
 					});
+			ast.source = contents;
+			return ast;
 		}
 	
 		/**

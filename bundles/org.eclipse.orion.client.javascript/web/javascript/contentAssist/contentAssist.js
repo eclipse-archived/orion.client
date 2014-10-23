@@ -13,7 +13,7 @@
  ******************************************************************************/
 /*eslint-env amd */
 define([
-	'javascript/contentAssist/typeEnvironment',  //$NON-NLS-0$
+    'javascript/contentAssist/typeEnvironment',
 	'javascript/contentAssist/typeInference',  //$NON-NLS-0$
 	'javascript/contentAssist/typeUtils',  //$NON-NLS-0$
 	'javascript/contentAssist/proposalUtils',  //$NON-NLS-0$
@@ -183,7 +183,6 @@ define([
 	 * @constructor
 	 * @public
 	 * @param {javascript.ASTManager} astManager An AST manager to create ASTs with
-	 * @param {Object} [indexer] An indexer to load / work with supplied indexes
 	 * @param {Object} lintOptions the given jslint options from the source
 	 */
 	function JSContentAssist(astManager, lintOptions) {
@@ -270,12 +269,11 @@ define([
 			    context.prefix = proposalUtils.getPrefix(buffer, context, completionKind.kind);
 				var self = this;
 				return typeEnv.createEnvironment({
-					buffer: buffer,
+				    ast: ast,
 					uid : "local",
 					offset : offset,
 					indexer: self.indexer,
-					globalObjName : self._findGlobalObject(ast.comments, self.lintOptions),
-					comments : ast.comments
+					globalObjName : typeUtils.findGlobalObject(ast.comments, self.lintOptions),
 				}).then(function(environment) {
 					// must defer inferring the containing function block until the end
 					environment.defer = completionKind.toDefer;
@@ -286,6 +284,8 @@ define([
 					var target = typeInf.inferTypes(ast, environment, self.lintOptions);
 					var proposalsObj = { };
 					self._createInferredProposals(target, environment, completionKind.kind, context, buffer, offset - context.prefix.length, proposalsObj);
+				    delete environment.defer;
+				    delete environment.deferredComments;
 					return [].concat(self._filterAndSortProposals(proposalsObj),
 					                 self._createDocProposals(context, completionKind, buffer, environment, ast),
 									 self._createTemplateProposals(context, completionKind, buffer),
@@ -798,40 +798,6 @@ define([
 			}
 	
 			return newProposals;
-		},
-		
-		/**
-		 * @description Find the global objects given the AST comments and the lint options
-		 * @function
-		 * @private
-		 * @param {Array} comments The array of comment nodes from the AST
-		 * @param {Object} lintOptions The lint options
-		 */
-		_findGlobalObject: function(comments, lintOptions) {
-			for (var i = 0; i < comments.length; i++) {
-				var comment = comments[i];
-				var value = comment.value.trim();
-				if (comment.type === "Block" && value.match(/^(?:jslint|jshint|eslint-env).*/)) {
-					// the lint options section.  now look for the browser or node
-					if (value.match(/^(?:jslint|jshint)\s+.*(?:browser|amd)\s*:\s*true(?:\s+|$).*/) || 
-					    value.match(/^eslint-env\s+.*(?:browser|amd)(?:\s+|$).*/)) {
-						return "Window";
-					} else if (value.match(/^(?:jslint|jshint)\s+.*node\s*:\s*true(?:\s+|$).*/) ||
-					           value.match(/^eslint-env\s+.*node(?:\s+|$).*/)) {
-						return "Module";
-					} else {
-						return "Global";
-					}
-				}
-			}
-			if (lintOptions && lintOptions.options) {
-				if (lintOptions.options.browser === true || lintOptions.options.amd === true) {
-					return "Window";
-				} else if (lintOptions.options.node === true) {
-					return "Module";
-				}
-			}
-			return "Global";
 		},
 		
 		/**

@@ -18,10 +18,70 @@ other utility functions related to types.
 /*eslint-env es5, browser, amd*/
 /*global doctrine*/
 define([
-'javascript/contentAssist/proposalUtils',
 'logger',
 'doctrine' //stays last, exports into global scope
-], function(proposalUtils, Logger) {
+], function(Logger) {
+    
+    /**
+	 * @description The Definition class refers to the declaration of an identifier.
+	 * The start and end are locations in the source code.
+	 * Path is a URL corresponding to the document where the definition occurs.
+	 * If range is undefined, then the definition refers to the entire document
+	 * Range is a two element array with the start and end values
+	 * (Exactly the same range field as is used in Esprima)
+	 * If the document is undefined, then the definition is in the current document.
+	 *
+	 * @param String typeName
+	 * @param {[Number]} range
+	 * @param String path
+	 */
+	function Definition(typeObj, range, path) {
+		this._typeObj = ensureTypeObject(typeObj);
+		this.range = range;
+		this.path = path;
+	}
+
+    Definition.prototype = {
+		set typeObj(val) {
+			var maybeObj = val;
+			if (typeof maybeObj === 'string') {
+				maybeObj = ensureTypeObject(maybeObj);
+			}
+			this._typeObj = maybeObj;
+		},
+
+		get typeObj() {
+			return this._typeObj;
+		}
+	};
+
+    /**
+	 * @description Revivies a Definition object from a regular object
+	 * @param {Object} obj The type object to revive
+	 * @returns {Definition} The revived definition
+	 */
+    Definition.revive = function(obj) {
+		var defn = new Definition();
+		for (var prop in obj) {
+			if (obj.hasOwnProperty(prop)) {
+				if (prop === 'typeSig') {
+					defn.typeObj = obj[prop];
+				} else {
+					defn[prop] = obj[prop];
+				}
+			}
+		}
+		return defn;
+	};
+
+    var THE_UNKNOWN_TYPE = createNameType("Object");
+	var JUST_DOTS = '$$__JUST_DOTS__$$';
+	var JUST_DOTS_TYPE = createNameType(JUST_DOTS);
+	var JUST_DOTS_REGEX = /\$\$__JUST_DOTS__\$\$/g;
+	var UNDEFINED_OR_EMPTY_OBJ = /:undefined|:\{\}/g;
+	var GEN_NAME = "gen~";
+	var PROTO_LENGTH = "~proto".length;
+
 	/**
 	 * @description Doctrine closure compiler style type objects
 	 * @param {String} signature The Doctrine-style signature to parse
@@ -68,65 +128,6 @@ define([
 	    }
 		return { type: 'NameExpression', name: name };
 	}
-	
-	var THE_UNKNOWN_TYPE = createNameType("Object");
-	var JUST_DOTS = '$$__JUST_DOTS__$$';
-	var JUST_DOTS_REGEX = /\$\$__JUST_DOTS__\$\$/g;
-	var UNDEFINED_OR_EMPTY_OBJ = /:undefined|:\{\}/g;
-
-	/**
-	 * @description The Definition class refers to the declaration of an identifier.
-	 * The start and end are locations in the source code.
-	 * Path is a URL corresponding to the document where the definition occurs.
-	 * If range is undefined, then the definition refers to the entire document
-	 * Range is a two element array with the start and end values
-	 * (Exactly the same range field as is used in Esprima)
-	 * If the document is undefined, then the definition is in the current document.
-	 *
-	 * @param String typeName
-	 * @param {[Number]} range
-	 * @param String path
-	 */
-	var Definition = function(typeObj, range, path) {
-		this._typeObj = ensureTypeObject(typeObj);
-		this.range = range;
-		this.path = path;
-	};
-
-	Definition.prototype = {
-		set typeObj(val) {
-			var maybeObj = val;
-			if (typeof maybeObj === 'string') {
-				maybeObj = ensureTypeObject(maybeObj);
-			}
-			this._typeObj = maybeObj;
-		},
-
-		get typeObj() {
-			return this._typeObj;
-		}
-	};
-
-	/**
-	 * @description Revivies a Definition object from a regular object
-	 * @param {Object} obj The type object to revive
-	 * @returns {Definition} The revived definition
-	 */
-	Definition.revive = function(obj) {
-		var defn = new Definition();
-		for (var prop in obj) {
-			if (obj.hasOwnProperty(prop)) {
-				if (prop === 'typeSig') {
-					defn.typeObj = obj[prop];
-				} else {
-					defn[prop] = obj[prop];
-				}
-			}
-		}
-		return defn;
-	};
-	
-	var GEN_NAME = "gen~";
 	
 	/**
 	 * @description Returns if the generated type name refers to the general object or is undefined
@@ -177,7 +178,24 @@ define([
 		return false;
 	}
 
-
+    /**
+	 * @description Converts the type name to a number
+	 * @function
+	 * @param {String} typeName The name of the type
+	 * @param {Object} env The type environment
+	 * @returns {Number} The number corresponding to the type
+	 */
+	function convertToNumber(typeName, env) {
+		if (typeName === "undefined") {
+			return 0;
+		} else if (typeName === "Object") {
+			return 1;
+		} else if (isEmpty(typeName, env.getAllTypes())) {
+			return 2;
+		} else {
+			return 3;
+		}
+	}
 
 	/**
 	 * Determines if the left type name is more general than the right type name.
@@ -202,29 +220,12 @@ define([
 				leftTypeName = 'undefined';
 			}
 		}
-		/**
-		 * @description Converts the type name to a number
-		 * @function
-		 * @param {String} typeName The name of the type
-		 * @returns {Number} The number corresponding to the type
-		 */
-		function convertToNumber(typeName) {
-			if (typeName === "undefined") {
-				return 0;
-			} else if (typeName === "Object") {
-				return 1;
-			} else if (isEmpty(typeName, env.getAllTypes())) {
-				return 2;
-			} else {
-				return 3;
-			}
-		}
-
+		
 		if (!rightTypeName) {
 			return false;
 		}
 
-		var leftNum = convertToNumber(leftTypeName);
+		var leftNum = convertToNumber(leftTypeName, env);
 		// avoid calculating the rightNum if possible
 		if (leftNum === 0) {
 			return rightTypeName !== "undefined";
@@ -237,7 +238,41 @@ define([
 		}
 	}
 
-	var protoLength = "~proto".length;
+    /**
+	 * @description Find the global objects given the AST comments and the lint options
+	 * @function
+	 * @private
+	 * @param {Array} comments The array of comment nodes from the AST
+	 * @param {Object} lintOptions The lint options
+	 * @since 8.0
+	 */
+	function findGlobalObject(comments, lintOptions) {
+		for (var i = 0; i < comments.length; i++) {
+			var comment = comments[i];
+			var value = comment.value.trim();
+			if (comment.type === "Block" && value.match(/^(?:jslint|jshint|eslint-env).*/)) {
+				// the lint options section.  now look for the browser or node
+				if (value.match(/^(?:jslint|jshint)\s+.*(?:browser|amd)\s*:\s*true(?:\s+|$).*/) || 
+				    value.match(/^eslint-env\s+.*(?:browser|amd)(?:\s+|$).*/)) {
+					return "Window";
+				} else if (value.match(/^(?:jslint|jshint)\s+.*node\s*:\s*true(?:\s+|$).*/) ||
+				           value.match(/^eslint-env\s+.*node(?:\s+|$).*/)) {
+					return "Module";
+				} else {
+					return "Global";
+				}
+			}
+		}
+		if (lintOptions && lintOptions.options) {
+			if (lintOptions.options.browser === true || lintOptions.options.amd === true) {
+				return "Window";
+			} else if (lintOptions.options.node === true) {
+				return "Module";
+			}
+		}
+		return "Global";
+	}
+
 	return {
 		Definition : Definition,
 
@@ -256,7 +291,7 @@ define([
 		},
 
 		isPrototypeName : function(typeName) {
-			return typeName.substr( - protoLength, protoLength) === "~proto";
+			return typeName.slice(typeName.length - PROTO_LENGTH, PROTO_LENGTH) === "~proto";
 		},
 
 		/**
@@ -278,10 +313,7 @@ define([
 				applications: [
 					applicationTypeObj
 				],
-				expression: {
-					name: 'Array',
-					type: 'NameExpression'
-				}
+				expression: createNameType('Array')
 			};
 		},
 
@@ -429,7 +461,7 @@ define([
 					if (jsdocType.result) {
 						// prevent recursion on functions that return themselves
 						fnType.result = depth > 2 /*&& jsdocType.result.type === 'FunctionType'*/ ?
-							{ type : 'NameExpression', name : JUST_DOTS } :
+							JUST_DOTS_TYPE :
 							self.convertJsDocType(jsdocType.result, env, doCombine, depth);
 					}
 					return fnType;
@@ -484,7 +516,7 @@ define([
 							// and the field type is itself an object type, just represent the type
 							// with '...' rather than recursing further
 							var fieldType = depth > 0 && (prop.typeObj.type === 'NameExpression' && env.isSyntheticName(prop.typeObj.name) && !allTypes[prop.typeObj.name].$$fntype) ?
-							     { type : 'NameExpression', name : JUST_DOTS } :
+							     JUST_DOTS_TYPE :
 							     self.convertJsDocType(prop.typeObj, env, doCombine, depth+1);
 							newFields.push({
 								type: 'FieldType',
@@ -498,17 +530,17 @@ define([
 						};
 					} else {
 						if (allTypes[name]) {
-							return { type: 'NameExpression', name: name };
+							return createNameType(name);
 						} else {
 						    //may have been a proto lookup i.e. Connection..prototype
 						    var names = name.split('..');
 						    if(names.length === 2 && names[1] === 'prototype') {
-						        return {type: 'NameExpression', name: names[0]};
+						        return createNameType(names[0]);
 						    }
 						}
 						var capType = name[0].toUpperCase() + name.substring(1);
 						if (allTypes[capType]) {
-							return { type: 'NameExpression', name: capType };
+							return createNameType(capType);
 						}
 					}
 					return THE_UNKNOWN_TYPE;
@@ -615,136 +647,20 @@ define([
 		/**
 		 * creates a human readable type name from the name given
 		 */
-		createReadableType : function(typeObj, env, useFunctionSig, depth, useHtml) {
+		createReadableType : function(typeObj, env, useFunctionSig, depth) {
 			if (useFunctionSig) {
 				typeObj = this.convertJsDocType(typeObj, env, true);
-				if (useHtml) {
-					return this.convertToHtml(typeObj, 0);
-				}
 				var res = doctrine.type.stringify(typeObj, {compact: true});
 				res = res.replace(JUST_DOTS_REGEX, "{...}");
 				res = res.replace(UNDEFINED_OR_EMPTY_OBJ, "");
 				return res;
 			} else {
 				typeObj = this.extractReturnType(typeObj);
-				return this.createReadableType(typeObj, env, true, depth, useHtml);
+				return this.createReadableType(typeObj, env, true, depth);
 			}
-		},
-		convertToHtml : function(typeObj, depth) {
-			// typeObj must already be converted to avoid infinite loops
-//			typeObj = this.convertJsDocType(typeObj, env, true);
-			var self = this;
-			var res;
-			var parts = [];
-			depth = depth || 0;
-			switch(typeObj.type) {
-				case 'NullableLiteral':
-					return this.styleAsType("?", true);
-				case 'AllLiteral':
-					return this.styleAsType("*", true);
-				case 'NullLiteral':
-					return this.styleAsType("null", true);
-				case 'UndefinedLiteral':
-					return this.styleAsType("undefined", true);
-				case 'VoidLiteral':
-					return this.styleAsType("void", true);
-				case 'NameExpression':
-					var name = typeObj.name === JUST_DOTS ? "{...}" : typeObj.name;
-					return this.styleAsType(name, true);
-				case 'UnionType':
-					parts = [];
-					if (typeObj.expressions) {
-						typeObj.expressions.forEach(function(elt) {
-							parts.push(self.convertToHtml(elt, depth+1));
-						});
-					}
-					return "( " + parts.join(", ") + " )";
-				case 'TypeApplication':
-					if (typeObj.applications) {
-						typeObj.applications.forEach(function(elt) {
-							parts.push(self.convertToHtml(elt, depth));
-						});
-					}
-					var isArray = typeObj.expression.name === 'Array';
-					if (!isArray) {
-						res = this.convertToHtml(typeObj.expression, depth) + ".<";
-					}
-					res += parts.join(",");
-					if (isArray) {
-						res += '[]';
-					} else {
-						res += ">";
-					}
-					return res;
-				case 'ArrayType':
-					if (typeObj.elements) {
-						typeObj.elements.forEach(function(elt) {
-							parts.push(self.convertToHtml(elt, depth+1));
-						});
-					}
-					return parts.join(", ") + '[]';
-				case 'NonNullableType':
-					return "!" +  this.convertToHtml(typeObj.expression, depth);
-				case 'OptionalType':
-					return this.convertToHtml(typeObj.expression, depth) + "=";
-				case 'NullableType':
-					return "?" +  this.convertToHtml(typeObj.expression, depth);
-				case 'RestType':
-					return "..." +  this.convertToHtml(typeObj.expression, depth);
-				case 'ParameterType':
-					return this.styleAsProperty(typeObj.name, true) +
-						(typeObj.expression.name === JUST_DOTS ? "" : (":" + this.convertToHtml(typeObj.expression, depth)));
-				case 'FunctionType':
-					var isCons = false;
-					var resType;
-					if (typeObj.params) {
-						typeObj.params.forEach(function(elt) {
-							if (elt.name === 'this') {
-								isCons = true;
-								resType = elt.expression;
-							} else if (elt.name === 'new') {
-								isCons = true;
-								resType = elt.expression;
-							} else {
-								parts.push(self.convertToHtml(elt, depth+1));
-							}
-						});
-					}
-					if (!resType && typeObj.result) {
-						resType = typeObj.result;
-					}
-					var resText;
-					if (resType && resType.type !== 'UndefinedLiteral' && resType.name !== 'undefined') {
-						resText = this.convertToHtml(resType, depth+1);
-					} else {
-						resText = '';
-					}
-					res = this.styleAsOther(isCons ? 'new ' : 'function', true);
-					if (isCons) {
-						res += resText;
-					}
-					res += '(' + parts.join(",") + ')';
-					if (!isCons && resText) {
-						res += '&rarr;' + resText;
-					}
-					return res;
-				case 'RecordType':
-					if (typeObj.fields && typeObj.fields.length > 0) {
-						typeObj.fields.forEach(function(elt) {
-							parts.push(proposalUtils.repeatChar('&nbsp;&nbsp;', depth+1) + self.convertToHtml(elt, depth+1));
-						});
-						return '{<br/>' + parts.join(',<br/>') + '<br/>' + proposalUtils.repeatChar('&nbsp;&nbsp;', depth) + '}';
-					} else {
-						return '{ }';
-					}
-					break;
-				case 'FieldType':
-					return this.styleAsProperty(typeObj.key, true) +
-						":" + this.convertToHtml(typeObj.value, depth);
-			}
-
 		},
 		leftTypeIsMoreGeneral: leftTypeIsMoreGeneral,
+		findGlobalObject: findGlobalObject,
 		isEmpty: isEmpty,
 		ensureTypeObject: ensureTypeObject,
 		isUpperCaseChar: isUpperCaseChar,
