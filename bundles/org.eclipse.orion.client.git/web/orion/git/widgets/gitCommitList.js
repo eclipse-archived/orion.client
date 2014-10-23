@@ -145,7 +145,7 @@ define([
 				return this.targetRef;
 			}
 			var ref = this.currentBranch;
-			return ref && ref.RemoteLocation[0] && ref.RemoteLocation[0].Children[ref.RemoteLocation[0].Children.length - 1];
+			return ref && ref.RemoteLocation &&  ref.RemoteLocation[0] && ref.RemoteLocation[0].Children[ref.RemoteLocation[0].Children.length - 1];
 		},
 		tracksRemoteBranch: function(){
 			if (this.targetRef) {
