@@ -1811,6 +1811,7 @@ var exports = {};
 			name: messages["Commit"], //$NON-NLS-0$
 			tooltip: messages["Commit"], //$NON-NLS-0$
 			id: "eclipse.orion.git.commitCommand", //$NON-NLS-0$
+			track: true,
 			preCallback: function(data) {
 				return preCallback("commit", data);
 			},
