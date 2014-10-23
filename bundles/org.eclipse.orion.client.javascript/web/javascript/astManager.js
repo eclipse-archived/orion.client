@@ -97,6 +97,7 @@ define([
 				this._computeErrorTypes(ast.errors);
 				ast.errors = ast.errors.map(Serialize.serializeError);
 			}
+			ast.source = text;
 			return ast;
 		},
 		/**
