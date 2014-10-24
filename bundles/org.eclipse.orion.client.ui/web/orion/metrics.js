@@ -20,8 +20,10 @@ define([], function() {
 			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-			window.ga('create', tid, 'auto', args); //$NON-NLS-1$ //$NON-NLS-0$
-			window.ga('require', 'linkid', 'linkid.js'); /* adds enhanced link attribution */
+			args = args || {};
+			args.siteSpeedSampleRate = 50;
+			window.ga('create', tid, args); //$NON-NLS-0$
+//			window.ga('require', 'linkid', 'linkid.js'); /* adds enhanced link attribution */
 			window.ga('send', 'pageview'); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	};
