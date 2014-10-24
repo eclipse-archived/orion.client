@@ -46,25 +46,40 @@ define([
 	function MockInputManager() {
 		EventTarget.attach(this);
 	}
-	MockInputManager.prototype.getContentType = function() {
-		return this.contentType;
-	};
-	/**
-	 * Dispatches an InputChanged event, then sets the editor input to the new text.
-	 * @see orion.editor.InputManager#_setInputContents
-	 */
-	MockInputManager.prototype._setInputContents = function(newContentTypeId, contents) {
-		this.contentType = contentTypeRegistry.getContentType(newContentTypeId);
-		this.dispatchEvent({
-			type: "InputChanged",
-			contentType: this.contentType,
-			contents: contents,
-		});
-
-		if (typeof contents === "string") {
-			editor.setInput("fake title", null, contents);
-		}
-	};
+	MockInputManager.prototype = Object.create(Object.prototype, {
+		getContentType: {
+			value: function() {
+				return this.contentType;
+			},
+		},
+		getFileMetadata: {
+			value: function() {
+				return this.metadata;
+			}
+		},
+		_setInputContents: {
+			/**
+			 * Dispatches an InputChanged event, then sets the editor input to the new text.
+			 * @see orion.editor.InputManager#_setInputContents
+			 */
+			value: function(newContentTypeId, contents) {
+				this.contentType = contentTypeRegistry.getContentType(newContentTypeId);
+				this.dispatchEvent({
+					type: "InputChanged",
+					contentType: this.contentType,
+					contents: contents,
+				});
+				if (typeof contents === "string") {
+					editor.setInput("fake title", null, contents);
+				}
+			}
+		},
+		_setFileMetadata: {
+			value: function(value) {
+				this.metadata = value;
+			}
+		},
+	});
 
 	function registerOrionEditModelService(impl, contentTypes) {
 		serviceRegistry.registerService("orion.edit.model", impl, {
@@ -150,6 +165,34 @@ define([
 			assert.equal(fooCall, 0, "foo listener not called");
 			inputManager._setInputContents(MIME_FOO, "b");
 			assert.equal(fooCall, 1, "foo listener called exactly once");
+		});
+		it("should augment dispatched event with file metadata", function() {
+			var metadata = { Location: "/foo/bar.js", Name: "bar.js" };
+			var d1 = new Deferred(), d2 = new Deferred();
+			registerOrionEditModelService({
+				onModelChanging: function(event) {
+					try {
+						assert.equal(event.file.location, metadata.Location);
+						assert.equal(event.file.name,     metadata.Name);
+						d1.resolve();
+					} catch (e) {
+						d1.reject(e);
+					}
+				},
+				onVerify: function(event) {
+					try {
+						assert.equal(event.file.location, metadata.Location);
+						assert.equal(event.file.name,     metadata.Name);
+						d2.resolve();
+					} catch (e) {
+						d2.reject(e);
+					}
+				},
+			}, MIME_FOO);
+			inputManager._setFileMetadata(metadata);
+			inputManager._setInputContents(MIME_FOO, "");
+			editor.setText("whatever"); // will cause a dispatch of Verify and InputChanged events
+			return Deferred.all([d1, d2]);
 		});
 	});
 });
