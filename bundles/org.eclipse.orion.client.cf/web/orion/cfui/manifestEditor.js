@@ -367,20 +367,26 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation', 'orion/cfui
 							/* got error details */
 							var details = error.JsonData;
 							var errorLine = details.Line || applicationsLine;
+							var problem = null;
 							
 							if(errorLine > 0){
-								problems.push({
+								problem = {
 									description : details.Message,
 									line : errorLine,
 									start : 1,
-									end : lines[errorLine - 1].length + 1
-								});
+									end : lines[errorLine - 1].length + 1	
+								};
 							} else {
-								problems.push({
+								problem = {
 									description : details.Message,
 									start: 0
-								});
+								};
 							}
+							
+							if(details.Severity === "Warning")
+								problem.severity = "warning";
+							
+							problems.push(problem);
 							
 						} else {
 							problems.push({
