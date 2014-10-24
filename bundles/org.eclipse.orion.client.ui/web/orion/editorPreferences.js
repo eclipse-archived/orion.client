@@ -78,7 +78,9 @@ define([], function() {
 		marginOffsetVisible: true,
 		keyBindings: "Default",
 		keyBindingsVisible: true,
-		keyBindingsLocalVisible: true
+		keyBindingsLocalVisible: true,
+		diffService: true,
+		diffServiceVisible: false
 	};
 
 	function EditorPreferences(preferences, callback) {

@@ -94,12 +94,11 @@ var exports = {};
 			var editActionsScope = this.editActionsScope;
 			var viewActionsScope = this.viewActionsScope;
 			var toolsActionsScope = this.toolsActionsScope;
-			
+
 			commandRegistry.addCommandGroup(fileActionsScope, "orion.menuBarFileGroup", 1000, messages["File"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(editActionsScope, "orion.menuBarEditGroup", 100, messages["Edit"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.addCommandGroup(viewActionsScope, "orion.menuBarViewGroup", 100, messages["View"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-0$	
+			commandRegistry.addCommandGroup(viewActionsScope, "orion.menuBarViewGroup", 100, messages["View"], null, messages["noActions"], null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(toolsActionsScope, "orion.menuBarToolsGroup", 100, messages["Tools"], null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-0$
-			
 			commandRegistry.addCommandGroup(fileActionsScope, "orion.newContentGroup", 0, messages["New"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(fileActionsScope, "orion.importGroup", 100, messages["Import"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(fileActionsScope, "orion.exportGroup", 1001, messages["Export"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -224,9 +223,9 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			if (metadata) {
 				commandRegistry.renderCommands(settingsToolbar.id, settingsToolbar, metadata, editor, "button"); //$NON-NLS-0$
 			}
-		}		
+		}
 	}
-	
+
 	function statusReporter(message, type, isAccessible) {
 		if (type === "progress") { //$NON-NLS-0$
 			statusService.setProgressMessage(message);
@@ -250,14 +249,14 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			}
 		}
 	};
-	
+
 	var currentEditorView, defaultOptions;
 	// Shared text model and undo stack
 	var model = new mTextModel.TextModel();
 	var undoStack = new mUndoStack.UndoStack(model, 500);
 	var lastMetadata;
 	var contextImpl = {};
-	[	
+	[
 		"getText", //$NON-NLS-0$
 		"setText" //$NON-NLS-0$
 	].forEach(function(method) {
@@ -312,7 +311,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		lastMetadata = metadata;
 		return currentEditorView;
 	}
-	
+
 //	var switchScope = "settingsActions"; //$NON-NLS-0$
 //	commandRegistry.addCommandGroup(switchScope, "orion.edit.switch", 1000, messages.switchEditor, null, null, "core-sprite-outline", null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 //	Deferred.when(contentTypeRegistry.getContentTypes(), function(contentTypes) {
@@ -330,13 +329,14 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		selection: selection,
 		contentTypeRegistry: contentTypeRegistry
 	});
+	
 	inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 		var metadata = evt.metadata;
-		
+
 		var view = getEditorView(evt.input, metadata);
 		setEditor(view ? view.editor : null);
 		evt.editor = editor;
-	
+
 		renderToolbars(metadata);
 		var name = evt.name, target = metadata;
 		if (evt.input === null || evt.input === undefined) {
@@ -373,7 +373,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 
 		commandRegistry.processURL(window.location.href);
 	});
-	
+
 	menuBar = new MenuBar({
 		parentNode: pageToolbar,
 		fileClient: fileClient,
@@ -382,7 +382,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		serviceRegistry: serviceRegistry
 	});
 	menuBar.createCommands().then(function() {
-		
+
 		defaultOptions = {
 			parent: editorDomNode,
 			model: model,
@@ -454,7 +454,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 				window.location = href;
 			}
 		});
-	
+
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			inputManager.setInput(event.selection);
 		});
