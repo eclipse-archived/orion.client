@@ -344,9 +344,11 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(removeRemoteBranchCommand);
-
-		var addRemoteParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Name:']),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		                                                               		new mCommandRegistry.CommandParameter('url', 'url', messages['URL:'])]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	
+		var addRemoteParameters = new mCommandRegistry.ParametersDescription([
+			new mCommandRegistry.CommandParameter('name', 'text', messages['Name:'],null,null,null,function(name){  return !(name.indexOf(' ') >= 0);}),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			new mCommandRegistry.CommandParameter('url', 'url', messages['URL:'])
+		]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var addRemoteCommand = new mCommands.Command({
 			name: messages["New Remote"],

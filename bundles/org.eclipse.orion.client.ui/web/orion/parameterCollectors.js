@@ -121,34 +121,56 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 		},
 		
 		_collectAndCall: function(commandInvocation, parent) {
-			lib.$$array("input", parent).forEach(function(field) { //$NON-NLS-0$
-				if (field.type === "checkbox") { //$NON-NLS-0$
-					commandInvocation.parameters.setValue(field.parameterName, field.checked);
-				} else if (field.type !== "button") { //$NON-NLS-0$
-					commandInvocation.parameters.setValue(field.parameterName, field.value.trim());
+			var validate = function(name, value, node) {
+				if (commandInvocation.parameters.validate(name, value)) {
+					commandInvocation.parameters.setValue(name, value);
+					return true;
 				}
-			});
-			lib.$$array("textArea", parent).forEach(function(field) { //$NON-NLS-0$
-				commandInvocation.parameters.setValue(field.parameterName, field.value.trim());
-			});
+				node.classList.add("parameterInvalid");
+				return false;
+			};
+			
+			var isValid = function(field) { //$NON-NLS-0$
+				if (field.type === "checkbox") { //$NON-NLS-0$
+					if (!validate(field.parameterName, field.checked, field)) {
+						return true;
+					}
+				} else if (field.type !== "button") { //$NON-NLS-0$
+					if (!validate(field.parameterName, field.value.trim(), field)) {
+						return true;
+					}
+				} else if (field.type !== "textarea") { //$NON-NLS-0$
+					if (!validate(field.parameterName, field.value.trim(), field)) {
+						return true;
+					}
+				}
+				return false;
+			};
+
+			if (lib.$$array("input", parent).some(isValid)) {  //$NON-NLS-0$
+				return false;
+			}
+			
+			if (lib.$$array("textArea", parent).some(isValid)) {  //$NON-NLS-0$
+				return false;
+			}
+			
 			var getParameterElement = commandInvocation.parameters.getParameterElement;
 			if (getParameterElement) {
-				commandInvocation.parameters.forEach(function(param) {
+				if (commandInvocation.parameters.some(function(param) {
 					var field = getParameterElement(param, parent);
 					if (field) {
-						if (field.type === "checkbox") { //$NON-NLS-0$
-							commandInvocation.parameters.setValue(field.parameterName, field.checked);
-						} else if (field.type !== "button") { //$NON-NLS-0$
-							commandInvocation.parameters.setValue(field.parameterName, field.value.trim());
-						} else if (field.type !== "textarea") { //$NON-NLS-0$
-							commandInvocation.parameters.setValue(field.parameterName, field.value.trim());
-						}
+						return isValid(field);
 					}
-				});
+					return false;
+				})) {
+					return false;
+				}
 			}
 			if (commandInvocation.command.callback) {
 				commandInvocation.command.callback.call(commandInvocation.handler, commandInvocation);
 			}
+			return true;
 		},
 		
 		collectParameters: function(commandInvocation,cancelCallback) {
@@ -172,10 +194,11 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 					self.close();
 				};
 				var keyHandler = function(event) {
-					if (event.keyCode === lib.KEY.ENTER) {
-						self._collectAndCall(commandInvocation, parameterArea);
-						localClose();
-						lib.stop(event);
+					event.target.classList.remove("parameterInvalid");  //$NON-NLS-0$
+					if (event.keyCode === lib.KEY.ENTER && event.target.tagName !== "TEXTAREA") {  //$NON-NLS-0$
+							self._collectAndCall(commandInvocation, parameterArea);
+							localClose();
+							lib.stop(event);
 					}
 					if (event.keyCode === lib.KEY.ESCAPE) {
 						if (typeof(cancelFunction) === 'function') cancelFunction();
@@ -213,13 +236,6 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 							field.id = id;
 							parent.appendChild(field);
 						}
-						// esc only
-						keyHandler = function(event) {
-							if (event.keyCode === lib.KEY.ESCAPE) {
-								localClose();
-								lib.stop(event);
-							}
-						};
 					} else if (parm.type === "boolean") { //$NON-NLS-0$
 						if (!field) {
 							field = document.createElement("input"); //$NON-NLS-0$
@@ -270,8 +286,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'],
 					parameterArea.appendChild(parentDismiss);
 				}
 				var finish = function (collector) {
-					collector._collectAndCall(commandInvocation, parameterArea);
-					localClose();
+					if (collector._collectAndCall(commandInvocation, parameterArea)) {
+						localClose();
+					}
 				};
 
 				var makeButton = function(text, parent) {

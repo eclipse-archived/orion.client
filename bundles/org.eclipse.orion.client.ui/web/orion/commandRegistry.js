@@ -1147,16 +1147,18 @@ define([
 	 * @param {String} [value] the (optional) default value for the parameter
 	 * @param {Number} [lines] the (optional) number of lines that should be shown when collecting the value.  Valid for type "text" only.
 	 * @param {Object|Array} [eventListeners] the (optional) array or single command event listener
+	 * @param {Function} [validator] a (optional) validator function
 	 * 
 	 * @name orion.commands.CommandParameter
 	 * @class
 	 */
-	function CommandParameter (name, type, label, value, lines, eventListeners) {
+	function CommandParameter (name, type, label, value, lines, eventListeners, validator) {
 		this.name = name;
 		this.type = type;
 		this.label = label;
 		this.value = value;
 		this.lines = lines || 1;
+		this.validator = validator;
 		
 		this.eventListeners = (Array.isArray(eventListeners)) ?
 			eventListeners : (eventListeners ? [eventListeners] : []);
@@ -1306,6 +1308,14 @@ define([
 			}
 		},
 		
+		validate: function(name, value) {
+			var parm = this.parameterTable[name];
+			if (parm && parm.validator) {
+				return parm.validator(value);
+			}
+			return true;
+		},
+		
 		/**
 		 * Make a copy of this description.  Used for collecting values when a client doesn't want
 		 * the values to be persisted across different objects.
@@ -1314,7 +1324,7 @@ define([
 		 makeCopy: function() {
 			var parameters = [];
 			this.forEach(function(parm) {
-				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value, parm.lines, parm.eventListeners);
+				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value, parm.lines, parm.eventListeners, parm.validator);
 				parameters.push(newParm);
 			});
 			var copy = new ParametersDescription(parameters, this._options, this.getParameters);
