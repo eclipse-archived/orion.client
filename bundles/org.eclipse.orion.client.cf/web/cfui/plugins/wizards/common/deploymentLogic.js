@@ -115,14 +115,19 @@ define(['orion/objects', 'cfui/cfUtil'], function(objects, mCfUtil){
 				var packager = options.getPackager ? options.getPackager() : null;
 				
 				var editLocation = new URL("../edit/edit.html#" + contentLocation, window.location.href);
-				cfService.pushApp(selection, null, decodeURIComponent(contentLocation + appPath), manifest, saveManifest, packager, instrumentation).then(function(result){
-					
-					var launchConfigurationContent = mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation);
-					postMsg(launchConfigurationContent);
-					
-				}, function(error){
-					postError(error, selection);
-				});
+				cfService.pushApp(selection, null, decodeURIComponent(contentLocation + appPath), manifest, saveManifest, packager, instrumentation).then(
+					function(result){
+						mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation).then(
+							function(launchConfigurationContent){
+								postMsg(launchConfigurationContent);
+							}, function(error){
+								postError(error, selection);
+							}
+						);
+					}, function(error){
+						postError(error, selection);
+					}
+				);
 				
 			}, postError);
 		};

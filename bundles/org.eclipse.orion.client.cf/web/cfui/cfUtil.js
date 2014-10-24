@@ -50,6 +50,8 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 		},
 		
 		prepareLaunchConfigurationContent : function(resp, appPath, editLocation){
+			var deferred = new Deferred();
+			
 			var appName = resp.App.name || resp.App.entity.name;
 			var launchConfName = appName + " on " + resp.Target.Space.Name + " / " + resp.Target.Org.Name;
 			
@@ -59,7 +61,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 				url = "http://" + host + "." + resp.Domain;
 			}
 			
-			return {
+			deferred.resolve({
 				CheckState: true,
 				ToSave: {
 					ConfigurationName: launchConfName,
@@ -78,7 +80,9 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 					Path: appPath
 				},
 				Message: "See Manual Deployment Information in the [root folder page](" + editLocation.href + ") to view and manage [" + launchConfName + "](" + resp.ManageUrl + ")"
-			};
+			});
+			
+			return deferred;
 		},
 		
 		/**
