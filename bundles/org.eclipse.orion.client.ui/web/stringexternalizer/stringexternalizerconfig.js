@@ -172,14 +172,21 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'orion/section', 'orion/we
 					var match = new RegExp("define\\(\\{(.*\\r?\\n*)*\\}\\);", "gmi").exec(contents); //$NON-NLS-1$ //$NON-NLS-0$
 					var messages = {};
 					if (match) {
-						var messagesString = match[0].substring("define(".length, match[0].length - ");".length); //$NON-NLS-1$ //$NON-NLS-0$
-						messagesString = messagesString.replace(/(?:\/\*(?:[\s\S]*?)\*\/)|(?:([\s;])+\/\/(?:.*)$)/gmi, '');
 						try{
-							messages = JSON.parse(messagesString);
-						} catch (e) {
-							messagesString = messagesString.replace(/[^\\]'/gmi, function(m){return m.replace("'", '"')});
-							messagesString = messagesString.replace(/\\'/gmi, "'");
-							messages = JSON.parse(messagesString);
+							var messagesString = match[0].substring("define(".length, match[0].length - ");".length); //$NON-NLS-1$ //$NON-NLS-0$
+							messagesString = messagesString.replace(/(?:\/\*(?:[\s\S]*?)\*\/)|(?:([\s;])+\/\/(?:.*)$)/gmi, '');
+							try{
+								messages = JSON.parse(messagesString);
+							} catch (e) {
+								messagesString = messagesString.replace(/[^\\]'/gmi, function(m){return m.replace("'", '"')});
+								messagesString = messagesString.replace(/\\'/gmi, "'");
+								messages = JSON.parse(messagesString);
+							}
+						} catch (e){
+							that.serviceRegistry.getService("orion.page.progress").setProgressResult({
+								Message: "Could not parse " + that.config.fileLocation + ". Previously externalized messages will be ignored. To proceed backup this file, because it will be overwritten.",
+								Severity: "Error"
+							});
 						}
 					}
 					that.config.messages = {};
