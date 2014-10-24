@@ -173,7 +173,14 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'orion/section', 'orion/we
 					var messages = {};
 					if (match) {
 						var messagesString = match[0].substring("define(".length, match[0].length - ");".length); //$NON-NLS-1$ //$NON-NLS-0$
-						messages = JSON.parse(messagesString);
+						messagesString = messagesString.replace(/(?:\/\*(?:[\s\S]*?)\*\/)|(?:([\s;])+\/\/(?:.*)$)/gmi, '');
+						try{
+							messages = JSON.parse(messagesString);
+						} catch (e) {
+							messagesString = messagesString.replace(/[^\\]'/gmi, function(m){return m.replace("'", '"')});
+							messagesString = messagesString.replace(/\\'/gmi, "'");
+							messages = JSON.parse(messagesString);
+						}
 					}
 					that.config.messages = {};
 					for (var message in messages) {
