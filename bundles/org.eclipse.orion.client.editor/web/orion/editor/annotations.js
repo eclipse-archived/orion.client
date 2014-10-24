@@ -1,12 +1,12 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
- * Contributors: 
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
+ * Contributors:
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
@@ -28,9 +28,9 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	 * <b>See:</b><br/>
 	 * {@link orion.editor.AnnotationModel}<br/>
 	 * {@link orion.editor.Ruler}<br/>
-	 * </p>		 
+	 * </p>
 	 * @name orion.editor.Annotation
-	 * 
+	 *
 	 * @property {String} type The annotation type (for example, orion.annotation.error).
 	 * @property {Number} start The start offset of the annotation in the text model.
 	 * @property {Number} end The end offset of the annotation in the text model.
@@ -43,11 +43,11 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	 */
 	/**
 	 * Constructs a new folding annotation.
-	 * 
+	 *
 	 * @param {Number} start The start offset of the annotation in the text model.
 	 * @param {Number} end The end offset of the annotation in the text model.
 	 * @param {orion.editor.ProjectionTextModel} projectionModel The projection text model.
-	 * 
+	 *
 	 * @class This object represents a folding annotation.
 	 * @name orion.editor.FoldingAnnotation
 	 */
@@ -59,7 +59,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		this.style = this._expandedStyle;
 		this.expanded = true;
 	}
-	
+
 	FoldingAnnotation.prototype = /** @lends orion.editor.FoldingAnnotation.prototype */ {
 		_expandedHTML: "<div class='annotationHTML expanded'></div>", //$NON-NLS-0$
 		_expandedStyle: {styleClass: "annotation expanded"}, //$NON-NLS-0$
@@ -196,36 +196,42 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	 * Write Occurrence annotation type.
 	 */
 	AnnotationType.ANNOTATION_WRITE_OCCURRENCE = "orion.annotation.writeOccurrence"; //$NON-NLS-0$
-
 	/**
 	 * Selected linked group annotation type.
 	 */
 	AnnotationType.ANNOTATION_SELECTED_LINKED_GROUP = "orion.annotation.selectedLinkedGroup"; //$NON-NLS-0$
-
 	/**
 	 * Current linked group annotation type.
 	 */
 	AnnotationType.ANNOTATION_CURRENT_LINKED_GROUP = "orion.annotation.currentLinkedGroup"; //$NON-NLS-0$
-
 	/**
 	 * Linked group annotation type.
 	 */
 	AnnotationType.ANNOTATION_LINKED_GROUP = "orion.annotation.linkedGroup"; //$NON-NLS-0$
-	
 	/**
 	* Blame annotation type.
 	*/
 	AnnotationType.ANNOTATION_BLAME = "orion.annotation.blame"; //$NON-NLS-0$
-	
 	/**
 	* Current Blame annotation type.
 	*/
 	AnnotationType.ANNOTATION_CURRENT_BLAME = "orion.annotation.currentBlame"; //$NON-NLS-0$
-	
-	
+	/**
+	 * Diff Added annotation type.
+	 */
+	AnnotationType.ANNOTATION_DIFF_ADDED = "orion.annotation.diffAdded"; //$NON-NLS-0$
+	/**
+	 * Diff Deleted annotation type.
+	 */
+	AnnotationType.ANNOTATION_DIFF_DELETED = "orion.annotation.diffDeleted"; //$NON-NLS-0$
+	/**
+	 * Diff Modification annotation type.
+	 */
+	AnnotationType.ANNOTATION_DIFF_MODIFIED = "orion.annotation.diffModified"; //$NON-NLS-0$
+
 	/** @private */
 	var annotationTypes = {};
-	
+
 	/**
 	 * Register an annotation type.
 	 *
@@ -248,7 +254,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		annotationTypes[type] = constructor;
 		return type;
 	};
-	
+
 	/**
 	 * Creates an annotation of a given type with the specified start end end offsets.
 	 *
@@ -261,7 +267,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	AnnotationType.createAnnotation = function(type, start, end, title) {
 		return new (this.getType(type))(start, end, title);
 	};
-	
+
 	/**
 	 * Gets the registered annotation type with specified type. The returned
 	 * value is a constructor that can be used to create annotations of the
@@ -274,7 +280,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	AnnotationType.getType = function(type) {
 		return annotationTypes[type];
 	};
-	
+
 	/** @private */
 	function registerType(type, lineStyling) {
 		var index = type.lastIndexOf('.'); //$NON-NLS-0$
@@ -309,11 +315,15 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	registerType(AnnotationType.ANNOTATION_CURRENT_LINE, true);
 	registerType(AnnotationType.ANNOTATION_BLAME, true);
 	registerType(AnnotationType.ANNOTATION_CURRENT_BLAME, true);
+	registerType(AnnotationType.ANNOTATION_DIFF_ADDED);
+	registerType(AnnotationType.ANNOTATION_DIFF_DELETED);
+	registerType(AnnotationType.ANNOTATION_DIFF_MODIFIED);
+
 	AnnotationType.registerType(AnnotationType.ANNOTATION_FOLDING, FoldingAnnotation);
-	
-	/** 
+
+	/**
 	 * Constructs a new AnnotationTypeList object.
-	 * 
+	 *
 	 * @class This represents an interface of prioritized annotation types.
 	 * @name orion.editor.AnnotationTypeList
 	 */
@@ -331,7 +341,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 				object[p] = proto[p];
 			}
 		}
-	};	
+	};
 	AnnotationTypeList.prototype = /** @lends orion.editor.AnnotationTypeList.prototype */ {
 		/**
 		 * Adds an annotation type to the receiver.
@@ -369,13 +379,13 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * </p>
 		 *
 		 * @param {Object} type the annotation type
-		 * 
+		 *
 		 * @see orion.editor.AnnotationTypeList#addAnnotationType
 		 * @see orion.editor.AnnotationTypeList#removeAnnotationType
 		 * @see orion.editor.AnnotationTypeList#isAnnotationTypeVisible
 		 */
 		getAnnotationTypePriority: function(type) {
-			if (this._annotationTypes) { 
+			if (this._annotationTypes) {
 				for (var i = 0; i < this._annotationTypes.length; i++) {
 					if (this._annotationTypes[i] === type) {
 						return i + 1;
@@ -410,9 +420,9 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		/**
 		 * Returns whether the receiver shows annotations of the specified type.
 		 *
-		 * @param {Object} type the annotation type 
+		 * @param {Object} type the annotation type
 		 * @returns {Boolean} whether the specified annotation type is shown
-		 * 
+		 *
 		 * @see orion.editor.AnnotationTypeList#addAnnotationType
 		 * @see orion.editor.AnnotationTypeList#removeAnnotationType
 		 */
@@ -423,7 +433,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * Removes an annotation type from the receiver.
 		 *
 		 * @param {Object} type the annotation type to be removed
-		 * 
+		 *
 		 * @see orion.editor.AnnotationTypeList#addAnnotationType
 		 * @see orion.editor.AnnotationTypeList#isAnnotationTypeVisible
 		 */
@@ -486,11 +496,11 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 
 	AnnotationModel.prototype = /** @lends orion.editor.AnnotationModel.prototype */ {
 		/**
-		 * Adds an annotation to the annotation model. 
+		 * Adds an annotation to the annotation model.
 		 * <p>The annotation model listeners are notified of this change.</p>
-		 * 
+		 *
 		 * @param {orion.editor.Annotation} annotation the annotation to be added.
-		 * 
+		 *
 		 * @see orion.editor.AnnotationModel#removeAnnotation
 		 */
 		addAnnotation: function(annotation) {
@@ -508,10 +518,10 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 			this.onChanged(e);
 		},
 		/**
-		 * Returns the text model. 
-		 * 
+		 * Returns the text model.
+		 *
 		 * @return {orion.editor.TextModel} The text model.
-		 * 
+		 *
 		 * @see orion.editor.AnnotationModel#setTextModel
 		 */
 		getTextModel: function() {
@@ -522,12 +532,12 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * <p>
 		 * <b>See:</b><br/>
 		 * {@link orion.editor.AnnotationModel#getAnnotations}<br/>
-		 * </p>		 
+		 * </p>
 		 * @name orion.editor.AnnotationIterator
-		 * 
+		 *
 		 * @property {Function} hasNext Determines whether there are more annotations in the iterator.
 		 * @property {Function} next Returns the next annotation in the iterator.
-		 */		
+		 */
 		/**
 		 * Returns an iterator of annotations for the given range of text. If called with no parameters,
 		 * returns all annotations in the model.
@@ -563,7 +573,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 				next: function() {
 					var result = current;
 					if (result) { current = skip(); }
-					return result;					
+					return result;
 				},
 				hasNext: function() {
 					return current !== null;
@@ -573,9 +583,9 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		/**
 		 * Notifies the annotation model that the given annotation has been modified.
 		 * <p>The annotation model listeners are notified of this change.</p>
-		 * 
+		 *
 		 * @param {orion.editor.Annotation} annotation the modified annotation.
-		 * 
+		 *
 		 * @see orion.editor.AnnotationModel#addAnnotation
 		 */
 		modifyAnnotation: function(annotation) {
@@ -603,16 +613,16 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		},
 		/**
 		 * Removes all annotations of the given <code>type</code>. All annotations
-		 * are removed if the type is not specified. 
+		 * are removed if the type is not specified.
 		 * <p>The annotation model listeners are notified of this change.  Only one changed event is generated.</p>
-		 * 
+		 *
 		 * @param {Object} type the type of annotations to be removed.
-		 * 
+		 *
 		 * @see orion.editor.AnnotationModel#removeAnnotation
 		 */
 		removeAnnotations: function(type) {
 			var annotations = this._annotations;
-			var removed, i; 
+			var removed, i;
 			if (type) {
 				removed = [];
 				for (i = annotations.length - 1; i >= 0; i--) {
@@ -636,11 +646,11 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 			this.onChanged(e);
 		},
 		/**
-		 * Removes an annotation from the annotation model. 
+		 * Removes an annotation from the annotation model.
 		 * <p>The annotation model listeners are notified of this change.</p>
-		 * 
+		 *
 		 * @param {orion.editor.Annotation} annotation the annotation to be removed.
-		 * 
+		 *
 		 * @see orion.editor.AnnotationModel#addAnnotation
 		 */
 		removeAnnotation: function(annotation) {
@@ -657,12 +667,12 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 			this.onChanged(e);
 		},
 		/**
-		 * Removes and adds the specifed annotations to the annotation model. 
+		 * Removes and adds the specifed annotations to the annotation model.
 		 * <p>The annotation model listeners are notified of this change.  Only one changed event is generated.</p>
-		 * 
+		 *
 		 * @param {orion.editor.Annotation} remove the annotations to be removed.
 		 * @param {orion.editor.Annotation} add the annotations to be added.
-		 * 
+		 *
 		 * @see orion.editor.AnnotationModel#addAnnotation
 		 * @see orion.editor.AnnotationModel#removeAnnotation
 		 */
@@ -691,15 +701,16 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 				added: add,
 				changed: []
 			};
+			
 			this.onChanged(e);
 		},
 		/**
 		 * Sets the text model of the annotation model.  The annotation
 		 * model listens for changes in the text model to update and remove
 		 * annotations that are affected by the change.
-		 * 
+		 *
 		 * @param {orion.editor.TextModel} textModel the text model.
-		 * 
+		 *
 		 * @see orion.editor.AnnotationModel#getTextModel
 		 */
 		setTextModel: function(textModel) {
@@ -774,10 +785,10 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 
 	/**
 	 * Constructs a new styler for annotations.
-	 * 
+	 *
 	 * @param {orion.editor.TextView} view The styler view.
 	 * @param {orion.editor.AnnotationModel} view The styler annotation model.
-	 * 
+	 *
 	 * @class This object represents a styler for annotation attached to a text view.
 	 * @name orion.editor.AnnotationStyler
 	 * @borrows orion.editor.AnnotationTypeList#addAnnotationType as #addAnnotationType
@@ -807,7 +818,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	}
 	AnnotationStyler.prototype = /** @lends orion.editor.AnnotationStyler.prototype */ {
 		/**
-		 * Destroys the styler. 
+		 * Destroys the styler.
 		 * <p>
 		 * Removes all listeners added by this styler.
 		 * </p>
@@ -956,7 +967,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		}
 	};
 	AnnotationTypeList.addMixin(AnnotationStyler.prototype);
-	
+
 	return {
 		FoldingAnnotation: FoldingAnnotation,
 		AnnotationType: AnnotationType,

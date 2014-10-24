@@ -1,14 +1,14 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2009, 2014 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
- 
+
 /*eslint-env browser, amd*/
 define("orion/editor/editor", [ //$NON-NLS-0$
 	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
@@ -18,15 +18,15 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
 ], function(messages, mEventTarget, mTooltip, mAnnotations, objects, util) {
-
+	
 	var AT = mAnnotations.AnnotationType;
 
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError"; //$NON-NLS-0$
-	
+
 	/**
 	 * @name orion.editor.BaseEditor
 	 * @class This is the base interface for text and visual editors based on a text buffer.
-	 * 
+	 *
 	 * @description Creates a new Base Editor with the given options.
 	 * @param {Object} options Creation options for this editor.
 	 * @param {Object} options.domNode
@@ -65,7 +65,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				this._model.removeEventListener("Changed", this._listener.onChanged); //$NON-NLS-0$
 			}
 		},
-		
+
 		/** @private */
 		checkDirty : function() {
 			this.setDirty(this._undoStack && !this._undoStack.isClean());
@@ -81,7 +81,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @returns {orion.editor.TextModel} the text model of the view.
 		 */
 		getModel: function() {
-			return this._model;	
+			return this._model;
 		},
 		/**
 		 * Returns the text for the given range.
@@ -98,7 +98,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this.getModel().getText(start, end);
 		},
 		/**
-		 * Returns the editor title. 
+		 * Returns the editor title.
 		 *
 		 * @returns {String} the editor title.
 		 */
@@ -106,7 +106,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._title;
 		},
 		/**
-		 * Returns the editor undo stack. 
+		 * Returns the editor undo stack.
 		 *
 		 * @returns {orion.editor.UndoStack} the editor undo stack.
 		 */
@@ -126,7 +126,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		isDirty: function() {
 			return this._dirty;
 		},
-		/** 
+		/**
 		 * Marks the current state of the editor as clean. Meaning there are no unsaved modifications.
 		 */
 		markClean: function() {
@@ -156,7 +156,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		},
 		/**
 		 * Report the message to the user.
-		 * 
+		 *
 		 * @param {String} message the message to show
 		 * @param {String} [type] the message type. Either normal or "progress" or "error";
 		 * @param {Boolean} [isAccessible] If <code>true</code>, a screen reader will read this message.
@@ -255,7 +255,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	 * <li>Rulers for displaying line numbers and annotations</li>
 	 * <li>Status reporting</li>
 	 * </ul>
-	 * 
+	 *
 	 * @description Creates a new Editor with the given options.
 	 * @param {Object} options Options controlling the features of this Editor.
 	 * @param {Object} options.annotationFactory
@@ -284,7 +284,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		this._contentAssistFactory = options.contentAssistFactory;
 		this._keyBindingFactory = options.keyBindingFactory;
 		this._hoverFactory = options.hoverFactory;
-		
 		this._annotationStyler = null;
 		this._annotationModel = null;
 		this._annotationRuler = null;
@@ -306,7 +305,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			this._contentAssistFactory = this._keyBindingFactory = this._hoverFactory = this._zoomRulerFactory = null;
 		},
 		/**
-		 * Returns the annotation model of the editor. 
+		 * Returns the annotation model of the editor.
 		 *
 		 * @returns {orion.editor.AnnotationModel}
 		 */
@@ -314,7 +313,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._annotationModel;
 		},
 		/**
-		 * Returns the annotation ruler of the editor. 
+		 * Returns the annotation ruler of the editor.
 		 *
 		 * @returns {orion.editor.AnnotationRuler}
 		 */
@@ -322,7 +321,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._annotationRuler;
 		},
 		/**
-		 * Returns the annotation styler of the editor. 
+		 * Returns the annotation styler of the editor.
 		 *
 		 * @returns {orion.editor.AnnotationStyler}
 		 */
@@ -330,7 +329,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._annotationStyler;
 		},
 		/**
-		 * Returns the content assist of the editor. 
+		 * Returns the content assist of the editor.
 		 *
 		 * @returns {orion.editor.LineNumberRuler}
 		 */
@@ -338,7 +337,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._contentAssist;
 		},
 		/**
-		 * Returns the folding ruler of the editor. 
+		 * Returns the folding ruler of the editor.
 		 *
 		 * @returns {orion.editor.FoldingRuler}
 		 */
@@ -346,7 +345,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._foldingRuler;
 		},
 		/**
-		 * Returns the line number ruler of the editor. 
+		 * Returns the line number ruler of the editor.
 		 *
 		 * @returns {orion.editor.LineNumberRuler}
 		 */
@@ -354,7 +353,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._lineNumberRuler;
 		},
 		/**
-		 * Returns the zoom ruler of the editor. 
+		 * Returns the zoom ruler of the editor.
 		 *
 		 * @returns {orion.editor.LineNumberRuler}
 		 */
@@ -377,7 +376,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return model;
 		},
 		/**
-		 * Returns the overview ruler of the editor. 
+		 * Returns the overview ruler of the editor.
 		 *
 		 * @returns {orion.editor.OverviewRuler}
 		 */
@@ -385,7 +384,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._overviewRuler;
 		},
 		/**
-		 * Returns the underlying <code>TextView</code> used by this editor. 
+		 * Returns the underlying <code>TextView</code> used by this editor.
 		 * @returns {orion.editor.TextView} the editor text view.
 		 */
 		getTextView: function() {
@@ -520,7 +519,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				textView.removeRuler(this._zoomRuler);
 			}
 		},
-		
+
 		mapOffset: function(offset, parent) {
 			var textView = this._textView;
 			var model = textView.getModel();
@@ -540,7 +539,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @since 5.0
 		 */
 		getLineAtOffset: function(offset) {
-			return this.getModel().getLineAtOffset(this.mapOffset(offset));	
+			return this.getModel().getLineAtOffset(this.mapOffset(offset));
 		},
 		/**
 		 * @name getLineStart
@@ -558,7 +557,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		getCaretOffset: function() {
 			return this.mapOffset(this._textView.getCaretOffset());
 		},
-		
+
 		getSelection: function() {
 			var textView = this._textView;
 			var selection = textView.getSelection();
@@ -569,7 +568,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			}
 			return selection;
 		},
-		
+
 		_expandOffset: function(offset) {
 			var model = this._textView.getModel();
 			var annotationModel = this._annotationModel;
@@ -613,7 +612,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			}
 			textView.setText(text, start, end);
 		},
-		
+
 		setSelection: function(start, end, show, callback) {
 			var textView = this._textView;
 			var model = textView.getModel();
@@ -625,7 +624,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			}
 			textView.setSelection(start, end, show, callback);
 		},
-				
+
 		/**
 		 * @param {Number} start
 		 * @param {Number} [end]
@@ -646,10 +645,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				}
 			});
 		},
-		
+
 		/** @private */
 		_getTooltipInfo: function(x, y) {
-			var textView = this._textView;			
+			var textView = this._textView;
 			var annotationModel = this.getAnnotationModel();
 			if (!annotationModel) { return null; }
 			var annotationStyler = this._annotationStyler;
@@ -687,7 +686,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			};
 			return info;
 		},
-		
+
 		/** @private */
 		_highlightCurrentLine: function(newSelection, oldSelection) {
 			var annotationModel = this._annotationModel;
@@ -705,7 +704,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				start = model.mapOffset(start);
 				end = model.mapOffset(end);
 			}
-			var annotation = this._currentLineAnnotation; 
+			var annotation = this._currentLineAnnotation;
 			if (oldLineIndex === lineIndex && oldEmpty && newEmpty && annotation && annotation.start === start && annotation.end === end) {
 				return;
 			}
@@ -719,17 +718,17 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			this._currentLineAnnotation = annotation;
 			annotationModel.replaceAnnotations(remove, add);
 		},
-		
+
 		/**
 		 * Creates the underlying TextView and installs the editor's features.
 		 */
 		installTextView: function() {
 			this.install();
 		},
-		
+
 		install : function() {
 			if (this._textView) { return; }
-			
+
 			// Create textView and install optional features
 			this._textView = this._textViewFactory();
 			if (this._undoStackFactory) {
@@ -743,13 +742,12 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				var contentAssistMode = this._contentAssistFactory.createContentAssistMode(this);
 				this._contentAssist = contentAssistMode.getContentAssist();
 			}
-			
 			if (this._hoverFactory) {
 				this._hover = this._hoverFactory.createHover(this);
 			}
 			
 			var editor = this, textView = this._textView;
-			
+
 			var self = this;
 			this._listener = {
 				onModelChanged: function(e) {
@@ -800,7 +798,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			textView.addEventListener("MouseOut", this._listener.onMouseOut); //$NON-NLS-0$
 			textView.addEventListener("MouseMove", this._listener.onMouseMove); //$NON-NLS-0$
 			textView.addEventListener("Scroll", this._listener.onScroll); //$NON-NLS-0$
-						
+
 			// Set up keybindings
 			if (this._keyBindingFactory) {
 				var keyBindings;
@@ -865,7 +863,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						styler.addAnnotationType(HIGHLIGHT_ERROR_ANNOTATION);
 					}
 				}
-				
+
 				var rulers = this._annotationFactory.createAnnotationRulers(this._annotationModel);
 				var ruler = this._annotationRuler = rulers.annotationRuler;
 				if (ruler) {
@@ -875,9 +873,13 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					ruler.addAnnotationType(AT.ANNOTATION_WARNING);
 					ruler.addAnnotationType(AT.ANNOTATION_TASK);
 					ruler.addAnnotationType(AT.ANNOTATION_BOOKMARK);
+					ruler.addAnnotationType(AT.ANNOTATION_DIFF_ADDED);
+					ruler.addAnnotationType(AT.ANNOTATION_DIFF_DELETED);
+					ruler.addAnnotationType(AT.ANNOTATION_DIFF_MODIFIED);
 				}
 				this.setAnnotationRulerVisible(this._annotationRulerVisible || this._annotationRulerVisible === undefined, true);
-					
+
+				// Overview Ruler Annotation Type
 				ruler = this._overviewRuler = rulers.overviewRuler;
 				if (ruler) {
 					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_SEARCH);
@@ -892,29 +894,36 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					ruler.addAnnotationType(AT.ANNOTATION_MATCHING_BRACKET);
 					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_BRACKET);
 					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_LINE);
+					ruler.addAnnotationType(AT.ANNOTATION_DIFF_ADDED);
+					ruler.addAnnotationType(AT.ANNOTATION_DIFF_DELETED);
+					ruler.addAnnotationType(AT.ANNOTATION_DIFF_MODIFIED);
+
 				}
 				this.setOverviewRulerVisible(this._overviewRulerVisible || this._overviewRulerVisible === undefined, true);
 			}
-			
+
 			if (this._zoomRulerFactory) {
 				this._zoomRuler = this._zoomRulerFactory.createZoomRuler(this._annotationModel);
 				this.setZoomRulerVisible(this._zoomRulerVisible || this._zoomRulerVisible === undefined, true);
 			}
-			
+
 			if (this._lineNumberRulerFactory) {
 				this._lineNumberRuler = this._lineNumberRulerFactory.createLineNumberRuler(this._annotationModel);
 				this._lineNumberRuler.addAnnotationType(AT.ANNOTATION_CURRENT_BLAME);
 				this._lineNumberRuler.addAnnotationType(AT.ANNOTATION_BLAME);
+		        this._lineNumberRuler.addAnnotationType(AT.ANNOTATION_DIFF_ADDED);
+		        this._lineNumberRuler.addAnnotationType(AT.ANNOTATION_DIFF_MODIFIED);
+		        this._lineNumberRuler.addAnnotationType(AT.ANNOTATION_DIFF_DELETED);
 				this._lineNumberRuler.onDblClick = addRemoveBookmark;
 				this.setLineNumberRulerVisible(this._lineNumberRulerVisible || this._lineNumberRulerVisible === undefined, true);
 			}
-			
+
 			if (this._foldingRulerFactory) {
 				this._foldingRuler = this._foldingRulerFactory.createFoldingRuler(this._annotationModel);
 				this._foldingRuler.addAnnotationType(AT.ANNOTATION_FOLDING);
 				this.setFoldingRulerVisible(this._foldingRulerVisible || this._foldingRulerVisible === undefined, true);
 			}
-			
+
 			var textViewInstalledEvent = {
 				type: "TextViewInstalled", //$NON-NLS-0$
 				textView: textView
@@ -929,24 +938,24 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		uninstallTextView: function() {
 			this.uninstall();
 		},
-		
+
 		uninstall: function() {
 			var textView = this._textView;
 			if (!textView) { return; }
-			
+
 			textView.destroy();
-			
+
 			if (this._annotationModel) {
 				this._annotationModel.setTextModel(null);
 			}
-			this._textView = this._undoStack = this._textDND = this._contentAssist = 
+			this._textView = this._undoStack = this._textDND = this._contentAssist =
 				this._listener = this._annotationModel = this._annotationStyler =
 				this._annotationRuler = this._overviewRuler = this._zoomRuler = this._lineNumberRuler =
 				this._foldingRuler = this._currentLineAnnotation = this._title = null;
 			this._dirty = false;
 			this._foldingRulerVisible = this._overviewRulerVisible = this._zoomRulerVisible =
 				this._lineNumberRulerVisible = this._annotationRulerVisible = undefined;
-			
+
 			var textViewUninstalledEvent = {
 				type: "TextViewUninstalled", //$NON-NLS-0$
 				textView: textView
@@ -954,7 +963,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			this.dispatchEvent(textViewUninstalledEvent);
 			BaseEditor.prototype.uninstall.call(this);
 		},
-		
+
 		_updateCursorStatus: function() {
 			var model = this.getModel();
 			var caretOffset = this.getCaretOffset();
@@ -971,7 +980,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			}
 			this.reportStatus(util.formatMessage(messages.lineColumn, lineIndex + 1, offsetInLine + 1));
 		},
-		
+
 		showAnnotations: function(annotations, types, createAnnotation, getType) {
 			var annotationModel = this._annotationModel;
 			if (!annotationModel) {
@@ -988,7 +997,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					}
 				}
 			}
-			if (annotations) { 
+			if (annotations) {
 				for (var i = 0; i < annotations.length; i++) {
 					annotation = annotations[i];
 					if (!annotation) { continue; }
@@ -996,7 +1005,15 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						annotation = createAnnotation(annotation);
 					} else {
 						var start, end;
-						if (typeof annotation.line === "number") { //$NON-NLS-0$
+						if (annotation.lineStart && annotation.lineEnd){
+							start = model.getLineStart(annotation.lineStart);
+							// If the closing line number of the modified range is on the last line,
+							// get the line ending offset of the previous line
+							end = model.getLineCount() === annotation.lineEnd
+										? model.getLineEnd(annotation.lineEnd - 1)
+										: model.getLineStart(annotation.lineEnd);
+						}
+						else if (typeof annotation.line === "number") { //$NON-NLS-0$
 							// line/column
 							var lineIndex = annotation.line - 1;
 							var lineStart = model.getLineStart(lineIndex);
@@ -1013,12 +1030,12 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					}
 					annotation.creatorID = this;
 					add.push(annotation);
-					
+
 				}
 			}
 			annotationModel.replaceAnnotations(remove, add);
 		},
-		
+
 		showProblems: function(problems) {
 			this.showAnnotations(problems, [
 				AT.ANNOTATION_ERROR,
@@ -1033,7 +1050,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				return null;
 			});
 		},
-		
+
 		showOccurrences: function(occurrences) {
 			this.showAnnotations(occurrences, [
 				AT.ANNOTATION_READ_OCCURRENCE,
@@ -1042,7 +1059,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				return annotation.readAccess ? AT.ANNOTATION_READ_OCCURRENCE : AT.ANNOTATION_WRITE_OCCURRENCE;
 			});
 		},
-		
+
 		showBlame : function(blameMarkers) {
 			var blameRGB = this._blameRGB;
 			var document = this.getTextView().getOptions("parent").ownerDocument; //$NON-NLS-0$
@@ -1104,7 +1121,40 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				return annotation;
 			});
 		},
-		
+
+		/**
+		 * Display git diff annotation on the editor's annotation ruler and overview ruler.
+		 *
+		 * @param diffs { additions, modifications, deletions }
+		 * 		Each property in diffs contains an array of objects { start, end } that
+		 * 		provides the starting and ending line index for the specified property.
+		 */
+		showDiffAnnotations: function(diffs) {
+			/*
+			 * var start = model.getLineStart(modified.start);
+					// If the closing line number of the modified range is on the last line,
+					// get the line ending offset of the previous line
+					var end = model.getLineCount() === modified.end
+								? model.getLineEnd(modified.end - 1)
+								: model.getLineStart(modified.end);
+			 */
+			this.showAnnotations(diffs.added, [
+				AT.ANNOTATION_DIFF_ADDED
+			], null, function(annotation) {
+				return AT.ANNOTATION_DIFF_ADDED;
+			});
+			this.showAnnotations(diffs.modified, [
+				AT.ANNOTATION_DIFF_MODIFIED
+			], null, function(annotation) {
+				return AT.ANNOTATION_DIFF_MODIFIED;
+			});
+			this.showAnnotations(diffs.deleted, [
+				AT.ANNOTATION_DIFF_DELETED
+			], null, function(annotation) {
+				return AT.ANNOTATION_DIFF_DELETED;
+			});
+		},
+
 		/**
 		 * Reveals and selects a portion of text.
 		 * @param {Number} start
@@ -1132,7 +1182,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				this.moveSelection(pos, pos+length);
 			}
 		},
-		
+
 		/**
 		 * @private
 		 */
@@ -1143,7 +1193,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				this._highlightCurrentLine(this._textView.getSelection());
 			}
 		},
-		
+
 		/**
 		 * Sets the editor's contents.
 		 *

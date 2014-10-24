@@ -36,6 +36,29 @@ define([
 	var provider = new PluginProvider(headers);
 
 	// Git category for contributed links
+
+	provider.registerService("orion.edit.diff", {
+		getDiffContent: function(editorContext, context) {
+			var diffTarget = new URL("/gitapi/diff/Default/" + context.metadata.Location, window.location);
+			diffTarget.query.set("parts", "diff");
+			return xhr("GET", diffTarget.href, {
+				headers: {
+					"Orion-Version": "1"
+				},
+				timeout: 10000
+			}).then(function(result) {
+				return result.responseText;
+			});
+		}
+	}, {
+		name: "Git Diff",
+		validationProperties: [{
+			source: "Git",
+			variableName: "Git"
+		} //$NON-NLS-1$ //$NON-NLS-0$
+		]
+	}); //$NON-NLS-0$
+
 	provider.registerService("orion.page.link.category", null, {
 		id: "git",
 		nameKey: "Git",
