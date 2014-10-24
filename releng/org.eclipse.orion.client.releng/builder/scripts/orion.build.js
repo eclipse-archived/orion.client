@@ -86,7 +86,6 @@
         var modules = [
             { name: "index" },
             { name: "cfui/apps" },
-            { name: "cfui/deployInteractive" },
             { name: "cfui/logs" },
             { name: "cfui/plugins/cFDeployService" },
             { name: "cfui/plugins/cFPlugin" },

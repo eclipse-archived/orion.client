@@ -166,56 +166,64 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 					);
 				} else {
 					
-					/* find out if any deployment wizards are plugged in */
+					/* Note, that there's at least one deployment wizard present */
 					var wizardReferences = serviceRegistry.getServiceReferences("orion.project.deploy.wizard");
-					if(wizardReferences.length === 0){
 						
-						/* old-style interactive deploy */
-						deferred.resolve({UriTemplate: "{+OrionHome}/cfui/deployInteractive.html#" + encodeURIComponent(JSON.stringify({ContentLocation: project.ContentLocation, AppPath: appPath})), 
-							Width: "450px", 
-							Height: "350px",
-							UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate"});
+					/* figure out which deployment plan & wizard to use */
+					var relativeFilePath = new URL(project.ContentLocation).href;
+					var orionHomeUrl = new URL(PageLinks.getOrionHome());
 						
-					} else {
+					if(relativeFilePath.indexOf(orionHomeUrl.origin) === 0)
+						relativeFilePath = relativeFilePath.substring(orionHomeUrl.origin.length);
 						
-						/* figure out which deployment plan & wizard to use */
-						var relativeFilePath = new URL(project.ContentLocation).href;
-						var orionHomeUrl = new URL(PageLinks.getOrionHome());
+					if(relativeFilePath.indexOf(orionHomeUrl.pathname) === 0)
+						relativeFilePath = relativeFilePath.substring(orionHomeUrl.pathname.length);
 						
-						if(relativeFilePath.indexOf(orionHomeUrl.origin) === 0)
-							relativeFilePath = relativeFilePath.substring(orionHomeUrl.origin.length);
-						
-						if(relativeFilePath.indexOf(orionHomeUrl.pathname) === 0)
-							relativeFilePath = relativeFilePath.substring(orionHomeUrl.pathname.length);
-						
-						cFService.getDeploymentPlans(relativeFilePath).then(function(resp){
-							var plans = resp.Children;
+					cFService.getDeploymentPlans(relativeFilePath).then(function(resp){
+						var plans = resp.Children;
 							
-							/* find feasible deployments */
-							var feasibleDeployments = [];
-							plans.forEach(function(plan){
+						/* find feasible deployments */
+						var feasibleDeployments = [];
+						plans.forEach(function(plan){
 								
-								var wizard;
-								wizardReferences.forEach(function(ref){
-									if(ref.getProperty("id") === plan.Wizard && !wizard)
-										wizard = ref;
+							var wizard;
+							wizardReferences.forEach(function(ref){
+								if(ref.getProperty("id") === plan.Wizard && !wizard)
+									wizard = ref;
+							});
+								
+							if(wizard){
+								feasibleDeployments.push({
+									wizard : serviceRegistry.getService(wizard),
+									plan : plan
 								});
+							}
+						});
+							
+						var nonGenerics = feasibleDeployments.filter(function(deployment){
+							return deployment.plan.ApplicationType !== "generic";
+						});
+							
+						/* single deployment scenario */
+						if(feasibleDeployments.length === 1){
+							var deployment = feasibleDeployments[0];
+							deployment.wizard.getInitializationParameters().then(function(initParams){
+								deferred.resolve({
+									UriTemplate : initParams.LocationTemplate + "#" + encodeURIComponent(JSON.stringify({
+										ContentLocation: project.ContentLocation,
+										AppPath: appPath,
+										Plan: deployment.plan
+									})),
+									Width : initParams.Width,
+									Height : initParams.Height,
+									UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate"
+								});
+							});
+						} else {
 								
-								if(wizard){
-									feasibleDeployments.push({
-										wizard : serviceRegistry.getService(wizard),
-										plan : plan
-									});
-								}
-							});
-							
-							var nonGenerics = feasibleDeployments.filter(function(deployment){
-								return deployment.plan.ApplicationType !== "generic";
-							});
-							
-							/* single deployment scenario */
-							if(feasibleDeployments.length === 1){
-								var deployment = feasibleDeployments[0];
+							if(nonGenerics[0].plan.Required.length === 0){
+								/* multiple deployment scenarios, but a single non-generic */
+								var deployment = nonGenerics[0];
 								deployment.wizard.getInitializationParameters().then(function(initParams){
 									deferred.resolve({
 										UriTemplate : initParams.LocationTemplate + "#" + encodeURIComponent(JSON.stringify({
@@ -228,54 +236,30 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 										UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate"
 									});
 								});
-							} else if(nonGenerics.length === 1) {
-								
-								if(nonGenerics[0].plan.Required.length === 0){
-									/* multiple deployment scenarios, but a single non-generic */
-									var deployment = nonGenerics[0];
-									deployment.wizard.getInitializationParameters().then(function(initParams){
-										deferred.resolve({
-											UriTemplate : initParams.LocationTemplate + "#" + encodeURIComponent(JSON.stringify({
-												ContentLocation: project.ContentLocation,
-												AppPath: appPath,
-												Plan: deployment.plan
-											})),
-											Width : initParams.Width,
-											Height : initParams.Height,
-											UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate"
-										});
-									});
-								} else {
-									/* TODO: Support this case in wizards */
-									var generic;
-									feasibleDeployments.forEach(function(deployment){
-										if(deployment.plan.ApplicationType === "generic" && !generic)
-											generic = deployment;
-									});
-									
-									deployment.wizard.getInitializationParameters().then(function(initParams){
-										deferred.resolve({
-											UriTemplate : initParams.LocationTemplate + "#" + encodeURIComponent(JSON.stringify({
-												ContentLocation: project.ContentLocation,
-												AppPath: appPath,
-												Plan: deployment.plan
-											})),
-											Width : initParams.Width,
-											Height : initParams.Height,
-											UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate"
-										});
-									});
-								}
 							} else {
+								/* TODO: Support this case in wizards */
+								var generic;
+								feasibleDeployments.forEach(function(deployment){
+									if(deployment.plan.ApplicationType === "generic" && !generic)
+										generic = deployment;
+								});
 								
-								/* old-style interactive deploy */
-								deferred.resolve({UriTemplate: "{+OrionHome}/cfui/deployInteractive.html#" + encodeURIComponent(JSON.stringify({ContentLocation: project.ContentLocation, AppPath: appPath})), 
-									Width: "400px", 
-									Height: "350px",
-									UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate"});
+								var deployment = generic;
+								deployment.wizard.getInitializationParameters().then(function(initParams){
+									deferred.resolve({
+										UriTemplate : initParams.LocationTemplate + "#" + encodeURIComponent(JSON.stringify({
+											ContentLocation: project.ContentLocation,
+											AppPath: appPath,
+											Plan: deployment.plan
+										})),
+										Width : initParams.Width,
+										Height : initParams.Height,
+										UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate"
+									});
+								});
 							}
-						});
-					}
+						}
+					});
 				}
 			},
 				
