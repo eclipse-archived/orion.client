@@ -14,7 +14,6 @@ define(['browse/builder/browse'],
 function(mFileBrowser) {
 	new mFileBrowser(
 		"fileBrowser",
-		//"https://github.com/eclipse/orion.client.git&token=3bbaae0679391edd086b665627fbbe5b7168ff50",
 		"https://github.com/libingw/test1.git",
 		null /*,
 		{maxLine: 20, fileURL: "https://api.github.com/repos/libingw/test1/contents!testBranch/demo.html", start: 23, end: 192}*/

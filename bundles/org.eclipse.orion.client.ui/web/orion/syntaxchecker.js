@@ -15,31 +15,6 @@ define([
 	'orion/i18nUtil',
 ], function(Deferred, EditorContext, i18nUtil) {
 
-var SyntaxChecker = (function () {
-	/**
-	 * @name orion.SyntaxChecker
-	 * @class Provides access to validation services registered with the service registry.
-	 * @description Provides access to validation services registered with the service registry.
-	 */
-	function SyntaxChecker(serviceRegistry, editor) {
-		this.registry = serviceRegistry;
-		this.editor = editor;
-	}
-
-	function clamp(n, min, max) {
-		n = Math.max(n, min);
-		n = Math.min(n, max);
-		return n;
-	}
-
-    
-
-    function extractProblems(data) {
-		data = data || {};
-		var problems = data.problems || data.errors || data;
-		return Array.isArray(problems) ? problems : [];
-	}
-
     function getValidators(registry, contentType, title) {
 		var contentTypeService = registry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
 		function getFilteredValidator(validator, contentType) {
@@ -75,19 +50,43 @@ var SyntaxChecker = (function () {
 			});
 	}
 			
+var SyntaxChecker = (function () {
+	/**
+	 * @name orion.SyntaxChecker
+	 * @class Provides access to validation services registered with the service registry.
+	 * @description Provides access to validation services registered with the service registry.
+	 */
+	function SyntaxChecker(serviceRegistry, model) {
+		this.registry = serviceRegistry;
+		this.textModel = model;
+	}
+
+	function clamp(n, min, max) {
+		n = Math.max(n, min);
+		n = Math.min(n, max);
+		return n;
+	}
+
+    
+
+    function extractProblems(data) {
+		data = data || {};
+		var problems = data.problems || data.errors || data;
+		return Array.isArray(problems) ? problems : [];
+	}
 
 	SyntaxChecker.prototype = /** @lends orion.SyntaxChecker.prototype */ {
 		/**
 		 * Looks up applicable validators, calls them to obtain problems, passes problems to the marker service.
 		 */
-		checkSyntax: function (contentType, title, message, contents) {
-			if (!contentType) {
-				return;
+		checkSyntax: function (contentType, title, message, contents, editorContext) {
+			if (!contentType || message) {
+				return new Deferred().resolve([]);
 			}
 			if (!message) {
 				var serviceRegistry = this.registry;
 				var self = this;
-				getValidators(serviceRegistry, contentType, title).then(function(validators) {
+				return getValidators(serviceRegistry, contentType, title).then(function(validators) {
 					var progress = serviceRegistry.getService("orion.page.progress");
 					var problemPromises = validators.map(function(validator) {
 						var service = serviceRegistry.getService(validator);
@@ -97,7 +96,7 @@ var SyntaxChecker = (function () {
 								contentType: contentType.id,
 								title: title
 							};
-							promise = service.computeProblems(EditorContext.getEditorContext(serviceRegistry), context);
+							promise = service.computeProblems(editorContext ? editorContext : EditorContext.getEditorContext(serviceRegistry), context);
 						} else if (service.checkSyntax) {
 							// Old API
 							promise = service.checkSyntax(title, contents);
@@ -124,7 +123,7 @@ var SyntaxChecker = (function () {
 						return progress.progress(promise, "Validating " + title).then(extractProblems);
 					});
 					
-					Deferred.all(problemPromises, function(error) {return {_error: error}; })
+					return Deferred.all(problemPromises, function(error) {return {_error: error}; })
 						.then(function(results) {
 							var problems = [];
 							for (var i=0; i < results.length; i++) {
@@ -134,14 +133,19 @@ var SyntaxChecker = (function () {
 									problems = problems.concat(probs);
 								}
 							}
-							serviceRegistry.getService("orion.core.marker")._setProblems(problems); //$NON-NLS-0$
+							return new Deferred().resolve(problems);
+							//serviceRegistry.getService("orion.core.marker")._setProblems(problems); //$NON-NLS-0$
 						});
 				});
 			}
 		},
 		
+		setTextModel: function(model) {
+			this.textModel = model;
+		},
+		
 		_fixup: function(problems) {
-    		var model = this.editor.getModel();
+    		var model = this.textModel;
     		for (var i=0; i < problems.length; i++) {
     			var problem = problems[i];
     			
@@ -183,5 +187,6 @@ var SyntaxChecker = (function () {
 	};
 	return SyntaxChecker;
 }());
-return {SyntaxChecker: SyntaxChecker};
+return {SyntaxChecker: SyntaxChecker,
+		getValidators: getValidators};
 });

@@ -78,7 +78,10 @@ define(['orion/edit/dispatcher'], function() {
 		},
 		_wireServiceMethod: function(serviceReference, service, serviceMethod, textView, type) {
 //			console.log("  Add listener " + type + " for " + serviceReference.getProperty('service.id'));
+			var _self = this;
 			var listener = function(event) {
+				// Inject metadata about the file being edited into the event.
+				event.file = _self.getServiceFileObject();
 				serviceMethod(event).then(/*No return value*/);
 			};
 			var serviceId = serviceReference.getProperty('service.id'); //$NON-NLS-0$
@@ -113,6 +116,34 @@ define(['orion/edit/dispatcher'], function() {
 				this._removeListeners(keys[i]);
 			}
 		},
+		/**
+		 * @since 8.0
+		 */
+		getServiceFileObject: function() {
+			var metadata = this.inputManager.getFileMetadata();
+			if (!metadata) {
+				return null;
+			}
+			return Dispatcher.toServiceFileObject(metadata, this.inputManager.getContentType());
+		},
 	};
+
+	/**
+	 * @since 8.0
+	 */
+	Dispatcher.toServiceFileObject = function(metadata, contentType) {
+		var data = Object.create(null);
+		data.name = metadata.Name;
+		data.location = metadata.Location;
+		if (contentType) {
+			data.contentType = Object.create(null);
+			data.contentType.id = contentType.id;
+			data.contentType.name = contentType.name;
+			data.contentType.imageClass = contentType.imageClass;
+			data.contentType.extension = contentType.extension;
+		}
+		return data;
+	};
+
 	return {Dispatcher: Dispatcher};
 });

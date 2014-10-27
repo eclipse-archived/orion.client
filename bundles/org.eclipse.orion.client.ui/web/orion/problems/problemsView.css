@@ -1,0 +1,22 @@
+.problems_inner_container {
+	margin-top: 20px;
+	width: 100%;
+	height: 100%;
+	overflow-y: auto;
+	overflow-x:hidden;
+}
+
+.problems_inner_container .sectionWrapper{
+	margin-left: 2px;
+	margin-right: 2px;
+	margin-top: 2px;
+}
+
+.problems_link {
+	padding-left: 40px;
+}
+
+.problems_inner_container .sectionTable{
+	margin-left: 2px;
+	margin-right: 2px;
+}

@@ -51,6 +51,7 @@ define([
 	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
 	mKeyBinding, mUIUtils, util, objects, mMetrics
 ) {
+	var Dispatcher = mDispatcher.Dispatcher;
 
 	function parseNumericParams(input, params) {
 		for (var i = 0; i < params.length; i++) {
@@ -445,7 +446,7 @@ define([
 				this.showSelection(params.start, params.end, params.line, params.offset, params.length);
 			};
 
-			this.dispatcher = new mDispatcher.Dispatcher(this.serviceRegistry, this.contentTypeRegistry, editor, inputManager);
+			this.dispatcher = new Dispatcher(this.serviceRegistry, this.contentTypeRegistry, editor, inputManager);
 			if(themePreferences && editorPreferences){
 				localSettings = new EditorSettings({local: true, editor: editor, themePreferences: themePreferences, preferences: editorPreferences});
 			}
@@ -490,9 +491,12 @@ define([
 			markOccurrences.setOccurrencesVisible(this.settings.occurrencesVisible);
 			markOccurrences.findOccurrences();
 			
-			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
+			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor.getModel());
 			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
-				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
+				syntaxChecker.setTextModel(editor.getModel());
+				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents).then(function(problems) {
+					serviceRegistry.getService("orion.core.marker")._setProblems(problems); //$NON-NLS-0$
+				});
 				if (inputManager.getReadOnly()) {
 					editor.reportStatus(messages.readonly, "error"); //$NON-NLS-0$
 				}
@@ -517,22 +521,7 @@ define([
 			 * @since 7.0
 			 */
 			contextImpl.getFileMetadata = function() {
-				var meta = self.inputManager.getFileMetadata();
-				if(meta) {
-					var data = Object.create(null);
-					data.name = meta.Name;
-					data.location = meta.Location;
-					var type = self.inputManager.getContentType();
-					if(type) {
-						data.contentType = Object.create(null);
-						data.contentType.id = type.id;
-						data.contentType.name = type.name;
-						data.contentType.imageClass = type.imageClass;
-						data.contentType.extension = type.extension;
-					}
-					return data;
-				}
-				return null;
+				return self.dispatcher.getServiceFileObject();
 			};
 			// Forward status from plugin to orion.page.message
 			contextImpl.setStatus = mEditorCommands.handleStatusMessage.bind(null, serviceRegistry);
