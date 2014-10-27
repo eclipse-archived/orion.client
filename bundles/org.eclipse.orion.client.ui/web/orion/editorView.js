@@ -491,9 +491,12 @@ define([
 			markOccurrences.setOccurrencesVisible(this.settings.occurrencesVisible);
 			markOccurrences.findOccurrences();
 			
-			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
+			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor.getModel());
 			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
-				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
+				syntaxChecker.setTextModel(editor.getModel());
+				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents).then(function(problems) {
+					serviceRegistry.getService("orion.core.marker")._setProblems(problems); //$NON-NLS-0$
+				});
 				if (inputManager.getReadOnly()) {
 					editor.reportStatus(messages.readonly, "error"); //$NON-NLS-0$
 				}

@@ -13,6 +13,7 @@
 define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils', 'orion/contentTypes', 'orion/Deferred'], 
 		function(messages, i18nUtil, mSearchUtils, mContentTypes, Deferred) {
 	
+	var DEBUG = false;
 	var _folderFilter = [".git"];
 	/**
 	 * SearchCrawler is an alternative when a file service does not provide the search API.
@@ -35,15 +36,23 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 		this._buildSkeletonOnly = options && options.buildSkeletonOnly;
 		this._fetchChildrenCallBack = options && options.fetchChildrenCallBack;
 		this._searchParams = searchParams;
-		this.searchHelper = (this._searchOnName || this._buildSkeletonOnly) ? null: mSearchUtils.generateSearchHelper(searchParams);
+		this.searchHelper = (this._searchOnName || this._buildSkeletonOnly || !this._searchParams) ? null: mSearchUtils.generateSearchHelper(searchParams);
 		this._location = options && options.location;
 		this._childrenLocation = options && options.childrenLocation ? options.childrenLocation : this._location;   
-		this._reportOnCancel = options && options.reportOnCancel;   
+		this._reportOnCancel = options && options.reportOnCancel;
+		this._visitSingleFile = options && options.visitSingleFile;
+		if(!this._visitSingleFile) {
+			this._visitSingleFile = this._searchSingleFile;
+		}
+		this._cancelMessage = options && options.cancelMessage;
+		if(!this._cancelMessage) {
+			this._cancelMessage = messages["searchCancelled"];
+		}
 		this._cancelled = false;
 		this._statusService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 		this._progressService = this.registry.getService("orion.page.progress"); //$NON-NLS-0$
 		if(this._statusService) {
-			this._statusService.setCancelFunction(function() {this._cancelFileContentsSearch();}.bind(this));
+			this._statusService.setCancelFunction(function() {this._cancelFileVisit();}.bind(this));
 		}
 	}
 	
@@ -139,6 +148,32 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 		});
 	};
 	
+	SearchCrawler.prototype.incrementalReport = function(fileObj){
+		if(this._cancelled){
+			return;
+		}
+		fileObj.LastModified = fileObj.LocalTimeStamp;
+		this.fileLocations.push(fileObj);
+		this._hitCounter++;
+		this._sort(this.fileLocations);
+		var response = {numFound: this.fileLocations.length, docs: this.fileLocations };
+		this._onSearchComplete({response: response}, true);
+		if(this._statusService) {
+			this._statusService.setProgressResult({Message: i18nUtil.formatMessage(messages["filesFound"], this._hitCounter, this._totalCounter)}, messages["Cancel"]);
+		}
+	};
+	
+	SearchCrawler.prototype.addTotalCounter = function(number){
+		if(!number) {
+			number = 1;
+		}
+		this._totalCounter = this._totalCounter + number;
+	};
+	
+	SearchCrawler.prototype.isCancelled = function(){
+		return this._cancelled;
+	};
+	
 	SearchCrawler.prototype._contains = function(array, item){
 		return (array || []).indexOf(item) !== -1;
 	};
@@ -146,7 +181,7 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 	SearchCrawler.prototype._sort = function(fileArray){
 		fileArray.sort(function(a, b) {
 			var n1, n2;
-			if(this._searchParams.sort === "Path asc"){ //$NON-NLS-0$
+			if(this._searchParams && this._searchParams.sort === "Path asc"){ //$NON-NLS-0$
 				//Folder equals to Location's substring after tailing out the file name
 				//We can not purely sort on Location because "Location" includes the file name at the tail.
 				//E.g. "DDD/f1_2_1.css" will be lined up after "DDD/AAA/f1_2_2.html" if we do so.
@@ -165,8 +200,10 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 		
 	SearchCrawler.prototype._HandleStatus = function(error){
 		if(this._statusService && error.name === "Cancel") { //$NON-NLS-0$
-			console.log("Crawling search cancelled. Deferred array length : " + this._deferredArray.length); //$NON-NLS-0$
-			this._statusService.setProgressResult({Message: messages["searchCancelled"], Severity: "Warning"}); //$NON-NLS-0$
+			if(DEBUG) {
+				console.log("Crawling search cancelled. Deferred array length : " + this._deferredArray.length); //$NON-NLS-0$
+			}
+			this._statusService.setProgressResult({Message: this._cancelMessage, Severity: "Warning"}); //$NON-NLS-0$
 		}
 	};
 		
@@ -186,7 +223,7 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 	
 	SearchCrawler.prototype._fileNameMatches = function(fileName){
 		var matches = true;
-		if(this.searchHelper.params.fileNamePatterns){
+		if(this.searchHelper && this.searchHelper.params.fileNamePatterns){
 			matches = this.searchHelper.params.fileNamePatterns.some(function(pattern){
 				var regExpPattern = "^" + pattern.replace(/([*?])/g, ".$1") + "$"; // add line start, line end, and convert user input * and ? to .* and .? //$NON-NLS-0$
 				return fileName.match(regExpPattern);
@@ -212,7 +249,7 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 						var contentType = mContentTypes.getFilenameContentType(children[i].Name, _this.contentTypesCache);
 						var isBinary = (mContentTypes.isImage(contentType) || mContentTypes.isBinary(contentType));
 						if(!isBinary && _this._fileNameMatches(children[i].Name)){
-							var fileDeferred = _this._sniffSearch(children[i]);
+							var fileDeferred = _this._visitSingleFile(_this, children[i], contentType);
 							results.push(fileDeferred);
 							_this._deferredArray.push(fileDeferred);
 						}
@@ -244,19 +281,7 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 		return result;
 	};
 
-	SearchCrawler.prototype._reportSingleHit = function(fileObj){
-		if(this._cancelled){
-			return;
-		}
-		fileObj.LastModified = fileObj.LocalTimeStamp;
-		this.fileLocations.push(fileObj);
-		this._hitCounter++;
-		this._sort(this.fileLocations);
-		var response = {numFound: this.fileLocations.length, docs: this.fileLocations };
-		this._onSearchComplete({response: response}, true);
-	};
-	
-	SearchCrawler.prototype._cancelFileContentsSearch = function(){
+	SearchCrawler.prototype._cancelFileVisit = function(){
 		this._cancelled = true;
 		if(this._cancelled) {
 			this._deferredArray.forEach(function(result) {
@@ -265,24 +290,18 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 		}
 	};
 	
-	SearchCrawler.prototype._sniffSearch = function(fileObj){
-		this._totalCounter++;
+	SearchCrawler.prototype._searchSingleFile = function(crawer, fileObj, contentType){
+		this.addTotalCounter();
 		var self = this;
 		if(this._cancelled){
 			return;
 		}
 		if(this.searchHelper.params.keyword === ""){
-			this._reportSingleHit(fileObj);
-			if(this._statusService) {
-				this._statusService.setProgressResult({Message: i18nUtil.formatMessage(messages["filesFound"], this._hitCounter, this._totalCounter)});
-			}
+			this.incrementalReport(fileObj);
 		} else {
 			return (self._progressService ? self._progressService.progress(self.fileClient.read(fileObj.Location), "Reading file " + fileObj.Location) : self.fileClient.read(fileObj.Location)).then(function(jsonData) { //$NON-NLS-0$
 					if(self._hitOnceWithinFile(jsonData)){
-						self._reportSingleHit(fileObj);
-					}
-					if(self._statusService) {
-						self._statusService.setProgressResult({Message: i18nUtil.formatMessage(messages["filesFound"], self._hitCounter, self._totalCounter)}, messages["Cancel"]);
+						self.incrementalReport(fileObj);
 					}
 				},
 				function(error) {
@@ -295,13 +314,11 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 	};
 	
 	SearchCrawler.prototype._buildSingleSkeleton = function(fileObj){
-		this._totalCounter++;
+		this.addTotalCounter();
 		this.fileSkeleton.push(fileObj);
 		if(this.searchHelper && !this._buildSkeletonOnly && this._totalCounter%100 === 0){
 			this.searchName();
 		}
-		//console.log("skeltoned files : "+ this._totalCounter);
-		//console.log(fileObj.Location);
 		var df = new Deferred();
 		df.resolve(this._totalCounter);
 		return df;

@@ -179,7 +179,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		blameService = new mBlameAnnotation.BlameService(serviceRegistry);
 	}());
-
+	
 	var sidebarDomNode = lib.node("sidebar"), //$NON-NLS-0$
 		sidebarToolbar = lib.node("sidebarToolbar"), //$NON-NLS-0$
 		pageToolbar = lib.node("pageToolbar"), //$NON-NLS-0$
