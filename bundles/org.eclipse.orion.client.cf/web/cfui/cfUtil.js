@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*eslint-env browser,amd*/
 define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URITemplate',
-	'orion/PageLinks', 'orion/urlUtils', 'orion/webui/littlelib'], 
-	function(messages, Deferred, i18nUtil, URITemplate, PageLinks, URLUtil, lib){
+	'orion/PageLinks', 'orion/urlUtils', 'orion/webui/littlelib', 'orion/i18nUtil'], 
+	function(messages, Deferred, i18nUtil, URITemplate, PageLinks, URLUtil, lib, i18Util){
 
 	function handleNoCloud(error) {
 		error = error || {};
@@ -53,7 +53,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 			var deferred = new Deferred();
 			
 			var appName = resp.App.name || resp.App.entity.name;
-			var launchConfName = appName + " on " + resp.Target.Space.Name + " / " + resp.Target.Org.Name;
+			var launchConfName = i18Util.formatMessage(messages["${0}On${1}/${2}"], appName, resp.Target.Space.Name, resp.Target.Org.Name);
 			
 			var host, url;
 			if(resp.Route !== undefined){
@@ -79,9 +79,8 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 					ManageUrl: resp.ManageUrl,
 					Path: appPath
 				},
-				Message: "See Manual Deployment Information in the [root folder page](" + editLocation.href + ") to view and manage [" + launchConfName + "](" + resp.ManageUrl + ")"
+				Message: i18Util.formatMessage(messages["seeManualDeploymentInformationIn"], editLocation.href, launchConfName, resp.ManageUrl)
 			});
-			
 			return deferred;
 		},
 		
@@ -92,7 +91,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 			error.Severity = "Error";
 			
 			if (error.Message && error.Message.indexOf("The host is taken") === 0)
-				error.Message = "The host is already in use by another application. Please check the host/domain in the manifest file.";
+				error.Message = messages["theHostIsAlreadyIn"];
 			
 			if (error.HttpCode === 404){
 				
@@ -107,7 +106,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 				if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){
 					
 					error.Retry = {
-						parameters: [{id: "user", type: "text", name: "ID:"}, {id: "password", type: "password", name: "Password:"}, {id: "url", hidden: true, value: target.Url}]
+						parameters: [{id: "user", type: "text", name: messages["iD:"]}, {id: "password", type: "password", name: messages["password:"]}, {id: "url", hidden: true, value: target.Url}]
 					};
 					
 					error.forceShowMessage = true;
@@ -116,7 +115,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 				
 				} else if (err.error_code === "CF-TargetNotSet"){
 					var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=cloud").expand({OrionHome : PageLinks.getOrionHome()});
-					error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+					error.Message = i18Util.formatMessage(messages["setUpYourCloud.Go"], cloudSettingsPageUrl); 
 				}
 			}
 			
@@ -155,7 +154,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 						
 						/* handle login errors */
 						if(params.url && params.user && params.password){
-							showMessage("Logging in to " + params.url + "...");
+							showMessage(i18Util.formatMessage(messages["loggingInTo${0}..."], params.url));
 							cFService.login(params.url, params.user, params.password).then(function(result){
 								
 								hideMessage();
@@ -204,7 +203,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 					});
 					
 					var submitButton = document.createElement("button");
-					submitButton.appendChild(document.createTextNode("Submit"));
+					submitButton.appendChild(document.createTextNode(messages["submit"]));
 					submitButton.onclick = submitParams;
 					
 					fields.appendChild(submitButton);

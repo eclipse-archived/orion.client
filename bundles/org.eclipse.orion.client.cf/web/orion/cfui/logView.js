@@ -9,15 +9,16 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define([
+define(['i18n!cfui/nls/messages', 
 	'orion/editor/textModel',
 	'orion/editorView',
 	'orion/inputManager',
 	'orion/objects',
 	'orion/Deferred',
 	'orion/globalCommands',
+	'orion/i18nUtil',
 	'orion/URL-shim'
-], function(mTextModel, mEditorView, mInputManager, objects, Deferred, mGlobalCommands) {
+], function(messages, mTextModel, mEditorView, mInputManager, objects, Deferred, mGlobalCommands, i18Util) {
 
 	function handleError(statusService, error) {
 		if (!statusService) {
@@ -64,7 +65,7 @@ define([
 				deferred.resolve(log);
 				
 				mGlobalCommands.setPageTarget({
-						task: "Cloud Foundry Logs",
+						task: messages["cloudFoundryLogs"],
 						target: log,
 						breadcrumbTarget: log,
 						serviceRegistry: this.serviceRegistry,
@@ -106,7 +107,7 @@ define([
 			
 			if((!this.lastLogLoaded || this.lastLogLoaded!==logName) || (this.applicationInfo.instance !== null && this.lastLogInstance !== this.applicationInfo.instance)){
 				// Read the log
-				this.progressService.showWhile(this._read(logName, true), "Loading " + logName).then(function(metadata) {
+				this.progressService.showWhile(this._read(logName, true), i18Util.formatMessage(messages["loading${0}"], logName)).then(function(metadata) {
 					this.lastLogLoaded = logName;
 					this.lastLogInstance = metadata.Instance;
 					this._setInputContents(this._parsedLocation, logName, metadata.Contents, metadata);
@@ -114,7 +115,7 @@ define([
 			} else {
 				progressTimeout = window.setTimeout(function() {
 					progressTimeout = null;
-					this.reportStatus("Fetching " + logName);
+					this.reportStatus(i18Util.formatMessage(messages["fetching${0}"], logName));
 				}.bind(this), 800);
 				
 				var found = false;

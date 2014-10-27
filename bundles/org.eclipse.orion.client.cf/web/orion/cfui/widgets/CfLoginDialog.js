@@ -8,7 +8,7 @@
  * Contract with IBM Corp.
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/webui/dialog'], function(dialog) {
+define(['i18n!cfui/nls/messages', 'orion/webui/dialog'], function(messages, dialog) {
 
 /**
  * @param options {{ 
@@ -34,15 +34,15 @@ CfLoginDialog.prototype.TEMPLATE =
 
 	CfLoginDialog.prototype._init = function(options) {
 		this.options = options || {};
-		this.title = this.options.title || "Cloud Foundry Login";
+		this.title = this.options.title || messages["cloudFoundryLogin"];
 		this.modal = true;
-		this.buttons = [{text: 'OK', isDefault: true, callback: this.done.bind(this)}];
+		this.buttons = [{text: messages["oK"], isDefault: true, callback: this.done.bind(this)}];
 		this._func = options.func;
 		this._initialize();
 	};
 	CfLoginDialog.prototype._bindToDom = function() {
-		this.$userIdLabel.appendChild(document.createTextNode("User Id:"));
-		this.$passwordLabel.appendChild(document.createTextNode("Password:"));
+		this.$userIdLabel.appendChild(document.createTextNode(messages["userId:"]));
+		this.$passwordLabel.appendChild(document.createTextNode(messages["password:"]));
 	};
 	
 	CfLoginDialog.prototype.done = function() {

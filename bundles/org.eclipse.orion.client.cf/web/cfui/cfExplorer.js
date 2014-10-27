@@ -9,7 +9,7 @@
  *******************************************************************************/
  /*global define window document*/
  /*eshint-env browser, amd*/
-define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], function(URITemplate, PageLinks, mExplorer){
+define(['i18n!cfui/nls/messages', 'orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], function(messages, URITemplate, PageLinks, mExplorer){
 	
 	function getUrlLinkNode(url, name){
 		if(!name){
@@ -35,7 +35,7 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 	ApplicationsRenderer.prototype.emptyCallback = function(bodyElement){
 		var tr = document.createElement("tr");
 		var td = document.createElement("td");
-		td.appendChild(document.createTextNode("You have no applications in this space"));
+		td.appendChild(document.createTextNode(messages["youHaveNoApplicationsIn"]));
 		tr.appendChild(td);
 		bodyElement.appendChild(tr);
 	};
@@ -77,29 +77,29 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 					a.target = "_new";
 					var uriTemplate = new URITemplate("{+OrionHome}/cfui/logs.html#{Name,Target*}");
 					a.href = uriTemplate.expand({OrionHome : PageLinks.getOrionHome(), Name: item.Name, Target: item.parent.Target});
-					a.appendChild(document.createTextNode("Logs"));
+					a.appendChild(document.createTextNode(messages["logs"]));
 					span.appendChild(a);	
 					return col;
 				case 2:
 				col.classList.add("secondaryColumnRight");
 				if(item.State === "STARTED"){
 					span.className = "imageSprite core-sprite-applicationrunning";
-					span.title = (typeof item.Instances !== "undefined" && typeof item.RunningInstances !== "undefined") ? ( item.RunningInstances + " of " + item.Instances + " instances running") : "Started";
+					span.title = (typeof item.Instances !== "undefined" && typeof item.RunningInstances !== "undefined") ? ( item.RunningInstances + messages["of"] + item.Instances + messages["instancesRunning"]) : messages["started"];
 					return col;
 				} else if(item.State==="STOPPED"){
 					span.className = "imageSprite core-sprite-applicationstopped";
-					span.title = (typeof item.Instances !== "undefined" && typeof item.RunningInstances !== "undefined") ? ( item.RunningInstances + " of " + item.Instances + " instances running") : "Stopped";
+					span.title = (typeof item.Instances !== "undefined" && typeof item.RunningInstances !== "undefined") ? ( item.RunningInstances + messages["of"] + item.Instances + messages["instancesRunning"]) : messages["stopped"];
 					return col;
 				} else if(item.State==="NOT_DEPLOYED"){
 					span.className = "imageSprite core-sprite-applicationnotdeployed";
-					span.title = "Not deployed";
+					span.title = messages["notDeployed"];
 					return col;
 				} else if(item.State==="PROGRESS"){
 					span.className = "imageSprite core-sprite-progress";
-					span.title = "Checking application state";
+					span.title = messages["checkingApplicationState"];
 					return col;
 				} else {
-					span.appendChild(document.createTextNode("State unknown"));
+					span.appendChild(document.createTextNode(messages["stateUnknown"]));
 					return col;
 				}
 					
@@ -279,7 +279,7 @@ define(['orion/URITemplate', 'orion/PageLinks', 'orion/explorers/explorer'], fun
 	OrphanRoutesRenderer.prototype.emptyCallback = function(bodyElement){
 		var tr = document.createElement("tr");
 		var td = document.createElement("td");
-		td.appendChild(document.createTextNode("You have no orphan routes in this space"));
+		td.appendChild(document.createTextNode(messages["youHaveNoOrphanRoutes"]));
 		tr.appendChild(td);
 		bodyElement.appendChild(tr);
 	};

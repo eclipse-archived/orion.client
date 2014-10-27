@@ -11,8 +11,8 @@
 
 /*eslint-env browser,amd*/
 
-define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifestEditor', 'orion/serviceregistry', 'domReady!'],
-		function(xhr, PluginProvider, CFClient, mManifestEditor, ServiceRegistry) {
+define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifestEditor', 'orion/serviceregistry', 'orion/i18nUtil', 'domReady!'],
+		function(messages, xhr, PluginProvider, CFClient, mManifestEditor, ServiceRegistry, i18Util) {
 
 	var temp = document.createElement('a');
 	var login = temp.href;
@@ -20,7 +20,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 	var headers = {
 		name: "Cloud Foundry",
 		version: "1.0",
-		description: "This plugin integrates with Cloud Foundry."
+		description: messages["thisPluginIntegratesWithCloud"]
 	};
 
 	var provider = new PluginProvider(headers);
@@ -108,7 +108,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 	provider.registerServiceProvider(
 		"orion.shell.command", null, {
 		name: "cfo",
-		description: "Commands for interacting with a Cloud Foundry compatible target"
+		description: messages["commandsForInteractingWithA"]
 	});
 	
 	/** Add cf target command **/
@@ -119,7 +119,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 					if (result) {
 						return "target: " + result.Url;
 					} else {
-						return "Target not set";
+						return messages["targetNotSet"];
 					}
 				});
 			} else {
@@ -134,21 +134,21 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		targetImpl, {
 			name: "cfo target",
-			description: "Set or display the target cloud, organization, and space",
+			description: messages["setOrDisplayTheTarget"],
 			parameters: [{
 				name: "url",
 				type: "string",
-				description: "Target URL to switch to",
+				description: messages["targetURLToSwitchTo"],
 				defaultValue: null
 			}, {
 				name: "org",
 				type: "string",
-				description: "Organization",
+				description: messages["organization"],
 				defaultValue: null
 			}, {
 				name: "space",
 				type: "string",
-				description: "Space",
+				description: messages["space"],
 				defaultValue: null
 			}]
 		}
@@ -159,11 +159,11 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		callback: function(args) {
 			return cFService.getInfo().then(function(result) {
 				var value = result.description + 
-					"\nversion: " + result.version +
-					"\nsupport: " + result.support;
+					"\n" + messages["version:"] + result.version +
+					"\n" + messages["support:"] + result.support;
 				
 				if (result.user) {
-					value += "\n\nuser: " + result.user;
+					value += "\n\n" + messages["user:"] + result.user;
 				}
 				
 				return value;
@@ -175,7 +175,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		infoImpl, {
 			name: "cfo info",
-			description: "Display information on the current target, user, etc."
+			description: messages["displayInformationOnTheCurrent"]
 		}
 	);
 	
@@ -192,7 +192,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 					strResult += ", ";
 			});
 		} else {
-			strResult += "<none>";
+			strResult += messages["<none>"];
 		}
 		
 		return strResult;
@@ -204,7 +204,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 				result = result.Orgs;
 				
 				if (!result || result.length === 0) {
-					return "No orgs.";
+					return messages["noOrgs."];
 				}
 				var strResult = "";
 				result.forEach(function(org) {
@@ -220,7 +220,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		orgsImpl, {
 			name: "cfo orgs",
-			description: "List all orgs"
+			description: messages["listAllOrgs"]
 		}
 	);
 	
@@ -229,7 +229,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		callback: function(args) {
 			return cFService.login(null, args.username, args.password,
 				args.org, args.space).then(function(result) {
-					return "Logged in";
+					return messages["loggedIn"];
 				}
 			);
 		}
@@ -239,26 +239,26 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		loginImpl, {
 			name: "cfo login",
-			description: "Log user in",
+			description: messages["logUserIn"],
 			parameters: [{
 				name: "username",
 				type: "string",
-				description: "Username",
+				description: messages["username"],
 				defaultValue: null
 			}, {
 				name: "password",
 				type: "string",
-				description: "Password",
+				description: messages["password"],
 				defaultValue: null
 			}, {
 				name: "org",
 				type: "string",
-				description: "Organization",
+				description: messages["organization"],
 				defaultValue: null
 			}, {
 				name: "space",
 				type: "string",
-				description: "Space",
+				description: messages["space"],
 				defaultValue: null
 			}]
 		}
@@ -268,7 +268,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 	var logoutImpl = {
 		callback: function(args) {
 			return cFService.logout().then(function(result) {
-				return "Logged out";
+				return messages["loggedOut"];
 			});
 		}
 	};
@@ -277,7 +277,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		logoutImpl, {
 			name: "cfo logout",
-			description: "Log user out"
+			description: messages["logUserOut"]
 		}
 	);
 	
@@ -294,9 +294,9 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 				result = result.Apps;
 				
 				if (!result || result.length === 0) {
-					return "No applications.";
+					return messages["noApplications."];
 				}
-				var strResult = "\nname\tstate\tinstances\tmemory\tdisk\turls\n";
+				var strResult = "\n"+messages["name"]+"\t"+messages["state"]+"\t"+messages["instances"]+"\t"+messages["memory"]+"\t"+messages["disk"]+"\t"+messages["urls"]+"\n";
 				result.forEach(function(app) {
 					strResult += describeApp(app);
 				});
@@ -309,7 +309,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		appsImpl, {
 			name: "cfo apps",
-			description: "List all apps in the target space"
+			description: messages["listAllAppsInThe"]
 		}
 	);
 
@@ -324,9 +324,9 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		}
 		var percentage = runningInstances / instances * 100;
 		strResult += percentage + "%";
-		strResult += "\n\tusage: " + app.memory + "M x ";
-		strResult += runningInstances + " instance(s)";
-		strResult += "\n\turl: ";
+		strResult += "\n\t" + messages["usage:"] + app.memory + "M x ";
+		strResult += i18Util.formatMessage(messages["${0}Instance(s)"], runningInstances);
+		strResult += "\n\t" + messages["url:"];
 		
 		if (app.routes && app.routes.length > 0){
 			var host = app.routes[0].host;
@@ -342,7 +342,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		callback: function(args, context) {
 			return cFService.getApp(null, args.app, context.cwd).then(function(result) {
 				if (!result) {
-					return "Application not found";
+					return messages["applicationNotFound"];
 				}
 				return describeAppVerbose(result);
 			});
@@ -353,11 +353,11 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		appImpl, {
 			name: "cfo app",
-			description: "Display health and status for app",
+			description: messages["displayHealthAndStatusFor"],
 			parameters: [{
 				name: "app",
 				type: "string",
-				description: "Application to show information for",
+				description: messages["applicationToShowInformationFor"],
 				defaultValue: null
 			}]
 		}
@@ -369,13 +369,13 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 			return cFService.pushApp(null, args.app, decodeURIComponent(context.cwd)).then(
 				function(result) {
 					if (!result || !result.App) {
-						return "Application not found";
+						return messages["applicationNotFound"];
 					}
 					
 					return cFService.getApp(null, args.app, decodeURIComponent(context.cwd)).then(
 						function(result) {
 							if (!result) {
-								return "Application not found";
+								return messages["applicationNotFound"];
 							}
 							return describeAppVerbose(result);
 						}
@@ -389,11 +389,11 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		pushImpl, {
 			name: "cfo push",
-			description: "Push a new app or sync changes to an existing app",
+			description: messages["pushANewAppOr"],
 			parameters: [{
 				name: "app",
 				type: "string",
-				description: "Application to push",
+				description: messages["applicationToPush"],
 				defaultValue: null
 			}]
 		}
@@ -404,14 +404,14 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		callback: function(args, context) {
 			return cFService.startApp(null, args.app, context.cwd).then(function(result) {
 				if (!result || !result['0']) {
-					return "Application not found";
+					return messages["applicationNotFound"];
 				}
 				
 				var app = result['0'];
 				if (app.state === "RUNNING"){
-					return "Application " + args.app + " started";
+					return i18Util.formatMessage(messages["application${0}Started"], args.app);
 				} else {
-					return "Problems while starting application " + args.app;
+					return i18Util.formatMessage(messages["problemsWhileStartingApplication${0}"], args.app);
 				}
 			});
 		}
@@ -421,11 +421,11 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		startImpl, {
 			name: "cfo start",
-			description: "Start an application",
+			description: messages["startAnApplication"],
 			parameters: [{
 				name: "app",
 				type: "string",
-				description: "Application to start",
+				description: messages["applicationToStart"],
 				defaultValue: null
 			}]
 		}
@@ -436,13 +436,13 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		callback: function(args, context) {
 			return cFService.stopApp(null, args.app, context.cwd).then(function(result) {
 				if (!result || !result.entity) {
-					return "Application not found";
+					return messages["applicationNotFound"];
 				}
 				var app = result.entity;
 				if (app.state === "STOPPED"){
-					return "Application " + app.name + " stopped";
+					return i18Util.formatMessage(messages["application${0}Stopped"], app.name);
 				} else {
-					return "Problems while stopping application " + app.name;
+					return i18Util.formatMessage(messages["problemsWhileStoppingApplication${0}"], app.name);
 				}
 			});
 		}
@@ -452,11 +452,11 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		stopImpl, {
 			name: "cfo stop",
-			description: "Stop an application",
+			description: messages["stopAnApplication"],
 			parameters: [{
 				name: "app",
 				type: "string",
-				description: "Application to stop",
+				description: messages["applicationToStop"],
 				defaultValue: null
 			}]
 		}
@@ -477,9 +477,9 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		callback: function(args) {
 			return cFService.getRoutes().then(function(result) {
 				if (!result || !result.Routes || result.Routes.length === 0) {
-					return "No routes.";
+					return messages["noRoutes."];
 				}
-				var strResult = "\nhost\tdomain\tapps\n";
+				var strResult = "\n"+messages["host"]+"\t"+messages["domain"]+"\t"+messages["apps"]+"\n";
 				result.Routes.forEach(function(route) {
 					strResult += describeRoute(route);
 				});
@@ -492,7 +492,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		routesImpl, {
 			name: "cfo routes",
-			description: "List all routes in the target space"
+			description: messages["listAllRoutesInThe"]
 		}
 	);
 	
@@ -501,9 +501,9 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		callback: function(args, context) {
 			return cFService.createRoute(null, args.domain, args.hostname).then(function(result) {
 				if (!result || result.Type !== "Route") {
-					return "No routes found";
+					return messages["noRoutesFound"];
 				}
-				var strResult = "\nCreated " + result.Host + " at " + args.domain;
+				var strResult = "\n" + i18Util.formatMessage(messages["created${0}At${1}"], result.Host, args.domain);
 				return strResult;
 			});
 		}
@@ -513,15 +513,15 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		createRouteImpl, {
 			name: "cfo create-route",
-			description: "Create a url route in a space for later use",
+			description: messages["createAUrlRouteIn"],
 			parameters: [{
 				name: "domain",
 				type: "string",
-				description: "Domain"
+				description: messages["domain"]
 			}, {
 				name: "hostname",
 				type: "string",
-				description: "Hostname"
+				description: messages["hostname"]
 			}]
 		}
 	);
@@ -531,11 +531,11 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		callback: function(args, context) {
 			return cFService.deleteRoute(null, args.domain, args.hostname).then(function(result) {
 				if (!result || !result.Routes) {
-					return "No routes found";
+					return messages["noRoutesFound"];
 				}
 				var strResult = "";
 				result.Routes.forEach(function(item) {
-					strResult += "\nDeleted " + item.Host + " at " + item.DomainName;
+					strResult += "\n" + i18Util.formatMessage(messages["deleted${0}At${1}"], item.Host, item.DomainName);
 				});
 				return strResult;
 			});
@@ -546,15 +546,15 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		deleteRouteImpl, {
 			name: "cfo delete-route",
-			description: "Delete a route",
+			description: messages["deleteARoute"],
 			parameters: [{
 				name: "domain",
 				type: "string",
-				description: "Domain"
+				description: messages["domain"]
 			}, {
 				name: "hostname",
 				type: "string",
-				description: "Hostname"
+				description: messages["hostname"]
 			}]
 		}
 	);
@@ -564,11 +564,11 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		callback: function(args, context) {
 			return cFService.deleteOrphanedRoutes(null).then(function(result) {
 				if (!result || !result.Routes) {
-					return "No orphaned routes";
+					return messages["noOrphanedRoutes"];
 				}
 				var strResult = "";
 				result.Routes.forEach(function(item) {
-					strResult += "\nDeleted " + item.Host + " at " + item.DomainName;
+					strResult += "\n" + i18Util.formatMessage(messages["deleted${0}At${1}"], item.Host, item.DomainName);
 				});
 				return strResult;
 			});
@@ -579,7 +579,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		deleteRouteImpl, {
 			name: "cfo delete-orphaned-routes",
-			description: "Delete all orphaned routes (e.g.: those that are not mapped to an app)",
+			description: messages["deleteAllOrphanedRoutes(e.g.:"],
 			parameters: []
 		}
 	);
@@ -591,7 +591,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 				var messages = result.Messages;
 				
 				if (!messages || messages.length === 0) {
-					return "No recent logs.";
+					return messages["noRecentLogs."];
 				}
 				var strResult = "";
 				messages.forEach(function(message) {
@@ -606,11 +606,11 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 		"orion.shell.command",
 		appLogsImpl, {
 			name: "cfo logs",
-			description: "Show recent logs for an app",
+			description: messages["showRecentLogsForAn"],
 			parameters: [{
 				name: "app",
 				type: "string",
-				description: "Application to show logs for",
+				description: messages["applicationToShowLogsFor"],
 				defaultValue: null
 			}]
 		}
@@ -619,7 +619,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 	/* Add a manifest editor content assist */
 	provider.registerServiceProvider("orion.edit.contentAssist",
 		mManifestEditor.contentAssistImpl, {
-			name : "Cloud foundry manifest content assist",
+			name : messages["cloudFoundryManifestContentAssist"],
 			contentType: ["text/x-yaml"]
 		}
 	);
@@ -627,7 +627,7 @@ define(['orion/xhr', 'orion/plugin', 'orion/cfui/cFClient', 'orion/cfui/manifest
 	/* Add a manifest validator */
 	provider.registerServiceProvider("orion.edit.validator",
 		mManifestEditor.validatorImpl, {
-			name : "Cloud foundry manifest validator",
+			name : messages["cloudFoundryManifestValidator"],
 			contentType: ["text/x-yaml"]
 		}
 	);

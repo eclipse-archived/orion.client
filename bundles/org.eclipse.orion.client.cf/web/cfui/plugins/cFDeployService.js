@@ -11,9 +11,9 @@
 
 /*eslint-env browser,amd*/
 
-define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil', 'orion/URITemplate', 'orion/serviceregistry', 
-        'orion/preferences', 'orion/PageLinks', 'orion/xhr'],
-        function(mBootstrap, Deferred, CFClient, mCfUtil, URITemplate, ServiceRegistry, mPreferences, PageLinks, xhr){
+define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil', 'orion/URITemplate', 'orion/serviceregistry', 
+        'orion/preferences', 'orion/PageLinks', 'orion/xhr', 'orion/i18nUtil'],
+        function(messages, mBootstrap, Deferred, CFClient, mCfUtil, URITemplate, ServiceRegistry, mPreferences, PageLinks, xhr, i18Util){
 	
 	var deferred = new Deferred();
 	mBootstrap.startup().then(function(core){
@@ -85,7 +85,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 			},
 			
 			getDeployProgressMessage: function(project, launchConf){
-				var message = "Deploying application to Cloud Foundry: ";
+				var message = messages["deployingApplicationToCloudFoundry:"];
 				if(launchConf.ConfigurationName){
 					return message + " " + launchConf.ConfigurationName;
 				}
@@ -94,13 +94,13 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 				if(!appName){
 					var manifestFolder = params.AppPath || "";
 					manifestFolder = manifestFolder.substring(0, manifestFolder.lastIndexOf("/")+1);
-					appName = "application from /" + manifestFolder + "manifest.yml";
+					appName = messages["applicationFrom/"] + manifestFolder + "manifest.yml";
 				}
 				
 				message += appName;
 				
 				if(params.Target){
-					message += " on " + params.Target.Space + " / " + params.Target.Org;
+					message += messages["on"] + params.Target.Space + " / " + params.Target.Org;
 				}
 				
 				return message;
@@ -125,7 +125,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 							that._deploy(project, target, appName, appPath, deferred);
 						}, function(error){
 							error.Retry = {
-								parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
+								parameters: [{id: "user", type: "text", name: messages["user:"]}, {id: "password", type: "password", name: messages["password:"]}]
 							};
 							deferred.reject(error);
 						}
@@ -159,7 +159,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 								var err = error.JsonData;
 								if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){
 									error.Retry = {
-										parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
+										parameters: [{id: "user", type: "text", name: messages["user:"]}, {id: "password", type: "password", name: messages["password:"]}]
 									};
 								}
 								deferred.reject(error);
@@ -277,7 +277,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 							func(props, deferred);
 						}, function(error){
 							error.Retry = {
-								parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
+								parameters: [{id: "user", type: "text", name: messages["user:"]}, {id: "password", type: "password", name: messages["password:"]}]
 							};
 							deferred.reject(error);
 						}
@@ -299,7 +299,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 							var app = result;
 							deferred.resolve({
 								State: (app.running_instances > 0 ? "STARTED": "STOPPED"),
-								Message: app.running_instances + " of " + app.instances + " instance(s) running"
+								Message: app.running_instances + messages["of"] + app.instances + messages["instance(s)Running"]
 							});
 						}, function(error){
 							if (error.HttpCode === 404){
@@ -311,7 +311,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 								var err = error.JsonData;
 								if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){
 									error.Retry = {
-										parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
+										parameters: [{id: "user", type: "text", name: messages["user:"]}, {id: "password", type: "password", name: messages["password:"]}]
 									};
 								}
 								deferred.reject(error);
@@ -344,7 +344,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 								var err = error.JsonData;
 								if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){
 									error.Retry = {
-										parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
+										parameters: [{id: "user", type: "text", name: messages["user:"]}, {id: "password", type: "password", name: messages["password:"]}]
 									};
 								}
 								deferred.reject(error);
@@ -368,7 +368,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 							var app = result.entity;
 							deferred.resolve({
 								State: (app.state === "STARTED" ? "STARTED" : "STOPPED"),
-								Message: "Application is not running"
+								Message: messages["applicationIsNotRunning"]
 							});
 						}, function(error){
 							if (error.HttpCode === 404){
@@ -380,7 +380,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 								var err = error.JsonData;
 								if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){
 									error.Retry = {
-										parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
+										parameters: [{id: "user", type: "text", name: messages["user:"]}, {id: "password", type: "password", name: messages["password:"]}]
 									};
 								}
 								deferred.reject(error);
@@ -407,7 +407,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 				}
 				return {
 					State: (runningInstances > 0 ? "STARTED": "STOPPED"),
-					Message: runningInstances + "/" + instances + " instance(s) running" + (flappingInstances > 0 ? " : " + flappingInstances  + " flapping" : "")
+					Message: flappingInstances > 0 ?  i18Util.formatMessage(messages["${0}/${1}Instance(s)Running,${2}Flapping"], runningInstances, instances, flappingInstances) : i18Util.formatMessage(messages["${0}/${1}Instance(s)Running"], runningInstances, instances)
 				};
 			}
 		};

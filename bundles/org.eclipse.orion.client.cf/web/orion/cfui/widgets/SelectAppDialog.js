@@ -10,8 +10,8 @@
 /*global dojo dijit eclipse widgets define */
 /*eslint-env browser*/
 
-define(['orion/uiUtils', 'orion/explorers/explorer', 'orion/webui/dialog', 'orion/selection', 'orion/commands', 'orion/commandRegistry'], 
-        function(mUtil, mExplorer, dialog, mSelection, mCommands, mCommandRegistry) {
+define(['i18n!cfui/nls/messages', 'orion/uiUtils', 'orion/explorers/explorer', 'orion/webui/dialog', 'orion/selection', 'orion/commands', 'orion/commandRegistry'], 
+        function(messages, mUtil, mExplorer, dialog, mSelection, mCommands, mCommandRegistry) {
 
 	function SelectAppDialogRenderer (options, explorer) {
 		this.explorer = explorer;
@@ -31,7 +31,7 @@ define(['orion/uiUtils', 'orion/explorers/explorer', 'orion/webui/dialog', 'orio
 		span.className = "mainNavColumn singleNavColumn"; //$NON-NLS-0$
 		if (item instanceof Array){
 			this.getExpandImage(tableRow, span);
-			span.appendChild(document.createTextNode("Root"));
+			span.appendChild(document.createTextNode(messages["root"]));
 		} else {
 			span.appendChild(document.createTextNode(item.Name)); 
 		}
@@ -59,12 +59,12 @@ define(['orion/uiUtils', 'orion/explorers/explorer', 'orion/webui/dialog', 'orio
 		'<div id="appsTree" class="explorerTreeClass" style="width:30em; min-height: 25em; max-height:30em; height: auto; overflow-y: auto;"></div>'; //$NON-NLS-0$
 	
 	SelectAppDialog.prototype._init = function(options) {
-		this.title = options.title || "Select Project to Add";
+		this.title = options.title || messages["selectProjectToAdd"];
 		this._serviceRegistry = options.serviceRegistry;
 		this.cfClient = options.cfClient;
 		this.commandService = options.commandRegistry;
 		this.modal = true;
-		this.buttons = [{id: "okbutton", text: 'OK', callback: this.done.bind(this)}];
+		this.buttons = [{id: "okbutton", text: messages["oK"], callback: this.done.bind(this)}];
 		this._func = options.func;
 		this.apps = options.apps;
 		this._initialize();

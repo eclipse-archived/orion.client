@@ -9,8 +9,8 @@
  *******************************************************************************/
  /*global define*/
  /*eshint-env browser, amd*/
-define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/EventTarget', 'orion/cfui/widgets/SelectAppDialog'],
-	function(Deferred, mCommands, mCommandRegistry, EventTarget, mSelectAppDialog){
+define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/EventTarget', 'orion/cfui/widgets/SelectAppDialog'],
+	function(messages, Deferred, mCommands, mCommandRegistry, EventTarget, mSelectAppDialog){
 	
 	var sharedEventDispatcher;
 	
@@ -35,12 +35,12 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 			var cfClient = serviceRegistry.getService("orion.cf.service");
 			
 			var createRouteParameters = new mCommandRegistry.ParametersDescription(
-					[new mCommandRegistry.CommandParameter("domain", "text", 'Domain:'),
-					 new mCommandRegistry.CommandParameter("host", "text", 'Host:')]);
+					[new mCommandRegistry.CommandParameter("domain", "text", messages["domain:"]),
+					 new mCommandRegistry.CommandParameter("host", "text", messages["host:"])]);
 			
 			var createRouteCommand = new mCommands.Command({
-				name : "Create",
-				tooltip: "Create route",
+				name : messages["create"],
+				tooltip: messages["createRoute"],
 				id : "orion.cf.CreateRoute",
 				parameters: createRouteParameters,
 				
@@ -51,7 +51,7 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 					var host = data.parameters.valueFor("host");
 					
 					progressService.showWhile(cfClient.createRoute(target, 
-							domain, host), "Creating route...").then(
+							domain, host), messages["creatingRoute..."]).then(
 						function(jazzResp) {
 							if(sharedEventDispatcher){
 								sharedEventDispatcher.dispatchEvent({type: "create", newValue: jazzResp });
@@ -69,15 +69,15 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 			commandService.addCommand(createRouteCommand);
 			
 			var deleteOrphanedRoutesCommand = new mCommands.Command({
-				name : "Delete All Unmapped",
-				tooltip: "Delete all unmapped routes",
+				name : messages["deleteAllUnmapped"],
+				tooltip: messages["deleteAllUnmappedRoutes"],
 				id : "orion.cf.DeleteOrphanedRoutes",
 				
 				callback : function(data) {
 					var target = data.items;
 					
 					progressService.showWhile(cfClient.deleteOrphanedRoutes(target), 
-						"Deleteing all unmapped routes...").then(
+						messages["deleteingAllUnmappedRoutes..."]).then(
 						function(jazzResp) {
 							refreshFunc();
 						}, function (error) {
@@ -93,8 +93,8 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 			commandService.addCommand(deleteOrphanedRoutesCommand);
 			
 			var deleteRouteCommand = new mCommands.Command({
-				name : "Delete",
-				tooltip: "Delete route",
+				name : messages["delete"],
+				tooltip: messages["deleteRoute"],
 				id : "orion.cf.DeleteRoute",
 				
 				callback : function(data) {
@@ -102,7 +102,7 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 					var target = route.target;
 					
 					progressService.showWhile(cfClient.deleteRouteById(target, 
-						route.Guid), "Deleting route...").then(
+						route.Guid), messages["deletingRoute..."]).then(
 						function(jazzResp) {
 							if(sharedEventDispatcher){
 								sharedEventDispatcher.dispatchEvent({type: "delete", oldValue: route });
@@ -129,24 +129,24 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 			commandService.addCommand(deleteRouteCommand);
 			
 			var mapRouteCommand = new mCommands.Command({
-				name : "Map to app",
-				tooltip: "Add the route to an app",
+				name : messages["mapToApp"],
+				tooltip: messages["addTheRouteToAn"],
 				id : "orion.cf.MapRoute",
 				
 				callback : function(data) {
 					var route = data.items[0];
 					var target = route.target;
 					
-					progressService.showWhile(cfClient.getApps(target), "Loading...").then(
+					progressService.showWhile(cfClient.getApps(target), messages["loading..."]).then(
 						function(result){
 							var dialog = new mSelectAppDialog.SelectAppDialog({
-								title: "Select Application",
+								title: messages["selectApplication"],
 								cfClient: cfClient,
 								serviceRegistry: serviceRegistry,
 								apps: result.Apps,
 								func: function(app) {
 									progressService.showWhile(cfClient.mapRoute(target, app.Guid, 
-										route.Guid), "Mapping route to an app ...").then(
+										route.Guid), messages["mappingRouteToAnApp"]).then(
 										function(resp) {
 											if(sharedEventDispatcher){
 												sharedEventDispatcher.dispatchEvent({type: "map", app: app, route: route, expand: true });
@@ -176,8 +176,8 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 			commandService.addCommand(mapRouteCommand);
 			
 			var unmapRouteCommand = new mCommands.Command({
-				name : "Unmap from app",
-				tooltip: "Remove the route from an app",
+				name : messages["unmapFromApp"],
+				tooltip: messages["removeTheRouteFromAn"],
 				id : "orion.cf.UnmapRoute",
 				
 				callback : function(data) {
@@ -186,7 +186,7 @@ define(['orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/Even
 					var target = app.parent.Target;
 					
 					progressService.showWhile(cfClient.unmapRoute(target, app.Guid, 
-						route.Guid), "Removing route from an app ...").then(
+						route.Guid), messages["removingRouteFromAnApp"]).then(
 						function(resp) {
 							if(sharedEventDispatcher){
 								sharedEventDispatcher.dispatchEvent({type: "unmap", app: app, route: route, expand: true });

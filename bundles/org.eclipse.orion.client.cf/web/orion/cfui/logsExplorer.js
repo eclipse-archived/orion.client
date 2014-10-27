@@ -10,13 +10,13 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define([
+define(['i18n!cfui/nls/messages', 
 	'orion/webui/littlelib',
 	'orion/explorers/explorer',
 	'orion/objects',
 	'orion/URITemplate'
 ],
-function(lib, mExplorer, objects,URITemplate){
+function(messages, lib, mExplorer, objects,URITemplate){
 	
 	
 	function LogsModel(application, prefix){
@@ -111,7 +111,7 @@ function(lib, mExplorer, objects,URITemplate){
 				span.appendChild(a);
 			} else if(item.Type === "Instance"){
 				this.getExpandImage(tableRow, span);
-				span.appendChild(document.createTextNode("Instance: " + item.Instance));
+				span.appendChild(document.createTextNode(messages["instance:"] + item.Instance));
 			}
 			col.appendChild(span);
 			return col;

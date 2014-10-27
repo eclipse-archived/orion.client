@@ -9,12 +9,12 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',  'orion/keyBinding', 'orion/dialogs', 'orion/selection',
+define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',  'orion/keyBinding', 'orion/dialogs', 'orion/selection',
 	'orion/contentTypes','orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/links',
-	'orion/cfui/cFClient', 'orion/PageUtil', 'orion/cfui/logsExplorer', 'orion/cfui/logView', 'orion/section',  'orion/cfui/widgets/CfLoginDialog'], 
-	function(lib, mBootstrap, mStatus, mProgress, CommandRegistry, KeyBinding, mDialogs, mSelection,
+	'orion/cfui/cFClient', 'orion/PageUtil', 'orion/cfui/logsExplorer', 'orion/cfui/logView', 'orion/section',  'orion/cfui/widgets/CfLoginDialog', 'orion/i18nUtil'], 
+	function(messages, lib, mBootstrap, mStatus, mProgress, CommandRegistry, KeyBinding, mDialogs, mSelection,
 	mContentTypes, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mLinks,
-	mCFClient, PageUtil, mLogsExplorer, mLogView, mSection, CfLoginDialog) {
+	mCFClient, PageUtil, mLogsExplorer, mLogView, mSection, CfLoginDialog, i18Util) {
 	mBootstrap.startup().then(
 		function(core) {
 			var serviceRegistry = core.serviceRegistry;
@@ -73,7 +73,7 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 			function displayInlineLogsExplorer(logs){
 				
 				mGlobalCommands.setPageTarget({
-						task: logs.Application ? "Cloud Foundry Logs" : logs.Application + " - Cloud Foundry Logs",
+						task: logs.Application ? messages["cloudFoundryLogs"] : (logs.Application + " - " + messages["cloudFoundryLogs"]),
 						target: logs,
 						breadcrumbTarget: logs,
 						serviceRegistry: serviceRegistry,
@@ -81,7 +81,7 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 				
 				mainLogView.classList.remove("toolbarTarget");
 				lib.empty(mainLogView);
-				var logsSection = new mSection.Section(mainLogView, {id: "logsNavSection", title: "Log Files", canHide: false});
+				var logsSection = new mSection.Section(mainLogView, {id: "logsNavSection", title: messages["logFiles"], canHide: false});
 				logsSection.embedExplorer(logsInlineExplorer);
 				logsInlineExplorer.setCommandsVisible(false);
 				logsInlineExplorer.load(logs);
@@ -95,7 +95,7 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 					if (error.status === 0) {
 						error = {
 							Severity: "Error", //$NON-NLS-0$
-							Message: "No response"
+							Message: messages["noResponse"]
 						};
 					} else {
 						var responseText = error.responseText;
@@ -129,7 +129,7 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 				}
 				
 				if(this.lastLogsInfo.Application !== logParams.resource){
-					progressService.showWhile(cFClient.getLogs(target, logParams.resource), "Getting logs").then(function(logs){
+					progressService.showWhile(cFClient.getLogs(target, logParams.resource), messages["gettingLogs"]).then(function(logs){
 						var logsInfo = {
 							Target: target,
 							Application: logParams.resource,
@@ -150,9 +150,9 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 							var err = e.JsonData;
 							if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){
 								var dialog = new CfLoginDialog({
-								title: "Login to " + target.Url,
+								title: messages["loginTo"] + target.Url,
 								func: function(login, password){
-									progressService.showWhile(cFClient.login(target.Url, login, password, target.Org, target.Space), "Logging in to " + target.Url).then(function(){
+									progressService.showWhile(cFClient.login(target.Url, login, password, target.Org, target.Space), i18Util.formatMessage(messages["loggingInTo${0}"], target.Url)).then(function(){
 										loadLogs(logParams);
 									}, handleError);
 								}});

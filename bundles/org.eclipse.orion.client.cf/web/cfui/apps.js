@@ -9,11 +9,11 @@
  *******************************************************************************/
  /*global define window document*/
  /*eshint-env browser, amd*/
-define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',
+define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',
  	'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient',
  	'orion/globalCommands', 'orion/links', 'orion/cfui/cFClient', 'orion/Deferred', 'orion/cfui/widgets/CfLoginDialog',
 	'orion/section', 'cfui/cfUtil', 'cfui/cfCommands', 'cfui/cfExplorer'],
-		function(lib, mBootstrap, mStatus, mProgress, CommandRegistry,
+		function(messages, lib, mBootstrap, mStatus, mProgress, CommandRegistry,
 			mDialogs, mSelection, mFileClient, mOperationsClient, mSearchClient,
 			mGlobalCommands, mLinks, mCFClient, Deferred, CfLoginDialog,
 			mSection, mCfUtil, mCfCommands, mCfExplorer) {
@@ -40,7 +40,7 @@ mBootstrap.startup().then(function(core) {
 		
 	mGlobalCommands.generateBanner("cfView", serviceRegistry, commandRegistry, preferences, searcher, {});
 	
-	mGlobalCommands.setPageTarget({task: 'Cloud Applications', serviceRegistry: serviceRegistry, commandService: commandRegistry});
+	mGlobalCommands.setPageTarget({task: messages["cloudApplications"], serviceRegistry: serviceRegistry, commandService: commandRegistry});
 	
 	var orgsNode = document.getElementById("orgsNode");
 	var applicationsNode = document.getElementById("applicationsTable");
@@ -53,7 +53,7 @@ mBootstrap.startup().then(function(core) {
 	function promptLogin(cFService) {
 		var deferred = new Deferred();
 		function loginFunc(user, password){
-			progressService.showWhile(cFService.login(_target.Url, user, password), "Logging in to Cloud Foundry").then(function (result) {
+			progressService.showWhile(cFService.login(_target.Url, user, password), messages["loggingInToCloudFoundry"]).then(function (result) {
 				deferred.resolve(result);					
 			}, function(error) {
 				deferred.reject(error);					
@@ -88,10 +88,10 @@ mBootstrap.startup().then(function(core) {
 	function displayOrgsAndSpaces(){
 		lib.empty(orgsNode);
 		
-		progressService.showWhile(mCfUtil.getTargets(preferences), "Checking for Cloud Foundry settings").then(function(targets){
+		progressService.showWhile(mCfUtil.getTargets(preferences), messages["checkingForCloudFoundrySettings"]).then(function(targets){
 			_target = targets[0];
 			
-			progressService.showWhile(cFService.getOrgs(_target), "Loading ...").then(function(result){
+			progressService.showWhile(cFService.getOrgs(_target), messages["loading..."]).then(function(result){
 				
 				var table = document.createElement("table");
 				table.className = "centerTable";
@@ -102,7 +102,7 @@ mBootstrap.startup().then(function(core) {
 					td1.className = "orgsLabel";
 					td1.id = "orgsLabel";
 					var label = document.createElement("label");
-					label.appendChild(document.createTextNode("Organization:"));
+					label.appendChild(document.createTextNode(messages["organization:"]));
 					td1.appendChild(label);
 					tr1.appendChild(td1);
 
@@ -132,7 +132,7 @@ mBootstrap.startup().then(function(core) {
 					td1.className = "orgsLabel";
 					td1.id = "spacesLabel";
 					label = document.createElement("label");
-					label.appendChild(document.createTextNode("Space:"));
+					label.appendChild(document.createTextNode(messages["space:"]));
 					td1.appendChild(label);
 					tr2.appendChild(td1);
 
@@ -196,7 +196,7 @@ mBootstrap.startup().then(function(core) {
 		
 		var applicationsSection = new mSection.Section(applicationsNode, {
 			id: "applicationsSection", //$NON-NLS-0$
-			title: "Applications",
+			title: messages["applications"],
 			slideout: true,
 			canHide: false,
 			preferenceService: preferences,
@@ -216,7 +216,7 @@ mBootstrap.startup().then(function(core) {
 			}
 		});
 						
-		progressService.showWhile(cFService.getApps(target), "Loading ...").then(function(apps){
+		progressService.showWhile(cFService.getApps(target), messages["loading..."]).then(function(apps){
 			apps = apps || {};
 			if (!apps.Apps)
 				apps.Apps = [];
@@ -226,7 +226,7 @@ mBootstrap.startup().then(function(core) {
 			explorer.loadApps(apps, target);
 			explorer.addListeners(cfEventDispatcher);
 			
-			progressService.showWhile(cFService.getRoutes(target), "Loading ...").then(
+			progressService.showWhile(cFService.getRoutes(target), messages["loading..."]).then(
 				function(routes){
 					displayOrphanRoutes(routes, target);
 				}, function(error){
@@ -249,7 +249,7 @@ mBootstrap.startup().then(function(core) {
 			
 		var orphanRoutesSection = new mSection.Section(orphanRoutesNode, {
 			id: "orphanRoutes", //$NON-NLS-0$
-			title: "Unmapped Routes",
+			title: messages["unmappedRoutes"],
 			slideout: true,
 			canHide: false,
 			preferenceService: preferences,

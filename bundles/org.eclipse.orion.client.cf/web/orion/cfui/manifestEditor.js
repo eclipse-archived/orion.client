@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation', 'orion/cfui/cFClient'],
- function(require, xhr, Deferred, operation, cFClient) {
+define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'orion/operation', 'orion/cfui/cFClient'],
+ function(messages, require, xhr, Deferred, operation, cFClient) {
  	
  	var cfService = new cFClient.CFService();
 	
@@ -153,7 +153,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation', 'orion/cfui
 						
 						proposals.push({
 							proposal : proposal,
-							description : "Manifest template",
+							description : messages["manifestTemplate"],
 							positions : getPositions(proposal)
 						});
 						
@@ -170,7 +170,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation', 'orion/cfui
 				
 				proposals.push({
 					proposal : proposal,
-					description : "Manifest template",
+					description : messages["manifestTemplate"],
 					positions : getPositions(proposal)
 				});
 				
@@ -328,7 +328,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation', 'orion/cfui
 						var end = match !== null ? match[0].length + 1 : undefined;
 						
 						problems.push({
-							description : "Invalid indentation: mixed spaces and tabs",
+							description : messages["invalidIndentation:MixedSpacesAnd"],
 							line : lineNumber,
 							start : 1,
 							end : end
@@ -346,7 +346,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation', 'orion/cfui
 				
 				if(missingCommand && !missingApplications){
 					problems.push({
-						description : "Missing application command",
+						description : messages["missingApplicationCommand"],
 						start : 0,
 						severity: "warning"
 					});
