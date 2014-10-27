@@ -24,60 +24,7 @@ define([
 	'orion/editor/textModel'
 ], function(messages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, navigatorRenderer, objects, mSyntaxchecker, mTextModel) {
 	
-    /* Internal wrapper functions*/
-    function _empty(nodeToEmpty) {
-        var node = lib.node(nodeToEmpty);
-        if (node) {
-            lib.empty(node);
-        }
-        return node;
-    }
-
-    function _connect(nodeOrId, event, eventHandler) {
-        var node = lib.node(nodeOrId);
-        if (node) {
-            node.addEventListener(event, eventHandler, false);
-        }
-    }
-
-    function _place(ndoeToPlace, parent, position) {
-        var parentNode = lib.node(parent);
-        if (parentNode) {
-            if (position === "only") { //$NON-NLS-0$
-                lib.empty(parentNode);
-            }
-            parentNode.appendChild(ndoeToPlace);
-        }
-    }
-
-    function _createElement(elementTag, classNames, id, parent) {
-        var element = document.createElement(elementTag);
-        if (classNames) {
-            if (Array.isArray(classNames)) {
-                for (var i = 0; i < classNames.length; i++) {
-                    element.classList.add(classNames[i]);
-                }
-            } else if (typeof classNames === "string") { //$NON-NLS-0$
-                element.className = classNames;
-            }
-        }
-        if (id) {
-            element.id = id;
-        }
-        var parentNode = lib.node(parent);
-        if (parentNode) {
-            parentNode.appendChild(element);
-        }
-        return element;
-    }
-
-    function _createSpan(classNames, id, parent, spanName) {
-        var span = _createElement('span', classNames, id, parent); //$NON-NLS-0$
-        if (spanName) {
-            span.appendChild(document.createTextNode(spanName));
-        }
-        return span;
-    }
+    var DEBUG = false;
 
 	function processChildren(parentItem, children, problemsParent, warningsParent) {
 		children.forEach(function(child) {
@@ -95,6 +42,20 @@ define([
 			}
 		});
 		return children;
+	}
+	function recalculateOffset(textContent, problems) {
+		var textModel = null;
+		problems.forEach(function(problem) {
+			if(typeof problem.line === "number") { //$NON-NLS-0$
+				if(!textModel) {//lazy creation of textModel
+					textModel = new mTextModel.TextModel(textContent);
+				}
+				var lineIndex = problem.line - 1;
+				var lineStart = textModel.getLineStart(lineIndex);
+				problem.start = lineStart + problem.start - 1;
+				problem.end = lineStart + problem.end - 1;
+			}
+		});
 	}
 	function ProblemsModel(options) {
 		this.problems = options.problems;
@@ -182,6 +143,11 @@ define([
 								return;
 							}
 							fileObj.problems = problems;
+							recalculateOffset(jsonData, problems);
+							if(DEBUG) {
+								console.log("File that has problems: " + fileObj.Name); //$NON-NLS-0$
+								console.log(problems); //$NON-NLS-0$
+							}
 							crawler.incrementalReport(fileObj);
 						});
 					},
@@ -190,6 +156,10 @@ define([
 							console.error("Error loading file content: " + error.message); //$NON-NLS-0$
 						}
 					});
+				} else {
+					if(DEBUG) {
+						console.log("File that are not read at all: " + fileObj.Name); //$NON-NLS-0$
+					}
 				}
 			});
 		},
@@ -246,7 +216,6 @@ define([
 			mExplorer.Explorer.prototype.destroy.call(this);
 		},
 	    _incrementalRender: function() {
-	        var that = this;
 			var model =  new ProblemsModel({
 				registry: this.registry,
 				problems: this.problems,
@@ -257,10 +226,7 @@ define([
 	            selectionPolicy: "singleSelection", //$NON-NLS-0$
 	            //getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
 	            indent: 24,
-	            setFocus: false,
-	            onCollapse: function(model) {
-	                //that.onCollapse(model);
-	            }
+	            setFocus: false
 	        });
 	    },
 	    incrementalRender: function() {
@@ -285,7 +251,7 @@ define([
 			}
 			return Deferred.all(deferreds);
 		},
-		isRowSelectable: function(modelItem) {
+		isRowSelectable: function(/*modelItem*/) {
 			return true;
 		},
 		updateCommands: function() {
@@ -296,7 +262,7 @@ define([
 		}
 	});
 	
-	function ProblemsRenderer(options) {
+	function ProblemsRenderer() {
 		mExplorer.SelectionRenderer.apply(this, arguments);
 	}
 	ProblemsRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
@@ -313,15 +279,7 @@ define([
 				{id:item.location + "linkId"}, 
 				params, 
 				{});
-			//link.removeChild(link.firstChild); //remove file name from link
 	        spanHolder.appendChild(link);
-	       	//trigger a click on the span when the link is clicked to set the selection cursor
-	       	_connect(link, "click", function() { //$NON-NLS-0$
-	       		spanHolder.click();
-	        });
-	        
-	        //var span = _createElement('span', null, null, link); //$NON-NLS-0$
-	        //return span;
 	    },
 	    /*
 		getCellHeaderElement: function(col_no){
@@ -377,7 +335,6 @@ define([
 						//this.getExpandImage(tableRow, div);
 						itemLabel = document.createElement("span"); //$NON-NLS-0$
 						itemLabel.textContent = item.fileName;
-						//itemLabel.id = item.location + "FileItemId"; //$NON-NLS-0$
 						div.appendChild(itemLabel);
 					} 
 					return td;
