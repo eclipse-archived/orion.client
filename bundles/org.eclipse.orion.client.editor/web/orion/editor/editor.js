@@ -836,8 +836,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				if (bookmark) {
 					annotationModel.removeAnnotation(bookmark);
 				} else {
-					bookmark = AT.createAnnotation(AT.ANNOTATION_BOOKMARK, lineStart, lineEnd);
-					bookmark.title = undefined;
+					bookmark = AT.createAnnotation(AT.ANNOTATION_BOOKMARK, lineStart, lineEnd, editor.getText(lineStart, lineEnd));
 					annotationModel.addAnnotation(bookmark);
 				}
 			};
