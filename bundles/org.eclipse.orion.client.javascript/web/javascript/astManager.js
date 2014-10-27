@@ -57,6 +57,7 @@ define([
 				: new Deferred().resolve({});
 			var _self = this;
 			return metadataPromise.then(function(metadata) {
+				metadata = metadata || {};
 				var cachedEntry = _self.cache,
 				    fileLocation = metadata.location;
 				if (cachedEntry && cachedEntry.location === fileLocation) {
@@ -141,11 +142,13 @@ define([
 		},
 		/**
 		 * Notifies the AST manager of a change to the model.
-		 * @param {Object} event
+		 * @param {Object} event An <tt>orion.edit.model</tt> event.
 		 */
-		updated: function(/*event*/) {
-//			console.log("Cache invalidate " + (this.cache && this.cache.location));
-			this.cache = null;
+		updated: function(event) {
+			if (this.cache && this.cache.location === event.file.location) {
+//				console.log("Cache invalidate " + (this.cache && this.cache.location));
+				this.cache = null;
+			}
 		}
 	});
 	return {

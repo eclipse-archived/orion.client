@@ -117,26 +117,32 @@ define(['orion/edit/dispatcher'], function() {
 			}
 		},
 		/**
-		 * @since 7.0
+		 * @since 8.0
 		 */
 		getServiceFileObject: function() {
 			var metadata = this.inputManager.getFileMetadata();
 			if (!metadata) {
 				return null;
 			}
-			var data = Object.create(null);
-			data.name = metadata.Name;
-			data.location = metadata.Location;
-			var type = this.inputManager.getContentType();
-			if (type) {
-				data.contentType = Object.create(null);
-				data.contentType.id = type.id;
-				data.contentType.name = type.name;
-				data.contentType.imageClass = type.imageClass;
-				data.contentType.extension = type.extension;
-			}
-			return data;
+			return Dispatcher.toServiceFileObject(metadata, this.inputManager.getContentType());
 		},
+	};
+
+	/**
+	 * @since 8.0
+	 */
+	Dispatcher.toServiceFileObject = function(metadata, contentType) {
+		var data = Object.create(null);
+		data.name = metadata.Name;
+		data.location = metadata.Location;
+		if (contentType) {
+			data.contentType = Object.create(null);
+			data.contentType.id = contentType.id;
+			data.contentType.name = contentType.name;
+			data.contentType.imageClass = contentType.imageClass;
+			data.contentType.extension = contentType.extension;
+		}
+		return data;
 	};
 
 	return {Dispatcher: Dispatcher};
