@@ -99,7 +99,7 @@ define([
 					this.checkId(node.object);
 					if (node.computed) { //computed = true for [], false for . notation
 						this.checkId(node.property);
-					} else if (node.object.type === Estraverse.Syntax.ThisExpression){
+					} else {
 						this.checkId(node.property, false, true);
 					}
 					break;
@@ -1002,15 +1002,23 @@ define([
 				// See if a 'this' keyword was selected
 				this.visitor.thisCheck = context.token.type === Estraverse.Syntax.ThisExpression;
 				
-				// See if an object property key is selected (or a usage of an object property such as this.prop()) (or a named function expression as the child of a property)
+				// See if we are doing an object property check
 				this.visitor.objectPropCheck = false;
 				if (parent && parent.type === Estraverse.Syntax.Property){
+					// Object property key is selected
 					this.visitor.objectPropCheck = context.token === parent.key;
-				} else if (parent && (parent.type === Estraverse.Syntax.MemberExpression && parent.object && parent.object.type === Estraverse.Syntax.ThisExpression)){
-					this.visitor.objectPropCheck = true;
+				} else if (parent && (parent.type === Estraverse.Syntax.MemberExpression)){
+					if (parent.object && parent.object.type === Estraverse.Syntax.ThisExpression){
+						// Usage of this within an object
+						this.visitor.objectPropCheck = true;
+					} else if (parent.property && context.start >= parent.property.range[0] && context.end <= parent.property.range[1]){
+					 	// Selecting the property key of a member expression
+						this.visitor.objectPropCheck = true;
+					}
 				} else if (parent && parent.type === Estraverse.Syntax.FunctionExpression && context.token.parents.length > 1 && context.token.parents[context.token.parents.length-2].type === Estraverse.Syntax.Property){
 					// Both the name and the params have the same parent
 					if (parent.id && parent.id.range === context.token.range){
+						// Named function expresison as the child of a property
 						this.visitor.objectPropCheck = true;
 					}
 				}

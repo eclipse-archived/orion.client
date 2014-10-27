@@ -2864,5 +2864,134 @@ define([
 				}
 			});
 		});
+		
+		/**
+		 * Tests selections inside member expressions and whether they should be object property checks
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448543
+		 */
+		it('test_memberExpressionAsObjectProp1', function() {
+			editorContext.text = "var a = {a: function a(){ var that = this; that.b(); return function() { that.b(); } }, b: function b(){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(4,4)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:4, end:5}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests selections inside member expressions and whether they should be object property checks
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448543
+		 */
+		it('test_memberExpressionAsObjectProp2', function() {
+			editorContext.text = "var a = {a: function a(){ var that = this; that.b(); return function() { that.b(); } }, b: function b(){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(9,10)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:9, end:10}, {start:21, end:22}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests selections inside member expressions and whether they should be object property checks
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448543
+		 */
+		it('test_memberExpressionAsObjectProp3', function() {
+			editorContext.text = "var a = {a: function a(){ var that = this; that.b(); return function() { that.b(); } }, b: function b(){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(32,32)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:30, end:34}, {start:43, end:47}, {start: 73, end: 77}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests selections inside member expressions and whether they should be object property checks
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448543
+		 */
+		it('test_memberExpressionAsObjectProp4', function() {
+			editorContext.text = "var a = {a: function a(){ var that = this; that.b(); return function() { that.b(); } }, b: function b(){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(75,83)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:30, end:34}, {start:43, end:47}, {start: 73, end: 77}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests selections inside member expressions and whether they should be object property checks
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448543
+		 */
+		it('test_memberExpressionAsObjectProp5', function() {
+			editorContext.text = "var a = {a: function a(){ var that = this; that.b(); return function() { that.b(); } }, b: function b(){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(48,49)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:48, end:49}, {start:78, end:79}, {start: 88, end: 89}, {start: 100, end: 101}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests selections inside member expressions and whether they should be object property checks
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448543
+		 */
+		it('test_memberExpressionAsObjectProp6', function() {
+			editorContext.text = "var a = {a: function a(){ var that = this; that.b(); return function() { that.b(); } }, b: function b(){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(78,78)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:48, end:49}, {start:78, end:79}, {start: 88, end: 89}, {start: 100, end: 101}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests selections inside member expressions and whether they should be object property checks
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448543
+		 */
+		it('test_memberExpressionAsObjectProp7', function() {
+			editorContext.text = "var a = {a: function a(){ var that = this; that.b(); return function() { that.b(); } }, b: function b(){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(88,88)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:48, end:49}, {start:78, end:79}, {start: 88, end: 89}, {start: 100, end: 101}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests selections inside member expressions and whether they should be object property checks
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=448543
+		 */
+		it('test_memberExpressionAsObjectProp8', function() {
+			editorContext.text = "var a = {a: function a(){ var that = this; that.b(); return function() { that.b(); } }, b: function b(){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(100,101)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:48, end:49}, {start:78, end:79}, {start: 88, end: 89}, {start: 100, end: 101}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
 	});
 });
