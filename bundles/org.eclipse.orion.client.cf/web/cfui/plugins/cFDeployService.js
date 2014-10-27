@@ -142,7 +142,7 @@ define(['orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil
 					cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath)).then(
 						function(result){
 							var editLocation = new URL("../edit/edit.html#" + project.ContentLocation, window.location.href);
-							mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation).then(
+							mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, project.ContentLocation).then(
 								function(launchConfigurationContent){
 									deferred.resolve(launchConfigurationContent);
 								}, function(error){

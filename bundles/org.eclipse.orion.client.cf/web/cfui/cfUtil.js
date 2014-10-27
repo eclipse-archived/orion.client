@@ -49,7 +49,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 			return messages["deploy.enterCredentials"];
 		},
 		
-		prepareLaunchConfigurationContent : function(resp, appPath, editLocation){
+		prepareLaunchConfigurationContent : function(resp, appPath, editLocation, contentLocation){
 			var deferred = new Deferred();
 			
 			var appName = resp.App.name || resp.App.entity.name;
