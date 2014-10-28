@@ -13,10 +13,13 @@ define([
 	'i18n!orion/nls/messages',
 	'orion/webui/littlelib',
 	'orion/globalCommands',
-	'orion/urlUtils'
-], function(messages, lib, mGlobalCommands, URLUtil) {
-	var ProgressMonitor;
-	
+	'marked/marked',
+], function(messages, lib, mGlobalCommands, marked) {
+	var SEV_ERROR = "Error", SEV_WARNING = "Warning", SEV_INFO = "Info", SEV_OK = "Ok"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+	// this is a cheat, all dom ids should be passed in
+	var closeButtonDomId = "closeNotifications"; //$NON-NLS-0$
+
 	/**
 	 * Service for reporting status
 	 * @class Service for reporting status
@@ -42,8 +45,7 @@ define([
 	StatusReportingService.prototype = /** @lends orion.status.StatusReportingService.prototype */ {
 	
 		_init: function() {
-			// this is a cheat, all dom ids should be passed in
-			var closeButton = lib.node("closeNotifications"); //$NON-NLS-0$
+			var closeButton = lib.node(closeButtonDomId); //$NON-NLS-0$
 			if (closeButton && !this._hookedClose) {
 				closeButton.style.cursor = "pointer"; //$NON-NLS-0$
 				this._hookedClose = true;
@@ -69,7 +71,7 @@ define([
 		
 		close: function(){
 			window.clearTimeout(this._timer);
-			var closeButton = lib.node("closeNotifications"); //$NON-NLS-0$
+			var closeButton = lib.node(closeButtonDomId); //$NON-NLS-0$
 			if(this._cancelMsg && this._cancelFunc && closeButton) {
 				closeButton.innerHTML = "";
 				closeButton.classList.remove("cancelButton"); //$NON-NLS-0$
@@ -152,14 +154,14 @@ define([
 			var color = "red"; //$NON-NLS-0$
 			if (status.Severity) {
 				switch (status.Severity) {
-				case "Warning": //$NON-NLS-0$
+				case SEV_WARNING: //$NON-NLS-0$
 					color = "#FFCC00"; //$NON-NLS-0$
 					break;
-				case "Error": //$NON-NLS-0$
+				case SEV_ERROR: //$NON-NLS-0$
 					color = "red"; //$NON-NLS-0$
 					break;
-				case "Info": //$NON-NLS-0$
-				case "Ok": //$NON-NLS-0$
+				case SEV_INFO: //$NON-NLS-0$
+				case SEV_OK: //$NON-NLS-0$
 					color = "green"; //$NON-NLS-0$
 					break;
 				}
@@ -211,7 +213,7 @@ define([
 		 * Set a message that indicates that a long-running (progress) operation is complete.
 		 * @param {String|orionError} message The error to display. Can be a simple String,
 		 * or an error object from a XHR error callback, or the body of an error response 
-		 * from the Orion server.
+		 * from the Orion server. The string may be formatted as rich text using Markdown syntax.
 		 */
 		setProgressResult : function(message, cancelMsg) {
 			this._clickToDisMiss = false;
@@ -228,8 +230,8 @@ define([
 				}
 			}
 			this._init();
-			var msg = status.Message || status.toString();
-			var fallbackMessage = messages.UnknownError;
+
+			// Create the image
 			var imageClass = "core-sprite-information"; //$NON-NLS-0$
 			var extraClass = "progressNormal"; //$NON-NLS-0$
 			var image = document.createElement("span"); //$NON-NLS-0$
@@ -238,8 +240,7 @@ define([
 			var removedClasses = [];
 			if (status.Severity) {
 				switch (status.Severity) {
-				case "Warning": //$NON-NLS-0$
-					fallbackMessage = messages.UnknownWarning;
+				case SEV_WARNING: //$NON-NLS-0$
 					imageClass = "core-sprite-warning"; //$NON-NLS-0$
 					extraClass="progressWarning"; //$NON-NLS-0$
 					removedClasses.push("progressInfo");
@@ -247,7 +248,7 @@ define([
 					removedClasses.push("progressNormal"); //$NON-NLS-0$
 					this._clickToDisMiss = true;
 					break;
-				case "Error": //$NON-NLS-0$
+				case SEV_ERROR: //$NON-NLS-0$
 					imageClass = "core-sprite-error"; //$NON-NLS-0$
 					extraClass="progressError"; //$NON-NLS-0$
 					removedClasses.push("progressWarning");
@@ -270,45 +271,16 @@ define([
 			lib.empty(node);
 			node.appendChild(image);
 
+			// Create the message
+			var msg = status.Message || status.toString();
 			if (msg === Object.prototype.toString()) {
 				// Last ditch effort to prevent user from seeing meaningless "[object Object]" message
-				msg = fallbackMessage;
+				msg = messages.UnknownError;
 			}
-			if (status.HTML) { // msg is HTML to be inserted directly
-				var span = document.createElement("span"); //$NON-NLS-0$
-				span.innerHTML = msg;
-				node.appendChild(span);
-			} else {
-				// msg is text. parse Markdown-style links
-				var chunks, msgNode;
-				try {
-					chunks = URLUtil.detectValidURL(msg);
-				} catch (e) {
-					// Contained a corrupt URL
-					chunks = [];
-				}
-				if (chunks.length) {
-					msgNode = document.createDocumentFragment();
-					URLUtil.processURLSegments(msgNode, chunks);
-					// All status links open in new window
-					Array.prototype.forEach.call(lib.$$("a", msgNode), function(link) { //$NON-NLS-0$
-						link.target = "_blank"; //$NON-NLS-0$
-					});
-				} else {
-					//If the message is just neither warning nor error, without a URL link in it, then we will auto hide it in 5 seconds.
-					if(status.Severity !== "Warning" && status.Severity !== "Error" && !cancelMsg){ //$NON-NLS-1$ //$NON-NLS-0$
-						if(this._timer){
-							window.clearTimeout(this._timer);
-						}
-						this._timer = window.setTimeout(function(){
-							this.setProgressMessage("");
-							this._timer = null;
-						}.bind(this), 5000);
-					}
-					msgNode = document.createTextNode(msg);
-				}
-				node.appendChild(msgNode);
-			}
+			node.appendChild(this.createMessage(status, msg));
+
+			// Given the severity, add/remove the appropriate classes
+			// TODO refactor extraClass & removedClasses out of `switch` above
 			if (extraClass && this.progressDomId !== this.domId) {
 				container.classList.add(extraClass);
 				for (var i=0; i<removedClasses.length; i++) {
@@ -316,7 +288,9 @@ define([
 				}
 			}
 			container.classList.add("notificationShow"); //$NON-NLS-0$
-			var closeButton = lib.node("closeNotifications"); //$NON-NLS-0$
+
+			// Set up the close button
+			var closeButton = lib.node(closeButtonDomId); //$NON-NLS-0$
 			if(closeButton){
 				if(this._cancelMsg) {
 					closeButton.classList.add("cancelButton"); //$NON-NLS-0$
@@ -333,7 +307,54 @@ define([
 				}
 			}
 		},
-		
+
+		/**
+		 * @private
+		 * @returns {Element}
+		 */
+		createMessage: function(status, msg) {
+			if (status.HTML) {
+				// msg is HTML to be inserted directly
+				var span = document.createElement("span"); //$NON-NLS-0$
+				span.innerHTML = msg;
+				return span;
+			}
+			// msg is text. Try parsing as Markdown
+			var markdownHtml;
+			try {
+				markdownHtml = marked(msg, {
+					sanitize: true,
+				});
+			} catch (e) {
+			}
+
+			var msgNode, links = [];
+			if (markdownHtml) {
+				msgNode = document.createElement("div"); //$NON-NLS-0$
+				msgNode.innerHTML = markdownHtml;
+				// All status links open in new window
+				links = lib.$$("a", msgNode); //$NON-NLS-0$
+				Array.prototype.forEach.call(links, function(link) { //$NON-NLS-0$
+					link.target = "_blank"; //$NON-NLS-0$
+				});
+			} else {
+				// Treat as plain text
+				msgNode = document.createTextNode(msg);
+			}
+			if (!links.length && status.Severity !== SEV_WARNING && status.Severity !== SEV_ERROR && !this._cancelMsg) {
+				// Message has no links in it, and is not a Warning or Error severity. Therefore we consider
+				// it unimportant and will auto hide it in 5 seconds.
+				if(this._timer){
+					window.clearTimeout(this._timer);
+				}
+				this._timer = window.setTimeout(function(){
+					this.setProgressMessage("");
+					this._timer = null;
+				}.bind(this), 5000);
+			}
+			return msgNode;
+		},
+
 		/**
 		 * Shows a progress message until the given deferred is resolved.
 		 */
@@ -406,7 +427,7 @@ define([
 	};
 	StatusReportingService.prototype.constructor = StatusReportingService;
 	
-	ProgressMonitor = function(statusService, progressId, deferred, message){
+	function ProgressMonitor(statusService, progressId, deferred, message){
 		this.statusService = statusService;
 		this.progressId = progressId;
 		if(deferred){
@@ -414,14 +435,14 @@ define([
 			this.begin(message);
 			var that = this;
 			deferred.then(
-					function(response, secondArg){
+					function(/*response, secondArg*/){
 						that.done.bind(that)();
 					},
-					function(error, secondArg){
+					function(/*error, secondArg*/){
 						that.done.bind(that)();
 					});
 		}
-	};
+	}
 	
 	/**
 	 * Starts the progress monitor. Message will be shown in the status area.

@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-/*global prompt */
+/*global console prompt */
 
 define([
 	'i18n!orion/edit/nls/messages',
@@ -109,6 +109,7 @@ define([
 	 * and stripping HTML.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 * @param {Object|string} status
+	 * @returns {orion.Promise}
 	 */
 	function handleStatusMessage(serviceRegistry, status) {
 		if (status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
@@ -116,9 +117,13 @@ define([
 		}
 		var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 		if (statusService) {
-			statusService.setProgressResult(status);
+			return statusService.setProgressResult(status).then(null, function(e) {
+				console.log(e);
+				throw e; // reject
+			});
 		} else {
-			window.console.log(status);
+			console.log(status);
+			return new Deferred().resolve(status);
 		}
 	}
 

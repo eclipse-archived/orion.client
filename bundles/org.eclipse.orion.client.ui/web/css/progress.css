@@ -306,3 +306,15 @@
 	-o-transition: top 0.7s;
 }
 
+.notifications {
+	display: inline-block;
+	text-align: left; /*initial*/
+}
+
+/* Avoid leading/trailing whitespace on Markdown paragraphs */
+.notifications p:first-child {
+	margin-top: 0;
+}
+.notifications p:last-child {
+	margin-bottom: 0;
+}
