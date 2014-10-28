@@ -9,10 +9,42 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd, mocha*/
-define(["require", "orion/Deferred", "orion/bootstrap", "chai/chai", "orion/i18nUtil", "orion/i18n"], function(require, Deferred, bootstrap, chai, i18nUtil) {
+define([
+	"require",
+	"orion/Deferred",
+	"chai/chai",
+	"orion/i18nUtil",
+	"orion/i18n", // TODO why?
+	"orion/pluginregistry",
+	"orion/serviceregistry",
+], function(require, Deferred, chai, i18nUtil, i18n, mPluginRegistry, mServiceRegistry) {
 	var assert = chai.assert;
 	var I18N_PLUGIN = "orion/i18n";
 	var locale = typeof navigator === "undefined" ? "root" : (navigator.language || navigator.userLanguage || "root").toLowerCase();
+
+	var bootstrap;
+
+	function setup() {
+		bootstrap = new MockBootstrap();
+	}
+	function teardown() {
+		bootstrap = null;
+	}
+
+	function MockBootstrap() {
+	}
+	MockBootstrap.prototype.startup = function() {
+		var configuration = {
+			storage: {} // Our test PluginRegistry will use this instead of writing to localStorage
+		};
+		var serviceRegistry = new mServiceRegistry.ServiceRegistry(),
+		    pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, configuration);
+
+		return new Deferred().resolve({
+			serviceRegistry: serviceRegistry,
+			pluginRegistry: pluginRegistry,
+		});
+	};
 
 	/**
 	 * i18n tests are skipped for 2 reasons:
@@ -28,6 +60,9 @@ define(["require", "orion/Deferred", "orion/bootstrap", "chai/chai", "orion/i18n
 	 * TODO mock out the AMD loader and bootstrap.js, then try these tests again.
 	 */
 	describe/*.skip*/("I18n", function() {
+		beforeEach(setup);
+		afterEach(teardown);
+
 		it("I18n", function() {
 			var name = "test/i18n/nls/message1";
 			define(name, [], {
