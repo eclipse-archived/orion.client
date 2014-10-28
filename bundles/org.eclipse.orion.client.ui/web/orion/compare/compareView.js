@@ -552,6 +552,7 @@ exports.TwoWayCompareView = (function() {
 	};
 	
 	TwoWayCompareView.prototype.destroy = function(){
+		this._destroyed = true;
 		this._destroy();		
 	};
 
@@ -567,6 +568,9 @@ exports.TwoWayCompareView = (function() {
 	};
 	
 	TwoWayCompareView.prototype.refresh = function(refreshEditors, generateMapper, refreshingEditorIndex){	
+		if(this._destroyed) {
+			return;
+		}
 		if(this._imageMode){
 			if(this.options.commandProvider){
 				this.options.commandProvider.renderCommands(this);
@@ -715,6 +719,7 @@ exports.InlineCompareView = (function() {
 	};
 
 	InlineCompareView.prototype.destroy = function(){
+		this._destroyed = true;
 		if(this._textView){
 			this._diffNavigator.destroy();
 			this._textView.destroy();
@@ -795,6 +800,9 @@ exports.InlineCompareView = (function() {
 	};
 	
 	InlineCompareView.prototype.refresh = function(refreshEditors, generateMapper){
+		if(this._destroyed) {
+			return;
+		}
 		if(this._imageMode){
 			if(this.options.commandProvider){
 				this.options.commandProvider.renderCommands(this);
