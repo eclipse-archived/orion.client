@@ -446,7 +446,7 @@ exports.ExplorerNavHandler = (function() {
 			this.toggleCursor(currentModel, true);
 			var currentRowDiv = this.getRowDiv();
 			if(currentRowDiv && !noScroll) {
-				var offsetParent = lib.getOffsetParent(currentRowDiv.parentNode);
+				var offsetParent = lib.getOffsetParent(currentRowDiv);
 				if (offsetParent) {
 					var visible = true;
 					if(currentRowDiv.offsetTop <= offsetParent.scrollTop){
