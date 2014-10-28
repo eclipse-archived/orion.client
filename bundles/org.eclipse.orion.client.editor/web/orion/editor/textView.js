@@ -3981,8 +3981,18 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				var lineCount = this._model.getLineCount ();
 				var viewPad = this._getViewPadding();
 				var viewRect = this._viewDiv.getBoundingClientRect();
+				var lineHeight = this._getLineHeight();
+				var contentHeight = lineHeight * lineCount;
 				var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * this._metrics.scrollWidth;
-				lineIndex = Math.floor(((e.clientY - viewRect.top) - this._metrics.scrollWidth) * lineCount / trackHeight);
+				var divHeight, arrowWidth;
+				if (contentHeight < trackHeight) {
+					divHeight = lineHeight;
+					arrowWidth = viewPad.top;
+				} else {
+					divHeight = trackHeight / lineCount;
+					arrowWidth = this._metrics.scrollWidth;
+				}
+				lineIndex = Math.floor(((e.clientY - viewRect.top) - arrowWidth) / divHeight);
 				if (!(0 <= lineIndex && lineIndex < lineCount)) {
 					lineIndex = undefined;
 				}
@@ -7394,11 +7404,13 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					var lineCount = this._model.getLineCount ();
 					var contentHeight = lineHeight * lineCount;
 					var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * this._metrics.scrollWidth;
-					var divHeight;
+					var divHeight, arrowWidth;
 					if (contentHeight < trackHeight) {
 						divHeight = lineHeight;
+						arrowWidth = viewPad.top;
 					} else {
 						divHeight = trackHeight / lineCount;
+						arrowWidth = this._metrics.scrollWidth;
 					}
 					if (div.rulerChanged) {
 						var count = div.childNodes.length;
@@ -7415,7 +7427,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 							annotation = annotations[prop];
 							applyStyle(annotation.style, lineDiv);
 							lineDiv.style.position = "absolute"; //$NON-NLS-0$
-							lineDiv.style.top = this._metrics.scrollWidth + lineHeight + Math.floor(lineIndex * divHeight) + "px"; //$NON-NLS-0$
+							lineDiv.style.top = arrowWidth + lineHeight + Math.floor(lineIndex * divHeight) + "px"; //$NON-NLS-0$
 							if (annotation.html) {
 								lineDiv.innerHTML = annotation.html;
 							}
