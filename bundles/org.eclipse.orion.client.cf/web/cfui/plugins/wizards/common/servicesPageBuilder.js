@@ -59,7 +59,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 				render: function(){
 					
 		    		document.getElementById("allServicesLabel").appendChild(document.createTextNode(messages["bindServicesFromTheList."])); //$NON-NLS-0$
-		    		document.getElementById("servicesLabel").appendChild(document.createTextNode(messages["existingServices:"])); //$NON-NLS-0$
+		    		document.getElementById("servicesLabel").appendChild(document.createTextNode(messages["availableServices:"])); //$NON-NLS-0$
 		    		
 		    		self._servicesDropdown = document.createElement("select"); //$NON-NLS-0$
 		    		self._servicesDropdown.size = 7;
@@ -67,7 +67,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 			    	
 		    		document.getElementById("servicesDropdown").appendChild(self._servicesDropdown); //$NON-NLS-0$
 			    	
-			    	document.getElementById("servicesAdded").appendChild(document.createTextNode(messages["applicationServices:"])); //$NON-NLS-0$
+			    	document.getElementById("servicesAdded").appendChild(document.createTextNode(messages["boundServices:"])); //$NON-NLS-0$
 			    	self._servicesList = document.createElement("select"); //$NON-NLS-0$
 			    	self._servicesList.multiple="multiple"; //$NON-NLS-0$
 			    	self._servicesList.size = 7;
