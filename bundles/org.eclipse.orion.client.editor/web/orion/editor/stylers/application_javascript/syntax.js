@@ -98,7 +98,7 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 				 * http://stackoverflow.com/questions/2008279/validate-a-javascript-function-name/2008444#2008444
 				 * was referenced in the composition of the "begin" pattern below.
 				 */
-				begin: "(function)(\\s+[_$a-zA-Z\\xA0-\\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*)?\\s*\\(", //$NON-NLS-0$
+				begin: "(function)(\\s+[_$a-zA-Z\\xA0-\\uFFFF][_$a-zA-Z0-9\\xA0-\\uFFFF]*)?\\s*\\(", //$NON-NLS-0$
 				end: "\\)", //$NON-NLS-0$
 				captures: {
 					1: {name: "keyword.operator.js"}, //$NON-NLS-0$
