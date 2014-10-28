@@ -15,9 +15,10 @@ define([
 	"chai/chai",
 	"orion/i18nUtil",
 	"orion/i18n", // TODO why?
+	"orion/objects",
 	"orion/pluginregistry",
 	"orion/serviceregistry",
-], function(require, Deferred, chai, i18nUtil, i18n, mPluginRegistry, mServiceRegistry) {
+], function(require, Deferred, chai, i18nUtil, i18n, objects, mPluginRegistry, mServiceRegistry) {
 	var assert = chai.assert;
 	var I18N_PLUGIN = "orion/i18n";
 	var locale = typeof navigator === "undefined" ? "root" : (navigator.language || navigator.userLanguage || "root").toLowerCase();
@@ -26,11 +27,26 @@ define([
 
 	function setup() {
 		bootstrap = new MockBootstrap();
+		// When orion/i18n asks `parentRequire` to load the orion/bootstrap module, we feed it the mock bootstrap.
+		// This is important; we need orion/i18n to be sharing the same bootstrap that these tests are using.
+		i18n._setParentRequire(function(deps, callback) {
+			if (deps && deps[0] === "orion/bootstrap") {
+				console.log("switcheroo");
+				setTimeout(callback.bind(null, bootstrap));
+				return;
+			}
+			// Delegate to real loader
+			return require.apply(null, Array.prototype.slice.call(arguments));
+		});
 	}
 	function teardown() {
 		bootstrap = null;
+		i18n._setParentRequire(null);
 	}
 
+	/**
+	 * Mock version of orion/bootstrap because the real one has auth dependencies that break tests
+	 */
 	function MockBootstrap() {
 	}
 	MockBootstrap.prototype.startup = function() {
@@ -39,7 +55,6 @@ define([
 		};
 		var serviceRegistry = new mServiceRegistry.ServiceRegistry(),
 		    pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, configuration);
-
 		return new Deferred().resolve({
 			serviceRegistry: serviceRegistry,
 			pluginRegistry: pluginRegistry,

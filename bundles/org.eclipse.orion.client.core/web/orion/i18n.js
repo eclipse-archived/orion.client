@@ -11,9 +11,18 @@
 
 /*eslint-env browser, amd*/
 define(function() {
+	var parentRequireOverride;
 	return {
+		/**
+		 * Internal function for testing only. Allows the parentRequire to be overridden at test time.
+		 * @private
+		 */
+		_setParentRequire: function(pr) {
+			parentRequireOverride = pr;
+		},
 		load: function(name, parentRequire, onLoad, config) {
 			config = config || {};
+			parentRequire = parentRequireOverride || parentRequire;
 
 			// as per requirejs i18n definition ignoring irrelevant matching groups
 			// [0] is complete match
@@ -119,6 +128,6 @@ define(function() {
 					}
 				});
 			});
-		}
+		},
 	};
 });
