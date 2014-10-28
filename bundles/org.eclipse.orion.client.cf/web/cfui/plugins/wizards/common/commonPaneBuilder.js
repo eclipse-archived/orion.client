@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/webui/Wizard'], function(mWizard){
+define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWizard){
 	
 	/**
 	 * A common pane builder.
@@ -32,26 +32,26 @@ define(['orion/webui/Wizard'], function(mWizard){
 			
 			var self = this;
 			return new mWizard.WizardPage({
-		    	template: '<div class="manifest formTable" id="manifest"></div>',
+		    	template: '<div class="manifest formTable" id="manifest"></div>', //$NON-NLS-0$
 		    	render: function(){
 		    		
-		    		var manifestElement = document.getElementById("manifest");
-		    		var saveManifestCheckbox = document.createElement("input");
+		    		var manifestElement = document.getElementById("manifest"); //$NON-NLS-0$
+		    		var saveManifestCheckbox = document.createElement("input"); //$NON-NLS-0$
 		    		
-		    		saveManifestCheckbox.type = "checkbox";
-		    		saveManifestCheckbox.id = "saveManifest";
-		    		saveManifestCheckbox.checked = "checked";
+		    		saveManifestCheckbox.type = "checkbox"; //$NON-NLS-0$
+		    		saveManifestCheckbox.id = "saveManifest";//$NON-NLS-0$
+		    		saveManifestCheckbox.checked = "checked"; //$NON-NLS-0$
 		    		
 					manifestElement.appendChild(saveManifestCheckbox);
 					self._saveManifestCheckbox = saveManifestCheckbox;
 					
-					var label = document.createElement("label");
-					label.className = "manifestLabel";
-					label.appendChild(document.createTextNode("Save to manifest file: "));
+					var label = document.createElement("label"); //$NON-NLS-0$
+					label.className = "manifestLabel"; //$NON-NLS-0$
+					label.appendChild(document.createTextNode(messages["saveToManifestFile:"]));
 					
 					var manifestFolder = self._appPath;
-					manifestFolder = manifestFolder.substring(0, manifestFolder.lastIndexOf("/") + 1);
-					label.appendChild(document.createTextNode("/" + manifestFolder + "manifest.yml"));
+					manifestFolder = manifestFolder.substring(0, manifestFolder.lastIndexOf("/") + 1); //$NON-NLS-0$
+					label.appendChild(document.createTextNode("/" + manifestFolder + "manifest.yml")); //$NON-NLS-0$ //$NON-NLS-1$
 					manifestElement.appendChild(label);
 		    	},
 		    	

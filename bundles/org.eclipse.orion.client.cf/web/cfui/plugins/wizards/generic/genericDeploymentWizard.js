@@ -10,11 +10,11 @@
  ******************************************************************************/
 /*global parent window document define orion setTimeout*/
 
-define(["orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil',
+define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/cfui/cFClient', 'orion/PageUtil',
 	'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'cfui/plugins/wizards/common/wizardUtils',
 	'orion/webui/Wizard', 'cfui/plugins/wizards/common/deploymentLogic', 'cfui/plugins/wizards/common/commonPaneBuilder', 'cfui/plugins/wizards/common/corePageBuilder', 
 	'cfui/plugins/wizards/common/servicesPageBuilder', 'cfui/plugins/wizards/common/additionalParamPageBuilder'], 
-		function(mBootstrap, Deferred, CFClient, PageUtil, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, Wizard,
+		function(messages, mBootstrap, CFClient, PageUtil, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, Wizard,
 				mDeploymentLogic, mCommonPaneBuilder, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder) {
 	
 	/* plugin-host communication */
@@ -31,7 +31,7 @@ define(["orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageU
 	mBootstrap.startup().then(function(core) {
 		
 		/* set up initial message */
-		document.getElementById('title').appendChild(document.createTextNode("Configure Application Deployment")); //$NON-NLS-1$//$NON-NLS-0$
+		document.getElementById('title').appendChild(document.createTextNode(messages["configureApplicationDeployment"])); //$NON-NLS-0$
 		
 		/* allow the frame to be closed */
 		document.getElementById('closeDialog').addEventListener('click', closeFrame); //$NON-NLS-1$ //$NON-NLS-0$
@@ -66,7 +66,7 @@ define(["orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageU
 			hideMessage : hideMessage,
 			showError : showError,
 			render : function(fields){
-				document.getElementById('messageText').appendChild(fields);
+				document.getElementById('messageText').appendChild(fields); //$NON-NLS-0$
 			}
 		});
 		
@@ -132,12 +132,12 @@ define(["orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageU
 		    var page3 = additionalParamPageBuilder.build();
 		    
 			new Wizard.Wizard({
-				parent: "wizard",
+				parent: "wizard", //$NON-NLS-0$
 				pages: [page1, page2, page3],
 				commonPane: commonPane,
 				onCancel: closeFrame,
-				buttonNames: { ok: "Deploy" },
-				size: { width: "420px", height: "180px" },
+				buttonNames: { ok: messages["deploy"] },
+				size: { width: "420px", height: "180px" }, //$NON-NLS-0$//$NON-NLS-1$
 				onSubmit: mDeploymentLogic.buildDeploymentTrigger({
 					
 					showMessage : showMessage,

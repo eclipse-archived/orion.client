@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/webui/Wizard'], function(mWizard){
+define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWizard){
 	
 	/**
 	 * A services page builder.
@@ -40,52 +40,52 @@ define(['orion/webui/Wizard'], function(mWizard){
 			var self = this;
 			return new mWizard.WizardPage({
 				
-				template:'<table class="formTable">'+
-					'<tr>'+
-						'<td id="allServicesLabel" class="label" colspan="3"></td>'+
-					'</tr>'+
-					'<tr>'+
-						'<td id="servicesLabel" class="label"></td>'+
-						'<td id="servicesLabel">&nbsp;</td>'+
-						'<td id="servicesAdded" class="label"></td>'+
-					'</tr>'+
-					'<tr>'+
-						'<td id="servicesDropdown" class="listCell"></td>'+
-						'<td id="servicesAddRemoveButtonsCol" class="listCell"></td>'+
-						'<td id="servicesList" class="listCell"></td>'+
-					'</tr>'+
-				'</table>',
+				template:'<table class="formTable">'+ //$NON-NLS-0$
+					'<tr>'+ //$NON-NLS-0$
+						'<td id="allServicesLabel" class="label" colspan="3"></td>'+ //$NON-NLS-0$
+					'</tr>'+ //$NON-NLS-0$
+					'<tr>'+ //$NON-NLS-0$
+						'<td id="servicesLabel" class="label"></td>'+ //$NON-NLS-0$
+						'<td id="servicesLabel">&nbsp;</td>'+ //$NON-NLS-0$
+						'<td id="servicesAdded" class="label"></td>'+ //$NON-NLS-0$
+					'</tr>'+ //$NON-NLS-0$
+					'<tr>'+ //$NON-NLS-0$
+						'<td id="servicesDropdown" class="listCell"></td>'+ //$NON-NLS-0$
+						'<td id="servicesAddRemoveButtonsCol" class="listCell"></td>'+ //$NON-NLS-0$
+						'<td id="servicesList" class="listCell"></td>'+ //$NON-NLS-0$
+					'</tr>'+ //$NON-NLS-0$
+				'</table>', //$NON-NLS-0$
 				
 				render: function(){
 					
-		    		document.getElementById("allServicesLabel").appendChild(document.createTextNode("Bind services from the list."));
-		    		document.getElementById("servicesLabel").appendChild(document.createTextNode("Existing Services:"));
+		    		document.getElementById("allServicesLabel").appendChild(document.createTextNode(messages["bindServicesFromTheList."])); //$NON-NLS-0$
+		    		document.getElementById("servicesLabel").appendChild(document.createTextNode(messages["existingServices:"])); //$NON-NLS-0$
 		    		
-		    		self._servicesDropdown = document.createElement("select");
+		    		self._servicesDropdown = document.createElement("select"); //$NON-NLS-0$
 		    		self._servicesDropdown.size = 7;
-		    		self._servicesDropdown.multiple="multiple";
+		    		self._servicesDropdown.multiple="multiple"; //$NON-NLS-0$
 			    	
-		    		document.getElementById("servicesDropdown").appendChild(self._servicesDropdown);
+		    		document.getElementById("servicesDropdown").appendChild(self._servicesDropdown); //$NON-NLS-0$
 			    	
-			    	document.getElementById("servicesAdded").appendChild(document.createTextNode("Application Services:"));
-			    	self._servicesList = document.createElement("select");
-			    	self._servicesList.multiple="multiple";
+			    	document.getElementById("servicesAdded").appendChild(document.createTextNode(messages["applicationServices:"])); //$NON-NLS-0$
+			    	self._servicesList = document.createElement("select"); //$NON-NLS-0$
+			    	self._servicesList.multiple="multiple"; //$NON-NLS-0$
 			    	self._servicesList.size = 7;
 		    		
-			    	document.getElementById("servicesList").appendChild(self._servicesList);
+			    	document.getElementById("servicesList").appendChild(self._servicesList); //$NON-NLS-0$
 			    	
-			    	var addButton = document.createElement("button");
-			    	addButton.appendChild(document.createTextNode(">"));
-			    	addButton.className = "orionButton commandButton";
+			    	var addButton = document.createElement("button"); //$NON-NLS-0$
+			    	addButton.appendChild(document.createTextNode(">")); //$NON-NLS-0$
+			    	addButton.className = "orionButton commandButton"; //$NON-NLS-0$
 			    	
-			    	var removeButton = document.createElement("button");
-			    	removeButton.className = "orionButton commandButton";
-			    	removeButton.appendChild(document.createTextNode("<"));
+			    	var removeButton = document.createElement("button"); //$NON-NLS-0$
+			    	removeButton.className = "orionButton commandButton"; //$NON-NLS-0$
+			    	removeButton.appendChild(document.createTextNode("<")); //$NON-NLS-0$
 			    	
-			    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(removeButton);
-			    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(addButton);
+			    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(removeButton); //$NON-NLS-0$
+			    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(addButton); //$NON-NLS-0$
 			    	
-			    	addButton.addEventListener('click', function(){
+			    	addButton.addEventListener('click', function(){ //$NON-NLS-0$
 			    		for(var i=self._servicesDropdown.options.length-1; i>=0; i--){
 			    			var option = self._servicesDropdown.options[i];
 							if(option.selected){
@@ -95,7 +95,7 @@ define(['orion/webui/Wizard'], function(mWizard){
 						}
 					});
 						
-					removeButton.addEventListener('click', function(){
+					removeButton.addEventListener('click', function(){ //$NON-NLS-0$
 			    		for(var i=self._servicesList.options.length-1; i>=0; i--){
 			    			var option = self._servicesList.options[i];
 							if(option.selected){
@@ -108,11 +108,11 @@ define(['orion/webui/Wizard'], function(mWizard){
 					var services = self._manifestServices;
 					if(self._manifestServices){
 						if(!Array.isArray(services)){
-							if(typeof services === "object"){
+							if(typeof services === "object"){ //$NON-NLS-0$
 								services = Object.keys(services);
 								if(services.lengh > 0){
-									document.getElementById("allServicesLabel").appendChild(document.createElement("br"));
-									document.getElementById("allServicesLabel").appendChild(document.createTextNode("Convert my manifest.yml file to v6"));
+									document.getElementById("allServicesLabel").appendChild(document.createElement("br")); //$NON-NLS-0$//$NON-NLS-1$
+									document.getElementById("allServicesLabel").appendChild(document.createTextNode(messages["convertMyManifest.ymlFileTo"])); //$NON-NLS-0$
 								}
 							} else {
 								services = [];
@@ -120,19 +120,19 @@ define(['orion/webui/Wizard'], function(mWizard){
 						}
 						
 		    			services.forEach(function(serviceName){
-			    			var serviceOption = document.createElement("option");
-			    			if(typeof serviceName !== "string"){
+			    			var serviceOption = document.createElement("option"); //$NON-NLS-0$
+			    			if(typeof serviceName !== "string"){ //$NON-NLS-0$
 			    				return;
 			    			}
 			    			
 							serviceOption.appendChild(document.createTextNode(serviceName));
 							serviceOption.service = serviceName;
-							serviceOption.id = "service_" + serviceName;
+							serviceOption.id = "service_" + serviceName; //$NON-NLS-0$
 							self._servicesList.appendChild(serviceOption);	
 		    			});
 		    		}
 		    		
-					self._showMessage("Loading services...");
+					self._showMessage(messages["loadingServices..."]);
 					self._targetSelection = self._getTargetSelection();
 					
 					self._cfService.getServices(self._targetSelection.getSelection()).then(function(servicesResp){
@@ -150,10 +150,10 @@ define(['orion/webui/Wizard'], function(mWizard){
 						}
 								
 				    	servicesToChooseFrom.forEach(function(serviceName){
-							var serviceOption = document.createElement("option");
+							var serviceOption = document.createElement("option"); //$NON-NLS-0$
 							serviceOption.appendChild(document.createTextNode(serviceName));
 							serviceOption.service = serviceName;
-							serviceOption.id = "service_" + serviceName;
+							serviceOption.id = "service_" + serviceName; //$NON-NLS-0$
 							self._servicesDropdown.appendChild(serviceOption);
 				    	});
 				    	

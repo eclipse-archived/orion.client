@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/webui/Wizard'], function(mWizard){
+define(['i18n!cfui/nls/messages', 'orion/webui/Wizard', 'orion/i18nUtil'], function(messages, mWizard, i18nUtil){
 	
 	/**
 	 * A common pane builder.
@@ -32,18 +32,18 @@ define(['orion/webui/Wizard'], function(mWizard){
 			
 			var self = this;
 			return new mWizard.WizardPage({
-		    	template: '<div class="manifest formTable" id="debug"></div>' +
-		    		'<table class="formTable">'+
-						'<tr>'+
-							'<td id="cfPasswordLabel" class="label"></td>'+
-							'<td id="cfPassword" class="selectCell"></td>'+
-						'</tr>'+
-						'<tr>'+
-							'<td id="cfUrlPrefixLabel" class="label"></td>'+
-							'<td id="cfUrlPrefix" class="selectCell"></td>'+
-						'</tr>'+
-					'</table>' +
-					'<div class="manifest formTable" id="manifest"></div>',
+		    	template: '<div class="manifest formTable" id="debug"></div>' + //$NON-NLS-0$
+		    		'<table class="formTable">'+ //$NON-NLS-0$
+						'<tr>'+ //$NON-NLS-0$
+							'<td id="cfPasswordLabel" class="label"></td>'+ //$NON-NLS-0$
+							'<td id="cfPassword" class="selectCell"></td>'+ //$NON-NLS-0$
+						'</tr>'+ //$NON-NLS-0$
+						'<tr>'+ //$NON-NLS-0$
+							'<td id="cfUrlPrefixLabel" class="label"></td>'+ //$NON-NLS-0$
+							'<td id="cfUrlPrefix" class="selectCell"></td>'+ //$NON-NLS-0$
+						'</tr>'+ //$NON-NLS-0$
+					'</table>' + //$NON-NLS-0$
+					'<div class="manifest formTable" id="manifest"></div>', //$NON-NLS-0$
 					
 				validate: function(callback){
 					var checkbox = self._debugCheckbox;
@@ -58,66 +58,67 @@ define(['orion/webui/Wizard'], function(mWizard){
 		    	render: function(){
 		    		
 		    		var gandalfthewhite = this.wizard;
-		    		var manifestElement = document.getElementById("manifest");
-		    		var saveManifestCheckbox = document.createElement("input");
+		    		var manifestElement = document.getElementById("manifest"); //$NON-NLS-0$
+		    		var saveManifestCheckbox = document.createElement("input"); //$NON-NLS-0$
 		    		
-		    		saveManifestCheckbox.type = "checkbox";
-		    		saveManifestCheckbox.id = "saveManifest";
-		    		saveManifestCheckbox.checked = "checked";
+		    		saveManifestCheckbox.type = "checkbox"; //$NON-NLS-0$
+		    		saveManifestCheckbox.id = "saveManifest"; //$NON-NLS-0$
+		    		saveManifestCheckbox.checked = "checked"; //$NON-NLS-0$
 		    		
 					manifestElement.appendChild(saveManifestCheckbox);
 					self._saveManifestCheckbox = saveManifestCheckbox;
 					
-					var label = document.createElement("label");
-					label.className = "manifestLabel";
-					label.appendChild(document.createTextNode("Save to manifest file: "));
+					var label = document.createElement("label"); //$NON-NLS-0$
+					label.className = "manifestLabel"; //$NON-NLS-0$
+					label.appendChild(document.createTextNode(messages["saveToManifestFile:"]));
 					
 					var manifestFolder = self._appPath;
-					manifestFolder = manifestFolder.substring(0, manifestFolder.lastIndexOf("/") + 1);
-					label.appendChild(document.createTextNode("/" + manifestFolder + "manifest.yml"));
+					manifestFolder = manifestFolder.substring(0, manifestFolder.lastIndexOf("/") + 1); //$NON-NLS-0$
+					label.appendChild(document.createTextNode("/" + manifestFolder + "manifest.yml")); //$NON-NLS-0$ //$NON-NLS-1$
 					manifestElement.appendChild(label);
 					
-					var debugElement = document.getElementById("debug");
-					var debugCheckbox = document.createElement("input");
-					debugCheckbox.type = "checkbox";
-					debugCheckbox.id = "debugApp";
+					var debugElement = document.getElementById("debug"); //$NON-NLS-0$
+					var debugCheckbox = document.createElement("input"); //$NON-NLS-0$
+					debugCheckbox.type = "checkbox"; //$NON-NLS-0$
+					debugCheckbox.id = "debugApp"; //$NON-NLS-0$
 					
 					debugElement.appendChild(debugCheckbox);
 					self._debugCheckbox = debugCheckbox;
 					
-					var label = document.createElement("label");
-					label.className = "manifestLabel";
-					label.innerHTML = "Debug with <a href=\"https://www.npmjs.org/package/cf-launcher\">cf-launcher</a>:";
+					label = document.createElement("label"); //$NON-NLS-0$
+					label.className = "manifestLabel"; //$NON-NLS-0$
+					
+					label.innerHTML = i18nUtil.formatMessage(messages["debugWith${0}:"], "<a href=\"https://www.npmjs.org/package/cf-launcher\">cf-launcher</a>"); //$NON-NLS-1$
 					debugElement.appendChild(label);
 					
-					var cfPasswordLabel = document.getElementById("cfPasswordLabel");
-					var passwordLabel = document.createTextNode("Password: ");
+					var cfPasswordLabel = document.getElementById("cfPasswordLabel"); //$NON-NLS-0$
+					var passwordLabel = document.createTextNode(messages["password:"]);
 					cfPasswordLabel.appendChild(passwordLabel);
 					
-					var cfPassword = document.getElementById("cfPassword");
-					var passwordInput = document.createElement("input");
+					var cfPassword = document.getElementById("cfPassword"); //$NON-NLS-0$
+					var passwordInput = document.createElement("input"); //$NON-NLS-0$
 					self._cfLauncherPassword = passwordInput;
 					
-					passwordInput.type = "password";
+					passwordInput.type = "password"; //$NON-NLS-0$
 					passwordInput.disabled = true;
-					passwordInput.placeholder = "Required to prevent random access to cf-launcher";
+					passwordInput.placeholder = messages["requiredToPreventRandomAccess"];
 					cfPassword.appendChild(passwordInput);
 					
-					var cfUrlPrefixLabel = document.getElementById("cfUrlPrefixLabel");
-					var urlLabel = document.createTextNode("URL Prefix: ");
+					var cfUrlPrefixLabel = document.getElementById("cfUrlPrefixLabel"); //$NON-NLS-0$
+					var urlLabel = document.createTextNode(messages["uRLPrefix:"]);
 					cfUrlPrefixLabel.appendChild(urlLabel);
 					
-					var cfUrlPrefix = document.getElementById("cfUrlPrefix");
+					var cfUrlPrefix = document.getElementById("cfUrlPrefix"); //$NON-NLS-0$
 					
-					var urlInput = document.createElement("input");
+					var urlInput = document.createElement("input"); //$NON-NLS-0$
 					self._cfLauncherURLPrefix = urlInput;
 					
-					urlInput.placeholder = "Leave blank for default /launcher";
+					urlInput.placeholder = messages["leaveBlankForDefault/launcher"];
 					urlInput.disabled = true;
 					
 					cfUrlPrefix.appendChild(urlInput);
 					
-					debugCheckbox.addEventListener("change", function(){
+					debugCheckbox.addEventListener("change", function(){ //$NON-NLS-0$
 						var enable = !debugCheckbox.checked;
 						passwordInput.disabled = enable;
 						urlInput.disabled = enable;
@@ -125,7 +126,7 @@ define(['orion/webui/Wizard'], function(mWizard){
 						gandalfthewhite.validate();
 					});
 					
-					passwordInput.addEventListener("keyup", function(){
+					passwordInput.addEventListener("keyup", function(){ //$NON-NLS-0$
 						gandalfthewhite.validate();
 					});
 		    	},

@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/Deferred', 'cfui/cfUtil',  'orion/urlUtils', 'orion/webui/littlelib'], 
-		function(Deferred, mCfUtil, URLUtil, lib){
+define(['i18n!cfui/nls/messages', 'orion/Deferred', 'cfui/cfUtil',  'orion/urlUtils', 'orion/webui/littlelib'], 
+		function(messages, Deferred, mCfUtil, URLUtil, lib){
 	
 	/**
 	 * Common wizard utilities.
@@ -21,9 +21,9 @@ define(['orion/Deferred', 'cfui/cfUtil',  'orion/urlUtils', 'orion/webui/littlel
 		 * Posts the given status message.
 		 */
 		defaultPostMsg : function(status){
-			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-				 source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
-				 status: status}), "*");
+			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", //$NON-NLS-0$
+				 source: "org.eclipse.orion.client.cf.deploy.uritemplate",  //$NON-NLS-0$
+				 status: status}), "*"); //$NON-NLS-0$
 		},
 		
 		/**
@@ -32,9 +32,9 @@ define(['orion/Deferred', 'cfui/cfUtil',  'orion/urlUtils', 'orion/webui/littlel
 		buildDefaultPostError : function(defaultDecorateError){
 			return function(error, target){
 				error = defaultDecorateError(error, target);
-				window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-					source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
-					status: error}), "*");
+				window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", //$NON-NLS-0$
+					source: "org.eclipse.orion.client.cf.deploy.uritemplate", //$NON-NLS-0$
+					status: error}), "*"); //$NON-NLS-0$
 			};
 		},
 		
@@ -42,8 +42,8 @@ define(['orion/Deferred', 'cfui/cfUtil',  'orion/urlUtils', 'orion/webui/littlel
 		 *  Posts to close the plugin frame.
 		 */
 		defaultCloseFrame : function(){
-			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-				 source: "org.eclipse.orion.client.cf.deploy.uritemplate", cancelled: true}), "*");
+			window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", //$NON-NLS-0$
+				 source: "org.eclipse.orion.client.cf.deploy.uritemplate", cancelled: true}), "*"); //$NON-NLS-0$ //$NON-NLS-1$
 		},
 		
 		/**
@@ -75,42 +75,42 @@ define(['orion/Deferred', 'cfui/cfUtil',  'orion/urlUtils', 'orion/webui/littlel
 		 * Displays the message bar panel with the given message.
 		 */
 		defaultShowMessage : function(message){
-			document.getElementById('messageLabel').classList.remove("errorMessage");
-			document.getElementById('messageContainer').classList.remove("errorMessage");
-			lib.empty(document.getElementById('messageText'));
+			document.getElementById('messageLabel').classList.remove("errorMessage"); //$NON-NLS-0$//$NON-NLS-1$
+			document.getElementById('messageContainer').classList.remove("errorMessage"); //$NON-NLS-0$ //$NON-NLS-1$
+			lib.empty(document.getElementById('messageText')); //$NON-NLS-0$
 			
-			document.getElementById('messageText').style.width = "100%";
-			document.getElementById('messageText').appendChild(WizardUtils.defaultParseMessage(message));
+			document.getElementById('messageText').style.width = "100%"; //$NON-NLS-0$ //$NON-NLS-1$
+			document.getElementById('messageText').appendChild(WizardUtils.defaultParseMessage(message)); //$NON-NLS-0$
 			
-			document.getElementById('messageButton').className = "";
-			document.getElementById('messageContainer').classList.add("showing");
+			document.getElementById('messageButton').className = ""; //$NON-NLS-0$
+			document.getElementById('messageContainer').classList.add("showing"); //$NON-NLS-0$ //$NON-NLS-1$
 		},
 		
 		/**
 		 * Hides the message bar panel.
 		 */
 		defaultHideMessage : function(){
-			document.getElementById('messageLabel').classList.remove("errorMessage");
-			document.getElementById('messageContainer').classList.remove("errorMessage");
-			lib.empty(document.getElementById('messageText'));
-			document.getElementById('messageContainer').classList.remove("showing");
+			document.getElementById('messageLabel').classList.remove("errorMessage"); //$NON-NLS-0$ //$NON-NLS-1$
+			document.getElementById('messageContainer').classList.remove("errorMessage"); //$NON-NLS-0$ //$NON-NLS-1$
+			lib.empty(document.getElementById('messageText')); //$NON-NLS-0$
+			document.getElementById('messageContainer').classList.remove("showing"); //$NON-NLS-0$ //$NON-NLS-1$
 		},
 		
 		/**
 		 * Displays the message bar panel with the given error message.
 		 */
 		defaultShowError : function(message){
-			document.getElementById('messageLabel').classList.add("errorMessage");
-			document.getElementById('messageContainer').classList.add("errorMessage");
-			lib.empty(document.getElementById('messageText'));
+			document.getElementById('messageLabel').classList.add("errorMessage"); //$NON-NLS-0$ //$NON-NLS-1$
+			document.getElementById('messageContainer').classList.add("errorMessage"); //$NON-NLS-0$ //$NON-NLS-1$
+			lib.empty(document.getElementById('messageText')); //$NON-NLS-0$
 			
-			document.getElementById('messageText').style.width = "calc(100% - 10px)";
-			document.getElementById('messageText').appendChild(WizardUtils.defaultParseMessage(message.Message || message));
-			lib.empty(document.getElementById('messageButton'));
+			document.getElementById('messageText').style.width = "calc(100% - 10px)"; //$NON-NLS-0$ //$NON-NLS-1$
+			document.getElementById('messageText').appendChild(WizardUtils.defaultParseMessage(message.Message || message)); //$NON-NLS-0$
+			lib.empty(document.getElementById('messageButton')); //$NON-NLS-0$
 			
-			document.getElementById('messageButton').className = "dismissButton core-sprite-close imageSprite";
-			document.getElementById('messageButton').onclick = WizardUtils.defaultHideMessage;
-			document.getElementById('messageContainer').classList.add("showing");
+			document.getElementById('messageButton').className = "dismissButton core-sprite-close imageSprite"; //$NON-NLS-0$ //$NON-NLS-1$
+			document.getElementById('messageButton').onclick = WizardUtils.defaultHideMessage; //$NON-NLS-0$
+			document.getElementById('messageContainer').classList.add("showing"); //$NON-NLS-0$ //$NON-NLS-1$
 		},
 		
 		/**
@@ -136,8 +136,8 @@ define(['orion/Deferred', 'cfui/cfUtil',  'orion/urlUtils', 'orion/webui/littlel
 			var iframe = window.frameElement;
 		    setTimeout(function(){
 		    	
-				var titleBar = document.getElementById('titleBar');
-				titleBar.addEventListener('mousedown', function(e) {
+				var titleBar = document.getElementById('titleBar'); //$NON-NLS-0$
+				titleBar.addEventListener('mousedown', function(e) { //$NON-NLS-0$
 					frameHolder._dragging = true;
 					if (titleBar.setCapture)
 						titleBar.setCapture();
@@ -148,7 +148,7 @@ define(['orion/Deferred', 'cfui/cfUtil',  'orion/urlUtils', 'orion/webui/littlel
 					};
 				});
 				
-				titleBar.addEventListener('mousemove', function(e) {
+				titleBar.addEventListener('mousemove', function(e) { //$NON-NLS-0$
 					if (frameHolder._dragging) {
 						var dx = e.screenX - frameHolder.start.screenX;
 						var dy = e.screenY - frameHolder.start.screenY;
@@ -159,12 +159,12 @@ define(['orion/Deferred', 'cfui/cfUtil',  'orion/urlUtils', 'orion/webui/littlel
 						var x = parseInt(iframe.style.left) + dx;
 						var y = parseInt(iframe.style.top) + dy;
 						
-						iframe.style.left = x+"px";
-						iframe.style.top = y+"px";
+						iframe.style.left = x+"px"; //$NON-NLS-0$
+						iframe.style.top = y+"px"; //$NON-NLS-0$
 					}
 				});
 				
-				titleBar.addEventListener('mouseup', function(e) {
+				titleBar.addEventListener('mouseup', function(e) { //$NON-NLS-0$
 					frameHolder._dragging = false;
 					if (titleBar.releaseCapture) {
 						titleBar.releaseCapture();
@@ -180,7 +180,7 @@ define(['orion/Deferred', 'cfui/cfUtil',  'orion/urlUtils', 'orion/webui/littlel
 		loadClouds : function(options){
 			options = options || {};
 			
-			var message = options.message || "Loading deployment settings...";
+			var message = options.message || messages["loadingDeploymentSettings..."];
 			var showMessage = options.showMessage;
 			var hideMessage = options.hideMessage;
 			

@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/objects', 'cfui/cfUtil'], function(objects, mCfUtil){
+define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil'], function(messages, objects, mCfUtil){
 	
 	function _getManifestApplication(manifestContents, results){
 		manifestContents = manifestContents || { applications: [{}] };
@@ -31,42 +31,42 @@ define(['orion/objects', 'cfui/cfUtil'], function(objects, mCfUtil){
 				manifestContents.applications[0].services = results.services;
 		}
 		
-		if(typeof results.command === "string"){
+		if(typeof results.command === "string"){ //$NON-NLS-0$
 			if(results.command)
 				manifestContents.applications[0].command = results.command;
 			else
 				delete manifestContents.applications[0].command;
 		}
 		
-		if(typeof results.path === "string"){
+		if(typeof results.path === "string"){ //$NON-NLS-0$
 			if(results.path)
 				manifestContents.applications[0].path = results.path;
 			else
 				delete manifestContents.applications[0].path;
 		}
 		
-		if(typeof results.buildpack === "string"){
+		if(typeof results.buildpack === "string"){ //$NON-NLS-0$
 			if(results.buildpack)
 				manifestContents.applications[0].buildpack = results.buildpack;
 			else
 				delete manifestContents.applications[0].buildpack;
 		}
 		
-		if(typeof results.memory === "string"){
+		if(typeof results.memory === "string"){ //$NON-NLS-0$
 			if(results.memory)
 				manifestContents.applications[0].memory = results.memory;
 			else
 				delete manifestContents.applications[0].memory;
 		}
 		
-		if(typeof results.instances !== "undefined"){
+		if(typeof results.instances !== "undefined"){ //$NON-NLS-0$
 			if(results.instances)
 				manifestContents.applications[0].instances = results.instances;
 			else
 				delete manifestContents.applications[0].instances;
 		}
 		
-		if(typeof results.timeout !== "undefined"){
+		if(typeof results.timeout !== "undefined"){ //$NON-NLS-0$
 			if(results.timeout)
 				manifestContents.applications[0].timeout = results.timeout;
 			else
@@ -100,7 +100,7 @@ define(['orion/objects', 'cfui/cfUtil'], function(objects, mCfUtil){
 			var contentLocation = options.ContentLocation;
 			var appPath = options.AppPath;
 			
-			showMessage("Deploying...");
+			showMessage(messages["deploying..."]);
 			targetSelection.getSelection(function(selection){
 				if(selection === null || selection.length === 0){
 					closeFrame();
@@ -114,7 +114,7 @@ define(['orion/objects', 'cfui/cfUtil'], function(objects, mCfUtil){
 				var instrumentation = options.getManifestInstrumentation ? options.getManifestInstrumentation(manifest) : null;
 				var packager = options.getPackager ? options.getPackager() : null;
 				
-				var editLocation = new URL("../edit/edit.html#" + contentLocation, window.location.href);
+				var editLocation = new URL("../edit/edit.html#" + contentLocation, window.location.href); //$NON-NLS-0$
 				cfService.pushApp(selection, null, decodeURIComponent(contentLocation + appPath), manifest, saveManifest, packager, instrumentation).then(
 					function(result){
 						mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, contentLocation).then(

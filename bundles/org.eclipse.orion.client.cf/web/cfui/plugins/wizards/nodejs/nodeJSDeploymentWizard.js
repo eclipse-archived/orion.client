@@ -10,11 +10,11 @@
  ******************************************************************************/
 /*global parent window document define orion setTimeout*/
 
-define(["orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection', 'orion/i18nUtil',
+define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection', 'orion/i18nUtil',
 	 'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'cfui/plugins/wizards/common/wizardUtils',
 	'orion/webui/Wizard', 'cfui/plugins/wizards/common/deploymentLogic', 'cfui/plugins/wizards/common/debugPaneBuilder', 'cfui/plugins/wizards/common/corePageBuilder', 
 	'cfui/plugins/wizards/common/servicesPageBuilder', 'cfui/plugins/wizards/common/additionalParamPageBuilder'], 
-		function(mBootstrap, Deferred, CFClient, PageUtil, mSelection, i18nUtil, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, Wizard,
+		function(messages, mBootstrap, Deferred, CFClient, PageUtil, mSelection, i18nUtil, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, Wizard,
 				mDeploymentLogic, mDebugPaneBuilder, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder) {
 	
 	/* plugin-host communication */
@@ -66,7 +66,7 @@ define(["orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageU
 			hideMessage : hideMessage,
 			showError : showError,
 			render : function(fields){
-				document.getElementById('messageText').appendChild(fields);
+				document.getElementById(messages["messageText"]).appendChild(fields);
 			}
 		});
 		
@@ -117,33 +117,33 @@ define(["orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageU
 			var defaultSelection;
 			var page0 = new Wizard.WizardPage({
 				
-				template: "<table class=\"formTable\">"+
-			    	"<tr>"+
-						"<td id=\"_runtimeLabel\" class=\"label\"></td>"+
-						"<td id=\"_runtime\" class=\"selectCell\"></td>"+
-					"</tr>"+
-					"<tr>"+
-						"<td id=\"_targetLabel\" class=\"label\"></td>"+
-						"<td id=\"_target\" class=\"selectCell\"></td>"+
-					"</tr>"+
-					"<tr>"+
-						"<td id=\"_organizationLabel\" class=\"label\"></td>"+
-						"<td id=\"_organization\" class=\"selectCell\"></td>"+
-					"</tr>"+
-					"<tr>"+
-						"<td id=\"_spaceLabel\" class=\"label\"></td>"+
-						"<td id=\"_space\" class=\"selectCell\"></td>"+
-					"</tr>"+
-					"<tr>"+
-						"<td id=\"_nameLabel\" class=\"label\"></td>"+
-						"<td id=\"_name\" class=\"selectCell\"></td>"+
-					"</tr>"+
-				"</table><br /><div class=\"deployMessage\" id=\"confirmationMessage\"></div>",
+				template: "<table class=\"formTable\">"+ //$NON-NLS-0$
+			    	"<tr>"+ //$NON-NLS-0$
+						"<td id=\"_runtimeLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td id=\"_runtime\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
+					"</tr>"+ //$NON-NLS-0$
+					"<tr>"+ //$NON-NLS-0$
+						"<td id=\"_targetLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td id=\"_target\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
+					"</tr>"+ //$NON-NLS-0$
+					"<tr>"+ //$NON-NLS-0$
+						"<td id=\"_organizationLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td id=\"_organization\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
+					"</tr>"+ //$NON-NLS-0$
+					"<tr>"+ //$NON-NLS-0$
+						"<td id=\"_spaceLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td id=\"_space\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
+					"</tr>"+ //$NON-NLS-0$
+					"<tr>"+ //$NON-NLS-0$
+						"<td id=\"_nameLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td id=\"_name\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
+					"</tr>"+ //$NON-NLS-0$
+				"</table><br /><div class=\"deployMessage\" id=\"confirmationMessage\"></div>", //$NON-NLS-0$
 		    	
 		    	render: function(){
 		    		this.wizard.validate();
 		    		
-		    		showMessage("Preparing deployment settings...");
+		    		showMessage(messages["preparingDeploymentSettings..."]);
 		    		getDefaultNonEmptyTarget(clouds).then(function(nonEmpty){
 		    			
 		    			var resp = nonEmpty.resp;
@@ -161,43 +161,43 @@ define(["orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageU
 		    			defaultSelection.setSelections(target);
 		    			
 		    			/* runtime */
-		    			var label = document.createTextNode("Runtime:");
-		    			document.getElementById("_runtimeLabel").appendChild(label);
+		    			var label = document.createTextNode(messages["runtime:"]);
+		    			document.getElementById("_runtimeLabel").appendChild(label); //$NON-NLS-0$
 		    			
-		    			var node = document.createTextNode("node.js");
-		    			document.getElementById("_runtime").appendChild(node);
+		    			var node = document.createTextNode(messages["node.js"]);
+		    			document.getElementById("_runtime").appendChild(node); //$NON-NLS-0$
 		    			
 		    			/* target */
-		    			label = document.createTextNode("Target:");
-		    			document.getElementById("_targetLabel").appendChild(label);
+		    			label = document.createTextNode(messages["target:"]);
+		    			document.getElementById("_targetLabel").appendChild(label); //$NON-NLS-0$
 		    			
 		    			node = document.createTextNode(defaultTarget.Name || defaultTarget.Url || target.Name || target.Url);
-		    			document.getElementById("_target").appendChild(node);
+		    			document.getElementById("_target").appendChild(node); //$NON-NLS-0$
 		    			
 		    			/* organization */
-		    			label = document.createTextNode("Organization:");
-		    			document.getElementById("_organizationLabel").appendChild(label);
+		    			label = document.createTextNode(messages["organization:"]);
+		    			document.getElementById("_organizationLabel").appendChild(label); //$NON-NLS-0$
 		    			
 		    			node = document.createTextNode(org.Name);
-		    			document.getElementById("_organization").appendChild(node);
+		    			document.getElementById("_organization").appendChild(node); //$NON-NLS-0$
 		    			
 		    			/* space */
-		    			label = document.createTextNode("Space:");
-		    			document.getElementById("_spaceLabel").appendChild(label);
+		    			label = document.createTextNode(messages["space:"]);
+		    			document.getElementById("_spaceLabel").appendChild(label); //$NON-NLS-0$
 		    			
 		    			node = document.createTextNode(space.Name);
-		    			document.getElementById("_space").appendChild(node);
+		    			document.getElementById("_space").appendChild(node); //$NON-NLS-0$
 		    			
 		    			/* application name */
-		    			label = document.createTextNode("Application Name:");
-		    			document.getElementById("_nameLabel").appendChild(label);
+		    			label = document.createTextNode(messages["applicationName:"]);
+		    			document.getElementById("_nameLabel").appendChild(label); //$NON-NLS-0$
 		    			
 		    			node = document.createTextNode(manifestApplication.name);
-		    			document.getElementById("_name").appendChild(node);
+		    			document.getElementById("_name").appendChild(node); //$NON-NLS-0$
 		    			
-		    			var message = "<p>Click <b>\"Deploy\"</b> to proceed or <b>\"Next\"</b> to change the deployment parameters.</p>";
+		    			var message =  "<p>" + messages["Click \"Deploy\" to proceed or \"Next\" to change the deployment parameters."] + "</p>"; //$NON-NLS-0$ //$NON-NLS-2$
 		    			
-		    			var messageDiv = document.getElementById("confirmationMessage");
+		    			var messageDiv = document.getElementById("confirmationMessage"); //$NON-NLS-0$
 			    		messageDiv.innerHTML = message;
 		    			
 		    		}, function(err){
@@ -265,12 +265,12 @@ define(["orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageU
 		    var page3 = additionalParamPageBuilder.build();
 		    
 			new Wizard.Wizard({
-				parent: "wizard",
+				parent: "wizard", //$NON-NLS-0$
 				pages: [page0, page1, page2, page3],
 				commonPane: commonPane,
 				onCancel: closeFrame,
-				buttonNames: { ok: "Deploy" },
-				size: { width: "420px", height: "180px" },
+				buttonNames: { ok: messages["deploy"] },
+				size: { width: "420px", height: "180px" }, //$NON-NLS-0$ //$NON-NLS-1$
 				onSubmit: mDeploymentLogic.buildDeploymentTrigger({
 					
 					showMessage : showMessage,
@@ -296,7 +296,7 @@ define(["orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageU
 					getTargetSelection : function(){
 						
 						var selection = corePageBuilder.getSelection();
-						if(typeof selection === "undefined" && defaultSelection)
+						if(typeof selection === "undefined" && defaultSelection) //$NON-NLS-0$
 							return defaultSelection;
 						
 			    		return selection;
@@ -313,7 +313,7 @@ define(["orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageU
 			    		if(!debugEnabled)
 			    			return null;
 			    					    		
-			    		return "org.eclipse.orion.server.cf.nodejs.CFLauncherDeploymentPackager";
+			    		return "org.eclipse.orion.server.cf.nodejs.CFLauncherDeploymentPackager"; //$NON-NLS-0$
 			    	},
 			    	
 			    	getManifestInstrumentation : function(manifest){
@@ -329,8 +329,8 @@ define(["orion/bootstrap", 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageU
 			    		var userURLPrefix = debugPaneBuilder._cfLauncherURLPrefix.value;
 			    		
 			    		var command = userURLPrefix ?
-			    				i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} --urlprefix ${1} -- ${2}", password, userURLPrefix, app.command)
-			    				: i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} -- ${1}", password, app.command);
+			    				i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} --urlprefix ${1} -- ${2}", password, userURLPrefix, app.command) //$NON-NLS-0$
+			    				: i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} -- ${1}", password, app.command); //$NON-NLS-0$
 			    		
 			    		instrumentation.command = command;
 			    		return instrumentation;
