@@ -27,7 +27,7 @@ define(["require", "orion/Deferred", "orion/bootstrap", "chai/chai", "orion/i18n
 	 * 
 	 * TODO mock out the AMD loader and bootstrap.js, then try these tests again.
 	 */
-	describe.skip("I18n", function() {
+	describe/*.skip*/("I18n", function() {
 		it("I18n", function() {
 			var name = "test/i18n/nls/message1";
 			define(name, [], {
@@ -71,7 +71,10 @@ define(["require", "orion/Deferred", "orion/bootstrap", "chai/chai", "orion/i18n
 			});
 		});
 
-		describe("I18n service", function() {
+		/**
+		 * Tests orion.i18n.message services
+		 */
+		describe("orion.i18n.message service", function() {
 			it("I18nService", function() {
 				var name = "test/i18n/nls/message3";
 				var serviceName = "test/i18n/nls/" + locale + "/message3";
