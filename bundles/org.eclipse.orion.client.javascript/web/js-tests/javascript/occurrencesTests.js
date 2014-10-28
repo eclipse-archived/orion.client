@@ -2255,6 +2255,150 @@ define([
 		});
 		
 		/**
+		 * Tests computing occurrences for object property used in two sibling scopes and defined in an outside scope
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
+		 */
+		it('test_ObjectPropsSiblingScopes1', function() {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); }; var c = { p: this.g(); }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(31, 32)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:31, end:32}, {start:54, end:55}, {start:80, end:81}, {start:91, end:92}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object property used in two sibling scopes and defined in an outside scope
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
+		 */
+		it('test_ObjectPropsSiblingScopes2', function() {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); }; var c = { p: this.g(); }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(54, 54)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:31, end:32}, {start:54, end:55}, {start:80, end:81}, {start:91, end:92}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object property used in two sibling scopes and defined in an outside scope
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
+		 */
+		it('test_ObjectPropsSiblingScopes3', function() {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); }; var c = { p: this.g(); }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(80, 80)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:31, end:32}, {start:54, end:55}, {start:80, end:81}, {start:91, end:92}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object property used in two sibling scopes and defined in an outside scope
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
+		 */
+		it('test_ObjectPropsSiblingScopes4', function() {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); }; var c = { p: this.g(); }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(91, 92)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:31, end:32}, {start:54, end:55}, {start:80, end:81}, {start:91, end:92}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object property used in sibling scopes and defined in multiple nested scopes
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
+		 */
+		it('test_ObjectPropsNestedScopes1', function() {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); g: function (){} }; var c = { p: this.g(); }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(31, 32)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:31, end:32}, {start:97, end:98}, {start:108, end:109}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});	
+		
+		/**
+		 * Tests computing occurrences for object property used in sibling scopes and defined in multiple nested scopes
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
+		 */
+		it('test_ObjectPropsNestedScopes2', function() {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); g: function (){} }; var c = { p: this.g(); }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(97, 97)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:31, end:32}, {start:97, end:98}, {start:108, end:109}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object property used in sibling scopes and defined in multiple nested scopes
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
+		 */
+		it('test_ObjectPropsNestedScopes3', function() {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); g: function (){} }; var c = { p: this.g(); }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(109, 109)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:31, end:32}, {start:97, end:98}, {start:108, end:109}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object property used in sibling scopes and defined in multiple nested scopes
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
+		 */
+		it('test_ObjectPropsNestedScopes4', function() {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); g: function (){} }; var c = { p: this.g(); }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(54, 55)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:54, end:55}, {start:59, end:60}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests computing occurrences for object property used in sibling scopes and defined in multiple nested scopes
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
+		 */
+		it('test_ObjectPropsNestedScopes5', function() {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); g: function (){} }; var c = { p: this.g(); }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(59, 59)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:54, end:55}, {start:59, end:60}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
 		 * Tests whether occurrences finds and selects the correct token/word/node
 		 */
 		it('test_punctuators_1A', function() {

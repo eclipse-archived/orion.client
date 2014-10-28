@@ -245,10 +245,6 @@ define([
 				switch(node.type) {
 					case Estraverse.Syntax.ObjectExpression:
 						this.scopes.push({range: node.range, occurrences: [], kind:'o'});  //$NON-NLS-0$
-						// Skip object expressions that don't contain the selection
-						if(node.range[0] > this.context.start || node.range[1] < this.context.end) {
-							return true;
-						}						
 				}
 			} else if (this.labeledStatementCheck){
 				switch(node.type) {
