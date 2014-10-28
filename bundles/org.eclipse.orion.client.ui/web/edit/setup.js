@@ -231,7 +231,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		if (type === "progress") { //$NON-NLS-0$
 			statusService.setProgressMessage(message);
 		} else if (type === "error") { //$NON-NLS-0$
-			statusService.setErrorMessage(message);
+			statusService.setErrorMessage({Message: message, Severity: "Error"}); //$NON-NLS-0$
 		} else {
 			statusService.setMessage(message, null, isAccessible);
 		}
