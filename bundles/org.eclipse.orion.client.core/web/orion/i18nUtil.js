@@ -85,6 +85,12 @@ define(['require', 'orion/Deferred'], function(require, Deferred) {
 			d.reject(error);
 		}
 
+		if (!(/^(orion|javascript)\//.test(name))) {
+			// Hack: the bundle name doesn't start with "orion/" or javascript/ so assume it's plugin-contributed.
+			// Therefore skip i18n! and go straight to orion/i18n! to resolve it against plugin contributions.
+			require(['orion/i18n!' + name], _resolveMessageBundle, _rejectMessageBundle); //$NON-NLS-0$
+			return d;
+		}
 		try {
 			require([name], _resolveMessageBundle, _rejectMessageBundle);
 		} catch (ignore) {
