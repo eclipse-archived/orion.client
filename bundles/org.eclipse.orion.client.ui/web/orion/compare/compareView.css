@@ -63,6 +63,7 @@
     left: 44px;
     right: 0;
 	height:100%;
+	border-left: 1px solid #eaeaea;
 }
 
 .canvasContainer {
