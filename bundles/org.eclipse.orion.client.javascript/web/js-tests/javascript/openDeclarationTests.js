@@ -121,20 +121,5 @@ define([
 				}
 			});
 		});
-		
-		it("Test logical name literal 1", function() {
-			var text = "importScripts('javascript/astManager')";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var decl = Finder.findDeclaration(37, ast, {id: 'f', kind: Finder.SearchOptions.FUNCTION_DECLARATION});
-					assert(decl, "Should have found the defining function");
-					assert.equal(decl.type, 'FunctionDeclaration', 'Should have found a func decl');
-					assert.equal(decl.range[0], 19, 'decl start should be second decl at offset 19');
-				}
-				finally {
-					tearDown();
-				}
-			});
-		});
 	});
 });

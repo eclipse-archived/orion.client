@@ -54,6 +54,14 @@ define([
 		    this._size = 0;
 		},
 		/**
+		 * @description Returns the current size of the map
+		 * @function
+		 * @returns {Number} The size of the map
+		 */
+		size: function size() {
+		  return this._size;  
+		},
+		/**
 		 * @description If the map contains the given key
 		 * @function
 		 * @param {String} key The key to check
@@ -81,10 +89,15 @@ define([
 		    }
 		    this.remove(key);  //torch the existing value
 		    var entry = node(key, value);
+		    if(!this._start) {
+		        this._start = this._end = entry;
+		    } else {
+		        entry = node(key, value);
+		        entry._n = this._start;
+		        this._start._p = entry;
+		        this._start = entry;
+		    }
 		    this._cache[key] = entry;
-		    var n = this._start;
-		    this._start = entry;
-		    entry._n = n;
 		    this._size++;
 		},
 		/**
@@ -97,7 +110,9 @@ define([
 		get: function get(key) {
 		    if(this._size > 0) {
 		        var entry = this._cache[key];
-		        return entry._v.value;
+		        if(entry && entry._v) {
+		          return entry._v.value;
+		        }
 		    }
 		    return null;
 		},
@@ -115,8 +130,16 @@ define([
  		    var entry = this._cache[key];
  		    if(entry) {
  		        var p = entry._p;
+ 		        if(this._end === entry) {
+ 		        	this._end = p;
+ 		        }
  		        var n = entry._n;
- 		        p._n = n;
+ 		        if(this._start === entry) {
+ 		        	this._start = entry._n;
+ 		        }
+ 		        if(p) {
+ 		            p._n = n;
+ 		        }
  		        if(n) {
  		            n._p = p;
  		        }
@@ -125,6 +148,23 @@ define([
  		        return entry._v.value;
  		    }
  		    return null;
+ 		},
+ 		/**
+		  * @description Returns the array of keys found in the map in the order they were inserted,
+		  * so for this LRU map the first key would be the oldest mapped value
+		  * @function
+		  * @returns {String[]} The keys in the map in insertion order
+		  */
+		 keys: function keys() {
+		    var keys = [];
+		    if(this._end) {
+		       var n = this._end;
+		       while(n) {
+		           keys.push(n._v.key);
+		           n = n._p;
+		       }
+		    }
+		    return keys;
  		}
 	});
 	
