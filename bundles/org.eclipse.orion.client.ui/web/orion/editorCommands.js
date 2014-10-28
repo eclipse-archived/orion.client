@@ -284,7 +284,6 @@ define([
 				tooltip: messages.saveFile,
 				imageClass : "core-sprite-save", //$NON-NLS-0$
 				id: cmdId,
-				track: true,
 				visibleWhen: function() {
 					if(saveCmdVisibleFunc) {
 						return saveCmdVisibleFunc();
