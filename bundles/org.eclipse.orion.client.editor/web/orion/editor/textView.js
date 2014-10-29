@@ -7133,7 +7133,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 
 				/* Need to set the height first in order for the width to consider the vertical scrollbar */
 				var scrollDiv = this._scrollDiv;
-				scrollDiv.style.height = scrollHeight + "px"; //$NON-NLS-0$
+				scrollDiv.style.height = (scrollHeight + (util.isWebkit ? 0 : viewPad.bottom)) + "px"; //$NON-NLS-0$
 				
 				clientWidth = this._getClientWidth();
 				if (!this._singleMode && !this._wrapMode && !this._noScroll) {
