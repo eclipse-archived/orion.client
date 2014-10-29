@@ -10,7 +10,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env amd */
-define("webtools/htmlContentAssist", ['orion/editor/templates'], function(mTemplates) { //$NON-NLS-1$ //$NON-NLS-0$
+define("webtools/htmlContentAssist", [ //$NON-NLS-0$
+	'orion/editor/templates',  //$NON-NLS-0$
+	'orion/editor/stylers/text_html/syntax' //$NON-NLS-0$
+], function(mTemplates, mHTML) {
 
 	var simpleDocTemplate = new mTemplates.Template("", "Simple HTML document", //$NON-NLS-0$
 		"<!DOCTYPE html>\n" + //$NON-NLS-0$
@@ -129,23 +132,20 @@ define("webtools/htmlContentAssist", ['orion/editor/templates'], function(mTempl
 	 */
 	function HTMLContentAssistProvider() {
 	}
-	HTMLContentAssistProvider.prototype = new mTemplates.TemplateContentAssist([], templates);
+	HTMLContentAssistProvider.prototype = new mTemplates.TemplateContentAssist(mHTML.keywords, templates);
 
 	HTMLContentAssistProvider.prototype.getPrefix = function(buffer, offset, context) {
 		var prefix = "";
 		var index = offset;
 		while (index && /[A-Za-z0-9<!-]/.test(buffer.charAt(index - 1))) {
 			index--;
-			if (buffer.charAt(index) === "<") { //$NON-NLS-0$
-				prefix = buffer.substring(index, offset);
-				break;
-			}
+			prefix = buffer.substring(index, offset);
 		}
 		return prefix;
 	};
 	
 	HTMLContentAssistProvider.prototype.computeProposals = function(buffer, offset, context) {
-		//template - simple html document
+		// template - simple html document
 		if (buffer.length === 0) {
 			return [simpleDocTemplate.getProposal("", offset, context)];
 		}
