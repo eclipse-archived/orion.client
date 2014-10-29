@@ -634,7 +634,7 @@ define([
 					});
 					commandPromises.push(deferred);
 				});
-				return Deferred.all(commandPromises);
+				return Deferred.all(commandPromises, errorTransformer);
 			});
 		},
 
