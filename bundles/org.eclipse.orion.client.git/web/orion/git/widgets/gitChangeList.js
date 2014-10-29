@@ -27,6 +27,8 @@ define([
 	'orion/objects'
 ], function(messages, i18nUtil, Deferred, mExplorer, mGitUIUtil, mGitUtil, mTooltip, mSelection , lib, mGitCommands, mCommands, gitCommit, objects) {
 	
+	var pageQuery = "?pageSize=100&page=1"; //$NON-NLS-0$
+	
 	var interestedUnstagedGroup = [ "Missing", "Modified", "Untracked", "Conflicting" ]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var interestedStagedGroup = [ "Added", "Changed", "Removed" ]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var allGroups = interestedUnstagedGroup.concat(interestedStagedGroup);
@@ -60,7 +62,7 @@ define([
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;
 		this.section = options.section;
-		this.root = this.changes || {Type: this.location ? "Diff" : "Root"};
+		this.root = this.changes || {Type: this.location ? "Diff" : "Root"}; //$NON-NLS-1$ //$NON-NLS-0$
 	}
 	GitChangeListModel.prototype = Object.create(mExplorer.ExplorerModel.prototype);
 	objects.mixin(GitChangeListModel.prototype, /** @lends orion.git.GitChangeListModel.prototype */ {
@@ -123,7 +125,7 @@ define([
 			} else if (parentItem.Type === "Diff" && !parentItem.parent) { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
 				progress.begin(messages["Getting changes"]);
-				location = parentItem.more ? parentItem.location : (this.location ? this.location + "?pageSize=100&page=1" : "");
+				location = parentItem.more ? parentItem.location : (this.location ? this.location + pageQuery : "");
 				if (!location) {
 					progress.done();
 					onComplete([]);
@@ -141,7 +143,7 @@ define([
 				}
 				if (this.commitName && !parentItem.more) {
 					gitClient.getDiff(location, this.commitName).then(function(resp) {
-						doDiff(resp.Location + "?pageSize=100&page=1");
+						doDiff(resp.Location + pageQuery);
 					}, function(error) {
 						progress.done();
 						that.handleError(error);
@@ -149,7 +151,7 @@ define([
 				} else {
 					doDiff(location);
 				}
-			} else if (parentItem.Type === "Root") {
+			} else if (parentItem.Type === "Root") { //$NON-NLS-0$
 				progress = this.section.createProgressMonitor();
 				progress.begin(messages["Getting changes"]);
 				location = repository.StatusLocation;
@@ -371,6 +373,9 @@ define([
 			case "ignoreFile": //$NON-NLS-0$
 				this.changedItem(event.items);
 				break;
+			case "mergeSquash": //$NON-NLS-0$
+				this.changedItem();
+				break;
 			}
 		}.bind(this));
 		mGitCommands.getModelEventDispatcher().addEventListener("stateChanging", this._modelChangingListener = function(event) { //$NON-NLS-0$
@@ -413,7 +418,7 @@ define([
 					that.setCommitInfo(commitInfo);
 					deferred.resolve(children);
 				});
-			} else if (this.prefix === "diff") {
+			} else if (this.prefix === "diff") { //$NON-NLS-0$
 				var model = this.model;
 				var item = items;
 				if (!item) {
@@ -1127,12 +1132,12 @@ define([
 								undefined,
 								compareWidgetLeftActionWrapper.id,
 								explorer.preferencesService,
-								item.parent.Type === "Diff" ? null : compareWidgetLeftActionWrapper.id,//saveCmdContainerId
-								item.parent.Type === "Diff" ? null : "compare.save." + item.DiffLocation, //saveCmdId
+								item.parent.Type === "Diff" ? null : compareWidgetLeftActionWrapper.id, //saveCmdContainerId  //$NON-NLS-0$
+								item.parent.Type === "Diff" ? null : "compare.save." + item.DiffLocation, //saveCmdId  //$NON-NLS-1$ //$NON-NLS-0$
 								//We pass an array of two title Ids here in order for the resource comparer to render the dirty indicator optionally
 								//If the widget is not maximized, the dirty indicator, if any, is rendered at the end of the file name
 								//If the widget is maximized, as the file name is not visible, the "*" is rendered right beside the left hand action wrapper
-								item.parent.Type === "Diff" ? null : [explorer.prefix + item.parent.name + item.parent.type + "FileItemId", dirtyindicator.id],//$NON-NLS-0$ //The compare widget title where the dirty indicator can be inserted
+								item.parent.Type === "Diff" ? null : [explorer.prefix + item.parent.name + item.parent.type + "FileItemId", dirtyindicator.id], //$NON-NLS-1$ //$NON-NLS-0$ //The compare widget title where the dirty indicator can be inserted
 								//We need to attach the compare widget reference to the model. Also we need the widget to be destroy when the model is destroyed.
 								item
 							);
