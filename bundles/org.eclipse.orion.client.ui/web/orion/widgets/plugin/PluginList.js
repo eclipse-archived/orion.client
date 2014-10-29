@@ -394,7 +394,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'require', 'orion/
 		
 		reloaded: function(){
 			var settingsPluginList = this.settings.pluginRegistry.getPlugins();
-			this.statusService.setMessage( ( settingsPluginList.length===1 ? i18nUtil.formatMessage(messages["ReloadedPlug"], settingsPluginList.length): i18nUtil.formatMessage(messages["ReloadedPlug"], settingsPluginList.length)), 5000, true );
+			this.statusService.setMessage( ( settingsPluginList.length===1 ? i18nUtil.formatMessage(messages["ReloadedPlug"], settingsPluginList.length): i18nUtil.formatMessage(messages["ReloadedNPlugs"], settingsPluginList.length)), 5000, true );
 			this.render();
 		},
 		

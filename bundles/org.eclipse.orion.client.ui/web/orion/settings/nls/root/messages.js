@@ -118,6 +118,7 @@ define({
 	"Uninstalled":"Uninstalled ${0}",
 	"UninstallCfrm":"Are you sure you want to uninstall '${0}'?",
 	"ReloadedPlug":"Reloaded ${0} plugin.",
+	"ReloadedNPlugs":"Reloaded ${0} plugins.",
 	"Reloaded":"Reloaded ${0}",
 	"Services": "Services",
 	"Value": "Value",
