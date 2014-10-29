@@ -12,24 +12,23 @@
  
 /*eslint-env browser, amd*/
  
-define(["require", 
-		"orion/keyBinding",
-		"orion/editor/emacs",
-		"orion/editor/vi",
-		"orion/editor/textModel",
-		"orion/editor/annotations", 
-		"orion/editor/projectionTextModel", 
-		"orion/editor/textView", 
-		"orion/editor/textTheme", 
-		"orion/editor/textDND", 
-		"orion/editor/rulers",
-		"orion/editor/undoStack",
-		"orion/editor/eventTarget",
-		"orion/editor/textMateStyler",
-		"orion/editor/htmlGrammar",
-		"examples/editor/textStyler",
-		"orion/util"
-], function(require, mKeyBinding, mEmacs, mVI, mTextModel, mAnnotations, mProjectionTextModel, mTextView, mTextTheme, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler, util) {
+define([
+	"orion/keyBinding",
+	"orion/editor/emacs",
+	"orion/editor/vi",
+	"orion/editor/textModel",
+	"orion/editor/annotations", 
+	"orion/editor/projectionTextModel", 
+	"orion/editor/textView", 
+	"orion/editor/textTheme", 
+	"orion/editor/textDND", 
+	"orion/editor/rulers",
+	"orion/editor/undoStack",
+	"orion/editor/textMateStyler",
+	"orion/editor/htmlGrammar",
+	"examples/editor/textStyler",
+	"orion/util"
+], function(mKeyBinding, mEmacs, mVI, mTextModel, mAnnotations, mProjectionTextModel, mTextView, mTextTheme, mTextDND, mRulers, mUndoStack, mTextMateStyler, mHtmlGrammar, mTextStyler, util) {
 
 	var exports = {};
 	var view = null;
