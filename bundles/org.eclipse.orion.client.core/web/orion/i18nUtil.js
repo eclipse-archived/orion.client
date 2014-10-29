@@ -8,8 +8,8 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 /*eslint-env browser, amd*/
+/*global requirejs*/
 define(['require', 'orion/Deferred'], function(require, Deferred) {
 
 	var messageBundleDeffereds = {};
@@ -67,18 +67,25 @@ define(['require', 'orion/Deferred'], function(require, Deferred) {
 				return d;
 		}
 
-		function _resolveMessageBundle(bundle) {
-			if (bundle) {
-				require(['i18n!' + name], function(bundle) { //$NON-NLS-0$
-					if (bundle) {
-						setCachedMessageBundle(name, bundle);
-					}
-					d.resolve(bundle);
-				});
-			} else {
-				// IE disguises failure as success, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=428797
-				_rejectMessageBundle(new Error(name));
-			}
+		// Wrapper for require() that normalizes away the IE quirk of never calling `errback`,
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=428797
+		function _require(deps, callback, errback) {
+			require(deps, function(bundle) {
+				if (typeof bundle === "undefined") { // IE
+					errback(new Error(name));
+				} else {
+					callback.apply(null, Array.prototype.slice.call(arguments));
+				}
+			}, errback);
+		}
+
+		function _resolveMessageBundle(/*bundle*/) {
+			require(['i18n!' + name], function(bundle) { //$NON-NLS-0$
+				if (bundle) {
+					setCachedMessageBundle(name, bundle);
+				}
+				d.resolve(bundle);
+			});
 		}
 
 		function _rejectMessageBundle(error) {
@@ -86,9 +93,16 @@ define(['require', 'orion/Deferred'], function(require, Deferred) {
 		}
 
 		try {
-			require([name], _resolveMessageBundle, _rejectMessageBundle);
+			// First try to require `name` directly in case it's a bundle that ships with Orion
+			_require([name], _resolveMessageBundle, function(/*error*/) {
+				// Failed; fallback to orion/i18n to check the service registry for this bundle.
+				// But first unload `name` from the loader, so orion/i18n can start fresh.
+				requirejs.undef(name);
+				_require(['orion/i18n!' + name], _resolveMessageBundle, _rejectMessageBundle); //$NON-NLS-0$
+			});
 		} catch (ignore) {
-			require(['orion/i18n!' + name], _resolveMessageBundle, _rejectMessageBundle); //$NON-NLS-0$
+			// TODO require() never throws so this probably never runs
+			_require(['orion/i18n!' + name], _resolveMessageBundle, _rejectMessageBundle); //$NON-NLS-0$
 		}
 		return d;
 	}
