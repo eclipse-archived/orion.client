@@ -979,7 +979,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 							rangeRight = rect.right * xFactor - lineRect.left;
 							rangeTop = rect.top * yFactor - lineRect.top;
 							rangeBottom = rect.bottom * yFactor - lineRect.top;
-							if (rangeLeft <= x && x < rangeRight && (!view._wrapMode || (rangeTop <= y && y < rangeBottom))) {
+							if (rangeLeft <= x && x < rangeRight && (!view._wrapMode || (rangeTop <= y && y <= rangeBottom))) {
 								found = true;
 								break;
 							}
@@ -1100,7 +1100,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				var rects = self._getClientRects(child, lineRect);
 				for (var j = 0; j < rects.length; j++) {
 					var rect = rects[j];
-					if (rect.left <= x && x < rect.right && (!view._wrapMode || (rect.top <= y && y < rect.bottom))) {
+					if (rect.left <= x && x < rect.right && (!view._wrapMode || (rect.top <= y && y <= rect.bottom))) {
 						return rect;
 					}
 				}
