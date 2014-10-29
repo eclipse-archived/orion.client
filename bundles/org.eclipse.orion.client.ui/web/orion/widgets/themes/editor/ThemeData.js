@@ -46,6 +46,182 @@ define([
 		function ThemeData() {
 
 		this.styles = [];
+		
+		var seti = {
+		   "name":"Seti",
+		   "className":"seti",
+		   "styles":{
+		      "annotationRange":{
+		          "matchingSearch":{
+		              "backgroundColor":"#2B333C"
+		          },
+		          "currentSearch":{
+		              "backgroundColor":"#2B333C",
+		              "text-decoration":"underline"
+		          }
+		      },
+		      "backgroundColor":"#151718",
+		      "color":"#d4d7d6",
+		      "fontFamily":"\"Consolas\", \"Monaco\", \"Vera Mono\", monospace",
+		      "fontSize":"16px",
+		      "textviewRightRuler":{
+		         "borderLeft":"1px solid #0e1112"
+		      },
+		      "textviewLeftRuler":{
+		         "borderRight":"1px solid #0e1112"
+		      },
+		      "ruler":{
+		         "backgroundColor":"#0e1112",
+		         "overview":{
+		            "backgroundColor":"#0e1112"
+		         },
+		         "annotations":{
+		            "backgroundColor":"#0e1112"
+		         }
+		      },
+		      "rulerLines":{
+		         "color":"#404b53",
+		         "odd":{
+		            "color":"#404b53"
+		         },
+		         "even":{
+		            "color":"#404b53"
+		         }
+		      },
+		      "annotationLine":{
+		         "currentLine":{
+		            "backgroundColor":"#101112"
+		         }
+		      },
+		      "comment":{
+		         "color":"#41535b",
+		         "block":{
+		            "color":"#41535b"
+		         },
+		         "line":{
+		            "color":"#41535b"
+		         }
+		      },
+		      "constant":{
+		         "color":"#cd3f45",
+		         "numeric":{
+		            "color":"#cd3f45",
+		            "hex":{
+		               "color":"#cd3f45"
+		            }
+		         }
+		      },
+		      "entity":{
+		         "name":{
+		            "color":"#55b5db",
+		            "function":{
+		               "fontWeight":"normal",
+		               "color":"#55b5db"
+		            }
+		         },
+		         "other":{
+		            "attribute-name":{
+		               "color":"cadetBlue"
+		            }
+		         }
+		      },
+		      "keyword":{
+		         "control":{
+		            "color":"#9fca56",
+		            "fontWeight":"normal"
+		         },
+		         "operator":{
+		            "color":"#e6cd69",
+		            "fontWeight":"normal"
+		         },
+		         "other":{
+		            "documentation":{
+		               "color":"#7F9FBF"
+		            }
+		         }
+		      },
+		      "markup":{
+		         "bold":{
+		            "fontWeight":"bold"
+		         },
+		         "heading":{
+		            "color":"blue"
+		         },
+		         "italic":{
+		            "fontStyle":"italic"
+		         },
+		         "list":{
+		            "color":"#CC4C07"
+		         },
+		         "other":{
+		            "separator":{
+		               "color":"#00008F"
+		            },
+		            "strikethrough":{
+		               "textDecoration":"line-through"
+		            },
+		            "table":{
+		               "color":"#3C802C"
+		            }
+		         },
+		         "quote":{
+		            "color":"#55b5db"
+		         },
+		         "raw":{
+		            "fontFamily":"monospace"
+		         },
+		         "underline":{
+		            "link":{
+		               "textDecoration":"underline"
+		            }
+		         }
+		      },
+		      "meta":{
+		         "documentation":{
+		            "annotation":{
+		               "color":"#7F9FBF"
+		            },
+		            "tag":{
+		               "color":"#7F7F9F"
+		            }
+		         },
+		         "tag":{
+		            "color":"#CC4C07"
+		         }
+		      },
+		      "string":{
+		         "color":"#55b5db",
+		         "quoted":{
+		            "single":{
+		               "color":"#55b5db"
+		            },
+		            "double":{
+		               "color":"#55b5db"
+		            }
+		         }
+		      },
+		      "support":{
+		         "type":{
+		            "propertyName":{
+		               "color":"#9F4177"
+		            }
+		         }
+		      },
+		      "variable":{
+		         "language":{
+		            "color":"#9fca56",
+		            "fontWeight":"normal"
+		         },
+		         "other":{
+		            "color":"#E038AD"
+		         },
+		         "parameter":{
+		            "color":"#55b5db"
+		         }
+		      }
+		   }
+		}
+		this.styles.push(seti);
 
 		var eclipse = {
 			name: messages["eclipseThemeName"],
@@ -1846,10 +2022,220 @@ define([
 		
 		ThemeData.prototype.selectFontSize = selectFontSize;
 		
+		// Changes XML to JSON
+		function xmlToJson(xml) {
+			// Create the return object
+			var obj = {};
+			if (xml.nodeType == 1) { // element
+				// do attributes
+				if (xml.attributes.length > 0) {
+					for (var j = 0; j < xml.attributes.length; j++) {
+						var attribute = xml.attributes.item(j);
+						obj[attribute.nodeName] = attribute.nodeValue;
+					}
+				}
+			} else if (xml.nodeType == 3) { // text
+				obj = xml.nodeValue.trim(); // add trim here
+			}
+			// do children
+			if (xml.hasChildNodes()) {
+				for(var i = 0; i < xml.childNodes.length; i++) {
+					var item = xml.childNodes.item(i);
+					var nodeName = item.nodeName;
+					if (typeof(obj[nodeName]) == "undefined") {
+						var tmp = xmlToJson(item);
+						if(tmp != "") // if not empty string
+							obj[nodeName] = tmp;
+					} else {
+						if (typeof(obj[nodeName].push) == "undefined") {
+							var old = obj[nodeName];
+							obj[nodeName] = [];
+							obj[nodeName].push(old);
+						}
+						var tmp = xmlToJson(item);
+						if(tmp != "") // if not empty string
+							obj[nodeName].push(tmp);
+					}
+				}
+			}
+			return obj;
+		}		
+		
 		function importTheme(data) {
 			var body = data.parameters.valueFor("name"); //$NON-NLS-0$
 			var xml = this.parseToXML(body);
-			if (xml) {
+			
+			if(xml.children[0].tagName === "plist"){ //$NON-NLS-0$ //assume it uses tmTheme structure
+				var themeJson = xmlToJson(xml); //convert to Json
+				var newStyle = new StyleSet(); //sets the default styling
+				newStyle = {"name":"default","className":"default","styles":{"annotationRange":{"matchingSearch":{"backgroundColor":""}, "currentSearch":{"backgroundColor":"","text-decoration":"underline"}},"backgroundColor":"","color":"","fontFamily":"\"Consolas\", \"Monaco\", \"Vera Mono\", monospace","fontSize":"16px","textviewRightRuler":{"borderLeft":"1px solid rgba(131, 131, 131, 0.05)"},"textviewLeftRuler":{"borderRight":"1px solid rgba(131, 131, 131, 0.05)"},"ruler":{"backgroundColor":"","overview":{"backgroundColor":""},"annotations":{"backgroundColor":""}},"rulerLines":{"color":"","odd":{"color":""},"even":{"color":""}},"annotationLine":{"currentLine":{"backgroundColor":"rgba(255, 255, 255, 0.05)"}},"comment":{"color":"","block":{"color":""},"line":{"color":""}},"constant":{"color":"","numeric":{"color":"","hex":{"color":""}}},"entity":{"name":{"color":"","function":{"fontWeight":"normal","color":""}},"other":{"attribute-name":{"color":""}}},"keyword":{"control":{"color":"","fontWeight":"normal"},"operator":{"color":"","fontWeight":"normal"},"other":{"documentation":{"color":""}}},"markup":{"bold":{"fontWeight":"bold"},"heading":{"color":"blue"},"italic":{"fontStyle":"italic"},"list":{"color":"#CC4C07"},"other":{"separator":{"color":"#00008F"},"strikethrough":{"textDecoration":"line-through"},"table":{"color":"#3C802C"}},"quote":{"color":"#55b5db"},"raw":{"fontFamily":"monospace"},"underline":{"link":{"textDecoration":"underline"}}},"meta":{"documentation":{"annotation":{"color":""},"tag":{"color":""}},"tag":{"color":""}},"string":{"color":"","quoted":{"single":{"color":""},"double":{"color":""}}},"support":{"type":{"propertyName":{"color":"#9F4177"}}},"variable":{"language":{"color":"","fontWeight":"normal"},"other":{"color":""},"parameter":{"color":""}}}				}
+				//finds the name tag
+				for(var i = 0; i < themeJson.plist[1].dict.key.length; i++){
+					if(themeJson.plist[1].dict.key[i]["#text"] === "name"){
+						newStyle.name = themeJson.plist[1].dict.string[i]["#text"];
+						newStyle.className = newStyle.name.replace(/\s+/g, '');
+					}
+				}
+				var dictKey = themeJson.plist[1].dict.array.dict[0].dict.key;
+				var dictString = themeJson.plist[1].dict.array.dict[0].dict.string;
+				
+				//finds the general attributes
+				for(var i = 0; i<dictKey.length; i++){
+					if(dictKey[i]["#text"] === "background" && dictString[i]["#text"].length < 8){
+						newStyle.styles.backgroundColor = dictString[i]["#text"];
+					}
+					else if(dictKey[i]["#text"] === "foreground" && dictString[i]["#text"].length < 8){
+						newStyle.styles.color = dictString[i]["#text"];
+					}
+					else if(dictKey[i]["#text"] === "lineHighlight" && dictString[i]["#text"].length < 8){
+						newStyle.styles.annotationLine.currentLine.backgroundColor = dictString[i]["#text"];
+					}////annotationRange matchingSearch
+					else if(dictKey[i]["#text"] === "selection" && dictString[i]["#text"].length < 8){
+						newStyle.styles.annotationRange.matchingSearch.backgroundColor = dictString[i]["#text"];
+						newStyle.styles.annotationRange.currentSearch.backgroundColor = dictString[i]["#text"];
+					}
+				}
+				//finds the scope attributes
+				var restKey = themeJson.plist[1].dict.array.dict;
+				for(var i = 1; i< restKey.length; i++){
+					try{
+						var target = restKey[i].string[0]["#text"].split(",");
+						for (var k = 0; k < target.length; k++){
+							var found = false;
+							if(target[k].trim() === "Comment"){
+								found = true;
+								if (restKey[i].dict.key instanceof Array){
+									for(var l = 0; l< restKey[i].dict.key.length; l++){
+										if (restKey[i].dict.key[l]["#text"] === "foreground"){
+											newStyle.styles.comment.color = restKey[i].dict.string[l]["#text"];
+											newStyle.styles.comment.block.color = restKey[i].dict.string[l]["#text"];
+											newStyle.styles.comment.line.color = restKey[i].dict.string[l]["#text"];
+										}
+									}
+								}
+								else{
+									if (restKey[i].dict.key["#text"] === "foreground"){
+										newStyle.styles.comment.color = restKey[i].dict.string["#text"];
+										newStyle.styles.comment.block.color = restKey[i].dict.string["#text"];
+										newStyle.styles.comment.line.color = restKey[i].dict.string["#text"];
+									}
+								}
+							}
+							else if(target[k].trim() === "Keyword"){
+								found = true;
+								if (restKey[i].dict.key instanceof Array){
+									for(var l = 0; l< restKey[i].dict.key.length; l++){
+										if (restKey[i].dict.key[l]["#text"] === "foreground"){
+											newStyle.styles.keyword.control.color = restKey[i].dict.string[l]["#text"];
+										}
+									}
+								}
+								else{
+									if (restKey[i].dict.key["#text"] === "foreground"){
+										newStyle.styles.keyword.control.color = restKey[i].dict.string["#text"];
+									}
+								}
+							}
+							else if(target[k].trim() === "Variable" || target[k].trim() === "Function argument"){
+								found = true;
+								if (restKey[i].dict.key instanceof Array){
+									for(var l = 0; l< restKey[i].dict.key.length; l++){
+										if (restKey[i].dict.key[l]["#text"] === "foreground"){
+											newStyle.styles.variable.language.color = restKey[i].dict.string[l]["#text"];
+											newStyle.styles.variable.other.color = restKey[i].dict.string[l]["#text"];
+											newStyle.styles.variable.parameter.color = restKey[i].dict.string[l]["#text"];
+										}
+									}
+								}
+								else{
+									if (restKey[i].dict.key["#text"] === "foreground"){
+										newStyle.styles.variable.language.color = restKey[i].dict.string["#text"];
+										newStyle.styles.variable.other.color = restKey[i].dict.string["#text"];
+										newStyle.styles.variable.parameter.color = restKey[i].dict.string["#text"];
+									}
+								}
+							}
+							else if(target[k].trim() === "Constant" || target[k].trim() === "Number"){
+								found = true;
+								if (restKey[i].dict.key instanceof Array){
+									for(var l = 0; l< restKey[i].dict.key.length; l++){
+										if (restKey[i].dict.key[l]["#text"] === "foreground"){
+											newStyle.styles.constant.color = restKey[i].dict.string[l]["#text"];
+											newStyle.styles.constant.numeric.color = restKey[i].dict.string[l]["#text"];
+											newStyle.styles.constant.numeric.hex.color = restKey[i].dict.string[l]["#text"];
+										}
+									}
+								}
+								else{
+									if (restKey[i].dict.key["#text"] === "foreground"){
+										newStyle.styles.constant.color = restKey[i].dict.string["#text"];
+										newStyle.styles.constant.numeric.color = restKey[i].dict.string["#text"];
+										newStyle.styles.constant.numeric.hex.color = restKey[i].dict.string["#text"];
+									}
+								}
+							}
+							else if(target[k].trim() === "String"){
+								found = true;
+								if (restKey[i].dict.key instanceof Array){
+									for(var l = 0; l< restKey[i].dict.key.length; l++){
+										if (restKey[i].dict.key[l]["#text"] === "foreground"){
+											newStyle.styles.string.color = restKey[i].dict.string[l]["#text"];
+											newStyle.styles.string.quoted.single.color = restKey[i].dict.string[l]["#text"];
+											newStyle.styles.string.quoted.double.color = restKey[i].dict.string[l]["#text"];
+										}
+									}
+								}
+								else{
+									if (restKey[i].dict.key["#text"] === "foreground"){
+										newStyle.styles.string.color = restKey[i].dict.string["#text"];
+										newStyle.styles.string.quoted.single.color = restKey[i].dict.string["#text"];
+										newStyle.styles.string.quoted.double.color = restKey[i].dict.string["#text"];
+									}
+								}
+							}
+							else if(target[k].trim() === "Storage" || target[k].trim() === "Storage type"){
+								found = true;
+								if (restKey[i].dict.key instanceof Array){
+									for(var l = 0; l< restKey[i].dict.key.length; l++){
+										if (restKey[i].dict.key[l]["#text"] === "foreground"){
+											newStyle.styles.keyword.operator.color = restKey[i].dict.string[l]["#text"];
+										}
+									}
+								}
+								else{
+									if (restKey[i].dict.key["#text"] === "foreground"){
+										newStyle.styles.keyword.operator.color = restKey[i].dict.string["#text"];
+									}
+								}
+							}
+							else if(target[k].trim() === "Function" || target[k].trim() === "Entity" || target[k].trim() === "Function name"){
+								found = true;
+								if (restKey[i].dict.key instanceof Array){
+									for(var l = 0; l< restKey[i].dict.key.length; l++){
+										if (restKey[i].dict.key[l]["#text"] === "foreground"){
+											newStyle.styles.entity.name.color = restKey[i].dict.string[l]["#text"];
+											newStyle.styles.entity.name["function"].color = restKey[i].dict.string[l]["#text"];
+										}
+									}
+								}
+								else{
+									if (restKey[i].dict.key["#text"] === "foreground"){
+										newStyle.styles.entity.name.color = restKey[i].dict.string["#text"];
+											newStyle.styles.entity.name["function"].color = restKey[i].dict.string["#text"];
+									}
+								}
+							}
+							
+							if(found === false)
+								console.log("Theme scope ignored : " + target[k].trim());
+						}
+					}
+					catch (e){
+						console.log("Exception : " + e);
+					}
+				}
+			}
+			else if (xml) {
 				/* old-style theme definition */
 				var newStyle = new StyleSet();
 				
