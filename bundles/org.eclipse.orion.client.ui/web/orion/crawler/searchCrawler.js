@@ -148,14 +148,16 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 		});
 	};
 	
-	SearchCrawler.prototype.incrementalReport = function(fileObj){
+	SearchCrawler.prototype.incrementalReport = function(fileObj, doSort){
 		if(this._cancelled){
 			return;
 		}
 		fileObj.LastModified = fileObj.LocalTimeStamp;
 		this.fileLocations.push(fileObj);
 		this._hitCounter++;
-		this._sort(this.fileLocations);
+		if(doSort) {
+			this._sort(this.fileLocations);
+		}
 		var response = {numFound: this.fileLocations.length, docs: this.fileLocations };
 		this._onSearchComplete({response: response}, true);
 		if(this._statusService) {
@@ -297,11 +299,11 @@ define(['i18n!orion/crawler/nls/messages', 'orion/i18nUtil', 'orion/searchUtils'
 			return;
 		}
 		if(this.searchHelper.params.keyword === ""){
-			this.incrementalReport(fileObj);
+			this.incrementalReport(fileObj, true);
 		} else {
 			return (self._progressService ? self._progressService.progress(self.fileClient.read(fileObj.Location), "Reading file " + fileObj.Location) : self.fileClient.read(fileObj.Location)).then(function(jsonData) { //$NON-NLS-0$
 					if(self._hitOnceWithinFile(jsonData)){
-						self.incrementalReport(fileObj);
+						self.incrementalReport(fileObj, true);
 					}
 				},
 				function(error) {

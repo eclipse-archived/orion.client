@@ -10,12 +10,12 @@
  
 /*eslint-env browser, amd*/
 define([
+	'i18n!orion/problems/nls/messages',
 	'orion/objects',
 	'orion/webui/littlelib',
-	'orion/section',
 	'orion/problems/problemsExplorer',
 	'orion/webui/Slideout'
-], function(objects, lib, mSection, mProblemsExplorer, mSlideout) {
+], function(messages, objects, lib, mProblemsExplorer, mSlideout) {
 	var SlideoutViewMode = mSlideout.SlideoutViewMode;
 	/** 
 	 * Constructs a new ProblemView object.
@@ -49,20 +49,76 @@ define([
 				lib.empty(this._parent);
 				this._parent.appendChild(this._inner_node);
 			}
+			this._createFilterInput();
 			var explorerParentNode = document.createElement("div"); //$NON-NLS-0$
 			explorerParentNode.id = "problemsExplorerParent_id"; //$NON-NLS-0$
-			this._mainSection = new mSection.Section(this._inner_node, {id: "problemsViewSection_id", /*headerClass: ["sectionTreeTableHeader"],*/ title: "Problems", canHide: false});
-			this._sectionContents = document.createElement("div"); //$NON-NLS-0$
-			this._sectionContents.classList.add("problemsSectionWrapper"); 
-			this._mainSection.setContent(this._sectionContents);
+			explorerParentNode.classList.add("problemsExplorerNodeWrapper"); //$NON-NLS-0$
+			this._inner_node.appendChild(explorerParentNode);
 			this._problemsExplorer = new mProblemsExplorer.ProblemsExplorer({parentId: explorerParentNode.id, serviceRegistry: this.serviceRegistry, commandRegistry: this.commandRegistry, contentTypeRegistry: this.contentTypeRegistry, fileClient: this.fileClient});
-			this._sectionContents.appendChild(explorerParentNode);
+		},
+		_createFilterInput: function() {
+			var input = document.createElement("input"); //$NON-NLS-0$
+			input.classList.add("problemsFilter"); //$NON-NLS-0$
+			input.placeholder = messages["ProblemsFilter"]; //$NON-NLS-0$
+			input.type="text"; //$NON-NLS-0$
+			input.addEventListener("input", function (e) { //$NON-NLS-0$
+				if (this._filterInputTimeout) {
+					window.clearTimeout(this._filterInputTimeout);
+				}
+				var that = this;
+				this._filterInputTimeout = window.setTimeout(function(){
+					if (that._problemsExplorer) {
+						that._problemsExplorer.filterProblems(input.value);
+					}
+					that._filterInputTimeout = null;
+				}, 400);
+			}.bind(this));
+		
+			input.addEventListener("keydown", function (e) { //$NON-NLS-0$
+				var navHandler = null;
+				var firstNode = null;
+				if (e.keyCode === lib.KEY.DOWN)	{
+					input.blur();
+					navHandler = this._problemsExplorer.getNavHandler();
+					navHandler.focus();
+					if (navHandler.getTopLevelNodes()) {
+						firstNode = navHandler.getTopLevelNodes()[0];
+						navHandler.cursorOn(firstNode, false, true);
+						if (firstNode.isNotSelectable) {
+							navHandler.iterate(true, false, false, true);
+						}
+					}
+					
+					//prevent the browser's default behavior of automatically scrolling 
+					//the outline view down because the DOWN key was pressed
+					if (e.preventDefault) {
+						e.preventDefault();	
+					}
+				} else if (e.keyCode === lib.KEY.ESCAPE) {
+					if (this._slideout.getPreviousActiveElement()) {
+						if (this._slideout.getPreviousActiveElement() === input) {
+							input.blur();
+						} else {
+							this._slideout.getPreviousActiveElement().focus();
+						}
+						this.hide();
+					}
+				}
+			}.bind(this), false);
+			
+			this._inner_node.appendChild(input);
+			this._filterInput = input;
 		},
 		getWrapperNode: function() {
 			return this._inner_node;
 		},
 		validate: function(location) {
-			this._problemsExplorer.validate(location);
+			this._filterInput.value = "";
+			this._filterInput.style.display = "none";
+			this._problemsExplorer.validate(location, function(){
+				this._filterInput.style.display = "";
+				this._filterInput.select();
+			}.bind(this));
 		}
 	});
 	return {ProblemsView: ProblemsView};

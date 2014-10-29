@@ -11,5 +11,9 @@
 //NLS_CHARSET=UTF-8
 /*eslint-env browser, amd*/
 define({
+	"ProblemsFilter": "Filter on description(* = any string, ? = any character)",
 	"computeCancelled": "Problems computation cancelled by user",
+	"computingProblems": "Computing problems...",
+	"Errors": "Errors",
+	"Warnings": "Warnings"
 });

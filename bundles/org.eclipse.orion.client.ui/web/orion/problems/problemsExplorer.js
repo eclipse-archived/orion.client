@@ -26,7 +26,7 @@ define([
 	
     var DEBUG = false;
 
-	function processChildren(parentItem, children, problemsParent, warningsParent) {
+	function processChildren(parentItem, children, errorsParent, warningsParent) {
 		children.forEach(function(child) {
 			child.type = "problem";
 			child.fileName = parentItem.name;
@@ -37,8 +37,8 @@ define([
 				child.parent = warningsParent;
 				warningsParent.children.push(child);
 			} else {
-				child.parent = problemsParent;
-				problemsParent.children.push(child);
+				child.parent = errorsParent;
+				errorsParent.children.push(child);
 			}
 		});
 		return children;
@@ -119,7 +119,9 @@ define([
 	}
 	ProblemsExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(ProblemsExplorer.prototype, /** @lends orion.propertyPanel.ProblemsExplorer.prototype */ {
-		validate: function(location) {
+		validate: function(location, postValidate) {
+			this._postValidate = postValidate;
+			this._initSpinner();
 			var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileClient, null, 
 				{location: location,
 				cancelMessage: messages["computeCancelled"],
@@ -128,6 +130,57 @@ define([
 				this._renderProblems(jsonData, incremental);
 			}.bind(this));
 			
+		},
+		_initSpinner: function() {
+			var parentNode = lib.node(this.parentId);
+			lib.empty(parentNode);
+			var spinner = document.createElement("span"); //$NON-NLS-0$
+			spinner.classList.add("modelDecorationSprite"); //$NON-NLS-0$
+			spinner.classList.add("core-sprite-progress"); //$NON-NLS-0$
+			parentNode.appendChild(spinner);
+			var span = document.createElement("span"); //$NON-NLS-0$
+			span.appendChild(document.createTextNode(messages["computingProblems"])); //$NON-NLS-0$
+			span.classList.add("problemsProgressSpan"); //$NON-NLS-0$
+			parentNode.appendChild(span);
+		},
+		filterProblems: function (filterStr, onFileName) {
+			var modifiedFilter = null;
+			
+			if (filterStr) {
+				var filterFlags = "i"; // case insensitive by default //$NON-NLS-0$
+				modifiedFilter = filterStr.replace(/([.+^=!:${}()|\[\]\/\\])/g, "\\$1"); //add start of line character and escape all special characters except * and ? //$NON-NLS-1$ //$NON-NLS-0$
+				modifiedFilter = modifiedFilter.replace(/([*?])/g, ".$1");	//convert user input * and ? to .* and .? //$NON-NLS-0$
+				
+				if (/[A-Z]/.test(modifiedFilter)) {
+					//filter contains uppercase letters, perform case sensitive search
+					filterFlags = "";	
+				}
+				modifiedFilter = new RegExp(modifiedFilter, filterFlags);
+				this._filterOn(modifiedFilter, onFileName);
+			} else {
+				//filter was emptied, expand all
+				this.filteredProblems = this.problems;
+			}
+			this.incrementalRender(true);
+		},
+		_filterSingle: function(item, modifiedFilter, onFileName) {
+			var strToTest = item.description;
+			if(onFileName) {
+				strToTest = item.fileName;
+			}
+			return (-1 !== strToTest.search(modifiedFilter));
+		},
+		_filterOn: function(modifiedFilter, onFileName) {
+			var newErrors = this.problems[0].children.filter(function(error){
+				return this._filterSingle(error, modifiedFilter, onFileName);
+			}.bind(this));
+			var newWarnings = this.problems[1].children.filter(function(warning){
+				return this._filterSingle(warning, modifiedFilter, onFileName);
+			}.bind(this));
+			
+			var errorsParent = {children: newErrors, type: "category", location: "category_erros_id", name: messages["Errors"]}, 
+			warningsParent = {children: newWarnings, type: "category", location: "category_warnings_id", name: messages["Warnings"]};
+			this.filteredProblems = [errorsParent, warningsParent];
 		},
 		_visitFile: function(crawler, fileObj, contentType){
 			crawler.addTotalCounter();
@@ -169,9 +222,12 @@ define([
 			return syntaxChecker.checkSyntax(cType, fileObj.Location, null, fileContentText, {getText: function(){return fileContentText;}});
 		},
 		_renderProblems: function(jsonData, incremental) {
+			if(incremental) {
+				return;
+			}
 			var resultLocation = [];
-			var problemsParent = {children: [], type: "category", location: "category_problems_id", name: "Errors"}, 
-			warningsParent = {children: [], type: "category", location: "category_warnings_id", name: "Warnings"};
+			var errorsParent = {children: [], type: "category", location: "category_erros_id", name: messages["Errors"]}, 
+			warningsParent = {children: [], type: "category", location: "category_warnings_id", name: messages["Warnings"]};
 			
 			lib.empty(lib.node(this.parentId));
 			
@@ -188,7 +244,7 @@ define([
 						if(incremental) {
 							resultLocation.push(fileItem);
 						} else {
-							processChildren(fileItem, hit.problems, problemsParent, warningsParent);
+							processChildren(fileItem, hit.problems, errorsParent, warningsParent);
 						}
 					}
 				}.bind(this));
@@ -196,13 +252,17 @@ define([
 			if(incremental) {
 				this.problems = resultLocation;
 			} else {
-				this.problems = [problemsParent, warningsParent];
+				this.problems = [errorsParent, warningsParent];
+				this.filteredProblems = this.problems;
 			}
 			if(incremental){
 				this.incrementalRender();
 			} else {
-				this.incrementalRender();
+				this.incrementalRender(true);
         		this.registry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$
+        		if(typeof this._postValidate === "function") {
+        			this._postValidate();
+        		}
 			}
 		},
 		getParent: function() {
@@ -215,10 +275,10 @@ define([
 			}
 			mExplorer.Explorer.prototype.destroy.call(this);
 		},
-	    _incrementalRender: function() {
+	    _incrementalRender: function(expandAll) {
 			var model =  new ProblemsModel({
 				registry: this.registry,
-				problems: this.problems,
+				problems: this.filteredProblems,
 				progressService: this.progressService,
 				section: this.section
 			});
@@ -228,15 +288,18 @@ define([
 	            indent: 24,
 	            setFocus: false
 	        });
+	        if(expandAll) {
+	        	this.expandAll();
+	        }
 	    },
-	    incrementalRender: function() {
+	    incrementalRender: function(expandAll) {
 	        if(this._openWithCommands){
-				this._incrementalRender();
+				this._incrementalRender(expandAll);
 	        } else {
 				var openWithCommandsDeferred =  extensionCommands.createOpenWithCommands(this.registry, this.contentTypeRegistry, this.commandService);
 				Deferred.when(openWithCommandsDeferred, function(openWithCommands) {
 						this._openWithCommands = openWithCommands;
-						this._incrementalRender();
+						this._incrementalRender(expandAll);
 					}.bind(this));
 	        }
 	    },
@@ -268,6 +331,7 @@ define([
 	ProblemsRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(ProblemsRenderer.prototype, {
 	    renderProblemsElement: function(item, spanHolder) {
+			this._getDecoratorIcon(spanHolder, item.severity === "error");
 			var params = {start: item.start, end: item.end};
 			var name = item.description;
 			var location = item.fileLocation;
@@ -281,23 +345,17 @@ define([
 				{});
 	        spanHolder.appendChild(link);
 	    },
-	    /*
-		getCellHeaderElement: function(col_no){
-			var col, h2;
-			switch(col_no){
-				case 0:
-					col = _createElement('th'); //$NON-NLS-0$
-					h2 = _createElement('h2', "compare_tree_grid", null, col); //$NON-NLS-1$ //$NON-NLS-0$
-					h2.textContent = "Description";
-					return col;
-				case 1: 
-					col = _createElement('th'); //$NON-NLS-0$
-					h2 = _createElement('h2', "compare_tree_grid", null, col); //$NON-NLS-1$ //$NON-NLS-0$
-					h2.textContent = "File";
-					return col;
+		_getDecoratorIcon: function(holderDiv, isError){
+			var icon = document.createElement("div"); //$NON-NLS-0$
+			
+			icon.classList.add("problemsDecorator"); //$NON-NLS-0$
+			if(isError) {
+				icon.classList.add("problemsError"); //$NON-NLS-0$
+			} else {
+				icon.classList.add("problemsWarning"); //$NON-NLS-0$
 			}
+			holderDiv.appendChild(icon);
 		},
-		*/
 		getCellElement: function(col_no, item, tableRow){
 			var div, td, itemLabel;
 			switch (col_no) {
@@ -305,32 +363,28 @@ define([
 					td = document.createElement("td"); //$NON-NLS-0$
 					if (item.type === "category") { //$NON-NLS-0$
 						div = document.createElement("div"); //$NON-NLS-0$
-						div.className = "sectionTableItem"; //$NON-NLS-0$
 						td.appendChild(div);
 						this.getExpandImage(tableRow, div);
+						this._getDecoratorIcon(div, item.location === "category_erros_id");
 						itemLabel = document.createElement("span"); //$NON-NLS-0$
 						itemLabel.textContent = item.name + " (" + item.children.length + " items)";
 						itemLabel.id = item.name + "CategoryItemId"; //$NON-NLS-0$
 						div.appendChild(itemLabel);
 					}else if (item.type === "file") { //$NON-NLS-0$
 						div = document.createElement("div"); //$NON-NLS-0$
-						div.className = "sectionTableItem"; //$NON-NLS-0$
 						td.appendChild(div);
-						//this.getExpandImage(tableRow, div);
 						itemLabel = document.createElement("span"); //$NON-NLS-0$
 						itemLabel.textContent = item.name;
 						itemLabel.id = item.location + "FileItemId"; //$NON-NLS-0$
 						div.appendChild(itemLabel);
 					} else if (item.type === "problem") { //$NON-NLS-0$
                     	this.renderProblemsElement(item, td);
-                    	td.classList.add("problems_link");
-					}
+ 					}
 					return td;
 				case 1:
 					td = document.createElement("td"); //$NON-NLS-0$
 					if (item.type === "problem") { //$NON-NLS-0$
 						div = document.createElement("div"); //$NON-NLS-0$
-						div.className = "sectionTableItem"; //$NON-NLS-0$
 						td.appendChild(div);
 						//this.getExpandImage(tableRow, div);
 						itemLabel = document.createElement("span"); //$NON-NLS-0$
