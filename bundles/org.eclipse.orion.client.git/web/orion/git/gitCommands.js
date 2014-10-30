@@ -298,13 +298,14 @@ var exports = {};
 			id: "eclipse.removeBranch", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
-				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				if (confirm(i18nUtil.formatMessage(messages["DelBrConfirm"], item.Name))) {
+				commandService.confirm(data.domNode, i18nUtil.formatMessage(messages["DelBrConfirm"], item.Name), messages.OK, messages.Cancel, false, function(doit) {
+					if (!doit) return;
+					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
  					var msg = i18nUtil.formatMessage(messages["Removing branch ${0}..."], item.Name);
 					progress.progress(serviceRegistry.getService("orion.git.provider").removeBranch(item.Location), msg).then(function() { //$NON-NLS-0$
 						dispatchModelEventOn({type: "modelChanged", action: "removeBranch", branch: item}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
-				}
+				});
 			},
 			visibleWhen: function(item) {
 				return item.Type === "Branch" && !item.Current; //$NON-NLS-0$
@@ -319,23 +320,25 @@ var exports = {};
 			id: "eclipse.removeRemoteBranch", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
-				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				if(confirm(i18nUtil.formatMessage(messages["RemoveRemoteBranchConfirm"], item.Name))) //$NON-NLS-1$
-				exports.getDefaultSshOptions(serviceRegistry, item).then(function(options){
-					var func = arguments.callee;
-					var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
-					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-					var deferred = progress.progress(gitService.doPush(item.Location, "", false, false,
-							options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey,
-							options.gitPassphrase), messages["Removing remote branch: "] + item.Name);
-					progressService.createProgressMonitor(deferred, messages["Removing remote branch: "] + item.Name);
-					deferred.then(function(remoteJsonData) {
-						exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry, function(jsonData) {
-							if (!jsonData || jsonData.Result.Severity === "Ok") //$NON-NLS-0$
-								dispatchModelEventOn({type: "modelChanged", action: "removeBranch", branch: item}); //$NON-NLS-1$ //$NON-NLS-0$
-						}, func, messages["Delete Remote Branch"]);
-					}, function(jsonData) {
-						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Removing remote branch: '] + item.Name);
+				commandService.confirm(data.domNode, i18nUtil.formatMessage(messages["RemoveRemoteBranchConfirm"], item.Name), messages.OK, messages.Cancel, false, function(doit) {
+					if (!doit) return;
+					exports.getDefaultSshOptions(serviceRegistry, item).then(function(options){
+						var func = arguments.callee;
+						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+						var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+						var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+						var deferred = progress.progress(gitService.doPush(item.Location, "", false, false,
+								options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey,
+								options.gitPassphrase), messages["Removing remote branch: "] + item.Name);
+						progressService.createProgressMonitor(deferred, messages["Removing remote branch: "] + item.Name);
+						deferred.then(function(remoteJsonData) {
+							exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry, function(jsonData) {
+								if (!jsonData || jsonData.Result.Severity === "Ok") //$NON-NLS-0$
+									dispatchModelEventOn({type: "modelChanged", action: "removeBranch", branch: item}); //$NON-NLS-1$ //$NON-NLS-0$
+							}, func, messages["Delete Remote Branch"]);
+						}, function(jsonData) {
+							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Removing remote branch: '] + item.Name);
+						});
 					});
 				});
 			},
@@ -390,13 +393,14 @@ var exports = {};
 			id: "eclipse.removeRemote", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
-				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete remote ${0}?"], item.Name))) {
+				commandService.confirm(data.domNode, i18nUtil.formatMessage(messages["Are you sure you want to delete remote ${0}?"], item.Name), messages.OK, messages.Cancel, false, function(doit) {
+					if (!doit) return;
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					var msg = i18nUtil.formatMessage(messages["Removing remote ${0}..."], item.Name);
 					progress.progress(serviceRegistry.getService("orion.git.provider").removeRemote(item.Location), msg).then(function() { //$NON-NLS-0$
 						dispatchModelEventOn({type: "modelChanged", action: "removeRemote", remote: item}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus);
-				}
+				});
 			},
 			visibleWhen: function(item) {
 				return item.Type === "Remote"; //$NON-NLS-0$
