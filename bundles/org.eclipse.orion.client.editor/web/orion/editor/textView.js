@@ -2102,9 +2102,10 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			if (!this._clientDiv) { return; }
 			var action = this._actions[actionID];
 			if (action) {
-				if (action.actionDescription && action.actionDescription.track) {
-					mMetrics.logEvent("editor", "action invoked", action.actionDescription.id); //$NON-NLS-1$ //$NON-NLS-0$
-				}
+				var id = action.actionDescription ?
+					action.actionDescription.id || action.actionDescription.name + " (no id)" : //$NON-NLS-0$
+					"(unknown)"; //$NON-NLS-0$
+				mMetrics.logEvent("editor", "action", id); //$NON-NLS-1$ //$NON-NLS-0$
 				if (!defaultAction && action.handler) {
 					if (action.handler(actionOptions)) {
 						return true;

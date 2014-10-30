@@ -14,7 +14,8 @@ define([], function() {
 	var tid = 'UA-55945995-1'; //$NON-NLS-0$
 
 	var init = function(args) {
-		if (window.location.host.indexOf("orion.eclipse.org") !== -1) {
+		var host = window.location.host;
+		if (host.indexOf("orion.eclipse.org") !== -1 || host.indexOf("orionhub.org") !== -1) { //$NON-NLS-1$ //$NON-NLS-0$
 			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -23,7 +24,6 @@ define([], function() {
 			args = args || {};
 			args.siteSpeedSampleRate = 50;
 			window.ga('create', tid, args); //$NON-NLS-0$
-//			window.ga('require', 'linkid', 'linkid.js'); /* adds enhanced link attribution */
 			window.ga('send', 'pageview'); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	};

@@ -138,7 +138,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				self.activate();
 			}
 			return true;
-		}, {name: messages.contentAssist, track: true});
+		}, {name: messages.contentAssist});
 	}
 	ContentAssist.prototype = /** @lends orion.editor.ContentAssist.prototype */ {
 		/**
@@ -190,11 +190,12 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				}
 			}
 			this.dispatchEvent({type: "ProposalApplied", data: data}); //$NON-NLS-0$
-			mMetrics.logEvent("editor", "content assist proposal applied"); //$NON-NLS-1$ //$NON-NLS-0$
+			mMetrics.logEvent("contentAssist", "apply"); //$NON-NLS-1$ //$NON-NLS-0$
 			return true;
 		},
 		activate: function(providers, autoTriggered) {
 			if (this.state === State.INACTIVE) {
+				mMetrics.logEvent("contentAssist", "activate", undefined, autoTriggered ? 0 : 1); //$NON-NLS-1$ //$NON-NLS-0$
 				this._autoTriggered = autoTriggered ? true : false;
 				this.setState(State.ACTIVE, providers);
 			}

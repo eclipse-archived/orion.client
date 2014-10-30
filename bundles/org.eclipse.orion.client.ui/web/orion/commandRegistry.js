@@ -321,12 +321,12 @@ define([
 						}
 					}
 					if (!collecting) {
-						mMetrics.logEvent("command", "command invoked", commandInvocation.command.id); //$NON-NLS-1$ //$NON-NLS-0$
+						mMetrics.logEvent("command", "invoke", commandInvocation.command.id); //$NON-NLS-1$ //$NON-NLS-0$
 						// Just call the callback with the information we had.
 						return commandInvocation.command.callback.call(commandInvocation.handler || window, commandInvocation);
 					}
 				} else {
-					mMetrics.logEvent("command", "command invoked", commandInvocation.command.id); //$NON-NLS-1$ //$NON-NLS-0$
+					mMetrics.logEvent("command", "invoke", commandInvocation.command.id); //$NON-NLS-1$ //$NON-NLS-0$
 					// We should not be trying to collect parameters, just call the callback.
 					return commandInvocation.command.callback.call(commandInvocation.handler || window, commandInvocation);
 				}
