@@ -47,6 +47,12 @@
 	vertical-align:middle;
 }
 
+.problems_inner_container  .navColumn {
+	min-width: 16px; 
+	vertical-align: baseline;
+	padding: 0; 
+}
+
 .problems_inner_container .problemsDecorator {
 	display: inline-block;
 	width: 16px;
@@ -55,6 +61,15 @@
 	margin: 1px;
 	border: none;
 }
+
+.problems_inner_container .problemsDecoratorTD {
+	width: 18px;
+}
+
+.problems_inner_container .problemsDecoratorTDTitle {
+	width: 36px;
+}
+
 
 .problems_inner_container .problemsError {
 	/* images/error.gif */

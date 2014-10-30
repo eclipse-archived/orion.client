@@ -21,8 +21,9 @@ define([
 	'orion/explorers/navigatorRenderer',
 	'orion/objects',
 	'orion/syntaxchecker',
-	'orion/editor/textModel'
-], function(messages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, navigatorRenderer, objects, mSyntaxchecker, mTextModel) {
+	'orion/editor/textModel',
+	'orion/explorers/navigationUtils'
+], function(messages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, navigatorRenderer, objects, mSyntaxchecker, mTextModel, mNavUtils) {
 	
     var DEBUG = false;
 
@@ -285,7 +286,7 @@ define([
 	        this.createTree(this.parentId, model, {
 	            selectionPolicy: "singleSelection", //$NON-NLS-0$
 	            //getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
-	            indent: 24,
+	            indent: 18,
 	            setFocus: false
 	        });
 	        if(expandAll) {
@@ -331,7 +332,7 @@ define([
 	ProblemsRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(ProblemsRenderer.prototype, {
 	    renderProblemsElement: function(item, spanHolder) {
-			this._getDecoratorIcon(spanHolder, item.severity === "error");
+			//this._getDecoratorIcon(spanHolder, item.severity === "error");
 			var params = {start: item.start, end: item.end};
 			var name = item.description;
 			var location = item.fileLocation;
@@ -343,6 +344,7 @@ define([
 				{id:item.location + "linkId"}, 
 				params, 
 				{});
+       		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	        spanHolder.appendChild(link);
 	    },
 		_getDecoratorIcon: function(holderDiv, isError){
@@ -361,11 +363,24 @@ define([
 			switch (col_no) {
 				case 0:
 					td = document.createElement("td"); //$NON-NLS-0$
+					div = document.createElement("div"); //$NON-NLS-0$
+					td.appendChild(div);
+					if (item.type === "category") { //$NON-NLS-0$
+						td.classList.add("problemsDecoratorTDTitle"); //$NON-NLS-0$
+						this.getExpandImage(tableRow, div);
+						this._getDecoratorIcon(div, item.location === "category_erros_id");
+					} else if (item.type === "problem") { //$NON-NLS-0$
+ 						td.classList.add("problemsDecoratorTD"); //$NON-NLS-0$
+						this._getDecoratorIcon(div, item.severity === "error");
+ 					}
+					return td;
+				case 1:
+					td = document.createElement("td"); //$NON-NLS-0$
 					if (item.type === "category") { //$NON-NLS-0$
 						div = document.createElement("div"); //$NON-NLS-0$
 						td.appendChild(div);
-						this.getExpandImage(tableRow, div);
-						this._getDecoratorIcon(div, item.location === "category_erros_id");
+						//this.getExpandImage(tableRow, div);
+						//this._getDecoratorIcon(div, item.location === "category_erros_id");
 						itemLabel = document.createElement("span"); //$NON-NLS-0$
 						itemLabel.textContent = item.name + " (" + item.children.length + " items)";
 						itemLabel.id = item.name + "CategoryItemId"; //$NON-NLS-0$
@@ -381,7 +396,7 @@ define([
                     	this.renderProblemsElement(item, td);
  					}
 					return td;
-				case 1:
+				case 2:
 					td = document.createElement("td"); //$NON-NLS-0$
 					if (item.type === "problem") { //$NON-NLS-0$
 						div = document.createElement("div"); //$NON-NLS-0$
