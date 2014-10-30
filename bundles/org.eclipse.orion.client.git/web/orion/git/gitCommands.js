@@ -1928,8 +1928,7 @@ var exports = {};
 				return preCallback("checkoutFile", data);
 			},
 			callback: function(data) {				
-				var dialog = serviceRegistry.getService("orion.page.dialog"); //$NON-NLS-0$
-				dialog.confirm(messages["CheckoutConfirm"],
+				commandService.confirm(data.domNode, messages["CheckoutConfirm"], messages.OK, messages.Cancel, false,
 					function(doit) {
 						if (!doit) {
 							return;
