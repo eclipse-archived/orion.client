@@ -396,6 +396,35 @@ define(["orion/util"], function(util) {
 		return KEY_CODE[keyCode] || null;
 	}
 
+	/**
+	 * Creates DOM nodes from the specified template string.
+	 * 
+	 * @param {String} templateString 	A string containing the HTML template to use
+	 * @param {Node} parentNode 		Optional. The parent node to insert the new nodes into. 
+	 * 									The parent's contents will be completely replaced.
+	 * @returns If the template string contains a single node or a wrapper node which
+	 * 			wraps all the other nodes that single DOM node will be returned. 
+	 * 			Otherwise if the template string contains multiple top-level nodes a
+	 * 			{NodeList} object containing all the top-level nodes will be returned.
+	 */
+	function createNodes(templateString, parentNode) {
+		var parent = parentNode;
+		var newNodes = null;
+		
+		if (undefined === parent) {
+			parent = document.createElement("div"); //$NON-NLS-0$
+		}
+
+		parent.innerHTML = templateString;	
+		if (1 < parent.childNodes.length) {
+			newNodes = parent.childNodes;
+		} else {
+			newNodes = parent.firstChild;
+		}
+		
+		return newNodes;
+	}
+
 	//return module exports
 	return {
 		$: $,
@@ -416,5 +445,6 @@ define(["orion/util"], function(util) {
 		removeAutoDismiss: removeAutoDismiss,
 		keyName: keyName,
 		KEY: KEY,
+		createNodes: createNodes
 	};
 });

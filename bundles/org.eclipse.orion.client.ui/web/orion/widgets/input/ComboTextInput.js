@@ -56,15 +56,7 @@ define([
 	}
 	objects.mixin(ComboTextInput.prototype, {
 		_initializeDomNodes: function() {
-			var range = document.createRange();
-			range.selectNode(this._parentNode);
-			var domNodeFragment = range.createContextualFragment(ComboTextInputTemplate);
-			
-			// using a throw-away container to prevent the element from being added
-			// to the page before any unnecessary subnodes have been removed from it
-			var throwawayContainer = document.createElement("span"); //$NON-NLS-0$
-			throwawayContainer.appendChild(domNodeFragment);
-			this._domNode = throwawayContainer.lastChild;
+			this._domNode = lib.createNodes(ComboTextInputTemplate);
 			this._domNode.id = this._domNodeId;
 			
 			this._textInputNode = lib.$(".comboTextInputField", this._domNode); //$NON-NLS-0$
