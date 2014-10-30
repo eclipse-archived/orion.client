@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2010, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -20,40 +20,61 @@ orion.DiffParser = (function() {
 	/** @private */
 	function DiffParser(lineDelimiter, diffLineDilemeter) {
 		this._lineDelimiter = lineDelimiter ? lineDelimiter : (isWindows ? "\r\n" : "\n");  //$NON-NLS-1$ //$NON-NLS-0$
-		this._diffLineDelimiter = diffLineDilemeter ? diffLineDilemeter : this._lineDelimiter; 
+		this._diffLineDelimiter = diffLineDilemeter ? diffLineDilemeter : this._lineDelimiter;
 		this._DEBUG = false;
 	}
 	DiffParser.prototype = {
 		_init: function(){
-			//Input 
+			//Input
 			this._oFileContents = [];
 			this._diffContents = [];
-			
-			//All the middle result when computing 
-			this._oBlocks = [];//each item inside new block will be formatted as [startAtLine , linesInBlock]
-			this._nBlocks = [];//each item inside new block will be formatted as [startAtLine , linesInBlock , indexInDiffLines]
+
+			//All the middle result when computing
+			this._oBlocks = []; //each item inside original block will be formatted as [startAtLine , linesInBlock]
+			this._nBlocks = []; //each item inside new block will be formatted as [startAtLine , linesInBlock , indexInDiffLines]
 			this._hunkRanges = [];
 			this._lastToken = " "; //$NON-NLS-0$
-			
+
 			//Final result as out put
 			this._deltaMap = [];
 			this._nFileContents = [];
-			
+
 			//Flag of new line at file end
 			this._oNewLineAtEnd = true;
 			this._nNewLineAtEnd = true;
 			this._diffContentIndex = 1;
 		},
-		
+
+		/**
+		 * Returns an array of arrays of the parsed original blocks of the file.
+		 * This is formatted as [[startAtLine, linesInBlock]] where startAtLine is
+		 * the start line of the new diff block, and linesInBlock is the number of
+		 * lines that were affected
+		 */
+		getOriginalBlocks: function() {
+			return this._oBlocks;
+		},
+
+		/**
+		 * Returns an array of arrays of the parsed diffs of the new blocks in the file.
+		 * This is formatted as [[startAtLine, linesInBlock, indexInDiffLines]]
+		 * where startAtLine is the start line of the new diff block, linesInBlock is
+		 * the number of lines that were affected, and indexInDiffLines is the starting
+		 * index of the diff in the line block.
+		 */
+		getNewBlocks: function() {
+			return this._nBlocks;
+		},
+
 		setLineDelim: function(lineDelimiter){
 			this._lineDelimiter = lineDelimiter;
 			this._diffLineDelimiter = lineDelimiter;
 		},
-		
+
 		getDiffArray: function(){
 			return {array:this._diffContents , index:this._diffContentIndex};
 		},
-		
+
 		parse: function(oFileString , diffString , detectConflicts ,doNotBuildNewFile){
 			this._init();
 			if(diffString === ""){
@@ -67,7 +88,7 @@ orion.DiffParser = (function() {
 				var hunkRange = this._parseHunkRange(i);
 				if (hunkRange) {
 				    this._hunkRanges.push(hunkRange);
-				}			
+				}
 		    }
 			if(0 === this._hunkRanges.length){
 				return {outPutFile:oFileString,mapper:[]};
@@ -110,7 +131,7 @@ orion.DiffParser = (function() {
 			}
 			return {outPutFile:this._nFileContents.join(this._diffLineDelimiter),mapper:this._deltaMap};
 		},
-		
+
 		_logMap: function(){
 			for(var i = 0;i < this._deltaMap.length ; i++){
 				console.log(JSON.stringify(this._deltaMap[i]));
@@ -122,13 +143,13 @@ orion.DiffParser = (function() {
 				}
 			}
 		},
-		
+
 		_logNewFile: function(){
 			for(var i = 0;i < this._nFileContents.length ; i++){
 				console.log(this._nFileContents[i]);
 			}
 		},
-		
+
 		_createBlock: function(token , blocks , startAtLine , endAtLine){
 			if(endAtLine === startAtLine && token === " "){ //$NON-NLS-0$
 				return;
@@ -143,7 +164,7 @@ orion.DiffParser = (function() {
 			}
 			blocks.push(block);
 		},
-		
+
 		_createMinusBlock: function(oBlkStart , nBlkStart , oBlockLength){
 			var len = this._oBlocks.length;
 			if(len === 0 || oBlkStart !== this._oBlocks[len-1][0]){
@@ -153,7 +174,7 @@ orion.DiffParser = (function() {
 				this._oBlocks[len-1][1] = this._oBlocks[len-1][1] + oBlockLength;
 			}
 		},
-		
+
 		_createPlusBlock: function(oBlkStart , nBlkStart , nBlockLength , lastPlusPos ){
 			var len = this._nBlocks.length;
 			if(len === 0 || nBlkStart !== this._nBlocks[len-1][0]){
@@ -164,13 +185,13 @@ orion.DiffParser = (function() {
 				this._nBlocks[len-1][2] = lastPlusPos;
 			}
 		},
-		
+
 		//read line by line in a hunk range
 		_parseHunkBlock: function(hunkRangeNo ){
 			var lastToken = " "; //$NON-NLS-0$
 			var startNo = this._hunkRanges[hunkRangeNo][0] + 1;
 			var endNo = (hunkRangeNo === (this._hunkRanges.length - 1) ) ? this._diffContents.length : this._hunkRanges[hunkRangeNo+1][0];
-			
+
 			var oCursor = 0;
 			var nCursor = 0;
 			var oBlkStart = this._hunkRanges[hunkRangeNo][1];
@@ -191,7 +212,7 @@ orion.DiffParser = (function() {
 							this._oNewLineAtEnd = false;
 						} else {
 							this._nNewLineAtEnd = false;
-						}		
+						}
 						if(i > startNo && this._diffContents[i-1][this._diffContents[i-1].length-1] === "\r"){ //$NON-NLS-0$
 							this._diffContents[i-1] = this._diffContents[i-1].substring(0 , this._diffContents[i-1].length-1);
 						}
@@ -206,7 +227,7 @@ orion.DiffParser = (function() {
 				default:
 					continue;
 				}
-				
+
 				if(lastToken !== curToken){
 					if(curToken === "+"){ //$NON-NLS-0$
 						lastPlusPos = i;
@@ -226,7 +247,7 @@ orion.DiffParser = (function() {
 					}
 					lastToken = curToken;
 				}
-				
+
 				switch(curToken){
 				case "-": //$NON-NLS-0$
 					oCursor++;
@@ -249,7 +270,7 @@ orion.DiffParser = (function() {
 				break;
 			}
 		},
-		
+
 		_detectConflictes: function(startIndexInDiff , lines){
 			if(startIndexInDiff < 0){
 				return false;
@@ -263,7 +284,7 @@ orion.DiffParser = (function() {
 			}
 			return false;
 		},
-		
+
 		_buildMap: function(detectConflicts){
 			var  blockLen = this._oBlocks.length;
 			var oFileLen = this._oFileContents.length;
@@ -271,7 +292,7 @@ orion.DiffParser = (function() {
 			var delta, lastSamePos = 1;
 			for(var i = 0 ; i < blockLen ; i++){
 				delta =  this._oBlocks[i][0] - lastSamePos;
-				//Create the "same on both" delta 
+				//Create the "same on both" delta
 				if(delta > 0){
 					this._deltaMap.push([delta , delta , 0]);
 					oFileLineCounter += delta;
@@ -308,7 +329,7 @@ orion.DiffParser = (function() {
 				}
 			}
 		},
-		
+
 		_buildNewFile: function(){
 			var oFileCursor = 1;
 			var lastUpdateBySameBlk = false;
@@ -333,8 +354,8 @@ orion.DiffParser = (function() {
 				//this._deltaMap[len-1][0] = this._deltaMap[len-1][0] + 1;
 			}
 		},
-		
-		//In many versions of GNU diff, each range can omit the comma and trailing value s, in which case s defaults to 1. 
+
+		//In many versions of GNU diff, each range can omit the comma and trailing value s, in which case s defaults to 1.
 		_converHRangeBody: function(body , retVal){
 			if( body ){
 				var number =  parseInt(body, 10);
@@ -343,12 +364,12 @@ orion.DiffParser = (function() {
 				retVal.push(1);
 			}
 		},
-		
-		//The hunk range information contains two hunk ranges. 
-		//The range for the hunk of the original file is preceded by a minus symbol, and the range for the new file is preceded by a plus symbol. 
-		//Each hunk range is of the format l,s where l is the starting line number and s is the number of lines the change hunk applies to for each respective file. 
-		//In many versions of GNU diff, each range can omit the comma and trailing value s, in which case s defaults to 1. 
-		//Note that the only really interesting value is the l line number of the first range; all the other values can be computed from the diff.	
+
+		//The hunk range information contains two hunk ranges.
+		//The range for the hunk of the original file is preceded by a minus symbol, and the range for the new file is preceded by a plus symbol.
+		//Each hunk range is of the format l,s where l is the starting line number and s is the number of lines the change hunk applies to for each respective file.
+		//In many versions of GNU diff, each range can omit the comma and trailing value s, in which case s defaults to 1.
+		//Note that the only really interesting value is the l line number of the first range; all the other values can be computed from the diff.
 		/*
 		 * return value :
 		 * [lineNumberInDiff , OriginalL , OriginalS , NewL ,NewS] , no matter "-l,s +l,s" or "+l,s -l,s"
@@ -377,7 +398,7 @@ orion.DiffParser = (function() {
 			}
 			return retVal;
 		}
-	
+
 	};
 	return DiffParser;
 }());
