@@ -122,12 +122,18 @@ exports.CompareView = (function() {
 					this._diffNavigator.renderAnnotations(this.isWhitespaceIgnored());
 					this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 					this.dispatchEvent({type: "contentLoaded"});
+					if(this.options.toggler) {
+						this.options.toggler.dispatchEvent({type: "contentLoaded"});
+					}
 				}.bind(this));
 			} else {//render all the diff annotations directly
 				window.setTimeout(function () {
 					this._diffNavigator.renderAnnotations(this.isWhitespaceIgnored());
 					this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 					this.dispatchEvent({type: "contentLoaded"});
+					if(this.options.toggler) {
+						this.options.toggler.dispatchEvent({type: "contentLoaded"});
+					}
 				}.bind(this), 50);
 			}
 		},
@@ -891,6 +897,7 @@ exports.InlineCompareView = (function() {
  */
 exports.toggleableCompareView = (function() {
 	function toggleableCompareView(startWith, options) {
+		mEventTarget.attach(this);
 		if(options){
 			options.toggler = this;
 		}
