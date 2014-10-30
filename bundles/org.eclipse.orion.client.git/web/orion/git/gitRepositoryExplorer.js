@@ -598,7 +598,7 @@ define([
 		var section = this.statusSection = new mSection.Section(parent, {
 			id: "statusSection", //$NON-NLS-0$
 			title: messages["WorkingDirChanges"],
-			slideout: true,
+			slideout: false,
 			content: '<div id="statusNode"></div>', //$NON-NLS-0$
 			canHide: false,
 			noTwistie: true,

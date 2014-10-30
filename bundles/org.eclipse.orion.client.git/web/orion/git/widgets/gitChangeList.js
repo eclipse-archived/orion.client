@@ -743,7 +743,18 @@ define([
 				callback: function(data) {
 					var info = that.getCommitInfo(true);
 					if (!info) return;
-					that.commandService.runCommand("eclipse.orion.git.commitCommand", data.items, data.handler, null, info); //$NON-NLS-0$
+					var doIt = function() {
+						that.commandService.runCommand("eclipse.orion.git.commitCommand", data.items, data.handler, null, info); //$NON-NLS-0$
+					};
+					if (data.items.length === 0 && !info.Amend) {
+						that.commandService.confirm(data.domNode, messages.EmptyCommitConfirm, messages.OK, messages.Cancel, false, function(val) { 
+							if (val) {
+								doIt();
+							}
+						});
+					} else {
+						doIt();
+					}
 				},
 				visibleWhen: function() {
 					return true;

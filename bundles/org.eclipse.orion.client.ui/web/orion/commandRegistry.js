@@ -207,39 +207,70 @@ define([
 			var result = false;
 			if (this._parameterCollector && !modal) {
 				var self = this;
+				var okCallback = function() {onConfirm(result);};
+				var closeFunction = function(){self._parameterCollector.close();}
+				var fillFunction = function(parent, buttonParent) {
+					var label = document.createElement("span"); //$NON-NLS-0$
+					label.classList.add("parameterPrompt"); //$NON-NLS-0$
+					label.textContent = message;
+					
+					parent.appendChild(label);
+					var yesButton = document.createElement("button"); //$NON-NLS-0$
+					yesButton.addEventListener("click", function(event) { //$NON-NLS-0$
+						result = true;
+						okCallback();
+						closeFunction();
+					}, false);
+					buttonParent.appendChild(yesButton);
+					yesButton.appendChild(document.createTextNode(yesString)); //$NON-NLS-0$
+					yesButton.className = "dismissButton"; //$NON-NLS-0$
+					var button = document.createElement("button"); //$NON-NLS-0$
+					button.addEventListener("click", function(event) { //$NON-NLS-0$
+						result = false;
+						closeFunction();
+					}, false);
+					buttonParent.appendChild(button);
+					button.appendChild(document.createTextNode(noString)); //$NON-NLS-0$
+					button.className = "dismissButton"; //$NON-NLS-0$
+					return yesButton;
+				};
 				this._parameterCollector.close();
-				var opened = this._parameterCollector.open(node, 
-					function(parent, buttonParent) {
-						var label = document.createElement("span"); //$NON-NLS-0$
-						label.classList.add("parameterPrompt"); //$NON-NLS-0$
-						label.textContent = message;
-						
-						parent.appendChild(label);
-						var yesButton = document.createElement("button"); //$NON-NLS-0$
-						yesButton.addEventListener("click", function(event) { //$NON-NLS-0$
-							result = true;
-							self._parameterCollector.close();
-						}, false);
-						buttonParent.appendChild(yesButton);
-						yesButton.appendChild(document.createTextNode(yesString)); //$NON-NLS-0$
-						yesButton.className = "dismissButton"; //$NON-NLS-0$
-						var button = document.createElement("button"); //$NON-NLS-0$
-						button.addEventListener("click", function(event) { //$NON-NLS-0$
-							result = false;
-							self._parameterCollector.close();
-						}, false);
-						buttonParent.appendChild(button);
-						button.appendChild(document.createTextNode(noString)); //$NON-NLS-0$
-						button.className = "dismissButton"; //$NON-NLS-0$
-						return yesButton;
-					},
-					function() {
-						onConfirm(result);
-					}
-				);
-				if (opened) {
-					return;
+				var opened = this._parameterCollector.open(node, fillFunction, function(){});
+				if (!opened) {
+					var tooltip = new mTooltip.Tooltip({
+						node: node,
+						afterHiding: function() {
+							this.destroy();
+						},
+						trigger: "click", //$NON-NLS-0$
+						position: ["below", "right", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});
+					var parameterArea = tooltip.contentContainer();
+					parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
+					var originalFocusNode = window.document.activeElement;
+					closeFunction = function() {
+						if (originalFocusNode) {
+							originalFocusNode.focus();
+						}
+						tooltip.destroy();
+					};
+					var messageArea = document.createElement("div"); //$NON-NLS-0$
+					messageArea.classList.add("parameterMessage"); //$NON-NLS-0$
+					parameterArea.appendChild(messageArea);
+					
+					var buttonArea = document.createElement("div"); //$NON-NLS-0$
+					parameterArea.appendChild(buttonArea);
+					buttonArea.classList.add("layoutRight"); //$NON-NLS-0$
+					buttonArea.classList.add("parametersDismiss"); //$NON-NLS-0$
+				
+					var focusNode = fillFunction(messageArea, buttonArea);
+					tooltip.show();
+					window.setTimeout(function() {
+						focusNode.focus();
+						focusNode.select();
+					}, 0);	
 				}
+				return;
 			} 
 			result = window.confirm(message);
 			onConfirm(result);
@@ -277,7 +308,6 @@ define([
 			return this._collectAndInvoke(commandInvocation.makeCopy(parameters), false);
 		},
 		
-	
 		/*
 		 * This method is the actual implementation for collecting parameters and invoking a callback.
 		 * "forceCollect" specifies whether we should always collect parameters or consult the parameters description to see if we should.
