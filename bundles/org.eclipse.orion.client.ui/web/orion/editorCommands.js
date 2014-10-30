@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2011, 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -20,7 +20,7 @@ define([
 	'orion/widgets/input/DropDownMenu',
 	'orion/Deferred',
 	'orion/URITemplate',
-	'orion/commands', 
+	'orion/commands',
 	'orion/keyBinding',
 	'orion/commandRegistry',
 	'orion/extensionCommands',
@@ -37,9 +37,9 @@ define([
 ], function(messages, i18nUtil, lib, openResource, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, blamer, regex, util, EditorContext) {
 
 	var exports = {};
-	
+
 	var contentTypesCache = null;
-	
+
 	function createDelegatedUI(options) {
 		var uriTemplate = new URITemplate(options.uriTemplate);
 		var params = options.params || {};
@@ -99,7 +99,7 @@ define([
 				}
 			}
 		}, false);
-		
+
 		return delegatedParent;
 	}
 	exports.createDelegatedUI = createDelegatedUI;
@@ -145,11 +145,13 @@ define([
 		this._searcher = options.searcher;
 		this.editorSettings = options.editorSettings;
 		this.localSettings = options.localSettings;
+		this.editorPreferences = options.editorPreferences;
+		this.diffService = options.diffService;
 	}
 	EditorCommandFactory.prototype = {
 		/**
 		 * Creates the common text editing commands.  Also generates commands for any installed plug-ins that
-		 * contribute editor actions.  
+		 * contribute editor actions.
 		 */
 		generateSimpleEditorCommands: function(editor, saveCmdId, saveCmdVisibleFunc, saveCommandOrderNumber) {
 			if (!this.isReadOnly) {
@@ -177,6 +179,7 @@ define([
 			this._generateGotoLineCommnand(editor);
 			this._generateFindCommnand(editor);
 			this._generateBlame(editor);
+			this._generateDiff(editor);
 		},
 		_generateSettingsCommand: function(editor) {
 			var self = this;
@@ -190,7 +193,7 @@ define([
 				callback: function(data) {
 					var dropDown = settingsCommand.settingsDropDown;
 					if (!dropDown || dropDown.isDestroyed()) {
-						dropDown = settingsCommand.settingsDropDown = new DropDownMenu(data.domNode.parentNode, data.domNode, { 
+						dropDown = settingsCommand.settingsDropDown = new DropDownMenu(data.domNode.parentNode, data.domNode, {
 							noClick: true,
 							selectionClass: 'dropdownSelection', //$NON-NLS-0$
 							onShow: function() {
@@ -223,7 +226,7 @@ define([
 			});
 			this.commandService.addCommand(undoCommand);
 			this.commandService.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.undo", 400, this.editToolbarId ? "orion.menuBarEditGroup/orion.undoGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('z', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			
+
 			var redoCommand = new mCommands.Command({
 				name: messages.Redo,
 				id: "orion.redo", //$NON-NLS-0$
@@ -305,7 +308,7 @@ define([
 			});
 			this.commandService.addCommand(saveCommand);
 			this.commandService.registerCommandContribution(this.saveToolbarId || this.toolbarId, cmdId, typeof commandOrderNumber === "number" ? commandOrderNumber : 1, this.saveToolbarId ? "orion.menuBarFileGroup/orion.saveGroup" : null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
-			
+
 			// Add key binding to editor so that the user agent save dialog does not show when auto save is enabled
 			if (editor.getTextView && editor.getTextView()) {
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -324,7 +327,7 @@ define([
 					return [new mCommandRegistry.CommandParameter('line', 'number', messages.gotoLinePrompt, line.toString())]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			);
-			
+
 			var gotoLineCommand =  new mCommands.Command({
 				name: messages.gotoLine,
 				tooltip: messages.gotoLineTooltip,
@@ -358,7 +361,7 @@ define([
 					if (data) {
 						editor.onGotoLine(data.line - 1, 0, undefined, data.callback);
 						return true;
-					} 
+					}
 					self.commandService.runCommand("orion.gotoLine"); //$NON-NLS-0$
 					return true;
 				}, gotoLineCommand);
@@ -432,7 +435,7 @@ define([
 			});
 			this.commandService.addCommand(findCommand);
 			this.commandService.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.editor.find", 0, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			// override the editor binding 
+			// override the editor binding
 			if (editor.getTextView && editor.getTextView()) {
 				editor.getTextView().setAction("find", function (data) { //$NON-NLS-0$
 					if (data) {
@@ -440,13 +443,13 @@ define([
 						return true;
 					}
 					self.commandService.runCommand("orion.editor.find", null, null, new mCommandRegistry.ParametersDescription( //$NON-NLS-0$
-						[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 
+						[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						{clientCollect: true}));
 					return true;
 				}, findCommand);
 			}
 		},
-		
+
 		_generateBlame: function(editor){
 			var self = this;
 			var blameCommand = new mCommands.Command({
@@ -485,6 +488,31 @@ define([
 			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.blame", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 
+		_generateDiff: function(editor){
+			var self = this;
+			var diffCommand = new mCommands.Command({
+				name: messages.Diff,
+				tooltip: messages.DiffTooltip,
+				id: "orion.edit.diff", //$NON-NLS-0$
+				visibleWhen: function() {
+					if (!editor.installed) {
+						return false;
+					}
+					return true;
+				},
+				callback: function(data) {
+					self.diffService.toggleEnabled(editor);
+					self.editorPreferences.getPrefs(function(pref){
+						pref.diffService = self.diffService.isEnabled();
+						self.editorPreferences.setPrefs(pref);
+					});
+
+				}
+			});
+			this.commandService.addCommand(diffCommand);
+			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.diff", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		},
+
 		/**
 		 * Helper for {@link #_generateEditCommands}. Creates and returns the Command objects and the service info
 		 * that derived them. Does not render commands.
@@ -496,7 +524,7 @@ define([
 		 */
 		_createEditCommands: function(editor) {
 			var self = this;
-			
+
 			function getContentTypes(serviceRegistry) {
 				if (contentTypesCache) {
 					return contentTypesCache;
@@ -636,7 +664,7 @@ define([
 						info[propertyNames[j]] = serviceReference.getProperty(propertyNames[j]);
 					}
 					info.forceSingleItem = true;  // for compatibility with mExtensionCommands._createCommandOptions
-					
+
 					var deferred = mExtensionCommands._createCommandOptions(info, serviceReference, self.serviceRegistry, contentTypesCache, false, function(items) {
 						// items is the editor and we care about the file metadata for validation
 						return inputManager.getFileMetadata();
@@ -686,12 +714,12 @@ define([
 				var metadata;
 				if ((metadata = inputManager.getFileMetadata())) {
 					var toolbar = lib.node(toolbarId); //$NON-NLS-0$
-					if (toolbar) {	
+					if (toolbar) {
 						commandService.destroy(toolbar);
 						commandService.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
 					}
 					toolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
-					if (toolbar) {	
+					if (toolbar) {
 						commandService.destroy(toolbar);
 						commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button");   //$NON-NLS-0$
 					}
@@ -702,5 +730,5 @@ define([
 	exports.EditorCommandFactory = EditorCommandFactory;
 	exports.handleStatusMessage = handleStatusMessage;
 
-	return exports;	
+	return exports;
 });
