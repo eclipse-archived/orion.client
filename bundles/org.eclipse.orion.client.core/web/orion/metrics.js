@@ -11,11 +11,17 @@
 
 /*eslint-env browser, amd*/
 define([], function() {
-	var tid = 'UA-55945995-1'; //$NON-NLS-0$
+	var TID = 'UA-55945995-1'; //$NON-NLS-0$
+	var TID_ORIONHUB = 'UA-56260249-1'; //$NON-NLS-0$
 
 	var init = function(args) {
 		var host = window.location.host;
-		if (host.indexOf("orion.eclipse.org") !== -1 || host.indexOf("orionhub.org") !== -1) { //$NON-NLS-1$ //$NON-NLS-0$
+		if (host.indexOf("orion.eclipse.org") !== -1) { //$NON-NLS-0$
+			var tid = TID;
+		} else if (host.indexOf("orionhub.org") !== -1) { //$NON-NLS-0$
+			tid = TID_ORIONHUB;
+		}
+		if (tid) {
 			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
