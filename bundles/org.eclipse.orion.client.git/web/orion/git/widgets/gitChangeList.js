@@ -1158,10 +1158,12 @@ define([
 			}
 		},
 		onCheckedFunc: function(rowId, checked, manually, item) {
+			var that = this;
 			this.explorer.unhookCompareWidget().then(function(result) {
 				if(!result) {
 					return;
 				}
+				lib.node(that.getCheckBoxId(rowId)).classList.add("core-sprite-progress"); //$NON-NLS-0$
 				if (item.Type === "ExplorerSelection") { //$NON-NLS-0$
 					if (checked) {
 						this.explorer.commandService.runCommand("orion.explorer.selectAllCommandChangeList", this.explorer, this.explorer); //$NON-NLS-0$
