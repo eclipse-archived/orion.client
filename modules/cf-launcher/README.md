@@ -82,6 +82,25 @@ on the top banner to access the debugger and shell.
 
 ![screenshot](http://i.imgur.com/YH0kJqu.png)
 
+## File access with WebDAV
+cf-launcher includes a [WebDAV](http://en.wikipedia.org/wiki/WebDAV) server, which provides access to the files in your app instance.
+Most operating systems ship with a WebDAV client built in, allowing you to map your instance files to a local drive or folder. You
+can then view and edit the files in your app instance as easily as local files.
+
+WebDAV connection info:
+* URL: `http://your_application_url/launcher/dav`
+* Username: (Any username should work, but don't leave it blank.)
+* Password: (The password you chose when you set up cf-launcher.)
+
+For detailed setup instructions, see:
+* [Windows](http://doc.owncloud.org/server/6.0/user_manual/files/files.html#windows)
+* [OS X](http://support.apple.com/kb/PH13859)
+* [Linux](http://doc.owncloud.org/server/6.0/user_manual/files/files.html#linux)
+
+Note: we've encountered certain Cloud Foundry fabrics that block WebDAV requests at the network level. If you have problems
+connecting with WebDAV, deploy a [test application](https://github.com/mamacdon/propfind) on your CF fabric to verify that
+it supports DAV requests.
+
 ## Uninstallation ##
 When your app is ready for production, you should uninstall cf-launcher.
 
