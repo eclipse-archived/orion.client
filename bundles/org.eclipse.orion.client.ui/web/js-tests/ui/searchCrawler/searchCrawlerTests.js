@@ -401,19 +401,19 @@ define(['chai/chai', 'js-tests/ui/searchCrawler/mockFileClient', 'orion/crawler/
 	function _cancellAndCompare(crawler, cancelNumber, expected) {
 		var d  = new Deferred();
 		crawler.search(function(searchResult, incremental){
+			try {
 				if(!incremental){
-					try {
-						assertSearchReresultEqual(expected,	searchResult);
-						d.resolve();
-					} catch (e){
-						d.reject(e);
-					}
+					assertSearchReresultEqual(expected,	searchResult);
+					d.resolve();
 				} else {
 					if(crawler._hitCounter === cancelNumber){
 						crawler._cancelFileVisit();
 					}
 				}
-			});
+			} catch (e) {
+				d.reject(e);
+			}
+		});
 		return d;
 	}
 
