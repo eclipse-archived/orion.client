@@ -174,7 +174,7 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 					var wizardReferences = serviceRegistry.getServiceReferences("orion.project.deploy.wizard");
 						
 					/* figure out which deployment plan & wizard to use */
-					var relativeFilePath = new URL(project.ContentLocation).href;
+					var relativeFilePath = new URL(project.ContentLocation + appPath).href;
 					var orionHomeUrl = new URL(PageLinks.getOrionHome());
 						
 					if(relativeFilePath.indexOf(orionHomeUrl.origin) === 0)
