@@ -265,12 +265,14 @@ define([
 				
 					var focusNode = fillFunction(messageArea, buttonArea);
 					tooltip.show();
-					window.setTimeout(function() {
-						focusNode.focus();
-						if (focusNode.select) {
-							focusNode.select();
-						}
-					}, 0);	
+					if (focusNode) {
+						window.setTimeout(function() {
+								focusNode.focus();
+								if (focusNode.select) {
+									focusNode.select();
+								}
+						}, 0);	
+					}
 				}
 				return;
 			} 
@@ -345,12 +347,14 @@ define([
 								tooltip.destroy();
 							}, cancelCallback)(parameterArea);
 							tooltip.show();
-							window.setTimeout(function() {
-								focusNode.focus();
-								if (focusNode.select) {
-									focusNode.select();
-								}
-							}, 0);
+							if (focusNode) {
+								window.setTimeout(function() {
+										focusNode.focus();
+										if (focusNode.select) {
+											focusNode.select();
+										}
+								}, 0);
+							}
 							collecting = true;
 						}
 					}
