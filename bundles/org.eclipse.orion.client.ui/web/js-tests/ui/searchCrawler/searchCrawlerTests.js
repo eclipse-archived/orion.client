@@ -410,7 +410,7 @@ define(['chai/chai', 'js-tests/ui/searchCrawler/mockFileClient', 'orion/crawler/
 					}
 				} else {
 					if(crawler._hitCounter === cancelNumber){
-						crawler._cancelFileContentsSearch();
+						crawler._cancelFileVisit();
 					}
 				}
 			});
