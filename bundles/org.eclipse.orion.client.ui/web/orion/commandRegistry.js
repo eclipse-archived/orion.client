@@ -267,7 +267,9 @@ define([
 					tooltip.show();
 					window.setTimeout(function() {
 						focusNode.focus();
-						focusNode.select();
+						if (focusNode.select) {
+							focusNode.select();
+						}
 					}, 0);	
 				}
 				return;
@@ -345,7 +347,9 @@ define([
 							tooltip.show();
 							window.setTimeout(function() {
 								focusNode.focus();
-								focusNode.select();
+								if (focusNode.select) {
+									focusNode.select();
+								}
 							}, 0);
 							collecting = true;
 						}
