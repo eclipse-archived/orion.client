@@ -11,10 +11,11 @@
 /*eslint-env browser, amd*/
 define(['orion/commandRegistry',
 		'orion/Deferred',
+		'orion/webui/littlelib',
 		'orion/compare/compareView',
 		'orion/compare/compareCommands',
 		'orion/compare/compareHighlighter'],
-function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mCompareHighlighter) {
+function(mCommandRegistry, Deferred, lib, mCompareView, mCompareCommands, mCompareHighlighter) {
 	var commandService = new mCommandRegistry.CommandRegistry({
 	});
 
@@ -61,6 +62,25 @@ function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mCompareHig
 		return d;
 	}
 	
+	function _convertCommandId(commandId){
+		if(!commandId) {
+			return commandId; 
+		}
+		var node = lib.node(commandId);
+		if(node) {
+			if(node.nodeName.toLowerCase() !== "ul") { //$NON-NLS-0$
+				var commandContainer = document.createElement("ul");//$NON-NLS-0$
+				commandContainer.id = commandId + "__compareCmdUL";//$NON-NLS-0$
+				commandContainer.classList.add("commandList");//$NON-NLS-0$
+				node.appendChild(commandContainer);
+				return commandContainer.id;
+			} else {
+				node.classList.add("commandList");//$NON-NLS-0$
+			}
+		}
+		return commandId;
+	}
+	
 	/**
 	 * @class This object describes options of a file. Two instances of this object construct the core parameters of a compare view. 
 	 * @name orion.compare.FileOptions
@@ -101,7 +121,7 @@ function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mCompareHig
 			vOptions.newFile.Type = _contentType(vOptions.newFile.Name);
 		}
 		if(commandSpanId || toggleCommandSpanId) {
-			var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: commandSpanId, toggleCommandSpanId: toggleCommandSpanId});
+			var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: _convertCommandId(commandSpanId), toggleCommandSpanId: _convertCommandId(toggleCommandSpanId)});
 			vOptions.commandProvider = cmdProvider;
 		}
 		var vType = (viewType === "inline") ? "inline" : "twoWay"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
