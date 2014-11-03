@@ -59,7 +59,7 @@ define([
 		var result = marked.Renderer.prototype.paragraph.call(this, text);
 		return processRefLinks(result);
 	};
-	var markedOptions = marked.parse.defaults;
+	var markedOptions = objects.clone(marked.parse.defaults);
 	markedOptions.sanitize = true;
 	markedOptions.tables = true;
 	markedOptions.renderer = customRenderer;
