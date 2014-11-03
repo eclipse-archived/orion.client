@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser,amd*/
-
+/*global URL*/
 define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil', 'orion/URITemplate', 'orion/serviceregistry', 
         'orion/preferences', 'orion/PageLinks', 'orion/xhr', 'orion/i18nUtil'],
         function(messages, mBootstrap, Deferred, CFClient, mCfUtil, URITemplate, ServiceRegistry, mPreferences, PageLinks, xhr, i18Util){
@@ -141,7 +141,12 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 				if (target && appName){
 					cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath)).then(
 						function(result){
-							var editLocation = new URL("../edit/edit.html#" + project.ContentLocation, window.location.href);
+							// FIXME is it really appropriate for this plugin to know about edit.html
+							var expandedURL = new URITemplate("{+OrionHome}/edit/edit.html#{,ContentLocation}").expand({
+								OrionHome: PageLinks.getOrionHome(),
+								ContentLocation: project.ContentLocation,
+							});
+							var editLocation = new URL(expandedURL);
 							mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, project.ContentLocation).then(
 								function(launchConfigurationContent){
 									deferred.resolve(launchConfigurationContent);
