@@ -665,7 +665,7 @@ define([
 			var iter = annotationModel.getAnnotations(block.start, block.end);
 			while (iter.hasNext()) {
 				var annotation = iter.next();
-				if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_WARNING) {
+				if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_WARNING && annotation.start <= end && start <= annotation.end) {
 					_remove.push(annotation);
 				}
 			}
