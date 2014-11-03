@@ -71,6 +71,7 @@ function(mCommandRegistry, Deferred, lib, mCompareView, mCompareCommands, mCompa
 			if(node.nodeName.toLowerCase() !== "ul") { //$NON-NLS-0$
 				var commandContainer = document.createElement("ul");//$NON-NLS-0$
 				commandContainer.id = commandId + "__compareCmdUL";//$NON-NLS-0$
+				commandContainer.classList.add("layoutLeft");//$NON-NLS-0$
 				commandContainer.classList.add("commandList");//$NON-NLS-0$
 				node.appendChild(commandContainer);
 				return commandContainer.id;

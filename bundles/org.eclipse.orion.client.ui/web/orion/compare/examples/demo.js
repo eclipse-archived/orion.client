@@ -49,7 +49,7 @@ function(Compare) {
         }
     };
 	
-	var compare = new Compare(options, "compareCmdDiv", "twoWay", true, "toggleCmd"); //$NON-NLS-1$ //$NON-NLS-0$
+	var compare = new Compare(options, "compareCmdDiv", "twoWay", true/*, "toggleCmd"*/); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	function getFile(file) {
 		try {
