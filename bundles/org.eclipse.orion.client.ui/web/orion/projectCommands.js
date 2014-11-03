@@ -1114,7 +1114,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				}
 				var item = forceSingleItem(data.items);
 				fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
-					progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name}),i18nUtil.formatMessage( messages["Creating project {0}"], name)).then(function(project){
+					progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name}),i18nUtil.formatMessage( messages["Creating project ${0}"], name)).then(function(project){
 						dispatchNewProject(workspace, project);
 					}, errorHandler);
 				});
@@ -1160,7 +1160,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 						// Add listener to wait for the project to open
 						
 						fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
-							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: projectName}),i18nUtil.formatMessage( messages["Creating project {0}"], projectName)).then(function(project){
+							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: projectName}),i18nUtil.formatMessage( messages["Creating project ${0}"], projectName)).then(function(project){
 								explorer.sidebarNavInputManager.addEventListener("projectOpened", handleOpen); //$NON-NLS-0$
 								dispatchNewProject(workspace, project);
 							}, function(error) {
@@ -1240,7 +1240,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 						}
 						var item = forceSingleItem(data.items);
 						fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
-							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name, ContentLocation: url}), i18nUtil.formatMessage( messages["Creating project {0}"], name)).then(function(project){
+							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name, ContentLocation: url}), i18nUtil.formatMessage( messages["Creating project ${0}"], name)).then(function(project){
 								dispatchNewProject(workspace, project);
 							});
 						});
