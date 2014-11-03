@@ -92,6 +92,13 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils, mNonnls
 
     /*** Prototypes required by the search/replace renderer and explorer ***/
 
+   /*
+    * New: Required by the fileDetailRenderer
+    */
+	StrExternalizerModel.prototype.enableCheckbox = function(/*item*/) {
+		return this.replaceMode();
+	};
+
     /**
      * Return the root model. Required function.
      * There should be three layers of the root model. Any model item in each layer must have a string property called type.

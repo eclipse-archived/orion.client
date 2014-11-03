@@ -109,6 +109,18 @@ function(messages, Deferred, i18nUtil, mExplorer, mSearchUtils) {
     };
 
     /*** Prototypes required by the search/replace renderer and explorer ***/
+   
+   /*
+    * New: Required by the fileDetailRenderer
+    */
+   
+	SearchResultModel.prototype.disableExpand = function(/*item*/) {
+		return this._provideSearchHelper().params.keyword === "";
+	};
+
+	SearchResultModel.prototype.enableCheckbox = function(/*item*/) {
+		return this.replaceMode();
+	};
 
     /**
      * Return the root model. Required function.
