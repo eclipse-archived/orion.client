@@ -230,28 +230,25 @@ function(messages, lib, mOperationsDialog) {
 				this._serviceRegistry.getService("orion.page.message").setProgressResult(result); //$NON-NLS-0$
 			},
 			/**
-			 * Shows a progress message until the given deferred is resolved. Returns a deferred that resolves when
-			 * the operation completes.
-			 * @param deferred {orion.Deferred} Deferred to track
-			 * @param message {String} Message to display
-			 * @param avoidDisplayError Do not display error when deferred is rejected
+			 * Shows a progress message until the given promise is resolved. Returns a promise that resolves when
+			 * the operation completes. If the given promise rejects, the default behavior is to show an error
+			 * message, but this can be suppressed by passing <tt>avoidDisplayError == true</tt>.
+			 * @param {orion.Promise} promise Promise to track
+			 * @param {String} message Message to display
+			 * @param {Boolean} avoidDisplayError Do not display error when promise is rejected
 			 * @returns {orion.Promise}
 			 */
 			showWhile: function(deferred, message, avoidDisplayError){
-				if(message) {
-					this._serviceRegistry.getService("orion.page.message").setProgressMessage(message); //$NON-NLS-0$
-				}
+				this._serviceRegistry.getService("orion.page.message").showWhile(deferred, message);
+
 				var that = this;
-				
-				deferred.then(function(jsonResult){
-					that._serviceRegistry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$
-				}, function(jsonError){
-					if(avoidDisplayError){
-						that._serviceRegistry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$
+				// If the underlying deferred was rejected, display an error
+				deferred.then(null, function(error) {
+					if (avoidDisplayError) {
+						// do nothing
 					} else {
-						that.setProgressResult.bind(that)(jsonError);
+						that.setProgressResult(error);
 					}
-					return jsonError;
 				});
 				return this.progress(deferred, message);
 			},
