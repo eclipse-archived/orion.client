@@ -41,7 +41,9 @@ define ([
 	};
 
 	function renderMarkDown(markDown) {
-		return Markdown(markDown);
+		return Markdown(markDown, {
+			sanitize: true
+		});
 	}
 	
 	function HoverFactory(serviceRegistry, inputManager) {
