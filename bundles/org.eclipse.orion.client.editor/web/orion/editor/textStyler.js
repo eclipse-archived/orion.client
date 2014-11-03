@@ -809,11 +809,12 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		}
 	};
 
-	function TextStyler(view, annotationModel, stylerAdapter) {
+	function TextStyler(view, annotationModel, stylerAdapter) {		
 		this._whitespacesVisible = false;
 		this._highlightCaretLine = false;
 		this._foldingEnabled = true;
 		this._detectTasks = true;
+		this._annotationProviders = [];
 		this._view = view;
 		this._annotationModel = annotationModel;
 		this._stylerAdapter = stylerAdapter;
@@ -1592,7 +1593,6 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				}.bind(this));
 			}
 		},
-		_annotationProviders: [],
 		_caretLineStyle: {styleClass: "meta annotation currentLine"}, //$NON-NLS-0$
 		_spacePattern: {regex: /[ ]/g, style: {styleClass: "punctuation separator space", unmergeable: true}}, //$NON-NLS-0$
 		_tabPattern: {regex: /\t/g, style: {styleClass: "punctuation separator tab", unmergeable: true}} //$NON-NLS-0$
