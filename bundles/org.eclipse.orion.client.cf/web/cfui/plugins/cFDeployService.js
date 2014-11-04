@@ -145,7 +145,6 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 				if (target && appName){
 					cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath)).then(
 						function(result){
-							// FIXME is it really appropriate for this plugin to know about edit.html
 							var expandedURL = new URITemplate("{+OrionHome}/edit/edit.html#{,ContentLocation}").expand({ //$NON-NLS-0$
 								OrionHome: PageLinks.getOrionHome(),
 								ContentLocation: project.ContentLocation,
