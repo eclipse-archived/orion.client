@@ -182,12 +182,11 @@ define([
 			this._clickToDisMiss = false;
 			this._init();
 			this.currentMessage = message;
-			var image = document.createElement("span"); //$NON-NLS-0$
-			image.classList.add("progressIcon"); //$NON-NLS-0$
+			
 			var node = lib.node(this.progressDomId);
 			lib.empty(node);
-			node.appendChild(image);
 			node.appendChild(document.createTextNode(message));
+
 			var container = lib.node(this.notificationContainerDomId);
 			container.classList.remove("notificationHide"); //$NON-NLS-0$
 			if (message && message.length > 0) {
@@ -231,17 +230,22 @@ define([
 			}
 			this._init();
 
-			// Create the image
-			var imageClass = "core-sprite-information"; //$NON-NLS-0$
+			// Create the message
+			var msg = status.Message || status.toString();
+			if (msg === Object.prototype.toString()) {
+				// Last ditch effort to prevent user from seeing meaningless "[object Object]" message
+				msg = messages.UnknownError;
+			}
+			var node = lib.node(this.progressDomId);
+			lib.empty(node);
+			node.appendChild(this.createMessage(status, msg));
+
+			// Given the severity, add/remove the appropriate classes from the notificationContainerDomId
 			var extraClass = "progressNormal"; //$NON-NLS-0$
-			var image = document.createElement("span"); //$NON-NLS-0$
-			image.classList.add("imageSprite"); //$NON-NLS-0$
-			image.classList.add("progressIcon"); //$NON-NLS-0$
 			var removedClasses = [];
 			if (status.Severity) {
 				switch (status.Severity) {
 				case SEV_WARNING: //$NON-NLS-0$
-					imageClass = "core-sprite-warning"; //$NON-NLS-0$
 					extraClass="progressWarning"; //$NON-NLS-0$
 					removedClasses.push("progressInfo");
 					removedClasses.push("progressError");
@@ -249,7 +253,6 @@ define([
 					this._clickToDisMiss = true;
 					break;
 				case SEV_ERROR: //$NON-NLS-0$
-					imageClass = "core-sprite-error"; //$NON-NLS-0$
 					extraClass="progressError"; //$NON-NLS-0$
 					removedClasses.push("progressWarning");
 					removedClasses.push("progressInfo");
@@ -264,23 +267,7 @@ define([
 				}
 			}
 			removedClasses.push("notificationHide");
-			image.classList.add(imageClass); //$NON-NLS-0$
-
-			var node = lib.node(this.progressDomId);
 			var container = lib.node(this.notificationContainerDomId);
-			lib.empty(node);
-			node.appendChild(image);
-
-			// Create the message
-			var msg = status.Message || status.toString();
-			if (msg === Object.prototype.toString()) {
-				// Last ditch effort to prevent user from seeing meaningless "[object Object]" message
-				msg = messages.UnknownError;
-			}
-			node.appendChild(this.createMessage(status, msg));
-
-			// Given the severity, add/remove the appropriate classes
-			// TODO refactor extraClass & removedClasses out of `switch` above
 			if (extraClass && this.progressDomId !== this.domId) {
 				container.classList.add(extraClass);
 				for (var i=0; i<removedClasses.length; i++) {
