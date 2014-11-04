@@ -22,19 +22,39 @@ define([
 	'orion/objects',
 	'orion/syntaxchecker',
 	'orion/editor/textModel',
-	'orion/explorers/navigationUtils'
-], function(messages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, navigatorRenderer, objects, mSyntaxchecker, mTextModel, mNavUtils) {
-	
+	'orion/explorers/navigationUtils',
+	'orion/explorers/fileDetailRenderer'
+], function(messages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, navigatorRenderer, objects, mSyntaxchecker, mTextModel, mNavUtils, mFileDetailRenderer) {
     var DEBUG = false;
-
-	function processChildren(parentItem, children, errorsParent, warningsParent) {
-		children.forEach(function(child) {
-			child.type = "problem";
-			child.fileName = parentItem.name;
-			child.filePath = parentItem.path;
-			child.fileLocation = parentItem.location;
-			child.location = parentItem.location + child.description + child.start + child.end;
-			if(child.severity === "warning") {
+	function generateProblemsLink(explorer, item) {
+		var params = {start: item.start, end: item.end};
+		var name = item.description;
+		var location = item.fileLocation;
+		var link = navigatorRenderer.createLink(null, 
+			{Location: location, Name: name}, 
+			explorer.commandService, 
+			explorer.contentTypeRegistry,
+			explorer._openWithCommands, 
+			{id:item.location + "_linkId"}, //$NON-NLS-0$
+			params, 
+			{});
+		return link;
+	}
+	function processTotalProblems(fileItem, problemsInFile, totalProblems) {
+		problemsInFile.forEach(function(child) {
+			child.type = "problem"; //$NON-NLS-0$
+			child.fileName = fileItem.name;
+			child.filePath = fileItem.path;
+			child.fileLocation = fileItem.location;
+			child.location = fileItem.location + child.description + child.start + child.end;
+			totalProblems.push(child);
+		});
+	}
+	function processProblemsByType(totalProblems) {
+		var errorsParent = {children: [], type: "category", location: "category_errors_id", name: messages["Errors"]}, 
+		warningsParent = {children: [], type: "category", location: "category_warnings_id", name: messages["Warnings"]};
+		totalProblems.forEach(function(child) {
+			if(child.severity === "warning") { //$NON-NLS-0$
 				child.parent = warningsParent;
 				warningsParent.children.push(child);
 			} else {
@@ -42,9 +62,10 @@ define([
 				errorsParent.children.push(child);
 			}
 		});
-		return children;
+		return [errorsParent, warningsParent];
 	}
 	function recalculateOffset(textContent, problems) {
+		//TODO: We also need line number here
 		var textModel = null;
 		problems.forEach(function(problem) {
 			if(typeof problem.line === "number") { //$NON-NLS-0$
@@ -62,7 +83,6 @@ define([
 		this.problems = options.problems;
 		this.registry = options.registry;
 		this.progressService = options.progressService;
-		this.section = options.section;
 	}
 	ProblemsModel.prototype = Object.create(mExplorer.ExplorerModel.prototype);
 	objects.mixin(ProblemsModel.prototype, /** @lends orion.propertyPanel.ProblemsModel.prototype */ {
@@ -110,8 +130,6 @@ define([
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.parentId = options.parentId ? options.parentId : "orion.PropertyPanel.container";
 		this.actionScopeId = options.actionScopeId;
-		this.problems = options.problems;
-		this.section = options.section;
 		this.location = options.location;
 		this.progressService = options.progressService;
 		this.explorerSelectionScope = "explorerSelection";  //$NON-NLS-0$
@@ -160,11 +178,12 @@ define([
 				this._filterOn(modifiedFilter, onFileName);
 			} else {
 				//filter was emptied, expand all
-				this.filteredProblems = this.problems;
+				this.filteredProblems = processProblemsByType(this.totalProblems);
 			}
 			this.incrementalRender(true);
 		},
 		_filterSingle: function(item, modifiedFilter, onFileName) {
+			//TODO: we need to return true if either file name or description hit the search
 			var strToTest = item.description;
 			if(onFileName) {
 				strToTest = item.fileName;
@@ -172,16 +191,10 @@ define([
 			return (-1 !== strToTest.search(modifiedFilter));
 		},
 		_filterOn: function(modifiedFilter, onFileName) {
-			var newErrors = this.problems[0].children.filter(function(error){
-				return this._filterSingle(error, modifiedFilter, onFileName);
+			var newProblems = this.totalProblems.filter(function(problem){
+				return this._filterSingle(problem, modifiedFilter, onFileName);
 			}.bind(this));
-			var newWarnings = this.problems[1].children.filter(function(warning){
-				return this._filterSingle(warning, modifiedFilter, onFileName);
-			}.bind(this));
-			
-			var errorsParent = {children: newErrors, type: "category", location: "category_erros_id", name: messages["Errors"]}, 
-			warningsParent = {children: newWarnings, type: "category", location: "category_warnings_id", name: messages["Warnings"]};
-			this.filteredProblems = [errorsParent, warningsParent];
+			this.filteredProblems = processProblemsByType(newProblems);
 		},
 		_visitFile: function(crawler, fileObj, contentType){
 			crawler.addTotalCounter();
@@ -227,10 +240,8 @@ define([
 				return;
 			}
 			var resultLocation = [];
-			var errorsParent = {children: [], type: "category", location: "category_erros_id", name: messages["Errors"]}, 
-			warningsParent = {children: [], type: "category", location: "category_warnings_id", name: messages["Warnings"]};
-			
 			lib.empty(lib.node(this.parentId));
+			this.totalProblems = [];
 			
 			if (jsonData.response.numFound > 0) {
 				jsonData.response.docs.forEach(function(hit) {
@@ -245,16 +256,15 @@ define([
 						if(incremental) {
 							resultLocation.push(fileItem);
 						} else {
-							processChildren(fileItem, hit.problems, errorsParent, warningsParent);
+							processTotalProblems(fileItem, hit.problems, this.totalProblems);
 						}
 					}
 				}.bind(this));
 			}
 			if(incremental) {
-				this.problems = resultLocation;
+				this.filteredProblems = resultLocation;
 			} else {
-				this.problems = [errorsParent, warningsParent];
-				this.filteredProblems = this.problems;
+				this.filteredProblems = processProblemsByType(this.totalProblems);
 			}
 			if(incremental){
 				this.incrementalRender();
@@ -281,7 +291,6 @@ define([
 				registry: this.registry,
 				problems: this.filteredProblems,
 				progressService: this.progressService,
-				section: this.section
 			});
 	        this.createTree(this.parentId, model, {
 	            selectionPolicy: "singleSelection", //$NON-NLS-0$
@@ -304,17 +313,6 @@ define([
 					}.bind(this));
 	        }
 	    },
-		expandSections: function(tree, children) {
-			var deferreds = [];
-			for (var i = 0; i < children.length; i++) {
-				var deferred = new Deferred();
-				deferreds.push(deferred);
-				tree.expand(this.model.getId(children[i]), function (d) {
-					d.resolve();
-				}, [deferred]);
-			}
-			return Deferred.all(deferreds);
-		},
 		isRowSelectable: function(/*modelItem*/) {
 			return true;
 		},
@@ -326,24 +324,14 @@ define([
 		}
 	});
 	
-	function ProblemsRenderer() {
+	function ProblemsRenderer(explorer) {
 		mExplorer.SelectionRenderer.apply(this, arguments);
+		this.explorer = explorer;
 	}
 	ProblemsRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(ProblemsRenderer.prototype, {
 	    renderProblemsElement: function(item, spanHolder) {
-			//this._getDecoratorIcon(spanHolder, item.severity === "error");
-			var params = {start: item.start, end: item.end};
-			var name = item.description;
-			var location = item.fileLocation;
-			var link = navigatorRenderer.createLink(null, 
-				{Location: location, Name: name}, 
-				this.explorer.commandService, 
-				this.explorer.contentTypeRegistry,
-				this.explorer._openWithCommands, 
-				{id:item.location + "linkId"}, 
-				params, 
-				{});
+			var link = generateProblemsLink(this.explorer, item);
        		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	        spanHolder.appendChild(link);
 	    },
@@ -368,7 +356,7 @@ define([
 					if (item.type === "category") { //$NON-NLS-0$
 						td.classList.add("problemsDecoratorTDTitle"); //$NON-NLS-0$
 						this.getExpandImage(tableRow, div);
-						this._getDecoratorIcon(div, item.location === "category_erros_id");
+						this._getDecoratorIcon(div, item.location === "category_errors_id");
 					} else if (item.type === "problem") { //$NON-NLS-0$
  						td.classList.add("problemsDecoratorTD"); //$NON-NLS-0$
 						this._getDecoratorIcon(div, item.severity === "error");
@@ -380,7 +368,7 @@ define([
 						div = document.createElement("div"); //$NON-NLS-0$
 						td.appendChild(div);
 						//this.getExpandImage(tableRow, div);
-						//this._getDecoratorIcon(div, item.location === "category_erros_id");
+						//this._getDecoratorIcon(div, item.location === "category_errors_id");
 						itemLabel = document.createElement("span"); //$NON-NLS-0$
 						itemLabel.textContent = item.name + " (" + item.children.length + " items)";
 						itemLabel.id = item.name + "CategoryItemId"; //$NON-NLS-0$
@@ -411,10 +399,32 @@ define([
 		},
 	});
 	
-	return {
-		ProblemsExplorer: ProblemsExplorer,
-		ProblemsRenderer: ProblemsRenderer,
-		ProblemsModel: ProblemsModel
+    //Renderer to render the model
+    function ProblemsFileRenderer(explorer) {
+        this.explorer = explorer;
+    }
+	ProblemsFileRenderer.prototype = Object.create(mFileDetailRenderer.FileDetailRenderer.prototype);
+    
+    /*
+     * APIs that the subclass of fileDetailRenderer has to override
+     */
+    ProblemsFileRenderer.prototype.generateFileLink = function(resultModel, item) {
+		var link = navigatorRenderer.createLink(null, 
+				{Location: item.location}, 
+				this.explorer._commandService, 
+				this.explorer._contentTypeService,
+				this.explorer._openWithCommands, 
+				{id:item.location + "_linkId"}, //$NON-NLS-0$
+				null, 
+				{holderDom: this._lastFileIconDom});
+		return link;
+    };
+    
+    ProblemsFileRenderer.prototype.generateDetailLink = function(item) {
+		return generateProblemsLink(this.explorer, item);
 	};
-
+	
+	return {
+		ProblemsExplorer: ProblemsExplorer
+	};
 });

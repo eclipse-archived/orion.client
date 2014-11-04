@@ -83,5 +83,5 @@ define({
 	'projectsSectionTitle': 'Projects',  //$NON-NLS-0$  //$NON-NLS-1$
 	'listingProjects': 'Listing projects...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'gettingWorkspaceInfo': 'Getting workspace information...',  //$NON-NLS-0$  //$NON-NLS-1$
-	"computeProblems": "Compute problems",  //$NON-NLS-1$ //$NON-NLS-0$
+	"showProblems": "Show problems...",  //$NON-NLS-1$ //$NON-NLS-0$
 });

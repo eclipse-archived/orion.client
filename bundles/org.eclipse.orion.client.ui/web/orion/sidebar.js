@@ -248,7 +248,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				contentTypeRegistry: this.contentTypeRegistry, 
 				fileClient: this.fileClient}, this._slideout);
 			var problemsInFolderCommand = new mCommands.Command({
-				name: messages["computeProblems"], //$NON-NLS-0$
+				name: messages["showProblems"], //$NON-NLS-0$
 				id: "orion.problemsInFolder", //$NON-NLS-0$
 				visibleWhen: function(item) {
 					if (Array.isArray(item)) {

@@ -35,17 +35,23 @@ exports.Explorer = (function() {
 	 */
 	function Explorer(serviceRegistry, selection, renderer, commandRegistry) {
 		this.registry = serviceRegistry;
-		this.renderer = renderer;
 		this.selection = selection;
 		this.commandService = commandRegistry;
-		if(this.renderer){
-			this.renderer.explorer = this;
-		}
+		this.setRenderer(renderer);
 		
 		this.myTree = null;
 	}
 	Explorer.prototype = /** @lends orion.explorer.Explorer.prototype */ {
 	
+		setRenderer: function(renderer) {
+			if(this.renderer && typeof this.renderer.destroy === "function") { //$NON-NLS-0$
+				 this.renderer.destroy();
+			}
+			this.renderer = renderer;
+			if(this.renderer){
+				this.renderer.explorer = this;
+			}
+		},
 		destroy: function() {
 			if (this._navHandler) {
 				this._navHandler.destroy();
