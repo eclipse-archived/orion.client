@@ -1619,13 +1619,14 @@ var exports = {};
 						}
 					}
 				} else {
-					if(confirm(i18nUtil.formatMessage(messages['Are you sure you want to delete ${0}?'], item.Name)))
+					if(confirm(i18nUtil.formatMessage(messages['Are you sure you want to delete ${0}?'], item.Name))) {
 						var msg1 = i18nUtil.formatMessage(messages["Removing repository ${0}"], item.Name);
 						progress.progress(gitService.removeGitRepository(item.Location), msg1).then(
 							function(){
 								dispatchModelEventOn({type: "modelChanged", action: "removeClone", items: [item]}); //$NON-NLS-1$ //$NON-NLS-0$
 							},
 							displayErrorOnStatus);
+					}
 				}
 				
 			}
