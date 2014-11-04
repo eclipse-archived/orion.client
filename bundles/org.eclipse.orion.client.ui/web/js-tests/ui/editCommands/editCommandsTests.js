@@ -67,6 +67,7 @@ define([
 			impl = impl || {};
 			impl.setProgressMessage = impl.setProgressMessage || Function.prototype; // noop
 			impl.setProgressResult  = impl.setProgressResult  || Function.prototype; // noop
+			impl.showWhile          = impl.showWhile || Function.prototype; // noop
 			serviceRegistry.registerService(MESSAGE, impl);
 		}
 	}
