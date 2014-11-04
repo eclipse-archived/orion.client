@@ -30,7 +30,7 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-c__src/syntax'], function(P
 			{	id: "text/x-c++src",
 				"extends": "text/plain",
 				name: "C++",
-				extension: ["cpp", "h"]
+				extension: ["cpp", "hpp"]
 			}
 		] 
 	});

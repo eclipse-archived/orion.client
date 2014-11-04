@@ -30,7 +30,7 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-csrc/syntax'], function(Plu
 			{	id: "text/x-csrc",
 				"extends": "text/plain",
 				name: "C",
-				extension: ["c"]
+				extension: ["c", "h"]
 			}
 		] 
 	});
