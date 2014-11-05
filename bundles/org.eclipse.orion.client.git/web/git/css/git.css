@@ -130,7 +130,8 @@
 	margin-left: 15px;
 	margin-right:5px;
 	margin-top: 0;
-	height: 25px;
+	flex: 0 0 main-size;
+	-ms-flex: 0 0 main-size;
 }
 
 .sidebar .sectionWrapper.sectionOpened {
@@ -142,7 +143,8 @@
 	margin-right: 5px;
 	margin-bottom: 0;
 	background-color: #fcfcfc;
-	height: calc(100% - 45px);
+	flex: 1 0;
+	-ms-flex: 1 0;
 	overflow: auto;
 }
 
@@ -250,7 +252,8 @@
 	margin-left: 0;
 	margin-right: 0;
 	margin-top: 0;
-	height: 25px;
+	flex: 0 0 main-size;
+	-ms-flex: 0 0 main-size;
 	background:white;
 }
 
@@ -258,7 +261,8 @@
 	margin-left: 0;
 	margin-right: 0;
 	margin-bottom: 0;
-	height: calc(100% - 40px);
+	flex: 1 0;
+	-ms-flex: 1 0;
 	overflow-y: auto;
 }
 
@@ -278,14 +282,22 @@ table .sectionTable {
 	top: 0;
 	box-shadow: none;
 	overflow: visible;
+	display: -ms-flexbox;
+	display: flex;
+	flex-direction: column;
+	-ms-flex-direction: column;
 }
 
 .sidebar {
 	overflow: visible;
+	display: -ms-flexbox;
+	display: flex;
+	flex-direction: column;
+	-ms-flex-direction: column;
 }
 
 .sidebarWrapper > .sidebar {
-	height: calc(100% - 5px);
+	height: calc(100% - 10px);
 }
 
 .sidebarWrapper {
