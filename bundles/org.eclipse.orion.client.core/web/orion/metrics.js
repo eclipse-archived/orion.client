@@ -36,7 +36,7 @@ define(["orion/xhr"], function(xhr) {
 						if (result.siteSpeedSampleRate) {
 							args.siteSpeedSampleRate = result.siteSpeedSampleRate;
 						}
-						window[GA_ID]("create", result.tid, "none", args); //$NON-NLS-0$
+						window[GA_ID]("create", result.tid, args); //$NON-NLS-0$
 						window[GA_ID]("send", "pageview"); //$NON-NLS-1$ //$NON-NLS-0$
 
 						queue.forEach(function(current) {
