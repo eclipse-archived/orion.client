@@ -80,7 +80,7 @@ Optional. Gives the URL prefix reserved by cf-launcher. Defaults to `urlprefix=l
 Once you've logged in, you're taken to a landing page that shows the status of your app, and the stdout/stderr log. Use the tabs
 on the top banner to access the debugger and shell.
 
-![screenshot](http://i.imgur.com/YH0kJqu.png)
+![screenshot](//i.imgur.com/YH0kJqu.png)
 
 ## File access with WebDAV
 cf-launcher includes a [WebDAV](http://en.wikipedia.org/wiki/WebDAV) server, which provides access to the files in your app instance.
