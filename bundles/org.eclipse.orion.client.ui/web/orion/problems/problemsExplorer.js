@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-
+/*global URL*/
 define([
 	'i18n!orion/problems/nls/messages',
 	'orion/Deferred',
@@ -23,7 +23,8 @@ define([
 	'orion/syntaxchecker',
 	'orion/editor/textModel',
 	'orion/explorers/navigationUtils',
-	'orion/explorers/fileDetailRenderer'
+	'orion/explorers/fileDetailRenderer',
+	'orion/URL-shim'
 ], function(messages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, navigatorRenderer, objects, mSyntaxchecker, mTextModel, mNavUtils, mFileDetailRenderer) {
     var DEBUG = false;
 	function generateProblemsLink(explorer, item) {
@@ -63,6 +64,22 @@ define([
 			}
 		});
 		return [errorsParent, warningsParent];
+	}
+	function processProblemsByFiles(totalFiles, totalProblems) {
+		var problemsByFile = [];
+		totalFiles.forEach(function(file) {
+			var newProblems = totalProblems.filter(function(problem){
+				return problem.fileLocation === file.location;
+			});
+			if(newProblems && newProblems.length > 0) {
+				problemsByFile.push(file);
+				file.children = newProblems;
+				newProblems.forEach(function(problem) {
+					problem.parent = file;
+				});
+			}
+		});
+		return problemsByFile;
 	}
 	function recalculateOffset(textContent, problems) {
 		//TODO: We also need line number here
@@ -119,6 +136,8 @@ define([
 	 * @extends orion.explorers.Explorer
 	 */
 	function ProblemsExplorer(options) {
+		var url = new URL(window.location.href);
+		this._byFile = url.query.get("byFile") === "true";
 		var renderer = new ProblemsRenderer({
 			noRowHighlighting: true,
 			registry: options.serviceRegistry,
@@ -150,6 +169,13 @@ define([
 			}.bind(this));
 			
 		},
+		_generateProblemsModel: function(totalProblems) {
+			if(this._byFile) {
+				this.filteredProblems = processProblemsByFiles(this.totalFiles, totalProblems);
+			} else {
+				this.filteredProblems = processProblemsByType(totalProblems);
+			}
+		},
 		_initSpinner: function() {
 			var parentNode = lib.node(this.parentId);
 			lib.empty(parentNode);
@@ -178,7 +204,7 @@ define([
 				this._filterOn(modifiedFilter, onFileName);
 			} else {
 				//filter was emptied, expand all
-				this.filteredProblems = processProblemsByType(this.totalProblems);
+				this._generateProblemsModel(this.totalProblems);
 			}
 			this.incrementalRender(true);
 		},
@@ -194,7 +220,7 @@ define([
 			var newProblems = this.totalProblems.filter(function(problem){
 				return this._filterSingle(problem, modifiedFilter, onFileName);
 			}.bind(this));
-			this.filteredProblems = processProblemsByType(newProblems);
+			this._generateProblemsModel(newProblems);
 		},
 		_visitFile: function(crawler, fileObj, contentType){
 			crawler.addTotalCounter();
@@ -242,6 +268,7 @@ define([
 			var resultLocation = [];
 			lib.empty(lib.node(this.parentId));
 			this.totalProblems = [];
+			this.totalFiles = [];
 			
 			if (jsonData.response.numFound > 0) {
 				jsonData.response.docs.forEach(function(hit) {
@@ -256,6 +283,7 @@ define([
 						if(incremental) {
 							resultLocation.push(fileItem);
 						} else {
+							this.totalFiles.push(fileItem);
 							processTotalProblems(fileItem, hit.problems, this.totalProblems);
 						}
 					}
@@ -264,7 +292,7 @@ define([
 			if(incremental) {
 				this.filteredProblems = resultLocation;
 			} else {
-				this.filteredProblems = processProblemsByType(this.totalProblems);
+				this._generateProblemsModel(this.totalProblems);
 			}
 			if(incremental){
 				this.incrementalRender();
@@ -353,7 +381,7 @@ define([
 					td = document.createElement("td"); //$NON-NLS-0$
 					div = document.createElement("div"); //$NON-NLS-0$
 					td.appendChild(div);
-					if (item.type === "category") { //$NON-NLS-0$
+					if (item.type === "category" || item.type === "file") { //$NON-NLS-0$
 						td.classList.add("problemsDecoratorTDTitle"); //$NON-NLS-0$
 						this.getExpandImage(tableRow, div);
 						this._getDecoratorIcon(div, item.location === "category_errors_id");
