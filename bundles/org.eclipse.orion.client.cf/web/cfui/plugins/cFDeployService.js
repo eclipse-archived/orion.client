@@ -11,16 +11,23 @@
 
 /*eslint-env browser,amd*/
 /*global URL*/
-define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 'cfui/cfUtil', 'orion/URITemplate',
+define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 
+        'cfui/cfUtil', 'orion/fileClient', 'orion/URITemplate', 'orion/serviceregistry', 
         'orion/preferences', 'orion/PageLinks', 'orion/xhr', 'orion/i18nUtil'],
-        function(messages, mBootstrap, Deferred, CFClient, mCfUtil, URITemplate, mPreferences, PageLinks, xhr, i18Util){
-
+        function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, 
+        		URITemplate, ServiceRegistry, mPreferences, PageLinks, xhr, i18Util){
+	
 	var deferred = new Deferred();
 	mBootstrap.startup().then(function(core){
-
-		var cFService = new CFClient.CFService();
 		var serviceRegistry = core.serviceRegistry;
-
+		var fileClient = new mFileClient.FileClient(serviceRegistry);
+		
+		var cFService = new CFClient.CFService();
+		
+		var temp = document.createElement('a');
+		temp.href = "../../prefs/user";
+		var location = temp.href;
+		
 		/* register hacked pref service */
 		var temp = document.createElement('a'); //$NON-NLS-0$
 		temp.href = "../prefs/user"; //$NON-NLS-0$
@@ -150,7 +157,7 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 								ContentLocation: project.ContentLocation,
 							});
 							var editLocation = new URL(expandedURL);
-							mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, project.ContentLocation).then(
+							mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, project.ContentLocation, fileClient).then(
 								function(launchConfigurationContent){
 									deferred.resolve(launchConfigurationContent);
 								}, function(error){

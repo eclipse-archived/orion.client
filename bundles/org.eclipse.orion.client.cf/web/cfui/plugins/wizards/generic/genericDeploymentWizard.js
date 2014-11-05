@@ -44,6 +44,8 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/cfui/cFClient', 'ori
 		var resource = JSON.parse(resourceString);
 			
 		var serviceRegistry = core.serviceRegistry;
+		var fileClient = new mFileClient.FileClient(serviceRegistry);
+		
 		var cfService = new CFClient.CFService(serviceRegistry);
 			
 		/* compute relative content location */
@@ -153,6 +155,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/cfui/cFClient', 'ori
 					postMsg : postMsg,
 					postError : postError,
 					
+					FileService: fileClient,
 					CFService : cfService,
 					getTargetSelection : function(){
 			    		return corePageBuilder.getSelection();

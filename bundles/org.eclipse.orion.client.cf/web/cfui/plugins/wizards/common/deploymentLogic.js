@@ -94,6 +94,7 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 			var postMsg = options.postMsg;
 			var postError = options.postError;
 
+			var fileService = options.FileService;
 			var cfService = options.CFService;
 			var targetSelection = options.getTargetSelection();
 			var saveManifest = options.saveManifest();
@@ -123,7 +124,7 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 				var editLocation = new URL(expandedURL);
 				cfService.pushApp(selection, null, decodeURIComponent(contentLocation + appPath), manifest, saveManifest, packager, instrumentation).then(
 					function(result){
-						mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, contentLocation).then(
+						mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, contentLocation, fileService).then(
 							function(launchConfigurationContent){
 								postMsg(launchConfigurationContent);
 							}, function(error){
