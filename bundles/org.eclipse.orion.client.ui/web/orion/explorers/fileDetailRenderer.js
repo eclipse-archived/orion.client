@@ -75,8 +75,8 @@ define([
         return span;
     }
 
-	function FileDetailRenderer() {
-		mExplorer.SelectionRenderer.apply(this, arguments);
+	function FileDetailRenderer(options, explorer) {
+		mExplorer.SelectionRenderer.call(this, options, explorer);
 	}
 	FileDetailRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(FileDetailRenderer.prototype, {
@@ -229,6 +229,7 @@ define([
 	        this._renderSegments(segments, parentSpan);
 	    },
 	    renderDetailElement: function(item, spanHolder) {
+			this.generateDetailDecorator(item, spanHolder);
 	        var linkSpan = this.getDetailElement(item, spanHolder);
 	        this.generateDetailHighlight(item, linkSpan);
 	    },
@@ -258,6 +259,8 @@ define([
 	    },
 	    enableCheckbox: function(item) {
 	    	return (typeof this.explorer.model.enableCheckbox === "function" && this.explorer.model.enableCheckbox(item)); //$NON-NLS-0$
+	    },
+	    generateDetailDecorator: function(/*item, col*/) {
 	    },
 	   	getCellElement: function(col_no, item, tableRow) {
 	        var col = null;
@@ -363,7 +366,7 @@ define([
 	});
 	
 	return {
-		FileDetailRenderer: FileDetailRenderer,
+		FileDetailRenderer: FileDetailRenderer
 	};
 
 });

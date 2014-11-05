@@ -10,9 +10,9 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/searchUtils', 'stringexternalizer/nonnlsSearchUtil'],
+define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/uiUtils', 'orion/searchUtils', 'stringexternalizer/nonnlsSearchUtil'],
 
-function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils, mNonnlsSearchUtil) {
+function(messages, require, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils, mNonnlsSearchUtil) {
     
     function _writeReport(reportList, fileItem, passed, message) {
         reportList.push({
@@ -121,8 +121,8 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils, mNonnls
 		for (var i = 0; i < this._listRoot.children.length; i++) {
 			this._listRoot.children[i].type = "file"; //$NON-NLS-0$
 			this._listRoot.children[i].linkLocation = require.toUrl("edit/edit.html") + "#" + this._listRoot.children[i].Location; //$NON-NLS-1$ //$NON-NLS-0$
-			this._listRoot.children[i].fullPathName = mSearchUtils.fullPathNameByMeta(this._listRoot.children[i].Parents);
-			this._listRoot.children[i].parentLocation = mSearchUtils.path2FolderName(this._listRoot.children[i].Location, this._listRoot.children[i].Name, true);
+			this._listRoot.children[i].fullPathName = mUiUtils.fullPathNameByMeta(this._listRoot.children[i].Parents);
+			this._listRoot.children[i].parentLocation = mUiUtils.path2FolderName(this._listRoot.children[i].Location, this._listRoot.children[i].Name, true);
 			for (var j = 0; j < this._listRoot.children[i].nonnls.length; j++) {
 				this._listRoot.children[i].nonnls[j].type = "detail"; //$NON-NLS-0$
 				this._listRoot.children[i].nonnls[j].parent = this._listRoot.children[i]; //.parent is reserved for tree visitor

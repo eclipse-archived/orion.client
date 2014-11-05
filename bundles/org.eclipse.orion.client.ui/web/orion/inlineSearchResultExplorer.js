@@ -108,8 +108,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     
     //Renderer to render the model
     function SearchResultRenderer(options, explorer) {
-        this._init(options);
-        this.explorer = explorer;
+		mFileDetailRenderer.FileDetailRenderer.call(this, options, explorer);
     }
 	SearchResultRenderer.prototype = Object.create(mFileDetailRenderer.FileDetailRenderer.prototype);
     

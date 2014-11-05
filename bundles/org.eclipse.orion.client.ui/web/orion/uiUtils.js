@@ -325,6 +325,18 @@ define([
 		return element.parentNode && isFormElement(element.parentNode, parentLimit);
 	}
 
+	/**
+	 * Returns the folder name from path.
+	 * @param {String} filePath
+	 * @param {String} fileName
+	 * @param {Boolean} keepTailSlash
+	 * @returns {String}
+	 */
+	function path2FolderName(filePath, fileName, keepTailSlash){
+		var tail = keepTailSlash ? 0: 1;
+		return filePath.substring(0, filePath.length - encodeURIComponent(fileName).length - tail);
+	}
+	
 	//return module exports
 	return {
 		getUserKeyString: getUserKeyString,
@@ -333,6 +345,7 @@ define([
 		followLink: followLink,
 		createButton: createButton,
 		createDropdownButton: createDropdownButton,
-		isFormElement: isFormElement
+		isFormElement: isFormElement,
+		path2FolderName: path2FolderName
 	};
 });

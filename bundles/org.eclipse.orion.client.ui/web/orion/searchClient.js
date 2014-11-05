@@ -13,9 +13,9 @@
 /*eslint-env browser, amd*/
 define([
 	'i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/searchUtils', 'orion/crawler/searchCrawler',
-	'orion/explorers/navigatorRenderer', 'orion/extensionCommands', 'orion/Deferred'
+	'orion/explorers/navigatorRenderer', 'orion/extensionCommands', 'orion/uiUtils', 'orion/Deferred'
 	],
-function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigatorRenderer, extensionCommands, Deferred){
+function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigatorRenderer, extensionCommands, mUiUtils, Deferred){
 
 	//default search renderer until we factor this out completely
 	function DefaultSearchRenderer(serviceRegistry, commandRegistry) {
@@ -201,7 +201,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 				for (var i=0; i < jsonData.response.docs.length; i++) {
 					var hit = jsonData.response.docs[i];
 					var path = hit.Location;
-					var folderName = mSearchUtils.path2FolderName(hit.Path ? hit.Path : hit.Location, hit.Name);
+					var folderName = mUiUtils.path2FolderName(hit.Path ? hit.Path : hit.Location, hit.Name);
 					var folder = folderName ? folderName : path;
 					var folderCheck = folderKeyword ? (folder.indexOf(folderKeyword) >= 0) : true;
 					if(folderCheck) {

@@ -10,9 +10,9 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['i18n!orion/search/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/searchUtils'],
+define(['i18n!orion/search/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/uiUtils', 'orion/searchUtils'],
 
-function(messages, Deferred, i18nUtil, mExplorer, mSearchUtils) {
+function(messages, Deferred, i18nUtil, mExplorer, mUiUtils, mSearchUtils) {
 
     /*** Internal model wrapper functions ***/
 
@@ -152,8 +152,8 @@ function(messages, Deferred, i18nUtil, mExplorer, mSearchUtils) {
                 lastModified: this._resultLocation[i].lastModified, //$NON-NLS-0$
                 linkLocation: this._resultLocation[i].linkLocation,
                 location: this._resultLocation[i].location,
-                parentLocation: mSearchUtils.path2FolderName(this._resultLocation[i].location, this._resultLocation[i].name, true),
-                fullPathName: mSearchUtils.path2FolderName(this._resultLocation[i].path, this._resultLocation[i].name)
+                parentLocation: mUiUtils.path2FolderName(this._resultLocation[i].location, this._resultLocation[i].name, true),
+                fullPathName: mUiUtils.path2FolderName(this._resultLocation[i].path, this._resultLocation[i].name)
             };
             this._location2ModelMap[childNode.location] = childNode;
             this.getListRoot().children.push(childNode);

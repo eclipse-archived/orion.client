@@ -498,10 +498,5 @@ searchUtils.fullPathNameByMeta = function(parents){
 	return fullPath;
 };
 
-searchUtils.path2FolderName = function(filePath, fileName, keepTailSlash){
-	var tail = keepTailSlash ? 0: 1;
-	return filePath.substring(0, filePath.length - encodeURIComponent(fileName).length - tail);
-};
-
 return searchUtils;
 });

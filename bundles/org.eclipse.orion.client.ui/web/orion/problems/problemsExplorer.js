@@ -24,9 +24,21 @@ define([
 	'orion/editor/textModel',
 	'orion/explorers/navigationUtils',
 	'orion/explorers/fileDetailRenderer',
+	'orion/uiUtils',
 	'orion/URL-shim'
-], function(messages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, navigatorRenderer, objects, mSyntaxchecker, mTextModel, mNavUtils, mFileDetailRenderer) {
+], function(messages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, navigatorRenderer, objects, mSyntaxchecker, mTextModel, mNavUtils, mFileDetailRenderer, mUiUtils) {
     var DEBUG = false;
+	function getDetailDecoratorIcon(holderDiv, isError){
+		var icon = document.createElement("div"); //$NON-NLS-0$
+		
+		icon.classList.add("problemsDecorator"); //$NON-NLS-0$
+		if(isError) {
+			icon.classList.add("problemsError"); //$NON-NLS-0$
+		} else {
+			icon.classList.add("problemsWarning"); //$NON-NLS-0$
+		}
+		holderDiv.appendChild(icon);
+	}
 	function generateProblemsLink(explorer, item) {
 		var params = {start: item.start, end: item.end};
 		var name = item.description;
@@ -82,17 +94,19 @@ define([
 		return problemsByFile;
 	}
 	function recalculateOffset(textContent, problems) {
-		//TODO: We also need line number here
 		var textModel = null;
 		problems.forEach(function(problem) {
+			//TODO: We may want to ask the validator always return line number later
+			if(!textModel) {//lazy creation of textModel
+				textModel = new mTextModel.TextModel(textContent);
+			}
 			if(typeof problem.line === "number") { //$NON-NLS-0$
-				if(!textModel) {//lazy creation of textModel
-					textModel = new mTextModel.TextModel(textContent);
-				}
 				var lineIndex = problem.line - 1;
 				var lineStart = textModel.getLineStart(lineIndex);
 				problem.start = lineStart + problem.start - 1;
 				problem.end = lineStart + problem.end - 1;
+			} else {
+				problem.line = textModel.getLineAtOffset(problem.start) + 1;
 			}
 		});
 	}
@@ -131,6 +145,23 @@ define([
 		}
 	});
 	
+	function ProblemsFileModel(options) {
+		ProblemsModel.call(this, options);
+	}
+	ProblemsFileModel.prototype = Object.create(ProblemsModel.prototype);
+	objects.mixin(ProblemsFileModel.prototype, /** @lends orion.propertyPanel.ProblemsFileModel.prototype */ {
+		getFileName: function(item) {
+			return item.name;
+		},
+	    getScopingParams: function(item) {
+	        return {
+	            name: mUiUtils.path2FolderName(item.path, item.name)
+	        };
+	    },
+	    getDetailInfo: function(item) {
+			return {lineString: item.description, lineNumber: item.line - 1, matches:[], matchNumber: 0};
+	    }
+	});
 	/**
 	 * @class orion.propertyPanel.ProblemsExplorer
 	 * @extends orion.explorers.Explorer
@@ -138,13 +169,17 @@ define([
 	function ProblemsExplorer(options) {
 		var url = new URL(window.location.href);
 		this._byFile = url.query.get("byFile") === "true";
-		var renderer = new ProblemsRenderer({
-			noRowHighlighting: true,
+		this._ProblemsRendererByType = new ProblemsRenderer({
 			registry: options.serviceRegistry,
 			commandService: options.commandRegistry,
 			actionScopeId: options.actionScopeId,
 			checkbox: false}, this);
-		mExplorer.Explorer.call(this, options.serviceRegistry, options.selection, renderer, options.commandRegistry);	
+		this._ProblemsRendererByFile = new ProblemsFileRenderer({
+			registry: options.serviceRegistry,
+			commandService: options.commandRegistry,
+			actionScopeId: options.actionScopeId,
+			checkbox: false}, this);
+		mExplorer.Explorer.call(this, options.serviceRegistry, options.selection, this._ProblemsRendererByType, options.commandRegistry);	
 		this.fileClient = options.fileClient,
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.parentId = options.parentId ? options.parentId : "orion.PropertyPanel.container";
@@ -188,7 +223,7 @@ define([
 			span.classList.add("problemsProgressSpan"); //$NON-NLS-0$
 			parentNode.appendChild(span);
 		},
-		filterProblems: function (filterStr, onFileName) {
+		filterProblems: function (filterStr) {
 			var modifiedFilter = null;
 			
 			if (filterStr) {
@@ -201,24 +236,19 @@ define([
 					filterFlags = "";	
 				}
 				modifiedFilter = new RegExp(modifiedFilter, filterFlags);
-				this._filterOn(modifiedFilter, onFileName);
+				this._filterOn(modifiedFilter);
 			} else {
 				//filter was emptied, expand all
 				this._generateProblemsModel(this.totalProblems);
 			}
 			this.incrementalRender(true);
 		},
-		_filterSingle: function(item, modifiedFilter, onFileName) {
-			//TODO: we need to return true if either file name or description hit the search
-			var strToTest = item.description;
-			if(onFileName) {
-				strToTest = item.fileName;
-			}
-			return (-1 !== strToTest.search(modifiedFilter));
+		_filterSingle: function(item, modifiedFilter) {
+			return (-1 !== item.description.search(modifiedFilter) || -1 !== item.fileName.search(modifiedFilter));
 		},
-		_filterOn: function(modifiedFilter, onFileName) {
+		_filterOn: function(modifiedFilter) {
 			var newProblems = this.totalProblems.filter(function(problem){
-				return this._filterSingle(problem, modifiedFilter, onFileName);
+				return this._filterSingle(problem, modifiedFilter);
 			}.bind(this));
 			this._generateProblemsModel(newProblems);
 		},
@@ -315,11 +345,22 @@ define([
 			mExplorer.Explorer.prototype.destroy.call(this);
 		},
 	    _incrementalRender: function(expandAll) {
-			var model =  new ProblemsModel({
-				registry: this.registry,
-				problems: this.filteredProblems,
-				progressService: this.progressService,
-			});
+	    	var model;
+	    	if(this._byFile) {
+				model =  new ProblemsFileModel({
+					registry: this.registry,
+					problems: this.filteredProblems,
+					progressService: this.progressService,
+				});
+				this.setRenderer(this._ProblemsRendererByFile);
+	    	} else {
+				model =  new ProblemsModel({
+					registry: this.registry,
+					problems: this.filteredProblems,
+					progressService: this.progressService,
+				});
+				this.setRenderer(this._ProblemsRendererByType);
+	    	}
 	        this.createTree(this.parentId, model, {
 	            selectionPolicy: "singleSelection", //$NON-NLS-0$
 	            //getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
@@ -352,9 +393,8 @@ define([
 		}
 	});
 	
-	function ProblemsRenderer(explorer) {
-		mExplorer.SelectionRenderer.apply(this, arguments);
-		this.explorer = explorer;
+	function ProblemsRenderer(options, explorer) {
+		mExplorer.SelectionRenderer.call(this, options, explorer);
 	}
 	ProblemsRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(ProblemsRenderer.prototype, {
@@ -363,17 +403,6 @@ define([
        		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	        spanHolder.appendChild(link);
 	    },
-		_getDecoratorIcon: function(holderDiv, isError){
-			var icon = document.createElement("div"); //$NON-NLS-0$
-			
-			icon.classList.add("problemsDecorator"); //$NON-NLS-0$
-			if(isError) {
-				icon.classList.add("problemsError"); //$NON-NLS-0$
-			} else {
-				icon.classList.add("problemsWarning"); //$NON-NLS-0$
-			}
-			holderDiv.appendChild(icon);
-		},
 		getCellElement: function(col_no, item, tableRow){
 			var div, td, itemLabel;
 			switch (col_no) {
@@ -384,10 +413,10 @@ define([
 					if (item.type === "category" || item.type === "file") { //$NON-NLS-0$
 						td.classList.add("problemsDecoratorTDTitle"); //$NON-NLS-0$
 						this.getExpandImage(tableRow, div);
-						this._getDecoratorIcon(div, item.location === "category_errors_id");
+						getDetailDecoratorIcon(div, item.location === "category_errors_id");
 					} else if (item.type === "problem") { //$NON-NLS-0$
  						td.classList.add("problemsDecoratorTD"); //$NON-NLS-0$
-						this._getDecoratorIcon(div, item.severity === "error");
+						getDetailDecoratorIcon(div, item.severity === "error");
  					}
 					return td;
 				case 1:
@@ -395,8 +424,6 @@ define([
 					if (item.type === "category") { //$NON-NLS-0$
 						div = document.createElement("div"); //$NON-NLS-0$
 						td.appendChild(div);
-						//this.getExpandImage(tableRow, div);
-						//this._getDecoratorIcon(div, item.location === "category_errors_id");
 						itemLabel = document.createElement("span"); //$NON-NLS-0$
 						itemLabel.textContent = item.name + " (" + item.children.length + " items)";
 						itemLabel.id = item.name + "CategoryItemId"; //$NON-NLS-0$
@@ -424,33 +451,39 @@ define([
 					} 
 					return td;
 			}
-		},
+		}
 	});
 	
     //Renderer to render the model
-    function ProblemsFileRenderer(explorer) {
-        this.explorer = explorer;
+    function ProblemsFileRenderer(options, explorer) {
+		mFileDetailRenderer.FileDetailRenderer.call(this, options, explorer);
     }
 	ProblemsFileRenderer.prototype = Object.create(mFileDetailRenderer.FileDetailRenderer.prototype);
     
     /*
      * APIs that the subclass of fileDetailRenderer has to override
      */
-    ProblemsFileRenderer.prototype.generateFileLink = function(resultModel, item) {
-		var link = navigatorRenderer.createLink(null, 
-				{Location: item.location}, 
-				this.explorer._commandService, 
-				this.explorer._contentTypeService,
-				this.explorer._openWithCommands, 
-				{id:item.location + "_linkId"}, //$NON-NLS-0$
-				null, 
-				{holderDom: this._lastFileIconDom});
-		return link;
-    };
-    
-    ProblemsFileRenderer.prototype.generateDetailLink = function(item) {
-		return generateProblemsLink(this.explorer, item);
-	};
+	objects.mixin(ProblemsFileRenderer.prototype, {
+	    generateFileLink: function(resultModel, item) {
+			var link = navigatorRenderer.createLink(null, 
+					{Location: item.location}, 
+					this.explorer.commandService, 
+					this.explorer.contentTypeRegistry,
+					this.explorer._openWithCommands, 
+					{id:item.location + "_linkId"}, //$NON-NLS-0$
+					null, 
+					{holderDom: this._lastFileIconDom});
+			return link;
+	    },
+	    generateDetailLink: function(item) {
+			return generateProblemsLink(this.explorer, item);
+		},
+	    generateDetailDecorator: function(item, spanHolder) {
+//			var div = document.createElement("div"); //$NON-NLS-0$
+//			col.appendChild(div);
+			getDetailDecoratorIcon(spanHolder, item.severity === "error"); //$NON-NLS-0$
+	    }
+	});
 	
 	return {
 		ProblemsExplorer: ProblemsExplorer

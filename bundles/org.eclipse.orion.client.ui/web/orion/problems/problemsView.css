@@ -20,7 +20,7 @@
 }
 
 .problemsFilter {
-	border: 1px solid lightgrey;
+	border: 1px solid lightgray;
 	margin: 3px 6px;
 	width: 95%; /* for older browsers */
 	width: calc(100% - 38px);
@@ -33,7 +33,7 @@
 }
 
 .problemsProgressSpan {
-	color: grey;
+	color: gray;
 	display: inline-block;
 	margin: 10px 6px;
 	position: relative;
