@@ -570,6 +570,15 @@ define([
 							contentType: inputManager.getContentType(),
 							input: inputManager.getInput()
 						};
+						
+						// TODO: Make this more generic
+						if (info.commandScope === "orion.edit.quickfixes") {
+							context.annotation = {
+								start: data.userData.start,
+								end: data.userData.end,
+								title: data.userData.title
+							};
+						}
 						var editorContext = EditorContext.getEditorContext(serviceRegistry);
 						// Hook up delegated UI and Status handling
 						editorContext.openDelegatedUI = function(/*options, ..*/) {
@@ -662,7 +671,13 @@ define([
 				for (var i = 0, position = 100; i < commandObjects.length; i++, position++) {
 					var command = commandObjects[i].command, info = commandObjects[i].info;
 					commandService.addCommand(command);
-					commandService.registerCommandContribution(toolbarId, command.id, position, "orion.menuBarToolsGroup", info.bindingOnly, createKeyBinding(info.key)); //$NON-NLS-0$
+					
+					// Handle quick fixes
+					if (info.commandScope) {
+						commandService.registerCommandContribution(info.commandScope, command.id, position, "orion.quickfixesGroup", info.bindingOnly, createKeyBinding(info.key)); //$NON-NLS-0$
+					} else {
+						commandService.registerCommandContribution(toolbarId, command.id, position, "orion.menuBarToolsGroup", info.bindingOnly, createKeyBinding(info.key)); //$NON-NLS-0$
+					}
 				}
 
 				// Render commands.

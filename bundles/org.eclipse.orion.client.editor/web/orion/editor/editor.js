@@ -746,6 +746,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			
 			if (this._hoverFactory) {
 				this._hover = this._hoverFactory.createHover(this);
+				var tooltip = mTooltip.Tooltip.getTooltip(this._textView);
+				tooltip.hover = this._hover;
 			}
 			
 			var editor = this, textView = this._textView;

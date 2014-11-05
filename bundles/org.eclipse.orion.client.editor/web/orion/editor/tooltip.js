@@ -396,6 +396,11 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					title = span;
 				}
 				result.appendChild(title);
+				
+				// Handle quick fixes
+				if (self.hover) {
+					self.hover.renderQuickFixes(annotation, result);
+				}
 				return result;
 			}
 			if (annotations.length === 1) {

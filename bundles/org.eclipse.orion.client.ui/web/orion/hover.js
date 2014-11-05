@@ -21,6 +21,7 @@ define ([
 		this.hoverFactory = hoverFactory;
 		this.inputManager = hoverFactory.inputManager;
 		this.serviceRegistry = hoverFactory.serviceRegistry;
+		this.commandRegistry = hoverFactory.commandRegistry;
 	}
 	
 	Hover.prototype = {
@@ -37,7 +38,22 @@ define ([
 			}.bind(this));
 
 			return hoverInfo;
+		},
+				
+		renderQuickFixes: function(annotation, parentDiv) {
+			if  (!annotation || !parentDiv)
+				return;
+
+			var actions = document.createElement("ul"); //$NON-NLS-0$
+			actions.className = "commandList layoutRight";
+			parentDiv.appendChild(actions);
+			
+			var metadata = this.inputManager.getFileMetadata();//copy
+			metadata.annotation = annotation;
+			this.commandRegistry.renderCommands("orion.edit.quickfixes", actions, metadata, this.editor, 'tool', annotation);
+			delete metadata.annonation;
 		}
+
 	};
 
 	function renderMarkDown(markDown) {
@@ -46,9 +62,10 @@ define ([
 		});
 	}
 	
-	function HoverFactory(serviceRegistry, inputManager) {
+	function HoverFactory(serviceRegistry, inputManager, commandRegistry) {
 		this.serviceRegistry = serviceRegistry;
 		this.inputManager = inputManager;
+		this.commandRegistry = commandRegistry;
 		
 		// Filter the plugins based on contentType...
 		this.filterHoverPlugins();
