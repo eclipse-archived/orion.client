@@ -105,6 +105,7 @@
             { name: "plugins/GitHubFilePlugin" },
             { name: "plugins/authenticationPlugin" },
             { name: "plugins/fileClientPlugin" },
+            { name: "plugins/googleAnalyticsPlugin" },
             { name: "plugins/gitBlamePlugin" },
             { name: "plugins/helpPlugin" },
             { name: "plugins/jslintPlugin" },

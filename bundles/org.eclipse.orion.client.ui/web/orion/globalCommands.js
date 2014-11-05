@@ -556,7 +556,7 @@ define([
 	 * @param {Boolean} closeSplitter true to make the splitter's initial state "closed".
 	 */
 	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, closeSplitter) {
-		mMetrics.init();
+		mMetrics.init(serviceRegistry);
 
 		new mThemePreferences.ThemePreferences(prefsService, new mThemeData.ThemeData()).apply();
 
