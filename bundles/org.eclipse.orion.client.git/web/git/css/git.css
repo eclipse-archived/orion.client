@@ -132,6 +132,7 @@
 	margin-top: 0;
 	flex: 0 0 main-size;
 	-ms-flex: 0 0 main-size;
+	-webkit-flex: 0 0 main-size;
 }
 
 .sidebar .sectionWrapper.sectionOpened {
@@ -145,6 +146,7 @@
 	background-color: #fcfcfc;
 	flex: 1 0;
 	-ms-flex: 1 0;
+	-webkit-flex: 1 0;
 	overflow: auto;
 }
 
@@ -254,6 +256,7 @@
 	margin-top: 0;
 	flex: 0 0 main-size;
 	-ms-flex: 0 0 main-size;
+	-webkit-flex: 0 0 main-size;
 	background:white;
 }
 
@@ -263,7 +266,8 @@
 	margin-bottom: 0;
 	flex: 1 0;
 	-ms-flex: 1 0;
-	overflow-y: auto;
+	-webkit-flex: 1 0;
+	overflow: auto;
 }
 
 table .sectionWrapper {
@@ -282,18 +286,26 @@ table .sectionTable {
 	top: 0;
 	box-shadow: none;
 	overflow: visible;
+	display: -webkit-box;
+	display: -moz-box;
 	display: -ms-flexbox;
+	display: -webkit-flex;
 	display: flex;
 	flex-direction: column;
 	-ms-flex-direction: column;
+	-webkit-flex-direction: column;
 }
 
 .sidebar {
 	overflow: visible;
+	display: -webkit-box;
+	display: -moz-box;
 	display: -ms-flexbox;
+	display: -webkit-flex;
 	display: flex;
 	flex-direction: column;
 	-ms-flex-direction: column;
+	-webkit-flex-direction: column;
 }
 
 .sidebarWrapper > .sidebar {
