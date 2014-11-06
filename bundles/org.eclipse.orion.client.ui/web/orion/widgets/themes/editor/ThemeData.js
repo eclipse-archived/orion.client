@@ -1885,11 +1885,106 @@ define([
 			return obj;
 		}		
 		
+		function rulesForCssText (styleContent) {
+			var doc = document.implementation.createHTMLDocument(""),
+				styleElement = document.createElement("style");
+			
+			styleElement.textContent = styleContent;
+			// the style will only be parsed once it is added to a document
+			doc.body.appendChild(styleElement);
+		
+			return styleElement.sheet.cssRules;
+		};
+		
 		function importTheme(data) {
 			var body = data.parameters.valueFor("name"); //$NON-NLS-0$
-			var xml = this.parseToXML(body);
 			
-			if(xml.children[0].tagName === "plist"){ //$NON-NLS-0$ //assume it uses tmTheme structure
+			var xml = this.parseToXML(body);
+			var rules = rulesForCssText(body);
+			
+			if(rules.length !== 0){
+				var newStyle = new StyleSet(); //sets the default styling
+					newStyle = {"name":"hellpo","className":"hellpo","styles":{"punctuation":{"block":{"color":""}},"annotationRange":{"matchingSearch":{"backgroundColor":"","color":""},"currentSearch":{"backgroundColor":"","color":"","text-decoration":"underline"}},"background":"","color":"#535353","fontFamily":"\"Consolas\", \"Monaco\", \"Vera Mono\", monospace","fontSize":"16px","textviewRightRuler":{"borderLeft":"1px solid rgba(131, 131, 131, 0.05)"},"textviewLeftRuler":{"borderRight":"1px solid rgba(131, 131, 131, 0.05)"},"ruler":{"backgroundColor":"#f8f8f8","overview":{"backgroundColor":"#f8f8f8"},"annotations":{"backgroundColor":"#f8f8f8"}},"rulerLines":{"color":"#535353","odd":{"color":"#535353"},"even":{"color":"#535353"}},"annotationLine":{"currentLine":{"backgroundColor":"rgba(255, 255, 255, 0.05)"}},"comment":{"color":"#949494","block":{"color":"#949494"},"line":{"color":"#949494"}},"constant":{"color":"#6d8600","numeric":{"color":"#6d8600","hex":{"color":"#6d8600"}}},"entity":{"name":{"color":"#8757ad","function":{"fontWeight":"normal","color":"#8757ad"}},"other":{"attribute-name":{"color":""}}},"keyword":{"control":{"color":"#446fbd","fontWeight":"normal"},"operator":{"color":"#446fbd","fontWeight":"normal"},"other":{"documentation":{"color":""}}},"markup":{"bold":{"fontWeight":"bold"},"heading":{"color":"blue"},"italic":{"fontStyle":"italic"},"list":{"color":"#CC4C07"},"other":{"separator":{"color":"#00008F"},"strikethrough":{"textDecoration":"line-through"},"table":{"color":"#3C802C"}},"quote":{"color":"#55b5db"},"raw":{"fontFamily":"monospace"},"underline":{"link":{"textDecoration":"underline"}}},"meta":{"documentation":{"annotation":{"color":""},"tag":{"color":""}},"tag":{"color":""}},"string":{"color":"#e88501","quoted":{"single":{"color":"#e88501"},"double":{"color":"#e88501"}}},"support":{"type":{"propertyName":{"color":"#9F4177"}}},"variable":{"language":{"color":"#446fbd","fontWeight":"normal"},"other":{"color":"#446fbd"},"parameter":{"color":"#8757ad"}}}} //$NON-NLS-0$
+					
+				for (var i = 0; i< rules.length; i++){
+					var classes = rules[i].selectorText.split(",");
+					for (var l = 0; l< classes.length; l++){
+						classes[l] = classes[l].trim();
+						if (classes[l].substr(classes[l].length - 10) === "CodeMirror"){ //$NON-NLS-0$
+							if(rules[i].style.background){
+								newStyle.styles.background = rules[i].style.background;
+							}
+							if(rules[i].style.color){
+								newStyle.styles.color = rules[i].style.color; 
+							}
+						}
+						else if (classes[l].substr(classes[l].length - 8) === "-comment"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.comment.color = rules[i].style.color;
+								newStyle.styles.comment.block.color = rules[i].style.color;
+								newStyle.styles.comment.line.color = rules[i].style.color;
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 7) === "-string"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.string.color = rules[i].style.color;
+								newStyle.styles.string.quoted.single.color = rules[i].style.color;
+								newStyle.styles.string.quoted.double.color = rules[i].style.color;
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 7) === "-number" || classes[l].substr(classes[l].length - 5) === "-atom"){ //$NON-NLS-1$ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.constant.color = rules[i].style.color;
+								newStyle.styles.constant.numeric.color = rules[i].style.color;
+								newStyle.styles.constant.numeric.hex.color = rules[i].style.color;
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 4) === "-def"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.entity.name.color = rules[i].style.color;
+								newStyle.styles.entity.name["function"].color = rules[i].style.color;
+								newStyle.styles.variable.parameter.color = rules[i].style.color;
+								newStyle.styles.variable.other.color = rules[i].style.color;
+								newStyle.styles.variable.language.color = rules[i].style.color;
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 8) === "-keyword"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.keyword.control.color = rules[i].style.color;
+								newStyle.styles.keyword.operator.color = rules[i].style.color;
+							}
+						}
+						else if(classes[l].indexOf("activeline") > -1){ //$NON-NLS-0$
+							if(rules[i].style.backgroundColor){
+								newStyle.styles.annotationLine.currentLine.backgroundColor = rules[i].style.backgroundColor;
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 8) === "-gutters"){ //$NON-NLS-0$
+							if(rules[i].style.backgroundColor){
+								newStyle.styles.ruler.backgroundColor = rules[i].style.backgroundColor;
+								newStyle.styles.ruler.overview.backgroundColor = rules[i].style.backgroundColor;
+								newStyle.styles.ruler.annotations.backgroundColor = rules[i].style.backgroundColor;
+							}
+							if(rules[i].style.color){
+								newStyle.styles.rulerLines.odd.color = rules[i].style.color;
+								newStyle.styles.rulerLines.even.color = rules[i].style.color;
+								newStyle.styles.rulerLines.color = rules[i].style.color;
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 5) === "-meta"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.meta.documentation.annotation.color = rules[i].style.color;
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 8) === "-bracket"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.punctuation.block.color = rules[i].style.color;	
+							}
+						}
+					}
+				}
+			}
+			else if(xml && xml.children[0].tagName === "plist"){ //$NON-NLS-0$ //assume it uses tmTheme structure [sublime, textmate, etc]
 				var themeJson = xmlToJson(xml); //convert to Json
 				var newStyle = new StyleSet(); //sets the default styling
 				newStyle = {"name":"default","className":"default","styles":{"annotationRange":{"matchingSearch":{"backgroundColor":""}, "currentSearch":{"backgroundColor":"","text-decoration":"underline"}},"backgroundColor":"","color":"","fontFamily":"\"Consolas\", \"Monaco\", \"Vera Mono\", monospace","fontSize":"16px","textviewRightRuler":{"borderLeft":"1px solid rgba(131, 131, 131, 0.05)"},"textviewLeftRuler":{"borderRight":"1px solid rgba(131, 131, 131, 0.05)"},"ruler":{"backgroundColor":"","overview":{"backgroundColor":""},"annotations":{"backgroundColor":""}},"rulerLines":{"color":"","odd":{"color":""},"even":{"color":""}},"annotationLine":{"currentLine":{"backgroundColor":"rgba(255, 255, 255, 0.05)"}},"comment":{"color":"","block":{"color":""},"line":{"color":""}},"constant":{"color":"","numeric":{"color":"","hex":{"color":""}}},"entity":{"name":{"color":"","function":{"fontWeight":"normal","color":""}},"other":{"attribute-name":{"color":""}}},"keyword":{"control":{"color":"","fontWeight":"normal"},"operator":{"color":"","fontWeight":"normal"},"other":{"documentation":{"color":""}}},"markup":{"bold":{"fontWeight":"bold"},"heading":{"color":"blue"},"italic":{"fontStyle":"italic"},"list":{"color":"#CC4C07"},"other":{"separator":{"color":"#00008F"},"strikethrough":{"textDecoration":"line-through"},"table":{"color":"#3C802C"}},"quote":{"color":"#55b5db"},"raw":{"fontFamily":"monospace"},"underline":{"link":{"textDecoration":"underline"}}},"meta":{"documentation":{"annotation":{"color":""},"tag":{"color":""}},"tag":{"color":""}},"string":{"color":"","quoted":{"single":{"color":""},"double":{"color":""}}},"support":{"type":{"propertyName":{"color":"#9F4177"}}},"variable":{"language":{"color":"","fontWeight":"normal"},"other":{"color":""},"parameter":{"color":""}}}				} //$NON-NLS-0$
