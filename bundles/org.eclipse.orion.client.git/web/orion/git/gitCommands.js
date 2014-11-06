@@ -1370,11 +1370,12 @@ var exports = {};
 			id: "eclipse.orion.git.deleteConfigEntryCommand", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
-				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
-				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				var key = item.Key;
 				var value = item.Value;
-				if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete ${0}?"], key))) {
+				commandService.confirm(data.domNode, i18nUtil.formatMessage(messages["Are you sure you want to delete ${0}?"], key), messages.OK, messages.Cancel, false, function(doit) {
+					if (!doit) return;
+					var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					var msg = i18nUtil.formatMessage(messages["DeletingConfig"], key);
 					var query = item.index !== undefined ? "?index=" + item.index : ""; //$NON-NLS-0$
 					progress.progress(gitService.deleteCloneConfigurationProperty(item.Location + query), msg).then(
@@ -1382,7 +1383,7 @@ var exports = {};
 							dispatchModelEventOn({type: "modelChanged", action: "deleteConfig", key: key, value: value}); //$NON-NLS-1$ //$NON-NLS-0$
 						}, displayErrorOnStatus
 					);
-				}
+				});
 			},
 			visibleWhen: function(item) {
 				return (item.Key && item.Value && item.Location);
@@ -1605,7 +1606,8 @@ var exports = {};
 				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				if(Array.isArray(item)){
-					if(confirm(i18nUtil.formatMessage(messages["Are you sure you want do delete ${0} repositories?"], item.length))){
+					commandService.confirm(data.domNode, i18nUtil.formatMessage(messages["Are you sure you want do delete ${0} repositories?"], item.length), messages.OK, messages.Cancel, false, function(doit) {
+						if (!doit) return;
 						var alreadyDeleted = 0;
 						for(var i=0; i<item.length; i++){
 							var msg = i18nUtil.formatMessage(messages["Removing repository ${0}"], item.Name);
@@ -1617,18 +1619,18 @@ var exports = {};
 										}
 									}, displayErrorOnStatus);
 						}
-					}
+					});
 				} else {
-					if(confirm(i18nUtil.formatMessage(messages['Are you sure you want to delete ${0}?'], item.Name))) {
+					commandService.confirm(data.domNode, i18nUtil.formatMessage(messages['Are you sure you want to delete ${0}?'], item.Name), messages.OK, messages.Cancel, false, function(doit) {
+						if (!doit) return;
 						var msg1 = i18nUtil.formatMessage(messages["Removing repository ${0}"], item.Name);
 						progress.progress(gitService.removeGitRepository(item.Location), msg1).then(
 							function(){
 								dispatchModelEventOn({type: "modelChanged", action: "removeClone", items: [item]}); //$NON-NLS-1$ //$NON-NLS-0$
 							},
 							displayErrorOnStatus);
-					}
+					});
 				}
-				
 			}
 		});
 		commandService.addCommand(deleteCommand);

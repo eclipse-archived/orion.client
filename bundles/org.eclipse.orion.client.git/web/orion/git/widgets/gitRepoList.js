@@ -380,7 +380,7 @@ define([
 						tableRow.classList.remove("selectableNavRow"); //$NON-NLS-0$
 					} else {
 						var actionsArea = document.createElement("div"); //$NON-NLS-0$
-						actionsArea.className = "sectionTableItemActions"; //$NON-NLS-0$
+						actionsArea.className = "sectionTableItemActions toolComposite"; //$NON-NLS-0$
 						actionsArea.id = actionsID;
 						horizontalBox.appendChild(actionsArea);
 						this.commandService.renderCommands(this.actionScopeId, actionsArea, item, explorer, explorer.section ? "tool" : "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$	
