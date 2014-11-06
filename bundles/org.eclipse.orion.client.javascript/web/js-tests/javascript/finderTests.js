@@ -55,7 +55,7 @@ define([
 		 */
 		function tearDown() {
 			editorContext.text = "";
-			astManager.updated();
+			astManager.updated({file:{}});
 		}
 	
 		it('test_findWord1', function() {
@@ -393,7 +393,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -416,7 +416,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -439,7 +439,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -462,7 +462,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -485,7 +485,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -508,7 +508,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -531,7 +531,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -554,7 +554,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -571,7 +571,7 @@ define([
 					assert.equal(token, null, "Should not have found a token for out of range");
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -594,7 +594,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -617,7 +617,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -640,7 +640,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -663,7 +663,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -686,7 +686,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -709,7 +709,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -726,7 +726,7 @@ define([
 					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -743,7 +743,7 @@ define([
 					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -760,7 +760,7 @@ define([
 					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -777,7 +777,7 @@ define([
 					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -794,7 +794,7 @@ define([
 					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -811,7 +811,7 @@ define([
 					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -828,7 +828,7 @@ define([
 					assert.equal(null, token, 'Should not have found a token');
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -851,7 +851,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -870,7 +870,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -889,7 +889,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -908,7 +908,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -927,7 +927,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -946,7 +946,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -965,7 +965,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -984,7 +984,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -1003,7 +1003,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -1022,7 +1022,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -1041,7 +1041,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -1060,7 +1060,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -1079,7 +1079,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -1098,7 +1098,7 @@ define([
 					}
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -1115,7 +1115,7 @@ define([
 					assert.equal(token, null, "Should not have found a token for a negative offset");
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -1132,7 +1132,7 @@ define([
 					assert.equal(token, null, "Should not have found a token for a null offset");
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -1149,7 +1149,7 @@ define([
 					assert.equal(token, null, "Should not have found a token for an undefined offset");
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -1166,7 +1166,7 @@ define([
 					assert.equal(token, null, "Should not have found a node for a null offset");
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -1183,7 +1183,7 @@ define([
 					assert.equal(token, null, "Should not have found a node for a negative offset");
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});
@@ -1200,7 +1200,7 @@ define([
 					assert.equal(token, null, "Should not have found a node for an undefined offset");
 				}
 				finally {
-					astManager.updated();
+					tearDown();
 				}
 			});
 		});

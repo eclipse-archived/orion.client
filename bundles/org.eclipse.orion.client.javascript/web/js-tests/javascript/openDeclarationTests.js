@@ -59,7 +59,7 @@ define([
 		 */
 		function tearDown() {
 			editorContext.text = "";
-			astManager.updated();
+			astManager.updated({file:{}});
 		}
 	
 		it("Test Function decl 1", function() {

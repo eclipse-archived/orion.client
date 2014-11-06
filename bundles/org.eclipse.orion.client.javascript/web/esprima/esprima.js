@@ -1911,11 +1911,15 @@ parseStatement: true, parseSourceElement: true */
 			var token = lookahead;
 			if (token.type === Token.EOF) {
 	            throwErrorTolerant(token, Messages.UnexpectedEOS);
-	        } else if(token.type !== Token.Punctuator && token.value !== value) {
+	        } else if(token.value !== value) {
         		if(extra.tokens && extra.tokens.length > 0) {
         			token = extra.tokens[extra.tokens.length-1];
         		}
-        		throwErrorTolerant(token, Messages.MissingToken, value);
+        		if(token.type !== 'Punctuator') { // XXX this is a 'saved' token which has names for types, NOT num values
+        		    throwErrorTolerant(token, Messages.MissingToken, value);
+        		} else {
+        		    throwErrorTolerant(token, Messages.UnexpectedToken, token.value);
+        		}
         	} else {
         		lex();
         	}

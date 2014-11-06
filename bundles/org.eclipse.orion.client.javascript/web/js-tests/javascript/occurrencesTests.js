@@ -47,7 +47,7 @@ define([
 		 */
 		function tearDown() {
 			editorContext.text = "";
-			astManager.updated();
+			astManager.updated({file:{}});
 			context.selection.start = -1;
 			context.selection.end = -1;
 			context.contentType = 'application/javascript';
@@ -747,7 +747,7 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426930
 		 */
 		it('test_thisUsageCallExpressionObject1', function() {
-			editorContext.text = "call({f1: function() {this.bool;},f2: function() {this.bool;},f3: function() {this.bool;}}this.end = true;";
+			editorContext.text = "call({f1: function() {this.bool;},f2: function() {this.bool;},f3: function() {this.bool;}});this.end = true;";
 			return occurrences.computeOccurrences(editorContext, setContext(24, 24)).then(function(results) {
 				try {
 					assertOccurrences(results, [{start:22, end:26}, {start:50, end:54}, {start:78, end:82}]);
@@ -763,7 +763,7 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426930
 		 */
 		it('test_thisUsageCallExpressionObject2', function() {
-			editorContext.text = "call({f1: function() {this.bool;},f2: function() {this.bool;},f3: function() {this.bool;}}this.end = true;";
+			editorContext.text = "call({f1: function() {this.bool;},f2: function() {this.bool;},f3: function() {this.bool;}});this.end = true;";
 			return occurrences.computeOccurrences(editorContext, setContext(53, 53)).then(function(results) {
 				try {
 					assertOccurrences(results, [{start:22, end:26}, {start:50, end:54}, {start:78, end:82}]);
@@ -779,7 +779,7 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426930
 		 */
 		it('test_thisUsageCallExpressionObject3', function() {
-			editorContext.text = "call({f1: function() {this.bool;},f2: function() {this.bool;},f3: function() {this.bool;}}this.end = true;";
+			editorContext.text = "call({f1: function() {this.bool;},f2: function() {this.bool;},f3: function() {this.bool;}});this.end = true;";
 			return occurrences.computeOccurrences(editorContext, setContext(81, 81)).then(function(results) {
 				try {
 					assertOccurrences(results, [{start:22, end:26}, {start:50, end:54}, {start:78, end:82}]);
@@ -2259,10 +2259,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
 		 */
 		it('test_ObjectPropsSiblingScopes1', function() {
-			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); }; var c = { p: this.g(); }; }, g: function (){} };";
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g() }; var c = { p: this.g() }; }, g: function (){} };";
 			return occurrences.computeOccurrences(editorContext, setContext(31, 32)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:31, end:32}, {start:54, end:55}, {start:80, end:81}, {start:91, end:92}]);
+					assertOccurrences(results, [{start:31, end:32}, {start:54, end:55}, {start:79, end:80}, {start:89, end:90}]);
 				}
 				finally {
 					tearDown();
@@ -2275,10 +2275,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
 		 */
 		it('test_ObjectPropsSiblingScopes2', function() {
-			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); }; var c = { p: this.g(); }; }, g: function (){} };";
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g() }; var c = { p: this.g() }; }, g: function (){} };";
 			return occurrences.computeOccurrences(editorContext, setContext(54, 54)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:31, end:32}, {start:54, end:55}, {start:80, end:81}, {start:91, end:92}]);
+					assertOccurrences(results, [{start:31, end:32}, {start:54, end:55}, {start:79, end:80}, {start:89, end:90}]);
 				}
 				finally {
 					tearDown();
@@ -2291,10 +2291,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
 		 */
 		it('test_ObjectPropsSiblingScopes3', function() {
-			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); }; var c = { p: this.g(); }; }, g: function (){} };";
-			return occurrences.computeOccurrences(editorContext, setContext(80, 80)).then(function(results) {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g() }; var c = { p: this.g() }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(79, 79)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:31, end:32}, {start:54, end:55}, {start:80, end:81}, {start:91, end:92}]);
+					assertOccurrences(results, [{start:31, end:32}, {start:54, end:55}, {start:79, end:80}, {start:89, end:90}]);
 				}
 				finally {
 					tearDown();
@@ -2307,10 +2307,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
 		 */
 		it('test_ObjectPropsSiblingScopes4', function() {
-			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); }; var c = { p: this.g(); }; }, g: function (){} };";
-			return occurrences.computeOccurrences(editorContext, setContext(91, 92)).then(function(results) {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g() }; var c = { p: this.g() }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(89, 90)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:31, end:32}, {start:54, end:55}, {start:80, end:81}, {start:91, end:92}]);
+					assertOccurrences(results, [{start:31, end:32}, {start:54, end:55}, {start:79, end:80}, {start:89, end:90}]);
 				}
 				finally {
 					tearDown();
@@ -2323,10 +2323,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
 		 */
 		it('test_ObjectPropsNestedScopes1', function() {
-			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); g: function (){} }; var c = { p: this.g(); }; }, g: function (){} };";
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g() g: function (){} }; var c = { p: this.g() }; }, g: function (){} };";
 			return occurrences.computeOccurrences(editorContext, setContext(31, 32)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:31, end:32}, {start:97, end:98}, {start:108, end:109}]);
+					assertOccurrences(results, [{start:31, end:32}, {start:96, end:97}, {start:106, end:107}]);
 				}
 				finally {
 					tearDown();
@@ -2339,10 +2339,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
 		 */
 		it('test_ObjectPropsNestedScopes2', function() {
-			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); g: function (){} }; var c = { p: this.g(); }; }, g: function (){} };";
-			return occurrences.computeOccurrences(editorContext, setContext(97, 97)).then(function(results) {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g() g: function (){} }; var c = { p: this.g() }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(96, 96)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:31, end:32}, {start:97, end:98}, {start:108, end:109}]);
+					assertOccurrences(results, [{start:31, end:32}, {start:96, end:97}, {start:106, end:107}]);
 				}
 				finally {
 					tearDown();
@@ -2355,10 +2355,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
 		 */
 		it('test_ObjectPropsNestedScopes3', function() {
-			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); g: function (){} }; var c = { p: this.g(); }; }, g: function (){} };";
-			return occurrences.computeOccurrences(editorContext, setContext(109, 109)).then(function(results) {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g() g: function (){} }; var c = { p: this.g() }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(106, 106)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:31, end:32}, {start:97, end:98}, {start:108, end:109}]);
+					assertOccurrences(results, [{start:31, end:32}, {start:96, end:97}, {start:106, end:107}]);
 				}
 				finally {
 					tearDown();
@@ -2371,10 +2371,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
 		 */
 		it('test_ObjectPropsNestedScopes4', function() {
-			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); g: function (){} }; var c = { p: this.g(); }; }, g: function (){} };";
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g() g: function (){} }; var c = { p: this.g() }; }, g: function (){} };";
 			return occurrences.computeOccurrences(editorContext, setContext(54, 55)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:54, end:55}, {start:59, end:60}]);
+					assertOccurrences(results, [{start:54, end:55}, {start:58, end:59}]);
 				}
 				finally {
 					tearDown();
@@ -2387,10 +2387,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=439156
 		 */
 		it('test_ObjectPropsNestedScopes5', function() {
-			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g(); g: function (){} }; var c = { p: this.g(); }; }, g: function (){} };";
-			return occurrences.computeOccurrences(editorContext, setContext(59, 59)).then(function(results) {
+			editorContext.text = "var a = { f: function (){ this.g(); var b = { p: this.g() g: function (){} }; var c = { p: this.g() }; }, g: function (){} };";
+			return occurrences.computeOccurrences(editorContext, setContext(58, 58)).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:54, end:55}, {start:59, end:60}]);
+					assertOccurrences(results, [{start:54, end:55}, {start:58, end:59}]);
 				}
 				finally {
 					tearDown();
