@@ -235,9 +235,9 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				return;
 			}
 			
+			var self = this;
 			var deferredInfo = info.deferredInfo;
 			if (deferredInfo) {
-				var self = this;
 				deferredInfo.forEach(function(tipSection) {
 					tipSection.promise.then(function (data) {
 						if (data) {
@@ -278,7 +278,6 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 			
 			if (autoHide) {
-				var self = this;
 				var window = this._getWindow();
 				self._hideTimeout = window.setTimeout(function() {
 					self._hideTimeout = null;
@@ -370,9 +369,11 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				var result = util.createElement(document, "div"); //$NON-NLS-0$
 				result.className = "tooltipRow"; //$NON-NLS-0$
 				if (annotation.html) {
-					result.innerHTML = annotation.html;
-					if (result.lastChild) {
-						textUtil.addEventListener(result.lastChild, "click", function(event) { //$NON-NLS-0$
+					var htmlHolder = util.createElement(document, "div"); //$NON-NLS-0$
+					htmlHolder.className = "tooltipImage"; //$NON-NLS-0$
+					htmlHolder.innerHTML = annotation.html;
+					if (htmlHolder.lastChild) {
+						textUtil.addEventListener(htmlHolder.lastChild, "click", function() { //$NON-NLS-0$
 							var start = annotation.start, end = annotation.end;
 							if (model.getBaseModel) {
 								start = model.mapOffset(start, true);
@@ -381,7 +382,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 							view.setSelection(start, end, 1 / 3, function() { self._hide(); });
 						}, false);
 					}
-					result.appendChild(document.createTextNode("\u00A0")); //$NON-NLS-0$
+					result.appendChild(htmlHolder); //$NON-NLS-0$
 				}
 				if (!title) {
 					title = getText(annotation.start, annotation.end);
@@ -391,7 +392,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				}
 				if (typeof title === "string") { //$NON-NLS-0$
 					var span = util.createElement(document, "span"); //$NON-NLS-0$
-//					span.className = "tooltipTitle"; //$NON-NLS-0$
+					span.className = "tooltipTitle"; //$NON-NLS-0$
 					span.appendChild(document.createTextNode(title));
 					title = span;
 				}

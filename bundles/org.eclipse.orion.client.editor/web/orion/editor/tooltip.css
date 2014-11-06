@@ -34,8 +34,14 @@
 	display: table-row;
 }
 
+.textviewTooltip .tooltipImage {
+	display: inline-block;
+	vertical-align: middle;
+	padding: 1px;
+}
+
 .textviewTooltip .tooltipTitle {
-	float: right;
+	vertical-align: middle;
 }
 
 .tooltipTheme .annotationLine.currentLine {
