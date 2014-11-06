@@ -225,6 +225,9 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 		 * as destroying resources.
 		 */
 		hide: function(keepCurrentModal) {
+			var activeElement = document.activeElement;
+			var hasFocus = this.$frameParent === activeElement || (this.$frameParent.compareDocumentPosition(activeElement) & 16) !== 0;
+			var originalFocus = this.$originalFocus;
 			if(!keepCurrentModal && modalDialogManager.dialog === this) {
 				modalDialogManager.dialog = null;
 			}
@@ -240,6 +243,9 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 			lib.setFramesEnabled(true);
 			if (typeof this._afterHiding === "function") { //$NON-NLS-0$
 				this._afterHiding();
+			}
+			if (hasFocus && originalFocus && document.compareDocumentPosition(originalFocus) !== 1) {
+				originalFocus.focus();
 			}
 			var self = this;
 			if (!this.keepAlive) {
@@ -286,7 +292,7 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 				left = Math.max(0, (totalRect.width - rect.width) / 2);
 				top = Math.max(0, (totalRect.height - rect.height) / 2);
 			}
-			this.$lastFocusedElement = document.activeElement;
+			this.$lastFocusedElement = this.$originalFocus = document.activeElement;
 			this.$frame.style.top = top + "px"; //$NON-NLS-0$
 			this.$frame.style.left = left + "px"; //$NON-NLS-0$ 
 			this.$frame.classList.add("dialogShowing"); //$NON-NLS-0$
