@@ -31,13 +31,17 @@ define ([
 				var providerImpl = this.serviceRegistry.getService(provider);
 				if (providerImpl && providerImpl.computeHoverInfo) {
 					var editorContext = EditorContext.getEditorContext(this.serviceRegistry);
-					var promise = providerImpl.computeHoverInfo(editorContext, context);
-					hoverInfo.push({promise: promise,
-									renderMarkDown: renderMarkDown});
+					hoverInfo.push(providerImpl.computeHoverInfo(editorContext, context));
 				}
 			}.bind(this));
 
 			return hoverInfo;
+		},
+		
+		renderMarkDown: function(markDown) {
+			return Markdown(markDown, {
+				sanitize: true
+			});
 		},
 				
 		renderQuickFixes: function(annotation, parentDiv) {
@@ -45,23 +49,17 @@ define ([
 				return;
 
 			var actions = document.createElement("ul"); //$NON-NLS-0$
-			actions.className = "commandList layoutRight";
+			actions.className = "commandList layoutRight"; //$NON-NLS-0$
 			parentDiv.appendChild(actions);
 			
-			var metadata = this.inputManager.getFileMetadata();//copy
+			var metadata = this.inputManager.getFileMetadata();
 			metadata.annotation = annotation;
-			this.commandRegistry.renderCommands("orion.edit.quickfix", actions, metadata, this.editor, 'tool', annotation);
+			this.commandRegistry.renderCommands("orion.edit.quickfix", actions, metadata, this.editor, 'tool', annotation); //$NON-NLS-1$ //$NON-NLS-0$
 			delete metadata.annonation;
 		}
 
 	};
 
-	function renderMarkDown(markDown) {
-		return Markdown(markDown, {
-			sanitize: true
-		});
-	}
-	
 	function HoverFactory(serviceRegistry, inputManager, commandRegistry) {
 		this.serviceRegistry = serviceRegistry;
 		this.inputManager = inputManager;

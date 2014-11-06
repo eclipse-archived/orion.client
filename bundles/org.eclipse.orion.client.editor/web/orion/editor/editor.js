@@ -659,28 +659,15 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			offset = this.mapOffset(offset);
 			var annotations = annotationStyler.getAnnotationsByType(annotationModel, offset, offset + 1);
 			var rangeAnnotations = [];
-			var annotationMsgs = [];
 			for (var i = 0; i < annotations.length; i++) {
 				if (annotations[i].rangeStyle) {
 					rangeAnnotations.push(annotations[i]);
-					annotationMsgs.push(annotations[i].title);
 				}
-			}
-			
-			var deferredInfo = [];
-			if (this._hover) {
-				var context = {offset: offset, 
-								annotations: annotationMsgs};
-				deferredInfo = this._hover.computeHoverInfo(context);
-			}
-			
-			if (rangeAnnotations.length === 0 && deferredInfo.length === 0) {
-				return null;
 			}
 			var pt = textView.convert({x: x, y: y}, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
 			var info = {
-				deferredInfo: deferredInfo,
 				contents: rangeAnnotations,
+				offset: offset,
 				anchor: "left", //$NON-NLS-0$
 				x: pt.x + 10,
 				y: pt.y + 20

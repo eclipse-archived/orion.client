@@ -14,9 +14,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
 	'orion/editor/textView', //$NON-NLS-0$
 	'orion/editor/projectionTextModel', //$NON-NLS-0$
+	'orion/Deferred', //$NON-NLS-0$
 	'orion/editor/util', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mTextView, mProjectionTextModel, textUtil, util) {
+], function(messages, mTextView, mProjectionTextModel, Deferred, textUtil, util) {
 
 	/** @private */
 	function Tooltip (view) {
@@ -194,11 +195,16 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			var tooltipDoc = tooltipDiv.ownerDocument;
 			var documentElement = tooltipDoc.documentElement;
 			
+			var hoverInfo;
+			if (this.hover && info.offset !== undefined) {
+				var context = {offset: info.offset};
+				hoverInfo = this.hover.computeHoverInfo(context);
+			}
+			
 			var contents = info.contents;
 			if (contents instanceof Array) {
 				contents = this._getAnnotationContents(contents);			
 			}
-			
 			if (typeof contents === "string") { //$NON-NLS-0$
 				tooltipContents.innerHTML = contents;
 			} else if (this._isNode(contents)) {
@@ -231,27 +237,8 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				tooltipContents.style.width = size.width + "px"; //$NON-NLS-0$
 				tooltipContents.style.height = size.height + "px"; //$NON-NLS-0$
 				contentsView.resize();
-			} else if (!info.deferredInfo) {
+			} else if (!(hoverInfo && hoverInfo.length)) {
 				return;
-			}
-			
-			var self = this;
-			var deferredInfo = info.deferredInfo;
-			if (deferredInfo) {
-				deferredInfo.forEach(function(tipSection) {
-					tipSection.promise.then(function (data) {
-						if (data) {
-							if (data.content) {
-								self._renderContent(tooltipDoc, tooltipContents, data, tipSection);
-							}
-
-							// Ensure that the tooltip is visible
-							tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
-						}
-					}, function(err) {
-						console.error("Problem computing hover tooltip", err);
-					});
-				});
 			}
 			
 			if (info.anchor === "right") { //$NON-NLS-0$
@@ -271,6 +258,25 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			tooltipDiv.style.top = top + "px"; //$NON-NLS-0$
 			tooltipDiv.style.maxHeight = (documentElement.clientHeight - top - 10) + "px"; //$NON-NLS-0$
 			tooltipDiv.style.opacity = "1"; //$NON-NLS-0$
+			
+			var self = this;
+			if (hoverInfo) {
+				hoverInfo.forEach(function(info) {
+					Deferred.when(info, function (data) {
+						if (data) {
+							self._renderContent(tooltipDoc, tooltipContents, data);
+
+							// Ensure that the tooltip is visible
+							tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
+						}
+					}, function(error) {
+						if (typeof console !== "undefined") { //$NON-NLS-0$
+							console.error("Error computing hover tooltip"); //$NON-NLS-0$
+							console.log(error && error.stack);
+						}
+					});
+				});
+			}
 			
 			// Delay the showing of a tootip with no 'static' contents
 			if (contents) {
@@ -293,50 +299,29 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				}, self._autoHideDelay);
 			}
 		},
-		_renderContent: function(tooltipDoc, tooltipContents, data, tipSection) {
-		    var sectionDiv = null;
-		    var divResult = null;
+		_renderContent: function(tooltipDoc, tooltipContents, data) {
+			var sectionDiv = null;
+			var divResult = null;
 
 			// render the title, if any
 			if (data.title) {
 				sectionDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
-				sectionDiv.innerHTML = tipSection.renderMarkDown(data.title);
+				sectionDiv.innerHTML = this.hover.renderMarkDown(data.title);
 				tooltipContents.appendChild(sectionDiv);
 			}
-							
+			if (!data.content) return;
 			switch(data.type) {
-				case 'markdown': {
-					if (data.content) {
-						divResult = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
-						divResult.innerHTML = tipSection.renderMarkDown(data.content);
-						sectionDiv.appendChild(divResult);
-					}
-					break;
-				}
-				case 'proposal': {
-						var params = data.content;
-						sectionDiv = util.createElement(tooltipDoc, "button"); //$NON-NLS-0$
-						sectionDiv.textContent = params.label;
-						tooltipContents.appendChild(sectionDiv);
-						
-						var self = this;
-						sectionDiv.addEventListener("click", function() {
-							self._view.setText(params.text, params.start, params.end);
-							self._hide();
-						});
+				case 'markdown': { //$NON-NLS-0$
+					divResult = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
+					divResult.innerHTML = this.hover.renderMarkDown(data.content);
+					sectionDiv.appendChild(divResult);
 					break;
 				}
 				default: {
-					if (data.title) {
-						sectionDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
-						sectionDiv.textContent = data.title;
-					}
-					if (data.content) {
-						tooltipContents.appendChild(sectionDiv);
-						divResult = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
-						divResult.appendChild(tooltipDoc.createTextNode(data.content));
-						sectionDiv.appendChild(divResult);
-					}
+					tooltipContents.appendChild(sectionDiv);
+					divResult = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
+					divResult.appendChild(tooltipDoc.createTextNode(data.content));
+					sectionDiv.appendChild(divResult);
 				}
 			}
 		},
