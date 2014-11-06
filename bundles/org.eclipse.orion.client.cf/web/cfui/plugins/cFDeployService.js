@@ -10,24 +10,20 @@
  ******************************************************************************/
 
 /*eslint-env browser,amd*/
-/*global URL*/
-define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient', 
-        'cfui/cfUtil', 'orion/fileClient', 'orion/URITemplate', 'orion/serviceregistry', 
-        'orion/preferences', 'orion/PageLinks', 'orion/xhr', 'orion/i18nUtil'],
-        function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, 
-        		URITemplate, ServiceRegistry, mPreferences, PageLinks, xhr, i18Util){
-	
+/*global URL confirm*/
+define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient',
+        'cfui/cfUtil', 'orion/fileClient', 'orion/URITemplate', 'orion/preferences', 'orion/PageLinks',
+        'orion/xhr', 'orion/i18nUtil', 'orion/projectClient'],
+        function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient,
+        		URITemplate, mPreferences, PageLinks, xhr, i18Util, mProjectClient){
+
 	var deferred = new Deferred();
 	mBootstrap.startup().then(function(core){
 		var serviceRegistry = core.serviceRegistry;
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
-		
+
 		var cFService = new CFClient.CFService();
-		
-		var temp = document.createElement('a');
-		temp.href = "../../prefs/user";
-		var location = temp.href;
-		
+
 		/* register hacked pref service */
 		var temp = document.createElement('a'); //$NON-NLS-0$
 		temp.href = "../prefs/user"; //$NON-NLS-0$
@@ -78,6 +74,9 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 		serviceRegistry.registerService("orion.core.preference.provider", service, {}); //$NON-NLS-0$
 		var preferences = new mPreferences.PreferencesService(serviceRegistry);
 
+		/* used to interact with launch configurations */
+		var projectClient = new mProjectClient.ProjectClient(serviceRegistry, fileClient);
+
 		function DeployService(){}
 		DeployService.prototype = {
 
@@ -109,6 +108,41 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 				return message;
 			},
 
+			_getAdditionalLaunchConfigurations : function(launchConf, project){
+				var deferred = new Deferred();
+				projectClient.getLaunchConfigurationsDir(project).then(function(launchConfDir){
+
+					if(launchConfDir.Children){
+						var sharedConfigurationName = projectClient.normalizeFileName(launchConf.ConfigurationName, ".yml");
+
+						var launchConfigurationEntries = launchConfDir.Children;
+						for(var i=0; i<launchConfigurationEntries.length; ++i){
+							var lc = launchConfigurationEntries[i];
+
+							if(lc.Name === sharedConfigurationName){
+								cFService.getManifestInfo(lc.Location, true).then(function(manifest){
+									deferred.resolve(manifest.Contents);
+								}, deferred.reject);
+
+								return;
+							}
+						}
+
+						deferred.resolve(null);
+
+					} else {
+						var func = arguments.callee.bind(this);
+						fileClient.fetchChildren(launchConfDir.ChildrenLocation).then(function(children){
+							launchConfDir.Children = children;
+							func(launchConfDir);
+						}.bind(this), deferred.reject);
+					}
+
+				}, deferred.reject);
+
+				return deferred;
+			},
+
 			deploy: function(project, launchConf) {
 				var that = this;
 				var deferred = new Deferred();
@@ -119,13 +153,15 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 					target = {};
 					target.Url = params.url;
 				}
+
 				var appName = params.Name;
 				var appPath = launchConf.Path;
+				var appPackager = params.Packager;
 
 				if(params.user && params.password){
 					cFService.login(target.Url, params.user, params.password).then(
 						function(){
-							that._deploy(project, target, appName, appPath, deferred);
+							that._deploy(project, target, appName, appPath, appPackager, deferred, launchConf);
 						}, function(error){
 							error.Retry = {
 								parameters: [{
@@ -142,55 +178,102 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 						}
 					);
 				} else {
-					that._deploy(project, target, appName, appPath, deferred);
+					that._deploy(project, target, appName, appPath, appPackager, deferred, launchConf);
 				}
 
 				return deferred;
 			},
 
-			_deploy: function(project, target, appName, appPath, deferred) {
+			_deploy: function(project, target, appName, appPath, appPackager, deferred, launchConf) {
 				if (target && appName){
-					cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath)).then(
-						function(result){
-							var expandedURL = new URITemplate("{+OrionHome}/edit/edit.html#{,ContentLocation}").expand({ //$NON-NLS-0$
-								OrionHome: PageLinks.getOrionHome(),
-								ContentLocation: project.ContentLocation,
+
+					var errorHandler = function(error){
+						if (error.HttpCode === 404){
+							deferred.resolve({
+								State: "NOT_DEPLOYED", //$NON-NLS-0$
+								Message: error.Message
 							});
-							var editLocation = new URL(expandedURL);
-							mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, project.ContentLocation, fileClient).then(
-								function(launchConfigurationContent){
-									deferred.resolve(launchConfigurationContent);
-								}, function(error){
-									deferred.reject(error);
-								}
-							);
-						}, function(error){
-							if (error.HttpCode === 404){
-								deferred.resolve({
-									State: "NOT_DEPLOYED", //$NON-NLS-0$
-									Message: error.Message
-								});
-							} else if (error.JsonData && error.JsonData.error_code) {
-								var err = error.JsonData;
-								if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){ //$NON-NLS-0$//$NON-NLS-1$
-									error.Retry = {
-										parameters: [{
-											id: "user", //$NON-NLS-0$
-											type: "text",  //$NON-NLS-0$
-											name: messages["user:"]
-										}, {
-											id: "password", //$NON-NLS-0$
-											type: "password", //$NON-NLS-0$
-											name: messages["password:"]
-										}]
-									};
-								}
-								deferred.reject(error);
-							} else {
-								deferred.reject(error);
+						} else if (error.JsonData && error.JsonData.error_code) {
+							var err = error.JsonData;
+							if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){ //$NON-NLS-0$ //$NON-NLS-1$
+								error.Retry = {
+									parameters: [{
+										id: "user", //$NON-NLS-0$
+										type: "text",  //$NON-NLS-0$
+										name: messages["user:"]
+									}, {
+										id: "password", //$NON-NLS-0$
+										type: "password", //$NON-NLS-0$
+										name: messages["password:"]
+									}]
+								};
 							}
+							deferred.reject(error);
+						} else {
+							deferred.reject(error);
 						}
-					);
+					};
+
+					this._getAdditionalLaunchConfigurations(launchConf, project).then(function(manifest){
+						var func = arguments.callee.bind(this);
+
+						if(manifest === null){
+							/* could not find the launch configuration manifest, get the main manifest.yml if present */
+							fileClient.fetchChildren(project.ContentLocation).then(function(children){
+
+								var manifests = children.filter(function(child){
+									return child.Name === "manifest.yml"; //$NON-NLS-0$
+								});
+
+								if(manifests.length === 0){
+
+									/* the deployment will not succeed anyway */
+									deferred.reject({
+										State: "NOT_DEPLOYED", //$NON-NLS-0$
+										Severity: "Error", //$NON-NLS-0$
+										Message: messages["Could not find the launch configuration manifest"]
+									});
+
+								} else {
+
+									if(confirm(messages["Would you like to use the top-level project manifest"])){
+										cFService.getManifestInfo(manifests[0].Location, true).then(function(manifest){
+											func(manifest.Contents);
+										}, deferred.reject);
+									} else {
+										deferred.reject({
+											State: "NOT_DEPLOYED", //$NON-NLS-0$
+											Severity: "Warning", //$NON-NLS-0$
+											Message: messages["Cancelled"]
+										});
+									}
+								}
+							}.bind(this), errorHandler);
+						} else {
+							cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath), manifest, false, appPackager).then(function(result){
+
+								var expandedURL = new URITemplate("{+OrionHome}/edit/edit.html#{,ContentLocation}").expand({ //$NON-NLS-0$
+									OrionHome: PageLinks.getOrionHome(),
+									ContentLocation: project.ContentLocation,
+								});
+
+								var editLocation = new URL(expandedURL);
+								var additionalConfiguration = {
+									Manifest : manifest,
+									Packager : appPackager
+								};
+
+								mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, project.ContentLocation, fileClient, additionalConfiguration).then(
+									function(launchConfigurationContent){
+										deferred.resolve(launchConfigurationContent);
+									}, function(error){
+										deferred.reject(error);
+									}
+								);
+							}, errorHandler);
+						}
+					}, errorHandler);
+
 				} else {
 
 					/* Note, that there's at least one deployment wizard present */

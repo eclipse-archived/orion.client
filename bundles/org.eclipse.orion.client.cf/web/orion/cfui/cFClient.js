@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
@@ -13,14 +13,14 @@
 define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(messages, require, xhr, Deferred, operation) {
 
 	var eclipse = eclipse || {};
-	
+
 	eclipse.CFService = (function(){
-		
+
 		var contentType = "application/json; charset=UTF-8";
-		
+
 		/**
 		 * Creates a new CF service.
-		 * 
+		 *
 		 * @class Provides operations for interacting with Cloud Foundry
 		 * @name org.eclipse.orion.client.cf.CFService
 		 */
@@ -31,9 +31,9 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 						"orion.cf.service", this);
 			}
 		}
-	
+
 		CFService.prototype = /** @lends org.eclipse.orion.client.cf.CFService.prototype */
-		{	
+		{
 			_getServiceResponse : function(deferred, result) {
 				var response = result.response ? JSON.parse(result.response) : null;
 
@@ -57,17 +57,17 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 				deferred.resolve(response);
 				return;
 			},
-				
+
 			_handleServiceResponseError: function(deferred, error){
 				deferred.reject(this._translateResponseToStatus(error));
 			},
-			
+
 			_translateResponseToStatus: function(response) {
 				var json;
 				try {
 					json = JSON.parse(response.responseText);
 				} catch (e) {
-					json = { 
+					json = {
 						Message : messages["problemWhilePerformingTheAction"]
 					};
 				}
@@ -93,35 +93,35 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 
 				return clientDeferred;
 			},
-		
+
 			// Target CF v2 operations
-			
+
 			setTarget: function(url, org, space) {
 				var targetObject = {
 					'Url': url
 				};
 				if (org) targetObject.Org = org;
 				if (space) targetObject.Space = space;
-				
+
 				return this._xhrV1("POST", require.toUrl("cfapi/target"), targetObject);
 			},
-			
+
 			login: function(url, username, password, org, space) {
 				var loginData = {};
-				
+
 				if (url) loginData.Url = url;
 				if (username) {
 					loginData.Username = username;
 					loginData.Password = password;
 				}
-				
+
 				return this._xhrV1("POST", require.toUrl("cfapi/target"), loginData);
 			},
-			
+
 			logout: function() {
 				return this._xhrV1("DELETE", require.toUrl("cfapi/target"));
 			},
-			
+
 			getLogs: function(target, applicationName, logFileName, instance){
 				if(!applicationName){
 					var deferred = new Deferred();
@@ -139,7 +139,7 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 				}
 				return this._xhrV1("GET", location);
 			},
-			
+
 			getTarget: function() {
 				return this._xhrV1("GET", require.toUrl("cfapi/target"));
 			},
@@ -147,186 +147,189 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 			getInfo: function() {
 				return this._xhrV1("GET", require.toUrl("cfapi/info"));
 			},
-			
+
 			// Apps CF v2 operations
-			
+
 			pushApp: function(target, name, contentLocation, manifest, saveManifest, packager, instrumentation) {
 				var pushReq = {};
-				
+
 				if (name)
 					pushReq.Name = name;
-				
+
 				if (contentLocation)
 					pushReq.ContentLocation = contentLocation;
-				
+
 				if (target)
 					pushReq.Target = target;
-				
+
 				if(manifest)
 					pushReq.Manifest = manifest;
-				
+
 				if(saveManifest)
 					pushReq.Persist = saveManifest;
-				
+
 				if(packager)
 					pushReq.Packager = packager;
-				
+
 				if(instrumentation)
 					pushReq.Instrumentation = instrumentation;
-				
+
 				return this._xhrV1("PUT", require.toUrl("cfapi/apps"), pushReq);
 			},
-			
+
 			getApp: function(target, name, contentLocation) {
 				var url = require.toUrl("cfapi/apps");
-				
+
 				if (name) {
 					url += "?Name=" + name;
 				} else if (contentLocation) {
 					url += "?ContentLocation=" + contentLocation;
 				}
-				
+
 				if (target)
 					url += "&Target=" + JSON.stringify(target);
-				
+
 				return this._xhrV1("GET", url);
 			},
-			
+
 			getApps: function(target) {
 				var url = require.toUrl("cfapi/apps");
-				
+
 				if (target)
 					url += "?Target=" + JSON.stringify(target);
-				
+
 				return this._xhrV1("GET", url);
 			},
-			
+
 			startApp: function(target, name, contentLocation, timeout) {
 				var startReq = {
-					Name: name, 
+					Name: name,
 					ContentLocation: contentLocation,
 					Timeout: timeout,
 					State: "Started"
 				};
-				
+
 				if (target)
 					startReq.Target = target;
-				
+
 				return this._xhrV1("PUT", require.toUrl("cfapi/apps"), startReq);
 			},
-			
+
 			stopApp: function(target, name, contentLocation) {
 				var stopReq = {
-					Name: name, 
+					Name: name,
 					ContentLocation: contentLocation,
 					State: "Stopped"
 				};
-				
+
 				if (target)
 					stopReq.Target = target;
-				
+
 				return this._xhrV1("PUT", require.toUrl("cfapi/apps"), stopReq);
 			},
-			
+
 			getOrgs: function(target) {
 				var url = require.toUrl("cfapi/orgs");
-				
+
 				if (target)
 					url += "?Target=" + JSON.stringify(target);
-				
+
 				return this._xhrV1("GET", url);
 			},
-			
+
 			getRoutes: function(target) {
 				var url = require.toUrl("cfapi/routes");
-				
+
 				if (target)
 					url += "?Target=" + JSON.stringify(target);
-				
+
 				return this._xhrV1("GET", url);
 			},
-			
+
 			getServices: function(target) {
 				var url = require.toUrl("cfapi/services");
-				
+
 				if (target)
 					url += "?Target=" + JSON.stringify(target);
-				
+
 				return this._xhrV1("GET", url);
 			},
-			
+
 			createRoute: function(target, domainName, hostName) {
 				var routeObj = {
 					DomainName: domainName,
 					Host: hostName
 				};
-				
+
 				if (target)
 					routeObj.Target = target;
-				
+
 				return this._xhrV1("PUT", require.toUrl("cfapi/routes"), routeObj);
 			},
-			
+
 			deleteRoute: function(target, domainName, hostName) {
 				var routeObj = {
 					DomainName: domainName,
 					Host: hostName
 				};
-				
+
 				var url = require.toUrl("cfapi/routes");
 				url += "?Route=" + encodeURIComponent(JSON.stringify(routeObj));
-				
+
 				if (target)
 					url += "&Target=" + JSON.stringify(target);
-				
+
 				return this._xhrV1("DELETE", url);
 			},
-			
-			deleteRouteById: function(target, routeId) {				
+
+			deleteRouteById: function(target, routeId) {
 				var url = require.toUrl("cfapi/routes/" + routeId);
-				
+
 				if (target)
 					url += "?Target=" + JSON.stringify(target);
-				
+
 				return this._xhrV1("DELETE", url);
 			},
-			
+
 			deleteOrphanedRoutes: function (target) {
 				var url = require.toUrl("cfapi/routes");
 				url += "?Orphaned=true";
-				
+
 				if (target)
 					url += "&Target=" + JSON.stringify(target);
-				
+
 				return this._xhrV1("DELETE", url);
 			},
-			
+
 			mapRoute: function(target, appId, routeId) {
 				var url = require.toUrl("cfapi/apps/" + appId + "/routes/" + routeId);
 				if (target)
 					url += "?Target=" + JSON.stringify(target);
-				
+
 				return this._xhrV1("PUT", url);
 			},
-			
+
 			unmapRoute: function(target, appId, routeId) {
 				var url = require.toUrl("cfapi/apps/" + appId + "/routes/" + routeId);
 				if (target)
 					url += "?Target=" + JSON.stringify(target);
-				
+
 				return this._xhrV1("DELETE", url);
 			},
-			
-			getManifestInfo: function(relFilePath){
+
+			getManifestInfo: function(relFilePath, strict){
 				var url = require.toUrl("cfapi/manifests" + relFilePath);
+				if (strict === true)
+					url += "?Strict=true";
+
 				return this._xhrV1("GET", url);
 			},
-			
+
 			getDeploymentPlans: function(relFilePath){
 				var url = require.toUrl("cfapi/plans" + relFilePath);
 				return this._xhrV1("GET", url);
 			},
-			
+
 			getLogz: function(target, appName){
 				if(!appName){
 					var deferred = new Deferred();
@@ -339,9 +342,9 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 				return this._xhrV1("GET", url);
 			},
 		};
-		
+
 		return CFService;
 	}());
-	
+
 	return eclipse;
 });

@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 /*global URL*/
-define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemplate', 'orion/PageLinks'],
- function(messages, objects, mCfUtil, URITemplate, PageLinks){
+define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemplate', 'orion/PageLinks', 'cfui/manifestUtils'],
+ function(messages, objects, mCfUtil, URITemplate, PageLinks, mManifestUtils){
 
 	function _getManifestApplication(manifestContents, results){
 		manifestContents = manifestContents || { applications: [{}] };
@@ -117,14 +117,23 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 				var instrumentation = options.getManifestInstrumentation ? options.getManifestInstrumentation(manifest) : null;
 				var packager = options.getPackager ? options.getPackager() : null;
 
+				/* manifest to persist as additional configuration */
+				var intrumentedManifest = instrumentation ? mManifestUtils.applyInstrumentation(manifest, instrumentation) : manifest;
+
+				var additionalConfiguration = {
+					Packager : packager,
+					Manifest : intrumentedManifest
+				};
+				
 				var expandedURL = new URITemplate("{+OrionHome}/edit/edit.html#{,ContentLocation}").expand({ //$NON-NLS-0$
 					OrionHome: PageLinks.getOrionHome(),
 					ContentLocation: contentLocation,
 				});
+
 				var editLocation = new URL(expandedURL);
 				cfService.pushApp(selection, null, decodeURIComponent(contentLocation + appPath), manifest, saveManifest, packager, instrumentation).then(
 					function(result){
-						mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, contentLocation, fileService).then(
+						mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, contentLocation, fileService, additionalConfiguration).then(
 							function(launchConfigurationContent){
 								postMsg(launchConfigurationContent);
 							}, function(error){
