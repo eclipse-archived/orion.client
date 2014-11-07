@@ -179,7 +179,8 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 		it("AppendText", function() {
 			var d = new Deferred();
 			var buffer = "", i;
-			for (i = 0; i < 512;i++) {
+			var count = util.isIE ? 256 : 512; // reduce count for IE to avoid timeouts, since it performs poorly
+			for (i = 0; i < count;i++) {
 				buffer += "var id; function() {return 30;} var foo; ";
 			}
 	
@@ -349,7 +350,7 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 		});
 		it("GetOffsetAtLocation", function() {
 			var d = new Deferred();
-			var count = 15;
+			var count = util.isIE ? 8 : 15; // reduce count for IE to avoid timeouts, since it performs poorly
 			var buffer = "";
 			for (var i = 0; i < 3;i++) {
 				buffer += "var nada for nada function " + i + " ";
