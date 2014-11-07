@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -450,7 +450,6 @@ define([
 			if(themePreferences && editorPreferences){
 				localSettings = new EditorSettings({local: true, editor: editor, themePreferences: themePreferences, preferences: editorPreferences});
 			}
-
 			var liveEditSession = new LiveEditSession(serviceRegistry, editor);
 			inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 				var textView = editor.getTextView();
@@ -465,6 +464,9 @@ define([
 							setContentAssistProviders(editor, editor.getContentAssist());
 						}
 					}.bind(this));
+					if(textView.onInputChanged) {
+					   textView.onInputChanged({type:event.type});
+					}
 				} else {
 					liveEditSession.start();					
 				}
@@ -473,8 +475,11 @@ define([
 				if (self.settings.trimTrailingWhiteSpace) {
 					editor.getTextView().invokeAction("trimTrailingWhitespaces"); //$NON-NLS-0$
 				}
+				var textView = editor.getTextView();
+				if(textView && textView.onSaving) {
+				    textView.onSaving({type:event.type});
+				}
 			});
-			
 			var markerService = serviceRegistry.getService("orion.core.marker"); //$NON-NLS-0$
 			if(markerService) {
 				markerService.addEventListener("problemsChanged", function(event) { //$NON-NLS-0$

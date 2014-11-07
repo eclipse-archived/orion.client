@@ -2191,6 +2191,24 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			return this.dispatchEvent(destroyEvent);
 		},
 		/**
+		 * @description This event is sent when the file is being saved
+		 * @function
+		 * @param {Object} savingEvent the event
+		 * @since 8.0
+		 */
+		onSaving: function onSaving(savingEvent) {
+		    return this.dispatchEvent(savingEvent);
+		},
+		/**
+		 * @description This event is sent when the file has been saved
+		 * @function
+		 * @param {Object} inputChangedEvent the event
+		 * @since 8.0
+		 */
+		onInputChanged: function onInputChanged(inputChangedEvent) {
+		    return this.dispatchEvent(inputChangedEvent);
+		},
+		/**
 		 * @class This object is used to define style information for the text view.
 		 * <p>
 		 * <b>See:</b><br/>
