@@ -8,6 +8,12 @@
 
 @import "../orion/editor/editor.css";
 
+@import "../orion/webui/Slideout.css";
+
+@import "../orion/search/InlineSearchPane.css";
+
+@import "../orion/problems/problemsView.css";
+
 @import "../css/theme.css";
 
 .outlinerWrapper {
