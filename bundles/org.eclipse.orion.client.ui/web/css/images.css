@@ -695,6 +695,8 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.core-sprite-collected-errors,
+.core-sprite-listed-errors,
 .core-sprite-checkmark,
 .core-sprite-save,
 .core-sprite-eraser{
@@ -752,6 +754,8 @@
 .core-sprite-eraser:before{ content:'\E03D'; }
 .core-sprite-checkmark:before{ content:'\E050'; }
 .core-sprite-save:before{ content:'\E052'; }
+.core-sprite-listed-errors:before{ content:'\E053'; }
+.core-sprite-collected-errors:before{ content:'\E054'; }
 
 /* icons for file types - possibly more to come - at least one for images */ 
 

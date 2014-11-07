@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
 <svg xmlns="http://www.w3.org/2000/svg">
 <metadata>
-Created by FontPrep 20130207 at Wed Oct  8 10:26:45 2014
+Created by FontPrep 20130207 at Fri Nov  7 17:41:19 2014
  By Anton McConville
 copyright missing
 </metadata>
@@ -19,7 +19,7 @@ copyright missing
     bbox="-0.450704 -424 2076 1666"
     underline-thickness="100"
     underline-position="-100"
-    unicode-range="U+E000-E052"
+    unicode-range="U+E000-E054"
   />
 <missing-glyph horiz-adv-x="1000" 
 d="M100 1210v-1020l340 510zM160 100h680l-340 510zM560 700l340 -510v1020zM500 790l340 510h-680zM0 0v1400h1000v-1400h-1000z" />
@@ -144,7 +144,7 @@ d="M128 -256h1792v1408h-1792v-1408zM0 1664h2048v-2048h-2048v2048zM516 -80l-72 72
     <glyph glyph-name="uniE02F" unicode="&#xe02f;" 
 d="M598 720l90 90l272 -272l272 272l90 -90l-272 -272l272 -272l-90 -90l-272 272l-272 -272l-90 90l272 272zM384 -128h1280v1024h-512v512h-768v-1536zM1792 -256h-1536v1792h896l640 -640v-1152z" />
     <glyph glyph-name="uniE030" unicode="&#xe030;" 
-d="M384 0h1280v1280h-1280v-1280zM256 -128v1536h1536v-1536h-1536zM1536 1152v-828l-350 348l-548 -546l-112 120l544 548l-348 358h814z" />
+d="M1536 1152v-828l-350 348l-548 -546l-112 120l544 548l-348 358h814zM256 -128h1536v1536h-1536v-1536zM128 -256v1792h1792v-1792h-1792z" />
     <glyph glyph-name="uniE031" unicode="&#xe031;" 
 d="M724 1280q80 0 136 -56t56 -136t-56 -136t-136 -56t-136 56t-56 136t56 136t136 56zM1664 896h-512v512h-768v-1030l200 192l248 -240l394 398l438 -448v616zM1792 -256h-1536v1792h916l502 -512l118 -128v-1152z" />
     <glyph glyph-name="uniE032" unicode="&#xe032;" 
@@ -219,5 +219,9 @@ d="M1152 -352h-256v128h256v-128zM1280 -96h-512v128h512v-128zM1152 288v210q166 42
 q-172 76 -278 234t-106 352q0 266 187 453t453 187z" />
     <glyph glyph-name="uniE052" unicode="&#xe052;" 
 d="M384 0v256h1280v-256h-1280zM384 384v256h1280v-256h-1280zM128 -256h1792v1408l-384 384h-128v-640h-1024v640h-256v-1792zM1280 1024v512h-384v-512h384zM0 1664h1536l512 -512v-1536h-2048v2048z" />
+    <glyph glyph-name="uniE053" unicode="&#xe053;" 
+d="M676 512h768v-128h-768v128zM676 256h768v-126h-768v126zM676 896h768v-128h-768v128zM676 1150h768v-126h-768v126zM294 -126h1532v1532h-1532v-1532zM166 -254v1788h1788v-1788h-1788z" />
+    <glyph glyph-name="uniE054" unicode="&#xe054;" 
+d="M1040 384h510v-254h-510v254zM1040 1150h510v-254h-510v254zM530 20v510l384 -256zM530 786v510l384 -254zM274 -126h1532v1532h-1532v-1532zM146 -254v1788h1788v-1788h-1788z" />
   </font>
 </defs></svg>
