@@ -84,9 +84,9 @@ define ([
 			for (var i = 0; i < infoProviders.length; i++) {
 				var providerRef = infoProviders[i];
 				var contentType = this.inputManager.getContentType();
-				if (providerRef._properties.contentType && contentType) {
-					var validTypes = providerRef.getProperty('contentType');
-					if (validTypes.indexOf(contentType.id) !== -1) {
+				if (contentType) {
+					var validTypes = providerRef.getProperty('contentType'); //$NON-NLS-0$
+					if (validTypes && validTypes.indexOf(contentType.id) !== -1) {
 						this._applicableProviders.push(providerRef);
 					}
 				}

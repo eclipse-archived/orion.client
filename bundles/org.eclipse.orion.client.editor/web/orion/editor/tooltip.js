@@ -264,10 +264,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				hoverInfo.forEach(function(info) {
 					Deferred.when(info, function (data) {
 						if (data) {
-							self._renderContent(tooltipDoc, tooltipContents, data);
-
-							// Ensure that the tooltip is visible
-							tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
+							if (self._renderContent(tooltipDoc, tooltipContents, data)) {
+								// Ensure that the tooltip is visible
+								tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
+							}
 						}
 					}, function(error) {
 						if (typeof console !== "undefined") { //$NON-NLS-0$
@@ -309,7 +309,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				sectionDiv.innerHTML = this.hover.renderMarkDown(data.title);
 				tooltipContents.appendChild(sectionDiv);
 			}
-			if (!data.content) return;
+			if (!data.content) return false;
 			switch(data.type) {
 				case 'markdown': { //$NON-NLS-0$
 					divResult = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
@@ -324,6 +324,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					sectionDiv.appendChild(divResult);
 				}
 			}
+			return true;
 		},
 		_getAnnotationContents: function(annotations) {
 			var annotation;
