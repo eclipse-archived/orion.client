@@ -40,6 +40,7 @@ define([
 		this._timer = null;
 		this._clickToDisMiss = true;
 		this._cancelMsg = null;
+		this.statusMessage = this.progressMessage = null;
 	}
  
 	StatusReportingService.prototype = /** @lends orion.status.StatusReportingService.prototype */ {
@@ -100,7 +101,7 @@ define([
 		 */
 		setMessage : function(msg, timeout, isAccessible) {
 			this._init();
-			this.currentMessage = msg;
+			this.statusMessage = msg;
 			var node = lib.node(this.domId);
 			if(typeof(isAccessible) === "boolean") { //$NON-NLS-0$
 				// this is kind of a hack; when there is good screen reader support for aria-busy,
@@ -108,7 +109,7 @@ define([
 				var readSetting = node.getAttribute("aria-live"); //$NON-NLS-0$
 				node.setAttribute("aria-live", isAccessible ? "polite" : "off"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				window.setTimeout(function() {
-					if (msg === this.currentMessage) {
+					if (msg === this.statusMessage) {
 						lib.empty(node);
 						node.appendChild(document.createTextNode(msg));
 						window.setTimeout(function() { node.setAttribute("aria-live", readSetting); }, 100); //$NON-NLS-0$
@@ -121,7 +122,7 @@ define([
 			}
 			if (typeof(timeout) === "number") { //$NON-NLS-0$
 				window.setTimeout(function() {
-					if (msg === this.currentMessage) {
+					if (msg === this.statusMessage) {
 						lib.empty(node);
 						node.appendChild(document.createTextNode("")); //$NON-NLS-0$
 					}
@@ -138,7 +139,7 @@ define([
 		 */
 		setErrorMessage : function(st) {
 			this._clickToDisMiss = true;
-			this.currentMessage = st;
+			this.statusMessage = st;
 			this._init();
 			//could be: responseText from xhrGet, deferred error object, or plain string
 			var status = st.responseText || st.message || st;
@@ -181,7 +182,7 @@ define([
 		setProgressMessage : function(message) {
 			this._clickToDisMiss = false;
 			this._init();
-			this.currentMessage = message;
+			this.progressMessage = message;
 			
 			var node = lib.node(this.progressDomId);
 			lib.empty(node);
@@ -217,7 +218,7 @@ define([
 		setProgressResult : function(message, cancelMsg) {
 			this._clickToDisMiss = false;
 			this._cancelMsg = cancelMsg;
-			this.currentMessage = message;
+			this.progressMessage = message;
 			//could either be responseText from xhrGet or just a string
 			var status = message.responseText || message;
 			//accept either a string or a JSON representation of an IStatus
@@ -343,15 +344,15 @@ define([
 		},
 
 		/**
-		 * Shows a progress message until the given deferred is resolved.
+		 * Shows a progress message in the progress area until the given deferred is resolved.
 		 */
 		showWhile: function(deferred, message) {
 			var that = this;
 			if(message){
 				that.setProgressMessage(message);
 				var finish = function(){
-					if(message === that.currentMessage){
-						that.setProgressMessage("");		
+					if(message === that.progressMessage){
+						that.setProgressMessage(""); //$NON-NLS-0$
 					}
 				};
 				deferred.then(finish, finish);

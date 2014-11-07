@@ -614,7 +614,7 @@ define([
 							}
 						};
 					}
-					progress.showWhile(serviceCall, i18nUtil.formatMessage(messages.running, info.name)).then(handleResult);
+					progress.showWhile(serviceCall, i18nUtil.formatMessage(messages.running, options.name)).then(handleResult);
 					return true;
 				};
 				options.callback = options.callback.bind(editor);
