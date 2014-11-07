@@ -15,27 +15,29 @@
  * APIs not available in workers.
  */
 define([
-	'esprima',
-	'javascript/astManager',
-	'javascript/contentAssist/indexFiles/mongodbIndex',
-	'javascript/contentAssist/indexFiles/mysqlIndex',
-	'javascript/contentAssist/indexFiles/postgresIndex',
-	'javascript/contentAssist/indexFiles/redisIndex',
-	'javascript/contentAssist/indexFiles/expressIndex',
-	'javascript/contentAssist/indexFiles/amqpIndex',
-	'javascript/contentAssist/contentAssist',
-	'javascript/validator',
-	'javascript/occurrences',
-	'javascript/hover',
-	'javascript/outliner',
-	'orion/plugin',
-	'orion/util',
-	'javascript/commands/generateDocCommand',
-	'orion/editor/stylers/application_javascript/syntax',
-	'orion/editor/stylers/application_json/syntax',
-	'orion/editor/stylers/application_schema_json/syntax',
-	'orion/editor/stylers/application_x-ejs/syntax'
-], function(Esprima, ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
+'orion/bootstrap',
+'esprima',
+'javascript/scriptResolver',
+'javascript/astManager',
+'javascript/contentAssist/indexFiles/mongodbIndex',
+'javascript/contentAssist/indexFiles/mysqlIndex',
+'javascript/contentAssist/indexFiles/postgresIndex',
+'javascript/contentAssist/indexFiles/redisIndex',
+'javascript/contentAssist/indexFiles/expressIndex',
+'javascript/contentAssist/indexFiles/amqpIndex',
+'javascript/contentAssist/contentAssist',
+'javascript/validator',
+'javascript/occurrences',
+'javascript/hover',
+'javascript/outliner',
+'orion/plugin',
+'orion/util',
+'javascript/commands/generateDocCommand',
+'orion/editor/stylers/application_javascript/syntax',
+'orion/editor/stylers/application_json/syntax',
+'orion/editor/stylers/application_schema_json/syntax',
+'orion/editor/stylers/application_x-ejs/syntax'
+], function(Bootstrap, Esprima, ScriptResolver, ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
 			EslintValidator, Occurrences, Hover, Outliner,	PluginProvider, Util, GenerateDocCommand, mJS, mJSON, mJSONSchema, mEJS) {
 
 	/**
@@ -81,12 +83,14 @@ define([
 	 * Register AST manager as Model Change listener
 	 */
 	provider.registerService("orion.edit.model", {  //$NON-NLS-0$
-			onModelChanging: astManager.updated.bind(astManager),
-			onDestroy: astManager.updated.bind(astManager)
+			onModelChanging: astManager.onModelChanging.bind(astManager),
+			onDestroy: astManager.onDestroy.bind(astManager),
+			onSaving: astManager.onSaving.bind(astManager),
+			onInputChanged: astManager.onInputChanged.bind(astManager)
 		},
 		{
 			contentType: ["application/javascript"],  //$NON-NLS-0$
-			types: ["ModelChanging", 'Destroy']  //$NON-NLS-0$  //$NON-NLS-1$
+			types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-0$  //$NON-NLS-1$
 	});
 	
 	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
@@ -120,13 +124,15 @@ define([
 			contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
 	});
 	
+	var scriptresolver = new ScriptResolver.ScriptResolver(Bootstrap);
+	
 	/**
 	 * Register the hover support
 	 */
-	provider.registerService("orion.edit.hover", new Hover.JavaScriptHover(astManager),  //$NON-NLS-0$
+	provider.registerService("orion.edit.hover", new Hover.JavaScriptHover(astManager, scriptresolver),  //$NON-NLS-0$
 		{
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-		    name: 'jsHover',
+		    nls: 'javascript/nls/messages',  //$NON-NLS-0$
+	        name: 'jsHover',
 			contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
 	});
 	
@@ -134,7 +140,7 @@ define([
 		{
 			contentType: ["application/javascript"],  //$NON-NLS-0$
 			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			name: 'contentAssist',  //$NON-NLS-0$
+			nameKey: 'contentAssist',  //$NON-NLS-0$
 			id: "orion.edit.contentassist.javascript",  //$NON-NLS-0$
 			charTriggers: "[.]",  //$NON-NLS-0$
 			excludedStyles: "(string.*)"  //$NON-NLS-0$
@@ -143,7 +149,7 @@ define([
 	/**
 	 * Register the ESLint validator
 	 */
-	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new EslintValidator(astManager),  //$NON-NLS-0$  //$NON-NLS-1$
+	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new EslintValidator(astManager, scriptresolver),  //$NON-NLS-0$  //$NON-NLS-1$
 		{
 			contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$ //$NON-NLS-1$
 			nls: 'javascript/nls/problems',  //$NON-NLS-0$

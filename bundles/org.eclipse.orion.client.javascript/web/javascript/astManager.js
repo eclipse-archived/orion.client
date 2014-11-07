@@ -13,8 +13,9 @@
 define([
 	'orion/Deferred',
 	'orion/objects',
-	'orion/serialize'
-], function(Deferred, Objects, Serialize) {
+	'orion/serialize',
+	'javascript/lru'
+], function(Deferred, Objects, Serialize, LRU) {
 	/**
 	 * @description Object of error types
 	 * @since 5.0
@@ -38,7 +39,7 @@ define([
 	 */
 	function ASTManager(esprima) {
 		this.parser = esprima;
-		this.cache = null;
+		this.cache = new LRU.LRU(10);
 		if (!this.parser) {
 			throw new Error("Missing parser");
 		}
@@ -46,9 +47,7 @@ define([
 	
 	Objects.mixin(ASTManager.prototype, /** @lends javascript.ASTManager.prototype */ {
 		/**
-		 * @param {Object} editorContext
-		 * @param {Function} [editorContext.getFileMetadata] A function returning a promise resolving to the
-		 * file metadata.
+		 * @param {orion.editor.EditorContext} editorContext
 		 * @returns {orion.Promise} A promise resolving to the AST.
 		 */
 		getAST: function(editorContext) {
@@ -58,17 +57,15 @@ define([
 			var _self = this;
 			return metadataPromise.then(function(metadata) {
 				metadata = metadata || {};
-				var cachedEntry = _self.cache,
-				    fileLocation = metadata.location;
-				if (cachedEntry && cachedEntry.location === fileLocation) {
-//					console.log("Cache hit for " + fileLocation);
-					return new Deferred().resolve(cachedEntry.ast);
+				var ast = _self.cache.get(metadata.location);
+				if (ast) {
+					return new Deferred().resolve(ast);
 				}
 				return editorContext.getText().then(function(text) {
 					var ast = _self.parse(text);
-					if (typeof fileLocation === "string") {
-//						console.log("Cache store: " + fileLocation);
-						_self.cache = { location: fileLocation, ast: ast };
+					_self.cache.put(metadata.location, ast);
+					if(metadata.location) {
+					    ast.fileLocation = metadata.location;
 					}
 					return ast;
 				});
@@ -141,14 +138,44 @@ define([
 			}
 		},
 		/**
-		 * Notifies the AST manager of a change to the model.
+		 * Callback from the orion.edit.model service
 		 * @param {Object} event An <tt>orion.edit.model</tt> event.
+		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 		 */
-		updated: function(event) {
-			if (this.cache && this.cache.location === event.file.location) {
-//				console.log("Cache invalidate " + (this.cache && this.cache.location));
-				this.cache = null;
-			}
+		onModelChanging: function(event) {
+		    if(this.inputChanged) {
+		        //TODO haxxor, eat the first model changing event which immediately follows
+		        //input changed
+		        this.inputChanged = null;
+		    } else {
+		        this.cache.remove(event.file.location);
+		    }
+		},
+		/**
+		 * Callback from the orion.edit.model service
+		 * @param {Object} event An <tt>orion.edit.model</tt> event.
+		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
+		 */
+		onDestroy: function(event) {
+		    //TODO with multi-env we will not need to destory the cache each editor switch
+		    //but we could do a consistency check
+		},
+		/**
+		 * Callback from the orion.edit.model service
+		 * @param {Object} event An <tt>orion.edit.model</tt> event.
+		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
+		 */
+		onSaving: function(event) {
+		    this.cache.remove(event.file.location);
+		},
+		/**
+		 * Callback from the orion.edit.model service
+		 * @param {Object} event An <tt>orion.edit.model</tt> event.
+		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
+		 */
+		onInputChanged: function(event) {
+		    this.inputChanged = event;
+		    //TODO will add to mult-env
 		}
 	});
 	return {
