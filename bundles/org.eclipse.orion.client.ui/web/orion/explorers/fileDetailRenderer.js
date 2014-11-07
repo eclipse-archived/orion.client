@@ -17,18 +17,11 @@ define([
 	'orion/explorers/explorer',
 	'orion/webui/littlelib',
 	'orion/explorers/navigationUtils',
-	'orion/objects'
-], function(messages, i18nUtil, mExplorer, lib, mNavUtils, objects) {
+	'orion/objects',
+	'orion/Deferred'
+], function(messages, i18nUtil, mExplorer, lib, mNavUtils, objects, Deferred) {
 	
     /* Internal wrapper functions*/
-    function _empty(nodeToEmpty) {
-        var node = lib.node(nodeToEmpty);
-        if (node) {
-            lib.empty(node);
-        }
-        return node;
-    }
-
     function _connect(nodeOrId, event, eventHandler) {
         var node = lib.node(nodeOrId);
         if (node) {
@@ -73,6 +66,45 @@ define([
             span.appendChild(document.createTextNode(spanName));
         }
         return span;
+    }
+
+	function getFullPathPref(preferences, prefName, properties) {
+    	return preferences.getPreferences(prefName).then(function(prefs) { //$NON-NLS-0$
+			var returnVal = [];
+			properties.forEach(function(property){
+				var value = prefs.get(property);
+				if (value === undefined) {
+					value = false;
+					prefs.put(property, value); //$NON-NLS-0$
+				}
+		        returnVal.push(value);
+			});
+	        return new Deferred().resolve(returnVal);
+		}, function(/*err*/){
+			return new Deferred().resolve(false);
+		});
+	}
+    
+    function showFullPath(parentNode, show) {
+		if (show) {
+        	parentNode.classList.add("showFullPath"); //$NON-NLS-0$
+        } else {
+        	parentNode.classList.remove("showFullPath"); //$NON-NLS-0$
+        }
+    }
+
+    function switchFullPathPref(preferences, prefName, properties) {
+    	return preferences.getPreferences(prefName).then(function(prefs) { //$NON-NLS-0$
+			var returnVal = [];
+			properties.forEach(function(property){
+				var value = !prefs.get(property);
+		        prefs.put(property, value);
+		        returnVal.push(value);
+			});
+	        return new Deferred().resolve(returnVal);
+		}, function(/*err*/){
+			return new Deferred().resolve();
+		});
     }
 
 	function FileDetailRenderer(options, explorer) {
@@ -366,7 +398,10 @@ define([
 	});
 	
 	return {
-		FileDetailRenderer: FileDetailRenderer
+		FileDetailRenderer: FileDetailRenderer,
+		switchFullPathPref: switchFullPathPref,
+		getFullPathPref: getFullPathPref,
+		showFullPath: showFullPath
 	};
 
 });

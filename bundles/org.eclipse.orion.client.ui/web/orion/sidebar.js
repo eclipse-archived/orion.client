@@ -246,6 +246,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			this._problemsPane = new mProblemsView.ProblemsView({serviceRegistry: this.serviceRegistry, 
 				commandRegistry: this.commandRegistry, 
 				contentTypeRegistry: this.contentTypeRegistry, 
+				preferences: this.preferences,
 				fileClient: this.fileClient}, this._slideout);
 			var problemsInFolderCommand = new mCommands.Command({
 				name: messages["showProblems"], //$NON-NLS-0$

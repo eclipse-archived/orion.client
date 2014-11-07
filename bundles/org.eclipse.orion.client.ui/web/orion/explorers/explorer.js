@@ -309,7 +309,7 @@ exports.Explorer = (function() {
  * @param {orion.commands.CommandService} commandService the command service where the commands wil be added
  * @param {Function} visibleWhen optional if not provided we always display the commands
  */
-exports.createExplorerCommands = function(commandService, visibleWhen) {
+exports.createExplorerCommands = function(commandService, visibleWhen, commandIdExpand, commandIdCollaspe) {
 	function isVisible(item){
 		if( typeof(item.getItemCount) === "function"){ //$NON-NLS-0$
 			if(item.getItemCount() > 0){
@@ -322,7 +322,7 @@ exports.createExplorerCommands = function(commandService, visibleWhen) {
 	var expandAllCommand = new mCommands.Command({
 		tooltip : messages["Expand all"],
 		imageClass : "core-sprite-expandAll", //$NON-NLS-0$
-		id: "orion.explorer.expandAll", //$NON-NLS-0$
+		id: commandIdExpand ? commandIdExpand : "orion.explorer.expandAll", //$NON-NLS-0$
 		groupId: "orion.explorerGroup", //$NON-NLS-0$
 		visibleWhen : function(item) {
 			return isVisible(item);
@@ -333,7 +333,7 @@ exports.createExplorerCommands = function(commandService, visibleWhen) {
 	var collapseAllCommand = new mCommands.Command({
 		tooltip : messages["Collapse all"],
 		imageClass : "core-sprite-collapseAll", //$NON-NLS-0$
-		id: "orion.explorer.collapseAll", //$NON-NLS-0$
+		id: commandIdCollaspe ? commandIdCollaspe : "orion.explorer.collapseAll", //$NON-NLS-0$
 		groupId: "orion.explorerGroup", //$NON-NLS-0$
 		visibleWhen : function(item) {
 			return isVisible(item);

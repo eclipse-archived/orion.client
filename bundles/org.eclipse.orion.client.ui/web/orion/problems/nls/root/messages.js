@@ -11,9 +11,13 @@
 //NLS_CHARSET=UTF-8
 /*eslint-env browser, amd*/
 define({
-	"ProblemsFilter": "Filter on description(* = any string, ? = any character)",
-	"computeCancelled": "Problems computation cancelled by user",
-	"computingProblems": "Computing problems...",
-	"Errors": "Errors",
-	"Warnings": "Warnings"
+	"ProblemsFilter": "Filter on description(* = any string, ? = any character)", //$NON-NLS-1$ //$NON-NLS-0$
+	"computeCancelled": "Problems computation cancelled by user", //$NON-NLS-1$ //$NON-NLS-0$
+	"computingProblems": "Computing problems...", //$NON-NLS-1$ //$NON-NLS-0$
+	"Errors": "Errors", //$NON-NLS-1$ //$NON-NLS-0$
+	"Warnings": "Warnings", //$NON-NLS-1$ //$NON-NLS-0$
+	"viewByTypes" : "By types", //$NON-NLS-1$ //$NON-NLS-0$
+	"viewByFiles" : "By files", //$NON-NLS-1$ //$NON-NLS-0$
+	"viewByTypesTooltip": "View problems grouped by errors and warnings", //$NON-NLS-1$ //$NON-NLS-0$
+	"viewByFilesTooltip": "View problems grouped by files" //$NON-NLS-1$ //$NON-NLS-0$
 });

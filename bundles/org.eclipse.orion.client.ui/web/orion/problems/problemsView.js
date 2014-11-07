@@ -31,6 +31,7 @@ define([
 		this._parent = lib.node(parentId);
 		this.serviceRegistry = options.serviceRegistry;
 		this.commandRegistry = options.commandRegistry;
+		this.preferences = options.preferences;
 		this.fileClient = options.fileClient;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this._init(slideout);
@@ -50,11 +51,19 @@ define([
 				this._parent.appendChild(this._inner_node);
 			}
 			this._createFilterInput();
+			this._createCommandsContainer();
 			var explorerParentNode = document.createElement("div"); //$NON-NLS-0$
 			explorerParentNode.id = "problemsExplorerParent_id"; //$NON-NLS-0$
 			explorerParentNode.classList.add("problemsExplorerNodeWrapper"); //$NON-NLS-0$
 			this._inner_node.appendChild(explorerParentNode);
-			this._problemsExplorer = new mProblemsExplorer.ProblemsExplorer({parentId: explorerParentNode.id, serviceRegistry: this.serviceRegistry, commandRegistry: this.commandRegistry, contentTypeRegistry: this.contentTypeRegistry, fileClient: this.fileClient});
+			this._problemsExplorer = new mProblemsExplorer.ProblemsExplorer({parentId: explorerParentNode.id, serviceRegistry: this.serviceRegistry, commandRegistry: this.commandRegistry, 
+																			preferences: this.preferences, contentTypeRegistry: this.contentTypeRegistry, fileClient: this.fileClient});
+		},
+		_createCommandsContainer: function() {
+			var CommandsContainerNode = document.createElement("div"); //$NON-NLS-0$
+			CommandsContainerNode.id = "problemsViewActionsContainer"; //$NON-NLS-0$
+			CommandsContainerNode.classList.add("problemsCommandsContainer"); //$NON-NLS-0$
+			this._inner_node.appendChild(CommandsContainerNode);
 		},
 		_createFilterInput: function() {
 			var input = document.createElement("input"); //$NON-NLS-0$

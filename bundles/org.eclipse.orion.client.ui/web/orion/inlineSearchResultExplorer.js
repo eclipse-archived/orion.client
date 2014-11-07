@@ -384,17 +384,24 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		this._inlineSearchPane = inlineSearchPane;
 		this._preferences = preferences;
 		this.staleTooltips = [];
-		
-		var gotPreferences = this._preferences.getPreferences("/inlineSearchPane").then(function(prefs) { //$NON-NLS-0$
-			var show = prefs.get("showFullPath"); //$NON-NLS-0$
-			if (show === undefined) {
-				show = false;
-				prefs.put("showFullPath", show); //$NON-NLS-0$
-			}
-			this._shouldShowFullPath = show;
-		}.bind(this));
-		
-        gotPreferences.then(this.declareCommands.bind(this));
+		this._replaceRenderer =  new SearchResultRenderer({
+            checkbox: true,
+            highlightSelection: false,
+            getCheckedFunc: function(item) {
+                return this.getItemChecked(item);
+            }.bind(this),
+            onCheckedFunc: function(rowId, checked, manually) {
+                this.onRowChecked(rowId, checked, manually);
+            }.bind(this)
+        }, this);
+        this.render = this._normalRenderer = new SearchResultRenderer({
+            checkbox: false,
+            highlightSelection: false
+        }, this);
+    	mFileDetailRenderer.getFullPathPref(this._preferences, "/inlineSearchPane", ["showFullPath"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
+    		this._shouldShowFullPath = (properties ? properties[0] : false);
+    		this.declareCommands();
+     	}.bind(this));
     }
 
     InlineSearchResultExplorer.prototype = new mExplorer.Explorer();
@@ -406,33 +413,16 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     InlineSearchResultExplorer.prototype.onchange = function(item) {};
 
     InlineSearchResultExplorer.prototype.setResult = function(parentNode, model) {
-        var that = this;
         this.parentNode = parentNode;
-        if (this._shouldShowFullPath) { //$NON-NLS-0$
-        	this.parentNode.classList.add("showFullPath"); //$NON-NLS-0$
-        } else {
-        	this.parentNode.classList.remove("showFullPath"); //$NON-NLS-0$
-        }
+        mFileDetailRenderer.showFullPath(this.parentNode, this._shouldShowFullPath);
         this.model = model;
         if (this.model.replaceMode()) {
             this._hasCheckedItems = true;
             this.checkbox = true;
-            this.renderer = new SearchResultRenderer({
-                checkbox: true,
-                highlightSelection: false,
-                getCheckedFunc: function(item) {
-                    return that.getItemChecked(item);
-                },
-                onCheckedFunc: function(rowId, checked, manually) {
-                    that.onRowChecked(rowId, checked, manually);
-                }
-            }, that);
+            this.renderer = this._replaceRenderer;
         } else {
             this.checkbox = false;
-            this.renderer = new SearchResultRenderer({
-                checkbox: false,
-                highlightSelection: false
-            }, this);
+            this.renderer = this._normalRenderer;
         }
 
         this._reporting = false;
@@ -1154,16 +1144,10 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
     
     InlineSearchResultExplorer.prototype.switchFullPath = function() {
-    	this._preferences.getPreferences("/inlineSearchPane").then(function(prefs) { //$NON-NLS-0$
-			var show = !prefs.get("showFullPath"); //$NON-NLS-0$
-			if (show) { //$NON-NLS-0$
-	        	this.parentNode.classList.add("showFullPath"); //$NON-NLS-0$
-	        } else {
-	        	this.parentNode.classList.remove("showFullPath"); //$NON-NLS-0$
-	        }
-	        prefs.put("showFullPath", show); //$NON-NLS-0$
-			this._shouldShowFullPath = show;
-		}.bind(this));
+    	mFileDetailRenderer.switchFullPathPref(this._preferences, "/inlineSearchPane", ["showFullPath"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
+    		this._shouldShowFullPath = (properties ? properties[0] : false);
+       		mFileDetailRenderer.showFullPath(this.parentNode, this._shouldShowFullPath);
+     	}.bind(this));
     };
 
 	InlineSearchResultExplorer.prototype._renderSearchResult = function(crawling, resultsNode, searchParams, jsonData, incremental) {

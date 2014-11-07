@@ -19,15 +19,34 @@
 	margin-right: 2px;
 }
 
+.problems_Details_Line_number {
+	padding-left: 0 !important;
+	text-align: right;
+	vertical-align: middle;
+	width: 45px;
+}
 .problemsFilter {
 	border: 1px solid lightgray;
 	margin: 3px 6px;
 	width: 95%; /* for older browsers */
 	width: calc(100% - 38px);
+	height: 20px;
 }
 
+.problemsCommandsContainer {
+	display: block;
+	margin: 5px 0;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.problemsCommandsContainer > .orionSwitch {
+	display: inline-block;
+	margin-bottom: 1px;
+	vertical-align: bottom;
+}
 .problemsExplorerNodeWrapper {
-	height: calc(100% - 22px);
+	height: calc(100% - 60px);
 	overflow-x: auto;
 	overflow-y: auto;
 }
@@ -70,6 +89,22 @@
 	width: 36px;
 }
 
+.problems-sprite-view-mode{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
+	padding-right:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.problems-sprite-view-mode:before{ content: '\E04C'; }/* view mode grouped by errors and warnings */
+.problems-sprite-view-mode:after{ content: '\E04A'; }/*view mode grouped by files */
 
 .problems_inner_container .problemsError {
 	/* images/error.gif */

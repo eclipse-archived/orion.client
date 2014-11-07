@@ -13,11 +13,13 @@
 /*global URL*/
 define([
 	'i18n!orion/problems/nls/messages',
+	'i18n!orion/search/nls/messages',
 	'orion/Deferred',
 	'orion/explorers/explorer',
 	'orion/webui/littlelib',
 	'orion/crawler/searchCrawler',
 	'orion/extensionCommands',
+	'orion/commands',
 	'orion/explorers/navigatorRenderer',
 	'orion/objects',
 	'orion/syntaxchecker',
@@ -26,9 +28,59 @@ define([
 	'orion/explorers/fileDetailRenderer',
 	'orion/uiUtils',
 	'orion/URL-shim'
-], function(messages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, navigatorRenderer, objects, mSyntaxchecker, mTextModel, mNavUtils, mFileDetailRenderer, mUiUtils) {
+], function(messages, sharedMessages, Deferred, mExplorer, lib, mSearchCrawler, extensionCommands, mCommands, navigatorRenderer, objects, mSyntaxchecker, mTextModel, mNavUtils, mFileDetailRenderer, mUiUtils) {
     var DEBUG = false;
+    function _place(ndoeToPlace, parent, position) {
+        var parentNode = lib.node(parent);
+        if (parentNode) {
+            if (position === "only") { //$NON-NLS-0$
+                lib.empty(parentNode);
+            }
+            parentNode.appendChild(ndoeToPlace);
+        }
+    }
+
+    function _createElement(elementTag, classNames, id, parent) {
+        var element = document.createElement(elementTag);
+        if (classNames) {
+            if (Array.isArray(classNames)) {
+                for (var i = 0; i < classNames.length; i++) {
+                    element.classList.add(classNames[i]);
+                }
+            } else if (typeof classNames === "string") { //$NON-NLS-0$
+                element.className = classNames;
+            }
+        }
+        if (id) {
+            element.id = id;
+        }
+        var parentNode = lib.node(parent);
+        if (parentNode) {
+            parentNode.appendChild(element);
+        }
+        return element;
+    }
+
+    function _createSpan(classNames, id, parent, spanName) {
+        var span = _createElement('span', classNames, id, parent); //$NON-NLS-0$
+        if (spanName) {
+            span.appendChild(document.createTextNode(spanName));
+        }
+        return span;
+    }
+
 	function getDetailDecoratorIcon(holderDiv, isError){
+		var icon = document.createElement("div"); //$NON-NLS-0$
+		
+		icon.classList.add("problemsDecorator"); //$NON-NLS-0$
+		if(isError) {
+			icon.classList.add("problemsError"); //$NON-NLS-0$
+		} else {
+			icon.classList.add("problemsWarning"); //$NON-NLS-0$
+		}
+		holderDiv.appendChild(icon);
+	}
+	function getDetailLineNumber(holderDiv, isError){
 		var icon = document.createElement("div"); //$NON-NLS-0$
 		
 		icon.classList.add("problemsDecorator"); //$NON-NLS-0$
@@ -167,8 +219,8 @@ define([
 	 * @extends orion.explorers.Explorer
 	 */
 	function ProblemsExplorer(options) {
-		var url = new URL(window.location.href);
-		this._byFile = url.query.get("byFile") === "true";
+		this.totalProblems = [];
+		this.totalFiles = [];
 		this._ProblemsRendererByType = new ProblemsRenderer({
 			registry: options.serviceRegistry,
 			commandService: options.commandRegistry,
@@ -182,16 +234,121 @@ define([
 		mExplorer.Explorer.call(this, options.serviceRegistry, options.selection, this._ProblemsRendererByType, options.commandRegistry);	
 		this.fileClient = options.fileClient,
 		this.contentTypeRegistry = options.contentTypeRegistry;
-		this.parentId = options.parentId ? options.parentId : "orion.PropertyPanel.container";
+		this.preferences = options.preferences;
+		this.parentId = options.parentId;
 		this.actionScopeId = options.actionScopeId;
 		this.location = options.location;
 		this.progressService = options.progressService;
-		this.explorerSelectionScope = "explorerSelection";  //$NON-NLS-0$
-		this.explorerSelectionStatus = "explorerSelectionStatus";  //$NON-NLS-0$
-		//this.createCommands();
+    	mFileDetailRenderer.getFullPathPref(this.preferences, "/problemsView", ["showFullPath", "viewByFile"]).then(function(properties){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+    		this._shouldShowFullPath = (properties ? properties[0] : false);
+    		this._viewByFile = (properties ? properties[1] : false);
+    		this.declareCommands();
+     	}.bind(this));
 	}
 	ProblemsExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	objects.mixin(ProblemsExplorer.prototype, /** @lends orion.propertyPanel.ProblemsExplorer.prototype */ {
+	    /* one-time setup of commands */
+	    declareCommands: function() {
+	        // actions for the renderer
+			var switchViewCommand = new mCommands.Command({
+				tooltip : messages["viewByTypesTooltip"],
+				name: messages["viewByTypes"],
+				imageClass : "problems-sprite-view-mode", //$NON-NLS-0$
+	            id: "orion.problemsView.switchView", //$NON-NLS-0$
+	            groupId: "orion.problemsViewGroup", //$NON-NLS-0$
+				type: "switch", //$NON-NLS-0$
+				checked: this._viewByFile,
+				visibleWhen: function(/*item*/) {
+					switchViewCommand.checked = this._viewByFile;
+					switchViewCommand.name = this._viewByFile ? messages["viewByTypes"] : messages["viewByFiles"];
+					switchViewCommand.tooltip = this._viewByFile ? messages["viewByTypesTooltip"] : messages["viewByFilesTooltip"];
+					return this.getItemCount() > 0;
+				}.bind(this),
+				callback : function(data) {
+					this.switchViewMode();
+			}.bind(this)});
+	        var nextResultCommand = new mCommands.Command({
+	            tooltip: sharedMessages["Next result"],
+	            imageClass: "core-sprite-move-down", //$NON-NLS-0$
+	            id: "orion.problemsView.nextResult", //$NON-NLS-0$
+	            groupId: "orion.problemsViewGroup", //$NON-NLS-0$
+	            visibleWhen: function(/*item*/) {
+	                return this.getItemCount() > 0;
+	            }.bind(this),
+	            callback: function() {
+	                this.gotoNext(true, true);
+	            }.bind(this)
+	        });
+	        var prevResultCommand = new mCommands.Command({
+	            tooltip: sharedMessages["Previous result"],
+	            imageClass: "core-sprite-move-up", //$NON-NLS-0$
+	            id: "orion.problemsView.prevResult", //$NON-NLS-0$
+	            groupId: "orion.problemsViewGroup", //$NON-NLS-0$
+	            visibleWhen: function(/*item*/) {
+	                return this.getItemCount() > 0;
+	            }.bind(this),
+	            callback: function() {
+	                this.gotoNext(false, true);
+	            }.bind(this)
+	        });
+	        
+	        var switchFullPathCommand = new mCommands.Command({
+	        	name: sharedMessages["fullPath"], //$NON-NLS-0$
+	            tooltip: sharedMessages["switchFullPath"], //$NON-NLS-0$
+	            imageClass : "sprite-switch-full-path", //$NON-NLS-0$
+	            id: "orion.problemsView.switchFullPath", //$NON-NLS-0$
+	            groupId: "orion.problemsViewGroup", //$NON-NLS-0$
+	            type: "switch", //$NON-NLS-0$
+	            checked: this._shouldShowFullPath,
+	            visibleWhen: function(/*item*/) {
+	                return this._viewByFile && this.getItemCount() > 0;
+	            }.bind(this),
+	            callback: function() {
+	                this.switchFullPath();
+	            }.bind(this)
+	        });
+	        
+	        this.commandService.addCommand(switchViewCommand);
+	        this.commandService.addCommand(nextResultCommand);
+	        this.commandService.addCommand(prevResultCommand);
+	        this.commandService.addCommand(switchFullPathCommand);
+	        
+	        this.commandService.addCommandGroup("problemsViewActions", "orion.problemsViewActions.unlabeled", 200); //$NON-NLS-1$ //$NON-NLS-0$
+	        
+	        mExplorer.createExplorerCommands(this.commandService, function(/*item*/) {
+	        	return this.getItemCount() > 0;
+	        }.bind(this), "orion.explorer.problems.expandAll", "orion.explorer.problems.collapseAll"); //$NON-NLS-1$ //$NON-NLS-0$
+	        
+	        this.commandService.registerCommandContribution("problemsViewActions", "orion.problemsView.switchView", 1); //$NON-NLS-1$ //$NON-NLS-0$
+	        this.commandService.registerCommandContribution("problemsViewActions", "orion.explorer.problems.expandAll", 2); //$NON-NLS-1$ //$NON-NLS-0$
+	        this.commandService.registerCommandContribution("problemsViewActions", "orion.explorer.problems.collapseAll", 3); //$NON-NLS-1$ //$NON-NLS-0$
+	        this.commandService.registerCommandContribution("problemsViewActions", "orion.problemsView.nextResult", 4); //$NON-NLS-1$ //$NON-NLS-0$
+	        this.commandService.registerCommandContribution("problemsViewActions", "orion.problemsView.prevResult", 5); //$NON-NLS-1$ //$NON-NLS-0$
+	        this.commandService.registerCommandContribution("problemsViewActions", "orion.problemsView.switchFullPath", 6); //$NON-NLS-1$ //$NON-NLS-0$
+	    },
+	    refreshCommands:function() {
+	        this.commandService.destroy("problemsViewActionsContainer"); //$NON-NLS-0$
+	        this.commandService.renderCommands("problemsViewActions", "problemsViewActionsContainer", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	    },
+	    getItemCount: function() {
+			return this.totalProblems.length;
+	    },
+	    gotoNext: function(next, forceExpand) {
+	        this.getNavHandler().iterate(next, forceExpand, true);
+	    },
+	    switchViewMode: function() {
+	    	mFileDetailRenderer.switchFullPathPref(this.preferences, "/problemsView", ["viewByFile"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
+	    		this._viewByFile = (properties ? properties[0] : false);
+				this._generateProblemsModel(this.currentFlatProblems);
+				this.incrementalRender(true);
+	     	}.bind(this));
+	    },
+	    switchFullPath: function() {
+	    	mFileDetailRenderer.switchFullPathPref(this.preferences, "/problemsView", ["showFullPath"]).then(function(properties){ //$NON-NLS-1$ //$NON-NLS-0$
+	    		this._shouldShowFullPath = (properties ? properties[0] : false);
+	       		mFileDetailRenderer.showFullPath(lib.node(this.parentId), this._shouldShowFullPath);
+	     	}.bind(this));
+	    },
 		validate: function(location, postValidate) {
 			this._postValidate = postValidate;
 			this._initSpinner();
@@ -205,7 +362,8 @@ define([
 			
 		},
 		_generateProblemsModel: function(totalProblems) {
-			if(this._byFile) {
+			this.currentFlatProblems = totalProblems;
+			if(this._viewByFile) {
 				this.filteredProblems = processProblemsByFiles(this.totalFiles, totalProblems);
 			} else {
 				this.filteredProblems = processProblemsByType(totalProblems);
@@ -319,6 +477,7 @@ define([
 					}
 				}.bind(this));
 			}
+        	mFileDetailRenderer.showFullPath(lib.node(this.parentId), this._shouldShowFullPath);
 			if(incremental) {
 				this.filteredProblems = resultLocation;
 			} else {
@@ -345,8 +504,9 @@ define([
 			mExplorer.Explorer.prototype.destroy.call(this);
 		},
 	    _incrementalRender: function(expandAll) {
+			this.refreshCommands();
 	    	var model;
-	    	if(this._byFile) {
+	    	if(this._viewByFile) {
 				model =  new ProblemsFileModel({
 					registry: this.registry,
 					problems: this.filteredProblems,
@@ -370,6 +530,9 @@ define([
 	        if(expandAll) {
 	        	this.expandAll();
 	        }
+	        if(this.filteredProblems.length > 0) {
+        		this.getNavHandler().cursorOn(this.filteredProblems[0], true, null, true);
+        	}
 	    },
 	    incrementalRender: function(expandAll) {
 	        if(this._openWithCommands){
@@ -384,12 +547,6 @@ define([
 	    },
 		isRowSelectable: function(/*modelItem*/) {
 			return true;
-		},
-		updateCommands: function() {
-			mExplorer.createExplorerCommands(this.commandService);
-		},
-		refreshSelection: function() {
-			//Do nothing
 		}
 	});
 	
@@ -403,6 +560,9 @@ define([
        		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	        spanHolder.appendChild(link);
 	    },
+	    renderDetailLineNumber: function(item, spanHolder) {
+	        _place(document.createTextNode(item.line + ":"), spanHolder, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+	    },
 		getCellElement: function(col_no, item, tableRow){
 			var div, td, itemLabel;
 			switch (col_no) {
@@ -410,7 +570,7 @@ define([
 					td = document.createElement("td"); //$NON-NLS-0$
 					div = document.createElement("div"); //$NON-NLS-0$
 					td.appendChild(div);
-					if (item.type === "category" || item.type === "file") { //$NON-NLS-0$
+					if (item.type === "category") { //$NON-NLS-0$
 						td.classList.add("problemsDecoratorTDTitle"); //$NON-NLS-0$
 						this.getExpandImage(tableRow, div);
 						getDetailDecoratorIcon(div, item.location === "category_errors_id");
