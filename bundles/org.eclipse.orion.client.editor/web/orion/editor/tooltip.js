@@ -300,30 +300,28 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 		},
 		_renderContent: function(tooltipDoc, tooltipContents, data) {
-			var sectionDiv = null;
-			var divResult = null;
-
+			if (!data.content) return false;
+			var sectionDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$;
 			// render the title, if any
 			if (data.title) {
-				sectionDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
-				sectionDiv.innerHTML = this.hover.renderMarkDown(data.title);
-				tooltipContents.appendChild(sectionDiv);
+				var titleDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$;
+				titleDiv.innerHTML = this.hover.renderMarkDown ? this.hover.renderMarkDown(data.title) : data.title;
+				sectionDiv.appendChild(titleDiv);
 			}
-			if (!data.content) return false;
+			var contentDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
 			switch(data.type) {
 				case 'markdown': { //$NON-NLS-0$
-					divResult = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
-					divResult.innerHTML = this.hover.renderMarkDown(data.content);
-					sectionDiv.appendChild(divResult);
+					if (this.hover.renderMarkDown) {
+						contentDiv.innerHTML = this.hover.renderMarkDown(data.content);
+					}
 					break;
 				}
 				default: {
-					tooltipContents.appendChild(sectionDiv);
-					divResult = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
-					divResult.appendChild(tooltipDoc.createTextNode(data.content));
-					sectionDiv.appendChild(divResult);
+					contentDiv.appendChild(tooltipDoc.createTextNode(data.content));
 				}
 			}
+			sectionDiv.appendChild(contentDiv);
+			tooltipContents.appendChild(sectionDiv);
 			return true;
 		},
 		_getAnnotationContents: function(annotations) {
