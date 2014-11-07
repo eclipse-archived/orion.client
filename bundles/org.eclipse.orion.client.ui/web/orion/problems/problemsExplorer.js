@@ -404,8 +404,8 @@ define([
 			}
 			this.incrementalRender(true);
 		},
-		_filterSingle: function(item, modifiedFilter) {
-			return (-1 !== item.description.search(modifiedFilter) || -1 !== item.fileName.search(modifiedFilter));
+		_filterSingle: function(item, modifiedFilter) { 
+			return (-1 !== item.description.search(modifiedFilter) || -1 !== item.fileName.search(modifiedFilter) || (this._viewByFile && this._shouldShowFullPath && -1 !== item.filePath.search(modifiedFilter)));
 		},
 		_filterOn: function(modifiedFilter) {
 			var newProblems = this.totalProblems.filter(function(problem){
