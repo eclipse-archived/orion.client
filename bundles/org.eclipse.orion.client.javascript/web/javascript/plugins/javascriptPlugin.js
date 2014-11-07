@@ -33,12 +33,13 @@ define([
 'orion/plugin',
 'orion/util',
 'javascript/commands/generateDocCommand',
+'javascript/commands/openDeclaration',
 'orion/editor/stylers/application_javascript/syntax',
 'orion/editor/stylers/application_json/syntax',
 'orion/editor/stylers/application_schema_json/syntax',
 'orion/editor/stylers/application_x-ejs/syntax'
 ], function(Bootstrap, Esprima, ScriptResolver, ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
-			EslintValidator, Occurrences, Hover, Outliner,	PluginProvider, Util, GenerateDocCommand, mJS, mJSON, mJSONSchema, mEJS) {
+			EslintValidator, Occurrences, Hover, Outliner,	PluginProvider, Util, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS) {
 
 	/**
 	 * Plug-in headers
@@ -104,6 +105,18 @@ define([
    				contentType: ['application/javascript']  //$NON-NLS-0$
  			}
  	);
+	
+	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+			new OpenDeclCommand.OpenDeclarationCommand(astManager), 
+			{
+				nameKey : 'openDeclName',  //$NON-NLS-0$
+				tooltipKey : 'openDeclTooltip',  //$NON-NLS-0$
+   				id : "open.js.decl",  //$NON-NLS-0$
+   				nls: 'javascript/nls/messages',  //$NON-NLS-0$
+   				key : [ 114, false, false, false, false],  //$NON-NLS-0$
+    			contentType: ['application/javascript']  //$NON-NLS-0$
+  			}
+  	);
 	
 	/**
 	 * Register the jsdoc-based outline
