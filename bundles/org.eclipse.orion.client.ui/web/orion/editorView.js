@@ -454,7 +454,14 @@ define([
 			inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 				var textView = editor.getTextView();
 				if (textView) {
-					mMetrics.logEvent("editor", "open", event.contentType ? event.contentType.id : "(unknown)"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					var label;
+					if (event.contentType) {
+						label = event.contentType.id;
+					} else {
+						var index = event.name.lastIndexOf("."); //$NON-NLS-0$
+						label = index > 0 ? "unknown: " + event.name.substring(index) : "(none)"; //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					mMetrics.logEvent("editor", "open", label); //$NON-NLS-1$ //$NON-NLS-0$
 					liveEditSession.start(inputManager.getContentType(), event.title);
 					textView.setOptions(this.updateViewOptions(this.settings));
 					this.syntaxHighlighter.setup(event.contentType, editor.getTextView(), editor.getAnnotationModel(), event.title, true).then(function() {
