@@ -41,6 +41,7 @@
 }
 
 .textviewTooltip .tooltipTitle {
+	padding-left: 3px;
 	vertical-align: middle;
 }
 
