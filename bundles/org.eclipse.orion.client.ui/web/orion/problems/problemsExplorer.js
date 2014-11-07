@@ -69,10 +69,13 @@ define([
         return span;
     }
 
-	function getDetailDecoratorIcon(holderDiv, isError){
+	function getDetailDecoratorIcon(holderDiv, isError, additionalCss){
 		var icon = document.createElement("div"); //$NON-NLS-0$
 		
 		icon.classList.add("problemsDecorator"); //$NON-NLS-0$
+		if(additionalCss) {
+			icon.classList.add(additionalCss); //$NON-NLS-0$
+		}
 		if(isError) {
 			icon.classList.add("problemsError"); //$NON-NLS-0$
 		} else {
@@ -91,12 +94,12 @@ define([
 		}
 		holderDiv.appendChild(icon);
 	}
-	function generateProblemsLink(explorer, item) {
+	function generateProblemsLink(explorer, item, showName) {
 		var params = {start: item.start, end: item.end};
 		var name = item.description;
 		var location = item.fileLocation;
 		var link = navigatorRenderer.createLink(null, 
-			{Location: location, Name: name}, 
+			{Location: location, Name: showName ? name : null}, 
 			explorer.commandService, 
 			explorer.contentTypeRegistry,
 			explorer._openWithCommands, 
@@ -556,7 +559,7 @@ define([
 	ProblemsRenderer.prototype = Object.create(mExplorer.SelectionRenderer.prototype);
 	objects.mixin(ProblemsRenderer.prototype, {
 	    renderProblemsElement: function(item, spanHolder) {
-			var link = generateProblemsLink(this.explorer, item);
+			var link = generateProblemsLink(this.explorer, item, true);
        		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	        spanHolder.appendChild(link);
 	    },
@@ -641,7 +644,7 @@ define([
 	    generateDetailDecorator: function(item, spanHolder) {
 //			var div = document.createElement("div"); //$NON-NLS-0$
 //			col.appendChild(div);
-			getDetailDecoratorIcon(spanHolder, item.severity === "error"); //$NON-NLS-0$
+			getDetailDecoratorIcon(spanHolder, item.severity === "error", "problemsDecoratorLessMargin"); //$NON-NLS-0$
 	    }
 	});
 	

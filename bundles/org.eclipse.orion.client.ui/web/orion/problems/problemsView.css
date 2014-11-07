@@ -61,8 +61,8 @@
 .problems_inner_container .secondaryColumn {
 	color: #666666;	
 	padding-right: 2px;
-	padding-top: 2px;
-	padding-bottom: 2px;
+	padding-top: 4px;
+	padding-bottom: 4px;
 	vertical-align:middle;
 }
 
@@ -77,8 +77,13 @@
 	width: 16px;
 	height: 16px;
 	vertical-align: middle;
-	margin: 1px;
+	margin-top: 4px;
 	border: none;
+}
+
+.problems_inner_container .problemsDecoratorLessMargin {
+	margin-top: 0 !important;
+	margin-right: 1px;
 }
 
 .problems_inner_container .problemsDecoratorTD {
