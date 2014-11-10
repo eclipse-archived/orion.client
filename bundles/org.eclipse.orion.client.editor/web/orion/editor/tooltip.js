@@ -271,7 +271,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 						}
 					}, function(error) {
 						if (typeof console !== "undefined") { //$NON-NLS-0$
-							console.error("Error computing hover tooltip"); //$NON-NLS-0$
+							console.log("Error computing hover tooltip"); //$NON-NLS-0$
 							console.log(error && error.stack);
 						}
 					});
