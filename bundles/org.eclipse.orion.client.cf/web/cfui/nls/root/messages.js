@@ -193,5 +193,5 @@ define({
 	"debugWith${0}:": "Debug with ${0}:",
 	"requiredToPreventRandomAccess": "Required to prevent random access to cf-launcher",
 	"uRLPrefix:": "URL Prefix: ",
-	"leaveBlankForDefault/launcher": "Leave blank for default /launcher"
+	"leaveBlankForDefault": "Leave blank for default ${0}"
 });

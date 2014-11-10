@@ -113,7 +113,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard', 'orion/i18nUtil'], funct
 					var urlInput = document.createElement("input"); //$NON-NLS-0$
 					self._cfLauncherURLPrefix = urlInput;
 					
-					urlInput.placeholder = messages["leaveBlankForDefault/launcher"];
+					urlInput.placeholder = i18nUtil.formatMessage(messages["leaveBlankForDefault"], "/launcher"); 
 					urlInput.disabled = true;
 					
 					cfUrlPrefix.appendChild(urlInput);
