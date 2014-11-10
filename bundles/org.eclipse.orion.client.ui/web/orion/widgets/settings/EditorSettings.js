@@ -320,7 +320,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					for( var theme= 0; theme < styles.length; theme++ ){
 						set = {
 							value: styles[theme].name,
-							label: styles[theme].name
+							label: messages[styles[theme].name + "ThemeName"] || styles[theme].name //$NON-NLS-0$
 						};
 						if( styles[theme].name === themeStyles.style.name ){
 							set.selected = true;

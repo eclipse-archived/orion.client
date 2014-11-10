@@ -595,7 +595,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 		for (var theme = 0; theme < styles.length; theme++) {
 			var set = {
 				value: styles[theme].name,
-				label: styles[theme].name
+				label: messages[styles[theme].name + "ThemeName"] || styles[theme].name //$NON-NLS-0$
 			};
 			if (styles[theme].name === name) {
 				set.selected = true;
@@ -626,7 +626,7 @@ function(messages, mCommands, mCommandRegistry, lib, Component, Select, TextFiel
 		for (var theme in styles) {
 			var set = {
 				value: styles[theme].name,
-				label: styles[theme].name
+				label: messages[styles[theme].name + "ThemeName"] || styles[theme].name //$NON-NLS-0$
 			};
 			if (selection) {
 				if (styles[theme].name === selection) {

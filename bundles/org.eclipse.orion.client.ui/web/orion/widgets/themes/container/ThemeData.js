@@ -36,7 +36,7 @@ define([
 		}
 		
 		// TODO: what are these for? They just get overridden by ThemeData constructor
-		StyleSet.prototype.name = messages['orionThemeName'];
+		StyleSet.prototype.name = 'Orion';
 		StyleSet.prototype.navbar = '#404648';
 		StyleSet.prototype.button = '#EFEFEF';
 		StyleSet.prototype.location = '#333';
@@ -56,7 +56,7 @@ define([
 			this.styles = [];
 			
 			var orion = new StyleSet();
-			orion.name = messages['orionThemeName'];
+			orion.name = 'Orion';
 			orion.navbar = 'white'; // #404648 for dark banner
 			orion.button = '#EFEFEF';
 			orion.location = '#efefef';
@@ -74,7 +74,7 @@ define([
 			this.styles.push( orion );		
 			
 			var orion2014 = new StyleSet();
-			orion2014.name = messages['orion2014ThemeName'];
+			orion2014.name = 'Orion2014';
 			orion2014.navbar = 'white';
 			orion2014.button = '#EFEFEF';
 			orion2014.location = '#EFEFEF';
@@ -93,7 +93,7 @@ define([
 
 			var eire = new StyleSet();
 			
-			eire.name = messages['greenZoneThemeName'];
+			eire.name = 'Green Zone';
 			eire.navbar = 'seagreen';
 			eire.button = 'lavender';
 			eire.location = 'darkseagreen';
@@ -112,7 +112,7 @@ define([
 			
 			var avril = new StyleSet();
 			
-			avril.name = messages['prettyInPinkThemeName'];
+			avril.name = 'Pretty In Pink';
 			avril.navbar = 'plum';
 			avril.button = 'lavender';
 			avril.location = 'pink';
@@ -131,7 +131,7 @@ define([
 			
 			var blue = new StyleSet();
 			
-			blue.name = messages['blueMondayThemeName'];
+			blue.name = 'Blue Monday';
 			blue.navbar = 'cornflowerblue';
 			blue.button = 'lavender';
 			blue.location = 'skyblue';
@@ -150,7 +150,7 @@ define([
 			
 			var vanilla = new StyleSet();
 			
-			vanilla.name = messages['vanillaSkiesThemeName'];
+			vanilla.name = 'Vanilla Skies';
 			vanilla.navbar = 'sandybrown';
 			vanilla.button = 'lemmonchiffon';
 			vanilla.location = 'cornsilk';
@@ -169,7 +169,7 @@ define([
 			
 			var beetlejuice = new StyleSet();
 			
-			beetlejuice.name = messages['beetlejuiceThemeName'];
+			beetlejuice.name = 'Beetlejuice';
 			beetlejuice.navbar = 'indigo';
 			beetlejuice.button = 'slateblue';
 			beetlejuice.location = 'darkslateblue';
@@ -188,7 +188,7 @@ define([
 			
 			var red = new StyleSet();
 			
-			red.name = messages['redThemeName'];
+			red.name = 'Red';
 			red.navbar = '#CD2127';
 			red.button = '#777777';
 			red.location = '#D85F56';
@@ -218,7 +218,7 @@ define([
 			return {
 				storage:'/themes',
 				styleset:'styles',
-				defaultTheme:messages['orion2014ThemeName'],
+				defaultTheme:'Orion2014',
 				selectedKey: 'selected',
 				version: THEMES_VERSION
 			};

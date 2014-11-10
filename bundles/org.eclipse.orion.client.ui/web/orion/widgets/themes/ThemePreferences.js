@@ -212,6 +212,19 @@ define(['orion/Deferred'], function(Deferred) {
 		apply: function() {
 			this.setTheme();
 		},
+		_findStyle: function(styles, name) {
+			for (var i = 0; i < styles.length; i++) {
+				if (styles[i].name === name) {
+					return styles[i];
+				}
+			}
+			return null;
+		},
+		_getCurrentStyle: function(styles, selectedName) {
+			var themeData = this._themeData;
+			var themeInfo = themeData.getThemeStorageInfo();
+			return  this._findStyle(styles, selectedName) || this._findStyle(styles, themeInfo.defaultTheme) || styles[0];
+		},
 		getTheme: function(callback) {
 			var themeData = this._themeData;
 			var themeInfo = themeData.getThemeStorageInfo();
@@ -229,12 +242,7 @@ define(['orion/Deferred'], function(Deferred) {
 							styles[i] = this._convertThemeStylesToHierarchicalFormat(styles[i]);
 						}
 					}
-					for (i = 0; i < styles.length; i++) {
-						if (styles[i].name === selected[themeInfo.selectedKey]) {
-							style = styles[i];
-							break;
-						}
-					}
+					style = this._getCurrentStyle(styles, selected[themeInfo.selectedKey]);
 				}
 				callback({
 					style: style,
@@ -258,12 +266,7 @@ define(['orion/Deferred'], function(Deferred) {
 				} else {
 					styles = JSON.parse(prefs.get(themeInfo.styleset));
 				}
-				for (var i = 0; i <styles.length; i++) {
-					if (styles[i].name === selected[themeInfo.selectedKey]) {
-						themeData.processSettings(styles[i]);
-						break;
-					}
-				}
+				themeData.processSettings(this._getCurrentStyle(styles, selected[themeInfo.selectedKey]));
 				prefs.put('version', this._themeVersion); //$NON-NLS-0$
 			}.bind(this));
 		},
@@ -277,10 +280,8 @@ define(['orion/Deferred'], function(Deferred) {
 				if (styles) {
 					for( var s = 0; s < styles.length; s++ ){
 						styles[s].styles.fontSize = size;
-						if( styles[s].name ===  selected[themeInfo.selectedKey] ){
-							style = styles[s];
-						}
 					}
+					style = this._getCurrentStyle(styles, selected[themeInfo.selectedKey]);
 				}
 				prefs.put(themeInfo.styleset , JSON.stringify(styles));
 				themeData.processSettings(style);

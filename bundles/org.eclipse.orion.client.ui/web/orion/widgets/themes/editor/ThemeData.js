@@ -40,15 +40,15 @@ define([
 		
 		}
 		
-		var defaultFont = '"Consolas", "Monaco", "Vera Mono", monospace';
-		var defaultFontSize = '12px';
+		var defaultFont = '"Consolas", "Monaco", "Vera Mono", monospace'; //$NON-NLS-0$
+		var defaultFontSize = '12px'; //$NON-NLS-0$
 
 		function ThemeData() {
 
 		this.styles = [];
 		
 		var eclipse = {
-			name: messages["eclipseThemeName"],
+			name: "Eclipse", //$NON-NLS-0$
 			className: "eclipse", //$NON-NLS-0$
 			styles: {
 				/* top-level properties */
@@ -192,7 +192,7 @@ define([
 		this.styles.push(eclipse);
 
 		var prospecto = {
-			name: messages["prospectoThemeName"],
+			name: "Prospecto", //$NON-NLS-0$
 			className: "prospecto", //$NON-NLS-0$
 			styles: {
 				/* top-level properties */
@@ -336,7 +336,7 @@ define([
 		this.styles.push(prospecto);
 
 		var darker = {
-			name: messages["darkerThemeName"],
+			name: "Darker", //$NON-NLS-0$
 			className: "darker", //$NON-NLS-0$
 			styles: {
 				/* top-level properties */
@@ -485,7 +485,7 @@ define([
 		this.styles.push(darker);
 
 		var blue = {
-			name: messages["blueThemeName"],
+			name: "Blue", //$NON-NLS-0$
 			className: "blue", //$NON-NLS-0$
 			styles: {
 				/* top-level properties */
@@ -629,7 +629,7 @@ define([
 		this.styles.push(blue);
 
 		var ambience = {
-			name: messages["ambienceThemeName"],
+			name: "Ambience", //$NON-NLS-0$
 			className: "ambience", //$NON-NLS-0$
 			styles: {
 				/* top-level properties */
@@ -776,7 +776,7 @@ define([
 		this.styles.push(ambience);
 
 		var tierra = {
-			name: messages["tierraThemeName"],
+			name: "Tierra", //$NON-NLS-0$
 			className: "tierra", //$NON-NLS-0$
 			styles: {
 				/* top-level properties */
@@ -921,7 +921,7 @@ define([
 
 
 		var nimbus = {
-			name: messages["nimbusThemeName"],
+			name: "Nimbus", //$NON-NLS-0$
 			className: "nimbus", //$NON-NLS-0$
 			styles: {
 				/* top-level properties */
@@ -1070,7 +1070,7 @@ define([
 		this.styles.push(nimbus);
 
 		var adelante = {
-			name: messages["adelanteThemeName"],
+			name: "Adelante", //$NON-NLS-0$
 			className: "adelante", //$NON-NLS-0$
 			styles: {
 				/* top-level properties */
@@ -1214,8 +1214,8 @@ define([
 		this.styles.push(adelante);
 
 		var raspberry = {
-			name: messages["raspberryPiThemeName"],
-			className: "raspberry", //$NON-NLS-0$
+			name: "Raspberry Pi", //$NON-NLS-0$
+			className: "raspberrypi", //$NON-NLS-0$
 			styles: {
 				/* top-level properties */
 				backgroundColor: "seashell", //$NON-NLS-0$
