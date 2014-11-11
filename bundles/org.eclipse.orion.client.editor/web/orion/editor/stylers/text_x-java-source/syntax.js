@@ -13,20 +13,33 @@
 define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-1$ //$NON-NLS-0$
 	var keywords = [
 		"abstract", //$NON-NLS-0$
-		"boolean", "break", "byte", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"case", "catch", "char", "class", "continue", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"default", "do", "double", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"else", "extends", //$NON-NLS-1$ //$NON-NLS-0$
-		"false", "final", "finally", "float", "for", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"if", "implements", "import", "instanceof", "int", "interface", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"boolean", "byte", //$NON-NLS-1$ //$NON-NLS-0$
+		"char", "class", //$NON-NLS-1$ //$NON-NLS-0$
+		"double", //$NON-NLS-0$
+		"extends", //$NON-NLS-0$
+		"final", "float", //$NON-NLS-1$ //$NON-NLS-0$
+		"implements", "import", "instanceof", "int", "interface", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"long", //$NON-NLS-0$
-		"native", "new", "null", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"native", "new", //$NON-NLS-1$ //$NON-NLS-0$
 		"package", "private", "protected", "public", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"short", "static", "synchronized", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"throws", "transient", //$NON-NLS-1$ //$NON-NLS-0$
+		"void", "volatile" //$NON-NLS-1$ //$NON-NLS-0$
+	];
+	var controlKeywords = [
+		"break", //$NON-NLS-0$
+		"case", "catch", "continue", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"default", "do", //$NON-NLS-1$ //$NON-NLS-0$
+		"else", //$NON-NLS-0$
+		"finally", "for", //$NON-NLS-1$ //$NON-NLS-0$
+		"if", //$NON-NLS-0$
 		"return", //$NON-NLS-0$
-		"short", "static", "super", "switch", "synchronized", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"this", "throw", "throws", "transient", "true", "try", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"void", "volatile", //$NON-NLS-1$ //$NON-NLS-0$
+		"switch", //$NON-NLS-0$
+		"throw", "try", //$NON-NLS-1$ //$NON-NLS-0$
 		"while" //$NON-NLS-0$
+	];
+	var constants = [
+		"false", "null", "true" //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
 	var grammars = mLib.grammars;
@@ -49,13 +62,25 @@ define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/
 			{include: "orion.lib#number_hex"}, //$NON-NLS-0$
 			{
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				name: "keyword.operator.java" //$NON-NLS-0$
+			},
+			{
+				match: "\\b(?:" + controlKeywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "keyword.control.java" //$NON-NLS-0$
+			},
+			{
+				match: "\\b(?:" + constants.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				name: "constant.language.java" //$NON-NLS-0$
+			},
+			{
+				match: "\\b(?:this|super)\\b", //$NON-NLS-0$
+				name: "variable.language.java" //$NON-NLS-0$
 			}
 		]
 	});
 	return {
 		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
-		keywords: keywords
+		keywords: keywords.concat(controlKeywords)
 	};
 });

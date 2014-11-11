@@ -90,7 +90,7 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 			{
 				match: "\\bthis\\b", //$NON-NLS-0$
 				name: "variable.language.js" //$NON-NLS-0$
-			},
+			}
 		],
 		repository: {
 			jsFunctionDef: {
