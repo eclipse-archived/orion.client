@@ -450,7 +450,8 @@ define([
 	
 		_findProblems: function( fileContentText, fileObj, cType){
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(this.registry, new mTextModel.TextModel(fileContentText));
-			return syntaxChecker.checkSyntax(cType, fileObj.Location, null, fileContentText, {getText: function(){return fileContentText;}});
+			return syntaxChecker.checkSyntax(cType, fileObj.Location, null, fileContentText, {getFileMetadata: function(){return {location: fileObj.Location};},
+																							  getText: function(){return fileContentText;}});
 		},
 		_renderProblems: function(jsonData, incremental) {
 			if(incremental) {
