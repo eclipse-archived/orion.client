@@ -108,8 +108,8 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.problems-sprite-view-mode:before{ content: '\E04C'; }/* view mode grouped by errors and warnings */
-.problems-sprite-view-mode:after{ content: '\E04A'; }/*view mode grouped by files */
+.problems-sprite-view-mode:before{ content: '\E054'; }/* view mode grouped by errors and warnings */
+.problems-sprite-view-mode:after{ content: '\E053'; }/*view mode grouped by files */
 
 .problems_inner_container .problemsError {
 	/* images/error.gif */
