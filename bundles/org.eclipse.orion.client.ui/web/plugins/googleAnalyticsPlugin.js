@@ -17,8 +17,8 @@ define(["orion/plugin", "orion/Deferred", "orion/xhr"], function(PluginProvider,
 	GoogleAnalyticsImpl.prototype = {
 		init: function() {
 			var promise = new Deferred();
-			var url = require.toUrl("/metrics"); //$NON-NLS-0$
-			xhr("GET", url, { //$NON-NLS-0$
+			var url = new URL("../metrics", window.location); //$NON-NLS-0$
+			xhr("GET", url.href, { //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
