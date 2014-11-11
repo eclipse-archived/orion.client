@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/operationsCommands'
-	], function(messages, lib,	mExplorer, mOperationsCommands) {
+define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/operationsCommands', 'orion/metrics'
+	], function(messages, lib,	mExplorer, mOperationsCommands, mMetrics) {
 	
 	var exports = {};
 
@@ -93,8 +93,13 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/ex
 					operation.deferred.then(success.bind(operationLocation), failure.bind(operationLocation), progress.bind(operationLocation));
 				}
 				that._loadOperationsList.bind(that)(operations);
+
+				if (window.orionPageLoadStart) {
+					var interval = new Date().getTime() - window.orionPageLoadStart;
+					mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
+					window.orionPageLoadStart = undefined;
+				}
 			}, displayError);
-			
 		};
 		
 		OperationsExplorer.prototype._loadOperationsList = function(operationsList){

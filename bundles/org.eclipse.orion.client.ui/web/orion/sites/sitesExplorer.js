@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/sites/nls/messages', 'orion/explorers/explorer', 'orion/Deferred', 'orion/section', 'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/webui/littlelib'],
-		function(messages, mExplorer, Deferred, mSection, mSiteUtils, mSiteClient, lib) {
+define(['i18n!orion/sites/nls/messages', 'orion/explorers/explorer', 'orion/Deferred', 'orion/section', 'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/metrics', 'orion/webui/littlelib'],
+		function(messages, mExplorer, Deferred, mSection, mSiteUtils, mSiteClient, mMetrics, lib) {
 	var SiteServicesExplorer, SitesRenderer, SiteTreeModel;
 
 	/** 
@@ -134,6 +134,12 @@ define(['i18n!orion/sites/nls/messages', 'orion/explorers/explorer', 'orion/Defe
 					
 					loadingDeferred.resolve();
 					progressService.setProgressMessage("");
+
+					if (window.orionPageLoadStart) {
+						var interval = new Date().getTime() - window.orionPageLoadStart;
+						mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
+						window.orionPageLoadStart = undefined;
+					}
 				}
 			);
 		};

@@ -11,6 +11,8 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 
+window.orionPageLoadStart = new Date().getTime();
+
 define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/config'], function(require, Deferred, mServiceregistry, mPreferences, mPluginRegistry, mConfig) {
 
 	var once; // Deferred
@@ -20,7 +22,7 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 			return once;
 		}
 		once = new Deferred();
-	
+		
 		// initialize service registry and EAS services
 		var serviceRegistry = new mServiceregistry.ServiceRegistry();
 	

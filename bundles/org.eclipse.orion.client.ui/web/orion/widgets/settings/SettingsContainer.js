@@ -31,11 +31,13 @@ define([
 	'orion/widgets/settings/UserSettings',
 	'orion/widgets/settings/GitSettings',
 	'orion/widgets/settings/EditorSettings',
-	'orion/editorPreferences'
+	'orion/editorPreferences',
+	'orion/metrics'
 ], function(messages, Deferred, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
 		ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings,
 		GitSettings,
-		EditorSettings, mEditorPreferences) {
+		EditorSettings, mEditorPreferences,
+		mMetrics) {
 
 	/**
 	 * @param {Object} options
@@ -125,6 +127,12 @@ define([
 				window.addEventListener("hashchange", _self.processHash.bind(_self)); //$NON-NLS-0$
 	
 				mGlobalCommands.setPageTarget({task: messages['Settings'], serviceRegistry: _self.registry, commandService: _self.commandService});
+				
+				if (window.orionPageLoadStart) {
+					var interval = new Date().getTime() - window.orionPageLoadStart;
+					mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
+					window.orionPageLoadStart = undefined;
+				}
 			});
 		},
 		
