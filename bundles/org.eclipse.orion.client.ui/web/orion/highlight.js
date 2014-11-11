@@ -127,7 +127,7 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 						for(var key in this.orionGrammars) {
 						    grammars.push(this.orionGrammars[key]);
 						}
-						var stylerAdapter = new mTextStyler2.createPatternBasedAdapter(grammars, provider.getProperty("id"));
+						var stylerAdapter = new mTextStyler2.createPatternBasedAdapter(grammars, provider.getProperty("id"), contentType.id);  //$NON-NLS-0$
 						styler = new mTextStyler2.TextStyler(textView, annotationModel, stylerAdapter);
 					}
 				}

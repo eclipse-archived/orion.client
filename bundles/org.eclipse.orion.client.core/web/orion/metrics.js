@@ -40,7 +40,7 @@ define(["orion/xhr"], function(xhr) {
 						window[GA_ID]("send", "pageview"); //$NON-NLS-1$ //$NON-NLS-0$
 
 						queue.forEach(function(current) {
-							logEvent(current.category, current.action, current.label, current.value);
+							window[GA_ID]("send", current.type, current.arg1, current.arg2, current.arg3, current.arg4); //$NON-NLS-0$
 						});
 						queue = null; /* no longer needed */
 					}
@@ -57,13 +57,24 @@ define(["orion/xhr"], function(xhr) {
 			window[GA_ID]("send", "event", category, action, label, value); //$NON-NLS-1$ //$NON-NLS-0$
 		} else {
 			if (queue) {
-				queue.push({category: category, action: action, label: label, value: value});
+				queue.push({type: "event", arg1: category, arg2: action, arg3: label, arg4: value});
+			}
+		}
+	};
+
+	var logTiming = function(timingCategory, timingVar, timingValue, timingLabel) {
+		if (window[GA_ID]) {
+			window[GA_ID]("send", "timing", timingCategory, timingVar, Math.round(timingValue), timingLabel); //$NON-NLS-1$ //$NON-NLS-0$
+		} else {
+			if (queue) {
+				queue.push({type: "timing", arg1: timingCategory, arg2: timingVar, arg3: Math.round(timingValue), arg4: timingLabel}); //$NON-NLS-0$
 			}
 		}
 	};
 
 	return {
 		init: init,
-		logEvent: logEvent
+		logEvent: logEvent,
+		logTiming: logTiming
 	};
 });

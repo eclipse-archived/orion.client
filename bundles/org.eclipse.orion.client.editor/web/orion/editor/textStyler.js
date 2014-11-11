@@ -11,7 +11,8 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eventTarget'], function(mAnnotations, mEventTarget) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eventTarget', 'orion/metrics'], //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	function(mAnnotations, mEventTarget, mMetrics) {
 
 	/*
 	 * Throughout textStyler "block" refers to a potentially multi-line token.
@@ -36,12 +37,13 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		return high;
 	};
 
-	var createPatternBasedAdapter = function(grammars, rootId) {
-		return new PatternBasedAdapter(grammars, rootId);
+	var createPatternBasedAdapter = function(grammars, rootId, contentType) {
+		return new PatternBasedAdapter(grammars, rootId, contentType);
 	};
 
-	function PatternBasedAdapter(grammars, rootId) {
+	function PatternBasedAdapter(grammars, rootId, contentType) {
 		this._patternManager = new PatternManager(grammars, rootId);
+		this._contentType = contentType;
 	}
 	PatternBasedAdapter.prototype = {
 		blockSpansBeyondEnd: function(block) {
@@ -305,6 +307,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				endName: closingName,
 				atStart: atStart
 			};
+		},
+		getContentType: function() {
+			return this._contentType;
 		},
 		parse: function(text, offset, block, _styles, ignoreCaptures) {
 			if (!text) {
@@ -852,7 +857,20 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 
 		var charCount = model.getCharCount();
 		var rootBounds = {start: 0, contentStart: 0, end: charCount, contentEnd: charCount};
+		if (charCount >= 50000) {
+			var startTime = new Date().getTime();
+		}
 		this._rootBlock = this._stylerAdapter.createBlock(rootBounds, this, model, null);
+		if (startTime) {
+			var interval = new Date().getTime() - startTime;
+			if (interval > 10) {
+				mMetrics.logTiming(
+					"editor", //$NON-NLS-0$
+					"styler compute blocks (ms/50000 chars)", //$NON-NLS-0$
+					interval * 50000 / charCount,
+					stylerAdapter.getContentType());
+			}
+		}
 		if (annotationModel) {
 			var add = [];
 			annotationModel.removeAnnotations(mAnnotations.AnnotationType.ANNOTATION_FOLDING);

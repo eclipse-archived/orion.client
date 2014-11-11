@@ -502,6 +502,9 @@ define([
 		getBracketMatch: function(/*block, text*/) {
 			return null;
 		},
+		getContentType: function() {
+			return "text/x-markdown"; //$NON-NLS-0$
+		},
 		getElementByIdentifier: function(id, rootNode) {
 			return lib.$("." + id, rootNode || previewDiv); //$NON-NLS-0$
 		},
