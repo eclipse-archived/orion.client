@@ -1804,7 +1804,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		 * Returns all the key bindings associated to the given action ID.
 		 *
 		 * @param {String} actionID the action ID.
-		 * @returns {orion.editor.KeyBinding[]} the array of key bindings associated to the given action ID.
+		 * @returns {orion.KeyBinding[]} the array of key bindings associated to the given action ID.
 		 *
 		 * @see orion.editor.TextView#setKeyBinding
 		 * @see orion.editor.TextView#setAction
@@ -2695,7 +2695,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		 * association with the specified key binding is overwriten. If the
 		 * action ID is <code>null</code>, the association is removed.
 		 * 
-		 * @param {orion.editor.KeyBinding} keyBinding the key binding
+		 * @param {orion.KeyBinding} keyBinding the key binding
 		 * @param {String} actionID the action ID
 		 */
 		setKeyBinding: function(keyBinding, actionID) {

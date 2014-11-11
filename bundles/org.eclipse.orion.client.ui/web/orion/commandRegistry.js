@@ -88,7 +88,7 @@ define([
 		 * @param {String} commandId the id of the command to run.
 		 * @param {Object} item the item on which the command should run.
 		 * @param {Object} handler the handler for the command.
-		 * @param {orion.commands.ParametersDescription} parameters used on this invocation. Optional.
+		 * @param {orion.commands.ParametersDescription} [parameters] Parameters used on this invocation. Optional.
 		 * @param {Object} [userData] Optional user data that should be attached to generated command callbacks.
 		 * @param {DOMElement} [parent] Optional parent for the parameter collector.
 		 *
@@ -577,7 +577,7 @@ define([
 		 *  a path of "group1Id/group2Id/command" indicates that the command belongs as a child of 
 		 *  group2Id, which is itself a child of group1Id.  Optional.
 		 * @param {boolean} [bindingOnly=false] if true, then the command is never rendered, but the key or URL binding is hooked.
-		 * @param {orion.editor.KeyBinding} [keyBinding] a keyBinding for the command.  Optional.
+		 * @param {orion.KeyBinding} [keyBinding] a keyBinding for the command.  Optional.
 		 * @param {orion.commands.URLBinding} [urlBinding] a url binding for the command.  Optional.
 		 */
 		registerCommandContribution: function(scopeId, commandId, position, parentPath, bindingOnly, keyBinding, urlBinding) {
@@ -1294,7 +1294,7 @@ define([
 		 * by that name.
 		 *
 		 * @param {String} name the name of the parameter
-		 * @returns {orion.command.CommandParameter} the parameter with the given name
+		 * @returns {orion.commands.CommandParameter} the parameter with the given name
 		*/
 		parameterNamed: function(name) {
 			return this.parameterTable[name];

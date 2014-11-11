@@ -16,7 +16,7 @@ define(['orion/edit/dispatcher'], function() {
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 * @param {orion.core.ContentTypeRegistry}
 	 * @param {orion.editor.Editor} editor
-	 * @param {orion.InputManger} inputManager
+	 * @param {orion.editor.InputManger} inputManager
 	 */
 	function Dispatcher(serviceRegistry, contentTypeRegistry, editor, inputManager) {
 		this.serviceRegistry = serviceRegistry;
