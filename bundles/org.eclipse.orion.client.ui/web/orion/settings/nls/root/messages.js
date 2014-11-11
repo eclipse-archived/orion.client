@@ -126,6 +126,8 @@ define({
 	"CheckJsConsoleDrillDown": "click here, then check javascript console to drill down",
 	"Item": "Item",
 	"Git Config": "Git Config",
+	"GitWorkDir": "Git Working Directory",
+	"SelectUnstagedChanges": "Always select unstaged changes",
 	"Clear Git Credentials": "Clear Git Credentials",
 	"Enable Storage": "Enable Storage:",
 	"BrowserCredStoreMsg" : "Please be aware that your credentials will be stored persistently in the browser.",

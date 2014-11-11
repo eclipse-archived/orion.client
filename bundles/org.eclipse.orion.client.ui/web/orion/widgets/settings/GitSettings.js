@@ -74,6 +74,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			var gitSection = new Subsection( {sectionName:messages["Git Config"], parentNode: this.sections, children: this.gitFields } );
 			gitSection.show();
 			
+			/* - git select all -------------------------------------------------- */
+			this.gitAlwaysSelect = [ new LabeledCheckbox( 
+				{	fieldlabel: messages["SelectUnstagedChanges"], 
+					postChange: this.update.bind(this)
+				} 
+			)];
+			var gitSection2 = new Subsection( {sectionName:messages["GitWorkDir"], parentNode: this.sections, children: this.gitAlwaysSelect } );
+			gitSection2.show();
+			
 			//--------- git credentials -------------------------------
 			this.gitCredentialsFields = [ new LabeledCheckbox( 
 				{	fieldlabel:messages["Enable Storage"], 
@@ -126,7 +135,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		update: function(){
 			var gitConfigPreference = new GitConfigPreference(this.registry);
 			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-			gitConfigPreference.setConfig({GitMail: this.gitFields[0].getValue(),	GitName: this.gitFields[1].getValue()}).then(
+			gitConfigPreference.setConfig({GitMail: this.gitFields[0].getValue(),	
+										GitName: this.gitFields[1].getValue(),
+										GitSelectAll: this.gitAlwaysSelect[0].isChecked()}).then(
 				function(){
 					messageService.setProgressResult( messages['GitUsrUpdateSuccess'] );
 				}
@@ -170,6 +181,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						}
 						if( userInfo.GitName ){
 							this.gitFields[1].setValue( userInfo.GitName );	
+						}
+						if ( userInfo.GitSelectAll ) {
+							this.gitAlwaysSelect[0].setChecked (userInfo.GitSelectAll);
 						}
 					}
 				}.bind(this));
