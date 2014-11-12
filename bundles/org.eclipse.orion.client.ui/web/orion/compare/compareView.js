@@ -49,11 +49,13 @@ exports.CompareView = (function() {
 			this.options.changeNumber = 0;
 		},
 		/** @private */
-		_disableAnnoBookMark: function(editor){	
-			var ruler = editor.getAnnotationRuler();
-			if(ruler) {
-				ruler.onDblClick = function(/*lineIndex, e*/) {};
-			}
+		_disableAnnoBookMark: function(editors){
+			editors.forEach(function(editor) {
+				var ruler = editor.getAnnotationRuler();
+				if(ruler) {
+					ruler.onDblClick = function(/*lineIndex, e*/) {};
+				}
+			});
 		},
 		/** @private */
 		_getLineDelim: function(input , diff){	
@@ -379,6 +381,10 @@ exports.TwoWayCompareView = (function() {
 				return messages["There are unsaved changes."];
 			}
 		}.bind(this);
+	};
+	
+	TwoWayCompareView.prototype.disableAnnoBookMark = function(){
+		this._disableAnnoBookMark(this._editors);
 	};
 	
 	TwoWayCompareView.prototype.initImageMode = function(){
@@ -785,6 +791,10 @@ exports.InlineCompareView = (function() {
 		}.bind(this)); 
 	};
 
+	InlineCompareView.prototype.disableAnnoBookMark = function(){
+		this._disableAnnoBookMark([this._editor]);
+	};
+	
 	InlineCompareView.prototype.initImageMode = function(){
 		if(this._editor) {
 			this._editor.destroy();
