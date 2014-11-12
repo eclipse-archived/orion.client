@@ -13,8 +13,9 @@
 /*global confirm*/
 define(['require', 'i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 
 	'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteClient', 'orion/sites/siteCommands',
-	'orion/PageUtil', 'orion/sites/SiteEditor'], 
-	function(require, messages, i18nUtil, mBootstrap, mStatus, mProgress, mCommandRegistry, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteClient, mSiteCommands, PageUtil, SiteEditor) {
+	'orion/PageUtil', 'orion/sites/SiteEditor', 'orion/metrics'], 
+	function(require, messages, i18nUtil, mBootstrap, mStatus, mProgress, mCommandRegistry, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands,
+			mSiteClient, mSiteCommands, PageUtil, SiteEditor, mMetrics) {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
@@ -63,6 +64,13 @@ define(['require', 'i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/boo
 						widget.load(resource).then(
 							function() {
 								updateTitle();
+
+								if (window.orionPageLoadStart) {
+									/* only the case for the page's initial rendering */
+									var interval = new Date().getTime() - window.orionPageLoadStart;
+									mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
+									window.orionPageLoadStart = undefined;
+								}
 							});
 					}
 				}
