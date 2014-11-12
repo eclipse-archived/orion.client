@@ -14,9 +14,9 @@
 /*global URL*/
 define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/globalCommands", "orion/URITemplate",
 		"orion/Deferred", "marked/marked", "orion/webui/littlelib","orion/objects", "orion/explorers/explorer", "orion/contentTypes",
-		"orion/status", "orion/operationsClient", "orion/commands"],
+		"orion/status", "orion/operationsClient", "orion/commands", "orion/metrics"],
 	function(require, messages, mBootstrap, mCommandRegistry, mGlobalCommands, URITemplate, Deferred, marked,
-		lib, objects, mExplorer, mContentTypes, mStatus, mOperationsClient, mCommands) {
+		lib, objects, mExplorer, mContentTypes, mStatus, mOperationsClient, mCommands, mMetrics) {
 
 	var serviceRegistry, progress, contentTypeService, statusService;
 	var helpModel;
@@ -533,6 +533,12 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			setOutput(item).then(
 				function() {
 					selectItem(item);
+					if (window.orionPageLoadStart) {
+						/* will only be the case if the page's initial load was seeded with a hash to specify the initial page */
+						var interval = new Date().getTime() - window.orionPageLoadStart;
+						mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
+						window.orionPageLoadStart = undefined;
+					}
 				}
 			);
 		};
@@ -565,6 +571,8 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 	}
 
 	function outputHTML(item) {
+		mMetrics.logEvent("help", "open", item.id); //$NON-NLS-1$ //$NON-NLS-0$
+
 		var outputDocument = output.contentDocument;
 		if (!selectedItem || selectedItem.fileNode.Location !== item.fileNode.Location) {
 			outputDocument.body.scrollTop = 0;
@@ -865,6 +873,12 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 				};
 				outputDocument.body.classList.add("orionMarkdown"); //$NON-NLS-0$
 				outputDocument.head.appendChild(link);
+
+				if (window.orionPageLoadStart) {
+					var interval = new Date().getTime() - window.orionPageLoadStart;
+					mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
+					window.orionPageLoadStart = undefined;
+				}
 			};
 
 			if (output.contentDocument.readyState === "complete") { //$NON-NLS-0$
