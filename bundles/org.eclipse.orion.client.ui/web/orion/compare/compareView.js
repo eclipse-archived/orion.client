@@ -49,6 +49,13 @@ exports.CompareView = (function() {
 			this.options.changeNumber = 0;
 		},
 		/** @private */
+		_disableAnnoBookMark: function(editor){	
+			var ruler = editor.getAnnotationRuler();
+			if(ruler) {
+				ruler.onDblClick = function(/*lineIndex, e*/) {};
+			}
+		},
+		/** @private */
 		_getLineDelim: function(input , diff){	
 			var delim = "\n"; //$NON-NLS-0$
 			return delim;
@@ -755,7 +762,7 @@ exports.InlineCompareView = (function() {
 		this._editor.installTextView();
 		this._editor.setInput(null, null, initString);
 		this._editor.setOverviewRulerVisible(false);
-		this._editor.setAnnotationRulerVisible(false);
+		this._editor.setAnnotationRulerVisible(true);
 			
 		this._textView = this._editor.getTextView();
 			
