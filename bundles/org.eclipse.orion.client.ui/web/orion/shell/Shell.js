@@ -12,8 +12,8 @@
 
 /*eslint-env browser, amd*/
 define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli/types", "gcli/types/selection", "gcli/ui/fields",
-		"gcli/ui/fields/menu", "util/util", "gcli/settings", "gcli/canon", "gcli/cli", "gcli/commands/help", "util/promise"],
-	function(messages, i18nUtil, mGCLI, mTypes, mSelectionType, mFields, mMenu, mUtil, mSettings, mCanon, mCli, mHelp, mPromise) {
+		"gcli/ui/fields/menu", "util/util", "gcli/settings", "gcli/canon", "gcli/cli", "gcli/commands/help", "util/promise", "orion/metrics"],
+	function(messages, i18nUtil, mGCLI, mTypes, mSelectionType, mFields, mMenu, mUtil, mSettings, mCanon, mCli, mHelp, mPromise, mMetrics) {
 
 	function CustomType(typeSpec) {}
 	CustomType.prototype = Object.create(mSelectionType.SelectionType.prototype);
@@ -122,8 +122,9 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 				if (!command.params) {
 					command.params = command.parameters;
 				}
-				var fn = function(exec) {
+				var fn = function(exec, name) {
 					return function(args, context) {
+						mMetrics.logEvent("shell", "invoke", name);
 						var result = exec(args, context);
 						this.registeredTypes.forEach(function(current) {
 							current.prototype.lastParseTimestamp = 0;
@@ -132,7 +133,7 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 					}.bind(this);
 				}.bind(this);
 				if (command.exec) {
-					command.exec = fn(command.exec);
+					command.exec = fn(command.exec, command.name);
 				}
 				mGCLI.addCommand(command);
 			},
