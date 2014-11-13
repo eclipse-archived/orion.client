@@ -153,22 +153,12 @@
 	</target>
 	
 	<target name="editorStylersOptimize" unless="skipEditorStylers">
-		<taskdef resource="net/sf/antcontrib/antcontrib.properties" />
-		<foreach target="optimizeStyler" param="stylerDir">
-			<fileset dir="${staging}/orion/editor/stylers">
-				<include name="*"/>
-			</fileset>
-		</foreach>
-	</target>
-	
-	<target name="optimizeStyler">
-		<basename property="styler" file="${stylerDir}"/>
-		<stylerOptimizeFile out="${out}/stylers/${styler}/syntax.min.js"
-			name="orion/editor/stylers/${styler}/syntax"
+		<stylerOptimizeFile out="${out}/stylers/text_x-yaml/syntax.min.js"
+			name="orion/editor/stylers/text_x-yaml/syntax"
 			optimize="closure"
 			staging="${staging}" />
-		<stylerOptimizeFile out="${out}/stylers/${styler}/syntax.js"
-			name="orion/editor/stylers/${styler}/syntax"
+		<stylerOptimizeFile out="${out}/stylers/text_x-yaml/syntax.js"
+			name="orion/editor/stylers/text_x-yaml/syntax"
 			optimize="none"
 			staging="${staging}" />
 	</target>
