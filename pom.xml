@@ -191,6 +191,7 @@
 
 							    <!-- minify javascript -->
 								<ant antfile="${basedir}/releng/org.eclipse.orion.client.releng/builder/orion.mini.xml">
+									<property name="requirejsHome" value="${requirejsHome}"/>
 								    <target name="download3rdPartyLibs"/>
 								    <target name="updateBuildLabel"/>
 									<target name="requirejs"/>
