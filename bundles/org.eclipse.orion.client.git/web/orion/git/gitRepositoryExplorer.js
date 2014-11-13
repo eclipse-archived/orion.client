@@ -27,8 +27,9 @@ define([
 	'orion/i18nUtil',
 	'orion/globalCommands',
 	'orion/git/gitCommands',
-	'orion/Deferred'
-], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mSection, mSelection, lib, URITemplate, PageUtil, util, mFileUtils, i18nUtil, mGlobalCommands, mGitCommands, Deferred) {
+	'orion/Deferred',
+	'orion/metrics'
+], function(require, messages, mGitChangeList, mGitCommitList, mGitBranchList, mGitConfigList, mGitRepoList, mSection, mSelection, lib, URITemplate, PageUtil, util, mFileUtils, i18nUtil, mGlobalCommands, mGitCommands, Deferred, mMetrics) {
 	
 	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
 	
@@ -291,6 +292,13 @@ define([
 				that.displayBranches(repository); 
 				that.displayConfig(repository, "full"); //$NON-NLS-0$
 				that.setSelectedReference(that.reference);
+			} else {
+				if (window.orionPageLoadStart) {
+					var interval = new Date().getTime() - window.orionPageLoadStart;
+					mMetrics.logTiming("page", "interactive", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
+					mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
+					window.orionPageLoadStart = undefined;
+				}
 			}
 		};
 	
@@ -678,6 +686,10 @@ define([
 		});
 		this.autoFetch = false;
 		return this.statusDeferred.then(function() {
+			if (window.orionPageLoadStart) {
+				var interval = new Date().getTime() - window.orionPageLoadStart;
+				mMetrics.logTiming("page", "interactive", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
+			}
 			return explorer.display().then(function() {
 				if (!this.reference) {
 					this.reference = this.commitsNavigator.model.getTargetReference();
@@ -688,6 +700,11 @@ define([
 					});
 				} else {
 					explorer.select(repository.status);
+				}
+				if (window.orionPageLoadStart) {
+					var interval = new Date().getTime() - window.orionPageLoadStart;
+					mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
+					window.orionPageLoadStart = undefined;
 				}
 			}.bind(this));
 		}.bind(this));

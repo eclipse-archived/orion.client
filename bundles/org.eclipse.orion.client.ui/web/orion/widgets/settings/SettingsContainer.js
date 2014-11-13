@@ -130,6 +130,7 @@ define([
 				
 				if (window.orionPageLoadStart) {
 					var interval = new Date().getTime() - window.orionPageLoadStart;
+					mMetrics.logTiming("page", "interactive", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
 					mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
 					window.orionPageLoadStart = undefined;
 				}
