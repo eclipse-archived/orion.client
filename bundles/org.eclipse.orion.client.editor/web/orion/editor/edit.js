@@ -281,10 +281,10 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 				var textView = editor.getTextView();
 				var annotationModel = editor.getAnnotationModel();
 				if (contentType) {
-					contentType = contentType.replace(/[*|:/".<>?+]/g, '_');
-					require(["./stylers/" + contentType + "/syntax"], //$NON-NLS-1$ //$NON-NLS-0$
+					var folderName = contentType.replace(/[*|:/".<>?+]/g, '_');
+					require(["./stylers/" + folderName + "/syntax"], //$NON-NLS-1$ //$NON-NLS-0$
 						function(grammar) {
-							var stylerAdapter = new mTextStyler.createPatternBasedAdapter(grammar.grammars, grammar.id);
+							var stylerAdapter = new mTextStyler.createPatternBasedAdapter(grammar.grammars, grammar.id, contentType);
 							this.styler = new mTextStyler.TextStyler(textView, annotationModel, stylerAdapter);
 						},
 						function(error) {

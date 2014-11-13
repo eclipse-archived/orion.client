@@ -18,8 +18,9 @@ define([
 	'orion/Deferred',
 	'orion/EventTarget',
 	'orion/objects',
-	'orion/PageUtil'
-], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil) {
+	'orion/PageUtil',
+	'orion/metrics'
+], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil, mMetrics) {
 
 	function Idle(options){
 		this._document = options.document || document;
@@ -569,6 +570,11 @@ define([
 				}
 				this._unsavedChanges = [];
 				this.processParameters(input);
+			}
+
+			if (window.orionPageLoadStart) {
+				var interval = new Date().getTime() - window.orionPageLoadStart;
+				mMetrics.logTiming("page", "interactive", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		}
 	});

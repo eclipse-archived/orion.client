@@ -24,10 +24,11 @@ define([
 	'orion/selection',
 	'orion/URITemplate',
 	'orion/PageUtil',
-	'orion/webui/contextmenu'
+	'orion/webui/contextmenu',
+	'orion/metrics'
 ], function(
 	messages, objects, lib, mExplorer, mNavigatorRenderer, mKeyBinding,
-	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, mContextMenu
+	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, mContextMenu, mMetrics
 ) {
 	var FileExplorer = mExplorer.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
@@ -72,9 +73,15 @@ define([
 
 		this.treeRoot = {}; // Needed by FileExplorer.prototype.loadResourceList
 		var _self = this;
-		this.editorInputListener = function(event) {
-			_self.reveal(event.metadata);
-		};
+ 		this.editorInputListener = function(event) {
+			_self.reveal(event.metadata).then(function() {
+				if (window.orionPageLoadStart) {
+					var interval = new Date().getTime() - window.orionPageLoadStart;
+					mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
+					window.orionPageLoadStart = undefined;
+				}
+			});
+ 		};
 		this.editorInputManager.addEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
 		if (sidebarNavInputManager) {
 			sidebarNavInputManager.reveal = function(metadata) {
@@ -209,7 +216,13 @@ define([
 		display: function(root, force) {
 			return this.loadRoot(root, force).then(function(){
 				this.updateCommands();
-				return this.reveal(this.editorInputManager.getFileMetadata());
+				return this.reveal(this.editorInputManager.getFileMetadata()).then(function() {
+					if (window.orionPageLoadStart) {
+						var interval = new Date().getTime() - window.orionPageLoadStart;
+						mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
+						window.orionPageLoadStart = undefined;
+					}
+				});
 			}.bind(this));	
 		},
 		/**
