@@ -63,6 +63,7 @@ utils.extend = function(target, source) {
 
 /**
  * Logs a debug message with printf-style substitution.
+ * @deprecated use a specific debugger instead, eg debug("cf-launcher:foo") for some component 'foo'
  */
 utils.log = function(/*message, replacements*/) {
 	debug(nodeutil.format.apply(nodeutil, arguments));

@@ -11,7 +11,7 @@
 /*eslint-env node*/
 var httpProxy = require("http-proxy"),
     nodeutil = require("util"),
-    util = require("../util");
+    proxylogger = require("../logger")("proxy");
 
 var PROXY_ERR = "Error proxying to %s. Check application logs.";
 
@@ -41,7 +41,7 @@ ProxyManager.prototype.createProxies = function(setup) {
 		config.target.port = port;
 		var proxy = new httpProxy.createProxyServer(config);
 		proxy.on("error", function(err, socket, res) {
-			util.log("Error proxying to %s: %s", name, err);
+			proxylogger("Error proxying to %s: %s", name, err);
 			if (res.writeHead)
 				res.send(500, nodeutil.format(PROXY_ERR, name));
 			else if (socket.close)
@@ -51,6 +51,7 @@ ProxyManager.prototype.createProxies = function(setup) {
 			port: port,
 			proxy: proxy,
 		};
+		proxylogger("Creating proxy config: %s --proxy--> port :%s ", name, port);
 	});
 	return result;
 };

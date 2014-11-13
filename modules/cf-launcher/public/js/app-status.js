@@ -1,6 +1,6 @@
 /*eslint-env browser */
 /*eslint no-unused-params:0 */
-/*global $ */
+/*global $ console*/
 
 // @returns A Promise resolving with the parsed application
 function appxhr(method, url, appData) {
@@ -107,9 +107,7 @@ var view = {
 		    isDebugging = (app.state === "debug" || app.state === "debugbreak"),
 		    template = isDebugging ? $("#template-debug") : $("#template-stop"),
 		    status = template[0].cloneNode(true /*deep*/); // Element
-		replaceSubtree(status, {
-			name: app.name
-		});
+		replaceSubtree(status, app); // replace ${f} patterns with app values
 		panel.empty().append(status);
 
 		var tail = $("#logtail");

@@ -20,18 +20,21 @@ var bodyParser = require("body-parser"),
     nodeurl = require("url"),
     appControl = require("./appctl"),
     dav = require("./dav"),
+    logger = require("../logger"),
+    proxylogger = require("../logger")("proxy"),
     ProcessManager = require("../proc"),
     ProxyManager = require("./proxy"),
     tty = require("./tty"),
     util = require("../util");
 
+var TARGET_APP = "target";
+
 var moduleDir = path.join(__dirname, "..", "..");
 
-
-function startProcesses(appName, appCommand, port_app, port_debug) {
+function startProcesses(appCommand, label, port_app, port_debug) {
 	var procman = new ProcessManager();
 	// Chose DEBUG state here for initial launch, it's less confusing that way
-	procman.startApp(appName, appCommand, port_app, ProcessManager.State.DEBUG);
+	procman.startApp(TARGET_APP, appCommand, label, port_app, ProcessManager.State.DEBUG);
 	procman.startDebugger("debugger", port_debug);
 	return procman;
 }
@@ -39,23 +42,22 @@ function startProcesses(appName, appCommand, port_app, port_debug) {
 function createProxyApp(options) {
 	util.checker(options)
 		.array("appCommand")
-		.string("appName")
+//		.string("appName")
 		.string("urlPrefix")
 		.optString("password") // password is optional
 		.numbery("port");
 
 	var appCommand = options.appCommand,
-	    appName = options.appName,
 	    launcherPrefix = "/" + options.urlPrefix,
 	    password = options.password,
 	    port = options.port,
 	    useAuth = (typeof options.password === "string");
 
-	util.log("Password %s", (useAuth ? "set" : "not set"));
-	util.log("Application command line: %s", appCommand);
-	util.log("VCAP_APP_PORT: %s", port);
-	util.log("Launcher URL prefix: %s", launcherPrefix);
-	util.log();
+	logger("Password %s", (useAuth ? "set" : "not set"));
+	logger("Application command line: %s", appCommand);
+	logger("VCAP_APP_PORT: %s", port);
+	logger("Launcher URL prefix: %s", launcherPrefix);
+	logger();
 
 	// Create proxies, start app & inspector
 	var proxyman = new ProxyManager(port);
@@ -67,11 +69,11 @@ function createProxyApp(options) {
 	});
 	var inspector = proxies.inspector,
 	    target = proxies.target;
-	var procman = startProcesses(appName, appCommand, target.port, inspector.port);
+	var procman = startProcesses(appCommand, options.appName, target.port, inspector.port);
 	var ttyServer = tty.createServer({ port: proxies.tty.port }).listen();
 	var davServer = dav.createServer(proxies.dav.port, password);
-	util.log("[Internal] Application port: %s", target.port);
-	util.log("[Internal] node-inspector port: %s", inspector.port);
+	logger("[Internal] Application port: %s", target.port);
+	logger("[Internal] node-inspector port: %s", inspector.port);
 
 	// ===================================================================
 	// Setup authentication and client-side session.
@@ -122,6 +124,7 @@ function createProxyApp(options) {
 	});
 	// jsDAV supplies its own auth, so it goes outside the session check
 	launcherApp.use("/dav/", function(req, res) {
+		proxylogger("%s %s -> dav", req.method, req.url);
 		proxies.dav.proxy.web(req, res);
 	});
 	// CSS resources can be accessed without session
@@ -139,8 +142,9 @@ function createProxyApp(options) {
 			res.redirect(appPrefix.substr(1) + "/"); // "apps/"
 		else next();
 	});
-	launcherApp.use(appPrefix, appControl(procman, appName));
+	launcherApp.use(appPrefix, appControl(procman, TARGET_APP));
 	launcherApp.use("/tty/", function(req, res) {
+		proxylogger("%s %s -> tty", req.method, req.url);
 		proxies.tty.proxy.web(req, res);
 	});
 	launcherApp.use("/help/dav", function(req, res) {
@@ -166,8 +170,9 @@ function createProxyApp(options) {
 	app.use(flash());
 	app.use(launcherPrefix, launcherApp);
 	app.use(function(req, res/*, next*/) {
-		if (procman.get(appName).state !== ProcessManager.State.STOP) {
+		if (procman.get(TARGET_APP).state !== ProcessManager.State.STOP) {
 			// App is running, proxy the request to it
+			proxylogger("%s -> target app", req.url);
 			target.proxy.web(req, res);
 		} else {
 			// App not running, redirect user to launcher for convenience
@@ -204,31 +209,38 @@ function startServer(options) {
 	// Listen to `upgrade` event and proxy incoming WebSocket requests to either inspector, tty, or user app.
 	// TODO: clean this up -- there has to be a better way
 	server.on("upgrade", function(req, socket, head) {
-		var url = req._parsedUrl || nodeurl.parse(req.url);
-		var segs = url.pathname.split("/").slice(1), rootSegment = segs[0];
-		if (rootSegment !== launcherPrefix)
+		var url = req._parsedUrl || nodeurl.parse(req.url),
+		    url_str = nodeurl.format(url),
+		    segs = url.pathname.split("/").slice(1), rootSegment = segs[0];
+		if (rootSegment !== launcherPrefix) {
+			proxylogger("ws request %s -> target app", url_str);
 			return proxies.target.proxy.ws(req, socket, head); // not for us, send to user app
+		}
 
 		// At this point we know the request is for something in the launcher, either inspector or TTY
-		var service = segs[1], destinationProxy;
+		var service = segs[1], destinationProxy, destProxyName;
 		if (service === "ws") {
 			// node-inspector makes a ws connection to "ws://[whatever]/launcher/ws?", which we catch here.
+			destProxyName = "node-inspector";
 			destinationProxy = proxies.inspector.proxy;
 		} else if (service === "tty") {
 			// Hack: we have a url like /launcher/tty/socket.io?foo but tty.js is expecting /socket.io?foo
 			// so chop off the leading 2 segments and shove the result back into req.url before proxying
 			// TODO try http-proxy forward or forwardPath
+			proxylogger("ws request %s --> rewrite for tty", url_str);
 			url.pathname = "/" + segs.slice(2).join("/");
 			req._parsedUrl = url;
 			req.url = nodeurl.format(url);
+			destProxyName = "tty.js";
 			destinationProxy = proxies.tty.proxy;
 		}
 		// Check login
-		sessionMiddleware(req, {}, function(err) {
+		sessionMiddleware(req, {}, function(/*err*/) {
 			if (isLoggedIn(req)) {
+				proxylogger("  Auth check passed, ws %s --> %s ", req.url, destProxyName);
 				return destinationProxy.ws(req, socket, head);
 			}
-			util.log("Rejected unauthenticated websocket access from %s", req.ip);
+			proxylogger("  Auth check failed, destroying ws socket: %s (%s)", req.url, req.ip);
 			return socket.destroy();
 		});
 	});

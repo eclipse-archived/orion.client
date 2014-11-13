@@ -11,13 +11,15 @@
 /*eslint-env node*/
 var child_process = require("child_process"),
     EventEmitter = require("events").EventEmitter,
+    logger = require("./logger"),
     nodeutil = require("util"),
     streamtailer = require("./streamtailer"),
+    proclogger = logger("proc"),
     util = require("./util");
 
-var CHILD_ERR = "[%s] error: %s",
-    CHILD_EXIT_CODE = "[%s] exited with code: %s",
-    CHILD_EXIT_SIGNAL = "[%s] exited due to signal: %s";
+var CHILD_ERR = "Threw an error: %s",
+    CHILD_EXIT_CODE = "Exited with code: %s",
+    CHILD_EXIT_SIGNAL = "Exited due to signal: %s";
 
 var State = {
 	STOP: "stop",
@@ -38,14 +40,19 @@ Object.defineProperty(State, "fromString", {
 	}
 });
 
+/**
+ * @name ProcessInfo
+ * @class
+ */
 function ProcessInfo(name, proc, launchFn, state) {
 	this.name = name;
 	this.proc = proc;
 	this.launchFn = launchFn;
 	this._state = state;
 	this.tailer = null;
+	this._label = null;
 }
-util.extend(ProcessInfo.prototype, {
+util.extend(ProcessInfo.prototype, /** @lends ProcessInfo.prototype */ {
 	get process() {
 		return this.proc;
 	},
@@ -57,6 +64,12 @@ util.extend(ProcessInfo.prototype, {
 	},
 	set state(value) {
 		this._state = value;
+	},
+	get label() {
+		return this._label;
+	},
+	set label(value)  {
+		this._label = value;
 	},
 	setOutputStreams: function(stdout, stderr) {
 		this.tailer = streamtailer();
@@ -104,7 +117,7 @@ util.extend(ProcessManager.prototype, {
 		try {
 			info.process.kill();
 		} catch (err) {
-			util.log("Error killing %s: %s", name, err);
+			proclogger("Error killing %s: %s", name, err);
 		}
 	},
 	/**
@@ -156,11 +169,13 @@ util.extend(ProcessManager.prototype, {
 	 * Start the user app in debug mode.
 	 * @param {String}   name Name to refer to app by.
 	 * @param {String[]} args Command that launches the application. (eg. ["grunt"], ["node", "foo.js"])
+	 * @param {String}   [label]
 	 * @param {Number}   port The VCAP_APP_PORT that the app should listen on.
 	 * @param {Object}   options Options that may change across different invocations.
 	 * @param {Boolean}  options.state DEBUG | DEBUG_BREAK
+	 * @returns {ProcessInfo}
 	 */
-	startApp: function(name, args, port, state) {
+	startApp: function(name, args, label, port, state) {
 		if (state !== State.DEBUG && state !== State.DEBUG_BREAK)
 			throw new Error(nodeutil.format("Only states %s, %s are allowed for apps.", State.DEBUG, State.DEBUG_BREAK));
 		args = args.slice();
@@ -178,11 +193,14 @@ util.extend(ProcessManager.prototype, {
 			stdio: ["ignore", "pipe", "pipe"]
 		};
 
-		var launchFn = this.startApp.bind(this, name, args.slice(1) /*omit --debug*/, port);
+		var launchFn = this.startApp.bind(this, name, args.slice(1) /*omit --debug*/, label, port /*, state passed later*/);
 		var procInfo = this._spawn("node", args, childopts, name, launchFn, state);
 		var child = procInfo.process;
-		isBreak && util.log("[%s] stopped at breakpoint. Visit debugger to continue.", name);
+		if (isBreak) {
+			proclogger("`%s` stopped at breakpoint. Visit debugger to continue.", name);
+		}
 
+		procInfo.label = label;
 		procInfo.setOutputStreams(child.stdout, child.stderr);
 		child.stdout.pipe(process.stdout);
 		child.stderr.pipe(process.stderr);
@@ -191,6 +209,7 @@ util.extend(ProcessManager.prototype, {
 	 * Forks node inspector. We use the node<->node message channel.
 	 * @param {String} name Name to refer to debugger process by.
 	 * @param {Number} port Web port the debugger will listen on
+	 * @returns {ProcessInfo}
 	 */
 	startDebugger: function(name, port) {
 		var args = ["--web-port=" + port, "--debug-port=" + util.V8_DEBUG_PORT];
@@ -203,18 +222,19 @@ util.extend(ProcessManager.prototype, {
 		// TODO perhaps node-inspector process should be persistent. If killed && !shutdown, launch it again.
 
 		var _self = this;
+		var debuglogger = logger("proc:" + name);
 		child.on("message", function(msg) {
 			switch (msg.event) {
 				case "SERVER.LISTENING":
-					util.log("[%s] is listening.", name);
+					debuglogger("Debugger is listening.");
 					_self.emit("debuggerListening");
 					break;
 				case "SERVER.ERROR":
 					var err = msg.error;
 					if (err.code === "EADDRINUSE") {
-						util.log("[%s] Failed to start because web-port %s is already in use", name, port);
+						debuglogger("Failed to start because web-port %s is already in use", name, port);
 					} else {
-						util.log("[%s] Failed to start. Error: %s", name, err.message || err);
+						debuglogger("Failed to start due to error: %s", name, err.message || err);
 					}
 				break;
 			}
@@ -228,24 +248,27 @@ util.extend(ProcessManager.prototype, {
 	},
 	/**
 	 * spawn or fork
-	 * @param {String} method fork|spawn
+	 * @param {String} method "fork" or "spawn"
+	 * @returns {ProcessInfo}
 	 */
 	_spork: function(method, command, args, options, name, launchFn, state) {
 		if (!child_process[method])
 			throw new Error("Bad method " + method);
-		util.log("[%s] starting %s %s", name, command, args.join(" "));
+		// Create a proc:{name} logger to distinguish logging from different processes
+		var childlogger = logger("proc:" + name);
+		childlogger("Starting %s %s", command, args.join(" "));
 		var child = child_process[method].call(child_process, command, args, options);
 		var info = this._put(name, child, launchFn, state);
 		child.on("error", function(err) {
-			util.log(CHILD_ERR, name, err);
+			util.log(CHILD_ERR, err);
 		});
 		child.once("exit", function(code, signal) {
 			info.process = null;
 			info.state = State.STOP;
 			if (typeof code === "number")
-				util.log(CHILD_EXIT_CODE, name, code);
+				childlogger(CHILD_EXIT_CODE, code);
 			else
-				util.log(CHILD_EXIT_SIGNAL, name, signal);
+				childlogger(CHILD_EXIT_SIGNAL, signal);
 		}.bind(this));
 		return info;
 	}
