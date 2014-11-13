@@ -1722,7 +1722,7 @@ var exports = {};
 					progressService.createProgressMonitor(
 						deferred,
 						messages["Staging changes"]);
-					deferred.then(
+					return deferred.then(
 						function(){
 							dispatchModelEventOn({type: "modelChanged", action: "stage", items: items}); //$NON-NLS-1$ //$NON-NLS-0$
 						}, displayErrorOnStatus
@@ -1737,7 +1737,7 @@ var exports = {};
 					progressService.createProgressMonitor(
 						deferred, //$NON-NLS-0$
 						messages["Staging changes"]);
-					deferred.then( //$NON-NLS-0$
+					return deferred.then(
 						function(){
 							dispatchModelEventOn({type: "modelChanged", action: "stage", items: items}); //$NON-NLS-1$ //$NON-NLS-0$
 						}, displayErrorOnStatus
@@ -1791,7 +1791,7 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$ //$NON-NLS-1$
 			id: "eclipse.orion.git.unstageCommand", //$NON-NLS-0$
 			callback: function(data) {
-				doUnstage(data).then(
+				return doUnstage(data).then(
 					function(items){
 						dispatchModelEventOn({type: "modelChanged", action: "unstage", items: items}); //$NON-NLS-1$ //$NON-NLS-0$
 					}, displayErrorOnStatus

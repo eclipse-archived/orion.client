@@ -538,7 +538,8 @@ define({
 	"FilesChanged": "${0} files changed", //$NON-NLS-0$  //$NON-NLS-1$
 	"file": "file", //$NON-NLS-0$  //$NON-NLS-1$
 	"files": "files", //$NON-NLS-0$  //$NON-NLS-1$
-	"EmptyCommitConfirm": "You have no files selected. Are you sure?", //$NON-NLS-0$  //$NON-NLS-1$
+	"EmptyCommitConfirm": "You have no files selected. If you continue, you will end up with an empty commit. Do you want to continue?", //$NON-NLS-0$  //$NON-NLS-1$
+	"AlwaysSelectFiles": "Always select changed files (see Git Preferences)", //$NON-NLS-0$  //$NON-NLS-1$
 	"EmptyCommitWarning": "The commit is empty", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilesChangedVsReadyToCommit": "${0} ${1} changed. ${2} ${3} ready to commit.", //$NON-NLS-0$  //$NON-NLS-1$
 	"CommitPush": "Commit and Push", //$NON-NLS-0$  //$NON-NLS-1$

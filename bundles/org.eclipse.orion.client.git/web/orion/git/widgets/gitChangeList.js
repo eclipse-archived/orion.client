@@ -23,10 +23,12 @@ define([
 	'orion/webui/littlelib',
 	'orion/git/gitCommands',
 	'orion/commands',
+	'orion/commandRegistry',
+	'orion/metrics',
 	'orion/git/logic/gitCommit',
 	'orion/git/gitConfigPreference',
 	'orion/objects'
-], function(messages, i18nUtil, Deferred, mExplorer, mGitUIUtil, mGitUtil, mTooltip, mSelection , lib, mGitCommands, mCommands, gitCommit, gitConfigPreference, objects) {
+], function(messages, i18nUtil, Deferred, mExplorer, mGitUIUtil, mGitUtil, mTooltip, mSelection , lib, mGitCommands, mCommands, mCommandRegistry, metrics, gitCommit, gitConfigPreference, objects) {
 	
 	var pageQuery = "?pageSize=100&page=1"; //$NON-NLS-0$
 	
@@ -682,12 +684,14 @@ define([
 					return result;
 				},
 				callback : function() {
+					var deferred = new Deferred();
 					that.model.getRoot(function(root) {
 						var selection = root.children.filter(function(item) {
 							return !that.model.isStaged(item.type) && mGitUtil.isChange(item);
 						});
-						that.commandService.runCommand("eclipse.orion.git.stageCommand", selection, that, null, that.status); //$NON-NLS-0$
+						that.commandService.runCommand("eclipse.orion.git.stageCommand", selection, that, null, that.status).then(deferred.resolve, deferred.reject); //$NON-NLS-0$
 					});
+					return deferred;
 				}
 			});
 			
@@ -708,12 +712,14 @@ define([
 					return result;
 				},
 				callback : function() {
+					var deferred = new Deferred();
 					that.model.getRoot(function(root) {
 						var selection = root.children.filter(function(item) {
 							return that.model.isStaged(item.type);
 						});
-						that.commandService.runCommand("eclipse.orion.git.unstageCommand", selection, that, null, that.status); //$NON-NLS-0$
+						that.commandService.runCommand("eclipse.orion.git.unstageCommand", selection, that, null, that.status).then(deferred.resolve, deferred.reject); //$NON-NLS-0$
 					});
+					return deferred;
 				}
 			});
 			
@@ -753,26 +759,45 @@ define([
 				}
 			});
 			
+			var okCancelOptions = {getSubmitName: function(){return messages.OK;}, getCancelName: function(){return messages.Cancel;}};
+			var listener = new mCommandRegistry.CommandEventListener("click", function(event, commandInvocation){ //$NON-NLS-0$
+				var gitConfigPref = new gitConfigPreference(that.registry);
+				lib.$$array(".core-sprite-check", lib.node(that.parentId)).forEach(function (check) { //$NON-NLS-0$
+					check.classList.add("core-sprite-progress"); //$NON-NLS-0$
+				});
+				gitConfigPref.getConfig().then(function(userInfo){
+					gitConfigPref.setConfig({
+						GitMail: userInfo.GitMail,	
+						GitName: userInfo.GitName,
+						GitSelectAll: event.target.checked}).then(function(){
+							metrics.logEvent("git", "select", "stageAllWorkingDir", event.target.checked); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+							if (event.target.checked) {
+								commandInvocation.commandRegistry.runCommand("orion.explorer.selectAllCommandChangeList", that, that); //$NON-NLS-0$
+							} else {
+								commandInvocation.commandRegistry.runCommand("orion.explorer.deselectAllCommandChangeList", that, that); //$NON-NLS-0$
+							}
+					});
+				});
+				
+				
+			});
+			var precommitParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("alwaysSelect", "boolean", messages.AlwaysSelectFiles, null, null, listener)], objects.mixin({}, okCancelOptions)); //$NON-NLS-1$ //$NON-NLS-0$
+			precommitParameters.message = messages.EmptyCommitConfirm;
+			
 			var precommitCommand = new mCommands.Command({
-				name: messages['Commit'],
+				name: messages["Commit"],
 				tooltip: messages["CommitTooltip"],
 				id: "eclipse.orion.git.precommitCommand", //$NON-NLS-0$
 				extraClass: "primaryButton", //$NON-NLS-0$
+				parameters: precommitParameters,
+				preCallback: function(data) {
+					data.parameters.clientCollect = that.getCommitInfo(true) && (data.items.length !== 0);
+					return new Deferred().resolve(that.getCommitInfo(true));
+				},
 				callback: function(data) {
 					var info = that.getCommitInfo(true);
 					if (!info) return;
-					var doIt = function() {
-						that.commandService.runCommand("eclipse.orion.git.commitCommand", data.items, data.handler, null, info); //$NON-NLS-0$
-					};
-					if (data.items.length === 0 && !info.Amend) {
-						that.commandService.confirm(data.domNode, messages.EmptyCommitConfirm, messages.OK, messages.Cancel, false, function(val) { 
-							if (val) {
-								doIt();
-							}
-						});
-					} else {
-						doIt();
-					}
+					that.commandService.runCommand("eclipse.orion.git.commitCommand", data.items, data.handler, null, info); //$NON-NLS-0$
 				},
 				visibleWhen: function() {
 					return true;
