@@ -770,7 +770,7 @@ define([
 						GitMail: userInfo.GitMail,	
 						GitName: userInfo.GitName,
 						GitSelectAll: event.target.checked}).then(function(){
-							metrics.logEvent("git", "select", "stageAllWorkingDir", event.target.checked); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+							metrics.logEvent("git", "preference", "stageAllWorkingDir", event.target.checked); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 							if (event.target.checked) {
 								commandInvocation.commandRegistry.runCommand("orion.explorer.selectAllCommandChangeList", that, that); //$NON-NLS-0$
 							} else {
