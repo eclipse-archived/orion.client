@@ -10,11 +10,13 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-
+/*global URL*/
 define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/webui/littlelib', 'orion/xsrfUtils'], function(domReady, xhr, PageUtil, PageLinks, lib, xsrfUtils) {
 	var userCreationEnabled;
 	var registrationURI;
 	var forceUserEmail;
+
+	var GA_ID = "ga"; //$NON-NLS-0$
 
 	function getParam(key) {
 		var regex = new RegExp('[\\?&]' + key + '=([^&#]*)');
@@ -406,6 +408,32 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 	}
 
 	domReady(function() {
+
+		/* initialize metrics collection for this page */
+		var url = new URL("../metrics", window.location); //$NON-NLS-0$
+		xhr("GET", url.href, { //$NON-NLS-0$
+			headers: {
+				"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$
+			},
+			log: false
+		}).then(
+			function(result) {
+				result = JSON.parse(result.response);				
+				if (result.tid) {
+					(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+					(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+					m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+					})(window,document,'script','//www.google-analytics.com/analytics.js',GA_ID);
+
+					var args = {};
+					if (result.siteSpeedSampleRate) {
+						args.siteSpeedSampleRate = result.siteSpeedSampleRate;
+					}
+					window[GA_ID]("create", result.tid, args); //$NON-NLS-0$
+					window[GA_ID]("send", "pageview"); //$NON-NLS-1$ //$NON-NLS-0$
+				}
+			}
+		);
 
 		var error = getParam("error");
 		if (error) {
