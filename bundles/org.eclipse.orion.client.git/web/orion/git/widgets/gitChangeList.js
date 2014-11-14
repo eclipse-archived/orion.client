@@ -652,6 +652,7 @@ define([
 			}
 		},
 		updateSelectionStatus: function(selections) {
+			if (!this.explorerSelectionStatus) return;
 			if (!selections) selections = this.selection.getSelections();
 			var count = selections ? selections.length : 0;
 			var msg = i18nUtil.formatMessage(messages[count === 1 ? "FileSelected" : "FilesSelected"], count);
