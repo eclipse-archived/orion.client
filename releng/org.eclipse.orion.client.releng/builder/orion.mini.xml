@@ -153,19 +153,35 @@
 	</target>
 	
 	<target name="editorStylersOptimize" unless="skipEditorStylers">
-		<stylerOptimizeFile out="${out}/stylers/text_x-yaml/syntax.min.js"
-			name="orion/editor/stylers/text_x-yaml/syntax"
+		<stylerOptimizeFile out="${out}"
 			optimize="closure"
 			staging="${staging}" />
-		<stylerOptimizeFile out="${out}/stylers/text_x-yaml/syntax.js"
-			name="orion/editor/stylers/text_x-yaml/syntax"
+		<move todir="${out}/stylers.min" includeemptydirs="false">
+ 			<fileset dir="${out}/stylers">
+				<include name="**/syntax.js"/>
+			</fileset>
+			<mapper type="glob" from="*/syntax.js" to="*/syntax.min.js"/>
+ 		</move>
+		<stylerOptimizeFile out="${out}"
 			optimize="none"
 			staging="${staging}" />
+		<move todir="${out}/stylers" includeemptydirs="false">
+ 			<fileset dir="${out}/stylers.min">
+				<include name="**/syntax.min.js"/>
+			</fileset>
+ 		</move>
+		<delete dir="${out}/stylers.min"/>
 	</target>
 
 	<target name="editorOptimize" unless="skipEditor">
 		<sequential>
 			<antcall target="editorStylersOptimize"/>
+
+			<copy todir="${out}/themes" includeemptydirs="false">
+ 				<fileset dir="${staging}/orion/editor/themes">
+					<include name="**/*.css"/>
+				</fileset>
+ 			</copy>
 			
 			<widgetOptimizeFile out="${out}/built-editor.css"
 				buildfile="${staging}/editor.build-css.js"
@@ -187,7 +203,7 @@
 				buildfile="${staging}/editor.build.almond-js.js"
 				optimize="none"
 				staging="${staging}" />
-			<zip destFile="${out}/built-editor.zip" basedir="${out}" includes="built-editor.css, built-editor-amd.min.js, built-editor-amd.js, built-editor.min.js, built-editor.js, stylers/**/*" />
+			<zip destFile="${out}/built-editor.zip" basedir="${out}" includes="built-editor.css, built-editor-amd.min.js, built-editor-amd.js, built-editor.min.js, built-editor.js, stylers/**/*, themes/*" excludes="stylers/build.txt" />
 		</sequential>
 	</target>
 				
@@ -271,7 +287,6 @@
 	<macrodef name="stylerOptimizeFile">
 		<attribute name="staging" />
 		<attribute name="out" />
-		<attribute name="name" />
 		<attribute name="optimize" />
 		<sequential>
 			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}" failonerror="true">
@@ -290,9 +305,9 @@
 				<arg value="-o" />
 				<arg value="@{staging}/editor.build.stylers-js.js"/>
 				<arg value="optimize=@{optimize}" />
-				<arg value="name=@{name}"/>
-				<arg value="out=@{out}"/>
-				<arg value="dir=" />
+				<arg value="appDir=@{staging}/orion/editor/stylers"/>
+				<arg value="baseUrl=./"/>
+				<arg value="dir=@{out}/stylers" />
 			</java>
 		</sequential>
 	</macrodef>
