@@ -55,7 +55,7 @@ define([
 		 */
 		function tearDown() {
 			editorContext.text = "";
-			astManager.updated({file:{}});
+			astManager.onModelChanging({file:{}});
 		}
 	
 		it('test_findWord1', function() {

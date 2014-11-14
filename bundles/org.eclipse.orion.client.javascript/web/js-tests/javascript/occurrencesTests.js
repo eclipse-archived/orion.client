@@ -47,7 +47,7 @@ define([
 		 */
 		function tearDown() {
 			editorContext.text = "";
-			astManager.updated({file:{}});
+			astManager.onModelChanging({file:{}});
 			context.selection.start = -1;
 			context.selection.end = -1;
 			context.contentType = 'application/javascript';

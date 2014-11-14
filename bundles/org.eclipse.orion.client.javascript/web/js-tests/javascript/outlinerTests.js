@@ -41,7 +41,7 @@ define([
 		 */
 		function tearDown() {
 			context.text = "";
-			astManager.updated({file:{}});
+			astManager.onModelChanging({file:{}});
 		}
 		
 		/**

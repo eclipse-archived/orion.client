@@ -50,8 +50,9 @@ define([
 			getFileMetadata: {
 				value: function() {
 					var result = null;
-					if (this._metadata)
+					if (this._metadata) {
 						result = Dispatcher.toServiceFileObject(this._metadata, null);
+					}
 					return new Deferred().resolve(result);
 				},
 			},
@@ -97,7 +98,7 @@ define([
 			});
 		});
 		describe("cache", function() {
-			it("should not hit cache when file metadata is not known", function() {
+			it("should hit cache when file metadata is not known", function() {
 				var result = setup(),
 				    astManager = result.astManager,
 				    editorContext = result.editorContext,
@@ -111,7 +112,7 @@ define([
 				return astManager.getAST(editorContext).then(function(ast) {
 					assert.equal(ast, "AST callcount 0");
 					return astManager.getAST(editorContext).then(function(ast) {
-						assert.equal(ast, "AST callcount 1");
+						assert.equal(ast, "AST callcount 0");
 					});
 				});
 			});
@@ -168,7 +169,7 @@ define([
 					assert.equal(ast, "AST callcount 0");
 					// This call to #updated should invalidate the cache, because the file location in the
 					// param matches the editorContext's current file location.
-					astManager.updated({ file: Dispatcher.toServiceFileObject(metadata) });
+					astManager.onModelChanging({ file: Dispatcher.toServiceFileObject(metadata) });
 					return astManager.getAST(editorContext).then(function(ast) {
 						assert.equal(ast, "AST callcount 1"); // has increased to 1
 					});

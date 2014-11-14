@@ -57,20 +57,34 @@ define([
 			var _self = this;
 			return metadataPromise.then(function(metadata) {
 				metadata = metadata || {};
-				var ast = _self.cache.get(metadata.location);
+				var loc = _self._getKey(metadata);
+				var ast = _self.cache.get(loc);
 				if (ast) {
 					return new Deferred().resolve(ast);
 				}
 				return editorContext.getText().then(function(text) {
 					var ast = _self.parse(text);
-					_self.cache.put(metadata.location, ast);
+					_self.cache.put(loc, ast);
 					if(metadata.location) {
+					    //only set this if the original metadata has a real location
 					    ast.fileLocation = metadata.location;
 					}
 					return ast;
 				});
 			});
 		},
+		/**
+		 * Returns the key to use when caching
+		 * @param {Object} metadata The file infos 
+		 * @since 8.0
+		 */
+		_getKey: function _getKey(metadata) {
+		      if(!metadata.location) {
+		          return 'unknown';
+		      }    
+		      return metadata.location;
+		},
+		
 		/**
 		 * @private
 		 * @param {String} text The code to parse.
@@ -148,7 +162,7 @@ define([
 		        //input changed
 		        this.inputChanged = null;
 		    } else {
-		        this.cache.remove(event.file.location);
+		        this.cache.remove(this._getKey(event.file));
 		    }
 		},
 		/**
@@ -166,7 +180,7 @@ define([
 		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 		 */
 		onSaving: function(event) {
-		    this.cache.remove(event.file.location);
+		    this.cache.remove(this._getKey(event.file));
 		},
 		/**
 		 * Callback from the orion.edit.model service
