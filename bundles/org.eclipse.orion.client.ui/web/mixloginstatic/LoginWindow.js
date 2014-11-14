@@ -312,12 +312,12 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 
 	function generateRandomPassword() {
 		// Passwords are a mix of both alpha and non-alpha charaters
-		var aphaCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		var alphaCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 		var nonAlphaCharacters = "0123456789";
 		var minLength = 7;
 		var password = "";
 		for(var i = 0; i < minLength; i++) {
-			password += aphaCharacters.charAt(Math.floor(Math.random() * aphaCharacters.length));
+			password += alphaCharacters.charAt(Math.floor(Math.random() * alphaCharacters.length));
 		}
 		for(var i = 0; i < minLength; i++) {
 			password += nonAlphaCharacters.charAt(Math.floor(Math.random() * nonAlphaCharacters.length));
