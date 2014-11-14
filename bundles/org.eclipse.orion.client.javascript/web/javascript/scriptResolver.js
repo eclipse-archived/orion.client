@@ -54,22 +54,28 @@ define([
            if(files) {
                return new Deferred().resolve(files);
            }
-           //first check the file map
-           var file = FileMap.getWSPath(name+'.js'); //TODO haxxor, for now we always look up .js files, might expand
-           if(file) {
-               files = [this._newFileObj(name, null, file)];
-               this.cache.put(name, files);
-               return new Deferred().resolve(files);
-           }
-           
-           //fall back to looking for it
-           var idx = name.lastIndexOf('/');
-           var searchname = name.slice(idx+1);
            var that = this;
            return this._getFileClient().then(function(fileClient) {
+               //first check the file map
+               var file = FileMap.getWSPath(name);
+               if(!file) {
+                   file = FileMap.getWSPath(name+'.js');
+               }
+               if(file && file.indexOf('.js') > -1) {
+                   return fileClient.loadWorkspace().then(function(workspace) {
+                       //TODO hack - right now we know the index always is talking about the orion client,could differ later
+                       files = [that._newFileObj(name, '/file/'+workspace.Id+'/org.eclipse.orion.client/'+file, that._trimName(file), fileClient)];
+                       that.cache.put(name, files);
+                       return files;
+                   });
+               }
+               var filename = name.replace(/^i18n!/, '');
+               var idx = filename.lastIndexOf('/');
+               var searchname = filename.slice(idx+1);
+               //fall back to looking for it
                return fileClient.search(
                     {
-                        'resource': this.fileClient.fileServiceRootURL(),
+                        'resource': fileClient.fileServiceRootURL(),
                         'keyword': searchname,
                         'sort': 'Name asc',
                         'nameSearch': true,
@@ -82,20 +88,19 @@ define([
                    var len = r.docs.length;
                    if(r.numFound > 0) {
                        files = [];
-                       var testname = name.replace(/(?:\.?\.\/)*/, '');
+                       var testname = filename.replace(/(?:\.?\.\/)*/, '');
                        testname = testname.replace(/\.js$/, '');
-                       testname = testname.replace(/\//, "\\/");
+                       testname = testname.replace(/\//g, "\\/");
                        for(var i = 0; i < len; i++) {
                            var file = r.docs[i];
-                           //TODO haxxor - only keep ones that end in the logical name
-                           //or the mapped logical name
+                           //TODO haxxor - only keep ones that end in the logical name or the mapped logical name
                            var regex = ".*(?:"+testname+")$";
                            if(new RegExp(regex).test(file.Location.slice(0, file.Location.length-3))) {
                                files.push(that._newFileObj(file.Name, file.Location, that._trimName(file.Path)));
                            }
                        }
                        if(files.length > 0) {
-                           that.cache.put(name, files);
+                           that.cache.put(filename, files);
                            return files;
                        }
                    }
@@ -104,15 +109,28 @@ define([
            });
        },
        
-       _trimName: function _trimeName(name) {
-           //TODO haxxor - we don't need to see the root client path
-           return name.replace(/^org\.eclipse\.orion\.client\/bundles\//, '');
+       /**
+        * @description Converts the given file object to a URL that can be opened in Orion
+        * @param {Object} file
+        * @function
+        * @returns {String} The URL as a string or null if one could no be computed
+        */
+       convertToURL: function convertToURL(file) {
+           if(file) {
+               return 'https://orion.eclipse.org/edit/edit.html#'+file.location;
+           }
+           return null;
        },
        
-       _newFileObj: function _newFileObj(name, location, path) {
+       _trimName: function _trimeName(name) {
+           //TODO haxxor - we don't need to see the root client path
+           return name.replace(/^(?:org\.eclipse\.orion\.client)?(?:\/)?bundles\//, '');
+       },
+       
+       _newFileObj: function _newFileObj(name, location, path, fileClient) {
            var meta = Object.create(null);
            meta.name = name;
-           meta.loc = location;
+           meta.location = location ? location : fileClient.getServiceRootURL() + '/' + path;
            meta.path = path;
            meta.contentType = Object.create(null);
            meta.contentType.icon = '/javascript/images/javascript.png';

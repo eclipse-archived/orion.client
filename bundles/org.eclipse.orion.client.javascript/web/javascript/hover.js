@@ -15,8 +15,9 @@ define([
 'orion/objects',
 'javascript/finder',
 'javascript/signatures',
+'orion/URITemplate',
 'doctrine'
-], function(Objects, Finder, Signatures) {
+], function(Objects, Finder, Signatures, URITemplate) {
 	
 	/**
 	 * @name javascript.JavaScriptHover
@@ -24,10 +25,12 @@ define([
 	 * @constructor
 	 * @public
 	 * @param {javascript.ASTManager} astManager
+	 * @param {javascript.ScriptResolver} resolver
 	 * @since 7.0
 	 */
-	function JavaScriptHover(astManager) {
+	function JavaScriptHover(astManager, resolver) {
 		this.astManager = astManager;
+		this.resolver = resolver;
 	}
 	
 	Objects.mixin(JavaScriptHover.prototype, /** @lends javascript.JavaScriptHover.prototype*/ {
@@ -43,21 +46,45 @@ define([
 		 */
 		computeHoverInfo: function computeHover(editorContext, ctxt) {
 		    var that = this;
-			return this.astManager.getAST(editorContext).then(function(ast) {
+			return that.astManager.getAST(editorContext).then(function(ast) {
+			    if(ctxt.offset < ast.range[0] || ctxt.offset >= ast.range[1]) {
+			        //end of the AST, nothing to hover
+			        return null;
+			    }
 			    var node = Finder.findNode(ctxt.offset, ast, {parents:true});
 			    if(node) {
 			        switch(node.type) {
 			            case 'Identifier': {
-			                return that._formatHover(that._getIdentifierHover(node, ctxt.index, ast));
+			                return that._formatHover(that._getIdentifierHover(node, ctxt.offset, ast), editorContext);
 			            }
 			            case 'FunctionDeclaration': {
-			                return that._formatHover(that._getCommentFromNode(node));
+			                return that._formatHover(node);
 			            }
 			            case 'FunctionExpression': {
 			                return that._formatHover(that._getFunctionExprHover(node));
 			            }
 			            case 'CallExpression': {
-			                return that._formatHover(that._getCallExprHover(node, ctxt.index, ast));
+        	               return that._formatHover(that._getCallExprHover(node, ctxt.offset, ast), editorContext);
+			            }
+			            case 'Literal': {
+			                var parents = node.parents;
+			                var parent = parents.pop();
+			                if(parent.type === 'CallExpression') {
+			                    if(parent.callee.name === 'require' || parent.callee.name === 'importScripts') {
+			                        return that.resolver.getWorkspaceFile(node.value).then(function(files) {
+        			                    return that._formatFilesHover(node.value, files);
+        			                });
+			                    }
+			                } else if(parent.type === 'ArrayExpression') {
+			                    parent = parents.pop();
+			                    if(parent.type === 'CallExpression') {
+			                        if(parent.callee.name === 'define' || parent.callee.name === 'require') {
+    			                        return that.resolver.getWorkspaceFile(node.value).then(function(files) {
+            			                    return that._formatFilesHover(node.value, files);
+            			                });
+			                        }
+			                    }
+			                }
 			            }
 			        }
 			    }
@@ -76,13 +103,21 @@ define([
 		 */
 		_getCommentFromNode: function _getCommentFromNode(node) {
 		    var comments = node.leadingComments;
+		    var comment = null;
 	        if(comments && comments.length > 0) {
 	            //simple case: the node has an attaced comment, take the last comment in the leading array
-	            var comment = comments[comments.length-1];
+	            comment = comments[comments.length-1];
+	            if(comment.type === 'Block') {
+    	            comment.node = node;
+    	            return comment;
+	            }
+	        } else {
+	            //we still want to show a hover for something with no doc
+	            comment = Object.create(null);
 	            comment.node = node;
-	            return comment;
+	            comment.value = '';
 	        }
-	        return null;
+	        return comment;
 		},
 		
 		/**
@@ -97,7 +132,7 @@ define([
 		    if(node.parents) {
     	        var parent = node.parents[node.parents.length-1];
     	        if(parent.type === 'Property') {
-    	            return this._getCommentFromNode(parent);
+    	            return parent;
     	        }
     	    }
     	    return null;
@@ -124,13 +159,7 @@ define([
 	                break;
 	            }
 	            case 'Identifier': {
-	                var func = Finder.findDeclaration(offset, ast, {
-	                                       kind: Finder.SearchOptions.FUNCTION_DECLARATION, 
-	                                       id: node.callee.name});
-	                if(func) {
-	                    return this._getCommentFromNode(func);
-	                }
-	                break;
+	                return Finder.findDeclaration(offset, ast, {id: node.callee.name, kind: Finder.SearchOptions.FUNCTION_DECLARATION});
 	            }
 		    }
 		    return null;
@@ -151,9 +180,8 @@ define([
 		        //find what it ids
 		        var parent = node.parents[node.parents.length-1];
 		        switch(parent.type) {
-		            case 'FunctionDeclaration': 
-		            case 'VariableDeclarator': {
-		                return this._getCommentFromNode(parent);
+		            case 'FunctionDeclaration': {
+		                return parent;
 		            }
 		            case 'FunctionExpression': {
 		                return this._getFunctionExprHover(parent);
@@ -163,7 +191,7 @@ define([
 		            }
 		            case 'Property': {
 		                if(parent.kind === 'init' && parent.value && parent.value.type === 'FunctionExpression') {
-		                    return this._getCommentFromNode(parent);
+		                    return parent;
 		                } else {
 		                    return null;
 		                }
@@ -179,68 +207,73 @@ define([
 		 * @description Formats the hover info
 		 * @function
 		 * @private
-		 * @param comment
-		 * @param node
+		 * @param {Object} comment The comment from the declaration in the AST
+		 * @param {Object} editorContext The editor context 
+		 * @param {Boolean} linkDecl If we should include a link to jump to the declaration
 		 * @returns returns
 		 */
-		_formatHover: function _formatHover(comment) {
-		    if(!comment) {
+		_formatHover: function _formatHover(node, editorContext) {
+		    if(!node) {
 		        return null;
 		    }
+		    var that = this;
 		    try {
-		        var doc = doctrine.parse(comment.value, {recoverable:true, unwrap : true});
 		        var format = Object.create(null);
-		        format.params = [];
-		        format.desc = (doc.description ? doc.description : '');
-		        if(doc.tags) {
-		            var len = doc.tags.length;
-		            for(var i = 0; i < len; i++) {
-		                var tag = doc.tags[i];
-		                switch(tag.title) {
-		                    case 'name': {
-		                        if(tag.name) {
-		                          format.name = tag.name; 
-		                        }
-		                        break;
-		                    }
-		                    case 'description': {
-		                        if(tag.description !== null) {
-		                          format.desc = (format.desc === '' ? tag.description : format.desc+'\n'+tag.description);
-		                        }
-		                        break;
-		                    }
-		                    case 'param': {
-		                        format.params.push(this._convertTagType(tag.type) +
-		                                  (tag.name ? '__'+tag.name+'__ ' : '') + 
-		                                  (tag.description ? tag.description+'\n' : ''));
-		                        break;
-		                    }
-		                    case 'returns': 
-		                    case 'return': {
-		                        format.returns = this._convertTagType(tag.type) +
-		                              (tag.description ? tag.description+'\n' : '');
-		                         break;
-		                    }
-		                    case 'since': {
-		                        if(tag.description) {
-		                          format.since = tag.description;
-		                        }
-		                        break;
-		                    }
-		                    case 'function': {
-		                        format.isfunc = true;
-		                        break;
-		                    }
-		                    case 'constructor': {
-		                        format.iscon = true;
-		                        break;
-		                    }
-		                    case 'private': {
-		                        format.isprivate = true;
-		                        break; 
-		                    }
-	                }
-		            }
+		        var comment = this._getCommentFromNode(node);
+		        if(comment) {
+    		        var doc = doctrine.parse(comment.value, {recoverable:true, unwrap : true});
+    		        format.params = [];
+    		        format.desc = (doc.description ? doc.description : '');
+    		        if(doc.tags) {
+    		            var len = doc.tags.length;
+    		            for(var i = 0; i < len; i++) {
+    		                var tag = doc.tags[i];
+    		                switch(tag.title) {
+    		                    case 'name': {
+    		                        if(tag.name) {
+    		                          format.name = tag.name; 
+    		                        }
+    		                        break;
+    		                    }
+    		                    case 'description': {
+    		                        if(tag.description !== null) {
+    		                          format.desc = (format.desc === '' ? tag.description : format.desc+'\n'+tag.description);
+    		                        }
+    		                        break;
+    		                    }
+    		                    case 'param': {
+    		                        format.params.push(that._convertTagType(tag.type) +
+    		                                  (tag.name ? '__'+tag.name+'__ ' : '') + 
+    		                                  (tag.description ? tag.description+'\n' : ''));
+    		                        break;
+    		                    }
+    		                    case 'returns': 
+    		                    case 'return': {
+    		                        format.returns = that._convertTagType(tag.type) +
+    		                              (tag.description ? tag.description+'\n' : '');
+    		                         break;
+    		                    }
+    		                    case 'since': {
+    		                        if(tag.description) {
+    		                          format.since = tag.description;
+    		                        }
+    		                        break;
+    		                    }
+    		                    case 'function': {
+    		                        format.isfunc = true;
+    		                        break;
+    		                    }
+    		                    case 'constructor': {
+    		                        format.iscon = true;
+    		                        break;
+    		                    }
+    		                    case 'private': {
+    		                        format.isprivate = true;
+    		                        break; 
+    		                    }
+    	                }
+    		            }
+    		        }
 		        }
 		        var name = Signatures.computeSignature(comment.node);
 		        var title = '###';
@@ -257,7 +290,7 @@ define([
 		        }
 		        if(format.params.length > 0) {
 		            hover += '__Parameters:__\n\n';
-		            for(var i = 0; i < format.params.length; i++) {
+		            for(i = 0; i < format.params.length; i++) {
 		                hover += '>'+format.params[i] + '\n\n';
 		            }
 		        }
@@ -267,6 +300,13 @@ define([
 		        if(format.since) {
 		            hover += '__Since:__\n\n>'+format.since;
 		        }
+		        //TODO scope this to not show when you are on a decl
+		        /**var href = new URITemplate("#{,resource,params*}").expand(
+		                      {
+		                      resource: metadata.location, 
+		                      params: {start:node.range[0], end: node.range[1]}
+		                      }); //$NON-NLS-0$
+		        hover += '\n\n\n  [Jump to declaration]('+href+')';*/
 		    }
 		    catch(e) {
 		        //add on the wad of text for now
@@ -326,6 +366,40 @@ define([
 	            }
 	            default: return '';
 	        }
+		},
+		
+		/**
+		 * @name _formatFilesHover
+		 * @description Formats the list of files as links for the hover
+		 * @function
+		 * @private
+		 * @param {String} path The path we are navigating to
+		 * @param {Array.<javascript.ScriptResolver.File>} files The array of files to linkify
+		 * @returns {String} The mardown to show in the hover
+		 */
+		_formatFilesHover: function _formatFilesHover(path, files) {
+		    if(path && files) {
+		        var title = '###Open file for \''+path+'\'###';
+		        var hover = '';
+		        for(var i = 0; i < files.length; i++) {
+		            var file = files[i];
+		            if(file.name && file.path && file.contentType) {
+		                hover += '[';
+		                if(file.contentType.icon) {
+		                    hover += '!['+file.contentType.name+']('+file.contentType.icon+') ';
+		                }
+		                var href = new URITemplate("#{,resource,params*}").expand(
+    		                      {
+    		                      resource: file.location, 
+    		                      params: {}
+    		                      }); //$NON-NLS-0$
+		                hover += file.name + ']('+href+') - '+file.path+'\n\n';
+		            }
+		            
+		        }
+		        return {title: title, content: hover, type:'markdown'};
+		    }
+		    return null;
 		}
 	});
 	

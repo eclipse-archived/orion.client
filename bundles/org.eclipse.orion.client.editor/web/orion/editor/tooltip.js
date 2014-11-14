@@ -300,7 +300,9 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 		},
 		_renderContent: function(tooltipDoc, tooltipContents, data) {
-			if (!data.content) return false;
+			if (typeof data.content === 'undefined') {
+			    return false;
+			}
 			var sectionDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$;
 			// render the title, if any
 			if (data.title) {

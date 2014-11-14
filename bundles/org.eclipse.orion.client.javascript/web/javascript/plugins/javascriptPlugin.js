@@ -74,7 +74,11 @@ define([
 			}
 		]
 	});
-
+    /**
+     * Create the script resolver
+     * @since 8.0
+     */
+    var scriptresolver = new ScriptResolver.ScriptResolver(Bootstrap);
 	/**
 	 * Create the AST manager
 	 */
@@ -107,7 +111,7 @@ define([
  	);
 	
 	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
-			new OpenDeclCommand.OpenDeclarationCommand(astManager), 
+			new OpenDeclCommand.OpenDeclarationCommand(astManager, scriptresolver), 
 			{
 				nameKey : 'openDeclName',  //$NON-NLS-0$
 				tooltipKey : 'openDeclTooltip',  //$NON-NLS-0$
@@ -136,8 +140,6 @@ define([
 		{
 			contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
 	});
-	
-	var scriptresolver = new ScriptResolver.ScriptResolver(Bootstrap);
 	
 	/**
 	 * Register the hover support
