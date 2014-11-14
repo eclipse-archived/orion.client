@@ -20,7 +20,8 @@
     "grunt-cli": "~0.1.13",
     "grunt-contrib-connect": "~0.7.1",
     "grunt-curl": "~1.5.1",
-    "grunt-saucelabs": "~8.3.2"
+    "grunt-saucelabs": "~8.3.2",
+    "q": "~1.1.1"
   },
   "results": "./target/test-reports/",
   "urls": [

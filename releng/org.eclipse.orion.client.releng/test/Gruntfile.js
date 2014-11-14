@@ -43,9 +43,11 @@ module.exports = function(grunt) {
 	    nodeUrl = require("url"),
 	    archiver = require("archiver"),
 	    fmt = require("util").format,
+	    Q = require("q"),
 	    nodeutil = require("util"),
 	    zlib = require("zlib"),
-	    util = require(orionClient + "modules/orionode/build/utils")(grunt);
+	    util = require(orionClient + "modules/orionode/build/utils")(grunt),
+	    helpers = require("./test-helpers");
 
 	var config = util.loadBuildConfig(orionClient + "/releng/org.eclipse.orion.client.releng/builder/scripts/orion.build.js"),
 	    bundles = util.parseBundles(config, { orionClient: orionClient }),
@@ -151,26 +153,7 @@ module.exports = function(grunt) {
 	grunt.registerTask("test", ["server", "sauce"]);
 	grunt.registerTask("default", "test");
 
-	/**
-	 * For Hudson to parse out nice packages instead of (root), we have to add classname="packageName.className"
-	 * to the <testsuite> element, and prefix the "packageName." onto every <testcase>'s @classname. We also strip
-	 * out some problematic characters from the original classnames: [#?.]
-	 * @param {String} xml The xunit test result
-	 * @returns {String} The test result, fixed up
-	 */
-	function nicerName(xml, sauceResult, testUrl) {
-		function sanitize(s) {
-			return s.replace(/[^A-Za-z0-9_\.]/g, "_");
-		}
-		testUrl = testUrl.replace(/(^\/)|(\.html$)/g, "");
-		var platform = sanitize(sauceResult.platform.join(" ")),
-		    packageName = sanitize(fmt("%s.%s", platform, testUrl));
-		return xml
-			.replace(/(<testsuite\s+name="[^"]+")/g, fmt("$1 classname=\"%s\"", packageName))
-			.replace(/<testcase classname="([^"]+)"/g, function(match, className) {
-				return fmt("<testcase classname=\"%s.%s\"", packageName, className.replace(/[#?.]/g, "_"));
-			});
-	}
+
 
 	/**
 	 * Called per browser, per test page, after a test job is complete. Not called for a job that times out.
@@ -178,42 +161,52 @@ module.exports = function(grunt) {
 	 * @param {Function} callback Async CB to be invoked as callback(err, passOrFail) when done
 	 */
 	function onTestComplete(sauceResult, callback) {
-		function error(msgOrError) {
-			var e = nodeutil.isError(msgOrError) ? msgOrError : new Error(msgOrError);
-			grunt.warn(e && e.stack);
-			callback(e);
-		}
 		grunt.verbose.write("Got test result: ");
-		grunt.verbose.oklns(JSON.stringify(sauceResult));
+		grunt.verbose.write(sauceResult);
 		var mochaResult = sauceResult.result,
-		   id = sauceResult.id;
-		if (!mochaResult)
-			throw new Error(fmt("Test %s is missing 'result' field in response:\n%s", id, JSON.stringify(sauceResult)));
-		var testurl = mochaResult.url || "",
-		   gzippedXml = mochaResult.xunit,
-		   filename = fmt("TEST-%s_%s.xml", testurl.replace(/[^A-Za-z0-9_\-]/g, "_"), id);
-		if (/experienced an error/.test(sauceResult.message))
-			error(sauceResult.message);
-		if (!testurl)
-			error(fmt("Test %s did not return its url. Ensure it is using sauce.js", id));
-		if (!gzippedXml)
-			error(fmt("Test %s did not return an xunit result. Ensure it is using sauce.js.", testurl));
-
-		grunt.verbose.write("Inflating compressed xunit result...");
-		zlib.gunzip(new Buffer(gzippedXml, "base64"), function(e, buffer) {
-			if (e) {
-				error(e);
+		    id = sauceResult.id,
+		    testPageUrl = sauceResult.testPageUrl,
+		    filename = fmt("TEST-%s_%s.xml", testPageUrl.replace(/[^A-Za-z0-9_\-]/g, "_"), id);
+		Q.try(function() {
+			function throwError(msgOrError) {
+				var e = nodeutil.isError(msgOrError) ? msgOrError : new Error(msgOrError);
+				throw e;
 			}
-			grunt.verbose.ok();
-			var xunitReport = buffer.toString("utf8");
-			grunt.verbose.write("Replacing xunit testsuite name...");
-			xunitReport = nicerName(xunitReport, sauceResult, testurl);
-			grunt.verbose.ok();
+			if (!mochaResult)
+				throwError(fmt("Test %s is missing 'result' field in response. Ensure the test is using sauce.js.\n%s", id, JSON.stringify(sauceResult)));
 
-			grunt.file.write(nodePath.join(results, filename), xunitReport);
+			var testurl = testPageUrl || mochaResult.url,
+			   gzippedXml = mochaResult.xunit;
+			if (/experienced an error/.test(sauceResult.message))
+				throwError(sauceResult.message);
+			if (!testurl)
+				throwError(fmt("Test %s did not return its url. Ensure it is using sauce.js", id));
+			if (!gzippedXml)
+				throwError(fmt("Test %s did not return an xunit result. Ensure it is using sauce.js.", testurl));
+
+			grunt.verbose.write("Inflating compressed xunit result...");
+			var deferred = Q.defer();
+			var zipresolver = deferred.makeNodeResolver(); // will resolve or reject `deferred`
+			zlib.gunzip(new Buffer(gzippedXml, "base64"), zipresolver);
+			return deferred.promise.then(function(buffer) {
+				grunt.verbose.ok();
+				var xunitReport = buffer.toString("utf8");
+				grunt.verbose.write("Replacing xunit testsuite name...");
+				xunitReport = helpers.xunit_cleanup(xunitReport, sauceResult, testurl);
+				grunt.verbose.ok();
+
+				helpers.xunit_write(grunt, nodePath.join(results, filename), xunitReport);
+				testFilenames.push(filename);
+				callback(undefined, true /*job pass*/);
+			});
+		})
+		.catch(function(error) {
+			// Something broke the test suite; output a generic xunit showing that it error'd
+			grunt.warn(error && error.stack);
+
+			helpers.xunit_write(grunt, nodePath.join(results, filename), helpers.xunit_suite_error(filename, error));
 			testFilenames.push(filename);
-			grunt.verbose.ok();
-			callback(undefined, true /*job pass*/);
+			callback(error); /*job fail*/
 		});
 	}
 

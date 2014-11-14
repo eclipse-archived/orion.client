@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint node:true*/
+/*eslint-env node*/
 /**
  * Performs the programatic equivalent of running `grunt --force --verbose` from the command line.
  * Need this for CF where running grunt from the command line has.. issues
@@ -23,7 +23,7 @@ try {
 		force: true,
 		stack: true,
 		verbose: true,
-		"no-color": !!(process.env.VCAP_APPLICATION) // CF logs can't deal with color codes
+		"no-color": ("VCAP_APPLICATION" in process.env) // CF logs can't deal with color codes
 	});
 } catch(e) {
 	// Uncaught exceptions are getting swallowed in CF env, need to log explicitly
