@@ -68,6 +68,13 @@ define([
 		return Base64.encode(pako.gzip(new TextEncoder("utf8").encode(str)));
 	}
 
+	/**
+	 * @returns {Boolean} true if the `global.mochaResults` object exceeds the Sauce Labs 64KB API size limit
+	 */
+	function tooBig() {
+		return JSON.stringify(global.mochaResults).length >= 64000 ;
+	}
+
 	function makeWrapper(mocha) {
 		var wrapper = Object.create(Object.getPrototypeOf(mocha));
 		objects.mixin(wrapper, mocha);
@@ -90,10 +97,25 @@ define([
 				global.mochaResults.reports = failed;
 				global.mochaResults.url = global.location.pathname;
 				global.mochaResults.xunit = compress(xunitResult.report);
-				if (JSON.stringify(global.mochaResults).length >= 64000) {
-					console.log(new Error("Test report size exceeds Sauce Labs API limit. "
-						+ "Full results will not be available. To fix this, split up this test page into smaller pages."));
+
+				// Try to make the `mochaResults` structure fit into the Sauce Labs API size limit.
+				if (tooBig()) {
+					var reports = global.mochaResults.reports;
+					// Pare down failed test summaries by binary splicing
+					while (reports.length > 0 && tooBig()) {
+						var index = reports.length >> 1, n = reports.length - index;
+						console.log("Throwing away " + n + " failed test summaries");
+						reports.splice(index, n);
+					}
+				}
+				// If we still exceed the limit, it must be the xunit results, throw them away :(
+				if (tooBig()) {
+					console.log(new Error("mochaResults size exceeds Sauce Labs API limit. xUnit results will not be available. "
+						+ "To fix this, split up this test page into smaller pages."));
 					delete global.mochaResults.xunit;
+				}
+				if (tooBig()) {
+					console.log(new Error("Could not make mochaResults fit into Sauce Labs API limit. Test results will not be recorded!!"));
 				}
 			});
 
