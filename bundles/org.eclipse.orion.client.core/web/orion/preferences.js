@@ -10,7 +10,10 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['require', 'orion/Deferred', 'orion/xhr'], function(require, Deferred, xhr){
+define(['require', 'orion/Deferred', 'orion/xhr', 'orion/metrics'], function(require, Deferred, xhr, mMetrics){
+
+	var METRICS_MAXLENGTH = 256;
+
 	/**
 	 * Constructs a new preferences instance. This constructor is not
 	 * intended to be used by clients. Preferences should instead be
@@ -119,6 +122,22 @@ define(['require', 'orion/Deferred', 'orion/xhr'], function(require, Deferred, x
 			var top = this._stores[0];
 			
 			if (top[key] !== value) {
+				var metricsKey = this._name + "/" + key; //$NON-NLS-0$
+				if (typeof(value) === "string") { //$NON-NLS-0$
+					if (value.length <= METRICS_MAXLENGTH) {
+						mMetrics.logEvent("preferenceChange", metricsKey, value); //$NON-NLS-0$
+					}
+				} else {
+					for (var current in value) {
+						if (!top[key] || top[key][current] !== value[current]) {
+							var stringValue = String(value[current]);
+							if (stringValue.length <= METRICS_MAXLENGTH) {
+								mMetrics.logEvent("preferenceChange", metricsKey + "/" + current, stringValue); //$NON-NLS-1$ //$NON-NLS-0$
+							}
+						} 
+					}
+				}
+
 				top[key] = value;
 				this._cached = null;
 				this._scheduleFlush(top);

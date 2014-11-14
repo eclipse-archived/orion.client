@@ -11,9 +11,11 @@
 /*eslint-env browser, amd*/
 define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/objects',
 		'orion/widgets/input/LabeledCheckbox', 'orion/widgets/input/LabeledTextfield', 
-		'orion/widgets/input/LabeledSelect', 'i18n!orion/settings/nls/messages', 'orion/i18nUtil'],
-		function(mExplorer, mSection, Deferred, objects, LabeledCheckbox, LabeledTextfield, LabeledSelect, messages, i18nUtil) {
+		'orion/widgets/input/LabeledSelect', 'i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'orion/metrics'],
+		function(mExplorer, mSection, Deferred, objects, LabeledCheckbox, LabeledTextfield, LabeledSelect, messages, i18nUtil, mMetrics) {
 	var Explorer = mExplorer.Explorer, SelectionRenderer = mExplorer.SelectionRenderer, Section = mSection.Section;
+
+	var METRICS_MAXLENGTH = 256;
 
 	/**
 	 * @name orion.settings.ui.PropertyWidget
@@ -229,6 +231,16 @@ define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/ob
 					configuration.remove();
 					this.config = null;
 					this.configPromise = null;
+					
+					/* log the change event here since it will not get through to preferences.set() */
+					for (var current in props) {
+						if (current !== "pid") { //$NON-NLS-0$
+							var stringValue = String(props[current]);
+							if (stringValue.length <= METRICS_MAXLENGTH) {
+								mMetrics.logEvent("preferenceChange", "/cm/configurations/" + configuration.pid + "/" + current, stringValue); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							}
+						} 
+					}
 				} else {
 					configuration.update(props);
 				}
