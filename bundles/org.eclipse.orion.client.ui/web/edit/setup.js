@@ -187,7 +187,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 
 	// Do not collapse sidebar, https://bugs.eclipse.org/bugs/show_bug.cgi?id=418558
 	var collapseSidebar = false; //PageUtil.hash() !== ""
-	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, null, null, collapseSidebar); //$NON-NLS-0$
+	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, null, null, collapseSidebar, fileClient); //$NON-NLS-0$
 
 	var editor, editorDirtyListener, inputManager, sidebarNavInputManager, editorView, lastRoot, menuBar;
 	function setEditor(newEditor) {

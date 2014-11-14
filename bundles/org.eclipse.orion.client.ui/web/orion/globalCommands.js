@@ -438,7 +438,7 @@ define([
 					rootSegmentName: breadcrumbRootName
 				});
 			} else {
-				var fileClient = serviceRegistry && new mFileClient.FileClient(serviceRegistry);
+				var fileClient = options.fileService || (serviceRegistry && new mFileClient.FileClient(serviceRegistry));
 				var resource = options.breadcrumbTarget || options.target;
 				var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
 				currentBreadcrumb = new mBreadcrumbs.BreadCrumbs({
@@ -555,7 +555,7 @@ define([
 	 * @param editor - no longer used
 	 * @param {Boolean} closeSplitter true to make the splitter's initial state "closed".
 	 */
-	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, closeSplitter) {
+	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, closeSplitter, fileClient) {
 		mMetrics.init(serviceRegistry);
 
 		new mThemePreferences.ThemePreferences(prefsService, new mThemeData.ThemeData()).apply();
