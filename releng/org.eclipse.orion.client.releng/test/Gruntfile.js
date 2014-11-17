@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
+/*eslint no-unused-params:0 */
 /*
  * Script for running Orion mocha tests at Sauce Labs. This launches a mini Orion web server (using connect)
  * that hosts the client code. Then Sauce Labs API is called, passing the URLs of test pages on the web
@@ -26,6 +27,7 @@
  * SAUCE_USERNAME          required
  * SAUCE_ACCESS_KEY        required
  * QUIT                    optional If set, program quits after tests finish instead of running forever. Default: not set
+ * TRACE                   optional If set, all requests served by the web server are logged to stdout. Default: not set
  *
  * For running the script locally or on a server that is not accessible from the public Internet:
  * TUNNEL                  optional If set, Sauce Tunnel will be established. Default: not set
@@ -37,8 +39,8 @@
  *   application_uris[]    optional The publicly accessible URIs of this application.
  */
 module.exports = function(grunt) {
-	var orionClient = __dirname + "/",
-		packageRoot = __dirname + "/";
+	var TEST_RESULTS_PATH = "/testresults";
+
 	var nodePath = require("path"),
 	    nodeUrl = require("url"),
 	    archiver = require("archiver"),
@@ -46,14 +48,17 @@ module.exports = function(grunt) {
 	    Q = require("q"),
 	    nodeutil = require("util"),
 	    zlib = require("zlib"),
-	    util = require(orionClient + "modules/orionode/build/utils")(grunt),
 	    helpers = require("./test-helpers");
+
+	var env = process.env,
+	    orionClient = nodePath.join(__dirname, (env.VCAP_APPLICATION ? "/" : "../../../")), // Allow us to run outside cf
+	    packageRoot = __dirname + "/",
+	    util = require(orionClient + "modules/orionode/build/utils")(grunt);
 
 	var config = util.loadBuildConfig(orionClient + "/releng/org.eclipse.orion.client.releng/builder/scripts/orion.build.js"),
 	    bundles = util.parseBundles(config, { orionClient: orionClient }),
 	    pkg = grunt.file.readJSON(packageRoot + "package.json"),
 	    results = packageRoot + pkg.results, // dirs provided in package.json are relative to package.json
-	    env = process.env,
 	    vcap_app = getJSON(env.VCAP_APPLICATION);
 	// Track the tests that have finished so far
 	var allTestsComplete = false,
@@ -77,8 +82,16 @@ module.exports = function(grunt) {
 					port: "<%= port %>",
 					base: bundles.map(function(bundle) { return bundle.web; }),
 					middleware: function(connect, options, middlewares) {
+						var logger = connect.logger();
+						var optionalLogger = function(req, res, next) {
+							// By default we only log /testresults calls, TRACE can be used to override this
+							if (typeof env.TRACE === "undefined" || req.url !== TEST_RESULTS_PATH)
+								next();
+							else
+								logger.apply(null, arguments);
+						};
 						// Inject logger and compress at the top of the middleware stack
-						middlewares.splice(0, 0, connect.logger(), connect.compress());
+						middlewares.splice(0, 0, optionalLogger, connect.compress());
 						// And /testresults at the bottom
 						middlewares.push(testResultsMiddleware);
 						return middlewares;
@@ -153,33 +166,31 @@ module.exports = function(grunt) {
 	grunt.registerTask("test", ["server", "sauce"]);
 	grunt.registerTask("default", "test");
 
-
-
 	/**
 	 * Called per browser, per test page, after a test job is complete. Not called for a job that times out.
 	 * @param {Object} sauceResults The job result object returned from Sauce Labs.
 	 * @param {Function} callback Async CB to be invoked as callback(err, passOrFail) when done
 	 */
 	function onTestComplete(sauceResult, callback) {
-		grunt.verbose.write("Got test result: ");
-		grunt.verbose.write(sauceResult);
+		grunt.verbose.writeln("Got test result: ");
+		grunt.verbose.writeln(nodeutil.inspect(sauceResult));
 		var mochaResult = sauceResult.result,
 		    id = sauceResult.id,
-		    testPageUrl = sauceResult.testPageUrl,
-		    filename = fmt("TEST-%s_%s.xml", testPageUrl.replace(/[^A-Za-z0-9_\-]/g, "_"), id);
+		    testurl = helpers.test_page_url(sauceResult),
+		    filename = helpers.xunit_filename(sauceResult);
+		grunt.verbose.writeln(fmt("Test page url: %s, xunit filename: %s", testurl, filename));
 		Q.try(function() {
 			function throwError(msgOrError) {
 				var e = nodeutil.isError(msgOrError) ? msgOrError : new Error(msgOrError);
 				throw e;
 			}
 			if (!mochaResult)
-				throwError(fmt("Test %s is missing 'result' field in response. Ensure the test is using sauce.js.\n%s", id, JSON.stringify(sauceResult)));
+				throwError(fmt("Test %s is missing 'result' field in response. Ensure the test is using sauce.js.\n%s", id, nodeutil.inspect(sauceResult)));
 
-			var testurl = testPageUrl || mochaResult.url,
-			   gzippedXml = mochaResult.xunit;
+			var gzippedXml = mochaResult.xunit;
 			if (/experienced an error/.test(sauceResult.message))
 				throwError(sauceResult.message);
-			if (!testurl)
+			if (!mochaResult.url)
 				throwError(fmt("Test %s did not return its url. Ensure it is using sauce.js", id));
 			if (!gzippedXml)
 				throwError(fmt("Test %s did not return an xunit result. Ensure it is using sauce.js.", testurl));
@@ -212,7 +223,7 @@ module.exports = function(grunt) {
 
 	// Middleware for delivering all test results as a zip.
 	function testResultsMiddleware(req, res, next) {
-		if (req.url !== "/testresults" || req.method !== "GET")
+		if (req.url !== TEST_RESULTS_PATH || req.method !== "GET")
 			return next();
 
 		if (!allTestsComplete) {

@@ -17,13 +17,12 @@ try {
 	var grunt = require("grunt");
 
 	// Grunt finds Gruntfile.js automatically
-
 	var tasklist = [];
 	grunt.tasks(tasklist, {
 		force: true,
 		stack: true,
 		verbose: true,
-		"no-color": ("VCAP_APPLICATION" in process.env) // CF logs can't deal with color codes
+		color: !("VCAP_APPLICATION" in process.env), // CF logs can't deal with color codes
 	});
 } catch(e) {
 	// Uncaught exceptions are getting swallowed in CF env, need to log explicitly

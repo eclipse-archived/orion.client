@@ -68,3 +68,22 @@ exports.xunit_write = function(grunt, filepath, contents) {
 	grunt.verbose.ok();
 };
 
+/**
+ * @returns {String} The url of the test page
+ */
+exports.test_page_url = function(sauceResult) {
+	var url = sauceResult.testPageUrl;
+	if (sauceResult.result) {
+		url = sauceResult.result.url;
+	}
+	return url;
+};
+
+/**
+ * @returns {String} A good filename for the xunit results, of the form TEST-{url}-{job_id}.xml
+ */
+exports.xunit_filename = function(sauceResult) {
+	var url = exports.test_page_url(sauceResult).replace(/[^A-Za-z0-9_\-]/g, "_"),
+	    job_id = sauceResult.id;
+	return fmt("TEST-%s_%s.xml", url, job_id);
+};
