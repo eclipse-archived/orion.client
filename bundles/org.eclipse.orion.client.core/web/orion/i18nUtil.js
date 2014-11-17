@@ -35,8 +35,16 @@ define(['require', 'orion/Deferred'], function(require, Deferred) {
 		});
 	}
 
+	function bundleKey(name) {
+		var userLocale = typeof navigator !== "undefined" ? (navigator.language || navigator.userLanguage) : null;
+		if(userLocale) {
+			return 'orion/messageBundle/' + userLocale.toLowerCase() + "/" + name;
+		}
+		return 'orion/messageBundle/' + name;
+	}
+
 	function getCachedMessageBundle(name) {
-		var item = localStorage.getItem('orion/messageBundle/' + name);
+		var item = localStorage.getItem(bundleKey(name));
 		if (item) {
 			var bundle = JSON.parse(item);
 			if (bundle._expires && bundle._expires > new Date().getTime()) {
@@ -49,7 +57,7 @@ define(['require', 'orion/Deferred'], function(require, Deferred) {
 
 	function setCachedMessageBundle(name, bundle) {
 		bundle._expires = new Date().getTime() + 1000 * 900; //15 minutes
-		localStorage.setItem('orion/messageBundle/' + name, JSON.stringify(bundle));
+		localStorage.setItem(bundleKey(name), JSON.stringify(bundle));
 		delete bundle._expires;
 	}
 
