@@ -18,7 +18,7 @@ define(['orion/Deferred'], function(Deferred) {
 		var themeInfo = themeData.getThemeStorageInfo();
 		this._themeVersion = themeInfo.version;
 		var that = this;
-		var storageKey = preferences.listenForChangedSettings(themeInfo.storage, 2, function(e) {
+		var storageKey = preferences.listenForChangedSettings(themeInfo.storage, function(e) {
 			if (e.key === storageKey) {
 				Deferred.when(that._themePreferences, function(prefs) {
 					// Need to sync because the memory cached is out of date.
@@ -26,18 +26,19 @@ define(['orion/Deferred'], function(Deferred) {
 				});
 			}
 		});
-		this._themePreferences = this._preferences.getPreferences(themeInfo.storage, 2);
+		this._themePreferences = this._preferences.getPreferences(themeInfo.storage);
 	}
 
 	ThemePreferences.prototype = /** @lends orion.editor.ThemePreferences.prototype */ {
 		_initialize: function(themeInfo, themeData, prefs) {
 			var styles, selected;
-			if (this._themeVersion === undefined || prefs.get('version') === this._themeVersion) { //$NON-NLS-0$
+			var prefsVer = prefs.get('version'); //$NON-NLS-0$
+			if (this._themeVersion === undefined || (prefsVer && prefsVer >> 0 === this._themeVersion >> 0)) {
 				// Version matches (or ThemeData hasn't provided an expected version). Trust prefs
 				styles = prefs.get(themeInfo.styleset);
 				selected = prefs.get('selected'); //$NON-NLS-0$
 				if (selected) {
-					selected = JSON.parse(selected);
+					selected = this._parse(selected);
 				}
 			} else {
 				// Stale theme prefs. Overwrite everything
@@ -225,13 +226,16 @@ define(['orion/Deferred'], function(Deferred) {
 			var themeInfo = themeData.getThemeStorageInfo();
 			return  this._findStyle(styles, selectedName) || this._findStyle(styles, themeInfo.defaultTheme) || styles[0];
 		},
+		_parse: function(o) {
+			return typeof(o) === "string" ? JSON.parse(o) : o; //$NON-NLS-0$
+		},
 		getTheme: function(callback) {
 			var themeData = this._themeData;
 			var themeInfo = themeData.getThemeStorageInfo();
 			Deferred.when(this._themePreferences, function(prefs) {
 				this._initialize(themeInfo, themeData, prefs);
-				var selected = JSON.parse(prefs.get('selected')); //$NON-NLS-0$
-				var styles = JSON.parse(prefs.get(themeInfo.styleset)), style;
+				var selected = this._parse(prefs.get('selected')); //$NON-NLS-0$
+				var styles = this._parse(prefs.get(themeInfo.styleset)), style;
 				if (styles) {
 					/*
 					 * Convert the read theme info into the new supported format if the
@@ -255,7 +259,7 @@ define(['orion/Deferred'], function(Deferred) {
 			var themeInfo = themeData.getThemeStorageInfo();
 			Deferred.when(this._themePreferences, function(prefs) {
 				this._initialize(themeInfo, themeData, prefs);
-				var selected = JSON.parse(prefs.get('selected')); //$NON-NLS-0$
+				var selected = this._parse(prefs.get('selected')); //$NON-NLS-0$
 				if (!name) {
 					name = selected[themeInfo.selectedKey];
 				}
@@ -264,7 +268,7 @@ define(['orion/Deferred'], function(Deferred) {
 				if (styles) {
 					prefs.put(themeInfo.styleset, JSON.stringify(styles));
 				} else {
-					styles = JSON.parse(prefs.get(themeInfo.styleset));
+					styles = this._parse(prefs.get(themeInfo.styleset));
 				}
 				themeData.processSettings(this._getCurrentStyle(styles, selected[themeInfo.selectedKey]));
 				prefs.put('version', this._themeVersion); //$NON-NLS-0$
@@ -275,8 +279,8 @@ define(['orion/Deferred'], function(Deferred) {
 			var themeInfo = themeData.getThemeStorageInfo();
 			Deferred.when(this._themePreferences, function(prefs) {
 				this._initialize(themeInfo, themeData, prefs);
-				var selected = JSON.parse(prefs.get('selected')); //$NON-NLS-0$
-				var styles = JSON.parse(prefs.get(themeInfo.styleset)), style;
+				var selected = this._parse(prefs.get('selected')); //$NON-NLS-0$
+				var styles = this._parse(prefs.get(themeInfo.styleset)), style;
 				if (styles) {
 					for( var s = 0; s < styles.length; s++ ){
 						styles[s].styles.fontSize = size;
