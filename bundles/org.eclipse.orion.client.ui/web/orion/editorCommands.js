@@ -177,6 +177,7 @@ define([
 			this._generateGotoLineCommnand(editor);
 			this._generateFindCommnand(editor);
 			this._generateBlame(editor);
+			this._generateShowTooltip(editor);
 		},
 		_generateSettingsCommand: function(editor) {
 			var self = this;
@@ -483,6 +484,31 @@ define([
 			});
 			this.commandService.addCommand(blameCommand);
 			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.blame", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		},
+		
+		_generateShowTooltip: function(editor){
+			var tooltip = editor.getTooltip();
+			var showTooltipCommand = new mCommands.Command({
+				name: messages.showTooltip,
+				tooltip: messages.showTooltipTooltip,
+				id: "orion.edit.showTooltip", //$NON-NLS-0$
+//				parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('blame', 'boolean')], {clientCollect: true}), //$NON-NLS-1$ //$NON-NLS-0$
+				callback: function(data) {
+					console.log("Testing Show Tooltip");
+					var tv = editor._textView;
+					var offset = tv.getCaretOffset();
+					var pos = tv.getLocationAtOffset(offset);
+					tooltip.setTarget({
+						x: pos.x,
+						y: pos.y,
+						getTooltipInfo: function() {
+							return editor._getTooltipInfo(this.x, this.y);
+						}
+					}, 0, -1);
+				}
+			});
+			this.commandService.addCommand(showTooltipCommand);
+			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('e', true, true), new mCommandRegistry.URLBinding("blame", "blame")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 
 		/**

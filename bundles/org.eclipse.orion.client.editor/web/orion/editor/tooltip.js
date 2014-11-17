@@ -16,8 +16,9 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 	'orion/editor/projectionTextModel', //$NON-NLS-0$
 	'orion/Deferred', //$NON-NLS-0$
 	'orion/editor/util', //$NON-NLS-0$
+	'orion/webui/littlelib', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mTextView, mProjectionTextModel, Deferred, textUtil, util) {
+], function(messages, mTextView, mProjectionTextModel, Deferred, textUtil, lib, util) {
 
 	/** @private */
 	function Tooltip (view) {
@@ -102,6 +103,15 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			var document = tooltipDiv.ownerDocument;
 			return textUtil.contains(tooltipDiv, document.activeElement);
 		},
+		/**
+		 * @name hide
+		 * @description Hides the current hover popup
+		 * @function
+		 * @public 
+		 * @memberof ???
+		 * @param {int} hideDelay Delay the hide by this many millisecs (defaults to the 'hideDelay' field
+		 * of this tooltip)
+		 */
 		hide: function(hideDelay) {
 			if (hideDelay === undefined) {
 				hideDelay = this._hideDelay;
@@ -155,10 +165,40 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				this._fadeTimeout = null;
 			}
 		},
+		/**
+		 * @name isVisible
+		 * @description Returns a boolean indicating whether the tooltip is currently visible
+		 * @function
+		 * @public 
+		 * @memberof ???
+		 * @returns {boolean} 'true' iff the tooltip is currently visible
+		 */
 		isVisible: function() {
 			return this._tooltipDiv && this._tooltipDiv.style.visibility === "visible"; //$NON-NLS-0$
 		},
+		/**
+		 * @name setTarget
+		 * @description Set the 'target' used to gather the information to be displayed the next
+		 * time the tooltip is shown.
+		 * @function
+		 * @public 
+		 * @memberof ???
+		 * @param {Object} target The target to use on the next 'show'
+		 * @param {int} delay Delay the show by this many millisecs (defaults to the 'showDelay' field
+		 * of this tooltip
+		 * @param {int} hideDelay Delay the hide by this many millisecs (defaults to the 'hideDelay' field
+		 * of this tooltip). Note that a value of '-1' indicates that the toottip should remain up until the
+		 * user dismisses it (hits ESC / clicks outside it...).
+		 * 
+		 * NOTE: This is the preferred call to use to programmatically bring up the tooltip
+		 * (as opposed to calling 'show' directly). Calling this method with a desired target, a
+		 * 'delay' of 0 and a 'hideDelay' of -1 will immediately show the tooltip, ensure that it
+		 * remains up.
+		 */
 		setTarget: function(target, delay, hideDelay) {
+			if (target && !target.getTooltipInfo && this._target) {
+				target.getTooltipInfo = this._target.getTooltipInfo;
+			}
 			var visible = this.isVisible();
 			if (visible) {
 				if (this._hasFocus()) { return; }
@@ -174,16 +214,28 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 						self._showTimeout = null;
 					}
 					if (delay === 0) {
-						self.show(true);
+						self.show(hideDelay !== -1);
 					} else {
 						self._showTimeout = window.setTimeout(function() {
 							self._showTimeout = null;
-							self.show(true);
+							self.show(hideDelay !== -1);
 						}, delay ? delay : self._showDelay);
 					}
 				}
 			}
 		},
+		/**
+		 * @name show
+		 * @description Show the tooltip using the current target
+		 * @function
+		 * @public 
+		 * @memberof ???
+		 * @param {boolean} autoHide If 'true' then the tooltip will call 'hide' once the 'hideDelay'
+		 * timer expires. if 'false' then the tooltip will remain visible until dismissed by the User.
+		 * 
+		 * Note that if 'autoHide' is false then the tooltip will attempt to set the focus onto the
+		 * resulting tooltip.
+		 */
 		show: function(autoHide) {
 			if (!this._target) { return; }
 			var info = this._target.getTooltipInfo();
@@ -267,6 +319,9 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 							if (self._renderContent(tooltipDoc, tooltipContents, data)) {
 								// Ensure that the tooltip is visible
 								tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
+								if (!autoHide) {
+									self._setInitialFocus(tooltipDiv);
+								}
 							}
 						}
 					}, function(error) {
@@ -280,7 +335,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			
 			// Delay the showing of a tootip with no 'static' contents
 			if (contents) {
-				tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
+				tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$				
+				if (!autoHide) {
+					this._setInitialFocus(tooltipDiv);
+				}
 			}
 			
 			if (autoHide) {
@@ -297,6 +355,18 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 						self._hide();
 					}, self._fadeDelay / 10);
 				}, self._autoHideDelay);
+			}
+		},
+		_setInitialFocus: function(tooltipDiv) {
+			var buttons = lib.$$("button", tooltipDiv);
+			if (buttons && buttons.length > 0) {
+				buttons[0].focus();
+				return;
+			}
+			
+			var toFocus = lib.firstTabbable(tooltipDiv);
+			if (toFocus) {
+				toFocus.focus();
 			}
 		},
 		_renderContent: function(tooltipDoc, tooltipContents, data) {
@@ -386,7 +456,13 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				
 				// Handle quick fixes
 				if (self.hover) {
-					self.hover.renderQuickFixes(annotation, result);
+					var tb = self.hover.renderQuickFixes(annotation, result);
+					var buttons = lib.$$("button", tb);
+					for (var i=0; i<buttons.length; i++) {
+						buttons[i].addEventListener("click", function() {
+							self.hide(0);
+						});
+					}
 				}
 				return result;
 			}
