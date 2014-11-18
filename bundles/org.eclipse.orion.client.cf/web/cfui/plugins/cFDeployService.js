@@ -112,7 +112,11 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 				var deferred = new Deferred();
 				projectClient.getLaunchConfigurationsDir(project).then(function(launchConfDir){
 
-					if(launchConfDir.Children){
+					if(!launchConfDir){
+						
+						deferred.resolve(null);
+						
+					} else if(launchConfDir.Children){
 						var sharedConfigurationName = projectClient.normalizeFileName(launchConf.ConfigurationName, ".yml");
 
 						var launchConfigurationEntries = launchConfDir.Children;
