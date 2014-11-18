@@ -98,7 +98,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		}
 	});
 
-
 	function localHandleStatus(status, allowHTML, context) {
 		if (!allowHTML && status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
 			delete status.HTML;
@@ -306,6 +305,16 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				});
 			}.bind(this));
 		}
+	}
+
+	function runDeleteLaunchConfiguration(launchConf, context){
+		progress.showWhile(context.deployService.deleteLaunchConfiguration(context.project, launchConf), context.deployService.name + " in progress", true).then(function(){
+			fileDispatcher.dispatchEvent({
+				type: "delete",
+				oldValue: launchConf.File,
+				parent: launchConf.File.parent
+			});
+		});
 	}
 
 	var sharedDependencyDispatcher;
@@ -682,6 +691,34 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			}
 		});
 		commandService.addCommand(deployLaunchConfigurationCommands);
+
+		var deleteLaunchConfigurationCommand = new mCommands.Command({
+			name: messages["deleteLaunchConfiguration"],
+			tooltip: messages["deleteLaunchConfiguration"],
+			id: "orion.launchConfiguration.delete",
+			imageClass: "core-sprite-delete",
+			callback: function(data) {
+				var item = forceSingleItem(data.items);
+				fileClient.loadWorkspace(item.project.ContentLocation).then(function(){
+					projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
+						if(service && service.deleteLaunchConfiguration){
+							runDeleteLaunchConfiguration(item, {
+								project: item.project,
+								deployService: service,
+								errorHandler: errorHandler,
+								projectClient: projectClient,
+								commandService: commandService
+							});
+						}
+					});
+				});
+			},
+			visibleWhen: function(items) {
+				var item = forceSingleItem(items);
+				return item.ServiceId && item.Name && item.status;
+			}
+		});
+		commandService.addCommand(deleteLaunchConfigurationCommand);
 	};
 
 	/**

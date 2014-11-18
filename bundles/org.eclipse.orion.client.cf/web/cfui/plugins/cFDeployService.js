@@ -108,27 +108,31 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 				return message;
 			},
 
-			_getAdditionalLaunchConfigurations : function(launchConf, project){
+			_getAdditionalLaunchConfigurations : function(launchConf, project, rawFile){
 				var deferred = new Deferred();
 				projectClient.getLaunchConfigurationsDir(project).then(function(launchConfDir){
 
 					if(!launchConfDir){
-						
+
 						deferred.resolve(null);
-						
+
 					} else if(launchConfDir.Children){
-						var sharedConfigurationName = projectClient.normalizeFileName(launchConf.ConfigurationName, ".yml");
+						var sharedConfigurationName = projectClient.normalizeFileName(launchConf.ConfigurationName || launchConf.Name, ".yml");
 
 						var launchConfigurationEntries = launchConfDir.Children;
 						for(var i=0; i<launchConfigurationEntries.length; ++i){
 							var lc = launchConfigurationEntries[i];
 
 							if(lc.Name === sharedConfigurationName){
-								cFService.getManifestInfo(lc.Location, true).then(function(manifest){
-									deferred.resolve(manifest.Contents);
-								}, deferred.reject);
 
-								return;
+								if(rawFile)
+									deferred.resolve(lc);
+								else
+									cFService.getManifestInfo(lc.Location, true).then(function(manifest){
+										deferred.resolve(manifest.Contents);
+									}, deferred.reject);
+
+								return deferred;
 							}
 						}
 
@@ -143,6 +147,21 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 					}
 
 				}, deferred.reject);
+
+				return deferred;
+			},
+
+			deleteLaunchConfiguration: function(project, launchConf){
+				var deferred = new Deferred();
+
+				this._getAdditionalLaunchConfigurations(launchConf, project, true).then(function(manifest){
+
+					var deferreds = [];
+					if(manifest) deferreds.push(fileClient.deleteFile(manifest.Location));
+					deferreds.push(fileClient.deleteFile(launchConf.File.Location));
+
+					Deferred.all(deferreds).then(deferred.resolve, deferred.reject);
+				});
 
 				return deferred;
 			},

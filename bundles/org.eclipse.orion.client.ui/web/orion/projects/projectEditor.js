@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
- 
+
 /*eslint-env browser, amd*/
 define([
 	'i18n!orion/edit/nls/messages',
@@ -22,20 +22,20 @@ define([
 	'orion/section',
 	'orion/webui/tooltip'
 ], function(messages, i18nUtil, URITemplate, lib, Deferred, objects, mProjectCommands, PageLinks, mExplorer, mSection, mTooltip) {
-	
+
 	var editTemplate = new URITemplate("./edit.html#{,resource,params*}");
-	
+
 	function ProjectInfoModel(project){
 		this.root = project;
 	}
-	
+
 	ProjectInfoModel.prototype = new mExplorer.ExplorerModel();
 	ProjectInfoModel.prototype.constructor = ProjectInfoModel;
-	
+
 	ProjectInfoModel.prototype.getRoot = function(onItem){
 		return onItem(this.root);
 	};
-	
+
 	ProjectInfoModel.prototype.getChildren = function(parent, onComplete){
 		if(parent === this.root){
 			onComplete([
@@ -47,23 +47,23 @@ define([
 			onComplete([]);
 		}
 	};
-	
+
 	ProjectInfoModel.prototype.getId = function(item){
 		return "ProjectInfo" + item.id;
 	};
-	
+
 	function ProjectInfoRenderer(options, projectEditor, explorer){
 		this._init(options);
 		this.projectEditor = projectEditor;
 		this.explorer = explorer;
 	}
-	
+
 	ProjectInfoRenderer.prototype = new mExplorer.SelectionRenderer();
 	ProjectInfoRenderer.prototype.constructor = ProjectInfoRenderer;
-	
+
 	ProjectInfoRenderer.prototype.getCellHeaderElement = function(col_no){
 	};
-	
+
 	ProjectInfoRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		if(col_no===0) {
 			var td = document.createElement("td");
@@ -80,24 +80,24 @@ define([
 			if(item.href){
 				td = document.createElement("td");
 				td.style.verticalAlign = "top";
-				
+
 				var urlInput = document.createElement("input");
 				urlInput.style.visibility = "hidden";
-				
+
 				var urlSelector = document.createElement("div");
 				urlSelector.style.marginTop = "-15px";
 				urlSelector.title = messages.ClickEditLabel;
 				urlSelector.className = "discreetInput";
 				urlSelector.tabIndex = item.no;	//this is the same as the urlInput's tab index but they will never be visible at the same time
-				
+
 				var urlLink = document.createElement("a");
 				urlLink.href = item.value || "";
 				urlLink.appendChild(document.createTextNode(item.value || ""));
 				urlLink.tabIndex = item.no+1;
-							
+
 				urlSelector.appendChild(urlLink);
 				urlSelector.title = "Click to edit";
-		
+
 				//show url input, hide selector
 				urlSelector.onclick = function (event){
 					urlSelector.style.visibility = "hidden";
@@ -105,19 +105,19 @@ define([
 					urlInput.style.visibility = "";
 					urlInput.focus();
 				}.bind(this.projectEditor);
-				
+
 				//make the url editable when the selector gains focus
 				urlSelector.onfocus = urlSelector.onclick;
-				
+
 				//Make pressing "Enter" on the selector do the same think as clicking it
 				urlSelector.onkeyup = function(event){
 					if(event.keyCode === lib.KEY.ENTER){
 						urlSelector.onclick(event);
 					}
 				}.bind(this.projectEditor);
-				
+
 				urlLink.urlSelector = urlSelector; //refer to selector to be able to make it visible from within _renderEditableFields
-				
+
 				this.projectEditor._renderEditableFields(urlInput, item.id, item.no, urlLink);
 				td.appendChild(urlInput);
 				td.appendChild(urlSelector);
@@ -132,19 +132,19 @@ define([
 		}
 
 	};
-	
-	
+
+
 	function AdditionalInfoModel(project){
 		this.root = project;
 	}
-	
+
 	AdditionalInfoModel.prototype = new mExplorer.ExplorerModel();
 	AdditionalInfoModel.prototype.constructor = AdditionalInfoModel;
-	
+
 	AdditionalInfoModel.prototype.getRoot = function(onItem){
 		return onItem(this.root);
 	};
-	
+
 	AdditionalInfoModel.prototype.getChildren = function(parent, onComplete){
 		if(parent === this.root){
 			for(var i=0; i<parent.Children.length; i++){
@@ -155,20 +155,20 @@ define([
 			onComplete([]);
 		}
 	};
-	
+
 	AdditionalInfoModel.prototype.getId = function(item){
 		return "AdditionalInfo" + mExplorer.ExplorerModel.prototype.getId.call(this, {Location: item.parent.Name + item.Name});
 	};
-	
+
 	function AdditionalInfoRenderer(options, projectEditor, explorer){
 		this._init(options);
 		this.projectEditor = projectEditor;
 		this.explorer = explorer;
 	}
-	
+
 	AdditionalInfoRenderer.prototype = new mExplorer.SelectionRenderer();
 	AdditionalInfoRenderer.prototype.constructor = AdditionalInfoRenderer;
-	
+
 	AdditionalInfoRenderer.prototype.getCellHeaderElement = function(col_no){
 		if(col_no===0){
 			var td = document.createElement("td");
@@ -177,7 +177,7 @@ define([
 			return td;
 		}
 	};
-	
+
 	AdditionalInfoRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		if(col_no===0) {
 			var td = document.createElement("td");
@@ -203,20 +203,20 @@ define([
 			return td;
 		}
 
-	};	
-	
+	};
+
 	function DependenciesModel(project, projectClient){
 		this.root = project;
 		this.projectClient = projectClient;
 	}
-	
+
 	DependenciesModel.prototype = new mExplorer.ExplorerModel();
 	DependenciesModel.prototype.constructor = DependenciesModel;
-	
+
 	DependenciesModel.prototype.getRoot = function(onItem){
 		return onItem(this.root);
 	};
-	
+
 	DependenciesModel.prototype.getChildren = function(parentItem, onComplete){
 		if(parentItem === this.root){
 			var children = [];
@@ -231,16 +231,16 @@ define([
 			}.bind(this))).then(function() {
 				onComplete(children);
 			}.bind(this));
-			
+
 		} else {
 			onComplete([]);
 		}
 	};
-	
+
 	DependenciesModel.prototype.getId = function(item){
 		return mExplorer.ExplorerModel.prototype.getId.call(this, item.Dependency);
 	};
-	
+
 	function DependenciesRenderer(options, projectEditor, explorer){
 		this._init(options);
 		this.projectEditor = projectEditor;
@@ -248,17 +248,17 @@ define([
 		this.commandService = options.commandRegistry;
 		this.actionScopeId = options.actionScopeId;
 	}
-	
+
 	DependenciesRenderer.prototype = new mExplorer.SelectionRenderer();
 	DependenciesRenderer.prototype.constructor = DependenciesRenderer;
-	
+
 	DependenciesRenderer.prototype.getCellHeaderElement = function(col_no){
 	};
-	
+
 	DependenciesRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		if(col_no===0) {
 			var td = document.createElement("td");
-			
+
 			if(item.Location){
 				td.className = "navColumnNoIcon";
 				var a = document.createElement("a");
@@ -281,20 +281,20 @@ define([
 		}
 
 	};
-	
+
 	function LaunchConfigurationModel(project, launchConfigurations, projectClient){
 		this.root = project;
 		this.launchConfigurations = launchConfigurations;
 		this.projectClient = projectClient;
 	}
-	
+
 	LaunchConfigurationModel.prototype = new mExplorer.ExplorerModel();
 	LaunchConfigurationModel.prototype.constructor = LaunchConfigurationModel;
-	
+
 	LaunchConfigurationModel.prototype.getRoot = function(onItem){
 		return onItem(this.root);
 	};
-	
+
 	LaunchConfigurationModel.prototype.getChildren = function(parent, onComplete){
 		if(parent === this.root){
 			if(this.launchConfigurations){
@@ -318,7 +318,7 @@ define([
 			onComplete([]);
 		}
 	};
-	
+
 	LaunchConfigurationModel.prototype.getId = function(item){
 		return "LaunchConfiguration" + mExplorer.ExplorerModel.prototype.getId.call(this, {Location: item.Name});
 	};
@@ -332,10 +332,10 @@ define([
 		this.projectClient = options.projectClient;
 		this.emptyMessage = options.emptyMessage;
 	}
-	
+
 	LaunchConfigurationRenderer.prototype = new mExplorer.SelectionRenderer();
 	LaunchConfigurationRenderer.prototype.constructor = LaunchConfigurationRenderer;
-	
+
 	LaunchConfigurationRenderer.prototype.emptyCallback = function(bodyElement) {
 		var tr = document.createElement("tr");
 		var td = document.createElement("td");
@@ -346,14 +346,14 @@ define([
 		tr.appendChild(td);
 		bodyElement.appendChild(tr);
 	};
-	
+
 	LaunchConfigurationRenderer.prototype.getCellHeaderElement = function(col_no){
 	};
-	
+
 	LaunchConfigurationRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		if(col_no===0) {
 			var td = document.createElement("td");
-			
+
 			if(item.Name){
 				td.className = "secondaryColumnLeft";
 				td.appendChild(document.createTextNode(item.Name));
@@ -399,7 +399,7 @@ define([
 						objects.mixin(params, {OrionHome : PageLinks.getOrionHome()});
 						a.href = uriTemplate.expand(params);
 						a.appendChild(document.createTextNode("Logs"));
-						td.appendChild(a);							
+						td.appendChild(a);
 						});
 					} else if(service.logLocationTemplate){
 						var a = document.createElement("a");
@@ -496,7 +496,7 @@ define([
 					if(service && service.getState){
 						item.status = {State: "PROGRESS"};
 						td.innerHTML = this.getCellElement(col_no, item, tableRow).innerHTML;
-					
+
 						service.getState(item.Params).then(function(result){
 							item.status = result;
 							var newTd = this.getCellElement(col_no, item, tableRow);
@@ -535,22 +535,23 @@ define([
 		}
 
 	};
-	
+
 	function LaunchConfigurationExplorer(serviceRegistry, selection, renderer, commandRegistry, launchConfigurationActions){
 		mExplorer.Explorer.apply(this, arguments);
 		this.actionScopeId = launchConfigurationActions;
 		this.selectionActions = "LaunchConfigurationExplorerSelectionActions";
 		this.actionsSections = [this.selectionActions];
 	}
-	
+
 	LaunchConfigurationExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
-	
+
 	objects.mixin(LaunchConfigurationExplorer.prototype, /** @lends orion.Explorer.prototype */ {
 		registerCommands: function(){
 			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.manage", 1);
 			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.deploy", 2);
 			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.startApp", 3);
 			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.stopApp", 4);
+			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.delete", 5);
 		},
 		updateCommands: function(selections){
 			this.selectionActionsNode = lib.node(this.selectionActions);
@@ -567,7 +568,7 @@ define([
 		},
 		constructor: LaunchConfigurationExplorer
 	});
-	
+
 	function ProjectEditor(options){
 		this.serviceRegistry = options.serviceRegistry;
 		this.fileClient = options.fileClient;
@@ -590,21 +591,21 @@ define([
 			this._launchConfigurationEventTypes.forEach(function(eventType) {
 				_self.launchConfigurationDispatcher.addEventListener(eventType, _self.launchConfigurationListener);
 			});
-			
+
 			this.dependneciesListener = function(event){_self.dependenciesChanged.call(_self, event);};
 			this._dependenciesEventTypes = ["create", "delete"];
 			this._dependenciesEventTypes.forEach(function(eventType) {
 				_self.dependenciesDisplatcher.addEventListener(eventType, _self.dependneciesListener);
 			});
 
-			
+
 //			mProjectCommands.createDependencyCommands(this.serviceRegistry, this.commandRegistry, this.fileClient, this.projectClient);
 //			var dependencyTypes = this.projectClient.getProjectHandlerTypes();
 			this.commandRegistry.registerCommandContribution(this.dependencyActions, "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandRegistry.registerCommandContribution(this.dependencyActions, "orion.project.dependency.disconnect", 2); //$NON-NLS-0$
 			this.commandRegistry.registerCommandContribution(this.launchConfigurationActions, "orion.launchConfiguration.checkStatus", 1);
-			
-			
+
+
 		},
 		changedItem: function(item){
 			this.fileClient.read(this.parentFolder.Location, true).then(function(metadata){
@@ -614,9 +615,9 @@ define([
 		},
 		display: function(node, projectData){
 			this.node = node;
-			this.node.className = "orionProject";				
+			this.node.className = "orionProject";
 			this.projectData = projectData;
-			
+
 			function renderSections(sectionsOrder, sectionNames, emptyMessages){
 				sectionNames = sectionNames || {};
 				sectionsOrder.forEach(function(sectionName){
@@ -646,7 +647,7 @@ define([
 					}
 				}.bind(this));
 		}
-			
+
 			var sectionsOrder = ["projectInfo", "additionalInfo", "deployment", "dependencies"];
 			this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){
 				sectionsOrder = sectionsOrderPrefs.get("projectView") || sectionsOrder;
@@ -657,7 +658,7 @@ define([
 				renderSections.apply(this, [sectionsOrder, {}, {}]);
 				window.console.error(error);
 			}.bind(this));
-			
+
 		},
 		displayContents: function(node, parentFolder){
 			this.parentFolder = parentFolder;
@@ -688,7 +689,7 @@ define([
 			lib.empty(dependenciesNode);
 			this.renderDependencies(dependenciesNode, this.dependenciesSectionName);
 		},
-		_renderEditableFields: function(input, property, tabIndex, urlElement /*optional*/){	
+		_renderEditableFields: function(input, property, tabIndex, urlElement /*optional*/){
 			var saveInput = function(event) {
 				var properties = {};
 				properties[property] = event.target.value;
@@ -697,7 +698,7 @@ define([
 						if(newProjectData){
 							this.projectData = newProjectData;
 							input.value = event.target.value;
-							
+
 							//behave differently for inputs associated with urls
 							//hide the <input> element and show the <a> urlElement
 							if(urlElement){
@@ -708,19 +709,19 @@ define([
 								if(urlElement.urlSelector){
 									urlElement.urlSelector.style.visibility = "";
 								}
-								
+
 								input.style.visibility = "hidden";
 							}
 						}
 					}.bind(this)
 				);
 			}.bind(this);
-			
+
 			input.value = this.projectData[property] || "";
 			input.title = messages.ClickEditLabel;
 			input.className = "discreetInput";
 			input.tabIndex = String(tabIndex);
-						
+
 			input.onkeyup = function(event){
 				if(event.keyCode === lib.KEY.ENTER){
 					// Excluding <textarea> because it is a multi-line input
@@ -738,7 +739,7 @@ define([
 			};
 		},
 		renderProjectInfo: function(parent, sectionName){
-			
+
 			var title = sectionName || messages.ProjectInfo;
 			var projectInfoSection = new mSection.Section(parent, {id: "projectInfoSection", headerClass: ["sectionTreeTableHeader"], title: title, canHide: true});
 			var explorerParent = document.createElement("div");
@@ -786,13 +787,13 @@ define([
 			}.bind(this));
 		},
 		renderDependencies: function(parent, sectionName){
-			
+
 			if(!this.projectData.Dependencies || this.projectData.Dependencies.length===0){
 				return;
 			}
-			
+
 			this.dependenciesSectionName = sectionName || "Associated Content";
-			
+
 			var dependenciesSection = new mSection.Section(parent, {id: "projectDependenciesSection", headerClass: ["sectionTreeTableHeader"], title: this.dependenciesSectionName, canHide: true});
 			var dependenciesParent = document.createElement("div");
 			dependenciesParent.id = "dependenciesNode";
@@ -806,12 +807,12 @@ define([
 			dependenciesExplorer.actionScopeId = this.dependencyActions;
 			dependenciesSection.embedExplorer(dependenciesExplorer, dependenciesParent);
 			dependenciesExplorer.createTree(dependenciesParent, new DependenciesModel(this.projectData, this.projectClient),  {indent: '8px', noSelection: true});
-			
+
 		},
 		renderLaunchConfigurations: function(parent, configurations, sectionName, emptyMessage){
 			this.configurationsParent = parent;
 			this.configurationsEmptyMessage = emptyMessage;
-			
+
 			if(emptyMessage || (configurations && configurations.length > 0)){
 				lib.empty(this.configurationsParent);
 				this.launchCofunctionSectionsTitle = sectionName || messages.DeployInfo;
@@ -819,7 +820,7 @@ define([
 				var launchConfigurationParent = document.createElement("div");
 				launchConfigurationParent.id = "launchConfigurationsNode";
 			}
-			
+
 			if(!configurations){
 				var progressMonitor;
 				if(launchConfigurationSection){
@@ -838,7 +839,7 @@ define([
 				}.bind(this));
 				return;
 			}
-			
+
 			//Destroy tooptips for app status
 			if(lib.$(".sectionTreeTable", this.configurationsParent) || lib.$(".treetable", this.configurationsParent)) { //$NON-NLS-1$ //$NON-NLS-0$
 				lib.$$array(".treeTableRow", this.configurationsParent).forEach(function(tableRow, i) { //$NON-NLS-0$
@@ -852,7 +853,7 @@ define([
 					}
 				});
 			}
-			
+
 			var launchConfigurationRenderer = new LaunchConfigurationRenderer({
 				checkbox: false,
 				treeTableClass: "sectionTreeTable",
@@ -915,6 +916,6 @@ define([
 				});
 		}
 	};
-	
+
 	return {ProjectEditor: ProjectEditor};
 });

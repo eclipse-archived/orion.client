@@ -131,6 +131,7 @@ define({
 	"startApplication": "Start application",
 	"manage": "Manage",
 	"manageThisApplicationOnRemote": "Manage this application on remote server",
+	"deleteLaunchConfiguration": "Delete this launch configuration",
 	"deployThisApplicationAgain": "Deploy this application again",
 	"associatedFolder": "Associated Folder",
 	"associateAFolderFromThe": "Associate a folder from the workspace with this project.",
