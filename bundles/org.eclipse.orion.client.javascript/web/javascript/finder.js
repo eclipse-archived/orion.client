@@ -1007,8 +1007,8 @@ define([
 					if (parent.object && parent.object.type === Estraverse.Syntax.ThisExpression){
 						// Usage of this within an object
 						this.visitor.objectPropCheck = true;
-					} else if (parent.property && context.start >= parent.property.range[0] && context.end <= parent.property.range[1]){
-					 	// Selecting the property key of a member expression
+					} else if (!parent.computed && parent.property && context.start >= parent.property.range[0] && context.end <= parent.property.range[1]){
+					 	// Selecting the property key of a member expression that is not computed (foo.a vs foo[a])
 						this.visitor.objectPropCheck = true;
 					}
 				} else if (parent && parent.type === Estraverse.Syntax.FunctionExpression && context.token.parents.length > 1 && context.token.parents[context.token.parents.length-2].type === Estraverse.Syntax.Property){

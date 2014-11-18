@@ -3137,5 +3137,53 @@ define([
 			});
 		});
 		
+		/**
+		 * Tests selections inside a computed property identifer are not treated as member expressions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=452161
+		 */
+		it('test_computedObjectProperty1', function() {
+			editorContext.text = "var x = {a: {}, b: function(a) {var c = arr[a];} };";
+			return occurrences.computeOccurrences(editorContext, setContext(9,10)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:9, end:10}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests selections inside a computed property identifer are not treated as member expressions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=452161
+		 */
+		it('test_computedObjectProperty2', function() {
+			editorContext.text = "var x = {a: {}, b: function(a) {var c = arr[a];} };";
+			return occurrences.computeOccurrences(editorContext, setContext(28,29)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:28, end:29}, {start:44, end:45}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Tests selections inside a computed property identifer are not treated as member expressions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=452161
+		 */
+		it('test_computedObjectProperty3', function() {
+			editorContext.text = "var x = {a: {}, b: function(a) {var c = arr[a];} };";
+			return occurrences.computeOccurrences(editorContext, setContext(44,45)).then(function(results) {
+				try {
+					assertOccurrences(results, [{start:28, end:29}, {start:44, end:45}]);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
 	});
 });
