@@ -23,11 +23,33 @@ define([
 	'orion/urlUtils',
 	'orion/section'
 ], function(mExplorerTable, mNavigatorRenderer, mMarkdownView, PageUtil, URITemplate, lib, objects, Deferred, mDropdown, mCommitInfoRenderer, mUrlUtils, mSection) {
-	
+	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 	var FileExplorer = mExplorerTable.FileExplorer;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
 	
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+	
+	function _ctrlKeyOn(e){
+		return isMac ? e.metaKey : e.ctrlKey;
+	}
+	function _imageId(location) {
+		return location + "_readonly_imageId";  //$NON-NLS-0$
+	}
+	function _processLinkIcon(linkNode, iconNode) {
+		if(iconNode) {
+			linkNode.addEventListener("click", function(e){ //$NON-NLS-0$
+				if(!_ctrlKeyOn(e)) {
+					if(iconNode) {
+						if(iconNode.classList.length > 0) {
+							iconNode.classList.remove(iconNode.classList[0]);
+						}
+						iconNode.classList.add("core-sprite-progress"); //$NON-NLS-0$
+						iconNode.classList.add("core-sprite-progress-file-browser"); //$NON-NLS-0$
+					}
+				}
+			});
+		}
+	}
 	function FolderNavRenderer() {
 		NavigatorRenderer.apply(this, arguments);
 	}
@@ -50,13 +72,15 @@ define([
 				folderNode.href = "javascript:void(0)";
 				folderNode.addEventListener("click", function(){this.explorer.clickHandler(folder.Location);}.bind(this)
 				, false);
+			} else {
+				_processLinkIcon(folderNode, folderNode.firstChild);
 			}
 			return folderNode;
 		},
 		/**
 		 * override NavigatorRenderer's prototype
 		 */
-		updateFileNode: function(file, fileNode, isImage) {
+		updateFileNode: function(file, fileNode, isImage, iconElement) {
 			mNavigatorRenderer.NavigatorRenderer.prototype.updateFileNode.call(this, file, fileNode, isImage);
 			if (this.explorer.readonly && fileNode.tagName === "A") { //$NON-NLS-0$
 				if(this.explorer.clickHandler){
@@ -65,6 +89,7 @@ define([
 					, false);
 				} else {
 					fileNode.href = uriTemplate.expand({resource: file.Location});
+					_processLinkIcon(fileNode, iconElement);
 				}
 			}
 		},

@@ -387,6 +387,11 @@ div.currentLocation {
 	
 }
 
+.core-sprite-progress-file-browser {
+	padding-top:0 !important;
+	margin-left:-1px !important;
+}
+
 .breadcrumb {
 	font-size: 1em;
 	font-weight: bold;
