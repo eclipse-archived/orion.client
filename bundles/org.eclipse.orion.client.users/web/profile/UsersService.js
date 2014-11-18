@@ -110,8 +110,8 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 			userInfo = userInfo || {};
 			var formData = {
 				login : userInfo.login,
-				password : userInfo.password,
-				email: userInfo.email
+				Password : userInfo.Password,
+				Email: userInfo.Email
 			};
 			return xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
@@ -158,7 +158,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 			var uri = userUri;
 			
 
-			if(data.password!==data.passwordRetype){
+			if(data.Password!==data.passwordRetype){
 				ret.reject({message: "Passwords do not match!"});
 				return ret;
 			}
@@ -201,7 +201,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 				data : form.encodeFormData({
 					reset: true,
 					login : login,
-					password : password
+					Password : password
 				})
 			}).then(function(result) {
 				var jsonData = getJSON(result.response);

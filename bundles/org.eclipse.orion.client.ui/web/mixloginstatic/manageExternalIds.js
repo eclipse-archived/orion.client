@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -18,14 +18,14 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 
 	function removeOAuth(oauth) {
 		if (confirm("Are you sure you want to remove " + oauth + " from the list of your external accounts?")) {
-			var oauths = jsonData.properties.oauth.split('\n');
+			var oauths = jsonData.OAuth.split('\n');
 			var newoauths = "";
 			for (var i = 0; i < oauths.length; i++) {
 				if (oauths[i] !== oauth) {
 					newoauths += (oauths[i] + '\n');
 				}
 			}
-			jsonData.properties.oauth = newoauths;
+			jsonData.OAuth = newoauths;
 
 			xhr("PUT", jsonData.Location, { //$NON-NLS-0$
 				data: JSON.stringify(jsonData),
@@ -51,9 +51,9 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 		var table = document.createElement("table"); //$NON-NLS-0$
 		table.classList.add("manageExternalIdsTable"); //$NON-NLS-0$
 		list.appendChild(table); //$NON-NLS-0$
-		if (jsonData.properties && jsonData.properties.oauth) {
+		if (jsonData.OAuth) {
 
-			var oauths = jsonData.properties.oauth ? jsonData.properties.oauth.split('\n') : []; //$NON-NLS-0$
+			var oauths = jsonData.OAuth ? jsonData.OAuth.split('\n') : []; //$NON-NLS-0$
 			for (var i = oauths.length - 1; i >= 0; i--) {
 				if (oauths[i] === "") {
 					oauths.splice(i, 1);
@@ -136,17 +136,17 @@ define(["i18n!orion/mixloginstatic/nls/messages", "orion/xhr", "orion/webui/litt
 	}
 
 	window.handleOAuthResponse = function(oauthid) {
-		var oauthids = jsonData.properties.oauth ? jsonData.properties.oauth.split('\n') : [];
+		var oauthids = jsonData.OAuth ? jsonData.OAuth.split('\n') : [];
 		for (var i = 0; i < oauthids.length; i++) {
 			if (oauthids[i] === oauthid) {
 				return;
 			}
 		}
 
-		if (!jsonData.properties.oauth) {
-			jsonData.properties.oauth = oauthid;
+		if (!jsonData.OAuth) {
+			jsonData.OAuth = oauthid;
 		} else {
-			jsonData.properties.oauth += '\n' + oauthid;
+			jsonData.OAuth += '\n' + oauthid;
 		}
 
 		xhr("PUT", jsonData.Location, { //$NON-NLS-0$

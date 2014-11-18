@@ -64,7 +64,7 @@ define(['orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'], function
 				login: login
 			};
 			if (typeof password === 'string') {
-				formData.password = password;
+				formData.Password = password;
 			}
 			return xhr('POST', '../login/form', {
 				headers: {
@@ -103,7 +103,7 @@ define(['orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'], function
 //				});
 //			} else
 			if (userInfo) {
-				return doLogin(userInfo.login, userInfo.password);
+				return doLogin(userInfo.login, userInfo.Password);
 			} else {
 				// !createUser and !userInfo implies we're already authenticated, so just continue
 				//return getLoggedInUser();

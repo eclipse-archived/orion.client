@@ -133,7 +133,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		mypostrequest.setRequestHeader("Orion-Version", "1");
 		xsrfUtils.addCSRFNonce(mypostrequest);
-		mypostrequest.send("{login='" + document.getElementById("reset").value + "', email='" + document.getElementById("resetEmail").value + "'}");
+		mypostrequest.send("{login='" + document.getElementById("reset").value + "', Email='" + document.getElementById("resetEmail").value + "'}");
 
 		setResetMessage(false, "Sending password reset confirmation...");
 	}
@@ -205,7 +205,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 				}
 			};
 
-			var parameters = "login=" + encodeURIComponent(login) + "&password=" + encodeURIComponent(password);
+			var parameters = "login=" + encodeURIComponent(login) + "&Password=" + encodeURIComponent(password);
 			mypostrequest.open("POST", "../login/form", true);
 			mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 			mypostrequest.setRequestHeader("Orion-Version", "1");
@@ -271,7 +271,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 				}
 			}
 		};
-		var parameters = "login=" + encodeURIComponent(login) + "&password=" + encodeURIComponent(password) + "&email=" + encodeURIComponent(email);
+		var parameters = "login=" + encodeURIComponent(login) + "&Password=" + encodeURIComponent(password) + "&Email=" + encodeURIComponent(email);
 		mypostrequest.open("POST", "../users", true);
 		mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		mypostrequest.setRequestHeader("Orion-Version", "1");
@@ -302,7 +302,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 				}
 			}
 		};
-		var parameters = "login=" + encodeURIComponent(login) + "&password=" + encodeURIComponent(password) + "&identifier=" + encodeURIComponent(identifier) + "&email=" + encodeURIComponent(email);
+		var parameters = "login=" + encodeURIComponent(login) + "&Password=" + encodeURIComponent(password) + "&identifier=" + encodeURIComponent(identifier) + "&Email=" + encodeURIComponent(email);
 		mypostrequest.open("POST", "../users", true);
 		mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		mypostrequest.setRequestHeader("Orion-Version", "1");

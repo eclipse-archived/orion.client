@@ -125,13 +125,13 @@ eclipse.UsersRenderer = (function() {
 		col.appendChild(h2);
 		switch(col_no){
 		case 0: 
-			h2.textContent = messages["Login"];
+			h2.textContent = messages["User Name"];
 			return col;
 		case 1:
 			h2.textContent = messages["Actions"];
 			return col;
 		case 2:
-			h2.textContent = messages["Name"];
+			h2.textContent = messages["Full Name"];
 			return col;
 		case 3:
 			h2.textContent = messages["Last Login"];
@@ -166,14 +166,14 @@ eclipse.UsersRenderer = (function() {
 			return td;
 		case 3:
 			td = document.createElement("td"); //$NON-NLS-0$
-			td.textContent = item.LastLogInTimestamp ? new Date(parseInt(item.LastLogInTimestamp, 10)).toLocaleString() : '\u00a0'; //$NON-NLS-0$
+			td.textContent = item.LastLoginTimestamp ? new Date(parseInt(item.LastLoginTimestamp, 10)).toLocaleString() : '\u00a0'; //$NON-NLS-0$
 			return td;
 		case 4:
 			td = document.createElement("td"); //$NON-NLS-0$
-			var diskUsage = item.diskUsage ? item.diskUsage : " "; //$NON-NLS-0$
+			var diskUsage = item.DiskUsage ? item.DiskUsage : " "; //$NON-NLS-0$
 			var diskUsageTextContent = '\u00a0'; //$NON-NLS-0$
 			if (diskUsage !== " ") {
-				var diskUsageTimestamp = item.diskUsageTimestamp ? new Date(parseInt(item.diskUsageTimestamp, 10)).toLocaleString() : '\u00a0'; //$NON-NLS-0$
+				var diskUsageTimestamp = item.DiskUsageTimestamp ? new Date(parseInt(item.DiskUsageTimestamp, 10)).toLocaleString() : '\u00a0'; //$NON-NLS-0$
 				diskUsageTextContent = i18nUtil.formatMessage(messages["A(lastCalculated B)"], diskUsage, diskUsageTimestamp); //$NON-NLS-1$ //$NON-NLS-0$
 			};
 			td.textContent = diskUsageTextContent;

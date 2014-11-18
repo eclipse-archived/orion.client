@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2009, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -55,8 +55,8 @@ define(['i18n!profile/nls/messages', 'orion/webui/dialog'], function(messages, d
 
 		this.registry.getService("orion.core.user").createUser({
 			login: dialog.$userName.value,
-			password: dialog.$password.value,
-			email: dialog.$email.value
+			Password: dialog.$password.value,
+			Email: dialog.$email.value
 		}).then(dialog.func, function(response) { //$NON-NLS-0$
 			console.info(response);
 			var message = response.Message;

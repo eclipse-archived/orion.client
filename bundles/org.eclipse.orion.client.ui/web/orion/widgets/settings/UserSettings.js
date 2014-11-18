@@ -139,7 +139,7 @@ define([
 			
 			userdata.login = this.accountFields[0].getValue();
 			userdata.FullName = this.accountFields[1].getValue();
-			userdata.email = this.accountFields[2].getValue();
+			userdata.Email = this.accountFields[2].getValue();
 			
 			for(var i=0; i<authServices.length; i++){
 				var servicePtr = authServices[i];
@@ -193,7 +193,7 @@ define([
 					if (newPassword === newPasswordRetype) {
 						if(currentPassword.length > 0){
 							userdata.oldPassword = currentPassword;
-							userdata.password = newPassword;
+							userdata.Password = newPassword;
 							userdata.passwordRetype = newPasswordRetype;
 						
 							//dispatch passwords to user service
@@ -303,8 +303,8 @@ define([
 							} else {
 								settingsWidget.accountFields[1].setValue( '' );
 							}
-							if (accountData.email){
-								settingsWidget.accountFields[2].setValue( accountData.email );
+							if (accountData.Email){
+								settingsWidget.accountFields[2].setValue( accountData.Email );
 							} else {
 								settingsWidget.accountFields[2].setValue( '' );
 							}
