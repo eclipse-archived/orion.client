@@ -1305,7 +1305,7 @@ var exports = {};
 		
 		var addConfigEntryCommand = new mCommands.Command({
 			name: messages["New Configuration Entry"],
-			tooltip: "Add a new entry to the repository configuration", //$NON-NLS-0$
+			tooltip: messages['NewConfigurationEntryTooltip'],
 			id: "eclipse.orion.git.addConfigEntryCommand", //$NON-NLS-0$
 			parameters: addConfigParameters,
 			callback: function(data) {
