@@ -132,6 +132,7 @@ define([
 			}
 		}
 		var prob = {
+		    id: e.ruleId,
 		    descriptionKey: (e.args && e.args.nls ? e.args.nls : e.ruleId),
 		    descriptionArgs: e.args,
 			description: e.message,

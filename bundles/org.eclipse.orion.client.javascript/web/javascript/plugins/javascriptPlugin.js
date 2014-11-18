@@ -19,6 +19,7 @@ define([
 'esprima',
 'javascript/scriptResolver',
 'javascript/astManager',
+'javascript/quickFixes',
 'javascript/contentAssist/indexFiles/mongodbIndex',
 'javascript/contentAssist/indexFiles/mysqlIndex',
 'javascript/contentAssist/indexFiles/postgresIndex',
@@ -38,7 +39,7 @@ define([
 'orion/editor/stylers/application_json/syntax',
 'orion/editor/stylers/application_schema_json/syntax',
 'orion/editor/stylers/application_x-ejs/syntax'
-], function(Bootstrap, Esprima, ScriptResolver, ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
+], function(Bootstrap, Esprima, ScriptResolver, ASTManager, QuickFixes, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
 			EslintValidator, Occurrences, Hover, Outliner,	PluginProvider, Util, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS) {
 
 	/**
@@ -119,6 +120,58 @@ define([
    				nls: 'javascript/nls/messages',  //$NON-NLS-0$
    				key : [ 114, false, false, false, false],  //$NON-NLS-0$
     			contentType: ['application/javascript']  //$NON-NLS-0$
+  			}
+  	);
+	
+	var opts = Object.create(null);
+	opts.astManager = astManager;
+	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(opts);
+	
+	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+			quickFixComputer, 
+			{
+				nameKey : 'removeExtraSemiFixName',  //$NON-NLS-0$
+				tooltipKey : 'removeExtraSemiFixTooltip',  //$NON-NLS-0$
+				scopeId: "orion.edit.quickfix",
+   				id : "rm.extra.semi.fix",  //$NON-NLS-0$
+   				nls: 'javascript/nls/messages',  //$NON-NLS-0$
+                key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+    			contentType: ['application/javascript'],  //$NON-NLS-0$
+    			validationProperties: [
+        			{source: "annotation:id", match: "no-extra-semi"} //$NON-NLS-1$ //$NON-NLS-0$
+        		]
+  			}
+  	);
+	
+	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+			quickFixComputer, 
+			{
+				nameKey : 'addFallthroughCommentFixName',  //$NON-NLS-0$
+				tooltipKey : 'addFallthroughCommentFixTooltip',  //$NON-NLS-0$
+				scopeId: "orion.edit.quickfix",
+   				id : "add.fallthrough.comment.fix",  //$NON-NLS-0$
+   				nls: 'javascript/nls/messages',  //$NON-NLS-0$
+                key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+    			contentType: ['application/javascript'],  //$NON-NLS-0$
+    			validationProperties: [
+        			{source: "annotation:id", match: "no-fallthrough"} //$NON-NLS-1$ //$NON-NLS-0$
+        		]
+  			}
+  	);
+  	
+  	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+			quickFixComputer, 
+			{
+				nameKey : 'addEmptyCommentFixName',  //$NON-NLS-0$
+				tooltipKey : 'addEmptyCommentFixTooltip',  //$NON-NLS-0$
+				scopeId: "orion.edit.quickfix",
+   				id : "add.empty.comment.fix",  //$NON-NLS-0$
+   				nls: 'javascript/nls/messages',  //$NON-NLS-0$
+                key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+    			contentType: ['application/javascript'],  //$NON-NLS-0$
+    			validationProperties: [
+        			{source: "annotation:id", match: "no-empty-block"} //$NON-NLS-1$ //$NON-NLS-0$
+        		]
   			}
   	);
 	
