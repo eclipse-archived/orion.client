@@ -25,8 +25,9 @@ define([
 	var max_more_info_column_length = 60;
 	/* Internal */
 	function addImageToLink(contentType, link, location, replace) {
+		var image;
 		if (contentType) {
-			var image, imageClass = contentType.imageClass, imageURL = contentType.image;
+			var imageClass = contentType.imageClass, imageURL = contentType.image;
 			if (imageClass) {
 				image = document.createElement("span"); //$NON-NLS-0$
 				image.className += imageClass; // may be several classes in here
@@ -40,9 +41,8 @@ define([
 			if (image) {
 				link.replaceChild(image, replace);
 			}
-			return image;
 		}
-		return null;
+		return image ? image : replace;
 	}
 	
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
