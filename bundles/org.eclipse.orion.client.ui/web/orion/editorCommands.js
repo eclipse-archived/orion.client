@@ -604,7 +604,8 @@ define([
 							context.annotation = {
 								start: data.userData.start,
 								end: data.userData.end,
-								title: data.userData.title
+								title: data.userData.title,
+								id: data.userData.id
 							};
 						}
 						var editorContext = EditorContext.getEditorContext(serviceRegistry);

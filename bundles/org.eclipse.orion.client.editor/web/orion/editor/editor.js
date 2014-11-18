@@ -1016,6 +1016,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						if (!type) { continue; }
 						annotation = AT.createAnnotation(type, start, end, annotation.description);
 					}
+					annotation.id = annotations[i].id; //allow consumers to tag the annotation with their own identifier
 					annotation.creatorID = this;
 					add.push(annotation);
 
