@@ -12,13 +12,14 @@
 define({
 	'htmlOutline' : 'HTML Outline', //$NON-NLS-0$  //$NON-NLS-1$
 	'cssOutline' : 'CSS Rule Outline', //$NON-NLS-0$  //$NON-NLS-1$
-	'htmlContentAssist' : 'HTML content assist', //$NON-NLS-0$  //$NON-NLS-1$
-	'cssContentAssist' : 'CSS content assist', //$NON-NLS-0$  //$NON-NLS-1$
+	'htmlContentAssist' : 'HTML Content Assist', //$NON-NLS-0$  //$NON-NLS-1$
+	'cssContentAssist' : 'CSS Content Assist', //$NON-NLS-0$  //$NON-NLS-1$
+	'cssHover' : 'CSS Hover', //$NON-NLS-0$  //$NON-NLS-1$
+	'csslintValidator' : 'CSS Validator', //$NON-NLS-0$  //$NON-NLS-1$
 	
-	'csslintValidator' : 'CSS Validator',
-	'ignore' : 'Ignore',
-	'warning' : 'Warning',
-	'error' : 'Error',
+	'ignore' : 'Ignore', //$NON-NLS-0$  //$NON-NLS-1$
+	'warning' : 'Warning', //$NON-NLS-0$  //$NON-NLS-1$
+	'error' : 'Error', //$NON-NLS-0$  //$NON-NLS-1$
 	
 	'adjoining-classes': 'Disallow adjoining classes:', //$NON-NLS-0$  //$NON-NLS-1$
 	'box-model': 'Beware of broken box size:', //$NON-NLS-0$  //$NON-NLS-1$

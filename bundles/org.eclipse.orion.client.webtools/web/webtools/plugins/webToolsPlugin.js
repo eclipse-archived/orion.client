@@ -17,8 +17,9 @@ define(['orion/plugin',
 'webtools/cssContentAssist', 
 'webtools/cssValidator',
 'webtools/cssOutliner',
+'webtools/cssHover',
 'orion/editor/stylers/text_css/syntax'
-], function(PluginProvider, htmlContentAssist, htmlOutliner, mHTML, cssContentAssist, mCssValidator, mCssOutliner, mCSS) {
+], function(PluginProvider, htmlContentAssist, htmlOutliner, mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, mCSS) {
 	/**
 	 * Plug-in headers
 	 */
@@ -110,7 +111,18 @@ define(['orion/plugin',
    			provider.registerService("orion.edit.highlighter", {}, newGrammars[current]); //$NON-NLS-0$
   		}
     }
-    
+
+    /**
+	 * Register the hover support
+	 * TODO This hover support is experimental and is turned off by default
+	 */
+//	provider.registerService("orion.edit.hover", new cssHover.CSSHover(),  //$NON-NLS-0$
+//		{
+//			nls: 'webtools/nls/messages',  //$NON-NLS-0$
+//		    name: 'cssHover',	//$NON-NLS-0$
+//			contentType: ["text/css"]	//$NON-NLS-0$
+//	});
+	
     /**
 	 * CSSLint settings
 	 */
