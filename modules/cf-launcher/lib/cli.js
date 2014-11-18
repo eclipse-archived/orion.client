@@ -11,7 +11,7 @@
 /*eslint-env node*/
 var cfenv = require("cfenv"),
     minimist = require("minimist"),
-    startServer = require("./web/app"),
+    startServer = require("./web/server"),
     util = require("./util");
 
 var USAGE = "\n\nUsage: cf-launcher [options] -- COMMAND";

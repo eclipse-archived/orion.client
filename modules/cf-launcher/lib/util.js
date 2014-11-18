@@ -34,14 +34,6 @@ utils.checker = function(obj) {
 			fail(prop, "string");
 		return checker;
 	};
-	checker.optString = function(prop) {
-		var val = obj[prop];
-		if (typeof val === "number")
-			val = obj[prop] = String(val); // Coerce to string
-		if (typeof val !== "string" && val !== null && typeof val !== "undefined" )
-			fail(prop, "string or null or undefined");
-		return checker;
-	};
 	// Something coercible to a number
 	checker.numbery = function(prop) {
 		var val = obj[prop];

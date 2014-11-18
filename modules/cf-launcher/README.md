@@ -106,16 +106,18 @@ The `DEBUG` environment variable enables debugging output from cf-launcher. For 
 ```shell
 $ cf set-env myapp DEBUG cf-launcher:*
 ```
-will print all debug output from cf launcher to standard output, meaning it will appear in your `cf logs` output.
+will print all debug output from cf-launcher to standard output, meaning it will appear in your app's `cf logs`.
 
-To filter debug output, the following suffixes can be used:
+To filter debug output, the following suffixes can appear after cf-launcher:
 * `*`: logs everything.
+* `auth`: logs login attempts and logouts.
 * `proc`: logs action taken by the process manager, which is responsible for managing the lifecycle of the
   target app and node inspector. It can be scoped down further:
   * `proc:target`: logs only actions related to the target app process.
   * `proc:debugger`: logs only actions related to the node-inspector process.
 * `proxy`: logs action taken by the reverse proxy, which takes over the web port and forwards requests based
   on the request URL.
+* `webdav`: logs WebDAV requests. (This is an alias for the `debugMode` flag in the underlying jsDAV server.)
 
 The `DEBUG` variable is very flexible. See [debug](https://www.npmjs.org/package/debug) for full details.
 

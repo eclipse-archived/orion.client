@@ -9,44 +9,39 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var crypto = require("crypto"),
-    fmt = require("util").format,
+var fmt = require("util").format,
     jsDAV = require("jsDAV"),
-    jsDAV_Auth_Backend_AbstractDigest = require("jsDAV/lib/DAV/plugins/auth/abstractDigest"),
-    util = require("../util");
+//    jsDAV_Auth_Backend_AbstractDigest = require("jsDAV/lib/DAV/plugins/auth/abstractDigest"),
+    pkgName = require("../../package.json").name;
 	
-function md5(str) {
-	return crypto.createHash("md5").update(str).digest("hex");
+
+function isDebugMode() {
+	// Determine if debug flag `cf-launcher:*` or `cf-launcher:webdav` is set
+	var debugFlags = (process.env.DEBUG || "").split(/\s*,\s*/);
+	return debugFlags.indexOf(pkgName + ":*") !== -1 || debugFlags.indexOf(pkgName + ":webdav") !== -1;
 }
 
-exports.createServer = function(port, password) {
-	if (!port || !password)
+exports.createServer = function(options) {
+	var port = options.port,
+	    launcherPassword = options.password,
+	    backend = options.authBackend,
+	    realm = options.realm;
+
+	if (!port || !launcherPassword || !backend || !realm)
 		throw new Error("Missing required parameter");
 	try {
-		var auth = jsDAV_Auth_Backend_AbstractDigest.extend({
-			/**
-			 * Gets the digest (`HA1`) for the given realm and user.
-			 * @param {Function} callback Must be invoked as <tt>callback(null, digest)</tt>.
-			 */
-			getDigestHash: function(realm, username, callback) {
-				var str = username + ":" + realm + ":" + password;
-				callback(null, md5(str));
-			}
-		});
-
-		jsDAV.debugMode = true;
+		jsDAV.debugMode = isDebugMode();
 		return jsDAV.createServer({
 			// Expose the parent directory of the one that cf-launcher is installed in, which should be the
 			// target app being debugged
 			node: __dirname + "/../../../../",
-			authBackend: auth,
-			realm: "App files (username is 'vcap')",
+			realm: realm,
+			authBackend: backend,
 		}, port);
 	} catch (e) {
 		// Workaround for https://github.com/c9/node-gnu-tools/issues/11 on Windows. If jsDAV blew up, just
 		// return a no-op server, so cf-launcher will still run (with no DAV support).
-		console.error(fmt("Error loading jsDAV. WebDAV features will not be available."));
-		util.log(e && e.stack);
+		console.error(fmt("**** Could not load jsDAV, WebDAV features will not be available: %s", e.message));
 		return {
 			listen: Function.prototype
 		};
