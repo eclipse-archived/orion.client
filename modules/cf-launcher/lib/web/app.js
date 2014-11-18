@@ -128,9 +128,10 @@ function createProxyApp(options) {
 	// ---> Routes below this point require a valid session <---
 	launcherApp.use("/", express.static(path.join(moduleDir, "public")));
 	launcherApp.all(appPrefix, function(req, res, next) {
-		// Redirect /apps to /apps. This would be better in appctrl.js
+		// Redirect /apps to /apps/. Note that code 308 prevents clients from changing the method to GET upon
+		// following the redirect. TODO This code would be better in appctrl.js.
 		if (req.originalUrl.slice(-1) !== "/")
-			res.redirect(appPrefix.substr(1) + "/"); // "apps/"
+			res.redirect(308 /*permanent*/, appPrefix.substr(1) + "/"); // "apps/"
 		else next();
 	});
 	launcherApp.use(appPrefix, appControl(procman, TARGET_APP));
