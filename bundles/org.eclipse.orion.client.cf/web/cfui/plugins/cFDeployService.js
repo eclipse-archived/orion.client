@@ -236,7 +236,12 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 
 								} else {
 
-									if(confirm(messages["Would you like to use the top-level project manifest"])){
+									cFService.getManifestInfo(manifests[0].Location, true).then(function(manifest){
+										func(manifest.Contents);
+									}, deferred.reject);
+
+									/* Uncomment to re-enable confirmation */
+									/*if(confirm(messages["Would you like to use the top-level project manifest"])){
 										cFService.getManifestInfo(manifests[0].Location, true).then(function(manifest){
 											func(manifest.Contents);
 										}, deferred.reject);
@@ -246,7 +251,7 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 											Severity: "Warning", //$NON-NLS-0$
 											Message: messages["Cancelled"]
 										});
-									}
+									}*/
 								}
 							}.bind(this), errorHandler);
 						} else {
@@ -264,12 +269,7 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 								};
 
 								mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, project.ContentLocation, fileClient, additionalConfiguration).then(
-									function(launchConfigurationContent){
-										deferred.resolve(launchConfigurationContent);
-									}, function(error){
-										deferred.reject(error);
-									}
-								);
+										deferred.resolve, deferred.reject);
 							}, errorHandler);
 						}
 					}, errorHandler);
