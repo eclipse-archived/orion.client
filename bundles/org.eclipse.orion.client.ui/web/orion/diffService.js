@@ -17,7 +17,6 @@ define([
 	'orion/edit/editorContext' //$NON-NLS-0$
 ], function(mExtensionCommands, mDiffParser, EditorContext) {
 
-
 	function DiffService(serviceRegistry, inputManager, editor) {
 		this._serviceRegistry = serviceRegistry;
 		this._inputManager = inputManager;
@@ -29,25 +28,25 @@ define([
 	DiffService.prototype = {
 		init: function(){
 			var self = this;
+			this._changeListener = function() {
+				if (self._enabled) {
+					if (self.occurrenceTimer) {
+						window.clearTimeout(self.occurrenceTimer);
+					}
+					self.occurrenceTimer = window.setTimeout(function() {
+						self.occurrenceTimer = null;
+						self.doDiff();
+					}, 500);
+				}
+			};
 			this._inputManager.addEventListener("InputChanged", function() { //$NON-NLS-0$
-				var service = self.getDiffServices();
+				var service = self.service = self.getDiffServices();
 				if (service) {
-					var occurrenceTimer;
-					var changeListener = function(e) {
-						if(self._enabled){
-							if (occurrenceTimer) {
-								window.clearTimeout(occurrenceTimer);
-							}
-							occurrenceTimer = window.setTimeout(function() {
-								occurrenceTimer = null;
-								self._inputManager.save().then(function() {
-									self.showAnnotations(service);
-								});
-							}, 500);
-						}
-					};
-					self._editor.getTextView().removeEventListener("ModelChanged", changeListener); //$NON-NLS-0$
-					self._editor.getTextView().addEventListener("ModelChanged", changeListener); //$NON-NLS-0$
+					var textView = self._editor.getTextView();
+					if (textView) {
+						textView.removeEventListener("ModelChanged", self._changeListener); //$NON-NLS-0$
+						textView.addEventListener("ModelChanged", self._changeListener); //$NON-NLS-0$
+					}
 				}
 			});
 		},
@@ -74,9 +73,8 @@ define([
 			var context = {
 				metadata: this._inputManager.getFileMetadata()
 			};
-			service.computeDiff(EditorContext.getEditorContext(this._serviceRegistry), context)
-				.then(function(diffContent) {
-				diffParser.setLineDelim("\n");
+			service.computeDiff(EditorContext.getEditorContext(this._serviceRegistry), context).then(function(diffContent) {
+				diffParser.setLineDelim("\n"); //$NON-NLS-0$
 				diffParser.parse("", diffContent);
 				var oBlocks = diffParser.getOriginalBlocks();
 				var nBlocks = diffParser.getNewBlocks();
@@ -97,19 +95,19 @@ define([
 					diffResult.push({
 						lineStart: lineStart - 1,
 						lineEnd: lineStart,
-						type:"deleted"
+						type:"deleted" //$NON-NLS-0$
 					});
 				} else if (oldSize === 0) {
 					diffResult.push({
 						lineStart: lineStart - 1,
 						lineEnd: lineStart + newSize - 1,
-						type:"added"
+						type:"added" //$NON-NLS-0$
 					});
 				} else {
 					diffResult.push({
 						lineStart: lineStart - 1,
 						lineEnd: lineStart + newSize - 1,
-						type:"modified"
+						type:"modified" //$NON-NLS-0$
 					});
 				}
 			}
@@ -117,28 +115,26 @@ define([
 		},
 
 		toggleEnabled: function(){
-			this._enabled = !this._enabled;
-			this.initiateDiff();
+			this.setEnabled(!this.isEnabled());
 		},
 
 		setEnabled: function(state){
 			this._enabled = state;
-			this.initiateDiff();
+			this.doDiff();
 		},
 
 		isEnabled: function(){
 			return this._enabled;
 		},
 
-		initiateDiff: function(){
-			if(this._enabled === false){
+		doDiff: function() {
+			if (!this._enabled) {
 				this._editor.showDiffAnnotations([]);
 			} else {
-				var service = this.getDiffServices();
-				if (service) {
+				if (this.service) {
 					var self = this;
 					this._inputManager.save().then(function() {
-						self.showAnnotations(service);
+						self.showAnnotations(self.service);
 					});
 				}
 			}
