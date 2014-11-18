@@ -55,7 +55,7 @@ define ([
 			var metadata = this.inputManager.getFileMetadata();
 			metadata.annotation = annotation;
 			this.commandRegistry.renderCommands("orion.edit.quickfix", actions, metadata, this.editor, 'tool', annotation); //$NON-NLS-1$ //$NON-NLS-0$
-			delete metadata.annonation;
+			delete metadata.annotation;
 		}
 
 	};
