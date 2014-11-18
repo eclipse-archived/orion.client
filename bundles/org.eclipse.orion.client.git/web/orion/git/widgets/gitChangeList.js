@@ -791,7 +791,7 @@ define([
 				extraClass: "primaryButton", //$NON-NLS-0$
 				parameters: precommitParameters,
 				preCallback: function(data) {
-					data.parameters.clientCollect = that.getCommitInfo(true) && (data.items.length !== 0);
+					data.parameters.clientCollect = that.getCommitInfo(true) && (data.items.length !== 0)  || data.handler.amendCheck.checked;
 					return new Deferred().resolve(that.getCommitInfo(true));
 				},
 				callback: function(data) {
