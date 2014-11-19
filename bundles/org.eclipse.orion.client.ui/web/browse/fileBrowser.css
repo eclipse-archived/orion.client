@@ -118,7 +118,21 @@
 	box-sizing: initial !important;
 	/*background: none repeat scroll 0 0 #f7f7f7;*/
 	padding: 4px;
-	width: calc(100% - 8px); /* subtract padding */
+	width: calc(100% - 6px); /* subtract padding */
+}
+
+.breadCrumbNode {
+	width: calc(100% - 30px) !important;
+	display: inline-block !important;
+}
+
+.breadCrumbNodeWider {
+	width: 100% !important;
+	display: inline-block !important;
+}
+
+.breadCrumbActionNode {
+	float: right;
 }
 
 .commitInfoContainer {
@@ -393,6 +407,18 @@ div.currentLocation {
 	width: 16px !important;
 	height: 16px !important;
 }
+.core-sprite-download-file-browser{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+.core-sprite-download-file-browser:before{ content:'\E036'; }
 
 .breadcrumb {
 	font-size: 1em;

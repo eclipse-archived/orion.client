@@ -326,7 +326,7 @@ define([
 							this.actionNode =  this._foldersSection.getActionElement();
 						}
 						if(!this.messageView && this.commandRegistry) {
-							this.commandRegistry.renderCommands("orion.browse.sectionActions", this.actionNode, {}, "button");
+							//this.commandRegistry.renderCommands("orion.browse.sectionActions", this.actionNode, {}, "button");
 						}
 						//Render the branch and component selector 
 						var titleNode = this._foldersSection.getTitleElement();
@@ -350,23 +350,35 @@ define([
 						}
 						//Render the bread crumb 
 						if(this.breadCrumbMaker) {
-							var bcNodeContainer = document.createElement("div"), bcNode=document.createElement("div");
+							var bcNodeContainer = document.createElement("div"), bcNode=document.createElement("div"); //$NON-NLS-1$ //$NON-NLS-0$
 							bcNodeContainer.appendChild(bcNode);
 							if(this.breadCrumbInHeader) {
-								bcNodeContainer.classList.add("breadCrumbContainerInHeader"); 
+								bcNodeContainer.classList.add("breadCrumbContainerInHeader"); //$NON-NLS-0$ 
 								titleNode.appendChild(bcNodeContainer);
 								this.breadCrumbMaker(bcNode);
 							} else {
-								bcNodeContainer.classList.add("breadCrumbContainer"); 
+								if(this.editorView) {
+									bcNode.classList.add("breadCrumbNode"); //$NON-NLS-0$
+								} else {
+									bcNode.classList.add("breadCrumbNodeWider"); //$NON-NLS-0$
+								}
+								var innerBCNode = document.createElement("div"); //$NON-NLS-0$
+								bcNode.appendChild(innerBCNode);
+								bcNodeContainer.classList.add("breadCrumbContainer"); //$NON-NLS-0$ 
+								var bcActionNode = document.createElement("div"); //$NON-NLS-0$
+								bcActionNode.classList.add("breadCrumbActionNode"); //$NON-NLS-0$
+								bcActionNode.id = "file_browser_breadcrumb_action_node_id"; //$NON-NLS-0$
+								bcNodeContainer.appendChild(bcActionNode);
 								this.sectionContents.appendChild(bcNodeContainer);
-								this.breadCrumbMaker(bcNode);
+								this.breadCrumbMaker(innerBCNode);
+								this.bcActionNode = bcActionNode;
 							}
 						}
 						//Render the branch level commit information 
 						var commitInfo = this.branchSelector ? this.branchSelector.getCommitInfo() : null;
 						if(commitInfo) {
-							var commitNodeContainer = document.createElement("div");
-							commitNodeContainer.classList.add("commitInfoContainer"); 
+							var commitNodeContainer = document.createElement("div"); //$NON-NLS-0$
+							commitNodeContainer.classList.add("commitInfoContainer"); //$NON-NLS-0$
 							this.sectionContents.appendChild(commitNodeContainer);
 							new mCommitInfoRenderer.CommitInfoRenderer({parent: commitNodeContainer, commitInfo: commitInfo}).render(this.componentSelector ? "Delivery" : "Commit", true);
 						}
@@ -376,12 +388,13 @@ define([
 								this.updateMessageContents(this.messageView.message, this.messageView.classes ? this.messageView.classes : ["messageViewTable"], this.messageView.tdClass);
 							}						
 						} else if(this.editorView) {//To embed an orion editor in the section
+							this.commandRegistry.renderCommands("orion.browse.breadcrumbActions", this.bcActionNode, this._metadata, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 							this.sectionContents.appendChild(this.editorView.getParent());
 							this.editorView.getParent().style.height = "30px"; //$NON-NLS-0$
 							this.editorView.create();
 							this.resetTextModel = this.snippetShareOptions && this.snippetShareOptions.e ? true : false;
 							var textView = this.editorView.editor.getTextView();
-							var shareCodeTrigger = lib.node("orion.browse.shareCodeTrigger");
+							var shareCodeTrigger = lib.node("orion.browse.shareCodeTrigger"); //$NON-NLS-0$
 							if(shareCodeTrigger) {
 								textView.addEventListener("Selection", this._editorViewSelectionChangedListener = function(evt){ //$NON-NLS-0$
 									if(evt.newValue){

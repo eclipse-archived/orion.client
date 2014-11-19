@@ -14,8 +14,9 @@
 define([
 	'i18n!orion/navigate/nls/messages',
 	'orion/i18nUtil',
+	'orion/Deferred',
 	'orion/URL-shim'
-], function(messages, i18nUtil) {
+], function(messages, i18nUtil, Deferred) {
 
 	var orion_download_initiator = document.createElementNS("http://www.w3.org/1999/xhtml", "a");
 	
@@ -87,7 +88,7 @@ define([
 		},
 		downloadFromLocation: function(fileMetaData, contentType, forceDownload) {
 			if(!this._isSupported(forceDownload)) {
-				return;
+				return new Deferred().resolve();
 			}
 			var progressService = this.progressService;
 			var progress = function(deferred, msgKey, uri) {
@@ -108,11 +109,12 @@ define([
 			if(this.statusService && this.statusService.setProgressResult) {
 				this.statusService.setProgressResult({Message: messages["Downloading..."]});
 			}
-			progress(this.fileClinet.readBlob(fileMetaData.Location), messages["Downloading..."], fileMetaData.Location).then(function(contents) {
+			return progress(this.fileClinet.readBlob(fileMetaData.Location), messages["Downloading..."], fileMetaData.Location).then(function(contents) {
 				if(this.statusService && this.statusService.setProgressMessage) {
 					this.statusService.setProgressMessage("");
 				}
 				this.downloadFromBlob(contents, fileMetaData.Name, contentType, forceDownload);
+				return new Deferred().resolve();
 			}.bind(this), errorHandler);
 		},
 		downloadFromBlob: function(blobContents, fileName, contentType, forceDownload, createLink) {
