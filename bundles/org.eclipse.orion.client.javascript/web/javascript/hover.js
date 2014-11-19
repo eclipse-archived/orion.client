@@ -55,16 +55,16 @@ define([
 			    if(node) {
 			        switch(node.type) {
 			            case 'Identifier': {
-			                return that._formatHover(that._getIdentifierHover(node, ctxt.offset, ast), editorContext);
+			                return that._formatHtmlHover(that._getIdentifierHover(node, ctxt.offset, ast), editorContext);
 			            }
 			            case 'FunctionDeclaration': {
-			                return that._formatHover(node);
+			                return that._formatHtmlHover(node);
 			            }
 			            case 'FunctionExpression': {
-			                return that._formatHover(that._getFunctionExprHover(node));
+			                return that._formatHtmlHover(that._getFunctionExprHover(node));
 			            }
 			            case 'CallExpression': {
-        	               return that._formatHover(that._getCallExprHover(node, ctxt.offset, ast), editorContext);
+        	               return that._formatHtmlHover(that._getCallExprHover(node, ctxt.offset, ast), editorContext);
 			            }
 			            case 'Literal': {
 			                var parents = node.parents;
@@ -242,7 +242,7 @@ define([
     		                        break;
     		                    }
     		                    case 'param': {
-    		                        format.params.push(that._convertTagType(tag.type) +
+    		                        format.params.push('*' + that._convertTagType(tag.type) + '*' +
     		                                  (tag.name ? '__'+tag.name+'__ ' : '') + 
     		                                  (tag.description ? tag.description+'\n' : ''));
     		                        break;
@@ -316,6 +316,136 @@ define([
 		},
 		
 		/**
+		 * @name _formatHtmlHover
+		 * @description Formats the hover info as HTML
+		 * @function
+		 * @private
+		 * @param {Object} comment The comment from the declaration in the AST
+		 * @param {Object} editorContext The editor context 
+		 * @param {Boolean} linkDecl If we should include a link to jump to the declaration
+		 * @returns returns
+		 */
+		_formatHtmlHover: function _formatHtmlHover(node, editorContext) {
+		    if(!node) {
+		        return null;
+		    }
+		    var that = this;
+		    try {
+		        var format = Object.create(null);
+		        var comment = this._getCommentFromNode(node);
+		        if(comment) {
+    		        var doc = doctrine.parse(comment.value, {recoverable:true, unwrap : true});
+    		        format.params = [];
+    		        format.desc = (doc.description ? doc.description : '');
+    		        if(doc.tags) {
+    		            var len = doc.tags.length;
+    		            for(var i = 0; i < len; i++) {
+    		                var tag = doc.tags[i];
+    		                switch(tag.title) {
+    		                    case 'name': {
+    		                        if(tag.name) {
+    		                          format.name = tag.name; 
+    		                        }
+    		                        break;
+    		                    }
+    		                    case 'description': {
+    		                        if(tag.description !== null) {
+    		                          format.desc = (format.desc === '' ? tag.description : format.desc+'\n'+tag.description);
+    		                        }
+    		                        break;
+    		                    }
+    		                    case 'param': {
+    		                        format.params.push('<i>' + that._convertTagType(tag.type) + '</i>' +
+    		                                  (tag.name ? '<b>'+tag.name+'</b> ' : '') + 
+    		                                  (tag.description ? tag.description+'\n' : ''));
+    		                        break;
+    		                    }
+    		                    case 'returns': 
+    		                    case 'return': {
+    		                        format.returns = that._convertTagType(tag.type) +
+    		                              (tag.description ? tag.description+'\n' : '');
+    		                         break;
+    		                    }
+    		                    case 'since': {
+    		                        if(tag.description) {
+    		                          format.since = tag.description;
+    		                        }
+    		                        break;
+    		                    }
+    		                    case 'function': {
+    		                        format.isfunc = true;
+    		                        break;
+    		                    }
+    		                    case 'constructor': {
+    		                        format.iscon = true;
+    		                        break;
+    		                    }
+    		                    case 'private': {
+    		                        format.isprivate = true;
+    		                        break; 
+    		                    }
+    	                }
+    		            }
+    		        }
+		        }
+		        
+		        var hover = '<style>\n' +
+		        			'.monospace {\n' +
+		        			'font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;' + 
+		        			'}\n' +
+		        			'div {\n' +
+		        			'margin: 5px, 0\n' + 
+		        			'}</style>\n';
+		        			
+		        hover += '<div style="font-size: 75%">\n';
+		        
+		        // Name
+		        var name = Signatures.computeSignature(comment.node);
+		        hover += '<div class="monospace"><b>';
+		        if(format.isprivate) {
+		            hover += 'private ';
+		        }
+		        if(format.iscon) {
+		            hover += 'constructor ';
+		        }
+		        hover += name.sig;
+		        hover += '</b></div>\n';
+		        
+		        // Description
+		        if(format.desc !== '') {
+		            hover += '<div style="margin-top: 5px">' + format.desc + '</div>\n';
+		        }
+		        if(format.params.length > 0) {
+		            hover += '<div style="margin-top: 5px"><b>Parameters:</b></div>\n';
+		            for(i = 0; i < format.params.length; i++) {
+		                hover += '<div style="margin-left: 10px">'+format.params[i] + '</div>\n';
+		            }
+		        }
+		        if(format.returns) {
+		            hover += '<div style="margin-top: 5px"><b>Returns:</b></div>\n';
+		            hover += '<div style="margin-left: 10px">' + format.returns + '</div>\n';
+		        }
+		        if(format.since) {
+		            hover += '<div style="margin-top: 5px"><b>Since:</b> ' + format.since + '</div>\n';
+		        }
+		        //TODO scope this to not show when you are on a decl
+		        /**var href = new URITemplate("#{,resource,params*}").expand(
+		                      {
+		                      resource: metadata.location, 
+		                      params: {start:node.range[0], end: node.range[1]}
+		                      }); //$NON-NLS-0$
+		        hover += '\n\n\n  [Jump to declaration]('+href+')';*/
+		       
+		       hover += '</div>';
+		    }
+		    catch(e) {
+		        //add on the wad of text for now
+		        hover += comment;
+		    }
+		    return {content: hover, type:'html'};
+		},
+		
+		/**
 		 * @name _convertTagType
 		 * @description Converts the doctrine tag type to a simple form to appear in the hover
 		 * @function
@@ -330,15 +460,15 @@ define([
 	        switch(type.type) {
 	            case 'NameExpression': {
 	                if(type.name) {
-	                  return '*('+type.name+')* ';
+	                  return '('+type.name+') ';
 	                }
 	                break;
 	            }
 	            case 'RecordType': {
-	                return '*(Object)* ';
+	                return '(Object) ';
 	            }
 	            case 'FunctionType': {
-	                return '*(Function)* ';
+	                return '(Function) ';
 	            }
 	            case 'NullableType': 
 	            case 'NonNullableType':
@@ -351,7 +481,7 @@ define([
 	                if(type.expression.name === 'Array') {
 	                    //we need to grab the first application
 	                    if(type.applications && type.applications.length > 0) {
-    	                    return '*('+type.applications[0].name+'[])* ';
+    	                    return '('+type.applications[0].name+'[]) ';
     	                }
 	                }
 	                return this._convertTagType(type.expression);
