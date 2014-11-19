@@ -390,6 +390,8 @@ div.currentLocation {
 .core-sprite-progress-file-browser {
 	padding-top:0 !important;
 	margin-left:-1px !important;
+	width: 16px !important;
+	height: 16px !important;
 }
 
 .breadcrumb {
