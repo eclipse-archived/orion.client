@@ -41,7 +41,6 @@ define([
 		this.progressService = options.progressService;
 		this.statusService = options.statusService;
 		this.gitClient = options.gitClient;
-		this.progressService = options.progressService;
 		this.simpleLog = options.simpleLog;
 		this.parentId = options.parentId;
 		this.targetRef = options.targetRef;
