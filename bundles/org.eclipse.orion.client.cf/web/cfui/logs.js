@@ -34,8 +34,6 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 			var cFClient = new mCFClient.CFService(serviceRegistry);
 			var contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
-			var sidebar = lib.node("sidebar");
-			var sidebarToolbar = lib.node("sidebarToolbar");
 			var mainLogView = lib.node("log");
 			
 			function statusReporter(message, type, isAccessible) {
