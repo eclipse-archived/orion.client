@@ -86,4 +86,6 @@ define({
 	'listingProjects': 'Listing projects...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'gettingWorkspaceInfo': 'Getting workspace information...',  //$NON-NLS-0$  //$NON-NLS-1$
 	"showProblems": "Show problems...",  //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltip": "Show Tooltip", //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltipTooltip": "Shows the tooltip immediately based on the caret position", //$NON-NLS-1$ //$NON-NLS-0$
 });
