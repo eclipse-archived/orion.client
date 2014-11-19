@@ -714,6 +714,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				});
 			},
 			visibleWhen: function(items) {
+				// hide for now
+				return false;
+				
 				var item = forceSingleItem(items);
 				return item.ServiceId && item.Name && item.status;
 			}
