@@ -588,14 +588,14 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 	var appLogsImpl = {
 		callback: function(args, context) {
 			return cFService.getLogz(null, args.app).then(function(result) {
-				var messages = result.Messages;
+				var logs = result.Messages;
 				
-				if (!messages || messages.length === 0) {
+				if (!logs || logs.length === 0) {
 					return messages["noRecentLogs."];
 				}
 				var strResult = "";
-				messages.forEach(function(message) {
-					strResult += "\n" + message;
+				logs.forEach(function(log) {
+					strResult += "\n" + log;
 				});
 				return strResult;
 			});

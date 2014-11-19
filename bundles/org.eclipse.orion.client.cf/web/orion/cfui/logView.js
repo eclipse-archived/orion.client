@@ -56,23 +56,6 @@ define(['i18n!cfui/nls/messages',
 	LogInputManager.prototype = new mInputManager.InputManager({});
 	
 	objects.mixin(LogInputManager.prototype, {
-		_read: function(location, readOptions){
-			var deferred = new Deferred();
-			var currentInstance = this.applicationInfo.instance || Object.keys(this.applicationInfo.logs)[0];
-			this.cFClient.getLogs(this.applicationInfo.Target, this.applicationInfo.Application, location, this.applicationInfo.instance).then(function(logInfo){
-				var log = logInfo[currentInstance];
-				log.Instance = currentInstance;
-				deferred.resolve(log);
-				
-				mGlobalCommands.setPageTarget({
-						task: messages["cloudFoundryLogs"],
-						target: log,
-						breadcrumbTarget: log,
-						serviceRegistry: this.serviceRegistry,
-						commandService: this.commandRegistry});
-			}.bind(this));
-			return deferred;
-		},
 		setApplicationInfo: function(appInfo){
 			this.applicationInfo = appInfo;
 		},
@@ -81,14 +64,8 @@ define(['i18n!cfui/nls/messages',
 		},
 		load: function(){
 			var logName = this.getInput();
-			if(!logName){
-				this.lastLogLoaded = null;
-				this.lastLogInstance = null;
-				return;
-			}
 
 			var progressTimeout = null;
-			
 			var clearTimeout = function() {
 				this.reportStatus("");
 				if (progressTimeout) {
@@ -105,46 +82,20 @@ define(['i18n!cfui/nls/messages',
 			
 			this._acceptPatch = null;
 			
-			if((!this.lastLogLoaded || this.lastLogLoaded!==logName) || (this.applicationInfo.instance !== null && this.lastLogInstance !== this.applicationInfo.instance)){
-				// Read the log
-				this.progressService.showWhile(this._read(logName, true), i18Util.formatMessage(messages["loading${0}"], logName)).then(function(metadata) {
-					this.lastLogLoaded = logName;
-					this.lastLogInstance = metadata.Instance;
-					this._setInputContents(this._parsedLocation, logName, metadata.Contents, metadata);
-				}.bind(this), errorHandler);
-			} else {
-				progressTimeout = window.setTimeout(function() {
-					progressTimeout = null;
-					this.reportStatus(i18Util.formatMessage(messages["fetching${0}"], logName));
-				}.bind(this), 800);
-				
-				var found = false;
-				var currentInstance = this.applicationInfo.instance || Object.keys(this.applicationInfo.logs)[0];
-				this.cFClient.getLogs(this.applicationInfo.Target, this.applicationInfo.Application).then(function(logs){
-					this.applicationInfo.logs[currentInstance].forEach(function(log){
-						if(log.Name === logName){
-							logs[currentInstance].forEach(function(log2){
-								if(log2.Name === logName){
-									if(log.Size!==log2.Size){
-										found = true;
-										this._read(logName, true).then(function(metadata) {
-											this._setInputContents(this._parsedLocation, logName, metadata.Contents, metadata);
-											this.lastLogLoaded = logName;
-										}.bind(this), errorHandler);
-									}
-									clearTimeout();
-								}
-							}.bind(this));
-						}
-					}.bind(this));
-					
-					if(!found){
-						clearTimeout();
-					}
-					this.applicationInfo.logs = logs;
-					
-				}.bind(this), errorHandler);
-			}
+			var fullLog = "";
+			this.applicationInfo.logs.forEach(function(line){
+				fullLog += line + "\n";
+			});
+			
+			mGlobalCommands.setPageTarget({
+				task: messages["cloudFoundryLogs"],
+//				target: log,
+				breadcrumbTarget: logName,
+				serviceRegistry: this.serviceRegistry,
+				commandService: this.commandRegistry});
+			
+			this._setInputContents(this._parsedLocation, logName, fullLog, {});
+
 		},
 		constructor: LogInputManager
 	});

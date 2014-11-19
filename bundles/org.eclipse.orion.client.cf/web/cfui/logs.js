@@ -11,10 +11,10 @@
 
 define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',  'orion/keyBinding', 'orion/dialogs', 'orion/selection',
 	'orion/contentTypes','orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/links',
-	'orion/cfui/cFClient', 'orion/PageUtil', 'orion/cfui/logsExplorer', 'orion/cfui/logView', 'orion/section',  'orion/cfui/widgets/CfLoginDialog', 'orion/i18nUtil'], 
+	'orion/cfui/cFClient', 'orion/PageUtil', 'orion/cfui/logView', 'orion/section',  'orion/cfui/widgets/CfLoginDialog', 'orion/i18nUtil'], 
 	function(messages, lib, mBootstrap, mStatus, mProgress, CommandRegistry, KeyBinding, mDialogs, mSelection,
 	mContentTypes, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mLinks,
-	mCFClient, PageUtil, mLogsExplorer, mLogView, mSection, CfLoginDialog, i18Util) {
+	mCFClient, PageUtil, mLogView, mSection, CfLoginDialog, i18Util) {
 	mBootstrap.startup().then(
 		function(core) {
 			var serviceRegistry = core.serviceRegistry;
@@ -37,7 +37,6 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 			var sidebar = lib.node("sidebar");
 			var sidebarToolbar = lib.node("sidebarToolbar");
 			var mainLogView = lib.node("log");
-			var logsExplorerParent = document.createElement("div");
 			
 			function statusReporter(message, type, isAccessible) {
 				if (type === "progress") { //$NON-NLS-0$
@@ -49,70 +48,52 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 				}
 			}
 			
-			var logsNavExplorer = new mLogsExplorer.LogsExplorer(serviceRegistry, selection, commandRegistry, sidebar, sidebarToolbar, true);
-			var logsInlineExplorer = new mLogsExplorer.LogsExplorer(serviceRegistry, selection, commandRegistry, logsExplorerParent);
 			var logEditorView = new mLogView.LogEditorView({
-					parent: mainLogView,
-					undoStack: null,
-					serviceRegistry: serviceRegistry,
-					pluginRegistry: pluginRegistry,
-					commandRegistry: commandRegistry,
-					contentTypeRegistry: contentTypeRegistry,
-					preferences: preferences,
-					searcher: searcher,
-					selection: selection,
-					fileService: fileClient,
-					statusReporter: statusReporter,
-					statusService: statusService,
-					progressService: progressService,
-					cFClient: cFClient
-				});
+				parent: mainLogView,
+				undoStack: null,
+				serviceRegistry: serviceRegistry,
+				pluginRegistry: pluginRegistry,
+				commandRegistry: commandRegistry,
+				contentTypeRegistry: contentTypeRegistry,
+				preferences: preferences,
+				searcher: searcher,
+				selection: selection,
+				fileService: fileClient,
+				statusReporter: statusReporter,
+				statusService: statusService,
+				progressService: progressService,
+				cFClient: cFClient
+			});
 
 			mGlobalCommands.generateBanner("cf-logs", serviceRegistry, commandRegistry, preferences, searcher, {});
-			
-			function displayInlineLogsExplorer(logs){
-				
-				mGlobalCommands.setPageTarget({
-						task: logs.Application ? messages["cloudFoundryLogs"] : (logs.Application + " - " + messages["cloudFoundryLogs"]),
-						target: logs,
-						breadcrumbTarget: logs,
-						serviceRegistry: serviceRegistry,
-						commandService: commandRegistry});
-				
-				mainLogView.classList.remove("toolbarTarget");
-				lib.empty(mainLogView);
-				var logsSection = new mSection.Section(mainLogView, {id: "logsNavSection", title: messages["logFiles"], canHide: false});
-				logsSection.embedExplorer(logsInlineExplorer);
-				logsInlineExplorer.setCommandsVisible(false);
-				logsInlineExplorer.load(logs);
-			}
-			
-				function handleError(error) {
-					if (!statusService) {
-						window.console.log(error);
-						return;
-					}
-					if (error.status === 0) {
-						error = {
-							Severity: "Error", //$NON-NLS-0$
-							Message: messages["noResponse"]
-						};
-					} else {
-						var responseText = error.responseText;
-						if (responseText) {
-							try {
-								error = JSON.parse(responseText);
-							} catch(e) {
-								error = {
-									//HTML: true,
-									Severity: "Error", //$NON-NLS-0$
-									Message: responseText
-								};
-							}
+
+			function handleError(error) {
+				if (!statusService) {
+					window.console.log(error);
+					return;
+				}
+				if (error.status === 0) {
+					error = {
+						Severity: "Error", //$NON-NLS-0$
+						Message: messages["noResponse"]
+					};
+				} else {
+					var responseText = error.responseText;
+					if (responseText) {
+						try {
+							error = JSON.parse(responseText);
+						} catch(e) {
+							error = {
+								//HTML: true,
+								Severity: "Error", //$NON-NLS-0$
+								Message: responseText
+							};
 						}
 					}
-					statusService.setProgressResult(error);
 				}
+				
+				statusService.setProgressResult(error);
+			}
 			
 			function loadLogs(logParams){
 				var target;
@@ -121,30 +102,21 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 					logParams.target = target;
 				}
 
-				if(logParams.log){
-					logEditorView.create();
-				}
-				if(!logParams.log){
-					logEditorView.destroy();
-				}
+				logEditorView.create();
 				
-				if(this.lastLogsInfo.Application !== logParams.resource){
-					progressService.showWhile(cFClient.getLogs(target, logParams.resource), messages["gettingLogs"]).then(function(logs){
+				progressService.showWhile(cFClient.getLogz(target, logParams.resource), messages["gettingLogs"]).then(
+					function(logs){
 						var logsInfo = {
 							Target: target,
 							Application: logParams.resource,
 							instance: logParams.instance,
-							logs: logs
-						}
+							logs: logs.Messages
+						};
 						this.lastLogsInfo = logsInfo;
 						logEditorView.inputManager.setApplicationInfo(logsInfo);
-						logsNavExplorer.load(logsInfo);
-						if(logParams.log){
-							mainLogView.classList.add("toolbarTarget");
-							logEditorView.inputManager.setInput(logParams.log);
-						} else {
-							displayInlineLogsExplorer(logsInfo);
-						}
+
+						mainLogView.classList.add("toolbarTarget");
+						logEditorView.inputManager.setInput("logs for " + logParams.resource);
 					}, function(e){
 						if(e.JsonData && e.JsonData.error_code){
 							var err = e.JsonData;
@@ -162,22 +134,8 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 						}
 
 						handleError(e);
-					});
-					return;
-				}
-				if(this.lastLogsInfo.instance !== logParams.instance){
-					this.lastLogsInfo.instance = logParams.instance;
-					logEditorView.inputManager.setApplicationInfo(this.lastLogsInfo);
-					if(logParams.log && logEditorView.inputManager.getInput() === logParams.log){
-						logEditorView.inputManager.load();
 					}
-				}
-				if(logParams.log){
-					mainLogView.classList.add("toolbarTarget");
-					logEditorView.inputManager.setInput(logParams.log);
-				} else {
-					displayInlineLogsExplorer(logEditorView.inputManager.getApplicationInfo());
-				}
+				);
 			}
 			
 			this.lastLogsInfo = {};
