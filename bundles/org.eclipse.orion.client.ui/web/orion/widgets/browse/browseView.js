@@ -357,17 +357,18 @@ define([
 								titleNode.appendChild(bcNodeContainer);
 								this.breadCrumbMaker(bcNode);
 							} else {
-								if(this.editorView) {
-									bcNode.classList.add("breadCrumbNode"); //$NON-NLS-0$
-								} else {
-									bcNode.classList.add("breadCrumbNodeWider"); //$NON-NLS-0$
-								}
 								var innerBCNode = document.createElement("div"); //$NON-NLS-0$
 								bcNode.appendChild(innerBCNode);
 								bcNodeContainer.classList.add("breadCrumbContainer"); //$NON-NLS-0$ 
 								var bcActionNode = document.createElement("div"); //$NON-NLS-0$
 								bcActionNode.classList.add("breadCrumbActionNode"); //$NON-NLS-0$
 								bcActionNode.id = "file_browser_breadcrumb_action_node_id"; //$NON-NLS-0$
+								if(this.editorView) {
+									bcNode.classList.add("breadCrumbNode"); //$NON-NLS-0$
+									bcActionNode.title = "Download this file";
+								} else {
+									bcNode.classList.add("breadCrumbNodeWider"); //$NON-NLS-0$
+								}
 								bcNodeContainer.appendChild(bcActionNode);
 								this.sectionContents.appendChild(bcNodeContainer);
 								this.breadCrumbMaker(innerBCNode);
