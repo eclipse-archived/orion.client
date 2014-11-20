@@ -255,7 +255,9 @@ define([
 				
 				this.projectClient.getProjectLaunchConfigurations(this.treeRoot.Project).then(function(launchConfigurations){
 					doUpdateForLaunchConfigurations.apply(this, [launchConfigurations, selections]);
-					this._runBar.setLaunchConfigurations(launchConfigurations);
+					if (this._runBar) {
+						this._runBar.setLaunchConfigurations(launchConfigurations);
+					}
 					if(!this.launchConfigurationListener){
 						var _self = this;
 						this.launchConfigurationDispatcher = ProjectCommands.getLaunchConfigurationDispatcher();
