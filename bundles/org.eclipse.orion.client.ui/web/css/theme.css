@@ -547,7 +547,7 @@ a.breadcrumb.currentLocation {
 
 .dropdownArrowDown {
 	display: inline-block;
-	vertical-align: baseline;
+	vertical-align: top;
 	line-height: 12px;
 	color: #555;
 }
