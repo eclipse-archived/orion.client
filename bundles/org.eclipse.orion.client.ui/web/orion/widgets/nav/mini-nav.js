@@ -79,6 +79,7 @@ define([
 		this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
 		this.serviceRegistry = params.serviceRegistry;
+		this.progressService = params.progressService;
 
 		this.fsToolbar = null;
 		this.explorer = null;
@@ -109,7 +110,8 @@ define([
 					}, explorer, _self.commandRegistry, _self.contentTypeRegistry); //$NON-NLS-0$
 				},
 				serviceRegistry: this.serviceRegistry,
-				toolbarNode: this.toolbarNode
+				toolbarNode: this.toolbarNode,
+				progressService: this.progressService
 			});
 
 			// Create switcher here

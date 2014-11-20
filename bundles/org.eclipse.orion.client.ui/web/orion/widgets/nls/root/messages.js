@@ -70,5 +70,10 @@ define({
 	"Related Links": "Related Links",
 	"Yes": "Yes",
 	"No": "No",
-	"DeleteSearchTrmMsg": "Click or use delete key to delete the search term"
+	"DeleteSearchTrmMsg": "Click or use delete key to delete the search term",
+	"Application": "Application",
+	"selectLaunchConfig": "Select a configuration to run",
+	"createNew": "Create New...",
+	"Running": "Running",
+	"checkingStateMessage": "Checking status of ${0}"
 });

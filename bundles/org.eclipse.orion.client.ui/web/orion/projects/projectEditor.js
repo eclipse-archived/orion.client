@@ -331,6 +331,8 @@ define([
 		this.actionScopeId = options.actionScopeId;
 		this.projectClient = options.projectClient;
 		this.emptyMessage = options.emptyMessage;
+		
+		this.launchConfigurationDispatcher = projectEditor.launchConfigurationDispatcher;
 	}
 
 	LaunchConfigurationRenderer.prototype = new mExplorer.SelectionRenderer();
@@ -510,6 +512,7 @@ define([
 								newLogsColumn.classList.toggle(oldLogsColumn.classList[i], true);
 							}
 							tableRow.replaceChild(newLogsColumn, oldLogsColumn);
+							this.launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item}); //$NON-NLS-0$
 							return;
 						}.bind(this), function(error){
 							item.status = {error: error};
@@ -524,6 +527,7 @@ define([
 								newLogsColumn.classList.toggle(oldLogsColumn.classList[i], true);
 							}
 							tableRow.replaceChild(newLogsColumn, oldLogsColumn);
+							this.launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item}); //$NON-NLS-0$
 							return;
 						}.bind(this));
 					} else {

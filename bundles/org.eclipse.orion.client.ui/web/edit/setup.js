@@ -69,6 +69,8 @@ var exports = {};
 		this.toolsActionsScope = "toolsActions"; //$NON-NLS-0$
 		this.additionalActionsScope = "extraActions"; //$NON-NLS-0$
 		this.createActionSections();
+		
+		this.runBarNode = lib.$(".runBar", this.parentNode); //$NON-NLS-0$
 	}
 	MenuBar.prototype = {};
 	objects.mixin(MenuBar.prototype, {
@@ -144,6 +146,11 @@ var exports = {};
 			commandRegistry.renderCommands(this.toolsActionsScope, this.toolsActionsScope, metadata, explorer, "tool"); //$NON-NLS-0$
 			commandRegistry.destroy(this.additionalActionsScope);
 			commandRegistry.renderCommands(this.additionalActionsScope, this.additionalActionsScope, treeRoot, explorer, "button"); //$NON-NLS-0$
+			if (explorer && explorer.isRunBarVisible()) {
+				this.runBarNode.classList.add("runBarVisible"); //$NON-NLS-0$
+			} else {
+				this.runBarNode.classList.remove("runBarVisible"); //$NON-NLS-0$
+			}
 		}
 	});
 

@@ -1,0 +1,104 @@
+@import "../../webui/RichDropdown.css";
+
+.runBarWrapper {
+	-webkit-align-items: center;		 		 /* Safari */
+	align-items: center;
+	border-left: solid 1px #ccc;
+	border-right: solid 1px #ccc;
+	display: -webkit-inline-flex;		 /* Safari */
+	display: inline-flex;
+	overflow: hidden;
+	padding: 0 10px;
+}
+
+.launchConfigurationsWrapper {
+	background: white;
+	border-radius: 3px;
+	display: inline-block;
+	min-height: 29px;
+	min-width: 250px;
+}
+
+.launchConfigurationsWrapper > .launchConfigurationsButton.dropdownTrigger {
+	background: white;
+	padding: 6px 2px 6px 6px;
+	width: 250px;
+}
+
+.launchConfigurationsWrapper > .dropdownMenuOpen {
+	min-width: 160px;
+}
+
+.runBarButton {
+	background: none;
+	border: 1px solid transparent;
+	border-radius: 3px;
+	padding: 0;
+	margin: 0;
+}
+
+.runBarButton:hover {
+	border-color: #ccc;
+	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
+}
+
+.playButton {
+	color: #333333;
+	display: inline-block;
+	font: 20px Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana;
+	margin-right: 4px;
+	padding: 0;
+}
+
+.playButton:before {
+	content: '\25ba'; /* Unicode - BLACK RIGHT-POINTING POINTER */
+}
+
+.stopButton {
+	display: inline-block;
+	height: 25px;
+	width: 22px;
+}
+
+.stopButton:before {
+	background: #333333;
+	border: none;
+	border-radius: 2px;
+	content: ' ';
+	display: inline-block;
+	height: 14px;
+	margin: 4px 0 5px 0;
+	width: 14px;
+}
+
+.statusLabel {
+	color: #222;
+	margin-right: 10px;
+}
+
+.statusLight {
+	background: gray;
+	border-radius: 50%;
+	display: inline-block;
+	height: 12px;
+	width: 12px;
+	transition: background 0.2s ease;
+}
+
+.statusLight.statusLightGreen {
+	background: green;
+}
+
+.statusLight.statusLightRed {
+	background: red;
+}
+
+.runBarSeparator {
+	background: #ccc;
+	display: inline-block;
+	height: 35px;
+	margin: 0 10px;
+	position: relative;
+    width: 1px;
+}
+

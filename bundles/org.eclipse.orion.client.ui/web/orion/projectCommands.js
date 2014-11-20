@@ -36,7 +36,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		return item;
 	}
 
-	function getCommandParameters(mainParams, optionalParams, hiddenParams){
+	function getCommandParameters(mainParams, options, hiddenParams){
 		if(!mainParams){
 			return null;
 		}
@@ -48,7 +48,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				paramDescps.push(new mCommandRegistry.CommandParameter(mainParams[i].id, mainParams[i].type, mainParams[i].name));
 			}
 		}
-		return new mCommandRegistry.ParametersDescription(paramDescps, {hasOptionalParameters: !!optionalParams, optionalParams: optionalParams});
+		return new mCommandRegistry.ParametersDescription(paramDescps, options);
 	}
 
 	function handleParamsInCommand(func, data, dialogTitle){
@@ -107,7 +107,12 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			if(status.forceShowMessage){
 				progress.setProgressResult(status);
 			}
-			context.data.parameters = getCommandParameters(status.Retry.parameters, status.Retry.optionalParameters, context.oldParams);
+			
+			var options = {
+				hasOptionalParameters: !!status.Retry.optionalParameters, 
+				optionalParams: status.Retry.optionalParameters
+			};
+			context.data.parameters = getCommandParameters(status.Retry.parameters, options, context.oldParams);
 			context.data.oldParams = context.oldParams;
 			context.commandService.collectParameters(context.data);
 		} else {
@@ -288,7 +293,11 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 							context.errorHandler(error);
 						}
 						context.data.oldParams = enhansedLaunchConf.Params;
-						context.data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters, context.data.oldParams);
+						var options = {
+							hasOptionalParameters: !!error.Retry.optionalParameters, 
+							optionalParams: error.Retry.optionalParameters
+						};
+						context.data.parameters = getCommandParameters(error.Retry.parameters, options, context.data.oldParams);
 						context.commandService.collectParameters(context.data);
 					} else {
 						context.errorHandler(error);
@@ -352,68 +361,22 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			}, function(error){
 				if(error.Retry && error.Retry.addParameters){
 					data.oldParams = params || {};
-					data.parameters = getCommandParameters(error.Retry.addParameters, error.Retry.optionalParameters, data.oldParams);
+					var options = {
+						hasOptionalParameters: !!error.Retry.optionalParameters, 
+						optionalParams: error.Retry.optionalParameters
+					};
+					data.parameters = getCommandParameters(error.Retry.addParameters, options, data.oldParams);
 					commandService.collectParameters(data);
 				}
 				errorHandler(error);
 			});
 	}
 
-	projectCommandUtils.updateProjectNavCommands = function(treeRoot, launchConfigurations, commandService, projectClient, fileClient){
-
-		function errorHandler(error) {
-			if (progress) {
-				progress.setProgressResult(error);
-			} else {
-				window.console.log(error);
-			}
-		}
-
-		for(var i=0; i<launchConfigurations.length; i++){
-			(function(launchConfiguration){
-			var command = new mCommands.Command({
-				name: messages["deployTo"] + launchConfiguration.Name,
-				tooltip: messages["deployTo"] + launchConfiguration.Name,
-				id: "orion.launchConfiguration.deploy." + launchConfiguration.ServiceId + launchConfiguration.Name,
-				imageClass: "core-sprite-deploy",
-				callback: function(data) {
-					var item = forceSingleItem(data.items);
-
-					if(!data.oldParams){
-						data.oldParams = launchConfiguration.Params;
-					}
-
-					var func = arguments.callee;
-					var params = handleParamsInCommand(func, data, messages["deploy"] + item.Name);
-					if(!params){
-						return;
-					}
-					var launchConfToPass = objects.clone(launchConfiguration);
-					launchConfToPass.Params = params;
-
-					projectClient.getProjectDelpoyService(launchConfiguration.ServiceId, launchConfiguration.Type).then(function(service){
-						if(service && service.deploy){
-							fileClient.loadWorkspace(item.Project.ContentLocation).then(function(projectFolder){
-								runDeploy(launchConfToPass, {project: treeRoot.Project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: launchConfiguration});
-							});
-						}
-					});
-				},
-				visibleWhen: function(items) {
-					if(projectCommandUtils.hideAllDeployCommands) return false;
-					if (!(command.showCommand == undefined || command.showCommand)) return false;
-					var item = forceSingleItem(items);
-					return(item.Project === treeRoot.Project);
-				}
-			});
-			command.isLaunchProject = true;
-			commandService.addCommand(command);
-		})(launchConfigurations[i]);
-		}
-	},
 	projectCommandUtils.createDependencyCommands = function(serviceRegistry, commandService, fileClient, projectClient, dependencyTypes) {
 		progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 
+		var messageService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+		
 		function errorHandler(error) {
 			if (progress) {
 				progress.setProgressResult(error);
@@ -490,9 +453,32 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			id: "orion.launchConfiguration.checkStatus", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
-
+				
+				var errorMessage = i18nUtil.formatMessage(messages["missingCredentials"], item.Type, item.Url); //$NON-NLS-0$
+				
+				var commonRetryOptions = {
+					getCancelName: function(){
+						return messages.Cancel;
+					},
+					getSubmitName: function(){
+						return messages.Ok;
+					}
+				};
+				
+				messageService.close();
+				
 				if(!data.parameters){
-					data.parameters = getCommandParameters(item.parametersRequested, item.optionalParameters, item.Params);
+					messageService.setProgressResult({
+						Message: errorMessage,
+						Severity: "Info" //$NON-NLS-0$
+					});
+					
+					var options = objects.mixin({}, commonRetryOptions, {
+						hasOptionalParameters: !!item.optionalParameters, 
+						optionalParams: item.optionalParameters
+					});
+					
+					data.parameters = getCommandParameters(item.parametersRequested, options, item.Params);
 					data.oldParams = item.Params;
 					commandService.collectParameters(data);
 					return;
@@ -532,7 +518,17 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 
 						}, function(error){
 							if(error.Retry){
-								data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters, params);
+								var options = objects.mixin({}, commonRetryOptions, {
+									hasOptionalParameters: !!error.Retry.optionalParameters, 
+									optionalParams: error.Retry.optionalParameters
+								});
+								
+								messageService.setProgressResult({
+									Message: error.Message || errorMessage,
+									Severity: error.Severity || "Error" //$NON-NLS-0$
+								});
+																
+								data.parameters = getCommandParameters(error.Retry.parameters, options, params);
 								data.oldParams = params;
 								commandService.collectParameters(data);
 							} else {
@@ -616,7 +612,17 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 								}
 							}, function(error){
 								if(error.Retry){
-									data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters, params);
+									var options = {
+										hasOptionalParameters: !!error.Retry.optionalParameters, 
+										optionalParams: error.Retry.optionalParameters,
+										getCancelName: function(){
+											return messages.Cancel;
+										},
+										getSubmitName: function(){
+											return messages.Ok;
+										}
+									};
+									data.parameters = getCommandParameters(error.Retry.parameters, options, params);
 									data.oldParams = params;
 									commandService.collectParameters(data);
 								} else {
@@ -801,12 +807,27 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		return commands;
 	};
 
+	var sharedGeneralEventDispatcher;
+
+	projectCommandUtils.getGeneralEventDispatcher = function(){
+		if(!sharedGeneralEventDispatcher){
+			sharedGeneralEventDispatcher = new EventTarget();
+		}
+		return sharedGeneralEventDispatcher;
+	};
+	
 	var explorer;
 
 	projectCommandUtils.setExplorer = function(theExplorer) {
 		explorer = theExplorer;
+		projectCommandUtils.getGeneralEventDispatcher().dispatchEvent({type: "setExplorer"}); //$NON-NLS-0$
 	};
-
+	
+	projectCommandUtils.getExplorer = function() {
+		return explorer;
+	};
+	
+	
 	/**
 	 * Creates the commands related to file management.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to use when creating commands
@@ -1051,8 +1072,12 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 						return item.type==="Project" || explorer.treeRoot.type==="Project";
 					}
 				};
-
-				commandParams.parameters = getCommandParameters(handler.addParameters, handler.optionalParameters);
+				
+				var options = {
+					hasOptionalParameters: !!handler.optionalParameters, 
+					optionalParams: handler.optionalParameters
+				};
+				commandParams.parameters = getCommandParameters(handler.addParameters, options);
 
 				var command = new mCommands.Command(commandParams);
 				command.isAddDependency = true;
@@ -1096,7 +1121,11 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 							dispatchNewProject(item, project);
 						}, function(error){
 							if(error.Retry && error.Retry.addParameters){
-								data.parameters = getCommandParameters(error.Retry.addParameters, error.Retry.optionalParameters, params);
+								var options = {
+									hasOptionalParameters: !!error.Retry.optionalParameters, 
+									optionalParams: error.Retry.optionalParameters
+								};
+								data.parameters = getCommandParameters(error.Retry.addParameters, options, params);
 								data.oldParams = params;
 								commandService.collectParameters(data);
 							}
@@ -1113,7 +1142,11 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					}
 				};
 
-				commandParams.parameters = getCommandParameters(handler.addParameters, handler.optionalParameters);
+				var options = {
+					hasOptionalParameters: !!handler.optionalParameters, 
+					optionalParams: handler.optionalParameters
+				};
+				commandParams.parameters = getCommandParameters(handler.addParameters, options);
 
 				var command = new mCommands.Command(commandParams);
 				command.isCreateProject = true;
@@ -1377,7 +1410,11 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					}
 				};
 
-				commandParams.parameters = getCommandParameters(deployService.parameters, deployService.optionalParameters);
+				var options = {
+					hasOptionalParameters: !!deployService.optionalParameters, 
+					optionalParams: deployService.optionalParameters
+				};
+				commandParams.parameters = getCommandParameters(deployService.parameters, options);
 
 				command = new mCommands.Command(commandParams);
 				command.isDeployProject = true;

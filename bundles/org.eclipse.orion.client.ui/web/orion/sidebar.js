@@ -57,6 +57,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 		this.activeViewMode = null;
 		this.switcherScope = params.switcherScope;
 		this.switcherNode = null;
+		this.progressService = params.progressService;
 	}
 	objects.mixin(Sidebar.prototype, /** @lends orion.sidebar.Sidebar.prototype */ {
 		/**
@@ -110,7 +111,8 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				sidebarNavInputManager: this.sidebarNavInputManager,
 				serviceRegistry: serviceRegistry,
 				toolbarNode: toolbarNode,
-				sidebar: this
+				sidebar: this,
+				progressService: progressService
 			}));
 			
 			this.projectViewMode = new ProjectNavViewMode({
@@ -123,7 +125,8 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				sidebarNavInputManager: this.sidebarNavInputManager,
 				serviceRegistry: serviceRegistry,
 				toolbarNode: toolbarNode,
-				sidebar: this
+				sidebar: this,
+				progressService: progressService
 			});
 			
 			this._slideout = new mSlideout.Slideout(this.toolbarNode.parentNode);

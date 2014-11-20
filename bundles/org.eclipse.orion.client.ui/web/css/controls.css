@@ -64,6 +64,14 @@
 	margin-top: 8px;
 }
 
+.runBar {
+	display: none;
+}
+
+.runBarVisible {
+	display: inline-block !important;
+}
+
 /* 4px margin used by toolbar, plus 4px of border/padding */
 .status {
 	padding-top: 10px;

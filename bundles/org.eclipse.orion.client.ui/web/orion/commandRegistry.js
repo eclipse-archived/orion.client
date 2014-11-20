@@ -330,7 +330,7 @@ define([
 						// The parameter collector cannot collect.  We will do a default implementation using a popup.
 						if (!collecting) {
 							var tooltip = new mTooltip.Tooltip({
-								node: commandInvocation.domNode,
+								node: commandInvocation.domNode || commandInvocation.domParent,
 								afterHiding: function() {
 									this.destroy();
 								},

@@ -482,6 +482,14 @@ define([
 			contextMenu.addEventListener("triggered", contextMenuTriggered); //$NON-NLS-0$
 			
 			this._contextMenu = contextMenu;
+		},
+		
+		isRunBarVisible: function() {
+			return this._isRunBarVisible;
+		},
+		
+		setRunBarVisible: function(isRunBarVisible) {
+			this._isRunBarVisible = isRunBarVisible;
 		}
 	});
 
