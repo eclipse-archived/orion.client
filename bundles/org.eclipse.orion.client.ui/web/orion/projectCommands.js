@@ -371,7 +371,59 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				errorHandler(error);
 			});
 	}
+	
+	projectCommandUtils.updateProjectNavCommands = function(treeRoot, launchConfigurations, commandService, projectClient, fileClient){
 
+		function errorHandler(error) {
+			if (progress) {
+				progress.setProgressResult(error);
+			} else {
+				window.console.log(error);
+			}
+		}
+
+		for(var i=0; i<launchConfigurations.length; i++){
+			(function(launchConfiguration){
+			var command = new mCommands.Command({
+				name: messages["deployTo"] + launchConfiguration.Name,
+				tooltip: messages["deployTo"] + launchConfiguration.Name,
+				id: "orion.launchConfiguration.deploy." + launchConfiguration.ServiceId + launchConfiguration.Name,
+				imageClass: "core-sprite-deploy",
+				callback: function(data) {
+					var item = forceSingleItem(data.items);
+
+					if(!data.oldParams){
+						data.oldParams = launchConfiguration.Params;
+					}
+
+					var func = arguments.callee;
+					var params = handleParamsInCommand(func, data, messages["deploy"] + item.Name);
+					if(!params){
+						return;
+					}
+					var launchConfToPass = objects.clone(launchConfiguration);
+					launchConfToPass.Params = params;
+
+					projectClient.getProjectDelpoyService(launchConfiguration.ServiceId, launchConfiguration.Type).then(function(service){
+						if(service && service.deploy){
+							fileClient.loadWorkspace(item.Project.ContentLocation).then(function(projectFolder){
+								runDeploy(launchConfToPass, {project: treeRoot.Project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: launchConfiguration});
+							});
+						}
+					});
+				},
+				visibleWhen: function(items) {
+					if(projectCommandUtils.hideAllDeployCommands) return false;
+					if (!(command.showCommand == undefined || command.showCommand)) return false;
+					var item = forceSingleItem(items);
+					return(item.Project === treeRoot.Project);
+				}
+			});
+			command.isLaunchProject = true;
+			commandService.addCommand(command);
+		})(launchConfigurations[i]);
+		}
+	},
 	projectCommandUtils.createDependencyCommands = function(serviceRegistry, commandService, fileClient, projectClient, dependencyTypes) {
 		progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 
