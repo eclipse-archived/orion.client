@@ -137,22 +137,22 @@
 
 /* The added block in the new file/left side, lightest green */
 .annotationLine.addedBlockDiff {
-	background-color: #B3E8B3;
+	background-color: #E5FFCF;
 }
 
 /* The current added block in the new file/left side, 2nd lightest green */
 .annotationLine.currentAddedBlockDiff {
-	background-color: #8EDD8E;
+	background-color: #CFFFCF;
 }
 
 /* The deleted block in the old file/right side, lightest red */
 .annotationLine.deletedBlockDiff {
-	background-color: #FFD2D2; /*'#FFEFEF;*/
+	background-color: #FAE6E6;
 }
 
 /* The current deleted block in the old file/right side, 2nd lightest red */
 .annotationLine.currentDeletedBlockDiff {
-	background-color: #FFB0B0;
+	background-color: #FCD6D6;
 }
 
 /* Style for an empty block, which draws a lighter black line on top of a line to indicate an insertion or deletion */
@@ -187,22 +187,22 @@
 
 /* The added word in the new file/left side, 3rd lightest green */
 .annotationRange.addedWordDiff {
-	background-color: #63CF63;
+	background-color: #B8E8B8;
 }
 
 /* The current added word in the new file/left side, darkest green */
 .annotationRange.currentAddedWordDiff {
-	background-color: #31A231;
+	background-color: #93FF93;
 }
 
 /* The deleted word in the old file/right side, 3rd lightest red */
 .annotationRange.deletedWordDiff {
-	background-color: #EE9999;
+	background-color: #F9BDBD;
 }
 
 /* The current deleted word in the old file/right side, darkest red */
 .annotationRange.currentDeletedWordDiff {
-	background-color: #E66868;
+	background-color: #FF8B8B;
 }
 
 /* The following 4 styles are for the special annotations when presenting a position between 2 characters, which looks like a caret cursor.
