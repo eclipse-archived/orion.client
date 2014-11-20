@@ -12,9 +12,9 @@
 /*eslint-env amd*/
 /* global doctrine */
 define([
-'orion/objects',
-'javascript/finder',
-'javascript/signatures',
+'orion/objects', 
+'javascript/finder', 
+'javascript/signatures',  
 'orion/URITemplate',
 'doctrine'
 ], function(Objects, Finder, Signatures, URITemplate) {
@@ -66,6 +66,10 @@ define([
         	               return that._formatHover(that._getCallExprHover(node, ctxt.offset, ast), editorContext);
 			            }
 			            case 'Literal': {
+			                if(ctxt.offset <= node.range[0] || ctxt.offset >= node.range[1]) {
+			                    //be a bit more precise than finder
+			                    return null;
+			                }
 			                var parents = node.parents;
 			                var parent = parents.pop();
 			                if(parent.type === 'CallExpression') {
