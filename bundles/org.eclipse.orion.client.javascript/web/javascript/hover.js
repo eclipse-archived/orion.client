@@ -234,7 +234,7 @@ define([
     		                        break;
     		                    }
     		                    case 'param': {
-    		                        format.params.push('*' + that._convertTagType(tag.type) + '*' +
+    		                        format.params.push(that._convertTagType(tag.type) +
     		                                  (tag.name ? '__'+tag.name+'__ ' : '') + 
     		                                  (tag.description ? tag.description+'\n' : ''));
     		                        break;
@@ -448,15 +448,15 @@ define([
 	        switch(type.type) {
 	            case 'NameExpression': {
 	                if(type.name) {
-	                  return '('+type.name+') ';
+	                  return '*('+type.name+')* ';
 	                }
 	                break;
 	            }
 	            case 'RecordType': {
-	                return '(Object) ';
+	                return '*(Object)* ';
 	            }
 	            case 'FunctionType': {
-	                return '(Function) ';
+	                return '*(Function)* ';
 	            }
 	            case 'NullableType': 
 	            case 'NonNullableType':
@@ -469,7 +469,7 @@ define([
 	                if(type.expression.name === 'Array') {
 	                    //we need to grab the first application
 	                    if(type.applications && type.applications.length > 0) {
-    	                    return '('+type.applications[0].name+'[]) ';
+    	                    return '*('+type.applications[0].name+'[])* ';
     	                }
 	                }
 	                return this._convertTagType(type.expression);
