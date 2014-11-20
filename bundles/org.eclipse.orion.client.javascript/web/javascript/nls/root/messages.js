@@ -50,7 +50,7 @@ define({
 	'noSparseArrays': 'Sparse array declarations', //$NON-NLS-0$ //$NON-NLS-1$
 	'jsHover': 'JavaScript Hover Provider', //$NON-NLS-0$ //$NON-NLS-1$
 	'removeExtraSemiFixName': 'Remove extra semicolon', //$NON-NLS-0$ //$NON-NLS-1$
-	'removeExtraSemiFixTooltip': 'Removes the extra semi colon', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeExtraSemiFixTooltip': 'Removes the extra semicolon', //$NON-NLS-0$ //$NON-NLS-1$
 	'addFallthroughCommentFixName': 'Add $FALLTHROUGH$ comment', //$NON-NLS-0$ //$NON-NLS-1$
 	'addFallthroughCommentFixTooltip': 'Add the $FALLTHROUGH$ line comment', //$NON-NLS-0$ //$NON-NLS-1$
 	'addEmptyCommentFixName': 'Comment empty block', //$NON-NLS-0$ //$NON-NLS-1$

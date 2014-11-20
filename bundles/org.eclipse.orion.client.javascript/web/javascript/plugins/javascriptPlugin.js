@@ -19,7 +19,7 @@ define([
 'esprima',
 'javascript/scriptResolver',
 'javascript/astManager',
-'javascript/quickFixes',
+'javascript/fixes/quickFixes',
 'javascript/contentAssist/indexFiles/mongodbIndex',
 'javascript/contentAssist/indexFiles/mysqlIndex',
 'javascript/contentAssist/indexFiles/postgresIndex',
