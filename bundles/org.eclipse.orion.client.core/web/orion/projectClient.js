@@ -818,6 +818,19 @@ define([
 		}.bind(this));
 
 		return deferred;
+	},
+
+	deleteProjectLaunchConfiguration: function(launchConf){
+		var deferred = new Deferred();
+
+		if(!launchConf.File || !launchConf.File.Location){
+			/* nothing to do */
+			deferred.resolve();
+			return deferred;
+		}
+
+		this.fileClient.deleteFile(launchConf.File.Location).then(deferred.resolve, deferred.reject);
+		return deferred;
 	}
 
 	};//end ProjectClient prototype

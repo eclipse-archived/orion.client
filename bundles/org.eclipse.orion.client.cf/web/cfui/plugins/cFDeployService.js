@@ -151,16 +151,12 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 				return deferred;
 			},
 
-			deleteLaunchConfiguration: function(project, launchConf){
+			deleteAdditionalLaunchConfiguration: function(project, launchConf){
 				var deferred = new Deferred();
 
+				/* delete the additional manifest file if present */
 				this._getAdditionalLaunchConfigurations(launchConf, project, true).then(function(manifest){
-
-					var deferreds = [];
-					if(manifest) deferreds.push(fileClient.deleteFile(manifest.Location));
-					deferreds.push(fileClient.deleteFile(launchConf.File.Location));
-
-					Deferred.all(deferreds).then(deferred.resolve, deferred.reject);
+					fileClient.deleteFile(manifest.Location).then(deferred.resolve, deferred.reject);
 				});
 
 				return deferred;

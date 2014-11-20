@@ -308,10 +308,14 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 	}
 
 	function runDeleteLaunchConfiguration(launchConf, context){
-		progress.showWhile(context.deployService.deleteLaunchConfiguration(context.project, launchConf), context.deployService.name + " in progress", true).then(function(){
+		var deferreds = [];
+		deferreds.push(context.projectClient.deleteProjectLaunchConfiguration(launchConf)); /* deletes the launch configuration file if present */
+		deferreds.push(context.deployService.deleteAdditionalLaunchConfiguration(context.project, launchConf)); /* deletes additional launch configuration data if present */
+
+		progress.showWhile(Deferred.all(deferreds), context.deployService.name + " in progress", true).then(function(){
 			fileDispatcher.dispatchEvent({
 				type: "delete",
-				oldValue: launchConf.File,
+				oldValue: launchConf.File, /* TODO: Find out what happens when there's no File */
 				parent: launchConf.File.parent
 			});
 		});
@@ -701,7 +705,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				var item = forceSingleItem(data.items);
 				fileClient.loadWorkspace(item.project.ContentLocation).then(function(){
 					projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
-						if(service && service.deleteLaunchConfiguration){
+						if(service && service.deleteAdditionalLaunchConfiguration){
 							runDeleteLaunchConfiguration(item, {
 								project: item.project,
 								deployService: service,
@@ -714,9 +718,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				});
 			},
 			visibleWhen: function(items) {
-				// hide for now
-				return false;
-				
 				var item = forceSingleItem(items);
 				return item.ServiceId && item.Name && item.status;
 			}
