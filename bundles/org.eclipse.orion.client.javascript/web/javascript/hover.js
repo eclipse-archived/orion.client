@@ -36,7 +36,6 @@ define([
 	Objects.mixin(JavaScriptHover.prototype, /** @lends javascript.JavaScriptHover.prototype*/ {
 		
 		/**
-		 * @name computeHover
 		 * @description Callback from the editor to compute the hover
 		 * @function
 		 * @public 
@@ -55,16 +54,16 @@ define([
 			    if(node) {
 			        switch(node.type) {
 			            case 'Identifier': {
-			                return that._formatHtmlHover(that._getIdentifierHover(node, ctxt.offset, ast), editorContext);
+			                return that._formatHover(that._getIdentifierHover(node, ctxt.offset, ast), editorContext);
 			            }
 			            case 'FunctionDeclaration': {
-			                return that._formatHtmlHover(node);
+			                return that._formatHover(node);
 			            }
 			            case 'FunctionExpression': {
-			                return that._formatHtmlHover(that._getFunctionExprHover(node));
+			                return that._formatHover(that._getFunctionExprHover(node));
 			            }
 			            case 'CallExpression': {
-        	               return that._formatHtmlHover(that._getCallExprHover(node, ctxt.offset, ast), editorContext);
+        	               return that._formatHover(that._getCallExprHover(node, ctxt.offset, ast), editorContext);
 			            }
 			            case 'Literal': {
 			                var parents = node.parents;
@@ -93,7 +92,6 @@ define([
 		},
 		
 		/**
-		 * @name _getCommentFromNode
 		 * @description Tries to find the comment for the given node. If more than one is found in the array
 		 * the last entry is considered 'attached' to the node
 		 * @function
@@ -121,7 +119,6 @@ define([
 		},
 		
 		/**
-		 * @name _getFunctionExprHover
 		 * @description Computes the hover for a FunctionExpression
 		 * @function
 		 * @private
@@ -139,7 +136,6 @@ define([
 		},
 		
 		/**
-		 * @name _getCallExprHover
 		 * @description Computes the hover for a CallExpression
 		 * @function
 		 * @private
@@ -166,7 +162,6 @@ define([
 		},
 		
 		/**
-		 * @name _getIdentifierHover
 		 * @description Computes the hover for an Identifier node
 		 * @function
 		 * @private
@@ -203,16 +198,13 @@ define([
 		},
 		
 		/**
-		 * @name _formatHover
 		 * @description Formats the hover info
 		 * @function
 		 * @private
-		 * @param {Object} comment The comment from the declaration in the AST
-		 * @param {Object} editorContext The editor context 
-		 * @param {Boolean} linkDecl If we should include a link to jump to the declaration
+		 * @param {Object} node The AST node
 		 * @returns returns
 		 */
-		_formatHover: function _formatHover(node, editorContext) {
+		_formatHover: function _formatHover(node) {
 		    if(!node) {
 		        return null;
 		    }
@@ -316,16 +308,13 @@ define([
 		},
 		
 		/**
-		 * @name _formatHtmlHover
 		 * @description Formats the hover info as HTML
 		 * @function
 		 * @private
-		 * @param {Object} comment The comment from the declaration in the AST
-		 * @param {Object} editorContext The editor context 
-		 * @param {Boolean} linkDecl If we should include a link to jump to the declaration
+		 * @param {Object} node The AST node
 		 * @returns returns
 		 */
-		_formatHtmlHover: function _formatHtmlHover(node, editorContext) {
+		_formatHtmlHover: function _formatHtmlHover(node) {
 		    if(!node) {
 		        return null;
 		    }
@@ -397,7 +386,7 @@ define([
 		        			'margin: 5px, 0\n' + 
 		        			'}</style>\n';
 		        			
-		        hover += '<div style="font-size: 75%">\n';
+		        hover += '<div >\n';
 		        
 		        // Name
 		        var name = Signatures.computeSignature(comment.node);
@@ -446,7 +435,6 @@ define([
 		},
 		
 		/**
-		 * @name _convertTagType
 		 * @description Converts the doctrine tag type to a simple form to appear in the hover
 		 * @function
 		 * @private
@@ -499,7 +487,6 @@ define([
 		},
 		
 		/**
-		 * @name _formatFilesHover
 		 * @description Formats the list of files as links for the hover
 		 * @function
 		 * @private
