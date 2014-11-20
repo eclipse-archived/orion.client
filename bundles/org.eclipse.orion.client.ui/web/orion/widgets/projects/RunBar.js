@@ -102,12 +102,11 @@ define([
 							menuItem = dropdown.appendMenuItem(launchConfiguration.Name);
 							
 							menuItem.addEventListener("click", function(currentHash, event){ //$NON-NLS-0$
-								// Use currentHash to get cached launch config again because it will 
-								// be updated by the listener as events occur. Using currentHash directly 
-								// instead of _getCachedCopy(launchConfiguration) here to avoid 
+								// Use currentHash to get cached launch config again because it will be updated 
+								// by the listener as events occur. Using currentHash directly here to avoid 
 								// unnecessarily keeping old copies of the launchConfiguration alive.
 								var cachedConfig = this._cachedLaunchConfigurations[currentHash];
-								this.selectLaunchConfiguration(cachedConfig);
+								this.selectLaunchConfiguration(cachedConfig, true);
 							}.bind(this, hash)); // passing in hash here because using it directly in function only creates a reference which ends up with the last value of hash
 							
 							this._menuItemsCache.push(menuItem);
@@ -122,7 +121,6 @@ define([
 					
 					var defaultDeployCommand = this._projectCommands.getDeployProjectCommands(this._commandRegistry)[0];
 					createNewItem.addEventListener("click", function(event){ //$NON-NLS-0$
-//						defaultDeployCommand.callback({});
 						this._commandRegistry.runCommand(defaultDeployCommand.id, this._projectExplorer.treeRoot, this, null, null, this._launchConfigurationsWrapper); //$NON-NLS-0$
 					}.bind(this));
 				}
@@ -157,10 +155,11 @@ define([
 			var newConfig = event.newValue;
 			
 			if(event.type === "changeState" && newConfig){ //$NON-NLS-0$			
-				// replace selected launch config if necessary
-				var cachedConfig = this._getCachedCopy(newConfig);
-				if (cachedConfig === this._selectedLaunchConfiguration) {
-					this.selectLaunchConfiguration(newConfig);
+				// update status if selected launch config was modified
+				var cachedHash = this._getHash(newConfig);
+				var selectedHash = this._getHash(this._selectedLaunchConfiguration);
+				if (cachedHash === selectedHash) {
+					this.selectLaunchConfiguration(newConfig, false);
 				}
 				
 				// replace cached launch config
@@ -195,12 +194,25 @@ define([
 			}
 		},
 	
-		selectLaunchConfiguration: function(launchConfiguration) {
+		/**
+		 * Selects the specified launch configuration
+		 * 
+		 * @param {Object} launchConfiguration The launch configuration to select
+		 * @param {Boolean} checkStatus Specifies whether or not the status of the launchConfiguration should be checked
+		 */
+		selectLaunchConfiguration: function(launchConfiguration, checkStatus) {
 			if (launchConfiguration) {
 				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(launchConfiguration.Name);
 				this._selectedLaunchConfiguration = launchConfiguration;
 				
-				this._checkLaunchConfigurationStatus(launchConfiguration);
+				if (checkStatus) {
+					this._checkLaunchConfigurationStatus(launchConfiguration);
+				} else {
+					// do not check the status, only set it in the UI if is already in the launchConfiguration
+					if (launchConfiguration.status) {
+						this.setStatus(launchConfiguration.status);
+					}
+				}
 			} else {
 				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(messages["selectLaunchConfig"]); //$NON-NLS-0$
 				this._selectedLaunchConfiguration = null;
@@ -208,54 +220,66 @@ define([
 		},
 		
 		_checkLaunchConfigurationStatus: function(launchConfiguration) {
-			// update status
 			if (launchConfiguration.status) {
-				if (launchConfiguration.status.error) {
-					if(launchConfiguration.status.error.Retry){
-						// authentication error, gather required parameters and try again
-						launchConfiguration.parametersRequested = launchConfiguration.status.error.Retry.parameters;
-						launchConfiguration.optionalParameters = launchConfiguration.status.error.Retry.optionalParameters;
-						this._commandRegistry.runCommand("orion.launchConfiguration.checkStatus", launchConfiguration, this, null, null, this._statusLight); //$NON-NLS-0$
-					} else {
-						this.turnStatusLightRed();
-						this._statusLight.title = launchConfiguration.status.error.Message;
-					}
-				} else {
-					this.setStatus(launchConfiguration.status);
-				}
-			} else {
-				// check status
-				this._projectClient.getProjectDelpoyService(launchConfiguration.ServiceId, launchConfiguration.Type).then(function(service){
-					if(service && service.getState){
-						var progressMessage = i18nUtil.formatMessage(messages["checkingStateMessage"], launchConfiguration.Name); //$NON-NLS-0$
-						this._progressService.progress(service.getState(launchConfiguration.Params), progressMessage).then(function(result){
-							launchConfiguration.status = result;
-							this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
-						}.bind(this), function(error){
-							launchConfiguration.status = {error: error};
-							this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
-						}.bind(this), function(error){}, function(progress){});
-					}
-				}.bind(this));
+				// display old status while we check for the current one
+				// skip the error Retry case
+				this.setStatus(launchConfiguration.status);
 			}
+			
+			// update status
+			this._projectClient.getProjectDelpoyService(launchConfiguration.ServiceId, launchConfiguration.Type).then(function(service){
+				if(service && service.getState){
+					var progressMessage = i18nUtil.formatMessage(messages["checkingStateMessage"], launchConfiguration.Name); //$NON-NLS-0$
+					this._progressService.progress(service.getState(launchConfiguration.Params), progressMessage).then(function(result){
+						launchConfiguration.status = result;
+						this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
+					}.bind(this), function(error){
+						launchConfiguration.status = {error: error};
+						if (error.Retry) {
+							// authentication error, gather required parameters and try again
+							launchConfiguration.parametersRequested = launchConfiguration.status.error.Retry.parameters;
+							launchConfiguration.optionalParameters = launchConfiguration.status.error.Retry.optionalParameters;
+							
+							// run command to collect params first then check status again
+							this._commandRegistry.runCommand("orion.launchConfiguration.checkStatus", launchConfiguration, this, null, null, this._statusLight); //$NON-NLS-0$
+						} else {
+							this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
+						}
+					}.bind(this), function(error){}, function(progress){});
+				}
+			}.bind(this));
 		},
 		
 		setStatus: function(status) {
-			switch (status.State) {
-				case "PROGRESS": //$NON-NLS-0$
-					break; //do nothing
-				case "STARTED": //$NON-NLS-0$
-					this.turnStatusLightGreen();
-					break;
-				case "STOPPED": //$NON-NLS-0$
-					this.turnStatusLightRed();
-					break;
-				default:
+			if (status.error) {
+				if (status.error.Retry) {
 					this.turnStatusLightOff();
-					break;
+					this._setStatusTitles(null);
+				} else {
+					this.turnStatusLightRed();
+					this._setStatusTitles(status.error.Message);
+				}
+			} else {
+				switch (status.State) {
+					case "PROGRESS": //$NON-NLS-0$
+						break; //do nothing
+					case "STARTED": //$NON-NLS-0$
+						this.turnStatusLightGreen();
+						break;
+					case "STOPPED": //$NON-NLS-0$
+						this.turnStatusLightRed();
+						break;
+					default:
+						this.turnStatusLightOff();
+						break;
+				}
+				this._setStatusTitles(status.Message);
 			}
-			this._statusLabel.title = status.Message;
-			this._statusLight.title = status.Message;
+		},
+		
+		_setStatusTitles: function(title) {
+			this._statusLabel.title = title || ""; //$NON-NLS-0$
+			this._statusLight.title = title || ""; //$NON-NLS-0$
 		},
 		
 		/**
@@ -269,11 +293,6 @@ define([
 			this._menuItemsCache = []; //reset the cached launch configuration dropdown menu items
 			this._cacheLaunchConfigurations(launchConfigurations);
 		},
-	
-		_getCachedCopy: function(launchConfiguration) {
-			var hash = this._getHash(launchConfiguration);
-			return this._cachedLaunchConfigurations[hash];
-		},
 		
 		_cacheLaunchConfigurations: function(launchConfigurations) {
 			this._cachedLaunchConfigurations = {};
@@ -283,7 +302,11 @@ define([
 		},
 		
 		_getHash: function(launchConfiguration) {
-			return launchConfiguration.Name + ":" + launchConfiguration.ServiceId; //$NON-NLS-0$
+			var hash = null;
+			if (launchConfiguration) {
+				hash = launchConfiguration.Name + ":" + launchConfiguration.ServiceId; //$NON-NLS-0$
+			}
+			return hash;
 		},
 		
 		_putInLaunchConfigurationsCache: function(launchConfiguration) {
