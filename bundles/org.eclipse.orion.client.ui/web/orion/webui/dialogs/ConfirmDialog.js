@@ -9,30 +9,42 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/widgets/nls/messages', 'orion/webui/dialog', 'text!orion/webui/dialogs/confirmdialog.html', 'orion/EventTarget'], 
-function(messages, dialog, ConfirmDialogFragment, EventTarget) {
+define([
+	'i18n!orion/widgets/nls/messages',
+	'orion/webui/dialog',
+	'text!orion/webui/dialogs/confirmdialog.html',
+	'orion/EventTarget',
+	'orion/webui/littlelib',
+], function(messages, mDialog, ConfirmDialogFragment, EventTarget, lib) {
+	var Dialog = mDialog.Dialog;
 
 	/**
-	 * @class orion.webui.dialogs.ConfirmDialog
+	 * Dispatched when the user dismisses the ConfirmDialog.
+	 * @name orion.webui.dialogs.DismissEvent
+	 * @property {Boolean} value The confirmation value: <tt>true</tt> if the user gave an affirmative response
+	 * (eg. clicking Yes/OK); <tt>false</tt> if they gave a negative response (eg. clicking Cancel/no/close button).
+	 */
+
+	/**
+	 * Creates a modal confirm dialog.
+	 * <p>Dispatches a {@link orion.webui.dialogs.DismissEvent} giving the confirmation value.</p>
+	 * 
+	 * @name orion.webui.dialogs.ConfirmDialog
+	 * @class
 	 * @extends orion.webui.Dialog
 	 * 
-	 * Creates a modal confirm dialog.
-	 * @param {Object} options 	An object containing the options for this dialog.
-	 * 						   	Below is a list of the options that are specific to ConfirmDialog.
-	 * 							See orion.webui.Dialog for a list of other usable options.
-	 * 		{String} options.title The title to be displayed in the dialog's title bar.
-	 * 		{String} options.confirmMessage The message to be displayed in the dialog.
-	 * 		{Boolean} options.yesNoDialog A boolean which if true indicates that this dialog should have yes/no buttons instead of ok/cancel buttons. Optional.
-	 *
-	 * @name orion.webui.dialogs.ConfirmDialog
-	 *
+	 * @param {Object} options The options for this dialog. Only options specific to ConfirmDialog are
+	 *   documented here; see @{link orion.webui.Dialog} for a list of other usable options.
+	 * @param {String} [options.title] The title to be displayed in the dialog's title bar.
+	 * @param {String} options.confirmMessage The message to be displayed in the dialog.
+	 * @param {Boolean} [options.yesNoDialog=false] A boolean which if true indicates that this dialog should have yes/no buttons instead of ok/cancel buttons.
 	 */
 	function ConfirmDialog(options) {
 		EventTarget.attach(this);
 		this._init(options);
 	}
 	
-	ConfirmDialog.prototype = Object.create(dialog.Dialog.prototype);
+	ConfirmDialog.prototype = Object.create(Dialog.prototype);
 	ConfirmDialog.prototype.constructor = ConfirmDialog;
 	
 	ConfirmDialog.prototype.TEMPLATE = ConfirmDialogFragment;
@@ -48,31 +60,42 @@ function(messages, dialog, ConfirmDialogFragment, EventTarget) {
 		
 		if (options.yesNoDialog) {
 			this.buttons = [
-				{id: "yesButton", text: messages["Yes"], callback: this._buttonPressed.bind(this, "yes")}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				{id: "noButton", text: messages["No"], callback: this._buttonPressed.bind(this, "no")} //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				{id: "yesButton", text: messages["Yes"], callback: this._dismiss.bind(this, true)}, //$NON-NLS-1$ //$NON-NLS-0$
+				{id: "noButton", text: messages["No"], callback: this._dismiss.bind(this, false)} //$NON-NLS-1$ //$NON-NLS-0$
 			];
 		} else {
 			this.buttons = [
-				{id: "okButton", text: messages["OK"], callback: this._buttonPressed.bind(this, "ok")}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				{id: "cancelButton", text: messages["Cancel"], callback: this._buttonPressed.bind(this, "cancel")} //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				{id: "okButton", text: messages["OK"], callback: this._dismiss.bind(this, true)}, //$NON-NLS-1$ //$NON-NLS-0$
+				{id: "cancelButton", text: messages["Cancel"], callback: this._dismiss.bind(this, false)} //$NON-NLS-1$ //$NON-NLS-0$
 			];
 		}
 		
 		this._initialize(); //superclass function
 	};
-	
+
+	ConfirmDialog.prototype._bindToDom = function(/*parent*/) {
+		var cancel = this._dismiss.bind(this, false);
+		this.$close.addEventListener("click", cancel); //$NON-NLS-0$
+		this.escListener = function (e) { //$NON-NLS-0$
+			if(e.keyCode === lib.KEY.ESCAPE) {
+				cancel();
+			}
+		};
+		this.$frameParent.addEventListener("keydown", this.escListener); //$NON-NLS-0$
+	};
+
+	ConfirmDialog.prototype.destroy = function() {
+		this.$frameParent.removeEventListener("keydown", this.escListener); //$NON-NLS-0$
+		Dialog.prototype.destroy.apply(this, arguments);
+	};
+
 	/**
-	 * Dispatches an event and hides the dialog. 
-	 * 
-	 * The type of the dispatched event depends on the button that was pressed.
-	 * For the default confirm dialog, the type will either be "ok" or "cancel".
-	 * For a yes/no dialog, the type will either be "yes" or "no".
+	 * Dispatches a {@link orion.webui.dialogs.DismissEvent} and hides the dialog. 
 	 */
-	ConfirmDialog.prototype._buttonPressed = function(eventType) {
-		this.dispatchEvent({type: eventType});
+	ConfirmDialog.prototype._dismiss = function(value) {
+		this.dispatchEvent({ type: "dismiss", value: value });
 		this.hide();
 	};
-	
-	//return the module exports
+
 	return {ConfirmDialog: ConfirmDialog};
 });

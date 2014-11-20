@@ -9,11 +9,26 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/objects',
-		'orion/widgets/input/LabeledCheckbox', 'orion/widgets/input/LabeledTextfield', 
-		'orion/widgets/input/LabeledSelect', 'i18n!orion/settings/nls/messages', 'orion/i18nUtil', 'orion/metrics'],
-		function(mExplorer, mSection, Deferred, objects, LabeledCheckbox, LabeledTextfield, LabeledSelect, messages, i18nUtil, mMetrics) {
-	var Explorer = mExplorer.Explorer, SelectionRenderer = mExplorer.SelectionRenderer, Section = mSection.Section;
+define([
+	'orion/explorers/explorer',
+	'orion/section',
+	'orion/Deferred',
+	'orion/objects',
+	'orion/webui/dialogs/ConfirmDialog',
+	'orion/widgets/input/LabeledCheckbox',
+	'orion/widgets/input/LabeledTextfield',
+	'orion/widgets/input/LabeledSelect',
+	'i18n!orion/settings/nls/messages',
+	'orion/i18nUtil',
+	'orion/metrics',
+	'orion/commands'
+], function(mExplorer, mSection, Deferred, objects, mConfirmDialog, LabeledCheckbox, LabeledTextfield, 
+		LabeledSelect, messages, i18nUtil, mMetrics, Commands) {
+	var Explorer = mExplorer.Explorer,
+	    SelectionRenderer = mExplorer.SelectionRenderer,
+	    Section = mSection.Section,
+	    Command = Commands.Command,
+	    ConfirmDialog = mConfirmDialog.ConfirmDialog;
 
 	var METRICS_MAXLENGTH = 256;
 
@@ -141,18 +156,17 @@ define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/ob
 	 */
 	var PropertiesWidget = function(options, parentNode) {
 		objects.mixin(this, options);
-		if (!parentNode) { throw "parentNode is required"; }
+		if (!parentNode) { throw new Error("parentNode is required"); }
 		this.node = parentNode;
-		this.config = this.defaultConfig = null;
 		this.messageService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 		this.updateMessage = i18nUtil.formatMessage(messages["SettingUpdateSuccess"], this.categoryTitle);
+		var configAdmin = this.serviceRegistry.getService('orion.cm.configadmin'); //$NON-NLS-0$
+		this.controller = new ConfigController(configAdmin, this.setting.getPid());
 	};
 	objects.mixin(PropertiesWidget.prototype, { //$NON-NLS-0$
 		createElements: function() {
-			var serviceRegistry = this.serviceRegistry;
 			var self = this;
 			this.children = [];
-			this.configAdmin = serviceRegistry.getService('orion.cm.configadmin'); //$NON-NLS-0$
 			this.initConfiguration().then(function(configuration) {
 				self.createChildren(configuration);
 			});
@@ -171,25 +185,6 @@ define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/ob
 			this.children.push(childWidget);
 			this.node.appendChild(childWidget.node);
 			childWidget.show();
-		},
-		/** Creates a new configuration if necessary */
-		initConfiguration: function() {
-			var configuration = this.config;
-			if (!configuration) {
-				var pid = this.setting.getPid(), self = this;
-				this.configPromise = this.configPromise ||
-					Deferred.all([
-						this.configAdmin.getDefaultConfiguration(pid),
-						this.configAdmin.getConfiguration(pid)
-					]).then(function(result) {
-						self.defaultConfig = result[0];
-						self.config = result[1];
-						return self.config;
-					});
-				return this.configPromise;
-			} else {
-				return new Deferred().resolve(configuration);
-			}
 		},
 		createChildren: function(configuration) {
 			var self = this;
@@ -218,34 +213,86 @@ define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/ob
 				self.addChild(widget);
 			});
 		},
+		initConfiguration: function() {
+			return this.controller.initConfiguration();
+		},
 		changeProperty: function(attributeDefinition, value) {
-			this.initConfiguration().then(function(configuration) {
-				var setting = this.setting;
+			var _self = this;
+			return this.controller.changeProperty(this.setting, attributeDefinition.getId(), value).then(function() {
+				_self.messageService.setProgressResult(_self.updateMessage);
+			});
+		}
+	});
+
+	/**
+	 * Controller for modifying a configuration
+	 */
+	function ConfigController(configAdmin, pid) {
+		this.configAdmin = configAdmin;
+		this.pid = pid;
+		this.config = this.defaultConfig = this.configPromise = null;
+	}
+	objects.mixin(ConfigController.prototype, {
+		/** Creates a new configuration if necessary */
+		initConfiguration: function() {
+			var configuration = this.config;
+			if (!configuration) {
+				var pid = this.pid, self = this;
+				this.configPromise = this.configPromise ||
+					Deferred.all([
+						this.configAdmin.getDefaultConfiguration(pid),
+						this.configAdmin.getConfiguration(pid)
+					]).then(function(result) {
+						self.defaultConfig = result[0];
+						self.config = result[1];
+						return self.config;
+					});
+				return this.configPromise;
+			} else {
+				return new Deferred().resolve(configuration);
+			}
+		},
+		changeProperty: function(setting, attributeId, value) {
+			return this.initConfiguration().then(function(configuration) {
 				var props = configuration.getProperties() || {};
-				props[attributeDefinition.getId()] = value;
+				props[attributeId] = value;
 				// Decide if this configuration equals the setting's default values.
-				var defaultProps = this.defaultConfig ? this.defaultConfig.getProperties() : null;
+				var defaultProps = this.getDefaultProps();
 				var isNoop = setting.isDefaults(props, defaultProps);
 				if (isNoop) {
 					// Entire configuration is a no-op (i.e. it equals its default values) so remove it entirely
-					configuration.remove();
-					this.config = null;
-					this.configPromise = null;
-					
-					/* log the change event here since it will not get through to preferences.set() */
-					for (var current in props) {
-						if (current !== "pid") { //$NON-NLS-0$
-							var stringValue = String(props[current]);
-							if (stringValue.length <= METRICS_MAXLENGTH) {
-								mMetrics.logEvent("preferenceChange", "/cm/configurations/" + configuration.pid + "/" + current, stringValue); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							}
-						} 
-					}
+					return this.remove();
 				} else {
 					configuration.update(props);
 				}
-				this.messageService.setProgressResult(this.updateMessage);
 			}.bind(this));
+		},
+		getDefaultProps: function() {
+			return this.defaultConfig ? this.defaultConfig.getProperties() : null;
+		},
+		/** Reset the configuration back to the effective defaults, whatever they are */
+		reset: function() {
+			return this.initConfiguration().then(function(configuration) {
+				var defaultProps = this.getDefaultProps();
+				if (!defaultProps) {
+					return this.remove();
+				} else {
+					configuration.update(defaultProps);
+				}
+			}.bind(this));
+		},
+		/** Remove the configuration */
+		remove: function() {
+			return this.initConfiguration().then(function(configuration) {
+				configuration.remove();
+				this.config = null;
+				this.configPromise = null;
+				this.logRemove({});
+			}.bind(this));
+		},
+		/* log the removal here since it will not get through to preferences.set() */
+		logRemove: function() {
+			mMetrics.logEvent("preferenceChange", "/cm/configurations/" + this.pid, "null"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	});
 
@@ -257,7 +304,7 @@ define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/ob
 		this.childWidgets = [];
 		SelectionRenderer.call(this, {cachePrefix: 'pluginSettings', noRowHighlighting: true}, settingsListExplorer); //$NON-NLS-0$
 	}
-	SettingsRenderer.prototype = new SelectionRenderer();
+	SettingsRenderer.prototype = Object.create(SelectionRenderer.prototype);
 	SettingsRenderer.prototype.getCellElement = function(col_no, /*Setting*/ setting, rowElement) {
 		var sectionId = setting.getPid(), headerId = sectionId + 'header'; //$NON-NLS-0$
 		
@@ -305,7 +352,7 @@ define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/ob
 		Explorer.call(this, serviceRegistry, undefined, new SettingsRenderer(this, serviceRegistry));
 		this.categoryTitle = categoryTitle;
 	}
-	SettingsListExplorer.prototype = new Explorer();
+	SettingsListExplorer.prototype = Object.create(Explorer.prototype);
 	SettingsListExplorer.prototype.destroy = function() {
 		if (this.renderer) {
 			this.renderer.destroy();
@@ -320,15 +367,36 @@ define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/ob
 	 * @param {orion.settings.Settings[]} options.settings
 	 */
 	function SettingsList(options) {
-		var parent = options.parent;
-		var serviceRegistry = options.serviceRegistry;
-		var settings = options.settings;
+		this.serviceRegistry = options.serviceRegistry;
+		var commandRegistry = this.commandRegistry = options.commandRegistry;
+		this.settings = options.settings;
+		this.title = options.title;
 		if (!options.parent || !options.serviceRegistry || !options.settings || !options.title) {
 			throw new Error('Missing required option'); //$NON-NLS-0$
 		}
-		this.parent = typeof parent === 'string' ? document.getElementById('parent') : parent; //$NON-NLS-0$ //$NON-NLS-1$
-		// TODO add commands
-		this.render(parent, serviceRegistry, settings, options.title);
+		this.parent = typeof options.parent === 'string' ? document.getElementById('parent') : options.parent; //$NON-NLS-0$ //$NON-NLS-1$
+
+		var restoreCommand = new Command({
+			id: "orion.pluginsettings.restore", //$NON-NLS-0$
+			name: messages["Restore"], //$NON-NLS-0$
+			callback: function(/*data*/) {
+				var dialog = new ConfirmDialog({
+					confirmMessage: messages["ConfirmRestore"], //$NON-NLS-0$
+					title: messages["Restore"] //$NON-NLS-0$
+				});
+				dialog.show();
+				var _self = this;
+				dialog.addEventListener("dismiss", function(event) { //$NON-NLS-0$
+					if (event.value) {
+						_self.restore();
+					}
+				}); //$NON-NLS-0$
+			}.bind(this)
+		});
+		commandRegistry.addCommand(restoreCommand);
+		commandRegistry.registerCommandContribution("restoreDefaults", "orion.pluginsettings.restore", 2); //$NON-NLS-1$ //$NON-NLS-0$
+
+		this.render(this.parent, this.serviceRegistry, this.settings, this.title);
 	}
 	SettingsList.prototype = {
 		_makeSection: function(parent, sectionId, setting, title) {
@@ -339,6 +407,18 @@ define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/ob
 		destroy: function() {
 			this.explorer.destroy();
 		},
+		restore: function() {
+			var _self = this;
+			var deferreds = this.settings.map(function(setting) {
+				return new ConfigController(_self.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset();
+			});
+			Deferred.all(deferreds, function(err) { return err; }).then(function() {
+				this.parent.innerHTML = ""; // empty
+				
+				this.render(this.parent, this.serviceRegistry, this.settings, this.title);
+				this.serviceRegistry.getService("orion.page.message").setProgressResult("Settings reset."); //$NON-NLS-0$
+			}.bind(this));
+		},
 		render: function(parent, serviceRegistry, settings, categoryTitle) {
 			// FIXME Section forces a singleton id, bad
 			var idPrefix = 'pluginsettings-'; //$NON-NLS-0$
@@ -347,6 +427,8 @@ define(['orion/explorers/explorer', 'orion/section', 'orion/Deferred', 'orion/ob
 				var sectionId = idPrefix + 'section' + i; //$NON-NLS-0$
 				var setting = settings[i];
 				var section = this._makeSection(parent, sectionId, setting, setting.getName() || "Unnamed"); //$NON-NLS-0$
+				this.commandRegistry.renderCommands("restoreDefaults", section.getActionElement(), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+				
 				// Add a class name based on the category (all settings on the page have the same category currently)
 				if(setting.category){
 					// This does not match the full spec of legal class names, but we avoid categories breaking the UI, Bug 444194

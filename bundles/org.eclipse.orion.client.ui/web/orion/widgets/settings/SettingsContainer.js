@@ -304,6 +304,7 @@ define([
 			this.pluginSettingsWidget = new SettingsList({
 				parent: this.table,
 				serviceRegistry: this.registry,
+				commandRegistry: this.commandService,
 				settings: settingsInCategory,
 				title: title
 			});

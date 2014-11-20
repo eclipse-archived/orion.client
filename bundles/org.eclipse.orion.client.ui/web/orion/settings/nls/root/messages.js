@@ -262,5 +262,6 @@ define({
     'RedThemeName': 'Red',  //$NON-NLS-0$  //$NON-NLS-1$
     "SettingUpdateSuccess": "${0} settings successfully updated.",
     "buttonSave": "Save",
-    "buttonRevert": " Revert"
+    "buttonRevert": " Revert",
+    "ConfirmRestore": "Restore these settings to their default values?"
 });
