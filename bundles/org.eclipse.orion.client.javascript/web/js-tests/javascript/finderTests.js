@@ -1733,6 +1733,60 @@ define([
 //			assert.equal(blocks.length, 1, "Should have found 1 script block");
 			assert.equal(blocks.length, 0, "We don't currently support both type and language attributes on a script tag (Bug 437957)");
 		});
+		
+		/**
+		 * Tests the support for finding a member in the ESLint environments description
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=452296
+		 */
+		it('test_findESlintEnvForMember1', function() {
+			var env = Finder.findESLintEnvForMember('console');
+			assert.equal(env, 'node', "Should have found the node env");
+		});
+		
+		/**
+		 * Tests the support for finding a member in the ESLint environments description
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=452296
+		 */
+		it('test_findESlintEnvForMember2', function() {
+			var env = Finder.findESLintEnvForMember('define');
+			assert.equal(env, 'amd', "Should have found the amd env");
+		});
+		
+		/**
+		 * Tests the support for finding a member in the ESLint environments description
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=452296
+		 */
+		it('test_findESlintEnvForMember3', function() {
+			var env = Finder.findESLintEnvForMember('describe');
+			assert.equal(env, 'mocha', "Should have found the mocha env");
+		});
+		
+		/**
+		 * Tests the support for finding a member in the ESLint environments description
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=452296
+		 */
+		it('test_findESlintEnvForMember4', function() {
+			var env = Finder.findESLintEnvForMember('SVGFEMergeNodeElement');
+			assert.equal(env, 'browser', "Should have found the browser env");
+		});
+		
+		/**
+		 * Tests the support for finding a member in the ESLint environments description
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=452296
+		 */
+		it('test_findESlintEnvForMember5', function() {
+			var env = Finder.findESLintEnvForMember('encodeURIComponent');
+			assert.equal(env, 'builtin', "Should have found the builtin env");
+		});
+		
+		/**
+		 * Tests the support for finding a member in the ESLint environments description
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=452296
+		 */
+		it('test_findESlintEnvForMember5', function() {
+			var env = Finder.findESLintEnvForMember('encodeURIComponent');
+			assert.equal(env, 'builtin', "Should have found the builtin env");
+		});
 
 	});
 });

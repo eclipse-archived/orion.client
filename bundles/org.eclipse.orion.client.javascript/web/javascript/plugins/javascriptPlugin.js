@@ -123,9 +123,7 @@ define([
   			}
   	);
 	
-	var opts = Object.create(null);
-	opts.astManager = astManager;
-	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(opts);
+	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager);
 	
 	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 			quickFixComputer, 
@@ -171,6 +169,38 @@ define([
     			contentType: ['application/javascript'],  //$NON-NLS-0$
     			validationProperties: [
         			{source: "annotation:id", match: "no-empty-block"} //$NON-NLS-1$ //$NON-NLS-0$
+        		]
+  			}
+  	);
+  	
+  	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+			quickFixComputer, 
+			{
+				nameKey : 'addESLintEnvFixName',  //$NON-NLS-0$
+				tooltipKey : 'addESLintEnvFixTooltip',  //$NON-NLS-0$
+				scopeId: "orion.edit.quickfix",
+   				id : "add.eslint-env.fix",  //$NON-NLS-0$
+   				nls: 'javascript/nls/messages',  //$NON-NLS-0$
+                key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+    			contentType: ['application/javascript'],  //$NON-NLS-0$
+    			validationProperties: [
+        			{source: "annotation:id", match: "no-undef-defined"} //$NON-NLS-1$ //$NON-NLS-0$
+        		]
+  			}
+  	);
+  	
+  	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+			quickFixComputer, 
+			{
+				nameKey : 'addESLintGlobalFixName',  //$NON-NLS-0$
+				tooltipKey : 'addESLintGlobalFixTooltip',  //$NON-NLS-0$
+				scopeId: "orion.edit.quickfix",
+   				id : "add.eslint-global.fix",  //$NON-NLS-0$
+   				nls: 'javascript/nls/messages',  //$NON-NLS-0$
+                key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+    			contentType: ['application/javascript'],  //$NON-NLS-0$
+    			validationProperties: [
+        			{source: "annotation:id", match: "no-undef-defined"} //$NON-NLS-1$ //$NON-NLS-0$
         		]
   			}
   	);

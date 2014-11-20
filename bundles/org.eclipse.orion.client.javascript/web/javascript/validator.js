@@ -131,9 +131,10 @@ define([
 				end = relatedToken.range[1];
 			}
 		}
+		var key = (e.args && e.args.nls ? e.args.nls : e.ruleId);
 		var prob = {
-		    id: e.ruleId,
-		    descriptionKey: (e.args && e.args.nls ? e.args.nls : e.ruleId),
+		    id: key,
+		    descriptionKey: key,
 		    descriptionArgs: e.args,
 			description: e.message,
 			severity: getSeverity(e),

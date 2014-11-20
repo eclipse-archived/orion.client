@@ -12,8 +12,9 @@
 /*eslint-env amd*/
 define([
 'estraverse',
-'orion/objects'
-], function(Estraverse, Objects) {
+'orion/objects',
+'eslint/conf/environments'
+], function(Estraverse, Objects, ESlintEnv) {
 
 	/**
 	 * @name javascript.Visitor
@@ -1025,6 +1026,53 @@ define([
 				
 			this.visitor.context = context;
 			return this.visitor;			
+		},
+		
+		/**
+		 * @description Asks the ESLint environment description if it knows about the given member name and if so
+		 * returns the index name it was found in
+		 * @function
+		 * @param {String name The name of the member to look up
+		 * @returns {String} The name of the ESLint environment it was found in or <code>null</code>
+		 * @since 8.0
+		 */
+		findESLintEnvForMember: function findESLintEnvForMember(name) {
+		    var keys = Object.keys(ESlintEnv);
+		    if(keys) {
+		        var len = keys.length;
+		        for(var i = 0; i < len; i++) {
+		            var env = ESlintEnv[keys[i]];
+		            if(typeof env[name] !== 'undefined') {
+		                return keys[i];
+		            }
+		            var globals = env['globals'];
+		            if(globals && (typeof globals[name] !== 'undefined')) {
+		                return keys[i];
+		            }
+		        }
+		    }
+		    return null;
+		},
+		
+		/**
+		 * @description Find the directive comment with the given name in the given AST
+		 * @function
+		 * @param {Object} ast The AST to search
+		 * @param {String} name The name of the fdirective to look for. e.g. eslint-env
+		 * @returns {Object} The AST comment node or <code>null</code>
+		 * @since 8.0
+		 */
+		findDirective: function findDirective(ast, name) {
+		    if(ast && (typeof name !== 'undefined')) {
+		        var len = ast.comments.length;
+		        for(var i = 0; i < len; i++) {
+		            var match = /^(eslint-\w+|eslint|globals?)(\s|$)/.exec(ast.comments[i].value);
+		            if(typeof match !== 'undefined') {
+		                return ast.comments[i];
+		            }
+		        }
+		    }
+		    return null;
 		}
 		
 	};

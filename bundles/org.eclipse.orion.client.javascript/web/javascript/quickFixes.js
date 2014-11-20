@@ -13,16 +13,17 @@
 /* global doctrine */
 define([
 'orion/objects',
-], function(Objects) {
+'javascript/finder'
+], function(Objects, Finder) {
 	
 	/**
 	 * @description Creates a new JavaScript quick fix computer
-	 * @param {Object} options The map of options
+	 * @param {javascript.ASTManager} astManager The AST manager
 	 * @returns {javascript.JavaScriptQuickfixes} The new quick fix computer instance
 	 * @since 8.0
 	 */
-	function JavaScriptQuickfixes(options) {
-	   // var opts = options ? options : Object.create(null);
+	function JavaScriptQuickfixes(astManager) {
+	   this.astManager = astManager;
 	}
 	
 	Objects.mixin(JavaScriptQuickfixes.prototype, /** @lends javascript.JavaScriptQuickfixes.prototype*/ {
@@ -73,6 +74,20 @@ define([
     		            fix += postfix;
     		            return editorContext.setText(fix, annotation.start+1, annotation.start+1);
     		        }
+    		     /*   case 'no-undef-defined': {
+    		            var name = /^'(.*)'/.exec(annotation.value);
+    		            if(typeof name !== 'undefined') {
+        		            var env = Finder.findESLintEnvForMember(name);
+        		            return that.astManager.getAST(editorContext).then(function(ast) {
+        		                var comment = Finder.findDirective(ast, '');
+        		                if(comment) {
+        		                    
+        		                } else {
+        		                    
+        		                }
+        		            });
+    		            }
+    		        }*/
     		        default: return null;
     		    }
 		    });
