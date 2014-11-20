@@ -312,13 +312,13 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		deferreds.push(context.projectClient.deleteProjectLaunchConfiguration(launchConf)); /* deletes the launch configuration file if present */
 		deferreds.push(context.deployService.deleteAdditionalLaunchConfiguration(context.project, launchConf)); /* deletes additional launch configuration data if present */
 
-		progress.showWhile(Deferred.all(deferreds), context.deployService.name + " in progress", true).then(function(){
+		progress.showWhile(Deferred.all(deferreds), messages["deletingLaunchConfiguration"], true).then(function(){
 			fileDispatcher.dispatchEvent({
 				type: "delete",
 				oldValue: launchConf.File, /* TODO: Find out what happens when there's no File */
 				parent: launchConf.File.parent
 			});
-		});
+		}, context.errorHandler);
 	}
 
 	var sharedDependencyDispatcher;

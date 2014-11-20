@@ -115,6 +115,7 @@ define({
 	"Downloading...": "Reading file contents...",
 	"Download not supported": "Contents download is not supported in this browser.",
 	"gettingContentFrom": "Getting content from ",
+	"deletingLaunchConfiguration": "Deleting launch configuration...",
 	"deployTo": "Deploy to ",
 	"deploy": "Deploy ",
 	"connect": "Connect",
