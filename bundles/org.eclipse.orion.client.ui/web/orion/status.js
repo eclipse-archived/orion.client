@@ -213,7 +213,7 @@ define([
 		 * Set a message that indicates that a long-running (progress) operation is complete.
 		 * @param {String|orionError} message The error to display. Can be a simple String,
 		 * or an error object from a XHR error callback, or the body of an error response 
-		 * from the Orion server. The string may be formatted as rich text using Markdown syntax.
+		 * from the Orion server.
 		 */
 		setProgressResult : function(message, cancelMsg) {
 			this._clickToDisMiss = false;
@@ -307,19 +307,28 @@ define([
 				span.innerHTML = msg;
 				return span;
 			}
-			// msg is text. Try parsing as Markdown
-			var markdownHtml;
+			// Check for Markdown
+			var markdownSource;
+			if (status.type === "markdown") { //$NON-NLS-0$
+				markdownSource = status.content || msg;
+			} else {
+				// Attempt to parse the msg field as Markdown
+				// TODO this is deprecated - should be removed in favor of explicit `type`
+				markdownSource = msg;
+			}
+
+			var html= null;
 			try {
-				markdownHtml = marked(msg, {
+				html = marked(markdownSource, {
 					sanitize: true,
 				});
 			} catch (e) {
 			}
 
 			var msgNode, links = [];
-			if (markdownHtml) {
+			if (html) {
 				msgNode = document.createElement("div"); //$NON-NLS-0$
-				msgNode.innerHTML = markdownHtml;
+				msgNode.innerHTML = html;
 				// All status links open in new window
 				links = lib.$$("a", msgNode); //$NON-NLS-0$
 				Array.prototype.forEach.call(links, function(link) { //$NON-NLS-0$
