@@ -17,11 +17,12 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	'orion/editor/eventTarget', //$NON-NLS-0$
 	'orion/Deferred', //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
+	'orion/editor/tooltip', //$NON-NLS-0$
 	'orion/editor/util', //$NON-NLS-0$
 	'orion/util', //$NON-NLS-0$
 	'orion/webui/littlelib', //$NON-NLS-0$
 	'orion/metrics' //$NON-NLS-0$
-], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, textUtil, util, lib, mMetrics) {
+], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, mTooltip, textUtil, util, lib, mMetrics) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -937,8 +938,33 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			if (this.widget) {
 				this.widget.selectNode(newIndex);
 			}
+			
+//			var tooltip = mTooltip.Tooltip.getTooltip(this.contentAssist.textView);
+//			var self = this;
+//			tooltip.hide(0);
+//			tooltip.setTarget({
+//				x: 400,
+//				y: 400,
+//				getTooltipInfo: function() {
+//					return self._getTooltipInfo(this.x, this.y);
+//				}
+//			}, 0, 5000);
+			
 			return true;
 		},
+
+		/** @private */
+//		_getTooltipInfo: function(x, y) {
+//			var bounds = lib.bounds(this.widget.parentNode);
+//			var info = {
+//				contents: this.proposals[this.selectedIndex].name,
+//				offset: 0,
+//				anchor: "left", //$NON-NLS-0$
+//				x: bounds.left + bounds.width + 10,
+//				y: bounds.top + (bounds.height/2)
+//			};
+//			return info;
+//		},
 		
 		pageUp: function() {
 			//TODO find out why this doesn't always go to the very top
