@@ -30,6 +30,9 @@ utils.checker = function(obj) {
 	};
 	checker.string = function(prop) {
 		var val = obj[prop];
+		if (typeof val === "number")
+			val = obj[prop] = String(val); // Coerce to string
+
 		if (typeof val !== "string")
 			fail(prop, "string");
 		return checker;
