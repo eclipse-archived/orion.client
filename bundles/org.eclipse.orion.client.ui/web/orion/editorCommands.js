@@ -180,6 +180,7 @@ define([
 			this._generateFindCommnand(editor);
 			this._generateBlame(editor);
 			this._generateDiff(editor);
+			this._generateShowTooltip(editor);
 		},
 		_generateSettingsCommand: function(editor) {
 			var self = this;
@@ -513,6 +514,30 @@ define([
 			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.diff", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 
+		_generateShowTooltip: function(editor){
+			var tooltip = editor.getTooltip();
+			var showTooltipCommand = new mCommands.Command({
+				name: messages.showTooltip,
+				tooltip: messages.showTooltipTooltip,
+				id: "orion.edit.showTooltip", //$NON-NLS-0$
+				callback: function(data) {
+					var tv = editor._textView;
+					var offset = tv.getCaretOffset();
+					var pos = tv.getLocationAtOffset(offset);
+					tooltip.setTarget({
+					x: pos.x,
+					y: pos.y,
+					getTooltipInfo: function() {
+						return editor._getTooltipInfo(this.x, this.y);
+					}
+					}, 0, -1);
+				}
+			});
+			this.commandService.addCommand(showTooltipCommand);
+			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, //$NON-NLS-1$ //$NON-NLS-0$
+				new mKeyBinding.KeyBinding('e', true, true));
+		},
+	
 		/**
 		 * Helper for {@link #_generateEditCommands}. Creates and returns the Command objects and the service info
 		 * that derived them. Does not render commands.

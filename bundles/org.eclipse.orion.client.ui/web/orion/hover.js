@@ -48,9 +48,11 @@ define ([
 			if  (!annotation || !parentDiv)
 				return;
 
+			var qfToolbar = document.createElement("span");
 			var actions = document.createElement("ul"); //$NON-NLS-0$
 			actions.className = "commandList layoutRight"; //$NON-NLS-0$
-			parentDiv.appendChild(actions);
+			qfToolbar.appendChild(actions);
+			parentDiv.appendChild(qfToolbar);
 			
 			var metadata = this.inputManager.getFileMetadata();
 			metadata.annotation = annotation;

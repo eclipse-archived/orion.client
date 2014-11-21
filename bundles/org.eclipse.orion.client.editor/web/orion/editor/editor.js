@@ -353,6 +353,14 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._lineNumberRuler;
 		},
 		/**
+		 * Returns the Tooltip instance for this editor
+		 *
+		 * @returns {orion.editor.Tooltip}
+		*/
+		getTooltip: function() {
+			return mTooltip.Tooltip.getTooltip(this._textView);
+		},
+		/**
 		 * Returns the zoom ruler of the editor.
 		 *
 		 * @returns {orion.editor.LineNumberRuler}
