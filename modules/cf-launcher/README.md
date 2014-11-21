@@ -78,9 +78,12 @@ Most operating systems ship with a WebDAV client built in, allowing you to map y
 can then view and edit the files in your app instance as easily as local files.
 
 WebDAV connection info:
-* URL: `http://your_application_url/launcher/dav`
-* Username: (Any username should work, but don't leave it blank.)
+* URL: `https://your_application_url/launcher/dav`
+* Username: `vcap`
 * Password: (The password you chose when you set up cf-launcher.)
+
+HTTPS is mandatory when connecting from most WebDAV clients: accessing your files using an `http://..` URL will fail.
+But who needs HTTP anyway?
 
 For detailed setup instructions, see:
 * [Windows](http://doc.owncloud.org/server/6.0/user_manual/files/files.html#windows)

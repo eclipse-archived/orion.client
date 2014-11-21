@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*eslint-env node*/
 var bodyParser = require("body-parser"),
-    cfAppEnv = require("cfenv").getAppEnv(),
+    cfAppEnv = require("cfenv").getAppEnv({ protocol: "https:" }), // Always generate https: urls to ourself
     compression = require("compression"),
     express = require("express"),
     flash = require("connect-flash"),
@@ -77,7 +77,7 @@ function createProxyApp(options) {
 	var davServer = dav.createServer({
 			port: proxies.dav.port,
 			password: password,
-			authBackend: auth.digestBackend,
+			authBackend: auth.backend,
 			realm: realm,
 	});
 	logger("[Internal] Application port: %s", target.port);

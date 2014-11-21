@@ -11,9 +11,7 @@
 /*eslint-env node*/
 var fmt = require("util").format,
     jsDAV = require("jsDAV"),
-//    jsDAV_Auth_Backend_AbstractDigest = require("jsDAV/lib/DAV/plugins/auth/abstractDigest"),
     pkgName = require("../../package.json").name;
-	
 
 function isDebugMode() {
 	// Determine if debug flag `cf-launcher:*` or `cf-launcher:webdav` is set

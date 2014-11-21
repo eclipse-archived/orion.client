@@ -9,27 +9,24 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var crypto = require("crypto"),
-    internalLogger = require("../logger")("auth:spam"),
-    jsDAV_Auth_Backend_AbstractDigest = require("jsDAV/lib/DAV/plugins/auth/abstractDigest"),
+var internalLogger = require("../logger")("auth:spam"),
+    jsDAV_Auth_Backend_AbstractBasic = require("jsDAV/lib/DAV/plugins/auth/abstractBasic"),
     sessions = require("client-sessions");
 
-// @returns {Boolean} whether the user has been authenticated (either through client session or digest).
+// @returns {Boolean} whether the user has been authenticated (either through client session or Basic).
 function isAuthenticated(req) {
 	return req.authenticated;
 }
 
-function md5(str) {
-	return crypto.createHash("md5").update(str).digest("hex");
-}
-
-// Adapter for jsDAV Handler API
+/**
+ * Adapter for jsDAV Handler API. The auth backends need this.
+ */
 function Handler(req) {
 	this.httpRequest = req;
 }
 Handler.prototype.handleError = null;
 Handler.prototype.getRequestBody = function(enc, stream, force, callback) {
-	// TODO this is only needed for QOP_OPINT which nobody uses
+	// jsDAV basic auth backend does not call this so we do not implement it
 	callback(new Error("#getRequestBody() not implemented"));
 };
 
@@ -37,21 +34,13 @@ var Auth = module.exports = function(options) {
 	var password = options.password,
 	    realm = options.realm;
 
-	var digestBackend = (function() {
-		var MyDigest = jsDAV_Auth_Backend_AbstractDigest.extend({
-			initialize: function() {
-				jsDAV_Auth_Backend_AbstractDigest.initialize.call(this);
+	var basicBackend = (function() {
+		var MyBasic = jsDAV_Auth_Backend_AbstractBasic.extend({
+			validateUserPass: function(username, pwd, cbvalidpass) {
+				cbvalidpass(pwd === password);
 			},
-			/**
-			 * Gets the digest (`HA1`) for the given realm and user.
-			 * @param {Function} callback Must be invoked as <tt>callback(null, digest)</tt>.
-			 */
-			getDigestHash: function(realm, username, callback) {
-				var str = username + ":" + realm + ":" + password;
-				callback(null, md5(str));
-			}
 		});
-		return MyDigest.new();
+		return MyBasic.new();
 	}());
 
 	// Setup client-side session
@@ -63,7 +52,7 @@ var Auth = module.exports = function(options) {
 		activeDuration: 1000 * 60 * 5,
 	});
 
-	// Auth middleware combining client-session with digest
+	// Auth middleware combining client-session with Basic
 	function authMiddleware(req, res, next) {
 		// Check client session first..
 		sessionMiddleware(req, res, function(err) {
@@ -73,17 +62,18 @@ var Auth = module.exports = function(options) {
 				req.authenticated = true;
 				return next();
 			}
-			// Fall back to digest auth
-			digestBackend.authenticate(new Handler(req), realm, function(err, result) {
+			// Fall back to basic auth
+			basicBackend.authenticate(new Handler(req), realm, function(err, result) {
 				if (err && err.type === "NotAuthenticated") {
-					internalLogger("%s - NotAuthenticated, setting WWW-Auth header: %s", req.url, err.headers["WWW-Authenticate"]);
+					// Add the auth header
+					internalLogger("%s - NotAuthenticated, setting WWW-Authenticate header: %s", req.url, err.headers["WWW-Authenticate"]);
 					res.set(err.headers);
 					return next();
 				}
 				if (err)
 					return next(err); // not sure about this
 				if (result) {
-					internalLogger("%s - authenticated using Digest, user: %s :)", req.url, digestBackend.getUsername());
+					internalLogger("%s - authenticated user '%s' using Basic Auth :)", req.url, basicBackend.currentUser);
 					req.authenticated = true;
 				}
 				return next();
@@ -96,7 +86,7 @@ var Auth = module.exports = function(options) {
 		else
 			req.session.reset();
 	};
-	authMiddleware.digestBackend = digestBackend;
+	authMiddleware.backend = basicBackend;
 
 	return authMiddleware;
 };
