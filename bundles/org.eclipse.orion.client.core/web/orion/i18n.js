@@ -10,7 +10,8 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(function() {
+define(["orion/Deferred"
+], function(Deferred) {
 	return {
 		load: function(name, parentRequire, onLoad, config) {
 			config = config || {};
@@ -52,71 +53,119 @@ define(function() {
 			parentRequire(['orion/bootstrap'], function(bootstrap) { //$NON-NLS-0$
 				bootstrap.startup().then(function(core) {
 					var serviceRegistry = core.serviceRegistry;
-					var nlsReferences = serviceRegistry.getServiceReferences("orion.i18n.message"); //$NON-NLS-0$
-
-					if (!locale) {
-						// create master language entries				
-						var master = {};
-						var masterReference;
-						nlsReferences.forEach(function(reference) {
-							var name = reference.getProperty("name"); //$NON-NLS-0$
-							if ((match = NLS_REG_EXP.exec(name)) && prefix === match[1] && suffix === (match[3] || match[2])) {
-								locale = match[3] ? match[2] : "";
-								if (locale) {
-									// see Bug 381042 - [Globalization] Messages are loaded even if their language is not used
-									var userLocale = config.locale || (typeof navigator !== "undefined" ? (navigator.language || navigator.userLanguage) : null);
-									if (!userLocale || userLocale.toLowerCase().indexOf(locale.toLowerCase()) !== 0) {
-										return;
-									}
-									// end
-									master[locale] = true;
-									if (!parentRequire.specified || !parentRequire.specified(name)) {
-										define(name, ['orion/i18n!' + name], function(bundle) { //$NON-NLS-0$
-											return bundle;
-										});
-									}
-								} else {
-									masterReference = reference;
+					var promiseFunc, perLanguage = false;
+					var matchedRef;
+					var nlsReferencesPerLanguage = serviceRegistry.getServiceReferences("orion.i18n.message.perlanguage"); //$NON-NLS-0$
+					if(nlsReferencesPerLanguage.length > 0) {
+						perLanguage = true;
+						var userLocale = config.locale || (typeof navigator !== "undefined" ? (navigator.language || navigator.userLanguage) : null);
+						if(userLocale) {
+							userLocale = userLocale.toLowerCase();
+							var matchFunc = function(reference, completeMatch) {
+								var serviceName = reference.getProperty("name");
+								if(serviceName) {
+									serviceName = serviceName.toLowerCase();
 								}
+								var flag = completeMatch ? (userLocale === serviceName) : (userLocale.indexOf(serviceName) === 0);
+								if (flag) {
+									return reference;
+								}
+								return null;
+							};
+							var matched = nlsReferencesPerLanguage.some(function(ref) {
+								matchedRef = matchFunc(ref, true);
+								if (matchedRef) {
+									return true;
+								}
+								return false;
+							});
+							if(!matched) {
+								matched = nlsReferencesPerLanguage.some(function(ref) {
+									matchedRef = matchFunc(ref);
+									if (matchedRef) {
+										return true;
+									}
+									return false;
+								});								
 							}
-						});
-						if (!parentRequire.specified || !parentRequire.specified(name)) {
-							if (masterReference) {
-								serviceRegistry.getService(masterReference).getMessageBundle().then(function(bundle) {
-									Object.keys(master).forEach(function(key) {
-										if (typeof bundle[key] === 'undefined') { //$NON-NLS-0$
-											bundle[key] = master[key];
+							if(matchedRef) {
+								promiseFunc = serviceRegistry.getService(matchedRef).getBundleNames();
+							} else {
+								promiseFunc = new Deferred().resolve([]);
+							}
+						} else {
+							promiseFunc = new Deferred().resolve([]);
+						}
+					} else {
+						var nlsReferencesSingle = serviceRegistry.getServiceReferences("orion.i18n.message"); //$NON-NLS-0$
+						promiseFunc = new Deferred().resolve(nlsReferencesSingle);
+					}
+					promiseFunc.then(function(nlsReferences) {
+						if (!locale) {
+							// create master language entries				
+							var master = {};
+							var masterReference;
+							nlsReferences.forEach(function(reference) {
+								var name = perLanguage ? reference : reference.getProperty("name"); //$NON-NLS-0$
+								if ((match = NLS_REG_EXP.exec(name)) && prefix === match[1] && suffix === (match[3] || match[2])) {
+									locale = match[3] ? match[2] : "";
+									if (locale) {
+										// see Bug 381042 - [Globalization] Messages are loaded even if their language is not used
+										var userLocale = config.locale || (typeof navigator !== "undefined" ? (navigator.language || navigator.userLanguage) : null);
+										if (!userLocale || userLocale.toLowerCase().indexOf(locale.toLowerCase()) !== 0) {
+											return;
 										}
+										// end
+										master[locale.toLowerCase()] = true;
+										if (!parentRequire.specified || !parentRequire.specified(name)) {
+											define(name, ['orion/i18n!' + name], function(bundle) { //$NON-NLS-0$
+												return bundle;
+											});
+										}
+									} else {
+										masterReference = perLanguage ? matchedRef: reference;
+									}
+								}
+							});
+							if (!parentRequire.specified || !parentRequire.specified(name)) {
+								if (masterReference) {
+									serviceRegistry.getService(masterReference).getMessageBundle(perLanguage ? name : null).then(function(bundle) {
+										Object.keys(master).forEach(function(key) {
+											if (typeof bundle[key] === 'undefined') { //$NON-NLS-0$
+												bundle[key] = master[key];
+											}
+										});
+										define(name, [], bundle);
+										onLoad(bundle);
+									}, function() {
+										define(name, [], master);
+										onLoad(master);
 									});
-									define(name, [], bundle);
-									onLoad(bundle);
-								}, function() {
+								} else {
 									define(name, [], master);
 									onLoad(master);
-								});
+								}
 							} else {
-								define(name, [], master);
 								onLoad(master);
 							}
 						} else {
-							onLoad(master);
-						}
-					} else {
-						var found = nlsReferences.some(function(reference) {
-							if (name === reference.getProperty("name")) { //$NON-NLS-0$
-								serviceRegistry.getService(reference).getMessageBundle().then(function(bundle) {
-									onLoad(bundle);
-								}, function() {
-									onLoad({});
-								});
-								return true;
+							var found = nlsReferences.some(function(reference) {
+								var refName = perLanguage ? reference : reference.getProperty("name"); //$NON-NLS-0$
+								if (name === refName) { //$NON-NLS-0$
+									serviceRegistry.getService(perLanguage ? matchedRef: reference).getMessageBundle(perLanguage ? name : null).then(function(bundle) {
+										onLoad(bundle);
+									}, function() {
+										onLoad({});
+									});
+									return true;
+								}
+								return false;
+							});
+							if (!found) {
+								onLoad({});
 							}
-							return false;
-						});
-						if (!found) {
-							onLoad({});
 						}
-					}
+					});//PromiseFunc
 				});
 			});
 		}
