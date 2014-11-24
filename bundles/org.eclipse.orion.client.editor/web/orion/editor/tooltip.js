@@ -401,7 +401,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 						iframe.id = 'HtmlHover'; //$NON-NLS-0$
 						iframe.name = 'HTML Hover'; //$NON-NLS-0$
 						iframe.type = "text/html"; //$NON-NLS-0$
-						iframe.sandbox = "allow-scripts allow-same-origin"; //$NON-NLS-0$
+						iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
 						iframe.style.border = "none"; //$NON-NLS-0$
 						iframe.style.width = "auto"; //$NON-NLS-0$
 						iframe.style.height = "auto"; //$NON-NLS-0$
@@ -557,7 +557,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			iframe.id = options.id;
 			iframe.name = options.id;
 			iframe.type = "text/html"; //$NON-NLS-0$
-			iframe.sandbox = "allow-scripts allow-same-origin"; //$NON-NLS-0$
+			iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
 			iframe.frameborder = options.border !== undefined ? options.border : 0;
 			iframe.src = href;
 			iframe.style.border = "none"; //$NON-NLS-0$

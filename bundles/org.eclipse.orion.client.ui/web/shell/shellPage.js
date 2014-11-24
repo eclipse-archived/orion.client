@@ -753,7 +753,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 						iframe.id = name;
 						iframe.name = name;
 						iframe.type = "text/html"; //$NON-NLS-0$
-						iframe.sandbox = "allow-scripts allow-same-origin"; //$NON-NLS-0$
+						iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
 						iframe.frameborder = 1;
 						iframe.src = href;
 						iframe.className = "delegatedUI"; //$NON-NLS-0$

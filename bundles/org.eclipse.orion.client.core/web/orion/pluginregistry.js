@@ -954,7 +954,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                     clearTimeout(loadTimeout);
                     loadTimeout = setTimeout(sendTimeout.bind(null, "Plugin handshake timeout for: " + url), 5000);
                 };
-                iframe.sandbox = "allow-scripts allow-same-origin"; //$NON-NLS-0$
+                iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
         		iframe.style.width = iframe.style.height = "100%"; //$NON-NLS-0$
 	        	iframe.frameBorder = 0;
                 (parent || _parent).appendChild(iframe);
