@@ -1108,6 +1108,11 @@ textarea.parameterInput {
 	padding: 8px;
 }
 
+.discreetInfoCell {
+	color: #666666;	
+	padding: 8px;
+}
+
 .sectionTreeTable {
 	border-spacing: 0;
 	width:100%;

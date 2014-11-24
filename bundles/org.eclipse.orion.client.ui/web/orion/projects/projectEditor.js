@@ -204,6 +204,10 @@ define([
 		}
 
 	};
+	
+	AdditionalInfoRenderer.prototype.getSecondaryColumnStyle = function() {
+		return "discreetInfoCell"; //$NON-NLS-0$
+	};
 
 	function DependenciesModel(project, projectClient){
 		this.root = project;
