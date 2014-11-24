@@ -38,7 +38,6 @@ exports.define = define;
  * @returns {void}
  */
 function load(rulesDir) {
-    /*ORION*/
     var newRules = Rules.getESLintRules(rulesDir);
     Object.keys(newRules).forEach(function(ruleId) {
         define(ruleId, newRules[ruleId]);
@@ -46,6 +45,21 @@ function load(rulesDir) {
 }
 
 exports.load = load;
+
+/**
+ * Registers all given rules of a plugin.
+ * @param {Object} pluginRules A key/value map of rule definitions.
+ * @param {String} pluginName The name of the plugin without prefix (`eslint-plugin-`).
+ * @returns {void}
+ */
+exports.import = function (pluginRules, pluginName) {
+    Object.keys(pluginRules).forEach(function (ruleId) {
+        var qualifiedRuleId = pluginName + "/" + ruleId,
+            rule = pluginRules[ruleId];
+
+        define(qualifiedRuleId, rule);
+    });
+};
 
 /**
  * Access rule handler by id (file name).

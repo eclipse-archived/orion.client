@@ -26,6 +26,14 @@ var EventEmitter = events.EventEmitter;
 function escapeRegExp(rx) {
     return rx.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
+/***
+ * ORION
+ */
+function assign(o1, o2) {
+    Object.keys(o2).forEach(function(name) {
+        o1[name] = o2[name];
+    });
+}
 
 /**
  * Parses a list of "name:boolean_value" or/and "name" options divided by comma or
@@ -49,7 +57,9 @@ function parseBooleanConfig(string) {
             value = name.substring(pos + 1, name.length);
             name = name.substring(0, pos);
         }
+
         items[name] = (value === "true");
+
     });
     return items;
 }
@@ -61,10 +71,11 @@ function parseBooleanConfig(string) {
  */
 function parseJsonConfig(string) {
     var items = {};
-    string = string.replace(/([a-z0-9\-]+):/g, "\"$1\":").replace(/(\]|[0-9])\s+(?=")/, "$1,");
+    string = string.replace(/([a-z0-9\-\/]+):/g, "\"$1\":").replace(/(\]|[0-9])\s+(?=")/, "$1,");
     try {
         items = JSON.parse("{" + string + "}");
     } catch(e) { }
+
     return items;
 }
 
@@ -95,12 +106,13 @@ function parseListConfig(string) {
 function getVariable(scope, name) {
     var variable = null;
     scope.variables.some(function(v) {
-    if (v.name === name) {
+        if (v.name === name) {
             variable = v;
             return true;
         } else {
             return false;
         }
+
     });
     return variable;
 }
@@ -118,20 +130,21 @@ function addDeclaredGlobals(program, globalScope, config) {
     var declaredGlobals = {},
         explicitGlobals = {},
         builtin = environments.builtin;
-    /*ORION*/
-    util.assign(declaredGlobals, builtin);
+
+    assign(declaredGlobals, builtin);
+
     Object.keys(config.env).forEach(function (name) {
         if (config.env[name]) {
             var environmentGlobals = environments[name] && environments[name].globals;
             if (environmentGlobals) {
-                /*ORION*/
-                util.assign(declaredGlobals, environmentGlobals);
+                assign(declaredGlobals, environmentGlobals);
             }
         }
     });
-    /*ORION*/
-    util.assign(declaredGlobals, config.globals);
-    util.assign(explicitGlobals, config.astGlobals);
+
+    assign(declaredGlobals, config.globals);
+    assign(explicitGlobals, config.astGlobals);
+
     Object.keys(declaredGlobals).forEach(function(name) {
         var variable = getVariable(globalScope, name);
         if (!variable) {
@@ -141,7 +154,7 @@ function addDeclaredGlobals(program, globalScope, config) {
         }
         variable.writeable = declaredGlobals[name];
     });
-    
+
     Object.keys(explicitGlobals).forEach(function(name) {
         var variable = getVariable(globalScope, name);
         if (!variable) {
@@ -162,6 +175,7 @@ function addDeclaredGlobals(program, globalScope, config) {
  * @returns {void}
  */
 function disableReporting(reportingConfig, start, rules) {
+
     if (rules.length) {
         rules.forEach(function(rule){
             reportingConfig.push({
@@ -204,6 +218,7 @@ function enableReporting(reportingConfig, start, rules) {
             if (prevStart && prevStart !== reportingConfig[i].start) {
                 break;
             }
+
             if (!reportingConfig[i].end) {
                 reportingConfig[i].end = start;
                 prevStart = reportingConfig[i].start;
@@ -230,31 +245,35 @@ function modifyConfigsFromComments(ast, config, reportingConfig) {
         env: {}
     };
     var commentRules = {};
-    
+
     ast.comments.forEach(function(comment) {
         if (comment.type === "Block") {
-    
+
             var value = comment.value.trim();
             var match = /^(eslint-\w+|eslint|globals?)(\s|$)/.exec(value);
-    
+
             if (match) {
                 value = value.substring(match.index + match[1].length);
-    
+
                 switch (match[1]) {
                     case "globals":
                     case "global":
                         util.mixin(commentConfig.astGlobals, parseBooleanConfig(value));
                         break;
-                     case "eslint-env":
+
+                    case "eslint-env":
                         util.mixin(commentConfig.env, parseListConfig(value));
                         break;
-                     case "eslint-disable":
+
+                    case "eslint-disable":
                         disableReporting(reportingConfig, comment.loc.start, Object.keys(parseListConfig(value)));
                         break;
-                     case "eslint-enable":
+
+                    case "eslint-enable":
                         enableReporting(reportingConfig, comment.loc.start, Object.keys(parseListConfig(value)));
                         break;
-                     case "eslint":
+
+                    case "eslint":
                         var items = parseJsonConfig(value);
                         Object.keys(items).forEach(function(name) {
                             var ruleValue = items[name];
@@ -263,13 +282,13 @@ function modifyConfigsFromComments(ast, config, reportingConfig) {
                             }
                         });
                         break;
-    
+
                     //no default
                 }
             }
         }
     });
-    
+
     // apply environment rules before user rules
     Object.keys(commentConfig.env).forEach(function (name) {
         var environmentRules = environments[name] && environments[name].rules;
@@ -278,7 +297,7 @@ function modifyConfigsFromComments(ast, config, reportingConfig) {
         }
     });
     util.mixin(commentConfig.rules, commentRules);
-    
+
     util.mergeConfigs(config, commentConfig);
 }
 
@@ -290,7 +309,9 @@ function modifyConfigsFromComments(ast, config, reportingConfig) {
  * @returns {boolean}          True if message should be ignored, false otherwise
  */
 function isDisabledByReportingConfig(reportingConfig, ruleId, location) {
+
     for (var i = 0, c = reportingConfig.length; i < c; i++) {
+
         var ignore = reportingConfig[i];
         if ((!ignore.rule || ignore.rule === ruleId) &&
             (location.line > ignore.start.line || (location.line === ignore.start.line && location.column >= ignore.start.column)) &&
@@ -298,6 +319,7 @@ function isDisabledByReportingConfig(reportingConfig, ruleId, location) {
                 return true;
         }
     }
+
     return false;
 }
 
@@ -307,8 +329,10 @@ function isDisabledByReportingConfig(reportingConfig, ruleId, location) {
  * @returns {Object}        Processed config
  */
 function prepareConfig(config) {
+
     config.globals = config.globals || config.global || {};
     delete config.global;
+
     var copiedRules = {};
     if (typeof config.rules === "object") {
         Object.keys(config.rules).forEach(function(k){
@@ -320,10 +344,12 @@ function prepareConfig(config) {
             }
         });
     }
+
     return {
         rules: copiedRules,
         globals: util.mergeConfigs({}, config.globals),
-        env: util.mergeConfigs({}, config.env || {})
+        env: util.mergeConfigs({}, config.env || {}),
+        settings: util.mergeConfigs({}, config.settings || {})
     };
 }
 
@@ -337,129 +363,133 @@ function prepareConfig(config) {
  */
 module.exports = (function() {
 
-var api = Object.create(new EventEmitter()),
-    messages = [],
-    currentText = null,
-    currentTextLines = [],
-    currentConfig = null,
-    currentTokens = null,
-    currentScopes = null,
-    currentFilename = null,
-    controller = null,
-    reportingConfig = [],
-    commentLocsEnter = [],
-    commentLocsExit = [];
+    var api = Object.create(new EventEmitter()),
+        messages = [],
+        currentText = null,
+        currentTextLines = [],
+        currentConfig = null,
+        currentTokens = null,
+        currentScopes = null,
+        scopeMap = null,
+        currentFilename = null,
+        controller = null,
+        reportingConfig = [],
+        commentLocsEnter = [],
+        commentLocsExit = [];
 
-/**
- * Parses text into an AST. Moved out here because the try-catch prevents
- * optimization of functions, so it's best to keep the try-catch as isolated
- * as possible
- * @param {string} text The text to parse.
- * @returns {ASTNode} The AST if successful or null if not.
- * @private
- */
-function parse(text) {
-    /*
-     * Check for parsing errors first. If there's a parsing error, nothing
-     * else can happen. However, a parsing error does not throw an error
-     * from this method - it's just considered a fatal error message, a
-     * problem that ESLint identified just like any other.
+    /**
+     * Parses text into an AST. Moved out here because the try-catch prevents
+     * optimization of functions, so it's best to keep the try-catch as isolated
+     * as possible
+     * @param {string} text The text to parse.
+     * @returns {ASTNode} The AST if successful or null if not.
+     * @private
      */
-    try {
-        return esprima.parse(text, {
-            loc: true,
-            range: true,
-            raw: true,
-            tokens: true,
-            comment: true,
-            attachComment: true
-        });
-    } catch (ex) {
+    function parse(text) {
+        /*
+         * Check for parsing errors first. If there's a parsing error, nothing
+         * else can happen. However, a parsing error does not throw an error
+         * from this method - it's just considered a fatal error message, a
+         * problem that ESLint identified just like any other.
+         */
+        try {
+            return esprima.parse(text, {
+                loc: true,
+                range: true,
+                raw: true,
+                tokens: true,
+                comment: true,
+                attachComment: true
+            });
+        } catch (ex) {
 
-        messages.push({
-            fatal: true,
-             // messages come as "Line X: Unexpected token foo", so strip off leading part
-            message: ex.message.substring(ex.message.indexOf(":") + 1).trim(),
+            messages.push({
+                fatal: true,
+                severity: 2,
 
-            line: ex.lineNumber,
-            column: ex.column
-        });
+                // messages come as "Line X: Unexpected token foo", so strip off leading part
+                message: ex.message.substring(ex.message.indexOf(":") + 1).trim(),
 
-        return null;
+                line: ex.lineNumber,
+                column: ex.column
+            });
+
+            return null;
+        }
     }
-}
 
-/**
- * Check collection of comments to prevent double event for comment as
- * leading and trailing, then emit event if passing
- * @param {ASTNode[]} comments Collection of comment nodes
- * @param {Object[]} locs List of locations of previous comment nodes
- * @param {string} eventName Event name postfix
- * @returns {void}
- */
-function emitComments(comments, locs, eventName) {
-    if (comments.length) {
-        comments.forEach(function(node) {
-            if (locs.indexOf(node.loc) >= 0) {
-                locs.splice(locs.indexOf(node.loc), 1);
-            } else {
-                locs.push(node.loc);
-                api.emit(node.type + eventName, node);
-            }
-        });
+    /**
+     * Check collection of comments to prevent double event for comment as
+     * leading and trailing, then emit event if passing
+     * @param {ASTNode[]} comments Collection of comment nodes
+     * @param {Object[]} locs List of locations of previous comment nodes
+     * @param {string} eventName Event name postfix
+     * @returns {void}
+     */
+    function emitComments(comments, locs, eventName) {
+
+        if (comments.length) {
+            comments.forEach(function(node) {
+                if (locs.indexOf(node.loc) >= 0) {
+                    locs.splice(locs.indexOf(node.loc), 1);
+                } else {
+                    locs.push(node.loc);
+                    api.emit(node.type + eventName, node);
+                }
+            });
+        }
     }
-}
 
-/**
- * Shortcut to check and emit enter of comment nodes
- * @param {ASTNode[]} comments Collection of comment nodes
- * @returns {void}
- */
-function emitCommentsEnter(comments) {
-    emitComments(comments, commentLocsEnter, "Comment");
-}
-
-/**
- * Shortcut to check and emit exit of comment nodes
- * @param {ASTNode[]} comments Collection of comment nodes
- * @returns {void}
- */
-function emitCommentsExit(comments) {
-    emitComments(comments, commentLocsExit, "Comment:exit");
-}
-
-/**
- * Get the severity level of a rule (0 - none, 1 - warning, 2 - error)
- * Returns 0 if the rule config is not valid (an Array or a number)
- * @param {Array|number} ruleConfig rule configuration
- * @returns {number} 0, 1, or 2, indicating rule severity
- */
-function getRuleSeverity(ruleConfig) {
-    if (typeof ruleConfig === "number") {
-        return ruleConfig;
-    } else if (Array.isArray(ruleConfig)) {
-        return ruleConfig[0];
-    } else {
-        return 0;
+    /**
+     * Shortcut to check and emit enter of comment nodes
+     * @param {ASTNode[]} comments Collection of comment nodes
+     * @returns {void}
+     */
+    function emitCommentsEnter(comments) {
+        emitComments(comments, commentLocsEnter, "Comment");
     }
-}
 
-/**
- * Get the options for a rule (not including severity), if any
- * @param {Array|number} ruleConfig rule configuration
- * @returns {Array} of rule options, empty Array if none
- */
-function getRuleOptions(ruleConfig) {
-    if (Array.isArray(ruleConfig)) {
-        return ruleConfig.slice(1);
-    } else {
-        return [];
+    /**
+     * Shortcut to check and emit exit of comment nodes
+     * @param {ASTNode[]} comments Collection of comment nodes
+     * @returns {void}
+     */
+    function emitCommentsExit(comments) {
+        emitComments(comments, commentLocsExit, "Comment:exit");
     }
-}
+
+    /**
+     * Get the severity level of a rule (0 - none, 1 - warning, 2 - error)
+     * Returns 0 if the rule config is not valid (an Array or a number)
+     * @param {Array|number} ruleConfig rule configuration
+     * @returns {number} 0, 1, or 2, indicating rule severity
+     */
+    function getRuleSeverity(ruleConfig) {
+        if (typeof ruleConfig === "number") {
+            return ruleConfig;
+        } else if (Array.isArray(ruleConfig)) {
+            return ruleConfig[0];
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Get the options for a rule (not including severity), if any
+     * @param {Array|number} ruleConfig rule configuration
+     * @returns {Array} of rule options, empty Array if none
+     */
+    function getRuleOptions(ruleConfig) {
+        if (Array.isArray(ruleConfig)) {
+            return ruleConfig.slice(1);
+        } else {
+            return [];
+        }
+    }
 
     // set unlimited listeners (see https://github.com/eslint/eslint/issues/524)
     api.setMaxListeners(0);
-    
+
     /**
      * Resets the internal state of the object.
      * @returns {void}
@@ -472,15 +502,16 @@ function getRuleOptions(ruleConfig) {
         currentTextLines = [];
         currentTokens = null;
         currentScopes = null;
+        scopeMap = null;
         controller = null;
         reportingConfig = [];
         commentLocsEnter = [];
         commentLocsExit = [];
     };
-    
+
     /**
      * Verifies the text against the rules specified by the second argument.
-     * @param {string} text The JavaScript text to verify.
+     * @param {Object} text The JavaScript text or the cached AST to verify.
      * @param {Object} config An object whose keys specify the rules to use.
      * @param {string=} filename The optional filename of the file being checked.
      *      If this is not set, the filename will default to '<input>' in the rule context.
@@ -488,39 +519,38 @@ function getRuleOptions(ruleConfig) {
      *      Mostly useful for testing purposes.
      * @returns {Object[]} The results as an array of messages or null if no messages.
      */
-    api.verify = function(text, config, filename, saveState) {
-    
+    api.verify = function(textOrAST, config, filename, saveState) {
+
         // set the current parsed filename
         currentFilename = filename;
-    
+
         if (!saveState) {
             this.reset();
         }
-        /*ORION*/
-        var ast = (text && typeof text === "object") ? text : ast = parse(text.replace(/^(#![^\r\n]+[\r\n]+)/, "//$1"));
-    
+        
+        var ast = (textOrAST && typeof textOrAST === "object") ? textOrAST : ast = parse(textOrAST.replace(/^#!([^\r\n]+[\r\n]+)/, "//$1"));
+
         //if Esprima failed to parse the file, there's no sense in setting up rules
         if (ast) {
             // process initial config to make it safe to extend
             config = prepareConfig(config);
-    
+
             // parse global comments and modify config
             modifyConfigsFromComments(ast, config, reportingConfig);
-    
+
             // enable appropriate rules
             Object.keys(config.rules).filter(function(key) {
                 return getRuleSeverity(config.rules[key]) > 0;
             }).forEach(function(key) {
-    
                 var ruleCreator = rules.get(key),
                     severity = getRuleSeverity(config.rules[key]),
                     options = getRuleOptions(config.rules[key]),
                     rule;
-    
+
                 if (ruleCreator) {
                     try {
-                        rule = ruleCreator(new RuleContext(key, api, severity, options));
-    
+                        rule = ruleCreator(new RuleContext(key, api, severity, options, config.settings));
+
                         // add all the node types as listeners
                         Object.keys(rule).forEach(function(nodeType) {
                             api.on(nodeType, rule[nodeType]);
@@ -529,30 +559,45 @@ function getRuleOptions(ruleConfig) {
                         ex.message = "Error while loading rule '" + key + "': " + ex.message;
                         throw ex;
                     }
-    
+
                 } else {
                     throw new Error("Definition for rule '" + key + "' was not found.");
                 }
             });
-    
+
             // save config so rules can access as necessary
             currentConfig = config;
-            currentText = text && typeof text === "string" ? text : null; /*ORION*/
+            currentText = textOrAST && typeof textOrAST === "string" ? textOrAST : textOrAST.source;
             controller = new estraverse.Controller();
-    
+
             // gather data that may be needed by the rules
             currentScopes = escope.analyze(ast, { ignoreEval: true }).scopes;
-    
+
+            /*
+             * Index the scopes by the start range of their block for efficient
+             * lookup in getScope.
+             */
+            scopeMap = [];
+            currentScopes.forEach(function (scope, index) {
+                var range = scope.block.range[0];
+
+                // Sometimes two scopes are returned for a given node. This is
+                // handled later in a known way, so just don't overwrite here.
+                if (!scopeMap[range]) {
+                    scopeMap[range] = index;
+                }
+            });
+
             /*
              * Split text here into array of lines so
              * it's not being done repeatedly
              * by individual rules.
              */
-            //currentTextLines = currentText.split(/\r?\n/g); /*ORION*/
-    
+            currentTextLines = currentText.split(/\r?\n/g);
+
             // Freezing so array isn't accidentally changed by a rule.
-            //Object.freeze(currentTextLines); /*ORION*/
-    
+            Object.freeze(currentTextLines);
+
             /* get all tokens from the ast and store them as a hashtable to
              * improve traversal speed when wanting to find tokens for a given
              * node
@@ -561,10 +606,10 @@ function getRuleOptions(ruleConfig) {
             ast.tokens.forEach(function(token) {
                 currentTokens[token.range[0]] = token;
             });
-    
+
             // augment global scope with declared global variables
             addDeclaredGlobals(ast, currentScopes[0], currentConfig);
-    
+
             /*
              * Each node has a type property. Whenever a particular type of node is found,
              * an event is fired. This allows any listeners to automatically be informed
@@ -572,29 +617,29 @@ function getRuleOptions(ruleConfig) {
              */
             controller.traverse(ast, {
                 enter: function(node, parent) {
-    
+
                     var comments = api.getComments(node);
-    
+
                     emitCommentsEnter(comments.leading);
                     node.parent = parent;
                     api.emit(node.type, node);
                     emitCommentsEnter(comments.trailing);
                 },
                 leave: function(node) {
-    
+
                     var comments = api.getComments(node);
-    
+
                     emitCommentsExit(comments.trailing);
                     api.emit(node.type + ":exit", node);
                     emitCommentsExit(comments.leading);
                 }
             });
-    
+
         }
-    
+
         return messages;
     };
-    
+
     /**
      * Reports a message from one of the rules.
      * @param {string} ruleId The ID of the rule causing the message.
@@ -609,41 +654,39 @@ function getRuleOptions(ruleConfig) {
      * @param {Object} related Optional related token or node that the rule wishes to point out.
      * @returns {void}
      */
-    api.report = function(ruleId, severity, node, location, message, opts, /*ORION*/related) {
-    
+    api.report = function(ruleId, severity, node, location, message, opts, related) {
+
         if (typeof location === "string") {
-        	related = opts; /*ORION*/
+            related = opts; //mrennie Orion
             opts = message;
             message = location;
             location = node.loc.start;
         }
-        /*ORION*/
-        /*Object.keys(opts || {}).forEach(function (key) {
-            var rx = new RegExp("{{" + escapeRegExp(key) + "}}", "g");
+
+       /* Object.keys(opts || {}).forEach(function (key) {
+            var rx = new RegExp("\$\{" + escapeRegExp(key) + "\}", "g");
             message = message.replace(rx, opts[key]);
-        });*/
-    
-        message = message.replace(/\$\{([^\}]+)\}/g, function(str, key) {
+        });
+        */
+		message = message.replace(/\$\{([^\}]+)\}/g, function(str, key) {
 			return opts[key];
 		});
 		
         if (isDisabledByReportingConfig(reportingConfig, ruleId, location)) {
             return;
         }
-    
+
         messages.push({
             ruleId: ruleId,
             severity: severity,
             node: node,
             message: message,
-            line: location.line,
-            column: location.column,
+            args: opts, //mrennie Orion
             source: api.getSource(node),
-            args: opts, /*ORION*/
-            related: typeof related !== "undefined" ? related : null /*ORION*/
+            related: typeof related !== "undefined" ? related : null
         });
     };
-    
+
     /**
      * Gets the source code for the given node.
      * @param {ASTNode=} node The AST node to get the text for.
@@ -658,8 +701,9 @@ function getRuleOptions(ruleConfig) {
         } else {
             return currentText;
         }
+
     };
-    
+
     /**
      * Gets the entire source text split into an array of lines.
      * @returns {Array} The source text as an array of lines.
@@ -667,16 +711,17 @@ function getRuleOptions(ruleConfig) {
     api.getSourceLines = function() {
         return currentTextLines;
     };
-    
+
     /**
      * Gets all comments for the given node.
      * @param {ASTNode} node The AST node to get the comments for.
      * @returns {Object} The list of comments indexed by their position.
      */
     api.getComments = function(node) {
+
         var leadingComments = node.leadingComments || [],
             trailingComments = node.trailingComments || [];
-    
+
         /*
          * Esprima adds a "comments" array on Program nodes rather than
          * leadingComments/trailingComments. Comments are only left in the
@@ -687,13 +732,13 @@ function getRuleOptions(ruleConfig) {
                 leadingComments = node.comments;
             }
         }
-    
+
         return {
             leading: leadingComments,
             trailing: trailingComments
         };
     };
-    
+
     /**
      * Retrieves the JSDoc comment for a given node.
      * @param {ASTNode} node The AST node to get the comment for.
@@ -701,9 +746,10 @@ function getRuleOptions(ruleConfig) {
      *      given node or null if not found.
      */
     api.getJSDocComment = function(node) {
+
         var parent = node.parent,
             line = node.loc.start.line;
-    
+
         /**
          * Finds a JSDoc comment node in an array of comment nodes.
          * @param {ASTNode[]} comments The array of comment nodes to search.
@@ -711,10 +757,11 @@ function getRuleOptions(ruleConfig) {
          * @private
          */
         function findJSDocComment(comments) {
+
             if (comments) {
                 for (var i = comments.length - 1; i >= 0; i--) {
                     if (comments[i].type === "Block" && comments[i].value.charAt(0) === "*") {
-    
+
                         if (line - comments[i].loc.end.line <= 1) {
                             return comments[i];
                         } else {
@@ -723,29 +770,29 @@ function getRuleOptions(ruleConfig) {
                     }
                 }
             }
-    
+
             return null;
         }
-    
+
         switch (node.type) {
             case "FunctionDeclaration":
                 return findJSDocComment(node.leadingComments);
-    
+
             case "FunctionExpression":
-    
+
                 if (parent.type !== "CallExpression" || parent.callee !== node) {
                     while (parent && !parent.leadingComments && parent.type !== "FunctionExpression" && parent.type !== "FunctionDeclaration") {
                         parent = parent.parent;
                     }
-    
+
                     return parent && (parent.type !== "FunctionDeclaration") ? findJSDocComment(parent.leadingComments) : null;
                 }
             //$FALLTHROUGH$
             default:
                 return null;
-         }
+        }
     };
-    
+
     /**
      * Gets a number of tokens that precede a given node's tokens in the token stream.
      * @param {ASTNode} node The AST node.
@@ -763,7 +810,7 @@ function getRuleOptions(ruleConfig) {
         }
         return beforeTokens;
     };
-    
+
     /**
      * Gets the token that precedes a given node's tokens in the token stream.
      * @param {ASTNode} node The AST node.
@@ -781,7 +828,7 @@ function getRuleOptions(ruleConfig) {
             }
         }
     };
-    
+
     /**
      * Gets a number of tokens that precede a given node's tokens in the token stream.
      * @param {ASTNode} node The AST node.
@@ -801,7 +848,7 @@ function getRuleOptions(ruleConfig) {
         }
         return afterTokens;
     };
-    
+
     /**
      * Gets the token that follows a given node's tokens in the token stream.
      * @param {ASTNode} node The AST node.
@@ -819,7 +866,7 @@ function getRuleOptions(ruleConfig) {
             }
         }
     };
-    
+
     /**
      * Gets all tokens that are related to the given node.
      * @param {ASTNode} node The AST node.
@@ -839,10 +886,10 @@ function getRuleOptions(ruleConfig) {
             } else {
                 ++cursor;
             }
-         }
+        }
         return beforeTokens.concat(tokens, afterTokens);
     };
-    
+
     /**
      * Gets the first `count` tokens of the given node's token stream.
      * @param {ASTNode} node The AST node.
@@ -862,7 +909,7 @@ function getRuleOptions(ruleConfig) {
         }
         return tokens;
     };
-    
+
     /**
      * Gets the first token of the given node's token stream.
      * @param {ASTNode} node The AST node.
@@ -880,7 +927,7 @@ function getRuleOptions(ruleConfig) {
             }
         }
     };
-    
+
     /**
      * Gets the last `count` tokens of the given node.
      * @param {ASTNode} node The AST node.
@@ -898,7 +945,7 @@ function getRuleOptions(ruleConfig) {
         }
         return tokens;
     };
-    
+
     /**
      * Gets the last token of the given node's token stream.
      * @param {ASTNode} node The AST node.
@@ -916,7 +963,7 @@ function getRuleOptions(ruleConfig) {
             }
         }
     };
-    
+
     /**
      * Gets nodes that are ancestors of current node.
      * @returns {ASTNode[]} Array of objects representing ancestors.
@@ -924,28 +971,29 @@ function getRuleOptions(ruleConfig) {
     api.getAncestors = function() {
         return controller.parents();
     };
-    
-    
+
+
     /**
      * Gets the scope for the current node.
      * @returns {Object} An object representing the current node's scope.
      */
     api.getScope = function() {
-        var parents = controller.parents().reverse(),
-            innerBlock = null;
-    
+        var parents = controller.parents(),
+            innerBlock = null,
+            selectedScopeIndex;
+
         // Don't do this for Program nodes - they have no parents
         if (parents.length) {
-    
+
             // if current node is function declaration, add it to the list
             var current = controller.current();
             if (current.type === "FunctionDeclaration" || current.type === "FunctionExpression") {
-                parents.splice(0, 0, current);
+                parents.push(current);
             }
-    
+
             // Ascend the current node's parents
-            for (var i = 0; i < parents.length; i++) {
-    
+            for (var i = parents.length - 1; i >= 0; --i) {
+
                 // The first node that requires a scope is the node that will be
                 // our current node's innermost scope.
                 if (escope.Scope.isScopeRequired(parents[i])) {
@@ -953,30 +1001,23 @@ function getRuleOptions(ruleConfig) {
                     break;
                 }
             }
-    
-            // Loop through the scopes returned by escope to find the innermost
-            // scope and return that scope.
-            for (var j = 0; j < currentScopes.length; j++) {
-                if (innerBlock.type === currentScopes[j].block.type &&
-                    innerBlock.range[0] === currentScopes[j].block.range[0] &&
-                    innerBlock.range[1] === currentScopes[j].block.range[1]) {
-    
-                    // Escope returns two similar scopes for named functional
-                    // expression, we should take the last
-                    if ((innerBlock.type === "FunctionExpression" && innerBlock.id && innerBlock.id.name)) {
-    
-                        var nextScope = currentScopes[j + 1];
-                        return nextScope;
-                    }
-    
-                    return currentScopes[j];
-                }
+
+            // Find and return the innermost scope
+            selectedScopeIndex = scopeMap[innerBlock.range[0]];
+
+            // Named function expressions create two nested scope objects. The
+            // outer scope contains only the function expression name. We return
+            // the inner scope.
+            if (innerBlock.type === "FunctionExpression" && innerBlock.id && innerBlock.id.name) {
+                ++selectedScopeIndex;
             }
+
+            return currentScopes[selectedScopeIndex];
         } else {
             return currentScopes[0];    // global scope
         }
     };
-    
+
     /**
      * Gets the filename for the currently parsed source.
      * @returns {string} The filename associated with the source being parsed.
@@ -989,7 +1030,7 @@ function getRuleOptions(ruleConfig) {
             return "<input>";
         }
     };
-    
+
     /**
      * Defines a new linting rule.
      * @param {string} ruleId A unique rule identifier
@@ -999,7 +1040,7 @@ function getRuleOptions(ruleConfig) {
     var defineRule = api.defineRule = function(ruleId, ruleModule) {
         rules.define(ruleId, ruleModule);
     };
-    
+
     /**
      * Defines many new linting rules.
      * @param {object} rules map from unique rule identifier to rule
@@ -1010,7 +1051,7 @@ function getRuleOptions(ruleConfig) {
             defineRule(ruleId, rules[ruleId]);
         });
     };
-    
+
     /**
      * Gets the default eslint configuration.
      * @returns {Object} Object mapping rule IDs to their default configurations
@@ -1018,7 +1059,7 @@ function getRuleOptions(ruleConfig) {
     api.defaults = function() {
         return require("../conf/eslint.json");
     };
-    
+
     return api;
 
 }());

@@ -13,6 +13,7 @@ define([
 
 var PASSTHROUGHS = [
         "getSource",
+        "getSourceLines",
         "getTokens",
         "getTokensBefore",
         "getTokenBefore",
@@ -39,9 +40,10 @@ var PASSTHROUGHS = [
  * @param {string} ruleId The ID of the rule using this object.
  * @param {eslint} eslint The eslint object.
  * @param {number} severity The configured severity level of the rule.
- * @param {array} options the configuration information to be added to the rule
+ * @param {array} options The configuration information to be added to the rule.
+ * @param {object} settings The configuration settings passed from the config file.
  */
-function RuleContext(ruleId, eslint, severity, options) {
+function RuleContext(ruleId, eslint, severity, options, settings) {
 
     /**
      * The read-only ID of the rule.
@@ -57,6 +59,13 @@ function RuleContext(ruleId, eslint, severity, options) {
         value: options
     });
 
+    /**
+     * The read-only settings shared between all rules
+     */
+    Object.defineProperty(this, "settings", {
+        value: settings
+    });
+
     // copy over passthrough methods
     PASSTHROUGHS.forEach(function(name) {
         this[name] = function() {
@@ -65,7 +74,7 @@ function RuleContext(ruleId, eslint, severity, options) {
     }, this);
 
     /**
-     * Passthrough to eslint.report() that automatically assigns the rule ID.
+     * Passthrough to eslint.report() that automatically assigns the rule ID and severity.
      * @param {ASTNode} node The AST node related to the message.
      * @param {Object=} location The location of the error.
      * @param {string} message The message to display to the user.
@@ -74,7 +83,7 @@ function RuleContext(ruleId, eslint, severity, options) {
      * @param {Object} related Optional related token or node.
      * @returns {void}
      */
-    this.report = function(node, location, message, opts, /*ORION*/related) {
+    this.report = function(node, location, message, opts, related) {
         eslint.report(ruleId, severity, node, location, message, opts, related);
     };
 
