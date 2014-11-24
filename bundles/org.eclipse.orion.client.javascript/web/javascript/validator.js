@@ -56,6 +56,9 @@ define([
 		 * @param {Object} [key] Optional key to use for complex rule configuration.
 		 */
 		setOption: function(ruleId, value, key) {
+		    if(value === null || typeof value === 'undefined') {
+		        value = 0;
+			}
 			if (typeof value === "number") {
 				if(Array.isArray(this.rules[ruleId])) {
 					var ruleConfig = this.rules[ruleId];
@@ -69,7 +72,7 @@ define([
 				else {
 					this.rules[ruleId] = value;
 				}
-			}
+			} 
 		}
 	};
 
@@ -326,7 +329,7 @@ define([
 			config.setOption("no-debugger", properties.validate_debugger); //$NON-NLS-0$
 			config.setOption("no-dupe-keys", properties.validate_dupe_obj_keys); //$NON-NLS-0$
 			config.setOption("no-eval", properties.validate_eval); //$NON-NLS-0$
-			config.setOption("no-extra-semi", properties.validate_unnecessary_semi); //$NON-NLS-0$
+			config.setOption("no-extra-semi", properties.validate_no_extra_semi); //$NON-NLS-0$
 			config.setOption("no-new-array", properties["no-new-array"]); //$NON-NLS-1$ //$NON-NLS-0$
 			config.setOption("no-new-func", properties["no-new-func"]); //$NON-NLS-1$ //$NON-NLS-0$
 			config.setOption("no-new-object", properties["no-new-object"]); //$NON-NLS-1$ //$NON-NLS-0$
