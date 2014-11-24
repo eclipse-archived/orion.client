@@ -12,8 +12,9 @@
 define([
 	'orion/EventTarget',
 	'orion/util',
+	'orion/metrics',
 	'orion/webui/littlelib'
-], function(EventTarget, util, lib) {
+], function(EventTarget, util, metrics, lib) {
 
 	var ORIENTATION_HORIZONTAL = 1;
 	var ORIENTATION_VERTICAL = 2;
@@ -381,6 +382,7 @@ define([
 			}
 			if (!noUpdateStorage) {
 				localStorage.setItem(this._prefix+"/toggleState", this._closed ? "closed" : null);  //$NON-NLS-1$  //$NON-NLS-0$
+				metrics.logEvent("preferenceChange", "splitterClosed", this._prefix, this._closed ? 0 : 1);
 			}
 		},
 
@@ -428,6 +430,8 @@ define([
 			this.$trailing.classList.remove("panelTracking"); //$NON-NLS-0$
 			this.$leading.classList.remove("panelTracking"); //$NON-NLS-0$
 
+			var curState = this._closed;
+			
 			// if the user dragged the splitter closed or open capture this
 			if (this._offset > 0) {
 				// Store the current position
@@ -437,8 +441,11 @@ define([
 				this._closed = true;
 			}
 			
-			// Update the state
-			localStorage.setItem(this._prefix+"/toggleState", this._closed ? "closed" : null);  //$NON-NLS-1$  //$NON-NLS-0$
+			// Update the state if necessary
+			if (curState !== this._closed) {
+				localStorage.setItem(this._prefix+"/toggleState", this._closed ? "closed" : null);  //$NON-NLS-1$  //$NON-NLS-0$
+				metrics.logEvent("preferenceChange", "splitterClosed", this._prefix, this._closed ? 0 : 1);
+			}
 		},
 
 		_mouseDown: function(event) {
