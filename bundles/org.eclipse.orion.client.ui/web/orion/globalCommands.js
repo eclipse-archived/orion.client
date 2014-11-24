@@ -556,7 +556,20 @@ define([
 	 * @param {Boolean} closeSplitter true to make the splitter's initial state "closed".
 	 */
 	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, closeSplitter, fileClient) {
-		mMetrics.init(serviceRegistry);
+		mMetrics.init(serviceRegistry).then(
+			function() {
+				var userService = serviceRegistry.getService("orion.core.user"); //$NON-NLS-0$
+				var authServices = serviceRegistry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
+				for (var i = 0; i < authServices.length; i++) {
+					var authService = serviceRegistry.getService(authServices[i]);		
+					authService.getUser().then(function(jsonData){
+						userService.getUserInfo(jsonData.Location).then(function(accountData) {
+							mMetrics.setDimension("dimension2", accountData.login); //$NON-NLS-0$
+						});
+					});
+				}
+			}
+		);
 
 		new mThemePreferences.ThemePreferences(prefsService, new mThemeData.ThemeData()).apply();
 

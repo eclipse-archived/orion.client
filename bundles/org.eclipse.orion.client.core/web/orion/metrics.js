@@ -10,11 +10,12 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(["orion/xhr"], function(xhr) {
+define(["orion/Deferred"], function(Deferred) {
 	var GA_ID = "OrionGA"; //$NON-NLS-0$
 	var queue = [];
 
 	var init = function(serviceRegistry, args) {
+		var promise = new Deferred();
 		var refs = serviceRegistry.getServiceReferences("orion.analytics.google"); //$NON-NLS-0$
 		if (refs.length) {
 			var ref = refs[0];
@@ -40,9 +41,11 @@ define(["orion/xhr"], function(xhr) {
 						window[GA_ID]("send", "pageview"); //$NON-NLS-1$ //$NON-NLS-0$
 
 						queue.forEach(function(current) {
-							window[GA_ID]("send", current.type, current.arg1, current.arg2, current.arg3, current.arg4); //$NON-NLS-0$
+							window[GA_ID](current.command, current.arg0, current.arg1, current.arg2, current.arg3, current.arg4); //$NON-NLS-0$
 						});
 						queue = null; /* no longer needed */
+						
+						promise.resolve();
 					}
 				);
 			}
@@ -50,6 +53,7 @@ define(["orion/xhr"], function(xhr) {
 		if (!(service && service.init)) {
 			queue = null; /* not tracking */
 		}
+		return promise;
 	};
 
 	var logEvent = function(category, action, label, value) {
@@ -57,7 +61,7 @@ define(["orion/xhr"], function(xhr) {
 			window[GA_ID]("send", "event", category, action, label, value); //$NON-NLS-1$ //$NON-NLS-0$
 		} else {
 			if (queue) {
-				queue.push({type: "event", arg1: category, arg2: action, arg3: label, arg4: value});
+				queue.push({command: "send", arg0: "event", arg1: category, arg2: action, arg3: label, arg4: value}); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		}
 	};
@@ -67,7 +71,17 @@ define(["orion/xhr"], function(xhr) {
 			window[GA_ID]("send", "timing", timingCategory, timingVar, Math.round(timingValue), timingLabel); //$NON-NLS-1$ //$NON-NLS-0$
 		} else {
 			if (queue) {
-				queue.push({type: "timing", arg1: timingCategory, arg2: timingVar, arg3: Math.round(timingValue), arg4: timingLabel}); //$NON-NLS-0$
+				queue.push({command: "send", arg0: "timing", arg1: timingCategory, arg2: timingVar, arg3: Math.round(timingValue), arg4: timingLabel}); //$NON-NLS-1$ //$NON-NLS-0$
+			}
+		}
+	};
+
+	var setDimension = function(dimensionId, value) {
+		if (window[GA_ID]) {
+			window[GA_ID]("set", dimensionId, value); //$NON-NLS-0$
+		} else {
+			if (queue) {
+				queue.push({command: "set", arg0: dimensionId, arg1: value}); //$NON-NLS-0$
 			}
 		}
 	};
@@ -75,6 +89,7 @@ define(["orion/xhr"], function(xhr) {
 	return {
 		init: init,
 		logEvent: logEvent,
-		logTiming: logTiming
+		logTiming: logTiming,
+		setDimension: setDimension
 	};
 });
