@@ -79,15 +79,14 @@ define([
 			var td;
 			if(item.href){
 				td = document.createElement("td");
-				td.style.verticalAlign = "top";
 
 				var urlInput = document.createElement("input");
-				urlInput.style.visibility = "hidden";
+				urlInput.classList.add("discreetInputHidden"); //$NON-NLS-0$
 
 				var urlSelector = document.createElement("div");
-				urlSelector.style.marginTop = "-15px";
 				urlSelector.title = messages.ClickEditLabel;
-				urlSelector.className = "discreetInput";
+				urlSelector.classList.add("discreetInput"); //$NON-NLS-0$
+				urlSelector.classList.add("discreetInputURLWrapper"); //$NON-NLS-0$
 				urlSelector.tabIndex = item.no;	//this is the same as the urlInput's tab index but they will never be visible at the same time
 
 				var urlLink = document.createElement("a");
@@ -100,9 +99,11 @@ define([
 
 				//show url input, hide selector
 				urlSelector.onclick = function (event){
-					urlSelector.style.visibility = "hidden";
-					urlLink.style.visibility = "hidden";
-					urlInput.style.visibility = "";
+					urlSelector.classList.add("discreetInputHidden"); //$NON-NLS-0$
+					urlLink.classList.add("discreetInputHidden"); //$NON-NLS-0$
+					
+					urlInput.classList.remove("discreetInputHidden"); //$NON-NLS-0$
+					
 					urlInput.focus();
 				}.bind(this.projectEditor);
 
@@ -124,13 +125,16 @@ define([
 				return td;
 			}
 			td = document.createElement("td");
-			td.style.verticalAlign = "top";
 			var input = item.id==="Description" ? document.createElement("textArea") : document.createElement("input");
 			this.projectEditor._renderEditableFields(input, item.id, item.no, null);
 			td.appendChild(input);
 			return td;
 		}
 
+	};
+	
+	ProjectInfoRenderer.prototype.getSecondaryColumnStyle = function() {
+		return "discreetInputCell"; //$NON-NLS-0$
 	};
 
 
@@ -713,12 +717,12 @@ define([
 								lib.empty(urlElement);
 								urlElement.appendChild(document.createTextNode(event.target.value) || "");
 								urlElement.href = event.target.value;
-								urlElement.style.visibility = "";
+								urlElement.classList.remove("discreetInputHidden"); //$NON-NLS-0$
 								if(urlElement.urlSelector){
-									urlElement.urlSelector.style.visibility = "";
+									urlElement.urlSelector.classList.remove("discreetInputHidden"); //$NON-NLS-0$
 								}
 
-								input.style.visibility = "hidden";
+								input.classList.add("discreetInputHidden"); //$NON-NLS-0$
 							}
 						}
 					}.bind(this)
@@ -727,7 +731,7 @@ define([
 
 			input.value = this.projectData[property] || "";
 			input.title = messages.ClickEditLabel;
-			input.className = "discreetInput";
+			input.classList.add("discreetInput"); //$NON-NLS-0$
 			input.tabIndex = String(tabIndex);
 
 			input.onkeyup = function(event){

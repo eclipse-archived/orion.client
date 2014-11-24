@@ -1108,6 +1108,19 @@ textarea.parameterInput {
 	padding: 8px;
 }
 
+.discreetInputHidden {
+	display: none !important;
+}
+
+.discreetInputURLWrapper {
+	padding: 2px;
+}
+
+.discreetInputCell {
+	color: #666666;	
+	padding: 1px;
+}
+
 .discreetInfoCell {
 	color: #666666;	
 	padding: 8px;
