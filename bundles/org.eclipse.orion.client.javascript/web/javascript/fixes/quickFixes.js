@@ -35,6 +35,7 @@ define([
 	    'no-extra-semi': no_extra_semi,
 	    'no-fallthrough': no_fallthrough,
 	    'no-undef-defined': no_undef_defined,
+	    'no-undef-defined-inenv': no_undef_defined,
 	    'no-unused-params': no_unused_params
 	};
 	

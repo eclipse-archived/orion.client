@@ -30,17 +30,19 @@ define([
     return function(editorContext, annotation, astManager) {
         var name = /^'(.*)'/.exec(annotation.title);
         if(name != null && typeof name !== 'undefined') {
-            var env = Finder.findESLintEnvForMember(name[1]);
             return astManager.getAST(editorContext).then(function(ast) {
                 var comment = null;
                 var start = 0;
-                if(env) {
-                    comment = Finder.findDirective(ast, 'eslint-env');
-                    if(comment) {
-                        start = comment.range[0]+2;
-	                    return editorContext.setText(updateDirective(comment.value, 'eslint-env', env, true), start, start+comment.value.length);
-                    } else {
-                        return editorContext.setText('/*eslint-env '+env+' */\n', ast.range[0], ast.range[0]);
+                if(annotation.id === 'no-undef-defined-inenv') {
+                    var env = Finder.findESLintEnvForMember(name[1]);
+                    if(env) {
+                        comment = Finder.findDirective(ast, 'eslint-env');
+                        if(comment) {
+                            start = comment.range[0]+2;
+    	                    return editorContext.setText(updateDirective(comment.value, 'eslint-env', env, true), start, start+comment.value.length);
+                        } else {
+                            return editorContext.setText('/*eslint-env '+env+' */\n', ast.range[0], ast.range[0]);
+                        }
                     }
                 } else {
                     comment = Finder.findDirective(ast, 'globals');

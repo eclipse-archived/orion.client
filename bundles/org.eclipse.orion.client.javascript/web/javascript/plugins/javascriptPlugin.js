@@ -152,7 +152,7 @@ define([
                 key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
     			contentType: ['application/javascript'],  //$NON-NLS-0$
     			validationProperties: [
-        			{source: "annotation:id", match: "no-fallthrough"} //$NON-NLS-1$ //$NON-NLS-0$
+        			{source: "annotation:id", match: "^(?:no-fallthrough)$"} //$NON-NLS-1$ //$NON-NLS-0$
         		]
   			}
   	);
@@ -168,7 +168,7 @@ define([
                 key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
     			contentType: ['application/javascript'],  //$NON-NLS-0$
     			validationProperties: [
-        			{source: "annotation:id", match: "no-empty-block"} //$NON-NLS-1$ //$NON-NLS-0$
+        			{source: "annotation:id", match: "^(?:no-empty-block)$"} //$NON-NLS-1$ //$NON-NLS-0$
         		]
   			}
   	);
@@ -184,7 +184,7 @@ define([
                 key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
     			contentType: ['application/javascript'],  //$NON-NLS-0$
     			validationProperties: [
-        			{source: "annotation:id", match: "no-undef-defined"} //$NON-NLS-1$ //$NON-NLS-0$
+        			{source: "annotation:id", match: "^(?:no-undef-defined-inenv)$"} //$NON-NLS-1$ //$NON-NLS-0$
         		]
   			}
   	);
@@ -200,7 +200,7 @@ define([
                 key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
     			contentType: ['application/javascript'],  //$NON-NLS-0$
     			validationProperties: [
-        			{source: "annotation:id", match: "no-undef-defined"} //$NON-NLS-1$ //$NON-NLS-0$
+        			{source: "annotation:id", match: "^(?:no-undef-defined)$"} //$NON-NLS-1$ //$NON-NLS-0$
         		]
   			}
   	);
@@ -216,7 +216,7 @@ define([
                 key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
     			contentType: ['application/javascript'],  //$NON-NLS-0$
     			validationProperties: [
-        			{source: "annotation:id", match: "no-unused-params"} //$NON-NLS-1$ //$NON-NLS-0$
+        			{source: "annotation:id", match: "^(?:no-unused-params)$"} //$NON-NLS-1$ //$NON-NLS-0$
         		]
   			}
   	);

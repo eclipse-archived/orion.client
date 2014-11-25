@@ -113,6 +113,23 @@ define([
 	}
 	
 	/**
+	 * @description Computes the problem id to use in the framework from the ESLint problem object
+	 * @param {Object} pb The original ESLint problem
+	 * @returns {String} The problem id to pass into the framework
+	 * @since 8.0
+	 */
+	function getProblemId(pb) {
+	    if(pb.args) {
+	        if(pb.args.pid) {
+	            return pb.args.pid;
+	        } else if(pb.args.nls) {
+	            return pb.args.nls;
+	        }
+	    }
+	    return pb.ruleId;
+	}
+	
+	/**
 	 * @description Converts an eslint / esprima problem object to an Orion problem object
 	 * @public
 	 * @param {eslint.Error|esprima.Error} e Either an eslint error or an esprima parse error.
@@ -131,10 +148,9 @@ define([
 				end = relatedToken.range[1];
 			}
 		}
-		var key = (e.args && e.args.nls ? e.args.nls : e.ruleId);
 		var prob = {
-		    id: key,
-		    descriptionKey: key,
+		    id: getProblemId(e),
+		    descriptionKey: e.args && e.args.nls ? e.args.nls : e.ruleId,
 		    descriptionArgs: e.args,
 			description: e.message,
 			severity: getSeverity(e),

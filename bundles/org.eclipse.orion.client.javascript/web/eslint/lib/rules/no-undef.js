@@ -11,8 +11,9 @@
  *******************************************************************************/
 /*eslint-env amd */
 define([
-'logger'
-], function(Logger) {
+'logger',
+'javascript/finder'
+], function(Logger, Finder) {
     
     function isImplicitGlobal(variable) {
         return variable.defs.every(function(def) {
@@ -61,7 +62,10 @@ define([
     	                var variable = getDeclaredGlobalVariable(globalScope, ref),
     	                    name = ref.identifier.name;
     	                if (!variable) {
-    	                    context.report(ref.identifier, "'${0}' is not defined.", {0:name, nls: 'no-undef-defined'});
+    	                    var env = Finder.findESLintEnvForMember(name);
+    	                    var inenv = env ? '-inenv' : '';
+    	                    var nls = 'no-undef-defined';
+    	                    context.report(ref.identifier, "'${0}' is not defined.", {0:name, nls: nls, pid: nls+inenv});
     	                } else if (ref.isWrite() && variable.writeable === false) {
     	                    context.report(ref.identifier, "'${0}' is read only.", {0:name, nls: 'no-undef-readonly'});
     	                }
