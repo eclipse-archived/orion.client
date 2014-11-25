@@ -497,6 +497,13 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				// Handle quick fixes
 				if (self.hover) {
 					self.hover.renderQuickFixes(annotation, result);
+					var buttons = lib.$$("button", result);
+					for (var i=0; i<buttons.length; i++) {
+						buttons[i].addEventListener("click", function() { //$NON-NLS-0$
+							self.hide(0);
+						});
+					}
+
 				}
 				return result;
 			}
