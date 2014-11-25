@@ -430,11 +430,9 @@ define([
 			case "merge": //$NON-NLS-0$
 			case "mergeSquash": //$NON-NLS-0$
 			case "reset": //$NON-NLS-0$
-				this.changedItem();
-				break;
 			case "commit": //$NON-NLS-0$
 			case "revert": //$NON-NLS-0$
-				this.changedItem(this.model.outgoingItem);
+				this.changedItem();
 				break;
 			case "applyPatch":  //$NON-NLS-0$
 			case "stage": //$NON-NLS-0$
