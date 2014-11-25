@@ -30,7 +30,7 @@ define(['i18n!profile/nls/messages','orion/webui/dialog'], function(messages, di
 		this.user = options.user;
 		this.func = options.func || function() {};
 		this.registry = options.registry;
-		this.title = messages['Change password for '] + this.user.login;
+		this.title = messages['Change password for '] + this.user.UserName;
 		this.buttons = [{text: messages['Set Password'], callback: this.done.bind(this)}]; 
 		this._initialize();
 	};
@@ -43,7 +43,7 @@ define(['i18n!profile/nls/messages','orion/webui/dialog'], function(messages, di
 		
 		var dialog = this;
 		
-		this.registry.getService("orion.core.user").resetUserPassword(dialog.user.login, dialog.$password.value).then(dialog.func, function(response) { //$NON-NLS-0$
+		this.registry.getService("orion.core.user").resetUserPassword(dialog.user.UserName, dialog.$password.value).then(dialog.func, function(response) { //$NON-NLS-0$
 		  var message = response.Message;
 		  try{
 			  if(response.responseText){

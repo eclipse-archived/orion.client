@@ -46,7 +46,7 @@ define({
 	"Show previous page of Users names": "Show previous page of Users names",
 	"Next Page >": "Next Page >",
 	"Show next page of User names": "Show next page of User names",
-	"Login:" : "Login:",
+	"User Name:" : "User Name:",
 	"Password:" : "Password:",
 	"Retype password:" : "Retype password:",
 	"Email:" : "Email:",

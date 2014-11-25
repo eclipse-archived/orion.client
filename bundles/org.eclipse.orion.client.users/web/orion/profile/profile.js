@@ -116,7 +116,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 		},
 		
 		populateData: function(jsonData){
-			if(jsonData && jsonData.login){
+			if(jsonData && jsonData.UserName){
 				this.lastJSON = jsonData;
 				if(this.profileForm){
 					var fields = lib.$$array(".userInput", this.profileForm); //$NON-NLS-0$

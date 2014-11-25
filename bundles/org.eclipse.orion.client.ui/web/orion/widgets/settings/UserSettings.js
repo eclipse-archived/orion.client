@@ -63,7 +63,7 @@ define([
 			
 			/* - account ----------------------------------------------------- */
 			this.accountFields = [
-				new LabeledTextfield( {fieldlabel:messages['Username'], editmode:'readonly'}),  //$NON-NLS-0$
+				new LabeledTextfield( {fieldlabel:messages['User Name'], editmode:'readonly'}),  //$NON-NLS-0$
 				new LabeledTextfield( {fieldlabel:messages['Full Name'], postChange: updateAccountFunction}),
 				new LabeledTextfield( {fieldlabel:messages['Email Address'], postChange: updateAccountFunction}),
 				new LabeledCheckbox( {fieldlabel: messages['Email Confirmed'], editmode:'readonly'})  //$NON-NLS-0$
@@ -137,7 +137,7 @@ define([
 			var userService = this.userService;
 			var userdata = {};
 			
-			userdata.login = this.accountFields[0].getValue();
+			userdata.UserName = this.accountFields[0].getValue();
 			userdata.FullName = this.accountFields[1].getValue();
 			userdata.Email = this.accountFields[2].getValue();
 			
@@ -192,7 +192,7 @@ define([
 				if (newPassword && newPasswordRetype) {
 					if (newPassword === newPasswordRetype) {
 						if(currentPassword.length > 0){
-							userdata.oldPassword = currentPassword;
+							userdata.OldPassword = currentPassword;
 							userdata.Password = newPassword;
 							userdata.passwordRetype = newPasswordRetype;
 						
@@ -296,8 +296,8 @@ define([
 					authService.getUser().then(function(jsonData){
 
 						var b = userService.getUserInfo(jsonData.Location).then( function( accountData ){
-							settingsWidget.username = accountData.login;
-							settingsWidget.accountFields[0].setValue( accountData.login );
+							settingsWidget.UserName = accountData.UserName;
+							settingsWidget.accountFields[0].setValue( accountData.UserName );
 							if (accountData.FullName){
 								settingsWidget.accountFields[1].setValue( accountData.FullName );
 							} else {
@@ -308,7 +308,7 @@ define([
 							} else {
 								settingsWidget.accountFields[2].setValue( '' );
 							}
-							settingsWidget.accountFields[3].setChecked( accountData.emailConfirmed );
+							settingsWidget.accountFields[3].setChecked( accountData.EmailConfirmed );
 						}, function(error) {
 							messageService.setProgressResult(error);
 						});

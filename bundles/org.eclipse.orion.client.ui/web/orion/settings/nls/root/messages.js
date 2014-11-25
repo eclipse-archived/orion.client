@@ -52,7 +52,7 @@ define({
 	"Keyword Types": "Keyword Types",
 	"darkred": "darkred",
 	"Categories": "Categories",
-	"Username": "Username:",
+	"User Name": "User Name:",
 	"Full Name": "Full Name:",
 	"Email Address": "Email Address:",
 	"Email Confirmed": "Email Confirmed:",

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2009, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -74,7 +74,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 					else
 						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
-				ret.resolve(jsonData.users);
+				ret.resolve(jsonData.Users);
 			}, function(error) {
 				ret.reject(error.response || error);
 			});
@@ -109,17 +109,17 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 		createUser : function(userInfo, onLoad, onError) {
 			userInfo = userInfo || {};
 			var formData = {
-				login : userInfo.login,
+				UserName : userInfo.UserName,
 				Password : userInfo.Password,
 				Email: userInfo.Email
 			};
 			return xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
-					"Content-Type": "application/x-www-form-urlencoded", //$NON-NLS-1$ //$NON-NLS-0$
+					"Content-Type": "application/json", //$NON-NLS-1$ //$NON-NLS-0$
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				timeout: 15000,
-				data: form.encodeFormData(formData)
+				data: JSON.stringify(formData)
 			}).then(function(result) {
 				return new Deferred().resolve(getJSON(result.response));
 			}, function(result) {
@@ -190,19 +190,19 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 			
 			return ret;
 		},
-		resetUserPassword: function(login, password, onLoad){
+		resetUserPassword: function(username, password, onLoad){
 			var service = this;
-			return xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
+			var formData = {
+				Password : password,
+				Reset: true
+			};
+			return xhr("POST", "../users/" + username, { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
-					"Content-Type": "application/x-www-form-urlencoded", //$NON-NLS-1$ //$NON-NLS-0$
+					"Content-Type": "application/json; charset=UTF-8", //$NON-NLS-1$ //$NON-NLS-0$
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				timeout : 15000,
-				data : form.encodeFormData({
-					reset: true,
-					login : login,
-					Password : password
-				})
+				data: JSON.stringify(formData)
 			}).then(function(result) {
 				var jsonData = getJSON(result.response);
 				if (onLoad){

@@ -93,10 +93,10 @@ eclipse.UsersList = (function(){
 	    }
 		return aService.getUsersListSubset(this.queryObject.start, this.queryObject.rows).then(
 			function(result) {
-				this.queryObject.start = parseInt(result.users_start, 10);
-				this.queryObject.rows = parseInt(result.users_rows, 10);
-				this.queryObject.length = parseInt(result.users_length, 10);
-				return result.users;
+				this.queryObject.start = parseInt(result.UsersStart, 10);
+				this.queryObject.rows = parseInt(result.UsersRows, 10);
+				this.queryObject.length = parseInt(result.UsersLength, 10);
+				return result.Users;
 			}.bind(this),function(error) {
 				var display = {};
 				display.Severity = "Error"; //$NON-NLS-0$
@@ -155,7 +155,7 @@ eclipse.UsersRenderer = (function() {
 			link.className = "navlinkonpage"; //$NON-NLS-0$
 			link.href = require.toUrl("profile/user-profile.html") +"#" + item.Location; //$NON-NLS-1$ //$NON-NLS-0$
 			div.appendChild(link);
-			link.appendChild(document.createTextNode(item.login));
+			link.appendChild(document.createTextNode(item.UserName));
 			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 			return col;
 		case 1:

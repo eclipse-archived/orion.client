@@ -32,9 +32,9 @@ define(['orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'], function
 	 * When <code>createUser</code> is true, an Orion account may created by providing the following parameters in userInfo:
 	 * <dl>
 	 *  <dt>{String} data.userInfo.Email</dt> <dd>Required. May be user for email validation.</dd>
-	 *  <dt>{String} data.userInfo.Login</dt> <dd>Required.</dd>
-	 *  <dt>{String} data.userInfo.Password</dt> <dd>Required.</dd>
-	 *  <dt>{String} [data.userInfo.Name]</dt> <dd>Optional.</dd>
+	 *  <dt>{String} data.userInfo.username</dt> <dd>Required.</dd>
+	 *  <dt>{String} data.userInfo.password</dt> <dd>Required.</dd>
+	 *  <dt>{String} [data.userInfo.FullName]</dt> <dd>Optional.</dd>
 	 * </dl>
 	 * If <code>createUser</code> is false and userInfo is not provided, the client assumed to be authenticated already.
 	 * @param {Blob} data.zip
@@ -58,13 +58,13 @@ define(['orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'], function
 		}
 
 		// Log in -- TODO no service API for this, so it's hardcoded
-		var doLogin = function(login, password) {
+		var doLogin = function(username, password) {
 			debug('logging in...');
 			var formData = {
-				login: login
+				username: username
 			};
 			if (typeof password === 'string') {
-				formData.Password = password;
+				formData.password = password;
 			}
 			return xhr('POST', '../login/form', {
 				headers: {
@@ -103,7 +103,7 @@ define(['orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'], function
 //				});
 //			} else
 			if (userInfo) {
-				return doLogin(userInfo.login, userInfo.Password);
+				return doLogin(userInfo.username, userInfo.password);
 			} else {
 				// !createUser and !userInfo implies we're already authenticated, so just continue
 				//return getLoggedInUser();

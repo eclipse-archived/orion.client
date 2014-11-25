@@ -87,7 +87,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/i18nUtil', 'orion/bootstr
 		var findUserCommand = new mCommands.Command({
 			name: messages["Find User"],
 			id: "eclipse.findUser", //$NON-NLS-0$
-			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages["Login:"])]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages["User Name:"])]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			callback: function(data) {
 				var name = data.parameters && data.parameters.valueFor('name'); //$NON-NLS-0$
 				var findFunction = function(name) {

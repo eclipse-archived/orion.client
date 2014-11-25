@@ -103,6 +103,8 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 			setResetMessage(true, "Provide username or email to reset.");
 			return;
 		}
+		var username = document.getElementById("reset").value;
+		var email =  document.getElementById("resetEmail").value;
 		var mypostrequest = new XMLHttpRequest();
 		mypostrequest.onreadystatechange = function() {
 			hideErrorMessage();
@@ -129,13 +131,19 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 			}
 		};
 
+		var formData = {
+			UserName : username,
+			Email: email
+		};
 		mypostrequest.open("POST", "../useremailconfirmation", true);
-		mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		mypostrequest.setRequestHeader("Content-type", "application/json;charset=UTF-8");
 		mypostrequest.setRequestHeader("Orion-Version", "1");
 		xsrfUtils.addCSRFNonce(mypostrequest);
-		mypostrequest.send("{login='" + document.getElementById("reset").value + "', Email='" + document.getElementById("resetEmail").value + "'}");
+		mypostrequest.send(JSON.stringify(formData));
 
 		setResetMessage(false, "Sending password reset confirmation...");
+		
+		
 	}
 
 	function getRedirect() {
@@ -185,13 +193,13 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		return outcome;
 	}
 
-	function confirmLogin(login, password) {
-		if (!login) {
-			login = document.getElementById('login').value.trim();
+	function confirmLogin(username, password) {
+		if (!username) {
+			username = document.getElementById('username').value.trim();
 			password = document.getElementById('password').value;
 		}
 
-		if( login.length > 0 && password.length > 0 ){
+		if( username.length > 0 && password.length > 0 ){
 
 			var mypostrequest = new XMLHttpRequest();
 			mypostrequest.onreadystatechange = function() {
@@ -205,7 +213,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 				}
 			};
 
-			var parameters = "login=" + encodeURIComponent(login) + "&Password=" + encodeURIComponent(password);
+			var parameters = "username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password);
 			mypostrequest.open("POST", "../login/form", true);
 			mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 			mypostrequest.setRequestHeader("Orion-Version", "1");
@@ -252,7 +260,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		document.getElementById("create_password").setAttribute("aria-invalid", "false");
 		document.getElementById("create_passwordRetype").setAttribute("aria-invalid", "false");
 		var mypostrequest = new XMLHttpRequest();
-		var login = document.getElementById("create_login").value;
+		var username = document.getElementById("create_username").value;
 		var password = document.getElementById("create_password").value;
 		var email =  document.getElementById("create_email").value;
 		mypostrequest.onreadystatechange = function() {
@@ -267,20 +275,24 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 						hideRegistration();
 					}
 				} else {
-					confirmLogin(login, password);
+					confirmLogin(username, password);
 				}
 			}
 		};
-		var parameters = "login=" + encodeURIComponent(login) + "&Password=" + encodeURIComponent(password) + "&Email=" + encodeURIComponent(email);
+		var formData = {
+			UserName : username,
+			Password : password,
+			Email: email
+		};
 		mypostrequest.open("POST", "../users", true);
-		mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		mypostrequest.setRequestHeader("Content-type", "application/json;charset=UTF-8");
 		mypostrequest.setRequestHeader("Orion-Version", "1");
 		xsrfUtils.addCSRFNonce(mypostrequest);
-		mypostrequest.send(parameters);
+		mypostrequest.send(JSON.stringify(formData));
 	}
 
 	function confirmCreateLinkedUser(){
-		var login = document.getElementById("create_linked_login").value;
+		var username = document.getElementById("create_linked_username").value;
 		var email =  document.getElementById("create_linked_email").value;
 		var identifier = getParam("identifier");
 		var password = generateRandomPassword();
@@ -298,16 +310,22 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 						hideLinkedRegistration();
 					}
 				} else {
-					confirmLogin(login, password);
+					confirmLogin(username, password);
 				}
 			}
 		};
-		var parameters = "login=" + encodeURIComponent(login) + "&Password=" + encodeURIComponent(password) + "&identifier=" + encodeURIComponent(identifier) + "&Email=" + encodeURIComponent(email);
+		var formData = {
+			UserName : username,
+			Password : password,
+			Email: email,
+			identifier: identifier
+		};
+		var parameters = "username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&identifier=" + encodeURIComponent(identifier) + "&Email=" + encodeURIComponent(email);
 		mypostrequest.open("POST", "../users", true);
-		mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		mypostrequest.setRequestHeader("Content-type", "application/json;charset=UTF-8");
 		mypostrequest.setRequestHeader("Orion-Version", "1");
 		xsrfUtils.addCSRFNonce(mypostrequest);
-		mypostrequest.send(parameters);
+		mypostrequest.send(JSON.stringify(formData));
 	}
 
 	function generateRandomPassword() {
@@ -341,7 +359,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 			document.getElementById('orionLoginForm').style.visibility = 'hidden';
 			document.getElementById('orionRegister').style.visibility = 'hidden';
 			document.getElementById('newUserHeaderShown').style.visibility = '';
-			document.getElementById('create_login').focus();
+			document.getElementById('create_username').focus();
 		}
 	}
 
@@ -354,8 +372,8 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		document.getElementById('orionRegister').style.visibility = 'hidden';
 		// Show stuff
 		document.getElementById('createLinkedHeaderShown').style.visibility = '';
-		document.getElementById('create_linked_login').focus();
-		document.getElementById('create_linked_login').value = username;
+		document.getElementById('create_linked_username').focus();
+		document.getElementById('create_linked_username').value = username;
 		document.getElementById('create_linked_email').value = email;
 	}
 
@@ -386,7 +404,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 			document.getElementById('orionOpen').style.visibility = 'hidden';
 			document.getElementById('orionRegister').style.visibility = 'hidden';
 			document.getElementById('orionLoginForm').style.visibility = '';
-			document.getElementById("login").focus();
+			document.getElementById("username").focus();
 		}
 	}
 
@@ -478,7 +496,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 			if (checkemailrequest.readyState === 4) {
 				if (checkemailrequest.status === 200) {
 					var responseObject = JSON.parse(checkemailrequest.responseText);
-					if (responseObject.emailConfigured === false) {
+					if (responseObject.EmailConfigured === false) {
 						document.getElementById("resetUserLink").style.display = 'none';
 					}
 				}
@@ -510,7 +528,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		});
 
 		// TODO: Temporary --- old page logic
-		document.getElementById("login").addEventListener("keypress", function(event) {
+		document.getElementById("username").addEventListener("keypress", function(event) {
 			if (event.keyCode === lib.KEY.ENTER) {
 				confirmLogin();
 				lib.stop(event);
@@ -554,7 +572,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		document.getElementById("registerButton").addEventListener("click", revealRegistration);
 		document.getElementById("registerButton").addEventListener("keydown", revealRegistration);
 
-		document.getElementById("create_login").addEventListener("keyup", function(event) {
+		document.getElementById("create_username").addEventListener("keyup", function(event) {
 			if (event.keyCode === lib.KEY.ENTER) {
 				confirmCreateUser();
 			} else {
