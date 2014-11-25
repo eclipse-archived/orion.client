@@ -564,7 +564,7 @@ define([
 					var authService = serviceRegistry.getService(authServices[i]);		
 					authService.getUser().then(function(jsonData){
 						userService.getUserInfo(jsonData.Location).then(function(accountData) {
-							mMetrics.setDimension("dimension2", accountData.login); //$NON-NLS-0$
+							mMetrics.setDimension("dimension2", accountData.UserName); //$NON-NLS-0$
 						});
 					});
 				}
