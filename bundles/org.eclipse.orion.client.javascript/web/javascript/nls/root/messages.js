@@ -60,5 +60,7 @@ define({
 	'addESLintGlobalFixName': 'Add to global directive', //$NON-NLS-0$ //$NON-NLS-1$
 	'addESLintGlobalFixTooltip': 'Add or update a global directive to filter the unknown member', //$NON-NLS-0$ //$NON-NLS-1$
 	'removeUnusedParamsFixName': 'Remove unused parameter', //$NON-NLS-0$ //$NON-NLS-1$
-	'removeUnusedParamsFixTooltip': 'Remove the unused parameter, keeping assignment side effects', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeUnusedParamsFixTooltip': 'Remove the unused parameter, keeping side effects', //$NON-NLS-0$ //$NON-NLS-1$
+	'commentCallbackFixName': 'Document as callback', //$NON-NLS-0$ //$NON-NLS-1$
+	'commentCallbackFixTooltip': 'Document the parameter as a callback, ignoring unused parameters', //$NON-NLS-0$ //$NON-NLS-1$
 });

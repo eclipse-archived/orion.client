@@ -12,29 +12,15 @@
 /*eslint-env amd*/
 define([
 'javascript/finder',
+'javascript/fixes/fixUtils',
 'orion/editor/textModel'
-], function(Finder, TextModel) {
+], function(Finder, FixUtils, TextModel) {
     
     function makeEdit(value, start, end) {
         var edit = Object.create(null);
         edit.value = value;
         edit.start = start;
         edit.end = end;
-    }
-    
-    /**
-     * @description Computes the offset for the block comment. i.e. 2 if the block starts with /*, 3 if it starts with /**
-     * @param {String} text The file text
-     * @param {Number} offset The doc node offset
-     * @returns {Number} 2 or 3 depending on the start of the comment block
-     */
-    function getDocOffset(text, offset) {
-        if(text.charAt(offset+1) === '*') {
-            if(text.charAt(offset+2) === '*') {
-                return 3;
-            }
-            return 2;
-        }
     }
     
     function removeIndexedItem(list, index, model) {
@@ -57,7 +43,7 @@ define([
                 var comment = node.leadingComments[i];
                 var edit = new RegExp("(\\s*[*]+\\s*(?:@param)\\s*(?:\\{.*\\})?\\s*(?:"+node.name+")?.*)").exec(comment.value);
                 if(edit) {
-                    var start = comment.range[0] + edit.index + getDocOffset(source, comment.range[0]);
+                    var start = comment.range[0] + edit.index + FixUtils.getDocOffset(source, comment.range[0]);
                     model.setText('', start, start+edit[1].length);
                 }
             }

@@ -69,6 +69,13 @@ define([
 			template: "@author ${cursor}" //$NON-NLS-0$  
 	    },
 	    {
+	        prefix: "@callback", //$NON-NLS-0$
+			name: "@callback",  //$NON-NLS-0$
+			nodes: {top:false, member:false, prop:false, jsdoc:true},
+			description: " - Callback JSDoc tag", //$NON-NLS-0$
+			template: "@callback ${cursor}" //$NON-NLS-0$  
+	    },
+	    {
 	        prefix: "@class", //$NON-NLS-0$
 			name: "@class",  //$NON-NLS-0$
 			nodes: {top:false, member:false, prop:false, jsdoc:true},

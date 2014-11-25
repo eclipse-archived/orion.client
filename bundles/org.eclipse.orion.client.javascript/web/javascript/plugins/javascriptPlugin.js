@@ -216,7 +216,23 @@ define([
                 key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
     			contentType: ['application/javascript'],  //$NON-NLS-0$
     			validationProperties: [
-        			{source: "annotation:id", match: "^(?:no-unused-params)$"} //$NON-NLS-1$ //$NON-NLS-0$
+        			{source: "annotation:id", match: "^(?:no-unused-params).*$"} //$NON-NLS-1$ //$NON-NLS-0$
+        		]
+  			}
+  	);
+  	
+  	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+			quickFixComputer, 
+			{
+				nameKey : 'commentCallbackFixName',  //$NON-NLS-0$
+				tooltipKey : 'commentCallbackFixTooltip',  //$NON-NLS-0$
+				scopeId: "orion.edit.quickfix",
+   				id : "comment.callback.fix",  //$NON-NLS-0$
+   				nls: 'javascript/nls/messages',  //$NON-NLS-0$
+                key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+    			contentType: ['application/javascript'],  //$NON-NLS-0$
+    			validationProperties: [
+        			{source: "annotation:id", match: "^(?:no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-0$
         		]
   			}
   	);

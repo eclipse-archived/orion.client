@@ -16,6 +16,19 @@ define([
 	return function(context) {
 		"use strict";  //$NON-NLS-0$
 
+        function hasCallbackComment(node) {
+            if(node.leadingComments) {
+                var len = node.leadingComments.length;
+                for(var i = 0; i < len; i++) {
+                    var comment = node.leadingComments[i];
+                    if(comment.type === 'Block' && /.*\*\s*(?:@callback)\s+/.test(comment.value)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
 		function check(node) {
 			try {
 				var scope = context.getScope();
@@ -29,7 +42,17 @@ define([
 					}
 					var defnode = variable.defs[0].name;
 					if (!variable.references.length) {
-						context.report(defnode, "Parameter '${0}' is never used.", {0:defnode.name}); //$NON-NLS-0
+					    var pid = 'no-unused-params';
+					    if(node.type === 'FunctionExpression') {
+					        pid += '-expr';
+					        if(hasCallbackComment(node)) {
+					            return;
+					        }
+					        if(hasCallbackComment(node.parent)) {
+					            return;
+					        }
+					    }
+						context.report(defnode, "Parameter '${0}' is never used.", {0:defnode.name, pid: pid}); //$NON-NLS-0
 					}
 				});
 			}

@@ -92,9 +92,26 @@ define([
 	    return val;
     }
     
+    /**
+     * @description Computes the offset for the block comment. i.e. 2 if the block starts with /*, 3 if it starts with /**
+     * @param {String} text The file text
+     * @param {Number} offset The doc node offset
+     * @returns {Number} 2 or 3 depending on the start of the comment block
+     * @since 8.0
+     */
+    function getDocOffset(text, offset) {
+        if(text.charAt(offset+1) === '*') {
+            if(text.charAt(offset+2) === '*') {
+                return 3;
+            }
+            return 2;
+        }
+    }
+    
     return {
         getLineStart: getLineStart,
         computeIndent: computeIndent,
-        computePostfix: computePostfix
+        computePostfix: computePostfix,
+        getDocOffset: getDocOffset
     };
 });
