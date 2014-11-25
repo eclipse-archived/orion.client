@@ -429,6 +429,14 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 					cFService.getApp(props.Target, props.Name).then(
 						function(result){
 							var app = result;
+							if (app.debug && app.debug.state){
+								deferred.resolve({
+									State: (app.debug.state !== "stop" ? "STARTED": "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
+									Message: "Application in debug mode"
+								});
+								return;
+							}
+							
 							deferred.resolve({
 								State: (app.running_instances > 0 ? "STARTED": "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
 								Message: app.running_instances + messages["of"] + app.instances + messages["instance(s)Running"]
@@ -513,6 +521,14 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 				if (props.Target && props.Name){
 					cFService.stopApp(props.Target, props.Name).then(
 						function(result){
+							if (result.state) {
+								deferred.resolve({
+									State: (result.state !== "stop" ? "STARTED": "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
+									Message: "Application in debug mode"
+								});	
+								return;
+							}
+							
 							var app = result.entity;
 							deferred.resolve({
 								State: (app.state === "STARTED" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$ //$NON-NLS-2$
@@ -550,6 +566,12 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 			},
 
 			_prepareAppStateMessage: function(appInstances){
+				if (appInstances.state){
+					return {
+						State: (appInstances.state !== "stop" ? "STARTED": "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
+						Message: "Application in debug mode"
+					};
+				}
 				var instances = 0;
 				var runningInstances = 0;
 				var flappingInstances = 0;
