@@ -19,11 +19,11 @@ define(["orion/Deferred"
 			if(userLocale) {
 				userLocale = userLocale.toLowerCase();
 				var matchFunc = function(reference, completeMatch) {
-					var serviceName = reference.getProperty("name");
-					if(serviceName) {
-						serviceName = serviceName.toLowerCase();
+					var localeName = reference.getProperty("locale");
+					if(localeName) {
+						localeName = localeName.toLowerCase();
 					}
-					var flag = completeMatch ? (userLocale === serviceName) : (userLocale.indexOf(serviceName) === 0);
+					var flag = completeMatch ? (userLocale === localeName) : (userLocale.indexOf(localeName) === 0);
 					if (flag) {
 						return reference;
 					}
@@ -46,12 +46,15 @@ define(["orion/Deferred"
 					});								
 				}
 				if(matchedRef) {
-					return serviceRegistry.getService(matchedRef).getBundleNames().then(function(bundleNames) {
-						bundleNames.forEach(function(bName) {
-							perBundleRefs.push({serviceRef: matchedRef, bundleName: bName});				
+					var serviceEntry = serviceRegistry.getService(matchedRef);
+					if(serviceEntry.getBundleNames) {
+						return serviceEntry.getBundleNames().then(function(bundleNames) {
+							bundleNames.forEach(function(bName) {
+								perBundleRefs.push({serviceRef: matchedRef, bundleName: bName});				
+							});
+							return new Deferred().resolve(perBundleRefs);
 						});
-						return new Deferred().resolve(perBundleRefs);
-					});
+					}
 				}
 			}
 		}
@@ -62,7 +65,7 @@ define(["orion/Deferred"
 		var perlanguageRefs = [];
 		var perBundleRefs = [];
 		nlsReferences.forEach(function(reference) {
-			if(reference.getProperty("perLanguage")){
+			if(reference.getProperty("locale")){
 				perlanguageRefs.push(reference);
 			} else {
 				perBundleRefs.push({serviceRef: reference, bundleName: reference.getProperty("name")});				
