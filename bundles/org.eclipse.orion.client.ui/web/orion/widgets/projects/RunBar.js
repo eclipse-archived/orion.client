@@ -216,6 +216,7 @@ define([
 			} else {
 				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(messages["selectLaunchConfig"]); //$NON-NLS-0$
 				this._selectedLaunchConfiguration = null;
+				this.setStatus({State: "", Message: ""}); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
 		
