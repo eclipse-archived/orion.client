@@ -336,7 +336,7 @@ define([
 		
 		_playButtonListener: function() {
 			if (this._liveUpdateBar && this._liveUpdateBar.isLiveUpdateActive()) {
-				// TODO
+				// TODO restart app
 			} else {
 				this.deploySelectedLaunchConfiguration();
 			}
@@ -357,11 +357,15 @@ define([
 			separator.classList.add("runBarSeparator"); //$NON-NLS-0$
 			this._domNode.appendChild(separator);
 			
-			this._liveUpdateBar.setParentNode(this._domNode);
+			this._domNode.appendChild(this._liveUpdateBar.getDomNode());
 		},
 		
 		getLiveUpdateBar: function() {
 			return this._liveUpdateBar;
+		},
+		
+		getSelectedLaunchConfiguration: function() {
+			return this._selectedLaunchConfiguration;
 		}
 		
 	});
