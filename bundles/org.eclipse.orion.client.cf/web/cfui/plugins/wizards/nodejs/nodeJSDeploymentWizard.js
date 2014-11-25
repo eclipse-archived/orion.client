@@ -327,8 +327,9 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 			    		var instrumentation = {};
 			    		var app = manifest.applications[0];
 
-			    		var password = debugPaneBuilder._cfLauncherPassword.value;
-			    		var userURLPrefix = debugPaneBuilder._cfLauncherURLPrefix.value;
+			    		// TODO: Restore previous parameters
+			    		var password = "holydiver"; // debugPaneBuilder._cfLauncherPassword.value;
+			    		var userURLPrefix = ""; // debugPaneBuilder._cfLauncherURLPrefix.value;
 
 			    		var command = userURLPrefix ?
 			    				i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} --urlprefix ${1} -- ${2}", password, userURLPrefix, app.command) //$NON-NLS-0$
