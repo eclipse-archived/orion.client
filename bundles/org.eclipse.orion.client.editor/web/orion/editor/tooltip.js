@@ -406,18 +406,12 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 						iframe.style.width = "auto"; //$NON-NLS-0$
 						iframe.style.height = "auto"; //$NON-NLS-0$
 						iframe.srcdoc = data.content;
-//						iframe.className = "delegatedUI"; //$NON-NLS-0$
-//						if (options){
-//							iframe.frameborder = options.border !== undefined ? options.border : 0;
-//							if (options.width) {
-//								delegatedParent.style.width = options.width;
-//								iframe.style.width = options.width;
-//							}
-//							if (options.height) {
-//								delegatedParent.style.height = options.height;
-//								iframe.style.height = options.height;
-//							}
-//						}
+						if (data.width) {
+							iframe.style.width = data.width;
+						}
+						if (data.height) {
+							iframe.style.height = data.height;
+						}
 						sectionDiv.appendChild(iframe);
 					}
 					break;

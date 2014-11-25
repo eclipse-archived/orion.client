@@ -67,11 +67,11 @@ define([
 					var result = null;
 					if (token.charAt(token.length-1) === ':'){ //$NON-NLS-0$
 						var uriTemplate = 'http://www.w3schools.com/css/css_' + token.substring(0, token.length-1) + '.asp';
-						result = {type: "delegatedUI", title: 'CSS Property Information', uriTemplate: uriTemplate, height: "200px"}
+						result = {type: "delegatedUI", title: 'CSS Property Information', uriTemplate: uriTemplate, width: "500px", height: "500px"}
 					} else if (that.colorValues.indexOf(token) > -1 || (token.length===7 && token.charAt(0) === '#')){ //$NON-NLS-0$
 						var html = '<html><body style=\"background-color: ' + token + ';\"></html>';
 						var title = token.charAt(0) === '#' ? '\\' + token : token;
-						result = {type: "html", title: title, content: html};
+						result = {type: "html", title: title, content: html, width: "200px", height: "200px"};
 					} else if (token.indexOf('image') >= 0){
 //						var domain = window.location.href.split('/')[0]; //$NON-NLS-0$
 //						var hostName = (nonHash.indexOf("/index.html") != -1 ? nonHash.substring(0, nonHash.indexOf("/index.html")) : nonHash);
