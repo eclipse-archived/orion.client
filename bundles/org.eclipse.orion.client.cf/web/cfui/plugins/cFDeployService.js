@@ -182,17 +182,9 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 						function(){
 							that._deploy(project, target, appName, appPath, appPackager, deferred, launchConf);
 						}, function(error){
-							error.Retry = {
-								parameters: [{
-									id: "user", //$NON-NLS-0$
-									type: "text", //$NON-NLS-0$
-									name: messages["user:"]
-								}, {
-									id: "password", //$NON-NLS-0$
-									type: "password", //$NON-NLS-0$
-									name: messages["password:"]
-								}]
-							};
+
+							/* default cf error message decoration */
+							error = mCfUtil.defaultDecorateError(error, target);
 							deferred.reject(error);
 						}
 					);
@@ -207,30 +199,13 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 				if (target && appName){
 
 					var errorHandler = function(error){
-						if (error.HttpCode === 404){
-							deferred.resolve({
-								State: "NOT_DEPLOYED", //$NON-NLS-0$
-								Message: error.Message
-							});
-						} else if (error.JsonData && error.JsonData.error_code) {
-							var err = error.JsonData;
-							if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){ //$NON-NLS-0$ //$NON-NLS-1$
-								error.Retry = {
-									parameters: [{
-										id: "user", //$NON-NLS-0$
-										type: "text",  //$NON-NLS-0$
-										name: messages["user:"]
-									}, {
-										id: "password", //$NON-NLS-0$
-										type: "password", //$NON-NLS-0$
-										name: messages["password:"]
-									}]
-								};
-							}
+
+						/* default cf error message decoration */
+						error = mCfUtil.defaultDecorateError(error, target);
+						if (error.HttpCode === 404)
+							deferred.resolve(error);
+						else
 							deferred.reject(error);
-						} else {
-							deferred.reject(error);
-						}
 					};
 
 					this._getAdditionalLaunchConfigurations(launchConf, project).then(function(manifest){
@@ -420,6 +395,7 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 
 				return deferred;
 			},
+
 			getState: function(props) {
 				return this._retryWithLogin(props, this._getState);
 			},
@@ -428,6 +404,7 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 				if (props.Target && props.Name){
 					cFService.getApp(props.Target, props.Name).then(
 						function(result){
+
 							var app = result;
 							if (app.debug && app.debug.state){
 								deferred.resolve({
@@ -436,36 +413,20 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 								});
 								return;
 							}
-							
+
 							deferred.resolve({
 								State: (app.running_instances > 0 ? "STARTED": "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
-								Message: app.running_instances + messages["of"] + app.instances + messages["instance(s)Running"]
+								Message:  i18Util.formatMessage(messages["{0}of${1}instance(s)Running"], app.running_instances, app.instances)
 							});
+
 						}, function(error){
-							if (error.HttpCode === 404){
-								deferred.resolve({
-									State: "NOT_DEPLOYED", //$NON-NLS-0$
-									Message: error.Message
-								});
-							} else if (error.JsonData && error.JsonData.error_code) {
-								var err = error.JsonData;
-								if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){ //$NON-NLS-0$ //$NON-NLS-1$
-									error.Retry = {
-										parameters: [{
-											id: "user", //$NON-NLS-0$
-											type: "text", //$NON-NLS-0$
-											name: messages["user:"]
-										}, {
-											id: "password", //$NON-NLS-0$
-											type: "password", //$NON-NLS-0$
-											name: messages["password:"]
-										}]
-									};
-								}
+
+							/* default cf error message decoration */
+							error = mCfUtil.defaultDecorateError(error, props.Target);
+							if (error.HttpCode === 404)
+								deferred.resolve(error);
+							else
 								deferred.reject(error);
-							} else {
-								deferred.reject(error);
-							}
 						}
 					);
 					return deferred;
@@ -483,30 +444,13 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 						function(result){
 							deferred.resolve(that._prepareAppStateMessage(result));
 						}, function(error){
-							if (error.HttpCode === 404){
-								deferred.resolve({
-									State: "NOT_DEPLOYED", //$NON-NLS-0$
-									Message: error.Message
-								});
-							} else if (error.JsonData && error.JsonData.error_code) {
-								var err = error.JsonData;
-								if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){ //$NON-NLS-0$//$NON-NLS-1$
-									error.Retry = {
-										parameters: [{
-											id: "user", //$NON-NLS-0$
-											type: "text", //$NON-NLS-0$
-											name: messages["user:"]
-										}, {
-											id: "password", //$NON-NLS-0$
-											type: "password", //$NON-NLS-0$
-											name: messages["password:"]
-										}]
-									};
-								}
+
+							/* default cf error message decoration */
+							error = mCfUtil.defaultDecorateError(error, props.Target);
+							if (error.HttpCode === 404)
+								deferred.resolve(error);
+							else
 								deferred.reject(error);
-							} else {
-								deferred.reject(error);
-							}
 						}
 					);
 					return deferred;
@@ -525,40 +469,23 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 								deferred.resolve({
 									State: (result.state !== "stop" ? "STARTED": "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
 									Message: "Application in debug mode"
-								});	
+								});
 								return;
 							}
-							
+
 							var app = result.entity;
 							deferred.resolve({
 								State: (app.state === "STARTED" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$ //$NON-NLS-2$
 								Message: messages["applicationIsNotRunning"]
 							});
 						}, function(error){
-							if (error.HttpCode === 404){
-								deferred.resolve({
-									State: "NOT_DEPLOYED", //$NON-NLS-0$
-									Message: error.Message
-								});
-							} else if (error.JsonData && error.JsonData.error_code) {
-								var err = error.JsonData;
-								if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){ //$NON-NLS-0$ //$NON-NLS-1$
-									error.Retry = {
-										parameters: [{
-											id: "user", //$NON-NLS-0$
-											type: "text", //$NON-NLS-0$
-											name: messages["user:"]
-										}, {
-											id: "password", //$NON-NLS-0$
-											type: "password", //$NON-NLS-0$
-											name: messages["password:"]
-										}]
-									};
-								}
+
+							/* default cf error message decoration */
+							error = mCfUtil.defaultDecorateError(error, props.Target);
+							if (error.HttpCode === 404)
+								deferred.resolve(error);
+							else
 								deferred.reject(error);
-							} else {
-								deferred.reject(error);
-							}
 						}
 					);
 					return deferred;
