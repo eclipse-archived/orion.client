@@ -345,6 +345,26 @@ define([
 			config.setOption("no-empty-block", properties.validate_no_empty_block); //$NON-NLS-0$
 			config.setOption("valid-typeof", properties.validate_typeof); //$NON-NLS-0$
 			config.setOption("no-sparse-arrays", properties.validate_no_sparse_arrays); //$NON-NLS-0$
+		},
+		
+		/**
+		 * @description Hook for the test suite to enable only the given rule
+		 * @function
+		 * @private
+		 * @param {String} ruleid The id for the rule
+		 * @param {Number} severity The desired severity or null
+		 * @param {String} opts Option for a given rule, for example the missing-doc rule has 'decl' or 'expr'
+		 * @since 8.0
+		 */
+		_enableOnly: function _enableOnly(ruleid, severity, opts) {
+		    var keys = Object.keys(config.rules);
+		    for(var i = 0; i < keys.length; i++) {
+		        if(keys[i] === ruleid) {
+		            config.setOption(ruleid, severity ? severity : 2, opts);
+		        } else {
+		            config.setOption(keys[i], 0);
+		        }
+		    }
 		}
 	});
 	return ESLintValidator;
