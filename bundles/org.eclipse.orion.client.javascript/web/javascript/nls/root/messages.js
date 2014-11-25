@@ -59,4 +59,6 @@ define({
 	'addESLintEnvFixTooltip': 'Add or update an eslint-env directive to filter the known member', //$NON-NLS-0$ //$NON-NLS-1$
 	'addESLintGlobalFixName': 'Add to global directive', //$NON-NLS-0$ //$NON-NLS-1$
 	'addESLintGlobalFixTooltip': 'Add or update a global directive to filter the unknown member', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeUnusedParamsFixName': 'Remove unused parameter', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeUnusedParamsFixTooltip': 'Remove the unused parameter, keeping assignment side effects', //$NON-NLS-0$ //$NON-NLS-1$
 });

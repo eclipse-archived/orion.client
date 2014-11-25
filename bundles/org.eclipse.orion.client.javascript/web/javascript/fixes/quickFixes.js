@@ -16,8 +16,9 @@ define([
 'javascript/fixes/no-empty-block',
 'javascript/fixes/no-extra-semi',
 'javascript/fixes/no-fallthrough',
-'javascript/fixes/no-undef-defined'
-], function(Objects, no_empty_block, no_extra_semi, no_fallthrough, no_undef_defined) {
+'javascript/fixes/no-undef-defined',
+'javascript/fixes/no-unused-params'
+], function(Objects, no_empty_block, no_extra_semi, no_fallthrough, no_undef_defined, no_unused_params) {
 	
 	/**
 	 * @description Creates a new JavaScript quick fix computer
@@ -33,7 +34,8 @@ define([
 	    'no-empty-block': no_empty_block,
 	    'no-extra-semi': no_extra_semi,
 	    'no-fallthrough': no_fallthrough,
-	    'no-undef-defined': no_undef_defined
+	    'no-undef-defined': no_undef_defined,
+	    'no-unused-params': no_unused_params
 	};
 	
 	Objects.mixin(JavaScriptQuickfixes.prototype, /** @lends javascript.JavaScriptQuickfixes.prototype*/ {
