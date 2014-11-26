@@ -24,6 +24,9 @@ define([
                 var item = node.elements[idx];
                 if(item === null) {
                     var end = Finder.findToken(node.range[1], ast.tokens);
+                    if(end.value === ';') {
+                        end = ast.tokens[end.index-1];
+                    }
                     //wipe all trailing entries first using the ']' token start as the end
                     for(; idx > -1; idx--) {
                         item = node.elements[idx];

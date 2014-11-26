@@ -356,5 +356,21 @@ define([
 			                      //TODO empty block
 		    });
 		});
+		it("Test no-sparse-arrays-7", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    return getFixes({buffer: 'var a = [1, , 2, , ];', 
+		                      rule: rule,
+		                      expected: "[1, 2]"}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test no-sparse-arrays-4", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    return getFixes({buffer: 'var a = [, , \n1, \n, 2, \n, ];', 
+		                      rule: rule,
+		                      expected: "[1, 2]"}).then(function() {
+			                      //TODO empty block
+		    });
+		});
 	});
 });
