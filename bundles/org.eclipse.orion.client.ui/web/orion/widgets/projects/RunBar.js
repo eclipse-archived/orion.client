@@ -336,8 +336,9 @@ define([
 		},
 		
 		_playButtonListener: function() {
+			// TODO check if app is already running and confirm with user if they want to restart it
 			if (this._liveUpdateBar && this._liveUpdateBar.isLiveUpdateActive()) {
-				// TODO restart app
+				this._commandRegistry.runCommand("orion.launchConfiguration.startApp", this._selectedLaunchConfiguration, this, null, null, this._playButton); //$NON-NLS-0$
 			} else {
 				this.deploySelectedLaunchConfiguration();
 			}
