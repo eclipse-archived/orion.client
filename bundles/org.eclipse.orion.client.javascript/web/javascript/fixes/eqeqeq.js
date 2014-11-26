@@ -13,6 +13,7 @@
 define([
 ], function() {
     return function(editorContext, annotation) {
-        return editorContext.setText('===', annotation.start, annotation.end);
+        var expected = /^.*\'(\!==|===)\'/.exec(annotation.title);
+        return editorContext.setText(expected[1], annotation.start, annotation.end);
     };
 });

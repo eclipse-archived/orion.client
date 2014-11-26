@@ -65,7 +65,9 @@ define([
                 var pbs = problems.problems;
                 assert(pbs, "There should always be problems");
                 assert.equal(pbs.length, 1, 'There should only be one problem per test');
-                return obj.fixComputer.execute(obj.editorContext, {annotation: pbs[0]});
+                var annot = pbs[0];
+                annot.title = annot.description;
+                return obj.fixComputer.execute(obj.editorContext, {annotation: annot});
             });
 	    }
 	
@@ -202,7 +204,7 @@ define([
 		    var rule = createTestRule('no-undef');
 		    return getFixes({buffer: 'console.log(10);', 
 		                      rule: rule,
-		                      expected: "/**eslint-env node */"}).then(function() {
+		                      expected: "/*eslint-env node */"}).then(function() {
 			                      //TODO empty block
 		    });
 		});
@@ -210,7 +212,7 @@ define([
 		    var rule = createTestRule('no-undef');
 		    return getFixes({buffer: 'foo(10);', 
 		                      rule: rule,
-		                      expected: "/**globals foo */"}).then(function() {
+		                      expected: "/*globals foo */"}).then(function() {
 			                      //TODO empty block
 		    });
 		});
@@ -269,6 +271,22 @@ define([
 		    return getFixes({buffer: 'if(typeof f == "undefined") {}', 
 		                      rule: rule,
 		                      expected: '==='}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test eqeqeq-3", function() {
+		    var rule = createTestRule('eqeqeq');
+		    return getFixes({buffer: 'if(1 != 3) {}', 
+		                      rule: rule,
+		                      expected: "!=="}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test eqeqeq-4", function() {
+		    var rule = createTestRule('eqeqeq');
+		    return getFixes({buffer: 'if(typeof f != "undefined") {}', 
+		                      rule: rule,
+		                      expected: '!=='}).then(function() {
 			                      //TODO empty block
 		    });
 		});
