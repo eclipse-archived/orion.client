@@ -75,5 +75,6 @@ define({
 	"selectLaunchConfig": "Select a configuration to run",
 	"createNew": "Create New...",
 	"Running": "Running",
-	"checkingStateMessage": "Checking status of ${0}"
+	"checkingStateMessage": "Checking status of ${0}",
+	"Status": "Status"
 });

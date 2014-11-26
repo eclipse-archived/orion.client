@@ -56,7 +56,7 @@ define([
 				this._launchConfigurationsWrapper = lib.$(".launchConfigurationsWrapper", this._domNode); //$NON-NLS-0$
 				
 				this._statusLabel = lib.$(".statusLabel", this._domNode); //$NON-NLS-0$
-				this._statusLabel.appendChild(document.createTextNode(messages["Running"])); //$NON-NLS-0$
+				this._statusLabel.appendChild(document.createTextNode(messages["Status"])); //$NON-NLS-0$
 				
 				this._statusLight = lib.$(".statusLight", this._domNode); //$NON-NLS-0$
 				
