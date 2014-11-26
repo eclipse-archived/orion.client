@@ -36,6 +36,10 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		}
 		return high;
 	};
+	
+	function copy(object) {
+		return JSON.parse(JSON.stringify(object));
+	}
 
 	var createPatternBasedAdapter = function(grammars, rootId, contentType) {
 		return new PatternBasedAdapter(grammars, rootId, contentType);
@@ -697,8 +701,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 					if (current.include) {
 						this._processInclude(current, indexCounter, resultObject);
 					} else {
-						current.index = indexCounter[0]++;
-						resultObject[current.id] = current;
+						var newPattern = copy(current);
+						newPattern.index = indexCounter[0]++;
+						resultObject[current.id] = newPattern;
 					}
 				}
 			}.bind(this));
@@ -751,8 +756,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 					if (current.include) {
 						this._processInclude(current, indexCounter, resultObject);
 					} else if (!resultObject[current.id]) {
-						current.index = indexCounter[0]++;
-						resultObject[current.id] = current;
+						var newPattern = copy(current);
+						newPattern.index = indexCounter[0]++;
+						resultObject[current.id] = newPattern;
 					}
 				}
 			}.bind(this));
