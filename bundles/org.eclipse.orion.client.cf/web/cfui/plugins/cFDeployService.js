@@ -416,7 +416,7 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 
 							deferred.resolve({
 								State: (app.running_instances > 0 ? "STARTED": "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
-								Message:  i18Util.formatMessage(messages["{0}of${1}instance(s)Running"], app.running_instances, app.instances)
+								Message:  i18Util.formatMessage(messages["${0}of${1}instance(s)Running"], app.running_instances, app.instances)
 							});
 
 						}, function(error){
