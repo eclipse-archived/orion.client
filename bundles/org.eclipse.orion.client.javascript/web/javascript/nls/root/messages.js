@@ -63,4 +63,6 @@ define({
 	'removeUnusedParamsFixTooltip': 'Remove the unused parameter, keeping side effects', //$NON-NLS-0$ //$NON-NLS-1$
 	'commentCallbackFixName': 'Document as callback', //$NON-NLS-0$ //$NON-NLS-1$
 	'commentCallbackFixTooltip': 'Document the parameter as a callback, ignoring unused parameters', //$NON-NLS-0$ //$NON-NLS-1$
+	'eqeqeqFixName': 'Change to \'===\'', //$NON-NLS-0$ //$NON-NLS-1$
+	'eqeqeqFixTooltip': 'Change the \'==\' to \'===\'', //$NON-NLS-0$ //$NON-NLS-1$
 });

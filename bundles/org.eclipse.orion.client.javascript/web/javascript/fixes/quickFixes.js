@@ -14,12 +14,13 @@
 define([
 'orion/objects',
 'javascript/fixes/comment-callback',
+'javascript/fixes/eqeqeq',
 'javascript/fixes/no-empty-block',
 'javascript/fixes/no-extra-semi',
 'javascript/fixes/no-fallthrough',
 'javascript/fixes/no-undef-defined',
 'javascript/fixes/no-unused-params'
-], function(Objects, comment_callback, no_empty_block, no_extra_semi, no_fallthrough, no_undef_defined, no_unused_params) {
+], function(Objects, comment_callback, eqeqeq, no_empty_block, no_extra_semi, no_fallthrough, no_undef_defined, no_unused_params) {
 	
 	/**
 	 * @description Creates a new JavaScript quick fix computer
@@ -32,6 +33,7 @@ define([
 	}
 	
 	var fixMap = {
+	    'eqeqeq': eqeqeq,
 	    'no-empty-block': no_empty_block,
 	    'no-extra-semi': no_extra_semi,
 	    'no-fallthrough': no_fallthrough,

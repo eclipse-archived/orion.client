@@ -255,5 +255,22 @@ define([
 			                      //TODO empty block
 		    });
 		});
+	//EQEQEQ
+		it("Test eqeqeq-1", function() {
+		    var rule = createTestRule('eqeqeq');
+		    return getFixes({buffer: 'if(1 == 3) {}', 
+		                      rule: rule,
+		                      expected: "==="}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test eqeqeq-2", function() {
+		    var rule = createTestRule('eqeqeq');
+		    return getFixes({buffer: 'if(typeof f == "undefined") {}', 
+		                      rule: rule,
+		                      expected: '==='}).then(function() {
+			                      //TODO empty block
+		    });
+		});
 	});
 });
