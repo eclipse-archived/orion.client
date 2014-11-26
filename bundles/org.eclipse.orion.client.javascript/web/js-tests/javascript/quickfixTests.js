@@ -214,5 +214,46 @@ define([
 			                      //TODO empty block
 		    });
 		});
+	//NO-UNUSED-PARAMS
+		it("Test no-unused-params-1", function() {
+		    var rule = createTestRule('no-unused-params');
+		    return getFixes({buffer: 'function f(p) {}', 
+		                      rule: rule,
+		                      expected: "function f() {}"}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test no-unused-params-2", function() {
+		    var rule = createTestRule('no-unused-params');
+		    return getFixes({buffer: 'function f(p, p2, p3) {p(); p3();}', 
+		                      rule: rule,
+		                      expected: "function f(p, p3) {p(); p3();}"}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test no-unused-params-3", function() {
+		    var rule = createTestRule('no-unused-params');
+		    return getFixes({buffer: 'function f(p, p2, p3) {p(); p2();}', 
+		                      rule: rule,
+		                      expected: "function f(p, p2) {p(); p2();}"}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test no-unused-params-4", function() {
+		    var rule = createTestRule('no-unused-params');
+		    return getFixes({buffer: 'define([], function(p, p2, p3) {p(); p2();});', 
+		                      rule: rule,
+		                      expected: "/* @callback */"}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test no-unused-params-5", function() {
+		    var rule = createTestRule('no-unused-params');
+		    return getFixes({buffer: 'var f = { one: function(p, p2, p3) {p(); p2();}};', 
+		                      rule: rule,
+		                      expected: "/**\n * @callback\n */"}).then(function() {
+			                      //TODO empty block
+		    });
+		});
 	});
 });
