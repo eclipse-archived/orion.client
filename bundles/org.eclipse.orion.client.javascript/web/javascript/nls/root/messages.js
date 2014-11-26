@@ -67,4 +67,6 @@ define({
 	'eqeqeqFixTooltip': 'Update the operator to the expected one', //$NON-NLS-0$ //$NON-NLS-1$
 	'unreachableFixName': 'Remove unreachable code', //$NON-NLS-0$ //$NON-NLS-1$
 	'unreachableFixTooltip': 'Remove the unreachable code', //$NON-NLS-0$ //$NON-NLS-1$
+	'sparseArrayFixName': 'Convert to normal array', //$NON-NLS-0$ //$NON-NLS-1$
+	'sparseArrayFixTooltip': 'Remove sparse entries and convert to normal array', //$NON-NLS-0$ //$NON-NLS-1$
 });

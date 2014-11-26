@@ -307,5 +307,54 @@ define([
 			                      //TODO empty block
 		    });
 		});
+	//NO-SPARSE-ARRAYS
+		it("Test no-sparse-arrays-1", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    return getFixes({buffer: 'var a = [1, , 2]', 
+		                      rule: rule,
+		                      expected: "[1, 2]"}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test no-sparse-arrays-2", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    return getFixes({buffer: 'var a = [1, , 2, , ]', 
+		                      rule: rule,
+		                      expected: "[1, 2]"}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test no-sparse-arrays-3", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    return getFixes({buffer: 'var a = [, , 1, , 2, , ]', 
+		                      rule: rule,
+		                      expected: "[1, 2]"}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test no-sparse-arrays-4", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    return getFixes({buffer: 'var a = [, , \n1, \n, 2, \n, ]', 
+		                      rule: rule,
+		                      expected: "[1, 2]"}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test no-sparse-arrays-5", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    return getFixes({buffer: 'var a = [, , \n1, \n, 2, \n, 3]', 
+		                      rule: rule,
+		                      expected: "[1, 2, 3]"}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test no-sparse-arrays-6", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    return getFixes({buffer: 'var a = [, ,,,, \n1, \n, , ,, ,\n,, 2, \n, 3]', 
+		                      rule: rule,
+		                      expected: "[1, 2, 3]"}).then(function() {
+			                      //TODO empty block
+		    });
+		});
 	});
 });

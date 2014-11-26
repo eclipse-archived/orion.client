@@ -18,10 +18,11 @@ define([
 'javascript/fixes/no-empty-block',
 'javascript/fixes/no-extra-semi',
 'javascript/fixes/no-fallthrough',
+'javascript/fixes/no-sparse-arrays',
 'javascript/fixes/no-undef-defined',
 'javascript/fixes/no-unreachable',
 'javascript/fixes/no-unused-params'
-], function(Objects, comment_callback, eqeqeq, no_empty_block, no_extra_semi, no_fallthrough, no_undef_defined, no_unreachable, no_unused_params) {
+], function(Objects, comment_callback, eqeqeq, no_empty_block, no_extra_semi, no_fallthrough, no_sparse_arrays, no_undef_defined, no_unreachable, no_unused_params) {
 	
 	/**
 	 * @description Creates a new JavaScript quick fix computer
@@ -38,6 +39,7 @@ define([
 	    'no-empty-block': no_empty_block,
 	    'no-extra-semi': no_extra_semi,
 	    'no-fallthrough': no_fallthrough,
+	    'no-sparse-arrays': no_sparse_arrays,
 	    'no-undef-defined': no_undef_defined,
 	    'no-undef-defined-inenv': no_undef_defined,
 	    'no-unreachable': no_unreachable,

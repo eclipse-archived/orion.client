@@ -268,6 +268,22 @@ define([
         		]
   			}
   	);
+  	
+  	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+			quickFixComputer, 
+			{
+				nameKey : 'sparseArrayFixName',  //$NON-NLS-0$
+				tooltipKey : 'sparseArrayFixTooltip',  //$NON-NLS-0$
+				scopeId: "orion.edit.quickfix",
+   				id : "sparse.array.fix",  //$NON-NLS-0$
+   				nls: 'javascript/nls/messages',  //$NON-NLS-0$
+                key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+    			contentType: ['application/javascript'],  //$NON-NLS-0$
+    			validationProperties: [
+        			{source: "annotation:id", match: "^(?:no-sparse-arrays)$"} //$NON-NLS-1$ //$NON-NLS-0$
+        		]
+  			}
+  	);
 	
 	/**
 	 * Register the jsdoc-based outline
