@@ -31,6 +31,7 @@ define([
 "eslint/tests/lib/rules/no-new-object",
 "eslint/tests/lib/rules/no-new-wrappers",
 "eslint/tests/lib/rules/no-redeclare",
+"eslint/tests/lib/rules/no-shadow",
 "eslint/tests/lib/rules/no-undef",
 "eslint/tests/lib/rules/no-unused-params",
 "eslint/tests/lib/rules/no-unused-vars",

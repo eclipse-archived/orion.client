@@ -462,85 +462,119 @@ define([
 		"no-redeclare": {
 		    description: 'Warn when variable or function is redeclared',
 		    rule: function(context) {
-        		"use strict";  //$NON-NLS-0$
-        
-        		function addNamedFunctions(map, scope) {
-        			scope.variables.forEach(function(variable) {
-        				variable.defs.some(function(def) {
-        					if (def.type === "FunctionName") {  //$NON-NLS-0$
-        						var name = def.name.name;
-        						if (!(Object.prototype.hasOwnProperty.call(map, name))) {
-        							map[name] = scope;
-        						}
-        						return true;
-        					}
-        					return false;
-        				});
-        			});
-        		}
-        
-        		/**
-        		 * @returns {Object} A map of {String} -> {Scope}. Keys are FunctionDecl or FunctionExpr names, values are the 
-        		 * uppermost scope that binds the name.
-        		 */
-        		function createNamedFunctionMap(scope) {
-        			var upper = scope.upper;
-        			var named = Object.create(null);
-        
-        			// Hack to walk past upper scope lacking a _namedFunctions map. This happens because escope generates
-        			// 2 scopes for a FunctionExpression. The first is never returned by context.getScope() as it is not
-        			// the innermost, so this rule never visits it.
-        			while (upper && !upper._namedFunctions) { upper = upper.upper; }
-        			if (upper) {
-        				// Propagate upper scope's named functions to ours
-        				util.mixin(named, upper._namedFunctions);
-        			}
-        			addNamedFunctions(named, scope);
-        			scope._namedFunctions = named;
-        			return named;
-        		}
-        
-        		function isParameter(variable) {
-        			return variable.defs.some(function(def) {
-        				return def.type === "Parameter";  //$NON-NLS-0$
-        			});
-        		}
-        
-        		function checkScope(node) {
-        			try {
-        				var scope = context.getScope();
-        				if(node.type === 'FunctionExpression' && node.id && node.id.name) {
-        				    scope  = scope.upper;
-        				}
-        				var namedFunctions = createNamedFunctionMap(scope);
-        	
-        				scope.variables.forEach(function(variable) {
-        					// If variable collides with a named function name from an upper scope, it's a redeclaration. Unless
-        					// the variable is a param, then we allow it.
-        					var bindingSource;
-        					if (node.type !== "Program" && (bindingSource = namedFunctions[variable.name]) && bindingSource !== scope && !isParameter(variable)) {  //$NON-NLS-0$
-        						context.report(variable.defs[0].name, "'${0}' is already defined.", {0:variable.name});
-        					}
-        	
-        					// If variable has multiple defs, every one after the 1st is a redeclaration
-        					variable.defs.forEach(function(def, i) {
-        						if (i > 0) {
-        							context.report(def.name, "'${0}' is already defined.", {0:def.name.name});
-        						}
-        					});
-        				});
-        			}
-        			catch(ex) {
-        				Logger.log(ex);
-        			}
-        		}
-        
-        		return {
-        			"Program": checkScope,  //$NON-NLS-0$
-        			"FunctionDeclaration": checkScope,  //$NON-NLS-0$
-        			"FunctionExpression": checkScope  //$NON-NLS-0$
-        		};
+                "use strict"; //$NON-NLS-0$
+
+                function reportRedeclaration(node, name) {
+                    context.report(node, "'${0}' is already defined.", {0:name});
+                }
+
+                function checkScope(node) {
+                    try {
+                        var scope = context.getScope();
+                        if(node.type === "FunctionExpression" && node.id && node.id.name) {
+                            scope  = scope.upper;
+                        }
+                        scope.variables.forEach(function(variable) {
+                            // If variable has multiple defs, every one after the 1st is a redeclaration
+                            variable.defs.slice(1).forEach(function(def) {
+                                reportRedeclaration(def.name, def.name.name);
+                            });
+                        });
+                    }
+                    catch(ex) {
+                        Logger.log(ex);
+                    }
+                }
+
+                return {
+                    "Program": checkScope,  //$NON-NLS-0$
+                    "FunctionDeclaration": checkScope,  //$NON-NLS-0$
+                    "FunctionExpression": checkScope,  //$NON-NLS-0$
+                    "ArrowFunctionExpression": checkScope, //$NON-NLS-0$
+                };
         	}
+        },
+        "no-shadow": {
+            description: "Warn when shadowing variable from upper scope",
+            rule: function(context) {
+                "use strict"; //$NON-NLS-0$
+
+                var hasOwnProperty = Object.prototype.hasOwnProperty;
+                function addVariables(map, scope) {
+                    scope.variables.forEach(function(variable) {
+                        var name = variable.name;
+                        if (!variable.defs.length) { // Ignore the synthetic 'arguments' variable
+                            return;
+                        } if (!hasOwnProperty.call(map, name)) {
+                            map[variable.name] = scope;
+                        }
+                    });
+                }
+
+                /**
+                 * @returns {Object} A map of {String} -> {Scope}. Keys are symbol names, values are the 
+                 * uppermost scope that binds the name.
+                 */
+                function createSymbolMap(scope) {
+                    var upper = scope.upper;
+                    var symbols = Object.create(null);
+
+                    // Hack to walk past upper scope lacking a _namedFunctions map. This happens because escope generates
+                    // 2 scopes for a FunctionExpression. The first is never returned by context.getScope() as it is not
+                    // the innermost, so this rule never visits it.
+                    while (upper && !upper._symbols) { upper = upper.upper; }
+                    if (upper) {
+                        // Propagate upper scope's named functions to ours
+                        util.mixin(symbols, upper._symbols);
+                    }
+                    addVariables(symbols, scope);
+                    scope._symbols = symbols;
+                    return symbols;
+                }
+
+                function reportShadow(node, name) {
+                    context.report(node, "'${0}' is already declared in the upper scope.", {0: name});
+                }
+
+                function isParameter(variable) {
+                    return variable.defs.some(function(def) {
+                        return def.type === "Parameter";  //$NON-NLS-0$
+                    });
+                }
+
+                function checkScope(node) {
+                    try {
+                        // Build map
+                        var scope = context.getScope();
+                        if (node.type === "FunctionExpression" && node.id && node.id.name) {
+                            scope  = scope.upper;
+                        }
+                        var symbolMap = createSymbolMap(scope);
+
+                        if (scope.type === "global") //$NON-NLS-0$
+                            return; // No shadowing can occur in the global (Program) scope
+
+                        scope.variables.forEach(function(variable) {
+                            if (!variable.defs.length)
+                                return; // Skip 'arguments'
+                            // If variable's name was first bound in an upper scope, and the variable is not a parameter,
+                            // flag it.
+                            var bindingSource;
+                            if ((bindingSource = symbolMap[variable.name]) && bindingSource !== scope && !isParameter(variable)) { //$NON-NLS-0$
+                                reportShadow(variable.defs[0].name, variable.name);
+                            }
+                        });
+                    } catch(ex) {
+                        Logger.log(ex);
+                    }
+                }
+                return {
+                    "Program": checkScope, //$NON-NLS-0$
+                    "FunctionDeclaration": checkScope, //$NON-NLS-0$
+                    "FunctionExpression": checkScope, //$NON-NLS-0$
+                    "ArrowFunctionExpression": checkScope, //$NON-NLS-0$
+                };
+            }
         },
 		'no-sparse-arrays': {
 		    description: 'Warn when sparse arrays are defined',

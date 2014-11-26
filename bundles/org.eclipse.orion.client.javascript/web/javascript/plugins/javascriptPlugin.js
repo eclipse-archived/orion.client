@@ -539,6 +539,11 @@ define([
 							type: "number",  //$NON-NLS-0$
 							defaultValue: warning,
 							options: severities
+						},{	id: "validate_no_shadow",  //$NON-NLS-0$
+							nameKey: "varShadow",  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: warning,
+							options: severities
 						}
 					]
 				}

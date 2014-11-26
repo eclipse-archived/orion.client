@@ -37,6 +37,7 @@ define({
 	'missingSemi' : 'Missing semicolons:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedVars' : 'Unused variables:', //$NON-NLS-0$  //$NON-NLS-1$
 	'varRedecl' : 'Variable re-declarations:', //$NON-NLS-0$  //$NON-NLS-1$
+	'varShadow': 'Variable shadowing:', //$NON-NLS-0$  //$NON-NLS-1$
 	'undefMember' : 'Undeclared global reference:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unnecessarySemis' : 'Unnecessary semicolons:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedParams' : 'Unused parameters:', //$NON-NLS-0$  //$NON-NLS-1$
