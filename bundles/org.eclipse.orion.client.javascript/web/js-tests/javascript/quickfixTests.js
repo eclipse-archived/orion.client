@@ -272,5 +272,22 @@ define([
 			                      //TODO empty block
 		    });
 		});
+	//NO-UNREACHABLE
+		it("Test no-unreachable-1", function() {
+		    var rule = createTestRule('no-unreachable');
+		    return getFixes({buffer: 'if(1 == 3) {return; var foo = 9;}', 
+		                      rule: rule,
+		                      expected: ""}).then(function() {
+			                      //TODO empty block
+		    });
+		});
+		it("Test no-unreachable-2", function() {
+		    var rule = createTestRule('no-unreachable');
+		    return getFixes({buffer: 'switch(num) { case 1: {throw e; f = 10;}}', 
+		                      rule: rule,
+		                      expected: ''}).then(function() {
+			                      //TODO empty block
+		    });
+		});
 	});
 });

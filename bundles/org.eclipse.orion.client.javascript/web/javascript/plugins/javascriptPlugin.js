@@ -252,6 +252,22 @@ define([
         		]
   			}
   	);
+  	
+  	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+			quickFixComputer, 
+			{
+				nameKey : 'unreachableFixName',  //$NON-NLS-0$
+				tooltipKey : 'unreachableFixTooltip',  //$NON-NLS-0$
+				scopeId: "orion.edit.quickfix",
+   				id : "remove.unreachable.fix",  //$NON-NLS-0$
+   				nls: 'javascript/nls/messages',  //$NON-NLS-0$
+                key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+    			contentType: ['application/javascript'],  //$NON-NLS-0$
+    			validationProperties: [
+        			{source: "annotation:id", match: "^(?:no-unreachable)$"} //$NON-NLS-1$ //$NON-NLS-0$
+        		]
+  			}
+  	);
 	
 	/**
 	 * Register the jsdoc-based outline

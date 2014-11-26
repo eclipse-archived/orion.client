@@ -65,4 +65,6 @@ define({
 	'commentCallbackFixTooltip': 'Document the parameter as a callback, ignoring unused parameters', //$NON-NLS-0$ //$NON-NLS-1$
 	'eqeqeqFixName': 'Change to \'===\'', //$NON-NLS-0$ //$NON-NLS-1$
 	'eqeqeqFixTooltip': 'Change the \'==\' to \'===\'', //$NON-NLS-0$ //$NON-NLS-1$
+	'unreachableFixName': 'Remove unreachable code', //$NON-NLS-0$ //$NON-NLS-1$
+	'unreachableFixTooltip': 'Remove the unreachable code', //$NON-NLS-0$ //$NON-NLS-1$
 });

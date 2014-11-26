@@ -13,6 +13,6 @@
 define([
 ], function() {
     return function(editorContext, annotation) {
-        return editorContext.setText('===', annotation.start, annotation.end);
+       return editorContext.setText('', annotation.start, annotation.end);    
     };
 });
