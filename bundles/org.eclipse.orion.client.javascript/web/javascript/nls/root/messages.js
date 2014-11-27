@@ -56,9 +56,9 @@ define({
 	'addEmptyCommentFixName': 'Comment empty block', //$NON-NLS-0$ //$NON-NLS-1$
 	'addEmptyCommentFixTooltip': 'Add a TODO comment to the empty block', //$NON-NLS-0$ //$NON-NLS-1$
 	'addESLintEnvFixName': 'Add to eslint-env directive', //$NON-NLS-0$ //$NON-NLS-1$
-	'addESLintEnvFixTooltip': 'Add or update an eslint-env directive to filter the known member', //$NON-NLS-0$ //$NON-NLS-1$
-	'addESLintGlobalFixName': 'Add to global directive', //$NON-NLS-0$ //$NON-NLS-1$
-	'addESLintGlobalFixTooltip': 'Add or update a global directive to filter the unknown member', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintEnvFixTooltip': 'Add to eslint-env directive to filter the known member', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintGlobalFixName': 'Add to globals directive', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintGlobalFixTooltip': 'Add to globals directive to filter the unknown member', //$NON-NLS-0$ //$NON-NLS-1$
 	'removeUnusedParamsFixName': 'Remove unused parameter', //$NON-NLS-0$ //$NON-NLS-1$
 	'removeUnusedParamsFixTooltip': 'Remove the unused parameter, keeping side effects', //$NON-NLS-0$ //$NON-NLS-1$
 	'commentCallbackFixName': 'Document as callback', //$NON-NLS-0$ //$NON-NLS-1$
@@ -69,4 +69,6 @@ define({
 	'unreachableFixTooltip': 'Remove the unreachable code', //$NON-NLS-0$ //$NON-NLS-1$
 	'sparseArrayFixName': 'Convert to normal array', //$NON-NLS-0$ //$NON-NLS-1$
 	'sparseArrayFixTooltip': 'Remove sparse entries and convert to normal array', //$NON-NLS-0$ //$NON-NLS-1$
+	'semiFixName': 'Add missing \';\'', //$NON-NLS-0$ //$NON-NLS-1$
+	'semiFixTooltip': 'Add the missing \';\'', //$NON-NLS-0$ //$NON-NLS-1$
 });

@@ -21,7 +21,7 @@ define([
                 var len = node.leadingComments.length;
                 for(var i = 0; i < len; i++) {
                     var comment = node.leadingComments[i];
-                    if(comment.type === 'Block' && /.*\*\s*(?:@callback)\s+/.test(comment.value)) {
+                    if(comment.type === 'Block' && /\s*(?:@callback)\s+/.test(comment.value)) {
                         return true;
                     }
                 }
@@ -48,7 +48,7 @@ define([
 					        if(hasCallbackComment(node)) {
 					            return;
 					        }
-					        if(hasCallbackComment(node.parent)) {
+					        if(node.parent.type === 'Property' && hasCallbackComment(node.parent)) {
 					            return;
 					        }
 					    }

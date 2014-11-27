@@ -19,7 +19,7 @@ define([
 'esprima',
 'javascript/scriptResolver',
 'javascript/astManager',
-'javascript/fixes/quickFixes',
+'javascript/quickFixes',
 'javascript/contentAssist/indexFiles/mongodbIndex',
 'javascript/contentAssist/indexFiles/mysqlIndex',
 'javascript/contentAssist/indexFiles/postgresIndex',
@@ -206,7 +206,14 @@ define([
   	);
   	
   	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
-			quickFixComputer, 
+			{
+			    execute: function(editorContext, context) {
+			        if(context.annotation.id === 'no-unused-params-expr') {
+			            return quickFixComputer['no-unused-params'](editorContext, context.annotation, astManager);
+			        }
+			        return quickFixComputer.execute(editorContext, context);
+			    }
+			}, 
 			{
 				nameKey : 'removeUnusedParamsFixName',  //$NON-NLS-0$
 				tooltipKey : 'removeUnusedParamsFixTooltip',  //$NON-NLS-0$
@@ -216,7 +223,7 @@ define([
                 key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
     			contentType: ['application/javascript'],  //$NON-NLS-0$
     			validationProperties: [
-        			{source: "annotation:id", match: "^(?:no-unused-params).*$"} //$NON-NLS-1$ //$NON-NLS-0$
+        			{source: "annotation:id", match: "^(?:no-unused-params|no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-0$
         		]
   			}
   	);
@@ -281,6 +288,22 @@ define([
     			contentType: ['application/javascript'],  //$NON-NLS-0$
     			validationProperties: [
         			{source: "annotation:id", match: "^(?:no-sparse-arrays)$"} //$NON-NLS-1$ //$NON-NLS-0$
+        		]
+  			}
+  	);
+  	
+  	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+			quickFixComputer, 
+			{
+				nameKey : 'semiFixName',  //$NON-NLS-0$
+				tooltipKey : 'semiFixTooltip',  //$NON-NLS-0$
+				scopeId: "orion.edit.quickfix",
+   				id : "semi.fix",  //$NON-NLS-0$
+   				nls: 'javascript/nls/messages',  //$NON-NLS-0$
+                key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+    			contentType: ['application/javascript'],  //$NON-NLS-0$
+    			validationProperties: [
+        			{source: "annotation:id", match: "^(?:semi)$"} //$NON-NLS-1$ //$NON-NLS-0$
         		]
   			}
   	);

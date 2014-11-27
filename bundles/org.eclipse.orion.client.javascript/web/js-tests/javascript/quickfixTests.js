@@ -42,8 +42,8 @@ define([
 					return new Deferred().resolve(buffer);
 				},
 				
-				setText: function(text) {
-				    assertFixes(text, options.expected);
+				setText: function(text, start, end) {
+				    assertFixes(text, start, end, options.expected);
 				}
 			};
 			return {
@@ -76,9 +76,11 @@ define([
     	 * @param {Array.<orion.Fix>} computed The computed set of fixes
     	 * @param {Array.<Object>} expected The expected set of fixes
     	 */
-    	function assertFixes(computed, expected) {
-    	    assert(computed !== null && typeof computed !== 'undefined', 'There should be fixes');
-    	    assert(computed.indexOf(expected) > -1, 'The fix: '+computed+' does not match the expected fix of: '+expected);
+    	function assertFixes(computed, start, end, expected) {
+	        assert(computed !== null && typeof computed !== 'undefined', 'There should be fixes');
+    	    assert(computed.indexOf(expected.value) > -1, 'The fix: '+computed+' does not match the expected fix of: '+expected.value);
+    	    assert.equal(start, expected.start, 'The fix starts do not match');
+    	    assert.equal(end, expected.end, 'The fix ends do not match');
 	    }
 	
 	    /**
@@ -99,278 +101,351 @@ define([
 	//NO-EMPTY-BLOCK
 		it("Test no-empty-block-1", function() {
 		    var rule = createTestRule('no-empty-block');
+		    var expected = {value: "//TODO empty block",
+		                    start: 14, 
+		                    end: 14};
 		    return getFixes({buffer: 'function f() {}', 
 		                      rule: rule,
-		                      expected: "//TODO empty block"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		
 		it("Test no-empty-block-2", function() {
 		    var rule = createTestRule('no-empty-block');
+		    var expected = {value: "//TODO empty block",
+		                    start: 39, 
+		                    end: 39};
 		    return getFixes({buffer: 'var f = {f: function() { function q() {}}}', 
 		                      rule: rule,
-		                      expected: "//TODO empty block"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		
 		it("Test no-empty-block-3", function() {
 		    var rule = createTestRule('no-empty-block');
+		    var expected = {value: "//TODO empty block",
+		                    start: 25, 
+		                    end: 25};
 		    return getFixes({buffer: 'var f = { f: function() {}};', 
 		                      rule: rule,
-		                      expected: "//TODO empty block"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		
 		it("Test no-empty-block-4", function() {
 		    var rule = createTestRule('no-empty-block');
+		    var expected = {value: "//TODO empty block",
+		                    start: 10, 
+		                    end: 10};
 		    return getFixes({buffer: 'while(f) {}', 
 		                      rule: rule,
-		                      expected: "//TODO empty block"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-empty-block-5", function() {
 		    var rule = createTestRule('no-empty-block');
+		    var expected = {value: "//TODO empty block",
+		                    start: 7, 
+		                    end: 7};
 		    return getFixes({buffer: 'if(f) {}', 
 		                      rule: rule,
-		                      expected: "//TODO empty block"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-empty-block-6", function() {
 		    var rule = createTestRule('no-empty-block');
+		    var expected = {value: "//TODO empty block",
+		                    start: 17, 
+		                    end: 17};
 		    return getFixes({buffer: 'if(f) {while(f) {}}', 
 		                      rule: rule,
-		                      expected: "//TODO empty block"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		
 	//NO-EXTRA-SEMI
 		it("Test no-extra-semi-1", function() {
 		    var rule = createTestRule('no-extra-semi');
+		     var expected = {value: "",
+		                    start: 15, 
+		                    end: 16};
 		    return getFixes({buffer: 'function f() {};', 
 		                      rule: rule,
-		                      expected: ""}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-extra-semi-2", function() {
 		    var rule = createTestRule('no-extra-semi');
+		    var expected = {value: "",
+		                    start: 13, 
+		                    end: 14};
 		    return getFixes({buffer: 'var foo = 10;;', 
 		                      rule: rule,
-		                      expected: ""}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-extra-semi-3", function() {
 		    var rule = createTestRule('no-extra-semi');
+		    var expected = {value: "",
+		                    start: 13, 
+		                    end: 14};
 		    return getFixes({buffer: 'var foo = {};;', 
 		                      rule: rule,
-		                      expected: ""}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-extra-semi-4", function() {
 		    var rule = createTestRule('no-extra-semi');
+		    var expected = {value: "",
+		                    start: 0, 
+		                    end: 1};
 		    return getFixes({buffer: ';', 
 		                      rule: rule,
-		                      expected: ""}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 	//NO-FALLTHROUGH
 		it("Test no-fallthrough-1", function() {
 		    var rule = createTestRule('no-fallthrough');
+		    var expected = {value: "//$FALLTHROUGH$",
+		                    start: 30, 
+		                    end: 30};
 		    return getFixes({buffer: 'switch(num) {case 1:{code();} case 2:{}}', 
 		                      rule: rule,
-		                      expected: "//$FALLTHROUGH$"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-fallthrough-2", function() {
 		    var rule = createTestRule('no-fallthrough');
+		    var expected = {value: "//$FALLTHROUGH$",
+		                    start: 46, 
+		                    end: 46};
 		    return getFixes({buffer: 'switch(num) {case 1:{break;} case 2:{code();} default: {}}', 
 		                      rule: rule,
-		                      expected: "//$FALLTHROUGH$"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 	//NO-UNDEF
 		it("Test no-undef-defined-1", function() {
 		    var rule = createTestRule('no-undef');
+		    var expected = {value: "/*eslint-env node */",
+		                    start: 0, 
+		                    end: 0};
 		    return getFixes({buffer: 'console.log(10);', 
 		                      rule: rule,
-		                      expected: "/*eslint-env node */"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-undef-defined-2", function() {
 		    var rule = createTestRule('no-undef');
+		    var expected = {value: "/*globals foo */",
+		                    start: 0, 
+		                    end: 0};
 		    return getFixes({buffer: 'foo(10);', 
 		                      rule: rule,
-		                      expected: "/*globals foo */"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
+		});
+		it("Test no-undef-defined-3", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "globals foo bar",
+		                    start: 2, 
+		                    end: 14};
+		    return getFixes({buffer: '/*globals foo */ foo(10); bar();', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test no-undef-defined-4", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "eslint-env node, browser",
+		                    start: 2, 
+		                    end: 18};
+		    return getFixes({buffer: '/*eslint-env node */ console.log(10); window.open();', 
+		                      rule: rule,
+		                      expected: expected});
 		});
 	//NO-UNUSED-PARAMS
 		it("Test no-unused-params-1", function() {
 		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: ""};
 		    return getFixes({buffer: 'function f(p) {}', 
 		                      rule: rule,
-		                      expected: "function f() {}"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-unused-params-2", function() {
 		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "p, p3"};
 		    return getFixes({buffer: 'function f(p, p2, p3) {p(); p3();}', 
 		                      rule: rule,
-		                      expected: "function f(p, p3) {p(); p3();}"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-unused-params-3", function() {
 		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "p, p2"};
 		    return getFixes({buffer: 'function f(p, p2, p3) {p(); p2();}', 
 		                      rule: rule,
-		                      expected: "function f(p, p2) {p(); p2();}"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-unused-params-4", function() {
 		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "/* @callback */",
+		                    start: 11, 
+		                    end: 11};
 		    return getFixes({buffer: 'define([], function(p, p2, p3) {p(); p2();});', 
 		                      rule: rule,
-		                      expected: "/* @callback */"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-unused-params-5", function() {
 		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "/**\n * @callback\n */",
+		                    start: 10, 
+		                    end: 10};
 		    return getFixes({buffer: 'var f = { one: function(p, p2, p3) {p(); p2();}};', 
 		                      rule: rule,
-		                      expected: "/**\n * @callback\n */"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 	//EQEQEQ
 		it("Test eqeqeq-1", function() {
 		    var rule = createTestRule('eqeqeq');
+		    var expected = {value: "===",
+		                    start: 5, 
+		                    end: 7};
 		    return getFixes({buffer: 'if(1 == 3) {}', 
 		                      rule: rule,
-		                      expected: "==="}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test eqeqeq-2", function() {
 		    var rule = createTestRule('eqeqeq');
+		    var expected = {value: "===",
+		                    start: 12, 
+		                    end: 14};
 		    return getFixes({buffer: 'if(typeof f == "undefined") {}', 
 		                      rule: rule,
-		                      expected: '==='}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test eqeqeq-3", function() {
 		    var rule = createTestRule('eqeqeq');
+		    var expected = {value: "!==",
+		                    start: 5, 
+		                    end: 7};
 		    return getFixes({buffer: 'if(1 != 3) {}', 
 		                      rule: rule,
-		                      expected: "!=="}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test eqeqeq-4", function() {
 		    var rule = createTestRule('eqeqeq');
+		    var expected = {value: "!==",
+		                    start: 12, 
+		                    end: 14};
 		    return getFixes({buffer: 'if(typeof f != "undefined") {}', 
 		                      rule: rule,
-		                      expected: '!=='}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 	//NO-UNREACHABLE
 		it("Test no-unreachable-1", function() {
 		    var rule = createTestRule('no-unreachable');
+		    var expected = {value: "",
+		                    start: 12, 
+		                    end: 14};
 		    return getFixes({buffer: 'if(1 == 3) {return; var foo = 9;}', 
 		                      rule: rule,
-		                      expected: ""}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-unreachable-2", function() {
 		    var rule = createTestRule('no-unreachable');
+		    var expected = {value: "",
+		                    start: 32, 
+		                    end: 39};
 		    return getFixes({buffer: 'switch(num) { case 1: {throw e; f = 10;}}', 
 		                      rule: rule,
-		                      expected: ''}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 	//NO-SPARSE-ARRAYS
 		it("Test no-sparse-arrays-1", function() {
 		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 8, 
+		                    end: 16};
 		    return getFixes({buffer: 'var a = [1, , 2]', 
 		                      rule: rule,
-		                      expected: "[1, 2]"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-sparse-arrays-2", function() {
 		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 8, 
+		                    end: 20};
 		    return getFixes({buffer: 'var a = [1, , 2, , ]', 
 		                      rule: rule,
-		                      expected: "[1, 2]"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-sparse-arrays-3", function() {
 		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 8, 
+		                    end: 24};
 		    return getFixes({buffer: 'var a = [, , 1, , 2, , ]', 
 		                      rule: rule,
-		                      expected: "[1, 2]"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-sparse-arrays-4", function() {
 		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 8, 
+		                    end: 27};
 		    return getFixes({buffer: 'var a = [, , \n1, \n, 2, \n, ]', 
 		                      rule: rule,
-		                      expected: "[1, 2]"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-sparse-arrays-5", function() {
 		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2, 3]",
+		                    start: 8, 
+		                    end: 28};
 		    return getFixes({buffer: 'var a = [, , \n1, \n, 2, \n, 3]', 
 		                      rule: rule,
-		                      expected: "[1, 2, 3]"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-sparse-arrays-6", function() {
 		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2, 3]",
+		                    start: 8, 
+		                    end: 41};
 		    return getFixes({buffer: 'var a = [, ,,,, \n1, \n, , ,, ,\n,, 2, \n, 3]', 
 		                      rule: rule,
-		                      expected: "[1, 2, 3]"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
 		it("Test no-sparse-arrays-7", function() {
 		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 8, 
+		                    end: 20};
 		    return getFixes({buffer: 'var a = [1, , 2, , ];', 
 		                      rule: rule,
-		                      expected: "[1, 2]"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
 		});
-		it("Test no-sparse-arrays-4", function() {
+		it("Test no-sparse-arrays-8", function() {
 		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 8, 
+		                    end: 27};
 		    return getFixes({buffer: 'var a = [, , \n1, \n, 2, \n, ];', 
 		                      rule: rule,
-		                      expected: "[1, 2]"}).then(function() {
-			                      //TODO empty block
-		    });
+		                      expected: expected});
+		});
+	//SEMI
+	    it("Test semi-1", function() {
+		    var rule = createTestRule('semi');
+		    var expected = {value: ";",
+		                    start: 14, 
+		                    end: 14};
+		    return getFixes({buffer: 'var a = [1, 2]', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test semi-2", function() {
+		    var rule = createTestRule('semi');
+		    var expected = {value: ";",
+		                    start: 5, 
+		                    end: 5};
+		    return getFixes({buffer: 'foo()', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test semi-3", function() {
+		    var rule = createTestRule('semi');
+		    var expected = {value: ";",
+		                    start: 10, 
+		                    end: 10};
+		    return getFixes({buffer: 'var a = {}', 
+		                      rule: rule,
+		                      expected: expected});
 		});
 	});
 });
