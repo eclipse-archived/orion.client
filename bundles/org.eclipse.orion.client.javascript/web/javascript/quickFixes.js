@@ -145,11 +145,11 @@ define([
         return null;
     }
     
-    function updateDoc(node, source, editorContext) {
+    function updateDoc(node, source, editorContext, name) {
         if(node.leadingComments && node.leadingComments.length > 0) {
             for(var i = node.leadingComments.length-1; i > -1; i--) {
                 var comment = node.leadingComments[i];
-                var edit = new RegExp("(\\s*[*]+\\s*(?:@param)\\s*(?:\\{.*\\})?\\s*(?:"+node.name+")?.*)").exec(comment.value);
+                var edit = new RegExp("(\\s*[*]+\\s*(?:@param)\\s*(?:\\{.*\\})?\\s*(?:"+name+")+.*)").exec(comment.value);
                 if(edit) {
                     var start = comment.range[0] + edit.index + getDocOffset(source, comment.range[0]);
                     return editorContext.setText('', start, start+edit[1].length);
@@ -338,7 +338,7 @@ define([
                                     }
                                 }
                             } else if(funcparent.type === 'Property' && funcparent.leadingComments && funcparent.leadingComments.length > 0) {
-                                promise = updateDoc(funcparent, ast.source, editorContext);
+                                promise = updateDoc(funcparent, ast.source, editorContext, parent.params[paramindex].name);
                                 if(promise) {
                                     promises.push(promise);
                                 }
@@ -346,7 +346,7 @@ define([
                             break;
                         }
                         case 'FunctionDeclaration': {
-                           promise = updateDoc(parent, ast.source, editorContext);
+                           promise = updateDoc(parent, ast.source, editorContext, parent.params[paramindex].name);
                            if(promise) {
                                promises.push(promise);
                            }
