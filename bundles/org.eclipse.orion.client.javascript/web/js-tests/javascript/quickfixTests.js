@@ -11,7 +11,7 @@
  ******************************************************************************/
 /*eslint-env amd, mocha*/
 define([
-	'javascript/fixes/quickFixes',
+	'javascript/quickFixes',
 	'javascript/validator',
 	'chai/chai',
 	'orion/Deferred',
@@ -253,21 +253,27 @@ define([
 	//NO-UNUSED-PARAMS
 		it("Test no-unused-params-1", function() {
 		    var rule = createTestRule('no-unused-params');
-		    var expected = {value: ""};
+		    var expected = {value: "",
+		                    start: 11,
+		                    end: 12};
 		    return getFixes({buffer: 'function f(p) {}', 
 		                      rule: rule,
 		                      expected: expected});
 		});
 		it("Test no-unused-params-2", function() {
 		    var rule = createTestRule('no-unused-params');
-		    var expected = {value: "p, p3"};
+		    var expected = {value: "",
+		                    start: 14,
+		                    end: 18};
 		    return getFixes({buffer: 'function f(p, p2, p3) {p(); p3();}', 
 		                      rule: rule,
 		                      expected: expected});
 		});
 		it("Test no-unused-params-3", function() {
 		    var rule = createTestRule('no-unused-params');
-		    var expected = {value: "p, p2"};
+		    var expected = {value: "",
+		                    start:16,
+		                    end:20};
 		    return getFixes({buffer: 'function f(p, p2, p3) {p(); p2();}', 
 		                      rule: rule,
 		                      expected: expected});

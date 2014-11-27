@@ -13,9 +13,10 @@
 /* global doctrine */
 define([
 'orion/objects',
+'orion/Deferred',
 'orion/editor/textModel',
 'javascript/finder',
-], function(Objects, TextModel, Finder) {
+], function(Objects, Deferred, TextModel, Finder) {
 	
 	/**
 	 * @description Creates a new JavaScript quick fix computer
@@ -129,31 +130,33 @@ define([
 	    }
     }
 	
-	function removeIndexedItem(list, index, model) {
+	function removeIndexedItem(list, index, editorContext) {
         if(index < 0 || index > list.length) {
             return;
         }
         var node = list[index];
         if(list.length === 1) {
-            model.setText('', node.range[0], node.range[1]);
+            return editorContext.setText('', node.range[0], node.range[1]);
         } else if(index === list.length-1) {
-            model.setText('', list[index-1].range[1], node.range[1]);
+            return editorContext.setText('', list[index-1].range[1], node.range[1]);
         } else {
-            model.setText('', node.range[0], list[index+1].range[0]);
+            return editorContext.setText('', node.range[0], list[index+1].range[0]);
         }
+        return null;
     }
     
-    function updateDoc(node, source, model) {
+    function updateDoc(node, source, editorContext) {
         if(node.leadingComments && node.leadingComments.length > 0) {
             for(var i = node.leadingComments.length-1; i > -1; i--) {
                 var comment = node.leadingComments[i];
                 var edit = new RegExp("(\\s*[*]+\\s*(?:@param)\\s*(?:\\{.*\\})?\\s*(?:"+node.name+")?.*)").exec(comment.value);
                 if(edit) {
                     var start = comment.range[0] + edit.index + getDocOffset(source, comment.range[0]);
-                    model.setText('', start, start+edit[1].length);
+                    return editorContext.setText('', start, start+edit[1].length);
                 }
             }
         }
+        return null;
     }
 	
 	function hasDocTag(tag, node) {
@@ -305,7 +308,7 @@ define([
             return astManager.getAST(editorContext).then(function(ast) {
                 var node = Finder.findNode(annotation.start, ast, {parents:true});
                 if(node) {
-                    var model = new TextModel.TextModel(ast.source);
+                    var promises = [];
                     var parent = node.parents.pop();
                     var paramindex = -1;
                     for(var i = 0; i < parent.params.length; i++) {
@@ -315,7 +318,10 @@ define([
                             break;
                         }
                     }
-                    removeIndexedItem(parent.params, paramindex, model);  
+                    var promise = removeIndexedItem(parent.params, paramindex, editorContext);
+                    if(promise) {
+                        promises.push(promise);
+                    }
                     switch(parent.type) {
                         case 'FunctionExpression': {
                             var funcparent = node.parents.pop();
@@ -324,21 +330,30 @@ define([
                                 for(i = 0; i < args.length; i++) {
                                     var arg = args[i];
                                     if(arg.type === 'ArrayExpression') {
-                                        removeIndexedItem(arg.elements, paramindex, model);
+                                        promise = removeIndexedItem(arg.elements, paramindex, editorContext);
+                                        if(promise) {
+                                            promises.push(promise);
+                                        }
                                         break;
                                     }
                                 }
                             } else if(funcparent.type === 'Property' && funcparent.leadingComments && funcparent.leadingComments.length > 0) {
-                                updateDoc(parent, ast.source, model);
+                                promise = updateDoc(funcparent, ast.source, editorContext);
+                                if(promise) {
+                                    promises.push(promise);
+                                }
                             }
                             break;
                         }
                         case 'FunctionDeclaration': {
-                           updateDoc(parent, ast.source, model);
+                           promise = updateDoc(parent, ast.source, editorContext);
+                           if(promise) {
+                               promises.push(promise);
+                           }
                            break;
                         }
                     }
-                    return editorContext.setText(model.getText());
+                    return Deferred.all(promises);
                 }
                 return null;
             });
