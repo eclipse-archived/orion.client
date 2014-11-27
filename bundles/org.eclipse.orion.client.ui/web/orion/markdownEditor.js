@@ -252,11 +252,9 @@ define([
 
 					if (tokens[i].type === "blockquote_start") { //$NON-NLS-0$
 						endToken = "blockquote_end"; //$NON-NLS-0$
-						var contentStartRegex = this._blockquoteStartRegex;
 						name = "markup.quote.markdown"; //$NON-NLS-0$
 					} else { /* list_start */
 						endToken = "list_end"; //$NON-NLS-0$
-						contentStartRegex = null;
 						name = "markup.list.markdown"; //$NON-NLS-0$
 					}
 
@@ -284,7 +282,6 @@ define([
 					match = this._newlineRegex.exec(text);
 					if (match) {
 						index = match.index + match[0].length;
-
 						if (name === "markup.list.markdown") { //$NON-NLS-0$
 							/* for lists claim whitespace that starts the next line */
 							this._spacesAndTabsRegex.lastIndex = index;
@@ -296,11 +293,15 @@ define([
 					}
 
 					/* compute the block's contentStart bound */
-					if (contentStartRegex) {
-						contentStartRegex.lastIndex = start;
-						match = contentStartRegex.exec(text);
+					if (name === "markup.quote.markdown") { //$NON-NLS-0$
+						this._blockquoteStartRegex.lastIndex = start;
+						match = this._blockquoteStartRegex.exec(text);
 						var contentStart = start + match[0].length;
 					} else {
+						/* marked.Lexer.rules.normal.bullet is not global, so cannot set its lastIndex */
+						var tempText = text.substring(start);
+						match = marked.Lexer.rules.normal.bullet.exec(tempText);
+						start += match.index;
 						contentStart = start;
 					}
 					index = Math.max(index, contentStart);
