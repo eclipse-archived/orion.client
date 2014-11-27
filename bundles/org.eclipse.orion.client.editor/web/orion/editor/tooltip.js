@@ -242,16 +242,17 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			var tooltipDoc = tooltipDiv.ownerDocument;
 			var documentElement = tooltipDoc.documentElement;
 			
-			var hoverInfo;
-			if (this.hover && info.offset !== undefined) {
-				var context = {offset: info.offset};
-				hoverInfo = this.hover.computeHoverInfo(context);
-			}
-			
 			var contents = info.contents;
 			if (contents instanceof Array) {
 				contents = this._getAnnotationContents(contents);			
 			}
+			
+			var hoverInfo;
+			if (this.hover && info.offset !== undefined && !contents) {
+				var context = {offset: info.offset};
+				hoverInfo = this.hover.computeHoverInfo(context);
+			}
+			
 			if (typeof contents === "string") { //$NON-NLS-0$
 				tooltipContents.innerHTML = contents;
 			} else if (this._isNode(contents)) {
