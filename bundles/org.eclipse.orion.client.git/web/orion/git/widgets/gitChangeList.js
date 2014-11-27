@@ -24,11 +24,10 @@ define([
 	'orion/git/gitCommands',
 	'orion/commands',
 	'orion/commandRegistry',
-	'orion/metrics',
 	'orion/git/logic/gitCommit',
 	'orion/git/gitConfigPreference',
 	'orion/objects'
-], function(messages, i18nUtil, Deferred, mExplorer, mGitUIUtil, mGitUtil, mTooltip, mSelection , lib, mGitCommands, mCommands, mCommandRegistry, metrics, gitCommit, gitConfigPreference, objects) {
+], function(messages, i18nUtil, Deferred, mExplorer, mGitUIUtil, mGitUtil, mTooltip, mSelection , lib, mGitCommands, mCommands, mCommandRegistry, gitCommit, gitConfigPreference, objects) {
 	
 	var pageQuery = "?pageSize=100&page=1"; //$NON-NLS-0$
 	
