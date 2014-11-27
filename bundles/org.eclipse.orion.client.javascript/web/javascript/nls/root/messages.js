@@ -59,10 +59,10 @@ define({
 	'addESLintEnvFixTooltip': 'Add to eslint-env directive to filter the known member', //$NON-NLS-0$ //$NON-NLS-1$
 	'addESLintGlobalFixName': 'Add to globals directive', //$NON-NLS-0$ //$NON-NLS-1$
 	'addESLintGlobalFixTooltip': 'Add to globals directive to filter the unknown member', //$NON-NLS-0$ //$NON-NLS-1$
-	'removeUnusedParamsFixName': 'Remove unused parameter', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeUnusedParamsFixName': 'Remove parameter', //$NON-NLS-0$ //$NON-NLS-1$
 	'removeUnusedParamsFixTooltip': 'Remove the unused parameter, keeping side effects', //$NON-NLS-0$ //$NON-NLS-1$
-	'commentCallbackFixName': 'Document as callback', //$NON-NLS-0$ //$NON-NLS-1$
-	'commentCallbackFixTooltip': 'Document the parameter as a callback, ignoring unused parameters', //$NON-NLS-0$ //$NON-NLS-1$
+	'commentCallbackFixName': 'Add @callback to function', //$NON-NLS-0$ //$NON-NLS-1$
+	'commentCallbackFixTooltip': 'Document the function with @callback, ignoring unused parameters', //$NON-NLS-0$ //$NON-NLS-1$
 	'eqeqeqFixName': 'Update operator', //$NON-NLS-0$ //$NON-NLS-1$
 	'eqeqeqFixTooltip': 'Update the operator to the expected one', //$NON-NLS-0$ //$NON-NLS-1$
 	'unreachableFixName': 'Remove unreachable code', //$NON-NLS-0$ //$NON-NLS-1$
