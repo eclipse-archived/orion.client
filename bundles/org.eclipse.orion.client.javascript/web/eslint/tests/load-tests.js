@@ -22,6 +22,7 @@ define([
 "eslint/tests/lib/rules/missing-func-decl-doc",
 "eslint/tests/lib/rules/missing-func-expr-doc",
 "eslint/tests/lib/rules/new-parens",
+"eslint/tests/lib/rules/no-caller",
 "eslint/tests/lib/rules/no-debugger",
 "eslint/tests/lib/rules/no-dupe-keys",
 "eslint/tests/lib/rules/no-eval",

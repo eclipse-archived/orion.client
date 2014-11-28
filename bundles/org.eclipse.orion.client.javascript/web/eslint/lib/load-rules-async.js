@@ -189,6 +189,25 @@ define([
         		};
         	}
         },
+        "no-caller": {
+            description: "Warn on use of arguments.callee or arguments.caller",
+            rule: function(context) {
+                function reportCaller(node, name) {
+                    context.report(node, "'arguments.${0}' is deprecated.", {0: name});
+                }
+                return {
+                    "MemberExpression": function(node) { //$NON-NLS-0$
+                        var object = node.object;
+                        if (!object || object.name !== "arguments" || object.type !== "Identifier") { //$NON-NLS-1$ //$NON-NLS-0$
+                            return;
+                        }
+                        var prop = node.property;
+                        if (prop.name === "callee" || prop.name === "caller") //$NON-NLS-1$ //$NON-NLS-0$
+                            reportCaller(prop, prop.name);
+                    }
+                };
+            }
+        },
 		"no-debugger" : {
 		    description: 'Disallow use of the debugger keyword',
 		    rule: function(context) {

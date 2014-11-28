@@ -24,6 +24,7 @@ define([
 			"eqeqeq": 1, //$NON-NLS-0$
 			"missing-doc": [1, {decl: 0, expr: 0}], //$NON-NLS-0$
 			"new-parens" : 1, //$NON-NLS-0$
+			"no-caller": 1, //$NON-NLS-0$
 			"no-debugger" : 1, //$NON-NLS-0$
 			"no-dupe-keys" : 2, //$NON-NLS-0$
 			"no-eval" : 0, //$NON-NLS-0$
@@ -341,6 +342,7 @@ define([
 			config.setOption("missing-doc", properties.validate_func_decl, "decl"); //$NON-NLS-0$ // missing-func-decl-doc
 			config.setOption("missing-doc", properties.validate_func_expr, "expr"); //$NON-NLS-0$ // missing-func-expr-doc
 			config.setOption("new-parens", properties.validate_new_parens); //$NON-NLS-0$
+			config.setOption("no-caller", properties.validate_no_caller); //$NON-NLS-0$
 			config.setOption("no-debugger", properties.validate_debugger); //$NON-NLS-0$
 			config.setOption("no-dupe-keys", properties.validate_dupe_obj_keys); //$NON-NLS-0$
 			config.setOption("no-eval", properties.validate_eval); //$NON-NLS-0$

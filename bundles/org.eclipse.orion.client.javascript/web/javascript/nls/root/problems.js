@@ -18,6 +18,7 @@ define({
 	'eqeqeq' : 'Expected \'${0}\' and instead saw \'${1}\'.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'missing-doc' : 'Missing documentation for function \'${0}\'.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'new-parens' : 'Missing parentheses invoking constructor.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-caller': '\'arguments.${0}\' is deprecated.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-debugger': '\'debugger\' statement use is discouraged.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'no-dupe-keys' : 'Duplicate object key \'${0}\'.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-empty-block' : 'Empty block should be removed or commented.',  //$NON-NLS-0$ //$NON-NLS-1$
