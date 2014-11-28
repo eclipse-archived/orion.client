@@ -38,7 +38,6 @@ define([], function() {
         "helpContent": {source: "org.eclipse.orion.client.help/web/helpContent"},
         "htmlparser": {source: "org.eclipse.orion.client.webtools/web/htmlparser"},
         "images"	: {source: "org.eclipse.orion.client.ui/web/images"},
-        "import"	: {source: "org.eclipse.orion.client.ui/web/import"},
         "javascript": {source: "org.eclipse.orion.client.javascript/web/javascript"},
         "jsdiff"	: {source: "org.eclipse.orion.client.ui/web/jsdiff"},
         "js-tests/core"	: {source: "org.eclipse.orion.client.core/web/js-tests/core"},
