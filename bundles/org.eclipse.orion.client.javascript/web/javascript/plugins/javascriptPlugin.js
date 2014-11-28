@@ -450,6 +450,12 @@ define([
 							defaultValue: error,
 							options: severities
 						},
+						{	id: "validate_radix",  //$NON-NLS-0$
+							nameKey: 'radix',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: warning,
+							options: severities
+						},
 						{	id: "validate_missing_semi",  //$NON-NLS-0$
 							nameKey: 'missingSemi',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$

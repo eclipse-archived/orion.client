@@ -72,4 +72,5 @@ define({
 	'sparseArrayFixTooltip': 'Remove sparse entries and convert to normal array', //$NON-NLS-0$ //$NON-NLS-1$
 	'semiFixName': 'Add missing \';\'', //$NON-NLS-0$ //$NON-NLS-1$
 	'semiFixTooltip': 'Add the missing \';\'', //$NON-NLS-0$ //$NON-NLS-1$
+	'radix': 'Missing radix parameter to parseInt()', //$NON-NLS-0$ //$NON-NLS-1$
 });

@@ -831,8 +831,34 @@ define([
         		};
         	}
         },
+        radix: {
+            description: "Warn when parseInt() is called without the 'radix' parameter.",
+            rule: function(context) {
+                function checkParseInt(call) {
+                    var callee = call.callee;
+                    if (callee.name === "parseInt" && callee.type === "Identifier" && call.arguments.length < 2) { //$NON-NLS-1$ //$NON-NLS-0$
+                        // Ensure callee actually resolves to the global `parseInt`
+                        var shadowed = false;
+                        for (var scope = context.getScope(); scope; scope = scope.upper) { //$NON-NLS-0$
+                            shadowed = scope.variables.some(function(variable) {
+                                // Found a `parseInt` that is not the builtin
+                                return variable.name === "parseInt" && variable.defs.length; //$NON-NLS-0$
+                            });
+                            if (shadowed)
+                                break;
+                        }
+                        if (!shadowed) {
+                            context.report(callee, "Missing radix parameter.", null);
+                        }
+                    }
+                }
+                return {
+                    "CallExpression": checkParseInt
+                };
+            }
+        },
 		"semi": {
-		    description: 'Warn about missing semi colons',
+		    description: 'Warn about missing semicolons',
 		    rule: function(context) {
         		function checkForSemicolon(node) {
         			try {

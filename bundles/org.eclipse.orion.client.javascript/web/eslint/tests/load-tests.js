@@ -36,6 +36,7 @@ define([
 "eslint/tests/lib/rules/no-unused-params",
 "eslint/tests/lib/rules/no-unused-vars",
 "eslint/tests/lib/rules/no-use-before-define",
+"eslint/tests/lib/rules/radix",
 "eslint/tests/lib/rules/semi",
 "eslint/tests/lib/rules/throw-error",
 "eslint/tests/lib/rules/use-isnan",
