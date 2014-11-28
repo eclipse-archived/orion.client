@@ -45,19 +45,19 @@ define ([
 		},
 				
 		renderQuickFixes: function(annotation, parentDiv) {
-			if  (!annotation || !parentDiv)
+			if  (!annotation || !parentDiv){
 				return;
+			}
 
-			var qfToolbar = document.createElement("span");
-			var actions = document.createElement("ul"); //$NON-NLS-0$
-			actions.className = "commandList layoutRight"; //$NON-NLS-0$
-			qfToolbar.appendChild(actions);
-			parentDiv.appendChild(qfToolbar);
+			var actionsDiv = document.createElement("div"); //$NON-NLS-0$
+			actionsDiv.className = "commandList"; //$NON-NLS-0$ 
 			
+			var nodeList = [];
 			var metadata = this.inputManager.getFileMetadata();
 			metadata.annotation = annotation;
-			this.commandRegistry.renderCommands("orion.edit.quickfix", actions, metadata, this.editor, 'tool', annotation); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandRegistry.renderCommands("orion.edit.quickfix", actionsDiv, metadata, this.editor, 'quickfix', annotation, nodeList); //$NON-NLS-1$ //$NON-NLS-0$
 			delete metadata.annotation;
+			parentDiv.appendChild(actionsDiv);
 		}
 
 	};

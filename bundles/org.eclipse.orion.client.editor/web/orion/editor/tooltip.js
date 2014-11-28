@@ -354,7 +354,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 		},
 		_setInitialFocus: function(tooltipDiv) {
-			var buttons = lib.$$("button", tooltipDiv);
+			var buttons = lib.$$("button", tooltipDiv); //$NON-NLS-0$
 			if (buttons && buttons.length > 0) {
 				buttons[0].focus();
 				return;
@@ -381,7 +381,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				case 'delegatedUI': { //$NON-NLS-0$
 					// TODO The delegated UI data type is experimental and not part of the API
 					if (data.uriTemplate) {
-						 var options = {};
+						var options = {};
 						options.id = 'Delegated UI Tooltip'; //$NON-NLS-0$
 						options.uriTemplate = data.uriTemplate;
 //					    options.params = inputManager.getFileMetadata();
@@ -390,7 +390,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 						
 						// TODO Push status messages to page message service (see editorCommands.js)
 //						options.status = handleStatus;
-						divResult = this._createDelegatedUI(options);
+						var divResult = this._createDelegatedUI(options);
 						sectionDiv.appendChild(divResult);
 					}
 					break;
@@ -492,7 +492,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				// Handle quick fixes
 				if (self.hover) {
 					self.hover.renderQuickFixes(annotation, result);
-					var buttons = lib.$$("button", result);
+					var buttons = lib.$$("button", result); //$NON-NLS-0$
 					for (var i=0; i<buttons.length; i++) {
 						buttons[i].addEventListener("click", function() { //$NON-NLS-0$
 							self.hide(0);

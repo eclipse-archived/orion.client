@@ -543,7 +543,9 @@ define([
 			if (onClick) {
 				command.onClick = onClick;
 				element.addEventListener("click", function(e) { //$NON-NLS-0$
-					dropdown.close(true);
+					if (dropdown){
+						dropdown.close(true);
+					}
 					onClick.call(commandInvocation.handler, commandInvocation);
 				}, false);
 				element.addEventListener("keydown", function(e) { //$NON-NLS-0$

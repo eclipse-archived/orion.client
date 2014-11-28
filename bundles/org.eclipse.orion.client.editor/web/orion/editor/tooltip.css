@@ -48,3 +48,7 @@
 .tooltipTheme .annotationLine.currentLine {
 	background-color: transparent !important;
 }
+
+.textviewTooltip .dropdownCommandName {
+	color: #3333CC;
+}
