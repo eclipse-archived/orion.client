@@ -680,6 +680,13 @@ exports.TwoWayCompareView = (function() {
 		}
 		return null;
 	};
+	/**
+	 * Convert the 0-based line number from logical to physical or vice versa. 
+	 * @param[int] lineNumber The 0 based line number to convert.
+	 * @param[boolean] reverse If false or not defined, convert from logical number to phsical number. Otherwie convert from physical to logical.
+	 * 				   Physical number is the line number in the text editor, merged if any. Logical number is what shows in the ruler.
+	 * @returns {int} the converted number, 0-based. -1 means that the phical number can not be converted to a logical number, which means an empty number in the ruler.
+	 */
 	TwoWayCompareView.prototype.getLineNumber = function(lineNumber){
 		return lineNumber;
 	};
@@ -895,9 +902,24 @@ exports.InlineCompareView = (function() {
 		}
 		return null;
 	};
-	InlineCompareView.prototype.getLineNumber = function(lineNumber){
-		var mergedNumber = mCompareUtils.convertMergedLineNumber(this._mapper, lineNumber);
-		return mergedNumber;
+	/**
+	 * Convert the 0-based line number from logical to physical or vice versa. 
+	 * @param[int] lineNumber The 0 based line number to convert.
+	 * @param[boolean] reverse If false or not defined, convert from logical number to phsical number. Otherwie convert from physical to logical.
+	 * 				   Physical number is the line number in the text editor, merged if any. Logical number is what shows in the ruler.
+	 * @returns {int} the converted number, 0-based. -1 means that the phical number can not be converted to a logical number, which means an empty number in the ruler.
+	 */
+	InlineCompareView.prototype.getLineNumber = function(lineNumber, reverse){
+		if(reverse) {
+			var diffFeeder = this._diffNavigator.getFeeder(true);
+			if(diffFeeder) {
+				return diffFeeder.getLineNumber(lineNumber);
+			}
+			return lineNumber;
+		} else {
+			var mergedNumber = mCompareUtils.convertMergedLineNumber(this._mapper, lineNumber);
+			return mergedNumber;
+		}
 	};
 	
 	return InlineCompareView;
