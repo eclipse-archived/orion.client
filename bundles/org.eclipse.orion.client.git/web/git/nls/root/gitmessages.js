@@ -18,7 +18,7 @@ define({
 	"Working Directory": "Working Directory", //$NON-NLS-0$  //$NON-NLS-1$
 	"ViewWorkingDirVer": "View the working directory version of the file", //$NON-NLS-0$  //$NON-NLS-1$
 	"Loading...": "Loading...", //$NON-NLS-0$  //$NON-NLS-1$
-	"Repositories": "All Git Repositories", //$NON-NLS-0$  //$NON-NLS-1$
+	"Repositories": "Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repo": "Repositories", //$NON-NLS-0$  //$NON-NLS-1$
 	"0 on 1 - Git": "${0} on ${1} - Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Git": "Git", //$NON-NLS-0$  //$NON-NLS-1$
