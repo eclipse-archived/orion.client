@@ -1,5 +1,5 @@
 /**
- * @license RequireJS i18n 2.0.2 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * @license RequireJS i18n 2.0.4 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/requirejs/i18n for details
  */
@@ -77,6 +77,9 @@
             if (source.hasOwnProperty(prop) && (!target.hasOwnProperty(prop) || force)) {
                 target[prop] = source[prop];
             } else if (typeof source[prop] === 'object') {
+                if (!target[prop] && source[prop]) {
+                    target[prop] = {};
+                }
                 mixin(target[prop], source[prop], force);
             }
         }
@@ -84,10 +87,9 @@
 
     define(['module'], function (module) {
         var masterConfig = module.config ? module.config() : {};
-        masterConfig = masterConfig || {};
 
         return {
-            version: '2.0.1+',
+            version: '2.0.4',
             /**
              * Called when a dependency needs to be loaded.
              */
