@@ -13,7 +13,8 @@
  * Shim for Node events API
  * http://nodejs.org/api/events.html
  */
-/*eslint-env amd, node */
+/*eslint-env amd */
+/*global console*/
 define([
 	"orion/EventTarget",
 	"orion/objects"
