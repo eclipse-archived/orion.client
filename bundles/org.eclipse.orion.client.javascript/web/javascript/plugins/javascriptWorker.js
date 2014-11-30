@@ -31,14 +31,15 @@ require.config({
 	},
 	packages: [
 		{
+			name: "eslint/conf",
+			location: "eslint/conf",
+		},
+		{
 			name: "eslint",
 			location: "eslint/lib",
 			main: "eslint"
 		},
-		{
-			name: "eslint/conf",
-			main: "eslint/conf"
-	}]
+	]
 });
 
 require(["javascript/plugins/javascriptPlugin"]);

@@ -22,15 +22,15 @@
 		},
 		packages: [
 			{
+				name: "eslint/conf",
+				location: "eslint/conf",
+			},
+			{
 				name: "eslint",
 				location: "eslint/lib",
 				main: "eslint"
 			},
-			{
-				name: "eslint/conf",
-				main: "eslint/conf"
-			}
-		],
+		]
 	});
 	require(['mocha/sauce'], function(mocha) {
 		mocha.setup('bdd');
