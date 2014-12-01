@@ -342,12 +342,14 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				self._hideTimeout = window.setTimeout(function() {
 					self._hideTimeout = null;
 					var opacity = parseFloat(self._getNodeStyle(tooltipDiv, "opacity", "1")); //$NON-NLS-1$ //$NON-NLS-0$
-					self._fadeTimeout = window.setInterval(function() {
+					var fadeTimeout = self._fadeTimeout = window.setInterval(function() {
 						if (tooltipDiv.style.visibility === "visible" && opacity > 0) { //$NON-NLS-0$
 							opacity -= 0.1;
 							tooltipDiv.style.opacity = opacity;
 							return;
 						}
+						window.clearInterval(fadeTimeout);
+						self._fadeTimeout = null;
 						self._hide();
 					}, self._fadeDelay / 10);
 				}, self._autoHideDelay);
