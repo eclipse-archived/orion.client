@@ -165,13 +165,14 @@ orion.DiffParser = (function() {
 			blocks.push(block);
 		},
 
-		_createMinusBlock: function(oBlkStart , nBlkStart , oBlockLength){
+		_createMinusBlock: function(oBlkStart , nBlkStart , oBlockLength, lastMinusPos){
 			var len = this._oBlocks.length;
 			if(len === 0 || oBlkStart !== this._oBlocks[len-1][0]){
-				this._oBlocks.push([oBlkStart === 0 ? 1 : oBlkStart , oBlockLength]);
+				this._oBlocks.push([oBlkStart === 0 ? 1 : oBlkStart , oBlockLength, lastMinusPos]);
 				this._nBlocks.push([nBlkStart , 0 , -2]);
 			} else {
 				this._oBlocks[len-1][1] = this._oBlocks[len-1][1] + oBlockLength;
+				this._oBlocks[len-1][2] = lastMinusPos;
 			}
 		},
 
@@ -197,6 +198,7 @@ orion.DiffParser = (function() {
 			var oBlkStart = this._hunkRanges[hunkRangeNo][1];
 			var nBlkStart = this._hunkRanges[hunkRangeNo][3];
 			var lastPlusPos = startNo;
+			var lastMinusPos = startNo;
 			for (var i = startNo ; i< endNo ; i++){
 				if( 0 === this._diffContents[i].length){
 					continue;
@@ -232,13 +234,16 @@ orion.DiffParser = (function() {
 					if(curToken === "+"){ //$NON-NLS-0$
 						lastPlusPos = i;
 					}
+					if(curToken === "-"){ //$NON-NLS-0$
+						lastMinusPos = i;
+					}
 					switch(lastToken){
 					case " ": //$NON-NLS-0$
 						oBlkStart = this._hunkRanges[hunkRangeNo][1] + oCursor;
 						nBlkStart = this._hunkRanges[hunkRangeNo][3] + nCursor;
 						break;
 					case "-": //$NON-NLS-0$
-						this._createMinusBlock(oBlkStart , nBlkStart ,this._hunkRanges[hunkRangeNo][1] + oCursor - oBlkStart);
+						this._createMinusBlock(oBlkStart , nBlkStart ,this._hunkRanges[hunkRangeNo][1] + oCursor - oBlkStart, lastMinusPos);
 						break;
 					case "+": //$NON-NLS-0$
 						this._createPlusBlock(oBlkStart , nBlkStart ,this._hunkRanges[hunkRangeNo][3] + nCursor - nBlkStart , lastPlusPos);
@@ -263,7 +268,7 @@ orion.DiffParser = (function() {
 			}
 			switch(lastToken){
 			case "-": //$NON-NLS-0$
-				this._createMinusBlock(oBlkStart , nBlkStart ,this._hunkRanges[hunkRangeNo][1] + oCursor - oBlkStart);
+				this._createMinusBlock(oBlkStart , nBlkStart ,this._hunkRanges[hunkRangeNo][1] + oCursor - oBlkStart, lastMinusPos);
 				break;
 			case "+": //$NON-NLS-0$
 				this._createPlusBlock(oBlkStart , nBlkStart ,this._hunkRanges[hunkRangeNo][3] + nCursor - nBlkStart , lastPlusPos);

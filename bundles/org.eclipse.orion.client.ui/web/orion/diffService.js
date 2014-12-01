@@ -78,14 +78,32 @@ define([
 				diffParser.parse("", diffContent);
 				var oBlocks = diffParser.getOriginalBlocks();
 				var nBlocks = diffParser.getNewBlocks();
-				var diffRanges = self.getDiffRanges(oBlocks, nBlocks);
+				var diffArray = diffParser.getDiffArray();
+				var diffRanges = self.getDiffRanges(oBlocks, nBlocks, diffArray);
 				if(self._enabled){//for cases when user turns off diffService computing diff
 					self._editor.showDiffAnnotations(diffRanges);
 				}
 			});
 		},
 
-		getDiffRanges: function(originalHunkBlocks, newHunkBlocks){
+		_getOriginalText: function(originalHunkBlock, diffArray, diffArraySubstrIndex, lineDelim) {
+			var oldSize = originalHunkBlock[1];
+			var oldStartInDiffArra = originalHunkBlock[2];
+			var oText = "";
+			if(oldSize > 0) {
+				for(var i = 0; i < oldSize; i++) {
+					var lineText = diffArray[oldStartInDiffArra + i];
+					if(lineText) {
+						oText = oText + lineText.substring(diffArraySubstrIndex) + lineDelim;
+					} else {
+						oText = oText + lineDelim;
+					}
+				}
+			}
+			return oText;
+		},
+		
+		getDiffRanges: function(originalHunkBlocks, newHunkBlocks, diffArray){
 			var diffResult = [];
 			for (var i = 0; i < newHunkBlocks.length; i++) {
 				var lineStart = newHunkBlocks[i][0];
@@ -104,6 +122,7 @@ define([
 						type:"added" //$NON-NLS-0$
 					});
 				} else {
+					//this._getOriginalText(originalHunkBlocks[i], diffArray.array, diffArray.index, "\n");
 					diffResult.push({
 						lineStart: lineStart - 1,
 						lineEnd: lineStart + newSize - 1,
