@@ -114,16 +114,19 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 				disableUI();
 
 				var manifest = _getManifestApplication(userManifest, results);
-				var instrumentation = options.getManifestInstrumentation ? options.getManifestInstrumentation(manifest) : null;
-				var packager = options.getPackager ? options.getPackager() : null;
-
+				var devMode = options.getDevMode ? options.getDevMode(manifest) : null;
+				
 				/* manifest to persist as additional configuration */
-				var intrumentedManifest = instrumentation ? mManifestUtils.applyInstrumentation(manifest, instrumentation) : manifest;
 
 				var additionalConfiguration = {
-					Packager : packager,
-					Manifest : intrumentedManifest
+					DevMode : devMode,
+					Manifest : manifest
 				};
+				
+				if (devMode && devMode.On){
+					var packager = devMode.Packager;
+					var instrumentation = devMode.Instrumentation;
+				}
 				
 				var expandedURL = new URITemplate("{+OrionHome}/edit/edit.html#{,ContentLocation}").expand({ //$NON-NLS-0$
 					OrionHome: PageLinks.getOrionHome(),

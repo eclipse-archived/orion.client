@@ -175,12 +175,11 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 
 				var appName = params.Name;
 				var appPath = launchConf.Path;
-				var appPackager = params.Packager;
 
 				if(params.user && params.password){
 					cFService.login(target.Url, params.user, params.password).then(
 						function(){
-							that._deploy(project, target, appName, appPath, appPackager, deferred, launchConf);
+							that._deploy(project, target, appName, appPath, deferred, launchConf, params);
 						}, function(error){
 
 							/* default cf error message decoration */
@@ -189,13 +188,13 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 						}
 					);
 				} else {
-					that._deploy(project, target, appName, appPath, appPackager, deferred, launchConf);
+					that._deploy(project, target, appName, appPath, deferred, launchConf, params);
 				}
 
 				return deferred;
 			},
 
-			_deploy: function(project, target, appName, appPath, appPackager, deferred, launchConf) {
+			_deploy: function(project, target, appName, appPath, deferred, launchConf, launchConfParams) {
 				if (target && appName){
 
 					var errorHandler = function(error){
@@ -249,7 +248,15 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 								}
 							}.bind(this), errorHandler);
 						} else {
-							cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath), manifest, false, appPackager).then(function(result){
+							var devMode = launchConfParams.DevMode;
+							var appPackager;
+							var instrumentation;
+							if (devMode && devMode.On){
+								appPackager = devMode.Packager;
+								instrumentation = devMode.Instrumentation;
+							}
+							
+							cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath), manifest, false, appPackager, instrumentation).then(function(result){
 
 								var expandedURL = new URITemplate("{+OrionHome}/edit/edit.html#{,ContentLocation}").expand({ //$NON-NLS-0$
 									OrionHome: PageLinks.getOrionHome(),
@@ -259,7 +266,7 @@ define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cf
 								var editLocation = new URL(expandedURL);
 								var additionalConfiguration = {
 									Manifest : manifest,
-									Packager : appPackager
+									DevMode : devMode
 								};
 
 								mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, project.ContentLocation, fileClient, additionalConfiguration).then(

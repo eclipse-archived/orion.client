@@ -308,23 +308,13 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 			    		var checkbox = debugPaneBuilder._saveManifestCheckbox;
 			    		return checkbox ? checkbox.checked : false;
 			    	},
-
-			    	getPackager : function(){
-			    		var checkbox = debugPaneBuilder._debugCheckbox;
-			    		var debugEnabled = checkbox ? checkbox.checked : false;
-			    		if(!debugEnabled)
-			    			return null;
-
-			    		return "org.eclipse.orion.server.cf.nodejs.CFLauncherDeploymentPackager"; //$NON-NLS-0$
-			    	},
-
-			    	getManifestInstrumentation : function(manifest){
-			    		var checkbox = debugPaneBuilder._debugCheckbox;
-			    		var debugEnabled = checkbox ? checkbox.checked : false;
-			    		if(!debugEnabled)
-			    			return null;
-
-			    		var instrumentation = {};
+			    	
+			    	getDevMode : function(manifest){
+			    		var devMode = {};
+			    		
+			    		devMode.Packager = "org.eclipse.orion.server.cf.nodejs.CFLauncherDeploymentPackager"; //$NON-NLS-0$
+			    		
+			    		devMode.Instrumentation = {};
 			    		var app = manifest.applications[0];
 
 			    		// TODO: Restore previous parameters
@@ -334,9 +324,11 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 			    		var command = userURLPrefix ?
 			    				i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} --urlprefix ${1} -- ${2}", password, userURLPrefix, app.command) //$NON-NLS-0$
 			    				: i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} -- ${1}", password, app.command); //$NON-NLS-0$
-
-			    		instrumentation.command = command;
-			    		return instrumentation;
+			    		devMode.Instrumentation.command = command;
+			    		
+			    		devMode.On = debugPaneBuilder._debugCheckbox.checked;
+			    		
+			    		return devMode;
 			    	},
 
 			    	Manifest : plan.Manifest,

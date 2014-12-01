@@ -90,8 +90,8 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 				};
 			}
 
-			if(additionalConfiguration.Packager){
-				launchConf.ToSave.Parameters.Packager = additionalConfiguration.Packager;
+			if(additionalConfiguration.DevMode){
+				launchConf.ToSave.Parameters.DevMode = additionalConfiguration.DevMode;
 			}
 
 			deferred.resolve(launchConf);
