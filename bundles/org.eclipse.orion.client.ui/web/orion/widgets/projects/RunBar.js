@@ -213,6 +213,9 @@ define([
 						this.setStatus(launchConfiguration.status);
 					}
 				}
+				
+				if (this.getLiveUpdateBar())
+					this.getLiveUpdateBar().selectLaunchConfiguration(launchConfiguration);
 			} else {
 				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(messages["selectLaunchConfig"]); //$NON-NLS-0$
 				this._selectedLaunchConfiguration = null;
