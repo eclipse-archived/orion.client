@@ -79,7 +79,7 @@ define([], function() {
 		keyBindings: "Default",
 		keyBindingsVisible: true,
 		keyBindingsLocalVisible: true,
-		diffService: true,
+		diffService: false,
 		diffServiceVisible: false
 	};
 
