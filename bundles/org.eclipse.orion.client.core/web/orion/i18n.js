@@ -103,7 +103,7 @@ define(["orion/Deferred"
 				return;
 			}
 			
-			if (parentRequire.specified && !parentRequire.specified("orion/bootstrap")) {
+			if (parentRequire.specified && (!parentRequire.specified("orion/bootstrap") || parentRequire.specified("orion/plugin"))) {
 				onLoad({});
 				return;
 			}
