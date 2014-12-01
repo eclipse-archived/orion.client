@@ -28,6 +28,9 @@ define({
 	"currentLine": "Current Line", //$NON-NLS-1$ //$NON-NLS-0$
 	"matchingBracket": "Matching Bracket", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentBracket": "Current Bracket", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffAdded": "Diff Added Lines", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffDeleted": "Diff Deleted Lines", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffModified": "Diff Modified Lines", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	"lineUp": "Line Up", //$NON-NLS-1$ //$NON-NLS-0$
 	"lineDown": "Line Down", //$NON-NLS-1$ //$NON-NLS-0$

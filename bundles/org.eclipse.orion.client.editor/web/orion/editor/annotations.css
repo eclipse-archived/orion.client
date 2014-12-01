@@ -33,6 +33,8 @@
 	color: #CCCCCC;
 }
 .annotation.diffModified {
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAYAAABWKLW/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAcSURBVBhXYwzdevs/AxCs8lJhYAIxYACJw8AAAIlKBAKlNXzqAAAAAElFTkSuQmCC);
+	background-repeat: repeat-y;
 	color: #CCCCCC;
 }
 .annotation.diffDeleted {
@@ -41,14 +43,14 @@
 	color: #CCCCCC;
 }
 .lines .annotation.diffAdded {
-    background-image: none;
-    background-color: rgba(159, 202, 86, 0.68);
-    color: #555555;
+	background-image: none;
+	background-color: rgba(159, 202, 86, 0.68);
+	color: #555555;
 }
 .lines .annotation.diffModified {
-    background-image: none;
-    background-color: rgba(85, 181, 219, 0.67);
-    color: #555555;
+	background-image: none;
+	background-color: rgba(85, 181, 219, 0.67);
+	color: #555555;
 }
 
 /* Styles for the annotation ruler (first line) */
@@ -147,12 +149,19 @@
 	height: 32px;
 }
 .annotationHTML.diffAdded {
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAaSURBVBhXY5x/KoyBgSHBdCUTkIIAGIuBAQBMsAMD4UOAtwAAAABJRU5ErkJggg==);
+	background-repeat: repeat-y;
+	background-position: left top;
 }
 .annotationHTML.diffDeleted {
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAIAAADZSiLoAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY3growJBDP9hAMb6/x8ADgMVdmD2Og4AAAAASUVORK5CYII=);
+	background-repeat: repeat-x;
+	background-position: left top;
 }
-.annotation.diffModified {
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAYAAABWKLW/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAcSURBVBhXYwzdevs/AxCs8lJhYAIxYACJw8AAAIlKBAKlNXzqAAAAAElFTkSuQmCC);
-    background-repeat: repeat-y;
+.annotationHTML.diffModified {
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAYAAABWKLW/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAcSURBVBhXYwzdevs/AxCs8lJhYAIxYACJw8AAAIlKBAKlNXzqAAAAAElFTkSuQmCC);
+	background-repeat: repeat-y;
+	background-position: left top;
 }
 
 /* Styles for the overview ruler  */
@@ -218,7 +227,6 @@
 	background-color: rgba(159, 202, 86, 0.52);
 	border: 1px solid black;
 }
-
 .annotationOverview.diffDeleted {
 }
 .annotationOverview.diffModified {
