@@ -21,10 +21,10 @@ define([
 	'orion/PageUtil',
 	'orion/URITemplate',
 	'orion/Deferred',
-	'orion/widgets/projects/RunBar'
+	'orion/customGlobalCommands'
 ], function(
 	messages, mCommands, i18nUtil, objects, lib, mExplorer, mCommonNav, ProjectCommands,
-	PageUtil, URITemplate, Deferred, mRunBar
+	PageUtil, URITemplate, Deferred, mCustomGlobalCommands
 ) {
 	var CommonNavExplorer = mCommonNav.CommonNavExplorer;
 	var CommonNavRenderer = mCommonNav.CommonNavRenderer;
@@ -369,7 +369,7 @@ define([
 			var runBarParent = menuBar.runBarNode;
 			lib.empty(runBarParent);
 			
-			this._runBar = new mRunBar.RunBar({
+			this._runBar = mCustomGlobalCommands.createRunBar({
 				parentNode: runBarParent,
 				projectExplorer: this,
 				serviceRegistry: this.serviceRegistry,
@@ -381,10 +381,7 @@ define([
 			});
 			
 			this.setRunBarVisible(true);
-		},
-		getRunBar: function() {
-			return this._runBar;
-		}		
+		}
 	});
 
 	function ProjectNavRenderer() {

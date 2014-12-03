@@ -10,7 +10,23 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
-define([],
-	function(){
-	return {};
+define(['orion/widgets/projects/RunBar'],
+function(mRunBar){
+	
+	function createRunBar(options) {
+		return new mRunBar.RunBar({
+			parentNode: options.parentNode,
+			projectExplorer: options.projectExplorer,
+			serviceRegistry: options.serviceRegistry,
+			commandRegistry: options.commandRegistry,
+			fileClient: options.fileClient,
+			projectCommands: options.projectCommands,
+			projectClient: options.projectClient,
+			progressService: options.progressService
+		});
+	}
+	
+	return {
+		createRunBar: createRunBar
+	};
 });

@@ -858,21 +858,11 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		}
 		return commands;
 	};
-
-	var sharedGeneralEventDispatcher;
-
-	projectCommandUtils.getGeneralEventDispatcher = function(){
-		if(!sharedGeneralEventDispatcher){
-			sharedGeneralEventDispatcher = new EventTarget();
-		}
-		return sharedGeneralEventDispatcher;
-	};
 	
 	var explorer;
 
 	projectCommandUtils.setExplorer = function(theExplorer) {
 		explorer = theExplorer;
-		projectCommandUtils.getGeneralEventDispatcher().dispatchEvent({type: "setExplorer"}); //$NON-NLS-0$
 	};
 	
 	projectCommandUtils.getExplorer = function() {
