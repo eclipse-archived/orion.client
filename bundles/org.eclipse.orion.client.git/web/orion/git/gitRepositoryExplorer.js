@@ -274,7 +274,6 @@ define([
 		this.destroyDiffs();
 	};
 	
-	
 	GitRepositoryExplorer.prototype.setSelectedRepository = function(repository, force) {
 		var that = this;
 		var setRepoSelection =  function(repository, force) {
@@ -293,12 +292,8 @@ define([
 				that.displayConfig(repository, "full"); //$NON-NLS-0$
 				that.setSelectedReference(that.reference);
 			} else {
-				if (window.orionPageLoadStart) {
-					var interval = new Date().getTime() - window.orionPageLoadStart;
-					mMetrics.logTiming("page", "interactive", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
-					mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
-					window.orionPageLoadStart = undefined;
-				}
+				mMetrics.logPageLoadTiming("interactive", window.location.pathname);
+				mMetrics.logPageLoadTiming("complete", window.location.pathname);
 			}
 		};
 	
@@ -686,10 +681,7 @@ define([
 		});
 		this.autoFetch = false;
 		return this.statusDeferred.then(function() {
-			if (window.orionPageLoadStart) {
-				var interval = new Date().getTime() - window.orionPageLoadStart;
-				mMetrics.logTiming("page", "interactive", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
-			}
+			mMetrics.logPageLoadTiming("interactive", window.location.pathname); //$NON-NLS-0$
 			return explorer.display().then(function() {
 				if (!this.reference) {
 					this.reference = this.commitsNavigator.model.getTargetReference();
@@ -701,11 +693,7 @@ define([
 				} else {
 					explorer.select(repository.status);
 				}
-				if (window.orionPageLoadStart) {
-					var interval = new Date().getTime() - window.orionPageLoadStart;
-					mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
-					window.orionPageLoadStart = undefined;
-				}
+				mMetrics.logPageLoadTiming("complete", window.location.pathname); //$NON-NLS-0$
 			}.bind(this));
 		}.bind(this));
 	};

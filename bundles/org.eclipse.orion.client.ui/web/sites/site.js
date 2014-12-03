@@ -64,13 +64,7 @@ define(['require', 'i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/boo
 						widget.load(resource).then(
 							function() {
 								updateTitle();
-
-								if (window.orionPageLoadStart) {
-									/* only the case for the page's initial rendering */
-									var interval = new Date().getTime() - window.orionPageLoadStart;
-									mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
-									window.orionPageLoadStart = undefined;
-								}
+								mMetrics.logPageLoadTiming("complete", window.location.pathname); //$NON-NLS-0$
 							});
 					}
 				}

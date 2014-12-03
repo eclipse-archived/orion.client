@@ -533,12 +533,8 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 			setOutput(item).then(
 				function() {
 					selectItem(item);
-					if (window.orionPageLoadStart) {
-						/* will only be the case if the page's initial load was seeded with a hash to specify the initial page */
-						var interval = new Date().getTime() - window.orionPageLoadStart;
-						mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
-						window.orionPageLoadStart = undefined;
-					}
+					/* will only be logged if the page's initial load was seeded with a hash to specify the initial page */
+					mMetrics.logPageLoadTiming("complete", window.location.pathname); //$NON-NLS-0$
 				}
 			);
 		};
@@ -874,11 +870,7 @@ define(["require", "i18n!orion/help/nls/messages", "orion/bootstrap", "orion/com
 				outputDocument.body.classList.add("orionMarkdown"); //$NON-NLS-0$
 				outputDocument.head.appendChild(link);
 
-				if (window.orionPageLoadStart) {
-					var interval = new Date().getTime() - window.orionPageLoadStart;
-					mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
-					window.orionPageLoadStart = undefined;
-				}
+				mMetrics.logPageLoadTiming("complete", window.location.pathname); //$NON-NLS-0$
 			};
 
 			if (output.contentDocument.readyState === "complete") { //$NON-NLS-0$

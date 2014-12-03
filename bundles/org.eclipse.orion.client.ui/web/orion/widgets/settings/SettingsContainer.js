@@ -128,12 +128,8 @@ define([
 	
 				mGlobalCommands.setPageTarget({task: messages['Settings'], serviceRegistry: _self.registry, commandService: _self.commandService});
 				
-				if (window.orionPageLoadStart) {
-					var interval = new Date().getTime() - window.orionPageLoadStart;
-					mMetrics.logTiming("page", "interactive", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
-					mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
-					window.orionPageLoadStart = undefined;
-				}
+				mMetrics.logPageLoadTiming("interactive", window.location.pathname); //$NON-NLS-0$
+				mMetrics.logPageLoadTiming("complete", window.location.pathname); //$NON-NLS-0$
 			});
 		},
 		

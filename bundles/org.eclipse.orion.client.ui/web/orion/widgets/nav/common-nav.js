@@ -75,11 +75,7 @@ define([
 		var _self = this;
  		this.editorInputListener = function(event) {
 			_self.reveal(event.metadata).then(function() {
-				if (window.orionPageLoadStart) {
-					var interval = new Date().getTime() - window.orionPageLoadStart;
-					mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
-					window.orionPageLoadStart = undefined;
-				}
+				mMetrics.logPageLoadTiming("complete", window.location.pathname); //$NON-NLS-0$
 			});
  		};
 		this.editorInputManager.addEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
@@ -217,11 +213,7 @@ define([
 			return this.loadRoot(root, force).then(function(){
 				this.updateCommands();
 				return this.reveal(this.editorInputManager.getFileMetadata()).then(function() {
-					if (window.orionPageLoadStart) {
-						var interval = new Date().getTime() - window.orionPageLoadStart;
-						mMetrics.logTiming("page", "complete", interval, window.location.pathname); //$NON-NLS-1$ //$NON-NLS-0$
-						window.orionPageLoadStart = undefined;
-					}
+					mMetrics.logPageLoadTiming("complete", window.location.pathname); //$NON-NLS-0$
 				});
 			}.bind(this));	
 		},

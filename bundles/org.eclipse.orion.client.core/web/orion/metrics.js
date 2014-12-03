@@ -56,7 +56,7 @@ define(["orion/Deferred"], function(Deferred) {
 		return promise;
 	};
 
-	var logEvent = function(category, action, label, value) {
+	function logEvent(category, action, label, value) {
 		if (window[GA_ID]) {
 			window[GA_ID]("send", "event", category, action, label, value); //$NON-NLS-1$ //$NON-NLS-0$
 		} else {
@@ -64,9 +64,20 @@ define(["orion/Deferred"], function(Deferred) {
 				queue.push({command: "send", arg0: "event", arg1: category, arg2: action, arg3: label, arg4: value}); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		}
-	};
+	}
 
-	var logTiming = function(timingCategory, timingVar, timingValue, timingLabel) {
+	function logPageLoadTiming(timingVar, timingLabel) {
+		/* 
+		 * The level of window.performance implementation varies across the browsers,
+		 * so check for the existence of all utilized functions up-front.
+		 */
+		if (window.performance && window.performance.getEntriesByName && window.performance.mark && !window.performance.getEntriesByName(timingVar).length) {
+			window.performance.mark(timingVar); /* ensure that no more timings of this type are logged for this page */
+			logTiming("page", timingVar, window.performance.now(), timingLabel); //$NON-NLS-0$
+		}
+	}
+
+	function logTiming(timingCategory, timingVar, timingValue, timingLabel) {
 		if (window[GA_ID]) {
 			window[GA_ID]("send", "timing", timingCategory, timingVar, Math.round(timingValue), timingLabel); //$NON-NLS-1$ //$NON-NLS-0$
 		} else {
@@ -74,9 +85,9 @@ define(["orion/Deferred"], function(Deferred) {
 				queue.push({command: "send", arg0: "timing", arg1: timingCategory, arg2: timingVar, arg3: Math.round(timingValue), arg4: timingLabel}); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		}
-	};
+	}
 
-	var setDimension = function(dimensionId, value) {
+	function setDimension(dimensionId, value) {
 		if (window[GA_ID]) {
 			window[GA_ID]("set", dimensionId, value); //$NON-NLS-0$
 		} else {
@@ -84,11 +95,12 @@ define(["orion/Deferred"], function(Deferred) {
 				queue.push({command: "set", arg0: dimensionId, arg1: value}); //$NON-NLS-0$
 			}
 		}
-	};
+	}
 
 	return {
 		init: init,
 		logEvent: logEvent,
+		logPageLoadTiming: logPageLoadTiming,
 		logTiming: logTiming,
 		setDimension: setDimension
 	};
