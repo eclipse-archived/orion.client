@@ -145,10 +145,6 @@ define([
 			this._playButton.removeEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$
 			this._stopButton.removeEventListener("click", this._boundStopButtonListener); //$NON-NLS-0$
 			
-			if (this._liveUpdateBar) {
-				this._liveUpdateBar.destroy();
-				this._liveUpdateBar = null;
-			}
 		},
 		
 		_launchConfigurationListener: function(event) {
@@ -214,8 +210,6 @@ define([
 					}
 				}
 				
-				if (this.getLiveUpdateBar())
-					this.getLiveUpdateBar().selectLaunchConfiguration(launchConfiguration);
 			} else {
 				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(messages["selectLaunchConfig"]); //$NON-NLS-0$
 				this._selectedLaunchConfiguration = null;
@@ -340,33 +334,11 @@ define([
 		
 		_playButtonListener: function() {
 			// TODO check if app is already running and confirm with user if they want to restart it
-			if (this._liveUpdateBar && this._liveUpdateBar.isLiveUpdateActive()) {
-				this._commandRegistry.runCommand("orion.launchConfiguration.startApp", this._selectedLaunchConfiguration, this, null, null, this._playButton); //$NON-NLS-0$
-			} else {
-				this.deploySelectedLaunchConfiguration();
-			}
-		},
-		
-		deploySelectedLaunchConfiguration: function() {
 			this._commandRegistry.runCommand("orion.launchConfiguration.deploy", this._selectedLaunchConfiguration, this, null, null, this._playButton); //$NON-NLS-0$
 		},
 		
 		_stopButtonListener: function() {
 			this._commandRegistry.runCommand("orion.launchConfiguration.stopApp", this._selectedLaunchConfiguration, this, null, null, this._stopButton); //$NON-NLS-0$
-		},
-		
-		insertLiveUpdateBar: function(liveUpdateBar) {
-			this._liveUpdateBar = liveUpdateBar;
-			
-			var separator = document.createElement("span"); //$NON-NLS-0$
-			separator.classList.add("runBarSeparator"); //$NON-NLS-0$
-			this._domNode.appendChild(separator);
-			
-			this._domNode.appendChild(this._liveUpdateBar.getDomNode());
-		},
-		
-		getLiveUpdateBar: function() {
-			return this._liveUpdateBar;
 		},
 		
 		getSelectedLaunchConfiguration: function() {
