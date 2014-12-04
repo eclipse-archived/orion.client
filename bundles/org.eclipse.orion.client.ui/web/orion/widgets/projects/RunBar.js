@@ -76,7 +76,9 @@ define([
 					this._launchConfigurationDispatcher.addEventListener(eventType, this._boundLaunchConfigurationListener);
 				}, this);
 				
-				this._createLaunchConfigurationsDropdown();			
+				this._createLaunchConfigurationsDropdown();
+				
+				this._disableControls(); // start with controls disabled until a launch configuration is selected
 			} else {
 				throw new Error("this._domNode is null"); //$NON-NLS-0$
 			}
@@ -204,16 +206,18 @@ define([
 				if (checkStatus) {
 					this._checkLaunchConfigurationStatus(launchConfiguration);
 				} else {
-					// do not check the status, only set it in the UI if is already in the launchConfiguration
+					// do not check the status, only set it in the UI if it is already in the launchConfiguration
 					if (launchConfiguration.status) {
 						this.setStatus(launchConfiguration.status);
 					}
 				}
 				
+				this._enableControls();
 			} else {
 				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(messages["selectLaunchConfig"]); //$NON-NLS-0$
 				this._selectedLaunchConfiguration = null;
 				this.setStatus({State: "", Message: ""}); //$NON-NLS-1$ //$NON-NLS-0$
+				this._disableControls();
 			}
 		},
 		
@@ -333,16 +337,38 @@ define([
 		},
 		
 		_playButtonListener: function() {
-			// TODO check if app is already running and confirm with user if they want to restart it
-			this._commandRegistry.runCommand("orion.launchConfiguration.deploy", this._selectedLaunchConfiguration, this, null, null, this._playButton); //$NON-NLS-0$
+			if (this._isEnabled(this._playButton)) {
+				// TODO check if app is already running and confirm with user if they want to restart it
+				this._commandRegistry.runCommand("orion.launchConfiguration.deploy", this._selectedLaunchConfiguration, this, null, null, this._playButton); //$NON-NLS-0$
+			}
 		},
 		
 		_stopButtonListener: function() {
-			this._commandRegistry.runCommand("orion.launchConfiguration.stopApp", this._selectedLaunchConfiguration, this, null, null, this._stopButton); //$NON-NLS-0$
+			if (this._isEnabled(this._stopButton)) {
+				this._commandRegistry.runCommand("orion.launchConfiguration.stopApp", this._selectedLaunchConfiguration, this, null, null, this._stopButton); //$NON-NLS-0$
+			}
 		},
 		
 		getSelectedLaunchConfiguration: function() {
 			return this._selectedLaunchConfiguration;
+		},
+		
+		_disableControls: function() {
+			this._statusLabel.classList.add("disabled"); //$NON-NLS-0$
+			this._statusLight.classList.add("disabled"); //$NON-NLS-0$
+			this._playButton.classList.add("disabled"); //$NON-NLS-0$
+			this._stopButton.classList.add("disabled"); //$NON-NLS-0$
+		},
+		
+		_enableControls: function() {
+			this._statusLabel.classList.remove("disabled"); //$NON-NLS-0$
+			this._statusLight.classList.remove("disabled"); //$NON-NLS-0$
+			this._playButton.classList.remove("disabled"); //$NON-NLS-0$
+			this._stopButton.classList.remove("disabled"); //$NON-NLS-0$
+		},
+		
+		_isEnabled: function(domNode) {
+			return !domNode.classList.contains("disabled"); //$NON-NLS-0$
 		}
 		
 	});

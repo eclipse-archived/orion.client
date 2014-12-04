@@ -11,12 +11,17 @@
 	padding: 0 10px;
 }
 
+.disabled {
+	opacity: 0.3;
+}
+
 .launchConfigurationsWrapper {
 	background: white;
 	border-radius: 3px;
 	display: inline-block;
 	min-height: 29px;
 	min-width: 250px;
+	transition: opacity 0.3s ease;
 }
 
 .launchConfigurationsWrapper > .launchConfigurationsButton.dropdownTrigger {
@@ -39,9 +44,10 @@
 	border-radius: 3px;
 	padding: 0;
 	margin: 0;
+	transition: opacity 0.3s ease;
 }
 
-.runBarButton:hover {
+.runBarButton:not(.disabled):hover {
 	border-color: #ccc;
 	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
 }
@@ -78,6 +84,7 @@
 .statusLabel {
 	color: #222;
 	margin-right: 10px;
+	transition: opacity 0.3s ease;
 }
 
 .statusLight {
@@ -86,7 +93,7 @@
 	display: inline-block;
 	height: 12px;
 	width: 12px;
-	transition: background 0.2s ease;
+	transition: background 0.2s ease, opacity 0.3s ease;;
 }
 
 .statusLight.statusLightGreen {
