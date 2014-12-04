@@ -113,12 +113,11 @@ define([
     	            comment.node = node;
     	            return comment;
 	            }
-	        } else {
-	            //we still want to show a hover for something with no doc
-	            comment = Object.create(null);
-	            comment.node = node;
-	            comment.value = '';
 	        }
+            //we still want to show a hover for something with no doc
+            comment = Object.create(null);
+            comment.node = node;
+            comment.value = '';
 	        return comment;
 		},
 		
