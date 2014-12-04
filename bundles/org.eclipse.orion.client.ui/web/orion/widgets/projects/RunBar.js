@@ -55,11 +55,8 @@ define([
 				this._parentNode.appendChild(this._domNode);
 				this._launchConfigurationsWrapper = lib.$(".launchConfigurationsWrapper", this._domNode); //$NON-NLS-0$
 				
-				this._statusLabel = lib.$(".statusLabel", this._domNode); //$NON-NLS-0$
-				this._statusLabel.appendChild(document.createTextNode(messages["Status"])); //$NON-NLS-0$
-				
-				this._statusLight = lib.$(".statusLight", this._domNode); //$NON-NLS-0$
-				
+				this._statusLight = document.createElement("span"); //$NON-NLS-0$
+				this._statusLight.classList.add("statusLight"); //$NON-NLS-0$
 				
 				this._playButton = lib.$("button.playButton", this._domNode); //$NON-NLS-0$
 				this._boundPlayButtonListener = this._playButtonListener.bind(this);
@@ -200,7 +197,7 @@ define([
 		 */
 		selectLaunchConfiguration: function(launchConfiguration, checkStatus) {
 			if (launchConfiguration) {
-				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(launchConfiguration.Name);
+				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(launchConfiguration.Name, this._statusLight);
 				this._selectedLaunchConfiguration = launchConfiguration;
 				
 				if (checkStatus) {
@@ -280,7 +277,6 @@ define([
 		},
 		
 		_setStatusTitles: function(title) {
-			this._statusLabel.title = title || ""; //$NON-NLS-0$
 			this._statusLight.title = title || ""; //$NON-NLS-0$
 		},
 		
@@ -354,15 +350,11 @@ define([
 		},
 		
 		_disableControls: function() {
-			this._statusLabel.classList.add("disabled"); //$NON-NLS-0$
-			this._statusLight.classList.add("disabled"); //$NON-NLS-0$
 			this._playButton.classList.add("disabled"); //$NON-NLS-0$
 			this._stopButton.classList.add("disabled"); //$NON-NLS-0$
 		},
 		
 		_enableControls: function() {
-			this._statusLabel.classList.remove("disabled"); //$NON-NLS-0$
-			this._statusLight.classList.remove("disabled"); //$NON-NLS-0$
 			this._playButton.classList.remove("disabled"); //$NON-NLS-0$
 			this._stopButton.classList.remove("disabled"); //$NON-NLS-0$
 		},

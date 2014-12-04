@@ -26,11 +26,13 @@ define([
 	 * @param {DOMNode} options.parentNode The DOM node which this rich dropdown will be appended to
 	 * @param {Function} options.populateFunction The function which will populate the dropdown when it is opened (see @ref orion.webui.dropdown)	 
 	 * @param {String} options.buttonName Optional. A string to display on the dropdown trigger button.
+	 * @param {DOMNode} options.buttonDecorator Optional. A DOM node will be inserted into the dropdown trigger button as a decorator.
 	 * @param {Boolean} options.noDropdownArrow Optional. A boolean indicating that the dropdown arrow should be omitted from the dropdown trigger button.
 	 */
 	function RichDropdown(options) {
 		this._parentNode = options.parentNode;
 		this._buttonName = options.buttonName;
+		this._buttonDecorator = options.buttonDecorator;
 		this._populateFunction = options.populateFunction;
 		this._noDropdownArrow = options.noDropdownArrow;
 		this._initialize();
@@ -46,7 +48,7 @@ define([
 			this._dropdownNode = lib.$("ul.dropdownMenu", wrapperNode);
 			
 			if (this._buttonName) {
-				this.setDropdownTriggerButtonName(this._buttonName);
+				this.setDropdownTriggerButtonName(this._buttonName, this._buttonDecorator);
 			}
 			
 			var dropdownArrow = lib.$(".dropdownArrowDown", this._dropdownTriggerButton);
@@ -72,9 +74,14 @@ define([
 		/**
 		 * Sets the text label displayed in this dropdown's trigger button
 		 * @param {String} name The string to display on the dropdown trigger button.
+		 * @param {DOMNode} decorator Optional. A dom node which will be placed in front of the button name.
 		 */
-		setDropdownTriggerButtonName: function(name) {
+		setDropdownTriggerButtonName: function(name, decorator) {
 			lib.empty(this._dropdownTriggerButtonLabel);
+			
+			if (decorator) {
+				this._dropdownTriggerButtonLabel.appendChild(decorator);
+			}
 			
 			var nameNode = document.createTextNode(name);
 			this._dropdownTriggerButtonLabel.appendChild(nameNode);

@@ -7,6 +7,8 @@
 	border-right: solid 1px #ccc;
 	display: -webkit-inline-flex;		 /* Safari */
 	display: inline-flex;
+	height: 33px;
+	margin: 1px 0;
 	overflow: hidden;
 	padding: 0 10px;
 }
@@ -19,15 +21,16 @@
 	background: white;
 	border-radius: 3px;
 	display: inline-block;
+	margin-right: 10px;
 	min-height: 29px;
-	min-width: 250px;
+	min-width: 270px;
 	transition: opacity 0.3s ease;
 }
 
 .launchConfigurationsWrapper > .launchConfigurationsButton.dropdownTrigger {
 	background: white;
 	padding: 6px 2px 6px 6px;
-	width: 250px;
+	width: 270px;
 }
 
 .launchConfigurationsButton > .dropdownArrowDown {
@@ -92,8 +95,10 @@
 	border-radius: 50%;
 	display: inline-block;
 	height: 12px;
+	margin-right: 5px;
 	width: 12px;
-	transition: background 0.2s ease, opacity 0.3s ease;;
+	transition: background 0.2s ease, opacity 0.3s ease;
+	vertical-align: bottom;
 }
 
 .statusLight.statusLightGreen {
@@ -107,8 +112,8 @@
 .runBarSeparator {
 	background: #ccc;
 	display: inline-block;
-	height: 35px;
-	margin: 0 10px;
+	height: 33px;
+	margin: 1px 10px;
 	position: relative;
     width: 1px;
 }
