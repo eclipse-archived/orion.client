@@ -192,9 +192,6 @@ define([
         "no-caller": {
             description: "Warn on use of arguments.callee or arguments.caller",
             rule: function(context) {
-                function reportCaller(node, name) {
-                    context.report(node, "'arguments.${0}' is deprecated.", {0: name});
-                }
                 return {
                     "MemberExpression": function(node) { //$NON-NLS-0$
                         var object = node.object;
@@ -202,8 +199,9 @@ define([
                             return;
                         }
                         var prop = node.property;
-                        if (prop.name === "callee" || prop.name === "caller") //$NON-NLS-1$ //$NON-NLS-0$
-                            reportCaller(prop, prop.name);
+                        if (prop.name === "callee" || prop.name === "caller") {//$NON-NLS-1$ //$NON-NLS-0$
+                            context.report(prop, "'arguments.${0}' is deprecated.", {0: prop.name});
+                        }
                     }
                 };
             }
@@ -570,12 +568,13 @@ define([
                         }
                         var symbolMap = createSymbolMap(scope);
 
-                        if (scope.type === "global") //$NON-NLS-0$
+                        if (scope.type === "global") {//$NON-NLS-0$
                             return; // No shadowing can occur in the global (Program) scope
-
+                        }
                         scope.variables.forEach(function(variable) {
-                            if (!variable.defs.length)
+                            if (!variable.defs.length) {
                                 return; // Skip 'arguments'
+                            }
                             // If variable's name was first bound in an upper scope, and the variable is not a parameter,
                             // flag it.
                             var bindingSource;
@@ -850,7 +849,7 @@ define([
         		};
         	}
         },
-        radix: {
+        "radix": {
             description: "Warn when parseInt() is called without the 'radix' parameter.",
             rule: function(context) {
                 function checkParseInt(call) {
@@ -863,8 +862,9 @@ define([
                                 // Found a `parseInt` that is not the builtin
                                 return variable.name === "parseInt" && variable.defs.length; //$NON-NLS-0$
                             });
-                            if (shadowed)
+                            if (shadowed) {
                                 break;
+                            }
                         }
                         if (!shadowed) {
                             context.report(callee, "Missing radix parameter.", null);
