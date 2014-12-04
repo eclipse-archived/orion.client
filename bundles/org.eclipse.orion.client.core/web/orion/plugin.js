@@ -60,10 +60,9 @@
             }
         }
         var _notify = _publish;
-      	var message = {
+	    _publish({
 	    	method: "loading", //$NON-NLS-0$
-	    };
-	    _publish(message);
+	    });
 
         function _getPluginData() {
             var services = [];
