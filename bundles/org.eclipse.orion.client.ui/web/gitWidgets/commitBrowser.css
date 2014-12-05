@@ -1,0 +1,24 @@
+@import "../css/layout.css";
+
+@import "../css/controls.css";
+
+@import "../css/images.css";
+
+@import "../css/sections.css";
+
+@import "../orion/compare/compareView.css";
+
+@import "../font/font.css";
+
+@import "../git/css/git.css";
+
+@import "../css/theme.css";
+
+@import "./widgetCommon.css";
+
+.tooltip {
+	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
+}
+.commit_browse_inner_container {
+	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
+}

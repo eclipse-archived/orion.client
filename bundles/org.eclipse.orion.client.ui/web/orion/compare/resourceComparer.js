@@ -125,9 +125,12 @@ exports.ResourceComparer = (function() {
 		this._registry = serviceRegistry;
 		this._commandService = commandRegistry;
 		this._fileClient = new mFileClient.FileClient(serviceRegistry);
-		this._fileClient = new mFileClient.FileClient(serviceRegistry);
 		this._searchService = this._registry.getService("orion.core.search"); //$NON-NLS-0$
-		this._progress = this._registry.getService("orion.page.progress"); //$NON-NLS-0$
+		var progressService = this._progress = this._registry.getService("orion.page.progress"); //$NON-NLS-0$
+		this._progressFunc =  function(deferred, msgKey, uri) {
+			if (!progressService) { return deferred; }
+			return progressService.progress(deferred, i18nUtil.formatMessage(msgKey, uri));
+		};
 		this.setOptions(options, true);
 		this._inputManagers = [];
 		viewOptions.preCreate = this._initInputManagers.bind(this);
@@ -297,7 +300,7 @@ exports.ResourceComparer = (function() {
 							
 				setInput: function(fileURI, editor) {
 					this._parsedLocation = {resource:fileURI};
-					that._progress.progress(that._fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["readingFileMetadata"], fileURI)).then( //$NON-NLS-0$
+					that._progressFunc(that._fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["readingFileMetadata"], fileURI)).then( //$NON-NLS-0$
 						function(metadata) {
 							this._fileMetadata = metadata;
 							if(!this.embedded) {
@@ -443,7 +446,7 @@ exports.ResourceComparer = (function() {
 			return Deferred.all(promises, function(error) { return {_error: error}; });
 	    },
 	    _loadSingleFile: function(file) {
-	        return this._registry.getService("orion.page.progress").progress(this._fileClient.read(file.URL), //$NON-NLS-0$
+	        return this._progressFunc(this._fileClient.read(file.URL), //$NON-NLS-0$
 	                   i18nUtil.formatMessage(messages["readingFile"], file.URL)).then( //$NON-NLS-0$
 		        function(contents) {
 					file.Content = contents;

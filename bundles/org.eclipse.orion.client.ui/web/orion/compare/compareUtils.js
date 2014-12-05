@@ -236,7 +236,7 @@ orion.compareUtils.convertMergedLineNumber = function(mapper, lineindex/*zero ba
 };
 
 orion.compareUtils.generateCompareHref = function(diffLocation, options) {
-	var base =  require.toUrl("compare/compare.html"); //$NON-NLS-0$
+	var base =  "../compare/compare.html"; //$NON-NLS-0$
 	if(!options.conflict){
 		options.conflict = undefined;
 	}
@@ -251,7 +251,7 @@ orion.compareUtils.generateCompareHref = function(diffLocation, options) {
 };
 
 orion.compareUtils.generateCompareTreeHref = function(folderToCompare, options) {
-	var base =  require.toUrl("compare-tree/compare-tree.html"); //$NON-NLS-0$
+	var base =  "../compare-tree/compare-tree.html"; //$NON-NLS-0$
 	var href = new URITemplate(base + "#{,resource,params*}").expand({ //$NON-NLS-0$
 		resource: folderToCompare,
 		params: options

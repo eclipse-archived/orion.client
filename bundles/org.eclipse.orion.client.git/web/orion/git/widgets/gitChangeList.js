@@ -522,39 +522,42 @@ define([
 				},
 				onComplete: function(tree) {
 					var model = that.model;
-					var gitConfigPref = new gitConfigPreference(that.registry);
-					gitConfigPref.getConfig().then(function(userInfo){
-							var selectFunc = function() {
-								if (that.prefix === "all") { //$NON-NLS-0$
-										that.updateCommands();
-										that.selection.setSelections(model._sortBlock(model.getGroups("staged"))); //$NON-NLS-0$
-									}
-									if (that.prefix === "diff") { //$NON-NLS-0$
-										that.updateCommands();
-									}
-									that.status = model.status;
-									if (that.getItemCount() === 1) {
-										that.expandSections(tree, model.root.children).then(function() {
-											deferred.resolve();
-										});
-										return;
-									}
-									deferred.resolve();
-							};
+					var selectFunc = function() {
+						if (that.prefix === "all") { //$NON-NLS-0$
+							that.updateCommands();
+							that.selection.setSelections(model._sortBlock(model.getGroups("staged"))); //$NON-NLS-0$
+						}
+						if (that.prefix === "diff") { //$NON-NLS-0$
+							that.updateCommands();
+						}
+						that.status = model.status;
+						if (that.getItemCount() === 1) {
+							that.expandSections(tree, model.root.children).then(function() {
+								deferred.resolve();
+							});
+							return;
+						}
+						deferred.resolve();
+					};
+					if (that.prefix === "all") { //$NON-NLS-0$
+						var gitConfigPref = new gitConfigPreference(that.registry);
+						gitConfigPref.getConfig().then(function(userInfo){
 							if (userInfo && userInfo.GitSelectAll) {
-										model.getRoot(function(root) {
-										var selection = root.children.filter(function(item) {
-											return !that.model.isStaged(item.type) && mGitUtil.isChange(item);
-										});
-										that.commandService.runCommand("eclipse.orion.git.stageCommand", selection, that, null, that.repository.status); //$NON-NLS-0$
-										selectFunc();
+								model.getRoot(function(root) {
+									var selection = root.children.filter(function(item) {
+										return !that.model.isStaged(item.type) && mGitUtil.isChange(item);
 									});
+									that.commandService.runCommand("eclipse.orion.git.stageCommand", selection, that, null, that.repository.status); //$NON-NLS-0$
+									selectFunc();
+								});
 							} else {
 								selectFunc();
 							}
-					});
-					
-				}
+						});
+					} else {
+						selectFunc();
+					}
+				} 
 			});
 			return deferred;
 		},

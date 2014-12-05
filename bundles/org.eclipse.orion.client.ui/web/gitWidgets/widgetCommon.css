@@ -1,0 +1,38 @@
+.sectionWrapper, .sectionTable{
+	margin-left: 2px;
+	margin-right: 2px;
+	margin-top: 2px;
+}
+
+.commit_browse_inner_container .navRow {
+	font-size: 9pt;
+}
+
+.sectionTable {
+	margin-top: 0;
+	border: 1px solid;
+	border-color:#dadada;
+}
+
+.sectionWrapperClosed{
+	border-bottom: 1px solid;
+}
+
+.sectionWrapper+.sectionTable {
+	margin-top: 0;
+	border-top: none;
+}
+
+.sectionTable td {
+	border-bottom: 1px solid #dadada;
+	vertical-align: middle;
+	color: gray;
+}
+
+.sectionTable tr:last-child td{
+	border-bottom: 0;
+}
+
+.sectionTable div.lightTreeTableRow:last-child, .sectionTable div.lightTreeTableRow:last-child{
+	border-bottom: 0;
+}
