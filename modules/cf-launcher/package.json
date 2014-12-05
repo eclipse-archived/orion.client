@@ -1,6 +1,6 @@
 {
   "name": "cf-launcher",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "Launcher daemon for Cloud Foundry + Node.js development.",
   "main": "index.js",
   "scripts": {
