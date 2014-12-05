@@ -18,34 +18,6 @@ utils.V8_DEBUG_PORT = 5858;
 
 utils.VERBOSE = "VERBOSE" in process.env || "LAUNCHER_VERBOSE" in process.env || false;
 
-utils.checker = function(obj) {
-	function fail(prop, type) {
-		throw new Error(nodeutil.format("Expected property '%s' to be %s", prop, type));
-	}
-	var checker = {};
-	checker.array = function(prop) {
-		if (!Array.isArray(obj[prop]))
-			fail(prop, "array");
-		return checker;
-	};
-	checker.string = function(prop) {
-		var val = obj[prop];
-		if (typeof val === "number")
-			val = obj[prop] = String(val); // Coerce to string
-
-		if (typeof val !== "string")
-			fail(prop, "string");
-		return checker;
-	};
-	// Something coercible to a number
-	checker.numbery = function(prop) {
-		var val = obj[prop];
-		isNaN(Number(val)) && fail(prop, "number");
-		return checker;
-	};
-	return checker;
-};
-
 // Mix in properties from `source` into  `target`
 utils.extend = function(target, source) {
 	if (!source || typeof source !== "object")
@@ -64,3 +36,14 @@ utils.log = function(/*message, replacements*/) {
 	debug(nodeutil.format.apply(nodeutil, arguments));
 };
 
+/**
+ * Tries to parse an array from JSON from the given value.
+ * @param {String} [value]
+ * @returns {Array} or null if value did not contain a valid JSON array.
+ */
+utils.maybeJSONArray = function(value) {
+	try {
+		value = JSON.parse(value);
+	} catch(e) {}
+	return Array.isArray(value) ? value : null;
+};

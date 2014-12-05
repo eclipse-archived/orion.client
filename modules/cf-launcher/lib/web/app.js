@@ -17,14 +17,15 @@ var bodyParser = require("body-parser"),
     path = require("path"),
     appControl = require("./appctl"),
     Auth = require("./auth"),
+    Cors = require("./cors"),
     dav = require("./dav"),
-    logger = require("../logger"),
-    authlogger = logger("auth"),
-    proxylogger = logger("proxy"),
+    Logger = require("../logger"),
+    log = Logger(""), // main
+    authlog = Logger("auth"),
+    proxylog = Logger("proxy"),
     ProcessManager = require("../proc"),
     ProxyManager = require("./proxy"),
-    tty = require("./tty"),
-    util = require("../util");
+    tty = require("./tty");
 
 var TARGET_APP = "target";
 
@@ -38,29 +39,40 @@ function startProcesses(appCommand, label, port_app, port_debug) {
 	return procman;
 }
 
+function checkParams(options) {
+	function fail(p) {
+		throw new Error("Missing or invalid parameter: " + p);
+	}
+
+	!Array.isArray(options.appCommand)    && fail("appCommand");
+	typeof options.urlPrefix !== "string" && fail("urlPrefix");
+	typeof options.password !== "string"  && fail("password");
+	isNaN(Number(options.port))           && fail("port");
+
+	options.port = Number(options.port); // coerce to number
+}
+
 function createProxyApp(options) {
-	util.checker(options)
-		.array("appCommand")
-//		.string("appName")
-		.string("urlPrefix")
-		.string("password")
-		.numbery("port");
+	checkParams(options);
 
 	var appCommand = options.appCommand,
+	    corsWhitelist = options.corsWhitelist,
 	    launcherPrefix = "/" + options.urlPrefix,
 	    password = options.password,
 	    port = options.port;
 
-	logger("Application command line: %s", appCommand);
-	logger("VCAP_APP_PORT: %s", port);
-	logger("Launcher URL prefix: %s", launcherPrefix);
-	logger();
+	log("Application command line: %s", appCommand);
+	log("VCAP_APP_PORT: %s", port);
+	log("Launcher URL prefix: %s", launcherPrefix);
+	log("CORS origins: [%s]", corsWhitelist.join(", "));
+	log();
 
 	// ===================================================================
 	// Create auth & session management
 	var isAuthenticated = Auth.isAuthenticated,
 	    realm = "cf-launcher (username is 'vcap')",
-	    auth = Auth({ password: password, realm: realm });
+	    auth = Auth({ password: password, realm: realm }),
+	    cors = Cors({ whitelist: corsWhitelist });
 
 	// Create proxies, start app & inspector
 	var proxyman = new ProxyManager(port);
@@ -80,20 +92,22 @@ function createProxyApp(options) {
 			authBackend: auth.backend,
 			realm: realm,
 	});
-	logger("[Internal] Application port: %s", target.port);
-	logger("[Internal] node-inspector port: %s", inspector.port);
+	log("[Internal] Application port: %s", target.port);
+	log("[Internal] node-inspector port: %s", inspector.port);
 
 	// ===================================================================
 	var launcherApp = express.Router(), appPrefix = "/apps";
 	launcherApp.use(bodyParser());
+	launcherApp.use(cors);
+	launcherApp.options("*", cors); // enable pre-flight request for all routes
 	launcherApp.use(auth); // Middleware to lookup auth status
 	launcherApp.post("/login", function(req, res) {
 		if (req.body.password === password) {
-			authlogger("Successful login from: %s", req.ip);
+			authlog("Successful login from: %s", req.ip);
 			auth.setClientSession(req, true);
 			res.redirect(launcherPrefix);
 		} else {
-			authlogger("Failed login attempt from: %s", req.ip);
+			authlog("Failed login attempt from: %s", req.ip);
 			req.flash("error", "Incorrect password.");
 			res.redirect("login");
 		}
@@ -105,13 +119,13 @@ function createProxyApp(options) {
 		res.render("login", { error: req.flash().error });
 	});
 	launcherApp.get("/logout", function(req, res) {
-		authlogger("Logout %s", req.ip);
+		authlog("Logout %s", req.ip);
 		auth.setClientSession(req, false);
 		res.redirect("login");
 	});
 	// jsDAV supplies its own auth strategy, so it goes outside the session check
 	launcherApp.use("/dav/", function(req, res) {
-		proxylogger("%s %s -> dav", req.method, req.url);
+		proxylog("%s %s -> dav", req.method, req.url);
 		proxies.dav.proxy.web(req, res);
 	});
 	// CSS resources can be accessed without session
@@ -136,7 +150,7 @@ function createProxyApp(options) {
 	});
 	launcherApp.use(appPrefix, appControl(procman, TARGET_APP));
 	launcherApp.use("/tty/", function(req, res) {
-		proxylogger("%s %s -> tty", req.method, req.url);
+		proxylog("%s %s -> tty", req.method, req.url);
 		proxies.tty.proxy.web(req, res);
 	});
 	launcherApp.use("/help/dav", function(req, res) {
@@ -163,7 +177,7 @@ function createProxyApp(options) {
 	app.use(function(req, res/*, next*/) {
 		if (procman.get(TARGET_APP).state !== ProcessManager.State.STOP) {
 			// App is running, proxy the request to it
-			proxylogger("%s -> target app", req.url);
+			proxylog("%s -> target app", req.url);
 			target.proxy.web(req, res);
 		} else {
 			// App not running, redirect user to launcher for convenience
@@ -172,7 +186,7 @@ function createProxyApp(options) {
 	});
 	return {
 		proxies: proxies,
-		logger: proxylogger,
+		logger: proxylog,
 		serverApp: app,
 		processManager: procman,
 		authMiddleware: auth,

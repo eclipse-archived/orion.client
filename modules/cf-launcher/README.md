@@ -66,6 +66,9 @@ The supported `[options]` are:
 
 **`--urlprefix=prefix`** Optional. Gives the URL prefix reserved by cf-launcher. Defaults to `urlprefix=launcher`.
 
+**`--cors=origin`** Optional. Enables CORS requests to cf-launcher from the given [origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Origin).
+  By default, CORS is not enabled.
+
 ## User interface
 Once you've logged in, you're taken to a landing page that shows the status of your app, and the stdout/stderr log. Use the tabs
 on the top banner to access the debugger and shell.
@@ -123,6 +126,14 @@ To filter debug output, the following suffixes can appear after cf-launcher:
 * `webdav`: logs WebDAV requests. (This is an alias for the `debugMode` flag in the underlying jsDAV server.)
 
 The `DEBUG` variable is very flexible. See [debug](https://www.npmjs.org/package/debug) for full details.
+
+#### LAUNCHER_CORS_ORIGINS ####
+* Gives a JSON array of origins that CORS requests will be allowed from.
+* For example, to allow CORS requests from https://foo.example.org:
+```shell
+cf set-env myapp LAUNCHER_CORS_ORIGINS "[\"https://foo.example.org\"]"
+```
+* If any `--cors` command-line options are provided, the environment variable is ignored.
 
 #### PASSWORD ####
 * The `PASSWORD` environment variable gives the password used to log in to cf-launcher.

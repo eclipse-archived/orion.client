@@ -32,6 +32,7 @@
     "client-sessions": "~0.6.0",
     "compression": "~1.0.7",
     "connect-flash": "~0.1.1",
+    "cors": "~2.5.2",
     "ejs": "~1.0.0",
     "express": "~4.4.2",
     "jsDAV": "~0.3.2",

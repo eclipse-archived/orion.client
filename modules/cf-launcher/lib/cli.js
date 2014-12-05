@@ -20,11 +20,15 @@ var USAGE = "\n\nUsage: cf-launcher [options] -- COMMAND";
  * @param {String} args Command-line arguments passed to launcher (should not include "node", "cf-launcher.js").
  */
 exports.run = function(args) {
-	var argv = minimist(args);
+	var argv = minimist(args, {
+		string: ["cors", "password", "urlprefix"] // Always parse as strings
+	});
 	var command = argv._; // args following the "--" if present, otherwise all args, eg. ["node", "userapp.js"]
 	var appenv = cfenv.getAppEnv();
 	var password = argv.password || process.env.LAUNCHER_PASSWORD || null;
 	var urlPrefix = argv.urlprefix || "launcher";
+	var cors = argv.cors || util.maybeJSONArray(process.env.LAUNCHER_CORS_ORIGINS) || [];
+	cors = Array.isArray(cors) ? cors : [cors];
 
 	if (!command.length)
 		throw new Error("Missing required argument: COMMAND." + USAGE);
@@ -33,11 +37,12 @@ exports.run = function(args) {
 
 	util.log("Starting cf-launcher...");
 	var srv = startServer({
-		appCommand: command,
-		appName:    appenv.name, // name of the user app
-		urlPrefix:  urlPrefix,
-		password:   password,
-		port:       appenv.port
+		appCommand:    command,
+		appName:       appenv.name, // name of the user app
+		corsWhitelist: cors,
+		urlPrefix:     urlPrefix,
+		password:      password,
+		port:          appenv.port
 	});
 	srv.once("initialized", function() {
 		util.log("Visit %s to start debugging your app.",  appenv.url + "/" + urlPrefix);
