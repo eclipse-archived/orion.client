@@ -185,9 +185,14 @@ define([
 				}
 				this.styler = null;
 			}
-			return this.highlight(fileContentType, textView, annotationModel);
+			return this._highlight(fileContentType, textView, annotationModel);
 		},
-		highlight: function(fileContentType, textView, annotationModel) {
+		highlight: function(fileName, contentType, editor) {
+			var textView = editor.getTextView();
+			var annotationModel = editor.getAnnotationModel();
+			return this._highlight(contentType, textView, annotationModel);
+		},
+		_highlight: function(fileContentType, textView, annotationModel) {
 			if (this.styler) {
 				this.styler.destroy();
 				this.styler = null;

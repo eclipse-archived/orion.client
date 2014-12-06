@@ -351,6 +351,7 @@ define([
 		this.gitClient = options.gitClient;
 		this.progressService = options.progressService;
 		this.preferencesService = options.preferencesService;
+		this.standAloneOptions = options.standAloneOptions;
 		this.explorerSelectionScope = "explorerSelection";  //$NON-NLS-0$
 		this.explorerSelectionStatus = "explorerSelectionStatus";  //$NON-NLS-0$
 		this.createSelection();
@@ -1195,7 +1196,8 @@ define([
 								//If the widget is maximized, as the file name is not visible, the "*" is rendered right beside the left hand action wrapper
 								item.parent.Type === "Diff" ? null : [explorer.prefix + item.parent.name + item.parent.type + "FileItemId", dirtyindicator.id], //$NON-NLS-1$ //$NON-NLS-0$ //The compare widget title where the dirty indicator can be inserted
 								//We need to attach the compare widget reference to the model. Also we need the widget to be destroy when the model is destroyed.
-								item
+								item,
+								this.explorer.standAloneOptions
 							);
 						}.bind(this), 0);
 					}

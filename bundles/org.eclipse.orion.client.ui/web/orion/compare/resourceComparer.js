@@ -158,9 +158,11 @@ exports.ResourceComparer = (function() {
 		this._compareView.getWidget().setOptions({resource: options.resource});
 		this._compareView.getWidget().setOptions({titleIds: this.options.saveLeft ? this.options.saveLeft.titleIds : null });
 		this._compareView.getWidget().setOptions({extCmdHolder: this});
-		if(!viewOptions.highlighters){
+		if(viewOptions.highlighters){
+			this._compareView.getWidget().setOptions({highlighters: viewOptions.highlighters});
+		} else {
 			this._compareView.getWidget().setOptions({highlighters: [new CompareStyler(serviceRegistry), new CompareStyler(serviceRegistry)]});
-		} 
+		}
 		if(!viewOptions.oldFile){//Create a default file option object for right side 
 			this._compareView.getWidget().setOptions({oldFile: {readonly: this._checkReadonly(options.readonlyRight)}});
 		}
@@ -425,7 +427,7 @@ exports.ResourceComparer = (function() {
 					id: "orion.compare.openComparePage", //$NON-NLS-0$
 					groupId: "orion.compareGroup", //$NON-NLS-0$
 					visibleWhen: function(item) {
-						return item.options.extCmdHolder.options.resource && !item.options.extCmdHolder.options.generateLink;
+						return item.options.extCmdHolder.options.resource && !item.options.extCmdHolder.options.generateLink && !item.options.extCmdHolder.options.standAlone;
 					},
 					hrefCallback: function(data) {
 						return data.items.options.extCmdHolder.openComparePage(data.items);
