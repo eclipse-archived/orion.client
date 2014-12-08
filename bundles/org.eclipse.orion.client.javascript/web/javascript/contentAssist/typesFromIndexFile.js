@@ -211,39 +211,72 @@ define([
 	 * @param {Object} typeInfo The computed type information
  	 */
 	function _parseObjType(type, name, typeInfo) {
-		var propInfo = {}, def;
+		var propInfo = {}, def, doc = null, url = null;
 		for (var p in type) {
 			if (hop(type, p)) {
-				if (p === "!type") {
-					def = _definitionForType(typeInfo, type[p], name);
-					if (typeUtils.isFunctionOrConstructor(def.typeObj)) {
-						propInfo.$$fntype = def.typeObj;
-						if (name) {
-							def = new typeUtils.Definition(name);
-						} else {
-							def = new typeUtils.Definition(genObjName());
-						}
-					}
-				} else if (p === "!proto") {
-					// prototype chain
-					propInfo.$$proto = _definitionForType(typeInfo, type[p]);
-				} else if (p === "!url" || p === "!stdProto" || p === "!effects" || p === "!doc") {
-					// do nothing for now
-				} else if (p[0] === '!') {
-					throw new Error("didn't handle special property " + p);
-				} else if (p === "prototype") {
-					propInfo.$$prototype = _definitionForType(typeInfo, type[p]);
-					// we set the $$newtype to be the same as the $$prototype.
-					// we need $$newtype in order to be consistent with the rest of
-					// the type system.  we don't need it to be a fresh object, since
-					// we won't add properties to it while analyzing the constructor.
-					// setting $$newtype and $$prototype to be the same avoids some
-					// issues with naming of types (since we don't need to generate some
-					// different name for $$newtype)
-					propInfo.$$newtype = propInfo.$$prototype;
-				} else {
-					propInfo[p] = _definitionForType(typeInfo, type[p]);
-				}
+			    switch (p) {
+			        case '!doc': {
+			            doc = type[p];
+			            if(def) {
+			                def.$$doc = doc;
+			            }
+			            propInfo.$$doc = doc;
+			            break;
+			        }
+			        case '!url': {
+			            url = type[p];
+			            if(def) {
+			                def.$$url = url;
+			            }
+			            propInfo.$$url = url;
+			            break;
+			        }
+			        case '!type': {
+			            def = _definitionForType(typeInfo, type[p], name);
+    					if (typeUtils.isFunctionOrConstructor(def.typeObj)) {
+    						propInfo.$$fntype = def.typeObj;
+    						if (name) {
+    							def = new typeUtils.Definition(name);
+    						} else {
+    							def = new typeUtils.Definition(genObjName());
+    						}
+    					}
+    					if(url && !def.$$utl) {
+					       def.$$url = url;
+					    }
+					    if(doc && !def.$$doc) {
+					       def.$$doc = doc;
+					    }
+			            break;
+			        }
+			        case '!proto': {
+			            propInfo.$$proto = _definitionForType(typeInfo, type[p]);
+			            break;
+			        }
+			        case 'prototype': {
+			            propInfo.$$prototype = _definitionForType(typeInfo, type[p]);
+    					// we set the $$newtype to be the same as the $$prototype.
+    					// we need $$newtype in order to be consistent with the rest of
+    					// the type system.  we don't need it to be a fresh object, since
+    					// we won't add properties to it while analyzing the constructor.
+    					// setting $$newtype and $$prototype to be the same avoids some
+    					// issues with naming of types (since we don't need to generate some
+    					// different name for $$newtype)
+    					propInfo.$$newtype = propInfo.$$prototype;
+			            break;
+			        }
+			        case '!stdProto':
+			        case '!effects': {
+			            //TODO nothing for now
+			            break;
+			        }
+			        default: {
+			            if (p[0] === '!') {
+        					throw new Error("didn't handle special property " + p);
+        				}
+			            propInfo[p] = _definitionForType(typeInfo, type[p]);
+			        }
+			    }
 			}
 		}
 		if (propInfo.$$prototype && propInfo.$$fntype && typeof type.prototype === "string") {

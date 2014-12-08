@@ -37,7 +37,6 @@ define([
 	function TemplateProvider() {
 	    //constructor
  	}
- 	
 	TemplateProvider.prototype = new mTemplates.TemplateContentAssist(JSSyntax.keywords, []);
 	
 	Objects.mixin(TemplateProvider.prototype, {
@@ -211,11 +210,10 @@ define([
 			var self = this;
 			return Deferred.all([
 				this.astManager.getAST(editorContext),
-				editorContext.getText(), // TODO Can we avoid getText() here? The AST should have all we need.
 				this._createIndexData(editorContext, params)
 			]).then(function(results) {
-				var ast = results[0], buffer = results[1];
-				return self._computeProposalsFromAST(ast, buffer, params);
+				var ast = results[0];
+				return self._computeProposalsFromAST(ast, ast.source, params);
 			});
 
 		},
@@ -636,14 +634,15 @@ define([
 						continue;
 					}
 					if (proposalUtils.looselyMatches(context.prefix, propName)) {
-						var propTypeObj = type[prop].typeObj;
+					    var def = type[prop];
+						var propTypeObj = def.typeObj;
 						// if propTypeObj is a reference to a function type, extract the actual function type
 						if ((env._allTypes[propTypeObj.name]) && (env._allTypes[propTypeObj.name].$$fntype)) {
 							propTypeObj = env._allTypes[propTypeObj.name].$$fntype;
 						}
 						if (propTypeObj.type === 'FunctionType') {
 							var res = this._calculateFunctionProposal(propName, propTypeObj, replaceStart - 1);
-							proposals["$"+propName] = {
+							var proposal = {
 								proposal: res.completion,
 								name: res.completion,
 								description: this._createProposalDescription(propTypeObj, env),
@@ -655,7 +654,7 @@ define([
 								overwrite: true
 							};
 						} else {
-							proposals["$"+propName] = {
+							proposal = {
 								proposal: propName,
 								relevance: relevance,
 								name: propName,
@@ -664,6 +663,8 @@ define([
 								overwrite: true
 							};
 						}
+						proposal.hover = this._formatProposalHover(proposal, def);
+						proposals["$"+propName] = proposal;
 					}
 				}
 			}
@@ -921,6 +922,35 @@ define([
 				}
 			}
 			return { kind : 'top', toDefer : toDefer };
+		},
+
+		/**
+		 * @description Computes the hover for the given proposal and type definition element. Returns null
+		 * if one cannot be computed.
+		 * @function
+		 * @private
+		 * @param {Object} proposal The computed proposal to format 
+		 * @param {Object} definition The definition for the type the proposal is for 
+		 * @returns {String | null} Returns the computed hover infos for the given proposal or null
+		 * @since 8.0
+		 */
+		_formatProposalHover: function _formatProposalHover(proposal, definition) {
+            if(proposal && definition) {
+                var obj = Object.create(null);
+                obj.type = 'markdown';
+                var hover = '';
+                if(!definition.$$doc) {
+                    hover += proposal.name;
+                } else {
+                    hover += definition.$$doc;
+                }
+                if(definition.$$url) {
+                    hover += '\n\n[Online documentation]('+definition.$$url+')';
+                }
+                obj.hover = hover;
+                return obj;
+            }		    
+            return null;
 		}
 	});
 	
