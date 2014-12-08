@@ -17,10 +17,12 @@ define({
 	'cssHover' : 'CSS Hover', //$NON-NLS-0$  //$NON-NLS-1$
 	'csslintValidator' : 'CSS Validator', //$NON-NLS-0$  //$NON-NLS-1$
 	
+	// Validator Severities
 	'ignore' : 'Ignore', //$NON-NLS-0$  //$NON-NLS-1$
 	'warning' : 'Warning', //$NON-NLS-0$  //$NON-NLS-1$
 	'error' : 'Error', //$NON-NLS-0$  //$NON-NLS-1$
 	
+	// CSS Validator Settings
 	'adjoining-classes': 'Disallow adjoining classes:', //$NON-NLS-0$  //$NON-NLS-1$
 	'box-model': 'Beware of broken box size:', //$NON-NLS-0$  //$NON-NLS-1$
 	'box-sizing': 'Disallow use of box-sizing:', //$NON-NLS-0$  //$NON-NLS-1$
@@ -54,5 +56,9 @@ define({
 	'universal-selector': 'Disallow universal selector:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unqualified-attributes': 'Disallow unqualified attribute selectors:', //$NON-NLS-0$  //$NON-NLS-1$
 	'vendor-prefix': 'Require standard property with vendor prefix:', //$NON-NLS-0$  //$NON-NLS-1$
-	'zero-units': 'Disallow units for 0 values:' //$NON-NLS-0$  //$NON-NLS-1$
+	'zero-units': 'Disallow units for 0 values:', //$NON-NLS-0$  //$NON-NLS-1$
+	
+	// CSS Quick Fixes
+	'quickfix-zero-units': 'Remove \'px\' qualifier.' //$NON-NLS-0$  //$NON-NLS-1$
+	
 });

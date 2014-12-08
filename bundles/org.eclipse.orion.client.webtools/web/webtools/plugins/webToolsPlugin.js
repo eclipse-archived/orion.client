@@ -18,8 +18,10 @@ define(['orion/plugin',
 'webtools/cssValidator',
 'webtools/cssOutliner',
 'webtools/cssHover',
-'orion/editor/stylers/text_css/syntax'
-], function(PluginProvider, htmlContentAssist, htmlOutliner, mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, mCSS) {
+'webtools/cssQuickFixes',
+'orion/editor/stylers/text_css/syntax',
+'orion/util'
+], function(PluginProvider, htmlContentAssist, htmlOutliner, mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, mCSS, Util) {
 	/**
 	 * Plug-in headers
 	 */
@@ -122,6 +124,27 @@ define(['orion/plugin',
 //		    name: 'cssHover',	//$NON-NLS-0$
 //			contentType: ["text/css"]	//$NON-NLS-0$
 //	});
+//	
+	/**
+	 * Register quick fixes as editor commands
+	 */
+	var cssQuickFixComputer = new cssQuickFixes.CssQuickFixes();
+		
+	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+			cssQuickFixComputer, 
+			{
+		nameKey : 'quickfix-zero-units',  //$NON-NLS-0$
+		scopeId: "orion.edit.quickfix",
+		id : "quickfix-zero-units",  //$NON-NLS-0$
+		nls: 'webtools/nls/messages',  //$NON-NLS-0$
+		key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+		contentType: ['text/css'],  //$NON-NLS-0$
+		validationProperties: [
+		                       {source: "annotation:id", match: "zero-units"} //$NON-NLS-1$ //$NON-NLS-0$
+		                       ]
+			}
+	);
+	
 	
     /**
 	 * CSSLint settings
