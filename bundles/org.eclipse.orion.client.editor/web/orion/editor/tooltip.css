@@ -49,6 +49,8 @@
 	background-color: transparent !important;
 }
 
-.textviewTooltip .dropdownCommandName {
+.textviewTooltip .commandButton {
+	border: 0;
+	background-color: inherit;
 	color: #3333CC;
 }

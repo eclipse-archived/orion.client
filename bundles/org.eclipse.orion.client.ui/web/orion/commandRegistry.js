@@ -998,7 +998,7 @@ define([
 								id = renderType + command.id + index; //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item
 								var commandDiv = document.createElement("div"); //$NON-NLS-0$
 								parent.appendChild(commandDiv);
-								element = Commands.createCommandMenuItem(commandDiv, command, invocation, null, onClick);
+								element = Commands.createCommandItem(commandDiv, command, invocation, id, null, renderType === "button", onClick); //$NON-NLS-0$
 							} else {
 								id = renderType + command.id + index;  //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item
 								element = Commands.createCommandItem(parent, command, invocation, id, null, renderType === "tool", onClick); //$NON-NLS-0$
