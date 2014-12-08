@@ -216,7 +216,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		isDeactivatingChange: function(/**orion.editor.ModelChangingEvent*/ event, selectionEvent) {
 			var isDeactivating = false;
 			
-			var isPriorToInitialCaretOffset = selectionEvent.newValue.start < this._initialCaretOffset;
+			var selections = Array.isArray(selectionEvent.newValue) ? selectionEvent.newValue : [selectionEvent.newValue];
+			var isPriorToInitialCaretOffset = selections[0].start < this._initialCaretOffset;
 			
 			if (isPriorToInitialCaretOffset || !event) {
 				isDeactivating = true;

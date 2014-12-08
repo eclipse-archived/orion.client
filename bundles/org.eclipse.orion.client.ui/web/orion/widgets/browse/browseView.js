@@ -398,12 +398,11 @@ define([
 							var shareCodeTrigger = lib.node("orion.browse.shareCodeTrigger"); //$NON-NLS-0$
 							if(shareCodeTrigger) {
 								textView.addEventListener("Selection", this._editorViewSelectionChangedListener = function(evt){ //$NON-NLS-0$
-									if(evt.newValue){
-										if(evt.newValue.start !== evt.newValue.end){
-											shareCodeTrigger.style.display = "";
-										} else {
-											shareCodeTrigger.style.display = "none";
-										}
+									var selections = Array.isArray(evt.newValue) ? evt.newValue : [evt.newValue];
+									if(selections.length === 1 && !selections[0].isEmpty()){
+										shareCodeTrigger.style.display = "";
+									} else {
+										shareCodeTrigger.style.display = "none";
 									}
 								}.bind(this)); 
 							}

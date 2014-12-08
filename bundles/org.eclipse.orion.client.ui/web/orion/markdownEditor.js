@@ -1420,7 +1420,8 @@ define([
 
 		this._sourceSelectionListener = function(e) {
 			var model = this._editorView.editor.getTextView().getModel();
-			var selectionIndex = model.mapOffset(e.newValue.start);
+			var selection = Array.isArray(e.newValue) ? e.newValue[0] : e.newValue;
+			var selectionIndex = model.mapOffset(selection.start);
 			var block = this._styler.getBlockAtIndex(selectionIndex);
 
 			var element = this._stylerAdapter.getElementByIdentifier(block.elementId);
@@ -1450,7 +1451,7 @@ define([
 			 * event listener will take care of this.
 			 */
 			var textView = this._editorView.editor.getTextView();
-			var lineIndex = textView.getLineAtOffset(e.newValue.start);
+			var lineIndex = textView.getLineAtOffset(selection.start);
 			var topIndex = textView.getTopIndex(true);
 			var bottomIndex = textView.getBottomIndex(true);
 			if (!(topIndex <= lineIndex && lineIndex <= bottomIndex)) {

@@ -65,16 +65,9 @@ define("orion/editor/textDND", ['orion/util'], function(util) { //$NON-NLS-1$ //
 		},
 		_onDragStart: function(e) {
 			var view = this._view;
-			var selection = view.getSelection();
-			var model = view.getModel();
-			if (model.getBaseModel) {
-				selection.start = model.mapOffset(selection.start);
-				selection.end = model.mapOffset(selection.end);
-				model = model.getBaseModel();
-			}
-			var text = model.getText(selection.start, selection.end);
+			var text = view.getSelectionText();
 			if (text) {
-				this._dragSelection = selection;
+				this._dragSelection = view.getSelections();
 				e.event.dataTransfer.effectAllowed = "copyMove"; //$NON-NLS-0$
 				e.event.dataTransfer.setData("Text", text); //$NON-NLS-0$
 			}
@@ -91,17 +84,19 @@ define("orion/editor/textDND", ['orion/util'], function(util) { //$NON-NLS-1$ //
 				if (this._undoStack) { this._undoStack.startCompoundChange(); }
 				var move = dropEffect === "move"; //$NON-NLS-0$
 				if (move) {
-					view.setText("", this._dragSelection.start, this._dragSelection.end);
+					view.setText({text: "", selection: this._dragSelection});
 				}
 				if (this._dropText) {
 					var text = this._dropText;
 					var offset = this._dropOffset;
 					if (move) {
-						if (offset >= this._dragSelection.end) {
-							offset -= this._dragSelection.end - this._dragSelection.start;
-						} else if (offset >= this._dragSelection.start) {
-							offset = this._dragSelection.start;
-						}
+						this._dragSelection.forEach(function(selection) {
+							if (offset >= selection.end) {
+								offset -= selection.end - selection.start;
+							} else if (offset >= selection.start) {
+								offset = selection.start;
+							}
+						});
 					}
 					view.setText(text, offset, offset);
 					view.setSelection(offset, offset + text.length);
@@ -109,8 +104,8 @@ define("orion/editor/textDND", ['orion/util'], function(util) { //$NON-NLS-1$ //
 					this._dropOffset = -1;
 				}
 				if (this._undoStack) { this._undoStack.endCompoundChange(); }
+				this._dragSelection = null;
 			}
-			this._dragSelection = null;
 		},
 		_onDragEnter: function(e) {
 			this._onDragOver(e);

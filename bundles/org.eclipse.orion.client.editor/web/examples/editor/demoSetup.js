@@ -110,6 +110,7 @@ define([
 		/* Undo stack */
 		var undoStack = exports.undoStack = new mUndoStack.UndoStack(view, 200);
 		exports.textDND = new mTextDND.TextDND(view, undoStack);
+		view.setOptions({undoStack: undoStack});
 		view.setAction("undo", function() { //$NON-NLS-0$
 			undoStack.undo();
 			return true;

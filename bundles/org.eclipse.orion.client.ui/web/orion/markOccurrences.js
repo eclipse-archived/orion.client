@@ -84,8 +84,13 @@ define([
 				occurrenceTimer = window.setTimeout(function() {
 					occurrenceTimer = null;
 					var editor = self.editor;
+					var selections = editor.getSelections();
+					if (selections.length > 1) {
+						self.editor.showOccurrences([]);
+						return;
+					}
 					var context = {
-						selection: editor.getSelection(),
+						selection: selections[0],
 						contentType: self.inputManager.getContentType().id
 					};
 					occurrencesService.computeOccurrences(EditorContext.getEditorContext(self.registry), context).then(function (occurrences) {

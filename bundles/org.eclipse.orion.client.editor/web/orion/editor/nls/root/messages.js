@@ -76,6 +76,7 @@ define({
 	"tab": "Insert Tab", //$NON-NLS-1$ //$NON-NLS-0$
 	"enter": "Insert Line Delimiter", //$NON-NLS-1$ //$NON-NLS-0$
 	"enterNoCursor": "Insert Line Delimiter", //$NON-NLS-1$ //$NON-NLS-0$
+	"escape": "Escape", //$NON-NLS-1$ //$NON-NLS-0$
 	"selectAll": "Select All", //$NON-NLS-1$ //$NON-NLS-0$
 	"copy": "Copy", //$NON-NLS-1$ //$NON-NLS-0$
 	"cut": "Cut", //$NON-NLS-1$ //$NON-NLS-0$
@@ -138,7 +139,8 @@ define({
 	"linkedModeExited": "Linked Mode exited", //$NON-NLS-1$ //$NON-NLS-0$
 	"syntaxError": "Syntax Error", //$NON-NLS-1$ //$NON-NLS-0$
 	"contentAssist": "Content Assist", //$NON-NLS-1$ //$NON-NLS-0$
-	"lineColumn": "Line ${0} : Col ${1}", //$NON-NLS-1$ //$NON-NLS-0$
+	"lineColumn": "Line ${0} : Column ${1}", //$NON-NLS-1$ //$NON-NLS-0$
+	"multiSelections": "${0} selection regions", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	//vi
 	"vi": "vi", //$NON-NLS-1$ //$NON-NLS-0$

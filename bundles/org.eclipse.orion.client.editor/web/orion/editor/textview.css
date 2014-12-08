@@ -6,6 +6,22 @@
 	min-height: 50px;
 }
 
+.textviewSelection {
+	background: rgb(180, 213, 255);
+}
+.textview ::-moz-selection {
+	background: rgb(180, 213, 255);
+}
+.textview ::selection {
+	background: rgb(180, 213, 255);
+}
+.textviewSelectionUnfocused {
+	background: lightgray;
+}
+.textviewSelectionCaret {
+	background: black;
+}
+
 .textviewScroll {
 	padding: 4px 2px 4px 2px;
 }

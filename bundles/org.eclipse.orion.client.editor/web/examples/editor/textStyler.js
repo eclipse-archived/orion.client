@@ -553,10 +553,15 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 			if (this.highlightCaretLine) {
 				var view = this.view;
 				var model = view.getModel();
-				var selection = view.getSelection();
-				if (selection.start === selection.end && model.getLineAtOffset(selection.start) === lineIndex) {
-					return caretLineStyle;
-				}
+				var selections = view.getSelections();
+				var hasCaret = false;
+				if (!selections.some(function(selection) {
+					if (selection.start === selection.end) {
+						hasCaret = hasCaret || model.getLineAtOffset(selection.start) === lineIndex;
+						return false;
+					}
+					return true;
+				}) && hasCaret) return caretLineStyle;
 			}
 			return null;
 		},
@@ -899,28 +904,40 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 			e.ranges = this._getStyles(e.textView.getModel(), e.lineText, e.lineStart);
 		},
 		_onSelection: function(e) {
-			var oldSelection = e.oldValue;
-			var newSelection = e.newValue;
+			var oldSelections = Array.isArray(e.oldValue) ? e.oldValue : [e.oldValue];
+			var newSelections = Array.isArray(e.newValue) ? e.newValue : [e.newValue];
 			var view = this.view;
 			var model = view.getModel();
 			var lineIndex;
 			if (this.highlightCaretLine) {
-				var oldLineIndex = model.getLineAtOffset(oldSelection.start);
-				lineIndex = model.getLineAtOffset(newSelection.start);
-				var newEmpty = newSelection.start === newSelection.end;
-				var oldEmpty = oldSelection.start === oldSelection.end;
-				if (!(oldLineIndex === lineIndex && oldEmpty && newEmpty)) {
-					if (oldEmpty) {
-						view.redrawLines(oldLineIndex, oldLineIndex + 1);
-					}
-					if ((oldLineIndex !== lineIndex || !oldEmpty) && newEmpty) {
-						view.redrawLines(lineIndex, lineIndex + 1);
+				function getHighlightLines(selections) {
+					var lines = {};
+					if (selections.some(function(selection) {
+						if (selection.isEmpty()) {
+							lines[model.getLineAtOffset(selection.start).toString()] = true;
+						} else {
+							return true;
+						}
+						return false;
+					})) return {};
+					return lines;
+				}
+				var oldLines = getHighlightLines(oldSelections);
+				var newLines = getHighlightLines(newSelections);
+				function redraw(o, n) {
+					for (var p in o) {
+						if (!n[p]) {
+							lineIndex = p >> 0;
+							view.redrawLines(lineIndex, lineIndex + 1);
+						}
 					}
 				}
+				redraw(oldLines, newLines);
+				redraw(newLines, oldLines);
 			}
 			if (!this.annotationModel) { return; }
 			var remove = this._bracketAnnotations, add, caret;
-			if (newSelection.start === newSelection.end && (caret = view.getCaretOffset()) > 0) {
+			if (newSelections.length === 1 && newSelections[0].isEmpty() && (caret = newSelections[0].getCaret()) > 0) {
 				var mapCaret = caret - 1;
 				if (model.getBaseModel) {
 					mapCaret = model.mapOffset(mapCaret);
