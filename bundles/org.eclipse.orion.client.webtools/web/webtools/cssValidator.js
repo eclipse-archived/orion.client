@@ -135,6 +135,7 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 				var message = messages[i];
 				if (message.line) {
 					var problem = {
+						id: this._getProblemId(message),
 						description: message.message,
 						line: message.line,
 						start: message.col,
@@ -145,6 +146,21 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 				}
 			}
 			return {problems: problems};
+		},
+		
+		/**
+		 * @description Computes the problem id to use in the framework from the cssLint message
+		 * @param {Object} message The original CSSLint problem message
+		 * @returns {String} The problem id to pass into the framework
+		 * @since 8.0
+		 */
+		_getProblemId: function(message) {
+		    if(message.rule) {
+		        if(message.rule.id) {
+		            return message.rule.id;
+		        }
+		    }
+		    return null;
 		},
 		
 		/**
