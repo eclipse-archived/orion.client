@@ -67,8 +67,9 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
 		type: "link", //$NON-NLS-0$
 		values: []
 	};
-	for (var i=0; i<10; i++) {
-		widths.values.push(i.toString());
+	widths.values.push('0'); //$NON-NLS-0$
+	for (var i=1; i<10; i++) {
+		widths.values.push(i.toString() + 'px'); //$NON-NLS-0$
 	}
 	var colorValues = {
 		type: "link", //$NON-NLS-0$
@@ -183,7 +184,7 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
 		{
 			prefix: "outline", //$NON-NLS-0$
 			description: "outline - outline style",
-			template: "outline: ${color:" + fromJSON(colorValues) + "} ${style:" + fromJSON(borderStyles) + "} ${width:" + fromJSON(widths) + "}px;" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			template: "outline: ${color:" + fromJSON(colorValues) + "} ${style:" + fromJSON(borderStyles) + "} ${width:" + fromJSON(widths) + "};" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		{
 			prefix: "background-image", //$NON-NLS-0$
@@ -281,7 +282,7 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
 		templates.push({
 			prefix: prop, //$NON-NLS-0$
 			description: prop + " - " + prop + " style",
-			template: prop + ": ${width:" + fromJSON(widths) + "}px ${style:" + fromJSON(borderStyles) + "} ${color:" + fromJSON(colorValues) + "};" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			template: prop + ": ${width:" + fromJSON(widths) + "} ${style:" + fromJSON(borderStyles) + "} ${color:" + fromJSON(colorValues) + "};" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		});
 	}
 
