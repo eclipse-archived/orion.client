@@ -219,16 +219,16 @@ define([
 		},
 		
 		_checkLaunchConfigurationStatus: function(launchConfiguration) {
-			if (launchConfiguration.status) {
-				// display old status while we check for the current one
-				// skip the error Retry case
-				this.setStatus(launchConfiguration.status);
-			}
+			var progressMessage = i18nUtil.formatMessage(messages["checkingStateMessage"], launchConfiguration.Name); //$NON-NLS-0$
+			
+			this.setStatus({
+				State: "PROGRESS", //$NON-NLS-0$
+				Message: progressMessage
+			});
 			
 			// update status
 			this._projectClient.getProjectDelpoyService(launchConfiguration.ServiceId, launchConfiguration.Type).then(function(service){
 				if(service && service.getState){
-					var progressMessage = i18nUtil.formatMessage(messages["checkingStateMessage"], launchConfiguration.Name); //$NON-NLS-0$
 					this._progressService.progress(service.getState(launchConfiguration.Params), progressMessage).then(function(result){
 						launchConfiguration.status = result;
 						this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
@@ -250,33 +250,40 @@ define([
 		},
 		
 		setStatus: function(status) {
+			// turn status light off
+			this._statusLight.classList.remove("statusLightGreen"); //$NON-NLS-0$
+			this._statusLight.classList.remove("statusLightRed"); //$NON-NLS-0$
+			this._statusLight.classList.remove("statusLightProgress"); //$NON-NLS-0$
+			
 			if (status.error) {
 				if (status.error.Retry) {
-					this.turnStatusLightOff();
-					this._setStatusTitles(null);
+					this._setStatusTitle(null);
 				} else {
-					this.turnStatusLightRed();
-					this._setStatusTitles(status.error.Message);
+					this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
+					this._setStatusTitle(status.error.Message);
 				}
 			} else {
 				switch (status.State) {
 					case "PROGRESS": //$NON-NLS-0$
-						break; //do nothing
+						this._statusLight.classList.add("statusLightProgress"); //$NON-NLS-0$
+						break;
 					case "STARTED": //$NON-NLS-0$
-						this.turnStatusLightGreen();
+						this._statusLight.classList.add("statusLightGreen"); //$NON-NLS-0$
+						this._convertPlayButtonToRestartButton();
 						break;
 					case "STOPPED": //$NON-NLS-0$
-						this.turnStatusLightRed();
+						this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
+						this._restorePlayButton();
 						break;
 					default:
-						this.turnStatusLightOff();
+						this._restorePlayButton();
 						break;
 				}
-				this._setStatusTitles(status.Message);
+				this._setStatusTitle(status.Message);
 			}
 		},
 		
-		_setStatusTitles: function(title) {
+		_setStatusTitle: function(title) {
 			this._statusLight.title = title || ""; //$NON-NLS-0$
 		},
 		
@@ -316,22 +323,7 @@ define([
 			var hash = this._getHash(launchConfiguration);
 			delete this._cachedLaunchConfigurations[hash];
 		},
-	
-		turnStatusLightRed: function() {
-			this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
-			this._statusLight.classList.remove("statusLightGreen"); //$NON-NLS-0$
-		},
-	
-		turnStatusLightGreen: function() {
-			this._statusLight.classList.add("statusLightGreen"); //$NON-NLS-0$
-			this._statusLight.classList.remove("statusLightRed"); //$NON-NLS-0$
-		},
-		
-		turnStatusLightOff: function() {
-			this._statusLight.classList.remove("statusLightGreen"); //$NON-NLS-0$
-			this._statusLight.classList.remove("statusLightRed"); //$NON-NLS-0$
-		},
-		
+
 		_playButtonListener: function() {
 			if (this._isEnabled(this._playButton)) {
 				// TODO check if app is already running and confirm with user if they want to restart it
@@ -361,6 +353,14 @@ define([
 		
 		_isEnabled: function(domNode) {
 			return !domNode.classList.contains("disabled"); //$NON-NLS-0$
+		},
+		
+		_convertPlayButtonToRestartButton: function() {
+			this._playButton.classList.add("restartAppButton"); //$NON-NLS-0$
+		},
+		
+		_restorePlayButton: function() {
+			this._playButton.classList.remove("restartAppButton"); //$NON-NLS-0$
 		}
 		
 	});

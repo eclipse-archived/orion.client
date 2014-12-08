@@ -92,11 +92,12 @@
 
 .statusLight {
 	background: gray;
-	border-radius: 50%;
+	border: 2px solid transparent;
+	border-radius: 100%;
 	display: inline-block;
-	height: 12px;
+	height: 8px;
 	margin-right: 5px;
-	width: 12px;
+	width: 8px;
 	transition: background 0.2s ease, opacity 0.3s ease;
 	vertical-align: bottom;
 }
@@ -109,6 +110,18 @@
 	background: red;
 }
 
+.statusLight.statusLightProgress {
+	background: none;
+	border-color: gray;
+	border-top-color: transparent;
+	
+	-webkit-animation: rotate 1s infinite linear;
+	-moz-animation: rotate 1s infinite linear;
+	-ms-animation: rotate 1s infinite linear;
+	-o-animation: rotate 1s infinite linear;
+	animation: rotate 1s infinite linear;
+}
+
 .runBarSeparator {
 	background: #ccc;
 	display: inline-block;
@@ -118,3 +131,6 @@
     width: 1px;
 }
 
+.playButton.restartAppButton:before {
+	content: '\21ba'; /* Unicode - Circular Arrow, This is temporary until we have an icon */
+}
