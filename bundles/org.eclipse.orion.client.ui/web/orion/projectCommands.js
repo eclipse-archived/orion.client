@@ -204,10 +204,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 	 * @param context.commandService
 	 */
 	function runDeploy(enhansedLaunchConf, context){
-		if(sharedLaunchConfigurationDispatcher && context.launchConfiguration){
-			context.launchConfiguration.status = {State: "PROGRESS"};
-			sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration });
-		}
 		if(context.deployService.getDeployProgressMessage){
 			context.projectClient.formPluginLaunchConfiguration(enhansedLaunchConf).then(function(pluginLaunchConf){
 				context.deployService.getDeployProgressMessage(context.project, pluginLaunchConf).then(function(message){
@@ -221,6 +217,11 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		}
 
 		function deploy(progressMessage){
+			if(sharedLaunchConfigurationDispatcher && context.launchConfiguration){
+				context.launchConfiguration.status = {State: "PROGRESS", Message: progressMessage};
+				sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration });
+			}
+			
 			context.projectClient.formPluginLaunchConfiguration(enhansedLaunchConf).then(function(pluginLaunchConf){
 				progress.showWhile(context.deployService.deploy(context.project, pluginLaunchConf), progressMessage, true).then(function(result){
 					if(!result){
