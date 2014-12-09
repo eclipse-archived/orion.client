@@ -341,12 +341,13 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 				/* figure out which deployment plan & wizard to use */
 				var relativeFilePath = new URL(project.ContentLocation + appPath).href;
 				var orionHomeUrl = new URL(PageLinks.getOrionHome());
-
+				
 				if (relativeFilePath.indexOf(orionHomeUrl.origin) === 0) relativeFilePath = relativeFilePath.substring(orionHomeUrl.origin.length);
-				if (relativeFilePath.indexOf(orionHomeUrl.pathname) === 0) relativeFilePath = relativeFilePath.substring(orionHomeUrl.pathname.length);
 
 				this._getDeploymentPaths(project, relativeFilePath, appPath).then(function(paths){
 
+					if (relativeFilePath.indexOf(orionHomeUrl.pathname) === 0) relativeFilePath = relativeFilePath.substring(orionHomeUrl.pathname.length);
+					
 					/* update paths according to the current policy */
 					var path = paths.path;
 					appPath = paths.appPath;
