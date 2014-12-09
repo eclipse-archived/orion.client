@@ -162,8 +162,9 @@ define([
 				this._menuItemsCache = []; // clear launch configurations menu items cache
 				
 				if(event.type === "create" && newConfig){ //$NON-NLS-0$
-					// cache new launch config
+					// cache and select new launch config
 					this._putInLaunchConfigurationsCache(newConfig);
+					this.selectLaunchConfiguration(newConfig);
 				} else if(event.type === "delete"){ //$NON-NLS-0$
 					var deletedFile = event.oldValue.File;
 					
