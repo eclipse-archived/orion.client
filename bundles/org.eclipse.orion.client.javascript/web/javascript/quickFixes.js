@@ -135,7 +135,7 @@ define([
             for(var i = 0; i < list.length; i++) {
                 var p = list[i];
                 if(item.range[0] === p.range[0] && item.range[1] === p.range[1]) {
-                    return i
+                    return i;
                 }
             }
         }

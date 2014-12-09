@@ -1066,7 +1066,7 @@ define([
 		    if(ast && (typeof name !== 'undefined')) {
 		        var len = ast.comments.length;
 		        for(var i = 0; i < len; i++) {
-		            var match = /^(eslint-\w+|eslint|globals?)(\s|$)/.exec(ast.comments[i].value);
+		            var match = /^\s*(eslint-\w+|eslint|globals?)(\s|$)/.exec(ast.comments[i].value);
 		            if(match != null && typeof match !== 'undefined' && match[1] === name) {
 		                return ast.comments[i];
 		            }

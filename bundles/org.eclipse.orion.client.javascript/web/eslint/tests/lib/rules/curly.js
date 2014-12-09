@@ -30,7 +30,6 @@ define([
 			assert.equal(messages[0].ruleId, RULE_ID);
 			assert.equal(messages[0].message, "Statement should be enclosed in braces.");
 			assert.equal(messages[0].node.type, "VariableDeclaration");
-			assert.equal(messages[0].related.type, "Keyword");
 		});
 		it("should flag else", function() {
 			var topic = "if (a != b) {} else var i = 1;";
@@ -43,7 +42,6 @@ define([
 			assert.equal(messages[0].ruleId, RULE_ID);
 			assert.equal(messages[0].message, "Statement should be enclosed in braces.");
 			assert.equal(messages[0].node.type, "VariableDeclaration");
-			assert.equal(messages[0].related.type, "Keyword");
 		});
 		it("should flag while", function() {
 			var topic = "while(true) var i = 1;";
@@ -56,7 +54,6 @@ define([
 			assert.equal(messages[0].ruleId, RULE_ID);
 			assert.equal(messages[0].message, "Statement should be enclosed in braces.");
 			assert.equal(messages[0].node.type, "VariableDeclaration");
-			assert.equal(messages[0].related.type, "Keyword");
 		});
 		it("should flag for", function() {
 			var topic = "for(true;;) var i = 1;";
@@ -69,7 +66,6 @@ define([
 			assert.equal(messages[0].ruleId, RULE_ID);
 			assert.equal(messages[0].message, "Statement should be enclosed in braces.");
 			assert.equal(messages[0].node.type, "VariableDeclaration");
-			assert.equal(messages[0].related.type, "Keyword");
 		});
 		it("should flag for-in", function() {
 			var topic = "var o = {}; for(var p in o) var i = 1;";
@@ -82,7 +78,48 @@ define([
 			assert.equal(messages[0].ruleId, RULE_ID);
 			assert.equal(messages[0].message, "Statement should be enclosed in braces.");
 			assert.equal(messages[0].node.type, "VariableDeclaration");
-			assert.equal(messages[0].related.type, "Keyword");
+		});
+		it("should flag with", function() {
+			var topic = "with(f) var i = 1;";
+	
+			var config = { rules: {} };
+			config.rules[RULE_ID] = 1;
+	
+			var messages = eslint.verify(topic, config);
+			assert.equal(messages.length, 1);
+			assert.equal(messages[0].ruleId, RULE_ID);
+			assert.equal(messages[0].message, "Statement should be enclosed in braces.");
+			assert.equal(messages[0].node.type, "VariableDeclaration");
+		});
+		it("should flag do-while", function() {
+			var topic = "do var i = 1; while(true)";
+	
+			var config = { rules: {} };
+			config.rules[RULE_ID] = 1;
+	
+			var messages = eslint.verify(topic, config);
+			assert.equal(messages.length, 1);
+			assert.equal(messages[0].ruleId, RULE_ID);
+			assert.equal(messages[0].message, "Statement should be enclosed in braces.");
+			assert.equal(messages[0].node.type, "VariableDeclaration");
+		});
+		it("should not flag with with block", function() {
+			var topic = "with(f) {var i = 1;}";
+	
+			var config = { rules: {} };
+			config.rules[RULE_ID] = 1;
+	
+			var messages = eslint.verify(topic, config);
+			assert.equal(messages.length, 0);
+		});
+		it("should not flag do-while with block", function() {
+			var topic = "do {var i = 1;} while(true)";
+	
+			var config = { rules: {} };
+			config.rules[RULE_ID] = 1;
+	
+			var messages = eslint.verify(topic, config);
+			assert.equal(messages.length, 0);
 		});
 		it("should not flag if with block", function() {
 			var topic = "if (a != null) {var i = 1;}";

@@ -28,19 +28,28 @@ define([
         		 */
         		function checkBlock(node) {
         			try {
-        				if(node.type === 'IfStatement') {
-        					if(node.consequent && node.consequent.type !== 'BlockStatement') {
-        						//flag the first token of the statement that should be in the block
-        						context.report(node.consequent, "Statement should be enclosed in braces.", null, context.getTokens(node.consequent)[0]);
-        					}
-        					if(node.alternate && node.alternate.type !== 'BlockStatement' && node.alternate.type !== 'IfStatement') {
-        						//flag the first token of the statement that should be in the block
-        						context.report(node.alternate, "Statement should be enclosed in braces.", null, context.getTokens(node.alternate)[0]);
-        					}
-        				} else if(node.type === 'WhileStatement' || node.type === 'ForStatement' || node.type === 'ForInStatement') {
-        					if(node.body && node.body.type !== 'BlockStatement') {
-        						//flag the first token of the statement that should be in the block
-        						context.report(node.body, "Statement should be enclosed in braces.", null, context.getTokens(node.body)[0]);
+        			    switch(node.type) {
+        			        case 'IfStatement': {
+            					if(node.consequent && node.consequent.type !== 'BlockStatement') {
+            						//flag the first token of the statement that should be in the block
+            						context.report(node.consequent, "Statement should be enclosed in braces.", null /*, context.getTokens(node.consequent)[0]*/);
+            					}
+            					if(node.alternate && node.alternate.type !== 'BlockStatement' && node.alternate.type !== 'IfStatement') {
+            						//flag the first token of the statement that should be in the block
+            						context.report(node.alternate, "Statement should be enclosed in braces.", null /*, context.getTokens(node.alternate)[0]*/);
+            					}
+            					break;
+        				    }
+        				    case 'DoWhileStatement':
+        				    case 'WhileStatement':
+        				    case 'WithStatement':
+        				    case 'ForStatement': 
+                            case 'ForInStatement': {
+            					if(node.body && node.body.type !== 'BlockStatement') {
+            						//flag the first token of the statement that should be in the block
+            						context.report(node.body, "Statement should be enclosed in braces.", null /*, context.getTokens(node.body)[0]*/);
+            					}
+            					break;
         					}
         				}
         			}
@@ -53,7 +62,9 @@ define([
         			'IfStatement' : checkBlock,
         			'WhileStatement' : checkBlock,
         			'ForStatement' : checkBlock,
-        			'ForInStatement' : checkBlock
+        			'ForInStatement' : checkBlock,
+        			'WithStatement': checkBlock,
+        			'DoWhileStatement': checkBlock
         		};
         	}
         },
