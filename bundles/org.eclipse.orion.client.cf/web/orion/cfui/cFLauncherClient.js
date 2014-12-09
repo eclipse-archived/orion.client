@@ -107,7 +107,7 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Base64', 'orion
 			},
 
 			getApp: function(url, password) {
-				if (!url.endsWith("/"))
+				if (url.charAt(url.length-1) !== "/")
 					url += "/";
 				url += "launcher/apps/target";
 				
@@ -115,7 +115,7 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Base64', 'orion
 			},
 
 			startApp: function(url, password) {
-				if (!url.endsWith("/"))
+				if (url.charAt(url.length-1) !== "/")
 					url += "/";
 				url += "launcher/apps/target";
 				var startReq = {
@@ -126,7 +126,7 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Base64', 'orion
 			},
 			
 			stopApp: function(url, password) {
-				if (!url.endsWith("/"))
+				if (url.charAt(url.length-1) !== "/")
 					url += "/";
 				url += "launcher/apps/target";
 				var startReq = {
