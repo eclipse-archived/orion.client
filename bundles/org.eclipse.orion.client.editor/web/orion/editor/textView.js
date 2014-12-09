@@ -147,7 +147,11 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				index = lf + 1;
 			}
 			addTextFunc(text.substring(start, end));
-			addDelimiterFunc();
+			if (addDelimiterFunc) {
+				addDelimiterFunc();
+			} else {
+				if (index === length) addTextFunc("");
+			}
 		}
 	}
 	/** @private */
@@ -5151,7 +5155,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					}
 					var selections = self._getSelections();
 					var delimiter = self._singleMode ? "" : self._model.getLineDelimiter();
-					self._doContent(selections.length === text.length ? text : text.join(delimiter));
+					self._doContent(selections.length > 1 && selections.length === text.length ? text : text.join(delimiter));
 				}
 			});
 			return result !== null;
@@ -5967,7 +5971,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			}
 			function convert(wholeText) {
 				var clipboadText = [];
-				convertDelimiter(wholeText, function(t) {clipboadText.push(t);}, function() {});
+				convertDelimiter(wholeText, function(t) {clipboadText.push(t);}, null);
 				if (handler) { handler(clipboadText); }
 				return clipboadText;
 			}
