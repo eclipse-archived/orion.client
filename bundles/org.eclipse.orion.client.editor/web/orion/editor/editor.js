@@ -804,35 +804,45 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					self._listener.onMouseMove(e);
 				},
 				onMouseMove: function(e) {
-					var tooltip = mTooltip.Tooltip.getTooltip(textView);
 					if (!tooltip) { return; }
-					if (self._listener.lastMouseX === e.event.clientX && self._listener.lastMouseY === e.event.clientY) {
-						return;
-					}
+					
 					self._listener.lastMouseX = e.event.clientX;
 					self._listener.lastMouseY = e.event.clientY;
-					tooltip.setTarget({
-						x: e.x,
-						y: e.y,
-						getTooltipInfo: function() {
-							return self._getTooltipInfo(this.x, this.y);
-						}
-					});
+					if (tooltip.OKToHide(e.event.clientX, e.event.clientY))	{
+						tooltip.hide();
+					}		
+					if (self._hoverTimeout) {
+						window.clearTimeout(self._hoverTimeout);
+						self._hoverTimeout = null;
+					}
+					self._hoverTimeout = window.setTimeout(function() {
+						self._hoverTimeout = null;
+						if (!tooltip.OKToHover(self._listener.lastMouseX)) { return; }
+						tooltip.show({
+							clientX: self._listener.lastMouseX,
+							clientY: self._listener.lastMouseY,
+							x: e.x,							
+							y: e.y,							
+							getTooltipInfo: function() {
+								return self._getTooltipInfo(this.x, this.y);
+							}
+						});
+					}, 100);
 				},
 				onMouseOut: function(e) {
-					var tooltip = mTooltip.Tooltip.getTooltip(textView);
-					if (!tooltip) { return; }
-					if (self._listener.lastMouseX === e.event.clientX && self._listener.lastMouseY === e.event.clientY) {
-						return;
-					}
-					self._listener.lastMouseX = e.event.clientX;
-					self._listener.lastMouseY = e.event.clientY;
-					tooltip.setTarget(null);
+//					var tooltip = mTooltip.Tooltip.getTooltip(textView);
+//					if (!tooltip) { return; }
+//					if (self._listener.lastMouseX === e.event.clientX && self._listener.lastMouseY === e.event.clientY) {
+//						return;
+//					}
+//					self._listener.lastMouseX = e.event.clientX;
+//					self._listener.lastMouseY = e.event.clientY;
+//					tooltip.hide();
 				},
 				onScroll: function(e) {
 					var tooltip = mTooltip.Tooltip.getTooltip(textView);
 					if (!tooltip) { return; }
-					tooltip.setTarget(null, 0, 0);
+					tooltip.hide();
 				},
 				onSelection: function(e) {
 					self._updateCursorStatus();

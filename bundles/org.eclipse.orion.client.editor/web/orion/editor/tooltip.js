@@ -25,10 +25,6 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 	/** @private */
 	function Tooltip (view) {
 		this._view = view;
-		this._fadeDelay = 500;
-		this._hideDelay = 200;
-		this._showDelay = 500;
-		this._autoHideDelay = 5000;
 		this._create(view.getOptions("parent").ownerDocument); //$NON-NLS-0$
 	}
 	Tooltip.getTooltip = function(view) {
@@ -45,46 +41,30 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			tooltipDiv.className = "textviewTooltip"; //$NON-NLS-0$
 			tooltipDiv.setAttribute("aria-live", "assertive"); //$NON-NLS-1$ //$NON-NLS-0$
 			tooltipDiv.setAttribute("aria-atomic", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
 			var tooltipContents = this._tooltipContents = util.createElement(document, "div"); //$NON-NLS-0$
 			tooltipDiv.appendChild(tooltipContents);
 			document.body.appendChild(tooltipDiv);
 			var self = this;
 			textUtil.addEventListener(tooltipDiv, "mouseover", function(event) { //$NON-NLS-0$
-				if (!self._hideDelay) { return; }
-				var window = self._getWindow();
-				if (self._delayedHideTimeout) {
-					window.clearTimeout(self._delayedHideTimeout);
-					self._delayedHideTimeout = null;
-				}
-				
-				if (self._hideTimeout) {
-					window.clearTimeout(self._hideTimeout);
-					self._hideTimeout = null;
-				}
-				self._nextTarget = null;
+				this._inTooltip = true;
 			}, false);
 			textUtil.addEventListener(tooltipDiv, "mouseout", function(event) { //$NON-NLS-0$
-				var relatedTarget = event.relatedTarget || event.toElement;
-				if (relatedTarget === tooltipDiv || self._hasFocus()) { return; }
-				if (relatedTarget) {
-					if (textUtil.contains(tooltipDiv, relatedTarget)) { return; }
-				}
-				self._hide();
+				this.inTooltip = false;
 			}, false);
 			textUtil.addEventListener(tooltipDiv, "keydown", function(event) { //$NON-NLS-0$
 				if (event.keyCode === 27) {
-					self._hide();
+					self.hide();
 				}
 			}, false);
-			textUtil.addEventListener(document, "mousedown", this._mouseDownHandler = function(event) { //$NON-NLS-0$
-				if (!self.isVisible()) { return; }
-				if (textUtil.contains(tooltipDiv, event.target || event.srcElement)) { return; }
-				self._hide();
-			}, true);
+//			textUtil.addEventListener(document, "mousedown", this._mouseDownHandler = function(event) { //$NON-NLS-0$
+//				if (!self.isVisible()) { return; }
+//				if (textUtil.contains(tooltipDiv, event.target || event.srcElement)) { return; }
+//				self.hide();
+//			}, true);
 			this._view.addEventListener("Destroy", function() { //$NON-NLS-0$
 				self.destroy();
 			});
-			this._hide();
 		},
 		_getWindow: function() {
 			var document = this._tooltipDiv.ownerDocument;
@@ -92,7 +72,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		},
 		destroy: function() {
 			if (!this._tooltipDiv) { return; }
-			this._hide();
+			this.hide();
 			var parent = this._tooltipDiv.parentNode;
 			if (parent) { parent.removeChild(this._tooltipDiv); }
 			var document = this._tooltipDiv.ownerDocument;
@@ -105,6 +85,36 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			var document = tooltipDiv.ownerDocument;
 			return textUtil.contains(tooltipDiv, document.activeElement);
 		},
+		_setContentRange: function(start, end) {
+			this._contentRangeStart = start;
+			this._contentRangeEnd = end;
+			var tv = this._view;
+			var curLine = tv.getLineAtOffset(start);
+			var endLine = tv.getLineAtOffset(end);
+			
+			// Adjust start / end to be on the current line if necessary
+			if (curLine !== endLine) {
+				start = tv.getLineStart(curLine);
+				end = tv.getLineEnd(curLine);
+			}
+			
+			var height = tv.getLineHeight(curLine);
+			var startPos = tv.getLocationAtOffset(start);
+			var endPos = tv.getLocationAtOffset(end);
+			
+			var viewRect = { x: startPos.x, y: startPos.y, 
+								width: endPos.x - startPos.x, height: height};
+								
+			viewRect = this._view.convert(viewRect, "document", "page");
+			this._anchorRect = {left: viewRect.x, top: viewRect.y, 
+								width: viewRect.width, height: viewRect.height};
+		},
+		_isInRect: function(rect, x, y) {
+			if (!rect) return false;
+			var xOK = x >= rect.left && x <= (rect.left + rect.width);
+			var yOK = y >= rect.top && y <= (rect.top + rect.height);
+			return xOK && yOK;
+		},
 		/**
 		 * @name hide
 		 * @description Hides the current hover popup
@@ -113,30 +123,9 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		 * @param {int} hideDelay Delay the hide by this many millisecs (defaults to the 'hideDelay' field
 		 * of this tooltip)
 		*/
-		hide: function(hideDelay) {
-			if (hideDelay === undefined) {
-				hideDelay = this._hideDelay;
-			}
-			var window = this._getWindow();
-			if (this._delayedHideTimeout) {
-				window.clearTimeout(this._delayedHideTimeout);
-				this._delayedHideTimeout = null;
-			}
-			var self = this;
-			if (!hideDelay) {
-				self._hide();
-				self.setTarget(self._nextTarget, 0);
-			} else {
-				self._delayedHideTimeout = window.setTimeout(function() {
-					self._delayedHideTimeout = null;
-					self._hide();
-					self.setTarget(self._nextTarget, 0);
-				}, hideDelay);
-			}
-		},
-		_hide: function() {
-			var tooltipDiv = this._tooltipDiv;
-			if (!tooltipDiv) { return; }
+		hide: function() {
+			if (!this.isVisible()) { return; }
+			
 			if (this._hasFocus()) {
 				this._view.focus();
 			}
@@ -147,24 +136,13 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			if (this._tooltipContents) {
 				this._tooltipContents.innerHTML = "";
 			}
-			tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
-			var window = this._getWindow();
-			if (this._showTimeout) {
-				window.clearTimeout(this._showTimeout);
-				this._showTimeout = null;
-			}
-			if (this._delayedHideTimeout) {
-				window.clearTimeout(this._delayedHideTimeout);
-				this._delayedHideTimeout = null;
-			}
-			if (this._hideTimeout) {
-				window.clearTimeout(this._hideTimeout);
-				this._hideTimeout = null;
-			}
-			if (this._fadeTimeout) {
-				window.clearInterval(this._fadeTimeout);
-				this._fadeTimeout = null;
-			}
+			this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
+			this._tooltipDiv.style.left = "auto";
+			this._tooltipDiv.style.top = "auto";
+			this._target = undefined;
+			this._anchor = undefined;
+			this._anchorRect = undefined;
+			this._hoverRect = undefined;
 		},
 		/**
 		 * @name isVisible
@@ -176,49 +154,23 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		isVisible: function() {
 			return this._tooltipDiv && this._tooltipDiv.style.visibility === "visible"; //$NON-NLS-0$
 		},
-		/**
-		 * @name setTarget
-		 * @description Set the 'target' used to gather the information to be displayed the next
-		 * time the tooltip is shown.
-		 * @function
-		 * @public
-		 * @param {Object} target The target to use on the next 'show'
-		 * @param {int} delay Delay the show by this many millisecs (defaults to the 'showDelay' field
-		 * of this tooltip
-		 * @param {int} hideDelay Delay the hide by this many millisecs (defaults to the 'hideDelay' field
-		 * of this tooltip). Note that a value of '-1' indicates that the toottip should remain up until the
-		 * user dismisses it (hits ESC / clicks outside it...).
-		 *
-		 * NOTE: This is the preferred call to use to programmatically bring up the tooltip
-		 * (as opposed to calling 'show' directly). Calling this method with a desired target, a
-		 * 'delay' of 0 and a 'hideDelay' of -1 will immediately show the tooltip, ensure that it
-		 * remains up.
-		*/
-		setTarget: function(target, delay, hideDelay) {
-			var visible = this.isVisible();
-			if (visible) {
-				if (this._hasFocus()) { return; }
-				this._nextTarget = target;
-				this.hide(hideDelay);
-			} else {
-				this._target = target;
-				if (target) {
-					var self = this;
-					var window = self._getWindow();
-					if (self._showTimeout) {
-						window.clearTimeout(self._showTimeout);
-						self._showTimeout = null;
-					}
-					if (delay === 0) {
-						self.show(hideDelay !== -1);
-					} else {
-						self._showTimeout = window.setTimeout(function() {
-							self._showTimeout = null;
-							self.show(hideDelay !== -1);
-						}, delay ? delay : self._showDelay);
-					}
-				}
-			}
+		OKToHover: function(x, y) {
+			if (!this.isVisible())
+				return true;
+			
+			if (this._hasFocus())
+				return false;
+				
+			return !this._isInRect(this._anchorRect, x, y);
+		},
+		OKToHide: function(x, y) {
+			if (!this.isVisible())
+				return false;
+			
+			if (this._hasFocus())
+				return false;
+				
+			return !this._isInRect(this._hoverRect, x, y);
 		},
 		/**
 		 * @name show
@@ -231,11 +183,34 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		 * Note that if 'autoHide' is false then the tooltip will attempt to set the focus onto the
 		 * resulting tooltip.
 		*/
-		show: function(autoHide) {
-			if (!this._target) { return; }
-			var info = this._target.getTooltipInfo();
+		show: function(target, giveFocus) {
+			if (!target) { return; }
+			console.log("CP: " + target.clientX + "," + target.clientY);
+			
+			// Do we need to process this one ?
+			if (this._isInRect(this._hoverRect, target.clientX, target.clientY)) {
+				if (target.clientY <= this._anchorRect.top 
+					|| target.clientY >= (this._anchorRect.top + this._anchorRect.height)) {
+					return;
+				}
+			}
+			
+			var info = target.getTooltipInfo();
 
 			if (!info) { return; }
+			
+			if (this.isVisible()) {
+				this.hide();
+			}
+			
+			// Allow the info to define the anchorRect (for rulers)
+			if (info.anchorRect) {
+				this._anchor = info.anchor;
+				this._anchorRect = info.anchorRect;
+			}
+			
+			this._target = target;
+			
 			var tooltipDiv = this._tooltipDiv, tooltipContents = this._tooltipContents;
 			tooltipDiv.style.left = tooltipDiv.style.right = tooltipDiv.style.width = tooltipDiv.style.height = 
 				tooltipContents.style.width = tooltipContents.style.height = "auto"; //$NON-NLS-0$
@@ -291,19 +266,19 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			
 			if (info.anchor === "right") { //$NON-NLS-0$
 				var right = documentElement.clientWidth - info.x;
-				tooltipDiv.style.right = right + "px"; //$NON-NLS-0$
+				//tooltipDiv.style.right = right + "px"; //$NON-NLS-0$
 				tooltipDiv.style.maxWidth = (documentElement.clientWidth - right - 10) + "px"; //$NON-NLS-0$
 			} else {
 				var left = parseInt(this._getNodeStyle(tooltipDiv, "padding-left", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
 				left += parseInt(this._getNodeStyle(tooltipDiv, "border-left-width", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
 				left = info.x - left;
-				tooltipDiv.style.left = left + "px"; //$NON-NLS-0$
+				//tooltipDiv.style.left = left + "px"; //$NON-NLS-0$
 				tooltipDiv.style.maxWidth = (documentElement.clientWidth - left - 10) + "px"; //$NON-NLS-0$
 			}
 			var top = parseInt(this._getNodeStyle(tooltipDiv, "padding-top", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
 			top += parseInt(this._getNodeStyle(tooltipDiv, "border-top-width", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
 			top = info.y - top;
-			tooltipDiv.style.top = top + "px"; //$NON-NLS-0$
+			//tooltipDiv.style.top = top + "px"; //$NON-NLS-0$
 			tooltipDiv.style.maxHeight = (documentElement.clientHeight - top - 10) + "px"; //$NON-NLS-0$
 			tooltipDiv.style.opacity = "1"; //$NON-NLS-0$
 			
@@ -313,11 +288,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					Deferred.when(info, function (data) {
 						if (data) {
 							if (self._renderContent(tooltipDoc, tooltipContents, data)) {
-								// Ensure that the tooltip is visible
-								tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
-								if (!autoHide) {
-									self._setInitialFocus(tooltipDiv);
-								}
+								self._showTooltip();
 							}
 						}
 					}, function(error) {
@@ -331,29 +302,59 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			
 			// Delay the showing of a tootip with no 'static' contents
 			if (contents) {
-				tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
-				if (!autoHide) {
-					this._setInitialFocus(tooltipDiv);
-				}
+				this._showTooltip();
 			}
 			
-			if (autoHide) {
-				var window = this._getWindow();
-				self._hideTimeout = window.setTimeout(function() {
-					self._hideTimeout = null;
-					var opacity = parseFloat(self._getNodeStyle(tooltipDiv, "opacity", "1")); //$NON-NLS-1$ //$NON-NLS-0$
-					var fadeTimeout = self._fadeTimeout = window.setInterval(function() {
-						if (tooltipDiv.style.visibility === "visible" && opacity > 0) { //$NON-NLS-0$
-							opacity -= 0.1;
-							tooltipDiv.style.opacity = opacity;
-							return;
-						}
-						window.clearInterval(fadeTimeout);
-						self._fadeTimeout = null;
-						self._hide();
-					}, self._fadeDelay / 10);
-				}, self._autoHideDelay);
+			if (giveFocus === true) {
+				this._setInitialFocus(tooltipDiv);
 			}
+		},
+		_showTooltip: function() {
+			if (this.isVisible())
+				return;
+
+			// HACK! Fake a contentBox if necessary
+			if (!this._anchorRect) {
+				// Use the whole line
+				var curOffset = this._view.getOffsetAtLocation(this._target.x, this._target.y);
+				if (curOffset >= 0) {
+					var start = this._view.getNextOffset(curOffset, 
+										{ unit: "word", count: -1});
+					var end = this._view.getNextOffset(curOffset, 
+										{ unit: "word", count: 0});
+					this._setContentRange(start, end);
+				} else {
+					this._anchorRect = {
+						left: this._target.clientX-8, top: this._target.clientY -8,
+						width: 16, height: 16
+					};
+				}
+			}
+			var tipDiv = this._tooltipDiv;
+			
+			// Align the tooltip with the anchor rect
+			var divBounds = lib.bounds(tipDiv);
+			if (this._anchor === 'right') {
+				var rightEdge = this._anchorRect.left + this._anchorRect.width;
+				tipDiv.style.left = (rightEdge - divBounds.width) + "px";
+				tipDiv.style.top = (this._anchorRect.top + this._anchorRect.height + 5) + "px";
+				this._hoverRect = {
+					left: rightEdge - divBounds.width, top: this._anchorRect.top,
+					width: divBounds.width,
+					height: this._anchorRect.height + divBounds.height + 5
+				};
+			} else {
+				tipDiv.style.left = this._anchorRect.left + "px";
+				tipDiv.style.top = (this._anchorRect.top + this._anchorRect.height + 5) + "px";
+				this._hoverRect = {
+					left: this._anchorRect.left, top: this._anchorRect.top,
+					width: divBounds.width,
+					height: this._anchorRect.height + divBounds.height + 5
+				};
+			}
+			console.log("HR: " + this._hoverRect.left + ',' + this._hoverRect.top
+			+ ',' + this._hoverRect.width + ',' + this._hoverRect.height);
+			this._tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
 		},
 		_setInitialFocus: function(tooltipDiv) {
 			var buttons = lib.$$("button", tooltipDiv); //$NON-NLS-0$
@@ -472,7 +473,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 								start = model.mapOffset(start, true);
 								end = model.mapOffset(end, true);
 							}
-							view.setSelection(start, end, 1 / 3, function() { self._hide(); });
+							view.setSelection(start, end, 1 / 3, function() { self.hide(); });
 						}, false);
 					}
 					result.appendChild(htmlHolder); //$NON-NLS-0$
@@ -501,6 +502,11 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 						});
 					}
 
+				}
+				
+				// Set the anchor rect to the annotation if it's not already set
+				if (!self._anchorRect) {
+					self._setContentRange(annotation.start, annotation.end);
 				}
 				return result;
 			}

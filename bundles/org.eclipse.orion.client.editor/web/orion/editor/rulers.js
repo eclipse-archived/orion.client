@@ -16,9 +16,10 @@ define("orion/editor/rulers", [
 	'orion/editor/annotations',
 	'orion/editor/tooltip', 
 	'orion/objects',
+	'orion/webui/littlelib', //$NON-NLS-0$
 	'orion/editor/util',
 	'orion/util'
-], function(messages, mTextView, mAnnotations, mTooltip, objects, textUtil, util) {
+], function(messages, mTextView, mAnnotations, mTooltip, objects, lib, textUtil, util) {
 
 	function BaseRuler (rulerLocation, rulerOverview, rulerStyle) {
 		this._location = rulerLocation || "left"; //$NON-NLS-0$
@@ -311,7 +312,7 @@ define("orion/editor/rulers", [
 			}
 			var tooltip = mTooltip.Tooltip.getTooltip(this._view);
 			if (tooltip) {
-				tooltip.setTarget(null);
+				tooltip.hide();
 			}
 			this._view.setSelection(end, start, 1/3, function(){});
 		},
@@ -336,13 +337,31 @@ define("orion/editor/rulers", [
 			if (!tooltip) { return; }
 			if (tooltip.isVisible() && this._tooltipLineIndex === lineIndex) { return; }
 			this._tooltipLineIndex = lineIndex;
+
+			if (tooltip.OKToHide(e.clientX, e.clientY))	{
+				tooltip.hide();
+			}		
+
+			if (this._hoverTimeout) {
+				window.clearTimeout(this._hoverTimeout);
+				this._hoverTimeout = null;
+			}
+			
+			this._curElement = e.target ? e.target : e.srcElement;
+			
+			console.log("onMouseMove");
 			var self = this;
-			tooltip.setTarget({
-				y: e.clientY,
-				getTooltipInfo: function() {
-					return self._getTooltipInfo(self._tooltipLineIndex, this.y);
-				}
-			});
+			self._hoverTimeout = window.setTimeout(function() {
+				self._hoverTimeout = null;
+				if (!tooltip.OKToHover(e.clientX, e.clientY)) { return; }
+				tooltip.show({
+					clientX: e.clientX,
+					clientY: e.clientY,
+					getTooltipInfo: function() {
+						return self._getTooltipInfo(self._tooltipLineIndex, this.clientY);
+					}
+				});
+			}, 100);
 		},
 		/**
 		 * This event is sent when the mouse pointer enters a line annotation.
@@ -368,9 +387,6 @@ define("orion/editor/rulers", [
 			if (!this._currentClickGroup) {
 				this._setCurrentGroup(-1);
 			}
-			var tooltip = mTooltip.Tooltip.getTooltip(this._view);
-			if (!tooltip) { return; }
-			tooltip.setTarget(null);
 		},
 		/** @ignore */
 		_getTooltipInfo: function(lineIndex, y) {
@@ -389,11 +405,17 @@ define("orion/editor/rulers", [
 				annotations = this.getAnnotationsByType(annotationModel, start, end);
 			}
 			var contents = this._getTooltipContents(lineIndex, annotations);
+			
+			// TODO: shouldn't this check the length, it'll never be null
 			if (!contents) { return null; }
+			var anchorRect = lib.bounds(this._curElement); //.parentNode);
 			var info = {
 				contents: contents,
-				anchor: this.getLocation()
+				anchor: this.getLocation(),
+				anchorRect: anchorRect
 			};
+			
+			
 			var rect = view.getClientArea();
 			if (this.getOverview() === "document") { //$NON-NLS-0$
 				rect.y = view.convert({y: y}, "view", "document").y; //$NON-NLS-1$ //$NON-NLS-0$
@@ -751,7 +773,7 @@ define("orion/editor/rulers", [
 		if (annotation) {
 			var tooltip = mTooltip.Tooltip.getTooltip(this._view);
 			if (tooltip) {
-				tooltip.setTarget(null);
+				tooltip.hide();
 			}
 			if (annotation.expanded) {
 				annotation.collapse();
