@@ -423,6 +423,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		/** @private */
 		update: function() {
 			var view = this._view;
+			var primary = this.primary;
 			var focused = view._hasFocus;
 			var visible = view._cursorVisible;
 			var cursor = !this.primary && this._selection && this._selection.isEmpty();
@@ -436,6 +437,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			this._divs[0].style.zIndex = visible && cursor ? "2" : "0"; //$NON-NLS-1$ //$NON-NLS-0$
 			this._divs.forEach(function(div) {
 				div.className = className;
+				if (util.isWebkit && primary) {
+					div.style.background = focused ? "transparent" : ""; //$NON-NLS-0$
+				}
 			});
 		},
 		/** @private */
