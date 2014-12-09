@@ -2335,7 +2335,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 					text.push(self._getBaseText(selection.start, selection.end));
 				}
 			});
-			return text.join(delimiter || this._model.getLineDelimiter());
+			return text.join(delimiter !== undefined ? delimiter : this._model.getLineDelimiter());
 		},
 		/**
 		 * Returns the text for the given range.
