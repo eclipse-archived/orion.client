@@ -46,7 +46,7 @@ define([
 		this._projectClient = options.projectClient;
 		
 		this._initialize();
-		this._disableControls(); // start with controls disabled until a launch configuration is selected
+		this._disableAllControls(); // start with controls disabled until a launch configuration is selected
 	}
 	
 	objects.mixin(RunBar.prototype, /** @lends orion.projects.RunBar.prototype */ {
@@ -208,13 +208,10 @@ define([
 						this.setStatus(launchConfiguration.status);
 					}
 				}
-				
-				this._enableControls();
 			} else {
 				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(messages["selectLaunchConfig"]); //$NON-NLS-0$
 				this._selectedLaunchConfiguration = null;
 				this.setStatus({State: "", Message: ""}); //$NON-NLS-1$ //$NON-NLS-0$
-				this._disableControls();
 			}
 		},
 		
@@ -255,7 +252,10 @@ define([
 			this._statusLight.classList.remove("statusLightRed"); //$NON-NLS-0$
 			this._statusLight.classList.remove("statusLightProgress"); //$NON-NLS-0$
 			
+			this._disableAllControls();
+			
 			if (status.error) {
+				this._enableControl(this._playButton);
 				if (status.error.Retry) {
 					this._setStatusTitle(null);
 				} else {
@@ -268,12 +268,15 @@ define([
 						this._statusLight.classList.add("statusLightProgress"); //$NON-NLS-0$
 						break;
 					case "STARTED": //$NON-NLS-0$
-						this._statusLight.classList.add("statusLightGreen"); //$NON-NLS-0$
+						this._enableControl(this._playButton);
 						this._convertPlayButtonToRestartButton();
+						this._enableControl(this._stopButton);
+						this._statusLight.classList.add("statusLightGreen"); //$NON-NLS-0$
 						break;
 					case "STOPPED": //$NON-NLS-0$
-						this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
+						this._enableControl(this._playButton);
 						this._restorePlayButton();
+						this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
 						break;
 					default:
 						this._restorePlayButton();
@@ -341,14 +344,17 @@ define([
 			return this._selectedLaunchConfiguration;
 		},
 		
-		_disableControls: function() {
-			this._playButton.classList.add("disabled"); //$NON-NLS-0$
-			this._stopButton.classList.add("disabled"); //$NON-NLS-0$
+		_disableAllControls: function() {
+			this._disableControl(this._playButton);
+			this._disableControl(this._stopButton);
 		},
 		
-		_enableControls: function() {
-			this._playButton.classList.remove("disabled"); //$NON-NLS-0$
-			this._stopButton.classList.remove("disabled"); //$NON-NLS-0$
+		_enableControl: function(domNode) {
+			domNode.classList.remove("disabled"); //$NON-NLS-0$
+		},
+		
+		_disableControl: function(domNode) {
+			domNode.classList.add("disabled"); //$NON-NLS-0$
 		},
 		
 		_isEnabled: function(domNode) {
