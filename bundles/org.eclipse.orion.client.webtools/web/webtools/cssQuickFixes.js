@@ -37,13 +37,31 @@ define([
 	        }
 		    return null;
 		},
-		"zero-units": function(editorContext, annotation) {
+		"zero-units": function(editorContext, annotation) { //$NON-NLS-0$
 			return editorContext.getText().then(function(text) {
-				if (text[annotation.end-1] === ';'){
-					 return editorContext.setText('0;', annotation.start, annotation.end);
-				} else {
-					return editorContext.setText('0', annotation.start, annotation.end);
+				var contents = text.substring(annotation.start, annotation.end);
+				contents = contents.replace(/0px/g,'0'); //$NON-NLS-0$
+				return editorContext.setText(contents, annotation.start, annotation.end);
+            });
+		},
+		"empty-rules": function(editorContext, annotation) { //$NON-NLS-0$
+			return editorContext.getText().then(function(text) {
+				// Remove the rule (selected by the annotation) as well as leading/trailing whitespace
+				var start = annotation.start;
+				while (start >= 0 && (text[start-1] === ' ' || text[start-1] === '\t')){ //$NON-NLS-0$ //$NON-NLS-1$
+					start--;
 				}
+				var end = annotation.end;
+				while (end < text.length && /[\s}]/.test( text[end])){
+					end++;
+				}
+				while (end < text.length && (text[end] === ' ' || text[end] === '\t')){ //$NON-NLS-0$ //$NON-NLS-1$
+					end++;
+				}
+				while (end < text.length && (text[end] === '\r' || text[end] === '\n')){ //$NON-NLS-0$ //$NON-NLS-1$
+					end++;
+				}
+				return editorContext.setText('', start, end);
             });
 		}
 	});

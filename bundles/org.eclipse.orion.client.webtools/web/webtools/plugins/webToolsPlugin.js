@@ -134,13 +134,27 @@ define(['orion/plugin',
 			cssQuickFixComputer, 
 			{
 		nameKey : 'quickfix-zero-units',  //$NON-NLS-0$
-		scopeId: "orion.edit.quickfix",
+		scopeId: "orion.edit.quickfix", //$NON-NLS-0$
 		id : "quickfix-zero-units",  //$NON-NLS-0$
 		nls: 'webtools/nls/messages',  //$NON-NLS-0$
 		key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
 		contentType: ['text/css'],  //$NON-NLS-0$
 		validationProperties: [
 		                       {source: "annotation:id", match: "zero-units"} //$NON-NLS-1$ //$NON-NLS-0$
+		                       ]
+			}
+	);
+	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+			cssQuickFixComputer, 
+			{
+		nameKey : 'quickfix-empty-rules',  //$NON-NLS-0$
+		scopeId: "orion.edit.quickfix", //$NON-NLS-0$
+		id : "quickfix-empty-rules",  //$NON-NLS-0$
+		nls: 'webtools/nls/messages',  //$NON-NLS-0$
+		key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+		contentType: ['text/css'],  //$NON-NLS-0$
+		validationProperties: [
+		                       {source: "annotation:id", match: "empty-rules"} //$NON-NLS-1$ //$NON-NLS-0$
 		                       ]
 			}
 	);
