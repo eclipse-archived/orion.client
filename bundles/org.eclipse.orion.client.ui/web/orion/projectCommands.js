@@ -542,6 +542,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				if(!params){
 					return;
 				}
+				
+				var launchConfToPass = objects.clone(item);
+				launchConfToPass.Params = params;
 
 				projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
 					if(sharedLaunchConfigurationDispatcher){
@@ -549,7 +552,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
 					}
 					if(service && service.getState){
-						service.getState(params).then(function(result){
+						service.getState(launchConfToPass).then(function(result){
 							item.status = result;
 							if(sharedLaunchConfigurationDispatcher){
 								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });

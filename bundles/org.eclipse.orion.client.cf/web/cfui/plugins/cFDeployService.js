@@ -465,38 +465,60 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 
 			return deferred;
 		},
-
-		getState: function(props) {
-			return this._retryWithLogin(props, this._getState);
-		},
-
-		_getState: function(props, deferred) {
-			if (props.Target && props.Name) {
-				cFService.getApp(props.Target, props.Name).then(
-
-				function(result) {
-
-					var app = result;
-					if (app.debug && app.debug.state) {
-						deferred.resolve({
-							State: (app.debug.state !== "stop" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
-							Message: "Application in debug mode"
-						});
+		
+		getState: function(launchConf) {
+			var that = this;
+			var deferred = new Deferred();
+			var params = launchConf.Params || {};
+			
+			cfLauncherService.getApp(launchConf.Url).then(
+				function(result){
+					if (!result.state){
+						that._getStateCFWithLogin(launchConf).then(
+							deferred.resolve, deferred.reject
+						);
 						return;
 					}
-
+					
 					deferred.resolve({
-						State: (app.running_instances > 0 ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
-						Message: i18nUtil.formatMessage(messages["${0}of${1}instance(s)Running"], app.running_instances, app.instances)
+						State: (result.state !== "stop" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
+						Message: "Application in debug mode [" + result.state + "]"
 					});
+				}, function(error){
+					if (error.HttpCode === 0){
+						that._getStateCFWithLogin(launchConf).then(
+							deferred.resolve, deferred.reject
+						);
+						return;
+					}
+					deferred.reject(error);
+				}
+			);
+			
+			return deferred;
+		},
 
-				}, function(error) {
+		_getStateCFWithLogin: function(launchConf) {
+			var params = launchConf.Params || {};
+			return this._retryWithLogin(params, this._getStateCF);
+		},
 
-					/* default cf error message decoration */
-					error = mCfUtil.defaultDecorateError(error, props.Target);
-					if (error.HttpCode === 404) deferred.resolve(error);
-					else deferred.reject(error);
-				});
+		_getStateCF: function(params, deferred) {
+			if (params.Target && params.Name) {
+				cFService.getApp(params.Target, params.Name).then(
+					function(result) {
+						var app = result;
+						deferred.resolve({
+							State: (app.running_instances > 0 ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
+							Message: i18nUtil.formatMessage(messages["${0}of${1}instance(s)Running"], app.running_instances, app.instances)
+						});
+					}, function(error) {
+						/* default cf error message decoration */
+						error = mCfUtil.defaultDecorateError(error, params.Target);
+						if (error.HttpCode === 404) deferred.resolve(error);
+						else deferred.reject(error);
+					}
+				);
 				return deferred;
 			}
 		},
@@ -507,8 +529,8 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 			var params = launchConf.Params || {};
 			
 			cfLauncherService.getApp(launchConf.Url).then(
-				function(response){
-					if (!response.state){
+				function(result){
+					if (!result.state){
 						that._startCFWithLogin(launchConf).then(
 							deferred.resolve, deferred.reject
 						);
@@ -568,8 +590,8 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 			var params = launchConf.Params || {};
 			
 			cfLauncherService.getApp(launchConf.Url).then(
-				function(response){
-					if (!response.state){
+				function(result){
+					if (!result.state){
 						that._stopCFWithLogin(launchConf).then(
 							deferred.resolve, deferred.reject
 						);

@@ -229,7 +229,7 @@ define([
 			// update status
 			this._projectClient.getProjectDelpoyService(launchConfiguration.ServiceId, launchConfiguration.Type).then(function(service){
 				if(service && service.getState){
-					this._progressService.progress(service.getState(launchConfiguration.Params), progressMessage).then(function(result){
+					this._progressService.progress(service.getState(launchConfiguration), progressMessage).then(function(result){
 						launchConfiguration.status = result;
 						this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
 					}.bind(this), function(error){

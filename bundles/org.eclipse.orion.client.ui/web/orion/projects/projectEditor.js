@@ -507,7 +507,7 @@ define([
 						item.status = {State: "PROGRESS"};
 						td.innerHTML = this.getCellElement(col_no, item, tableRow).innerHTML;
 
-						service.getState(item.Params).then(function(result){
+						service.getState(item).then(function(result){
 							item.status = result;
 							var newTd = this.getCellElement(col_no, item, tableRow);
 							for(var i=0; i<td.classList.length; i++){
