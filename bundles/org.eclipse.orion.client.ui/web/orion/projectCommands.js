@@ -621,13 +621,16 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 						return;
 					}
 
+					var launchConfToPass = objects.clone(item);
+					launchConfToPass.Params = params;
+
 					projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
 						if(service && (start ? service.start : service.stop)){
 							if(sharedLaunchConfigurationDispatcher){
 								item.status = {State: "PROGRESS"};
 								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
 							}
-							(start ? service.start : service.stop)(params).then(function(result){
+							(start ? service.start : service.stop)(launchConfToPass).then(function(result){
 								item.status = result;
 								if(sharedLaunchConfigurationDispatcher){
 									sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });

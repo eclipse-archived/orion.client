@@ -38,6 +38,9 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 
 		/* allow frame to be dragged by title bar */
 		mWizardUtils.makeDraggable(this);
+		
+		/* TODO workaround for no wildcards in cf-launcher cors */
+		var wizardOrigin = window.location.origin;
 
 		var pageParams = PageUtil.matchResourceParameters();
 		var resourceString = decodeURIComponent(pageParams.resource);
@@ -322,8 +325,8 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 			    		var userURLPrefix = ""; // debugPaneBuilder._cfLauncherURLPrefix.value;
 
 			    		var command = userURLPrefix ?
-			    				i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} --urlprefix ${1} -- ${2}", password, userURLPrefix, app.command) //$NON-NLS-0$
-			    				: i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} -- ${1}", password, app.command); //$NON-NLS-0$
+			    				i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} --cors ${1} --urlprefix ${2} -- ${3}", password, wizardOrigin, userURLPrefix, app.command) //$NON-NLS-0$
+			    				: i18nUtil.formatMessage("node_modules/.bin/launcher --password ${0} --cors ${1} -- ${2}", password, wizardOrigin, app.command); //$NON-NLS-0$
 			    		devMode.Instrumentation.command = command;
 			    		
 			    		devMode.On = debugPaneBuilder._debugCheckbox.checked;
