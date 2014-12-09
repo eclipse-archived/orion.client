@@ -46,6 +46,7 @@ define([
 		this._projectClient = options.projectClient;
 		
 		this._initialize();
+		this._disableControls(); // start with controls disabled until a launch configuration is selected
 	}
 	
 	objects.mixin(RunBar.prototype, /** @lends orion.projects.RunBar.prototype */ {
@@ -74,8 +75,6 @@ define([
 				}, this);
 				
 				this._createLaunchConfigurationsDropdown();
-				
-				this._disableControls(); // start with controls disabled until a launch configuration is selected
 			} else {
 				throw new Error("this._domNode is null"); //$NON-NLS-0$
 			}
