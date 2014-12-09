@@ -12,8 +12,6 @@
 /*eslint-env browser, amd*/
 define(['require', 'orion/Deferred', 'orion/xhr', 'orion/metrics'], function(require, Deferred, xhr, mMetrics){
 
-	var METRICS_MAXLENGTH = 256;
-
 	/**
 	 * Constructs a new preferences instance. This constructor is not
 	 * intended to be used by clients. Preferences should instead be
@@ -22,9 +20,10 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/metrics'], function(req
 	 * @name orion.preferences.Preferences
 	 * @see orion.preferences.PreferencesService
 	 */
-	function Preferences(_name, providers) {
+	function Preferences(_name, providers, changeCallback) {
 		this._name = _name;
 		this._providers = providers;
+		this._changeCallback = changeCallback;
 		this._flushPending = false;
 		
 		// filled by _getCached call
@@ -122,22 +121,7 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/metrics'], function(req
 			var top = this._stores[0];
 			
 			if (top[key] !== value) {
-				var metricsKey = this._name + "/" + key; //$NON-NLS-0$
-				if (typeof(value) === "string") { //$NON-NLS-0$
-					if (value.length <= METRICS_MAXLENGTH) {
-						mMetrics.logEvent("preferenceChange", metricsKey, value); //$NON-NLS-0$
-					}
-				} else {
-					for (var current in value) {
-						if (!top[key] || top[key][current] !== value[current]) {
-							var stringValue = String(value[current]);
-							if (stringValue.length <= METRICS_MAXLENGTH) {
-								mMetrics.logEvent("preferenceChange", metricsKey + "/" + current, stringValue); //$NON-NLS-1$ //$NON-NLS-0$
-							}
-						} 
-					}
-				}
-
+				this.valueChanged(key, value);
 				top[key] = value;
 				this._cached = null;
 				this._scheduleFlush(top);
@@ -208,6 +192,20 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/metrics'], function(req
 		 */
 		flush: function() {
 			this._flush();
+		},
+		valueChanged: function(key, value) {
+			var changeKey = this._name + "/" + key; //$NON-NLS-0$
+			if (typeof(value) === "string") { //$NON-NLS-0$
+				this._changeCallback(changeKey, value);
+			} else {
+				var top = this._stores[0];
+				for (var current in value) {
+					if (current !== "pid" && (!top[key] || top[key][current] !== value[current])) { //$NON-NLS-0$
+						var stringValue = String(value[current]);
+						this._changeCallback(changeKey + "/" + current, stringValue); //$NON-NLS-0$
+					} 
+				}
+			}
 		}
 	};
 	
@@ -421,7 +419,8 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/metrics'], function(req
 	function PreferencesService(serviceRegistry, defaultPreferencesLocation) {
 		this._userProvider = new UserPreferencesProvider(serviceRegistry);
 		this._localProvider = new LocalPreferencesProvider();
-		
+		this._changeListeners = [];
+
 		defaultPreferencesLocation = defaultPreferencesLocation || "defaults.pref"; //$NON-NLS-0$
 		if (defaultPreferencesLocation.indexOf("://") === -1) { //$NON-NLS-0$
 			defaultPreferencesLocation = require.toUrl(defaultPreferencesLocation);
@@ -452,7 +451,13 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/metrics'], function(req
 			
 			return "/orion/preferences/default" + key; //$NON-NLS-0$
 		},
-		
+
+		addChangeListener: function(callback) {
+			if (typeof(callback) === "function") { //$NON-NLS-0$
+				this._changeListeners.push(callback);
+			}
+		},
+
 		/**
 		 * Retrieves the preferences of the given node name.
 		 * @param {String} name A slash-delimited path to the preference node to return
@@ -472,7 +477,7 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/metrics'], function(req
 				providers.push(this._defaultsProvider);
 			}
 			
-			var preferences = new Preferences(name, providers);
+			var preferences = new Preferences(name, providers, this._prefChangeListener.bind(this));
 			var promise = preferences.sync().then(function() {
 				return preferences;
 			});
@@ -497,6 +502,23 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/metrics'], function(req
 				}
 			}
 			return value;
+		},
+
+		removeChangeListener: function(callback) {
+			if (typeof(callback) === "function") { //$NON-NLS-0$
+				for (var i = 0; i < this._changeListeners.length; i++) {
+					if (this._changeListeners[i] === callback) {
+						this._changeListeners.splice(i, 1);
+						return;
+					}
+				}
+			}
+		},
+
+		_prefChangeListener: function(name, value) {
+			this._changeListeners.forEach(function(current) {
+				current(name, value);
+			});
 		}
 	};
 	return {

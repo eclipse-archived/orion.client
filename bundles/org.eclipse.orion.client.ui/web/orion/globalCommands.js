@@ -29,6 +29,8 @@ define([
 	 * @name orion.globalCommands
 	 */
 
+	var METRICS_MAXLENGTH = 256;
+
 	var customGlobalCommands = {
 		createMenuGenerator: mCustomGlobalCommands.createMenuGenerator || function (serviceRegistry, keyAssistFunction) {
 			var userMenuPlaceholder = lib.node("userMenu"); //$NON-NLS-0$
@@ -556,20 +558,12 @@ define([
 	 * @param {Boolean} closeSplitter true to make the splitter's initial state "closed".
 	 */
 	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, closeSplitter, fileClient) {
-		mMetrics.init(serviceRegistry).then(
-			function() {
-				var userService = serviceRegistry.getService("orion.core.user"); //$NON-NLS-0$
-				var authServices = serviceRegistry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
-				for (var i = 0; i < authServices.length; i++) {
-					var authService = serviceRegistry.getService(authServices[i]);		
-					authService.getUser().then(function(jsonData){
-						userService.getUserInfo(jsonData.Location).then(function(accountData) {
-							mMetrics.setDimension("dimension2", window.btoa(accountData.UserName)); //$NON-NLS-0$
-						});
-					});
-				}
+		mMetrics.init(serviceRegistry);
+		prefsService.addChangeListener(function(name, value) {
+			if (value.length < METRICS_MAXLENGTH) {
+				mMetrics.logEvent("preferenceChange", name, value); //$NON-NLS-0$
 			}
-		);
+		});
 
 		new mThemePreferences.ThemePreferences(prefsService, new mThemeData.ThemeData()).apply();
 

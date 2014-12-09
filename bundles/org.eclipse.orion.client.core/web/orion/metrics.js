@@ -15,7 +15,6 @@ define(["orion/Deferred"], function(Deferred) {
 	var queue = [];
 
 	var init = function(serviceRegistry, args) {
-		var promise = new Deferred();
 		var refs = serviceRegistry.getServiceReferences("orion.analytics.google"); //$NON-NLS-0$
 		if (refs.length) {
 			var ref = refs[0];
@@ -44,8 +43,6 @@ define(["orion/Deferred"], function(Deferred) {
 							window[GA_ID](current.command, current.arg0, current.arg1, current.arg2, current.arg3, current.arg4); //$NON-NLS-0$
 						});
 						queue = null; /* no longer needed */
-						
-						promise.resolve();
 					}
 				);
 			}
@@ -53,7 +50,6 @@ define(["orion/Deferred"], function(Deferred) {
 		if (!(service && service.init)) {
 			queue = null; /* not tracking */
 		}
-		return promise;
 	};
 
 	function logEvent(category, action, label, value) {

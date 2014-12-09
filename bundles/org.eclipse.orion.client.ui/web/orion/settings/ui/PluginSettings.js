@@ -261,6 +261,7 @@ define([
 				var isNoop = setting.isDefaults(props, defaultProps);
 				if (isNoop) {
 					// Entire configuration is a no-op (i.e. it equals its default values) so remove it entirely
+					configuration.store.pref.valueChanged(props.pid, props);
 					return this.remove();
 				} else {
 					configuration.update(props);
@@ -287,12 +288,7 @@ define([
 				configuration.remove();
 				this.config = null;
 				this.configPromise = null;
-				this.logRemove({});
 			}.bind(this));
-		},
-		/* log the removal here since it will not get through to preferences.set() */
-		logRemove: function() {
-			mMetrics.logEvent("preferenceChange", "/cm/configurations/" + this.pid, "null"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	});
 
