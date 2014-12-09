@@ -4118,7 +4118,9 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			if (left && this._isMouseDown) {
 				var selections = this._getSelections();
 				var selection = Selection.editing(selections);
-				selection._editing = false;
+				selections.forEach(function(sel) {
+					sel._editing = false;
+				});
 				if (this._dragOffset !== -1) {
 					selection.extend(this._dragOffset);
 					selection.collapse();
