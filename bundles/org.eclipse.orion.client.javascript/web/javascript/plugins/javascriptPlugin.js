@@ -31,7 +31,6 @@ define([
 'javascript/occurrences',
 'javascript/hover',
 'javascript/outliner',
-'orion/plugin',
 'orion/util',
 'javascript/commands/generateDocCommand',
 'javascript/commands/openDeclaration',
@@ -40,7 +39,7 @@ define([
 'orion/editor/stylers/application_schema_json/syntax',
 'orion/editor/stylers/application_x-ejs/syntax'
 ], function(Bootstrap, Esprima, ScriptResolver, ASTManager, QuickFixes, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
-			EslintValidator, Occurrences, Hover, Outliner,	PluginProvider, Util, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS) {
+			EslintValidator, Occurrences, Hover, Outliner,	Util, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS) {
 
 	function Factory(provider) {
 		/**
@@ -119,80 +118,80 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-			nameKey : 'removeExtraSemiFixName',  //$NON-NLS-0$
-			tooltipKey : 'removeExtraSemiFixTooltip',  //$NON-NLS-0$
-			scopeId: "orion.edit.quickfix",
-			id : "rm.extra.semi.fix",  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
-			contentType: ['application/javascript'],  //$NON-NLS-0$
-			validationProperties: [
-			                       {source: "annotation:id", match: "no-extra-semi"} //$NON-NLS-1$ //$NON-NLS-0$
-			                       ]
+        			nameKey : 'removeExtraSemiFixName',  //$NON-NLS-0$
+        			tooltipKey : 'removeExtraSemiFixTooltip',  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "rm.extra.semi.fix",  //$NON-NLS-0$
+        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
+        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "no-extra-semi"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
 				}
 		);
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-			nameKey : 'addFallthroughCommentFixName',  //$NON-NLS-0$
-			tooltipKey : 'addFallthroughCommentFixTooltip',  //$NON-NLS-0$
-			scopeId: "orion.edit.quickfix",
-			id : "add.fallthrough.comment.fix",  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
-			contentType: ['application/javascript'],  //$NON-NLS-0$
-			validationProperties: [
-			                       {source: "annotation:id", match: "^(?:no-fallthrough)$"} //$NON-NLS-1$ //$NON-NLS-0$
-			                       ]
+        			nameKey : 'addFallthroughCommentFixName',  //$NON-NLS-0$
+        			tooltipKey : 'addFallthroughCommentFixTooltip',  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "add.fallthrough.comment.fix",  //$NON-NLS-0$
+        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
+        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-fallthrough)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
 				}
 		);
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-			nameKey : 'addEmptyCommentFixName',  //$NON-NLS-0$
-			tooltipKey : 'addEmptyCommentFixTooltip',  //$NON-NLS-0$
-			scopeId: "orion.edit.quickfix",
-			id : "add.empty.comment.fix",  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
-			contentType: ['application/javascript'],  //$NON-NLS-0$
-			validationProperties: [
-			                       {source: "annotation:id", match: "^(?:no-empty-block)$"} //$NON-NLS-1$ //$NON-NLS-0$
-			                       ]
+        			nameKey : 'addEmptyCommentFixName',  //$NON-NLS-0$
+        			tooltipKey : 'addEmptyCommentFixTooltip',  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "add.empty.comment.fix",  //$NON-NLS-0$
+        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
+        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-empty-block)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
 				}
 		);
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-			nameKey : 'addESLintEnvFixName',  //$NON-NLS-0$
-			tooltipKey : 'addESLintEnvFixTooltip',  //$NON-NLS-0$
-			scopeId: "orion.edit.quickfix",
-			id : "add.eslint-env.fix",  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
-			contentType: ['application/javascript'],  //$NON-NLS-0$
-			validationProperties: [
-			                       {source: "annotation:id", match: "^(?:no-undef-defined-inenv)$"} //$NON-NLS-1$ //$NON-NLS-0$
-			                       ]
+        			nameKey : 'addESLintEnvFixName',  //$NON-NLS-0$
+        			tooltipKey : 'addESLintEnvFixTooltip',  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "add.eslint-env.fix",  //$NON-NLS-0$
+        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
+        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-undef-defined-inenv)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
 				}
 		);
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-			nameKey : 'addESLintGlobalFixName',  //$NON-NLS-0$
-			tooltipKey : 'addESLintGlobalFixTooltip',  //$NON-NLS-0$
-			scopeId: "orion.edit.quickfix",
-			id : "add.eslint-global.fix",  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
-			contentType: ['application/javascript'],  //$NON-NLS-0$
-			validationProperties: [
-			                       {source: "annotation:id", match: "^(?:no-undef-defined)$"} //$NON-NLS-1$ //$NON-NLS-0$
-			                       ]
+        			nameKey : 'addESLintGlobalFixName',  //$NON-NLS-0$
+        			tooltipKey : 'addESLintGlobalFixTooltip',  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "add.eslint-global.fix",  //$NON-NLS-0$
+        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
+        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-undef-defined)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
 				}
 		);
 		
@@ -214,88 +213,104 @@ define([
 					key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
 					contentType: ['application/javascript'],  //$NON-NLS-0$
 					validationProperties: [
-					                       {source: "annotation:id", match: "^(?:no-unused-params|no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-0$
-					                       ]
+                        {source: "annotation:id", match: "^(?:no-unused-params|no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
 				}
 		);
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-			nameKey : 'commentCallbackFixName',  //$NON-NLS-0$
-			tooltipKey : 'commentCallbackFixTooltip',  //$NON-NLS-0$
-			scopeId: "orion.edit.quickfix",
-			id : "comment.callback.fix",  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
-			contentType: ['application/javascript'],  //$NON-NLS-0$
-			validationProperties: [
-			                       {source: "annotation:id", match: "^(?:no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-0$
-			                       ]
+        			nameKey : 'commentCallbackFixName',  //$NON-NLS-0$
+        			tooltipKey : 'commentCallbackFixTooltip',  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "comment.callback.fix",  //$NON-NLS-0$
+        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
+        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
 				}
 		);
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-			nameKey : 'eqeqeqFixName',  //$NON-NLS-0$
-			tooltipKey : 'eqeqeqFixTooltip',  //$NON-NLS-0$
-			scopeId: "orion.edit.quickfix",
-			id : "eqeqeq.fix",  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
-			contentType: ['application/javascript'],  //$NON-NLS-0$
-			validationProperties: [
-			                       {source: "annotation:id", match: "^(?:eqeqeq)$"} //$NON-NLS-1$ //$NON-NLS-0$
-			                       ]
+        			nameKey : 'eqeqeqFixName',  //$NON-NLS-0$
+        			tooltipKey : 'eqeqeqFixTooltip',  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "eqeqeq.fix",  //$NON-NLS-0$
+        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
+        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:eqeqeq)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
 				}
 		);
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-			nameKey : 'unreachableFixName',  //$NON-NLS-0$
-			tooltipKey : 'unreachableFixTooltip',  //$NON-NLS-0$
-			scopeId: "orion.edit.quickfix",
-			id : "remove.unreachable.fix",  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
-			contentType: ['application/javascript'],  //$NON-NLS-0$
-			validationProperties: [
-			                       {source: "annotation:id", match: "^(?:no-unreachable)$"} //$NON-NLS-1$ //$NON-NLS-0$
-			                       ]
+        			nameKey : 'unreachableFixName',  //$NON-NLS-0$
+        			tooltipKey : 'unreachableFixTooltip',  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "remove.unreachable.fix",  //$NON-NLS-0$
+        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
+        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-unreachable)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
 				}
 		);
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-			nameKey : 'sparseArrayFixName',  //$NON-NLS-0$
-			tooltipKey : 'sparseArrayFixTooltip',  //$NON-NLS-0$
-			scopeId: "orion.edit.quickfix",
-			id : "sparse.array.fix",  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
-			contentType: ['application/javascript'],  //$NON-NLS-0$
-			validationProperties: [
-			                       {source: "annotation:id", match: "^(?:no-sparse-arrays)$"} //$NON-NLS-1$ //$NON-NLS-0$
-			                       ]
+        			nameKey : 'sparseArrayFixName',  //$NON-NLS-0$
+        			tooltipKey : 'sparseArrayFixTooltip',  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "sparse.array.fix",  //$NON-NLS-0$
+        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
+        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-sparse-arrays)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
 				}
 		);
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-			nameKey : 'semiFixName',  //$NON-NLS-0$
-			tooltipKey : 'semiFixTooltip',  //$NON-NLS-0$
-			scopeId: "orion.edit.quickfix",
-			id : "semi.fix",  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
-			contentType: ['application/javascript'],  //$NON-NLS-0$
-			validationProperties: [
-			                       {source: "annotation:id", match: "^(?:semi)$"} //$NON-NLS-1$ //$NON-NLS-0$
-			                       ]
+        			nameKey : 'semiFixName',  //$NON-NLS-0$
+        			tooltipKey : 'semiFixTooltip',  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "semi.fix",  //$NON-NLS-0$
+        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
+        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:semi)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
+				}
+		);
+		
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+				quickFixComputer, 
+				{
+        			nameKey : 'unusedVarsUnusedFixName',  //$NON-NLS-0$
+        			tooltipKey : 'unusedVarsUnusedFixTooltip',  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "unused.var.fix",  //$NON-NLS-0$
+        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
+        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-unused-vars-unused)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
 				}
 		);
 		

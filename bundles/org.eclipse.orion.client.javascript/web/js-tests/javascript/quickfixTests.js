@@ -63,9 +63,19 @@ define([
             var obj = setup(options);
             return obj.validator.computeProblems(obj.editorContext, {contentType: obj.contentType, rule: options.rule}).then(function(problems) {
                 var pbs = problems.problems;
-                assert(pbs, "There should always be problems");
-                assert.equal(pbs.length, 1, 'There should only be one problem per test');
                 var annot = pbs[0];
+                if(options.pid) {
+                    for(var i = 0; i < pbs.length; i++) {
+                        if(pbs[i].id === options.pid) {
+                            annot = pbs[i];
+                            break;
+                        }
+                    }
+                    assert(i !== pbs.length, "Did not find any problems for the expcted id: "+ options.pid);
+                } else {
+                    assert(pbs, "There should always be problems");
+                    assert.equal(pbs.length, 1, 'There should only be one problem per test');
+                }
                 annot.title = annot.description;
                 return obj.fixComputer.execute(obj.editorContext, {annotation: annot});
             });
@@ -88,7 +98,7 @@ define([
     	 * @param {String} id The id of the rule used to update the preferences in javascript/validator#updated
     	 * @param {Number} severity The severity of the problem or null (which defaults to '2')
     	 * @param {String} opts The optional args for a rule. For example no-missing-doc has 'decl' and 'expr' as optional args
-    	 * @returns returns
+    	 * @returns {Object} Returns a new rule object for testing with
     	 */
     	function createTestRule(id, severity, opts) {
 	        var rule = Object.create(null);
@@ -452,6 +462,37 @@ define([
 		    return getFixes({buffer: 'var a = {}', 
 		                      rule: rule,
 		                      expected: expected});
+		});
+	//NO-UNUSED-VARS-UNUSED
+	    it("Test no-unused-vars-unused-1", function() {
+		    var rule = createTestRule('no-unused-vars');
+		    var expected = {value: "",
+		                    start: 0, 
+		                    end: 6};
+		    return getFixes({buffer: 'var a;', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'no-unused-vars-unused'});
+		});
+		it("Test no-unused-vars-unused-2", function() {
+		    var rule = createTestRule('no-unused-vars');
+		    var expected = {value: "",
+		                    start: 10, 
+		                    end: 13};
+		    return getFixes({buffer: 'var a = 10, b;', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'no-unused-vars-unused'});
+		});
+		it("Test no-unused-vars-unused-3", function() {
+		    var rule = createTestRule('no-unused-vars');
+		    var expected = {value: "",
+		                    start: 12, 
+		                    end: 15};
+		    return getFixes({buffer: 'var a = 10, b, c = 1;', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'no-unused-vars-unused'});
 		});
 	});
 });
