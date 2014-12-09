@@ -170,6 +170,25 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 			return deferred;
 		},
 
+		_findManifest: function(location){
+			var deferred = new Deferred();
+
+			fileClient.fetchChildren(location).then(function(children){
+
+				var manifests = children.filter(function(child) {
+					return child.Name === "manifest.yml"; //$NON-NLS-0$
+				});
+
+				if(manifests.length === 0)
+					deferred.resolve(null);
+				else
+					deferred.resolve(manifests[0]);
+
+			}, deferred.reject);
+
+			return deferred;
+		},
+
 		deploy: function(project, launchConf) {
 			var that = this;
 			var deferred = new Deferred();
@@ -202,6 +221,42 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 			return deferred;
 		},
 
+		/* determines the deployment paths using the selected folder and project location. */
+		_getDeploymentPaths: function(project, relativeFilePath, appPath){
+			var deferred = new Deferred();
+			var self = this;
+
+			if(project.ContentLocation === relativeFilePath){
+				/* use the project root as deployment path */
+				deferred.resolve({
+					path: relativeFilePath,
+					appPath: appPath
+				});
+
+				return deferred;
+			}
+
+			/* check if there's a manifest in the selected sub-folder */
+			self._findManifest(relativeFilePath).then(function(manifest){
+
+				if(manifest !== null)
+					/* use the sub-folder manifest */
+					deferred.resolve({
+						path: relativeFilePath,
+						appPath: appPath
+					});
+				else
+					/* use the project as deployment path */
+					deferred.resolve({
+						path: project.ContentLocation,
+						appPath: "" /* Note that the appPath has to be updated as well */
+					});
+
+			}, deferred.reject);
+
+			return deferred;
+		},
+
 		_deploy: function(project, target, appName, appPath, deferred, launchConf, launchConfParams) {
 			if (target && appName) {
 
@@ -213,18 +268,15 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 					else deferred.reject(error);
 				};
 
+				var self = this;
 				this._getAdditionalLaunchConfigurations(launchConf, project).then(function(manifest) {
 					var func = arguments.callee.bind(this);
 
 					if (manifest === null) {
 						/* could not find the launch configuration manifest, get the main manifest.yml if present */
-						fileClient.fetchChildren(project.ContentLocation).then(function(children) {
+						self._findManifest(project.ContentLocation).then(function(manifest) {
 
-							var manifests = children.filter(function(child) {
-								return child.Name === "manifest.yml"; //$NON-NLS-0$
-							});
-
-							if (manifests.length === 0) {
+							if (manifest === null) {
 
 								/* the deployment will not succeed anyway */
 								deferred.reject({
@@ -235,7 +287,7 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 
 							} else {
 
-								cFService.getManifestInfo(manifests[0].Location, true).then(function(manifest) {
+								cFService.getManifestInfo(manifest.Location, true).then(function(manifest) {
 									func(manifest.Contents);
 								}, deferred.reject);
 
@@ -291,54 +343,42 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 				var orionHomeUrl = new URL(PageLinks.getOrionHome());
 
 				if (relativeFilePath.indexOf(orionHomeUrl.origin) === 0) relativeFilePath = relativeFilePath.substring(orionHomeUrl.origin.length);
-
 				if (relativeFilePath.indexOf(orionHomeUrl.pathname) === 0) relativeFilePath = relativeFilePath.substring(orionHomeUrl.pathname.length);
 
-				cFService.getDeploymentPlans(relativeFilePath).then(function(resp) {
-					var plans = resp.Children;
+				this._getDeploymentPaths(project, relativeFilePath, appPath).then(function(paths){
 
-					/* find feasible deployments */
-					var feasibleDeployments = [];
-					plans.forEach(function(plan) {
+					/* update paths according to the current policy */
+					var path = paths.path;
+					appPath = paths.appPath;
 
-						var wizard;
-						wizardReferences.forEach(function(ref) {
-							if (ref.getProperty("id") === plan.Wizard && !wizard) //$NON-NLS-0$
-							wizard = ref;
+					cFService.getDeploymentPlans(path).then(function(resp) {
+						var plans = resp.Children;
+
+						/* find feasible deployments */
+						var feasibleDeployments = [];
+						plans.forEach(function(plan) {
+
+							var wizard;
+							wizardReferences.forEach(function(ref) {
+								if (ref.getProperty("id") === plan.Wizard && !wizard) //$NON-NLS-0$
+								wizard = ref;
+							});
+
+							if (wizard) {
+								feasibleDeployments.push({
+									wizard: serviceRegistry.getService(wizard),
+									plan: plan
+								});
+							}
 						});
 
-						if (wizard) {
-							feasibleDeployments.push({
-								wizard: serviceRegistry.getService(wizard),
-								plan: plan
-							});
-						}
-					});
-
-					var nonGenerics = feasibleDeployments.filter(function(deployment) {
-						return deployment.plan.ApplicationType !== "generic"; //$NON-NLS-0$
-					});
-
-					/* single deployment scenario */
-					if (feasibleDeployments.length === 1) {
-						var deployment = feasibleDeployments[0];
-						deployment.wizard.getInitializationParameters().then(function(initParams) {
-							deferred.resolve({
-								UriTemplate: initParams.LocationTemplate + "#" + encodeURIComponent(JSON.stringify({ //$NON-NLS-0$
-									ContentLocation: project.ContentLocation,
-									AppPath: appPath,
-									Plan: deployment.plan
-								})),
-								Width: initParams.Width,
-								Height: initParams.Height,
-								UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate" //$NON-NLS-0$
-							});
+						var nonGenerics = feasibleDeployments.filter(function(deployment) {
+							return deployment.plan.ApplicationType !== "generic"; //$NON-NLS-0$
 						});
-					} else {
 
-						if (nonGenerics[0].plan.Required.length === 0) {
-							/* multiple deployment scenarios, but a single non-generic */
-							var deployment = nonGenerics[0];
+						/* single deployment scenario */
+						if (feasibleDeployments.length === 1) {
+							var deployment = feasibleDeployments[0];
 							deployment.wizard.getInitializationParameters().then(function(initParams) {
 								deferred.resolve({
 									UriTemplate: initParams.LocationTemplate + "#" + encodeURIComponent(JSON.stringify({ //$NON-NLS-0$
@@ -352,29 +392,48 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 								});
 							});
 						} else {
-							/* TODO: Support this case in wizards */
-							var generic;
-							feasibleDeployments.forEach(function(deployment) {
-								if (deployment.plan.ApplicationType === "generic" && !generic) //$NON-NLS-0$
-								generic = deployment;
-							});
 
-							var deployment = generic;
-							deployment.wizard.getInitializationParameters().then(function(initParams) {
-								deferred.resolve({
-									UriTemplate: initParams.LocationTemplate + "#" + encodeURIComponent(JSON.stringify({ //$NON-NLS-0$
-										ContentLocation: project.ContentLocation,
-										AppPath: appPath,
-										Plan: deployment.plan
-									})),
-									Width: initParams.Width,
-									Height: initParams.Height,
-									UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate" //$NON-NLS-0$
+							if (nonGenerics[0].plan.Required.length === 0) {
+								/* multiple deployment scenarios, but a single non-generic */
+								var deployment = nonGenerics[0];
+								deployment.wizard.getInitializationParameters().then(function(initParams) {
+									deferred.resolve({
+										UriTemplate: initParams.LocationTemplate + "#" + encodeURIComponent(JSON.stringify({ //$NON-NLS-0$
+											ContentLocation: project.ContentLocation,
+											AppPath: appPath,
+											Plan: deployment.plan
+										})),
+										Width: initParams.Width,
+										Height: initParams.Height,
+										UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate" //$NON-NLS-0$
+									});
 								});
-							});
+							} else {
+								/* TODO: Support this case in wizards */
+								var generic;
+								feasibleDeployments.forEach(function(deployment) {
+									if (deployment.plan.ApplicationType === "generic" && !generic) //$NON-NLS-0$
+									generic = deployment;
+								});
+
+								var deployment = generic;
+								deployment.wizard.getInitializationParameters().then(function(initParams) {
+									deferred.resolve({
+										UriTemplate: initParams.LocationTemplate + "#" + encodeURIComponent(JSON.stringify({ //$NON-NLS-0$
+											ContentLocation: project.ContentLocation,
+											AppPath: appPath,
+											Plan: deployment.plan
+										})),
+										Width: initParams.Width,
+										Height: initParams.Height,
+										UriTemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate" //$NON-NLS-0$
+									});
+								});
+							}
 						}
-					}
-				});
+					});
+
+				}, deferred.reject);
 			}
 		},
 
