@@ -33,7 +33,14 @@ define(['orion/Deferred'], function(Deferred) {
 		_initialize: function(themeInfo, themeData, prefs) {
 			var styles, selected;
 			var prefsVer = prefs.get('version'); //$NON-NLS-0$
-			if (this._themeVersion === undefined || (prefsVer && prefsVer >> 0 === this._themeVersion >> 0)) {
+			var currentVer = 0;
+			try {
+				prefsVer = parseFloat(prefsVer);
+				currentVer = parseFloat(this._themeVersion);
+			} catch (e) {
+			}
+			
+			if (prefsVer === currentVer) {
 				// Version matches (or ThemeData hasn't provided an expected version). Trust prefs
 				styles = prefs.get(themeInfo.styleset);
 				selected = prefs.get('selected'); //$NON-NLS-0$
