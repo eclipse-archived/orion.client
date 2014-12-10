@@ -72,7 +72,7 @@ define([
 	 * @param {orion.progress.ProgressService} [progressService=null] Optional. If defined progress is reported while downloading.
 	 */
 	function FileDownloader(fileClient, statusService, progressService) {
-		this.fileClinet = fileClient;
+		this.fileClient = fileClient;
 		this.statusService = statusService;
 		this.progressService = progressService;
 	}
@@ -109,7 +109,7 @@ define([
 			if(this.statusService && this.statusService.setProgressResult) {
 				this.statusService.setProgressResult({Message: messages["Downloading..."]});
 			}
-			return progress(this.fileClinet.readBlob(fileMetaData.Location), messages["Downloading..."], fileMetaData.Location).then(function(contents) {
+			return progress(this.fileClient.readBlob(fileMetaData.Location), messages["Downloading..."], fileMetaData.Location).then(function(contents) {
 				if(this.statusService && this.statusService.setProgressMessage) {
 					this.statusService.setProgressMessage("");
 				}
