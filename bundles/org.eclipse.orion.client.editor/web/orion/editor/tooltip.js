@@ -183,7 +183,6 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		*/
 		show: function(target, giveFocus) {
 			if (!target) { return; }
-			console.log("CP: " + target.clientX + "," + target.clientY);
 			
 			// Do we need to process this one ?
 			if (this._isInRect(this._hoverRect, target.clientX, target.clientY)) {
@@ -346,8 +345,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					height: this._anchorRect.height + divBounds.height + 5
 				};
 			}
-			console.log("HR: " + this._hoverRect.left + ',' + this._hoverRect.top
-			+ ',' + this._hoverRect.width + ',' + this._hoverRect.height);
+
 			this._tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
 
 			if (giveFocus === true) {
