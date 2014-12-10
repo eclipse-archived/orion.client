@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/plugin', 'orion/editor/stylers/text_x-ruby/syntax'], function(PluginProvider, mRuby) {
+define(['orion/plugin', 'orion/editor/stylers/text_x-ruby/syntax', 'orion/editor/stylers/text_x-haml/syntax'], function(PluginProvider, mRuby, mHaml) {
 
 	/**
 	 * Plug-in headers
@@ -23,7 +23,7 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-ruby/syntax'], function(Plu
 	var provider = new PluginProvider(headers);
 
 	/**
-	 * Register the Ruby content type
+	 * Register the Ruby content types
 	 */
 	provider.registerServiceProvider("orion.core.contenttype", {}, {
 		contentTypes: [
@@ -34,11 +34,21 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-ruby/syntax'], function(Plu
 			}
 		] 
 	});
+	provider.registerServiceProvider("orion.core.contenttype", {}, {
+		contentTypes: [
+			{	id: "text/x-haml",
+				"extends": "text/plain",
+				name: "Haml",
+				extension: ["haml"]
+			}
+		] 
+	});
 
 	/**
 	 * Register syntax styling
 	 */
 	provider.registerServiceProvider("orion.edit.highlighter", {}, mRuby.grammars[mRuby.grammars.length - 1]);
+	provider.registerServiceProvider("orion.edit.highlighter", {}, mHaml.grammars[mHaml.grammars.length - 1]);
 
 	provider.connect();
 });
