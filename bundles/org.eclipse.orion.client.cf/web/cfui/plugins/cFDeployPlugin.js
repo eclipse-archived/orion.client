@@ -24,7 +24,7 @@ require(["cfui/plugins/cFDeployService", "orion/plugin"], function(CFDeployServi
 			id: "org.eclipse.orion.client.cf.deploy",
 			deployTypes: ["Cloud Foundry"],
 			nls: "cfui/nls/messages",
-			nameKey: "deploy.cf",
+			nameKey: localStorage.getItem("darklaunch") === "true" ? "createNew" : "deploy.cf",
 			tooltipKey: "deploy.cf.tooltip",
 			validationProperties: [{source: "NoShow" }],
 			logLocationTemplate: "{+OrionHome}/cfui/logs.html#{Name,Target*}",

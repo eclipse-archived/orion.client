@@ -21,7 +21,7 @@
 	background: white;
 	border-radius: 3px;
 	display: inline-block;
-	margin-right: 10px;
+	margin: 1px 0 0 10px;
 	min-height: 29px;
 	min-width: 270px;
 	transition: opacity 0.3s ease;
@@ -37,8 +37,38 @@
 	vertical-align: baseline;
 }
 
-.launchConfigurationsWrapper > .dropdownMenuOpen {
-	min-width: 160px;
+.launchConfigurationsWrapper > .dropdownMenu {
+	display: block;
+	padding-bottom: 0;
+	-webkit-transform: scaleY(0);
+	-ms-transform: scaleY(0);
+	transform: scaleY(0);
+	-webkit-transform-origin: top;
+	-ms-transform-origin: top;	
+	transform-origin: top;
+	transition: transform 0.2s ease;
+	visibility: visible;
+}
+
+.launchConfigurationsWrapper > .dropdownMenu.dropdownMenuOpen {
+	min-width: 300px;
+	-webkit-transform: scaleY(1);
+	-ms-transform: scaleY(1);
+	transform: scaleY(1);
+}
+
+.launchConfigurationMenuItem > .dropdownMenuItem {
+	padding: 9px 3px 9px 5px;
+}
+
+.dropdownMenu.dropdownMenuOpen > li > .addNewMenuItem {
+	background-color: whitesmoke;
+	border-left-color: transparent;
+	padding-left: 0;
+}
+
+.launchConfigurationDeleteButton.orionButton {
+
 }
 
 .runBarButton {

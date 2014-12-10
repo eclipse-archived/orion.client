@@ -672,6 +672,11 @@ a.breadcrumb.currentLocation {
 }
 
 .dropdownMenuItem .dropdownCommandName {
+	-webkit-align-items: center;		/* Safari */
+	align-items: center;
+	display: inline-flex;
+	display: -webkit-inline-flex;		/* Safari */
+	
 	flex-grow: 1;
 	-webkit-flex-grow: 1;		/* Safari */
 	text-decoration: inherit; /* inherit hover decoration when inside an <a> */

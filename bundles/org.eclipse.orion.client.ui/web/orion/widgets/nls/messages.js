@@ -71,7 +71,7 @@ define({
 		"No": "No",
 		"DeleteSearchTrmMsg": "Click or use delete key to delete the search term",
 		"Application": "Application",
-		"selectLaunchConfig": "Select a configuration to run",
+		"selectLaunchConfig": "Applications in project",
 		"createNew": "Create New...",
 		"Running": "Running",
 		"checkingStateMessage": "Checking status of ${0}",

@@ -85,6 +85,8 @@ define([
 		_createLaunchConfigurationsDropdown: function() {
 			this._cachedLaunchConfigurations = {};
 			
+			var separator;
+			
 			// function which populates the launch configurations dropdown menu
 			var populateFunction = function(parent) {
 				if (this._menuItemsCache && this._menuItemsCache.length > 0) {
@@ -100,6 +102,7 @@ define([
 						if (this._cachedLaunchConfigurations.hasOwnProperty(hash)) {
 							launchConfiguration = this._cachedLaunchConfigurations[hash];
 							menuItem = dropdown.appendMenuItem(launchConfiguration.Name);
+							menuItem.classList.add("launchConfigurationMenuItem"); //$NON-NLS-0$
 							menuItem.id = launchConfiguration.Name + "_RunBarMenuItem"; //$NON-NLS-0$
 							
 							menuItem.addEventListener("click", function(currentHash, event){ //$NON-NLS-0$
@@ -111,22 +114,32 @@ define([
 							}.bind(this, hash)); // passing in hash here because using it directly in function only creates a reference which ends up with the last value of hash
 							
 							this._commandRegistry.registerCommandContribution(menuItem.id, "orion.launchConfiguration.delete", 1); //$NON-NLS-0$
-							this._commandRegistry.renderCommands(menuItem.id, menuItem, launchConfiguration, this, "tool"); //$NON-NLS-0$
+							var domNodeWrapperList = [];
+							this._commandRegistry.renderCommands(menuItem.id, menuItem.firstChild, launchConfiguration, this, "tool", null, domNodeWrapperList); //$NON-NLS-0$
+							domNodeWrapperList[0].domNode.classList.remove("commandMargins"); //$NON-NLS-0$
+							domNodeWrapperList[0].domNode.classList.add("launchConfigurationDeleteButton"); //$NON-NLS-0$
 							
 							this._menuItemsCache.push(menuItem);
+							
+							separator = dropdown.appendSeparator();
+							this._menuItemsCache.push(separator);
 						}
 					}
 					
-					var separator = dropdown.appendSeparator();
+					separator = dropdown.appendSeparator();
 					this._menuItemsCache.push(separator);
-					
-					var createNewItem = dropdown.appendMenuItem(messages["createNew"]); //$NON-NLS-0$
+
+					var createNewItem = dropdown.appendMenuItem(); //$NON-NLS-0$
+					createNewItem.id = "CreateNew_RunBarMenuItem"; //$NON-NLS-0$
 					this._menuItemsCache.push(createNewItem);
 					
+					var dropdownMenuItemSpan = lib.$(".dropdownMenuItem", createNewItem); //$NON-NLS-0$
+					dropdownMenuItemSpan.classList.add("addNewMenuItem"); //$NON-NLS-0$
+					
 					var defaultDeployCommand = this._projectCommands.getDeployProjectCommands(this._commandRegistry)[0];
-					createNewItem.addEventListener("click", function(event){ //$NON-NLS-0$
-						this._commandRegistry.runCommand(defaultDeployCommand.id, this._projectExplorer.treeRoot, this, null, null, this._launchConfigurationsWrapper); //$NON-NLS-0$
-					}.bind(this));
+					
+					this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommand.id, 1); //$NON-NLS-0$
+					this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._projectExplorer.treeRoot, this, "button", null, domNodeWrapperList); //$NON-NLS-0$
 				}
 			}.bind(this);
 			

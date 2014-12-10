@@ -427,7 +427,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		
 		/**
 		 * Creates a new menu item and appends it to the bottom of this dropdown.
-		 * @param {String} text The text to display inside the new menu item. Required.
+		 * @param {String} text The text to display inside the new menu item. Optional.
 		 * @param {String} innerNodeType The type of the inner node to create. The default is "span". Optional.
 		 * @returns {Object} The top-most new element that was created
 		 */
@@ -450,7 +450,7 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 	
 	/**
 	 * Creates a new menu item and returns it to the caller.
-	 * @param {String} text The text to display inside the new menu item. Required.
+	 * @param {String} text The text to display inside the new menu item. Optional.
 	 * @param {String} innerNodeType The type of the inner node to create. The default is "span". Optional.
 	 * @returns {Object} The top-most new element that was created
 	 */
@@ -461,11 +461,13 @@ define(['orion/webui/littlelib', 'orion/EventTarget'], function(lib, EventTarget
 		element.tabIndex = 0;
 		element.className = "dropdownMenuItem"; //$NON-NLS-0$
 		element.role = "menuitem";  //$NON-NLS-0$
-	
-		var span = document.createElement("span");  //$NON-NLS-0$
-		span.appendChild(document.createTextNode(text));
-		span.classList.add("dropdownCommandName"); //$NON-NLS-0$
-		element.appendChild(span);
+		
+		if (text) {
+			var span = document.createElement("span");  //$NON-NLS-0$
+			span.appendChild(document.createTextNode(text));
+			span.classList.add("dropdownCommandName"); //$NON-NLS-0$
+			element.appendChild(span);
+		}
 	 	
 	 	var li = document.createElement("li"); //$NON-NLS-0$
 	 	li.appendChild(element); //$NON-NLS-0$
