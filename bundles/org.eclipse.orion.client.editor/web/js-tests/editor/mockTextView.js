@@ -233,8 +233,19 @@ define([
 			var s = this._getSelection();
 			return {start: s.start, end: s.end};
 		},
+		getSelections: function () {
+			return [this.getSelection()];
+		},
 		getText: function(start, end) {
 			return this._model.getText(start, end);
+		},
+		setOptions: function (options) {
+			for (var option in options) {
+				if (options.hasOwnProperty(option)) {
+					var newValue = options[option];
+					this["_" + option] = clone(newValue); //$NON-NLS-0$
+				}
+			}
 		},
 		setSelection: function (start, end, show, callback) {
 			var caret = start > end;
