@@ -633,7 +633,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 								item.status = {State: "PROGRESS"};
 								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
 							}
-							(start ? service.start : service.stop)(launchConfToPass).then(function(result){
+							progress.showWhile((start ? service.start : service.stop)(launchConfToPass).then(function(result){
 								item.status = result;
 								if(sharedLaunchConfigurationDispatcher){
 									sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
@@ -687,13 +687,13 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 								} else {
 									errorHandler(error);
 								}
-							});
+							}), (start ? "Starting application" : "Stopping application"));
 						}
 					});
 				},
 				visibleWhen: function(items) {
 					var item = forceSingleItem(items);
-					return item.ServiceId && item.Name && item.status && (start ? item.status.State==="STOPPED" : item.status.State==="STARTED");
+					return item.ServiceId && item.Name && item.status && (start ? true /*item.status.State==="STOPPED"*/ : item.status.State==="STARTED");
 				}
 			});
 			commandService.addCommand(stopApplicationCommand);

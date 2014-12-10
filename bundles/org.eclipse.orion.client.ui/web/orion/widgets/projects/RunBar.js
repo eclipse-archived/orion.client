@@ -63,6 +63,10 @@ define([
 				this._boundPlayButtonListener = this._playButtonListener.bind(this);
 				this._playButton.addEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$ 
 				
+				this._deployButton = lib.$("button.deployButton", this._domNode); //$NON-NLS-0$
+				this._boundDeployButtonListener = this._deployButtonListener.bind(this);
+				this._deployButton.addEventListener("click", this._boundDeployButtonListener); //$NON-NLS-0$ 
+				
 				this._stopButton = lib.$("button.stopButton", this._domNode); //$NON-NLS-0$
 				this._boundStopButtonListener = this._stopButtonListener.bind(this);
 				this._stopButton.addEventListener("click", this._boundStopButtonListener); //$NON-NLS-0$
@@ -141,6 +145,7 @@ define([
 				this._launchConfigurationDispatcher.removeEventListener(eventType, this._boundLaunchConfigurationListener);
 			}, this);
 			this._playButton.removeEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$
+			this._deployButton.removeEventListener("click", this._boundDeployButtonListener); //$NON-NLS-0$
 			this._stopButton.removeEventListener("click", this._boundStopButtonListener); //$NON-NLS-0$
 			
 		},
@@ -255,7 +260,7 @@ define([
 			this._disableAllControls();
 			
 			if (status.error) {
-				this._enableControl(this._playButton);
+				this._enableDeployControl();
 				if (status.error.Retry) {
 					this._setStatusTitle(null);
 				} else {
@@ -326,11 +331,16 @@ define([
 			var hash = this._getHash(launchConfiguration);
 			delete this._cachedLaunchConfigurations[hash];
 		},
+		
+		_deployButtonListener: function() {
+			if (this._isEnabled(this._deployButton)) {
+				this._commandRegistry.runCommand("orion.launchConfiguration.deploy", this._selectedLaunchConfiguration, this, null, null, this._playButton); //$NON-NLS-0$
+			}
+		},
 
 		_playButtonListener: function() {
 			if (this._isEnabled(this._playButton)) {
-				// TODO check if app is already running and confirm with user if they want to restart it
-				this._commandRegistry.runCommand("orion.launchConfiguration.deploy", this._selectedLaunchConfiguration, this, null, null, this._playButton); //$NON-NLS-0$
+				this._commandRegistry.runCommand("orion.launchConfiguration.startApp", this._selectedLaunchConfiguration, this, null, null, this._playButton); //$NON-NLS-0$
 			}
 		},
 		
@@ -346,7 +356,16 @@ define([
 		
 		_disableAllControls: function() {
 			this._disableControl(this._playButton);
+			this._playButton.classList.remove("hidden"); //$NON-NLS-0$
+			this._disableControl(this._deployButton);
+			this._deployButton.classList.add("hidden"); //$NON-NLS-0$
 			this._disableControl(this._stopButton);
+		},
+		
+		_enableDeployControl: function(domNode) {
+			this._deployButton.classList.remove("disabled"); //$NON-NLS-0$
+			this._deployButton.classList.remove("hidden"); //$NON-NLS-0$
+			this._playButton.classList.add("hidden"); //$NON-NLS-0$
 		},
 		
 		_enableControl: function(domNode) {

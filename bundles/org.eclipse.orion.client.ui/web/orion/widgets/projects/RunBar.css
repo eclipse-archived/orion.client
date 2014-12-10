@@ -67,6 +67,18 @@
 	content: '\25ba'; /* Unicode - BLACK RIGHT-POINTING POINTER */
 }
 
+.deployButton {
+	color: #333333;
+	display: inline-block;
+	font: 20px Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana;
+	margin-right: 4px;
+	padding: 0;
+}
+
+.deployButton:before {
+	content: '\25ba'; /* Unicode - BLACK RIGHT-POINTING POINTER */
+}
+
 .stopButton {
 	display: inline-block;
 	height: 25px;
