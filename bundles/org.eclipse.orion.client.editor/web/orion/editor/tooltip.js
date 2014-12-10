@@ -100,12 +100,14 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			var viewRect = { x: startPos.x, y: startPos.y, 
 								width: endPos.x - startPos.x, height: height};
 								
-			viewRect = this._view.convert(viewRect, "document", "page");
+			viewRect = this._view.convert(viewRect, "document", "page"); //$NON-NLS-0$ //$NON-NLS-1$
 			this._anchorRect = {left: viewRect.x, top: viewRect.y, 
 								width: viewRect.width, height: viewRect.height};
 		},
 		_isInRect: function(rect, x, y) {
-			if (!rect) return false;
+			if (!rect){
+				return false;
+			}
 			var xOK = x >= rect.left && x <= (rect.left + rect.width);
 			var yOK = y >= rect.top && y <= (rect.top + rect.height);
 			return xOK && yOK;
@@ -132,15 +134,16 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				this._tooltipContents.innerHTML = "";
 			}
 			this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
-			this._tooltipDiv.style.left = "auto";
-			this._tooltipDiv.style.right = "auto";			
-			this._tooltipDiv.style.top = "auto";			
-			this._tooltipDiv.style.bottom = "auto";			
+			this._tooltipDiv.style.left = "auto"; //$NON-NLS-0$
+			this._tooltipDiv.style.right = "auto";		 //$NON-NLS-0$	
+			this._tooltipDiv.style.top = "auto";	 //$NON-NLS-0$		
+			this._tooltipDiv.style.bottom = "auto";		 //$NON-NLS-0$	
 			
 			this._target = undefined;
 			this._anchor = undefined;
 			this._anchorRect = undefined;
 			this._hoverRect = undefined;
+			this._preventTooltipClose = undefined;
 		},
 		/**
 		 * @name isVisible
@@ -152,22 +155,49 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		isVisible: function() {
 			return this._tooltipDiv && this._tooltipDiv.style.visibility === "visible"; //$NON-NLS-0$
 		},
+		/**
+		 * @name OKToHover
+		 * @description Returns whether a new hover can be opened in the editor.  New hovers
+		 * may be prevented from opening because an existing hover has focus or is otherwise unready
+		 * to be closed. Provide x,y coordinates to check if that location is within the bounding rectangle
+		 * around the tooltip.
+		 * @function
+		 * @param x Location to check if within bounds, usually a cursor location
+		 * @param y Location to check if within bounds, usually a cursor location
+		 * @returns {Boolean} returns whether a new hover can be opened in the editor
+		 */
 		OKToHover: function(x, y) {
-			if (!this.isVisible())
+			if (!this.isVisible()){
 				return true;
-			
-			if (this._hasFocus())
+			}
+			if (this._preventTooltipClose && this._preventTooltipClose()){
 				return false;
-				
+			}
+			if (this._hasFocus()){
+				return false;
+			}
 			return !this._isInRect(this._anchorRect, x, y);
 		},
+		/**
+		 * @name OKToHide
+		 * @description Returns whether an existing hover should be hidden or if it should stay open.
+		 * A hover may stay open if it has focus or the user's mouse x and y coordinates are within the bounding
+		 * rectangle around the tooltip.
+		 * @function
+		 * @param x Location to check if within bounds, usually a cursor location
+		 * @param y Location to check if within bounds, usually a cursor location
+		 * @returns {Boolean} returns whether the existing hover should be closed
+		 */
 		OKToHide: function(x, y) {
-			if (!this.isVisible())
+			if (!this.isVisible()){
 				return false;
-			
-			if (this._hasFocus())
+			}
+			if (this._preventTooltipClose && this._preventTooltipClose()){
 				return false;
-				
+			}
+			if (this._hasFocus()){
+				return false;
+			}
 			return !this._isInRect(this._hoverRect, x, y);
 		},
 		/**
@@ -263,21 +293,34 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			
 			if (info.anchor === "right") { //$NON-NLS-0$
 				var right = documentElement.clientWidth - info.x;
-				//tooltipDiv.style.right = right + "px"; //$NON-NLS-0$
+				tooltipDiv.style.right = right + "px"; //$NON-NLS-0$
 				tooltipDiv.style.maxWidth = (documentElement.clientWidth - right - 10) + "px"; //$NON-NLS-0$
 			} else {
 				var left = parseInt(this._getNodeStyle(tooltipDiv, "padding-left", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
 				left += parseInt(this._getNodeStyle(tooltipDiv, "border-left-width", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
 				left = info.x - left;
-				//tooltipDiv.style.left = left + "px"; //$NON-NLS-0$
+				tooltipDiv.style.left = left + "px"; //$NON-NLS-0$
 				tooltipDiv.style.maxWidth = (documentElement.clientWidth - left - 10) + "px"; //$NON-NLS-0$
 			}
+			
+			if (info.width) {
+				tooltipDiv.style.width = info.width + "px"; //$NON-NLS-0$
+			}
+			if (info.height) {
+				tooltipDiv.style.height = info.height + "px"; //$NON-NLS-0$
+				tooltipDiv.style.overflowY = "auto"; //$NON-NLS-0$
+			}
+			
 			var top = parseInt(this._getNodeStyle(tooltipDiv, "padding-top", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
 			top += parseInt(this._getNodeStyle(tooltipDiv, "border-top-width", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
 			top = info.y - top;
-			//tooltipDiv.style.top = top + "px"; //$NON-NLS-0$
+			tooltipDiv.style.top = top + "px"; //$NON-NLS-0$
 			tooltipDiv.style.maxHeight = (documentElement.clientHeight - top - 10) + "px"; //$NON-NLS-0$
 			tooltipDiv.style.opacity = "1"; //$NON-NLS-0$
+			
+			if (info.preventTooltipClose){
+				this._preventTooltipClose = info.preventTooltipClose;
+			}
 			
 			var self = this;
 			if (hoverInfo) {
@@ -303,8 +346,9 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 		},
 		_showTooltip: function(giveFocus, tooltipDiv) {
-			if (this.isVisible())
+			if (this.isVisible()){
 				return;
+			}
 
 			// HACK! Fake a contentBox if necessary
 			if (!this._anchorRect) {
@@ -312,9 +356,9 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				var curOffset = this._view.getOffsetAtLocation(this._target.x, this._target.y);
 				if (curOffset >= 0) {
 					var start = this._view.getNextOffset(curOffset, 
-										{ unit: "word", count: -1});
+										{ unit: "word", count: -1}); //$NON-NLS-0$
 					var end = this._view.getNextOffset(curOffset, 
-										{ unit: "word", count: 0});
+										{ unit: "word", count: 0}); //$NON-NLS-0$
 					this._setContentRange(start, end);
 				} else {
 					this._anchorRect = {
@@ -327,18 +371,18 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			
 			// Align the tooltip with the anchor rect
 			var divBounds = lib.bounds(tipDiv);
-			if (this._anchor === 'right') {
+			if (this._anchor === 'right') { //$NON-NLS-0$
 				var rightEdge = this._anchorRect.left + this._anchorRect.width;
-				tipDiv.style.left = (rightEdge - divBounds.width) + "px";
-				tipDiv.style.top = (this._anchorRect.top + this._anchorRect.height + 5) + "px";
+				tipDiv.style.left = (rightEdge - divBounds.width) + "px"; //$NON-NLS-0$
+				tipDiv.style.top = (this._anchorRect.top + this._anchorRect.height + 5) + "px"; //$NON-NLS-0$
 				this._hoverRect = {
 					left: rightEdge - divBounds.width, top: this._anchorRect.top,
 					width: divBounds.width,
 					height: this._anchorRect.height + divBounds.height + 5
 				};
 			} else {
-				tipDiv.style.left = this._anchorRect.left + "px";
-				tipDiv.style.top = (this._anchorRect.top + this._anchorRect.height + 5) + "px";
+				tipDiv.style.left = this._anchorRect.left + "px"; //$NON-NLS-0$
+				tipDiv.style.top = (this._anchorRect.top + this._anchorRect.height + 5) + "px"; //$NON-NLS-0$
 				this._hoverRect = {
 					left: this._anchorRect.left, top: this._anchorRect.top,
 					width: divBounds.width,
@@ -503,8 +547,8 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				if (self.hover) {
 					self.hover.renderQuickFixes(annotation, result);
 					var buttons = lib.$$("button", result); //$NON-NLS-0$
-					for (var i=0; i<buttons.length; i++) {
-						buttons[i].addEventListener("click", function() { //$NON-NLS-0$
+					for (var k=0; k<buttons.length; k++) {
+						buttons[k].addEventListener("click", function() { //$NON-NLS-0$
 							self.hide(0);
 						});
 					}

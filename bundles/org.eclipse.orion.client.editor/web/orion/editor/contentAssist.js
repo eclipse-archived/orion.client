@@ -940,33 +940,52 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				this.widget.selectNode(newIndex);
 			}
 			
-//			var tooltip = mTooltip.Tooltip.getTooltip(this.contentAssist.textView);
-//			var self = this;
-//			tooltip.hide(0);
-//			tooltip.setTarget({
-//				x: 400,
-//				y: 400,
-//				getTooltipInfo: function() {
-//					return self._getTooltipInfo(this.x, this.y);
-//				}
-//			}, 0, 5000);
+			this._showTooltip();
 			
 			return true;
 		},
-
-		/** @private */
-//		_getTooltipInfo: function(x, y) {
-//			var bounds = lib.bounds(this.widget.parentNode);
-//			var info = {
-//				contents: this.proposals[this.selectedIndex].name,
-//				offset: 0,
-//				anchor: "left", //$NON-NLS-0$
-//				x: bounds.left + bounds.width + 10,
-//				y: bounds.top + (bounds.height/2)
-//			};
-//			return info;
-//		},
 		
+		_showTooltip: function() {
+			// TODO Uncomment this to enable tooltips on content assist
+//			var tooltip = mTooltip.Tooltip.getTooltip(this.contentAssist.textView);
+//			var self = this;
+//			tooltip.hide(0);
+//			tooltip.show({
+//				getTooltipInfo: function() {
+//					var bounds = lib.bounds(self.widget.parentNode);
+//					var anchor = "left"; //$NON-NLS-0$
+//					var x = bounds.left + bounds.width + 10;
+//					var y = bounds.top + 5;
+//					if ((bounds.left + bounds.width) >= document.documentElement.clientWidth){
+//						anchor = "right"; //$NON-NLS-0$
+//						x -= (bounds.width + 15);
+//					}
+//					var info = {
+//						contents: self.proposals[self.selectedIndex].name,
+//						offset: 0,
+//						anchor: anchor,
+//						x: x,
+//						y: y,
+//						width: 350,
+//						height: bounds.height - 10 ,
+//						preventTooltipClose : function() {
+//							if (self.widget && self.widget.isShowing){
+//								return true;
+//							}
+//							return false;
+//						}
+//					};
+//					return info;
+//				}
+//			}, false);
+		},
+		
+		_hideTooltip: function() {
+			// TODO Uncomment this to enable tooltips on content assist
+//			var tooltip = mTooltip.Tooltip.getTooltip(this.contentAssist.textView);
+//			tooltip.hide(0);
+		},
+
 		pageUp: function() {
 			//TODO find out why this doesn't always go to the very top
 			if (this.widget) {
@@ -1141,7 +1160,6 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					
 					var descriptionNode = document.createTextNode(proposal.description);
 					node.appendChild(descriptionNode);
-					div.setAttribute("title", proposal.name + proposal.description); //$NON-NLS-0$
 				} else {
 					plainString = proposal.description;
 				}
@@ -1152,7 +1170,6 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			
 			if (plainString) {
 				node = this._createNameNode(plainString);
-				div.setAttribute("title", plainString); //$NON-NLS-0$
 			}
 			
 			node.contentAssistProposalIndex = index;
@@ -1309,6 +1326,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				this.parentNode.onclick = this.onClick.bind(this);
 				this.isShowing = true;
 				
+				this._contentAssistMode._showTooltip();
+				
 				if (!this.textViewListenerAdded) {
 					this.textView.addEventListener("MouseDown", this.textViewListener.onMouseDown); //$NON-NLS-0$
 					this.textViewListenerAdded = true;
@@ -1322,6 +1341,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this.parentNode.style.display = "none"; //$NON-NLS-0$
 			this.parentNode.onclick = null;
 			this.isShowing = false;
+			
+			this._contentAssistMode._hideTooltip();
 			
 			if (this.textViewListenerAdded) {
 				this.textView.removeEventListener("MouseDown", this.textViewListener.onMouseDown); //$NON-NLS-0$
