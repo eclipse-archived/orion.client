@@ -341,8 +341,8 @@ define([
 			name: "define", //$NON-NLS-0$
 			nodes: {top:true, member:false, prop:false},
 			description: " - define function call",  //$NON-NLS-0$
-			template: "/* global define */\n"+
-					  "define('${name}',[\n"+  //$NON-NLS-0$
+			template: "/* eslint-env amd */\n"+
+					  "define('${name}', [\n"+  //$NON-NLS-0$
 					  "'${import}'\n"+  //$NON-NLS-0$
 					  "], function(${importname}) {\n"+  //$NON-NLS-0$
 					  "\t${cursor}\n"+  //$NON-NLS-0$
