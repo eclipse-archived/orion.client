@@ -537,17 +537,19 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 						);
 						return;
 					}
-						
-					cfLauncherService.startApp(launchConf.Url, "holydiver").then(
+					
+					cfLauncherService.stopApp(launchConf.Url).then(
 						function(result){
-							deferred.resolve({
-								State: (result.state !== "stop" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
-								Message: "Application in debug mode [" + result.state + "]"
-							});
-						}, function(error){
-							deferred.reject(error);
-						}
-					);
+							cfLauncherService.startApp(launchConf.Url).then(
+								function(result){
+									deferred.resolve({
+										State: (result.state !== "stop" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
+										Message: "Application in debug mode [" + result.state + "]"
+									});
+								}, deferred.reject
+							);
+						}, deferred.reject
+					)
 				}, function(error){
 					if (error.HttpCode === 0){
 						that._startCFWithLogin(launchConf).then(
