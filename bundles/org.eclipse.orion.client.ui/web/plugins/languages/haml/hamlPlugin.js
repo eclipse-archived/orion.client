@@ -10,27 +10,27 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/plugin', 'orion/editor/stylers/text_x-ruby/syntax'], function(PluginProvider, mRuby) {
+define(['orion/plugin', 'orion/editor/stylers/text_x-haml/syntax'], function(PluginProvider, mHaml) {
 
 	/**
 	 * Plug-in headers
 	 */
 	var headers = {
-		name: "Orion Ruby Tool Support",
+		name: "Orion Haml Tool Support",
 		version: "1.0",
-		description: "This plugin provides Ruby tools support for Orion."
+		description: "This plugin provides Haml tools support for Orion."
 	};
 	var provider = new PluginProvider(headers);
 
 	/**
-	 * Register the Ruby content type
+	 * Register the Haml content type
 	 */
 	provider.registerServiceProvider("orion.core.contenttype", {}, {
 		contentTypes: [
-			{	id: "text/x-ruby",
+			{	id: "text/x-haml",
 				"extends": "text/plain",
-				name: "Ruby",
-				extension: ["rb", "rbx", "rjs", "Rakefile", "rake", "cgi", "fcgi", "gemspec", "irbrc", "capfile", "ru", "prawn", "Gemfile", "Guardfile", "Vagrantfile", "Appraisals", "Rantfile"]
+				name: "Haml",
+				extension: ["haml"]
 			}
 		] 
 	});
@@ -38,7 +38,7 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-ruby/syntax'], function(Plu
 	/**
 	 * Register syntax styling
 	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mRuby.grammars[mRuby.grammars.length - 1]);
+	provider.registerServiceProvider("orion.edit.highlighter", {}, mHaml.grammars[mHaml.grammars.length - 1]);
 
 	provider.connect();
 });

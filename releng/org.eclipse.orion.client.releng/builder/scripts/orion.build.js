@@ -115,6 +115,7 @@
             { name: "plugins/languages/docker/dockerPlugin" },
             { name: "plugins/languages/erlang/erlangPlugin" },
             { name: "plugins/languages/go/goPlugin" },
+            { name: "plugins/languages/haml/hamlPlugin" },
             { name: "plugins/languages/java/javaPlugin" },
             { name: "plugins/languages/lua/luaPlugin" },
             { name: "plugins/languages/markdown/markdownPlugin" },

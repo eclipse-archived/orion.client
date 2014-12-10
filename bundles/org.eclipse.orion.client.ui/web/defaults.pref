@@ -18,6 +18,7 @@
 		"plugins/languages/docker/dockerPlugin.html":true,
 		"plugins/languages/erlang/erlangPlugin.html":true,
 		"plugins/languages/go/goPlugin.html":true,
+		"plugins/languages/haml/hamlPlugin.html":true,
 		"plugins/languages/java/javaPlugin.html":true,
 		"plugins/languages/lua/luaPlugin.html":true,
 		"plugins/languages/markdown/markdownPlugin.html":true,
