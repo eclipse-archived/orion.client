@@ -11,6 +11,8 @@
  *******************************************************************************/
  
 /*eslint-env browser, amd*/
+
+/*globals log*/
  
 define([
 	"orion/keyBinding",
