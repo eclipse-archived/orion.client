@@ -57,11 +57,6 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					self.hide();
 				}
 			}, false);
-//			textUtil.addEventListener(document, "mousedown", this._mouseDownHandler = function(event) { //$NON-NLS-0$
-//				if (!self.isVisible()) { return; }
-//				if (textUtil.contains(tooltipDiv, event.target || event.srcElement)) { return; }
-//				self.hide();
-//			}, true);
 			this._view.addEventListener("Destroy", function() { //$NON-NLS-0$
 				self.destroy();
 			});
@@ -138,7 +133,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 			this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
 			this._tooltipDiv.style.left = "auto";
-			this._tooltipDiv.style.top = "auto";
+			this._tooltipDiv.style.right = "auto";			
+			this._tooltipDiv.style.top = "auto";			
+			this._tooltipDiv.style.bottom = "auto";			
+			
 			this._target = undefined;
 			this._anchor = undefined;
 			this._anchorRect = undefined;
@@ -288,7 +286,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					Deferred.when(info, function (data) {
 						if (data) {
 							if (self._renderContent(tooltipDoc, tooltipContents, data)) {
-								self._showTooltip();
+								self._showTooltip(giveFocus, tooltipDiv);
 							}
 						}
 					}, function(error) {
@@ -302,14 +300,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			
 			// Delay the showing of a tootip with no 'static' contents
 			if (contents) {
-				this._showTooltip();
-			}
-			
-			if (giveFocus === true) {
-				this._setInitialFocus(tooltipDiv);
+				this._showTooltip(giveFocus, tooltipDiv);
 			}
 		},
-		_showTooltip: function() {
+		_showTooltip: function(giveFocus, tooltipDiv) {
 			if (this.isVisible())
 				return;
 
@@ -355,14 +349,29 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			console.log("HR: " + this._hoverRect.left + ',' + this._hoverRect.top
 			+ ',' + this._hoverRect.width + ',' + this._hoverRect.height);
 			this._tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
+
+			if (giveFocus === true) {
+				this._setInitialFocus(tooltipDiv);
+			}
 		},
 		_setInitialFocus: function(tooltipDiv) {
-			var buttons = lib.$$("button", tooltipDiv); //$NON-NLS-0$
-			if (buttons && buttons.length > 0) {
-				buttons[0].focus();
+			// Any buttons ?
+			var button = lib.$("button", tooltipDiv); //$NON-NLS-0$
+			if (button) {
+				button.focus();
 				return;
 			}
-
+			// Any links ?
+			var link = lib.$("a", tooltipDiv); //$NON-NLS-0$
+			if (link) {
+				link.focus();
+				var self = this;
+				link.addEventListener("click", function() { //$NON-NLS-0$
+					self.hide();
+				});
+				return;
+			}
+			// Give up and focus on the first tabbable
 			var toFocus = lib.firstTabbable(tooltipDiv);
 			if (toFocus) {
 				toFocus.focus();
@@ -501,7 +510,6 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 							self.hide(0);
 						});
 					}
-
 				}
 				
 				// Set the anchor rect to the annotation if it's not already set

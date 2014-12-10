@@ -349,7 +349,6 @@ define("orion/editor/rulers", [
 			
 			this._curElement = e.target ? e.target : e.srcElement;
 			
-			console.log("onMouseMove");
 			var self = this;
 			self._hoverTimeout = window.setTimeout(function() {
 				self._hoverTimeout = null;
@@ -409,6 +408,11 @@ define("orion/editor/rulers", [
 			// TODO: shouldn't this check the length, it'll never be null
 			if (!contents) { return null; }
 			var anchorRect = lib.bounds(this._curElement); //.parentNode);
+			if (typeof contents === 'string') {
+				// Hack for line numbers
+				anchorRect.top = y;
+				anchorRect.height = 1;
+			}
 			var info = {
 				contents: contents,
 				anchor: this.getLocation(),
