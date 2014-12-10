@@ -1073,7 +1073,34 @@ define([
 		        }
 		    }
 		    return null;
-		}
+		},
+		
+		/**
+		 * @description Tries to find the comment for the given node. If more than one is found in the array
+		 * the last entry is considered 'attached' to the node
+		 * @function
+		 * @private
+		 * @param {Object} node The AST node
+		 * @returns {Object} The comment object from the AST or null
+		 * @since 8.0
+		 */
+		findCommentForNode: function findCommentForNode(node) {
+		    var comments = node.leadingComments;
+		    var comment = null;
+	        if(comments && comments.length > 0) {
+	            //simple case: the node has an attaced comment, take the last comment in the leading array
+	            comment = comments[comments.length-1];
+	            if(comment.type === 'Block') {
+    	            comment.node = node;
+    	            return comment;
+	            }
+	        }
+            //we still want to show a hover for something with no doc
+            comment = Object.create(null);
+            comment.node = node;
+            comment.value = '';
+	        return comment;
+		},
 		
 	};
 

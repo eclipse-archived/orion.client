@@ -334,7 +334,7 @@ define([
 					} else {
 						keyType = typeUtils.OBJECT_TYPE;
 					}
-					env.addVariable(property.key.name, node, keyType, property.key.range, docComment.range);
+					env.addVariable(property.key.name, node, keyType, property.key.range, docComment);
 					property.key.extras.associatedComment = docComment;
 					// remember that this is the LHS so that we don't add the identifier to global scope
 					property.key.extras.isLHS = property.key.extras.isDecl = true;
@@ -463,7 +463,7 @@ define([
 				// if we have a name, then add it to the scope.  make sure we add the name
 				// *before* calling initFunctionType(), which creates a new scope for within
 				// the function
-				env.addVariable(name, node.extras.target, newFunctionType, nameRange, docComment.range);
+				env.addVariable(name, node.extras.target, newFunctionType, nameRange, docComment);
 			}
 			env.initFunctionType(functionTypeObj,node,newFunctionType,isConstructor ? newTypeObj.name : undefined);
 			if (isConstructor) {
@@ -491,7 +491,7 @@ define([
 					if (typeUtils.isPrototypeName(ownerTypeName)) {
 						ownerTypeName = typeUtils.extractReturnType(ownerTypeName);
 					}
-					env.addVariable("this", node.extras.target, typeUtils.createNameType(ownerTypeName), nameRange, docComment.range);
+					env.addVariable("this", node.extras.target, typeUtils.createNameType(ownerTypeName), nameRange, docComment);
 				}
 			}
 

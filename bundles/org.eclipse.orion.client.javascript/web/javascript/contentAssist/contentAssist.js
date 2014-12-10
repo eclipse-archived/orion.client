@@ -27,9 +27,10 @@ define([
 	'javascript/finder',
 	'javascript/signatures',
 	'eslint/load-rules-async',
-	'eslint/conf/environments'
+	'eslint/conf/environments',
+	'javascript/hover'
 ], function(typeEnv, typeInf, typeUtils, proposalUtils, mTemplates, JSSyntax, Templates, Deferred, Objects, Estraverse, Indexer,
-            Finder, Signatures, Rules, ESLintEnv) {
+            Finder, Signatures, Rules, ESLintEnv, Hover) {
 
 	/**
 	 * @description Creates a new delegate to create keyword and template proposals
@@ -942,7 +943,7 @@ define([
                 if(!definition.$$doc) {
                     hover += proposal.name;
                 } else {
-                    hover += definition.$$doc;
+                    hover += Hover.formatMarkdownHover(definition.$$doc).content;
                 }
                 if(definition.$$url) {
                     hover += '\n\n[Online documentation]('+definition.$$url+')';

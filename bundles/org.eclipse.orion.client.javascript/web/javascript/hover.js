@@ -19,6 +19,300 @@ define([
 'doctrine'
 ], function(Objects, Finder, Signatures, URITemplate) {
 	
+	
+	/**
+	 * @description Formats the hover info as markdown text
+	 * @param {Object} node The AST node or {@link Definition}
+	 * @returns returns
+	 */
+	function formatMarkdownHover(node) {
+	    if(!node) {
+	        return null;
+	    }
+	    try {
+	        var format = Object.create(null);
+	        var comment = Finder.findCommentForNode(node);
+	        if(typeof node === "string") {
+	           comment.value = node;
+	        }
+	        if(comment) {
+		        var doc = doctrine.parse(comment.value, {recoverable:true, unwrap : true});
+		        format.params = [];
+		        format.desc = (doc.description ? doc.description : '');
+		        if(doc.tags) {
+		            var len = doc.tags.length;
+		            for(var i = 0; i < len; i++) {
+		                var tag = doc.tags[i];
+		                switch(tag.title) {
+		                    case 'name': {
+		                        if(tag.name) {
+		                          format.name = tag.name; 
+		                        }
+		                        break;
+		                    }
+		                    case 'description': {
+		                        if(tag.description !== null) {
+		                          format.desc = (format.desc === '' ? tag.description : format.desc+'\n'+tag.description);
+		                        }
+		                        break;
+		                    }
+		                    case 'param': {
+		                        format.params.push(_convertTagType(tag.type) +
+		                                  (tag.name ? '__'+tag.name+'__ ' : '') + 
+		                                  (tag.description ? tag.description+'\n' : ''));
+		                        break;
+		                    }
+		                    case 'returns': 
+		                    case 'return': {
+		                        format.returns = _convertTagType(tag.type) +
+		                              (tag.description ? tag.description+'\n' : '');
+		                         break;
+		                    }
+		                    case 'since': {
+		                        if(tag.description) {
+		                          format.since = tag.description;
+		                        }
+		                        break;
+		                    }
+		                    case 'function': {
+		                        format.isfunc = true;
+		                        break;
+		                    }
+		                    case 'constructor': {
+		                        format.iscon = true;
+		                        break;
+		                    }
+		                    case 'private': {
+		                        format.isprivate = true;
+		                        break; 
+		                    }
+	                }
+		            }
+		        }
+	        }
+	        if(comment.node) {
+    	        var name = Signatures.computeSignature(comment.node);
+    	        var title = '###';
+    	        if(format.isprivate) {
+    	            title += 'private ';
+    	        }
+    	        if(format.iscon) {
+    	            title += 'constructor ';
+    	        }
+    	        title += name.sig+'###';
+	        }
+	        var hover = '';
+	        if(format.desc !== '') {
+	            hover += format.desc+'\n\n';
+	        }
+	        if(format.params.length > 0) {
+	            hover += '__Parameters:__\n\n';
+	            for(i = 0; i < format.params.length; i++) {
+	                hover += '>'+format.params[i] + '\n\n';
+	            }
+	        }
+	        if(format.returns) {
+	            hover += '__Returns:__\n\n>' + format.returns + '\n\n';
+	        }
+	        if(format.since) {
+	            hover += '__Since:__\n\n>'+format.since;
+	        }
+	        //TODO scope this to not show when you are on a decl
+	        /**var href = new URITemplate("#{,resource,params*}").expand(
+	                      {
+	                      resource: metadata.location, 
+	                      params: {start:node.range[0], end: node.range[1]}
+	                      }); //$NON-NLS-0$
+	        hover += '\n\n\n  [Jump to declaration]('+href+')';*/
+	    }
+	    catch(e) {
+	        //add on the wad of text for now
+	        hover += comment;
+	    }
+	    return {content: hover, title: title, type:'markdown'};
+	}
+	
+	/**
+	 * @description Formats the hover info as HTML
+	 * @function
+	 * @private
+	 * @param {Object} node The AST node
+	 * @returns returns
+	 */
+	function formatHtmlHover(node) {
+	    if(!node) {
+	        return null;
+	    }
+	    try {
+	        var format = Object.create(null);
+	        var comment = Finder.findCommentForNode(node);
+	        if(typeof node === "string") {
+	           comment.value = node;
+	        }
+	        if(comment) {
+		        var doc = doctrine.parse(comment.value, {recoverable:true, unwrap : true});
+		        format.params = [];
+		        format.desc = (doc.description ? doc.description : '');
+		        if(doc.tags) {
+		            var len = doc.tags.length;
+		            for(var i = 0; i < len; i++) {
+		                var tag = doc.tags[i];
+		                switch(tag.title) {
+		                    case 'name': {
+		                        if(tag.name) {
+		                          format.name = tag.name; 
+		                        }
+		                        break;
+		                    }
+		                    case 'description': {
+		                        if(tag.description !== null) {
+		                          format.desc = (format.desc === '' ? tag.description : format.desc+'\n'+tag.description);
+		                        }
+		                        break;
+		                    }
+		                    case 'param': {
+		                        format.params.push('<i>' + _convertTagType(tag.type) + '</i>' +
+		                                  (tag.name ? '<b>'+tag.name+'</b> ' : '') + 
+		                                  (tag.description ? tag.description+'\n' : ''));
+		                        break;
+		                    }
+		                    case 'returns': 
+		                    case 'return': {
+		                        format.returns = _convertTagType(tag.type) +
+		                              (tag.description ? tag.description+'\n' : '');
+		                         break;
+		                    }
+		                    case 'since': {
+		                        if(tag.description) {
+		                          format.since = tag.description;
+		                        }
+		                        break;
+		                    }
+		                    case 'function': {
+		                        format.isfunc = true;
+		                        break;
+		                    }
+		                    case 'constructor': {
+		                        format.iscon = true;
+		                        break;
+		                    }
+		                    case 'private': {
+		                        format.isprivate = true;
+		                        break; 
+		                    }
+	                }
+		            }
+		        }
+	        }
+	        
+	        var hover = '<style>\n' +
+	        			'.monospace {\n' +
+	        			'font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;' + 
+	        			'}\n' +
+	        			'div {\n' +
+	        			'margin: 5px, 0\n' + 
+	        			'}</style>\n';
+	        			
+	        hover += '<div >\n';
+	        
+	        if(comment.node) {
+    	        // Name
+    	        var name = Signatures.computeSignature(comment.node);
+    	        hover += '<div class="monospace"><b>';
+    	        if(format.isprivate) {
+    	            hover += 'private ';
+    	        }
+    	        if(format.iscon) {
+    	            hover += 'constructor ';
+    	        }
+    	        hover += name.sig;
+    	        hover += '</b></div>\n';
+	        }
+	        // Description
+	        if(format.desc !== '') {
+	            hover += '<div style="margin-top: 5px">' + format.desc + '</div>\n';
+	        }
+	        if(format.params.length > 0) {
+	            hover += '<div style="margin-top: 5px"><b>Parameters:</b></div>\n';
+	            for(i = 0; i < format.params.length; i++) {
+	                hover += '<div style="margin-left: 10px">'+format.params[i] + '</div>\n';
+	            }
+	        }
+	        if(format.returns) {
+	            hover += '<div style="margin-top: 5px"><b>Returns:</b></div>\n';
+	            hover += '<div style="margin-left: 10px">' + format.returns + '</div>\n';
+	        }
+	        if(format.since) {
+	            hover += '<div style="margin-top: 5px"><b>Since:</b> ' + format.since + '</div>\n';
+	        }
+	        //TODO scope this to not show when you are on a decl
+	        /**var href = new URITemplate("#{,resource,params*}").expand(
+	                      {
+	                      resource: metadata.location, 
+	                      params: {start:node.range[0], end: node.range[1]}
+	                      }); //$NON-NLS-0$
+	        hover += '\n\n\n  [Jump to declaration]('+href+')';*/
+	       
+	       hover += '</div>';
+	    }
+	    catch(e) {
+	        //add on the wad of text for now
+	        hover += comment;
+	    }
+	    return {content: hover, type:'html'};
+	}
+	
+	/**
+	 * @description Converts the doctrine tag type to a simple form to appear in the hover
+	 * @private
+	 * @param {Object} tag Teh doctrine tag object
+	 * @returns {String} The simple name to display for the given doctrine tag type
+	 */
+	function _convertTagType(type) {
+	    if(!type) {
+	        return '';
+	    }
+        switch(type.type) {
+            case 'NameExpression': {
+                if(type.name) {
+                  return '*('+type.name+')* ';
+                }
+                break;
+            }
+            case 'RecordType': {
+                return '*(Object)* ';
+            }
+            case 'FunctionType': {
+                return '*(Function)* ';
+            }
+            case 'NullableType': 
+            case 'NonNullableType':
+            case 'OptionalType':
+            case 'RestType': {
+                return _convertTagType(type.expression);
+            }
+            case 'TypeApplication': {
+                //we only want to care about the first part i.e. Object[] vs. Object.<string, etc>
+                if(type.expression.name === 'Array') {
+                    //we need to grab the first application
+                    if(type.applications && type.applications.length > 0) {
+	                    return '*('+type.applications[0].name+'[])* ';
+	                }
+                }
+                return _convertTagType(type.expression);
+            }
+            case 'UnionType': 
+            case 'ArrayType': {
+                if(type.elements && type.elements.length > 0) {
+                    //always just take the first type
+                    return _convertTagType(type.elements[0]);
+                }
+                break;
+            }
+            default: return '';
+        }
+	}
+	
 	/**
 	 * @name javascript.JavaScriptHover
 	 * @description creates a new instance of the hover
@@ -54,16 +348,16 @@ define([
 			    if(node) {
 			        switch(node.type) {
 			            case 'Identifier': {
-			                return that._formatHover(that._getIdentifierHover(node, ctxt.offset, ast), editorContext);
+			                return formatMarkdownHover(that._getIdentifierHover(node, ctxt.offset, ast), editorContext);
 			            }
 			            case 'FunctionDeclaration': {
-			                return that._formatHover(node);
+			                return formatMarkdownHover(node);
 			            }
 			            case 'FunctionExpression': {
-			                return that._formatHover(that._getFunctionExprHover(node));
+			                return formatMarkdownHover(that._getFunctionExprHover(node));
 			            }
 			            case 'CallExpression': {
-        	               return that._formatHover(that._getCallExprHover(node, ctxt.offset, ast), editorContext);
+        	               return formatMarkdownHover(that._getCallExprHover(node, ctxt.offset, ast), editorContext);
 			            }
 			            case 'Literal': {
 			                if(ctxt.offset <= node.range[0] || ctxt.offset >= node.range[1]) {
@@ -201,295 +495,6 @@ define([
 		},
 		
 		/**
-		 * @description Formats the hover info
-		 * @function
-		 * @private
-		 * @param {Object} node The AST node
-		 * @returns returns
-		 */
-		_formatHover: function _formatHover(node) {
-		    if(!node) {
-		        return null;
-		    }
-		    var that = this;
-		    try {
-		        var format = Object.create(null);
-		        var comment = this._getCommentFromNode(node);
-		        if(comment) {
-    		        var doc = doctrine.parse(comment.value, {recoverable:true, unwrap : true});
-    		        format.params = [];
-    		        format.desc = (doc.description ? doc.description : '');
-    		        if(doc.tags) {
-    		            var len = doc.tags.length;
-    		            for(var i = 0; i < len; i++) {
-    		                var tag = doc.tags[i];
-    		                switch(tag.title) {
-    		                    case 'name': {
-    		                        if(tag.name) {
-    		                          format.name = tag.name; 
-    		                        }
-    		                        break;
-    		                    }
-    		                    case 'description': {
-    		                        if(tag.description !== null) {
-    		                          format.desc = (format.desc === '' ? tag.description : format.desc+'\n'+tag.description);
-    		                        }
-    		                        break;
-    		                    }
-    		                    case 'param': {
-    		                        format.params.push(that._convertTagType(tag.type) +
-    		                                  (tag.name ? '__'+tag.name+'__ ' : '') + 
-    		                                  (tag.description ? tag.description+'\n' : ''));
-    		                        break;
-    		                    }
-    		                    case 'returns': 
-    		                    case 'return': {
-    		                        format.returns = that._convertTagType(tag.type) +
-    		                              (tag.description ? tag.description+'\n' : '');
-    		                         break;
-    		                    }
-    		                    case 'since': {
-    		                        if(tag.description) {
-    		                          format.since = tag.description;
-    		                        }
-    		                        break;
-    		                    }
-    		                    case 'function': {
-    		                        format.isfunc = true;
-    		                        break;
-    		                    }
-    		                    case 'constructor': {
-    		                        format.iscon = true;
-    		                        break;
-    		                    }
-    		                    case 'private': {
-    		                        format.isprivate = true;
-    		                        break; 
-    		                    }
-    	                }
-    		            }
-    		        }
-		        }
-		        var name = Signatures.computeSignature(comment.node);
-		        var title = '###';
-		        if(format.isprivate) {
-		            title += 'private ';
-		        }
-		        if(format.iscon) {
-		            title += 'constructor ';
-		        }
-		        title += name.sig+'###';
-		        var hover = '';
-		        if(format.desc !== '') {
-		            hover += format.desc+'\n\n';
-		        }
-		        if(format.params.length > 0) {
-		            hover += '__Parameters:__\n\n';
-		            for(i = 0; i < format.params.length; i++) {
-		                hover += '>'+format.params[i] + '\n\n';
-		            }
-		        }
-		        if(format.returns) {
-		            hover += '__Returns:__\n\n>' + format.returns + '\n\n';
-		        }
-		        if(format.since) {
-		            hover += '__Since:__\n\n>'+format.since;
-		        }
-		        //TODO scope this to not show when you are on a decl
-		        /**var href = new URITemplate("#{,resource,params*}").expand(
-		                      {
-		                      resource: metadata.location, 
-		                      params: {start:node.range[0], end: node.range[1]}
-		                      }); //$NON-NLS-0$
-		        hover += '\n\n\n  [Jump to declaration]('+href+')';*/
-		    }
-		    catch(e) {
-		        //add on the wad of text for now
-		        hover += comment;
-		    }
-		    return {content: hover, title: title, type:'markdown'};
-		},
-		
-		/**
-		 * @description Formats the hover info as HTML
-		 * @function
-		 * @private
-		 * @param {Object} node The AST node
-		 * @returns returns
-		 */
-		_formatHtmlHover: function _formatHtmlHover(node) {
-		    if(!node) {
-		        return null;
-		    }
-		    var that = this;
-		    try {
-		        var format = Object.create(null);
-		        var comment = this._getCommentFromNode(node);
-		        if(comment) {
-    		        var doc = doctrine.parse(comment.value, {recoverable:true, unwrap : true});
-    		        format.params = [];
-    		        format.desc = (doc.description ? doc.description : '');
-    		        if(doc.tags) {
-    		            var len = doc.tags.length;
-    		            for(var i = 0; i < len; i++) {
-    		                var tag = doc.tags[i];
-    		                switch(tag.title) {
-    		                    case 'name': {
-    		                        if(tag.name) {
-    		                          format.name = tag.name; 
-    		                        }
-    		                        break;
-    		                    }
-    		                    case 'description': {
-    		                        if(tag.description !== null) {
-    		                          format.desc = (format.desc === '' ? tag.description : format.desc+'\n'+tag.description);
-    		                        }
-    		                        break;
-    		                    }
-    		                    case 'param': {
-    		                        format.params.push('<i>' + that._convertTagType(tag.type) + '</i>' +
-    		                                  (tag.name ? '<b>'+tag.name+'</b> ' : '') + 
-    		                                  (tag.description ? tag.description+'\n' : ''));
-    		                        break;
-    		                    }
-    		                    case 'returns': 
-    		                    case 'return': {
-    		                        format.returns = that._convertTagType(tag.type) +
-    		                              (tag.description ? tag.description+'\n' : '');
-    		                         break;
-    		                    }
-    		                    case 'since': {
-    		                        if(tag.description) {
-    		                          format.since = tag.description;
-    		                        }
-    		                        break;
-    		                    }
-    		                    case 'function': {
-    		                        format.isfunc = true;
-    		                        break;
-    		                    }
-    		                    case 'constructor': {
-    		                        format.iscon = true;
-    		                        break;
-    		                    }
-    		                    case 'private': {
-    		                        format.isprivate = true;
-    		                        break; 
-    		                    }
-    	                }
-    		            }
-    		        }
-		        }
-		        
-		        var hover = '<style>\n' +
-		        			'.monospace {\n' +
-		        			'font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;' + 
-		        			'}\n' +
-		        			'div {\n' +
-		        			'margin: 5px, 0\n' + 
-		        			'}</style>\n';
-		        			
-		        hover += '<div >\n';
-		        
-		        // Name
-		        var name = Signatures.computeSignature(comment.node);
-		        hover += '<div class="monospace"><b>';
-		        if(format.isprivate) {
-		            hover += 'private ';
-		        }
-		        if(format.iscon) {
-		            hover += 'constructor ';
-		        }
-		        hover += name.sig;
-		        hover += '</b></div>\n';
-		        
-		        // Description
-		        if(format.desc !== '') {
-		            hover += '<div style="margin-top: 5px">' + format.desc + '</div>\n';
-		        }
-		        if(format.params.length > 0) {
-		            hover += '<div style="margin-top: 5px"><b>Parameters:</b></div>\n';
-		            for(i = 0; i < format.params.length; i++) {
-		                hover += '<div style="margin-left: 10px">'+format.params[i] + '</div>\n';
-		            }
-		        }
-		        if(format.returns) {
-		            hover += '<div style="margin-top: 5px"><b>Returns:</b></div>\n';
-		            hover += '<div style="margin-left: 10px">' + format.returns + '</div>\n';
-		        }
-		        if(format.since) {
-		            hover += '<div style="margin-top: 5px"><b>Since:</b> ' + format.since + '</div>\n';
-		        }
-		        //TODO scope this to not show when you are on a decl
-		        /**var href = new URITemplate("#{,resource,params*}").expand(
-		                      {
-		                      resource: metadata.location, 
-		                      params: {start:node.range[0], end: node.range[1]}
-		                      }); //$NON-NLS-0$
-		        hover += '\n\n\n  [Jump to declaration]('+href+')';*/
-		       
-		       hover += '</div>';
-		    }
-		    catch(e) {
-		        //add on the wad of text for now
-		        hover += comment;
-		    }
-		    return {content: hover, type:'html'};
-		},
-		
-		/**
-		 * @description Converts the doctrine tag type to a simple form to appear in the hover
-		 * @function
-		 * @private
-		 * @param {Object} tag Teh doctrine tag object
-		 * @returns {String} The simple name to display for the given doctrine tag type
-		 */
-		_convertTagType: function _convertTagType(type) {
-		    if(!type) {
-		        return '';
-		    }
-	        switch(type.type) {
-	            case 'NameExpression': {
-	                if(type.name) {
-	                  return '*('+type.name+')* ';
-	                }
-	                break;
-	            }
-	            case 'RecordType': {
-	                return '*(Object)* ';
-	            }
-	            case 'FunctionType': {
-	                return '*(Function)* ';
-	            }
-	            case 'NullableType': 
-	            case 'NonNullableType':
-	            case 'OptionalType':
-	            case 'RestType': {
-	                return this._convertTagType(type.expression);
-	            }
-	            case 'TypeApplication': {
-	                //we only want to care about the first part i.e. Object[] vs. Object.<string, etc>
-	                if(type.expression.name === 'Array') {
-	                    //we need to grab the first application
-	                    if(type.applications && type.applications.length > 0) {
-    	                    return '*('+type.applications[0].name+'[])* ';
-    	                }
-	                }
-	                return this._convertTagType(type.expression);
-	            }
-	            case 'UnionType': 
-	            case 'ArrayType': {
-	                if(type.elements && type.elements.length > 0) {
-	                    //always just take the first type
-	                    return this._convertTagType(type.elements[0]);
-	                }
-	                break;
-	            }
-	            default: return '';
-	        }
-		},
-		
-		/**
 		 * @description Formats the list of files as links for the hover
 		 * @function
 		 * @private
@@ -526,6 +531,8 @@ define([
 	JavaScriptHover.prototype.contructor = JavaScriptHover;
 	
 	return {
-		JavaScriptHover: JavaScriptHover
+		JavaScriptHover: JavaScriptHover,
+		formatMarkdownHover: formatMarkdownHover,
+		formatHtmlHover: formatHtmlHover
 		};
 });
