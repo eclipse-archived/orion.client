@@ -701,7 +701,7 @@ a.breadcrumb.currentLocation {
 /* tooltips */
 
 .tooltipContainer {
-	visibility: hidden;
+	display: none;
 	z-index: 200;
 	background: transparent;
 	position: absolute;
@@ -822,7 +822,7 @@ a.breadcrumb.currentLocation {
 }
 
 .tooltipShowing {
-	visibility: visible;
+	display: block;
 }
 
 /* dialogs */

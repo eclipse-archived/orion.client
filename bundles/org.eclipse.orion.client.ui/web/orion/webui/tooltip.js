@@ -146,6 +146,8 @@ define(['orion/webui/littlelib'], function(lib) {
 		_positionTip: function(position, force) {
 			this._makeTipNode();  // lazy initialize
 			
+			this._tip.classList.add("tooltipShowing"); //$NON-NLS-0$
+			
 			// special case for left tooltip to ensure inner span is adjacent to tail.
 			if (position === "left") { //$NON-NLS-0$
 				this._tipInner.classList.add("left"); //$NON-NLS-0$
@@ -273,7 +275,6 @@ define(['orion/webui/littlelib'], function(lib) {
 			if (!positioned) {
 				this._positionTip(this._position[0], true);  // force it in, it doesn't fit anywhere
 			}
-			this._tip.classList.add("tooltipShowing"); //$NON-NLS-0$
 			if (this._afterShowing) {
 				this._afterShowing();
 			}
