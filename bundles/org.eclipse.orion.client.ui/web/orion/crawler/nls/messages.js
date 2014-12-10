@@ -8,14 +8,18 @@
  * 
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/i18n!orion/crawler/nls/messages', 'orion/crawler/nls/root/messages'], function(bundle, root) {
-	var result = {
-			root:root
-	};
-	Object.keys(bundle).forEach(function(key) {
-		if (typeof result[key] === 'undefined') {
-			result[key] = bundle[key];
-		}
-	});
-	return result;
+define({
+	root: {//Default message bundle
+		"filesFound": "${0} files found out of ${1}",
+		"searchCancelled": "Search cancelled by user",
+		"Cancel": "Cancel"
+	},
+	"ja": true,
+	"zh": true,
+	"zh-tw": true,
+	"fr": true,
+	"de": true,
+	"it": true,
+	"es": true,
+	"pt-br": true						
 });

@@ -8,14 +8,18 @@
  * 
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/i18n!orion/terminal/nls/messages', 'orion/terminal/nls/root/messages'], function(bundle, root) {
-	var result = {
-			root:root
-	};
-	Object.keys(bundle).forEach(function(key) {
-		if (typeof result[key] === 'undefined') {
-			result[key] = bundle[key];
-		}
-	});
-	return result;
+define({
+	root: {//Default message bundle
+		"Terminal": "Terminal",
+		"Open Terminal page": "Open the Terminal page.",
+		"Open Terminal page pwd": "Open the Terminal page with this folder as the current directory."
+	},
+	"ja": true,
+	"zh": true,
+	"zh-tw": true,
+	"fr": true,
+	"de": true,
+	"it": true,
+	"es": true,
+	"pt-br": true						
 });

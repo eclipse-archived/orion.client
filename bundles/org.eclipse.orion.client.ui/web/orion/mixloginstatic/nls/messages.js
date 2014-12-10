@@ -8,14 +8,20 @@
  * 
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/i18n!orion/mixloginstatic/nls/messages', 'orion/mixloginstatic/nls/root/messages'], function(bundle, root) {
-	var result = {
-			root:root
-	};
-	Object.keys(bundle).forEach(function(key) {
-		if (typeof result[key] === 'undefined') {
-			result[key] = bundle[key];
-		}
-	});
-	return result;
+define({
+	root: {//Default message bundle
+		"ExternalAccounts" : "Linked accounts:",
+		"AddExternalAccount" : "Add linked account:",
+		"ConfirmRemove" : "Are you sure you want to remove ${0} from the list of your external accounts?",
+		"Remove" : "Remove",
+		"RemoveExternalAccount" : "Remove ${0}",
+	},
+	"ja": true,
+	"zh": true,
+	"zh-tw": true,
+	"fr": true,
+	"de": true,
+	"it": true,
+	"es": true,
+	"pt-br": true						
 });

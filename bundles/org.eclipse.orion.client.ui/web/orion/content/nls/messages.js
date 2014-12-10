@@ -8,14 +8,21 @@
  * 
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/i18n!orion/content/nls/messages', 'orion/content/nls/root/messages'], function(bundle, root) {
-	var result = {
-			root:root
-	};
-	Object.keys(bundle).forEach(function(key) {
-		if (typeof result[key] === 'undefined') {
-			result[key] = bundle[key];
-		}
-	});
-	return result;
+define({
+	root: {//Default message bundle
+		"PluginContentNotFound": "Plugin content could not be found",
+		"ContentSavedMsg": "Content has been saved.  Click OK to go to the navigator, Cancel to keep editing.",
+		"ContentSavedData": "Content plugin ${0} has saved data.",
+		"Save": "Save",
+		"StoreFileMsg": "Click ${0} to store this file into Orion.",
+		"ResrcOutOfSync": "Resource is out of sync with the server. Do you want to save it anyway?"
+	},
+	"ja": true,
+	"zh": true,
+	"zh-tw": true,
+	"fr": true,
+	"de": true,
+	"it": true,
+	"es": true,
+	"pt-br": true						
 });
