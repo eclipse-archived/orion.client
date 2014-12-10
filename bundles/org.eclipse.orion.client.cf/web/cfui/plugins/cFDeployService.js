@@ -592,35 +592,39 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 			var deferred = new Deferred();
 			var params = launchConf.Params || {};
 			
-			cfLauncherService.getApp(launchConf.Url).then(
-				function(result){
-					if (!result.state){
-						that._stopCFWithLogin(launchConf).then(
-							deferred.resolve, deferred.reject
-						);
-						return;
-					}
-						
-					cfLauncherService.stopApp(launchConf.Url, "holydiver").then(
-						function(result){
-							deferred.resolve({
-								State: (result.state !== "stop" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
-								Message: "Application in debug mode [" + result.state + "]"
-							});
-						}, function(error){
-							deferred.reject(error);
-						}
-					);
-				}, function(error){
-					if (error.HttpCode === 0){
-						that._stopCFWithLogin(launchConf).then(
-							deferred.resolve, deferred.reject
-						);
-						return;
-					}
-					deferred.reject(error);
-				}
+			that._stopCFWithLogin(launchConf).then(
+				deferred.resolve, deferred.reject
 			);
+			
+//			cfLauncherService.getApp(launchConf.Url).then(
+//				function(result){
+//					if (!result.state){
+//						that._stopCFWithLogin(launchConf).then(
+//							deferred.resolve, deferred.reject
+//						);
+//						return;
+//					}
+//						
+//					cfLauncherService.stopApp(launchConf.Url, "holydiver").then(
+//						function(result){
+//							deferred.resolve({
+//								State: (result.state !== "stop" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
+//								Message: "Application in debug mode [" + result.state + "]"
+//							});
+//						}, function(error){
+//							deferred.reject(error);
+//						}
+//					);
+//				}, function(error){
+//					if (error.HttpCode === 0){
+//						that._stopCFWithLogin(launchConf).then(
+//							deferred.resolve, deferred.reject
+//						);
+//						return;
+//					}
+//					deferred.reject(error);
+//				}
+//			);
 			
 			return deferred;
 		},
