@@ -100,6 +100,7 @@ define([
 						if (this._cachedLaunchConfigurations.hasOwnProperty(hash)) {
 							launchConfiguration = this._cachedLaunchConfigurations[hash];
 							menuItem = dropdown.appendMenuItem(launchConfiguration.Name);
+							menuItem.id = launchConfiguration.Name + "_RunBarMenuItem"; //$NON-NLS-0$
 							
 							menuItem.addEventListener("click", function(currentHash, event){ //$NON-NLS-0$
 								// Use currentHash to get cached launch config again because it will be updated 
@@ -108,6 +109,9 @@ define([
 								var cachedConfig = this._cachedLaunchConfigurations[currentHash];
 								this.selectLaunchConfiguration(cachedConfig, true);
 							}.bind(this, hash)); // passing in hash here because using it directly in function only creates a reference which ends up with the last value of hash
+							
+							this._commandRegistry.registerCommandContribution(menuItem.id, "orion.launchConfiguration.delete", 1); //$NON-NLS-0$
+							this._commandRegistry.renderCommands(menuItem.id, menuItem, launchConfiguration, this, "tool"); //$NON-NLS-0$
 							
 							this._menuItemsCache.push(menuItem);
 						}

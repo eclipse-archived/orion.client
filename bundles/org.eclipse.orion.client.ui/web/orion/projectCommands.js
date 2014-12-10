@@ -784,7 +784,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			},
 			visibleWhen: function(items) {
 				var item = forceSingleItem(items);
-				return item.ServiceId && item.Name && item.status;
+				return item.ServiceId && item.Name;
 			}
 		});
 		commandService.addCommand(deleteLaunchConfigurationCommand);
