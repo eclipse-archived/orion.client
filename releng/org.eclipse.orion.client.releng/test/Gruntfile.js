@@ -125,7 +125,8 @@ module.exports = function(grunt) {
 			protocol: grunt.config.get("protocol"),
 			hostname: grunt.config.get("appHostname"),
 			port: grunt.config.get("appPort"),
-			pathname: url
+			pathname: url,
+			hash: "env=integration",
 		});
 		var suiteURLShort = url.replace(/\./g, "_") ;
 		grunt.config("saucelabs-mocha." + suiteURLShort + ".options", {
@@ -136,6 +137,7 @@ module.exports = function(grunt) {
 			tags: [env.BUILD_TAG || "master"], // FIXME tags seem to be ignored
 			onTestComplete: onTestComplete,
 			maxRetries: 1, // retry once on timeout
+			"max-duration":    120, // default: 180
 			testname: suiteURLShort,
 			urls: [suiteURL],
 		});

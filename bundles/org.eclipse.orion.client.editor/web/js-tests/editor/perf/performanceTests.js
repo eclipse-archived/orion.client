@@ -117,288 +117,292 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 			});
 		});
 
-		it("CaretUpDown", function() {
-			var d = new Deferred();
-			var buffer = "", i;
-			for (i = 0; i < 256;i++) {
-				buffer += "var id; function() {return 30;} var foo; ";
-			}
-			buffer += "\n";
-			for (i = 0; i < 256;i++) {
-				buffer += "var id; function() {return 30;} var foo; ";
-			}
-	
-			var max = 25;
-			var view = setupView(buffer, "js");
-			var start = new Date().getTime();
-			var caretLine = 0;
-			function t() {
-				if (caretLine === 0) {
-					view.invokeAction("lineDown");
-					caretLine = 1;
-				} else {
-					view.invokeAction("lineUp");
-					caretLine = 0;
+		// Put the slowest tests in their own category. This category is skipped during the nightly build since
+		// it's prone to timeouts in virtualized environments
+		var isBuild = location.hash.indexOf("env=integration") !== -1;
+		var describeOrSkip = isBuild ? describe.skip.bind(describe) : describe;
+		describeOrSkip("intense tests", function() {
+			it("CaretUpDown", function() {
+				var d = new Deferred();
+				var buffer = "", i;
+				for (i = 0; i < 256;i++) {
+					buffer += "var id; function() {return 30;} var foo; ";
 				}
-				if (--max > 0) {			
-					setTimeout(t, 0);
-				} else {
-					d.resolve(true);
-					log ("time(CaretUpDown)=", (new Date().getTime() - start));
+				buffer += "\n";
+				for (i = 0; i < 256;i++) {
+					buffer += "var id; function() {return 30;} var foo; ";
 				}
-			}
-			view.focus();
-			t();
-			return d;
-		});
 		
-		it("InsertText", function() {
-			var d = new Deferred();
-			var buffer = "", i;
-			for (i = 0; i < 512;i++) {
-				buffer += "var id; function() {return 30;} var foo; ";
-			}
-	
-			var max = 5;
-			var view = setupView(buffer, "js");
-			var start = new Date().getTime();
-			function t() {
-				view.setText("a", 0, 0);
-				if (--max > 0) {			
-					setTimeout(t, 0);
-				} else {
-					d.resolve(true);
-					log ("time(InsertText)=", (new Date().getTime() - start));
+				var max = 25;
+				var view = setupView(buffer, "js");
+				var start = new Date().getTime();
+				var caretLine = 0;
+				function t() {
+					if (caretLine === 0) {
+						view.invokeAction("lineDown");
+						caretLine = 1;
+					} else {
+						view.invokeAction("lineUp");
+						caretLine = 0;
+					}
+					if (--max > 0) {			
+						setTimeout(t, 0);
+					} else {
+						d.resolve(true);
+						log ("time(CaretUpDown)=", (new Date().getTime() - start));
+					}
 				}
-			}
-			view.focus();
-			t();
-			return d;
-		});
+				view.focus();
+				t();
+				return d;
+			});
+			
+			it("InsertText", function() {
+				var d = new Deferred();
+				var buffer = "", i;
+				for (i = 0; i < 512;i++) {
+					buffer += "var id; function() {return 30;} var foo; ";
+				}
 		
-		it("AppendText", function() {
-			var d = new Deferred();
-			var buffer = "", i;
-			var count = util.isIE ? 256 : 512; // reduce count for IE to avoid timeouts, since it performs poorly
-			for (i = 0; i < count;i++) {
-				buffer += "var id; function() {return 30;} var foo; ";
-			}
-	
-			var max = 5;
-			var view = setupView(buffer, "js");
-			var start = new Date().getTime();
-			function t() {
-				var charCount = view.getModel().getCharCount();
-				view.setText("a", charCount, charCount);
-				if (--max > 0) {			
-					setTimeout(t, 0);
-				} else {
-					d.resolve(true);
-					log ("time(AppendText)=", (new Date().getTime() - start));
+				var max = 5;
+				var view = setupView(buffer, "js");
+				var start = new Date().getTime();
+				function t() {
+					view.setText("a", 0, 0);
+					if (--max > 0) {			
+						setTimeout(t, 0);
+					} else {
+						d.resolve(true);
+						log ("time(InsertText)=", (new Date().getTime() - start));
+					}
 				}
-			}
-			view.focus();
-			t();
-			return d;
-		});
+				view.focus();
+				t();
+				return d;
+			});
+			
+			it("AppendText", function() {
+				var d = new Deferred();
+				var buffer = "", i;
+				var count = util.isIE ? 256 : 512; // reduce count for IE to avoid timeouts, since it performs poorly
+				for (i = 0; i < count;i++) {
+					buffer += "var id; function() {return 30;} var foo; ";
+				}
 		
-		it("ChangeText", function() {
-			var d = new Deferred();
-			var buffer = "", i;
-			for (i = 0; i < 512;i++) {
-				buffer += "var id; function() {return 30;} var foo; ";
-			}
-	
-			var max = 5;
-			var view = setupView(buffer, "js");
-			var offset = 8, insert = false;
-			var start = new Date().getTime();
-			function t() {
-				if (insert) {
-					view.setText("f", offset, offset);
-				} else {
-					view.setText("", offset, offset+1);
+				var max = 5;
+				var view = setupView(buffer, "js");
+				var start = new Date().getTime();
+				function t() {
+					var charCount = view.getModel().getCharCount();
+					view.setText("a", charCount, charCount);
+					if (--max > 0) {			
+						setTimeout(t, 0);
+					} else {
+						d.resolve(true);
+						log ("time(AppendText)=", (new Date().getTime() - start));
+					}
 				}
-				insert = !insert;
-				if (--max > 0) {			
-					setTimeout(t, 0);
-				} else {
-					d.resolve(true);
-					log ("time(ChangeText)=", (new Date().getTime() - start));
+				view.focus();
+				t();
+				return d;
+			});
+			
+			it("ChangeText", function() {
+				var d = new Deferred();
+				var buffer = "", i;
+				for (i = 0; i < 512;i++) {
+					buffer += "var id; function() {return 30;} var foo; ";
 				}
-			}
-			view.focus();
-			t();
-			return d;
-		});
 		
-		it("CaretNextPrevious", function() {
-			var d = new Deferred();
-			var buffer = "", i;
-			for (i = 0; i < 256;i++) {
-				buffer += "var id; function() {return 30;} var foo; ";
-			}
-			buffer += "\n";
-			for (i = 0; i < 256;i++) {
-				buffer += "var id; function() {return 30;} var foo; ";
-			}
+				var max = 5;
+				var view = setupView(buffer, "js");
+				var offset = 8, insert = false;
+				var start = new Date().getTime();
+				function t() {
+					if (insert) {
+						view.setText("f", offset, offset);
+					} else {
+						view.setText("", offset, offset+1);
+					}
+					insert = !insert;
+					if (--max > 0) {			
+						setTimeout(t, 0);
+					} else {
+						d.resolve(true);
+						log ("time(ChangeText)=", (new Date().getTime() - start));
+					}
+				}
+				view.focus();
+				t();
+				return d;
+			});
+			
+			it("CaretNextPrevious", function() {
+				var d = new Deferred();
+				var buffer = "", i;
+				for (i = 0; i < 256;i++) {
+					buffer += "var id; function() {return 30;} var foo; ";
+				}
+				buffer += "\n";
+				for (i = 0; i < 256;i++) {
+					buffer += "var id; function() {return 30;} var foo; ";
+				}
+		
+				var max = 15;
+				var view = setupView(buffer, "js");
+				var start = new Date().getTime();
+				var caret = buffer.indexOf("{"), initialCaret = caret;
+				view.setCaretOffset(caret);
+				function t() {
+					if (caret === initialCaret) {
+						view.invokeAction("charNext");
+						caret++;
+					} else {
+						view.invokeAction("charPrevious");
+						caret--;
+					}
+					if (--max > 0) {			
+						setTimeout(t, 0);
+					} else {
+						d.resolve(true);
+						log ("time(CaretNextPrevious)=", (new Date().getTime() - start));
+					}
+				}
+				view.focus();
+				t();
+				return d;
+			});
 	
-			var max = 15;
-			var view = setupView(buffer, "js");
-			var start = new Date().getTime();
-			var caret = buffer.indexOf("{"), initialCaret = caret;
-			view.setCaretOffset(caret);
-			function t() {
-				if (caret === initialCaret) {
-					view.invokeAction("charNext");
-					caret++;
-				} else {
-					view.invokeAction("charPrevious");
-					caret--;
+			it("ScrollLeft", function() {
+				var d = new Deferred();
+				var buffer = "";
+				for (var i = 0; i < 1000;i++) {
+					buffer += "var id; function() {return 30;} var foo; ";
 				}
-				if (--max > 0) {			
-					setTimeout(t, 0);
-				} else {
-					d.resolve(true);
-					log ("time(CaretNextPrevious)=", (new Date().getTime() - start));
+				var max = 128;
+				var view = setupView(buffer, "js");
+				var start = new Date().getTime();
+				var hscroll = -1;
+				function t() {
+					var newHscroll = view.getHorizontalPixel();
+					if (newHscroll !== hscroll && --max > 0) {			
+						hscroll = newHscroll;
+						view.setHorizontalPixel(hscroll + 4);
+						setTimeout(t, 0);
+					} else {
+						d.resolve(true);
+						log ("time(setHorizontalPixel)=", (new Date().getTime() - start));
+					}
 				}
-			}
-			view.focus();
-			t();
-			return d;
-		});
-
-		var testFunc = util.isIE ? it.skip.bind(it) : it;
-		// Skip ScrollLeft in IE since it's simply too slow: ~5 seconds *per call* to #getHorizontalPixel()
-		testFunc("ScrollLeft", function() {
-			var d = new Deferred();
-			var buffer = "";
-			for (var i = 0; i < 1000;i++) {
-				buffer += "var id; function() {return 30;} var foo; ";
-			}
-			var max = 128;
-			var view = setupView(buffer, "js");
-			var start = new Date().getTime();
-			var hscroll = -1;
-			function t() {
-				var newHscroll = view.getHorizontalPixel();
-				if (newHscroll !== hscroll && --max > 0) {			
-					hscroll = newHscroll;
-					view.setHorizontalPixel(hscroll + 4);
-					setTimeout(t, 0);
-				} else {
-					d.resolve(true);
-					log ("time(setHorizontalPixel)=", (new Date().getTime() - start));
+				view.focus();
+				t();
+				return d;
+			});
+	
+			it("GetLocationAtOffset", function() {
+				var d = new Deferred();
+				var count = 10;
+				var buffer = "";
+				for (var i = 0; i < 10;i++) {
+					buffer += "var nada for nada function " + i + " ";
 				}
-			}
-			view.focus();
-			t();
-			return d;
-		});
-
-		it("GetLocationAtOffset", function() {
-			var d = new Deferred();
-			var count = 10;
-			var buffer = "";
-			for (var i = 0; i < 10;i++) {
-				buffer += "var nada for nada function " + i + " ";
-			}
-			//test hit test without any styles
-			var view = setupView(buffer, null);
-			view.focus();
-			var start = new Date().getTime();
-			var length = buffer.length;
-			function t() {
-				for (var j = 0; j < length;j++) {
-					view.getLocationAtOffset(j);
+				//test hit test without any styles
+				var view = setupView(buffer, null);
+				view.focus();
+				var start = new Date().getTime();
+				var length = buffer.length;
+				function t() {
+					for (var j = 0; j < length;j++) {
+						view.getLocationAtOffset(j);
+					}
+					if (--count > 0) {
+						setTimeout(t, 0);
+					} else {
+						d.resolve(true);
+						log("time(getLocationAtOffset)=" + (new Date().getTime() - start));
+					}
 				}
-				if (--count > 0) {
-					setTimeout(t, 0);
-				} else {
-					d.resolve(true);
-					log("time(getLocationAtOffset)=" + (new Date().getTime() - start));
+				t();
+				return d;
+			});
+			it("GetLocationAtOffsetStyled", function() {
+				var d = new Deferred();
+				var count = 10;
+				var buffer = "";
+				for (var i = 0; i < 10;i++) {
+					buffer += "var nada for nada function " + i + " ";
 				}
-			}
-			t();
-			return d;
-		});
-		it("GetLocationAtOffsetStyled", function() {
-			var d = new Deferred();
-			var count = 10;
-			var buffer = "";
-			for (var i = 0; i < 10;i++) {
-				buffer += "var nada for nada function " + i + " ";
-			}
-			//test hit test with styles
-			var view = setupView(buffer, "js");
-			view.focus();
-			var start = new Date().getTime();
-			var length = buffer.length;
-			function t() {
-				for (var j = 0; j < length;j++) {
-					view.getLocationAtOffset(j);
+				//test hit test with styles
+				var view = setupView(buffer, "js");
+				view.focus();
+				var start = new Date().getTime();
+				var length = buffer.length;
+				function t() {
+					for (var j = 0; j < length;j++) {
+						view.getLocationAtOffset(j);
+					}
+					if (--count > 0) {
+						setTimeout(t, 0);
+					} else {
+						d.resolve(true);
+						log("time(getLocationAtOffset)[styled]=" + (new Date().getTime() - start));
+					}
 				}
-				if (--count > 0) {
-					setTimeout(t, 0);
-				} else {
-					d.resolve(true);
-					log("time(getLocationAtOffset)[styled]=" + (new Date().getTime() - start));
+				t();
+				return d;
+			});
+			it("GetOffsetAtLocation", function() {
+				var d = new Deferred();
+				var count = util.isIE ? 8 : 15; // reduce count for IE to avoid timeouts, since it performs poorly
+				var buffer = "";
+				for (var i = 0; i < 3;i++) {
+					buffer += "var nada for nada function " + i + " ";
 				}
-			}
-			t();
-			return d;
-		});
-		it("GetOffsetAtLocation", function() {
-			var d = new Deferred();
-			var count = util.isIE ? 8 : 15; // reduce count for IE to avoid timeouts, since it performs poorly
-			var buffer = "";
-			for (var i = 0; i < 3;i++) {
-				buffer += "var nada for nada function " + i + " ";
-			}
-			//test hit test without any styles
-			var view = setupView(buffer, null);
-			view.focus();
-			var location = view.getLocationAtOffset(buffer.length);
-			var start = new Date().getTime();
-			function t() {
-				for (var j = 0; j < location.x; j++) {
-					view.getOffsetAtLocation(j, location.y);
+				//test hit test without any styles
+				var view = setupView(buffer, null);
+				view.focus();
+				var location = view.getLocationAtOffset(buffer.length);
+				var start = new Date().getTime();
+				function t() {
+					for (var j = 0; j < location.x; j++) {
+						view.getOffsetAtLocation(j, location.y);
+					}
+					if (--count > 0) {
+						setTimeout(t, 0);
+					} else {
+						d.resolve(true);
+						log("time(getOffseAtLocation)=" + (new Date().getTime() - start));
+					}
 				}
-				if (--count > 0) {
-					setTimeout(t, 0);
-				} else {
-					d.resolve(true);
-					log("time(getOffseAtLocation)=" + (new Date().getTime() - start));
+				t();
+				return d;
+			});
+			it("GetOffsetAtLocationStyled", function() {
+				var d = new Deferred();
+				var count = 15;
+				var buffer = "";
+				for (var i = 0; i < 3;i++) {
+					buffer += "var nada for nada function " + i + " ";
 				}
-			}
-			t();
-			return d;
-		});
-		it("GetOffsetAtLocationStyled", function() {
-			var d = new Deferred();
-			var count = 15;
-			var buffer = "";
-			for (var i = 0; i < 3;i++) {
-				buffer += "var nada for nada function " + i + " ";
-			}
-			//test hit test with styles
-			var view = setupView(buffer, "js");
-			view.focus();
-			var location = view.getLocationAtOffset(buffer.length);
-			var start = new Date().getTime();
-			function t() {
-				for (var j = 0; j < location.x; j++) {
-					view.getOffsetAtLocation(j, location.y);
+				//test hit test with styles
+				var view = setupView(buffer, "js");
+				view.focus();
+				var location = view.getLocationAtOffset(buffer.length);
+				var start = new Date().getTime();
+				function t() {
+					for (var j = 0; j < location.x; j++) {
+						view.getOffsetAtLocation(j, location.y);
+					}
+					if (--count > 0) {
+						setTimeout(t, 0);
+					} else {
+						d.resolve(true);
+						log("time(getOffseAtLocation)[styled]=" + (new Date().getTime() - start));
+					}
 				}
-				if (--count > 0) {
-					setTimeout(t, 0);
-				} else {
-					d.resolve(true);
-					log("time(getOffseAtLocation)[styled]=" + (new Date().getTime() - start));
-				}
-			}
-			t();
-			return d;
-		});
+				t();
+				return d;
+			});
+		}); // describe("intense tests")
 	}); // describe()
 });
