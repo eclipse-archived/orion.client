@@ -90,7 +90,8 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			// Adjust start / end to be on the current line if necessary
 			if (curLine !== endLine) {
 				start = tv.getLineStart(curLine);
-				end = tv.getLineEnd(curLine);
+				// 'getLineEnd' isn't API in textView but is in textModel...
+				end = tv.getModel().getLineEnd(curLine);
 			}
 			
 			var height = tv.getLineHeight(curLine);
