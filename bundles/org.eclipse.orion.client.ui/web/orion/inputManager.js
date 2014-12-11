@@ -98,6 +98,7 @@ define([
 			error = _makeError(error);
 		}
 		statusService.setProgressResult(error);
+		return error;
 	}
 
 	/**
@@ -374,7 +375,11 @@ define([
 			}
 			function errorHandler(error) {
 				self.reportStatus("");
-				handleError(statusService, error);
+				var errorMsg = handleError(statusService, error);
+				if (errorMsg.Message === messages.noResponse) {
+					mMetrics.logEvent("status", "error", 
+						this._autoSaveActive?"auto-save":"save", error.status);
+				}
 				self._errorSaving = true;
 				return done();
 			}
@@ -410,6 +415,7 @@ define([
 		 */
 		setAutoSaveTimeout: function(timeout) {
 			this._autoSaveEnabled = timeout !== -1;
+			this._autoSaveActive = false;
 			if (!this._idle) {
 				var options = {
 					document: document,
@@ -418,7 +424,12 @@ define([
 				this._idle = new Idle(options);
 				this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
 					if (!this._errorSaving) {
-						this.save();
+						try {
+							this._autoSaveActive = true;
+							this.save();
+						} finally {
+							this._autoSaveActive = false;
+						}
 					}
 				}.bind(this));
 			} else {
