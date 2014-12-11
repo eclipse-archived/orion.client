@@ -16,8 +16,11 @@ define([
 	'orion/webui/littlelib',
 	'orion/i18nUtil',
 	'orion/webui/RichDropdown',
-	'orion/webui/tooltip'
-], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown, mTooltip) {
+	'orion/webui/tooltip',
+	'orion/metrics'
+], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown, mTooltip, mMetrics) {
+	
+	var METRICS_LABEL_PREFIX = "RunBar"; //$NON-NLS-0$
 	
 	/**
 	 * Creates a new RunBar.
@@ -160,9 +163,13 @@ define([
 			this._disableControl(this._launchConfigurationsWrapper); // start with control greyed out until launch configs are set
 			
 			var triggerButton = this._launchConfigurationsDropdown.getDropdownTriggerButton();
-			
 			triggerButton.classList.remove("dropdownDefaultButton"); //$NON-NLS-0$
 			triggerButton.classList.add("launchConfigurationsButton"); //$NON-NLS-0$
+			
+			this._boundTriggerButtonEventListener = function(event){ 
+				mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + ".launchConfigurationsDropdownTriggerButton.clicked", event.which); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			}.bind(this);
+			triggerButton.addEventListener("click", this._boundTriggerButtonEventListener); //$NON-NLS-0$
 		},
 		
 		destroy: function() {
@@ -178,6 +185,12 @@ define([
 			if (this._stopButton.tooltip) {
 				this._stopButton.tooltip.destroy();
 				this._stopButton.tooltip = null;
+			}
+			if (this._launchConfigurationsDropdown) {
+				var triggerButton = this._launchConfigurationsDropdown.getDropdownTriggerButton();
+				if (triggerButton && this._boundTriggerButtonEventListener) {
+					triggerButton.removeEventListener("click", this._boundTriggerButtonEventListener); //$NON-NLS-0$
+				}
 			}
 		},
 		
@@ -370,15 +383,21 @@ define([
 			delete this._cachedLaunchConfigurations[hash];
 		},
 
-		_playButtonListener: function() {
+		_playButtonListener: function(event) {
 			if (this._isEnabled(this._playButton)) {
+				mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + ".playButton.clicked", event.which); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				this._commandRegistry.runCommand("orion.launchConfiguration.deploy", this._selectedLaunchConfiguration, this, null, null, this._playButton); //$NON-NLS-0$
+			} else {
+				mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + ".playButton.clickedWhileDisabled", event.which); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
 		
-		_stopButtonListener: function() {
+		_stopButtonListener: function(event) {
 			if (this._isEnabled(this._stopButton)) {
+				mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + ".stopButton.clicked", event.which); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				this._commandRegistry.runCommand("orion.launchConfiguration.stopApp", this._selectedLaunchConfiguration, this, null, null, this._stopButton); //$NON-NLS-0$
+			} else {
+				mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + ".stopButton.clickedWhileDisabled", event.which); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
 		
@@ -417,6 +436,7 @@ define([
 	});
 	
 	return {
-		RunBar: RunBar
+		RunBar: RunBar,
+		METRICS_LABEL_PREFIX: METRICS_LABEL_PREFIX
 	};
 });
