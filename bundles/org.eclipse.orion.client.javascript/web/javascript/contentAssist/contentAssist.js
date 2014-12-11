@@ -948,7 +948,7 @@ define([
                 if(definition.$$url) {
                     hover += '\n\n[Online documentation]('+definition.$$url+')';
                 }
-                obj.hover = hover;
+                obj.content = hover;
                 return obj;
             }		    
             return null;

@@ -251,7 +251,12 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			
 			var hoverInfo;
 			if (this.hover && info.offset !== undefined && !contents) {
-				var context = {offset: info.offset};
+				var context; 
+				if (info.context){
+					context = info.context;
+				} else {
+					context = {offset: info.offset};
+				}
 				hoverInfo = this.hover.computeHoverInfo(context);
 			}
 			

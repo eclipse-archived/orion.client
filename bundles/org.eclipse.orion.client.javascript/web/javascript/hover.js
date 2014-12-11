@@ -353,7 +353,11 @@ define([
 		computeHoverInfo: function computeHover(editorContext, ctxt) {
 		    var that = this;
 			return that.astManager.getAST(editorContext).then(function(ast) {
-			    if(ctxt.offset < ast.range[0] || ctxt.offset >= ast.range[1]) {
+				if (ctxt.proposal){
+					return ctxt.proposal.hover;
+				}
+				
+			    if(!ctxt.offset || ctxt.offset < ast.range[0] || ctxt.offset >= ast.range[1]) {
 			        //end of the AST, nothing to hover
 			        return null;
 			    }
