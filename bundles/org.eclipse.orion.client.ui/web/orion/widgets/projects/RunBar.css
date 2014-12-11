@@ -17,6 +17,12 @@
 	opacity: 0.3;
 }
 
+.disabled:hover {
+	color: #555;
+	opacity: 0.3;
+	cursor: default;
+}
+
 .launchConfigurationsWrapper {
 	background: white;
 	border-radius: 3px;
