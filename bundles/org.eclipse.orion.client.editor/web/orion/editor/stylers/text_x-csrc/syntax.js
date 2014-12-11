@@ -35,7 +35,8 @@ define("orion/editor/stylers/text_x-csrc/syntax", ["orion/editor/stylers/lib/syn
 		"ifndef", "if", "include", "line", "pragma", "undef" //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: "orion.c", //$NON-NLS-0$
 		contentTypes: ["text/x-csrc", "text/x-c"], //$NON-NLS-1$ //$NON-NLS-0$

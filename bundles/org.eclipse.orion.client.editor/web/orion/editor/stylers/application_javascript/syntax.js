@@ -43,7 +43,8 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 		"false", "null", "true", "undefined" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: "orion.js", //$NON-NLS-0$
 		contentTypes: ["application/javascript"], //$NON-NLS-0$

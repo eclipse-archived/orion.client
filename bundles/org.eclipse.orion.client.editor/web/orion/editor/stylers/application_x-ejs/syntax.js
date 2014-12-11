@@ -11,10 +11,12 @@
 
 /*eslint-env browser, amd*/
 
-define("orion/editor/stylers/application_x-ejs/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/application_javascript/syntax", "orion/editor/stylers/application_xml/syntax"], //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	function(mLib, mJS, mXML) {
+define("orion/editor/stylers/application_x-ejs/syntax", ["orion/editor/stylers/application_javascript/syntax", "orion/editor/stylers/application_xml/syntax"], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	function(mJS, mXML) {
 
-	var grammars = mLib.grammars.concat(mJS.grammars).concat(mXML.grammars);
+	var grammars = [];
+	grammars.push.apply(grammars, mJS.grammars);
+	grammars.push.apply(grammars, mXML.grammars);
 	grammars.push({
 		id: "orion.ejs", //$NON-NLS-0$
 		contentTypes: ["application/x-ejs"], //$NON-NLS-0$

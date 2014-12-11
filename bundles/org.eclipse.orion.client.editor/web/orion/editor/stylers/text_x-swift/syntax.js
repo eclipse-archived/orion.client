@@ -37,7 +37,8 @@ define("orion/editor/stylers/text_x-swift/syntax", ["orion/editor/stylers/lib/sy
 		"__COLUMN__", "__FILE__", "__FUNCTION__", "__LINE__" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: "orion.swift", //$NON-NLS-0$
 		contentTypes: ["text/x-swift"], //$NON-NLS-0$

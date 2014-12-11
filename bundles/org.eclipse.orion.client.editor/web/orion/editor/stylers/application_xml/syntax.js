@@ -13,7 +13,8 @@
 
 define("orion/editor/stylers/application_xml/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-1$ //$NON-NLS-0$
 
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: "orion.xml", //$NON-NLS-0$
 		contentTypes: ["application/xml", "application/xhtml+xml"], //$NON-NLS-1$ //$NON-NLS-0$

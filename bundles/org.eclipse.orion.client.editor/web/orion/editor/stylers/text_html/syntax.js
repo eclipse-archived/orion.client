@@ -10,10 +10,13 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/application_javascript/syntax", "orion/editor/stylers/text_css/syntax", "orion/editor/stylers/application_xml/syntax"], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	function(mLib, mJS, mCSS, mXML) {
+define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/application_javascript/syntax", "orion/editor/stylers/text_css/syntax", "orion/editor/stylers/application_xml/syntax"], //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	function(mJS, mCSS, mXML) {
 
-	var grammars = mLib.grammars.concat(mJS.grammars).concat(mCSS.grammars).concat(mXML.grammars);
+	var grammars = [];
+	grammars.push.apply(grammars, mJS.grammars);
+	grammars.push.apply(grammars, mCSS.grammars);
+	grammars.push.apply(grammars, mXML.grammars);
 	grammars.push({
 		id: "orion.html", //$NON-NLS-0$
 		contentTypes: ["text/html"], //$NON-NLS-0$

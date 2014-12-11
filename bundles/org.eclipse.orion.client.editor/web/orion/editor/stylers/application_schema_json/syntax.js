@@ -28,7 +28,8 @@ define("orion/editor/stylers/application_schema_json/syntax", ["orion/editor/sty
 		"uniqueItems" //$NON-NLS-0$
 	];
 
-	var grammars = mJSON.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mJSON.grammars);
 	grammars.push({
 		id: "orion.json.schema", //$NON-NLS-0$
 		contentTypes: ["application/schema+json"], //$NON-NLS-0$

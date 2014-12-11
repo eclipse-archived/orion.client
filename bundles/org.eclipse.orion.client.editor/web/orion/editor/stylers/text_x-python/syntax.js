@@ -30,7 +30,8 @@ define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/lib/s
 		"yield" //$NON-NLS-0$
 	];
 
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: "orion.python", //$NON-NLS-0$
 		contentTypes: ["text/x-python"], //$NON-NLS-0$

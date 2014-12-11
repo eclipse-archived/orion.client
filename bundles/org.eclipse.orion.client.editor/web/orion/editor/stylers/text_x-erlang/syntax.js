@@ -46,7 +46,8 @@ define("orion/editor/stylers/text_x-erlang/syntax", ["orion/editor/stylers/lib/s
 		"behaviour" //$NON-NLS-0$
 	];
 
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: "orion.erlang", //$NON-NLS-0$
 		contentTypes: ["text/x-erlang"], //$NON-NLS-0$

@@ -51,7 +51,8 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/lib/syntax
 		"widows", "width", "word-break", "word-spacing", "word-wrap", "z-index" //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: "orion.css", //$NON-NLS-0$
 		contentTypes: ["text/css"], //$NON-NLS-0$

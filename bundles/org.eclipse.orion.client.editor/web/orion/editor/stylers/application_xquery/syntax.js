@@ -44,7 +44,8 @@ define("orion/editor/stylers/application_xquery/syntax", ["orion/editor/stylers/
 		"and", "ancestor-or-self", "ancestor", "allowing" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: "orion.xquery", //$NON-NLS-0$
 		contentTypes: ["application/xquery"], //$NON-NLS-0$ // Connection to xqueryPlugin.js

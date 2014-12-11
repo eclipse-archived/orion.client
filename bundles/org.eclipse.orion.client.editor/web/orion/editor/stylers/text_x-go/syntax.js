@@ -27,7 +27,8 @@ define("orion/editor/stylers/text_x-go/syntax", ["orion/editor/stylers/lib/synta
 		"var" //$NON-NLS-0$
 	];
 
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: "orion.go", //$NON-NLS-0$
 		contentTypes: ["text/x-go"], //$NON-NLS-0$

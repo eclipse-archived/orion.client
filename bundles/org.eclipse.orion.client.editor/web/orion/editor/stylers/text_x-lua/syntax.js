@@ -52,7 +52,8 @@ define("orion/editor/stylers/text_x-lua/syntax", ["orion/editor/stylers/lib/synt
 		"_VERSION" //$NON-NLS-0$
 	];
 
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: "orion.lua", //$NON-NLS-0$
 		contentTypes: ["text/x-luasrc", "text/x-lua"], //$NON-NLS-1$ //$NON-NLS-0$

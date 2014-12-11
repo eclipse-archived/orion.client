@@ -13,7 +13,9 @@
 define("orion/editor/stylers/text_x-haml/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/text_x-ruby/syntax"], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	function(mLib, mRuby) {
 
-	var grammars = mLib.grammars.concat(mRuby.grammars);
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
+	grammars.push.apply(grammars, mRuby.grammars);
 	grammars.push({
 		id: "orion.haml", //$NON-NLS-0$
 		contentTypes: ["text/x-haml"], //$NON-NLS-0$

@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/stylers/text_x-objective-c/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/text_x-csrc/syntax"], function(mLib, mC) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/stylers/text_x-objective-c/syntax", ["orion/editor/stylers/text_x-csrc/syntax"], function(mC) { //$NON-NLS-1$ //$NON-NLS-0$
 	var keywords = [
 		"atomic", //$NON-NLS-0$
 		"BOOL", "bycopy", "byref", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -38,7 +38,8 @@ define("orion/editor/stylers/text_x-objective-c/syntax", ["orion/editor/stylers/
 
 	var directives = ["import"]; //$NON-NLS-0$
 
-	var grammars = mLib.grammars.concat(mC.grammars);
+	var grammars = [];
+	grammars.push.apply(grammars, mC.grammars);
 	grammars.push({
 		id: "orion.objectiveC", //$NON-NLS-0$
 		contentTypes: ["text/x-objective-c"], //$NON-NLS-0$

@@ -37,7 +37,8 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/synt
 		"__LINE__", "__METHOD__", "__NAMESPACE__", "__TRAIT__"  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: "orion.php", //$NON-NLS-0$
 		contentTypes: ["text/x-php"], //$NON-NLS-0$

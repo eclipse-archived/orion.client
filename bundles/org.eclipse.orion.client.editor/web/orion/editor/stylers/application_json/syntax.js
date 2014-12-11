@@ -14,7 +14,8 @@
 define("orion/editor/stylers/application_json/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-1$ //$NON-NLS-0$
 	var keywords = ["false", "true"]; //$NON-NLS-1$ //$NON-NLS-0$
 
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: "orion.json", //$NON-NLS-0$
 		contentTypes: ["application/json"], //$NON-NLS-0$

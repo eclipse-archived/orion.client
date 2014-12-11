@@ -42,7 +42,8 @@ define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/
 		"false", "null", "true" //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: "orion.java", //$NON-NLS-0$
 		contentTypes: ["text/x-java-source"], //$NON-NLS-0$

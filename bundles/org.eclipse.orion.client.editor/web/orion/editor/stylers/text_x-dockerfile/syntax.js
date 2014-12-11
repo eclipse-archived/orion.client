@@ -25,7 +25,8 @@ define("orion/editor/stylers/text_x-dockerfile/syntax", ["orion/editor/stylers/l
 	];
 
 	var id = "orion.dockerfile"; //$NON-NLS-0$
-	var grammars = mLib.grammars;
+	var grammars = [];
+	grammars.push.apply(grammars, mLib.grammars);
 	grammars.push({
 		id: id,
 		contentTypes: ["text/x-dockerfile"], //$NON-NLS-0$
