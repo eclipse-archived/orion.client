@@ -463,7 +463,23 @@ define([
 						label = event.contentType.id;
 					} else {
 						var index = event.name.lastIndexOf("."); //$NON-NLS-0$
-						label = index > 0 ? "unknown: " + event.name.substring(index) : "(none)"; //$NON-NLS-1$ //$NON-NLS-0$
+						if (index >= 0) {
+							label = "unregistered: " + event.name.substring(index); //$NON-NLS-0$
+						} else {
+							switch (event.name) {
+								case "AUTHORS": //$NON-NLS-0$
+								case "config": //$NON-NLS-0$
+								case "LICENSE": //$NON-NLS-0$
+								case "make": //$NON-NLS-0$
+								case "Makefile": { //$NON-NLS-0$ 
+									label = "unregistered: " + event.name; //$NON-NLS-0$
+									break;
+								}
+								default: {
+									label = "(none)"; //$NON-NLS-0$
+								}
+							}
+						}
 					}
 					mMetrics.logEvent("editor", "open", label); //$NON-NLS-1$ //$NON-NLS-0$
 					liveEditSession.start(inputManager.getContentType(), event.title);
