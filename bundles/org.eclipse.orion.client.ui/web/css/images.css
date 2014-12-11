@@ -695,6 +695,7 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.core-sprite-debug,
 .core-sprite-download,
 .core-sprite-collected-errors,
 .core-sprite-listed-errors,
@@ -758,6 +759,7 @@
 .core-sprite-listed-errors:before{ content:'\E053'; }
 .core-sprite-collected-errors:before{ content:'\E054'; }
 .core-sprite-download:before{ content:'\E036'; }
+.core-sprite-debug:before{ content:'\E056'; }
 
 /* icons for file types - possibly more to come - at least one for images */ 
 
