@@ -296,7 +296,17 @@ define([
                 if(type.expression.name === 'Array') {
                     //we need to grab the first application
                     if(type.applications && type.applications.length > 0) {
-	                    return '*('+type.applications[0].name+'[])* ';
+                        var val = type.applications[0];
+                        if(val.name) {
+                            //simple type
+                            return '*('+val.name+'[])* ';
+                        } else if(val.fields && val.fields.length > 0) {
+                            return _convertTagType(val.fields[0]);
+                        } else {
+                            //fallback to trying to format the raw value
+                            return _convertTagType(val);
+                        }
+	                    
 	                }
                 }
                 return _convertTagType(type.expression);
@@ -308,6 +318,9 @@ define([
                     return _convertTagType(type.elements[0]);
                 }
                 break;
+            }
+            case 'FieldType': {
+                return _convertTagType(type.value);
             }
             default: return '';
         }
