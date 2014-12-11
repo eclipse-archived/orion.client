@@ -11,10 +11,75 @@
 /*eslint-env node, mocha, amd*/
 define([
 	'eslint/events',
+	'eslint/util',
+	'eslint',
 	'chai/chai',
 	'mocha/mocha' //not a module, leave at the end
-], function(events, chai) {
+], function(events, util, eslint, chai) {
 	var assert = chai.assert;
+	
+	describe("ESLint Util Tests", function() {
+		var topic = function() {
+			var a = {}, b = { foo: "f", bar: 1 };
+			util.mixin(a, b);
+			return [a, b];
+		};
+
+		it("should add properties to target object", function() {
+			var a = topic()[0];
+			assert.equal(Object.keys(a).length, 2);
+			assert.equal(a.foo, "f");
+			assert.equal(a.bar, 1);
+		});
+
+		it("should not change the source object", function() {
+			var b = topic()[1];
+			assert.equal(Object.keys(b).length, 2);
+			assert.equal(b.foo, "f");
+			assert.equal(b.bar, 1);
+		});
+	});
+	
+	describe("ESLint Scope Tests", function() {
+		var topic = "function f() {} \n var g = function() {}";
+
+		it("should return global scope when called from Program", function() {
+			var config = { rules: {} };
+
+			eslint.reset();
+			eslint.on("Program", function(node) {
+				var scope = eslint.getScope();
+				assert.equal(scope.type, "global");
+				assert.equal(scope.block, node);
+			});
+
+			eslint.verify(topic, config, true /* do not reset */);
+		});
+		it("should return function scope when called from FunctionDeclaration", function() {
+			var config = { rules: {} };
+
+			eslint.reset();
+			eslint.on("FunctionDeclaration", function(node) {
+				var scope = eslint.getScope();
+				assert.equal(scope.type, "function");
+				assert.equal(scope.block, node);
+			});
+
+			eslint.verify(topic, config, true);
+		});
+		it("should return function scope when called from FunctionExpression", function() {
+			var config = { rules: {} };
+
+			eslint.reset();
+			eslint.on("FunctionExpression", function(node) {
+				var scope = eslint.getScope();
+				assert.equal(scope.type, "function");
+				assert.equal(scope.block, node);
+			});
+
+			eslint.verify(topic, config, true);
+		});
+	});
 	
 	describe('ESLint Event Tests', function() {
 		var EventEmitter = events.EventEmitter;
