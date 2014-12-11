@@ -535,7 +535,7 @@ define([
 			});
 			this.commandService.addCommand(showTooltipCommand);
 			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, //$NON-NLS-1$ //$NON-NLS-0$
-				new mKeyBinding.KeyBinding('e', true, true));
+				new mKeyBinding.KeyBinding(113));
 		},
 	
 		/**
