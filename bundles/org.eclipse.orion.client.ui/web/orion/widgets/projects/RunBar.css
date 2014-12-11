@@ -160,7 +160,3 @@
 	position: relative;
     width: 1px;
 }
-
-.playButton.restartAppButton:before {
-	content: '\21ba'; /* Unicode - Circular Arrow, This is temporary until we have an icon */
-}

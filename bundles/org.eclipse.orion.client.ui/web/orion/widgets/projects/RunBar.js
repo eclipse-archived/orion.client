@@ -15,10 +15,9 @@ define([
 	'text!orion/widgets/projects/RunBar.html',
 	'orion/webui/littlelib',
 	'orion/i18nUtil',
-	'orion/webui/RichDropdown'
-], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown) {
-	
-	var PLAY_BUTTON_MODES = {deploy: 1, restart: 2};
+	'orion/webui/RichDropdown',
+	'orion/webui/tooltip'
+], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown, mTooltip) {
 	
 	/**
 	 * Creates a new RunBar.
@@ -68,6 +67,17 @@ define([
 				this._stopButton = lib.$("button.stopButton", this._domNode); //$NON-NLS-0$
 				this._boundStopButtonListener = this._stopButtonListener.bind(this);
 				this._stopButton.addEventListener("click", this._boundStopButtonListener); //$NON-NLS-0$
+				
+				// set button tooltips
+				var playCommand = this._commandRegistry.findCommand("orion.launchConfiguration.deploy"); //$NON-NLS-0$
+				if (playCommand.tooltip) {
+					this._setNodeTooltip(this._playButton, playCommand.tooltip);
+				}
+				
+				var stopCommand = this._commandRegistry.findCommand("orion.launchConfiguration.stopApp"); //$NON-NLS-0$
+				if (stopCommand.tooltip) {
+					this._setNodeTooltip(this._stopButton, stopCommand.tooltip);
+				}
 				
 				this._launchConfigurationDispatcher = this._projectCommands.getLaunchConfigurationDispatcher();
 				this._launchConfigurationEventTypes = ["create", "delete", "changeState", "deleteAll"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -161,7 +171,14 @@ define([
 			}, this);
 			this._playButton.removeEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$
 			this._stopButton.removeEventListener("click", this._boundStopButtonListener); //$NON-NLS-0$
-			
+			if (this._playButton.tooltip) {
+				this._playButton.tooltip.destroy();
+				this._playButton.tooltip = null;
+			}
+			if (this._stopButton.tooltip) {
+				this._stopButton.tooltip.destroy();
+				this._stopButton.tooltip = null;
+			}
 		},
 		
 		_launchConfigurationListener: function(event) {
@@ -275,7 +292,6 @@ define([
 			
 			if (status.error) {
 				this._enableControl(this._playButton);
-				this._setPlayButtonMode(PLAY_BUTTON_MODES.deploy);
 				if (status.error.Retry) {
 					this._setStatusTitle(null);
 				} else {
@@ -289,17 +305,14 @@ define([
 						break;
 					case "STARTED": //$NON-NLS-0$
 						this._enableControl(this._playButton);
-						this._setPlayButtonMode(PLAY_BUTTON_MODES.restart);
 						this._enableControl(this._stopButton);
 						this._statusLight.classList.add("statusLightGreen"); //$NON-NLS-0$
 						break;
 					case "STOPPED": //$NON-NLS-0$
 						this._enableControl(this._playButton);
-						this._setPlayButtonMode(PLAY_BUTTON_MODES.deploy);
 						this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
 						break;
 					default:
-						this._setPlayButtonMode(PLAY_BUTTON_MODES.deploy);
 						break;
 				}
 				this._setStatusTitle(status.Message);
@@ -359,16 +372,7 @@ define([
 
 		_playButtonListener: function() {
 			if (this._isEnabled(this._playButton)) {
-				switch (this._playButtonMode) {
-					case PLAY_BUTTON_MODES.deploy:
-						this._commandRegistry.runCommand("orion.launchConfiguration.deploy", this._selectedLaunchConfiguration, this, null, null, this._playButton); //$NON-NLS-0$
-						break;
-					case PLAY_BUTTON_MODES.restart:
-						this._commandRegistry.runCommand("orion.launchConfiguration.startApp", this._selectedLaunchConfiguration, this, null, null, this._playButton); //$NON-NLS-0$
-						break;
-					default:
-						throw new Error("Invalid play button mode: " + this._playButtonMode); //$NON-NLS-0$
-				}
+				this._commandRegistry.runCommand("orion.launchConfiguration.deploy", this._selectedLaunchConfiguration, this, null, null, this._playButton); //$NON-NLS-0$
 			}
 		},
 		
@@ -399,18 +403,16 @@ define([
 			return !domNode.classList.contains("disabled"); //$NON-NLS-0$
 		},
 		
-		_setPlayButtonMode: function(playButtonMode) {
-			this._playButtonMode = playButtonMode;
-			switch (this._playButtonMode) {
-				case PLAY_BUTTON_MODES.deploy:
-					this._playButton.classList.remove("restartAppButton"); //$NON-NLS-0$
-					break;
-				case PLAY_BUTTON_MODES.restart:
-					this._playButton.classList.add("restartAppButton"); //$NON-NLS-0$
-					break;
-				default:
-					throw new Error("Invalid play button mode: " + this._playButtonMode); //$NON-NLS-0$
+		_setNodeTooltip: function(domNode, text) {
+			if (domNode.tooltip) {
+				domNode.tooltip.destroy();
 			}
+			domNode.tooltip = new mTooltip.Tooltip({
+				node: domNode,
+				text: text,
+				trigger: "mouseover", //$NON-NLS-0$
+				position: ["below", "right", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			});
 		}
 	});
 	
