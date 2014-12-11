@@ -144,10 +144,10 @@ define([
 			}.bind(this);
 			
 			this._launchConfigurationsDropdown = new mRichDropdown.RichDropdown({
-				parentNode: this._launchConfigurationsWrapper, 
-				buttonName: messages["selectLaunchConfig"], //$NON-NLS-0$
+				parentNode: this._launchConfigurationsWrapper,
 				populateFunction: populateFunction
 			});
+			this._disableControl(this._launchConfigurationsWrapper); // start with control greyed out until launch configs are set
 			
 			var triggerButton = this._launchConfigurationsDropdown.getDropdownTriggerButton();
 			
@@ -318,8 +318,18 @@ define([
 		 * @param {Array} launchConfigurations An array of launch configurations
 		 */
 		setLaunchConfigurations: function(launchConfigurations) {
+			this._enableControl(this._launchConfigurationsWrapper);
 			this._menuItemsCache = []; //reset the cached launch configuration dropdown menu items
 			this._cacheLaunchConfigurations(launchConfigurations);
+			
+			if (launchConfigurations && launchConfigurations[0]) {
+				// select first launch configuration
+				var hash = this._getHash(launchConfigurations[0]);
+				var cachedConfig = this._cachedLaunchConfigurations[hash];
+				this.selectLaunchConfiguration(cachedConfig, true);
+			} else {
+				this.selectLaunchConfiguration(null);
+			}
 		},
 		
 		_cacheLaunchConfigurations: function(launchConfigurations) {
