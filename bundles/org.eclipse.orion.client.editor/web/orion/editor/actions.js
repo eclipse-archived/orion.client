@@ -24,11 +24,11 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 
 	var exports = {};
 	
-	function forEachSelection(actions, compound, callback) {
+	function forEachSelection(actions, compound, callback, noUndo) {
 		var offset = 0;
 		var editor = actions.editor;
 		var selections = editor.getSelections();
-		if (compound || selections.length > 1) actions.startUndo();
+		if (!noUndo && (compound || selections.length > 1)) actions.startUndo();
 		function setText(text, start, end) {
 			editor.setText(text, start, end);
 			offset += (start - end) + text.length;
@@ -39,7 +39,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			callback(selection, setText);
 		});
 		editor.setSelections(selections);
-		if (compound || selections.length > 1) actions.endUndo();
+		if (!noUndo && (compound || selections.length > 1)) actions.endUndo();
 	}
 
 	/**
@@ -1002,7 +1002,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					(prevChar === "'" && nextChar === "'")) { //$NON-NLS-1$ //$NON-NLS-0$
 					setText("", selection.start, selection.start + 1); //$NON-NLS-0$
 				}
-			});
+			}, true);
 			return false;
 		},
 		_findEnclosingComment: function(model, start, end) {
