@@ -1251,7 +1251,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				var yFactor = util.isIE ? window.screen.logicalYDPI / window.screen.deviceYDPI : 1;
 				var rangeLeft, rangeTop, rangeRight, rangeBottom;
 				var range, start, end;
-				var rl = rect.left + lineRect.left, fixIE8, rects;
+				var rl = rect.left + lineRect.left, fixIE8, rects1;
 				if (util.isIE || view._isRangeRects) {
 					range = view._isRangeRects ? document.createRange() : document.body.createTextRange();
 					var high = nodeLength;
@@ -1275,10 +1275,10 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 							range.move("character", start); //$NON-NLS-0$
 							range.moveEnd("character", end - start); //$NON-NLS-0$
 						}
-						rects = range.getClientRects();
+						rects1 = range.getClientRects();
 						var found = false;
-						for (var k = 0; k < rects.length; k++) {
-							rect = rects[k];
+						for (var k = 0; k < rects1.length; k++) {
+							rect = rects1[k];
 							rangeLeft = (fixIE8 ? rl : rect.left) * xFactor - lineRect.left;
 							rangeRight = rect.right * xFactor - lineRect.left;
 							rangeTop = rect.top * yFactor - lineRect.top;
@@ -1305,10 +1305,10 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 						range.move("character", start); //$NON-NLS-0$
 						range.moveEnd("character", end - start); //$NON-NLS-0$
 					}
-					rects = range.getClientRects();
+					rects1 = range.getClientRects();
 					var trailing = false;
-					if (rects.length > 0) {
-						rect = rects[0];
+					if (rects1.length > 0) {
+						rect = rects1[0];
 						rangeLeft = (fixIE8 ? rl : rect.left) * xFactor - lineRect.left;
 						rangeRight = rect.right * xFactor - lineRect.left;
 						//TODO test for character trailing (wrong for bidi)
