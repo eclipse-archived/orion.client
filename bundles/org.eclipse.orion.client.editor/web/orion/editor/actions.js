@@ -871,7 +871,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					selection.start = selection.end = selection.start + 1;
 				} else if (selection.start !== selection.end) {
 					// Wrap the selected text with the specified opening and closing brackets and keep selection on text
-					var text = openBracket + model.getText(selection.start, selection.end) + closeBracket;
+					text = openBracket + model.getText(selection.start, selection.end) + closeBracket;
 					setText(text, selection.start, selection.end);
 					selection.start += 1;
 					selection.end += 1;
@@ -1040,7 +1040,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		lineStart: function() {
 			var editor = this.editor;
 			var model = editor.getModel();
-			forEachSelection(this, false, function(selection, setText) {
+			forEachSelection(this, false, function(selection/*, setText*/) {
 				var caretOffset = selection.getCaret();
 				var lineIndex = model.getLineAtOffset(caretOffset);
 				var lineOffset = model.getLineStart(lineIndex);
@@ -1205,10 +1205,10 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 			var model = editor.getModel();
 			var selections = editor.getSelections();
-			if (selections.length == 1 && selections[0].start === selections[0].end) {
+			if (selections.length === 1 && selections[0].start === selections[0].end) {
 				var nextChar = selections[0].start === model.getCharCount() ? "" : model.getText(selections[0].start, selections[0].start + 1); //$NON-NLS-0$
 				if (nextChar === closingChar) {
-					selections[0].start = selections[0].end = selections[0].start + 1
+					selections[0].start = selections[0].end = selections[0].start + 1;
 					editor.setSelections(selections);
 					return true;
 				}
