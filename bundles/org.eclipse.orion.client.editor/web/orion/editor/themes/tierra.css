@@ -55,3 +55,12 @@
 .tierra .keyword.other.documentation.markup {
 	color: darkseagreen;
 }
+.tierra .textviewSelection {
+	background-color: moccasin;
+}
+.tierra .textviewContent ::selection {
+	background-color: moccasin;
+}
+.tierra .textviewContent ::-moz-selection {
+	background-color: moccasin;
+}

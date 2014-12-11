@@ -55,3 +55,12 @@
 .ambience .keyword.other.documentation.markup {
 	color: mediumslateblue;
 }
+.ambience .textviewSelection {
+	background-color: lightcyan;
+}
+.ambience .textviewContent ::selection {
+	background-color: lightcyan;
+}
+.ambience .textviewContent ::-moz-selection {
+	background-color: lightcyan;
+}

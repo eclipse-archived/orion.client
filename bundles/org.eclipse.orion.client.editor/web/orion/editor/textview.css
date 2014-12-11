@@ -9,10 +9,10 @@
 .textviewSelection {
 	background: rgb(180, 213, 255);
 }
-.textview ::-moz-selection {
+.textviewContent ::-moz-selection {
 	background: rgb(180, 213, 255);
 }
-.textview ::selection {
+.textviewContent ::selection {
 	background: rgb(180, 213, 255);
 }
 .textviewSelectionUnfocused {

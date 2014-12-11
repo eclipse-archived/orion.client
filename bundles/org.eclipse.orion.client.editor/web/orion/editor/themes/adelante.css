@@ -26,7 +26,7 @@
 	color: #AF473B;
 }
 .adelante .annotationLine.currentLine {
-	background-color: #9e937b;
+	background-color: #E2D2B5;
 }
 .adelante .entity-name-tag {
 	color: #AF473B;
@@ -38,7 +38,7 @@
 	color: #DE5D3B;
 }
 .adelante .meta.annotation.currentLine {
-	background-color: #9e937b;
+	background-color: #E2D2B5;
 }
 .adelante .keyword {
 	color: #AF473B;
@@ -54,4 +54,13 @@
 }
 .adelante .keyword.other.documentation.markup {
 	color: #5D774E;
+}
+.adelante .textviewSelection {
+	background-color: #E2D2B2;
+}
+.adelante .textviewContent ::selection {
+	background-color: #E2D2B2;
+}
+.adelante .textviewContent ::-moz-selection {
+	background-color: #E2D2B2;
 }

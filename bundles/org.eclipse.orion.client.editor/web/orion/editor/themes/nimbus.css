@@ -55,3 +55,12 @@
 .nimbus .keyword.other.documentation.markup {
 	color: darkseagreen;
 }
+.nimbus .textviewSelection {
+	background-color: gray;
+}
+.nimbus .textviewContent ::selection {
+	background-color: gray;
+}
+.nimbus .textviewContent ::-moz-selection {
+	background-color: gray;
+}
