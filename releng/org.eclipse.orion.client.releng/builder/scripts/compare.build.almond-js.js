@@ -27,6 +27,7 @@
        	"orion/i18n": "compare/builder/i18n"
  	},
 	name: "almond",
+	locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br"],						
 	include: "compare/builder/compare",
 	preserveLicenseComments: false,
 	uglify: {

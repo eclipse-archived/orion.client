@@ -28,6 +28,7 @@
         "orion/extensionCommands": "browse/builder/buildFrom/emptyExtensionCommands"
 	},
 	name: "almond",
+	locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br"],						
 	include: "browse/builder/browse",
 	preserveLicenseComments: false,
 	uglify: {

@@ -25,6 +25,7 @@
         i18n: 'requirejs/i18n'
 	},
 	name: "almond",
+	locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br"],						
 	include: "orion/editor/edit",
 	preserveLicenseComments: false,
 	uglify: {
