@@ -47,10 +47,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			document.body.appendChild(tooltipDiv);
 			var self = this;
 			textUtil.addEventListener(tooltipDiv, "mouseover", function(event) { //$NON-NLS-0$
-				this._inTooltip = true;
+				self._inTooltip = true;
 			}, false);
 			textUtil.addEventListener(tooltipDiv, "mouseout", function(event) { //$NON-NLS-0$
-				this.inTooltip = false;
+				self._inTooltip = false;
 			}, false);
 			textUtil.addEventListener(tooltipDiv, "keydown", function(event) { //$NON-NLS-0$
 				if (event.keyCode === 27) {
