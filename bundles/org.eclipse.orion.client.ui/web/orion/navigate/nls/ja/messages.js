@@ -115,6 +115,7 @@ define({
 	"Downloading...": "ファイル内容の読み取り中...",
 	"Download not supported": "内容のダウンロードはこのブラウザーではサポートされていません。",
 	"gettingContentFrom": "コンテンツの取得先",
+	"deletingLaunchConfiguration": "起動構成の削除中...",
 	"deployTo": "デプロイ先",
 	"deploy": "デプロイ",
 	"connect": "接続",
@@ -131,6 +132,7 @@ define({
 	"startApplication": "アプリケーションの開始",
 	"manage": "管理",
 	"manageThisApplicationOnRemote": "このアプリケーションをリモート・サーバーで管理",
+	"deleteLaunchConfiguration": "この起動構成を削除",
 	"deployThisApplicationAgain": "このアプリケーションを再度デプロイ",
 	"associatedFolder": "関連フォルダー",
 	"associateAFolderFromThe": "ワークスペースからのフォルダーをこのプロジェクトと関連付けます。",
@@ -147,6 +149,9 @@ define({
 	'zipArchiveCommandTooltip': 'ローカルの zip アーカイブからプロジェクトを作成します。',  //$NON-NLS-0$  //$NON-NLS-1$
 	'Url:': 'URL:',  //$NON-NLS-0$  //$NON-NLS-1$
 	'notZip' : '次のファイルは zip ファイルではありません: ${0}。インポートを続行しますか? ', //$NON-NLS-0$  //$NON-NLS-1$
-	'notZipMultiple' : '複数の非 zip ファイルがアップロードされています。インポートを続行しますか? ' //$NON-NLS-0$  //$NON-NLS-1$
+	'notZipMultiple' : '複数の非 zip ファイルがアップロードされています。インポートを続行しますか? ', //$NON-NLS-0$  //$NON-NLS-1$
+	"Cancel": "キャンセル", //$NON-NLS-0$  //$NON-NLS-1$
+	"Ok": "OK", //$NON-NLS-0$  //$NON-NLS-1$
+	"missingCredentials": "${1} に関連付けられている ${0} 認証資格情報を入力して、その状況を確認します。" //$NON-NLS-0$  //$NON-NLS-1$
 });
 

@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013, 2014 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser,amd*/
@@ -53,6 +53,9 @@ define({
 	"seeManualDeploymentInformationIn": "Consulte as informações de implementação manual na [página da pasta-raiz](${0}) para visualizar e gerenciar [${1}](${2})",
 	"theHostIsAlreadyIn": "O host já está em uso por outro aplicativo. Verifique o host/domínio no arquivo manifest.",
 	"password:": "Senha:",
+	"Cancelled": "Cancelado",
+	"Could not find the launch configuration manifest": "Não foi possível localizar o manifest de configuração de ativação nem usar o manifest de projeto de nível superior. Restaure-o ou forneça um manifest de projeto.",
+	"Would you like to use the top-level project manifest": "Não foi possível localizar o manifest de configuração de ativação. Gostaria de usar o manifest de projeto de nível superior em substituição e ligá-lo à configuração de ativação? ",
 	"iD:": "ID:",
 	"setUpYourCloud.Go": "Configure sua nuvem. Acesse [Configurações](${0}).",
 	"loggingInTo${0}...": "Efetuando login em ${0}...",
@@ -68,7 +71,7 @@ define({
 	"applicationFrom/": "aplicativo de /",
 	"on": " em ",
 	"user:": "Usuário:",
-	"instance(s)Running": " instância(s) em execução",
+	"${0}of${1}instance(s)Running": "${0} de ${1} instância(s) em execução",
 	"of": " de ",
 	"applicationIsNotRunning": "O aplicativo não está em execução",
 	"${0}/${1}Instance(s)Running": "${0}/${1} instância(s) em execução",
@@ -193,6 +196,6 @@ define({
 	"debugWith${0}:": "Depurar com ${0}:",
 	"requiredToPreventRandomAccess": "Necessário para impedir o acesso aleatório ao cf-launcher",
 	"uRLPrefix:": "Prefixo da URL: ",
-	"leaveBlankForDefault/launcher": "Deixar em branco para /ativador padrão"
+	"leaveBlankForDefault": "Deixar em branco para padrão ${0}"
 });
 

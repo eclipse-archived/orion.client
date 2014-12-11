@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013, 2014 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser,amd*/
@@ -53,6 +53,9 @@ define({
 	"seeManualDeploymentInformationIn": "Consultare le informazioni relative alla Distribuzione manuale in [root folder page](${0}) per visualizzare e gestire [${1}](${2})",
 	"theHostIsAlreadyIn": "L'host è già utilizzato da un'altra applicazione. Controllare l'host/dominio nel file manifest.",
 	"password:": "Password:",
+	"Cancelled": "Attività annullata",
+	"Could not find the launch configuration manifest": "Impossibile trovare il file manifest della configurazione di avvio o utilizzare il file manifest del progetto a livello superiore. Ripristinarlo o fornire un file manifest del progetto.",
+	"Would you like to use the top-level project manifest": "Impossibile trovare il file manifest della configurazione di avvio. Si desidera, invece,  utilizzare il file manifest del progetto di livello superiore e collegarlo alla configurazione di avvio?",
 	"iD:": "ID:",
 	"setUpYourCloud.Go": "Impostazione del Cloud. Accedere a [Impostazioni](${0}).",
 	"loggingInTo${0}...": "Accesso a ${0}...",
@@ -68,8 +71,8 @@ define({
 	"applicationFrom/": "modulo applicazione /",
 	"on": " attivo ",
 	"user:": "Utente:",
-	"instance(s)Running": " istanze in esecuzione",
-	"of": " di",
+	"${0}of${1}instance(s)Running": "${0} di ${1} istanze in esecuzione",
+	"of": " di ",
 	"applicationIsNotRunning": "L'applicazione non è in esecuzione",
 	"${0}/${1}Instance(s)Running": "${0}/${1} istanze in esecuzione",
 	"${0}/${1}Instance(s)Running,${2}Flapping": "${0}/${1} istanze in esecuzione, ${2} flapping",
@@ -161,7 +164,7 @@ define({
 	"loading${0}": "Caricamento di ${0}",
 	"fetching${0}": "Richiamo dati di ${0}",
 	"manifestTemplate": "Modello del manifest",
-	"invalidIndentation:MixedSpacesAnd": "Rientro non valido: misto di spazi e tabulazioni ",
+	"invalidIndentation:MixedSpacesAnd": "Rientro non valido: misto di spazi e tabulazioni",
 	"missingApplicationCommand": "Comando applicazione mancante",
 	"messageText": "messageText",
 	"preparingDeploymentSettings...": "Preparazione delle impostazioni di distribuzione...",
@@ -192,7 +195,7 @@ define({
 	"applicationName*:": "Nome applicazione*:",
 	"debugWith${0}:": "Esegui debug con ${0}:",
 	"requiredToPreventRandomAccess": "Necessario per evitare accessi casuali a cf-launcher",
-	"uRLPrefix:": "Prefisso URL:",
-	"leaveBlankForDefault/launcher": "Lasciare vuoto per utilizzare l'impostazione predefinita /launcher"
+	"uRLPrefix:": "Prefisso URL: ",
+	"leaveBlankForDefault": "Lasciare in bianco per l'impostazione predefinita ${0}"
 });
 

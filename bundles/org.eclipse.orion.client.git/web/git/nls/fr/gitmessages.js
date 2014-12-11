@@ -18,7 +18,7 @@ define({
 	"Working Directory": "Répertoire de travail", //$NON-NLS-0$  //$NON-NLS-1$
 	"ViewWorkingDirVer": "Afficher la version du répertoire de travail du fichier", //$NON-NLS-0$  //$NON-NLS-1$
 	"Loading...": "Chargement...", //$NON-NLS-0$  //$NON-NLS-1$
-	"Repositories": "Tous les référentiels Git", //$NON-NLS-0$  //$NON-NLS-1$
+	"Repositories": "Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repo": "Référentiels", //$NON-NLS-0$  //$NON-NLS-1$
 	"0 on 1 - Git": "${0} de ${1} - Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Git": "Git", //$NON-NLS-0$  //$NON-NLS-1$
@@ -538,7 +538,8 @@ define({
 	"FilesChanged": "${0} fichier(s) modifié(s)", //$NON-NLS-0$  //$NON-NLS-1$
 	"file": "fichier", //$NON-NLS-0$  //$NON-NLS-1$
 	"files": "fichiers", //$NON-NLS-0$  //$NON-NLS-1$
-	"EmptyCommitConfirm": "Aucun fichier n'est sélectionné. Voulez-vous vraiment effectuer cette opération ?", //$NON-NLS-0$  //$NON-NLS-1$
+	"EmptyCommitConfirm": "Aucun fichier n'est sélectionné. Si vous continuez, vous aboutirez à une validation vide. Voulez-vous continuer ?", //$NON-NLS-0$  //$NON-NLS-1$
+	"AlwaysSelectFiles": "Toujours sélectionner les fichiers modifiés (voir les préférences Git)", //$NON-NLS-0$  //$NON-NLS-1$
 	"EmptyCommitWarning": "La validation est vide", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilesChangedVsReadyToCommit": "${0} ${1} modifié(s). ${2} ${3} prêt(s) pour validation.", //$NON-NLS-0$  //$NON-NLS-1$
 	"CommitPush": "Valider et insérer", //$NON-NLS-0$  //$NON-NLS-1$
@@ -561,6 +562,7 @@ define({
 	'Url:' : 'URL :', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Private Key:' : 'Clé privée SSH :', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Passphrase:' : 'Phrase passe SSH :', //$NON-NLS-0$  //$NON-NLS-1$
-	'confirmUnsavedChanges': 'Des modifications n\'ont pas été sauvegardées. Voulez-vous les sauvegarder ?' //$NON-NLS-1$ //$NON-NLS-0$
+	'confirmUnsavedChanges': 'Des modifications n\'ont pas été sauvegardées. Voulez-vous les sauvegarder ?', //$NON-NLS-1$ //$NON-NLS-0$
+	'NewConfigurationEntryTooltip': "Ajouter une nouvelle entrée à la configuration du référentiel" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

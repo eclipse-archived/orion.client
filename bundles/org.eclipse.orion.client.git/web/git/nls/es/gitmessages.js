@@ -18,7 +18,7 @@ define({
 	"Working Directory": "Directorio de trabajo", //$NON-NLS-0$  //$NON-NLS-1$
 	"ViewWorkingDirVer": "Ver la versión del directorio de trabajo del archivo", //$NON-NLS-0$  //$NON-NLS-1$
 	"Loading...": "Cargando...", //$NON-NLS-0$  //$NON-NLS-1$
-	"Repositories": "Todos los repositorios de Git", //$NON-NLS-0$  //$NON-NLS-1$
+	"Repositories": "Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repo": "Repositorios", //$NON-NLS-0$  //$NON-NLS-1$
 	"0 on 1 - Git": "${0} en ${1} - Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Git": "Git", //$NON-NLS-0$  //$NON-NLS-1$
@@ -431,7 +431,7 @@ define({
 	"Active Branch Log": "Registro de Git (rama activa)", //$NON-NLS-0$  //$NON-NLS-1$
 	"Show the log for the active local branch": "Mostrar registro para rama local activa", //$NON-NLS-0$  //$NON-NLS-1$
 	"Remote Branch Log": "Registro de Git (rama remota)", //$NON-NLS-0$  //$NON-NLS-1$
-	"Show the log for the corresponding remote tracking branch": "Mostrar registro para la rama de rastro remota correspondiente", //$NON-NLS-0$  //$NON-NLS-1$
+	"Show the log for the corresponding remote tracking branch": "Mostrar registro para la rama de rastreo remota correspondiente", //$NON-NLS-0$  //$NON-NLS-1$
 	"See Full Status" : "Ver estado completo", //$NON-NLS-0$  //$NON-NLS-1$
 	"See the status" : "Ver el estado", //$NON-NLS-0$  //$NON-NLS-1$
 	"Choose target location" : "Elegir ubicación de destino", //$NON-NLS-0$  //$NON-NLS-1$
@@ -538,7 +538,8 @@ define({
 	"FilesChanged": "${0} archivos modificados", //$NON-NLS-0$  //$NON-NLS-1$
 	"file": "archivo", //$NON-NLS-0$  //$NON-NLS-1$
 	"files": "archivos", //$NON-NLS-0$  //$NON-NLS-1$
-	"EmptyCommitConfirm": "No tiene ningún archivo seleccionado. ¿Está seguro?", //$NON-NLS-0$  //$NON-NLS-1$
+	"EmptyCommitConfirm": "No tiene ningún archivo seleccionado. Si continúa, conseguirá una confirmación vacía. ¿Desea continuar?", //$NON-NLS-0$  //$NON-NLS-1$
+	"AlwaysSelectFiles": "Seleccionar siempre archivos modificados (consulte preferencias de Git)", //$NON-NLS-0$  //$NON-NLS-1$
 	"EmptyCommitWarning": "La confirmación está vacía", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilesChangedVsReadyToCommit": "${0} ${1} modificado(s). ${2} ${3} preparado para confirmar.", //$NON-NLS-0$  //$NON-NLS-1$
 	"CommitPush": "Confirmar y enviar", //$NON-NLS-0$  //$NON-NLS-1$
@@ -561,6 +562,7 @@ define({
 	'Url:' : 'URL:', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Private Key:' : 'Clave privada de SSH:', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Passphrase:' : 'Frase de contraseña de SSH:', //$NON-NLS-0$  //$NON-NLS-1$
-	'confirmUnsavedChanges': 'Hay cambios no guardados. ¿Desea guardarlos?' //$NON-NLS-1$ //$NON-NLS-0$
+	'confirmUnsavedChanges': 'Hay cambios no guardados. ¿Desea guardarlos?', //$NON-NLS-1$ //$NON-NLS-0$
+	'NewConfigurationEntryTooltip': "Añadir entrada nueva a la configuración del repositorio" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

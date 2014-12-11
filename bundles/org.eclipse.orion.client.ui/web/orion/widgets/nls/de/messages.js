@@ -70,6 +70,12 @@ define({
 	"Related Links": "Zugehörige Links",
 	"Yes": "Ja",
 	"No": "Nein",
-	"DeleteSearchTrmMsg": "Klicken Sie hier oder verwenden Sie die Löschtaste, um den Suchbegriff zu löschen."
+	"DeleteSearchTrmMsg": "Klicken Sie hier oder verwenden Sie die Löschtaste, um den Suchbegriff zu löschen.",
+	"Application": "Anwendung",
+	"selectLaunchConfig": "Auszuführende Konfiguration auswählen",
+	"createNew": "Neu erstellen... ",
+	"Running": "Wird ausgeführt",
+	"checkingStateMessage": "Status von ${0} wird überprüft",
+	"Status": "Status"
 });
 

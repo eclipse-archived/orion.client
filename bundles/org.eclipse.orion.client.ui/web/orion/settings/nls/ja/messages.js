@@ -52,7 +52,7 @@ define({
 	"Keyword Types": "キーワード・タイプ",
 	"darkred": "ダークレッド",
 	"Categories": "カテゴリー",
-	"Username": "ユーザー名:",
+	"User Name": "ユーザー名:",
 	"Full Name": "フルネーム:",
 	"Email Address": "E メール・アドレス:",
 	"Email Confirmed": "E メールの確認:",
@@ -126,6 +126,8 @@ define({
 	"CheckJsConsoleDrillDown": "ここをクリックしてから、JavaScript コンソールを確認してドリルダウンします",
 	"Item": "項目",
 	"Git Config": "Git 構成",
+	"GitWorkDir": "Git 作業ディレクトリー",
+	"SelectUnstagedChanges": "変更済みファイルを常に選択",
 	"Clear Git Credentials": "Git 資格情報のクリア",
 	"Enable Storage": "保管を有効にする",
 	"BrowserCredStoreMsg" : "資格情報が常時、ブラウザーに保存されますのでご注意ください。",
@@ -176,9 +178,9 @@ define({
 	"tabSizeInvalid": "タブ・サイズが無効です。",
 	"localSettingsTooltip" : "ローカル・エディター設定のドロップダウンにこの設定を表示するかどうかを切り替えます。",
 	"editorSettingsInfo": "${0} と ${1} を使用して、ローカル・エディター設定のドロップダウン ${2} にこの設定を表示するかどうかを切り替えます。",
-	"autoPairParentheses": "自動ペア生成 (小括弧):",
-	"autoPairBraces": "自動ペア生成 {中括弧}:",
-	"autoPairSquareBrackets": "自動ペア生成 [大] 括弧:",
+	"autoPairParentheses": "自動ペア生成 (括弧):",
+	"autoPairBraces": "自動ペア生成 {波括弧}:",
+	"autoPairSquareBrackets": "自動ペア生成 [角] 括弧:",
 	"autoPairAngleBrackets": "自動ペア生成 <不等号> 括弧:",
 	"autoPairQuotations": '自動ペア生成 "ストリング":',
 	"autoCompleteComments": "オートコンプリート /** ブロック・コメント */:",
@@ -241,25 +243,26 @@ define({
 	'clearThemeAndEditorSettings.name': 'テーマおよびエディター設定のクリア',  //$NON-NLS-0$  //$NON-NLS-1$
 	'clearThemeAndEditorSettings.tooltip': 'エディターのテーマおよびウィンドウのテーマと関連付けられている設定をすべてクリア',  //$NON-NLS-0$  //$NON-NLS-1$
 	"Settings": "設定",
-	'eclipseThemeName': 'Eclipse',  //$NON-NLS-0$ //$NON-NLS-1$
-	'darkerThemeName': 'ダーク',  //$NON-NLS-0$ //$NON-NLS-1$
-	'prospectoThemeName': 'プロスペクト',  //$NON-NLS-0$ //$NON-NLS-1$
-	'blueThemeName': '青',  //$NON-NLS-0$  //$NON-NLS-1$
-	'ambienceThemeName': 'アンビエンス',  //$NON-NLS-0$ //$NON-NLS-1$
-	'tierraThemeName': 'ティエラ',  //$NON-NLS-0$  //$NON-NLS-1$
-	'nimbusThemeName': 'ニンバス',  //$NON-NLS-0$ //$NON-NLS-1$
-	'adelanteThemeName': 'アデランテ',  //$NON-NLS-0$ //$NON-NLS-1$
-	'raspberryPiThemeName': 'ラズベリー・パイ',  //$NON-NLS-0$ //$NON-NLS-1$
-    'orionThemeName': 'Orion',  //$NON-NLS-0$  //$NON-NLS-1$
-    'orion2014ThemeName': 'Orion2014',  //$NON-NLS-0$  //$NON-NLS-1$
-    'greenZoneThemeName': '緑色のゾーン',  //$NON-NLS-0$  //$NON-NLS-1$
-    'prettyInPinkThemeName': 'プリティ・イン・ピンク',  //$NON-NLS-0$  //$NON-NLS-1$
-    'blueMondayThemeName': 'ブルー・マンデー',  //$NON-NLS-0$  //$NON-NLS-1$
-    'vanillaSkiesThemeName': 'バニラ・スカイ',  //$NON-NLS-0$  //$NON-NLS-1$
-    'beetlejuiceThemeName': 'ビートルジュース',  //$NON-NLS-0$  //$NON-NLS-1$
-    'redThemeName': '赤',  //$NON-NLS-0$  //$NON-NLS-1$
+	'EclipseThemeName': 'Eclipse',  //$NON-NLS-0$ //$NON-NLS-1$
+	'DarkerThemeName': 'ダーカー',  //$NON-NLS-0$ //$NON-NLS-1$
+	'ProspectoThemeName': 'プロスペクト',  //$NON-NLS-0$ //$NON-NLS-1$
+	'BlueThemeName': '青',  //$NON-NLS-0$  //$NON-NLS-1$
+	'AmbienceThemeName': 'アンビエンス',  //$NON-NLS-0$ //$NON-NLS-1$
+	'TierraThemeName': 'ティエラ',  //$NON-NLS-0$  //$NON-NLS-1$
+	'NimbusThemeName': 'ニンバス',  //$NON-NLS-0$ //$NON-NLS-1$
+	'AdelanteThemeName': 'アデランテ',  //$NON-NLS-0$ //$NON-NLS-1$
+	'Raspberry PiThemeName': 'ラズベリー・パイ',  //$NON-NLS-0$ //$NON-NLS-1$
+    'OrionThemeName': 'Orion',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Orion2014ThemeName': 'Orion2014',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Green ZoneThemeName': '緑色のゾーン',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Pretty In PinkThemeName': 'プリティ・イン・ピンク',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Blue MondayThemeName': 'ブルー・マンデー',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Vanilla SkiesThemeName': 'バニラ・スカイ',  //$NON-NLS-0$  //$NON-NLS-1$
+    'BeetlejuiceThemeName': 'ビートルジュース',  //$NON-NLS-0$  //$NON-NLS-1$
+    'RedThemeName': '赤',  //$NON-NLS-0$  //$NON-NLS-1$
     "SettingUpdateSuccess": "${0} 設定は正常に更新されました。",
     "buttonSave": "保存",
-    "buttonRevert": " 前回の状態に戻す"
+    "buttonRevert": " 前回の状態に戻す",
+    "ConfirmRestore": "これらの設定をデフォルト値に戻しますか? "
 });
 

@@ -18,7 +18,7 @@ define({
 	"Working Directory": "Directory di lavoro", //$NON-NLS-0$  //$NON-NLS-1$
 	"ViewWorkingDirVer": "Visualizzare la versione della directory di lavoro del file", //$NON-NLS-0$  //$NON-NLS-1$
 	"Loading...": "Caricamento...", //$NON-NLS-0$  //$NON-NLS-1$
-	"Repositories": "Tutti i repository Git", //$NON-NLS-0$  //$NON-NLS-1$
+	"Repositories": "Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repo": "Repository", //$NON-NLS-0$  //$NON-NLS-1$
 	"0 on 1 - Git": "${0} su ${1} - Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Git": "Git", //$NON-NLS-0$  //$NON-NLS-1$
@@ -538,7 +538,8 @@ define({
 	"FilesChanged": "${0} file modificati", //$NON-NLS-0$  //$NON-NLS-1$
 	"file": "file", //$NON-NLS-0$  //$NON-NLS-1$
 	"files": "file", //$NON-NLS-0$  //$NON-NLS-1$
-	"EmptyCommitConfirm": "Non vi sono file selezionati. Continuare?", //$NON-NLS-0$  //$NON-NLS-1$
+	"EmptyCommitConfirm": "Non vi sono file selezionati. Se si continua, si terminerà con un commit vuoto. Continuare?", //$NON-NLS-0$  //$NON-NLS-1$
+	"AlwaysSelectFiles": "Seleziona sempre i file modificati (vedere Preferenze Git)", //$NON-NLS-0$  //$NON-NLS-1$
 	"EmptyCommitWarning": "Il commit è vuoto", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilesChangedVsReadyToCommit": "modificato ${0} ${1}. pronto per essere sottoposto a commit ${2} ${3}.", //$NON-NLS-0$  //$NON-NLS-1$
 	"CommitPush": "Esegui commit e inoltra", //$NON-NLS-0$  //$NON-NLS-1$
@@ -561,6 +562,7 @@ define({
 	'Url:' : 'Url:', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Private Key:' : 'Chiave privata ssh:', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Passphrase:' : 'Passphrase Ssh:', //$NON-NLS-0$  //$NON-NLS-1$
-	'confirmUnsavedChanges': 'Esistono modifiche non salvate. Salvarle?' //$NON-NLS-1$ //$NON-NLS-0$
+	'confirmUnsavedChanges': 'Esistono modifiche non salvate. Salvarle?', //$NON-NLS-1$ //$NON-NLS-0$
+	'NewConfigurationEntryTooltip': "Aggiungi una nuova voce alla configurazione del repository" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

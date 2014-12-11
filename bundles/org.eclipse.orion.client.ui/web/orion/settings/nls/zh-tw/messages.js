@@ -52,7 +52,7 @@ define({
 	"Keyword Types": "關鍵字類型",
 	"darkred": "darkred",
 	"Categories": "種類",
-	"Username": "使用者名稱：",
+	"User Name": "使用者名稱：",
 	"Full Name": "完整名稱：",
 	"Email Address": "電子郵件位址：",
 	"Email Confirmed": "電子郵件確認：",
@@ -126,6 +126,8 @@ define({
 	"CheckJsConsoleDrillDown": "請按一下這裡，然後檢查要往下探查的 javascript 主控台",
 	"Item": "項目",
 	"Git Config": "Git 配置",
+	"GitWorkDir": "Git 工作目錄",
+	"SelectUnstagedChanges": "一律選取變更的檔案",
 	"Clear Git Credentials": "清除 Git 認證",
 	"Enable Storage": "啟用儲存體：",
 	"BrowserCredStoreMsg" : "請記得您的認證會持續儲存在瀏覽器中。",
@@ -241,25 +243,26 @@ define({
 	'clearThemeAndEditorSettings.name': '清除佈景主題和編輯器設定',  //$NON-NLS-0$  //$NON-NLS-1$
 	'clearThemeAndEditorSettings.tooltip': '清除與編輯器佈景主題和視窗佈景主題相關聯的所有設定',  //$NON-NLS-0$  //$NON-NLS-1$
 	"Settings": "設定",
-	'eclipseThemeName': 'Eclipse',  //$NON-NLS-0$ //$NON-NLS-1$
-	'darkerThemeName': 'Dark',  //$NON-NLS-0$ //$NON-NLS-1$
-	'prospectoThemeName': 'Prospecto',  //$NON-NLS-0$ //$NON-NLS-1$
-	'blueThemeName': 'Blue',  //$NON-NLS-0$  //$NON-NLS-1$
-	'ambienceThemeName': 'Ambience',  //$NON-NLS-0$ //$NON-NLS-1$
-	'tierraThemeName': 'Tierra',  //$NON-NLS-0$  //$NON-NLS-1$
-	'nimbusThemeName': 'Nimbus',  //$NON-NLS-0$ //$NON-NLS-1$
-	'adelanteThemeName': 'Adelante',  //$NON-NLS-0$ //$NON-NLS-1$
-	'raspberryPiThemeName': 'Raspberry Pi',  //$NON-NLS-0$ //$NON-NLS-1$
-    'orionThemeName': 'Orion',  //$NON-NLS-0$  //$NON-NLS-1$
-    'orion2014ThemeName': 'Orion2014',  //$NON-NLS-0$  //$NON-NLS-1$
-    'greenZoneThemeName': 'Green Zone',  //$NON-NLS-0$  //$NON-NLS-1$
-    'prettyInPinkThemeName': 'Pretty In Pink',  //$NON-NLS-0$  //$NON-NLS-1$
-    'blueMondayThemeName': 'Blue Monday',  //$NON-NLS-0$  //$NON-NLS-1$
-    'vanillaSkiesThemeName': 'Vanilla Skies',  //$NON-NLS-0$  //$NON-NLS-1$
-    'beetlejuiceThemeName': 'Beetlejuice',  //$NON-NLS-0$  //$NON-NLS-1$
-    'redThemeName': 'Red',  //$NON-NLS-0$  //$NON-NLS-1$
+	'EclipseThemeName': 'Eclipse',  //$NON-NLS-0$ //$NON-NLS-1$
+	'DarkerThemeName': '較暗',  //$NON-NLS-0$ //$NON-NLS-1$
+	'ProspectoThemeName': 'Prospecto',  //$NON-NLS-0$ //$NON-NLS-1$
+	'BlueThemeName': 'Blue',  //$NON-NLS-0$  //$NON-NLS-1$
+	'AmbienceThemeName': 'Ambience',  //$NON-NLS-0$ //$NON-NLS-1$
+	'TierraThemeName': 'Tierra',  //$NON-NLS-0$  //$NON-NLS-1$
+	'NimbusThemeName': 'Nimbus',  //$NON-NLS-0$ //$NON-NLS-1$
+	'AdelanteThemeName': 'Adelante',  //$NON-NLS-0$ //$NON-NLS-1$
+	'Raspberry PiThemeName': 'Raspberry Pi',  //$NON-NLS-0$ //$NON-NLS-1$
+    'OrionThemeName': 'Orion',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Orion2014ThemeName': 'Orion2014',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Green ZoneThemeName': 'Green Zone',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Pretty In PinkThemeName': 'Pretty In Pink',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Blue MondayThemeName': 'Blue Monday',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Vanilla SkiesThemeName': 'Vanilla Skies',  //$NON-NLS-0$  //$NON-NLS-1$
+    'BeetlejuiceThemeName': 'Beetlejuice',  //$NON-NLS-0$  //$NON-NLS-1$
+    'RedThemeName': 'Red',  //$NON-NLS-0$  //$NON-NLS-1$
     "SettingUpdateSuccess": "已順利更新${0}設定。",
     "buttonSave": "儲存",
-    "buttonRevert": " 回復"
+    "buttonRevert": " 回復",
+    "ConfirmRestore": "將這些設定還原為預設值嗎？"
 });
 

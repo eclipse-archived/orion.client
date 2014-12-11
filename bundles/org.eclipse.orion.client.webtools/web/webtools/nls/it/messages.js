@@ -14,11 +14,12 @@ define({
 	'cssOutline' : 'Descrizione regole CSS', //$NON-NLS-0$  //$NON-NLS-1$
 	'htmlContentAssist' : 'Assistente ai contenuti HTML', //$NON-NLS-0$  //$NON-NLS-1$
 	'cssContentAssist' : 'Assistente ai contenuti CSS', //$NON-NLS-0$  //$NON-NLS-1$
+	'cssHover' : 'Testo a comparsa CSS', //$NON-NLS-0$  //$NON-NLS-1$
+	'csslintValidator' : 'Programma di convalida CSS', //$NON-NLS-0$  //$NON-NLS-1$
 	
-	'csslintValidator' : 'Programma di convalida CSS',
-	'ignore' : 'Ignora',
-	'warning' : 'Avviso',
-	'error' : 'Error',
+	'ignore' : 'Ignora', //$NON-NLS-0$  //$NON-NLS-1$
+	'warning' : 'Avviso', //$NON-NLS-0$  //$NON-NLS-1$
+	'error' : 'Errore', //$NON-NLS-0$  //$NON-NLS-1$
 	
 	'adjoining-classes': 'Non consentire classi adiacenti:', //$NON-NLS-0$  //$NON-NLS-1$
 	'box-model': 'Fare attenzione alla dimensione della casella di suddivisione:', //$NON-NLS-0$  //$NON-NLS-1$

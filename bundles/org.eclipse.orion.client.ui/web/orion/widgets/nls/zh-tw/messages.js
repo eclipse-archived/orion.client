@@ -70,6 +70,12 @@ define({
 	"Related Links": "相關鏈結",
 	"Yes": "是",
 	"No": "否",
-	"DeleteSearchTrmMsg": "按一下或使用刪除鍵來刪除搜尋詞彙"
+	"DeleteSearchTrmMsg": "按一下或使用刪除鍵來刪除搜尋詞彙",
+	"Application": "應用程式",
+	"selectLaunchConfig": "請選取配置以執行",
+	"createNew": "新建...",
+	"Running": "執行中",
+	"checkingStateMessage": "正在檢查 ${0} 的狀態",
+	"Status": "狀態"
 });
 

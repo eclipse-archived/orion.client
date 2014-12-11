@@ -28,6 +28,9 @@ define({
 	"currentLine": "現在行", //$NON-NLS-1$ //$NON-NLS-0$
 	"matchingBracket": "対応する大括弧", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentBracket": "現行大括弧", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffAdded": "Diff の追加された行", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffDeleted": "Diff の削除された行", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffModified": "Diff の変更された行", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	"lineUp": "1 行上へ", //$NON-NLS-1$ //$NON-NLS-0$
 	"lineDown": "1 行下へ", //$NON-NLS-1$ //$NON-NLS-0$

@@ -18,7 +18,7 @@ define({
 	"Working Directory": "Diretório de Trabalho", //$NON-NLS-0$  //$NON-NLS-1$
 	"ViewWorkingDirVer": "Visualizar a versão do diretório ativo do arquivo", //$NON-NLS-0$  //$NON-NLS-1$
 	"Loading...": "Carregando...", //$NON-NLS-0$  //$NON-NLS-1$
-	"Repositories": "Todos os repositórios Git", //$NON-NLS-0$  //$NON-NLS-1$
+	"Repositories": "Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repo": "Repositórios", //$NON-NLS-0$  //$NON-NLS-1$
 	"0 on 1 - Git": "${0} em ${1} - Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Git": "Git", //$NON-NLS-0$  //$NON-NLS-1$
@@ -538,7 +538,8 @@ define({
 	"FilesChanged": "${0} arquivos alterados", //$NON-NLS-0$  //$NON-NLS-1$
 	"file": "arquivo", //$NON-NLS-0$  //$NON-NLS-1$
 	"files": "arquivos", //$NON-NLS-0$  //$NON-NLS-1$
-	"EmptyCommitConfirm": "Você não possui arquivos selecionados. Tem certeza?", //$NON-NLS-0$  //$NON-NLS-1$
+	"EmptyCommitConfirm": "Você não possui arquivos selecionados. Se continuar, você encerrará com uma confirmação vazia. Deseja continuar?", //$NON-NLS-0$  //$NON-NLS-1$
+	"AlwaysSelectFiles": "Sempre selecionar arquivos alterados (consulte Preferências Git)", //$NON-NLS-0$  //$NON-NLS-1$
 	"EmptyCommitWarning": "A confirmação está vazia", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilesChangedVsReadyToCommit": "${0} ${1} alterado. ${2} ${3} pronto para confirmação.", //$NON-NLS-0$  //$NON-NLS-1$
 	"CommitPush": "Confirmar e enviar por push", //$NON-NLS-0$  //$NON-NLS-1$
@@ -561,6 +562,7 @@ define({
 	'Url:' : 'Url:', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Private Key:' : 'Chave privada Ssh:', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Passphrase:' : 'Passphrase Ssh:', //$NON-NLS-0$  //$NON-NLS-1$
-	'confirmUnsavedChanges': 'Há mudanças não salvas. Deseja salvá-las?' //$NON-NLS-1$ //$NON-NLS-0$
+	'confirmUnsavedChanges': 'Há mudanças não salvas. Deseja salvá-las?', //$NON-NLS-1$ //$NON-NLS-0$
+	'NewConfigurationEntryTooltip': "Incluir uma nova entada na configuração do repositório" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

@@ -113,6 +113,7 @@ define(["orion/Deferred"
 				suffix = match[3] || match[2];
 			parentRequire(['orion/bootstrap'], function(bootstrap) { //$NON-NLS-0$
 				bootstrap.startup().then(function(core) {
+					console.log(name);
 					var serviceRegistry = core.serviceRegistry;
 					_filterServices(serviceRegistry, config).then(function(nlsReferences) {
 						if (!locale) {

@@ -14,11 +14,12 @@ define({
 	'cssOutline' : 'CSS-Regelstruktur', //$NON-NLS-0$  //$NON-NLS-1$
 	'htmlContentAssist' : 'HTML-Inhaltshilfe', //$NON-NLS-0$  //$NON-NLS-1$
 	'cssContentAssist' : 'CSS-Inhaltshilfe', //$NON-NLS-0$  //$NON-NLS-1$
+	'cssHover' : 'CSS-Hover', //$NON-NLS-0$  //$NON-NLS-1$
+	'csslintValidator' : 'CSS-Prüfprogramm', //$NON-NLS-0$  //$NON-NLS-1$
 	
-	'csslintValidator' : 'CSS-Prüfprogramm',
-	'ignore' : 'Ignorieren',
-	'warning' : 'Warnung',
-	'error' : 'Fehler',
+	'ignore' : 'Ignorieren', //$NON-NLS-0$  //$NON-NLS-1$
+	'warning' : 'Warnung', //$NON-NLS-0$  //$NON-NLS-1$
+	'error' : 'Fehler', //$NON-NLS-0$  //$NON-NLS-1$
 	
 	'adjoining-classes': 'Angrenzende Klassen nicht zulassen:', //$NON-NLS-0$  //$NON-NLS-1$
 	'box-model': 'Vorsicht bei fehlerhafter Feldgröße:', //$NON-NLS-0$  //$NON-NLS-1$

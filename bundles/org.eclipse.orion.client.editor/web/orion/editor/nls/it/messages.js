@@ -20,7 +20,7 @@ define({
 	"line": "Riga: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"breakpoint": "Punto di interruzione", //$NON-NLS-1$ //$NON-NLS-0$
 	"bookmark": "Segnalibro", //$NON-NLS-1$ //$NON-NLS-0$
-	"task": "Attività", //$NON-NLS-1$ //$NON-NLS-0$
+	"task": "Operazione", //$NON-NLS-1$ //$NON-NLS-0$
 	"error": "Errore", //$NON-NLS-1$ //$NON-NLS-0$
 	"warning": "Avviso", //$NON-NLS-1$ //$NON-NLS-0$
 	"matchingSearch": "Ricerca corrispondente", //$NON-NLS-1$ //$NON-NLS-0$
@@ -28,6 +28,9 @@ define({
 	"currentLine": "Riga corrente", //$NON-NLS-1$ //$NON-NLS-0$
 	"matchingBracket": "Parentesi corrispondente", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentBracket": "Parentesi corrente", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffAdded": "Linee aggiunte diff", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffDeleted": "Linee eliminate diff", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffModified": "Linee modificate diff", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	"lineUp": "Riga su", //$NON-NLS-1$ //$NON-NLS-0$
 	"lineDown": "Riga giù", //$NON-NLS-1$ //$NON-NLS-0$
@@ -87,7 +90,7 @@ define({
 	"toggleTabMode": "Attiva/disattiva modalità di tabulazione", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleOverwriteMode": "Attiva/disattiva modalità Sovrascrivi", //$NON-NLS-1$ //$NON-NLS-0$
 	
-	"committerOnTime": "${0} su ${1}", //$NON-NLS-1$ //$NON-NLS-0$
+	"committerOnTime": "${0} il ${1}", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	//Emacs
 	"emacs": "Emacs", //$NON-NLS-1$ //$NON-NLS-0$
@@ -129,7 +132,7 @@ define({
 	"lastEdit": "Posizione ultima modifica", //$NON-NLS-1$ //$NON-NLS-0$
 	"trimTrailingWhitespaces": "Taglia spazi finali", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleLineComment": "Attiva/disattiva commento riga", //$NON-NLS-1$ //$NON-NLS-0$
-	"addBlockComment": "Aggiungi commento al blocco", //$NON-NLS-1$ //$NON-NLS-0$
+	"addBlockComment": "Aggiungi commento di blocco", //$NON-NLS-1$ //$NON-NLS-0$
 	"removeBlockComment": "Rimuovi commento dal blocco", //$NON-NLS-1$ //$NON-NLS-0$
 	"linkedModeEntered": "Entrata in modalità collegata", //$NON-NLS-1$ //$NON-NLS-0$
 	"linkedModeExited": "Uscita dalla modalità collegata", //$NON-NLS-1$ //$NON-NLS-0$
@@ -187,9 +190,9 @@ define({
 	"viP": "Incolla prima del carattere o riga", //$NON-NLS-1$ //$NON-NLS-0$
 	"viStar": "Ricerca parola sotto al cursore", //$NON-NLS-1$ //$NON-NLS-0$
 	
-	"next": "Avanti", //$NON-NLS-1$ //$NON-NLS-0$
+	"next": "Successivo", //$NON-NLS-1$ //$NON-NLS-0$
 	"previous": "Indietro", //$NON-NLS-1$ //$NON-NLS-0$
-	"replace": "Sostituisci", //$NON-NLS-1$ //$NON-NLS-0$
+	"replace": "Sostituire", //$NON-NLS-1$ //$NON-NLS-0$
 	"replaceAll": "Sostituisci tutto", //$NON-NLS-1$ //$NON-NLS-0$
 	"findWith": "Trova con", //$NON-NLS-1$ //$NON-NLS-0$
 	"replaceWith": "Sostituisci con", //$NON-NLS-1$ //$NON-NLS-0$

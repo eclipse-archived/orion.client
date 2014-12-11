@@ -24,6 +24,8 @@ define({
 	"Saved": "Gespeichert", //$NON-NLS-1$ //$NON-NLS-0$
 	"Blame": "Verantwortliche/r", //$NON-NLS-1$ //$NON-NLS-0$
 	"BlameTooltip":"Anmerkungen der Verantwortlichen anzeigen", //$NON-NLS-1$ //$NON-NLS-0$
+	"Diff": "Differenz", //$NON-NLS-1$//$NON-NLS-0$
+	"DiffTooltip":"Anmerkungen zur Differenz anzeigen", //$NON-NLS-1$//$NON-NLS-0$
 	"saveOutOfSync": "Die Ressource ist nicht mit dem Server synchronisiert. Möchten Sie sie trotzdem speichern?", //$NON-NLS-1$ //$NON-NLS-0$
 	"loadOutOfSync": "Die Ressource ist nicht mit dem Server synchronisiert. Soll sie dennoch geladen werden? Ihre lokalen Änderungen werden hierdurch überschrieben.", //$NON-NLS-1$ //$NON-NLS-0$
 	"ReadingMetadata": "Metadaten von ${0} werden gelesen", //$NON-NLS-1$ //$NON-NLS-0$
@@ -84,5 +86,7 @@ define({
 	'listingProjects': 'Projekte werden aufgelistet...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'gettingWorkspaceInfo': 'Arbeitsbereichsinformationen werden abgerufen...',  //$NON-NLS-0$  //$NON-NLS-1$
 	"showProblems": "Probleme anzeigen...",  //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltip": "QuickInfo anzeigen", //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltipTooltip": "Zeigt die QuickInfo sofort entsprechend der Position des Winkelzeichens an" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

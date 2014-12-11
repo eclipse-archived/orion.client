@@ -115,6 +115,7 @@ define({
 	"Downloading...": "Lendo conteúdo do arquivo...",
 	"Download not supported": "O download de conteúdo não é suportado neste navegador.",
 	"gettingContentFrom": "Obtendo conteúdo de ",
+	"deletingLaunchConfiguration": "Excluindo configuração de ativação...",
 	"deployTo": "Implementar para ",
 	"deploy": "Implementar ",
 	"connect": "Conectar",
@@ -131,6 +132,7 @@ define({
 	"startApplication": "Iniciar aplicativo",
 	"manage": "Gerenciar",
 	"manageThisApplicationOnRemote": "Gerenciar este aplicativo no servidor remoto",
+	"deleteLaunchConfiguration": "Excluir esta configuração de ativação",
 	"deployThisApplicationAgain": "Implementar este aplicativo novamente",
 	"associatedFolder": "Pasta Associada",
 	"associateAFolderFromThe": "Associar uma pasta da área de trabalho a este projeto.",
@@ -147,6 +149,9 @@ define({
 	'zipArchiveCommandTooltip': 'Criar um projeto a partir do archive zip local.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'Url:': 'Url:',  //$NON-NLS-0$  //$NON-NLS-1$
 	'notZip' : 'Os arquivos a seguir não são arquivos zip: ${0}. Deseja continuar a importação?', //$NON-NLS-0$  //$NON-NLS-1$
-	'notZipMultiple' : 'Há vários arquivos não zip sendo transferidos por upload. Deseja continuar a importação?' //$NON-NLS-0$  //$NON-NLS-1$
+	'notZipMultiple' : 'Há vários arquivos não zip sendo transferidos por upload. Deseja continuar a importação?', //$NON-NLS-0$  //$NON-NLS-1$
+	"Cancel": "Cancelar", //$NON-NLS-0$  //$NON-NLS-1$
+	"Ok": "OK", //$NON-NLS-0$  //$NON-NLS-1$
+	"missingCredentials": "Insira as credenciais de autenticação ${0} associadas ao ${1} para verificar seu status." //$NON-NLS-0$  //$NON-NLS-1$
 });
 

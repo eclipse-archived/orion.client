@@ -28,6 +28,9 @@ define({
 	"currentLine": "現行行", //$NON-NLS-1$ //$NON-NLS-0$
 	"matchingBracket": "對稱的方括弧", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentBracket": "現行方括弧", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffAdded": "比較新增行差異", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffDeleted": "比較刪除行差異", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffModified": "比較修改行差異", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	"lineUp": "上移一行", //$NON-NLS-1$ //$NON-NLS-0$
 	"lineDown": "下移一行", //$NON-NLS-1$ //$NON-NLS-0$

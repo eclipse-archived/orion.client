@@ -52,7 +52,7 @@ define({
 	"Keyword Types": "Tipos de palabra clave",
 	"darkred": "rojo oscuro",
 	"Categories": "Categorías",
-	"Username": "Nombre de usuario:",
+	"User Name": "Nombre de usuario:",
 	"Full Name": "Nombre completo:",
 	"Email Address": "Dirección de correo electrónico:",
 	"Email Confirmed": "Correo electrónico confirmado:",
@@ -126,6 +126,8 @@ define({
 	"CheckJsConsoleDrillDown": "Pulse aquí y compruebe la consola javascript para obtener más detalles",
 	"Item": "Artículo",
 	"Git Config": "Config de Git",
+	"GitWorkDir": "Directorio de trabajo de Git",
+	"SelectUnstagedChanges": "Seleccionar siempre archivos modificados",
 	"Clear Git Credentials": "Borrar credenciales Git",
 	"Enable Storage": "Habilitar almacenamiento:",
 	"BrowserCredStoreMsg" : "Tenga en cuenta que las credenciales se almacenarán de forma persistente en el navegador.",
@@ -241,25 +243,26 @@ define({
 	'clearThemeAndEditorSettings.name': 'Borrar valores de temas y del editor',  //$NON-NLS-0$  //$NON-NLS-1$
 	'clearThemeAndEditorSettings.tooltip': 'Borrar todos los valores asociados con temas del editor y temas de ventana',  //$NON-NLS-0$  //$NON-NLS-1$
 	"Settings": "Valores",
-	'eclipseThemeName': 'Eclipse',  //$NON-NLS-0$ //$NON-NLS-1$
-	'darkerThemeName': 'Oscuro',  //$NON-NLS-0$ //$NON-NLS-1$
-	'prospectoThemeName': 'Prospecto',  //$NON-NLS-0$ //$NON-NLS-1$
-	'blueThemeName': 'Azul',  //$NON-NLS-0$  //$NON-NLS-1$
-	'ambienceThemeName': 'Ambience',  //$NON-NLS-0$ //$NON-NLS-1$
-	'tierraThemeName': 'Tierra',  //$NON-NLS-0$  //$NON-NLS-1$
-	'nimbusThemeName': 'Nimbus',  //$NON-NLS-0$ //$NON-NLS-1$
-	'adelanteThemeName': 'Adelante',  //$NON-NLS-0$ //$NON-NLS-1$
-	'raspberryPiThemeName': 'Raspberry Pi',  //$NON-NLS-0$ //$NON-NLS-1$
-    'orionThemeName': 'Orion',  //$NON-NLS-0$  //$NON-NLS-1$
-    'orion2014ThemeName': 'Orion2014',  //$NON-NLS-0$  //$NON-NLS-1$
-    'greenZoneThemeName': 'Green Zone',  //$NON-NLS-0$  //$NON-NLS-1$
-    'prettyInPinkThemeName': 'Pretty In Pink',  //$NON-NLS-0$  //$NON-NLS-1$
-    'blueMondayThemeName': 'Blue Monday',  //$NON-NLS-0$  //$NON-NLS-1$
-    'vanillaSkiesThemeName': 'Vanilla Skies',  //$NON-NLS-0$  //$NON-NLS-1$
-    'beetlejuiceThemeName': 'Beetlejuice',  //$NON-NLS-0$  //$NON-NLS-1$
-    'redThemeName': 'Rojo',  //$NON-NLS-0$  //$NON-NLS-1$
+	'EclipseThemeName': 'Eclipse',  //$NON-NLS-0$ //$NON-NLS-1$
+	'DarkerThemeName': 'Más oscuro',  //$NON-NLS-0$ //$NON-NLS-1$
+	'ProspectoThemeName': 'Prospecto',  //$NON-NLS-0$ //$NON-NLS-1$
+	'BlueThemeName': 'Azul',  //$NON-NLS-0$  //$NON-NLS-1$
+	'AmbienceThemeName': 'Ambience',  //$NON-NLS-0$ //$NON-NLS-1$
+	'TierraThemeName': 'Tierra',  //$NON-NLS-0$  //$NON-NLS-1$
+	'NimbusThemeName': 'Nimbus',  //$NON-NLS-0$ //$NON-NLS-1$
+	'AdelanteThemeName': 'Adelante',  //$NON-NLS-0$ //$NON-NLS-1$
+	'Raspberry PiThemeName': 'Raspberry Pi',  //$NON-NLS-0$ //$NON-NLS-1$
+    'OrionThemeName': 'Orion',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Orion2014ThemeName': 'Orion2014',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Green ZoneThemeName': 'Green Zone',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Pretty In PinkThemeName': 'Pretty In Pink',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Blue MondayThemeName': 'Blue Monday',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Vanilla SkiesThemeName': 'Vanilla Skies',  //$NON-NLS-0$  //$NON-NLS-1$
+    'BeetlejuiceThemeName': 'Beetlejuice',  //$NON-NLS-0$  //$NON-NLS-1$
+    'RedThemeName': 'Rojo',  //$NON-NLS-0$  //$NON-NLS-1$
     "SettingUpdateSuccess": "${0} valores actualizados satisfactoriamente.",
     "buttonSave": "Guardar",
-    "buttonRevert": " Revertir"
+    "buttonRevert": " Revertir",
+    "ConfirmRestore": "¿Restaurar valores predeterminados de estos valores?"
 });
 

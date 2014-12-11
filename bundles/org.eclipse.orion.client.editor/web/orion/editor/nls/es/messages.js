@@ -28,6 +28,9 @@ define({
 	"currentLine": "Línea actual", //$NON-NLS-1$ //$NON-NLS-0$
 	"matchingBracket": "Corchete coincidente", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentBracket": "Corchete actual", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffAdded": "Dif Líneas añadidas", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffDeleted": "Dif Líneas suprimidas", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffModified": "Dif Líneas modificadas", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	"lineUp": "Retroceso línea", //$NON-NLS-1$ //$NON-NLS-0$
 	"lineDown": "Avance línea", //$NON-NLS-1$ //$NON-NLS-0$

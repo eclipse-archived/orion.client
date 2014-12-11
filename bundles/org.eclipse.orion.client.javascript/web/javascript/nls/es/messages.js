@@ -18,6 +18,7 @@ define({
 	'contentAssist' : 'Asistencia de contenido de JavaScript', //$NON-NLS-0$  //$NON-NLS-1$
 	'eslintValidator' : 'Validador de JavaScript', //$NON-NLS-0$  //$NON-NLS-1$
 	'missingCurly' : 'Sentencias no encerradas entre llaves:', //$NON-NLS-0$  //$NON-NLS-1$
+	'noCaller' : 'Uso de \'arguments.caller\' o \'arguments.callee\' no recomendado:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noEqeqeq' : 'Uso de \'==\' no recomendado:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noDebugger' : 'Uso de la sentencia \'debugger\' no recomendado:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noEval' : 'Uso de \'eval()\' no recomendado:', //$NON-NLS-0$  //$NON-NLS-1$
@@ -37,6 +38,7 @@ define({
 	'missingSemi' : 'Puntos y coma faltantes:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedVars' : 'Variables no utilizadas:', //$NON-NLS-0$  //$NON-NLS-1$
 	'varRedecl' : 'Redeclaraciones de variable:', //$NON-NLS-0$  //$NON-NLS-1$
+	'varShadow': 'Copia continua de variable:', //$NON-NLS-0$  //$NON-NLS-1$
 	'undefMember' : 'Referencia global no declarada:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unnecessarySemis' : 'Puntos y coma no necesarios:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedParams' : 'Parámetros no utilizados:', //$NON-NLS-0$  //$NON-NLS-1$
@@ -49,5 +51,28 @@ define({
 	'validTypeof': 'Comparación \'typeof\' no válida',  //$NON-NLS-0$ //$NON-NLS-1$
 	'noSparseArrays': 'Declaraciones de matriz dispersa', //$NON-NLS-0$ //$NON-NLS-1$
 	'jsHover': 'Proveedor de JavaScript Hover', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeExtraSemiFixName': 'Eliminar punto y coma extra', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeExtraSemiFixTooltip': 'Elimina el punto y coma que sobra', //$NON-NLS-0$ //$NON-NLS-1$
+	'addFallthroughCommentFixName': 'Añadir comentario $FALLTHROUGH$', //$NON-NLS-0$ //$NON-NLS-1$
+	'addFallthroughCommentFixTooltip': 'Añadir la línea de comentario $FALLTHROUGH$', //$NON-NLS-0$ //$NON-NLS-1$
+	'addEmptyCommentFixName': 'Comentar bloque vacío', //$NON-NLS-0$ //$NON-NLS-1$
+	'addEmptyCommentFixTooltip': 'Añadir un comentario TODO al bloque vacío', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintEnvFixName': 'Añadir a directiva eslint-env', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintEnvFixTooltip': 'Añadir a directiva eslint-env para filtrar el miembro conocido', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintGlobalFixName': 'Añadir a directiva global', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintGlobalFixTooltip': 'Añadir a directiva global para filtrar el miembro desconocido', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeUnusedParamsFixName': 'Eliminar parámetro', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeUnusedParamsFixTooltip': 'Eliminar el parámetro no utilizado, conservando efectos secundarios', //$NON-NLS-0$ //$NON-NLS-1$
+	'commentCallbackFixName': 'Añadir @callback a función', //$NON-NLS-0$ //$NON-NLS-1$
+	'commentCallbackFixTooltip': 'Documentar la función con @callback, pasando por alto los parámetros no utilizados', //$NON-NLS-0$ //$NON-NLS-1$
+	'eqeqeqFixName': 'Actualizar operador', //$NON-NLS-0$ //$NON-NLS-1$
+	'eqeqeqFixTooltip': 'Actualizar el operador con el esperado', //$NON-NLS-0$ //$NON-NLS-1$
+	'unreachableFixName': 'Eliminar código no accesible', //$NON-NLS-0$ //$NON-NLS-1$
+	'unreachableFixTooltip': 'Eliminar el código no accesible', //$NON-NLS-0$ //$NON-NLS-1$
+	'sparseArrayFixName': 'Convertir en matriz normal', //$NON-NLS-0$ //$NON-NLS-1$
+	'sparseArrayFixTooltip': 'Eliminar entradas dispersas y convertirlas en una matriz normal', //$NON-NLS-0$ //$NON-NLS-1$
+	'semiFixName': 'Añadir \';\' que falta', //$NON-NLS-0$ //$NON-NLS-1$
+	'semiFixTooltip': 'Añadir el signo \';\' que falta', //$NON-NLS-0$ //$NON-NLS-1$
+	'radix': 'Falta parámetro radix en parseInt()', //$NON-NLS-0$ //$NON-NLS-1$
 });
 

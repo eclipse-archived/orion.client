@@ -28,6 +28,9 @@ define({
 	"currentLine": "Ligne en cours", //$NON-NLS-1$ //$NON-NLS-0$
 	"matchingBracket": "Crochet correspondant", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentBracket": "Crochet en cours", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffAdded": "Lignes diff ajoutées", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffDeleted": "Lignes diff supprimées", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffModified": "Lignes diff modifiées", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	"lineUp": "Ligne précédente", //$NON-NLS-1$ //$NON-NLS-0$
 	"lineDown": "Ligne suivante", //$NON-NLS-1$ //$NON-NLS-0$
@@ -189,7 +192,7 @@ define({
 	
 	"next": "Suivant", //$NON-NLS-1$ //$NON-NLS-0$
 	"previous": "Précédent", //$NON-NLS-1$ //$NON-NLS-0$
-	"replace": "Remplacement", //$NON-NLS-1$ //$NON-NLS-0$
+	"replace": "Remplacer", //$NON-NLS-1$ //$NON-NLS-0$
 	"replaceAll": "Remplacer tout", //$NON-NLS-1$ //$NON-NLS-0$
 	"findWith": "Rechercher avec", //$NON-NLS-1$ //$NON-NLS-0$
 	"replaceWith": "Remplacer par", //$NON-NLS-1$ //$NON-NLS-0$

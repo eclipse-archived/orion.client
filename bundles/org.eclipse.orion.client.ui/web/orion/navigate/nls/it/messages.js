@@ -22,7 +22,7 @@ define({
 	"Copy of ${0}": "Copia di ${0}",
 	"EnterName": "Immettere un nuovo nome per '${0}'",
 	"ChooseFolder": "Scegli cartella...",
-	"Rename": "Rinomina",
+	"Rename": "Ridenomina",
 	"RenameFilesFolders": "Ridenomina i file o le cartelle selezionate",
 	"CompareEach": "Confronta l'uno con l'altro",
 	"Compare 2 files": "Confronta l'uno con l'altro di 2 file selezionati",
@@ -39,7 +39,7 @@ define({
 	"Name:": "Nome:",
 	"New Folder": "Cartella",
 	"Folder name:": "Nome cartella:",
-	"Create a new folder": "Crea una nuova cartella",
+	"Create a new folder": "Crea nuova cartella",
 	"Creating folder": "Creazione cartella",
 	"Folder": "Cartella",
 	"Create an empty folder": "Crea una cartella vuota",
@@ -88,7 +88,7 @@ define({
 	"Fetching children of ": "Recupero elementi secondari di ",
 	"Paste": "Incolla",
 	"Open With": "Apri con",
-	"Loading ": "Caricamento ",
+	"Loading ": "Caricamento in corso ",
 	"New": "Nuovo",
 	"File": "File",
 	"Actions": "Azioni",
@@ -115,8 +115,9 @@ define({
 	"Downloading...": "Lettura del contenuto file in corso...",
 	"Download not supported": "Il download del contenuto non è supportato in questo browser.",
 	"gettingContentFrom": "Richiamo del contenuto da ",
+	"deletingLaunchConfiguration": "Eliminazione configurazione di avvio...",
 	"deployTo": "Distribuisci a ",
-	"deploy": "Distribuisci ",
+	"deploy": "Distribuzione ",
 	"connect": "Connetti",
 	"fetchContent": "Recupera contenuto",
 	"fetchContentOf": "Recupera contenuto di ",
@@ -126,11 +127,12 @@ define({
 	"checkApplicationStatus": "Verifica condizione applicazione",
 	"checkApplicationState": "Verifica stato applicazione",
 	"stop": "Arresta",
-	"start": "Avvia",
+	"start": "Inizio",
 	"stopApplication": "Arresta applicazione",
 	"startApplication": "Avvia applicazione",
 	"manage": "Gestisci",
 	"manageThisApplicationOnRemote": "Gestisci questa applicazione sul server remoto",
+	"deleteLaunchConfiguration": "Elimina questa configurazione di avvio",
 	"deployThisApplicationAgain": "Distribuisci nuovamente questa applicazione",
 	"associatedFolder": "Cartella associata",
 	"associateAFolderFromThe": "Associa una cartella dallo spazio di lavoro a questo progetto.",
@@ -147,6 +149,9 @@ define({
 	'zipArchiveCommandTooltip': 'Crea un progetto da un archivio zip locale.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'Url:': 'Url:',  //$NON-NLS-0$  //$NON-NLS-1$
 	'notZip' : 'I seguenti file non sono file di zip: ${0}. Si desidera continuare l\'importazione?', //$NON-NLS-0$  //$NON-NLS-1$
-	'notZipMultiple' : 'Esistono più file non in formato zip in fase di caricamento. Si desidera continuare l\'importazione?' //$NON-NLS-0$  //$NON-NLS-1$
+	'notZipMultiple' : 'Esistono più file non in formato zip in fase di caricamento. Si desidera continuare l\'importazione?', //$NON-NLS-0$  //$NON-NLS-1$
+	"Cancel": "Annulla", //$NON-NLS-0$  //$NON-NLS-1$
+	"Ok": "Ok", //$NON-NLS-0$  //$NON-NLS-1$
+	"missingCredentials": "Immettere le credenziali di autenticazione  ${0} associate a ${1} per verificare il relativo stato." //$NON-NLS-0$  //$NON-NLS-1$
 });
 

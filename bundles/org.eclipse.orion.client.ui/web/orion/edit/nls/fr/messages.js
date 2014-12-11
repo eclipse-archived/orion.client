@@ -24,6 +24,8 @@ define({
 	"Saved": "Sauvegardé", //$NON-NLS-1$ //$NON-NLS-0$
 	"Blame": "Reproche", //$NON-NLS-1$ //$NON-NLS-0$
 	"BlameTooltip":"Afficher les annotations de reproche", //$NON-NLS-1$ //$NON-NLS-0$
+	"Diff": "Diff", //$NON-NLS-1$//$NON-NLS-0$
+	"DiffTooltip":"Afficher les annotations de diff", //$NON-NLS-1$//$NON-NLS-0$
 	"saveOutOfSync": "Ressource non synchronisée avec le serveur. Voulez-vous la sauvegarder quand même ?", //$NON-NLS-1$ //$NON-NLS-0$
 	"loadOutOfSync": "Ressource non synchronisée avec le serveur. Voulez-vous la charger malgré tout ? Vous remplacerez vos modifications locales.", //$NON-NLS-1$ //$NON-NLS-0$
 	"ReadingMetadata": "Lecture des métadonnées de ${0}", //$NON-NLS-1$ //$NON-NLS-0$
@@ -54,7 +56,7 @@ define({
 	"File": "Fichier", //$NON-NLS-1$ //$NON-NLS-0$
 	"Edit": "Edition", //$NON-NLS-1$ //$NON-NLS-0$
 	"Tools": "Outils", //$NON-NLS-1$ //$NON-NLS-0$
-	"Add": "Ajouter", //$NON-NLS-1$ //$NON-NLS-0$
+	"Add": "Ajoutez", //$NON-NLS-1$ //$NON-NLS-0$
 	"noActions": "Il n'existe aucune action pour la sélection en cours.", //$NON-NLS-1$ //$NON-NLS-0$
 	"NoFile": "Utilisez ${0} pour créer des fichiers et des dossiers. Cliquez sur un fichier pour commencer le codage.", //$NON-NLS-1$ //$NON-NLS-0$
 	"LocalEditorSettings": "Paramètres de l'éditeur local", //$NON-NLS-1$ //$NON-NLS-0$
@@ -83,6 +85,8 @@ define({
 	'projectsSectionTitle': 'Projets',  //$NON-NLS-0$  //$NON-NLS-1$
 	'listingProjects': 'Listage des projets...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'gettingWorkspaceInfo': 'Obtention d\'informations sur l\'espace de travail...',  //$NON-NLS-0$  //$NON-NLS-1$
-	"showProblems": "Afficher les problèmes... ",  //$NON-NLS-1$ //$NON-NLS-0$
+	"showProblems": "Afficher les problèmes...",  //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltip": "Afficher l'infobulle", //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltipTooltip": "Affiche l'infobulle immédiatement en fonction de la position du caret" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

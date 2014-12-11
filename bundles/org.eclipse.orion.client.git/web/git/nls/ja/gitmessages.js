@@ -18,7 +18,7 @@ define({
 	"Working Directory": "作業ディレクトリー", //$NON-NLS-0$  //$NON-NLS-1$
 	"ViewWorkingDirVer": "ファイルの作業ディレクトリーのバージョンを表示", //$NON-NLS-0$  //$NON-NLS-1$
 	"Loading...": "ロード中...", //$NON-NLS-0$  //$NON-NLS-1$
-	"Repositories": "すべての Git リポジトリー", //$NON-NLS-0$  //$NON-NLS-1$
+	"Repositories": "Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repo": "リポジトリー", //$NON-NLS-0$  //$NON-NLS-1$
 	"0 on 1 - Git": "${0} (${1} 上) - Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Git": "Git", //$NON-NLS-0$  //$NON-NLS-1$
@@ -538,7 +538,8 @@ define({
 	"FilesChanged": "${0} ファイルは変更されました", //$NON-NLS-0$  //$NON-NLS-1$
 	"file": "ファイル", //$NON-NLS-0$  //$NON-NLS-1$
 	"files": "ファイル", //$NON-NLS-0$  //$NON-NLS-1$
-	"EmptyCommitConfirm": "ファイルが選択されていません。実行しますか?", //$NON-NLS-0$  //$NON-NLS-1$
+	"EmptyCommitConfirm": "ファイルが選択されていません。続行すると空のコミットになります。続行しますか?", //$NON-NLS-0$  //$NON-NLS-1$
+	"AlwaysSelectFiles": "変更済みファイルを常に選択 (Git 設定を参照)", //$NON-NLS-0$  //$NON-NLS-1$
 	"EmptyCommitWarning": "コミットは空です", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilesChangedVsReadyToCommit": "${0} ${1} を変更しました。${2} ${3} のコミット準備ができました。", //$NON-NLS-0$  //$NON-NLS-1$
 	"CommitPush": "コミットしてプッシュ", //$NON-NLS-0$  //$NON-NLS-1$
@@ -561,6 +562,7 @@ define({
 	'Url:' : 'URL:', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Private Key:' : 'SSH 秘密鍵:', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Passphrase:' : 'SSH パスフレーズ:', //$NON-NLS-0$  //$NON-NLS-1$
-	'confirmUnsavedChanges': '保存されていない変更があります。 保存しますか?' //$NON-NLS-1$ //$NON-NLS-0$
+	'confirmUnsavedChanges': '保存されていない変更があります。 保存しますか?', //$NON-NLS-1$ //$NON-NLS-0$
+	'NewConfigurationEntryTooltip': "リポジトリー構成に新規項目を追加します" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

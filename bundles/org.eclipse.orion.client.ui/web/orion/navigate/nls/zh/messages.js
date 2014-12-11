@@ -115,6 +115,7 @@ define({
 	"Downloading...": "正在读取文件内容...",
 	"Download not supported": "在此浏览器中不支持下载内容。",
 	"gettingContentFrom": "从以下位置获取内容",
+	"deletingLaunchConfiguration": "正在删除启动配置...",
 	"deployTo": "部署至",
 	"deploy": "部署",
 	"connect": "连接",
@@ -131,6 +132,7 @@ define({
 	"startApplication": "启动应用程序",
 	"manage": "管理",
 	"manageThisApplicationOnRemote": "在远程服务器上管理此应用程序",
+	"deleteLaunchConfiguration": "删除此启动配置",
 	"deployThisApplicationAgain": "再次部署此应用程序",
 	"associatedFolder": "关联的文件夹",
 	"associateAFolderFromThe": "将工作空间中的文件夹与此项目相关联。",
@@ -147,6 +149,9 @@ define({
 	'zipArchiveCommandTooltip': '从本地 ZIP 归档中创建项目。',  //$NON-NLS-0$  //$NON-NLS-1$
 	'Url:': 'Url：',  //$NON-NLS-0$  //$NON-NLS-1$
 	'notZip' : '以下文件不是 zip 文件：${0}。要继续导入吗？', //$NON-NLS-0$  //$NON-NLS-1$
-	'notZipMultiple' : '存在多个要上载的非 zip 文件。要继续导入吗？' //$NON-NLS-0$  //$NON-NLS-1$
+	'notZipMultiple' : '存在多个要上载的非 zip 文件。要继续导入吗？', //$NON-NLS-0$  //$NON-NLS-1$
+	"Cancel": "取消", //$NON-NLS-0$  //$NON-NLS-1$
+	"Ok": "确定", //$NON-NLS-0$  //$NON-NLS-1$
+	"missingCredentials": "输入与 ${1} 关联的 ${0} 认证凭证，以检查其状态。" //$NON-NLS-0$  //$NON-NLS-1$
 });
 

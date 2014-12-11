@@ -107,7 +107,7 @@ define({
 	"Cancel upload": "Annuler le téléchargement en amont",
 	"UploadingFileErr": "Echec du téléchargement du fichier suivant : ",
 	"Enter project name:": "Entrez le nom du projet :",
-	"Create new project" : "Créer un projet ",
+	"Create new project" : "Créer un projet",
 	"Creating project ${0}": "Création du projet ${0}",
 	"NoFile": "Utilisez le menu ${0} pour créer de nouveaux fichiers et dossiers. Cliquez sur un fichier pour commencer le codage.",
 	"Download": "Télécharger",
@@ -115,7 +115,8 @@ define({
 	"Downloading...": "Lecture du contenu du fichier...",
 	"Download not supported": "Le téléchargement du contenu n'est pas pris en charge dans ce navigateur.",
 	"gettingContentFrom": "Obtention d'un contenu de ",
-	"deployTo": "Déployer vers ",
+	"deletingLaunchConfiguration": "Suppression de la configuration de lancement...",
+	"deployTo": "Déployer dans ",
 	"deploy": "Déployer ",
 	"connect": "Connecter",
 	"fetchContent": "Extraire un contenu",
@@ -131,6 +132,7 @@ define({
 	"startApplication": "Démarrer l'application",
 	"manage": "Gérer",
 	"manageThisApplicationOnRemote": "Gérer cette application sur un serveur distant",
+	"deleteLaunchConfiguration": "Supprimer cette configuration de lancement",
 	"deployThisApplicationAgain": "Redéployer cette application",
 	"associatedFolder": "Dossier associé",
 	"associateAFolderFromThe": "Associer un dossier de l'espace de travail à ce projet.",
@@ -146,7 +148,10 @@ define({
 	'zipArchiveCommandName': 'Archive Zip',  //$NON-NLS-0$  //$NON-NLS-1$
 	'zipArchiveCommandTooltip': 'Créer un projet à partir d\'une archive ZIP locale.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'Url:': 'URL :',  //$NON-NLS-0$  //$NON-NLS-1$
-	'notZip' : 'Les fichiers suivants ne sont pas des fichiers zip : ${0}. Voulez-vous continuer l\'importation ? ', //$NON-NLS-0$  //$NON-NLS-1$
-	'notZipMultiple' : 'Plusieurs fichiers autres que des fichiers zip sont en cours de téléchargement. Voulez-vous continuer l\'importation ? ' //$NON-NLS-0$  //$NON-NLS-1$
+	'notZip' : 'Les fichiers suivants ne sont pas des fichiers zip : ${0}. Voulez-vous continuer l\'importation ?', //$NON-NLS-0$  //$NON-NLS-1$
+	'notZipMultiple' : 'Plusieurs fichiers autres que des fichiers zip sont en cours de téléchargement. Voulez-vous continuer l\'importation ?', //$NON-NLS-0$  //$NON-NLS-1$
+	"Cancel": "Annuler", //$NON-NLS-0$  //$NON-NLS-1$
+	"Ok": "OK", //$NON-NLS-0$  //$NON-NLS-1$
+	"missingCredentials": "Entrez les données d'authentification de ${0} associées à ${1} pour vérifier son statut." //$NON-NLS-0$  //$NON-NLS-1$
 });
 

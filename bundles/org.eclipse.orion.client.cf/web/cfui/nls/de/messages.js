@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013, 2014 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser,amd*/
@@ -30,7 +30,7 @@ define({
 	"deploy.enterCredentials": "Bitte geben Sie nachfolgende Ihre Identifikationsdaten ein, um die Bereitstellung zu autorisieren.",
 	"deploy.noSpaces": "Keine Spaces in dieser Organisation gefunden.",
 	"deploy.spaceOrg": "${0} (${1})",
-	"domain:": "Domäne: ",
+	"domain:": "Domäne:",
 	"host:": "Host:",
 	"create": "Erstellen",
 	"createRoute": "Route erstellen",
@@ -53,6 +53,9 @@ define({
 	"seeManualDeploymentInformationIn": "Sie die Informationen zur manuellen Bereitstellung in [root_ordnerseite](${0}) zum Anzeigen und Verwalten von [${1}](${2})",
 	"theHostIsAlreadyIn": "Der Host wird bereits durch eine andere Anwendung verwendet. Überprüfen Sie die den Host bzw. die Domäne in der Manifestdatei.",
 	"password:": "Kennwort:",
+	"Cancelled": "Abgebrochen",
+	"Could not find the launch configuration manifest": "Manifest für Startkonfiguration konnte nicht gefunden werden und das Projektmanifest der höchsten Ebene konnte nicht verwendet werden.Stellen Sie es wieder her oder stellen Sie ein Projektmanifest bereit.",
+	"Would you like to use the top-level project manifest": "Manifest für die Startkonfiguration konnte nicht gefunden werden. Soll stattdessen das Projektmanifest der höchsten Ebene verwendet werden und an die Startkonfiguration gebunden werden?",
 	"iD:": "ID:",
 	"setUpYourCloud.Go": "Für Cloud einrichten. Gehen zu [Settings](${0}).",
 	"loggingInTo${0}...": "Anmelden bei ${0}...",
@@ -64,11 +67,11 @@ define({
 	"space:": "Space:",
 	"applications": "Anwendungen",
 	"unmappedRoutes": "Nicht zugeordnete Routes",
-	"deployingApplicationToCloudFoundry:": "Anwendung wird in Cloud Foundry bereitgestellt:",
+	"deployingApplicationToCloudFoundry:": "Anwendung wird in Cloud Foundry bereitgestellt: ",
 	"applicationFrom/": "Anwendung von /",
 	"on": " ein ",
 	"user:": "Benutzer:",
-	"instance(s)Running": " Instanz(en) ausgeführt",
+	"${0}of${1}instance(s)Running": "${0} von ${1} Instanz(en) ausgeführt",
 	"of": " von ",
 	"applicationIsNotRunning": "Anwendung wird nicht ausgeführt",
 	"${0}/${1}Instance(s)Running": "${0}/${1} Instanz(en) ausgeführt",
@@ -89,7 +92,7 @@ define({
 	"loginTo": "Anmelden bei ",
 	"loggingInTo${0}": "Anmelden bei ${0}",
 	"thisPluginIntegratesWithCloud": "Dieses Plug-in kann in Cloud Foundry integriert werden.",
-	"commandsForInteractingWithA": "Befehle zum Interagieren mit einem kompatiblen Ziel von Cloud Foundry ",
+	"commandsForInteractingWithA": "Befehle zum Interagieren mit einem kompatiblen Ziel von Cloud Foundry",
 	"targetNotSet": "Ziel nicht festgelegt",
 	"setOrDisplayTheTarget": "Zielcloud, Organisation und Space festlegen oder anzeigen",
 	"targetURLToSwitchTo": "Ziel-URL, zu der gewechselt werden soll",
@@ -107,7 +110,7 @@ define({
 	"password": "Kennwort",
 	"loggedOut": "Abgemeldet",
 	"logUserOut": "Benutzer abmelden",
-	"noApplications.": "Keine Anwendungen. ",
+	"noApplications.": "Keine Anwendungen.",
 	"urls": "URLs",
 	"disk": "Platte",
 	"memory": "Speicher",
@@ -147,8 +150,8 @@ define({
 	"noRecentLogs.": "Keine aktuellen Protokolle.",
 	"showRecentLogsForAn": "Aktuelle Protokolle für eine Anwendung anzeigen",
 	"applicationToShowLogsFor": "Anwendung, zu der Protokolle angezeigt werden sollen",
-	"cloudFoundryManifestContentAssist": "Inhaltshilfe für Cloud Foundry-Manifest ",
-	"cloudFoundryManifestValidator": "Prüfprogramm für Cloud Foundry-Manifest ",
+	"cloudFoundryManifestContentAssist": "Inhaltshilfe für Cloud Foundry-Manifest",
+	"cloudFoundryManifestValidator": "Prüfprogramm für Cloud Foundry-Manifest",
 	"problemWhilePerformingTheAction": "Problem bei Ausführung der Aktion",
 	"applicationNameNotSet": "Anwendungsname nicht festgelegt",
 	"appNameIsMissing": "Anwendungsname fehlt",
@@ -169,11 +172,11 @@ define({
 	"node.js": "node.js",
 	"target:": "Ziel:",
 	"applicationName:": "Anwendungsname:",
-	"Click \"Deploy\" to proceed or \"Next\" to change the deployment parameters.": "Klicken Sie auf \"Bereitstellen\", um fortzufahren, oder auf \"Weiter\", um die Bereitstellungsparameter zu ändern. ",
+	"Click \"Deploy\" to proceed or \"Next\" to change the deployment parameters.": "Klicken Sie auf \"Bereitstellen\", um fortzufahren, oder auf \"Weiter\", um die Bereitstellungsparameter zu ändern.",
 	"deploy": "Bereitstellen",
 	"configureApplicationDeployment": "Anwendungsbereitstellung konfigurieren",
 	"saveToManifestFile:": "In Manifestdatei speichern: ",
-	"bindServicesFromTheList.": "Services aus der Liste binden. ",
+	"bindServicesFromTheList.": "Services aus der Liste binden.",
 	"availableServices:": "Verfügbare Services:",
 	"boundServices:": "Gebundene Services:",
 	"convertMyManifest.ymlFileTo": "Meine manifest.yml-Datei auf v6 konvertieren",
@@ -193,6 +196,6 @@ define({
 	"debugWith${0}:": "Debuggen mit ${0}:",
 	"requiredToPreventRandomAccess": "Erforderlich, um wahlfreien Zugriff auf cf-launcher zu verhindern",
 	"uRLPrefix:": "URL-Präfix: ",
-	"leaveBlankForDefault/launcher": "Leer lassen für Standardstartprogramm"
+	"leaveBlankForDefault": "Leer lassen für Standard-${0}"
 });
 

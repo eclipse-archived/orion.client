@@ -24,6 +24,8 @@ define({
 	"Saved": "已保存", //$NON-NLS-1$ //$NON-NLS-0$
 	"Blame": "负责", //$NON-NLS-1$ //$NON-NLS-0$
 	"BlameTooltip":"显示负责注释", //$NON-NLS-1$ //$NON-NLS-0$
+	"Diff": "差集", //$NON-NLS-1$//$NON-NLS-0$
+	"DiffTooltip":"显示差集注释", //$NON-NLS-1$//$NON-NLS-0$
 	"saveOutOfSync": "资源与服务器不同步。无论如何都要保存此资源吗？", //$NON-NLS-1$ //$NON-NLS-0$
 	"loadOutOfSync": "资源与服务器不同步。无论如何都要将其装入吗？这将覆盖您在本地所作的更改。", //$NON-NLS-1$ //$NON-NLS-0$
 	"ReadingMetadata": "正在读取 ${0} 的元数据", //$NON-NLS-1$ //$NON-NLS-0$
@@ -84,5 +86,7 @@ define({
 	'listingProjects': '正在列示项目...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'gettingWorkspaceInfo': '正在获取工作空间信息...',  //$NON-NLS-0$  //$NON-NLS-1$
 	"showProblems": "显示问题...",  //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltip": "显示工具提示", //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltipTooltip": "基于插入标记位置立即显示工具提示" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

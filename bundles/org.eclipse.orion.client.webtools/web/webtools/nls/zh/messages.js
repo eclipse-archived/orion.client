@@ -14,11 +14,12 @@ define({
 	'cssOutline' : 'CSS 规则纲要', //$NON-NLS-0$  //$NON-NLS-1$
 	'htmlContentAssist' : 'HTML 内容辅助', //$NON-NLS-0$  //$NON-NLS-1$
 	'cssContentAssist' : 'CSS 内容辅助', //$NON-NLS-0$  //$NON-NLS-1$
+	'cssHover' : 'CSS Hover', //$NON-NLS-0$  //$NON-NLS-1$
+	'csslintValidator' : 'CSS 验证器', //$NON-NLS-0$  //$NON-NLS-1$
 	
-	'csslintValidator' : 'CSS 验证器',
-	'ignore' : '忽略',
-	'warning' : '警告',
-	'error' : '错误',
+	'ignore' : '忽略', //$NON-NLS-0$  //$NON-NLS-1$
+	'warning' : '警告', //$NON-NLS-0$  //$NON-NLS-1$
+	'error' : '错误', //$NON-NLS-0$  //$NON-NLS-1$
 	
 	'adjoining-classes': '不允许相邻的类：', //$NON-NLS-0$  //$NON-NLS-1$
 	'box-model': '请注意中断框大小：', //$NON-NLS-0$  //$NON-NLS-1$

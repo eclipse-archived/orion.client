@@ -52,7 +52,7 @@ define({
 	"Keyword Types": "Types de mot clé",
 	"darkred": "rouge foncé",
 	"Categories": "Catégories",
-	"Username": "Nom d'utilisateur :",
+	"User Name": "Nom d'utilisateur :",
 	"Full Name": "Nom complet :",
 	"Email Address": "Adresse électronique :",
 	"Email Confirmed": "Adresse électronique confirmée :",
@@ -118,7 +118,7 @@ define({
 	"Uninstalled":"${0} désinstallé",
 	"UninstallCfrm":"Voulez-vous vraiment désinstaller '${0}' ?",
 	"ReloadedPlug":"Plug-in ${0} rechargé.",
-	"ReloadedNPlugs":"${0} plug-ins rechargés. ",
+	"ReloadedNPlugs":"${0} plug-ins rechargés.",
 	"Reloaded":"${0} rechargé",
 	"Services": "Services",
 	"Value": "Valeur",
@@ -126,6 +126,8 @@ define({
 	"CheckJsConsoleDrillDown": "cliquez ici, puis cochez la console javascript à explorer en aval",
 	"Item": "Elément",
 	"Git Config": "Configuration Git",
+	"GitWorkDir": "Répertoire de travail Git",
+	"SelectUnstagedChanges": "Toujours sélectionner les fichiers modifiés",
 	"Clear Git Credentials": "Effacer les données d'identification Git",
 	"Enable Storage": "Activer le stockage :",
 	"BrowserCredStoreMsg" : "Notez que vos données d'identification seront stockées dans le navigateur de façon persistante.",
@@ -164,7 +166,7 @@ define({
 	"lineNumberRuler": "Afficher la règle des numéros de ligne :",
 	"foldingRuler": "Afficher la règle de réduction :",
 	"overviewRuler": "Afficher la règle de présentation :",
-	"zoomRuler": "Afficher la règle de mappe de code : ",
+	"zoomRuler": "Afficher la règle de mappe de code :",
 	"whitespaces": "Blancs",
 	"wrapping": "Retour à la ligne",
 	"wordWrap": "Retour à la ligne automatique :",
@@ -241,25 +243,26 @@ define({
 	'clearThemeAndEditorSettings.name': 'Effacer les paramètres de thèmes et de l\'éditeur',  //$NON-NLS-0$  //$NON-NLS-1$
 	'clearThemeAndEditorSettings.tooltip': 'Effacer tous les paramètres associés aux thèmes de l\'éditeur et de la fenêtre',  //$NON-NLS-0$  //$NON-NLS-1$
 	"Settings": "Paramètres",
-	'eclipseThemeName': 'Eclipse',  //$NON-NLS-0$ //$NON-NLS-1$
-	'darkerThemeName': 'Sombre',  //$NON-NLS-0$ //$NON-NLS-1$
-	'prospectoThemeName': 'Prospecto',  //$NON-NLS-0$ //$NON-NLS-1$
-	'blueThemeName': 'Blue',  //$NON-NLS-0$  //$NON-NLS-1$
-	'ambienceThemeName': 'Ambience',  //$NON-NLS-0$ //$NON-NLS-1$
-	'tierraThemeName': 'Tierra',  //$NON-NLS-0$  //$NON-NLS-1$
-	'nimbusThemeName': 'Nimbus',  //$NON-NLS-0$ //$NON-NLS-1$
-	'adelanteThemeName': 'Adelante',  //$NON-NLS-0$ //$NON-NLS-1$
-	'raspberryPiThemeName': 'Raspberry Pi',  //$NON-NLS-0$ //$NON-NLS-1$
-    'orionThemeName': 'Orion',  //$NON-NLS-0$  //$NON-NLS-1$
-    'orion2014ThemeName': 'Orion2014',  //$NON-NLS-0$  //$NON-NLS-1$
-    'greenZoneThemeName': 'Green Zone',  //$NON-NLS-0$  //$NON-NLS-1$
-    'prettyInPinkThemeName': 'Pretty In Pink',  //$NON-NLS-0$  //$NON-NLS-1$
-    'blueMondayThemeName': 'Blue Monday',  //$NON-NLS-0$  //$NON-NLS-1$
-    'vanillaSkiesThemeName': 'Vanilla Skies',  //$NON-NLS-0$  //$NON-NLS-1$
-    'beetlejuiceThemeName': 'Beetlejuice',  //$NON-NLS-0$  //$NON-NLS-1$
-    'redThemeName': 'Red',  //$NON-NLS-0$  //$NON-NLS-1$
+	'EclipseThemeName': 'Eclipse',  //$NON-NLS-0$ //$NON-NLS-1$
+	'DarkerThemeName': 'Darker',  //$NON-NLS-0$ //$NON-NLS-1$
+	'ProspectoThemeName': 'Prospecto',  //$NON-NLS-0$ //$NON-NLS-1$
+	'BlueThemeName': 'Blue',  //$NON-NLS-0$  //$NON-NLS-1$
+	'AmbienceThemeName': 'Ambience',  //$NON-NLS-0$ //$NON-NLS-1$
+	'TierraThemeName': 'Tierra',  //$NON-NLS-0$  //$NON-NLS-1$
+	'NimbusThemeName': 'Nimbus',  //$NON-NLS-0$ //$NON-NLS-1$
+	'AdelanteThemeName': 'Adelante',  //$NON-NLS-0$ //$NON-NLS-1$
+	'Raspberry PiThemeName': 'Raspberry Pi',  //$NON-NLS-0$ //$NON-NLS-1$
+    'OrionThemeName': 'Orion',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Orion2014ThemeName': 'Orion2014',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Green ZoneThemeName': 'Green Zone',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Pretty In PinkThemeName': 'Pretty In Pink',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Blue MondayThemeName': 'Blue Monday',  //$NON-NLS-0$  //$NON-NLS-1$
+    'Vanilla SkiesThemeName': 'Vanilla Skies',  //$NON-NLS-0$  //$NON-NLS-1$
+    'BeetlejuiceThemeName': 'Beetlejuice',  //$NON-NLS-0$  //$NON-NLS-1$
+    'RedThemeName': 'Red',  //$NON-NLS-0$  //$NON-NLS-1$
     "SettingUpdateSuccess": "${0} paramètres ont été mis à jour.",
     "buttonSave": "Sauvegarder",
-    "buttonRevert": " Rétablir"
+    "buttonRevert": " Rétablir",
+    "ConfirmRestore": "Restaurer les valeurs par défaut ?"
 });
 

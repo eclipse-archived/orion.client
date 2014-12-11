@@ -28,6 +28,9 @@ define({
 	"currentLine": "Aktuelle Zeile", //$NON-NLS-1$ //$NON-NLS-0$
 	"matchingBracket": "Übereinstimmende eckige Klammer", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentBracket": "Aktuelle eckige Klammer", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffAdded": "Differenz hinzugefügte Zeilen", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffDeleted": "Differenz gelöschte Zeilen", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffModified": "Differenz geänderte Zeilen", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	"lineUp": "Zeile nach oben", //$NON-NLS-1$ //$NON-NLS-0$
 	"lineDown": "Zeile nach unten", //$NON-NLS-1$ //$NON-NLS-0$

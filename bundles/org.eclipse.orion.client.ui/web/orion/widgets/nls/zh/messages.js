@@ -70,6 +70,12 @@ define({
 	"Related Links": "相关链接",
 	"Yes": "是",
 	"No": "否",
-	"DeleteSearchTrmMsg": "单击或者使用“删除”键来删除搜索项"
+	"DeleteSearchTrmMsg": "单击或者使用“删除”键来删除搜索项",
+	"Application": "应用程序",
+	"selectLaunchConfig": "选择要运行的配置",
+	"createNew": "新建...",
+	"Running": "正在运行",
+	"checkingStateMessage": "检查 ${0} 的状态",
+	"Status": "状态"
 });
 

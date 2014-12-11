@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013, 2014 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser,amd*/
@@ -53,6 +53,9 @@ define({
 	"seeManualDeploymentInformationIn": "请参阅 [root folder page](${0}) 中的“手动部署信息”以查看和管理 [${1}](${2})",
 	"theHostIsAlreadyIn": "主机已经由其他应用程序在使用。请检查清单文件中的主机/域。",
 	"password:": "密码：",
+	"Cancelled": "已取消",
+	"Could not find the launch configuration manifest": "找不到启动配置清单，或无法使用顶级项目清单。请复原或提供项目清单。",
+	"Would you like to use the top-level project manifest": "找不到启动配置清单。是否要改为使用顶级项目清单，并将其绑定到启动配置？",
 	"iD:": "标识：",
 	"setUpYourCloud.Go": "设置云。转至 [设置](${0})。",
 	"loggingInTo${0}...": "正在登录到 ${0}...",
@@ -68,7 +71,7 @@ define({
 	"applicationFrom/": "来自 / 的应用程序",
 	"on": " 打开",
 	"user:": "用户：",
-	"instance(s)Running": " 个实例在运行",
+	"${0}of${1}instance(s)Running": "${0} 个实例（共 ${1} 个实例）正在运行",
 	"of": " 其中",
 	"applicationIsNotRunning": "应用程序未处于运行状态",
 	"${0}/${1}Instance(s)Running": "${0}/${1} 个实例在运行",
@@ -193,6 +196,6 @@ define({
 	"debugWith${0}:": "使用 ${0} 调试：",
 	"requiredToPreventRandomAccess": "阻止随机访问 cf-launcher 所必需",
 	"uRLPrefix:": "URL 前缀：",
-	"leaveBlankForDefault/launcher": "对于缺省 /launcher 保留为空"
+	"leaveBlankForDefault": "对于缺省 ${0}，保留为空"
 });
 

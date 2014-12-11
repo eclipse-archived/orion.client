@@ -14,11 +14,12 @@ define({
 	'cssOutline' : 'Structure de la règle CSS', //$NON-NLS-0$  //$NON-NLS-1$
 	'htmlContentAssist' : 'Assistant de contenu HTML', //$NON-NLS-0$  //$NON-NLS-1$
 	'cssContentAssist' : 'Assistant de contenu CSS', //$NON-NLS-0$  //$NON-NLS-1$
+	'cssHover' : 'Infobulle CSS', //$NON-NLS-0$  //$NON-NLS-1$
+	'csslintValidator' : 'Valideur CSS', //$NON-NLS-0$  //$NON-NLS-1$
 	
-	'csslintValidator' : 'Valideur CSS',
-	'ignore' : 'Ignorer',
-	'warning' : 'Avertissement',
-	'error' : 'Erreur',
+	'ignore' : 'Ignorer', //$NON-NLS-0$  //$NON-NLS-1$
+	'warning' : 'Avertissement', //$NON-NLS-0$  //$NON-NLS-1$
+	'error' : 'Erreur', //$NON-NLS-0$  //$NON-NLS-1$
 	
 	'adjoining-classes': 'Interdire l\'adjonction de classes :', //$NON-NLS-0$  //$NON-NLS-1$
 	'box-model': 'Tenez compte de la taille de zone ingérable :', //$NON-NLS-0$  //$NON-NLS-1$

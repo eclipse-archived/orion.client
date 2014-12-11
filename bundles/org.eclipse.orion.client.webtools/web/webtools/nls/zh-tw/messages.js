@@ -14,11 +14,12 @@ define({
 	'cssOutline' : 'CSS 規則大綱', //$NON-NLS-0$  //$NON-NLS-1$
 	'htmlContentAssist' : 'HTML 內容輔助', //$NON-NLS-0$  //$NON-NLS-1$
 	'cssContentAssist' : 'CSS 內容輔助', //$NON-NLS-0$  //$NON-NLS-1$
+	'cssHover' : 'CSS 滑鼠橫越', //$NON-NLS-0$  //$NON-NLS-1$
+	'csslintValidator' : 'CSS 驗證器', //$NON-NLS-0$  //$NON-NLS-1$
 	
-	'csslintValidator' : 'CSS 驗證器',
-	'ignore' : '忽略',
-	'warning' : '警告',
-	'error' : '錯誤',
+	'ignore' : '忽略', //$NON-NLS-0$  //$NON-NLS-1$
+	'warning' : '警告', //$NON-NLS-0$  //$NON-NLS-1$
+	'error' : '錯誤', //$NON-NLS-0$  //$NON-NLS-1$
 	
 	'adjoining-classes': '不允許鄰接類別：', //$NON-NLS-0$  //$NON-NLS-1$
 	'box-model': '注意中斷的方框大小：', //$NON-NLS-0$  //$NON-NLS-1$

@@ -24,6 +24,8 @@ define({
 	"Saved": "已儲存", //$NON-NLS-1$ //$NON-NLS-0$
 	"Blame": "Blame", //$NON-NLS-1$ //$NON-NLS-0$
 	"BlameTooltip":"顯示 Blame 註釋", //$NON-NLS-1$ //$NON-NLS-0$
+	"Diff": "差異", //$NON-NLS-1$//$NON-NLS-0$
+	"DiffTooltip":"顯示差異註釋", //$NON-NLS-1$//$NON-NLS-0$
 	"saveOutOfSync": "資源與伺服器不同步。 您仍要儲存嗎？", //$NON-NLS-1$ //$NON-NLS-0$
 	"loadOutOfSync": "資源與伺服器不同步。 您還是要載入嗎？ 這會改寫您在本端所做的變更。", //$NON-NLS-1$ //$NON-NLS-0$
 	"ReadingMetadata": "正在讀取 ${0} 的 meta 資料", //$NON-NLS-1$ //$NON-NLS-0$
@@ -84,5 +86,7 @@ define({
 	'listingProjects': '正在列出專案...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'gettingWorkspaceInfo': '正在取得工作區資訊...',  //$NON-NLS-0$  //$NON-NLS-1$
 	"showProblems": "顯示問題...",  //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltip": "顯示工具提示", //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltipTooltip": "根據脫字符號 (^) 位置立即顯示工具提示" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

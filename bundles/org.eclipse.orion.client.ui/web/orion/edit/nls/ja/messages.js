@@ -24,6 +24,8 @@ define({
 	"Saved": "保存済み", //$NON-NLS-1$ //$NON-NLS-0$
 	"Blame": "変更履歴", //$NON-NLS-1$ //$NON-NLS-0$
 	"BlameTooltip":"変更履歴注釈の表示", //$NON-NLS-1$ //$NON-NLS-0$
+	"Diff": "Diff", //$NON-NLS-1$//$NON-NLS-0$
+	"DiffTooltip":"Diff の注釈の表示", //$NON-NLS-1$//$NON-NLS-0$
 	"saveOutOfSync": "リソースは、サーバーと同期がとれていません。 このまま保存しますか?", //$NON-NLS-1$ //$NON-NLS-0$
 	"loadOutOfSync": "リソースは、サーバーと同期がとれていません。 ロードしますか? この処理により、ローカルの変更内容が上書きされます。", //$NON-NLS-1$ //$NON-NLS-0$
 	"ReadingMetadata": "${0} のメタデータの読み取り中", //$NON-NLS-1$ //$NON-NLS-0$
@@ -84,5 +86,7 @@ define({
 	'listingProjects': 'プロジェクトのリストを作成中...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'gettingWorkspaceInfo': 'ワークスペース情報を取得中...',  //$NON-NLS-0$  //$NON-NLS-1$
 	"showProblems": "問題を表示...",  //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltip": "ツールチップの表示", //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltipTooltip": "キャレットの位置に基づいてツールチップを即時表示します" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

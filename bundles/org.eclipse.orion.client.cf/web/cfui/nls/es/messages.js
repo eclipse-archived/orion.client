@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013, 2014 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser,amd*/
@@ -53,6 +53,9 @@ define({
 	"seeManualDeploymentInformationIn": "Consulte la información sobre despliegue manual en [página carpeta raíz](${0}) para ver y gestionar [${1}](${2})",
 	"theHostIsAlreadyIn": "El host ya está siendo utilizado por otra aplicación. Compruebe el host/dominio en el archivo de manifiesto. ",
 	"password:": "Contraseña:",
+	"Cancelled": "Cancelada",
+	"Could not find the launch configuration manifest": "No se ha encontrado el manifiesto de configuración de lanzamiento ni se ha utilizado el manifiesto del proyecto de nivel superior. Restáurelo o especifique un manifiesto del proyecto. ",
+	"Would you like to use the top-level project manifest": "No se ha encontrado el manifiesto de configuración de lanzamiento. ¿Desea utilizar el manifiesto del proyecto de nivel superior en su lugar y enlazarlo a la configuración de lanzamiento?",
 	"iD:": "ID:",
 	"setUpYourCloud.Go": "Configurar su Nube. Ir a [Valores](${0}).",
 	"loggingInTo${0}...": "Iniciando sesión en ${0}...",
@@ -68,7 +71,7 @@ define({
 	"applicationFrom/": "aplicación de /",
 	"on": " activado ",
 	"user:": "Usuario:",
-	"instance(s)Running": " instancia(s) en ejecución",
+	"${0}of${1}instance(s)Running": "${0} de ${1} instancia(s) en ejecución",
 	"of": " de ",
 	"applicationIsNotRunning": "La aplicación no se está ejecutando",
 	"${0}/${1}Instance(s)Running": "${0}/${1} instancia(s) en ejecución",
@@ -193,6 +196,6 @@ define({
 	"debugWith${0}:": "Depurar con ${0}:",
 	"requiredToPreventRandomAccess": "Obligatorio para evitar acceso aleatorio a cf-launcher",
 	"uRLPrefix:": "Prefijo de URL: ",
-	"leaveBlankForDefault/launcher": "Deje este valor en blanco para aceptar el valor predeterminado de /launcher"
+	"leaveBlankForDefault": "Deje este valor en blanco para aceptar el valor predeterminado de ${0}"
 });
 

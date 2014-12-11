@@ -24,6 +24,8 @@ define({
 	"Saved": "Salvato", //$NON-NLS-1$ //$NON-NLS-0$
 	"Blame": "Blame", //$NON-NLS-1$ //$NON-NLS-0$
 	"BlameTooltip":"Mostra annotazioni blame", //$NON-NLS-1$ //$NON-NLS-0$
+	"Diff": "Diff", //$NON-NLS-1$//$NON-NLS-0$
+	"DiffTooltip":"Mostra annotazioni diff", //$NON-NLS-1$//$NON-NLS-0$
 	"saveOutOfSync": "La risorsa non è sincronizzata con il server. Si desidera salvarla comunque?", //$NON-NLS-1$ //$NON-NLS-0$
 	"loadOutOfSync": "La risorsa non è sincronizzata con il server. Si desidera caricarla comunque? Ciò sovrascriverà le modifiche locali.", //$NON-NLS-1$ //$NON-NLS-0$
 	"ReadingMetadata": "Lettura di metadati di ${0}", //$NON-NLS-1$ //$NON-NLS-0$
@@ -84,5 +86,7 @@ define({
 	'listingProjects': 'Elenco dei progetti...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'gettingWorkspaceInfo': 'Acquisizione informazioni sullo spazio di lavoro...',  //$NON-NLS-0$  //$NON-NLS-1$
 	"showProblems": "Mostra problemi...",  //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltip": "Mostra testo a comparsa", //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltipTooltip": "Mostra immediatamente la descrizione basata sulla posizione del punto di inserimento" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

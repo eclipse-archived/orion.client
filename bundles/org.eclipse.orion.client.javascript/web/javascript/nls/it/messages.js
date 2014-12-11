@@ -18,6 +18,7 @@ define({
 	'contentAssist' : 'Assistente ai contenuti JavaScript', //$NON-NLS-0$  //$NON-NLS-1$
 	'eslintValidator' : 'Programma di convalida JavaScript', //$NON-NLS-0$  //$NON-NLS-1$
 	'missingCurly' : 'Istruzioni non racchiuse tra parentesi graffe:', //$NON-NLS-0$  //$NON-NLS-1$
+	'noCaller' : 'L\'utilizzo di \'arguments.caller\' o \'arguments.callee\' sconsigliato:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noEqeqeq' : 'Utilizzo di \'==\' sconsigliato:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noDebugger' : 'Utilizzo istruzione \'debugger\' sconsigliato:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noEval' : 'Utilizzo di \'eval()\' sconsigliato:', //$NON-NLS-0$  //$NON-NLS-1$
@@ -37,6 +38,7 @@ define({
 	'missingSemi' : 'Punti e virgola mancanti:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedVars' : 'Variabili non utilizzate:', //$NON-NLS-0$  //$NON-NLS-1$
 	'varRedecl' : 'Nuove dichiarazioni di variabile:', //$NON-NLS-0$  //$NON-NLS-1$
+	'varShadow': 'Osservazione variabile:', //$NON-NLS-0$  //$NON-NLS-1$
 	'undefMember' : 'Riferimento globale non dichiarato:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unnecessarySemis' : 'Punti e virgola non necessari:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedParams' : 'Parametri non utilizzati:', //$NON-NLS-0$  //$NON-NLS-1$
@@ -49,5 +51,28 @@ define({
 	'validTypeof': 'Confronto \'typeof\' non valido',  //$NON-NLS-0$ //$NON-NLS-1$
 	'noSparseArrays': 'Dichiarazioni array non frequenti', //$NON-NLS-0$ //$NON-NLS-1$
 	'jsHover': 'JavaScript Hover Provider', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeExtraSemiFixName': 'Rimuovi punto e virgola supplementari', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeExtraSemiFixTooltip': 'Rimuove il punto e virgola supplementare', //$NON-NLS-0$ //$NON-NLS-1$
+	'addFallthroughCommentFixName': 'Aggiungi commento $FALLTHROUGH$', //$NON-NLS-0$ //$NON-NLS-1$
+	'addFallthroughCommentFixTooltip': 'Aggiungi il commento di riga  $FALLTHROUGH$', //$NON-NLS-0$ //$NON-NLS-1$
+	'addEmptyCommentFixName': 'Blocco commenti vuoto', //$NON-NLS-0$ //$NON-NLS-1$
+	'addEmptyCommentFixTooltip': 'Aggiungi commento  TODO al blocco commenti vuoto', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintEnvFixName': 'Aggiungi alla direttiva eslint-env', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintEnvFixTooltip': 'Aggiungi alla direttiva eslint-env per filtrare il membro conosciuto', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintGlobalFixName': 'Aggiungi alla direttiva globals', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintGlobalFixTooltip': 'Aggiungi alla direttiva globals per filtrare il membro sconosciuto', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeUnusedParamsFixName': 'Rimuovi parametro', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeUnusedParamsFixTooltip': 'Rimuovi il parametro non utilizzato mantenendo gli effetti collaterali', //$NON-NLS-0$ //$NON-NLS-1$
+	'commentCallbackFixName': 'Aggiungi @callback alla funzione', //$NON-NLS-0$ //$NON-NLS-1$
+	'commentCallbackFixTooltip': 'Documenta la funzione con @callback, ignorando i parametri non utilizzati', //$NON-NLS-0$ //$NON-NLS-1$
+	'eqeqeqFixName': 'Aggiorna operatore', //$NON-NLS-0$ //$NON-NLS-1$
+	'eqeqeqFixTooltip': 'Aggiorna l\'operatore a quello previsto', //$NON-NLS-0$ //$NON-NLS-1$
+	'unreachableFixName': 'Rimuovi codice non raggiungibile', //$NON-NLS-0$ //$NON-NLS-1$
+	'unreachableFixTooltip': 'Rimuovi codice non raggiungibile', //$NON-NLS-0$ //$NON-NLS-1$
+	'sparseArrayFixName': 'Converti in array normale', //$NON-NLS-0$ //$NON-NLS-1$
+	'sparseArrayFixTooltip': 'Rimuovi voci non frequenti e converti in array normale', //$NON-NLS-0$ //$NON-NLS-1$
+	'semiFixName': 'Aggiungi \';\' mancante', //$NON-NLS-0$ //$NON-NLS-1$
+	'semiFixTooltip': 'Aggiungi \';\' mancante', //$NON-NLS-0$ //$NON-NLS-1$
+	'radix': 'Parametro radice mancante per parseInt()', //$NON-NLS-0$ //$NON-NLS-1$
 });
 

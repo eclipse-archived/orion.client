@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013, 2014 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser,amd*/
@@ -53,6 +53,9 @@ define({
 	"seeManualDeploymentInformationIn": "[${1}](${2}) を表示および管理するには、[ルート・フォルダー・ページ](${0}) 内の手動デプロイメント情報を参照してください",
 	"theHostIsAlreadyIn": "このホストは既に別のアプリケーションによって使用されています。マニフェスト・ファイルでホスト/ドメインを確認してください。",
 	"password:": "パスワード:",
+	"Cancelled": "キャンセル済み",
+	"Could not find the launch configuration manifest": "起動構成マニフェストが見つからなかったか、トップレベル・プロジェクト・マニフェストを使用できませんでした。元に戻すか、プロジェクト・マニフェストを指定してください。",
+	"Would you like to use the top-level project manifest": "起動構成マニフェストが見つかりませんでした。代わりにトップレベル・プロジェクト・マニフェストを使用し、それを起動構成にバインドしますか?",
 	"iD:": "ID:",
 	"setUpYourCloud.Go": "Cloud をセットアップします。[設定](${0}) にジャンプします。",
 	"loggingInTo${0}...": "${0} へのログイン中...",
@@ -68,7 +71,7 @@ define({
 	"applicationFrom/": "/ からのアプリケーション",
 	"on": " 作成日: ",
 	"user:": "ユーザー:",
-	"instance(s)Running": " インスタンスの実行中",
+	"${0}of${1}instance(s)Running": "${0} / ${1} インスタンスの実行中",
 	"of": " / ",
 	"applicationIsNotRunning": "アプリケーションは実行されていません",
 	"${0}/${1}Instance(s)Running": "${0}/${1} インスタンスの実行中",
@@ -193,6 +196,6 @@ define({
 	"debugWith${0}:": "${0} でのデバッグ:",
 	"requiredToPreventRandomAccess": "cf-launcher へのランダム・アクセスを防ぐために必要です",
 	"uRLPrefix:": "URL 接頭部: ",
-	"leaveBlankForDefault/launcher": "デフォルトの /launcher の場合ブランクのままにしてください"
+	"leaveBlankForDefault": "デフォルトの ${0} の場合、ブランクのままにしておきます"
 });
 

@@ -18,7 +18,7 @@ define({
 	"Working Directory": "Arbeitsverzeichnis", //$NON-NLS-0$  //$NON-NLS-1$
 	"ViewWorkingDirVer": "Arbeitsverzeichnisversion der Datei anzeigen", //$NON-NLS-0$  //$NON-NLS-1$
 	"Loading...": "Laden...", //$NON-NLS-0$  //$NON-NLS-1$
-	"Repositories": "Alle Git-Repositorys", //$NON-NLS-0$  //$NON-NLS-1$
+	"Repositories": "Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repo": "Repositorys", //$NON-NLS-0$  //$NON-NLS-1$
 	"0 on 1 - Git": "${0} in ${1} - Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Git": "Git", //$NON-NLS-0$  //$NON-NLS-1$
@@ -538,7 +538,8 @@ define({
 	"FilesChanged": "${0} Dateien geändert", //$NON-NLS-0$  //$NON-NLS-1$
 	"file": "Datei", //$NON-NLS-0$  //$NON-NLS-1$
 	"files": "Dateien", //$NON-NLS-0$  //$NON-NLS-1$
-	"EmptyCommitConfirm": "Sie haben keine Dateien ausgewählt. Möchten Sie fortfahren?", //$NON-NLS-0$  //$NON-NLS-1$
+	"EmptyCommitConfirm": "Sie haben keine Dateien ausgewählt. Wenn Sie fortfahren, erfolgt ein leerer Commit. Möchten Sie fortfahren?", //$NON-NLS-0$  //$NON-NLS-1$
+	"AlwaysSelectFiles": "Wählen Sie immer geänderte Dateien aus (siehe Git-Vorgaben)", //$NON-NLS-0$  //$NON-NLS-1$
 	"EmptyCommitWarning": "Die Festschreibung ist leer", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilesChangedVsReadyToCommit": "${0} ${1} geändert. ${2} ${3} für Festschreibung bereit.", //$NON-NLS-0$  //$NON-NLS-1$
 	"CommitPush": "Festschreibung und mit Push-Operation übertragen", //$NON-NLS-0$  //$NON-NLS-1$
@@ -561,6 +562,7 @@ define({
 	'Url:' : 'URL:', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Private Key:' : 'Privater SSH-Schlüssel:', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Passphrase:' : 'SSH-Kennphrase:', //$NON-NLS-0$  //$NON-NLS-1$
-	'confirmUnsavedChanges': 'Nicht gespeicherte Änderungen vorhanden. Möchten Sie sie speichern?' //$NON-NLS-1$ //$NON-NLS-0$
+	'confirmUnsavedChanges': 'Nicht gespeicherte Änderungen vorhanden. Möchten Sie sie speichern?', //$NON-NLS-1$ //$NON-NLS-0$
+	'NewConfigurationEntryTooltip': "Fügen Sie der Repository-Konfiguration einen neuen Eintrag hinzu" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

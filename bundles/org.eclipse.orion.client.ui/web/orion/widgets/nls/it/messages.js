@@ -20,7 +20,7 @@ define({
 	"Sign in": "Collega",
 	"Authentication required!": "Richiesta autenticazione!",
 	"Name:": "Nome:",
-	"Plug-ins": "Plug-in",
+	"Plug-ins": "Plugin",
 	"Properties": "Proprietà",
 	"Services": "Servizi",
 	"SFTP Transfer": "Trasferimento SFTP",
@@ -44,7 +44,7 @@ define({
 	"FileName FolderName": "NomeFile NomeCartella(Facoltativo)",
 	"Searching...": "Ricerca in corso...",
 	"SearchOccurences": "Ricerca di ricorrenza di: \"${0}\"",
-	"name": "nome",
+	"name": "name",
 	"test": "test",
 	"Type the name of a file to open (? = any character, * = any string):": "Immetti il nome di un file per aprirlo (? = qualsiasi carattere, * = qualsiasi stringa):",
 	"Sign Out": "Esci",
@@ -61,7 +61,7 @@ define({
 	"Cancel the transfer" : "Annulla il trasferimento",
 	"Always overwrite destination" : "Sostituisci sempre la destinazione",
 	"Overwrite if source is newer" : "Sostituisci se l'origine è più recente",
-	"New" : "New",
+	"New" : "Nuovo",
 	"Building file skeleton..." : "Creazione della struttura del file in corso...",
 	"Add" : "Aggiungi",
 	"Upload..." : "Carica...",
@@ -70,6 +70,12 @@ define({
 	"Related Links": "Collegamenti correlati",
 	"Yes": "Sì",
 	"No": "No",
-	"DeleteSearchTrmMsg": "Fare clic o utilizzare il tasto di eliminazione per eliminare il termine di ricerca"
+	"DeleteSearchTrmMsg": "Fare clic o utilizzare il tasto di eliminazione per eliminare il termine di ricerca",
+	"Application": "Applicazione",
+	"selectLaunchConfig": "Seleziona una configurazione da eseguire",
+	"createNew": "Crea nuovo...",
+	"Running": "In esecuzione",
+	"checkingStateMessage": "Verifica stato di ${0}",
+	"Status": "Stato"
 });
 

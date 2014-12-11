@@ -70,6 +70,12 @@ define({
 	"Related Links": "Links Relacionados",
 	"Yes": "Sim",
 	"No": "Não",
-	"DeleteSearchTrmMsg": "Clique ou use a tecla delete para excluir o termo de procura"
+	"DeleteSearchTrmMsg": "Clique ou use a tecla delete para excluir o termo de procura",
+	"Application": "Aplicativo",
+	"selectLaunchConfig": "Selecionar uma configuração a ser executada",
+	"createNew": "Criar Novo...",
+	"Running": "Executando",
+	"checkingStateMessage": "Verificando status de ${0}",
+	"Status": "Status"
 });
 

@@ -18,7 +18,7 @@ define({
 	"Working Directory": "工作目錄", //$NON-NLS-0$  //$NON-NLS-1$
 	"ViewWorkingDirVer": "檢視檔案的工作目錄版本", //$NON-NLS-0$  //$NON-NLS-1$
 	"Loading...": "載入中...", //$NON-NLS-0$  //$NON-NLS-1$
-	"Repositories": "所有 Git 儲存庫", //$NON-NLS-0$  //$NON-NLS-1$
+	"Repositories": "Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repo": "儲存庫", //$NON-NLS-0$  //$NON-NLS-1$
 	"0 on 1 - Git": "${0} 在 ${1} - Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Git": "Git", //$NON-NLS-0$  //$NON-NLS-1$
@@ -538,7 +538,8 @@ define({
 	"FilesChanged": "${0} 個檔案已變更", //$NON-NLS-0$  //$NON-NLS-1$
 	"file": "檔案", //$NON-NLS-0$  //$NON-NLS-1$
 	"files": "個檔案", //$NON-NLS-0$  //$NON-NLS-1$
-	"EmptyCommitConfirm": "您未選取檔案。您確定要這樣做嗎？", //$NON-NLS-0$  //$NON-NLS-1$
+	"EmptyCommitConfirm": "您未選取檔案。如果您繼續，將會以空白確定結束。要繼續嗎？", //$NON-NLS-0$  //$NON-NLS-1$
+	"AlwaysSelectFiles": "一律選取變更的檔案（請參閱 Git 喜好設定）", //$NON-NLS-0$  //$NON-NLS-1$
 	"EmptyCommitWarning": "確定是空的", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilesChangedVsReadyToCommit": "${0} ${1}已變更。${2} ${3}已備妥可確定。", //$NON-NLS-0$  //$NON-NLS-1$
 	"CommitPush": "確定和推送", //$NON-NLS-0$  //$NON-NLS-1$
@@ -561,6 +562,7 @@ define({
 	'Url:' : 'URL：', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Private Key:' : 'Ssh 私密金鑰：', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Passphrase:' : 'Ssh 通行詞組：', //$NON-NLS-0$  //$NON-NLS-1$
-	'confirmUnsavedChanges': '有未儲存的變更。您要儲存它們嗎？' //$NON-NLS-1$ //$NON-NLS-0$
+	'confirmUnsavedChanges': '有未儲存的變更。您要儲存它們嗎？', //$NON-NLS-1$ //$NON-NLS-0$
+	'NewConfigurationEntryTooltip': "新增新項目至儲存庫配置" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

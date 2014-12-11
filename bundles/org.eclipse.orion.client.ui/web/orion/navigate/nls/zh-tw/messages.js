@@ -115,6 +115,7 @@ define({
 	"Downloading...": "正在讀取檔案內容...",
 	"Download not supported": "這個瀏覽器中不支援下載內容。",
 	"gettingContentFrom": "從下列取得內容 ",
+	"deletingLaunchConfiguration": "正在刪除啟動配置...",
 	"deployTo": "部署至 ",
 	"deploy": "部署 ",
 	"connect": "連接",
@@ -131,6 +132,7 @@ define({
 	"startApplication": "開始應用程式",
 	"manage": "管理",
 	"manageThisApplicationOnRemote": "在遠端伺服器上管理此應用程式",
+	"deleteLaunchConfiguration": "刪除此啟動配置",
 	"deployThisApplicationAgain": "重新部署此應用程式",
 	"associatedFolder": "關聯的資料夾",
 	"associateAFolderFromThe": "從工作區將資料夾關聯到這個專案。",
@@ -147,6 +149,9 @@ define({
 	'zipArchiveCommandTooltip': '從本端 zip 保存檔來建立專案。',  //$NON-NLS-0$  //$NON-NLS-1$
 	'Url:': 'URL：',  //$NON-NLS-0$  //$NON-NLS-1$
 	'notZip' : '下列檔案不是壓縮檔：${0}。您要繼續匯入嗎？', //$NON-NLS-0$  //$NON-NLS-1$
-	'notZipMultiple' : '正在上傳多個非壓縮檔。您要繼續匯入嗎？' //$NON-NLS-0$  //$NON-NLS-1$
+	'notZipMultiple' : '正在上傳多個非壓縮檔。您要繼續匯入嗎？', //$NON-NLS-0$  //$NON-NLS-1$
+	"Cancel": "取消", //$NON-NLS-0$  //$NON-NLS-1$
+	"Ok": "確定", //$NON-NLS-0$  //$NON-NLS-1$
+	"missingCredentials": "輸入與 ${1} 關聯的 ${0} 鑑別認證以檢查其狀態。" //$NON-NLS-0$  //$NON-NLS-1$
 });
 

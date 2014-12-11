@@ -18,6 +18,7 @@ define({
 	'contentAssist' : 'JavaScript 內容輔助', //$NON-NLS-0$  //$NON-NLS-1$
 	'eslintValidator' : 'JavaScript 驗證器', //$NON-NLS-0$  //$NON-NLS-1$
 	'missingCurly' : '陳述式未用大括弧括住：', //$NON-NLS-0$  //$NON-NLS-1$
+	'noCaller' : '不建議的 \'arguments.caller\' 或 \'arguments.callee\' 用法：', //$NON-NLS-0$  //$NON-NLS-1$
 	'noEqeqeq' : '不建議的 \'==\' 用法：', //$NON-NLS-0$  //$NON-NLS-1$
 	'noDebugger' : '不建議的 \'debugger\' 陳述式用法：', //$NON-NLS-0$  //$NON-NLS-1$
 	'noEval' : '不建議的 \'eval()\' 用法：', //$NON-NLS-0$  //$NON-NLS-1$
@@ -37,6 +38,7 @@ define({
 	'missingSemi' : '遺漏分號：', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedVars' : '未使用的變數：', //$NON-NLS-0$  //$NON-NLS-1$
 	'varRedecl' : '變數重複宣告：', //$NON-NLS-0$  //$NON-NLS-1$
+	'varShadow': '變數投影處理：', //$NON-NLS-0$  //$NON-NLS-1$
 	'undefMember' : '未宣告的廣域參照：', //$NON-NLS-0$  //$NON-NLS-1$
 	'unnecessarySemis' : '不必要的分號：', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedParams' : '未使用的參數：', //$NON-NLS-0$  //$NON-NLS-1$
@@ -49,5 +51,28 @@ define({
 	'validTypeof': '無效的 \'typeof\' 比較',  //$NON-NLS-0$ //$NON-NLS-1$
 	'noSparseArrays': '稀疏陣列宣告', //$NON-NLS-0$ //$NON-NLS-1$
 	'jsHover': 'JavaScript 移至提供者', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeExtraSemiFixName': '移除額外的分號', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeExtraSemiFixTooltip': '移除額外的分號', //$NON-NLS-0$ //$NON-NLS-1$
+	'addFallthroughCommentFixName': '新增 $FALLTHROUGH$ 註解', //$NON-NLS-0$ //$NON-NLS-1$
+	'addFallthroughCommentFixTooltip': '新增 $FALLTHROUGH$ 行註解', //$NON-NLS-0$ //$NON-NLS-1$
+	'addEmptyCommentFixName': '註解空白區塊', //$NON-NLS-0$ //$NON-NLS-1$
+	'addEmptyCommentFixTooltip': '新增待辦事項註解至空白區塊', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintEnvFixName': '新增至 eslint-env 指引', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintEnvFixTooltip': '新增至 eslint-env 指引以過濾已知成員', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintGlobalFixName': '新增至廣域指引', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintGlobalFixTooltip': '新增至廣域指引以過濾未知成員', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeUnusedParamsFixName': '移除參數', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeUnusedParamsFixTooltip': '移除未用的參數，保留負面影響', //$NON-NLS-0$ //$NON-NLS-1$
+	'commentCallbackFixName': '將 @callback 新增至函數', //$NON-NLS-0$ //$NON-NLS-1$
+	'commentCallbackFixTooltip': '製作附加 @callback 之函數的文件，忽略未用的參數', //$NON-NLS-0$ //$NON-NLS-1$
+	'eqeqeqFixName': '更新運算子', //$NON-NLS-0$ //$NON-NLS-1$
+	'eqeqeqFixTooltip': '將運算子更新為預期的運算子', //$NON-NLS-0$ //$NON-NLS-1$
+	'unreachableFixName': '移除無法呼叫到的程式碼', //$NON-NLS-0$ //$NON-NLS-1$
+	'unreachableFixTooltip': '移除無法呼叫到的程式碼', //$NON-NLS-0$ //$NON-NLS-1$
+	'sparseArrayFixName': '轉換為一般陣列', //$NON-NLS-0$ //$NON-NLS-1$
+	'sparseArrayFixTooltip': '移除稀疏項目並轉換為一般陣列', //$NON-NLS-0$ //$NON-NLS-1$
+	'semiFixName': '新增遺漏的 \';\'', //$NON-NLS-0$ //$NON-NLS-1$
+	'semiFixTooltip': '新增遺漏的 \';\'', //$NON-NLS-0$ //$NON-NLS-1$
+	'radix': '遺漏 parseInt() 的基數參數', //$NON-NLS-0$ //$NON-NLS-1$
 });
 

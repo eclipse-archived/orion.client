@@ -13,12 +13,13 @@ define({
 	'htmlOutline' : 'Estrutura de tópicos HTML', //$NON-NLS-0$  //$NON-NLS-1$
 	'cssOutline' : 'Descrição da regra CSS', //$NON-NLS-0$  //$NON-NLS-1$
 	'htmlContentAssist' : 'Assistente de Conteúdo HTML', //$NON-NLS-0$  //$NON-NLS-1$
-	'cssContentAssist' : 'Assistente de conteúdo CSS', //$NON-NLS-0$  //$NON-NLS-1$
+	'cssContentAssist' : 'Assistente de Conteúdo CSS', //$NON-NLS-0$  //$NON-NLS-1$
+	'cssHover' : 'Ajuda instantânea CSS', //$NON-NLS-0$  //$NON-NLS-1$
+	'csslintValidator' : 'Validador de CSS', //$NON-NLS-0$  //$NON-NLS-1$
 	
-	'csslintValidator' : 'Validador de CSS',
-	'ignore' : 'Ignorar',
-	'warning' : 'Aviso',
-	'error' : 'Erro',
+	'ignore' : 'Ignorar', //$NON-NLS-0$  //$NON-NLS-1$
+	'warning' : 'Aviso', //$NON-NLS-0$  //$NON-NLS-1$
+	'error' : 'Erro', //$NON-NLS-0$  //$NON-NLS-1$
 	
 	'adjoining-classes': 'Desaprovar união de classes:', //$NON-NLS-0$  //$NON-NLS-1$
 	'box-model': 'Tomar cuidado com o tamanho de caixa dividido:', //$NON-NLS-0$  //$NON-NLS-1$

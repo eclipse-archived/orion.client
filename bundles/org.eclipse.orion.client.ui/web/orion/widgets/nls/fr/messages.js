@@ -40,11 +40,11 @@ define({
 	"Import a file or zip": "Importer un fichier non compressé ou un fichier zip",
 	"MissingSearchRenderer": "Argument obligatoire manquant : searchRenderer",
 	"Find File Named": "Rechercher le fichier nommé",
-	"Search": "Rechercher",
+	"Search": "Recherche",
 	"FileName FolderName": "NomFichier NomDossier (facultatif)",
 	"Searching...": "Recherche...",
 	"SearchOccurences": "Recherche des occurrences de : \"${0}\"",
-	"name": "name",
+	"name": "nom",
 	"test": "test",
 	"Type the name of a file to open (? = any character, * = any string):": "Entrez le nom d'un fichier à ouvrir (? = tout caractère, * = toute chaîne) :",
 	"Sign Out": "Fermer la session",
@@ -70,6 +70,12 @@ define({
 	"Related Links": "Liens connexes",
 	"Yes": "Oui",
 	"No": "Non",
-	"DeleteSearchTrmMsg": "Cliquez sur Supprimer ou utilisez la touche de suppression pour supprimer un terme de recherche"
+	"DeleteSearchTrmMsg": "Cliquez sur Supprimer ou utilisez la touche de suppression pour supprimer un terme de recherche",
+	"Application": "Application",
+	"selectLaunchConfig": "Sélectionner une configuration à exécuter",
+	"createNew": "Créer un nouvel élément...",
+	"Running": "En cours d'exécution",
+	"checkingStateMessage": "Vérification du statut de ${0}",
+	"Status": "Statut"
 });
 

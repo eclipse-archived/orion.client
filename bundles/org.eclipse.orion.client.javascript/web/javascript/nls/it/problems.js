@@ -18,18 +18,20 @@ define({
 	'eqeqeq' : 'Previsto \'${0}\' ma visualizzato \'${1}\'.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'missing-doc' : 'Documentazione mancante per la funzione \'${0}\'.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'new-parens' : 'Parentesi mancanti per il richiamo del costruttore.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-caller': 'L\'attributo \'arguments.${0}\' è obsoleto.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-debugger': 'L\'utilizzo dell\'istruzione \'debugger\' è sconsigliato.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'no-dupe-keys' : 'Chiave oggetto duplicata \'${0}\'.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-empty-block' : 'Il blocco vuoto deve essere rimosso o commentato.',  //$NON-NLS-0$ //$NON-NLS-1$
 	'no-eval' : '${0} chiamate di funzione sono sconsigliate.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-extra-semi' : 'Punto e virgola non necessario.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-fallthrough' : 'L\'istruzione switch case può essere immessa mediante fall-through del case precedente. Se necessario, aggiungere un nuovo commento //$FALLTHROUGH$ sulla riga precedente.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-fallthrough' : 'L\'istruzione switch case può essere immessa mediante fall-through del case precedente.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-jslint' : 'La direttiva \'${0}\' non è supportata, utilizzare eslint-env.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-array' : 'Utilizzare la notazione letterale dell\'array \'[]\'.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-func' : 'Il costruttore Function è eval.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-object' : 'Utilizzare la notazione letterale dell\'oggetto \'{}\' o Object.create(null).', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-wrappers' : 'Non utilizzare \'${0}\' come costruttore.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-redeclare' : '\'${0}\' è già definito.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-shadow' : '\'${0}\' è già dichiarato in ambito superiore.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-sparse-arrays': 'Le dichiarazioni array non frequenti devono essere evitate.',  //$NON-NLS-0$ //$NON-NLS-1$
 	'no-undef-defined' : '\'${0}\' non definito.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-undef-readonly': '\'${0}\' è di sola lettura.',  //$NON-NLS-0$  //$NON-NLS-1$
@@ -38,6 +40,7 @@ define({
 	'no-unused-vars-unused' : '\'${0}\' è inutilizzato.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-unused-vars-unread' : '\'${0}\' non è stato letto.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-use-before-define': '\'${0}\' è stato utilizzato prima di essere stato definito.', //$NON-NLS-0$  //$NON-NLS-1$
+	'radix': 'Parametro radice mancante.', //$NON-NLS-0$  //$NON-NLS-1$
 	'semi': 'Punto e virgola mancante.', //$NON-NLS-0$  //$NON-NLS-1$
 	'throw-error': 'Throw di un errore.', //$NON-NLS-0$  //$NON-NLS-1$
 	'use-isnan': 'Utilizzare la funzione isNaN da confrontare con NaN.', //$NON-NLS-0$  //$NON-NLS-1$

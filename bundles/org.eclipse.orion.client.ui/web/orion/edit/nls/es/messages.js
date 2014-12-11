@@ -24,6 +24,8 @@ define({
 	"Saved": "Guardado", //$NON-NLS-1$ //$NON-NLS-0$
 	"Blame": "Culpa", //$NON-NLS-1$ //$NON-NLS-0$
 	"BlameTooltip":"Mostrar anotaciones de culpa", //$NON-NLS-1$ //$NON-NLS-0$
+	"Diff": "Dif", //$NON-NLS-1$//$NON-NLS-0$
+	"DiffTooltip":"Mostrar anotaciones de diferencias", //$NON-NLS-1$//$NON-NLS-0$
 	"saveOutOfSync": "El recurso no está sincronizado con el servidor. ¿Desea guardarlo de todos modos?", //$NON-NLS-1$ //$NON-NLS-0$
 	"loadOutOfSync": "El recurso no está sincronizado con el servidor. ¿Desea cargarlo de todos modos? Se sobrescribirán los cambios locales.", //$NON-NLS-1$ //$NON-NLS-0$
 	"ReadingMetadata": "Leyendo metadatos de ${0}", //$NON-NLS-1$ //$NON-NLS-0$
@@ -84,5 +86,7 @@ define({
 	'listingProjects': 'Listando proyectos...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'gettingWorkspaceInfo': 'Obteniendo información de espacio de trabajo...',  //$NON-NLS-0$  //$NON-NLS-1$
 	"showProblems": "Mostrar problemas...",  //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltip": "Mostrar ayuda contextual", //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltipTooltip": "Muestra la ayuda contextual inmediatamente en función de la posición del símbolo del cursor" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

@@ -18,19 +18,21 @@ define({
 	'eqeqeq' : 'Es wurde \'${0}\' an Stelle von \'${1}\' erwartet.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'missing-doc' : 'Fehlende Dokumentation für Funktion \'${0}\'.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'new-parens' : 'Im Aufruf des Konstruktors fehlen die runden Klammern.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-caller': '\'arguments.${0}\' ist veraltet.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-debugger': 'Von der Verwendung der Anweisung \'debugger\' wird abgeraten.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'no-dupe-keys' : 'Der Objektschlüssel \'${0}\' ist doppelt vorhanden.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-empty-block' : 'Ein leerer Block sollte entfernt oder kommentiert werden.',  //$NON-NLS-0$ //$NON-NLS-1$
 	'no-eval' : 'Von der Verwendung von Aufrufen von ${0}-Funktionen wird abgeraten.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-extra-semi' : 'Nicht erforderliches Semikolon.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-fallthrough' : 'CASE in SWITCH-Anweisung wird möglicherweise wegen Durchlauf der vorherigen CASE-Angabe ausgeführt. Wenn dies beabsichtigt ist, fügen Sie in der Zeile darüber einen neuen Kommentar //$FALLTHROUGH$ hinzu.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-fallthrough' : 'CASE in SWITCH-Anweisung wird möglicherweise wegen Durchlauf der vorherigen CASE-Angabe ausgeführt.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-jslint' : 'Die Anweisung \'${0}\' wird nicht unterstützt. Verwenden Sie \'eslint-env\'.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-array' : 'Verwenden Sie die Notation für Array-Literale \'[]\'.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-func' : 'Der FunktionsKonstruktor lautet \'eval\'.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-object' : 'Verwenden Sie die Notation für Objekt-Literale \'{}\' oder aber Object.create(null).', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-wrappers' : 'Verwenden Sie \'${0}\' nicht als Konstruktor.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-redeclare' : '\'${0}\' ist bereits definiert.', //$NON-NLS-0$  //$NON-NLS-1$
-	'no-sparse-arrays': 'Deklarationen für dünn besetzte Arrays müssen vermieden werden. ',  //$NON-NLS-0$ //$NON-NLS-1$
+	'no-shadow' : '\'${0}\' wurde bereits im oberen Bereich deklariert.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-sparse-arrays': 'Deklarationen für dünn besetzte Arrays müssen vermieden werden.',  //$NON-NLS-0$ //$NON-NLS-1$
 	'no-undef-defined' : '\'${0}\' ist nicht definiert.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-undef-readonly': '\'${0}\' ist schreibgeschützt.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'no-unreachable' : 'Der Code kann nicht adressiert werden.', //$NON-NLS-0$  //$NON-NLS-1$
@@ -38,6 +40,7 @@ define({
 	'no-unused-vars-unused' : '\'${0}\' wird nicht verwendet.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-unused-vars-unread' : '\'${0}\' wird nicht gelesen.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-use-before-define': '\'${0}\' wurde verwendet, bevor eine Definition festgelegt wurde.', //$NON-NLS-0$  //$NON-NLS-1$
+	'radix': 'Basisparameter fehlt.', //$NON-NLS-0$  //$NON-NLS-1$
 	'semi': 'Fehlendes Semikolon.', //$NON-NLS-0$  //$NON-NLS-1$
 	'throw-error': 'Stattdessen sollte ein Fehler ausgelöst werden.', //$NON-NLS-0$  //$NON-NLS-1$
 	'use-isnan': 'Verwenden Sie die Funktion \'isNaN\' für den Vergleich mit \'NaN\'.', //$NON-NLS-0$  //$NON-NLS-1$

@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013, 2014 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser,amd*/
@@ -53,6 +53,9 @@ define({
 	"seeManualDeploymentInformationIn": "請參閱 [根資料夾頁面](${0}) 中的「手動部署資訊」，以檢視及管理 [${1}](${2})",
 	"theHostIsAlreadyIn": "主機已由另一個應用程式使用中。請檢查資訊清單檔中的主機/網域。",
 	"password:": "密碼：",
+	"Cancelled": "已取消",
+	"Could not find the launch configuration manifest": "找不到啟動配置資訊清單，也未使用最上層專案資訊清單。請將其還原或者提供專案資訊清單。",
+	"Would you like to use the top-level project manifest": "找不到啟動配置資訊清單。您要改成使用最上層專案資訊清單並將它連結到啟動配置嗎？",
 	"iD:": "ID：",
 	"setUpYourCloud.Go": "設定您的雲端。 移至 [設定](${0})。",
 	"loggingInTo${0}...": "正在登入 ${0}...",
@@ -68,15 +71,15 @@ define({
 	"applicationFrom/": "應用程式來源 /",
 	"on": " 於 ",
 	"user:": "使用者：",
-	"instance(s)Running": " 個實例執行中",
+	"${0}of${1}instance(s)Running": " ${0}/${1} 個實例正在執行中",
 	"of": " /",
 	"applicationIsNotRunning": "應用程式不在執行中",
-	"${0}/${1}Instance(s)Running": "${0}/${1} 個實例執行中",
-	"${0}/${1}Instance(s)Running,${2}Flapping": "${0}/${1} 個實例執行中，${2} 個擺動中",
+	"${0}/${1}Instance(s)Running": "${0}/${1} 個實例正在執行中",
+	"${0}/${1}Instance(s)Running,${2}Flapping": "${0}/${1} 個實例正在執行中，${2} 個正在擺動中",
 	"youHaveNoApplicationsIn": "您在此空間中沒有應用程式",
 	"logs": "日誌",
 	"started": "已啟動",
-	"instancesRunning": " 實例執行中",
+	"instancesRunning": " 實例正在執行中",
 	"stopped": "已停止",
 	"notDeployed": "未部署",
 	"checkingApplicationState": "正在檢查應用程式狀態",
@@ -193,6 +196,6 @@ define({
 	"debugWith${0}:": "使用 ${0} 除錯：",
 	"requiredToPreventRandomAccess": "需要防止對 cf-launcher 進行隨機存取",
 	"uRLPrefix:": "URL 字首：",
-	"leaveBlankForDefault/launcher": "針對預設值/啟動程式保留空白"
+	"leaveBlankForDefault": "將預設 ${0} 保留為空白"
 });
 

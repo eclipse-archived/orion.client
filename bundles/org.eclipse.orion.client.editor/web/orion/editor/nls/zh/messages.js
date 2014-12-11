@@ -28,6 +28,9 @@ define({
 	"currentLine": "当前行", //$NON-NLS-1$ //$NON-NLS-0$
 	"matchingBracket": "配对的方括号", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentBracket": "当前方括号", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffAdded": "比较添加行的差异", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffDeleted": "比较删除行的差异", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffModified": "比较修改行的差异", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	"lineUp": "上移", //$NON-NLS-1$ //$NON-NLS-0$
 	"lineDown": "下移", //$NON-NLS-1$ //$NON-NLS-0$

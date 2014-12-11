@@ -16,6 +16,6 @@ define({
 	"Print": "Stampa",
 	"unknownError": "Si è verificato un errore sconosciuto.",
 	"noResponse": "Nessuna risposta dal server. Controllare la connessione Internet e riprovare.",
-	"introMarkdown": "#Uso della Guida\nSfoglia gli argomenti disponibili nell'indice a sinistra e fare clic su un argomento per visualizzarlo. possibile utilizzare i tasti del proprio browser **Indietro** e **Avanti** per navigare nella cronologia degli argomenti visualizzati."
+	"introMarkdown": "#Uso della Guida\nSfoglia gli argomenti disponibili nell'indice a sinistra e fare clic su un argomento per visualizzarlo. È possibile utilizzare i tasti del proprio browser **Indietro** e **Avanti** per navigare nella cronologia degli argomenti visualizzati."
 });
 

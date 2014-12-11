@@ -18,7 +18,7 @@ define({
 	"Working Directory": "工作目录", //$NON-NLS-0$  //$NON-NLS-1$
 	"ViewWorkingDirVer": "查看文件的工作目录版本", //$NON-NLS-0$  //$NON-NLS-1$
 	"Loading...": "正在装入...", //$NON-NLS-0$  //$NON-NLS-1$
-	"Repositories": "所有 Git 存储库", //$NON-NLS-0$  //$NON-NLS-1$
+	"Repositories": "Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Repo": "存储库", //$NON-NLS-0$  //$NON-NLS-1$
 	"0 on 1 - Git": "${1} 上的 ${0} - Git", //$NON-NLS-0$  //$NON-NLS-1$
 	"Git": "Git", //$NON-NLS-0$  //$NON-NLS-1$
@@ -538,7 +538,8 @@ define({
 	"FilesChanged": "更改了 ${0} 个文件", //$NON-NLS-0$  //$NON-NLS-1$
 	"file": "文件", //$NON-NLS-0$  //$NON-NLS-1$
 	"files": "文件", //$NON-NLS-0$  //$NON-NLS-1$
-	"EmptyCommitConfirm": "您没有选择文件。您确定吗？", //$NON-NLS-0$  //$NON-NLS-1$
+	"EmptyCommitConfirm": "您没有选择文件。如果继续，那么将以空落实结束。要继续吗？", //$NON-NLS-0$  //$NON-NLS-1$
+	"AlwaysSelectFiles": "始终选择更改的文件（请参见 Git 首选项）", //$NON-NLS-0$  //$NON-NLS-1$
 	"EmptyCommitWarning": "落实为空", //$NON-NLS-0$  //$NON-NLS-1$
 	"FilesChangedVsReadyToCommit": "${0} ${1} 已更改。${2} ${3} 准备好进行落实。", //$NON-NLS-0$  //$NON-NLS-1$
 	"CommitPush": "落实和推送", //$NON-NLS-0$  //$NON-NLS-1$
@@ -561,6 +562,7 @@ define({
 	'Url:' : 'Url：', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Private Key:' : 'Ssh 专用密钥：', //$NON-NLS-0$  //$NON-NLS-1$
 	'Ssh Passphrase:' : 'Ssh 口令：', //$NON-NLS-0$  //$NON-NLS-1$
-	'confirmUnsavedChanges': '存在未保存的更改。要保存这些更改吗？' //$NON-NLS-1$ //$NON-NLS-0$
+	'confirmUnsavedChanges': '存在未保存的更改。要保存这些更改吗？', //$NON-NLS-1$ //$NON-NLS-0$
+	'NewConfigurationEntryTooltip': "将新条目添加到存储库配置" //$NON-NLS-1$ //$NON-NLS-0$
 });
 

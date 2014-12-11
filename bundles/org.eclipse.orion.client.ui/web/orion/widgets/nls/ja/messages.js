@@ -70,6 +70,12 @@ define({
 	"Related Links": "関連リンク",
 	"Yes": "はい",
 	"No": "いいえ",
-	"DeleteSearchTrmMsg": "検索語を削除するには、クリックするか、Delete キーを使用します"
+	"DeleteSearchTrmMsg": "検索語を削除するには、クリックするか、Delete キーを使用します",
+	"Application": "アプリケーション",
+	"selectLaunchConfig": "実行する構成の選択",
+	"createNew": "新規作成...",
+	"Running": "実行中",
+	"checkingStateMessage": "${0} の状況の確認中",
+	"Status": "状況"
 });
 

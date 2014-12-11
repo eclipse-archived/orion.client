@@ -12,13 +12,14 @@
 define({
 	'htmlOutline' : 'Esquema HTML', //$NON-NLS-0$  //$NON-NLS-1$
 	'cssOutline' : 'Esquema de regla CSS', //$NON-NLS-0$  //$NON-NLS-1$
-	'htmlContentAssist' : 'Asistencia de contenido de HTML', //$NON-NLS-0$  //$NON-NLS-1$
+	'htmlContentAssist' : 'Asistencia de contenido en HTML', //$NON-NLS-0$  //$NON-NLS-1$
 	'cssContentAssist' : 'Asistencia de contenido de CSS', //$NON-NLS-0$  //$NON-NLS-1$
+	'cssHover' : 'Ayuda contextual de CSS', //$NON-NLS-0$  //$NON-NLS-1$
+	'csslintValidator' : 'Validador de CSS', //$NON-NLS-0$  //$NON-NLS-1$
 	
-	'csslintValidator' : 'Validador de CSS',
-	'ignore' : 'Omitir',
-	'warning' : 'Aviso',
-	'error' : 'Error',
+	'ignore' : 'Omitir', //$NON-NLS-0$  //$NON-NLS-1$
+	'warning' : 'Aviso', //$NON-NLS-0$  //$NON-NLS-1$
+	'error' : 'Error', //$NON-NLS-0$  //$NON-NLS-1$
 	
 	'adjoining-classes': 'No permite adjuntar clases:', //$NON-NLS-0$  //$NON-NLS-1$
 	'box-model': 'Observe que se ha descompuesto el tamaño del recuadro:', //$NON-NLS-0$  //$NON-NLS-1$

@@ -18,6 +18,7 @@ define({
 	'contentAssist' : 'JavaScript-Inhaltshilfe', //$NON-NLS-0$  //$NON-NLS-1$
 	'eslintValidator' : 'JavaScript-Prüfprogramm', //$NON-NLS-0$  //$NON-NLS-1$
 	'missingCurly' : 'Nicht in geschweifte Klammern eingeschlossene Anweisungen:', //$NON-NLS-0$  //$NON-NLS-1$
+	'noCaller' : 'Verwendung von \'arguments.caller\' oder \'arguments.callee\' nicht empfohlen:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noEqeqeq' : 'Verwendung von \'==\' nicht empfohlen:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noDebugger' : 'Verwendung der Anweisung \'debugger\' nicht empfohlen:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noEval' : 'Verwendung von \'eval()\' nicht empfohlen:', //$NON-NLS-0$  //$NON-NLS-1$
@@ -37,6 +38,7 @@ define({
 	'missingSemi' : 'Fehlende Semikolons:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedVars' : 'Nicht verwendete Variablen:', //$NON-NLS-0$  //$NON-NLS-1$
 	'varRedecl' : 'Neudeklarationen von Variablen:', //$NON-NLS-0$  //$NON-NLS-1$
+	'varShadow': 'Abbildung von Variablen:', //$NON-NLS-0$  //$NON-NLS-1$
 	'undefMember' : 'Nicht deklarierter globaler Verweis:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unnecessarySemis' : 'Nich erforderliche Semikolons:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedParams' : 'Nicht verwendete Parameter:', //$NON-NLS-0$  //$NON-NLS-1$
@@ -49,5 +51,28 @@ define({
 	'validTypeof': 'Ungültiger \'typeof\'-Vergleich',  //$NON-NLS-0$ //$NON-NLS-1$
 	'noSparseArrays': 'Deklarationen für dünn besetzte Arrays', //$NON-NLS-0$ //$NON-NLS-1$
 	'jsHover': 'JavaScript-Hover-Provider', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeExtraSemiFixName': 'Zusätzliches Semikolon entfernen', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeExtraSemiFixTooltip': 'Entfernt das zusätzliche Semikolon', //$NON-NLS-0$ //$NON-NLS-1$
+	'addFallthroughCommentFixName': '$FALLTHROUGH$-Kommentar hinzufügen', //$NON-NLS-0$ //$NON-NLS-1$
+	'addFallthroughCommentFixTooltip': '$FALLTHROUGH$-Kommentarzeile hinzufügen', //$NON-NLS-0$ //$NON-NLS-1$
+	'addEmptyCommentFixName': 'Leeren Block kommentieren', //$NON-NLS-0$ //$NON-NLS-1$
+	'addEmptyCommentFixTooltip': 'Kommentar für unerledigte Aufgabe zum leeren Block hinzufügen', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintEnvFixName': 'Zu Anweisung \'eslint-env\' hinzufügen', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintEnvFixTooltip': 'Zu Anweisung \'eslint-env\' hinzufügen, um nach dem bekannten Member zu filtern', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintGlobalFixName': 'Zu Anweisung \'globals\' hinzufügen', //$NON-NLS-0$ //$NON-NLS-1$
+	'addESLintGlobalFixTooltip': 'Zu Anweisung \'globals\' hinzufügen, um nach dem unbekannten Member zu filtern', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeUnusedParamsFixName': 'Parameter entfernen', //$NON-NLS-0$ //$NON-NLS-1$
+	'removeUnusedParamsFixTooltip': 'Nicht verwendete Parameter entfernen, Nebeneffekte beibehalten', //$NON-NLS-0$ //$NON-NLS-1$
+	'commentCallbackFixName': '@callback zur Funktion hinzufügen', //$NON-NLS-0$ //$NON-NLS-1$
+	'commentCallbackFixTooltip': 'Die Funktion mit @callback dokumentieren, dabei nicht verwendete Parameter ignorieren', //$NON-NLS-0$ //$NON-NLS-1$
+	'eqeqeqFixName': 'Operator aktualisieren', //$NON-NLS-0$ //$NON-NLS-1$
+	'eqeqeqFixTooltip': 'Den Operator auf den erwarteten Operator aktualisieren', //$NON-NLS-0$ //$NON-NLS-1$
+	'unreachableFixName': 'Nicht adressierbaren Code entfernen', //$NON-NLS-0$ //$NON-NLS-1$
+	'unreachableFixTooltip': 'Den nicht adressierbaren Code entfernen', //$NON-NLS-0$ //$NON-NLS-1$
+	'sparseArrayFixName': 'In normales Array konvertieren', //$NON-NLS-0$ //$NON-NLS-1$
+	'sparseArrayFixTooltip': 'Dünn besetzte Einträge entfernen und in normales Array konvertieren', //$NON-NLS-0$ //$NON-NLS-1$
+	'semiFixName': 'Fehlendes \';\' hinzufügen', //$NON-NLS-0$ //$NON-NLS-1$
+	'semiFixTooltip': 'Das fehlende \';\' hinzufügen', //$NON-NLS-0$ //$NON-NLS-1$
+	'radix': 'Basisparameter für parseInt() fehlt', //$NON-NLS-0$ //$NON-NLS-1$
 });
 

@@ -28,6 +28,9 @@ define({
 	"currentLine": "Linha Atual", //$NON-NLS-1$ //$NON-NLS-0$
 	"matchingBracket": "Colchete Correspondente", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentBracket": "Colchete Atual", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffAdded": "Linhas incluídas diff", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffDeleted": "Linhas excluídas diff", //$NON-NLS-1$ //$NON-NLS-0$
+	"diffModified": "Linhas modificadas diff", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	"lineUp": "Linha Acima", //$NON-NLS-1$ //$NON-NLS-0$
 	"lineDown": "Linha Abaixo", //$NON-NLS-1$ //$NON-NLS-0$
@@ -166,9 +169,9 @@ define({
 	"vin": "${0} Próxima Procura", //$NON-NLS-1$ //$NON-NLS-0$
 	"viN": "${0} Procura Anterior", //$NON-NLS-1$ //$NON-NLS-0$
 	"vif": "${0} Procurar Caractere Fwd", //$NON-NLS-1$ //$NON-NLS-0$
-	"viF": "${0} Procurar Caracter Bckwd", //$NON-NLS-1$ //$NON-NLS-0$
+	"viF": "${0} Procurar Caractere Bckwd", //$NON-NLS-1$ //$NON-NLS-0$
 	"vit": "${0} Procurar Caractere Fwd Anterior", //$NON-NLS-1$ //$NON-NLS-0$
-	"viT": "${0} Procurar Caracter Bckwd Anterior", //$NON-NLS-1$ //$NON-NLS-0$
+	"viT": "${0} Procurar Caractere Bckwd Anterior", //$NON-NLS-1$ //$NON-NLS-0$
 	"vi,": "${0} Repetir Procura de Caractere Reversa", //$NON-NLS-1$ //$NON-NLS-0$
 	"vi;": "${0} Repetir Procura de Caractere", //$NON-NLS-1$ //$NON-NLS-0$
 	"viG": "${0} Ir para Linha", //$NON-NLS-1$ //$NON-NLS-0$

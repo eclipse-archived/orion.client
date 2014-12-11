@@ -24,6 +24,8 @@ define({
 	"Saved": "Salvo", //$NON-NLS-1$ //$NON-NLS-0$
 	"Blame": "Defeito", //$NON-NLS-1$ //$NON-NLS-0$
 	"BlameTooltip":"Mostrar anotações de defeito", //$NON-NLS-1$ //$NON-NLS-0$
+	"Diff": "Diff", //$NON-NLS-1$//$NON-NLS-0$
+	"DiffTooltip":"Mostrar anotações diff", //$NON-NLS-1$//$NON-NLS-0$
 	"saveOutOfSync": "O recurso está fora de sincronização com o servidor. Deseja salvá-la de qualquer maneira?", //$NON-NLS-1$ //$NON-NLS-0$
 	"loadOutOfSync": "O recurso está fora de sincronização com o servidor. Deseja carregá-lo de qualquer maneira? Isso sobrescreverá suas mudanças locais.", //$NON-NLS-1$ //$NON-NLS-0$
 	"ReadingMetadata": "Lendo metadados de ${0}", //$NON-NLS-1$ //$NON-NLS-0$
@@ -84,5 +86,7 @@ define({
 	'listingProjects': 'Listando projetos...',  //$NON-NLS-0$  //$NON-NLS-1$
 	'gettingWorkspaceInfo': 'Obtendo informações da área de trabalho...',  //$NON-NLS-0$  //$NON-NLS-1$
 	"showProblems": "Mostrar problemas...",  //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltip": "Mostrar Dicas de Ferramenta", //$NON-NLS-1$ //$NON-NLS-0$
+	"showTooltipTooltip": "Mostra a dica de ferramenta imediatamente com base na posição do acento circunflexo" //$NON-NLS-1$ //$NON-NLS-0$
 });
 
