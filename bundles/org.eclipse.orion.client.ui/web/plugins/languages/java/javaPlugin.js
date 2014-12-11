@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/plugin', 'orion/editor/stylers/text_x-java-source/syntax'], function(PluginProvider, mJava) {
+define(['orion/plugin', 'orion/editor/stylers/text_x-java-source/syntax', 'orion/editor/stylers/application_x-jsp/syntax'], function(PluginProvider, mJava, mJSP) {
 
 	/**
 	 * Plug-in headers
@@ -34,11 +34,21 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-java-source/syntax'], funct
 			}
 		] 
 	});
+	provider.registerServiceProvider("orion.core.contenttype", {}, {
+		contentTypes: [
+			{	id: "application/x-jsp",
+				"extends": "text/plain",
+				name: "Java Server Page",
+				extension: ["jsp"]
+			}
+		] 
+	});
 
 	/**
 	 * Register syntax styling
 	 */
 	provider.registerServiceProvider("orion.edit.highlighter", {}, mJava.grammars[mJava.grammars.length - 1]);
+	provider.registerServiceProvider("orion.edit.highlighter", {}, mJSP.grammars[mJSP.grammars.length - 1]);
 
 	provider.connect();
 });
