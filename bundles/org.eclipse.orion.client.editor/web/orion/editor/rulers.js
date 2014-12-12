@@ -340,7 +340,16 @@ define("orion/editor/rulers", [
 
 			if (tooltip.OKToHide(e.clientX, e.clientY))	{
 				tooltip.hide();
-			}		
+			}
+			
+			// Prevent spurious mouse event (e.g. on a scroll)					
+			if (e.clientX === this._lastMouseX
+				&& e.clientY === this._lastMouseY) {
+				return;
+			}
+			
+			this._lastMouseX = e.clientX;
+			this._lastMouseY = e.clientY;
 
 			if (this._hoverTimeout) {
 				window.clearTimeout(this._hoverTimeout);
@@ -360,7 +369,7 @@ define("orion/editor/rulers", [
 						return self._getTooltipInfo(self._tooltipLineIndex, this.clientY);
 					}
 				});
-			}, 100);
+			}, 175);
 		},
 		/**
 		 * This event is sent when the mouse pointer enters a line annotation.
