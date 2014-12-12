@@ -424,12 +424,10 @@ define([
 				this._idle = new Idle(options);
 				this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
 					if (!this._errorSaving) {
-						try {
-							this._autoSaveActive = true;
-							this.save();
-						} finally {
+						this._autoSaveActive = true;
+						this.save().then(function() {
 							this._autoSaveActive = false;
-						}
+						});
 					}
 				}.bind(this));
 			} else {
