@@ -123,7 +123,12 @@ define([
 								// by the listener as events occur. Using currentHash directly here to avoid 
 								// unnecessarily keeping old copies of the launchConfiguration alive.
 								var cachedConfig = this._cachedLaunchConfigurations[currentHash];
-								this.selectLaunchConfiguration(cachedConfig, true);
+								var checkStatus = true;
+								if (cachedConfig.status && ("PROGRESS" === cachedConfig.status.State) ) { //$NON-NLS-0$
+									//do not check status if it is in PROGRESS
+									checkStatus = false;
+								}
+								this.selectLaunchConfiguration(cachedConfig, checkStatus);
 							}.bind(this, hash)); // passing in hash here because using it directly in function only creates a reference which ends up with the last value of hash
 							
 							this._commandRegistry.registerCommandContribution(menuItem.id, "orion.launchConfiguration.delete", 1); //$NON-NLS-0$
@@ -202,7 +207,8 @@ define([
 				var cachedHash = this._getHash(newConfig);
 				var selectedHash = this._getHash(this._selectedLaunchConfiguration);
 				if (cachedHash === selectedHash) {
-					this.selectLaunchConfiguration(newConfig, false);
+					var checkStatus = newConfig.status && newConfig.status.CheckState; // check status again if status.CheckState is set
+					this.selectLaunchConfiguration(newConfig, checkStatus);
 				}
 				
 				// replace cached launch config
@@ -213,7 +219,7 @@ define([
 				if(event.type === "create" && newConfig){ //$NON-NLS-0$
 					// cache and select new launch config
 					this._putInLaunchConfigurationsCache(newConfig);
-					this.selectLaunchConfiguration(newConfig);
+					this.selectLaunchConfiguration(newConfig, true); //check the status of newly created configs
 				} else if(event.type === "delete"){ //$NON-NLS-0$
 					var deletedFile = event.oldValue.File;
 					
@@ -375,6 +381,10 @@ define([
 		
 		_putInLaunchConfigurationsCache: function(launchConfiguration) {
 			var hash = this._getHash(launchConfiguration);
+			if (!launchConfiguration.project) {
+				// TODO Find a better way to get this info
+				launchConfiguration.project = this._projectExplorer.treeRoot.Project;
+			}
 			this._cachedLaunchConfigurations[hash] = launchConfiguration;
 		},
 		
