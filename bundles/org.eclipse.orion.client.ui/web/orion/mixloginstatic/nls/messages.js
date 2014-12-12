@@ -15,13 +15,5 @@ define({
 		"ConfirmRemove" : "Are you sure you want to remove ${0} from the list of your external accounts?",
 		"Remove" : "Remove",
 		"RemoveExternalAccount" : "Remove ${0}",
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}			
 });

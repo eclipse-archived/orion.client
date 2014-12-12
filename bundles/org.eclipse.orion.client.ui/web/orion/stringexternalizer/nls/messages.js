@@ -23,13 +23,5 @@ define({
 		"Passed": "Passed",
 		"Failed": "Failed",
 		"ResourceChanged": "Resource has been changed by others"
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}		
 });

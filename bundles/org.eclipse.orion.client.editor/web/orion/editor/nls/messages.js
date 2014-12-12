@@ -207,13 +207,5 @@ define({
 		"replacedMatches": "Replaced ${0} matches", //$NON-NLS-1$ //$NON-NLS-0$
 		"nothingReplaced": "Nothing replaced", //$NON-NLS-1$ //$NON-NLS-0$
 		"notFound": "Not found" //$NON-NLS-1$ //$NON-NLS-0$
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}			
 });

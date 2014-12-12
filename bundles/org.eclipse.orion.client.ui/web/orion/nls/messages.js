@@ -146,13 +146,5 @@ define({
 		"KeyPAGEUP": "Page Up",
 		"KeySPACE": "Space",
 		"KeyTAB": "Tab"
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}		
 });

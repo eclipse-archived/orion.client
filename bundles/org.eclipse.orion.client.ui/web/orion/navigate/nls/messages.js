@@ -152,13 +152,5 @@ define({
 		"Cancel": "Cancel", //$NON-NLS-0$  //$NON-NLS-1$
 		"Ok": "Ok", //$NON-NLS-0$  //$NON-NLS-1$
 		"missingCredentials": "Enter the ${0} authentication credentials associated with ${1} to check its status." //$NON-NLS-0$  //$NON-NLS-1$
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}			
 });

@@ -74,13 +74,5 @@ define({
 		"Mappings": "Mappings",
 		"SitesExplorer.NoSitesText" : "You have no sites. Click ${0} to create a site.", // ${0} is replaced by create button.
 		"Edit Site": "Edit Site"
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}						
 });

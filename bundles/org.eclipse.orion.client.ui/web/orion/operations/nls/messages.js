@@ -32,13 +32,5 @@ define({
 		"All Operations": "All Operations",
 		"NoPageOps": "No operations running on this page.",
 		"NoOperations": "No operations running."
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}			
 });

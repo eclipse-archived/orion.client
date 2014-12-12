@@ -19,13 +19,5 @@ define({
 		"viewByFiles" : "By files", //$NON-NLS-1$ //$NON-NLS-0$
 		"viewByTypesTooltip": "View problems grouped by errors and warnings", //$NON-NLS-1$ //$NON-NLS-0$
 		"viewByFilesTooltip": "View problems grouped by files" //$NON-NLS-1$ //$NON-NLS-0$
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}			
 });

@@ -76,13 +76,5 @@ define({
 		"Running": "Running",
 		"checkingStateMessage": "Checking status of ${0}",
 		"Status": "Status"
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}					
 });

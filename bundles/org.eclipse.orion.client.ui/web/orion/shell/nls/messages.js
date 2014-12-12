@@ -55,13 +55,5 @@ define({
 		"WriteFailMsg": "Failed to write ${0}",
 		"WriteFailNotDescendentOfOutputDir": "Cannot write ${0}, it is not a descendent of the output directory",
 		"FileOrDirRedirectOutput": "The file or directory to re-direct output to"
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}				
 });

@@ -76,13 +76,5 @@ define({
 		'radix': 'Missing radix parameter to parseInt()', //$NON-NLS-0$ //$NON-NLS-1$
 		'unusedVarsUnusedFixName': 'Remove unused variable', //$NON-NLS-0$ //$NON-NLS-1$
 		'unusedVarsUnusedFixTooltip': 'Remove the unused variable, keeping side effects', //$NON-NLS-0$ //$NON-NLS-1$
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}		
 });

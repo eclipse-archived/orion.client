@@ -16,13 +16,5 @@ define({
 		"Save": "Save",
 		"StoreFileMsg": "Click ${0} to store this file into Orion.",
 		"ResrcOutOfSync": "Resource is out of sync with the server. Do you want to save it anyway?"
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}				
 });

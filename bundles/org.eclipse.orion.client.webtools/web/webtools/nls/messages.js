@@ -61,13 +61,5 @@ define({
 		// CSS Quick Fixes
 		'quickfix-zero-units': 'Remove \'px\' qualifier.', //$NON-NLS-0$  //$NON-NLS-1$
 		'quickfix-empty-rules': 'Remove the rule.' //$NON-NLS-0$  //$NON-NLS-1$
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}				
 });

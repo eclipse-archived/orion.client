@@ -7,6 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  ******************************************************************************/
+/*eslint-env browser, amd*/
 define({
 	root: {//Default message bundle
 		"Loading ${0}...": "Loading ${0}...",
@@ -52,13 +53,5 @@ define({
 		"Set Password" : "Set Password",
 		"Permission to view user list denied." : "Permission to view user list denied.",
 		"A(lastCalculated B)" : "${0} ( last calculated ${1} )"
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}				
 });

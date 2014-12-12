@@ -104,13 +104,5 @@ define({
 		"Preview: " : "Preview: ",
 		"fullPath": "Show Full Path",
 		"switchFullPath": "Show/hide full path"
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}			
 });

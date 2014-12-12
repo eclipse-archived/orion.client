@@ -263,13 +263,5 @@ define({
 	    "buttonSave": "Save",
 	    "buttonRevert": " Revert",
 	    "ConfirmRestore": "Restore these settings to their default values?"
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}			
 });

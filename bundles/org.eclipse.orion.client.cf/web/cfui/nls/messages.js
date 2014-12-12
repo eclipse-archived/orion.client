@@ -196,13 +196,5 @@ define({
 		"uRLPrefix:": "URL Prefix: ",
 		"leaveBlankForDefault": "Leave blank for default ${0}",
 		"createNew": "Create New"
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}				
 });

@@ -47,13 +47,5 @@ define({
 		'UseWhitespace': 'Use white space', //$NON-NLS-0$  //$NON-NLS-1$
 		'UseWhitespaceTooltip': 'Compare white space where applicable', //$NON-NLS-0$  //$NON-NLS-1$
 		'confirmUnsavedChanges': 'There are unsaved changes. Do you want to save them?' //$NON-NLS-1$ //$NON-NLS-0$
-	},
-	"ja": true,
-	"zh": true,
-	"zh-tw": true,
-	"fr": true,
-	"de": true,
-	"it": true,
-	"es": true,
-	"pt-br": true						
+	}			
 });
