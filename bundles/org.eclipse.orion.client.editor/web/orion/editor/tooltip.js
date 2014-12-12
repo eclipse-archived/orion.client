@@ -217,8 +217,8 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			
 			// Do we need to process this one ?
 			if (this._isInRect(this._hoverRect, target.clientX, target.clientY)) {
-				if (target.clientY <= this._anchorRect.top 
-					|| target.clientY >= (this._anchorRect.top + this._anchorRect.height)) {
+				// TODO: only works when the ttip is below the anchor rect
+				if (target.clientY > (this._anchorRect.top + this._anchorRect.height)) {
 					return;
 				}
 			}
@@ -552,12 +552,6 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				// Handle quick fixes
 				if (self.hover) {
 					self.hover.renderQuickFixes(annotation, result);
-					var buttons = lib.$$("button", result); //$NON-NLS-0$
-					for (var k=0; k<buttons.length; k++) {
-						buttons[k].addEventListener("click", function() { //$NON-NLS-0$
-							self.hide(0);
-						});
-					}
 				}
 				
 				// Set the anchor rect to the annotation if it's not already set

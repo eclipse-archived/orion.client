@@ -787,9 +787,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				var contentAssistMode = this._contentAssistFactory.createContentAssistMode(this);
 				this._contentAssist = contentAssistMode.getContentAssist();
 			}
+
+			var tooltip = mTooltip.Tooltip.getTooltip(this._textView);
 			if (this._hoverFactory) {
 				this._hover = this._hoverFactory.createHover(this);
-				var tooltip = mTooltip.Tooltip.getTooltip(this._textView);
 				tooltip.hover = this._hover;
 			}
 			
@@ -803,11 +804,25 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				onMouseOver: function(e) {
 					self._listener.onMouseMove(e);
 				},
+				onMouseDown: function(e) {
+					if (tooltip) { tooltip.hide(); }
+					self._listener.mouseDown = true;
+				},
+				onMouseUp: function(e) {
+					self._listener.mouseDown = false;
+				},
 				onMouseMove: function(e) {
-					if (!tooltip) { return; }
+					if (!tooltip || self._listener.mouseDown) { return; }
+
+					// Prevent spurious mouse event (e.g. on a scroll)					
+					if (e.event.clientX === self._listener.lastMouseX
+						&& e.event.clientY === self._listener.lastMouseY) {
+						return;
+					}
 					
 					self._listener.lastMouseX = e.event.clientX;
 					self._listener.lastMouseY = e.event.clientY;
+					
 					if (tooltip.OKToHide(e.event.clientX, e.event.clientY))	{
 						tooltip.hide();
 					}		
@@ -817,7 +832,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					}
 					self._hoverTimeout = window.setTimeout(function() {
 						self._hoverTimeout = null;
-						if (!tooltip.OKToHover(self._listener.lastMouseX)) { return; }
+						if (!tooltip.OKToHover(self._listener.lastMouseX, self._listener.lastMouseY)) { return; }
 						tooltip.show({
 							clientX: self._listener.lastMouseX,
 							clientY: self._listener.lastMouseY,
@@ -827,24 +842,18 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 								return self._getTooltipInfo(this.x, this.y);
 							}
 						});
-					}, 100);
+					}, 175);
 				},
 				onMouseOut: function(e) {
-//					var tooltip = mTooltip.Tooltip.getTooltip(textView);
-//					if (!tooltip) { return; }
-//					if (self._listener.lastMouseX === e.event.clientX && self._listener.lastMouseY === e.event.clientY) {
-//						return;
-//					}
-//					self._listener.lastMouseX = e.event.clientX;
-//					self._listener.lastMouseY = e.event.clientY;
-//					tooltip.hide();
+//					self._listener.lastMouseX = undefined;
+//					self._listener.lastMouseY = undefined;
 				},
 				onScroll: function(e) {
-					var tooltip = mTooltip.Tooltip.getTooltip(textView);
 					if (!tooltip) { return; }
 					tooltip.hide();
 				},
 				onSelection: function(e) {
+					if (tooltip) { tooltip.hide(); }
 					self._updateCursorStatus();
 					self._highlightCurrentLine(e.newValue, e.oldValue);
 				}
@@ -853,6 +862,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			textView.addEventListener("Selection", this._listener.onSelection); //$NON-NLS-0$
 			textView.addEventListener("MouseOver", this._listener.onMouseOver); //$NON-NLS-0$
 			textView.addEventListener("MouseOut", this._listener.onMouseOut); //$NON-NLS-0$
+			textView.addEventListener("MouseDown", this._listener.onMouseDown); //$NON-NLS-0$
+			textView.addEventListener("MouseUp", this._listener.onMouseUp); //$NON-NLS-0$
 			textView.addEventListener("MouseMove", this._listener.onMouseMove); //$NON-NLS-0$
 			textView.addEventListener("Scroll", this._listener.onScroll); //$NON-NLS-0$
 
