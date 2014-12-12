@@ -156,37 +156,6 @@ define([
 			name: "ZIP",
 			extension: ["war", "jar", "zip", "rar"]
 		},
-		// Image types
-		{	id: "image/gif",
-			name: "GIF",
-			extension: ["gif"],
-			imageClass: "file-sprite-image modelDecorationSprite"
-		},
-		{	id: "image/jpeg",
-			name: "JPG",
-			extension: ["jpg", "jpeg", "jpe"],
-			imageClass: "file-sprite-image modelDecorationSprite"
-		},
-		{	id: "image/ico",
-			name: "ICO",
-			extension: ["ico"],
-			imageClass: "file-sprite-image modelDecorationSprite"
-		},
-		{	id: "image/png",
-			name: "PNG",
-			extension: ["png"],
-			imageClass: "file-sprite-image modelDecorationSprite"
-		},
-		{	id: "image/tiff",
-			name: "TIFF",
-			extension: ["tif", "tiff"],
-			imageClass: "file-sprite-image modelDecorationSprite"
-		},
-		{	id: "image/svg",
-			name: "SVG",
-			extension: ["svg"],
-			imageClass: "file-sprite-image modelDecorationSprite"
-		},
 		{	id: "text/x-arduino",
 			"extends": "text/plain",
 			name: "Arduino",
@@ -226,6 +195,37 @@ define([
 			"extends": "text/plain",
 			name: "XQuery",
 			extension:  ["xq", "xqy", "xquery"]
+		},
+		// Image types
+		{	id: "image/gif",
+			name: "GIF",
+			extension: ["gif"],
+			imageClass: "file-sprite-image modelDecorationSprite"
+		},
+		{	id: "image/jpeg",
+			name: "JPG",
+			extension: ["jpg", "jpeg", "jpe"],
+			imageClass: "file-sprite-image modelDecorationSprite"
+		},
+		{	id: "image/ico",
+			name: "ICO",
+			extension: ["ico"],
+			imageClass: "file-sprite-image modelDecorationSprite"
+		},
+		{	id: "image/png",
+			name: "PNG",
+			extension: ["png"],
+			imageClass: "file-sprite-image modelDecorationSprite"
+		},
+		{	id: "image/tiff",
+			name: "TIFF",
+			extension: ["tif", "tiff"],
+			imageClass: "file-sprite-image modelDecorationSprite"
+		},
+		{	id: "image/svg",
+			name: "SVG",
+			extension: ["svg"],
+			imageClass: "file-sprite-image modelDecorationSprite"
 		}
 	];
 	
@@ -328,7 +328,7 @@ define([
 						break;
 				}
 			}
-			if(stylerAdapter) {
+			if (stylerAdapter) {
 				this.styler = new mStyler.TextStyler(textView, annotationModel, stylerAdapter);
 			}
 			return new Deferred().resolve();
