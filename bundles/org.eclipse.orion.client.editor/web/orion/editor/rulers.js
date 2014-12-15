@@ -337,10 +337,6 @@ define("orion/editor/rulers", [
 			if (!tooltip) { return; }
 			if (tooltip.isVisible() && this._tooltipLineIndex === lineIndex) { return; }
 			this._tooltipLineIndex = lineIndex;
-
-			if (tooltip.OKToHide(e.clientX, e.clientY))	{
-				tooltip.hide();
-			}
 			
 			// Prevent spurious mouse event (e.g. on a scroll)					
 			if (e.clientX === this._lastMouseX

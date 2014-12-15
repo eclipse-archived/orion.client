@@ -805,7 +805,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					self._listener.onMouseMove(e);
 				},
 				onMouseDown: function(e) {
-					if (tooltip) { tooltip.hide(); }
 					self._listener.mouseDown = true;
 				},
 				onMouseUp: function(e) {
@@ -822,10 +821,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					
 					self._listener.lastMouseX = e.event.clientX;
 					self._listener.lastMouseY = e.event.clientY;
-					
-					if (tooltip.OKToHide(e.event.clientX, e.event.clientY))	{
-						tooltip.hide();
-					}		
+
 					if (self._hoverTimeout) {
 						window.clearTimeout(self._hoverTimeout);
 						self._hoverTimeout = null;

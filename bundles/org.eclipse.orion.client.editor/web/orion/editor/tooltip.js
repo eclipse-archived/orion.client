@@ -46,6 +46,17 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			tooltipDiv.appendChild(tooltipContents);
 			document.body.appendChild(tooltipDiv);
 			var self = this;
+			textUtil.addEventListener(document, "mousedown", this._mouseDownHandler = function(event) { //$NON-NLS-0$
+				if (!self.isVisible()) { return; }
+				if (textUtil.contains(tooltipDiv, event.target || event.srcElement)) { return; }
+				self.hide();
+			}, true);
+			textUtil.addEventListener(document, "mousemove", this._mouseMoveHandler = function(event) { //$NON-NLS-0$
+				if (!self.isVisible()) { return; }
+				if (self.OKToHide(event.clientX, event.clientY)) {
+					self.hide();
+				}
+			}, true);
 			textUtil.addEventListener(tooltipDiv, "mouseover", function(event) { //$NON-NLS-0$
 				self._inTooltip = true;
 			}, false);
@@ -72,6 +83,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			if (parent) { parent.removeChild(this._tooltipDiv); }
 			var document = this._tooltipDiv.ownerDocument;
 			textUtil.removeEventListener(document, "mousedown", this._mouseDownHandler, true); //$NON-NLS-0$
+			textUtil.removeEventListener(document, "mousemove", this._mouseMoveHandler, true); //$NON-NLS-0$
 			this._tooltipDiv = null;
 		},
 		_hasFocus: function() {

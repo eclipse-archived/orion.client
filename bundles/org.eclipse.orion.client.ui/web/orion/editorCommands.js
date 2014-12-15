@@ -520,6 +520,9 @@ define([
 				name: messages.showTooltip,
 				tooltip: messages.showTooltipTooltip,
 				id: "orion.edit.showTooltip", //$NON-NLS-0$
+				visibleWhen: function() {
+					return editor.installed;
+				},
 				callback: function(data) {
 					var tv = editor._textView;
 					var offset = tv.getCaretOffset();
