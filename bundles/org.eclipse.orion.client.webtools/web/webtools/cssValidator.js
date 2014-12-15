@@ -208,6 +208,42 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 			config.setOption("unqualified-attributes", properties.validate_unqualified_attributes); //$NON-NLS-0$
 			config.setOption("vendor-prefix", properties.validate_vendor_prefix); //$NON-NLS-0$
 			config.setOption("zero-units", properties.validate_zero_units); //$NON-NLS-0$
+		},
+		
+		/**
+		 * @description Hook for the test suite to enable only the given rule
+		 * @function
+		 * @private
+		 * @param {String} ruleid The id for the rule
+		 * @param {Number} severity The desired severity or null
+		 * @since 8.0
+		 */
+		_enableOnly: function _enableOnly(ruleid, severity) {
+			config.archivedRules = {};
+		    var keys = Object.keys(config.rules);
+		    for(var i = 0; i < keys.length; i++) {
+		        if(keys[i] === ruleid) {
+		        	config.archivedRules[ruleid] = config.rules[ruleid];
+		            config.setOption(ruleid, severity ? severity : 2);
+		        } else {
+		        	config.archivedRules[keys[i]] = config.rules[ruleid];
+		            config.setOption(keys[i], 0);
+		        }
+		    }
+		},
+		
+		/**
+		 * @description Hook for the test suite to restore the rule settings after 
+		 * calling _enableOnly.  Does not support complex rules (csslint doesn't have any currently)
+		 * @function
+		 * @private
+		 * @since 8.0
+		 */
+		_restoreRules: function _enableOnly() {
+			if (config.archivedRules){
+				config.rules = config.archivedRules;
+				config.archivedRules = undefined;
+			}
 		}
 	});
 	
