@@ -25,7 +25,8 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 	/** @private */
 	function Tooltip (view) {
 		this._view = view;
-		this._create(view.getOptions("parent").ownerDocument); //$NON-NLS-0$
+		var parent = view.getOptions("parent"); //$NON-NLS-0$
+		this._create(parent ? parent.ownerDocument : document);
 	}
 	Tooltip.getTooltip = function(view) {
 		if (!view._tooltip) {
