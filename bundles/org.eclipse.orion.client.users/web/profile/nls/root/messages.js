@@ -1,0 +1,55 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ ******************************************************************************/
+/*eslint-env browser, amd*/
+define({//Default message bundle
+	"Loading ${0}...": "Loading ${0}...",
+	"User is not defined": "User is not defined",
+	"type is missing!": "type is missing!",
+	"no": "no",
+	"yes": "yes",
+	"Type not found ": "Type not found ",
+	"User Profile": "User Profile",
+	"Loading users...": "Loading users...",
+	"User Name": "User Name",
+	"Actions": "Actions",
+	"Full Name": "Full Name",
+	"Last Login": "Last Login",
+	"Disk Usage": "Disk Usage",
+	"Delete": "Delete",
+	"Delete user ": "Delete user ",
+	"Do you want to delete user ${0}?": "Do you want to delete user ${0}?",
+	"could not find toolbar ": "could not find toolbar ",
+	"Create New User": "Create New User",
+	"Provide user login!": "Provide user login!",
+	"Passwords don't match!": "Passwords don't match!",
+	"User could not be created.": "User could not be created.",
+	"Change password for ": "Change password for ",
+	"Password reset failed": "Password reset failed",
+	"Create User": "Create User",
+	"Find User": "Find User",
+	"Delete User": "Delete User",
+	"ConfirmDeleteUsers": "Are you sure you want to delete these ${0} users?\n\nWARNING: This will delete the users' workspaces and projects!",
+	"ConfirmDeleteUser": "Are you sure you want to delete user ${0}?\n\nWARNING: This will delete the user's workspaces and projects!",
+	"Change Password": "Change Password",
+	"More": "More",
+	"Passwords do not match!": "Passwords do not match!",
+	"< Previous Page": "< Previous Page",
+	"Show previous page of Users names": "Show previous page of Users names",
+	"Next Page >": "Next Page >",
+	"Show next page of User names": "Show next page of User names",
+	"User Name:" : "User Name:",
+	"Password:" : "Password:",
+	"Retype password:" : "Retype password:",
+	"Email:" : "Email:",
+	"Create" : "Create",
+	"Set Password" : "Set Password",
+	"Permission to view user list denied." : "Permission to view user list denied.",
+	"A(lastCalculated B)" : "${0} ( last calculated ${1} )"
+});

@@ -9,9 +9,5 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define({
-	root: {//Default message bundle
-		"filesFound": "${0} files found out of ${1}",
-		"searchCancelled": "Search cancelled by user",
-		"Cancel": "Cancel"
-	}		
+	root:true
 });

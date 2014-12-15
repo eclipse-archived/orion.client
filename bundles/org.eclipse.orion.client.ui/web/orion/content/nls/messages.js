@@ -9,12 +9,5 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define({
-	root: {//Default message bundle
-		"PluginContentNotFound": "Plugin content could not be found",
-		"ContentSavedMsg": "Content has been saved.  Click OK to go to the navigator, Cancel to keep editing.",
-		"ContentSavedData": "Content plugin ${0} has saved data.",
-		"Save": "Save",
-		"StoreFileMsg": "Click ${0} to store this file into Orion.",
-		"ResrcOutOfSync": "Resource is out of sync with the server. Do you want to save it anyway?"
-	}				
+	root:true
 });

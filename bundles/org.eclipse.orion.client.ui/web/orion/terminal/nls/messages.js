@@ -9,9 +9,5 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define({
-	root: {//Default message bundle
-		"Terminal": "Terminal",
-		"Open Terminal page": "Open the Terminal page.",
-		"Open Terminal page pwd": "Open the Terminal page with this folder as the current directory."
-	}				
+	root:true
 });

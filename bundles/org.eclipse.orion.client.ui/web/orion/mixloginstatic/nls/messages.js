@@ -9,11 +9,5 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define({
-	root: {//Default message bundle
-		"ExternalAccounts" : "Linked accounts:",
-		"AddExternalAccount" : "Add linked account:",
-		"ConfirmRemove" : "Are you sure you want to remove ${0} from the list of your external accounts?",
-		"Remove" : "Remove",
-		"RemoveExternalAccount" : "Remove ${0}",
-	}			
+	root:true
 });
