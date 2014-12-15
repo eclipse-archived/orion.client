@@ -570,7 +570,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 		/*
 		* Iterate over an array of items and return the target folder. The target
 		* folder of an item is either itself (if it is a dir) or its parent. If there
-		* are multiple target folders, return null.
+		* are multiple target folders, return the first.
 		*/
 		function getTargetFolder(items) {
 			var folder;
@@ -584,13 +584,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				} else {
 					testFolder = currentItem.parent;
 				}
-				if (!folder) {
+				if (testFolder) {
 					folder = testFolder;
-				} else {
-					if (folder.Location !== testFolder.Location) {
-						folder = null;
-						return true;
-					}
+					return true;
 				}
 				return false;
 			});
