@@ -564,6 +564,10 @@ define([
 				mMetrics.logEvent("preferenceChange", name, value); //$NON-NLS-0$
 			}
 		});
+		window.addEventListener("error", function(e) { //$NON-NLS-0$
+			var errorString = e.message + " (" + e.filename + ": " + e.lineno + (e.colno ? ", " + e.colno : "") + ")"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			mMetrics.logEvent("runtime", "uncaughtError", errorString); //$NON-NLS-1$ //$NON-NLS-0$
+		});
 
 		new mThemePreferences.ThemePreferences(prefsService, new mThemeData.ThemeData()).apply();
 
