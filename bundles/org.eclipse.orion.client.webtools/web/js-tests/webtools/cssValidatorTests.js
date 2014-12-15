@@ -36,6 +36,14 @@ define([
 			context.text = "";
 		});
 		
+				
+		afterEach(function(){
+			// Reset the rule severities to defaults
+			if (validator){
+				validator._restoreRules();
+			}
+		});
+		
 		
 		/**
     	 * @name assertProblems
@@ -66,10 +74,11 @@ define([
 		 */
 		it("Test common csslint problems: unknown property", function(/*done*/) {
 			context.text = "h1:{f: 22px}";
+			validator._enableOnly(null, 1);
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, [
 				    {start: 5,
-				     end: 17,
+				     end: 6,
 				     line: 1,
 				     severity: 'warning',
 				     description: 'Unknown property \'f\'.',
@@ -84,10 +93,11 @@ define([
 		 */
 		it("Test common csslint problems: duplicate property", function(/*done*/) {
 			context.text = "h2:{border: 0; border: 0;}";
+			validator._enableOnly(null, 1);
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, [
 				    {start: 16,
-				     end: 42,
+				     end: 22,
 				     line: 1,
 				     severity: 'warning',
 				     description: 'Duplicate property \'border\' found.',
@@ -101,10 +111,11 @@ define([
 		 */
 		it("Test common csslint problems: empty rule", function(/*done*/) {
 			context.text = "h3:{}";
+			validator._enableOnly(null, 1);
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
-				     end: 6,
+				     end: 3,
 				     line: 1,
 				     severity: 'warning',
 				     description: 'Rule is empty.',
@@ -119,16 +130,17 @@ define([
 		 */
 		it("Test csslint parsing errors: Missing end of rule brace", function(/*done*/) {
 			context.text = "h3:{";
+			validator._enableOnly(null, 2);
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, [
-				    {start: 5,
-				     end: 9,
+				    {start: 1,
+				     end: 5,
 				     line: 1,
 				     severity: 'error',
 				     description: 'Expected RBRACE at line 1, col 5.',
 				    },
-				    {start: 5,
-				     end: 9,
+				    {start: 1,
+				     end: 5,
 				     line: 1,
 				     severity: 'error',
 				     description: 'Expected RBRACE at line 1, col 5.',
@@ -142,10 +154,11 @@ define([
 		 */
 		it("Test csslint parsing errors: Unexpected brace token", function(/*done*/) {
 			context.text = "h3:{border: 0}}";
+			validator._enableOnly(null, 2);
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, [
-				    {start: 15,
-				     end: 30,
+				    {start: 1,
+				     end: 16,
 				     line: 1,
 				     severity: 'error',
 				     description: 'Unexpected token \'}\' at line 1, col 15.',
@@ -159,10 +172,11 @@ define([
 		 */
 		it("Test csslint parsing errors: Fatal error missing string", function(/*done*/) {
 			context.text = "@import ;";
+			validator._enableOnly(null, 2);
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, [
-				    {start: 9,
-				     end: 18,
+				    {start: 1,
+				     end: 10,
 				     line: 1,
 				     severity: 'error',
 				     description: 'Fatal error, cannot continue: Expected STRING at line 1, col 9.',
@@ -176,6 +190,7 @@ define([
 		 */
 		it("Test embedded ruleset: False to ignore", function(/*done*/) {
 			context.text = "/*csslint empty-rules:false*/\nh3:{}";
+			validator._enableOnly(null, 2);
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, []);
 			});
@@ -186,10 +201,11 @@ define([
 		 */
 		it("Test embedded ruleset: True to error", function(/*done*/) {
 			context.text = "/*csslint empty-rules:true*/\nh3:{}";
+			validator._enableOnly(null, 1);
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
-				     end: 6,
+				     end: 3,
 				     line: 2,
 				     severity: 'error',
 				     description: 'Rule is empty.',
@@ -203,6 +219,7 @@ define([
 		 */
 		it("Test embedded ruleset: 0 to ignore", function(/*done*/) {
 			context.text = "/*csslint empty-rules:0*/\nh3:{}";
+			validator._enableOnly(null, 1);
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, []);
 			});
@@ -213,10 +230,11 @@ define([
 		 */
 		it("Test embedded ruleset: 1 to warn", function(/*done*/) {
 			context.text = "/*csslint empty-rules:1*/\nh3:{}";
+			validator._enableOnly(null, 0);
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
-				     end: 6,
+				     end: 3,
 				     line: 2,
 				     severity: 'warning',
 				     description: 'Rule is empty.',
@@ -230,10 +248,11 @@ define([
 		 */
 		it("Test embedded ruleset: 2 to error", function(/*done*/) {
 			context.text = "/*csslint empty-rules:2*/\nh3:{}";
+			validator._enableOnly(null, 1);
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
-				     end: 6,
+				     end: 3,
 				     line: 2,
 				     severity: 'error',
 				     description: 'Rule is empty.',
@@ -246,11 +265,12 @@ define([
 		 * Test embedded rulset. Allow whitespace
 		 */
 		it("Test embedded ruleset: Allow whitespace", function(/*done*/) {
+			validator._enableOnly(null, 1);
 			context.text = "/*       csslint empty-rules:2      */\nh3:{}";
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
-				     end: 6,
+				     end: 3,
 				     line: 2,
 				     severity: 'error',
 				     description: 'Rule is empty.',
@@ -264,16 +284,17 @@ define([
 		 */
 		it("Test embedded ruleset: Allow multiple rules", function(/*done*/) {
 			context.text = "/*csslint empty-rules:2,duplicate-properties:true*/\nh1:{}\nh2:{border: 0; border: 0}";
+			validator._enableOnly(null, 1);
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
-				     end: 6,
+				     end: 3,
 				     line: 2,
 				     severity: 'error',
 				     description: 'Rule is empty.',
 				    },
 				    {start: 16,
-				     end: 41,
+				     end: 22,
 				     line: 3,
 				     severity: 'error',
 				     description: 'Duplicate property \'border\' found.',
@@ -287,16 +308,17 @@ define([
 		 */
 		it("Test embedded ruleset: Ignore multiple embedded rulesets", function(/*done*/) {
 			context.text = "/*csslint empty-rules:2*/\n/*duplicate-properties:true*/\nh1:{}\nh2:{border: 0; border: 0}";
+			validator._enableOnly(null, 1);
 			return validator.computeProblems(context).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
-				     end: 6,
+				     end: 3,
 				     line: 3,
 				     severity: 'error',
 				     description: 'Rule is empty.',
 				    },
 				    {start: 16,
-				     end: 41,
+				     end: 22,
 				     line: 4,
 				     severity: 'warning',
 				     description: 'Duplicate property \'border\' found.',

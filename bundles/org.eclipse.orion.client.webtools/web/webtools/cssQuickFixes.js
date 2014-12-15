@@ -46,22 +46,17 @@ define([
 		},
 		"empty-rules": function(editorContext, annotation) { //$NON-NLS-0$
 			return editorContext.getText().then(function(text) {
-				// Remove the rule (selected by the annotation) as well as leading/trailing whitespace
+				// Remove leading space
 				var start = annotation.start;
 				while (start >= 0 && (text[start-1] === ' ' || text[start-1] === '\t')){ //$NON-NLS-0$ //$NON-NLS-1$
 					start--;
 				}
-				var end = annotation.end;
-				while (end < text.length && /[\s}]/.test( text[end])){
-					end++;
+				var contents = text.substring(annotation.start);
+				contents = contents.match(/.*{\s*}\s*/,''); //$NON-NLS-0$
+				if (contents){
+					return editorContext.setText("", start, start+contents[0].length);
 				}
-				while (end < text.length && (text[end] === ' ' || text[end] === '\t')){ //$NON-NLS-0$ //$NON-NLS-1$
-					end++;
-				}
-				while (end < text.length && (text[end] === '\r' || text[end] === '\n')){ //$NON-NLS-0$ //$NON-NLS-1$
-					end++;
-				}
-				return editorContext.setText('', start, end);
+				return null;
             });
 		}
 	});

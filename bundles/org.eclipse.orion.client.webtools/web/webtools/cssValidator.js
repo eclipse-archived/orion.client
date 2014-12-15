@@ -112,6 +112,7 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 		 * @param {orion.edit.EditorContext} editorContext The editor context
 		 * @param {Object} context The in-editor context (selection, offset, etc)
 		 * @returns {orion.Promise} A promise to compute some problems
+		 * @callback
 		 */
 		computeProblems: function(editorContext, context) {
 			var that = this;
@@ -134,12 +135,13 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 			for (var i=0; i < messages.length; i++) {
 				var message = messages[i];
 				if (message.line) {
+					var range = this._getProblemRange(message);
 					var problem = {
 						id: this._getProblemId(message),
 						description: message.message,
 						line: message.line,
-						start: message.col,
-						end: message.col + message.evidence.length,
+						start: range.start,
+						end: range.end,
 						severity: message.type
 					};
 					problems.push(problem);
@@ -161,6 +163,62 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 		        }
 		    }
 		    return null;
+		},
+		
+		/**
+		 * @description Computes the problem range (within the line) for the problem annotation
+		 * @param {Object} message The original CSSLint problem message
+		 * @returns {Object} Object containing start and end properties to pass into the framework
+		 * @since 8.0
+		 */
+		_getProblemRange: function(message) {
+			if (!message.rule || !message.rule.id || message.rule.id === "errors"){
+				// Parsing errors often don't have a token to select, so instead select the line
+				return {start: 1, end: message.evidence.length + 1};
+			}
+		    var token = this._findToken(message.evidence, message.col);
+		    var end = message.col + (token ? token.length : 1);
+		    return {start: message.col, end: end};
+		},
+		
+		_punc: '\n\t\r (){}[]:;,',  //$NON-NLS-0$
+		
+		/**
+		 * @description Returns the token or word found at the given offset
+		 * @param {String} contents The text to search for the token
+		 * @param {Number} offset The offset in the contents to start the search
+		 * @returns {String} Returns the computed token from the given string and offset or <code>null</code>
+		 * @since 8.0
+		 */
+		_findToken: function(contents, offset) {
+			if(contents && offset) {
+				var ispunc = this._punc.indexOf(contents.charAt(offset)) > -1;
+				var pos = ispunc ? offset-1 : offset;
+				while(pos >= 0) {
+					if(this._punc.indexOf(contents.charAt(pos)) > -1) {
+						break;
+					}
+					pos--;
+				}
+				var s = pos;
+				pos = offset;
+				while(pos <= contents.length) {
+					if(this._punc.indexOf(contents.charAt(pos)) > -1) {
+						break;
+					}
+					pos++;
+				}
+				if((s === offset || (ispunc && (s === offset-1))) && pos === offset) {
+					return null;
+				}
+				else if(s === offset) {
+					return contents.substring(s, pos);
+				}
+				else {
+					return contents.substring(s+1, pos);
+				}
+			}
+			return null;
 		},
 		
 		/**
@@ -211,10 +269,10 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 		},
 		
 		/**
-		 * @description Hook for the test suite to enable only the given rule
+		 * @description Hook for the test suite to enable only the given rule, or set all rules to a certain severity
 		 * @function
 		 * @private
-		 * @param {String} ruleid The id for the rule
+		 * @param {String} ruleid The id for the rule, if null all rules will be set to the given severity
 		 * @param {Number} severity The desired severity or null
 		 * @since 8.0
 		 */
@@ -222,12 +280,17 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 			config.archivedRules = {};
 		    var keys = Object.keys(config.rules);
 		    for(var i = 0; i < keys.length; i++) {
-		        if(keys[i] === ruleid) {
-		        	config.archivedRules[ruleid] = config.rules[ruleid];
-		            config.setOption(ruleid, severity ? severity : 2);
-		        } else {
-		        	config.archivedRules[keys[i]] = config.rules[ruleid];
-		            config.setOption(keys[i], 0);
+		    	if (!ruleid){
+		    		config.archivedRules[keys[i]] = config.rules[ruleid];
+			        config.setOption(keys[i], severity ? severity : 2);
+		    	} else {
+			        if(keys[i] === ruleid) {
+			        	config.archivedRules[ruleid] = config.rules[ruleid];
+			            config.setOption(ruleid, severity ? severity : 2);
+			        } else {
+			        	config.archivedRules[keys[i]] = config.rules[ruleid];
+			            config.setOption(keys[i], 0);
+			        }
 		        }
 		    }
 		},

@@ -84,6 +84,26 @@ define([
                     assert.equal(pbs.length, 1, 'There should only be one problem per test');
                 }
                 annot.title = annot.description;
+                
+            	// Problem has start/end ranges with a line number, Annotation uses a start/end offset of the entire text buffer. Translate these values to allow tests with more than one line
+                if (pbs[0].line){
+                	annot.start--;
+                	annot.end--;
+                	if (pbs[0].line > 1){
+	                	obj.editorContext.getText().then(function(text){
+		                	var line = pbs[0].line;
+		                	var offset = 0;
+		                	while (line > 1){
+								offset = text.indexOf('\n', offset);
+								line--;
+		                	}
+		                	if (offset >= 0){
+		                		annot.start += offset;
+		                		annot.end += offset;
+		                	}
+	                	});
+                	}
+                }
                 return obj.fixComputer.execute(obj.editorContext, {annotation: annot});
             });
 	    }
@@ -96,9 +116,8 @@ define([
     	function assertFixes(computed, start, end, expected) {
 	        assert(computed !== null && typeof computed !== 'undefined', 'There should be fixes');
     	    assert(computed.indexOf(expected.value) > -1, 'The fix: '+computed+' does not match the expected fix of: '+expected.value);
-    	    // TODO csslint doesn't return end values, see Bug 454946
-//    	    assert.equal(start, expected.start, 'The fix location {' + start + ',' + end + '} does not match the expected position {'+ expected.start + ',' + expected.end + '}');
-//    	    assert.equal(end, expected.end, 'The fix location {' + start + ',' + end + '} does not match the expected position {'+ expected.start + ',' + expected.end + '}');
+    	    assert.equal(start, expected.start, 'The fix location {' + start + ',' + end + '} does not match the expected position {'+ expected.start + ',' + expected.end + '}');
+    	    assert.equal(end, expected.end, 'The fix location {' + start + ',' + end + '} does not match the expected position {'+ expected.start + ',' + expected.end + '}');
 	    }
 	
 	    /**
@@ -114,12 +133,63 @@ define([
 	        return rule;
 	    }
 	
-		it("Test zero-units 1", function() {
+		it("Test zero-units - single line", function() {
 		    var rule = createTestRule('zero-units');
-		    var expected = {value: "0;",
+		    var expected = {value: "0",
+		                    start: 16, 
+		                    end: 19};
+		    return getFixes({buffer: 'rule { border : 0px;}', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		
+		it("Test zero-units - multi line", function() {
+			// Used to test that getFixes() can properly translate a line/col problem to an offset annotation
+		    var rule = createTestRule('zero-units');
+		    var expected = {value: "0",
 		                    start: 16, 
 		                    end: 19};
 		    return getFixes({buffer: 'rule {\n border : 0px;\n}', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		
+		it("Test empty-rules - single line", function() {
+		    var rule = createTestRule('empty-rules');
+		    var expected = {value: "",
+		                    start: 0, 
+		                    end: 7};
+		    return getFixes({buffer: 'rule {}', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		
+		it("Test empty-rules - multi line", function() {
+		    var rule = createTestRule('empty-rules');
+		    var expected = {value: "",
+		                    start: 0, 
+		                    end: 9};
+		    return getFixes({buffer: 'rule {\n}\n', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		
+		it("Test empty-rules - leading trailing whitespace", function() {
+		    var rule = createTestRule('empty-rules');
+		    var expected = {value: "",
+		                    start: 0, 
+		                    end: 14};
+		    return getFixes({buffer: '\t rule {\t\n}   \t\n', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		
+		it("Test empty-rules - multiple identifiers", function() {
+		    var rule = createTestRule('empty-rules');
+		    var expected = {value: "",
+		                    start: 0, 
+		                    end: 21};
+		    return getFixes({buffer: '\truleA ruleB ruleC {}\n', 
 		                      rule: rule,
 		                      expected: expected});
 		});
