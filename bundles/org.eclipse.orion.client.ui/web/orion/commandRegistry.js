@@ -912,7 +912,9 @@ define([
 							// synchronously render the children since order matters
 							self._render(childContributions, parent, items, handler, renderType, userData, domNodeWrapperList); 
 							// Add a trailing separator if children rendered.
-							self._generateMenuSeparator(parent);
+							if (parent.childNodes.length > 0) {
+								self._generateMenuSeparator(parent);
+							}
 						}
 					}
 				} else {
