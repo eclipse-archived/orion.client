@@ -217,6 +217,19 @@ define([
                 };
             }
         },
+        "no-comma-dangle": {
+            description: 'Report extra trailing comma in object expressions',
+            rule: function(context) {
+                return {
+                    'ObjectExpression': function(node) {
+                        var token  = context.getLastToken(node, 1);
+                        if(token && token.value === ',') {
+                            context.report(node, 'Trailing commas in object expressions are discouraged.', null, token);
+                        }
+                    }
+                };
+            }
+        },
 		"no-debugger" : {
 		    description: 'Disallow use of the debugger keyword',
 		    rule: function(context) {

@@ -107,7 +107,34 @@ define([
 	        rule.opts = opts;
 	        return rule;
 	    }
-	
+	//NO-COMMA-DANGLE
+	    it("Test no-comma-dangle-1", function() {
+		    var rule = createTestRule('no-comma-dangle');
+		    var expected = {value: "",
+		                    start: 15, 
+		                    end: 16};
+		    return getFixes({buffer: 'f({one:1, two:2,})', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test no-comma-dangle-2", function() {
+		    var rule = createTestRule('no-comma-dangle');
+		    var expected = {value: "",
+		                    start: 21, 
+		                    end: 22};
+		    return getFixes({buffer: 'var f = {one:1, two:2,};', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test no-comma-dangle-3", function() {
+		    var rule = createTestRule('no-comma-dangle');
+		    var expected = {value: "",
+		                    start: 22, 
+		                    end: 23};
+		    return getFixes({buffer: 'var f = [{one:1, two:2,}];', 
+		                      rule: rule,
+		                      expected: expected});
+		});
 	//NO-EMPTY-BLOCK
 		it("Test no-empty-block-1", function() {
 		    var rule = createTestRule('no-empty-block');

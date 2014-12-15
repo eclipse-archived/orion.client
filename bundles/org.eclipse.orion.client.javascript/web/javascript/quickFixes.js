@@ -202,6 +202,10 @@ define([
 		    var expected = /^.*\'(\!==|===)\'/.exec(annotation.title);
             return editorContext.setText(expected[1], annotation.start, annotation.end);
 		},
+		/** fix for the no-comma-dangle linting rule */
+		"no-comma-dangle": function(editorContext, annotation) {
+		    return editorContext.setText('', annotation.start, annotation.end);
+		},
 		/** fix for the no-empty-block linting rule */
 		"no-empty-block": function(editorContext, annotation) {
             return editorContext.getText().then(function(text) {

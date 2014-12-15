@@ -314,6 +314,22 @@ define([
 				}
 		);
 		
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+				quickFixComputer, 
+				{
+        			nameKey : 'noCommaDangleFixName',  //$NON-NLS-0$
+        			tooltipKey : 'noCommaDangleFixTooltip',  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "no.comma.dangle.fix",  //$NON-NLS-0$
+        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
+        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-comma-dangle)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
+				}
+		);
+		
 		/**
 		 * Register the jsdoc-based outline
 		 */
@@ -509,6 +525,12 @@ define([
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
+				 	        	                },
+				 	        	                {	id: "validate_no_comma_dangle", //$NON-NLS-0$
+				 	        	                	nameKey: "noCommaDangle", //$NON-NLS-0$
+				 	        	                	type: "number", //$NON-NLS-0$
+				 	        	                	defaultValue: ignore, //$NON-NLS-0$
+				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
 				 	        	                {	id: "validate_no_undef",  //$NON-NLS-0$
 				 	        	                	nameKey: 'undefMember',  //$NON-NLS-0$

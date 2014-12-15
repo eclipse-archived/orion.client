@@ -19,6 +19,7 @@ define({
 		'eslintValidator' : 'JavaScript Validator', //$NON-NLS-0$  //$NON-NLS-1$
 		'missingCurly' : 'Statements not enclosed in braces:', //$NON-NLS-0$  //$NON-NLS-1$
 		'noCaller' : 'Discouraged \'arguments.caller\' or \'arguments.callee\' use:', //$NON-NLS-0$  //$NON-NLS-1$
+		'noCommaDangle' : 'Trailing commas in object expressions:', //$NON-NLS-0$  //$NON-NLS-1$
 		'noEqeqeq' : 'Discouraged \'==\' use:', //$NON-NLS-0$  //$NON-NLS-1$
 		'noDebugger' : 'Discouraged \'debugger\' statement use:', //$NON-NLS-0$  //$NON-NLS-1$
 		'noEval' : 'Discouraged \'eval()\' use:', //$NON-NLS-0$  //$NON-NLS-1$
@@ -76,5 +77,7 @@ define({
 		'radix': 'Missing radix parameter to parseInt()', //$NON-NLS-0$ //$NON-NLS-1$
 		'unusedVarsUnusedFixName': 'Remove unused variable', //$NON-NLS-0$ //$NON-NLS-1$
 		'unusedVarsUnusedFixTooltip': 'Remove the unused variable, keeping side effects', //$NON-NLS-0$ //$NON-NLS-1$
+		'noCommaDangleFixName': 'Remove extra \',\'', //$NON-NLS-0$ //$NON-NLS-1$
+		'noCommaDangleFixTooltip': 'Remove the extra comma', //$NON-NLS-0$ //$NON-NLS-1$
 	}		
 });

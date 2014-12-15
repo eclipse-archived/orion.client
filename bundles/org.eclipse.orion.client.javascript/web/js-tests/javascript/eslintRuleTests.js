@@ -694,7 +694,73 @@ define([
     			assert.equal(messages.length, 0);
     		});
     	});
+//NO-COMMA-DANGLE ----------------------------------------
+  	    describe('no-comma-dangle', function() {
+    	    var RULE_ID = "no-comma-dangle";
+    		it("should flag simple object", function() {
+    			var topic = "var o = {one:1, two:2,}";
     	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Trailing commas in object expressions are discouraged.");
+    			assert.equal(messages[0].node.type, "ObjectExpression");
+    		});
+    		it("should flag object param", function() {
+    			var topic = "f({one:1, two:2,});";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Trailing commas in object expressions are discouraged.");
+    			assert.equal(messages[0].node.type, "ObjectExpression");
+    		});
+    		it("should flag array expression", function() {
+    			var topic = "var a = [{one:1, two:2,}];";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Trailing commas in object expressions are discouraged.");
+    			assert.equal(messages[0].node.type, "ObjectExpression");
+    		});
+    		it("should not flag simple object", function() {
+    			var topic = "var o = {one:1, two:2}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag object param", function() {
+    			var topic = "f({one:1, two:2});";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag array expression", function() {
+    			var topic = "var a = [{one:1, two:2}];";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    	});
 //NO-DEBUGGER --------------------------------------------
     	describe('no-debugger', function() {
     	    var RULE_ID = "no-debugger";
