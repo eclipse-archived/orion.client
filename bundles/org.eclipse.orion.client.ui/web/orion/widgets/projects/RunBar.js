@@ -58,11 +58,7 @@ define([
 			this._domNode = lib.createNodes(RunBarTemplate);
 			if (this._domNode) {
 				this._parentNode.appendChild(this._domNode);
-				this._launchConfigurationsWrapper = lib.$(".launchConfigurationsWrapper", this._domNode); //$NON-NLS-0$
-				
-				this._statusLight = document.createElement("span"); //$NON-NLS-0$
-				this._statusLight.classList.add("statusLight"); //$NON-NLS-0$
-				
+								
 				this._playButton = lib.$("button.playButton", this._domNode); //$NON-NLS-0$
 				this._boundPlayButtonListener = this._runBarButtonListener.bind(this, "orion.launchConfiguration.deploy"); //$NON-NLS-0$
 				this._playButton.addEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$ 
@@ -81,6 +77,11 @@ define([
 					this._setNodeTooltip(this._stopButton, stopCommand.tooltip);
 				}
 				
+				this._launchConfigurationsWrapper = lib.$(".launchConfigurationsWrapper", this._domNode); //$NON-NLS-0$
+				
+				this._statusLight = document.createElement("span"); //$NON-NLS-0$
+				this._statusLight.classList.add("statusLight"); //$NON-NLS-0$
+				
 				this._launchConfigurationDispatcher = this._projectCommands.getLaunchConfigurationDispatcher();
 				this._launchConfigurationEventTypes = ["create", "delete", "changeState", "deleteAll"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				this._boundLaunchConfigurationListener = this._launchConfigurationListener.bind(this);
@@ -89,6 +90,17 @@ define([
 				}, this);
 				
 				this._createLaunchConfigurationsDropdown();
+				
+				//app info and link
+				this._boundLinkClickListener = this._linkClickListener.bind(this);
+				
+				this._appInfoWrapper = lib.$(".appInfoWrapper", this._domNode); //$NON-NLS-0$
+				this._appInfoSpan = lib.$(".appInfoSpan", this._domNode); //$NON-NLS-0$
+
+				this._appLink = lib.$(".appLink", this._domNode); //$NON-NLS-0$
+				this._appLink.addEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
+				this._disableLink(this._appLink);
+				
 			} else {
 				throw new Error("this._domNode is null"); //$NON-NLS-0$
 			}
@@ -196,6 +208,9 @@ define([
 					triggerButton.removeEventListener("click", this._boundTriggerButtonEventListener); //$NON-NLS-0$
 				}
 			}
+			if (this._appLink) {
+				this._appLink.removeEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
+			}
 		},
 		
 		_launchConfigurationListener: function(event) {
@@ -250,9 +265,15 @@ define([
 		 * @param {Boolean} checkStatus Specifies whether or not the status of the launchConfiguration should be checked
 		 */
 		selectLaunchConfiguration: function(launchConfiguration, checkStatus) {
+			this._disableLink(this._appLink);
+			
 			if (launchConfiguration) {
 				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(launchConfiguration.Name, this._statusLight);
 				this._selectedLaunchConfiguration = launchConfiguration;
+				
+				if (launchConfiguration.Url) {
+					this._enableLink(this._appLink, launchConfiguration.Url);
+				}
 				
 				if (checkStatus) {
 					this._checkLaunchConfigurationStatus(launchConfiguration);
@@ -306,6 +327,8 @@ define([
 			this._statusLight.classList.remove("statusLightRed"); //$NON-NLS-0$
 			this._statusLight.classList.remove("statusLightProgress"); //$NON-NLS-0$
 			
+			this._setAppInfoText(null);
+			
 			this._disableAllControls();
 			
 			if (status.error) {
@@ -316,19 +339,30 @@ define([
 					this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
 					this._setStatusTitle(status.error.Message);
 				}
+				
+				if (status.Message) {
+					this._setAppInfoText(status.Message);
+				} else {
+					this._setAppInfoText(messages["appInfoStopped"]); //$NON-NLS-0$
+				}
 			} else {
 				switch (status.State) {
 					case "PROGRESS": //$NON-NLS-0$
 						this._statusLight.classList.add("statusLightProgress"); //$NON-NLS-0$
+						if (status.Message) {
+							this._setAppInfoText(status.Message);
+						}
 						break;
 					case "STARTED": //$NON-NLS-0$
 						this._enableControl(this._playButton);
 						this._enableControl(this._stopButton);
 						this._statusLight.classList.add("statusLightGreen"); //$NON-NLS-0$
+						this._setAppInfoText(messages["appInfoRunning"]); //$NON-NLS-0$
 						break;
 					case "STOPPED": //$NON-NLS-0$
 						this._enableControl(this._playButton);
 						this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
+						this._setAppInfoText(messages["appInfoStopped"]); //$NON-NLS-0$
 						break;
 					default:
 						break;
@@ -426,6 +460,28 @@ define([
 			return !domNode.classList.contains("disabled"); //$NON-NLS-0$
 		},
 		
+		_enableLink: function(linkNode, href) {
+			linkNode.href = href;
+			this._enableControl(linkNode);
+		},
+		
+		_disableLink: function(linkNode) {
+			linkNode.href = "javascript: void(0)"; //$NON-NLS-0$
+			this._disableControl(linkNode);
+		},
+		
+		_isLinkDisabled: function(linkNode) {
+			return ("javascript: void(0)" === linkNode.href); //$NON-NLS-0$ 
+		},
+		
+		_linkClickListener: function(event) {
+			var domNode = event.target;
+			var id = domNode.id;
+			var disabled = this._isLinkDisabled(domNode) ? ".disabled" : ""; //$NON-NLS-1$ //$NON-NLS-0$
+			
+			mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + "." + id +".clicked" + disabled, event.which); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		},
+		
 		_setNodeTooltip: function(domNode, text) {
 			if (domNode.tooltip) {
 				domNode.tooltip.destroy();
@@ -436,6 +492,14 @@ define([
 				trigger: "mouseover", //$NON-NLS-0$
 				position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			});
+		},
+		
+		_setAppInfoText: function(text) {
+			lib.empty(this._appInfoSpan);
+			if (text) {
+				var textNode = document.createTextNode(text);
+				this._appInfoSpan.appendChild(textNode);
+			}
 		}
 	});
 	

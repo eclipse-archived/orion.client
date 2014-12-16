@@ -166,3 +166,50 @@
 	position: relative;
     width: 1px;
 }
+
+.appInfoWrapper {
+	-webkit-align-items: center;		/* Safari */
+	align-items: center;
+	background: white;
+	border-radius: 3px;
+	display: -webkit-inline-flex;		/* Safari */
+	display: inline-flex;
+	margin: 1px 0 0 10px;
+	min-height: 29px;
+	width: 262px;
+	padding: 0 4px;
+	transition: opacity 0.3s ease;
+}
+
+.appInfoSpan {
+	color: #666;
+	-webkit-flex-grow: 1;		/* Safari */
+	flex-grow: 1;
+	-webkit-flex-shrink: 1;		/* Safari */
+	flex-shrink: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.appLink{
+	-webkit-flex-grow: 0;		/* Safari */
+	flex-grow: 0;
+	-webkit-flex-shrink: 0;		/* Safari */
+	flex-shrink: 0;
+	font-size: 16px;
+	line-height: 18px;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';	
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.appLink:before{ content:'\E030'; }
+
+.runBarLink:hover {
+	text-decoration: none;
+}
