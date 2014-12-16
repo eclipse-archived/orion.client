@@ -3802,6 +3802,18 @@ define([
     			assert.equal(messages[0].message, "Missing semicolon.");
     			assert.equal(messages[0].node.type, "ExpressionStatement");
     		});
+    		it("should flag throw statement lacking ;", function() {
+    			var topic = "throw 1";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Missing semicolon.");
+    			assert.equal(messages[0].node.type, "ThrowStatement");
+    		});
     		it("should flag bare expression lacking ;", function() {
     			var topic = "x";
     	

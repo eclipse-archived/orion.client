@@ -1060,6 +1060,7 @@ define([
         			"VariableDeclaration": checkVariableDeclaration,  //$NON-NLS-0$
         			"ExpressionStatement": checkForSemicolon,  //$NON-NLS-0$
         			"ReturnStatement": checkForSemicolon,  //$NON-NLS-0$
+        			"ThrowStatement": checkForSemicolon,  //$NON-NLS-0$
         		};
         	}
         },
