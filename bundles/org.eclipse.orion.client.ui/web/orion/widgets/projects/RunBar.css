@@ -175,7 +175,7 @@
 	display: -webkit-inline-flex;		/* Safari */
 	display: inline-flex;
 	margin: 1px 0 0 10px;
-	min-height: 29px;
+	height: 29px;
 	width: 262px;
 	padding: 0 4px;
 	transition: opacity 0.3s ease;
@@ -206,6 +206,7 @@
 	border: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	margin-top: -3px;
 }
 
 .appLink:before{ content:'\E030'; }
