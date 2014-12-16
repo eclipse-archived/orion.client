@@ -18,6 +18,8 @@ define({//Default message bundle
 	"User Profile": "User Profile",
 	"Git": "Git",
 	"Git Settings": "Git Settings",
+	"Theme":"Editor Styles",
+	"Theme Settings": "Theme Settings",
 	"General": "General",
 	"Navigation": "Navigation",
 	"Links": "Links:",
@@ -133,9 +135,9 @@ define({//Default message bundle
 	"general": "General",
 	"validation": "Validation",
 	"DeletedGitMsg": "Deleted git credentials for ${0}",
-	"Editor": "Editor",
-	"editorSettings": "Settings",
-	"EditorThemes": "Themes",
+	"Editor": "Editor Settings",
+	"editorSettings": "Editor Settings",
+	"EditorThemes": "Editor Styles",
 	"Import": "Import",
 	"Import a theme": "Import a theme",
 	"Export": "Export",
@@ -190,7 +192,6 @@ define({//Default message bundle
 	"contentAssistAutoTrigger": "Show Content Assist automatically:",
 	"Editor preferences updated": "Editor preferences updated",
 	"Editor defaults restored": "Editor defaults restored",
-	"Theme": "Theme",
 	"Font Size": "Font Size:",
 	"New Theme Name:": "New Theme Name:",
 	"Font Size:": "Font Size:",
@@ -261,5 +262,7 @@ define({//Default message bundle
     "SettingUpdateSuccess": "${0} settings successfully updated.",
     "buttonSave": "Save",
     "buttonRevert": " Revert",
-    "ConfirmRestore": "Restore these settings to their default values?"
+    "ConfirmRestore": "Restore these settings to their default values?",
+    "Theme : " : "Theme : ",
+    "Display Language : " : "Display Language : "
 });
