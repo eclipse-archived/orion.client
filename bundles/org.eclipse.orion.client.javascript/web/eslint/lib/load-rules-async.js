@@ -17,8 +17,9 @@ define([
 './util',
 'logger',
 'javascript/finder',
-'estraverse'
-], function(util, Logger, Finder, Estraverse) {
+'estraverse',
+'orion/editor/stylers/application_javascript/syntax'
+], function(util, Logger, Finder, Estraverse, JsSyntax) {
 	
     var rules = {
         "curly" : {
@@ -591,11 +592,29 @@ define([
                 };
         	}
         },
+        "no-reserved-keys": {
+            description: "Warn when a reserved word is used as a property key",
+            rule: function(context) {
+                return {
+                    'ObjectExpression': function(node) {
+                        if(node.properties) {
+                            for(var i = 0; i < node.properties.length; i++) {
+                                var prop = node.properties[i];
+                                if(prop.key.type === 'Identifier' && JsSyntax.keywords.indexOf(prop.key.name) > -1) {
+                                    context.report(prop.key, 'Reserved words should not be used as property keys.');
+                                } else if(JsSyntax.keywords.indexOf(prop.key.value) > -1) {
+                                    //literal
+                                    context.report(prop.key, 'Reserved words should not be used as property keys.');
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+        },
         "no-shadow": {
             description: "Warn when shadowing variable from upper scope",
             rule: function(context) {
-                "use strict"; //$NON-NLS-0$
-
                 var hasOwnProperty = Object.prototype.hasOwnProperty;
                 function addVariables(map, scope) {
                     scope.variables.forEach(function(variable) {

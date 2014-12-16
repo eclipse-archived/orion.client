@@ -33,6 +33,7 @@ define({
 		'no-new-object' : 'Use the object literal notation \'{}\' or Object.create(null).', //$NON-NLS-0$  //$NON-NLS-1$
 		'no-new-wrappers' : 'Do not use \'${0}\' as a constructor.', //$NON-NLS-0$  //$NON-NLS-1$
 		'no-redeclare' : '\'${0}\' is already defined.', //$NON-NLS-0$  //$NON-NLS-1$
+		'no-reserved-keys' : 'Reserved words should not be used as property keys.', //$NON-NLS-0$  //$NON-NLS-1$
 		'no-shadow' : '\'${0}\' is already declared in the upper scope.', //$NON-NLS-0$  //$NON-NLS-1$
 		'no-sparse-arrays': 'Sparse array declarations should be avoided.',  //$NON-NLS-0$ //$NON-NLS-1$
 		'no-undef-defined' : '\'${0}\' is undefined.', //$NON-NLS-0$  //$NON-NLS-1$

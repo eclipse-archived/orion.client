@@ -514,6 +514,12 @@ define([
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                },
+				 	        	                {	id: "validate_no_reserved_keys", //$NON-NLS-0$
+				 	        	                	nameKey: "noReservedKeys", //$NON-NLS-0$
+				 	        	                	type: "number", //$NON-NLS-0$
+				 	        	                	defaultValue: error, //$NON-NLS-0$
+				 	        	                	options: severities //$NON-NLS-0$
+				 	        	                },
 				 	        	                {	id: "validate_no_sparse_arrays",  //$NON-NLS-0$
 				 	        	                	nameKey: 'noSparseArrays',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$

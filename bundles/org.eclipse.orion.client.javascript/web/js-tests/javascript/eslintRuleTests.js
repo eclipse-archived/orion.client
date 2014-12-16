@@ -2253,7 +2253,82 @@ define([
     			assert.equal(messages.length, 0);
     		});
     	});
-    	
+//NO-RESERVED-KEYS -------------------------------------------------
+        describe('no-reserved-keys', function() {
+            var RULE_ID = "no-reserved-keys";
+            it("should flag using public keyword", function() {
+                var topic = "var a = {public:1}";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, "Reserved words should not be used as property keys.");
+                assert.equal(messages[0].node.type, "Identifier");
+            });
+            it("should flag using function keyword", function() {
+                var topic = "var a = {function:1}";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, "Reserved words should not be used as property keys.");
+                assert.equal(messages[0].node.type, "Identifier");
+            });
+            it("should flag using for keyword", function() {
+                var topic = "var a = {for:1}";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, "Reserved words should not be used as property keys.");
+                assert.equal(messages[0].node.type, "Identifier");
+            });
+            it("should flag using public keyword literal", function() {
+                var topic = "var a = {'public':1}";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, "Reserved words should not be used as property keys.");
+                assert.equal(messages[0].node.type, "Literal");
+            });
+            it("should flag using function keyword literal", function() {
+                var topic = "var a = {'function':1}";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, "Reserved words should not be used as property keys.");
+                assert.equal(messages[0].node.type, "Literal");
+            });
+            it("should flag using for keyword literal", function() {
+                var topic = "var a = {'for':1}";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, "Reserved words should not be used as property keys.");
+                assert.equal(messages[0].node.type, "Literal");
+            });
+        });
 //NO-SHADOW --------------------------------------------------------    	
         describe('no-shadow', function() {
             var RULE_ID = "no-shadow";

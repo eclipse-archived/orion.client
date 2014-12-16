@@ -37,6 +37,7 @@ define([
 			"no-new-object": 1, //$NON-NLS-0$
 			"no-new-wrappers": 1, //$NON-NLS-0$
 			"no-redeclare": 1, //$NON-NLS-0$
+			"no-reserved-keys": 2, //$NON-NLS-0$
 			"no-shadow": 1, //$NON-NLS-0$
 			"no-undef": 2, //$NON-NLS-0$
 			"no-unused-params": 1, //$NON-NLS-0$
@@ -356,6 +357,7 @@ define([
 			config.setOption("no-new-object", properties["no-new-object"]); //$NON-NLS-1$ //$NON-NLS-0$
 			config.setOption("no-new-wrappers", properties["no-new-wrappers"]); //$NON-NLS-1$ //$NON-NLS-0$
 			config.setOption("no-redeclare", properties.validate_no_redeclare); //$NON-NLS-0$
+			config.setOption("no-reserved-keys", properties.validate_no_reserved_keys); //$NON-NLS-0$
 			config.setOption("no-shadow", properties.validate_no_shadow); //$NON-NLS-0$
 			config.setOption("no-undef", properties.validate_no_undef); //$NON-NLS-0$
 			config.setOption("no-unused-params", properties.validate_unused_params); //$NON-NLS-0$
