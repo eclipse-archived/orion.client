@@ -761,6 +761,262 @@ define([
     			assert.equal(messages.length, 0);
     		});
     	});
+//NO-COND-ASSIGN -----------------------------------------
+        describe('no-cond-assign', function() {
+    	    var RULE_ID = "no-cond-assign";
+    		it("should flag root assign in if statement ", function() {
+    			var topic = "if (a = b) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Expected a conditional expression and instead saw an assignment.");
+    			assert.equal(messages[0].node.type, "AssignmentExpression");
+    		});
+    		it("should flag follow-on assign in if statement ", function() {
+    			var topic = "if (a = b && (c = 10)) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Expected a conditional expression and instead saw an assignment.");
+    			assert.equal(messages[0].node.type, "AssignmentExpression");
+    		});
+    		it("should flag nested assign in if statement ", function() {
+    			var topic = "if ((a = b = 10)) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Expected a conditional expression and instead saw an assignment.");
+    			assert.equal(messages[0].node.type, "AssignmentExpression");
+    		});
+    		it("should flag root assign in while statement ", function() {
+    			var topic = "while (a = b) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Expected a conditional expression and instead saw an assignment.");
+    			assert.equal(messages[0].node.type, "AssignmentExpression");
+    		});
+    		it("should flag follow-on assign in while statement ", function() {
+    			var topic = "while (a = b && (c = 10)) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Expected a conditional expression and instead saw an assignment.");
+    			assert.equal(messages[0].node.type, "AssignmentExpression");
+    		});
+    		it("should flag nested assign in while statement ", function() {
+    			var topic = "while ((a = b = 10)) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Expected a conditional expression and instead saw an assignment.");
+    			assert.equal(messages[0].node.type, "AssignmentExpression");
+    		});
+    		it("should flag root assign in do-while statement ", function() {
+    			var topic = "do {} while (a = b) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Expected a conditional expression and instead saw an assignment.");
+    			assert.equal(messages[0].node.type, "AssignmentExpression");
+    		});
+    		it("should flag follow-on assign in do-while statement ", function() {
+    			var topic = "do {} while (a = b && (c = 10)) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Expected a conditional expression and instead saw an assignment.");
+    			assert.equal(messages[0].node.type, "AssignmentExpression");
+    		});
+    		it("should flag nested assign in do-while statement", function() {
+    			var topic = "do {} while ((a = b = 10)) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Expected a conditional expression and instead saw an assignment.");
+    			assert.equal(messages[0].node.type, "AssignmentExpression");
+    		});
+    		it("should flag root assign in for statement ", function() {
+    			var topic = "for(var q = 0; a = b; q++) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Expected a conditional expression and instead saw an assignment.");
+    			assert.equal(messages[0].node.type, "AssignmentExpression");
+    		});
+    		it("should flag follow-on assign in for statement ", function() {
+    			var topic = "for(var q = 0; a = b && (c = 10); q++) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Expected a conditional expression and instead saw an assignment.");
+    			assert.equal(messages[0].node.type, "AssignmentExpression");
+    		});
+    		it("should flag nested assign in for statement", function() {
+    			var topic = "for(var q = 0; (a = b = 10); q++) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Expected a conditional expression and instead saw an assignment.");
+    			assert.equal(messages[0].node.type, "AssignmentExpression");
+    		});
+    		it("should not flag root assign in if statement if parenthesised", function() {
+    			var topic = "if ((a = b)) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag follow-on assign in if statement if parenthesised ", function() {
+    			var topic = "if ((a = b) && (c = 10)) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag nested assign in if statement if parenthesised", function() {
+    			var topic = "if ((a = (b = 10))) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag root assign in while statement if parenthesised", function() {
+    			var topic = "while ((a = b)) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag follow-on assign in while statement if parenthesised ", function() {
+    			var topic = "while ((a = b) && (c = 10)) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag nested assign in while statement if parenthesised", function() {
+    			var topic = "while ((a = (b = 10))) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag root assign in do-while statement if parenthesised", function() {
+    			var topic = "do{}while ((a = b)) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag follow-on assign in do-while statement if parenthesised ", function() {
+    			var topic = "do{}while ((a = b) && (c = 10)) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag nested assign in do-while statement if parenthesised", function() {
+    			var topic = "do{}while ((a = (b = 10))) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag root assign in for statement if parenthesised", function() {
+    			var topic = "for(var q = 0; (a = b); q++) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should flag follow-on assign in for statement ", function() {
+    			var topic = "for(var q = 0; (a = b) && (c = 10); q++) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should flag nested assign in for statement", function() {
+    			var topic = "for(var q = 0; (a = (b = 10)); q++) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    	});
 //NO-DEBUGGER --------------------------------------------
     	describe('no-debugger', function() {
     	    var RULE_ID = "no-debugger";

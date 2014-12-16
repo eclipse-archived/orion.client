@@ -17,7 +17,8 @@ define([
 './util',
 'logger',
 'javascript/finder',
-], function(util, Logger, Finder) {
+'estraverse'
+], function(util, Logger, Finder, Estraverse) {
 	
     var rules = {
         "curly" : {
@@ -227,6 +228,61 @@ define([
                             context.report(node, 'Trailing commas in object expressions are discouraged.', null, token);
                         }
                     }
+                };
+            }
+        },
+        "no-cond-assign": {
+            description: 'Disallow assignment statements in control statements like if-else, do-while, while and for statements',
+            rule: function(context) {
+                
+                var statements = {
+                    'IfStatement': true,
+                    'DoWhileStatement': true,
+                    'WhileStatement': true,
+                    'ForStatement': true
+                };
+                
+                function isParenthesised(node) {
+                    var type = node.parent.type;
+                    if(statements[type]) {
+                        //if its direct parent is the control statement, check for double parenthesis
+                        if(type !== 'ForStatement') {
+                            return context.getTokenBefore(node, 1).value === '(';
+                        }
+                    }
+                    return context.getTokenBefore(node).value === '(';
+                }
+                
+                function checkForAssignment(node) {
+                    var assigns = [];
+                    node.test.parent = node;
+                    Estraverse.traverse(node.test, {
+                        enter: function(n, parent) {
+                            if(parent) {
+                                n.parent = parent;
+                            }
+                            if(n && n.type === 'AssignmentExpression') {
+                                assigns.push(n);
+                            }
+                        }
+                    });
+                    var len = assigns.length;
+                    if(len > 0) {
+                        for(var i = 0; i < len; i++) {
+                            var assign = assigns[i];
+                            if(!isParenthesised(assign)) {
+                                assign.range[0] = assign.left.range[0]; //mark only from the start of first part
+                                context.report(assign, 'Expected a conditional expression and instead saw an assignment.');
+                            }
+                        }
+                    }
+                }
+                
+                return {
+                  'IfStatement': checkForAssignment,
+                  'WhileStatement': checkForAssignment,
+                  'ForStatement': checkForAssignment,
+                  'DoWhileStatement': checkForAssignment
                 };
             }
         },

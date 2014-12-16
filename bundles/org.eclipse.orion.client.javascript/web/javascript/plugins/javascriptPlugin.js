@@ -396,6 +396,12 @@ define([
 				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
 				 	        	   category: "javascript",  //$NON-NLS-0$
 				 	        	   properties: [
+				 	        	                {	id: "validate_no_cond_assign", //$NON-NLS-0$
+				 	        	                	nameKey: "noCondAssign", //$NON-NLS-0$
+				 	        	                	type: "number", //$NON-NLS-0$
+				 	        	                	defaultValue: error, //$NON-NLS-0$
+				 	        	                	options: severities //$NON-NLS-0$
+				 	        	                },
 				 	        	                {	id: "validate_no_caller", //$NON-NLS-0$
 				 	        	                	nameKey: "noCaller", //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$

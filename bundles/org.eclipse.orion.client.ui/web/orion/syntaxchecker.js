@@ -112,7 +112,8 @@ var SyntaxChecker = (function () {
 						                   var key = probs[i].descriptionKey;
 						                   if(key) {
 						                       var args = probs[i].descriptionArgs ? probs[i].descriptionArgs : Object.create(null);
-						                       probs[i].description = i18nUtil.formatMessage.call(null, bundle[key], args);
+						                       var msg = bundle[key] ? bundle[key] : bundle.root[key];
+						                       probs[i].description = i18nUtil.formatMessage.call(null, msg, args);
 						                   }
 						               }
 						               return results;
