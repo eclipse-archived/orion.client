@@ -301,7 +301,11 @@ define([
                 return astManager.getAST(editorContext).then(function(ast) {
                     var comment = null;
                     var start = 0;
-                    var env = Finder.findESLintEnvForMember(name[1]);
+                    if(name[1] === 'console') {
+                        var env = 'node';
+                    } else {
+                        env = Finder.findESLintEnvForMember(name[1]);
+                    }
                     if(env) {
                         comment = Finder.findDirective(ast, 'eslint-env');
                         if(comment) {

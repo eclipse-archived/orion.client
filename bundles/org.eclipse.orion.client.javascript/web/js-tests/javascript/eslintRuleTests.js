@@ -1017,6 +1017,40 @@ define([
     			assert.equal(messages.length, 0);
     		});
     	});
+//NO-CONSOLE ---------------------------------------------
+        describe('no-console', function() {
+    	    var RULE_ID = "no-console";
+    		it("should flag console use in browser env", function() {
+    			var topic = "/*eslint-env browser */ console.log('flag me')";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of console in browser-based code.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		it("should not flag console use in node env", function() {
+    			var topic = "/*eslint-env node */ console.log('flag me')";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag console use no env", function() {
+    			var topic = "console.log('flag me')";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    	});
 //NO-DEBUGGER --------------------------------------------
     	describe('no-debugger', function() {
     	    var RULE_ID = "no-debugger";

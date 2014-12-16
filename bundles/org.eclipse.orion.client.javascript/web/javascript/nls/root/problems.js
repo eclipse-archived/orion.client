@@ -21,6 +21,7 @@ define({
 		'no-caller': '\'arguments.${0}\' is deprecated.', //$NON-NLS-0$  //$NON-NLS-1$
 		'no-comma-dangle': 'Trailing commas in object expressions are discouraged.',  //$NON-NLS-0$ //$NON-NLS-1$
 		'no-cond-assign': 'Expected a conditional expression and instead saw an assignment.',  //$NON-NLS-0$ //$NON-NLS-1$
+		'no-console': 'Discouraged use of console in browser-based code.', //$NON-NLS-0$ //$NON-NLS-1$
 		'no-debugger': '\'debugger\' statement use is discouraged.',  //$NON-NLS-0$  //$NON-NLS-1$
 		'no-dupe-keys' : 'Duplicate object key \'${0}\'.', //$NON-NLS-0$  //$NON-NLS-1$
 		'no-empty-block' : 'Empty block should be removed or commented.',  //$NON-NLS-0$ //$NON-NLS-1$

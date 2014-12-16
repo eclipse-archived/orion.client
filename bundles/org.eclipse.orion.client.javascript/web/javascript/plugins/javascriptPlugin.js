@@ -408,6 +408,31 @@ define([
 				 	        	                	defaultValue: warning, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
+				 	        	                {	id: "validate_eqeqeq",  //$NON-NLS-0$
+				 	        	                	nameKey: 'noEqeqeq',  //$NON-NLS-0$
+				 	        	                	type: "number",  //$NON-NLS-0$
+				 	        	                	defaultValue: warning,
+				 	        	                	options: severities
+				 	        	                },
+				 	        	                {
+				 	        	                	id: "validate_no_console", //$NON-NLS-0$
+				 	        	                	nameKey: "noConsole", //$NON-NLS-0$
+				 	        	                	type: "number", //$NON-NLS-0$
+				 	        	                	defaultValue: error, //$NON-NLS-0$
+				 	        	                	options: severities //$NON-NLS-0$
+				 	        	                },
+				 	        	                {	id: "validate_debugger",  //$NON-NLS-0$
+				 	        	                	nameKey: 'noDebugger',  //$NON-NLS-0$
+				 	        	                	type: "number",  //$NON-NLS-0$
+				 	        	                	defaultValue: warning,
+				 	        	                	options: severities
+				 	        	                },
+				 	        	                {	id: "validate_eval",  //$NON-NLS-0$
+				 	        	                	nameKey: 'noEval',  //$NON-NLS-0$
+				 	        	                	type: "number",  //$NON-NLS-0$
+				 	        	                	defaultValue: ignore,
+				 	        	                	options: severities
+				 	        	                },
 				 	        	                {
 				 	        	                	id: "no-new-array", //$NON-NLS-0$
 				 	        	                	nameKey: "noNewArray", //$NON-NLS-0$
@@ -435,24 +460,6 @@ define([
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: warning, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
-				 	        	                },
-				 	        	                {	id: "validate_eqeqeq",  //$NON-NLS-0$
-				 	        	                	nameKey: 'noEqeqeq',  //$NON-NLS-0$
-				 	        	                	type: "number",  //$NON-NLS-0$
-				 	        	                	defaultValue: warning,
-				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "validate_debugger",  //$NON-NLS-0$
-				 	        	                	nameKey: 'noDebugger',  //$NON-NLS-0$
-				 	        	                	type: "number",  //$NON-NLS-0$
-				 	        	                	defaultValue: warning,
-				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "validate_eval",  //$NON-NLS-0$
-				 	        	                	nameKey: 'noEval',  //$NON-NLS-0$
-				 	        	                	type: "number",  //$NON-NLS-0$
-				 	        	                	defaultValue: ignore,
-				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "validate_dupe_obj_keys",  //$NON-NLS-0$
 				 	        	                	nameKey: 'noDupeKeys',  //$NON-NLS-0$

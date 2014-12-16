@@ -287,6 +287,21 @@ define([
                 };
             }
         },
+        "no-console": {
+            description: 'Disallow the use of \'console\' in browser-run code',
+            rule: function(context) {
+                return {
+                    'MemberExpression': function(node) {
+                        if(node.object.name === 'console') {
+                            //are we using the browser env?
+                            if(context.settings && context.settings.env['browser']) {
+                                context.report(node.object, 'Discouraged use of console in browser-based code.');
+                            }
+                        }
+                    }
+                };
+            }
+        },
 		"no-debugger" : {
 		    description: 'Disallow use of the debugger keyword',
 		    rule: function(context) {

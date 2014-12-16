@@ -1740,7 +1740,7 @@ define([
 		 */
 		it('test_findESlintEnvForMember1', function() {
 			var env = Finder.findESLintEnvForMember('console');
-			assert.equal(env, 'node', "Should have found the node env");
+			assert.equal(env, 'browser', "Should have found the browser env");
 		});
 		
 		/**

@@ -549,7 +549,7 @@ module.exports = (function() {
 
                 if (ruleCreator) {
                     try {
-                        rule = ruleCreator(new RuleContext(key, api, severity, options, config.settings));
+                        rule = ruleCreator(new RuleContext(key, api, severity, options, config)); // ORION
 
                         // add all the node types as listeners
                         Object.keys(rule).forEach(function(nodeType) {

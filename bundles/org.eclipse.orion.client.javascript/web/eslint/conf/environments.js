@@ -77,6 +77,7 @@ module.exports = {
             "clearTimeout": false,
             "close": false,
             "closed": false,
+            "console": false,
             "crypto": false,
             "DataView": false,
             "defaultStatus": false,

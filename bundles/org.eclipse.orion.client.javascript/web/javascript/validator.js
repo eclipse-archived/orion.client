@@ -27,6 +27,7 @@ define([
 			"no-caller": 1, //$NON-NLS-0$
 			"no-cond-assign": 2, //$NON-NLS-0$
 			"no-comma-dangle": 0,  //$NON-NLS-0$
+			"no-console": 2,  //$NON-NLS-0$
 			"no-debugger" : 1, //$NON-NLS-0$
 			"no-dupe-keys" : 2, //$NON-NLS-0$
 			"no-eval" : 0, //$NON-NLS-0$
@@ -348,6 +349,7 @@ define([
 			config.setOption("no-caller", properties.validate_no_caller); //$NON-NLS-0$
 			config.setOption("no-cond-assign", properties.validate_no_cond_assign); //$NON-NLS-0$
 			config.setOption("no-comma-dangle", properties.validate_no_comma_dangle); //$NON-NLS-0$
+			config.setOption("no-console", properties.validate_no_console); //$NON-NLS-0$
 			config.setOption("no-debugger", properties.validate_debugger); //$NON-NLS-0$
 			config.setOption("no-dupe-keys", properties.validate_dupe_obj_keys); //$NON-NLS-0$
 			config.setOption("no-eval", properties.validate_eval); //$NON-NLS-0$
