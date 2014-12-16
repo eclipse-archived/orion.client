@@ -765,7 +765,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			name: messages["deleteLaunchConfiguration"],
 			tooltip: messages["deleteLaunchConfiguration"],
 			id: "orion.launchConfiguration.delete",
-			imageClass: "core-sprite-delete",
+			imageClass: "core-sprite-trashcan",
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
 				fileClient.loadWorkspace(item.project.ContentLocation).then(function(){

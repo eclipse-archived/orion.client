@@ -64,11 +64,11 @@ define([
 				this._statusLight.classList.add("statusLight"); //$NON-NLS-0$
 				
 				this._playButton = lib.$("button.playButton", this._domNode); //$NON-NLS-0$
-				this._boundPlayButtonListener = this._playButtonListener.bind(this);
+				this._boundPlayButtonListener = this._runBarButtonListener.bind(this, "orion.launchConfiguration.deploy"); //$NON-NLS-0$
 				this._playButton.addEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$ 
 				
 				this._stopButton = lib.$("button.stopButton", this._domNode); //$NON-NLS-0$
-				this._boundStopButtonListener = this._stopButtonListener.bind(this);
+				this._boundStopButtonListener = this._runBarButtonListener.bind(this, "orion.launchConfiguration.stopApp"); //$NON-NLS-0$
 				this._stopButton.addEventListener("click", this._boundStopButtonListener); //$NON-NLS-0$
 				
 				// set button tooltips
@@ -76,7 +76,6 @@ define([
 				if (playCommand.tooltip) {
 					this._setNodeTooltip(this._playButton, playCommand.tooltip);
 				}
-				
 				var stopCommand = this._commandRegistry.findCommand("orion.launchConfiguration.stopApp"); //$NON-NLS-0$
 				if (stopCommand.tooltip) {
 					this._setNodeTooltip(this._stopButton, stopCommand.tooltip);
@@ -202,7 +201,7 @@ define([
 		_launchConfigurationListener: function(event) {
 			var newConfig = event.newValue;
 			
-			if(event.type === "changeState" && newConfig){ //$NON-NLS-0$			
+			if((event.type === "changeState") && newConfig){ //$NON-NLS-0$			
 				// update status if selected launch config was modified
 				var cachedHash = this._getHash(newConfig);
 				var selectedHash = this._getHash(this._selectedLaunchConfiguration);
@@ -392,22 +391,17 @@ define([
 			var hash = this._getHash(launchConfiguration);
 			delete this._cachedLaunchConfigurations[hash];
 		},
-
-		_playButtonListener: function(event) {
-			if (this._isEnabled(this._playButton)) {
-				mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + ".playButton.clicked", event.which); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				this._commandRegistry.runCommand("orion.launchConfiguration.deploy", this._selectedLaunchConfiguration, this, null, null, this._playButton); //$NON-NLS-0$
-			} else {
-				mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + ".playButton.clickedWhileDisabled", event.which); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			}
-		},
 		
-		_stopButtonListener: function(event) {
-			if (this._isEnabled(this._stopButton)) {
-				mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + ".stopButton.clicked", event.which); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				this._commandRegistry.runCommand("orion.launchConfiguration.stopApp", this._selectedLaunchConfiguration, this, null, null, this._stopButton); //$NON-NLS-0$
-			} else {
-				mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + ".stopButton.clickedWhileDisabled", event.which); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		_runBarButtonListener: function(commandId, event) {
+			var buttonNode = event.target;
+			var id = buttonNode.id;
+			var isEnabled = this._isEnabled(buttonNode);
+			var disabled = isEnabled ? "" : ".disabled"; //$NON-NLS-1$ //$NON-NLS-0$
+			
+			mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + "." + id +".clicked" + disabled, event.which); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+			if (isEnabled) {
+				this._commandRegistry.runCommand(commandId, this._selectedLaunchConfiguration, this, null, null, buttonNode); //$NON-NLS-0$
 			}
 		},
 		
@@ -440,7 +434,7 @@ define([
 				node: domNode,
 				text: text,
 				trigger: "mouseover", //$NON-NLS-0$
-				position: ["below", "right", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			});
 		}
 	});
