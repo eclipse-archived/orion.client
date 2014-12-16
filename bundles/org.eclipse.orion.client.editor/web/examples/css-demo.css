@@ -1,0 +1,22 @@
+@import "../css/test.css";
+
+#identity {
+    background: white;
+    color: #222;
+    border: solid 1px #999;
+    border-radius: 2px;
+    font-size: 0.9em;
+    padding: 1px;
+}
+
+.className {
+	background: papayawhip;
+}
+
+.className *{
+	border: 1px solid black;
+}
+
+.className > .right{
+	text-align: right;
+}

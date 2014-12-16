@@ -31,12 +31,13 @@ define([
 	'orion/widgets/settings/UserSettings',
 	'orion/widgets/settings/GitSettings',
 	'orion/widgets/settings/EditorSettings',
+	'orion/widgets/settings/ThemeSettings',
 	'orion/editorPreferences',
 	'orion/metrics'
 ], function(messages, Deferred, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
 		ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings,
 		GitSettings,
-		EditorSettings, mEditorPreferences,
+		EditorSettings, ThemeSettings, mEditorPreferences,
 		mMetrics) {
 
 	/**
@@ -81,6 +82,14 @@ define([
 						textContent: messages.Git,
 						show: _self.showGitSettings
 					});
+				}
+				
+				if (categories.showThemeSettings === undefined || categories.showThemeSettings){
+					_self.settingsCategories.push({
+						id: "themeSettings", //$NON-NLS-0$
+						textContent: messages.Theme,
+						show: _self.showThemeSettings
+					})
 				}
 				
 				if (categories.showEditorSettings === undefined || categories.showEditorSettings) {
@@ -180,18 +189,12 @@ define([
 			var editorTheme = new editorThemeData.ThemeData();
 			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, editorTheme);
 			
-			var editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme, toolbarId: 'editorThemeSettingsToolActionsArea', serviceRegistry: this.registry}); //$NON-NLS-0$
-				
-			var command = { name:messages.Import, tip:messages['Import a theme'], id:0, callback: editorTheme.importTheme.bind(editorTheme) };
-			editorThemeWidget.addAdditionalCommand( command );
-
 			var editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences);
 			
 			this.editorSettings = new EditorSettings({
 				registry: this.registry,
 				preferences: editorPreferences,
 				themePreferences: themePreferences,
-				editorThemeWidget: editorThemeWidget,
 				statusService: this.preferencesStatusService,
 				dialogService: this.preferenceDialogService,
 				commandService: this.commandService,
@@ -255,6 +258,40 @@ define([
 			}, userNode);
 			
 			this.gitWidget.show();
+		},
+		
+		showThemeSettings: function(id){ // INSOO
+			this.selectCategory(id);
+
+			lib.empty(this.table);
+		
+			this.updateToolbar(id);
+
+			var themeSettingsNode = document.createElement('div'); //$NON-NLS-0$
+			this.table.appendChild(themeSettingsNode);
+
+			var editorTheme = new editorThemeData.ThemeData();
+			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, editorTheme);
+			
+			var editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme, toolbarId: 'editorThemeSettingsToolActionsArea', serviceRegistry: this.registry}); //$NON-NLS-0$
+				
+			var command = { name:messages.Import, tip:messages['Import a theme'], id:0, callback: editorTheme.importTheme.bind(editorTheme) };
+			editorThemeWidget.addAdditionalCommand( command );
+
+			var editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences);
+			
+			this.themeSettings = new ThemeSettings({
+				registry: this.registry,
+				preferences: editorPreferences,
+				themePreferences: themePreferences,
+				editorThemeWidget: editorThemeWidget,
+				statusService: this.preferencesStatusService,
+				dialogService: this.preferenceDialogService,
+				commandService: this.commandService,
+				userClient: this.userClient
+			}, themeSettingsNode);
+			
+			this.themeSettings.show();
 		},
 		
 		initPlugins: function(id){
@@ -358,7 +395,7 @@ define([
 					return true;
 				}
 			});
-
+			
 			if (!isDefaultCategory) {
 				this.selectCategory(id);
 			}
@@ -381,13 +418,9 @@ define([
 		},
 
 		drawUserInterface: function(settings) {
-
 			superPrototype.drawUserInterface.apply(this, arguments);
-
 			this.addCategories();
-
 			this.processHash();
-
 		},
 		
 		handleError: function( error ){

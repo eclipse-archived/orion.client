@@ -4,6 +4,7 @@
 @import "../css/images.css";
 @import "./services.css";
 @import "../css/theme.css";
+@import "../../../orion/editor/editor.css";
 
 #pluginUrlEntry {
 	background: white;
@@ -55,7 +56,7 @@
 }
 
 .navbar-item {
-	border-bottom: 1px solid #dadada;
+	border-bottom: 1px solid #eee;
 	color: gray;
 	display: block;
 	font-size: 8pt;
@@ -571,4 +572,147 @@ div.page section:last-child {
 	border-bottom-left-radius: 3px;
 	border-bottom-right-radius: 3px;
 	overflow-y: auto;
+}
+
+#editorThemeSettingsContent{
+	height: 100%;
+}
+
+.themeController {
+    width: 300px;
+    height: 100%;
+    float: left;
+}
+
+.themeDisplayEditor {  
+    width: 100%;
+    height: calc(100% - 39px);  
+    position: absolute;
+}
+
+.colorpicker-input {
+    padding: 0;
+    margin: 0;
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    border: 0;
+    float: right;
+    background: none;
+    position:relative;
+    outline: none;
+    top: 0px;
+}
+
+_:-moz-tree-row(hover), .colorpicker-input { /* Firefox  HACK */
+		width:19px;
+		height: 14px;
+}
+
+@media screen and (min-color-index:0) and(-webkit-min-device-pixel-ratio:0) { @media /* SAFARI 6.1 + HACK */
+{
+	.colorpicker-input { 
+		width:60px;
+	}
+	input.colorpicker-input[type=color]{
+		text-transform:lowercase;
+	}
+}}
+
+.scopeList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    height: calc(100% - 76px);
+    width: 299px;
+    position: absolute;
+    overflow-y: auto;
+    border-right: 1px solid #dadada;
+}
+
+.scopeList li{
+    padding:10px 15px;
+    border-bottom: 1px dotted #EFEFEF;
+    color: gray;
+}
+
+.scopeListHeader, .editorSectionHeader {
+    padding: 10px 15px;  
+    border-bottom: 1px solid #dadada;  
+    border-right: 1px solid #dadada;
+    font-weight: bold;
+}
+
+.editorSectionHeader{
+	border-right:none;
+}
+
+.editorSection {
+    margin-left: 300px;
+    height: calc(100% - 37px);
+    position: absolute;
+    width: calc(100% - 300px);
+}
+
+.scopeList li.modified::after {
+    content: "*";
+    color: red;
+}
+
+#editorTheme, #editorThemeName, #editorLanguage {
+	width: 104px;
+	margin: 0;
+	border: 1px solid #bbb;
+	font-size: 12px;
+}
+
+#editorThemeName{
+	padding: 1px 3px;
+}
+
+.hide{
+	display:none;
+}
+
+#editorThemeDelete, #editorThemeRevert, #editorThemeSave {
+    float: right;
+}
+
+.editorThemeCleanButton{
+	padding:0;
+	border:none;
+	background:none;
+	outline:none;
+}
+
+.editorThemeButton {
+    color: gray;  
+    padding: 0;  
+    font-size: 14px;
+}
+
+.editorThemeButton:hover {
+    cursor: pointer;
+    color: #333;
+}
+
+.git-sprite-revert:before{
+	font-family: 'Orion Icon Font';
+	content: '\E021';
+}
+
+#editorThemeRevert {
+    margin-right: 10px;
+}
+
+input[type=color]::-webkit-color-swatch-wrapper
+{ 
+    padding:0;
+    margin:0;
+}
+
+input[type=color]::-webkit-color-swatch
+{ 
+    border-radius: 10px;
+    border: 1px solid whitesmoke;
 }
