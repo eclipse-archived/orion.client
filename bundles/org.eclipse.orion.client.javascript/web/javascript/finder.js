@@ -88,6 +88,9 @@ define([
 					this.checkId(node.left);
 					this.checkId(node.right);
 					break;
+				case Estraverse.Syntax.ExpressionStatement:
+					this.checkId(node.expression);
+					break;
 				case Estraverse.Syntax.ArrayExpression: 
 					if (node.elements) {
 						len = node.elements.length;
