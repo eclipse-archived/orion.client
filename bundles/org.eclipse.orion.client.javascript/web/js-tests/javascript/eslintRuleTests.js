@@ -2287,6 +2287,112 @@ define([
     			assert.equal(messages.length, 0);
     		});
     	});
+//NO-REGEX-SPACES --------------------------------------------------
+        describe('no-regex-spaces', function() {
+            var RULE_ID = "no-regex-spaces";
+            it("should flag more than one space in regex literal", function() {
+                var topic = "var regex = /   .*/g;";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, "Avoid multiple spaces in regular expressions. Use ' {3}' instead.");
+                assert.equal(messages[0].node.type, "Literal");
+            });
+            it("should flag more than one group of more than one space in regex literal", function() {
+                var topic = "var regex = /   .*  /g;";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 2);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, "Avoid multiple spaces in regular expressions. Use ' {3}' instead.");
+                assert.equal(messages[0].node.type, "Literal");
+            });
+            it("should flag more than one space in RegExp new expression literal", function() {
+                var topic = "var regex = new RegExp(\"   .*\");";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 1);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, "Avoid multiple spaces in regular expressions. Use ' {3}' instead.");
+                assert.equal(messages[0].node.type, "Literal");
+            });
+            it("should flag more than one group of more than one space in RegExp new expression literal", function() {
+                var topic = "var regex = new RegExp(\"   .*  \");";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 2);
+                assert.equal(messages[0].ruleId, RULE_ID);
+                assert.equal(messages[0].message, "Avoid multiple spaces in regular expressions. Use ' {3}' instead.");
+                assert.equal(messages[0].node.type, "Literal");
+            });
+            it("should not flag one space in regex literal", function() {
+                var topic = "var regex = / .*/g;";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 0);
+            });
+            it("should not flag more than one group of one space in regex literal", function() {
+                var topic = "var regex = / .* /g;";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 0);
+            });
+            it("should not flag one space in regex literal using brace notation", function() {
+                var topic = "var regex = / {3}.*/g;";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 0);
+            });
+            it("should not flag one space in RegExp new expression literal", function() {
+                var topic = "var regex = new RegExp(\" .*\");";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 0);
+            });
+            it("should not flag more than one group of one space in RegExp new expression literal", function() {
+                var topic = "var regex = new RegExp(\" .* \");";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 0);
+            });
+            it("should not flag one space in RegExp new expression literal using brace notation", function() {
+                var topic = "var regex = new RegExp(\" {3}.*\");";
+    
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+    
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 0);
+            });
+        });
 //NO-RESERVED-KEYS -------------------------------------------------
         describe('no-reserved-keys', function() {
             var RULE_ID = "no-reserved-keys";

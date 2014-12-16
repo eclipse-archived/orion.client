@@ -485,12 +485,6 @@ define([
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_use_isnan",  //$NON-NLS-0$
-				 	        	                	nameKey: 'useIsNaN',  //$NON-NLS-0$
-				 	        	                	type: "number",  //$NON-NLS-0$
-				 	        	                	defaultValue: error,
-				 	        	                	options: severities
-				 	        	                },
 				 	        	                {	id: "validate_radix",  //$NON-NLS-0$
 				 	        	                	nameKey: 'radix',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
@@ -501,6 +495,18 @@ define([
 				 	        	                	nameKey: 'missingSemi',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
+				 	        	                	options: severities
+				 	        	                },
+				 	        	                {	id: "validate_no_regex_spaces", //$NON-NLS-0$
+				 	        	                	nameKey: "noRegexSpaces", //$NON-NLS-0$
+				 	        	                	type: "number", //$NON-NLS-0$
+				 	        	                	defaultValue: error, //$NON-NLS-0$
+				 	        	                	options: severities //$NON-NLS-0$
+				 	        	                },
+				 	        	                {	id: "validate_use_isnan",  //$NON-NLS-0$
+				 	        	                	nameKey: 'useIsNaN',  //$NON-NLS-0$
+				 	        	                	type: "number",  //$NON-NLS-0$
+				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "validate_throw_error",  //$NON-NLS-0$

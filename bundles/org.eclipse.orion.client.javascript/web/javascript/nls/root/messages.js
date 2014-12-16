@@ -21,6 +21,7 @@ define({//Default message bundle
 	'noCommaDangle' : 'Trailing commas in object expressions:', //$NON-NLS-0$  //$NON-NLS-1$
     'noCondAssign' : 'Assignments in conditional expressions:', //$NON-NLS-0$  //$NON-NLS-1$
     'noConsole' : 'Discouraged console use in browser code:', //$NON-NLS-0$  //$NON-NLS-1$
+    'noRegexSpaces' : 'Multiple spaces in regular expressions:', //$NON-NLS-0$  //$NON-NLS-1$
     'noReservedKeys' : 'Reserved words used as property keys:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noEqeqeq' : 'Discouraged \'==\' use:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noDebugger' : 'Discouraged \'debugger\' statement use:', //$NON-NLS-0$  //$NON-NLS-1$

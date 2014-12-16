@@ -607,6 +607,36 @@ define([
                 };
         	}
         },
+        "no-regex-spaces": {
+            description: "Warn when multiple spaces are used in regular expressions",
+            rule: function(context) {
+                
+                function reportSpaces(node) {
+                    var regex = /( {2,})/g;
+                    var val = null;
+                    while((val = regex.exec(node.raw)) != null) {
+                        var start = node.range[0]+val.index;
+                        var len = val[0].length;
+                        context.report({type: 'Literal', range:[start, start+len], loc: node.loc}, 
+                                        'Avoid multiple spaces in regular expressions. Use \' {${0}}\' instead.', {0:len});
+                    }
+                }
+                
+                return {
+                    'Literal': function(node) {
+                        if(node.parent && node.parent.type === 'NewExpression') {
+                            if(node.parent.callee.name === 'RegExp') {
+                                reportSpaces(node);
+                            }
+                        }
+                        var tok = context.getFirstToken(node);
+                        if(tok && tok.type === 'RegularExpression') {
+                            reportSpaces(node);
+                        }
+                    }  
+                };
+            }
+        },
         "no-reserved-keys": {
             description: "Warn when a reserved word is used as a property key",
             rule: function(context) {
