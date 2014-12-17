@@ -192,24 +192,36 @@ define([
 			this._launchConfigurationEventTypes.forEach(function(eventType) {
 				this._launchConfigurationDispatcher.removeEventListener(eventType, this._boundLaunchConfigurationListener);
 			}, this);
-			this._playButton.removeEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$
-			this._stopButton.removeEventListener("click", this._boundStopButtonListener); //$NON-NLS-0$
-			if (this._playButton.tooltip) {
-				this._playButton.tooltip.destroy();
-				this._playButton.tooltip = null;
+			
+			if (this._playButton) {
+				this._playButton.removeEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$
+				if (this._playButton.tooltip) {
+					this._playButton.tooltip.destroy();
+					this._playButton.tooltip = null;
+				}
+				this._playButton = null;
 			}
-			if (this._stopButton.tooltip) {
-				this._stopButton.tooltip.destroy();
-				this._stopButton.tooltip = null;
+			
+			if (this._stopButton) {
+				this._stopButton.removeEventListener("click", this._boundStopButtonListener); //$NON-NLS-0$
+				if (this._stopButton.tooltip) {
+					this._stopButton.tooltip.destroy();
+					this._stopButton.tooltip = null;
+				}
+				this._stopButton = null;
 			}
+			
 			if (this._launchConfigurationsDropdown) {
 				var triggerButton = this._launchConfigurationsDropdown.getDropdownTriggerButton();
 				if (triggerButton && this._boundTriggerButtonEventListener) {
 					triggerButton.removeEventListener("click", this._boundTriggerButtonEventListener); //$NON-NLS-0$
 				}
+				this._launchConfigurationsDropdown.destroy();
+				this._launchConfigurationsDropdown = null;
 			}
 			if (this._appLink) {
 				this._appLink.removeEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
+				this._appLink = null;
 			}
 		},
 		
@@ -230,7 +242,7 @@ define([
 			} else {
 				this._menuItemsCache = []; // clear launch configurations menu items cache
 				
-				if(event.type === "create" && newConfig){ //$NON-NLS-0$
+				if((event.type === "create") && newConfig){ //$NON-NLS-0$
 					// cache and select new launch config
 					this._putInLaunchConfigurationsCache(newConfig);
 					this.selectLaunchConfiguration(newConfig, true); //check the status of newly created configs
@@ -268,7 +280,9 @@ define([
 			this._disableLink(this._appLink);
 			
 			if (launchConfiguration) {
-				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(launchConfiguration.Name, this._statusLight);
+				var displayName = launchConfiguration.Params.Name + messages["displayNameSeparator"] + launchConfiguration.Params.Target.Space; //$NON-NLS-0$
+				
+				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(displayName, this._statusLight, launchConfiguration.Name);
 				this._selectedLaunchConfiguration = launchConfiguration;
 				
 				if (launchConfiguration.Url) {
@@ -304,7 +318,8 @@ define([
 					this._progressService.progress(service.getState(launchConfiguration), progressMessage).then(function(result){
 						launchConfiguration.status = result;
 						this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
-					}.bind(this), function(error){
+					}.bind(this), 
+					function(error){
 						launchConfiguration.status = {error: error};
 						if (error.Retry) {
 							// authentication error, gather required parameters and try again
@@ -316,7 +331,7 @@ define([
 						} else {
 							this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
 						}
-					}.bind(this), function(error){}, function(progress){});
+					}.bind(this));
 				}
 			}.bind(this));
 		},

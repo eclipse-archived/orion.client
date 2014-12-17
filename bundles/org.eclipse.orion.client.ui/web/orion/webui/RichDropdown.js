@@ -20,9 +20,6 @@ define([
 	/**
 	 * Creates a generic RichDropdown which can be appended to any dom node.
 	 * 
-	 * This RichDropdown is designed to have interchangeable content. Content
-	 * providers should extend the @ref orion.webui.RichDropdownViewMode class.
-	 * 
 	 * @param {DOMNode} options.parentNode The DOM node which this rich dropdown will be appended to
 	 * @param {Function} options.populateFunction The function which will populate the dropdown when it is opened (see @ref orion.webui.dropdown)	 
 	 * @param {String} options.buttonName Optional. A string to display on the dropdown trigger button.
@@ -42,16 +39,16 @@ define([
 		_initialize: function() {
 			var wrapperNode = lib.createNodes(RichDropdownTemplate);
 			
-			this._dropdownTriggerButton = lib.$("button.dropdownTrigger", wrapperNode);
-			this._dropdownTriggerButtonLabel = lib.$(".dropdownTriggerButtonLabel", this._dropdownTriggerButton);
+			this._dropdownTriggerButton = lib.$("button.dropdownTrigger", wrapperNode); //$NON-NLS-0$
+			this._dropdownTriggerButtonLabel = lib.$(".dropdownTriggerButtonLabel", this._dropdownTriggerButton); //$NON-NLS-0$
 			
-			this._dropdownNode = lib.$("ul.dropdownMenu", wrapperNode);
+			this._dropdownNode = lib.$("ul.dropdownMenu", wrapperNode); //$NON-NLS-0$
 			
 			if (this._buttonName) {
 				this.setDropdownTriggerButtonName(this._buttonName, this._buttonDecorator);
 			}
 			
-			var dropdownArrow = lib.$(".dropdownArrowDown", this._dropdownTriggerButton);
+			var dropdownArrow = lib.$(".dropdownArrowDown", this._dropdownTriggerButton); //$NON-NLS-0$
 			if (this._noDropdownArrow) {
 				this._dropdownTriggerButton.removeChild(dropdownArrow);
 			} else {
@@ -75,8 +72,10 @@ define([
 		 * Sets the text label displayed in this dropdown's trigger button
 		 * @param {String} name The string to display on the dropdown trigger button.
 		 * @param {DOMNode} decorator Optional. A dom node which will be placed in front of the button name.
+		 * @param {String} title Optional. A string to display as the dropdown trigger button's title.
 		 */
-		setDropdownTriggerButtonName: function(name, decorator) {
+		setDropdownTriggerButtonName: function(name, decorator, title) {
+			var titleText = title || ""; //$NON-NLS-0$
 			lib.empty(this._dropdownTriggerButtonLabel);
 			
 			if (decorator) {
@@ -86,7 +85,7 @@ define([
 			var nameNode = document.createTextNode(name);
 			this._dropdownTriggerButtonLabel.appendChild(nameNode);
 			
-			this._dropdownTriggerButton.title = name;
+			this._dropdownTriggerButton.title = titleText;
 		},
 		
 		/**
@@ -94,6 +93,19 @@ define([
 		 */
 		getDropdown: function() {
 			return this._dropdownTriggerButton.dropdown;
+		},
+		
+		/**
+		 * Destroys this dropdown and cleans up its resources.
+		 */
+		destroy: function() {
+			if (this._dropdownTriggerButton) {
+				if (this._dropdownTriggerButton.dropdown) {
+					this._dropdownTriggerButton.dropdown.destroy();
+					this._dropdownTriggerButton.dropdown = null;
+				}
+				this._dropdownTriggerButton = null;
+			}
 		}
 	});
 	
