@@ -57,6 +57,21 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 		return d;
 	}
 
+	/**
+	 * Wrapper for #describe() that calls describe.skip() during an integration build.
+	 */
+	var isBuild = location.hash.indexOf("env=integration") !== -1;
+	function describe_maybe(/*args..*/) {
+		return isBuild ? describe.skip.apply(describe, arguments) : describe.apply(null, arguments);
+	}
+
+	/**
+	 * Wrapper for #it() that calls it.skip() during an integration build.
+	 */
+	function it_maybe(/*args..*/) {
+		return isBuild ? it.skip.apply(it, arguments) : it.apply(null, arguments);
+	}
+
 	describe("Performance Tests", function() {
 		// These are heavy duty tests -- use a long timeout for each test.
 		this.timeout(30000);
@@ -103,7 +118,8 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 
 		describe("Line", function() {
 			var count = 300;
-			it("LineDown", function() {
+			// Skip LineDown during integration builds since it sometimes takes > 30 seconds in IE. Sad but true
+			it_maybe("LineDown", function() {
 				return doAction("lineDown", count);
 			});
 			it("SelectLineDown", function() {
@@ -117,11 +133,8 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 			});
 		});
 
-		// Put the slowest tests in their own category. This category is skipped during the nightly build since
-		// it's prone to timeouts in virtualized environments
-		var isBuild = location.hash.indexOf("env=integration") !== -1;
-		var describeOrSkip = isBuild ? describe.skip.bind(describe) : describe;
-		describeOrSkip("intense tests", function() {
+		// This category is skipped during the nightly build since it's prone to timeouts in virtualized environments.
+		describe_maybe("intense tests", function() {
 			it("CaretUpDown", function() {
 				var d = new Deferred();
 				var buffer = "", i;
