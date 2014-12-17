@@ -1769,7 +1769,7 @@ var exports = {};
 				deferred = progress.progress(serviceRegistry.getService("orion.git.provider").unstage(items[0].indexURI, items[0].name), messages['Unstaging changes']); //$NON-NLS-0$
 				progressService.createProgressMonitor(
 					deferred, //$NON-NLS-0$
-					messages['Staging changes']);
+					messages['Unstaging changes']);
 			} else {
 				var paths = [];
 				for (var i = 0; i < items.length; i++) {
@@ -1779,7 +1779,7 @@ var exports = {};
 				deferred = progress.progress(serviceRegistry.getService("orion.git.provider").unstage(data.userData.Clone.IndexLocation, paths), messages['Unstaging changes']); //$NON-NLS-0$
 				progressService.createProgressMonitor(
 					deferred,
-					messages['Staging changes']);
+					messages['Unstaging changes']);
 			}
 			return deferred.then(function() {return items;});
 		};
