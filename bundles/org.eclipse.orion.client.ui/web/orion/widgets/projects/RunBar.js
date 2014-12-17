@@ -77,11 +77,6 @@ define([
 					this._setNodeTooltip(this._stopButton, stopCommand.tooltip);
 				}
 				
-				this._launchConfigurationsWrapper = lib.$(".launchConfigurationsWrapper", this._domNode); //$NON-NLS-0$
-				
-				this._statusLight = document.createElement("span"); //$NON-NLS-0$
-				this._statusLight.classList.add("statusLight"); //$NON-NLS-0$
-				
 				this._launchConfigurationDispatcher = this._projectCommands.getLaunchConfigurationDispatcher();
 				this._launchConfigurationEventTypes = ["create", "delete", "changeState", "deleteAll"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				this._boundLaunchConfigurationListener = this._launchConfigurationListener.bind(this);
@@ -91,11 +86,8 @@ define([
 				
 				this._createLaunchConfigurationsDropdown();
 				
-				//app info and link
+				//app link
 				this._boundLinkClickListener = this._linkClickListener.bind(this);
-				
-				this._appInfoWrapper = lib.$(".appInfoWrapper", this._domNode); //$NON-NLS-0$
-				this._appInfoSpan = lib.$(".appInfoSpan", this._domNode); //$NON-NLS-0$
 
 				this._appLink = lib.$(".appLink", this._domNode); //$NON-NLS-0$
 				this._appLink.addEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
@@ -107,6 +99,7 @@ define([
 		},
 		
 		_createLaunchConfigurationsDropdown: function() {
+			this._launchConfigurationsWrapper = lib.$(".launchConfigurationsWrapper", this._domNode); //$NON-NLS-0$
 			this._cachedLaunchConfigurations = {};
 			
 			var separator;
@@ -177,6 +170,14 @@ define([
 				populateFunction: populateFunction
 			});
 			this._disableControl(this._launchConfigurationsWrapper); // start with control greyed out until launch configs are set
+			
+			this._launchConfigurationsLabel = lib.$(".dropdownTriggerButtonLabel", this._launchConfigurationsWrapper); //$NON-NLS-0$
+			this._appName = lib.$(".appName", this._launchConfigurationsLabel); //$NON-NLS-0$
+			this._statusLight = lib.$(".statusLight", this._launchConfigurationsLabel); //$NON-NLS-0$
+			this._appInfoSpan = lib.$(".appInfoSpan", this._launchConfigurationsLabel); //$NON-NLS-0$
+			
+			this._launchConfigurationsWrapper.removeChild(this._launchConfigurationsLabel);
+			this._launchConfigurationsDropdown.setCustomTriggerButtonLabelNode(this._launchConfigurationsLabel);
 			
 			var triggerButton = this._launchConfigurationsDropdown.getDropdownTriggerButton();
 			triggerButton.classList.remove("dropdownDefaultButton"); //$NON-NLS-0$
@@ -280,10 +281,8 @@ define([
 			this._disableLink(this._appLink);
 			
 			if (launchConfiguration) {
-				var displayName = launchConfiguration.Params.Name + messages["displayNameSeparator"] + launchConfiguration.Params.Target.Space; //$NON-NLS-0$
-				
-				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(displayName, this._statusLight, launchConfiguration.Name);
 				this._selectedLaunchConfiguration = launchConfiguration;
+				this._setLaunchConfigurationsLabel(launchConfiguration);
 				
 				if (launchConfiguration.Url) {
 					this._enableLink(this._appLink, launchConfiguration.Url);
@@ -298,8 +297,8 @@ define([
 					}
 				}
 			} else {
-				this._launchConfigurationsDropdown.setDropdownTriggerButtonName(messages["selectLaunchConfig"]); //$NON-NLS-0$
 				this._selectedLaunchConfiguration = null;
+				this._setLaunchConfigurationsLabel(null);
 				this.setStatus({State: "", Message: ""}); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
@@ -337,12 +336,14 @@ define([
 		},
 		
 		setStatus: function(status) {
+			var appInfoText = null;
+			
 			// turn status light off
 			this._statusLight.classList.remove("statusLightGreen"); //$NON-NLS-0$
 			this._statusLight.classList.remove("statusLightRed"); //$NON-NLS-0$
 			this._statusLight.classList.remove("statusLightProgress"); //$NON-NLS-0$
 			
-			this._setAppInfoText(null);
+			this._setText(this._appInfoSpan, null);
 			
 			this._disableAllControls();
 			
@@ -356,33 +357,39 @@ define([
 				}
 				
 				if (status.Message) {
-					this._setAppInfoText(status.Message);
+					appInfoText = status.Message;
 				} else {
-					this._setAppInfoText(messages["appInfoStopped"]); //$NON-NLS-0$
+					appInfoText = messages["appInfoStopped"]; //$NON-NLS-0$
 				}
 			} else {
 				switch (status.State) {
 					case "PROGRESS": //$NON-NLS-0$
 						this._statusLight.classList.add("statusLightProgress"); //$NON-NLS-0$
 						if (status.Message) {
-							this._setAppInfoText(status.Message);
+							appInfoText = status.Message;
 						}
 						break;
 					case "STARTED": //$NON-NLS-0$
 						this._enableControl(this._playButton);
 						this._enableControl(this._stopButton);
 						this._statusLight.classList.add("statusLightGreen"); //$NON-NLS-0$
-						this._setAppInfoText(messages["appInfoRunning"]); //$NON-NLS-0$
+						
+						appInfoText = messages["appInfoRunning"]; //$NON-NLS-0$
 						break;
 					case "STOPPED": //$NON-NLS-0$
 						this._enableControl(this._playButton);
 						this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
-						this._setAppInfoText(messages["appInfoStopped"]); //$NON-NLS-0$
+						
+						appInfoText = messages["appInfoStopped"]; //$NON-NLS-0$
 						break;
 					default:
 						break;
 				}
 				this._setStatusTitle(status.Message);
+			}
+			
+			if (appInfoText) {
+				this._setText(this._appInfoSpan, "(" + appInfoText + ")"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
 		
@@ -509,11 +516,27 @@ define([
 			});
 		},
 		
-		_setAppInfoText: function(text) {
-			lib.empty(this._appInfoSpan);
+		_setText: function(domNode, text) {
+			lib.empty(domNode);
 			if (text) {
 				var textNode = document.createTextNode(text);
-				this._appInfoSpan.appendChild(textNode);
+				domNode.appendChild(textNode);
+			}
+		},
+		
+		_setLaunchConfigurationsLabel: function(launchConfiguration) {
+			lib.empty(this._launchConfigurationsLabel);
+			if (launchConfiguration) {
+				var displayName = launchConfiguration.Params.Name + messages["displayNameSeparator"] + launchConfiguration.Params.Target.Space; //$NON-NLS-0$
+				this._setText(this._appName, displayName);
+				this._setText(this._appInfoSpan, null);
+				
+				this._launchConfigurationsLabel.appendChild(this._statusLight);
+				this._launchConfigurationsLabel.appendChild(this._appName);
+				this._launchConfigurationsLabel.appendChild(this._appInfoSpan);
+			} else {
+				this._launchConfigurationsLabel.appendChild(this._appName);
+				this._setText(this._appName, messages["selectLaunchConfig"]); //$NON-NLS-0$
 			}
 		}
 	});

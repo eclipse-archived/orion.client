@@ -89,6 +89,16 @@ define([
 		},
 		
 		/**
+		 * Replaces this dropdown's default trigger button label node with the one specified.
+		 * 
+		 * @param {DOMNode} labelNode A dom node which will replace the dropdownTriggerButtonLabel
+		 */
+		setCustomTriggerButtonLabelNode: function(labelNode) {
+			this._dropdownTriggerButton.replaceChild(labelNode, this._dropdownTriggerButtonLabel);
+			this._dropdownTriggerButtonLabel = labelNode;
+		},
+		
+		/**
 		 * @return {orion.webui.dropdown.Dropdown} This rich dropdown's generic dropdown javascript object
 		 */
 		getDropdown: function() {

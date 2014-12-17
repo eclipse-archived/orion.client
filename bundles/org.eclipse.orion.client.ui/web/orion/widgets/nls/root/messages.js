@@ -75,7 +75,7 @@ define({//Default message bundle
 	"Running": "Running",
 	"checkingStateMessage": "Checking status of ${0}",
 	"Status": "Status",
-	"appInfoStopped": "Application is stopped",
-	"appInfoRunning": "Application is running",
+	"appInfoStopped": "stopped",
+	"appInfoRunning": "running",
 	"displayNameSeparator": " on "
 });

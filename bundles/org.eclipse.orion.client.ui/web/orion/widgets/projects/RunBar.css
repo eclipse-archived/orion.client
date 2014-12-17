@@ -7,8 +7,6 @@
 	border-right: solid 1px #ccc;
 	display: -webkit-inline-flex;		 /* Safari */
 	display: inline-flex;
-	height: 33px;
-	margin: 1px 0;
 	overflow: hidden;
 	padding: 0 10px;
 }
@@ -27,16 +25,29 @@
 	background: white;
 	border-radius: 3px;
 	display: inline-block;
-	margin: 1px 0 0 10px;
-	min-height: 29px;
+	margin: 1px 10px 0 0;
+	min-height: 21px;
 	min-width: 270px;
 	transition: opacity 0.3s ease;
 }
 
 .launchConfigurationsWrapper > .launchConfigurationsButton.dropdownTrigger {
+	-webkit-align-items: center;		 		 /* Safari */
+	align-items: center;
+	display: -webkit-inline-flex;		 /* Safari */
+	display: inline-flex;
+	
 	background: white;
-	padding: 6px 2px 6px 6px;
+	border-radius: 5px;
+	padding: 2px 2px 2px 4px;
 	width: 270px;
+}
+
+.launchConfigurationsButton > .dropdownTriggerButtonLabel {
+	-webkit-align-items: center;		 		 /* Safari */
+	align-items: center;
+	display: -webkit-inline-flex;		 /* Safari */
+	display: inline-flex;
 }
 
 .launchConfigurationsButton > .dropdownArrowDown {
@@ -106,6 +117,7 @@
 .stopButton {
 	display: inline-block;
 	height: 25px;
+	margin-right: 10px;
 	width: 22px;
 }
 
@@ -127,6 +139,11 @@
 }
 
 .statusLight {
+	-webkit-flex-grow: 0;		/* Safari */
+	flex-grow: 0;
+	-webkit-flex-shrink: 0;		/* Safari */
+	flex-shrink: 0;
+	
 	background: gray;
 	border: 2px solid transparent;
 	border-radius: 100%;
@@ -161,33 +178,31 @@
 .runBarSeparator {
 	background: #ccc;
 	display: inline-block;
-	height: 33px;
-	margin: 1px 10px;
+	height: 25px;
+	margin: 0 10px;
 	position: relative;
     width: 1px;
 }
 
-.appInfoWrapper {
-	-webkit-align-items: center;		/* Safari */
-	align-items: center;
-	background: white;
-	border-radius: 3px;
-	display: -webkit-inline-flex;		/* Safari */
-	display: inline-flex;
-	margin: 1px 0 0 10px;
-	height: 29px;
-	width: 262px;
-	padding: 0 4px;
-	transition: opacity 0.3s ease;
+.appName {
+	color: #666;
+	-webkit-flex-grow: 0;		/* Safari */
+	flex-grow: 0;
+	-webkit-flex-shrink: 0;		/* Safari */
+	flex-shrink: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .appInfoSpan {
 	color: #666;
-	-webkit-flex-grow: 1;		/* Safari */
-	flex-grow: 1;
+	-webkit-flex-grow: 0;		/* Safari */
+	flex-grow: 0;
 	-webkit-flex-shrink: 1;		/* Safari */
 	flex-shrink: 1;
 	overflow: hidden;
+	margin-left: 4px;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
@@ -212,5 +227,6 @@
 .appLink:before{ content:'\E030'; }
 
 .runBarLink:hover {
+	color: #F58B0F;
 	text-decoration: none;
 }

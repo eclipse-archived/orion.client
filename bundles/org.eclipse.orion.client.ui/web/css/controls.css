@@ -66,10 +66,14 @@
 
 .runBar {
 	display: none;
+	height: 100%;
 }
 
 .runBarVisible {
-	display: inline-block !important;
+	-webkit-align-items: center;		 		 /* Safari */
+	align-items: center;
+	display: -webkit-inline-flex !important;		 /* Safari */
+	display: inline-flex !important;
 }
 
 /* 4px margin used by toolbar, plus 4px of border/padding */
