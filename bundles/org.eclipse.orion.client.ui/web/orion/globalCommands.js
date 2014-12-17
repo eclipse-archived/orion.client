@@ -565,7 +565,8 @@ define([
 			}
 		});
 		window.addEventListener("error", function(e) { //$NON-NLS-0$
-			var errorString = e.message + " (" + e.filename + ": " + e.lineno + (e.colno ? ", " + e.colno : "") + ")"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var index = e.filename.lastIndexOf("/"); //$NON-NLS-0$
+			var errorString = e.message + " (" + e.filename.substring(index + 1) + ": " + e.lineno + (e.colno ? ", " + e.colno : "") + ")"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			mMetrics.logEvent("runtime", "uncaughtError", errorString); //$NON-NLS-1$ //$NON-NLS-0$
 		});
 
