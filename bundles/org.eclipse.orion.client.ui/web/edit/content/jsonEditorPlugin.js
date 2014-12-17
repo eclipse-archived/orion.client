@@ -14,12 +14,12 @@ define([
 	'orion/plugin',
 	'edit/content/jsonExplorer',
 	'orion/Deferred',
-	'orion/commands',
+	'orion/commandsProxy',
 	'orion/keyBinding',
 	'orion/webui/littlelib'
-], function(PluginProvider, mJSONExplorer, Deferred, mCommands, mKeyBinding, lib) {
+], function(PluginProvider, mJSONExplorer, Deferred, mCommandsProxy, mKeyBinding, lib) {
 	
-	var json, showItem, expandItem, model, explorer, commandsProxy = new mCommands.CommandsProxy();
+	var json, showItem, expandItem, model, explorer, commandsProxy = new mCommandsProxy.CommandsProxy();
 	
 	var EDITOR_ID = "orion.editor.json"; //$NON-NLS-0$
 	

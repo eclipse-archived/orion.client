@@ -11,14 +11,14 @@
 /*eslint-env browser, amd*/
  
 define([
-	'orion/util',
 	'orion/webui/littlelib',
+	'orion/commandsProxy',
 	'orion/webui/dropdown',
 	'text!orion/webui/dropdowntriggerbutton.html',
 	'text!orion/webui/dropdowntriggerbuttonwitharrow.html',
 	'text!orion/webui/checkedmenuitem.html',
 	'orion/webui/tooltip'
-], function(util, lib, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, CheckedMenuItemFragment, Tooltip) {
+], function(lib, mCommandsProxy, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, CheckedMenuItemFragment, Tooltip) {
 		/**
 		 * @name orion.commands.NO_IMAGE
 		 * @description Image data for 16x16 transparent png.
@@ -129,138 +129,9 @@ define([
 			_processKey(evt, getKeyBindings());
 		}
 		
-		function handleKeyEvent(evt, processKeyFunc) {
-			function isContentKey(e) {
-				// adapted from handleKey in http://git.eclipse.org/c/platform/eclipse.platform.swt.git/plain/bundles/org.eclipse.swt/Eclipse%20SWT%20Custom%20Widgets/common/org/eclipse/swt/custom/StyledText.java
-				if (util.isMac) {
-					// COMMAND+ALT combinations produce characters on the mac, but COMMAND or COMMAND+SHIFT do not.
-					if (e.metaKey && !e.altKey) {  //command without alt
-						// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=390341
-						// special case for select all, cut, copy, paste, and undo.  A slippery slope...
-						if (!e.shiftKey && !e.ctrlKey && (e.keyCode === 65 || e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 88 || e.keyCode === 90)) {
-							return true;
-						}
-						return false;
-					}
-					if (e.ctrlKey) {
-						return false;
-					}
-				} else {
-					// CTRL or ALT combinations are not characters, however both of them together (CTRL+ALT)
-					// are the Alt Gr key on some keyboards.  See Eclipse bug 20953. If together, they might
-					// be a character. However there aren't usually any commands associated with Alt Gr keys.
-					if (e.ctrlKey && !e.altKey) {
-						// special case for select all, cut, copy, paste, and undo.  
-						if (!e.shiftKey && (e.keyCode === 65 || e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 88 || e.keyCode === 90)) {
-							return true;
-						}
-						return false;
-					}
-					if (e.altKey && !e.ctrlKey) {
-						return false;
-					}
-					if (e.ctrlKey && e.altKey){
-						return false;
-					}
-				}
-				if (e['char']) { //$NON-NLS-0$
-					return e['char'].length > 0;  // empty string for non characters //$NON-NLS-0$
-				} else if (e.charCode || e.keyCode) {
-					var keyCode= e.charCode || e.keyCode;
-					// anything below SPACE is not a character except for line delimiter keys, tab, and delete.
-					switch (keyCode) {
-						case 8:  // backspace
-						case 9:  // tab
-						case 13: // enter
-						case 46: // delete
-							return true;
-						default:
-							return (keyCode >= 32 && keyCode < 112) || // space key and above until function keys
-								keyCode > 123; // above function keys  
-					}
-				}
-				// If we can't identify as a character, assume it's not
-				return false;
-			}
-			
-			evt = evt || window.event;
-			if (isContentKey(evt)) {
-				// bindings that are text content keys are ignored if we are in a text field or editor
-				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=375058
-				if (evt.target.contentEditable === "true") { //$NON-NLS-0$
-					return;
-				}
-				var tagType = evt.target.nodeName.toLowerCase();
-				if (tagType === 'input') { //$NON-NLS-0$
-					var inputType = evt.target.type.toLowerCase();
-					// Any HTML5 input type that involves typing text should be ignored
-					switch (inputType) {
-						case "text": //$NON-NLS-0$
-						case "password": //$NON-NLS-0$
-						case "search": //$NON-NLS-0$
-						case "color": //$NON-NLS-0$
-						case "date": //$NON-NLS-0$
-						case "datetime": //$NON-NLS-0$
-						case "datetime-local": //$NON-NLS-0$
-						case "email": //$NON-NLS-0$
-						case "month": //$NON-NLS-0$
-						case "number": //$NON-NLS-0$
-						case "range": //$NON-NLS-0$
-						case "tel": //$NON-NLS-0$
-						case "time": //$NON-NLS-0$
-						case "url": //$NON-NLS-0$
-						case "week": //$NON-NLS-0$
-							return;
-					}
-				} else if (tagType === 'textarea') { //$NON-NLS-0$
-					return;
-				}
-			}
-			if (processKeyFunc) {
-				processKeyFunc(evt);
-			} else {
-				processKey(evt);
-			}
-		}
-		
-		function CommandsProxy() {
-			this._init();
-		}
-		CommandsProxy.prototype = {
-			setProxy: function(proxy) {
-				this.proxy = proxy;
-			},
-			setKeyBindings: function(bindings) {
-				this.bindings = bindings;
-			},
-			_init: function() {
-				var self = this;
-				document.addEventListener("keydown", function(evt) { //$NON-NLS-0$
-					return handleKeyEvent(evt, function(evt) {
-						var proxy = self.proxy;
-						var bindings = self.bindings;
-						if (!bindings || !proxy) {
-							return;
-						}
-						for (var i=0; i<bindings.length; i++) {
-							if (bindings[i].match(evt)) {
-								proxy.processKey({
-									type: evt.type,
-									keyCode: evt.keyCode,
-									altKey: evt.altKey,
-									ctrlKey: evt.ctrlKey,
-									metaKey: evt.metaKey,
-									shiftKey: evt.shiftKey
-								});
-								lib.stop(evt);
-							}
-						}
-					});
-				});
-			}
-		};
-
-		window.document.addEventListener("keydown", handleKeyEvent, false); //$NON-NLS-0$
+		window.document.addEventListener("keydown", function(evt) { //$NON-NLS-0$
+			return mCommandsProxy.handleKeyEvent(evt, processKey);
+		}, false);
 
 	function _addImageToElement(command, element, name) {
 		element.classList.add("commandImage"); //$NON-NLS-0$
@@ -826,7 +697,6 @@ define([
 		executeBinding: executeBinding,
 		setKeyBindingProvider: setKeyBindingProvider,
 		localKeyBindings: localKeyBindings,
-		CommandsProxy: CommandsProxy,
 		getKeyBindings: getKeyBindings,
 		processKey: processKey,
 		NO_IMAGE: NO_IMAGE,
