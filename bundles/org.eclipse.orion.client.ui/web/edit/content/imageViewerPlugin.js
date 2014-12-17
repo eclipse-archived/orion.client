@@ -14,7 +14,7 @@
 define([
 	'orion/plugin',
 	'orion/Deferred',
-	'orion/commands',
+	'orion/commandsProxy',
 	'orion/keyBinding',
 	'orion/webui/littlelib',
 	'orion/URL-shim'
