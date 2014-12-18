@@ -39,7 +39,7 @@
 	
 	background: white;
 	border-radius: 5px;
-	padding: 2px 2px 2px 4px;
+	padding: 2px 0 2px 4px;
 	width: 270px;
 }
 
@@ -48,9 +48,19 @@
 	align-items: center;
 	display: -webkit-inline-flex;		 /* Safari */
 	display: inline-flex;
+	
+	-webkit-flex-grow: 1;		/* Safari */
+	flex-grow: 1;
+	-webkit-flex-shrink: 0;		/* Safari */
+	flex-shrink: 0;
 }
 
 .launchConfigurationsButton > .dropdownArrowDown {
+	-webkit-flex-grow: 0;		/* Safari */
+	flex-grow: 0;
+	-webkit-flex-shrink: 0;		/* Safari */
+	flex-shrink: 0;
+	
 	vertical-align: baseline;
 }
 
