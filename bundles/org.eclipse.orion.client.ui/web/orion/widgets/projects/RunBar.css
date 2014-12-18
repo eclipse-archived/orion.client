@@ -23,7 +23,7 @@
 
 .launchConfigurationsWrapper {
 	background: white;
-	border-radius: 3px;
+	border-radius: 5px;
 	display: inline-block;
 	margin: 1px 10px 0 0;
 	min-height: 21px;
@@ -32,11 +32,6 @@
 }
 
 .launchConfigurationsWrapper > .launchConfigurationsButton.dropdownTrigger {
-	-webkit-align-items: center;		 		 /* Safari */
-	align-items: center;
-	display: -webkit-inline-flex;		 /* Safari */
-	display: inline-flex;
-	
 	background: white;
 	border-radius: 5px;
 	padding: 2px 0 2px 4px;
@@ -48,19 +43,11 @@
 	align-items: center;
 	display: -webkit-inline-flex;		 /* Safari */
 	display: inline-flex;
-	
-	-webkit-flex-grow: 1;		/* Safari */
-	flex-grow: 1;
-	-webkit-flex-shrink: 0;		/* Safari */
-	flex-shrink: 0;
+	vertical-align: top;
+	width: calc(100% - 20px);
 }
 
 .launchConfigurationsButton > .dropdownArrowDown {
-	-webkit-flex-grow: 0;		/* Safari */
-	flex-grow: 0;
-	-webkit-flex-shrink: 0;		/* Safari */
-	flex-shrink: 0;
-	
 	vertical-align: baseline;
 }
 
@@ -198,8 +185,8 @@
 	color: #666;
 	-webkit-flex-grow: 0;		/* Safari */
 	flex-grow: 0;
-	-webkit-flex-shrink: 0;		/* Safari */
-	flex-shrink: 0;
+	-webkit-flex-shrink: 1;		/* Safari */
+	flex-shrink: 1;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -209,8 +196,8 @@
 	color: #666;
 	-webkit-flex-grow: 0;		/* Safari */
 	flex-grow: 0;
-	-webkit-flex-shrink: 1;		/* Safari */
-	flex-shrink: 1;
+	-webkit-flex-shrink: 0;		/* Safari */
+	flex-shrink: 0;
 	overflow: hidden;
 	margin-left: 4px;
 	text-overflow: ellipsis;

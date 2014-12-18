@@ -537,6 +537,8 @@ define([
 			if (launchConfiguration) {
 				var displayName = launchConfiguration.Params.Name + messages["displayNameSeparator"] + launchConfiguration.Params.Target.Space; //$NON-NLS-0$
 				this._setText(this._appName, displayName);
+				this._setNodeTooltip(this._appName, launchConfiguration.Name);
+				
 				this._setText(this._appInfoSpan, null);
 				
 				this._launchConfigurationsLabel.appendChild(this._statusLight);
