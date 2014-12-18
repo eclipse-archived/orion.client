@@ -27,6 +27,7 @@ define({
 	'no-eval' : '${0} function calls are discouraged.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-extra-semi' : 'Unnecessary semicolon.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-fallthrough' : 'Switch case may be entered by falling through the previous case.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-iterator' : 'Discouraged __iterator__ property use.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-jslint' : 'The \'${0}\' directive is unsupported, please use eslint-env.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-array' : 'Use the array literal notation \'[]\'.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-func' : 'The Function constructor is eval.', //$NON-NLS-0$  //$NON-NLS-1$

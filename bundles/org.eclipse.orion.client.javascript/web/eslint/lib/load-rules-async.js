@@ -511,6 +511,22 @@ define([
         		};
         	}
         },
+        "no-iterator": {
+            description: "Warn when the __iterator__ property is used",
+            rule: function(context) {
+                return {
+                    'MemberExpression': function(node) {
+                        if(node.computed) {
+                            if(node.property.value === '__iterator__') {
+                                context.report(node.property, 'Discouraged __iterator__ property use.');
+                            }
+                        } else if(node.property.name === '__iterator__') {
+                            context.report(node.property, 'Discouraged __iterator__ property use.');    
+                        }
+                    }
+                };
+            }
+        },
 		'no-jslint': {
 		    description: 'Warn when the jslint/jshint directive is used',
 		    rule: function(context) {

@@ -32,6 +32,7 @@ define([
 			"no-dupe-keys" : 2, //$NON-NLS-0$
 			"no-eval" : 0, //$NON-NLS-0$
 			"no-extra-semi": 1, //$NON-NLS-0$
+			"no-iterator": 2,  //$NON-NLS-0$
 			'no-jslint' : 1,  //$NON-NLS-0$
 			"no-new-array": 1, //$NON-NLS-0$
 			"no-new-func": 1, //$NON-NLS-0$
@@ -355,6 +356,7 @@ define([
 			config.setOption("no-dupe-keys", properties.validate_dupe_obj_keys); //$NON-NLS-0$
 			config.setOption("no-eval", properties.validate_eval); //$NON-NLS-0$
 			config.setOption("no-extra-semi", properties.validate_unnecessary_semi); //$NON-NLS-0$
+			config.setOption("no-iterator", properties.validate_no_iterator); //$NON-NLS-0$
 			config.setOption("no-new-array", properties["no-new-array"]); //$NON-NLS-1$ //$NON-NLS-0$
 			config.setOption("no-new-func", properties["no-new-func"]); //$NON-NLS-1$ //$NON-NLS-0$
 			config.setOption("no-new-object", properties["no-new-object"]); //$NON-NLS-1$ //$NON-NLS-0$

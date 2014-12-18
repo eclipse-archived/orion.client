@@ -433,6 +433,12 @@ define([
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                },
+				 	        	                {	id: "validate_no_iterator", //$NON-NLS-0$
+				 	        	                	nameKey: "noIterator", //$NON-NLS-0$
+				 	        	                	type: "number", //$NON-NLS-0$
+				 	        	                	defaultValue: error, //$NON-NLS-0$
+				 	        	                	options: severities //$NON-NLS-0$
+				 	        	                },
 				 	        	                {
 				 	        	                	id: "no-new-array", //$NON-NLS-0$
 				 	        	                	nameKey: "noNewArray", //$NON-NLS-0$
