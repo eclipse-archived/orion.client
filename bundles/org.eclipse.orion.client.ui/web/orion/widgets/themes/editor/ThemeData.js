@@ -418,7 +418,7 @@ define([
 						}
 					}
 					catch (e){
-						console.log("Exception : " + e); //$NON-NLS-0$
+						//console.log("Exception : " + e); //$NON-NLS-0$
 					}
 				}
 			}
