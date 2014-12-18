@@ -26,7 +26,7 @@
 	border-radius: 5px;
 	display: inline-block;
 	margin: 1px 10px 0 0;
-	min-height: 21px;
+	min-height: 20px;
 	min-width: 270px;
 	transition: opacity 0.3s ease;
 }
@@ -48,7 +48,7 @@
 }
 
 .launchConfigurationsButton > .dropdownArrowDown {
-	vertical-align: baseline;
+	vertical-align: bottom;
 }
 
 .launchConfigurationsWrapper > .dropdownMenu {
