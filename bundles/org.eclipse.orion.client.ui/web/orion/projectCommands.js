@@ -117,11 +117,10 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			context.commandService.collectParameters(context.data);
 		} else {
 			storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
-			progress.setProgressResult(status);
 		}
 
 		if(status.ToSave){
-			progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, status.ToSave.ConfigurationName, context.deployService.id, status.ToSave.Parameters, status.ToSave.Url, status.ToSave.ManageUrl, status.ToSave.Path, status.ToSave.Type, status.AdditionalConfiguration), "Saving configuration").then(
+			context.projectClient.saveProjectLaunchConfiguration(context.project, status.ToSave.ConfigurationName, context.deployService.id, status.ToSave.Parameters, status.ToSave.Url, status.ToSave.ManageUrl, status.ToSave.Path, status.ToSave.Type, status.AdditionalConfiguration).then(
 				function(configuration){
 					storeLastDeployment(context.project.Name, context.deployService, configuration);
 					if(sharedLaunchConfigurationDispatcher){
@@ -131,7 +130,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 						fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent.parent, newValue: configuration.File.parent, ignoreRedirect: true});
 					}
 					fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent, newValue: configuration.File, ignoreRedirect: true});
-					displayDeployResult(progress, status, context);
 				}, context.errorHandler
 			);
 		} else {
@@ -153,23 +151,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					//}
 				});
 			}
-			displayDeployResult(progress, status, context);
 		}
-	}
-
-	function displayDeployResult(progress, status, context){
-		var display = [];
-		display.Severity = "Info";
-
-		if (status.Message){
-			display.HTML = false;
-			display.Message = status.Message;
-		} else {
-			display.HTML = true;
-			display.Message = "Use <a href=\""+ require.toUrl("edit/edit.html#" + context.project.ContentLocation) + "\">Project</a> page to view and manage the application.";
-		}
-
-		progress.setProgressResult(display);
 	}
 
 	function storeLastDeployment(projectName, deployService, launchConfiguration){
@@ -251,7 +233,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					}
 
 					if(result.ToSave){
-						progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, result.ToSave.ConfigurationName, context.deployService.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path, result.ToSave.Type, result.AdditionalConfiguration), "Saving configuration").then(
+						context.projectClient.saveProjectLaunchConfiguration(context.project, result.ToSave.ConfigurationName, context.deployService.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path, result.ToSave.Type, result.AdditionalConfiguration).then(
 							function(configuration){
 								storeLastDeployment(context.project.Name, context.deployService, configuration);
 								if(sharedLaunchConfigurationDispatcher){
@@ -261,7 +243,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 									fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent.parent, newValue: configuration.File.parent, ignoreRedirect: true});
 								}
 								fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent, newValue: configuration.File, ignoreRedirect: true});
-								displayDeployResult(progress, result, context);
 							}, context.errorHandler
 						);
 					} else {
@@ -285,8 +266,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 						}
 						storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
 					}
-
-					displayDeployResult(progress, result, context);
 
 				}, function(error){
 					if(error.Retry && error.Retry.parameters){
@@ -587,7 +566,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 									sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
 								}
 								if(result.ToSave){
-									progress.showWhile(projectClient.saveProjectLaunchConfiguration(item.project, result.ToSave.ConfigurationName, service.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path, result.ToSave.Type, result.ToSave.AdditionalConfiguration), "Saving configuration").then(
+									projectClient.saveProjectLaunchConfiguration(item.project, result.ToSave.ConfigurationName, service.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path, result.ToSave.Type, result.ToSave.AdditionalConfiguration).then(
 										function(configuration){
 											storeLastDeployment(item.project.Name, service, configuration);
 											if(sharedLaunchConfigurationDispatcher){
