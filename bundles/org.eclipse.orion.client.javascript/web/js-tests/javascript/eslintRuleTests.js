@@ -4092,6 +4092,67 @@ define([
     			assert.equal(messages[0].related.type, "Punctuator");
     			assert.equal(messages[0].related.value, ")");
     		});
+    		/**
+    		 * Should flag bare BreakStatement
+    		 */
+    		it("should flag bare break statement", function() {
+    			var topic = "while(true) {break}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].related.type, "Keyword");
+    			assert.equal(messages[0].related.value, "break");
+    		});
+    		/**
+    		 * Should flag labelled BreakStatement
+    		 */
+    		it("should flag labelled break statement", function() {
+    			var topic = "l: while(true) {break l}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].related.type, "Identifier");
+    			assert.equal(messages[0].related.value, "l");
+    		});
+            /**
+    		 * Should flag bare ContinueStatement
+    		 */
+    		it("should flag bare continue statement", function() {
+    			var topic = "while(true) {continue}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].related.type, "Keyword");
+    			assert.equal(messages[0].related.value, "continue");
+    		});
+ 		     /**
+    		 * Should flag labelled ContinueStatement
+    		 */
+    		it("should flag labelled continue statement", function() {
+    			var topic = "l: while(true) {continue l}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].related.type, "Identifier");
+    			assert.equal(messages[0].related.value, "l");
+    		});
+
     		//------------------------------------------------------------------------------
     		// Should nots
     		//------------------------------------------------------------------------------

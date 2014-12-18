@@ -1077,6 +1077,8 @@ define([
         			"ExpressionStatement": checkForSemicolon,  //$NON-NLS-0$
         			"ReturnStatement": checkForSemicolon,  //$NON-NLS-0$
         			"ThrowStatement": checkForSemicolon,  //$NON-NLS-0$
+        			"BreakStatement": checkForSemicolon,  //$NON-NLS-0$
+        			"ContinueStatement": checkForSemicolon,  //$NON-NLS-0$
         		};
         	}
         },
