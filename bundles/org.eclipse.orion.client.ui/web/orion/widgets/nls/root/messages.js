@@ -74,6 +74,7 @@ define({//Default message bundle
 	"createNew": "Create New...",
 	"Running": "Running",
 	"checkingStateMessage": "Checking status of ${0}",
+	"checkingStateShortMessage": "checking status",
 	"Status": "Status",
 	"appInfoStopped": "stopped",
 	"appInfoRunning": "running",

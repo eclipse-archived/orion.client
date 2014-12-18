@@ -58,6 +58,8 @@ define([
 			this._domNode = lib.createNodes(RunBarTemplate);
 			if (this._domNode) {
 				this._parentNode.appendChild(this._domNode);
+				
+				this._undestroyedTooltips = []; // an array of all the tooltips that need to be destroyed when this widget is destroyed
 								
 				this._playButton = lib.$("button.playButton", this._domNode); //$NON-NLS-0$
 				this._boundPlayButtonListener = this._runBarButtonListener.bind(this, "orion.launchConfiguration.deploy"); //$NON-NLS-0$
@@ -190,25 +192,24 @@ define([
 		},
 		
 		destroy: function() {
+			// destroy tooltips
+			this._undestroyedTooltips.forEach(function(tooltip){
+				tooltip.destroy();
+			}, this);
+			this._undestroyedTooltips = null;
+			
+			// remove event listeners
 			this._launchConfigurationEventTypes.forEach(function(eventType) {
 				this._launchConfigurationDispatcher.removeEventListener(eventType, this._boundLaunchConfigurationListener);
 			}, this);
 			
 			if (this._playButton) {
 				this._playButton.removeEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$
-				if (this._playButton.tooltip) {
-					this._playButton.tooltip.destroy();
-					this._playButton.tooltip = null;
-				}
 				this._playButton = null;
 			}
 			
 			if (this._stopButton) {
 				this._stopButton.removeEventListener("click", this._boundStopButtonListener); //$NON-NLS-0$
-				if (this._stopButton.tooltip) {
-					this._stopButton.tooltip.destroy();
-					this._stopButton.tooltip = null;
-				}
 				this._stopButton = null;
 			}
 			
@@ -308,35 +309,38 @@ define([
 			
 			this.setStatus({
 				State: "PROGRESS", //$NON-NLS-0$
-				Message: progressMessage
+				Message: progressMessage,
+				ShortMessage: messages["checkingStateShortMessage"] //$NON-NLS-0$
 			});
 			
 			// update status
 			this._projectClient.getProjectDelpoyService(launchConfiguration.ServiceId, launchConfiguration.Type).then(function(service){
 				if(service && service.getState){
-					this._progressService.progress(service.getState(launchConfiguration), progressMessage).then(function(result){
-						launchConfiguration.status = result;
-						this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
-					}.bind(this), 
-					function(error){
-						launchConfiguration.status = {error: error};
-						if (error.Retry) {
-							// authentication error, gather required parameters and try again
-							launchConfiguration.parametersRequested = launchConfiguration.status.error.Retry.parameters;
-							launchConfiguration.optionalParameters = launchConfiguration.status.error.Retry.optionalParameters;
-							
-							// run command to collect params first then check status again
-							this._commandRegistry.runCommand("orion.launchConfiguration.checkStatus", launchConfiguration, this, null, null, this._statusLight); //$NON-NLS-0$
-						} else {
+					service.getState(launchConfiguration).then(function(result){
+							launchConfiguration.status = result;
 							this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
-						}
-					}.bind(this));
+						}.bind(this), 
+						function(error){
+							launchConfiguration.status = {error: error};
+							if (error.Retry) {
+								// authentication error, gather required parameters and try again
+								launchConfiguration.parametersRequested = launchConfiguration.status.error.Retry.parameters;
+								launchConfiguration.optionalParameters = launchConfiguration.status.error.Retry.optionalParameters;
+								
+								// run command to collect params first then check status again
+								this._commandRegistry.runCommand("orion.launchConfiguration.checkStatus", launchConfiguration, this, null, null, this._statusLight); //$NON-NLS-0$
+							} else {
+								this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
+							}
+						}.bind(this)
+					);
 				}
 			}.bind(this));
 		},
 		
 		setStatus: function(status) {
 			var appInfoText = null;
+			var statusLightText = null;
 			
 			// turn status light off
 			this._statusLight.classList.remove("statusLightGreen"); //$NON-NLS-0$
@@ -349,24 +353,18 @@ define([
 			
 			if (status.error) {
 				this._enableControl(this._playButton);
-				if (status.error.Retry) {
-					this._setStatusTitle(null);
-				} else {
+				if (!status.error.Retry) {
 					this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
-					this._setStatusTitle(status.error.Message);
+					statusLightText = status.error.Message;
 				}
 				
-				if (status.Message) {
-					appInfoText = status.Message;
-				} else {
-					appInfoText = messages["appInfoStopped"]; //$NON-NLS-0$
-				}
+				appInfoText = status.ShortMessage || status.Message || messages["appInfoStopped"]; //$NON-NLS-0$
 			} else {
 				switch (status.State) {
 					case "PROGRESS": //$NON-NLS-0$
 						this._statusLight.classList.add("statusLightProgress"); //$NON-NLS-0$
-						if (status.Message) {
-							appInfoText = status.Message;
+						if (status.ShortMessage || status.Message) {
+							appInfoText = status.ShortMessage || status.Message;
 						}
 						break;
 					case "STARTED": //$NON-NLS-0$
@@ -385,8 +383,10 @@ define([
 					default:
 						break;
 				}
-				this._setStatusTitle(status.Message);
+				statusLightText = status.Message;
 			}
+			
+			this._setNodeTooltip(this._statusLight, statusLightText);
 			
 			if (appInfoText) {
 				this._setText(this._appInfoSpan, "(" + appInfoText + ")"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -505,15 +505,23 @@ define([
 		},
 		
 		_setNodeTooltip: function(domNode, text) {
+			var index = -1;
 			if (domNode.tooltip) {
 				domNode.tooltip.destroy();
+				index = this._undestroyedTooltips.indexOf(domNode.tooltip);
+				if (-1 !== index) {
+					this._undestroyedTooltips.splice(index, 1);
+				}
 			}
-			domNode.tooltip = new mTooltip.Tooltip({
-				node: domNode,
-				text: text,
-				trigger: "mouseover", //$NON-NLS-0$
-				position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			});
+			if (text) {
+				domNode.tooltip = new mTooltip.Tooltip({
+					node: domNode,
+					text: text,
+					trigger: "mouseover", //$NON-NLS-0$
+					position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				});
+				this._undestroyedTooltips.push(domNode.tooltip);
+			}
 		},
 		
 		_setText: function(domNode, text) {

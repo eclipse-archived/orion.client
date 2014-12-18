@@ -150,5 +150,6 @@ define({//Default message bundle
 	'notZipMultiple' : 'There are multiple non-zip files being uploaded. Would you like to continue the import?', //$NON-NLS-0$  //$NON-NLS-1$
 	"Cancel": "Cancel", //$NON-NLS-0$  //$NON-NLS-1$
 	"Ok": "Ok", //$NON-NLS-0$  //$NON-NLS-1$
-	"missingCredentials": "Enter the ${0} authentication credentials associated with ${1} to check its status." //$NON-NLS-0$  //$NON-NLS-1$
+	"missingCredentials": "Enter the ${0} authentication credentials associated with ${1} to check its status.", //$NON-NLS-0$  //$NON-NLS-1$
+	"deploying": "deploying" //$NON-NLS-0$  //$NON-NLS-1$
 });
