@@ -264,5 +264,8 @@ define({//Default message bundle
     "buttonRevert": " Revert",
     "ConfirmRestore": "Restore these settings to their default values?",
     "Theme : " : "Theme : ",
-    "Display Language : " : "Display Language : "
+    "Display Language : " : "Display Language : ",
+    "cannotDeleteMsg" : " is a default theme that cannot be deleted",
+    "confirmDeleteMsg" : "Are you sure you want to delete this theme?",
+    "cannotModifyMsg" : " is a default theme that cannot be modified. Please use another name."
 });

@@ -89,7 +89,7 @@ define([
 						id: "themeSettings", //$NON-NLS-0$
 						textContent: messages.Theme,
 						show: _self.showThemeSettings
-					})
+					});
 				}
 				
 				if (categories.showEditorSettings === undefined || categories.showEditorSettings) {

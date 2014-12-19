@@ -9,9 +9,16 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegistry', 'orion/webui/littlelib', 'orion/widgets/themes/editor/editorSetup'],
-
-function(messages, mCommands, mCommandRegistry, lib, mSetup) {
+define(['i18n!orion/settings/nls/messages', 
+		'orion/commands', 
+		'orion/commandRegistry', 
+		'orion/webui/littlelib', 
+		'orion/widgets/themes/editor/editorSetup',
+		'text!examples/js-demo.js',
+		'text!examples/html-demo.html',
+		'text!examples/css-demo.css',
+		'text!examples/java-demo.java'],
+function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExample, cssExample, javaExample) {
 	
 	var editorLanguage, editorTheme, originalTheme, currentTheme, revertBtn, deleteBtn ,saveBtn, themeNameInput;
 	var protectedThemes = ["Prospecto", "Darker"];
@@ -257,7 +264,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup) {
 				}
 			}
 		}
-		for (var i = 0; i < scopeList.length; i++){
+		for (i = 0; i < scopeList.length; i++){
 			document.getElementById(scopeList[i].id).value = scopeList[i].value; // updates the input[type=color] with correct color
 		}
 		checkForChanges(); // checks if any value is changed
@@ -273,7 +280,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup) {
 				for(var l = 8; l < 19; l++){
 					htmlString = htmlString + "<option value='" + l+"px'>"+l+"px</option>";
 				}
-				for(var l = 8; l < 19; l++){
+				for(l = 8; l < 19; l++){
 					htmlString = htmlString + "<option value='" + l+"pt'>"+l+"pt</option>";
 				}
 				htmlString += "</select></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -354,14 +361,14 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup) {
 	function renderData(anchor, state) {
 		anchor.innerHTML = this.template; // ok--this is a fixed value
 		lib.processTextNodes(anchor, messages);
-		mSetup.setupView(mSetup.getFile("/examples/js-demo.js"), "js"); //$NON-NLS-1$ //$NON-NLS-0$
+		mSetup.setupView(jsExample, "js"); //$NON-NLS-0$
 		
 		this.commandService.renderCommands('themeCommands', document.getElementById(this.toolbarId || "userCommands"), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		for (var i = 0; i < scopeList.length; i++){ // 0th one is a select
 			document.getElementById(scopeList[i].id).onchange = function(e){
 				updateScopeValue(e.srcElement.id, e.srcElement.value);
-			}
+			};
 		}
 		
 		this.populateThemes();
@@ -403,16 +410,16 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup) {
 		
 		switch (language) {
 			case "javascript":
-				mSetup.setupView(mSetup.getFile("/examples/js-demo.js"), "js"); //$NON-NLS-1$ //$NON-NLS-0$
+				mSetup.setupView(jsExample, "js"); //$NON-NLS-0$
 				break;
 			case "html":
-				mSetup.setupView(mSetup.getFile("/examples/html-demo.html"), "html"); //$NON-NLS-1$ //$NON-NLS-0$
+				mSetup.setupView(htmlExample, "html"); //$NON-NLS-0$
 				break;
 			case "css":
-				mSetup.setupView(mSetup.getFile("/examples/css-demo.css"), "css"); //$NON-NLS-1$ //$NON-NLS-0$
+				mSetup.setupView(cssExample, "css"); //$NON-NLS-0$
 				break;
 			case "java":
-				mSetup.setupView(mSetup.getFile("/examples/java-demo.java"), "java"); //$NON-NLS-1$ //$NON-NLS-0$
+				mSetup.setupView(javaExample, "java"); //$NON-NLS-0$
 				break;
 		}
 		
@@ -458,9 +465,9 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup) {
 	function deleteTheme(){
 		//if default theme
 		if(protectedThemes.indexOf(currentTheme.name) !== -1){
-			window.alert(currentTheme.name + " is a default theme that cannot be deleted");
+			window.alert(currentTheme.name + messages["cannotDeleteMsg"]);
 		}
-		else if (confirm("Are you sure you want to delete this theme?") === true){
+		else if (confirm(messages["confirmDeleteMsg"]) === true){
 			this.preferences.getTheme(function(themeStyles) {
 				var themeName = currentTheme.name;
 				
@@ -479,7 +486,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup) {
 	
 	function saveTheme(){
 		if(protectedThemes.indexOf(currentTheme.name) !== -1){
-			window.alert(currentTheme.name + " is a default theme that cannot be modified. Please use another name.");
+			window.alert(currentTheme.name + messages["cannotModifyMsg"]);
 		}
 		else {
 			this.addTheme(currentTheme);
