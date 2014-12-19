@@ -10,54 +10,54 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define("orion/editor/stylers/text_x-cshtml/syntax", [
+define("orion/editor/stylers/text_x-vbhtml/syntax", [
 	"orion/editor/stylers/application_xml/syntax",
 	"orion/editor/stylers/text_html/syntax",
-	"orion/editor/stylers/text_x-csharp/syntax"], function(mXML, mHTML, mCSharp) { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	"orion/editor/stylers/text_x-vb/syntax"], function(mXML, mHTML, mVB) { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	var grammars = [];
 	grammars.push.apply(grammars, mXML.grammars);
 	grammars.push.apply(grammars, mHTML.grammars);
-	grammars.push.apply(grammars, mCSharp.grammars);
+	grammars.push.apply(grammars, mVB.grammars);
 	grammars.push({
-		id: "orion.cshtml", //$NON-NLS-0$
-		contentTypes: ["text/x-cshtml"], //$NON-NLS-0$
+		id: "orion.vbhtml", //$NON-NLS-0$
+		contentTypes: ["text/x-vbhtml"], //$NON-NLS-0$
 		patterns: [
-			{include: "#cshtmlComment"}, //$NON-NLS-0$
+			{include: "#vbhtmlComment"}, //$NON-NLS-0$
 			{include: "#codeBlock"}, //$NON-NLS-0$
 			{include: "#expression"}, //$NON-NLS-0$
 			{include: "#reference"}, //$NON-NLS-0$
 			{include: "orion.html"}, //$NON-NLS-0$
 		],
 		repository: {
-			cshtmlComment: {
+			vbhtmlComment: {
 				begin: {match: "@\\*", literal: "@*"}, //$NON-NLS-1$ //$NON-NLS-0$
 				end: {match: "\\*@", literal: "*@"}, //$NON-NLS-1$ //$NON-NLS-0$
-				name: "comment.block.cshtml", //$NON-NLS-0$
+				name: "comment.block.vbhtml", //$NON-NLS-0$
 			},
 			codeBlock: {
-				begin: "(^\\s*)(@)(?=([^{]*){)", //$NON-NLS-0$
-				end: "}", //$NON-NLS-0$
+				begin: "(?i)^\\s*@code", //$NON-NLS-0$
+				end: "(?i)end code", //$NON-NLS-0$
 				captures: {
-					2: {name: "entity.name.declaration.csharp"} //$NON-NLS-0$
+					0: {name: "entity.name.declaration.vb"} //$NON-NLS-0$
 				},
-				contentName: "source.csharp.embedded.cshtml", //$NON-NLS-0$
+				contentName: "source.vb.embedded.vbhtml", //$NON-NLS-0$
 				patterns: [
 				    {include: "orion.xml#tag"}, //$NON-NLS-0$
 				    {include: "#reference"}, //$NON-NLS-0$
-					{include: "orion.csharp"}, //$NON-NLS-0$
+					{include: "orion.vb"}, //$NON-NLS-0$
 				]
 			},
 			expression: {
-				match: "^\\s*@[^{]*$", //$NON-NLS-0$
+				match: "(?i)^\\s*@(?!code)[^$]*", //$NON-NLS-0$
 				patterns: [
 				    {include: "#reference"}, //$NON-NLS-0$
-					{include: "orion.csharp"}, //$NON-NLS-0$
+					{include: "orion.vb"}, //$NON-NLS-0$
 				]
 			},
 			reference: {
 				match: "@", //$NON-NLS-0$
-				name: "entity.name.declaration.csharp" //$NON-NLS-0$
+				name: "entity.name.declaration.vb" //$NON-NLS-0$
 			}
 		}
 	});

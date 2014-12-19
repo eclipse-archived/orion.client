@@ -10,36 +10,36 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/plugin', 'orion/editor/stylers/text_x-csharp/syntax', 'orion/editor/stylers/text_x-cshtml/syntax'], function(PluginProvider, mCSharp, mCSHtml) {
+define(['orion/plugin', 'orion/editor/stylers/text_x-vb/syntax', 'orion/editor/stylers/text_x-vbhtml/syntax'], function(PluginProvider, mVB, mVBHtml) {
 
 	/**
 	 * Plug-in headers
 	 */
 	var headers = {
-		name: "Orion C# Tool Support",
+		name: "Orion Visual Basic .NET Tool Support",
 		version: "1.0",
-		description: "This plugin provides C# tools support for Orion."
+		description: "This plugin provides Visual Basic .NET tools support for Orion."
 	};
 	var provider = new PluginProvider(headers);
 
 	/**
-	 * Register the C# content types
+	 * Register the Visual Basic .NET content types
 	 */
 	provider.registerServiceProvider("orion.core.contenttype", {}, {
 		contentTypes: [
-			{	id: "text/x-csharp",
+			{	id: "text/x-vb",
 				"extends": "text/plain",
-				name: "C#",
-				extension: ["cs"]
+				name: "Visual Basic .NET",
+				extension: ["vb"]
 			}
 		] 
 	});
 	provider.registerServiceProvider("orion.core.contenttype", {}, {
 		contentTypes: [
-			{	id: "text/x-cshtml",
+			{	id: "text/x-vbhtml",
 				"extends": "text/plain",
-				name: "cshtml",
-				extension: ["cshtml"]
+				name: "vbhtml",
+				extension: ["vbhtml"]
 			}
 		] 
 	});
@@ -47,8 +47,8 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-csharp/syntax', 'orion/edit
 	/**
 	 * Register syntax styling
 	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mCSharp.grammars[mCSharp.grammars.length - 1]);
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mCSHtml.grammars[mCSHtml.grammars.length - 1]);
+	provider.registerServiceProvider("orion.edit.highlighter", {}, mVB.grammars[mVB.grammars.length - 1]);
+	provider.registerServiceProvider("orion.edit.highlighter", {}, mVBHtml.grammars[mVBHtml.grammars.length - 1]);
 
 	provider.connect();
 });

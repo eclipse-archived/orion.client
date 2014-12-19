@@ -49,7 +49,7 @@ define("orion/editor/stylers/lib/syntax", [], function() { //$NON-NLS-0$
 							match: "@(?:(?!\\*/)\\S)*", //$NON-NLS-0$
 							name: "meta.documentation.annotation" //$NON-NLS-0$
 						}, {
-							match: "\\<\\S*\\>", //$NON-NLS-0$
+							match: "<[^\\s>]*>", //$NON-NLS-0$
 							name: "meta.documentation.tag" //$NON-NLS-0$
 						}, {
 							match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)", //$NON-NLS-0$

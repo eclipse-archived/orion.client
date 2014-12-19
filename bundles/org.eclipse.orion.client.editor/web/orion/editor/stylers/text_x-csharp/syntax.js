@@ -80,7 +80,7 @@ define("orion/editor/stylers/text_x-csharp/syntax", ["orion/editor/stylers/lib/s
 				name: "comment.block.documentation.csharp", //$NON-NLS-0$
 				patterns: [
 					{
-						match: "\\<\\S*\\>", //$NON-NLS-0$
+						match: "<[^\\s>]*>", //$NON-NLS-0$
 						name: "meta.documentation.tag" //$NON-NLS-0$
 					}, {
 						match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)", //$NON-NLS-0$
@@ -97,15 +97,10 @@ define("orion/editor/stylers/text_x-csharp/syntax", ["orion/editor/stylers/lib/s
 				name: "comment.line.documentation.csharp", //$NON-NLS-0$
 				patterns: [
 					{
-						match: "\\<\\S*\\>", //$NON-NLS-0$
+						match: "<[^\\s>]*>", //$NON-NLS-0$
 						name: "meta.documentation.tag" //$NON-NLS-0$
 					}, {
-						match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)", //$NON-NLS-0$
-						name: "meta.annotation.task.todo", //$NON-NLS-0$
-						captures: {
-							2: {name: "keyword.other.documentation.task"}, //$NON-NLS-0$
-							4: {name: "comment.block"} //$NON-NLS-0$
-						}
+						include: "orion.lib#todo_comment_singleLine" //$NON-NLS-0$
 					}
 				]
 			}
