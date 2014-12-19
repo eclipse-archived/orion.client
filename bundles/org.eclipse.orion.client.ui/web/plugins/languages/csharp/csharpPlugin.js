@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/plugin', 'orion/editor/stylers/text_x-csharp/syntax'], function(PluginProvider, mCsharp) {
+define(['orion/plugin', 'orion/editor/stylers/text_x-csharp/syntax', 'orion/editor/stylers/text_x-cshtml/syntax'], function(PluginProvider, mCSharp, mCSHtml) {
 
 	/**
 	 * Plug-in headers
@@ -34,11 +34,21 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-csharp/syntax'], function(P
 			}
 		] 
 	});
+	provider.registerServiceProvider("orion.core.contenttype", {}, {
+		contentTypes: [
+			{	id: "text/x-cshtml",
+				"extends": "text/plain",
+				name: "cshtml",
+				extension: ["cshtml"]
+			}
+		] 
+	});
 
 	/**
 	 * Register syntax styling
 	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mCsharp.grammars[mCsharp.grammars.length - 1]);
+	provider.registerServiceProvider("orion.edit.highlighter", {}, mCSharp.grammars[mCSharp.grammars.length - 1]);
+	provider.registerServiceProvider("orion.edit.highlighter", {}, mCSHtml.grammars[mCSHtml.grammars.length - 1]);
 
 	provider.connect();
 });
