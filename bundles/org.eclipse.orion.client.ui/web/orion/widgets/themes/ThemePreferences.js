@@ -40,13 +40,14 @@ define(['orion/Deferred'], function(Deferred) {
 			} catch (e) {
 			}
 			
-			if (prefsVer === currentVer) {
+			if (prefsVer === currentVer || prefsVer > currentVer) {
 				// Version matches (or ThemeData hasn't provided an expected version). Trust prefs
 				styles = prefs.get(themeInfo.styleset);
 				selected = prefs.get('selected'); //$NON-NLS-0$
 				if (selected) {
 					selected = this._parse(selected);
 				}
+				this._themeVersion = prefsVer;
 			} else {
 				// Stale theme prefs. Overwrite everything
 				styles = null;
