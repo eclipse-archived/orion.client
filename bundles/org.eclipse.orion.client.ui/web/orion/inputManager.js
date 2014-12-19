@@ -378,7 +378,7 @@ define([
 				var errorMsg = handleError(statusService, error);
 				if (errorMsg.Message === messages.noResponse) {
 					mMetrics.logEvent("status", "error", 
-						this._autoSaveActive?"auto-save":"save", error.status);
+						self._autoSaveActive?"auto-save":"save", error.status);
 				}
 				self._errorSaving = true;
 				return done();
