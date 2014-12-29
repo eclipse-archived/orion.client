@@ -998,7 +998,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 0);
     		});
-    		it("should flag follow-on assign in for statement ", function() {
+    		it("should not flag parenthesied follow-on assign in for statement ", function() {
     			var topic = "for(var q = 0; (a = b) && (c = 10); q++) {}";
     	
     			var config = { rules: {} };
@@ -1007,8 +1007,17 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 0);
     		});
-    		it("should flag nested assign in for statement", function() {
+    		it("should not flag parenthesised nested assign in for statement", function() {
     			var topic = "for(var q = 0; (a = (b = 10)); q++) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag nested assign in function condition statement", function() {
+    			var topic = "if(function(a) {f = 10;}) {}";
     	
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
@@ -1043,6 +1052,452 @@ define([
     		});
     		it("should not flag console use no env", function() {
     			var topic = "console.log('flag me')";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    	});
+//NO-CONSTANT-CONDITION ----------------------------------
+        describe('no-constant-condition', function() {
+    	    var RULE_ID = "no-constant-condition";
+    		it("should flag conditional statement 1", function() {
+    			var topic = "var a = (0 ? 1 : 2);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag conditional statement 2", function() {
+    			var topic = "var a = ('hello' ? 1 : 2);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag conditional statement 3", function() {
+    			var topic = "var a = ({} ? 1 : 2);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag conditional statement 4", function() {
+    			var topic = "var a = (!true ? 1 : 2);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag conditional statement 5", function() {
+    			var topic = "var a = (false ? 1 : 2);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag conditional statement 6", function() {
+    			var topic = "var a = (true || false ? 1 : 2);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag conditional statement 7", function() {
+    			var topic = "var a = (function(){} ? 1 : 2);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag while statement 1", function() {
+    			var topic = "while (true) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag while statement 2", function() {
+    			var topic = "while(10) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag while statement 3", function() {
+    			var topic = "while(!true) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag while statement 4", function() {
+    			var topic = "while(true || false) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag while statement 5", function() {
+    			var topic = "while('hello') {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag while statement 6", function() {
+    			var topic = "while(function(){}) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag while statement 7", function() {
+    			var topic = "while({}) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag while statement 8", function() {
+    			var topic = "while((a = (0 ? 1 : 2))) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag do-while statement 1", function() {
+    			var topic = "do{}while (true)";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag do-while statement 2", function() {
+    			var topic = "do{}while(10)";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag do-while statement 3", function() {
+    			var topic = "do{}while(!true) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag do-while statement 4", function() {
+    			var topic = "do{}while(true || false)";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag do-while statement 5", function() {
+    			var topic = "do{}while('hello')";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag do-while statement 6", function() {
+    			var topic = "do{}while(function(){})";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag do-while statement 7", function() {
+    			var topic = "do{}while({})";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag for statement 1", function() {
+    			var topic = "for(;true;) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag for statement 2", function() {
+    			var topic = "for(;10;) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag for statement 3", function() {
+    			var topic = "for(;!true;) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag for statement 4", function() {
+    			var topic = "for(;true || false;) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag for statement 5", function() {
+    			var topic = "for(;'hello';) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag for statement 6", function() {
+    			var topic = "for(;function() {};) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag for statement 7", function() {
+    			var topic = "for(;{};) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    	    it("should flag if statement 1", function() {
+    			var topic = "if (true) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag if statement 2", function() {
+    			var topic = "if(10) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag if statement 3", function() {
+    			var topic = "if(!true) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag if statement 4", function() {
+    			var topic = "if(true || false) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag if statement 5", function() {
+    			var topic = "if('hello') {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag if statement 6", function() {
+    			var topic = "if(function(){}) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		it("should flag if statement 7", function() {
+    			var topic = "if({}) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Discouraged use of constant as a conditional expression.");
+    		});
+    		
+    		it("should not flag do-while statement", function() {
+    			var topic = "do{}while(x) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag if statement", function() {
+    			var topic = "if(x) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag conditional statement", function() {
+    			var topic = "var a = (x ? 1: 0);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag for statement", function() {
+    			var topic = "for(;x;){}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag while statement", function() {
+    			var topic = "while(x){}";
     	
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;

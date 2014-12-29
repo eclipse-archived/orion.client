@@ -253,12 +253,29 @@ define([
                     }
                     return context.getTokenBefore(node).value === '(';
                 }
-                
+                function skip(node) {
+                    switch(node.type) {
+                        case 'FunctionExpression':
+                        case 'ObjectExpression':
+                        case 'CallExpression':
+                        case 'ArrayExpression': {
+                            return true;
+                        }
+                        default: return false;
+                    }
+                }
                 function checkForAssignment(node) {
                     var assigns = [];
                     node.test.parent = node;
                     Estraverse.traverse(node.test, {
                         enter: function(n, parent) {
+                            if(n.range[0] > node.test.range[1]) {
+                                //once we've left the test object 
+                                return Estraverse.VisitorOption.Break;
+                            }
+                            if(skip(n)) {
+                                return Estraverse.VisitorOption.Skip;
+                            }
                             if(parent) {
                                 n.parent = parent;
                             }
@@ -299,6 +316,46 @@ define([
                             }
                         }
                     }
+                };
+            }
+        },
+        "no-constant-condition": {
+            description: 'Disallow use of a constant value as a conditional expression',
+            rule: function(context) {
+                /**
+                 * @param {Object} node The AST node
+                 * @returns {Boolean} If the given node has a 'truthy' constant value
+                 */
+                function isConst(node) {
+                    switch(node.type) {
+                        case 'Literal':
+                        case 'ObjectExpression':
+                        case 'FunctionExpression': 
+                        case 'ArrayExpression': {
+                            return true;
+                        }
+                        case 'BinaryExpression': 
+                        case 'LogicalExpression': {
+                            return isConst(node.left) && isConst(node.right);
+                        }
+                        case 'UnaryExpression': {
+                            return isConst(node.argument);
+                        }
+                        default: return false;
+                    }
+                }
+                function checkCondition(node) {
+                    if(node && node.test && isConst(node.test)) {
+                        context.report(node.test, 'Discouraged use of constant as a conditional expression.');                    
+                    }
+                }
+                
+                return {
+                    'IfStatement': checkCondition,
+                    'WhileStatement': checkCondition,
+                    'DoWhileStatement': checkCondition,
+                    'ForStatement': checkCondition,
+                    'ConditionalExpression': checkCondition
                 };
             }
         },

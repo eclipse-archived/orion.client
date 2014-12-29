@@ -402,6 +402,12 @@ define([
 				 	        	                	defaultValue: error, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
+				 	        	                {	id: "validate_no_constant_condition", //$NON-NLS-0$
+				 	        	                	nameKey: "noConstantCondition", //$NON-NLS-0$
+				 	        	                	type: "number", //$NON-NLS-0$
+				 	        	                	defaultValue: error, //$NON-NLS-0$
+				 	        	                	options: severities //$NON-NLS-0$
+				 	        	                },
 				 	        	                {	id: "validate_no_caller", //$NON-NLS-0$
 				 	        	                	nameKey: "noCaller", //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
