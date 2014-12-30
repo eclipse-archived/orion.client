@@ -12,7 +12,9 @@ Orion source code is available in an Eclipse Git repository, and there is also a
 on GitHub. For complete details on getting the source and getting setup to develop Orion,
 see the [Orion wiki](http://wiki.eclipse.org/Orion/Getting_the_source).
 
-Bug reports and patches are welcome in [bugzilla](https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion).
+Bug reports are welcome in [bugzilla](https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion).
+
+Patches are welcome in [Gerrit](http://wiki.eclipse.org/Gerrit).
 
 License
 -------
