@@ -22,6 +22,8 @@ define([
 	"orion/editor/stylers/application_json/syntax",
 	"orion/editor/stylers/text_x-arduino/syntax",
 	"orion/editor/stylers/text_x-csrc/syntax",
+	"orion/editor/stylers/text_x-csharp/syntax",
+	"orion/editor/stylers/text_x-cshtml/syntax",
 	"orion/editor/stylers/text_x-c__src/syntax",
 	"orion/editor/stylers/text_x-dockerfile/syntax",
 	"orion/editor/stylers/text_x-erlang/syntax",
@@ -34,10 +36,12 @@ define([
 	"orion/editor/stylers/text_x-go/syntax",
 	"orion/editor/stylers/text_x-objective-c/syntax",
 	"orion/editor/stylers/text_x-swift/syntax",
+	"orion/editor/stylers/text_x-vb/syntax",
+	"orion/editor/stylers/text_x-vbhtml/syntax",
 	'orion/editor/stylers/application_x-ejs/syntax',
 	'orion/editor/stylers/application_xml/syntax',
 	'orion/editor/stylers/text_x-yaml/syntax',
-], function(Deferred, mStyler, mJS, mJSP, mXQuery, mCss, mHtml, mJson, mArduino, mC, mCpp, mDockerfile, mErlang, mHaml, mJava, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSwift, mEJS, mXml, mYaml) {
+], function(Deferred, mStyler, mJS, mJSP, mXQuery, mCss, mHtml, mJson, mArduino, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSwift, mVB, mVBHTML, mEJS, mXml, mYaml) {
 	var ContentTypes = [{	id: "text/plain",
 			name: "Text",
 			extension: ["txt"],
@@ -166,6 +170,16 @@ define([
 			name: "C",
 			extension: ["c", "h"]
 		},
+		{	id: "text/x-csharp",
+			"extends": "text/plain",
+			name: "C#",
+			extension: ["cs"]
+		},
+		{	id: "text/x-cshtml",
+			"extends": "text/plain",
+			name: "cshtml",
+			extension: ["cshtml"]
+		},
 		{	id: "text/x-c++src",
 			"extends": "text/plain",
 			name: "C++",
@@ -195,6 +209,16 @@ define([
 			"extends": "text/plain",
 			name: "XQuery",
 			extension:  ["xq", "xqy", "xquery"]
+		},
+		{	id: "text/x-vb",
+			"extends": "text/plain",
+			name: "Visual Basic .NET",
+			extension: ["vb"]
+		},
+		{	id: "text/x-vbhtml",
+			"extends": "text/plain",
+			name: "vbhtml",
+			extension: ["vbhtml"]
 		},
 		// Image types
 		{	id: "image/gif",
@@ -308,6 +332,12 @@ define([
 					case "text/x-csrc": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mC.grammars, "orion.c", fileContentType.id); //$NON-NLS-0$
 						break;
+					case "text/x-csharp": //$NON-NLS-0$
+						stylerAdapter = new mStyler.createPatternBasedAdapter(mCS.grammars, "orion.csharp", fileContentType.id); //$NON-NLS-0$
+						break;
+					case "text/x-cshtml": //$NON-NLS-0$
+						stylerAdapter = new mStyler.createPatternBasedAdapter(mCSHTML.grammars, "orion.cshtml", fileContentType.id); //$NON-NLS-0$
+						break;
 					case "text/x-c++src": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mCpp.grammars, "orion.cpp", fileContentType.id); //$NON-NLS-0$
 						break;
@@ -325,6 +355,12 @@ define([
 						break;
 					case "application/xquery": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mXQuery.grammars, "orion.xquery", fileContentType.id); //$NON-NLS-0$
+						break;
+					case "text/x-vb": //$NON-NLS-0$
+						stylerAdapter = new mStyler.createPatternBasedAdapter(mVB.grammars, "orion.vb", fileContentType.id); //$NON-NLS-0$
+						break;
+					case "text/x-vbhtml": //$NON-NLS-0$
+						stylerAdapter = new mStyler.createPatternBasedAdapter(mVBHTML.grammars, "orion.vbhtml", fileContentType.id); //$NON-NLS-0$
 						break;
 				}
 			}
