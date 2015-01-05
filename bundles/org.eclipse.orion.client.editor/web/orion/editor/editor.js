@@ -702,13 +702,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					rangeAnnotations.push(annotations[i]);
 				}
 			}
-			var pt = textView.convert({x: x, y: y}, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
 			var info = {
 				contents: rangeAnnotations,
 				offset: offset,
-				anchor: "left", //$NON-NLS-0$
-				x: pt.x + 10,
-				y: pt.y + 20
+				position: "below", //$NON-NLS-0$
 			};
 			return info;
 		},

@@ -115,7 +115,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 								width: endPos.x - startPos.x, height: height};
 								
 			viewRect = this._view.convert(viewRect, "document", "page"); //$NON-NLS-0$ //$NON-NLS-1$
-			this._anchorRect = {left: viewRect.x, top: viewRect.y, 
+			this._hoverArea = {left: viewRect.x, top: viewRect.y, 
 								width: viewRect.width, height: viewRect.height};
 		},
 		_isInRect: function(rect, x, y) {
@@ -137,6 +137,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		hide: function() {
 			if (!this.isVisible()) { return; }
 			
+			if (this.hover) {
+				this.hover.clearQuickFixes();
+			}
+
 			if (this._hasFocus()) {
 				this._view.focus();
 			}
@@ -152,12 +156,28 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			this._tooltipDiv.style.right = "auto";		 //$NON-NLS-0$	
 			this._tooltipDiv.style.top = "auto";	 //$NON-NLS-0$		
 			this._tooltipDiv.style.bottom = "auto";		 //$NON-NLS-0$	
+			this._tooltipDiv.style.width = "auto";		 //$NON-NLS-0$	
+			this._tooltipDiv.style.height = "auto";		 //$NON-NLS-0$	
 			
+			// cancel any outstanding defers
+			if (this._hoverInfo) {
+				this._hoverInfo.forEach(function(info) {
+					info.cancel();
+				});
+			}
+
+			// Values that can be overridden by returned info			
 			this._target = undefined;
-			this._anchor = undefined;
-			this._anchorRect = undefined;
-			this._hoverRect = undefined;
+			this._offsetX = undefined;
+			this._offsetY = undefined;
+			this._position = undefined;
+			this._hoverArea = undefined;
 			this._preventTooltipClose = undefined;
+
+			// vlaues that are calculated
+			this._hoverInfo = undefined;
+			this._hoverRect = undefined;
+			this._tipRect = undefined;
 		},
 		/**
 		 * @name isVisible
@@ -190,7 +210,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			if (this._hasFocus()){
 				return false;
 			}
-			return !this._isInRect(this._anchorRect, x, y);
+			return !this._isInRect(this._hoverArea, x, y);
 		},
 		/**
 		 * @name OKToHide
@@ -228,12 +248,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		show: function(target, giveFocus) {
 			if (!target) { return; }
 			
-			// Do we need to process this one ?
-			if (this._isInRect(this._hoverRect, target.clientX, target.clientY)) {
-				// TODO: only works when the ttip is below the anchor rect
-				if (target.clientY > (this._anchorRect.top + this._anchorRect.height)) {
-					return;
-				}
+			// Don't process if we're in the hoverArea or tip rects
+			if (this._isInRect(this._hoverArea, target.clientX, target.clientY)
+					|| this._isInRect(this._tipRect, target.clientX, target.clientY)) {
+				return;
 			}
 			
 			var info = target.getTooltipInfo();
@@ -244,11 +262,11 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				this.hide();
 			}
 			
-			// Allow the info to define the anchorRect (for rulers)
-			if (info.anchorRect) {
-				this._anchor = info.anchor;
-				this._anchorRect = info.anchorRect;
-			}
+			// Capture optional positioning
+			this._position = info.position;
+			this._hoverArea = info.hoverArea;
+			this._offsetX = info.offsetX;
+			this._offsetY = info.offsetY;
 			
 			this._target = target;
 			
@@ -263,7 +281,6 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				contents = this._getAnnotationContents(contents);			
 			}
 			
-			var hoverInfo;
 			if (this.hover && info.offset !== undefined && !contents) {
 				var context; 
 				if (info.context){
@@ -271,7 +288,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				} else {
 					context = {offset: info.offset};
 				}
-				hoverInfo = this.hover.computeHoverInfo(context);
+				this._hoverInfo = this.hover.computeHoverInfo(context);
 			}
 			
 			if (typeof contents === "string") { //$NON-NLS-0$
@@ -279,6 +296,9 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			} else if (this._isNode(contents)) {
 				tooltipContents.appendChild(contents);
 			} else if (contents instanceof mProjectionTextModel.ProjectionTextModel) {
+				this._offsetX = -1;  // re-position to match the visible comment
+				this._offsetY = -3;  // re-position to match the visible comment
+				
 				var view = this._view;
 				var options = view.getOptions();
 				options.wrapMode = false;
@@ -306,20 +326,8 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				tooltipContents.style.width = size.width + "px"; //$NON-NLS-0$
 				tooltipContents.style.height = size.height + "px"; //$NON-NLS-0$
 				contentsView.resize();
-			} else if (!(hoverInfo && hoverInfo.length)) {
+			} else if (!(this._hoverInfo && this._hoverInfo.length)) {
 				return;
-			}
-			
-			if (info.anchor === "right") { //$NON-NLS-0$
-				var right = documentElement.clientWidth - info.x;
-				tooltipDiv.style.right = right + "px"; //$NON-NLS-0$
-				tooltipDiv.style.maxWidth = (documentElement.clientWidth - right - 10) + "px"; //$NON-NLS-0$
-			} else {
-				var left = parseInt(this._getNodeStyle(tooltipDiv, "padding-left", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
-				left += parseInt(this._getNodeStyle(tooltipDiv, "border-left-width", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
-				left = info.x - left;
-				tooltipDiv.style.left = left + "px"; //$NON-NLS-0$
-				tooltipDiv.style.maxWidth = (documentElement.clientWidth - left - 10) + "px"; //$NON-NLS-0$
 			}
 			
 			if (info.width) {
@@ -342,12 +350,16 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 			
 			var self = this;
-			if (hoverInfo) {
-				hoverInfo.forEach(function(info) {
+			if (this._hoverInfo) {
+				this._hoverInfo.forEach(function(info) {
 					Deferred.when(info, function (data) {
 						if (data) {
 							if (self._renderContent(tooltipDoc, tooltipContents, data)) {
 								self._showTooltip(giveFocus, tooltipDiv);
+							
+								// Adjust the hoverRect to match the new content
+								var divBounds = lib.bounds(tooltipDiv);
+								self._setHoverRect(self._hoverArea, divBounds);
 							}
 						}
 					}, function(error) {
@@ -370,7 +382,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 
 			// HACK! Fake a contentBox if necessary
-			if (!this._anchorRect) {
+			if (!this._hoverArea) {
 				// Use the whole line
 				var curOffset = this._view.getOffsetAtLocation(this._target.x, this._target.y);
 				if (curOffset >= 0) {
@@ -380,39 +392,70 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 										{ unit: "word", count: 0}); //$NON-NLS-0$
 					this._setContentRange(start, end);
 				} else {
-					this._anchorRect = {
+					this._hoverArea = {
 						left: this._target.clientX-8, top: this._target.clientY -8,
 						width: 16, height: 16
 					};
 				}
 			}
-			var tipDiv = this._tooltipDiv;
 			
-			// Align the tooltip with the anchor rect
+			// Align the tooltip with the hover area
+			var tipDiv = this._tooltipDiv;
 			var divBounds = lib.bounds(tipDiv);
-			if (this._anchor === 'right') { //$NON-NLS-0$
-				var rightEdge = this._anchorRect.left + this._anchorRect.width;
-				tipDiv.style.left = (rightEdge - divBounds.width) + "px"; //$NON-NLS-0$
-				tipDiv.style.top = (this._anchorRect.top + this._anchorRect.height + 5) + "px"; //$NON-NLS-0$
-				this._hoverRect = {
-					left: rightEdge - divBounds.width, top: this._anchorRect.top,
-					width: divBounds.width,
-					height: this._anchorRect.height + divBounds.height + 5
-				};
-			} else {
-				tipDiv.style.left = this._anchorRect.left + "px"; //$NON-NLS-0$
-				tipDiv.style.top = (this._anchorRect.top + this._anchorRect.height + 5) + "px"; //$NON-NLS-0$
-				this._hoverRect = {
-					left: this._anchorRect.left, top: this._anchorRect.top,
-					width: divBounds.width,
-					height: this._anchorRect.height + divBounds.height + 5
-				};
+			if (!this._position) { this._position = "below"; }
+			if (!this._offsetX) { this._offsetX = 0; }
+			if (!this._offsetY) { this._offsetY = 0; }
+
+			var tipRect = {
+				width: divBounds.width,
+				height: divBounds.height
+			}			
+			switch (this._position) {
+				case "left":
+					tipRect.left = this._hoverArea.left - (divBounds.width + this._offsetX);
+					tipRect.top = this._hoverArea.top + this._offsetY;
+				break;
+				case "right":
+					tipRect.left = (this._hoverArea.left + this._hoverArea.width) + this._offsetX;
+					tipRect.top = this._hoverArea.top + this._offsetY;
+				break;
+				case "above":
+					tipRect.left = this._hoverArea.left + this._offsetX;
+					tipRect.top = this._hoverArea.top - (divBounds.height + this._offsetY);
+				break;
+				case "below":
+					tipRect.left = this._hoverArea.left + this._offsetX;
+					tipRect.top = (this._hoverArea.top + this._hoverArea.height) + this._offsetY;
+				break;
 			}
 
+			tipDiv.style.left = tipRect.left + "px"; //$NON-NLS-0$
+			tipDiv.style.top = tipRect.top + "px"; //$NON-NLS-0$
+
+			this._setHoverRect(this._hoverArea, tipRect);
+			
 			this._tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
 
 			if (giveFocus === true) {
 				this._setInitialFocus(tooltipDiv);
+			}
+		},
+		_setHoverRect: function(hoverArea, tipRect) {
+			var left = Math.min(hoverArea.left, tipRect.left);
+			var top = Math.min(hoverArea.top, tipRect.top);
+			var positionRight = hoverArea.left + hoverArea.width;
+			var tipRight = tipRect.left + tipRect.width;
+			var right = Math.max(positionRight, tipRight);
+			var positionBottom = hoverArea.top + hoverArea.height;
+			var tipBottom = tipRect.top + tipRect.height;
+			var bottom = Math.max(positionBottom, tipBottom);
+			
+			this._tipRect = tipRect;
+			this._hoverRect = {
+				left: left,
+				top : top,
+				width: right - left,
+				height: bottom - top
 			}
 		},
 		_setInitialFocus: function(tooltipDiv) {
@@ -567,8 +610,8 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					self.hover.renderQuickFixes(annotation, result);
 				}
 				
-				// Set the anchor rect to the annotation if it's not already set
-				if (!self._anchorRect) {
+				// Set the hover area to the annotation if it's not already set
+				if (!self._hoverArea) {
 					self._setContentRange(annotation.start, annotation.end);
 				}
 				return result;

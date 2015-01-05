@@ -952,19 +952,16 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			tooltip.show({
 				getTooltipInfo: function() {
 					var bounds = lib.bounds(self.widget.parentNode);
-					var anchor = "left"; //$NON-NLS-0$
-					var x = bounds.left + bounds.width + 10;
-					var y = bounds.top + 5;
+					var position = "right"; //$NON-NLS-0$
 					if ((bounds.left + bounds.width) >= document.documentElement.clientWidth){
-						anchor = "right"; //$NON-NLS-0$
-						x -= (bounds.width + 15);
+						position = "left"; //$NON-NLS-0$
 					}
 					var info = {
 						context: {proposal: self.proposals[self.selectedIndex]},
 						offset: 0,
-						anchor: anchor,
-						x: x,
-						y: y,
+						hoverArea: bounds,
+						position: position,
+						offsetX: 10,
 						width: 350,
 						height: bounds.height - 10 ,
 						preventTooltipClose : function() {

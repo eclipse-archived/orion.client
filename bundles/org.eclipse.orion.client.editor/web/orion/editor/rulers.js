@@ -391,6 +391,11 @@ define("orion/editor/rulers", [
 			if (!this._currentClickGroup) {
 				this._setCurrentGroup(-1);
 			}
+
+			if (this._hoverTimeout) {
+				window.clearTimeout(this._hoverTimeout);
+				this._hoverTimeout = null;
+			}
 		},
 		/** @ignore */
 		_getTooltipInfo: function(lineIndex, y) {
@@ -412,30 +417,28 @@ define("orion/editor/rulers", [
 			
 			// TODO: shouldn't this check the length, it'll never be null
 			if (!contents) { return null; }
-			var anchorRect = lib.bounds(this._curElement); //.parentNode);
+			var hoverArea = lib.bounds(this._curElement); //.parentNode);
 			if (typeof contents === 'string') {
 				// Hack for line numbers
-				anchorRect.top = y;
-				anchorRect.height = 1;
+				hoverArea.top = y;
+				hoverArea.height = 1;
 			}
+			
+			var rulerLocation = this.getLocation();
+			// The tooltip is positioned opposite to where the ruler is
+			var position = rulerLocation === "left" ? "right" : "left";
 			var info = {
 				contents: contents,
-				anchor: this.getLocation(),
-				anchorRect: anchorRect
+				position: position,
+				hoverArea: hoverArea
 			};
 			
-			
-			var rect = view.getClientArea();
-			if (this.getOverview() === "document") { //$NON-NLS-0$
-				rect.y = view.convert({y: y}, "view", "document").y; //$NON-NLS-1$ //$NON-NLS-0$
-			} else {
-				rect.y = view.getLocationAtOffset(model.getLineStart(lineIndex)).y;
-			}
-			view.convert(rect, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
-			info.x = rect.x;
-			info.y = rect.y;
-			if (info.anchor === "right") { //$NON-NLS-0$
-				info.x += rect.width;
+			var viewRect = lib.bounds(view._clientDiv);
+
+			info.offsetX = viewRect.left - (hoverArea.left + hoverArea.width);
+			info.offsetY = hoverArea.height;
+			if (info.position === "left") { //$NON-NLS-0$
+				info.offsetX = 20;
 			}
 			return info;
 		},

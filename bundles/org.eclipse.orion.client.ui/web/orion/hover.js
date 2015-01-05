@@ -22,6 +22,8 @@ define ([
 		this.inputManager = hoverFactory.inputManager;
 		this.serviceRegistry = hoverFactory.serviceRegistry;
 		this.commandRegistry = hoverFactory.commandRegistry;
+		
+		this._qfToolbars = [];
 	}
 	
 	Hover.prototype = {
@@ -43,6 +45,13 @@ define ([
 				sanitize: true
 			});
 		},
+		
+		clearQuickFixes: function() {
+			this._qfToolbars.forEach(function(qfTB) {
+				qfTB.destroy();
+			});
+			this._qfToolbars = [];
+		},
 				
 		renderQuickFixes: function(annotation, parentDiv) {
 			if  (!annotation || !parentDiv){
@@ -51,6 +60,7 @@ define ([
 
 			var actionsDiv = document.createElement("div"); //$NON-NLS-0$
 			actionsDiv.className = "commandList"; //$NON-NLS-0$ 
+//			this._qfToolbars.push(actionsDiv);
 			
 			var nodeList = [];
 			var metadata = this.inputManager.getFileMetadata();
