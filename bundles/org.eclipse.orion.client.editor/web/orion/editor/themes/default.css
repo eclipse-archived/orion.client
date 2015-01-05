@@ -29,6 +29,10 @@
 	color: #7F9FBF;
 }
 
+.meta.preprocessor {
+	color: #A4A4A4;
+}
+
 .markup.bold {
 	font-weight: bold;
 }
