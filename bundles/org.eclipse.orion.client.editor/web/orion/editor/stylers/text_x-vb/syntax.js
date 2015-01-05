@@ -56,6 +56,10 @@ define("orion/editor/stylers/text_x-vb/syntax", ["orion/editor/stylers/lib/synta
 		id: "orion.vb", //$NON-NLS-0$
 		contentTypes: ["text/x-vb"], //$NON-NLS-0$
 		patterns: [
+			{
+				match: "^\\s*#(?:" + preprocessorDirectives.join("|") + ")\\b[^$]*", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				name: "meta.preprocessor.vb" //$NON-NLS-0$
+			},
 			{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
 			{include: "#doc"}, //$NON-NLS-0$
 			{include: "#comment"}, //$NON-NLS-0$
@@ -67,10 +71,6 @@ define("orion/editor/stylers/text_x-vb/syntax", ["orion/editor/stylers/lib/synta
 			{include: "orion.lib#parenthesis_close"}, //$NON-NLS-0$
 			{include: "orion.lib#number_decimal"}, //$NON-NLS-0$
 			{include: "#number_hex"}, //$NON-NLS-0$
-			{
-				match: "^\\s*#(?:" + preprocessorDirectives.join("|") + ")\\b[^$]*", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "meta.preprocessor.vb" //$NON-NLS-0$
-			},
 			{
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "keyword.control.vb" //$NON-NLS-0$
