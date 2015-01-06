@@ -703,7 +703,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 					} else {
 						var newPattern = copy(current);
 						newPattern.index = indexCounter[0]++;
-						resultObject[current.id] = newPattern;
+						resultObject[current.qualifiedId] = newPattern;
 					}
 				}
 			}.bind(this));
@@ -755,10 +755,10 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				if (searchExp.test(current.qualifiedId)) {
 					if (current.include) {
 						this._processInclude(current, indexCounter, resultObject);
-					} else if (!resultObject[current.id]) {
+					} else if (!resultObject[current.qualifiedId]) {
 						var newPattern = copy(current);
 						newPattern.index = indexCounter[0]++;
-						resultObject[current.id] = newPattern;
+						resultObject[current.qualifiedId] = newPattern;
 					}
 				}
 			}.bind(this));

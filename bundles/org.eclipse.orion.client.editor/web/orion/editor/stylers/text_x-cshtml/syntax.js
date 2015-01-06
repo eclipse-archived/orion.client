@@ -23,14 +23,14 @@ define("orion/editor/stylers/text_x-cshtml/syntax", [
 		id: "orion.cshtml", //$NON-NLS-0$
 		contentTypes: ["text/x-cshtml"], //$NON-NLS-0$
 		patterns: [
-			{include: "#cshtmlComment"}, //$NON-NLS-0$
+			{include: "#comment"}, //$NON-NLS-0$
 			{include: "#codeBlock"}, //$NON-NLS-0$
 			{include: "#expression"}, //$NON-NLS-0$
 			{include: "#reference"}, //$NON-NLS-0$
 			{include: "orion.html"}, //$NON-NLS-0$
 		],
 		repository: {
-			cshtmlComment: {
+			comment: {
 				begin: {match: "@\\*", literal: "@*"}, //$NON-NLS-1$ //$NON-NLS-0$
 				end: {match: "\\*@", literal: "*@"}, //$NON-NLS-1$ //$NON-NLS-0$
 				name: "comment.block.cshtml", //$NON-NLS-0$
