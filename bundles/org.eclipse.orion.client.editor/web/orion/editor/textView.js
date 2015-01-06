@@ -982,7 +982,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 								}
 							}
 						}
-						if (util.isIE) {
+						if (util.isIE < 11) {
 							var window = getWindow(child.ownerDocument);
 							var xFactor = window.screen.logicalXDPI / window.screen.deviceXDPI;
 							var yFactor = window.screen.logicalYDPI / window.screen.deviceYDPI;
@@ -1247,8 +1247,8 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				var nodeLength = self._nodeLength(lineChild);
 				var document = child.ownerDocument;
 				var window = getWindow(document);
-				var xFactor = util.isIE ? window.screen.logicalXDPI / window.screen.deviceXDPI : 1;
-				var yFactor = util.isIE ? window.screen.logicalYDPI / window.screen.deviceYDPI : 1;
+				var xFactor = util.isIE < 11 ? window.screen.logicalXDPI / window.screen.deviceXDPI : 1;
+				var yFactor = util.isIE < 11 ? window.screen.logicalYDPI / window.screen.deviceYDPI : 1;
 				var rangeLeft, rangeTop, rangeRight, rangeBottom;
 				var range, start, end;
 				var rl = rect.left + lineRect.left, fixIE8, rects1;
