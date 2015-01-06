@@ -32,7 +32,8 @@ define(['orion/Deferred'], function(Deferred) {
 	ThemePreferences.prototype = /** @lends orion.editor.ThemePreferences.prototype */ {
 		_initialize: function(themeInfo, themeData, prefs) {
 			var styles, selected;
-			var prefsVer = prefs.get('version'); //$NON-NLS-0$
+			var versionKey = themeInfo.styleset + "Version"; //$NON-NLS-0$
+			var prefsVer = prefs.get(versionKey);
 			var currentVer = 0;
 			try {
 				prefsVer = parseFloat(prefsVer);
@@ -64,7 +65,7 @@ define(['orion/Deferred'], function(Deferred) {
 				prefs.put('selected', JSON.stringify(selected)); //$NON-NLS-0$
 			}
 			// prefs have now been updated
-			prefs.put('version', this._themeVersion); //$NON-NLS-0$
+			prefs.put(versionKey, this._themeVersion);
 		},
 		_convertThemeStylesToHierarchicalFormat: function(styles) {
 			return {
@@ -279,7 +280,8 @@ define(['orion/Deferred'], function(Deferred) {
 					styles = this._parse(prefs.get(themeInfo.styleset));
 				}
 				themeData.processSettings(this._getCurrentStyle(styles, selected[themeInfo.selectedKey]));
-				prefs.put('version', this._themeVersion); //$NON-NLS-0$
+				var versionKey = themeInfo.styleset + "Version"; //$NON-NLS-0$
+				prefs.put(versionKey, this._themeVersion);
 			}.bind(this));
 		},
 		setFontSize: function(size) {
