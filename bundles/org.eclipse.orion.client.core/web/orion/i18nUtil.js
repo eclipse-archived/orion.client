@@ -11,9 +11,6 @@
 /*eslint-env browser, amd*/
 /*global requirejs*/
 define(['require', 'orion/Deferred'], function(require, Deferred) {
-
-	var messageBundleDeffereds = {};
-
 	/**
 	 * Performs string substitution. Can be invoked in 2 ways:
 	 *
@@ -35,85 +32,14 @@ define(['require', 'orion/Deferred'], function(require, Deferred) {
 		});
 	}
 
-	function bundleKey(name) {
-		var userLocale = typeof navigator !== "undefined" ? (navigator.language || navigator.userLanguage) : null;
-		if(userLocale) {
-			return 'orion/messageBundle/' + userLocale.toLowerCase() + "/" + name;
-		}
-		return 'orion/messageBundle/' + name;
-	}
-
-	function getCachedMessageBundle(name) {
-		var item = localStorage.getItem(bundleKey(name));
-		if (item) {
-			var bundle = JSON.parse(item);
-			if (bundle._expires && bundle._expires > new Date().getTime()) {
-				delete bundle._expires;
-				return bundle;
-			}
-		}
-		return null;
-	}
-
-	function setCachedMessageBundle(name, bundle) {
-		bundle._expires = new Date().getTime() + 1000 * 900; //15 minutes
-		localStorage.setItem(bundleKey(name), JSON.stringify(bundle));
-		delete bundle._expires;
-	}
-
 	function getMessageBundle(name) {
-		if (messageBundleDeffereds[name]) {
-			return messageBundleDeffereds[name];
-		}
-
 		var d = new Deferred();
-		messageBundleDeffereds[name] = d;
-
-		var cached = getCachedMessageBundle(name);
-		if (cached) {
-				d.resolve(cached);
-				return d;
-		}
-
-		// Wrapper for require() that normalizes away the IE quirk of never calling `errback`,
-		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=428797
-		function _require(deps, callback, errback) {
-			require(deps, function(bundle) {
-				if (typeof bundle === "undefined") { // IE
-					errback(new Error(name));
-				} else {
-					callback.apply(null, Array.prototype.slice.call(arguments));
-				}
-			}, errback);
-		}
-
-		function _resolveMessageBundle(/*bundle*/) {
-			require(['i18n!' + name], function(bundle) { //$NON-NLS-0$
-				if (bundle) {
-					setCachedMessageBundle(name, bundle);
-				}
-				d.resolve(bundle);
-			});
-		}
-
-		function _rejectMessageBundle(error) {
-			d.reject(error);
-		}
-
-		try {
-			// First try to require `name` directly in case it's a bundle that ships with Orion
-			_require([name], _resolveMessageBundle, function(/*error*/) {
-				// Failed; fallback to orion/i18n to check the service registry for this bundle.
-				// But first unload `name` from the loader, so orion/i18n can start fresh.
-				requirejs.undef(name);
-				_require(['orion/i18n!' + name], _resolveMessageBundle, _rejectMessageBundle); //$NON-NLS-0$
-			});
-		} catch (ignore) {
-			// TODO require() never throws so this probably never runs
-			_require(['orion/i18n!' + name], _resolveMessageBundle, _rejectMessageBundle); //$NON-NLS-0$
-		}
+		require(['i18n!' + name], function(bundle) { //$NON-NLS-0$
+			d.resolve(bundle);
+		});
 		return d;
 	}
+	
 	return {
 		getMessageBundle: getMessageBundle,
 		formatMessage: formatMessage
