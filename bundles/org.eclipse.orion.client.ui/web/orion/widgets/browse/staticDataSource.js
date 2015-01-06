@@ -212,7 +212,7 @@ define([
 		},
 		{	id: "text/x-vb",
 			"extends": "text/plain",
-			name: "Visual Basic .NET",
+			name: "VB.NET",
 			extension: ["vb"]
 		},
 		{	id: "text/x-vbhtml",

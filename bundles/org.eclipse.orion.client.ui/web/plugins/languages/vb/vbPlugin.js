@@ -16,20 +16,20 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-vb/syntax', 'orion/editor/s
 	 * Plug-in headers
 	 */
 	var headers = {
-		name: "Orion Visual Basic .NET Tool Support",
+		name: "Orion VB.NET Tool Support",
 		version: "1.0",
-		description: "This plugin provides Visual Basic .NET tools support for Orion."
+		description: "This plugin provides VB.NET tools support for Orion."
 	};
 	var provider = new PluginProvider(headers);
 
 	/**
-	 * Register the Visual Basic .NET content types
+	 * Register the VB.NET content types
 	 */
 	provider.registerServiceProvider("orion.core.contenttype", {}, {
 		contentTypes: [
 			{	id: "text/x-vb",
 				"extends": "text/plain",
-				name: "Visual Basic .NET",
+				name: "VB.NET",
 				extension: ["vb"]
 			}
 		] 
