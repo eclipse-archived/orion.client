@@ -695,6 +695,9 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.core-sprite-play,
+.core-sprite-stop,
+.core-sprite-open,
 .core-sprite-debug,
 .core-sprite-download,
 .core-sprite-collected-errors,
@@ -760,6 +763,9 @@
 .core-sprite-collected-errors:before{ content:'\E054'; }
 .core-sprite-download:before{ content:'\E036'; }
 .core-sprite-debug:before{ content:'\E056'; }
+.core-sprite-play:before{ content:'\E057'; }
+.core-sprite-stop:before{ content:'\E058'; }
+.core-sprite-open:before{ content:'\E059'; }
 
 /* icons for file types - possibly more to come - at least one for images */ 
 
