@@ -1345,19 +1345,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					tootlip: deployService.tooltip,
 					id: "orion.project.deploy." + deployService.id,
 					callback: function(data){
-						var selections = explorer.selection.getSelections();
-						//when there is no selection take tree root
-						var item = (selections && selections.length>0) ? forceSingleItem(selections) : explorer.treeRoot;
+						var item = explorer.treeRoot;
 						var project = item.Project;
-
-						var appPath;
-						if(item.Location){
-							//Folder is selected
-							appPath = item.Location.replace(project.ContentLocation, "");
-						} else {
-							//Project root is selected
-							appPath = "";
-						}
 
 						var func = arguments.callee;
 						var params = handleParamsInCommand(func, data, deployService.tooltip);
@@ -1365,7 +1354,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 							return;
 						}
 
-						runDeploy({Params: params, Path: appPath}, {
+						runDeploy({Params: params, Path: ""}, {
 							project: project,
 							deployService: deployService,
 							data: data,
