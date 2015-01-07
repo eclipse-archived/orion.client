@@ -648,8 +648,6 @@ define([
 		"no-redeclare": {
 		    description: 'Warn when variable or function is redeclared',
 		    rule: function(context) {
-                "use strict"; //$NON-NLS-0$
-
                 function reportRedeclaration(node, name) {
                     context.report(node, "'${0}' is already defined.", {0:name});
                 }
@@ -843,7 +841,6 @@ define([
                     });
                     return declaredGlobal;
                 }
-                "use strict";  //$NON-NLS-0$
             
                 return {
                     "Program": function(/*node*/) {  //$NON-NLS-0$
@@ -1006,9 +1003,14 @@ define([
         					if (!variable.defs.length || variable.defs[0].type === "Parameter") { // Don't care about parameters  //$NON-NLS-0$
         						return;
         					}
-        					var references = getReferences(scope, variable), id = variable.defs[0].node.id;
+        					var node = variable.defs[0].node;
+        					var references = getReferences(scope, variable), id = node.id;
         					if (!references.length) {
-        						context.report(id, "'${0}' is never used.", {0:id.name, nls: 'no-unused-vars-unused'});
+        					    if(node.type === 'FunctionDeclaration') {
+        					       context.report(id, "Function '${0}' is never used.", {0:id.name, nls: 'no-unused-vars-unused-funcdecl'});
+        					    } else {
+        						   context.report(id, "'${0}' is never used.", {0:id.name, nls: 'no-unused-vars-unused'});
+        						}
         					} else if (!references.some(isRead)) {
         						context.report(id, "'${0}' is never read.", {0:id.name, nls: 'no-unused-vars-unread'});
         					}

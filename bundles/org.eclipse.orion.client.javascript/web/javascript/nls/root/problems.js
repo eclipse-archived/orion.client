@@ -44,6 +44,7 @@ define({
 	'no-unreachable' : 'Unreachable code.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-unused-params' : 'Parameter \'${0}\' is never used.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-unused-vars-unused' : '\'${0}\' is unused.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-unused-vars-unused-funcdecl' : 'Function \'${0}\' is unused.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-unused-vars-unread' : '\'${0}\' is unread.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-use-before-define': '\'${0}\' was used before it was defined.', //$NON-NLS-0$  //$NON-NLS-1$
 	'radix': 'Missing radix parameter.', //$NON-NLS-0$  //$NON-NLS-1$

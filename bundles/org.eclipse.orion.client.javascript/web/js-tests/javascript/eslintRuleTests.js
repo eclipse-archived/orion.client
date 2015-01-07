@@ -4040,7 +4040,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "'f' is never used.");
+    			assert.equal(messages[0].message, "Function 'f' is never used.");
     			assert.equal(messages[0].node.type, "Identifier");
     		});
     

@@ -317,6 +317,22 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
+        			nameKey : 'unusedFuncDeclFixName',  //$NON-NLS-0$
+        			tooltipKey : 'unusedFuncDeclFixTooltip',  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "unused.func.decl.fix",  //$NON-NLS-0$
+        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
+        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-unused-vars-unused-funcdecl)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
+				}
+		);
+		
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+				quickFixComputer, 
+				{
         			nameKey : 'noCommaDangleFixName',  //$NON-NLS-0$
         			tooltipKey : 'noCommaDangleFixTooltip',  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",

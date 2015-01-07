@@ -407,6 +407,18 @@ define([
                 return null;
             });
         },
+        "no-unused-vars-unused-funcdecl": function(editorContext, annotation, astManager) {
+            return astManager.getAST(editorContext).then(function(ast) {
+                var node = Finder.findNode(annotation.start, ast, {parents:true});
+                if(node && node.parents && node.parents.length > 0) {
+                    var decl = node.parents.pop();
+                    if(decl.type === 'FunctionDeclaration') {
+                        return editorContext.setText('', decl.range[0], decl.range[1]);
+                    }
+                }
+                return null;
+            });
+        },
         /** alternate id for the no-unsed-params linting fix */
         "no-unused-params-expr": function(editorContext, annotation, astManager) {
             return astManager.getAST(editorContext).then(function(ast) {

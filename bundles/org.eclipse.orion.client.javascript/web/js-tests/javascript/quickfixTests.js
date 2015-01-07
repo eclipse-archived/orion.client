@@ -521,5 +521,25 @@ define([
 		                      expected: expected,
 		                      pid: 'no-unused-vars-unused'});
 		});
+		it("Test no-unused-vars-unused-funcdecl-1", function() {
+		    var rule = createTestRule('no-unused-vars');
+		    var expected = {value: "",
+		                    start: 0, 
+		                    end: 15};
+		    return getFixes({buffer: 'function f() {}', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'no-unused-vars-unused-funcdecl'});
+		});
+		it("Test no-unused-vars-unused-funcdecl-2", function() {
+		    var rule = createTestRule('no-unused-vars');
+		    var expected = {value: "",
+		                    start: 26, 
+		                    end: 41};
+		    return getFixes({buffer: 'var a = {one: function() {function f() {}}}', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'no-unused-vars-unused-funcdecl'});
+		});
 	});
 });

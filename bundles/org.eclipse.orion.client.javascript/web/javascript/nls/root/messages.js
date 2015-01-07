@@ -82,6 +82,8 @@ define({//Default message bundle
 	'radix': 'Missing radix parameter to parseInt()', //$NON-NLS-0$ //$NON-NLS-1$
 	'unusedVarsUnusedFixName': 'Remove unused variable', //$NON-NLS-0$ //$NON-NLS-1$
 	'unusedVarsUnusedFixTooltip': 'Remove the unused variable, keeping side effects', //$NON-NLS-0$ //$NON-NLS-1$
+	'unusedFuncDeclFixName': 'Remove unused function', //$NON-NLS-0$ //$NON-NLS-1$
+	'unusedFuncDeclFixTooltip': 'Remove the unused function, keeping side effects', //$NON-NLS-0$ //$NON-NLS-1$
 	'noCommaDangleFixName': 'Remove extra \',\'', //$NON-NLS-0$ //$NON-NLS-1$
 	'noCommaDangleFixTooltip': 'Remove the extra comma', //$NON-NLS-0$ //$NON-NLS-1$
 });
