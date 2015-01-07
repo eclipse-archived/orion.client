@@ -89,6 +89,7 @@ define([
 
 				this._appLink = lib.$(".appLink", this._domNode); //$NON-NLS-0$
 				this._appLink.addEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
+				this._setNodeTooltip(this._appLink, messages["openAppTooltip"]); //$NON-NLS-0$
 				this._disableLink(this._appLink);
 				
 			} else {
