@@ -630,7 +630,8 @@ define([
 			this.node.className = "orionProject";
 			this.projectData = projectData;
 
-			function renderSections(sectionsOrder, sectionNames, emptyMessages){
+			function renderSections(sectionsOrder, sectionNames){
+				var emptyMessage = null;
 				sectionNames = sectionNames || {};
 				sectionsOrder.forEach(function(sectionName){
 					var span;
@@ -638,7 +639,7 @@ define([
 						case "projectInfo":
 							span = document.createElement("span");
 							this.node.appendChild(span);
-							this.renderProjectInfo(span, sectionNames[sectionName], emptyMessages[sectionName]);
+							this.renderProjectInfo(span, sectionNames[sectionName]);
 							break;
 						case "additionalInfo":
 							span = document.createElement("span");
@@ -648,13 +649,14 @@ define([
 						case "deployment":
 							span = document.createElement("span");
 							this.node.appendChild(span);
-							this.renderLaunchConfigurations(span, null, sectionNames[sectionName], emptyMessages[sectionName]);
+							emptyMessage = i18nUtil.formatMessage(messages["emptyDeploymentInfoMessage"], "\u25ba"); //$NON-NLS-1$ //$NON-NLS-0$ //insert Unicode Play icon into message
+							this.renderLaunchConfigurations(span, null, sectionNames[sectionName], emptyMessage);
 							break;
 						case "dependencies":
 							span = document.createElement("span");
 							span.id = "projectDependenciesNode";
 							this.node.appendChild(span);
-							this.renderDependencies(span, sectionNames[sectionName], emptyMessages[sectionName]);
+							this.renderDependencies(span, sectionNames[sectionName]);
 							break;
 					}
 				}.bind(this));
@@ -664,10 +666,9 @@ define([
 			this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){
 				sectionsOrder = sectionsOrderPrefs.get("projectView") || sectionsOrder;
 				var sectionsNames = sectionsOrderPrefs.get("projectViewNames") || [];
-				var emptyMessages = sectionsOrderPrefs.get("emptyMessages") || [];
-				renderSections.apply(this, [sectionsOrder, sectionsNames, emptyMessages]);
+				renderSections.apply(this, [sectionsOrder, sectionsNames]);
 			}.bind(this), function(error){
-				renderSections.apply(this, [sectionsOrder, {}, {}]);
+				renderSections.apply(this, [sectionsOrder, {}]);
 				window.console.error(error);
 			}.bind(this));
 
