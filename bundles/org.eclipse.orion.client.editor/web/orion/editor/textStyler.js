@@ -265,6 +265,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			}
 			return result ? result[0] : null;
 		},
+		getBlockFoldBounds: function(block, model) {
+			return {start: block.start, end: block.end};
+		},
 		getBlockStartStyle: function(block, text, index, _styles) {
 			/* pattern-defined blocks specify a start style by either a capture or name */
 			var result;
@@ -989,7 +992,8 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			if (!viewModel.getBaseModel) { return; }
 			var baseModel = viewModel.getBaseModel();
 			blocks.forEach(function(block) {
-				var annotation = this._createFoldingAnnotation(viewModel, baseModel, block.start, block.end);
+				var foldBounds = this._stylerAdapter.getBlockFoldBounds(block, baseModel);
+				var annotation = this._createFoldingAnnotation(viewModel, baseModel, foldBounds.start, foldBounds.end);
 				if (annotation) {
 					_add.push(annotation);
 				}
@@ -1461,10 +1465,14 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 					if (doFolding && annotation.type === mAnnotations.AnnotationType.ANNOTATION_FOLDING) {
 						allFolding.push(annotation);
 						block = this._findBlock(parent, annotation.start);
-						if (!(block && annotation.start === block.start && annotation.end === block.end)) {
-							remove.push(annotation);
-							annotation.expand();
-						} else {
+						while (block) {
+							var foldBounds = this._stylerAdapter.getBlockFoldBounds(block, baseModel);
+							if (annotation.start === foldBounds.start && annotation.end === foldBounds.end) {
+								break;
+							}
+							block = block.parent;
+						}
+						if (block && annotation.start === foldBounds.start && annotation.end === foldBounds.end) {
 							var annotationStart = annotation.start;
 							var annotationEnd = annotation.end;
 							if (annotationStart > start) {
@@ -1484,6 +1492,9 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 									remove.push(annotation);
 								}
 							}
+						} else {
+							remove.push(annotation);
+							annotation.expand();
 						}
 					} else if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_TASK) {
 						if (ancestorBlock.start <= annotation.start && annotation.end <= ancestorBlock.end) {
@@ -1623,10 +1634,11 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 		_updateFolding: function(block, baseModel, viewModel, allFolding, _add, start, end) {
 			start = start || block.start;
 			end = end || block.end;
-			if (!block.doNotFold && block.start <= end && start <= block.end) {
-				var index = binarySearch(allFolding, block.start, true);
-				if (!(index < allFolding.length && allFolding[index].start === block.start && allFolding[index].end === block.end)) {
-					var annotation = this._createFoldingAnnotation(viewModel, baseModel, block.start, block.end);
+			var foldBounds = this._stylerAdapter.getBlockFoldBounds(block, baseModel);
+			if (!block.doNotFold && foldBounds.start <= end && start <= foldBounds.end) {
+				var index = binarySearch(allFolding, foldBounds.start, true);
+				if (!(index < allFolding.length && allFolding[index].start === foldBounds.start && allFolding[index].end === foldBounds.end)) {
+					var annotation = this._createFoldingAnnotation(viewModel, baseModel, foldBounds.start, foldBounds.end);
 					if (annotation) {
 						_add.push(annotation);
 					}

@@ -91,7 +91,7 @@ define([
 
 	function processRefLinks(string) {
 		/* add ref ids on successfully-resolved ref links */
-		string = string.replace(refLinkIDRegex, function(match, p1) {
+		string = string.replace(refLinkIDRegex, /* @callback */ function(match, p1) {
 			return '" ' + ATTRIBUTE_REFID + '="' + p1 + '"'; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		});
 
@@ -351,7 +351,7 @@ define([
 					/* compute the block's contentStart bound */
 
 					/* marked.Lexer.rules.normal.bullet is not global, so cannot set its lastIndex */
-					var tempText = text.substring(start);
+					tempText = text.substring(start);
 					match = marked.Lexer.rules.normal.bullet.exec(tempText);
 					contentStart = start + match.index + match[0].length;
 					index = Math.max(index, contentStart);
@@ -484,8 +484,12 @@ define([
 		getBlockEndStyle: function(/*block, text, endIndex, _styles*/) {
 			return null;
 		},
-		getBlockStartStyle: function(/*block, text, index, _styles*/) {
-			return null;
+		getBlockFoldBounds: function(block, model) {
+			var result = {start: block.start, end: block.end};
+			if (model.getText(block.end - 1, block.end) === this._NEWLINE) {
+				result.end--;
+			}
+			return result;
 		},
 		getBlockForElement: function(element) {
 			if (element === previewDiv) {
@@ -496,6 +500,9 @@ define([
 				return this.getBlockWithId(id);
 			}
 			return this.getBlockForElement(element.parentElement);
+		},
+		getBlockStartStyle: function(/*block, text, index, _styles*/) {
+			return null;
 		},
 		getBlockWithId: function(elementId) {
 			return this._blocksCache[elementId];
