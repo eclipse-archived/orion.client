@@ -555,12 +555,13 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					launchConfToPass.Params = params;
 
 					projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
+						var progressMessage = start ? messages["starting"] : messages["stopping"]; //$NON-NLS-1$ //$NON-NLS-0$
 						if(service && (start ? service.start : service.stop)){
 							if(sharedLaunchConfigurationDispatcher){
-								item.status = {State: "PROGRESS"};
+								item.status = {State: "PROGRESS", ShortMessage: progressMessage}; //$NON-NLS-0$
 								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
 							}
-							progress.showWhile((start ? service.start : service.stop)(launchConfToPass).then(function(result){
+							(start ? service.start : service.stop)(launchConfToPass).then(function(result){
 								item.status = result;
 								if(sharedLaunchConfigurationDispatcher){
 									sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
@@ -614,7 +615,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 								} else {
 									errorHandler(error);
 								}
-							}), (start ? "Starting application" : "Stopping application"));
+							});
 						}
 					});
 				},
