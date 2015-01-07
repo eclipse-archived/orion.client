@@ -2966,41 +2966,32 @@ define([
                 assert.equal(messages[0].message, "Reserved words should not be used as property keys.");
                 assert.equal(messages[0].node.type, "Identifier");
             });
-            it("should flag using public keyword literal", function() {
+            it("should not flag using public keyword literal", function() {
                 var topic = "var a = {'public':1}";
     
                 var config = { rules: {} };
                 config.rules[RULE_ID] = 1;
     
                 var messages = eslint.verify(topic, config);
-                assert.equal(messages.length, 1);
-                assert.equal(messages[0].ruleId, RULE_ID);
-                assert.equal(messages[0].message, "Reserved words should not be used as property keys.");
-                assert.equal(messages[0].node.type, "Literal");
+                assert.equal(messages.length, 0);
             });
-            it("should flag using function keyword literal", function() {
+            it("should not flag using function keyword literal", function() {
                 var topic = "var a = {'function':1}";
     
                 var config = { rules: {} };
                 config.rules[RULE_ID] = 1;
     
                 var messages = eslint.verify(topic, config);
-                assert.equal(messages.length, 1);
-                assert.equal(messages[0].ruleId, RULE_ID);
-                assert.equal(messages[0].message, "Reserved words should not be used as property keys.");
-                assert.equal(messages[0].node.type, "Literal");
+                assert.equal(messages.length, 0);
             });
-            it("should flag using for keyword literal", function() {
+            it("should not flag using for keyword literal", function() {
                 var topic = "var a = {'for':1}";
     
                 var config = { rules: {} };
                 config.rules[RULE_ID] = 1;
     
                 var messages = eslint.verify(topic, config);
-                assert.equal(messages.length, 1);
-                assert.equal(messages[0].ruleId, RULE_ID);
-                assert.equal(messages[0].message, "Reserved words should not be used as property keys.");
-                assert.equal(messages[0].node.type, "Literal");
+                assert.equal(messages.length, 0);
             });
         });
 //NO-SHADOW --------------------------------------------------------    	

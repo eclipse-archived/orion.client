@@ -720,9 +720,6 @@ define([
                                 var prop = node.properties[i];
                                 if(prop.key.type === 'Identifier' && JsSyntax.keywords.indexOf(prop.key.name) > -1) {
                                     context.report(prop.key, 'Reserved words should not be used as property keys.');
-                                } else if(JsSyntax.keywords.indexOf(prop.key.value) > -1) {
-                                    //literal
-                                    context.report(prop.key, 'Reserved words should not be used as property keys.');
                                 }
                             }
                         }
