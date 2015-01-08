@@ -12,12 +12,12 @@
 }
 
 .runBarWrapper .disabled {
-	opacity: 0.3;
+	opacity: 0.15;
 }
 
 .runBarWrapper .disabled:hover {
 	color: #555;
-	opacity: 0.3;
+	opacity: 0.15;
 	cursor: default;
 }
 
@@ -89,8 +89,9 @@
 	background: none;
 	border: 1px solid transparent;
 	border-radius: 3px;
-	padding: 1px;
 	margin: 0 2px;
+	outline: none;
+	padding: 1px;
 	transition: opacity 0.3s ease;
 }
 
