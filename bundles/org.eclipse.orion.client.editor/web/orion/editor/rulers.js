@@ -256,7 +256,11 @@ define("orion/editor/rulers", [
 			this._multiAnnotationOverlay = annotation;
 		},
 		/**
-		 * This event is sent when the user clicks a line annotation.
+		 * This event is sent when the user clicks a line annotation. We select an annotation on the line using
+		 * the following logic:
+		 * 1) If no selection or selection is on another line, select the first annotation
+		 * 2) If an annotation is selected, select the next annotation in the model
+		 * 3) If there is a selection that does not match an annotation, select the first annotation after the selection start
 		 *
 		 * @event
 		 * @param {Number} lineIndex the line index of the annotation under the pointer.
@@ -265,56 +269,69 @@ define("orion/editor/rulers", [
 		onClick: function(lineIndex, e) {
 			if (lineIndex === undefined) { return; }
 			var view = this._view;
+			
 			var model = view.getModel();
-			var baseModel = model;
-			var start = model.getLineStart(lineIndex), lineStart = start;
-			var end = start;
+			var lineStart = model.getLineStart(lineIndex);
+			var lineEnd = model.getLineEnd(lineIndex, true);
+			var selectionStart = view.getSelection().start;
+			var selectionEnd = view.getSelection().end;
+			
 			var annotationModel = this._annotationModel;
-			if (annotationModel) {
-				var selection = view.getSelection();
-				end = model.getLineEnd(lineIndex, true);
-				if (start <= selection.start && selection.start < end) {
-					start = selection.start;
-				}
+			var annotation, start, end;
+			if (annotationModel){
+
 				if (model.getBaseModel) {
-					start = model.mapOffset(start);
-					end = model.mapOffset(end);
-					baseModel = model.getBaseModel();
+					lineStart = model.mapOffset(lineStart);
+					lineEnd = model.mapOffset(lineEnd);
+					selectionStart = model.mapOffset(selectionStart);
+					selectionEnd = model.mapOffset(selectionEnd);
 				}
-				var annotation, iter = annotationModel.getAnnotations(start, end);
-				var clickedAnnotation = null;
-				while (!annotation && iter.hasNext()) {
-					var a = iter.next();
-					if (!this.isAnnotationTypeVisible(a.type)) { continue; }
-					clickedAnnotation = a;
-					if (a.start <= start) { continue; }
-					annotation = a; 
-				}
-				if (clickedAnnotation && clickedAnnotation.groupId !== undefined) {
-					if (this._currentClickGroup === clickedAnnotation.groupId) {
-						this._currentClickGroup = null;
-					} else {
-						this._currentClickGroup = clickedAnnotation.groupId;
+				
+				var self = this;
+				annotation = this._findNextAnnotation(annotationModel, lineStart, lineEnd, selectionStart, selectionEnd, 
+					function(annotationType){
+						return self.isAnnotationTypeVisible(annotationType)
 					}
-					this._setCurrentGroup(lineIndex);
-				} 
-				if (annotation && baseModel.getLineAtOffset(annotation.start) === baseModel.getLineAtOffset(start)) {
-					start = annotation.start;
-					end = annotation.end;
-				} else {
-					end = start = lineStart;
-				}
+				);
+				// Select the annotation or the start of the line
+				start = annotation ? annotation.start : lineStart;
+				end = annotation ? annotation.end : lineStart;
 				
 				if (model.getBaseModel) {
 					start = model.mapOffset(start, true);
 					end = model.mapOffset(end, true);
 				}
+				
+				// TODO What does this code do
+				if (annotation && annotation.groupId !== undefined) {
+					if (this._currentClickGroup === annotation.groupId) {
+						this._currentClickGroup = null;
+					} else {
+						this._currentClickGroup = annotation.groupId;
+					}
+					this._setCurrentGroup(lineIndex);
+				}
 			}
+			
+			// Set the selection before opening the tooltip otherwise the tooltip will be closed immediately
+			this._view.setSelection(end, start, 1/3, function(){});
+			
+			// Open the tooltip for the selected annotation in the same location as the multi-annotation ruler tooltip.
 			var tooltip = mTooltip.Tooltip.getTooltip(this._view);
 			if (tooltip) {
-				tooltip.hide();
+				if (annotation && this.getLocation() === "left"){ //$NON-NLS-0$
+					var self = this;
+					tooltip.show({
+						clientX: e.clientX,
+						clientY: e.clientY,
+						getTooltipInfo: function() {
+							return self._getOnClickTooltipInfo(annotation, this.clientY);
+						}
+					}, false);
+				} else {
+					tooltip.hide();
+				}
 			}
-			this._view.setSelection(end, start, 1/3, function(){});
 		},
 		/**
 		 * This event is sent when the user double clicks a line annotation.
@@ -322,6 +339,7 @@ define("orion/editor/rulers", [
 		 * @event
 		 * @param {Number} lineIndex the line index of the annotation under the pointer.
 		 * @param {DOMEvent} e the double click event.
+		 * @callback
 		 */
 		onDblClick: function(lineIndex, e) {
 		},
@@ -386,6 +404,7 @@ define("orion/editor/rulers", [
 		 * @event
 		 * @param {Number} lineIndex the line index of the annotation under the pointer.
 		 * @param {DOMEvent} e the mouse out event.
+		 * @callback
 		 */
 		onMouseOut: function(lineIndex, e) {
 			if (!this._currentClickGroup) {
@@ -396,6 +415,71 @@ define("orion/editor/rulers", [
 				window.clearTimeout(this._hoverTimeout);
 				this._hoverTimeout = null;
 			}
+		},
+		/**
+		 * @name _findNextAnnotation
+		 * @description Looks at all annotations in the given range and attempt to find the next valid
+		 * 				annotation after the current selection.
+		 * @function
+		 * @private
+		 * @param annotationModel The annotation model to lookup annotations in
+		 * @param rangeStart The start range to search for annotations (required)
+		 * @param rangeEnd The end range to search for annotations (required)
+		 * @param selectionStart The start of the current selection (optional)
+		 * @param selectionEnd The end of the current selection (optional)
+		 * @param isAnnotationTypeVisible A function callback to check if a given annotation type is valid or visible (optional)
+		 * @returns The next annotation in the list or <code>null</code>
+		 */
+		_findNextAnnotation: function(annotationModel, rangeStart, rangeEnd, selectionStart, selectionEnd, isAnnotationTypeVisible){
+			var annotation = null;
+			var selectedAnnotation;
+			var searchStart = rangeStart;
+			
+			if (selectionStart >= 0 && selectionEnd >= 0){
+				if (selectionStart >= rangeStart && selectionStart < rangeEnd){
+					searchStart = selectionStart;
+					var selectedAnnotations = annotationModel.getAnnotations(selectionStart, selectionEnd);
+					while (!selectedAnnotation && selectedAnnotations.hasNext()){
+						var current = selectedAnnotations.next();
+						if (isAnnotationTypeVisible && !isAnnotationTypeVisible(current.type)) { continue; }
+						if (current.start === selectionStart && current.end === selectionEnd){
+							selectedAnnotation = current;
+						}
+					}
+				}
+			}
+			
+			var iter = annotationModel.getAnnotations(searchStart, rangeEnd);
+			var useNextValid;
+			while (iter.hasNext()){
+				current = iter.next();
+				if (isAnnotationTypeVisible && !isAnnotationTypeVisible(current.type)) { continue; }
+				// Default to first visible annotation
+				if (!annotation){
+					annotation = current;
+				}
+				// If no selected annotation, use the first in the list
+				if (!selectedAnnotation){
+					annotation = current;
+					break;
+				}
+				// If the selected annotation was found, use the next annotation
+				// NOTE: If two annotations have the same range, we skip to the next annotation so don't flip between them
+				if (useNextValid && (selectedAnnotation.start !== current.start || selectedAnnotation.end !== current.end)){
+					useNextValid = false;
+					annotation = current;
+					break;
+				}
+				// Found the selected annotation, use the next in the list
+				if (selectedAnnotation && selectedAnnotation === current){
+					useNextValid = true;
+				}
+			}
+			if (useNextValid){
+				annotation = null; // Last annotation on the line was selected, go to line start
+			}
+			
+			return annotation;
 		},
 		/** @ignore */
 		_getTooltipInfo: function(lineIndex, y) {
@@ -418,7 +502,7 @@ define("orion/editor/rulers", [
 			// TODO: shouldn't this check the length, it'll never be null
 			if (!contents) { return null; }
 			var hoverArea = lib.bounds(this._curElement); //.parentNode);
-			if (typeof contents === 'string') {
+			if (typeof contents === 'string') { //$NON-NLS-0$
 				// Hack for line numbers
 				hoverArea.top = y;
 				hoverArea.height = 1;
@@ -426,9 +510,40 @@ define("orion/editor/rulers", [
 			
 			var rulerLocation = this.getLocation();
 			// The tooltip is positioned opposite to where the ruler is
-			var position = rulerLocation === "left" ? "right" : "left";
+			var position = rulerLocation === "left" ? "right" : "left"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 			var info = {
 				contents: contents,
+				position: position,
+				hoverArea: hoverArea,
+				context: {source: "ruler" + rulerLocation} //$NON-NLS-0$
+			};
+			
+			var viewRect = lib.bounds(view._clientDiv);
+
+			info.offsetX = viewRect.left - (hoverArea.left + hoverArea.width);
+			info.offsetY = hoverArea.height;
+			if (info.position === "left") { //$NON-NLS-0$
+				info.offsetX = 20;
+			}
+			return info;
+		},
+		/**
+		 * @name _getOnClickTooltipInfo
+		 * @description Collects information needed to display a tooltip for a specific annotation when the user clicks on a multi-annotation in the ruler
+		 * @function
+		 * @private
+		 * @param annotation The annotation that is selected
+		 * @returns a hover info object to pass to the tooltip
+		 */
+		_getOnClickTooltipInfo: function(annotation) {
+			var view = this._view;
+			
+			var hoverArea = lib.bounds(this._curElement); //.parentNode);
+			
+			var rulerLocation = this.getLocation();
+			var position = rulerLocation === "left" ? "right" : "left"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+			var info = {
+				contents: [annotation],
 				position: position,
 				hoverArea: hoverArea
 			};
@@ -762,7 +877,7 @@ define("orion/editor/rulers", [
 	FoldingRuler.prototype = new AnnotationRuler();
 	
 	/** @ignore */
-	FoldingRuler.prototype.onClick =  function(lineIndex, e) {
+	FoldingRuler.prototype.onClick =  /* @callback */ function(lineIndex, e) {
 		if (lineIndex === undefined) { return; }
 		var annotationModel = this._annotationModel;
 		if (!annotationModel) { return; }

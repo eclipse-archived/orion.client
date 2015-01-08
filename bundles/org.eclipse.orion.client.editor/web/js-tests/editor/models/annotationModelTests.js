@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,7 +11,12 @@
 
 /*eslint-env browser, amd, mocha*/
 
-define(["chai/chai", 'orion/editor/textModel', 'orion/editor/annotations'], function(chai, mTextModel, mAnnotations) {
+define(["chai/chai",
+		'orion/editor/textModel',
+		'orion/editor/annotations',
+		'orion/editor/rulers'
+], function(chai, mTextModel, mAnnotations, mRulers) {
+		 	
 	var assert = chai.assert;
 
 	describe("AnnotationModel", function() {
@@ -388,6 +393,146 @@ define(["chai/chai", 'orion/editor/textModel', 'orion/editor/annotations'], func
 			assert.equal(a1.start, Number.NEGATIVE_INFINITY);
 			assert.equal(a2.start, Number.POSITIVE_INFINITY);
 		});
-
+		
+		
+		it("15: Iterate over annotations found in a range", function() {
+			var text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
+			var textModel = new mTextModel.TextModel(text, "\n");
+			var annotationModel = new mAnnotations.AnnotationModel(textModel);
+			var ruler = new mRulers.Ruler();
+			
+			var annotation1 = {start: 0, end: 5};
+			var annotation2 = {start: 10, end: 15};
+			var annotation3 = {start: 20, end: 30};
+			var annotation4 = {start: 35, end: 64};
+			
+			var next = ruler._findNextAnnotation(annotationModel, 0, 65);			
+			assert.equal(next, null, 'No annotations, no selection');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 10, 15);			
+			assert.equal(next, null, 'No annotations, no selection 2');
+			
+			annotationModel.addAnnotation(annotation1);
+			annotationModel.addAnnotation(annotation2);
+			annotationModel.addAnnotation(annotation3);
+			annotationModel.addAnnotation(annotation4);
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65);			
+			assert.equal(next, annotation1, 'No selection, select first annotation');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 0, 0);			
+			assert.equal(next, annotation1, 'Line start selection, select first annotation');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 67, 67);			
+			assert.equal(next, annotation1, 'Out of range selection, select first annotation');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, -1, -1);			
+			assert.equal(next, annotation1, 'Out of range selection, select first annotation 2');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 0, 65);			
+			assert.equal(next, annotation1, 'Full range selection, select first annotation');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 0, 5);			
+			assert.equal(next, annotation2, 'First annotation selection, select second annotation');
+						
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 10, 15);			
+			assert.equal(next, annotation3, 'Second annotation selection, select third annotation');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 10, 35);			
+			assert.equal(next, annotation2, 'Overlapping selection, select first annotation after selection start');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 12, 14);			
+			assert.equal(next, annotation2, 'Subset selected, select first annotation after selection start');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 35, 40);			
+			assert.equal(next, annotation4, 'Subset selected, select first annotation after selection start 2');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 35, 64);			
+			assert.equal(next, null, 'Last annotation selection, no selection');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 65, 65);			
+			assert.equal(next, annotation1, 'End of range selection, select first annotation');
+		});
+		
+		it("16: Iterate over annotations found in a range with overlapping annotations", function() {
+			var text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
+			var textModel = new mTextModel.TextModel(text, "\n");
+			var annotationModel = new mAnnotations.AnnotationModel(textModel);
+			var annotation1 = {start: 0, end: 5};
+			var annotation2 = {start: 0, end: 5};
+			var annotation3 = {start: 20, end: 30};
+			var annotation4 = {start: 25, end: 35};
+			var annotation5 = {start: 35, end: 65};
+			var annotation6 = {start: 40, end: 45};
+			annotationModel.addAnnotation(annotation1);
+			annotationModel.addAnnotation(annotation2);
+			annotationModel.addAnnotation(annotation3);
+			annotationModel.addAnnotation(annotation4);
+			annotationModel.addAnnotation(annotation5);
+			annotationModel.addAnnotation(annotation6);
+			
+			var ruler = new mRulers.Ruler();
+			var next;
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65);			
+			assert.equal(next, annotation2, 'No selection, select second annotation');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 0, 0);			
+			assert.equal(next, annotation2, 'Line start selection, select second annotation');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 67, 67);			
+			assert.equal(next, annotation2, 'Out of range selection, select second annotation');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, -1, -1);			
+			assert.equal(next, annotation2, 'Out of range selection, select second annotation 2');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 0, 65);			
+			assert.equal(next, annotation2, 'Full range selection, select first annotation');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 0, 5);			
+			assert.equal(next, annotation3, 'First annotation selection, skip duplicate range, select third annotation');
+						
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 20, 30);			
+			assert.equal(next, annotation4, 'Third annotation selection, select fourth overlapping annotation');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 10, 35);			
+			assert.equal(next, annotation3, 'Overlapping selection, select third annotation, first in selection');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 35, 65);			
+			assert.equal(next, annotation6, 'Overlapping fifth annotation selected, select inner sixth annotation');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 40, 45);			
+			assert.equal(next, null, 'Inner sixth annotation selected, reach end of list, use no select');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 40, 40);			
+			assert.equal(next, annotation5, 'Selection inside fifth and sixth annotation, use fifth annotation');
+		});
+		
+		it("17: Iterate over annotations found in a range with excluded types", function() {
+			var text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
+			var textModel = new mTextModel.TextModel(text, "\n");
+			var annotationModel = new mAnnotations.AnnotationModel(textModel);
+			var annotation1 = {start: 1, end: 5, type: 'aaa'};
+			var annotation2 = {start: 6, end: 10, type: 'bbb'};
+			annotationModel.addAnnotation(annotation1);
+			annotationModel.addAnnotation(annotation2);
+			
+			var ruler = new mRulers.Ruler();
+			var next;
+			
+			var isTypeVisible = function(annotationType) { return annotationType === 'aaa'};
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 0, 0, isTypeVisible);			
+			assert.equal(next, annotation1, 'Line start, select first annotation');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 1, 5, isTypeVisible);			
+			assert.equal(next, null, 'First annotation selection, second is not valid, no selection');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 6, 10, isTypeVisible);			
+			assert.equal(next, null, 'Second annotation selection, not valid, no selection');
+			
+			next = ruler._findNextAnnotation(annotationModel, 0, 65, 11, 11, isTypeVisible);			
+			assert.equal(next, null, 'End annotation selection, no selection');
+		});
 	});
 });

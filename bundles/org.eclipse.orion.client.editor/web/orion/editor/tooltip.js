@@ -278,7 +278,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			
 			var contents = info.contents;
 			if (contents instanceof Array) {
-				contents = this._getAnnotationContents(contents);			
+				contents = this._getAnnotationContents(contents, info.context);			
 			}
 			
 			if (this.hover && info.offset !== undefined && !contents) {
@@ -402,28 +402,28 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			// Align the tooltip with the hover area
 			var tipDiv = this._tooltipDiv;
 			var divBounds = lib.bounds(tipDiv);
-			if (!this._position) { this._position = "below"; }
+			if (!this._position) { this._position = "below"; } //$NON-NLS-0$
 			if (!this._offsetX) { this._offsetX = 0; }
 			if (!this._offsetY) { this._offsetY = 0; }
 
 			var tipRect = {
 				width: divBounds.width,
 				height: divBounds.height
-			}			
+			};	
 			switch (this._position) {
-				case "left":
+				case "left": //$NON-NLS-0$
 					tipRect.left = this._hoverArea.left - (divBounds.width + this._offsetX);
 					tipRect.top = this._hoverArea.top + this._offsetY;
 				break;
-				case "right":
+				case "right": //$NON-NLS-0$
 					tipRect.left = (this._hoverArea.left + this._hoverArea.width) + this._offsetX;
 					tipRect.top = this._hoverArea.top + this._offsetY;
 				break;
-				case "above":
+				case "above": //$NON-NLS-0$
 					tipRect.left = this._hoverArea.left + this._offsetX;
 					tipRect.top = this._hoverArea.top - (divBounds.height + this._offsetY);
 				break;
-				case "below":
+				case "below": //$NON-NLS-0$
 					tipRect.left = this._hoverArea.left + this._offsetX;
 					tipRect.top = (this._hoverArea.top + this._hoverArea.height) + this._offsetY;
 				break;
@@ -456,7 +456,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				top : top,
 				width: right - left,
 				height: bottom - top
-			}
+			};
 		},
 		_setInitialFocus: function(tooltipDiv) {
 			// Any buttons ?
@@ -547,7 +547,17 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			tooltipContents.appendChild(sectionDiv);
 			return true;
 		},
-		_getAnnotationContents: function(annotations) {
+		
+		/**
+		 * @name _getAnnotationContents
+		 * @description Takes a list of annotation and renders them in the tooltip
+		 * @function
+		 * @private
+		 * @param annotations the list of annotations to render
+		 * @param context optional object containing context information, such as where the annotations are displayed (ruler, editor, etc.)
+		 * @returns returns document node containing rendered tooltip content
+		 */
+		_getAnnotationContents: function(annotations, context) {
 			var annotation;
 			var newAnnotations = [];
 			for (var j = 0; j < annotations.length; j++) {
@@ -571,7 +581,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				var textEnd = baseModel.getLineEnd(baseModel.getLineAtOffset(end), true);
 				return baseModel.getText(textStart, textEnd);
 			}
-			function getAnnotationHTML(annotation) {
+			function getAnnotationHTML(annotation, showQuickfixes) {
 				var title = annotation.title;
 				var result = util.createElement(document, "div"); //$NON-NLS-0$
 				result.className = "tooltipRow"; //$NON-NLS-0$
@@ -606,7 +616,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				result.appendChild(title);
 				
 				// Handle quick fixes
-				if (self.hover) {
+				if (showQuickfixes) {
 					self.hover.renderQuickFixes(annotation, result);
 				}
 				
@@ -616,10 +626,17 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				}
 				return result;
 			}
+			
+			// Don't show quickfixes for ruler annotations (left or right side)
+			var showQuickfixes = self.hover ? true : false;
+			if (showQuickfixes && context && context.source && context.source.indexOf('ruler') >= 0){ //$NON-NLS-0$
+				showQuickfixes = false;
+			}			
+			
 			if (annotations.length === 1) {
 				annotation = annotations[0];
 				if (annotation.title !== undefined) {
-					html = getAnnotationHTML(annotation);
+					html = getAnnotationHTML(annotation, showQuickfixes);
 					if (html.firstChild) {
 						var className = html.firstChild.className;
 						if (className) { className += " "; } //$NON-NLS-0$
@@ -646,7 +663,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				tooltipHTML.appendChild(em);
 				for (var i = 0; i < annotations.length; i++) {
 					annotation = annotations[i];
-					html = getAnnotationHTML(annotation);
+					html = getAnnotationHTML(annotation, showQuickfixes);
 					if (html) {
 						tooltipHTML.appendChild(html);
 					}
