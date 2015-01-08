@@ -664,7 +664,7 @@ define([
 								overwrite: true
 							};
 						}
-						proposal.hover = this._formatProposalHover(proposal, def);
+						proposal.hover = this._formatProposalHover(proposal, def, buffer);
 						proposals["$"+propName] = proposal;
 					}
 				}
@@ -898,7 +898,7 @@ define([
 							// on the right hand side of a dot with no text after, eg: foo.^
 							return { kind : 'member', toDefer : toDefer };
 						}
-						break
+						break;
 					case Estraverse.Syntax.Program:
 					case Estraverse.Syntax.BlockStatement:
 						break;
@@ -935,13 +935,17 @@ define([
 		 * @returns {String | null} Returns the computed hover infos for the given proposal or null
 		 * @since 8.0
 		 */
-		_formatProposalHover: function _formatProposalHover(proposal, definition) {
+		_formatProposalHover: function _formatProposalHover(proposal, definition, buffer) {
             if(proposal && definition) {
                 var obj = Object.create(null);
                 obj.type = 'markdown';
                 var hover = '';
                 if(!definition.$$doc) {
-                    hover += proposal.name;
+                    if(definition.docRange) {
+                        hover += Hover.formatMarkdownHover(buffer.slice(definition.docRange[0], definition.docRange[1])).content;
+                    } else {
+                        hover += proposal.name;
+                    }
                 } else {
                     hover += Hover.formatMarkdownHover(definition.$$doc).content;
                 }
