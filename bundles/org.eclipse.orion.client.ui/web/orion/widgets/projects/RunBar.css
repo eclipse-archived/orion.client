@@ -7,7 +7,7 @@
 	border-right: solid 1px #ccc;
 	display: -webkit-inline-flex;		 /* Safari */
 	display: inline-flex;
-	overflow: hidden;
+	overflow: visible;
 	padding: 0 10px;
 }
 
@@ -25,7 +25,7 @@
 	background: white;
 	border-radius: 5px;
 	display: inline-block;
-	margin: 1px 10px 0 0;
+	margin: 0 8px 0 0;
 	min-height: 20px;
 	min-width: 270px;
 	transition: opacity 0.3s ease;
@@ -85,48 +85,35 @@
 
 }
 
-.runBarButton {
+.runBarWrapper .runBarButton {
 	background: none;
 	border: 1px solid transparent;
 	border-radius: 3px;
-	padding: 0;
-	margin: 0;
+	padding: 1px;
+	margin: 0 2px;
 	transition: opacity 0.3s ease;
 }
 
-.runBarButton:not(.disabled):hover {
+.runBarWrapper .runBarButton:not(.disabled):hover {
 	border-color: #ccc;
 	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
 }
 
-.playButton {
-	color: #333333;
-	display: inline-block;
-	font: 20px Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana;
-	margin-right: 4px;
-	padding: 0;
+.runBarWrapper .runBarButton:before {
+	display: block;
+	height: 18px;
+	line-height: 18px;
+	margin-top: -3px;
 }
 
-.playButton:before {
-	content: '\25ba'; /* Unicode - BLACK RIGHT-POINTING POINTER */
+.runBarButton.playButton {
+	display: inline-block;
+	font-size: 18px;
 }
 
-.stopButton {
+.runBarButton.stopButton {
 	display: inline-block;
-	height: 25px;
-	margin-right: 10px;
-	width: 22px;
-}
-
-.stopButton:before {
-	background: #333333;
-	border: none;
-	border-radius: 2px;
-	content: ' ';
-	display: inline-block;
-	height: 14px;
-	margin: 4px 0 5px 0;
-	width: 14px;
+	font-size: 18px;
 }
 
 .statusLabel {
@@ -204,26 +191,22 @@
 	white-space: nowrap;
 }
 
-.appLink{
+.runBarLink {
 	-webkit-flex-grow: 0;		/* Safari */
 	flex-grow: 0;
 	-webkit-flex-shrink: 0;		/* Safari */
 	flex-shrink: 0;
-	font-size: 16px;
-	line-height: 18px;
-	vertical-align:middle;
-	color: #555;
-	font-family: 'Orion Icon Font';	
-	background: none;
-	border: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	margin-top: -3px;
+	margin: 0 2px;
 }
-
-.appLink:before{ content:'\E030'; }
 
 .runBarLink:hover {
 	color: #F58B0F;
 	text-decoration: none;
+}
+
+.runBarLink.appLink{
+	font-size: 17px;
+	height: 17px;
+	line-height: 17px;
+	margin: -4px 0 0 6px;
 }

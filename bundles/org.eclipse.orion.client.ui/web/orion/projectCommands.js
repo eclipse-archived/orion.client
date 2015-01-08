@@ -539,7 +539,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				name: start ? messages["start"] :messages["stop"],
 				tooltip: start ? messages["startApplication"] : messages["stopApplication"],
 				id: start ? "orion.launchConfiguration.startApp" : "orion.launchConfiguration.stopApp", //$NON-NLS-0$
-				imageClass: start ? "core-sprite-start" : "core-sprite-stop",
+				imageClass: start ? "core-sprite-play" : "core-sprite-stop",
 				callback: function(data) {
 					var item = forceSingleItem(data.items);
 
