@@ -304,21 +304,27 @@ define([
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 0);
 			});
-			it("should not flag for line comment", function() {
+			it("should flag for line comment", function() {
 				var topic = "var v;\n//foo\nfunction f() {};";
 		
 				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
-				assert.equal(messages.length, 0);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages[0].message, "Missing documentation for function \'f\'.");
+				assert.equal(messages[0].node.type, "Identifier");
 			});
-			it("should not flag for excessive space with line comment", function() {
+			it("should flag for excessive space with line comment", function() {
 				var topic = "var v;\n//foo\n\n\n\nfunction f() {};";
 		
 				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
-				assert.equal(messages.length, 0);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages[0].message, "Missing documentation for function \'f\'.");
+				assert.equal(messages[0].node.type, "Identifier");
 			});
 			it("should not flag for inner block comment", function() {
 				var topic = "var v;\n/***/function o() {/***/function f() {};};";
@@ -336,21 +342,27 @@ define([
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 0);
 			});
-			it("should not flag for inner line comment", function() {
+			it("should flag for inner line comment", function() {
 				var topic = "var v;\n/***/function o() {//foo\nfunction f() {};};";
 		
 				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
-				assert.equal(messages.length, 0);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages[0].message, "Missing documentation for function \'f\'.");
+				assert.equal(messages[0].node.type, "Identifier");
 			});
-			it("should not flag for excessive space with inner line comment", function() {
+			it("should flag for excessive space with inner line comment", function() {
 				var topic = "var v;\n/***/function o() {//foo\n\n\n\nfunction f() {};};";
 		
 				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
-				assert.equal(messages.length, 0);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages[0].message, "Missing documentation for function \'f\'.");
+				assert.equal(messages[0].node.type, "Identifier");
 			});
 			it("should flag for function f", function() {
 				var topic = "var foo;\nfunction f() {};";
@@ -401,6 +413,18 @@ define([
 				assert.equal(messages.length, 1);
 				assert.equal(messages[0].related.type, "decl");
 			});
+			/**
+			 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457044
+			 */
+			it("should flag with preceding line comment", function() {
+				var topic = "var foo; //line comment \nfunction f() {};";
+
+				var config = flagDecl;
+
+				var messages = eslint.verify(topic, config);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].related.type, "decl");
+			});
     	});
     	
 // MISSING-DOC EXPR    
@@ -427,21 +451,27 @@ define([
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 0);
 			});
-			it("should not flag for line comment", function() {
+			it("should flag for line comment", function() {
 				var topic = "var foo = {//foo\nf: function() {}};";
 		
 				var config = flagExpr;
 		
 				var messages = eslint.verify(topic, config);
-				assert.equal(messages.length, 0);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages[0].message, "Missing documentation for function \'f\'.");
+				assert.equal(messages[0].node.type, "Identifier");
 			});
-			it("should not flag for excessive space with line comment", function() {
+			it("should flag for excessive space with line comment", function() {
 				var topic = "var foo = {//foo\n\n\n\n\n\nf: function() {}};";
 		
 				var config = flagExpr;
 		
 				var messages = eslint.verify(topic, config);
-				assert.equal(messages.length, 0);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages[0].message, "Missing documentation for function \'f\'.");
+				assert.equal(messages[0].node.type, "Identifier");
 			});
 			it("should not flag for inner block comment", function() {
 				var topic = "var foo = {/**foo*/o: function() { var bar = { /***/f: function() {}}}};";
@@ -459,21 +489,27 @@ define([
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 0);
 			});
-			it("should not flag for inner line comment", function() {
+			it("should flag for inner line comment", function() {
 				var topic = "var foo = {/**foo*/o: function() { var bar = { //foo\nf: function() {}}}};";
 		
 				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
-				assert.equal(messages.length, 0);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages[0].message, "Missing documentation for function \'f\'.");
+				assert.equal(messages[0].node.type, "Identifier");
 			});
-			it("should not flag for excessive space with inner line comment", function() {
+			it("should flag for excessive space with inner line comment", function() {
 				var topic = "var foo = {/**foo*/o: function() { var bar = { //foo\n\n\n\n\n\nf: function() {}}}};";
 		
 				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
-				assert.equal(messages.length, 0);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages[0].message, "Missing documentation for function \'f\'.");
+				assert.equal(messages[0].node.type, "Identifier");
 			});
 			it("should not flag for member expression assignment", function() {
 				var topic = "var Foo; /***/Foo.bar = function() {};";
@@ -507,37 +543,49 @@ define([
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 0);
 			});
-			it("should not flag for member expression assignment line comment", function() {
+			it("should flag for member expression assignment line comment", function() {
 				var topic = "var Foo; //comment\nFoo.bar = function() {};";
 		
 				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
-				assert.equal(messages.length, 0);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages[0].message, "Missing documentation for function \'bar\'.");
+				assert.equal(messages[0].node.type, "Identifier");
 			});
-			it("should not flag for member literal expression assignment line comment", function() {
+			it("should flag for member literal expression assignment line comment", function() {
 				var topic = "var Foo; //comment\nFoo[\'bar\'] = function() {};";
 		
 				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
-				assert.equal(messages.length, 0);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages[0].message, "Missing documentation for function \'bar\'.");
+				assert.equal(messages[0].node.type, "Literal");
 			});
-			it("should not flag for member expression assignment line comment excessive space", function() {
+			it("should flag for member expression assignment line comment excessive space", function() {
 				var topic = "var Foo; //comment\n\n\n\n\n\nFoo.bar = function() {};";
 		
 				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
-				assert.equal(messages.length, 0);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages[0].message, "Missing documentation for function \'bar\'.");
+				assert.equal(messages[0].node.type, "Identifier");
 			});
-			it("should not flag for member literal expression assignment line comment excessive space", function() {
+			it("should flag for member literal expression assignment line comment excessive space", function() {
 				var topic = "var Foo; //comment\n\n\n\n\n\nFoo[\'bar\'] = function() {};";
 		
 				var config = flagDecl;
 		
 				var messages = eslint.verify(topic, config);
-				assert.equal(messages.length, 0);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages[0].message, "Missing documentation for function \'bar\'.");
+				assert.equal(messages[0].node.type, "Literal");
 			});
 			it("should flag for function expression f", function() {
 				var topic = "var foo = { f: function() {}};";
@@ -583,14 +631,14 @@ define([
 				assert.equal(messages[0].message, "Missing documentation for function \'f\'.");
 				assert.equal(messages[0].node.type, "Identifier");
 			});
-			it("should include {type: 'decl'} as related object", function() {
-				var topic = "var foo;\nfunction f() {};";
+			it("should flag with preceding line comment", function() {
+				var topic = "var foo = {//line comment\n one: function() {}}";
 
 				var config = flagDecl;
 
 				var messages = eslint.verify(topic, config);
 				assert.equal(messages.length, 1);
-				assert.equal(messages[0].related.type, "decl");
+				assert.equal(messages[0].related.type, "expr");
 			});
 		});
 

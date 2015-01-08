@@ -115,7 +115,13 @@ define([
 		"missing-doc" : {
 		    description: 'Require JSDoc for all functions',
 		    rule: function(context) {
-        
+                function validComment(comments) {
+                    if(comments && comments.leading) {
+                        var len = comments.leading.length;
+                        return len > 0 && comments.leading[len-1].type === 'Block';
+                    }
+                    return false;
+                }
         		function checkDoc(node) {
         			try {
         				var comments;
@@ -124,7 +130,7 @@ define([
         					case 'Property':  //$NON-NLS-0$
         						if(node.value && (node.value.type === 'FunctionExpression')) {  //$NON-NLS-0$  //$NON-NLS-1$
         							comments = context.getComments(node);
-        							if(!comments || comments.leading.length < 1) {
+        							if(!validComment(comments)) {
         								switch(node.key.type) { 
         									case 'Identifier':  //$NON-NLS-0$
         										name = node.key.name;
@@ -139,7 +145,7 @@ define([
         						break;
         					case 'FunctionDeclaration':  //$NON-NLS-0$
     							comments = context.getComments(node);
-    							if(!comments || comments.leading.length < 1) {
+    							if(!validComment(comments)) {
     								context.report(node.id, 'Missing documentation for function \'${0}\'.', {0:node.id.name}, { type: 'decl' });
     							}
         						break;
@@ -149,7 +155,7 @@ define([
         							if(anode.right && (anode.right.type === 'FunctionExpression') && anode.left && (anode.left.type === 'MemberExpression')) {  //$NON-NLS-0$  //$NON-NLS-1$
         								//comments are attached to the enclosing expression statement
         								comments = context.getComments(node);
-        								if(!comments || comments.leading.length < 1) {
+        								if(!validComment(comments)) {
         									name = anode.left.computed === true ? anode.left.property.value : anode.left.property.name;
         									context.report(anode.left.property, 'Missing documentation for function \'${0}\'.', {0:name}, { type: 'expr' });
         								}
