@@ -3920,6 +3920,66 @@ define([
     			assert.equal(messages[0].message, "Parameter 'a' is never used.");
     			assert.equal(messages[0].node.type, "Identifier");
     		});
+    		/**
+    		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
+    		 */
+    		it("Should flag unused param func expr as call expression in property", function() {
+    			var topic = "var c = {fn: function(a) {}.bind(this)};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Parameter 'a' is never used.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		/**
+    		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
+    		 */
+    		it("Should flag unused param func expr as call expression in call expression", function() {
+    			var topic = "define('foo', function(a){}.bind(this));";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Parameter 'a' is never used.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		/**
+    		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
+    		 */
+    		it("Should not flag unused param func decl as call expression in closure with @callback", function() {
+    			var topic = "(function f(a) {}).bind(this);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Parameter 'a' is never used.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		/**
+    		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
+    		 */
+    		it("Should not flag unused param func decl as closure call expression with @callback", function() {
+    			var topic = "(function f(a) {})();";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Parameter 'a' is never used.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
     		it("Should not flag used param simple use func decl", function() {
     			var topic = "function f(a) {var b = a;}";
     	
@@ -4030,6 +4090,54 @@ define([
     		});
     		it("Should not flag used param func expr param", function() {
     			var topic = "function f() {}f(function(a) {var b = a;});";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
+    		 */
+    		it("Should not flag unused param func expr as call expression in property with @callback", function() {
+    			var topic = "var c = {fn: /** @callback */ function(a) {}.bind(this)};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
+    		 */
+    		it("Should not flag unused param func expr as call expression in call expression with @callback", function() {
+    			var topic = "define('foo', /** @callback */function(a){}.bind(this));";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
+    		 */
+    		it("Should not flag unused param func decl as call expression in closure with @callback", function() {
+    			var topic = "(/* @callback */ function f(a) {}).bind(this);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
+    		 */
+    		it("Should not flag unused param func decl as closure call expression with @callback", function() {
+    			var topic = "(/* @callback */ function f(a) {})();";
     	
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;

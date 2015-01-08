@@ -959,8 +959,18 @@ define([
         					        if(hasCallbackComment(node)) {
         					            return;
         					        }
-        					        if(node.parent.type === 'Property' && hasCallbackComment(node.parent)) {
+        					        var parent = node.parent;
+        					        if(parent.type === 'Property' && hasCallbackComment(parent)) {
         					            return;
+        					        }
+        					        if(parent.type === 'MemberExpression') {
+        					            //https://bugs.eclipse.org/bugs/show_bug.cgi?id=457067
+        					            // func epxrs part of call expressions, i.e. bind-like calls
+        					            //Esprima tags the root containing expression with the doc, not the func expr
+        					            parent = parent.parent;
+        					            if(parent.type === 'CallExpression' && hasCallbackComment(parent)) {
+        					               return;
+        					            }
         					        }
         					    }
         						context.report(defnode, "Parameter '${0}' is never used.", {0:defnode.name, pid: pid}); //$NON-NLS-0
