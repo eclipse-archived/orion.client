@@ -411,7 +411,8 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				regex.lastIndex = regex.oldLastIndex;
 			});
 		},
-		setStyler: function(/*styler*/) {
+		/** @callback */
+		setStyler: function(styler) {
 		},
 		verifyBlock: function(baseModel, text, ancestorBlock, changeCount) {
 			var result = null;

@@ -129,7 +129,8 @@ define([
 	};
 
 	MarkdownStylingAdapter.prototype = {
-		blockSpansBeyondEnd: function(/*block*/) {
+		/** @callback */
+		blockSpansBeyondEnd: function(block) {
 			return false;
 		},
 		computeBlocks: function(model, text, block, offset/*, startIndex, endIndex, maxBlockCount*/) {
@@ -469,7 +470,8 @@ define([
 
 			return result;
 		},
-		computeStyle: function(/*block, model, offset*/) {
+		/** @callback */
+		computeStyle: function(block, model, offset) {
 			return null;
 		},
 		createBlock: function(bounds, styler, model, parent, data, initFn) {
@@ -481,7 +483,8 @@ define([
 		getBlockContentStyleName: function(block) {
 			return block.name;
 		},
-		getBlockEndStyle: function(/*block, text, endIndex, _styles*/) {
+		/** @callback */
+		getBlockEndStyle: function(block, text, endIndex, _styles) {
 			return null;
 		},
 		getBlockFoldBounds: function(block, model) {
@@ -501,13 +504,15 @@ define([
 			}
 			return this.getBlockForElement(element.parentElement);
 		},
-		getBlockStartStyle: function(/*block, text, index, _styles*/) {
+		/** @callback */
+		getBlockStartStyle: function(block, text, index, _styles) {
 			return null;
 		},
 		getBlockWithId: function(elementId) {
 			return this._blocksCache[elementId];
 		},
-		getBracketMatch: function(/*block, text*/) {
+		/** @callback */
+		getBracketMatch: function(block, text) {
 			return null;
 		},
 		getContentType: function() {
@@ -1748,7 +1753,8 @@ define([
 			visibleWhen: function() {
 				return !!this._options;
 			}.bind(this),
-			callback: function(/*data*/) {
+			/** @callback */
+			callback: function(data) {
 				var textView = options.editorView.editor.getTextView();
 				var text = textView.getText();
 				exportHTML(text, options.fileService, options.metadata, options.statusService);
