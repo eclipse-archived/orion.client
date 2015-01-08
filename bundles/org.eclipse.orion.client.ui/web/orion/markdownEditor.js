@@ -1242,7 +1242,7 @@ define([
 											URL.revokeObjectURL(objectURL);
 										}
 									}.bind(this),
-									function(/*e*/) {
+									/* @callback */ function(e) {
 										var element = document.getElementById(id);
 										if (element) {
 											element.src = "missing"; //$NON-NLS-0$
@@ -1474,7 +1474,7 @@ define([
 			this._alignPreviewOnSourceBlock(block, selectionIndex);
 		}.bind(this);
 
-		this._splitterResizeListener = function(/*e*/) {
+		this._splitterResizeListener = /* @callback */ function(e) {
 			this._editorView.editor.resize();
 		}.bind(this);
 
@@ -1772,7 +1772,7 @@ define([
 		ID = "markdown.toggle.orientation"; //$NON-NLS-0$
 		toggleOrientationCommand = new mCommands.Command({
    			id: ID,
-			callback: function(/*data*/) {
+			callback: /* @callback */ function(data) {
 				this.editor.togglePaneOrientation();
 			}.bind(this),
 			type: "switch", //$NON-NLS-0$
