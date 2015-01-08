@@ -385,10 +385,11 @@ define([
 			excludedStyles: "(string.*)"  //$NON-NLS-0$
 				});
 		
+		
 		/**
 		 * Register the ESLint validator
 		 */
-		provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new EslintValidator(astManager, scriptresolver),  //$NON-NLS-0$  //$NON-NLS-1$
+		provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new EslintValidator(astManager),  //$NON-NLS-0$  //$NON-NLS-1$
 				{
 			contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$ //$NON-NLS-1$
 			nls: 'javascript/nls/problems',  //$NON-NLS-0$
@@ -412,50 +413,50 @@ define([
 				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
 				 	        	   category: "javascript",  //$NON-NLS-0$
 				 	        	   properties: [
-				 	        	                {	id: "validate_no_cond_assign", //$NON-NLS-0$
+				 	        	                {	id: "no-cond-assign",  //$NON-NLS-0$ 
 				 	        	                	nameKey: "noCondAssign", //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: error, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
-				 	        	                {	id: "validate_no_constant_condition", //$NON-NLS-0$
+				 	        	                {	id: "no-constant-condition",  //$NON-NLS-0$
 				 	        	                	nameKey: "noConstantCondition", //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: error, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
-				 	        	                {	id: "validate_no_caller", //$NON-NLS-0$
+				 	        	                {	id: "no-caller",  //$NON-NLS-0$
 				 	        	                	nameKey: "noCaller", //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: warning, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
-				 	        	                {	id: "validate_eqeqeq",  //$NON-NLS-0$
+				 	        	                {	id: "eqeqeq",  //$NON-NLS-0$
 				 	        	                	nameKey: 'noEqeqeq',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {
-				 	        	                	id: "validate_no_console", //$NON-NLS-0$
+				 	        	                	id: "no-console",  //$NON-NLS-0$
 				 	        	                	nameKey: "noConsole", //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: error, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
-				 	        	                {	id: "validate_debugger",  //$NON-NLS-0$
+				 	        	                {	id: "no-debugger",  //$NON-NLS-0$
 				 	        	                	nameKey: 'noDebugger',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_eval",  //$NON-NLS-0$
+				 	        	                {	id: "no-eval",  //$NON-NLS-0$
 				 	        	                	nameKey: 'noEval',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_no_iterator", //$NON-NLS-0$
+				 	        	                {	id: "no-iterator",  //$NON-NLS-0$
 				 	        	                	nameKey: "noIterator", //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: error, //$NON-NLS-0$
@@ -489,150 +490,145 @@ define([
 				 	        	                	defaultValue: warning, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
-				 	        	                {	id: "validate_dupe_obj_keys",  //$NON-NLS-0$
+				 	        	                {	id: "no-dupe-keys",  //$NON-NLS-0$
 				 	        	                	nameKey: 'noDupeKeys',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_typeof",  //$NON-NLS-0$
+				 	        	                {	id: "valid-typeof",  //$NON-NLS-0$
 				 	        	                	nameKey: 'validTypeof',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_use_before_define",  //$NON-NLS-0$
+				 	        	                {	id: "no-use-before-define",  //$NON-NLS-0$
 				 	        	                	nameKey: 'useBeforeDefine',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_new_parens",  //$NON-NLS-0$
+				 	        	                {	id: "missing-doc",
+				 	        	                	nameKey: 'missingDoc',  //$NON-NLS-0$
+				 	        	                	type: "number",  //$NON-NLS-0$
+				 	        	                	defaultValue: ignore,
+				 	        	                	options: severities
+				 	        	                },
+				 	        	                {	id: "new-parens",  //$NON-NLS-0$
 				 	        	                	nameKey: 'newParens',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_radix",  //$NON-NLS-0$
+				 	        	                {	id: "radix",  //$NON-NLS-0$
 				 	        	                	nameKey: 'radix',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_missing_semi",  //$NON-NLS-0$
+				 	        	                {	id: "semi",  //$NON-NLS-0$
 				 	        	                	nameKey: 'missingSemi',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_no_regex_spaces", //$NON-NLS-0$
+				 	        	                {	id: "no-regex-spaces",  //$NON-NLS-0$
 				 	        	                	nameKey: "noRegexSpaces", //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: error, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
-				 	        	                {	id: "validate_use_isnan",  //$NON-NLS-0$
+				 	        	                {	id: "use-isnan",  //$NON-NLS-0$
 				 	        	                	nameKey: 'useIsNaN',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_throw_error",  //$NON-NLS-0$
+				 	        	                {	id: "throw-error",  //$NON-NLS-0$
 				 	        	                	nameKey: 'throwError',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_func_decl",  //$NON-NLS-0$
-				 	        	                	nameKey: 'docFuncDecl',  //$NON-NLS-0$
-				 	        	                	type: "number",  //$NON-NLS-0$
-				 	        	                	defaultValue: ignore,
-				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "validate_func_expr",  //$NON-NLS-0$
-				 	        	                	nameKey: 'docFuncExpr',  //$NON-NLS-0$
-				 	        	                	type: "number",  //$NON-NLS-0$
-				 	        	                	defaultValue: ignore,
-				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "validate_no_reserved_keys", //$NON-NLS-0$
+				 	        	                {	id: "no-reserved-keys",
 				 	        	                	nameKey: "noReservedKeys", //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: error, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
-				 	        	                {	id: "validate_no_sparse_arrays",  //$NON-NLS-0$
+				 	        	                {	id: "no-sparse-arrays",
 				 	        	                	nameKey: 'noSparseArrays',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_curly",  //$NON-NLS-0$
+				 	        	                {	id: "curly",  //$NON-NLS-0$
 				 	        	                	nameKey: 'missingCurly',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_no_fallthrough",  //$NON-NLS-0$
+				 	        	                {	id: "no-fallthrough",  //$NON-NLS-0$
 				 	        	                	nameKey: 'noFallthrough',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_no_comma_dangle", //$NON-NLS-0$
+				 	        	                {	id: "no-comma-dangle", //$NON-NLS-0$
 				 	        	                	nameKey: "noCommaDangle", //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: ignore, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
-				 	        	                {	id: "validate_no_undef",  //$NON-NLS-0$
+				 	        	                {	id: "no-undef",  //$NON-NLS-0$
 				 	        	                	nameKey: 'undefMember',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_no_empty_block",  //$NON-NLS-0$
+				 	        	                {	id: "no-empty-block",  //$NON-NLS-0$
 				 	        	                	nameKey: 'noEmptyBlock',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_unnecessary_semi",  //$NON-NLS-0$
+				 	        	                {	id: "no-extra-semi",  //$NON-NLS-0$
 				 	        	                	nameKey: 'unnecessarySemis',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_no_jslint",  //$NON-NLS-0$
+				 	        	                {	id: "no-jslint",  //$NON-NLS-0$
 				 	        	                	nameKey: 'unsupportedJSLint',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_unused_params",  //$NON-NLS-0$
+				 	        	                {	id: "no-unused-params",  //$NON-NLS-0$
 				 	        	                	nameKey: 'unusedParams',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_no_unused_vars",  //$NON-NLS-0$
+				 	        	                {	id: "no-unused-vars",  //$NON-NLS-0$
 				 	        	                	nameKey: 'unusedVars',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_no_unreachable",  //$NON-NLS-0$
+				 	        	                {	id: "no-unreachable",  //$NON-NLS-0$
 				 	        	                	nameKey: 'noUnreachable',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "validate_no_redeclare",  //$NON-NLS-0$
+				 	        	                {	id: "no-redeclare",  //$NON-NLS-0$
 				 	        	                	nameKey: 'varRedecl',  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
-				 	        	                },{	id: "validate_no_shadow",  //$NON-NLS-0$
+				 	        	                },
+				 	        	                {	id: "no-shadow",  //$NON-NLS-0$
 				 	        	                	nameKey: "varShadow",  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,

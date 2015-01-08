@@ -115,20 +115,14 @@ define([
 		"missing-doc" : {
 		    description: 'Require JSDoc for all functions',
 		    rule: function(context) {
-        		var config = (context.options && context.options[0]) || {},
-        		    declEnabled = Number(config.decl) > 0,
-        		    exprEnabled = Number(config.expr) > 0;
         
         		function checkDoc(node) {
         			try {
-        				if(!declEnabled && !exprEnabled) {
-        					return;
-        				}
         				var comments;
         				var name;
         				switch(node.type) {
         					case 'Property':  //$NON-NLS-0$
-        						if(exprEnabled && node.value && (node.value.type === 'FunctionExpression')) {  //$NON-NLS-0$  //$NON-NLS-1$
+        						if(node.value && (node.value.type === 'FunctionExpression')) {  //$NON-NLS-0$  //$NON-NLS-1$
         							comments = context.getComments(node);
         							if(!comments || comments.leading.length < 1) {
         								switch(node.key.type) { 
@@ -144,15 +138,13 @@ define([
         						}
         						break;
         					case 'FunctionDeclaration':  //$NON-NLS-0$
-        						if(declEnabled) {  //$NON-NLS-0$
-        							comments = context.getComments(node);
-        							if(!comments || comments.leading.length < 1) {
-        								context.report(node.id, 'Missing documentation for function \'${0}\'.', {0:node.id.name}, { type: 'decl' });
-        							}
-        						}
+    							comments = context.getComments(node);
+    							if(!comments || comments.leading.length < 1) {
+    								context.report(node.id, 'Missing documentation for function \'${0}\'.', {0:node.id.name}, { type: 'decl' });
+    							}
         						break;
         					case 'ExpressionStatement':  //$NON-NLS-0$
-        						if(exprEnabled && node.expression && node.expression.type === 'AssignmentExpression') {  //$NON-NLS-0$  //$NON-NLS-1$
+        						if(node.expression && node.expression.type === 'AssignmentExpression') {  //$NON-NLS-0$  //$NON-NLS-1$
         							var anode = node.expression;
         							if(anode.right && (anode.right.type === 'FunctionExpression') && anode.left && (anode.left.type === 'MemberExpression')) {  //$NON-NLS-0$  //$NON-NLS-1$
         								//comments are attached to the enclosing expression statement

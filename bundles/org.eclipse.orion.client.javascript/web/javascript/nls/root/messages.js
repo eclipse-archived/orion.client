@@ -30,8 +30,7 @@ define({//Default message bundle
 	'noDupeKeys' : 'Duplicate object keys:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noIterator': 'Discouraged __iterator__ property use:', //$NON-NLS-0$  //$NON-NLS-1$
 	'useIsNaN' : 'NaN not compared with isNaN():', //$NON-NLS-0$  //$NON-NLS-1$
-	'docFuncDecl' : 'No JSDoc on function declarations:', //$NON-NLS-0$  //$NON-NLS-1$
-	'docFuncExpr' : 'No JSDoc on function expressions:', //$NON-NLS-0$  //$NON-NLS-1$
+	'missingDoc' : 'Missing JSDoc:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noUnreachable' : 'Unreachable code:', //$NON-NLS-0$  //$NON-NLS-1$
 	'noFallthrough' : 'Switch case fall-through:', //$NON-NLS-0$  //$NON-NLS-1$
 	'useBeforeDefine' : 'Member used before definition:', //$NON-NLS-0$  //$NON-NLS-1$

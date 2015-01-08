@@ -16,13 +16,12 @@ define([
 	"javascript/astManager",
 	"javascript/finder"
 ], function(eslint, Objects, ASTManager, Finder) {
-	// Should have a better way of keeping this up-to-date with ./load-rules-async.js
 	var config = {
 		// 0:off, 1:warning, 2:error
 		rules: {
 			"curly" : 0, //$NON-NLS-0$
 			"eqeqeq": 1, //$NON-NLS-0$
-			"missing-doc": [1, {decl: 0, expr: 0}], //$NON-NLS-0$
+			"missing-doc": 0,  //$NON-NLS-0$
 			"new-parens" : 1, //$NON-NLS-0$
 			"no-caller": 1, //$NON-NLS-0$
 			"no-cond-assign": 2, //$NON-NLS-0$
@@ -342,45 +341,22 @@ define([
 			if (!properties) {
 				return;
 			}
-			// TODO these option -> setting mappings are becoming hard to manage
-			// And they must be kept in sync with javascriptPlugin.js
-			config.setOption("curly", properties.validate_curly); //$NON-NLS-0$
-			config.setOption("eqeqeq", properties.validate_eqeqeq); //$NON-NLS-0$
-			config.setOption("missing-doc", properties.validate_func_decl, "decl"); //$NON-NLS-0$ // missing-func-decl-doc
-			config.setOption("missing-doc", properties.validate_func_expr, "expr"); //$NON-NLS-0$ // missing-func-expr-doc
-			config.setOption("new-parens", properties.validate_new_parens); //$NON-NLS-0$
-			config.setOption("no-caller", properties.validate_no_caller); //$NON-NLS-0$
-			config.setOption("no-cond-assign", properties.validate_no_cond_assign); //$NON-NLS-0$
-			config.setOption("no-comma-dangle", properties.validate_no_comma_dangle); //$NON-NLS-0$
-			config.setOption("no-console", properties.validate_no_console); //$NON-NLS-0$
-			config.setOption("no-constant-condition", properties.validate_no_constant_condition); //$NON-NLS-0$
-			config.setOption("no-debugger", properties.validate_debugger); //$NON-NLS-0$
-			config.setOption("no-dupe-keys", properties.validate_dupe_obj_keys); //$NON-NLS-0$
-			config.setOption("no-eval", properties.validate_eval); //$NON-NLS-0$
-			config.setOption("no-extra-semi", properties.validate_unnecessary_semi); //$NON-NLS-0$
-			config.setOption("no-iterator", properties.validate_no_iterator); //$NON-NLS-0$
-			config.setOption("no-new-array", properties["no-new-array"]); //$NON-NLS-1$ //$NON-NLS-0$
-			config.setOption("no-new-func", properties["no-new-func"]); //$NON-NLS-1$ //$NON-NLS-0$
-			config.setOption("no-new-object", properties["no-new-object"]); //$NON-NLS-1$ //$NON-NLS-0$
-			config.setOption("no-new-wrappers", properties["no-new-wrappers"]); //$NON-NLS-1$ //$NON-NLS-0$
-			config.setOption("no-redeclare", properties.validate_no_redeclare); //$NON-NLS-0$
-			config.setOption("no-regex-spaces", properties.validate_no_regex_spaces); //$NON-NLS-0$
-			config.setOption("no-reserved-keys", properties.validate_no_reserved_keys); //$NON-NLS-0$
-			config.setOption("no-shadow", properties.validate_no_shadow); //$NON-NLS-0$
-			config.setOption("no-undef", properties.validate_no_undef); //$NON-NLS-0$
-			config.setOption("no-unused-params", properties.validate_unused_params); //$NON-NLS-0$
-			config.setOption("no-unused-vars", properties.validate_no_unused_vars); //$NON-NLS-0$
-			config.setOption("no-use-before-define", properties.validate_use_before_define); //$NON-NLS-0$
-			config.setOption("radix", properties.validate_radix); //$NON-NLS-0$
-			config.setOption("semi", properties.validate_missing_semi); //$NON-NLS-0$
-			config.setOption("throw-error", properties.validate_throw_error); //$NON-NLS-0$
-			config.setOption("use-isnan", properties.validate_use_isnan); //$NON-NLS-0$
-			config.setOption("no-unreachable", properties.validate_no_unreachable); //$NON-NLS-0$
-			config.setOption("no-fallthrough", properties.validate_no_fallthrough); //$NON-NLS-0$
-			config.setOption("no-jslint", properties.validate_no_jslint); //$NON-NLS-0$
-			config.setOption("no-empty-block", properties.validate_no_empty_block); //$NON-NLS-0$
-			config.setOption("valid-typeof", properties.validate_typeof); //$NON-NLS-0$
-			config.setOption("no-sparse-arrays", properties.validate_no_sparse_arrays); //$NON-NLS-0$
+			var keys = Object.keys(properties);
+			var seen = Object.create(null);
+			for(var i = 0; i < keys.length; i++) {
+			    var key = keys[i];
+			    var ruleId = key;
+			    var legacy = this._legacy[ruleId];
+			    if(typeof(legacy) === 'string') {
+			        ruleId = legacy;
+			        if(seen[ruleId]) {
+			            //don't overwrite a new pref name with a legacy one
+			            continue;
+			        }
+			    }
+			    seen[ruleId] = true;
+			    config.setOption(ruleId, properties[key]);
+			}
 		},
 		
 		/**
@@ -401,7 +377,48 @@ define([
 		            config.setOption(keys[i], 0);
 		        }
 		    }
+		},
+		
+		/**
+		 * All new pref ids MUST be the id of the rule they are for, but to 
+		 * not break existing prefs this object translates the old pref name to its rule name
+		 * @private 
+		 * @since 8.0
+		 */
+		_legacy: {
+		    validate_no_cond_assign: 'no-cond-assign',
+		    validate_no_constant_condition: 'no-constant-condition',
+		    validate_no_caller: 'no-caller',
+		    validate_eqeqeq: 'eqeqeq',
+		    validate_no_console: 'no-console',
+		    validate_debugger: 'no-debugger',
+		    validate_eval: 'no-eval',
+		    validate_no_iterator:'no-iterator',
+		    validate_dupe_obj_keys: 'no-dupe-keys',
+		    validate_typeof: 'valid-typeof',
+		    validate_use_before_define: 'no-use-before-define',
+		    validate_new_parens: 'new-parens',
+		    validate_radix: 'radix',
+		    validate_missing_semi: 'semi',
+		    validate_no_regex_spaces: 'no-spaces-regex',
+		    validate_use_isnan: 'use-isnan',
+		    validate_throw_error: 'throw-error',
+		    validate_no_reserved_keys: 'no-reserved-keys',
+		    validate_no_sparse_arrays: 'no-sparse-arrays',
+		    validate_curly: 'curly',
+		    validate_no_fallthrough: 'no-fallthrough',
+		    validate_no_comma_dangle: 'no-comma-dangle',
+		    validate_no_undef: 'no-undef',
+		    validate_no_empty_block: 'no-empty-block',
+		    validate_unnecessary_semi: 'no-extra-semi',
+		    validate_no_jslint: 'no-jslint',
+		    validate_unused_params: 'no-unused-params',
+		    validate_no_unused_vars: 'no-unused-vars',
+		    validate_no_unreachable: 'no-unreachable',
+		    validate_no_redeclare: 'no-redeclare',
+		    validate_no_shadow: 'no-shadow'
 		}
+		
 	});
 	return ESLintValidator;
 });
