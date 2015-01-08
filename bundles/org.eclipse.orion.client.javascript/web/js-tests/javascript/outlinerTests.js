@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -55,18 +55,10 @@ define([
 		 * @param {Number} end The expected end offset of the element
 		 */
 		function assertElement(element, label, start, end) {
-			if(!element) {
-				assert.fail("The tested element cannot be null");
-			}
-			if(!element.label) {
-				assert.fail("The outlined element must have a label");
-			}
-			if(!element.start) {
-				assert.fail("The outlined element must have a start range");
-			}
-			if(!element.end) {
-				assert.fail("The outlined element must have an end range");
-			}
+			assert(element, "The tested element cannot be null");
+			assert(element.label, "The outlined element must have a label");
+			assert(element.start, "The outlined element must have a start range");
+			assert(element.end, "The outlined element must have an end range");
 			var fullLabel = element.label;
 			if (element.labelPre){
 				fullLabel = element.labelPre + fullLabel;
@@ -87,6 +79,51 @@ define([
 						assert.fail("There should be one outline element");
 					}
 					assertElement(outline[0], "F1(p1, p2)", 9, 11);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457057
+		 */
+		it('testMemberExpressionLiteral1', function() {
+			context.text = "Foo[\'bar\'] = function() {}";
+			return outliner.computeOutline(context).then(function(outline) {
+				try {
+					assert(outline && outline.length > 0, "There should be one outline element");
+					assertElement(outline[0], "Foo.bar()", 1, 10);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457057
+		 */
+		it('testMemberExpressionLiteral2', function() {
+			context.text = "Foo[\'bar\'].baz = function() {}";
+			return outliner.computeOutline(context).then(function(outline) {
+				try {
+					assert(outline && outline.length > 0, "There should be one outline element");
+					assertElement(outline[0], "Foo.bar.baz()", 1, 14);
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		/**
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457057
+		 */
+		it('testMemberExpressionLiteral3', function() {
+			context.text = "Foo.baz[\'bar\'] = function() {}";
+			return outliner.computeOutline(context).then(function(outline) {
+				try {
+					assert(outline && outline.length > 0, "There should be one outline element");
+					assertElement(outline[0], "Foo.baz.bar()", 1, 14);
 				}
 				finally {
 					tearDown();

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -29,17 +29,19 @@ define([
 	}
 	
 	Objects.mixin(GenerateDocCommand.prototype, {
-		/* override */
+		/* override
+		 * @callback
+		 */
 		execute: function(editorContext, options) {
 			var that = this;
 			return Deferred.all([
 				this.astManager.getAST(editorContext),
-				editorContext.getText(),
 				editorContext.getCaretOffset()
 			]).then(function(results) {
-				var node = Finder.findNode(results[2], results[0], {parents:true});
+			    var ast = results[0];
+				var node = Finder.findNode(results[1], ast, {parents:true});
 				if(node) {
-					var text = results[1];
+					var text = ast.source;
 					var parent = that._resolveParent(node);
 					if(parent) {
 						//don't monkey with existing comments
@@ -71,7 +73,7 @@ define([
 					if(template) {
 						return Deferred.all([
 										editorContext.setText(template, start, start),
-										editorContext.setCaretOffset(results[2]+template.length)
+										editorContext.setCaretOffset(results[1]+template.length)
 										]);
 					}
 				}
