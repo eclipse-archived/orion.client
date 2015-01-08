@@ -1025,6 +1025,18 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 0);
     		});
+    		/**
+    		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=456964
+    		 */
+    		it("should not flag infinite for statement", function() {
+    			var topic = "for(;;) {}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
     	});
 //NO-CONSOLE ---------------------------------------------
         describe('no-console', function() {

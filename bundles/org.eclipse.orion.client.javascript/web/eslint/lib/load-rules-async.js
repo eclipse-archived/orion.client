@@ -258,6 +258,9 @@ define([
                 }
                 function checkForAssignment(node) {
                     var assigns = [];
+                    if(node.test === null) {
+                        return;
+                    }
                     node.test.parent = node;
                     Estraverse.traverse(node.test, {
                         enter: function(n, parent) {
