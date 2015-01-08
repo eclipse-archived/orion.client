@@ -1035,7 +1035,7 @@ define([
 		 * @description Asks the ESLint environment description if it knows about the given member name and if so
 		 * returns the index name it was found in
 		 * @function
-		 * @param {String name The name of the member to look up
+		 * @param {String} name The name of the member to look up
 		 * @returns {String} The name of the ESLint environment it was found in or <code>null</code>
 		 * @since 8.0
 		 */

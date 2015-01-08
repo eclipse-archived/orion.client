@@ -126,8 +126,7 @@ define([
 	        hover += '\n\n\n  [Jump to declaration]('+href+')';*/
 	    }
 	    catch(e) {
-	        //add on the wad of text for now
-	        hover += comment;
+	        //do nothing, show what we have
 	    }
 	    return {content: hover, title: title, type:'markdown'};
 	}
@@ -256,8 +255,7 @@ define([
 	       hover += '</div>';
 	    }
 	    catch(e) {
-	        //add on the wad of text for now
-	        hover += comment;
+	       //do nothing, show what we have
 	    }
 	    return {content: hover, type:'html'};
 	}
