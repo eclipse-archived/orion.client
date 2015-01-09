@@ -75,11 +75,11 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			if (url.host === "github.com") {
 				pluginURL = new URL("../../plugins/GitHubFilePlugin.html?repo=" + url.href, _browser_script_source);
 			} else {
-				var regex = /^\/git([\d]?)([\d]?)\/(.*)/;// Pattern : "/git/", "/git02/", "/git3/", "/git04"
+				var regex = /^\/(git)([\d]?)([\d]?)\/(.*)/;// Pattern : "/git/", "/git02/", "/git3/", "/git04"
 				var match = regex.exec(url.pathname);
-				if(match && match.length === 4) {
-					pluginURL = new URL("/gerrit" + match[1] + match[2] + "/plugins/gerritfs/static/plugins/GerritFilePlugin.html", url);
-					pluginURL.query.set("project", match[3]);
+				if(match && match.length === 5) {
+					pluginURL = new URL("/gerrit" + match[2] + match[3] + "/plugins/gerritfs/static/plugins/GerritFilePlugin.html", url);
+					pluginURL.query.set("project", match[4]);
 				} else if (url.pathname.indexOf("/ccm") === 0) {
 					if (!base) {
 						var ccmPath = url.pathname.match(/^\/ccm[^/]*/);
