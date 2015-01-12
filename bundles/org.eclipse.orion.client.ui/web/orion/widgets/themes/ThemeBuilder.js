@@ -228,16 +228,15 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 	}
 	ThemeBuilder.prototype.updateScopeValue = updateScopeValue;
 	
-	function getValueFromPath (obj, keys) {
+	function getValueFromPath(obj, keys) {
 		var nodes = keys.split('.');
-		try{
-			for (var i = 0; i < nodes.length; i++) {
-				obj = obj[nodes[i]];
+		for (var i = 0; i < nodes.length; i++) {
+			if (!obj[nodes[i]]) {
+				return "";
 			}
-			return obj;
-		}catch(e){
-			return "";
+			obj = obj[nodes[i]];
 		}
+		return obj;
 	}
 	
 	function setValueToPath (obj, path, val){
