@@ -117,6 +117,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			context.commandService.collectParameters(context.data);
 		} else {
 			storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
+			if ( ("Error" === status.Severity) || ("Warning" === status.Severity) ) { //$NON-NLS-1$ //$NON-NLS-0$
+				progress.setProgressResult(status); //show errors and warnings
+			}
 		}
 
 		if(status.ToSave){
