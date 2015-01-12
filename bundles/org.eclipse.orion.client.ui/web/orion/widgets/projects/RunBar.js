@@ -62,7 +62,7 @@ define([
 				this._undestroyedTooltips = []; // an array of all the tooltips that need to be destroyed when this widget is destroyed
 								
 				this._playButton = lib.$("button.playButton", this._domNode); //$NON-NLS-0$
-				this._boundPlayButtonListener = this._runBarButtonListener.bind(this, this._playButtonCommand);
+				this._boundPlayButtonListener = this._runBarButtonListener.bind(this, "orion.launchConfiguration.deploy"); //$NON-NLS-0$
 				this._playButton.addEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$ 
 				
 				this._stopButton = lib.$("button.stopButton", this._domNode); //$NON-NLS-0$
@@ -70,6 +70,10 @@ define([
 				this._stopButton.addEventListener("click", this._boundStopButtonListener); //$NON-NLS-0$
 				
 				// set button tooltips
+				var playCommand = this._commandRegistry.findCommand("orion.launchConfiguration.deploy"); //$NON-NLS-0$
+				if (playCommand.tooltip) {
+					this._setNodeTooltip(this._playButton, playCommand.tooltip);
+				}
 				var stopCommand = this._commandRegistry.findCommand("orion.launchConfiguration.stopApp"); //$NON-NLS-0$
 				if (stopCommand.tooltip) {
 					this._setNodeTooltip(this._stopButton, stopCommand.tooltip);
@@ -286,11 +290,6 @@ define([
 					this._enableLink(this._appLink, launchConfiguration.Url);
 				}
 				
-				var playCommand = this._commandRegistry.findCommand("orion.launchConfiguration.deploy"); //$NON-NLS-0$
-				if (playCommand.tooltip) {
-					this._setNodeTooltip(this._playButton, playCommand.tooltip);
-				}
-				
 				if (checkStatus) {
 					this._checkLaunchConfigurationStatus(launchConfiguration);
 				} else {
@@ -303,8 +302,6 @@ define([
 				this._selectedLaunchConfiguration = null;
 				this._setLaunchConfigurationsLabel(null);
 				this.setStatus({State: "", Message: ""}); //$NON-NLS-1$ //$NON-NLS-0$
-				
-				this._setNodeTooltip(this._playButton, null); //destroy play button tooltip
 			}
 		},
 		
@@ -456,22 +453,19 @@ define([
 		 * Implements a generic button listener which executes the specified
 		 * command when it is invoked and collects metrics
 		 * 
-		 * @param[in] {String | Function} command A String containing the id of the command to run or a Function to call 
+		 * @param[in] {String} command A String containing the id of the command to run
+		 * @param[in] {Event} event The event which triggered the listener
 		 */
-		_runBarButtonListener: function(command, event) {
+		_runBarButtonListener: function(commandId, event) {
 			var buttonNode = event.target;
 			var id = buttonNode.id;
 			var isEnabled = this._isEnabled(buttonNode);
 			var disabled = isEnabled ? "" : ".disabled"; //$NON-NLS-1$ //$NON-NLS-0$
-						
+			
 			mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + "." + id +".clicked" + disabled, event.which); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			if (isEnabled) {
-				if (typeof command === "function") { //$NON-NLS-0$
-					command.call(this, buttonNode);
-				} else {
-					this._commandRegistry.runCommand(command, this._selectedLaunchConfiguration, this, null, null, buttonNode); //$NON-NLS-0$
-				}
+				this._commandRegistry.runCommand(commandId, this._selectedLaunchConfiguration, this, null, null, buttonNode); //$NON-NLS-0$
 			}
 		},
 		
@@ -480,6 +474,7 @@ define([
 		},
 		
 		_disableAllControls: function() {
+			this._disableControl(this._playButton);
 			this._disableControl(this._stopButton);
 		},
 		
@@ -546,31 +541,20 @@ define([
 		},
 		
 		_setLaunchConfigurationsLabel: function(launchConfiguration) {
-			var emptyMessage = i18nUtil.formatMessage(messages["selectLaunchConfig"], "\u25ba"); //$NON-NLS-1$ //$NON-NLS-0$
-			
-			lib.empty(this._launchConfigurationsLabel);
 			if (launchConfiguration) {
 				var displayName = launchConfiguration.Params.Name + messages["displayNameSeparator"] + launchConfiguration.Params.Target.Space; //$NON-NLS-0$
+				
+				lib.empty(this._launchConfigurationsLabel);
+				
 				this._setText(this._appName, displayName);
 				this._setNodeTooltip(this._appName, launchConfiguration.Name);
-				
 				this._setText(this._appInfoSpan, null);
 				
 				this._launchConfigurationsLabel.appendChild(this._statusLight);
 				this._launchConfigurationsLabel.appendChild(this._appName);
 				this._launchConfigurationsLabel.appendChild(this._appInfoSpan);
 			} else {
-				this._launchConfigurationsLabel.appendChild(this._appName);
-				this._setText(this._appName, emptyMessage); //$NON-NLS-0$
-			}
-		},
-		
-		_playButtonCommand: function(buttonNode) {
-			if (this._selectedLaunchConfiguration) {
-				this._commandRegistry.runCommand("orion.launchConfiguration.deploy", this._selectedLaunchConfiguration, this, null, null, buttonNode); //$NON-NLS-0$
-			} else {
-				var defaultDeployCommand = this._projectCommands.getDeployProjectCommands(this._commandRegistry)[0];
-				this._commandRegistry.runCommand(defaultDeployCommand.id, this._projectExplorer.treeRoot, this, null, null, buttonNode); //$NON-NLS-0$
+				this._setText(this._launchConfigurationsLabel, messages["selectLaunchConfig"]); //$NON-NLS-0$
 			}
 		}
 	});

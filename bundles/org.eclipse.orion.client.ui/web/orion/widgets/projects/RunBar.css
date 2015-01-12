@@ -41,9 +41,13 @@
 .launchConfigurationsButton > .dropdownTriggerButtonLabel {
 	-webkit-align-items: center;		 		 /* Safari */
 	align-items: center;
+	color: #888;
 	display: -webkit-inline-flex;		 /* Safari */
 	display: inline-flex;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	vertical-align: top;
+	white-space: nowrap;
 	width: calc(100% - 20px);
 }
 
