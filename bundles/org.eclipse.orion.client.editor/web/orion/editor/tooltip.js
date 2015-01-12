@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2015 IBM Corporation and others.
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -58,10 +58,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					self.hide();
 				}
 			}, true);
-			textUtil.addEventListener(tooltipDiv, "mouseover", /* @callback */ function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(tooltipDiv, "mouseover", function(event) { //$NON-NLS-0$
 				self._inTooltip = true;
 			}, false);
-			textUtil.addEventListener(tooltipDiv, "mouseout", /* @callback */ function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(tooltipDiv, "mouseout", function(event) { //$NON-NLS-0$
 				self._inTooltip = false;
 			}, false);
 			textUtil.addEventListener(tooltipDiv, "keydown", function(event) { //$NON-NLS-0$
@@ -645,10 +645,6 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					}
 					return html;
 				} else {
-					// Don't create a projection model if we are in the editor it will just duplicate the content the user is looking at
-					if (context && context.source && context.source === 'editor'){ //$NON-NLS-0$
-						return null;
-					}
 					var newModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 					var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(annotation.start));
 					var charCount = baseModel.getCharCount();
