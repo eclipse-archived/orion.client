@@ -54,7 +54,7 @@ define([
 			} else {
 				status = message;
 			}
-			console.log( dirtyIndicator + status); //$NON-NLS-0$
+			// console.log( dirtyIndicator + status); //$NON-NLS-0$
 		};
 		
 		editor = edit({
