@@ -526,7 +526,7 @@ define([
 		            if(file.name && file.path && file.contentType) {
 		                hover += '[';
 		                if(file.contentType.icon) {
-		                    hover += '!['+file.contentType.name+']('+file.contentType.icon+') ';
+		                    hover += '!['+file.contentType.name+']('+file.contentType.icon+')';
 		                }
 		                var href = new URITemplate("#{,resource,params*}").expand(
     		                      {

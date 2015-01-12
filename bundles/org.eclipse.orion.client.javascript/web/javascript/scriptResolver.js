@@ -133,7 +133,7 @@ define([
            meta.location = location ? location : fileClient.getServiceRootURL() + '/' + path;
            meta.path = path;
            meta.contentType = Object.create(null);
-           meta.contentType.icon = '/javascript/images/javascript.png';
+           meta.contentType.icon = '../javascript/images/javascript.png';
            meta.contentType.name = 'JavaScript';
            return meta;
        },
