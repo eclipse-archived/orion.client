@@ -36,7 +36,6 @@ define("orion/widgets/settings/ThemeSettings", //$NON-NLS-0$
 			} else {
 				var commandArea = document.getElementById( 'pageActions' ); //$NON-NLS-0$
 				commandArea.innerHTML = this.commandTemplate;
-				this.createToolbar();
 			}
 		},
 		createSections: function() {
@@ -69,45 +68,18 @@ define("orion/widgets/settings/ThemeSettings", //$NON-NLS-0$
 				messageService.setProgressResult( {Message:msg, Severity:severity} );
 			}
 		},
-		update: function() {
-			var currentPrefs = this.valueChanged();
-			if (currentPrefs) {
-				var msg = this.validate(currentPrefs);
-				if (msg) {
-					this._progress(msg,"Error"); //$NON-NLS-0$
-					return;
-				}
-				this.preferences.setPrefs(currentPrefs, function () {
-					this.setValues(this.oldPrefs = currentPrefs);
-					this._progress(messages["Editor preferences updated"], "Normal"); //$NON-NLS-0$
-				}.bind(this));
-			} else {
-				this.setValues(this.oldPrefs);
-			}
-			if (this.editor) {
-				this.editor.focus();
-			}
-		},
 		show: function(node, callback) {
 			if (node) {
 				this.node = node;
 			}
 			this.themePreferences.getTheme(function(themeStyles) {
-				this.preferences.getPrefs(function (editorPrefs) {
-					this._show(editorPrefs, themeStyles);
+				this.preferences.getPrefs(function(editorPrefs) {
+					this.createElements();
 					if (callback) {
 						callback();
 					}
 				}.bind(this));
 			}.bind(this));
-		},
-		_show: function(editorPrefs, themeStyles) {
-			if (themeStyles) {
-				this.oldThemeStyles = themeStyles;
-			}
-			this.oldPrefs = editorPrefs;
-			this.createElements();
-			this.setValues(editorPrefs);
 		},
 		destroy: function() {
 			if (this.node) {
