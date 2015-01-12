@@ -191,6 +191,7 @@ define({//Default message bundle
 	"space*:": "Space*:",
 	"applicationName*:": "Application Name*:",
 	"debugWith${0}:": "Debug with ${0}:",
+	"runInDebugMode": "Run in debug mode",
 	"requiredToPreventRandomAccess": "Required to prevent random access to cf-launcher",
 	"uRLPrefix:": "URL Prefix: ",
 	"leaveBlankForDefault": "Leave blank for default ${0}",

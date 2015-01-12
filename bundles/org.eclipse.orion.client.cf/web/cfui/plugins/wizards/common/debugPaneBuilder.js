@@ -89,7 +89,8 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard', 'orion/i18nUtil'], funct
 					label = document.createElement("label"); //$NON-NLS-0$
 					label.className = "manifestLabel"; //$NON-NLS-0$
 					
-					label.innerHTML = i18nUtil.formatMessage(messages["debugWith${0}:"], "<a href=\"https://www.npmjs.org/package/cf-launcher\">cf-launcher</a>"); //$NON-NLS-1$
+					// label.innerHTML = i18nUtil.formatMessage(messages["debugWith${0}:"], "<a href=\"https://www.npmjs.org/package/cf-launcher\">cf-launcher</a>"); //$NON-NLS-1$
+					label.innerHTML = messages["runInDebugMode"];
 					debugElement.appendChild(label);
 					
 					// TODO: Restore previous parameters
