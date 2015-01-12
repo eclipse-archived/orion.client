@@ -335,6 +335,9 @@ define([
 							if(this.branchSelector) {
 								titleNode.appendChild(this.branchSelector.parentNode);
 								this.branchSelector.refresh();
+								var dlZipContainer = lib.node("folderNavSectionLeftTitleActionsArea");
+								this.commandRegistry.renderCommands("orion.browse.branchLevelActions", dlZipContainer, {}, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+								dlZipContainer.title = "Download this branch as zip";
 							}
 							if(this.componentSelector) {
 								titleNode.appendChild(this.componentSelector.parentNode);
