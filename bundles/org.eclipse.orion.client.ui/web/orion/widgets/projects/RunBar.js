@@ -116,7 +116,7 @@ define([
 				} else {
 					this._menuItemsCache = []; // clear launch configurations menu items cache
 					var dropdown = this._launchConfigurationsDropdown.getDropdown();
-					var hash, launchConfiguration, menuItem;
+					var hash, launchConfiguration, menuItem, domNodeWrapperList;
 					
 					for (hash in this._cachedLaunchConfigurations) {
 						if (this._cachedLaunchConfigurations.hasOwnProperty(hash)) {
@@ -139,7 +139,7 @@ define([
 							}.bind(this, hash)); // passing in hash here because using it directly in function only creates a reference which ends up with the last value of hash
 							
 							this._commandRegistry.registerCommandContribution(menuItem.id, "orion.launchConfiguration.delete", 1); //$NON-NLS-0$
-							var domNodeWrapperList = [];
+							domNodeWrapperList = [];
 							this._commandRegistry.renderCommands(menuItem.id, menuItem.firstChild, launchConfiguration, this, "tool", null, domNodeWrapperList); //$NON-NLS-0$
 							domNodeWrapperList[0].domNode.classList.remove("commandMargins"); //$NON-NLS-0$
 							domNodeWrapperList[0].domNode.classList.add("launchConfigurationDeleteButton"); //$NON-NLS-0$
@@ -164,7 +164,9 @@ define([
 					var defaultDeployCommand = this._projectCommands.getDeployProjectCommands(this._commandRegistry)[0];
 					
 					this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommand.id, 1); //$NON-NLS-0$
+					domNodeWrapperList = [];
 					this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._projectExplorer.treeRoot, this, "button", null, domNodeWrapperList); //$NON-NLS-0$
+					domNodeWrapperList[0].domNode.textContent = messages["createNew"]; //$NON-NLS-0$
 				}
 			}.bind(this);
 			
