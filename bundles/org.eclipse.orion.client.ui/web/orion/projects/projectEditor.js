@@ -631,7 +631,6 @@ define([
 			this.projectData = projectData;
 
 			function renderSections(sectionsOrder, sectionNames){
-				var emptyMessage = null;
 				sectionNames = sectionNames || {};
 				sectionsOrder.forEach(function(sectionName){
 					var span;
@@ -649,8 +648,7 @@ define([
 						case "deployment":
 							span = document.createElement("span");
 							this.node.appendChild(span);
-							emptyMessage = i18nUtil.formatMessage(messages["emptyDeploymentInfoMessage"], "\u25ba"); //$NON-NLS-1$ //$NON-NLS-0$ //insert Unicode Play icon into message
-							this.renderLaunchConfigurations(span, null, sectionNames[sectionName], emptyMessage);
+							this.renderLaunchConfigurations(span, null, sectionNames[sectionName], messages["emptyDeploymentInfoMessage"]); //$NON-NLS-0$
 							break;
 						case "dependencies":
 							span = document.createElement("span");

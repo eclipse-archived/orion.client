@@ -85,5 +85,5 @@ define({//Default message bundle
 	"showProblems": "Show problems...",  //$NON-NLS-1$ //$NON-NLS-0$
 	"showTooltip": "Show Tooltip", //$NON-NLS-1$ //$NON-NLS-0$
 	"showTooltipTooltip": "Shows the tooltip immediately based on the caret position", //$NON-NLS-1$ //$NON-NLS-0$
-	"emptyDeploymentInfoMessage": "Use the ${0} button to deploy this project" //$NON-NLS-1$ //$NON-NLS-0$
+	"emptyDeploymentInfoMessage": "Use the Launch Configurations dropdown to deploy this project" //$NON-NLS-1$ //$NON-NLS-0$
 });
