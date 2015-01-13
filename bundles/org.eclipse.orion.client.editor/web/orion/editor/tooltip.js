@@ -58,10 +58,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					self.hide();
 				}
 			}, true);
-			textUtil.addEventListener(tooltipDiv, "mouseover", function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(tooltipDiv, "mouseover", /* @callback */ function(event) { //$NON-NLS-0$
 				self._inTooltip = true;
 			}, false);
-			textUtil.addEventListener(tooltipDiv, "mouseout", function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(tooltipDiv, "mouseout", /* @callback */ function(event) { //$NON-NLS-0$
 				self._inTooltip = false;
 			}, false);
 			textUtil.addEventListener(tooltipDiv, "keydown", function(event) { //$NON-NLS-0$
@@ -282,12 +282,11 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 			
 			if (this.hover && info.offset !== undefined && !contents) {
-				var context; 
+				var context = Object.create(null); 
 				if (info.context){
 					context = info.context;
-				} else {
-					context = {offset: info.offset};
 				}
+				context.offset = info.offset;
 				this._hoverInfo = this.hover.computeHoverInfo(context);
 			}
 			
@@ -645,6 +644,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					}
 					return html;
 				} else {
+					// Don't create a projection model if we are in the editor it will just duplicate the content the user is looking at
+					if (context && context.source && context.source === 'editor'){ //$NON-NLS-0$
+						return null;
+					}
 					var newModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 					var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(annotation.start));
 					var charCount = baseModel.getCharCount();

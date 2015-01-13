@@ -706,6 +706,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				contents: rangeAnnotations,
 				offset: offset,
 				position: "below", //$NON-NLS-0$
+				context: {source: "editor"} //$NON-NLS-0$
 			};
 			return info;
 		},
