@@ -54,3 +54,7 @@
 	background-color: inherit;
 	color: #3333CC;
 }
+
+.textviewTooltip .commandButton:not(.dropdownTrigger){
+  text-transform: initial; 
+}
