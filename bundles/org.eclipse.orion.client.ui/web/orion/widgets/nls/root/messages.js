@@ -78,6 +78,7 @@ define({//Default message bundle
 	"Status": "Status",
 	"appInfoStopped": "stopped",
 	"appInfoRunning": "running",
+	"appInfoUnknown": "unknown",
 	"displayNameSeparator": " on ",
 	"openAppTooltip": "Open URL"
 });

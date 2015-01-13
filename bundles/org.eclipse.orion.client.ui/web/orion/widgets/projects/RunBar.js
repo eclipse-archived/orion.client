@@ -303,42 +303,55 @@ define([
 			} else {
 				this._selectedLaunchConfiguration = null;
 				this._setLaunchConfigurationsLabel(null);
-				this.setStatus({State: "", Message: ""}); //$NON-NLS-1$ //$NON-NLS-0$
+				this.setStatus({});
 			}
 		},
-		
+			
 		_checkLaunchConfigurationStatus: function(launchConfiguration) {
 			var progressMessage = i18nUtil.formatMessage(messages["checkingStateMessage"], launchConfiguration.Name); //$NON-NLS-0$
 			
+			// start progress spinner in launch config dropdown trigger and indicate that we are checking the status
 			this.setStatus({
 				State: "PROGRESS", //$NON-NLS-0$
 				Message: progressMessage,
 				ShortMessage: messages["checkingStateShortMessage"] //$NON-NLS-0$
 			});
 			
+			var errorHandler = function (error) {
+				// stop the progress spinner in the launch config dropdown trigger
+				this.setStatus({
+					error: error || true //if no error was passed in we still want to ensure that the error state is recorded
+				});
+			}.bind(this);
+			
 			// update status
-			this._projectClient.getProjectDelpoyService(launchConfiguration.ServiceId, launchConfiguration.Type).then(function(service){
-				if(service && service.getState){
-					service.getState(launchConfiguration).then(function(result){
-							launchConfiguration.status = result;
-							this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
-						}.bind(this), 
-						function(error){
-							launchConfiguration.status = {error: error};
-							if (error.Retry) {
-								// authentication error, gather required parameters and try again
-								launchConfiguration.parametersRequested = launchConfiguration.status.error.Retry.parameters;
-								launchConfiguration.optionalParameters = launchConfiguration.status.error.Retry.optionalParameters;
-								
-								// run command to collect params first then check status again
-								this._commandRegistry.runCommand("orion.launchConfiguration.checkStatus", launchConfiguration, this, null, null, this._statusLight); //$NON-NLS-0$
-							} else {
+			this._projectClient.getProjectDelpoyService(launchConfiguration.ServiceId, launchConfiguration.Type).then(
+				function(service){
+					if(service && service.getState){
+						service.getState(launchConfiguration).then(function(result){
+								launchConfiguration.status = result;
 								this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
-							}
-						}.bind(this)
-					);
-				}
-			}.bind(this));
+							}.bind(this),
+							function(error){
+								launchConfiguration.status = {error: error};
+								if (error.Retry) {
+									// authentication error, gather required parameters and try again
+									launchConfiguration.parametersRequested = launchConfiguration.status.error.Retry.parameters;
+									launchConfiguration.optionalParameters = launchConfiguration.status.error.Retry.optionalParameters;
+									
+									// run command because it knows how to collect params first then check the status again
+									this._commandRegistry.runCommand("orion.launchConfiguration.checkStatus", launchConfiguration, this, null, null, this._statusLight); //$NON-NLS-0$
+								} else {
+									this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
+								}
+							}.bind(this)
+						);
+					} else {
+						errorHandler();
+					}
+				}.bind(this),
+				errorHandler
+			);
 		},
 		
 		setStatus: function(status) {
@@ -352,16 +365,17 @@ define([
 			
 			this._setText(this._appInfoSpan, null);
 			
-			this._disableAllControls();
+			this._disableAllControls(); // applicable controls will be re-enabled further below
 			
 			if (status.error) {
 				this._enableControl(this._playButton);
 				if (!status.error.Retry) {
-					this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
-					statusLightText = status.error.Message;
+					if (status.error.Message) {
+						statusLightText = status.error.Message;
+					}
 				}
-				
-				appInfoText = status.ShortMessage || status.Message || messages["appInfoStopped"]; //$NON-NLS-0$
+				// set the short status that appears next to the app name
+				appInfoText = status.ShortMessage || statusLightText || messages["appInfoUnknown"]; //$NON-NLS-0$
 			} else {
 				switch (status.State) {
 					case "PROGRESS": //$NON-NLS-0$
@@ -392,14 +406,10 @@ define([
 			this._setNodeTooltip(this._statusLight, statusLightText);
 			
 			if (appInfoText) {
-				this._setText(this._appInfoSpan, "(" + appInfoText + ")"); //$NON-NLS-1$ //$NON-NLS-0$
+				this._setText(this._appInfoSpan, "(" + appInfoText.toLocaleLowerCase() + ")"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
-		
-		_setStatusTitle: function(title) {
-			this._statusLight.title = title || ""; //$NON-NLS-0$
-		},
-		
+				
 		/**
 		 * Sets the list of launch configurations to be used by this run bar.
 		 * This method may be called more than once. Any previously cached
