@@ -351,6 +351,7 @@ define([
 			this._commandRegistry.registerCommandContribution("orion.browse.breadcrumbActions", "orion.browse.download", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			var downloadZipCommand = new mCommands.Command({
 				imageClass: "core-sprite-download-file-browser", //$NON-NLS-0$
+				tooltip: "Download the contents of this branch as a zip file",
 				id: "orion.browse.downloadZip", //$NON-NLS-0$
 				visibleWhen: function() {
 					return !!this._downloadURL && this._downloadZip;
