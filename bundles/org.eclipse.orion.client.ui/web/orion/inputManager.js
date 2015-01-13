@@ -329,7 +329,6 @@ define([
 
 			this.dispatchEvent({ type: "Saving", inputManager: this}); //$NON-NLS-0$
 
-			editor.markClean();
 			var contents = editor.getText();
 			var data = contents;
 			if (this._getSaveDiffsEnabled() && !this._errorSaving) {
@@ -371,6 +370,7 @@ define([
 				if (self.postSave) {
 					self.postSave(closing);
 				}
+				editor.markClean();
 				return done(result);
 			}
 			function errorHandler(error) {
