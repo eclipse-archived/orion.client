@@ -14,6 +14,14 @@ define(['gitWidgets/builder/commitBrowser'],
 function(mCommitBrowser) {
 	var commitBrowser = new mCommitBrowser("commitBrowser");
 	commitBrowser.startup().then(function() {
-		commitBrowser.displayCommit(null, "/gitapi/diff/0977fdc693d3cf8955304335ff11e8445dc85d45/file/libingw-OrionContent/OrionClient/", "1959585b786038e12ac72e44e5b170bbb3eb5aa6", "0977fdc693d3cf8955304335ff11e8445dc85d45");
+		//How to get the 2th, 3th and 4th parameters for demo
+		//Open the git repository page, select a commit from the history section
+		//In the debugger, set a break point at the first line at GitRepositoryExplorer.prototype.displayDiffs function in GitRepositoryExplorer.js
+		//Inspect "commit" param
+		//2th param: commit.DiffLocation
+		//3th param: commit.Parents[0].Name
+		//4th param: commit.Name (optional)
+		commitBrowser.displayCommit(null, "/gitapi/diff/d7cb9bb433a8fab1a509e4acb7cf059da8635a2d/file/liwang-OrionContent/OrionClient/", 
+		"815951d96103ca75245f0849cc26afc24581dbb4", "d7cb9bb433a8fab1a509e4acb7cf059da8635a2d"); 
 	});
 });
