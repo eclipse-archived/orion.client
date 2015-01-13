@@ -10,31 +10,7 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["orion/plugin", "orion/Deferred", "orion/xhr"], function(PluginProvider, Deferred, xhr) {
-
-	function GoogleAnalyticsImpl() {}
-
-	GoogleAnalyticsImpl.prototype = {
-		init: function() {
-			var promise = new Deferred();
-			var url = new URL("../metrics", window.location); //$NON-NLS-0$
-			xhr("GET", url.href, { //$NON-NLS-0$
-				headers: {
-					"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$
-				},
-				log: false
-			}).then(
-				function(result) {
-					promise.resolve(JSON.parse(result.response));
-				},
-				function(error) {
-					promise.resolve({});
-				}
-			);
-			return promise;
-		}
-	};
-
+define(["orion/plugin", "plugins/metrics/googleAnalyticsImpl"], function(PluginProvider, GoogleAnalyticsImpl) {
 	var headers = {
 		name: "Google Analytics Plugin",
 		version: "1.0",

@@ -14,40 +14,44 @@ define(["orion/Deferred"], function(Deferred) {
 	var GA_ID = "OrionGA"; //$NON-NLS-0$
 	var queue = [];
 
-	var init = function(serviceRegistry, args) {
+	var init = function(service, args) {
+		if (service && service.init) {
+			service.init().then(
+				function(result) {
+					if (!result.tid) { /* not tracking */
+						queue = null;
+						return;
+					}
+
+					(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+					(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+					m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+					})(window,document,'script','//www.google-analytics.com/analytics.js',GA_ID);
+
+					args = args || {};
+					if (result.siteSpeedSampleRate) {
+						args.siteSpeedSampleRate = result.siteSpeedSampleRate;
+					}
+					window[GA_ID]("create", result.tid, args); //$NON-NLS-0$
+					window[GA_ID]("send", "pageview"); //$NON-NLS-1$ //$NON-NLS-0$
+
+					queue.forEach(function(current) {
+						window[GA_ID](current.command, current.arg0, current.arg1, current.arg2, current.arg3, current.arg4); //$NON-NLS-0$
+					});
+					queue = null; /* no longer needed */
+				}
+			);
+		} else {
+			queue = null; /* not tracking */
+		}
+	};
+
+	var initFromRegistry = function(serviceRegistry, args) {
 		var refs = serviceRegistry.getServiceReferences("orion.analytics.google"); //$NON-NLS-0$
 		if (refs.length) {
-			var ref = refs[0];
-			var service = serviceRegistry.getService(ref);
-			if (service && service.init) {
-				service.init().then(
-					function(result) {
-						if (!result.tid) { /* not tracking */
-							queue = null;
-							return;
-						}
-
-						(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-						(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-						m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-						})(window,document,'script','//www.google-analytics.com/analytics.js',GA_ID);
-
-						args = args || {};
-						if (result.siteSpeedSampleRate) {
-							args.siteSpeedSampleRate = result.siteSpeedSampleRate;
-						}
-						window[GA_ID]("create", result.tid, args); //$NON-NLS-0$
-						window[GA_ID]("send", "pageview"); //$NON-NLS-1$ //$NON-NLS-0$
-
-						queue.forEach(function(current) {
-							window[GA_ID](current.command, current.arg0, current.arg1, current.arg2, current.arg3, current.arg4); //$NON-NLS-0$
-						});
-						queue = null; /* no longer needed */
-					}
-				);
-			}
-		}
-		if (!(service && service.init)) {
+			var service = serviceRegistry.getService(refs[0]);
+			init(service, args);
+		} else {
 			queue = null; /* not tracking */
 		}
 	};
@@ -95,6 +99,7 @@ define(["orion/Deferred"], function(Deferred) {
 
 	return {
 		init: init,
+		initFromRegistry: initFromRegistry,
 		logEvent: logEvent,
 		logPageLoadTiming: logPageLoadTiming,
 		logTiming: logTiming,

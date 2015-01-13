@@ -136,7 +136,7 @@ define([], function() {
         "plugins/gitBlamePlugin.js"	: {source: "org.eclipse.orion.client.ui/web/plugins/gitBlamePlugin.js"},
         "plugins/GitHubFilePlugin.html"	: {source: "org.eclipse.orion.client.ui/web/plugins/GitHubFilePlugin.html"},
         "plugins/GitHubFilePlugin.js"	: {source: "org.eclipse.orion.client.ui/web/plugins/GitHubFilePlugin.js"},
-        "plugins/googleAnalyticsPlugin.js"	: {source: "org.eclipse.orion.client.ui/web/plugins/googleAnalyticsPlugin.js"},
+        "plugins/metrics/googleAnalyticsPlugin.js"	: {source: "org.eclipse.orion.client.ui/web/plugins/metrics/googleAnalyticsPlugin.js"},
         "plugins/HoverTestPlugin2.html"	: {source: "org.eclipse.orion.client.ui/web/plugins/HoverTestPlugin2.html"},
         "plugins/HoverTestPlugin2.js"	: {source: "org.eclipse.orion.client.ui/web/plugins/HoverTestPlugin2.js"},
         "plugins/HTML5LocalFilePlugin.html": {source: "org.eclipse.orion.client.ui/web/plugins/HTML5LocalFilePlugin.html"},
