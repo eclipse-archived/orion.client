@@ -82,6 +82,7 @@
 .dropdownMenu.dropdownMenuOpen > li > .addNewMenuItem {
 	background-color: whitesmoke;
 	border-left-color: transparent;
+	cursor: default;
 	padding-left: 0;
 }
 
