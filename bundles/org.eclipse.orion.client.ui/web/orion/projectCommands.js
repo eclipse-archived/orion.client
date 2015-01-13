@@ -478,7 +478,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 
 				projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
 					if(sharedLaunchConfigurationDispatcher){
-						item.status = {State: "PROGRESS"};
+						item.status = {State: "PROGRESS", ShortMessage: messages["checkingStateShortMessage"]}; //$NON-NLS-1$ //$NON-NLS-0$
 						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
 					}
 					if(service && service.getState){
