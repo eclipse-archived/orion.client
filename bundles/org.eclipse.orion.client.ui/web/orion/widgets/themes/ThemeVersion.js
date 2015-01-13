@@ -14,7 +14,7 @@ define([], function() {
 	/**
 	 * Version string for theme data. Please update this string whenever you change the style of a themable element.
 	 */
-	var THEMES_VERSION = "6.57";
+	var THEMES_VERSION = "6.58";
 
 	return THEMES_VERSION;
 });
