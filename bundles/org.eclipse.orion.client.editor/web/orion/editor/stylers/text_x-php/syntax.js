@@ -13,28 +13,41 @@
 define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-0$
 	var keywords = [
 		"abstract", "and", "array", "as", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"break", //$NON-NLS-0$
-		"callable", "case", "catch", "class", "clone", "const", "continue", //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"declare", "default", "die", "do", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"echo", "else", "elseif", "empty", "enddeclare", "endfor", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"endforeach", "endif", "endswitch", "endwhile", "eval", "exit", "extends", //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"false", "FALSE", "final", "finally", "for", "foreach", "function", //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"global", "goto", //$NON-NLS-1$ //$NON-NLS-0$
-		"if", "implements", "include", "include_once", "insteadof", "interface", "instanceof", "isset", //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"callable", "class", "clone", "const", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"declare", //$NON-NLS-0$
+		"echo", "empty", "eval", "extends", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"final", "function", //$NON-NLS-1$ //$NON-NLS-0$
+		"global", //$NON-NLS-0$
+		"implements", "include", "include_once", "insteadof", "interface", "instanceof", "isset", //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"list", //$NON-NLS-0$
-		"namespace", "new", "null", "NULL", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"namespace", "new", //$NON-NLS-1$ //$NON-NLS-0$
 		"or", //$NON-NLS-0$
 		"parent", "print", "private", "protected", "public", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"require", "require_once", "return", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"self", "static", "switch", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"throw", "trait", "try", "true", "TRUE", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"require", "require_once", //$NON-NLS-1$ //$NON-NLS-0$
+		"static", //$NON-NLS-0$
+		"trait", //$NON-NLS-0$
 		"unset", "use", //$NON-NLS-1$ //$NON-NLS-0$
 		"var", //$NON-NLS-0$
-		"while", //$NON-NLS-0$
 		"xor", //$NON-NLS-0$
-		"yield", //$NON-NLS-0$
 		"__halt_compiler", "__CLASS__", "__DIR__", "__FILE__", "__FUNCTION__",  //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"__LINE__", "__METHOD__", "__NAMESPACE__", "__TRAIT__"  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	];
+	var controlKeywords = [
+		"break", //$NON-NLS-0$
+		"case", "catch", "continue", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"default", "die", "do", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"else", "elseif", "enddeclare", "endfor", "endforeach", "endif", "endswitch", "endwhile", "exit", //$NON-NLS-8$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"finally", "for", "foreach", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"goto", //$NON-NLS-0$
+		"if", //$NON-NLS-0$
+		"return", //$NON-NLS-0$
+		"switch", //$NON-NLS-0$
+		"throw", "try", //$NON-NLS-1$ //$NON-NLS-0$
+		"while", //$NON-NLS-0$
+		"yield" //$NON-NLS-0$
+	];
+	var constants = [
+		"false", "FALSE", "null", "NULL", "true", "TRUE" //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
 	var grammars = [];
@@ -85,7 +98,19 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/synt
 					{include: "orion.lib#number_hex"}, //$NON-NLS-0$
 					{
 						match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						name: "keyword.operator.php" //$NON-NLS-0$
+					},
+					{
+						match: "\\b(?:" + controlKeywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						name: "keyword.control.php" //$NON-NLS-0$
+					},
+					{
+						match: "\\b(?:" + constants.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						name: "constant.language.php" //$NON-NLS-0$
+					},
+					{
+						match: "\\bself\\b", //$NON-NLS-0$
+						name: "variable.language.php" //$NON-NLS-0$
 					}
 				]
 			}, {
@@ -97,6 +122,6 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/synt
 	return {
 		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
-		keywords: keywords
+		keywords: keywords.concat(controlKeywords)
 	};
 });
