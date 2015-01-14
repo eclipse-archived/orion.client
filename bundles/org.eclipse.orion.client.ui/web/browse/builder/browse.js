@@ -75,12 +75,12 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			if (url.host === "github.com") {
 				pluginURL = new URL("../../plugins/GitHubFilePlugin.html?repo=" + url.href, _browser_script_source);
 			} else {
-				var regexGit = /^\/(git)([\d]?)([\d]?)\/(.*)/;// Pattern : "/git/", "/git02/", "/git3/", "/git04"
+				var regexGit = /^\/(git|gerrit)([\d]?)([\d]?)\/(.*)/;// Pattern : "/git/", "/git02/", "/git3/", "/git04"
 				var match = regexGit.exec(url.pathname);
 				if(match && match.length === 5) {
 					pluginURL = new URL("/gerrit" + match[2] + match[3] + "/plugins/gerritfs/static/plugins/GerritFilePlugin.html", url);
 					pluginURL.query.set("project", match[4]);
-					downloadURL = new URL("/gerrit" + match[2] + match[3] + "/a/plugins/jazzhub/project", url);
+					downloadURL = new URL("/gerrit" + match[2] + match[3] + "/plugins/jazzhub/project", url);
 					downloadURL.query.set("action", "compress");
 					downloadURL.query.set("project", match[4]);
 				} else if (url.pathname.indexOf("/ccm") === 0) {
