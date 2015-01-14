@@ -58,6 +58,7 @@ define({//Default message bundle
 	'zero-units': 'Disallow units for 0 values:', //$NON-NLS-0$  //$NON-NLS-1$
 	
 	// CSS Quick Fixes
+	'quickfix-empty-rules': 'Remove the rule.', //$NON-NLS-0$  //$NON-NLS-1$
+	'quickfix-important': 'Remove \'!important\' annotation.', //$NON-NLS-0$  //$NON-NLS-1$
 	'quickfix-zero-units': 'Remove \'px\' qualifier.', //$NON-NLS-0$  //$NON-NLS-1$
-	'quickfix-empty-rules': 'Remove the rule.' //$NON-NLS-0$  //$NON-NLS-1$
 });

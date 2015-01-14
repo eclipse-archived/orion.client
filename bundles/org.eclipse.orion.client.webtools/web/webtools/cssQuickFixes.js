@@ -37,13 +37,6 @@ define([
 	        }
 		    return null;
 		},
-		"zero-units": function(editorContext, annotation) { //$NON-NLS-0$
-			return editorContext.getText().then(function(text) {
-				var contents = text.substring(annotation.start, annotation.end);
-				contents = contents.replace(/0px/g,'0'); //$NON-NLS-0$
-				return editorContext.setText(contents, annotation.start, annotation.end);
-            });
-		},
 		"empty-rules": function(editorContext, annotation) { //$NON-NLS-0$
 			return editorContext.getText().then(function(text) {
 				// Remove leading space
@@ -57,6 +50,27 @@ define([
 					return editorContext.setText("", start, start+contents[0].length);
 				}
 				return null;
+            });
+		},
+		"important": function(editorContext, annotation){ //$NON-NLS-0$
+			return editorContext.getText().then(function(text) {
+				// The annotation will select the property name. Get the complete property.
+				var contents = text.substring(annotation.start);
+				var startRange = contents.search(/\s*\!important/i);
+				var endRange = contents.search(/[;}]/);
+				if (startRange !== 1 && endRange !== -1 && startRange < endRange){
+					contents = contents.substring(startRange, endRange);
+					contents = contents.replace(/\s*\!important/gi, "");
+					return editorContext.setText(contents, annotation.start+startRange, annotation.start+endRange);
+				}
+				return null;
+            });
+		},
+		"zero-units": function(editorContext, annotation) { //$NON-NLS-0$
+			return editorContext.getText().then(function(text) {
+				var contents = text.substring(annotation.start, annotation.end);
+				contents = contents.replace(/0px/gi,'0'); //$NON-NLS-0$
+				return editorContext.setText(contents, annotation.start, annotation.end);
             });
 		}
 	});

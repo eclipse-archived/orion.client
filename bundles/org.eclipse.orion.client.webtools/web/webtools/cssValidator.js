@@ -77,7 +77,7 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 		 * @param {Object} [key] Optional key to use for complex rule configuration.
 		 */
 		setOption: function(ruleId, value, key) {
-			if (typeof value === "number") {
+			if (typeof value === "number") { //$NON-NLS-0$
 				if(Array.isArray(this.rules[ruleId])) {
 					var ruleConfig = this.rules[ruleId];
 					if (key) {
@@ -172,7 +172,7 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 		 * @since 8.0
 		 */
 		_getProblemRange: function(message) {
-			if (!message.rule || !message.rule.id || message.rule.id === "errors"){
+			if (!message.rule || !message.rule.id || message.rule.id === "errors"){ //$NON-NLS-0$
 				// Parsing errors often don't have a token to select, so instead select the line
 				return {start: 1, end: message.evidence.length + 1};
 			}

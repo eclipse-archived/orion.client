@@ -22,6 +22,11 @@ define([
 	describe('CSS Quick Fix Tests', function() {
 		
 		var validator;
+		var contentsChanged;
+		
+		beforeEach(function(){
+			contentsChanged = false;
+		});
 		
 		afterEach(function(){
 			// Reset the rule severities to defaults
@@ -50,6 +55,7 @@ define([
 				},
 				
 				setText: function(text, start, end) {
+					contentsChanged = true;
 				    assertFixes(text, start, end, options.expected);
 				}
 			};
@@ -104,7 +110,9 @@ define([
 	                	});
                 	}
                 }
-                return obj.fixComputer.execute(obj.editorContext, {annotation: annot});
+                return obj.fixComputer.execute(obj.editorContext, {annotation: annot}).then(function(){
+                	assert(contentsChanged, "No fixes were executed");
+                });
             });
 	    }
 	
@@ -133,27 +141,6 @@ define([
 	        return rule;
 	    }
 	
-		it("Test zero-units - single line", function() {
-		    var rule = createTestRule('zero-units');
-		    var expected = {value: "0",
-		                    start: 16, 
-		                    end: 19};
-		    return getFixes({buffer: 'rule { border : 0px;}', 
-		                      rule: rule,
-		                      expected: expected});
-		});
-		
-		it("Test zero-units - multi line", function() {
-			// Used to test that getFixes() can properly translate a line/col problem to an offset annotation
-		    var rule = createTestRule('zero-units');
-		    var expected = {value: "0",
-		                    start: 16, 
-		                    end: 19};
-		    return getFixes({buffer: 'rule {\n border : 0px;\n}', 
-		                      rule: rule,
-		                      expected: expected});
-		});
-		
 		it("Test empty-rules - single line", function() {
 		    var rule = createTestRule('empty-rules');
 		    var expected = {value: "",
@@ -190,6 +177,82 @@ define([
 		                    start: 0, 
 		                    end: 21};
 		    return getFixes({buffer: '\truleA ruleB ruleC {}\n', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		
+		it("Test important - single line", function() {
+		    var rule = createTestRule('important');
+		    var expected = {value: "",
+		                    start: 19, 
+		                    end: 30};
+		    return getFixes({buffer: 'rule { border : 0px !important;}', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test important - uppercase", function() {
+		    var rule = createTestRule('important');
+		    var expected = {value: "",
+		                    start: 19, 
+		                    end: 30};
+		    return getFixes({buffer: 'rule { border : 0px !IMPORTANT;}', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test important - missing semi", function() {
+		    var rule = createTestRule('important');
+		    var expected = {value: "",
+		                    start: 19, 
+		                    end: 30};
+		    return getFixes({buffer: 'rule { border : 0px !important}', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test important - multi line", function() {
+			// Used to test that getFixes() can properly translate a line/col problem to an offset annotation
+		    var rule = createTestRule('important');
+		    var expected = {value: "",
+		                    start: 20, 
+		                    end: 31};
+		    return getFixes({buffer: 'rule {\n border : 0px\n!important;\n}', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test important - trailing spaces", function() {
+		    var rule = createTestRule('important');
+		    var expected = {value: "",
+		                    start: 20, 
+		                    end: 40};
+		    return getFixes({buffer: 'rule {\n border : 0px !important       \t\n;\n}', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test important - preceding spaces", function() {
+		    var rule = createTestRule('important');
+		    var expected = {value: "",
+		                    start: 20, 
+		                    end: 40};
+		    return getFixes({buffer: 'rule {\n border : 0px        \n\t!important;\n}', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		
+		it("Test zero-units - single line", function() {
+		    var rule = createTestRule('zero-units');
+		    var expected = {value: "0",
+		                    start: 16, 
+		                    end: 19};
+		    return getFixes({buffer: 'rule { border : 0px;}', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test zero-units - multi line", function() {
+			// Used to test that getFixes() can properly translate a line/col problem to an offset annotation
+		    var rule = createTestRule('zero-units');
+		    var expected = {value: "0",
+		                    start: 16, 
+		                    end: 19};
+		    return getFixes({buffer: 'rule {\n border : 0px;\n}', 
 		                      rule: rule,
 		                      expected: expected});
 		});
