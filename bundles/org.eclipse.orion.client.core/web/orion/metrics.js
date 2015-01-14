@@ -14,11 +14,19 @@ define(["orion/Deferred"], function(Deferred) {
 	var GA_ID = "OrionGA"; //$NON-NLS-0$
 	var queue = [];
 
-	var init = function(service, args) {
-		if (service && service.init) {
+	var init = function(services, args) {
+		var service = services.shift();
+		if (!service) {
+			queue = null; /* no more services to try, so will not track */
+			return;
+		}
+
+		if (service.init) {
 			service.init().then(
 				function(result) {
-					if (!result.tid) { /* not tracking */
+					/* service succeeded */
+					if (!result.tid) {
+						/* not tracking */
 						queue = null;
 						return;
 					}
@@ -35,25 +43,28 @@ define(["orion/Deferred"], function(Deferred) {
 					window[GA_ID]("create", result.tid, args); //$NON-NLS-0$
 					window[GA_ID]("send", "pageview"); //$NON-NLS-1$ //$NON-NLS-0$
 
+					/* process events logged while initialization was occurring */
 					queue.forEach(function(current) {
 						window[GA_ID](current.command, current.arg0, current.arg1, current.arg2, current.arg3, current.arg4); //$NON-NLS-0$
 					});
 					queue = null; /* no longer needed */
+				},
+				/* @callback */ function(error) {
+					init(services, args); /* service failed, try the next one */
 				}
 			);
 		} else {
-			queue = null; /* not tracking */
+			init(services, args); /* invalid service, try the next one */
 		}
 	};
 
 	var initFromRegistry = function(serviceRegistry, args) {
 		var refs = serviceRegistry.getServiceReferences("orion.analytics.google"); //$NON-NLS-0$
-		if (refs.length) {
-			var service = serviceRegistry.getService(refs[0]);
-			init(service, args);
-		} else {
-			queue = null; /* not tracking */
-		}
+		var services = [];
+		refs.forEach(function(current) {
+			services.push(serviceRegistry.getService(current));
+		});
+		init(services, args);
 	};
 
 	function logEvent(category, action, label, value) {
