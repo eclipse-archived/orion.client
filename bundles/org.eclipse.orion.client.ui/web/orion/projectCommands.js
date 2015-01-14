@@ -1369,7 +1369,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 
 					},
 					visibleWhen: function(item) {
-						if(projectCommandUtils.hideAllDeployCommands) return false;
 						if (!(command.showCommand == undefined || command.showCommand)) return false;
 						item = explorer.treeRoot;
 						if(!item.Project || !item.children || item.children.length === 0){

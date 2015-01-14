@@ -199,14 +199,11 @@ define([
 				
 				this.projectClient.getProjectLaunchConfigurations(this.treeRoot.Project).then(function(launchConfigurations){
 					doUpdateForLaunchConfigurations.apply(this, [launchConfigurations, selections]);
-					if (this._runBar) {
-						this._runBar.setLaunchConfigurations(launchConfigurations);
-					}
 					if(!this.launchConfigurationListener){
 						var _self = this;
 						this.launchConfigurationDispatcher = ProjectCommands.getLaunchConfigurationDispatcher();
 						this.launchConfigurationListener = function(event){
-							if(event.type === "changedVisibility"){
+							if(event.type === "changedVisibility"){ //$NON-NLS-0$
 								_self.updateCommands.apply(_self, selections);
 							} if(event.type === "changedDefault"){ //$NON-NLS-0$
 								return;
@@ -297,7 +294,7 @@ define([
 			var runBarParent = menuBar.runBarNode;
 			lib.empty(runBarParent);
 			
-			this._runBar = mCustomGlobalCommands.createRunBar({
+			mCustomGlobalCommands.createRunBar({
 				parentNode: runBarParent,
 				projectExplorer: this,
 				serviceRegistry: this.serviceRegistry,
@@ -306,9 +303,13 @@ define([
 				projectCommands: ProjectCommands,
 				projectClient: this.projectClient,
 				progressService: this.progressService
-			});
-			
-			this.setRunBarVisible(true);
+			}).then(function(runBar){
+				if (runBar) {
+					// runBar successfully created, stash it and make it visible
+					this._runBar = runBar;
+					this.setRunBarVisible(true);
+				}
+			}.bind(this));
 		}
 	});
 

@@ -96,11 +96,22 @@ define([
 				this._setNodeTooltip(this._appLink, messages["openAppTooltip"]); //$NON-NLS-0$
 				this._disableLink(this._appLink);
 				
+				if (this._projectExplorer.treeRoot && this._projectExplorer.treeRoot.Project) {
+					this.loadLaunchConfigurations(this._projectExplorer.treeRoot.Project);
+				} else {
+					// the Project has not yet been fully loaded into the explorer, wait until that happens 
+					this._projectExplorer.addEventListener("rootChanged", function(event){ //$NON-NLS-0$
+						var root = event.root;
+						if (root && root.Project) {
+							this.loadLaunchConfigurations(root.Project);
+						}
+					}.bind(this));
+				}
 			} else {
 				throw new Error("this._domNode is null"); //$NON-NLS-0$
 			}
 		},
-		
+				
 		_createLaunchConfigurationsDropdown: function() {
 			this._launchConfigurationsWrapper = lib.$(".launchConfigurationsWrapper", this._domNode); //$NON-NLS-0$
 			this._cachedLaunchConfigurations = {};
@@ -162,11 +173,12 @@ define([
 					dropdownMenuItemSpan.classList.add("addNewMenuItem"); //$NON-NLS-0$
 					
 					var defaultDeployCommand = this._projectCommands.getDeployProjectCommands(this._commandRegistry)[0];
-					
-					this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommand.id, 1); //$NON-NLS-0$
-					domNodeWrapperList = [];
-					this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._projectExplorer.treeRoot, this, "button", null, domNodeWrapperList); //$NON-NLS-0$
-					domNodeWrapperList[0].domNode.textContent = messages["createNew"]; //$NON-NLS-0$
+					if (defaultDeployCommand) {
+						this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommand.id, 1); //$NON-NLS-0$
+						domNodeWrapperList = [];
+						this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._projectExplorer.treeRoot, this, "button", null, domNodeWrapperList); //$NON-NLS-0$
+						domNodeWrapperList[0].domNode.textContent = messages["createNew"]; //$NON-NLS-0$
+					}
 				}
 			}.bind(this);
 			
@@ -196,15 +208,19 @@ define([
 		
 		destroy: function() {
 			// destroy tooltips
-			this._undestroyedTooltips.forEach(function(tooltip){
-				tooltip.destroy();
-			}, this);
-			this._undestroyedTooltips = null;
+			if (this._undestroyedTooltips) {
+				this._undestroyedTooltips.forEach(function(tooltip){
+					tooltip.destroy();
+				}, this);
+				this._undestroyedTooltips = null;
+			}
 			
 			// remove event listeners
-			this._launchConfigurationEventTypes.forEach(function(eventType) {
-				this._launchConfigurationDispatcher.removeEventListener(eventType, this._boundLaunchConfigurationListener);
-			}, this);
+			if (this._launchConfigurationEventTypes) {
+				this._launchConfigurationEventTypes.forEach(function(eventType) {
+					this._launchConfigurationDispatcher.removeEventListener(eventType, this._boundLaunchConfigurationListener);
+				}, this);
+			}
 			
 			if (this._playButton) {
 				this._playButton.removeEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$
@@ -424,7 +440,18 @@ define([
 				this._setText(this._appInfoSpan, "(" + appInfoText.toLocaleLowerCase() + ")"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
-				
+		
+		/**
+		 * Get launch configurations from the specified project and load them into this run bar.
+		 * 
+		 * @param[in] {Object} project The project from which to load the launch configurations
+		 */
+		loadLaunchConfigurations: function (project) {
+			this._projectClient.getProjectLaunchConfigurations(project).then(function(launchConfigurations){
+				this._setLaunchConfigurations(launchConfigurations);
+			}.bind(this));
+		},
+		
 		/**
 		 * Sets the list of launch configurations to be used by this run bar.
 		 * This method may be called more than once. Any previously cached
@@ -432,7 +459,7 @@ define([
 		 * 
 		 * @param {Array} launchConfigurations An array of launch configurations
 		 */
-		setLaunchConfigurations: function(launchConfigurations) {
+		_setLaunchConfigurations: function(launchConfigurations) {
 			this._enableControl(this._launchConfigurationsWrapper);
 			this._menuItemsCache = []; //reset the cached launch configuration dropdown menu items
 			this._cacheLaunchConfigurations(launchConfigurations);
