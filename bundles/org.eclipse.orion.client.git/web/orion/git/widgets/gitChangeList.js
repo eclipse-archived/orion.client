@@ -353,7 +353,7 @@ define([
 		this.preferencesService = options.preferencesService;
 		this.standAloneOptions = options.standAloneOptions;
 		this.explorerSelectionScope = "explorerSelection";  //$NON-NLS-0$
-		this.explorerSelectionStatus = "explorerSelectionStatus";  //$NON-NLS-0$
+		this.explorerSelectionStatus;  //$NON-NLS-0$
 		this.createSelection();
 		this.createCommands();
 		if (this.prefix !== "all") { //$NON-NLS-0$
