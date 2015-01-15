@@ -76,18 +76,6 @@
 	font-weight: bold;
 }
 
-
-.contentassist > div:hover {
-	background-color: #fab467; /* for browsers that don't support linear-gradient */
-	background: linear-gradient(#fabb76, #e1a25c);
-	border-radius: 3px;
-}
-
-.contentassist>div.proposal-hr:hover {
-	background-color: white; /* for browsers that don't support linear-gradient */
-	background: none;
-}
-
 .contentassist .selected {
 	background-color: rgb(48, 135, 179); /* for browsers that don't support linear-gradient */
 	background: linear-gradient(rgb(60, 150, 190), rgb(30, 120, 160));
