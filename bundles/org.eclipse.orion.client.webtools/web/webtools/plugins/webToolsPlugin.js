@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -116,15 +116,14 @@ define(['orion/plugin',
 
     /**
 	 * Register the hover support
-	 * TODO This hover support is experimental and is turned off by default
 	 */
-//	provider.registerService("orion.edit.hover", new cssHover.CSSHover(),  //$NON-NLS-0$
-//		{
-//			nls: 'webtools/nls/messages',  //$NON-NLS-0$
-//		    name: 'cssHover',	//$NON-NLS-0$
-//			contentType: ["text/css"]	//$NON-NLS-0$
-//	});
-//	
+	provider.registerService("orion.edit.hover", new cssHover.CSSHover(),  //$NON-NLS-0$
+		{
+			nls: 'webtools/nls/messages',  //$NON-NLS-0$
+		    name: 'cssHover',	//$NON-NLS-0$
+			contentType: ["text/css"]	//$NON-NLS-0$
+	});
+	
 	/**
 	 * Register quick fixes as editor commands
 	 */

@@ -494,25 +494,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			var contentDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
 			switch(data.type) { //$NON-NLS-0$
 				case 'delegatedUI': { //$NON-NLS-0$
-					// TODO The delegated UI data type is experimental and not part of the API
-					if (data.uriTemplate) {
-						var options = {};
-						options.id = 'Delegated UI Tooltip'; //$NON-NLS-0$
-						options.uriTemplate = data.uriTemplate;
-//					    options.params = inputManager.getFileMetadata();
-						options.width = data.width;
-						options.height = data.height;
-						
-						// TODO Push status messages to page message service (see editorCommands.js)
-//						options.status = handleStatus;
-						var divResult = this._createDelegatedUI(options);
-						sectionDiv.appendChild(divResult);
-					}
-					break;
+					// The delegated UI is not included in the 8.0 release, see Bug 449240.
 				}
 				case 'html': { //$NON-NLS-0$
 					if (data.content){
-						// TODO The html data type is experimental and not part of the API
 						var iframe = document.createElement("iframe"); //$NON-NLS-0$
 						iframe.id = 'HtmlHover'; //$NON-NLS-0$
 						iframe.name = 'HTML Hover'; //$NON-NLS-0$
@@ -675,81 +660,6 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 		},
 
-		/**
-		 * @name _createDelegatedUI
-		 * @description Creates a delegated UI section in the tooltip that renders an iframe with content from a URI
-		 * @function
-		 * @private
-		 * @param options
-		 * @returns the div containing the iframe
-		 */
-		_createDelegatedUI: function _createDelegedUI(options) {
-			var uriTemplate = new URITemplate(options.uriTemplate);
-			var params = options.params || {};
-			params.OrionHome = params.OrionHome || PageLinks.getOrionHome();
-			var href = uriTemplate.expand(params);
-			var delegatedParent = document.createElement("div"); //$NON-NLS-0$
-			var iframe = document.createElement("iframe"); //$NON-NLS-0$
-			iframe.id = options.id;
-			iframe.name = options.id;
-			iframe.type = "text/html"; //$NON-NLS-0$
-			iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
-			iframe.frameborder = options.border !== undefined ? options.border : 0;
-			iframe.src = href;
-			iframe.style.border = "none"; //$NON-NLS-0$
-			iframe.style.width = "auto"; //$NON-NLS-0$
-			iframe.style.height = "auto"; //$NON-NLS-0$
-//			iframe.className = "delegatedUI"; //$NON-NLS-0$
-			if (options.width) {
-				delegatedParent.style.width = options.width;
-				iframe.style.width = options.width;
-			}
-			if (options.height) {
-				delegatedParent.style.height = options.height;
-				iframe.style.height = options.height;
-			}
-//			iframe.style.visibility = 'hidden'; //$NON-NLS-0$
-//			if (options.parent !== null) {
-//				(options.parent || window.document.body).appendChild(delegatedParent);
-//			}
-//			iframe.style.left = options.left || (window.innerWidth - parseInt(iframe.clientWidth, 10))/2 + "px"; //$NON-NLS-0$
-//			iframe.style.top = options.top || (window.innerHeight - parseInt(iframe.clientHeight, 10))/2 + "px"; //$NON-NLS-0$
-//			iframe.style.visibility = '';
-
-			// Listen for notification from the iframe.  We expect either a "result" or a "cancelled" property.
-//			window.addEventListener("message", function _messageHandler(event) { //$NON-NLS-0$
-//				if (event.source !== iframe.contentWindow) {
-//					return;
-//				}
-//				if (typeof event.data === "string") { //$NON-NLS-0$
-//					var data = JSON.parse(event.data);
-//					if (data.pageService === "orion.page.delegatedUI" && data.source === options.id) { //$NON-NLS-0$
-//						if (data.cancelled) {
-//							// console.log("Delegated UI Cancelled");
-//							if (options.cancelled) {
-//								options.cancelled();
-//							}
-//						} else if (data.result) {
-//							if (options.done) {
-//								options.done(data.result);
-//							}
-//						} else if (data.Status || data.status) {
-//							if (options.status) {
-//								options.status(data.Status || data.status);
-//							}
-//						}
-//						window.removeEventListener("message", _messageHandler, false); //$NON-NLS-0$
-//						if (delegatedParent.parentNode) {
-//							delegatedParent.parentNode.removeChild(delegatedParent);
-//						}
-//					}
-//				}
-//			}, false);
-
-			delegatedParent.appendChild(iframe);
-			return delegatedParent;
-		},
-		
 		_getNodeStyle: function(node, prop, defaultValue) {
 			return textUtil.getNodeStyle(node, prop, defaultValue);
 		},

@@ -1,6 +1,6 @@
  /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,9 +12,8 @@
 /*eslint-env amd*/
 /* global doctrine */
 define([
-'orion/Deferred',
-'orion/objects',
-], function(Deferred, Objects) {
+'orion/objects'
+], function(Objects) {
 	
 	/**
 	 * @name webtools.CSSHover
@@ -59,30 +58,15 @@ define([
 		 * @param {Object} ctxt The current selection context
 		 */
 		computeHoverInfo: function computeHover(editorContext, ctxt) {
-			// TODO This hover implementation is experimental
 			var that = this;
 			var result = editorContext.getText().then(function(text){
 				var token = that._getToken(text, ctxt.offset);
 				if (token){
-					var result = null;
-					if (token.charAt(token.length-1) === ':'){ //$NON-NLS-0$
-						var uriTemplate = 'http://www.w3schools.com/css/css_' + token.substring(0, token.length-1) + '.asp';
-						result = {type: "delegatedUI", title: 'CSS Property Information', uriTemplate: uriTemplate, width: "500px", height: "500px"}
-					} else if (that.colorValues.indexOf(token) > -1 || (token.length===7 && token.charAt(0) === '#')){ //$NON-NLS-0$
-						var html = '<html><body style=\"background-color: ' + token + ';\"></html>';
-						var title = token.charAt(0) === '#' ? '\\' + token : token;
-						result = {type: "html", title: title, content: html, width: "200px", height: "200px"};
-					} else if (token.indexOf('image') >= 0){
-//						var domain = window.location.href.split('/')[0]; //$NON-NLS-0$
-//						var hostName = (nonHash.indexOf("/index.html") != -1 ? nonHash.substring(0, nonHash.indexOf("/index.html")) : nonHash);
-//						hostName = hostName + "/picker.html?query=" + ""; //$NON-NLS-0$
-
-						// TODO Picker HTML example is not included in Orion by default
-//						result = {type: "delegatedUI", title: 'Image Picker Test', uriTemplate: 'http://client.orion.eclipse.org:8080/picker.html', height: "200px"}
+					if (that.colorValues.indexOf(token) > -1){
+						return that._getColorHover(token);
 					}
-
-					if (result){
-						return result;
+					if (/\#[0-9A-Fa-f]{1,6}/.test(token)){
+						return that._getColorHover(token);	
 					}
 				}
 				return null;
@@ -92,7 +76,7 @@ define([
 
 		_getToken: function _getToken(text, offset){
 			var start = offset;
-			var regex = /[0-9A-Za-z\-\@\.\:\#]/;
+			var regex = /[0-9A-Za-z\-\@\.\#]/;
 			while (start && regex.test(text.charAt(start-1))) {
 				start--;
 			}
@@ -107,6 +91,11 @@ define([
 			}
 			return null;
 		},
+		
+		_getColorHover: function _getColorHover(colorID){
+			var html = '<html><body style=\"background-color: ' + colorID + ';\"></html>'; //$NON-NLS-0$  //$NON-NLS-1$
+			return {type: "html", content: html, width: "50px", height: "25px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+		}
 		
 	});
 
