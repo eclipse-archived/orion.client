@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -265,15 +265,13 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/web
 		var email =  document.getElementById("create_email").value;
 		mypostrequest.onreadystatechange = function() {
 			if (mypostrequest.readyState === 4) {
-				if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
+				if (mypostrequest.status !== 201 && window.location.href.indexOf("http") !== -1) {
 					if (!mypostrequest.responseText) {
 						return;
 					}
 					var responseObject = JSON.parse(mypostrequest.responseText);
 					showErrorMessage(responseObject.Message);
-					if(mypostrequest.status === 201){
-						hideRegistration();
-					}
+					hideRegistration();
 				} else {
 					confirmLogin(username, password);
 				}
