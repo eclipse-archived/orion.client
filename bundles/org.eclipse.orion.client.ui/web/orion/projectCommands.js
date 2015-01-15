@@ -659,7 +659,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 
 		var deployLaunchConfigurationCommands = new mCommands.Command({
 			name: messages["deploy"],
-			tooltip: messages["deployThisApplicationAgain"],
+			tooltip: messages["deployThisApplication"], //$NON-NLS-0$
 			id: "orion.launchConfiguration.deploy",
 			imageClass: "core-sprite-deploy",
 			callback: function(data) {
