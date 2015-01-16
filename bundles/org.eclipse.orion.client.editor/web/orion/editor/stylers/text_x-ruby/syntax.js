@@ -12,26 +12,40 @@
 /*eslint-env browser, amd*/
 define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-1$ //$NON-NLS-0$
 	var keywords = [
-		"alias", "alias_method", "and", "attr_reader", "attr_writer", "attr_accessor", "attr", //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"BEGIN", "begin", "break", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"case", "class", "catch", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"def", "defined?", "do", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"else", "elsif", "END", "end", "ensure", "extend", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"false", "for", "fail", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"alias_method", "alias", "attr_accessor", "attr_reader", "attr_writer", "attr", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"BEGIN", //$NON-NLS-0$
+		"class", //$NON-NLS-0$
+		"defined?", "def", //$NON-NLS-1$ //$NON-NLS-0$
+		"END", "extend", //$NON-NLS-1$ //$NON-NLS-0$
 		"gem", //$NON-NLS-0$
-		"if", "in", "include", "initialize", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"load",  "loop", "lambda", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"module", "module_function", //$NON-NLS-1$ //$NON-NLS-0$
-		"new", "next", "nil", "not", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"or", //$NON-NLS-0$
+		"include", "initialize", "in", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"load",  "lambda", //$NON-NLS-1$ //$NON-NLS-0$
+		"module_function", "module", //$NON-NLS-1$ //$NON-NLS-0$
+		"new", "not", //$NON-NLS-1$ //$NON-NLS-0$
 		"public", "prepend", "private", "protected", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"raise", "redo", "require", "require_relative", "rescue", "retry", "return", //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"self", "super", //$NON-NLS-1$ //$NON-NLS-0$
-		"then", "throw", "true", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"undef", "unless", "until", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"when", "while", //$NON-NLS-1$ //$NON-NLS-0$
-		"yield", //$NON-NLS-0$
+		"require_relative", "require", //$NON-NLS-1$ //$NON-NLS-0$
+		"undef", //$NON-NLS-0$
 		"__ENCODING__", "__END__", "__FILE__", "__LINE__" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	];
+	var controlKeywords = [
+		"and", //$NON-NLS-0$
+		"begin", "break", //$NON-NLS-1$ //$NON-NLS-0$
+		"case", "catch", //$NON-NLS-1$ //$NON-NLS-0$
+		"do", //$NON-NLS-0$
+		"else", "elsif", "end", "ensure", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"fail", "for", //$NON-NLS-1$ //$NON-NLS-0$
+		"if", //$NON-NLS-0$
+		"loop", //$NON-NLS-0$
+		"next", //$NON-NLS-0$
+		"or", //$NON-NLS-0$
+		"raise", "redo", "rescue", "retry", "return", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"then", "throw", //$NON-NLS-1$ //$NON-NLS-0$
+		"unless", "until", //$NON-NLS-1$ //$NON-NLS-0$
+		"when", "while", //$NON-NLS-1$ //$NON-NLS-0$
+		"yield" //$NON-NLS-0$
+	];
+	var constants = [
+		"false", "nil", "true" //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
 	var grammars = [];
@@ -79,9 +93,22 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 			{
 				match: "\\b0[bB][01]+\\b", //$NON-NLS-0$
 				name: "constant.numeric.binary.ruby" //$NON-NLS-0$
-			}, {
+			},
+			{
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				name: "keyword.operator.ruby" //$NON-NLS-0$
+			},
+			{
+				match: "\\b(?:" + controlKeywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "keyword.control.ruby" //$NON-NLS-0$
+			},
+			{
+				match: "\\b(?:" + constants.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				name: "constant.language.ruby" //$NON-NLS-0$
+			},
+			{
+				match: "\\b(?:self|super)\\b", //$NON-NLS-0$
+				name: "variable.language.ruby" //$NON-NLS-0$
 			}
 		],
 		repository: {
@@ -98,6 +125,6 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 	return {
 		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
-		keywords: keywords
+		keywords: keywords.concat(controlKeywords)
 	};
 });
