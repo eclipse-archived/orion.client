@@ -10,7 +10,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/plugin', 
+define(['orion/plugin',
+'orion/bootstrap',
+'javascript/scriptResolver',
 'webtools/htmlContentAssist', 
 'webtools/htmlOutliner',
 'orion/editor/stylers/text_html/syntax', 
@@ -21,7 +23,7 @@ define(['orion/plugin',
 'webtools/cssQuickFixes',
 'orion/editor/stylers/text_css/syntax',
 'orion/util'
-], function(PluginProvider, htmlContentAssist, htmlOutliner, mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, mCSS, Util) {
+], function(PluginProvider, Bootstrap, ScriptResolver, htmlContentAssist, htmlOutliner, mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, mCSS, Util) {
 	/**
 	 * Plug-in headers
 	 */
@@ -114,10 +116,12 @@ define(['orion/plugin',
   		}
     }
 
+    var resolver = new ScriptResolver.ScriptResolver(Bootstrap);
+
     /**
 	 * Register the hover support
 	 */
-	provider.registerService("orion.edit.hover", new cssHover.CSSHover(),  //$NON-NLS-0$
+	provider.registerService("orion.edit.hover", new cssHover.CSSHover(resolver),  //$NON-NLS-0$
 		{
 			nls: 'webtools/nls/messages',  //$NON-NLS-0$
 		    name: 'cssHover',	//$NON-NLS-0$

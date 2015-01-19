@@ -12,8 +12,9 @@
 /*eslint-env amd*/
 /* global doctrine */
 define([
-'orion/objects'
-], function(Objects) {
+'orion/objects',
+'orion/URITemplate',
+], function(Objects, URITemplate) {
 	
 	/**
 	 * @name webtools.CSSHover
@@ -22,7 +23,8 @@ define([
 	 * @public
 	 * @since 8.0
 	 */
-	function CSSHover() {
+	function CSSHover(resolver) {
+	    this.resolver = resolver;
 	}
 	
 	Objects.mixin(CSSHover.prototype, /** @lends webtools.CSSHover.prototype*/ {
@@ -62,11 +64,14 @@ define([
 			var result = editorContext.getText().then(function(text){
 				var token = that._getToken(text, ctxt.offset);
 				if (token){
-					if (that.colorValues.indexOf(token) > -1){
-						return that._getColorHover(token);
+				    if(that._isImport(text, ctxt.offset, token)) {
+				        return that._getFileHover(token);
+				    }
+					if (that.colorValues.indexOf(token.value) > -1){
+						return that._getColorHover(token.value);
 					}
-					if (/\#[0-9A-Fa-f]{1,6}/.test(token)){
-						return that._getColorHover(token);	
+					if (/\#[0-9A-Fa-f]{1,6}/.test(token.value)){
+						return that._getColorHover(token.value);	
 					}
 				}
 				return null;
@@ -74,23 +79,102 @@ define([
 			return result;
 		},
 
-		_getToken: function _getToken(text, offset){
+		_getToken: function _getToken(text, offset, regexp){
 			var start = offset;
-			var regex = /[0-9A-Za-z\-\@\.\#]/;
+			var regex = regexp ? regexp : /[0-9A-Za-z\-\@\.\#\/]/;
 			while (start && regex.test(text.charAt(start-1))) {
 				start--;
 			}
-			
 			var end = offset;
 			while (end < text.length && regex.test(text.charAt(end))) {
 				end++;
 			}
-			
 			if (end - start){
-				return text.substring(start, end);
+			    var tok = Object.create(null);
+			    tok.start = start;
+			    tok.end = end;
+			    tok.value = text.substring(start, end);
+				return tok;
 			}
 			return null;
 		},
+		
+		_isImport: function _isImport(text, offset, token) {
+		    if(token && text && offset > -1) {
+		        var tok = this._getToken(text, token.start-1, /[0-9A-Za-z\-\@\.\#\(\/]/);
+		        if(tok && /url\(/ig.test(tok.value)) {
+		            return true;
+		        }
+		        var start = token.start-1;
+                if(!tok || /\s/.test(tok.value)) {
+		            while(/\s/.test(text.charAt(start-1))) {
+    			        start--;
+    			    }
+		        }
+	            tok = this._getToken(text, start);
+			    if(tok && /\@import/i.test(tok.value)) {
+                    return true;
+                }
+            }
+            return false;
+		},
+		
+		_getFileHover: function _getFileHover(token) {
+		    if(token) {
+		        if(/^http/i.test(token.value)) {
+		                 
+		        }
+		        var that = this;
+		        return that.resolver.getWorkspaceFile(token.value, {ext:'css', type:'CSS', icon:'../webtools/images/css.png'}).then(function(files) {
+    		        if(files) {
+    		            return that._formatFilesHover(token.value, files);
+    		        }
+		        });
+		    }
+		    return null;
+		},
+		
+		/**
+    	 * @description Formats the list of files as links for the hover
+    	 * @function
+    	 * @private
+    	 * @param {String} path The path we are navigating to
+    	 * @param {Array.<javascript.ScriptResolver.File>} files The array of files to linkify
+    	 * @returns {String} The mardown to show in the hover
+    	 */
+    	_formatFilesHover: function _formatFilesHover(path, files) {
+    	    if(path) {
+    	        var title = '###Open file for \''+path+'\'###';
+    	        var hover = '';
+    	        if(Array.isArray(files)) {  
+        	        for(var i = 0; i < files.length; i++) {
+        	            var file = files[i];
+        	            if(file.name && file.path && file.contentType) {
+        	                hover += '[';
+        	                if(file.contentType.icon) {
+        	                    hover += '!['+file.contentType.name+']('+file.contentType.icon+')';
+        	                }
+        	                var href = new URITemplate("#{,resource,params*}").expand(
+        		                      {
+        		                      resource: file.location, 
+        		                      params: {}
+        		                      }); //$NON-NLS-0$
+        	                hover += file.name + ']('+href+') - '+file.path+'\n\n';
+        	            }
+        	            
+        	        }
+    	        } /*else if(typeof files === 'string') {
+    	            var name = path.slice(path.lastIndexOf('/'));
+    	            title = '###Open file for \''+name+'\'###';
+	                hover += '[!['+name+'](../webtools/images/css.png)';
+	                hover += name + ']('+path+') - '+path+'\n\n';
+    	        } */
+    	        if(hover !== '') {
+    	           return {title: title, content: hover, type:'markdown'};
+    	        }
+    	    }
+    	    return null;
+    	},
 		
 		_getColorHover: function _getColorHover(colorID){
 			var html = '<html><body style=\"background-color: ' + colorID + ';\"></html>'; //$NON-NLS-0$  //$NON-NLS-1$

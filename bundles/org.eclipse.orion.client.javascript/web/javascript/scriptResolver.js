@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -23,7 +23,8 @@ define([
     
     /**
      * @name ScriptResolver
-     * @description Creates a new script resolver for finding 
+     * @description Creates a new script resolver for finding workspace file based
+     * on a given logical path and search options
      * @param {orion.Bootstrap} bootstrap The bootstrap object
      * @constructor 
      * @since 8.0
@@ -35,12 +36,16 @@ define([
     
     Objects.mixin(ScriptResolver.prototype, {
        /**
-        * @name getWorkspaceFile
         * @description Tries to find the workspace file for the given logical name and options
         * @function
         * @param {String} logicalName The name of the file to look up, for example, 'orion/objects'
-        * @param {Object} options The map of search options
-        * @returns {File | null} The found file or <code>null</code>
+        * @param {Object} options The map of search options.
+        * 
+        * >Supported options include:
+        * >  * ext - the file extension type to look for, for example 'js'
+        * >  * icon - the URL or relative path to the icon to describe found files
+        * >  * type - the name to use for the content type of any found files
+        * @returns {File | null} The found file or ```null```
         */
        getWorkspaceFile : function getWorkspaceFile(logicalName, options) {
           if(logicalName) {
@@ -49,22 +54,27 @@ define([
           return new Deferred().resolve(null);
        },
        
-       _getFile : function _getFile(name /*, options*/) {
+       _getFile : function _getFile(name, options) {
            var files = this.cache.get(name);
            if(files) {
                return new Deferred().resolve(files);
            }
            var that = this;
            return this._getFileClient().then(function(fileClient) {
+               var opts = options ? options : Object.create(null);
+               var ext = opts.ext ? opts.ext : 'js';
+               var icon = opts.icon ? opts.icon : '../javascript/images/javascript.png';
+               var type = opts.type ? opts.type : 'JavaScript';
+               var dotext = '.'+ext;
                //first check the file map
                var file = FileMap.getWSPath(name);
                if(!file) {
-                   file = FileMap.getWSPath(name+'.js');
+                   file = FileMap.getWSPath(name+dotext);
                }
-               if(file && file.indexOf('.js') > -1) {
+               if(file && file.indexOf(dotext) > -1) {
                    return fileClient.loadWorkspace().then(function(workspace) {
                        //TODO hack - right now we know the index always is talking about the orion client,could differ later
-                       files = [that._newFileObj(name, '/file/'+workspace.Id+'/org.eclipse.orion.client/'+file, that._trimName(file), fileClient)];
+                       files = [that._newFileObj(name, '/file/'+workspace.Id+'/org.eclipse.orion.client/'+file, that._trimName(file), icon, type, fileClient)];
                        that.cache.put(name, files);
                        return files;
                    });
@@ -79,7 +89,7 @@ define([
                         'keyword': searchname,
                         'sort': 'Name asc',
                         'nameSearch': true,
-                        'fileType': 'js',
+                        'fileType': ext,
                         'start': 0,
                         'rows': 30
                     }
@@ -89,14 +99,14 @@ define([
                    if(r.numFound > 0) {
                        files = [];
                        var testname = filename.replace(/(?:\.?\.\/)*/, '');
-                       testname = testname.replace(/\.js$/, '');
+                       testname = testname.replace(new RegExp("\\"+dotext+"$"), '');
                        testname = testname.replace(/\//g, "\\/");
                        for(var i = 0; i < len; i++) {
-                           var file = r.docs[i];
+                           file = r.docs[i];
                            //TODO haxxor - only keep ones that end in the logical name or the mapped logical name
                            var regex = ".*(?:"+testname+")$";
-                           if(new RegExp(regex).test(file.Location.slice(0, file.Location.length-3))) {
-                               files.push(that._newFileObj(file.Name, file.Location, that._trimName(file.Path)));
+                           if(new RegExp(regex).test(file.Location.slice(0, file.Location.length-dotext.length))) {
+                               files.push(that._newFileObj(file.Name, file.Location, that._trimName(file.Path), icon, type));
                            }
                        }
                        if(files.length > 0) {
@@ -127,14 +137,18 @@ define([
            return name.replace(/^(?:org\.eclipse\.orion\.client)?(?:\/)?bundles\//, '');
        },
        
-       _newFileObj: function _newFileObj(name, location, path, fileClient) {
+       _newFileObj: function _newFileObj(name, location, path, icon, type, fileClient) {
            var meta = Object.create(null);
            meta.name = name;
            meta.location = location ? location : fileClient.getServiceRootURL() + '/' + path;
            meta.path = path;
            meta.contentType = Object.create(null);
-           meta.contentType.icon = '../javascript/images/javascript.png';
-           meta.contentType.name = 'JavaScript';
+           if(icon) {
+                meta.contentType.icon = icon;
+           }
+           if(type) {
+                meta.contentType.name = type;
+           }
            return meta;
        },
        
