@@ -12,10 +12,10 @@
 /*eslint-env browser,amd*/
 /*global URL confirm*/
 define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient',
-	'orion/cfui/cFLauncherClient', 'cfui/cfUtil', 'orion/fileClient', 'orion/URITemplate', 'orion/preferences', 'orion/PageLinks',
+	'cfui/cfUtil', 'orion/fileClient', 'orion/URITemplate', 'orion/preferences', 'orion/PageLinks',
 	'orion/xhr', 'orion/i18nUtil', 'orion/projectClient'],
 
-function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mFileClient, URITemplate, 
+function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemplate, 
 		mPreferences, PageLinks, xhr, i18nUtil, mProjectClient) {
 
 	function PreferencesProvider(location) {
@@ -62,7 +62,6 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 	var serviceRegistry;
 	var fileClient;
 	var cFService;
-	var cfLauncherService;
 	var preferences;
 	var projectClient;
 
@@ -71,7 +70,6 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 		fileClient = new mFileClient.FileClient(serviceRegistry);
 
 		cFService = new CFClient.CFService();
-		cfLauncherService = new CFLauncherClient.CFLauncherService();
 
 		/* register hacked pref service */
 		var temp = document.createElement('a'); //$NON-NLS-0$
@@ -466,40 +464,8 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 
 			return deferred;
 		},
-		
-		getState: function(launchConf) {
-			var that = this;
-			var deferred = new Deferred();
-			var params = launchConf.Params || {};
-			
-			cfLauncherService.getApp(launchConf.Url).then(
-				function(result){
-					if (!result.state){
-						that._getStateCFWithLogin(launchConf).then(
-							deferred.resolve, deferred.reject
-						);
-						return;
-					}
-					
-					deferred.resolve({
-						State: (result.state !== "stop" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
-						Message: "Application in debug mode [" + result.state + "]"
-					});
-				}, function(error){
-					if (error.HttpCode === 0){
-						that._getStateCFWithLogin(launchConf).then(
-							deferred.resolve, deferred.reject
-						);
-						return;
-					}
-					deferred.reject(error);
-				}
-			);
-			
-			return deferred;
-		},
 
-		_getStateCFWithLogin: function(launchConf) {
+		getState: function(launchConf) {
 			var params = launchConf.Params || {};
 			return this._retryWithLogin(params, this._getStateCF);
 		},
@@ -523,48 +489,8 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 				return deferred;
 			}
 		},
-		
-		start: function(launchConf) {
-			var that = this;
-			var deferred = new Deferred();
-			var params = launchConf.Params || {};
-			
-			cfLauncherService.getApp(launchConf.Url).then(
-				function(result){
-					if (!result.state){
-						that._startCFWithLogin(launchConf).then(
-							deferred.resolve, deferred.reject
-						);
-						return;
-					}
-					
-					cfLauncherService.stopApp(launchConf.Url).then(
-						function(result){
-							cfLauncherService.startApp(launchConf.Url).then(
-								function(result){
-									deferred.resolve({
-										State: (result.state !== "stop" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
-										Message: "Application in debug mode [" + result.state + "]"
-									});
-								}, deferred.reject
-							);
-						}, deferred.reject
-					)
-				}, function(error){
-					if (error.HttpCode === 0){
-						that._startCFWithLogin(launchConf).then(
-							deferred.resolve, deferred.reject
-						);
-						return;
-					}
-					deferred.reject(error);
-				}
-			);
-			
-			return deferred;
-		},
 
-		_startCFWithLogin: function(launchConf) {
+		start: function(launchConf) {
 			var params = launchConf.Params || {};
 			return this._retryWithLogin(params, this._startCF.bind(this));
 		},
@@ -586,50 +512,8 @@ function(messages, mBootstrap, Deferred, CFClient, CFLauncherClient, mCfUtil, mF
 				return deferred;
 			}
 		},
-		
-		stop: function(launchConf) {
-			var that = this;
-			var deferred = new Deferred();
-			var params = launchConf.Params || {};
-			
-			that._stopCFWithLogin(launchConf).then(
-				deferred.resolve, deferred.reject
-			);
-			
-//			cfLauncherService.getApp(launchConf.Url).then(
-//				function(result){
-//					if (!result.state){
-//						that._stopCFWithLogin(launchConf).then(
-//							deferred.resolve, deferred.reject
-//						);
-//						return;
-//					}
-//						
-//					cfLauncherService.stopApp(launchConf.Url, "holydiver").then(
-//						function(result){
-//							deferred.resolve({
-//								State: (result.state !== "stop" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
-//								Message: "Application in debug mode [" + result.state + "]"
-//							});
-//						}, function(error){
-//							deferred.reject(error);
-//						}
-//					);
-//				}, function(error){
-//					if (error.HttpCode === 0){
-//						that._stopCFWithLogin(launchConf).then(
-//							deferred.resolve, deferred.reject
-//						);
-//						return;
-//					}
-//					deferred.reject(error);
-//				}
-//			);
-			
-			return deferred;
-		},
 
-		_stopCFWithLogin: function(launchConf) {
+		stop: function(launchConf) {
 			var params = launchConf.Params || {};
 			return this._retryWithLogin(params, this._stopCF);
 		},
