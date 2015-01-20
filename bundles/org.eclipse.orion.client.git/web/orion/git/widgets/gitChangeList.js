@@ -987,7 +987,6 @@ define([
 						var config = commitLogic.getGitCloneConfig(explorer.model.status.Clone.Config);
 						
 						var amendCheck = explorer.amendCheck = createInput(bottomLeft, "amendCheck", "SmartAmend", null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						explorer.changeIDCheck = createInput(bottomLeft, "changeIDCheck", 'SmartChangeId', null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						amendCheck.addEventListener("change", function() { //$NON-NLS-0$
 							if (amendCheck.checked) {
 								var repository = explorer.model.repository;
@@ -1003,7 +1002,8 @@ define([
 						
 						var moreDiv = document.createElement("div"); //$NON-NLS-0$
 						bottomLeft.appendChild(moreDiv);
-						
+
+						explorer.changeIDCheck = createInput(moreDiv, "changeIDCheck", 'SmartChangeId', null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var div1Content = createGroup(moreDiv, "Author:"); //$NON-NLS-0$
 						explorer.authorNameInput = createInput(div1Content, "authorNameInput", "Name:", "AuthorNamePlaceholder", config.AuthorName); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						explorer.authorEmailInput = createInput(div1Content, "authorEmailInput", "Email:", "AuthorEmailPlaceholder", config.AuthorEmail); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
