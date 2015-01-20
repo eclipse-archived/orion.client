@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2014 IBM Corporation and others.
+ * Copyright (c) 2010, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -2157,6 +2157,17 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 		getLineIndex: function(y) {
 			if (!this._clientDiv) { return 0; }
 			return this._getLineIndex(y);
+		},
+		/**
+		 * @name isValidLineIndex
+		 * @description Return whether the given line pixel position, relative to the document, is inside a line of the document
+		 * @function
+		 * @param y {Number} [y] the line pixel
+		 * @returns returns {Boolean} true if the pixel position is within a line of the document
+		 */
+		isValidLineIndex: function(y){
+			if (!this._clientDiv) { return false; }
+			return this._getLineIndex(y, true) >= 0;
 		},
 		/**
 		 * Returns the top pixel position of a given line index relative to the beginning
@@ -6133,7 +6144,17 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			var lineHeight = this._getLineHeight();
 			return lineHeight * lineIndex;
 		},
-		_getLineIndex: function(y) {
+		/**
+		 * @name _getLineIndex
+		 * @description Returns the line index closest to the given text view relative location.  Will return -1
+		 * 				if restrictToValidLines is true and y location is outside of text lines.
+		 * @function
+		 * @private
+		 * @param y location to search
+		 * @param restrictToValidLines whether to return -1 if the location is outside a valid line, otherwise return the closest valid line index
+		 * @returns returns The line index closest to the location or -1 if restrictToValidLines is true and location is outside text area
+		 */
+		_getLineIndex: function(y, restrictToValidLines) {
 			var lineHeight, lineIndex = 0;
 			var lineCount = this._model.getLineCount();
 			if (this._lineHeight) {
@@ -6155,6 +6176,11 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			} else {
 				lineHeight = this._getLineHeight();
 				lineIndex = Math.floor(y / lineHeight);
+			}
+			if (restrictToValidLines){
+				if (lineCount === 0 || lineIndex < 0 || lineIndex > (lineCount-1)){
+					return -1;
+				}
 			}
 			return Math.max(0, Math.min(lineCount - 1, lineIndex));
 		},
