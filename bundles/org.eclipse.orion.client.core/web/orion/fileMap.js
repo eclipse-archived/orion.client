@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -110,7 +110,6 @@ define([], function() {
         "orion/sites"		: {source: "org.eclipse.orion.client.ui/web/orion/sites"},
         "orion/ssh"		: {source: "org.eclipse.orion.client.ui/web/orion/ssh"},
         "orion/stringexternalizer": {source: "org.eclipse.orion.client.ui/web/orion/stringexternalizer"},
-        "orion/terminal"		: {source: "org.eclipse.orion.client.ui/web/orion/terminal"},
         "orion/webui"		: {source: "org.eclipse.orion.client.ui/web/orion/webui"},
         "orion/widgets"		: {source: "org.eclipse.orion.client.ui/web/orion/widgets"},
         "orion/profile"		: {source: "org.eclipse.orion.client.users/web/orion/profile"},
@@ -171,7 +170,6 @@ define([], function() {
         "shell"		: {source: "org.eclipse.orion.client.ui/web/shell"},
         "sites"		: {source: "org.eclipse.orion.client.ui/web/sites"},
         "stringexternalizer": {source: "org.eclipse.orion.client.ui/web/stringexternalizer"},
-        "terminal"	: {source: "org.eclipse.orion.client.ui/web/terminal"},
         "webapp"		: {source: "org.eclipse.orion.client.ui/web/webapp"},
         "webtools"	: {source: "org.eclipse.orion.client.webtools/web/webtools" }
     };

@@ -47,7 +47,6 @@ define([], function() {
 		{ type: API, source: "/logout", targetPattern: "${0}logout" },
 		{ type: API, source: "/task", targetPattern: "${0}task" },
 		{ type: API, source: "/cfapi", targetPattern: "${0}cfapi" },
-		{ type: API, source: "/docker", targetPattern: "${0}docker" },
 		{ type: API, source: "/metrics", targetPattern: "${0}metrics" },
 	];
 
