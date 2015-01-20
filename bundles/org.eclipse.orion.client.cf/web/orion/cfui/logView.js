@@ -94,7 +94,7 @@ define(['i18n!cfui/nls/messages',
 				serviceRegistry: this.serviceRegistry,
 				commandService: this.commandRegistry});
 			
-			this._setInputContents(this._parsedLocation, logName, fullLog, {});
+			this._setInputContents(this._parsedLocation, logName, fullLog, {Name: logName});
 
 		},
 		constructor: LogInputManager
