@@ -356,12 +356,13 @@ define([
 			}.bind(this);
 			
 			// update status
-			this._projectClient.getProjectDelpoyService(launchConfiguration.ServiceId, launchConfiguration.Type).then(
+			return this._projectClient.getProjectDelpoyService(launchConfiguration.ServiceId, launchConfiguration.Type).then(
 				function(service){
 					if(service && service.getState){
-						service.getState(launchConfiguration).then(function(result){
-								launchConfiguration.status = result;
+						return service.getState(launchConfiguration).then(function(status){
+								launchConfiguration.status = status;
 								this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
+								return status;
 							}.bind(this),
 							function(error){
 								launchConfiguration.status = {error: error};
