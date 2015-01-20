@@ -9,15 +9,25 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/commandRegistry',
-		'orion/Deferred',
-		'orion/webui/littlelib',
-		'orion/compare/compareView',
-		'orion/compare/compareCommands',
-		'orion/compare/compareHighlighter'],
-function(mCommandRegistry, Deferred, lib, mCompareView, mCompareCommands, mCompareHighlighter) {
-	var commandService = new mCommandRegistry.CommandRegistry({
-	});
+define([
+	'orion/commandRegistry',
+	'orion/widgets/browse/staticDataSource',
+	'orion/contentTypes',
+	'orion/Deferred',
+	'orion/webui/littlelib',
+	'orion/compare/compareView',
+	'orion/compare/compareCommands'
+], function(
+	mCommandRegistry, 
+	mStaticDataSource,
+	mContentTypes,
+	Deferred, 
+	lib, 
+	mCompareView, 
+	mCompareCommands
+) {
+	var commandService = new mCommandRegistry.CommandRegistry({});
+	var contentTypeService =  new mContentTypes.ContentTypeRegistry(mStaticDataSource.ContentTypes);
 
 	function _fileExt(fName){
 		var splitName = fName.split("."); //$NON-NLS-0$
@@ -29,17 +39,7 @@ function(mCommandRegistry, Deferred, lib, mCompareView, mCompareCommands, mCompa
 	}
 	
 	function _contentType(fName){
-		var ext = _fileExt(fName);
-		var cType = {id: "application/javascript"}; //$NON-NLS-0$
-		switch (ext) {
-			case "java": //$NON-NLS-0$
-				cType.id = "text/x-java-source"; //$NON-NLS-0$
-				break;
-			case "css": //$NON-NLS-0$
-				cType.id = "text/css"; //$NON-NLS-0$
-				break;
-		}
-		return cType;
+		return contentTypeService.getFilenameContentType(fName);
 	}
 	
 	function _getFile(fileURL){
@@ -113,7 +113,7 @@ function(mCommandRegistry, Deferred, lib, mCompareView, mCompareCommands, mCompa
     function compare(viewOptions, commandSpanId, viewType, toggleable, toggleCommandSpanId){
 		var vOptions = viewOptions;
 		if(!vOptions.highlighters && vOptions.oldFile && vOptions.oldFile.Name && vOptions.newFile && vOptions.newFile.Name){
-			vOptions.highlighters = [new mCompareHighlighter.DefaultHighlighter(), new mCompareHighlighter.DefaultHighlighter()];
+			vOptions.highlighters = [new mStaticDataSource.SyntaxHighlighter(), new mStaticDataSource.SyntaxHighlighter()];
 		}
 		if(vOptions.oldFile && vOptions.oldFile.Name){
 			vOptions.oldFile.Type = _contentType(vOptions.oldFile.Name);
@@ -138,6 +138,17 @@ function(mCommandRegistry, Deferred, lib, mCompareView, mCompareCommands, mCompa
 	compare.prototype = {
 		getCompareView: function(){
 			return this.compareView;
+		},
+		setFileNames: function(newFName, oldFName){
+			var options = this.getCompareView().getWidget().options;
+			if(options.newFile && newFName){
+				options.newFile.Name = newFName;
+				options.newFile.Type = _contentType(newFName);
+			}
+			if(options.oldFile && oldFName){
+				options.oldFile.Name = oldFName;
+				options.oldFile.Type = _contentType(oldFName);
+			}
 		},
 		refresh: function(){
 			var options = this.getCompareView().getWidget().options;

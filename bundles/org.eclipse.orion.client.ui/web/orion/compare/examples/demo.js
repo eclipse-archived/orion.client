@@ -141,9 +141,7 @@ function(Compare) {
 	
 	function onContentType(evt) {
 		contentType = bContentType.options[bContentType.selectedIndex].value;
-		var widget = compare.getCompareView().getWidget();
-		widget.options.oldFile.Name = "right." + contentType; //$NON-NLS-0$
-		widget.options.newFile.Name = "left." + contentType; //$NON-NLS-0$
+		compare.setFileNames("left." + contentType, "right." + contentType);
 	}
 	
 	/* Adding events */
