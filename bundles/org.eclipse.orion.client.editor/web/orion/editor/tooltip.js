@@ -246,7 +246,15 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		 * resulting tooltip.
 		*/
 		show: function(target, giveFocus) {
-			if (!target) { return; }
+			if (!target) {
+				return;
+			}
+			
+			var tooltipDiv = this._tooltipDiv;
+			var tooltipContents = this._tooltipContents;
+			if (!tooltipDiv || !tooltipContents){
+				return;
+			}
 			
 			// Don't process if we're in the hoverArea or tip rects
 			if (this._isInRect(this._hoverArea, target.clientX, target.clientY)
@@ -256,7 +264,9 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			
 			var info = target.getTooltipInfo();
 
-			if (!info) { return; }
+			if (!info) {
+				return;
+			}
 			
 			if (this.isVisible()) {
 				this.hide();
@@ -270,7 +280,6 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			
 			this._target = target;
 			
-			var tooltipDiv = this._tooltipDiv, tooltipContents = this._tooltipContents;
 			tooltipDiv.style.left = tooltipDiv.style.right = tooltipDiv.style.width = tooltipDiv.style.height = 
 				tooltipContents.style.width = tooltipContents.style.height = "auto"; //$NON-NLS-0$
 			var tooltipDoc = tooltipDiv.ownerDocument;
