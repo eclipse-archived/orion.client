@@ -213,6 +213,7 @@ a.breadcrumb.currentLocation {
  	padding-right: 5px;
 	/* border-bottom: 1px solid #ebebeb; */
 	/* padding-left:50px; */
+	white-space: nowrap;
 }
 
 /* Filesystem switcher toolbar */
