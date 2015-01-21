@@ -13,15 +13,17 @@
 define([
 	'webtools/cssQuickFixes',
 	'webtools/cssValidator',
+	'webtools/cssResultManager',
 	'chai/chai',
 	'orion/Deferred',
 	'mocha/mocha', //must stay at the end, not a module
-], function(CssQuickFixes, CssValidator, chai, Deferred) {
+], function(CssQuickFixes, CssValidator, ResultMgr, chai, Deferred) {
 	var assert = chai.assert;
 
 	describe('CSS Quick Fix Tests', function() {
 		
 		var validator;
+		var resultMgr;
 		var contentsChanged;
 		
 		beforeEach(function(){
@@ -32,6 +34,9 @@ define([
 			// Reset the rule severities to defaults
 			if (validator){
 				validator._restoreRules();
+			}
+			if(resultMgr) {
+			    resultMgr.onModelChanging({file:{}});
 			}
 		});
 		
@@ -44,7 +49,8 @@ define([
 		function setup(options) {
 		    var buffer = options.buffer;
 		    var contentType = options.contentType ? options.contentType : 'text/css';
-			validator = new CssValidator();
+		    resultMgr = new ResultMgr.CssResultManager();
+			validator = new CssValidator(resultMgr);
 			var rule = options.rule;
 			validator._enableOnly(rule.id, rule.severity);
 			var fixComputer = new CssQuickFixes.CssQuickFixes();

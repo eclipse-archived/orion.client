@@ -213,7 +213,15 @@ StringReader.prototype = {
     getLine: function(){
         return this._line ;
     },
-
+    
+    /**
+     * @returns {Number} Returns the current offset into the source string
+     * ORION 8.0
+     */
+    getCursor: function() {
+        return this._cursor;
+    },
+    
     /**
      * Determines if you're at the end of the input.
      * @return {Boolean} True if there's no more input, false otherwise.
@@ -623,6 +631,7 @@ TokenStreamBase.prototype = {
     //restore constructor
     constructor: TokenStreamBase,    
     
+    tokens: [],
     //-------------------------------------------------------------------------
     // Matching methods
     //-------------------------------------------------------------------------
@@ -4694,6 +4703,7 @@ function mix(receiver, supplier){
  */
 function TokenStream(input){
 	TokenStreamBase.call(this, input, Tokens);
+	this.tokens = [];  //reset the cached stream ORION 8.0
 }
 
 TokenStream.prototype = mix(new TokenStreamBase(), {
@@ -4714,7 +4724,7 @@ TokenStream.prototype = mix(new TokenStreamBase(), {
             token   = null,
             startLine   = reader.getLine(),
             startCol    = reader.getCol();
-
+            start       = reader.getCursor(); //ORION 8.0
         c = reader.read();
 
 
@@ -4901,23 +4911,22 @@ TokenStream.prototype = mix(new TokenStreamBase(), {
                     {
                         token = this.charToken(c, startLine, startCol);
                     }
-
-
-
-
-
-
             }
 
             //make sure this token is wanted
             //TODO: check channel
             break;
         }
-
         if (!token && c === null){
             token = this.createToken(Tokens.EOF,null,startLine,startCol);
         }
-
+        if(token.type !== Tokens.S) {
+            var smalltoken = Object.create(null);
+            smalltoken.type = Tokens.name(token.type);
+            smalltoken.value = token.value;
+            smalltoken.range = [start, reader.getCursor()];
+            this.tokens.push(smalltoken);
+        }
         return token;
     },
 
@@ -6643,11 +6652,13 @@ var CSSLint = (function(){
         } catch (ex) {
             reporter.error("Fatal error, cannot continue: " + ex.message, ex.line, ex.col, {});
         }
-
+        //ORION 8.0
+        var tokens = (parser._tokenStream && parser._tokenStream.tokens) ? parser._tokenStream.tokens : [];
         report = {
             messages    : reporter.messages,
             stats       : reporter.stats,
-            ruleset     : reporter.ruleset
+            ruleset     : reporter.ruleset,
+            tokens      : tokens  //add the token array to the result ORION 8.0
         };
 
         //sort by line numbers, rollups at the bottom
@@ -6895,6 +6906,7 @@ CSSLint.Util = {
         }
     }
 };
+
 /*global CSSLint*/
 /*
  * Rule: Don't use adjoining classes (.foo.bar).
@@ -9259,6 +9271,7 @@ CSSLint.addFormatter({
         return output;
     }
 });
+
 return CSSLint;
 })();
 
