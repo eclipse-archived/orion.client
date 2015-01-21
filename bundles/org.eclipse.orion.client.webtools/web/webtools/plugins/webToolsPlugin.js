@@ -12,6 +12,8 @@
 /*eslint-env browser, amd*/
 define(['orion/plugin',
 'orion/bootstrap',
+'webtools/htmlAstManager',
+'webtools/htmlHover',
 'javascript/scriptResolver',
 'webtools/htmlContentAssist', 
 'webtools/htmlOutliner',
@@ -21,9 +23,11 @@ define(['orion/plugin',
 'webtools/cssOutliner',
 'webtools/cssHover',
 'webtools/cssQuickFixes',
+'webtools/cssResultManager',
 'orion/editor/stylers/text_css/syntax',
 'orion/util'
-], function(PluginProvider, Bootstrap, ScriptResolver, htmlContentAssist, htmlOutliner, mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, mCSS, Util) {
+], function(PluginProvider, Bootstrap, HtmlAstManager, htmlHover, ScriptResolver, htmlContentAssist, htmlOutliner, 
+            mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, Util) {
 	/**
 	 * Plug-in headers
 	 */
@@ -72,19 +76,51 @@ define(['orion/plugin',
 			contentType: ["text/css"] //$NON-NLS-0$
 		});
 
+    var cssResultMgr = new cssResultManager.CssResultManager();
+	
+	/**
+	 * Register result manager as model changed listener
+	 */
+	provider.registerService("orion.edit.model", {  //$NON-NLS-0$
+		onModelChanging: cssResultMgr.onModelChanging.bind(cssResultMgr),
+		onDestroy: cssResultMgr.onDestroy.bind(cssResultMgr),
+		onSaving: cssResultMgr.onSaving.bind(cssResultMgr),
+		onInputChanged: cssResultMgr.onInputChanged.bind(cssResultMgr)
+	},
+	{
+		contentType: ["text/css"],  //$NON-NLS-0$
+		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-0$  //$NON-NLS-1$
+	});
+
 	/**
 	 * Register validators
 	 */
-	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new mCssValidator(), //$NON-NLS-0$  //$NON-NLS-1$
+	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new mCssValidator(cssResultMgr), //$NON-NLS-0$  //$NON-NLS-1$
 		{
 			contentType: ["text/css"], //$NON-NLS-0$
 			pid: 'csslint.config'  //$NON-NLS-0$
 		});
 		
+	var htmlAstManager = new HtmlAstManager.HtmlAstManager();
+	
+	/**
+	 * Register AST manager as Model Change listener
+	 */
+	provider.registerService("orion.edit.model", {  //$NON-NLS-0$
+		onModelChanging: htmlAstManager.onModelChanging.bind(htmlAstManager),
+		onDestroy: htmlAstManager.onDestroy.bind(htmlAstManager),
+		onSaving: htmlAstManager.onSaving.bind(htmlAstManager),
+		onInputChanged: htmlAstManager.onInputChanged.bind(htmlAstManager)
+	},
+	{
+		contentType: ["text/html"],  //$NON-NLS-0$
+		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-0$  //$NON-NLS-1$
+	});
+	
 	/**
 	* Register outliners
 	*/
-	provider.registerService("orion.edit.outliner", new htmlOutliner.HtmlOutliner(), //$NON-NLS-0$
+	provider.registerService("orion.edit.outliner", new htmlOutliner.HtmlOutliner(htmlAstManager), //$NON-NLS-0$
 		{
 			id: "orion.webtools.html.outliner", //$NON-NLS-0$
 			nls: 'webtools/nls/messages',  //$NON-NLS-0$
@@ -121,11 +157,21 @@ define(['orion/plugin',
     /**
 	 * Register the hover support
 	 */
-	provider.registerService("orion.edit.hover", new cssHover.CSSHover(resolver),  //$NON-NLS-0$
+	provider.registerService("orion.edit.hover", new cssHover.CSSHover(resolver, cssResultMgr),  //$NON-NLS-0$
 		{
 			nls: 'webtools/nls/messages',  //$NON-NLS-0$
 		    name: 'cssHover',	//$NON-NLS-0$
 			contentType: ["text/css"]	//$NON-NLS-0$
+	});
+	
+	/**
+	 * Register the hover support
+	 */
+	provider.registerService("orion.edit.hover", new htmlHover.HTMLHover(htmlAstManager, resolver),  //$NON-NLS-0$
+		{
+			nls: 'webtools/nls/messages',  //$NON-NLS-0$
+		    name: 'htmlHover',	//$NON-NLS-0$
+			contentType: ["text/html"]	//$NON-NLS-0$
 	});
 	
 	/**

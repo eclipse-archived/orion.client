@@ -12,9 +12,8 @@
 /*global CSSLint*/
 /*eslint-env amd*/
 define("webtools/cssValidator", [ //$NON-NLS-0$
-	'csslint', //$NON-NLS-0$
 	'orion/objects' //$NON-NLS-0$
-], function(csslint, Objects) {
+], function(Objects) {
 
 	// TODO How to keep this list up to date with rules definitions, settings options and content assist
 	var config = {
@@ -98,9 +97,11 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 	 * @description Creates a new validator
 	 * @constructor
 	 * @public
+	 * @param {Object} cssResultManager The back result manager
 	 * @since 6.0
 	 */
-	function CssValidator() {
+	function CssValidator(cssResultManager) {
+	    this.cssResultManager = cssResultManager;
 	}
 
 	Objects.mixin(CssValidator.prototype, /** @lends webtools.CssValidator.prototype*/ {
@@ -116,8 +117,11 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 		 */
 		computeProblems: function(editorContext, context) {
 			var that = this;
-			return editorContext.getText().then(function(text) {
-				return that._computeProblems(text);
+			return that.cssResultManager.getResult(editorContext, config).then(function(results) {
+			    if(results) {
+			         return that._computeProblems(results);
+			    }
+			    return null;
 			});
 		},
 		
@@ -128,9 +132,8 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 		 * @param {String} contents The file contents
 		 * @returns {Array} The problem array
 		 */
-		_computeProblems: function(contents) {
-			var cssResult = csslint.verify(contents, config.getRuleSet()),
-			    messages = cssResult.messages,
+		_computeProblems: function(results) {
+			    var messages = results.messages,
 			    problems = [];
 			for (var i=0; i < messages.length; i++) {
 				var message = messages[i];

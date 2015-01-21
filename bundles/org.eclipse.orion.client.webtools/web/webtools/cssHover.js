@@ -14,17 +14,21 @@
 define([
 'orion/objects',
 'orion/URITemplate',
-], function(Objects, URITemplate) {
+'webtools/util'
+], function(Objects, URITemplate, Util) {
 	
 	/**
 	 * @name webtools.CSSHover
 	 * @description creates a new instance of the hover support
 	 * @constructor
 	 * @public
+	 * @param {Object} resolver The backing file resolver
+	 * @param {Object} cssResultManager The back result manager
 	 * @since 8.0
 	 */
-	function CSSHover(resolver) {
+	function CSSHover(resolver, cssResultManager) {
 	    this.resolver = resolver;
+	    this.cssResultManager = cssResultManager;
 	}
 	
 	Objects.mixin(CSSHover.prototype, /** @lends webtools.CSSHover.prototype*/ {
@@ -61,11 +65,14 @@ define([
 		 */
 		computeHoverInfo: function computeHover(editorContext, ctxt) {
 			var that = this;
-			var result = editorContext.getText().then(function(text){
-				var token = that._getToken(text, ctxt.offset);
+			return that.cssResultManager.getResult(editorContext, {}).then(function(results) {
+			    var token = Util.findToken(ctxt.offset, results.tokens);
 				if (token){
-				    if(that._isImport(text, ctxt.offset, token)) {
+				    if(that.hasPreviousToken(token, results.tokens, 'IMPORT_SYM')) {
 				        return that._getFileHover(token);
+				    }
+				    if(that.hasPreviousToken(token, results.tokens, 'IDENT', 'background-image')) {
+				        return that._getImageHover(token);
 				    }
 					if (that.colorValues.indexOf(token.value) > -1){
 						return that._getColorHover(token.value);
@@ -76,62 +83,69 @@ define([
 				}
 				return null;
 			});
-			return result;
-		},
-
-		_getToken: function _getToken(text, offset, regexp){
-			var start = offset;
-			var regex = regexp ? regexp : /[0-9A-Za-z\-\@\.\#\/]/;
-			while (start && regex.test(text.charAt(start-1))) {
-				start--;
-			}
-			var end = offset;
-			while (end < text.length && regex.test(text.charAt(end))) {
-				end++;
-			}
-			if (end - start){
-			    var tok = Object.create(null);
-			    tok.start = start;
-			    tok.end = end;
-			    tok.value = text.substring(start, end);
-				return tok;
-			}
-			return null;
 		},
 		
-		_isImport: function _isImport(text, offset, token) {
-		    if(token && text && offset > -1) {
-		        var tok = this._getToken(text, token.start-1, /[0-9A-Za-z\-\@\.\#\(\/]/);
-		        if(tok && /url\(/ig.test(tok.value)) {
-		            return true;
+		hasPreviousToken: function hasPreviousToken(token, tokens, name, id) {
+		    if(token && tokens) {
+		        switch(token.type) {
+		            case 'URI': 
+		            case 'STRING': {
+		                if(token.index > 0) {
+		                    var prev = null;
+		                    for(var i = token.index-1; i >= 0; i--) {
+		                        prev = tokens[i];
+		                        if(prev.type === 'COLON' || prev.type === 'STRING' || prev.type === 'URI' || prev.type === 'COMMA') {
+		                            continue;
+		                        } else {
+		                            break;
+		                        }
+		                    }
+		                    if(id && prev && prev.type === name) {
+		                    return id === prev.value;
+    		                } else {
+    		                  return prev && prev.type === name;
+    		                }
+		                }
+		            }
 		        }
-		        var start = token.start-1;
-                if(!tok || /\s/.test(tok.value)) {
-		            while(/\s/.test(text.charAt(start-1))) {
-    			        start--;
-    			    }
-		        }
-	            tok = this._getToken(text, start);
-			    if(tok && /\@import/i.test(tok.value)) {
-                    return true;
-                }
             }
             return false;
 		},
 		
 		_getFileHover: function _getFileHover(token) {
-		    if(token) {
-		        if(/^http/i.test(token.value)) {
-		                 
-		        }
-		        var that = this;
-		        return that.resolver.getWorkspaceFile(token.value, {ext:'css', type:'CSS', icon:'../webtools/images/css.png'}).then(function(files) {
-    		        if(files) {
-    		            return that._formatFilesHover(token.value, files);
-    		        }
-		        });
-		    }
+		    var path = this._getPathFromToken(token);
+		    if(path) {
+    	        if(/^http/i.test(path)) {
+    	            return this._formatFilesHover(path);
+    	        } else {
+        	        var that = this;
+        	        return that.resolver.getWorkspaceFile(path, {ext:'css', type:'CSS', icon:'../webtools/images/css.png'}).then(function(files) {
+        		        if(files) {
+        		            return that._formatFilesHover(path, files);
+        		        }
+        	        });
+    	        }
+	        }
 		    return null;
+		},
+		
+		_getPathFromToken: function _getPathFromToken(token) {
+		    var path = token.value;
+		    switch(token.type) {
+		        case 'STRING': {
+		            path = token.value.slice(1, token.value.length-1); //peel off the quotes
+		            break;
+		        }
+		        case 'URI': {
+		            var val = /\s*[\'\"](.*)[\'\"]/i.exec(token.value);
+    		        if(val) {
+    		            path = val[1];
+    		        } else {
+    		            return null;
+    		        }
+		        }
+		    }
+		    return path;
 		},
 		
 		/**
@@ -163,18 +177,30 @@ define([
         	            }
         	            
         	        }
-    	        } /*else if(typeof files === 'string') {
-    	            var name = path.slice(path.lastIndexOf('/'));
+    	        } else {
+    	            var name = path.slice(path.lastIndexOf('/')+1);
     	            title = '###Open file for \''+name+'\'###';
 	                hover += '[!['+name+'](../webtools/images/css.png)';
 	                hover += name + ']('+path+') - '+path+'\n\n';
-    	        } */
+    	        }
     	        if(hover !== '') {
     	           return {title: title, content: hover, type:'markdown'};
     	        }
     	    }
     	    return null;
     	},
+		
+		_getImageHover: function _getImageHover(token) {
+		      var path = this._getPathFromToken(token);
+		      if(path) {
+		          if(/^http/i.test(path)) {
+    		          var html = '<html><body style="margin:1px;"><img src="'+path+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
+    			      return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+		          } else {
+		              
+		          }
+		      }
+		},
 		
 		_getColorHover: function _getColorHover(colorID){
 			var html = '<html><body style=\"background-color: ' + colorID + ';\"></html>'; //$NON-NLS-0$  //$NON-NLS-1$
