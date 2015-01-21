@@ -58,14 +58,10 @@ define([
 		/**
 		 * @returns {orion.Promise}
 		 */
-		loadTranslatedPluginSettings: function() {
-			return this.settingsRegistry.loadI18n();
-		},
-
 		show: function() {
 			var _self = this;
 
-			Deferred.all([this.preferences.getPreferences('/settingsContainer'), this.loadTranslatedPluginSettings()]).then(function(results){
+			Deferred.all([this.preferences.getPreferences('/settingsContainer')]).then(function(results){
 				var prefs = results[0];
 				var categories = prefs.get( 'categories' ) || {};
 				if (categories.showUserSettings === undefined || categories.showUserSettings) {

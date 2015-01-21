@@ -636,26 +636,15 @@ define([
 			});
 			// Load resource bundles
 			this._providerLookup = true;
-			var deferreds = filteredProviders.map(function(provider) {
-				if(provider.getProperty("nameKey") && provider.getProperty("nls")){ //$NON-NLS-1$ //$NON-NLS-0$
-					var deferred = new Deferred();
-					var getDisplayName = function(provider, deferred, commandMessages) { //$NON-NLS-0$
-						provider.displayName = commandMessages[provider.getProperty("nameKey")]; //$NON-NLS-0$
-						deferred.resolve();
-					};
-					i18nUtil.getMessageBundle(provider.getProperty("nls")).then(getDisplayName.bind(null, provider, deferred), deferred.reject); //$NON-NLS-0$
-					return deferred;
-				} else {
-					provider.displayName = provider.getProperty("name"); //$NON-NLS-0$
-					return new Deferred().resolve();
-				}
+			filteredProviders.forEach(function(provider) {
+				provider.displayName = provider.getProperty("name") || provider.getProperty("nameKey"); //$NON-NLS-0$
 			});
-			Deferred.all(deferreds, function(error) { return error; }).then(function(){
-				_self._providerLookup = false;
-				_self._outlineService.setOutlineProviders(filteredProviders);
-				_self.setOutlineProviders(filteredProviders);
-				_self.generateOutline();
-			});
+			
+			_self._providerLookup = false;
+			_self._outlineService.setOutlineProviders(filteredProviders);
+			_self.setOutlineProviders(filteredProviders);
+			_self.generateOutline();
+		
 		}
 	});
 	

@@ -477,41 +477,15 @@ define(["orion/Deferred", "orion/commands", "orion/contentTypes", "orion/URITemp
 			deferred.resolve(commandOptions);
 		}
 		
-		if(info.nls){
-			var callback = function(commandMessages) {
-				var name, tooltip;
-				if (commandMessages) {
-					var translatedName = info.nameKey && commandMessages[info.nameKey];
-					var translatedTooltip = info.tooltipKey && commandMessages[info.tooltipKey];
-					name = translatedName || info.name || DEFAULT_NAME;
-					tooltip = translatedTooltip || info.tooltip || DEFAULT_TOOLTIP;
-				} else {
-					// Failed to load nls bundle -- fallback to untranslated name or Key
-					name = info.name || info.nameKey || DEFAULT_NAME;
-					tooltip = info.tooltip || info.tooltipKey || DEFAULT_TOOLTIP;
-				}
-				var commandOptions = {
-					name: name,
-					image: info.image,
-					id: getIdFromInfo(info),
-					tooltip: tooltip,
-					isEditor: info.isEditor,
-					showGlobally: info.showGlobally
-				};
-				enhanceCommandOptions(commandOptions, deferred);
-			};
-			i18nUtil.getMessageBundle(info.nls).then(callback, callback.bind(this, null));
-		} else {
-			var commandOptions = {
-					name: info.name,
-					image: info.image,
-					id: getIdFromInfo(info),
-					tooltip: info.tooltip,
-					isEditor: info.isEditor,
-					showGlobally: info.showGlobally
-			};
-			enhanceCommandOptions(commandOptions, deferred);
-		}
+		var commandOptions = {
+			name: info.name || info.nameKey || DEFAULT_NAME,
+			image: info.image,
+			id: getIdFromInfo(info),
+			tooltip: info.tooltip || info.tooltipKey || DEFAULT_TOOLTIP,
+			isEditor: info.isEditor,
+			showGlobally: info.showGlobally
+		};
+		enhanceCommandOptions(commandOptions, deferred);
 		
 		return deferred;
 	};

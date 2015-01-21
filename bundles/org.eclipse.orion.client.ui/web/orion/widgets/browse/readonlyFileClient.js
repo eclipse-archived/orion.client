@@ -198,7 +198,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 				LocalTimeStamp: 0,
 				Location: _references[j].getProperty("top"), //$NON-NLS-0$
 				ChildrenLocation: _references[j].getProperty("top"), //$NON-NLS-0$
-				Name: _references[j].getProperty("Name")		 //$NON-NLS-0$
+				Name: _references[j].getProperty("Name") || _references[j].getProperty("NameKey")		 //$NON-NLS-0$
 			};
 
 			var patternString = _references[j].getProperty("pattern") || ".*"; //$NON-NLS-1$ //$NON-NLS-0$
@@ -208,14 +208,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 			_patterns[j] = new RegExp(patternString);			
 			//_services[j] = serviceRegistry.getService(_references[j]);
 			_services[j] = _references[j].service;
-			_names[j] = _references[j].getProperty("Name"); //$NON-NLS-0$
-			
-			if(_references[j].getProperty("NameKey") && _references[j].getProperty("nls")){
-				i18nUtil.getMessageBundle(_references[j].getProperty("nls")).then(function(j, pluginMessages){
-					_fileSystemsRoots[j].Name = pluginMessages[_references[j].getProperty("NameKey")]; //$NON-NLS-0$
-					_names[j] = pluginMessages[_references[j].getProperty("NameKey")]; //$NON-NLS-0$
-				}.bind(this, j));
-			}
+			_names[j] = _references[j].getProperty("Name") || _references[j].getProperty("NameKey"); //$NON-NLS-0$
 		}
 				
 		this._getServiceIndex = function(location) {

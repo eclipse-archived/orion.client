@@ -335,42 +335,28 @@ objects.mixin(SiteEditor.prototype, {
 
 	// Special feature for setting up self-hosting
 	convertToSelfHostedSite: function(items, userData) {
-		function onError(e) {
-			return e;
-		}
 
-		// Load the translated labels first so dialog can be constructed synchronously
 		var selfHostingConfig = this._siteClient.getSelfHostingConfig();
-		var i18nLoaded = [];
-		selfHostingConfig.folders.forEach(function(folderInfo) {
-			if (folderInfo.nls) {
-				i18nLoaded.push(i18nUtil.getMessageBundle(folderInfo.nls).then(function(bundle) {
-					folderInfo.label = bundle[folderInfo.labelKey] || folderInfo.label || folderInfo.labelKey;
-				}));
+
+		var self = this;
+		var dialog = new ConvertToSelfHostingDialog({
+			serviceRegistry: this.serviceRegistry,
+			fileClient: this.fileClient,
+			siteClient: this._siteClient,
+			selfHostingConfig: selfHostingConfig,
+			func: function(folderInfos) {
+				var folderLocations = folderInfos.map(function(folderInfo) {
+					return folderInfo.folder.Location;
+				});
+				self._siteClient.convertToSelfHosting(self.getSiteConfiguration(), folderLocations).then(
+					function(updatedSite) {
+						self.mappings.deleteAllMappings();
+						self.mappings.addMappings(updatedSite.Mappings);
+						self.save();
+					});
 			}
 		});
-
-		Deferred.all(i18nLoaded, onError).then(function() {
-			var self = this;
-			var dialog = new ConvertToSelfHostingDialog({
-				serviceRegistry: this.serviceRegistry,
-				fileClient: this.fileClient,
-				siteClient: this._siteClient,
-				selfHostingConfig: selfHostingConfig,
-				func: function(folderInfos) {
-					var folderLocations = folderInfos.map(function(folderInfo) {
-						return folderInfo.folder.Location;
-					});
-					self._siteClient.convertToSelfHosting(self.getSiteConfiguration(), folderLocations).then(
-						function(updatedSite) {
-							self.mappings.deleteAllMappings();
-							self.mappings.addMappings(updatedSite.Mappings);
-							self.save();
-						});
-				}
-			});
-			dialog.show();
-		}.bind(this));
+		dialog.show();
 	},
 	
 	/**

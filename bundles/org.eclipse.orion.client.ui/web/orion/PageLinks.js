@@ -60,21 +60,6 @@ define([
 		return props;
 	}
 
-	/**
-	 * Loads translated name if possible.
-	 * @returns {orion.Promise} The info, with info.textContent set
-	 */
-	function _loadTranslatedName(info) {
-		return i18nUtil.getMessageBundle(info.nls).then(function(messages) {
-			info.textContent = info.nameKey ? messages[info.nameKey] : info.name;
-			return info;
-		}, function(error) {
-			// Bundle failed to load. Fallback to untranslated name
-			info.textContent = info.nameKey || info.name;
-			return info;
-		});
-	}
-
 	function _readPageLinksMetadata(serviceRegistry, serviceName) {
 		serviceName = serviceName || "orion.page.link"; //$NON-NLS-0$
 
@@ -97,12 +82,8 @@ define([
 			expandedHref = PageUtil.validateURLScheme(expandedHref);
 			info.href = expandedHref;
 
-			if(info.nls){
-				navLinkInfos.push(_loadTranslatedName(info));
-			} else {
-				info.textContent = info.name;
-				navLinkInfos.push(new Deferred().resolve(info));
-			}
+			info.textContent = info.name || info.nameKey;
+			navLinkInfos.push(new Deferred().resolve(info));
 		});
 		return Deferred.all(navLinkInfos);
 	}
@@ -125,12 +106,8 @@ define([
 					return;
 				}
 				info.service = serviceRegistry.getService(serviceRef);
-				if (info.nls) {
-					categoryInfos.push(_loadTranslatedName(info));
-				} else {
-					info.textContent = info.name;
-					categoryInfos.push(new Deferred().resolve(info));
-				}
+				info.textContent = info.name;
+				categoryInfos.push(new Deferred().resolve(info));				
 			});
 			return Deferred.all(categoryInfos).then(function(infos) {
 				_cachedCategories = new CategoriesInfo(infos);

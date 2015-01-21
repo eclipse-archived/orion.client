@@ -288,68 +288,6 @@ define([
 		 */
 		getCategoryLabel: function(category) {
 			return this.categoryLabels[category] || null;
-		},
-		/**
-		 * Loads the localizations for settings in the registry. After this method resolves, the Settings and AttributeDefinitions
-		 * will return localized values from their name and label getters.
-		 * @returns {orion.Promise} A promise that resolves when localizations have been loaded.
-		 */
-		loadI18n: function() {
-			function continueOnError(err) {
-				return null;
-			}
-			function translateSetting(messages, setting) {
-				setting._setNlsName(messages[setting.getNameKey()]);
-				setting._setNlsCategory(messages[setting.getCategoryKey()]);
-				setting.getAttributeDefinitions().forEach(function(attr) {
-					attr._setNlsName(messages[attr.getNameKey()]);
-					var labelKeys = attr.getOptionLabelKeys();
-					if (labelKeys) {
-						var translatedLabels = labelKeys.map(function(key) {
-							return messages[key];
-						});
-						attr._setNlsOptionLabels(translatedLabels);
-					}
-				});
-			}
-
-			var toTranslate = Object.create(null);    // {String} bundle name -> {Setting[]}
-			var bundles = Object.create(null);        // {String} bundle name -> {Object} messages
-			var bundlePromises = [];
-
-			this.getSettings().forEach(function(setting) {
-				var bundleName = setting.getNls();
-				if (!bundleName) {
-					return;
-				}
-				bundlePromises.push(i18nUtil.getMessageBundle(bundleName).then(function(messages) {
-					bundles[bundleName] = messages;
-				}));
-				toTranslate[bundleName] = toTranslate[bundleName] || [];
-				toTranslate[bundleName].push(setting);
-			});
-
-			var loadBundles = Deferred.all(bundlePromises, continueOnError);
-			var _self = this;
-			return loadBundles.then(function() {
-				Object.keys(bundles).forEach(function(bundleName) {
-					var messages = bundles[bundleName];
-					toTranslate[bundleName].forEach(translateSetting.bind(null, messages));
-				});
-
-				// Update the categoryLabels
-				_self.getCategories().forEach(function(category) {
-					// Find a setting that provides a label for the category
-					_self.getSettings(category).some(function(setting) {
-						var label = setting.getCategoryLabel();
-						if (!label) {
-							return false;
-						}
-						_self.categoryLabels[category] = label;
-						return true;
-					});
-				});
-			});
 		}
 	};
 
