@@ -37,9 +37,10 @@ define([
 'orion/editor/stylers/application_javascript/syntax',
 'orion/editor/stylers/application_json/syntax',
 'orion/editor/stylers/application_schema_json/syntax',
-'orion/editor/stylers/application_x-ejs/syntax'
+'orion/editor/stylers/application_x-ejs/syntax',
+'i18n!javascript/nls/messages'
 ], function(Bootstrap, Esprima, ScriptResolver, ASTManager, QuickFixes, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
-			EslintValidator, Occurrences, Hover, Outliner,	Util, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS) {
+			EslintValidator, Occurrences, Hover, Outliner,	Util, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessagages) {
 
 	function Factory(provider) {
 		/**
@@ -400,9 +401,9 @@ define([
 		 * ESLint settings
 		 */
 		var ignore = 0, warning = 1, error = 2, severities = [
-		                                                      {labelKey: 'ignore',  value: ignore},  //$NON-NLS-0$
-		                                                      {labelKey: 'warning', value: warning},  //$NON-NLS-0$
-		                                                      {labelKey: 'error',   value: error}  //$NON-NLS-0$
+		                                                      {label: javascriptMessagages.ignore,  value: ignore},  //$NON-NLS-0$
+		                                                      {label: javascriptMessagages.warning, value: warning},  //$NON-NLS-0$
+		                                                      {label: javascriptMessagages.error,   value: error}  //$NON-NLS-0$
 		                                                      ];
 		provider.registerService("orion.core.setting",  //$NON-NLS-0$
 				{},

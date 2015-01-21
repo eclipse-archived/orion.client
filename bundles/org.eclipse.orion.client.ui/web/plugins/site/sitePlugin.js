@@ -12,8 +12,9 @@
 define([
 	'orion/plugin',
 	'plugins/site/siteServiceImpl',
-	'plugins/site/selfHostingRules'
-], function(PluginProvider, siteImpl, mSelfHostingRules) {
+	'plugins/site/selfHostingRules',
+	'i18n!orion/sites/nls/messages'
+], function(PluginProvider, siteImpl, mSelfHostingRules, messages) {
 	function qualify(url) {
 		var a = document.createElement('a');
 		a.href = url;
@@ -120,8 +121,7 @@ define([
 				folders: [
 					{
 						name: "org.eclipse.orion.client",
-						labelKey: "orionClientLabel",
-						nls: "orion/sites/nls/messages"
+						label: messages.orionClientLabel
 					}
 				]
 			}

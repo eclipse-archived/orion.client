@@ -160,12 +160,7 @@ define([
 		},
 		getOptionLabels: function() {
 			return this.options && this.options.map(function(o) {
-				return o._nlsLabel || o.label;
-			});
-		},
-		getOptionLabelKeys: function() {
-			return this.options && this.options.map(function(o) {
-				return o.labelKey;
+				return o.label;
 			});
 		},
 		getOptionValues: function() {
@@ -178,18 +173,6 @@ define([
 		},
 		getDefaultValue: function() {
 			return this.defaultValue;
-		},
-		// Private, for translation
-		_setNlsName: function(value) {
-			this._nlsName = value;
-		},
-		// Private, for translation
-		_setNlsOptionLabels: function(values) {
-			if (this.options) {
-				this.options.forEach(function(o, i) {
-					o._nlsLabel = values[i];
-				});
-			}
 		}
 	};
 
@@ -268,16 +251,6 @@ define([
 		 * @returns {String[]|null} The option labels. The ordering of the returned array matches the ordering of the values
 		 * array returned by {@link #getOptionValues}.
 		 * <p>If there are no option labels available, <code>null</code> is returned.</p>
-		 */
-		/**
-		 * @name orion.metatype.AttributeDefinition#getOptionLabelKeys
-		 * @function
-		 * @description Returns a list of label keys for option values.
-		 * @see orion.metatype.ObjectClassDefinition#getNameKey The parent ObjectClassDefinition's nameKey gives the message bundle
-		 * to which the labelKeys apply.
-		 * @returns {String[]|null} The option label keys. The ordering of the returned array matches the ordering of the values
-		 * array returned by {@link #getOptionValues}.
-		 * <p>If there are no label keys available, <code>null</code> is returned.</p>
 		 */
 		/**
 		 * @name orion.metatype.AttributeDefinition#getType
