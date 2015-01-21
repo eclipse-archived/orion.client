@@ -177,7 +177,7 @@ define([
 						this._commandRegistry.registerCommandContribution(createNewItem.id, defaultDeployCommand.id, 1); //$NON-NLS-0$
 						domNodeWrapperList = [];
 						this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._projectExplorer.treeRoot, this, "button", null, domNodeWrapperList); //$NON-NLS-0$
-						domNodeWrapperList[0].domNode.textContent = messages["createNew"]; //$NON-NLS-0$
+						domNodeWrapperList[0].domNode.textContent = "+"; //$NON-NLS-0$
 					}
 				}
 			}.bind(this);

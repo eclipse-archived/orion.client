@@ -70,7 +70,7 @@ define({//Default message bundle
 	"No": "No",
 	"DeleteSearchTrmMsg": "Click or use delete key to delete the search term",
 	"Application": "Application",
-	"selectLaunchConfig": "Launch Configurations...",
+	"selectLaunchConfig": "Create new launch configuration",
 	"createNew": "Create New",
 	"Running": "Running",
 	"checkingStateMessage": "Checking status of ${0}",

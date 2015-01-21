@@ -86,6 +86,11 @@
 	padding-left: 0;
 }
 
+.addNewMenuItem > .orionButton {
+	font-size: 16px;
+	font-weight: bold;
+}
+
 .launchConfigurationDeleteButton.orionButton {
 
 }
