@@ -137,9 +137,17 @@ define([
 		            break;
 		        }
 		        case 'URI': {
-		            var val = /\s*[\'\"](.*)[\'\"]/i.exec(token.value);
+		            var val = /^\s*(?:url)\s*\(\s*(.*)\s*\)/i.exec(token.value);
     		        if(val) {
     		            path = val[1];
+    		            var c = path.charAt(0);
+    		            if(c === '\'' || c === '"') {
+    		                path = path.slice(1);
+    		            }
+    		            c = path.charAt(path.length-1);
+    		            if(c === '\'' || c === '"') {
+    		                path = path.slice(0, path.length-1);
+    		            }
     		        } else {
     		            return null;
     		        }
@@ -193,11 +201,9 @@ define([
 		_getImageHover: function _getImageHover(token) {
 		      var path = this._getPathFromToken(token);
 		      if(path) {
-		          if(/^http/i.test(path)) {
+		          if(/^http/i.test(path) || /^data:image.*;base64/i.test(path)) {
     		          var html = '<html><body style="margin:1px;"><img src="'+path+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
     			      return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
-		          } else {
-		              
 		          }
 		      }
 		},
