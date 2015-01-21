@@ -290,7 +290,7 @@ define("orion/editor/rulers", [
 				var self = this;
 				annotation = this._findNextAnnotation(annotationModel, lineStart, lineEnd, selectionStart, selectionEnd, 
 					function(annotationType){
-						return self.isAnnotationTypeVisible(annotationType)
+						return self.isAnnotationTypeVisible(annotationType);
 					}
 				);
 				// Select the annotation or the start of the line
@@ -320,12 +320,11 @@ define("orion/editor/rulers", [
 			var tooltip = mTooltip.Tooltip.getTooltip(this._view);
 			if (tooltip) {
 				if (annotation && this.getLocation() === "left"){ //$NON-NLS-0$
-					var self = this;
 					tooltip.show({
 						clientX: e.clientX,
 						clientY: e.clientY,
 						getTooltipInfo: function() {
-							return self._getOnClickTooltipInfo(annotation, this.clientY);
+							return self._getOnClickTooltipInfo(annotation);
 						}
 					}, false);
 				} else {
@@ -370,7 +369,7 @@ define("orion/editor/rulers", [
 				this._hoverTimeout = null;
 			}
 			
-			this._curElement = e.target ? e.target : e.srcElement;
+			this._curElementBounds = lib.bounds(e.target ? e.target : e.srcElement);
 			
 			var self = this;
 			self._hoverTimeout = window.setTimeout(function() {
@@ -501,7 +500,7 @@ define("orion/editor/rulers", [
 			
 			// TODO: shouldn't this check the length, it'll never be null
 			if (!contents) { return null; }
-			var hoverArea = lib.bounds(this._curElement); //.parentNode);
+			var hoverArea = this._curElementBounds;
 			if (typeof contents === 'string') { //$NON-NLS-0$
 				// Hack for line numbers
 				hoverArea.top = y;
@@ -537,9 +536,7 @@ define("orion/editor/rulers", [
 		 */
 		_getOnClickTooltipInfo: function(annotation) {
 			var view = this._view;
-			
-			var hoverArea = lib.bounds(this._curElement); //.parentNode);
-			
+			var hoverArea = this._curElementBounds;
 			var rulerLocation = this.getLocation();
 			var position = rulerLocation === "left" ? "right" : "left"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 			var info = {
