@@ -30,9 +30,16 @@ define([
 	Objects.mixin(CssResultManager.prototype, /** @lends webtools.CssResultManager.prototype */ {
 		/**
 		 * @param {orion.editor.EditorContext} editorContext
-		 * @returns {orion.Promise} A promise resolving to the CSS parse / checking result.
+		 * @returns {orion.Promise} A promise resolving to the CSS parse / checking result or null if called 
+		 * with an incomplete config
 		 */
 		getResult: function(editorContext, config) {
+		    if(typeof(config) === 'undefined') {
+		        config = Object.create(null);
+		    }
+		    if(typeof(config.getRuleSet) === 'undefined') {
+		        config.getRuleSet = function() {return null;};
+			}
 			var metadataPromise = (typeof editorContext.getFileMetadata === "function")
 				? editorContext.getFileMetadata()
 				: new Deferred().resolve({});

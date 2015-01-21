@@ -65,24 +65,32 @@ define([
 		 */
 		computeHoverInfo: function computeHover(editorContext, ctxt) {
 			var that = this;
-			return that.cssResultManager.getResult(editorContext, {}).then(function(results) {
-			    var token = Util.findToken(ctxt.offset, results.tokens);
-				if (token){
-				    if(that.hasPreviousToken(token, results.tokens, 'IMPORT_SYM')) {
-				        return that._getFileHover(token);
-				    }
-				    if(that.hasPreviousToken(token, results.tokens, 'IDENT', 'background-image')) {
-				        return that._getImageHover(token);
-				    }
-					if (that.colorValues.indexOf(token.value) > -1){
-						return that._getColorHover(token.value);
-					}
-					if (/\#[0-9A-Fa-f]{1,6}/.test(token.value)){
-						return that._getColorHover(token.value);	
-					}
+			return that.cssResultManager.getResult(editorContext, that._emptyRuleSet()).then(function(results) {
+			    if(results) {
+    			    var token = Util.findToken(ctxt.offset, results.tokens);
+    				if (token){
+    				    if(that.hasPreviousToken(token, results.tokens, 'IMPORT_SYM')) {
+    				        return that._getFileHover(token);
+    				    }
+    				    if(that.hasPreviousToken(token, results.tokens, 'IDENT', 'background-image')) {
+    				        return that._getImageHover(token);
+    				    }
+    					if (that.colorValues.indexOf(token.value) > -1){
+    						return that._getColorHover(token.value);
+    					}
+    					if (/\#[0-9A-Fa-f]{1,6}/.test(token.value)){
+    						return that._getColorHover(token.value);	
+    					}
+    				}
 				}
 				return null;
 			});
+		},
+		
+		_emptyRuleSet: function() {
+		    var config = Object.create(null);
+		    config.getRuleSet = function() {return null;};
+		    return config;
 		},
 		
 		hasPreviousToken: function hasPreviousToken(token, tokens, name, id) {
