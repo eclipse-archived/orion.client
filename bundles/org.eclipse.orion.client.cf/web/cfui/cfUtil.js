@@ -57,7 +57,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 			var host, url;
 			if(resp.Route !== undefined){
 				host = resp.Route.host || resp.Route.entity.host;
-				url = "http://" + host + "." + resp.Domain; //$NON-NLS-0$
+				url = "https://" + host + "." + resp.Domain; //$NON-NLS-1$ //$NON-NLS-0$
 			}
 
 			var launchConf = {
