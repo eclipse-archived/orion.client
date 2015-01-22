@@ -479,10 +479,10 @@ define([
 		addParameters: [{id: "url", type: "url", name: gitmessages["Url:"]}],
 		optionalParameters: [{id: "sshuser", type: "text", name:  gitmessages["User Name:"]}, {id: "sshpassword", type: "password", name:  gitmessages["Password:"]},{id: "sshprivateKey", type: "textarea", name:  gitmessages["Ssh Private Key:"]}, {id: "sshpassphrase", type: "password", name:  gitmessages["Ssh Passphrase:"]}],
 		nls: "git/nls/gitmessages",
-		addDependencyNameKey: "addDependencyName",
-		addDependencyTooltipKey: "addDependencyTooltip",
-		addProjectNameKey: "addProjectName",
-		addProjectTooltipKey: "addProjectTooltip",
+		addDependencyName: gitmessages["addDependencyName"],
+		addDependencyTooltip: gitmessages["addDependencyTooltip"],
+		addProjectName: gitmessages["addProjectName"],
+		addProjectTooltip: gitmessages["addProjectTooltip"],
 		actionComment: "Cloning ${url}",
 		validationProperties: [
 			{source: "Git"} // alternate {soruce: "Children:[Name]", match: ".git"}
