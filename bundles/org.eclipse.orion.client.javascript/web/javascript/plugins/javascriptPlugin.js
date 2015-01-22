@@ -40,7 +40,7 @@ define([
 'orion/editor/stylers/application_x-ejs/syntax',
 'i18n!javascript/nls/messages'
 ], function(Bootstrap, Esprima, ScriptResolver, ASTManager, QuickFixes, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
-			EslintValidator, Occurrences, Hover, Outliner,	Util, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessagages) {
+			EslintValidator, Occurrences, Hover, Outliner,	Util, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
 	function Factory(provider) {
 		/**
@@ -93,8 +93,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				new GenerateDocCommand.GenerateDocCommand(astManager), 
 				{
-			name: javascriptMessagages["generateDocName"],  //$NON-NLS-0$
-			tooltip : javascriptMessagages.generateDocTooltip,  //$NON-NLS-0$
+			name: javascriptMessages["generateDocName"],  //$NON-NLS-0$
+			tooltip : javascriptMessages.generateDocTooltip,  //$NON-NLS-0$
 			id : "generate.js.doc.comment",  //$NON-NLS-0$
 			nls: 'javascript/nls/messages',  //$NON-NLS-0$
 			key : [ "j", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
@@ -105,8 +105,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				new OpenDeclCommand.OpenDeclarationCommand(astManager, scriptresolver), 
 				{
-			name: javascriptMessagages["openDeclName"],  //$NON-NLS-0$
-			tooltip : javascriptMessagages.openDeclTooltip,  //$NON-NLS-0$
+			name: javascriptMessages["openDeclName"],  //$NON-NLS-0$
+			tooltip : javascriptMessages.openDeclTooltip,  //$NON-NLS-0$
 			id : "open.js.decl",  //$NON-NLS-0$
 			nls: 'javascript/nls/messages',  //$NON-NLS-0$
 			key : [ 114, false, false, false, false],  //$NON-NLS-0$
@@ -119,8 +119,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-        			name: javascriptMessagages["removeExtraSemiFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessagages.removeExtraSemiFixTooltip,  //$NON-NLS-0$
+        			name: javascriptMessages["removeExtraSemiFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages.removeExtraSemiFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "rm.extra.semi.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -135,8 +135,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-        			name: javascriptMessagages["addFallthroughCommentFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessagages.addFallthroughCommentFixTooltip,  //$NON-NLS-0$
+        			name: javascriptMessages["addFallthroughCommentFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages.addFallthroughCommentFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "add.fallthrough.comment.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -151,8 +151,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-        			name: javascriptMessagages["addEmptyCommentFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessagages.addEmptyCommentFixTooltip,  //$NON-NLS-0$
+        			name: javascriptMessages["addEmptyCommentFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages.addEmptyCommentFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "add.empty.comment.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -167,8 +167,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-        			name: javascriptMessagages["addESLintEnvFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessagages.addESLintEnvFixTooltip,  //$NON-NLS-0$
+        			name: javascriptMessages["addESLintEnvFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages.addESLintEnvFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "add.eslint-env.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -183,8 +183,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-        			name: javascriptMessagages["addESLintGlobalFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessagages.addESLintGlobalFixTooltip,  //$NON-NLS-0$
+        			name: javascriptMessages["addESLintGlobalFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages.addESLintGlobalFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "add.eslint-global.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -206,8 +206,8 @@ define([
 			}
 				}, 
 				{
-					name: javascriptMessagages["removeUnusedParamsFixName"],  //$NON-NLS-0$
-					tooltip : javascriptMessagages.removeUnusedParamsFixTooltip,  //$NON-NLS-0$
+					name: javascriptMessages["removeUnusedParamsFixName"],  //$NON-NLS-0$
+					tooltip : javascriptMessages.removeUnusedParamsFixTooltip,  //$NON-NLS-0$
 					scopeId: "orion.edit.quickfix",
 					id : "remove.unused.param.fix",  //$NON-NLS-0$
 					nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -222,8 +222,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-        			name: javascriptMessagages["commentCallbackFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessagages.commentCallbackFixTooltip,  //$NON-NLS-0$
+        			name: javascriptMessages["commentCallbackFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages.commentCallbackFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "comment.callback.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -238,8 +238,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-        			name: javascriptMessagages["eqeqeqFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessagages.eqeqeqFixTooltip,  //$NON-NLS-0$
+        			name: javascriptMessages["eqeqeqFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages.eqeqeqFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "eqeqeq.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -254,8 +254,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-        			name: javascriptMessagages["unreachableFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessagages.unreachableFixTooltip,  //$NON-NLS-0$
+        			name: javascriptMessages["unreachableFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages.unreachableFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "remove.unreachable.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -270,8 +270,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-        			name: javascriptMessagages["sparseArrayFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessagages.sparseArrayFixTooltip,  //$NON-NLS-0$
+        			name: javascriptMessages["sparseArrayFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages.sparseArrayFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "sparse.array.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -286,8 +286,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-        			name: javascriptMessagages["semiFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessagages.semiFixTooltip,  //$NON-NLS-0$
+        			name: javascriptMessages["semiFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages.semiFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "semi.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -302,8 +302,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-        			name: javascriptMessagages["unusedVarsUnusedFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessagages.unusedVarsUnusedFixTooltip,  //$NON-NLS-0$
+        			name: javascriptMessages["unusedVarsUnusedFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages.unusedVarsUnusedFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "unused.var.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -318,8 +318,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-        			name: javascriptMessagages["unusedFuncDeclFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessagages.unusedFuncDeclFixTooltip,  //$NON-NLS-0$
+        			name: javascriptMessages["unusedFuncDeclFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages.unusedFuncDeclFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "unused.func.decl.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -334,8 +334,8 @@ define([
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
-        			name: javascriptMessagages["noCommaDangleFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessagages.noCommaDangleFixTooltip,  //$NON-NLS-0$
+        			name: javascriptMessages["noCommaDangleFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages.noCommaDangleFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "no.comma.dangle.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -353,7 +353,7 @@ define([
 		provider.registerService("orion.edit.outliner", new Outliner.JSOutliner(astManager),  //$NON-NLS-0$
 				{ contentType: ["application/javascript"],  //$NON-NLS-0$
 			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			name: javascriptMessagages["sourceOutline"],  //$NON-NLS-0$
+			name: javascriptMessages["sourceOutline"],  //$NON-NLS-0$
 			titleKey: 'sourceOutlineTitle',  //$NON-NLS-0$
 			id: "orion.javascript.outliner.source"  //$NON-NLS-0$
 				});
@@ -380,7 +380,7 @@ define([
 				{
 			contentType: ["application/javascript"],  //$NON-NLS-0$
 			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			name: javascriptMessagages["contentAssist"],  //$NON-NLS-0$
+			name: javascriptMessages["contentAssist"],  //$NON-NLS-0$
 			id: "orion.edit.contentassist.javascript",  //$NON-NLS-0$
 			charTriggers: "[.]",  //$NON-NLS-0$
 			excludedStyles: "(string.*)"  //$NON-NLS-0$
@@ -401,236 +401,236 @@ define([
 		 * ESLint settings
 		 */
 		var ignore = 0, warning = 1, error = 2, severities = [
-		                                                      {label: javascriptMessagages.ignore,  value: ignore},  //$NON-NLS-0$
-		                                                      {label: javascriptMessagages.warning, value: warning},  //$NON-NLS-0$
-		                                                      {label: javascriptMessagages.error,   value: error}  //$NON-NLS-0$
+		                                                      {label: javascriptMessages.ignore,  value: ignore},  //$NON-NLS-0$
+		                                                      {label: javascriptMessages.warning, value: warning},  //$NON-NLS-0$
+		                                                      {label: javascriptMessages.error,   value: error}  //$NON-NLS-0$
 		                                                      ];
 		provider.registerService("orion.core.setting",  //$NON-NLS-0$
 				{},
 				{	settings: [
 				 	           {	pid: "eslint.config",  //$NON-NLS-0$
 				 	        	   nls: 'javascript/nls/messages',  //$NON-NLS-0$
-				 	        	   name: javascriptMessagages["eslintValidator"],  //$NON-NLS-0$
+				 	        	   name: javascriptMessages["eslintValidator"],  //$NON-NLS-0$
 				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
 				 	        	   category: "javascript",  //$NON-NLS-0$
 				 	        	   properties: [
 				 	        	                {	id: "no-cond-assign",  //$NON-NLS-0$ 
-				 	        	                	name: javascriptMessagages["noCondAssign"], //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noCondAssign"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: error, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
 				 	        	                {	id: "no-constant-condition",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noConstantCondition"], //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noConstantCondition"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: error, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
 				 	        	                {	id: "no-caller",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noCaller"], //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noCaller"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: warning, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
 				 	        	                {	id: "eqeqeq",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noEqeqeq"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noEqeqeq"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {
 				 	        	                	id: "no-console",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noConsole"], //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noConsole"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: error, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
 				 	        	                {	id: "no-debugger",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noDebugger"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noDebugger"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-eval",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noEval"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noEval"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-iterator",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noIterator"], //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noIterator"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: error, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
 				 	        	                {
 				 	        	                	id: "no-new-array", //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noNewArray"], //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noNewArray"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: warning, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
 				 	        	                {
 				 	        	                	id: "no-new-func", //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noNewFunc"], //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noNewFunc"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: warning, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
 				 	        	                {
 				 	        	                	id: "no-new-object", //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noNewObject"], //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noNewObject"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: warning, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
 				 	        	                {
 				 	        	                	id: "no-new-wrappers", //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noNewWrappers"], //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noNewWrappers"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: warning, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
 				 	        	                {	id: "no-dupe-keys",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noDupeKeys"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noDupeKeys"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "valid-typeof",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["validTypeof"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["validTypeof"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-use-before-define",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["useBeforeDefine"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["useBeforeDefine"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "missing-doc",
-				 	        	                	name: javascriptMessagages["missingDoc"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["missingDoc"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "new-parens",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["newParens"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["newParens"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "radix",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["radix"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["radix"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "semi",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["missingSemi"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["missingSemi"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-regex-spaces",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noRegexSpaces"], //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noRegexSpaces"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: error, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
 				 	        	                {	id: "use-isnan",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["useIsNaN"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["useIsNaN"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "throw-error",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["throwError"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["throwError"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-reserved-keys",
-				 	        	                	name: javascriptMessagages["noReservedKeys"], //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noReservedKeys"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: error, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
 				 	        	                {	id: "no-sparse-arrays",
-				 	        	                	name: javascriptMessagages["noSparseArrays"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noSparseArrays"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "curly",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["missingCurly"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["missingCurly"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-fallthrough",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noFallthrough"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noFallthrough"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-comma-dangle", //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noCommaDangle"], //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noCommaDangle"], //$NON-NLS-0$
 				 	        	                	type: "number", //$NON-NLS-0$
 				 	        	                	defaultValue: ignore, //$NON-NLS-0$
 				 	        	                	options: severities //$NON-NLS-0$
 				 	        	                },
 				 	        	                {	id: "no-undef",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["undefMember"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["undefMember"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-empty-block",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noEmptyBlock"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noEmptyBlock"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-extra-semi",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["unnecessarySemis"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["unnecessarySemis"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-jslint",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["unsupportedJSLint"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["unsupportedJSLint"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-unused-params",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["unusedParams"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["unusedParams"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-unused-vars",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["unusedVars"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["unusedVars"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-unreachable",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["noUnreachable"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noUnreachable"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-redeclare",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["varRedecl"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["varRedecl"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
 				 	        	                {	id: "no-shadow",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessagages["varShadow"],  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["varShadow"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities

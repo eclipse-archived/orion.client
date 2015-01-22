@@ -15,7 +15,8 @@ define([
 	'orion/plugin',
 	'orion/URITemplate',
 	'i18n!orion/nls/messages',
-	'i18n!orion/nls/widgets/messages'
+	'i18n!orion/widgets/nls/messages',
+	'orion/plugin'
 ], function(PageLinks, PluginProvider, URITemplate, messages, widgetMessages) {
 	var serviceImpl = { /* All data is in properties */ };
 
@@ -45,7 +46,7 @@ define([
 	
 	provider.registerService("orion.page.link.category", null, {
 		id: "settings",
-		nameKey: "Settings",
+		name: widgetMessages["Settings"],
 		nls: "orion/widgets/nls/messages",
 		imageClass: "core-sprite-gear",
 		order: 60
@@ -70,7 +71,7 @@ define([
 	});
 
 	provider.registerService("orion.page.link", null, {
-		nameKey: "Settings",
+		name: widgetMessages["Settings"],
 		id: "orion.settings",
 		nls: "orion/widgets/nls/messages",
 		category: "settings",

@@ -13,7 +13,7 @@
 define([
 	'orion/plugin',
 	'stringexternalizer/nonnlsSearchUtil',
-	'i18n!javascript/nls/messages'
+	'i18n!orion/navigate/nls/messages'
 ], function (PluginProvider, NlsSearchUtil, messages) {
 
 	var validatorEnabled = true;
