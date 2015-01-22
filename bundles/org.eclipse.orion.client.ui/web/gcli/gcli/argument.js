@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-define(function(require, exports, module) {
+/*eslint-env amd, node*/
+define(/* @callback */ function(require, exports, module) {
 
 'use strict';
 
@@ -93,7 +94,7 @@ Argument.prototype.beget = function(options) {
 
     // We need to add quotes when the replacement string has spaces or is empty
     if (!options.dontQuote) {
-      var needsQuote = text.indexOf(' ') >= 0 || text.length == 0;
+      var needsQuote = text.indexOf(' ') >= 0 || text.length === 0;
       var hasQuote = /['"]$/.test(prefix);
       if (needsQuote && !hasQuote) {
         prefix = prefix + '\'';
