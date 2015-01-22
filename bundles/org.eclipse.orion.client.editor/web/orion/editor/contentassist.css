@@ -10,7 +10,8 @@
 	min-width: 70px;
 	width: 350px;
 	height: 170px;
-	overflow: hidden;
+	overflow-x: hidden;
+	overflow-y: auto;
 	white-space: nowrap;
 	border-radius: 5px;
 	box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 10px;
@@ -22,9 +23,6 @@
 	outline: none;
 }
 
-.contentassist:hover {
-	overflow-y: auto;
-}
 
 .contentassist .proposal-emphasis {
 	font-weight: normal;

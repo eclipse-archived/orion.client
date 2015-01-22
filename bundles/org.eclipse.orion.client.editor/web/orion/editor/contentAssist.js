@@ -1229,6 +1229,14 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		selectNode: function(nodeIndex) {
 			var node = null;
 			
+			if (this._hideTimeout) {
+				window.clearTimeout(this._hideTimeout);
+				this._hideTimeout = null;
+			}
+			if (this._fadeTimer) {
+				window.clearTimeout(this._fadeTimer);
+				this._fadeTimer = null;
+			}
 			if (this.previousSelectedNode) {
 				this.previousSelectedNode.classList.remove(STYLES.selected);
 				this.previousSelectedNode = null;
@@ -1252,11 +1260,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				
 				var textNode = node.firstChild || node;  
 				var textBounds = lib.bounds(textNode);
-				var parentBounds = lib.bounds(this.parentNode);
+				var parentWidth = this.parentNode.clientWidth ? this.parentNode.clientWidth : lib.bounds(this.parentNode); // Scrollbar can cover text
 				var parentStyle = window.getComputedStyle(this.parentNode);
 				var nodeStyle = window.getComputedStyle(node);
 				var allPadding = parseInt(parentStyle.paddingLeft) + parseInt(parentStyle.paddingRight) + parseInt(nodeStyle.paddingLeft) + parseInt(nodeStyle.paddingRight);
-				if (textBounds.width >= (parentBounds.width - allPadding)) {
+				if (textBounds.width >= (parentWidth - allPadding)) {
 					var parentTop = parseInt(parentStyle.top);
 					
 					// create clone node
@@ -1296,6 +1304,24 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 						}
 					};
 					recursiveSetIndex(parentClone);
+					
+					var self = this;
+					this._hideTimeout = window.setTimeout(function() {
+						self._hideTimeout = null;
+						node.classList.add(STYLES.selected);
+						var opacity = 1;
+						self._fadeTimer = window.setInterval(function() {
+							if (!self.previousCloneNode || opacity <= 0.01){
+								self._removeCloneNode();
+								window.clearInterval(self._fadeTimer);
+								self._fadeTimer = null;
+							} else {
+								parentClone.style.opacity = opacity;
+								parentClone.style.filter = 'alpha(opacity=' + opacity * 100 + ")";
+        						opacity -= opacity * 0.1;
+        					}
+						}, 50);
+					}, 1500);
 					
 					node.classList.remove(STYLES.selected);
 					
