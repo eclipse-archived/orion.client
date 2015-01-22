@@ -31,17 +31,7 @@ define(['require', 'orion/Deferred'], function(require, Deferred) {
 			return args[(index << 0) + 1];
 		});
 	}
-
-	function getMessageBundle(name) {
-		var d = new Deferred();
-		require(['i18n!' + name], function(bundle) { //$NON-NLS-0$
-			d.resolve(bundle);
-		});
-		return d;
-	}
-	
 	return {
-		getMessageBundle: getMessageBundle,
 		formatMessage: formatMessage
 	};
 });

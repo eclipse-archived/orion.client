@@ -14,8 +14,10 @@ define([
 	"eslint",
 	"orion/objects",
 	"javascript/astManager",
-	"javascript/finder"
-], function(eslint, Objects, ASTManager, Finder) {
+	"javascript/finder",
+	"orion/i18nUtil",
+	"i18n!javascript/nls/problems"
+], function(eslint, Objects, ASTManager, Finder, i18nUtil, messages) {
 	var config = {
 		// 0:off, 1:warning, 2:error
 		rules: {
@@ -157,11 +159,15 @@ define([
 				end = relatedToken.range[1];
 			}
 		}
+		var descriptionKey = e.args && e.args.nls ? e.args.nls : e.ruleId;
+		var descriptionArgs = e.args || Object.create(null);
+		var description = e.message;
+		if (descriptionKey && messages[descriptionKey]) {
+           description = i18nUtil.formatMessage.call(null, messages[descriptionKey], descriptionArgs);
+		}
 		var prob = {
 		    id: getProblemId(e),
-		    descriptionKey: e.args && e.args.nls ? e.args.nls : e.ruleId,
-		    descriptionArgs: e.args,
-			description: e.message,
+			description: description,
 			severity: getSeverity(e),
 		};
 		if(typeof(start) !== 'undefined') {
