@@ -223,7 +223,7 @@ define([
 	function FileBrowser(options) {
 		var url = new URL(window.location.href);
 		this.shareCode = true;
-		this._downloadZip = ("true" === localStorage.getItem("darklaunch"));
+		this._downloadZip = true;
 		this.shareSnippet = url.query.get("shareSnippet") === "true" && options.widgetSource;
 		if(this.shareSnippet) {
 			this.widgetSource = options.widgetSource;
