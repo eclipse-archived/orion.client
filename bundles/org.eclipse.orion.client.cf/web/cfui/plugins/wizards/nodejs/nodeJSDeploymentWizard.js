@@ -321,7 +321,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 			    		var app = manifest.applications[0];
 
 			    		// TODO: Restore previous parameters
-			    		var password = "holydiver"; // debugPaneBuilder._cfLauncherPassword.value;
+			    		var password = ""; // debugPaneBuilder._cfLauncherPassword.value;
 			    		var userURLPrefix = ""; // debugPaneBuilder._cfLauncherURLPrefix.value;
 
 			    		var command = userURLPrefix ?

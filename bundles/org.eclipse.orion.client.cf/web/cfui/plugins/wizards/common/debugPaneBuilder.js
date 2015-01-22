@@ -52,7 +52,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard', 'orion/i18nUtil'], funct
 					if(!debugEnabled)
 						return callback(true);
 						
-					var cfLauncherPassword = "holydiver"; //self._cfLauncherPassword.value;
+					var cfLauncherPassword = ""; //self._cfLauncherPassword.value;
 					return callback(cfLauncherPassword && cfLauncherPassword.length > 0);
 				},
 		    		
@@ -140,7 +140,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard', 'orion/i18nUtil'], funct
 		    		return {
 		    			// TODO: Restore previous parameters
 		    			saveManifest : self._saveManifestCheckbox.checked,
-		    			cfLauncherPassword : "holydiver", //self._cfLauncherPassword.value,
+		    			cfLauncherPassword : "", //self._cfLauncherPassword.value,
 		    			cfLauncherURLPrefix : "" //self._cfLauncherURLPrefix.value
 		    		};
 		    	}
