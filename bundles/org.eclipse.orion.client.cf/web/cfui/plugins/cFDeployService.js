@@ -467,18 +467,31 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 
 		getState: function(launchConf) {
 			var params = launchConf.Params || {};
-			return this._retryWithLogin(params, this._getStateCF);
+			return this._retryWithLogin(params, this._getStateCF.bind(this));
 		},
 
 		_getStateCF: function(params, deferred) {
+			var that = this;
+			
 			if (params.Target && params.Name) {
 				cFService.getApp(params.Target, params.Name).then(
 					function(result) {
 						var app = result;
-						deferred.resolve({
+						var appState = {
 							State: (app.running_instances > 0 ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
 							Message: i18nUtil.formatMessage(messages["${0}of${1}instance(s)Running"], app.running_instances, app.instances)
-						});
+						}
+						
+						that._getRoutes(params.Target, params.Name).then(
+							function(routes){
+								if (routes.length > 0)
+									appState.Url = "https://" + routes[0].host + "." + routes[0].domain.name;
+								
+								deferred.resolve(appState);
+							}, function(error){
+								deferred.resolve(appState);
+							}
+						);
 					}, function(error) {
 						/* default cf error message decoration */
 						error = mCfUtil.defaultDecorateError(error, params.Target);
@@ -488,6 +501,14 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 				);
 				return deferred;
 			}
+		},
+		
+		_getRoutes: function(target, name){
+			return cFService.getApp(target, name).then(
+				function(result) {
+					return result.routes;
+				}
+			);
 		},
 
 		start: function(launchConf) {
