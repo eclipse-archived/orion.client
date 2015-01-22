@@ -94,7 +94,7 @@ define([
 				new GenerateDocCommand.GenerateDocCommand(astManager), 
 				{
 			nameKey : 'generateDocName',  //$NON-NLS-0$
-			tooltipKey : 'generateDocTooltip',  //$NON-NLS-0$
+			tooltip : javascriptMessagages.generateDocTooltip,  //$NON-NLS-0$
 			id : "generate.js.doc.comment",  //$NON-NLS-0$
 			nls: 'javascript/nls/messages',  //$NON-NLS-0$
 			key : [ "j", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
@@ -106,7 +106,7 @@ define([
 				new OpenDeclCommand.OpenDeclarationCommand(astManager, scriptresolver), 
 				{
 			nameKey : 'openDeclName',  //$NON-NLS-0$
-			tooltipKey : 'openDeclTooltip',  //$NON-NLS-0$
+			tooltip : javascriptMessagages.openDeclTooltip,  //$NON-NLS-0$
 			id : "open.js.decl",  //$NON-NLS-0$
 			nls: 'javascript/nls/messages',  //$NON-NLS-0$
 			key : [ 114, false, false, false, false],  //$NON-NLS-0$
@@ -120,7 +120,7 @@ define([
 				quickFixComputer, 
 				{
         			nameKey : 'removeExtraSemiFixName',  //$NON-NLS-0$
-        			tooltipKey : 'removeExtraSemiFixTooltip',  //$NON-NLS-0$
+        			tooltip : javascriptMessagages.removeExtraSemiFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "rm.extra.semi.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -136,7 +136,7 @@ define([
 				quickFixComputer, 
 				{
         			nameKey : 'addFallthroughCommentFixName',  //$NON-NLS-0$
-        			tooltipKey : 'addFallthroughCommentFixTooltip',  //$NON-NLS-0$
+        			tooltip : javascriptMessagages.addFallthroughCommentFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "add.fallthrough.comment.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -152,7 +152,7 @@ define([
 				quickFixComputer, 
 				{
         			nameKey : 'addEmptyCommentFixName',  //$NON-NLS-0$
-        			tooltipKey : 'addEmptyCommentFixTooltip',  //$NON-NLS-0$
+        			tooltip : javascriptMessagages.addEmptyCommentFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "add.empty.comment.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -168,7 +168,7 @@ define([
 				quickFixComputer, 
 				{
         			nameKey : 'addESLintEnvFixName',  //$NON-NLS-0$
-        			tooltipKey : 'addESLintEnvFixTooltip',  //$NON-NLS-0$
+        			tooltip : javascriptMessagages.addESLintEnvFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "add.eslint-env.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -184,7 +184,7 @@ define([
 				quickFixComputer, 
 				{
         			nameKey : 'addESLintGlobalFixName',  //$NON-NLS-0$
-        			tooltipKey : 'addESLintGlobalFixTooltip',  //$NON-NLS-0$
+        			tooltip : javascriptMessagages.addESLintGlobalFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "add.eslint-global.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -207,7 +207,7 @@ define([
 				}, 
 				{
 					nameKey : 'removeUnusedParamsFixName',  //$NON-NLS-0$
-					tooltipKey : 'removeUnusedParamsFixTooltip',  //$NON-NLS-0$
+					tooltip : javascriptMessagages.removeUnusedParamsFixTooltip,  //$NON-NLS-0$
 					scopeId: "orion.edit.quickfix",
 					id : "remove.unused.param.fix",  //$NON-NLS-0$
 					nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -223,7 +223,7 @@ define([
 				quickFixComputer, 
 				{
         			nameKey : 'commentCallbackFixName',  //$NON-NLS-0$
-        			tooltipKey : 'commentCallbackFixTooltip',  //$NON-NLS-0$
+        			tooltip : javascriptMessagages.commentCallbackFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "comment.callback.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -239,7 +239,7 @@ define([
 				quickFixComputer, 
 				{
         			nameKey : 'eqeqeqFixName',  //$NON-NLS-0$
-        			tooltipKey : 'eqeqeqFixTooltip',  //$NON-NLS-0$
+        			tooltip : javascriptMessagages.eqeqeqFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "eqeqeq.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -255,7 +255,7 @@ define([
 				quickFixComputer, 
 				{
         			nameKey : 'unreachableFixName',  //$NON-NLS-0$
-        			tooltipKey : 'unreachableFixTooltip',  //$NON-NLS-0$
+        			tooltip : javascriptMessagages.unreachableFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "remove.unreachable.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -271,7 +271,7 @@ define([
 				quickFixComputer, 
 				{
         			nameKey : 'sparseArrayFixName',  //$NON-NLS-0$
-        			tooltipKey : 'sparseArrayFixTooltip',  //$NON-NLS-0$
+        			tooltip : javascriptMessagages.sparseArrayFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "sparse.array.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -287,7 +287,7 @@ define([
 				quickFixComputer, 
 				{
         			nameKey : 'semiFixName',  //$NON-NLS-0$
-        			tooltipKey : 'semiFixTooltip',  //$NON-NLS-0$
+        			tooltip : javascriptMessagages.semiFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "semi.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -303,7 +303,7 @@ define([
 				quickFixComputer, 
 				{
         			nameKey : 'unusedVarsUnusedFixName',  //$NON-NLS-0$
-        			tooltipKey : 'unusedVarsUnusedFixTooltip',  //$NON-NLS-0$
+        			tooltip : javascriptMessagages.unusedVarsUnusedFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "unused.var.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -319,7 +319,7 @@ define([
 				quickFixComputer, 
 				{
         			nameKey : 'unusedFuncDeclFixName',  //$NON-NLS-0$
-        			tooltipKey : 'unusedFuncDeclFixTooltip',  //$NON-NLS-0$
+        			tooltip : javascriptMessagages.unusedFuncDeclFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "unused.func.decl.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -335,7 +335,7 @@ define([
 				quickFixComputer, 
 				{
         			nameKey : 'noCommaDangleFixName',  //$NON-NLS-0$
-        			tooltipKey : 'noCommaDangleFixTooltip',  //$NON-NLS-0$
+        			tooltip : javascriptMessagages.noCommaDangleFixTooltip,  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "no.comma.dangle.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$

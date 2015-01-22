@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser,amd*/
-require(["cfui/plugins/cFDeployService", "orion/plugin"], function(CFDeployService, PluginProvider){
+require(["cfui/plugins/cFDeployService", "orion/plugin", "i18n!cfui/nls/messages"], function(CFDeployService, PluginProvider, messages){
 	
 	var provider = new PluginProvider({
 		name: "Cloud Foundry Deploy",
@@ -25,7 +25,7 @@ require(["cfui/plugins/cFDeployService", "orion/plugin"], function(CFDeployServi
 			deployTypes: ["Cloud Foundry"],
 			nls: "cfui/nls/messages",
 			nameKey: "createNew",
-			tooltipKey: "deploy.cf.tooltip",
+			tooltip: messages["deploy.cf.tooltip"],
 			validationProperties: [{source: "NoShow" }],
 			logLocationTemplate: "{+OrionHome}/cfui/logs.html#{Name,Target*}",
 			priorityForDefault: 9

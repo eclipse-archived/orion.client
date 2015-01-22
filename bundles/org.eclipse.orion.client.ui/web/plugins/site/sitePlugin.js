@@ -91,7 +91,7 @@ define([
 	provider.registerService('orion.navigate.command', null, {
 		id: 'orion.site.' + host.hostname + '.viewon',
 		nameKey: 'View on Site',
-		tooltipKey: 'View this file or folder on a web site hosted by Orion',
+		tooltip: messages['View this file or folder on a web site hosted by Orion'],
 		nls: 'orion/nls/messages',
 		forceSingleItem: true,
 		category: 'sites',
@@ -102,7 +102,7 @@ define([
 	provider.registerService('orion.page.link.related', null, {
 		id: 'orion.site.' + host.hostname + '.viewon',
 		nameKey: 'View on Site',
-		tooltipKey: 'View this file or folder on a web site hosted by Orion',
+		tooltip: messages['View this file or folder on a web site hosted by Orion'],
 		nls: 'orion/nls/messages',
 		category: 'sites',
 		validationProperties: filesAndFoldersOnService(fileBase),

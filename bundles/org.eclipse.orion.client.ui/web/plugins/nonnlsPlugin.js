@@ -12,8 +12,9 @@
 /*eslint-env browser, amd*/
 define([
 	'orion/plugin',
-	'stringexternalizer/nonnlsSearchUtil'
-], function (PluginProvider, NlsSearchUtil) {
+	'stringexternalizer/nonnlsSearchUtil',
+	'i18n!javascript/nls/messages'
+], function (PluginProvider, NlsSearchUtil, messages) {
 
 	var validatorEnabled = true;
 
@@ -83,7 +84,7 @@ define([
 	provider.registerService('orion.navigate.command', null, {
 		id: 'orion.nonnls.externalize',
 		nameKey: 'Strings Xtrnalizr',
-		tooltipKey: 'Externalize strings',
+		tooltip: messages['Externalize strings'],
 		nls: 'orion/navigate/nls/messages',
 		forceSingleItem: true,
 		validationProperties:

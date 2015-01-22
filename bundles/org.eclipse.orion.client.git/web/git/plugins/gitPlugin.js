@@ -20,8 +20,9 @@ define([
 	"orion/Deferred",
 	"orion/git/GitFileImpl",
 	"orion/git/util",
+	"i18n!git/nls/gitmessages",
 	"orion/URL-shim", // no exports
-], function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil, Deferred, GitFileImpl, mGitUtil) {
+], function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil, Deferred, GitFileImpl, mGitUtil, gitmessages) {
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
 	var gitClient = new mGitClient.GitService(serviceRegistry);
 	var sshService = new mSshTools.SshService(serviceRegistry);
@@ -79,7 +80,7 @@ define([
 	provider.registerService("orion.navigate.command", {}, {
 		nameKey: "Git Log",
 		id: "eclipse.git.log",
-		tooltipKey: "Go to Git Log",
+		tooltip: gitmessages["Go to Git Log"],
 		nls: "git/nls/gitmessages",
 		validationProperties: [
 			{source: "Git:CommitLocation", variableName: "GitLogLocation"}
@@ -93,7 +94,7 @@ define([
 	provider.registerService("orion.navigate.command", null, {
 		id: "eclipse.git.repository",
 		nameKey: "Git Repository",
-		tooltipKey: "Go to the git repository",
+		tooltip: gitmessages["Go to the git repository"],
 		nls: "git/nls/gitmessages",
 		category: "git",
 		validationProperties: [{
@@ -107,7 +108,7 @@ define([
 		id: "orion.content.gitClone",
 		nls: "git/nls/gitmessages",
 		nameKey: "Clone Git Repository",
-		descriptionKey: "Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator.",
+		description: gitmessages["Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator."],
 		uriTemplate: "{+OrionHome}/git/git-repository.html#,cloneGitRepository=URL"
 	});
 
@@ -129,7 +130,7 @@ define([
 	provider.registerService("orion.page.link.related", null, {
 		nameKey: "Active Branch Log",
 		id: "eclipse.orion.git.switchToCurrentLocal",
-		tooltipKey: "Show the log for the active local branch",
+		tooltip: gitmessages["Show the log for the active local branch"],
 		nls: "git/nls/gitmessages",
 		category: "git",
 		validationProperties: [
@@ -143,7 +144,7 @@ define([
 	provider.registerService("orion.page.link.related", null, {
 		nameKey: "Remote Branch Log",
 		id: "eclipse.orion.git.switchToRemote2",
-		tooltipKey: "Show the log for the corresponding remote tracking branch",
+		tooltip: gitmessages["Show the log for the corresponding remote tracking branch"],
 		nls: "git/nls/gitmessages",
 		category: "git",
 		validationProperties: [
@@ -159,7 +160,7 @@ define([
 		category: "git",
 		order: 10,
 		nameKey: "Git Repository",
-		tooltipKey: "Go to the git repository",
+		tooltip: gitmessages["Go to the git repository"],
 		nls: "git/nls/gitmessages",
 		validationProperties: [
 			{source: "CloneLocation", variableName: "GitCloneLocation"},
@@ -173,7 +174,7 @@ define([
 		category: "git",
 		order: 10,
 		nameKey: "Git Repository",
-		tooltipKey: "Go to the git repository",
+		tooltip: gitmessages["Go to the git repository"],
 		nls: "git/nls/gitmessages",
 		validationProperties: [
 			{source: "Location", variableName: "GitCloneLocation"},
@@ -191,7 +192,7 @@ define([
 	provider.registerService("orion.page.link.related", null, {
 		id: "orion.git.gotoEclipseGit",
 		nameKey: "Show Repository in eclipse.org",
-		tooltipKey: "Show this repository in eclipse.org",
+		tooltip: gitmessages["Show this repository in eclipse.org"],
 		nls: "git/nls/gitmessages",
 		category: "git",
 		validationProperties: [{
@@ -207,7 +208,7 @@ define([
 		id: "orion.git.gotoGithub",
 		nameKey: "Show Repository in GitHub",
 		nls: "git/nls/gitmessages",
-		tooltipKey: "Show this repository in GitHub",
+		tooltip: gitmessages["Show this repository in GitHub"],
 		category: "git",
 		validationProperties: [{
 			source: "GitUrl|Clone:GitUrl", 
@@ -223,7 +224,7 @@ define([
 		id: "orion.git.gotoGithubCommit",
 		nameKey: "Show Commit in GitHub",
 		nls: "git/nls/gitmessages",
-		tooltipKey: "Show this commit in GitHub",
+		tooltip: gitmessages["Show this commit in GitHub"],
 		category: "git",
 		validationProperties: [{
 			source: "GitUrl", 
@@ -242,7 +243,7 @@ define([
 		id: "orion.git.gotoEclipseGitCommit",
 		nameKey: "Show Commit in eclipse.org",
 		nls: "git/nls/gitmessages",
-		tooltipKey: "Show this commit in eclipse.org",
+		tooltip: gitmessages["Show this commit in eclipse.org"],
 		category: "git",
 		validationProperties: [{
 			source: "GitUrl", 

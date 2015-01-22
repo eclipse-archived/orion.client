@@ -13,8 +13,9 @@
 define([
 	'orion/PageLinks',
 	'orion/plugin',
-	'orion/URITemplate'
-], function(PageLinks, PluginProvider, URITemplate) {
+	'orion/URITemplate',
+	'i18n!orion/nls/messages'
+], function(PageLinks, PluginProvider, URITemplate, messages) {
 	var serviceImpl = { /* All data is in properties */ };
 
 	var headers = {
@@ -178,7 +179,7 @@ define([
 		id: "orion.content.html5",
 		nameKey: "Sample HTML5 Site",
 		nls: "orion/nls/messages",
-		descriptionKey: "Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files.",
+		description: messages["Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files."],
 		contentURITemplate: htmlHelloWorld.href
 	});
 
@@ -186,7 +187,7 @@ define([
 		id: "orion.content.plugin",
 		nameKey: "Sample Orion Plugin",
 		nls: "orion/nls/messages",
-		descriptionKey: "Generate a sample plugin for integrating with Orion.",
+		description: messages["Generate a sample plugin for integrating with Orion."],
 		contentURITemplate: pluginHelloWorld.href
 	});
 

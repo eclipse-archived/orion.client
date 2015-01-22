@@ -25,9 +25,10 @@ define(['orion/plugin',
 'webtools/cssQuickFixes',
 'webtools/cssResultManager',
 'orion/editor/stylers/text_css/syntax',
-'orion/util'
+'orion/util',
+'i18n!webtools/nls/messages'
 ], function(PluginProvider, Bootstrap, HtmlAstManager, htmlHover, ScriptResolver, htmlContentAssist, htmlOutliner, 
-            mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, Util) {
+            mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, Util, messages) {
 	/**
 	 * Plug-in headers
 	 */
@@ -226,9 +227,9 @@ define(['orion/plugin',
 	 * CSSLint settings
 	 */
 	var ignore = 0, warning = 1, error = 2, severities = [
-		{labelKey: 'ignore',  value: ignore},  //$NON-NLS-0$
-		{labelKey: 'warning', value: warning},  //$NON-NLS-0$
-		{labelKey: 'error',   value: error}  //$NON-NLS-0$
+		{label: messages.ignore,  value: ignore},  //$NON-NLS-0$
+		{label: messages.warning, value: warning},  //$NON-NLS-0$
+		{label: messages.error,   value: error}  //$NON-NLS-0$
 	];
 	provider.registerService("orion.core.setting",  //$NON-NLS-0$
 		{},
