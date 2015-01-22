@@ -152,7 +152,7 @@ define([
 							this._commandRegistry.registerCommandContribution(menuItem.id, "orion.launchConfiguration.delete", 1); //$NON-NLS-0$
 							domNodeWrapperList = [];
 							this._commandRegistry.renderCommands(menuItem.id, menuItem.firstChild, launchConfiguration, this, "tool", null, domNodeWrapperList); //$NON-NLS-0$
-							if (domNodeWrapperList.lenght > 0){
+							if (domNodeWrapperList.length > 0){
 								domNodeWrapperList[0].domNode.classList.remove("commandMargins"); //$NON-NLS-0$
 								domNodeWrapperList[0].domNode.classList.add("launchConfigurationDeleteButton"); //$NON-NLS-0$
 							}
