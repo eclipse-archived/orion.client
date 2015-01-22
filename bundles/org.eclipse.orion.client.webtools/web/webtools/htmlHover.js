@@ -49,11 +49,27 @@ define([
 			                return editorContext.getLineStart(line).then(function(start) {
 			                    if(start > -1) {
 			                        var col = ctxt.offset - start;
-			                        //visit the AST and find the node at line + col
-			                        var node = that._findNode(ast, line+1, col, ast[0]);
-			                        if(node) {
-			                            
-			                        }
+			                        return editorContext.getLineStart(line+1).then(function(end){
+			                        	// TODO Hack to get around the lack of ranges and not show hover when user is at end of line, could also regex for end of line whitespace
+			                        	end -= 3; // 2 for \r\n, 1 for second last position
+			                        	if (ctxt.offset < end){
+					                        // Visit the AST and find the node at line + col
+					                        var node = that._findNode(ast, line+1, col, ast[0]);
+					                        if(node && node.type === 'tag' && node.attributes) { //$NON-NLS-0$
+//				                            	var opts = {ext:'htm', type:'HTML', icon:'../webtools/images/html.png'};
+//												var opts = {ext: 'js', type:'JavaScript', '../javascript/images/javascript.pn'}
+												var opts = {};  // Defaults to JS
+					                            switch (node.name) {
+					                            	case 'link': //$NON-NLS-0$
+					                            		// TODO Link nodes don't include the attributes for unknown reason
+//					                            		return that._getFileHover(node.attributes.href, opts);
+					                                case 'script': //$NON-NLS-0$
+//					                                	return that._getFileHover(node.attributes.src, opts);
+					                            }
+					                            
+					                        }
+					                	}
+			                        });
 			                    }
 			                });
 			            }
@@ -65,7 +81,7 @@ define([
 		},
 
         /**
-		 * Returns the DOM node corresponding to the line nand column number 
+		 * Returns the DOM node corresponding to the line and column number 
 		 * or null if no such node could be found.
 		 */
 		_findNode: function(dom, line, col, last) {
@@ -74,9 +90,14 @@ define([
 			for (var i = 0; i < dom.length; i++) {
 			    node = dom[i];
                 var loc = node.location;
-				if (loc.line === line && loc.col > col) { //$NON-NLS-0$
-					return last;
-				}
+                if (loc.line === line){
+                	if (!node.children){
+                		return node;
+                	}
+                	if (loc.col > col){
+                		return last;
+                	}
+                }
 				if (node.children) {
 					var result = this._findNode(node.children, line, col, node);
 					if (result) {
@@ -87,10 +108,10 @@ define([
 			return null;
 		},
 		
-		_getFileHover: function _getFileHover(path) {
+		_getFileHover: function _getFileHover(path, opts) {
 		    if(path) {
 		        var that = this;
-		        return that.resolver.getWorkspaceFile(path, {ext:'htm', type:'HTML', icon:'../webtools/images/html.png'}).then(function(files) {
+		        return that.resolver.getWorkspaceFile(path, opts).then(function(files) {
     		        if(files) {
     		            return that._formatFilesHover(path, files);
     		        }
