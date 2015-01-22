@@ -62,14 +62,14 @@ define([
 
 	provider.registerService("orion.page.link.category", null, {
 		id: "git",
-		nameKey: "Git",
+		name: gitmessages["Git"],
 		nls: "git/nls/gitmessages",
 		imageClass: "core-sprite-git-logo",
 		order: 20
 	});
 
 	provider.registerService("orion.page.link", {}, {
-		nameKey: "Repositories",
+		name: gitmessages["Repositories"],
 		id: "orion.git.repositories",
 		nls: "git/nls/gitmessages",
 		category: "git",
@@ -78,7 +78,7 @@ define([
 	});
 	
 	provider.registerService("orion.navigate.command", {}, {
-		nameKey: "Git Log",
+		name: gitmessages["Git Log"],
 		id: "eclipse.git.log",
 		tooltip: gitmessages["Go to Git Log"],
 		nls: "git/nls/gitmessages",
@@ -93,7 +93,7 @@ define([
 	// orion.navigate.command for Git Repository -- applies to File objects
 	provider.registerService("orion.navigate.command", null, {
 		id: "eclipse.git.repository",
-		nameKey: "Git Repository",
+		name: gitmessages["Git Repository"],
 		tooltip: gitmessages["Go to the git repository"],
 		nls: "git/nls/gitmessages",
 		category: "git",
@@ -107,7 +107,7 @@ define([
 	provider.registerService("orion.core.content", null, {
 		id: "orion.content.gitClone",
 		nls: "git/nls/gitmessages",
-		nameKey: "Clone Git Repository",
+		name: gitmessages["Clone Git Repository"],
 		description: gitmessages["Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator."],
 		uriTemplate: "{+OrionHome}/git/git-repository.html#,cloneGitRepository=URL"
 	});
@@ -128,7 +128,7 @@ define([
 	});
 	*/
 	provider.registerService("orion.page.link.related", null, {
-		nameKey: "Active Branch Log",
+		name: gitmessages["Active Branch Log"],
 		id: "eclipse.orion.git.switchToCurrentLocal",
 		tooltip: gitmessages["Show the log for the active local branch"],
 		nls: "git/nls/gitmessages",
@@ -142,7 +142,7 @@ define([
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
-		nameKey: "Remote Branch Log",
+		name: gitmessages["Remote Branch Log"],
 		id: "eclipse.orion.git.switchToRemote2",
 		tooltip: gitmessages["Show the log for the corresponding remote tracking branch"],
 		nls: "git/nls/gitmessages",
@@ -159,7 +159,7 @@ define([
 		id: "eclipse.git.repository2",
 		category: "git",
 		order: 10,
-		nameKey: "Git Repository",
+		name: gitmessages["Git Repository"],
 		tooltip: gitmessages["Go to the git repository"],
 		nls: "git/nls/gitmessages",
 		validationProperties: [
@@ -173,7 +173,7 @@ define([
 		id: "eclipse.git.repository3",
 		category: "git",
 		order: 10,
-		nameKey: "Git Repository",
+		name: gitmessages["Git Repository"],
 		tooltip: gitmessages["Go to the git repository"],
 		nls: "git/nls/gitmessages",
 		validationProperties: [
@@ -191,7 +191,7 @@ define([
 
 	provider.registerService("orion.page.link.related", null, {
 		id: "orion.git.gotoEclipseGit",
-		nameKey: "Show Repository in eclipse.org",
+		name: gitmessages["Show Repository in eclipse.org"],
 		tooltip: gitmessages["Show this repository in eclipse.org"],
 		nls: "git/nls/gitmessages",
 		category: "git",
@@ -206,7 +206,7 @@ define([
 	
 	provider.registerService("orion.page.link.related", null, {
 		id: "orion.git.gotoGithub",
-		nameKey: "Show Repository in GitHub",
+		name: gitmessages["Show Repository in GitHub"],
 		nls: "git/nls/gitmessages",
 		tooltip: gitmessages["Show this repository in GitHub"],
 		category: "git",
@@ -222,7 +222,7 @@ define([
 	
 	provider.registerServiceProvider("orion.page.link.related", null, {
 		id: "orion.git.gotoGithubCommit",
-		nameKey: "Show Commit in GitHub",
+		name: gitmessages["Show Commit in GitHub"],
 		nls: "git/nls/gitmessages",
 		tooltip: gitmessages["Show this commit in GitHub"],
 		category: "git",
@@ -241,7 +241,7 @@ define([
 	
 	provider.registerServiceProvider("orion.page.link.related", null, {
 		id: "orion.git.gotoEclipseGitCommit",
-		nameKey: "Show Commit in eclipse.org",
+		name: gitmessages["Show Commit in eclipse.org"],
 		nls: "git/nls/gitmessages",
 		tooltip: gitmessages["Show this commit in eclipse.org"],
 		category: "git",
@@ -404,8 +404,8 @@ define([
 						} 
 						if(error.JsonData.Host){
 							error.Retry = {
-								addParameters : [{id: "sshuser", type: "text", nameKey: "User Name:"}, {id: "sshpassword", type: "password", nameKey: "Password:"}],
-								optionalParameters: [{id: "sshprivateKey", type: "textarea", nameKey: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", nameKey: "Ssh Passphrase:"}]
+								addParameters : [{id: "sshuser", type: "text", name:  gitmessages["User Name:"]}, {id: "sshpassword", type: "password", name:  gitmessages["Password:"]}],
+								optionalParameters: [{id: "sshprivateKey", type: "textarea", name:  gitmessages["Ssh Private Key:"]}, {id: "sshpassphrase", type: "password", name:  gitmessages["Ssh Passphrase:"]}]
 							};
 							deferred.reject(error);
 							return;
@@ -476,8 +476,8 @@ define([
 	}, {
 		id: "orion.git.projecthandler",
 		type: "git",
-		addParameters: [{id: "url", type: "url", nameKey: "Url:"}],
-		optionalParameters: [{id: "sshuser", type: "text", nameKey: "User Name:"}, {id: "sshpassword", type: "password", nameKey: "Password:"},{id: "sshprivateKey", type: "textarea", nameKey: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", nameKey: "Ssh Passphrase:"}],
+		addParameters: [{id: "url", type: "url", name: gitmessages["Url:"]}],
+		optionalParameters: [{id: "sshuser", type: "text", name:  gitmessages["User Name:"]}, {id: "sshpassword", type: "password", name:  gitmessages["Password:"]},{id: "sshprivateKey", type: "textarea", name:  gitmessages["Ssh Private Key:"]}, {id: "sshpassphrase", type: "password", name:  gitmessages["Ssh Passphrase:"]}],
 		nls: "git/nls/gitmessages",
 		addDependencyNameKey: "addDependencyName",
 		addDependencyTooltipKey: "addDependencyTooltip",

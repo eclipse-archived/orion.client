@@ -16,8 +16,9 @@ define([
 	'orion/Deferred',
 	'orion/commandsProxy',
 	'orion/keyBinding',
-	'orion/webui/littlelib'
-], function(PluginProvider, mJSONExplorer, Deferred, mCommandsProxy, mKeyBinding, lib) {
+	'orion/webui/littlelib',
+	'i18n!orion/nls/messages'
+], function(PluginProvider, mJSONExplorer, Deferred, mCommandsProxy, mKeyBinding, lib, messages) {
 	
 	var json, showItem, expandItem, model, explorer, commandsProxy = new mCommandsProxy.CommandsProxy();
 	
@@ -90,7 +91,7 @@ define([
 		}
 	}, {
 		id: EDITOR_ID,
-		nameKey: "Orion JSON Editor", //$NON-NLS-0$
+		name: messages["Orion JSON Editor"], //$NON-NLS-0$
 		nls: "orion/nls/messages", //$NON-NLS-0$
 		uriTemplate: "../edit/edit.html#{,Location,params*},editor=" + EDITOR_ID //$NON-NLS-0$
 	});

@@ -23,10 +23,9 @@ define([
 	var provider = new PluginProvider(headers);
 	
 	provider.registerService("orion.navigate.command", {}, {
-		nameKey: "Shell",
+		name: messages["Shell"],
 		id: "eclipse.shell.open",
 		tooltip: messages["Open Shell page"],
-		nls: "orion/shell/nls/messages",
 		validationProperties: [{
 			source: "ChildrenLocation|ContentLocation",
 			variableName: "ShellLocation",

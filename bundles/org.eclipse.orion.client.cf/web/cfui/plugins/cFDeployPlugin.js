@@ -23,8 +23,7 @@ require(["cfui/plugins/cFDeployService", "orion/plugin", "i18n!cfui/nls/messages
 		{
 			id: "org.eclipse.orion.client.cf.deploy",
 			deployTypes: ["Cloud Foundry"],
-			nls: "cfui/nls/messages",
-			nameKey: "createNew",
+			name: messages["createNew"],
 			tooltip: messages["deploy.cf.tooltip"],
 			validationProperties: [{source: "NoShow" }],
 			logLocationTemplate: "{+OrionHome}/cfui/logs.html#{Name,Target*}",

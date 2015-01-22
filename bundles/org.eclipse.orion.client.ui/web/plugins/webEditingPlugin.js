@@ -11,8 +11,9 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 define([
-	'orion/plugin'
-], function(PluginProvider) {
+	'orion/plugin',
+	'i18n!orion/nls/messages'
+], function(PluginProvider, messages) {
 	var headers = {
 		name: "Orion Web Editing Plugin",
 		version: "1.0",
@@ -101,7 +102,7 @@ define([
 	provider.registerService("orion.edit.editor", {}, {
 		id: "orion.editor",
 		"default": true, 
-		nameKey: "Orion Editor",
+		name: messages["Orion Editor"],
 		nls: "orion/nls/messages",
 		uriTemplate: "../edit/edit.html#{,Location,params*}",
 		orionTemplate: "../edit/edit.html#{,Location,params*}",
@@ -120,7 +121,7 @@ define([
 	var MARKDOWN_VIEWER_ID = "orion.viewer.markdown";
 	provider.registerService("orion.edit.editor", {}, {
 		id: MARKDOWN_VIEWER_ID,
-		nameKey: "Orion Markdown Viewer",
+		name: messages["Orion Markdown Viewer"],
 		nls: "orion/nls/messages",
 		uriTemplate: "../edit/edit.html#{,Location,params*},editor=" + MARKDOWN_VIEWER_ID});
 
@@ -131,7 +132,7 @@ define([
 	var MARKDOWN_EDITOR_ID = "orion.editor.markdown";
 	provider.registerService("orion.edit.editor", {}, {
 		id: MARKDOWN_EDITOR_ID,
-		nameKey: "Orion Markdown Editor",
+		name: messages["Orion Markdown Editor"],
 		nls: "orion/nls/messages",
 		default: true,
 		uriTemplate: "../edit/edit.html#{,Location,params*},editor=" + MARKDOWN_EDITOR_ID});
@@ -143,7 +144,7 @@ define([
 	// open file with browser, no associated orion.navigate.openWith command means that any content type is valid
 	provider.registerService("orion.edit.editor", {}, {
 		id: "orion.viewer.raw",
-		nameKey: "Browser",
+		name: messages["Browser"],
 		nls: "orion/nls/messages",
 		uriTemplate:  "{+Location}",
 		validationProperties: [{

@@ -82,18 +82,18 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 	provider.registerService("orion.core.setting", null, {
 		settings: [{
 			pid: "org.eclipse.orion.client.cf.settings",
-			nameKey: "URLs",
+			name: messages["URLs"],
 			nls: "cfui/nls/messages",
 			category: "cloud",
 			categoryKey: "Cloud Foundry",
 			properties: [{
 				id: "targetUrl",
-				nameKey: "API URL",
+				name: messages["API URL"],
 				type: "string",
 				defaultValue: apiUrl
 			}, {
 				id: "manageUrl",
-				nameKey: "Manage URL",
+				name: messages["Manage URL"],
 				type: "string",
 				defaultValue: manageUrl
 			}]

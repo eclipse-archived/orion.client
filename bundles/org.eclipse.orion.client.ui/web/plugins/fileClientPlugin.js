@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", "domReady!"], function(Deferred, PluginProvider, FileServiceImpl) {
+define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", 'i18n!orion/navigate/nls/messages', "domReady!"], function(Deferred, PluginProvider, FileServiceImpl, messages) {
 	function trace(implementation) {
 		var method;
 		var traced = {};
@@ -74,8 +74,8 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", "domRea
 	var service = new FileServiceImpl(fileBase, workspaceBase);
 	//provider.registerService("orion.core.file", trace(service), {Name:'Orion Content', top:fileBase, pattern:patternBase});
 	provider.registerService("orion.core.file", service, {
-		Name: 'Orion Content',  // HACK  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386509
-		NameKey: 'Orion Content',
+		//Name: 'Orion Content',  // HACK  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386509
+		Name: messages['Orion Content'],
 		nls: 'orion/navigate/nls/messages',
 		top: fileBase,
 		ranking: -1,

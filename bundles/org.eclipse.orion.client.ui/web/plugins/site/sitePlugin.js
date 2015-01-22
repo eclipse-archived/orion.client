@@ -62,7 +62,7 @@ define([
 	// "Sites" category for putting page links and related links in.
 	provider.registerService("orion.page.link.category", null, {
 		id: "sites",
-		nameKey: "Sites",
+		name: messages["Sites"],
 		nls: "orion/nls/messages",
 		imageClass: "core-sprite-sites",
 		order: 50,
@@ -71,7 +71,7 @@ define([
 
 	// Default link to ensure "Sites" category is never empty
 	provider.registerService("orion.page.link", null, {
-		nameKey: "Sites",
+		name: messages["Sites"],
 		id: "orion.sites",
 		nls: "orion/nls/messages",
 		category: "sites",
@@ -80,7 +80,7 @@ define([
 	});
 
 	provider.registerService("orion.page.link", null, {
-		nameKey: "Sites",
+		name: messages["Sites"],
 		id: "orion.sites.2",
 		nls: "orion/nls/messages",
 		category: "sites",
@@ -90,7 +90,7 @@ define([
 
 	provider.registerService('orion.navigate.command', null, {
 		id: 'orion.site.' + host.hostname + '.viewon',
-		nameKey: 'View on Site',
+		name: messages['View on Site'],
 		tooltip: messages['View this file or folder on a web site hosted by Orion'],
 		nls: 'orion/nls/messages',
 		forceSingleItem: true,
@@ -101,7 +101,7 @@ define([
 
 	provider.registerService('orion.page.link.related', null, {
 		id: 'orion.site.' + host.hostname + '.viewon',
-		nameKey: 'View on Site',
+		name: messages['View on Site'],
 		tooltip: messages['View this file or folder on a web site hosted by Orion'],
 		nls: 'orion/nls/messages',
 		category: 'sites',

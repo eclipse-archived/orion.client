@@ -125,7 +125,7 @@ define(['orion/plugin',
 		{
 			id: "orion.webtools.html.outliner", //$NON-NLS-0$
 			nls: 'webtools/nls/messages',  //$NON-NLS-0$
-			nameKey: 'htmlOutline', //$NON-NLS-0$
+			name: messages["htmlOutline"], //$NON-NLS-0$
 			contentType: ["text/html"] //$NON-NLS-0$
 		});
 	
@@ -133,7 +133,7 @@ define(['orion/plugin',
 		{
 			id: "orion.outline.css.outliner", //$NON-NLS-0$
 			nls: 'webtools/nls/messages',  //$NON-NLS-0$
-			nameKey: 'cssOutline', //$NON-NLS-0$
+			name: messages["cssOutline"], //$NON-NLS-0$
 			contentType: ["text/css"] //$NON-NLS-0$
 		});
 		
@@ -183,7 +183,7 @@ define(['orion/plugin',
 	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 			cssQuickFixComputer, 
 			{
-		nameKey : 'quickfix-empty-rules',  //$NON-NLS-0$
+		name: messages["quickfix-empty-rules"],  //$NON-NLS-0$
 		scopeId: "orion.edit.quickfix", //$NON-NLS-0$
 		id : "quickfix-empty-rules",  //$NON-NLS-0$
 		nls: 'webtools/nls/messages',  //$NON-NLS-0$
@@ -197,7 +197,7 @@ define(['orion/plugin',
 	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 			cssQuickFixComputer, 
 			{
-		nameKey : 'quickfix-important',  //$NON-NLS-0$
+		name: messages["quickfix-important"],  //$NON-NLS-0$
 		scopeId: "orion.edit.quickfix", //$NON-NLS-0$
 		id : "quickfix-important",  //$NON-NLS-0$
 		nls: 'webtools/nls/messages',  //$NON-NLS-0$
@@ -211,7 +211,7 @@ define(['orion/plugin',
 	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 			cssQuickFixComputer, 
 			{
-		nameKey : 'quickfix-zero-units',  //$NON-NLS-0$
+		name: messages["quickfix-zero-units"],  //$NON-NLS-0$
 		scopeId: "orion.edit.quickfix", //$NON-NLS-0$
 		id : "quickfix-zero-units",  //$NON-NLS-0$
 		nls: 'webtools/nls/messages',  //$NON-NLS-0$
@@ -236,243 +236,243 @@ define(['orion/plugin',
 		{	settings: [
 				{	pid: "csslint.config",  //$NON-NLS-0$
 					nls: 'webtools/nls/messages',  //$NON-NLS-0$
-					nameKey: 'csslintValidator',  //$NON-NLS-0$
+					name: messages["csslintValidator"],  //$NON-NLS-0$
 					tags: "validation webtools css csslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
 					category: "css",  //$NON-NLS-0$
 					properties: [
 						{
 							id: "validate_adjoining_classes", //$NON-NLS-0$
-							nameKey: "adjoining-classes", //$NON-NLS-0$
+							name: messages["adjoining-classes"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_box_model", //$NON-NLS-0$
-							nameKey: "box-model", //$NON-NLS-0$
+							name: messages["box-model"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_box_sizing", //$NON-NLS-0$
-							nameKey: "box-sizing", //$NON-NLS-0$
+							name: messages["box-sizing"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_bulletproof_font_face", //$NON-NLS-0$
-							nameKey: "bulletproof-font-face", //$NON-NLS-0$
+							name: messages["bulletproof-font-face"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_compatible_vendor_prefixes", //$NON-NLS-0$
-							nameKey: "compatible-vendor-prefixes", //$NON-NLS-0$
+							name: messages["compatible-vendor-prefixes"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_display_property_grouping", //$NON-NLS-0$
-							nameKey: "display-property-grouping", //$NON-NLS-0$
+							name: messages["display-property-grouping"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},{
 							id: "validate_duplicate_background_images", //$NON-NLS-0$
-							nameKey: "duplicate-background-images", //$NON-NLS-0$
+							name: messages["duplicate-background-images"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_duplicate_properties", //$NON-NLS-0$
-							nameKey: "duplicate-properties", //$NON-NLS-0$
+							name: messages["duplicate-properties"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_empty_rules", //$NON-NLS-0$
-							nameKey: "empty-rules", //$NON-NLS-0$
+							name: messages["empty-rules"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_fallback_colors", //$NON-NLS-0$
-							nameKey: "fallback-colors", //$NON-NLS-0$
+							name: messages["fallback-colors"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_floats", //$NON-NLS-0$
-							nameKey: "floats", //$NON-NLS-0$
+							name: messages["floats"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_font_faces", //$NON-NLS-0$
-							nameKey: "font-faces", //$NON-NLS-0$
+							name: messages["font-faces"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_font_sizes", //$NON-NLS-0$
-							nameKey: "font-sizes", //$NON-NLS-0$
+							name: messages["font-sizes"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_gradients", //$NON-NLS-0$
-							nameKey: "gradients", //$NON-NLS-0$
+							name: messages["gradients"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_ids", //$NON-NLS-0$
-							nameKey: "ids", //$NON-NLS-0$
+							name: messages["ids"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_imports", //$NON-NLS-0$
-							nameKey: "import", //$NON-NLS-0$
+							name: messages["import"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_important", //$NON-NLS-0$
-							nameKey: "important", //$NON-NLS-0$
+							name: messages["important"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_known_properties", //$NON-NLS-0$
-							nameKey: "known-properties", //$NON-NLS-0$
+							name: messages["known-properties"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_outline_none", //$NON-NLS-0$
-							nameKey: "outline-none", //$NON-NLS-0$
+							name: messages["outline-none"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_overqualified_elements", //$NON-NLS-0$
-							nameKey: "overqualified-elements", //$NON-NLS-0$
+							name: messages["overqualified-elements"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_qualified_headings", //$NON-NLS-0$
-							nameKey: "qualified-headings", //$NON-NLS-0$
+							name: messages["qualified-headings"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_regex_selectors", //$NON-NLS-0$
-							nameKey: "regex-selectors", //$NON-NLS-0$
+							name: messages["regex-selectors"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_rules_count", //$NON-NLS-0$
-							nameKey: "rules-count", //$NON-NLS-0$
+							name: messages["rules-count"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_selector_max_approaching", //$NON-NLS-0$
-							nameKey: "selector-max-approaching", //$NON-NLS-0$
+							name: messages["selector-max-approaching"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_selector_max", //$NON-NLS-0$
-							nameKey: "selector-max", //$NON-NLS-0$
+							name: messages["selector-max"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_shorthand", //$NON-NLS-0$
-							nameKey: "shorthand", //$NON-NLS-0$
+							name: messages["shorthand"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_star_property_hack", //$NON-NLS-0$
-							nameKey: "star-property-hack", //$NON-NLS-0$
+							name: messages["star-property-hack"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_text_indent", //$NON-NLS-0$
-							nameKey: "text-indent", //$NON-NLS-0$
+							name: messages["text-indent"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_underscore_property_hack", //$NON-NLS-0$
-							nameKey: "underscore-property-hack", //$NON-NLS-0$
+							name: messages["underscore-property-hack"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_unique_headings", //$NON-NLS-0$
-							nameKey: "unique-headings", //$NON-NLS-0$
+							name: messages["unique-headings"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_universal_selector", //$NON-NLS-0$
-							nameKey: "universal-selector", //$NON-NLS-0$
+							name: messages["universal-selector"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_unqualified_attributes", //$NON-NLS-0$
-							nameKey: "unqualified-attributes", //$NON-NLS-0$
+							name: messages["unqualified-attributes"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_vendor_prefix", //$NON-NLS-0$
-							nameKey: "vendor-prefix", //$NON-NLS-0$
+							name: messages["vendor-prefix"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
 						},
 						{
 							id: "validate_zero_units", //$NON-NLS-0$
-							nameKey: "zero-units", //$NON-NLS-0$
+							name: messages["zero-units"], //$NON-NLS-0$
 							type: "number", //$NON-NLS-0$
 							defaultValue: warning, //$NON-NLS-0$
 							options: severities //$NON-NLS-0$
