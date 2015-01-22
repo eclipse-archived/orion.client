@@ -283,7 +283,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                 }
             });
 
-            var response = typeof messageId === undefined ? null : {
+            var response = typeof messageId === "undefined" ? null : {
                 id: messageId,
                 result: null,
                 error: null
