@@ -315,15 +315,9 @@ define([
 		 * @param {Boolean} checkStatus Specifies whether or not the status of the launchConfiguration should be checked
 		 */
 		selectLaunchConfiguration: function(launchConfiguration, checkStatus) {
-			this._disableLink(this._appLink);
-			
 			if (launchConfiguration) {
 				this._selectedLaunchConfiguration = launchConfiguration;
 				this._setLaunchConfigurationsLabel(launchConfiguration);
-				
-				if (launchConfiguration.Url) {
-					this._enableLink(this._appLink, launchConfiguration.Url);
-				}
 				
 				if (checkStatus) {
 					this._checkLaunchConfigurationStatus(launchConfiguration);
@@ -442,6 +436,10 @@ define([
 			if (appInfoText) {
 				this._setText(this._appInfoSpan, "(" + appInfoText.toLocaleLowerCase() + ")"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
+			
+			if (status.Url) {
+				this._enableLink(this._appLink, status.Url);
+			}
 		},
 		
 		/**
@@ -533,6 +531,7 @@ define([
 		_disableAllControls: function() {
 			this._disableControl(this._playButton);
 			this._disableControl(this._stopButton);
+			this._disableLink(this._appLink);
 		},
 		
 		_enableControl: function(domNode) {
