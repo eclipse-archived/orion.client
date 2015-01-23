@@ -158,8 +158,7 @@ function StringReader(text){
      * @type String
      * @private
      */
-    this._input = text.replace(/\n\r?/g, "\n");
-
+    this._input = text;//.replace(/\r\n?/g, "\n");  ORION 8.0
 
     /**
      * The row for the character to be read next.
@@ -249,7 +248,7 @@ StringReader.prototype = {
         if (this._cursor < this._input.length){
 
             //get character and increment cursor and column
-            c = this._input.charAt(this._cursor + count - 1);
+            c = this._input.charAt(this._cursor + count-1);
         }
 
         return c;
@@ -277,7 +276,9 @@ StringReader.prototype = {
             }
 
             //get character and increment cursor and column
-            c = this._input.charAt(this._cursor++);
+            var i = this._cursor++;
+            c = this._input.charAt(i);
+            var num = this._input.charCodeAt(i);
         }
 
         return c;
@@ -4886,7 +4887,6 @@ TokenStream.prototype = mix(new TokenStreamBase(), {
                     if (isDigit(c)){
                         token = this.numberToken(c, startLine, startCol);
                     } else
-
                     /*
                      * Potential tokens:
                      * - S

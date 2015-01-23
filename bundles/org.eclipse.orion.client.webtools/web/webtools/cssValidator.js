@@ -310,6 +310,16 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 				config.rules = config.archivedRules;
 				config.archivedRules = undefined;
 			}
+		},
+	   
+	   /**
+	    * @description Hook for the parser test suite
+	    * @function 
+	    * @private 
+	    * @since 8.0
+	    */
+		_defaultRuleSet: function _defaultConfig() {
+		    return config.getRuleSet();
 		}
 	});
 	

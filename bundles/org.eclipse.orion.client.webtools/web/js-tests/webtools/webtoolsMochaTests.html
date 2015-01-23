@@ -14,14 +14,15 @@
 			csslint: "csslint/csslint"
 		}
 	});
-	require(["mocha/sauce"], function(mochaSauce) {
-		mochaSauce.setup("bdd");
+	require(["mocha/sauce"], function(mocha) {
+		mocha.setup("bdd");
 		require([
 			"js-tests/webtools/cssOutlinerTests",
 			"js-tests/webtools/cssQuickFixTests",
-			"js-tests/webtools/cssValidatorTests"
+			"js-tests/webtools/cssValidatorTests",
+			"js-tests/webtools/cssParserTests"
 		], function(){
-			mochaSauce.run();
+			mocha.run();
 		});
 	});
 	</script>
