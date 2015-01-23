@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/swift/swiftPlugin"]);
+		require(["plugins/languages/swift/swiftPlugin"], function(swiftPlugin) {
+			swiftPlugin.connect();
+		});
 	</script>
 </head>
 

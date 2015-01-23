@@ -10,33 +10,34 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/plugin', 'orion/editor/stylers/text_x-erlang/syntax'], function(PluginProvider, mErlang) {	
-	/**
-	 * Plug-in headers
-	 */
-	var headers = {
-		name: "Orion Erlang Tool Support",
-		version: "1.0",
-		description: "This plugin provides Erlang tools support for Orion."
+define(['orion/plugin', 'orion/editor/stylers/text_x-erlang/syntax'], function(PluginProvider, mErlang) {
+
+	function connect() {
+		var headers = {
+			name: "Orion Erlang Tool Support",
+			version: "1.0",
+			description: "This plugin provides Erlang tools support for Orion."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(pluginProvider) {
+		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
+			contentTypes: [
+				{	id: "text/x-erlang",
+					"extends": "text/plain",
+					name: "Erlang",
+					extension: ["erl", "hrl"]
+				}
+			] 
+		});
+		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mErlang.grammars[mErlang.grammars.length - 1]);
 	};
-	var provider = new PluginProvider(headers);
 
-	/**
-	 * Register the XQuery content types
-	 */
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
-		contentTypes: [
-			{	id: "text/x-erlang",
-				"extends": "text/plain",
-				name: "Erlang",
-				extension: ["erl", "hrl"]
-			}
-		] 
-	});
-
-	/**
-	 * Register syntax styling
-	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mErlang.grammars[mErlang.grammars.length - 1]);
-	provider.connect();
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
+	};
 });

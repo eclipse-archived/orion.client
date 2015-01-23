@@ -12,43 +12,37 @@
 /*eslint-env browser, amd*/
 define(['orion/plugin', 'orion/editor/stylers/text_x-csharp/syntax', 'orion/editor/stylers/text_x-cshtml/syntax'], function(PluginProvider, mCSharp, mCSHtml) {
 
-	/**
-	 * Plug-in headers
-	 */
-	var headers = {
-		name: "Orion C# Tool Support",
-		version: "1.0",
-		description: "This plugin provides C# tools support for Orion."
+	function connect() {
+		var headers = {
+			name: "Orion C# Tool Support",
+			version: "1.0",
+			description: "This plugin provides C# tools support for Orion."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(pluginProvider) {
+		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
+			contentTypes: [
+				{	id: "text/x-csharp",
+					"extends": "text/plain",
+					name: "C#",
+					extension: ["cs"]
+				}, {id: "text/x-cshtml",
+					"extends": "text/plain",
+					name: "cshtml",
+					extension: ["cshtml"]
+				}
+			] 
+		});
+		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mCSharp.grammars[mCSharp.grammars.length - 1]);
+		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mCSHtml.grammars[mCSHtml.grammars.length - 1]);
 	};
-	var provider = new PluginProvider(headers);
 
-	/**
-	 * Register the C# content types
-	 */
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
-		contentTypes: [
-			{	id: "text/x-csharp",
-				"extends": "text/plain",
-				name: "C#",
-				extension: ["cs"]
-			}
-		] 
-	});
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
-		contentTypes: [
-			{	id: "text/x-cshtml",
-				"extends": "text/plain",
-				name: "cshtml",
-				extension: ["cshtml"]
-			}
-		] 
-	});
-
-	/**
-	 * Register syntax styling
-	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mCSharp.grammars[mCSharp.grammars.length - 1]);
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mCSHtml.grammars[mCSHtml.grammars.length - 1]);
-
-	provider.connect();
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
+	};
 });

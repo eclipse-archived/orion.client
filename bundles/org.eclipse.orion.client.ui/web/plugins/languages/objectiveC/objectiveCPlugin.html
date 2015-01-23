@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/objectiveC/objectiveCPlugin"]);
+		require(["plugins/languages/objectiveC/objectiveCPlugin"], function(objectiveCPlugin) {
+			objectiveCPlugin.connect();
+		});
 	</script>
 </head>
 

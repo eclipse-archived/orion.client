@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/docker/dockerPlugin"]);
+		require(["plugins/languages/docker/dockerPlugin"], function(dockerPlugin) {
+			dockerPlugin.connect();
+		});
 	</script>
 </head>
 

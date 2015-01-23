@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/cpp/cppPlugin"]);
+		require(["plugins/languages/cpp/cppPlugin"], function(cppPlugin) {
+			cppPlugin.connect();
+		});
 	</script>
 </head>
 

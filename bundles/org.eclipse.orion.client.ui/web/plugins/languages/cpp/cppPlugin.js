@@ -12,33 +12,32 @@
 /*eslint-env browser, amd*/
 define(['orion/plugin', 'orion/editor/stylers/text_x-c__src/syntax'], function(PluginProvider, mCPP) {
 
-	/**
-	 * Plug-in headers
-	 */
-	var headers = {
-		name: "Orion C++ Tool Support",
-		version: "1.0",
-		description: "This plugin provides C++ tools support for Orion."
+	function connect() {
+		var headers = {
+			name: "Orion C++ Tool Support",
+			version: "1.0",
+			description: "This plugin provides C++ tools support for Orion."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(pluginProvider) {
+		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
+			contentTypes: [
+				{	id: "text/x-c++src",
+					"extends": "text/plain",
+					name: "C++",
+					extension: ["cpp", "hpp"]
+				}
+			] 
+		});
+		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mCPP.grammars[mCPP.grammars.length - 1]);
 	};
-	var provider = new PluginProvider(headers);
 
-	/**
-	 * Register the C++ content type
-	 */
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
-		contentTypes: [
-			{	id: "text/x-c++src",
-				"extends": "text/plain",
-				name: "C++",
-				extension: ["cpp", "hpp"]
-			}
-		] 
-	});
-
-	/**
-	 * Register syntax styling
-	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mCPP.grammars[mCPP.grammars.length - 1]);
-
-	provider.connect();
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
+	};
 });

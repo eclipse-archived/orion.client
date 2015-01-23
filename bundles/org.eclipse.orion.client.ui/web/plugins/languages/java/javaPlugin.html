@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/java/javaPlugin"]);
+		require(["plugins/languages/java/javaPlugin"], function(javaPlugin) {
+			javaPlugin.connect();
+		});
 	</script>
 </head>
 

@@ -12,33 +12,32 @@
 /*eslint-env browser, amd*/
 define(['orion/plugin', 'orion/editor/stylers/text_x-csrc/syntax'], function(PluginProvider, mC) {
 
-	/**
-	 * Plug-in headers
-	 */
-	var headers = {
-		name: "Orion C Tool Support",
-		version: "1.0",
-		description: "This plugin provides C tools support for Orion."
+	function connect() {
+		var headers = {
+			name: "Orion C Tool Support",
+			version: "1.0",
+			description: "This plugin provides C tools support for Orion."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(pluginProvider) {
+		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
+			contentTypes: [
+				{	id: "text/x-csrc",
+					"extends": "text/plain",
+					name: "C",
+					extension: ["c", "h"]
+				}
+			] 
+		});
+		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mC.grammars[mC.grammars.length - 1]);
 	};
-	var provider = new PluginProvider(headers);
 
-	/**
-	 * Register the C content type
-	 */
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
-		contentTypes: [
-			{	id: "text/x-csrc",
-				"extends": "text/plain",
-				name: "C",
-				extension: ["c", "h"]
-			}
-		] 
-	});
-
-	/**
-	 * Register syntax styling
-	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mC.grammars[mC.grammars.length - 1]);
-
-	provider.connect();
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
+	};
 });

@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/csharp/csharpPlugin"]);
+		require(["plugins/languages/csharp/csharpPlugin"], function(csharpPlugin) {
+			csharpPlugin.connect();
+		});
 	</script>
 </head>
 

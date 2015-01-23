@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/vb/vbPlugin"]);
+		require(["plugins/languages/vb/vbPlugin"], function(vbPlugin) {
+			vbPlugin.connect();
+		});
 	</script>
 </head>
 

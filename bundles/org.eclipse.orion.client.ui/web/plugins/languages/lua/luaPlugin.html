@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/lua/luaPlugin"]);
+		require(["plugins/languages/lua/luaPlugin"], function(luaPlugin) {
+			luaPlugin.connect();
+		});
 	</script>
 </head>
 

@@ -12,43 +12,37 @@
 /*eslint-env browser, amd*/
 define(['orion/plugin', 'orion/editor/stylers/text_x-vb/syntax', 'orion/editor/stylers/text_x-vbhtml/syntax'], function(PluginProvider, mVB, mVBHtml) {
 
-	/**
-	 * Plug-in headers
-	 */
-	var headers = {
-		name: "Orion VB.NET Tool Support",
-		version: "1.0",
-		description: "This plugin provides VB.NET tools support for Orion."
+	function connect() {
+		var headers = {
+			name: "Orion VB.NET Tool Support",
+			version: "1.0",
+			description: "This plugin provides VB.NET tools support for Orion."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(pluginProvider) {
+		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
+			contentTypes: [
+				{	id: "text/x-vb",
+					"extends": "text/plain",
+					name: "VB.NET",
+					extension: ["vb"]
+				}, {id: "text/x-vbhtml",
+					"extends": "text/plain",
+					name: "vbhtml",
+					extension: ["vbhtml"]
+				}
+			]
+		});
+		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mVB.grammars[mVB.grammars.length - 1]);
+		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mVBHtml.grammars[mVBHtml.grammars.length - 1]);
 	};
-	var provider = new PluginProvider(headers);
 
-	/**
-	 * Register the VB.NET content types
-	 */
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
-		contentTypes: [
-			{	id: "text/x-vb",
-				"extends": "text/plain",
-				name: "VB.NET",
-				extension: ["vb"]
-			}
-		] 
-	});
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
-		contentTypes: [
-			{	id: "text/x-vbhtml",
-				"extends": "text/plain",
-				name: "vbhtml",
-				extension: ["vbhtml"]
-			}
-		] 
-	});
-
-	/**
-	 * Register syntax styling
-	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mVB.grammars[mVB.grammars.length - 1]);
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mVBHtml.grammars[mVBHtml.grammars.length - 1]);
-
-	provider.connect();
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
+	};
 });

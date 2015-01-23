@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/xquery/xqueryPlugin"]);
+		require(["plugins/languages/xquery/xqueryPlugin"], function(xqueryPlugin) {
+			xqueryPlugin.connect();
+		});
 	</script>
 </head>
 

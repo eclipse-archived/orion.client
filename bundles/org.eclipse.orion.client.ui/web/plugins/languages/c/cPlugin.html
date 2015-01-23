@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/c/cPlugin"]);
+		require(["plugins/languages/c/cPlugin"], function(cPlugin) {
+			cPlugin.connect();
+		});
 	</script>
 </head>
 

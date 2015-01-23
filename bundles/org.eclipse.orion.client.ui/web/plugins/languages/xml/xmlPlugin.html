@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/xml/xmlPlugin"]);
+		require(["plugins/languages/xml/xmlPlugin"], function(xmlPlugin) {
+			xmlPlugin.connect();
+		});
 	</script>
 </head>
 

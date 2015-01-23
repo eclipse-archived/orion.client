@@ -12,33 +12,32 @@
 /*eslint-env browser, amd*/
 define(['orion/plugin', 'orion/editor/stylers/text_x-dockerfile/syntax'], function(PluginProvider, mDockerfile) {
 
-	/**
-	 * Plug-in headers
-	 */
-	var headers = {
-		name: "Orion Editor Docker Tool Support",
-		version: "1.0",
-		description: "This plugin provides Docker tools support for the Orion editor."
+	function connect() {
+		var headers = {
+			name: "Orion Editor Docker Tool Support",
+			version: "1.0",
+			description: "This plugin provides Docker tools support for the Orion editor."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(pluginProvider) {
+		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
+			contentTypes: [
+				{	id: "text/x-dockerfile",
+					"extends": "text/plain",
+					name: "dockerfile",
+					extension: ["dockerfile"]
+				}
+			] 
+		});
+		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mDockerfile.grammars[mDockerfile.grammars.length - 1]);
 	};
-	var provider = new PluginProvider(headers);
 
-	/**
-	 * Register the dockerfile content type
-	 */
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
-		contentTypes: [
-			{	id: "text/x-dockerfile",
-				"extends": "text/plain",
-				name: "dockerfile",
-				filename: ["dockerfile"]
-			}
-		]
-	});
-
-	/**
-	 * Register syntax styling
-	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mDockerfile.grammars[mDockerfile.grammars.length - 1]);
-
-	provider.connect();
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
+	};
 });

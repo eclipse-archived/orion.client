@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/ruby/rubyPlugin"]);
+		require(["plugins/languages/ruby/rubyPlugin"], function(rubyPlugin) {
+			rubyPlugin.connect();
+		});
 	</script>
 </head>
 

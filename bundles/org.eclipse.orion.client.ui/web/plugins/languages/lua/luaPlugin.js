@@ -12,33 +12,32 @@
 /*eslint-env browser, amd*/
 define(['orion/plugin', 'orion/editor/stylers/text_x-lua/syntax'], function(PluginProvider, mLua) {
 
-	/**
-	 * Plug-in headers
-	 */
-	var headers = {
-		name: "Orion Lua Tool Support",
-		version: "1.0",
-		description: "This plugin provides Lua tools support for Orion."
+	function connect() {
+		var headers = {
+			name: "Orion Lua Tool Support",
+			version: "1.0",
+			description: "This plugin provides Lua tools support for Orion."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(pluginProvider) {
+		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
+			contentTypes: [
+				{	id: "text/x-lua",
+					"extends": "text/plain",
+					name: "Lua",
+					extension: ["lua"]
+				}
+			] 
+		});
+		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mLua.grammars[mLua.grammars.length - 1]);
 	};
-	var provider = new PluginProvider(headers);
 
-	/**
-	 * Register the Lua content type
-	 */
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
-		contentTypes: [
-			{	id: "text/x-lua",
-				"extends": "text/plain",
-				name: "Lua",
-				extension: ["lua"]
-			}
-		] 
-	});
-
-	/**
-	 * Register syntax styling
-	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mLua.grammars[mLua.grammars.length - 1]);
-
-	provider.connect();
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
+	};
 });

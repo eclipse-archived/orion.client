@@ -10,34 +10,34 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/plugin', 'orion/editor/stylers/application_xquery/syntax'], function(PluginProvider, mXQ) {	
-	/**
-	 * Plug-in headers
-	 */
-	var headers = {
-		name: "Orion XQuery Tool Support",
-		version: "1.0",
-		description: "This plugin provides XQuery tools support for Orion."
+define(['orion/plugin', 'orion/editor/stylers/application_xquery/syntax'], function(PluginProvider, mXQuery) {
+	
+	function connect() {
+		var headers = {
+			name: "Orion XQuery Tool Support",
+			version: "1.0",
+			description: "This plugin provides XQuery tools support for Orion."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(pluginProvider) {
+		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
+			contentTypes: [
+				{	id: "application/xquery",
+					"extends": "text/plain",
+					name: "XQuery",
+					extension: ["xq", "xqy", "xquery"]
+				}
+			] 
+		});
+		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mXQuery.grammars[mXQuery.grammars.length - 1]);
 	};
-	var provider = new PluginProvider(headers);
 
-	/**
-	 * Register the XQuery content types
-	 */
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
-		contentTypes: [
-			{	id: "application/xquery",
-				"extends": "text/plain",
-				name: "XQuery",
-				extension:  ["xq", "xqy", "xquery"]
-			}
-		] 
-	});
-
-	/**
-	 * Register syntax styling
-	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mXQ.grammars[mXQ.grammars.length - 1]);
-
-	provider.connect();
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
+	};
 });

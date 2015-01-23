@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/python/pythonPlugin"]);
+		require(["plugins/languages/python/pythonPlugin"], function(pythonPlugin) {
+			pythonPlugin.connect();
+		});
 	</script>
 </head>
 

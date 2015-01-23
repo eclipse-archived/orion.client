@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/yaml/yamlPlugin"]);
+		require(["plugins/languages/yaml/yamlPlugin"], function(yamlPlugin) {
+			yamlPlugin.connect();
+		});
 	</script>
 </head>
 

@@ -12,33 +12,32 @@
 /*eslint-env browser, amd*/
 define(['orion/plugin', 'orion/editor/stylers/text_x-arduino/syntax'], function(PluginProvider, mArduino) {
 
-	/**
-	 * Plug-in headers
-	 */
-	var headers = {
-		name: "Orion Arduino Tool Support",
-		version: "1.0",
-		description: "This plugin provides Arduino tools support for Orion."
+	function connect() {
+		var headers = {
+			name: "Orion Arduino Tool Support",
+			version: "1.0",
+			description: "This plugin provides Arduino tools support for Orion."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(pluginProvider) {
+		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
+			contentTypes: [
+				{	id: "text/x-arduino", // TODO could not find a commonly-used value for this
+					"extends": "text/plain",
+					name: "Arduino",
+					extension: ["ino", "pde"]
+				}
+			] 
+		});
+		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mArduino.grammars[mArduino.grammars.length - 1]);
 	};
-	var provider = new PluginProvider(headers);
 
-	/**
-	 * Register the Arduino content type
-	 */
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
-		contentTypes: [
-			{	id: "text/x-arduino", // TODO could not find a commonly-used value for this
-				"extends": "text/plain",
-				name: "Arduino",
-				extension: ["ino", "pde"]
-			}
-		] 
-	});
-
-	/**
-	 * Register syntax styling
-	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mArduino.grammars[mArduino.grammars.length - 1]);
-
-	provider.connect();
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
+	};
 });

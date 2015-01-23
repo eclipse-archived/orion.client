@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/php/phpPlugin"]);
+		require(["plugins/languages/php/phpPlugin"], function(phpPlugin) {
+			phpPlugin.connect();
+		});
 	</script>
 </head>
 

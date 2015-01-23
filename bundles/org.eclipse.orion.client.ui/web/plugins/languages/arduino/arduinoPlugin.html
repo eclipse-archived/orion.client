@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/arduino/arduinoPlugin"]);
+		require(["plugins/languages/arduino/arduinoPlugin"], function(arduinoPlugin) {
+			arduinoPlugin.connect();
+		});
 	</script>
 </head>
 

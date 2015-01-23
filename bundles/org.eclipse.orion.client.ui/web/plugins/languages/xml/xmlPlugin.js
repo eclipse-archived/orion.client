@@ -12,39 +12,38 @@
 /*eslint-env browser, amd*/
 define(['orion/plugin', 'orion/editor/stylers/application_xml/syntax'], function(PluginProvider, mXML) {
 
-	/**
-	 * Plug-in headers
-	 */
-	var headers = {
-		name: "Orion XML Tool Support",
-		version: "1.0",
-		description: "This plugin provides XML tools support for Orion."
+	function connect() {
+		var headers = {
+			name: "Orion XML Tool Support",
+			version: "1.0",
+			description: "This plugin provides XML tools support for Orion."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(pluginProvider) {
+		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
+			contentTypes: [
+				{	id: "application/xml",
+					"extends": "text/plain",
+					name: "XML",
+					extension: ["xml", "xib"],
+					imageClass: "file-sprite-xml"
+				}, {id: "application/xhtml+xml",
+					"extends": "text/plain",
+					name: "XHTML",
+					extension: ["xhtml", "xht"],
+					imageClass: "file-sprite-xml"
+				}
+			] 
+		});
+		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mXML.grammars[mXML.grammars.length - 1]);
 	};
-	var provider = new PluginProvider(headers);
 
-	/**
-	 * Register the XML content types
-	 */
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
-		contentTypes: [
-			{	id: "application/xml",
-				"extends": "text/plain",
-				name: "XML",
-				extension: ["xml", "xib"],
-				imageClass: "file-sprite-xml"
-			}, {id: "application/xhtml+xml",
-				"extends": "text/plain",
-				name: "XHTML",
-				extension: ["xhtml", "xht"],
-				imageClass: "file-sprite-xml"
-			}
-		] 
-	});
-
-	/**
-	 * Register syntax styling
-	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mXML.grammars[mXML.grammars.length - 1]);
-
-	provider.connect();
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
+	};
 });

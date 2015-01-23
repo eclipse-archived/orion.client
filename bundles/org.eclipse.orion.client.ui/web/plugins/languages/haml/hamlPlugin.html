@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/haml/hamlPlugin"]);
+		require(["plugins/languages/haml/hamlPlugin"], function(hamlPlugin) {
+			hamlPlugin.connect();
+		});
 	</script>
 </head>
 

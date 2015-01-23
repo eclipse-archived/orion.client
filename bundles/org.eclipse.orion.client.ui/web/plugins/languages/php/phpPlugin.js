@@ -12,33 +12,32 @@
 /*eslint-env browser, amd*/
 define(['orion/plugin', 'orion/editor/stylers/text_x-php/syntax'], function(PluginProvider, mPHP) {
 
-	/**
-	 * Plug-in headers
-	 */
-	var headers = {
-		name: "Orion PHP Tool Support",
-		version: "1.0",
-		description: "This plugin provides PHP tools support for Orion."
+	function connect() {
+		var headers = {
+			name: "Orion PHP Tool Support",
+			version: "1.0",
+			description: "This plugin provides PHP tools support for Orion."
+		};
+		var pluginProvider = new PluginProvider(headers);
+		registerServiceProviders(pluginProvider);
+		pluginProvider.connect();
+	}
+
+	function registerServiceProviders(pluginProvider) {
+		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
+			contentTypes: [
+				{	id: "text/x-php",
+					"extends": "text/plain",
+					name: "PHP",
+					extension: ["php", "php3", "php4", "php5", "phpt", "phtml", "aw", "ctp"]
+				}
+			] 
+		});
+		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mPHP.grammars[mPHP.grammars.length - 1]);
 	};
-	var provider = new PluginProvider(headers);
 
-	/**
-	 * Register the PHP content type
-	 */
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
-		contentTypes: [
-			{	id: "text/x-php",
-				"extends": "text/plain",
-				name: "PHP",
-				extension: ["php", "php3", "php4", "php5", "phpt", "phtml", "aw", "ctp"]
-			}
-		] 
-	});
-
-	/**
-	 * Register syntax styling
-	 */
-	provider.registerServiceProvider("orion.edit.highlighter", {}, mPHP.grammars[mPHP.grammars.length - 1]);
-
-	provider.connect();
+	return {
+		connect: connect,
+		registerServiceProviders: registerServiceProviders
+	};
 });

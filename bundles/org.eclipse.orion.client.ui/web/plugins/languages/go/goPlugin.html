@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/go/goPlugin"]);
+		require(["plugins/languages/go/goPlugin"], function(goPlugin) {
+			goPlugin.connect();
+		});
 	</script>
 </head>
 

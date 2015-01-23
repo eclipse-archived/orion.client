@@ -17,7 +17,9 @@
 			packages: [
 			]
 		});
-		require(["plugins/languages/erlang/erlangPlugin"]);
+		require(["plugins/languages/erlang/erlangPlugin"], function(erlangPlugin) {
+			erlangPlugin.connect();
+		});
 	</script>
 </head>
 
