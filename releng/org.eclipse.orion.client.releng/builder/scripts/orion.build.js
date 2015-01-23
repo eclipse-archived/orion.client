@@ -108,6 +108,7 @@
             { name: "plugins/gitBlamePlugin" },
             { name: "plugins/helpPlugin" },
             { name: "plugins/jslintPlugin" },
+            { name: "plugins/languageToolsPlugin" },
             { name: "plugins/languages/arduino/arduinoPlugin" },
             { name: "plugins/languages/c/cPlugin" },
             { name: "plugins/languages/cpp/cppPlugin" },
