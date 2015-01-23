@@ -13,12 +13,16 @@
 define("orion/editor/stylers/text_x-arduino/syntax", ["orion/editor/stylers/text_x-csrc/syntax"], function(mC) { //$NON-NLS-1$ //$NON-NLS-0$
 	var grammars = [];
 	grammars.push.apply(grammars, mC.grammars);
-	var grammar = grammars[grammars.length - 1];
-	grammar.id = "orion.arduino"; //$NON-NLS-0$
-	grammar.contentTypes = ["text/x-arduino"]; // TODO could not find a commonly-used value for this //$NON-NLS-0$
+	grammars.push({
+		id: "orion.arduino", //$NON-NLS-0$
+		contentTypes: ["text/x-arduino"], // TODO could not find a commonly-used value for this //$NON-NLS-0$
+		patterns: [
+			{include: "orion.c"} //$NON-NLS-0$
+		]
+	});
 	return {
-		id: grammar.id,
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
-		keywords: grammar.keywords
+		keywords: []
 	};
 });
