@@ -13,7 +13,7 @@ define([
 	'orion/plugin',
 	'plugins/site/siteServiceImpl',
 	'plugins/site/selfHostingRules',
-	'i18n!orion/sites/nls/messages'
+	'i18n!orion/nls/messages'
 ], function(PluginProvider, siteImpl, mSelfHostingRules, messages) {
 	function qualify(url) {
 		var a = document.createElement('a');
