@@ -14,8 +14,9 @@
 define([
 'orion/objects',
 'orion/URITemplate',
-'webtools/util'
-], function(Objects, URITemplate, Util) {
+'webtools/util',
+'csslint' //for colour object
+], function(Objects, URITemplate, Util, CSSLint) {
 	
 	/**
 	 * @name webtools.CSSHover
@@ -32,27 +33,6 @@ define([
 	}
 	
 	Objects.mixin(CSSHover.prototype, /** @lends webtools.CSSHover.prototype*/ {
-		
-		colorValues: [
-			"black", //$NON-NLS-0$
-			"white", //$NON-NLS-0$
-			"red", //$NON-NLS-0$
-			"green", //$NON-NLS-0$
-			"blue", //$NON-NLS-0$
-			"magenta", //$NON-NLS-0$
-			"yellow", //$NON-NLS-0$
-			"cyan", //$NON-NLS-0$
-			"grey", //$NON-NLS-0$
-			"darkred", //$NON-NLS-0$
-			"darkgreen", //$NON-NLS-0$
-			"darkblue", //$NON-NLS-0$
-			"darkmagenta", //$NON-NLS-0$
-			"darkcyan", //$NON-NLS-0$
-			"darkyellow", //$NON-NLS-0$
-			"darkgray", //$NON-NLS-0$
-			"lightgray" //$NON-NLS-0$
-		],
-		
 		
 		/**
 		 * @name computeHover
@@ -75,7 +55,14 @@ define([
     				    if(that.hasPreviousToken(token, results.tokens, 'IDENT', 'background-image')) {
     				        return that._getImageHover(token);
     				    }
-    					if (that.colorValues.indexOf(token.value) > -1){
+    				    var tok = that._isRgbLike(token, results.tokens);
+    				    if(tok) {
+    				        var color = that._collectColorId(tok, results.tokens);
+    		                if(color) {
+    		                    return that._getColorHover(color);    
+    		                }
+    				    }
+    					if (CSSLint.Colors[token.value]){
     						return that._getColorHover(token.value);
     					}
     					if (/\#[0-9A-Fa-f]{1,6}/.test(token.value)){
@@ -91,6 +78,67 @@ define([
 		    var config = Object.create(null);
 		    config.getRuleSet = function() {return null;};
 		    return config;
+		},
+		
+		_isColorFnName: function _isColorFnName(name) {
+		    var val = name.toLowerCase();
+		    return val === 'rgba(' || val === 'rgb(' || val === 'hsl(' || val === 'hsla(';
+		},
+ 		
+		_isRgbLike: function _isRgbLike(token, tokens) {
+		    if(token.type === 'FUNCTION') {
+		        if(this._isColorFnName(token.value.toLowerCase())) {
+		            return token;
+		        }
+		    } 
+		    var tok = this._isRgbLikeBody(token, tokens);
+		    if(tok) {
+		        return tok;
+		    }
+		    return null;
+		},
+		
+		_isRgbLikeBody: function _isRgbLikeBody(token, tokens) {
+		    if(token && tokens) {
+		        for(var i = token.index; i > -1; i--) {
+		            var tok = tokens[i];
+		            if(tok.type === 'NUMBER' || tok.type === 'COMMA' || tok.type === 'PERCENTAGE') {
+		                continue;
+		            } else if(tok.type === 'FUNCTION') {
+		                if(this._isColorFnName(tok.value)) {
+		                    tok.index = i;
+		                    return tok;
+		                } else {
+		                    return null;
+		                }
+		            } else {
+		                break;
+		            }
+		        }
+		    }
+		    return null;
+		},
+		
+		_collectColorId: function _collectColorId(token, tokens) {
+		    if(token && tokens) {
+		        var id = token.value;
+		        var next = null;
+		        var idx = token.index;
+		        for(var i = idx+1; i < tokens.length; i++) {
+		            next = tokens[i];
+		            if(next.type === 'COMMA' || next.type === 'NUMBER' || next.type === 'PERCENTAGE') {
+		                id += next.value;
+		                continue;
+		            }
+		            if(next.type === 'RPAREN') {
+		                id += next.value;
+		                return id;
+		            } else {
+		                break;
+		            }
+		        }
+		    }
+		    return null;
 		},
 		
 		hasPreviousToken: function hasPreviousToken(token, tokens, name, id) {
@@ -109,7 +157,7 @@ define([
 		                        }
 		                    }
 		                    if(id && prev && prev.type === name) {
-		                    return id === prev.value;
+		                       return id === prev.value;
     		                } else {
     		                  return prev && prev.type === name;
     		                }

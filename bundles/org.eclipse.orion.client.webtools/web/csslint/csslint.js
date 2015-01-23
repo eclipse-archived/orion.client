@@ -1151,6 +1151,9 @@ var Colors = {
     windowframe         :"Window frame.",
     windowtext          :"Text in windows."
 };
+
+parserlib.util.Colors = Colors;  //ORION 8.0
+
 /*global SyntaxUnit, Parser*/
 /**
  * Represents a selector combinator (whitespace, +, >).
@@ -6845,6 +6848,7 @@ Reporter.prototype = {
 //expose for testing purposes
 CSSLint._Reporter = Reporter;
 
+CSSLint.Colors = parserlib.util.Colors;   //ORION 8.0
 /*global CSSLint*/
 
 /*
