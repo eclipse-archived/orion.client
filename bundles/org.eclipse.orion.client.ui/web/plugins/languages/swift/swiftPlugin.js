@@ -34,7 +34,7 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-swift/syntax'], function(Pl
 			] 
 		});
 		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mSwift.grammars[mSwift.grammars.length - 1]);
-	};
+	}
 
 	return {
 		connect: connect,

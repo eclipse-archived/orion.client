@@ -39,7 +39,7 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-csharp/syntax', 'orion/edit
 		});
 		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mCSharp.grammars[mCSharp.grammars.length - 1]);
 		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mCSHtml.grammars[mCSHtml.grammars.length - 1]);
-	};
+	}
 
 	return {
 		connect: connect,

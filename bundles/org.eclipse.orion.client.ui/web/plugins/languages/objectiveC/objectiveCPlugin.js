@@ -34,7 +34,7 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-objective-c/syntax'], funct
 			] 
 		});
 		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mObjectiveC.grammars[mObjectiveC.grammars.length - 1]);
-	};
+	}
 
 	return {
 		connect: connect,

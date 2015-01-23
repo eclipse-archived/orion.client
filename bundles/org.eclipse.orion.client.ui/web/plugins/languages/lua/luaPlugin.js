@@ -34,7 +34,7 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-lua/syntax'], function(Plug
 			] 
 		});
 		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mLua.grammars[mLua.grammars.length - 1]);
-	};
+	}
 
 	return {
 		connect: connect,

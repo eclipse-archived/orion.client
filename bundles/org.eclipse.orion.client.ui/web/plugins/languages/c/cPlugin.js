@@ -34,7 +34,7 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-csrc/syntax'], function(Plu
 			] 
 		});
 		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mC.grammars[mC.grammars.length - 1]);
-	};
+	}
 
 	return {
 		connect: connect,

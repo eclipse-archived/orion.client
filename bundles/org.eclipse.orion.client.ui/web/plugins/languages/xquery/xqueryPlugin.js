@@ -34,7 +34,7 @@ define(['orion/plugin', 'orion/editor/stylers/application_xquery/syntax'], funct
 			] 
 		});
 		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mXQuery.grammars[mXQuery.grammars.length - 1]);
-	};
+	}
 
 	return {
 		connect: connect,

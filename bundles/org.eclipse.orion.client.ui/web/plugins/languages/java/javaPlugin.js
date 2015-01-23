@@ -39,7 +39,7 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-java-source/syntax', 'orion
 		});
 		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mJava.grammars[mJava.grammars.length - 1]);
 		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mJSP.grammars[mJSP.grammars.length - 1]);
-	};
+	}
 
 	return {
 		connect: connect,

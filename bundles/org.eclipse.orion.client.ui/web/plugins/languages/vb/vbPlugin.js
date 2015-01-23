@@ -39,7 +39,7 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-vb/syntax', 'orion/editor/s
 		});
 		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mVB.grammars[mVB.grammars.length - 1]);
 		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mVBHtml.grammars[mVBHtml.grammars.length - 1]);
-	};
+	}
 
 	return {
 		connect: connect,

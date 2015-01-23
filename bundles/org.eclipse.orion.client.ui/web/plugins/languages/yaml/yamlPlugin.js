@@ -34,7 +34,7 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-yaml/syntax'], function(Plu
 			] 
 		});
 		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mYAML.grammars[mYAML.grammars.length - 1]);
-	};
+	}
 
 	return {
 		connect: connect,
