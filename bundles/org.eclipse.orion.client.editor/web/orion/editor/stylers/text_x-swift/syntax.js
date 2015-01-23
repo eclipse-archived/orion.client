@@ -13,27 +13,43 @@
 define("orion/editor/stylers/text_x-swift/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-1$ //$NON-NLS-0$
 	var keywords = [
 		"associativity", "as", //$NON-NLS-1$ //$NON-NLS-0$
-		"break", //$NON-NLS-0$
-		"case", "class", "continue", "convenience", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"default", "deinit", "didSet", "do", "dynamicType", "dynamic", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"else", "enum", "extension", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"fallthrough", "false", "final", "for", "func", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"class", "convenience", //$NON-NLS-1$ //$NON-NLS-0$
+		"deinit", "didSet", "dynamicType", "dynamic", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"enum", "extension", //$NON-NLS-1$ //$NON-NLS-0$
+		"final", "func", //$NON-NLS-1$ //$NON-NLS-0$
 		"get", //$NON-NLS-0$
-		"if", "import", "infix", "init", "inout", "internal", "in", "is", //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"import", "infix", "init", "inout", "internal", "in", "is", //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"lazy", "left", "let", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"mutating", //$NON-NLS-0$
-		"nil", "none", "nonmutating", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"none", "nonmutating", //$NON-NLS-1$ //$NON-NLS-0$
 		"operator", "optional", "override", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"postfix", "precedence", "prefix", "private", "protocol", "Protocol", "public", //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"required", "return", "right", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"self", "Self", "set", "static", "struct", "subscript", "super", "switch", //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"true", "typealias", "Type", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"required", "right", //$NON-NLS-1$ //$NON-NLS-0$
+		"Self", "set", "static", "struct", "subscript", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"typealias", "Type", //$NON-NLS-1$ //$NON-NLS-0$
 		"unowned", //$NON-NLS-0$
 		"var", //$NON-NLS-0$
-		"weak", "where", "while", "willSet", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"weak", "willSet", //$NON-NLS-1$ //$NON-NLS-0$
 		"@objc" //$NON-NLS-0$
 	];
-	var keywords2 = [
+	var controlKeywords = [
+		"break", //$NON-NLS-0$
+		"case", "continue", //$NON-NLS-1$ //$NON-NLS-0$
+		"default", "do", //$NON-NLS-1$ //$NON-NLS-0$
+		"else", //$NON-NLS-0$
+		"fallthrough", "for", //$NON-NLS-1$ //$NON-NLS-0$
+		"if", //$NON-NLS-0$
+		"return", //$NON-NLS-0$
+		"switch", //$NON-NLS-0$
+		"where", "while" //$NON-NLS-1$ //$NON-NLS-0$
+	];
+	var constants = [
+		"false", "nil", "true" //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	];
+	var languageVars1 = [
+		"self", "super" //$NON-NLS-1$ //$NON-NLS-0$
+	];
+	var languageVars2 = [
 		"__COLUMN__", "__FILE__", "__FUNCTION__", "__LINE__" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
@@ -56,8 +72,11 @@ define("orion/editor/stylers/text_x-swift/syntax", ["orion/editor/stylers/lib/sy
 			{include: "#number_hex"}, //$NON-NLS-0$
 			{include: "#number_octal"}, //$NON-NLS-0$
 			{include: "#number_decimal"}, //$NON-NLS-0$
-			{include: "#keywords"}, //$NON-NLS-0$
-			{include: "#keywords2"}, //$NON-NLS-0$
+			{include: "#keywords_operator"}, //$NON-NLS-0$
+			{include: "#keywords_control"}, //$NON-NLS-0$
+			{include: "#constants"}, //$NON-NLS-0$
+			{include: "#languageVars1"}, //$NON-NLS-0$
+			{include: "#languageVars2"}, //$NON-NLS-0$
 		],
 		repository: {
 			comment_block: {
@@ -76,16 +95,34 @@ define("orion/editor/stylers/text_x-swift/syntax", ["orion/editor/stylers/lib/sy
 					}
 				]
 			},
-			keywords: {
+			constants: {
+				match: "(^|[^\\w`])(" + constants.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				captures: {
+					2: {name: "constant.language.swift"} //$NON-NLS-0$
+				}
+			},
+			keywords_operator: {
 				match: "(^|[^\\w`])(" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				captures: {
+					2: {name: "keyword.operator.swift"} //$NON-NLS-0$
+				}
+			},
+			keywords_control: {
+				match: "(^|[^\\w`])(" + controlKeywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				captures: {
 					2: {name: "keyword.control.swift"} //$NON-NLS-0$
 				}
 			},
-			keywords2: {
-				match: "(^|[^\\w`])(" + keywords2.join("|") + ")(?:$|[^\\w])", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			languageVars1: {
+				match: "(^|[^\\w`])(" + languageVars1.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				captures: {
-					2: {name: "keyword.control.swift"} //$NON-NLS-0$
+					2: {name: "variable.language.swift"} //$NON-NLS-0$
+				}
+			},
+			languageVars2: {
+				match: "(^|[^\\w`])(" + languageVars2.join("|") + ")(?:$|[^\\w])", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				captures: {
+					2: {name: "variable.language.swift"} //$NON-NLS-0$
 				}
 			},
 			number_binary: {
@@ -114,8 +151,11 @@ define("orion/editor/stylers/text_x-swift/syntax", ["orion/editor/stylers/lib/sy
 					{include: "#number_hex"}, //$NON-NLS-0$
 					{include: "#number_octal"}, //$NON-NLS-0$
 					{include: "#number_decimal"}, //$NON-NLS-0$
-					{include: "#keywords"}, //$NON-NLS-0$
-					{include: "#keywords2"} //$NON-NLS-0$
+					{include: "#keywords_operator"}, //$NON-NLS-0$
+					{include: "#keywords_control"}, //$NON-NLS-0$
+					{include: "#constants"}, //$NON-NLS-0$
+					{include: "#languageVars1"}, //$NON-NLS-0$
+					{include: "#languageVars2"} //$NON-NLS-0$
 				]
 			},
 			string_doubleQuote: {
@@ -125,7 +165,7 @@ define("orion/editor/stylers/text_x-swift/syntax", ["orion/editor/stylers/lib/sy
 					{
 						begin: "\\\\\\(", //$NON-NLS-0$
 						end: "\\)", //$NON-NLS-0$
-						name: "none", //$NON-NLS-0$
+						name: "string.interpolated.swift", //$NON-NLS-0$
 						patterns: [
 							{include: "#segment"}, //$NON-NLS-0$
 							{include: "#comment_block"}, //$NON-NLS-0$
@@ -133,8 +173,11 @@ define("orion/editor/stylers/text_x-swift/syntax", ["orion/editor/stylers/lib/sy
 							{include: "#number_hex"}, //$NON-NLS-0$
 							{include: "#number_octal"}, //$NON-NLS-0$
 							{include: "#number_decimal"}, //$NON-NLS-0$
-							{include: "#keywords"}, //$NON-NLS-0$
-							{include: "#keywords2"} //$NON-NLS-0$
+							{include: "#keywords_operator"}, //$NON-NLS-0$
+							{include: "#keywords_control"}, //$NON-NLS-0$
+							{include: "#constants"}, //$NON-NLS-0$
+							{include: "#languageVars1"}, //$NON-NLS-0$
+							{include: "#languageVars2"} //$NON-NLS-0$
 						]
 					}
 				]
@@ -145,6 +188,6 @@ define("orion/editor/stylers/text_x-swift/syntax", ["orion/editor/stylers/lib/sy
 	return {
 		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
-		keywords: keywords.concat(keywords2)
+		keywords: keywords.concat(controlKeywords)
 	};
 });
