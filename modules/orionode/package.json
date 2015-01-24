@@ -6,7 +6,7 @@
   "bugs": "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Node",
   "dependencies": {
     "connect": "~2.4.6",
-    "node-inspector": "~0.7.4",
+    "node-inspector": "~0.8.3",
     "socket.io": "~1.0.4",
     "deferred-fs": "~0.3.2",
     "rimraf": "~2.2.6"
