@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/*eslint-env amd, node*/
 define(function(require, exports, module) {
 
 'use strict';
