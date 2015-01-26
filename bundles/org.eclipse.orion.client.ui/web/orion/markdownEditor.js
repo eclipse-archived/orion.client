@@ -1773,7 +1773,9 @@ define([
 		toggleOrientationCommand = new mCommands.Command({
    			id: ID,
 			callback: /* @callback */ function(data) {
-				this.editor.togglePaneOrientation();
+				if (this.editor) {
+					this.editor.togglePaneOrientation();
+				}
 			}.bind(this),
 			type: "switch", //$NON-NLS-0$
 			imageClass: "core-sprite-split-pane-orientation", //$NON-NLS-0$
