@@ -54,6 +54,7 @@ define("orion/editor/stylers/text_x-csharp/syntax", ["orion/editor/stylers/lib/s
 				match: "^\\s*#(?:" + preprocessorDirectives.join("|") + ")\\b[^$]*", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "meta.preprocessor.csharp" //$NON-NLS-0$
 			},
+			{include: "#string_verbatim"}, //$NON-NLS-0$
 			{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
 			{include: "orion.lib#string_singleQuote"}, //$NON-NLS-0$
 			{include: "#doc_line"}, //$NON-NLS-0$
@@ -103,6 +104,11 @@ define("orion/editor/stylers/text_x-csharp/syntax", ["orion/editor/stylers/lib/s
 						include: "orion.lib#todo_comment_singleLine" //$NON-NLS-0$
 					}
 				]
+			},
+			string_verbatim: {
+				begin: '@"', //$NON-NLS-0$
+				end: '^(?:""|[^"])*"(?!")', //$NON-NLS-0$
+				name: "string.quoted.verbatim.csharp", //$NON-NLS-0$
 			}
 		}
 	});
