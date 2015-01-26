@@ -9,12 +9,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env amd*/
+/*eslint-env amd, node*/
 /* global doctrine */
 define([
 'orion/objects',
 'orion/URITemplate',
-], function(Objects, URITemplate) {
+'htmlparser/visitor'
+], function(Objects, URITemplate, Visitor) {
 	
 	/**
 	 * @description creates a new instance of the hover support
@@ -44,37 +45,40 @@ define([
 			var that = this;
 			return that.htmlAstManager.getAST(editorContext).then(function(ast) {
 			    if(ast) {
-			        return editorContext.getLineAtOffset(ctxt.offset).then(function(line) {
-			            if(line > -1) {
-			                return editorContext.getLineStart(line).then(function(start) {
-			                    if(start > -1) {
-			                        var col = ctxt.offset - start;
-			                        return editorContext.getLineStart(line+1).then(function(end){
-			                        	// TODO Hack to get around the lack of ranges and not show hover when user is at end of line, could also regex for end of line whitespace
-			                        	end -= 3; // 2 for \r\n, 1 for second last position
-			                        	if (ctxt.offset < end){
-					                        // Visit the AST and find the node at line + col
-					                        var node = that._findNode(ast, line+1, col, ast[0]);
-					                        if(node && node.type === 'tag' && node.attributes) { //$NON-NLS-0$
-//				                            	var opts = {ext:'htm', type:'HTML', icon:'../webtools/images/html.png'};
-//												var opts = {ext: 'js', type:'JavaScript', '../javascript/images/javascript.pn'}
-												var opts = {};  // Defaults to JS
-					                            switch (node.name) {
-					                            	case 'link': //$NON-NLS-0$
-					                            		// TODO Link nodes don't include the attributes for unknown reason
-//					                            		return that._getFileHover(node.attributes.href, opts);
-					                                case 'script': //$NON-NLS-0$
-//					                                	return that._getFileHover(node.attributes.src, opts);
-					                            }
-					                            
-					                        }
-					                	}
-			                        });
+			        var node = that._findNode(ast, ctxt.offset, null);
+			        if(node) {
+			            switch(node.type) {
+			                case 'tag': {
+			                    break;
+			                }
+			                case 'attr': {
+			                    var path = node.value;
+			                    switch(node.kind) {
+			                        case 'href': {
+			                            if(/\.(?:png|jpg|jpeg|bmp|gif)$/.test(path)) {
+                            	            return that._getImageHover(path);
+                            	        } else if(/^data:image.*;base64/i.test(path)) {
+                            	            return that._getImageHover(path, true);
+                            	        }
+			                            return that._getFileHover(path);
+			                        }
+			                        case 'src': {
+			                            if(/\.(?:png|jpg|jpeg|bmp|gif)$/.test(path)) {
+                            	            return that._getImageHover(path);
+                            	        } else if(/^data:image.*;base64/i.test(path)) {
+                            	            return that._getImageHover(path, true);
+                            	        }
+                            	        break;
+			                        }
+			                        case 'style': {
+			                            //TODO support embedded style sheets
+			                            break;
+			                        }
 			                    }
-			                });
+			                    break;
+			                }
 			            }
-			            return null;
-			        });
+			        }
 			    }
 			    return null; 
 			});
@@ -84,38 +88,42 @@ define([
 		 * Returns the DOM node corresponding to the line and column number 
 		 * or null if no such node could be found.
 		 */
-		_findNode: function(dom, line, col, last) {
-			//recursively walk the dom looking for a body element
-			var node = null;
-			for (var i = 0; i < dom.length; i++) {
-			    node = dom[i];
-                var loc = node.location;
-                if (loc.line === line){
-                	if (!node.children){
-                		return node;
-                	}
-                	if (loc.col > col){
-                		return last;
-                	}
-                }
-				if (node.children) {
-					var result = this._findNode(node.children, line, col, node);
-					if (result) {
-						return result;
-					}
-				}
-			}
-			return null;
+		_findNode: function(dom, offset) {
+		    var found = null;
+			 Visitor.visit(dom, {
+	            visitNode: function(node) {
+	                //only check nodes that are typed, we don't care about any others
+					if(node.range[0] <= offset) {
+						found = node;
+					} else {
+					    return Visitor.BREAK;
+					}      
+	            }
+	        });
+	        return found;
 		},
 		
-		_getFileHover: function _getFileHover(path, opts) {
+		_getFileHover: function _getFileHover(path) {
 		    if(path) {
-		        var that = this;
-		        return that.resolver.getWorkspaceFile(path, opts).then(function(files) {
-    		        if(files) {
-    		            return that._formatFilesHover(path, files);
+		        if(/^http/i.test(path)) {
+    	            return this._formatFilesHover(path);
+    	        } else {
+    		        var that = this;
+    		        var opts;
+    		        if(/\.css$/i.test(path)) {
+    		            opts = {ext:'css', type:'CSS', icon:'../webtools/images/css.png'};
+    		        } else if(/\.htm.*/i.test(path)) {
+    		            opts = {ext:'html', type:'HTML', icon:'../webtools/images/html.png'};
     		        }
-		        });
+    		        if(!opts) {
+    		            return null;
+    		        }
+    		        return that.resolver.getWorkspaceFile(path, opts).then(function(files) {
+        		        if(files) {
+        		            return that._formatFilesHover(path, files);
+        		        }
+    		        });
+		        }
 		    }
 		    return null;
 		},
@@ -149,18 +157,34 @@ define([
         	            }
         	            
         	        }
-    	        } /*else if(typeof files === 'string') {
-    	            var name = path.slice(path.lastIndexOf('/'));
+    	        } else {
+    	            var name = path.slice(path.lastIndexOf('/')+1);
     	            title = '###Open file for \''+name+'\'###';
-	                hover += '[!['+name+'](../webtools/images/css.png)';
+    	            var img = null;
+    	             if(/\.css$/i.test(path)) {
+    		            img = '../webtools/images/css.png';
+    		        } else if(/\.htm.*/i.test(path)) {
+    		            img = '../webtools/images/html.png';
+    		        }
+	                hover += '[!['+name+']('+img+')';
 	                hover += name + ']('+path+') - '+path+'\n\n';
-    	        } */
+    	        }
     	        if(hover !== '') {
     	           return {title: title, content: hover, type:'markdown'};
     	        }
     	    }
     	    return null;
     	},
+		
+		_getImageHover: function _getImageHover(path, base64) {
+		      if(path) {
+		          if(/^http/i.test(path) || base64) {
+    		          var html = '<html><body style="margin:1px;"><img src="'+path+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
+    			      return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+		          }
+		          //TODO need to look up relative images
+		      }
+		},
 		
 		_getColorHover: function _getColorHover(colorID){
 			var html = '<html><body style=\"background-color: ' + colorID + ';\"></html>'; //$NON-NLS-0$  //$NON-NLS-1$
