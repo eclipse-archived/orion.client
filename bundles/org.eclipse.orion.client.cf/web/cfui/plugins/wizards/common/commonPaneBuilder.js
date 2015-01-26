@@ -40,7 +40,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 		    		
 		    		saveManifestCheckbox.type = "checkbox"; //$NON-NLS-0$
 		    		saveManifestCheckbox.id = "saveManifest";//$NON-NLS-0$
-		    		saveManifestCheckbox.checked = "checked"; //$NON-NLS-0$
+		    		saveManifestCheckbox.checked = undefined;  // unchecked by default
 		    		
 					manifestElement.appendChild(saveManifestCheckbox);
 					self._saveManifestCheckbox = saveManifestCheckbox;
