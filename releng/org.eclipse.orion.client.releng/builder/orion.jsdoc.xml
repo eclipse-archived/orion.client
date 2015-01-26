@@ -1,0 +1,32 @@
+<project name="Orion JSDoc ant tasks" >
+
+    <target name="download3rdPartyLibs">
+        <mkdir dir="${jsdocHome}" />
+        <get src="https://jsdoc-toolkit.googlecode.com/files/jsdoc_toolkit-2.4.0.zip"
+             dest="${jsdocHome}/jsdoc_toolkit-2.4.0.zip"
+             usetimestamp="true"
+             maxtime="30" />
+        <unzip src="${jsdocHome}/jsdoc_toolkit-2.4.0.zip"
+             dest="${jsdocHome}">
+             <cutdirsmapper dirs="2"/>
+        </unzip>
+        <delete dir="${jsdocHome}/jsdoc_toolkit-2.4.0"/>
+    </target>
+
+	<target name="jsdocs" if="jsdocHome" unless="skipJsdoc">
+		<runjsdoc jar="${jsdocHome}/jsrun.jar" buildfile="${builder}/scripts/orion.build.js">
+			<argline value="${jsdocHome}/app/run.js -s -v -a" />
+			<arg value="-r=3" />
+			<arg value="-t=${jsdocHome}/templates/jsdoc" />
+			<arg value="-d=${buildDirectory}/doc/org.eclipse.orion.doc.isv/jsdoc" />
+		</runjsdoc>
+	</target>
+
+	<scriptdef name="runjsdoc" language="javascript" src="${builder}/scripts/generateJsdocs.js">
+		<attribute name="jar" />
+		<attribute name="buildfile" />
+		<!-- Should reuse <arg> from the Exec/Java tasks here if that is possible.. -->
+		<element name="argline" type="string" />
+		<element name="arg" type="string" />
+	</scriptdef>
+</project>
