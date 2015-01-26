@@ -63,9 +63,9 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
             if (!location) {
                 return this._services[0];
             }
-            for (var i = 0; i < this._patterns.length; ++i) {
-                if (this._patterns[i].test(location)) {
-                    return this._services[i];
+            for (var j = 0; j < this._patterns.length; ++j) {
+                if (this._patterns[j].test(location)) {
+                    return this._services[j];
                 }
             }
             this._operations.remove(location);
