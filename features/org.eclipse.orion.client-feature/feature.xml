@@ -21,12 +21,6 @@
    </license>
 
    <plugin
-         id="org.eclipse.orion.doc.isv"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="org.eclipse.orion.client.core"
          download-size="0"
          install-size="0"
@@ -47,12 +41,6 @@
 
    <plugin
          id="org.eclipse.orion.client.git"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.orion.doc.user"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
