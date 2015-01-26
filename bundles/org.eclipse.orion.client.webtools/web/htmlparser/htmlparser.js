@@ -355,7 +355,8 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
                 }
                 state.lastTag.raw += matchTrailingSlash[1];
                 // state.output.push({ type: Mode.Tag, name: '/' + state.lastTag.name, raw: null });
-                this._write({ type: Mode.Tag, name: '/' + state.lastTag.name, raw: null, range: [start, matchTrailingSlash[1].length]}); //TODO ORION 8.0
+                state.lastTag.range[1] = matchTrailingSlash.index+1; //TODO ORION 8.0
+                this._write({ type: Mode.Tag, name: '/' + state.lastTag.name, raw: null, range: [start, matchTrailingSlash.index+1]}); //TODO ORION 8.0
                 state.pos += matchTrailingSlash[1].length;
             }
             var foundPos = state.data.indexOf('>', state.pos);
@@ -707,13 +708,19 @@ function HtmlBuilder (callback, options) {
                         this._tagStack.push(node);
                     }
                     this._lastTag = node;
+                } else if(this._lastTag && this._lastTag.name === element.name.slice(1)) {
+                    //TODO ORION 8.0 update the range for a DOM root element
+                    this._lastTag.range[1] = element.range[1];
                 }
             } else if (element.type === Mode.Attr && this._lastTag) {
                 if (!this._lastTag.attributes) {
                     this._lastTag.attributes = {};
                 }
-                this._lastTag.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()] =
-                    element.data;
+               var data = Object.create(null); //TODO ORION 8.0
+                data.value = element.data;
+                data.range = element.range;
+                data.type = 'attr';
+                this._lastTag.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()] = data;
             } else { //Otherwise just add to the top level list
                 this.dom.push(this._copyElement(element));
             }
@@ -731,12 +738,22 @@ function HtmlBuilder (callback, options) {
                         ;
                     if (!this.isEmptyTag(element)) {
                         var pos = this._tagStack.length - 1;
+                        for(var i = pos; i > -1; i--) {
+                            var opening = this._tagStack.pop();
+                            if(opening.name === baseName) { //TODO ORION 8.0
+                                opening.range[1] = element.range[1];
+                                this._lastTag = this._tagStack.last(); //one more step, per parser spec
+                                break;
+                            }
+                        }
+                        /*
                         while (pos > -1 && this._tagStack[pos--].name != baseName) { }
                         if (pos > -1 || this._tagStack[0].name == baseName) {
                             while (pos < this._tagStack.length - 1) {
                                 this._tagStack.pop();
                             }
-                        }
+                        } 
+                        */
                     }
                 }
                 else { //This is not a closing tag
@@ -745,8 +762,11 @@ function HtmlBuilder (callback, options) {
                         if (!parent.attributes) {
                             parent.attributes = {};
                         }
-                        parent.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()] =
-                            element.data;
+                        var data = Object.create(null); //TODO ORION 8.0
+                        data.value = element.data;
+                        data.range = element.range;
+                        data.type = 'attr';
+                        parent.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()] = data;
                     } else {
                         node = this._copyElement(element);
                         if (!parent.children) {
@@ -771,8 +791,12 @@ function HtmlBuilder (callback, options) {
                     if (!parent.attributes) {
                         parent.attributes = {};
                     }
-                    parent.attributes[this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase()] =
-                        element.data;
+                    var data = Object.create(null); //TODO ORION 8.0
+                    data.value = element.data;
+                    data.range = element.range;
+                    data.type = 'attr';
+                    var name = this._options.caseSensitiveAttr ? element.name : element.name.toLowerCase();
+                    parent.attributes[name] = data;
                 } else {
                     if (!parent.children) {
                         parent.children = [];
