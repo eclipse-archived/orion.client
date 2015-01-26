@@ -21,7 +21,7 @@ IN THE SOFTWARE.
 /* v2.0.0 */
 
 (function () {
-
+/* eslint-disable */
 var exports;
 if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
     exports = module.exports;
@@ -197,6 +197,7 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
     Parser.prototype._parseText = function Parser$_parseText () {
         var state = this._state;
         var foundPos;
+        var start = state.pos; //TODO ORION 8.0
         if (state.isScript) {
             Parser._re_parseText_scriptClose.lastIndex = state.pos;
             foundPos = Parser._re_parseText_scriptClose.exec(state.data);
@@ -231,7 +232,7 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
                 text = state.data.substring(state.pos, foundPos);
             }
             if (text !== '') {
-                this._write({ type: Mode.Text, data: text });
+                this._write({ type: Mode.Text, data: text, range: [start, foundPos]}); //TODO ORION 8.0
             }
             state.pos = foundPos + 1;
             state.mode = Mode.Tag;
@@ -242,6 +243,7 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
     Parser.prototype._parseTag = function Parser$_parseTag () {
         var state = this._state;
         Parser.re_parseTag.lastIndex = state.pos;
+        var start = state.pos; //TODO ORION 8.0
         var match = Parser.re_parseTag.exec(state.data);
         if (match) {
             if (!match[1] && match[2].substr(0, 3) === '!--') {
@@ -273,7 +275,7 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
                 raw = match[0];
             }
             state.pos += match[0].length;
-            var tag = { type: Mode.Tag, name: match[1] + match[2], raw: raw };
+            var tag = { type: Mode.Tag, name: match[1] + match[2], raw: raw, range: [start, state.pos] }; //TODO ORION 8.0
             if (state.mode === Mode.Attr) {
                 state.lastTag = tag;
             }
@@ -341,6 +343,7 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
     Parser.re_parseAttr_selfClose = /(\s*\/\s*)(>?)/g;
     Parser.prototype._parseAttr = function Parser$_parseAttr () {
         var state = this._state;
+        var start = state.pos; //TODO ORION 8.0
         var name_data = this._parseAttr_findName(state);
         if (!name_data || name_data.name === '?') {
             Parser.re_parseAttr_selfClose.lastIndex = state.pos;
@@ -352,7 +355,7 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
                 }
                 state.lastTag.raw += matchTrailingSlash[1];
                 // state.output.push({ type: Mode.Tag, name: '/' + state.lastTag.name, raw: null });
-                this._write({ type: Mode.Tag, name: '/' + state.lastTag.name, raw: null });
+                this._write({ type: Mode.Tag, name: '/' + state.lastTag.name, raw: null, range: [start, matchTrailingSlash[1].length]}); //TODO ORION 8.0
                 state.pos += matchTrailingSlash[1].length;
             }
             var foundPos = state.data.indexOf('>', state.pos);
@@ -397,12 +400,13 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
         }
         state.lastTag.raw += name_data.match + value_data.match;
 
-        this._writePending({ type: Mode.Attr, name: name_data.name, data: value_data.value });
+        this._writePending({ type: Mode.Attr, name: name_data.name, data: value_data.value, range: [start, state.pos] }); //TODO ORION 8.0
     };
 
     Parser.re_parseCData_findEnding = /\]{1,2}$/;
     Parser.prototype._parseCData = function Parser$_parseCData () {
         var state = this._state;
+        var start = state.pos;
         var foundPos = state.data.indexOf(']]>', state.pos);
         if (foundPos < 0 && state.done) {
             foundPos = state.data.length;
@@ -429,7 +433,7 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
             } else {
                 text = state.data.substring(state.pos, foundPos);
             }
-            this._write({ type: Mode.CData, data: text });
+            this._write({ type: Mode.CData, data: text, range: [start, foundPos]}); //TODO ORION 8.0
             state.mode = Mode.Text;
             state.pos = foundPos + 3;
         }
@@ -437,6 +441,7 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
 
     Parser.prototype._parseDoctype = function Parser$_parseDoctype () {
         var state = this._state;
+        var start = state.pos; //TODO ORION 8.0
         var foundPos = state.data.indexOf('>', state.pos);
         if (foundPos < 0 && state.done) {
             foundPos = state.data.length;
@@ -458,7 +463,7 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
             } else {
                 text = state.data.substring(state.pos, foundPos);
             }
-            this._write({ type: Mode.Doctype, data: text });
+            this._write({ type: Mode.Doctype, data: text, range: [start, foundPos] }); //TODO ORION 8.0
             state.mode = Mode.Text;
             state.pos = foundPos + 1;
         }
@@ -467,6 +472,7 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
     Parser.re_parseComment_findEnding = /\-{1,2}$/;
     Parser.prototype._parseComment = function Parser$_parseComment () {
         var state = this._state;
+        var start = state.pos; //TODO ORION 8.0
         var foundPos = state.data.indexOf('-->', state.pos);
         if (foundPos < 0 && state.done) {
             foundPos = state.data.length;
@@ -494,7 +500,7 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
                 text = state.data.substring(state.pos, foundPos);
             }
             // state.output.push({ type: Mode.Comment, data: text });
-            this._write({ type: Mode.Comment, data: text });
+            this._write({ type: Mode.Comment, data: text, range: [start, foundPos] }); //TODO ORION 8.0
             state.mode = Mode.Text;
             state.pos = foundPos + 3;
         }
@@ -628,7 +634,9 @@ function HtmlBuilder (callback, options) {
 
     HtmlBuilder.prototype._copyElement = function HtmlBuilder$_copyElement (element) {
         var newElement = { type: element.type };
-
+        if(element.range) {
+            newElement.range = element.range;
+        }
         if (this._options.verbose && element['raw'] !== undefined) {
             newElement.raw = element.raw;
         }
@@ -757,6 +765,9 @@ function HtmlBuilder (callback, options) {
             else { //This is not a container element
                 parent = this._tagStack.last();
                 if (element.type === Mode.Attr) {
+                    if(this._lastTag) { //TODO ORION 8.0
+                        parent  = this._lastTag;
+                    }
                     if (!parent.attributes) {
                         parent.attributes = {};
                     }
