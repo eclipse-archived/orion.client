@@ -63,7 +63,7 @@ define([
 					return new Deferred().resolve(ast);
 				}
 				return editorContext.getText().then(function(text) {
-					var ast = _self.parse(text);
+					ast = _self.parse(text);
 					_self.cache.put(loc, ast);
 					if(metadata.location) {
 					    //only set this if the original metadata has a real location
