@@ -17,8 +17,10 @@ define([
 	'orion/Deferred',
 	'esprima',
 	'javascript/astManager',
+	"orion/i18nUtil",
+	"i18n!javascript/nls/problems",
 	'mocha/mocha', //must stay at the end, not a module
-], function(Validator, chai, Deferred, Esprima, ASTManager) {
+], function(Validator, chai, Deferred, Esprima, ASTManager, i18nUtil, messages) {
 	var assert = chai.assert;
 
 	describe('Validator Tests', function() {
@@ -88,8 +90,7 @@ define([
 				    {start: 9,
 				     line: 1,
 				     severity: 'error',
-				     description: 'syntaxErrorIncomplete',
-				     descriptionArgs: {nls: 'syntaxErrorIncomplete'}
+				     description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {nls: 'syntaxErrorIncomplete'}),
 				    }
 				]);
 			});
@@ -102,8 +103,7 @@ define([
 				    {start: 9,
 				     line: 2,
 				     severity: 'error',
-				     description: 'syntaxErrorIncomplete',
-				     descriptionArgs: {nls: 'syntaxErrorIncomplete'}
+				     description: i18nUtil.formatMessage.call(null, messages['syntaxErrorIncomplete'], {nls: 'syntaxErrorIncomplete'})
 				    }
 				]);
 			});
@@ -116,22 +116,18 @@ define([
     				{start: 0, 
     				 end: 1, 
     				 severity: 'error', 
-    				 description: "Invalid regular expression: missing /", 
-    				 descriptionKey: "esprimaParseFailure",
-    				 descriptionArgs: {
-    				    0: "Invalid regular expression: missing /",
-    				    nls: "esprimaParseFailure"
-    				 }
+    				 description: i18nUtil.formatMessage.call(null, messages['esprimaParseFailure'], {
+        				    0: "Invalid regular expression: missing /",
+        				    nls: "esprimaParseFailure"
+        				 })
     				 },
     				{start: 0, 
     				 end: 1, 
     				 severity: 'error', 
-    				 description:"syntaxErrorBadToken", 
-    				 descriptionKey: "syntaxErrorBadToken",
-    				 descriptionArgs: {
+    				 description: i18nUtil.formatMessage.call(null, messages['syntaxErrorBadToken'], {
     				    0: "/",
     				    nls: "syntaxErrorBadToken"
-    				 }
+    				 })
     				 }
 				]);
 			});
