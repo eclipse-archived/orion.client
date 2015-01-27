@@ -17,9 +17,8 @@ define([
 'javascript/signatures',
 'javascript/compilationUnit',  
 'orion/URITemplate',
-'orion/Deferred',
 'doctrine' //last, exports into global
-], function(Objects, Finder, Signatures, CU, URITemplate, Deferred) {
+], function(Objects, Finder, Signatures, CU, URITemplate) {
 	
 	
 	/**
@@ -403,18 +402,19 @@ define([
 		                }
 		                var parents = node.parents;
 		                var parent = parents.pop();
+		                var that = this;
 		                if(parent.type === 'CallExpression') {
 		                    if(parent.callee.name === 'require' || parent.callee.name === 'importScripts') {
-		                        return this.resolver.getWorkspaceFile(node.value).then(function(files) {
-    			                    return this._formatFilesHover(node.value, files);
+		                        return that.resolver.getWorkspaceFile(node.value).then(function(files) {
+    			                    return that._formatFilesHover(node.value, files);
     			                });
 		                    }
 		                } else if(parent.type === 'ArrayExpression') {
 		                    parent = parents.pop();
 		                    if(parent.type === 'CallExpression') {
 		                        if(parent.callee.name === 'define' || parent.callee.name === 'require') {
-			                        return this.resolver.getWorkspaceFile(node.value).then(function(files) {
-        			                    return this._formatFilesHover(node.value, files);
+			                        return that.resolver.getWorkspaceFile(node.value).then(function(files) {
+        			                    return that._formatFilesHover(node.value, files);
         			                });
 		                        }
 		                    }
