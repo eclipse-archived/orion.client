@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -13,12 +13,14 @@
 /*global URL*/
 define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], function(xhr, URITemplate, Deferred) {
 
-	var pathRegex = /.*\/(?:contents|list)\/([^\/]*)(?:\/([^\/]*)(?:\/(.*))?)?/;
+	// regex pattern for the file browser requests
+	var pathRegex = /.*\/git\/(.*)\/(browse|contents|list)(\/(\w+)(\/(.*))?)?/;
 
 	function GerritFileImpl(pluginURL, project) {
-		this._listTemplate = new URITemplate(pluginURL + "/list" + "{/project,ref,path:0}{+path}");
-		this._contentTemplate = new URITemplate(pluginURL + "/contents" + "{/project,ref,path:0}{+path}");
-		this._repoURL = this._listTemplate.expand({project: project});
+		// url templates for the Git router service requests
+		this._listTemplate = new URITemplate(pluginURL + "/git/{project}/list{/ref}{/path}");
+		this._contentTemplate = new URITemplate(pluginURL + "/git/{project}/contents{/ref}{/path}");
+		this._repoURL = decodeURIComponent(this._listTemplate.expand({project: project}));
 	}
 
 	GerritFileImpl.prototype = {
@@ -33,22 +35,34 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			var url = new URL(location);
 			var pathmatch = url.pathname.match(pathRegex);
 			var project = pathmatch[1] ? decodeURIComponent(pathmatch[1]) : pathmatch[1];
-			var ref = pathmatch[2] ? decodeURIComponent(pathmatch[2]) : pathmatch[2];
-			var path = pathmatch[3] ? decodeURIComponent(pathmatch[3]) : pathmatch[3];
+			var ref = pathmatch[4] ? decodeURIComponent(pathmatch[4]) : pathmatch[4];
+			var path = pathmatch[6] ? decodeURIComponent(pathmatch[6]) : pathmatch[6];
 			if (!ref){
 				return null;
 			}
 
 			var result = [];
+			
+			// root location of the file browser repo, this is static
+			var rootLocation = decodeURIComponent(this._listTemplate.expand({project: project, ref: ref}));
+			// relative parent location of the repo (i.e. one directory below current context)
+			var parentLocation = "";
+			
 			if (!path) {
 				return result;
 			}
 			var segments = path.split("/");
 			segments.pop(); // pop off the current name
-			var parentLocation = this._listTemplate.expand({project: project, ref: ref});
+			if (segments.length > 0) {
+				parentLocation = decodeURIComponent(this._listTemplate.expand({project: project, ref: ref, path: segments.join("/")}));
+			}
+			else {
+				parentLocation = decodeURIComponent(this._listTemplate.expand({project: project, ref: ref}));
+			}
+			
 			result.push({
-				Name: ref.split("/").pop(),
-				Location: parentLocation,
+				Name: ref,
+				Location: rootLocation,
 				ChildrenLocation: parentLocation
 			});
 
@@ -56,7 +70,7 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			for (var i = 0; i < segments.length; ++i) {
 				var parentName = segments[i];
 				parentPath += parentName;
-				parentLocation = this._listTemplate.expand({project: project, ref: ref, path: parentPath});
+				parentLocation = decodeURIComponent(this._listTemplate.expand({project: project, ref: ref, path: parentPath}));
 				result.push({
 					Name: parentName,
 					Location: parentLocation,
@@ -75,11 +89,12 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 				var directory = JSON.parse(result.response);
 				return directory.map(function(entry) {
 					var template = entry.type === "file" ? _this._contentTemplate : _this._listTemplate;
+					var ref = entry.ref.split("/").pop();
 					var name = entry.name.split("/").pop();
 					if(entry.path === "") {
 						entry.path = null;
 					}
-					var location = template.expand(entry);
+					var location = decodeURIComponent(template.expand({project: entry.project, ref: ref, path: entry.path}));
 					var result = {
 						Attributes: {
 							Archive: false,
@@ -103,14 +118,14 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			}, function(error) { return _this._handleError(error);});
 		},
 		loadWorkspaces: function() {
-			return this.loadWorkspace(this._repoURL);
+			return this.loadWorkspace(this._repoURL + "/list");
 		},
 		loadWorkspace: function(location) {
 			var _this = this;
 			var url = new URL(location);
 			var pathmatch = url.pathname.match(pathRegex);
-			var ref = pathmatch[2] ? decodeURIComponent(pathmatch[2]) : pathmatch[2];
-			var path = pathmatch[3] ? decodeURIComponent(pathmatch[3]) : pathmatch[3];
+			var ref = pathmatch[4] ? decodeURIComponent(pathmatch[4]) : pathmatch[4];
+			var path = pathmatch[6] ? decodeURIComponent(pathmatch[6]) : pathmatch[6];
 
 			return this.fetchChildren(location).then(function(children) {
 				var result = {
@@ -167,8 +182,7 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 				//var _this = this;
 				var url = new URL(location);
 				var pathmatch = url.pathname.match(pathRegex);
-				var ref = pathmatch[2] ? decodeURIComponent(pathmatch[2]) : pathmatch[2];
-				//var path = pathmatch[3] ? decodeURIComponent(pathmatch[3]) : pathmatch[3];
+				var ref = pathmatch[4] ? decodeURIComponent(pathmatch[4]) : pathmatch[4];
 				var parents = this._getParents(location);
 				if (!parents) {
 					return {
