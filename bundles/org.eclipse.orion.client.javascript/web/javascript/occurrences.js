@@ -12,8 +12,9 @@
 /*eslint-env amd*/
 define([
 'orion/objects',
-'javascript/finder'
-], function(Objects, Finder) {
+'javascript/finder',
+'javascript/compilationUnit'
+], function(Objects, Finder, CU) {
 	
 	/**
 	 * @name javascript.JavaScriptOccurrences
@@ -39,34 +40,23 @@ define([
 		 */
 		computeOccurrences: function(editorContext, ctxt) {
 			var that = this;
-			switch(ctxt.contentType) {
-				case 'text/html':
-					return editorContext.getText().then(function(text) {
-						var blocks = Finder.findScriptBlocks(text, ctxt.selection.start);
-						if(blocks.length > 0) {
-							var block = blocks[0];
-							var ast = that.astManager.parse(block.text);
-							var context = {
-								selection: {
-									start: ctxt.selection.start-block.offset, 
-									end: ctxt.selection.end-block.offset
-								}
-							};
-							var occurs = Finder.findOccurrences(ast, context);
-							var len = occurs.length;
-							for(var i = 0; i < len; i++) {
-								occurs[i].start += block.offset;
-								occurs[i].end += block.offset;
-							}
-						}
-						return occurs;
-					});
-				case 'application/javascript':
-					return this.astManager.getAST(editorContext).then(function(ast) {
+			return editorContext.getFileMetadata().then(function(meta) {
+			    if(meta.contentType.id === 'application/javascript') {
+			        return that.astManager.getAST(editorContext).then(function(ast) {
 						return Finder.findOccurrences(ast, ctxt);
 					});
-			}
-		},
+			    }
+			    return editorContext.getText().then(function(text) {
+    			    var scripts = Finder.findScriptBlocks(text);
+    	            if(scripts.length > 0) {
+    		            var cu = new CU(scripts, meta);
+    		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+            				return Finder.findOccurrences(ast, ctxt);
+            			});
+        			}
+    			});
+			});
+		}
 	});
 	
 	JavaScriptOccurrences.prototype.contructor = JavaScriptOccurrences;

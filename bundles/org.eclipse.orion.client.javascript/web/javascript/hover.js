@@ -14,10 +14,12 @@
 define([
 'orion/objects', 
 'javascript/finder', 
-'javascript/signatures',  
+'javascript/signatures',
+'javascript/compilationUnit',  
 'orion/URITemplate',
-'doctrine'
-], function(Objects, Finder, Signatures, URITemplate) {
+'orion/Deferred',
+'doctrine' //last, exports into global
+], function(Objects, Finder, Signatures, CU, URITemplate, Deferred) {
 	
 	
 	/**
@@ -350,58 +352,77 @@ define([
 		 */
 		computeHoverInfo: function computeHover(editorContext, ctxt) {
 		    var that = this;
-			return that.astManager.getAST(editorContext).then(function(ast) {
-				if (ctxt.proposal){
-					return ctxt.proposal.hover;
-				}
-				
-			    if(!ctxt.offset || ctxt.offset < ast.range[0] || ctxt.offset >= ast.range[1]) {
-			        //end of the AST, nothing to hover
-			        return null;
-			    }
-			    var node = Finder.findNode(ctxt.offset, ast, {parents:true});
-			    if(node) {
-			        switch(node.type) {
-			            case 'Identifier': {
-			                return formatMarkdownHover(that._getIdentifierHover(node, ctxt.offset, ast), editorContext);
-			            }
-			            case 'FunctionDeclaration': {
-			                return formatMarkdownHover(node);
-			            }
-			            case 'FunctionExpression': {
-			                return formatMarkdownHover(that._getFunctionExprHover(node));
-			            }
-			            case 'CallExpression': {
-        	               return formatMarkdownHover(that._getCallExprHover(node, ctxt.offset, ast), editorContext);
-			            }
-			            case 'Literal': {
-			                if(ctxt.offset <= node.range[0] || ctxt.offset >= node.range[1]) {
-			                    //be a bit more precise than finder
-			                    return null;
-			                }
-			                var parents = node.parents;
-			                var parent = parents.pop();
-			                if(parent.type === 'CallExpression') {
-			                    if(parent.callee.name === 'require' || parent.callee.name === 'importScripts') {
-			                        return that.resolver.getWorkspaceFile(node.value).then(function(files) {
-        			                    return that._formatFilesHover(node.value, files);
+		    return editorContext.getFileMetadata().then(function(meta) {
+		        if(meta.contentType.id === 'application/javascript') {
+		            return that.astManager.getAST(editorContext).then(function(ast) {
+        				return that._doHover(ast, editorContext, ctxt);
+        			});
+		        }
+		        return editorContext.getText().then(function(text) {
+		            var scripts = Finder.findScriptBlocks(text);
+		            if(scripts.length > 0) {
+    		            var cu = new CU(scripts, meta);
+    		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+            				return that._doHover(ast, editorContext, ctxt);
+            			});
+        			}
+        			return null;
+		        });
+		    });
+			
+		},
+		
+		_doHover: function _doHover(ast, editorContext, ctxt) {
+		    if (ctxt.proposal){
+				return ctxt.proposal.hover;
+			}
+			
+		    if(!ctxt.offset || ctxt.offset < ast.range[0] || ctxt.offset >= ast.range[1]) {
+		        //end of the AST, nothing to hover
+		        return null;
+		    }
+		    var node = Finder.findNode(ctxt.offset, ast, {parents:true});
+		    if(node) {
+		        switch(node.type) {
+		            case 'Identifier': {
+		                return formatMarkdownHover(this._getIdentifierHover(node, ctxt.offset, ast), editorContext);
+		            }
+		            case 'FunctionDeclaration': {
+		                return formatMarkdownHover(node);
+		            }
+		            case 'FunctionExpression': {
+		                return formatMarkdownHover(this._getFunctionExprHover(node));
+		            }
+		            case 'CallExpression': {
+    	               return formatMarkdownHover(this._getCallExprHover(node, ctxt.offset, ast), editorContext);
+		            }
+		            case 'Literal': {
+		                if(ctxt.offset <= node.range[0] || ctxt.offset >= node.range[1]) {
+		                    //be a bit more precise than finder
+		                    return null;
+		                }
+		                var parents = node.parents;
+		                var parent = parents.pop();
+		                if(parent.type === 'CallExpression') {
+		                    if(parent.callee.name === 'require' || parent.callee.name === 'importScripts') {
+		                        return this.resolver.getWorkspaceFile(node.value).then(function(files) {
+    			                    return this._formatFilesHover(node.value, files);
+    			                });
+		                    }
+		                } else if(parent.type === 'ArrayExpression') {
+		                    parent = parents.pop();
+		                    if(parent.type === 'CallExpression') {
+		                        if(parent.callee.name === 'define' || parent.callee.name === 'require') {
+			                        return this.resolver.getWorkspaceFile(node.value).then(function(files) {
+        			                    return this._formatFilesHover(node.value, files);
         			                });
-			                    }
-			                } else if(parent.type === 'ArrayExpression') {
-			                    parent = parents.pop();
-			                    if(parent.type === 'CallExpression') {
-			                        if(parent.callee.name === 'define' || parent.callee.name === 'require') {
-    			                        return that.resolver.getWorkspaceFile(node.value).then(function(files) {
-            			                    return that._formatFilesHover(node.value, files);
-            			                });
-			                        }
-			                    }
-			                }
-			            }
-			        }
-			    }
-			    return null;
-			});
+		                        }
+		                    }
+		                }
+		            }
+		        }
+		    }
+		    return null;
 		},
 		
 		/**

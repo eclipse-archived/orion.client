@@ -86,7 +86,7 @@ define([
 			onInputChanged: astManager.onInputChanged.bind(astManager)
 		},
 		{
-			contentType: ["application/javascript"],  //$NON-NLS-0$
+			contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$
 			types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-0$  //$NON-NLS-1$
 		});
 		
@@ -373,7 +373,7 @@ define([
 				{
 			nls: 'javascript/nls/messages',  //$NON-NLS-0$
 			name: 'jsHover',
-			contentType: ["application/javascript"]	//$NON-NLS-0$ //$NON-NLS-1$
+			contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
 				});
 		
 		provider.registerService("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager),  //$NON-NLS-0$

@@ -24,11 +24,20 @@ define([
 		var occurrences = new Occurrences.JavaScriptOccurrences(astManager);
 		var editorContext = {
 			text: "",
+			contentTypeId: "application/javascript",
 			/**
 			 * get the text
 			 */
 			getText: function() {
 				return new Deferred().resolve(this.text);
+			},
+			
+			getFileMetadata: function() {
+			    var o = Object.create(null);
+			    o.contentType = Object.create(null);
+			    o.contentType.id = this.contentTypeId;
+			    o.location = 'occurrences_test_script.js';
+			    return new Deferred().resolve(o);
 			}
 		};
 		var context = {
@@ -47,7 +56,8 @@ define([
 		 */
 		function tearDown() {
 			editorContext.text = "";
-			astManager.onModelChanging({file:{}});
+			editorContext.contentTypeId = 'application/javascript';
+			astManager.onModelChanging({file:{location: 'occurrences_test_script.js'}});
 			context.selection.start = -1;
 			context.selection.end = -1;
 			context.contentType = 'application/javascript';
@@ -1648,6 +1658,7 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHead1', function() {
+		    editorContext.contentTypeId = 'text/html';
 			editorContext.text = "<!DOCTYPE html><head><script>function f() {}</script></head><html></html>";
 			return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
 				try {
@@ -1664,6 +1675,7 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHead2', function() {
+		    editorContext.contentTypeId = 'text/html';
 			editorContext.text = "<!DOCTYPE html><head><scRipt>function f() {}</script></head><html></html>";
 			return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
 				try {
@@ -1680,6 +1692,7 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHead3', function() {
+		    editorContext.contentTypeId = 'text/html';
 			editorContext.text = "<!DOCTYPE html><head><scRipt  >function f() {}</script></head><html></html>";
 			return occurrences.computeOccurrences(editorContext, setContext(41, 41, 'text/html')).then(function(results) {
 				try {
@@ -1696,10 +1709,11 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHeadMulti1', function() {
+		    editorContext.contentTypeId = 'text/html';
 			editorContext.text = "<!DOCTYPE html><head><script>function f() {}</script><script>function f() {}</script></head><html></html>";
 			return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:38, end:39}]);
+					assertOccurrences(results, [{start:38, end:39}, {start:70, end:71}]);
 				}
 				finally {
 					tearDown();
@@ -1712,10 +1726,11 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHeadMulti2', function() {
+		    editorContext.contentTypeId = 'text/html';
 			editorContext.text = "<!DOCTYPE html><head><scRipt>function f() {}</script><script>function f() {}</script></head><html></html>";
 			return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:38, end:39}]);
+					assertOccurrences(results, [{start:38, end:39}, {start:70, end:71}]);
 				}
 				finally {
 					tearDown();
@@ -1728,10 +1743,11 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHeadMulti3', function() {
+		    editorContext.contentTypeId = 'text/html';
 			editorContext.text = "<!DOCTYPE html><head><scRipt   >function f() {}</script><script>function f() {}</script></head><html></html>";
 			return occurrences.computeOccurrences(editorContext, setContext(42, 42, 'text/html')).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:41, end:42}]);
+					assertOccurrences(results, [{start:41, end:42}, {start:73, end:74}]);
 				}
 				finally {
 					tearDown();
@@ -1744,10 +1760,11 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_htmlHeadMulti4', function() {
+		    editorContext.contentTypeId = 'text/html';
 			editorContext.text = "<!DOCTYPE html><head><scRipt   >function f() {}</script><script>function f() {}</script></head><html></html>";
 			return occurrences.computeOccurrences(editorContext, setContext(74, 74, 'text/html')).then(function(results) {
 				try {
-					assertOccurrences(results, [{start:73, end:74}]);
+					assertOccurrences(results, [{start:41, end:42}, {start:73, end:74}]);
 				}
 				finally {
 					tearDown();

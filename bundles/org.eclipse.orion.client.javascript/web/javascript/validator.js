@@ -227,7 +227,7 @@ define([
 								error.message = error.args.nls;
 								break;
 						}
-					} else if(!token) {
+					} else if(!error.token) {
 					    //an untyped error with no tokens, report the failure
 					    error.args = {0: error.message, nls: 'esprimaParseFailure'};
 					    error.message = error.args.nls;
