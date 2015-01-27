@@ -13,12 +13,13 @@
 
 define([
 	'i18n!git/nls/gitmessages',
+	'orion/i18nUtil',
 	'orion/commandRegistry',
 	'orion/git/gitPreferenceStorage',
 	'orion/git/logic/gitCommon',
 	'orion/Deferred',
 	'orion/objects'
-], function(messages,mCommandRegistry,GitPreferenceStorage, mGitCommon, Deferred, objects) {
+], function(messages,i18nUtil,mCommandRegistry,GitPreferenceStorage, mGitCommon, Deferred, objects) {
 	
 	var handleGitServiceResponse = mGitCommon.handleGitServiceResponse;
 	var gatherSshCredentials = mGitCommon.gatherSshCredentials;
@@ -143,22 +144,37 @@ define([
 										var display = {};
 										display.HTML = true;
 										display.Severity = jsonData.Severity || "Error"; //$NON-NLS-0$
-										var result = jsonData.Updates.length ? "<b>" +  messages["PushResult"] + "</b>\n" : ""; //$NON-NLS-0$ //$NON-NLS-1$
-										result += "<table class=\"gitPushUpdates\">"; //$NON-NLS-0$
-										jsonData.Updates.forEach(function (update) {
-											var message = update.Message || messages["Push_" + update.Result] || "";
-											result += "<tr>"; //$NON-NLS-0$
-											result += "<td>[" +  update.Result +"]</td><td><b>" + update.LocalName + " => " + update.RemoteName + "</b></td><td>" + message + "</td>"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-											result += "</tr>"; //$NON-NLS-0$
-										});
-										result += "</table>"; //$NON-NLS-0$
-										if (jsonData.Message) {
-											result +=  "<pre class=\"gitPushMessage\">" + jsonData.Message + "</pre>"|| ""; //$NON-NLS-0$ //$NON-NLS-1$
+										if (display.Severity != "Ok" && display.Severity != "Normal") {
+											var result = jsonData.Updates.length ? "<b>" +  messages["PushResult"] + "</b>\n" : ""; //$NON-NLS-0$ //$NON-NLS-1$
+											result += "<table class=\"gitPushUpdates\">"; //$NON-NLS-0$
+											jsonData.Updates.forEach(function (update) {
+												var message = update.Message || messages["Push_" + update.Result] || "";
+												result += "<tr>"; //$NON-NLS-0$
+												result += "<td><b>" + update.LocalName + " => " + update.RemoteName + "</b></td><td>" + message + "</td>"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+												result += "</tr>"; //$NON-NLS-0$
+											});
+											result += "</table>"; //$NON-NLS-0$
+											if (jsonData.Message) {
+												result +=  "<pre class=\"gitPushMessage\">" + jsonData.Message + "</pre>"|| ""; //$NON-NLS-0$ //$NON-NLS-1$
+											}
+											display.Message = "<span class=\"gitPushResult\">" + result + "</span>"; //$NON-NLS-0$ //$NON-NLS-1$
+										} else {
+											display.Message = i18nUtil.formatMessage(messages["PushingRemoteSucceeded"], name); //$NON-NLS-0$ 
+											var isGerrit = name.split('/')[1];
+											if (isGerrit === "for") {
+												var idx = jsonData.Message.indexOf("New Changes:");
+												if (idx>0) {
+													var subMsg = jsonData.Message.slice(idx);
+													var changeURLs = subMsg.match(/http[s]?:\/\/.*[\n\t ]/g);
+													if (changeURLs) {
+														display.Message = i18nUtil.formatMessage(messages["PushingGerritChangeSucceeded"], //$NON-NLS-0$ 
+															name, changeURLs[0]);
+													}
+												}
+											}
 										}
-										display.Message = "<span class=\"gitPushResult\">" + result + "</span>"; //$NON-NLS-0$ //$NON-NLS-1$
 										serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-									} 
-									
+									}
 									if (itemTargetBranch && !itemTargetBranch.Id) {
 										gitService.getGitBranch(itemTargetBranch.Location).then(function(remote) {
 											objects.mixin(itemTargetBranch, remote);
