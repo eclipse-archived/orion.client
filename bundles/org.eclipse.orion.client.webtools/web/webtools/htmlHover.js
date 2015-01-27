@@ -67,6 +67,8 @@ define([
                             	            return that._getImageHover(path);
                             	        } else if(/^data:image.*;base64/i.test(path)) {
                             	            return that._getImageHover(path, true);
+                            	        } else if(/\.js$/i.test(path)) {
+                            	            return that._getFileHover(path, 'js');
                             	        }
                             	        break;
 			                        }
@@ -114,8 +116,7 @@ define([
     		            opts = {ext:'css', type:'CSS', icon:'../webtools/images/css.png'};
     		        } else if(/\.htm.*/i.test(path)) {
     		            opts = {ext:'html', type:'HTML', icon:'../webtools/images/html.png'};
-    		        }
-    		        if(!opts) {
+    		        } else if(!/\.js$/i.test(path)) {
     		            return null;
     		        }
     		        return that.resolver.getWorkspaceFile(path, opts).then(function(files) {
