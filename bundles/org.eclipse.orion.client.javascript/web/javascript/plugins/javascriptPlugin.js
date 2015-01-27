@@ -124,7 +124,6 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "rm.extra.semi.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
         			contentType: ['application/javascript'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "no-extra-semi"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -140,7 +139,6 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "add.fallthrough.comment.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
         			contentType: ['application/javascript'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-fallthrough)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -156,7 +154,6 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "add.empty.comment.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
         			contentType: ['application/javascript'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-empty-block)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -172,7 +169,6 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "add.eslint-env.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
         			contentType: ['application/javascript'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-undef-defined-inenv)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -188,7 +184,6 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "add.eslint-global.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
         			contentType: ['application/javascript'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-undef-defined)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -211,7 +206,6 @@ define([
 					scopeId: "orion.edit.quickfix",
 					id : "remove.unused.param.fix",  //$NON-NLS-0$
 					nls: 'javascript/nls/messages',  //$NON-NLS-0$
-					key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
 					contentType: ['application/javascript'],  //$NON-NLS-0$
 					validationProperties: [
                         {source: "annotation:id", match: "^(?:no-unused-params|no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -227,7 +221,6 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "comment.callback.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
         			contentType: ['application/javascript'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -243,7 +236,6 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "eqeqeq.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
         			contentType: ['application/javascript'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:eqeqeq)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -259,7 +251,6 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "remove.unreachable.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
         			contentType: ['application/javascript'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-unreachable)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -275,7 +266,6 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "sparse.array.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
         			contentType: ['application/javascript'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-sparse-arrays)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -291,7 +281,6 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "semi.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
         			contentType: ['application/javascript'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:semi)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -307,7 +296,6 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "unused.var.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
         			contentType: ['application/javascript'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-unused-vars-unused)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -323,7 +311,6 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "unused.func.decl.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
         			contentType: ['application/javascript'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-unused-vars-unused-funcdecl)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -339,7 +326,6 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "no.comma.dangle.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			key : [ "e", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
         			contentType: ['application/javascript'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-comma-dangle)$"} //$NON-NLS-1$ //$NON-NLS-0$
