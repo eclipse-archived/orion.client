@@ -15,16 +15,7 @@ function(Deferred, mRunBar){
 	
 	function createRunBar(options) {
 		var runBarDeferred = new Deferred();
-		var runBar = new mRunBar.RunBar({
-			parentNode: options.parentNode,
-			projectExplorer: options.projectExplorer,
-			serviceRegistry: options.serviceRegistry,
-			commandRegistry: options.commandRegistry,
-			fileClient: options.fileClient,
-			projectCommands: options.projectCommands,
-			projectClient: options.projectClient,
-			progressService: options.progressService
-		});
+		var runBar = new mRunBar.RunBar(options);
 		runBarDeferred.resolve(runBar);
 		return runBarDeferred;
 	}

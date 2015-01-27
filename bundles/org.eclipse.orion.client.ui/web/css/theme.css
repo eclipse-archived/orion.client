@@ -870,7 +870,7 @@ a.breadcrumb.currentLocation {
 	font-weight: bold;
 }
 
-.dialogTitle .dismissButton {
+.dialogTitle > .dismissButton {
 	margin-right: 0;	
 }
 

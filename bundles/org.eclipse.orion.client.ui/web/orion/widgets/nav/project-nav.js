@@ -302,7 +302,8 @@ define([
 				fileClient: this.fileClient,
 				projectCommands: ProjectCommands,
 				projectClient: this.projectClient,
-				progressService: this.progressService
+				progressService: this.progressService,
+				preferences: this.preferences
 			}).then(function(runBar){
 				if (runBar) {
 					// runBar successfully created, stash it and make it visible

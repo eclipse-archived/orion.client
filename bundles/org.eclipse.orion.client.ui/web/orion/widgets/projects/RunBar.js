@@ -17,10 +17,12 @@ define([
 	'orion/i18nUtil',
 	'orion/webui/RichDropdown',
 	'orion/webui/tooltip',
-	'orion/metrics'
-], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown, mTooltip, mMetrics) {
+	'orion/metrics',
+	'orion/webui/dialogs/ConfirmDialog'
+], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown, mTooltip, mMetrics, mConfirmDialog) {
 	
 	var METRICS_LABEL_PREFIX = "RunBar"; //$NON-NLS-0$
+	var REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING = "doNotConfirmRedeployRunningApp"; //$NON-NLS-0$
 	
 	/**
 	 * Creates a new RunBar.
@@ -48,6 +50,7 @@ define([
 		this.actionScopeId = options.actionScopeId;
 		this._projectCommands = options.projectCommands;
 		this._projectClient = options.projectClient;
+		this._preferences = options.preferences;
 		
 		this._initialize();
 		this._disableAllControls(); // start with controls disabled until a launch configuration is selected
@@ -62,7 +65,7 @@ define([
 				this._undestroyedTooltips = []; // an array of all the tooltips that need to be destroyed when this widget is destroyed
 								
 				this._playButton = lib.$("button.playButton", this._domNode); //$NON-NLS-0$
-				this._boundPlayButtonListener = this._runBarButtonListener.bind(this, "orion.launchConfiguration.deploy"); //$NON-NLS-0$
+				this._boundPlayButtonListener = this._runBarButtonListener.bind(this, this._playButtonCommand);
 				this._playButton.addEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$ 
 				
 				this._stopButton = lib.$("button.stopButton", this._domNode); //$NON-NLS-0$
@@ -508,10 +511,10 @@ define([
 		 * Implements a generic button listener which executes the specified
 		 * command when it is invoked and collects metrics
 		 * 
-		 * @param[in] {String} command A String containing the id of the command to run
+		 * @param[in] {String | Function} command A String containing the id of the command to run or a Function to call
 		 * @param[in] {Event} event The event which triggered the listener
 		 */
-		_runBarButtonListener: function(commandId, event) {
+		_runBarButtonListener: function(command, event) {
 			var buttonNode = event.target;
 			var id = buttonNode.id;
 			var isEnabled = this._isEnabled(buttonNode);
@@ -520,7 +523,11 @@ define([
 			mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + "." + id +".clicked" + disabled, event.which); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			if (isEnabled) {
-				this._commandRegistry.runCommand(commandId, this._selectedLaunchConfiguration, this, null, null, buttonNode); //$NON-NLS-0$
+				if (typeof command === "function") { //$NON-NLS-0$
+					command.call(this, buttonNode);
+				} else {
+					this._commandRegistry.runCommand(command, this._selectedLaunchConfiguration, this, null, null, buttonNode); //$NON-NLS-0$
+				}
 			}
 		},
 		
@@ -612,6 +619,54 @@ define([
 			} else {
 				this._setText(this._launchConfigurationsLabel, messages["selectLaunchConfig"]); //$NON-NLS-0$
 			}
+		},
+		
+		_playButtonCommand: function(buttonNode) {
+			var deploy = function() {
+				this._commandRegistry.runCommand("orion.launchConfiguration.deploy", this._selectedLaunchConfiguration, this, null, null, buttonNode); //$NON-NLS-0$
+			}.bind(this);
+			
+			this._preferences.getPreferences("/RunBar").then(function(prefs) { //$NON-NLS-0$
+				var redeployWithoutConfirming = prefs.get(REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING);
+				if (redeployWithoutConfirming) {
+					deploy(); //user does not want a confirmation dialog, just deploy again
+				} else {
+					// need to confirm with user before redeploying over a running app
+					// get the latest app status
+					this._checkLaunchConfigurationStatus(this._selectedLaunchConfiguration).then(function(status) {
+						if (status && ("STARTED" === status.State)) { //$NON-NLS-0$
+							// app is running, confirm with user if they wish to stop it and redeploy
+							var confirmDialog = new mConfirmDialog.ConfirmDialog({
+								yesNoDialog: true,
+								title: messages["redeployConfirmationDialogTitle"], //$NON-NLS-0$
+								confirmMessage: messages["redeployConfirmationDialogMessage"], //$NON-NLS-0$
+								checkboxMessage: messages["redeployConfirmationDialogCheckboxMessage"], //$NON-NLS-0$
+							});
+		
+							var handleDismiss = function(event) {
+								var confirmed = event.value;
+								var doNotConfirmAnymore = event.checkboxValue;
+								
+								if (doNotConfirmAnymore) {
+									// save user preference to no longer display confirmation dialog
+									prefs.put(REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING, true);
+								}
+								
+								if (confirmed) {
+									deploy();
+								}
+							};
+		
+							// add listener which uses project name entered by user to create a new project
+							confirmDialog.addEventListener("dismiss", handleDismiss); //$NON-NLS-0$
+							confirmDialog.show();
+						} else {
+							// app is not running, just deploy again
+							deploy();
+						}
+					}.bind(this), deploy);
+				}
+			}.bind(this));
 		}
 	});
 	
