@@ -269,6 +269,7 @@ define({//Default message bundle
 	"Adding tag {$0}": "Adding tag {$0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Removing tag {$0}": "Removing tag {$0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Merging ${0}": "Merging ${0}", //$NON-NLS-0$  //$NON-NLS-1$
+	"Merging${0}Succeeded" : "Merging ${0} succeeded", //$NON-NLS-0$  //$NON-NLS-1$
 	'Unstaging changes' : 'Unstaging changes', //$NON-NLS-0$  //$NON-NLS-1$
 	"Checking out branch ${0}...": "Checking out branch ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Branch checked out.": "Branch checked out.", //$NON-NLS-0$  //$NON-NLS-1$
@@ -319,13 +320,16 @@ define({//Default message bundle
  	". Go to ${0}.": ". Go to ${0}.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Git Status page": "Git Status page", //$NON-NLS-0$  //$NON-NLS-1$
 	"Rebase": "Rebase", //$NON-NLS-0$  //$NON-NLS-1$
+	"RebaseOK": "Rebase succeeded", //$NON-NLS-0$  //$NON-NLS-1$
+	"RebaseAborted": "Rebase aborted", //$NON-NLS-0$  //$NON-NLS-1$
+	"RebaseSucceeded": "${0} succeeded", //$NON-NLS-0$  //$NON-NLS-1$
 	"RebaseCommitsMsg": "Rebase your commits by removing them from the active branch, starting the active branch again based on the latest state of the selected branch ", //$NON-NLS-0$  //$NON-NLS-1$
  	"Rebase on top of ": "Rebase on top of ", //$NON-NLS-0$  //$NON-NLS-1$
-	"RebaseSTOPPED": ". Some conflicts occurred. Please resolve them and continue, skip patch or abort rebasing.", //$NON-NLS-0$  //$NON-NLS-1$
-	"RebaseFAILED_WRONG_REPOSITORY_STATE": ". Repository state is invalid (i.e. already during rebasing).", //$NON-NLS-0$  //$NON-NLS-1$
-	"RebaseFAILED_UNMERGED_PATHS": ". Repository contains unmerged paths.", //$NON-NLS-0$  //$NON-NLS-1$
-	"RebaseFAILED_PENDING_CHANGES": ". Repository contains pending changes. Please commit or stash them.", //$NON-NLS-0$  //$NON-NLS-1$
-	"RebaseUNCOMMITTED_CHANGES": ". There are uncommitted changes.", //$NON-NLS-0$  //$NON-NLS-1$
+	"RebaseSTOPPED": "Some conflicts occurred. Please resolve them and continue, skip patch or abort rebasing.", //$NON-NLS-0$  //$NON-NLS-1$
+	"RebaseFAILED_WRONG_REPOSITORY_STATE": "Repository state is invalid (i.e. already during rebasing).", //$NON-NLS-0$  //$NON-NLS-1$
+	"RebaseFAILED_UNMERGED_PATHS": "Repository contains unmerged paths.", //$NON-NLS-0$  //$NON-NLS-1$
+	"RebaseFAILED_PENDING_CHANGES": "Repository contains pending changes. Please commit or stash them before performing the rebase again.", //$NON-NLS-0$  //$NON-NLS-1$
+	"RebaseUNCOMMITTED_CHANGES": "There are uncommitted changes. Please commit or stash them before performing the rebase again.", //$NON-NLS-0$  //$NON-NLS-1$
 	"RebaseCommitsByRmvingThem": "Rebase your commits by removing them from the active branch, ", //$NON-NLS-0$  //$NON-NLS-1$
 	"StartActiveBranch": "starting the active branch again based on the latest state of '", //$NON-NLS-0$  //$NON-NLS-1$
 	"ApplyEachCommitAgain": "and applying each commit again to the updated active branch.", //$NON-NLS-0$  //$NON-NLS-1$
@@ -339,6 +343,8 @@ define({//Default message bundle
 	"Force Push Branch": "Force Push Branch", //$NON-NLS-0$  //$NON-NLS-1$
 	"PushCommitsWithoutTagsOverridingCurrentContent": "Push commits without tags from your local branch into the remote branch overriding its current content", //$NON-NLS-0$  //$NON-NLS-1$
  	"Pushing remote: ": "Pushing remote: ", //$NON-NLS-0$  //$NON-NLS-1$
+ 	"PushingRemoteSucceeded": "Pushing to remote: ${0} succeeded", //$NON-NLS-0$  //$NON-NLS-1$
+ 	"PushingGerritChangeSucceeded": "Pushing to gerrit ${0} succeeded: ${1}", //$NON-NLS-0$  //$NON-NLS-1$
 	"ChooseBranchDialog": "Choose Branch", //$NON-NLS-0$  //$NON-NLS-1$
 	"Choose the remote branch.": "Choose the remote branch.", //$NON-NLS-0$  //$NON-NLS-1$
 	"Force Push All": "Force Push All", //$NON-NLS-0$  //$NON-NLS-1$
