@@ -56,6 +56,10 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 		patterns: [
 			{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
 			{include: "orion.lib#string_singleQuote"}, //$NON-NLS-0$
+			{include: "#symbol_quoted_single"}, //$NON-NLS-0$
+			{include: "#symbol_quoted_double"}, //$NON-NLS-0$
+			{include: "#symbol"}, //$NON-NLS-0$
+			{include: "#classRef"}, //$NON-NLS-0$
 			{
 				match: "/(?![\\s])(?:\\\\.|[^/])+/(?:[ioxmuesn]\\b)?", //$NON-NLS-0$
 				name: "string.regexp.ruby" //$NON-NLS-0$
@@ -88,7 +92,6 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 			{include: "orion.lib#parenthesis_close"}, //$NON-NLS-0$
 			{include: "orion.lib#number_decimal"}, //$NON-NLS-0$
 			{include: "orion.lib#number_hex"}, //$NON-NLS-0$
-			{include: "#symbol"}, //$NON-NLS-0$
 			{include: "#variable"}, //$NON-NLS-0$
 			{
 				match: "\\b0[bB][01]+\\b", //$NON-NLS-0$
@@ -112,9 +115,20 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 			}
 		],
 		repository: {
+			classRef: {
+				match: "\\w+::\\w+" //$NON-NLS-0$
+			},
 			symbol: {
 				match: ":\\w+", //$NON-NLS-0$
 				name: "entity.name.symbol.ruby" //$NON-NLS-0$
+			},
+			symbol_quoted_single: {
+				match: ":'[^']*'", //$NON-NLS-0$
+				name: "entity.name.symbol.quoted.single.ruby" //$NON-NLS-0$
+			},
+			symbol_quoted_double: {
+				match: ':"[^"]*"', //$NON-NLS-0$
+				name: "entity.name.symbol.quoted.double.ruby" //$NON-NLS-0$
 			},
 			variable: {
 				match: "@\\w+", //$NON-NLS-0$
