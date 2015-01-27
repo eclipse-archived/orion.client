@@ -44,7 +44,16 @@ define([
 				
 				setText: function(text, start, end) {
 				    assertFixes(text, start, end, options.expected);
-				}
+				},
+				
+				getFileMetadata: function() {
+    			    var o = Object.create(null);
+    			    o.contentType = Object.create(null);
+    			    o.contentType.id = contentType;
+    			    o.location = 'quickfix_test_script.js';
+    			    return new Deferred().resolve(o);
+    			}
+				
 			};
 			return {
 			    validator: validator,

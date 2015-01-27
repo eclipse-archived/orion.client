@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -15,9 +15,10 @@ define([
 	"orion/objects",
 	"javascript/astManager",
 	"javascript/finder",
+	'javascript/compilationUnit',
 	"orion/i18nUtil",
 	"i18n!javascript/nls/problems"
-], function(eslint, Objects, ASTManager, Finder, i18nUtil, messages) {
+], function(eslint, Objects, ASTManager, Finder, CU, i18nUtil, messages) {
 	var config = {
 		// 0:off, 1:warning, 2:error
 		rules: {
@@ -251,34 +252,25 @@ define([
 		 * @param {Object} context The in-editor context (selection, offset, etc)
 		 * @returns {orion.Promise} A promise to compute some problems
 		 */
-		computeProblems: function(editorContext, context) {
+		computeProblems: function(editorContext /*, context*/) {
 			var _self = this;
-			switch(context.contentType) {
-				case 'text/html': //$NON-NLS-0$
-					return editorContext.getText().then(function(text) {
-						var blocks = Finder.findScriptBlocks(text);
-						var len = blocks.length;
-						var allproblems = [];
-						for(var i = 0; i < len; i++) {
-							//we don't want to cache these ASTs so call into the private parse method of the manager
-							var block = blocks[i];
-							var ast = _self.astManager.parse(block.text);
-							var problems = _self._validateAst(ast).problems;
-							var len2 = problems.length;
-							for(var j = 0; j < len2; j++) {
-								//patch the start of the problem for the script block offset
-								problems[j].start += block.offset; 
-								problems[j].end += block.offset; 
-							}
-							allproblems = allproblems.concat(problems);
-						}
-						return {problems: allproblems};
-					});
-				case 'application/javascript': //$NON-NLS-0$
-					return this.astManager.getAST(editorContext).then(function(ast) {
-						return _self._validateAst(ast);
-					});
-			}
+			return editorContext.getFileMetadata().then(function(meta) {
+			    if(meta.contentType.id === 'text/html') {
+			        return editorContext.getText().then(function(text) {
+			            var blocks = Finder.findScriptBlocks(text);
+			            if(blocks && blocks.length > 0) {
+			                var cu = new CU(blocks, meta);
+			                return _self.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+            					return _self._validateAst(ast);
+            				});
+			            }
+			        });
+			    } else {
+    			    return _self.astManager.getAST(editorContext).then(function(ast) {
+    					return _self._validateAst(ast);
+    				});
+				}
+			});
 		},
 		
 		/**

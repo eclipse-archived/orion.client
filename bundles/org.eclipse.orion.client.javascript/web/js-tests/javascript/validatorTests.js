@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -39,7 +39,16 @@ define([
 				/*override*/
 				getText: function() {
 					return new Deferred().resolve(buffer);
-				}
+				},
+				
+				getFileMetadata: function() {
+    			    var o = Object.create(null);
+    			    o.contentType = Object.create(null);
+    			    o.contentType.id = contentType;
+    			    o.location = 'validator_test_script.js';
+    			    return new Deferred().resolve(o);
+    			}
+				
 			};
 			return {
 				validator: validator,
