@@ -49,6 +49,7 @@ define([
 			    if(results) {
     			    var token = Util.findToken(ctxt.offset, results.tokens);
     				if (token){
+    				    //TODO, investigate creating an AST in the CSS parser, walking tokens can be expensive
     				    if(that.hasPreviousToken(token, results.tokens, 'IMPORT_SYM')) {
     				        return that._getFileHover(token);
     				    }
@@ -68,6 +69,13 @@ define([
     					if (/\#[0-9A-Fa-f]{1,6}/.test(token.value)){
     						return that._getColorHover(token.value);	
     					}
+    					tok = that._isFontFamily(token, results.tokens);
+    					if(tok) {
+    					    var font = that._collectFontId(tok, results.tokens);
+    					    if(font) {
+    					        return that._getFontHover(font);
+    					    }
+    					}
     				}
 				}
 				return null;
@@ -78,6 +86,63 @@ define([
 		    var config = Object.create(null);
 		    config.getRuleSet = function() {return null;};
 		    return config;
+		},
+		
+		_isFontFamily: function _isFontFamily(token, tokens) {
+		    if(token && tokens) {
+		        for(var i = token.index; i > -1; i--) {
+		            var tok = tokens[i];
+		            if(tok.type === 'IDENT' || tok.type === 'COMMA' || tok.type === 'STRING') {
+		                continue;
+		            } else if(tok.type === 'COLON') {
+		                //the next one would have to be IDENT and 'font-family'
+		                tok = tokens[i-1];
+		                if(tok.type === 'IDENT' && tok.value.toLowerCase() === 'font-family') {
+		                    tok.index = i-1;
+		                    return tok;
+		                } else {
+		                    return null;
+		                }
+		            } else {
+		                break;
+		            }
+		        }
+		    }
+		    return null;
+		},
+		
+		_collectFontId: function _collectFontId(token, tokens) {
+		    if(token && tokens) {
+		        var id = '';
+		        var next = null;
+		        var idx = token.index;
+		        //skip the colon
+		        if(tokens[idx+1].type !== 'COLON') {
+		            return null;
+		        }
+		        ++idx;
+		        for(var i = idx+1; i < tokens.length; i++) {
+		            next = tokens[i];
+		            if(next.type === 'IDENT' || next.type === 'COMMA' || next.type === 'STRING') {
+		                id += next.value;
+		                if(i < tokens.length-1) {
+		                    id += ' ';
+		                }
+		                continue;
+		            }
+		            if(next.type === 'RBRACE' || next.type === 'SEMICOLON') {
+		                return id;
+		            } else {
+		                break;
+		            }
+		        }
+		    }
+		    return null;
+		},
+		
+		_getFontHover: function _getColorHover(font){
+			var html = '<html><body><div style="font-family:'+font+';margin:0px">Lorem ipsum dolor...</div></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
+			return {type: "html", content: html, height: '42px', width: '235px'};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
 		},
 		
 		_isColorFnName: function _isColorFnName(name) {
