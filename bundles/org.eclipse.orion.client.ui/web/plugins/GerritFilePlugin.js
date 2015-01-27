@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * Copyright (c) 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -43,9 +43,9 @@ define(["orion/plugin", "orion/Deferred", "plugins/filePlugin/GerritFileImpl", "
 	};
 	var provider = new PluginProvider(headers);
 	var url = new URL(window.location.href);
-	var segments = url.href.split("/");
-	var project = segments[4] + "/" + segments[5];
-	var baseURL = new URL(window.location.origin);
+	var project = url.query.get("project");
+	var baseURL = new URL("../..", url);
+	baseURL.search = "";
 	var service = new GerritFileImpl(baseURL.href, project);
 
 	provider.registerService("orion.core.file", service, {

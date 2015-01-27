@@ -20,15 +20,19 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 		// url templates for the Git router service requests
 		this._listTemplate = new URITemplate(pluginURL + "/git/{project}/list{/ref}{/path}");
 		this._contentTemplate = new URITemplate(pluginURL + "/git/{project}/contents{/ref}{/path}");
-		this._repoURL = decodeURIComponent(this._listTemplate.expand({project: project}));
+		this._repoURL = this._listTemplate.expand({project: project});
 	}
 
 	GerritFileImpl.prototype = {
 		_handleError: function(error) {
-			var errorMessage = "Unable to display repository contents at this time. Please try again later.";
-			var severity = "Warning";
-			var errorObj = {Severity: severity, Message: errorMessage};
-			error.responseText = JSON.stringify(errorObj);
+			// pass the expected error from the gerrit server as is
+			// currently the 501 error carries the git submodule error message
+			if(!error.status || error.status !== 501) {
+				var errorMessage = "Unable to display repository contents at this time. Please try again later.";
+				var severity = "Warning";
+				var errorObj = {Severity: severity, Message: errorMessage};
+				error.responseText = JSON.stringify(errorObj);
+			}
 			return new Deferred().reject(error);
 		},
 		_getParents: function(location) {
@@ -44,7 +48,7 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			var result = [];
 			
 			// root location of the file browser repo, this is static
-			var rootLocation = decodeURIComponent(this._listTemplate.expand({project: project, ref: ref}));
+			var rootLocation = this._listTemplate.expand({project: project, ref: ref});
 			// relative parent location of the repo (i.e. one directory below current context)
 			var parentLocation = "";
 			
@@ -54,10 +58,10 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			var segments = path.split("/");
 			segments.pop(); // pop off the current name
 			if (segments.length > 0) {
-				parentLocation = decodeURIComponent(this._listTemplate.expand({project: project, ref: ref, path: segments.join("/")}));
+				parentLocation = this._listTemplate.expand({project: project, ref: ref, path: segments.join("/")});
 			}
 			else {
-				parentLocation = decodeURIComponent(this._listTemplate.expand({project: project, ref: ref}));
+				parentLocation = this._listTemplate.expand({project: project, ref: ref});
 			}
 			
 			result.push({
@@ -70,7 +74,7 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			for (var i = 0; i < segments.length; ++i) {
 				var parentName = segments[i];
 				parentPath += parentName;
-				parentLocation = decodeURIComponent(this._listTemplate.expand({project: project, ref: ref, path: parentPath}));
+				parentLocation = this._listTemplate.expand({project: project, ref: ref, path: parentPath});
 				result.push({
 					Name: parentName,
 					Location: parentLocation,
@@ -94,7 +98,7 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 					if(entry.path === "") {
 						entry.path = null;
 					}
-					var location = decodeURIComponent(template.expand({project: entry.project, ref: ref, path: entry.path}));
+					var location = template.expand({project: entry.project, ref: ref, path: entry.path});
 					var result = {
 						Attributes: {
 							Archive: false,
