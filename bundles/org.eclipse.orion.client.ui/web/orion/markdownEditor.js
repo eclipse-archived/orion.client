@@ -25,8 +25,9 @@ define([
 	'orion/webui/littlelib',
 	'orion/URITemplate',
 	'orion/webui/splitter',
+	'orion/metrics',
 	'orion/URL-shim'
-], function(i18nUtil, messages, marked, mCommands, mKeyBinding, mAnnotations, mEditor, mTextStyler, mTextUtil, mFileCommands, objects, lib, URITemplate, mSplitter) {
+], function(i18nUtil, messages, marked, mCommands, mKeyBinding, mAnnotations, mEditor, mTextStyler, mTextUtil, mFileCommands, objects, lib, URITemplate, mSplitter, mMetrics) {
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	var extensionRegex = /\.([0-9a-z]+)(?:[\?#]|$)/i;
@@ -673,7 +674,11 @@ define([
 				/* marked.Lexer.rules.normal.bullet is not global, so cannot set its lastIndex */
 				text = text.substring(index);
 				match = marked.Lexer.rules.normal.bullet.exec(text);
-				index += match.index + match[0].length;
+				if (match) {
+					index += match.index + match[0].length;
+				} else {
+					mMetrics.logEvent("status", "error", "MD1 " + token.type + " index=" + index + ": " + text.substring(Math.max(0, index - 10), index + 40)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				}
 			}
 			return index;
 		},

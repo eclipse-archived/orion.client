@@ -376,7 +376,7 @@ define([
 			function errorHandler(error) {
 				self.reportStatus("");
 				var errorMsg = handleError(statusService, error);
-				mMetrics.logEvent("status", "error", (self._autoSaveActive ? "Auto-save: " : "Save: ") + errorMsg.Message); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				mMetrics.logEvent("status", "exception", (self._autoSaveActive ? "Auto-save: " : "Save: ") + errorMsg.Message); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				self._errorSaving = true;
 				return done();
 			}
