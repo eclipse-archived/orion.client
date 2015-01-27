@@ -159,15 +159,28 @@ define([
         	        }
     	        } else {
     	            var name = path.slice(path.lastIndexOf('/')+1);
-    	            title = '###Open file for \''+name+'\'###';
-    	            var img = null;
-    	             if(/\.css$/i.test(path)) {
-    		            img = '../webtools/images/css.png';
-    		        } else if(/\.htm.*/i.test(path)) {
-    		            img = '../webtools/images/html.png';
-    		        }
-	                hover += '[!['+name+']('+img+')';
-	                hover += name + ']('+path+') - '+path+'\n\n';
+    	            if(name.length < 1 && /^\s*http:/i.test(path)) {
+    	               name = /^\s*http\s*:\s*\/\s*\/\s*(.*)/i.exec(path);
+    	               name = name[1];
+    	               if(name.charAt(name.length-1) === '/') {
+    	                   name = name.slice(0, name.length-1);
+    	               }
+    	               title = '###Open site \''+name+'\'';
+    	               hover += '[!['+name+'](../webtools/images/html.png)';
+    	               hover += name + ']('+path+')\n\n';
+    	            } else {
+    	               title = '###Open file for \''+name+'\'###';
+        	            var img = null;
+        	             if(/\.css$/i.test(path)) {
+        		            img = '../webtools/images/css.png';
+        		        } else if(/\.htm.*/i.test(path)) {
+        		            img = '../webtools/images/html.png';
+        		        } else {
+        		            img = '../webtools/images/file.png';
+        		        }
+        		        hover += '[!['+name+']('+img+')';
+    	                hover += name + ']('+path+') - '+path+'\n\n';
+	                }
     	        }
     	        if(hover !== '') {
     	           return {title: title, content: hover, type:'markdown'};
