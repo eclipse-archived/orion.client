@@ -147,6 +147,7 @@
 	color: #222;
 	display: flex;
 	display: -webkit-flex;				/* Safari */
+	display: -ms-flexbox;               /*IE10*/
 	margin-top: 17px;
 	padding-bottom: 20px;
 	width: 100%;
