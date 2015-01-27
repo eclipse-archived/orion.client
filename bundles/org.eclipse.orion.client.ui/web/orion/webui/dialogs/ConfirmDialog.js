@@ -56,6 +56,10 @@ define([
 			ConfirmMessage: options.confirmMessage
 		};
 		
+		if (options.checkboxMessage) {
+			this.messages.CheckboxMessage = options.checkboxMessage;
+		}
+		
 		this.modal = true;
 		
 		if (options.yesNoDialog) {
@@ -71,6 +75,15 @@ define([
 		}
 		
 		this._initialize(); //superclass function
+		this.$frame.classList.add("confirmDialog"); //$NON-NLS-0$
+		
+		var checkboxWrapper = lib.$(".checkboxWrapper", this.$frame); //$NON-NLS-0$
+		
+		if (options.checkboxMessage) {
+			this._checkbox = lib.$("input.confirmDialogCheckbox", checkboxWrapper); //$NON-NLS-0$
+		} else {
+			this.$frame.removeChild(checkboxWrapper);
+		}
 	};
 
 	ConfirmDialog.prototype._bindToDom = function(/*parent*/) {
@@ -93,8 +106,13 @@ define([
 	 * Dispatches a {@link orion.webui.dialogs.DismissEvent} and hides the dialog. 
 	 */
 	ConfirmDialog.prototype._dismiss = function(value) {
-		this.dispatchEvent({ type: "dismiss", value: value });
+		var event = { type: "dismiss", value: value }; //$NON-NLS-0$
+		if (this._checkbox) {
+			event.checkboxValue = this._checkbox.checked;
+		}
+		
 		this.hide();
+		this.dispatchEvent(event);
 	};
 
 	return {ConfirmDialog: ConfirmDialog};

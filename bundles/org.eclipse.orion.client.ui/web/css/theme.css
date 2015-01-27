@@ -903,3 +903,18 @@ a.breadcrumb.currentLocation {
 	-webkit-transition: opacity 0.2s ease-in;
 	transition: opacity 0.2s ease-in;
 }
+
+.confirmDialog {
+	min-width: 300px;
+	max-width: 450px;
+}
+
+.confirmDialog .checkboxWrapper {
+	margin: 10px 2px 5px 2px;
+}
+
+.checkboxMessage > .confirmDialogCheckbox {
+	margin: 0 5px 0 0;
+	outline: none;
+	vertical-align: top;
+}
