@@ -720,10 +720,10 @@ var exports = {};
 				progress.progress(gitService.doMerge(item.HeadLocation, item.Name, false), msg).then(function(result){
 					var display = {};
 
-					if (result.Result === "FAST_FORWARD" || result.Result === "ALREADY_UP_TO_DATE"){ //$NON-NLS-1$ //$NON-NLS-0$
+					if (result.Result === "FAST_FORWARD" || result.Result === "ALREADY_UP_TO_DATE") { //$NON-NLS-1$ //$NON-NLS-0$
 						display.Severity = "Ok"; //$NON-NLS-0$
 						display.HTML = false;
-						display.Message = result.Result;
+						display.Message = i18nUtil.formatMessage(messages["Merging${0}Succeeded"], item.Name);
 					} else if(result.Result){
 						display.Severity = "Warning"; //$NON-NLS-0$
 						display.HTML = true;
@@ -798,7 +798,7 @@ var exports = {};
 					if (result.Result === "FAST_FORWARD_SQUASHED" || result.Result === "ALREADY_UP_TO_DATE"){ //$NON-NLS-1$ //$NON-NLS-0$
 						display.Severity = "Ok"; //$NON-NLS-0$
 						display.HTML = false;
-						display.Message = result.Result;
+						display.Message = i18nUtil.formatMessage(messages["Merging${0}Succeeded"], item.Name);
 					} else if(result.Result){
 						display.Severity = "Warning"; //$NON-NLS-0$
 						display.HTML = true;
@@ -849,8 +849,8 @@ var exports = {};
 			var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 			var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").doRebase(item.HeadLocation, item.Name, "BEGIN"), item.Name ? messages["Rebase on top of "] + item.Name: messages['Rebase']); //$NON-NLS-1$ //$NON-NLS-0$
-			progressService.createProgressMonitor(deferred, 
-			item.Name ? messages["Rebase on top of "] + item.Name: messages['Rebase']);
+			var rebaseMessage = item.Name ? messages["Rebase on top of "] + item.Name: messages['Rebase'];
+			progressService.createProgressMonitor(deferred, rebaseMessage);
 			deferred.then(
 				function(jsonData){
 					var display = {};
@@ -874,12 +874,12 @@ var exports = {};
 					}
 					if (display.Severity === "Ok") { //$NON-NLS-0$
 						display.HTML = false;
-						display.Message = jsonData.Result;
+						display.Message = i18nUtil.formatMessage(messages["RebaseSucceeded"], rebaseMessage);
 						d.resolve(jsonData);
 					} else {
 						display.HTML = true;
 						var msg = messages["Rebase" + jsonData.Result];
-						display.Message = "<span>" + jsonData.Result + (msg ? msg : "") + "</span>"; //$NON-NLS-1$ //$NON-NLS-0$ 
+						display.Message = "<span>" +  (msg ? msg : jsonData.Result) + "</span>"; //$NON-NLS-1$ //$NON-NLS-0$ 
 						d.reject(jsonData);
 					}
 					serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
@@ -2109,10 +2109,15 @@ var exports = {};
 			deferred.then(
 				function(jsonData){
 					var display = {};
-					if (jsonData.Result === "OK" || jsonData.Result === "ABORTED" || jsonData.Result === "FAST_FORWARD" || jsonData.Result === "UP_TO_DATE") { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					if (jsonData.Result === "OK" || jsonData.Result === "FAST_FORWARD" || jsonData.Result === "UP_TO_DATE") { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						display.Severity = "Ok"; //$NON-NLS-0$
 						display.HTML = false;
-						display.Message = jsonData.Result;
+						display.Message = messages["RebaseOK"]; //$NON-NLS-0$
+						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+					} else if (jsonData.Result === "ABORTED") { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						display.Severity = "Ok"; //$NON-NLS-0$
+						display.HTML = false;
+						display.Message = messages["RebaseAborted"]; //$NON-NLS-0$
 						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 					} else if (jsonData.Result === "STOPPED") { //$NON-NLS-0$
 						display.Severity = "Warning"; //$NON-NLS-0$
