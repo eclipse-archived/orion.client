@@ -48,6 +48,7 @@ define([
 			var buffer = options.buffer,
 			    prefix = options.prefix,
 			    offset = options.offset,
+			    contentType = options.contenttype ? options.contenttype : 'application/javascript',
 			    lintOptions = options.lintOptions,
 			    editorContextMixin = options.editorContextMixin || {},
 			    paramsMixin = options.paramsMixin || {};
@@ -75,7 +76,15 @@ define([
 				/*override*/
 				getText: function() {
 					return new Deferred().resolve(buffer);
-				}
+				},
+				
+				getFileMetadata: function() {
+    			    var o = Object.create(null);
+    			    o.contentType = Object.create(null);
+    			    o.contentType.id = contentType;
+    			    o.location = 'content_assist_test_script.js';
+    			    return new Deferred().resolve(o);
+    			}
 			};
 			
 			var params = {offset: offset, prefix : prefix, keyword: false, template: false };

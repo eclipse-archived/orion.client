@@ -359,7 +359,7 @@ define([
 		        }
 		        return editorContext.getText().then(function(text) {
 		            var scripts = Finder.findScriptBlocks(text);
-		            if(scripts.length > 0) {
+		            if(that._inBlockRange(scripts, ctxt.offset)) {
     		            var cu = new CU(scripts, meta);
     		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
             				return that._doHover(ast, editorContext, ctxt);
@@ -369,6 +369,29 @@ define([
 		        });
 		    });
 			
+		},
+		
+        /**
+		 * @description Returns if the given offset falls within the ranges of any of the given script blocks
+		 * @function
+		 * @private
+		 * @param {Array.<Object>} blocks The array of script blocks
+		 * @param {Number} offset The offset assist was activated at
+		 * @returns {Boolean} If the given offset falls within any of the script block ranges
+		 * @since 8.0
+		 */
+		_inBlockRange: function _inBlockRange(blocks, offset) {
+		    if(!blocks || blocks.length < 1 || offset < 0) {
+		        return false;
+		    }
+		    for(var i = 0; i < blocks.length; i++) {
+		        var block = blocks[i];
+		        var idx = block.offset;
+		        if(offset >= idx && offset <= idx+block.text.length) {
+		            return true;
+		        }
+		    }
+		    return false;
 		},
 		
 		_doHover: function _doHover(ast, editorContext, ctxt) {

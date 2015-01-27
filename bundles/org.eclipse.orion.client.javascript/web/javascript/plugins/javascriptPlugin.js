@@ -378,7 +378,7 @@ define([
 		
 		provider.registerService("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager),  //$NON-NLS-0$
 				{
-			contentType: ["application/javascript"],  //$NON-NLS-0$
+			contentType: ["application/javascript", 'text/html'],  //$NON-NLS-0$
 			nls: 'javascript/nls/messages',  //$NON-NLS-0$
 			name: javascriptMessages["contentAssist"],  //$NON-NLS-0$
 			id: "orion.edit.contentassist.javascript",  //$NON-NLS-0$

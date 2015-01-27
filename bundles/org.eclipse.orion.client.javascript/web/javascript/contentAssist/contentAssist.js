@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2014 VMware, Inc. and others.
+ * Copyright (c) 2012, 2015 VMware, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -28,9 +28,10 @@ define([
 	'javascript/signatures',
 	'eslint/load-rules-async',
 	'eslint/conf/environments',
-	'javascript/hover'
+	'javascript/hover',
+	'javascript/compilationUnit'
 ], function(typeEnv, typeInf, typeUtils, proposalUtils, mTemplates, JSSyntax, Templates, Deferred, Objects, Estraverse, Indexer,
-            Finder, Signatures, Rules, ESLintEnv, Hover) {
+            Finder, Signatures, Rules, ESLintEnv, Hover, CU) {
 
 	/**
 	 * @description Creates a new delegate to create keyword and template proposals
@@ -209,15 +210,56 @@ define([
 		 */
 		computeContentAssist: function(editorContext, params) {
 			var self = this;
-			return Deferred.all([
-				this.astManager.getAST(editorContext),
-				this._createIndexData(editorContext, params)
-			]).then(function(results) {
-				var ast = results[0];
-				return self._computeProposalsFromAST(ast, ast.source, params);
+			return editorContext.getFileMetadata().then(function(meta) {
+			    if(meta.contentType.id === 'text/html') {
+			        return editorContext.getText().then(function(text) {
+			            var blocks = Finder.findScriptBlocks(text);
+    			        if(self._inBlockRange(blocks, params.offset)) {
+    			            var cu = new CU(blocks, meta);
+    			            return Deferred.all([
+                				self.astManager.getAST(cu.getEditorContext()),
+                				self._createIndexData(editorContext, params)
+                			]).then(function(results) {
+                				var ast = results[0];
+                				return self._computeProposalsFromAST(ast, ast.source, params);
+                			});
+    			        }
+			        });
+			    } else {
+			        return Deferred.all([
+        				self.astManager.getAST(editorContext),
+        				self._createIndexData(editorContext, params)
+        			]).then(function(results) {
+        				var ast = results[0];
+        				return self._computeProposalsFromAST(ast, ast.source, params);
+        			});
+			    }
 			});
-
 		},
+		
+		/**
+		 * @description Returns if the given offset falls within the ranges of any of the given script blocks
+		 * @function
+		 * @private
+		 * @param {Array.<Object>} blocks The array of script blocks
+		 * @param {Number} offset The offset assist was activated at
+		 * @returns {Boolean} If the given offset falls within any of the script block ranges
+		 * @since 8.0
+		 */
+		_inBlockRange: function _inBlockRange(blocks, offset) {
+		    if(!blocks || blocks.length < 1 || offset < 0) {
+		        return false;
+		    }
+		    for(var i = 0; i < blocks.length; i++) {
+		        var block = blocks[i];
+		        var idx = block.offset;
+		        if(offset >= idx && offset <= idx+block.text.length) {
+		            return true;
+		        }
+		    }
+		    return false;
+		},
+		
 		/**
 		 * @description Reshapes typedefs into the expected format, sets up indexData
 		 * @function
