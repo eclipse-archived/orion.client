@@ -10,15 +10,15 @@
  ******************************************************************************/
 
 /*global define document console window*/
-/*jslint forin:true regexp:false sub:true*/
+/*eslint forin:true regexp:false sub:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 
 	'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/compare/compareView', 
-	'orion/highlight', 'orion/explorers/navigationUtils', 'orion/webui/tooltip', 'orion/explorers/navigatorRenderer', 'orion/extensionCommands',
+	'orion/highlight', 'orion/webui/tooltip', 'orion/explorers/navigatorRenderer', 'orion/extensionCommands',
 	'orion/searchModel', 'orion/crawler/searchCrawler', 'orion/explorers/fileDetailRenderer'
 ],
 function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mFileClient, mCommands, 
-	mSearchUtils, mCompareView, mHighlight, mNavUtils, mTooltip, 
+	mSearchUtils, mCompareView, mHighlight, mTooltip, 
 	navigatorRenderer, extensionCommands, mSearchModel, mSearchCrawler, mFileDetailRenderer
 ) {
     /* Internal wrapper functions*/
@@ -159,7 +159,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     
     // TODO:  this should be handled outside of here in a common select all command
     // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339500
-    SearchResultRenderer.prototype.initCheckboxColumn = function(tableNode) {
+    SearchResultRenderer.prototype.initCheckboxColumn = function(/*tableNode*/) {
         if (this._useCheckboxSelection) {
             var th = _createElement('th'); //$NON-NLS-0$
             var check = _createElement("span", null, null, th); //$NON-NLS-0$
@@ -186,36 +186,14 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     	}
 	};
 
-    SearchResultRenderer.prototype.staleFileElement = function(item) {
-        if (item.stale) {
-        	// replace file icon and twistie with a warning icon
-        	var span = lib.node(this.getFileIconId(item));
-            _empty(span);
-            span.classList.add("imageSprite"); //$NON-NLS-0$
-            span.classList.add("core-sprite-warning"); //$NON-NLS-0$
-            span.classList.add("staleSearchResultIcon"); //$NON-NLS-0$
-            
-            // add tooltip to warning icon
-            this.explorer.staleTooltips.push(new mTooltip.Tooltip({
-	            node: span,
-	            showDelay: 0,
-	            position: ["above", "right", "below"],
-	            text: messages["staleFileTooltip"]
-	        }));
-        }
-    };
-    
     SearchResultRenderer.prototype.replaceFileElement = function(item) {
 		if(item.totalMatches) {
 			var fileNameElement = this._getFileNameElement(item);
 			var linkDiv = lib.node(this.getItemLinkId(item));
 			linkDiv.removeChild(linkDiv.lastElementChild);
 			linkDiv.appendChild(fileNameElement);
-	    } else {
-			item.stale = true;
-			this.staleFileElement(item);
-	    }
-    };
+	    }    
+	};
 
     SearchResultRenderer.prototype.replaceDetailIcon = function(item, direction) {
         if (this.enableCheckbox(item)) {
@@ -383,7 +361,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		this._contentTypeService = new mContentTypes.ContentTypeRegistry(this.registry);
 		this._inlineSearchPane = inlineSearchPane;
 		this._preferences = preferences;
-		this.staleTooltips = [];
 		this._replaceRenderer =  new SearchResultRenderer({
             checkbox: true,
             highlightSelection: false,
@@ -410,7 +387,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
      * Clients can connect to this function to receive notification when the root item changes.
      * @param {Object} item
      */
-    InlineSearchResultExplorer.prototype.onchange = function(item) {};
+    InlineSearchResultExplorer.prototype.onchange = function(/*item*/) {};
 
     InlineSearchResultExplorer.prototype.setResult = function(parentNode, model) {
         this.parentNode = parentNode;
@@ -443,10 +420,10 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             name: messages["Apply Changes"],
             tooltip: messages["Replace all selected matches"],
             id: "orion.globalSearch.replaceAll", //$NON-NLS-0$
-            callback: function(data) {
+            callback: function(/*data*/) {
                 that.replaceAll();
             },
-            visibleWhen: function(item) {
+            visibleWhen: function(/*item*/) {
                 return that.model && that.model.replaceMode() && !that._reporting && that._hasCheckedItems;
             }
         });
@@ -456,7 +433,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             imageClass: "core-sprite-move-down", //$NON-NLS-0$
             id: "orion.search.nextResult", //$NON-NLS-0$
             groupId: "orion.searchGroup", //$NON-NLS-0$
-            visibleWhen: function(item) {
+            visibleWhen: function(/*item*/) {
                 return !that._reporting && (that.getItemCount() > 0);
             },
             callback: function() {
@@ -468,7 +445,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             imageClass: "core-sprite-move-up", //$NON-NLS-0$
             id: "orion.search.prevResult", //$NON-NLS-0$
             groupId: "orion.searchGroup", //$NON-NLS-0$
-            visibleWhen: function(item) {
+            visibleWhen: function(/*item*/) {
                 return !that._reporting && (that.getItemCount() > 0);
             },
             callback: function() {
@@ -484,7 +461,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             groupId: "orion.searchGroup", //$NON-NLS-0$
             type: "switch", //$NON-NLS-0$
             checked: this._shouldShowFullPath,
-            visibleWhen: function(item) {
+            visibleWhen: function(/*item*/) {
                 return (that.getItemCount() > 0);
             },
             callback: function() {
@@ -516,51 +493,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._commandService.registerCommandContribution("searchPageActions", "orion.search.switchFullPath", 6); //$NON-NLS-1$ //$NON-NLS-0$
     };
 
-    InlineSearchResultExplorer.prototype._checkStale = function(model) {
-        return this.registry.getService("orion.page.progress") //$NON-NLS-0$
-            .progress(this.fileClient.read(model.location), "Checking file " + model.location + " for stale") //$NON-NLS-1$ //$NON-NLS-0$
-            .then(function(contents) {
-            if (this.model.staleCheck(contents)) {
-                model.stale = false;
-            }
-        }.bind(this), function(error) {
-            console.error("Error loading file contents: " + error.message); //$NON-NLS-0$
-            throw error;
-        }.bind(this));
-    }; 
-    
-    InlineSearchResultExplorer.prototype.staleCheck = function(){
-        var promises = [];
-		_validFiles(this.model).forEach(function(fileItem) {
-			promises.push(this._loadFileMetaData(fileItem));
-		}.bind(this));
-		return Deferred.all(promises, function(error) { return {_error: error}; });
-    };
-    
-    InlineSearchResultExplorer.prototype._loadFileMetaData = function(fileItem) {
-        return this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location, true), "Getting file metadata " + fileItem.location).then( //$NON-NLS-1$ //$NON-NLS-0$
-	        function(meta) {
-	            fileItem.fullPathName = mSearchUtils.fullPathNameByMeta(meta.Parents);
-	            fileItem.parentLocation = meta.Parents[0].Location;
-	            fileItem.stale = (fileItem.lastModified !== meta.LocalTimeStamp);
-	            fileItem.ETag = meta.ETag;
-	            if (fileItem.stale) {
-	                return this._checkStale(fileItem).then(function(){
-	                   this.renderer.staleFileElement(fileItem);
-	                }.bind(this));
-	            }
-				return fileItem;
-	        }.bind(this),
-	        function(error) {
-	            console.error("Error loading file metadata: status " + error.status); //$NON-NLS-0$
-	            //If we can't load file meta data we have to stale the file.
-	            fileItem.stale = true;
-	            this.renderer.staleFileElement(fileItem);
-	            throw error;
-	        }.bind(this)
-		);
-    };
-    
     InlineSearchResultExplorer.prototype.setCrawling = function(crawling) {
         this._crawling = crawling;
     };
@@ -595,7 +527,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._reporting = true;
         this.initCommands();
         this.reportStatus(messages["Writing files..."]);
-        this.model.writeReplacedContents(reportList).then(function(modellist) {
+        this.model.writeReplacedContents(reportList).then(function(/*modellist*/) {
             _empty(this.getParentDivId());
             var reporter = new SearchReportExplorer(
             	this.getParentDivId(), 
@@ -647,11 +579,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         if (init) {
             this.gotoCurrent(this.model.restoreLocationStatus ? this.model.restoreLocationStatus() : null);
             this.reportStatus("");
-            if(!this._crawling && this.model.staleCheck) {
-	            this.staleCheck().then(function() {
-	                that.refreshValidFiles();
-	            });
-            }
         } else {
             this.gotoCurrent(this.model.restoreLocationStatus ? this.model.restoreLocationStatus() : null);
         }
@@ -877,7 +804,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }
     };
 
-    InlineSearchResultExplorer.prototype.onExpand = function(modelToExpand, childPosition, callback) {
+    InlineSearchResultExplorer.prototype.onExpand = function(modelToExpand, childPosition/*, callback*/) {
         if (modelToExpand && modelToExpand.children && modelToExpand.children.length > 0 && typeof(childPosition) === "string") { //$NON-NLS-0$
             var childIndex = 0;
             if (childPosition === "first") { //$NON-NLS-0$
@@ -904,7 +831,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     //Provide the key listening div.If not provided this._myTree._parent will be used.
     InlineSearchResultExplorer.prototype.keyEventListeningDiv = function(secondLevel) {
         return lib.node(this.getParentDivId(secondLevel));
-
     };
 
     InlineSearchResultExplorer.prototype.onFocus = function(focus) {
@@ -934,7 +860,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         return false;
     };
 
-    InlineSearchResultExplorer.prototype.onReplaceCursorChanged = function(prevModel, currentModel) {
+    InlineSearchResultExplorer.prototype.onReplaceCursorChanged = function(currentModel) {
     	this._inlineSearchPane.showReplacePreview();
         if (!_onSameFile(this._currentPreviewModel, currentModel)) {
             this.buildPreview();
@@ -972,7 +898,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 			}			
             this._timer = window.setTimeout(function() {
             	this._timer = null;
-                this.onReplaceCursorChanged(prevModel, currentModel);
+                this.onReplaceCursorChanged(currentModel);
             }.bind(this), 200);
         } else if (currentModel.type === "detail") { //$NON-NLS-0$
             if (this._popUpContext) {
@@ -1022,11 +948,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             });
             this.gotoCurrent(this.model.restoreLocationStatus ? this.model.restoreLocationStatus() : null);
             this.reportStatus("");
-            if(!this._crawling && this.model.staleCheck) {
-	            this.staleCheck().then(function() {
-	                that.refreshValidFiles();
-	            });
-            }
         }
     };
 
@@ -1068,32 +989,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }
     };
 
-    InlineSearchResultExplorer.prototype.refreshValidFiles = function() {
-        var newIndex = [];
-        var currentFileItem = _getFileModel(this.getNavHandler().currentModel());
-        var fileList = _validFiles(this.model);
-        for (var i = 0; i < fileList.length; i++) {
-            if (!fileList[i].stale) {
-                newIndex.push(fileList[i]);
-            } else if (currentFileItem === fileList[i]) {
-                currentFileItem = null;
-            }
-        }
-        if(this.model.setValidFileList){
-			this.model.setValidFileList(newIndex);
-        }
-        if (_validFiles(this.model).length === 0) {
-            this.getNavHandler().refreshModel(this.getNavDict(), this.model, _validFiles(this.model));
-            this.getNavHandler().cursorOn(null, true);
-        } else if (!currentFileItem) {
-            this.getNavHandler().cursorOn(null, true);
-            this.getNavHandler().refreshModel(this.getNavDict(), this.model, _validFiles(this.model));
-            this.gotoCurrent();
-        } else {
-            this.getNavHandler().refreshModel(this.getNavDict(), this.model, _validFiles(this.model), true);
-        }
-    };
-
     //provide to the expandAll/collapseAll commands
     InlineSearchResultExplorer.prototype.getItemCount = function() {
     	var count = 0;
@@ -1103,7 +998,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         return count;
     };
 
-    InlineSearchResultExplorer.prototype.getParentDivId = function(secondLevel) {
+    InlineSearchResultExplorer.prototype.getParentDivId = function(/*secondLevel*/) {
     	return this.parentNode.id;
     };
 
@@ -1154,13 +1049,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		var foundValidHit = false;
 		var resultLocation = [];
 		lib.empty(lib.node(resultsNode));
-		
-		// cleanup dead tooltips
-		var deadTooltip = this.staleTooltips.pop();
-		while (deadTooltip) {
-			deadTooltip.destroy();
-			deadTooltip = this.staleTooltips.pop();
-		}
 		
 		if (jsonData.response.numFound > 0) {
 			for (var i=0; i < jsonData.response.docs.length; i++) {
