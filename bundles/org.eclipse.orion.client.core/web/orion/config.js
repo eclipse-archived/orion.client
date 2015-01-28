@@ -308,6 +308,7 @@ ConfigImpl = /** @ignore */ (function() {
 		}
 		// Inherit any property values missing from this configuration
 		if (inheritProperties) {
+			this.properties = this.properties || Object.create(null);
 			var _self = this;
 			Object.keys(inheritProperties).forEach(function(key) {
 				if (key === PROPERTY_PID || Object.prototype.hasOwnProperty.call(_self.properties, key))
