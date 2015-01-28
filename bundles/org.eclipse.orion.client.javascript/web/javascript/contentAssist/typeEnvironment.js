@@ -264,8 +264,6 @@ define([
 					if(docRange && docRange.range) {
 					   type[name].$$doc = docRange.value;
 					   type[name].docRange = docRange.range;
-					} else {
-					   type[name].docRange = docRange;
 					}
 					return type[name];
 				}

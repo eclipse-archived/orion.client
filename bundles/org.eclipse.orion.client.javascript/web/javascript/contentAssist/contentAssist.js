@@ -967,7 +967,7 @@ define([
                 obj.type = 'markdown';
                 var hover = '';
                 if(!definition.$$doc) {
-                    if(definition.docRange) {
+                    if(Array.isArray(definition.docRange)) {
                         hover += Hover.formatMarkdownHover(buffer.slice(definition.docRange[0], definition.docRange[1])).content;
                     } else {
                         hover += proposal.name;
