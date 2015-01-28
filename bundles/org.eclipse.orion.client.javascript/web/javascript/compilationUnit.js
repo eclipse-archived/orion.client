@@ -26,25 +26,22 @@ define([
      * @since 8.0
      */
     function CompilationUnit(sourceblocks, metadata) {
-        this._init(sourceblocks, metadata);
+        this._blocks = sourceblocks;
+        this._metadata = metadata;
     }
     
     Objects.mixin(CompilationUnit.prototype, {
         
         /**
-         * @description Set up the compilation unit
+         * @description Builds the backing source for the compilation unit
          * @function
          * @private
-         * @param {Array.<String>} sourceblocks The blocks of source to compute the unit from 
-         * @param {Object} metadata The metadata describing the file this unit represents
-         * @returns returns
          */
-        _init: function _init(sourceblocks, metadata) {
-            this._metadata = metadata;
+        _init: function _init() {
             var _cursor = 0;
             this._source = '';
-            for(var i = 0; i < sourceblocks.length; i++) {
-                var block = sourceblocks[i];
+            for(var i = 0; i < this._blocks.length; i++) {
+                var block = this._blocks[i];
                 var pad = block.offset - _cursor;
                 while(pad > 0) {
                     this._source += ' ';
@@ -65,6 +62,27 @@ define([
         },
         
         /**
+         * @description Returns if the given offset is valid compared to the blocks of code
+         * that make up this unit
+         * @function
+         * @param {Number} offset The offset to check
+         * @returns {Boolean} If the given offset is within any of the backing code blocks
+         */
+        validOffset: function validOffset(offset) {
+            if(!this._blocks || this._blocks.length < 1 || offset < 0) {
+		        return false;
+		    }
+		    for(var i = 0; i < this._blocks.length; i++) {
+		        var block = this._blocks[i];
+		        var idx = block.offset;
+		        if(offset >= idx && offset <= idx+block.text.length) {
+		            return true;
+		        }
+		    }
+		    return false;
+        },    
+    
+        /**
          * @description Returns an EditorContext-like object tat can resolve promises for <code>getText</code> and <code>getFileMetadata</code>
          * @function
          * @returns {Object} The EditorContext object to use when parsing
@@ -73,6 +91,9 @@ define([
             var proxy = Object.create(null);
             var that = this;
             proxy.getText = function() {
+                if(!that._source) {
+                    that._init();
+                }
                 return new Deferred().resolve(that._source);
             };
             proxy.getFileMetadata = function() {

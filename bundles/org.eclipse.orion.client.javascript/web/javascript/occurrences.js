@@ -47,12 +47,14 @@ define([
 					});
 			    }
 			    return editorContext.getText().then(function(text) {
-    			    var scripts = Finder.findScriptBlocks(text);
-    	            if(scripts.length > 0) {
-    		            var cu = new CU(scripts, meta);
-    		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-            				return Finder.findOccurrences(ast, ctxt);
-            			});
+    			    var blocks = Finder.findScriptBlocks(text);
+    	            if(blocks && blocks.length > 0) {
+    		            var cu = new CU(blocks, meta);
+    		            if(cu.validOffset(ctxt.selection.start)) {
+        		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+                				return Finder.findOccurrences(ast, ctxt);
+                			});
+            			}
         			}
     			});
 			});

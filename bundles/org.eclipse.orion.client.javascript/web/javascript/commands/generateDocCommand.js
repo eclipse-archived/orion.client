@@ -14,8 +14,9 @@ define([
 'orion/objects',
 'javascript/finder',
 'javascript/signatures',
-'orion/Deferred'
-], function(Objects, Finder, Signatures, Deferred) {
+'orion/Deferred',
+'javascript/compilationUnit'
+], function(Objects, Finder, Signatures, Deferred, CU) {
 	
 	/**
 	 * @description Creates a new generate doc command
@@ -34,50 +35,103 @@ define([
 		 */
 		execute: function(editorContext, options) {
 			var that = this;
-			return Deferred.all([
-				this.astManager.getAST(editorContext),
-				editorContext.getCaretOffset()
-			]).then(function(results) {
-			    var ast = results[0];
-				var node = Finder.findNode(results[1], ast, {parents:true});
-				if(node) {
-					var text = ast.source;
-					var parent = that._resolveParent(node);
-					if(parent) {
-						//don't monkey with existing comments
-						var template;
-						var start = parent.range[0];
-						if(parent.type === 'FunctionDeclaration') {  //$NON-NLS-0$
-							template = that._genTemplate(parent.id.name, parent.params, false, parent.range[0], text);
-						} else if(parent.type === 'Property') {  //$NON-NLS-0$
-							template = that._genTemplate((parent.key.name ? parent.key.name : parent.key.value), parent.value.params, true, parent.range[0], text);
-						} else if(parent.type === 'VariableDeclarator') {  //$NON-NLS-0$
-							start = parent.range[0];
-							if(parent.decl) {
-								if(parent.decl.leadingComments) {
-									return;
-								}
-								if(parent.decl.declarations && parent.decl.declarations.length === 1) {
-									start = parent.decl.range[0];
-								}
+			return editorContext.getFileMetadata().then(function(meta) {
+			    if(meta.contentType.id === 'application/javascript') {
+			        return Deferred.all([
+        				that.astManager.getAST(editorContext),
+        				editorContext.getCaretOffset()
+        			]).then(function(results) {
+        				that._doCommand(editorContext, results[0], results[1]);
+        			});
+			    } else {
+			        return Deferred.all([
+			            editorContext.getText(),
+			            editorContext.getCaretOffset()
+			        ]).then(function(results) {
+			            var offset = results[1];
+			            var blocks = Finder.findScriptBlocks(results[0]);
+			            if(blocks && blocks.length > 0) {
+			                var cu = new CU(blocks, meta);
+        			        if(cu.validOffset(offset)) {
+        			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+        			               that._doCommand(editorContext, ast, offset); 
+        			            });
+        			        }
+    			        }
+			        });
+			    }
+			});
+		},
+
+        /**
+		 * @description Returns if the given offset falls within the ranges of any of the given script blocks
+		 * @function
+		 * @private
+		 * @param {Array.<Object>} blocks The array of script blocks
+		 * @param {Number} offset The offset assist was activated at
+		 * @returns {Boolean} If the given offset falls within any of the script block ranges
+		 * @since 8.0
+		 */
+		_inBlockRange: function _inBlockRange(blocks, offset) {
+		    if(!blocks || blocks.length < 1 || offset < 0) {
+		        return false;
+		    }
+		    for(var i = 0; i < blocks.length; i++) {
+		        var block = blocks[i];
+		        var idx = block.offset;
+		        if(offset >= idx && offset <= idx+block.text.length) {
+		            return true;
+		        }
+		    }
+		    return false;
+		},
+		
+		/**
+		 * @description Actually do the work
+		 * @function
+		 * @private
+		 * @returns {Deferred} A deferred to insert the template
+		 * @since 8.0
+		 */
+		_doCommand: function _doCommand(editorContext, ast, offset) {
+		    var node = Finder.findNode(offset, ast, {parents:true});
+			if(node) {
+				var text = ast.source;
+				var parent = this._resolveParent(node);
+				if(parent) {
+					//don't monkey with existing comments
+					var template;
+					var start = parent.range[0];
+					if(parent.type === 'FunctionDeclaration') {  //$NON-NLS-0$
+						template = this._genTemplate(parent.id.name, parent.params, false, parent.range[0], text);
+					} else if(parent.type === 'Property') {  //$NON-NLS-0$
+						template = this._genTemplate((parent.key.name ? parent.key.name : parent.key.value), parent.value.params, true, parent.range[0], text);
+					} else if(parent.type === 'VariableDeclarator') {  //$NON-NLS-0$
+						start = parent.range[0];
+						if(parent.decl) {
+							if(parent.decl.leadingComments) {
+								return;
 							}
-							template = that._genTemplate(parent.id.name, parent.init.params, true, start, text);
-						} else if(parent.type === 'AssignmentExpression') {
-							template = that._genTemplate(Signatures.expandMemberExpression(parent.left, ''), 
-															parent.right.params, 
-															true, 
-															parent.range[0], 
-															text);
+							if(parent.decl.declarations && parent.decl.declarations.length === 1) {
+								start = parent.decl.range[0];
+							}
 						}
-					}
-					if(template) {
-						return Deferred.all([
-										editorContext.setText(template, start, start),
-										editorContext.setCaretOffset(results[1]+template.length)
-										]);
+						template = this._genTemplate(parent.id.name, parent.init.params, true, start, text);
+					} else if(parent.type === 'AssignmentExpression') {
+						template = this._genTemplate(Signatures.expandMemberExpression(parent.left, ''), 
+														parent.right.params, 
+														true, 
+														parent.range[0], 
+														text);
 					}
 				}
-			});
+				if(template) {
+					return Deferred.all([
+									editorContext.setText(template, start, start),
+									editorContext.setCaretOffset(offset+template.length)
+									]);
+				}
+			}
 		},
 		
 		/**

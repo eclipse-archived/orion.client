@@ -98,7 +98,7 @@ define([
 			id : "generate.js.doc.comment",  //$NON-NLS-0$
 			nls: 'javascript/nls/messages',  //$NON-NLS-0$
 			key : [ "j", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
-			contentType: ['application/javascript']  //$NON-NLS-0$
+			contentType: ['application/javascript', 'text/html']  //$NON-NLS-0$
 				}
 		);
 		

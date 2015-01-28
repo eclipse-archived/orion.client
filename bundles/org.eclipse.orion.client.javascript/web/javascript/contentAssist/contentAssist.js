@@ -217,17 +217,19 @@ define([
 			    if(meta.contentType.id === 'text/html') {
 			        return editorContext.getText().then(function(text) {
 			            var blocks = Finder.findScriptBlocks(text);
-    			        if(self._inBlockRange(blocks, params.offset)) {
-    			            var cu = new CU(blocks, meta);
-    			            return Deferred.all([
-                				self.astManager.getAST(cu.getEditorContext()),
-                				self._createIndexData(editorContext, params)
-                			]).then(function(results) {
-                				var ast = results[0];
-                				//auto-assume browser env - https://bugs.eclipse.org/bugs/show_bug.cgi?id=458676
-                				self.lintOptions.options.browser = true;
-                				return self._computeProposalsFromAST(ast, ast.source, params);
-                			});
+			            if(blocks && blocks.length > 0) {
+			                var cu = new CU(blocks, meta);
+        			        if(cu.validOffset(params.offset)) {
+        			            return Deferred.all([
+                    				self.astManager.getAST(cu.getEditorContext()),
+                    				self._createIndexData(editorContext, params)
+                    			]).then(function(results) {
+                    				var ast = results[0];
+                    				//auto-assume browser env - https://bugs.eclipse.org/bugs/show_bug.cgi?id=458676
+                    				self.lintOptions.options.browser = true;
+                    				return self._computeProposalsFromAST(ast, ast.source, params);
+                    			});
+        			        }
     			        }
 			        });
 			    } else {
@@ -240,29 +242,6 @@ define([
         			});
 			    }
 			});
-		},
-		
-		/**
-		 * @description Returns if the given offset falls within the ranges of any of the given script blocks
-		 * @function
-		 * @private
-		 * @param {Array.<Object>} blocks The array of script blocks
-		 * @param {Number} offset The offset assist was activated at
-		 * @returns {Boolean} If the given offset falls within any of the script block ranges
-		 * @since 8.0
-		 */
-		_inBlockRange: function _inBlockRange(blocks, offset) {
-		    if(!blocks || blocks.length < 1 || offset < 0) {
-		        return false;
-		    }
-		    for(var i = 0; i < blocks.length; i++) {
-		        var block = blocks[i];
-		        var idx = block.offset;
-		        if(offset >= idx && offset <= idx+block.text.length) {
-		            return true;
-		        }
-		    }
-		    return false;
 		},
 		
 		/**
