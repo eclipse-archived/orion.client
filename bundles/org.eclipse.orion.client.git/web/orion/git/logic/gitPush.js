@@ -11,6 +11,8 @@
 
 /*eslint-env browser, amd*/
 
+/*globals confirm */
+
 define([
 	'i18n!git/nls/gitmessages',
 	'orion/i18nUtil',
