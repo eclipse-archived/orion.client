@@ -261,7 +261,10 @@ define([
 			            if(blocks && blocks.length > 0) {
 			                var cu = new CU(blocks, meta);
 			                return _self.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-            					return _self._validateAst(ast);
+			                    //auto-assume browser env - https://bugs.eclipse.org/bugs/show_bug.cgi?id=458676
+			                    var env = Object.create(null);
+			                    env.browser = true;
+            					return _self._validateAst(ast, env);
             				});
 			            }
 			        });
@@ -278,13 +281,17 @@ define([
 		 * @function
 		 * @private
 		 * @param {Object} ast The AST
+		 * @param {Object} env An environment object to set in the config
 		 * @returns {Array|Object} The array of problem objects
 		 * @since 6.0
 		 */
-		_validateAst: function(ast) {
+		_validateAst: function(ast, env) {
 			var eslintErrors = [], 
 				parseErrors = this._extractParseErrors(ast);
 			try {
+			    if(env) {
+			        config.env = env;
+			    }
 				eslintErrors = eslint.verify(ast, config);
 			} catch (e) {
 				if(parseErrors.length < 1) {

@@ -189,7 +189,10 @@ define([
 	function JSContentAssist(astManager, lintOptions) {
 		this.astManager = astManager;
 		this.indexer = new Indexer();
-		this.lintOptions = lintOptions;
+		this.lintOptions = lintOptions ? lintOptions : Object.create(null);
+		if(!this.lintOptions.options) {
+		    this.lintOptions.options = Object.create(null);
+		}
 		this.provider = new TemplateProvider();
 	}
 
@@ -221,6 +224,8 @@ define([
                 				self._createIndexData(editorContext, params)
                 			]).then(function(results) {
                 				var ast = results[0];
+                				//auto-assume browser env - https://bugs.eclipse.org/bugs/show_bug.cgi?id=458676
+                				self.lintOptions.options.browser = true;
                 				return self._computeProposalsFromAST(ast, ast.source, params);
                 			});
     			        }
