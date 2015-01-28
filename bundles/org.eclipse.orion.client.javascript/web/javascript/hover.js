@@ -350,6 +350,9 @@ define([
 		 * @param {Object} ctxt The current selection context
 		 */
 		computeHoverInfo: function computeHover(editorContext, ctxt) {
+		    if(ctxt.proposal) {
+		        return ctxt.proposal.hover;
+		    }
 		    var that = this;
 		    return editorContext.getFileMetadata().then(function(meta) {
 		        if(meta.contentType.id === 'application/javascript') {
@@ -395,10 +398,6 @@ define([
 		},
 		
 		_doHover: function _doHover(ast, editorContext, ctxt) {
-		    if (ctxt.proposal){
-				return ctxt.proposal.hover;
-			}
-			
 		    if(!ctxt.offset || ctxt.offset < ast.range[0] || ctxt.offset >= ast.range[1]) {
 		        //end of the AST, nothing to hover
 		        return null;
