@@ -306,9 +306,8 @@ define([
 				preferences: this.preferences
 			}).then(function(runBar){
 				if (runBar) {
-					// runBar successfully created, stash it and make it visible
+					// runBar successfully created, set local reference to it
 					this._runBar = runBar;
-					this.setRunBarVisible(true);
 				}
 			}.bind(this));
 		}

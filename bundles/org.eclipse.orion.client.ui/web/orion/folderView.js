@@ -165,12 +165,6 @@ define([
 		getTreeRoot: function() {
 			return this.treeRoot;
 		},
-		isRunBarVisible: function() {
-			return this._isRunBarVisible;
-		},
-		setRunBarVisible: function(isRunBarVisible) {
-			this._isRunBarVisible = isRunBarVisible;
-		}, 
 		updateCommands: function(selections) {
 			if (this.menuBar) {
 				this.menuBar.setActiveExplorer(this);

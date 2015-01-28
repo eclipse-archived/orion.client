@@ -212,6 +212,13 @@ define([
 		},
 		
 		destroy: function() {
+			// remove node from DOM
+			if (this._parentNode && this._domNode) {
+				this._parentNode.removeChild(this._domNode);
+				this._domNode = null;
+				this._parentNode = null;
+			}
+			
 			// destroy tooltips
 			if (this._undestroyedTooltips) {
 				this._undestroyedTooltips.forEach(function(tooltip){
