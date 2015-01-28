@@ -1096,7 +1096,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 	InlineSearchResultExplorer.prototype._search = function(resultsNode, searchParams, searcher) {
 		//For crawling search, temporary
 		//TODO: we need a better way to render the progress and allow user to be able to cancel the crawling search
-		var crawling = searchParams.regEx || searchParams.caseSensitive;
+		var crawling = false;
 		var crawler;
 		
 		lib.empty(resultsNode);
