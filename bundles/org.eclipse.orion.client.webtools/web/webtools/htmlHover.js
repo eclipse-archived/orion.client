@@ -159,13 +159,21 @@ define([
         	            
         	        }
     	        } else {
-    	            var name = path.slice(path.lastIndexOf('/')+1);
-    	            if(name.length < 1 && /^\s*http:/i.test(path)) {
-    	               name = /^\s*http\s*:\s*\/\s*\/\s*(.*)/i.exec(path);
-    	               name = name[1];
-    	               if(name.charAt(name.length-1) === '/') {
-    	                   name = name.slice(0, name.length-1);
+    	            var site = false;
+    	            var tmp = /^\s*http\s*:\s*\/\s*\/\s*(.*)/i.exec(path);
+    	            if(tmp) {
+    	                tmp = tmp[1];
+    	                if(tmp.charAt(tmp.length-1) === '/') {
+    	                   tmp = tmp.slice(0, tmp.length-1);
     	               }
+    	               site = tmp.indexOf('/') === -1;
+    	            }
+    	            var name = path.slice(path.lastIndexOf('/')+1);
+    	            if(site) {
+    	                name = tmp;
+    	            }
+    	            if(site) {
+    	               name = tmp;
     	               title = '###Open site \''+name+'\'';
     	               hover += '[!['+name+'](../webtools/images/html.png)';
     	               hover += name + ']('+path+')\n\n';
