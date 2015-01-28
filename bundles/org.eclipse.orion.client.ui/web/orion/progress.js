@@ -155,6 +155,9 @@ function(messages, lib, mOperationsDialog) {
 				deferred.then(function(result){
 					if(that._operations[operationsIndex]){
 						var operation = that._operations[operationsIndex];
+						// add the operation to the deferred object
+						deferred.operation = operation;
+						deferred.operationsIndex = operationsIndex;
 						if(operationName)
 							operation.Name = operationName;
 						that._lastOperation = operation;
@@ -170,6 +173,9 @@ function(messages, lib, mOperationsDialog) {
 				}, function(error){
 					if(that._operations[operationsIndex]){
 						var operation = that._operations[operationsIndex];
+						// add the operation to the deferred object
+						deferred.operation = operation;
+						deferred.operationsIndex = operationsIndex;
 						if(operationName)
 							operation.Name = operationName;
 						if(progressMonitor){
@@ -184,6 +190,9 @@ function(messages, lib, mOperationsDialog) {
 						}
 					}
 				}, function(operation){
+						// add the operation to the deferred object
+					deferred.operation = operation;
+					deferred.operationsIndex = operationsIndex;
 					if(operationName)
 						operation.Name = operationName;
 					if(progressMonitor){
@@ -257,7 +266,7 @@ function(messages, lib, mOperationsDialog) {
 				this._operationDeferrds[operationIndex] = deferred;
 				if(operation.Location){
 					this._serviceRegistry.getService("orion.core.preference").getPreferences("/operations").then(function(globalOperations){
-						globalOperations.put(operation.Location, {Name: operation.Name, expires: operation.expires});
+						globalOperations.put(operation.Location, {Name: operation.Name, expires: operation.expires, display: operation.display});
 					});
 				}
 				if(operation.progressMonitor){

@@ -717,7 +717,8 @@ var exports = {};
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 				var msg = i18nUtil.formatMessage(messages["Merging ${0}"], item.Name);
-				progress.progress(gitService.doMerge(item.HeadLocation, item.Name, false), msg).then(function(result){
+				var deferred = gitService.doMerge(item.HeadLocation, item.Name, false);
+				progress.progress(deferred, msg).then(function(result){
 					var display = {};
 
 					if (result.Result === "FAST_FORWARD" || result.Result === "ALREADY_UP_TO_DATE") { //$NON-NLS-1$ //$NON-NLS-0$
@@ -757,6 +758,10 @@ var exports = {};
 					}
 
 					progressService.setProgressResult(display);
+					if (deferred.operation) {
+						deferred.operation.display = display;
+						progress.writeOperation(deferred.operationsIndex, deferred.operation, deferred);
+					}
 					dispatchModelEventOn({type: "modelChanged", action: "merge", item: item}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function (error, ioArgs) {
 					error = null;//hide warning
@@ -816,6 +821,10 @@ var exports = {};
 					}
 
 					progressService.setProgressResult(display);
+					if (deferred.operation) {
+						deferred.operation.display = display;
+						progress.writeOperation(deferred.operationsIndex, deferred.operation, deferred);
+					}
 					dispatchModelEventOn({type: "modelChanged", action: "mergeSquash", item: item}); //$NON-NLS-1$ //$NON-NLS-0$
 				}, function (error, ioArgs) {
 					error = null;//hide warning
@@ -881,6 +890,10 @@ var exports = {};
 						var msg = messages["Rebase" + jsonData.Result];
 						display.Message = "<span>" +  (msg ? msg : jsonData.Result) + "</span>"; //$NON-NLS-1$ //$NON-NLS-0$ 
 						d.reject(jsonData);
+					}
+					if (deferred.operation) {
+						deferred.operation.display = display;
+						progress.writeOperation(deferred.operationsIndex, deferred.operation, deferred);
 					}
 					serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 				}, function(error) {

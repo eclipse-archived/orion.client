@@ -245,6 +245,8 @@ define(['i18n!orion/operations/nls/messages', 'orion/webui/littlelib', 'orion/ex
 					message = item.operation.error.Message || item.operation.error;
 					if(item.operation.error.DetailedMessage && item.operation.error.DetailedMessage!=="")
 						message += ": " + item.operation.error.DetailedMessage; //$NON-NLS-0$
+				} else if (item.operation && item.operation.display) {
+					message = item.operation.display.Message;
 				}
 				col = document.createElement("td"); //$NON-NLS-0$
 				col.textContent = message;
