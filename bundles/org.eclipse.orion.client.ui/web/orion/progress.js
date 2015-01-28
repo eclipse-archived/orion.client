@@ -155,6 +155,7 @@ function(messages, lib, mOperationsDialog) {
 				deferred.then(function(result){
 					if(that._operations[operationsIndex]){
 						var operation = that._operations[operationsIndex];
+						deferred.operation = operation;
 						if(operationName)
 							operation.Name = operationName;
 						that._lastOperation = operation;

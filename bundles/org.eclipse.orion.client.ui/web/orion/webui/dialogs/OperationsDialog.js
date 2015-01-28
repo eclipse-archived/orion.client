@@ -137,6 +137,9 @@ function(messages, require, lib, popupdialog, mOperationsCommands) {
 			var operationStatus = document.createElement("span"); //$NON-NLS-0$
 			operationStatus.classList.add("operationStatus"); //$NON-NLS-0$
 			operationStatus.textContent = operation.Name;
+			if (operation.display) {
+				operationStatus.textContent = operation.display.Message;
+			}
 			div.appendChild(operationStatus);
 			
 			if (operation.error) {

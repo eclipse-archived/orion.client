@@ -174,6 +174,9 @@ define([
 											}
 										}
 										serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+										if (deferred.operation) {
+											deferred.operation.display = display;
+										}
 									}
 									if (itemTargetBranch && !itemTargetBranch.Id) {
 										gitService.getGitBranch(itemTargetBranch.Location).then(function(remote) {
