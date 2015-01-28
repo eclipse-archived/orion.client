@@ -694,6 +694,8 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.core-sprite-dashboard,
+.core-sprite-runlogs,
 .core-sprite-play,
 .core-sprite-stop,
 .core-sprite-open,
@@ -765,6 +767,9 @@
 .core-sprite-play:before{ content:'\E057'; }
 .core-sprite-stop:before{ content:'\E058'; }
 .core-sprite-open:before{ content:'\E059'; }
+.core-sprite-dashboard:before{ content:'\E062'; }
+.core-sprite-runlogs:before{ content:'\E064'; }
+
 
 /* icons for file types - possibly more to come - at least one for images */ 
 
