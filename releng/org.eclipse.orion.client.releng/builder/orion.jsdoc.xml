@@ -18,7 +18,7 @@
 			<argline value="${jsdocHome}/app/run.js -s -v -a" />
 			<arg value="-r=3" />
 			<arg value="-t=${jsdocHome}/templates/jsdoc" />
-			<arg value="-d=${buildDirectory}/doc/org.eclipse.orion.doc.isv/jsdoc" />
+			<arg value="-d=${buildDirectory}/bundles/org.eclipse.orion.client.jsdoc/jsdoc" />
 		</runjsdoc>
 	</target>
 
