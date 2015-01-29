@@ -289,6 +289,24 @@ define([
 		});
 		it("Test no-undef-defined-4", function() {
 		    var rule = createTestRule('no-undef');
+		    var expected = {value: "globals bar foo:true",
+		                    start: 2, 
+		                    end: 13};
+		    return getFixes({buffer: '/*globals bar*/ foo++; bar();', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test no-undef-defined-5", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "globals bar foo:true",
+		                    start: 2, 
+		                    end: 13};
+		    return getFixes({buffer: '/*globals bar*/ foo = bar; bar();', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		it("Test no-undef-defined-eslint-env-4", function() {
+		    var rule = createTestRule('no-undef');
 		    var expected = {value: "eslint-env node, browser",
 		                    start: 2, 
 		                    end: 18};

@@ -278,17 +278,30 @@ define([
         },
         /** fix for the no-undef-defined linting rule */
         "no-undef-defined": function(editorContext, annotation, astManager) {
+            function assignLike(node) {
+                if(node && node.parents && node.parents.length > 0 && node.type === 'Identifier') {
+                    var parent = node.parents.pop();
+                    return parent && (parent.type === 'AssignmentExpression' || parent.type === 'UpdateExpression'); 
+                }
+                return false;
+            }
             var name = /^'(.*)'/.exec(annotation.title);
             if(name != null && typeof name !== 'undefined') {
                 return astManager.getAST(editorContext).then(function(ast) {
                     var comment = null;
                     var start = 0;
+                    var insert = name[1];
+                    var node = Finder.findNode(annotation.start, ast, {parents:true});
+                    if(assignLike(node)) {
+                        insert += ':true';
+                    }
                     comment = Finder.findDirective(ast, 'globals');
                     if(comment) {
                         start = comment.range[0]+2;
-                        return editorContext.setText(updateDirective(comment.value, 'globals', name[1]), start, start+comment.value.length);
+                        return editorContext.setText(updateDirective(comment.value, 'globals', insert), start, start+comment.value.length);
                     } else {
-                        return editorContext.setText('/*globals '+name[1]+' */\n', ast.range[0], ast.range[0]);
+                        //TODO find node, if used in assignment, set var:true in globals
+                        return editorContext.setText('/*globals '+insert+' */\n', ast.range[0], ast.range[0]);
                     }
                 });
             }
