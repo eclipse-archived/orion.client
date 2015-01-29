@@ -15,9 +15,13 @@
 }
 
 .wizardButtonRow .okButton{
-	background-color: #7fa4c0;
-    border: 1px solid #7fa4c0;
+	background-color: #00B299;
+    border: 1px solid #00B299;
     color: white;
+}
+
+.wizardButtonRow .okButton:disabled{
+    color: #cdcdcd;
 }
 
 .wizardButtonRow button:not(:last-child){
