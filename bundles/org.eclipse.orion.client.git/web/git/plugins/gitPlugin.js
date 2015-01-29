@@ -40,7 +40,7 @@ define([
 
 	provider.registerService("orion.edit.diff", {
 		computeDiff: function(editorContext, context) {
-			var diffTarget = new URL("/gitapi/diff/Default/" + context.metadata.Location, window.location);
+			var diffTarget = new URL(context.metadata.Git.DiffLocation, window.location);
 			diffTarget.query.set("parts", "diff");
 			return xhr("GET", diffTarget.href, {
 				headers: {
