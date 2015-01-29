@@ -16,7 +16,8 @@ var connect = require('connect'),
     orionNode = require('./lib/node'),
     orionWorkspace = require('./lib/workspace'),
     orionNodeStatic = require('./lib/orionode_static'),
-    orionStatic = require('./lib/orion_static');
+    orionStatic = require('./lib/orion_static'),
+    term = require('term.js');
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
     ORION_CLIENT = path.normalize(path.join(__dirname, '../../'));
@@ -32,7 +33,9 @@ function startServer(options) {
 	try {
 		var appContext = new AppContext({fileRoot: '/file', workspaceDir: workspaceDir, configParams: configParams});
 
+		// HTTP server
 		var app = connect()
+      .use(term.middleware())
 			// static code
 			.use(orionNodeStatic(path.normalize(path.join(LIBS, 'orionode.client/'))))
 			.use(orionStatic({
@@ -53,6 +56,7 @@ function startServer(options) {
 				appContext: appContext,
 				root: '/node'
 			}));
+
 		app.appContext = appContext;
 		return app;
 	} catch (e) {

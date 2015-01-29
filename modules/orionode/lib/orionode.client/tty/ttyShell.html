@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="copyright" content="Copyright (c) IBM Corporation and others 2012, 2014." >
+    <meta http-equiv="Content-Language" content="en-us">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="icon" href="/images/shell.png" type="image/png">
+    <title>Shell</title>
+    <link rel="stylesheet" type="text/css" href="ttyPage.css" />
+    <script data-main="/tty/scripts/main" src="../requirejs/require.js"></script>
+  </head>
+  <body id="orion-shellPage" class="orionPage">
+    <div id="sideMenu" class="sideMenu"></div>
+    <div id="pageContent" class="content-fixedHeight">
+     
+      <div class="fixedToolbarHolder mainpane mainPanelLayout">
+        <div class="mainToolbar toolComposite">
+
+        <button id="menuWrench" class="orionButton commandImage dropdownSelection">
+          <span class="commandSprite core-sprite-wrench"></span>
+        </button>
+        <div id="dropdown" class="dropDownContainer" tabindex="0">
+          <div class="sections local">
+            <div>
+              <div class="setting-property">
+                <label>
+                  <span class="setting-label">Color Scheme:</span>
+                  <select id="color-scheme-dropdown" class="setting-control">
+                    <option selected="selected">Dark</option>
+                    <option>Light</option>
+                    <option>Solarized</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        <div id="mainNode" class="toolbarTarget pageLayoutTarget">
+          <div id="terminalBox" class="clearfix"></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-fixed-bottom footer" id="footer"></div>
+  </body>
+</html>
+

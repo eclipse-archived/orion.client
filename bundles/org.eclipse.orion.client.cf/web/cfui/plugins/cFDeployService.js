@@ -590,6 +590,13 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 				State: (runningInstances > 0 ? "STARTED" : "STOPPED"), //$NON-NLS-0$ //$NON-NLS-1$
 				Message: flappingInstances > 0 ? i18nUtil.formatMessage(messages["${0}/${1}Instance(s)Running,${2}Flapping"], runningInstances, instances, flappingInstances) : i18nUtil.formatMessage(messages["${0}/${1}Instance(s)Running"], runningInstances, instances)
 			};
+		},
+		
+		/**
+		 * Delegates to @ref cFClient.js->getDeploymentPlans()
+		 */
+		getDeploymentPlans: function(projectContentLocation) {
+			return cFService.getDeploymentPlans(projectContentLocation);
 		}
 	};
 

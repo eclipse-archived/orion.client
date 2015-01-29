@@ -134,7 +134,8 @@ define([
 		blockSpansBeyondEnd: function(block) {
 			return false;
 		},
-		computeBlocks: function(model, text, block, offset/*, startIndex, endIndex, maxBlockCount*/) {
+		/** @callback */
+		computeBlocks: function(model, text, block, offset, startIndex, endIndex, maxBlockCount) {
 			var result = [];
 			var tokens;
 
@@ -536,9 +537,19 @@ define([
 			var rootBlock = this._styler.getRootBlock();
 			this._onBlocksChanged({oldBlocks: [], newBlocks: rootBlock.getBlocks()});
 		},
-		parse: function(text, offset, block, _styles /*, ignoreCaptures*/) {
+		/** @callback */
+		parse: function(text, offset, block, _styles, ignoreCaptures) {
 			if (!block.typeId) {
 				return;
+			}
+
+			/* span styles should not be applied in code blocks */
+			var current = block;
+			while (current) {
+				if (current.typeId && !current.typeId.indexOf("markup.raw.code")) { //$NON-NLS-0$
+					return;
+				}
+				current = current.parent;
 			}
 
 			var matches = [];
@@ -977,19 +988,15 @@ define([
 				var allLinks = previewDiv.getElementsByTagName("a"); //$NON-NLS-0$
 				for (i = 0; i < allLinks.length; i++) {
 					var refId = allLinks[i].getAttribute(ATTRIBUTE_REFID);
-					if (refId) {
-						if (refChanges[refId]) {
-							affectedBlocks.push(this.getBlockForElement(allLinks[i]));
-						}
+					if (refId && refChanges[refId]) {
+						affectedBlocks.push(this.getBlockForElement(allLinks[i]));
 					}
 				}
 				var allImages = previewDiv.getElementsByTagName("img"); //$NON-NLS-0$
 				for (i = 0; i < allImages.length; i++) {
 					refId = allImages[i].getAttribute(ATTRIBUTE_REFID);
-					if (refId) {
-						if (refChanges[refId]) {
-							affectedBlocks.push(this.getBlockForElement(allImages[i]));
-						}
+					if (refId && refChanges[refId]) {
+						affectedBlocks.push(this.getBlockForElement(allImages[i]));
 					}
 				}
 

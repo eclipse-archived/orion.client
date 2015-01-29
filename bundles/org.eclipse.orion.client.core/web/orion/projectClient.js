@@ -565,7 +565,28 @@ define([
 							launchConf.project = projectMetadata;
 							launchConf.File = file;
 							launchConf.File.parent = launchConfMeta;
-							def.resolve(launchConf);
+							if (!launchConf.Params) {
+								launchConf.Params = {};
+							}
+							
+							launchConf.Params.DevMode = undefined; //reset value
+							
+							// check if the deploy service supports DevMode and 
+							// modify the launch configuration object accordingly
+							var deployService = this.getProjectDelpoyService(launchConf.ServiceId, launchConf.Type);
+							if(deployService && deployService.getDevMode){
+								deployService.getDevMode(projectMetadata.ContentLocation).then(function(devModeParam){
+									if (devModeParam) {
+										launchConf.Params.DevMode = devModeParam;
+									}
+									
+									def.resolve(launchConf);
+								}, function(){
+									def.resolve(launchConf);
+								});
+							} else {
+								def.resolve(launchConf);
+							}
 						} catch(e){
 							console.error(e);
 							def.resolve();

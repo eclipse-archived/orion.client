@@ -1207,9 +1207,10 @@ define([
         			'UnaryExpression' : function(node){
         			    if(node.operator === 'typeof') {
         			        var parent = node.parent;
+        			        var val = parent.left === node ? parent.right : parent.left;
         			        if(parent && parent.type === 'BinaryExpression' && 
-        			             (parent.right.type !== 'Literal' || symbols.indexOf(parent.right.value) < 0)) {
-        			            context.report(parent.right, "Invalid typeof comparison.");
+        			             (val.type !== 'Literal' || symbols.indexOf(val.value) < 0)) {
+        			            context.report(val, "Invalid typeof comparison.");
         			        }
         			    }
         			}

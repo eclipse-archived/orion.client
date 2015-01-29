@@ -11,7 +11,8 @@
 		"webtools/plugins/webToolsPlugin.html":true,
 		"javascript/plugins/javascriptPlugin.html":true,
 		"shell/plugins/shellPagePlugin.html":true,
-		"plugins/nodePlugin.html":true
+		"plugins/nodePlugin.html":true,
+		"plugins/consolePlugin.html" :true
 	},
 	"/settingsContainer":{
 		"categories":{

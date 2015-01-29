@@ -1,0 +1,86 @@
+@import "../css/layout.css";
+@import "../css/ide.css";
+@import "../css/images.css";
+@import "../css/theme.css";
+
+html,body {
+  height: 100%;
+}
+
+.modelDecorationSprite { 
+  display: inline-block; 
+  vertical-align: middle; 
+}
+
+.toolbarTarget {
+	overflow: hidden;
+	margin-top: 10px;
+}
+
+.toolbarTarget-toolbarHidden {
+	top: 0px;  /* 2 */
+}
+
+.terminalContainer {
+	overflow-y: scroll;
+}
+
+.pageLayoutTarget {
+	position: absolute;
+ 	width: calc( 100% - 35px );
+ 	bottom: 10px;
+ 	overflow-y: hidden;
+	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.33); /* 0 0 0 1px #d1d1d1,0 0 4px 1px #ccc; */
+	margin-left: 2px;
+	margin-right: 10px;
+	margin-left:10px;
+	padding-top: 0px;
+	padding-bottom: 5px;
+	background: #4b4b4b;
+}
+
+#menuWrench {
+  padding: 5px;
+  margin: 6px;
+  float: right;
+}
+
+#dropdown {
+  top: 40px;
+  right: 25px;
+  display: none;
+}
+
+.dropDownContainer{
+	border-radius:1px;
+	background:#fefefe;
+	border: 1px solid #DDD;
+	padding:10px;
+	margin-top: 5px;
+	outline: none;
+	position:absolute;
+	z-index:100;
+	box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.terminal {
+  font-size: 14px;
+  font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
+}
+
+.clearfix:before,
+.clearfix:after {
+    content: " ";
+    display: table;
+}
+.clearfix:after {
+    clear: both;
+}
+/* For IE 6/7 only */
+.clearfix {
+    *zoom: 1;
+}
+
+#terminalControl {
+  display: inline-block;
+}

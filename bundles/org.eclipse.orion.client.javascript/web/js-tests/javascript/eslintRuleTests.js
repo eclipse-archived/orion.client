@@ -5192,6 +5192,36 @@ define([
     			assert.equal(messages[0].ruleId, RULE_ID);
     			assert.equal(messages[0].message, "Invalid typeof comparison.");
     		});
+    		it("should not flag literal RHS", function() {
+    			var topic = "var answer = ('object' === typeof foo);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag call expression unary RHS", function() {
+    			var topic = "var answer = ('undefined' === typeof(foo));";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should flag unsupported literal RHS", function() {
+    			var topic = "var answer = ('undefied' === typeof foo);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Invalid typeof comparison.");
+    		});
+
     	});
     });
 });
