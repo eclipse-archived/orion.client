@@ -18,8 +18,10 @@ define([
 	'orion/webui/RichDropdown',
 	'orion/webui/tooltip',
 	'orion/metrics',
-	'orion/webui/dialogs/ConfirmDialog'
-], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown, mTooltip, mMetrics, mConfirmDialog) {
+	'orion/webui/dialogs/ConfirmDialog',
+	'orion/URITemplate',
+	'orion/PageLinks'
+], function(objects, messages, RunBarTemplate, lib, i18nUtil, mRichDropdown, mTooltip, mMetrics, mConfirmDialog, URITemplate, PageLinks) {
 	
 	var METRICS_LABEL_PREFIX = "RunBar"; //$NON-NLS-0$
 	var REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING = "doNotConfirmRedeployRunningApp"; //$NON-NLS-0$
@@ -98,6 +100,11 @@ define([
 				this._appLink.addEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
 				this._setNodeTooltip(this._appLink, messages["openAppTooltip"]); //$NON-NLS-0$
 				this._disableLink(this._appLink);
+				
+				this._logsLink = lib.$(".logsLink", this._domNode); //$NON-NLS-0$
+				this._logsLink.addEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
+				this._setNodeTooltip(this._logsLink, messages["openLogsTooltip"]); //$NON-NLS-0$
+				this._disableLink(this._logsLink);
 				
 				if (this._projectExplorer.treeRoot && this._projectExplorer.treeRoot.Project) {
 					this.loadLaunchConfigurations(this._projectExplorer.treeRoot.Project);
@@ -252,9 +259,15 @@ define([
 				this._launchConfigurationsDropdown.destroy();
 				this._launchConfigurationsDropdown = null;
 			}
+			
 			if (this._appLink) {
 				this._appLink.removeEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
 				this._appLink = null;
+			}
+			
+			if (this._logsLink) {
+				this._logsLink.removeEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
+				this._logsLink = null;
 			}
 		},
 		
@@ -395,6 +408,12 @@ define([
 		setStatus: function(status) {
 			var appInfoText = null;
 			var statusLightText = null;
+			var uriTemplate = null;
+			var uriParams = null;
+			
+			// logLocationTemplate in status takes precendence because it comes from the 
+			// service implementation's method rather than from the service properties
+			var logLocationTemplate = status.logLocationTemplate || this._selectedLaunchConfiguration.Params.LogLocationTemplate;
 			
 			// turn status light off
 			this._statusLight.classList.remove("statusLightGreen"); //$NON-NLS-0$
@@ -449,6 +468,13 @@ define([
 			
 			if (status.Url) {
 				this._enableLink(this._appLink, status.Url);
+			}
+			
+			if (logLocationTemplate) {
+				uriTemplate = new URITemplate(logLocationTemplate);
+				uriParams = objects.clone(this._selectedLaunchConfiguration.Params);
+				objects.mixin(uriParams, {OrionHome : PageLinks.getOrionHome()});
+				this._enableLink(this._logsLink, uriTemplate.expand(uriParams));
 			}
 		},
 		
@@ -546,6 +572,7 @@ define([
 			this._disableControl(this._playButton);
 			this._disableControl(this._stopButton);
 			this._disableLink(this._appLink);
+			this._disableLink(this._logsLink);
 		},
 		
 		_enableControl: function(domNode) {

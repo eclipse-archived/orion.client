@@ -574,6 +574,11 @@ define([
 							// check if the deploy service supports DevMode and 
 							// modify the launch configuration object accordingly
 							var deployService = this.getProjectDelpoyService(launchConf.ServiceId, launchConf.Type);
+							
+							if (deployService.logLocationTemplate) {
+								launchConf.Params.LogLocationTemplate = deployService.logLocationTemplate;
+							}
+							
 							if(deployService && deployService.getDevMode){
 								deployService.getDevMode(projectMetadata.ContentLocation).then(function(devModeParam){
 									if (devModeParam) {
