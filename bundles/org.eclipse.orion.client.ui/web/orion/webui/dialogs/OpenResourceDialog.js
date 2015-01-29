@@ -11,8 +11,8 @@
  *     Andy Clement (vmware) - bug 344614
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion/contentTypes', 'require', 'orion/webui/littlelib', 'orion/util', 'orion/webui/dialog'], 
-		function(messages, mSearchCrawler, mContentTypes, require, lib, util, dialog) {
+define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion/contentTypes', 'require', 'orion/webui/littlelib', 'orion/util', 'orion/webui/dialog', 'orion/Deferred'], 
+		function(messages, mSearchCrawler, mContentTypes, require, lib, util, dialog, Deferred) {
 	/**
 	 * Usage: <code>new OpenResourceDialog(options).show();</code>
 	 * 
@@ -227,10 +227,22 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 			div.appendChild(document.createTextNode(this._nameSearch ? messages['Searching...'] : util.formatMessage(messages["SearchOccurences"], text)));
 			lib.empty(this.$results);
 			this.$results.appendChild(div);
-			this._searcher.search(searchParams, keyword.folderKeyword, function() {
-				if (renderFunction === this.currentSearch) {
-					renderFunction.apply(null, arguments);
-				}
+			var deferredSearch;
+			if(this._searchPending) {
+				deferredSearch = this._searcher.cancel();
+				this.cancelled = true;
+			} else {
+				deferredSearch = new Deferred().resolve();
+			}
+			deferredSearch.then(function(result) {
+				this._searchPending = true;
+				this._searcher.search(searchParams, keyword.folderKeyword, function() {
+					this._searchPending = false;
+					if (renderFunction === this.currentSearch || this.cancelled) {
+						this.cancelled = false;
+						renderFunction.apply(null, arguments);
+					}
+				}.bind(this));
 			}.bind(this));
 		}
 	};

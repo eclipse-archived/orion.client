@@ -218,7 +218,8 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 				this._crawler.searchName(searchParams, function(jsonData){renderer(transform(jsonData), searchParams.keyword, null, searchParams);});
 			} else {
 				try {
-					this.registry.getService("orion.page.progress").progress(this._fileService.search(searchParams), "Searching " + searchParams.keyword).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
+					this._searchDeferred = this._fileService.search(searchParams);
+					this.registry.getService("orion.page.progress").progress(this._searchDeferred, "Searching " + searchParams.keyword).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
 						/**
 						 * transforms the jsonData so that the result conforms to the same
 						 * format as the favourites list. This way renderer implementation can
@@ -229,8 +230,10 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 						token= token.substring(token.indexOf("}")+1); //$NON-NLS-0$
 						//remove field name if present
 						token= token.substring(token.indexOf(":")+1); //$NON-NLS-0$
+						this._searchDeferred = null;
 						renderer(transform(jsonData), token, null, searchParams);
 					}, function(error) {
+						this._searchDeferred = null;
 						renderer(null, null, error, null);
 					});
 				}
@@ -245,6 +248,12 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 					}
 				}
 			}
+		},
+		cancel: function() {
+			if(this._searchDeferred) {
+				return this._searchDeferred.cancel();
+			}
+			return new Deferred().resolve();
 		},
 		getFileService: function(){
 			return this._fileService;
