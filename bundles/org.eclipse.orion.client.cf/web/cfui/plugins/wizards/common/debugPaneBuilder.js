@@ -64,7 +64,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard', 'orion/i18nUtil'], funct
 		    		
 		    		saveManifestCheckbox.type = "checkbox"; //$NON-NLS-0$
 		    		saveManifestCheckbox.id = "saveManifest"; //$NON-NLS-0$
-		    		saveManifestCheckbox.checked = "checked"; //$NON-NLS-0$
+		    		saveManifestCheckbox.checked = undefined; //$NON-NLS-0$
 		    		
 					manifestElement.appendChild(saveManifestCheckbox);
 					self._saveManifestCheckbox = saveManifestCheckbox;
