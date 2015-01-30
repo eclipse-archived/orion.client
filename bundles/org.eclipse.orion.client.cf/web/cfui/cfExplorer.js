@@ -84,11 +84,11 @@ define(['i18n!cfui/nls/messages', 'orion/URITemplate', 'orion/PageLinks', 'orion
 				col.classList.add("secondaryColumnRight");
 				if(item.State === "STARTED"){
 					span.className = "imageSprite core-sprite-applicationrunning";
-					span.title = (typeof item.Instances !== "undefined" && typeof item.RunningInstances !== "undefined") ? ( item.RunningInstances + messages["of"] + item.Instances + messages["instancesRunning"]) : messages["started"];
+					span.title = (typeof item.Instances !== "undefined" && typeof item.RunningInstances !== "undefined") ? ( Math.max(0, item.RunningInstances) + messages["of"] + item.Instances + messages["instancesRunning"]) : messages["started"];
 					return col;
 				} else if(item.State==="STOPPED"){
 					span.className = "imageSprite core-sprite-applicationstopped";
-					span.title = (typeof item.Instances !== "undefined" && typeof item.RunningInstances !== "undefined") ? ( item.RunningInstances + messages["of"] + item.Instances + messages["instancesRunning"]) : messages["stopped"];
+					span.title = (typeof item.Instances !== "undefined" && typeof item.RunningInstances !== "undefined") ? ( Math.max(0, item.RunningInstances) + messages["of"] + item.Instances + messages["instancesRunning"]) : messages["stopped"];
 					return col;
 				} else if(item.State==="NOT_DEPLOYED"){
 					span.className = "imageSprite core-sprite-applicationnotdeployed";
