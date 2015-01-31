@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/*eslint-env amd, browser*/
 define(function(require, exports, module) {
 //
 //
