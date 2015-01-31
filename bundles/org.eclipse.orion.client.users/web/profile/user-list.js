@@ -11,6 +11,7 @@
  
 /*eslint-env browser, amd*/
 
+/*globals confirm */
 define(['i18n!profile/nls/messages', 'require', 'orion/i18nUtil', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 
 			'orion/commandRegistry', 'orion/commands', 'orion/selection',
 	        'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/profile/UsersList',
