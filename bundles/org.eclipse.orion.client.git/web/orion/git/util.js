@@ -13,6 +13,7 @@
 /**
  * Utility methods that do not have UI dependencies.
  */
+/*globals URL */
 define([
 	'i18n!git/nls/gitmessages',
 	'orion/i18nUtil',
