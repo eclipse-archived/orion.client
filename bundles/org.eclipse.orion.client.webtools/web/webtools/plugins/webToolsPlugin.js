@@ -25,17 +25,16 @@ define(['orion/plugin',
 'webtools/cssQuickFixes',
 'webtools/cssResultManager',
 'orion/editor/stylers/text_css/syntax',
-'orion/util',
 'i18n!webtools/nls/messages'
 ], function(PluginProvider, Bootstrap, HtmlAstManager, htmlHover, ScriptResolver, htmlContentAssist, htmlOutliner, 
-            mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, Util, messages) {
+            mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, messages) {
 	/**
 	 * Plug-in headers
 	 */
 	var headers = {
-		name: "Orion Web Tools Support", //$NON-NLS-0$
+		name: messages["pluginName"], //$NON-NLS-0$
 		version: "1.0", //$NON-NLS-0$
-		description: "This plug-in provides web language tools support for Orion, including HTML and CSS." //$NON-NLS-0$
+		description: messages["pluginDescription"] //$NON-NLS-0$
 	};
 	var provider = new PluginProvider(headers);
 
@@ -64,17 +63,10 @@ define(['orion/plugin',
 	 */
 	provider.registerService("orion.edit.contentassist", //$NON-NLS-0$
 		new htmlContentAssist.HTMLContentAssistProvider(),
-		{	name: 'htmlContentAssist', //$NON-NLS-0$
-			nls: 'webtools/nls/messages',  //$NON-NLS-0$
+		{	name: messages['htmlContentAssist'], //$NON-NLS-0$
 			contentType: ["text/html"], //$NON-NLS-0$
 			charTriggers: "<", //$NON-NLS-0$
 			excludedStyles: "(comment.*|string.*)" //$NON-NLS-0$
-		});
-	provider.registerService("orion.edit.contentassist", //$NON-NLS-0$
-		new cssContentAssist.CssContentAssistProvider(),
-		{	name: "cssContentAssist", //$NON-NLS-0$
-			nls: 'webtools/nls/messages',  //$NON-NLS-0$
-			contentType: ["text/css"] //$NON-NLS-0$
 		});
 
     var cssResultMgr = new cssResultManager.CssResultManager();
@@ -93,6 +85,12 @@ define(['orion/plugin',
 		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-0$  //$NON-NLS-1$
 	});
 
+    provider.registerService("orion.edit.contentassist", //$NON-NLS-0$
+		new cssContentAssist.CssContentAssistProvider(cssResultMgr),
+		{	name: messages["cssContentAssist"], //$NON-NLS-0$
+			contentType: ["text/css"] //$NON-NLS-0$
+		});
+		
 	/**
 	 * Register validators
 	 */
@@ -124,7 +122,6 @@ define(['orion/plugin',
 	provider.registerService("orion.edit.outliner", new htmlOutliner.HtmlOutliner(htmlAstManager), //$NON-NLS-0$
 		{
 			id: "orion.webtools.html.outliner", //$NON-NLS-0$
-			nls: 'webtools/nls/messages',  //$NON-NLS-0$
 			name: messages["htmlOutline"], //$NON-NLS-0$
 			contentType: ["text/html"] //$NON-NLS-0$
 		});
@@ -132,7 +129,6 @@ define(['orion/plugin',
 	provider.registerService("orion.edit.outliner", new mCssOutliner.CssOutliner(),  //$NON-NLS-0$
 		{
 			id: "orion.outline.css.outliner", //$NON-NLS-0$
-			nls: 'webtools/nls/messages',  //$NON-NLS-0$
 			name: messages["cssOutline"], //$NON-NLS-0$
 			contentType: ["text/css"] //$NON-NLS-0$
 		});
@@ -160,8 +156,7 @@ define(['orion/plugin',
 	 */
 	provider.registerService("orion.edit.hover", new cssHover.CSSHover(resolver, cssResultMgr),  //$NON-NLS-0$
 		{
-			nls: 'webtools/nls/messages',  //$NON-NLS-0$
-		    name: 'cssHover',	//$NON-NLS-0$
+		    name: messages['cssHover'],	//$NON-NLS-0$
 			contentType: ["text/css"]	//$NON-NLS-0$
 	});
 	
@@ -170,8 +165,7 @@ define(['orion/plugin',
 	 */
 	provider.registerService("orion.edit.hover", new htmlHover.HTMLHover(htmlAstManager, resolver),  //$NON-NLS-0$
 		{
-			nls: 'webtools/nls/messages',  //$NON-NLS-0$
-		    name: 'htmlHover',	//$NON-NLS-0$
+		    name: messages['htmlHover'],	//$NON-NLS-0$
 			contentType: ["text/html"]	//$NON-NLS-0$
 	});
 	
@@ -186,7 +180,6 @@ define(['orion/plugin',
 		name: messages["quickfix-empty-rules"],  //$NON-NLS-0$
 		scopeId: "orion.edit.quickfix", //$NON-NLS-0$
 		id : "quickfix-empty-rules",  //$NON-NLS-0$
-		nls: 'webtools/nls/messages',  //$NON-NLS-0$
 		contentType: ['text/css'],  //$NON-NLS-0$
 		validationProperties: [
 		                       {source: "annotation:id", match: "empty-rules"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -199,7 +192,6 @@ define(['orion/plugin',
 		name: messages["quickfix-important"],  //$NON-NLS-0$
 		scopeId: "orion.edit.quickfix", //$NON-NLS-0$
 		id : "quickfix-important",  //$NON-NLS-0$
-		nls: 'webtools/nls/messages',  //$NON-NLS-0$
 		contentType: ['text/css'],  //$NON-NLS-0$
 		validationProperties: [
 		                       {source: "annotation:id", match: "important"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -212,7 +204,6 @@ define(['orion/plugin',
 		name: messages["quickfix-zero-units"],  //$NON-NLS-0$
 		scopeId: "orion.edit.quickfix", //$NON-NLS-0$
 		id : "quickfix-zero-units",  //$NON-NLS-0$
-		nls: 'webtools/nls/messages',  //$NON-NLS-0$
 		contentType: ['text/css'],  //$NON-NLS-0$
 		validationProperties: [
 		                       {source: "annotation:id", match: "zero-units"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -232,7 +223,6 @@ define(['orion/plugin',
 		{},
 		{	settings: [
 				{	pid: "csslint.config",  //$NON-NLS-0$
-					nls: 'webtools/nls/messages',  //$NON-NLS-0$
 					name: messages["csslintValidator"],  //$NON-NLS-0$
 					tags: "validation webtools css csslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
 					category: "css",  //$NON-NLS-0$
