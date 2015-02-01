@@ -130,7 +130,7 @@ define([
 		                }
 		                continue;
 		            }
-		            if(next.type === 'RBRACE' || next.type === 'SEMICOLON') {
+		            if(next.type === 'RBRACE' || next.type === 'SEMICOLON' || next.type === 'RPAREN') {
 		                return id;
 		            } else {
 		                break;
