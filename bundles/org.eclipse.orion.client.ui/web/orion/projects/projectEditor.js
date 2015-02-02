@@ -290,297 +290,6 @@ define([
 
 	};
 
-	function LaunchConfigurationModel(project, launchConfigurations, projectClient){
-		this.root = project;
-		this.launchConfigurations = launchConfigurations;
-		this.projectClient = projectClient;
-	}
-
-	LaunchConfigurationModel.prototype = new mExplorer.ExplorerModel();
-	LaunchConfigurationModel.prototype.constructor = LaunchConfigurationModel;
-
-	LaunchConfigurationModel.prototype.getRoot = function(onItem){
-		return onItem(this.root);
-	};
-
-	LaunchConfigurationModel.prototype.getChildren = function(parent, onComplete){
-		if(parent === this.root){
-			if(this.launchConfigurations){
-				for(var i=0; i<this.launchConfigurations.length; i++){
-					this.launchConfigurations[i].project = parent;
-				}
-				this.root.children = this.launchConfigurations;
-				onComplete(this.launchConfigurations);
-			} else {
-				this.projectClient.getProjectLaunchConfigurations(parent).then(function(launchConfs){
-						for(var i=0; i<launchConfs.length; i++){
-							launchConfs[i].project = parent;
-						}
-						parent.children = launchConfs;
-						onComplete(launchConfs);
-					}
-				);
-			}
-		} else {
-			//TODO we may want to display some more properties
-			onComplete([]);
-		}
-	};
-
-	LaunchConfigurationModel.prototype.getId = function(item){
-		return "LaunchConfiguration" + mExplorer.ExplorerModel.prototype.getId.call(this, {Location: item.Name});
-	};
-
-	function LaunchConfigurationRenderer(options, projectEditor, explorer){
-		this._init(options);
-		this.projectEditor = projectEditor;
-		this.explorer = explorer;
-		this.commandService = options.commandRegistry;
-		this.actionScopeId = options.actionScopeId;
-		this.projectClient = options.projectClient;
-		this.emptyMessage = options.emptyMessage;
-		
-		this.launchConfigurationDispatcher = projectEditor.launchConfigurationDispatcher;
-	}
-
-	LaunchConfigurationRenderer.prototype = new mExplorer.SelectionRenderer();
-	LaunchConfigurationRenderer.prototype.constructor = LaunchConfigurationRenderer;
-
-	LaunchConfigurationRenderer.prototype.emptyCallback = function(bodyElement) {
-		var tr = document.createElement("tr");
-		var td = document.createElement("td");
-		var emptyMessage = document.createElement("div");
-		emptyMessage.classList.add("noFile");
-		emptyMessage.textContent = this.emptyMessage || "No project deployment information";
-		td.appendChild(emptyMessage);
-		tr.appendChild(td);
-		bodyElement.appendChild(tr);
-	};
-
-	LaunchConfigurationRenderer.prototype.getCellHeaderElement = function(col_no){
-	};
-
-	LaunchConfigurationRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-		if(col_no===0) {
-			var td = document.createElement("td");
-
-			if(item.Name){
-				td.className = "secondaryColumnLeft";
-				td.appendChild(document.createTextNode(item.Name));
-			}
-			return td;
-		}
-		if(col_no===1){
-			var td = document.createElement("td");
-			if(tableRow.urlTooltip){
-				tableRow.urlTooltip.destroy();
-				delete tableRow.urlTooltip;
-			}
-			if(item.Url){
-				var a = document.createElement("a");
-				a.target = "_new";
-				a.href = item.Url.indexOf("://")<0 ? "http://" + item.Url : item.Url;
-				tableRow.urlTooltip = new mTooltip.Tooltip({
-					node: a,
-					text: item.Url,
-					position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				});
-				a.appendChild(document.createTextNode(item.Url || item.Params.Name || "View App"));
-				td.appendChild(a);
-			}
-			return td;
-		}
-		if(col_no===2){
-			var td = document.createElement("td");
-			if(item.ServiceId){
-				this.projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
-					if(!service){
-						return;
-					}
-					if(service.getLogLocationTemplate){
-						service.getLogLocationTemplate(item).then(function(template){
-							if(!template){
-								return;
-							}
-						var a = document.createElement("a");
-						a.target = "_new";
-						var uriTemplate = new URITemplate(template);
-						var params = objects.clone(item.Params);
-						objects.mixin(params, {OrionHome : PageLinks.getOrionHome()});
-						a.href = uriTemplate.expand(params);
-						a.appendChild(document.createTextNode("Logs"));
-						td.appendChild(a);
-						});
-					} else if(service.logLocationTemplate){
-						var a = document.createElement("a");
-						a.target = "_new";
-						var uriTemplate = new URITemplate(service.logLocationTemplate);
-						var params = objects.clone(item.Params);
-						objects.mixin(params, {OrionHome : PageLinks.getOrionHome()});
-						a.href = uriTemplate.expand(params);
-						a.appendChild(document.createTextNode("Logs"));
-						td.appendChild(a);
-					}
-				});
-			}
-			return td;
-		}
-		if(col_no===3){
-			var td = document.createElement("td");
-			td.classList.add("secondaryColumnRight");
-			if(item.status && item.status.CheckState === true){
-				delete item.status;
-			} else if(item.status){
-				if(tableRow.statusTooltip){
-					tableRow.statusTooltip.destroy();
-					delete tableRow.statusTooltip;
-				}
-				if(item.status.error && item.status.error.Retry){
-					item.parametersRequested = item.status.error.Retry.parameters;
-					item.optionalParameters = item.status.error.Retry.optionalParameters;
-					return this.getActionsColumn(item, tableRow, null, "secondaryColumnRight", true);
-				} else if(item.status.error){
-					var span = document.createElement("span");
-					span.appendChild(document.createTextNode("Error"));
-					tableRow.statusTooltip = new mTooltip.Tooltip({
-						node: span,
-						text: item.status.error.Message,
-						position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					});
-					td.appendChild(span);
-					return td;
-				} else if(item.status.State === "STARTED"){
-					var span = document.createElement("span");
-					span.className = "imageSprite core-sprite-applicationrunning";
-					tableRow.statusTooltip = new mTooltip.Tooltip({
-						node: span,
-						text: item.status.Message || "Started",
-						position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					});
-					td.appendChild(span);
-					return td;
-				} else if(item.status.State==="STOPPED"){
-					var span = document.createElement("span");
-					span.className = "imageSprite core-sprite-applicationstopped";
-					tableRow.statusTooltip = new mTooltip.Tooltip({
-						node: span,
-						text: item.status.Message || "Stopped",
-						position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					});
-					td.appendChild(span);
-					return td;
-				} else if(item.status.State==="NOT_DEPLOYED"){
-					var span = document.createElement("span");
-					span.className = "imageSprite core-sprite-applicationnotdeployed";
-					tableRow.statusTooltip = new mTooltip.Tooltip({
-						node: span,
-						text: item.status.Message || "Not deployed",
-						position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					});
-					td.appendChild(span);
-					return td;
-				} else if(item.status.State==="PROGRESS"){
-					var span = document.createElement("span");
-					span.className = "imageSprite core-sprite-progress";
-					tableRow.statusTooltip = new mTooltip.Tooltip({
-						node: span,
-						text: "Checking application state",
-						position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					});
-					td.appendChild(span);
-					return td;
-				} else {
-					var span = document.createElement("span");
-					span.appendChild(document.createTextNode("State unknown"));
-					tableRow.statusTooltip = new mTooltip.Tooltip({
-						node: span,
-						text: item.status.Message,
-						position: ['right', 'above', 'below', 'left'] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					});
-					td.appendChild(span);
-					return td;
-				}
-			}
-			if(item.ServiceId){
-				this.projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
-					if(service && service.getState){
-						item.status = {State: "PROGRESS"};
-						td.innerHTML = this.getCellElement(col_no, item, tableRow).innerHTML;
-
-						service.getState(item).then(function(result){
-							item.status = result;
-							var newTd = this.getCellElement(col_no, item, tableRow);
-							for(var i=0; i<td.classList.length; i++){
-								newTd.classList.toggle(td.classList[i], true);
-							}
-							var oldLogsColumn = td.previousSibling;
-							tableRow.replaceChild(newTd, td);
-							var newLogsColumn = this.getCellElement(col_no-1, item, tableRow);
-							for(var i=0; i<oldLogsColumn.classList.length; i++){
-								newLogsColumn.classList.toggle(oldLogsColumn.classList[i], true);
-							}
-							tableRow.replaceChild(newLogsColumn, oldLogsColumn);
-							this.launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item}); //$NON-NLS-0$
-							return;
-						}.bind(this), function(error){
-							item.status = {error: error};
-							var newTd = this.getCellElement(col_no, item, tableRow);
-							for(var i=0; i<td.classList.length; i++){
-								newTd.classList.toggle(td.classList[i], true);
-							}
-							var oldLogsColumn = td.previousSibling;
-							tableRow.replaceChild(newTd, td);
-							var newLogsColumn = this.getCellElement(col_no-1, item, tableRow);
-							for(var i=0; i<oldLogsColumn.classList.length; i++){
-								newLogsColumn.classList.toggle(oldLogsColumn.classList[i], true);
-							}
-							tableRow.replaceChild(newLogsColumn, oldLogsColumn);
-							this.launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item}); //$NON-NLS-0$
-							return;
-						}.bind(this));
-					} else {
-						td.appendChild(document.createTextNode("State unknown"));
-					}
-				}.bind(this));
-			}
-			return td;
-		}
-
-	};
-
-	function LaunchConfigurationExplorer(serviceRegistry, selection, renderer, commandRegistry, launchConfigurationActions){
-		mExplorer.Explorer.apply(this, arguments);
-		this.actionScopeId = launchConfigurationActions;
-		this.selectionActions = "LaunchConfigurationExplorerSelectionActions";
-		this.actionsSections = [this.selectionActions];
-	}
-
-	LaunchConfigurationExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
-
-	objects.mixin(LaunchConfigurationExplorer.prototype, /** @lends orion.Explorer.prototype */ {
-		registerCommands: function(){
-			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.manage", 1);
-			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.deploy", 2);
-			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.startApp", 3);
-			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.stopApp", 4);
-			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.delete", 5);
-		},
-		updateCommands: function(selections){
-			this.selectionActionsNode = lib.node(this.selectionActions);
-			lib.empty(this.selectionActionsNode);
-			this.commandService.renderCommands(this.selectionActions, this.selectionActionsNode, selections, this, "tool");
-			lib.$$array(".commandLink", this.selectionActionsNode).forEach(function(node, i) {
-				//There is no way to render commands with target, so setting after rendering
-				node.target = "_new";
-			});
-		},
-		load: function(parent, project, configurations, projectClient){
-			this.createTree(parent, new LaunchConfigurationModel(project, configurations, projectClient),  {indent: '8px'});
-			this.loaded();
-		},
-		constructor: LaunchConfigurationExplorer
-	});
-
 	function ProjectEditor(options){
 		this.serviceRegistry = options.serviceRegistry;
 		this.fileClient = options.fileClient;
@@ -590,19 +299,12 @@ define([
 		this.commandRegistry = options.commandRegistry;
 		this._node = null;
 		this.dependencyActions = "dependencyActions";
-		this.launchConfigurationActions = "launchConfigurationsActions";
 		this.createCommands();
 	}
 	ProjectEditor.prototype = {
 		createCommands: function(){
-			this.launchConfigurationDispatcher = mProjectCommands.getLaunchConfigurationDispatcher();
 			this.dependenciesDisplatcher = mProjectCommands.getDependencyDispatcher();
 			var _self = this;
-			this.launchConfigurationListener = function(event){_self.launchConfigurationChanged.call(_self, event);};
-			this._launchConfigurationEventTypes = ["create", "delete", "changeState", "deleteAll"];
-			this._launchConfigurationEventTypes.forEach(function(eventType) {
-				_self.launchConfigurationDispatcher.addEventListener(eventType, _self.launchConfigurationListener);
-			});
 
 			this.dependneciesListener = function(event){_self.dependenciesChanged.call(_self, event);};
 			this._dependenciesEventTypes = ["create", "delete"];
@@ -610,14 +312,10 @@ define([
 				_self.dependenciesDisplatcher.addEventListener(eventType, _self.dependneciesListener);
 			});
 
-
 //			mProjectCommands.createDependencyCommands(this.serviceRegistry, this.commandRegistry, this.fileClient, this.projectClient);
 //			var dependencyTypes = this.projectClient.getProjectHandlerTypes();
 			this.commandRegistry.registerCommandContribution(this.dependencyActions, "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandRegistry.registerCommandContribution(this.dependencyActions, "orion.project.dependency.disconnect", 2); //$NON-NLS-0$
-			this.commandRegistry.registerCommandContribution(this.launchConfigurationActions, "orion.launchConfiguration.checkStatus", 1);
-
-
 		},
 		changedItem: function(item){
 			this.fileClient.read(this.parentFolder.Location, true).then(function(metadata){
@@ -645,11 +343,6 @@ define([
 							this.node.appendChild(span);
 							this.renderAdditionalProjectProperties(span);
 							break;
-						case "deployment":
-							span = document.createElement("span");
-							this.node.appendChild(span);
-							this.renderLaunchConfigurations(span, null, sectionNames[sectionName], messages["emptyDeploymentInfoMessage"]); //$NON-NLS-0$
-							break;
 						case "dependencies":
 							span = document.createElement("span");
 							span.id = "projectDependenciesNode";
@@ -660,7 +353,7 @@ define([
 				}.bind(this));
 		}
 
-			var sectionsOrder = ["projectInfo", "additionalInfo", "deployment", "dependencies"];
+			var sectionsOrder = ["projectInfo", "additionalInfo", "dependencies"];
 			this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){
 				sectionsOrder = sectionsOrderPrefs.get("projectView") || sectionsOrder;
 				var sectionsNames = sectionsOrderPrefs.get("projectViewNames") || [];
@@ -797,6 +490,7 @@ define([
 			}
 			}.bind(this));
 		},
+		
 		renderDependencies: function(parent, sectionName){
 
 			if(!this.projectData.Dependencies || this.projectData.Dependencies.length===0){
@@ -820,108 +514,9 @@ define([
 			dependenciesExplorer.createTree(dependenciesParent, new DependenciesModel(this.projectData, this.projectClient),  {indent: '8px', noSelection: true});
 
 		},
-		renderLaunchConfigurations: function(parent, configurations, sectionName, emptyMessage){
-			this.configurationsParent = parent;
-			this.configurationsEmptyMessage = emptyMessage;
-
-			if(emptyMessage || (configurations && configurations.length > 0)){
-				lib.empty(this.configurationsParent);
-				this.launchCofunctionSectionsTitle = sectionName || messages.DeployInfo;
-				var launchConfigurationSection = new mSection.Section(parent, {id: "projectLaunchConfigurationSection", headerClass: ["sectionTreeTableHeader"], title: this.launchCofunctionSectionsTitle, canHide: true});
-				var launchConfigurationParent = document.createElement("div");
-				launchConfigurationParent.id = "launchConfigurationsNode";
-			}
-
-			if(!configurations){
-				var progressMonitor;
-				if(launchConfigurationSection){
-					progressMonitor = launchConfigurationSection.createProgressMonitor();
-					progressMonitor.begin("Loading...");
-				}
-				this.projectClient.getProjectLaunchConfigurations(this.projectData).then(function(configurations){
-					if(progressMonitor){
-						progressMonitor.done();
-					}
-					this.configurations = configurations;
-					if(!emptyMessage && (!configurations || configurations.length === 0)){
-						return;
-					}
-					this.renderLaunchConfigurations(parent, configurations, sectionName, emptyMessage);
-				}.bind(this));
-				return;
-			}
-
-			//Destroy tooptips for app status
-			if(lib.$(".sectionTreeTable", this.configurationsParent) || lib.$(".treetable", this.configurationsParent)) { //$NON-NLS-1$ //$NON-NLS-0$
-				lib.$$array(".treeTableRow", this.configurationsParent).forEach(function(tableRow, i) { //$NON-NLS-0$
-					if(tableRow.statusTooltip){
-						tableRow.statusTooltip.destroy();
-						delete tableRow.statusTooltip;
-					}
-					if(tableRow.urlTooltip){
-						tableRow.urlTooltip.destroy();
-						delete tableRow.urlTooltip;
-					}
-				});
-			}
-
-			var launchConfigurationRenderer = new LaunchConfigurationRenderer({
-				checkbox: false,
-				treeTableClass: "sectionTreeTable",
-				commandRegistry: this.commandRegistry,
-				actionScopeId:  this.launchConfigurationActions,
-				projectClient: this.projectClient,
-				emptyMessage: emptyMessage
-			}, this);
-			var launchConfigurationExplorer = new LaunchConfigurationExplorer(this.serviceRegistry, null, launchConfigurationRenderer, this.commandRegistry, this.launchConfigurationActions);
-			launchConfigurationSection.embedExplorer(launchConfigurationExplorer, launchConfigurationParent);
-			launchConfigurationExplorer.load(launchConfigurationParent, this.projectData, configurations, this.projectClient);
-		},
-		launchConfigurationChanged: function(event){
-			if(!this.configurations){
-				return;
-			}
-			if((event.type === "create" || event.type === "changeState") && event.newValue){
-				for(var i=0; i<this.configurations.length; i++){
-					var configuration = this.configurations[i];
-					if(configuration.Name === event.newValue.Name && configuration.ServiceId === event.newValue.ServiceId){
-						this.configurations[i] = event.newValue;
-						this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle, this.configurationsEmptyMessage);
-						return;
-					}
-				}
-				if(event.type === "create"){
-					this.configurations.push(event.newValue);
-					this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle, this.configurationsEmptyMessage);
-					return;
-				}
-			} else if(event.type === "delete"){
-				if(!event.oldValue){
-					return;
-				}
-				for(var i=0; i<this.configurations.length; i++){
-					var configuration = this.configurations[i];
-					if((configuration.Name === event.oldValue.Name && configuration.ServiceId === event.oldValue.ServiceId) || (configuration.File && event.oldValue.File && (configuration.File.Location === event.oldValue.File.Location))){
-						this.configurations.splice(i, 1);
-						this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle, this.configurationsEmptyMessage);
-						return;
-					}
-				}
-			} else if(event.type === "deleteAll"){
-				for(var i=this.configurations.length-1; i>=0; i--){
-					var configuration = this.configurations[i];
-					if(configuration.File){
-						this.configurations.splice(i, 1);
-					}
-				}
-				this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle, this.configurationsEmptyMessage);
-			}
-		},
+		
 		destroy: function(){
 			var _self = this;
-			this._launchConfigurationEventTypes.forEach(function(eventType) {
-					_self.launchConfigurationDispatcher.removeEventListener(eventType, _self.launchConfigurationListener);
-				});
 			this._dependenciesEventTypes.forEach(function(eventType) {
 					_self.dependenciesDisplatcher.removeEventListener(eventType, _self.dependneciesListener);
 				});

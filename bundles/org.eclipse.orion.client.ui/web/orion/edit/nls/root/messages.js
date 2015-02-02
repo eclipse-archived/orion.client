@@ -75,7 +75,6 @@ define({//Default message bundle
 	"Global Search": "Global Search...", //$NON-NLS-1$ //$NON-NLS-0$
 	"ClickEditLabel": "Click to edit", //$NON-NLS-1$ //$NON-NLS-0$
 	"ProjectInfo": "Project Information", //$NON-NLS-1$ //$NON-NLS-0$
-	"DeployInfo": "Deployment Information", //$NON-NLS-1$ //$NON-NLS-0$
 	"Name": "Name", //$NON-NLS-1$ //$NON-NLS-0$
 	"Description": "Description", //$NON-NLS-1$ //$NON-NLS-0$
 	"Site": "Site", //$NON-NLS-1$ //$NON-NLS-0$
