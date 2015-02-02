@@ -476,7 +476,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				var launchConfToPass = objects.clone(item);
 				launchConfToPass.Params = params;
 
-				projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
+				projectClient.getProjectDeployService(item.ServiceId, item.Type).then(function(service){
 					if(sharedLaunchConfigurationDispatcher){
 						item.status = {State: "PROGRESS", ShortMessage: messages["checkingStateShortMessage"]}; //$NON-NLS-1$ //$NON-NLS-0$
 						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
@@ -557,7 +557,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					var launchConfToPass = objects.clone(item);
 					launchConfToPass.Params = params;
 
-					projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
+					projectClient.getProjectDeployService(item.ServiceId, item.Type).then(function(service){
 						var progressMessage = start ? messages["starting"] : messages["stopping"]; //$NON-NLS-1$ //$NON-NLS-0$
 						if(service && (start ? service.start : service.stop)){
 							if(sharedLaunchConfigurationDispatcher){
@@ -677,7 +677,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				var launchConfToPass = objects.clone(item);
 				launchConfToPass.Params = params;
 
-				projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
+				projectClient.getProjectDeployService(item.ServiceId, item.Type).then(function(service){
 					if(service && service.deploy){
 						fileClient.loadWorkspace(item.project.ContentLocation).then(function(projectFolder){
 							runDeploy(launchConfToPass, {project: item.project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: item});
@@ -700,7 +700,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
 				fileClient.loadWorkspace(item.project.ContentLocation).then(function(){
-					projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
+					projectClient.getProjectDeployService(item.ServiceId, item.Type).then(function(service){
 						if(service && service.deleteAdditionalLaunchConfiguration){
 							runDeleteLaunchConfiguration(item, {
 								project: item.project,
@@ -1395,7 +1395,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					var deferred = new Deferred();
 					allContributedCommandsDeferreds.push(deferred);
 					(function(deferred){
-						projectClient.getProjectDelpoyService(type).then(function(deployService){
+						projectClient.getProjectDeployService(type).then(function(deployService){
 							createDeployProjectCommand(deployService);
 							deferred.resolve();
 						});

@@ -440,7 +440,7 @@ define([
 		return types;
 	},
 
-	getProjectDelpoyService: function(serviceId, type){
+	getProjectDeployService: function(serviceId, type){
 		var foundRef;
 		// Find by id
 		this.allProjectDeployReferences.some(function(serviceRef) {
@@ -573,7 +573,7 @@ define([
 							
 							// check if the deploy service supports DevMode and 
 							// modify the launch configuration object accordingly
-							var deployService = this.getProjectDelpoyService(launchConf.ServiceId, launchConf.Type);
+							var deployService = this.getProjectDeployService(launchConf.ServiceId, launchConf.Type);
 							
 							if (deployService.logLocationTemplate) {
 								launchConf.Params.LogLocationTemplate = deployService.logLocationTemplate;

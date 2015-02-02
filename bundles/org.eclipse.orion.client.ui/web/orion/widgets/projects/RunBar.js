@@ -375,7 +375,7 @@ define([
 			}.bind(this);
 			
 			// update status
-			return this._projectClient.getProjectDelpoyService(launchConfiguration.ServiceId, launchConfiguration.Type).then(
+			return this._projectClient.getProjectDeployService(launchConfiguration.ServiceId, launchConfiguration.Type).then(
 				function(service){
 					if(service && service.getState){
 						return service.getState(launchConfiguration).then(function(status){
