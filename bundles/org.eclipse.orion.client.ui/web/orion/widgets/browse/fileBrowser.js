@@ -17,7 +17,6 @@ define([
 	'orion/inputManager',
 	'orion/breadcrumbs',
 	'orion/widgets/browse/browseView',
-	'orion/explorers/navigatorRenderer',
 	'orion/widgets/browse/readonlyEditorView',
 	'orion/widgets/browse/resourceSelector',
 	'orion/commandRegistry',
@@ -42,7 +41,7 @@ define([
 	'orion/xhr',
 	'orion/URL-shim'
 ], function(
-	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector,
+	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mReadonlyEditorView, mResourceSelector,
 	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, 
 	EventTarget, RepoAndBaseURLTriggerTemplate, RepoURLTriggerTemplate, ShareSnippetTriggerTemplate, ShareCodeTriggerTemplate, messages, mCommands, lib, i18nUtil, mFileDownloader, util, xhr
 ) {
