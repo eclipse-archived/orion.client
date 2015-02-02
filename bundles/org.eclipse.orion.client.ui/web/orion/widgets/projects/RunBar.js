@@ -413,7 +413,10 @@ define([
 			
 			// logLocationTemplate in status takes precendence because it comes from the 
 			// service implementation's method rather than from the service properties
-			var logLocationTemplate = status.logLocationTemplate || this._selectedLaunchConfiguration.Params.LogLocationTemplate;
+			var logLocationTemplate = null;
+			if (status || (this._selectedLaunchConfiguration && this._selectedLaunchConfiguration.Params)) {
+				logLocationTemplate = status.logLocationTemplate || this._selectedLaunchConfiguration.Params.LogLocationTemplate;
+			}
 			
 			// turn status light off
 			this._statusLight.classList.remove("statusLightGreen"); //$NON-NLS-0$
