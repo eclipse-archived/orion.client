@@ -1003,7 +1003,22 @@ define([
 						var moreDiv = document.createElement("div"); //$NON-NLS-0$
 						bottomLeft.appendChild(moreDiv);
 
-						explorer.changeIDCheck = createInput(moreDiv, "changeIDCheck", 'SmartChangeId', null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var changeIdDiv = document.createElement("div"); //$NON-NLS-0$
+						moreDiv.appendChild(changeIdDiv);
+						explorer.changeIDCheck = createInput(changeIdDiv, "changeIDCheck", 'SmartChangeId', null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						
+						var signedOffDiv = document.createElement("div"); //$NON-NLS-0$
+						moreDiv.appendChild(signedOffDiv);
+						explorer.signedOffByCheck = createInput(signedOffDiv, "signedOfByCheck", 'SmartSignedOffById', null, null, true); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						explorer.signedOffByCheck.addEventListener("click", function() { //$NON-NLS-0$
+							var repository = explorer.model.repository;
+							var msg = mGitUtil.changeSignedOffByCommitMessage(explorer.authorNameInput.value, 
+								explorer.authorEmailInput.value, textArea.value, explorer.signedOffByCheck.checked);
+							textArea.value = msg;
+							textArea.parentNode.classList.remove("invalidParam"); //$NON-NLS-0$
+							explorer.updateSelectionStatus();
+						});
+							
 						var div1Content = createGroup(moreDiv, "Author:"); //$NON-NLS-0$
 						explorer.authorNameInput = createInput(div1Content, "authorNameInput", "Name:", "AuthorNamePlaceholder", config.AuthorName); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						explorer.authorEmailInput = createInput(div1Content, "authorEmailInput", "Email:", "AuthorEmailPlaceholder", config.AuthorEmail); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
