@@ -33,6 +33,7 @@ define([
 	'text!orion/widgets/browse/repoUrlTrigger.html',
 	'text!orion/widgets/browse/shareSnippetTrigger.html',
 	'text!orion/widgets/browse/shareCodeTrigger.html',
+	'i18n!orion/widgets/browse/nls/messages',
 	'orion/commands',
 	'orion/webui/littlelib',
 	'orion/i18nUtil',
@@ -43,7 +44,7 @@ define([
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector,
 	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, 
-	EventTarget, RepoAndBaseURLTriggerTemplate, RepoURLTriggerTemplate, ShareSnippetTriggerTemplate, ShareCodeTriggerTemplate, mCommands, lib, i18nUtil, mFileDownloader, util, xhr
+	EventTarget, RepoAndBaseURLTriggerTemplate, RepoURLTriggerTemplate, ShareSnippetTriggerTemplate, ShareCodeTriggerTemplate, messages, mCommands, lib, i18nUtil, mFileDownloader, util, xhr
 ) {
 	
 	function ResourceChangeHandler() {
@@ -119,6 +120,29 @@ define([
 		}.bind(this);
 		
 		this.init = function() {
+			var triggerNodeSpan = lib.node("orion.browse.repoURLTriggerSpan");
+			var triggerNodeTitle = lib.node("orion.browse.repoURLTitle");
+			if (this.baseURL) {
+				if(triggerNodeSpan) {
+					lib.empty(triggerNodeSpan);
+					triggerNodeSpan.appendChild(document.createTextNode(messages["ConfigureEclipseClient"]));
+				}
+				if(triggerNodeTitle) {
+					lib.empty(triggerNodeTitle);
+					triggerNodeTitle.appendChild(document.createTextNode(messages["ConfigureEclipseClientTips1"]));
+					triggerNodeTitle.appendChild(document.createElement("br"));
+					triggerNodeTitle.appendChild(document.createTextNode(i18nUtil.formatMessage(messages["ConfigureEclipseClientTips2"], "JazzHub")));
+				}
+			} else {
+				if(triggerNodeSpan) {
+					lib.empty(triggerNodeSpan);
+					triggerNodeSpan.appendChild(document.createTextNode(messages["GitURL"]));
+				}
+				if(triggerNodeTitle) {
+					lib.empty(triggerNodeTitle);
+					triggerNodeTitle.appendChild(document.createTextNode(messages["GitURLTips"]));
+				}
+			}
 		};
 		this.getTextAreaValue = function() {
 			if(this.baseURL) {
@@ -176,7 +200,18 @@ define([
 		this.init = function() {
 			var node = lib.node(this.triggerNodeId);
 			if(node) {
+				node.title = messages["ShareCodeTooltips"];
 				node.style.display = "none";
+			}
+			var triggerNodeSpan = lib.node("orion.browse.shareCodeTriggerSpan");
+			var triggerNodeTitle = lib.node("orion.browse.shareCodeTitle");
+			if(triggerNodeSpan) {
+				lib.empty(triggerNodeSpan);
+				triggerNodeSpan.appendChild(document.createTextNode(messages["ShareCode"]));
+			}
+			if(triggerNodeTitle) {
+				lib.empty(triggerNodeTitle);
+				triggerNodeTitle.appendChild(document.createTextNode(messages["ShareCodeTitle"]));
 			}
 		};
 		this.getTextAreaValue = function() {
@@ -326,6 +361,7 @@ define([
 		_registerCommands: function() {
 			var downloadCommand = new mCommands.Command({
 				imageClass: "core-sprite-download-file-browser", //$NON-NLS-0$
+				tooltip: messages["DownloadFile"],
 				id: "orion.browse.download", //$NON-NLS-0$
 				visibleWhen: function() {
 					return mFileDownloader.downloadSupported();
@@ -351,7 +387,7 @@ define([
 			this._commandRegistry.registerCommandContribution("orion.browse.breadcrumbActions", "orion.browse.download", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			var downloadZipCommand = new mCommands.Command({
 				imageClass: "core-sprite-download-file-browser", //$NON-NLS-0$
-				tooltip: "Download the contents of this branch as a zip file",
+				tooltip: messages["DownloadBranchAsZip"],
 				id: "orion.browse.downloadZip", //$NON-NLS-0$
 				visibleWhen: function() {
 					return !!this._downloadURL && this._downloadZip;
