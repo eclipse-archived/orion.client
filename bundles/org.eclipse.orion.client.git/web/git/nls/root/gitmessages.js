@@ -212,6 +212,7 @@ define({//Default message bundle
 	"Message:": "Message:", //$NON-NLS-0$  //$NON-NLS-1$
 	"Amend:": "Amend:", //$NON-NLS-0$  //$NON-NLS-1$
 	"SmartAmend": "Amend previous commit", //$NON-NLS-0$  //$NON-NLS-1$
+	"SmartSignedOffById": "Add Signed-off-by to message", //$NON-NLS-0$  //$NON-NLS-1$
 	"ChangeId:": "ChangeId:", //$NON-NLS-0$  //$NON-NLS-1$
 	"SmartChangeId": "Add Change-ID to message", //$NON-NLS-0$  //$NON-NLS-1$
 	"Committer Name:": "Committer Name:", //$NON-NLS-0$  //$NON-NLS-1$

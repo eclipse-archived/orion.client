@@ -108,6 +108,24 @@ define([
 		return splitted[iterator];
 	}
 	
+	function changeSignedOffByCommitMessage(name, email, message, isIncluded) {
+		var sob = _generateSignedOffBy(name, email);
+		if (sob) {
+			if (isIncluded) {
+				return message + sob;
+			} else {
+				return message.replace(sob, "");
+			}
+		}
+		return message;
+	}
+	
+	function _generateSignedOffBy(name, email) {
+		if (name && email) {
+			return "\nSigned-off-by: " + name + " <" + email + ">";
+		}
+	}
+	
 	/**
 	 * Returns Change-Id and Signed-off-by of a commit if present
 	 */
@@ -195,6 +213,7 @@ define([
 		hasUnstagedChanges: hasUnstagedChanges,
 		parseSshGitUrl: parseSshGitUrl,
 		trimCommitMessage: trimCommitMessage,
+		changeSignedOffByCommitMessage: changeSignedOffByCommitMessage,
 		shortenRefName: shortenRefName,
 		shortenPath: shortenPath,
 		relativePath: relativePath,
