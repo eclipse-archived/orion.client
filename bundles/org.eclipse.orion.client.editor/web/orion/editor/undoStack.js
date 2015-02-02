@@ -157,9 +157,9 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 			}
 			return this.changes.length > 0;
 		},
-		merge: function(start, text, previousText, type, end) {
+		merge: function(start, text, previousText, type, end, compoundChange) {
 			var length = this.changes.length;
-			if (length > 0) {
+			if (length > 0 && this === compoundChange) {
 				return this.changes[length - 1].merge(start, text, previousText, type, end);
 			}
 			return false;
@@ -486,7 +486,7 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 			var previousText = this.model.getText(start, end);
 			if (length > 0 && this.index === length) {
 				var change = this.stack[length - 1];
-				if (change.merge(start, text, previousText, type, end)) {
+				if (change.merge(start, text, previousText, type, end, this.compoundChange)) {
 					return;
 				}
 			}
