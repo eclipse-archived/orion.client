@@ -32,6 +32,7 @@ define([
 	 * @name orion.projects.RunBar
 	 * @param options
 	 * @param options.parentNode
+	 * @param options.projectExplorer
 	 * @param options.serviceRegistry
 	 * @param options.commandRegistry
 	 * @param options.fileClient
@@ -39,6 +40,10 @@ define([
 	 * @param options.preferencesService
 	 * @param options.statusService
 	 * @param options.actionScopeId
+	 * @param options.projectCommands
+	 * @param options.projectClient
+	 * @param options.preferences
+	 * @param options.disabled
 	 */
 	function RunBar(options) {
 		this._parentNode = options.parentNode;
@@ -53,6 +58,7 @@ define([
 		this._projectCommands = options.projectCommands;
 		this._projectClient = options.projectClient;
 		this._preferences = options.preferences;
+		this._disabled = options.disabled;
 		
 		this._initialize();
 		this._disableAllControls(); // start with controls disabled until a launch configuration is selected
@@ -64,13 +70,21 @@ define([
 			if (this._domNode) {
 				this._parentNode.appendChild(this._domNode);
 				
-				this._undestroyedTooltips = []; // an array of all the tooltips that need to be destroyed when this widget is destroyed
-								
+				this._launchConfigurationsWrapper = lib.$(".launchConfigurationsWrapper", this._domNode); //$NON-NLS-0$
 				this._playButton = lib.$("button.playButton", this._domNode); //$NON-NLS-0$
+				this._stopButton = lib.$("button.stopButton", this._domNode); //$NON-NLS-0$
+				this._appLink = lib.$(".appLink", this._domNode); //$NON-NLS-0$
+				this._logsLink = lib.$(".logsLink", this._domNode); //$NON-NLS-0$
+				
+				if (this._disabled) {
+					return;
+				}
+				
+				this._undestroyedTooltips = []; // an array of all the tooltips that need to be destroyed when this widget is destroyed
+				
 				this._boundPlayButtonListener = this._runBarButtonListener.bind(this, this._playButtonCommand);
 				this._playButton.addEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$ 
 				
-				this._stopButton = lib.$("button.stopButton", this._domNode); //$NON-NLS-0$
 				this._boundStopButtonListener = this._runBarButtonListener.bind(this, "orion.launchConfiguration.stopApp"); //$NON-NLS-0$
 				this._stopButton.addEventListener("click", this._boundStopButtonListener); //$NON-NLS-0$
 				
@@ -96,16 +110,14 @@ define([
 				//app link
 				this._boundLinkClickListener = this._linkClickListener.bind(this);
 
-				this._appLink = lib.$(".appLink", this._domNode); //$NON-NLS-0$
 				this._appLink.addEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
 				this._setNodeTooltip(this._appLink, messages["openAppTooltip"]); //$NON-NLS-0$
 				this._disableLink(this._appLink);
 				
-				this._logsLink = lib.$(".logsLink", this._domNode); //$NON-NLS-0$
 				this._logsLink.addEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
 				this._setNodeTooltip(this._logsLink, messages["openLogsTooltip"]); //$NON-NLS-0$
 				this._disableLink(this._logsLink);
-				
+
 				if (this._projectExplorer.treeRoot && this._projectExplorer.treeRoot.Project) {
 					this.loadLaunchConfigurations(this._projectExplorer.treeRoot.Project);
 				} else {
@@ -123,7 +135,6 @@ define([
 		},
 				
 		_createLaunchConfigurationsDropdown: function() {
-			this._launchConfigurationsWrapper = lib.$(".launchConfigurationsWrapper", this._domNode); //$NON-NLS-0$
 			this._cachedLaunchConfigurations = {};
 			
 			var separator;
@@ -194,18 +205,21 @@ define([
 				}
 			}.bind(this);
 			
-			this._launchConfigurationsDropdown = new mRichDropdown.RichDropdown({
-				parentNode: this._launchConfigurationsWrapper,
-				populateFunction: populateFunction
-			});
-			this._disableControl(this._launchConfigurationsWrapper); // start with control greyed out until launch configs are set
-			
 			this._launchConfigurationsLabel = lib.$(".dropdownTriggerButtonLabel", this._launchConfigurationsWrapper); //$NON-NLS-0$
 			this._appName = lib.$(".appName", this._launchConfigurationsLabel); //$NON-NLS-0$
 			this._statusLight = lib.$(".statusLight", this._launchConfigurationsLabel); //$NON-NLS-0$
 			this._appInfoSpan = lib.$(".appInfoSpan", this._launchConfigurationsLabel); //$NON-NLS-0$
 			
-			this._launchConfigurationsWrapper.removeChild(this._launchConfigurationsLabel);
+			// remove placeholder button
+			var launchConfigButton = lib.$(".launchConfigurationsButton", this._launchConfigurationsWrapper); //$NON-NLS-0$
+			this._launchConfigurationsWrapper.removeChild(launchConfigButton);
+			
+			this._launchConfigurationsDropdown = new mRichDropdown.RichDropdown({
+				parentNode: this._launchConfigurationsWrapper,
+				populateFunction: populateFunction
+			});
+			this._disableControl(this._launchConfigurationsWrapper); // start with control greyed out until launch configs are set
+
 			this._launchConfigurationsDropdown.setCustomTriggerButtonLabelNode(this._launchConfigurationsLabel);
 			
 			var triggerButton = this._launchConfigurationsDropdown.getDropdownTriggerButton();
@@ -242,12 +256,16 @@ define([
 			}
 			
 			if (this._playButton) {
-				this._playButton.removeEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$
+				if (this._boundPlayButtonListener) {
+					this._playButton.removeEventListener("click", this._boundPlayButtonListener); //$NON-NLS-0$
+				}
 				this._playButton = null;
 			}
 			
 			if (this._stopButton) {
-				this._stopButton.removeEventListener("click", this._boundStopButtonListener); //$NON-NLS-0$
+				if (this._boundStopButtonListener) {
+					this._stopButton.removeEventListener("click", this._boundStopButtonListener); //$NON-NLS-0$
+				}
 				this._stopButton = null;
 			}
 			
@@ -261,12 +279,16 @@ define([
 			}
 			
 			if (this._appLink) {
-				this._appLink.removeEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
+				if (this._boundLinkClickListener) {
+					this._appLink.removeEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
+				}
 				this._appLink = null;
 			}
 			
 			if (this._logsLink) {
-				this._logsLink.removeEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
+				if (this._boundLinkClickListener) {
+					this._logsLink.removeEventListener("click", this._boundLinkClickListener); //$NON-NLS-0$
+				}
 				this._logsLink = null;
 			}
 		},
@@ -413,7 +435,10 @@ define([
 			
 			// logLocationTemplate in status takes precendence because it comes from the 
 			// service implementation's method rather than from the service properties
-			var logLocationTemplate = status.logLocationTemplate || this._selectedLaunchConfiguration.Params.LogLocationTemplate;
+			var logLocationTemplate = null;
+			if (status || this._selectedLaunchConfiguration) {
+				logLocationTemplate = status.logLocationTemplate || this._selectedLaunchConfiguration.Params.LogLocationTemplate;
+			}
 			
 			// turn status light off
 			this._statusLight.classList.remove("statusLightGreen"); //$NON-NLS-0$
