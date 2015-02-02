@@ -73,6 +73,16 @@ define([
 
 				//HACK
 				var context = serviceRegistry.getService(serviceRegistry.getServiceReferences("orion.edit.model.context")[0]); //$NON-NLS-0$
+				
+				var self = this;
+				self.oldSetText = context.setText;
+				context.setText = function() {
+					self.serviceChangingText = true;
+					var result = self.oldSetText.apply(context, arguments);
+					self.serviceChangingText = false;
+					return result;
+				};
+				
 				context.processKey = function(evt) {
 					Commands.processKey(evt);
 				};
@@ -110,6 +120,7 @@ define([
 			//TODO consider using the orion.edit.model service instead
 			var service = this.serviceRegistry.getService(this.editorService);
 			if (service && service.onChanged) {
+				modelChangedEvent.isService = this.serviceChangingText;
 				service.onChanged(modelChangedEvent);
 			}
 		},
@@ -122,6 +133,14 @@ define([
 		uninstall: function() {
 			var plugin = this._getPlugin();
 			plugin.setParent(null);
+
+			//HACK
+			var serviceRegistry = this.serviceRegistry;
+			if (this.oldSetText) {
+				var context = serviceRegistry.getService(serviceRegistry.getServiceReferences("orion.edit.model.context")[0]); //$NON-NLS-0$
+				context.setText = this.oldSetText;
+			}
+			
 			lib.empty(this._domNode);
 			BaseEditor.prototype.uninstall.call(this);
 		}
