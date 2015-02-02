@@ -85,7 +85,7 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 			name: messages["URLs"],
 			nls: "cfui/nls/messages",
 			category: "cloud",
-			categoryKey: "Cloud Foundry",
+			categoryLabel: "Cloud Foundry",
 			properties: [{
 				id: "targetUrl",
 				name: messages["API URL"],

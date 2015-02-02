@@ -83,8 +83,6 @@ define([
 	ObjectClassDefinitionImpl = /** @ignore */ function(ocdJson) {
 		this.id = ocdJson.id;
 		this.name = ocdJson.name || null;
-		this.nameKey = ocdJson.nameKey || null;
-		this.nls = ocdJson.nls || null;
 		var props = ocdJson.properties;
 		if (!this.id) {
 			throw 'Missing "id" property: ' + JSON.stringify(ocdJson); //$NON-NLS-0$
@@ -106,12 +104,6 @@ define([
 		},
 		getName: function() {
 			return this.name;
-		},
-		getNameKey: function() {
-			return this.nameKey;
-		},
-		getNls: function() {
-			return this.nls;
 		}
 	};
 
@@ -130,7 +122,6 @@ define([
 		}
 		this.id = attrJson.id;
 		this.name = attrJson.name || null;
-		this.nameKey = attrJson.nameKey || null;
 		this.options = attrJson.options || null;
 		this.type = attrJson.type || 'string'; //$NON-NLS-0$
 		this.defaultValue = typeof attrJson.defaultValue !== 'undefined' ? attrJson.defaultValue : null; //$NON-NLS-0$
@@ -154,9 +145,6 @@ define([
 		},
 		getName: function() {
 			return this._nlsName || this.name;
-		},
-		getNameKey: function() {
-			return this.nameKey;
 		},
 		getOptionLabels: function() {
 			return this.options && this.options.map(function(o) {
@@ -200,20 +188,6 @@ define([
 		 * @description Returns this Object Class Definition's name.
 		 * @returns {String} The name. May be <code>null</code>.
 		 */
-		/**
-		 * @name orion.metatype.ObjectClassDefinition#getNameKey
-		 * @function
-		 * @see #getNls
-		 * @description Returns this Object Class Definition's name key.
-		 * @returns {String} The name key. May be <code>null</code>.
-		 */
-		/**
-		 * @name orion.metatype.ObjectClassDefinition#getNls
-		 * @function
-		 * @see #getNameKey
-		 * @description Returns this Object Class Definition's NLS path.
-		 * @returns {String} The NLS path. May be <code>null</code>.
-		 */
 	/**
 	 * @name orion.metatype.AttributeDefinition
 	 * @class Describes the data type of a property/attribute.
@@ -231,12 +205,6 @@ define([
 		 * @function
 		 * @description Returns the name.
 		 * @returns {String} The name, or <code>null</code>.
-		 */
-		/**
-		 * @name orion.metatype.AttributeDefinition#getNameKey
-		 * @function
-		 * @description Returns the name key.
-		 * @returns {String} The name key, or <code>null</code>.
 		 */
 		/**
 		 * @name orion.metatype.AttributeDefinition#getOptionValues

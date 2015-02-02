@@ -11,10 +11,8 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 define([
-	'orion/Deferred',
-	'orion/i18nUtil',
 	'orion/serviceTracker'
-], function(Deferred, i18nUtil, ServiceTracker) {
+], function(ServiceTracker) {
 	var METATYPE_SERVICE = 'orion.cm.metatype', SETTING_SERVICE = 'orion.core.setting'; //$NON-NLS-0$ //$NON-NLS-1$
 	var SETTINGS_PROP = 'settings'; //$NON-NLS-0$
 	var DEFAULT_CATEGORY = 'unsorted'; //$NON-NLS-0$
@@ -60,12 +58,6 @@ define([
 		 * @returns {String} The category. May be <code>null</code>.
 		 */
 		/**
-		 * @name orion.settings.Setting#getCategoryKey
-		 * @function
-		 * @description Returns the category key.
-		 * @returns {String} The category key. May be <code>null</code>.
-		 */
-		/**
 		 * @name orion.settings.Setting#getCategoryLabel
 		 * @function
 		 * @description Returns the category label.
@@ -88,20 +80,6 @@ define([
 		 * @returns {String} The name. May be <code>null</code>.
 		 */
 		/**
-		 * @name orion.settings.Setting#getNameKey
-		 * @function
-		 * @see #getNls
-		 * @description Returns the name key.
-		 * @returns {String} The name key. May be <code>null</code>.
-		 */
-		/**
-		 * @name orion.settings.Setting#getNls
-		 * @function
-		 * @see #getNameKey
-		 * @description Returns the NLS path.
-		 * @returns {String} The NLS path. May be <code>null</code>.
-		 */
-		/**
 		 * @name orion.settings.Setting#getAttributeDefinitions
 		 * @function
 		 * @returns {orion.metatype.AttributeDefinition[]}
@@ -116,23 +94,15 @@ define([
 		this.isRef = getStringOrNull(json, 'classId'); //$NON-NLS-0$
 		this.classId = this.isRef ? json.classId : this.pid + '.type'; //$NON-NLS-0$
 		this.name = getStringOrNull(json, 'name'); //$NON-NLS-0$
-		this.nameKey = getStringOrNull(json, 'nameKey'); //$NON-NLS-0$
-		this.nls = getStringOrNull(json, 'nls'); //$NON-NLS-0$
 		this.properties = null;
 		this.category = json.category || null;
-		this.categoryKey = json.categoryKey || null;
+		this.categoryLabel = json.categoryLabel || null;
 		this.tags = json.tags;
 		if (!this.pid) { throw new Error('Missing "pid" property'); } //$NON-NLS-0$
 	}
 	SettingImpl.prototype = {
 		getName: function() {
 			return this._nlsName || this.name;
-		},
-		getNameKey: function() {
-			return this.nameKey;
-		},
-		getNls: function() {
-			return this.nls;
 		},
 		getPid: function() {
 			return this.pid;
@@ -147,10 +117,7 @@ define([
 			return this.category;
 		},
 		getCategoryLabel: function() {
-			return this._nlsCategoryLabel;
-		},
-		getCategoryKey: function() {
-			return this.categoryKey;
+			return this.categoryLabel;
 		},
 		getTags: function() {
 			return this.tags || [];
@@ -168,14 +135,6 @@ define([
 					defaultValue = attributeDefinition.getDefaultValue();
 				return equals(attributeDefinition.getType(), value, defaultValue);
 			});
-		},
-		// Private, for translation
-		_setNlsName: function(value) {
-			this._nlsName = value;
-		},
-		// Private, for translation
-		_setNlsCategory: function(value) {
-			this._nlsCategoryLabel = value;
 		}
 	};
 
@@ -198,8 +157,7 @@ define([
 				// The ObjectClassDefinition doesn't exist yet so we'll define it here
 				serviceProperties.classes = [{
 					id: classId,
-					nameKey: setting.getNameKey(),
-					nls: setting.getNls(),
+					name: setting.getName(),
 					properties: settingJson.properties
 				}];
 			}
@@ -255,7 +213,6 @@ define([
 	function SettingsRegistry(serviceRegistry, metaTypeRegistry) {
 		this.settingsMap = Object.create(null);    // PID -> Setting
 		this.categories = Object.create(null);     // Category -> PID[]
-		this.categoryLabels = Object.create(null); // Category -> String
 		var tracker = new SettingTracker(serviceRegistry, metaTypeRegistry, this.settingsMap, this.categories);
 		tracker.open();
 	}
@@ -287,7 +244,14 @@ define([
 		 * @returns {String} The category label, or <code>null</code> if no localized label is available.
 		 */
 		getCategoryLabel: function(category) {
-			return this.categoryLabels[category] || null;
+			var settings  = this.getSettings(category);
+			for (var i = 0; i < settings.length; i++){
+				var label = settings[i].getCategoryLabel();
+				if (label) {
+					return label;
+				}
+			}
+			return null;
 		}
 	};
 
