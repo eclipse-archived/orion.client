@@ -287,10 +287,6 @@ define([
 				this._runBar.destroy();
 				this._runBar = null;
 			}
-			if (this._handleProjectOpened) {
-				this.sidebarNavInputManager.removeEventListener("projectOpened", this._handleProjectOpened); //$NON-NLS-0$
-				this._handleProjectOpened = null;
-			}
 			CommonNavExplorer.prototype.destroy.call(this);
 		},
 		_createRunBar: function() {
@@ -298,40 +294,22 @@ define([
 			var runBarParent = menuBar.runBarNode;
 			lib.empty(runBarParent);
 			
-			this._handleProjectOpened = function(event) {
-				var project = event.item;
-				var foundManifest = project.Children.some(function(item) {
-					if ("manifest.yml" === item.Name) { //$NON-NLS-0$
-						return true; // found manifest file
-					}
-					return false;
-				}, this);
-				
-				mCustomGlobalCommands.createRunBar({
-					parentNode: runBarParent,
-					projectExplorer: this,
-					serviceRegistry: this.serviceRegistry,
-					commandRegistry: this.commandRegistry,
-					fileClient: this.fileClient,
-					projectCommands: ProjectCommands,
-					projectClient: this.projectClient,
-					progressService: this.progressService,
-					preferences: this.preferences,
-					disabled: !foundManifest
-				}).then(function(runBar){
-					if (runBar) {
-						// runBar successfully created, set local reference to it
-						this._runBar = runBar;
-					}
-				}.bind(this));
-				
-				if (this._handleProjectOpened) {
-					this.sidebarNavInputManager.removeEventListener("projectOpened", this._handleProjectOpened); //$NON-NLS-0$
-					this._handleProjectOpened = null;
+			mCustomGlobalCommands.createRunBar({
+				parentNode: runBarParent,
+				projectExplorer: this,
+				serviceRegistry: this.serviceRegistry,
+				commandRegistry: this.commandRegistry,
+				fileClient: this.fileClient,
+				projectCommands: ProjectCommands,
+				projectClient: this.projectClient,
+				progressService: this.progressService,
+				preferences: this.preferences
+			}).then(function(runBar){
+				if (runBar) {
+					// runBar successfully created, set local reference to it
+					this._runBar = runBar;
 				}
-			}.bind(this);
-			
-			this.sidebarNavInputManager.addEventListener("projectOpened", this._handleProjectOpened); //$NON-NLS-0$
+			}.bind(this));
 		}
 	});
 
