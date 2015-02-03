@@ -522,7 +522,9 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 				cFService.startApp(params.Target, params.Name, undefined, params.Timeout).then(
 
 				function(result) {
-					deferred.resolve(that._prepareAppStateMessage(result));
+					deferred.resolve({
+						CheckState: true
+					});
 				}, function(error) {
 
 					/* default cf error message decoration */
@@ -544,18 +546,8 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 				cFService.stopApp(params.Target, params.Name).then(
 
 				function(result) {
-					if (result.state) {
-						deferred.resolve({
-							State: (result.state !== "stop" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
-							Message: "Application in debug mode [" + result.state + "]"
-						});
-						return;
-					}
-
-					var app = result.entity;
 					deferred.resolve({
-						State: (app.state === "STARTED" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$ //$NON-NLS-2$
-						Message: messages["applicationIsNotRunning"]
+						CheckState: true
 					});
 				}, function(error) {
 
@@ -566,30 +558,6 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 				});
 				return deferred;
 			}
-		},
-
-		_prepareAppStateMessage: function(appInstances) {
-			if (appInstances.state) {
-				return {
-					State: (appInstances.state !== "stop" ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
-					Message: "Application in debug mode"
-				};
-			}
-			var instances = 0;
-			var runningInstances = 0;
-			var flappingInstances = 0;
-			for (var key in appInstances) {
-				var instance = appInstances[key];
-				instances++;
-				if (instance.state === "RUNNING") //$NON-NLS-0$
-				runningInstances++;
-				else if (instance.state === "FLAPPING") //$NON-NLS-0$
-				flappingInstances++;
-			}
-			return {
-				State: (runningInstances > 0 ? "STARTED" : "STOPPED"), //$NON-NLS-0$ //$NON-NLS-1$
-				Message: flappingInstances > 0 ? i18nUtil.formatMessage(messages["${0}/${1}Instance(s)Running,${2}Flapping"], runningInstances, instances, flappingInstances) : i18nUtil.formatMessage(messages["${0}/${1}Instance(s)Running"], runningInstances, instances)
-			};
 		},
 		
 		/**
