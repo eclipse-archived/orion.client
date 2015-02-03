@@ -40,7 +40,7 @@
     {
       "browserName": "internet explorer",
       "platform": "Windows 7",
-      "version": "10"
+      "version": "11"
     },
     {
       "browserName": "safari",
