@@ -170,7 +170,7 @@ define({//Default message bundle
 	"target:": "Target:",
 	"applicationName:": "Application Name:",
 	"Click \"Deploy\" to proceed or \"Next\" to change the deployment parameters.": "Click \"Deploy\" to proceed or \"Next\" to change the deployment parameters.",
-	"save": "Save",
+	"deploy": "Deploy",
 	"configureApplicationDeployment": "Configure Application Deployment",
 	"saveToManifestFile:": "Save to manifest file: ",
 	"bindServicesFromTheList.": "Bind services from the list.",
