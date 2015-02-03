@@ -81,14 +81,14 @@ define(['orion/plugin',
 		onInputChanged: cssResultMgr.onInputChanged.bind(cssResultMgr)
 	},
 	{
-		contentType: ["text/css"],  //$NON-NLS-0$
+		contentType: ["text/css", "text/html"],  //$NON-NLS-0$
 		types: ["ModelChanging", 'Destroy', 'onSaving', 'onInputChanged']  //$NON-NLS-0$  //$NON-NLS-1$
 	});
 
     provider.registerService("orion.edit.contentassist", //$NON-NLS-0$
 		new cssContentAssist.CssContentAssistProvider(cssResultMgr),
 		{	name: messages["cssContentAssist"], //$NON-NLS-0$
-			contentType: ["text/css"] //$NON-NLS-0$
+			contentType: ["text/css", "text/html"] //$NON-NLS-0$
 		});
 		
 	/**
@@ -96,7 +96,7 @@ define(['orion/plugin',
 	 */
 	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new mCssValidator(cssResultMgr), //$NON-NLS-0$  //$NON-NLS-1$
 		{
-			contentType: ["text/css"], //$NON-NLS-0$
+			contentType: ["text/css" /*, "text/html"*/], //$NON-NLS-0$
 			pid: 'csslint.config'  //$NON-NLS-0$
 		});
 		
@@ -157,7 +157,7 @@ define(['orion/plugin',
 	provider.registerService("orion.edit.hover", new cssHover.CSSHover(resolver, cssResultMgr),  //$NON-NLS-0$
 		{
 		    name: messages['cssHover'],	//$NON-NLS-0$
-			contentType: ["text/css"]	//$NON-NLS-0$
+			contentType: ["text/css", "text/html"]	//$NON-NLS-0$
 	});
 	
 	/**

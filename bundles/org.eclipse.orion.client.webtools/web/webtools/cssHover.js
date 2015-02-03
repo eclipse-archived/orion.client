@@ -15,8 +15,9 @@ define([
 'orion/objects',
 'orion/URITemplate',
 'webtools/util',
+'javascript/compilationUnit',
 'csslint' //for colour object
-], function(Objects, URITemplate, Util, CSSLint) {
+], function(Objects, URITemplate, Util, CU, CSSLint) {
 	
 	/**
 	 * @name webtools.CSSHover
@@ -45,41 +46,62 @@ define([
 		 */
 		computeHoverInfo: function computeHover(editorContext, ctxt) {
 			var that = this;
-			return that.cssResultManager.getResult(editorContext, that._emptyRuleSet()).then(function(results) {
-			    if(results) {
-    			    var token = Util.findToken(ctxt.offset, results.tokens);
-    				if (token){
-    				    //TODO, investigate creating an AST in the CSS parser, walking tokens can be expensive
-    				    if(that.hasPreviousToken(token, results.tokens, 'IMPORT_SYM')) {
-    				        return that._getFileHover(token);
-    				    }
-    				    if(that.hasPreviousToken(token, results.tokens, 'IDENT', 'background-image')) {
-    				        return that._getImageHover(token);
-    				    }
-    				    var tok = that._isRgbLike(token, results.tokens);
-    				    if(tok) {
-    				        var color = that._collectColorId(tok, results.tokens);
-    		                if(color) {
-    		                    return that._getColorHover(color);    
-    		                }
-    				    }
-    					if (CSSLint.Colors[token.value]){
-    						return that._getColorHover(token.value);
-    					}
-    					if (/\#[0-9A-Fa-f]{1,6}/.test(token.value)){
-    						return that._getColorHover(token.value);	
-    					}
-    					tok = that._isFontFamily(token, results.tokens);
-    					if(tok) {
-    					    var font = that._collectFontId(tok, results.tokens);
-    					    if(font) {
-    					        return that._getFontHover(font);
-    					    }
-    					}
-    				}
-				}
-				return null;
+			return editorContext.getFileMetadata().then(function(meta) {
+			   if(meta.contentType.id === 'text/html') {
+			       return editorContext.getText().then(function(text) {
+			           var blocks = Util.findStyleBlocks(text);
+			           if(blocks && blocks.length > 0) {
+			               var cu = new CU(blocks, meta);
+			               if(cu.validOffset(ctxt.offset)) {
+    			               return that.cssResultManager.getResult(cu.getEditorContext(), that._emptyRuleSet()).then(function(results) {
+                    			   return that._doHover(results, ctxt);
+    
+                               });
+                           }
+			           }
+			       });
+			   } else {
+			       return that.cssResultManager.getResult(editorContext, that._emptyRuleSet()).then(function(results) {
+        			   return that._doHover(results, ctxt);
+                   });
+			   }
 			});
+		},
+		
+		_doHover: function _doHover(results, ctxt) {
+		    if(results) {
+			    var token = Util.findToken(ctxt.offset, results.tokens);
+				if (token){
+				    //TODO, investigate creating an AST in the CSS parser, walking tokens can be expensive
+				    if(this.hasPreviousToken(token, results.tokens, 'IMPORT_SYM')) {
+				        return this._getFileHover(token);
+				    }
+				    if(this.hasPreviousToken(token, results.tokens, 'IDENT', 'background-image')) {
+				        return this._getImageHover(token);
+				    }
+				    var tok = this._isRgbLike(token, results.tokens);
+				    if(tok) {
+				        var color = this._collectColorId(tok, results.tokens);
+		                if(color) {
+		                    return this._getColorHover(color);    
+		                }
+				    }
+					if (CSSLint.Colors[token.value]){
+						return this._getColorHover(token.value);
+					}
+					if (/\#[0-9A-Fa-f]{1,6}/.test(token.value)){
+						return this._getColorHover(token.value);	
+					}
+					tok = this._isFontFamily(token, results.tokens);
+					if(tok) {
+					    var font = this._collectFontId(tok, results.tokens);
+					    if(font) {
+					        return this._getFontHover(font);
+					    }
+					}
+				}
+			}
+			return null;
 		},
 		
 		_emptyRuleSet: function() {

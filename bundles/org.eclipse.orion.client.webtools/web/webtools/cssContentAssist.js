@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * Copyright (c) 2011, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,8 +12,12 @@
 /*eslint-env browser, amd*/
 define("webtools/cssContentAssist", [ //$NON-NLS-0$
 	'orion/editor/templates', //$NON-NLS-0$
-	'orion/editor/stylers/text_css/syntax' //$NON-NLS-0$
-], function(mTemplates, mCSS) {
+	'orion/editor/stylers/text_css/syntax', //$NON-NLS-0$
+	'orion/objects',
+	'webtools/util',
+	'javascript/compilationUnit',
+	'csslint'
+], function(mTemplates, mCSS, Objects, Util, CU, CSSLint) {
 
 	var overflowValues = {
 		type: "link", //$NON-NLS-0$
@@ -73,25 +77,7 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
 	}
 	var colorValues = {
 		type: "link", //$NON-NLS-0$
-		values: [
-			"black", //$NON-NLS-0$
-			"white", //$NON-NLS-0$
-			"red", //$NON-NLS-0$
-			"green", //$NON-NLS-0$
-			"blue", //$NON-NLS-0$
-			"magenta", //$NON-NLS-0$
-			"yellow", //$NON-NLS-0$
-			"cyan", //$NON-NLS-0$
-			"grey", //$NON-NLS-0$
-			"darkred", //$NON-NLS-0$
-			"darkgreen", //$NON-NLS-0$
-			"darkblue", //$NON-NLS-0$
-			"darkmagenta", //$NON-NLS-0$
-			"darkcyan", //$NON-NLS-0$
-			"darkyellow", //$NON-NLS-0$
-			"darkgray", //$NON-NLS-0$
-			"lightgray" //$NON-NLS-0$
-		]
+		values: Object.keys(CSSLint.Colors)
 	};
 	var cursorValues = {
 		type: "link", //$NON-NLS-0$
@@ -289,18 +275,86 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
 	/**
 	 * @name orion.editor.CssContentAssistProvider
 	 * @class Provides content assist for CSS keywords.
+	 * @param {CssResultManager} resultManager The backing reult manager
 	 */
-	function CssContentAssistProvider() {
+	function CssContentAssistProvider(resultManager) {
+	    this._resultManager = resultManager;
 	}
-	CssContentAssistProvider.prototype = new mTemplates.TemplateContentAssist(mCSS.keywords, templates);
+	var templateAssist = new mTemplates.TemplateContentAssist(mCSS.keywords, templates);
 	
-	CssContentAssistProvider.prototype.getPrefix = function(buffer, offset, context) {
-		var index = offset;
-		while (index && /[A-Za-z\-\@]/.test(buffer.charAt(index - 1))) {
-			index--;
-		}
-		return index >= 0 ? buffer.substring(index, offset) : "";
-	};
+	Objects.mixin(CssContentAssistProvider.prototype, {
+	   /**
+	    * @callback
+	    */
+	   getPrefix: function getPrefix(buffer, offset, context) {
+	       var index = offset;
+    		while (index && /[A-Za-z\-\@]/.test(buffer.charAt(index - 1))) {
+    			index--;
+    		}
+    		return index >= 0 ? buffer.substring(index, offset) : "";
+        },
+        /**
+         * @callback
+         * @since 8.0
+         */
+        computeContentAssist: function computeContentAssist(editorContext, params) {
+            var that = this;
+            return editorContext.getFileMetadata().then(function(meta) {
+               if(meta.contentType.id === 'text/html') {
+                  return editorContext.getText().then(function(text) {
+                     var blocks = Util.findStyleBlocks(text, params.offset);
+                     if(blocks && blocks.length > 0) {
+                         var cu = new CU(blocks, meta);
+                         return that._computeProposals(cu.getEditorContext(), text, params);
+                     }
+                  });
+               } else {
+                   return editorContext.getText().then(function(text) {
+                      return that._computeProposals(editorContext, text, params);
+                   });
+               }
+            });
+        },
+        
+        /**
+         * @description Computes the proposals from the given offset, also returns all keyword and template proposals
+         * @since 8.0
+         */
+        _computeProposals: function _computeProposals(editorContext, buffer, context) {
+            //TODO compute completion context
+            return [].concat(templateAssist.computeProposals(buffer, context.offset, context));
+        },
+        
+        /**
+         * @description Computes the kind of completion we are attempting. For example 'color: <assist>' would return 'color'
+         * @function
+         * @private
+         * @param {Object} context The completion contest from #computeProposals
+         * @returns {String} The completion context or <code>null</code>
+         * @since 8.0
+         */
+        _getCompletionContext: function _getCompletionContext(editorContext, context) {
+            return this._resultManager.getResult(editorContext).then(function(results) {
+               if(results) {
+                   var tok = Util.findToken(context.offset, results.tokens);
+                   if(tok) {
+                       switch(tok.type) {
+                           case 'EOF': {
+                               if(results.tokens.length > 1) {
+                                   //grab the token right before the EOF if there is one
+                                   tok = results.tokens[results.tokens.length -2];
+                                   if(tok) {
+                                       return {prefix: tok.value, value: 'root'};
+                                   }
+                               }
+                           }
+                       }
+                   }
+               }
+               return null;
+            });
+        }
+	});
 
 	return {
 		CssContentAssistProvider: CssContentAssistProvider
