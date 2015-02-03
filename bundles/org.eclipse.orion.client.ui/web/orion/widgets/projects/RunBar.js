@@ -142,9 +142,9 @@ define([
 					for (hash in this._cachedLaunchConfigurations) {
 						if (this._cachedLaunchConfigurations.hasOwnProperty(hash)) {
 							launchConfiguration = this._cachedLaunchConfigurations[hash];
-							menuItem = dropdown.appendMenuItem(this._getName(launchConfiguration));
+							menuItem = dropdown.appendMenuItem(launchConfiguration.Name);
 							menuItem.classList.add("launchConfigurationMenuItem"); //$NON-NLS-0$
-							menuItem.id = this._getName(launchConfiguration) + "_RunBarMenuItem"; //$NON-NLS-0$
+							menuItem.id = launchConfiguration.Name + "_RunBarMenuItem"; //$NON-NLS-0$
 							
 							menuItem.addEventListener("click", function(currentHash, event){ //$NON-NLS-0$
 								// Use currentHash to get cached launch config again because it will be updated 
@@ -358,7 +358,7 @@ define([
 		},
 			
 		_checkLaunchConfigurationStatus: function(launchConfiguration) {
-			var progressMessage = i18nUtil.formatMessage(messages["checkingStateMessage"], this._getName(launchConfiguration)); //$NON-NLS-0$
+			var progressMessage = i18nUtil.formatMessage(messages["checkingStateMessage"], launchConfiguration.Name); //$NON-NLS-0$
 			
 			// start progress spinner in launch config dropdown trigger and indicate that we are checking the status
 			this.setStatus({
@@ -521,22 +521,13 @@ define([
 			}, this);
 		},
 		
-		_getName: function(launchConfiguration){
-			return launchConfiguration.Params.Name + messages["displayNameSeparator"] + launchConfiguration.Params.Target.Space + " / " + launchConfiguration.Params.Target.Org;
-		},
-		
 		_getHash: function(launchConfiguration) {
 			var hash = null;
 			if (launchConfiguration) {
-				hash = launchConfiguration.Params.Name + ":" + 
-					launchConfiguration.Params.Target.Space + ":" + 
-					launchConfiguration.Params.Target.Org + ":" + 
-					launchConfiguration.Params.Target.Url + ":" + 
-					launchConfiguration.ServiceId; //$NON-NLS-0$
+				hash = launchConfiguration.Name + ":" + launchConfiguration.ServiceId; //$NON-NLS-0$
 			}
 			return hash;
 		},
-		
 		
 		_putInLaunchConfigurationsCache: function(launchConfiguration) {
 			var hash = this._getHash(launchConfiguration);
@@ -651,12 +642,12 @@ define([
 		
 		_setLaunchConfigurationsLabel: function(launchConfiguration) {
 			if (launchConfiguration) {
-				var displayName = this._getName(launchConfiguration);
+				var displayName = launchConfiguration.Params.Name + messages["displayNameSeparator"] + launchConfiguration.Params.Target.Space; //$NON-NLS-0$
 				
 				lib.empty(this._launchConfigurationsLabel);
 				
 				this._setText(this._appName, displayName);
-				this._setNodeTooltip(this._appName, this._getName(launchConfiguration));
+				this._setNodeTooltip(this._appName, launchConfiguration.Name);
 				this._setText(this._appInfoSpan, null);
 				
 				this._launchConfigurationsLabel.appendChild(this._statusLight);
