@@ -80,7 +80,8 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 				if(match) {
 					// build the pluginURL and downloadURL
 					// these requests are expected to be handled by the Git router service
-					pluginURL = new URL("/git/" + match[1] + "/browse/plugins/GerritFilePlugin.html", url);
+					pluginURL = new URL("/browse/plugins/GerritFilePlugin.html", url);
+					pluginURL.query.set("project", match[1]);
 					downloadURL = new URL("/git/" + match[1] + "/archive", url);
 				} else if (url.pathname.indexOf("/ccm") === 0) {
 					if (!base) {
