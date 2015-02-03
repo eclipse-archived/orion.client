@@ -88,8 +88,8 @@
 .resourceSelectorContainer {
 	margin-left: 4px;
 	border: 1px solid;
-	height: 21px; 
-	margin-top: -2px;
+	height: 20px; 
+	margin-top: 2px;
 	background-color: white;
 	display: inline-block;
 	border-color: #dadada;
