@@ -93,7 +93,7 @@ define([
 	function processRefLinks(string) {
 		/* add ref ids on successfully-resolved ref links */
 		string = string.replace(refLinkIDRegex, /* @callback */ function(match, p1) {
-			return '" ' + ATTRIBUTE_REFID + '="' + p1 + '"'; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			return '" ' + ATTRIBUTE_REFID + '="' + p1; //$NON-NLS-1$ //$NON-NLS-0$
 		});
 
 		/* replace unsuccessfully-resolved ref links with html links with ref ids */
@@ -109,6 +109,9 @@ define([
 
 	var MarkdownStylingAdapter = function(model, resource, fileClient) {
 		this.model = model;
+		this._blocksCache = {};
+		this._defBlocks = {};
+		this._linkDefs = {};
 
 		/* relativize marked's outputLink */
 		var resourceURL = new URL(resource, window.location.href);
@@ -245,7 +248,7 @@ define([
 						contentEnd: end,
 						end: end
 					};
-					name = "meta.link.reference.def.markdown"; //$NON-NLS-0$
+					name = this._TYPEID_DEF;
 					index = end;
 				} else if (tokens[i].type === "blockquote_start" || tokens[i].type === "list_start") { //$NON-NLS-1$ //$NON-NLS-0$
 					/*
@@ -737,6 +740,15 @@ define([
 								messages.WarningOrderedListShouldStartAt1));
 						}
 					}
+				} else if (block.typeId === this._TYPEID_DEF) {
+					var def = this._linkDefs[block.tokens[0].id];
+					if (def.block.start !== block.start) {
+						_add.push(mAnnotations.AnnotationType.createAnnotation(
+							mAnnotations.AnnotationType.ANNOTATION_WARNING,
+							block.start,
+							block.end,
+							i18nUtil.formatMessage(messages.WarningDuplicateLinkId, block.tokens[0].id)));
+					}
 				} else if (block.typeId === this._TYPEID_PARAGRAPH) {
 					text = baseModel.getText(block.start, block.end);
 					var linkMatches = extractLinks(text, [marked.InlineLexer.rules.link, marked.InlineLexer.rules.reflink]);
@@ -759,7 +771,7 @@ define([
 								}
 							} else {
 								/* reference link */
-								var refId = current.match[2] || current.match[1];
+								var refId = (current.match[2] || current.match[1]).toLowerCase();
 								if (!this._linkDefs[refId]) {
 									_add.push(mAnnotations.AnnotationType.createAnnotation(
 										mAnnotations.AnnotationType.ANNOTATION_WARNING,
@@ -941,69 +953,92 @@ define([
 			e.oldBlocks.forEach(function(current) {
 				var token = current.tokens ? current.tokens[0] : null;
 				if (token && token.type === "def") { //$NON-NLS-0$
-					oldBlockRefs[token.id] = token;
+					delete this._defBlocks[current.elementId];
+					if (!oldBlockRefs[token.id]) {
+						oldBlockRefs[token.id] = current;
+					}
 				}
-			});
+			}.bind(this));
 			var refChanges = {};
 			e.newBlocks.forEach(function(current) {
 				var token = current.tokens ? current.tokens[0] : null;
 				if (token && token.type === "def") { //$NON-NLS-0$
+					this._defBlocks[current.elementId] = current;
+					token.block = current;
 
 					/* help our marked custom renderers to determine the ref ids for resolved ref links */
 					token.href += REFLINKID_PREAMBLE + token.id;
 
-					if (!oldBlockRefs[token.id]) {
-						/* a new definition */
-						refChanges[token.id] = [null, token];
-					} else {
-						if (oldBlockRefs[token.id].href !== token.href || oldBlockRefs[token.id].title !== token.title) {
-							/* a change to an old definition's href and/or title */
-							refChanges[token.id] = [oldBlockRefs[token.id], token];
-						}
-						delete oldBlockRefs[token.id];
-					}
+					refChanges[token.id] = refChanges[token.id] || [oldBlockRefs[token.id], current];
+					delete oldBlockRefs[token.id];
 				}
-			});
+			}.bind(this));
 			for (var key in oldBlockRefs) {
 				var current = oldBlockRefs[key];
 				/* an old definition that no longer exists */
-				refChanges[current.id] = [current, null];
+				refChanges[current.tokens[0].id] = [current, null];
 			}
 
 			/* update the master set of ref link definitions based on these changes */
+
 			for (key in refChanges) {
 				current = refChanges[key];
 				if (!current[1]) {
-					/* an old definition that no longer exists */
-					delete this._linkDefs[key];
+					/* deletion */
+					if (current[0].start === this._linkDefs[key].block.start) {
+						delete this._linkDefs[key];
+
+						/*
+						 * This was the first definition of this id in the document, search for a replacement
+						 * definition if there is one (ie.- the first duplicate definition with this id).
+						 */
+						var rootBlock = this._styler.getRootBlock();
+						var blocks = rootBlock.getBlocks();
+						for (i = 0; i < blocks.length; i++) {
+							var child = blocks[i];
+							if (child.typeId === this._TYPEID_DEF && child.tokens[0].id === key) {
+								if (child.start !== current[0].start) {
+									this._linkDefs[key] = child.tokens[0];
+									break;
+								}
+							}
+						}
+					}
+				} else if (!current[0]) {
+					/* addition */
+					if (!this._linkDefs[key] || current[1].start < this._linkDefs[key].block.start) {
+						this._linkDefs[key] = current[1].tokens[0];
+					}
 				} else {
-					/* either a new definition or a change to a definition's href and/or title */
-					this._linkDefs[key] = current[1];
+					/* modification */
+					if (current[0].start === this._linkDefs[key].block.start) {
+						this._linkDefs[key] = current[1].tokens[0];
+					}
 				}
 			}
 
 			/* regenerate blocks throughout the document that are affected by these ref link definition changes */
 			if (Object.keys(refChanges).length) {
-				var affectedBlocks = [];
+				var add = [], remove = [];
+				var annotationModel = this._styler.getAnnotationModel();
+				var baseModel = this._styler.getTextModel();
+
+				var affectedPreviewBlocks = [];
 				var allLinks = previewDiv.getElementsByTagName("a"); //$NON-NLS-0$
 				for (i = 0; i < allLinks.length; i++) {
 					var refId = allLinks[i].getAttribute(ATTRIBUTE_REFID);
 					if (refId && refChanges[refId]) {
-						affectedBlocks.push(this.getBlockForElement(allLinks[i]));
+						affectedPreviewBlocks.push(this.getBlockForElement(allLinks[i]));
 					}
 				}
 				var allImages = previewDiv.getElementsByTagName("img"); //$NON-NLS-0$
 				for (i = 0; i < allImages.length; i++) {
 					refId = allImages[i].getAttribute(ATTRIBUTE_REFID);
 					if (refId && refChanges[refId]) {
-						affectedBlocks.push(this.getBlockForElement(allImages[i]));
+						affectedPreviewBlocks.push(this.getBlockForElement(allImages[i]));
 					}
 				}
-
-				var add = [], remove = [];
-				var annotationModel = this._styler.getAnnotationModel();
-				var baseModel = this._styler.getTextModel();
-				affectedBlocks.forEach(function(current) {
+				affectedPreviewBlocks.forEach(function(current) {
 					/* regenerate the preview div corresponding to this block */
 					var newElement = document.createElement("div"); //$NON-NLS-0$
 					this._generateHTML(newElement, current);
@@ -1015,6 +1050,15 @@ define([
 						this._annotationProvider(annotationModel, baseModel, current, current.start, current.end, remove, add);
 					}
 				}.bind(this));
+
+				/* recompute annotations for affected def blocks */
+				for (key in this._defBlocks) {
+					current = this._defBlocks[key];
+					if (refChanges[current.tokens[0].id]) {
+						this._annotationProvider(annotationModel, baseModel, current, current.start, current.end, remove, add);
+					}
+				}
+
 				if (remove.length || add.length) {
 					annotationModel.replaceAnnotations(remove, add);
 				}
@@ -1128,6 +1172,9 @@ define([
 			} else if (newNode.nodeName === "A") { //$NON-NLS-0$
 				targetNode.href = newNode.href;
 				targetNode.title = newNode.title;
+				if (newNode.attributes.refid) {
+					targetNode.attributes.refid.value = newNode.attributes.refid.value;
+				}
 			}
 
 			var targetNodesIndex = 0;
@@ -1181,15 +1228,14 @@ define([
 		_TYPEID_HEADING: "markup.heading.markdown", //$NON-NLS-0$
 		_TYPEID_LISTITEM: "markup.list.item.markdown", //$NON-NLS-0$
 		_TYPEID_PARAGRAPH: "markup.other.paragraph.markdown", //$NON-NLS-0$
+		_TYPEID_DEF: "meta.link.reference.def.markdown", //$NON-NLS-0$
 		_atxDetectRegex: /\s*#/g,
 		_blockquoteRemoveMarkersRegex: /^[ \t]*>[ \t]?/gm,
 		_blockquoteStartRegex: /[ \t]*>[ \t]?/g,
-		_blocksCache: {},
 		_elementCounter: 0,
 		_hrRegex: /([ \t]*[-*_]){3,}/g,
 		_htmlNewlineRegex: /\n\s*\S[\s\S]*$/g,
 		_leadingHashesRegex: /^#*/,
-		_linkDefs: {},
 		_newlineRegex: /\n/g,
 		_orderedListRegex: /\d+\.[ \t]/g,
 		_spacesAndTabsRegex: /[ \t]*/g,

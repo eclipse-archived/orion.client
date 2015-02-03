@@ -1430,11 +1430,14 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			}
 
 			if (!blocks.length && !newBlocks.length) {
+				var eventOldBlocks = [ancestorBlock];
+				var eventNewBlocks = [ancestorBlock];
 				this.dispatchEvent({
 					type: "BlocksChanged", //$NON-NLS-0$
-					oldBlocks: [ancestorBlock],
-					newBlocks: [ancestorBlock]
+					oldBlocks: eventOldBlocks,
+					newBlocks: eventNewBlocks
 				});
+				ancestorBlock = eventNewBlocks[0]; /* enables the markdown styler to return a modified ancestorBlock */
 			} else {
 				this.dispatchEvent({
 					type: "BlocksChanged", //$NON-NLS-0$
