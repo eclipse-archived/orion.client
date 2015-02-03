@@ -12,8 +12,10 @@
 /*global CSSLint*/
 /*eslint-env amd*/
 define("webtools/cssValidator", [ //$NON-NLS-0$
-	'orion/objects' //$NON-NLS-0$
-], function(Objects) {
+	'orion/objects', //$NON-NLS-0$
+	'javascript/compilationUnit',
+	'webtools/util'
+], function(Objects, CU, Util) {
 
 	// TODO How to keep this list up to date with rules definitions, settings options and content assist
 	var config = {
@@ -117,11 +119,28 @@ define("webtools/cssValidator", [ //$NON-NLS-0$
 		 */
 		computeProblems: function(editorContext, context) {
 			var that = this;
-			return that.cssResultManager.getResult(editorContext, config).then(function(results) {
-			    if(results) {
-			         return that._computeProblems(results);
-			    }
-			    return null;
+			return editorContext.getFileMetadata().then(function(meta) {
+			    if(meta && meta.contentType.id === 'text/html') {
+			        return editorContext.getText().then(function(text) {
+    			         var blocks = Util.findStyleBlocks(text, context.offset);
+    			         if(blocks && blocks.length > 0) {
+    			             var cu = new CU(blocks, meta);
+    			             return that.cssResultManager.getResult(cu.getEditorContext(), config).then(function(results) {
+                			    if(results) {
+                			         return that._computeProblems(results);
+                			    }
+                			    return null;
+        			         });
+    			         }
+			         });
+			    } else {
+    			    return that.cssResultManager.getResult(editorContext, config).then(function(results) {
+        			    if(results) {
+        			         return that._computeProblems(results);
+        			    }
+        			    return null;
+        			});
+    			}
 			});
 		},
 		
