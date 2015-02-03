@@ -142,7 +142,7 @@ define([
 					for (hash in this._cachedLaunchConfigurations) {
 						if (this._cachedLaunchConfigurations.hasOwnProperty(hash)) {
 							launchConfiguration = this._cachedLaunchConfigurations[hash];
-							menuItem = dropdown.appendMenuItem(launchConfiguration.Name);
+							menuItem = dropdown.appendMenuItem(this._getDisplayName(launchConfiguration));
 							menuItem.classList.add("launchConfigurationMenuItem"); //$NON-NLS-0$
 							menuItem.id = launchConfiguration.Name + "_RunBarMenuItem"; //$NON-NLS-0$
 							
@@ -640,14 +640,32 @@ define([
 			}
 		},
 		
+		_getDisplayName: function(launchConfiguration) {
+			var displayName = launchConfiguration.Name;
+			
+			if (!displayName || "default" === displayName) { //$NON-NLS-0$
+				displayName = launchConfiguration.Params.Name;
+				
+				if (launchConfiguration.Params.Target && launchConfiguration.Params.Target.Space) {
+					displayName += messages["displayNameSeparator"] + launchConfiguration.Params.Target.Space; //$NON-NLS-0$
+					
+					if (launchConfiguration.Params.Target.Org) {
+						displayName += " / " + launchConfiguration.Params.Target.Org; //$NON-NLS-0$
+					}
+				}
+			}
+			
+			return displayName;
+		},
+		
 		_setLaunchConfigurationsLabel: function(launchConfiguration) {
 			if (launchConfiguration) {
-				var displayName = launchConfiguration.Params.Name + messages["displayNameSeparator"] + launchConfiguration.Params.Target.Space; //$NON-NLS-0$
+				var displayName = this._getDisplayName(launchConfiguration); //$NON-NLS-0$
 				
 				lib.empty(this._launchConfigurationsLabel);
 				
 				this._setText(this._appName, displayName);
-				this._setNodeTooltip(this._appName, launchConfiguration.Name);
+				this._setNodeTooltip(this._appName, displayName);
 				this._setText(this._appInfoSpan, null);
 				
 				this._launchConfigurationsLabel.appendChild(this._statusLight);
