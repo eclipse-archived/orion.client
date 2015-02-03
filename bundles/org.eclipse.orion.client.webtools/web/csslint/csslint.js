@@ -1314,7 +1314,51 @@ Parser.prototype = function(){
     var proto = new EventTarget(),  //new prototype
         prop,
         additions =  {
-
+            //ORION 8.0 AST generation junk
+            ast: Object.create(null),
+            _aststack: [],
+            startNode: function(name, start, parentprop) {
+              var node = Object.create(null);
+              node.type = name;
+              node.range = [-1,-1];
+              if(start !== null && start !== undefined && start > -1) {
+                node.range[0] = start;
+              }
+              this.addToParent(node, parentprop);
+              if(node.type !== 'StyleSheet') {
+                this.setNodeStart(this.ast, start);
+              }
+              this._aststack.push(node);
+              return node;
+            },
+            endNode: function(node, end) {
+                node.range[1] = end;
+                this._aststack.pop();
+                return node;
+            },
+            setNodeStart: function(node, from) {
+                if(node.range[0] < 0) {
+                    node.range[0] = from;
+                }  
+            },
+            addToParent: function(node, parentprop) {
+                if(typeof parentprop === "string") {
+                  if(this._aststack.length > 0) {
+                        var p = this._aststack[this._aststack.length-1];
+                        if(Array.isArray(p[parentprop])) {
+                            p[parentprop].push(node);
+                        } else {
+                            p[parentprop] = node;
+                        }
+                  }
+              }
+            },
+            idNode: function(name, token) {
+               var node = Object.create(null);
+               node.type = name;
+               node.range = token.range;
+               return node;
+            },
             //restore constructor
             constructor: Parser,
 
@@ -1352,21 +1396,21 @@ Parser.prototype = function(){
                     tt;
 
                 this.fire("startstylesheet");
-
+                this.ast = this.startNode('StyleSheet'); //ORION 8.0
+                this.ast.body = [];
                 //try to read character set
                 this._charset();
-
+                
                 this._skipCruft();
-
+                
                 //try to read imports - may be more than one
                 while (tokenStream.peek() == Tokens.IMPORT_SYM){
-                    this._import();
+                    this._import(); //ORION 8.0
                     this._skipCruft();
                 }
 
                 //try to read namespaces - may be more than one
                 while (tokenStream.peek() == Tokens.NAMESPACE_SYM){
-                    this._namespace();
                     this._skipCruft();
                 }
 
@@ -1475,7 +1519,7 @@ Parser.prototype = function(){
                 if (tt != Tokens.EOF){
                     this._unexpectedToken(tokenStream.token());
                 }
-
+                this.endNode(this.ast, tokenStream.curr().range[1]); //ORION 8.0
                 this.fire("endstylesheet");
             },
 
@@ -1485,8 +1529,8 @@ Parser.prototype = function(){
                     token,
                     line,
                     col;
-
                 if (tokenStream.match(Tokens.CHARSET_SYM)){
+                    var node = this.startNode('Charset', tokenStream.curr().range[0], 'body'); //ORION 8.0
                     line = tokenStream.token().startLine;
                     col = tokenStream.token().startCol;
 
@@ -1498,7 +1542,8 @@ Parser.prototype = function(){
 
                     this._readWhitespace();
                     tokenStream.mustMatch(Tokens.SEMICOLON);
-
+                    
+                    this.endNode(node, tokenStream.curr().range[1]);
                     if (emit !== false){
                         this.fire({
                             type:   "charset",
@@ -1522,25 +1567,26 @@ Parser.prototype = function(){
                     uri,
                     importToken,
                     mediaList   = [];
-
                 //read import symbol
                 tokenStream.mustMatch(Tokens.IMPORT_SYM);
                 importToken = tokenStream.token();
+                var node = this.startNode('Import', tokenStream.curr().range[0], 'body');
                 this._readWhitespace();
 
                 tokenStream.mustMatch([Tokens.STRING, Tokens.URI]);
 
                 //grab the URI value
-                uri = tokenStream.token().value.replace(/(?:url\()?["']([^"']+)["']\)?/, "$1");
-
+                tt = tokenStream.token(); //ORION 8.0
+                node.uri = this.idNode('Uri', tokenStream.curr());
+                uri = tt.value.replace(/(?:url\()?["']([^"']+)["']\)?/, "$1");
+                
                 this._readWhitespace();
-
                 mediaList = this._media_query_list();
-
+                
                 //must end with a semicolon
                 tokenStream.mustMatch(Tokens.SEMICOLON);
                 this._readWhitespace();
-
+                
                 if (emit !== false){
                     this.fire({
                         type:   "import",
@@ -1550,7 +1596,7 @@ Parser.prototype = function(){
                         col:    importToken.startCol
                     });
                 }
-
+                this.endNode(node, tokenStream.curr().range[1]); //ORION 8.0
             },
 
             _namespace: function(emit){
@@ -1567,6 +1613,7 @@ Parser.prototype = function(){
 
                 //read import symbol
                 tokenStream.mustMatch(Tokens.NAMESPACE_SYM);
+                var node = this.startNode('Namespace', tokenStream.curr().range[0], 'body'); //ORION 8.0
                 line = tokenStream.token().startLine;
                 col = tokenStream.token().startCol;
                 this._readWhitespace();
@@ -1574,6 +1621,7 @@ Parser.prototype = function(){
                 //it's a namespace prefix - no _namespace_prefix() method because it's just an IDENT
                 if (tokenStream.match(Tokens.IDENT)){
                     prefix = tokenStream.token().value;
+                    node.prefix = prefix;  //ORION 8.0
                     this._readWhitespace();
                 }
 
@@ -1583,6 +1631,7 @@ Parser.prototype = function(){
                 }*/
 
                 //grab the URI value
+                node.uri = this.idNode('Uri', tokenStream.curr());  //ORION 8.0
                 uri = tokenStream.token().value.replace(/(?:url\()?["']([^"']+)["']\)?/, "$1");
 
                 this._readWhitespace();
@@ -1600,7 +1649,7 @@ Parser.prototype = function(){
                         col:    col
                     });
                 }
-
+                this.endNode(node, tokenStream.curr().range[1]); //ORION 8.0
             },
 
             _media: function(){
@@ -1616,6 +1665,7 @@ Parser.prototype = function(){
 
                 //look for @media
                 tokenStream.mustMatch(Tokens.MEDIA_SYM);
+                var node = this.startNode('Media', tokenStream.curr().range[0], 'body'); //ORION 8.0
                 line = tokenStream.token().startLine;
                 col = tokenStream.token().startCol;
 
@@ -1652,6 +1702,7 @@ Parser.prototype = function(){
                     line:   line,
                     col:    col
                 });
+                this.endNode(node, tokenStream.curr().range[1]); //ORION 8.0
             },
 
 
@@ -1665,10 +1716,11 @@ Parser.prototype = function(){
                 var tokenStream = this._tokenStream,
                     mediaList   = [];
 
-
                 this._readWhitespace();
-
+                var node = this.startNode('MediaQueryList'); //ORION 8.0
+                node.queries = [];
                 if (tokenStream.peek() == Tokens.IDENT || tokenStream.peek() == Tokens.LPAREN){
+                    node.range[0] = tokenStream.curr().range[0];
                     mediaList.push(this._media_query());
                 }
 
@@ -1676,7 +1728,11 @@ Parser.prototype = function(){
                     this._readWhitespace();
                     mediaList.push(this._media_query());
                 }
-
+                this.endNode(node, tokenStream.curr().range[1])
+                if(node.range[0] > -1) {
+                    //only add the node if something was parsed
+                    this.addToParent(node, 'mediaqueries'); //ORION 8.0
+                }
                 return mediaList;
             },
 
@@ -1697,7 +1753,8 @@ Parser.prototype = function(){
                     ident       = null,
                     token       = null,
                     expressions = [];
-
+                var node = this.startNode('MediaQuery');//ORION 8.0
+                node.expressions = [];
                 if (tokenStream.match(Tokens.IDENT)){
                     ident = tokenStream.token().value.toLowerCase();
 
@@ -1707,15 +1764,17 @@ Parser.prototype = function(){
                         ident = null;
                     } else {
                         token = tokenStream.token();
+                        this.setNodeStart(node, tokenStream.curr().range[0]); //ORION 8.0
                     }
                 }
-
+               
                 this._readWhitespace();
 
                 if (tokenStream.peek() == Tokens.IDENT){
                     type = this._media_type();
                     if (token === null){
                         token = tokenStream.token();
+                        this.setNodeStart(node, tokenStream.curr().range[0]); //ORION 8.0
                     }
                 } else if (tokenStream.peek() == Tokens.LPAREN){
                     if (token === null){
@@ -1725,6 +1784,7 @@ Parser.prototype = function(){
                 }
 
                 if (type === null && expressions.length === 0){
+                    this.endNode(node); //ORION 8.0 clear it off the stack
                     return null;
                 } else {
                     this._readWhitespace();
@@ -1732,12 +1792,11 @@ Parser.prototype = function(){
                         if (tokenStream.token().value.toLowerCase() != "and"){
                             this._unexpectedToken(tokenStream.token());
                         }
-
                         this._readWhitespace();
                         expressions.push(this._media_expression());
                     }
                 }
-
+                this.addToParent(this.endNode(node, tokenStream.curr().range[1]), 'queries'); //ORION 8.0
                 return new MediaQuery(ident, type, expressions, token.startLine, token.startCol);
             },
 
@@ -1771,8 +1830,9 @@ Parser.prototype = function(){
                     expression  = null;
 
                 tokenStream.mustMatch(Tokens.LPAREN);
-
+                var node = this.startNode('MediaExpression', tokenStream.curr().range[0]); //ORION 8.0
                 feature = this._media_feature();
+                node.feature = this.idNode('MediaFeature', tokenStream.curr());
                 this._readWhitespace();
 
                 if (tokenStream.match(Tokens.COLON)){
@@ -1783,7 +1843,7 @@ Parser.prototype = function(){
 
                 tokenStream.mustMatch(Tokens.RPAREN);
                 this._readWhitespace();
-
+                this.addToParent(this.endNode(node, tokenStream.curr().range[1]), 'expressions'); // ORION 8.0
                 return new MediaFeature(feature, (expression ? new SyntaxUnit(expression, token.startLine, token.startCol) : null));
             },
 
@@ -1797,7 +1857,10 @@ Parser.prototype = function(){
                 var tokenStream = this._tokenStream;
 
                 tokenStream.mustMatch(Tokens.IDENT);
-
+                var tok = tokenStream.curr();
+                var node = this.startNode('MediaFeature', tok.range[0], 'mediafeature'); //ORION 8.0
+                node.value = tok.value;
+                this.endNode(node, tok.range[1]);
                 return SyntaxUnit.fromToken(tokenStream.token());
             },
 
@@ -1817,6 +1880,8 @@ Parser.prototype = function(){
 
                 //look for @page
                 tokenStream.mustMatch(Tokens.PAGE_SYM);
+                var node = this.startNode('Page', tokenStream.curr().range[0], 'body'); //ORION 8.0
+                node.declarations = [];
                 line = tokenStream.token().startLine;
                 col = tokenStream.token().startCol;
 
@@ -1824,7 +1889,7 @@ Parser.prototype = function(){
 
                 if (tokenStream.match(Tokens.IDENT)){
                     identifier = tokenStream.token().value;
-
+                    node.id = this.idNode('id', tokenStream.curr()); //ORION 8.0
                     //The value 'auto' may not be used as a page name and MUST be treated as a syntax error.
                     if (identifier.toLowerCase() === "auto"){
                         this._unexpectedToken(tokenStream.token());
@@ -1834,6 +1899,7 @@ Parser.prototype = function(){
                 //see if there's a colon upcoming
                 if (tokenStream.peek() == Tokens.COLON){
                     pseudoPage = this._pseudo_page();
+                    node.pseudo = this.idNode('PseudoPage', tokenStream.curr()); //ORION 8.0
                 }
 
                 this._readWhitespace();
@@ -1855,7 +1921,7 @@ Parser.prototype = function(){
                     line:   line,
                     col:    col
                 });
-
+                this.endNode(node, toeknStream.curr().range[1]); //ORION 8.0
             },
 
             //CSS3 Paged Media
@@ -1871,6 +1937,8 @@ Parser.prototype = function(){
                     marginSym   = this._margin_sym();
 
                 if (marginSym){
+                    var node = this.startNode('Margin', tokenStream.curr().range[0], 'body'); //ORION 8.0
+                    node.declarations = [];
                     line = tokenStream.token().startLine;
                     col = tokenStream.token().startCol;
 
@@ -1889,6 +1957,7 @@ Parser.prototype = function(){
                         line:   line,
                         col:    col
                     });
+                    this.endNode(node, tokenStream.curr().range[1]); //ORION 8.0
                     return true;
                 } else {
                     return false;
@@ -1966,6 +2035,8 @@ Parser.prototype = function(){
 
                 //look for @page
                 tokenStream.mustMatch(Tokens.FONT_FACE_SYM);
+                var node = this.startNode('FontFace', tokenStream.curr().range[0], 'body'); //ORION 8.0
+                node.declarations = [];
                 line = tokenStream.token().startLine;
                 col = tokenStream.token().startCol;
 
@@ -1978,7 +2049,8 @@ Parser.prototype = function(){
                 });
 
                 this._readDeclarations(true);
-
+                
+                this.endNode(node, tokenStream.curr().range[1]); //ORION 8.0
                 this.fire({
                     type:   "endfontface",
                     line:   line,
@@ -1998,6 +2070,8 @@ Parser.prototype = function(){
                     col;
 
                     tokenStream.mustMatch(Tokens.VIEWPORT_SYM);
+                    var node = this.startNode('Viewport', tokenStream.curr().range[0], 'body'); //ORION 8.0
+                    node.declarations = [];
                     line = tokenStream.token().startLine;
                     col = tokenStream.token().startCol;
 
@@ -2010,7 +2084,8 @@ Parser.prototype = function(){
                     });
 
                     this._readDeclarations(true);
-
+                    
+                    this.endNode(node, tokenStream.curr().range[1]); //ORION 8.0
                     this.fire({
                         type:   "endviewport",
                         line:   line,
@@ -2037,6 +2112,11 @@ Parser.prototype = function(){
                     token =  tokenStream.token();
                     this._readWhitespace();
                 }
+                if(token) {
+                    var node = this.startNode('Operator', tokenStream.curr().range[0], 'operator'); //ORION 8.0
+                    node.value = PropertyValuePart.fromToken(token);
+                    this.endNode(node, tokenStream.curr().range[1]);
+                }
                 return token ? PropertyValuePart.fromToken(token) : null;
 
             },
@@ -2058,7 +2138,11 @@ Parser.prototype = function(){
                     value = new Combinator(token.value, token.startLine, token.startCol);
                     this._readWhitespace();
                 }
-
+                if(value !== null) {
+                    var node = this.startNode('Combinator', tokenStream.curr().range[0], 'selector'); //ORION 8.0
+                    node.value = value;
+                    this.endNode(node, tokenStream.curr().range[0])
+                }
                 return value;
             },
 
@@ -2073,6 +2157,9 @@ Parser.prototype = function(){
                 var tokenStream = this._tokenStream;
 
                 if (tokenStream.match([Tokens.MINUS, Tokens.PLUS])){
+                    var node = this.startNode('UnaryOperator', tokenStream.curr().range[0], 'operator'); //ORION 8.0
+                    node.value = tokenStream.token().value;
+                    this.endNode(node, tokenStream.curr().range[1]);
                     return tokenStream.token().value;
                 } else {
                     return null;
@@ -2080,7 +2167,6 @@ Parser.prototype = function(){
             },
 
             _property: function(){
-
                 /*
                  * property
                  *   : IDENT S*
@@ -2094,7 +2180,7 @@ Parser.prototype = function(){
                     token,
                     line,
                     col;
-
+                var node = this.startNode('Property'); //ORION 8.0
                 //check for star hack - throws error if not allowed
                 if (tokenStream.peek() == Tokens.STAR && this.options.starHack){
                     tokenStream.get();
@@ -2102,18 +2188,22 @@ Parser.prototype = function(){
                     hack = token.value;
                     line = token.startLine;
                     col = token.startCol;
+                    this.setNodeStart(node, tokenStream.curr().range[0]); //ORION 8.0
                 }
 
                 if(tokenStream.match(Tokens.IDENT)){
                     token = tokenStream.token();
                     tokenValue = token.value;
-
+                    
+                    this.setNodeStart(node, tokenStream.curr().range[0]); //ORION 8.0
                     //check for underscore hack - no error if not allowed because it's valid CSS syntax
                     if (tokenValue.charAt(0) == "_" && this.options.underscoreHack){
                         hack = "_";
                         tokenValue = tokenValue.substring(1);
                     }
-
+                    node.hack = hack;
+                    node.value = tokenValue;
+                    this.addToParent(this.endNode(node, tokenStream.curr().range[1]), 'property'); //ORION 8.0
                     value = new PropertyName(tokenValue, hack, (line||token.startLine), (col||token.startCol));
                     this._readWhitespace();
                 }
@@ -2134,13 +2224,16 @@ Parser.prototype = function(){
                     tt,
                     selectors;
 
-
+                var node = this.startNode('RuleSet'); //ORION 8.0
                 /*
                  * Error Recovery: If even a single selector fails to parse,
                  * then the entire ruleset should be thrown away.
                  */
                 try {
                     selectors = this._selectors_group();
+                    if(node.selectors && node.selectors.length > 0) {
+                        this.setNodeStart(node, node.selectors[0].range[0]); //ORION 8.0
+                    }
                 } catch (ex){
                     if (ex instanceof SyntaxError && !this.options.strict){
 
@@ -2189,7 +2282,7 @@ Parser.prototype = function(){
                         line:       selectors[0].line,
                         col:        selectors[0].col
                     });
-
+                    this.addToParent(this.endNode(node, tokenStream.curr().range[1]), 'body');
                 }
 
                 return selectors;
@@ -2640,7 +2733,7 @@ Parser.prototype = function(){
 
                 var tokenStream = this._tokenStream,
                     value       = "";
-
+                var node = this.startNode('Expression', tokenStream.curr().range[0]); //ORION 8.0
                 while(tokenStream.match([Tokens.PLUS, Tokens.MINUS, Tokens.DIMENSION,
                         Tokens.NUMBER, Tokens.STRING, Tokens.IDENT, Tokens.LENGTH,
                         Tokens.FREQ, Tokens.ANGLE, Tokens.TIME,
@@ -2649,8 +2742,10 @@ Parser.prototype = function(){
                     value += tokenStream.token().value;
                     value += this._readWhitespace();
                 }
-
-                return value.length ? value : null;
+                var val = value.length ? value : null
+                node.value = val
+                this.addToParent(this.endNode(node, tokenStream.curr().range[1]), 'expression'); //ORION 8.0
+                return val;
 
             },
 
@@ -4933,6 +5028,16 @@ TokenStream.prototype = mix(new TokenStreamBase(), {
         return token;
     },
 
+    /**
+     * @description ORION 8.0 returns the last read token
+     */
+    curr: function() {
+        if(this.tokens.length > 0) {
+            return this.tokens[this.tokens.length-1];
+        }
+        return null;
+    },
+
     //-------------------------------------------------------------------------
     // Methods to create tokens
     //-------------------------------------------------------------------------
@@ -6661,7 +6766,8 @@ var CSSLint = (function(){
             messages    : reporter.messages,
             stats       : reporter.stats,
             ruleset     : reporter.ruleset,
-            tokens      : tokens  //add the token array to the result ORION 8.0
+            tokens      : tokens,   //add the token array to the result ORION 8.0
+            ast         : parser.ast //add in the AST from the  parser ORION 8.0
         };
 
         //sort by line numbers, rollups at the bottom
