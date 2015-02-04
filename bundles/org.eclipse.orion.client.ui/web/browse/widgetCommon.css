@@ -1,11 +1,15 @@
 .navlink {
 	display: inline-block;
 	padding: 2px;
-	color: #02ADD0 !important;
+	color: #00AED1 !important;
 	vertical-align: bottom;
 }
 .navlink:hover {
-	color:#F58B0F !important;
+	color:#00AED1 !important;
+}
+
+.darkSectionTreeTableRow {
+	background-color: #eff2f5 !important;
 }
 
 .sectionWrapper, .sectionTable{
@@ -66,6 +70,10 @@
 	color: gray;
 }
 
+.sectionTable a {
+	color: #00AED1 !important;
+}
+
 .sectionTable tr:last-child td{
 	border-bottom: 0;
 }
@@ -110,7 +118,7 @@
 }
 
 .orionMarkdown a {
-	color: #02ADD0 !important;
+	color: #00AED1 !important;
 }
 
 .orionMarkdown pre code {
@@ -154,7 +162,7 @@
 }
 
 .modelDecorationSprite:hover {
-	color:#F58B0F !important;
+	color:#00AED1 !important;
 	text-decoration: none !important;
 }
 

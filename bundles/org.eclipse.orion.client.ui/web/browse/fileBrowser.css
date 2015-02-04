@@ -55,7 +55,7 @@
 }
 
 .readmeHeader{
-	margin-top: 24px;
+	margin-top: 27px;
 	color: #444;
 	padding-top: 8px !important;
 	padding-bottom: 10px !important;
@@ -145,7 +145,7 @@
 	/*width: 100%;*/
 	border-color: #dadada;
 	color: #444;
-    background-color: #f0f7f9;
+    background-color: #eff2f5;
 	-webkit-box-sizing: initial !important;
 	box-sizing: initial !important;
 }
@@ -313,7 +313,7 @@ div.currentLocation {
 .infoDropdownLink {
 	margin-top: 5px;
 	margin-right: 4px;
-	color: #02ADD0;
+	color: #00AED1 !important;
 	font-size: 1.1em;
 }
 
