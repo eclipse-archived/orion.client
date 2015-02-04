@@ -297,7 +297,12 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 					}
 				}
 				
-				var mainSplitter = mGlobalCommands.getMainSplitter();
+				
+			}
+		}
+		if (currentEditorView !== view) {
+			
+			var mainSplitter = mGlobalCommands.getMainSplitter();
 				if (mainSplitter) {
 					var classList = mainSplitter.splitter.$splitter.classList;
 					if (view.editor && view.editor.getTextView) {
@@ -306,9 +311,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 						classList.remove("ruler");
 					}
 				}
-			}
-		}
-		if (currentEditorView !== view) {
+			
 			commandRegistry.closeParameterCollector();
 			if (currentEditorView) {
 				currentEditorView.destroy();
