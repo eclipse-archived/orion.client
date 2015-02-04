@@ -925,3 +925,7 @@ a.breadcrumb.currentLocation {
 	outline: none;
 	vertical-align: top;
 }
+
+.editorTheme .split {
+	background-color: white;
+}
