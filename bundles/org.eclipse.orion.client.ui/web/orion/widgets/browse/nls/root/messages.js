@@ -18,5 +18,6 @@ define({//Default message bundle
 	"DownloadBranchAsZip": "Download the contents of this branch as a zip file",
 	"ShareCode": "Share Code",
 	"ShareCodeTooltips": "Share the selected lines as code snippet",
-	"ShareCodeTitle": "Copy the snippet URL"
+	"ShareCodeTitle": "Copy the snippet URL",
+	"PluginHandshakeError": "Unable to display repository contents at this time. Refresh the browser to try again."
 });

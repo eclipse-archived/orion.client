@@ -37,7 +37,7 @@ if (_all_script && _all_script.length && _all_script.length > 0) {
 	}
 }
 
-define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/URL-shim'], function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
+define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry', 'i18n!orion/widgets/browse/nls/messages', 'orion/URL-shim'], function(mFileBrowser, mServiceRegistry, mPluginRegistry, messages) {
 	function Browser(params) { // parentId, repo, base
 		if (typeof params === "string") {
 			params = {
@@ -124,7 +124,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			storage: {},
 			plugins: plugins
 		});
-		var errorMessage = "Unable to display repository contents at this time. Refresh the browser to try again.";
+		var errorMessage = messages["PluginHandshakeError"];
 		pluginRegistry.start().then(function() {
 			var allReferences = serviceRegistry.getServiceReferences("orion.core.file"); //$NON-NLS-0$
 			if(allReferences.length === 0) {//If there is no file service reference, we treat it as plugin activation error.
