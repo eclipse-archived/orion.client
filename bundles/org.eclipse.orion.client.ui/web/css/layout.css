@@ -35,7 +35,7 @@ hard-coded numbers elsewhere.
 
 /* $ToolbarHeight */
 .toolbarLayout {
-	height: 36px;
+	height: 39px;
 }
 
 /*
@@ -349,16 +349,12 @@ hard-coded numbers elsewhere.
 
 .workingTarget {
 	position: absolute;
-	top: 2px;  /* $ToolbarHeight + 2 */
- 	width: 100%;
- 	bottom: 10px;
- 	overflow-y: auto;
-	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.33); /* 0 0 0 1px #d1d1d1,0 0 4px 1px #ccc; */
-	margin-left: 2px;
-	/* margin-top: 2px; */
-	/* padding-top: 10px; */
+	top: 0;
+	width: 100%;
+	bottom: 10px;
+	overflow-y: auto;
 	margin-right: 2px;
-	background: white;
+	background: #FFF;
 }
 
 .toolbarTarget {
@@ -389,6 +385,16 @@ hard-coded numbers elsewhere.
 
 .hasSplit {
    display: none;
+}
+
+.editorTheme .workingTarget {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	bottom: 0;
+	overflow-y: auto;
+	margin-right: 2px;
+	background: #FFF;
 }
 
 /* 
@@ -796,7 +802,7 @@ and (max-device-width : 1024px)  {
 .innerPanels{
 	position:absolute;
 	width:100%;
-	top:36px;
+	top:40px;
 	bottom:0;
 }
 

@@ -86,6 +86,10 @@ define(['orion/Deferred'], function(Deferred) {
 						borderRight: "1px solid " + styles.annotationRuler //$NON-NLS-0$
 					},
 
+					split: {
+						background: styles.background
+					},
+
 					/* from rulers.css */
 					ruler: {
 						backgroundColor: styles.annotationRuler,

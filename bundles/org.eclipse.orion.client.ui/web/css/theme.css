@@ -207,6 +207,12 @@ a.breadcrumb.currentLocation {
 	padding-right:15px;
 }
 
+.editorTheme .mainpane{
+	border: 0;
+	background: #eee !important;
+	padding-right:0;
+}
+
 .mainToolbar {
  	background: #eeeeee;
  	padding-left: 2px;
@@ -214,6 +220,7 @@ a.breadcrumb.currentLocation {
 	/* border-bottom: 1px solid #ebebeb; */
 	/* padding-left:50px; */
 	white-space: nowrap;
+	border-bottom: 1px solid #DDD;
 }
 
 /* Filesystem switcher toolbar */
