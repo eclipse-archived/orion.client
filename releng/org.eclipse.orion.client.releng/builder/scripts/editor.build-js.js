@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
- 
+/*global Packages*/
 // optimization script to concat/minify the Orion editor javascript code
  
 ({
@@ -21,7 +21,8 @@
 		loggingLevel: 'WARNING'
 	},
 	paths: {
-        i18n: 'requirejs/i18n'
+        i18n: 'requirejs/i18n',
+        csslint: 'csslint/csslint',
 	},
 	name: "orion/editor/edit",
 	preserveLicenseComments: false,
