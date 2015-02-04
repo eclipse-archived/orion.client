@@ -334,11 +334,11 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 	});
 	inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 		var metadata = evt.metadata;
-		
+		sessionStorage.lastFile = PageUtil.hash();
 		var view = getEditorView(evt.input, metadata);
 		setEditor(view ? view.editor : null);
 		evt.editor = editor;
-	
+		
 		renderToolbars(metadata);
 		var name = evt.name, target = metadata;
 		if (evt.input === null || evt.input === undefined) {
@@ -464,7 +464,18 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			inputManager.setInput(PageUtil.hash());
 			sidebarNavInputManager.processHash(PageUtil.hash());
 		});
-		inputManager.setInput(PageUtil.hash());
+		var lastEditedFile = sessionStorage.lastFile;
+		var currentHash = PageUtil.hash();
+		// lastEditedFile exists in session storage and if the project didn't change.
+		if (lastEditedFile && lastEditedFile.lastIndexOf(currentHash, 0) === 0 &&
+				lastEditedFile !== currentHash) {
+			inputManager.setInput(lastEditedFile);
+			window.location.hash = lastEditedFile;
+		}
+		else {
+			inputManager.setInput(PageUtil.hash());
+		}
+		
 		sidebarNavInputManager.processHash(PageUtil.hash());
 	});
 
