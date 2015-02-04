@@ -58,7 +58,7 @@
 }
 
 .sectionTreeTableHeader{
-	background: none !important;
+	background: white !important;
 	/*background: linear-gradient(to bottom, #f8f8f8 0%,#f2f2f3 100%) !important;*/
 	padding-top: 5px !important;
 	padding-bottom: 5px !important;
