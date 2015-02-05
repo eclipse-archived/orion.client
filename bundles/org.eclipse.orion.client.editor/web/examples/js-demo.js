@@ -6,7 +6,7 @@
 var hello = "hello";
 var foo = 123; // line comment
 
-function testing (one, two, three){
+function testing (one, two, three) {
 	var bool = true;
 	this.service.junk("command", 4, bool, foo, hello);
 	
@@ -15,11 +15,11 @@ function testing (one, two, three){
 // TODO 
 testing();
 
-for (var i = 0; i < 10; i++){
+for (var i = 0; i < 10; i++) {
 	foo += i;
 }
 
-while (foo < 200){
+while (foo < 200) {
 	foo++;
 }
 
