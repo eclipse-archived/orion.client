@@ -54,7 +54,7 @@ define([
 			               var cu = new CU(blocks, meta);
 			               if(cu.validOffset(ctxt.offset)) {
     			               return that.cssResultManager.getResult(cu.getEditorContext(), that._emptyRuleSet()).then(function(results) {
-                    			   return that._doHover(results, ctxt);
+                    			   return that._doHover(results, ctxt, meta);
     
                                });
                            }
@@ -62,22 +62,22 @@ define([
 			       });
 			   } else {
 			       return that.cssResultManager.getResult(editorContext, that._emptyRuleSet()).then(function(results) {
-        			   return that._doHover(results, ctxt);
+        			   return that._doHover(results, ctxt, meta);
                    });
 			   }
 			});
 		},
 		
-		_doHover: function _doHover(results, ctxt) {
+		_doHover: function _doHover(results, ctxt, metadata) {
 		    if(results) {
 			    var token = Util.findToken(ctxt.offset, results.tokens);
 				if (token){
 				    //TODO, investigate creating an AST in the CSS parser, walking tokens can be expensive
 				    if(this.hasPreviousToken(token, results.tokens, 'IMPORT_SYM')) {
-				        return this._getFileHover(token);
+				        return this._getFileHover(token, metadata);
 				    }
 				    if(this.hasPreviousToken(token, results.tokens, 'IDENT', 'background-image')) {
-				        return this._getImageHover(token);
+				        return this._getImageHover(token, metadata);
 				    }
 				    var tok = this._isRgbLike(token, results.tokens);
 				    if(tok) {
@@ -255,16 +255,21 @@ define([
             return false;
 		},
 		
-		_getFileHover: function _getFileHover(token) {
+		_getFileHover: function _getFileHover(token, metadata) {
 		    var path = this._getPathFromToken(token);
 		    if(path) {
     	        if(/^http/i.test(path)) {
     	            return this._formatFilesHover(path);
     	        } else {
-        	        var that = this;
+    	            var that = this;
         	        return that.resolver.getWorkspaceFile(path, {ext:'css', type:'CSS', icon:'../webtools/images/css.png'}).then(function(files) {
         		        if(files) {
-        		            return that._formatFilesHover(path, files);
+        		            //TODO we have to resolve each time as same-named files could be referenced from different locations
+                		    //and the resolver caches all hits for the name
+        		            var resolved = that._resolveRelativeFiles(path, files, metadata);
+        		            if(resolved.length > 0) {
+        		              return that._formatFilesHover(path, resolved);
+        		            }
         		        }
         	        });
     	        }
@@ -341,14 +346,57 @@ define([
     	    return null;
     	},
 		
-		_getImageHover: function _getImageHover(token) {
+		_getImageHover: function _getImageHover(token, metadata) {
 		      var path = this._getPathFromToken(token);
+		      var that = this;
 		      if(path) {
 		          if(/^http/i.test(path) || /^data:image.*;base64/i.test(path)) {
     		          var html = '<html><body style="margin:1px;"><img src="'+path+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
     			      return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+		          } else {
+		              var idx = path.lastIndexOf('.');
+		              if(idx > -1) {
+		                  var ext = path.slice(idx+1);
+    		              return that.resolver.getWorkspaceFile(path, {ext:ext, type:'Image', icon:'../webtools/images/file.png'}).then(function(files) {
+                		        if(files) {
+                		            //TODO we have to resolve each time as same-named files could be referenced from different locations
+                		            //and the resolver caches all hits for the name
+                		            var resolved = that._resolveRelativeFiles(path, files, metadata);
+                		            if(resolved.length > 0) {
+                		                 var html = '<html><body style="margin:1px;"><img src="'+resolved[0].location+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
+    			                         return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+                		            }
+                		        }
+                	        });
+        	          }
 		          }
 		      }
+		},
+		
+		_resolveRelativeFiles: function _resolveRelativeFiles(path, files, metadata) {
+		    if(files && files.length > 0 && metadata) {
+		        var filepath = metadata.location;
+		        var _files = [];
+		        filepath = filepath.slice(0, filepath.lastIndexOf('/')+1);
+		        if(path.charAt(0) !== '.') {
+	                filepath += path;
+	            } else {
+	                //resolve the realtive path
+	                while(/^\.\.\//.exec(path) != null) {
+	                    filepath = filepath.slice(0, filepath.lastIndexOf('/')+1);
+	                    path = path.slice(3);
+	                }
+	                filepath += path;
+	            }
+		        for(var i = 0; i < files.length; i++) {
+		            var file = files[i];
+                    if(file.location === filepath) {
+                        _files.push(file);
+                    }		            
+		        }
+		        return _files;
+		    }
+		    return [];
 		},
 		
 		_getColorHover: function _getColorHover(colorID){
