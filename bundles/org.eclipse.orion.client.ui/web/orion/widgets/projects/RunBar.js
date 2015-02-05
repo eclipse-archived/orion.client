@@ -198,7 +198,9 @@ define([
 				parentNode: this._launchConfigurationsWrapper,
 				populateFunction: populateFunction
 			});
-			this._disableControl(this._launchConfigurationsWrapper); // start with control greyed out until launch configs are set
+			// Disabling the launchConfigurationWrapper was causing UI issues, see 
+			// https://hub.jazz.net/ccm04/quickplanner/jazzhub.html#items:projectId=_TN2F9ixmEeS7qLT26z9i-w&serverId=hub.jazz.net&planType=mywork&itemId=118242
+			//this._disableControl(this._launchConfigurationsWrapper); // start with control greyed out until launch configs are set
 			
 			this._launchConfigurationsLabel = lib.$(".dropdownTriggerButtonLabel", this._launchConfigurationsWrapper); //$NON-NLS-0$
 			this._appName = lib.$(".appName", this._launchConfigurationsLabel); //$NON-NLS-0$
