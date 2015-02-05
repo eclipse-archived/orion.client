@@ -198,7 +198,11 @@ define([
 				parentNode: this._launchConfigurationsWrapper,
 				populateFunction: populateFunction
 			});
-			this._disableControl(this._launchConfigurationsWrapper); // start with control greyed out until launch configs are set
+			this._launchConfigurationsDropdownTriggerButton = this._launchConfigurationsDropdown.getDropdownTriggerButton();
+			this._launchConfigurationsDropdownTriggerButton.classList.remove("dropdownDefaultButton"); //$NON-NLS-0$
+			this._launchConfigurationsDropdownTriggerButton.classList.add("launchConfigurationsButton"); //$NON-NLS-0$
+			
+			this._disableLaunchConfigurationsDropdown(); // start with control greyed out until launch configs are set
 			
 			this._launchConfigurationsLabel = lib.$(".dropdownTriggerButtonLabel", this._launchConfigurationsWrapper); //$NON-NLS-0$
 			this._appName = lib.$(".appName", this._launchConfigurationsLabel); //$NON-NLS-0$
@@ -208,14 +212,10 @@ define([
 			this._launchConfigurationsWrapper.removeChild(this._launchConfigurationsLabel);
 			this._launchConfigurationsDropdown.setCustomTriggerButtonLabelNode(this._launchConfigurationsLabel);
 			
-			var triggerButton = this._launchConfigurationsDropdown.getDropdownTriggerButton();
-			triggerButton.classList.remove("dropdownDefaultButton"); //$NON-NLS-0$
-			triggerButton.classList.add("launchConfigurationsButton"); //$NON-NLS-0$
-			
 			this._boundTriggerButtonEventListener = function(event){ 
 				mMetrics.logEvent("ui", "invoke", METRICS_LABEL_PREFIX + ".launchConfigurationsDropdownTriggerButton.clicked", event.which); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}.bind(this);
-			triggerButton.addEventListener("click", this._boundTriggerButtonEventListener); //$NON-NLS-0$
+			this._launchConfigurationsDropdownTriggerButton.addEventListener("click", this._boundTriggerButtonEventListener); //$NON-NLS-0$
 		},
 		
 		destroy: function() {
@@ -252,9 +252,9 @@ define([
 			}
 			
 			if (this._launchConfigurationsDropdown) {
-				var triggerButton = this._launchConfigurationsDropdown.getDropdownTriggerButton();
-				if (triggerButton && this._boundTriggerButtonEventListener) {
-					triggerButton.removeEventListener("click", this._boundTriggerButtonEventListener); //$NON-NLS-0$
+				if (this._launchConfigurationsDropdownTriggerButton && this._boundTriggerButtonEventListener) {
+					this._launchConfigurationsDropdownTriggerButton.removeEventListener("click", this._boundTriggerButtonEventListener); //$NON-NLS-0$
+					this._launchConfigurationsDropdownTriggerButton = null;
 				}
 				this._launchConfigurationsDropdown.destroy();
 				this._launchConfigurationsDropdown = null;
@@ -500,7 +500,7 @@ define([
 		 * @param {Array} launchConfigurations An array of launch configurations
 		 */
 		_setLaunchConfigurations: function(launchConfigurations) {
-			this._enableControl(this._launchConfigurationsWrapper);
+			this._enableLaunchConfigurationsDropdown();
 			this._menuItemsCache = []; //reset the cached launch configuration dropdown menu items
 			this._cacheLaunchConfigurations(launchConfigurations);
 			
@@ -722,6 +722,16 @@ define([
 					}.bind(this), deploy);
 				}
 			}.bind(this));
+		},
+		
+		_enableLaunchConfigurationsDropdown: function() {
+			this._enableControl(this._launchConfigurationsWrapper);
+			this._launchConfigurationsDropdownTriggerButton.disabled = false;
+		},
+		
+		_disableLaunchConfigurationsDropdown: function() {
+			this._disableControl(this._launchConfigurationsWrapper);
+			this._launchConfigurationsDropdownTriggerButton.disabled = true;
 		}
 	});
 	
