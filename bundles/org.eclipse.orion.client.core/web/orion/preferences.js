@@ -323,11 +323,19 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/metrics'], function(req
 	DefaultPreferencesProvider.prototype = {
 		
 		get: function(name, optForce) {
+			var cached = null;
+			var that = this;
 			if (this._currentPromise) {
-				return this._currentPromise;
+				return this._currentPromise.then(function() {
+					cached = that._cache.get(name);
+					if (cached === null) {
+						cached = {};
+						that._cache.set(name, cached);
+					}
+					return cached;
+				});
 			}
 			var d = new Deferred();
-			var cached = null;
 			if (optForce) {
 				this._cache.remove(name);
 			} else {
@@ -337,7 +345,6 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/metrics'], function(req
 				d.resolve(cached);
 			} else {
 				this._currentPromise = d;
-				var that = this;
 				xhr("GET", this._location, { //$NON-NLS-0$
 					headers: {
 						"Orion-Version": "1" //$NON-NLS-0$
@@ -345,9 +352,16 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/metrics'], function(req
 					timeout: 15000
 				}).then(function(result) {
 					var data = JSON.parse(result.response);
-					that._cache.set(name, data[name] || {});
+					Object.keys(data).forEach(function(key) {
+						that._cache.set(key, data[key] || {});
+					});
+					cached = data[name];
+					if (!cached) {
+						cached = {};
+						that._cache.set(name, cached);						
+					}
 					that._currentPromise = null;
-					d.resolve(data[name]|| {});
+					d.resolve(cached);
 				}, function(error) {
 					if (error.xhr.status === 401 || error.xhr.status === 404 ) {
 						that._cache.set(name, {});
