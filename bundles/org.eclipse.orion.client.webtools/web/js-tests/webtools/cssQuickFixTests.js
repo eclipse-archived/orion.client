@@ -35,9 +35,6 @@ define([
 			if (validator){
 				validator._restoreRules();
 			}
-			if(resultMgr) {
-			    resultMgr.onModelChanging({file:{}});
-			}
 		});
 		
 		
@@ -63,7 +60,15 @@ define([
 				setText: function(text, start, end) {
 					contentsChanged = true;
 				    assertFixes(text, start, end, options.expected);
-				}
+				},
+				
+				getFileMetadata: function() {
+    			    var o = Object.create(null);
+    			    o.contentType = Object.create(null);
+    			    o.contentType.id = contentType;
+    			    o.location = 'css_quickfix_test_script.js';
+    			    return new Deferred().resolve(o);
+    			}
 			};
 			return {
 			    validator: validator,

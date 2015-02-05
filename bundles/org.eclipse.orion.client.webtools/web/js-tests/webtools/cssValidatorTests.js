@@ -17,38 +17,40 @@ define([
 	'mocha/mocha' // no exports
 ], function(chai, Deferred, CssValidator, ResultMgr) {
 	var assert = chai.assert;
-	var resultMgr = new ResultMgr.CssResultManager();
-	var validator = new CssValidator(resultMgr);
+    
+    var validator = null;
+    var resultMgr = null;
 
 	describe("CSS Validator Tests", function() {
-		var context = {
-			text: "",
-			/**
-			 * gets the text
-			 */
-			getText: function() {
-				return new Deferred().resolve(this.text);
-			}
-		};
 
-		/**
-		 * Resets the test state between runs
-		 */
-		beforeEach(function() {
-			context.text = "";
-		});
-		
+		function setup(options) {
+		    var buffer = options.buffer;
+		    var contentType = options.contentType ? options.contentType : 'text/css';
+		    resultMgr = new ResultMgr.CssResultManager();
+		    validator = new CssValidator(resultMgr);
+		    validator._restoreRules();
+			var rule = options.rule;
+			validator._enableOnly(rule.id, rule.severity);
+			var editorContext = {
+				/*override*/
+				getText: function() {
+					return new Deferred().resolve(buffer);
+				},
 				
-		afterEach(function(){
-			// Reset the rule severities to defaults
-			if (validator){
-				validator._restoreRules();
-			}
-			if(resultMgr) {
-			    resultMgr.onModelChanging({file:{}});
-			}
-		});
-		
+				getFileMetadata: function() {
+    			    var o = Object.create(null);
+    			    o.contentType = Object.create(null);
+    			    o.contentType.id = contentType;
+    			    o.location = 'css_validator_test_script.js';
+    			    return new Deferred().resolve(o);
+    			}
+			};
+			return {
+			    validator: validator,
+				editorContext: editorContext,
+				contentType: contentType
+			};
+		}
 		
 		/**
     	 * @name assertProblems
@@ -78,9 +80,8 @@ define([
 		 * Test common csslint problems. Tests a bad property decl
 		 */
 		it("Test common csslint problems: unknown property", function(/*done*/) {
-			context.text = "h1:{f: 22px}";
-			validator._enableOnly(null, 1);
-			return validator.computeProblems(context).then(function(result) {
+		    var val = setup({buffer: "h1:{f: 22px}", rule: {id:null, severity:1}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 5,
 				     end: 6,
@@ -94,12 +95,10 @@ define([
 		
 		/**
 		 * Test common csslint problems. Tests a duplicate property
-		 * TODO This problem will extend to the end of the line, including any whitespace
 		 */
 		it("Test common csslint problems: duplicate property", function(/*done*/) {
-			context.text = "h2:{border: 0; border: 0;}";
-			validator._enableOnly(null, 1);
-			return validator.computeProblems(context).then(function(result) {
+			var val = setup({buffer: "h2:{border: 0; border: 0;}", rule: {id:null, severity:1}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 16,
 				     end: 22,
@@ -115,9 +114,8 @@ define([
 		 * Test common csslint problems. Tests an empty rule
 		 */
 		it("Test common csslint problems: empty rule", function(/*done*/) {
-			context.text = "h3:{}";
-			validator._enableOnly(null, 1);
-			return validator.computeProblems(context).then(function(result) {
+			var val = setup({buffer: "h3:{}", rule: {id:null, severity:1}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
 				     end: 3,
@@ -131,12 +129,10 @@ define([
 		
 		/**
 		 * Test csslint parsing errors. Missing end of rule brace
-		 * TODO csslint returns two identical parsing errors in this case
 		 */
 		it("Test csslint parsing errors: Missing end of rule brace", function(/*done*/) {
-			context.text = "h3:{";
-			validator._enableOnly(null, 2);
-			return validator.computeProblems(context).then(function(result) {
+			var val = setup({buffer: "h3:{", rule: {id:null, severity:1}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
 				     end: 5,
@@ -158,9 +154,8 @@ define([
 		 * Test csslint parsing errors. Unexpected brace token
 		 */
 		it("Test csslint parsing errors: Unexpected brace token", function(/*done*/) {
-			context.text = "h3:{border: 0}}";
-			validator._enableOnly(null, 2);
-			return validator.computeProblems(context).then(function(result) {
+			var val = setup({buffer: "h3:{border: 0}}", rule: {id:null, severity:2}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
 				     end: 16,
@@ -176,9 +171,8 @@ define([
 		 * Test csslint parsing errors. Fatal error missing string
 		 */
 		it("Test csslint parsing errors: Fatal error missing string", function(/*done*/) {
-			context.text = "@import ;";
-			validator._enableOnly(null, 2);
-			return validator.computeProblems(context).then(function(result) {
+			var val = setup({buffer: "@import ;", rule: {id:null, severity:2}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
 				     end: 10,
@@ -194,9 +188,8 @@ define([
 		 * Test embedded rulset. False to ignore
 		 */
 		it("Test embedded ruleset: False to ignore", function(/*done*/) {
-			context.text = "/*csslint empty-rules:false*/\nh3:{}";
-			validator._enableOnly(null, 2);
-			return validator.computeProblems(context).then(function(result) {
+			var val = setup({buffer: "/*csslint empty-rules:false*/\nh3:{}", rule: {id:null, severity:2}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, []);
 			});
 		});	
@@ -205,9 +198,8 @@ define([
 		 * Test embedded rulset. True to error
 		 */
 		it("Test embedded ruleset: True to error", function(/*done*/) {
-			context.text = "/*csslint empty-rules:true*/\nh3:{}";
-			validator._enableOnly(null, 1);
-			return validator.computeProblems(context).then(function(result) {
+			var val = setup({buffer: "/*csslint empty-rules:true*/\nh3:{}", rule: {id:null, severity:1}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
 				     end: 3,
@@ -223,9 +215,8 @@ define([
 		 * Test embedded rulset. 0 to ignore
 		 */
 		it("Test embedded ruleset: 0 to ignore", function(/*done*/) {
-			context.text = "/*csslint empty-rules:0*/\nh3:{}";
-			validator._enableOnly(null, 1);
-			return validator.computeProblems(context).then(function(result) {
+			var val = setup({buffer: "/*csslint empty-rules:0*/\nh3:{}", rule: {id:null, severity:1}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, []);
 			});
 		});	
@@ -234,9 +225,8 @@ define([
 		 * Test embedded rulset. 1 to warn
 		 */
 		it("Test embedded ruleset: 1 to warn", function(/*done*/) {
-			context.text = "/*csslint empty-rules:1*/\nh3:{}";
-			validator._enableOnly(null, 0);
-			return validator.computeProblems(context).then(function(result) {
+			var val = setup({buffer: "/*csslint empty-rules:1*/\nh3:{}", rule: {id:null, severity:0}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
 				     end: 3,
@@ -252,9 +242,8 @@ define([
 		 * Test embedded rulset. 2 to error
 		 */
 		it("Test embedded ruleset: 2 to error", function(/*done*/) {
-			context.text = "/*csslint empty-rules:2*/\nh3:{}";
-			validator._enableOnly(null, 1);
-			return validator.computeProblems(context).then(function(result) {
+			var val = setup({buffer: "/*csslint empty-rules:2*/\nh3:{}", rule: {id:null, severity:1}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
 				     end: 3,
@@ -270,9 +259,8 @@ define([
 		 * Test embedded rulset. Allow whitespace
 		 */
 		it("Test embedded ruleset: Allow whitespace", function(/*done*/) {
-			validator._enableOnly(null, 1);
-			context.text = "/*       csslint empty-rules:2      */\nh3:{}";
-			return validator.computeProblems(context).then(function(result) {
+			var val = setup({buffer: "/*       csslint empty-rules:2      */\nh3:{}", rule: {id:null, severity:1}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
 				     end: 3,
@@ -288,9 +276,8 @@ define([
 		 * Test embedded rulset. Allow multiple rules
 		 */
 		it("Test embedded ruleset: Allow multiple rules", function(/*done*/) {
-			context.text = "/*csslint empty-rules:2,duplicate-properties:true*/\nh1:{}\nh2:{border: 0; border: 0}";
-			validator._enableOnly(null, 1);
-			return validator.computeProblems(context).then(function(result) {
+			var val = setup({buffer: "/*csslint empty-rules:2,duplicate-properties:true*/\nh1:{}\nh2:{border: 0; border: 0}", rule: {id:null, severity:1}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
 				     end: 3,
@@ -312,9 +299,8 @@ define([
 		 * Test embedded rulset. Ignore multiple embedded rulesets
 		 */
 		it("Test embedded ruleset: Ignore multiple embedded rulesets", function(/*done*/) {
-			context.text = "/*csslint empty-rules:2*/\n/*duplicate-properties:true*/\nh1:{}\nh2:{border: 0; border: 0}";
-			validator._enableOnly(null, 1);
-			return validator.computeProblems(context).then(function(result) {
+			var val = setup({buffer: "/*csslint empty-rules:2*/\n/*duplicate-properties:true*/\nh1:{}\nh2:{border: 0; border: 0}", rule: {id:null, severity:1}});
+			return validator.computeProblems(val.editorContext).then(function(result) {
 				assertProblems(result, [
 				    {start: 1,
 				     end: 3,
@@ -331,8 +317,5 @@ define([
 				]);
 			});
 		});
-		
-		// TODO Tests for user settings and that embedded rulesets override user settings
-		
 	});
 });
