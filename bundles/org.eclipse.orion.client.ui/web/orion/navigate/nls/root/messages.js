@@ -113,6 +113,7 @@ define({//Default message bundle
 	"Downloading...": "Reading file contents...",
 	"Download not supported": "Contents download is not supported in this browser.",
 	"gettingContentFrom": "Getting content from ",
+	"confirmLaunchDelete": "Delete Launch Configuration \"${0}\" ?",
 	"deletingLaunchConfiguration": "Deleting launch configuration...",
 	"deployTo": "Deploy to ",
 	"deploy": "Deploy ",
