@@ -117,74 +117,58 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 		},
 
 		_getAdditionalLaunchConfigurations: function(launchConf, project, rawFile) {
-			var deferred = new Deferred();
-			projectClient.getLaunchConfigurationsDir(project).then(function(launchConfDir) {
-
+			return projectClient.getLaunchConfigurationsDir(project).then(function(launchConfDir) {
 				if (!launchConfDir) {
-
-					deferred.resolve(null);
-
-				} else if (launchConfDir.Children) {
+					return null;
+				}
+				
+				if (launchConfDir.Children) {
 					var sharedConfigurationName = projectClient.normalizeFileName(launchConf.ConfigurationName || launchConf.Name, ".yml");
-
+					
 					var launchConfigurationEntries = launchConfDir.Children;
 					for (var i = 0; i < launchConfigurationEntries.length; ++i) {
 						var lc = launchConfigurationEntries[i];
 
 						if (lc.Name === sharedConfigurationName) {
-
-							if (rawFile) deferred.resolve(lc);
-							else cFService.getManifestInfo(lc.Location, true).then(function(manifest) {
-								deferred.resolve(manifest.Contents);
-							}, deferred.reject);
-
-							return deferred;
+							if (rawFile) {
+								return lc;
+							}
+							return cFService.getManifestInfo(lc.Location, true).then(function(manifest) {
+								return manifest.Contents;
+							});
 						}
 					}
-
-					deferred.resolve(null);
+					return null;
 
 				} else {
 					var func = arguments.callee.bind(this);
-					fileClient.fetchChildren(launchConfDir.ChildrenLocation).then(function(children) {
+					return fileClient.fetchChildren(launchConfDir.ChildrenLocation).then(function(children) {
 						launchConfDir.Children = children;
-						func(launchConfDir);
-					}.bind(this), deferred.reject);
+						return func(launchConfDir);
+					});
 				}
 
-			}, deferred.reject);
-
-			return deferred;
+			});
 		},
 
 		deleteAdditionalLaunchConfiguration: function(project, launchConf) {
-			var deferred = new Deferred();
-
 			/* delete the additional manifest file if present */
-			this._getAdditionalLaunchConfigurations(launchConf, project, true).then(function(manifest) {
-				fileClient.deleteFile(manifest.Location).then(deferred.resolve, deferred.reject);
+			return this._getAdditionalLaunchConfigurations(launchConf, project, true).then(function(manifest) {
+				fileClient.deleteFile(manifest.Location);
 			});
-
-			return deferred;
 		},
 
 		_findManifest: function(location){
-			var deferred = new Deferred();
-
-			fileClient.fetchChildren(location).then(function(children){
-
+			return fileClient.fetchChildren(location).then(function(children){
 				var manifests = children.filter(function(child) {
 					return child.Name === "manifest.yml"; //$NON-NLS-0$
 				});
 
 				if(manifests.length === 0)
-					deferred.resolve(null);
+					return null;
 				else
-					deferred.resolve(manifests[0]);
-
-			}, deferred.reject);
-
-			return deferred;
+					return manifests[0];
+			});
 		},
 
 		deploy: function(project, launchConf) {
@@ -437,13 +421,9 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 		},
 
 		_retryWithLogin: function(props, func) {
-			var deferred = new Deferred();
-
 			if (props.user && props.password) {
-				cFService.login(props.Target.Url, props.user, props.password).then(
-
-				function() {
-					func(props, deferred);
+				return cFService.login(props.Target.Url, props.user, props.password).then(function() {
+					return func(props);
 				}, function(error) {
 					error.Retry = {
 						parameters: [{
@@ -456,13 +436,10 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 							name: messages["password:"]
 						}]
 					};
-					deferred.reject(error);
+					throw error;
 				});
-			} else {
-				func(props, deferred);
 			}
-
-			return deferred;
+			return func(props);
 		},
 
 		getState: function(launchConf) {
@@ -470,45 +447,31 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 			return this._retryWithLogin(params, this._getStateCF.bind(this));
 		},
 
-		_getStateCF: function(params, deferred) {
-			var that = this;
-			
+		_getStateCF: function(params) {
 			if (params.Target && params.Name) {
-				cFService.getApp(params.Target, params.Name).then(
-					function(result) {
-						var app = result;
-						var appState = {
-							State: (app.running_instances > 0 ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
-							Message: i18nUtil.formatMessage(messages["${0}of${1}instance(s)Running"], app.running_instances, app.instances)
-						}
-						
-						that._getRoutes(params.Target, params.Name).then(
-							function(routes){
-								if (routes.length > 0)
-									appState.Url = "https://" + routes[0].host + "." + routes[0].domain.name;
-								
-								deferred.resolve(appState);
-							}, function(error){
-								deferred.resolve(appState);
-							}
-						);
-					}, function(error) {
-						/* default cf error message decoration */
-						error = mCfUtil.defaultDecorateError(error, params.Target);
-						if (error.HttpCode === 404) deferred.resolve(error);
-						else deferred.reject(error);
+				return cFService.getApp(params.Target, params.Name).then(function(result) {
+					var app = result;
+					var appState = {
+						State: (app.running_instances > 0 ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
+						Message: i18nUtil.formatMessage(messages["${0}of${1}instance(s)Running"], app.running_instances, app.instances),
+						Environment: app.environment_json
+					};
+					var routes = app.routes;
+					if (routes.length > 0) {							
+						appState.Url = "https://" + routes[0].host + "." + routes[0].domain.name;
 					}
-				);
-				return deferred;
-			}
-		},
-		
-		_getRoutes: function(target, name){
-			return cFService.getApp(target, name).then(
-				function(result) {
-					return result.routes;
-				}
-			);
+					return appState;
+				}, function(error) {
+					/* default cf error message decoration */
+					error = mCfUtil.defaultDecorateError(error, params.Target);
+					if (error.HttpCode === 404) {
+						return error;
+					} else {
+						throw error;
+					}
+				});
+			};
+			return new Deferred().reject("missing target and/or name"); // do we need this or will cfService.startApp check this for us
 		},
 
 		start: function(launchConf) {
@@ -516,24 +479,23 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 			return this._retryWithLogin(params, this._startCF.bind(this));
 		},
 
-		_startCF: function(params, deferred) {
-			var that = this;
+		_startCF: function(params) {
 			if (params.Target && params.Name) {
-				cFService.startApp(params.Target, params.Name, undefined, params.Timeout).then(
-
-				function(result) {
-					deferred.resolve({
+				return cFService.startApp(params.Target, params.Name, undefined, params.Timeout).then(function(result) {
+					return {
 						CheckState: true
-					});
+					};
 				}, function(error) {
 
 					/* default cf error message decoration */
 					error = mCfUtil.defaultDecorateError(error, params.Target);
-					if (error.HttpCode === 404) deferred.resolve(error);
-					else deferred.reject(error);
+					if (error.HttpCode === 404) {
+						return error;
+					}
+					throw error;
 				});
-				return deferred;
 			}
+			return new Deferred().reject("missing target and/or name"); // do we need this or will cfService.startApp check this for us
 		},
 
 		stop: function(launchConf) {
@@ -543,21 +505,22 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 
 		_stopCF: function(params, deferred) {
 			if (params.Target && params.Name) {
-				cFService.stopApp(params.Target, params.Name).then(
-
-				function(result) {
-					deferred.resolve({
+				return cFService.stopApp(params.Target, params.Name).then(function(result) {
+					return {
 						CheckState: true
-					});
+					};
 				}, function(error) {
 
 					/* default cf error message decoration */
 					error = mCfUtil.defaultDecorateError(error, params.Target);
-					if (error.HttpCode === 404) deferred.resolve(error);
-					else deferred.reject(error);
+					if (error.HttpCode === 404) {
+						return error;
+					} else {
+						throw error;
+					}
 				});
-				return deferred;
 			}
+			return new Deferred().reject("missing target and/or name"); // do we need this or will cfService.stopApp check this for us
 		},
 		
 		/**
