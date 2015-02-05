@@ -366,7 +366,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		
 		for (var i = 0; i < scopeList.length; i++){ // 0th one is a select
 			document.getElementById(scopeList[i].id).onchange = function(e){
-				updateScopeValue(e.srcElement.id, e.srcElement.value);
+				updateScopeValue(e.target.id, e.target.value);
 			};
 		}
 		
