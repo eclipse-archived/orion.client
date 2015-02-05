@@ -334,25 +334,28 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
          * @since 8.0
          */
         _getCompletionContext: function _getCompletionContext(editorContext, context) {
-            return this._resultManager.getResult(editorContext).then(function(results) {
-               if(results) {
-                   var tok = Util.findToken(context.offset, results.tokens);
-                   if(tok) {
-                       switch(tok.type) {
-                           case 'EOF': {
-                               if(results.tokens.length > 1) {
-                                   //grab the token right before the EOF if there is one
-                                   tok = results.tokens[results.tokens.length -2];
-                                   if(tok) {
-                                       return {prefix: tok.value, value: 'root'};
+            if(this._resultManager) {
+                return this._resultManager.getResult(editorContext).then(function(results) {
+                   if(results) {
+                       var tok = Util.findToken(context.offset, results.tokens);
+                       if(tok) {
+                           switch(tok.type) {
+                               case 'EOF': {
+                                   if(results.tokens.length > 1) {
+                                       //grab the token right before the EOF if there is one
+                                       tok = results.tokens[results.tokens.length -2];
+                                       if(tok) {
+                                           return {prefix: tok.value, value: 'root'};
+                                       }
                                    }
                                }
                            }
                        }
                    }
-               }
-               return null;
-            });
+                   return null;
+                });
+            }
+            return null;
         }
 	});
 
