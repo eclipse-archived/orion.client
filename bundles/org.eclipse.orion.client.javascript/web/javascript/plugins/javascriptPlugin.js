@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -236,7 +236,7 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "eqeqeq.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:eqeqeq)$"} //$NON-NLS-1$ //$NON-NLS-0$
                     ]

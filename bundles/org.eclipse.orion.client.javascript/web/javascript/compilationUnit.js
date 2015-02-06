@@ -22,12 +22,14 @@ define([
      * @constructor 
      * @param {Array.<String>} sourceblocks The blocks of source to combine into one unit
      * @param {Object} metadata The metadata describing the file this unit represents
+     * @param {Object} editorContext The original editor context that can be delegated to for setting the text 
      * @returns {CompilationUnit} The new CompiationUnit instance
      * @since 8.0
      */
-    function CompilationUnit(sourceblocks, metadata) {
+    function CompilationUnit(sourceblocks, metadata, editorContext) {
         this._blocks = sourceblocks;
         this._metadata = metadata;
+        this._ec = editorContext;
     }
     
     Objects.mixin(CompilationUnit.prototype, {
@@ -98,6 +100,13 @@ define([
             };
             proxy.getFileMetadata = function() {
                 return new Deferred().resolve(that._metadata);
+            };
+            proxy.setText = function(text, start, end) {
+                if(that._ec) {
+                    return that._ec.setText(text, start, end);
+                } else {
+                    return new Deferred().resolve(null);
+                }
             };
             return proxy;
         }

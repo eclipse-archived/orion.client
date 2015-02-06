@@ -397,6 +397,56 @@ define([
 		                      rule: rule,
 		                      expected: expected});
 		});
+		it("Test eqeqeq-html-1", function() {
+		    var rule = createTestRule('eqeqeq');
+		    var expected = {value: "===",
+		                    start: 25, 
+		                    end: 27};
+		    return getFixes({buffer: '<html><head><script>if(1 == 3) {}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test eqeqeq-html-2", function() {
+		    var rule = createTestRule('eqeqeq');
+		    var expected = {value: "===",
+		                    start: 32, 
+		                    end: 34};
+		    return getFixes({buffer: '<html><head><script>if(typeof f == "undefined") {}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test eqeqeq-html-3", function() {
+		    var rule = createTestRule('eqeqeq');
+		    var expected = {value: "!==",
+		                    start: 25, 
+		                    end: 27};
+		    return getFixes({buffer: '<html><head><script>if(1 != 3) {}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test eqeqeq-html-4", function() {
+		    var rule = createTestRule('eqeqeq');
+		    var expected = {value: "!==",
+		                    start: 32, 
+		                    end: 34};
+		    return getFixes({buffer: '<html><head><script>if(typeof f != "undefined") {}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test eqeqeq-html-5", function() {
+		    var rule = createTestRule('eqeqeq');
+		    var expected = {value: "!==",
+		                    start: 49, 
+		                    end: 51};
+		    return getFixes({buffer: '<html><head><script></script><script>if(typeof f != "undefined") {}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
 	//NO-UNREACHABLE
 		it("Test no-unreachable-1", function() {
 		    var rule = createTestRule('no-unreachable');

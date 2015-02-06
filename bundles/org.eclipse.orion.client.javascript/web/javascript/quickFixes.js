@@ -16,7 +16,8 @@ define([
 'orion/Deferred',
 'orion/editor/textModel',
 'javascript/finder',
-], function(Objects, Deferred, TextModel, Finder) {
+'javascript/compilationUnit'
+], function(Objects, Deferred, TextModel, Finder, CU) {
 	
 	/**
 	 * @description Creates a new JavaScript quick fix computer
@@ -193,7 +194,20 @@ define([
 		execute: function(editorContext, context) {
 		    var fixes = this[context.annotation.id];
 	        if(fixes) {
-	            return fixes(editorContext, context.annotation, this.astManager);
+	            var that = this;
+	            return editorContext.getFileMetadata().then(function(meta) {
+	                if(meta.contentType.id === 'text/html') {
+	                    return editorContext.getText().then(function(text) {
+                           var blocks = Finder.findScriptBlocks(text);
+                           if(blocks && blocks.length > 0) {
+                               var cu = new CU(blocks, meta, editorContext);
+                               return fixes(cu.getEditorContext(), context.annotation, that.astManager);
+                           }
+	                    });
+	                } else {
+	                    return fixes(editorContext, context.annotation, that.astManager);
+	                }
+	            });
 	        }
 		    return null;
 		},
