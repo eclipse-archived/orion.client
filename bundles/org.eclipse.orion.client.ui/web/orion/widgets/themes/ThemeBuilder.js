@@ -21,7 +21,7 @@ define(['i18n!orion/settings/nls/messages',
 function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExample, cssExample, javaExample) {
 	
 	var editorLanguage, editorTheme, originalTheme, currentTheme, revertBtn, deleteBtn ,saveBtn, themeNameInput;
-	var protectedThemes = ["Prospecto", "Darker"];
+	var protectedThemes = [];
 	var defaultColor = "#ff80c0";
 	var scopeList = [
 		{
@@ -295,6 +295,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		this.themeData = args.themeData;
 		this.toolbarId = args.toolbarId;
 		this.serviceRegistry = args.serviceRegistry;
+		protectedThemes = this.themeData ? (this.themeData.getProtectedThemes ? this.themeData.getProtectedThemes() : []) : [];
 		this.messageService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 
 		init();
@@ -502,7 +503,6 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		this.selectTheme(originalTheme.name);
 	}
 	ThemeBuilder.prototype.revertTheme = revertTheme;
-	
-	
+
 	return ThemeBuilder;
 });

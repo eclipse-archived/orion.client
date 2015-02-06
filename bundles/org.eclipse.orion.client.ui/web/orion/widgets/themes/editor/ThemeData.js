@@ -61,6 +61,12 @@ define([
 		ThemeData.prototype.styles = [];
 		ThemeData.prototype.getStyles = getStyles;
 		
+		function getProtectedThemes() {
+			return ["Prospecto", "Darker"]; //$NON-NLS-1$ //$NON-NLS-0$
+		}
+
+		ThemeData.prototype.getProtectedThemes = getProtectedThemes;
+
 		var fontSettable = true;
 		
 		ThemeData.prototype.fontSettable = fontSettable;
