@@ -242,7 +242,79 @@ define([
 		                      rule: rule,
 		                      expected: expected});
 		});
+		it("Test no-empty-block-html-1", function() {
+		    var rule = createTestRule('no-empty-block');
+		    var expected = {value: "//TODO empty block",
+		                    start: 34, 
+		                    end: 34};
+		    return getFixes({buffer: '<html><head><script>function f() {}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
 		
+		it("Test no-empty-block-html-2", function() {
+		    var rule = createTestRule('no-empty-block');
+		    var expected = {value: "//TODO empty block",
+		                    start: 59, 
+		                    end: 59};
+		    return getFixes({buffer: '<html><head><script>var f = {f: function() { function q() {}}}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		
+		it("Test no-empty-block-html-3", function() {
+		    var rule = createTestRule('no-empty-block');
+		    var expected = {value: "//TODO empty block",
+		                    start: 45, 
+		                    end: 45};
+		    return getFixes({buffer: '<html><head><script>var f = { f: function() {}};</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		
+		it("Test no-empty-block-html-4", function() {
+		    var rule = createTestRule('no-empty-block');
+		    var expected = {value: "//TODO empty block",
+		                    start: 30, 
+		                    end: 30};
+		    return getFixes({buffer: '<html><head><script>while(f) {}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-empty-block-html-5", function() {
+		    var rule = createTestRule('no-empty-block');
+		    var expected = {value: "//TODO empty block",
+		                    start: 27, 
+		                    end: 27};
+		    return getFixes({buffer: '<html><head><script>if(f) {}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-empty-block-html-6", function() {
+		    var rule = createTestRule('no-empty-block');
+		    var expected = {value: "//TODO empty block",
+		                    start: 37, 
+		                    end: 37};
+		    return getFixes({buffer: '<html><head><script>if(f) {while(f) {}}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-empty-block-html-7", function() {
+		    var rule = createTestRule('no-empty-block');
+		    var expected = {value: "//TODO empty block",
+		                    start: 54, 
+		                    end: 54};
+		    return getFixes({buffer: '<html><head><script></script><script>if(f) {while(f) {}}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
 	//NO-EXTRA-SEMI
 		it("Test no-extra-semi-1", function() {
 		    var rule = createTestRule('no-extra-semi');
@@ -280,6 +352,56 @@ define([
 		                      rule: rule,
 		                      expected: expected});
 		});
+		it("Test no-extra-semi-html-1", function() {
+		    var rule = createTestRule('no-extra-semi');
+		     var expected = {value: "",
+		                    start: 35, 
+		                    end: 36};
+		    return getFixes({buffer: '<html><head><script>function f() {};</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-extra-semi-html-2", function() {
+		    var rule = createTestRule('no-extra-semi');
+		    var expected = {value: "",
+		                    start: 33, 
+		                    end: 34};
+		    return getFixes({buffer: '<html><head><script>var foo = 10;;</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-extra-semi-html-3", function() {
+		    var rule = createTestRule('no-extra-semi');
+		    var expected = {value: "",
+		                    start: 33, 
+		                    end: 34};
+		    return getFixes({buffer: '<html><head><script>var foo = {};;</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-extra-semi-html-4", function() {
+		    var rule = createTestRule('no-extra-semi');
+		    var expected = {value: "",
+		                    start: 20, 
+		                    end: 21};
+		    return getFixes({buffer: '<html><head><script>;</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-extra-semi-html-5", function() {
+		    var rule = createTestRule('no-extra-semi');
+		    var expected = {value: "",
+		                    start: 37, 
+		                    end: 38};
+		    return getFixes({buffer: '<html><head><script></script><script>;</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
 	//NO-FALLTHROUGH
 		it("Test no-fallthrough-1", function() {
 		    var rule = createTestRule('no-fallthrough');
@@ -298,6 +420,36 @@ define([
 		    return getFixes({buffer: 'switch(num) {case 1:{break;} case 2:{code();} default: {}}', 
 		                      rule: rule,
 		                      expected: expected});
+		});
+		it("Test no-fallthrough-html-1", function() {
+		    var rule = createTestRule('no-fallthrough');
+		    var expected = {value: "//$FALLTHROUGH$",
+		                    start: 50, 
+		                    end: 50};
+		    return getFixes({buffer: '<html><head><script>switch(num) {case 1:{code();} case 2:{}}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-fallthrough-html-2", function() {
+		    var rule = createTestRule('no-fallthrough');
+		    var expected = {value: "//$FALLTHROUGH$",
+		                    start: 66, 
+		                    end: 66};
+		    return getFixes({buffer: '<html><head><script>switch(num) {case 1:{break;} case 2:{code();} default: {}}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-fallthrough-html-3", function() {
+		    var rule = createTestRule('no-fallthrough');
+		    var expected = {value: "//$FALLTHROUGH$",
+		                    start: 83, 
+		                    end: 83};
+		    return getFixes({buffer: '<html><head><script></script><script>switch(num) {case 1:{break;} case 2:{code();} default: {}}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
 		});
 	//NO-UNDEF
 		it("Test no-undef-defined-1", function() {

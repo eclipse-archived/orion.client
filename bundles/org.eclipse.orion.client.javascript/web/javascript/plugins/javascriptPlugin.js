@@ -124,7 +124,7 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "rm.extra.semi.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "no-extra-semi"} //$NON-NLS-1$ //$NON-NLS-0$
                     ]
@@ -139,7 +139,7 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "add.fallthrough.comment.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-fallthrough)$"} //$NON-NLS-1$ //$NON-NLS-0$
                     ]
@@ -154,7 +154,7 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "add.empty.comment.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-empty-block)$"} //$NON-NLS-1$ //$NON-NLS-0$
                     ]
