@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -23,10 +23,14 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 
 	GerritFileImpl.prototype = {
 		_handleError: function(error) {
-			var errorMessage = "Unable to display repository contents at this time. Please try again later.";
-			var severity = "Warning";
-			var errorObj = {Severity: severity, Message: errorMessage};
-			error.responseText = JSON.stringify(errorObj);
+			// pass the expected error from the gerrit server as is
+			// currently the 501 error carries the git submodule error message
+			if(!error.status || error.status !== 501) {
+				var errorMessage = "Unable to display repository contents at this time. Please try again later.";
+				var severity = "Warning";
+				var errorObj = {Severity: severity, Message: errorMessage};
+				error.responseText = JSON.stringify(errorObj);
+			}
 			return new Deferred().reject(error);
 		},
 		_getParents: function(location) {
