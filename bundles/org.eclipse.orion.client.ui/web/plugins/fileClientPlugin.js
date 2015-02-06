@@ -71,6 +71,10 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", 'i18n!o
 	// note global
 	var workspaceBase = makeParentRelative(temp.href);
 
+	temp.href = "../xfer";
+	// note global
+	var importBase = makeParentRelative(temp.href);
+
 	var service = new FileServiceImpl(fileBase, workspaceBase);
 	//provider.registerService("orion.core.file", trace(service), {Name:'Orion Content', top:fileBase, pattern:patternBase});
 	provider.registerService("orion.core.file", service, {
@@ -79,7 +83,7 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", 'i18n!o
 		nls: 'orion/navigate/nls/messages',
 		top: fileBase,
 		ranking: -1,
-		pattern: [fileBase, workspaceBase]
+		pattern: [fileBase, workspaceBase, importBase]
 	});
 	provider.connect();
 });
