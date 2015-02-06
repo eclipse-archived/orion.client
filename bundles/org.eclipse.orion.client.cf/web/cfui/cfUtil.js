@@ -47,18 +47,11 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 		getLoginMessage: function(/*manageUrl*/){
 			return messages["deploy.enterCredentials"];
 		},
-
-		prepareLaunchConfigurationContent : function(resp, appPath, editLocation, contentLocation, fileService, additionalConfiguration){
+		
+		prepareLaunchConfigurationContent : function(appName, target, appPath, additionalConfiguration){
 			var deferred = new Deferred();
 
-			var appName = resp.App.name || resp.App.entity.name;
-			var launchConfName = i18Util.formatMessage(messages["${0}On${1}/${2}"], appName, resp.Target.Space.Name, resp.Target.Org.Name);
-
-			var host, url;
-			if(resp.Route !== undefined){
-				host = resp.Route.host || resp.Route.entity.host;
-				url = "https://" + host + "." + resp.Domain; //$NON-NLS-1$ //$NON-NLS-0$
-			}
+			var launchConfName = i18Util.formatMessage(messages["${0}On${1}/${2}"], appName, target.Space, target.Org);
 
 			var launchConf = {
 				CheckState: true,
@@ -66,23 +59,21 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 					ConfigurationName: launchConfName,
 					Parameters: {
 						Target: {
-							Url: resp.Target.Url,
-							Org: resp.Target.Org.Name,
-							Space: resp.Target.Space.Name
+							Url: target.Url,
+							Org: target.Org,
+							Space: target.Space,
 						},
-						Name: appName,
-						Timeout: resp.Timeout
+						Name: appName
+//						Timeout: resp.Timeout
 					},
-					Url: url,
 					Type: "Cloud Foundry", //$NON-NLS-0$
-					ManageUrl: resp.ManageUrl,
 					Path: appPath
-				},
-				Message: i18Util.formatMessage(messages["seeManualDeploymentInformationIn"], editLocation.href, launchConfName, resp.ManageUrl)
+				}
 			};
 
 			/* additional configuration */
 			additionalConfiguration = additionalConfiguration || {};
+
 			if(additionalConfiguration.Manifest){
 				launchConf.AdditionalConfiguration = {
 					extension : ".yml", //$NON-NLS-0$
@@ -97,7 +88,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 			deferred.resolve(launchConf);
 			return deferred;
 		},
-
+		
 		/**
 		 * Decorates the given error object.
 		 */

@@ -243,7 +243,6 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 			if (target && appName) {
 
 				var errorHandler = function(error) {
-
 					/* default cf error message decoration */
 					error = mCfUtil.defaultDecorateError(error, target);
 					if (error.HttpCode === 404) deferred.resolve(error);
@@ -259,32 +258,16 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 						self._findManifest(project.ContentLocation).then(function(manifest) {
 
 							if (manifest === null) {
-
 								/* the deployment will not succeed anyway */
 								deferred.reject({
 									State: "NOT_DEPLOYED", //$NON-NLS-0$
 									Severity: "Error", //$NON-NLS-0$
 									Message: messages["Could not find the launch configuration manifest"]
 								});
-
 							} else {
-
 								cFService.getManifestInfo(manifest.Location, true).then(function(manifest) {
 									func(manifest.Contents);
 								}, deferred.reject);
-
-								/* Uncomment to re-enable confirmation */
-								/*if(confirm(messages["Would you like to use the top-level project manifest"])){
-									cFService.getManifestInfo(manifests[0].Location, true).then(function(manifest){
-										func(manifest.Contents);
-									}, deferred.reject);
-								} else {
-									deferred.reject({
-										State: "NOT_DEPLOYED", //$NON-NLS-0$
-										Severity: "Warning", //$NON-NLS-0$
-										Message: messages["Cancelled"]
-									});
-								}*/
 							}
 						}.bind(this), errorHandler);
 					} else {
@@ -297,7 +280,6 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 						}
 
 						cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath), manifest, false, appPackager, instrumentation).then(function(result) {
-
 							var expandedURL = new URITemplate("{+OrionHome}/edit/edit.html#{,ContentLocation}").expand({ //$NON-NLS-0$
 								OrionHome: PageLinks.getOrionHome(),
 								ContentLocation: project.ContentLocation,
@@ -309,7 +291,8 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 								DevMode: devMode
 							};
 
-							mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, project.ContentLocation, fileClient, additionalConfiguration).then(
+							var appName = result.App.name || result.App.entity.name;
+							mCfUtil.prepareLaunchConfigurationContent(appName, target, appPath, additionalConfiguration).then(
 							deferred.resolve, deferred.reject);
 						}, errorHandler);
 					}

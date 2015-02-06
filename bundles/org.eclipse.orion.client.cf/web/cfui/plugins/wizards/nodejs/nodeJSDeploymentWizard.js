@@ -199,7 +199,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 		    			node = document.createTextNode(manifestApplication.name);
 		    			document.getElementById("_name").appendChild(node); //$NON-NLS-0$
 
-		    			var message =  "<p>" + messages["Click \"Deploy\" to proceed or \"Next\" to change the deployment parameters."] + "</p>"; //$NON-NLS-0$ //$NON-NLS-2$
+		    			var message =  "<p>" + messages["Click \"Save\" to proceed or \"Next\" to change the deployment parameters."] + "</p>"; //$NON-NLS-0$ //$NON-NLS-2$
 
 		    			var messageDiv = document.getElementById("confirmationMessage"); //$NON-NLS-0$
 			    		messageDiv.innerHTML = message;
@@ -273,7 +273,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/Deferred', 'orion/cf
 				pages: [page0, page1, page2, page3],
 				commonPane: commonPane,
 				onCancel: closeFrame,
-				buttonNames: { ok: messages["deploy"] },
+				buttonNames: { ok: messages["save"] },
 				size: { width: "420px", height: "180px" }, //$NON-NLS-0$ //$NON-NLS-1$
 				onSubmit: mDeploymentLogic.buildDeploymentTrigger({
 

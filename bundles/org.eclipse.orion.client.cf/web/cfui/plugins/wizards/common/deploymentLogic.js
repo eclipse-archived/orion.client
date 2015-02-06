@@ -103,7 +103,7 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 			var contentLocation = options.ContentLocation;
 			var appPath = options.AppPath;
 
-			showMessage(messages["deploying..."]);
+			showMessage(messages["saving..."]);
 			targetSelection.getSelection(function(selection){
 				if(selection === null || selection.length === 0){
 					closeFrame();
@@ -134,15 +134,13 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 				});
 
 				var editLocation = new URL(expandedURL);
-				cfService.pushApp(selection, null, decodeURIComponent(contentLocation + appPath), manifest, saveManifest, packager, instrumentation).then(
-					function(result){
-						mCfUtil.prepareLaunchConfigurationContent(result, appPath, editLocation, contentLocation, fileService, additionalConfiguration).then(
-							function(launchConfigurationContent){
-								postMsg(launchConfigurationContent);
-							}, function(error){
-								postError(error, selection);
-							}
-						);
+				
+				var appName = manifest.applications[0].name;
+				var target = selection;
+				
+				mCfUtil.prepareLaunchConfigurationContent(appName, target, appPath, additionalConfiguration).then(
+					function(launchConfigurationContent){
+						postMsg(launchConfigurationContent);
 					}, function(error){
 						postError(error, selection);
 					}
