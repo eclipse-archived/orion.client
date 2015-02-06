@@ -192,7 +192,9 @@ define([
 		 * @param {Object} context The context params
 		 */
 		execute: function(editorContext, context) {
-		    var fixes = this[context.annotation.id];
+		    var id = context.annotation.fixid ? context.annotation.fixid : context.annotation.id;
+		    delete context.annotation.fixid;
+		    var fixes = this[id];
 	        if(fixes) {
 	            var that = this;
 	            return editorContext.getFileMetadata().then(function(meta) {

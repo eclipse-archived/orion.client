@@ -506,6 +506,46 @@ define([
 		                      rule: rule,
 		                      expected: expected});
 		});
+		it("Test no-undef-defined-html-1", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "/*globals foo */",
+		                    start: 20, 
+		                    end: 20};
+		    return getFixes({buffer: '<html><head><script>foo(10);</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-undef-defined-html-2", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "globals foo bar",
+		                    start: 22, 
+		                    end: 34};
+		    return getFixes({buffer: '<html><head><script>/*globals foo */ foo(10); bar();</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-undef-defined-html-3", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "globals bar foo:true",
+		                    start: 22, 
+		                    end: 33};
+		    return getFixes({buffer: '<html><head><script>/*globals bar*/ foo++; bar();</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-undef-defined-html-4", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "globals bar foo:true",
+		                    start: 22, 
+		                    end: 33};
+		    return getFixes({buffer: '<html><head><script>/*globals bar*/ foo = bar; bar();</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
 	//NO-UNUSED-PARAMS
 		it("Test no-unused-params-1", function() {
 		    var rule = createTestRule('no-unused-params');
@@ -552,6 +592,57 @@ define([
 		                      rule: rule,
 		                      expected: expected});
 		});
+		it("Test no-unused-params-html-1", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "",
+		                    start: 31,
+		                    end: 32};
+		    return getFixes({buffer: '<html><head><script>function f(p) {}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-unused-params-html-2", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "",
+		                    start: 34,
+		                    end: 38};
+		    return getFixes({buffer: '<html><head><script>function f(p, p2, p3) {p(); p3();}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-unused-params-html-3", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "",
+		                    start:36,
+		                    end:40};
+		    return getFixes({buffer: '<html><head><script>function f(p, p2, p3) {p(); p2();}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-unused-params-html-4", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "/* @callback */",
+		                    start: 31, 
+		                    end: 31};
+		    return getFixes({buffer: '<html><head><script>define([], function(p, p2, p3) {p(); p2();});</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-unused-params-html-5", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "/**\n                     * @callback\n                     */\n                    ",
+		                    start: 30, 
+		                    end: 30};
+		    return getFixes({buffer: '<html><head><script>var f = { one: function(p, p2, p3) {p(); p2();}};</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+
 	//EQEQEQ
 		it("Test eqeqeq-1", function() {
 		    var rule = createTestRule('eqeqeq');
@@ -658,6 +749,26 @@ define([
 		                      rule: rule,
 		                      expected: expected});
 		});
+		it("Test no-unreachable-html-1", function() {
+		    var rule = createTestRule('no-unreachable');
+		    var expected = {value: "",
+		                    start: 43, 
+		                    end: 51};
+		    return getFixes({buffer: '<html><head><script>function f(p) {return; foo = 9;}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-unreachable-html-2", function() {
+		    var rule = createTestRule('no-unreachable');
+		    var expected = {value: "",
+		                    start: 52, 
+		                    end: 59};
+		    return getFixes({buffer: '<html><head><script>switch(num) { case 1: {throw e; f = 10;}}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
 	//NO-SPARSE-ARRAYS
 		it("Test no-sparse-arrays-1", function() {
 		    var rule = createTestRule('no-sparse-arrays');
@@ -731,6 +842,86 @@ define([
 		                      rule: rule,
 		                      expected: expected});
 		});
+		it("Test no-sparse-arrays-html-1", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 28, 
+		                    end: 36};
+		    return getFixes({buffer: '<html><head><script>var a = [1, , 2]</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-sparse-arrays-html-2", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 28, 
+		                    end: 40};
+		    return getFixes({buffer: '<html><head><script>var a = [1, , 2, , ]</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-sparse-arrays-html-3", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 28, 
+		                    end: 44};
+		    return getFixes({buffer: '<html><head><script>var a = [, , 1, , 2, , ]</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-sparse-arrays-html-4", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 28, 
+		                    end: 46};
+		    return getFixes({buffer: '<html><head><script>var a = [, , 1, \n, 2, \n, ]</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-sparse-arrays-html-5", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2, 3]",
+		                    start: 28, 
+		                    end: 48};
+		    return getFixes({buffer: '<html><head><script>var a = [, , \n1, \n, 2, \n, 3]</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-sparse-arrays-html-6", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2, 3]",
+		                    start: 28, 
+		                    end: 61};
+		    return getFixes({buffer: '<html><head><script>var a = [, ,,,, \n1, \n, , ,, ,\n,, 2, \n, 3]</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-sparse-arrays-html-7", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 28, 
+		                    end: 40};
+		    return getFixes({buffer: '<html><head><script>var a = [1, , 2, , ];</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-sparse-arrays-html-8", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 28, 
+		                    end: 47};
+		    return getFixes({buffer: '<html><head><script>var a = [, , \n1, \n, 2, \n, ];</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
 	//SEMI
 	    it("Test semi-1", function() {
 		    var rule = createTestRule('semi');
@@ -758,6 +949,36 @@ define([
 		    return getFixes({buffer: 'var a = {}', 
 		                      rule: rule,
 		                      expected: expected});
+		});
+		it("Test semi-html-1", function() {
+		    var rule = createTestRule('semi');
+		    var expected = {value: ";",
+		                    start: 34, 
+		                    end: 34};
+		    return getFixes({buffer: '<html><head><script>var a = [1, 2]</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test semi-html-2", function() {
+		    var rule = createTestRule('semi');
+		    var expected = {value: ";",
+		                    start: 25, 
+		                    end: 25};
+		    return getFixes({buffer: '<html><head><script>foo()</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test semi-html-3", function() {
+		    var rule = createTestRule('semi');
+		    var expected = {value: ";",
+		                    start: 30, 
+		                    end: 30};
+		    return getFixes({buffer: '<html><head><script>var a = {}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
 		});
 	//NO-UNUSED-VARS-UNUSED
 	    it("Test no-unused-vars-unused-1", function() {
@@ -809,6 +1030,61 @@ define([
 		                      rule: rule,
 		                      expected: expected,
 		                      pid: 'no-unused-vars-unused-funcdecl'});
+		});
+		it("Test no-unused-vars-unused-html-1", function() {
+		    var rule = createTestRule('no-unused-vars');
+		    var expected = {value: "",
+		                    start: 20, 
+		                    end: 26};
+		    return getFixes({buffer: '<html><head><script>var a;</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'no-unused-vars-unused',
+		                      contentType: 'text/html'});
+		});
+		it("Test no-unused-vars-unused-html-2", function() {
+		    var rule = createTestRule('no-unused-vars');
+		    var expected = {value: "",
+		                    start: 30, 
+		                    end: 33};
+		    return getFixes({buffer: '<html><head><script>var a = 10, b;</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'no-unused-vars-unused',
+		                      contentType: 'text/html'});
+		});
+		it("Test no-unused-vars-unused-html-3", function() {
+		    var rule = createTestRule('no-unused-vars');
+		    var expected = {value: "",
+		                    start: 32, 
+		                    end: 35};
+		    return getFixes({buffer: '<html><head><script>var a = 10, b, c = 1;</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'no-unused-vars-unused',
+		                      contentType: 'text/html'});
+		});
+		it("Test no-unused-vars-unused-funcdecl-html-1", function() {
+		    var rule = createTestRule('no-unused-vars');
+		    var expected = {value: "",
+		                    start: 20, 
+		                    end: 35};
+		    return getFixes({buffer: '<html><head><script>function f() {}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'no-unused-vars-unused-funcdecl',
+		                      contentType: 'text/html'});
+		});
+		it("Test no-unused-vars-unused-funcdecl-html-2", function() {
+		    var rule = createTestRule('no-unused-vars');
+		    var expected = {value: "",
+		                    start: 46, 
+		                    end: 61};
+		    return getFixes({buffer: '<html><head><script>var a = {one: function() {function f() {}}}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'no-unused-vars-unused-funcdecl',
+		                      contentType: 'text/html'});
 		});
 	});
 });
