@@ -18,6 +18,7 @@ define({//Default message bundle
 	'csslintValidator' : 'CSS Validator', //$NON-NLS-0$  //$NON-NLS-1$
 	'pluginName': 'Orion Web Tools Support', //$NON-NLS-0$  //$NON-NLS-1$
 	'pluginDescription': 'This plug-in provides web language tools support for Orion, including HTML and CSS.', //$NON-NLS-0$  //$NON-NLS-1$
+	'fontHoverExampleText': 'Lorem ipsum dolor...', //$NON-NLS-0$  //$NON-NLS-1$
 	
 	// Validator Severities
 	'ignore' : 'Ignore', //$NON-NLS-0$  //$NON-NLS-1$

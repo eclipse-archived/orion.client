@@ -16,8 +16,9 @@ define([
 'orion/URITemplate',
 'webtools/util',
 'javascript/compilationUnit',
+'i18n!webtools/nls/messages',
 'csslint' //for colour object
-], function(Objects, URITemplate, Util, CU, CSSLint) {
+], function(Objects, URITemplate, Util, CU, messages, CSSLint) {
 	
 	/**
 	 * @name webtools.CSSHover
@@ -76,7 +77,7 @@ define([
 				    if(this.hasPreviousToken(token, results.tokens, 'IMPORT_SYM')) {
 				        return this._getFileHover(token, metadata);
 				    }
-				    if(this.hasPreviousToken(token, results.tokens, 'IDENT', 'background-image')) {
+				    if(this.hasPreviousToken(token, results.tokens, 'IDENT', ['background-image', '-webkit-border-image', '-o-border-image', 'border-image', 'border-image-source', 'icon'])) {
 				        return this._getImageHover(token, metadata);
 				    }
 				    var tok = this._isRgbLike(token, results.tokens);
@@ -92,11 +93,11 @@ define([
 					if (/\#[0-9A-Fa-f]{1,6}/.test(token.value)){
 						return this._getColorHover(token.value);	
 					}
-					tok = this._isFontFamily(token, results.tokens);
+					tok = this._isFontLike(token, results.tokens);
 					if(tok) {
 					    var font = this._collectFontId(tok, results.tokens);
 					    if(font) {
-					        return this._getFontHover(font);
+					        return this._getFontHover(tok.value, font);
 					    }
 					}
 				}
@@ -110,16 +111,19 @@ define([
 		    return config;
 		},
 		
-		_isFontFamily: function _isFontFamily(token, tokens) {
+		fontLikeNames: ['font-family', 'font', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight', 
+		                  'text-decoration', 'text-shadow', 'text-transform'],
+		
+		_isFontLike: function _isFontLike(token, tokens) {
 		    if(token && tokens) {
 		        for(var i = token.index; i > -1; i--) {
 		            var tok = tokens[i];
-		            if(tok.type === 'IDENT' || tok.type === 'COMMA' || tok.type === 'STRING') {
+		            if(tok.type === 'IDENT' || tok.type === 'COMMA' || tok.type === 'STRING' || tok.type === 'LENGTH' || tok.type === 'NUMBER' || tok.type === 'HASH') {
 		                continue;
 		            } else if(tok.type === 'COLON') {
 		                //the next one would have to be IDENT and 'font-family'
 		                tok = tokens[i-1];
-		                if(tok.type === 'IDENT' && tok.value.toLowerCase() === 'font-family') {
+		                if(tok.type === 'IDENT' && this.fontLikeNames.indexOf(tok.value.toLowerCase()) > -1) {
 		                    tok.index = i-1;
 		                    return tok;
 		                } else {
@@ -145,7 +149,7 @@ define([
 		        ++idx;
 		        for(var i = idx+1; i < tokens.length; i++) {
 		            next = tokens[i];
-		            if(next.type === 'IDENT' || next.type === 'COMMA' || next.type === 'STRING') {
+		            if(next.type === 'IDENT' || next.type === 'COMMA' || next.type === 'STRING' || next.type === 'NUMBER' || next.type === 'LENGTH' || next.type === 'HASH') {
 		                id += next.value;
 		                if(i < tokens.length-1) {
 		                    id += ' ';
@@ -162,8 +166,8 @@ define([
 		    return null;
 		},
 		
-		_getFontHover: function _getColorHover(font){
-			var html = '<html><body><div style="font-family:'+font+';margin:0px">Lorem ipsum dolor...</div></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
+		_getFontHover: function _getFontHover(prop, font){
+			var html = '<html><body><div style="'+prop+':'+font+';margin:0px">'+messages['fontHoverExampleText']+'</div></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
 			return {type: "html", content: html, height: '42px', width: '235px'};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
 		},
 		
@@ -243,7 +247,9 @@ define([
 		                            break;
 		                        }
 		                    }
-		                    if(id && prev && prev.type === name) {
+		                    if(Array.isArray(id) && prev && id.indexOf(prev.value) > -1) {
+		                        return true;
+		                    } else if(id && prev && prev.type === name) {
 		                       return id === prev.value;
     		                } else {
     		                  return prev && prev.type === name;
