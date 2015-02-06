@@ -326,7 +326,7 @@ define([
         			scopeId: "orion.edit.quickfix",
         			id : "no.comma.dangle.fix",  //$NON-NLS-0$
         			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-        			contentType: ['application/javascript'],  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-comma-dangle)$"} //$NON-NLS-1$ //$NON-NLS-0$
                     ]

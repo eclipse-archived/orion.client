@@ -122,7 +122,7 @@ define([
 		    var expected = {value: "",
 		                    start: 15, 
 		                    end: 16};
-		    return getFixes({buffer: 'f({one:1, two:2,})', 
+		    return getFixes({buffer: 'f({one:1, two:2,});', 
 		                      rule: rule,
 		                      expected: expected});
 		});
@@ -143,6 +143,46 @@ define([
 		    return getFixes({buffer: 'var f = [{one:1, two:2,}];', 
 		                      rule: rule,
 		                      expected: expected});
+		});
+		it("Test no-comma-dangle-html-1", function() {
+		    var rule = createTestRule('no-comma-dangle');
+		    var expected = {value: "",
+		                    start: 35, 
+		                    end: 36};
+		    return getFixes({buffer: '<html><head><script>f({one:1, two:2,});</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-comma-dangle-html-2", function() {
+		    var rule = createTestRule('no-comma-dangle');
+		    var expected = {value: "",
+		                    start: 41, 
+		                    end: 42};
+		    return getFixes({buffer: '<html><head><script>var f = {one:1, two:2,};</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-comma-dangle-html-3", function() {
+		    var rule = createTestRule('no-comma-dangle');
+		    var expected = {value: "",
+		                    start: 42, 
+		                    end: 43};
+		    return getFixes({buffer: '<html><head><script>var f = [{one:1, two:2,}];</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-comma-dangle-html-4", function() {
+		    var rule = createTestRule('no-comma-dangle');
+		    var expected = {value: "",
+		                    start: 59, 
+		                    end: 60};
+		    return getFixes({buffer: '<html><head><script></script><script>var f = [{one:1, two:2,}];</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
 		});
 	//NO-EMPTY-BLOCK
 		it("Test no-empty-block-1", function() {

@@ -289,9 +289,7 @@ define([
 			var eslintErrors = [], 
 				parseErrors = this._extractParseErrors(ast);
 			try {
-			    if(env) {
-			        config.env = env;
-			    }
+			    config.env = env;
 				eslintErrors = eslint.verify(ast, config);
 			} catch (e) {
 				if(parseErrors.length < 1) {
