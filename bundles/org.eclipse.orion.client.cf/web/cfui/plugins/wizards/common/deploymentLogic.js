@@ -25,6 +25,9 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 
 		if(results.host)
 			manifestContents.applications[0].host = results.host;
+		
+		if(results.domain)
+			manifestContents.applications[0].domain = results.domain;
 
 		if(results.services){
 			if(results.services.length === 0)

@@ -191,6 +191,7 @@ define({//Default message bundle
 	"target*:": "Target*:",
 	"organization*:": "Organization*:",
 	"space*:": "Space*:",
+	"domain*:": "Domain*:",
 	"applicationName*:": "Application Name*:",
 	"debugWith${0}:": "Debug with ${0}:",
 	"runInDebugMode": "Run in debug mode",

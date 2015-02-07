@@ -77,45 +77,46 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			var self = this;
 			
 			self._showMessage(messages["loadingDeploymentSettings..."]);
-			self._cfService.getOrgs(target).then(function(orgs){
-				
-				lib.empty(self._orgsDropdown);
-				orgs.Orgs.forEach(function(org){
-					
-					var option = document.createElement("option"); //$NON-NLS-0$
-					option.appendChild(document.createTextNode(org.Name));
-					option.org = org;
-					
-					if (self._defaultTarget && (self._defaultTarget.OrgId === org.Guid
-							|| self._defaultTarget.OrgName === org.Name)){
-						option.selected = "selected"; //$NON-NLS-0$
-						self._defaultTarget.OrgName = org.Name;
-					}
-					
-					self._orgsDropdown.appendChild(option);
-					self._targets[org.Name] = [];
-					
-					if (org.Spaces){
-						org.Spaces.forEach(function(space){
-							var newTarget = {};
-							newTarget.Url = target.Url;
-							if (target.ManageUrl)
-								newTarget.ManageUrl = target.ManageUrl;
+			self._cfService.getOrgs(target).then(
+				function(orgs){
+					lib.empty(self._orgsDropdown);
+					orgs.Orgs.forEach(
+						function(org){
+							var option = document.createElement("option"); //$NON-NLS-0$
+							option.appendChild(document.createTextNode(org.Name));
+							option.org = org;
 							
-							newTarget.Org = org.Name;
-							newTarget.Space = space.Name;
-							newTarget.SpaceId = space.Guid;
-							self._targets[org.Name].push(newTarget);
-						});
-					}
-				});
-				
-				self._loadSpaces(self._orgsDropdown.value);
-				self._hideMessage();
-				
-			}, function(error){
-				self._handleError(error, target, function(){ self._loadTargets(target); });
-			});
+							if (self._defaultTarget && (self._defaultTarget.OrgId === org.Guid
+									|| self._defaultTarget.OrgName === org.Name)){
+								option.selected = "selected"; //$NON-NLS-0$
+								self._defaultTarget.OrgName = org.Name;
+							}
+							
+							self._orgsDropdown.appendChild(option);
+							self._targets[org.Name] = [];
+							
+							if (org.Spaces){
+								org.Spaces.forEach(function(space){
+									var newTarget = {};
+									newTarget.Url = target.Url;
+									if (target.ManageUrl)
+										newTarget.ManageUrl = target.ManageUrl;
+									
+									newTarget.Org = org.Name;
+									newTarget.Space = space.Name;
+									newTarget.SpaceId = space.Guid;
+									self._targets[org.Name].push(newTarget);
+								});
+							}
+						}
+					);
+					
+					self._loadSpaces(self._orgsDropdown.value);
+					self._hideMessage();
+				}, function(error){
+					self._handleError(error, target, function(){ self._loadTargets(target); });
+				}
+			);
 		},
 		
 		_loadSpaces : function(org){
@@ -123,6 +124,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			
 			var targetsToDisplay = self._targets[org];
 			lib.empty(self._spacesDropdown);
+			lib.empty(self._domainsDropdown);
 			
 			targetsToDisplay.forEach(function(target){
 				var option = document.createElement("option"); //$NON-NLS-0$
@@ -140,8 +142,27 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			
 			self._setSelection();
 			self._selection.getSelection(function(selection){
+				self._loadDomains(selection);
 				self._loadApplications(selection);
 				self._loadHosts(selection);
+			});
+		},
+		
+		_loadDomains : function(target){
+			var self = this;
+			lib.empty(self._domainsDropdown);
+			
+			self._domainsDeferred = self._cfService.getDomains(target);
+			self._domainsDeferred.then(function(domains){
+				if(domains.Domains){
+					domains.Domains.forEach(function(domain){
+						var option = document.createElement("option"); //$NON-NLS-0$
+						option.appendChild(document.createTextNode(domain.DomainName));
+						if (domain.DomainName === self._manifestApplication.domain)
+							option.selected = "selected"; //$NON-NLS-0$
+						self._domainsDropdown.appendChild(option);
+					});
+				}
 			});
 		},
 		
@@ -195,6 +216,10 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						"<td id=\"spacesLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
 						"<td id=\"spaces\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
 					"</tr>"+ //$NON-NLS-0$
+					"<tr>"+ //$NON-NLS-0$
+						"<td id=\"domainsLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
+						"<td id=\"domains\" class=\"selectCell\"></td>"+ //$NON-NLS-0$
+					"</tr>"+ //$NON-NLS-0$
 					"<tr class=\"rowSeparator\"></tr>" + //$NON-NLS-0$
 					"<tr>"+ //$NON-NLS-0$
 						"<td id=\"nameLabel\" class=\"label\"></td>"+ //$NON-NLS-0$
@@ -229,6 +254,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						self._cloudsDropdown.onchange = function(event){
 							lib.empty(self._orgsDropdown);
 							lib.empty(self._spacesDropdown);
+							lib.empty(self._domainsDropdown);
 							self._setSelection();
 							
 							var selectedCloud = self._clouds[event.target.selectedIndex];
@@ -261,12 +287,18 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					self._spacesDropdown.onchange = function(event){
 						self._setSelection();
 						self._selection.getSelection(function(selection){
+							self._loadDomains(selection);
 							self._loadApplications(selection);
 							self._loadHosts(selection);
 						});
 					};
 					
 					document.getElementById("spaces").appendChild(self._spacesDropdown); //$NON-NLS-0$
+					
+					/* render the domains field */
+					document.getElementById("domainsLabel").appendChild(document.createTextNode(messages["domain*:"])); //$NON-NLS-0$
+					self._domainsDropdown = document.createElement("select"); //$NON-NLS-0$
+					document.getElementById("domains").appendChild(self._domainsDropdown); //$NON-NLS-0$
 					
 					/* render the application name field */
 					document.getElementById("nameLabel").appendChild(document.createTextNode(messages["applicationName*:"])); //$NON-NLS-0$
@@ -370,6 +402,8 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					if(self._hostInput && self._hostInput.value){
 						res.host = self._hostInput.value;
 					}
+					
+					res.domain = self._domainsDropdown.value;
 					
 					return res;
 				}
