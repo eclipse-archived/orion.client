@@ -153,7 +153,7 @@ define({//Default message bundle
 	"Ok": "Ok", //$NON-NLS-0$  //$NON-NLS-1$
 	"missingCredentials": "Enter the ${0} authentication credentials associated with ${1} to check its status.", //$NON-NLS-0$  //$NON-NLS-1$
 	"deploying": "deploying", //$NON-NLS-0$  //$NON-NLS-1$
-	"starting": "starting", //$NON-NLS-0$  //$NON-NLS-1$
+	"starting": "restarting", //$NON-NLS-0$  //$NON-NLS-1$
 	"stopping": "stopping", //$NON-NLS-0$  //$NON-NLS-1$
 	"checkingStateShortMessage": "checking status" //$NON-NLS-0$  //$NON-NLS-1$
 });
