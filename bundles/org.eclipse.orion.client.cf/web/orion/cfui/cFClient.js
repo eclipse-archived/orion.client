@@ -150,7 +150,7 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 
 			// Apps CF v2 operations
 
-			pushApp: function(target, name, contentLocation, manifest, saveManifest, packager, instrumentation) {
+			pushApp: function(target, name, contentLocation, manifest, packager, instrumentation) {
 				var pushReq = {};
 
 				if (name)
@@ -164,9 +164,6 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 
 				if(manifest)
 					pushReq.Manifest = manifest;
-
-				if(saveManifest)
-					pushReq.Persist = saveManifest;
 
 				if(packager)
 					pushReq.Packager = packager;

@@ -160,11 +160,6 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/cfui/cFClient', 'ori
 			    		return corePageBuilder.getSelection();
 			    	},
 
-			    	saveManifest : function(){
-			    		var checkbox = commonPaneBuilder._saveManifestCheckbox;
-			    		return checkbox ? checkbox.checked : false;
-			    	},
-
 			    	Manifest : plan.Manifest,
 			    	ContentLocation : resource.ContentLocation,
 			    	AppPath : resource.AppPath

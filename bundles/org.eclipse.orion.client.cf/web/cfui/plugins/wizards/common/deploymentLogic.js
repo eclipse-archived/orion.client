@@ -100,7 +100,6 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 			var fileService = options.FileService;
 			var cfService = options.CFService;
 			var targetSelection = options.getTargetSelection();
-			var saveManifest = options.saveManifest();
 
 			var userManifest = options.Manifest;
 			var contentLocation = options.ContentLocation;
