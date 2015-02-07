@@ -80,9 +80,9 @@ define({//Default message bundle
 	"appInfoRunning": "running",
 	"appInfoUnknown": "unknown",
 	"displayNameSeparator": " on ",
-	"openAppTooltip": "Open URL",
+	"openAppTooltip": "Open the application URL",
 	"openLogsTooltip": "Open logs",
 	"redeployConfirmationDialogTitle": "Stop and Redeploy?",
 	"redeployConfirmationDialogMessage": "The application is already running. Are you sure you want to stop it, then deploy it again?",
-	"redeployConfirmationDialogCheckboxMessage": "Don't ask me anymore (application will always be stopped and redeployed)"
+	"redeployConfirmationDialogCheckboxMessage": "Don't ask me again (application will always be stopped and redeployed)"
 });
