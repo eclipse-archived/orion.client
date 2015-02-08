@@ -172,7 +172,7 @@ define({//Default message bundle
 	"Click \"Save\" to proceed or \"Next\" to change the deployment parameters.": "Click \"Save\" to proceed or \"Next\" to change the deployment parameters.",
 	"deploy": "Deploy",
 	"save": "Save",
-	"configureApplicationDeployment": "Configure Application Deployment",
+	"configureApplicationDeployment": "Edit Launch Configuration",
 	"saveToManifestFile:": "Save to manifest file: ",
 	"bindServicesFromTheList.": "Bind services from the list.",
 	"availableServices:": "Available services:",
