@@ -65,13 +65,6 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 		return isBuild ? describe.skip.apply(describe, arguments) : describe.apply(null, arguments);
 	}
 
-	/**
-	 * Wrapper for #it() that calls it.skip() during an integration build.
-	 */
-	function it_maybe(/*args..*/) {
-		return isBuild ? it.skip.apply(it, arguments) : it.apply(null, arguments);
-	}
-
 	describe("Performance Tests", function() {
 		// These are heavy duty tests -- use a long timeout for each test.
 		this.timeout(30000);
@@ -116,25 +109,24 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 			});
 		});
 
-		describe("Line", function() {
-			var count = 300;
-			// Skip LineDown during integration builds since it sometimes takes > 30 seconds in IE. Sad but true
-			it_maybe("LineDown", function() {
-				return doAction("lineDown", count);
-			});
-			it("SelectLineDown", function() {
-				return doAction("selectLineDown", count);
-			});
-			it("LineUp", function() {
-				return doAction("lineUp", count);
-			});
-			it("SelectLineUp", function() {
-				return doAction("selectLineUp", count);
-			});
-		});
-
 		// This category is skipped during the nightly build since it's prone to timeouts in virtualized environments.
 		describe_maybe("intense tests", function() {
+			describe("Line", function() {
+				var count = 300;
+				it("LineDown", function() {
+					return doAction("lineDown", count);
+				});
+				it("SelectLineDown", function() {
+					return doAction("selectLineDown", count);
+				});
+				it("LineUp", function() {
+					return doAction("lineUp", count);
+				});
+				it("SelectLineUp", function() {
+					return doAction("selectLineUp", count);
+				});
+			});
+
 			it("CaretUpDown", function() {
 				var d = new Deferred();
 				var buffer = "", i;
