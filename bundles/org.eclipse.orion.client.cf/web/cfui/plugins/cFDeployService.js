@@ -11,11 +11,11 @@
 
 /*eslint-env browser,amd*/
 /*global URL confirm*/
-define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/cfui/cFClient',
+define(['i18n!cfui/nls/messages', 'orion/bootstrap', 'orion/objects', 'orion/Deferred', 'orion/cfui/cFClient',
 	'cfui/cfUtil', 'orion/fileClient', 'orion/URITemplate', 'orion/preferences', 'orion/PageLinks',
 	'orion/xhr', 'orion/i18nUtil', 'orion/projectClient'],
 
-function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemplate, 
+function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient, URITemplate, 
 		mPreferences, PageLinks, xhr, i18nUtil, mProjectClient) {
 
 	function PreferencesProvider(location) {
@@ -273,13 +273,22 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 					} else {
 						var devMode = launchConfParams.DevMode;
 						var appPackager;
-						var instrumentation;
+						
+						var instrumentation = launchConfParams.Instrumentation || {};
+						var mergedInstrumentation = objects.clone(instrumentation);
 						if (devMode && devMode.On) {
 							appPackager = devMode.Packager;
-							instrumentation = devMode.Instrumentation;
+							var devInstrumentation = devMode.Instrumentation;
+							
+							for (var key in devInstrumentation) {
+								if(devInstrumentation.hasOwnProperty(key)){
+									/* TODO handle memory */
+									mergedInstrumentation[key] = devInstrumentation[key];
+								}
+							}
 						}
 
-						cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath), manifest, appPackager, instrumentation).then(function(result) {
+						cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath), manifest, appPackager, mergedInstrumentation).then(function(result) {
 							var expandedURL = new URITemplate("{+OrionHome}/edit/edit.html#{,ContentLocation}").expand({ //$NON-NLS-0$
 								OrionHome: PageLinks.getOrionHome(),
 								ContentLocation: project.ContentLocation,
@@ -287,7 +296,7 @@ function(messages, mBootstrap, Deferred, CFClient, mCfUtil, mFileClient, URITemp
 
 							var editLocation = new URL(expandedURL);
 							var additionalConfiguration = {
-								Manifest: manifest,
+								Instrumentation: instrumentation,
 								DevMode: devMode
 							};
 
