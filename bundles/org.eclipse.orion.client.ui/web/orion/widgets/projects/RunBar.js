@@ -159,7 +159,8 @@ define([
 								this.selectLaunchConfiguration(cachedConfig, checkStatus);
 							}.bind(this, hash)); // passing in hash here because using it directly in function only creates a reference which ends up with the last value of hash
 							
-							this._commandRegistry.registerCommandContribution(menuItem.id, "orion.launchConfiguration.delete", 1); //$NON-NLS-0$
+							this._commandRegistry.registerCommandContribution(menuItem.id, "orion.launchConfiguration.edit", 1); //$NON-NLS-0$
+							this._commandRegistry.registerCommandContribution(menuItem.id, "orion.launchConfiguration.delete", 2); //$NON-NLS-0$
 							domNodeWrapperList = [];
 							this._commandRegistry.renderCommands(menuItem.id, menuItem.firstChild, launchConfiguration, this, "tool", null, domNodeWrapperList); //$NON-NLS-0$
 							if (domNodeWrapperList.length > 0){

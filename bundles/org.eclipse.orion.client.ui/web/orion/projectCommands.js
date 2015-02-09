@@ -298,6 +298,84 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			}.bind(this));
 		}
 	}
+	
+	function runEdit(enhansedLaunchConf, context){
+
+//		if(sharedLaunchConfigurationDispatcher && context.launchConfiguration){
+//			context.launchConfiguration.status = {State: "PROGRESS", Message: progressMessage, ShortMessage: messages["deploying"]}; //$NON-NLS-1$ //$NON-NLS-0$
+//			sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration }); //$NON-NLS-0$
+//		}
+		
+		context.projectClient.formPluginLaunchConfiguration(enhansedLaunchConf).then(function(pluginLaunchConf){
+			context.deployService.edit(context.project, pluginLaunchConf).then(function(result){
+				if(!result){
+					return;
+				}
+
+				if (result.UriTemplate) {
+				    var options = {};
+					options.uriTemplate = result.UriTemplate;
+					options.width = result.Width;
+					options.height = result.Height;
+					options.id = result.UriTemplateId || context.deployService.id;
+					context.oldParams = enhansedLaunchConf.Params;
+					options.done = function(status){
+						localHandleStatus(status, null, context);
+					};
+					options.status = function(status){localHandleStatus(status, null, context);};
+					mEditorCommands.createDelegatedUI(options);
+					return;
+				}
+
+				if(context.launchConfiguration && (result.State || result.CheckState)){
+					context.launchConfiguration.status = result;
+					if(sharedLaunchConfigurationDispatcher){
+						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration});
+					}
+				}
+
+				if(result.ToSave){
+					context.projectClient.saveProjectLaunchConfiguration(context.project, result.ToSave.ConfigurationName, context.deployService.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path, result.ToSave.Type, result.AdditionalConfiguration).then(
+						function(configuration){
+							storeLastDeployment(context.project.Name, context.deployService, configuration);
+							if(sharedLaunchConfigurationDispatcher){
+								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration});
+							}
+							if(configuration.File.parent.parent){
+								fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent.parent, newValue: configuration.File.parent, ignoreRedirect: true});
+							}
+							fileDispatcher.dispatchEvent({type: "create", parent: configuration.File.parent, newValue: configuration.File, ignoreRedirect: true});
+						}, context.errorHandler
+					);
+				}
+
+			}, function(error){
+				if(error.Retry && error.Retry.parameters){
+					if(error.forceShowMessage){
+						context.errorHandler(error);
+					}
+					context.data.oldParams = enhansedLaunchConf.Params;
+					var options = {
+						hasOptionalParameters: !!error.Retry.optionalParameters, 
+						optionalParams: error.Retry.optionalParameters
+					};
+					context.data.parameters = getCommandParameters(error.Retry.parameters, options, context.data.oldParams);
+					context.commandService.collectParameters(context.data);
+				} else {
+					context.errorHandler(error);
+					storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
+					if((error.State || error.CheckState)){
+						context.launchConfiguration.status = error;
+					} else {
+						delete context.launchConfiguration.status;
+					}
+					if(sharedLaunchConfigurationDispatcher){
+						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration});
+					}
+				}
+			});
+		}.bind(this));
+	}
 
 	function runDeleteLaunchConfiguration(launchConf, context){
 		var msg = i18nUtil.formatMessage(messages["confirmLaunchDelete"], launchConf.Name);
@@ -723,6 +801,43 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			}
 		});
 		commandService.addCommand(deleteLaunchConfigurationCommand);
+		
+		var editLaunchConfigurationCommand = new mCommands.Command({
+			name: messages["editLaunchConfiguration"],
+			tooltip: messages["editLaunchConfiguration"],
+			id: "orion.launchConfiguration.edit",
+			imageClass: "core-sprite-edit",
+			callback: function(data) {
+				var item = forceSingleItem(data.items);
+				
+				console.info("Jestem");
+
+				if(!data.oldParams){
+					data.oldParams = item.Params;
+				}
+
+				var func = arguments.callee;
+				var params = handleParamsInCommand(func, data, messages["deploy"] + item.Name);
+				if(!params){
+					return;
+				}
+				var launchConfToPass = objects.clone(item);
+				launchConfToPass.Params = params;
+
+				projectClient.getProjectDeployService(item.ServiceId, item.Type).then(function(service){
+					if(service && service.deploy){
+						fileClient.loadWorkspace(item.project.ContentLocation).then(function(projectFolder){
+							runEdit(launchConfToPass, {project: item.project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: item});
+						});
+					}
+				});
+			},
+			visibleWhen: function(items) {
+				var item = forceSingleItem(items);
+				return item.ServiceId && item.Name;
+			}
+		});
+		commandService.addCommand(editLaunchConfigurationCommand);
 	};
 
 	/**

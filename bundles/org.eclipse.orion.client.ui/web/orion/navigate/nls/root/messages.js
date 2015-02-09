@@ -132,6 +132,7 @@ define({//Default message bundle
 	"manage": "Manage",
 	"manageThisApplicationOnRemote": "Manage this application on remote server",
 	"deleteLaunchConfiguration": "Delete this launch configuration",
+	"editLaunchConfiguration": "Edit this launch configuration",
 	"deployThisApplication": "Deploy the application using the workspace contents",
 	"associatedFolder": "Associated Folder",
 	"associateAFolderFromThe": "Associate a folder from the workspace with this project.",
