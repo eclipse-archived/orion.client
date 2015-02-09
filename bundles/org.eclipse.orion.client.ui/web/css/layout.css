@@ -24,15 +24,6 @@ hard-coded numbers elsewhere.
 	height: 60px;
 }
 
-/* $FooterHeight */
-.footerLayout {
-	height: 28px;
-	padding-left:10px;
-	font-size:0.9em;
-	font-weight:bold;
-	/* background:linear-gradient( rgba(242, 242, 242, 0.9), rgba(222, 222, 222, 0.9)) 28px;*/
-}
-
 /* $ToolbarHeight */
 .toolbarLayout {
 	height: 39px;
@@ -174,38 +165,6 @@ hard-coded numbers elsewhere.
 	/* height: 36px;  It has to be this */
 	height: 0;
 	background:#ededed;
-}
-
-.footerBlock {
-	float: left;
-	margin: 8px;
-	color: #7F7F7F;
-	font-weight: bold;
-}
-
-.footerRightBlock {
-	float: right;
-	margin: 4px;
-}
-
-.footerRightBlock ul {
-	margin: 0;
-	margin-top:4px;
-	font-size: .9em;
-	margin-right: 4px;
-}
-
-.footerRightBlock li {
-	display: inline;
-}
-
-.footerRightBlock li:after {
-	content: ' ';
-	padding: 0 8px;
-}
-
-.footerRightBlock li:last-child:after {
-	content: none;
 }
 
 .layoutBlock {
