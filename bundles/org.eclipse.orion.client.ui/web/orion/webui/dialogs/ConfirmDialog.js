@@ -64,12 +64,12 @@ define([
 		
 		if (options.yesNoDialog) {
 			this.buttons = [
-				{id: "yesButton", text: messages["Yes"], callback: this._dismiss.bind(this, true)}, //$NON-NLS-1$ //$NON-NLS-0$
+				{id: "yesButton", text: messages["Yes"], callback: this._dismiss.bind(this, true), isDefault: true}, //$NON-NLS-1$ //$NON-NLS-0$
 				{id: "noButton", text: messages["No"], callback: this._dismiss.bind(this, false)} //$NON-NLS-1$ //$NON-NLS-0$
 			];
 		} else {
 			this.buttons = [
-				{id: "okButton", text: messages["OK"], callback: this._dismiss.bind(this, true)}, //$NON-NLS-1$ //$NON-NLS-0$
+				{id: "okButton", text: messages["OK"], callback: this._dismiss.bind(this, true), isDefault: true}, //$NON-NLS-1$ //$NON-NLS-0$
 				{id: "cancelButton", text: messages["Cancel"], callback: this._dismiss.bind(this, false)} //$NON-NLS-1$ //$NON-NLS-0$
 			];
 		}

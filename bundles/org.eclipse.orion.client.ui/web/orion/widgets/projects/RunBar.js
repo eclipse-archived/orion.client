@@ -358,7 +358,8 @@ define([
 		},
 			
 		_checkLaunchConfigurationStatus: function(launchConfiguration) {
-			var progressMessage = i18nUtil.formatMessage(messages["checkingStateMessage"], launchConfiguration.Name); //$NON-NLS-0$
+			var appName = this._getDisplayName(launchConfiguration);
+			var progressMessage = i18nUtil.formatMessage(messages["checkingStateMessage"], appName); //$NON-NLS-0$
 			
 			// start progress spinner in launch config dropdown trigger and indicate that we are checking the status
 			this.setStatus({
@@ -690,11 +691,12 @@ define([
 					// get the latest app status
 					this._checkLaunchConfigurationStatus(this._selectedLaunchConfiguration).then(function(status) {
 						if (status && ("STARTED" === status.State)) { //$NON-NLS-0$
+							var appName = this._getDisplayName(this._selectedLaunchConfiguration);
+							var confirmMessage = i18nUtil.formatMessage(messages["redeployConfirmationDialogMessage"], appName); //$NON-NLS-0$
 							// app is running, confirm with user if they wish to stop it and redeploy
 							var confirmDialog = new mConfirmDialog.ConfirmDialog({
-								yesNoDialog: true,
 								title: messages["redeployConfirmationDialogTitle"], //$NON-NLS-0$
-								confirmMessage: messages["redeployConfirmationDialogMessage"], //$NON-NLS-0$
+								confirmMessage: confirmMessage,
 								checkboxMessage: messages["redeployConfirmationDialogCheckboxMessage"], //$NON-NLS-0$
 							});
 		

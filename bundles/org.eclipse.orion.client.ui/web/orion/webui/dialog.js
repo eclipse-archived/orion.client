@@ -123,6 +123,7 @@ define(['orion/webui/littlelib', 'orion/uiUtils'],
 					if (buttonDefinition.isDefault) {
 						self._defaultCallback = buttonDefinition.callback;
 						self._defaultButton = button;
+						button.classList.add("primaryButton"); //$NON-NLS-0$
 					}
 					self.$buttonContainer.appendChild(button);
 				});
