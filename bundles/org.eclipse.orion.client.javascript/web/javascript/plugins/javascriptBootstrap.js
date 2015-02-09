@@ -41,7 +41,7 @@
 			packages: [
 				{
 					name: "eslint/conf",
-					location: "eslint/conf",
+					location: "eslint/conf"
 				},
 				{
 					name: "eslint",

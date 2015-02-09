@@ -12,10 +12,6 @@ Content assist can be easily extended to understand 3rd party libraries and come
 To activate the libraries in your source simply add a jslint or eslint-env directive at the top of your source indicating which library to use.
 
 For example to use **Node.js** we would add the following:
-```javascript
-/* jslint node:true */
-```
-or
 
 ```javascript
 /* eslint-env node */
@@ -41,6 +37,11 @@ Currently finds occurrrences of identifiers, function declarations and correctly
 
 Using the super convenient **Ctrl+O** keybinding (or the **View** menu) you can view an outline of your source. Clicking outline elements 
 takes you to the relevant position in the source.
+
+### Hovers
+
+In 8.0 we introduced a variety of hovers in the source. You can navigate from `importScript`, `define` statements
+and `require` statement, see documentation for functions and even fix some linting problems!
 
 # Contributing
 

@@ -94,9 +94,8 @@ define([
 				new GenerateDocCommand.GenerateDocCommand(astManager), 
 				{
 			name: javascriptMessages["generateDocName"],  //$NON-NLS-0$
-			tooltip : javascriptMessages.generateDocTooltip,  //$NON-NLS-0$
+			tooltip : javascriptMessages['generateDocTooltip'],  //$NON-NLS-0$
 			id : "generate.js.doc.comment",  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
 			key : [ "j", false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
 			contentType: ['application/javascript', 'text/html']  //$NON-NLS-0$
 				}
@@ -106,9 +105,8 @@ define([
 				new OpenDeclCommand.OpenDeclarationCommand(astManager, scriptresolver), 
 				{
 			name: javascriptMessages["openDeclName"],  //$NON-NLS-0$
-			tooltip : javascriptMessages.openDeclTooltip,  //$NON-NLS-0$
+			tooltip : javascriptMessages['openDeclTooltip'],  //$NON-NLS-0$
 			id : "open.js.decl",  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
 			key : [ 114, false, false, false, false],  //$NON-NLS-0$
 			contentType: ['application/javascript']  //$NON-NLS-0$
 				}
@@ -120,10 +118,9 @@ define([
 				quickFixComputer, 
 				{
         			name: javascriptMessages["removeExtraSemiFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages.removeExtraSemiFixTooltip,  //$NON-NLS-0$
+        			tooltip : javascriptMessages['removeExtraSemiFixTooltip'],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "rm.extra.semi.fix",  //$NON-NLS-0$
-        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "no-extra-semi"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -135,10 +132,9 @@ define([
 				quickFixComputer, 
 				{
         			name: javascriptMessages["addFallthroughCommentFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages.addFallthroughCommentFixTooltip,  //$NON-NLS-0$
+        			tooltip : javascriptMessages['addFallthroughCommentFixTooltip'],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "add.fallthrough.comment.fix",  //$NON-NLS-0$
-        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-fallthrough)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -150,10 +146,9 @@ define([
 				quickFixComputer, 
 				{
         			name: javascriptMessages["addEmptyCommentFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages.addEmptyCommentFixTooltip,  //$NON-NLS-0$
+        			tooltip : javascriptMessages['addEmptyCommentFixTooltip'],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "add.empty.comment.fix",  //$NON-NLS-0$
-        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-empty-block)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -165,10 +160,9 @@ define([
 				quickFixComputer, 
 				{
         			name: javascriptMessages["addESLintEnvFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages.addESLintEnvFixTooltip,  //$NON-NLS-0$
+        			tooltip : javascriptMessages['addESLintEnvFixTooltip'],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "add.eslint-env.fix",  //$NON-NLS-0$
-        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-undef-defined-inenv)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -180,10 +174,9 @@ define([
 				quickFixComputer, 
 				{
         			name: javascriptMessages["addESLintGlobalFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages.addESLintGlobalFixTooltip,  //$NON-NLS-0$
+        			tooltip : javascriptMessages['addESLintGlobalFixTooltip'],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "add.eslint-global.fix",  //$NON-NLS-0$
-        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-undef-defined)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -203,10 +196,9 @@ define([
 				}, 
 				{
 					name: javascriptMessages["removeUnusedParamsFixName"],  //$NON-NLS-0$
-					tooltip : javascriptMessages.removeUnusedParamsFixTooltip,  //$NON-NLS-0$
+					tooltip : javascriptMessages['removeUnusedParamsFixTooltip'],  //$NON-NLS-0$
 					scopeId: "orion.edit.quickfix",
 					id : "remove.unused.param.fix",  //$NON-NLS-0$
-					nls: 'javascript/nls/messages',  //$NON-NLS-0$
 					contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
 					validationProperties: [
                         {source: "annotation:id", match: "^(?:no-unused-params|no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -218,10 +210,9 @@ define([
 				quickFixComputer, 
 				{
         			name: javascriptMessages["commentCallbackFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages.commentCallbackFixTooltip,  //$NON-NLS-0$
+        			tooltip : javascriptMessages['commentCallbackFixTooltip'],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "comment.callback.fix",  //$NON-NLS-0$
-        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-unused-params-expr)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -233,10 +224,9 @@ define([
 				quickFixComputer, 
 				{
         			name: javascriptMessages["eqeqeqFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages.eqeqeqFixTooltip,  //$NON-NLS-0$
+        			tooltip : javascriptMessages['eqeqeqFixTooltip'],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "eqeqeq.fix",  //$NON-NLS-0$
-        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:eqeqeq)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -248,10 +238,9 @@ define([
 				quickFixComputer, 
 				{
         			name: javascriptMessages["unreachableFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages.unreachableFixTooltip,  //$NON-NLS-0$
+        			tooltip : javascriptMessages['unreachableFixTooltip'],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "remove.unreachable.fix",  //$NON-NLS-0$
-        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-unreachable)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -263,10 +252,9 @@ define([
 				quickFixComputer, 
 				{
         			name: javascriptMessages["sparseArrayFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages.sparseArrayFixTooltip,  //$NON-NLS-0$
+        			tooltip : javascriptMessages['sparseArrayFixTooltip'],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "sparse.array.fix",  //$NON-NLS-0$
-        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-sparse-arrays)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -278,10 +266,9 @@ define([
 				quickFixComputer, 
 				{
         			name: javascriptMessages["semiFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages.semiFixTooltip,  //$NON-NLS-0$
+        			tooltip : javascriptMessages['semiFixTooltip'],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "semi.fix",  //$NON-NLS-0$
-        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:semi)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -293,10 +280,9 @@ define([
 				quickFixComputer, 
 				{
         			name: javascriptMessages["unusedVarsUnusedFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages.unusedVarsUnusedFixTooltip,  //$NON-NLS-0$
+        			tooltip : javascriptMessages['unusedVarsUnusedFixTooltip'],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "unused.var.fix",  //$NON-NLS-0$
-        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-unused-vars-unused)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -308,10 +294,9 @@ define([
 				quickFixComputer, 
 				{
         			name: javascriptMessages["unusedFuncDeclFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages.unusedFuncDeclFixTooltip,  //$NON-NLS-0$
+        			tooltip : javascriptMessages['unusedFuncDeclFixTooltip'],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "unused.func.decl.fix",  //$NON-NLS-0$
-        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-unused-vars-unused-funcdecl)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -323,10 +308,9 @@ define([
 				quickFixComputer, 
 				{
         			name: javascriptMessages["noCommaDangleFixName"],  //$NON-NLS-0$
-        			tooltip : javascriptMessages.noCommaDangleFixTooltip,  //$NON-NLS-0$
+        			tooltip : javascriptMessages['noCommaDangleFixTooltip'],  //$NON-NLS-0$
         			scopeId: "orion.edit.quickfix",
         			id : "no.comma.dangle.fix",  //$NON-NLS-0$
-        			nls: 'javascript/nls/messages',  //$NON-NLS-0$
         			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
         			validationProperties: [
                         {source: "annotation:id", match: "^(?:no-comma-dangle)$"} //$NON-NLS-1$ //$NON-NLS-0$
@@ -339,9 +323,8 @@ define([
 		 */
 		provider.registerService("orion.edit.outliner", new Outliner.JSOutliner(astManager),  //$NON-NLS-0$
 				{ contentType: ["application/javascript"],  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
 			name: javascriptMessages["sourceOutline"],  //$NON-NLS-0$
-			titleKey: 'sourceOutlineTitle',  //$NON-NLS-0$
+			title: javascriptMessages['sourceOutlineTitle'],  //$NON-NLS-0$
 			id: "orion.javascript.outliner.source"  //$NON-NLS-0$
 				});
 		
@@ -358,15 +341,13 @@ define([
 		 */
 		provider.registerService("orion.edit.hover", new Hover.JavaScriptHover(astManager, scriptresolver),  //$NON-NLS-0$
 				{
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
-			name: 'jsHover',
+			name: javascriptMessages['jsHover'],
 			contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
 				});
 		
 		provider.registerService("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager),  //$NON-NLS-0$
 				{
 			contentType: ["application/javascript", 'text/html'],  //$NON-NLS-0$
-			nls: 'javascript/nls/messages',  //$NON-NLS-0$
 			name: javascriptMessages["contentAssist"],  //$NON-NLS-0$
 			id: "orion.edit.contentassist.javascript",  //$NON-NLS-0$
 			charTriggers: "[.]",  //$NON-NLS-0$
@@ -380,7 +361,6 @@ define([
 		provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new EslintValidator(astManager),  //$NON-NLS-0$  //$NON-NLS-1$
 				{
 			contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$ //$NON-NLS-1$
-			nls: 'javascript/nls/problems',  //$NON-NLS-0$
 			pid: 'eslint.config'  //$NON-NLS-0$
 				});
 		
@@ -396,7 +376,6 @@ define([
 				{},
 				{	settings: [
 				 	           {	pid: "eslint.config",  //$NON-NLS-0$
-				 	        	   nls: 'javascript/nls/messages',  //$NON-NLS-0$
 				 	        	   name: javascriptMessages["eslintValidator"],  //$NON-NLS-0$
 				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
 				 	        	   category: "javascript",  //$NON-NLS-0$
