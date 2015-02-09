@@ -350,6 +350,7 @@ define([
 						if (property.value.type === "FunctionExpression") {
 							// now remember the jsdocResult so it doesn't need to be recomputed
 							property.value.extras.jsdocResult = jsdocResult;
+							property.value.extras.associatedComment = docComment; // attach the comment for proposals
 						}
 					}
 				}
@@ -376,7 +377,7 @@ define([
 
 			if (node.extras.jsdocResult) {
 				jsdocResult = node.extras.jsdocResult;
-				docComment = { range : null };
+				docComment = node.extras.associatedComment || findAssociatedCommentBlock(node, env.comments); // don't null it out -> { range : null };
 			} else {
 				docComment = node.extras.associatedComment || findAssociatedCommentBlock(node, env.comments);
 				jsdocResult = typeUtils.parseJSDocComment(docComment);
@@ -409,7 +410,7 @@ define([
 				isConstructor = false;
 			}
 
-			var callArgs = new Array(params.length);
+			var callArgs = [];
 			var len = 0;
 			if (node.extras.paramTypeObj && node.extras.paramTypeObj.type === 'FunctionType') {
 				// this function is an anonymous function being passed as an argument

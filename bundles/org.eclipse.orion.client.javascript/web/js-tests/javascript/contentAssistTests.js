@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2014 VMware, Inc. and others.
+ * Copyright (c) 2012, 2015 VMware, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -2968,6 +2968,68 @@ define([
 					["xx", "xx : Number"]
 				]);
 			});
+	
+	       /**
+	        * Test the @returns tag in assist
+	        * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=459499
+	        * @since 8.0
+	        */
+			it("test simple jsdoc returns 1", function() {
+				var results = computeContentAssist(
+					"/** @returns {Number}*/\n" +
+					"var xx = function() { };\nx", "x"
+				);
+				return testProposals(results, [
+					["xx()", "xx() : Number"]
+				]);
+			});
+	
+		   /**
+	        * Test the @returns tag in assist
+	        * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=459499
+	        * @since 8.0
+	        */
+			it("test simple jsdoc returns 2", function() {
+				var results = computeContentAssist(
+					"/** @type {String}\n@returns {Number}*/\n" +
+					"var xx = function() { };\nx", "x"
+				);
+				return testProposals(results, [
+					["xx()", "xx() : Number"]
+				]);
+			});
+	
+	       /**
+	        * Test the @returns tag in assist
+	        * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=459499
+	        * @since 8.0
+	        */
+			it("test returns jsdoc 1", function() {
+				var results = computeContentAssist(
+					"/** @returns {function(a:String,?Number):Number} xx2\n */" +
+					"var flart = function(xx1,xx2) { }\nflar",
+					"flar");
+				// hmmmm... functions returning functions not really showing up
+				return testProposals(results, [
+					["flart(xx1, xx2)", "flart(xx1, xx2) : function(a:String,?Number):Number"]
+				]);
+			});
+	
+			/**
+	        * Test the @returns tag in assist
+	        * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=459499
+	        * @since 8.0
+	        */
+			it("test returns jsdoc 2", function() {
+				var results = computeContentAssist(
+					"/** @returns {function(String):Number} xx2\n */" +
+					"var flart = function(xx1,xx2) { }\n" +
+					"var other = flart();\noth", "oth");
+				return testProposals(results, [
+					["other(String)", "other(String) : Number"]
+				]);
+			});
+
 	
 			// the complex types tag
 			it("test type union jsdoc1", function() {

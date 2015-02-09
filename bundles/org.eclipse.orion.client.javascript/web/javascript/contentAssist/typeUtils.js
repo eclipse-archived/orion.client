@@ -374,7 +374,7 @@ define([
 					return result;
 				}
 				try {
-					var rawresult = doctrine.parse(commentText, {recoverable:true, unwrap : true, tags : ['param', 'type', 'return']});
+					var rawresult = doctrine.parse(commentText, {recoverable:true, unwrap : true, tags : ['param', 'type', 'return', 'returns']});
 					// transform result into something more manageable
 					var rawtags = rawresult.tags;
 					if (rawtags) {
@@ -382,13 +382,16 @@ define([
 							switch (rawtags[i].title) {
 								case "typedef":
 								case "define":
-								case "type":
+								case "type": {
 									result.type = rawtags[i].type;
 									break;
-								case "return":
+								}
+								case "return": 
+								case "returns": {
 									result.rturn = rawtags[i].type;
 									break;
-								case "param":
+								}
+								case "param": {
 									// remove square brackets
 									var name = rawtags[i].name;
 									if (name.charAt(0) === '[' && name.charAt(name.length -1) === ']') {
@@ -396,6 +399,7 @@ define([
 									}
 									result.params[name] = rawtags[i].type;
 									break;
+								}
 							}
 						}
 					}
