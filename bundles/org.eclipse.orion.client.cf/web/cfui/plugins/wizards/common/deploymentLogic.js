@@ -13,72 +13,51 @@
 define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemplate', 'orion/PageLinks', 'cfui/manifestUtils'],
  function(messages, objects, mCfUtil, URITemplate, PageLinks, mManifestUtils){
 
-	function _getManifestApplication(manifestContents, results){
+	function _getManifestInstrumentation(manifestContents, results){
 		manifestContents = manifestContents || { applications: [{}] };
-		var ret = objects.clone(manifestContents);
+		var manifestInstrumentation = {};
 
 		if(!manifestContents.applications.length > 0)
 			manifestContents.applications.push({});
 
-		if(results.name)
-			manifestContents.applications[0].name = results.name;
-
-		if(results.host)
-			manifestContents.applications[0].host = results.host;
+		if(manifestContents.applications[0].host !== results.host)
+			manifestInstrumentation.host = results.host;
 		
-		if(results.domain)
-			manifestContents.applications[0].domain = results.domain;
+		if(manifestContents.applications[0].domain !== results.domain)
+			manifestInstrumentation.domain = results.domain;
 
-		if(results.services){
-			if(results.services.length === 0)
-				delete manifestContents.applications[0].services;
-			else
-				manifestContents.applications[0].services = results.services;
-		}
+//		if(results.services){
+//			if(results.services.length === 0)
+//				delete manifestContents.applications[0].services;
+//			else
+//				manifestContents.applications[0].services = results.services;
+//		}
 
-		if(typeof results.command === "string"){ //$NON-NLS-0$
-			if(results.command)
-				manifestContents.applications[0].command = results.command;
-			else
-				delete manifestContents.applications[0].command;
-		}
+		var manifestCommand = manifestContents.applications[0].command || "";
+		if(manifestCommand !== results.command && typeof results.command === "string") //$NON-NLS-0$
+			manifestInstrumentation.command = results.command;
+		
+		var manifestPath = manifestContents.applications[0].path || "";
+		if(manifestPath !== results.path && typeof results.path === "string") //$NON-NLS-0$
+			manifestInstrumentation.path = results.path;
+		
+		var manifestBuildpack = manifestContents.applications[0].buildpack || "";
+		if(manifestBuildpack !== results.buildpack && typeof results.buildpack === "string") //$NON-NLS-0$
+			manifestInstrumentation.buildpack = results.buildpack;
+		
+		console.info(manifestContents.applications[0].memory);
+		console.info(results.memory);
+		if(manifestContents.applications[0].memory !== results.memory && typeof results.memory === "string") //$NON-NLS-0$
+			manifestInstrumentation.memory = results.memory;
+		
+		if(manifestContents.applications[0].instances !== results.instances && typeof results.instances !== "undefined") //$NON-NLS-0$
+			manifestInstrumentation.instances = results.instances;
 
-		if(typeof results.path === "string"){ //$NON-NLS-0$
-			if(results.path)
-				manifestContents.applications[0].path = results.path;
-			else
-				delete manifestContents.applications[0].path;
-		}
+		var manifestTimeout = manifestContents.applications[0].timeout || "";
+		if(manifestTimeout !== results.timeout && typeof results.timeout !== "undefined") //$NON-NLS-0$
+			manifestInstrumentation.timeout = results.timeout;
 
-		if(typeof results.buildpack === "string"){ //$NON-NLS-0$
-			if(results.buildpack)
-				manifestContents.applications[0].buildpack = results.buildpack;
-			else
-				delete manifestContents.applications[0].buildpack;
-		}
-
-		if(typeof results.memory === "string"){ //$NON-NLS-0$
-			if(results.memory)
-				manifestContents.applications[0].memory = results.memory;
-			else
-				delete manifestContents.applications[0].memory;
-		}
-
-		if(typeof results.instances !== "undefined"){ //$NON-NLS-0$
-			if(results.instances)
-				manifestContents.applications[0].instances = results.instances;
-			else
-				delete manifestContents.applications[0].instances;
-		}
-
-		if(typeof results.timeout !== "undefined"){ //$NON-NLS-0$
-			if(results.timeout)
-				manifestContents.applications[0].timeout = results.timeout;
-			else
-				delete manifestContents.applications[0].timeout;
-		}
-
-		return ret;
+		return manifestInstrumentation;
 	}
 
 	/**
@@ -115,14 +94,14 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 				/* disable any UI at this point */
 				disableUI();
 
-				var manifest = _getManifestApplication(userManifest, results);
-				var devMode = options.getDevMode ? options.getDevMode(manifest) : null;
+				var instrumentation = _getManifestInstrumentation(userManifest, results);
+				var devMode = options.getDevMode ? options.getDevMode() : null;
 				
 				/* manifest to persist as additional configuration */
 
 				var additionalConfiguration = {
 					DevMode : devMode,
-					Manifest : manifest
+					Instrumentation : instrumentation
 				};
 				
 				if (devMode && devMode.On){
@@ -137,7 +116,7 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 
 				var editLocation = new URL(expandedURL);
 				
-				var appName = manifest.applications[0].name;
+				var appName = results.name;
 				var target = selection;
 				
 				mCfUtil.prepareLaunchConfigurationContent(appName, target, appPath, additionalConfiguration).then(

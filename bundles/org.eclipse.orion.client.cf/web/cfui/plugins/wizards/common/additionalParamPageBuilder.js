@@ -98,12 +98,12 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 					
 			    	var option = document.createElement("option"); //$NON-NLS-0$
 					option.appendChild(document.createTextNode("MB")); //$NON-NLS-0$
-					option.value = "MB"; //$NON-NLS-0$
+					option.value = "M"; //$NON-NLS-0$
 					self._memoryUnit.appendChild(option);
 					
 					option = document.createElement("option"); //$NON-NLS-0$
 					option.appendChild(document.createTextNode("GB")); //$NON-NLS-0$
-					option.value = "GB"; //$NON-NLS-0$
+					option.value = "G"; //$NON-NLS-0$
 					self._memoryUnit.appendChild(option);
 					
 			    	if(self._manifestApplication.memory && (self._manifestApplication.memory.toUpperCase().indexOf("M") > 0 || self._manifestApplication.memory.toUpperCase().indexOf("G") > 0)){ //$NON-NLS-0$ //$NON-NLS-1$
