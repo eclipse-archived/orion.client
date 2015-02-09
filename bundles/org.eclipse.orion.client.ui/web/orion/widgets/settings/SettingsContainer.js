@@ -33,12 +33,13 @@ define([
 	'orion/widgets/settings/EditorSettings',
 	'orion/widgets/settings/ThemeSettings',
 	'orion/editorPreferences',
+	'orion/util',
 	'orion/metrics'
 ], function(messages, Deferred, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
 		ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings,
 		GitSettings,
 		EditorSettings, ThemeSettings, mEditorPreferences,
-		mMetrics) {
+		util, mMetrics) {
 
 	/**
 	 * @param {Object} options
@@ -80,7 +81,8 @@ define([
 					});
 				}
 				
-				if (categories.showThemeSettings === undefined || categories.showThemeSettings){
+				/* IE11 does not support "type=color" input elements, which are needed on the theme settings page */
+				if (!util.isIE && (categories.showThemeSettings === undefined || categories.showThemeSettings)) {
 					_self.settingsCategories.push({
 						id: "themeSettings", //$NON-NLS-0$
 						textContent: messages.Theme,
