@@ -9,8 +9,13 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWizard){
-	
+define([
+	'i18n!cfui/nls/messages',
+	'orion/webui/tooltip',
+	'orion/webui/Wizard',
+], function(messages, mTooltip, mWizard){
+	var Tooltip = mTooltip.Tooltip;
+
 	/**
 	 * A services page builder.
 	 */
@@ -128,6 +133,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 							serviceOption.appendChild(document.createTextNode(serviceName));
 							serviceOption.service = serviceName;
 							serviceOption.id = "service_" + serviceName; //$NON-NLS-0$
+							new Tooltip({ node: serviceOption, text: serviceName });
 							self._servicesList.appendChild(serviceOption);	
 		    			});
 		    		}
@@ -154,6 +160,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 							serviceOption.appendChild(document.createTextNode(serviceName));
 							serviceOption.service = serviceName;
 							serviceOption.id = "service_" + serviceName; //$NON-NLS-0$
+							new Tooltip({ node: serviceOption, text: serviceName });
 							self._servicesDropdown.appendChild(serviceOption);
 				    	});
 				    	
