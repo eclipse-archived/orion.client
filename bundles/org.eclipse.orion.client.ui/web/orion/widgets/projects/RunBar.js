@@ -164,8 +164,11 @@ define([
 							domNodeWrapperList = [];
 							this._commandRegistry.renderCommands(menuItem.id, menuItem.firstChild, launchConfiguration, this, "tool", null, domNodeWrapperList); //$NON-NLS-0$
 							if (domNodeWrapperList.length > 0){
-								domNodeWrapperList[0].domNode.classList.remove("commandMargins"); //$NON-NLS-0$
-								domNodeWrapperList[0].domNode.classList.add("launchConfigurationDeleteButton"); //$NON-NLS-0$
+								domNodeWrapperList[0].domNode.classList.add("launchConfigurationEditButton"); //$NON-NLS-0$
+								if (domNodeWrapperList.length > 1) {
+									domNodeWrapperList[1].domNode.classList.remove("commandMargins"); //$NON-NLS-0$
+									domNodeWrapperList[1].domNode.classList.add("launchConfigurationDeleteButton"); //$NON-NLS-0$
+								}
 							}
 							
 							this._menuItemsCache.push(menuItem);

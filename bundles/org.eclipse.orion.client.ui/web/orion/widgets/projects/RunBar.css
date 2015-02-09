@@ -95,6 +95,10 @@
 
 }
 
+.launchConfigurationEditButton > .core-sprite-edit {
+	color: #77858D;
+}
+
 .runBarWrapper .runBarButton {
 	background: none;
 	border: 1px solid transparent;
