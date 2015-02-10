@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -848,6 +848,29 @@ define([
 					else {
 						assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
 						assert.equal(token.value, 'foo', 'Should have found a foo token');
+					}
+				}
+				finally {
+					tearDown();
+				}
+			});
+		});
+		
+		/**
+		 * Find a token at the very start of the stream
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=459580
+		 */
+		it('test_findToken24', function() {
+			var text = "function f3(  foo   ,   bar   , baz) {};";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findToken(3, ast.tokens);
+					if(!token) {
+						assert.fail('Should have found a token');
+					}
+					else {
+						assert.equal(token.type, 'Keyword', 'Should have found a function keyword token');
+						assert.equal(token.value, 'function', 'Should have found a function keyword token');
 					}
 				}
 				finally {

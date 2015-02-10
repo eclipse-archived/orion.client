@@ -2,8 +2,9 @@
 define([
     'webtools/util',
     'chai/chai',
+    'csslint',
     'mocha/mocha' //global, stays last
-], function(Util, chai) {
+], function(Util, chai, CSSLint) {
     
     var assert = chai.assert;
     
@@ -265,6 +266,32 @@ define([
 			var text = "<!DOCTYPE html><head><style>@import 'foo';</style><!--<style>@import 'foo';</style>--><style>@import 'foo';</style></head><html></html>";
 			var blocks = Util.findStyleBlocks(text);
 			assert.equal(blocks.length, 2, "Should have found two style blocks");
+		});
+		
+		/**
+		 * Tests finding tokens
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=459580
+		 */
+		it('test_findToken1', function() {
+			var text = "@Namespace foo url('bar');";
+			var results = CSSLint.verify(text);
+			assert(results, 'CSSLint should have produced tokens and an AST');
+			var token = Util.findToken(6, results.tokens);
+			assert(token, "Should have found the first token in the stream");
+			assert.equal(token.type, 'NAMESPACE_SYM', 'We should have found a namespace token');
+		});
+		
+		/**
+		 * Tests finding tokens
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=459580
+		 */
+		it('test_findToken2', function() {
+			var text = "@Namespace foo url('bar');";
+			var results = CSSLint.verify(text);
+			assert(results, 'CSSLint should have produced tokens and an AST');
+			var token = Util.findToken(26, results.tokens);
+			assert(token, "Should have found the last token in the stream");
+			assert(token.type === 'EOF', "The last token should not be EOF");
 		});
     });
 });

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -597,7 +597,7 @@ define([
 					idx = 0;
 					token = tokens[0];
 				if(offset >= token.range[0] && offset < token.range[1]) {
-					token.index = offset;
+					token.index = 0;
 					return token;
 				}
 				token = tokens[max];
