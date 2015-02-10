@@ -1411,6 +1411,7 @@ Parser.prototype = function(){
 
                 //try to read namespaces - may be more than one
                 while (tokenStream.peek() == Tokens.NAMESPACE_SYM){
+                    this._namespace(true); //ORION 8.0
                     this._skipCruft();
                 }
 
