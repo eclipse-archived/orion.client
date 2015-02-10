@@ -698,57 +698,69 @@ define([
 		},
 		
 		_playButtonCommand: function(buttonNode) {
-			var deploy = function() {
-				this._commandRegistry.runCommand("orion.launchConfiguration.deploy", this._selectedLaunchConfiguration, this, null, null, buttonNode); //$NON-NLS-0$
+			var launchConfiguration = this._selectedLaunchConfiguration;
+			
+			var deployFunction = function() {
+				this._commandRegistry.runCommand("orion.launchConfiguration.deploy", launchConfiguration, this, null, null, buttonNode); //$NON-NLS-0$
+			}.bind(this);
+			
+			var cancelFunction = function() {
+				this._updateLaunchConfiguration(launchConfiguration);
 			}.bind(this);
 			
 			this._preferences.getPreferences("/RunBar").then(function(prefs) { //$NON-NLS-0$
 				var redeployWithoutConfirming = prefs.get(REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING);
 				if (redeployWithoutConfirming) {
-					deploy(); //user does not want a confirmation dialog, just deploy again
+					deployFunction(); //user does not want a confirmation dialog, just deploy again
 				} else {
-					var launchConfiguration = this._selectedLaunchConfiguration;
 					// need to confirm with user before redeploying over a running app
 					// get the latest app status
 					this._displayStatusCheck(launchConfiguration);
 					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(status) {
+						var dialogTitle = messages["redeployConfirmationDialogTitle"]; //$NON-NLS-0$
+						var appName = this._getDisplayName(launchConfiguration);
+						var confirmMessage = i18nUtil.formatMessage(messages["redeployConfirmationDialogMessage"], appName); //$NON-NLS-0$
+						
 						launchConfiguration.status = status;
+						
 						if (status && ("STARTED" === status.State)) { //$NON-NLS-0$
-							var appName = this._getDisplayName(launchConfiguration);
-							var confirmMessage = i18nUtil.formatMessage(messages["redeployConfirmationDialogMessage"], appName); //$NON-NLS-0$
-							// app is running, confirm with user if they wish to stop it and redeploy
-							var confirmDialog = new mConfirmDialog.ConfirmDialog({
-								title: messages["redeployConfirmationDialogTitle"], //$NON-NLS-0$
-								confirmMessage: confirmMessage,
-								checkboxMessage: messages["redeployConfirmationDialogCheckboxMessage"], //$NON-NLS-0$
-							});
-		
-							var handleDismiss = function(event) {
-								var confirmed = event.value;
-								var doNotConfirmAnymore = event.checkboxValue;
-								
-								if (doNotConfirmAnymore) {
-									// save user preference to no longer display confirmation dialog
-									prefs.put(REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING, true);
-								}
-								
-								if (confirmed) {
-									deploy();
-								} else {
-									this._updateLaunchConfiguration(launchConfiguration);
-								}
-							}.bind(this);
-		
-							// add listener which uses project name entered by user to create a new project
-							confirmDialog.addEventListener("dismiss", handleDismiss); //$NON-NLS-0$
-							confirmDialog.show();
+							this._confirmBeforeRedeploy(prefs, dialogTitle, confirmMessage, REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING, deployFunction, cancelFunction);
 						} else {
 							// app is not running, just deploy again
-							deploy();
+							deployFunction();
 						}
-					}.bind(this), deploy);
+					}.bind(this), deployFunction);
 				}
 			}.bind(this));
+		},
+		
+		_confirmBeforeRedeploy: function(prefs, dialogTitle, confirmMessage, preferenceName, deployFunction, cancelFunction){
+			// app is running, confirm with user if they wish to stop it and redeploy
+			var confirmDialog = new mConfirmDialog.ConfirmDialog({
+				title: dialogTitle,
+				confirmMessage: confirmMessage,
+				checkboxMessage: messages["redeployConfirmationDialogCheckboxMessage"], //$NON-NLS-0$
+			});
+			
+			var handleDismiss = function(event) {
+				var confirmed = event.value;
+				var doNotConfirmAnymore = event.checkboxValue;
+				
+				if (doNotConfirmAnymore) {
+					// save user preference to no longer display confirmation dialog
+					prefs.put(preferenceName, true);
+				}
+				
+				if (confirmed) {
+					deployFunction();
+				} else {
+					cancelFunction();
+				}
+			}.bind(this);
+
+			// add listener which uses project name entered by user to create a new project
+			confirmDialog.addEventListener("dismiss", handleDismiss); //$NON-NLS-0$
+			confirmDialog.show();
 		},
 		
 		_enableLaunchConfigurationsDropdown: function() {
