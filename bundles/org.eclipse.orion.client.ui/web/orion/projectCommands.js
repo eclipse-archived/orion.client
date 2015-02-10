@@ -383,7 +383,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			if (!doit) return;
 			var deferreds = [];
 			deferreds.push(context.projectClient.deleteProjectLaunchConfiguration(launchConf)); /* deletes the launch configuration file if present */
-			deferreds.push(context.deployService.deleteAdditionalLaunchConfiguration(context.project, launchConf)); /* deletes additional launch configuration data if present */
 			
 			progress.showWhile(Deferred.all(deferreds), messages["deletingLaunchConfiguration"], true).then(function(){
 				fileDispatcher.dispatchEvent({
@@ -783,7 +782,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				var item = forceSingleItem(data.items);
 				fileClient.loadWorkspace(item.project.ContentLocation).then(function(){
 					projectClient.getProjectDeployService(item.ServiceId, item.Type).then(function(service){
-						if(service && service.deleteAdditionalLaunchConfiguration){
+						if(service){
 							runDeleteLaunchConfiguration(item, {
 								project: item.project,
 								deployService: service,

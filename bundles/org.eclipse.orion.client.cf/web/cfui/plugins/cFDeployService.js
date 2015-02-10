@@ -151,13 +151,6 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 			});
 		},
 
-		deleteAdditionalLaunchConfiguration: function(project, launchConf) {
-			/* delete the additional manifest file if present */
-			return this._getAdditionalLaunchConfigurations(launchConf, project, true).then(function(manifest) {
-				fileClient.deleteFile(manifest.Location);
-			});
-		},
-
 		_findManifest: function(location){
 			return fileClient.fetchChildren(location).then(function(children){
 				var manifests = children.filter(function(child) {
