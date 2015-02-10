@@ -278,17 +278,8 @@ define([
 		_launchConfigurationListener: function(event) {
 			var newConfig = event.newValue;
 			
-			if((event.type === "changeState") && newConfig){ //$NON-NLS-0$			
-				// update status if selected launch config was modified
-				var cachedHash = this._getHash(newConfig);
-				var selectedHash = this._getHash(this._selectedLaunchConfiguration);
-				if (cachedHash === selectedHash) {
-					var checkStatus = newConfig.status && newConfig.status.CheckState; // check status again if status.CheckState is set
-					this.selectLaunchConfiguration(newConfig, checkStatus);
-				}
-				
-				// replace cached launch config
-				this._putInLaunchConfigurationsCache(newConfig);
+			if((event.type === "changeState") && newConfig){ //$NON-NLS-0$
+				this._updateLaunchConfiguration(newConfig);
 			} else {
 				this._menuItemsCache = []; // clear launch configurations menu items cache
 				
@@ -342,12 +333,23 @@ define([
 		 * @param {Boolean} checkStatus Specifies whether or not the status of the launchConfiguration should be checked
 		 */
 		selectLaunchConfiguration: function(launchConfiguration, checkStatus) {
+			var errorHandler = function (error) {
+				// stop the progress spinner in the launch config dropdown trigger
+				this.setStatus({
+					error: error || true //if no error was passed in we still want to ensure that the error state is recorded
+				});
+			}.bind(this);
+			
 			if (launchConfiguration) {
 				this._selectedLaunchConfiguration = launchConfiguration;
 				this._setLaunchConfigurationsLabel(launchConfiguration);
 				
 				if (checkStatus) {
-					this._checkLaunchConfigurationStatus(launchConfiguration);
+					this._displayStatusCheck(launchConfiguration);
+					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(status) {
+						launchConfiguration.status = status;
+						this._updateLaunchConfiguration(launchConfiguration);
+					}.bind(this), errorHandler);
 				} else {
 					// do not check the status, only set it in the UI if it is already in the launchConfiguration
 					if (launchConfiguration.status) {
@@ -360,8 +362,8 @@ define([
 				this.setStatus({});
 			}
 		},
-			
-		_checkLaunchConfigurationStatus: function(launchConfiguration) {
+
+		_displayStatusCheck: function(launchConfiguration) {
 			var appName = this._getDisplayName(launchConfiguration);
 			var progressMessage = i18nUtil.formatMessage(messages["checkingStateMessage"], appName); //$NON-NLS-0$
 			
@@ -371,21 +373,27 @@ define([
 				Message: progressMessage,
 				ShortMessage: messages["checkingStateShortMessage"] //$NON-NLS-0$
 			});
+		},
+		
+		_updateLaunchConfiguration: function(launchConfiguration) {
+			var cachedHash = this._getHash(launchConfiguration);
+			var selectedHash = this._getHash(this._selectedLaunchConfiguration);
 			
-			var errorHandler = function (error) {
-				// stop the progress spinner in the launch config dropdown trigger
-				this.setStatus({
-					error: error || true //if no error was passed in we still want to ensure that the error state is recorded
-				});
-			}.bind(this);
+			if (cachedHash === selectedHash) {
+				// select launch configuration if it replaces the currently selected one
+				var checkStatus = launchConfiguration.status && launchConfiguration.status.CheckState; // check status again if status.CheckState is set
+				this.selectLaunchConfiguration(launchConfiguration, checkStatus);
+			}
 			
-			// update status
+			// replace cached launch config
+			this._putInLaunchConfigurationsCache(launchConfiguration);
+		},
+					
+		_checkLaunchConfigurationStatus: function(launchConfiguration) {
 			return this._projectClient.getProjectDeployService(launchConfiguration.ServiceId, launchConfiguration.Type).then(
 				function(service){
 					if(service && service.getState){
 						return service.getState(launchConfiguration).then(function(status){
-								launchConfiguration.status = status;
-								this._launchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: launchConfiguration}); //$NON-NLS-0$
 								return status;
 							}.bind(this),
 							function(error){
@@ -402,11 +410,8 @@ define([
 								}
 							}.bind(this)
 						);
-					} else {
-						errorHandler();
 					}
-				}.bind(this),
-				errorHandler
+				}.bind(this)
 			);
 		},
 		
@@ -420,7 +425,7 @@ define([
 			// service implementation's method rather than from the service properties
 			var logLocationTemplate = null;
 			if (status || (this._selectedLaunchConfiguration && this._selectedLaunchConfiguration.Params)) {
-				logLocationTemplate = status.logLocationTemplate || this._selectedLaunchConfiguration.Params.LogLocationTemplate;
+				logLocationTemplate = (status && status.logLocationTemplate) || this._selectedLaunchConfiguration.Params.LogLocationTemplate;
 			}
 			
 			// turn status light off
@@ -432,40 +437,42 @@ define([
 			
 			this._disableAllControls(); // applicable controls will be re-enabled further below
 			
-			if (status.error) {
-				this._enableControl(this._playButton);
-				if (!status.error.Retry) {
-					if (status.error.Message) {
-						statusLightText = status.error.Message;
-					}
-				}
-				// set the short status that appears next to the app name
-				appInfoText = status.ShortMessage || statusLightText || messages["appInfoUnknown"]; //$NON-NLS-0$
-			} else {
-				switch (status.State) {
-					case "PROGRESS": //$NON-NLS-0$
-						this._statusLight.classList.add("statusLightProgress"); //$NON-NLS-0$
-						if (status.ShortMessage || status.Message) {
-							appInfoText = status.ShortMessage || status.Message;
+			if (status) {
+				if (status.error) {
+					this._enableControl(this._playButton);
+					if (!status.error.Retry) {
+						if (status.error.Message) {
+							statusLightText = status.error.Message;
 						}
-						break;
-					case "STARTED": //$NON-NLS-0$
-						this._enableControl(this._playButton);
-						this._enableControl(this._stopButton);
-						this._statusLight.classList.add("statusLightGreen"); //$NON-NLS-0$
-						
-						appInfoText = messages["appInfoRunning"]; //$NON-NLS-0$
-						break;
-					case "STOPPED": //$NON-NLS-0$
-						this._enableControl(this._playButton);
-						this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
-						
-						appInfoText = messages["appInfoStopped"]; //$NON-NLS-0$
-						break;
-					default:
-						break;
-				}
-				statusLightText = status.Message;
+					}
+					// set the short status that appears next to the app name
+					appInfoText = status.ShortMessage || statusLightText || messages["appInfoUnknown"]; //$NON-NLS-0$
+				} else {
+					switch (status.State) {
+						case "PROGRESS": //$NON-NLS-0$
+							this._statusLight.classList.add("statusLightProgress"); //$NON-NLS-0$
+							if (status.ShortMessage || status.Message) {
+								appInfoText = status.ShortMessage || status.Message;
+							}
+							break;
+						case "STARTED": //$NON-NLS-0$
+							this._enableControl(this._playButton);
+							this._enableControl(this._stopButton);
+							this._statusLight.classList.add("statusLightGreen"); //$NON-NLS-0$
+							
+							appInfoText = messages["appInfoRunning"]; //$NON-NLS-0$
+							break;
+						case "STOPPED": //$NON-NLS-0$
+							this._enableControl(this._playButton);
+							this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
+							
+							appInfoText = messages["appInfoStopped"]; //$NON-NLS-0$
+							break;
+						default:
+							break;
+					}
+					statusLightText = status.Message;
+				}	
 			}
 			
 			this._setNodeTooltip(this._statusLight, statusLightText);
@@ -474,7 +481,7 @@ define([
 				this._setText(this._appInfoSpan, "(" + appInfoText.toLocaleLowerCase() + ")"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			
-			if (status.Url) {
+			if (status && status.Url) {
 				this._enableLink(this._appLink, status.Url);
 			}
 			
@@ -691,11 +698,14 @@ define([
 				if (redeployWithoutConfirming) {
 					deploy(); //user does not want a confirmation dialog, just deploy again
 				} else {
+					var launchConfiguration = this._selectedLaunchConfiguration;
 					// need to confirm with user before redeploying over a running app
 					// get the latest app status
-					this._checkLaunchConfigurationStatus(this._selectedLaunchConfiguration).then(function(status) {
+					this._displayStatusCheck(launchConfiguration);
+					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(status) {
+						launchConfiguration.status = status;
 						if (status && ("STARTED" === status.State)) { //$NON-NLS-0$
-							var appName = this._getDisplayName(this._selectedLaunchConfiguration);
+							var appName = this._getDisplayName(launchConfiguration);
 							var confirmMessage = i18nUtil.formatMessage(messages["redeployConfirmationDialogMessage"], appName); //$NON-NLS-0$
 							// app is running, confirm with user if they wish to stop it and redeploy
 							var confirmDialog = new mConfirmDialog.ConfirmDialog({
@@ -715,8 +725,10 @@ define([
 								
 								if (confirmed) {
 									deploy();
+								} else {
+									this._updateLaunchConfiguration(launchConfiguration);
 								}
-							};
+							}.bind(this);
 		
 							// add listener which uses project name entered by user to create a new project
 							confirmDialog.addEventListener("dismiss", handleDismiss); //$NON-NLS-0$
