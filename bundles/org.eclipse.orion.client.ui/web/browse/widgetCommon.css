@@ -12,6 +12,10 @@
 	background-color: #E9F1F4 !important;
 }
 
+.core-sprite-openarrow {
+  margin-top: -3px;
+}
+
 .sectionWrapper, .sectionTable{
 	text-align: left;
 	border-collapse: collapse;

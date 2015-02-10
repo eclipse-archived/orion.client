@@ -256,7 +256,8 @@ div.currentLocation {
 }
 
 .breadcrumbContainer {
-	margin: 0 4px; 
+	margin-top: 3px; 
+	margin-left: 3px; 
 	justify-content: flex-start;
 	-webkit-justify-content: flex-start;
 }
