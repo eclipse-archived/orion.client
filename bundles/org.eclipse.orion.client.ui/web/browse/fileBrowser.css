@@ -55,7 +55,7 @@
 }
 
 .readmeHeader{
-	margin-top: 27px;
+	margin-top: 30px;
 	color: #444;
 	padding-top: 8px !important;
 	padding-bottom: 10px !important;
@@ -113,7 +113,7 @@
 .breadCrumbContainer {
 	border-bottom: 1px solid;
 	height: 22px;
-	border-color: #dadada;
+	border-color: #DFE6EB;
 	-webkit-box-sizing: initial !important;
 	box-sizing: initial !important;
 	/*background: none repeat scroll 0 0 #f7f7f7;*/
@@ -143,9 +143,9 @@
 	padding-top: 4px;
 	padding-bottom: 4px;
 	/*width: 100%;*/
-	border-color: #dadada;
+	border-color: #DFE6EB;
 	color: #444;
-    background-color: #eff2f5;
+    background-color: #E9F1F4;
 	-webkit-box-sizing: initial !important;
 	box-sizing: initial !important;
 }

@@ -9,7 +9,7 @@
 }
 
 .darkSectionTreeTableRow {
-	background-color: #eff2f5 !important;
+	background-color: #E9F1F4 !important;
 }
 
 .sectionWrapper, .sectionTable{
@@ -68,6 +68,17 @@
 	border-bottom: 1px solid #dadada;
 	vertical-align: middle;
 	color: gray;
+}
+
+.navColumn {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.secondaryColumn {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  vertical-align: middle;
 }
 
 .sectionTable a {
