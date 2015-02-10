@@ -25,6 +25,7 @@ define([
 	
 	var METRICS_LABEL_PREFIX = "RunBar"; //$NON-NLS-0$
 	var REDEPLOY_RUNNING_APP_WITHOUT_CONFIRMING = "doNotConfirmRedeployRunningApp"; //$NON-NLS-0$
+	var STATUS_POLL_INTERVAL_MS = 30000;
 	
 	/**
 	 * Creates a new RunBar.
@@ -223,6 +224,8 @@ define([
 		},
 		
 		destroy: function() {
+			this._stopStatusPolling();
+			
 			// remove node from DOM
 			if (this._parentNode && this._domNode) {
 				this._parentNode.removeChild(this._domNode);
@@ -357,6 +360,7 @@ define([
 					}
 				}
 			} else {
+				this._stopStatusPolling(); //stop before clearing selected config
 				this._selectedLaunchConfiguration = null;
 				this._setLaunchConfigurationsLabel(null);
 				this.setStatus({});
@@ -454,6 +458,7 @@ define([
 							if (status.ShortMessage || status.Message) {
 								appInfoText = status.ShortMessage || status.Message;
 							}
+							this._stopStatusPolling(); // do not poll while status is in a transitive state
 							break;
 						case "STARTED": //$NON-NLS-0$
 							this._enableControl(this._playButton);
@@ -472,7 +477,11 @@ define([
 							break;
 					}
 					statusLightText = status.Message;
-				}	
+				}
+				
+				if ("PROGRESS" !== status.State) {
+					this._startStatusPolling();
+				}
 			}
 			
 			this._setNodeTooltip(this._statusLight, statusLightText);
@@ -750,6 +759,25 @@ define([
 		_disableLaunchConfigurationsDropdown: function() {
 			this._disableControl(this._launchConfigurationsWrapper);
 			this._launchConfigurationsDropdownTriggerButton.disabled = true;
+		},
+		
+		_startStatusPolling: function() {
+			if (!this._statusPollingIntervalID) {
+				this._statusPollingIntervalID = window.setInterval(function(){
+					var launchConfiguration = this._selectedLaunchConfiguration;
+					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(status) {
+						launchConfiguration.status = status;
+						this._updateLaunchConfiguration(launchConfiguration);
+					}.bind(this));
+				}.bind(this), STATUS_POLL_INTERVAL_MS);
+			}
+		},
+		
+		_stopStatusPolling: function() {
+			if (this._statusPollingIntervalID) {
+				window.clearInterval(this._statusPollingIntervalID);
+				this._statusPollingIntervalID = null;
+			}
 		}
 	});
 	
