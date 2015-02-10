@@ -76,7 +76,7 @@ define("orion/editor/stylers/text_x-lua/syntax", ["orion/editor/stylers/lib/synt
 			{include: "#reserved_underscore_capital"}, //$NON-NLS-0$
 			{
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control.lua" //$NON-NLS-0$
+				name: "keyword.operator.lua" //$NON-NLS-0$
 			}
 		],
 		repository: {

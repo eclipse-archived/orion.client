@@ -65,11 +65,11 @@ define("orion/editor/stylers/text_x-erlang/syntax", ["orion/editor/stylers/lib/s
 			{include: "orion.lib#number_decimal"}, //$NON-NLS-0$
 			{
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control.erlang" //$NON-NLS-0$
+				name: "keyword.operator.erlang" //$NON-NLS-0$
 			},
 			{
 				match: "^\\s*-(?:" + hyphenKeywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control.erlang" //$NON-NLS-0$
+				name: "keyword.operator.erlang" //$NON-NLS-0$
 			}
 		],
 		repository: {

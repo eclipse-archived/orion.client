@@ -71,7 +71,7 @@ define("orion/editor/stylers/text_x-csharp/syntax", ["orion/editor/stylers/lib/s
 			{include: "orion.lib#number_hex"}, //$NON-NLS-0$
 			{
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control.csharp" //$NON-NLS-0$
+				name: "keyword.operator.csharp" //$NON-NLS-0$
 			}
 		],
 		repository: {

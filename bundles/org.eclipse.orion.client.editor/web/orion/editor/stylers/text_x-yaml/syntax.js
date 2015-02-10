@@ -39,10 +39,10 @@ define("orion/editor/stylers/text_x-yaml/syntax", [], function() { //$NON-NLS-0$
 						name: "entity.name.tag.yaml" //$NON-NLS-0$
 					}, {
 						match: "(?i)^\\s*(?:" + keywords.join("|") + ")\\s*$", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						name: "keyword.control.yaml" //$NON-NLS-0$
+						name: "keyword.operator.yaml" //$NON-NLS-0$
 					}, {
 						match: "(?i)^\\s*(?:" + casts.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						name: "keyword.control.yaml" //$NON-NLS-0$
+						name: "keyword.operator.yaml" //$NON-NLS-0$
 					}, {
 						match: "(?i)^\\s*(?:-?[0-9]*(?:\\.[0-9]+)?(?:e[-+][1-9][0-9]*)?)\\s*$", //$NON-NLS-0$
 						name: "constant.numeric.yaml" //$NON-NLS-0$

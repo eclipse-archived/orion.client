@@ -52,11 +52,11 @@ define("orion/editor/stylers/text_x-objective-c/syntax", ["orion/editor/stylers/
 		repository: {
 			objectiveCDirective: {
 				match: "(#\\s*(?:" + directives.join("|") + "))\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control.directive.objective-c" //$NON-NLS-0$
+				name: "keyword.operator.directive.objective-c" //$NON-NLS-0$
 			},
 			objectiveCKeyword: {
 				match: "(\\b(?:" + keywords.join("|") + ")|(?:" + atKeywords.join("|") + "))\\b", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control.objective-c" //$NON-NLS-0$
+				name: "keyword.operator.objective-c" //$NON-NLS-0$
 			},
 			objectiveCString: {
 				match: '@"(?:\\\\.|[^"])*"?', //$NON-NLS-0$

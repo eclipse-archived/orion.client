@@ -63,7 +63,7 @@ define("orion/editor/stylers/application_xquery/syntax", ["orion/editor/stylers/
 			{include: "orion.lib#parenthesis_close"}, //$NON-NLS-0$
 			{
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control.js" //$NON-NLS-0$
+				name: "keyword.operator.js" //$NON-NLS-0$
 			}
 		],
 		repository: {

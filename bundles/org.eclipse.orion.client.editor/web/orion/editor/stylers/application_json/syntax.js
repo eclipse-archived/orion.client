@@ -32,7 +32,7 @@ define("orion/editor/stylers/application_json/syntax", ["orion/editor/stylers/li
 			{include: "orion.lib#number_hex"}, //$NON-NLS-0$
 			{
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control.json" //$NON-NLS-0$
+				name: "keyword.operator.json" //$NON-NLS-0$
 			}
 		]
 	});

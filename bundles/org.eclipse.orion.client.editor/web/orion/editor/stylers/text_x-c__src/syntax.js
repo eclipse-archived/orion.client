@@ -65,13 +65,13 @@ define("orion/editor/stylers/text_x-c__src/syntax", ["orion/editor/stylers/lib/s
 			{include: "orion.lib#number_hex"}, //$NON-NLS-0$
 			{
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control.cpp" //$NON-NLS-0$
+				name: "keyword.operator.cpp" //$NON-NLS-0$
 			}
 		],
 		repository: {
 			directive: {
 				match: "(#\\s*(?:" + directives.join("|") + "))\\b",
-				name: "keyword.control.directive.c++"
+				name: "keyword.operator.directive.cpp"
 			}
 		}
 	});

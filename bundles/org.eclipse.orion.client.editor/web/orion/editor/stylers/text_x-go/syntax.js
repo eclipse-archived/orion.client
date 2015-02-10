@@ -52,7 +52,7 @@ define("orion/editor/stylers/text_x-go/syntax", ["orion/editor/stylers/lib/synta
 			{include: "orion.lib#number_hex"}, //$NON-NLS-0$
 			{
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control.go" //$NON-NLS-0$
+				name: "keyword.operator.go" //$NON-NLS-0$
 			},
 			{
 				match: "\\b(?:len|cap|new|make|append|close|copy|delete|complex|real|imag|panic|recover)\\b", //$NON-NLS-0$

@@ -73,7 +73,7 @@ define("orion/editor/stylers/text_x-vb/syntax", ["orion/editor/stylers/lib/synta
 			{include: "#number_hex"}, //$NON-NLS-0$
 			{
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control.vb" //$NON-NLS-0$
+				name: "keyword.operator.vb" //$NON-NLS-0$
 			}
 		],
 		repository: {
