@@ -68,6 +68,8 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 		options = options || {};
 
 		return function(results){
+			
+			var confName = options.ConfName;
 
 			var disableUI = options.disableUI;
 			var showMessage = options.showMessage;
@@ -76,8 +78,8 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 			var postMsg = options.postMsg;
 			var postError = options.postError;
 
-			var fileService = options.FileService;
-			var cfService = options.CFService;
+//			var fileService = options.FileService;
+//			var cfService = options.CFService;
 			var targetSelection = options.getTargetSelection();
 
 			var userManifest = options.Manifest;
@@ -97,29 +99,11 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 				var instrumentation = _getManifestInstrumentation(userManifest, results);
 				var devMode = options.getDevMode ? options.getDevMode() : null;
 				
-				/* manifest to persist as additional configuration */
-
-				var additionalConfiguration = {
-					DevMode : devMode,
-					Instrumentation : instrumentation
-				};
-				
-				if (devMode && devMode.On){
-					var packager = devMode.Packager;
-					var instrumentation = devMode.Instrumentation;
-				}
-				
-				var expandedURL = new URITemplate("{+OrionHome}/edit/edit.html#{,ContentLocation}").expand({ //$NON-NLS-0$
-					OrionHome: PageLinks.getOrionHome(),
-					ContentLocation: contentLocation,
-				});
-
-				var editLocation = new URL(expandedURL);
-				
 				var appName = results.name;
+				var configName = confName || (appName + "-" + Math.floor(Date.now() / 1000));
 				var target = selection;
 				
-				mCfUtil.prepareLaunchConfigurationContent(appName, target, appPath, additionalConfiguration).then(
+				mCfUtil.prepareLaunchConfigurationContent(configName, target, appName, appPath, instrumentation, devMode).then(
 					function(launchConfigurationContent){
 						postMsg(launchConfigurationContent);
 					}, function(error){

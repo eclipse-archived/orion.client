@@ -809,8 +809,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			imageClass: "core-sprite-edit",
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
-				
-				console.info("Jestem");
 
 				if(!data.oldParams){
 					data.oldParams = item.Params;

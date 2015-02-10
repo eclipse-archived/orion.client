@@ -182,14 +182,11 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 				target.Url = params.url;
 			}
 
-			var appName = params.Name;
-			var appPath = launchConf.Path;
-
 			if (params.user && params.password) {
 				cFService.login(target.Url, params.user, params.password).then(
 
 				function() {
-					that._deploy(project, target, appName, appPath, deferred, launchConf, params);
+					that._deploy(project, target, launchConf, deferred);
 				}, function(error) {
 
 					/* default cf error message decoration */
@@ -197,7 +194,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 					deferred.reject(error);
 				});
 			} else {
-				that._deploy(project, target, appName, appPath, deferred, launchConf, params);
+				that._deploy(project, target, launchConf, deferred);
 			}
 
 			return deferred;
@@ -239,9 +236,13 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 			return deferred;
 		},
 
-		_deploy: function(project, target, appName, appPath, deferred, launchConf, launchConfParams) {
+		_deploy: function(project, target, launchConf, deferred) {
+			var launchConfParams = launchConf.Parameters || {};
+			var appName = launchConfParams.Name;
+			var appPath = launchConf.Path;
+			var launchConfName = launchConf.ConfigurationName;
+			
 			if (target && appName) {
-
 				var errorHandler = function(error) {
 					/* default cf error message decoration */
 					error = mCfUtil.defaultDecorateError(error, target);
@@ -290,14 +291,8 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 								ContentLocation: project.ContentLocation,
 							});
 
-							var editLocation = new URL(expandedURL);
-							var additionalConfiguration = {
-								Instrumentation: instrumentation,
-								DevMode: devMode
-							};
-
 							var appName = result.App.name || result.App.entity.name;
-							mCfUtil.prepareLaunchConfigurationContent(appName, target, appPath, additionalConfiguration).then(
+							mCfUtil.prepareLaunchConfigurationContent(launchConfName, target, appName, appPath, instrumentation, devMode).then(
 							deferred.resolve, deferred.reject);
 						}, errorHandler);
 					}
@@ -419,14 +414,11 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 				target.Url = params.url;
 			}
 
-			var appName = params.Name;
-			var appPath = launchConf.Path;
-
 			if (params.user && params.password) {
 				cFService.login(target.Url, params.user, params.password).then(
 
 				function() {
-					that._edit(project, target, appName, appPath, deferred, launchConf, params);
+					that._edit(project, target, launchConf, deferred);
 				}, function(error) {
 
 					/* default cf error message decoration */
@@ -434,13 +426,17 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 					deferred.reject(error);
 				});
 			} else {
-				that._edit(project, target, appName, appPath, deferred, launchConf, params);
+				that._edit(project, target, launchConf, deferred);
 			}
 
 			return deferred;
 		},
 		
-		_edit: function(project, target, appName, appPath, deferred, launchConf, launchConfParams) {
+		_edit: function(project, target, launchConf, deferred) {
+			var launchConfParams = launchConf.Parameters || {};
+			var appName = launchConfParams.Name;
+			var appPath = launchConf.Path;
+			var launchConfName = launchConf.ConfigurationName;
 
 			/* Note, that there's at least one deployment wizard present */
 			var wizardReferences = serviceRegistry.getServiceReferences("orion.project.deploy.wizard"); //$NON-NLS-0$
@@ -500,7 +496,8 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 												ContentLocation: project.ContentLocation,
 												AppPath: appPath,
 												Plan: deployment.plan,
-												LaunchConfParams: launchConfParams
+												ConfParams: launchConfParams,
+												ConfName: launchConfName
 											})),
 											Width: initParams.Width,
 											Height: initParams.Height,
@@ -519,7 +516,8 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 													ContentLocation: project.ContentLocation,
 													AppPath: appPath,
 													Plan: deployment.plan,
-													LaunchConfParams: launchConfParams
+													ConfParams: launchConfParams,
+													ConfName: launchConfName
 												})),
 												Width: initParams.Width,
 												Height: initParams.Height,
@@ -545,7 +543,8 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 													ContentLocation: project.ContentLocation,
 													AppPath: appPath,
 													Plan: deployment.plan,
-													LaunchConfParams: launchConfParams
+													ConfParams: launchConfParams,
+													ConfName: launchConfName
 												})),
 												Width: initParams.Width,
 												Height: initParams.Height,

@@ -10,11 +10,11 @@
  ******************************************************************************/
 /*global parent window document define orion setTimeout*/
 
-define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/cfui/cFClient', 'orion/PageUtil',
+define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfui/cFClient', 'orion/PageUtil',
 	'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'cfui/plugins/wizards/common/wizardUtils',
 	'orion/webui/Wizard', 'cfui/plugins/wizards/common/deploymentLogic', 'cfui/plugins/wizards/common/commonPaneBuilder', 'cfui/plugins/wizards/common/corePageBuilder',
 	'cfui/plugins/wizards/common/servicesPageBuilder', 'cfui/plugins/wizards/common/additionalParamPageBuilder'],
-		function(messages, mBootstrap, CFClient, PageUtil, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, Wizard,
+		function(messages, mBootstrap, objects, CFClient, PageUtil, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, Wizard,
 				mDeploymentLogic, mCommonPaneBuilder, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder) {
 
 	/* plugin-host communication */
@@ -74,6 +74,9 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/cfui/cFClient', 'ori
 		/* deployment plan */
 		var plan = resource.Plan;
 		var manifestApplication = plan.Manifest.applications[0];
+		var launchConfParams = resource.ConfParams || {};
+		var launchConfName = resource.ConfName;
+		objects.mixin(manifestApplication, launchConfParams.Instrumentation);
 
 		mWizardUtils.loadClouds({
 			showMessage : showMessage,
@@ -84,7 +87,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/cfui/cFClient', 'ori
 		}).then(function(resp){
 
 			var clouds = resp.clouds;
-			var defaultTarget = resp.defaultTarget;
+			var defaultTarget = launchConfParams.Target || resp.defaultTarget;
 
 			/* init common pane builder */
 			var commonPaneBuilder = new mCommonPaneBuilder.CommonPaneBuilder({
@@ -135,12 +138,11 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/cfui/cFClient', 'ori
 			new Wizard.Wizard({
 				parent: "wizard", //$NON-NLS-0$
 				pages: [page1, page2, page3],
-				commonPane: commonPane,
 				onCancel: closeFrame,
 				buttonNames: { ok: messages["save"] },
 				size: { width: "420px", height: "210px" }, //$NON-NLS-0$//$NON-NLS-1$
 				onSubmit: mDeploymentLogic.buildDeploymentTrigger({
-
+					ConfName : launchConfName,
 					showMessage : showMessage,
 					closeFrame : closeFrame,
 					disableUI : function(){

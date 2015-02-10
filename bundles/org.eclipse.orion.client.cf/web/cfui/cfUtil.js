@@ -48,15 +48,13 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 			return messages["deploy.enterCredentials"];
 		},
 		
-		prepareLaunchConfigurationContent : function(appName, target, appPath, additionalConfiguration){
+		prepareLaunchConfigurationContent : function(configName, target, appName, appPath, instrumentation, devMode){
 			var deferred = new Deferred();
-
-			var launchConfName = i18Util.formatMessage(messages["${0}On${1}/${2}"], appName, target.Space, target.Org);
 
 			var launchConf = {
 				CheckState: true,
 				ToSave: {
-					ConfigurationName: launchConfName,
+					ConfigurationName: configName,
 					Parameters: {
 						Target: {
 							Url: target.Url,
@@ -72,17 +70,12 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 			};
 
 			/* additional configuration */
-			additionalConfiguration = additionalConfiguration || {};
-
-			if(additionalConfiguration.Manifest){
-				launchConf.AdditionalConfiguration = {
-					extension : ".yml", //$NON-NLS-0$
-					contents : mManifestUtils.toYML(additionalConfiguration.Manifest)
-				};
+			if(instrumentation){
+				launchConf.ToSave.Parameters.Instrumentation = instrumentation;
 			}
 
-			if(additionalConfiguration.DevMode){
-				launchConf.ToSave.Parameters.DevMode = additionalConfiguration.DevMode;
+			if(devMode){
+				launchConf.ToSave.Parameters.DevMode = devMode;
 			}
 
 			deferred.resolve(launchConf);
