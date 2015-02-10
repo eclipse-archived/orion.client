@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2014 VMware, Inc. and others.
+ * Copyright (c) 2012, 2015 VMware, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -885,7 +885,7 @@ define([
 
 						inferredTypeObj =  kvps[i].key.extras.jsdocType || kvps[i].value.extras.inferredTypeObj;
 						var docComment = kvps[i].key.extras.associatedComment;
-						env.addVariable(name, node, inferredTypeObj, range, docComment.range);
+						env.addVariable(name, node, inferredTypeObj, range, docComment);
 						if (proposalUtils.inRange(env.offset-1, kvps[i].key.range)) {
 							// We found it! rmember for later, but continue to the end of file anyway
 							env.storeTarget(env.scope(node));

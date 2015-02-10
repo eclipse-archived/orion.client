@@ -101,6 +101,16 @@ define([
 		// Also accepts a single object containing a map of arguments
 		var buffers = {};
 		var currentName = null;
+		/**
+		 * @description Computes the assist proposals from the given options
+		 * @param {String} buffer The source to parse
+		 * @param {String} prefix The prefix to use or null
+		 * @param {Number} offset The offset into the source
+		 * @param {Object} lintOptions Lit options to use
+		 * @param {EditorContext} editorContextMixin The ditro context object to use
+		 * @param {Object} paramsMixin The paraneters object
+		 * @returns {Promise} The promise to compute proposals
+		 */
 		function computeContentAssist(buffer, prefix, offset, lintOptions, editorContextMixin, paramsMixin) {
 			buffers[currentName] = buffer;
 	
@@ -180,7 +190,14 @@ define([
 					"Wrong number of proposals.  Expected:\n" + stringifyExpected(expectedProposals) +"\nActual:\n" + stringifyActual(actualProposals));
 	
 				for (var i = 0; i < actualProposals.length; i++) {
-					testProposal(actualProposals[i], expectedProposals[i][0], expectedProposals[i][1]);
+				    var ap = actualProposals[i];
+				    var ep = expectedProposals[i];
+					testProposal(ap, ep[0], ep[1]);
+					if(expectedProposals[i].length === 3) {
+					    //check for doc hover
+					    assert(ap.hover, 'There should be a hover entry for the proposal');
+					    assert(ap.hover.indexOf(ep[2]) === 0, "The doc should have started with the given value"); 
+					}
 				}
 			}, function (error) {
 				assert.fail(error);
@@ -5781,6 +5798,39 @@ define([
 			var results = computeContentAssist("/^.*/.e", "e", 7);
 			testProposals(results, [
 			['xec', 'exec : Array.<String>']]);
+		});
+		
+		/**
+		 * Tests proposal doc for function expressions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458693
+		 * @since 8.0
+		 */
+		it("test func expr doc 1", function() {
+			var results = computeContentAssist("var f = { /** \n* @returns {Array.<String>} array or null\n*/\n one: function() {}};\n f.", "o", 85);
+			testProposals(results, [
+			['one', 'one() : Array.<String>', 'Returns']]);
+		});
+		
+		/**
+		 * Tests proposal doc for function expressions
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458693
+		 * @since 8.0
+		 */
+		it("test func expr doc 2", function() {
+			var results = computeContentAssist("var f = { /** \n* @return {Array.<String>} array or null\n*/\n one: function() {}};\n f.", "o", 84);
+			testProposals(results, [
+			['one', 'one() : Array.<String>', 'Returns']]);
+		});
+		
+		/**
+		 * Tests proposal doc for function decls
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458693
+		 * @since 8.0
+		 */
+		it("test func decl doc 1", function() {
+			var results = computeContentAssist("/** \n* @returns {Object} Something or nothing\n */\nfunction z(a) {}\nz", "z", 71);
+			testProposals(results, [
+			['z', 'z(a) : Object', 'Returns']]);
 		});
 	});
 });
