@@ -195,6 +195,7 @@ define([
 						domNodeWrapperList = [];
 						this._commandRegistry.renderCommands(createNewItem.id, dropdownMenuItemSpan, this._projectExplorer.treeRoot, this, "button", null, domNodeWrapperList); //$NON-NLS-0$
 						domNodeWrapperList[0].domNode.textContent = "+"; //$NON-NLS-0$
+						this._setNodeTooltip(domNodeWrapperList[0].domNode, messages["createNewTooltip"]); //$NON-NLS-0$
 					}
 				}
 			}.bind(this);
