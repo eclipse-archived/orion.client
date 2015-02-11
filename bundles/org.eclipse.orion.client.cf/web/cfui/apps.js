@@ -87,95 +87,132 @@ mBootstrap.startup().then(function(core) {
 	
 	function displayOrgsAndSpaces(){
 		lib.empty(orgsNode);
-		
+
 		progressService.showWhile(mCfUtil.getTargets(preferences), messages["checkingForCloudFoundrySettings"]).then(function(targets){
 			_target = targets[0];
 			
-			progressService.showWhile(cFService.getOrgs(_target), messages["loading..."]).then(function(result){
-				
+			var targetsDropdown;
+			var orgsDropdown;
+			var spacesDropdown;
+			
+			createDropdowns();
+			loadAll();
+			
+			function createDropdowns() {
 				var table = document.createElement("table");
 				table.className = "centerTable";
-				var tr1 = document.createElement("tr");
-				table.appendChild(tr1);
 				
-					var td1 = document.createElement("td");
-					td1.className = "orgsLabel";
-					td1.id = "orgsLabel";
-					var label = document.createElement("label");
-					label.appendChild(document.createTextNode(messages["organization:"]));
-					td1.appendChild(label);
-					tr1.appendChild(td1);
+				targetsDropdown = createDropdown("targetsLabel", "target:", "targetsDropdown", table);
+				targetsDropdown.onchange = function(event){
+					_target = event.target.selectedOptions[0].target;
+					loadOrgs();
+				};
+				
+				orgsDropdown = createDropdown("orgsLabel", "organization:", "orgsDropdown", table);
+				orgsDropdown.onchange = function(event){
+					loadSpaces(event.target.selectedOptions[0].org);
+				};
+				
+				spacesDropdown = createDropdown("spacesLabel", "space:", "spacesDropdown", table);
+				spacesDropdown.onchange = function(event){
+					var selectedSpace = event.target.selectedOptions[0].space;
+					_target.Space = selectedSpace.Name;
+					_target.Org = selectedSpace.Org.Name;
+					displayApplications(_target);
+				};
 
-					var td2 = document.createElement("td");
-					td2.className = "orgsSelect";
-					td2.id = "orgsDropdown";
-					var orgsDropdown = document.createElement("select");
-					result.Orgs.forEach(function(org){
-						var option = document.createElement("option");
-						option.appendChild(document.createTextNode(org.Name));
-						option.org = org;
-						orgsDropdown.appendChild(option);
+				orgsNode.appendChild(table);
+			}
+			
+			function disableDropdowns() {
+				targetsDropdown.setAttribute("disabled", "disabled");
+				orgsDropdown.setAttribute("disabled", "disabled");
+				spacesDropdown.setAttribute("disabled", "disabled");
+			}
+
+			function enableDropdowns() {
+				targetsDropdown.removeAttribute("disabled");
+				orgsDropdown.removeAttribute("disabled");
+				spacesDropdown.removeAttribute("disabled");
+			}
+			
+			function loadAll() {
+				targets.forEach(function(target){
+					var option = document.createElement("option");
+					option.appendChild(document.createTextNode(target.Name));
+					option.target = target;
+					targetsDropdown.appendChild(option);
+				});
+				loadOrgs();
+			}
+
+			function loadOrgs() {
+				lib.empty(orgsDropdown);
+				lib.empty(spacesDropdown);
+				lib.empty(applicationsNode);
+				lib.empty(orphanRoutesNode);
+				disableDropdowns();
+				progressService.showWhile(cFService.getOrgs(_target), messages["loading..."]).then(
+						function(result) {
+							result.Orgs.forEach(function(org){
+								var option = document.createElement("option");
+								option.appendChild(document.createTextNode(org.Name));
+								option.org = org;
+								orgsDropdown.appendChild(option);
+
+							});
+							
+							if(result.Orgs && result.Orgs.length>0){
+								loadSpaces(result.Orgs[0]);
+							}
+							enableDropdowns();
+						},
+						function(error){
+							handleError(error);
+							enableDropdowns();
 					});
-					
-					orgsDropdown.onchange = function(event){
-						var selectedOrg = event.target.selectedOptions[0].org;
-						loadTargets(selectedOrg);
-					};
-					
-					td2.appendChild(orgsDropdown);
-					tr1.appendChild(td2);
-					
-					var tr2 = document.createElement("tr");
-					table.appendChild(tr2);
-					
-					td1 = document.createElement("td");
-					td1.className = "orgsLabel";
-					td1.id = "spacesLabel";
-					label = document.createElement("label");
-					label.appendChild(document.createTextNode(messages["space:"]));
-					td1.appendChild(label);
-					tr2.appendChild(td1);
+			}
+			
+			function loadSpaces(org){
+				lib.empty(spacesDropdown);
+				org.Spaces.forEach(function(space){
+					var option = document.createElement("option");
+					space.Org = org;
+					option.appendChild(document.createTextNode(space.Name));
+					option.space = space;
+					spacesDropdown.appendChild(option);
+				});
+				if(org.Spaces.length > 0){
+					var selectedSpace = org.Spaces[0];
+					_target.Space = selectedSpace.Name;
+					_target.Org = selectedSpace.Org.Name;
+					displayApplications(_target);
+				}
+			}
 
-					td2 = document.createElement("td");
-					td2.className = "orgsSelect";
-					td2.id = "spacesDropdown";
-					var spacesDropdown = document.createElement("select");
-					
-					if(result.Orgs && result.Orgs.length>0){
-						loadTargets(result.Orgs[0]);
-					}
-					
-					spacesDropdown.onchange = function(event){
-						var selectedSpace = event.target.selectedOptions[0].space;
-						_target.Space = selectedSpace.Name;
-						_target.Org = selectedSpace.Org.Name;
-						displayApplications(_target);
-					};
-					
-					td2.appendChild(spacesDropdown);
-					tr2.appendChild(td2);
-					
-					function loadTargets(org){
-						org.Spaces.forEach(function(space){
-							var option = document.createElement("option");
-							space.Org = org;
-							option.appendChild(document.createTextNode(space.Name));
-							option.space = space;
-							spacesDropdown.appendChild(option);
-						});
-						if(org.Spaces.length > 0){
-							var selectedSpace = org.Spaces[0];
-							_target.Space = selectedSpace.Name;
-							_target.Org = selectedSpace.Org.Name;
-							displayApplications(_target);
-						}
-					}
-					orgsNode.appendChild(table);
-
-			}.bind(this),
-			function(error){
-				handleError(error);
-			});
+			function createDropdown(labelId, labelText, dropdownId, parent) {
+				var row = document.createElement("tr");
+				parent.appendChild(row);
+				
+				// label
+				var tdLabel = document.createElement("td");
+				tdLabel.className = "appsLabel";
+				tdLabel.id = labelId;
+				var label = document.createElement("label");
+				label.appendChild(document.createTextNode(messages[labelText]));
+				tdLabel.appendChild(label);
+				row.appendChild(tdLabel);
+				
+				// dropdown
+				var tdDropdown = document.createElement("td");
+				tdDropdown.className = "appsSelect";
+				tdDropdown.id = dropdownId;
+				var dropdown = document.createElement("select");
+				tdDropdown.appendChild(dropdown);
+				row.appendChild(tdDropdown);
+				
+				return dropdown;
+			};
 		}.bind(this),
 		function(error){
 			handleError(error);
