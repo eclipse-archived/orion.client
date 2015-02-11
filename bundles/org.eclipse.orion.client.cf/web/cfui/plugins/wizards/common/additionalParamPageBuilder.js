@@ -25,6 +25,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 			
 		_init : function(options){
 			this._manifestApplication = options.ManifestApplication || {};
+			this._manifestInstrumentation = options.ManifestInstrumentation || {};
 		},
 			
 		build : function(){
@@ -60,36 +61,69 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 				'</table>', //$NON-NLS-0$
 				
 				render: function(){
+					
+					function addListener(inputField, manifestValue){
+						inputField.onkeyup = function(evt) {
+				    		if (inputField.value === ""){
+				    			inputField.value = manifestValue || "";
+				    			inputField.classList.remove("modifiedCell");
+				    		} else if (inputField.value === manifestValue){
+				    			inputField.classList.remove("modifiedCell");
+				    		} else {
+				    			inputField.classList.add("modifiedCell");
+				    		}
+				    	}
+					};
 
 					/* command */
 			    	document.getElementById("commandLabel").appendChild(document.createTextNode(messages["command:"])); //$NON-NLS-0$
 			    	self._command = document.createElement("input"); //$NON-NLS-0$
-			    	if(self._manifestApplication.command)
+			    	if (self._manifestInstrumentation.command) {
+			    		self._command.value = self._manifestInstrumentation.command;
+			    		self._command.classList.add("modifiedCell");
+			    	} else if(self._manifestApplication.command){
 			    		self._command.value = self._manifestApplication.command;
+			    	}
+			    	addListener(self._command, self._manifestApplication.command);
 			    	
 			    	document.getElementById("command").appendChild(self._command); //$NON-NLS-0$
 			    	
 			    	/* path */
 			    	document.getElementById("pathLabel").appendChild(document.createTextNode(messages["path:"])); //$NON-NLS-0$
 			    	self._path = document.createElement("input"); //$NON-NLS-0$
-			    	if(self._manifestApplication.path)
+			    	if (self._manifestInstrumentation.path) {
+			    		self._path.value = self._manifestInstrumentation.path;
+			    		self._path.classList.add("modifiedCell");
+			    	} else if(self._manifestApplication.path){
 			    		self._path.value = self._manifestApplication.path;
+			    	}
+			    	addListener(self._path, self._manifestApplication.path);
 			    	
 			    	document.getElementById("path").appendChild(self._path); //$NON-NLS-0$
 			    	
 			    	/* buildpack */
 			    	document.getElementById("buildpackLabel").appendChild(document.createTextNode(messages["buildpackUrl:"])); //$NON-NLS-0$
 			    	self._buildpack = document.createElement("input"); //$NON-NLS-0$
-			    	if(self._manifestApplication.buildpack)
+			    	if (self._manifestInstrumentation.buildpack) {
+			    		self._buildpack.value = self._manifestInstrumentation.buildpack;
+			    		self._buildpack.classList.add("modifiedCell");
+			    	} else if(self._manifestApplication.buildpack){
 			    		self._buildpack.value = self._manifestApplication.buildpack;
+			    	}
+			    	addListener(self._buildpack, self._manifestApplication.buildpack);
 			    	
 			    	document.getElementById("buildpack").appendChild(self._buildpack); //$NON-NLS-0$
 			    	
 			    	/* memory */
 			    	document.getElementById("memoryLabel").appendChild(document.createTextNode(messages["memory:"])); //$NON-NLS-0$
 			    	self._memory = document.createElement("input"); //$NON-NLS-0$
-			    	if(self._manifestApplication.memory)
+			    	if (self._manifestInstrumentation.memory) {
+			    		self._memory.value = self._manifestInstrumentation.memory;
+			    		self._memory.classList.add("modifiedCell");
+			    	} else if(self._manifestApplication.memory){
 			    		self._memory.value = self._manifestApplication.memory;
+			    	}
+			    	addListener(self._memory, self._manifestApplication.memory);
 
 			    	document.getElementById("memory").appendChild(self._memory); //$NON-NLS-0$
 			    	
@@ -98,8 +132,13 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 			    	self._instances = document.createElement("input"); //$NON-NLS-0$
 			    	self._instances.type = "number"; //$NON-NLS-0$
 			    	self._instances.min = "0"; //$NON-NLS-0$
-			    	if(self._manifestApplication.instances)
+			    	if (self._manifestInstrumentation.instances) {
+			    		self._instances.value = self._manifestInstrumentation.instances;
+			    		self._instances.classList.add("modifiedCell");
+			    	} else if(self._manifestApplication.memory){
 			    		self._instances.value = self._manifestApplication.instances;
+			    	}
+			    	addListener(self._instances, self._manifestApplication.instances);
 			    	
 			    	document.getElementById("instances").appendChild(self._instances); //$NON-NLS-0$
 			    	
@@ -108,8 +147,13 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 			    	self._timeout = document.createElement("input"); //$NON-NLS-0$
 			    	self._timeout.type = "number"; //$NON-NLS-0$
 			    	self._timeout.min = "0"; //$NON-NLS-0$
-			    	if(self._manifestApplication.timeout)
+			    	if (self._manifestInstrumentation.timeout) {
+			    		self._timeout.value = self._manifestInstrumentation.timeout;
+			    		self._timeout.classList.add("modifiedCell");
+			    	} else if(self._manifestApplication.memory){
 			    		self._timeout.value = self._manifestApplication.timeout;
+			    	}
+			    	addListener(self._timeout, self._manifestApplication.timeout);
 			    	
 			    	document.getElementById("timeout").appendChild(self._timeout); //$NON-NLS-0$
 			    },

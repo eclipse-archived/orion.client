@@ -60,6 +60,10 @@ select {
 	border: 1px solid #bbb;
 }
 
+.modifiedCell input {
+	background-color: yellow;
+}
+
 .comboTextInputWrapper {
 	height: 24px;
 	width: 290px;
