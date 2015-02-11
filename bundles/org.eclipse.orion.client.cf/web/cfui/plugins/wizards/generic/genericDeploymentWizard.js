@@ -76,7 +76,8 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 		var manifestApplication = plan.Manifest.applications[0];
 		var launchConfParams = resource.ConfParams || {};
 		var launchConfName = resource.ConfName;
-		objects.mixin(manifestApplication, launchConfParams.Instrumentation);
+		if (launchConfParams.Instrumentation)
+			launchConfParams.Instrumentation.name = launchConfParams.Name;
 
 		mWizardUtils.loadClouds({
 			showMessage : showMessage,
@@ -100,6 +101,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 		    	DefaultTarget : defaultTarget,
 
 		    	ManifestApplication : manifestApplication,
+		    	ManifestInstrumentation: launchConfParams.Instrumentation,
 		    	serviceRegistry : serviceRegistry,
 		    	CFService : cfService,
 
@@ -126,7 +128,8 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 
 		    /* init additional parameters page builder */
 		    var additionalParamPageBuilder = new mAdditionalParamPageBuilder.AdditionalParamPageBuilder({
-		    	ManifestApplication : manifestApplication
+		    	ManifestApplication : manifestApplication,
+		    	ManifestInstrumentation: launchConfParams.Instrumentation
 		    });
 
 		    /* build pages */

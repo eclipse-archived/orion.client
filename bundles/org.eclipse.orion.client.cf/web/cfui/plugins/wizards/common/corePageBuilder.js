@@ -30,6 +30,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			this._clouds = options.Clouds || [];
 			this._defaultTarget = options.DefaultTarget;
 			this._manifestApplication = options.ManifestApplication;
+			this._manifestInstrumentation = options.ManifestInstrumentation || {};
 			this._serviceRegistry = options.serviceRegistry;
 			this._cfService = options.CFService;
 			
@@ -158,10 +159,23 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					domains.Domains.forEach(function(domain){
 						var option = document.createElement("option"); //$NON-NLS-0$
 						option.appendChild(document.createTextNode(domain.DomainName));
-						if (domain.DomainName === self._manifestApplication.domain)
+						if (domain.DomainName === self._manifestInstrumentation.domain){
 							option.selected = "selected"; //$NON-NLS-0$
+							self._domainsDropdown.classList.add("modifiedCell");
+						}  else if(self._manifestApplication.domain){
+							option.selected = "selected"; //$NON-NLS-0$
+				    	}
+						
 						self._domainsDropdown.appendChild(option);
 					});
+					
+					self._domainsDropdown.onchange = function(evt) {
+			    		if (self._domainsDropdown.value === self._manifestApplication.domain){
+			    			self._domainsDropdown.classList.remove("modifiedCell");
+			    		} else {
+			    			self._domainsDropdown.classList.add("modifiedCell");
+			    		}
+			    	}
 				}
 			});
 		},
@@ -232,6 +246,20 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 				"</table>", //$NON-NLS-0$
 				
 				render: function(){
+					
+					function addListener(inputField, manifestValue){
+						inputField.onkeyup = function(evt) {
+				    		if (inputField.value === ""){
+				    			inputField.value = manifestValue || "";
+				    			inputField.classList.remove("modifiedCell");
+				    		} else if (inputField.value === manifestValue){
+				    			inputField.classList.remove("modifiedCell");
+				    		} else {
+				    			inputField.classList.add("modifiedCell");
+				    		}
+				    	}
+					};
+					
 					this.wizard.validate();
 					self._targets = {};
 					
@@ -332,8 +360,14 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					self._appsInput.onkeyup = function(){this.validate();}.bind(this.wizard);
 					self._appsInput.addEventListener("focus",function(){this.validate();}.bind(this.wizard)); //$NON-NLS-0$
 					
-					if(self._manifestApplication.name)
-						self._appsInput.value = self._manifestApplication.name;
+//					if(self._manifestApplication.name)
+//						self._appsInput.value = self._manifestApplication.name;
+					
+					if (self._manifestInstrumentation.name) {
+			    		self._appsInput.value = self._manifestInstrumentation.name;
+			    	} else if (self._manifestApplication.name){
+			    		self._appsInput.value = self._manifestApplication.name;
+			    	}
 					
 					/* render the application host field */
 					document.getElementById("hostLabel").appendChild(document.createTextNode(messages["host:"])); //$NON-NLS-0$
@@ -364,7 +398,15 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					});
 					
 					self._hostInput = self._hostDropdown.getTextInputNode();
-					self._hostInput.value = self._manifestApplication.host || self._manifestApplication.name || "";
+//					self._hostInput.value = self._manifestApplication.host || self._manifestApplication.name || "";
+					
+					if (self._manifestInstrumentation.host) {
+			    		self._hostInput.value = self._manifestInstrumentation.host;
+			    		self._hostInput.classList.add("modifiedCell");
+			    	} else if (self._manifestApplication.host){
+			    		self._hostInput.value = self._manifestApplication.host;
+			    	}
+			    	addListener(self._hostInput, self._manifestApplication.host);
 					
 					var selectedCloud = self._clouds[self._clouds.length > 1 ? self._cloudsDropdown.selectedIndex : 0];
 					self._loadTargets(selectedCloud);
