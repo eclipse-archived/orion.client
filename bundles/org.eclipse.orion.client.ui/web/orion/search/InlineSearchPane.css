@@ -9,6 +9,18 @@
 	overflow: hidden;
 }
 
+.searchResultsWrapperDiv .selectableNavRow:hover {
+	background-color: #cedce7;
+}
+
+.searchResultsWrapperDiv .navlink {
+	color: #333333;
+}
+
+.searchResultsWrapperDiv .modelDecorationSprite {
+  color: #777;
+}
+
 .searchResultsWrapperDiv > b {
 	margin-left: 10px;
 }
@@ -260,6 +272,7 @@
 }
 
 .fileNameSpan {
+	color: #333 !important;
 	flex-grow: 0;
 	flex-shrink: 0;
 	-webkit-flex-grow: 0;		/* Safari */
