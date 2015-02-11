@@ -635,7 +635,7 @@ textarea.parameterInput {
 .miniNavTreeTable {
 	border-spacing: 0;
 	width:100%;
-	padding-left:10px;
+	padding-left:0px;
 }
 
 .secondaryColumn {

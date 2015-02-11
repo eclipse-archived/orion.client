@@ -15,7 +15,7 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 	var OPEN_STATE = "open";
 	var CLOSED_STATE = "closed";
 	var DEFAULT_STATE = OPEN_STATE;
-	var SIDE_MENU_OPEN_WIDTH = "40px";
+	var SIDE_MENU_OPEN_WIDTH = "50px";
 	var TRANSITION_DURATION_MS = 301; /* this should always be greater than the duration of the left transition of .content-fixedHeight */
 
 	function SideMenu(parentNode, contentNode) {
