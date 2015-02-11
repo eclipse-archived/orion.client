@@ -644,19 +644,13 @@ define([
 	},
 
 	formPluginLaunchConfiguration: function(lc){
-		return this._formPluginLaunchConfiguration(lc.Name, lc.ServiceId, lc.Params, lc.Url, lc.ManageUrl, lc.Path, lc.Type, lc.File);
-	},
-
-	_formPluginLaunchConfiguration: function(configurationName, serviceId, params, url, manageUrl, path, deployType, file){
 		return {
-			ConfigurationName: configurationName,
-			Parameters: params,
-			Url: url,
-			Type: deployType,
-			ManageUrl: manageUrl,
-			Path: path,
-			File: file,
-			ServiceId: serviceId
+			ConfigurationName: lc.Name,
+			Parameters: lc.Params,
+			Type: lc.Type,
+			Path: lc.Path,
+			File: lc.File,
+			ServiceId: lc.ServiceId
 		};
 	},
 
