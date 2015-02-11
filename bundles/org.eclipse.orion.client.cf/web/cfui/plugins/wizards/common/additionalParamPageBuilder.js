@@ -34,6 +34,9 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 			return new mWizard.WizardPage({
 				
 				template: '<table class="formTable">'+ //$NON-NLS-0$
+					"<tr class=\"rowSeparator\">" +
+						"<td colspan=\"2\"><div class=\"wiz-hr\"><span id=\"addlManifestSettings\"></span></div></td>" + //$NON-NLS-0$
+					"</tr>" + //$NON-NLS-0$
 					'<tr>'+ //$NON-NLS-0$
 						'<td id="commandLabel" class="label"></td>'+ //$NON-NLS-0$
 						'<td id="command" class="selectCell"></td>'+ //$NON-NLS-0$
@@ -58,7 +61,10 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 						'<td id="timeoutLabel" class="label"></td>'+ //$NON-NLS-0$
 						'<td id="timeout" class="selectCell"></td>'+ //$NON-NLS-0$
 					'</tr>'+ //$NON-NLS-0$
-				'</table>', //$NON-NLS-0$
+				'</table>' + //$NON-NLS-0$
+				'<div class="manifestOverride">' + //$NON-NLS-0$
+					'<div id="addlOverrideNote"></div>' + //$NON-NLS-0$
+				'</div>', //$NON-NLS-0$
 				
 				render: function(){
 					
@@ -74,6 +80,9 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 				    		}
 				    	}
 					};
+
+					document.getElementById("addlManifestSettings").textContent = messages["manifestSettings"]; //$NON-NLS-0$
+					document.getElementById("addlOverrideNote").textContent = messages["manifestOverride"]; //$NON-NLS-1$ //$NON-NLS-0$
 
 					/* command */
 			    	document.getElementById("commandLabel").appendChild(document.createTextNode(messages["command:"])); //$NON-NLS-0$

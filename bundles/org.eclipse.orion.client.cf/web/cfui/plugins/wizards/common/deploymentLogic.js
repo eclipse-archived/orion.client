@@ -77,7 +77,7 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 
 		return function(results){
 			
-			var confName = options.ConfName;
+			var confName = options.ConfName || results.ConfName;
 
 			var disableUI = options.disableUI;
 			var showMessage = options.showMessage;
@@ -119,51 +119,38 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 						}
 					);
 					return;
+				} else {
+					throw new Error("Missing confName");
 				}
-
-				fileService.read(contentLocation + "launchConfigurations?depth=1", true).then(
-					function(projectDir){
-						var children = projectDir.Children;
-						var counter = 0;
-						for(var i=0; i<children.length; i++){
-							var childName = children[i].Name.replace(".launch", "");
-							if (appName === childName){
-								if (counter === 0) counter++;
-								continue;
-							}
-							
-							childName = childName.replace(appName + "-", "");
-							var launchConfCounter = parseInt(Number(childName), 10);
-							if (!isNaN(launchConfCounter) && launchConfCounter >= counter)
-								counter = launchConfCounter + 1;
-						}
-						
-						mCfUtil.prepareLaunchConfigurationContent(counter > 0 ? appName + "-" + counter : appName, target, appName, appPath, instrumentation, devMode).then(
-							function(launchConfigurationContent){
-								postMsg(launchConfigurationContent);
-							}, function(error){
-								postError(error, selection);
-							}
-						);
-					}.bind(this), function(error){
-						if (error.status = 404){
-							mCfUtil.prepareLaunchConfigurationContent(appName, target, appName, appPath, instrumentation, devMode).then(
-								function(launchConfigurationContent){
-									postMsg(launchConfigurationContent);
-								}, function(error){
-									postError(error, selection);
-								}
-							);
-						} else {
-							postError(error, selection);
-						}
-					}
-				);
 			}, postError);
 		};
 	}
 
+	/**
+	 * Calculates a uniqe name for the launch config
+	 * @returns {orion.Promise}
+	 */
+	function uniqueLaunchConfigName(fileService, contentLocation, baseName) {
+		return fileService.read(contentLocation + "launchConfigurations?depth=1", true).then(function(projectDir){
+			var children = projectDir.Children;
+			var counter = 0;
+			for(var i=0; i<children.length; i++){
+				var childName = children[i].Name.replace(".launch", "");
+				if (baseName === childName){
+					if (counter === 0) counter++;
+					continue;
+				}
+				childName = childName.replace(baseName + "-", "");
+				var launchConfCounter = parseInt(Number(childName), 10);
+				if (!isNaN(launchConfCounter) && launchConfCounter >= counter)
+					counter = launchConfCounter + 1;
+			}
+			return counter > 0 ? baseName + "-" + counter : baseName;
+		});
+	}
+
 	return {
-		buildDeploymentTrigger : buildDeploymentTrigger
+		buildDeploymentTrigger : buildDeploymentTrigger,
+		uniqueLaunchConfigName: uniqueLaunchConfigName,
 	};
 });

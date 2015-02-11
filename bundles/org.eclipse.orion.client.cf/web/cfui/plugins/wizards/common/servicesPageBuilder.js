@@ -47,6 +47,9 @@ define([
 			return new mWizard.WizardPage({
 				
 				template:'<table class="formTable">'+ //$NON-NLS-0$
+					"<tr class=\"rowSeparator\">" +
+						"<td colspan=\"3\"><div class=\"wiz-hr\"><span id=\"servicesManifestSettings\"></span></div></td>" + //$NON-NLS-0$
+					"</tr>" + //$NON-NLS-0$
 					'<tr>'+ //$NON-NLS-0$
 						'<td id="allServicesLabel" class="label" colspan="3"></td>'+ //$NON-NLS-0$
 					'</tr>'+ //$NON-NLS-0$
@@ -60,12 +63,16 @@ define([
 						'<td id="servicesAddRemoveButtonsCol" class="listCell"></td>'+ //$NON-NLS-0$
 						'<td id="servicesList" class="listCell"></td>'+ //$NON-NLS-0$
 					'</tr>'+ //$NON-NLS-0$
-				'</table>', //$NON-NLS-0$
+				'</table>' + //$NON-NLS-0$
+				'<div class="manifestOverride">' + //$NON-NLS-0$
+					'<div id="servicesOverrideNote"></div>' + //$NON-NLS-0$
+				'</div>', //$NON-NLS-0$
 				
 				render: function(){
-					
+					document.getElementById("servicesManifestSettings").textContent = messages["manifestSettings"]; //$NON-NLS-0$
 		    		document.getElementById("allServicesLabel").appendChild(document.createTextNode(messages["bindServicesFromTheList."])); //$NON-NLS-0$
 		    		document.getElementById("servicesLabel").appendChild(document.createTextNode(messages["availableServices:"])); //$NON-NLS-0$
+					document.getElementById("servicesOverrideNote").textContent = messages["manifestOverride"]; //$NON-NLS-1$ //$NON-NLS-0$
 		    		
 		    		self._servicesDropdown = document.createElement("select"); //$NON-NLS-0$
 		    		self._servicesDropdown.size = 7;
