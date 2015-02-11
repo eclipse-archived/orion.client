@@ -9,17 +9,17 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['i18n!orion/settings/nls/messages', 
-		'orion/commands', 
-		'orion/commandRegistry', 
-		'orion/webui/littlelib', 
+define(['i18n!orion/settings/nls/messages',
+		'orion/commands',
+		'orion/commandRegistry',
+		'orion/webui/littlelib',
 		'orion/widgets/themes/editor/editorSetup',
 		'text!examples/js-demo.js',
 		'text!examples/html-demo.html',
 		'text!examples/css-demo.css',
 		'text!examples/java-demo.java'],
 function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExample, cssExample, javaExample) {
-	
+
 	var editorLanguage, editorTheme, originalTheme, currentTheme, revertBtn, deleteBtn ,saveBtn, themeNameInput;
 	var protectedThemes = [];
 	var defaultColor = "#ff80c0";
@@ -126,26 +126,26 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 			value:defaultColor
 		}
 	];
-	
+
 	//initializes the default html structure
 	function init() {
 		ThemeBuilder.prototype.template = "<div class='editorSection'>" + //$NON-NLS-0$
 												"<div class='editorSectionHeader'>" +
-													"<span>${Display Language : }</span>" + 
-													"<select id='editorLanguage'>" + 
+													"<span>${Display Language : }</span>" +
+													"<select id='editorLanguage'>" +
 														"<option value='javascript' selected='selected'>javascript</option>" +
 														"<option value='java'>java</option>" +
 														"<option value='html'>HTML</option>" +
 														"<option value='css'>CSS</option>" +
-													"</select>" + 
+													"</select>" +
 												"</div>" +
 												"<div id='editor' class='themeDisplayEditor' class='editor_group'></div>" +
 											"</div>";//$NON-NLS-0$
 		//populate list of changable scopes for the theme
 		populateScopes();
 	}
-	
-	//populates theme selections 
+
+	//populates theme selections
 	function populateThemes(){
 		this.preferences.getTheme(function(themeStyles) {
 			var selectElement = document.getElementById('editorTheme');//$NON-NLS-0$
@@ -155,7 +155,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 			for (var i =0; i < themeStyles.styles.length; i++) {
 				var option = document.createElement('option');
 				option.setAttribute('value', themeStyles.styles[i].name);
-				//checks if a theme is the current theme 
+				//checks if a theme is the current theme
 				if(themeStyles.styles[i].name === themeStyles.style.name){
 					option.setAttribute('selected', 'true');
 				}
@@ -166,19 +166,19 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		}.bind(this));
 	}
 	ThemeBuilder.prototype.populateThemes = populateThemes;
-	
+
 	//initialize html structure for listing changable scopes for the theme (left side)
 	function populateScopes(){
-		ThemeBuilder.prototype.template = 
+		ThemeBuilder.prototype.template =
 			'<div class="themeController">' +//$NON-NLS-0$
 				'<div class="scopeListHeader" id="scopeOriginal">'+
-					'<span>${Theme : }</span>' + 
+					'<span>${Theme : }</span>' +
 					'<select id="editorTheme">' +
 					'</select>'+
 					'<button id="editorThemeDelete" class="editorThemeCleanButton"><span class="core-sprite-trashcan editorThemeButton"></span></button>'+
 				'</div>' +
 				'<div class="scopeListHeader hide" id="scopeChanged">'+
-					'<span> Theme : </span>' + 
+					'<span> Theme : </span>' +
 					'<input id="editorThemeName" type="text">' +
 					'<button id="editorThemeSave" class="editorThemeCleanButton"><span class="core-sprite-save editorThemeButton"></span></button>'+
 					'<button id="editorThemeRevert" class="editorThemeCleanButton"><span class="git-sprite-revert editorThemeButton"></span></button>'+
@@ -189,8 +189,8 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 			'</div>' +//$NON-NLS-0$
 			ThemeBuilder.prototype.template;
 	}
-	
-	//adds status class to scopes 
+
+	//adds status class to scopes
 	function checkForChanges(){
 		var changed = false;
 		for(var i = 0; i < scopeList.length; i++){
@@ -213,7 +213,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 			document.getElementById("scopeOriginal").classList.remove('hide');//$NON-NLS-1$ //$NON-NLS-0$
 		}
 	}
-	
+
 	function updateScopeValue(id, val){
 		for(var i = 0; i < scopeList.length; i++){
 			if (scopeList[i].id === id){
@@ -227,7 +227,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		checkForChanges();
 	}
 	ThemeBuilder.prototype.updateScopeValue = updateScopeValue;
-	
+
 	function getValueFromPath(obj, keys) {
 		var nodes = keys.split('.');
 		for (var i = 0; i < nodes.length; i++) {
@@ -238,7 +238,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		}
 		return obj;
 	}
-	
+
 	function setValueToPath (obj, path, val){
 		var nodes = path.split('.');
 		try{
@@ -250,7 +250,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 			return false;
 		}
 	}
-		
+
 	//updates the theme object with right values
 	function apply() {
 		document.getElementById("editorThemeName").value = currentTheme.name; //$NON-NLS-0$
@@ -269,7 +269,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		checkForChanges(); // checks if any value is changed
 	}
 	ThemeBuilder.prototype.apply = apply;
-	
+
 	//generates the html structure for list of scopes
 	function generateScopeList(){
 		var htmlString = "";
@@ -289,7 +289,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		}
 		return htmlString;
 	}
-	
+
 	function ThemeBuilder(args) {
 		this.settings = {};
 		this.themeData = args.themeData;
@@ -320,7 +320,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		this.commandService.addCommand(exportCommand);
 		this.commandService.registerCommandContribution('themeCommands', "orion.exportTheme", 5); //$NON-NLS-1$ //$NON-NLS-0$
 	}
-	
+
 	function addAdditionalCommand(commandData) {
 		var commitMessageParameters = new mCommandRegistry.ParametersDescription(
 			[new mCommandRegistry.CommandParameter('name', 'text', messages['Commit message:'], "", 4)], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -342,7 +342,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		this.commandService.registerCommandContribution('themeCommands', commandData.id, 4); //$NON-NLS-1$ //$NON-NLS-0$
 	}
 	ThemeBuilder.prototype.addAdditionalCommand = addAdditionalCommand;
-	
+
 	function select(name, styles) {
 		for (var theme = 0; theme < styles.length; theme++) {
 			var style = styles[theme];
@@ -357,57 +357,57 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		this.apply();
 	}
 	ThemeBuilder.prototype.select = select;
-	
+
 	function renderData(anchor, state) {
 		anchor.innerHTML = this.template; // ok--this is a fixed value
 		lib.processTextNodes(anchor, messages);
 		mSetup.setupView(jsExample, "js"); //$NON-NLS-0$
-		
+
 		this.commandService.renderCommands('themeCommands', document.getElementById(this.toolbarId || "userCommands"), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$
-		
+
 		for (var i = 0; i < scopeList.length; i++){ // 0th one is a select
 			document.getElementById(scopeList[i].id).onchange = function(e){
 				updateScopeValue(e.target.id, e.target.value);
 			};
 		}
-		
+
 		this.populateThemes();
-		
+
 		editorLanguage = document.getElementById("editorLanguage"); //$NON-NLS-0$
 		editorLanguage.onchange = this.changeLanguage.bind(this);
-		
+
 		editorTheme = document.getElementById("editorTheme");
 		editorTheme.onchange = this.changeTheme.bind(this);
-		
+
 		revertBtn = document.getElementById("editorThemeRevert");
 		revertBtn.onclick = this.revertTheme.bind(this);
-		
+
 		deleteBtn = document.getElementById("editorThemeDelete");
 		deleteBtn.onclick = this.deleteTheme.bind(this);
-		
+
 		saveBtn = document.getElementById("editorThemeSave");
 		saveBtn.onclick = this.saveTheme.bind(this);
-		
+
 		themeNameInput = document.getElementById("editorThemeName");
 		themeNameInput.onchange = this.updateThemeName.bind(this);
 	}
 	ThemeBuilder.prototype.renderData = renderData;
-		
+
 	function updateThemeName(){
 		currentTheme.name = themeNameInput.value;
-	}	
+	}
 	ThemeBuilder.prototype.updateThemeName = updateThemeName;
-	
+
 	function changeTheme(){
 		var theme = editorTheme.options[editorTheme.selectedIndex].value;
 		this.selectTheme(theme);
 		this.settings['name'] = theme;
 	}
 	ThemeBuilder.prototype.changeTheme = changeTheme;
-		
+
 	function changeLanguage(){
 		var language = editorLanguage.options[editorLanguage.selectedIndex].value;
-		
+
 		switch (language) {
 			case "javascript":
 				mSetup.setupView(jsExample, "js"); //$NON-NLS-0$
@@ -422,7 +422,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 				mSetup.setupView(javaExample, "java"); //$NON-NLS-0$
 				break;
 		}
-		
+
 		return true;
 	}
 	ThemeBuilder.prototype.changeLanguage = changeLanguage;
@@ -438,7 +438,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 	function addTheme(style) {
 		this.preferences.getTheme(function(themeStyles) {
 			var themeName = style.name;
-			
+
 			//allow theme to be overwritten
 			for (var i = 0; i < themeStyles.styles.length; i++) {
 				if (themeStyles.styles[i].name === themeName) {
@@ -459,9 +459,9 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 	ThemeBuilder.prototype.addTheme = addTheme;
 
 	ThemeBuilder.prototype.destroy = function() {
-		
+
 	};
-	
+
 	function deleteTheme(){
 		//if default theme
 		if(protectedThemes.indexOf(currentTheme.name) !== -1){
@@ -470,7 +470,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		else if (confirm(messages["confirmDeleteMsg"]) === true){
 			this.preferences.getTheme(function(themeStyles) {
 				var themeName = currentTheme.name;
-				
+
 				for (var i = 0; i < themeStyles.styles.length; i++) {
 					if (themeStyles.styles[i].name === themeName) {
 						themeStyles.styles.splice(i, 1);
@@ -483,7 +483,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		}
 	}
 	ThemeBuilder.prototype.deleteTheme = deleteTheme;
-	
+
 	function saveTheme(){
 		if(protectedThemes.indexOf(currentTheme.name) !== -1){
 			window.alert(currentTheme.name + messages["cannotModifyMsg"]);
@@ -493,9 +493,28 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		}
 	}
 	ThemeBuilder.prototype.saveTheme = saveTheme;
-	
+
 	function exportTheme() {
-		window.alert(JSON.stringify(currentTheme));
+		var themeString = JSON.stringify(currentTheme);
+
+		if (window.navigator.msSaveOrOpenBlob) { // Save blob from IE
+			var blobObject = new Blob([themeString]);
+			window.navigator.msSaveOrOpenBlob(blobObject, currentTheme.name);
+		} else { // Create a data-uri and save contents of it for other browsers
+			var encodedUri = encodeURIComponent(themeString),
+				link = document.createElement("a");
+
+			// Set the attributes for the link and append it (Firefox requires the element to actually be in the DOM)
+			link.setAttribute("href", "data:application/other;charset=utf-8," + encodedUri);
+			link.setAttribute("download", currentTheme.name + ".json");
+			document.body.appendChild(link);
+
+			// Simulate the click event
+			link.click();
+
+			// Remove the element from the DOM
+			link.remove();
+		}
 	}
 	ThemeBuilder.prototype.exportTheme = exportTheme;
 
