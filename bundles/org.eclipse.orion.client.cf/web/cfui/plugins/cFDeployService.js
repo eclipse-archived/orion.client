@@ -585,6 +585,8 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 				return cFService.getApp(params.Target, params.Name).then(function(result) {
 					var app = result;
 					var appState = {
+						Name: app.name,
+						Guid: app.guid,
 						State: (app.running_instances > 0 ? "STARTED" : "STOPPED"), //$NON-NLS-0$//$NON-NLS-1$
 						Message: i18nUtil.formatMessage(messages["${0}of${1}instance(s)Running"], app.running_instances, app.instances),
 						Environment: app.environment_json
