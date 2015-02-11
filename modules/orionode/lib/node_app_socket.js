@@ -10,7 +10,13 @@
  *******************************************************************************/
 /*eslint-env node*/
 var term = require('term.js');
-var pty = require('pty.js');
+var pty;
+try {
+	pty = require("pty.js");
+} catch (e) {
+	console.error(e);
+	console.error("pty.js is not installed. Some features will be unavailable.");
+}
 
 function emitError(socket, error) {
 	socket.emit('error', error && error.stack);
@@ -106,6 +112,14 @@ exports.install = function(options) {
 	});
   io.of('/tty').on('connection', function(sock) {
     sock.on('start', function(cwd) {
+      // Handle missing pty.js
+      if (!pty) {
+        var error = new Error('pty.js is not installed on this server. Terminal cannot be used.');
+        console.error(error);
+        sock.emit('fail', error.message);
+        return;
+      }
+
       var realCWD = appContext.getPath(cwd);
       var buff = [];
       // Open Terminal Connection

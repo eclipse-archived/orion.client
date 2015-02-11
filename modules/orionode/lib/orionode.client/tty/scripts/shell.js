@@ -37,6 +37,9 @@ require(["/socket.io/socket.io.js", "scripts/term.js", "/requirejs/domReady.js",
     socket.on('connect', function() {
       socket.emit('start', getCWD());
     });
+    socket.on('fail', function(error) {
+      console.log(error);
+    });
 	
 	var term;
     socket.on('ready', function() {

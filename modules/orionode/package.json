@@ -11,8 +11,10 @@
     "deferred-fs": "~0.3.2",
     "rimraf": "~2.2.6",
     "socket.io-client": "~0.9.11",
-    "term.js": "0.0.3",
-    "pty.js": "0.2.3"
+    "term.js": "0.0.3"
+  },
+  "optionalDependencies": {
+    "pty.js": "0.2.5"
   },
   "devDependencies": {
     "mocha": "*",
