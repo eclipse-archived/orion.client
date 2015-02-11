@@ -26,7 +26,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 				if (mypostrequest.readyState === 4) {
 					if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
 						var responseObject = JSON.parse(mypostrequest.responseText);
-						common.showErrorMessage(responseObject.error);
+						common.showStatusMessage(responseObject.error);
 					} else {
 						finishLogin(username, password);
 					}
@@ -128,6 +128,17 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 				}
 			}
 		);
+
+		var error = common.getParam("error");
+		if (error) {
+			var errorMessage = common.decodeBase64(error);
+
+			common.showStatusMessage(errorMessage);
+		}
+
+		// FIX the hrefs of the various forms here.
+		document.getElementById("signInWithGoogle").href = common.createOAuthLink("google");
+		document.getElementById("signInWithGitHub").href = common.createOAuthLink("github");
 
 		setUpLoginPage();
 	});

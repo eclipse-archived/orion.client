@@ -17,7 +17,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 		var responseObject;
 
 		if (document.getElementById("username").value === "" && document.getElementById("resetEmail").value === "") {
-			common.showErrorMessage("Provide username or email to reset.");
+			common.showStatusMessage("Provide username or email to reset.");
 			return;
 		}
 		var username = document.getElementById("username").value;
@@ -28,21 +28,21 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 				if (mypostrequest.status === 200) {
 					responseObject = JSON.parse(mypostrequest.responseText);
 					if (responseObject.Message) {
-						common.showErrorMessage(responseObject.Message);
+						common.showStatusMessage(responseObject.Message);
 					} else {
-						common.showErrorMessage();
+						common.showStatusMessage();
 					}
 				} else {
 					try {
 						responseObject = JSON.parse(mypostrequest.responseText);
 						if (responseObject.Message) {
-							common.showErrorMessage(responseObject.Message);
+							common.showStatusMessage(responseObject.Message);
 							return;
 						}
 					} catch (e) {
 						// not json
 					}
-					common.showErrorMessage(mypostrequest.statusText);
+					common.showStatusMessage(mypostrequest.statusText);
 				}
 			}
 		};
@@ -57,7 +57,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 		xsrfUtils.addCSRFNonce(mypostrequest);
 		mypostrequest.send(JSON.stringify(formData));
 
-		common.showErrorMessage("Sending password reset confirmation...");
+		common.showStatusMessage("Sending password reset confirmation...");
 	}
 
 	function setUpResetPage () {
