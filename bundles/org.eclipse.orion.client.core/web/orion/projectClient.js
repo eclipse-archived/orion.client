@@ -539,7 +539,6 @@ define([
 
 	getProjectLaunchConfigurations: function(projectMetadata){
 		var deferred = new Deferred();
-		var combinedResult = new Deferred();
 
 		this.getLaunchConfigurationsDir(projectMetadata).then(function(launchConfMeta){
 			if(!launchConfMeta){
@@ -624,54 +623,7 @@ define([
 			}
 		}.bind(this), deferred.reject);
 
-		deferred.then(function(results){
-			var i = 0;
-			function addPluginLaunchConfugurations(i, deferred){
-				if(i >= this.allProjectDeployReferences.length){
-					return deferred;
-				}
-				var deployServiceRef = this.allProjectDeployReferences[i];
-				var deployService = this._getProjectDeployService(deployServiceRef);
-
-				if(deployService.getLaunchConfigurations){
-					var retDef = new Deferred();
-					deferred.then(function(lConfs){
-						i++;
-						var tempDef = new Deferred();
-						deployService.getLaunchConfigurations(projectMetadata, lConfs).then(function(lConfs1){
-							lConfs1.forEach(function(lc){
-								if(!lc.ServiceId){
-									lc.ServiceId = deployService.id;
-								}
-							});
-							tempDef.resolve(lConfs1);
-						}, tempDef.reject);
-						addPluginLaunchConfugurations.bind(this)(i, tempDef).then(retDef.resolve, retDef.reject);
-					}.bind(this), retDef.reject);
-					return retDef;
-				} else {
-					i++;
-					return addPluginLaunchConfugurations.bind(this)(i, deferred);
-				}
-			};
-
-			var lConfs = [];
-			results.forEach(function(lc){
-				lConfs.push(this.formPluginLaunchConfiguration(lc));
-			}.bind(this));
-
-			var tempDef = new Deferred();
-			tempDef.resolve(lConfs);
-			addPluginLaunchConfugurations.bind(this)(i, tempDef).then(function(lConfs){
-				for(var i=0; i<lConfs.length; i++){
-						var lConf = lConfs[i];
-						lConfs[i] = this.formLaunchConfiguration(lConf.ConfigurationName, lConf.ServiceId, lConf.Parameters, lConf.Url, lConf.ManageUrl, lConf.Path, lConf.Type, lConf.File);
-					}
-					combinedResult.resolve(lConfs);
-			}.bind(this), combinedResult.reject);
-		}.bind(this), combinedResult.reject);
-
-		return combinedResult;
+		return deferred;
 	},
 
 	formLaunchConfiguration: function(configurationName, serviceId, params, url, manageUrl, path, deployType, file){

@@ -288,22 +288,7 @@ define([
 				
 				if((event.type === "create") && newConfig){ //$NON-NLS-0$
 					// cache and select new launch config
-					this._putInLaunchConfigurationsCache(newConfig);
-					
-					// iterate over cached launch configs, find and delete syntetic ones
-					for (var hash in this._cachedLaunchConfigurations) {
-						if (this._cachedLaunchConfigurations.hasOwnProperty(hash)) {
-							if (this._cachedLaunchConfigurations[hash].Params.Synthetic) {
-								if (this._cachedLaunchConfigurations[hash] === this._selectedLaunchConfiguration) {
-									this.selectLaunchConfiguration(null);
-								}
-								
-								this._removeFromLaunchConfigurationsCache(this._cachedLaunchConfigurations[hash]);
-								break;
-							}
-						}
-					}
-					
+					this._putInLaunchConfigurationsCache(newConfig);					
 					this.selectLaunchConfiguration(newConfig, true); //check the status of newly created configs
 				} else if(event.type === "delete"){ //$NON-NLS-0$
 					var deletedFile = event.oldValue.File;
