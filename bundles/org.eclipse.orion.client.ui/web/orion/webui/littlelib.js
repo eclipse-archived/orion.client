@@ -406,8 +406,8 @@ define(["orion/util"], function(util) {
 	 * 									The parent's contents will be completely replaced.
 	 * @returns If the template string contains a single node or a wrapper node which
 	 * 			wraps all the other nodes that single DOM node will be returned. 
-	 * 			Otherwise if the template string contains multiple top-level nodes a
-	 * 			{NodeList} object containing all the top-level nodes will be returned.
+	 * 			Otherwise if the template string contains multiple top-level nodes an
+	 * 			{HTMLCollection} object containing all the top-level nodes will be returned.
 	 */
 	function createNodes(templateString, parentNode) {
 		var parent = parentNode;
@@ -418,8 +418,8 @@ define(["orion/util"], function(util) {
 		}
 
 		parent.innerHTML = templateString;	
-		if (1 < parent.childNodes.length) {
-			newNodes = parent.childNodes;
+		if (parent.children.length > 1) {
+			newNodes = parent.children;
 		} else {
 			newNodes = parent.firstChild;
 		}
