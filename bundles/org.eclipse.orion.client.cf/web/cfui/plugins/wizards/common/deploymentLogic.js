@@ -78,7 +78,7 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 			var postMsg = options.postMsg;
 			var postError = options.postError;
 
-//			var fileService = options.FileService;
+			var fileService = options.FileService;
 //			var cfService = options.CFService;
 			var targetSelection = options.getTargetSelection();
 
@@ -100,17 +100,40 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 				var devMode = options.getDevMode ? options.getDevMode() : null;
 				
 				var appName = results.name;
-				var configName = confName || (appName + "-" + Math.floor(Date.now() / 1000));
 				var target = selection;
 				
-				mCfUtil.prepareLaunchConfigurationContent(configName, target, appName, appPath, instrumentation, devMode).then(
-					function(launchConfigurationContent){
-						postMsg(launchConfigurationContent);
-					}, function(error){
-						postError(error, selection);
-					}
-				);
+				if (confName){
+					mCfUtil.prepareLaunchConfigurationContent(confName, target, appName, appPath, instrumentation, devMode).then(
+						function(launchConfigurationContent){
+							postMsg(launchConfigurationContent);
+						}, function(error){
+							postError(error, selection);
+						}
+					);
+					return;
+				}
 
+				fileService.read(contentLocation + "launchConfigurations?depth=1", true).then(
+					function(projectDir){
+						var children = projectDir.Children;
+						var counter = 1;
+						for(var i=0; i<children.length; i++){
+							var childName = children[i].Name.replace(".launch", "");
+							childName = childName.replace(appName + "-", "");
+							var launchConfCounter = parseInt(Number(childName), 10);
+							if (!isNaN(launchConfCounter) && launchConfCounter >= counter)
+								counter = launchConfCounter + 1;
+						}
+						
+						mCfUtil.prepareLaunchConfigurationContent(appName + "-" + counter, target, appName, appPath, instrumentation, devMode).then(
+							function(launchConfigurationContent){
+								postMsg(launchConfigurationContent);
+							}, function(error){
+								postError(error, selection);
+							}
+						);
+					}.bind(this), postError
+				);
 			}, postError);
 		};
 	}

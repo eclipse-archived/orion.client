@@ -12,9 +12,10 @@
 /*eslint-env browser, amd*/
 define([
 	'orion/Deferred',
+	'orion/objects',
 	'orion/extensionCommands',
 	'orion/i18nUtil',
-], function(Deferred, mExtensionCommands, i18nUtil){
+], function(Deferred, objects, mExtensionCommands, i18nUtil){
 
 	function _toJSON(text) {
 		try {
@@ -560,7 +561,7 @@ define([
 					this.fileClient.read(file.Location).then(function(launchConf){
 						try{
 							launchConf = JSON.parse(launchConf);
-							launchConf.Name = launchConf.Name || launchConfMeta.Name.replace(".launch", "");
+							launchConf.Name = file.Name.replace(".launch", "");
 							launchConf.project = projectMetadata;
 							launchConf.File = file;
 							launchConf.File.parent = launchConfMeta;
@@ -678,7 +679,7 @@ define([
 	normalizeFileName : function(fileName, extension){
 		var tmp = fileName;
 		tmp = tmp.replace(/\ /g,' '); //$NON-NLS-0$
-		tmp = tmp.replace(/[^\w\d\s]/g, '');
+		tmp = tmp.replace(/[^\w\d\s-]/g, '');
 
 		if(tmp.indexOf(extension) < 0)
 			tmp += extension;
@@ -708,47 +709,29 @@ define([
 		return deferred;
 	},
 
-	saveProjectLaunchConfiguration: function(projectMetadata, configurationName, serviceId, params, url, manageUrl, path, deployType, additionalConfiguration){
+	saveProjectLaunchConfiguration: function(projectMetadata, configurationName, serviceId, params, url, manageUrl, path, deployType){
 		var deferred = new Deferred();
 
 		var configurationFile = this.normalizeFileName(configurationName, ".launch"); //$NON-NLS-0$
 		var launchConfigurationEntry = this.formLaunchConfiguration(configurationName, serviceId, params, url, manageUrl, path, deployType);
 
-		this._ensureLaunchConfigurationDir(projectMetadata).then(function(launchConfDir){
-
-			var launchConfigurationContents = JSON.stringify(launchConfigurationEntry, null, 2);
-			this._updateOrCreate(launchConfDir, configurationFile, launchConfigurationContents).then(function(result){
-
-				launchConfigurationEntry.File = result;
-				launchConfigurationEntry.File.parent = launchConfDir;
-
-				if(additionalConfiguration){
-					this.saveAdditionalProjectLaunchConfiguration(projectMetadata, configurationName, additionalConfiguration, launchConfDir).then(function(){
+		this._ensureLaunchConfigurationDir(projectMetadata).then(
+			function(launchConfDir){
+				/* TODO this is hack, we should handle launch conf represenations and persisting them in a civilized way */
+				var launchConfToSave = objects.clone(launchConfigurationEntry);
+				launchConfToSave.Name = undefined;
+				
+				var launchConfigurationContents = JSON.stringify(launchConfToSave, null, 2);
+				this._updateOrCreate(launchConfDir, configurationFile, launchConfigurationContents).then(
+					function(result){
+						launchConfigurationEntry.File = result;
+						launchConfigurationEntry.File.parent = launchConfDir;
 						deferred.resolve(launchConfigurationEntry);
-					}, deferred.reject);
-				} else
-					deferred.resolve(launchConfigurationEntry);
 
-			}.bind(this), deferred.reject);
-
-		}.bind(this), deferred.reject);
-		return deferred;
-	},
-
-	saveAdditionalProjectLaunchConfiguration: function(projectMetadata, configurationName, additionalConfiguration, launchConfDir){
-		var deferred = new Deferred();
-
-		this._ensureLaunchConfigurationDir(projectMetadata, launchConfDir).then(function(_launchConfDir){
-
-			/* persist additional information */
-			var extension = additionalConfiguration.extension;
-			var additionalContents = additionalConfiguration.contents;
-
-			var sharedConfigurationFile = this.normalizeFileName(configurationName, extension);
-			this._updateOrCreate(_launchConfDir, sharedConfigurationFile, additionalContents).then(deferred.resolve, deferred.reject);
-
-		}.bind(this));
-
+					}.bind(this), deferred.reject
+				);
+			}.bind(this), deferred.reject
+		);
 		return deferred;
 	},
 
