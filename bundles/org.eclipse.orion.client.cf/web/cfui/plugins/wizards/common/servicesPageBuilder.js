@@ -30,6 +30,7 @@ define([
 		_init : function(options){
 			
 			this._manifestServices = options.ManifestServices;
+			this._manifestInstrumentation = options.ManifestInstrumentation || {};
 			this._getTargetSelection = options.getTargetSelection;
 			
 			this._cfService = options.CFService;
@@ -110,7 +111,7 @@ define([
 						}
 					});
 					
-					var services = self._manifestServices;
+					var services = self._manifestInstrumentation.services || self._manifestServices;
 					if(self._manifestServices){
 						if(!Array.isArray(services)){
 							if(typeof services === "object"){ //$NON-NLS-0$

@@ -26,12 +26,20 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 		if(manifestContents.applications[0].domain !== results.domain)
 			manifestInstrumentation.domain = results.domain;
 
-//		if(results.services){
-//			if(results.services.length === 0)
-//				delete manifestContents.applications[0].services;
-//			else
-//				manifestContents.applications[0].services = results.services;
-//		}
+		var manifestServices = manifestContents.applications[0].services;
+		var selectedServices = results.services;
+		if ((!manifestServices || manifestServices.length === 0) && selectedServices.length > 0) {
+			manifestInstrumentation.services = results.services;
+		} else if (manifestServices && manifestServices.length != selectedServices.length) {
+			manifestInstrumentation.services = results.services;
+		} else if (manifestServices && manifestServices.length === selectedServices.length) {
+			for (var i=0; i<manifestServices.length; i++){
+				if (manifestServices[i] !== selectedServices[i]){
+					manifestInstrumentation.services = results.services;
+					break;
+				}
+			}
+		}
 
 		var manifestCommand = manifestContents.applications[0].command || "";
 		if(manifestCommand !== results.command && typeof results.command === "string") //$NON-NLS-0$

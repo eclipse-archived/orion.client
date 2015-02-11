@@ -114,6 +114,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 		    /* init services page builder */
 		    var servicesPageBuilder = new mServicesPageBuilder.ServicesPageBuilder({
 		    	ManifestServices : manifestApplication.services,
+		    	ManifestInstrumentation: launchConfParams.Instrumentation,
 
 		    	CFService : cfService,
 		    	getTargetSelection : function(){
