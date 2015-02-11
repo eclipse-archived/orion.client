@@ -88,37 +88,10 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 			    	/* memory */
 			    	document.getElementById("memoryLabel").appendChild(document.createTextNode(messages["memory:"])); //$NON-NLS-0$
 			    	self._memory = document.createElement("input"); //$NON-NLS-0$
-			    	
-			    	self._memory.id = "memoryInput"; //$NON-NLS-0$
-			    	self._memory.type = "number"; //$NON-NLS-0$
-			    	self._memory.min = "0"; //$NON-NLS-0$
-			    	
-			    	self._memoryUnit = document.createElement("select"); //$NON-NLS-0$
-			    	self._memoryUnit.id = "memoryUnit"; //$NON-NLS-0$
-					
-			    	var option = document.createElement("option"); //$NON-NLS-0$
-					option.appendChild(document.createTextNode("MB")); //$NON-NLS-0$
-					option.value = "M"; //$NON-NLS-0$
-					self._memoryUnit.appendChild(option);
-					
-					option = document.createElement("option"); //$NON-NLS-0$
-					option.appendChild(document.createTextNode("GB")); //$NON-NLS-0$
-					option.value = "G"; //$NON-NLS-0$
-					self._memoryUnit.appendChild(option);
-					
-			    	if(self._manifestApplication.memory && (self._manifestApplication.memory.toUpperCase().indexOf("M") > 0 || self._manifestApplication.memory.toUpperCase().indexOf("G") > 0)){ //$NON-NLS-0$ //$NON-NLS-1$
-			    		var indexOfUnit = self._manifestApplication.memory.toUpperCase().indexOf("M") > 0 ? self._manifestApplication.memory.toUpperCase().indexOf("M") : self._manifestApplication.memory.toUpperCase().indexOf("G"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
-			    		self._memory.value = self._manifestApplication.memory.substring(0, indexOfUnit);
-			    		
-						var unit = self._manifestApplication.memory.substring(indexOfUnit).toUpperCase();
-						if(unit.trim().length === 1)
-							unit += "B"; //$NON-NLS-0$
-						
-						self._memoryUnit.value = unit;
-			    	}
-			    	
+			    	if(self._manifestApplication.memory)
+			    		self._memory.value = self._manifestApplication.memory;
+
 			    	document.getElementById("memory").appendChild(self._memory); //$NON-NLS-0$
-			    	document.getElementById("memory").appendChild(self._memoryUnit); //$NON-NLS-0$
 			    	
 			    	/* instances */
 			    	document.getElementById("instancesLabel").appendChild(document.createTextNode(messages["instances:"])); //$NON-NLS-0$
@@ -151,7 +124,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 						ret.buildpack = self._buildpack.value;
 					
 					if(self._memory)
-						ret.memory = self._memory.value ? self._memory.value + self._memoryUnit.value : "";
+						ret.memory = self._memory.value;
 					
 					if(self._instances)
 						ret.instances = self._instances.value;
