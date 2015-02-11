@@ -189,9 +189,8 @@
 	height: 32px;
 	vertical-align: text-top;
 	width: 32px;
-	border: 1px solid lightgrey;
+	border: none;
 	padding: 2px;
-	margin-top: -1px;
 	margin-left: 2px;
 	margin-right: 8px;
 	box-sizing: initial !important;

@@ -172,6 +172,8 @@
 }
 
 .modelDecorationSprite {
+ 	-webkit-box-sizing: initial !important;
+	box-sizing: initial !important;
 	color: #798891 !important;
 	text-decoration: none !important;
 }
