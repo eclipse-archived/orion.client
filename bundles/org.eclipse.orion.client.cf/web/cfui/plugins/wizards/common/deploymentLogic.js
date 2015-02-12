@@ -53,8 +53,6 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/objects', 'cfui/cfUti
 		if(manifestBuildpack !== results.buildpack && typeof results.buildpack === "string") //$NON-NLS-0$
 			manifestInstrumentation.buildpack = results.buildpack;
 		
-		console.info(manifestContents.applications[0].memory);
-		console.info(results.memory);
 		if(manifestContents.applications[0].memory !== results.memory && typeof results.memory === "string") //$NON-NLS-0$
 			manifestInstrumentation.memory = results.memory;
 		
