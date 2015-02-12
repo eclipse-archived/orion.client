@@ -406,14 +406,17 @@ define([
 		},
 		
 		setStatus: function(status) {
-			var appInfoText = null;
-			var statusLightText = null;
+			var longStatusText = null;
+			var tooltipText = "";
 			var uriTemplate = null;
 			var uriParams = null;
+			var logLocationTemplate = null;			
+			var appName = this._getDisplayName(this._selectedLaunchConfiguration);
+			var appInfoText = this._getAppInfoText(status);
+
 			
 			// logLocationTemplate in status takes precendence because it comes from the 
 			// service implementation's method rather than from the service properties
-			var logLocationTemplate = null;
 			if (status || (this._selectedLaunchConfiguration && this._selectedLaunchConfiguration.Params)) {
 				logLocationTemplate = (status && status.logLocationTemplate) || this._selectedLaunchConfiguration.Params.LogLocationTemplate;
 			}
@@ -430,51 +433,57 @@ define([
 			if (status) {
 				if (status.error) {
 					this._enableControl(this._playButton);
+					
 					if (!status.error.Retry) {
+						// this is a real error
 						if (status.error.Message) {
-							statusLightText = status.error.Message;
+							longStatusText = status.error.Message;
 						}
 					}
-					// set the short status that appears next to the app name
-					appInfoText = status.ShortMessage || statusLightText || messages["appInfoUnknown"]; //$NON-NLS-0$
 				} else {
 					switch (status.State) {
 						case "PROGRESS": //$NON-NLS-0$
 							this._statusLight.classList.add("statusLightProgress"); //$NON-NLS-0$
-							if (status.ShortMessage || status.Message) {
-								appInfoText = status.ShortMessage || status.Message;
-							}
 							this._stopStatusPolling(); // do not poll while status is in a transitive state
 							break;
 						case "STARTED": //$NON-NLS-0$
 							this._enableControl(this._playButton);
 							this._enableControl(this._stopButton);
 							this._statusLight.classList.add("statusLightGreen"); //$NON-NLS-0$
-							
-							appInfoText = messages["appInfoRunning"]; //$NON-NLS-0$
 							break;
 						case "STOPPED": //$NON-NLS-0$
 							this._enableControl(this._playButton);
 							this._statusLight.classList.add("statusLightRed"); //$NON-NLS-0$
-							
-							appInfoText = messages["appInfoStopped"]; //$NON-NLS-0$
 							break;
 						default:
 							break;
 					}
-					statusLightText = status.Message;
+					longStatusText = status.Message;
 				}
 				
-				if ("PROGRESS" !== status.State) {
+				if (!status.error && ("PROGRESS" !== status.State)) {
 					this._startStatusPolling();
 				}
 			}
 			
-			this._setNodeTooltip(this._statusLight, statusLightText);
+			if (appName) {
+				tooltipText = appName;
+				if (appInfoText) {
+					tooltipText += " (" + appInfoText + ")"; //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				if (appInfoText !== longStatusText) {
+					tooltipText += " : " + longStatusText; //$NON-NLS-0$
+				}
+				
+			}
+			this._setNodeTooltip(this._launchConfigurationsDropdownTriggerButton, tooltipText);
 			
 			if (appInfoText) {
 				this._setText(this._appInfoSpan, "(" + appInfoText.toLocaleLowerCase() + ")"); //$NON-NLS-1$ //$NON-NLS-0$
+			} else {
+				this._setText(this._appInfoSpan, null);
 			}
+			
 			
 			if (status && status.Url) {
 				this._enableLink(this._appLink, status.Url);
@@ -486,6 +495,36 @@ define([
 				objects.mixin(uriParams, {OrionHome : PageLinks.getOrionHome()});
 				this._enableLink(this._logsLink, uriTemplate.expand(uriParams));
 			}
+		},
+		
+		_getAppInfoText: function(status) {
+			var appInfoText = ""; //$NON-NLS-0$
+			
+			if (status) {
+				if (status.error) {
+					if (status.error.Retry) {
+						appInfoText = status.ShortMessage || messages["appInfoUnknown"]; //$NON-NLS-0$
+					} else {
+						appInfoText = status.ShortMessage || status.error.Message || messages["appInfoError"]; //$NON-NLS-0$
+					}
+				} else {
+					switch (status.State) {
+						case "PROGRESS": //$NON-NLS-0$
+							if (status.ShortMessage || status.Message) {
+								appInfoText = status.ShortMessage || status.Message;
+							}
+							break;
+						case "STARTED": //$NON-NLS-0$
+							appInfoText = messages["appInfoRunning"]; //$NON-NLS-0$
+							break;
+						case "STOPPED": //$NON-NLS-0$
+							appInfoText = messages["appInfoStopped"]; //$NON-NLS-0$
+							break;
+					}
+				}
+			}
+			
+			return appInfoText;
 		},
 		
 		/**
@@ -672,7 +711,6 @@ define([
 				lib.empty(this._launchConfigurationsLabel);
 				
 				this._setText(this._appName, displayName);
-				this._setNodeTooltip(this._appName, displayName);
 				this._setText(this._appInfoSpan, null);
 				
 				this._launchConfigurationsLabel.appendChild(this._statusLight);

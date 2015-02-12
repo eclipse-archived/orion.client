@@ -203,6 +203,7 @@
 	flex-shrink: 0;
 	overflow: hidden;
 	margin-left: 4px;
+	max-width: 50%;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }

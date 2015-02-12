@@ -79,6 +79,7 @@ define({//Default message bundle
 	"appInfoStopped": "stopped",
 	"appInfoRunning": "running",
 	"appInfoUnknown": "unknown",
+	"appInfoError": "error",
 	"displayNameSeparator": " on ",
 	"openAppTooltip": "Open the application URL",
 	"openLogsTooltip": "Open logs",
