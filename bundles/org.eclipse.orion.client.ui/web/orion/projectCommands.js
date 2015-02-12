@@ -251,7 +251,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 						if((error.State || error.CheckState)){
 							context.launchConfiguration.status = error;
 						} else {
-							delete context.launchConfiguration.status;
+							context.launchConfiguration.status = {error: error};
 						}
 						if(sharedLaunchConfigurationDispatcher){
 							sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration});
