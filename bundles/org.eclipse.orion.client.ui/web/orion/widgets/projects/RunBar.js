@@ -603,12 +603,12 @@ define([
 		},
 		
 		_disableLink: function(linkNode) {
-			linkNode.href = "javascript: void(0)"; //$NON-NLS-0$
+			linkNode.removeAttribute("href"); //$NON-NLS-0$
 			this._disableControl(linkNode);
 		},
 		
 		_isLinkDisabled: function(linkNode) {
-			return ("javascript: void(0)" === linkNode.href); //$NON-NLS-0$ 
+			return !linkNode.hasAttribute("href") || !linkNode.href; //$NON-NLS-0$
 		},
 		
 		_linkClickListener: function(event) {
