@@ -187,7 +187,7 @@ define([
 	function getDirectiveInsertionPoint(node) {
 	    if(node.type === 'Program' && node.body && node.body.length > 0) {
             var n = node.body[0];
-            if(n.type === 'FunctionDeclaration') {
+            if(n.type === 'FunctionDeclaration' || (n.type === 'ExpressionStatement' && n.expression && n.expression.right && n.expression.right.type === 'FunctionExpression')) {
                 if(n.leadingComments && n.leadingComments.length > 0) {
                     var comment = n.leadingComments[n.leadingComments.length-1];
                     if(/(?:@param|@return|@returns|@type|@constructor|@name|@description)/ig.test(comment.value)) {
