@@ -282,6 +282,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					// render the launch config field
 					document.getElementById("launchConfLabel").textContent = messages["launchConfLabel"]; //$NON-NLS-1$ //$NON-NLS-0$
 					self._launchConfInput = document.createElement("input"); //$NON-NLS-0$
+					self._launchConfInput.readOnly = true;
 					self._launchConfInput.value = self._confName;
 					document.getElementById("launchConf").appendChild(self._launchConfInput); //$NON-NLS-0$
 					
