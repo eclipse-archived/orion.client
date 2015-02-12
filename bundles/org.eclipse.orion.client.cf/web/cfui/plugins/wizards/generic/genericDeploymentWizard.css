@@ -60,13 +60,27 @@ select {
 	border: 1px solid #bbb;
 }
 
+.selectCell>input, .selectCell>select, .selectCell>.comboTextInputWrapper {
+	float:right;
+	color: #333;
+}
+.selectCell>select {
+	width: 292px;
+}
+/*hacko: push simple text span over to align with inputs and selects*/
+.selectCell>span {
+	padding-left: 9px;
+}
+.selectCell .core-sprite-openarrow {
+	color: inherit;
+}
+
 .modifiedCell {
 	background-color: yellow;
 }
 
 .comboTextInputWrapper {
-	height: 24px;
-	width: 290px;
+	height: 26px;
 	border: 1px solid #bbb;
 }
 
@@ -90,14 +104,19 @@ select {
 }
 
 .formTable {
-	font-family: Arial, sans-serif;
+	/*font-family: Arial, sans-serif;*/
 	font-size: 14px;
 	width: 100%;
+}
+
+.formTable input, .formTable select {
+	font-size: 14px;
 }
 
 .selectCell {
 	padding-top: 4px;
 	text-align: left;
+	height: 24px; /*since min-height has no effect on <td>*/
 }
 
 .listCell select {
@@ -205,6 +224,7 @@ select {
 	width: 50px;
 }
 
+
 input[type='number'] {
 	-moz-appearance: textfield;
 }
@@ -217,4 +237,48 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 
 .rowSeparator {
 	height: 20px;
+}
+
+.rowSeparator td {
+	padding: 15px 0 12px 0;
+}
+
+.wizardButtonRow button {
+	text-transform: uppercase;
+}
+
+.wiz-hr {
+	display: block;
+	text-align: center;
+	overflow: hidden;
+	white-space: nowrap;
+}
+.wiz-hr > span {
+	position: relative;
+	display: inline-block;
+}
+.wiz-hr > span:before,
+.wiz-hr > span:after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	width: 1000px;
+	height: 1px;
+	background: black;
+}
+.wiz-hr > span:before {
+	right: 100%;
+	margin-right: 10px;
+}
+.wiz-hr > span:after {
+	left: 100%;
+	margin-left: 10px;
+}
+
+.manifestOverride {
+	text-align: center;
+	font-size: 9pt;
+	position: absolute;
+	bottom: 75px;
+	width: calc(100% - 24px);
 }

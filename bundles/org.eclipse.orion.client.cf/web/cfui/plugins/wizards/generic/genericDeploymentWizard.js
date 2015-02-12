@@ -8,14 +8,14 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global parent window document define orion setTimeout*/
+/*global parent window document define orion setTimeout URL*/
 
 define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfui/cFClient', 'orion/PageUtil',
 	'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'cfui/plugins/wizards/common/wizardUtils',
 	'orion/webui/Wizard', 'cfui/plugins/wizards/common/deploymentLogic', 'cfui/plugins/wizards/common/commonPaneBuilder', 'cfui/plugins/wizards/common/corePageBuilder',
-	'cfui/plugins/wizards/common/servicesPageBuilder', 'cfui/plugins/wizards/common/additionalParamPageBuilder'],
+	'cfui/plugins/wizards/common/servicesPageBuilder', 'cfui/plugins/wizards/common/additionalParamPageBuilder', 'orion/Deferred'],
 		function(messages, mBootstrap, objects, CFClient, PageUtil, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, Wizard,
-				mDeploymentLogic, mCommonPaneBuilder, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder) {
+				mDeploymentLogic, mCommonPaneBuilder, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder, Deferred) {
 
 	/* plugin-host communication */
 	var postMsg = mWizardUtils.defaultPostMsg;
@@ -75,18 +75,27 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 		var plan = resource.Plan;
 		var manifestApplication = plan.Manifest.applications[0];
 		var launchConfParams = resource.ConfParams || {};
-		var launchConfName = resource.ConfName;
 		if (launchConfParams.Instrumentation)
 			launchConfParams.Instrumentation.name = launchConfParams.Name;
 
-		mWizardUtils.loadClouds({
+		function ensureLaunchConfName() {
+			if (!resource.ConfName) {
+				// Creating a new launch config -- generate a name based on the app name
+				var appName = manifestApplication.name;
+				return mDeploymentLogic.uniqueLaunchConfigName(fileClient, resource.ContentLocation, appName);
+			}
+			return new Deferred().resolve(resource.ConfName);
+		}
+
+		Deferred.all([ensureLaunchConfName(), mWizardUtils.loadClouds({
 			showMessage : showMessage,
 			hideMessage : hideMessage,
 			preferences : preferences,
 			fileClient : fileClient,
 			resource : resource
-		}).then(function(resp){
-
+		})]).then(function(results){
+			var launchConfName = results[0];
+			var resp = results[1];
 			var clouds = resp.clouds;
 			var defaultTarget = launchConfParams.Target || resp.defaultTarget;
 
@@ -97,6 +106,8 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 
 			/* init core page builder */
 		    var corePageBuilder = new mCorePageBuilder.CorePageBuilder({
+				ConfName: launchConfName,
+
 		    	Clouds : clouds,
 		    	DefaultTarget : defaultTarget,
 
@@ -144,7 +155,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 				pages: [page1, page2, page3],
 				onCancel: closeFrame,
 				buttonNames: { ok: messages["save"] },
-				size: { width: "420px", height: "210px" }, //$NON-NLS-0$//$NON-NLS-1$
+				size: { width: "calc(100% - 24px)", height: "320px" }, //$NON-NLS-0$//$NON-NLS-1$
 				onSubmit: mDeploymentLogic.buildDeploymentTrigger({
 					ConfName : launchConfName,
 					showMessage : showMessage,
