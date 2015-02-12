@@ -159,12 +159,13 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					domains.Domains.forEach(function(domain){
 						var option = document.createElement("option"); //$NON-NLS-0$
 						option.appendChild(document.createTextNode(domain.DomainName));
-						if (domain.DomainName === self._manifestInstrumentation.domain){
-							option.selected = "selected"; //$NON-NLS-0$
-							self._domainsDropdown.classList.add("modifiedCell");
-						}  else if(self._manifestApplication.domain){
+						
+						if (domain.DomainName === (self._manifestInstrumentation.domain || self._manifestApplication.domain)){
 							option.selected = "selected"; //$NON-NLS-0$
 				    	}
+						if (self._manifestInstrumentation.domain) {
+							self._domainsDropdown.classList.add("modifiedCell");
+						}
 						
 						self._domainsDropdown.appendChild(option);
 					});
