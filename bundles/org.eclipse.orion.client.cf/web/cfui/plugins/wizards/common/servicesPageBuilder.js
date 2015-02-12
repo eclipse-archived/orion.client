@@ -186,6 +186,9 @@ define([
 						}
 						
 						ret.services = services;
+					} else {
+						var services = [];
+						ret.services = self._manifestInstrumentation.services || self._manifestServices || {};
 					}
 			    	
 					return ret;
