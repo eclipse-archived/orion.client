@@ -452,6 +452,30 @@ define([
 		                      contentType: 'text/html'});
 		});
 	//NO-UNDEF
+	     /**
+	      * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458567
+	      */
+	     it("Test no-undef-defined-existing-doc", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "/*globals aa:true */",
+		                    start: 0, 
+		                    end: 0};
+		    return getFixes({buffer: '/** @returns {Object} */ function f() {aa = 10;}', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		/**
+	      * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458567
+	      */
+	     it("Test no-undef-defined-existing-doc", function() {
+		    var rule = createTestRule('no-undef');
+		    var expected = {value: "/*globals aa:true */",
+		                    start: 25, 
+		                    end: 25};
+		    return getFixes({buffer: '/** just some comment */ function f() {aa = 10;}', 
+		                      rule: rule,
+		                      expected: expected});
+		});
 		it("Test no-undef-defined-1", function() {
 		    var rule = createTestRule('no-undef');
 		    var expected = {value: "/*eslint-env node */",

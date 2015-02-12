@@ -184,6 +184,22 @@ define([
 	    return false;
 	}
 	
+	function getDirectiveInsertionPoint(node) {
+	    if(node.type === 'Program' && node.body && node.body.length > 0) {
+            var n = node.body[0];
+            if(n.type === 'FunctionDeclaration') {
+                if(n.leadingComments && n.leadingComments.length > 0) {
+                    var comment = n.leadingComments[n.leadingComments.length-1];
+                    if(/(?:@param|@return|@returns|@type|@constructor|@name|@description)/ig.test(comment.value)) {
+                        //if the immediate comment has any of the tags we use for inferencing, add the directive before it instead of after
+                        return comment.range[0];
+                    }
+                }
+            }
+	    }
+	    return node.range[0];
+	}
+	
 	Objects.mixin(JavaScriptQuickfixes.prototype, /** @lends javascript.JavaScriptQuickfixes.prototype*/ {
 		/**
 		 * @description Editor command callback
@@ -316,8 +332,8 @@ define([
                         start = comment.range[0]+2;
                         return editorContext.setText(updateDirective(comment.value, 'globals', insert), start, start+comment.value.length);
                     } else {
-                        //TODO find node, if used in assignment, set var:true in globals
-                        return editorContext.setText('/*globals '+insert+' */\n', ast.range[0], ast.range[0]);
+                        var point = getDirectiveInsertionPoint(ast);
+                        return editorContext.setText('/*globals '+insert+' */\n', point, point);
                     }
                 });
             }
@@ -341,7 +357,8 @@ define([
                             start = getDocOffset(ast.source, comment.range[0]) + comment.range[0];
     	                    return editorContext.setText(updateDirective(comment.value, 'eslint-env', env, true), start, start+comment.value.length);
                         } else {
-                            return editorContext.setText('/*eslint-env '+env+' */\n', ast.range[0], ast.range[0]);
+                            var point = getDirectiveInsertionPoint(ast);
+                            return editorContext.setText('/*eslint-env '+env+' */\n', point, point);
                         }
                     }
                 });
