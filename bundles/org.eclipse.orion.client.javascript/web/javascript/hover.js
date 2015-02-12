@@ -357,7 +357,7 @@ define([
 		    return editorContext.getFileMetadata().then(function(meta) {
 		        if(meta.contentType.id === 'application/javascript') {
 		            return that.astManager.getAST(editorContext).then(function(ast) {
-        				return that._doHover(ast, editorContext, ctxt);
+        				return that._doHover(ast, editorContext, ctxt, meta);
         			});
 		        }
 		        return editorContext.getText().then(function(text) {
@@ -366,7 +366,7 @@ define([
     		            var cu = new CU(blocks, meta);
     		            if(cu.validOffset(ctxt.offset)) {
         		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-                				return that._doHover(ast, editorContext, ctxt);
+                				return that._doHover(ast, editorContext, ctxt, meta);
                 			});
             			}
         			}
@@ -376,7 +376,7 @@ define([
 			
 		},
 		
-		_doHover: function _doHover(ast, editorContext, ctxt) {
+		_doHover: function _doHover(ast, editorContext, ctxt, meta) {
 		    if(!ctxt.offset || ctxt.offset < ast.range[0] || ctxt.offset >= ast.range[1]) {
 		        //end of the AST, nothing to hover
 		        return null;
@@ -404,18 +404,36 @@ define([
 		                var parents = node.parents;
 		                var parent = parents.pop();
 		                var that = this;
-		                if(parent.type === 'CallExpression') {
-		                    if(parent.callee.name === 'require' || parent.callee.name === 'importScripts') {
-		                        return that.resolver.getWorkspaceFile(node.value).then(function(files) {
-    			                    return that._formatFilesHover(node.value, files);
+		                if(parent.type === 'ArrayExpression') {
+		                    parent = parents.pop();
+		                    if(parent.type === 'CallExpression' && parent.callee.name === 'define') {
+		                        var path = node.value;
+    		                    return that.resolver.getWorkspaceFile(path).then(function(files) {
+    			                    return that._formatFilesHover(path, files);
     			                });
 		                    }
-		                } else if(parent.type === 'ArrayExpression') {
-		                    parent = parents.pop();
-		                    if(parent.type === 'CallExpression') {
-		                        if(parent.callee.name === 'define' || parent.callee.name === 'require') {
-			                        return that.resolver.getWorkspaceFile(node.value).then(function(files) {
-        			                    return that._formatFilesHover(node.value, files);
+		                } else if(parent.type === 'CallExpression') {
+		                    var path = node.value;
+		                    switch(parent.callee.name) {
+		                        case 'require': {
+		                            var char = path.charAt(0);
+		                            if(char !== '.' && char !== '/') {
+		                                return that.resolver.getWorkspaceFile(path).then(function(files) {
+            			                    return that._formatFilesHover(path, files);
+            			                });
+		                            }
+		                        }
+		                        //$FALLTHROUGH$
+		                        case 'importScripts': {
+		                            var path = node.value;
+    		                        return that.resolver.getWorkspaceFile(path).then(function(files) {
+    		                            if(!/\.js$/.test(path)) {
+    		                                path += '.js';
+    		                            }
+    		                            var rels = that.resolver.resolveRelativeFiles(path, files, meta);
+    		                            if(rels && rels.length > 0) {
+        			                        return that._formatFilesHover(node.value, rels);
+        			                    }
         			                });
 		                        }
 		                    }
@@ -541,7 +559,10 @@ define([
 		 */
 		_formatFilesHover: function _formatFilesHover(path, files) {
 		    if(path && files) {
-		        var title = '###Open file for \''+path+'\'###';
+		        var title = null;
+		        if(files.length > 1) {
+		             title = '###Open file for \''+path+'\'###';
+		        }
 		        var hover = '';
 		        for(var i = 0; i < files.length; i++) {
 		            var file = files[i];

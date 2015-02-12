@@ -56,19 +56,19 @@ define([
 			                    switch(node.kind) {
 			                        case 'href': {
 			                            if(/\.(?:png|jpg|jpeg|bmp|gif)$/.test(path)) {
-                            	            return that._getImageHover(path);
+                            	            return that._getImageHover(editorContext, path);
                             	        } else if(/^data:image.*;base64/i.test(path)) {
-                            	            return that._getImageHover(path, true);
+                            	            return that._getImageHover(editorContext, path, true);
                             	        }
-			                            return that._getFileHover(path);
+			                            return that._getFileHover(editorContext, path);
 			                        }
 			                        case 'src': {
 			                            if(/\.(?:png|jpg|jpeg|bmp|gif)$/.test(path)) {
-                            	            return that._getImageHover(path);
+                            	            return that._getImageHover(editorContext, path);
                             	        } else if(/^data:image.*;base64/i.test(path)) {
-                            	            return that._getImageHover(path, true);
+                            	            return that._getImageHover(editorContext, path, true);
                             	        } else if(/\.js$/i.test(path)) {
-                            	            return that._getFileHover(path, 'js');
+                            	            return that._getFileHover(editorContext, path);
                             	        }
                             	        break;
 			                        }
@@ -105,7 +105,7 @@ define([
 	        return found;
 		},
 		
-		_getFileHover: function _getFileHover(path) {
+		_getFileHover: function _getFileHover(editorContext, path) {
 		    if(path) {
 		        if(/^http/i.test(path)) {
     	            return this._formatFilesHover(path);
@@ -119,10 +119,13 @@ define([
     		        } else if(!/\.js$/i.test(path)) {
     		            return null;
     		        }
-    		        return that.resolver.getWorkspaceFile(path, opts).then(function(files) {
-        		        if(files) {
-        		            return that._formatFilesHover(path, files);
-        		        }
+    		        return editorContext.getFileMetadata().then(function(meta) {
+        		          return that.resolver.getWorkspaceFile(path, opts).then(function(files) {
+        		            var rels  = that.resolver.resolveRelativeFiles(path, files, meta);
+            		        if(rels && rels.length > 0) {
+            		            return that._formatFilesHover(path, rels);
+            		        }
+        		          });    
     		        });
 		        }
 		    }
@@ -139,7 +142,10 @@ define([
     	 */
     	_formatFilesHover: function _formatFilesHover(path, files) {
     	    if(path) {
-    	        var title = '###Open file for \''+path+'\'###';
+    	        var title = null;
+    	        if(files.length > 1) {
+    	            '###Open file for \''+path+'\'###';
+    	        }
     	        var hover = '';
     	        if(Array.isArray(files)) {  
         	        for(var i = 0; i < files.length; i++) {
@@ -174,11 +180,11 @@ define([
     	            }
     	            if(site) {
     	               name = tmp;
-    	               title = '###Open site \''+name+'\'';
+    	               //title = '###Open site \''+name+'\'';
     	               hover += '[!['+name+'](../webtools/images/html.png)';
     	               hover += name + ']('+path+')\n\n';
     	            } else {
-    	               title = '###Open file for \''+name+'\'###';
+    	               //title = '###Open file for \''+name+'\'###';
         	            var img = null;
         	             if(/\.css$/i.test(path)) {
         		            img = '../webtools/images/css.png';
@@ -198,13 +204,29 @@ define([
     	    return null;
     	},
 		
-		_getImageHover: function _getImageHover(path, base64) {
+		_getImageHover: function _getImageHover(editorContext, path, base64) {
 		      if(path) {
 		          if(/^http/i.test(path) || base64) {
     		          var html = '<html><body style="margin:1px;"><img src="'+path+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
     			      return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+		          } else {
+		              var idx = path.lastIndexOf('.');
+		              if(idx > -1) {
+		                  var ext = path.slice(idx+1);
+		                  var that = this;
+		                  return editorContext.getFileMetadata().then(function(meta) {
+		                      return that.resolver.getWorkspaceFile(path, {ext:ext, type:'Image', icon:'../webtools/images/file.png'}).then(function(files) {
+                    		        if(files && files.length > 0) {
+                    		            var resolved = that.resolver.resolveRelativeFiles(path, files, meta);
+                    		            if(resolved && resolved.length > 0) {
+                    		                 var html = '<html><body style="margin:1px;"><img src="'+resolved[0].location+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
+        			                         return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+                    		            }
+                    		        }
+                	           });
+		                  });
+		              }
 		          }
-		          //TODO need to look up relative images
 		      }
 		},
 		

@@ -132,6 +132,75 @@ define([
            return null;
        },
        
+       /**
+        * @description Resolves the files that match the given location
+        * @function
+        * @param {String} path The path to resolve against
+        * @param {Array} files The array of files
+        * @param {Object} metadata The file metadata from the workspace
+        * @returns {Array} The filtered list of files for the relative path or an empty array, never null
+        * @since 8.0
+        */
+       resolveRelativeFiles: function resolveRelativeFiles(path, files, metadata) {
+		    if(files && files.length > 0 && metadata) {
+		        var filepath = metadata.location;
+		        var _files = [];
+		        filepath = filepath.slice(0, filepath.lastIndexOf('/'));
+		        if(path.charAt(0) !== '.') {
+	                filepath = this._appendPath(filepath, path);
+	            } else {
+	                //resolve the realtive path
+	                var rel = /^\.\.\//.exec(path);
+	                if(rel) {
+    	                while(rel != null) {
+    	                    filepath = filepath.slice(0, filepath.lastIndexOf('/'));
+    	                    path = path.slice(3);
+    	                    rel = /^\.\.\//.exec(path);
+    	                }
+    	                filepath = this._appendPath(filepath, path);
+	                } else {
+	                    while(/^\.\//.test(path)) {
+	                       path = path.slice(2);
+	                    }
+	                    filepath = this._appendPath(filepath, path);
+	                }
+	            }
+		        for(var i = 0; i < files.length; i++) {
+		            var file = files[i];
+                    if(file.location === filepath) {
+                        _files.push(file);
+                    }		            
+		        }
+		        return _files;
+		    }
+		    return [];
+		},
+       
+       /**
+        * @description Adds the additional path to the given path
+        * @function
+        * @private
+        * @param {String} path The original path
+        * @param {String} addition The additonal path to append
+        * @returns {String | null} Returns the new path as a string or null if either of the parameters are not strings
+        * @since 8.0
+        */
+       _appendPath: function _appendPath(path, addition) {
+            if(typeof(path) === 'string' && typeof(addition) === 'string') {
+                var newpath = path;
+                if(newpath.charAt(newpath.length-1) !== '/') {
+	               newpath += '/';
+                }
+                if(addition.charAt(0) === '/') {
+                    newpath += addition.slice(1);
+                } else {
+                    newpath += addition;
+                }
+                return newpath;
+            }  
+            return null;
+       },
+       
        _trimName: function _trimeName(name) {
            //TODO haxxor - we don't need to see the root client path
            return name.replace(/^(?:org\.eclipse\.orion\.client)?(?:\/)?bundles\//, '');
