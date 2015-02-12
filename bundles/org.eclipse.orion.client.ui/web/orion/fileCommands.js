@@ -707,12 +707,14 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 					}
 					if (Array.isArray(item)) {
 						if(item.length === 2 && !item[0].Directory && !item[1].Directory){
+							return true;//We should not limit the content type to the known text files here. It is preventing user from comparing two unknown(by Orion) text files.
+							/*
 							var contentType1 = contentTypeService.getFilenameContentType(item[0].Name);
 							var contentType2 = contentTypeService.getFilenameContentType(item[1].Name);
 							if(contentType1 && (contentType1['extends'] === "text/plain" || contentType1.id === "text/plain") && //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							   contentType2 && (contentType2['extends'] === "text/plain" || contentType2.id === "text/plain")){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 								return true;
-							}
+							}*/
 						} else if(item.length === 2 && item[0].Directory && item[1].Directory){
 							return true;
 						}
