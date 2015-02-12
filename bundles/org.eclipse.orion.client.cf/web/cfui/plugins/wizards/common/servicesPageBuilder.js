@@ -106,6 +106,24 @@ define([
 								self._servicesList.appendChild(option);
 							}
 						}
+			    		
+			    		var selectedServices = [];
+	    				for(var i=0; i<self._servicesList.options.length; i++){
+	    					selectedServices.push(self._servicesList.options[i].value);
+						}
+	    				var manifestServices = self._manifestServices || [];
+	    				
+	    				if (manifestServices.length === selectedServices.length) {
+	    					self._servicesList.classList.remove("modifiedCell");
+	    					for (var i=0; i<manifestServices.length; i++){
+	    						if (manifestServices[i] !== selectedServices[i]){
+	    							self._servicesList.classList.add("modifiedCell");
+	    							break;
+	    						}
+	    					}
+	    				} else {
+	    					self._servicesList.classList.add("modifiedCell");
+	    				}
 					});
 						
 					removeButton.addEventListener('click', function(){ //$NON-NLS-0$
@@ -116,10 +134,28 @@ define([
 								self._servicesDropdown.appendChild(option);
 							}
 						}
+			    		
+			    		var selectedServices = [];
+	    				for(var i=0; i<self._servicesList.options.length; i++){
+	    					selectedServices.push(self._servicesList.options[i].value);
+						}
+	    				var manifestServices = self._manifestServices || [];
+	    				
+	    				if (manifestServices.length === selectedServices.length) {
+	    					self._servicesList.classList.remove("modifiedCell");
+	    					for (var i=0; i<manifestServices.length; i++){
+	    						if (manifestServices[i] !== selectedServices[i]){
+	    							self._servicesList.classList.add("modifiedCell");
+	    							break;
+	    						}
+	    					}
+	    				} else {
+	    					self._servicesList.classList.add("modifiedCell");
+	    				}
 					});
 					
 					var services = self._manifestInstrumentation.services || self._manifestServices;
-					if(self._manifestServices){
+					if(services){
 						if(!Array.isArray(services)){
 							if(typeof services === "object"){ //$NON-NLS-0$
 								services = Object.keys(services);
@@ -145,6 +181,9 @@ define([
 							self._servicesList.appendChild(serviceOption);	
 		    			});
 		    		}
+					
+					if (self._manifestInstrumentation.services)
+	    				self._servicesList.classList.add("modifiedCell");
 		    		
 					self._showMessage(messages["loadingServices..."]);
 					self._targetSelection = self._getTargetSelection();
