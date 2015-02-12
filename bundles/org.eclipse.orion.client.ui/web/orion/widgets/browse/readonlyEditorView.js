@@ -190,10 +190,7 @@ define([
 				if(lineIndex > 0) {
 					lineIndex--;
 				}
-				this.moveSelection(moveTo, moveTo, function(){
-					var line = textView._getLineNode(lineIndex);
-					line.scrollIntoView(true);
-				}, false);
+				this.moveSelection(moveTo, moveTo);
 			};
 			inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 				var textView = editor.getTextView();
