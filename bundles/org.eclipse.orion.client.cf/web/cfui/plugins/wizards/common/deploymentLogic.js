@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 /*global URL*/
-define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemplate', 'orion/PageLinks', 'cfui/manifestUtils'],
- function(messages, objects, mCfUtil, URITemplate, PageLinks, mManifestUtils){
+define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/objects', 'cfui/cfUtil', 'orion/URITemplate', 'orion/PageLinks', 'cfui/manifestUtils'],
+ function(messages, Deferred, objects, mCfUtil, URITemplate, PageLinks, mManifestUtils){
 
 	function _getManifestInstrumentation(manifestContents, results){
 		manifestContents = manifestContents || { applications: [{}] };
@@ -131,22 +131,32 @@ define(['i18n!cfui/nls/messages', 'orion/objects', 'cfui/cfUtil', 'orion/URITemp
 	 * @returns {orion.Promise}
 	 */
 	function uniqueLaunchConfigName(fileService, contentLocation, baseName) {
-		return fileService.read(contentLocation + "launchConfigurations?depth=1", true).then(function(projectDir){
-			var children = projectDir.Children;
-			var counter = 0;
-			for(var i=0; i<children.length; i++){
-				var childName = children[i].Name.replace(".launch", "");
-				if (baseName === childName){
-					if (counter === 0) counter++;
-					continue;
+		var deferred = new Deferred();
+		fileService.read(contentLocation + "launchConfigurations?depth=1", true).then(
+			function(projectDir){
+				var children = projectDir.Children;
+				var counter = 0;
+				for(var i=0; i<children.length; i++){
+					var childName = children[i].Name.replace(".launch", "");
+					if (baseName === childName){
+						if (counter === 0) counter++;
+						continue;
+					}
+					childName = childName.replace(baseName + "-", "");
+					var launchConfCounter = parseInt(Number(childName), 10);
+					if (!isNaN(launchConfCounter) && launchConfCounter >= counter)
+						counter = launchConfCounter + 1;
 				}
-				childName = childName.replace(baseName + "-", "");
-				var launchConfCounter = parseInt(Number(childName), 10);
-				if (!isNaN(launchConfCounter) && launchConfCounter >= counter)
-					counter = launchConfCounter + 1;
+				deferred.resolve(counter > 0 ? baseName + "-" + counter : baseName);
+			}, function(error){
+				if (error.status = 404){
+					deferred.resolve(baseName);
+				} else {
+					deferred.reject(error);
+				}
 			}
-			return counter > 0 ? baseName + "-" + counter : baseName;
-		});
+		);
+		return deferred;
 	}
 
 	return {
