@@ -76,7 +76,7 @@ select {
 }
 
 .modifiedCell {
-	background-color: yellow;
+	background-color: #FFD801;
 }
 
 .comboTextInputWrapper {
