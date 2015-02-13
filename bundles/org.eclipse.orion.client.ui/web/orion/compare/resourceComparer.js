@@ -47,30 +47,35 @@ exports.DefaultDiffProvider = (function() {
 				if(Array.isArray(results) && results.length === 2 && results[0] && results[1]){
 					var oldFileContentType = results[0];
 					var newFileContentType = results[1];
-					return new Deferred().resolve({ oldFile:{URL: oldFileURL, Name: that._resolveFileName(oldFileURL), Type: oldFileContentType},
-								newFile:{URL: newFileURL, Name: that._resolveFileName(newFileURL), Type: newFileContentType},
+					return new Deferred().resolve({ oldFile:{URL: oldFileURL, Name: that._resolveFileName(oldFileURL, false), Type: oldFileContentType},
+								newFile:{URL: newFileURL, Name: that._resolveFileName(newFileURL, true), Type: newFileContentType},
 								diffContent: that._diffContent
 							 });
 				} else {
-					var oldFileName = oldFileURL ? that._resolveFileName(oldFileURL) : ""; //$NON-NLS-0$
-					var newFileName = newFileURL ? that._resolveFileName(newFileURL) : ""; //$NON-NLS-0$
+					var oldFileName = oldFileURL ? that._resolveFileName(oldFileURL, false) : ""; //$NON-NLS-0$
+					var newFileName = newFileURL ? that._resolveFileName(newFileURL, true) : ""; //$NON-NLS-0$
 					return new Deferred().resolve({ oldFile:{URL: oldFileURL, Name: oldFileName, Type: null},
 								newFile:{URL: newFileURL, Name: newFileName, Type: null},
 								diffContent: that._diffContent
 							 });
 				}
 			};
-			return Deferred.all([ that._getContentType(oldFileURL), that._getContentType(newFileURL)], function(error) { return {_error: error}; }).then(compareTwo);
+			return Deferred.all([ that._getContentType(oldFileURL, false), that._getContentType(newFileURL, true)], function(error) { return {_error: error}; }).then(compareTwo);
 		},
 		
 		//TODO : get the file name from file service
-		_resolveFileName: function(fileURL){
-			var fileName = fileURL.split("?")[0]; //$NON-NLS-0$
+		_resolveFileName: function(fileURL, newF){
+			var fileName;
+			if(this.options && this.options.newFileName && this.options.oldFileName) {
+				fileName = newF ? this.options.newFileName : this.options.oldFileName;
+			} else {
+				fileName = fileURL.split("?")[0]; //$NON-NLS-0$
+			}
 			return fileName;
 		},
 		
-		_getContentType: function(fileURL){
-			var filename = this._resolveFileName(fileURL);
+		_getContentType: function(fileURL, newF){
+			var filename = this._resolveFileName(fileURL, newF);
 			return this.serviceRegistry.getService("orion.core.contentTypeRegistry").getFilenameContentType(filename); //$NON-NLS-0$
 		},
 		
@@ -79,6 +84,14 @@ exports.DefaultDiffProvider = (function() {
 			return this._diffProvider.getDiffFileURI(complexURL).then(function(jsonData, secondArg) {
 				return that._resolveTwoFiles(jsonData.Old, jsonData.New);
 			}, function(){});
+		},
+		
+		setOptions: function(options) {
+			this.options = options;
+		},
+		
+		getComplexFileURL: function(complexURL) {
+			return this._diffProvider.getDiffFileURI(complexURL);
 		},
 		
 		resolveDiff: function(resource, compareTo, hasConflicts, ignoreWhitespace) {
@@ -504,7 +517,10 @@ exports.ResourceComparer = (function() {
 					return;
 				}
 				var that = this;
-				return that.options.diffProvider.resolveDiff(that.options.resource, that.options.compareTo, that.options.hasConflicts, that.options.ignoreWhitespace).then( function(diffParam){
+				if(this.options.diffProvider.setOptions) {
+					this.options.diffProvider.setOptions(this.options);
+				}
+				return this.options.diffProvider.resolveDiff(that.options.resource, that.options.compareTo, that.options.hasConflicts, that.options.ignoreWhitespace).then( function(diffParam){
 					if(diffParam.oldFile) {
 						diffParam.oldFile.readonly = that._compareView.getWidget().options.oldFile.readonly;
 					}

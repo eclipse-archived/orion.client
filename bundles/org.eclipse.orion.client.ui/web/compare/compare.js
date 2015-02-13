@@ -10,9 +10,9 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commandRegistry', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
+define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/deferred', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commandRegistry', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
 		'orion/compare/compareCommands', 'orion/compare/resourceComparer', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/compare/compareUtils', 'orion/contentTypes', 'orion/PageUtil', 'i18n!orion/compare/nls/messages'],
-		function(mBrowserCompatibility, mBootstrap, mStatus, mProgress, mOperationsClient, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mCompareCommands, mResourceComparer, mThemePreferences, mThemeData, mCompareUtils, mContentTypes, PageUtil, messages) {
+		function(mBrowserCompatibility, mBootstrap, Deferred, mStatus, mProgress, mOperationsClient, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mCompareCommands, mResourceComparer, mThemePreferences, mThemeData, mCompareUtils, mContentTypes, PageUtil, messages) {
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
@@ -37,27 +37,65 @@ define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/
 		var diffProvider = new mResourceComparer.DefaultDiffProvider(serviceRegistry);
 		var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: "pageNavigationActions"}); //$NON-NLS-0$
 		
+		var startWithFileNames = function(fileNames, compareParams){
+				var options = {
+					newFileName: fileNames ? fileNames[0] : undefined,
+					oldFileName: fileNames ? fileNames[1] : undefined,
+					readonly: compareParams.readonly === "true", //$NON-NLS-0$
+					readonlyRight: typeof compareParams.readonlyRight === "undefined" || compareParams.readonlyRight === "true", //$NON-NLS-1$ //$NON-NLS-0$
+					generateLink: true,
+					hasConflicts: compareParams.conflict === "true", //$NON-NLS-0$
+					diffProvider: diffProvider,
+					resource: compareParams.resource,
+					compareTo: compareParams.compareTo
+				};
+				var viewOptions = {
+					parentDivId: "compareContainer", //$NON-NLS-0$
+					commandProvider: cmdProvider,
+					showTitle: true,
+					showLineStatus: true,
+					blockNumber: typeof compareParams.block === "undefined" ? 1 : compareParams.block, //$NON-NLS-0$
+					changeNumber: typeof compareParams.change === "undefined" ? 0 : compareParams.change //$NON-NLS-0$
+				};
+				var comparer = new mResourceComparer.ResourceComparer(serviceRegistry, commandService, options, viewOptions);
+				comparer.start();
+		};
+		
 		var startWidget = function(){
 			var compareParams = PageUtil.matchResourceParameters();
-			var options = {
-				readonly: compareParams.readonly === "true", //$NON-NLS-0$
-				readonlyRight: typeof compareParams.readonlyRight === "undefined" || compareParams.readonlyRight === "true", //$NON-NLS-1$ //$NON-NLS-0$
-				generateLink: true,
-				hasConflicts: compareParams.conflict === "true", //$NON-NLS-0$
-				diffProvider: diffProvider,
-				resource: compareParams.resource,
-				compareTo: compareParams.compareTo
-			};
-			var viewOptions = {
-				parentDivId: "compareContainer", //$NON-NLS-0$
-				commandProvider: cmdProvider,
-				showTitle: true,
-				showLineStatus: true,
-				blockNumber: typeof compareParams.block === "undefined" ? 1 : compareParams.block, //$NON-NLS-0$
-				changeNumber: typeof compareParams.change === "undefined" ? 0 : compareParams.change //$NON-NLS-0$
-			};
-			var comparer = new mResourceComparer.ResourceComparer(serviceRegistry, commandService, options, viewOptions);
-			comparer.start();
+			var resolveFileNames;
+			if(compareParams.compareTo) {
+				resolveFileNames =  Deferred.all([fileClient.read(compareParams.resource, true), 
+									fileClient.read(compareParams.compareTo, true)], 
+									function(/*error*/) { startWithFileNames(null, compareParams); }).then( function(metadatas) {
+										var fileNames = null;
+										if(metadatas.length === 2) {
+											fileNames = metadatas.map(function (metadata) {return mCompareUtils.fullNameByMeta(metadata);});
+										}
+										return new Deferred().resolve(fileNames);
+									});
+			} else {
+				resolveFileNames =  diffProvider.getComplexFileURL(compareParams.resource).then(function (json){
+					if(json.New) {
+						return Deferred.all([fileClient.read(json.New, true)], 
+											function(/*error*/) {
+												startWithFileNames(null, compareParams); 
+											}).then( function(metadatas) {
+												var fileNames = null;
+												if(metadatas.length === 1) {
+													fileNames = metadatas.map(function (metadata) {return mCompareUtils.fullNameByMeta(metadata);});
+												}
+												return new Deferred().resolve(fileNames ? [fileNames[0], fileNames[0]] : null);
+											});
+						
+					} else {
+						return new Deferred().resolve();
+					}
+				});
+			}
+			resolveFileNames.then(function (fileNames) {
+				startWithFileNames(fileNames, compareParams);
+			});
 		};
 		startWidget();
 		// every time the user manually changes the hash, we need to reastart the compare widget.

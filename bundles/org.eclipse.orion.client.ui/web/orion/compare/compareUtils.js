@@ -259,5 +259,22 @@ orion.compareUtils.generateCompareTreeHref = function(folderToCompare, options) 
 	return href;
 };
 
+orion.compareUtils.fullNameByMeta = function(metadata){
+	var parents = metadata.Parents;
+	var parentIndex = parents.length;
+	var fullPath = "";
+	var separator;
+	//add parents chain top down if needed
+	if(parentIndex > 0){
+		for(var j = parentIndex - 1; j > -1; j--){
+			separator = (fullPath === "") ? "" : "/"; //$NON-NLS-1$ //$NON-NLS-0$
+			fullPath = fullPath + separator + parents[j].Name;
+		}
+	}
+	separator = (fullPath === "") ? "" : "/"; //$NON-NLS-1$ //$NON-NLS-0$
+	fullPath = fullPath + separator + metadata.Name;
+	return fullPath;
+};
+
 return orion.compareUtils;
 });
