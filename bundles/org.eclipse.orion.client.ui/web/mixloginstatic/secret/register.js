@@ -10,17 +10,38 @@
  ******************************************************************************/
 
 define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domReady, xhr, xsrfUtils, common) {
-	var userCreationEnabled;
-	var registrationURI;
-	var forceUserEmail;
+	function confirmCreateUser(e, linkedUser) {
 
-	function confirmCreateUser(e) {
-		e.preventDefault();
+		var e = typeof e !== 'undefined' ? e : null;
+		var linkedUser = typeof linkedUser !== 'undefined' ? linkedUser : false;
+		var authForm = document.getElementById("orion-auth"),
+			authFormElements = document.getElementById("form-elements"),
+			signUpBtn = document.getElementById("signUpBtn"),
+			processClass = "in-progress",
+			regCompleteClass = "complete";
+
+		if (e !== null) {
+			e.preventDefault();
+		}
+
+		if (linkedUser) {
+			document.getElementById("loginContainer").style.display = "none";
+			document.getElementById("passwordContainer").style.display = "none";
+			document.getElementById("repeatPasswordContainer").style.display = "none";
+			document.getElementById("emailContainer").style.display = "none";
+			document.getElementById("signUpBtn").style.display = "none";
+
+			var email = common.getParam("email");
+			var username = common.getParam("username");
+			var identifier = common.getParam("identifier");
+			var password = generateRandomPassword();
+		} else {
+			var username = document.getElementById("username").value;
+			var password = document.getElementById("password").value;
+			var email =  document.getElementById("email").value;
+		}
 
 		var mypostrequest = new XMLHttpRequest();
-		var username = document.getElementById("username").value;
-		var password = document.getElementById("password").value;
-		var email =  document.getElementById("email").value;
 		mypostrequest.onreadystatechange = function() {
 			if (mypostrequest.readyState === 4) {
 				if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
@@ -28,10 +49,14 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domRea
 						return;
 					}
 					var responseObject = JSON.parse(mypostrequest.responseText);
-					common.showErrorMessage(responseObject.Message);
+					common.showStatusMessage(responseObject.Message);
 					if(mypostrequest.status === 201){
-						common.showErrorMessage(mypostrequest.statusText);
+						common.showStatusMessage(mypostrequest.statusText);
+						common.addClass(authForm, regCompleteClass);
 					}
+					common.removeClass(authForm, processClass);
+					authFormElements.removeAttribute("disabled");
+					signUpBtn.removeAttribute("disabled");
 				}
 			}
 		};
@@ -41,25 +66,62 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domRea
 			Password : password,
 			Email: email
 		};
+
+		if (linkedUser) {
+			formData.identifier = identifier;
+			var parameters = "username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&identifier=" + encodeURIComponent(identifier) + "&Email=" + encodeURIComponent(email);
+		}
+
 		mypostrequest.open("POST", "../../users", true);
 		mypostrequest.setRequestHeader("Content-type", "application/json;charset=UTF-8");
 		mypostrequest.setRequestHeader("Orion-Version", "1");
 		xsrfUtils.addCSRFNonce(mypostrequest);
 		mypostrequest.send(JSON.stringify(formData));
+		common.showStatusMessage("Processing your request...");
+
+		if (!linkedUser) {
+			common.addClass(authForm, processClass);
+			authFormElements.setAttribute("disabled", "disabled");
+			signUpBtn.setAttribute("disabled", "disabled");
+		}
+	}
+
+	function generateRandomPassword() {
+		// Passwords are a mix of both alpha and non-alpha charaters
+		var alphaCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		var nonAlphaCharacters = "0123456789";
+		var minLength = 7;
+		var password = "";
+		for(var i = 0; i < minLength; i++) {
+			password += alphaCharacters.charAt(Math.floor(Math.random() * alphaCharacters.length));
+		}
+		for(var i = 0; i < minLength; i++) {
+			password += nonAlphaCharacters.charAt(Math.floor(Math.random() * nonAlphaCharacters.length));
+		}
+		return password;
 	}
 
 	function setUpRegisterPage() {
-		document.getElementById("password").addEventListener("keyup", function() {
-			common.copyText("password", "repeatPassword");
-		});
+		var oauth = common.getParam("oauth");
+		if (oauth) {
+			confirmCreateUser(null, true);
+		} else {
+			document.getElementById("signUpBtn").addEventListener("click", confirmCreateUser, false);
+			document.getElementById("show-password").addEventListener("click", common.passwordSwitcher);
+			document.getElementById("hide-password").addEventListener("click", common.passwordSwitcher);
 
-		document.getElementById("repeatPassword").addEventListener("keyup", function() {
-			common.copyText("repeatPassword", "password");
-		});
+			document.getElementById("password").addEventListener("keyup", function() {
+				common.copyText("password", "repeatPassword");
+			});
 
-		document.getElementById("signUpBtn").addEventListener("click", confirmCreateUser, false);
-		document.getElementById("show-password").addEventListener("click", common.passwordSwitcher);
-		document.getElementById("hide-password").addEventListener("click", common.passwordSwitcher);
+			document.getElementById("repeatPassword").addEventListener("keyup", function() {
+				common.copyText("repeatPassword", "password");
+			});
+		}
+
+		// FIX the hrefs of the various forms here.
+		document.getElementById("signInWithGoogle").href = common.createOAuthLink("google");
+		document.getElementById("signInWithGitHub").href = common.createOAuthLink("github");
 	}
 
 	domReady(function() {
