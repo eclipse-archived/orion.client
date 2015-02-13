@@ -85,7 +85,7 @@ define({//Default message bundle
 	"cloudFoundryLogs": "Cloud Foundry Logs",
 	"logFiles": "Log Files",
 	"noResponse": "No response",
-	"gettingLogs": "Getting logs",
+	"gettingLogs": "Fetching logs. This may take a few minutes.  You can continue to work in other pages while we collect the logs.",
 	"loginTo": "Login to ",
 	"loggingInTo${0}": "Logging in to ${0}",
 	"thisPluginIntegratesWithCloud": "This plugin integrates with Cloud Foundry.",
