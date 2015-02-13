@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
-define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/deferred', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commandRegistry', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
+define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/Deferred', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commandRegistry', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
 		'orion/compare/compareCommands', 'orion/compare/resourceComparer', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/compare/compareUtils', 'orion/contentTypes', 'orion/PageUtil', 'i18n!orion/compare/nls/messages'],
 		function(mBrowserCompatibility, mBootstrap, Deferred, mStatus, mProgress, mOperationsClient, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mCompareCommands, mResourceComparer, mThemePreferences, mThemeData, mCompareUtils, mContentTypes, PageUtil, messages) {
 	mBootstrap.startup().then(function(core) {
