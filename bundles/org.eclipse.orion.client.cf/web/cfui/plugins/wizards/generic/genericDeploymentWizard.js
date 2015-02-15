@@ -111,6 +111,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 		    	Clouds : clouds,
 		    	DefaultTarget : defaultTarget,
 
+				ManifestPath : plan.ManifestPath,
 		    	ManifestApplication : manifestApplication,
 		    	ManifestInstrumentation: launchConfParams.Instrumentation,
 		    	serviceRegistry : serviceRegistry,

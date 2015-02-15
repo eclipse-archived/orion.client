@@ -29,6 +29,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			this._confName = options.ConfName || null,
 			this._clouds = options.Clouds || [];
 			this._defaultTarget = options.DefaultTarget;
+			this._manifestPath = options.ManifestPath || ""; //$NON-NLS-0$
 			this._manifestApplication = options.ManifestApplication;
 			this._manifestInstrumentation = options.ManifestInstrumentation || {};
 			this._serviceRegistry = options.serviceRegistry;
@@ -352,7 +353,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					// render the manifest file
 					document.getElementById("manifestLabel").textContent = messages["manifestLabel"];
 					var manifestInput = document.createElement("input"); //$NON-NLS-0$
-					manifestInput.value = "/manifest.yml";
+					manifestInput.value = self._manifestPath || messages["noManifest"]; //$NON-NLS-0$
 					manifestInput.readOnly = true; // TODO should be editable
 					document.getElementById("manifest").appendChild(manifestInput); //$NON-NLS-0$
 					

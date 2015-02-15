@@ -202,5 +202,6 @@ define({//Default message bundle
 	"uRLPrefix:": "URL Prefix: ",
 	"leaveBlankForDefault": "Leave blank for default ${0}",
 	"createNew": "Create New",
-	"manifestOverride": "Yellow boxes indicate modified fields, which will override manifest file settings."
+	"manifestOverride": "Yellow boxes indicate modified fields, which will override manifest file settings.",
+	"noManifest": "No manifest found at /manifest.yml",
 });
