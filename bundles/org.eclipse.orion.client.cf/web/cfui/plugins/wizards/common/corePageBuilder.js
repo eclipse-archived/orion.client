@@ -353,7 +353,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					// render the manifest file
 					document.getElementById("manifestLabel").textContent = messages["manifestLabel"];
 					var manifestInput = document.createElement("input"); //$NON-NLS-0$
-					manifestInput.value = self._manifestPath || messages["noManifest"]; //$NON-NLS-0$
+					manifestInput.value = self._manifestPath || "";
 					manifestInput.readOnly = true; // TODO should be editable
 					document.getElementById("manifest").appendChild(manifestInput); //$NON-NLS-0$
 					

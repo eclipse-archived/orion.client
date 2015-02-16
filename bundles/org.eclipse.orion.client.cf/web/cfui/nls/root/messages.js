@@ -194,7 +194,7 @@ define({//Default message bundle
 	"space*:": "Space*:",
 	"domain*:": "Domain*:",
 	"applicationName*:": "Application Name*:",
-	"manifestLabel": "Manifest File:*",
+	"manifestLabel": "Manifest File:",
 	"manifestSettings": "Manifest Settings",
 	"debugWith${0}:": "Debug with ${0}:",
 	"runInDebugMode": "Run in debug mode",
