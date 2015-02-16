@@ -812,6 +812,10 @@ define([
 			if (!this._statusPollingIntervalID) {
 				this._statusPollingIntervalID = window.setInterval(function(){
 					var launchConfiguration = this._selectedLaunchConfiguration;
+					if (!launchConfiguration) {
+						this._stopStatusPolling();
+						return;
+					}
 					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(status) {
 						launchConfiguration.status = status;
 						this._updateLaunchConfiguration(launchConfiguration);
