@@ -244,23 +244,31 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 				};
 
 				var self = this;
-				this._getAdditionalLaunchConfigurations(launchConf, project).then(function(manifest) {
-					var func = arguments.callee.bind(this);
-
+				this._getAdditionalLaunchConfigurations(launchConf, project).then(function performPush(manifest) {
 					if (manifest === null) {
 						/* could not find the launch configuration manifest, get the main manifest.yml if present */
 						self._findManifest(project.ContentLocation).then(function(manifest) {
 
 							if (manifest === null) {
-								/* the deployment will not succeed anyway */
-								deferred.reject({
-									State: "NOT_DEPLOYED", //$NON-NLS-0$
-									Severity: "Error", //$NON-NLS-0$
-									Message: messages["Could not find the launch configuration manifest"]
-								});
+								if (appName) {
+									// a minimal manifest contains just the application name
+									performPush({
+										applications: [{
+											"name": appName
+										}]
+									});
+								} else {
+									/* the deployment will not succeed anyway */								
+									deferred.reject({
+										State: "NOT_DEPLOYED", //$NON-NLS-0$
+										Severity: "Error", //$NON-NLS-0$
+										Message: messages["Could not find the launch configuration manifest"]
+									});									
+								}
+								
 							} else {
 								cFService.getManifestInfo(manifest.Location, true).then(function(manifest) {
-									func(manifest.Contents);
+									performPush(manifest.Contents);
 								}, deferred.reject);
 							}
 						}.bind(this), errorHandler);
