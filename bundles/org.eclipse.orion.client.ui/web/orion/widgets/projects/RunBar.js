@@ -298,12 +298,22 @@ define([
 					// the one that matches the deleted file
 					for (var hash in this._cachedLaunchConfigurations) {
 						if (this._cachedLaunchConfigurations.hasOwnProperty(hash)) {
-							if (this._cachedLaunchConfigurations[hash].File.Location === deletedFile.Location) {
-								if (this._cachedLaunchConfigurations[hash] === this._selectedLaunchConfiguration) {
+							var current = this._cachedLaunchConfigurations[hash];
+							if (current.File.Location === deletedFile.Location) {
+								if (current === this._selectedLaunchConfiguration) {
 									this.selectLaunchConfiguration(null);
 								}
-								
-								this._removeFromLaunchConfigurationsCache(this._cachedLaunchConfigurations[hash]);
+								var element = document.getElementById(current.Name + '_RunBarMenuItem');
+								if (element) {
+									var parent = element.parentNode;
+									var sep = element.previousSibling;
+									if (sep && sep.className === "dropdownSeparator") {
+										parent.removeChild(sep);
+									}
+									parent.removeChild(element);										
+								}
+								//TODO: this has left a menu iteme separator in the dom still 
+								this._removeFromLaunchConfigurationsCache(current);
 								break;
 							}
 						}
@@ -417,9 +427,7 @@ define([
 			
 			// logLocationTemplate in status takes precendence because it comes from the 
 			// service implementation's method rather than from the service properties
-			if (status || (this._selectedLaunchConfiguration && this._selectedLaunchConfiguration.Params)) {
-				logLocationTemplate = (status && status.logLocationTemplate) || this._selectedLaunchConfiguration.Params.LogLocationTemplate;
-			}
+			logLocationTemplate = (status && status.logLocationTemplate) || (this._selectedLaunchConfiguration && this._selectedLaunchConfiguration.Params && this._selectedLaunchConfiguration.Params.LogLocationTemplate);
 			
 			// turn status light off
 			this._statusLight.classList.remove("statusLightGreen"); //$NON-NLS-0$
@@ -687,6 +695,9 @@ define([
 		},
 		
 		_getDisplayName: function(launchConfiguration) {
+			if (!launchConfiguration) {
+				return null;
+			}
 			var displayName = launchConfiguration.Name;
 			
 			if (!displayName || "default" === displayName) { //$NON-NLS-0$
