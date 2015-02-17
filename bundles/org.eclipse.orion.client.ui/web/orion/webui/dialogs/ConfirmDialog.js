@@ -82,7 +82,7 @@ define([
 		if (options.checkboxMessage) {
 			this._checkbox = lib.$("input.confirmDialogCheckbox", checkboxWrapper); //$NON-NLS-0$
 		} else {
-			this.$frame.removeChild(checkboxWrapper);
+			checkboxWrapper.parentNode.removeChild(checkboxWrapper);
 		}
 	};
 

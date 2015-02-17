@@ -284,7 +284,6 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					// render the launch config field
 					document.getElementById("launchConfLabel").textContent = messages["launchConfLabel"]; //$NON-NLS-1$ //$NON-NLS-0$
 					self._launchConfInput = document.createElement("input"); //$NON-NLS-0$
-					self._launchConfInput.readOnly = true;
 					self._launchConfInput.value = self._confName;
 					document.getElementById("launchConf").appendChild(self._launchConfInput); //$NON-NLS-0$
 					
@@ -339,13 +338,12 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					
 					document.getElementById("spacesLabel").appendChild(document.createTextNode(messages["space*:"])); //$NON-NLS-0$
 					self._spacesDropdown = document.createElement("select"); //$NON-NLS-0$
-					self._spacesDropdown.onchange = function(event){
+					self._spacesDropdown.onchange = function(/*event*/){
 						self._setSelection();
-						self._selection.getSelection(function(selection){
-							self._loadDomains(selection);
-							self._loadApplications(selection);
-							self._loadHosts(selection);
-						});
+						var selection = self._selection.getSelection();
+						self._loadDomains(selection);
+						self._loadApplications(selection);
+						self._loadHosts(selection);
 					};
 					
 					document.getElementById("spaces").appendChild(self._spacesDropdown); //$NON-NLS-0$
@@ -466,15 +464,14 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						return;
 					}
 					
-					self._selection.getSelection(function(selection) {
-						if(selection === null || selection.length === 0){
-							setValid(false);
-							return;
-						}
-						
-						if(self._appsInput.value){ setValid(true); }
-						else { setValid(false); }
-					});
+					var selection = self._selection.getSelection();
+					if(selection === null || selection.length === 0){
+						setValid(false);
+						return;
+					}
+					
+					if(self._appsInput.value){ setValid(true); }
+					else { setValid(false); }
 				},
 				
 				getResults: function(){

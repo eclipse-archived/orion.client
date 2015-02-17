@@ -204,4 +204,7 @@ define({//Default message bundle
 	"createNew": "Create New",
 	"manifestOverride": "Yellow boxes indicate modified fields, which will override manifest file settings.",
 	"noManifest": "No manifest found at /manifest.yml",
+	"overwriteTitle": "Overwrite Launch Configuration",
+	"overwriteConfirm": "You are about to overwrite launch configuration '${0}'. Proceed?",
+	"nameTaken": "File exists: ${0}. Delete the file and try again."
 });

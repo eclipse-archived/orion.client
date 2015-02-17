@@ -150,6 +150,12 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 		    var page1 = corePageBuilder.build();
 		    var page2 = servicesPageBuilder.build();
 		    var page3 = additionalParamPageBuilder.build();
+			var setUIState = function(disable) {
+				if(corePageBuilder._orgsDropdown)
+					corePageBuilder._orgsDropdown.disabled = disable;
+				if(corePageBuilder._spacesDropdown)
+					corePageBuilder._spacesDropdown.disabled = disable;
+			};
 
 			new Wizard.Wizard({
 				parent: "wizard", //$NON-NLS-0$
@@ -161,13 +167,8 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 					ConfName : launchConfName,
 					showMessage : showMessage,
 					closeFrame : closeFrame,
-					disableUI : function(){
-						if(corePageBuilder._orgsDropdown)
-							corePageBuilder._orgsDropdown.disabled = true;
-
-						if(corePageBuilder._spacesDropdown)
-							corePageBuilder._spacesDropdown.disabled = true;
-					},
+					disableUI : setUIState.bind(null, true),
+					enableUI  : setUIState.bind(null, false),
 
 					postMsg : postMsg,
 					postError : postError,

@@ -10,8 +10,13 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 /*global URL*/
-define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/objects', 'cfui/cfUtil', 'orion/URITemplate', 'orion/PageLinks', 'cfui/manifestUtils'],
- function(messages, Deferred, objects, mCfUtil, URITemplate, PageLinks, mManifestUtils){
+define([
+	'i18n!cfui/nls/messages',
+	'orion/Deferred',
+	'orion/webui/dialogs/ConfirmDialog',
+	'orion/i18nUtil',
+	'cfui/cfUtil',
+], function(messages, Deferred, mConfirmDialog, i18nUtil, mCfUtil){
 
 	function _getManifestInstrumentation(manifestContents, results){
 		manifestContents = manifestContents || { applications: [{}] };
@@ -30,7 +35,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/objects', 'cfui/cfUti
 		var selectedServices = results.services;
 		if ((!manifestServices || manifestServices.length === 0) && selectedServices.length > 0) {
 			manifestInstrumentation.services = results.services;
-		} else if (manifestServices && manifestServices.length != selectedServices.length) {
+		} else if (manifestServices && manifestServices.length !== selectedServices.length) {
 			manifestInstrumentation.services = results.services;
 		} else if (manifestServices && manifestServices.length === selectedServices.length) {
 			for (var i=0; i<manifestServices.length; i++){
@@ -74,10 +79,11 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/objects', 'cfui/cfUti
 		options = options || {};
 
 		return function(results){
-			
-			var confName = options.ConfName || results.ConfName;
+			var initialConfName = options.ConfName;
+			var confName = results.ConfName;
 
 			var disableUI = options.disableUI;
+			var enableUI = options.enableUI;
 			var showMessage = options.showMessage;
 			var closeFrame = options.closeFrame;
 
@@ -92,69 +98,130 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/objects', 'cfui/cfUti
 			var contentLocation = options.ContentLocation;
 			var appPath = options.AppPath;
 
-			showMessage(messages["saving..."]);
-			targetSelection.getSelection(function(selection){
-				if(selection === null || selection.length === 0){
-					closeFrame();
+			var selection = targetSelection.getSelection();
+			if(selection === null || selection.length === 0){
+				closeFrame();
+				return;
+			}
+
+			/* disable any UI at this point */
+			disableUI();
+
+			var instrumentation = _getManifestInstrumentation(userManifest, results);
+			var devMode = options.getDevMode ? options.getDevMode() : null;
+			
+			var appName = results.name;
+			var target = selection;
+
+			if (!confName){
+				postError(new Error("Could not determine the launch config name"));
+				return;
+			}
+			return checkContinue(fileService, contentLocation, initialConfName, confName).then(function(keepGoing) {
+				if (!keepGoing) {
+					enableUI();
 					return;
 				}
 
-				/* disable any UI at this point */
-				disableUI();
-
-				var instrumentation = _getManifestInstrumentation(userManifest, results);
-				var devMode = options.getDevMode ? options.getDevMode() : null;
-				
-				var appName = results.name;
-				var target = selection;
-				
-				if (confName){
-					mCfUtil.prepareLaunchConfigurationContent(confName, target, appName, appPath, instrumentation, devMode).then(
-						function(launchConfigurationContent){
-							postMsg(launchConfigurationContent);
-						}, function(error){
-							postError(error, selection);
-						}
-					);
-					return;
-				} else {
-					throw new Error("Missing confName");
-				}
-			}, postError);
+				showMessage(messages["saving..."]); //$NON-NLS-0$
+				return mCfUtil.prepareLaunchConfigurationContent(confName, target, appName, appPath, instrumentation, devMode).then(
+					function(launchConfigurationContent){
+						postMsg(launchConfigurationContent);
+					});
+			}).then(null, function(error){
+				postError(error, selection);
+			});
 		};
 	}
 
 	/**
-	 * Calculates a uniqe name for the launch config
-	 * @returns {orion.Promise}
+	 * @returns {orion.Promise} resolving to boolean <tt>true</tt> if save should continue, <tt>false</tt> to abort
 	 */
-	function uniqueLaunchConfigName(fileService, contentLocation, baseName) {
-		var deferred = new Deferred();
-		fileService.read(contentLocation + "launchConfigurations?depth=1", true).then(
-			function(projectDir){
-				var children = projectDir.Children;
-				var counter = 0;
-				for(var i=0; i<children.length; i++){
-					var childName = children[i].Name.replace(".launch", "");
-					if (baseName === childName){
-						if (counter === 0) counter++;
-						continue;
-					}
-					childName = childName.replace(baseName + "-", "");
-					var launchConfCounter = parseInt(Number(childName), 10);
-					if (!isNaN(launchConfCounter) && launchConfCounter >= counter)
-						counter = launchConfCounter + 1;
-				}
-				deferred.resolve(counter > 0 ? baseName + "-" + counter : baseName);
-			}, function(error){
-				if (error.status = 404){
-					deferred.resolve(baseName);
-				} else {
-					deferred.reject(error);
+	function checkContinue(fileService, contentLocation, confNameInitial, confName) {
+		if (confName === confNameInitial) {
+			return new Deferred().resolve(true);
+		}
+		return launchConfigExists(fileService, contentLocation, confName).then(function(exists) {
+			if (!exists) {
+				return true;
+			}
+			return confirmOverwrite(confName);
+		});
+	}
+
+	function confirmOverwrite(confName) {
+		var confirmDialog = new mConfirmDialog.ConfirmDialog({
+			title: messages["overwriteTitle"], //$NON-NLS-0$
+			confirmMessage: i18nUtil.formatMessage(messages["overwriteConfirm"], confName), //$NON-NLS-0$
+		});
+		var d = new Deferred();
+		confirmDialog.addEventListener("dismiss", function(event) { //$NON-NLS-0$
+			d.resolve(event.value);
+		});
+		confirmDialog.show();
+		return d;
+	}
+
+	/**
+	 * @returns {orion.Promise} resolving to <tt>true</tt> if the config exists, otherwise <tt>false</tt>.
+	 */
+	function launchConfigExists(fileService, contentLocation, confName) {
+		return readLaunchConfigsFolder(fileService, contentLocation).then(function(children){
+			for(var i=0; i<children.length; i++){
+				var childName = children[i].Name.replace(/\.launch$/, ""); //$NON-NLS-0$
+				if (confName === childName){
+					return true;
 				}
 			}
-		);
-		return deferred;
+			return false;
+		}, function(error) {
+			if (error.status === 404) {
+				return false;
+			}
+			throw error;
+		});
+	}
+
+	/**
+	 * Calculates a uniqe name for the launch config
+	 * @returns {orion.Promise} resolving to String
+	 */
+	function uniqueLaunchConfigName(fileService, contentLocation, baseName) {
+		return readLaunchConfigsFolder(fileService, contentLocation).then(function(children) {
+			var counter = 0;
+			for(var i=0; i<children.length; i++){
+				var childName = children[i].Name.replace(/\.launch$/, ""); //$NON-NLS-0$
+				if (baseName === childName){
+					if (counter === 0) counter++;
+					continue;
+				}
+				childName = childName.replace(baseName + "-", "");
+				var launchConfCounter = parseInt(Number(childName), 10);
+				if (!isNaN(launchConfCounter) && launchConfCounter >= counter)
+					counter = launchConfCounter + 1;
+			}
+			return (counter > 0 ? baseName + "-" + counter : baseName);
+		}, function(error){
+			if (error.status === 404){
+				return baseName;
+			}
+			throw error;
+		});
+	}
+
+	/**
+	 * @returns {orion.Promise} resolving to {File[]}. Rejects if launch configs folder does not exist.
+	 */
+	function readLaunchConfigsFolder(fileService, contentLocation) {
+		return fileService.read(contentLocation + "launchConfigurations?depth=1", true).then(function(projectDir) {
+			if (projectDir.Directory) {
+				return projectDir.Children;
+			}
+			var msg = i18nUtil.formatMessage(messages["nameTaken"], "launchConfigurations"); //$NON-NLS-1$ //$NON-NLS-0$
+			var error = new Error(msg);
+			error.Message = msg;
+			throw error;
+		});
 	}
 
 	return {
