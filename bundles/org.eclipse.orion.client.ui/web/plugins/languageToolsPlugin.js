@@ -20,6 +20,7 @@ define([
 	'plugins/languages/erlang/erlangPlugin',
 	'plugins/languages/go/goPlugin',
 	'plugins/languages/haml/hamlPlugin',
+	'plugins/languages/jade/jadePlugin',
 	'plugins/languages/java/javaPlugin',
 	'plugins/languages/lua/luaPlugin',
 	'plugins/languages/markdown/markdownPlugin',
@@ -32,11 +33,11 @@ define([
 	'plugins/languages/xml/xmlPlugin',
 	'plugins/languages/xquery/xqueryPlugin',
 	'plugins/languages/yaml/yamlPlugin'], function(
-		PluginProvider, mArduinoPlugin, mCPlugin, mCppPlugin, mCSharpPlugin, mDockerfilePlugin, mErlangPlugin, mGoPlugin, mHamlPlugin, mJavaPlugin, mLuaPlugin,
-		mMarkdownPlugin, mObjectiveCPlugin, mPhpPlugin, mPythonPlugin, mRubyPlugin, mSwiftPlugin, mVbPlugin, mXmlPlugin, mXQueryPlugin, mYamlPlugin) {
+		PluginProvider, mArduinoPlugin, mCPlugin, mCppPlugin, mCSharpPlugin, mDockerfilePlugin, mErlangPlugin, mGoPlugin, mHamlPlugin, mJadePlugin, mJavaPlugin,
+		mLuaPlugin, mMarkdownPlugin, mObjectiveCPlugin, mPhpPlugin, mPythonPlugin, mRubyPlugin, mSwiftPlugin, mVbPlugin, mXmlPlugin, mXQueryPlugin, mYamlPlugin) {
 
 	var languagePlugins = [
-		mArduinoPlugin, mCPlugin, mCppPlugin, mCSharpPlugin, mDockerfilePlugin, mErlangPlugin, mGoPlugin, mHamlPlugin, mJavaPlugin, mLuaPlugin,
+		mArduinoPlugin, mCPlugin, mCppPlugin, mCSharpPlugin, mDockerfilePlugin, mErlangPlugin, mGoPlugin, mHamlPlugin, mJadePlugin, mJavaPlugin, mLuaPlugin,
 		mMarkdownPlugin, mObjectiveCPlugin, mPhpPlugin, mPythonPlugin, mRubyPlugin, mSwiftPlugin, mVbPlugin, mXmlPlugin, mXQueryPlugin, mYamlPlugin
 	];
 
