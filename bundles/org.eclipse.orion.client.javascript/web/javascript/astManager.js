@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -180,7 +180,9 @@ define([
 		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 		 */
 		onSaving: function(event) {
-		    this.cache.remove(this._getKey(event.file));
+			//see https://bugs.eclipse.org/bugs/show_bug.cgi?id=457402
+			//we always get onModelChanged, don't need a follow up on saving
+		    //this.cache.remove(this._getKey(event.file));
 		},
 		/**
 		 * Callback from the orion.edit.model service
