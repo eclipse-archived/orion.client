@@ -221,15 +221,18 @@ orion.compareUtils.mergeDiffBlocks = function(oldTextModel, newDiffBlocks, mappe
 	}
 };
 
-orion.compareUtils.convertMergedLineNumber = function(mapper, lineindex/*zero based*/){
-	var mapperItem = orion.compareUtils.lookUpMapper(mapper, 0, lineindex);
+orion.compareUtils.convertMergedLineNumber = function(mapper, lineindex/*zero based*/, onOldFile){
+	var mapperItem = orion.compareUtils.lookUpMapper(mapper, onOldFile ? 1 : 0, lineindex);
 	var returnValue = lineindex;
+	if(!onOldFile && mapper[mapperItem.mapperIndex][2] !== 0) {
+		returnValue = returnValue + mapper[mapperItem.mapperIndex][1];
+	}
 	if(mapperItem.mapperIndex < 0){
 		return returnValue;
 	}
 	for(var i = 0; i < mapperItem.mapperIndex; i++){
 		if(mapper[i][2] !== 0) {
-			returnValue = returnValue + mapper[i][0];
+			returnValue = returnValue + mapper[i][onOldFile ? 0 : 1];
 		}
 	}
 	return returnValue;

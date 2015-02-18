@@ -81,6 +81,7 @@ function(Compare) {
 			widget.options.newFile.Name = "sampleLeft.js"; //$NON-NLS-0$
 			widget.options.mapper = null;
 			compare.refresh(true);
+			hookUp();
 		}
 	}
 	function animateDiffs() {
@@ -95,6 +96,12 @@ function(Compare) {
 		widget.initDiffNav();
 		var interval = parseInt(bAnimateInterval.options[bAnimateInterval.selectedIndex].value, 10);
 		window.setTimeout(animateDiffs, interval);
+	}
+	function hookUp() {
+		compare.getCompareView().getWidget().addEventListener("contentLoaded", function(){ //$NON-NLS-0$
+	 		var lineNumber = compare.getCompareView().getWidget().getLineNumber(31, false, true);
+	 		console.log(lineNumber);
+	 	});
 	}
 	function doCompare() {
 		var widget = compare.getCompareView().getWidget();
@@ -116,6 +123,7 @@ function(Compare) {
 			}
 			widget.options.mapper = null;
 			compare.refresh(true);
+			hookUp();
 			//widget.refresh();
 		}
 	}

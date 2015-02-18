@@ -903,17 +903,19 @@ exports.InlineCompareView = (function() {
 	 * @param[int] lineNumber The 0 based line number to convert.
 	 * @param[boolean] reverse If false or not defined, convert from logical number to phsical number. Otherwie convert from physical to logical.
 	 * 				   Physical number is the line number in the text editor, merged if any. Logical number is what shows in the ruler.
+	 * @param[boolean] onOldFile If false or not defined, convert from logical number to phsical number on the new file. Otherwie convert o nthe old file.
+	 * 				   Physical number is the line number in the text editor, merged if any. Logical number is what shows in the ruler.
 	 * @returns {int} the converted number, 0-based. -1 means that the phical number can not be converted to a logical number, which means an empty number in the ruler.
 	 */
-	InlineCompareView.prototype.getLineNumber = function(lineNumber, reverse){
+	InlineCompareView.prototype.getLineNumber = function(lineNumber, reverse, onOldFile){
 		if(reverse) {
-			var diffFeeder = this._diffNavigator.getFeeder(true);
+			var diffFeeder = this._diffNavigator.getFeeder(onOldFile ? false : true);
 			if(diffFeeder) {
 				return diffFeeder.getLineNumber(lineNumber);
 			}
 			return lineNumber;
 		} else {
-			var mergedNumber = mCompareUtils.convertMergedLineNumber(this._mapper, lineNumber);
+			var mergedNumber = mCompareUtils.convertMergedLineNumber(this._mapper, lineNumber, onOldFile);
 			return mergedNumber;
 		}
 	};
