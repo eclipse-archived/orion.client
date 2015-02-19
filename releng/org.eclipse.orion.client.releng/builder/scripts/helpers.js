@@ -8,19 +8,26 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*
- * Helper script for Orion build-time minification. 
- * Must be executed from an Ant <scriptdef> using Rhino.
- */
-/*global Packages orion:true project Project self*/
+/*eslint no-new-array:0 no-new-func:0*/
+/*global project Project self*/
+/*global Java Packages orion:true */
 
+/*
+ * Helper script for Orion build-time minification.
+ *
+ * This file must execute from an Ant <scriptdef> under Rhino or Nashorn, as it makes use of Ant Java classes
+ * and Ant script globals.
+ */
 if (typeof orion === "undefined" || orion === null) {
 	orion = {};
 }
 orion.build = orion.build || {};
 
 (function() {
-	// Rough ES5 shims if we are running under an ancient ES3 environment.. like the version of Rhino bundled with Java6
+	// TODO this check is pretty crude
+	var isNashorn = (typeof Java !== "undefined");
+
+	// Rough shims if we are running under a pre-ES5 environment.. eg. the version of Rhino bundled with Java6
 	if (!Array.isArray) {
 		Array.isArray = function(a) {
 			return Object.prototype.toString.call(a) === '[object Array]';
@@ -73,7 +80,7 @@ orion.build = orion.build || {};
 	function deserialize(buildFileText) {
 		return new Function("var o = " + buildFileText + "; return o;")();
 	}
-	
+
 	function getBuildObject(path) {
 		var file = project.resolveFile(path);
 		var scanner = new Packages.java.util.Scanner(file, "UTF-8").useDelimiter("\\Z");
@@ -104,6 +111,24 @@ orion.build = orion.build || {};
 		});
 	}
 
+	/**
+	 * @param {java.util.List} list
+	 * @returns A JavaScript array
+	 */
+	function listToArray(list) {
+		if (isNashorn) {
+			if (!(list instanceof Java.type("java.util.List")))
+				throw new Error("Expected a List");
+			return Java.from(list.toArray());
+		} else {
+			if (!(list instanceof Packages.java.util.List))
+				throw new Error("Expected a List");
+			return list.toArray(); // Rhino can coerce Java arrays to JS somehow
+		}
+	}
+
 	orion.build.getBuildObject = getBuildObject;
 	orion.build.getBundles = getBundles;
+	orion.build.isNashorn = isNashorn;
+	orion.build.listToArray = listToArray;
 }());

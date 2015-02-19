@@ -26,7 +26,8 @@
 var Project = Packages.org.apache.tools.ant.Project;
 var buildFile = attributes.get("buildfile");
 var jar = attributes.get("jar");
-var argLines = elements.get("argline").toArray(), argValues = elements.get("arg").toArray();
+var argLines  = orion.build.listToArray(elements.get("argline")),
+    argValues = orion.build.listToArray(elements.get("arg"));
 
 var jsdocs = orion.build.getBuildObject(buildFile).jsdocs || [];
 if (!jsdocs.length)
