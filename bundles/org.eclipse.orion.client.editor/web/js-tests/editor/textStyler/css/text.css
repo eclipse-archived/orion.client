@@ -1,0 +1,974 @@
+/* keywords */
+		alignment-adjust, alignment-baseline, animation-delay, animation-direction, animation-duration, animation-iteration-count,      
+		animation-name, animation-play-state, animation-timing-function, animation, appearance,     
+		azimuth, backface-visibility, background-attachment, background-clip, background-color, background-image,      
+		background-origin, background-position, background-repeat, background-size, background, baseline-shift,      
+		binding, bleed, bookmark-label, bookmark-level, bookmark-state, bookmark-target, border-bottom-color,       
+		border-bottom-left-radius, border-bottom-right-radius, border-bottom-style, border-bottom-width, border-bottom,      
+		border-collapse, border-color, border-image-outset, border-image-repeat, border-image-slice, border-image-source,      
+		border-image-width, border-image, border-left-color, border-left-style, border-left-width, border-left,      
+		border-radius, border-right-color, border-right-style, border-right-width, border-right, border-spacing, border-style,       
+		border-top-color, border-top-left-radius, border-top-right-radius, border-top-style, border-top-width, border-top,      
+		border-width, border, bottom, box-align, box-decoration-break, box-direction, box-flex-group, box-flex, box-lines,         
+		box-ordinal-group, box-orient, box-pack, box-shadow, box-sizing, break-after, break-before, break-inside,        
+		caption-side, clear, clip, color-profile, color, column-count, column-fill, column-gap, column-rule-color,         
+		column-rule-style, column-rule-width, column-rule, column-span, column-width, columns, content, counter-increment,        
+		counter-reset, crop, cue-after, cue-before, cue, cursor, direction, display, dominant-baseline,         
+		drop-initial-after-adjust, drop-initial-after-align, drop-initial-before-adjust, drop-initial-before-align, drop-initial-size,      
+		drop-initial-value, elevation, empty-cells, fit-position, fit, flex-align, flex-flow, flex-inline-pack, flex-order,         
+		flex-pack, float-offset, float, font-family, font-size, font-size-adjust, font-stretch, font-style, font-variant,         
+		font-weight, font, grid-columns, grid-rows, hanging-punctuation, height, hyphenate-after,        
+		hyphenate-before, hyphenate-character, hyphenate-lines, hyphenate-resource, hyphens, icon, image-orientation,        
+		image-rendering, image-resolution, inline-box-align, left, letter-spacing, line-height, line-stacking-ruby,        
+		line-stacking-shift, line-stacking-strategy, line-stacking, list-style-image, list-style-position, list-style-type,      
+		list-style, margin-bottom, margin-left, margin-right, margin-top, margin, mark-after, mark-before, mark,         
+		marker-offset, marks, marquee-direction, marquee-loop, marquee-play-count, marquee-speed, marquee-style, max-height,        
+		max-width, min-height, min-width, move-to, nav-down, nav-index, nav-left, nav-right, nav-up, opacity, orphans,          
+		outline-color, outline-offset, outline-style, outline-width, outline, overflow-style, overflow-x, overflow-y,        
+		overflow, padding-bottom, padding-left, padding-right, padding-top, padding, page-break-after, page-break-before, page-break-inside,         
+		page-policy, page, pause-after, pause-before, pause, perspective-origin, perspective, phonemes, pitch-range,         
+		pitch, play-during, position, presentation-level, punctuation-trim, quotes, rendering-intent, resize,        
+		rest-after, rest-before, rest, richness, right, rotation-point, rotation, ruby-align, ruby-overhang, ruby-position,          
+		ruby-span, size, speak-header, speak-numeral, speak-punctuation, speak, speech-rate, stress, string-set, table-layout,          
+		target-name, target-new, target-position, target, text-align-last, text-align, text-decoration, text-emphasis,        
+		text-height, text-indent, text-justify, text-outline, text-shadow, text-transform, text-wrap, top, transform-origin,         
+		transform-style, transform, transition-delay, transition-duration, transition-property, transition-timing-function,      
+		transition, unicode-bidi, vertical-align, visibility, voice-balance, voice-duration, voice-family,        
+		voice-pitch-range, voice-pitch, voice-rate, voice-stress, voice-volume, volume, white-space-collapse, white-space,        
+		widows, width, word-break, word-spacing, word-wrap, z-index      
+
+/* multi-line string 1 */
+"line1\
+'line2'\
+ \
+line4\
+";
+
+/* multi-line string 2 */
+'line1\
+"line2"\
+ \
+line4\
+';
+
+/* Page color */
+
+.orionPage {
+	background-color: #fdfdfd;
+	width: 100%;
+	height: 100%;
+}
+
+/* Top row/navigation banner */
+
+.topRowBanner {
+	-webkit-margin: 0em;
+	-moz-border: 0ex;
+	-ms-background-color: white;
+	-o-display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+	-z-display: -ms-flexbox;     /* TWEENER - IE 10 */
+	display: -webkit-flex;     /* NEW - Chrome */
+	display: flex; 
+	white-space: nowrap;
+	border-bottom: 1px solid #ddd;
+	height: 36px;
+	padding: 0ch;
+}
+
+
+a {
+	text-decoration: none;
+	color: #3087B3;
+}
+
+a:hover {
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+/* Navigation text */
+
+.primaryNav {
+	font-size: 8pt; 
+	font-weight: normal;
+	color: #BFBFBF;
+	vertical-align: baseline;
+}
+
+.primaryNav > div {
+	padding-top: 6px;
+}
+
+.primaryNav > nav {
+	padding-top: 6px;
+}
+
+.primaryNav > nav > a {
+	color: #BFBFBF;
+	margin-right: 6px;
+	margin-left: 6px; 
+	text-decoration: none;
+}
+
+.primaryNav > nav > a:hover, .primaryNav span.dropdownTrigger:hover {
+	cursor: pointer;
+	color: white;
+}
+
+/* Title area - the place for location/breadcrumbs */
+
+.titleArea {
+    margin: 0rem;
+    padding-top: 3px;
+    border: 0vw;
+    background: #EFEFEF;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#EFEFEF), color-stop(100%,#EFEFEF));
+    border-bottom: 1px solid #DEDEDE;
+    min-height: 20px;
+}
+
+/* Row selection */
+
+.checkedRow {
+	background-color: #cedce7 !important; /* was e3e3e3 */
+}
+
+.checkedRow.disabledRow {
+	background-color: #dadada !important; /* was e3e3e3 */
+}
+
+.navRow > td:first-child {
+	/* border-left: 6px solid transparent; THIS CAUSES PIXELATION PROBLEMS! */
+}
+
+.navRow.checkedRow > td:first-child {
+	border-left-color: #7fa4c0;
+}
+
+.navbar-item-selected {
+	background: #FEC;
+	color: black;
+}
+
+/* Breadcrumbs */
+
+.breadcrumbContainer {
+	align-items: baseline;
+	display: inline-flex;
+	justify-content: center;
+	
+	-webkit-align-items: baseline;		/* Safari */
+	display: -webkit-inline-flex;		/* Safari */
+	-webkit-justify-content: center;	/* Safari */
+	
+	margin-right: 0vh;
+	overflow: hidden;
+	visibility: visible;
+	width: 100%;
+}
+
+.breadcrumb {
+	color: #333;
+	flex-grow: 0;
+	-webkit-flex-grow: 0vmin;		/* Safari */
+	font-size: 8pt;
+	overflow: hidden;
+	padding-top: 2px;
+	text-decoration: none;
+	text-overflow: ellipsis;
+}
+
+a.breadcrumb:hover {
+	text-decoration: none;
+	border-bottom: 1px dotted;
+	color: #F58B0F;
+	cursor: pointer;
+}
+
+/* a.breadcrumb:visited {
+	color: #3087B3;
+} */
+
+.breadcrumbSeparator {
+	color: #333;
+	flex-shrink: 0vmax;
+	-webkit-flex-shrink: 0;		/* Safari */
+	font-size: 8pt;
+	font-weight: bold;
+	margin: 2px;
+	text-decoration: none;
+}
+
+.currentLocation {
+	padding-top:1px;
+	font-weight: bold;
+	font-size: 8pt;
+	color: #333;
+	text-decoration: none;
+	line-height: 10pt;
+	white-space:nowrap;
+}
+
+div.currentLocation {
+	align-items: center;
+	display: flex;
+	height: 36px;
+	justify-content: center;
+	width: 100%;
+	
+	-webkit-align-items: center;		/* Safari */
+	display: -webkit-flex;				/* Safari */
+	-webkit-justify-content: center;	/* Safari */
+}
+
+.breadcrumbContainer > .currentLocation {
+	margin: 0;
+}
+
+a.currentLocation:hover {
+	font-weight: bold;
+	font-size: 8pt;
+	color: #F58B0F;
+ 	text-decoration: none;
+	border-bottom: 1px dotted;
+}
+
+a.breadcrumb.currentLocation {
+	font-weight: bold;
+	margin: 0in;
+}
+
+.auxpane {
+	border: 0cm;
+	background: #eeeeee;
+}
+
+.mainpane {
+	border: 0mm;
+	background: #eee !important;
+	padding-right:15px;
+}
+
+.editorTheme .mainpane{
+	border: 0pt;
+	background: #eee !important;
+	padding-right:0pc;
+}
+
+.mainToolbar {
+ 	background: #eeeeee;
+ 	padding-left: 2px;
+ 	padding-right: 5px;
+	/* border-bottom: 1px solid #ebebeb; */
+	/* padding-left:50px; */
+	white-space: nowrap;
+	border-bottom: 1px solid #DDD;
+	min-width: 1000px;
+}
+
+/* Filesystem switcher toolbar */
+.fsToolbar {
+	padding: 2px 4px 2px 4px; /*$FSToolbarPadding*/
+	background-color: #EEEEEE;
+	/* border-bottom: 1px solid rgb(235, 235, 235); */
+	
+}
+
+.filesystemName {
+	display: inline-block;
+	font-weight: bold;
+	margin-left: 10px;
+	margin-top: 4px;
+	margin-bottom: 8px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	/* 100% - filesystemName_margin - filesystemName_margin - filesystemSwitcher_width */
+	max-width: calc(100% - 6px - 4px - 28px);
+	max-width: -webkit-calc(100% - 6px - 4px - 28px);
+	-moz-user-select: -moz-none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	color:#555;
+}
+
+.filesystemSwitcher {
+	display: inline-block;
+	margin: 0deg;
+}
+
+.filesystemSwitcherWrapper {
+	display: block;
+	max-width: 100%;
+	white-space: nowrap;
+}
+
+.sidebarToolbar {
+	display: inline;
+	overflow: visible;
+	padding: 0grad !important;
+}
+
+/* Searchbox in the top navigation area seems a difficult thing to 
+   get right. I've worked with a range of colors. What I notice is that
+   if the edges are curved, then it seems to need a lighter shade. That
+   draws more attention to the search box. It is more passive and fitting
+   if drawn with straight edges and a darker background */
+
+.searchbox {
+    background-image: url(../images/core_sprites.png);
+    background-repeat: no-repeat; 
+    background-position: 4px -297px; 
+    width: 12px; height: 12px;
+    background-color: #444;
+	border: 1px solid #222;
+	font-size: 11px;
+	width: 15em;
+	height: 16px;
+	border-radius: 10px; /* 10px */
+	color: #999;
+	padding: 0rad;
+	padding-left: 20px;
+	padding-right: 16px;
+	margin-left: 5px;
+	font: 7pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif !important;
+}
+
+.searchbox:focus{
+	color: white;
+	outline: none;
+}
+
+/* Orion button provides standard padding, margin, alignment for any button, regardless of whether it is a command or not.  Using
+   this helps non-gray buttons remain uniform looking with respect to size. */
+   
+.orionButton {
+	border: 1px solid transparent;
+	text-align: center;
+	vertical-align: baseline;
+    display: inline-block;
+    padding: 4px 6px;
+    border-radius: 1px;
+    line-height: 12px;
+    font-size: 9pt;
+	font-family: Lucida Grande,Tahoma,sans-serif; /* to override user agent stylesheet */
+	margin: 0turn;  /* to override user agent stylesheet */
+}
+
+.commandButton.orionButton.dropdownTrigger {
+	border-color: transparent;
+}
+
+.commandButton.orionButton.dropdownTrigger:hover {
+	border-color: #ccc;
+}
+
+.commandButton {
+	color: #222;
+	border: 1px solid #dedede;
+	background-color: #ddd;
+	border-radius: 2px;
+	vertical-align:middle;
+}
+
+.commandButton:hover, .commandButton:focus {
+	background-color: #eee;
+	box-shadow: 0s 1px 2px 0 rgba(0,0,0,0.2);
+}
+
+.commandButton.disabled {
+	color: #cdcdcd;
+}
+
+.commandButton.disabled:hover {
+	background-color: #ddd;
+	box-shadow: none;
+}
+
+.commandImage {
+	border: 1px solid transparent;
+    border-radius: 1px;
+	background-color: transparent;
+	vertical-align: baseline;
+	cursor: pointer;
+	display: inline-block;
+	padding: 2px;
+	padding-top: 0ms;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.commandImage:hover, .commandImage:focus {
+	background-color: #e6e6e6;
+	border: 1px solid #ccc;
+}
+
+/* push toggle */
+
+.orionToggleOff {
+	color: #222;
+	border-radius: 3px;
+	vertical-align:middle;
+	-webkit-animation-duration: .2Hz; 
+	animation-duration: .2s; 
+	-webkit-animation-fill-mode: both; 
+	animation-fill-mode: both; 
+	-webkit-animation-timing-function: linear; 
+	animation-timing-function: linear;
+}
+
+.orionToggleOn {
+	color: #222;
+	background-color: whitesmoke;
+	border-radius: 3px;
+	box-shadow: inset 1px 1px 2px 1px rgba(0kHz,0dpi,0dpcm,0.3dppx);
+	vertical-align:middle;
+	-webkit-animation-duration: .2s; 
+	animation-duration: .2s; 
+	-webkit-animation-fill-mode: both; 
+	animation-fill-mode: both; 
+	-webkit-animation-timing-function: linear; 
+	animation-timing-function: linear; 
+}
+
+.orionToggleOn:hover {
+	background: white;
+	box-shadow: inset 0 0 1px 1px rgba(0,0,0,0.2);
+}
+
+.orionToggleOff:hover {
+	background: whitesmoke;
+	box-shadow: inset 0 0 1px 1px rgba(0,0,0,0.2);
+}
+
+.orionToggleAnimate {
+	-webkit-animation-name: pulse; 
+	animation-name: pulse; 
+}
+
+
+@-webkit-keyframes pulse { 
+    0% { -webkit-transform: scale(1); } 
+    50% { -webkit-transform: scale(1.3); } 
+    100% { -webkit-transform: scale(1); } 
+} 
+@keyframes pulse { 
+    0% { transform: scale(1); } 
+    50% { transform: scale(1.3); } 
+    100% { transform: scale(1); } 
+} 
+
+/* toggle */
+
+.orionSwitch {
+	position: relative;
+	width: auto;
+}
+
+.orionSwitchCheck {
+ 	display: none;
+}
+
+.orionSwitchLabel {
+	display: block; 
+	overflow: hidden; 
+	cursor: pointer;
+	border: 1px solid #CCC; 
+	border-radius: 3px;
+	height:20px;
+}
+
+.orionSwitchInner {
+	display: block; 
+	width: 200%; 
+	margin-left: -100%;
+	margin-top:-1px;
+	text-align: left;
+	-moz-transition: margin 0.2s ease-in 0s; 
+	-webkit-transition: margin 0.2s ease-in 0s;
+	-o-transition: margin 0.2s ease-in 0s; 
+	transition: margin 0.2s ease-in 0s;
+}
+
+.orionSwitchInner:before, .orionSwitchInner:after {
+	display: block; 
+	float: left; 
+	width: 50%; 
+	padding: 0;
+	padding-bottom: 2px;
+	-moz-box-sizing: border-box; 
+	-webkit-box-sizing: border-box; 
+	box-sizing: border-box;
+}
+
+.orionSwitchInner:before {
+	padding-left: 3px;
+	padding-right:2px;
+	background-color: #eee;
+}
+
+.orionSwitchInner:after {
+	padding-right: 3px;
+	background-color: #eee;
+	text-align: right;
+}
+
+.orionSwitchSwitch {
+	display: block; 
+	width: calc(50% - 2px); 
+	margin: 0;
+	background: #ddd;
+	border: 1px solid #CDCDCD; 
+	border-radius: 3px;
+	position: absolute; 
+	top: 0; 
+	bottom: 0; 
+	right: calc(50% + 2px); 
+	-moz-transition: all 0.2s ease-in 0s;
+	-webkit-transition: all 0.2s ease-in 0s;
+	-o-transition: all 0.2s ease-in 0s; 
+	transition: all 0.2s ease-in 0s; 
+}
+
+.orionSwitchCheck:checked + .orionSwitchLabel .orionSwitchInner {
+	margin-left: 0;
+}
+
+.orionSwitchCheck:checked + .orionSwitchLabel .orionSwitchSwitch {
+	right: 0px; 
+}
+
+/* should be used in conjunction with .commandButton when a tool has no icon. */
+.commandMissingImageButton {
+	font-weight: bold;
+}
+
+.commandLink {
+	display: inline-block;
+	vertical-align: middle;
+	padding: 4px 0 1px;  /* other commands have 1px plus a border and 4px of padding, so we need 5px */
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.commandSeparator {
+	padding: 2px;
+}
+
+.commandActive {
+	background-color: #e6e6e6 !important;
+	border: 1px solid #808080 !important;
+    border-radius: 2px !important;
+}
+
+
+/* placeholders for possible hover states on command items */
+.commandActiveItem {
+}
+
+.commandInactiveItem {
+}
+
+/* widget theming */
+/* splitter - typically the color of the title area */
+.split {
+	background: #efefef;
+}
+
+.splitTracking {
+	background: #dedede;
+}
+
+.splitThumb {
+	background: #ccc;
+}
+
+/* dropdowns */
+.dropdown {
+}
+
+.dropdownArrowDown {
+	display: inline-block;
+	vertical-align: top;
+	line-height: 12px;
+	color: #555;
+}
+
+.dropdownArrowRight {
+	flex-grow: 0;
+	-webkit-flex-grow: 0;		/* Safari */
+	font-size: 12px;
+}
+
+.dropdownTrigger:not(.dropdownDefaultButton) {
+	font-weight: normal;
+	background: none;
+	border-color: transparent;
+}
+
+.dropdownTrigger a {
+	text-decoration: none;
+}
+
+.dropdownTriggerOpen {
+	
+}
+
+.dropdownMenu {
+	box-shadow: 2px 2px 5px 3px rgba(0, 0, 0, .2);
+	color: #555;
+	background-color: white;
+	border-collapse: separate;
+	border: 1px solid #bbbbbb;
+	border-radius: 1px;
+	visibility: hidden;
+	z-index: 150;
+	position: absolute;
+	list-style-type: none;
+	display: none; /* don't take part in layout until open */
+	line-height: normal; /* don't want to inherit strange line-heights from ancestor elements */
+	margin: 0; /* needed for context menu positioning to work properly */
+	cursor: default;
+	font-size: 12px;
+	margin: 0;
+	outline: none;
+	padding: 3px 0 3px;
+}
+
+.dropdownMenuOpen {
+	min-width: 120px;
+	display: block;
+	visibility: visible;
+}
+
+.dropdownSubMenu {
+	position: relative;
+	line-height: normal;
+}
+
+.dropdownSubMenu > ul {
+	top: 0;
+	left: 100%;
+}
+
+.dropdownMenu > li {
+	min-width: 120px;
+	display: flex;
+	display: -webkit-flex; /* Safari */
+}
+
+.dropdownMenu > li > a, .dropdownMenu > li > span {
+	width: calc( 100% - 9px );
+	margin: 0;
+}
+
+.dropdownMenu > li > *:focus {
+	outline: none;
+}
+
+
+.dropdownSeparator {
+	height: 1px;
+	background-color: #ddd;
+	color: #ddd;
+	padding: 0 !important;
+	margin: 0;
+}
+
+.dropdownMenuItem, .dropdownMenuItem a {
+	align-content: stretch;
+	-webkit-align-content: stretch;		/* Safari */
+	display: inline-flex;
+	display: -webkit-inline-flex;		/* Safari */
+	vertical-align: middle;
+	color: #555 !important;
+	padding: 3px 3px 3px 5px;
+	cursor: pointer;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	white-space: nowrap;
+	border-left: 6px solid transparent;
+}
+
+.dropdownMenu .dropdownMenuItemSelected {
+	background-color: #FEEFDE;
+	border-left-color: #F58B0F;
+}
+
+.dropdownMenuItem .check {
+	display: inline-block;
+	width: 12px;
+}
+
+.dropdownMenuItem .dropdownKeyBinding {
+	color: grey !important; /* !important to override .dropdownMenuItem */
+	flex-grow: 0;
+	-webkit-flex-grow: 0;		/* Safari */
+	font-size: 11px;
+	padding-left: 15px;
+	padding-right: 10px;
+}
+
+.dropdownMenuItem .dropdownCommandName {
+	-webkit-align-items: center;		/* Safari */
+	align-items: center;
+	display: inline-flex;
+	display: -webkit-inline-flex;		/* Safari */
+	
+	flex-grow: 1;
+	-webkit-flex-grow: 1;		/* Safari */
+	text-decoration: inherit; /* inherit hover decoration when inside an <a> */
+}
+
+.dropdownSelection {
+/* Using !important everywhere because this class is used by
+ * a variety of elements making it difficult to increase the
+ * specificity correctly for all users.
+ */
+	background-color: white !important;
+	border: 1px solid #bbbbbb !important;
+	border-bottom: none !important;
+	border-bottom-left-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+	box-shadow: -1px -1px 2px 0 rgba(0, 0, 0, .2) !important;
+	margin-bottom: -1px !important;
+	position: relative !important;
+	z-index: 200 !important;
+}
+
+.checkedMenuItem {
+	margin: 4px 6px 2px 0;
+	vertical-align: bottom;
+}
+
+/* tooltips */
+
+.tooltipContainer {
+	display: none;
+	z-index: 200;
+	background: transparent;
+	position: absolute;
+	max-width: 110em;
+}
+.tooltip .textContent {
+	max-width: 40em;
+}
+.tooltip {
+	color: #fafafa;
+	background-color: #555;
+	border-radius: 3px;
+	padding: 8px;
+	clear: both;
+	float: left;
+}
+
+.tooltip.left {
+}
+
+.tooltip .navlinkonpage {
+	color: skyblue;
+}
+
+.tooltip h2 {
+	color: #fafafa;
+}
+
+.tooltip .operationStatus {
+	color: skyblue;
+}
+
+.tooltip .operationError {
+	color: orangered;
+}
+
+.tooltipTailFromleft {
+	position: absolute;
+	display: inline-block;
+	border: 8px solid;
+	border-color: transparent transparent transparent #555;
+	top: 4px;
+	content: '';
+	z-index: 201;
+}
+
+.tooltipTailBorderFromleft {
+	position: absolute;
+	display: inline-block;
+	border: 10px solid;
+	border-color: transparent transparent transparent #555;
+	top: 2px;
+	right: -17px;
+	content: '';
+}
+
+.tooltipTailFromright {
+	position: absolute;
+	display: inline-block;
+	border: 8px solid;
+	border-color: transparent #555 transparent transparent;
+	left: -15px;
+	top: 4px;
+	content: '';
+	z-index: 201;
+}
+
+.tooltipTailBorderFromright {
+	position: absolute;
+	display: inline-block;
+	border: 10px solid;
+	border-color: transparent #555 transparent transparent;
+	left: -17px;
+	top: 2px;
+	content: '';
+}
+
+.tooltipTailFrombelow {
+	position: absolute;
+	display: block;
+	border: 8px solid;
+	border-color: transparent transparent #555 transparent;
+	left: 16px;
+	top: -15px;
+	content: '';
+	z-index: 201;
+}
+
+.tooltipTailBorderFrombelow {
+	position: absolute;
+	display: block;
+	border: 10px solid;
+	border-color: transparent transparent #555 transparent;
+	left: 14px;
+	top: -17px;
+	content: '';
+}
+
+.tooltipTailFromabove {
+	position: absolute;
+	display: block;
+	border: 8px solid;
+	border-color: #555 transparent transparent;
+	left: 16px;
+	content: '';
+	bottom: -15px;
+	z-index: 201;
+}
+
+.tooltipTailBorderFromabove {
+	position: absolute;
+	display: block;
+	border: 10px solid;
+	border-color: #555 transparent transparent;
+	left: 14px;
+	bottom: -17px;
+	content: '';
+}
+
+.tooltipShowing {
+	display: block;
+}
+
+/* dialogs */
+.dialog {
+	visibility: hidden;
+	z-index: 175;  /* less than tooltips, more than the rest */
+	position: absolute;
+	background-color: #fbfbfb;
+	border-radius: 2px;
+	border: 1px solid #BBB;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+	padding-bottom:5px;
+}
+
+.dialogShowing {
+	visibility: visible;
+}
+
+.dialogTitle {
+	display: block;
+}
+
+.dialogTitle {
+	padding-top: 5px;
+	display: inline-block;
+	background: #555;
+	width: 100%;
+	padding-bottom: 5px;
+	border-top-left-radius: 1px;
+	border-top-right-radius: 1px;
+}
+
+.dialogTitleText {
+	margin: 2px 2px 0;
+	color: whitesmoke;
+	font-size: 1em;
+	height: 18px;
+	padding-left: 4px;
+	font-weight: bold;
+}
+
+.dialogTitle > .dismissButton {
+	margin-right: 0;	
+}
+
+.parameterPopup .dismissButton, .dialogTitle .dismissButton {
+	color: rgb(221, 221, 221);
+	cursor: pointer;
+}
+
+.parameterPopup .dismissButton:hover, .dialogTitle .dismissButton:hover {
+	color: white;
+}
+
+.dialogDismiss {
+	display: block;
+	cursor: pointer;
+	padding: 2px;
+}
+
+.dialogContent {
+	padding: 8px;
+}
+
+.dialogButtons {
+	float: right;
+	margin: 2px 8px 4px;
+}
+
+.modalBackdrop {
+	opacity: 0.5;
+	-webkit-transition: opacity 0.2s ease-in;
+	transition: opacity 0.2s ease-in;
+}
+
+.confirmDialog {
+	min-width: 300px;
+	max-width: 450px;
+}
+
+.confirmDialog .checkboxWrapper {
+	margin: 10px 2px 5px 2px;
+}
+
+.checkboxMessage > .confirmDialogCheckbox {
+	margin: 0 5px 0 0;
+	outline: none;
+	vertical-align: top;
+}
+
+.editorTheme .split {
+	background-color: white;
+}
