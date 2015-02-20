@@ -76,7 +76,7 @@ define([
 				    if(this.hasPreviousToken(token, results.tokens, 'IMPORT_SYM')) {
 				        return this._getFileHover(token, metadata);
 				    }
-				    if(this.hasPreviousToken(token, results.tokens, 'IDENT', ['background-image', '-webkit-border-image', '-o-border-image', 'border-image', 'border-image-source', 'icon'])) {
+				    if(this.hasPreviousToken(token, results.tokens, 'IDENT', ['background', 'background-image', '-webkit-border-image', '-o-border-image', 'border-image', 'border-image-source', 'icon'])) {
 				        return this._getImageHover(token, metadata);
 				    }
 				    var tok = this._isRgbLike(token, results.tokens);
