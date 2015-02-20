@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-php/syntax",
-	"text!js-tests/editor/textStyler/php/text.php",
+	"text!js-tests/editor/textStyler/php/text.txt",
 	"text!js-tests/editor/textStyler/php/styles.txt"
 ], function(mPHP, mText, mStyles) {
 	

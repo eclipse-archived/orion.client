@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-dockerfile/syntax",
-	"text!js-tests/editor/textStyler/dockerfile/text.dockerfile",
+	"text!js-tests/editor/textStyler/dockerfile/text.txt",
 	"text!js-tests/editor/textStyler/dockerfile/styles.txt"
 ], function(mDockerfile, mText, mStyles) {
 	

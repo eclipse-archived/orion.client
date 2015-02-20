@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-swift/syntax",
-	"text!js-tests/editor/textStyler/swift/text.swift",
+	"text!js-tests/editor/textStyler/swift/text.txt",
 	"text!js-tests/editor/textStyler/swift/styles.txt"
 ], function(mSwift, mText, mStyles) {
 	

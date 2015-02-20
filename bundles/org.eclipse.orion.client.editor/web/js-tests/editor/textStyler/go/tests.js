@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-go/syntax",
-	"text!js-tests/editor/textStyler/go/text.go",
+	"text!js-tests/editor/textStyler/go/text.txt",
 	"text!js-tests/editor/textStyler/go/styles.txt"
 ], function(mGo, mText, mStyles) {
 	

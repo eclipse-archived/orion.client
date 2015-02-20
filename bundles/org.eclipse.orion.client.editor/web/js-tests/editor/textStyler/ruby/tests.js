@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-ruby/syntax",
-	"text!js-tests/editor/textStyler/ruby/text.rb",
+	"text!js-tests/editor/textStyler/ruby/text.txt",
 	"text!js-tests/editor/textStyler/ruby/styles.txt"
 ], function(mRuby, mText, mStyles) {
 	

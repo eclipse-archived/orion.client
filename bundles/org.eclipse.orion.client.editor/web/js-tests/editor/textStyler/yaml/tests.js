@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-yaml/syntax",
-	"text!js-tests/editor/textStyler/yaml/text.yaml",
+	"text!js-tests/editor/textStyler/yaml/text.txt",
 	"text!js-tests/editor/textStyler/yaml/styles.txt"
 ], function(mYAML, mText, mStyles) {
 	

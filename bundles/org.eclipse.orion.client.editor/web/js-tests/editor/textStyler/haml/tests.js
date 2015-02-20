@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-haml/syntax",
-	"text!js-tests/editor/textStyler/haml/text.haml",
+	"text!js-tests/editor/textStyler/haml/text.txt",
 	"text!js-tests/editor/textStyler/haml/styles.txt"
 ], function(mHAML, mText, mStyles) {
 	

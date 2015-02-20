@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/application_xquery/syntax",
-	"text!js-tests/editor/textStyler/xquery/text.xq",
+	"text!js-tests/editor/textStyler/xquery/text.txt",
 	"text!js-tests/editor/textStyler/xquery/styles.txt"
 ], function(mXQuery, mText, mStyles) {
 	

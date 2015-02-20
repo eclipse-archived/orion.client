@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/application_json/syntax",
-	"text!js-tests/editor/textStyler/json/text.json",
+	"text!js-tests/editor/textStyler/json/text.txt",
 	"text!js-tests/editor/textStyler/json/styles.txt"
 ], function(mJSON, mText, mStyles) {
 	

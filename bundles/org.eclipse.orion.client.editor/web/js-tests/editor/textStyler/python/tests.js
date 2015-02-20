@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-python/syntax",
-	"text!js-tests/editor/textStyler/python/text.py",
+	"text!js-tests/editor/textStyler/python/text.txt",
 	"text!js-tests/editor/textStyler/python/styles.txt"
 ], function(mPython, mText, mStyles) {
 	

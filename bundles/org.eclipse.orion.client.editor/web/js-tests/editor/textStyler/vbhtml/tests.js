@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-vbhtml/syntax",
-	"text!js-tests/editor/textStyler/vbhtml/text.vbhtml",
+	"text!js-tests/editor/textStyler/vbhtml/text.txt",
 	"text!js-tests/editor/textStyler/vbhtml/styles.txt"
 ], function(mVBHTML, mText, mStyles) {
 	

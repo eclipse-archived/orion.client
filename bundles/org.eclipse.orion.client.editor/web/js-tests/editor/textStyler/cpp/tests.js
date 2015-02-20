@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-c__src/syntax",
-	"text!js-tests/editor/textStyler/cpp/text.cpp",
+	"text!js-tests/editor/textStyler/cpp/text.txt",
 	"text!js-tests/editor/textStyler/cpp/styles.txt"
 ], function(mCPP, mText, mStyles) {
 	

@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-erlang/syntax",
-	"text!js-tests/editor/textStyler/erlang/text.erl",
+	"text!js-tests/editor/textStyler/erlang/text.txt",
 	"text!js-tests/editor/textStyler/erlang/styles.txt"
 ], function(mErlang, mText, mStyles) {
 	

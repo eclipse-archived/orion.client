@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-objective-c/syntax",
-	"text!js-tests/editor/textStyler/objectiveC/text.m",
+	"text!js-tests/editor/textStyler/objectiveC/text.txt",
 	"text!js-tests/editor/textStyler/objectiveC/styles.txt"
 ], function(mObjectiveC, mText, mStyles) {
 	

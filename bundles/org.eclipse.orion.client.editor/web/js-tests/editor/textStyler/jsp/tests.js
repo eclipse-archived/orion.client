@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/application_x-jsp/syntax",
-	"text!js-tests/editor/textStyler/jsp/text.jsp",
+	"text!js-tests/editor/textStyler/jsp/text.txt",
 	"text!js-tests/editor/textStyler/jsp/styles.txt"
 ], function(mJSP, mText, mStyles) {
 	

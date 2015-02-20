@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-cshtml/syntax",
-	"text!js-tests/editor/textStyler/cshtml/text.cshtml",
+	"text!js-tests/editor/textStyler/cshtml/text.txt",
 	"text!js-tests/editor/textStyler/cshtml/styles.txt"
 ], function(mCSHTML, mText, mStyles) {
 	

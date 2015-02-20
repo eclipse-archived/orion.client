@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-jade/syntax",
-	"text!js-tests/editor/textStyler/jade/text.jade",
+	"text!js-tests/editor/textStyler/jade/text.txt",
 	"text!js-tests/editor/textStyler/jade/styles.txt"
 ], function(mJade, mText, mStyles) {
 	

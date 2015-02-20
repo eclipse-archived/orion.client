@@ -11,7 +11,7 @@
 /*eslint-env amd, browser, mocha*/
 define([
 	"orion/editor/stylers/text_x-lua/syntax",
-	"text!js-tests/editor/textStyler/lua/text.lua",
+	"text!js-tests/editor/textStyler/lua/text.txt",
 	"text!js-tests/editor/textStyler/lua/styles.txt"
 ], function(mLua, mText, mStyles) {
 	
