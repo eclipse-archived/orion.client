@@ -157,19 +157,21 @@
 			optimize="closure"
 			staging="${staging}" />
 		<move todir="${out}/stylers.min" includeemptydirs="false">
- 			<fileset dir="${out}/stylers">
+			<fileset dir="${out}/stylers">
 				<include name="**/syntax.js"/>
 			</fileset>
-			<mapper type="glob" from="*/syntax.js" to="*/syntax.min.js"/>
- 		</move>
+			<!-- dirsep is needed on Windows for / to match \ -->
+			<globmapper from="*/syntax.js" to="*/syntax.min.js" handledirsep="true" />
+		</move>
 		<stylerOptimizeFile out="${out}"
 			optimize="none"
 			staging="${staging}" />
 		<move todir="${out}/stylers" includeemptydirs="false">
- 			<fileset dir="${out}/stylers.min">
+			<fileset dir="${out}/stylers.min">
 				<include name="**/syntax.min.js"/>
 			</fileset>
- 		</move>
+		</move>
+
 		<delete dir="${out}/stylers.min"/>
 	</target>
 
