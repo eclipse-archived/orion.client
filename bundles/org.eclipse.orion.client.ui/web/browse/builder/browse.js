@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others. All rights reserved. This
+ * Copyright (c) 2011, 2015 IBM Corporation and others. All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 (http://www.eclipse.org/legal/epl-v10.html),
  * and the Eclipse Distribution License v1.0
@@ -75,14 +75,14 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			if (url.host === "github.com") {
 				pluginURL = new URL("../../plugins/GitHubFilePlugin.html?repo=" + url.href, _browser_script_source);
 			} else {
-				var regexGit = /^\/(git|gerrit)([\d]?)([\d]?)\/(.*)/;// Pattern : "/git/", "/git02/", "/git3/", "/git04"
+				var regexGit = /^\/git\/(.*)/;
 				var match = regexGit.exec(url.pathname);
-				if(match && match.length === 5) {
-					pluginURL = new URL("/gerrit" + match[2] + match[3] + "/plugins/gerritfs/static/plugins/GerritFilePlugin.html", url);
-					pluginURL.query.set("project", match[4]);
-					downloadURL = new URL("/gerrit" + match[2] + match[3] + "/plugins/jazzhub/project", url);
-					downloadURL.query.set("action", "compress");
-					downloadURL.query.set("project", match[4]);
+				if(match) {
+					// build the pluginURL and downloadURL
+					// these requests are expected to be handled by the Git router service
+					pluginURL = new URL("/browse/plugins/GerritFilePlugin.html", url);
+					pluginURL.query.set("project", match[1]);
+					downloadURL = new URL("/git/" + match[1] + "/archive", url);
 				} else if (url.pathname.indexOf("/ccm") === 0) {
 					if (!base) {
 						var ccmPath = url.pathname.match(/^\/ccm[^/]*/);
