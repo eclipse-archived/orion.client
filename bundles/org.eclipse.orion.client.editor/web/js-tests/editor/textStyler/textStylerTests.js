@@ -98,31 +98,42 @@ define([
 		for (var i = 0; i < computedStyles.length; i++) {
 			if (computedStyles[i].start !== expectedStyles[i].start ||
 				computedStyles[i].end !== expectedStyles[i].end ||
-				computedStyles[i].contentStart !== expectedStyles[i].contentStart ||
-				computedStyles[i].contentEnd !== expectedStyles[i].contentEnd ||
-				computedStyles[i].name !== expectedStyles[i].name) {
+				computedStyles[i].style.styleClass !== expectedStyles[i].style.styleClass) {
 					return false;
 			}
 		}
 		return true;
 	}
 
-	function getStyles(block, _styles, output) {
-		var style = {
-			start: block.start,
-			end: block.end,
-			contentStart: block.contentStart,
-			contentEnd: block.contentEnd,
-			name: block.name
-		};
-		if (output) {
-			window.console.log(JSON.stringify(style));
+	function getStyles(styler, output) {
+		var result = [];
+		var model = view.getModel();
+		var lineCount = model.getLineCount();
+		for (var i = 0; i < lineCount; i++) {
+			var e = {textView: view, lineText: model.getLine(i), lineStart: model.getLineStart(i)};
+			styler._onLineStyle(e);
+			if (e.ranges) {
+				e.ranges.forEach(function(current) {
+					result.push(current);
+				});
+			}
 		}
-		_styles.push(style);
-		var children = block.getBlocks();
-		children.forEach(function(current) {
-			getStyles(current, _styles, output);
-		});
+
+		/* merge range elements where possible */
+		for (i = result.length - 2; 0 <= i; i--) {
+			if (result[i].end === result[i + 1].start && result[i].style.styleClass === result[i + 1].style.styleClass) {
+				result[i].end = result[i + 1].end;
+				result.splice(i + 1, 1);
+			}
+		}
+
+		if (output) {
+			for (i = 0; i < result.length; i++) {
+				window.console.log(JSON.stringify(result[i]));
+			}
+		}
+
+		return result;
 	}
 
 	function setup() {
@@ -139,9 +150,7 @@ define([
 			var stylerAdapter = new mTextStyler.createPatternBasedAdapter(test.grammar.grammars, test.grammar.id, test.mimeType);
 			var styler = new mTextStyler.TextStyler(view, /*annotationModel*/undefined, stylerAdapter);
 			view.setText(test.testText);
-			var rootBlock = styler.getRootBlock();
-			var styles = [];
-			getStyles(rootBlock, styles, test.outputStyles);
+			var styles = getStyles(styler, test.outputStyles);
 			if (!test.outputStyles) {
 				assert.equal(compareStyles(styles, test.expectedStyles), true);
 			} else {

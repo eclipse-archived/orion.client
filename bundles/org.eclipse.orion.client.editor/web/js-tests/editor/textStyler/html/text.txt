@@ -6,6 +6,30 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<link rel="stylesheet" type="text/css" href="css/landing.css" />
 		<script src="../requirejs/require.js"></script>
+		
+		<style>		
+		/* Use the parent of the editor to control its size. */
+		
+		#myEditor {
+			border: 1px solid #ddd;
+			position: relative;
+			width: 100%;
+			height: 400px;
+		}
+		
+		/*
+		 * Use this class (textview) to control the font-size, font-family, etc
+		 */
+		.textview {
+			font-size: 30pt;
+		}
+		
+		textarea {
+			width: 100%;
+			height: 100%;
+		}
+		</style>
+
 		<script type="text/javascript">
 			/*eslint-env browser, amd*/
 			require({
