@@ -1202,6 +1202,7 @@ define([
 		    rule: function(context) {
         		//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof
         		var symbols = ['undefined', 'object', 'function', 'boolean', 'number', 'string', 'symbol'];
+        		var ops = ['==', '===', '!=', '!=='];
         		
         		return {
         			'UnaryExpression' : function(node){
@@ -1209,6 +1210,7 @@ define([
         			        var parent = node.parent;
         			        var val = parent.left === node ? parent.right : parent.left;
         			        if(parent && parent.type === 'BinaryExpression' && 
+        			             ops.indexOf(parent.operator) > -1 &&
         			             (val.type !== 'Literal' || symbols.indexOf(val.value) < 0)) {
         			            context.report(val, "Invalid typeof comparison.");
         			        }

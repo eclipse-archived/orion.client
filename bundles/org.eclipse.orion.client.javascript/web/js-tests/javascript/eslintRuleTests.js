@@ -5221,7 +5221,83 @@ define([
     			assert.equal(messages[0].ruleId, RULE_ID);
     			assert.equal(messages[0].message, "Invalid typeof comparison.");
     		});
-
+            
+            /**
+             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460388
+             */
+            it("should not flag binary expr withour comparison 1", function() {
+    			var topic = "var str = ('val: ' + typeof(foo));";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		
+    		/**
+             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460388
+             */
+            it("should not flag binary expr withour comparison 2", function() {
+    			var topic = "var str = ('val: ' & typeof(foo));";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		
+    		/**
+             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460388
+             */
+            it("should not flag binary expr withour comparison 3", function() {
+    			var topic = "var str = ('val: ' > typeof(foo));";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		
+    		/**
+             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460388
+             */
+            it("should not flag binary expr withour comparison 4", function() {
+    			var topic = "var str = ('val: ' < typeof(foo));";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460388
+             */
+            it("should not flag binary expr withour comparison 5", function() {
+    			var topic = "var str = ('val: ' <= typeof(foo));";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		
+    		/**
+             * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460388
+             */
+            it("should not flag binary expr withour comparison 6", function() {
+    			var topic = "var str = ('val: ' >= typeof(foo));";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
     	});
     });
 });
