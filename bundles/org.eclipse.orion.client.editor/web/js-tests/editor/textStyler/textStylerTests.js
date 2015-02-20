@@ -56,14 +56,14 @@ define([
 //		goTests,
 //		hamlTests,
 		htmlTests,
-//		jadeTests,
+		jadeTests,
 		javaTests,
 		jsTests,
 //		jsonTests,
 //		jspTests,
 //		luaTests,
 //		objectiveCTests,
-//		phpTests,
+		phpTests,
 //		pythonTests,
 //		rubyTests,
 //		swiftTests,
@@ -114,7 +114,9 @@ define([
 			styler._onLineStyle(e);
 			if (e.ranges) {
 				e.ranges.forEach(function(current) {
-					result.push(current);
+					if (current.style) {
+						result.push(current);
+					}
 				});
 			}
 		}

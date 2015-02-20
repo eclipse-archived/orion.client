@@ -1,0 +1,238 @@
+ul
+  li Item A
+  li Item B
+  li Item C
+  
+img
+
+a: img
+
+foo/
+foo(bar='baz')/
+
+a@d(href='google.com') Google
+a(class='button', href='google.com') Google
+
+- var authenticated = true
+body(class=authenticated ? 'authed' : 'anon')
+
+input(
+  type='checkbox'
+  name='agreement'
+  checked
+)
+
+div(escaped="<code>")
+div(unescaped!="<code>")
+
+input(type='checkbox', checked)
+input(type='checkbox', checked=true)
+input(type='checkbox', checked=false)
+input(type='checkbox', checked=true.toString())
+
+doctype html
+input(type='checkbox', checked)
+input(type='checkbox', checked=true)
+input(type='checkbox', checked=false)
+input(type='checkbox', checked=true && 'checked')
+
+a(style={color: 'red', background: 'green'})
+
+- var classes = ['foo', 'bar', 'baz']
+a(class=classes)
+//- the class attribute may also be repeated to merge arrays
+a.bing(class=classes class=['bing'])
+
+- var currentUrl = '/about'
+a(class={active: currentUrl === '/'} href='/') Home
+a(class={active: currentUrl === '/about'} href='/about') About
+
+a.button
+
+.content
+
+a#main-link
+
+#content
+
+div#foo(data-bar="foo")&attributes({'data-foo': 
+
+- var attributes = {'data-foo': 'bar'};
+div#foo(data-bar="foo")&attributes(attributes)
+
+// just some paragra
+//- will not output within mark
+
+// TODO block comments
+body
+  //
+    As much text as you want
+    can go here.
+    
+- for (var x = 0; x < 3; x++)
+
+p= 'This code is' + ' <escaped>!' for in /* asdf TODO asdf */ asdf
+
+p!= 'This code is <strong>not</strong> escaped!' for in /* asdf TODO asdf */ asdf
+
+p
+  != 'This code is <strong>not</strong> escaped!' for in /* asdf TODO asdf */ asdf
+
+- var user = { description: 'foo bar baz' }
+- var authorised = false
+#user
+  if user.description 'sdf' /* comment */
+    h2 Description 'sdf' /* comment */
+    p.description= user.description
+  else if authorised 'sdf' /* comment */
+    h2 Description
+    p.description.
+      User has no description,
+      why not add one...
+   else 'sdf' /* comment */
+    h1 Description
+    p.description User has no description
+
+unless user.isAnonymous 'sdf' /* TODO comment */
+  p You're logged in as #{user.name}
+
+ul
+  each val in [1, 2, 3, 4, 5]
+    li= val
+
+ul
+  each val, index in ['zero', 'one', 'two']
+    li= index + ': ' + val
+
+ul
+  for val, index in {1:'one',2:'two',3:'three'}
+    li= index + ': ' + val
+
+- for var values = [];
+ul
+  each val in values.length ? values : ['There are no values']
+    li= val
+
+- var n = 0
+ul
+  while n < 4
+    li= n++
+
+include ./includes/head.jade
+    include:markdown article.md
+
+//- Declaration
+mixin list
+  ul
+    li foo
+    li bar
+    li baz
+//- Use
++list
++list
+
+mixin pet(name)
+  li.pet= name
+ul
+  +pet('cat')
+  +pet('dog')
+  +pet('pig')
+  
+mixin article(title1, title2, title3)
+  .article
+    .article-wrapper
+      h1= title
+      if block
+        block
+      else
+        p No content provided
+
++article('Hello world')
+
++article('Hello world')
+  p This is my
+  p Amazing article
+
+mixin link(href, name)
+  //- attributes == {class: "btn"}
+  a(class!=attributes.class, href=href)= name
+
++link('/foo', 'foo')(class="btn")
+
+doctype html
+html
+  head
+    block title
+      title Default title
+  body
+    block content
+
+//- index.jade
+extends ./layout.jade
+
+block title
+  title Article Title
+
+block content
+  h1 My Article
+
+- var friends = 10
+case friends
+  when 0
+    p you have no friends
+  when 1
+    p you have a friend
+  default
+    p you have #{friends} friends
+
+- var friends = 0
+case friends
+  when 0
+  when 1
+    p you have very few friends
+  default
+    p you have #{friends} friends
+
+- var friends = 1
+case friends
+  when 0: p you have no friends
+  when 1: p you have a friend
+  default: p you have #{friends} friends
+
+:markdown
+  # Markdown
+
+  I often like including markdown documents.
+script
+  :coffee
+    console.log 'This is coffee script'
+
+- var title = "On Dogs: Man's Best Friend";
+- var author = "enlore";
+- var theGreat = "<span>escape!</span>";
+
+h1= title
+p Written with love by #{author}
+p This will be safe: #{theGreat}
+
+- var title = "On Dogs: Man's Best Friend";
+- var author = "enlore";
+- var theGreat = "<span>escape!</span>";
+
+h1= title
+p Written with love by #{author if }
+p This will be safe: #{theGreat}
+
+- var riskyBusiness = "<em>Some of the girls are wearing my mother's clothing.</em>";
+.quote
+  p Joel: !{riskyBusiness}
+  
+ a(target="_blank", href="https://github.com/jadejs/jade/blob/master/docs/views/reference/interpolation.jade") 
+ 
+p.
+  If you take a look at this page's source #[a(target="_blank", href="https://github.com/jadejs/jade/blob/master/docs/views/reference/interpolation.jade") on GitHub],
+  you'll see several places where the tag interpolation operator is
+  used, like so.
+
+- var attributes = {'data-foo': 'bar'};
+div#foo(data-bar="foo")&attributes(attributes)

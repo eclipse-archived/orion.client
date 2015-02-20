@@ -395,7 +395,7 @@ define([
 					var start = ranges[i];
 					var prev = start;
 					var next = ranges[i + 1];
-					while (next && prev.end === next.start && prev.style.styleClass === next.style.styleClass) {
+					while (next && prev.end === next.start && prev.style && next.style && prev.style.styleClass === next.style.styleClass) {
 						prev = next;
 						next = ranges[++i];
 					}
