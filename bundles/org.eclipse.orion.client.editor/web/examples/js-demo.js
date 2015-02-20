@@ -6,7 +6,7 @@
 var hello = "hello";
 var foo = 123; // line comment
 
-function testing (one, two, three) {
+function testing(one, two, three) {
 	var bool = true;
 	this.service.junk("command", 4, bool, foo, hello);
 	
