@@ -143,7 +143,7 @@ define([
     	_formatFilesHover: function _formatFilesHover(path, files) {
     	    if(path) {
     	        var title = null;
-    	        if(files.length > 1) {
+    	        if(files && files.length > 1) {
     	            '###Open file for \''+path+'\'###';
     	        }
     	        var hover = '';
