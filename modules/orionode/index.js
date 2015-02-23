@@ -21,6 +21,7 @@ var connect = require('connect'),
     orionNodeStatic = require('./lib/orionode_static'),
     orionStatic = require('./lib/orion_static'),
     orionTasks = require('./lib/tasks'),
+    orionSearch = require('./lib/search'),
     term = require('term.js');
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/')),
@@ -63,6 +64,10 @@ function startServer(options) {
 			.use(orionGit({ 
 				root: '/gitapi',
 				fileRoot: '/file',
+				workspaceDir: workspaceDir
+			}))
+			.use(orionSearch({
+				root: '/filesearch',
 				workspaceDir: workspaceDir
 			}))
 			.use(orionNode({

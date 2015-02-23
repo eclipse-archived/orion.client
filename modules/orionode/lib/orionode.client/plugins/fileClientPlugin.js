@@ -10,10 +10,11 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd*/
+<<<<<<< HEAD
 define([
 	"orion/Deferred",
 	"orion/plugin",
-	"plugins/filePlugin/nodeFileImpl" /*node!*/,
+	"plugins/filePlugin/fileImpl" /*node!*/,
 	"orion/URL-shim", // no exports
 	"domReady!" // no exports
 ], function(Deferred, PluginProvider, FileServiceImpl) {
