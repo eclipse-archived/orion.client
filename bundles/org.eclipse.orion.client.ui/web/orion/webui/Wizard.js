@@ -9,7 +9,11 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects){
+define([
+	'i18n!orion/widgets/nls/messages',
+	'orion/webui/littlelib',
+	'orion/objects'
+], function(messages, lib, objects){
 	/**
 	 * A wizard widget
 	 * 
@@ -30,7 +34,12 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects){
 	Wizard.constructor = Wizard;
 	
 	Wizard.prototype = {
-		buttonNames: {cancel: "CANCEL", back: "< Back", ok: "OK", next: "Next >"},
+		buttonNames: {
+			back: messages["back"],
+			next: messages["next"],
+			cancel: messages["Cancel"],
+			ok: messages["OK"],
+		},
 		_init: function(options){
 			this.parent = typeof options.parent === "string" ? lib.node(options.parent) : options.parent;
 			this.pages = options.pages;
@@ -68,8 +77,8 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects){
 				this._pagesNode.appendChild(this._pagesNodes[this.currentPage]);
 				this.pages[this.currentPage].render();
 			}
-			this.backButton.style.display = this.currentPage===0 ?  "none" : "";
-			this.nextButton.style.display = this.currentPage===this.pages.length-1 ?  "none" : "";
+			this.backButton.style.visibility = this.currentPage===0 ?  "hidden" : "visible";
+			this.nextButton.style.visibility = this.currentPage===this.pages.length-1 ?  "hidden" : "visible";
 			this.validate(this.currentPage);
 		},
 		_renderCommonPane: function(){
@@ -81,51 +90,46 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects){
 			this.commonPane.render();
 		},
 		_renderButtons: function(){
-			this.backButton = document.createElement("button");
-			this.backButton.className = "orionButton commandButton";
-			this.backButton.type = "button";
-			this.backButton.id = "backButton";
-			this.backButton.value = "BACK";
-			this.backButton.style.display = "none";
-			this.backButton.appendChild(document.createTextNode(this.buttonNames.back));
-			this._buttonsNode.appendChild(this.backButton);
+			var back = this.backButton = document.createElement("button");
+			back.className = "orionButton commandButton";
+			back.type = "button";
+			back.id = "backButton";
+			back.style.visibility = "hidden";
+			back.appendChild(document.createTextNode(this.buttonNames.back));
+			this._buttonsNode.appendChild(back);
+
+			var cancel = this.cancelButton = document.createElement("button");
+			cancel.className = "orionButton commandButton";
+			cancel.type = "button";
+			cancel.id = "cancelButton";
+			cancel.style.visibility = "visible";
+			cancel.appendChild(document.createTextNode(this.buttonNames.cancel));
+			this._buttonsNode.appendChild(cancel);
+
+			var ok = this.okButton = document.createElement("button");
+			ok.className = "orionButton commandButton okButton";
+			ok.type = "button";
+			ok.id = "okButton";
+			ok.appendChild(document.createTextNode(this.buttonNames.ok));
+			this._buttonsNode.appendChild(ok);
+
+			var next = this.nextButton = document.createElement("button");
+			next.className = "orionButton commandButton";
+			next.type = "button";
+			next.id = "nextButton";
+			next.appendChild(document.createTextNode(this.buttonNames.next));
+			this._buttonsNode.appendChild(next);
 			
-			this.cancelButton = document.createElement("button");
-			this.cancelButton.className = "orionButton commandButton";
-			this.cancelButton.type = "button";
-			this.cancelButton.id = "cancelButton";
-			this.cancelButton.value = "CANCEL";
-			this.cancelButton.style.display = "";
-			this.cancelButton.appendChild(document.createTextNode(this.buttonNames.cancel));
-			this._buttonsNode.appendChild(this.cancelButton);
-			
-			this.okButton = document.createElement("button");
-			this.okButton.className = "orionButton commandButton okButton";
-			this.okButton.type = "button";
-			this.okButton.id = "okButton";
-			this.okButton.value = "OK";
-			this.okButton.appendChild(document.createTextNode(this.buttonNames.ok));
-			this._buttonsNode.appendChild(this.okButton);
-			
-			this.nextButton = document.createElement("button");
-			this.nextButton.className = "orionButton commandButton";
-			this.nextButton.type = "button";
-			this.nextButton.id = "nextButton";
-			this.nextButton.value = "NEXT";
-			this.nextButton.appendChild(document.createTextNode(this.buttonNames.next));
-			this._buttonsNode.appendChild(this.nextButton);
-			
-			this.nextButton.addEventListener('click', this.next.bind(this));
-			this.backButton.addEventListener('click', this.back.bind(this));
-			this.okButton.addEventListener('click', function(){
-				if(this.validate(undefined, function(valid){
+			next.addEventListener('click', this.next.bind(this));
+			back.addEventListener('click', this.back.bind(this));
+			ok.addEventListener('click', function(){
+				this.validate(undefined, function(valid){
 					if(valid){
 						this.onSubmit(this.getResults());					
 					}
-				}.bind(this))){
-				};
+				}.bind(this));
 			}.bind(this));
-			this.cancelButton.addEventListener('click', this.onCancel);
+			cancel.addEventListener('click', this.onCancel);
 		},
 		_setButtonEnabled: function(button, enabled){
 			if(enabled){
@@ -248,7 +252,7 @@ define(['orion/webui/littlelib', 'orion/objects'], function(lib, objects){
 		getResults: function(){
 			return {};
 		}
-	}
+	};
 	
 	return {
 		Wizard: Wizard,

@@ -243,8 +243,11 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 	padding: 15px 0 12px 0;
 }
 
-.wizardButtonRow button {
-	text-transform: uppercase;
+.wizardButtonRow {
+	-ms-user-select: none;
+	-moz-user-select: -moz-none;
+	-webkit-user-select: none;
+	user-select: none;
 }
 
 .wiz-hr {

@@ -86,5 +86,7 @@ define({//Default message bundle
 	"redeployConfirmationDialogTitle": "Stop and Redeploy?",
 	"redeployConfirmationDialogMessage": "Your application ${0} will be re-deployed.",
 	"redeployConfirmationDialogCheckboxMessage": "Don't ask me again.",
-	"createNewTooltip": "Create a new launch configuration"
+	"createNewTooltip": "Create a new launch configuration",
+	"back": "< Back",
+	"next": "Next >",
 });
