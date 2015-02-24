@@ -30,6 +30,7 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domRea
 			document.getElementById("repeatPasswordContainer").style.display = "none";
 			document.getElementById("emailContainer").style.display = "none";
 			document.getElementById("signUpBtn").style.display = "none";
+			document.getElementById("rightSection").style.display = "none";
 
 			var email = common.getParam("email");
 			var username = common.getParam("username");
