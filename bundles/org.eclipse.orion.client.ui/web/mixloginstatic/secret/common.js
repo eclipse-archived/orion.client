@@ -125,15 +125,17 @@ define(['orion/PageUtil'],function(PageUtil) {
         statusField.text("");
 
         if (typeof msg !== "undefined") {
-            var passwordContainer = $(".pass-container");
-            var loginContainer = $(".login-container");
-            var emailContainer = $(".email-container");
-            var resetContainer = $(".reset-container");
-            var resetEmailContainer = $(".reset-email-container");
+            var passwordContainer = $(".pass-container"),
+                loginContainer = $(".login-container"),
+                emailContainer = $(".email-container"),
+                resetContainer = $(".reset-container"),
+                resetEmailContainer = $(".reset-email-container"),
+                registrationRightSection = $(".right-section");
 
             var usernameField = document.getElementById("username");
-            var username = usernameField.value;
+            var username = usernameField.value.length > 0 ? usernameField.value : getParam("username");
             var userError = "User " + username + " already exists.";
+            var userErrorMessage = userError + " If you are the account owner, please login <a href='loginWindow.html'>here</a>.";
 
             var userCreated = "All good to go! Please follow the instructions in the e-mail sent to you to login into Orion.";
             var linkedUserCreated = "Your account " + username + " has been successfully created. You have been sent an email address verification. Follow the instructions in this email to login to your Orion account."
@@ -175,6 +177,11 @@ define(['orion/PageUtil'],function(PageUtil) {
                     statusField.text("Password must contain at least one number or special character");
                     break;
                 case userError:
+                    loginContainer.addClass(errorClass);
+                    passwordContainer.removeClass(errorClass);
+                    emailContainer.removeClass(errorClass);
+                    statusField.html(userErrorMessage);
+                    break;
                 case "User login not specified":
                 case "Username must contain at least 3 characters":
                     loginContainer.addClass(errorClass);
@@ -217,6 +224,7 @@ define(['orion/PageUtil'],function(PageUtil) {
                     statusField.text(msg);
                     break;
                 case "Confirmation email has been sent.":
+                    statusField.removeClass(errorClass);
                     statusField.text(msg);
                     break;
                 case "Sending password reset confirmation...":
@@ -228,6 +236,7 @@ define(['orion/PageUtil'],function(PageUtil) {
                     statusField.text(userEmailNotSet);
                     break;
                 case "Created":
+                    registrationRightSection.addClass("hide");
                     loginContainer.removeClass(errorClass);
                     passwordContainer.removeClass(errorClass);
                     emailContainer.removeClass(errorClass);
