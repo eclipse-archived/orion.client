@@ -27,13 +27,12 @@ define(['orion/plugin', 'orion/editor/stylers/text_x-arduino/syntax'], function(
 		pluginProvider.registerServiceProvider("orion.core.contenttype", {}, {
 			contentTypes: [
 				{	id: "text/x-arduino", // TODO could not find a commonly-used value for this
-					"extends": "text/plain",
+					"extends": "text/x-csrc",
 					name: "Arduino",
 					extension: ["ino", "pde"]
 				}
 			] 
 		});
-		pluginProvider.registerServiceProvider("orion.edit.highlighter", {}, mArduino.grammars[mArduino.grammars.length - 1]);
 	}
 
 	return {

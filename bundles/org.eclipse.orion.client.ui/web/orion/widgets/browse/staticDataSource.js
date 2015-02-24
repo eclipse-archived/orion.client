@@ -20,7 +20,6 @@ define([
 	"orion/editor/stylers/text_css/syntax",
 	"orion/editor/stylers/text_html/syntax",
 	"orion/editor/stylers/application_json/syntax",
-	"orion/editor/stylers/text_x-arduino/syntax",
 	"orion/editor/stylers/text_x-csrc/syntax",
 	"orion/editor/stylers/text_x-csharp/syntax",
 	"orion/editor/stylers/text_x-cshtml/syntax",
@@ -42,7 +41,7 @@ define([
 	'orion/editor/stylers/application_x-ejs/syntax',
 	'orion/editor/stylers/application_xml/syntax',
 	'orion/editor/stylers/text_x-yaml/syntax',
-], function(Deferred, mStyler, mJS, mJSP, mXQuery, mCss, mHtml, mJson, mArduino, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSwift, mVB, mVBHTML, mEJS, mXml, mYaml) {
+], function(Deferred, mStyler, mJS, mJSP, mXQuery, mCss, mHtml, mJson, mC, mCS, mCSHTML, mCpp, mDockerfile, mErlang, mHaml, mJava, mJade, mLua, mPhp, mPython, mRuby, mGo, mObjectiveC, mSwift, mVB, mVBHTML, mEJS, mXml, mYaml) {
 	var ContentTypes = [
 		{	id: "text/plain",
 			name: "Text",
@@ -168,7 +167,7 @@ define([
 			extension: ["war", "jar", "zip", "rar"]
 		},
 		{	id: "text/x-arduino",
-			"extends": "text/plain",
+			"extends": "text/x-csrc",
 			name: "Arduino",
 			extension: ["ino", "pde"]
 		},
@@ -337,9 +336,8 @@ define([
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mYaml.grammars, "orion.yaml", fileContentType.id); //$NON-NLS-0$
 						break;
 					case "text/x-arduino": //$NON-NLS-0$
-						stylerAdapter = new mStyler.createPatternBasedAdapter(mArduino.grammars, "orion.arduino", fileContentType.id); //$NON-NLS-0$
-						break;
 					case "text/x-csrc": //$NON-NLS-0$
+					case "text/x-c": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mC.grammars, "orion.c", fileContentType.id); //$NON-NLS-0$
 						break;
 					case "text/x-csharp": //$NON-NLS-0$
