@@ -10,36 +10,22 @@
  ******************************************************************************/
 
 define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domReady, xhr, xsrfUtils, common) {
-	function confirmCreateUser(e, linkedUser) {
-
-		var e = typeof e !== 'undefined' ? e : null;
-		var linkedUser = typeof linkedUser !== 'undefined' ? linkedUser : false;
+	function confirmCreateUser() {
+		var linkedUser = common.getParam("oauth") === "create" ? true : false;
 		var authForm = document.getElementById("orion-auth"),
 			authFormElements = document.getElementById("form-elements"),
 			signUpBtn = document.getElementById("signUpBtn"),
 			processClass = "in-progress",
 			regCompleteClass = "complete";
 
-		if (e !== null) {
-			e.preventDefault();
-		}
-
 		if (linkedUser) {
-			document.getElementById("loginContainer").style.display = "none";
-			document.getElementById("passwordContainer").style.display = "none";
-			document.getElementById("repeatPasswordContainer").style.display = "none";
-			document.getElementById("emailContainer").style.display = "none";
-			document.getElementById("signUpBtn").style.display = "none";
-
-			var email = common.getParam("email");
-			var username = common.getParam("username");
 			var identifier = common.getParam("identifier");
 			var password = generateRandomPassword();
 		} else {
-			var username = document.getElementById("username").value;
 			var password = document.getElementById("password").value;
-			var email =  document.getElementById("email").value;
 		}
+		var username = document.getElementById("username").value;
+		var email =  document.getElementById("email").value;
 
 		var mypostrequest = new XMLHttpRequest();
 		mypostrequest.onreadystatechange = function() {
@@ -69,7 +55,6 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domRea
 
 		if (linkedUser) {
 			formData.identifier = identifier;
-			var parameters = "username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&identifier=" + encodeURIComponent(identifier) + "&Email=" + encodeURIComponent(email);
 		}
 
 		mypostrequest.open("POST", "../../users", true);
@@ -79,11 +64,9 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domRea
 		mypostrequest.send(JSON.stringify(formData));
 		common.showStatusMessage("Processing your request...");
 
-		if (!linkedUser) {
-			common.addClass(authForm, processClass);
-			authFormElements.setAttribute("disabled", "disabled");
-			signUpBtn.setAttribute("disabled", "disabled");
-		}
+		common.addClass(authForm, processClass);
+		authFormElements.setAttribute("disabled", "disabled");
+		signUpBtn.setAttribute("disabled", "disabled");
 	}
 
 	function generateRandomPassword() {
@@ -104,7 +87,14 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domRea
 	function setUpRegisterPage() {
 		var oauth = common.getParam("oauth");
 		if (oauth) {
-			confirmCreateUser(null, true);
+			var email = common.getParam("email");
+			var username = common.getParam("username");
+
+			document.getElementById("passwordContainer").style.display = "none";
+			document.getElementById("repeatPasswordContainer").style.display = "none";
+			document.getElementById("username").value = username;
+			document.getElementById("email").value = email;
+			document.getElementById("signUpBtn").addEventListener("click", confirmCreateUser, false);
 		} else {
 			document.getElementById("signUpBtn").addEventListener("click", confirmCreateUser, false);
 			document.getElementById("show-password").addEventListener("click", common.passwordSwitcher);
