@@ -75,14 +75,15 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			if (url.host === "github.com") {
 				pluginURL = new URL("../../plugins/GitHubFilePlugin.html?repo=" + url.href, _browser_script_source);
 			} else {
-				var regexGit = /^\/git\/(.*)/;
+				//var regexGit = /^\/git\/(.*)/;
+				var regexGit = /^\/(git|gerrit)([\d]*)\/(.*)/;
 				var match = regexGit.exec(url.pathname);
 				if(match) {
 					// build the pluginURL and downloadURL
 					// these requests are expected to be handled by the Git router service
 					pluginURL = new URL("/browse/plugins/GerritFilePlugin.html", url);
-					pluginURL.query.set("project", match[1]);
-					downloadURL = new URL("/git/" + match[1] + "/archive", url);
+					pluginURL.query.set("project", match[3]);
+					downloadURL = new URL("/git/" + match[3] + "/archive", url);
 				} else if (url.pathname.indexOf("/ccm") === 0) {
 					if (!base) {
 						var ccmPath = url.pathname.match(/^\/ccm[^/]*/);
