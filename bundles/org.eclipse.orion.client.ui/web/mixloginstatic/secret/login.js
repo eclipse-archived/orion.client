@@ -136,6 +136,18 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 			common.showStatusMessage(errorMessage);
 		}
 
+		var oauth = common.getParam("oauth");
+		if (oauth) {
+			var oauthMessage = common.decodeBase64(oauth);
+
+			var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1);
+			var url = window.location.href;
+			var redirectURL = url.replace("LoginWindow", "register");
+			console.log(hashes);
+			console.log(redirectURL);
+			window.location.replace(redirectURL);
+		}
+
 		// FIX the hrefs of the various forms here.
 		document.getElementById("signInWithGoogle").href = common.createOAuthLink("google");
 		document.getElementById("signInWithGitHub").href = common.createOAuthLink("github");
