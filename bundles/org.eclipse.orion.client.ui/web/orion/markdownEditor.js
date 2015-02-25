@@ -541,7 +541,7 @@ define([
 			this._onBlocksChanged({oldBlocks: [], newBlocks: rootBlock.getBlocks()});
 		},
 		/** @callback */
-		parse: function(text, offset, block, _styles, ignoreCaptures) {
+		parse: function(text, offset, startIndex, block, _styles, ignoreCaptures) {
 			if (!block.typeId) {
 				return;
 			}
