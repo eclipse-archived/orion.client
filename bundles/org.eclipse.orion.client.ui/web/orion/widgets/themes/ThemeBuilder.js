@@ -149,14 +149,14 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 	function populateThemes(){
 		this.preferences.getTheme(function(themeStyles) {
 			var selectElement = document.getElementById('editorTheme');//$NON-NLS-0$
-			while(selectElement.hasChildNodes() ){
+			while (selectElement.hasChildNodes() ){
 				selectElement.removeChild(selectElement.lastChild);
 			}
 			for (var i =0; i < themeStyles.styles.length; i++) {
 				var option = document.createElement('option');
 				option.setAttribute('value', themeStyles.styles[i].name);
 				//checks if a theme is the current theme 
-				if(themeStyles.styles[i].name === themeStyles.style.name){
+				if (themeStyles.styles[i].name === themeStyles.style.name){
 					option.setAttribute('selected', 'true');
 				}
 				option.appendChild(document.createTextNode(themeStyles.styles[i].name));
@@ -193,13 +193,13 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 	//adds status class to scopes 
 	function checkForChanges(){
 		var changed = false;
-		for(var i = 0; i < scopeList.length; i++){
+		for (var i = 0; i < scopeList.length; i++){
 			// if a scope is modified
 			if (getValueFromPath(currentTheme, scopeList[i].objPath[0]) !== getValueFromPath(originalTheme, scopeList[i].objPath[0])){
 				document.getElementById("scopeList").childNodes[i].classList.add('modified');//$NON-NLS-1$ //$NON-NLS-0$
 				changed = true;
 			}
-			else{
+			else {
 				document.getElementById("scopeList").childNodes[i].classList.remove('modified');//$NON-NLS-1$ //$NON-NLS-0$
 			}
 		}
@@ -208,7 +208,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 			document.getElementById("scopeChanged").classList.remove('hide');//$NON-NLS-1$ //$NON-NLS-0$
 			document.getElementById("scopeOriginal").classList.add('hide');//$NON-NLS-1$ //$NON-NLS-0$
 		}
-		else{
+		else {
 			document.getElementById("scopeChanged").classList.add('hide');//$NON-NLS-1$ //$NON-NLS-0$
 			document.getElementById("scopeOriginal").classList.remove('hide');//$NON-NLS-1$ //$NON-NLS-0$
 		}
@@ -218,7 +218,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 		for(var i = 0; i < scopeList.length; i++){
 			if (scopeList[i].id === id){
 				scopeList[i].value = val;
-				for(var l = 0; l < scopeList[i].objPath.length; l++){
+				for (var l = 0; l < scopeList[i].objPath.length; l++){
 					setValueToPath(currentTheme, scopeList[i].objPath[l], scopeList[i].value);
 				}
 				mSetup.processTheme("editorTheme", currentTheme); //$NON-NLS-0$
@@ -241,12 +241,12 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 	
 	function setValueToPath (obj, path, val){
 		var nodes = path.split('.');
-		try{
+		try {
 			for (var i = 0; i < nodes.length - 1; i++) {
 				obj = obj[nodes[i]] || (obj[nodes[i]] = {});
 			}
 			obj[nodes[i]] = val;
-		}catch(e){
+		} catch (e) {
 			return false;
 		}
 	}
@@ -254,9 +254,9 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 	//updates the theme object with right values
 	function apply() {
 		document.getElementById("editorThemeName").value = currentTheme.name; //$NON-NLS-0$
-		for(var i = 0; i < scopeList.length; i++){
-			scopeList[i].value = defaultColor; // scopes with no value with have defaultColor showing
-			for(var l = 0; l < scopeList[i].objPath.length; l++){
+		for (var i = 0; i < scopeList.length; i++){
+			scopeList[i].value = defaultColor; // scopes with no value will have defaultColor showing
+			for (var l = 0; l < scopeList[i].objPath.length; l++){
 				var temp = getValueFromPath(currentTheme,scopeList[i].objPath[l]);
 				if (temp){
 					scopeList[i].value = temp;
@@ -274,9 +274,9 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 	function generateScopeList(){
 		var htmlString = "";
 		for (var i = 0; i < scopeList.length; i++){
-			if(scopeList[i].id === "editorThemeFontSize"){
+			if (scopeList[i].id === "editorThemeFontSize"){
 				htmlString = htmlString + "<li><span>" + scopeList[i].display + "</span><select id='editorThemeFontSize'>";
-				for(var l = 8; l < 19; l++){
+				for (var l = 8; l < 19; l++){
 					htmlString = htmlString + "<option value='" + l+"px'>"+l+"px</option>";
 				}
 				for(l = 8; l < 19; l++){
@@ -464,7 +464,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 	
 	function deleteTheme(){
 		//if default theme
-		if(protectedThemes.indexOf(currentTheme.name) !== -1){
+		if (protectedThemes.indexOf(currentTheme.name) !== -1){
 			window.alert(currentTheme.name + messages["cannotDeleteMsg"]);
 		}
 		else if (confirm(messages["confirmDeleteMsg"]) === true){
@@ -485,7 +485,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 	ThemeBuilder.prototype.deleteTheme = deleteTheme;
 	
 	function saveTheme(){
-		if(protectedThemes.indexOf(currentTheme.name) !== -1){
+		if (protectedThemes.indexOf(currentTheme.name) !== -1){
 			window.alert(currentTheme.name + messages["cannotModifyMsg"]);
 		}
 		else {

@@ -114,6 +114,11 @@ define([
 			extension: ["go"],
 			"extends": "text/plain"
 		},
+		{	id: "text/x-launch",
+			"extends": "application/json",
+			name: "Launch file",
+			extension: ["launch"]
+		},
 		{	id: "text/x-objective-c",
 			"extends": "text/plain",
 			name: "Objective-C",
@@ -305,6 +310,7 @@ define([
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mJSP.grammars, "orion.jsp", fileContentType.id); //$NON-NLS-0$
 						break;
 					case "application/json": //$NON-NLS-0$
+					case "text/x-launch": //$NON-NLS-0$
 						stylerAdapter = new mStyler.createPatternBasedAdapter(mJson.grammars, "orion.json", fileContentType.id); //$NON-NLS-0$
 						break;
 					case "text/x-jade": //$NON-NLS-0$
