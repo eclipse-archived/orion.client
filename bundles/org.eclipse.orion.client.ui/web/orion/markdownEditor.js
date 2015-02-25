@@ -691,7 +691,7 @@ define([
 				if (match) {
 					index += match.index + match[0].length;
 				} else {
-					mMetrics.logEvent("status", "error", "MD1 " + token.type + " index=" + index + ": " + text.substring(Math.max(0, index - 10), index + 40)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					mMetrics.logEvent("status", "error", "MD2 " + token.type + ": " + text.substring(0, 40)); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 			return index;
