@@ -846,6 +846,7 @@ define([
                             }
                             break;
                         }
+                        case 'ArrowFunctionExpression':
                         case 'FunctionExpression':
                         case 'FunctionDeclaration': {
                             node.params.forEach(function(param) {
@@ -859,6 +860,7 @@ define([
                 }
                 
                 return {
+                    'ArrowFunctionExpression': checkShadow,
                     'FunctionExpression': checkShadow,
                     'FunctionDeclaration': checkShadow,
                     'VariableDeclarator': checkShadow
@@ -1039,7 +1041,7 @@ define([
         					var defnode = variable.defs[0].name;
         					if (!variable.references.length) {
         					    var pid = 'no-unused-params';
-        					    if(node.type === 'FunctionExpression') {
+        					    if(node.type === 'FunctionExpression' || node.type === 'ArrowFunctionExpression') {
         					        pid += '-expr';
         					        if(hasCallbackComment(node) || (node.params && node.params.length > 0 && hasCallbackComment(node.params[0]))) { 
         					            return;
@@ -1068,6 +1070,7 @@ define([
         		}
         
         		return {
+        			"ArrowFunctionExpression": check,  //$NON-NLS-0$
         			"FunctionDeclaration": check,  //$NON-NLS-0$
         			"FunctionExpression": check  //$NON-NLS-0$
         		};
@@ -1120,7 +1123,8 @@ define([
         		return {
         			"Program": check,  //$NON-NLS-0$
         			"FunctionDeclaration": check,  //$NON-NLS-0$
-        			"FunctionExpression": check  //$NON-NLS-0$
+        			"FunctionExpression": check,  //$NON-NLS-0$
+        			"ArrowFunctionExpression": check //$NON-NLS-0$
         		};
         	}
         },
