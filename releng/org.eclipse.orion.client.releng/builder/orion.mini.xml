@@ -13,6 +13,7 @@
 	======================================================================
 		${skipOrionUI}      If set, the Orion pages and plugins will not be built
 		${skipBrowser}      If set, the readonly file browser widget will not be generated 
+		${skipCommitBrowser}   If set, the git commit browser widget will not be generated 
 		${skipEditor}       If set, the standalone editor will not be generated
 		${skipEditorStylers}       If set, the standalone editor stylers will not be generated
 		${skipCompareEditor}       If set, the standalone compare editor will not be generated
@@ -126,6 +127,7 @@
 		<condition property="widget.run">
 			<or>
 				<not><isset property="skipBrowser" /></not>
+				<not><isset property="skipCommitBrowser" /></not>
 				<not><isset property="skipEditor" /></not>
 				<not><isset property="skipCompareEditor" /></not>
 			</or>
@@ -149,6 +151,8 @@
 		<copy file="${builder}/scripts/compare.build.almond-js.js" tofile="${staging}/compare.build.almond-js.js" overwrite="true"/>
 		<copy file="${builder}/scripts/browse.build-css.js" tofile="${staging}/browse.build-css.js" overwrite="true"/>
 		<copy file="${builder}/scripts/browse.build.almond-js.js" tofile="${staging}/browse.build.almond-js.js" overwrite="true"/>
+		<copy file="${builder}/scripts/commitBrowser.build-css.js" tofile="${staging}/commitBrowser.build-css.js" overwrite="true"/>
+		<copy file="${builder}/scripts/commitBrowser.build.almond-js.js" tofile="${staging}/commitBrowser.build.almond-js.js" overwrite="true"/>
 		<copy file="${builder}/scripts/editor.build.stylers-js.js" tofile="${staging}/editor.build.stylers-js.js" overwrite="true"/>
 	</target>
 	
@@ -258,6 +262,26 @@
 		</sequential>
 	</target>
 	
+	<target name="commitBrowserOptimize" unless="skipCommitBrowser">
+		<sequential>
+			<widgetOptimizeFile out="${out}/built-commitBrowser.css"
+				buildfile="${staging}/commitBrowser.build-css.js"
+				optimize="closure"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/built-commitBrowser.min.js"
+				buildfile="${staging}/commitBrowser.build.almond-js.js"
+				optimize="closure"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/built-commitBrowser.js"
+				buildfile="${staging}/commitBrowser.build.almond-js.js"
+				optimize="none"
+				staging="${staging}" />
+			<copy todir="${orionClient}/bundles/org.eclipse.orion.client.ui/web/gitWidgets/built" >
+				<fileset dir="${out}" includes="built-commitBrowser.js, built-commitBrowser.css, built-commitBrowser.min.js"/>
+			</copy>
+		</sequential>
+	</target>
+	
 	<macrodef name="widgetOptimizeFile">
 		<attribute name="staging" />
 		<attribute name="buildfile" />
@@ -353,6 +377,12 @@
 
 		<!-- build readonly widget (unless skipBrowser is set) -->
 		<antcall target="browserOptimize">
+			<param name="staging" value="${staging}" />
+			<param name="out" value="${widgetOutDirectory}" />
+		</antcall>
+
+		<!-- build git commit widget (unless skipCommitBrowser is set) -->
+		<antcall target="commitBrowserOptimize">
 			<param name="staging" value="${staging}" />
 			<param name="out" value="${widgetOutDirectory}" />
 		</antcall>
