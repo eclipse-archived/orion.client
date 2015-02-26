@@ -217,13 +217,17 @@ define([
             rule: function(context) {
                 return {
                     "MemberExpression": function(node) { //$NON-NLS-0$
-                        var object = node.object;
-                        if (!object || object.name !== "arguments" || object.type !== "Identifier") { //$NON-NLS-1$ //$NON-NLS-0$
-                            return;
-                        }
-                        var prop = node.property;
-                        if (prop.name === "callee" || prop.name === "caller") {//$NON-NLS-1$ //$NON-NLS-0$
-                            context.report(prop, "'arguments.${0}' is deprecated.", {0: prop.name});
+                        var func = Finder.findParentFunction(node);
+                        if(func) {
+                            var object = node.object;
+                            if (!object || object.name !== "arguments" || object.type !== "Identifier") { //$NON-NLS-1$ //$NON-NLS-0$
+                                return;
+                            }
+                            var prop = node.property;
+                            var name = prop.name ? prop.name : prop.value;
+                            if (name === "callee" || name === "caller") {//$NON-NLS-1$ //$NON-NLS-0$
+                                context.report(prop, "'arguments.${0}' is deprecated.", {0: name});
+                            }
                         }
                     }
                 };

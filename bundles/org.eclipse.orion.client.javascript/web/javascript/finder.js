@@ -899,7 +899,7 @@ define([
 								start: ctxt.selection.start,
 								end: ctxt.selection.end,
 								word: this._nameFromNode(node),
-								token: node,
+								token: node
 							};
 							var visitor = this._getVisitor(context);
 							Estraverse.traverse(ast, visitor);
@@ -1105,6 +1105,38 @@ define([
 	        return comment;
 		},
 		
+		/**
+		 * @description Finds the parent function for the given node if one exists
+		 * @function
+		 * @param {Object} node The AST node
+		 * @returns {Object} The function node that directly encloses the given node or ```null```
+		 * @since 9.0
+		 */
+		findParentFunction: function findParentFunction(node) {
+		    if(node) {
+		        if(node.parents) {
+		            //the node has been computed with the parents array from Finder#findNode
+    		        var parents = node.parents;
+    		        var parent = parents.pop();
+    		        while(parent) {
+    		            if(parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression') {
+    		                return parent;
+    		            }
+    		            parent = parents.pop();
+    		        }
+		        } else if(node.parent) {
+		            //eslint has tagged the AST with herarchy infos
+		            var parent = node.parent;
+		            while(parent) {
+		                if(parent.type === 'FunctionDeclaration' || parent.type === 'FunctionExpression') {
+    		                return parent;
+    		            }
+    		            parent = parent.parent;
+		            }
+		        }
+		    }
+		    return null;
+		} 
 	};
 
 	return Finder;

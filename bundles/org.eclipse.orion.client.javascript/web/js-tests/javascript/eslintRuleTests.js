@@ -725,8 +725,35 @@ define([
     			assert.equal(messages[0].node.name, "caller");
     			assert.equal(messages[0].node.type, "Identifier");
     		});
-    
-    
+    		it("should flag arguments['callee']", function() {
+    			var topic = "(function() { arguments['callee']; }());";
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "\'arguments.callee\' is deprecated.");
+    		});
+    		it("should flag arguments['caller']", function() {
+    			var topic = "(function() { arguments['caller']; }());";
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "\'arguments.caller\' is deprecated.");
+    		});
+    		// Tests that the node flagged is the Identifier "callee" or "caller" not the parent CallExpression
+    		it("should flag the bad Identifier", function() {
+    			var topic = "(function() { arguments['caller']; }());";
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].node.value, "caller");
+    			assert.equal(messages[0].node.type, "Literal");
+    		});
     		it("should not flag arguments.{something else}", function() {
     			var topic = "(function() { arguments.fizz; }());";
     			var config = { rules: {} };
@@ -736,6 +763,26 @@ define([
     		});
     		it("should not flag arguments[n]", function() {
     			var topic = "(function() { arguments[0]; }());";
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460976
+    		 */
+    		it("should not flag arguments.callee outside a function", function() {
+    			var topic = "var arguments = {callee: 1}; arguments.callee();";
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		/**
+    		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=460976
+    		 */
+    		it("should not flag arguments.caller outside a function", function() {
+    			var topic = "var arguments = {caller: 1}; arguments.caller();";
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
     			var messages = eslint.verify(topic, config);
