@@ -11,7 +11,7 @@
 /*eslint-env browser, amd*/
 define([
 	'orion/commandRegistry',
-	'orion/widgets/browse/staticDataSource',
+	'orion/staticDataSource',
 	'orion/contentTypes',
 	'orion/Deferred',
 	'orion/webui/littlelib',

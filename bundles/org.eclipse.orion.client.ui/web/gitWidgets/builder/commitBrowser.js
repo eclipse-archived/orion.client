@@ -38,7 +38,7 @@ if (_all_script && _all_script.length && _all_script.length > 0) {
 }
 define([
 	'gitWidgets/helper/gitCommitHelper',
-	'orion/widgets/browse/staticDataSource',
+	'orion/staticDataSource',
 	'orion/contentTypes',
 	'orion/serviceregistry',
 	'orion/pluginregistry',

@@ -149,8 +149,6 @@
 		<copy file="${builder}/scripts/compare.build-css.js" tofile="${staging}/compare.build-css.js" overwrite="true"/>
 		<copy file="${builder}/scripts/compare.build-js.js" tofile="${staging}/compare.build-js.js" overwrite="true"/>
 		<copy file="${builder}/scripts/compare.build.almond-js.js" tofile="${staging}/compare.build.almond-js.js" overwrite="true"/>
-		<copy file="${builder}/scripts/browse.build-css.js" tofile="${staging}/browse.build-css.js" overwrite="true"/>
-		<copy file="${builder}/scripts/browse.build.almond-js.js" tofile="${staging}/browse.build.almond-js.js" overwrite="true"/>
 		<copy file="${builder}/scripts/commitBrowser.build-css.js" tofile="${staging}/commitBrowser.build-css.js" overwrite="true"/>
 		<copy file="${builder}/scripts/commitBrowser.build.almond-js.js" tofile="${staging}/commitBrowser.build.almond-js.js" overwrite="true"/>
 		<copy file="${builder}/scripts/editor.build.stylers-js.js" tofile="${staging}/editor.build.stylers-js.js" overwrite="true"/>
@@ -242,26 +240,6 @@
 		</sequential>
 	</target>
 
-	<target name="browserOptimize" unless="skipBrowser">
-		<sequential>
-			<widgetOptimizeFile out="${out}/built-browser.css"
-				buildfile="${staging}/browse.build-css.js"
-				optimize="closure"
-				staging="${staging}" />
-			<widgetOptimizeFile out="${out}/built-browser.min.js"
-				buildfile="${staging}/browse.build.almond-js.js"
-				optimize="closure"
-				staging="${staging}" />
-			<widgetOptimizeFile out="${out}/built-browser.js"
-				buildfile="${staging}/browse.build.almond-js.js"
-				optimize="none"
-				staging="${staging}" />
-			<copy todir="${orionClient}/bundles/org.eclipse.orion.client.ui/web/browse/built" >
-				<fileset dir="${out}" includes="built-browser.js, built-browser.css, built-browser.min.js"/>
-			</copy>
-		</sequential>
-	</target>
-	
 	<target name="commitBrowserOptimize" unless="skipCommitBrowser">
 		<sequential>
 			<widgetOptimizeFile out="${out}/built-commitBrowser.css"
@@ -373,12 +351,6 @@
 			<param name="staging" value="${staging}" />
 			<param name="out" value="${optimized}" />
 			<param name="buildfile" value="${buildConfig}" />
-		</antcall>
-
-		<!-- build readonly widget (unless skipBrowser is set) -->
-		<antcall target="browserOptimize">
-			<param name="staging" value="${staging}" />
-			<param name="out" value="${widgetOutDirectory}" />
 		</antcall>
 
 		<!-- build git commit widget (unless skipCommitBrowser is set) -->

@@ -15,7 +15,7 @@ define([
 	'orion/section',
 	'orion/webui/littlelib',
 	'orion/commandRegistry',
-	'orion/widgets/browse/staticDataSource',
+	'orion/staticDataSource',
 	'orion/objects'
 ], function(
 	messages,
