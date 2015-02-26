@@ -59,8 +59,8 @@ define([
 	function Browser(params) { // parentId, repo, base
 		if (typeof params === "string") {
 			params = {
-				parentId: arguments[0]
-				//repo: arguments[1]
+				parentId: arguments[0],
+				pluginURL: arguments[1]
 			};
 		} else {
 			params = params || {};
@@ -69,7 +69,8 @@ define([
 		var gitClient = this.gitClient = new mGitClient.GitService(serviceRegistry);
 		this._contentTypeService =  new mContentTypes.ContentTypeRegistry(mStaticDataSource.ContentTypes);
 		serviceRegistry.registerService("orion.core.contentTypeRegistry", this._contentTypeService); //$NON-NLS-0$
-		var pluginURL = new URL("../../git/plugins/gitPlugin.html", _browser_script_source);
+		var pluginURL = params.pluginURL ? new URL(params.pluginURL, _browser_script_source) :
+											new URL("../../git/plugins/gitPlugin.html", _browser_script_source);
 		var plugins = {};
 		plugins[pluginURL.href] = {autostart: "started", lastModified: -1};
 		this.pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {
