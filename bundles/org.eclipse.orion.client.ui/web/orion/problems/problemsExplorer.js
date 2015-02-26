@@ -454,7 +454,7 @@ define([
 			var editorContextObj = {
 				getFileMetadata: function(){
 					return {
-						contentType: that.contentTypeRegistry.getFilenameContentType(fileObj.Name),
+						contentType: cType,
 						location: fileObj.Location
 					};
 				},
