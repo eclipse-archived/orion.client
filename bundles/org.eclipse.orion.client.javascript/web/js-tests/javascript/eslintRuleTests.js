@@ -3534,6 +3534,15 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 0);
     		});
+            it("should not flag ES6 globals", function() {
+                var topic = "Promise; Proxy; Reflect; Symbol;";
+
+                var config = { rules: {} };
+                config.rules[RULE_ID] = 1;
+
+                var messages = eslint.verify(topic, config);
+                assert.equal(messages.length, 0);
+            });
     	});
     	
 //NO-UNREACHABLE ------------------------------------------------    	
