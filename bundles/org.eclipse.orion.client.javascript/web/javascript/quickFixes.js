@@ -187,17 +187,55 @@ define([
 	function getDirectiveInsertionPoint(node) {
 	    if(node.type === 'Program' && node.body && node.body.length > 0) {
             var n = node.body[0];
-            if(n.type === 'FunctionDeclaration' || (n.type === 'ExpressionStatement' && n.expression && n.expression.right && n.expression.right.type === 'FunctionExpression')) {
-                if(n.leadingComments && n.leadingComments.length > 0) {
-                    var comment = n.leadingComments[n.leadingComments.length-1];
-                    if(/(?:@param|@return|@returns|@type|@constructor|@name|@description)/ig.test(comment.value)) {
-                        //if the immediate comment has any of the tags we use for inferencing, add the directive before it instead of after
-                        return comment.range[0];
+            var val = -1;
+            switch(n.type) {
+                case 'FunctionDeclaration': {
+                    val = getCommentStart(n);
+                    if(val > -1) {
+                        return val;
+                    } else {
+                        //TODO see https://github.com/jquery/esprima/issues/1071
+                        val = getCommentStart(n.id);
+                        if(val > -1) {
+                            return val;
+                        }
                     }
+                    break;
+                }
+                case 'ExpressionStatement': {
+                    if(n.expression && n.expression.right && n.expression.right.type === 'FunctionExpression') {
+                        val = getCommentStart(n);
+                        if(val > -1) {
+                            return val;
+                        } else {
+                            //TODO see https://github.com/jquery/esprima/issues/1071
+                            val = getCommentStart(n.expression.left);
+                            if(val > -1) {
+                                return val;
+                            }
+                        }
+                    }   
                 }
             }
 	    }
 	    return node.range[0];
+	}
+	
+	/**
+	 * @description Returns the offset to use when inserting a comment directive
+	 * @param {Object} node The node to check for comments
+	 * @returns {Number} The offset to insert the comment
+	 * @sicne 9.0
+	 */
+	function getCommentStart(node) {
+	    if(node.leadingComments && node.leadingComments.length > 0) {
+            var comment = node.leadingComments[node.leadingComments.length-1];
+            if(/(?:@param|@return|@returns|@type|@constructor|@name|@description)/ig.test(comment.value)) {
+                //if the immediate comment has any of the tags we use for inferencing, add the directive before it instead of after
+                return comment.range[0];
+            }
+        }
+        return -1;
 	}
 	
 	Objects.mixin(JavaScriptQuickfixes.prototype, /** @lends javascript.JavaScriptQuickfixes.prototype*/ {

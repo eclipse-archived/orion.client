@@ -130,6 +130,10 @@ define([
         					case 'Property':  //$NON-NLS-0$
         						if(node.value && (node.value.type === 'FunctionExpression')) {  //$NON-NLS-0$  //$NON-NLS-1$
         							comments = context.getComments(node);
+        							if(comments.leading.length < 1 && comments.trailing.length < 1) {
+        							    //TODO see https://github.com/jquery/esprima/issues/1071
+    							        comments = context.getComments(node.key);
+        							}
         							if(!validComment(comments)) {
         								switch(node.key.type) { 
         									case 'Identifier':  //$NON-NLS-0$
@@ -145,6 +149,10 @@ define([
         						break;
         					case 'FunctionDeclaration':  //$NON-NLS-0$
     							comments = context.getComments(node);
+    							if(comments.leading.length < 1 && comments.trailing.length < 1) {
+    							    //TODO see https://github.com/jquery/esprima/issues/1071
+							        comments = context.getComments(node.id);
+    							}
     							if(!validComment(comments)) {
     								context.report(node.id, 'Missing documentation for function \'${0}\'.', {0:node.id.name}, { type: 'decl' });
     							}
@@ -155,6 +163,10 @@ define([
         							if(anode.right && (anode.right.type === 'FunctionExpression') && anode.left && (anode.left.type === 'MemberExpression')) {  //$NON-NLS-0$  //$NON-NLS-1$
         								//comments are attached to the enclosing expression statement
         								comments = context.getComments(node);
+        								if(comments.leading.length < 1 && comments.trailing.length < 1) {
+            							    //TODO see https://github.com/jquery/esprima/issues/1071
+        							        comments = context.getComments(anode.left);
+            							}
         								if(!validComment(comments)) {
         									name = anode.left.computed === true ? anode.left.property.value : anode.left.property.name;
         									context.report(anode.left.property, 'Missing documentation for function \'${0}\'.', {0:name}, { type: 'expr' });
@@ -547,11 +559,15 @@ define([
             			                        reportednode.range[1] = tokens[0].range[1];
             			                    }
             			                }
-            			                var len = reportednode.leadingComments ? reportednode.leadingComments.length : 0;
-            			                if(len > 0) {
+            			                var comments = reportednode.leadingComments;
+            			                if(!comments && reportednode.test) {
+            			                    //TODO see https://github.com/jquery/esprima/issues/1071
+            			                    comments = reportednode.test.leadingComments; 
+            			                }
+            			                if(comments) {
                         		            var comment = null;
-                        		            for(var c = 0; c < len; c++) {
-                        		                comment = reportednode.leadingComments[c];
+                        		            for(var c = 0; c < comments.length; c++) {
+                        		                comment = comments[c];
                         		                if(/\s*\$FALLTHROUGH\$\s*/.test(comment.value)) {
                         		                    continue cases;
                         		                }
