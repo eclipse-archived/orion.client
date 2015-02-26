@@ -301,6 +301,16 @@ define([
                 return editorContext.setText(fix, annotation.start, annotation.start);
             });
         },
+        /** alternate fix for the no-fallthrough linting rule */
+        "no-fallthrough-break": function(editorContext, annotation) {
+            return editorContext.getText().then(function(text) {
+                var linestart = getLineStart(text, annotation.start);
+                var fix = 'break;';
+                var indent = computeIndent(text, linestart);
+                fix += computePostfix(text, annotation, indent);
+                return editorContext.setText(fix, annotation.start, annotation.start);
+            });
+        },
         /** fix for the no-sparse-arrays linting rule */
         "no-sparse-arrays": function(editorContext, annotation, astManager) {
             return astManager.getAST(editorContext).then(function(ast) {

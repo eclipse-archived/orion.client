@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -85,4 +85,6 @@ define({//Default message bundle
 	'unusedFuncDeclFixTooltip': 'Remove the unused function, keeping side effects', //$NON-NLS-0$ //$NON-NLS-1$
 	'noCommaDangleFixName': 'Remove extra \',\'', //$NON-NLS-0$ //$NON-NLS-1$
 	'noCommaDangleFixTooltip': 'Remove the extra comma', //$NON-NLS-0$ //$NON-NLS-1$
+	'addBBreakFixName': 'Add break statement', //$NON-NLS-0$ //$NON-NLS-1$
+	'addBBreakFixTooltip': 'Add a break statement to the proceeding line' //$NON-NLS-0$ //$NON-NLS-1$
 });

@@ -86,6 +86,9 @@ define([
                     assert.equal(pbs.length, 1, 'There should only be one problem per test');
                 }
                 annot.title = annot.description;
+                if(options.fixid) {
+                    annot.fixid = options.fixid;
+                }
                 return obj.fixComputer.execute(obj.editorContext, {annotation: annot});
             });
 	    }
@@ -449,6 +452,59 @@ define([
 		    return getFixes({buffer: '<html><head><script></script><script>switch(num) {case 1:{break;} case 2:{code();} default: {}}</script></head></html>', 
 		                      rule: rule,
 		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		it("Test no-fallthrough-break-1", function() {
+		    var rule = createTestRule('no-fallthrough');
+		    var expected = {value: "break;",
+		                    start: 30, 
+		                    end: 30};
+		    return getFixes({buffer: 'switch(num) {case 1:{code();} case 2:{}}', 
+		                      rule: rule,
+		                      expected: expected,
+		                      fixid: 'no-fallthrough-break'});
+		});
+		it("Test no-fallthrough-break-2", function() {
+		    var rule = createTestRule('no-fallthrough');
+		    var expected = {value: "break;",
+		                    start: 46, 
+		                    end: 46};
+		    return getFixes({buffer: 'switch(num) {case 1:{break;} case 2:{code();} default: {}}', 
+		                      rule: rule,
+		                      expected: expected,
+		                      fixid: 'no-fallthrough-break'});
+		});
+		it("Test no-fallthrough-break-html-1", function() {
+		    var rule = createTestRule('no-fallthrough');
+		    var expected = {value: "break;",
+		                    start: 50, 
+		                    end: 50};
+		    return getFixes({buffer: '<html><head><script>switch(num) {case 1:{code();} case 2:{}}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      fixid: 'no-fallthrough-break',
+		                      contentType: 'text/html'});
+		});
+		it("Test no-fallthrough-break-html-2", function() {
+		    var rule = createTestRule('no-fallthrough');
+		    var expected = {value: "break;",
+		                    start: 66, 
+		                    end: 66};
+		    return getFixes({buffer: '<html><head><script>switch(num) {case 1:{break;} case 2:{code();} default: {}}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      fixid: 'no-fallthrough-break',
+		                      contentType: 'text/html'});
+		});
+		it("Test no-fallthrough-break-html-3", function() {
+		    var rule = createTestRule('no-fallthrough');
+		    var expected = {value: "break;",
+		                    start: 83, 
+		                    end: 83};
+		    return getFixes({buffer: '<html><head><script></script><script>switch(num) {case 1:{break;} case 2:{code();} default: {}}</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      fixid: 'no-fallthrough-break',
 		                      contentType: 'text/html'});
 		});
 	//NO-UNDEF

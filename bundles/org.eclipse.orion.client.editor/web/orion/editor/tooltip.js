@@ -27,6 +27,16 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		this._view = view;
 		var parent = view.getOptions("parent"); //$NON-NLS-0$
 		this._create(parent ? parent.ownerDocument : document);
+		switch(parent) {
+		    case 1: {
+			    //TODO empty block
+		        var foo = 1;
+		    }
+		    default: {
+			    //TODO empty block
+		        
+		    }
+		}
 	}
 	Tooltip.getTooltip = function(view) {
 		if (!view._tooltip) {

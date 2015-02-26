@@ -143,6 +143,27 @@ define([
 		);
 		
 		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+				{
+        			execute: function(editorContext, context) {
+        				if(context.annotation.id === 'no-fallthrough') {
+        				    context.annotation.fixid = 'no-fallthrough-break';
+        				}
+        				return quickFixComputer.execute(editorContext, context);
+        			} 
+			    },
+				{
+        			name: javascriptMessages["addBBreakFixName"],  //$NON-NLS-0$
+        			tooltip : javascriptMessages['addBreakFixTooltip'],  //$NON-NLS-0$
+        			scopeId: "orion.edit.quickfix",
+        			id : "add.fallthrough.break.fix",  //$NON-NLS-0$
+        			contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+        			validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-fallthrough)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
+				}
+		);
+		
+		provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
 				quickFixComputer, 
 				{
         			name: javascriptMessages["addEmptyCommentFixName"],  //$NON-NLS-0$
