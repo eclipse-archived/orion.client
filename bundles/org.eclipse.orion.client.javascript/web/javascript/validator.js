@@ -45,6 +45,7 @@ define([
 			"no-reserved-keys": 2, //$NON-NLS-0$
 			"no-regex-spaces": 2, //$NON-NLS-0$
 			"no-shadow": 1, //$NON-NLS-0$
+			"no-shadow-global": 1, //$NON-NLS-0$
 			"no-undef": 2, //$NON-NLS-0$
 			"no-unused-params": 1, //$NON-NLS-0$
 			"no-unused-vars": 1, //$NON-NLS-0$

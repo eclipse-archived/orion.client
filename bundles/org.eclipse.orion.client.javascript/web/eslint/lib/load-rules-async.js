@@ -695,7 +695,7 @@ define([
                     "Program": checkScope,  //$NON-NLS-0$
                     "FunctionDeclaration": checkScope,  //$NON-NLS-0$
                     "FunctionExpression": checkScope,  //$NON-NLS-0$
-                    "ArrowFunctionExpression": checkScope, //$NON-NLS-0$
+                    "ArrowFunctionExpression": checkScope //$NON-NLS-0$
                 };
         	}
         },
@@ -823,7 +823,45 @@ define([
                     "Program": checkScope, //$NON-NLS-0$
                     "FunctionDeclaration": checkScope, //$NON-NLS-0$
                     "FunctionExpression": checkScope, //$NON-NLS-0$
-                    "ArrowFunctionExpression": checkScope, //$NON-NLS-0$
+                    "ArrowFunctionExpression": checkScope //$NON-NLS-0$
+                };
+            }
+        },
+        "no-shadow-global": {
+            description: 'Warn when a variable or parameter shadows a member from the global environment',
+            rule: function(context) {
+                
+                function checkShadow(node) {
+                    if(context.settings && context.settings.env) {
+                        var envs = Object.keys(context.settings.env);
+                        if(envs.length < 1) {
+                            //do nothing if no envs in use
+                            return;
+                        }
+                        switch(node.type) {
+                            case 'VariableDeclarator': {
+                                if(context.settings.env[Finder.findESLintEnvForMember(node.id.name)]) {
+                                    context.report(node.id, "Variable '${0}' shadows a global member", {0: node.id.name});
+                                }
+                                break;
+                            }
+                            case 'FunctionExpression':
+                            case 'FunctionDeclaration': {
+                                node.params.forEach(function(param) {
+                                    if(param.type === 'Identifier' && context.settings.env[Finder.findESLintEnvForMember(param.name)]) {
+                                        context.report(param, "Parameter '${0}' shadows a global member", {0: param.name, nls:'no-shadow-global-param'});
+                                    }
+                                });
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                return {
+                    'FunctionExpression': checkShadow,
+                    'FunctionDeclaration': checkShadow,
+                    'VariableDeclarator': checkShadow
                 };
             }
         },
@@ -1165,7 +1203,7 @@ define([
         			"ReturnStatement": checkForSemicolon,  //$NON-NLS-0$
         			"ThrowStatement": checkForSemicolon,  //$NON-NLS-0$
         			"BreakStatement": checkForSemicolon,  //$NON-NLS-0$
-        			"ContinueStatement": checkForSemicolon,  //$NON-NLS-0$
+        			"ContinueStatement": checkForSemicolon  //$NON-NLS-0$
         		};
         	}
         },

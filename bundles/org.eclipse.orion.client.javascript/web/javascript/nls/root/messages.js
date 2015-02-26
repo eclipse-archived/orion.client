@@ -86,5 +86,6 @@ define({//Default message bundle
 	'noCommaDangleFixName': 'Remove extra \',\'', //$NON-NLS-0$ //$NON-NLS-1$
 	'noCommaDangleFixTooltip': 'Remove the extra comma', //$NON-NLS-0$ //$NON-NLS-1$
 	'addBBreakFixName': 'Add break statement', //$NON-NLS-0$ //$NON-NLS-1$
-	'addBBreakFixTooltip': 'Add a break statement to the proceeding line' //$NON-NLS-0$ //$NON-NLS-1$
+	'addBBreakFixTooltip': 'Add a break statement to the proceeding line', //$NON-NLS-0$ //$NON-NLS-1$
+	'noShadowGlobals': 'Global shadowing:' //$NON-NLS-0$ //$NON-NLS-1$
 });

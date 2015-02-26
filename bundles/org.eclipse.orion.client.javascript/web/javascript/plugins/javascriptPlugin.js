@@ -484,6 +484,13 @@ define([
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
+				 	        	                {
+				 	        	                	id: "no-shadow-global", //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noShadowGlobals"], //$NON-NLS-0$
+				 	        	                	type: "number", //$NON-NLS-0$
+				 	        	                	defaultValue: warning, //$NON-NLS-0$
+				 	        	                	options: severities //$NON-NLS-0$
+				 	        	                },
 				 	        	                {	id: "valid-typeof",  //$NON-NLS-0$
 				 	        	                	name: javascriptMessages["validTypeof"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$

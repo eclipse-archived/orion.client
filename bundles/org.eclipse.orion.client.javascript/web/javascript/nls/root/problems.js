@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -52,4 +52,6 @@ define({
 	'throw-error': 'Throw an Error instead.', //$NON-NLS-0$  //$NON-NLS-1$
 	'use-isnan': 'Use the isNaN function to compare with NaN.', //$NON-NLS-0$  //$NON-NLS-1$
 	'valid-typeof' : 'Invalid typeof comparison.',  //$NON-NLS-0$ //$NON-NLS-1$
+	'no-shadow-global' : 'Variable \'${0}\' shadows a global member.',  //$NON-NLS-0$ //$NON-NLS-1$
+	'no-shadow-global-param' : 'Parameter \'${0}\' shadows a global member.'  //$NON-NLS-0$ //$NON-NLS-1$
 });
