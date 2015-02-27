@@ -137,5 +137,18 @@ define({//Default message bundle
 	"KeyPAGEDOWN": "Page Down",
 	"KeyPAGEUP": "Page Up",
 	"KeySPACE": "Space",
-	"KeyTAB": "Tab"
+	"KeyTAB": "Tab",
+	// Display elapsed time:
+	"a year": "a year",
+	"years": "${0} years",
+	"a month": "a month",
+	"months": "${0} months",
+	"a day": "a day",
+	"days": "${0} days",
+	"an hour": "an hour",
+	"hours": "${0} hours",
+	"a minute": "a minute",
+	"minutes": "${0} minutes",
+	"timeAgo": "${0} ago", //${0} represent the time elapsed
+	"justNow": "just now" //Represent that the time elapsed is less than 1 minute
 });

@@ -11,8 +11,9 @@
 /*eslint-env browser, amd*/
 define([
 	'i18n!orion/nls/messages',
-	'orion/webui/littlelib'
-], function(messages, lib) {
+	'orion/webui/littlelib',
+	'orion/i18nUtil'
+], function(messages, lib, i18nUtil) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 * @class This class contains static utility methods.
@@ -337,6 +338,72 @@ define([
 		return filePath.substring(0, filePath.length - encodeURIComponent(fileName).length - tail);
 	}
 	
+	function _timeDifference(timeStamp) {
+		var currentDate = new Date();
+		var commitDate = new Date(timeStamp);
+	    var difference = currentDate.getTime() - commitDate.getTime();
+	    var yearDiff = Math.floor(difference/1000/60/60/24/365);
+	    difference -= yearDiff*1000*60*60*24*365;
+	    var monthDiff = Math.floor(difference/1000/60/60/24/30);
+	    difference -= monthDiff*1000*60*60*24*30;
+	    var daysDifference = Math.floor(difference/1000/60/60/24);
+	    difference -= daysDifference*1000*60*60*24;
+		var hoursDifference = Math.floor(difference/1000/60/60);
+	    difference -= hoursDifference*1000*60*60;
+	    var minutesDifference = Math.floor(difference/1000/60);
+	    difference -= minutesDifference*1000*60;
+	    var secondsDifference = Math.floor(difference/1000);
+	    return {year: yearDiff, month: monthDiff, day: daysDifference, hour: hoursDifference, minute: minutesDifference, second: secondsDifference};
+	}
+	
+	function _generateTimeString(number, singleTerm, term) {
+		if(number > 0) {
+			if(number === 1) {
+				return messages[singleTerm];
+			}
+			return i18nUtil.formatMessage(messages[term], number);
+		}
+		return "";
+	}
+	
+	/**
+	 * Returns the time duration passed by now. E.g. "2 minutes", "an hour", "a day", "3 months", "2 years"
+	 * @param {String} timeStamp
+	 * @returns {String} If the duration is less than 1 minute, it returns empty string "". Otherwise it returns a duration value.
+	 */
+	function timeElapsed(timeStamp) {
+		var diff = _timeDifference(timeStamp);
+		var yearStr = _generateTimeString(diff.year, "a year", "years");
+		var monthStr = _generateTimeString(diff.month, "a month", "months");
+		var dayStr = _generateTimeString(diff.day, "a day", "days");
+		var hourStr = _generateTimeString(diff.hour, "an hour", "hours");
+		var minuteStr = _generateTimeString(diff.minute, "a minute", "minutes");
+		var disPlayStr = "";
+		if(yearStr) {
+			disPlayStr = diff.year > 0 ? yearStr : yearStr + monthStr;
+		} else if(monthStr) {
+			disPlayStr = diff.month > 0 ? monthStr : monthStr + dayStr;
+		} else if(dayStr) {
+			disPlayStr = diff.day > 0 ? dayStr : dayStr + hourStr;
+		} else if(hourStr) {
+			disPlayStr = diff.hour > 0 ? hourStr : hourStr + minuteStr;
+		} else if(minuteStr) {
+			disPlayStr = minuteStr;
+		}
+		return disPlayStr;	
+	}
+	/**
+	 * Returns the displayable time duration passed by now. E.g. "just now", "2 minutes ago", "an hour ago", "a day ago", "3 months ago", "2 years ago"
+	 * @param {String} timeStamp
+	 * @returns {String} If the duration is less than 1 minute, it returns empty string "just now". Otherwise it returns a duration value.
+	 */
+	function displayableTimeElapsed(timeStamp) {
+		var duration = timeElapsed(timeStamp);
+		if(duration) {
+			return i18nUtil.formatMessage(messages["timeAgo"], duration);
+		}
+		return messages["justNow"];
+	}
 	//return module exports
 	return {
 		getUserKeyString: getUserKeyString,
@@ -346,6 +413,8 @@ define([
 		createButton: createButton,
 		createDropdownButton: createDropdownButton,
 		isFormElement: isFormElement,
-		path2FolderName: path2FolderName
+		path2FolderName: path2FolderName,
+		timeElapsed: timeElapsed,
+		displayableTimeElapsed: displayableTimeElapsed
 	};
 });
