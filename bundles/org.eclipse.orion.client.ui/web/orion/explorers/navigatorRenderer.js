@@ -17,10 +17,9 @@ define([
 	'orion/extensionCommands',
 	'orion/objects',
 	'orion/URITemplate',
-	'orion/widgets/browse/commitInfoRenderer',
 	'orion/contentTypes',
 	'orion/webui/littlelib'
-], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, mCommitInfoRenderer, mContentTypes, lib) {
+], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, mContentTypes, lib) {
 		
 	var max_more_info_column_length = 60;
 	/* Internal */
@@ -206,7 +205,7 @@ define([
 	 * @param {Object} commitInfo the commit info
 	 */
 	NavigatorRenderer.prototype.getCommitRenderer = function(parent, commitInfo) {
-		return new mCommitInfoRenderer.CommitInfoRenderer({parent: parent, commitInfo: commitInfo});
+		return null;
 	};
 	
 	/**
@@ -380,7 +379,10 @@ define([
 				return null;
 			}
 			var messageColumn = document.createElement('td'); //$NON-NLS-0$
-			this.getCommitRenderer(messageColumn, item.LastCommit).renderSimple(max_more_info_column_length);
+			var renderer = this.getCommitRenderer(messageColumn, item.LastCommit);
+			if(renderer) {
+				renderer.renderSimple(max_more_info_column_length);
+			}
 			return messageColumn;
 		}
 	};
