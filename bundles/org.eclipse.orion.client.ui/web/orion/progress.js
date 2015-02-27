@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/webui/dialogs/OperationsDialog'], 
-function(messages, lib, mOperationsDialog) {
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/webui/dialogs/OperationsDialog', 'orion/Deferred'], 
+function(messages, lib, mOperationsDialog, Deferred) {
 	
 	function ProgressMonitorTool(progressPane, commandRegistry){
 		if(this._progressPane){
@@ -138,12 +138,16 @@ function(messages, lib, mOperationsDialog) {
 		this._progressMonitorClass = progressMonitorClass;
 	}
 	
+
 	ProgressService.prototype = /** @lends orion.progress.ProgressService.prototype */ {
 			init: function(progressPane){
 				if(this._progressMonitorClass){
 					return; // we have an other progress monitor implementation, we don't need to initialize our UI
 				}
 				this._progressMonitorTool = new ProgressMonitorTool(progressPane, this._commandRegistry);
+			},
+			getNewoperationIndex: function() {
+				return this._operationsIndex++;
 			},
 			progress: function(deferred, operationName, progressMonitor){
 				var that = this;
@@ -228,6 +232,10 @@ function(messages, lib, mOperationsDialog) {
 			},
 			setProgressResult: function(result){
 				this._serviceRegistry.getService("orion.page.message").setProgressResult(result); //$NON-NLS-0$
+				var operation = this._operationsClient.createOperation(result.Message, "loadend", result);
+				var deferred = new Deferred();
+				deferred.resolve(result);
+				this.writeOperation(this._operationsIndex++, operation, deferred);
 			},
 			/**
 			 * Shows a progress message until the given promise is resolved. Returns a promise that resolves when
