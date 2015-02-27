@@ -21,29 +21,25 @@ define([
 	var assert = chai.assert;	
 
 	describe('Outliner Tests', function() {
-		var astManager = new ASTManager.ASTManager(Esprima);
-		var outliner = new Outliner.JSOutliner(astManager);
-		var context = {
-			text: "",
-			/**
-			 * gets the text
-			 */
-			getText: function() {
-				return new Deferred().resolve(this.text);
-			}
-		};
+	    function setup(text, contentType) {
+	        return {
+		        outliner: new Outliner.JSOutliner(new ASTManager.ASTManager(Esprima)),
+		        editorContext: {
+		            getText: function() {
+        				return new Deferred().resolve(text);
+        			},
+        			
+        			getFileMetadata: function() {
+        			    var o = Object.create(null);
+        			    o.contentType = Object.create(null);
+        			    o.contentType.id = contentType ? contentType : 'application/javascript';
+        			    o.location = 'outliner_test_script.js';
+        			    return new Deferred().resolve(o);
+        			}
+		        }
+	        };
+	    }
 			
-		/**
-		 * @name tearDown
-		 * @description Resets the test state between runs, must explicitly be called per-test
-		 * @function
-		 * @public
-		 */
-		function tearDown() {
-			context.text = "";
-			astManager.onModelChanging({file:{}});
-		}
-		
 		/**
 		 * @name assertElement
 		 * @description Checks the given element against the expected name, start and end to make sure it is outlined correctly
@@ -72,325 +68,230 @@ define([
 		}
 			
 		it('testfuncDeclaration1', function() {
-			context.text = "function F1(p1, p2) {};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					assertElement(outline[0], "F1(p1, p2)", 9, 11);
+			var r = setup("function F1(p1, p2) {};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
-				}
+				assertElement(outline[0], "F1(p1, p2)", 9, 11);
 			});
 		});
 		/**
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457057
 		 */
 		it('testMemberExpressionLiteral1', function() {
-			context.text = "Foo[\'bar\'] = function() {}";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					assert(outline && outline.length > 0, "There should be one outline element");
-					assertElement(outline[0], "Foo.bar()", 1, 10);
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("Foo[\'bar\'] = function() {}");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				assert(outline && outline.length > 0, "There should be one outline element");
+				assertElement(outline[0], "Foo.bar()", 1, 10);
 			});
 		});
 		/**
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457057
 		 */
 		it('testMemberExpressionLiteral2', function() {
-			context.text = "Foo[\'bar\'].baz = function() {}";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					assert(outline && outline.length > 0, "There should be one outline element");
-					assertElement(outline[0], "Foo.bar.baz()", 1, 14);
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("Foo[\'bar\'].baz = function() {}");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				assert(outline && outline.length > 0, "There should be one outline element");
+				assertElement(outline[0], "Foo.bar.baz()", 1, 14);
 			});
 		});
 		/**
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=457057
 		 */
 		it('testMemberExpressionLiteral3', function() {
-			context.text = "Foo.baz[\'bar\'] = function() {}";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					assert(outline && outline.length > 0, "There should be one outline element");
-					assertElement(outline[0], "Foo.baz.bar()", 1, 14);
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("Foo.baz[\'bar\'] = function() {}");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				assert(outline && outline.length > 0, "There should be one outline element");
+				assertElement(outline[0], "Foo.baz.bar()", 1, 14);
 			});
 		});
 		
 		it('testfuncExpression1', function() {
-			context.text = "var obj = {\n"+
+			var r = setup("var obj = {\n"+
 				"\titem: function(p1, p2) {}\n"+
-				"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					if(!outline[0].children || outline[0].children.length < 1) {
-						assert.fail("There should be one child outline element");
-					}
-					assertElement(outline[0].children[0], "item(p1, p2)", 13, 17);
+				"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
+				if(!outline[0].children || outline[0].children.length < 1) {
+					assert.fail("There should be one child outline element");
 				}
+				assertElement(outline[0].children[0], "item(p1, p2)", 13, 17);
 			});
 		});
 		
 		it('testObjectExpression1', function() {
-			context.text = "var object = {};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					assertElement(outline[0], "var object = {...}", 4, 10);
+			var r = setup("var object = {};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
-				}
+				assertElement(outline[0], "var object = {...}", 4, 10);
 			});
 		});
 		
 		it('testObjectExpression2', function() {
-			context.text = "var object = {a: \"\", b: \"\", c: \"\"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					assertElement(outline[0], "var object = {a, b, c}", 4, 10);
+			var r = setup("var object = {a: \"\", b: \"\", c: \"\"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
-				}
+				assertElement(outline[0], "var object = {a, b, c}", 4, 10);
 			});
 		});
 		
 		it('testObjectExpression3', function() {
-			context.text = "var object = {\"a\": \"\", \"b\": \"\", \"c\": \"\"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					assertElement(outline[0], "var object = {Object, Object, Object}", 4, 10);
+			var r = setup("var object = {\"a\": \"\", \"b\": \"\", \"c\": \"\"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
-				}
+				assertElement(outline[0], "var object = {Object, Object, Object}", 4, 10);
 			});
 		});
 		
 		it('testObjectExpression3', function() {
 			// Max length for properties is 50 characters
-			context.text = "var object = {A123456789B123456789C123456789D123456789E123456789: \"\"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					assertElement(outline[0], "var object = {A123456789B123456789C123456789D123456789E123456789}", 4, 10);
+			var r = setup("var object = {A123456789B123456789C123456789D123456789E123456789: \"\"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
-				}
+				assertElement(outline[0], "var object = {A123456789B123456789C123456789D123456789E123456789}", 4, 10);
 			});
 		});
 		
 		it('testObjectExpression4', function() {
 			// Max length for properties is 50 characters
-			context.text = "var object = {A123456789B123456789C123456789D123456789E123456789F: \"\"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					assertElement(outline[0], "var object = {...}", 4, 10);
+			var r = setup("var object = {A123456789B123456789C123456789D123456789E123456789F: \"\"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
-				}
+				assertElement(outline[0], "var object = {...}", 4, 10);
 			});
 		});
 		
 		it('testObjectExpression5', function() {
 			// Max length for properties is 50 characters
-			context.text = "var object = {a: \"\", b: \"\", A123456789B123456789C123456789D123456789E123456789F: \"\"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					assertElement(outline[0], "var object = {a, b, ...}", 4, 10);
+			var r = setup("var object = {a: \"\", b: \"\", A123456789B123456789C123456789D123456789E123456789F: \"\"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
-				}
+				assertElement(outline[0], "var object = {a, b, ...}", 4, 10);
 			});
 		});
 		
 		it('testClosure1', function() {
-			context.text = "foo.bar({});";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					assertElement(outline[0], "closure {...}", 8, 10);
+			var r = setup("foo.bar({});");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
-				}
+				assertElement(outline[0], "closure {...}", 8, 10);
 			});
 		});
 		
 		it('testClosure1', function() {
-			context.text = "foo.bar({a: \"\", b: \"\"});";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					assertElement(outline[0], "closure {a, b}", 8, 22);
+			var r = setup("foo.bar({a: \"\", b: \"\"});");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
-				}
+				assertElement(outline[0], "closure {a, b}", 8, 22);
 			});
 		});
 		
 		it('testObjectPropertyLiteral1', function() {
-			context.text = "var obj = {\n"+
+			var r = setup("var obj = {\n"+
 				"\t\"item\": function(p1, p2) {}\n"+
-				"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					if(!outline[0].children || outline[0].children.length < 1) {
-						assert.fail("There should be one child outline element");
-					}
-					assertElement(outline[0].children[0], "item(p1, p2)", 13, 19);
+				"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
+				if(!outline[0].children || outline[0].children.length < 1) {
+					assert.fail("There should be one child outline element");
 				}
+				assertElement(outline[0].children[0], "item(p1, p2)", 13, 19);
 			});
 		});
 		
 		it('testObjectPropertyLiteral2', function() {
-			context.text = "var obj = {\n"+
+			var r = setup("var obj = {\n"+
 				"\t\"item\": null\n"+
-				"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					if(!outline[0].children || outline[0].children.length < 1) {
-						assert.fail("There should be one child outline element");
-					}
-					assertElement(outline[0].children[0], "item", 13, 19);
+				"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
+				if(!outline[0].children || outline[0].children.length < 1) {
+					assert.fail("There should be one child outline element");
 				}
+				assertElement(outline[0].children[0], "item", 13, 19);
 			});
 		});
 		
 		it('testObjectPropertyLiteral3', function() {
-			context.text = "var obj = {\n"+
+			var r = setup("var obj = {\n"+
 				"\t\"item\": {}\n"+
-				"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					if(!outline[0].children || outline[0].children.length < 1) {
-						assert.fail("There should be one child outline element");
-					}
-					assertElement(outline[0].children[0], "item {...}", 13, 19);
+				"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
+				if(!outline[0].children || outline[0].children.length < 1) {
+					assert.fail("There should be one child outline element");
 				}
+				assertElement(outline[0].children[0], "item {...}", 13, 19);
 			});
 		});
 		
 		it('testObjectPropertyLiteral4', function() {
-			context.text = "var obj = {\n"+
+			var r = setup("var obj = {\n"+
 				"\t\"item\": function(p1, p2) {}\n"+
-				"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					if(!outline[0].children || outline[0].children.length < 1) {
-						assert.fail("There should be one child outline element");
-					}
-					assertElement(outline[0].children[0], "item(p1, p2)", 13, 19);
+				"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
+				if(!outline[0].children || outline[0].children.length < 1) {
+					assert.fail("There should be one child outline element");
 				}
+				assertElement(outline[0].children[0], "item(p1, p2)", 13, 19);
 			});
 		});
 		
 		it('testObjectPropertyLiteral5', function() {
-			context.text = "var obj = {\n"+
+			var r = setup("var obj = {\n"+
 				"\t\"item\": null\n"+
-				"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					if(!outline[0].children || outline[0].children.length < 1) {
-						assert.fail("There should be one child outline element");
-					}
-					assertElement(outline[0].children[0], "item", 13, 19);
+				"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
+				if(!outline[0].children || outline[0].children.length < 1) {
+					assert.fail("There should be one child outline element");
 				}
+				assertElement(outline[0].children[0], "item", 13, 19);
 			});
 		});
 		
 		it('testObjectPropertyLiteral6', function() {
-			context.text = "var obj = {\n"+
+			var r = setup("var obj = {\n"+
 				"\t\"item\": {}\n"+
-				"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					if(!outline[0].children || outline[0].children.length < 1) {
-						assert.fail("There should be one child outline element");
-					}
-					assertElement(outline[0].children[0], "item {...}", 13, 19);
+				"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
+				if(!outline[0].children || outline[0].children.length < 1) {
+					assert.fail("There should be one child outline element");
 				}
+				assertElement(outline[0].children[0], "item {...}", 13, 19);
 			});
 		});
 		
@@ -399,22 +300,17 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424202
 		 */
 		it('testReturnObject1', function() {
-			context.text = "function f1() {\n"+
+			var r = setup("function f1() {\n"+
 				"\t return {};\n"+
-				"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					if(!outline[0].children || outline[0].children.length < 1) {
-						assert.fail("There should be one child outline element");
-					}
-					assertElement(outline[0].children[0], "return {...}", 18, 24);
+				"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
+				if(!outline[0].children || outline[0].children.length < 1) {
+					assert.fail("There should be one child outline element");
 				}
+				assertElement(outline[0].children[0], "return {...}", 18, 24);
 			});
 		});
 		
@@ -423,22 +319,17 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424202
 		 */
 		it('testReturnObject2', function() {
-			context.text = "function f1() {\n"+
+			var r = setup("function f1() {\n"+
 				"\t return function() {};\n"+
-				"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					if(!outline[0].children || outline[0].children.length < 1) {
-						assert.fail("There should be one child outline element");
-					}
-					assertElement(outline[0].children[0], "return {...}", 18, 24);
+				"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
+				if(!outline[0].children || outline[0].children.length < 1) {
+					assert.fail("There should be one child outline element");
 				}
+				assertElement(outline[0].children[0], "return {...}", 18, 24);
 			});
 		});
 		
@@ -447,30 +338,25 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424202
 		 */
 		it('testReturnObject3', function() {
-			context.text = "function f1() {\n"+
+			var r = setup("function f1() {\n"+
 				"\t return {\n"+
 				"\t\tf1: function() {return {};}"+
 				"\t};"+
-				"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					if(!outline[0].children || outline[0].children.length < 1) {
-						assert.fail("There should be one level one child outline element");
-					}
-					if(!outline[0].children[0].children || outline[0].children[0].children.length < 1) {
-						assert.fail("There should be one level two child outline element");
-					}
-					if(!outline[0].children[0].children[0].children || outline[0].children[0].children[0].children.length < 1) {
-						assert.fail("There should be one level three child outline element");
-					}
-					assertElement(outline[0].children[0].children[0].children[0], "return {...}", 45, 51);
+				"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
+				if(!outline[0].children || outline[0].children.length < 1) {
+					assert.fail("There should be one level one child outline element");
 				}
+				if(!outline[0].children[0].children || outline[0].children[0].children.length < 1) {
+					assert.fail("There should be one level two child outline element");
+				}
+				if(!outline[0].children[0].children[0].children || outline[0].children[0].children[0].children.length < 1) {
+					assert.fail("There should be one level three child outline element");
+				}
+				assertElement(outline[0].children[0].children[0].children[0], "return {...}", 45, 51);
 			});
 		});
 		
@@ -479,30 +365,25 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424202
 		 */
 		it('testReturnObject4', function() {
-			context.text = "function f1() {\n"+
+			var r = setup("function f1() {\n"+
 				"\t return {\n"+
 				"\t\tf1: function() {return function() {};}"+
 				"\t};"+
-				"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					if(!outline[0].children || outline[0].children.length < 1) {
-						assert.fail("There should be one level one child outline element");
-					}
-					if(!outline[0].children[0].children || outline[0].children[0].children.length < 1) {
-						assert.fail("There should be one level two child outline element");
-					}
-					if(!outline[0].children[0].children[0].children || outline[0].children[0].children[0].children.length < 1) {
-						assert.fail("There should be one level three child outline element");
-					}
-					assertElement(outline[0].children[0].children[0].children[0], "return {...}", 45, 51);
+				"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
+				if(!outline[0].children || outline[0].children.length < 1) {
+					assert.fail("There should be one level one child outline element");
 				}
+				if(!outline[0].children[0].children || outline[0].children[0].children.length < 1) {
+					assert.fail("There should be one level two child outline element");
+				}
+				if(!outline[0].children[0].children[0].children || outline[0].children[0].children[0].children.length < 1) {
+					assert.fail("There should be one level three child outline element");
+				}
+				assertElement(outline[0].children[0].children[0].children[0], "return {...}", 45, 51);
 			});
 		});
 		
@@ -511,22 +392,17 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424202
 		 */
 		it('testReturnObject5', function() {
-			context.text = "function f1() {\n"+
+			var r = setup("function f1() {\n"+
 				"\t return {a: \"\", b: \"\"};\n"+
-				"};";
-			return outliner.computeOutline(context).then(function(outline) {
-				try {
-					if(!outline || outline.length < 1) {
-						assert.fail("There should be one outline element");
-					}
-					if(!outline[0].children || outline[0].children.length < 1) {
-						assert.fail("There should be one child outline element");
-					}
-					assertElement(outline[0].children[0], "return {a, b}", 18, 24);
+				"};");
+			return r.outliner.computeOutline(r.editorContext).then(function(outline) {
+				if(!outline || outline.length < 1) {
+					assert.fail("There should be one outline element");
 				}
-				finally {
-					tearDown();
+				if(!outline[0].children || outline[0].children.length < 1) {
+					assert.fail("There should be one child outline element");
 				}
+				assertElement(outline[0].children[0], "return {a, b}", 18, 24);
 			});
 		});
 		

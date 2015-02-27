@@ -51,12 +51,8 @@ define([
 		 * @returns {orion.Promise} A promise resolving to the AST.
 		 */
 		getAST: function(editorContext) {
-			var metadataPromise = (typeof editorContext.getFileMetadata === "function")
-				? editorContext.getFileMetadata()
-				: new Deferred().resolve({});
 			var _self = this;
-			return metadataPromise.then(function(metadata) {
-				metadata = metadata || {};
+			return editorContext.getFileMetadata().then(function(metadata) {
 				var loc = _self._getKey(metadata);
 				var ast = _self.cache.get(loc);
 				if (ast) {
@@ -65,7 +61,7 @@ define([
 				return editorContext.getText().then(function(text) {
 					ast = _self.parse(text);
 					_self.cache.put(loc, ast);
-					if(metadata.location) {
+					if(metadata && metadata.location) {
 					    //only set this if the original metadata has a real location
 					    ast.fileLocation = metadata.location;
 					}
@@ -79,7 +75,7 @@ define([
 		 * @since 8.0
 		 */
 		_getKey: function _getKey(metadata) {
-		      if(!metadata.location) {
+		      if(!metadata || !metadata.location) {
 		          return 'unknown';
 		      }    
 		      return metadata.location;
@@ -170,28 +166,8 @@ define([
 		 * @param {Object} event An <tt>orion.edit.model</tt> event.
 		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
 		 */
-		onDestroy: function(event) {
-		    //TODO with multi-env we will not need to destory the cache each editor switch
-		    //but we could do a consistency check
-		},
-		/**
-		 * Callback from the orion.edit.model service
-		 * @param {Object} event An <tt>orion.edit.model</tt> event.
-		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
-		 */
-		onSaving: function(event) {
-			//see https://bugs.eclipse.org/bugs/show_bug.cgi?id=457402
-			//we always get onModelChanged, don't need a follow up on saving
-		    //this.cache.remove(this._getKey(event.file));
-		},
-		/**
-		 * Callback from the orion.edit.model service
-		 * @param {Object} event An <tt>orion.edit.model</tt> event.
-		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
-		 */
 		onInputChanged: function(event) {
 		    this.inputChanged = event;
-		    //TODO will add to mult-env
 		}
 	});
 	return {

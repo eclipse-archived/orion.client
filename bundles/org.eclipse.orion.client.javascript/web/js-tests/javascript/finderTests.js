@@ -20,44 +20,36 @@ define([
 	var assert = chai.assert;
 
 	describe('Finder Tests', function() {
-		var astManager = new ASTManager.ASTManager(Esprima);
-		var editorContext = {
-			text: "",
-			/**
-			 * get the text
-			 */
-			getText: function() {
-				return new Deferred().resolve(this.text);
-			}
-		};
 		/**
 		 * @description Sets up the test
 		 * @public
 		 * @param {String} text The compilation unit text
+		 * @param {String} contentType The content type
 		 */
-		function setUp(text) {
+		function setup(text, contentType) {
 			return {
 				text: text,
-				/**
-				 * get the text
-				 */
-				getText: function() {
-					return new Deferred().resolve(this.text);
-				}
+				astManager: new ASTManager.ASTManager(Esprima),
+		        editorContext: {
+        			text: "",
+        			/**
+        			 * get the text
+        			 */
+        			getText: function() {
+        				return new Deferred().resolve(text);
+        			},
+        			
+        			getFileMetadata: function() {
+        			    var o = Object.create(null);
+        			    o.contentType = Object.create(null);
+        			    o.contentType.id = contentType ? contentType : 'application/javascript';
+        			    o.location = 'finder_test_script.js';
+        			    return new Deferred().resolve(o);
+        	        }
+        	     }
 			};
 		}
 		
-		/**
-		 * @name tearDown
-		 * @description Resets the test state between runs, must explicitly be called per-test
-		 * @function
-		 * @public
-		 */
-		function tearDown() {
-			editorContext.text = "";
-			astManager.onModelChanging({file:{}});
-		}
-	
 		it('test_findWord1', function() {
 			var word = Finder.findWord('function(param1, param2)', 12);
 			assert.equal(word, 'param1', 'Should have found the word param1');
@@ -135,11 +127,10 @@ define([
 			assert.equal(word, null, 'Should have found no word');
 		});
 		it('test_findNode1', function() {
-			after(tearDown);
-			editorContext.text = "function  F1(p1, p2) {\n"+
+			var r = setup("function  F1(p1, p2) {\n"+
 				"\tvar out = p1;\n"+
-				"};";
-			return astManager.getAST(editorContext).then(function(ast) {
+				"};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
 				var node = Finder.findNode(9, ast);
 				if(!node) {
 					assert.fail("Should have found a node");
@@ -150,11 +141,10 @@ define([
 			});
 		});
 		it('test_findNode2', function() {
-			after(tearDown);
-			editorContext.text = "function  F1(p1, p2) {\n"+
+			var r = setup("function  F1(p1, p2) {\n"+
 				"\tvar out = p1;\n"+
-				"};";
-			return astManager.getAST(editorContext).then(function(ast) {
+				"};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
 				var node = Finder.findNode(12, ast);
 				if(!node) {
 					assert.fail("Should have found a node");
@@ -165,11 +155,10 @@ define([
 			});
 		});
 		it('test_findNode3', function() {
-			after(tearDown);
-			editorContext.text = "function  F1(p1, p2) {\n"+
+			var r = setup("function  F1(p1, p2) {\n"+
 				"\tvar out = p1;\n"+
-				"};";
-			return astManager.getAST(editorContext).then(function(ast) {
+				"};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
 				var node = Finder.findNode(14, ast);
 				if(!node) {
 					assert.fail("Should have found a node");
@@ -181,11 +170,10 @@ define([
 		});
 		
 		it('test_findNode4', function() {
-			after(tearDown);
-			editorContext.text = "function  F1(p1, p2) {\n"+
+			var r = setup("function  F1(p1, p2) {\n"+
 				"\tvar out = p1;\n"+
-				"};";
-			return astManager.getAST(editorContext).then(function(ast) {
+				"};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
 				var node = Finder.findNode(28, ast);
 				if(!node) {
 					assert.fail("Should have found a node");
@@ -201,24 +189,19 @@ define([
 		 * @since 6.0
 		 */
 		it('test_findNodeAndParents1', function() {
-			editorContext.text = "function  F1(p1, p2) {\n"+
+			var r = setup("function  F1(p1, p2) {\n"+
 				"\tvar out = p1;\n"+
-				"};";
-			return astManager.getAST(editorContext).then(function(ast) {
-			    try {
-    				var node = Finder.findNode(9, ast, {parents:true});
-    				if(!node) {
-    					assert.fail("Should have found a node");
-    				}
-    				else {
-    					assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
-    					assert.equal(node.parents.length, 1, 'Should have found one parent');
-    					assert.equal(node.parents[0].type, 'Program', 'The program node should be the only parent');
-    				}
+				"};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var node = Finder.findNode(9, ast, {parents:true});
+				if(!node) {
+					assert.fail("Should have found a node");
 				}
-        		finally {
-        			tearDown();
-        		}
+				else {
+					assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
+					assert.equal(node.parents.length, 1, 'Should have found one parent');
+					assert.equal(node.parents[0].type, 'Program', 'The program node should be the only parent');
+				}
 			});
 			
 		});
@@ -228,25 +211,20 @@ define([
 		 * @since 6.0
 		 */
 		it('test_findNodeAndParents2', function() {
-			editorContext.text = "function  F1(p1, p2) {\n"+
+			var r = setup("function  F1(p1, p2) {\n"+
 				"\tvar out = p1;\n"+
-				"};";
-			return astManager.getAST(editorContext).then(function(ast) {
-			    try {
-					var node = Finder.findNode(14, ast, {parents:true});
-					if(!node) {
-						assert.fail("Should have found a node");
-					}
-					else {
-						assert.equal(node.type, 'Identifier', 'Should have found an Identifier node');
-						assert.equal(node.parents.length, 2, 'Should have found two parents');
-						assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the first parent');
-						assert.equal(node.parents[1].type, 'FunctionDeclaration', 'Should have found the parent function decl as the second parent');
-					}
+				"};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var node = Finder.findNode(14, ast, {parents:true});
+				if(!node) {
+					assert.fail("Should have found a node");
 				}
-    			finally {
-    				tearDown();
-    			}
+				else {
+					assert.equal(node.type, 'Identifier', 'Should have found an Identifier node');
+					assert.equal(node.parents.length, 2, 'Should have found two parents');
+					assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the first parent');
+					assert.equal(node.parents[1].type, 'FunctionDeclaration', 'Should have found the parent function decl as the second parent');
+				}
 			});
 		});
 		/**
@@ -254,24 +232,19 @@ define([
 		 * @since 6.0
 		 */
 		it('test_findNodeAndParents3', function() {
-			editorContext.text = "function  F1(p1, p2) {\n"+
+			var r = setup("function  F1(p1, p2) {\n"+
 				"\tvar out = p1;\n"+
-				"};";
-			return astManager.getAST(editorContext).then(function(ast) {
-			    try {
-    				var node = Finder.findNode(4, ast, {parents:true});
-    				if(!node) {
-    					assert.fail("Should have found a node");
-    				}
-    				else {
-    					assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
-    					assert.equal(node.parents.length, 1, 'Should have found one parent');
-    					assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the first parent');
-    				}
+				"};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var node = Finder.findNode(4, ast, {parents:true});
+				if(!node) {
+					assert.fail("Should have found a node");
 				}
-        		finally {
-        			tearDown();
-        		}
+				else {
+					assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
+					assert.equal(node.parents.length, 1, 'Should have found one parent');
+					assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the first parent');
+				}
 			});
 			
 		});
@@ -281,22 +254,17 @@ define([
 		 * @since 7.0
 		 */
 		it('test_findNodeNext1', function() {
-			editorContext.text = "/** */ function  F1(p1, p2) {}";
-			return astManager.getAST(editorContext).then(function(ast) {
-			    try {
-    				var node = Finder.findNode(6, ast, {parents:true, next:true});
-    				if(!node) {
-    					assert.fail("Should have found a node");
-    				}
-    				else {
-    					assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
-    					assert.equal(node.parents.length, 1, 'Should have found one parent');
-    					assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the first parent');
-    				}
+			var r = setup("/** */ function  F1(p1, p2) {}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var node = Finder.findNode(6, ast, {parents:true, next:true});
+				if(!node) {
+					assert.fail("Should have found a node");
 				}
-        		finally {
-        			tearDown();
-        		}
+				else {
+					assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
+					assert.equal(node.parents.length, 1, 'Should have found one parent');
+					assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the first parent');
+				}
 			});
 			
 		});
@@ -306,22 +274,17 @@ define([
 		 * @since 7.0
 		 */
 		it('test_findNodeNext2', function() {
-			editorContext.text = "/** */ /** */ function  F1(p1, p2) {}";
-			return astManager.getAST(editorContext).then(function(ast) {
-			    try {
-    				var node = Finder.findNode(6, ast, {parents:true, next:true});
-    				if(!node) {
-    					assert.fail("Should have found a node");
-    				}
-    				else {
-    					assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
-    					assert.equal(node.parents.length, 1, 'Should have found one parent');
-    					assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the first parent');
-    				}
+			var r = setup("/** */ /** */ function  F1(p1, p2) {}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var node = Finder.findNode(6, ast, {parents:true, next:true});
+				if(!node) {
+					assert.fail("Should have found a node");
 				}
-        		finally {
-        			tearDown();
-        		}
+				else {
+					assert.equal(node.type, 'FunctionDeclaration', 'Should have found a FunctionDeclaration node');
+					assert.equal(node.parents.length, 1, 'Should have found one parent');
+					assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the first parent');
+				}
 			});
 			
 		});
@@ -331,23 +294,18 @@ define([
 		 * @since 7.0
 		 */
 		it('test_findNodeNext3', function() {
-			editorContext.text = "function  F1(p1, p2) {}";
-			return astManager.getAST(editorContext).then(function(ast) {
-			    try {
-    				var node = Finder.findNode(6, ast, {parents:true, next:true});
-    				if(!node) {
-    					assert.fail("Should have found a node");
-    				}
-    				else {
-    					assert.equal(node.type, 'Identifier', 'Should have found an Identifier node');
-    					assert.equal(node.parents.length, 2, 'Should have found two parent');
-    					assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the second parent');
-    					assert.equal(node.parents[1].type, 'FunctionDeclaration', 'Should have found the parent FunctionDeclaration node as the first parent');
-    				}
+			var r = setup("function  F1(p1, p2) {}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var node = Finder.findNode(6, ast, {parents:true, next:true});
+				if(!node) {
+					assert.fail("Should have found a node");
 				}
-        		finally {
-        			tearDown();
-        		}
+				else {
+					assert.equal(node.type, 'Identifier', 'Should have found an Identifier node');
+					assert.equal(node.parents.length, 2, 'Should have found two parent');
+					assert.equal(node.parents[0].type, 'Program', 'Should have found the parent Program node as the second parent');
+					assert.equal(node.parents[1].type, 'FunctionDeclaration', 'Should have found the parent FunctionDeclaration node as the first parent');
+				}
 			});
 			
 		});
@@ -358,20 +316,15 @@ define([
 		 * @since 7.0
 		 */
 		it('test_findNodeNext3', function() {
-			editorContext.text = "/** */ ";
-			return astManager.getAST(editorContext).then(function(ast) {
-			    try {
-    				var node = Finder.findNode(6, ast, {parents:true, next:true});
-    				if(!node) {
-    					assert.fail("Should have found a node");
-    				}
-    				else {
-    					assert.equal(node.type, 'Program', 'Should have found the Program node');
-    				}
+			var r = setup("/** */ ");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var node = Finder.findNode(6, ast, {parents:true, next:true});
+				if(!node) {
+					assert.fail("Should have found a node");
 				}
-        		finally {
-        			tearDown();
-        		}
+				else {
+					assert.equal(node.type, 'Program', 'Should have found the Program node');
+				}
 			});
 			
 		});
@@ -381,19 +334,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken1', function() {
-			return astManager.getAST(setUp("(")).then(function(ast) {
-				try {
-					var token = Finder.findToken(0, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Punctuator', 'Should have found a Punctuator token');
-						assert.equal(token.value, '(', 'Should have found a ( token');
-					}
+		    var r = setup("(");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(0, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Punctuator', 'Should have found a Punctuator token');
+					assert.equal(token.value, '(', 'Should have found a ( token');
 				}
 			});
 		});
@@ -403,20 +352,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken2', function() {
-			var text = "var function f() {}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(4, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
-						assert.equal(token.value, 'function', 'Should have found a function token');
-					}
+			var r = setup("var function f() {}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(4, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
+					assert.equal(token.value, 'function', 'Should have found a function token');
 				}
 			});
 		});
@@ -426,20 +370,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken3', function() {
-			var text = "(var function f() {}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(21, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Punctuator', 'Should have found a Punctuator token');
-						assert.equal(token.value, '}', 'Should have found a } token');
-					}
+			var r = setup("(var function f() {}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(21, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Punctuator', 'Should have found a Punctuator token');
+					assert.equal(token.value, '}', 'Should have found a } token');
 				}
 			});
 		});
@@ -449,20 +388,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken4', function() {
-			var text = "(var function f() {}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(1, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
-						assert.equal(token.value, 'var', 'Should have found a var token');
-					}
+			var r = setup("(var function f() {}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(1, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
+					assert.equal(token.value, 'var', 'Should have found a var token');
 				}
 			});
 		});
@@ -472,20 +406,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken5', function() {
-			var text = "var foo.baz / = 43;";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(12, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Punctuator', 'Should have found a Punctuator token');
-						assert.equal(token.value, '/', 'Should have found a / token');
-					}
+			var r = setup("var foo.baz / = 43;");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(12, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Punctuator', 'Should have found a Punctuator token');
+					assert.equal(token.value, '/', 'Should have found a / token');
 				}
 			});
 		});
@@ -495,20 +424,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken6', function() {
-			var text = "var foo.baz / = 43;";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(1, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
-						assert.equal(token.value, 'var', 'Should have found a var token');
-					}
+			var r = setup("var foo.baz / = 43;");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(1, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
+					assert.equal(token.value, 'var', 'Should have found a var token');
 				}
 			});
 		});
@@ -518,20 +442,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken7', function() {
-			var text = "var function f1() {";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(7, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
-						assert.equal(token.value, 'function', 'Should have found a function token');
-					}
+			var r = setup("var function f1() {");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(7, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
+					assert.equal(token.value, 'function', 'Should have found a function token');
 				}
 			});
 		});
@@ -541,20 +460,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken8', function() {
-			var text = "var function f1() {";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(7, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
-						assert.equal(token.value, 'function', 'Should have found a function token');
-					}
+			var r = setup("var function f1() {");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(7, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
+					assert.equal(token.value, 'function', 'Should have found a function token');
 				}
 			});
 		});
@@ -564,15 +478,10 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken9', function() {
-			var text = "(var function f() {}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(-1, ast.tokens);
-					assert.equal(token, null, "Should not have found a token for out of range");
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("(var function f() {}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(-1, ast.tokens);
+				assert.equal(token, null, "Should not have found a token for out of range");
 			});
 		});
 		
@@ -581,20 +490,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken10', function() {
-			var text = "function f() {}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(9, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
-						assert.equal(token.value, 'f', 'Should have found a f token');
-					}
+			var r = setup("function f() {}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(9, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
+					assert.equal(token.value, 'f', 'Should have found a f token');
 				}
 			});
 		});
@@ -604,20 +508,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken11', function() {
-			var text = "var foo = {}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(8, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Punctuator', 'Should have found an Punctuator token');
-						assert.equal(token.value, '=', 'Should have found a = token');
-					}
+			var r = setup("var foo = {}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(8, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Punctuator', 'Should have found an Punctuator token');
+					assert.equal(token.value, '=', 'Should have found a = token');
 				}
 			});
 		});
@@ -627,20 +526,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken12', function() {
-			var text = "var foo = {f: function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(11, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
-						assert.equal(token.value, 'f', 'Should have found a f token');
-					}
+			var r = setup("var foo = {f: function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(11, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
+					assert.equal(token.value, 'f', 'Should have found a f token');
 				}
 			});
 		});
@@ -650,20 +544,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken13', function() {
-			var text = "var foo = {f: function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(14, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Keyword', 'Should have found an Keyword token');
-						assert.equal(token.value, 'function', 'Should have found a function token');
-					}
+			var r = setup("var foo = {f: function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(14, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Keyword', 'Should have found an Keyword token');
+					assert.equal(token.value, 'function', 'Should have found a function token');
 				}
 			});
 		});
@@ -673,20 +562,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken14', function() {
-			var text = "var foo = {f: function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(18, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Keyword', 'Should have found an Keyword token');
-						assert.equal(token.value, 'function', 'Should have found a function token');
-					}
+			var r = setup("var foo = {f: function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(18, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Keyword', 'Should have found an Keyword token');
+					assert.equal(token.value, 'function', 'Should have found a function token');
 				}
 			});
 		});
@@ -696,20 +580,15 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426399
 		 */
 		it('test_findToken15', function() {
-			var text = "var foo = {f: function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(23, ast.tokens);
-					if(!token) {
-						assert.fail("Should have found a token");
-					}
-					else {
-						assert.equal(token.type, 'Punctuator', 'Should have found an Punctuator token');
-						assert.equal(token.value, ')', 'Should have found a ) token');
-					}
+			var r = setup("var foo = {f: function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(23, ast.tokens);
+				if(!token) {
+					assert.fail("Should have found a token");
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Punctuator', 'Should have found an Punctuator token');
+					assert.equal(token.value, ')', 'Should have found a ) token');
 				}
 			});
 		});
@@ -719,15 +598,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
 		it('test_findToken16', function() {
-			var text = "var   foo = {f: function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(4, ast.tokens);
-					assert.equal(null, token, 'Should not have found a token');
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("var   foo = {f: function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(4, ast.tokens);
+				assert.equal(null, token, 'Should not have found a token');
 			});
 		});
 		
@@ -736,15 +610,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
 		it('test_findToken17', function() {
-			var text = "var   foo = {f: function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(5, ast.tokens);
-					assert.equal(null, token, 'Should not have found a token');
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("var   foo = {f: function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(5, ast.tokens);
+				assert.equal(null, token, 'Should not have found a token');
 			});
 		});
 		
@@ -753,15 +622,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
 		it('test_findToken18', function() {
-			var text = "var foo = {  f: function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(12, ast.tokens);
-					assert.equal(null, token, 'Should not have found a token');
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("var foo = {  f: function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(12, ast.tokens);
+				assert.equal(null, token, 'Should not have found a token');
 			});
 		});
 		
@@ -770,15 +634,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
 		it('test_findToken19', function() {
-			var text = "var foo = {f:   function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(14, ast.tokens);
-					assert.equal(null, token, 'Should not have found a token');
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("var foo = {f:   function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(14, ast.tokens);
+				assert.equal(null, token, 'Should not have found a token');
 			});
 		});
 		
@@ -787,15 +646,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
 		it('test_findToken20', function() {
-			var text = "var foo = {f:   function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(15, ast.tokens);
-					assert.equal(null, token, 'Should not have found a token');
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("var foo = {f:   function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(15, ast.tokens);
+				assert.equal(null, token, 'Should not have found a token');
 			});
 		});
 		
@@ -804,15 +658,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
 		it('test_findToken21', function() {
-			var text = "  var foo = {f: function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(1, ast.tokens);
-					assert.equal(null, token, 'Should not have found a token');
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("  var foo = {f: function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(1, ast.tokens);
+				assert.equal(null, token, 'Should not have found a token');
 			});
 		});
 		
@@ -821,15 +670,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
 		it('test_findToken22', function() {
-			var text = "  var foo = {f:   function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(0, ast.tokens);
-					assert.equal(null, token, 'Should not have found a token');
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("  var foo = {f:   function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(0, ast.tokens);
+				assert.equal(null, token, 'Should not have found a token');
 			});
 		});
 		
@@ -838,20 +682,15 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
 		 */
 		it('test_findToken23', function() {
-			var text = "function f3(  foo   ,   bar   , baz) {};";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(17, ast.tokens);
-					if(!token) {
-						assert.fail('Should have found a token');
-					}
-					else {
-						assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
-						assert.equal(token.value, 'foo', 'Should have found a foo token');
-					}
+			var r = setup("function f3(  foo   ,   bar   , baz) {};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(17, ast.tokens);
+				if(!token) {
+					assert.fail('Should have found a token');
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
+					assert.equal(token.value, 'foo', 'Should have found a foo token');
 				}
 			});
 		});
@@ -861,20 +700,15 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=459580
 		 */
 		it('test_findToken24', function() {
-			var text = "function f3(  foo   ,   bar   , baz) {};";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(3, ast.tokens);
-					if(!token) {
-						assert.fail('Should have found a token');
-					}
-					else {
-						assert.equal(token.type, 'Keyword', 'Should have found a function keyword token');
-						assert.equal(token.value, 'function', 'Should have found a function keyword token');
-					}
+			var r = setup("function f3(  foo   ,   bar   , baz) {};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(3, ast.tokens);
+				if(!token) {
+					assert.fail('Should have found a token');
 				}
-				finally {
-					tearDown();
+				else {
+					assert.equal(token.type, 'Keyword', 'Should have found a function keyword token');
+					assert.equal(token.value, 'function', 'Should have found a function keyword token');
 				}
 			});
 		});
@@ -884,16 +718,11 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
 		 */
 		it('test_findComment1', function() {
-			var text = "/***/var foo = {f: function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findComment(0, ast);
-					if(comment) {
-						assert.fail("Should not have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+			var r = setup("/***/var foo = {f: function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findComment(0, ast);
+				if(comment) {
+					assert.fail("Should not have found a comment");
 				}
 			});
 		});
@@ -903,16 +732,11 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
 		 */
 		it('test_findComment2', function() {
-			var text = "/***/var foo = {f: function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findComment(4, ast);
-					if(!comment) {
-						assert.fail("Should have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+			var r = setup("/***/var foo = {f: function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findComment(4, ast);
+				if(!comment) {
+					assert.fail("Should have found a comment");
 				}
 			});
 		});
@@ -922,16 +746,11 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
 		 */
 		it('test_findComment3', function() {
-			var text = "var foo = {/***/f: function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findComment(11, ast);
-					if(comment) {
-						assert.fail("Should not have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+			var r = setup("var foo = {/***/f: function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findComment(11, ast);
+				if(comment) {
+					assert.fail("Should not have found a comment");
 				}
 			});
 		});
@@ -941,16 +760,11 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
 		 */
 		it('test_findComment4', function() {
-			var text = "var foo = {/***/f: function() {}}";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findComment(14, ast);
-					if(!comment) {
-						assert.fail("Should have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+			var r = setup("var foo = {/***/f: function() {}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findComment(14, ast);
+				if(!comment) {
+					assert.fail("Should have found a comment");
 				}
 			});
 		});
@@ -960,16 +774,11 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
 		 */
 		it('test_findComment5', function() {
-			var text = "/***/function f() {/***/};";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findComment(19, ast);
-					if(comment) {
-						assert.fail("Should not have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+			var r = setup("/***/function f() {/***/};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findComment(19, ast);
+				if(comment) {
+					assert.fail("Should not have found a comment");
 				}
 			});
 		});
@@ -979,16 +788,11 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
 		 */
 		it('test_findComment6', function() {
-			var text = "/***/function f() {/***/};/***/";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findComment(26, ast);
-					if(comment) {
-						assert.fail("Should not have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+			var r = setup("/***/function f() {/***/};/***/");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findComment(26, ast);
+				if(comment) {
+					assert.fail("Should not have found a comment");
 				}
 			});
 		});
@@ -998,16 +802,11 @@ define([
 		 * @since 7.0
 		 */
 		it('test_findComment7', function() {
-			var text = "/*";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findComment(2, ast);
-					if(!comment) {
-						assert.fail("Should have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+			var r = setup("/*");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findComment(2, ast);
+				if(!comment) {
+					assert.fail("Should have found a comment");
 				}
 			});
 		});
@@ -1017,16 +816,11 @@ define([
 		 * @since 7.0
 		 */
 		it('test_findComment8', function() {
-			var text = "var f; /*";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findComment(9, ast);
-					if(!comment) {
-						assert.fail("Should have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+			var r = setup("var f; /*");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findComment(9, ast);
+				if(!comment) {
+					assert.fail("Should have found a comment");
 				}
 			});
 		});
@@ -1036,16 +830,11 @@ define([
 		 * @since 7.0
 		 */
 		it('test_findComment9', function() {
-			var text = "/* var f;";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findComment(9, ast);
-					if(!comment) {
-						assert.fail("Should have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+			var r = setup("/* var f;");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findComment(9, ast);
+				if(!comment) {
+					assert.fail("Should have found a comment");
 				}
 			});
 		});
@@ -1055,16 +844,11 @@ define([
 		 * @since 7.0
 		 */
 		it('test_findComment10', function() {
-			var text = "var b; /* var f;";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findComment(16, ast);
-					if(!comment) {
-						assert.fail("Should have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+			var r = setup("var b; /* var f;");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findComment(16, ast);
+				if(!comment) {
+					assert.fail("Should have found a comment");
 				}
 			});
 		});
@@ -1074,16 +858,11 @@ define([
 		 * @since 7.0
 		 */
 		it('test_findComment11', function() {
-			var text = "// .";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findComment(4, ast);
-					if(!comment) {
-						assert.fail("Should have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+			var r = setup("// .");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findComment(4, ast);
+				if(!comment) {
+					assert.fail("Should have found a comment");
 				}
 			});
 		});
@@ -1093,16 +872,11 @@ define([
 		 * @since 7.0
 		 */
 		it('test_findComment12', function() {
-			var text = "// . foo bar";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findComment(4, ast);
-					if(!comment) {
-						assert.fail("Should have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+			var r = setup("// . foo bar");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findComment(4, ast);
+				if(!comment) {
+					assert.fail("Should have found a comment");
 				}
 			});
 		});
@@ -1112,16 +886,11 @@ define([
 		 * @since 7.0
 		 */
 		it('test_findComment12', function() {
-			var text = "// .\nvar foo = 10;";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findComment(4, ast);
-					if(!comment) {
-						assert.fail("Should have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+			var r = setup("// .\nvar foo = 10;");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findComment(4, ast);
+				if(!comment) {
+					assert.fail("Should have found a comment");
 				}
 			});
 		});
@@ -1131,15 +900,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
 		 */
 		it('test_findTokenBadOffset1', function() {
-			var text = "if(()) {};";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(-1, ast);
-					assert.equal(token, null, "Should not have found a token for a negative offset");
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("if(()) {};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(-1, ast);
+				assert.equal(token, null, "Should not have found a token for a negative offset");
 			});
 		});
 		
@@ -1148,15 +912,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
 		 */
 		it('test_findTokenBadOffset2', function() {
-			var text = "if(()) {};";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(null, ast);
-					assert.equal(token, null, "Should not have found a token for a null offset");
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("if(()) {};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(null, ast);
+				assert.equal(token, null, "Should not have found a token for a null offset");
 			});
 		});
 		
@@ -1165,15 +924,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
 		 */
 		it('test_findTokenBadOffset3', function() {
-			var text = "if(()) {};";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findToken(undefined, ast);
-					assert.equal(token, null, "Should not have found a token for an undefined offset");
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("if(()) {};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findToken(undefined, ast);
+				assert.equal(token, null, "Should not have found a token for an undefined offset");
 			});
 		});
 		
@@ -1182,15 +936,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
 		 */
 		it('test_findNodeBadOffset1', function() {
-			var text = "if(()) {};";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findNode(null, ast);
-					assert.equal(token, null, "Should not have found a node for a null offset");
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("if(()) {};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findNode(null, ast);
+				assert.equal(token, null, "Should not have found a node for a null offset");
 			});
 		});
 		
@@ -1199,15 +948,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
 		 */
 		it('test_findNodeBadOffset2', function() {
-			var text = "if(()) {};";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findNode(-1, ast);
-					assert.equal(token, null, "Should not have found a node for a negative offset");
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("if(()) {};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findNode(-1, ast);
+				assert.equal(token, null, "Should not have found a node for a negative offset");
 			});
 		});
 		
@@ -1216,15 +960,10 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
 		 */
 		it('test_findNodeBadOffset3', function() {
-			var text = "if(()) {};";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var token = Finder.findNode(undefined, ast);
-					assert.equal(token, null, "Should not have found a node for an undefined offset");
-				}
-				finally {
-					tearDown();
-				}
+			var r = setup("if(()) {};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var token = Finder.findNode(undefined, ast);
+				assert.equal(token, null, "Should not have found a node for an undefined offset");
 			});
 		});
 		
@@ -1233,8 +972,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_findScriptBlock1', function() {
-			var text = "<!DOCTYPE html><head><script>function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><script>function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 29);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1245,8 +984,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_findScriptBlock2', function() {
-			var text = "<!DOCTYPE html><head><scriPt>function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><scriPt>function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 29);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1257,8 +996,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_findScriptBlock3', function() {
-			var text = "<!DOCTYPE html><head><script>function f() {}</scriPt></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><script>function f() {}</scriPt></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 29);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1269,8 +1008,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_findScriptBlock4', function() {
-			var text = "<!DOCTYPE html><head><scRipt>function f() {}</scripT></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><scRipt>function f() {}</scripT></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 29);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1281,8 +1020,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_findScriptBlock5', function() {
-			var text = "<!DOCTYPE html><head><scriPt   >function f() {}</scRIpt></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><scriPt   >function f() {}</scRIpt></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 32);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1293,8 +1032,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_findScriptBlockMulti1', function() {
-			var text = "<!DOCTYPE html><head><script>function f() {}</script><script>function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><script>function f() {}</script><script>function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 2, "Should have found two script blocks");
 			assert.equal(blocks[0].offset, 29);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1307,8 +1046,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_findScriptBlockMulti2', function() {
-			var text = "<!DOCTYPE html><head><scrIpt>function f() {}</script><scRipt>function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><scrIpt>function f() {}</script><scRipt>function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 2, "Should have found two script blocks");
 			assert.equal(blocks[0].offset, 29);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1321,8 +1060,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_findScriptBlockMulti3', function() {
-			var text = "<!DOCTYPE html><head><scripT>function f() {}</scriPt><scRipt>function f() {}</Script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><scripT>function f() {}</scriPt><scRipt>function f() {}</Script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 2, "Should have found two script blocks");
 			assert.equal(blocks[0].offset, 29);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1335,8 +1074,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_findScriptBlockMulti4', function() {
-			var text = "<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 2, "Should have found two script blocks");
 			assert.equal(blocks[0].offset, 30);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1349,8 +1088,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_findScriptBlockMultiWithOffset1', function() {
-			var text = "<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 39);
+			var r = setup("<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 39);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 30);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1360,8 +1099,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_findScriptBlockMultiWithOffset2', function() {
-			var text = "<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 71);
+			var r = setup("<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 71);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 64);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1372,8 +1111,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
 		 */
 		it('test_findScriptBlockWithOffset1', function() {
-			var text = "<!DOCTYPE html><head><script >function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 39);
+			var r = setup("<!DOCTYPE html><head><script >function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 39);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 30);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1384,8 +1123,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
 		it('test_findScriptBlockWithSpacePostamble1', function() {
-			var text = "<!DOCTYPE html><head><script type='javascript'>function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 48);
+			var r = setup("<!DOCTYPE html><head><script type='javascript'>function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 48);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 47);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1396,8 +1135,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
 		it('test_findScriptBlockWithSpacePostamble2', function() {
-			var text = "<!DOCTYPE html><head><script type=javascript  >function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 48);
+			var r = setup("<!DOCTYPE html><head><script type=javascript  >function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 48);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 47);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1408,8 +1147,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
 		it('test_findScriptBlockWithSpacePostamble3', function() {
-			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 47);
+			var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 47);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 46);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1420,8 +1159,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
 		it('test_findScriptBlockWithSpacePostamble4', function() {
-			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type='javascript' ></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 47);
+			var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type='javascript' ></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 47);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 46);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1432,8 +1171,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
 		it('test_findScriptBlockWithSpacePostamble5', function() {
-			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type=javascript ></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 47);
+			var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type=javascript ></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 47);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 46);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1444,8 +1183,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
 		it('test_findScriptBlockWithSpacePostamble6', function() {
-			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type= javas cript ></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 47);
+			var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}</script type= javas cript ></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 47);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 46);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1456,8 +1195,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
 		it('test_findScriptBlockWithSpacePostamble7', function() {
-			var text = "<!DOCTYPE html><head>< script source=foo bar  >function f() {}</script type= javas cript ></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 48);
+			var r = setup("<!DOCTYPE html><head>< script source=foo bar  >function f() {}</script type= javas cript ></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 48);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 47);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1468,8 +1207,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
 		it('test_findScriptBlockWithSpacePostamble8', function() {
-			var text = "<!DOCTYPE html><head><   scrIpt source=foo bar  >function f() {}</script type= javas cript ></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 50);
+			var r = setup("<!DOCTYPE html><head><   scrIpt source=foo bar  >function f() {}</script type= javas cript ></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 50);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 49);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1480,8 +1219,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
 		it('test_findScriptBlockWithSpacePostamble9', function() {
-			var text = "<!DOCTYPE html><head><script source=foo bar  >function f() {}<   /scrIpt type= javas cript ></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 47);
+			var r = setup("<!DOCTYPE html><head><script source=foo bar  >function f() {}<   /scrIpt type= javas cript ></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 47);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 46);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1491,8 +1230,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
 		 */
 		it('test_findScriptBlockWithType1', function() {
-			var text = "<!DOCTYPE html><head><script type=\"\">function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 51);
+			var r = setup("<!DOCTYPE html><head><script type=\"\">function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 51);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 37);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1502,8 +1241,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
 		 */
 		it('test_findScriptBlockWithType2', function() {
-			var text = "<!DOCTYPE html><head><script type=\"text/javascript\">function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 54);
+			var r = setup("<!DOCTYPE html><head><script type=\"text/javascript\">function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 54);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 52);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1513,8 +1252,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
 		 */
 		it('test_findScriptBlockWithType3', function() {
-			var text = "<!DOCTYPE html><head><script type=\"text/handlebars\">function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 54);
+			var r = setup("<!DOCTYPE html><head><script type=\"text/handlebars\">function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 54);
 			assert.equal(blocks.length, 0, "Should have found no script blocks");
 		});
 		
@@ -1570,8 +1309,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
 		 */
 		it('test_findScriptBlockWithLanguage1', function() {
-			var text = "<!DOCTYPE html><head><script language=\"javascript\">function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 53);
+			var r = setup("<!DOCTYPE html><head><script language=\"javascript\">function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 53);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 			assert.equal(blocks[0].offset, 51);
 			assert.equal(blocks[0].text, 'function f() {}');
@@ -1581,8 +1320,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
 		 */
 		it('test_findScriptBlockWithLanguage2', function() {
-			var text = "<!DOCTYPE html><head><script language=\"text/javascript\">function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 58);
+			var r = setup("<!DOCTYPE html><head><script language=\"text/javascript\">function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 58);
 			assert.equal(blocks.length, 0, "Should have found no valid script block");
 		});
 		/**
@@ -1590,8 +1329,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437489
 		 */
 		it('test_findScriptBlockWithLanguage3', function() {
-			var text = "<!DOCTYPE html><head><script language=\"text/handlebars\">function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 58);
+			var r = setup("<!DOCTYPE html><head><script language=\"text/handlebars\">function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 58);
 			assert.equal(blocks.length, 0, "Should have found no valid script block");
 		});
 
@@ -1641,8 +1380,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
 		it('test_findNoScriptBlockWithSpacePostamble1', function() {
-			var text = "<!DOCTYPE html><head><script <source=foo bar  >function f() {}</script type= javas cript ></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 39);
+			var r = setup("<!DOCTYPE html><head><script <source=foo bar  >function f() {}</script type= javas cript ></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 39);
 			assert.equal(blocks.length, 0, "Should not have found any script blocks");
 		});
 		
@@ -1651,8 +1390,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=433263
 		 */
 		it('test_findNoScriptBlockWithSpacePostamble2', function() {
-			var text = "<!DOCTYPE html><head><script source=foo bar  > source='js'>function f() {}</script type= javas cript ></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 39);
+			var r = setup("<!DOCTYPE html><head><script source=foo bar  > source='js'>function f() {}</script type= javas cript ></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 39);
 			assert.equal(blocks.length, 0, "Should not have found any script blocks");
 		});
 		
@@ -1661,8 +1400,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=431054
 		 */
 		it('test_findNoScriptBlockInHTMLComment1', function() {
-			var text = "<!DOCTYPE html><head><!--<script>function f() {}</script>--></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text, 39);
+			var r = setup("<!DOCTYPE html><head><!--<script>function f() {}</script>--></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text, 39);
 			assert.equal(blocks.length, 0, "Should not have found any script blocks");
 		});
 		/**
@@ -1670,8 +1409,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=431054
 		 */
 		it('test_findNoScriptBlockInHTMLComment2', function() {
-			var text = "<!DOCTYPE html><head><!--<script>function f() {}</script>--><script>function f() {}</script><!--<script>function f() {}</script>--></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><!--<script>function f() {}</script>--><script>function f() {}</script><!--<script>function f() {}</script>--></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 1, "Should have found one script block");
 		});
 		/**
@@ -1679,8 +1418,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=431054
 		 */
 		it('test_findNoScriptBlockInHTMLComment3', function() {
-			var text = "<!DOCTYPE html><head><!--<script>function f() {}</script><script>function f() {}</script><script>function f() {}</script>--></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><!--<script>function f() {}</script><script>function f() {}</script><script>function f() {}</script>--></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 0, "Should have found no script blocks");
 		});
 		/**
@@ -1688,8 +1427,8 @@ define([
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=431054
 		 */
 		it('test_findNoScriptBlockInHTMLComment2', function() {
-			var text = "<!DOCTYPE html><head><script>function f() {}</script><!--<script>function f() {}</script>--><script>function f() {}</script></head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><script>function f() {}</script><!--<script>function f() {}</script>--><script>function f() {}</script></head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 2, "Should have found two script blocks");
 		});
 		
@@ -1698,8 +1437,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
 		 */
 		it('test_findScriptBlockEmptyAndMixedAttributes1', function() {
-			var text = "<!DOCTYPE html><head><script language=\"BLARGH\" type=\"\">function f() {}</script>\n</head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><script language=\"BLARGH\" type=\"\">function f() {}</script>\n</head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 1, "Should have found 1 script block");
 		});
 		
@@ -1708,8 +1447,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
 		 */
 		it('test_findScriptBlockEmptyAndMixedAttributes2', function() {
-			var text = "<!DOCTYPE html><head><script language=\"\">function f() {}</script>\n</head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><script language=\"\">function f() {}</script>\n</head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 1, "Should have found 1 script block");
 		});
 		
@@ -1718,8 +1457,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
 		 */
 		it('test_findScriptBlockEmptyAndMixedAttributes3', function() {
-			var text = "<!DOCTYPE html><head><script>function f() {}</script>\n</head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><script>function f() {}</script>\n</head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 1, "Should have found 1 script block");
 		});
 		
@@ -1728,8 +1467,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
 		 */
 		it('test_findScriptBlockEmptyAndMixedAttributes4', function() {
-			var text = "<!DOCTYPE html><head><script language=\"BLARGH\" type=\"text/javascript\">function f() {}</script>\n</head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><script language=\"BLARGH\" type=\"text/javascript\">function f() {}</script>\n</head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			assert.equal(blocks.length, 1, "Should have found 1 script block");
 		});
 		
@@ -1738,8 +1477,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
 		 */
 		it('test_findScriptBlockEmptyAndMixedAttributes5', function() {
-			var text = "<!DOCTYPE html><head><script type=\"text/javascript\" language=\"BLARGH\">function f() {}</script>\n</head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><script type=\"text/javascript\" language=\"BLARGH\">function f() {}</script>\n</head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			// If we have both attributes, the regex will always take the last matching 
 //			assert.equal(blocks.length, 1, "Should have found 1 script block");
 			assert.equal(blocks.length, 0, "We don't currently support both type and language attributes on a script tag (Bug 437957)");
@@ -1750,8 +1489,8 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=437957
 		 */
 		it('test_findDeclaration1', function() {
-			var text = "<!DOCTYPE html><head><script type=\"text/javascript\" language=\"BLARGH\">function f() {}</script>\n</head><html></html>";
-			var blocks = Finder.findScriptBlocks(text);
+			var r = setup("<!DOCTYPE html><head><script type=\"text/javascript\" language=\"BLARGH\">function f() {}</script>\n</head><html></html>");
+			var blocks = Finder.findScriptBlocks(r.text);
 			// If we have both attributes, the regex will always take the last matching 
 //			assert.equal(blocks.length, 1, "Should have found 1 script block");
 			assert.equal(blocks.length, 0, "We don't currently support both type and language attributes on a script tag (Bug 437957)");
@@ -1834,16 +1573,11 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=452296
 		 */
 		it('test_findDirective1', function() {
-		    var text = "/*eslint-env amd*/";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findDirective(ast, 'eslint-env');
-					if(!comment) {
-						assert.fail("Should have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+		    var r = setup("/*eslint-env amd*/");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findDirective(ast, 'eslint-env');
+				if(!comment) {
+					assert.fail("Should have found a comment");
 				}
 			});
 		});
@@ -1853,16 +1587,11 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=452296
 		 */
 		it('test_findDirective2', function() {
-		    var text = "/*eslint*/";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findDirective(ast, 'eslint');
-					if(!comment) {
-						assert.fail("Should have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+		    var r = setup("/*eslint*/");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findDirective(ast, 'eslint');
+				if(!comment) {
+					assert.fail("Should have found a comment");
 				}
 			});
 		});
@@ -1871,16 +1600,11 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=452296
 		 */
 		it('test_findDirective3', function() {
-		    var text = "/*globals console,foo,bar*/";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findDirective(ast, 'globals');
-					if(!comment) {
-						assert.fail("Should have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+		    var r = setup("/*globals console,foo,bar*/");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findDirective(ast, 'globals');
+				if(!comment) {
+					assert.fail("Should have found a comment");
 				}
 			});
 		});
@@ -1889,16 +1613,11 @@ define([
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=452296
 		 */
 		it('test_findDirective4', function() {
-		    var text = "/**/";
-			return astManager.getAST(setUp(text)).then(function(ast) {
-				try {
-					var comment = Finder.findDirective(ast, 'eslint');
-					if(comment) {
-						assert.fail("Should not have found a comment");
-					}
-				}
-				finally {
-					tearDown();
+		    var r = setup("/**/");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var comment = Finder.findDirective(ast, 'eslint');
+				if(comment) {
+					assert.fail("Should not have found a comment");
 				}
 			});
 		});
