@@ -27,20 +27,24 @@ define([
 			});
 		},
 		keys: function() {
+			var that = this;
 			var keySet = Object.create(null);
 			this.providers.forEach(function(provider) {
-				var providerMap = provider.map;
-				Object.keys(providerMap).forEach(function(key) {
-					keySet[key] = 1;
-				});
+				var providerMap = provider.map[that.name];
+				if (providerMap) {
+					Object.keys(providerMap).forEach(function(key) {
+						keySet[key] = 1;
+					});
+				}
 			});
 			return Object.keys(keySet);
 		},
 		get: function(key) {
 			// Get key the first provider that has it defined
+			var that = this;
 			var value;
 			this.providers.some(function(provider) {
-				value = provider.get(key);
+				value = provider.get(that.name, key);
 				if (typeof value === "undefined")
 					return false;
 				return true;
@@ -49,11 +53,11 @@ define([
 		},
 		put: function(key, value) {
 			// Put into the first provider
-			this.providers[0].put(key, value);
+			this.providers[0].put(this.name, key, value);
 		},
 		remove: function(key) {
 			// Remove from the first provider
-			this.providers[0].remove(key);
+			this.providers[0].remove(this.name, key);
 		},
 		_all: function() {
 			var _self = this, result = Object.create(null);
@@ -81,18 +85,29 @@ define([
 		clear: function() {
 			this.map = Object.create(null);
 		},
-		get: function(key) {
-			var value = this.map[key];
-			return value && typeof value === 'string' ? JSON.parse(value) : undefined;
+		get: function(prefix, key) {
+			var node = this.map[prefix];
+			if (node) {
+				var value = node[key];
+				return value && typeof value === 'string' ? JSON.parse(value) : undefined;
+			}
+			return undefined;
 		},
-		put: function(key, value) {
+		put: function(prefix, key, value) {
 			if (value === null) {
 				throw new Error('Preferences does not allow null values');
 			}
-			this.map[key] = JSON.stringify(value);
+			var node = this.map[prefix];
+			if (!node) {
+				node = this.map[prefix] = Object.create(null);
+			}
+			node[key] = JSON.stringify(value);
 		},
-		remove: function(key) {
-			delete this.map[key];
+		remove: function(prefix, key) {
+			var node = this.map[prefix];
+			if (node) {
+				delete node[key];
+			}
 		},
 	};
 
