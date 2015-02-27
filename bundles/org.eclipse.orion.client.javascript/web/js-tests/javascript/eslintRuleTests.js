@@ -2266,6 +2266,18 @@ define([
     			assert.equal(messages[0].message, "Switch case may be entered by falling through the previous case.");
     			assert.equal(messages[0].node.type, "SwitchCase");
     		});
+    		/**
+    		 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461082
+    		 */
+    		it("should not flag block with following statements 1", function() {
+    			var topic = "switch(a) {case 1:{ foo;} break; case 2:{ foo;}}";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
     		it("should not flag break;", function() {
     			var topic = "switch(a) {case 1: foo; break; case 2: foo;}";
     	

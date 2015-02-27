@@ -523,7 +523,10 @@ define([
         		    if(node.consequent) {
         		        var statements = node.consequent;
         		        if(statements.length > 0 && statements[0].type === 'BlockStatement') {
-        		            statements = statements[0].body;
+        		            var stmts = statements.shift(); //take the block statement off the list, it is not returnable
+        		            if(stmts.body.length > 0) {
+        		                statements = [].concat(statements, stmts.body); //remove the block statement
+        		            }
         		        }
         		        if(statements.length < 1) {
         					return false;
