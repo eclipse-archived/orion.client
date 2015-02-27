@@ -81,8 +81,6 @@ define([
 		 */
 		provider.registerService("orion.edit.model", {  //$NON-NLS-0$
 			onModelChanging: astManager.onModelChanging.bind(astManager),
-			onDestroy: astManager.onDestroy.bind(astManager),
-			onSaving: astManager.onSaving.bind(astManager),
 			onInputChanged: astManager.onInputChanged.bind(astManager)
 		},
 		{
