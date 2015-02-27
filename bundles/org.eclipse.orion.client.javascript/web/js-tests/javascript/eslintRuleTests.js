@@ -3227,7 +3227,82 @@ define([
                 assert.equal(messages.length, 0);
             });
         });
-        
+//NO-SHADOW-GLOBAL ------------------------------------------------
+        describe('no-shadow-global', function() {
+           var RULE_ID = 'no-shadow-global'; 
+           it("should flag browser use 1", function() {
+               var topic = "/*eslint-env browser*/ var name = 'me';";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 1);
+			   assert.equal(messages[0].ruleId, RULE_ID);
+			   assert.equal(messages[0].message, "Variable 'name' shadows a global member");
+           });
+           it("should flag browser use 2", function() {
+               var topic = "/*eslint-env browser*/ function f(name){}";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 1);
+			   assert.equal(messages[0].ruleId, RULE_ID);
+			   assert.equal(messages[0].message, "Parameter 'name' shadows a global member");
+           });
+           it("should flag node use 1", function() {
+               var topic = "/*eslint-env node*/ var require = {};";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 1);
+			   assert.equal(messages[0].ruleId, RULE_ID);
+			   assert.equal(messages[0].message, "Variable 'require' shadows a global member");
+           });
+           it("should flag node use 2", function() {
+               var topic = "/*eslint-env node*/ function f(module){}";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 1);
+			   assert.equal(messages[0].ruleId, RULE_ID);
+			   assert.equal(messages[0].message, "Parameter 'module' shadows a global member");
+           });
+            it("should not flag browser use wih no env set 1", function() {
+               var topic = "var name = 'me';";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 0);
+           });
+           it("should not flag browser use with no env set 2", function() {
+               var topic = "function f(name){}";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 0);
+           });
+           it("should not flag node use without env set 1", function() {
+               var topic = "var require = {};";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 0);
+           });
+           it("should not flag browser use without env set 2", function() {
+               var topic = "function f(console){}";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 0);
+           });
+        });
 //NO-SPARSE-ARRAYS ------------------------------------------------        
     	describe('no-sparse-arrays', function() {
     	    var RULE_ID = "no-sparse-arrays";
