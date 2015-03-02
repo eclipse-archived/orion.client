@@ -8,11 +8,11 @@
         <link rel="stylesheet" href="fonts/font.css" />
         <link rel="stylesheet" href="stylesheets/landing-new.min.css" />
         <script src="javascript/jquery.js"></script>
-        <script src="../../requirejs/require.min.js"></script>
+        <script src="../requirejs/require.min.js"></script>
         <script type="text/javascript">
             /*eslint-env browser, amd*/
             require({
-              baseUrl: '../../',
+              baseUrl: '../',
 
               // set the paths to our library packages
               packages: [],
@@ -20,7 +20,7 @@
                   domReady: 'requirejs/domReady'
               }
             });
-            require(["mixloginstatic/secret/landing-new"]);
+            require(["mixloginstatic/javascript/landing-new"]);
         </script>
     </head>
     <body>
@@ -91,7 +91,7 @@
                             </p>
                         </div>
                     </div>
-                    <div class="mobileRepeat show-for-small-only">
+                    <div class="col-sm-12 mobileRepeat show-for-small-only">
                         <div class="mobileContent current">
                             <img src="images/assets/orion-screen-shot-small.png" id="powerEditorImage">
                             <p id="powerEditorImageText" class="contentImageText show-for-small-only">
@@ -116,9 +116,9 @@
                             </p>
                         </div>
                     </div>
-                    <div class="mobileRepeat show-for-small-only">
+                    <div class="col-sm-12 mobileRepeat show-for-small-only">
                         <div class="mobileContent">
-                            <img src="http://placehold.it/970x512" id="versatileThemeImage">
+                            <img src="images/assets/orion-screen-shot-small.png" id="versatileThemeImage">
                             <p id="versatileThemeImageText" class="contentImageText show-for-small-only">
                                 Orion's editor can be light, dark or anywhere in between, by cusomization or theme import from other popular editors.
                             </p>
@@ -144,9 +144,9 @@
                             </p>
                         </div>
                     </div>
-                    <div class="mobileRepeat show-for-small-only" >
+                    <div class="col-sm-12 mobileRepeat show-for-small-only" >
                         <div class="mobileContent">
-                            <img src="http://placehold.it/970x512" id="orionGitImage">
+                            <img src="images/assets/orion-screen-shot-small.png" id="orionGitImage">
                             <p id="orionGitImageText" class="contentImageText show-for-small-only">
                                 Strong git support, easing your choice of control, from detailed to simple, in a smart, single page layout.
                             </p>

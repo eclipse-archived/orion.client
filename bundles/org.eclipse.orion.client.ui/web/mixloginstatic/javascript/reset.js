@@ -51,7 +51,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 			UserName : username,
 			Email: email
 		};
-		mypostrequest.open("POST", "../../useremailconfirmation", true);
+		mypostrequest.open("POST", "../useremailconfirmation", true);
 		mypostrequest.setRequestHeader("Content-type", "application/json;charset=UTF-8");
 		mypostrequest.setRequestHeader("Orion-Version", "1");
 		xsrfUtils.addCSRFNonce(mypostrequest);
@@ -66,7 +66,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 
 	domReady(function() {
 		/* initialize metrics collection for this page */
-		var url = new URL("../../metrics", window.location); //$NON-NLS-0$
+		var url = new URL("../metrics", window.location); //$NON-NLS-0$
 		xhr("GET", url.href, { //$NON-NLS-0$
 			headers: {
 				"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$

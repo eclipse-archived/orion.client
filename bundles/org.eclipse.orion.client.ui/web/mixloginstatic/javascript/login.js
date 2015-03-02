@@ -34,7 +34,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 			};
 
 			var parameters = "username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password);
-			mypostrequest.open("POST", "../../login/form", true);
+			mypostrequest.open("POST", "../login/form", true);
 			mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 			mypostrequest.setRequestHeader("Orion-Version", "1");
 			xsrfUtils.addCSRFNonce(mypostrequest);
@@ -82,7 +82,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 			}
 		});
 
-		xhr("GET", "../../server-status.json", { //$NON-NLS-0$
+		xhr("GET", "../server-status.json", { //$NON-NLS-0$
 			timeout: 15000,
 			responseType: "json"
 		}).then(function(result) {
@@ -104,7 +104,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 
 	domReady(function() {
 		/* initialize metrics collection for this page */
-		var url = new URL("../../metrics", window.location); //$NON-NLS-0$
+		var url = new URL("../metrics", window.location); //$NON-NLS-0$
 		xhr("GET", url.href, { //$NON-NLS-0$
 			headers: {
 				"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$
@@ -134,6 +134,18 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 			var errorMessage = common.decodeBase64(error);
 
 			common.showStatusMessage(errorMessage);
+		}
+
+		var oauth = common.getParam("oauth");
+		if (oauth) {
+			var oauthMessage = common.decodeBase64(oauth);
+
+			var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1);
+			var url = window.location.href;
+			var redirectURL = url.replace("LoginWindow", "register");
+			console.log(hashes);
+			console.log(redirectURL);
+			window.location.replace(redirectURL);
 		}
 
 		// FIX the hrefs of the various forms here.

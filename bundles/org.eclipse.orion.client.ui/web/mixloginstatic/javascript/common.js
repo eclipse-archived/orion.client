@@ -25,9 +25,9 @@ define(['orion/PageUtil'],function(PageUtil) {
         if (oauth !== "" && oauth !== null) {
             var redirect = getRedirect();
             if (redirect !== null && PageUtil.validateURLScheme(decodeURIComponent(redirect))) {
-                return "../../login/oauth?oauth="+oauth+"&redirect=" + redirect;
+                return "../login/oauth?oauth="+oauth+"&redirect=" + redirect;
             } else {
-                return "../../login/oauth?oauth="+oauth;
+                return "../login/oauth?oauth="+oauth;
             }
         }
     }
@@ -125,14 +125,15 @@ define(['orion/PageUtil'],function(PageUtil) {
         statusField.text("");
 
         if (typeof msg !== "undefined") {
-            var passwordContainer = $(".pass-container");
-            var loginContainer = $(".login-container");
-            var emailContainer = $(".email-container");
-            var resetContainer = $(".reset-container");
-            var resetEmailContainer = $(".reset-email-container");
+            var passwordContainer = $(".pass-container"),
+                loginContainer = $(".login-container"),
+                emailContainer = $(".email-container"),
+                resetContainer = $(".reset-container"),
+                resetEmailContainer = $(".reset-email-container"),
+                registrationRightSection = $(".right-section");
 
             var usernameField = document.getElementById("username");
-            var username = usernameField.value;
+            var username = usernameField.value.length > 0 ? usernameField.value : getParam("username");
             var userError = "User " + username + " already exists.";
 
             var userCreated = "All good to go! Please follow the instructions in the e-mail sent to you to login into Orion.";
@@ -217,6 +218,7 @@ define(['orion/PageUtil'],function(PageUtil) {
                     statusField.text(msg);
                     break;
                 case "Confirmation email has been sent.":
+                    statusField.removeClass(errorClass);
                     statusField.text(msg);
                     break;
                 case "Sending password reset confirmation...":
@@ -228,6 +230,7 @@ define(['orion/PageUtil'],function(PageUtil) {
                     statusField.text(userEmailNotSet);
                     break;
                 case "Created":
+                    registrationRightSection.addClass("hide");
                     loginContainer.removeClass(errorClass);
                     passwordContainer.removeClass(errorClass);
                     emailContainer.removeClass(errorClass);

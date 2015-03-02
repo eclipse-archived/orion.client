@@ -68,7 +68,7 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 
 
 		/* initialize metrics collection for this page */
-		var url = new URL("../../metrics", window.location); //$NON-NLS-0$
+		var url = new URL("../metrics", window.location); //$NON-NLS-0$
 		xhr("GET", url.href, { //$NON-NLS-0$
 			headers: {
 				"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$

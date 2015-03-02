@@ -10,36 +10,24 @@
  ******************************************************************************/
 
 define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domReady, xhr, xsrfUtils, common) {
-	function confirmCreateUser(e, linkedUser) {
+	function confirmCreateUser(e) {
+		e.preventDefault();
 
-		var e = typeof e !== 'undefined' ? e : null;
-		var linkedUser = typeof linkedUser !== 'undefined' ? linkedUser : false;
+		var linkedUser = common.getParam("oauth") === "create" ? true : false;
 		var authForm = document.getElementById("orion-auth"),
 			authFormElements = document.getElementById("form-elements"),
 			signUpBtn = document.getElementById("signUpBtn"),
 			processClass = "in-progress",
 			regCompleteClass = "complete";
 
-		if (e !== null) {
-			e.preventDefault();
-		}
-
 		if (linkedUser) {
-			document.getElementById("loginContainer").style.display = "none";
-			document.getElementById("passwordContainer").style.display = "none";
-			document.getElementById("repeatPasswordContainer").style.display = "none";
-			document.getElementById("emailContainer").style.display = "none";
-			document.getElementById("signUpBtn").style.display = "none";
-
-			var email = common.getParam("email");
-			var username = common.getParam("username");
 			var identifier = common.getParam("identifier");
 			var password = generateRandomPassword();
 		} else {
-			var username = document.getElementById("username").value;
 			var password = document.getElementById("password").value;
-			var email =  document.getElementById("email").value;
 		}
+		var username = document.getElementById("username").value;
+		var email =  document.getElementById("email").value;
 
 		var mypostrequest = new XMLHttpRequest();
 		mypostrequest.onreadystatechange = function() {
@@ -69,21 +57,18 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domRea
 
 		if (linkedUser) {
 			formData.identifier = identifier;
-			var parameters = "username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&identifier=" + encodeURIComponent(identifier) + "&Email=" + encodeURIComponent(email);
 		}
 
-		mypostrequest.open("POST", "../../users", true);
+		mypostrequest.open("POST", "../users", true);
 		mypostrequest.setRequestHeader("Content-type", "application/json;charset=UTF-8");
 		mypostrequest.setRequestHeader("Orion-Version", "1");
 		xsrfUtils.addCSRFNonce(mypostrequest);
 		mypostrequest.send(JSON.stringify(formData));
 		common.showStatusMessage("Processing your request...");
 
-		if (!linkedUser) {
-			common.addClass(authForm, processClass);
-			authFormElements.setAttribute("disabled", "disabled");
-			signUpBtn.setAttribute("disabled", "disabled");
-		}
+		common.addClass(authForm, processClass);
+		authFormElements.setAttribute("disabled", "disabled");
+		signUpBtn.setAttribute("disabled", "disabled");
 	}
 
 	function generateRandomPassword() {
@@ -104,7 +89,14 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domRea
 	function setUpRegisterPage() {
 		var oauth = common.getParam("oauth");
 		if (oauth) {
-			confirmCreateUser(null, true);
+			var email = common.getParam("email");
+			var username = common.getParam("username");
+
+			document.getElementById("passwordContainer").style.display = "none";
+			document.getElementById("repeatPasswordContainer").style.display = "none";
+			document.getElementById("username").value = username;
+			document.getElementById("email").value = email;
+			document.getElementById("signUpBtn").addEventListener("click", confirmCreateUser, false);
 		} else {
 			document.getElementById("signUpBtn").addEventListener("click", confirmCreateUser, false);
 			document.getElementById("show-password").addEventListener("click", common.passwordSwitcher);
@@ -126,7 +118,7 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domRea
 
 	domReady(function() {
 		/* initialize metrics collection for this page */
-		var url = new URL("../../metrics", window.location); //$NON-NLS-0$
+		var url = new URL("../metrics", window.location); //$NON-NLS-0$
 		xhr("GET", url.href, { //$NON-NLS-0$
 			headers: {
 				"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$
