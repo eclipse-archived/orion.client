@@ -989,7 +989,7 @@ define([
 		    description: 'Warn when function parameters are not used',
 		    rule: function(context) {
                 function hasCallbackComment(node) {
-                    if(node.leadingComments) {
+                    if(node && node.leadingComments) {
                         var len = node.leadingComments.length;
                         for(var i = 0; i < len; i++) {
                             var comment = node.leadingComments[i];
@@ -1017,11 +1017,11 @@ define([
         					    var pid = 'no-unused-params';
         					    if(node.type === 'FunctionExpression') {
         					        pid += '-expr';
-        					        if(hasCallbackComment(node)) {
+        					        if(hasCallbackComment(node) || (node.params && node.params.length > 0 && hasCallbackComment(node.params[0]))) { 
         					            return;
         					        }
         					        var parent = node.parent;
-        					        if(parent.type === 'Property' && hasCallbackComment(parent)) {
+        					        if(parent.type === 'Property' && (hasCallbackComment(parent) || hasCallbackComment(parent.key))) {
         					            return;
         					        }
         					        if(parent.type === 'MemberExpression') {
