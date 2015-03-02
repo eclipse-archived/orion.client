@@ -214,10 +214,10 @@
 									<available file="about.properties" />
 									<then>
 										<echo
-											message="Replacing @qualifier@ token within about.properties with build id 8.0.0-v${build-timestamp}" />
+											message="Replacing @qualifier@ token within about.properties with build id 9.0.0-v${build-timestamp}" />
 										<replace file="about.properties">
 											<replacefilter token="@qualifier@"
-												value="8.0.0-v${build-timestamp}" />
+												value="9.0.0-v${build-timestamp}" />
 										</replace>
 									</then>
 								</if>
