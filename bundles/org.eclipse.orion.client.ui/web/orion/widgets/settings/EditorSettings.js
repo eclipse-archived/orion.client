@@ -320,7 +320,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 						options.push(set);
 					}
 					select = this.themeSelect = new LabeledSelect(
-						{	fieldlabel:messages.Theme,
+						{	fieldlabel:messages["Editor Theme"],
 							options:options,
 							postChange: themePreferences.setTheme.bind(themePreferences)
 						}
@@ -328,7 +328,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					fields.unshift(select);
 				}
 				if (!this.local && fields.length > 0) {
-					subSection = new Subsection( {sectionName:messages.Theme, parentNode: this.editorThemeSection.getContentElement(), children: fields} );
+					subSection = new Subsection( {sectionName:messages["Editor Theme"], parentNode: this.editorThemeSection.getContentElement(), children: fields} );
 					subSection.show();
 					fields = [];
 				}
