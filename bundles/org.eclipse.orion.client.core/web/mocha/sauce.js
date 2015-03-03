@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*eslint-env browser,amd*/
-/*eslint no-new-func:0*/
+/*eslint-env browser, amd*/
+/*eslint no-console:0, no-new-func:0*/
 /*global console:true TextEncoder*/
 
 /**
@@ -48,9 +48,11 @@ define([
 		var log = console.log;
 		console.log = global.console.log = function(str) {
 			if (isXunit(str)) {
+				// redirect Xunit output to buffer, do not print to console
 				reportHolder.report += str + "\n";
+			} else {
+				log && log.apply(global.console, Array.prototype.slice.call(arguments));
 			}
-			log && log.apply(global.console, Array.prototype.slice.call(arguments));
 		};
 		reportHolder.report = "";
 		// This is a hack to enable xunit as a 2nd reporter
@@ -69,10 +71,22 @@ define([
 	}
 
 	/**
-	 * @returns {Boolean} true if the `global.mochaResults` object exceeds the Sauce Labs 64KB API size limit
+	 * @returns {Boolean} true if the `mochaResults` object exceeds the Sauce Labs 64KB API size limit
 	 */
-	function tooBig() {
-		return JSON.stringify(global.mochaResults).length >= 64000 ;
+	function tooBig(mochaResults) {
+		return JSON.stringify(mochaResults).length >= 64000 ;
+	}
+	
+	function pruneReports(mochaResults) {
+		if (tooBig(mochaResults)) {
+			var reports = mochaResults.reports;
+			// Pare down reports by binary splicing
+			while (reports.length > 0 && tooBig()) {
+				var index = reports.length >> 1, n = reports.length - index;
+				console.log("Throwing away " + n + " failed test summaries");
+				reports.splice(index, n);
+			}
+		}
 	}
 
 	function makeWrapper(mocha) {
@@ -83,6 +97,7 @@ define([
 			var runner = mocha.run.apply(mocha, Array.prototype.slice.call(arguments));
 			var xunitResult = {};
 
+			console.log("* sauce.js *");
 			addxunit(mocha, runner, xunitResult);
 
 			var failed = [], passed = [];
@@ -93,30 +108,28 @@ define([
 			});
 			runner.on("end", function() {
 				// The `global.mochaResults` object gets sent to Sauce Labs, and later echoed back to Grunt build
-				global.mochaResults = runner.stats;
-				global.mochaResults.reports = failed;
-				global.mochaResults.url = global.location.pathname;
-				global.mochaResults.xunit = compress(xunitResult.report);
+				var mochaResults = global.mochaResults = runner.stats;
+				mochaResults.reports = failed;
+				mochaResults.url = global.location.pathname;
+				mochaResults.xunit = compress(xunitResult.report);
+				
+				console.log("XML report length: " + mochaResults.xunit.length);
 
 				// Try to make the `mochaResults` structure fit into the Sauce Labs API size limit.
-				if (tooBig()) {
-					var reports = global.mochaResults.reports;
-					// Pare down failed test summaries by binary splicing
-					while (reports.length > 0 && tooBig()) {
-						var index = reports.length >> 1, n = reports.length - index;
-						console.log("Throwing away " + n + " failed test summaries");
-						reports.splice(index, n);
-					}
-				}
-				// If we still exceed the limit, it must be the xunit results, throw them away :(
-				if (tooBig()) {
+				// First try the `reports` array since can it contain large stack traces
+				pruneReports(mochaResults);
+
+				// If we exceed the limit, it must be the xunit results, throw them away too :(
+				if (tooBig(mochaResults)) {
 					console.log(new Error("mochaResults size exceeds Sauce Labs API limit. xUnit results will not be available. "
 						+ "To fix this, split up this test page into smaller pages."));
-					delete global.mochaResults.xunit;
+					delete mochaResults.xunit;
 				}
-				if (tooBig()) {
+				// Should not happen; by this point the data structure is almost empty
+				if (tooBig(mochaResults)) {
 					console.log(new Error("Could not make mochaResults fit into Sauce Labs API limit. Test results will not be recorded!!"));
 				}
+				console.log("mocha result length: " + JSON.stringify(mochaResults).length);
 			});
 
 			function flattenTitles(test){
