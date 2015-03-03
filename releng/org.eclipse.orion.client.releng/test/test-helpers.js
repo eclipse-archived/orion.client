@@ -9,7 +9,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
-var fmt = require("util").format;
+var fmt = require("util").format,
+    rest = require("restler"),
+    nodeUrl = require("url"),
+    Q = require("q");
 
 function sanitizeClassName(s) {
 	return s.replace(/[^A-Za-z0-9_\.]/g, "_");
@@ -37,6 +40,47 @@ exports.xunit_cleanup = function(xml, sauceResult, testUrl) {
 		.replace(/<testcase classname="([^"]+)"/g, function(match, className) {
 			return fmt("<testcase classname=\"%s.%s\"", packageName, className.replace(/[#?.]/g, "_"));
 		});
+};
+
+/**
+ * Workaround for getting the Mocha test results in cases where Sauce Labs has decided not to store them
+ * in the job's `custom_data` field. Download the entire job log & scrape it to find the results.
+ * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461212
+ * @returns {Promise}
+ */
+exports.get_mocha_result_from_log = function(grunt, job_id, username, password) {
+	// https://saucelabs.com/rest/v1/{user}/jobs/{job_id}/assets/log.json
+	var url = nodeUrl.format({
+		protocol: "https",
+		host: "saucelabs.com",
+		pathname: fmt("/rest/v1/%s/jobs/%s/assets/log.json", username, job_id),
+	});
+
+	grunt.verbose.write(fmt("Downloading logs from %s...", nodeUrl.format(url)));
+	var d = Q.defer();
+	rest.get(url, {
+		username: username,
+		password: password
+	})
+	.on("success", function(data) {
+		if (!Array.isArray(data))
+			d.reject(new Error("Could not parse log.json"));
+
+		grunt.verbose.ok();
+		for (var i = data.length - 1; i >= 0; i--) {
+			var entry = data[i];
+			if (entry.result) {
+				d.resolve(entry.result);
+				return;
+			}
+		}
+		d.reject(new Error("Failed to find mocha results in log.json"));
+	})
+	.on("error", function(error) {
+		grunt.verbose.write(error);
+		d.reject(error);
+	});
+	return d.promise;
 };
 
 /**
@@ -71,10 +115,10 @@ exports.xunit_write = function(grunt, filepath, contents) {
 /**
  * @returns {String} The url of the test page
  */
-exports.test_page_url = function(sauceResult) {
+exports.test_page_url = function(sauceResult, mochaResult) {
 	var url = sauceResult.testPageUrl;
-	if (sauceResult.result) {
-		url = sauceResult.result.url;
+	if (mochaResult) {
+		url = mochaResult.url;
 	}
 	return url;
 };

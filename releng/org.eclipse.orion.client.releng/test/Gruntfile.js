@@ -177,38 +177,19 @@ module.exports = function(grunt) {
 		grunt.verbose.writeln("Got test result: ");
 		grunt.verbose.writeln(nodeutil.inspect(sauceResult));
 		var mochaResult = sauceResult.result,
-		    id = sauceResult.id,
-		    testurl = helpers.test_page_url(sauceResult),
+		    job_id = sauceResult.job_id,
 		    filename = helpers.xunit_filename(sauceResult);
-		grunt.verbose.writeln(fmt("Test page url: %s, xunit filename: %s", testurl, filename));
 		Q.try(function() {
-			function throwError(msgOrError) {
-				var e = nodeutil.isError(msgOrError) ? msgOrError : new Error(msgOrError);
-				throw e;
+			if (!mochaResult) {
+				grunt.verbose.writeln("Mocha result was missing. Will search for it in job logs.");
+				mochaResult = helpers.get_mocha_result_from_log(grunt, job_id, env.SAUCE_USERNAME, env.SAUCE_PASSWORD).then(function(data) {
+					grunt.verbose.writeln("Scraped mocha result: ");
+					grunt.verbose.writeln(nodeutil.inspect(data));
+					return data;
+				});
 			}
-			if (!mochaResult)
-				throwError(fmt("Test %s is missing 'result' field in response. Ensure the test is using sauce.js.\n%s", id, nodeutil.inspect(sauceResult)));
 
-			var gzippedXml = mochaResult.xunit;
-			if (/experienced an error/.test(sauceResult.message))
-				throwError(sauceResult.message);
-			if (!mochaResult.url)
-				throwError(fmt("Test %s did not return its url. Ensure it is using sauce.js", id));
-			if (!gzippedXml)
-				throwError(fmt("Test %s did not return an xunit result. Ensure it is using sauce.js.", testurl));
-
-			grunt.verbose.write("Inflating compressed xunit result...");
-			var deferred = Q.defer();
-			var zipresolver = deferred.makeNodeResolver(); // will resolve or reject `deferred`
-			zlib.gunzip(new Buffer(gzippedXml, "base64"), zipresolver);
-			return deferred.promise.then(function(buffer) {
-				grunt.verbose.ok();
-				var xunitReport = buffer.toString("utf8");
-				grunt.verbose.write("Replacing xunit testsuite name...");
-				xunitReport = helpers.xunit_cleanup(xunitReport, sauceResult, testurl);
-				grunt.verbose.ok();
-
-				helpers.xunit_write(grunt, nodePath.join(results, filename), xunitReport);
+			return Q.when(mochaResult, writeXUnitReport.bind(null, job_id, filename, sauceResult)).then(function() {
 				testFilenames.push(filename);
 				callback(undefined, true /*job pass*/);
 			});
@@ -220,6 +201,45 @@ module.exports = function(grunt) {
 			helpers.xunit_write(grunt, nodePath.join(results, filename), helpers.xunit_suite_error(filename, error));
 			testFilenames.push(filename);
 			callback(error); /*job fail*/
+		});
+	}
+
+	/**
+	 * @returns {Promise} resolves if we wrote the XUnit report, rejects if an error occurred
+	 */
+	function writeXUnitReport(job_id, filename, sauceResult, mochaResult) {
+		function throwError(msgOrError) {
+			var e = nodeutil.isError(msgOrError) ? msgOrError : new Error(msgOrError);
+			throw e;
+		}
+
+		var id = sauceResult.id,
+		    gzippedXml = mochaResult && mochaResult.xunit,
+		    testurl = helpers.test_page_url(sauceResult, mochaResult);
+		grunt.verbose.writeln(fmt("Test page url: %s, xunit filename: %s", testurl, filename));
+		if (!mochaResult)
+			throwError(fmt("Failed to get 'result'. For full details see: https://saucelabs.com/jobs/%s/\n", job_id));
+		if (typeof mochaResult === "string" && /duration/.test(mochaResult))
+			throwError(mochaResult); // Timeout
+		if (/experienced an error/.test(sauceResult.message))
+			throwError(sauceResult.message);
+		if (!mochaResult.url)
+			throwError(fmt("Test %s did not return its url. Ensure it is using sauce.js", id));
+		if (!gzippedXml)
+			throwError(fmt("Test %s did not return an xunit result. Ensure it is using sauce.js.", testurl));
+
+		grunt.verbose.write("Inflating compressed xunit result...");
+		var deferred = Q.defer();
+		var zipresolver = deferred.makeNodeResolver(); // will resolve or reject `deferred`
+		zlib.gunzip(new Buffer(gzippedXml, "base64"), zipresolver);
+		return deferred.promise.then(function(buffer) {
+			grunt.verbose.ok();
+			var xunitReport = buffer.toString("utf8");
+			grunt.verbose.write("Replacing xunit testsuite name...");
+			xunitReport = helpers.xunit_cleanup(xunitReport, sauceResult, testurl);
+			grunt.verbose.ok();
+
+			helpers.xunit_write(grunt, nodePath.join(results, filename), xunitReport);
 		});
 	}
 
