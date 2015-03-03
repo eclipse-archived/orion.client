@@ -364,7 +364,7 @@ define({//Default message bundle
 	"Resetting git index for ${0}" : "Resetting git index for ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Tag": "Tag", //$NON-NLS-0$  //$NON-NLS-1$
 	"Create a tag for the commit": "Create a tag for the commit", //$NON-NLS-0$  //$NON-NLS-1$
-	"ProjectSetup": "Your project is being set up. This may take a minute...", //$NON-NLS-0$  //$NON-NLS-1$
+	"ProjectSetup": "Your project is being set up. This might take a minute...", //$NON-NLS-0$  //$NON-NLS-1$
 	"LookingForProject": "Looking for project: ${0}", //$NON-NLS-0$  //$NON-NLS-1$
 	"Tag name": "Tag name", //$NON-NLS-0$  //$NON-NLS-1$
 	"Delete the tag from the repository": "Delete the tag from the repository", //$NON-NLS-0$  //$NON-NLS-1$
