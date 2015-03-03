@@ -1217,8 +1217,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		},
 		/** @private */
 		scrollIndex: function(index, top) {
-			this.parentNode.childNodes[index].scrollIntoView(top);
-			this.preserveCloneThroughScroll = true;
+			var nodeAtIndex = this.parentNode.childNodes[index];
+			if (nodeAtIndex){
+				nodeAtIndex.scrollIntoView(top);
+				this.preserveCloneThroughScroll = true;
+			}
 		},
 		/**
 		 * Visually selects the node at the specified nodeIndex
@@ -1247,85 +1250,87 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			
 			if (-1 !== nodeIndex) {
 				node = this.parentNode.childNodes[nodeIndex];
-				node.classList.add(STYLES.selected);
-				this.parentNode.setAttribute("aria-activedescendant", node.id); //$NON-NLS-0$
-				node.focus();
-				if (node.offsetTop < this.parentNode.scrollTop) {
-					node.scrollIntoView(true);
-					this.preserveCloneThroughScroll = true;
-				} else if ((node.offsetTop + node.offsetHeight) > (this.parentNode.scrollTop + this.parentNode.clientHeight)) {
-					node.scrollIntoView(false);
-					this.preserveCloneThroughScroll = true;
-				}
-				
-				var textNode = node.firstChild || node;  
-				var textBounds = lib.bounds(textNode);
-				var parentWidth = this.parentNode.clientWidth ? this.parentNode.clientWidth : lib.bounds(this.parentNode); // Scrollbar can cover text
-				var parentStyle = window.getComputedStyle(this.parentNode);
-				var nodeStyle = window.getComputedStyle(node);
-				var allPadding = parseInt(parentStyle.paddingLeft) + parseInt(parentStyle.paddingRight) + parseInt(nodeStyle.paddingLeft) + parseInt(nodeStyle.paddingRight);
-				if (textBounds.width >= (parentWidth - allPadding)) {
-					var parentTop = parseInt(parentStyle.top);
-					
-					// create clone node
-					var clone = node.cloneNode(true); // deep clone
-					clone.classList.add("cloneProposal"); //$NON-NLS-0$
-					clone.style.top = parentTop + node.offsetTop - this.parentNode.scrollTop + "px"; //$NON-NLS-0$
-					clone.style.left = parentStyle.left;
-					clone.setAttribute("id", clone.id + "_clone"); //$NON-NLS-1$ //$NON-NLS-0$
-					
-					// try to fit clone node on page horizontally
-					var viewportWidth = document.documentElement.clientWidth;
-					var horizontalOffset = (textBounds.left + textBounds.width) - parseInt(viewportWidth);
-					if (horizontalOffset > 0) {
-						var cloneLeft = parseInt(parentStyle.left) - horizontalOffset;
-						if (0 > cloneLeft) {
-							cloneLeft = 0;
-						}
-						clone.style.left = cloneLeft + "px";
+				if (node){
+					node.classList.add(STYLES.selected);
+					this.parentNode.setAttribute("aria-activedescendant", node.id); //$NON-NLS-0$
+					node.focus();
+					if (node.offsetTop < this.parentNode.scrollTop) {
+						node.scrollIntoView(true);
+						this.preserveCloneThroughScroll = true;
+					} else if ((node.offsetTop + node.offsetHeight) > (this.parentNode.scrollTop + this.parentNode.clientHeight)) {
+						node.scrollIntoView(false);
+						this.preserveCloneThroughScroll = true;
 					}
-
-					// create wrapper parent node (to replicate css class hierarchy)
-					var parentClone = document.createElement("div");
-					parentClone.id = "clone_contentassist";  //$NON-NLS-0$
-					parentClone.classList.add("contentassist"); //$NON-NLS-0$
-					parentClone.classList.add("cloneWrapper"); //$NON-NLS-0$
-					parentClone.appendChild(clone);
-					parentClone.onclick = this.parentNode.onclick;
-					this.parentNode.parentNode.insertBefore(parentClone, this.parentNode);
 					
-					// make all the cloned nodes clickable by setting their contentAssistProposalIndex
-					var recursiveSetIndex = function(cloneNode){
-						cloneNode.contentAssistProposalIndex = node.contentAssistProposalIndex;
-						if (cloneNode.hasChildNodes()) {
-							for (var i = 0 ; i < cloneNode.childNodes.length ; i++){
-								recursiveSetIndex(cloneNode.childNodes[i]);
+					var textNode = node.firstChild || node;  
+					var textBounds = lib.bounds(textNode);
+					var parentWidth = this.parentNode.clientWidth ? this.parentNode.clientWidth : lib.bounds(this.parentNode); // Scrollbar can cover text
+					var parentStyle = window.getComputedStyle(this.parentNode);
+					var nodeStyle = window.getComputedStyle(node);
+					var allPadding = parseInt(parentStyle.paddingLeft) + parseInt(parentStyle.paddingRight) + parseInt(nodeStyle.paddingLeft) + parseInt(nodeStyle.paddingRight);
+					if (textBounds.width >= (parentWidth - allPadding)) {
+						var parentTop = parseInt(parentStyle.top);
+						
+						// create clone node
+						var clone = node.cloneNode(true); // deep clone
+						clone.classList.add("cloneProposal"); //$NON-NLS-0$
+						clone.style.top = parentTop + node.offsetTop - this.parentNode.scrollTop + "px"; //$NON-NLS-0$
+						clone.style.left = parentStyle.left;
+						clone.setAttribute("id", clone.id + "_clone"); //$NON-NLS-1$ //$NON-NLS-0$
+						
+						// try to fit clone node on page horizontally
+						var viewportWidth = document.documentElement.clientWidth;
+						var horizontalOffset = (textBounds.left + textBounds.width) - parseInt(viewportWidth);
+						if (horizontalOffset > 0) {
+							var cloneLeft = parseInt(parentStyle.left) - horizontalOffset;
+							if (0 > cloneLeft) {
+								cloneLeft = 0;
 							}
+							clone.style.left = cloneLeft + "px";
 						}
-					};
-					recursiveSetIndex(parentClone);
-					
-					var self = this;
-					this._hideTimeout = window.setTimeout(function() {
-						self._hideTimeout = null;
-						node.classList.add(STYLES.selected);
-						var opacity = 1;
-						self._fadeTimer = window.setInterval(function() {
-							if (!self.previousCloneNode || opacity <= 0.01){
-								self._removeCloneNode();
-								window.clearInterval(self._fadeTimer);
-								self._fadeTimer = null;
-							} else {
-								parentClone.style.opacity = opacity;
-								parentClone.style.filter = 'alpha(opacity=' + opacity * 100 + ")";
-        						opacity -= opacity * 0.1;
-        					}
-						}, 50);
-					}, 1500);
-					
-					node.classList.remove(STYLES.selected);
-					
-					this.previousCloneNode = parentClone;				
+	
+						// create wrapper parent node (to replicate css class hierarchy)
+						var parentClone = document.createElement("div");
+						parentClone.id = "clone_contentassist";  //$NON-NLS-0$
+						parentClone.classList.add("contentassist"); //$NON-NLS-0$
+						parentClone.classList.add("cloneWrapper"); //$NON-NLS-0$
+						parentClone.appendChild(clone);
+						parentClone.onclick = this.parentNode.onclick;
+						this.parentNode.parentNode.insertBefore(parentClone, this.parentNode);
+						
+						// make all the cloned nodes clickable by setting their contentAssistProposalIndex
+						var recursiveSetIndex = function(cloneNode){
+							cloneNode.contentAssistProposalIndex = node.contentAssistProposalIndex;
+							if (cloneNode.hasChildNodes()) {
+								for (var i = 0 ; i < cloneNode.childNodes.length ; i++){
+									recursiveSetIndex(cloneNode.childNodes[i]);
+								}
+							}
+						};
+						recursiveSetIndex(parentClone);
+						
+						var self = this;
+						this._hideTimeout = window.setTimeout(function() {
+							self._hideTimeout = null;
+							node.classList.add(STYLES.selected);
+							var opacity = 1;
+							self._fadeTimer = window.setInterval(function() {
+								if (!self.previousCloneNode || opacity <= 0.01){
+									self._removeCloneNode();
+									window.clearInterval(self._fadeTimer);
+									self._fadeTimer = null;
+								} else {
+									parentClone.style.opacity = opacity;
+									parentClone.style.filter = 'alpha(opacity=' + opacity * 100 + ")";
+	        						opacity -= opacity * 0.1;
+	        					}
+							}, 50);
+						}, 1500);
+						
+						node.classList.remove(STYLES.selected);
+						
+						this.previousCloneNode = parentClone;				
+					}
 				}
 			}
 			
