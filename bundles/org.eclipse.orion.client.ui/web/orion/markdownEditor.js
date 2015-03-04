@@ -24,10 +24,11 @@ define([
 	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/URITemplate',
+	'orion/PageUtil',
 	'orion/webui/splitter',
 	'orion/metrics',
 	'orion/URL-shim'
-], function(i18nUtil, messages, marked, mCommands, mKeyBinding, mAnnotations, mEditor, mTextStyler, mTextUtil, mFileCommands, objects, lib, URITemplate, mSplitter, mMetrics) {
+], function(i18nUtil, messages, marked, mCommands, mKeyBinding, mAnnotations, mEditor, mTextStyler, mTextUtil, mFileCommands, objects, lib, URITemplate, PageUtil, mSplitter, mMetrics) {
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	var extensionRegex = /\.([0-9a-z]+)(?:[\?#]|$)/i;
@@ -1261,20 +1262,14 @@ define([
 						}
 					}
 					if (cap[0][0] !== '!') { //$NON-NLS-0$
-						/*
-						 * TODO: should not need to remove the URL hash to create a link that opens in the markdown editor
-						 *
-						 * eg.- http://...,editor=orion.editor.markdown#hash works fine, but uriTemplate generates
-						 * http://...#hash,editor=orion.editor.markdown for this, which does not work.  Since the
-						 * markdown editor does not currently acknowledge hashes, removing it here does not hurt anything.
-						 * However if the editor began opening to hashes then this would be removing a valuable piece
-						 * of the URL.  Need to determine if uriTemplate is creating an invalid URL, or if the editor
-						 * opener that looks at the URL is handling this case incorrectly.
-						 */
-						linkURL.hash = "";
+						var params = {editor: "orion.editor.markdown"}; //$NON-NLS-0$
+						if (linkURL.hash) {
+							params.anchor = linkURL.hash.substring(1);
+							linkURL.hash = "";
+						}
 						link.href = uriTemplate.expand({
 							resource: linkURL.href,
-							params: "editor=orion.editor.markdown" //$NON-NLS-0$
+							params: params
 						});
 					} else {
 						var entry = _imageCache[linkURL.href];
@@ -1385,6 +1380,7 @@ define([
 		this._parent = options.parent;
 		this._model = options.model;
 		this._editorView = options.editorView;
+		this._targetAnchor = options.anchor;
 
 		this._previewClickListener = function(e) {
 			var target = this._findNearestBlockElement(e.target);
@@ -1393,8 +1389,8 @@ define([
 				return;
 			}
 
-		    var elementBounds = target.getBoundingClientRect();
-		    var selectionPercentageWithinElement = (e.clientY - elementBounds.top) / (elementBounds.bottom - elementBounds.top);
+			var elementBounds = target.getBoundingClientRect();
+			var selectionPercentageWithinElement = (e.clientY - elementBounds.top) / (elementBounds.bottom - elementBounds.top);
 
 			var textView = this._editorView.editor.getTextView();
 			var block = this._stylerAdapter.getBlockWithId(this._stylerAdapter.getElementIdentifier(target));
@@ -1536,6 +1532,27 @@ define([
 			this._editorView.editor.resize();
 		}.bind(this);
 
+		var hashChangeListener = function(e) {
+			var oldParams = PageUtil.matchResourceParameters(e.oldURL);
+			var newParams = PageUtil.matchResourceParameters(e.newURL);
+			if (oldParams.resource !== newParams.resource || oldParams.editor !== newParams.editor) {
+				/* a different editor instance is being opened */
+				window.removeEventListener("hashchange", hashChangeListener); //$NON-NLS-0$
+				return;
+			}
+
+			if (newParams.anchor) {
+				this._scrollToAnchor(newParams.anchor);
+				/* remove the anchor parameter from the page url */
+				window.location.hash = uriTemplate.expand({
+					resource: newParams.resource,
+					params: {editor: newParams.editor}
+				});
+			}
+		}.bind(this);
+
+		window.addEventListener("hashchange", hashChangeListener); //$NON-NLS-0$
+
 		BaseEditor.apply(this, arguments);
 	}
 
@@ -1569,6 +1586,20 @@ define([
 
 			var settings = this._editorView.getSettings();
 			this._styler.setWhitespacesVisible(settings.showWhitespaces, true);
+
+			var blocksChanged = function(e) {
+				this._styler.removeEventListener("BlocksChanged", blocksChanged); //$NON-NLS-0$
+				this._scrollToAnchor(this._targetAnchor);
+				/* remove the anchor parameter from the page url */
+				var urlParams = PageUtil.matchResourceParameters(window.location.hash);
+				window.location.hash = uriTemplate.expand({
+					resource: urlParams.resource,
+					params: {editor: urlParams.editor}
+				});
+			}.bind(this);
+			if (this._targetAnchor) {
+				this._styler.addEventListener("BlocksChanged", blocksChanged); //$NON-NLS-0$
+			}
 		},
 		install: function() {
 			this._rootDiv = document.createElement("div"); //$NON-NLS-0$
@@ -1582,7 +1613,7 @@ define([
 			this._editorView.setParent(this._editorDiv);
 
 			this._splitterDiv = document.createElement("div"); //$NON-NLS-0$
-			this._splitterDiv.id = "orion.markdown.editor.splitter";
+			this._splitterDiv.id = "orion.markdown.editor.splitter"; //$NON-NLS-0$
 			this._rootDiv.appendChild(this._splitterDiv);
 
 			this._previewWrapperDiv = document.createElement("div"); //$NON-NLS-0$
@@ -1795,6 +1826,31 @@ define([
 
 			this._ignoreEditorScrollsCounter = Infinity;
 			this._scrollSourceAnimation.play();
+		},
+		_scrollToAnchor: function(anchor) {
+			var element = document.getElementById(anchor);
+			if (element) {
+				var textView = this._editorView.editor.getTextView();
+				var projectionModel = textView.getModel();
+				var block = this._stylerAdapter.getBlockWithId(this._stylerAdapter.getElementIdentifier(element));
+				var projectionBlockStart = projectionModel.mapOffset(block.start, true);
+				while (projectionBlockStart === -1) {
+					/*
+					 * Indicates that the block corresponding to the target element is within a collapsed ancestor,
+					 * so it is not visible in the source editor at all.  Move up to its parent block.
+					 */
+					block = block.parent;
+					projectionBlockStart = projectionModel.mapOffset(block.start, true);
+				}
+				var lineIndex = textView.getLineAtOffset(projectionBlockStart);
+				var topOffset = lineIndex ? textView.getLineHeight(lineIndex - 1) : 0;
+				var blockTop = textView.getLocationAtOffset(projectionBlockStart);
+				this._scrollSourceEditor(blockTop.y - topOffset);
+				var elementBounds = element.getBoundingClientRect();
+				var elementTop = elementBounds.top + window.scrollY + this._previewWrapperDiv.scrollTop;
+				var scrollY = elementTop - this._previewWrapperDiv.getBoundingClientRect().top;
+				this._scrollPreviewDiv(scrollY - topOffset);
+			}
 		},
 		_markdownSelected: "markdownSelected", //$NON-NLS-0$
 		_selectedBlock: null

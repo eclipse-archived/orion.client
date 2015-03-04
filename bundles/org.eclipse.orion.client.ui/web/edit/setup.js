@@ -285,6 +285,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 					view = new mMarkdownView.MarkdownEditorView(options);
 				} else if (id === "orion.editor.markdown") { //$NON-NLS-0$
 					options.editorView = editorView;
+					options.anchor = input.anchor;
 					view = new mMarkdownEditor.MarkdownEditorView(options);
 				} else {
 					var editors = serviceRegistry.getServiceReferences("orion.edit.editor"); //$NON-NLS-0$
