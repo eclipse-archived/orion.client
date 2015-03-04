@@ -526,7 +526,7 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 		}
 	);
 	
-	/** Add cf delete-route command **/
+	/** Add cf delete-route command filip**/
 	var deleteRouteImpl = {
 		callback: function(args, context) {
 			return cFService.deleteRoute(null, args.domain, args.hostname).then(function(result) {
