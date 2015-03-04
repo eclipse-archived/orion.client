@@ -835,28 +835,23 @@ define([
             rule: function(context) {
                 
                 function checkShadow(node) {
-                    if(context.settings && context.settings.env) {
-                        var envs = Object.keys(context.settings.env);
-                        if(envs.length < 1) {
-                            //do nothing if no envs in use
-                            return;
+                    var env = context.settings && context.settings.env ? context.settings.env : {};
+                    env.builtin = true;
+                    switch(node.type) {
+                        case 'VariableDeclarator': {
+                            if(env[Finder.findESLintEnvForMember(node.id.name)]) {
+                                context.report(node.id, "Variable '${0}' shadows a global member", {0: node.id.name});
+                            }
+                            break;
                         }
-                        switch(node.type) {
-                            case 'VariableDeclarator': {
-                                if(context.settings.env[Finder.findESLintEnvForMember(node.id.name)]) {
-                                    context.report(node.id, "Variable '${0}' shadows a global member", {0: node.id.name});
+                        case 'FunctionExpression':
+                        case 'FunctionDeclaration': {
+                            node.params.forEach(function(param) {
+                                if(param.type === 'Identifier' && env[Finder.findESLintEnvForMember(param.name)]) {
+                                    context.report(param, "Parameter '${0}' shadows a global member", {0: param.name, nls:'no-shadow-global-param'});
                                 }
-                                break;
-                            }
-                            case 'FunctionExpression':
-                            case 'FunctionDeclaration': {
-                                node.params.forEach(function(param) {
-                                    if(param.type === 'Identifier' && context.settings.env[Finder.findESLintEnvForMember(param.name)]) {
-                                        context.report(param, "Parameter '${0}' shadows a global member", {0: param.name, nls:'no-shadow-global-param'});
-                                    }
-                                });
-                                break;
-                            }
+                            });
+                            break;
                         }
                     }
                 }

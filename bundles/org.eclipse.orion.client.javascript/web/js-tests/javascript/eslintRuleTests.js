@@ -3282,6 +3282,32 @@ define([
 			   assert.equal(messages[0].ruleId, RULE_ID);
 			   assert.equal(messages[0].message, "Parameter 'module' shadows a global member");
            });
+           /**
+            * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461321
+            */
+           it("should flag builtins use 1", function() {
+               var topic = "function f(Math){}";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 1);
+			   assert.equal(messages[0].ruleId, RULE_ID);
+			   assert.equal(messages[0].message, "Parameter 'Math' shadows a global member");
+           });
+           /**
+            * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461321
+            */
+           it("should flag builtins use 2", function() {
+               var topic = "var Object;";
+               var config = {rules:{}};
+               config.rules[RULE_ID] = 1;
+               
+               var messages = eslint.verify(topic, config);
+			   assert.equal(messages.length, 1);
+			   assert.equal(messages[0].ruleId, RULE_ID);
+			   assert.equal(messages[0].message, "Variable 'Object' shadows a global member");
+           });
             it("should not flag browser use wih no env set 1", function() {
                var topic = "var name = 'me';";
                var config = {rules:{}};
