@@ -821,7 +821,7 @@ textarea.parameterInput {
 }
 
 .local .setting-label {
-	width: 150px;
+	min-width: 150px;
 	text-align: right;
 	display: inline-block;
 }
