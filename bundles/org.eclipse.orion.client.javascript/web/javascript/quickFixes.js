@@ -322,7 +322,8 @@ define([
                     var item = node.elements[idx];
                     if(item === null) {
                         var end = Finder.findToken(node.range[1], ast.tokens);
-                        if(end.value === ';') {
+                        if(end.value !== ']') {
+                            //for a follow-on token we want the previous - i.e. a token immediately following the ']' that has no space
                             end = ast.tokens[end.index-1];
                         }
                         //wipe all trailing entries first using the ']' token start as the end

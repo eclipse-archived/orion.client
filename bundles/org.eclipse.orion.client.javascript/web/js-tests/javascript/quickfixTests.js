@@ -946,6 +946,54 @@ define([
 		                      rule: rule,
 		                      expected: expected});
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461449
+		 */
+		it("Test no-sparse-arrays-no-spacing-1", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 8, 
+		                    end: 22};
+		    return getFixes({buffer: 'var a = [,,\n1,\n,2,\n,,]', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461449
+		 */
+		it("Test no-sparse-arrays-no-spacing-2", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 7, 
+		                    end: 21};
+		    return getFixes({buffer: 'define([,,\n1,\n,2,\n,,],function() {});', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461449
+		 */
+		it("Test no-sparse-arrays-no-spacing-3", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 8, 
+		                    end: 22};
+		    return getFixes({buffer: 'var a = [,,\n1,\n,2,\n,,];', 
+		                      rule: rule,
+		                      expected: expected});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461449
+		 */
+		it("Test no-sparse-arrays-no-spacing-4", function() {
+		    var rule = createTestRule('no-sparse-arrays');
+		    var expected = {value: "[1, 2]",
+		                    start: 8, 
+		                    end: 22};
+		    return getFixes({buffer: 'var a = [,,\n1,\n,2,\n,,]\nvar foo = "bar";', 
+		                      rule: rule,
+		                      expected: expected});
+		});
 		it("Test no-sparse-arrays-html-1", function() {
 		    var rule = createTestRule('no-sparse-arrays');
 		    var expected = {value: "[1, 2]",
