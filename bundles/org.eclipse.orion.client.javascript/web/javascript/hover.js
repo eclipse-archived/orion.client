@@ -445,32 +445,6 @@ define([
 		},
 		
 		/**
-		 * @description Tries to find the comment for the given node. If more than one is found in the array
-		 * the last entry is considered 'attached' to the node
-		 * @function
-		 * @private
-		 * @param {Object} node The AST node
-		 * @returns {Object} The comment object from the AST or null
-		 */
-		_getCommentFromNode: function _getCommentFromNode(node) {
-		    var comments = node.leadingComments;
-		    var comment = null;
-	        if(comments && comments.length > 0) {
-	            //simple case: the node has an attaced comment, take the last comment in the leading array
-	            comment = comments[comments.length-1];
-	            if(comment.type === 'Block') {
-    	            comment.node = node;
-    	            return comment;
-	            }
-	        }
-            //we still want to show a hover for something with no doc
-            comment = Object.create(null);
-            comment.node = node;
-            comment.value = '';
-	        return comment;
-		},
-		
-		/**
 		 * @description Computes the hover for a FunctionExpression
 		 * @function
 		 * @private
@@ -481,7 +455,7 @@ define([
 		    if(node.parents) {
     	        var parent = node.parents[node.parents.length-1];
     	        if(parent.type === 'Property') {
-    	            return parent;
+    	           return parent;
     	        }
     	    }
     	    return null;

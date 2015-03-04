@@ -1621,5 +1621,48 @@ define([
 				}
 			});
 		});
+		
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461446
+		 */
+		it('test_findCommentForNode1', function() {
+		    var r = setup("/**foo*/function f() {var v = 10;}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var node = Finder.findNode(15, ast);
+				assert(node, "We should have found a function declaration AST node");
+				var comment = Finder.findCommentForNode(node);
+				assert(comment, "We should have found a comment for the func decl node");
+				assert.equal(comment.node.type, 'FunctionDeclaration', "The comment node should be the func decl");
+				assert.equal(comment.value, '*foo', 'the comment value should have been "foo"');
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461446
+		 */
+		it('test_findCommentForNode2', function() {
+		    var r = setup("/**foo*/function f() {var v = 10;/**bar*/function f() {var v = 10;}}");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var node = Finder.findNode(44, ast);
+				assert(node, "We should have found a function declaration AST node");
+				var comment = Finder.findCommentForNode(node);
+				assert(comment, "We should have found a comment for the func decl node");
+				assert.equal(comment.node.type, 'FunctionDeclaration', "The comment node should be the func decl");
+				assert.equal(comment.value, '*bar', 'the comment value should have been "bar"');
+			});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461446
+		 */
+		it('test_findCommentForNode3', function() {
+		    var r = setup("var o = {/**bar*/one: function f() {var v = 10;}};");
+			return r.astManager.getAST(r.editorContext).then(function(ast) {
+				var node = Finder.findNode(18, ast, {parents:true});
+				assert(node, "We should have found an identifier AST node");
+				var comment = Finder.findCommentForNode(node.parents.pop());
+				assert(comment, "We should have found a comment for the property node");
+				assert.equal(comment.node.type, 'Property', "The comment node should be the property");
+				assert.equal(comment.value, '*bar', 'the comment value should have been "bar"');
+			});
+		});
 	});
 });

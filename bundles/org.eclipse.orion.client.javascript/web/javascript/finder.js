@@ -1097,6 +1097,18 @@ define([
     	            comment.node = node;
     	            return comment;
 	            }
+	        } else if(node.type === 'Property') { //TODO https://github.com/jquery/esprima/issues/1071
+	            comment = findCommentForNode(node.key);
+	            if(comment) {
+	                comment.node = node;
+	                return comment;
+	            }
+	        } else if(node.type === 'FunctionDeclaration') { //TODO https://github.com/jquery/esprima/issues/1071
+	            comment = findCommentForNode(node.id);
+	            if(comment) {
+	                comment.node = node;
+	                return comment;
+	            }
 	        }
             //we still want to show a hover for something with no doc
             comment = Object.create(null);
