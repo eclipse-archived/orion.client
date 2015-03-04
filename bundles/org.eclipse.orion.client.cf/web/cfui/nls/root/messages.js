@@ -137,6 +137,9 @@ define({//Default message bundle
 	"host": "host",
 	"listAllRoutesInThe": "List all routes in the target space",
 	"noRoutesFound": "No routes found",
+	"route${0}NotFound":"Route ${0} not found",
+	"${0}SuccessfullyMappedTo${1}.${2}" : "${0} successfully mapped to ${1}.${2}",
+	"${0}SuccessfullyUnmappedFrom${1}.${2}" : "${0} successfully unmapped from ${1}.${2}",
 	"created${0}At${1}": "Created ${0} at ${1}",
 	"createAUrlRouteIn": "Create a url route in a space for later use",
 	"hostname": "Hostname",
@@ -204,7 +207,4 @@ define({//Default message bundle
 	"createNew": "Create New",
 	"manifestOverride": "Yellow boxes indicate modified fields, which will override manifest file settings.",
 	"noManifest": "No manifest found at /manifest.yml",
-	"overwriteTitle": "Overwrite Launch Configuration",
-	"overwriteConfirm": "You are about to overwrite launch configuration '${0}'. Proceed?",
-	"nameTaken": "File exists: ${0}. Delete the file and try again."
 });

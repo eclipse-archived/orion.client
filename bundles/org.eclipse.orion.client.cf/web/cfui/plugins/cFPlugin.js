@@ -584,6 +584,120 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 		}
 	);
 	
+	/** Add cf map-route command **/
+	var mapRouteImpl = {
+		callback: function(args, context) {
+			return cFService.getApp(null, args.app, context.cwd).then(
+				function(result){
+					if (!result) {
+						return messages["applicationNotFound"];
+					}
+					var appId = result.guid;
+					return cFService.getRoutes(null).then(
+						function(result) {
+							if (!result){
+								return messages["noRoutesFound"];
+							}
+							var routeId;
+							result.Routes.forEach(function(item) {
+								if(item.DomainName == args.domain && item.Host == args.hostname){
+									routeId = item.Guid;
+								}	
+							});
+							if(!routeId){
+								return i18Util.formatMessage(messages["route${0}NotFound"], args.hostname + "." + args.domain);
+							}
+							return cFService.mapRoute(null, appId, routeId).then(
+								function(result){
+									return i18Util.formatMessage(messages["${0}SuccessfullyMappedTo${1}.${2}"], args.app, args.hostname, args.domain);
+								}
+							);
+						}	
+					);
+				}
+			);
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		mapRouteImpl, {
+			name: "cfo map-route",
+			description: messages["addTheRouteToAn"],
+			parameters: [{
+				name: "app",
+				type: "string",
+				description: messages["applicationName:"]
+			},{
+				name: "domain",
+				type: "string",
+				description: messages["domain"]
+			}, {
+				name: "hostname",
+				type: "string",
+				description: messages["hostname"]
+			}]
+		}
+	);
+
+	/** Add cf unmap-route command **/
+	var unmapRouteImpl = {
+		callback: function(args, context) {	 
+			return	cFService.getApp(null, args.app, context.cwd).then(
+				function(result){
+					if (!result) {
+						return messages["applicationNotFound"];
+					}
+					var appId = result.guid;
+					return cFService.getRoutes(null).then(
+						function(result) {
+							if (!result){
+								 return messages["noRoutesFound"];
+							}
+							var routeId;
+							result.Routes.forEach(function(item) {
+								if(item.DomainName == args.domain && item.Host == args.hostname){
+									if(item.Apps[0] && item.Apps[0].Name==args.app){
+										routeId = item.Guid;
+									}
+								}
+							});
+							if(!routeId){
+								return i18Util.formatMessage(messages["route${0}NotFound"], args.hostname + "." + args.domain);
+							}
+							return cFService.unmapRoute(null, appId, routeId).then(
+								function(result){
+									return i18Util.formatMessage(messages["${0}SuccessfullyUnmappedFrom${1}.${2}"], args.app, args.hostname, args.domain);
+								}
+							);
+						}	
+					);
+				}
+			);
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		unmapRouteImpl, {
+			name: "cfo unmap-route",
+			description: messages["removeTheRouteFromAn"],
+			parameters: [{
+				name: "app",
+				type: "string",
+				description: messages["applicationName:"]
+			},{
+				name: "domain",
+				type: "string",
+				description: messages["domain"]
+			}, {
+				name: "hostname",
+				type: "string",
+				description: messages["hostname"]
+			}]
+		}
+	);
+	
 	/** Add cf logs command **/
 	var appLogsImpl = {
 		callback: function(args, context) {
