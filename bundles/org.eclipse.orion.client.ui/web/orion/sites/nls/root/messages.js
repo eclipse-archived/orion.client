@@ -28,7 +28,6 @@ define({//Default message bundle
 	"SelectRequiredFolders": "Locate the following required folders in your workspace.",
 	"LocateFolderTitle": "Locate ${0}",
 	"FolderPrompt": "${0} (${1}):",
-	"orionClientLabel": "Orion client repository",
 	"Loading...": "Loading...",
 	"Add": "Add",
 	"Add a directory mapping to the site configuration": "Add a directory mapping to the site configuration",

@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2010, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
@@ -69,8 +69,8 @@ objects.mixin(ConvertToSelfHostingDialog.prototype, {
 			var li = document.createElement('li'); //$NON-NLS-0$
 			li.className = 'msg pad2'; //$NON-NLS-0$
 			var label = document.createElement('div'); //$NON-NLS-0$
-			//label.textContent = i18nUtil.formatMessage(messages['FolderPrompt'], folder.name, folder.label); //$NON-NLS-0$
-			label.textContent = messages['FolderPrompt']; //$NON-NLS-0$
+			label.textContent = i18nUtil.formatMessage(messages['FolderPrompt'], folder.name, folder.label); //$NON-NLS-0$
+			// label.textContent = messages['FolderPrompt']; //$NON-NLS-0$
 			var nameNode = document.createElement('span'); //$NON-NLS-0$
 			nameNode.className = 'folderName'; //$NON-NLS-0$
 			nameNode.textContent = folder.name;
@@ -162,7 +162,7 @@ var SiteEditor = function(options, parentNode) {
 	this._commandService = this.options.commandService;
 	this._statusService = this.options.statusService;
 	this._progressService = this.options.progressService;
-	
+
 	this._commandsContainer = this.options.commandsContainer;
 
 	if (this.options.location) {
@@ -175,10 +175,10 @@ EventTarget.attach(SiteEditor.prototype);
 objects.mixin(SiteEditor.prototype, {
 	/** SiteConfiguration */
 	_siteConfiguration: null,
-	
+
 	/** Array */
 	_modelListeners: null,
-	
+
 	/** MappingsTable */
 	mappings: null,
 
@@ -187,7 +187,7 @@ objects.mixin(SiteEditor.prototype, {
 	_isSelfHostingSite: false,
 
 	_isDirty: false,
-	
+
 	_autoSaveTimer: null,
 
 	show: function() {
@@ -255,7 +255,7 @@ objects.mixin(SiteEditor.prototype, {
 
 		this._autoSaveTimer = setTimeout(this.autoSave.bind(this), AUTOSAVE_INTERVAL);
 	},
-	
+
 	checkOptions: function(options, names) {
 		for (var i=0; i < names.length; i++) {
 			if (typeof options[names[i]] === "undefined") { //$NON-NLS-0$
@@ -263,9 +263,9 @@ objects.mixin(SiteEditor.prototype, {
 			}
 		}
 	},
-	
+
 	/**
-	 * @param {Array} proposals 
+	 * @param {Array} proposals
 	 * @param {Array|Object} items
 	 * @param {Object} userData
 	 * @returns {Array}
@@ -358,7 +358,7 @@ objects.mixin(SiteEditor.prototype, {
 		});
 		dialog.show();
 	},
-	
+
 	/**
 	 * Loads site configuration from a URL into the editor.
 	 * @param {String} location URL of the site configuration to load.
@@ -416,7 +416,7 @@ objects.mixin(SiteEditor.prototype, {
 		this._isDirty = value;
 		this.dispatchEvent({type: "dirty", value: value}); //$NON-NLS-0$
 	},
-	
+
 	isDirty: function() {
 		return this._isDirty;
 	},
@@ -455,9 +455,9 @@ objects.mixin(SiteEditor.prototype, {
 				content: '<div id="mappingsNode"/>', //$NON-NLS-0$
 				canHide: true
 			});
-			
+
 			this.mappings = new mSiteMappingsTable.MappingsTable({serviceRegistry: this.serviceRegistry,
-					siteClient: this._siteClient, fileClient: this._fileClient, commandRegistry: this._commandService, selection: null, 
+					siteClient: this._siteClient, fileClient: this._fileClient, commandRegistry: this._commandService, selection: null,
 					parentId: "mappingsNode", siteConfiguration: this._siteConfiguration //$NON-NLS-0$
 				});
 		} else {
@@ -482,7 +482,7 @@ objects.mixin(SiteEditor.prototype, {
 			this._attachListeners(this._siteConfiguration);
 		}.bind(this), 0);
 	},
-	
+
 	/**
 	 * Hook up listeners that perform form widget -> model updates.
 	 * @param site {SiteConfiguration}
@@ -490,7 +490,7 @@ objects.mixin(SiteEditor.prototype, {
 	_attachListeners: function(site) {
 		this._detachListeners();
 		this._modelListeners = this._modelListeners || [];
-		
+
 		var editor = this;
 		function bindText(widget, modelField) {
 			function commitWidgetValue(event) {
@@ -503,7 +503,7 @@ objects.mixin(SiteEditor.prototype, {
 			widget.addEventListener("input", commitWidgetValue); //$NON-NLS-0$
 			editor._modelListeners.push({target: widget, type: "input", listener: commitWidgetValue}); //$NON-NLS-0$
 		}
-		
+
 		bindText(this.name, messages["Name"]);
 		bindText(this.hostHint, messages["HostHint"]);
 
@@ -513,7 +513,7 @@ objects.mixin(SiteEditor.prototype, {
 		this.mappings.addEventListener("dirty", dirtyListener); //$NON-NLS-0$
 		this._modelListeners.push({target: this.mappings, type: "dirty", listener: dirtyListener}); //$NON-NLS-0$
 	},
-	
+
 	_detachListeners: function() {
 		if (this._modelListeners) {
 			for (var i=0; i < this._modelListeners.length; i++) {
@@ -523,14 +523,14 @@ objects.mixin(SiteEditor.prototype, {
 			this._modelListeners.splice(0);
 		}
 	},
-	
+
 	/**
 	 * @returns {SiteConfiguration} The site configuration that is being edited.
 	 */
 	getSiteConfiguration: function() {
 		return this._siteConfiguration;
 	},
-	
+
 	getResource: function() {
 		return this._siteConfiguration && this._siteConfiguration.Location;
 	},
@@ -575,16 +575,16 @@ objects.mixin(SiteEditor.prototype, {
 		deferred.then(this._onSuccess.bind(this), this._onError.bind(this));
 		this.progressService.showWhile(deferred, msg);
 	},
-	
+
 	_onSuccess: function(deferred) {
 		this.onSuccess(deferred);
 	},
-	
+
 	_onError: function(deferred) {
 		this._statusService.setErrorMessage(deferred);
 		this.onError(deferred);
 	},
-	
+
 	/**
 	 * @event success
 	 * Clients can listen for an "success" event to receive notifications about server calls that succeeded.
@@ -593,7 +593,7 @@ objects.mixin(SiteEditor.prototype, {
 	onSuccess: function(deferred) {
 		this.dispatchEvent({type: "success", deferred: deferred}); //$NON-NLS-0$
 	},
-		
+
 	/**
 	 * @event error
 	 * Clients can listen for an "error" event to receive notifications about server calls that failed.
