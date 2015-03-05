@@ -399,6 +399,7 @@ module.exports = (function() {
                 raw: true,
                 tokens: true,
                 comment: true,
+                tolerant: true,  //ORION
                 attachComment: true
             });
         } catch (ex) {

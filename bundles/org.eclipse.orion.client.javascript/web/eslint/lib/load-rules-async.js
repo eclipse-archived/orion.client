@@ -597,12 +597,14 @@ define([
             rule: function(context) {
                 return {
                     'MemberExpression': function(node) {
-                        if(node.computed) {
-                            if(node.property.value === '__iterator__') {
-                                context.report(node.property, 'Discouraged __iterator__ property use.');
+                        if(node.property != null) {
+                            if(node.computed) {
+                                if(node.property.value === '__iterator__') {
+                                    context.report(node.property, 'Discouraged __iterator__ property use.');
+                                }
+                            } else if(node.property.name === '__iterator__') {
+                                context.report(node.property, 'Discouraged __iterator__ property use.');    
                             }
-                        } else if(node.property.name === '__iterator__') {
-                            context.report(node.property, 'Discouraged __iterator__ property use.');    
                         }
                     }
                 };
