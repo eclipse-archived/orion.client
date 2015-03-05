@@ -73,7 +73,7 @@ define([
 		return {
 			provided: moduleName,
 			types: globalsAndTypes.types
-		}
+		};
 	}
 
 	/**
