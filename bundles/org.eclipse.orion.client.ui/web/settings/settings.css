@@ -605,6 +605,11 @@ div.page section:last-child {
     top: 0px;
 }
 
+.colorpicker-input-ie {
+	float: right;
+	width: 60px;
+}
+
 _:-moz-tree-row(hover), .colorpicker-input { /* Firefox  HACK */
 		width:19px;
 		height: 14px;
