@@ -81,8 +81,7 @@ define([
 					});
 				}
 				
-				/* IE11 does not support "type=color" input elements, which are needed on the theme settings page */
-				if (!util.isIE && (categories.showThemeSettings === undefined || categories.showThemeSettings)) {
+				if (categories.showThemeSettings === undefined || categories.showThemeSettings) {
 					_self.settingsCategories.push({
 						id: "themeSettings", //$NON-NLS-0$
 						textContent: messages.Theme,

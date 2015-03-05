@@ -273,6 +273,9 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 	//generates the html structure for list of scopes
 	function generateScopeList(){
 		var htmlString = "";
+        var isIE11 = navigator.userAgent.match(/Trident.*rv\:11\./) !== null ? true : false;
+        var ieClass = isIE11 ? "-ie" : "";
+
 		for (var i = 0; i < scopeList.length; i++){
 			if (scopeList[i].id === "editorThemeFontSize"){
 				htmlString = htmlString + "<li><span>" + scopeList[i].display + "</span><select id='editorThemeFontSize'>";
@@ -285,7 +288,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 				htmlString += "</select></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			else
-				htmlString = htmlString + "<li><span>" + scopeList[i].display + "</span><input id='"+scopeList[i].id+"' class='colorpicker-input' type='color' value='" + scopeList[i].value + "'></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				htmlString = htmlString + "<li><span>" + scopeList[i].display + "</span><input id='"+scopeList[i].id+"' class='colorpicker-input" + ieClass + "' type='color' value='" + scopeList[i].value + "'></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		return htmlString;
 	}
