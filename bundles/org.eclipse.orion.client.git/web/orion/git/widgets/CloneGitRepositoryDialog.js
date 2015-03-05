@@ -72,8 +72,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 
 		this.okbutton = this.$buttonContainer.querySelectorAll("button")[0]; //$NON-NLS-0$
 		if (!this.advancedOnly) {
-			this.okbutton.disabled = true;
-			this.okbutton.classList.add("disabled"); //$NON-NLS-0$
+			this._checkGitUrl();
 		}
 	};
 
@@ -83,14 +82,9 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 		if (this.url) {
 			this.$gitUrl.value = this.url;
 		}
-		this.$gitUrl.addEventListener("input", function() { //$NON-NLS-0$
-			var invalid = /^\s*$/.test(that.$gitUrl.value);
-			that.okbutton.disabled = invalid;
-			var cl = that.okbutton.classList;
-			if (invalid)
-				cl.add("disabled"); //$NON-NLS-0$
-			else
-				cl.remove("disabled"); //$NON-NLS-0$
+		
+		this.$gitUrl.addEventListener("input", function(evt) { //$NON-NLS-0$
+			that._checkGitUrl();
 		});
 
 		if (this.advancedOnly) {
@@ -128,6 +122,16 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 		if (this.alwaysShowAdvanced) {
 			this._showAdvanced();
 		}
+	};
+	
+	CloneGitRepositoryDialog.prototype._checkGitUrl = function() {
+		var invalid = /^\s*$/.test(this.$gitUrl.value);
+		this.okbutton.disabled = invalid;
+		var cl = this.okbutton.classList;
+		if (invalid)
+			cl.add("disabled"); //$NON-NLS-0$
+		else
+			cl.remove("disabled"); //$NON-NLS-0$
 	};
 
 	CloneGitRepositoryDialog.prototype._execute = function() {
