@@ -327,6 +327,33 @@ define([
 			var input = this.getInput();
 			this.reportStatus(messages['Saving...']);
 
+			if (!this._saveEventLogged) {
+				var label = "(none)"; //$NON-NLS-0$
+				if (this._contentType) {
+					label = this._contentType.id;
+				} else if (this._fileMetadata) {
+					var index = this._fileMetadata.Location.lastIndexOf("."); //$NON-NLS-0$
+					if (index >= 0) {
+						label = "unregistered: " + this._fileMetadata.Location.substring(index); //$NON-NLS-0$
+					} else {
+						index = this._fileMetadata.Location.lastIndexOf("/"); //$NON-NLS-0$
+						var name = this._fileMetadata.Location.substring(index + 1);
+						switch (name) {
+							case "AUTHORS": //$NON-NLS-0$
+							case "config": //$NON-NLS-0$
+							case "LICENSE": //$NON-NLS-0$
+							case "make": //$NON-NLS-0$
+							case "Makefile": { //$NON-NLS-0$ 
+								label = "unregistered: " + name; //$NON-NLS-0$
+								break;
+							}
+						}
+					}
+				}
+				mMetrics.logEvent("editor", "save", label); //$NON-NLS-1$ //$NON-NLS-0$
+				this._saveEventLogged = true;
+			}
+
 			this.dispatchEvent({ type: "Saving", inputManager: this}); //$NON-NLS-0$
 
 			var contents = editor.getText();
@@ -578,6 +605,7 @@ define([
 				this.processParameters(input);
 			}
 
+			this._saveEventLogged = false;
 			mMetrics.logPageLoadTiming("interactive", window.location.pathname); //$NON-NLS-0$
 		}
 	});
