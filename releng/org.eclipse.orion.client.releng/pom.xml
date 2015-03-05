@@ -78,7 +78,7 @@
 									<org>${tests.org}</org>
 									<space>${tests.space}</space>
 									<url>${tests.route}</url>
-									<memory>1024</memory>
+									<memory>512</memory>
 									<instances>1</instances>
 									<path>${project.build.directory}/orion-test-app.zip</path>
 									<command>node runtests.js</command>
