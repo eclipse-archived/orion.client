@@ -498,7 +498,26 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, util, jsExample, ht
 	ThemeBuilder.prototype.saveTheme = saveTheme;
 	
 	function exportTheme() {
-		window.alert(JSON.stringify(currentTheme));
+		var themeString = JSON.stringify(currentTheme);
+
+		if (window.navigator.msSaveOrOpenBlob) { // Save blob from IE
+			var blobObject = new Blob([themeString]);
+			window.navigator.msSaveOrOpenBlob(blobObject, currentTheme.name);
+		} else { // Create a data-uri and save contents of it for other browsers
+			var encodedUri = encodeURIComponent(themeString),
+				link = document.createElement("a");
+
+			// Set the attributes for the link and append it (Firefox requires the element to actually be in the DOM)
+			link.setAttribute("href", "data:application/other;charset=utf-8," + encodedUri);
+			link.setAttribute("download", currentTheme.name + ".json");
+			document.body.appendChild(link);
+
+			// Simulate the click event
+			link.click();
+
+			// Remove the element from the DOM
+			link.remove();
+		}
 	}
 	ThemeBuilder.prototype.exportTheme = exportTheme;
 
