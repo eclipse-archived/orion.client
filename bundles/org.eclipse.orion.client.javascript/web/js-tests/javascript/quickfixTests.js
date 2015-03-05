@@ -696,6 +696,18 @@ define([
 		                      rule: rule,
 		                      expected: expected});
 		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461462
+		 */
+		it("Test no-unused-params-existing-doc-1", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "* @callback\n",
+		                    start: 25, 
+		                    end: 25};
+		    return getFixes({buffer: 'var f = { /**\n *@see\n *\n */\none: function(p, p2, p3) {p(); p2();}};', 
+		                      rule: rule,
+		                      expected: expected});
+		});
 		it("Test no-unused-params-html-1", function() {
 		    var rule = createTestRule('no-unused-params');
 		    var expected = {value: "",
@@ -742,6 +754,19 @@ define([
 		                    start: 30, 
 		                    end: 30};
 		    return getFixes({buffer: '<html><head><script>var f = { one: function(p, p2, p3) {p(); p2();}};</script></head></html>', 
+		                      rule: rule,
+		                      expected: expected,
+		                      contentType: 'text/html'});
+		});
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461462
+		 */
+		it("Test no-unused-params-html-existing-doc-1", function() {
+		    var rule = createTestRule('no-unused-params');
+		    var expected = {value: "* @callback",
+		                    start: 45, 
+		                    end: 45};
+		    return getFixes({buffer: '<html><head><script>var f = { /**\n *@see\n *\n */\none: function(p, p2, p3) {p(); p2();}};</script></head></html>', 
 		                      rule: rule,
 		                      expected: expected,
 		                      contentType: 'text/html'});
