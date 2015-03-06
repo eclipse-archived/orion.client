@@ -25,7 +25,6 @@ define([
 	'orion/settings/ui/PluginSettings',
 	'orion/widgets/themes/ThemePreferences',
 	'orion/widgets/themes/editor/ThemeData',
-	'orion/widgets/themes/container/ThemeData',
 	'orion/widgets/settings/SplitSelectionLayout',
 	'orion/widgets/plugin/PluginList',
 	'orion/widgets/settings/UserSettings',
@@ -33,13 +32,12 @@ define([
 	'orion/widgets/settings/EditorSettings',
 	'orion/widgets/settings/ThemeSettings',
 	'orion/editorPreferences',
-	'orion/util',
 	'orion/metrics'
 ], function(messages, Deferred, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
-		ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings,
+		ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, SplitSelectionLayout, PluginList, UserSettings,
 		GitSettings,
 		EditorSettings, ThemeSettings, mEditorPreferences,
-		util, mMetrics) {
+		mMetrics) {
 
 	/**
 	 * @param {Object} options

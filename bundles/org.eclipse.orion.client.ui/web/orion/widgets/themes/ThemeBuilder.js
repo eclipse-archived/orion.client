@@ -14,11 +14,12 @@ define(['i18n!orion/settings/nls/messages',
 		'orion/commandRegistry', 
 		'orion/webui/littlelib', 
 		'orion/widgets/themes/editor/editorSetup',
+		'orion/util',
 		'text!examples/js-demo.js',
 		'text!examples/html-demo.html',
 		'text!examples/css-demo.css',
 		'text!examples/java-demo.java'],
-function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExample, cssExample, javaExample) {
+function(messages, mCommands, mCommandRegistry, lib, mSetup, util, jsExample, htmlExample, cssExample, javaExample) {
 	
 	var editorLanguage, editorTheme, originalTheme, currentTheme, revertBtn, deleteBtn ,saveBtn, themeNameInput;
 	var protectedThemes = [];
@@ -273,8 +274,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, jsExample, htmlExam
 	//generates the html structure for list of scopes
 	function generateScopeList(){
 		var htmlString = "";
-        var isIE11 = navigator.userAgent.match(/Trident.*rv\:11\./) !== null ? true : false;
-        var ieClass = isIE11 ? "-ie" : "";
+		var ieClass = util.isIE ? "-ie" : ""; //$NON-NLS-0$
 
 		for (var i = 0; i < scopeList.length; i++){
 			if (scopeList[i].id === "editorThemeFontSize"){
