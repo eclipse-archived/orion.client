@@ -1538,7 +1538,7 @@ define([
 		it('obj prop recovery - broken property 1', function() {
 			var data = {
 				source: 'require({, paths: {foo/bar": "foo/bar",}});',
-				nodes: [{"type":"ExpressionStatement","range":[0,9]},{"type":"ExpressionStatement","range":[9,11]},{"type":"LabeledStatement","range":[11,43]},{"type":"Identifier","name":"paths","range":[11,16]},{"type":"BlockStatement","range":[18,43]},{"type":"ExpressionStatement","range":[19,26]},{"type":"BinaryExpression","range":[19,26]},{"type":"Identifier","name":"foo","range":[19,22]},{"type":"Identifier","name":"bar","range":[23,26]},{"type":"ExpressionStatement","range":[26,30]},{"type":"Literal","range":[26,30],"value":": "},{"type":"ExpressionStatement","range":[30,37]},{"type":"BinaryExpression","range":[30,37]},{"type":"Identifier","name":"foo","range":[30,33]},{"type":"Identifier","name":"bar","range":[34,37]},{"type":"ExpressionStatement","range":[37,43]},{"type":"Literal","range":[37,43],"value":",}});"}],
+				nodes: [{"type":"ExpressionStatement","range":[0,9]},{"type":"ExpressionStatement","range":[9,11]},{"type":"LabeledStatement","range":[11,43]},{"type":"Identifier","name":"paths","range":[11,16]},{"type":"BlockStatement","range":[18,43]},{"type":"ExpressionStatement","range":[19,26]},{"type":"BinaryExpression","range":[19,26]},{"type":"Identifier","name":"foo","range":[19,22]},{"type":"Identifier","name":"bar","range":[23,26]},{"type":"ExpressionStatement","range":[26,30]},{"type":"Literal","range":[26,30],"value":": "},{"type":"ExpressionStatement","range":[30,37]},{"type":"BinaryExpression","range":[30,37]},{"type":"Identifier","name":"foo","range":[30,33]},{"type":"Identifier","name":"bar","range":[34,37]}],
 				tokens: [{"type":"Identifier","range":[0,7],"value":"require"},{"type":"Punctuator","range":[7,8],"value":"("},{"type":"Punctuator","range":[8,9],"value":"{"},{"type":"Punctuator","range":[9,10],"value":","},{"type":"Identifier","range":[11,16],"value":"paths"},{"type":"Punctuator","range":[16,17],"value":":"},{"type":"Punctuator","range":[18,19],"value":"{"},{"type":"Identifier","range":[19,22],"value":"foo"},{"type":"Punctuator","range":[22,23],"value":"/"},{"type":"Identifier","range":[23,26],"value":"bar"},{"type":"String","range":[26,30],"value":"\": \""},{"type":"Identifier","range":[30,33],"value":"foo"},{"type":"Punctuator","range":[33,34],"value":"/"},{"type":"Identifier","range":[34,37],"value":"bar"},{"type":"String","range":[37,43],"value":"\",}});"}],
 				errors: [{"lineNumber":1,"index":9,"message":"Unexpected token ,","token":","},{"lineNumber":1,"index":11,"message":"Unexpected identifier","token":"paths"},{"lineNumber":1,"index":26,"message":"Unexpected string","token":": "},{"lineNumber":1,"index":30,"message":"Unexpected identifier","token":"foo"},{"lineNumber":1,"index":37,"message":"Unexpected string","token":",}});"},{"lineNumber":1,"index":43,"message":"Unexpected end of input"}],
 				comments: []
@@ -1784,7 +1784,22 @@ define([
 				errors: [{"lineNumber":1,"index":26,"message":"Unexpected token }","token":"}"},{"lineNumber":1,"index":27,"message":"Unexpected end of input"}]
 			});
 		});
-		
+		/**
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=461608
+		 */
+		it('no infinite loop 3', function() {
+		    if(Util.isWindows) {
+    			runTest({
+    				source: "(function() {foo.bar = function() {{\r\n/Note that template's\r\n}})();",
+    				nodes: [{"type":"ExpressionStatement","range":[0,67]},{"type":"CallExpression","range":[0,66]},{"type":"FunctionExpression","range":[1,63]},{"type":"BlockStatement","range":[12,63]},{"type":"ExpressionStatement","range":[13,62]},{"type":"AssignmentExpression","range":[13,62]},{"type":"MemberExpression","range":[13,20]},{"type":"Identifier","name":"foo","range":[13,16]},{"type":"Identifier","name":"bar","range":[17,20]},{"type":"FunctionExpression","range":[23,62]},{"type":"BlockStatement","range":[34,62]},{"type":"BlockStatement","range":[35,60]},{"type":"ExpressionStatement","range":[38,38]}],
+    				tokens: [{"type":"Punctuator","range":[0,1],"value":"("},{"type":"Keyword","range":[1,9],"value":"function"},{"type":"Punctuator","range":[9,10],"value":"("},{"type":"Punctuator","range":[10,11],"value":")"},{"type":"Punctuator","range":[12,13],"value":"{"},{"type":"Identifier","range":[13,16],"value":"foo"},{"type":"Punctuator","range":[16,17],"value":"."},{"type":"Identifier","range":[17,20],"value":"bar"},{"type":"Punctuator","range":[21,22],"value":"="},{"type":"Keyword","range":[23,31],"value":"function"},{"type":"Punctuator","range":[31,32],"value":"("},{"type":"Punctuator","range":[32,33],"value":")"},{"type":"Punctuator","range":[34,35],"value":"{"},{"type":"Punctuator","range":[35,36],"value":"{"},{"type":"Punctuator","range":[38,39],"value":"/"},{"type":"Punctuator","range":[61,62],"value":"}"},{"type":"Punctuator","range":[62,63],"value":"}"},{"type":"Punctuator","range":[63,64],"value":")"},{"type":"Punctuator","range":[64,65],"value":"("},{"type":"Punctuator","range":[65,66],"value":")"},{"type":"Punctuator","range":[66,67],"value":";"}],
+    				errors: [{"lineNumber":2,"index":60,"message":"Invalid regular expression: missing /"},{"lineNumber":2,"index":38,"message":"Unexpected token /","token":"/"}],
+    				comments: []
+    			});
+			} else {
+			    //TODO make *nix test
+			}
+		});
 		/**
 		 * Unclosed doc tag recovery
 		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=440582

@@ -3004,15 +3004,18 @@ parseStatement: true, parseSourceElement: true */
 
     function parseStatementList() {
         var element, list = [];
-        while (startIndex < length) {
-            if (match('}')) {
+        var strt = index;
+         while (startIndex < length) {
+             if (match('}')) {
+                 break;
+             }
+             //ORION
+             element = parseSourceElement();
+            if (typeof element === 'undefined' || strt === index) {
                 break;
-            }
-            //ORION
-            element = parseSourceElement();
-            if(element) {
-                list.push(element);
-            }
+             }
+            list.push(element);
+            strt = index;
         }
 
         return list;
