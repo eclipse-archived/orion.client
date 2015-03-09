@@ -10,6 +10,7 @@
  ******************************************************************************/
 
 /*eslint-env browser, amd, mocha*/
+/*eslint no-console:0*/
 /*global console*/
 define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(mSetup, Deferred, util) {
 	function log() {
@@ -93,24 +94,23 @@ define(['examples/editor/demoSetup', 'orion/Deferred', 'orion/util'], function(m
 			document.getElementById("mocha").classList.remove("hide");
 		});
 
-		describe("Page", function() {
-			var count = 40;
-			it("PageDown", function() {
-				return doAction("pageDown", count);
-			});
-			it("SelectPageDown", function() {
-				return doAction("selectPageDown", count);
-			});
-			it("PageUp", function() {
-				return doAction("pageUp", count);
-			});
-			it("SelectPageUp", function() {
-				return doAction("selectPageUp", count);
-			});
-		});
-
 		// This category is skipped during the nightly build since it's prone to timeouts in virtualized environments.
 		describe_maybe("intense tests", function() {
+			describe("Page", function() {
+				var count = 40;
+				it("PageDown", function() {
+					return doAction("pageDown", count);
+				});
+				it("SelectPageDown", function() {
+					return doAction("selectPageDown", count);
+				});
+				it("PageUp", function() {
+					return doAction("pageUp", count);
+				});
+				it("SelectPageUp", function() {
+					return doAction("selectPageUp", count);
+				});
+			});
 			describe("Line", function() {
 				var count = 300;
 				it("LineDown", function() {
