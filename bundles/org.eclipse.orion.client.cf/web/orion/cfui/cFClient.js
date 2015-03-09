@@ -242,7 +242,22 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 
 				return this._xhrV1("GET", url);
 			},
-			
+
+			getRoute: function(target, domainName, hostName) {
+				var routeObj = {
+						DomainName: domainName,
+						Host: hostName
+				};
+
+				var url = require.toUrl("cfapi/routes");
+				url += "?Route=" + encodeURIComponent(JSON.stringify(routeObj));
+
+				if (target)
+					url += "&Target=" + JSON.stringify(target);
+
+				return this._xhrV1("GET", url);
+			},
+
 			getDomains: function(target) {
 				var url = require.toUrl("cfapi/domains");
 
