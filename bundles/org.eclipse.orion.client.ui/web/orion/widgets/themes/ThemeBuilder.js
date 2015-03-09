@@ -214,18 +214,74 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, util, jsExample, ht
 			document.getElementById("scopeOriginal").classList.remove('hide');//$NON-NLS-1$ //$NON-NLS-0$
 		}
 	}
-	
-	function updateScopeValue(id, val){
-		for(var i = 0; i < scopeList.length; i++){
-			if (scopeList[i].id === id){
-				scopeList[i].value = val;
-				for (var l = 0; l < scopeList[i].objPath.length; l++){
-					setValueToPath(currentTheme, scopeList[i].objPath[l], scopeList[i].value);
-				}
-				mSetup.processTheme("editorTheme", currentTheme); //$NON-NLS-0$
-			}
+
+	function namedToHex(val) {
+		var lowerCaseVal = val.toLowerCase();
+
+		switch(lowerCaseVal) {
+			case "aqua":
+				return "#00FFFF";
+			case "black":
+				return "#000000";
+			case "blue":
+				return "#0000FF";
+			case "fuchsia":
+				return "#FF00FF";
+			case "gray":
+				return "#808080";
+			case "green":
+				return "#008000";
+			case "lime":
+				return "#00FF00";
+			case "maroon":
+				return "#800000";
+			case "navy":
+				return "#000080";
+			case "olive":
+				return "#808000";
+			case "orange":
+				return "#FFA500";
+			case "purple":
+				return "#800080";
+			case "red":
+				return "#FF0000";
+			case "silver":
+				return "#C0C0C0";
+			case "teal":
+				return "#008080";
+			case "white":
+				return "#FFFFFF";
+			case "yellow":
+				return "#FFFF00";
+			default:
+				return val;
 		}
-		checkForChanges();
+
+	}
+
+	function updateScopeValue(id, val){
+		var val = namedToHex(val);
+		var isHexColor = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(val);
+
+		if (isHexColor) {
+			for(var i = 0; i < scopeList.length; i++){
+				if (scopeList[i].id === id){
+					scopeList[i].value = val;
+					for (var l = 0; l < scopeList[i].objPath.length; l++){
+						setValueToPath(currentTheme, scopeList[i].objPath[l], scopeList[i].value);
+					}
+					mSetup.processTheme("editorTheme", currentTheme); //$NON-NLS-0$
+				}
+			}
+			checkForChanges();
+		} else {
+			document.getElementById(id).value = ""; //$NON-NLS-0$
+			window.setTimeout(function () { //IE hack, focusing doesn't happen otherwise
+				document.getElementById(id).focus();
+			}, 0);
+
+			window.alert("HEX colours or HTML named colours only, please.");
+		}
 	}
 	ThemeBuilder.prototype.updateScopeValue = updateScopeValue;
 	
