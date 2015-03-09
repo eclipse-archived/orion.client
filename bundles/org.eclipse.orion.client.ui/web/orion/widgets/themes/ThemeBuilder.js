@@ -502,7 +502,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, util, jsExample, ht
 
 		if (window.navigator.msSaveOrOpenBlob) { // Save blob from IE
 			var blobObject = new Blob([themeString]);
-			window.navigator.msSaveOrOpenBlob(blobObject, currentTheme.name);
+			window.navigator.msSaveOrOpenBlob(blobObject, currentTheme.name+".json");
 		} else { // Create a data-uri and save contents of it for other browsers
 			var encodedUri = encodeURIComponent(themeString),
 				link = document.createElement("a");
