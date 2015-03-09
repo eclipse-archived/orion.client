@@ -144,8 +144,6 @@ define([], function() {
         "plugins/lowerPlugin.html"	: {source: "org.eclipse.orion.client.ui/web/plugins/lowerPlugin.html"},
         "plugins/nonnlsPlugin.html"	: {source: "org.eclipse.orion.client.ui/web/plugins/nonnlsPlugin.html"},
         "plugins/nonnlsPlugin.js"		: {source: "org.eclipse.orion.client.ui/web/plugins/nonnlsPlugin.js"},
-        "plugins/npmPlugin.html"		: {source: "org.eclipse.orion.client.ui/web/plugins/npmPlugin.html"},
-        "plugins/npmPlugin.js"		: {source: "org.eclipse.orion.client.ui/web/plugins/npmPlugin.js"},
         "plugins/pageLinksPlugin.html"	: {source: "org.eclipse.orion.client.ui/web/plugins/pageLinksPlugin.html"},
         "plugins/pageLinksPlugin.js"	: {source: "org.eclipse.orion.client.ui/web/plugins/pageLinksPlugin.js"},
         "plugins/preferencesPlugin.html"	: {source: "org.eclipse.orion.client.ui/web/plugins/preferencesPlugin.html"},

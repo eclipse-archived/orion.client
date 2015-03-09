@@ -129,7 +129,6 @@
             { name: "plugins/languages/xquery/xqueryPlugin" },
             { name: "plugins/languages/yaml/yamlPlugin" },
             { name: "plugins/metrics/googleAnalyticsPlugin" },
-            { name: "plugins/npmPlugin" },
             { name: "plugins/pageLinksPlugin" },
             { name: "plugins/preferencesPlugin" },
             { name: "plugins/site/sitePlugin" },

@@ -60,7 +60,6 @@
     "LoginWindow",
     "logs",
     "manageOpenids",
-    "npmPlugin",
     "preferencesPlugin",
     "site",
     "sitePlugin",
