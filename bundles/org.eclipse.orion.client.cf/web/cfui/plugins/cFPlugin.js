@@ -1,6 +1,6 @@
 /*******************************************************************************
-  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * @license
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -593,18 +593,11 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 						return messages["applicationNotFound"];
 					}
 					var appId = result.guid;
-					return cFService.getRoutes(null).then(
+					return cFService.getRoute(null, args.domain, args.hostname).then(
 						function(result) {
-							if (!result){
-								return messages["noRoutesFound"];
-							}
 							var routeId;
-							result.Routes.forEach(function(item) {
-								if(item.DomainName == args.domain && item.Host == args.hostname){
-									routeId = item.Guid;
-								}
-							});
-							if(!routeId){
+
+							if (!result || !result.Routes || result.Routes.length === 0){
 								return cFService.createRoute(null, args.domain, args.hostname).then(
 									function(result) {
 										if (!result || result.Type !== "Route") {
@@ -618,12 +611,14 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 										);
 									}
 								);
+							} else {
+								routeId = result.Routes[0].Guid;
+								return cFService.mapRoute(null, appId, routeId).then(
+									function(result){
+										return i18Util.formatMessage(messages["${0}SuccessfullyMappedTo${1}.${2}"], args.app, args.hostname, args.domain);
+									}
+								);
 							}
-							return cFService.mapRoute(null, appId, routeId).then(
-								function(result){
-									return i18Util.formatMessage(messages["${0}SuccessfullyMappedTo${1}.${2}"], args.app, args.hostname, args.domain);
-								}
-							);
 						}
 					);
 				}
@@ -661,22 +656,12 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 						return messages["applicationNotFound"];
 					}
 					var appId = result.guid;
-					return cFService.getRoutes(null).then(
+					return cFService.getRoute(null, args.domain, args.hostname).then(
 						function(result) {
-							if (!result){
-								 return messages["noRoutesFound"];
-							}
-							var routeId;
-							result.Routes.forEach(function(item) {
-								if(item.DomainName == args.domain && item.Host == args.hostname){
-									if(item.Apps[0] && item.Apps[0].Name==args.app){
-										routeId = item.Guid;
-									}
-								}
-							});
-							if(!routeId){
+							if (!result || !result.Routes || result.Routes.length === 0){
 								return i18Util.formatMessage(messages["route${0}NotFound"], args.hostname + "." + args.domain);
 							}
+							var routeId = result.Routes[0].Guid;
 							return cFService.unmapRoute(null, appId, routeId).then(
 								function(result){
 									return i18Util.formatMessage(messages["${0}SuccessfullyUnmappedFrom${1}.${2}"], args.app, args.hostname, args.domain);
