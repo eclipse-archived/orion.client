@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+<title>Orion Server Status</title>
+<link rel="icon" href="images/favicon.ico" />
 <meta name="copyright" content="Copyright (c) 2012 IBM Corporation and others.">
 <meta http-equiv="Content-Language" content="en-us">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" type="text/css" href="css/serverstatus.css" />
-<script src="../requirejs/require.js"></script>
+<link rel="stylesheet" type="text/css" href="stylesheets/serverstatus.css" />
+<script src="../requirejs/require.min.js"></script>
 <script type="text/javascript">
 /*eslint-env browser, amd*/
 require({
-  baseUrl: '..',
+  baseUrl: '../',
 
   // set the paths to our library packages
   packages: [
@@ -20,7 +23,7 @@ require({
   }
 });
 
-require(["mixloginstatic/ServerStatus"]);
+require(["mixloginstatic/javascript/ServerStatus"]);
 </script>
 <title>Orion Server Status</title>
 </head>
@@ -38,7 +41,7 @@ require(["mixloginstatic/ServerStatus"]);
 	<div id = "orionMessages" class="orion-messages">
 		<dl id = "loadingmessage">
 			<dt>loading...</dt>
-		</dl>		
+		</dl>
 	</div>
 </body>
 </html>

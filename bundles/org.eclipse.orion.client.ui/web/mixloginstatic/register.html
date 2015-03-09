@@ -1,0 +1,92 @@
+ <!doctype html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+		<title>Orion Registration Page</title>
+		<link rel="icon" href="images/favicon.ico"/>
+		<link rel="stylesheet" href="fonts/font.css"/>
+		<link rel="stylesheet" href="stylesheets/login.css"></link>
+		<script src="javascript/jquery.js"></script>
+		<script src="../requirejs/require.min.js"></script>
+		<script type="text/javascript">
+			/*eslint-env browser, amd*/
+			require({
+			  baseUrl: '../',
+
+			  // set the paths to our library packages
+			  packages: [],
+			  paths: {
+				  text: 'requirejs/text',
+				  i18n: 'requirejs/i18n',
+				  domReady: 'requirejs/domReady'
+			  }
+			});
+			require(["mixloginstatic/javascript/register"]);
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<div class="content-wrapper header">
+				<div class="orion-container">
+					<div class="logo-container">
+						<a href="/"><span class="orion-logo"><img src="images/assets/orion.png"/></span></a>
+					</div>
+				</div>
+			</div>
+			<div class="central">
+				<div class="main-section">
+					<div class="auth-sections">
+						<div class="left-section">
+							<h1 class="login-title" id="emailLogin">Registration</h1>
+							<form class="orion-auth" id="orion-auth">
+								<p id="description"></p>
+								<fieldset class="form-elements" id="form-elements">
+									<div class="form-elements-container login-container" id="loginContainer">
+										<input class="login-field" type="text" id="username" placeholder="Username"/>
+									</div>
+
+									<div class="form-elements-container pass-container password" id="passwordContainer">
+										<input class="login-field" type="password" id="password" placeholder="Password"/>
+										<span class="hide-password" id="hide-password" title="Show password"></span>
+									</div>
+
+									<div class="form-elements-container pass-container repeatPassword hide" id="repeatPasswordContainer">
+										<input class="login-field" type="text" id="repeatPassword" disabled="disabled" placeholder="Password visible" />
+										<span class="show-password" id="show-password" title="Hide password"></span>
+									</div>
+
+									<div class="form-elements-container email-container" id="emailContainer">
+										<input class="login-field" type="email" id="email" placeholder="Email" />
+									</div>
+									<div class="hide spinner"></div>
+								</fieldset>
+
+								<button class="login-button" id="signUpBtn">Sign Up</button>
+							</form>
+							<p class="status has-error"></p>
+						</div>
+
+						<div class="right-section" id="rightSection">
+							<div class="social-section">
+								<h1 class="login-title" id="socialLogin">Social Login</h1>
+								<a class="auth-btn google-auth" id="signInWithGoogle" href="http://orion.eclipse.org/login/oauth?oauth=google">
+									<i class="google-icon"></i>
+									<span class="social-login-text">Sign up with Google</span>
+								</a>
+								<a class="auth-btn github-auth" id="signInWithGitHub" href="http://orion.eclipse.org/login/oauth?oauth=github">
+									<i class="github-icon"></i>
+									<span class="social-login-text" id="signInWithGitHub">Sign up with Github</span>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="footer">
+				<p id="copyright">&copy; Copyright 2014 - Eclipse Foundation</p>
+			</div>
+		</div>
+	</body>
+</html>
