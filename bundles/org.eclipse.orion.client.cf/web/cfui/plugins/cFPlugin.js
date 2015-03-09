@@ -602,17 +602,29 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 							result.Routes.forEach(function(item) {
 								if(item.DomainName == args.domain && item.Host == args.hostname){
 									routeId = item.Guid;
-								}	
+								}
 							});
 							if(!routeId){
-								return i18Util.formatMessage(messages["route${0}NotFound"], args.hostname + "." + args.domain);
+								return cFService.createRoute(null, args.domain, args.hostname).then(
+									function(result) {
+										if (!result || result.Type !== "Route") {
+											return messages["noRoutesFound"];
+										}
+										routeId = result.Guid;
+										return cFService.mapRoute(null, appId, routeId).then(
+											function(result){
+												return i18Util.formatMessage(messages["${0}SuccessfullyMappedTo${1}.${2}"], args.app, args.hostname, args.domain);
+											}
+										);
+									}
+								);
 							}
 							return cFService.mapRoute(null, appId, routeId).then(
 								function(result){
 									return i18Util.formatMessage(messages["${0}SuccessfullyMappedTo${1}.${2}"], args.app, args.hostname, args.domain);
 								}
 							);
-						}	
+						}
 					);
 				}
 			);
@@ -642,7 +654,7 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 
 	/** Add cf unmap-route command **/
 	var unmapRouteImpl = {
-		callback: function(args, context) {	 
+		callback: function(args, context) {
 			return	cFService.getApp(null, args.app, context.cwd).then(
 				function(result){
 					if (!result) {
