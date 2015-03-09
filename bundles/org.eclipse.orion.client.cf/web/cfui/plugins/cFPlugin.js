@@ -508,7 +508,7 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 			});
 		}
 	};
-	
+
 	provider.registerServiceProvider(
 		"orion.shell.command",
 		createRouteImpl, {
@@ -525,7 +525,7 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 			}]
 		}
 	);
-	
+
 	/** Add cf delete-route command **/
 	var deleteRouteImpl = {
 		callback: function(args, context) {
@@ -541,7 +541,7 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 			});
 		}
 	};
-	
+
 	provider.registerServiceProvider(
 		"orion.shell.command",
 		deleteRouteImpl, {
@@ -558,7 +558,7 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 			}]
 		}
 	);
-	
+
 	/** Add cf delete-orphaned-routes command **/
 	var deleteRouteImpl = {
 		callback: function(args, context) {
@@ -574,7 +574,7 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 			});
 		}
 	};
-	
+
 	provider.registerServiceProvider(
 		"orion.shell.command",
 		deleteRouteImpl, {
@@ -583,7 +583,7 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 			parameters: []
 		}
 	);
-	
+
 	/** Add cf map-route command **/
 	var mapRouteImpl = {
 		callback: function(args, context) {
@@ -605,7 +605,19 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 								}	
 							});
 							if(!routeId){
-								return i18Util.formatMessage(messages["route${0}NotFound"], args.hostname + "." + args.domain);
+								return cFService.createRoute(null, args.domain, args.hostname).then(
+									function(result) {
+										if (!result || result.Type !== "Route") {
+											return messages["noRoutesFound"];
+										}
+										routeId = result.Guid;
+										return cFService.mapRoute(null, appId, routeId).then(
+											function(result){
+												return i18Util.formatMessage(messages["${0}SuccessfullyMappedTo${1}.${2}"], args.app, args.hostname, args.domain);
+											}
+										);
+									}
+								);
 							}
 							return cFService.mapRoute(null, appId, routeId).then(
 								function(result){
@@ -618,7 +630,7 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 			);
 		}
 	};
-	
+
 	provider.registerServiceProvider(
 		"orion.shell.command",
 		mapRouteImpl, {
@@ -676,7 +688,7 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 			);
 		}
 	};
-	
+
 	provider.registerServiceProvider(
 		"orion.shell.command",
 		unmapRouteImpl, {
@@ -697,7 +709,7 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 			}]
 		}
 	);
-	
+
 	/** Add cf logs command **/
 	var appLogsImpl = {
 		callback: function(args, context) {
