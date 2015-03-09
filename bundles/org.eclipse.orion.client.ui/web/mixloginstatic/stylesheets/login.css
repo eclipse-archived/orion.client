@@ -1,0 +1,556 @@
+/* Eric Meyer's Reset CSS v2.0 - http://cssreset.com */
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{border:0;font-size:100%;font:inherit;vertical-align:baseline;margin:0;padding:0}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:none}table{border-collapse:collapse;border-spacing:0}
+
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    background: white;
+    color: #222222;
+    padding: 0;
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1.5;
+    position: relative;
+    cursor: auto;
+}
+
+img {
+    max-width: 100%;
+}
+
+.hide {
+    display: none;
+}
+
+.container {
+    min-height: 100%;
+    position: relative;
+}
+
+.central {
+    padding-bottom: 50px;
+}
+
+.header {
+    border-bottom: 1px solid #DDD;
+}
+
+.orion-container {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -webkit-flex-wrap: nowrap;
+        -ms-flex-wrap: nowrap;
+            flex-wrap: nowrap;
+    -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    -ms-flex-line-pack: start;
+            -webkit-align-content: flex-start;
+            align-content: flex-start;
+    -webkit-align-items: flex-start;
+        -ms-flex-align: start;
+            align-items: flex-start;
+    height: 80px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+    max-width: 62.5rem;
+    width: 100%;
+}
+
+.orion-containercontainer >div {
+   -webkit-order: 0;
+       -ms-flex-order: 0;
+           order: 0;
+   -webkit-flex: 0 1 auto;
+       -ms-flex: 0 1 auto;
+           flex: 0 1 auto;
+      -ms-flex-item-align: auto;
+              -webkit-align-self: auto;
+              align-self: auto;
+}
+
+.logo-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: -10px;
+    height: 36px;
+    width: 110px;
+}
+
+.logo-container a {
+    color: transparent;
+    display: block;
+}
+
+.orion-auth-buttons {
+    color: white;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -webkit-flex-wrap: nowrap;
+        -ms-flex-wrap: nowrap;
+            flex-wrap: nowrap;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    -ms-flex-line-pack: start;
+            -webkit-align-content: flex-start;
+            align-content: flex-start;
+    -webkit-align-items: flex-start;
+        -ms-flex-align: start;
+            align-items: flex-start;
+}
+
+.form-elements-container {
+    position: relative;
+}
+
+.form-elements-container label {
+    display: none;
+}
+
+.form-elements-container.has-error input {
+    border-color: red;
+}
+
+.form-elements-container.has-error input:focus {
+    outline-color: transparent;
+}
+
+.has-error,
+.status.has-error {
+    color: red;
+}
+
+.orion-auth p {
+    font-size: 12px;
+    max-width: 220px;
+    color: #878787;
+}
+
+p.status {
+    color: green;
+    margin-top: 12px;
+    min-height: 18px;
+    margin-bottom: 0;
+    font-size: 12px;
+    max-width: 220px;
+}
+
+input::-ms-clear,
+input::-ms-reveal {
+    display: none;
+}
+
+@media only screen and (max-width: 40em) {
+    .orion-container {
+        -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+                flex-direction: column;
+        -webkit-align-items: center;
+            -ms-flex-align: center;
+                align-items: center;
+    }
+
+
+}
+
+.orion-link-button {
+    font-size: 12px;
+    background: #FFF;
+    color: #777;
+    margin-top: 26px;
+    margin-bottom: 1.26rem;
+    padding: 10px;
+    text-decoration: none;
+}
+
+.orion-link-button:hover {
+    background-color: #fbaf43;
+    border-color: #007095;
+    color: white;
+}
+.main-section,
+.auth-sections {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -webkit-flex-wrap: nowrap;
+        -ms-flex-wrap: nowrap;
+            flex-wrap: nowrap;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -ms-flex-line-pack: start;
+            -webkit-align-content: flex-start;
+            align-content: flex-start;
+    -webkit-align-items: stretch;
+        -ms-flex-align: stretch;
+            align-items: stretch;
+}
+
+.auth-sections {
+    margin-top: 50px;
+    -webkit-order: 0;
+        -ms-flex-order: 0;
+            order: 0;
+    -ms-flex-negative: 1;
+            -webkit-flex-shrink: 1;
+            flex-shrink: 1;
+    -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0;
+    -ms-flex-preferred-size: auto;
+            -webkit-flex-basis: auto;
+            flex-basis: auto;
+    -ms-flex-item-align: auto;
+            -webkit-align-self: auto;
+            align-self: auto;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(to right, #FFF 0%, #FFF 47%, #F7F7F7 50%);
+}
+
+.buffer-space{
+   -webkit-flex-grow: 2;
+       -ms-flex-positive: 2;
+           flex-grow: 2;
+}
+
+.left-section, .right-section, .middle-section {
+    -webkit-order: 0;
+        -ms-flex-order: 0;
+            order: 0;
+    -ms-flex-negative: 1;
+            -webkit-flex-shrink: 1;
+            flex-shrink: 1;
+    -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0;
+    -ms-flex-preferred-size: auto;
+            -webkit-flex-basis: auto;
+            flex-basis: auto;
+    -ms-flex-item-align: auto;
+            -webkit-align-self: auto;
+            align-self: auto;
+    padding: 40px;
+}
+
+.left-section {
+    min-width:220px;
+}
+
+.right-section {
+    border-left: 1px solid #E5E5E5;
+    background:white;
+    min-width:220px;
+}
+
+.divider-line {
+    border-right-style: solid;
+    border-right-width: 1px;
+    border-right-color: #ddd;
+    -webkit-order: 0;
+        -ms-flex-order: 0;
+            order: 0;
+    -ms-flex-negative: 1;
+            -webkit-flex-shrink: 1;
+            flex-shrink: 1;
+    -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0;
+    -ms-flex-preferred-size: auto;
+            -webkit-flex-basis: auto;
+            flex-basis: auto;
+    -ms-flex-item-align: auto;
+            -webkit-align-self: auto;
+            align-self: auto;
+}
+
+.middle-section {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -webkit-flex-wrap: nowrap;
+        -ms-flex-wrap: nowrap;
+            flex-wrap: nowrap;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -ms-flex-line-pack: start;
+            -webkit-align-content: flex-start;
+            align-content: flex-start;
+    -webkit-align-items: stretch;
+        -ms-flex-align: stretch;
+            align-items: stretch;
+}
+
+.orion-auth, .social-section {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-flex-wrap: nowrap;
+        -ms-flex-wrap: nowrap;
+            flex-wrap: nowrap;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -ms-flex-line-pack: start;
+            -webkit-align-content: flex-start;
+            align-content: flex-start;
+    -webkit-align-items: stretch;
+        -ms-flex-align: stretch;
+            align-items: stretch;
+}
+
+.orion-auth.in-progress .form-elements {
+    opacity: 0.6;
+    position: relative;
+}
+
+.orion-auth.in-progress button {
+    background-color: #ccc;
+    cursor: default;
+}
+
+.orion-auth.in-progress .spinner {
+    background-image: url("../images/assets/spinner.gif");
+    display: block;
+    height: 90px;
+    width: 90px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    top: 50%;
+    margin-top: -45px;
+}
+
+.orion-auth.complete {
+    display: none;
+}
+
+.auth-btn {
+    margin: 10px 0;
+    border-radius: 3px;
+    text-align: center;
+    padding: 5px 15px 5px 7px;
+    font-size: 14px;
+    color: white;
+    font-family: 'Roboto Bold', sans-serif;
+    font-size: 8pt;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    text-decoration: none;
+}
+
+.google-auth {
+    background-color: #DD4B39;
+    margin-top:12px;
+}
+
+.github-auth {
+    background-color: #444;
+}
+
+.google-auth:hover {
+    background-color: #C23321;
+}
+
+.github-auth:hover {
+    background-color: #2B2B2B;
+}
+
+@media only screen and (max-width: 40em) {
+    .auth-sections {
+        -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+                flex-direction: column;
+    }
+
+    .middle-section {
+        -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+                flex-direction: column;
+    }
+
+    .left-section, .right-section, .middle-section {
+        margin: 5px;
+        padding: 2px;
+    }
+
+    .right-section {
+        border: none;
+        background: transparent;
+    }
+
+    .divider-line {
+        border-bottom-style: solid;
+        border-bottom-width: 1px;
+        border-bottom-color: #ddd;
+    }
+}
+
+.login-title {
+    -webkit-order: 0;
+        -ms-flex-order: 0;
+            order: 0;
+    -ms-flex-negative: 1;
+            -webkit-flex-shrink: 1;
+            flex-shrink: 1;
+    -ms-flex-preferred-size: auto;
+            -webkit-flex-basis: auto;
+            flex-basis: auto;
+    -ms-flex-item-align: start;
+            -webkit-align-self: flex-start;
+            align-self: flex-start;
+    font-family: sans-serif;
+    font-weight: bold;
+    color: #878787;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.auth-btn i {
+    background-repeat: no-repeat;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    height: 24px;
+    width: 24px;
+    background-size: 24px 24px;
+    padding-right:7px;
+}
+
+.google-icon{
+    background-image: url("../images/assets/google-icon.png");
+    border-right: 1px solid #be3f2b;
+}
+
+.github-icon {
+    background-image:url("../images/assets/github-logo.png");
+    border-right: 1px solid #5d5d5d;
+}
+
+.social-login-text {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+
+    margin-left: 10px;
+}
+
+.login-field {
+    box-sizing: border-box;
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+    height: 36px;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #DDD;
+    border-radius: 3px;
+    color: #777;
+    font-size: 12px;
+    width: 100%;
+}
+
+.login-button {
+    background: #FBAF43;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 3px;
+    color: #FFF;
+    font-size: 12px;
+    margin-top: 15px;
+    transition: all 320ms ease-in;
+}
+
+.login-button:hover {
+    background-color: #e19d3c;
+    transition: all 320ms ease-out;
+}
+
+.password,
+.repeatPassword {
+    min-width: 160px;
+    padding: 0;
+    position: relative;
+}
+
+.hide-password,
+.show-password {
+    background: url("../images/assets/password-eye.gif") no-repeat;
+    background-color: transparent;
+    bottom: 22px;
+    display: block;
+    width: 21px;
+    height: 13px;
+    position: absolute;
+    right: 5px;
+    border-bottom: none;
+    cursor: pointer;
+}
+
+.hide-password {
+    background-position: top;
+}
+
+.show-password {
+    background-position: bottom;
+}
+
+.forgotten {
+    display: block;
+    padding: 15px 0 10px 0;
+    font-size: 12px;
+    color: #428BCA;
+}
+
+.orion-info {
+    margin: 0 auto;
+    max-width: 600px;
+    padding: 0 20px 60px 20px;
+}
+
+.footer {
+    position:absolute;
+    bottom: 0;
+    height: 50px;
+    text-align: center;
+    width: 100%;
+}
+
+.footer > p {
+    font-size: 0.9rem;
+    margin-top: 20px;
+}

@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <title>OrionHub - Open Source Web and Cloud Development Environment</title>
+        <link rel="icon" href="images/favicon.ico" />
+        <link rel="stylesheet" href="fonts/font.css" />
+        <link rel="stylesheet" href="stylesheets/landing-new.min.css" />
+        <script src="javascript/jquery.js"></script>
+        <script src="../requirejs/require.min.js"></script>
+        <script type="text/javascript">
+            /*eslint-env browser, amd*/
+            require({
+              baseUrl: '../',
+
+              // set the paths to our library packages
+              packages: [],
+              paths: {
+                  domReady: 'requirejs/domReady'
+              }
+            });
+            require(["mixloginstatic/javascript/landing-new"]);
+        </script>
+    </head>
+    <body>
+        <header class="border-bottom stretch">
+            <div class="container">
+                <div class="col-sm-12">
+                    <div class="row header-content separate">
+                        <div class="logo-container">
+                            <h1 class="hide">Orion</h1>
+                            <span class="orion-logo"><img src="images/assets/orion.png" width="110px" /></span>
+                        </div>
+                        <div class="orion-auth-buttons">
+                            <a href="LoginWindow.html" class="button orion-link-button" id="signinBtn">Sign In</a>
+                            <a href="register.html" class="button orion-link-button" id="registerBtn">Register</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <section class="intro">
+                <div class="row">
+                    <div class="col-sm-12 center">
+                        <p class="orionExplained center-text" id="orionExplained">
+                            A modern, open source software development environment that runs in the cloud.
+                        </p>
+
+                        <p class="small">
+                            Code, deploy and run in the cloud.
+                        </p>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="tryItContainer">
+                            <a href="register.html" class="radius button" id="tryIt">Try It Now</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="images hide-for-small-only">
+                <div class="row">
+                    <div class="col-sm-12 imageContainer">
+                        <img src="images/assets/editor.png" id="powerEditorImage" class="bannerImage">
+                        <img src="images/assets/style.png" id="versatileThemeImage" class="bannerImage hide">
+                        <img src="images/assets/git.png" id="orionGitImage" class="bannerImage hide">
+                    </div>
+                </div>
+            </section>
+
+            <section class="contentSwitcher">
+                <div class="row">
+                    <div class="col-sm-12 col-lg-4 no-gutter">
+                        <div class="contentContainer current" id="powerEditorContainer">
+                            <div class="center">
+                                <div>
+                                    <span class="core-sprite-edit hide-for-small-only"></span>
+                                </div>
+                            </div>
+                            <div class="titleContent">
+                                <h2 id="powerEditor" class="hide-for-small-only center-text">Powerful code editor</h2>
+                                <span class="show-for-small-only icon editorIcon core-sprite-edit">
+                                    <span id="orionEditorRepeat" class="repeatTitle">Powerful code editor</span>
+                                </span>
+                            </div>
+                            <p id="powerEditorDetails" class="hide-for-small-only center-text">
+                                Orion is built with a powerful JavaScript code editor, eqipped with content assist, code completion, error checking and a code map.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 mobileRepeat show-for-small-only">
+                        <div class="mobileContent current">
+                            <img src="images/assets/editor-small.png" id="powerEditorImage">
+                            <p id="powerEditorImageText" class="contentImageText show-for-small-only">
+                                Orion is built with a powerful JavaScript code editor, eqipped with content assist, code completion, error checking and a code map.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12 col-lg-4 no-gutter">
+                        <div class="contentContainer" id="versatileThemeContainer">
+                            <div class="center">
+                                <span class="core-sprite-palette hide-for-small-only"></span>
+                            </div>
+                            <div class="titleContent">
+                                <h2 id="versatileTheme" class="hide-for-small-only center-text">Versatile theming</h2>
+                                <span class="show-for-small-only icon themeIcon core-sprite-palette">
+                                    <span id="orionThemeRepeat" class="repeatTitle">Versatile theming</span>
+                                </span>
+                            </div>
+                            <p id="versatileThemeDetails" class="hide-for-small-only center-text">
+                                Orion's editor can be light, dark or anywhere in between, by cusomization or theme import from other popular editors.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 mobileRepeat show-for-small-only">
+                        <div class="mobileContent">
+                            <img src="images/assets/style-small.png" id="versatileThemeImage">
+                            <p id="versatileThemeImageText" class="contentImageText show-for-small-only">
+                                Orion's editor can be light, dark or anywhere in between, by cusomization or theme import from other popular editors.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12 col-lg-4 no-gutter">
+                        <div class="contentContainer" id="orionGitContainer">
+                            <div class="center">
+                                <div>
+                                    <span class="core-sprite-git-logo hide-for-small-only"></span>
+                                </div>
+                            </div>
+
+                            <div class="titleContent">
+                                <h2 id="orionGit" class="hide-for-small-only center-text">Compact Git UI</h2>
+                                <span class="show-for-small-only icon gitIcon core-sprite-git-logo">
+                                    <span id="orionGitRepeat" class="repeatTitle">Compact Git UI</span>
+                                </span>
+                            </div>
+                            <p id="orionGitDetails" class="hide-for-small-only center-text">
+                                Strong git support, easing your choice of control, from detailed to simple, in a smart, single page layout.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 mobileRepeat show-for-small-only" >
+                        <div class="mobileContent">
+                            <img src="images/assets/git-small.png" id="orionGitImage">
+                            <p id="orionGitImageText" class="contentImageText show-for-small-only">
+                                Strong git support, easing your choice of control, from detailed to simple, in a smart, single page layout.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section class="pre-footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12 col-lg-4">
+                        <h2>Tweets</h2>
+                        <div id="tweets">
+                            <a class="twitter-timeline" href="https://twitter.com/orionhub" data-widget-id="560441210322427905"  data-link-color="#c88c35" data-chrome="nofooter noborders noscrollbar transparent noheader" data-tweet-limit="3">
+                                Tweets by @orionhub
+                            </a>
+
+                            <script>
+                                !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
+                            </script>
+                        </div>
+
+                        <p><a href="https://twitter.com/orionhub" class="button radius secondary" id="orionTweets">Go to Twitter</a></p>
+
+                    </div>
+                    <div class="col-sm-12 col-lg-4">
+                        <h2>Plugins</h2>
+
+                        <h3 id="amazonTitle"><a id="amazonLink" href="https://github.com/mamacdon/orion-s3/">Amazon S3 filesystem</a></h3>
+                        <p id="amazonDescription">Provides access to an Amazon S3 bucket as a filesystem.</p>
+
+                        <h3 id="snippetTitle"><a id="snippetLink" href="https://github.com/kenwalker/snippet">Snippet</a></h3>
+                        <p id="snippetDescription">Editor command to create an HTML code snippet from a selection in your editor.</p>
+
+                        <h3 id="d2sTitle"><a id="d2sLink" href="https://github.com/kenwalker/Double2Single">Double2Single</a></h3>
+                        <p id="d2sDescription">Editor command to convert double quotes to single.</p>
+
+                        <p><a href="https://orion-plugins.googlecode.com/git/index.html" class="button radius secondary" id="orionPlug">Discover Plugins</a></p>
+                    </div>
+                    <div class="col-sm-12 col-lg-4">
+                        <h2>Recent Blog Posts</h2>
+                        <div id="blogFeed">
+
+                        </div>
+
+                        <p><a href="http://planetorion.org/news/" class="button radius secondary" id="orionBlog">Go to Blog</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="social">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12 center">
+                        <h2 class="getInTouch" id="getInTouch">Get in touch!</h2>
+                        <p class="getInTouchDetails" id="getInTouchDetails">We’d love to hear from you, you attractive person you.</p>
+                        <div class="orion-social-buttons">
+                            <div class="orion-social-button">
+                                <a class="orion-google" href="https://plus.google.com/u/1/113529759347248251090/posts">
+                                    <i class="fa fa-google-plus"></i>
+                                </a>
+                            </div>
+                            <div class="orion-social-button">
+                                <a class="orion-github" href="https://github.com/eclipse/orion.client">
+                                    <i class="fa fa-github"></i>
+                                </a>
+                            </div>
+                            <div class="orion-social-button">
+                                <a class="orion-twitter" href="https://twitter.com/orionhub">
+                                    <i class="fa fa-twitter"></i>
+                                </a>
+                            </div>
+                            <div class="orion-social-button">
+                                <a class="orion-email" href="https://dev.eclipse.org/mailman/listinfo/orion-dev">
+                                    <i class="fa fa-envelope-o"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12 center">
+                        <p id="copyright">&copy; Copyright 2014 - Eclipse Foundation.</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>
