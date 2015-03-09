@@ -24,8 +24,16 @@ define(["chai/chai", "orion/HTMLTemplates-shim"/*, "domReady!"*/], function(chai
 			document.body.appendChild(document.getElementById("commentTemplate3").content.cloneNode(true));
 			assert.equal(document.body.querySelectorAll("div.comment3").length, 2);
 		});
-	
-		it("NewTemplateElement", function() {
+
+		/**
+		 * Wrapper for #it() that calls it.skip() during an integration build.
+		 */
+		var isBuild = location.hash.indexOf("env=integration") !== -1;
+		function it_maybe(/*args..*/) {
+			return isBuild ? it.skip.apply(it, arguments) : it.apply(null, arguments);
+		}
+
+		it_maybe("NewTemplateElement", function() {
 			var template = document.createElement("template");
 			template.id="xyzzy";
 			document.body.appendChild(template);
