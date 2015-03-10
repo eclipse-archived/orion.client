@@ -12,7 +12,6 @@
 	Optional properties
 	======================================================================
 		${skipOrionUI}      If set, the Orion pages and plugins will not be built
-		${skipBrowser}      If set, the readonly file browser widget will not be generated 
 		${skipCommitBrowser}   If set, the git commit browser widget will not be generated 
 		${skipEditor}       If set, the standalone editor will not be generated
 		${skipEditorStylers}       If set, the standalone editor stylers will not be generated
@@ -126,7 +125,6 @@
 	<target name="widget.check">
 		<condition property="widget.run">
 			<or>
-				<not><isset property="skipBrowser" /></not>
 				<not><isset property="skipCommitBrowser" /></not>
 				<not><isset property="skipEditor" /></not>
 				<not><isset property="skipCompareEditor" /></not>
