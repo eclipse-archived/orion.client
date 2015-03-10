@@ -3400,7 +3400,123 @@ define([
     			assert.equal(messages[0].message, "Sparse array declarations should be avoided.");
     		});
     	});
+
+//NO-THROW-LITERAL ---------------------------------------------------------    	
+    	describe('no-throw-literal', function() {
+    	    var RULE_ID = "no-throw-literal";
+    		it("flag thrown Literal", function() {
+    			var topic = "throw 'a'";
     	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].node.type, "Literal");
+    		});
+    		it("flag thrown ObjectExpression", function() {
+    			var topic = "throw {};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].node.type, "ObjectExpression");
+    		});
+    		it("flag thrown ArrayExpression", function() {
+    			var topic = "throw [];";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].node.type, "ArrayExpression");
+    		});
+    		it("flag thrown 'undefined'", function() {
+    			var topic = "throw undefined;";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].node.name, "undefined");
+    		});
+    		it("flag thrown 'null'", function() {
+    			var topic = "throw null;";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].node.type, "Literal");
+    		});
+    		it("should not flag thrown Identifier", function() {
+    			var topic = "throw a";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag thrown MemberExpression", function() {
+    			var topic = "throw a.b";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag thrown NewExpression", function() {
+    			var topic = "throw new Error()";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag thrown CallExpression", function() {
+    			var topic = "throw Error()";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag thrown ConditionalExpression", function() {
+    			var topic = "throw (1 ? 2 : 3);";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag thrown LogicalExpression", function() {
+    			var topic = "throw 1||2;";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should not flag thrown SequenceExpression", function() {
+    			var topic = "throw 1,2;";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    	});
+
 //NO-UNDEF -----------------------------------------------------    	
     	describe('no-undef', function() {
     	    var RULE_ID = "no-undef";
@@ -5053,100 +5169,6 @@ define([
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
     	
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
-    		});
-    	});
-    	
-//THROW-ERROR ---------------------------------------------------------    	
-    	describe('throw-error', function() {
-    	    var RULE_ID = "throw-error";
-    		it("flag thrown Literal", function() {
-    			var topic = "throw 'a'";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    	
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 1);
-    			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].node.type, "Literal");
-    		});
-    		it("flag thrown ObjectExpression", function() {
-    			var topic = "throw {};";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    	
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 1);
-    			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].node.type, "ObjectExpression");
-    		});
-    		it("flag thrown ArrayExpression", function() {
-    			var topic = "throw [];";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    	
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 1);
-    			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].node.type, "ArrayExpression");
-    		});
-    		it("should not flag thrown Identifier", function() {
-    			var topic = "throw a";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
-    		});
-    		it("should not flag thrown MemberExpression", function() {
-    			var topic = "throw a.b";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
-    		});
-    		it("should not flag thrown NewExpression", function() {
-    			var topic = "throw new Error()";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
-    		});
-    		it("should not flag thrown CallExpression", function() {
-    			var topic = "throw Error()";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
-    		});
-    		it("should not flag thrown ConditionalExpression", function() {
-    			var topic = "throw (1 ? 2 : 3);";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
-    		});
-    		it("should not flag thrown LogicalExpression", function() {
-    			var topic = "throw 1||2;";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
-    		});
-    		it("should not flag thrown SequenceExpression", function() {
-    			var topic = "throw 1,2;";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 0);
     		});

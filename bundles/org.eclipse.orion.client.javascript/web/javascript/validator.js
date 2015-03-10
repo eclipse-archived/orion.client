@@ -46,13 +46,13 @@ define([
 			"no-regex-spaces": 2, //$NON-NLS-0$
 			"no-shadow": 1, //$NON-NLS-0$
 			"no-shadow-global": 1, //$NON-NLS-0$
+			"no-throw-literal": 1, //$NON-NLS-0$
 			"no-undef": 2, //$NON-NLS-0$
 			"no-unused-params": 1, //$NON-NLS-0$
 			"no-unused-vars": 1, //$NON-NLS-0$
 			"no-use-before-define": 1, //$NON-NLS-0$
 			"radix": 1, //$NON-NLS-0$
 			"semi": 1, //$NON-NLS-0$
-			"throw-error": 1, //$NON-NLS-0$
 			"use-isnan" : 2, //$NON-NLS-0$
 			'no-unreachable': 2,  //$NON-NLS-0$
 			'no-fallthrough' : 2,  //$NON-NLS-0$
@@ -390,6 +390,7 @@ define([
 		 * @since 8.0
 		 */
 		_legacy: {
+		    'throw-error': 'no-throw-literal',
 		    validate_no_cond_assign: 'no-cond-assign',
 		    validate_no_constant_condition: 'no-constant-condition',
 		    validate_no_caller: 'no-caller',
@@ -406,7 +407,7 @@ define([
 		    validate_missing_semi: 'semi',
 		    validate_no_regex_spaces: 'no-spaces-regex',
 		    validate_use_isnan: 'use-isnan',
-		    validate_throw_error: 'throw-error',
+		    validate_throw_error: 'no-throw-literal',
 		    validate_no_reserved_keys: 'no-reserved-keys',
 		    validate_no_sparse_arrays: 'no-sparse-arrays',
 		    validate_curly: 'curly',

@@ -877,6 +877,33 @@ define([
         		};
         	}
         },
+        "no-throw-literal": {
+            description: 'Warn when a Literal is used in a throw statement',
+            rule: function(context) {
+                return {
+                    "ThrowStatement": function(node) {
+                        try {
+                            var argument = node.argument;
+                            // We have no type analysis yet, so to avoid false positives, assume any expr that
+                            // *could* generate an Error actually does.
+                            switch (argument.type) {
+                                case "Identifier":
+                                    if (argument.name !== "undefined") {
+                                        return;
+                                    }
+                                //$FALLTHROUGH$
+                                case "Literal":
+                                case "ObjectExpression":
+                                case "ArrayExpression":
+                                    context.report(argument, "Throw an Error instead.");
+                            }
+                        } catch (ex) {
+                            Logger.log(ex);
+                        }
+                    }
+                };
+           }
+        },
 		"no-undef": {
 		    description: 'Warn when used variable or function has not been defined',
 		    rule: function(context) {
@@ -1204,35 +1231,6 @@ define([
         			"ThrowStatement": checkForSemicolon,  //$NON-NLS-0$
         			"BreakStatement": checkForSemicolon,  //$NON-NLS-0$
         			"ContinueStatement": checkForSemicolon  //$NON-NLS-0$
-        		};
-        	}
-        },
-		"throw-error": {
-		    description: 'Warn when a non-Error object is used in a throw statement',
-		    rule: function(context) {
-        		function checkThrowArgument(node) {
-        			try {
-        				var argument = node.argument;
-        				// We have no type analysis yet, so to avoid false positives, assume any expr that *could*
-        				// generate an Error actually does.
-        				switch (node.argument.type) {
-        					case "NewExpression":
-        					case "Identifier":
-        					case "CallExpression":
-        					case "MemberExpression":
-        					case "ConditionalExpression": // throw y ? x : y;
-        					case "LogicalExpression":     // throw x || y;
-        					case "SequenceExpression":    // throw 1, 2, new Error(); // throws an Error. weird but true
-        						return;
-        				}
-        				context.report(argument, "Throw an Error instead.");
-        			} catch (ex) {
-        				Logger.log(ex);
-        			}
-        		}
-        
-        		return {
-        			"ThrowStatement": checkThrowArgument //$NON-NLS-0$
         		};
         	}
         },
