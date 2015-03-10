@@ -119,7 +119,7 @@ objects.mixin(MenuBar.prototype, {
 				return projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
 					return projectClient.getProjectDeployTypes().then(function(deployTypes){
 						return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes, deployTypes);
-					}, function(error){
+					}, function(){
 						return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes);
 					});
 				});
@@ -226,19 +226,19 @@ objects.mixin(EditorSetup.prototype, {
 			evt.editor = this.editor;
 			
 			this.renderToolbars(metadata);
-			var name = evt.name, target = metadata;
+			var targetName = evt.name, target = metadata;
 			if (evt.input === null || evt.input === undefined) {
-				name = this.lastRoot ? this.lastRoot.Name : "";
+				targetName = this.lastRoot ? this.lastRoot.Name : "";
 				target = this.lastRoot;
 			} else if (target && !target.Parents) {//If the target is file system root then we use the file service name
-				name = this.fileClient.fileServiceName(target.Location);
+				targetName = this.fileClient.fileServiceName(target.Location);
 			}
 			// Exclude the "Show current folder" command: it's useless on editor page with built-in nav.
 			// TODO the command exclusions should be an API and specified by individual pages (page links)?
 			mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
 			mGlobalCommands.setPageTarget({
 				task: messages["Editor"],
-				name: name,
+				name: targetName,
 				target: target,
 				makeAlternate: function() {
 					if (metadata && metadata.parent) {
@@ -252,8 +252,8 @@ objects.mixin(EditorSetup.prototype, {
 					var resource = folder ? folder.Location : this.fileClient.fileServiceRootURL(folderLocation);
 					segment.href = uriTemplate.expand({resource: resource});
 					if (folder) {
-						var metadata = this.inputManager.getFileMetadata();
-						if (metadata && metadata.Location === folder.Location) {
+						var fileMetadata = this.inputManager.getFileMetadata();
+						if (fileMetadata && fileMetadata.Location === folder.Location) {
 							segment.addEventListener("click", function() { //$NON-NLS-0$
 								this.sidebarNavInputManager.reveal(folder);
 							});
@@ -434,21 +434,19 @@ objects.mixin(EditorSetup.prototype, {
 						}
 					}
 				}
-				
-				
 			}
 		}
 		if (this.currentEditorView !== view) {
 			
 			var mainSplitter = mGlobalCommands.getMainSplitter();
-				if (mainSplitter) {
-					var classList = mainSplitter.splitter.$splitter.classList;
-					if (view && view.editor && view.editor.getTextView) {
-						classList.add("ruler"); //$NON-NLS-0$
-					} else {
-						classList.remove("ruler"); //$NON-NLS-0$
-					}
+			if (mainSplitter) {
+				var classList = mainSplitter.splitter.$splitter.classList;
+				if (view && view.editor && view.editor.getTextView) {
+					classList.add("ruler"); //$NON-NLS-0$
+				} else {
+					classList.remove("ruler"); //$NON-NLS-0$
 				}
+			}
 			
 			this.commandRegistry.closeParameterCollector();
 			if (this.currentEditorView) {
