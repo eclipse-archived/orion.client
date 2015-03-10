@@ -38,6 +38,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 	 * @param {Element|String} params.parent
 	 * @param {Element|String} params.toolbar
 	 * @param {Element|String} params.switcherScope
+	 * @param {Element|String} params.editScope
 	 */
 	function Sidebar(params) {
 		this.params = params;
@@ -56,110 +57,21 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 		this.viewModes = {};
 		this.activeViewMode = null;
 		this.switcherScope = params.switcherScope;
+		this.editScope = params.editScope;
 		this.switcherNode = null;
 		this.progressService = params.progressService;
 	}
 	objects.mixin(Sidebar.prototype, /** @lends orion.sidebar.Sidebar.prototype */ {
-		/**
-		 * @name orion.sidebar.Sidebar#defaultViewMode
-		 * @type String
-		 */
-		defaultViewMode: "nav", //$NON-NLS-0$
-		show: function() {
+		create: function() {
 			if (this.created) {
 				return;
 			}
 			this.created = true;
-			var commandRegistry = this.commandRegistry;
-			var contentTypeRegistry = this.contentTypeRegistry;
-			var fileClient = this.fileClient;
-			var editorInputManager = this.editorInputManager;
-			var outlineService = this.outlineService;
-			var parentNode = this.parentNode;
-			var progressService = this.progressService;
-			var selection = this.selection;
-			var serviceRegistry = this.serviceRegistry;
-			var toolbarNode = this.toolbarNode;
-
-			var switcherNode = this.switcherNode = lib.node(this.switcherScope);
-			
-			var changeViewModeCommand = new mCommands.Command({
-				name: messages["SidePanel"],
-				imageClass: "core-sprite-outline", //$NON-NLS-0$
-				selectionClass: "dropdownSelection", //$NON-NLS-0$
-				tooltip: messages["SidePanelTooltip"],
-				id: "orion.sidebar.viewmode", //$NON-NLS-0$
-				visibleWhen: function(item) {
-					var mainSplitter = mGlobalCommands.getMainSplitter();
-					if (mainSplitter) {
-						return !mainSplitter.splitter.isClosed();
-					}
-					return true;
-				},
-				choiceCallback: this.viewModeMenuCallback.bind(this)
-			});
-			commandRegistry.addCommand(changeViewModeCommand);
-			commandRegistry.registerCommandContribution(switcherNode.id, "orion.sidebar.viewmode", 2, "orion.menuBarViewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			
-			this.addViewMode("nav", new MiniNavViewMode({ //$NON-NLS-0$
-				commandRegistry: commandRegistry,
-				contentTypeRegistry: contentTypeRegistry,
-				preferences: this.preferences,
-				fileClient: fileClient,
-				editorInputManager: editorInputManager,
-				parentNode: parentNode,
-				sidebarNavInputManager: this.sidebarNavInputManager,
-				serviceRegistry: serviceRegistry,
-				toolbarNode: toolbarNode,
-				sidebar: this,
-				progressService: progressService
-			}));
-			
-			this.projectViewMode = new ProjectNavViewMode({
-				commandRegistry: commandRegistry,
-				contentTypeRegistry: contentTypeRegistry,
-				preferences: this.preferences,
-				fileClient: fileClient,
-				editorInputManager: editorInputManager,
-				parentNode: parentNode,
-				sidebarNavInputManager: this.sidebarNavInputManager,
-				serviceRegistry: serviceRegistry,
-				toolbarNode: toolbarNode,
-				sidebar: this,
-				progressService: progressService
-			});
-			
-			this._slideout = new mSlideout.Slideout(this.toolbarNode.parentNode);
-			
-			// add Slideout menu group to View menu
-			commandRegistry.addCommandGroup(switcherNode.id, 
-				"orion.slideoutMenuGroup", //$NON-NLS-0$
-				3, 
-				messages["Slideout"], //$NON-NLS-0$
-				"orion.menuBarViewGroup", //$NON-NLS-0$
-				null, 
-				null, 
-				null, 
-				"dropdownSelection"); //$NON-NLS-0$
-			
-			
-			// Outliner is responsible for adding its view mode(s) to this sidebar
-			this.outliner = new mOutliner.Outliner(this._slideout,
-			{
-				toolbar: toolbarNode,
-				serviceRegistry: serviceRegistry,
-				contentTypeRegistry: contentTypeRegistry,
-				preferences: this.preferences,
-				outlineService: outlineService,
-				commandService: commandRegistry,
-				selectionService: selection,
-				inputManager: editorInputManager,
-				progressService: progressService,
-				sidebar: this,
-				switcherNode: switcherNode
-			});
-			this.setViewMode(this.defaultViewMode);
-			
+			this._createViewModeMenu();
+			this._createNavigationViewMode();
+			this._createProjectViewMode();
+			this._createSlideout();
+			this._createOutliner();
 			this._createInlineSearchPane();
 			this._createProblemsPane();
 		},
@@ -211,6 +123,9 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				mode.destroy();
 			}
 			delete this.viewModes[id];
+			if (this.getActiveViewModeId() === id) {
+				this.activeViewModeId = null;
+			}
 		},
 		/**
 		 * @param {String} id
@@ -245,6 +160,104 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 			this.commandRegistry.destroy(switcher);
 			this.commandRegistry.renderCommands(switcher.id, switcher, null, this, "button"); //$NON-NLS-0$
 		},
+		
+		getInlineSearchPane: function() {
+			return this._inlineSearchPane;
+		},
+
+		getNavigationViewMode: function() {
+			return this._navigationViewMode;
+		},
+
+		getProjectViewMode: function() {
+			return this._projectViewMode;
+		},
+
+		getOutliner: function() {
+			return this.outliner;
+		},
+		
+		_createViewModeMenu: function() {
+			this.switcherNode = lib.node(this.switcherScope);
+			var changeViewModeCommand = new mCommands.Command({
+				name: messages["SidePanel"],
+				imageClass: "core-sprite-outline", //$NON-NLS-0$
+				selectionClass: "dropdownSelection", //$NON-NLS-0$
+				tooltip: messages["SidePanelTooltip"],
+				id: "orion.sidebar.viewmode", //$NON-NLS-0$
+				visibleWhen: function() {
+					var mainSplitter = mGlobalCommands.getMainSplitter();
+					if (mainSplitter) {
+						return !mainSplitter.splitter.isClosed();
+					}
+					return true;
+				},
+				choiceCallback: this.viewModeMenuCallback.bind(this)
+			});
+			this.commandRegistry.addCommand(changeViewModeCommand);
+			this.commandRegistry.registerCommandContribution(this.switcherNode.id, "orion.sidebar.viewmode", 2, "orion.menuBarViewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+		},
+		_createNavigationViewMode: function() {
+			this._navigationViewMode = new MiniNavViewMode({
+				commandRegistry: this.commandRegistry,
+				contentTypeRegistry: this.contentTypeRegistry,
+				preferences: this.preferences,
+				fileClient: this.fileClient,
+				editorInputManager: this.editorInputManager,
+				parentNode: this.parentNode,
+				sidebarNavInputManager: this.sidebarNavInputManager,
+				serviceRegistry: this.serviceRegistry,
+				toolbarNode: this.toolbarNode,
+				sidebar: this,
+				progressService: this.progressService
+			});
+		},
+		_createProjectViewMode: function() {
+			this.projectViewMode = new ProjectNavViewMode({
+				commandRegistry: this.commandRegistry,
+				contentTypeRegistry: this.contentTypeRegistry,
+				preferences: this.preferences,
+				fileClient: this.fileClient,
+				editorInputManager: this.editorInputManager,
+				parentNode: this.parentNode,
+				sidebarNavInputManager: this.sidebarNavInputManager,
+				serviceRegistry: this.serviceRegistry,
+				toolbarNode: this.toolbarNode,
+				sidebar: this,
+				progressService: this.progressService
+			});
+		},
+		_createOutliner: function() {
+			// Outliner is responsible for adding its view mode(s) to this sidebar
+			this.outliner = new mOutliner.Outliner(this._slideout,
+			{
+				toolbar: this.toolbarNode,
+				serviceRegistry: this.serviceRegistry,
+				contentTypeRegistry: this.contentTypeRegistry,
+				preferences: this.preferences,
+				outlineService: this.outlineService,
+				commandService: this.commandRegistry,
+				selectionService: this.selection,
+				inputManager: this.editorInputManager,
+				progressService: this.progressService,
+				sidebar: this,
+				switcherNode: this.switcherNode
+			});
+		},
+		_createSlideout: function() {
+			this._slideout = new mSlideout.Slideout(this.toolbarNode.parentNode);
+			
+			// add Slideout menu group to View menu
+			this.commandRegistry.addCommandGroup(this.switcherNode.id, 
+				"orion.slideoutMenuGroup", //$NON-NLS-0$
+				3, 
+				messages["Slideout"], //$NON-NLS-0$
+				"orion.menuBarViewGroup", //$NON-NLS-0$
+				null, 
+				null, 
+				null, 
+				"dropdownSelection"); //$NON-NLS-0$
+		},
 		_createProblemsPane: function() {
 			this._problemsPane = new mProblemsView.ProblemsView({serviceRegistry: this.serviceRegistry, 
 				commandRegistry: this.commandRegistry, 
@@ -270,11 +283,8 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				}.bind(this)
 			});
 			
-			var activeViewModeId = this.getActiveViewModeId();
-			var explorer = this.getViewMode(activeViewModeId).explorer;
-			var editActionsScope = explorer.getEditActionsScope();
 			this.commandRegistry.addCommand(problemsInFolderCommand);
-			this.commandRegistry.registerCommandContribution(editActionsScope, "orion.problemsInFolder", 101, "orion.menuBarEditGroup/orion.findGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandRegistry.registerCommandContribution(this.editScope, "orion.problemsInFolder", 101, "orion.menuBarEditGroup/orion.findGroup");  //$NON-NLS-1$ //$NON-NLS-0$
  		},
 		_createInlineSearchPane: function() {
 			this._inlineSearchPane = new InlineSearchPane(this._slideout,
@@ -322,7 +332,7 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				visibleWhen: function() {
 					return true;
 				},
-				callback: function (data) {
+				callback: function () {
 					if (this._inlineSearchPane.isVisible()) {
 						this._inlineSearchPane.hide();
 					} else {
@@ -337,19 +347,12 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				}.bind(this)
 			});
 			
-			var activeViewModeId = this.getActiveViewModeId();
-			var explorer = this.getViewMode(activeViewModeId).explorer;
-			var editActionsScope = explorer.getEditActionsScope();
-	
 			this.commandRegistry.addCommand(searchInFolderCommand);
 			this.commandRegistry.addCommand(openSearchCommand);
 			
-			this.commandRegistry.registerCommandContribution(editActionsScope, "orion.searchInFolder", 99, "orion.menuBarEditGroup/orion.findGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandRegistry.registerCommandContribution(editActionsScope, "orion.openInlineSearchPane", 100, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('h', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandRegistry.registerCommandContribution(this.editScope, "orion.searchInFolder", 99, "orion.menuBarEditGroup/orion.findGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandRegistry.registerCommandContribution(this.editScope, "orion.openInlineSearchPane", 100, "orion.menuBarEditGroup/orion.findGroup", false, new mKeyBinding.KeyBinding('h', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
- 		},
- 		getInlineSearchPane: function() {
- 			return this._inlineSearchPane;
  		}
 	});
 

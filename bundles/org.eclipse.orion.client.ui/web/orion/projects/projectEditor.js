@@ -276,7 +276,7 @@ define([
 			} else {
 				var name = item.Dependency.Name;
 				if(item.disconnected){
-					name = i18nUtil.format(messages.Disconnected, name);
+					name = i18nUtil.formatMessage(messages.Disconnected, name);
 				}
 				td.appendChild(document.createTextNode(name));
 			}

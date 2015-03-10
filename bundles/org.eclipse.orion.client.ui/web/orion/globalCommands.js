@@ -816,7 +816,7 @@ define([
 			commandRegistry.processURL(window.location.href);
 		}, false);
 
-		customGlobalCommands.afterGenerateBanner.apply(this, arguments);
+		return customGlobalCommands.afterGenerateBanner.apply(this, arguments);
 	}
 
 	// return the module exports

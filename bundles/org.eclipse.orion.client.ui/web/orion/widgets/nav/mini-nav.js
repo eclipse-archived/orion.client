@@ -89,9 +89,11 @@ define([
 		this.sidebarNavInputManager.addEventListener("InputChanged", function(event){ //$NON-NLS-0$
 			_self.lastRoot = event.input;
 		});
+		this.sidebar.addViewMode(this.id, this);
 	}
 	objects.mixin(MiniNavViewMode.prototype, {
 		label: messages["Navigator"],
+		id: "nav", //$NON-NLS-0$
 		create: function() {
 			var _self = this;
 			this.explorer = new MiniNavExplorer({
