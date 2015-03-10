@@ -360,7 +360,9 @@ Lexer.prototype.token = function(src, top, bq) {
           ? 'paragraph'
           : 'html',
         pre: cap[1] === 'pre' || cap[1] === 'script' || cap[1] === 'style',
-        text: cap[0]
+        text: cap[0],
+        /* the following line is added by Orion (10/03/2015) */
+        isHTML: true
       });
       continue;
     }

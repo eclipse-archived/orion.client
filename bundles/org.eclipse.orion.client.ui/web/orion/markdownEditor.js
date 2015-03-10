@@ -228,7 +228,7 @@ define([
 						contentEnd: end,
 						end: end
 					};
-					name = this._TYPEID_PARAGRAPH;
+					name = tokens[i].isHTML ? "markup.raw.html.markdown" : this._TYPEID_PARAGRAPH; //$NON-NLS-0$
 					index = end;
 				} else if (tokens[i].type === "def") { //$NON-NLS-0$
 					newlineCount = 0;
@@ -1133,7 +1133,17 @@ define([
 		},
 		_setElementIdentifier: function(element, id) {
 			var isSelected = element.className.indexOf(this._markdownSelected) !== -1;
-			element.className = id + (isSelected ? " " + this._markdownSelected : ""); //$NON-NLS-0$
+			var classes = element.className.split(" "); //$NON-NLS-0$
+			for (var i = classes.length - 1; 0 <= i; i--) {
+				if (!classes[i].length || !classes[i].indexOf(ID_PREFIX)) {
+					classes.splice(i, 1);
+				}
+			}
+			classes.push(id);
+			if (isSelected) {
+				classes.push(this._markdownSelected);
+			}
+			element.className = classes.join(" "); //$NON-NLS-0$
 		},
 		_updateMatch: function(match, text, matches, minimumIndex) {
 			match.pattern.regex.lastIndex = minimumIndex;
