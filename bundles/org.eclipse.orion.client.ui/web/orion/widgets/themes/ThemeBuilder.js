@@ -227,13 +227,14 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 	}
 
 	function updateScopeValue(id, val){
-		var val = namedToHex(val);
+		val = namedToHex(val);
 		var isHexColor = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(val);
 
 		if (isHexColor) {
-			for(var i = 0; i < scopeList.length; i++){
+			for (var i = 0; i < scopeList.length; i++){
 				if (scopeList[i].id === id){
 					scopeList[i].value = val;
+					document.getElementById(scopeList[i].id).value = val; /* in case a color name was entered change it to hex */
 					for (var l = 0; l < scopeList[i].objPath.length; l++){
 						setValueToPath(currentTheme, scopeList[i].objPath[l], scopeList[i].value);
 					}
