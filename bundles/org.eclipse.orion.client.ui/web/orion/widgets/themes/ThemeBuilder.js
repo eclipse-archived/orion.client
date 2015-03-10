@@ -14,13 +14,14 @@ define(['i18n!orion/settings/nls/messages',
 		'orion/commandRegistry', 
 		'orion/webui/littlelib', 
 		'orion/widgets/themes/editor/editorSetup',
+		'orion/widgets/themes/colors',
 		'orion/util',
 		'text!examples/js-demo.js',
 		'text!examples/html-demo.html',
 		'text!examples/css-demo.css',
 		'text!examples/java-demo.java'],
-function(messages, mCommands, mCommandRegistry, lib, mSetup, util, jsExample, htmlExample, cssExample, javaExample) {
-	
+function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExample, htmlExample, cssExample, javaExample) {
+
 	var editorLanguage, editorTheme, originalTheme, currentTheme, revertBtn, deleteBtn ,saveBtn, themeNameInput;
 	var protectedThemes = [];
 	var defaultColor = "#ff80c0";
@@ -214,18 +215,39 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, util, jsExample, ht
 			document.getElementById("scopeOriginal").classList.remove('hide');//$NON-NLS-1$ //$NON-NLS-0$
 		}
 	}
-	
+
+	function namedToHex(val) {
+		var lowerCaseVal = val.toLowerCase();
+
+		if (colors.hasOwnProperty(lowerCaseVal)) {
+			return colors[lowerCaseVal];
+		}
+
+		return val;
+	}
+
 	function updateScopeValue(id, val){
-		for(var i = 0; i < scopeList.length; i++){
-			if (scopeList[i].id === id){
-				scopeList[i].value = val;
-				for (var l = 0; l < scopeList[i].objPath.length; l++){
-					setValueToPath(currentTheme, scopeList[i].objPath[l], scopeList[i].value);
+		var val = namedToHex(val);
+		var isHexColor = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(val);
+
+		if (isHexColor) {
+			for(var i = 0; i < scopeList.length; i++){
+				if (scopeList[i].id === id){
+					scopeList[i].value = val;
+					for (var l = 0; l < scopeList[i].objPath.length; l++){
+						setValueToPath(currentTheme, scopeList[i].objPath[l], scopeList[i].value);
+					}
+					mSetup.processTheme("editorTheme", currentTheme); //$NON-NLS-0$
 				}
-				mSetup.processTheme("editorTheme", currentTheme); //$NON-NLS-0$
+			}
+			checkForChanges();
+		} else {
+			for (i = 0; i < scopeList.length; i++){
+				if (scopeList[i].id === id) { //Resets the value back to its original value if the typed value was invalid
+					document.getElementById(scopeList[i].id).value = scopeList[i].value;
+				}
 			}
 		}
-		checkForChanges();
 	}
 	ThemeBuilder.prototype.updateScopeValue = updateScopeValue;
 	
