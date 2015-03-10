@@ -395,9 +395,9 @@ define([
 		this.render(this.parent, this.serviceRegistry, this.settings, this.title);
 	}
 	SettingsList.prototype = {
-		_makeSection: function(parent, sectionId, setting, title) {
+		_makeSection: function(parent, sectionId, setting, title, hasMultipleSections) {
 			var section = new Section(parent, { id: sectionId, title: title, useAuxStyle: true,
-				canHide: false});
+				canHide: hasMultipleSections, onExpandCollapse: true});
 			return section;
 		},
 		destroy: function() {
@@ -422,7 +422,7 @@ define([
 			for (var i=0; i<settings.length; i++) {
 				var sectionId = idPrefix + 'section' + i; //$NON-NLS-0$
 				var setting = settings[i];
-				var section = this._makeSection(parent, sectionId, setting, setting.getName() || "Unnamed"); //$NON-NLS-0$
+				var section = this._makeSection(parent, sectionId, setting, setting.getName() || "Unnamed", settings.length > 1); //$NON-NLS-0$
 				this.commandRegistry.renderCommands("restoreDefaults", section.getActionElement(), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 				
 				// Add a class name based on the category (all settings on the page have the same category currently)
