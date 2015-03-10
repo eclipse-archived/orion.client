@@ -16,14 +16,11 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 	'orion/editor/projectionTextModel', //$NON-NLS-0$
 	'orion/Deferred', //$NON-NLS-0$
 	'orion/editor/util', //$NON-NLS-0$
-	'orion/PageLinks', //$NON-NLS-0$
-	'orion/URITemplate', //$NON-NLS-0$
 	'orion/webui/littlelib', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mTextView, mProjectionTextModel, Deferred, textUtil, PageLinks, URITemplate, lib, util) {
+], function(messages, mTextView, mProjectionTextModel, Deferred, textUtil, lib, util) {
 
-	/** @private */
-	function Tooltip (view) {
+function Tooltip (view) {
 		this._view = view;
 		var parent = view.getOptions("parent"); //$NON-NLS-0$
 		this._create(parent ? parent.ownerDocument : document);
@@ -50,13 +47,14 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			textUtil.addEventListener(document, "mousedown", this._mouseDownHandler = function(event) { //$NON-NLS-0$
 				if (!self.isVisible()) { return; }
 				if (textUtil.contains(tooltipDiv, event.target || event.srcElement)) { return; }
-				self.hide();
-			}, true);
-			textUtil.addEventListener(document, "mousemove", this._mouseMoveHandler = function(event) { //$NON-NLS-0$
-				if (!self.isVisible()) { return; }
-				if (self.OKToHide(event.clientX, event.clientY)) {
+				if (!self._locked){
 					self.hide();
 				}
+			}, true);
+			textUtil.addEventListener(document, "mousemove", this._mouseMoveHandler = function(event) { //$NON-NLS-0$
+				if (!self.isVisible() || self._locked || self._hasFocus()) { return; }
+				if (self._isInRect(self._hoverRect, event.clientX, event.clientY)){ return; }
+				self.hide();
 			}, true);
 			textUtil.addEventListener(tooltipDiv, "mouseover", /* @callback */ function(event) { //$NON-NLS-0$
 				self._inTooltip = true;
@@ -66,77 +64,39 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}, false);
 			textUtil.addEventListener(tooltipDiv, "keydown", function(event) { //$NON-NLS-0$
 				if (event.keyCode === 27) {
-					self.hide();
+					if (!self._locked){
+						self.hide();
+					}
 				}
 			}, false);
 			this._view.addEventListener("Destroy", function() { //$NON-NLS-0$
 				self.destroy();
 			});
 		},
-		_getWindow: function() {
-			var document = this._tooltipDiv.ownerDocument;
-			return document.defaultView || document.parentWindow;
-		},
+		/*
+		 * Should this even be API ?
+		 */
 		destroy: function() {
 			if (!this._tooltipDiv) { return; }
 			this.hide();
 			var parent = this._tooltipDiv.parentNode;
 			if (parent) { parent.removeChild(this._tooltipDiv); }
-			var document = this._tooltipDiv.ownerDocument;
-			textUtil.removeEventListener(document, "mousedown", this._mouseDownHandler, true); //$NON-NLS-0$
-			textUtil.removeEventListener(document, "mousemove", this._mouseMoveHandler, true); //$NON-NLS-0$
+			var doc = this._tooltipDiv.ownerDocument;
+			textUtil.removeEventListener(doc, "mousedown", this._mouseDownHandler, true); //$NON-NLS-0$
+			textUtil.removeEventListener(doc, "mousemove", this._mouseMoveHandler, true); //$NON-NLS-0$
 			this._tooltipDiv = null;
-		},
-		_hasFocus: function() {
-			var tooltipDiv = this._tooltipDiv;
-			if (!tooltipDiv) { return false; }
-			var document = tooltipDiv.ownerDocument;
-			return textUtil.contains(tooltipDiv, document.activeElement);
-		},
-		_setContentRange: function(start, end) {
-			this._contentRangeStart = start;
-			this._contentRangeEnd = end;
-			var tv = this._view;
-			var curLine = tv.getLineAtOffset(start);
-			var endLine = tv.getLineAtOffset(end);
-			
-			// Adjust start / end to be on the current line if necessary
-			if (curLine !== endLine) {
-				start = tv.getLineStart(curLine);
-				// 'getLineEnd' isn't API in textView but is in textModel...
-				end = tv.getModel().getLineEnd(curLine);
-			}
-			
-			var height = tv.getLineHeight(curLine);
-			var startPos = tv.getLocationAtOffset(start);
-			var endPos = tv.getLocationAtOffset(end);
-			
-			var viewRect = { x: startPos.x, y: startPos.y, 
-								width: endPos.x - startPos.x, height: height};
-								
-			viewRect = this._view.convert(viewRect, "document", "page"); //$NON-NLS-0$ //$NON-NLS-1$
-			this._hoverArea = {left: viewRect.x, top: viewRect.y, 
-								width: viewRect.width, height: viewRect.height};
-		},
-		_isInRect: function(rect, x, y) {
-			if (!rect){
-				return false;
-			}
-			var xOK = x >= rect.left && x <= (rect.left + rect.width);
-			var yOK = y >= rect.top && y <= (rect.top + rect.height);
-			return xOK && yOK;
 		},
 		/**
 		 * @name hide
-		 * @description Hides the current hover popup
+		 * @description Hides the current hover popup (if it's showing)
 		 * @function
 		 * @public
-		 * @param {int} hideDelay Delay the hide by this many millisecs (defaults to the 'hideDelay' field
-		 * of this tooltip)
 		*/
 		hide: function() {
-			if (!this.isVisible()) { return; }
-			
+			if (!this.isVisible()){
+				return;
+			}
+				
 			if (this.hover) {
 				this.hover.clearQuickFixes();
 			}
@@ -149,7 +109,8 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				this._contentsView = null;
 			}
 			if (this._tooltipContents) {
-				this._tooltipContents.innerHTML = "";
+				this._tooltipDiv.removeChild(this._tooltipContents);
+				this._tooltipContents = null;
 			}
 			this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
 			this._tooltipDiv.style.left = "auto"; //$NON-NLS-0$
@@ -162,19 +123,24 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			// cancel any outstanding defers
 			if (this._hoverInfo) {
 				this._hoverInfo.forEach(function(info) {
-					info.cancel();
+					if (!info.resolved) {
+						info.cancel();
+					}
 				});
 			}
 
 			// Values that can be overridden by returned info			
-			this._target = undefined;
-			this._offsetX = undefined;
-			this._offsetY = undefined;
-			this._position = undefined;
-			this._hoverArea = undefined;
-			this._preventTooltipClose = undefined;
+//			this._x = undefined;
+//			this._y = undefined;
+//			this._width = undefined;
+//			this._height = undefined;
+//			this._offsetX = undefined;
+//			this._offsetY = undefined;
+//			this._position = undefined;
+//			this._hoverArea = undefined;
+//			this._locked = undefined;
 
-			// vlaues that are calculated
+			// values that are calculated
 			this._hoverInfo = undefined;
 			this._hoverRect = undefined;
 			this._tipRect = undefined;
@@ -189,210 +155,180 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		isVisible: function() {
 			return this._tooltipDiv && this._tooltipDiv.style.visibility === "visible"; //$NON-NLS-0$
 		},
-		/**
-		 * @name OKToHover
-		 * @description Returns whether a new hover can be opened in the editor.  New hovers
-		 * may be prevented from opening because an existing hover has focus or is otherwise unready
-		 * to be closed. Provide x,y coordinates to check if that location is within the bounding rectangle
-		 * around the tooltip.
-		 * @function
-		 * @param x Location to check if within bounds, usually a cursor location
-		 * @param y Location to check if within bounds, usually a cursor location
-		 * @returns {Boolean} returns whether a new hover can be opened in the editor
-		 */
-		OKToHover: function(x, y) {
-			if (!this.isVisible()){
-				return true;
-			}
-			if (this._preventTooltipClose && this._preventTooltipClose()){
-				return false;
-			}
-			if (this._hasFocus()){
-				return false;
-			}
-			return !this._isInRect(this._hoverArea, x, y);
-		},
-		/**
-		 * @name OKToHide
-		 * @description Returns whether an existing hover should be hidden or if it should stay open.
-		 * A hover may stay open if it has focus or the user's mouse x and y coordinates are within the bounding
-		 * rectangle around the tooltip.
-		 * @function
-		 * @param x Location to check if within bounds, usually a cursor location
-		 * @param y Location to check if within bounds, usually a cursor location
-		 * @returns {Boolean} returns whether the existing hover should be closed
-		 */
-		OKToHide: function(x, y) {
-			if (!this.isVisible()){
-				return false;
-			}
-			if (this._preventTooltipClose && this._preventTooltipClose()){
-				return false;
-			}
-			if (this._hasFocus()){
-				return false;
-			}
-			return !this._isInRect(this._hoverRect, x, y);
-		},
-		/**
-		 * @name show
-		 * @description Show the tooltip using the current target
-		 * @function
-		 * @public
-		 * @param {boolean} autoHide If 'true' then the tooltip will call 'hide' once the 'hideDelay'
-		 * timer expires. if 'false' then the tooltip will remain visible until dismissed by the User.
-		 *
-		 * Note that if 'autoHide' is false then the tooltip will attempt to set the focus onto the
-		 * resulting tooltip.
-		*/
-		show: function(target, giveFocus) {
-			if (!target) {
-				return;
-			}
+
+		_processInfo: function(target, update) {
+			// Remember where the cursor is
+			this._lastTarget = target;
 			
-			var tooltipDiv = this._tooltipDiv;
-			var tooltipContents = this._tooltipContents;
-			if (!tooltipDiv || !tooltipContents){
+			var newTooltipContents;
+			if (update && this._tooltipContents) {
+				// Clear out any current content
+				this._tooltipContents.innerHTML = "";
+				newTooltipContents = this._tooltipContents;
+			} else {
+				// Create a div for any new content
+ 				newTooltipContents = util.createElement(this._tooltipDiv.ownerDocument, "div"); //$NON-NLS-0$
+ 			}
+			
+			// Get any immediate data
+			var info = target.getTooltipInfo();
+			
+			// Now get any info from plugins
+			if (info) {
+				
+				this._captureLocationInfo(info);
+				
+				// Any immediate info to render ?
+				if (info.contents) {
+					if (this._renderImmediateInfo(newTooltipContents, info.contents, info.context)) {
+						this._showContents(newTooltipContents, update);
+					}
+				}
+				
+				if (this.hover && info.offset !== undefined){
+					var hoverContext = Object.create(null); 
+					if (info.context) {
+						hoverContext = info.context;
+					}
+					hoverContext.offset = info.offset;
+					this._hoverInfo = this.hover.computeHoverInfo(hoverContext);
+				
+					if (this._hoverInfo) {
+						var self = this;
+						this._hoverInfo.forEach(function(info) {
+							Deferred.when(info, function (data) {
+								info.resolved = true;  // resolved
+								if (data) {
+									if (self._renderPluginContent(newTooltipContents, data)) {
+										if (self.isVisible()) {
+											self._tooltipDiv.resize();
+										} else {
+											self._showContents(newTooltipContents, update);
+										}
+									}
+								}
+							}, function(error) {
+								if (typeof console !== "undefined") { //$NON-NLS-0$
+									console.log("Error computing hover tooltip"); //$NON-NLS-0$
+									console.log(error && error.stack);
+								}
+							});
+						});
+						return true;
+					}
+				}
+			}
+		},
+		/**
+		 * @name onHover
+		 * @description Show the tooltip using the given target information. Only called for hover events.
+		 * @function
+		 * @param target
+		 * @param giveFocus
+		 */
+		onHover: function(target) {
+			if (!target) {
 				return;
 			}
 			
 			// Don't process if we're in the hoverArea or tip rects
 			if (this._isInRect(this._hoverArea, target.clientX, target.clientY)
-					|| this._isInRect(this._tipRect, target.clientX, target.clientY)) {
+					|| this._isInRect(this._tipRect, target.clientX, target.clientY)
+					|| this._locked) {
 				return;
 			}
 			
-			var info = target.getTooltipInfo();
-
-			if (!info) {
+			this._processInfo(target);
+		},		
+		/**
+		 * @name show
+		 * @description Show the tooltip using the given target information
+		 * @function
+		 * @param target The target through which the info is obtained
+		 * @param locked If true locks the tooltip (never hides unless 'hide' is called)
+		 * @param giveFocus If true forces the focus onto the tooltip (used for F2 processing)
+		 */
+		show: function(target, locked, giveFocus) {
+			this._processInfo(target);
+			this._locked = locked;
+			if (giveFocus) {
+				this._setInitialFocus(this._tooltipDiv);
+			}
+		},
+		/**
+		 * @name update
+		 * @description Updates the information in an already visible tooltip
+		 * @function
+		 * @param target The target through which the info is obtained
+		 * @param locked If true locks the tooltip (never hides unless 'hide' is called)
+		 * @param giveFocus If true forces the focus onto the tooltip (used for F2 processing)
+		 */
+		update: function(target) {
+			if (!target){
 				return;
 			}
-			
-			if (this.isVisible()) {
-				this.hide();
-			}
-			
-			// Capture optional positioning
-			this._position = info.position;
-			this._hoverArea = info.hoverArea;
+			this._processInfo(target, true);
+		},
+		
+		/*
+		 ******************************************************************************************************************* 
+		 * Positioning: This section deals with setting the location and size of the tooltip
+		 ******************************************************************************************************************* 
+		 */
+		_captureLocationInfo: function(info) {
+			this._x = info.x;
+			this._y = info.y;
+			this._width = info.width;
+			this._height = info.height;
 			this._offsetX = info.offsetX;
 			this._offsetY = info.offsetY;
+			this._position = info.position;
+			this._hoverArea = info.hoverArea;
 			
-			this._target = target;
-			
-			tooltipDiv.style.left = tooltipDiv.style.right = tooltipDiv.style.width = tooltipDiv.style.height = 
-				tooltipContents.style.width = tooltipContents.style.height = "auto"; //$NON-NLS-0$
-			var tooltipDoc = tooltipDiv.ownerDocument;
-			var documentElement = tooltipDoc.documentElement;
-			
-			var contents = info.contents;
-			if (contents instanceof Array) {
-				contents = this._getAnnotationContents(contents, info.context);			
-			}
-			
-			if (this.hover && info.offset !== undefined && !contents) {
-				var context = Object.create(null); 
-				if (info.context){
-					context = info.context;
+			if (info.context){
+				// Adjust the tooltip for folding comments to exactly cover the unfolded text location
+				if (info.context.rulerStyle && info.context.rulerStyle.indexOf("folding") >= 0){ //$NON-NLS-0$
+					this._offsetX = -1;
+					this._offsetY = -3;
 				}
-				context.offset = info.offset;
-				this._hoverInfo = this.hover.computeHoverInfo(context);
 			}
 			
-			if (typeof contents === "string") { //$NON-NLS-0$
-				tooltipContents.innerHTML = contents;
-			} else if (this._isNode(contents)) {
-				tooltipContents.appendChild(contents);
-			} else if (contents instanceof mProjectionTextModel.ProjectionTextModel) {
-				this._offsetX = -1;  // re-position to match the visible comment
-				this._offsetY = -3;  // re-position to match the visible comment
-				
-				var view = this._view;
-				var options = view.getOptions();
-				options.wrapMode = false;
-				options.parent = tooltipContents;
-				var tooltipTheme = "tooltipTheme"; //$NON-NLS-0$
-				var theme = options.themeClass;
-				if (theme) {
-					theme = theme.replace(tooltipTheme, "");
-					if (theme) { theme = " " + theme; } //$NON-NLS-0$
-					theme = tooltipTheme + theme;
-				} else {
-					theme = tooltipTheme;
-				}
-				options.themeClass = theme;
-				var contentsView = this._contentsView = new mTextView.TextView(options);
-				//TODO need to find a better way of sharing the styler for multiple views
-				var listener = {
-					onLineStyle: function(e) {
-						view.onLineStyle(e);
-					}
-				};
-				contentsView.addEventListener("LineStyle", listener.onLineStyle); //$NON-NLS-0$
-				contentsView.setModel(contents);
-				var size = contentsView.computeSize();
-				tooltipContents.style.width = size.width + "px"; //$NON-NLS-0$
-				tooltipContents.style.height = size.height + "px"; //$NON-NLS-0$
-				contentsView.resize();
-			} else if (!(this._hoverInfo && this._hoverInfo.length)) {
-				return;
-			}
+		},
+		_computeTooltipPosition: function _computeTooltipPosition(){
+			var tooltipDiv = this._tooltipDiv;
+			var documentElement = tooltipDiv.ownerDocument.documentElement;
 			
-			if (info.width) {
-				tooltipDiv.style.width = info.width + "px"; //$NON-NLS-0$
+			if (this._width) {
+				tooltipDiv.style.width = this._width + "px"; //$NON-NLS-0$
 			}
-			if (info.height) {
-				tooltipDiv.style.height = info.height + "px"; //$NON-NLS-0$
+			if (this._height) {
+				tooltipDiv.style.height = this._height + "px"; //$NON-NLS-0$
 				tooltipDiv.style.overflowY = "auto"; //$NON-NLS-0$
 			}
 			
 			var top = parseInt(this._getNodeStyle(tooltipDiv, "padding-top", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
 			top += parseInt(this._getNodeStyle(tooltipDiv, "border-top-width", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
-			top = info.y - top;
+			top = this._y - top;
 			tooltipDiv.style.top = top + "px"; //$NON-NLS-0$
 			tooltipDiv.style.maxHeight = (documentElement.clientHeight - top - 10) + "px"; //$NON-NLS-0$
 			tooltipDiv.style.opacity = "1"; //$NON-NLS-0$
-			
-			if (info.preventTooltipClose){
-				this._preventTooltipClose = info.preventTooltipClose;
-			}
-			
-			var self = this;
-			if (this._hoverInfo) {
-				this._hoverInfo.forEach(function(info) {
-					Deferred.when(info, function (data) {
-						if (data) {
-							if (self._renderContent(tooltipDoc, tooltipContents, data)) {
-								self._showTooltip(giveFocus, tooltipDiv);
-							
-								// Adjust the hoverRect to match the new content
-								var divBounds = lib.bounds(tooltipDiv);
-								self._setHoverRect(self._hoverArea, divBounds);
-							}
-						}
-					}, function(error) {
-						if (typeof console !== "undefined") { //$NON-NLS-0$
-							console.log("Error computing hover tooltip"); //$NON-NLS-0$
-							console.log(error && error.stack);
-						}
-					});
-				});
-			}
-			
-			// Delay the showing of a tootip with no 'static' contents
-			if (contents) {
-				this._showTooltip(giveFocus, tooltipDiv);
-			}
-		},
-		_showTooltip: function(giveFocus, tooltipDiv) {
-			if (this.isVisible()){
-				return;
+		},		
+		_showContents: function _showContents(newContentsDiv, update) {
+			// TODO Hide is performing two operations, make the tooltip invisible and clearing out any stored data
+			if (this.isVisible() && !update) {
+				this.hide();
 			}
 
+			// TODO Potential for an empty tooltip or duplicated content, what if both static and deferred content are added?
+			this._tooltipContents = newContentsDiv;
+			this._tooltipDiv.appendChild(newContentsDiv);
+			
+			this._computeTooltipPosition();
+			
 			// HACK! Fake a contentBox if necessary
 			if (!this._hoverArea) {
 				// Use the whole line
-				var curOffset = this._view.getOffsetAtLocation(this._target.x, this._target.y);
+				var curOffset = this._view.getOffsetAtLocation(this._lastTarget.x, this._lastTarget.y);
 				if (curOffset >= 0) {
 					var start = this._view.getNextOffset(curOffset, 
 										{ unit: "word", count: -1}); //$NON-NLS-0$
@@ -401,7 +337,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					this._setContentRange(start, end);
 				} else {
 					this._hoverArea = {
-						left: this._target.clientX-8, top: this._target.clientY -8,
+						left: this._lastTarget.clientX-8, top: this._lastTarget.clientY -8,
 						width: 16, height: 16
 					};
 				}
@@ -443,11 +379,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			this._setHoverRect(this._hoverArea, tipRect);
 			
 			this._tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
-
-			if (giveFocus === true) {
-				this._setInitialFocus(tooltipDiv);
-			}
-		},
+		},		
 		_setHoverRect: function(hoverArea, tipRect) {
 			var left = Math.min(hoverArea.left, tipRect.left);
 			var top = Math.min(hoverArea.top, tipRect.top);
@@ -489,18 +421,103 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				toFocus.focus();
 			}
 		},
-		_renderContent: function(tooltipDoc, tooltipContents, data) {
-			if (typeof data.content === 'undefined' && typeof data.uriTemplate === 'undefined') { //$NON-NLS-0$ //$NON-NLS-1$
+		
+		/*
+		 ******************************************************************************************************************* 
+		 * Utility: This section contains various utility methods
+		 ******************************************************************************************************************* 
+		 */
+		_getWindow: function() {
+			var document = this._tooltipDiv.ownerDocument;
+			return document.defaultView || document.parentWindow;
+		},
+		_hasFocus: function() {
+			var tooltipDiv = this._tooltipDiv;
+			if (!tooltipDiv) { return false; }
+			return textUtil.contains(tooltipDiv, tooltipDiv.ownerDocument.activeElement);
+		},
+		setInitialFocus: function(tooltipDiv) {
+			// Any buttons ?
+			var button = lib.$("button", tooltipDiv); //$NON-NLS-0$
+			if (button) {
+				button.focus();
+				return;
+			}
+			// Any links ?
+			var link = lib.$("a", tooltipDiv); //$NON-NLS-0$
+			if (link) {
+				link.focus();
+				var self = this;
+				link.addEventListener("click", function() { //$NON-NLS-0$
+					self.hide();
+				});
+				return;
+			}
+			// Give up and focus on the first tabbable
+			var toFocus = lib.firstTabbable(tooltipDiv);
+			if (toFocus) {
+				toFocus.focus();
+			}
+		},
+		_getNodeStyle: function(node, prop, defaultValue) {
+			return textUtil.getNodeStyle(node, prop, defaultValue);
+		},
+		_isNode: function (obj) {
+			return typeof Node === "object" ? obj instanceof Node : //$NON-NLS-0$
+				obj && typeof obj === "object" && typeof obj.nodeType === "number" && typeof obj.nodeName === "string"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		},
+		_setContentRange: function(start, end) {
+			this._contentRangeStart = start;
+			this._contentRangeEnd = end;
+			var tv = this._view;
+			var curLine = tv.getLineAtOffset(start);
+			var endLine = tv.getLineAtOffset(end);
+			
+			// Adjust start / end to be on the current line if necessary
+			if (curLine !== endLine) {
+				start = tv.getLineStart(curLine);
+				// 'getLineEnd' isn't API in textView but is in textModel...
+				end = tv.getModel().getLineEnd(curLine);
+			}
+			
+			var height = tv.getLineHeight(curLine);
+			var startPos = tv.getLocationAtOffset(start);
+			var endPos = tv.getLocationAtOffset(end);
+			
+			var viewRect = { x: startPos.x, y: startPos.y, 
+								width: endPos.x - startPos.x, height: height};
+								
+			viewRect = this._view.convert(viewRect, "document", "page"); //$NON-NLS-0$ //$NON-NLS-1$
+			this._hoverArea = {left: viewRect.x, top: viewRect.y, 
+								width: viewRect.width, height: viewRect.height};
+		},
+		_isInRect: function(rect, x, y) {
+			if (!rect){
+				return false;
+			}
+			var xOK = x >= rect.left && x <= (rect.left + rect.width);
+			var yOK = y >= rect.top && y <= (rect.top + rect.height);
+			return xOK && yOK;
+		},
+		/*
+		 ******************************************************************************************************************* 
+		 * Rendering: This section deals with rendering supplied data into HTML for inclusion into the Info Popup.
+		 ******************************************************************************************************************* 
+		 */
+		_renderPluginContent: function(contentsDiv, data) {
+			var document = this._tooltipDiv.ownerDocument;
+			if (typeof data.content === 'undefined' || data.type === 'undefined') { //$NON-NLS-0$ //$NON-NLS-1$
 			    return false;
 			}
-			var sectionDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$;
+			
+			var sectionDiv = util.createElement(document, "div"); //$NON-NLS-0$;
 			// render the title, if any
 			if (data.title) {
-				var titleDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$;
+				var titleDiv = util.createElement(document, "div"); //$NON-NLS-0$;
 				titleDiv.innerHTML = this.hover.renderMarkDown ? this.hover.renderMarkDown(data.title) : data.title;
 				sectionDiv.appendChild(titleDiv);
 			}
-			var contentDiv = util.createElement(tooltipDoc, "div"); //$NON-NLS-0$
+			var contentDiv = util.createElement(document, "div"); //$NON-NLS-0$
 			switch(data.type) { //$NON-NLS-0$
 				case 'delegatedUI': { //$NON-NLS-0$
 					// The delegated UI is not included in the 8.0 release, see Bug 449240.
@@ -533,12 +550,68 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					break;
 				}
 				default: {
-					contentDiv.appendChild(tooltipDoc.createTextNode(data.content));
+					contentDiv.appendChild(document.createTextNode(data.content));
 				}
 			}
 			sectionDiv.appendChild(contentDiv);
-			tooltipContents.appendChild(sectionDiv);
+			contentsDiv.appendChild(sectionDiv);
 			return true;
+		},
+		/*
+		 * Empty or empty array = call hover service for dynamic content
+		 * Array = annotations
+		 * String = HTML text
+		 * Node = HTML node
+		 * ProjectionTextModel = code projection
+		 */
+		_renderImmediateInfo: function _renderImmediateInfo(contentsDiv, contents, context) {						
+			// If it's an annotation then process the annotation(s) to get the actual data
+			if (contents instanceof Array) {
+				contents = this._getAnnotationContents(contents, context);			
+				if (!contents) {
+					return false;
+				}
+			}
+			
+			if (typeof contents === "string") { //$NON-NLS-0$
+				contentsDiv.innerHTML = contents;
+				return true;
+			} else if (this._isNode(contents)) {
+				contentsDiv.appendChild(contents);
+				return true;
+			} else if (contents instanceof mProjectionTextModel.ProjectionTextModel) {
+				this._tooltipContents = contentsDiv;
+				this._tooltipDiv.appendChild(contentsDiv);
+				var view = this._view;
+				var options = view.getOptions();
+				options.wrapMode = false;
+				options.parent = contentsDiv;
+				var tooltipTheme = "tooltipTheme"; //$NON-NLS-0$
+				var theme = options.themeClass;
+				if (theme) {
+					theme = theme.replace(tooltipTheme, "");
+					if (theme) { theme = " " + theme; } //$NON-NLS-0$
+					theme = tooltipTheme + theme;
+				} else {
+					theme = tooltipTheme;
+				}
+				options.themeClass = theme;
+				var contentsView = this._contentsView = new mTextView.TextView(options);
+				//TODO need to find a better way of sharing the styler for multiple views
+				var listener = {
+					onLineStyle: function(e) {
+						view.onLineStyle(e);
+					}
+				};
+				contentsView.addEventListener("LineStyle", listener.onLineStyle); //$NON-NLS-0$
+				contentsView.setModel(contents);
+				var size = contentsView.computeSize();
+				contentsDiv.style.width = size.width + "px"; //$NON-NLS-0$
+				contentsDiv.style.height = size.height + "px"; //$NON-NLS-0$
+				contentsView.resize();
+				return true;
+			}
+			return false;
 		},
 		
 		/**
@@ -547,7 +620,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		 * @function
 		 * @private
 		 * @param annotations the list of annotations to render
-		 * @param context optional object containing context information, such as where the annotations are displayed (ruler, editor, etc.)
+		 * @param context optional object containing where the annotations are displayed (ruler, editor, etc.)
 		 * @returns returns document node containing rendered tooltip content
 		 */
 		_getAnnotationContents: function(annotations, context) {
@@ -638,6 +711,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					}
 					return html;
 				} else {
+					// TODO Test that the source here is still correct
 					// Don't create a projection model if we are in the editor it will just duplicate the content the user is looking at
 					if (context && context.source && context.source === 'editor'){ //$NON-NLS-0$
 						return null;
@@ -668,14 +742,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				return tooltipHTML;
 			}
 		},
-
-		_getNodeStyle: function(node, prop, defaultValue) {
-			return textUtil.getNodeStyle(node, prop, defaultValue);
-		},
-		_isNode: function (obj) {
-			return typeof Node === "object" ? obj instanceof Node : //$NON-NLS-0$
-				obj && typeof obj === "object" && typeof obj.nodeType === "number" && typeof obj.nodeName === "string"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		}
+		
 	};
 	return {Tooltip: Tooltip};
 });

@@ -508,13 +508,14 @@ define("orion/editor/rulers", [
 			}
 			
 			var rulerLocation = this.getLocation();
+			var rulerStyle = this.getRulerStyle();
 			// The tooltip is positioned opposite to where the ruler is
 			var position = rulerLocation === "left" ? "right" : "left"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 			var info = {
 				contents: contents,
 				position: position,
 				hoverArea: hoverArea,
-				context: {source: "ruler" + rulerLocation} //$NON-NLS-0$
+				context: {source: "ruler", rulerLocation: rulerLocation, rulerStyle: rulerStyle.styleClass} //$NON-NLS-0$
 			};
 			
 			var viewRect = lib.bounds(view._clientDiv);
