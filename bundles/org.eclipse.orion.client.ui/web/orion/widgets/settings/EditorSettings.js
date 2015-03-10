@@ -13,14 +13,17 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 [
 	'i18n!orion/settings/nls/messages', //$NON-NLS-0$
 	'orion/widgets/input/LabeledTextfield', //$NON-NLS-0$
+	'orion/widgets/input/LabeledTextfieldLocal', //$NON-NLS-0$
 	'orion/widgets/input/LabeledCheckbox',  //$NON-NLS-0$
+	'orion/widgets/input/LabeledCheckboxLocal',  //$NON-NLS-0$
 	'orion/widgets/input/LabeledSelect', //$NON-NLS-0$
+	'orion/widgets/input/LabeledSelectLocal', //$NON-NLS-0$
 	'orion/section', //$NON-NLS-0$
 	'orion/widgets/settings/Subsection', //$NON-NLS-0$
 	'orion/commands', //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
 	'orion/webui/littlelib' //$NON-NLS-0$
-], function(messages, LabeledTextfield, LabeledCheckbox, LabeledSelect, mSection, Subsection, commands, objects, lib)  {
+], function(messages, LabeledTextfield, LabeledTextfieldLocal, LabeledCheckbox, LabeledCheckboxLocal, LabeledSelect, LabeledSelectLocal, mSection, Subsection, commands, objects, lib)  {
 	var KEY_MODES = [
 		{value: "", label: messages.Default},
 		{value: "Emacs", label: "Emacs"}, //$NON-NLS-1$ //$NON-NLS-0$
@@ -53,11 +56,17 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 	}
 
 	function createBooleanProperty(property, options, prefs, editorSettings) {
+		if (options.local) {
+			return addLocalIndicator(new LabeledCheckboxLocal(options), property, this, options, prefs, editorSettings);
+		}
 		return addLocalIndicator(new LabeledCheckbox(options), property, this, options, prefs, editorSettings);
 	}
 
 	function createIntegerProperty(property, options, prefs, editorSettings) {
 		options.inputType = "integer"; //$NON-NLS-0$
+		if (options.local) {
+			return addLocalIndicator(new LabeledTextfieldLocal(options), property, this, options, prefs, editorSettings);
+		}
 		return addLocalIndicator(new LabeledTextfield(options), property, this, options, prefs, editorSettings);
 	}
 
@@ -74,6 +83,10 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				set.selected = true;
 			}
 			options.options.push(set);
+		}
+
+		if (options.local) {
+			return addLocalIndicator(new LabeledSelectLocal(options), property, this, options, prefs, editorSettings);
 		}
 		return addLocalIndicator(new LabeledSelect(options), property, this, options, prefs, editorSettings);
 	}
@@ -298,7 +311,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					}
 					fontSizes("px"); //$NON-NLS-0$
 					fontSizes("pt"); //$NON-NLS-0$
-					select = this.sizeSelect = new LabeledSelect(
+					select = this.sizeSelect = new LabeledSelectLocal(
 						{	fieldlabel:messages["Font Size"], //$NON-NLS-0$
 							options:options,
 							postChange: themePreferences.setFontSize.bind(themePreferences)
@@ -319,7 +332,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 						}
 						options.push(set);
 					}
-					select = this.themeSelect = new LabeledSelect(
+					select = this.themeSelect = new LabeledSelectLocal(
 						{	fieldlabel:messages.Theme,
 							options:options,
 							postChange: themePreferences.setTheme.bind(themePreferences)
