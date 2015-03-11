@@ -388,7 +388,10 @@ define([
 				_self.workspaceMetadata = workspace;
 				var project = null;
 				workspace.Children.some(function(p) {
-					if (metadata.Location.indexOf(p.Location) === 0) {
+					if (metadata.Location === p.Location) {
+						project = metadata;
+						return true;
+					} else if (metadata.Location.indexOf(p.Location) === 0) {
 						project = p;
 						return true;
 					}
