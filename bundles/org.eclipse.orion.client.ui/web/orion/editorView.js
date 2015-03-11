@@ -262,28 +262,36 @@ define([
 			}
 		},
 		recordSession: function() {
-			var textView = this.editor.getTextView();
+			var editor = this.editor;
+			var textView = editor.getTextView();
 			var inputManager = this.inputManager;
 			if (textView && inputManager) {
 				var metadata = inputManager.getFileMetadata();
 				if (metadata) {
 					var session = sessionStorage.editorViewSection ? JSON.parse(sessionStorage.editorViewSection) : {};
-					session[metadata.Location] = {topIndex: textView.getTopIndex()};
+					var selections = editor.getSelections().map(function(s) { return s.getOrientedSelection(); });
+					session[metadata.Location] = {
+						ETag: metadata.ETag,
+						topIndex: textView.getTopIndex(),
+						selections: selections,
+					};
 					sessionStorage.editorViewSection = JSON.stringify(session);
 				}
 			}
 		},
 		loadSession: function(evt) {
-			var textView = this.editor.getTextView();
+			var editor = this.editor;
+			var textView = editor.getTextView();
 			var inputManager = this.inputManager;
 			if (textView && inputManager) {
 				var metadata = inputManager.getFileMetadata();
 				if (metadata) {
 					var session = sessionStorage.editorViewSection ? JSON.parse(sessionStorage.editorViewSection) : {};
 					var locationSession = session[metadata.Location];
-					if (locationSession) {
+					if (locationSession && locationSession.ETag === metadata.ETag) {
 						evt.session = {
 							apply: function() {
+								editor.setSelections(locationSession.selections);
 								textView.setTopIndex(locationSession.topIndex);
 							}
 						};

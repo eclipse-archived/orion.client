@@ -388,6 +388,10 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			return this.caret ? this.end : this.start;
 		},
 		/** @private */
+		getOrientedSelection: function() {
+			return {start: this.getAnchor(), end: this.getCaret()};
+		},
+		/** @private */
 		toString: function() {
 			return "start=" + this.start + " end=" + this.end + (this.caret ? " caret is at start" : " caret is at end"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
