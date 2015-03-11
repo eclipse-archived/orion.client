@@ -39,6 +39,7 @@ define({
 	'no-reserved-keys' : 'Reserved words should not be used as property keys.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-shadow' : '\'${0}\' is already declared in the upper scope.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-sparse-arrays': 'Sparse array declarations should be avoided.',  //$NON-NLS-0$ //$NON-NLS-1$
+	'no-throw-literal': 'Throw an Error instead.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-undef-defined' : '\'${0}\' is undefined.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-undef-readonly': '\'${0}\' is readonly.',  //$NON-NLS-0$  //$NON-NLS-1$
 	'no-unreachable' : 'Unreachable code.', //$NON-NLS-0$  //$NON-NLS-1$
@@ -49,7 +50,6 @@ define({
 	'no-use-before-define': '\'${0}\' was used before it was defined.', //$NON-NLS-0$  //$NON-NLS-1$
 	'radix': 'Missing radix parameter.', //$NON-NLS-0$  //$NON-NLS-1$
 	'semi': 'Missing semicolon.', //$NON-NLS-0$  //$NON-NLS-1$
-	'throw-error': 'Throw an Error instead.', //$NON-NLS-0$  //$NON-NLS-1$
 	'use-isnan': 'Use the isNaN function to compare with NaN.', //$NON-NLS-0$  //$NON-NLS-1$
 	'valid-typeof' : 'Invalid typeof comparison.',  //$NON-NLS-0$ //$NON-NLS-1$
 	'no-shadow-global' : 'Variable \'${0}\' shadows a global member.',  //$NON-NLS-0$ //$NON-NLS-1$

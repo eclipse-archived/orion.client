@@ -48,7 +48,7 @@ define({//Default message bundle
 	'unnecessarySemis' : 'Unnecessary semicolons:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedParams' : 'Unused parameters:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unsupportedJSLint' : 'Unsupported environment directive:',  //$NON-NLS-0$  //$NON-NLS-1$
-	'throwError': 'Literal used in \'throw\':',  //$NON-NLS-0$  //$NON-NLS-1$
+	'noThrowLiteral': 'Literal used in \'throw\':',  //$NON-NLS-0$  //$NON-NLS-1$
 	'generateDocName' : 'Generate Element Comment',  //$NON-NLS-0$  //$NON-NLS-1$
 	'generateDocTooltip' : 'Generate a JSDoc-like comment for the selected JavaScript element',  //$NON-NLS-0$  //$NON-NLS-1$
 	'openDeclName' : 'Open Declaration',  //$NON-NLS-0$  //$NON-NLS-1$

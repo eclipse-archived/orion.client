@@ -537,8 +537,8 @@ define([
 				 	        	                	defaultValue: error,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "throw-error",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessages["throwError"],  //$NON-NLS-0$
+				 	        	                {	id: "no-throw-literal",  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noThrowLiteral"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
