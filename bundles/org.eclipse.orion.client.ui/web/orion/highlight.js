@@ -131,11 +131,15 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 						styler = new mTextStyler2.TextStyler(textView, annotationModel, stylerAdapter);
 					}
 				}
+			} else if (NEW) {
+				/* even if a grammar was not found create a default pattern adapter so that whitespace will be shown if appropriate */
+				stylerAdapter = new mTextStyler2.createPatternBasedAdapter([], "");
+				styler = new mTextStyler2.TextStyler(textView, annotationModel, stylerAdapter);
 			}
 			return styler;
 		});
 	}
-	
+
 	/**
 	 * @name orion.highlight.SyntaxHighlighter
 	 * @class
