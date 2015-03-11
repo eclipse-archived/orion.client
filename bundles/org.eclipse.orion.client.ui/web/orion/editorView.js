@@ -282,7 +282,11 @@ define([
 					var session = sessionStorage.editorViewSection ? JSON.parse(sessionStorage.editorViewSection) : {};
 					var locationSession = session[metadata.Location];
 					if (locationSession) {
-						evt.topIndex = locationSession.topIndex;
+						evt.session = {
+							apply: function() {
+								textView.setTopIndex(locationSession.topIndex);
+							}
+						};
 					}
 				}
 			}

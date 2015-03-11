@@ -606,12 +606,12 @@ define([
 				if (editor && editor.getTextView && editor.getTextView()) {
 					var textView = editor.getTextView();
 					textView.addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
-					if (evt.topIndex) {
-						textView.setTopIndex(evt.topIndex);
-					}
 				}
 				this._unsavedChanges = [];
 				this.processParameters(input);
+			}
+			if (evt.session) {
+				evt.session.apply();
 			}
 
 			this._saveEventLogged = false;
