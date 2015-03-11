@@ -512,7 +512,8 @@ function Tooltip (view) {
 		 */
 		_renderPluginContent: function(contentsDiv, data) {
 			var document = this._tooltipDiv.ownerDocument;
-			if (typeof data.content === 'undefined' || data.type === 'undefined') { //$NON-NLS-0$ //$NON-NLS-1$
+			// data object should be an object containing the type and content.  If no type or unknown type, default to string.
+			if (typeof data !== 'string' && typeof data.content === 'undefined') { //$NON-NLS-0$ //$NON-NLS-1$
 			    return false;
 			}
 			
@@ -524,39 +525,44 @@ function Tooltip (view) {
 				sectionDiv.appendChild(titleDiv);
 			}
 			var contentDiv = util.createElement(document, "div"); //$NON-NLS-0$
-			switch(data.type) { //$NON-NLS-0$
-				case 'delegatedUI': { //$NON-NLS-0$
-					// The delegated UI is not included in the 8.0 release, see Bug 449240.
-				}
-				case 'html': { //$NON-NLS-0$
-					if (data.content){
-						var iframe = document.createElement("iframe"); //$NON-NLS-0$
-						iframe.id = 'HtmlHover'; //$NON-NLS-0$
-						iframe.name = 'HTML Hover'; //$NON-NLS-0$
-						iframe.type = "text/html"; //$NON-NLS-0$
-						iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
-						iframe.style.border = "none"; //$NON-NLS-0$
-						iframe.style.width = "auto"; //$NON-NLS-0$
-						iframe.style.height = "auto"; //$NON-NLS-0$
-						iframe.srcdoc = data.content;
-						if (data.width) {
-							iframe.style.width = data.width;
-						}
-						if (data.height) {
-							iframe.style.height = data.height;
-						}
-						sectionDiv.appendChild(iframe);
+			
+			if (typeof data === 'string'){ //$NON-NLS-0$
+				contentDiv.appendChild(document.createTextNode(data));
+			} else {
+				switch(data.type) { //$NON-NLS-0$
+					case 'delegatedUI': { //$NON-NLS-0$
+						// The delegated UI is not included in the 8.0 release, see Bug 449240.
 					}
-					break;
-				}
-				case 'markdown': { //$NON-NLS-0$
-					if (this.hover.renderMarkDown) {
-						contentDiv.innerHTML = this.hover.renderMarkDown(data.content);
+					case 'html': { //$NON-NLS-0$
+						if (data.content){
+							var iframe = document.createElement("iframe"); //$NON-NLS-0$
+							iframe.id = 'HtmlHover'; //$NON-NLS-0$
+							iframe.name = 'HTML Hover'; //$NON-NLS-0$
+							iframe.type = "text/html"; //$NON-NLS-0$
+							iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
+							iframe.style.border = "none"; //$NON-NLS-0$
+							iframe.style.width = "auto"; //$NON-NLS-0$
+							iframe.style.height = "auto"; //$NON-NLS-0$
+							iframe.srcdoc = data.content;
+							if (data.width) {
+								iframe.style.width = data.width;
+							}
+							if (data.height) {
+								iframe.style.height = data.height;
+							}
+							sectionDiv.appendChild(iframe);
+						}
+						break;
 					}
-					break;
-				}
-				default: {
-					contentDiv.appendChild(document.createTextNode(data.content));
+					case 'markdown': { //$NON-NLS-0$
+						if (this.hover.renderMarkDown) {
+							contentDiv.innerHTML = this.hover.renderMarkDown(data.content);
+						}
+						break;
+					}
+					default: {
+						contentDiv.appendChild(document.createTextNode(data.content));
+					}
 				}
 			}
 			sectionDiv.appendChild(contentDiv);
