@@ -131,7 +131,7 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 						styler = new mTextStyler2.TextStyler(textView, annotationModel, stylerAdapter);
 					}
 				}
-			} else if (NEW) {
+			} else if (NEW && (!contentType || contentType.id !== "text/x-markdown")) { //$NON-NLS-0$
 				/* even if a grammar was not found create a default pattern adapter so that whitespace will be shown if appropriate */
 				stylerAdapter = new mTextStyler2.createPatternBasedAdapter([], "");
 				styler = new mTextStyler2.TextStyler(textView, annotationModel, stylerAdapter);
