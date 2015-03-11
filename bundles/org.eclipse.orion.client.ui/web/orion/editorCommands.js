@@ -528,12 +528,12 @@ define([
 					var offset = tv.getCaretOffset();
 					var pos = tv.getLocationAtOffset(offset);
 					tooltip.show({
-					x: pos.x,
-					y: pos.y,
-					getTooltipInfo: function() {
-						return editor._getTooltipInfo(this.x, this.y);
-					}
-					}, true);
+						x: pos.x,
+						y: pos.y,
+						getTooltipInfo: function() {
+							return editor._getTooltipInfo(this.x, this.y);
+						}
+					}, false, true);
 				}
 			});
 			this.commandService.addCommand(showTooltipCommand);

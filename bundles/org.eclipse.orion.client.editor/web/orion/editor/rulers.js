@@ -374,8 +374,7 @@ define("orion/editor/rulers", [
 			var self = this;
 			self._hoverTimeout = window.setTimeout(function() {
 				self._hoverTimeout = null;
-				if (!tooltip.OKToHover(e.clientX, e.clientY)) { return; }
-				tooltip.show({
+				tooltip.onHover({
 					clientX: e.clientX,
 					clientY: e.clientY,
 					getTooltipInfo: function() {

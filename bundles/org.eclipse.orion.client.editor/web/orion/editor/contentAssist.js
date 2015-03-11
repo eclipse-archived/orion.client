@@ -940,16 +940,15 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				this.widget.selectNode(newIndex);
 			}
 			
-			this._showTooltip();
+			this._showTooltip(true);
 			
 			return true;
 		},
 		
-		_showTooltip: function() {
+		_showTooltip: function(update) {
 			var tooltip = mTooltip.Tooltip.getTooltip(this.contentAssist.textView);
 			var self = this;
-			tooltip.hide(0);
-			tooltip.show({
+			var target = {
 				getTooltipInfo: function() {
 					var bounds = lib.bounds(self.widget.parentNode);
 					var position = "right"; //$NON-NLS-0$
@@ -973,12 +972,18 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					};
 					return info;
 				}
-			}, false);
+			};
+			
+			if (update) {
+				tooltip.update(target);
+			} else {
+				tooltip.show(target, true, false);
+			}
 		},
 		
 		_hideTooltip: function() {
 			var tooltip = mTooltip.Tooltip.getTooltip(this.contentAssist.textView);
-			tooltip.hide(0);
+			tooltip.hide();
 		},
 
 		pageUp: function() {
@@ -1352,7 +1357,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				this.parentNode.onclick = this.onClick.bind(this);
 				this.isShowing = true;
 				
-				this._contentAssistMode._showTooltip();
+				this._contentAssistMode._showTooltip(false);
 				
 				if (!this.textViewListenerAdded) {
 					this.textView.addEventListener("MouseDown", this.textViewListener.onMouseDown); //$NON-NLS-0$
