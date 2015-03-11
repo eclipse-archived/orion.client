@@ -496,6 +496,11 @@ define([
 			}
 			this._ignoreInput = false;
 			var fileURI = input.resource;
+			var evt = {
+				type: "InputChanging", //$NON-NLS-0$
+				input: input
+			};
+			this.dispatchEvent(evt);
 			if (fileURI) {
 				if (fileURI === this._input) {
 					if (editorChanged) {
@@ -599,7 +604,11 @@ define([
 					editor.setInput(title, null, contents);
 				}
 				if (editor && editor.getTextView && editor.getTextView()) {
-					editor.getTextView().addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
+					var textView = editor.getTextView();
+					textView.addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
+					if (evt.topIndex) {
+						textView.setTopIndex(evt.topIndex);
+					}
 				}
 				this._unsavedChanges = [];
 				this.processParameters(input);
