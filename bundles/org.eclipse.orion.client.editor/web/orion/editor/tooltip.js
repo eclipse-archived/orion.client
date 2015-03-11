@@ -130,15 +130,16 @@ function Tooltip (view) {
 			}
 
 			// Values that can be overridden by returned info			
-//			this._x = undefined;
-//			this._y = undefined;
-//			this._width = undefined;
-//			this._height = undefined;
-//			this._offsetX = undefined;
-//			this._offsetY = undefined;
-//			this._position = undefined;
-//			this._hoverArea = undefined;
-//			this._locked = undefined;
+			this._x = undefined;
+			this._y = undefined;
+			this._width = undefined;
+			this._height = undefined;
+			this._offsetX = undefined;
+			this._offsetY = undefined;
+			this._position = undefined;
+			this._hoverArea = undefined;
+			this._locked = undefined;
+//			this._giveFocus = undefined;
 
 			// values that are calculated
 			this._hoverInfo = undefined;
@@ -174,9 +175,8 @@ function Tooltip (view) {
 			var info = target.getTooltipInfo();
 			
 			// Now get any info from plugins
-			if (info) {
-				
-				this._captureLocationInfo(info);
+			if (info) {			
+				this._info = info;
 				
 				// Any immediate info to render ?
 				if (info.contents) {
@@ -251,9 +251,7 @@ function Tooltip (view) {
 		show: function(target, locked, giveFocus) {
 			this._processInfo(target);
 			this._locked = locked;
-			if (giveFocus) {
-				this._setInitialFocus(this._tooltipDiv);
-			}
+			this._giveFocus = giveFocus;
 		},
 		/**
 		 * @name update
@@ -319,6 +317,9 @@ function Tooltip (view) {
 				this.hide();
 			}
 
+			this._captureLocationInfo(this._info);
+			this._info = undefined;
+
 			// TODO Potential for an empty tooltip or duplicated content, what if both static and deferred content are added?
 			this._tooltipContents = newContentsDiv;
 			this._tooltipDiv.appendChild(newContentsDiv);
@@ -379,6 +380,11 @@ function Tooltip (view) {
 			this._setHoverRect(this._hoverArea, tipRect);
 			
 			this._tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
+			
+			if (this._giveFocus) {
+				this._setInitialFocus(this._tooltipContents);
+				this._giveFocus = undefined;
+			}
 		},		
 		_setHoverRect: function(hoverArea, tipRect) {
 			var left = Math.min(hoverArea.left, tipRect.left);
