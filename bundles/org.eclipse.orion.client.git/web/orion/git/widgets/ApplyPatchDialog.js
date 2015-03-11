@@ -22,7 +22,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils' ], 
 	ApplyPatchDialog.prototype.TEMPLATE =
 
 	'<div style="padding:4px"><input type="radio" name="radio" value="urlRadio" id="urlRadio" checked/>' +
-		messages["URL:"] + '<input type="text" name="url" id="url"/></div>' +
+		messages["URL:"] + '<input type="text" name="url" id="patchurl"/></div>' +
 	'<div style="padding:4px"><input type="radio" name="radio" value="fileRadio" id="fileRadio"/>' +
 		messages["File:"] + '<input type="file" name="selectedFile" id="selectedFile" class="uploadChooser" />' +
 	'</div>';
@@ -34,6 +34,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils' ], 
 		this.modal = true;
 		this.messages = messages;
 		this.options = options;
+		this.customFocus = true;
 
 		this.buttons = [];
 
@@ -49,20 +50,22 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/xsrfUtils' ], 
 	};
 
 	ApplyPatchDialog.prototype._bindToDom = function(parent) {
+		var urlField = this.$patchurl;
 		this.$selectedFile.onchange = function(event){
 			this.$urlRadio.checked = false;
 			this.$fileRadio.checked = "fileRadio";
 		}.bind(this);
-		this.$url.onchange = function(event){
+		this.$patchurl.onchange = function(event){
 			this.$urlRadio.checked = "urlRadio";
 			this.$fileRadio.checked = false;
 		}.bind(this);
+		window.setTimeout(function () {urlField.focus();}, 0);
 	};
 
 	ApplyPatchDialog.prototype._applyPatch = function(parent) {
 		var formData = new FormData();
 		formData.append("uploadedfile", this.$selectedFile.files[0]);
-		formData.append("url", this.$url.value);
+		formData.append("url", this.$patchurl.value);
 		formData.append("radio", this.$fileRadio.checked ? "fileRadio" : "urlRadio");
 
 		this.req = new XMLHttpRequest();
