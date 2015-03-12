@@ -1635,7 +1635,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				var newStyle = {
 					start: charIndex,
 					end: charIndex + 1,
-					style: whitespacePattern.style
+					style: copy(whitespacePattern.style)
 				};
 				if (rangeIndex < ranges.length && ranges[rangeIndex].start <= charIndex) {
 					var endStyle = {start: charIndex + 1, end: ranges[rangeIndex].end, style: ranges[rangeIndex].style};
@@ -1643,6 +1643,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 					ranges.splice(rangeIndex + 1, 0, endStyle);
 					ranges.splice(rangeIndex + 1, 0, newStyle);
 					rangeIndex += 2;
+					newStyle.style.styleClass += " " + ranges[rangeIndex].style.styleClass; //$NON-NLS-0$
 				} else {
 					ranges.splice(rangeIndex, 0, newStyle);
 					rangeIndex++;
