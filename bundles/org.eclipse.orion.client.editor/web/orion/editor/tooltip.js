@@ -203,7 +203,7 @@ function Tooltip (view) {
 										if (self.isVisible()) {
 											self._tooltipDiv.resize();
 										} else {
-											this._info = data;
+											self._info = data;
 											self._showContents(newTooltipContents, update);
 										}
 									}

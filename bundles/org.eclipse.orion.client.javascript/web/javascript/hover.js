@@ -26,7 +26,7 @@ define([
 	 * @param {Object} node The AST node or {@link Definition}
 	 * @returns returns
 	 */
-	function formatMarkdownHover(node) {
+	function formatMarkdownHover(node, offsetRange) {
 	    if(!node) {
 	        return null;
 	    }
@@ -129,7 +129,12 @@ define([
 	    catch(e) {
 	        //do nothing, show what we have
 	    }
-	    return {content: hover, title: title, type:'markdown'};
+	    var result = {content: hover, title: title, type:'markdown'};
+	    if (offsetRange){
+	    	result.offsetStart = offsetRange[0];
+	    	result.offsetEnd = offsetRange[1];
+	    }
+	    return result;
 	}
 	
 	/**
@@ -383,18 +388,18 @@ define([
 		    }
 		    var node = Finder.findNode(ctxt.offset, ast, {parents:true});
 		    if(node) {
-		        switch(node.type) {
+		    	switch(node.type) {
 		            case 'Identifier': {
-		                return formatMarkdownHover(this._getIdentifierHover(node, ctxt.offset, ast), editorContext);
+		                return formatMarkdownHover(this._getIdentifierHover(node, ctxt.offset, ast), node.range);
 		            }
 		            case 'FunctionDeclaration': {
-		                return formatMarkdownHover(node);
+		                return formatMarkdownHover(node, node.range);
 		            }
 		            case 'FunctionExpression': {
-		                return formatMarkdownHover(this._getFunctionExprHover(node));
+		                return formatMarkdownHover(this._getFunctionExprHover(node), node.range);
 		            }
 		            case 'CallExpression': {
-    	               return formatMarkdownHover(this._getCallExprHover(node, ctxt.offset, ast), editorContext);
+    	               return formatMarkdownHover(this._getCallExprHover(node, ctxt.offset, ast), node.range);
 		            }
 		            case 'Literal': {
 		                if(ctxt.offset <= node.range[0] || ctxt.offset >= node.range[1]) {
