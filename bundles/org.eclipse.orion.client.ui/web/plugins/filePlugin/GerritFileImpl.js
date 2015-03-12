@@ -58,7 +58,7 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			var segments = path.split("/");
 			segments.pop(); // pop off the current name
 			if (segments.length > 0) {
-				parentLocation = this._listTemplate.expand({project: project, ref: ref, path: segments.join("/")});
+				parentLocation = this._listTemplate.expand({project: project, ref: ref}) + "/" + segments.join("/");
 			}
 			else {
 				parentLocation = this._listTemplate.expand({project: project, ref: ref});
@@ -74,7 +74,7 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			for (var i = 0; i < segments.length; ++i) {
 				var parentName = segments[i];
 				parentPath += parentName;
-				parentLocation = this._listTemplate.expand({project: project, ref: ref, path: parentPath});
+				parentLocation = this._listTemplate.expand({project: project, ref: ref}) + "/" + parentPath;
 				result.push({
 					Name: parentName,
 					Location: parentLocation,
@@ -95,10 +95,10 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 					var template = entry.type === "file" ? _this._contentTemplate : _this._listTemplate;
 					var ref = entry.ref.split("/").pop();
 					var name = entry.name.split("/").pop();
-					if(entry.path === "") {
-						entry.path = null;
+					var location = template.expand({project: entry.project, ref: ref});
+					if (entry.path != "") {
+						location += "/" + decodeURIComponent(entry.path);
 					}
-					var location = template.expand({project: entry.project, ref: ref, path: entry.path});
 					var result = {
 						Attributes: {
 							Archive: false,
