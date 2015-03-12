@@ -141,15 +141,16 @@
 			Copy editor build files to ${staging} to make editorOptimize simpler. cssIn paths must be 
 			relative to the build file location, and having build file location == ${staging} is easier.
 		-->
-		<copy file="${builder}/scripts/editor.build-css.js" tofile="${staging}/editor.build-css.js" overwrite="true"/>
-		<copy file="${builder}/scripts/editor.build-js.js" tofile="${staging}/editor.build-js.js" overwrite="true"/>
-		<copy file="${builder}/scripts/editor.build.almond-js.js" tofile="${staging}/editor.build.almond-js.js" overwrite="true"/>
-		<copy file="${builder}/scripts/compare.build-css.js" tofile="${staging}/compare.build-css.js" overwrite="true"/>
-		<copy file="${builder}/scripts/compare.build-js.js" tofile="${staging}/compare.build-js.js" overwrite="true"/>
-		<copy file="${builder}/scripts/compare.build.almond-js.js" tofile="${staging}/compare.build.almond-js.js" overwrite="true"/>
-		<copy file="${builder}/scripts/commitBrowser.build-css.js" tofile="${staging}/commitBrowser.build-css.js" overwrite="true"/>
-		<copy file="${builder}/scripts/commitBrowser.build.almond-js.js" tofile="${staging}/commitBrowser.build.almond-js.js" overwrite="true"/>
-		<copy file="${builder}/scripts/editor.build.stylers-js.js" tofile="${staging}/editor.build.stylers-js.js" overwrite="true"/>
+		<copy todir="${staging}" overwrite="true">
+			<fileset dir="${builder}/scripts">
+				<include name="editor.build*" />
+				<include name="compare.build*" />
+				<include name="commitBrowser.build-css.js" />
+				<include name="commitBrowser.build.almond-js.js" />
+				<include name="contentassist*" />
+				<include name="editor.build.stylers-js.js" />
+			</fileset>
+		</copy>
 	</target>
 	
 	<target name="editorStylersOptimize" unless="skipEditorStylers">
@@ -184,7 +185,7 @@
 					<include name="**/*.css"/>
 				</fileset>
  			</copy>
-			
+
 			<widgetOptimizeFile out="${out}/built-editor.css"
 				buildfile="${staging}/editor.build-css.js"
 				optimize="closure"
@@ -205,7 +206,24 @@
 				buildfile="${staging}/editor.build.almond-js.js"
 				optimize="none"
 				staging="${staging}" />
-			<zip destFile="${out}/built-editor.zip" basedir="${out}" includes="built-editor.css, built-editor-amd.min.js, built-editor-amd.js, built-editor.min.js, built-editor.js, stylers/**/*, themes/*" excludes="stylers/build.txt" />
+
+			<!-- Content Assist -->
+			<widgetOptimizeFile out="${out}/htmlContentAssist.min.js"
+				buildfile="${staging}/contentassist.html.build.almond-js.js"
+				optimize="closure"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/cssContentAssist.min.js"
+				buildfile="${staging}/contentassist.css.build.almond-js.js"
+				optimize="closure"
+				staging="${staging}" />
+			<move todir="${out}/contentAssist">
+				<fileset dir="${out}" includes="*ContentAssist*.js" />
+			</move>
+
+			<zip destFile="${out}/built-editor.zip"
+				basedir="${out}"
+				includes="built-editor.css, built-editor-amd.min.js, built-editor-amd.js, built-editor.min.js, built-editor.js, stylers/**/*, themes/*, contentAssist/*"
+				excludes="stylers/build.txt" />
 		</sequential>
 	</target>
 				
