@@ -203,6 +203,7 @@ function Tooltip (view) {
 										if (self.isVisible()) {
 											self._tooltipDiv.resize();
 										} else {
+											this._info = data;
 											self._showContents(newTooltipContents, update);
 										}
 									}
@@ -282,6 +283,10 @@ function Tooltip (view) {
 			this._offsetY = info.offsetY;
 			this._position = info.position;
 			this._hoverArea = info.hoverArea;
+			
+			if (info.offsetStart && info.offsetEnd) {
+				this._setContentRange(info.offsetStart, info.offsetEnd);
+			}
 			
 			if (info.context){
 				// Adjust the tooltip for folding comments to exactly cover the unfolded text location
