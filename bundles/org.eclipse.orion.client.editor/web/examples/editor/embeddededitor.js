@@ -14,9 +14,10 @@
 
 define([
 	"orion/editor/edit",
-	"orion/keyBinding"
+	"orion/keyBinding",
+	"webtools/htmlContentAssist",
 ],
-function(edit, mKeyBinding){
+function(edit, mKeyBinding, mHTMLContentAssist) {
 	
 	var editorDomNode = document.getElementById("editor"); //$NON-NLS-0$
 
@@ -40,12 +41,19 @@ function(edit, mKeyBinding){
 	
 	var editor = edit({
 		parent: editorDomNode,
-		lang: "html", //$NON-NLS-0$
+		lang: "text/html", //$NON-NLS-0$
 		contents: "<!DOCTYPE html>\n<html>\n\t<head></head>\n<body>\nThis is an HTML document. Try pressing Ctrl+Space." //$NON-NLS-0$
 				+ "\n</body>\n</html>", //$NON-NLS-0$
 		statusReporter: statusReporter
 	});
-	
+
+	// Register the HTML content assist provider
+	var contentAssist = editor.getContentAssist();
+	var htmlContentAssistProvider = new mHTMLContentAssist.HTMLContentAssistProvider();
+	contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
+		contentAssist.setProviders([htmlContentAssistProvider]);
+	});
+
 	// save binding
 	editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
 	editor.getTextView().setAction("save", function(){ //$NON-NLS-0$
@@ -54,7 +62,7 @@ function(edit, mKeyBinding){
 	});
 	document.getElementById("save").onclick = function() {save(editor);}; //$NON-NLS-0$
 		
-	editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
+	editor.addEventListener("DirtyChanged", function(/*evt*/) { //$NON-NLS-0$
 		if (editor.isDirty()) {
 			dirtyIndicator = "*"; //$NON-NLS-0$
 		} else {
