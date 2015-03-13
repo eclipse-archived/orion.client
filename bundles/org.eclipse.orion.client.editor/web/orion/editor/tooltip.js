@@ -136,6 +136,8 @@ function Tooltip (view) {
 			this._height = undefined;
 			this._offsetX = undefined;
 			this._offsetY = undefined;
+			this._offsetStart = undefined;
+			this._offsetEnd = undefined;
 			this._position = undefined;
 			this._hoverArea = undefined;
 			this._locked = undefined;
@@ -250,9 +252,9 @@ function Tooltip (view) {
 		 * @param giveFocus If true forces the focus onto the tooltip (used for F2 processing)
 		 */
 		show: function(target, locked, giveFocus) {
-			this._processInfo(target);
 			this._locked = locked;
 			this._giveFocus = giveFocus;
+			this._processInfo(target);
 		},
 		/**
 		 * @name update
@@ -282,17 +284,18 @@ function Tooltip (view) {
 			this._offsetX = info.offsetX;
 			this._offsetY = info.offsetY;
 			this._position = info.position;
-			this._hoverArea = info.hoverArea;
-			
-			if (info.offsetStart && info.offsetEnd) {
-				this._setContentRange(info.offsetStart, info.offsetEnd);
-			}
+			this._offsetStart = info.offsetStart;			
+			this._offsetEnd = info.offsetEnd;			
+
+			// the hoverArea may have been set by rendering an annotation...
+			if (!this._hoverArea)
+				this._hoverArea = info.hoverArea;
 			
 			if (info.context){
 				// Adjust the tooltip for folding comments to exactly cover the unfolded text location
 				if (info.context.rulerStyle && info.context.rulerStyle.indexOf("folding") >= 0){ //$NON-NLS-0$
-					this._offsetX = -1;
-					this._offsetY = -3;
+					this._offsetX = 0;
+					this._offsetY = -5;
 				}
 			}
 			
@@ -308,7 +311,9 @@ function Tooltip (view) {
 				tooltipDiv.style.height = this._height + "px"; //$NON-NLS-0$
 				tooltipDiv.style.overflowY = "auto"; //$NON-NLS-0$
 			}
-			
+			if (!this._y) {
+				this._y = 0;
+			}
 			var top = parseInt(this._getNodeStyle(tooltipDiv, "padding-top", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
 			top += parseInt(this._getNodeStyle(tooltipDiv, "border-top-width", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
 			top = this._y - top;
@@ -331,21 +336,25 @@ function Tooltip (view) {
 			
 			this._computeTooltipPosition();
 			
-			// HACK! Fake a contentBox if necessary
+			// Create a hover area if necessary
 			if (!this._hoverArea) {
-				// Use the whole line
-				var curOffset = this._view.getOffsetAtLocation(this._lastTarget.x, this._lastTarget.y);
-				if (curOffset >= 0) {
-					var start = this._view.getNextOffset(curOffset, 
-										{ unit: "word", count: -1}); //$NON-NLS-0$
-					var end = this._view.getNextOffset(curOffset, 
-										{ unit: "word", count: 0}); //$NON-NLS-0$
-					this._setContentRange(start, end);
+				if (this._offsetStart && this._offsetEnd) {
+					this._setContentRange(this._offsetStart, this._offsetEnd);
 				} else {
-					this._hoverArea = {
-						left: this._lastTarget.clientX-8, top: this._lastTarget.clientY -8,
-						width: 16, height: 16
-					};
+					// Use the whole line
+					var curOffset = this._view.getOffsetAtLocation(this._lastTarget.x, this._lastTarget.y);
+					if (curOffset >= 0) {
+						var start = this._view.getNextOffset(curOffset, 
+											{ unit: "word", count: -1}); //$NON-NLS-0$
+						var end = this._view.getNextOffset(curOffset, 
+											{ unit: "word", count: 0}); //$NON-NLS-0$
+						this._setContentRange(start, end);
+					} else {
+						this._hoverArea = {
+							left: this._lastTarget.clientX-8, top: this._lastTarget.clientY -8,
+							width: 16, height: 16
+						};
+					}
 				}
 			}
 			
@@ -387,7 +396,7 @@ function Tooltip (view) {
 			this._tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
 			
 			if (this._giveFocus) {
-				this._setInitialFocus(this._tooltipContents);
+				this._setInitialFocus(this._tooltipDiv);
 				this._giveFocus = undefined;
 			}
 		},		
@@ -664,7 +673,7 @@ function Tooltip (view) {
 				var textEnd = baseModel.getLineEnd(baseModel.getLineAtOffset(end), true);
 				return baseModel.getText(textStart, textEnd);
 			}
-			function getAnnotationHTML(annotation, showQuickfixes) {
+			function getAnnotationHTML(annotation, inEditor) {
 				var title = annotation.title;
 				var result = util.createElement(document, "div"); //$NON-NLS-0$
 				result.className = "tooltipRow"; //$NON-NLS-0$
@@ -699,27 +708,25 @@ function Tooltip (view) {
 				result.appendChild(title);
 				
 				// Handle quick fixes
-				if (showQuickfixes) {
+				if (inEditor) {
 					self.hover.renderQuickFixes(annotation, result);
-				}
-				
-				// Set the hover area to the annotation if it's not already set
-				if (!self._hoverArea) {
+					
+					// Set the hover area to the annotation if it's not already set
 					self._setContentRange(annotation.start, annotation.end);
 				}
 				return result;
 			}
 			
 			// Don't show quickfixes for ruler annotations (left or right side)
-			var showQuickfixes = self.hover ? true : false;
-			if (showQuickfixes && context && context.source && context.source.indexOf('ruler') >= 0){ //$NON-NLS-0$
-				showQuickfixes = false;
+			var inEditor = self.hover ? true : false;
+			if (inEditor && context && context.source && context.source.indexOf('ruler') >= 0){ //$NON-NLS-0$
+				inEditor = false;
 			}			
 			
 			if (annotations.length === 1) {
 				annotation = annotations[0];
 				if (annotation.title !== undefined) {
-					html = getAnnotationHTML(annotation, showQuickfixes);
+					html = getAnnotationHTML(annotation, inEditor);
 					if (html.firstChild) {
 						var className = html.firstChild.className;
 						if (className) { className += " "; } //$NON-NLS-0$
@@ -751,7 +758,7 @@ function Tooltip (view) {
 				tooltipHTML.appendChild(em);
 				for (var i = 0; i < annotations.length; i++) {
 					annotation = annotations[i];
-					html = getAnnotationHTML(annotation, showQuickfixes);
+					html = getAnnotationHTML(annotation, inEditor);
 					if (html) {
 						tooltipHTML.appendChild(html);
 					}
