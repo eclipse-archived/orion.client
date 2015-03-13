@@ -47,6 +47,7 @@ define("orion/editor/stylers/text_x-objective-c/syntax", ["orion/editor/stylers/
 			{include: "#objectiveCString"}, //$NON-NLS-0$
 			{include: "orion.c"}, //$NON-NLS-0$
 			{include: "#objectiveCDirective"}, //$NON-NLS-0$
+			{include: "orion.lib#operator"}, //$NON-NLS-0$
 			{include: "#objectiveCKeyword"} //$NON-NLS-0$
 		],
 		repository: {
