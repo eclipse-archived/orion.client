@@ -37,7 +37,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			id:"editorThemeBackground", //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"font-color", //$NON-NLS-0$
+			display:"font color", //$NON-NLS-0$
 			objPath:["styles.color"], //$NON-NLS-0$
 			id:"editorThemeColor", //$NON-NLS-0$
 			value:defaultColor
@@ -87,6 +87,12 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			id:"editorThemeFunctionParameterColor", //$NON-NLS-0$
 			value:defaultColor
 		},{
+			display:"comparison and logical operators", //$NON-NLS-0$
+			objPath:["styles.punctuation.operator.color"], //$NON-NLS-0$
+			id:"editorThemeLogicalOperatorColor", //$NON-NLS-0$
+			value:defaultColor
+		},
+		{
 			display:"write occurrence background", //$NON-NLS-0$
 			objPath:["styles.annotationRange.writeOccurrence.backgroundColor"], //$NON-NLS-0$
 			id:"editorThemeWriteOccurrence", //$NON-NLS-0$
@@ -112,17 +118,17 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			id:"editorThemeDocumentationTask", //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"CSS - Property name color",//$NON-NLS-0$
+			display:"CSS property name color",//$NON-NLS-0$
 			objPath:["styles.support.type.propertyName.color"], //$NON-NLS-0$
 			id:"editorThemePropertyName", //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"HTML - Tag",//$NON-NLS-0$
+			display:"HTML tag",//$NON-NLS-0$
 			objPath:["styles.meta.tag.color"], //$NON-NLS-0$
 			id:"editorThemeMetaTag", //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"Selection Background",//$NON-NLS-0$
+			display:"selection background",//$NON-NLS-0$
 			objPath:["styles.textviewContent ::selection.backgroundColor", "styles.textviewContent ::-moz-selection.backgroundColor", "styles.textviewSelection.backgroundColor", "styles.textviewSelectionUnfocused.backgroundColor"], //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			id:"editorSelection", //$NON-NLS-0$
 			value:defaultColor
@@ -310,8 +316,9 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 				}
 				htmlString += "</select></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
-			else
+			else {
 				htmlString = htmlString + "<li><span>" + scopeList[i].display + "</span><input id='"+scopeList[i].id+"' class='colorpicker-input" + ieClass + "' type='color' value='" + scopeList[i].value + "'></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			}
 		}
 		return htmlString;
 	}

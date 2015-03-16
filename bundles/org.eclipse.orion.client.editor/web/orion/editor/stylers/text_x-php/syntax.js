@@ -90,6 +90,7 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/synt
 					{include: "orion.lib#bracket_close"}, //$NON-NLS-0$
 					{include: "orion.lib#parenthesis_open"}, //$NON-NLS-0$
 					{include: "orion.lib#parenthesis_close"}, //$NON-NLS-0$
+					{include: "orion.lib#operator"}, //$NON-NLS-0$
 					{
 						match: "\\b0[bB][01]+\\b", //$NON-NLS-0$
 						name: "constant.numeric.binary.php" //$NON-NLS-0$

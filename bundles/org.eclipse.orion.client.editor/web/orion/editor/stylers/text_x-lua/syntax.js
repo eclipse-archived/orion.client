@@ -69,6 +69,7 @@ define("orion/editor/stylers/text_x-lua/syntax", ["orion/editor/stylers/lib/synt
 			{include: "orion.lib#bracket_close"}, //$NON-NLS-0$
 			{include: "orion.lib#parenthesis_open"}, //$NON-NLS-0$
 			{include: "orion.lib#parenthesis_close"}, //$NON-NLS-0$
+			{include: "orion.lib#operator"}, //$NON-NLS-0$
 			{include: "orion.lib#number_decimal"}, //$NON-NLS-0$
 			{include: "orion.lib#number_hex"}, //$NON-NLS-0$
 			{include: "#base_functions"}, //$NON-NLS-0$
