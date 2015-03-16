@@ -437,21 +437,38 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 		switch (language) {
 			case "javascript":
 				mSetup.setupView(jsExample, "js"); //$NON-NLS-0$
+				this.updateLHS(["editorThemePropertyName", "editorThemeMetaTag"]);
 				break;
 			case "html":
 				mSetup.setupView(htmlExample, "html"); //$NON-NLS-0$
+				this.updateLHS();
 				break;
 			case "css":
 				mSetup.setupView(cssExample, "css"); //$NON-NLS-0$
+                this.updateLHS(["editorThemeColorEntityColor", "editorThemeControlColor", "editorThemeOperatorColor", "editorThemeFunctionParameterColor", "editorThemeLogicalOperatorColor", "editorThemeMetaTag"]);
 				break;
 			case "java":
 				mSetup.setupView(javaExample, "java"); //$NON-NLS-0$
+				this.updateLHS(["editorThemeColorEntityColor", "editorThemeFunctionParameterColor", "editorThemePropertyName", "editorThemeMetaTag"]);
 				break;
 		}
 		
 		return true;
 	}
 	ThemeBuilder.prototype.changeLanguage = changeLanguage;
+
+	function updateLHS(values) {
+        for (var i = scopeList.length - 1; i >= 0; i--) {
+            document.getElementById(scopeList[i].id).parentNode.style.display = "";
+        };
+
+        if (values && values.length > 0) {
+            for (var i = values.length - 1; i >= 0; i--) {
+                document.getElementById(values[i]).parentNode.style.display = "none";
+            };
+        }
+    }
+    ThemeBuilder.prototype.updateLHS = updateLHS;
 
 	function selectTheme(name) {
 		this.preferences.getTheme(function(themeStyles) {
