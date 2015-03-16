@@ -15,9 +15,10 @@
 define([
 	"orion/editor/edit",
 	"orion/keyBinding",
+	"webtools/cssContentAssist",
 	"webtools/htmlContentAssist",
 ],
-function(edit, mKeyBinding, mHTMLContentAssist) {
+function(edit, mKeyBinding, mCSSContentAssist, mHTMLContentAssist) {
 	
 	var editorDomNode = document.getElementById("editor"); //$NON-NLS-0$
 
@@ -38,20 +39,44 @@ function(edit, mKeyBinding, mHTMLContentAssist) {
 		}
 		document.getElementById("status").textContent = dirtyIndicator + status; //$NON-NLS-0$
 	};
-	
+
+	var html = "text/html";
 	var editor = edit({
 		parent: editorDomNode,
-		lang: "text/html", //$NON-NLS-0$
-		contents: "<!DOCTYPE html>\n<html>\n\t<head></head>\n<body>\nThis is an HTML document. Try pressing Ctrl+Space." //$NON-NLS-0$
-				+ "\n</body>\n</html>", //$NON-NLS-0$
+		lang: html, //$NON-NLS-0$
+		contents: "<!DOCTYPE html>\n<html>\n\t<head></head>\n<body>\n" //$NON-NLS-0$
+				+ "This is an HTML document. Press Ctrl+Space to show content assist.\n" //$NON-NLS-0$
+				+ "<style>\n/*Pro tip: content assist is context sensitive. Try it inside this style tag.*/\n"
+				+ "div {\n\tcolor: red\n}\n"
+				+ "</style>\n" //$NON-NLS-0$
+				+ "</body>\n</html>", //$NON-NLS-0$
 		statusReporter: statusReporter
+	});
+	var contentAssist = editor.getContentAssist();
+
+	// Set up an editor context provider.
+	var editorContext = {
+		getText: editor.getText.bind(editor),
+		getFileMetadata: function() {
+			return {
+				contentType: { id: html }
+			};
+		}
+	};
+	contentAssist.setEditorContextProvider({
+		getOptions: function() {
+			return [];
+		},
+		getEditorContext: function() {
+			return editorContext;
+		}
 	});
 
 	// Register the HTML content assist provider
-	var contentAssist = editor.getContentAssist();
-	var htmlContentAssistProvider = new mHTMLContentAssist.HTMLContentAssistProvider();
+	var htmlContentAssistProvider = new mHTMLContentAssist.HTMLContentAssistProvider(),
+	    cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
 	contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
-		contentAssist.setProviders([htmlContentAssistProvider]);
+		contentAssist.setProviders([cssContentAssistProvider, htmlContentAssistProvider]);
 	});
 
 	// save binding

@@ -11,13 +11,14 @@
  *******************************************************************************/
 /*eslint-env browser, amd*/
 define("webtools/cssContentAssist", [ //$NON-NLS-0$
+	'orion/Deferred', //$NON-NLS-0$
 	'orion/editor/templates', //$NON-NLS-0$
 	'orion/editor/stylers/text_css/syntax', //$NON-NLS-0$
 	'orion/objects',
 	'webtools/util',
 	'javascript/compilationUnit',
 	'csslint'
-], function(mTemplates, mCSS, Objects, Util, CU, CSSLint) {
+], function(Deferred, mTemplates, mCSS, Objects, Util, CU, CSSLint) {
 
 	var overflowValues = {
 		type: "link", //$NON-NLS-0$
@@ -299,9 +300,9 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
          */
         computeContentAssist: function computeContentAssist(editorContext, params) {
             var that = this;
-            return editorContext.getFileMetadata().then(function(meta) {
+            return Deferred.when(editorContext.getFileMetadata(), function(meta) {
                if(meta.contentType.id === 'text/html') {
-                  return editorContext.getText().then(function(text) {
+                  return Deferred.when(editorContext.getText(), function(text) {
                      var blocks = Util.findStyleBlocks(text, params.offset);
                      if(blocks && blocks.length > 0) {
                          var cu = new CU(blocks, meta);
@@ -309,7 +310,7 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
                      }
                   });
                } else {
-                   return editorContext.getText().then(function(text) {
+                   return Deferred.when(editorContext.getText(), function(text) {
                       return that._computeProposals(editorContext, text, params);
                    });
                }
