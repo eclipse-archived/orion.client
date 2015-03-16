@@ -18,8 +18,8 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 
 	function GerritFileImpl(pluginURL, project) {
 		// url templates for the Git router service requests
-		this._listTemplate = new URITemplate(pluginURL + "/git/{project}/list{/ref}{/path}");
-		this._contentTemplate = new URITemplate(pluginURL + "/git/{project}/contents{/ref}{/path}");
+		this._listTemplate = new URITemplate(pluginURL + "/git/{project}/list/{+ref}/{+path}");
+		this._contentTemplate = new URITemplate(pluginURL + "/git/{project}/contents/{+ref}/{+path}");
 		this._repoURL = this._listTemplate.expand({project: project});
 	}
 
@@ -58,7 +58,7 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			var segments = path.split("/");
 			segments.pop(); // pop off the current name
 			if (segments.length > 0) {
-				parentLocation = this._listTemplate.expand({project: project, ref: ref}) + "/" + segments.join("/");
+				parentLocation = this._listTemplate.expand({project: project, ref: ref, path: segments.join("/")});
 			}
 			else {
 				parentLocation = this._listTemplate.expand({project: project, ref: ref});
@@ -74,7 +74,7 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			for (var i = 0; i < segments.length; ++i) {
 				var parentName = segments[i];
 				parentPath += parentName;
-				parentLocation = this._listTemplate.expand({project: project, ref: ref}) + "/" + parentPath;
+				parentLocation = this._listTemplate.expand({project: project, ref: ref, path: parentPath});
 				result.push({
 					Name: parentName,
 					Location: parentLocation,
@@ -95,10 +95,10 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 					var template = entry.type === "file" ? _this._contentTemplate : _this._listTemplate;
 					var ref = entry.ref.split("/").pop();
 					var name = entry.name.split("/").pop();
-					var location = template.expand({project: entry.project, ref: ref});
-					if (entry.path != "") {
-						location += "/" + decodeURIComponent(entry.path);
+					if(entry.path === "") {
+						entry.path = null;
 					}
+					var location = template.expand({project: entry.project, ref: ref, path: entry.path});
 					var result = {
 						Attributes: {
 							Archive: false,
