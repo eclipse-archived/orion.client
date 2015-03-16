@@ -230,7 +230,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 		val = namedToHex(val);
 		var isHexColor = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(val);
 
-		if (isHexColor) {
+		if (isHexColor || id === "editorThemeFontSize") {
 			for (var i = 0; i < scopeList.length; i++){
 				if (scopeList[i].id === id){
 					scopeList[i].value = val;
