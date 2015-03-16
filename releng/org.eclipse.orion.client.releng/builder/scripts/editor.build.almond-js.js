@@ -33,10 +33,21 @@
 	uglify: {
 		ascii_only: true
 	},
+	// https://github.com/jrburke/almond#exporting-a-public-api
 	wrap: {
-		start: "/* orion editor */ ", //start cannot be empty
-		end: "\
-var orion = this.orion || (this.orion = {});\n\
-var editor = orion.editor || (orion.editor = {});"
+		start: "\
+			(function (root, factory) {\n\
+				if (typeof define === 'function' && define.amd) {\n\
+					define([], factory);\n\
+				} else {\n\
+					root.orion = root.orion || {};\n\
+					root.orion.editor = root.orion.editor || {};\n\
+					root.orion.editor.edit = factory();\n\
+				}\n\
+			}(this, function () {\n\
+		",
+		end: "\n\
+				return require('orion/editor/edit');\n\
+			}));"
 	}
 })
