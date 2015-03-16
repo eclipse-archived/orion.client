@@ -26,6 +26,7 @@
 	name: "requirejs/almond",
 	include: ["webtools/htmlContentAssist"],
 	preserveLicenseComments: false,
+	generateSourceMaps: true,
 	uglify: {
 		ascii_only: true
 	},

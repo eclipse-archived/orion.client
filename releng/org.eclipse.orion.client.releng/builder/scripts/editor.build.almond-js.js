@@ -29,6 +29,7 @@
 	locales: ["ja", "zh", "zh-tw", "fr", "de", "it", "es", "pt-br"],						
 	include: "orion/editor/edit",
 	preserveLicenseComments: false,
+	generateSourceMaps: true,
 	uglify: {
 		ascii_only: true
 	},

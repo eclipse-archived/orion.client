@@ -186,6 +186,7 @@
 				</fileset>
  			</copy>
 
+			<!-- Editor -->
 			<widgetOptimizeFile out="${out}/built-editor.css"
 				buildfile="${staging}/editor.build-css.js"
 				optimize="closure"
@@ -206,7 +207,10 @@
 				buildfile="${staging}/editor.build.almond-js.js"
 				optimize="none"
 				staging="${staging}" />
-
+			<move todir="${out}/sourcemaps">
+				<fileset dir="${out}" includes="*editor*.map, *editor*.src.js" />
+			</move>
+			
 			<!-- Content Assist -->
 			<widgetOptimizeFile out="${out}/htmlContentAssist.min.js"
 				buildfile="${staging}/contentassist.html.build.almond-js.js"
@@ -216,13 +220,17 @@
 				buildfile="${staging}/contentassist.css.build.almond-js.js"
 				optimize="closure"
 				staging="${staging}" />
+			<move todir="${out}/contentAssist/sourcemaps">
+				<fileset dir="${out}" includes="*ContentAssist*.map, *ContentAssist*.src.js" />
+			</move>
 			<move todir="${out}/contentAssist">
 				<fileset dir="${out}" includes="*ContentAssist*.js" />
 			</move>
 
 			<zip destFile="${out}/built-editor.zip"
 				basedir="${out}"
-				includes="built-editor.css, built-editor-amd.min.js, built-editor-amd.js, built-editor.min.js, built-editor.js, stylers/**/*, themes/*, contentAssist/*"
+				includes="built-editor.css, built-editor-amd.min.js, built-editor-amd.js, built-editor.min.js, built-editor.js,
+					sourcemaps/*, stylers/**/*, themes/*, contentAssist/*"
 				excludes="stylers/build.txt" />
 		</sequential>
 	</target>
