@@ -384,38 +384,22 @@ define([
 				return;
 			}
 			_self.lastCheckedLocation = metadata.Location;
-			_self.fileClient.loadWorkspace(mFileUtils.makeParentRelative("../file")).then(function(workspace) { //$NON-NLS-0$
-				_self.workspaceMetadata = workspace;
-				var project = null;
-				workspace.Children.some(function(p) {
-					if (metadata.Location === p.Location) {
-						project = metadata;
-						return true;
-					} else if (metadata.Location.indexOf(p.Location) === 0) {
-						project = p;
-						return true;
-					}
-					return false;
-				});
-				if (project) {
-					_self.getProjectJson(project).then(function(json) {
-						_self.showViewMode(!!json);
-						if (json) {
-							if (sidebar.getActiveViewModeId() === _self.id) {
-								_self.explorer.display(project);
-							} else {
-								_self.project = project;
-								sidebar.setViewMode(_self.id);
-							}
+			_self.getProject(metadata).then(function(project) {
+				_self.getProjectJson(project).then(function(json) {
+					_self.showViewMode(!!json);
+					if (json) {
+						if (sidebar.getActiveViewModeId() === _self.id) {
+							_self.explorer.display(project);
 						} else {
-							if (!sidebar.getActiveViewModeId()) {
-								sidebar.setViewMode(sidebar.getNavigationViewMode().id);
-							}
+							_self.project = project;
+							sidebar.setViewMode(_self.id);
 						}
-					}, failed);
-				} else {
-					failed();
-				}
+					} else {
+						if (!sidebar.getActiveViewModeId()) {
+							sidebar.setViewMode(sidebar.getNavigationViewMode().id);
+						}
+					}
+				}, failed);
 			}, failed);
 			var handleDisplay = function (event) {
 				if(event.item === metadata) {
@@ -434,12 +418,11 @@ define([
 			_self.project = null;
 			var item = event.selections && event.selections.length > 0 ? event.selections[0] : null;
 			if (item) {
-				while (item.parent && item.parent.parent) {
-					item = item.parent;
-				}
-				_self.getProjectJson(item).then(function(json) {
-					_self.project = item;
-					_self.showViewMode(!!json);
+				_self.getProject(item).then(function(project) {
+					_self.getProjectJson(project).then(function(json) {
+						_self.project = project;
+						_self.showViewMode(!!json);
+					});
 				});
 			} else {
 				_self.showViewMode(false);
@@ -481,6 +464,15 @@ define([
 			}
 			this.explorer = null;
 			this.toolbarNode.parentNode.classList.remove("projectNavSidebarWrapper"); //$NON-NLS-0$
+		},
+		getProject: function(metadata) {
+			while (metadata.parent && metadata.parent.parent) {
+				metadata = metadata.parent;
+			}
+			if (metadata.Parents && metadata.Parents.length > 0) {
+				return this.fileClient.read(metadata.Parents[metadata.Parents.length - 1].Location, true);
+			}
+			return new Deferred().resolve(metadata);
 		},
 		getProjectJson: function(metadata) {
 			function getJson(children) {
