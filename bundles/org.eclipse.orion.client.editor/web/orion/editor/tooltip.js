@@ -184,6 +184,7 @@ function Tooltip (view) {
 				if (info.contents) {
 					if (this._renderImmediateInfo(newTooltipContents, info.contents, info.context)) {
 						this._showContents(newTooltipContents, update);
+						return true;
 					}
 				}
 				
@@ -205,7 +206,13 @@ function Tooltip (view) {
 										if (self.isVisible()) {
 											self._tooltipDiv.resize();
 										} else {
-											self._info = data;
+											// TODO Need to clarify what data the deferred can return and update API doc
+											if (data.offsetStart){
+												this._offsetStart = info.offsetStart;
+											}
+											if (data.offsetEnd){
+												this._offsetEnd = info.offsetEnd;
+											}
 											self._showContents(newTooltipContents, update);
 										}
 									}
@@ -284,12 +291,11 @@ function Tooltip (view) {
 			this._offsetX = info.offsetX;
 			this._offsetY = info.offsetY;
 			this._position = info.position;
-			this._offsetStart = info.offsetStart;			
-			this._offsetEnd = info.offsetEnd;			
 
 			// the hoverArea may have been set by rendering an annotation...
-			if (!this._hoverArea)
+			if (!this._hoverArea){
 				this._hoverArea = info.hoverArea;
+			}
 			
 			if (info.context){
 				// Adjust the tooltip for folding comments to exactly cover the unfolded text location
