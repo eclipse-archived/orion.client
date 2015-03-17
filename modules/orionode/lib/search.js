@@ -27,15 +27,6 @@ module.exports = function(options) {
 	var fieldNames = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive";
 	var fieldList = fieldNames.split(",");
 
-	function isSearchField(term) {
-		for (var i = 0; i < fieldList.length; i++) {
-			if (term.lastIndexOf(fieldList[i] + ":", 0) === 0) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	function searchOptions(req, res){
 		this.defaultLocation = null;
 		this.fileContentSearch = false;
@@ -49,12 +40,21 @@ module.exports = function(options) {
 		this.searchTermCaseSensitive = false;
 		this.username = null;
 
+		this.isSearchField = function(term) {
+			for (var i = 0; i < fieldList.length; i++) {
+				if (term.lastIndexOf(fieldList[i] + ":", 0) === 0) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		this.buildOptions = function() {
 			var queryObject = url.parse(req.url, true).query;
 			var terms = queryObject.q.split(" ");
 			for (var i = 0; i < terms.length; i++) {
 				term = terms[i];
-				if (isSearchField(term)) {
+				if (this.isSearchField(term)) {
 					if (term.lastIndexOf("NameLower:", 0) === 0) {
 						this.filenamePatternCaseSensitive = false;
 						this.filenamePattern = term.substring(10);
@@ -78,15 +78,61 @@ module.exports = function(options) {
 		}
 	};
 
+	function searchPattern(searchOptions) {
+		this.undoLuceneEscape = function(searchTerm){
+			var specialChars = "+-&|!(){}[]^\"~:\\";
+			for (var i = 0; i < specialChars.length; i++) {
+				var character = specialChars.substring(i,i+1);
+				var escaped = "\\" + character;
+				searchTerm = searchTerm.replace(new RegExp(escaped,"g"), character);
+			}
+			return searchTerm;
+		}
+
+		this.buildSearchPattern = function(){
+			var searchTerm = searchOptions.searchTerm;
+			if (!searchOptions.regEx) {
+				if (searchTerm.indexOf("\"") === 0) {
+					searchTerm = searchTerm.substring(1, searchTerm.length - 1);
+				}
+				searchTerm = this.undoLuceneEscape(searchTerm);
+				if (searchTerm.indexOf("?") != -1 || searchTerm.indexOf("*") != -1) {
+					if (searchTerm.indexOf("*") === 0) {
+						searchTerm = searchTerm.substring(1);
+					}
+					if (searchTerm.indexOf("?") != -1) {
+						searchTerm = searchTerm.replace("?",".");
+					}
+					if (searchTerm.indexOf("*") != -1) {
+						searchTerm = searchTerm.replace("*", ".*");
+					}
+				}
+
+				if (!searchOptions.searchTermCaseSensitive) {
+					this.pattern = new RegExp(searchTerm, "i");
+				} else {
+					console.log(searchTerm);
+					this.pattern = new RegExp(searchTerm);
+				}
+			};
+		}
+	}
 
 	return connect()
 	.use(connect.json())
 	.use(resource(workspaceRoot, {
 		GET: function(req, res, next, rest) {
-			var search = new searchOptions(req, res);
-			search.buildOptions();
+			var searchOpt = new searchOptions(req, res);
+			searchOpt.buildOptions();
+
+			var searchPat = new searchPattern(searchOpt);
+			searchPat.buildSearchPattern();
+
+			console.log(searchPat.pattern);
+
 			var ws = JSON.stringify({
-					    "response": search
+					    "search": searchOpt,
+					    "pattern": searchPat
 					});
 			res.setHeader('Content-Type', 'application/json');
 			res.end(ws);
