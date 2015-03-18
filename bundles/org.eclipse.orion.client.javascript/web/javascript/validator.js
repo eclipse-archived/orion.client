@@ -17,8 +17,9 @@ define([
 	"javascript/finder",
 	'javascript/compilationUnit',
 	"orion/i18nUtil",
-	"i18n!javascript/nls/problems"
-], function(eslint, Objects, ASTManager, Finder, CU, i18nUtil, messages) {
+	"i18n!javascript/nls/problems",
+	"orion/metrics"
+], function(eslint, Objects, ASTManager, Finder, CU, i18nUtil, messages, Metrics) {
 	var config = {
 		// 0:off, 1:warning, 2:error
 		rules: {
@@ -289,6 +290,7 @@ define([
 		_validateAst: function(ast, env) {
 			var eslintErrors = [], 
 				parseErrors = this._extractParseErrors(ast);
+				var start = Date.now();
 			try {
 			    config.env = env;
 				eslintErrors = eslint.verify(ast, config);
@@ -301,6 +303,8 @@ define([
 					});
 				}
 			}
+			var end = Date.now() - start;
+			Metrics.logTiming('language tools', 'validation', end, 'application/javascript  - ('+(typeof(ast.source) === 'string' ? ast.source.length : '?')+' chars)');
 			return { problems: this._filterProblems(parseErrors, eslintErrors).map(toProblem) };
 		},
 		
