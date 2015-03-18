@@ -104,7 +104,7 @@
             { name: "mixloginstatic/javascript/register" },
             { name: "mixloginstatic/javascript/reset" },
             { name: "mixloginstatic/javascript/ServerStatus" },
-            { name: "mixloginstatic/manageExternalIds" },
+            { name: "mixloginstatic/javascript/manageExternalIds" },
             { name: "operations/list" },
             { name: "plugins/GerritFilePlugin" },
             { name: "plugins/GitHubFilePlugin" },
