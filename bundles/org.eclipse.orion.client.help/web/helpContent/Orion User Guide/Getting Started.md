@@ -126,7 +126,7 @@ Java syntax highlighting is also supported.  However, we have not implemented an
 
 ###Extending the editor with a Plug-in
 
-We've also implemented pluggable editor actions which allow third-party developers to extend the behavior of the Orion editor on the fly. For example, we've developed an Orion plug-in based on [the JSBeautifier code formatter](http://jsbeautifier.org) so that source code can be easily beautified. The plug-in is located at [https://orion-plugins.googlecode.com/git/0.5/plugins/beautify/jsbeautify.html](https://orion-plugins.googlecode.com/git/0.5/plugins/beautify/jsbeautify.html). Once the plug-in is installed, reload an Orion editor to see a new command appear beside rest of the editor commands. 
+We've also implemented pluggable editor actions which allow third-party developers to extend the behavior of the Orion editor on the fly. For example, we've developed an Orion plug-in based on [the JSBeautifier code formatter](http://jsbeautifier.org) so that source code can be easily beautified. The plug-in is located at [https://orion-plugins.github.io/0.5/plugins/beautify/jsbeautify.html](https://orion-plugins.github.io/0.5/plugins/beautify/jsbeautify.html). Once the plug-in is installed, reload an Orion editor to see a new command appear beside rest of the editor commands. 
 
 ![Plugins can contribute commands to the editor](images/Orion-editorplugin.png "Plugins can contribute commands to the editor")
 
