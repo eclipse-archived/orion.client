@@ -99,7 +99,7 @@
             { name: "help/help" },
             { name: "javascript/plugins/javascriptPluginLoader" },
             { name: "javascript/plugins/javascriptPlugin" },
-            { name: "mixloginstatic/LoginWindow" },
+            { name: "mixloginstatic/javascript/login" },
             { name: "mixloginstatic/manageExternalIds" },
             { name: "operations/list" },
             { name: "plugins/GerritFilePlugin" },
