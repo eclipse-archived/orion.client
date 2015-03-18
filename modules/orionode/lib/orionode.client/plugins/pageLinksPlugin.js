@@ -153,7 +153,7 @@ define([
 		contentURITemplate: pluginHelloWorld.href
 	});
 
-	var getPluginsTemplate = "http://orion-plugins.googlecode.com/git/index.html#?target={InstallTarget}&version={Version}&OrionHome={OrionHome}";
+	var getPluginsTemplate = "https://orion-plugins.github.io#?target={InstallTarget}&version={Version}&OrionHome={OrionHome}";
 	provider.registerService("orion.core.getplugins", null, {
 		uri: decodeURIComponent(new URITemplate(getPluginsTemplate).expand({
 			Version: "5.0",
