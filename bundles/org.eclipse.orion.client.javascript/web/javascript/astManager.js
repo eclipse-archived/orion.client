@@ -14,8 +14,9 @@ define([
 	'orion/Deferred',
 	'orion/objects',
 	'orion/serialize',
-	'javascript/lru'
-], function(Deferred, Objects, Serialize, LRU) {
+	'javascript/lru',
+	'orion/metrics'
+], function(Deferred, Objects, Serialize, LRU, Metrics) {
 	/**
 	 * @description Object of error types
 	 * @since 5.0
@@ -87,6 +88,7 @@ define([
 		 * @returns {Object} The AST.
 		 */
 		parse: function(text) {
+		    var start = Date.now();
 			try {
 				var ast = this.parser.parse(text, {
 					range: true,
@@ -96,11 +98,11 @@ define([
 					attachComment: true
 				});
 			} catch (e) {
-				// The "tolerant" Esprima sometimes blows up from parse errors in initial statements of code.
-				// Just return an empty AST with the parse error.
 				ast = this._emptyAST(text);
 				ast.errors = [e];
 			}
+			var end = Date.now() - start;
+			Metrics.logTiming('language tools', 'parse', end, 'application/javascript  - ('+(typeof(text) === 'string' ? text.length : '?')+' chars)');
 			if (ast.errors) {
 				this._computeErrorTypes(ast.errors);
 				ast.errors = ast.errors.map(Serialize.serializeError);

@@ -76,8 +76,6 @@ define(['orion/plugin',
 	 */
 	provider.registerService("orion.edit.model", {  //$NON-NLS-0$
 		onModelChanging: cssResultMgr.onModelChanging.bind(cssResultMgr),
-		onDestroy: cssResultMgr.onDestroy.bind(cssResultMgr),
-		onSaving: cssResultMgr.onSaving.bind(cssResultMgr),
 		onInputChanged: cssResultMgr.onInputChanged.bind(cssResultMgr)
 	},
 	{
@@ -107,8 +105,6 @@ define(['orion/plugin',
 	 */
 	provider.registerService("orion.edit.model", {  //$NON-NLS-0$
 		onModelChanging: htmlAstManager.onModelChanging.bind(htmlAstManager),
-		onDestroy: htmlAstManager.onDestroy.bind(htmlAstManager),
-		onSaving: htmlAstManager.onSaving.bind(htmlAstManager),
 		onInputChanged: htmlAstManager.onInputChanged.bind(htmlAstManager)
 	},
 	{

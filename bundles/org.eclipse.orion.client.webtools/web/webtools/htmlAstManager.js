@@ -15,8 +15,9 @@ define([
 	'orion/Deferred',
 	'orion/objects',
 	'javascript/lru',
+	'orion/metrics',
 	'htmlparser/htmlparser'  //stays last, exports into global scope
-], function(Deferred, Objects, LRU) {
+], function(Deferred, Objects, LRU, Metrics) {
 
 	/**
 	 * Provides a shared AST.
@@ -33,11 +34,8 @@ define([
 		 * @returns {orion.Promise} A promise resolving to the AST.
 		 */
 		getAST: function(editorContext) {
-			var metadataPromise = (typeof editorContext.getFileMetadata === "function")
-				? editorContext.getFileMetadata()
-				: new Deferred().resolve({});
 			var _self = this;
-			return metadataPromise.then(function(metadata) {
+			return editorContext.getFileMetadata().then(function(metadata) {
 				metadata = metadata || {};
 				var loc = _self._getKey(metadata);
 				var ast = _self.cache.get(loc);
@@ -80,7 +78,10 @@ define([
 				}
 			}, {ignoreWhitespace: true, includeLocation: true, verbose: false});
 			var parser = new Tautologistics.NodeHtmlParser.Parser(handler);
+			var start = Date.now();
 			parser.parseComplete(text);
+			var end = Date.now()-start;
+			Metrics.logTiming('language tools', 'parse', end, 'text/html  - ('+text.length+' chars)');
 			domResult.source = text;
 			return domResult;
 		},
@@ -98,24 +99,6 @@ define([
 		    } else {
 		        this.cache.remove(this._getKey(event.file));
 		    }
-		},
-		/**
-		 * Callback from the orion.edit.model service
-		 * @param {Object} event An <tt>orion.edit.model</tt> event.
-		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
-		 * @callback
-		 */
-		onDestroy: function(event) {
-		    //TODO with multi-env we will not need to destory the cache each editor switch
-		    //but we could do a consistency check
-		},
-		/**
-		 * Callback from the orion.edit.model service
-		 * @param {Object} event An <tt>orion.edit.model</tt> event.
-		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
-		 */
-		onSaving: function(event) {
-		    this.cache.remove(this._getKey(event.file));
 		},
 		/**
 		 * Callback from the orion.edit.model service

@@ -15,8 +15,9 @@ define([
 	'orion/Deferred',
 	'orion/objects',
 	'javascript/lru',
-	'csslint' 
-], function(Deferred, Objects, LRU, CSSLint) {
+	'csslint',
+	'orion/metrics'
+], function(Deferred, Objects, LRU, CSSLint, Metrics) {
 
 	/**
 	 * Provides a shared AST.
@@ -40,11 +41,8 @@ define([
 		    if(typeof(config.getRuleSet) === 'undefined') {
 		        config.getRuleSet = function() {return null;};
 			}
-			var metadataPromise = (typeof editorContext.getFileMetadata === "function")
-				? editorContext.getFileMetadata()
-				: new Deferred().resolve({});
 			var _self = this;
-			return metadataPromise.then(function(metadata) {
+			return editorContext.getFileMetadata().then(function(metadata) {
 				metadata = metadata || {};
 				var loc = _self._getKey(metadata);
 				var result = _self.cache.get(loc);
@@ -52,7 +50,10 @@ define([
 					return new Deferred().resolve(result);
 				}
 				return editorContext.getText().then(function(text) {
+				    var start = Date.now();
 					result = CSSLint.verify(text, config.getRuleSet());
+					var end = Date.now() - start;
+					Metrics.logTiming('language tools', 'parse', end, 'text/css  - ('+text.length+' chars)');
 					_self.cache.put(loc, result);
 					if(metadata.location) {
 					    //only set this if the original metadata has a real location
@@ -86,24 +87,6 @@ define([
 		    } else {
 		        this.cache.remove(this._getKey(event.file));
 		    }
-		},
-		/**
-		 * Callback from the orion.edit.model service
-		 * @param {Object} event An <tt>orion.edit.model</tt> event.
-		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
-		 * @callback
-		 */
-		onDestroy: function(event) {
-		    //TODO with multi-env we will not need to destory the cache each editor switch
-		    //but we could do a consistency check
-		},
-		/**
-		 * Callback from the orion.edit.model service
-		 * @param {Object} event An <tt>orion.edit.model</tt> event.
-		 * @see https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.model
-		 */
-		onSaving: function(event) {
-		    this.cache.remove(this._getKey(event.file));
 		},
 		/**
 		 * Callback from the orion.edit.model service
