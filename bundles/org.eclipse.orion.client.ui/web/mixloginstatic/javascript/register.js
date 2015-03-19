@@ -8,8 +8,9 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
-define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domReady, xhr, xsrfUtils, common) {
+/*eslint-env amd, browser*/
+/*global URL*/
+define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common', 'orion/URL-shim'], function(domReady, xhr, xsrfUtils, common) {
 	function confirmCreateUser(e) {
 		e.preventDefault();
 

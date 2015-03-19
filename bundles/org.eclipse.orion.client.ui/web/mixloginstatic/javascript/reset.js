@@ -8,8 +8,9 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
-define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsrfUtils', './common'], function(domReady, xhr, PageUtil, PageLinks, xsrfUtils, common) {
+/*eslint-env amd, browser*/
+/*global URL*/
+define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsrfUtils', './common', 'orion/URL-shim'], function(domReady, xhr, PageUtil, PageLinks, xsrfUtils, common) {
 
 	function confirmResetUser(e) {
 		e.preventDefault();
