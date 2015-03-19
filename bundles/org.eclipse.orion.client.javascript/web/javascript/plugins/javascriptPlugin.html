@@ -30,38 +30,8 @@
 			]
 		});
 
-		require(["javascript/plugins/javascriptPluginLoader"]);
+		require(["javascript/plugins/javascriptPlugin"]);
 	</script>
-
-	<script type="text/javascript">
-		/*eslint-env browser*/
-		document.addEventListener("DOMContentLoaded", /* @callback */ function(e) {
-			var checkbox = document.getElementById("useworker");
-			var key = "jstools.worker", value = localStorage.getItem(key), defaultState = false;
-			checkbox.checked = (value === null ? defaultState : JSON.parse(value));
-			checkbox.onchange = function(event) {
-				var newState = !!event.target.checked;
-				if (newState === defaultState) {
-					localStorage.removeItem(key);
-				}
-				else {
-					localStorage.setItem(key, JSON.stringify(newState));
-				}
-			};
-		});
-	</script>
-	<style>
-	    table {
-	        width:40%;
-	        border-collapse: collapse;
-	    }
-	    tr {
-	        border: 1px solid;
-	    }
-	    td {
-	        padding: 3px 7px 2px 7px;
-	    }
-	</style>
 </head>
 <body>
 	<h1>JavaScript Tools Support</h1>
@@ -72,11 +42,6 @@
 		<li><em>Content Assist</em> - smart content assist while editing.</li>
 		<li><em>Search</em> - named item searching, editor occurrences, etc.</li>
 	</ul>
-
-	<h3>Developer Options</h3>
-	<form>
-		<label><input type="checkbox" id="useworker" /> Use a web worker (improves responsiveness when editing large files)</label>
-	</form>
 	<div style="width:50%">
         <h3>Third Party Libraries</h3>
         <table>

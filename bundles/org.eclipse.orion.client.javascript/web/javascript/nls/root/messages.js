@@ -9,6 +9,8 @@
  ******************************************************************************/
 /* eslint-env amd */
 define({//Default message bundle
+    'pluginName': 'Orion JavaScript Tool Support',
+    'pluginDescription': 'This plugin provides JavaScript tools support for Orion, like editing, search, navigation, validation, and code completion.',
 	'error': 'Error',  //$NON-NLS-0$  //$NON-NLS-1$
 	'warning' : 'Warning',  //$NON-NLS-0$  //$NON-NLS-1$
 	'ignore' : 'Ignore',  //$NON-NLS-0$  //$NON-NLS-1$
