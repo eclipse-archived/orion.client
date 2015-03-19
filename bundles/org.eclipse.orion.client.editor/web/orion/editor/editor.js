@@ -832,7 +832,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						if (!self._listener){
 							return;
 						}
-							
+						
 						tooltip.onHover({
 							clientX: self._listener.lastMouseX,
 							clientY: self._listener.lastMouseY,
@@ -845,8 +845,11 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					}, 175);
 				},
 				onMouseOut: function(e) {
-//					self._listener.lastMouseX = undefined;
-//					self._listener.lastMouseY = undefined;
+					// When mouse leaves the editor, ignore any pending onMouseMove events
+					if (self._hoverTimeout) {
+						window.clearTimeout(self._hoverTimeout);
+						self._hoverTimeout = null;
+					}
 				},
 				onScroll: function(e) {
 					if (!tooltip) { return; }
