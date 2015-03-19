@@ -1097,11 +1097,12 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/i18n
 				var item = getTargetFolder(data.items);
 				var fileInput = lib.node("fileSelectorInput");
 				var cloneInput = fileInput.cloneNode(); // clone file input before its value is changed
+				var expandItem = explorer.treeRoot.ChildrenLocation === item.ChildrenLocation ? false : true;
 
 				var changeListener = function(){ //$NON-NLS-0$
 					if (fileInput.files && fileInput.files.length > 0) {
 						for (var i = 0; i < fileInput.files.length; i++) {
-							explorer._uploadFile(item, fileInput.files.item(i), true);
+							explorer._uploadFile(item, fileInput.files.item(i), expandItem);
 						}
 					}
 					

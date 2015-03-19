@@ -720,7 +720,7 @@ define([
 						},
 						loadend: function(event) {
 							destroy();
-							this.changedItem(targetItem);
+							this.changedItem(targetItem, true);
 						}.bind(this),
 						error: function(event) {
 							var errorMessage = messages["UploadingFileErr"] + file.name; //$NON-NLS-0$
@@ -768,7 +768,7 @@ define([
 		 */
 		_makeUploadNode: function(parentItem, artifactName, isDirectory) {
 			
-			var domId = this.getRow(parentItem).id;
+			var domId = this.getRow(parentItem) ? this.getRow(parentItem).id : this.parentId;
 			var child = {Name: artifactName, Directory: isDirectory};
 			
 			return this.makeNewChildItemPlaceholder(parentItem, child, domId).then(function(placeholder) {
@@ -1009,7 +1009,7 @@ define([
 			path = mFileUtils.makeRelative(path);
 			if (!force && path === this._lastPath) {
 				return new Deferred().resolve(this.treeRoot);
-			}			
+			}
 			this._lastPath = path;
 			var self = this;
 			if (force || (path !== this.treeRoot.Path)) {
