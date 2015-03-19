@@ -40,8 +40,6 @@ function Tooltip (view) {
 			tooltipDiv.setAttribute("aria-live", "assertive"); //$NON-NLS-1$ //$NON-NLS-0$
 			tooltipDiv.setAttribute("aria-atomic", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
-			var tooltipContents = this._tooltipContents = util.createElement(document, "div"); //$NON-NLS-0$
-			tooltipDiv.appendChild(tooltipContents);
 			document.body.appendChild(tooltipDiv);
 			var self = this;
 			textUtil.addEventListener(document, "mousedown", this._mouseDownHandler = function(event) { //$NON-NLS-0$
@@ -165,11 +163,9 @@ function Tooltip (view) {
 			
 			var newTooltipContents;
 			if (update && this._tooltipContents) {
-				// Clear out any current content
 				this._tooltipContents.innerHTML = "";
 				newTooltipContents = this._tooltipContents;
 			} else {
-				// Create a div for any new content
  				newTooltipContents = util.createElement(this._tooltipDiv.ownerDocument, "div"); //$NON-NLS-0$
  			}
 			
@@ -203,18 +199,14 @@ function Tooltip (view) {
 								info.resolved = true;  // resolved
 								if (data) {
 									if (self._renderPluginContent(newTooltipContents, data)) {
-										if (self.isVisible()) {
-											self._tooltipDiv.resize();
-										} else {
-											// TODO Need to clarify what data the deferred can return and update API doc
-											if (data.offsetStart){
-												this._offsetStart = info.offsetStart;
-											}
-											if (data.offsetEnd){
-												this._offsetEnd = info.offsetEnd;
-											}
-											self._showContents(newTooltipContents, update);
+										// TODO Need to clarify what data the deferred can return and update API doc
+										if (data.offsetStart){
+											this._offsetStart = info.offsetStart;
 										}
+										if (data.offsetEnd){
+											this._offsetEnd = info.offsetEnd;
+										}
+										self._showContents(newTooltipContents, update);
 									}
 								}
 							}, function(error) {
@@ -336,7 +328,6 @@ function Tooltip (view) {
 			this._captureLocationInfo(this._info);
 			this._info = undefined;
 
-			// TODO Potential for an empty tooltip or duplicated content, what if both static and deferred content are added?
 			this._tooltipContents = newContentsDiv;
 			this._tooltipDiv.appendChild(newContentsDiv);
 			
