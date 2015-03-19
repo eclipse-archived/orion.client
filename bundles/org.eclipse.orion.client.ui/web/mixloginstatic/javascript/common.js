@@ -8,8 +8,9 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
-define(['orion/PageUtil'],function(PageUtil) {
+/*eslint-env amd, browser*/
+/*global $*/
+define(['orion/PageUtil', './jquery'],function(PageUtil) {
     var errorClass = "has-error";
     var successClass = "success";
 

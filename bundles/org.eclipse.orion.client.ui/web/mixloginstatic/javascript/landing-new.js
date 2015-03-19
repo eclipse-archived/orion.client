@@ -8,8 +8,9 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
-define(['domReady', 'orion/xhr'], function(domReady, xhr) {
+/*eslint-env amd, browser*/
+/*global $ URL*/
+define(['domReady', 'orion/xhr', './jquery', 'orion/URL-shim'], function(domReady, xhr) {
 
 	var newsRssFeedUrl = "http://planetorion.org/news/feed/";
 
