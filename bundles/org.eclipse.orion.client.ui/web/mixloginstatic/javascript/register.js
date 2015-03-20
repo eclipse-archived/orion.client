@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*eslint-env amd, browser*/
 /*global URL*/
-define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common', 'orion/URL-shim'], function(domReady, xhr, xsrfUtils, common) {
+define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domReady, xhr, xsrfUtils, common) {
 	function confirmCreateUser(e) {
 		e.preventDefault();
 
@@ -46,6 +46,8 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common', 'orion/URL-shim'
 					common.removeClass(authForm, processClass);
 					authFormElements.removeAttribute("disabled");
 					signUpBtn.removeAttribute("disabled");
+				} else {
+					common.confirmLogin(e);
 				}
 			}
 		};
