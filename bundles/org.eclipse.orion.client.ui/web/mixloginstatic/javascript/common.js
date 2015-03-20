@@ -10,12 +10,43 @@
  ******************************************************************************/
 /*eslint-env amd, browser*/
 /*global $*/
-define(['orion/PageUtil', './jquery'],function(PageUtil) {
+define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],function(PageUtil, xsrfUtils, PageLinks) {
     var errorClass = "has-error";
     var successClass = "success";
 
     function addClass(ele,cls) {
       if (!hasClass(ele,cls)) ele.className += " "+cls;
+    }
+
+    function confirmLogin(e, username, password) {
+        e.preventDefault();
+
+        if (!username) {
+            username = document.getElementById('username').value.trim();
+            password = document.getElementById('password').value;
+        }
+
+        if (username.length > 0 && password.length > 0) {
+
+            var mypostrequest = new XMLHttpRequest();
+            mypostrequest.onreadystatechange = function() {
+                if (mypostrequest.readyState === 4) {
+                    if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
+                        var responseObject = JSON.parse(mypostrequest.responseText);
+                        common.showStatusMessage(responseObject.error);
+                    } else {
+                        finishLogin(username, password);
+                    }
+                }
+            };
+
+            var parameters = "username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password);
+            mypostrequest.open("POST", "../login/form", true);
+            mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            mypostrequest.setRequestHeader("Orion-Version", "1");
+            xsrfUtils.addCSRFNonce(mypostrequest);
+            mypostrequest.send(parameters);
+        }
     }
 
     function copyText(original, destination) {
@@ -84,6 +115,23 @@ define(['orion/PageUtil', './jquery'],function(PageUtil) {
         }
 
         return utftext;
+    }
+
+    function finishLogin() {
+        var redirect = getRedirect();
+        var username = document.getElementById('username').value.trim();
+        var password = document.getElementById('password').value;
+        redirect = redirect === null ? PageLinks.getOrionHome() : redirect;
+
+        if (redirect !== null) {
+            redirect = decodeURIComponent(redirect);
+            if(PageUtil.validateURLScheme(redirect)) {
+                window.location = redirect;
+                return;
+            }
+        }
+        window.close();
+
     }
 
     function getParam(key) {
@@ -156,8 +204,6 @@ define(['orion/PageUtil', './jquery'],function(PageUtil) {
             }
 
             var userEmailNotSet = "User " + username + " doesn't have its email set. Contact administrator to reset your password.";
-
-            console.log(msg);
 
             // Add the error class back. It will be removed in the switch statement if needed
             statusField.addClass(errorClass);
@@ -267,6 +313,7 @@ define(['orion/PageUtil', './jquery'],function(PageUtil) {
     return {
         addClass: addClass,
         copyText: copyText,
+        confirmLogin: confirmLogin,
         createOAuthLink: createOAuthLink,
         decodeBase64: decodeBase64,
         getParam: getParam,
