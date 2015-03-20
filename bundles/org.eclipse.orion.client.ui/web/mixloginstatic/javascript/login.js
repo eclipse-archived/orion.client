@@ -10,56 +10,7 @@
  ******************************************************************************/
 /*eslint-env amd, browser*/
 /*global URL*/
-define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsrfUtils', 'orion/webui/littlelib', './common', 'orion/URL-shim'], function(domReady, xhr, PageUtil, PageLinks, xsrfUtils, lib, common) {
-
-	function confirmLogin(e, username, password) {
-		e.preventDefault();
-
-		if (!username) {
-			username = document.getElementById('username').value.trim();
-			password = document.getElementById('password').value;
-		}
-
-		if (username.length > 0 && password.length > 0){
-
-			var mypostrequest = new XMLHttpRequest();
-			mypostrequest.onreadystatechange = function() {
-				if (mypostrequest.readyState === 4) {
-					if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
-						var responseObject = JSON.parse(mypostrequest.responseText);
-						common.showStatusMessage(responseObject.error);
-					} else {
-						finishLogin(username, password);
-					}
-				}
-			};
-
-			var parameters = "username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password);
-			mypostrequest.open("POST", "../login/form", true);
-			mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			mypostrequest.setRequestHeader("Orion-Version", "1");
-			xsrfUtils.addCSRFNonce(mypostrequest);
-			mypostrequest.send(parameters);
-		}
-	}
-
-	function finishLogin() {
-		var redirect = getRedirect();
-		var username = document.getElementById('username').value.trim();
-		var	password = document.getElementById('password').value;
-		redirect = redirect === null ? PageLinks.getOrionHome() : redirect;
-
-		if (redirect !== null) {
-			redirect = decodeURIComponent(redirect);
-			if(PageUtil.validateURLScheme(redirect)) {
-				window.location = redirect;
-				return;
-			}
-		}
-		window.close();
-
-	}
-
+define(['domReady', 'orion/xhr', 'orion/webui/littlelib', './common'], function(domReady, xhr, lib, common) {
 	function getRedirect() {
 		var regex = new RegExp('[\\?&]redirect=([^&#]*)');
 		var results = regex.exec(window.location.href);
@@ -67,18 +18,18 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 	}
 
 	function setUpLoginPage () {
-		document.getElementById("signInBtn").addEventListener("click", confirmLogin, false);
+		document.getElementById("signInBtn").addEventListener("click", common.confirmLogin, false);
 
 		document.getElementById("username").addEventListener("keypress", function(event) {
 			if (event.keyCode === lib.KEY.ENTER) {
-				confirmLogin();
+				common.confirmLogin();
 				lib.stop(event);
 			}
 		});
 
 		document.getElementById("password").addEventListener("keypress", function(event) {
 			if (event.keyCode === lib.KEY.ENTER) {
-				confirmLogin();
+				common.confirmLogin();
 				lib.stop(event);
 			}
 		});
@@ -144,8 +95,6 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 			var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1);
 			var url = window.location.href;
 			var redirectURL = url.replace("LoginWindow", "register");
-			console.log(hashes);
-			console.log(redirectURL);
 			window.location.replace(redirectURL);
 		}
 
