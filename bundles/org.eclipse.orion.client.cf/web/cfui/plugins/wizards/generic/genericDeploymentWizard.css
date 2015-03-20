@@ -281,6 +281,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .manifestOverride {
 	text-align: center;
 	font-size: 9pt;
+	position: absolute;
 	bottom: 75px;
 	width: calc(100% - 24px);
 }
