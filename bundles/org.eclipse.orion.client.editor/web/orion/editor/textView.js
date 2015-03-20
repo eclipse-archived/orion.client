@@ -6941,13 +6941,7 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			}
 			if (!this._domSelection) {
 				this._domSelection = [];
-				var window = this._getWindow();
-				var self = this;
 				this._cursorVisible = true;
-				this._cursorTimer = window.setInterval(function() {
-					self._cursorVisible = !self._cursorVisible;
-					self._domSelection.forEach(function(domSelection) { domSelection.update(); });
-				}, 500);
 			}
 			if (!init) {
 				this._updateDOMSelection();
@@ -7231,6 +7225,21 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 			for (i=0; i<domSelection.length; i++) {
 				domSelection[i].setPrimary(i === 0);
 				domSelection[i].setSelection(selection[i]);
+			}
+			var window = this._getWindow();
+			var self = this;
+			if (domSelection.length > 1) {
+				if (!this._cursorTimer) {
+					this._cursorTimer = window.setInterval(function() {
+						self._cursorVisible = !self._cursorVisible;
+						self._domSelection.forEach(function(domSelection) { domSelection.update(); });
+					}, 500);
+				}
+			} else {
+				if (this._cursorTimer) {
+					window.clearInterval(this._cursorTimer);
+					this._cursorTimer = null;
+				}
 			}
 		},
 		_update: function(hScrollOnly) {
