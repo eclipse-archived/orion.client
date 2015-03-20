@@ -15,6 +15,9 @@ define([
 	'i18n!orion/edit/nls/messages',
 	'orion/sidebar',
 	'orion/inputManager',
+	'orion/commands',
+	'orion/util',
+	'orion/keyBinding',
 	'orion/globalCommands',
 	'orion/editor/textModel',
 	'orion/editor/undoStack',
@@ -47,7 +50,7 @@ define([
 	'orion/Deferred',
 	'orion/projectClient'
 ], function(
-	messages, Sidebar, mInputManager, mGlobalCommands,
+	messages, Sidebar, mInputManager, mCommands, util, mKeyBinding, mGlobalCommands,
 	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
@@ -476,7 +479,209 @@ objects.mixin(EditorSetup.prototype, {
 			}.bind(this));
 		}
 	},
-	
+	_setPipSel: function(index) {
+		if (this._pipInfo._pipURLS.length === 0)
+			return;
+		if (index < 0)
+			index = this._pipInfo._pipURLS.length - 1;
+		if (index >= this._pipInfo._pipURLS.length)
+			index = 0;
+			
+		this._pipInfo._pipSel = index;
+		this._pipInfo._inputManager.setInput(this._pipInfo._pipURLS[this._pipInfo._pipSel]);
+		this._pipInfo._urlField.value = this._pipInfo._inputManager._title;		
+	},
+	_setPipMode: function(mode) {
+		var editorDiv = this._pipInfo._editorDiv;
+		var pipDiv = this._pipInfo._pipDiv;
+		if (mode === "P") {
+			pipDiv.style.top = "10px";
+			pipDiv.style.left = "auto";
+			pipDiv.style.right = "40px";
+			pipDiv.style.width = "500px";
+			pipDiv.style.height = "400px";
+			
+			editorDiv.style.width = "100%";
+			editorDiv.style.height = "100%";
+		} else if (mode === "H") {
+			editorDiv.style.width = "100%";
+			editorDiv.style.height = "50%";
+			
+			pipDiv.style.left = "0";
+			pipDiv.style.right = "auto";
+			pipDiv.style.top = "50%";
+			pipDiv.style.height = "50%";
+			pipDiv.style.width = "100%";
+		} else if (mode === "V") {
+			editorDiv.style.width = "50%";
+			editorDiv.style.height = "100%";
+			
+			pipDiv.style.top = "0";
+			pipDiv.style.right = "auto";
+			pipDiv.style.left = "50%";
+			pipDiv.style.height = "100%";
+			pipDiv.style.width = "50%";
+		}
+	},
+	_createButton: function(parentDiv, xPos, label, id, doit) {
+		// Create the div for the new button
+		var newButton = util.createElement(parentDiv.ownerDocument, "button");
+		newButton.id = id;
+		newButton.innerHTML = label;
+		newButton.style.position = "absolute";
+		newButton.style["text-align"] = "center";
+		newButton.style.left = xPos + "px";
+		newButton.style.top = "3px";
+		newButton.style.width = "20px";
+		newButton.style.height = "20px";
+
+		newButton.addEventListener("click", doit.bind(this));
+		parentDiv.appendChild(newButton);
+		
+		return xPos + 15 + 3;		
+	},
+	_addURL: function(newURL) {
+		console.log(newURL);
+	},
+	_swapPip: function() {
+		var editorInputMgr = this.inputManager;
+		var pipInputMgr = this._pipInfo._inputManager;
+		var curPipInput = pipInputMgr._input;
+		
+		this._pipInfo._pipURLS[this._pipInfo._pipSel] = editorInputMgr._input;
+		
+		pipInputMgr.setInput(editorInputMgr._input);
+		editorInputMgr.setInput(curPipInput);
+	},
+	_constructPipDivs: function(editorDiv) {
+		var theDoc = editorDiv.ownerDocument;
+		
+		// Create the div for the Pip itself
+		var pipDiv = util.createElement(theDoc, "div");
+		pipDiv.id = "PipDiv";
+		pipDiv.style.position = "absolute";
+		pipDiv.style["z-index"] = "100";
+		pipDiv.style.background = "#9090f0";
+		pipDiv.style["border-style"] = "solid";
+		pipDiv.style["border-color"] = "#9090f0";
+		
+		// Construct control UI
+		var nextX = this._createButton(pipDiv, 3, "<", "prevEditor", function() {
+			this._setPipSel(this._pipInfo._pipSel - 1);
+		});
+		nextX = this._createButton(pipDiv, nextX, ">", "nextEditor", function() {
+			this._setPipSel(this._pipInfo._pipSel + 1);
+		});
+		nextX = this._createButton(pipDiv, nextX, "P", "PipMode", function() {
+			this._setPipMode("P");
+		});
+		nextX = this._createButton(pipDiv, nextX, "H", "HorizontalSplit", function() {
+			this._setPipMode("H");
+		});
+		nextX = this._createButton(pipDiv, nextX, "V", "VerticalSplit", function() {
+			this._setPipMode("V");
+		});
+		nextX = this._createButton(pipDiv, nextX, "S", "Swap", function() {
+			this._swapPip();
+		});
+		// Create the div for the new button
+		var urlField = util.createElement(pipDiv.ownerDocument, "input");
+		urlField.id = "URLField";
+		urlField.style.position = "absolute";
+		urlField.style.background = "white";
+		urlField.style.top = "3px";
+		urlField.style.left = (nextX+7) + "px";
+		urlField.style.right = "23px";
+		urlField.addEventListener("keydown", function(ev) {
+			if(ev.keyCode === lib.KEY.ENTER) {
+				this._addURL(ev.target.value);
+			}
+		}.bind(this), false);
+		pipDiv.appendChild(urlField);
+		this._pipInfo._urlField = urlField;
+		
+		// Create the div for the editors
+		var pipContent = util.createElement(theDoc, "div");
+		pipContent.id = "PipContents";
+		pipContent.style.position = "absolute";
+		pipContent.style.top = "28px";
+		pipContent.style.bottom = "0px";
+		pipContent.style.width = "100%";
+		pipDiv.appendChild(pipContent);
+		
+		editorDiv.parentElement.appendChild(pipDiv);
+		
+		this._pipInfo._editorDiv = editorDiv;
+		this._pipInfo._pipDiv = pipDiv;
+		this._pipInfo._pipContent = pipContent;
+		
+		return pipContent;
+	},
+		_generateShowPip: function(){
+			var showPipCommand = new mCommands.Command({
+				name: "Show Pip",
+				tooltip: "Display Picture-in-Picture",
+				id: "orion.edit.showPip", //$NON-NLS-0$
+				visibleWhen: function() {
+					return true;
+				},
+				callback: function(data) {
+					var existingPip = lib.node("PipDiv");
+					if (existingPip) {
+						existingPip.parentNode.removeChild(existingPip);
+						return;
+					}
+					
+					this._pipInfo = {};
+					var pipDiv = this._constructPipDivs(this.editorDomNode);
+
+					var selection = new mSelection.Selection(this.serviceRegistry, "pipSel");
+					var model = this.model = new mTextModel.TextModel();
+					var undoStack = new mUndoStack.UndoStack(this.model, 500);
+					var inputManager = new mInputManager.InputManager({
+						serviceRegistry: this.serviceRegistry,
+						fileClient: this.fileClient,
+						progressService: this.progressService,
+						statusReporter: this.statusReporter.bind(this),
+						selection: selection,
+						contentTypeRegistry: this.contentTypeRegistry
+					});
+								
+					var editorOptions = this.defaultOptions();
+					editorOptions.parent = pipDiv;
+					editorOptions.model = model;
+					editorOptions.menuBar = this.menuBar;
+					editorOptions.undoStack = undoStack;
+					editorOptions.renderToolbars = this.renderToolbars.bind(this);
+					editorOptions.inputManager = inputManager;
+					editorOptions.selection = selection;
+					var newView = new mEditorView.EditorView(editorOptions);
+					
+					inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
+						var view =  newView;
+						this.setEditor(view ? view.editor : null);
+						evt.editor = this.editor;
+					}.bind(this));
+					selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
+						inputManager.setInput(event.selection);
+					});
+					newView.create();
+					
+					// Now, populate the Pip with some files
+					this._pipInfo._inputManager = inputManager;
+					this._pipInfo._pipURLS = [
+						"/file/emoffatt-OrionContent/org.eclipse.orion.client-2/bundles/org.eclipse.orion.client.ui/web/edit/setup.js",
+						"/file/emoffatt-OrionContent/org.eclipse.orion.client-2/bundles/org.eclipse.orion.client.ui/web/edit/common.css"
+					];
+					this._setPipMode('P');
+					this._setPipSel(0);
+					
+				}.bind(this)
+			});
+			this.commandRegistry.addCommand(showPipCommand);
+			this.commandRegistry.registerCommandContribution("pageActions" , "orion.edit.showPip", 1, "orion.menuBarToolsGroup", false, //$NON-NLS-1$ //$NON-NLS-0$
+				new mKeyBinding.KeyBinding('e', true, true));
+		},	
 	load: function() {
 		var inputManager = this.inputManager;
 		var sidebarNavInputManager = this.sidebarNavInputManager;
@@ -509,6 +714,7 @@ objects.mixin(EditorSetup.prototype, {
 exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isReadOnly) {
 	var setup = new EditorSetup(serviceRegistry, pluginRegistry, preferences, isReadOnly);
 	Deferred.when(setup.createBanner(), function() {
+		setup._generateShowPip();
 		setup.createTextModel();
 		setup.createInputManager();
 		setup.createMenuBar().then(function() {
