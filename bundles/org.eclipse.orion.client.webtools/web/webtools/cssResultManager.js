@@ -53,7 +53,7 @@ define([
 				    var start = Date.now();
 					result = CSSLint.verify(text, config.getRuleSet());
 					var end = Date.now() - start;
-					Metrics.logTiming('language tools', 'parse', end, 'text/css  - ('+text.length+' chars)');
+					Metrics.logTiming('language tools', 'parse', end, 'text/css');
 					_self.cache.put(loc, result);
 					if(metadata.location) {
 					    //only set this if the original metadata has a real location

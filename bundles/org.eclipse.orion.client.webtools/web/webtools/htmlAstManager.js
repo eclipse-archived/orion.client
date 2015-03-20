@@ -81,7 +81,7 @@ define([
 			var start = Date.now();
 			parser.parseComplete(text);
 			var end = Date.now()-start;
-			Metrics.logTiming('language tools', 'parse', end, 'text/html  - ('+text.length+' chars)');
+			Metrics.logTiming('language tools', 'parse', end, 'text/html');
 			domResult.source = text;
 			return domResult;
 		},

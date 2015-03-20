@@ -102,7 +102,7 @@ define([
 				ast.errors = [e];
 			}
 			var end = Date.now() - start;
-			Metrics.logTiming('language tools', 'parse', end, 'application/javascript  - ('+(typeof(text) === 'string' ? text.length : '?')+' chars)');
+			Metrics.logTiming('language tools', 'parse', end, 'application/javascript');
 			if (ast.errors) {
 				this._computeErrorTypes(ast.errors);
 				ast.errors = ast.errors.map(Serialize.serializeError);
