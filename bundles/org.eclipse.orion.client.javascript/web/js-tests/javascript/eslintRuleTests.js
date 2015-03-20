@@ -11,10 +11,15 @@
 /*eslint-env node, mocha, amd*/
 define([
 	'eslint',
+	'estraverse',
 	'chai/chai',
 	'mocha/mocha' //not a module, leave at the end
-], function(eslint, chai) {
+], function(eslint, Estraverse, chai) {
 	var assert = chai.assert;
+	
+	if(!Estraverse.VisitorKeys.RecoveredNode) {
+	    Estraverse.VisitorKeys.RecoveredNode = []; //ignore it, normally set up when JS loads
+	}
 	
 	describe('ESLint Rule Tests', function() {
 // CURLY ---------------------------------------------

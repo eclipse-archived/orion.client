@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2014 VMware, Inc. and others.
+ * Copyright (c) 2012, 2015 VMware, Inc. and others.
  * All Rights Reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -229,7 +229,7 @@ define(function() {
 		afterDot : function(offset, memberExpr, contents) {
 			// check for broken AST
 			var end;
-			if (memberExpr.property) {
+			if (memberExpr.property && memberExpr.property.type !== 'RecoveredNode') {
 				end = memberExpr.property.range[0];
 			} else {
 				// no property expression, use the end of the memberExpr as the end to look at

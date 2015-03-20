@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2014 VMware, Inc. and others.
+ * Copyright (c) 2012, 2015 VMware, Inc. and others.
  * All Rights Reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -35,6 +35,9 @@ define([
 		 * will only be invoked iff the operation returns true for the current node
 		 */
 		visit: function(node, context, operation, postoperation) {
+		    if(node.type === 'RecoveredNode') {
+		        return;
+		    }
 			if (operation(node, context, true)) {
 				// gather children to visit
 				var i = 0;

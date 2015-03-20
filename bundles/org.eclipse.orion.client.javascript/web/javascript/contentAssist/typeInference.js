@@ -578,7 +578,7 @@ define([
 			}
 			break;
 		case "MemberExpression":
-			if (node.property) {
+			if (node.property && !typeUtils.isRecovered(node.property)) {
 				if (!node.computed ||  // like this: foo.prop
 					(node.computed && node.property.type === "Literal" && typeof node.property.value === "string")) {  // like this: foo['prop']
 
@@ -822,13 +822,13 @@ define([
 			if (typeUtils.isArrayType(node.object.extras.inferredTypeObj) && node.computed) {
 				// inferred type of expression is the type of the dereferenced array
 				node.extras.inferredTypeObj = typeUtils.extractArrayParameterType(node.object.extras.inferredTypeObj);
-			} else if (node.computed && node.property && node.property.type !== "Literal") {
+			} else if (node.computed && node.property && node.property.type !== "Literal" && !typeUtils.isRecovered(node.property)) {
 				// we don't infer parameterized objects, but we have something like this: 'foo[at]'  just assume type is object
 				node.extras.inferredTypeObj = typeUtils.OBJECT_TYPE;
 			} else {
 				// a regular member expression: foo.bar or foo['bar']
 				// node.propery will be null for mal-formed asts
-				node.extras.inferredTypeObj = node.property ?
+				node.extras.inferredTypeObj = (node.property && !typeUtils.isRecovered(node.property)) ?
 					node.property.extras.inferredTypeObj :
 					node.object.extras.inferredTypeObj;
 			}

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2014 VMware, Inc. and others.
+ * Copyright (c) 2012, 2015 VMware, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -662,6 +662,15 @@ define([
 				typeObj = this.extractReturnType(typeObj);
 				return this.createReadableType(typeObj, env, true, depth);
 			}
+		},
+		/**
+		 * @description Returns if the node is recovered or not
+		 * @param {Object} node The AST node 
+		 * @returns {Boolean} If the node is a recovered node or not  
+		 * @since 9.0
+		 */
+		isRecovered: function isRecovered(node) {
+		  return node.recovered === true || node.type === 'RecoveredNode';  
 		},
 		leftTypeIsMoreGeneral: leftTypeIsMoreGeneral,
 		findGlobalObject: findGlobalObject,

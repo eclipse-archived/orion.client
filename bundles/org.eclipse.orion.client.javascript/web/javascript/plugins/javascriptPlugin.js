@@ -18,6 +18,7 @@ define([
 'orion/plugin',
 'orion/bootstrap',
 'esprima',
+'estraverse',
 'javascript/scriptResolver',
 'javascript/astManager',
 'javascript/quickFixes',
@@ -40,7 +41,7 @@ define([
 'orion/editor/stylers/application_schema_json/syntax',
 'orion/editor/stylers/application_x-ejs/syntax',
 'i18n!javascript/nls/messages'
-], function(PluginProvider, Bootstrap, Esprima, ScriptResolver, ASTManager, QuickFixes, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
+], function(PluginProvider, Bootstrap, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
 			EslintValidator, Occurrences, Hover, Outliner,	Util, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
     var provider = new PluginProvider({
@@ -72,6 +73,13 @@ define([
 		               }
 		               ]
 	});
+	
+	/**
+	 * make sure the RecoveredNode is ignored
+	 * @since 9.0
+	 */
+	Estraverse.VisitorKeys.RecoveredNode = []; //do not visit
+	
 	/**
 	 * Create the script resolver
 	 * @since 8.0

@@ -2541,7 +2541,7 @@ parseStatement: true, parseSourceElement: true */
         catch(e) {
             if (extra.errors) {
                 recordError(e);
-                return null;
+                return recoveredNode(node, Syntax.Identifier);
             } else {
                 throw e;
             }
@@ -3720,11 +3720,14 @@ parseStatement: true, parseSourceElement: true */
                 break;
             }
             sourceElement = parseSourceElement();
-            if (typeof sourceElement === 'undefined' || start === index) {
+            if (typeof sourceElement === 'undefined' || sourceElement == null) {
+                break;
+            }
+            sourceElements.push(sourceElement);
+            if(start === index) {
                 break;
             }
             start = index;
-            sourceElements.push(sourceElement);
         }
 
         expectSkipTo('}');
@@ -4338,12 +4341,17 @@ parseStatement: true, parseSourceElement: true */
     /**
      * @description Returns a node to fill in incomplete tree locations while recovering
      * @param {Node} node The node context we tried to parse. Used to collect range and loc infos
+     * @param {String} expecetdType The expected type of node (if known)
+     * @param {String} expectedValue The expected value of the node (if known)
      * @since 2.0
      */
-    function recoveredNode(node) {
+    function recoveredNode(node, expecetdType, expectedValue) {
         var recovered = {
-            type: Syntax.Identifier,
-            name: '\$\$_RECOVERED_\$\$'
+            type: 'RecoveredNode',
+            name: '',
+            recovered: true,
+            expectedValue: expectedValue,
+            expectedType: expecetdType
         };
         if (extra.range) {
             recovered.range = node.range;
