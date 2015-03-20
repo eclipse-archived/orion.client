@@ -62,7 +62,7 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 			});
 		},
 		getAuthForm: function(notify) {
-			return qualifyURL(notify ? ('../mixloginstatic/LoginWindow.html?redirect=' + encodeURIComponent(notify) + '&key=FORMOAuthUser') : '../mixloginstatic/LoginWindow.html');
+			return qualifyURL(notify ? ('../mixloginstatic/landing.html?redirect=' + encodeURIComponent(notify) + '&key=FORMOAuthUser') : '../mixloginstatic/LoginWindow.html');
 		},
 
 		getKey: function() {
