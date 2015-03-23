@@ -505,6 +505,38 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 		}
 	);
 	
+	/** Add cf check-route command **/
+	var checkRouteImpl = {
+		callback: function(args, context){
+			return cFService.checkRoute(null, args.domain, args.hostname).then(
+				function(result){
+					if(!result || !result.Route || result.Route.length === 0) {
+						return i18Util.formatMessage(messages["Route${0}${1}DoesNotExist"], args.hostname, args.domain);
+					} else {
+						return i18Util.formatMessage(messages["Route${0}${1}DoesExist"], args.hostname, args.domain);
+					}
+				}
+			);
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		checkRouteImpl, {
+			name: "cfo check-route",
+			description: messages["perfomSimpleCheckToDetermineWheterRouteExist"],
+			parameters: [{
+				name: "hostname",
+				type: "string",
+				description: messages["domain"]
+			}, {
+				name: "domain",
+				type: "string",
+				description: messages["hostname"]
+			}]
+		}
+	);
+	
 	/** Add cf create-route command **/
 	var createRouteImpl = {
 		callback: function(args, context) {
