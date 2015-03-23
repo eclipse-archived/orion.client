@@ -18,6 +18,6 @@ define(["orion/plugin", "plugins/metrics/googleAnalyticsImpl"], function(PluginP
 	};
 	var provider = new PluginProvider(headers);
 	var service = new GoogleAnalyticsImpl();
-	provider.registerService("orion.analytics.google", service, {});
+	provider.registerService("orion.metrics", service, {});
 	provider.connect();
 });
