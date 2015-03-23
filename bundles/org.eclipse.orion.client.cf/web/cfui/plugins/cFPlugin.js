@@ -1,6 +1,6 @@
 /*******************************************************************************
-  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * @license
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -493,6 +493,38 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 		routesImpl, {
 			name: "cfo routes",
 			description: messages["listAllRoutesInThe"]
+		}
+	);
+	
+	/** Add cf check-route command **/
+	var checkRouteImpl = {
+		callback: function(args, context){
+			return cFService.checkRoute(null, args.domain, args.hostname).then(
+				function(result){
+					if(!result || !result.Route || result.Route.length === 0) {
+						return i18Util.formatMessage(messages["Route${0}${1}DoesNotExist"], args.hostname, args.domain);
+					} else {
+						return i18Util.formatMessage(messages["Route${0}${1}DoesExist"], args.hostname, args.domain);
+					}
+				}		
+			);
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		checkRouteImpl, {
+			name: "cfo check-route",
+			description: messages["perfomSimpleCheckToDetermineWheterRouteExist"],
+			parameters: [{
+				name: "hostname",
+				type: "string",
+				description: messages["domain"]
+			}, {
+				name: "domain",
+				type: "string",
+				description: messages["hostname"]
+			}]
 		}
 	);
 	
