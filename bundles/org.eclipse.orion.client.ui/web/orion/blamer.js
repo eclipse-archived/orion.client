@@ -14,9 +14,8 @@
 define ([
 	'orion/extensionCommands', //$NON-NLS-0$
 	'orion/PageLinks', //$NON-NLS-0$
-	'orion/URITemplate', //$NON-NLS-0$
-	'orion/edit/editorContext'//$NON-NLS-0$
-], function(mExtensionCommands, PageLinks, URITemplate, EditorContext) {
+	'orion/URITemplate' //$NON-NLS-0$
+], function(mExtensionCommands, PageLinks, URITemplate) {
 	
 	function getBlamer(serviceRegistry, inputManager) {
 		var metadata = inputManager.getFileMetadata();
@@ -54,7 +53,7 @@ define ([
 			};
 			if (service.computeBlame) {
 				var context = {metadata: inputManager.getFileMetadata()};
-				service.computeBlame(EditorContext.getEditorContext(serviceRegistry), context).then(handleResult);
+				service.computeBlame(inputManager.getEditor().getEditorContext(), context).then(handleResult);
 			} else {
 				service.doBlame(inputManager.getInput()).then(handleResult);
 			}

@@ -11,9 +11,8 @@
 
 /*eslint-env browser, amd*/
 define([
-	'orion/edit/editorContext',
 	'orion/Deferred'
-], function(EditorContext, Deferred) {
+], function(Deferred) {
 
 	function MarkOccurrences(serviceRegistry, inputManager, editor) {
 		this.registry = serviceRegistry;
@@ -93,7 +92,7 @@ define([
 						selection: selections[0],
 						contentType: self.inputManager.getContentType().id
 					};
-					occurrencesService.computeOccurrences(EditorContext.getEditorContext(self.registry), context).then(function (occurrences) {
+					occurrencesService.computeOccurrences(editor.getEditorContext(), context).then(function (occurrences) {
 						self.editor.showOccurrences(occurrences);
 					});	
 				}, 500);

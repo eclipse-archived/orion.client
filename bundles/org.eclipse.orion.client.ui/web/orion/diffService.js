@@ -13,9 +13,8 @@
 
 define([
 	'orion/extensionCommands', //$NON-NLS-0$
-	'orion/compare/diffParser', //$NON-NLS-0$
-	'orion/edit/editorContext' //$NON-NLS-0$
-], function(mExtensionCommands, mDiffParser, EditorContext) {
+	'orion/compare/diffParser' //$NON-NLS-0$
+], function(mExtensionCommands, mDiffParser) {
 
 	function DiffService(serviceRegistry, inputManager, editor) {
 		this._serviceRegistry = serviceRegistry;
@@ -73,7 +72,7 @@ define([
 			var context = {
 				metadata: this._inputManager.getFileMetadata()
 			};
-			service.computeDiff(EditorContext.getEditorContext(this._serviceRegistry), context).then(function(diffContent) {
+			service.computeDiff(this._editor.getEditorContext(), context).then(function(diffContent) {
 				diffParser.setLineDelim("\n"); //$NON-NLS-0$
 				diffParser.parse("", diffContent);
 				var oBlocks = diffParser.getOriginalBlocks();

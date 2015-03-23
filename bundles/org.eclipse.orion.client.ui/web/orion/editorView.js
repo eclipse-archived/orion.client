@@ -444,7 +444,7 @@ define([
 				var boundEditorContext = {};
 				Object.keys(EditorContext).forEach(function(key) {
 					if (typeof EditorContext[key] === "function") { //$NON-NLS-0$
-						boundEditorContext[key] = EditorContext[key].bind(null, serviceRegistry);
+						boundEditorContext[key] = EditorContext[key].bind(null, serviceRegistry, that.editContextServiceID);
 					}
 				});
 				contentAssist.setEditorContextProvider(boundEditorContext);
@@ -492,6 +492,9 @@ define([
 			editor.processParameters = function(params) {
 				parseNumericParams(params, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				this.showSelection(params.start, params.end, params.line, params.offset, params.length);
+			};
+			editor.getEditorContext = function() {
+				return EditorContext.getEditorContext(serviceRegistry, that.editContextServiceID);
 			};
 
 			this.dispatcher = new Dispatcher(this.serviceRegistry, this.contentTypeRegistry, editor, inputManager);
@@ -580,8 +583,7 @@ define([
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor.getModel());
 			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				syntaxChecker.setTextModel(editor.getModel());
-				var editorContext = EditorContext.getEditorContext(serviceRegistry, that.editContextServiceID);
-				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents, editorContext).then(function(problems) {
+				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents, editor.getEditorContext()).then(function(problems) {
 					serviceRegistry.getService(that.problemsServiceID)._setProblems(problems);
 				});
 				if (inputManager.getReadOnly()) {

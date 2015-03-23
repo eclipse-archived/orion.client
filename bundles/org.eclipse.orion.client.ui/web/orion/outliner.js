@@ -20,11 +20,10 @@ define([
 	'orion/URITemplate',
 	'orion/EventTarget',
 	'orion/i18nUtil',
-	'orion/edit/editorContext',
 	'orion/keyBinding',
 	'orion/globalCommands',
 	'orion/webui/Slideout'
-], function(objects, messages, Deferred, lib, mUIUtils, mExplorer, mCommands, URITemplate, EventTarget, i18nUtil, EditorContext, KeyBinding, mGlobalCommands, mSlideout) {
+], function(objects, messages, Deferred, lib, mUIUtils, mExplorer, mCommands, URITemplate, EventTarget, i18nUtil, KeyBinding, mGlobalCommands, mSlideout) {
 
 	var OUTLINE_TIMEOUT_MS = 2 * 60 * 1000; // determines how many milliseconds we will wait for the outline service to compute and return an outline before considering it timed out
 	
@@ -716,7 +715,7 @@ define([
 				var method, args;
 				if ((method = outlineProviderService.computeOutline)) {
 					var contentType = inputManager.getContentType();
-					args = [EditorContext.getEditorContext(serviceRegistry), {
+					args = [editor.getEditorContext(), {
 						contentType: contentType && contentType.id
 					}];
 				} else if ((method = outlineProviderService.getOutline)) {
