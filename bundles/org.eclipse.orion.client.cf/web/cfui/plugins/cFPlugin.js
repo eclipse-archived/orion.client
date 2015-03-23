@@ -465,11 +465,27 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 	/** Add cf routes command **/
 	function describeRoute(route) {
 		var host = route.Host;
-		var strResult = "\n" + host + "\t";
-		if (host.length <= 4) {
+		var domain = route.DomainName;
+		var tabSize = 4;
+
+		var strResult = "\n" + host;
+		var tabSpace = host.length/4;
+		for(tabSize; tabSpace <= tabSize; tabSpace++){
 			strResult += "\t";
 		}
-		strResult += route.DomainName + "\t";
+
+		strResult += route.DomainName;
+		tabSpace = Math.round(domain.length/4);
+		for(tabSize; tabSpace <= tabSize; tabSpace++){
+			strResult += "\t";
+		}
+
+		if(route.Apps.length != 0)
+		{
+			route.Apps.forEach(function(result){
+				strResult += "\t" + result.Name + ",";
+			});
+		}
 		return strResult;
 	}
 	
@@ -479,7 +495,7 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 				if (!result || !result.Routes || result.Routes.length === 0) {
 					return messages["noRoutes."];
 				}
-				var strResult = "\n"+messages["host"]+"\t"+messages["domain"]+"\t"+messages["apps"]+"\n";
+				var strResult = "\n" + messages["host"]+"\t\t\t\t"+messages["domain"]+"\t\t\t\t"+messages["apps"]+"\n";
 				result.Routes.forEach(function(route) {
 					strResult += describeRoute(route);
 				});
@@ -487,14 +503,6 @@ define(['i18n!cfui/nls/messages', 'orion/xhr', 'orion/plugin', 'orion/cfui/cFCli
 			});
 		}
 	};
-	
-	provider.registerServiceProvider(
-		"orion.shell.command",
-		routesImpl, {
-			name: "cfo routes",
-			description: messages["listAllRoutesInThe"]
-		}
-	);
 	
 	/** Add cf create-route command **/
 	var createRouteImpl = {
