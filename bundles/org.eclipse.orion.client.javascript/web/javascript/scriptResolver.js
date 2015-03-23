@@ -17,20 +17,19 @@ define([
 'orion/objects',
 'orion/Deferred',
 'javascript/lru',
-'orion/fileMap',
-'orion/fileClient'
-], function(Objects, Deferred, LRU, FileMap, FileClient) {
+'orion/fileMap'
+], function(Objects, Deferred, LRU, FileMap) {
     
     /**
      * @name ScriptResolver
      * @description Creates a new script resolver for finding workspace file based
      * on a given logical path and search options
-     * @param {orion.Bootstrap} bootstrap The bootstrap object
+     * @param {orion.FileClient} fileclient The bootstrap object
      * @constructor 
      * @since 8.0
      */
-    function ScriptResolver(bootstrap) {
-        this.bootstrap = bootstrap;
+    function ScriptResolver(fileclient) {
+        this.fileclient = fileclient;
         this.cache = new LRU.LRU(10);
     }
     
@@ -60,62 +59,60 @@ define([
                return new Deferred().resolve(files);
            }
            var that = this;
-           return this._getFileClient().then(function(fileClient) {
-               var opts = options ? options : Object.create(null);
-               var ext = opts.ext ? opts.ext : 'js';
-               var icon = opts.icon ? opts.icon : '../javascript/images/javascript.png';
-               var type = opts.type ? opts.type : 'JavaScript';
-               var dotext = '.'+ext;
-               //first check the file map
-               var file = FileMap.getWSPath(name);
-               if(!file) {
-                   file = FileMap.getWSPath(name+dotext);
-               }
-               if(file && file.indexOf(dotext) > -1) {
-                   return fileClient.loadWorkspace().then(function(workspace) {
-                       //TODO hack - right now we know the index always is talking about the orion client,could differ later
-                       files = [that._newFileObj(name, '/file/'+workspace.Id+'/org.eclipse.orion.client/'+file, that._trimName(file), icon, type, fileClient)];
-                       that.cache.put(name, files);
-                       return files;
-                   });
-               }
-               var filename = name.replace(/^i18n!/, '');
-               var idx = filename.lastIndexOf('/');
-               var searchname = filename.slice(idx+1);
-               //fall back to looking for it
-               return fileClient.search(
-                    {
-                        'resource': fileClient.fileServiceRootURL(),
-                        'keyword': searchname,
-                        'sort': 'Name asc',
-                        'nameSearch': true,
-                        'fileType': ext,
-                        'start': 0,
-                        'rows': 30
-                    }
-               ).then(function(res) {
-                   var r = res.response;
-                   var len = r.docs.length;
-                   if(r.numFound > 0) {
-                       files = [];
-                       var testname = filename.replace(/(?:\.?\.\/)*/, '');
-                       testname = testname.replace(new RegExp("\\"+dotext+"$"), '');
-                       testname = testname.replace(/\//g, "\\/");
-                       for(var i = 0; i < len; i++) {
-                           file = r.docs[i];
-                           //TODO haxxor - only keep ones that end in the logical name or the mapped logical name
-                           var regex = ".*(?:"+testname+")$";
-                           if(new RegExp(regex).test(file.Location.slice(0, file.Location.length-dotext.length))) {
-                               files.push(that._newFileObj(file.Name, file.Location, that._trimName(file.Path), icon, type));
-                           }
-                       }
-                       if(files.length > 0) {
-                           that.cache.put(filename, files);
-                           return files;
+           var opts = options ? options : Object.create(null);
+           var ext = opts.ext ? opts.ext : 'js';
+           var icon = opts.icon ? opts.icon : '../javascript/images/javascript.png';
+           var type = opts.type ? opts.type : 'JavaScript';
+           var dotext = '.'+ext;
+           //first check the file map
+           var file = FileMap.getWSPath(name);
+           if(!file) {
+               file = FileMap.getWSPath(name+dotext);
+           }
+           if(file && file.indexOf(dotext) > -1) {
+               return this.fileclient.loadWorkspace().then(function(workspace) {
+                   //TODO hack - right now we know the index always is talking about the orion client,could differ later
+                   files = [that._newFileObj(name, '/file/'+workspace.Id+'/org.eclipse.orion.client/'+file, that._trimName(file), icon, type, this.fileclient)];
+                   that.cache.put(name, files);
+                   return files;
+               });
+           }
+           var filename = name.replace(/^i18n!/, '');
+           var idx = filename.lastIndexOf('/');
+           var searchname = filename.slice(idx+1);
+           //fall back to looking for it
+           return this.fileclient.search(
+                {
+                    'resource': this.fileclient.fileServiceRootURL(),
+                    'keyword': searchname,
+                    'sort': 'Name asc',
+                    'nameSearch': true,
+                    'fileType': ext,
+                    'start': 0,
+                    'rows': 30
+                }
+           ).then(function(res) {
+               var r = res.response;
+               var len = r.docs.length;
+               if(r.numFound > 0) {
+                   files = [];
+                   var testname = filename.replace(/(?:\.?\.\/)*/, '');
+                   testname = testname.replace(new RegExp("\\"+dotext+"$"), '');
+                   testname = testname.replace(/\//g, "\\/");
+                   for(var i = 0; i < len; i++) {
+                       file = r.docs[i];
+                       //TODO haxxor - only keep ones that end in the logical name or the mapped logical name
+                       var regex = ".*(?:"+testname+")$";
+                       if(new RegExp(regex).test(file.Location.slice(0, file.Location.length-dotext.length))) {
+                           files.push(that._newFileObj(file.Name, file.Location, that._trimName(file.Path), icon, type));
                        }
                    }
-                   return null;
-               });
+                   if(files.length > 0) {
+                       that.cache.put(filename, files);
+                       return files;
+                   }
+               }
+               return null;
            });
        },
        
@@ -219,16 +216,6 @@ define([
                 meta.contentType.name = type;
            }
            return meta;
-       },
-       
-       _getFileClient: function _getFileClient(){
-           if(this.fileClient) {
-               return new Deferred.resolve(this.fileClient);
-           }
-           return this.bootstrap.startup().then(function(core) {
-                this.fileClient = new FileClient.FileClient(core.serviceRegistry);
-                return this.fileClient;
-           });
        }
     });
     
