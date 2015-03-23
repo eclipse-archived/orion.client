@@ -324,6 +324,10 @@ function Tooltip (view) {
 			if (this.isVisible() && !update) {
 				this.hide();
 			}
+			
+			if (!this._info){
+				return;
+			}
 
 			this._captureLocationInfo(this._info);
 			this._info = undefined;
