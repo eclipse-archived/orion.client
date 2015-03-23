@@ -13,6 +13,7 @@
 define(['orion/plugin',
 'orion/bootstrap',
 'orion/fileClient',
+'orion/metrics',
 'webtools/htmlAstManager',
 'webtools/htmlHover',
 'javascript/scriptResolver',
@@ -27,7 +28,7 @@ define(['orion/plugin',
 'webtools/cssResultManager',
 'orion/editor/stylers/text_css/syntax',
 'i18n!webtools/nls/messages'
-], function(PluginProvider, Bootstrap, FileClient, HtmlAstManager, htmlHover, ScriptResolver, htmlContentAssist, htmlOutliner, 
+], function(PluginProvider, Bootstrap, FileClient, Metrics, HtmlAstManager, htmlHover, ScriptResolver, htmlContentAssist, htmlOutliner, 
             mHTML, cssContentAssist, mCssValidator, mCssOutliner, cssHover, cssQuickFixes, cssResultManager, mCSS, messages) {
 	
 	Bootstrap.startup().then(function(core) { 
@@ -60,7 +61,11 @@ define(['orion/plugin',
     			}
     		] 
     	});
-    	
+    	/**
+    	 * Re-init
+    	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=462878
+    	 */
+    	Metrics.initFromRegistry(core.serviceRegistry);
     	/**
     	 * load file client early
     	 */

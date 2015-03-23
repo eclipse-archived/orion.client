@@ -18,6 +18,7 @@ define([
 'orion/plugin',
 'orion/bootstrap',
 'orion/fileClient',
+'orion/metrics',
 'esprima',
 'estraverse',
 'javascript/scriptResolver',
@@ -42,7 +43,7 @@ define([
 'orion/editor/stylers/application_schema_json/syntax',
 'orion/editor/stylers/application_x-ejs/syntax',
 'i18n!javascript/nls/messages'
-], function(PluginProvider, Bootstrap, FileClient, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
+], function(PluginProvider, Bootstrap, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
 			EslintValidator, Occurrences, Hover, Outliner,	Util, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
     Bootstrap.startup().then(function(core) {
@@ -76,6 +77,12 @@ define([
     		               }
     		               ]
     	});
+    	
+    	/**
+    	 * Re-init
+    	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=462878
+    	 */
+    	Metrics.initFromRegistry(core.serviceRegistry);
     	
     	/**
     	 * make sure the RecoveredNode is ignored
