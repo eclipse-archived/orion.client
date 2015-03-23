@@ -13,10 +13,10 @@
 define("orion/blameAnnotations", ["orion/EventTarget"], function(EventTarget) {
 
 	
-	function BlameService(serviceRegistry) {
+	function BlameService(serviceRegistry, serviceID) {
 		this._serviceRegistry = serviceRegistry;
 		EventTarget.attach(this);
-		this._serviceRegistration = serviceRegistry.registerService("orion.core.blame", this); //$NON-NLS-0$
+		this._serviceRegistration = serviceRegistry.registerService(serviceID || "orion.core.blame", this); //$NON-NLS-0$
 	}
 
 	BlameService.prototype = /** @lends orion.blameAnnotations.BlameService.prototype */ {
@@ -24,7 +24,7 @@ define("orion/blameAnnotations", ["orion/EventTarget"], function(EventTarget) {
 		_setAnnotations: function(blameInfo) {
 			this.blameInfo = blameInfo;
 			this.dispatchEvent({type:"blameChanged", blameInfo:blameInfo}); //$NON-NLS-0$
-		}	    
+		}
 	};
 	BlameService.prototype.constructor = BlameService;
 	

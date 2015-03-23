@@ -19,10 +19,10 @@ define(["orion/EventTarget"], function(EventTarget) {
 	 * @class The problem service tracks markers and sends notification of marker changes.
 	 * @name orion.problems.ProblemService
 	 */
-	function ProblemService(serviceRegistry) {
+	function ProblemService(serviceRegistry, serviceID) {
 		this._serviceRegistry = serviceRegistry;
 		EventTarget.attach(this);
-		this._serviceRegistration = serviceRegistry.registerService("orion.core.marker", this); //$NON-NLS-0$
+		this._serviceRegistration = serviceRegistry.registerService(serviceID || "orion.core.marker", this); //$NON-NLS-0$
 	}
 
 	ProblemService.prototype = /** @lends orion.problems.ProblemService.prototype */ {

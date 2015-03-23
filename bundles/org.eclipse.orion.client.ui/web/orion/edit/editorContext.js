@@ -26,9 +26,9 @@ define([
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to consult.
 	 * @returns {orion.edit.EditorContext}
 	 */
-	function getEditorContext(serviceRegistry) {
+	function getEditorContext(serviceRegistry, serviceID) {
 		var editorContext = Object.create(null);
-		getReferences(serviceRegistry).forEach(function(serviceRef) { 
+		getReferences(serviceRegistry, serviceID).forEach(function(serviceRef) { 
 			var service = serviceRegistry.getService(serviceRef);
 			Object.keys(service).forEach(function(key) {
 				if (typeof service[key] === "function") { //$NON-NLS-0$
@@ -46,9 +46,9 @@ define([
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to consult.
 	 * @returns {Object}
 	 */
-	function getOptions(serviceRegistry) {
+	function getOptions(serviceRegistry, serviceID) {
 		var options = Object.create(null);
-		getReferences(serviceRegistry).forEach(function(serviceRef) {
+		getReferences(serviceRegistry, serviceID).forEach(function(serviceRef) {
 			serviceRef.getPropertyKeys().forEach(function(key) {
 				if (key !== "service.id" && key !== "service.names" && key !== "objectClass") //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					options[key] = serviceRef.getProperty(key);
@@ -57,8 +57,8 @@ define([
 		return options;
 	}
 
-	function getReferences(serviceRegistry) {
-		return serviceRegistry.getServiceReferences("orion.edit.context"); //$NON-NLS-0$
+	function getReferences(serviceRegistry, serviceID) {
+		return serviceRegistry.getServiceReferences(serviceID || "orion.edit.context"); //$NON-NLS-0$
 	}
 
 	return {

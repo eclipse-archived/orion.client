@@ -39,8 +39,6 @@ define([
 	'orion/extensionCommands',
 	'orion/projectCommands',
 	'orion/searchClient',
-	'orion/problems',
-	'orion/blameAnnotations',
 	'orion/EventTarget',
 	'orion/URITemplate',
 	'orion/i18nUtil',
@@ -54,7 +52,6 @@ define([
 	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	mProblems, mBlameAnnotation,
 	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient
 ) {
 
@@ -180,13 +177,11 @@ objects.mixin(EditorSetup.prototype, {
 		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry);
 
 		// Editor needs additional services
-		this.problemService = new mProblems.ProblemService(serviceRegistry);
 		this.outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: this.preferences});
 		this.contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		this.fileClient = new mFileClient.FileClient(serviceRegistry);
 		this.projectClient = new mProjectClient.ProjectClient(serviceRegistry, this.fileClient);
 		this.searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: this.commandRegistry, fileService: this.fileClient});
-		this.blameService = new mBlameAnnotation.BlameService(serviceRegistry);
 	},
 	
 	createBanner: function() {
@@ -655,6 +650,9 @@ objects.mixin(EditorSetup.prototype, {
 					editorOptions.renderToolbars = this.renderToolbars.bind(this);
 					editorOptions.inputManager = inputManager;
 					editorOptions.selection = selection;
+					editorOptions.problemsServiceID = "orion.core.marker.split"; //$NON-NLS-0$
+					editorOptions.editContextServiceID = "orion.edit.context.split"; //$NON-NLS-0$
+					editorOptions.blameServiceID = "orion.core.blame.split"; //$NON-NLS-0$
 					var newView = new mEditorView.EditorView(editorOptions);
 					
 					inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
