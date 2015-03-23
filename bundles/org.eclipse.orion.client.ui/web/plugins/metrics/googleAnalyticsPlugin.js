@@ -17,7 +17,8 @@ define(["orion/plugin", "plugins/metrics/googleAnalyticsImpl"], function(PluginP
 		description: "Google Analytics Plugin"
 	};
 	var provider = new PluginProvider(headers);
-	var service = new GoogleAnalyticsImpl();
-	provider.registerService("orion.metrics", service, {});
+	var servletPath = new URL("../../metrics", window.location).href; //$NON-NLS-0$
+	var service = new GoogleAnalyticsImpl(servletPath); //$NON-NLS-0$
+	provider.registerService("orion.metrics", service, {}); //$NON-NLS-0$
 	provider.connect();
 });

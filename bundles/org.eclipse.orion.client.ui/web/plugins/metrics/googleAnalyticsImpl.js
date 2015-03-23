@@ -10,12 +10,15 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 /*global URL*/
-define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
+define(["orion/xhr"], function(xhr) {
 
 	var GA_ID = "OrionGA"; //$NON-NLS-0$
 	var queue = [];
+	var path;
 
-	function GoogleAnalyticsImpl() {}
+	function GoogleAnalyticsImpl(servletPath) {
+		path = servletPath;
+	}
 
 	GoogleAnalyticsImpl.prototype = {
 		logEvent: function(category, action, label, value) {
@@ -33,8 +36,11 @@ define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
 			}
 		},
 		pageLoad: function(href, page, title, args) {
-			var xhrUrl = new URL("../../metrics", window.location); //$NON-NLS-0$
-			xhr("GET", xhrUrl.href, { //$NON-NLS-0$
+			if (!path) {
+				return;
+			}
+
+			xhr("GET", path, { //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
