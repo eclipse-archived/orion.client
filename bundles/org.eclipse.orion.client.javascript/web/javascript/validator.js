@@ -22,7 +22,7 @@ define([
 ], function(eslint, Objects, ASTManager, Finder, CU, i18nUtil, messages, Metrics) {
 	var config = {
 		// 0:off, 1:warning, 2:error
-		rules: {
+		defaults: {
 			"curly" : 0, //$NON-NLS-0$
 			"eqeqeq": 1, //$NON-NLS-0$
 			"missing-doc": 0,  //$NON-NLS-0$
@@ -61,6 +61,7 @@ define([
 			'valid-typeof': 2,  //$NON-NLS-0$
 			'no-sparse-arrays': 1  //$NON-NLS-0$
 		},
+		
 		/**
 		 * @description Sets the given rule to the given enabled value
 		 * @function
@@ -84,6 +85,15 @@ define([
 					this.rules[ruleId] = value;
 				}
 			}
+		},
+		
+		setDefaults: function setDefaults() {
+		    this.rules = Object.create(null);
+		    var keys = Object.keys(this.defaults);
+		    for(var i = 0; i < keys.length; i++) {
+		        var key = keys[i];
+		        this.rules[key] = this.defaults[key];
+		    }
 		}
 	};
 
@@ -96,6 +106,7 @@ define([
 	 */
 	function ESLintValidator(astManager) {
 		this.astManager = astManager;
+		config.setDefaults();
 	}
 	
 	/**
@@ -349,11 +360,16 @@ define([
 			if (!properties) {
 				return;
 			}
+			var oldconfig = properties.pid === 'eslint.config';
 			var keys = Object.keys(properties);
 			var seen = Object.create(null);
 			for(var i = 0; i < keys.length; i++) {
 			    var key = keys[i];
 			    var ruleId = key;
+			    if(oldconfig && config.rules[key] !== config.defaults[key]) {
+			        //don't overwrite a new setting with an old one
+		            continue;
+			    }
 			    var legacy = this._legacy[ruleId];
 			    if(typeof(legacy) === 'string') {
 			        ruleId = legacy;
