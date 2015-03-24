@@ -490,11 +490,9 @@ objects.mixin(EditorSetup.prototype, {
 		var editorDiv = this._pipInfo._editorDiv;
 		var pipDiv = this._pipInfo._pipDiv;
 		if (mode === "P") {
-			pipDiv.style.top = "10px";
-			pipDiv.style.left = "auto";
-			pipDiv.style.right = "40px";
-			pipDiv.style.width = "500px";
-			pipDiv.style.height = "400px";
+			pipDiv.classList.remove("auxEditorVertical");
+			pipDiv.classList.remove("auxEditorHorizontal");
+			pipDiv.classList.add("auxEditorPicInPic");
 			
 			editorDiv.style.width = "100%";
 			editorDiv.style.height = "100%";
@@ -502,20 +500,16 @@ objects.mixin(EditorSetup.prototype, {
 			editorDiv.style.width = "100%";
 			editorDiv.style.height = "50%";
 			
-			pipDiv.style.left = "0";
-			pipDiv.style.right = "auto";
-			pipDiv.style.top = "50%";
-			pipDiv.style.height = "50%";
-			pipDiv.style.width = "100%";
+			pipDiv.classList.remove("auxEditorVertical");
+			pipDiv.classList.remove("auxEditorPicInPic");
+			pipDiv.classList.add("auxEditorHorizontal");
 		} else if (mode === "V") {
 			editorDiv.style.width = "50%";
 			editorDiv.style.height = "100%";
 			
-			pipDiv.style.top = "0";
-			pipDiv.style.right = "auto";
-			pipDiv.style.left = "50%";
-			pipDiv.style.height = "100%";
-			pipDiv.style.width = "50%";
+			pipDiv.classList.remove("auxEditorPicInPic");
+			pipDiv.classList.remove("auxEditorHorizontal");
+			pipDiv.classList.add("auxEditorVertical");
 		}
 	},
 	_createButton: function(parentDiv, xPos, label, id, doit) {
@@ -523,17 +517,13 @@ objects.mixin(EditorSetup.prototype, {
 		var newButton = util.createElement(parentDiv.ownerDocument, "button");
 		newButton.id = id;
 		newButton.innerHTML = label;
-		newButton.style.position = "absolute";
-		newButton.style["text-align"] = "center";
+		newButton.classList.add("auxEditorButton");
 		newButton.style.left = xPos + "px";
-		newButton.style.top = "3px";
-		newButton.style.width = "20px";
-		newButton.style.height = "20px";
 
 		newButton.addEventListener("click", doit.bind(this));
 		parentDiv.appendChild(newButton);
 		
-		return xPos + 15 + 3;		
+		return xPos + 20 + 3;		
 	},
 	_addURL: function(newURL) {
 		console.log(newURL);
@@ -554,11 +544,7 @@ objects.mixin(EditorSetup.prototype, {
 		// Create the div for the Pip itself
 		var pipDiv = util.createElement(theDoc, "div");
 		pipDiv.id = "PipDiv";
-		pipDiv.style.position = "absolute";
-		pipDiv.style["z-index"] = "100";
-		pipDiv.style.background = "#9090f0";
-		pipDiv.style["border-style"] = "solid";
-		pipDiv.style["border-color"] = "#9090f0";
+		pipDiv.classList.add("auxEditorFrame");
 		
 		// Construct control UI
 		var nextX = this._createButton(pipDiv, 3, "<", "prevEditor", function() {
@@ -582,11 +568,8 @@ objects.mixin(EditorSetup.prototype, {
 		// Create the div for the new button
 		var urlField = util.createElement(pipDiv.ownerDocument, "input");
 		urlField.id = "URLField";
-		urlField.style.position = "absolute";
-		urlField.style.background = "white";
-		urlField.style.top = "3px";
+		urlField.classList.add("auxEditorField");
 		urlField.style.left = (nextX+7) + "px";
-		urlField.style.right = "23px";
 		urlField.addEventListener("keydown", function(ev) {
 			if(ev.keyCode === lib.KEY.ENTER) {
 				this._addURL(ev.target.value);
@@ -598,10 +581,7 @@ objects.mixin(EditorSetup.prototype, {
 		// Create the div for the editors
 		var pipContent = util.createElement(theDoc, "div");
 		pipContent.id = "PipContents";
-		pipContent.style.position = "absolute";
-		pipContent.style.top = "28px";
-		pipContent.style.bottom = "0px";
-		pipContent.style.width = "100%";
+		pipContent.classList.add("auxEditorContent");
 		pipDiv.appendChild(pipContent);
 		
 		editorDiv.parentElement.appendChild(pipDiv);
