@@ -10,12 +10,60 @@
  ******************************************************************************/
 /*eslint-env amd, browser*/
 /*global $*/
-define(['orion/PageUtil', './jquery'],function(PageUtil) {
+define(['orion/PageUtil', 'orion/xsrfUtils', './jquery'],function(PageUtil, xsrfUtils) {
     var errorClass = "has-error";
     var successClass = "success";
 
     function addClass(ele,cls) {
       if (!hasClass(ele,cls)) ele.className += " "+cls;
+    }
+
+    function checkEmailConfigured() {
+        var checkemailrequest = new XMLHttpRequest();
+        checkemailrequest.onreadystatechange = function() {
+            if (checkemailrequest.readyState === 4) {
+                if (checkemailrequest.status === 200) {
+                    var responseObject = JSON.parse(checkemailrequest.responseText);
+                    if (responseObject.EmailConfigured === false) {
+                        if (document.getElementById("forgotPassword")) {
+                            document.getElementById("forgotPassword").style.display = 'none';
+                        }
+
+                        if (document.getElementById("email")) {
+                            document.getElementById("email").style.display = 'none';
+                        }
+                    }
+                }
+            }
+        };
+
+        checkemailrequest.open("POST", "../useremailconfirmation/cansendemails", true);
+        checkemailrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        checkemailrequest.setRequestHeader("Orion-Version", "1");
+        checkemailrequest.send();
+    }
+
+    function checkUserCreationEnabled() {
+        var checkusersrequest = new XMLHttpRequest();
+        checkusersrequest.onreadystatechange = function() {
+            if (checkusersrequest.readyState === 4) {
+                if (checkusersrequest.status === 200) {
+                    var responseObject = JSON.parse(checkusersrequest.responseText);
+                    userCreationEnabled = responseObject.CanAddUsers;
+                    forceUserEmail = responseObject.ForceEmail;
+                    registrationURI = responseObject.RegistrationURI;
+                    if (!userCreationEnabled && !registrationURI) {
+                        window.location.replace("LoginWindow.html");
+                    }
+                }
+            }
+        };
+
+        checkusersrequest.open("POST", "../login/canaddusers", true);
+        checkusersrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        checkusersrequest.setRequestHeader("Orion-Version", "1");
+        xsrfUtils.addCSRFNonce(checkusersrequest);
+        checkusersrequest.send();
     }
 
     function copyText(original, destination) {
@@ -266,6 +314,8 @@ define(['orion/PageUtil', './jquery'],function(PageUtil) {
 
     return {
         addClass: addClass,
+        checkEmailConfigured: checkEmailConfigured,
+        checkUserCreationEnabled: checkUserCreationEnabled,
         copyText: copyText,
         createOAuthLink: createOAuthLink,
         decodeBase64: decodeBase64,

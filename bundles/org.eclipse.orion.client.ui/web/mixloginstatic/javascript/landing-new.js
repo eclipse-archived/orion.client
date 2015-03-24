@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*eslint-env amd, browser*/
 /*global $ URL*/
-define(['domReady', 'orion/xhr', './jquery', 'orion/URL-shim'], function(domReady, xhr) {
+define(['domReady', 'orion/xhr', './common', './jquery', 'orion/URL-shim'], function(domReady, xhr, common) {
 
 	var newsRssFeedUrl = "http://planetorion.org/news/feed/";
 
@@ -61,6 +61,8 @@ define(['domReady', 'orion/xhr', './jquery', 'orion/URL-shim'], function(domRead
 	}
 
 	domReady(function() {
+		common.checkUserCreationEnabled();
+
 		var doc = $(document);
 		var pos = $("#tryIt").offset().top;
 		var buttonClone = $("#tryIt").clone();

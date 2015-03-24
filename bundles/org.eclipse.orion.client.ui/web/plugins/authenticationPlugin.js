@@ -1,15 +1,15 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider) {
+define(["orion/xhr", 'orion/xsrfUtils', "orion/plugin", "domReady!"], function(xhr, xsrfUtils, PluginProvider) {
 	var headers = {
 		name: "Orion User Authentication",
 		version: "1.0",
@@ -42,7 +42,7 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 				loginData = null;
 				if (error instanceof Error && error.name === "Cancel") {
 					return "_cancel";
-				} 
+				}
 				return error.response ? JSON.parse(error.response) : null;
 			});
 			return loginData;
@@ -62,7 +62,7 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 			});
 		},
 		getAuthForm: function(notify) {
-			return qualifyURL(notify ? ('../mixloginstatic/landing.html?redirect=' + encodeURIComponent(notify) + '&key=FORMOAuthUser') : '../mixloginstatic/LoginWindow.html');
+			return qualifyURL('../mixloginstatic/landing.html');
 		},
 
 		getKey: function() {

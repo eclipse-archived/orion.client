@@ -104,6 +104,8 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 	}
 
 	domReady(function() {
+		common.checkEmailConfigured();
+
 		/* initialize metrics collection for this page */
 		var url = new URL("../metrics", window.location); //$NON-NLS-0$
 		xhr("GET", url.href, { //$NON-NLS-0$
@@ -144,8 +146,6 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/PageLinks', 'orion/xsr
 			var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1);
 			var url = window.location.href;
 			var redirectURL = url.replace("LoginWindow", "register");
-			console.log(hashes);
-			console.log(redirectURL);
 			window.location.replace(redirectURL);
 		}
 
