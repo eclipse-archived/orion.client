@@ -375,7 +375,7 @@ define([
 		var restoreCommand = new Command({
 			id: "orion.pluginsettings.restore", //$NON-NLS-0$
 			name: messages["Restore"], //$NON-NLS-0$
-			callback: function(/*data*/) {
+			callback: function(data) {
 				var dialog = new ConfirmDialog({
 					confirmMessage: messages["ConfirmRestore"], //$NON-NLS-0$
 					title: messages["Restore"] //$NON-NLS-0$
@@ -384,7 +384,11 @@ define([
 				var _self = this;
 				dialog.addEventListener("dismiss", function(event) { //$NON-NLS-0$
 					if (event.value) {
-						_self.restore();
+					    if(data.items) {
+						    _self.restore(data.items.pid);
+						} else {
+						    _self.restore();
+						}
 					}
 				}); //$NON-NLS-0$
 			}.bind(this)
@@ -403,17 +407,26 @@ define([
 		destroy: function() {
 			this.explorer.destroy();
 		},
-		restore: function() {
-			var _self = this;
-			var deferreds = this.settings.map(function(setting) {
-				return new ConfigController(_self.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset();
-			});
-			Deferred.all(deferreds, function(err) { return err; }).then(function() {
-				this.parent.innerHTML = ""; // empty
-				
-				this.render(this.parent, this.serviceRegistry, this.settings, this.title);
-				this.serviceRegistry.getService("orion.page.message").setProgressResult("Settings reset."); //$NON-NLS-0$
-			}.bind(this));
+		restore: function(pid) {
+			var deferreds = [];
+			for(var i = 0; i < this.settings.length; i++) {
+			    var setting = this.settings[i];
+			    if(pid) {
+			        if(setting.getPid() === pid) {
+				        deferreds.push(new ConfigController(this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset());
+				    }
+				} else {
+				    deferreds.push(new ConfigController(this.serviceRegistry.getService('orion.cm.configadmin'), setting.getPid()).reset());
+				}
+			}
+			if(deferreds.length > 0) { 
+    			Deferred.all(deferreds, function(err) { return err; }).then(function() {
+    				this.parent.innerHTML = ""; // empty
+    				
+    				this.render(this.parent, this.serviceRegistry, this.settings, this.title);
+    				this.serviceRegistry.getService("orion.page.message").setProgressResult("Settings reset."); //$NON-NLS-0$
+    			}.bind(this));
+			}
 		},
 		render: function(parent, serviceRegistry, settings, categoryTitle) {
 			// FIXME Section forces a singleton id, bad
@@ -423,7 +436,7 @@ define([
 				var sectionId = idPrefix + 'section' + i; //$NON-NLS-0$
 				var setting = settings[i];
 				var section = this._makeSection(parent, sectionId, setting, setting.getName() || "Unnamed", settings.length > 1); //$NON-NLS-0$
-				this.commandRegistry.renderCommands("restoreDefaults", section.getActionElement(), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+				this.commandRegistry.renderCommands("restoreDefaults", section.getActionElement(), settings[i], this, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 				
 				// Add a class name based on the category (all settings on the page have the same category currently)
 				if(setting.category){
