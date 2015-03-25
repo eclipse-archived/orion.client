@@ -11,11 +11,11 @@
 /*eslint-env browser, amd*/
 define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 
-	function LabeledCommand(options, node) {
+	function SettingsCommand(options, node) {
 		objects.mixin(this, options);
 		this.node = node || document.createElement('div'); //$NON-NLS-0$
 	}
-	objects.mixin(LabeledCommand.prototype, {
+	objects.mixin(SettingsCommand.prototype, {
 		templateString: '' +  //$NON-NLS-0$
 			'<span class="setting-repository-label"></span>' + //$NON-NLS-0$
 			'<span class="setting-command"></span>', //$NON-NLS-0$
@@ -38,5 +38,5 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
             this.commandService.renderCommands(this.scopeId, this.myCommand, {gitUrl: this.fieldlabel, keyIndex: this.keyIndex}, this, "button"); //$NON-NLS-0$
         }
     });
-    return LabeledCommand;
+    return SettingsCommand;
 });
