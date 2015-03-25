@@ -4351,21 +4351,23 @@ parseStatement: true, parseSourceElement: true */
     /**
      * @description Returns a node to fill in incomplete tree locations while recovering
      * @param {Node} node The node context we tried to parse. Used to collect range and loc infos
-     * @param {String} expecetdType The expected type of node (if known)
+     * @param {String} expectedType The expected type of node (if known)
      * @param {String} expectedValue The expected value of the node (if known)
      * @since 2.0
      */
-    function recoveredNode(node, expecetdType, expectedValue) {
+    function recoveredNode(node, expectedType, expectedValue) {
         var recovered = {
             type: 'RecoveredNode',
             name: '',
             recovered: true,
             expectedValue: expectedValue,
-            expectedType: expecetdType
+            expectedType: expectedType
         };
         if (extra.range) {
             recovered.range = node.range;
             recovered.range[1] = index;
+            recovered.start = node.range;
+            recovered.end = index;
         }
         if (extra.loc) {
             recovered.loc = node.loc;
