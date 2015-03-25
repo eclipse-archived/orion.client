@@ -487,7 +487,7 @@ define([
 			this._setNodeTooltip(this._launchConfigurationsDropdownTriggerButton, tooltipText);
 			
 			if (appInfoText) {
-				this._setText(this._appInfoSpan, "(" + appInfoText.toLocaleLowerCase() + ")"); //$NON-NLS-1$ //$NON-NLS-0$
+				this._setText(this._appInfoSpan, "(" + appInfoText + ")"); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
 				this._setText(this._appInfoSpan, null);
 			}
