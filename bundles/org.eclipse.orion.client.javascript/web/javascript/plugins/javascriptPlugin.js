@@ -435,6 +435,7 @@ define([
     			{},
     			{	settings: [
     			 	           {   pid: "eslint.config.potential",  //$NON-NLS-0$
+    			 	           	   order: 1,
 				 	        	   name: javascriptMessages['prefPotentialProblems'],  //$NON-NLS-0$
  				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
  				 	        	   category: "javascript",  //$NON-NLS-0$
@@ -530,6 +531,7 @@ define([
 				 	        	                }]
 				 	        	},
 				 	        	{  pid: "eslint.config.practices",  //$NON-NLS-0$
+				 	        	   order: 2,
 				 	        	   name: javascriptMessages['prefBestPractices'],  //$NON-NLS-0$
 				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
 				 	        	   category: "javascript",  //$NON-NLS-0$
@@ -648,6 +650,7 @@ define([
     			 	        	                }]
 				 	            },
 				 	        	{  pid: "eslint.config.codestyle",  //$NON-NLS-0$
+				 	        	   order: 3,
 				 	        	   name: javascriptMessages['prefCodeStyle'],  //$NON-NLS-0$
 				 	        	   tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
 				 	        	   category: "javascript",  //$NON-NLS-0$

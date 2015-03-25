@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -98,6 +98,7 @@ define([
 		this.category = json.category || null;
 		this.categoryLabel = json.categoryLabel || null;
 		this.tags = json.tags;
+		this.order = typeof(json.order) === 'number' && json.order > -1 ? json.order : 0;
 		if (!this.pid) { throw new Error('Missing "pid" property'); } //$NON-NLS-0$
 	}
 	SettingImpl.prototype = {
@@ -121,6 +122,13 @@ define([
 		},
 		getTags: function() {
 			return this.tags || [];
+		},
+		/**
+		 * Allow settings to declare thier relative ordering on the generated page
+		 * @since 9.0
+		 */
+		getOrder: function getOrder() {
+			return this.order;	
 		},
 		isDefaults: function(properties, defaultProperties) {
 			defaultProperties = defaultProperties || {};

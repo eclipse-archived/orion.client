@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -314,6 +314,11 @@ define([
 
 		initPluginSettings: function(category) {
 			function settingsCompare(a, b) {
+				if (a.getOrder() > b.getOrder()) {
+					return 1;
+				} else if (b.getOrder() > a.getOrder()) {
+					return -1;
+				}
 				var nameA = a.getName(), nameB = b.getName();
 				if (typeof nameA === 'string' && typeof nameB === 'string') {
 					return nameA.localeCompare(nameB);
