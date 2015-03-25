@@ -315,7 +315,7 @@ define([
 				}
 			}
 			var end = Date.now() - start;
-			Metrics.logTiming('language tools', 'validation', end, 'application/javascript  - ('+(typeof(ast.source) === 'string' ? ast.source.length : '?')+' chars)');
+			Metrics.logTiming('language tools', 'validation', end, 'application/javascript');
 			return { problems: this._filterProblems(parseErrors, eslintErrors).map(toProblem) };
 		},
 		
