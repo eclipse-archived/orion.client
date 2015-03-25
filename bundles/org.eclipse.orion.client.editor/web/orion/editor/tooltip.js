@@ -97,7 +97,7 @@ function Tooltip (view) {
 				self.destroy();
 			});
 		},
-		_destroy: function() {
+		destroy: function() {
 			if (!this._tooltipDiv) { return; }
 			this.hide();
 			var parent = this._tooltipDiv.parentNode;
@@ -439,14 +439,14 @@ function Tooltip (view) {
 				case "left": //$NON-NLS-0$
 					tipRect.left =  anchorArea.left - tipRect.width + offsetX;
 					tipRect.top = anchorArea.top + offsetY;
-					tooltipDiv.style.maxWidth = spaceLeft + offsetX;
-					tooltipDiv.style.maxHeight = viewportHeight;
+					tipRect.maxWidth = spaceLeft + offsetX;
+					tipRect.maxHeight = viewportHeight;
 				break;
 				case "right": //$NON-NLS-0$
 					tipRect.left = anchorArea.left + anchorArea.width + offsetX;
 					tipRect.top = anchorArea.top + offsetY;
-					tooltipDiv.style.maxWidth = spaceRight + offsetX;
-					tooltipDiv.style.maxHeight = viewportHeight;
+					tipRect.maxWidth = spaceRight + offsetX;
+					tipRect.maxHeight = viewportHeight;
 				break;
 				case "above": //$NON-NLS-0$
 					if ((tipRect.width + offsetX) > (spaceRight + anchorArea.width) && tipRect.width <= viewportWidth){
@@ -456,8 +456,8 @@ function Tooltip (view) {
 						tipRect.left = anchorArea.left + offsetX;
 					}
 					tipRect.top = anchorArea.top - tipRect.height + offsetY;
-					tooltipDiv.style.maxWidth = viewportWidth - tipRect.left;
-					tooltipDiv.style.maxHeight = spaceAbove + offsetY;
+					tipRect.maxWidth = viewportWidth - tipRect.left;
+					tipRect.maxHeight = spaceAbove + offsetY;
 				break;
 				case "below": //$NON-NLS-0$
 					if ((tipRect.width + offsetX) > (spaceRight + anchorArea.width) && tipRect.width <= viewportWidth){
@@ -467,11 +467,17 @@ function Tooltip (view) {
 						tipRect.left = anchorArea.left + offsetX;
 					}
 					tipRect.top = anchorArea.top + anchorArea.height + offsetY;
-					tooltipDiv.style.maxWidth = viewportWidth - tipRect.left;
-					tooltipDiv.style.maxHeight = spaceBelow + offsetY;
+					tipRect.maxWidth = viewportWidth - tipRect.left;
+					tipRect.maxHeight = spaceBelow + offsetY;
 				break;
 			}
 			
+			// Adjust max sizes for the border and padding
+			tipRect.maxWidth -= 6;
+			tipRect.maxHeight -= 6;
+			
+			tooltipDiv.style.maxWidth = tipRect.maxWidth + "px"; //$NON-NLS-0$
+			tooltipDiv.style.maxHeight = tipRect.maxHeight + "px"; //$NON-NLS-0$
 			tooltipDiv.style.left = tipRect.left + "px"; //$NON-NLS-0$
 			tooltipDiv.style.top = tipRect.top + "px"; //$NON-NLS-0$
 			return tipRect;
