@@ -67,9 +67,9 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 				if(orgTargets[i].Space == self._spacesDropdown.value){
 					self._selection.setSelections(orgTargets[i]);
 					self._defaultTarget.OrgId = null;
-					self._defaultTarget.OrgName = orgTargets[i].Org;
+					self._defaultTarget.Org = orgTargets[i].Org;
 					self._defaultTarget.SpaceId = null;
-					self._defaultTarget.SpaceName = orgTargets[i].Space;
+					self._defaultTarget.Space = orgTargets[i].Space;
 					return;
 				}
 			}
@@ -89,9 +89,9 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 							option.org = org;
 							
 							if (self._defaultTarget && (self._defaultTarget.OrgId === org.Guid
-									|| self._defaultTarget.OrgName === org.Name)){
+									|| self._defaultTarget.Org === org.Name)){
 								option.selected = "selected"; //$NON-NLS-0$
-								self._defaultTarget.OrgName = org.Name;
+								self._defaultTarget.Org = org.Name;
 							}
 							
 							self._orgsDropdown.appendChild(option);
@@ -134,9 +134,9 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 				option.target = target;
 				
 				if (self._defaultTarget && (self._defaultTarget.SpaceId === target.SpaceId
-						|| self._defaultTarget.SpaceName === target.Space)){
+						|| self._defaultTarget.Space === target.Space)){
 					option.selected = "selected"; //$NON-NLS-0$
-					self._defaultTarget.SpaceName = target.Space;
+					self._defaultTarget.Space = target.Space;
 				}
 				
 				self._spacesDropdown.appendChild(option);
