@@ -1599,6 +1599,9 @@ parseStatement: true, parseSourceElement: true */
         if (extra.range) {
             this.range = [startIndex, 0];
         }
+        if(extra.directSourceFile) {
+        	this.sourceFile = extra.directSourceFile; //ORION for Tern
+        }
     }
 
     function WrappingNode(startToken) {
@@ -1607,6 +1610,9 @@ parseStatement: true, parseSourceElement: true */
         }
         if (extra.range) {
             this.range = [startToken.start, 0];
+        }
+        if(extra.directSourceFile) {
+        	this.sourceFile = extra.directSourceFile; //ORION for Tern
         }
     }
 
@@ -1690,6 +1696,8 @@ parseStatement: true, parseSourceElement: true */
             }
             if (extra.range) {
                 this.range[1] = lastIndex;
+                this.start = this.range[0]; //ORION for Tern
+            	this.end = lastIndex; //ORION for Tern
             }
             if (extra.attachComment) {
                 this.processComment();
@@ -4159,6 +4167,8 @@ parseStatement: true, parseSourceElement: true */
                 extra.trailingComments = [];
                 extra.leadingComments = [];
             }
+            
+            extra.directSourceFile = options.directSourceFile; //ORION for Tern
         }
 
         try {
@@ -4421,6 +4431,12 @@ parseStatement: true, parseSourceElement: true */
     exports.tokenize = tokenize;
 
     exports.parse = parse;
+
+  //ORION
+    exports.isIdentifierPart = isIdentifierPart;
+    exports.isIdentifierStart = isIdentifierStart;
+    //for Tern
+    exports.isIdentifierChar = isIdentifierPart;
 
     // Deep copy.
    /* istanbul ignore next */

@@ -31,7 +31,14 @@ define([
 		 */
 		EndOfInput: 2
 	};
-
+	
+	var emptyAST = Object.create(null);
+	emptyAST.type = "Program"; //$NON-NLS-0$
+	emptyAST.body = [];
+	emptyAST.comments = [];
+	emptyAST.tokens = [];
+	emptyAST.range = [0, 0];
+	
 	/**
 	 * Provides a shared AST.
 	 * @name javascript.ASTManager
@@ -60,12 +67,8 @@ define([
 					return new Deferred().resolve(ast);
 				}
 				return editorContext.getText().then(function(text) {
-					ast = _self.parse(text);
+					ast = _self.parse(text, metadata ? metadata.location : 'unknown');
 					_self.cache.put(loc, ast);
-					if(metadata && metadata.location) {
-					    //only set this if the original metadata has a real location
-					    ast.fileLocation = metadata.location;
-					}
 					return ast;
 				});
 			});
@@ -81,13 +84,13 @@ define([
 		      }    
 		      return metadata.location;
 		},
-		
 		/**
 		 * @private
 		 * @param {String} text The code to parse.
+		 * @param {String} file The file name that we parsed
 		 * @returns {Object} The AST.
 		 */
-		parse: function(text) {
+		parse: function(text, file) {
 		    var start = Date.now();
 			try {
 				var ast = this.parser.parse(text, {
@@ -95,10 +98,12 @@ define([
 					loc: true,
 					tolerant: true,
 					tokens: true,
-					attachComment: true
+					attachComment: true,
+					directSourceFile: file
 				});
 			} catch (e) {
-				ast = this._emptyAST(text);
+				ast = emptyAST;
+				ast.range[1] = (text && typeof text.length === "number") ? text.length : 0;  //$NON-NLS-0$
 				ast.errors = [e];
 			}
 			var end = Date.now() - start;
@@ -107,25 +112,9 @@ define([
 				this._computeErrorTypes(ast.errors);
 				ast.errors = ast.errors.map(Serialize.serializeError);
 			}
+		    ast.fileLocation = file;
 			ast.source = text;
 			return ast;
-		},
-		/**
-		 * @description Returns an empty AST in the event a parse failed with a thrown exception
-		 * @function
-		 * @private
-		 * @param {String} text The text that failed to parse
-		 * @returns {Object} A new, empty AST object
-		 */
-		_emptyAST: function(text) {
-			var charCount = (text && typeof text.length === "number") ? text.length : 0;  //$NON-NLS-0$
-			return {
-				type: "Program", //$NON-NLS-0$
-				body: [],
-				comments: [],
-				tokens: [],
-				range: [0, charCount]
-			};
 		},
 		/**
 		 * @description Computes the problem type from the error and sets a 'type' property
