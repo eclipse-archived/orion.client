@@ -705,9 +705,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			}
 			var info = {
 				contents: rangeAnnotations,
-				offset: offset,
 				position: "below", //$NON-NLS-0$
-				context: {source: "editor"} //$NON-NLS-0$
+				context: {source: "editor", offset: offset} //$NON-NLS-0$
 			};
 			return info;
 		},
@@ -834,14 +833,12 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						}
 						
 						tooltip.onHover({
-							clientX: self._listener.lastMouseX,
-							clientY: self._listener.lastMouseY,
+							y: e.y,
 							x: e.x,							
-							y: e.y,							
 							getTooltipInfo: function() {
 								return self._getTooltipInfo(this.x, this.y);
 							}
-						});
+						}, e.x, e.y);
 					}, 175);
 				},
 				onMouseOut: function(e) {

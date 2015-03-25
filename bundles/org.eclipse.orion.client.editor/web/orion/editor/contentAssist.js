@@ -951,24 +951,18 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var target = {
 				getTooltipInfo: function() {
 					var bounds = lib.bounds(self.widget.parentNode);
-					var position = "right"; //$NON-NLS-0$
+					var tipArea = {width: 350, height: bounds.height - 10, top: bounds.top};
 					if ((bounds.left + bounds.width) >= document.documentElement.clientWidth){
-						position = "left"; //$NON-NLS-0$
+						tipArea.left = bounds.left - tipArea.width;
+						tipArea.left -= 10;
+					} else {
+						tipArea.left = bounds.left + bounds.width;
+						tipArea.left += 10;
 					}
 					var info = {
 						context: {proposal: self.proposals[self.selectedIndex]},
-						offset: 0,
-						hoverArea: bounds,
-						position: position,
-						offsetX: 10,
-						width: 350,
-						height: bounds.height - 10 ,
-						preventTooltipClose : function() {
-							if (self.widget && self.widget.isShowing){
-								return true;
-							}
-							return false;
-						}
+						anchorArea: bounds,
+						tooltipArea: tipArea
 					};
 					return info;
 				}

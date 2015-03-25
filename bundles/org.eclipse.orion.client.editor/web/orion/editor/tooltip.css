@@ -18,7 +18,8 @@
 	border: 1px solid black;
 	z-index: 100;
 	position: fixed;
-	overflow: hidden;
+	overflow-x: hidden;
+	overflow-y: hidden;
 }
 
 .textviewTooltip em {
@@ -43,6 +44,11 @@
 .textviewTooltip .tooltipTitle {
 	padding-left: 3px;
 	vertical-align: middle;
+}
+
+.textViewTooltipAllowResize {
+	resize: both;
+	overflow: auto;
 }
 
 .tooltipTheme .annotationLine.currentLine {

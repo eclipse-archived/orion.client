@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2014 IBM Corporation and others.
+ * Copyright (c) 2010, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -20,6 +20,30 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
 ], function(messages, mTextView, mProjectionTextModel, Deferred, textUtil, lib, util) {
 
+/**
+ * @name Tooltip
+ * @description Tooltip support for text views
+ * 
+ * show() - Opens the tooltip
+ * update() - Updates the content of the open tooltip
+ * onHover() - Checks if the x,y coordinates are outside the current tooltip area and updates the tooltip if necessary
+ * hide() - Closes the tooltip
+ * isVisible() - Returns whether the tooltip is currently showing
+ * 
+ * The methods above ask for a tooltipInfo object, which must contain a callback function getTooltipInfo()
+ * This function must return an info object with the following contents:
+ * 
+ * Info {
+ * 	Contents {string, html element, annotation array, etc.} Contents to display, if undefined, the hover service will be asked for content
+ * 	Context {source, offset, offsetStart, offsetEnd}} Information used to modify the tooltip position or contents
+ * 	Position {String} One of left, right, top, bottom used to position the tooltip relative to the anchor area
+ * 	AnchorArea {x, y, width, height} rectangle defining the source of the tooltip and where to position relative to
+ * 	TooltipArea {x, y, width, height} rectangle to define the tooltip's exact placement rather than a relative position to the anchor
+ * 	TooltipOffsetX {Number} Hint to move the tooltip position horizontally
+ * 	TooltipOffsetY {Number} Hint to move the tooltip position vertically
+ * 
+ * @param view
+ */
 function Tooltip (view) {
 		this._view = view;
 		var parent = view.getOptions("parent"); //$NON-NLS-0$
@@ -51,14 +75,16 @@ function Tooltip (view) {
 			}, true);
 			textUtil.addEventListener(document, "mousemove", this._mouseMoveHandler = function(event) { //$NON-NLS-0$
 				if (!self.isVisible() || self._locked || self._hasFocus()) { return; }
-				if (self._isInRect(self._hoverRect, event.clientX, event.clientY)){ return; }
+				if (self._isInRect(self._outerArea, event.clientX, event.clientY)){ return; }
 				self.hide();
 			}, true);
-			textUtil.addEventListener(tooltipDiv, "mouseover", /* @callback */ function(event) { //$NON-NLS-0$
-				self._inTooltip = true;
+			textUtil.addEventListener(tooltipDiv, "focus", /* @callback */ function(event) { //$NON-NLS-0$
+				if (!self._locked){
+					self._tooltipDiv.classList.add('textViewTooltipAllowResize'); //$NON-NLS-0$
+				}
 			}, false);
-			textUtil.addEventListener(tooltipDiv, "mouseout", /* @callback */ function(event) { //$NON-NLS-0$
-				self._inTooltip = false;
+			textUtil.addEventListener(tooltipDiv, "blur", /* @callback */ function(event) { //$NON-NLS-0$
+				self._tooltipDiv.classList.remove('textViewTooltipAllowResize'); //$NON-NLS-0$
 			}, false);
 			textUtil.addEventListener(tooltipDiv, "keydown", function(event) { //$NON-NLS-0$
 				if (event.keyCode === 27) {
@@ -71,10 +97,7 @@ function Tooltip (view) {
 				self.destroy();
 			});
 		},
-		/*
-		 * Should this even be API ?
-		 */
-		destroy: function() {
+		_destroy: function() {
 			if (!this._tooltipDiv) { return; }
 			this.hide();
 			var parent = this._tooltipDiv.parentNode;
@@ -84,9 +107,62 @@ function Tooltip (view) {
 			textUtil.removeEventListener(doc, "mousemove", this._mouseMoveHandler, true); //$NON-NLS-0$
 			this._tooltipDiv = null;
 		},
+		
+		/**
+		 * @name show
+		 * @description Show the tooltip using the given target information
+		 * @function
+		 * @param target The target through which the info is obtained
+		 * @param locked If true locks the tooltip (never hides unless 'hide' is called)
+		 * @param giveFocus If true forces the focus onto the tooltip (used for F2 processing)
+		 */
+		show: function(tooltipInfo, locked, giveFocus) {
+			this._locked = locked;
+			this._giveFocus = giveFocus;
+			this._processInfo(tooltipInfo.getTooltipInfo());
+		},
+		
+		/**
+		 * @name update
+		 * @description Updates the information in an already visible tooltip
+		 * @function
+		 * @param target The target through which the info is obtained
+		 * @param locked If true locks the tooltip (never hides unless 'hide' is called)
+		 * @param giveFocus If true forces the focus onto the tooltip (used for F2 processing)
+		 */
+		update: function(tooltipInfo) {
+			if (!tooltipInfo){
+				return;
+			}
+			this._processInfo(tooltipInfo.getTooltipInfo(), true);
+		},
+		
+		/**
+		 * @name onHover
+		 * @description Show the tooltip using the given target information. Only called for hover events.
+		 * @function
+		 * @param target
+		 * @param giveFocus
+		 */
+		onHover: function(tooltipInfo, x, y) {
+			if (!tooltipInfo) {
+				return;
+			}
+			
+			// Don't process if we're in the anchor or tooltip
+			if (this._isInRect(this._anchorArea, x, y)
+					|| this._isInRect(this._tooltipArea, x, y)
+					|| this._locked) {
+				return;
+			}
+			
+			// TODO Should we process if an open tooltip has focus?  Currently we close the open tooltip and open the new one
+			this._processInfo(tooltipInfo.getTooltipInfo());
+		},		
+	
 		/**
 		 * @name hide
-		 * @description Hides the current hover popup (if it's showing)
+		 * @description Hides the current tooltip (if it's showing)
 		 * @function
 		 * @public
 		*/
@@ -111,41 +187,38 @@ function Tooltip (view) {
 				this._tooltipContents = null;
 			}
 			this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
-			this._tooltipDiv.style.left = "auto"; //$NON-NLS-0$
-			this._tooltipDiv.style.right = "auto";		 //$NON-NLS-0$	
-			this._tooltipDiv.style.top = "auto";	 //$NON-NLS-0$		
-			this._tooltipDiv.style.bottom = "auto";		 //$NON-NLS-0$	
-			this._tooltipDiv.style.width = "auto";		 //$NON-NLS-0$	
+			this._tooltipDiv.style.left = "";
+			this._tooltipDiv.style.right = "";
+			this._tooltipDiv.style.top = "";
+			this._tooltipDiv.style.bottom = "";
+			this._tooltipDiv.style.width = "auto";		 //$NON-NLS-0$
+			this._tooltipDiv.style.maxWidth = "";
 			this._tooltipDiv.style.height = "auto";		 //$NON-NLS-0$	
+			this._tooltipDiv.style.maxHeight = "";		 //$NON-NLS-0$
+			this._tooltipDiv.style.overflowX = "";		 //$NON-NLS-0$	
+			this._tooltipDiv.style.overflowY = "";		 //$NON-NLS-0$	
+			
+			this._giveFocus = undefined;
+			this._locked = undefined;
+			
+			this._anchorArea = undefined;  // Area of text/ruler/etc. we are showing a tooltip for
+			this._tooltipArea = undefined;  // The area the tooltip covers
+			this._outerArea = undefined; // The rectangle encapsulating both anchor and tooltip areas where we want to keep the tooltip open
 			
 			// cancel any outstanding defers
-			if (this._hoverInfo) {
-				this._hoverInfo.forEach(function(info) {
+			if (this._hoverPromises) {
+				this._hoverPromises.forEach(function(info) {
 					if (!info.resolved) {
 						info.cancel();
 					}
 				});
 			}
-
-			// Values that can be overridden by returned info			
-			this._x = undefined;
-			this._y = undefined;
-			this._width = undefined;
-			this._height = undefined;
-			this._offsetX = undefined;
-			this._offsetY = undefined;
-			this._offsetStart = undefined;
-			this._offsetEnd = undefined;
-			this._position = undefined;
-			this._hoverArea = undefined;
-			this._locked = undefined;
-//			this._giveFocus = undefined;
-
+			this._hoverPromises = undefined;
+			
 			// values that are calculated
-			this._hoverInfo = undefined;
-			this._hoverRect = undefined;
 			this._tipRect = undefined;
 		},
+		
 		/**
 		 * @name isVisible
 		 * @description Returns a boolean indicating whether the tooltip is currently visible
@@ -156,57 +229,72 @@ function Tooltip (view) {
 		isVisible: function() {
 			return this._tooltipDiv && this._tooltipDiv.style.visibility === "visible"; //$NON-NLS-0$
 		},
-
-		_processInfo: function(target, update) {
-			// Remember where the cursor is
-			this._lastTarget = target;
-			
+		
+		/**
+		 * @name _processInfo
+		 * @description Renders the content, positions the tooltip then makes the tooltip visible
+		 * @function
+		 * @private
+		 * @param info {Object} The info object passed by the caller
+		 * 
+		 * Info:
+		 * 1) Contents
+		 * 2) Context
+		 * 3) Position string left, right, top, bottom
+		 * 4) AnchorArea x, y, width, height
+		 * 5) TooltipArea x, y, width, height
+		 * 6) TooltipOffsetX
+		 * 7) TooltipOffsetY
+		 * 
+		 * @param update Whether to update the existing tooltip contents or open a new tooltip
+		 */
+		_processInfo: function(info, update) {
 			var newTooltipContents;
+			// TODO Should we provide a default width/height of the tooltip?
 			if (update && this._tooltipContents) {
 				this._tooltipContents.innerHTML = "";
 				newTooltipContents = this._tooltipContents;
 			} else {
  				newTooltipContents = util.createElement(this._tooltipDiv.ownerDocument, "div"); //$NON-NLS-0$
  			}
+ 			
+			/*
+			 * Info:
+			 * 1) Contents
+			 * 2) Context
+			 * 3) Position string left, right, top, bottom
+			 * 4) AnchorArea x, y, width, height
+			 * 5) TooltipArea x, y, width, height
+			 * 6) TooltipOffsetX
+			 * 7) TooltipOffsetY
+			 */
 			
-			// Get any immediate data
-			var info = target.getTooltipInfo();
-			
-			// Now get any info from plugins
-			if (info) {			
-				this._info = info;
-				
-				// Any immediate info to render ?
+			if (info) {
+				// Render provided content
 				if (info.contents) {
 					if (this._renderImmediateInfo(newTooltipContents, info.contents, info.context)) {
-						this._showContents(newTooltipContents, update);
+						this._showContents(newTooltipContents, info, update);
 						return true;
 					}
 				}
 				
-				if (this.hover && info.offset !== undefined){
-					var hoverContext = Object.create(null); 
-					if (info.context) {
-						hoverContext = info.context;
-					}
-					hoverContext.offset = info.offset;
-					this._hoverInfo = this.hover.computeHoverInfo(hoverContext);
-				
-					if (this._hoverInfo) {
+				// If no immediate content, check if hover service plug-ins have content
+				if (this.hover && info.context){
+					this._hoverPromises = this.hover.computeHoverInfo(info.context);
+					if (this._hoverPromises) {
 						var self = this;
-						this._hoverInfo.forEach(function(info) {
-							Deferred.when(info, function (data) {
-								info.resolved = true;  // resolved
+						this._hoverPromises.forEach(function(hoverPromise) {
+							Deferred.when(hoverPromise, function (data) {
+								hoverPromise.resolved = true;  // resolved
 								if (data) {
 									if (self._renderPluginContent(newTooltipContents, data)) {
-										// TODO Need to clarify what data the deferred can return and update API doc
 										if (data.offsetStart){
-											this._offsetStart = info.offsetStart;
+											info.context.offsetStart = data.offsetStart;
 										}
 										if (data.offsetEnd){
-											this._offsetEnd = info.offsetEnd;
+											info.context.offsetEnd = data.offsetEnd;
 										}
-										self._showContents(newTooltipContents, update);
+										self._showContents(newTooltipContents, info, update);
 									}
 								}
 							}, function(error) {
@@ -222,202 +310,204 @@ function Tooltip (view) {
 			}
 		},
 		/**
-		 * @name onHover
-		 * @description Show the tooltip using the given target information. Only called for hover events.
+		 * @name _showContents
+		 * @description Takes the rendered contents, positions the tooltip, opens the tooltip
 		 * @function
-		 * @param target
-		 * @param giveFocus
+		 * @private
+		 * @param newContentsDiv
+		 * @param info
+		 * @param update
 		 */
-		onHover: function(target) {
-			if (!target) {
-				return;
-			}
-			
-			// Don't process if we're in the hoverArea or tip rects
-			if (this._isInRect(this._hoverArea, target.clientX, target.clientY)
-					|| this._isInRect(this._tipRect, target.clientX, target.clientY)
-					|| this._locked) {
-				return;
-			}
-			
-			this._processInfo(target);
-		},		
-		/**
-		 * @name show
-		 * @description Show the tooltip using the given target information
-		 * @function
-		 * @param target The target through which the info is obtained
-		 * @param locked If true locks the tooltip (never hides unless 'hide' is called)
-		 * @param giveFocus If true forces the focus onto the tooltip (used for F2 processing)
-		 */
-		show: function(target, locked, giveFocus) {
-			this._locked = locked;
-			this._giveFocus = giveFocus;
-			this._processInfo(target);
-		},
-		/**
-		 * @name update
-		 * @description Updates the information in an already visible tooltip
-		 * @function
-		 * @param target The target through which the info is obtained
-		 * @param locked If true locks the tooltip (never hides unless 'hide' is called)
-		 * @param giveFocus If true forces the focus onto the tooltip (used for F2 processing)
-		 */
-		update: function(target) {
-			if (!target){
-				return;
-			}
-			this._processInfo(target, true);
-		},
-		
-		/*
-		 ******************************************************************************************************************* 
-		 * Positioning: This section deals with setting the location and size of the tooltip
-		 ******************************************************************************************************************* 
-		 */
-		_captureLocationInfo: function(info) {
-			this._x = info.x;
-			this._y = info.y;
-			this._width = info.width;
-			this._height = info.height;
-			this._offsetX = info.offsetX;
-			this._offsetY = info.offsetY;
-			this._position = info.position;
-
-			// the hoverArea may have been set by rendering an annotation...
-			if (!this._hoverArea){
-				this._hoverArea = info.hoverArea;
-			}
-			
-			if (info.context){
-				// Adjust the tooltip for folding comments to exactly cover the unfolded text location
-				if (info.context.rulerStyle && info.context.rulerStyle.indexOf("folding") >= 0){ //$NON-NLS-0$
-					this._offsetX = 0;
-					this._offsetY = -5;
-				}
-			}
-			
-		},
-		_computeTooltipPosition: function _computeTooltipPosition(){
-			var tooltipDiv = this._tooltipDiv;
-			var documentElement = tooltipDiv.ownerDocument.documentElement;
-			
-			if (this._width) {
-				tooltipDiv.style.width = this._width + "px"; //$NON-NLS-0$
-			}
-			if (this._height) {
-				tooltipDiv.style.height = this._height + "px"; //$NON-NLS-0$
-				tooltipDiv.style.overflowY = "auto"; //$NON-NLS-0$
-			}
-			if (!this._y) {
-				this._y = 0;
-			}
-			var top = parseInt(this._getNodeStyle(tooltipDiv, "padding-top", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
-			top += parseInt(this._getNodeStyle(tooltipDiv, "border-top-width", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
-			top = this._y - top;
-			tooltipDiv.style.top = top + "px"; //$NON-NLS-0$
-			tooltipDiv.style.maxHeight = (documentElement.clientHeight - top - 10) + "px"; //$NON-NLS-0$
-			tooltipDiv.style.opacity = "1"; //$NON-NLS-0$
-		},		
-		_showContents: function _showContents(newContentsDiv, update) {
-			// TODO Hide is performing two operations, make the tooltip invisible and clearing out any stored data
-			if (this.isVisible() && !update) {
+		_showContents: function _showContents(newContentsDiv, info, update) {
+			if (!update){
 				this.hide();
 			}
 			
-			if (!this._info){
-				return;
-			}
-
-			this._captureLocationInfo(this._info);
-			this._info = undefined;
-
 			this._tooltipContents = newContentsDiv;
 			this._tooltipDiv.appendChild(newContentsDiv);
 			
-			this._computeTooltipPosition();
-			
-			// Create a hover area if necessary
-			if (!this._hoverArea) {
-				if (this._offsetStart && this._offsetEnd) {
-					this._setContentRange(this._offsetStart, this._offsetEnd);
-				} else {
-					// Use the whole line
-					var curOffset = this._view.getOffsetAtLocation(this._lastTarget.x, this._lastTarget.y);
-					if (curOffset >= 0) {
-						var start = this._view.getNextOffset(curOffset, 
-											{ unit: "word", count: -1}); //$NON-NLS-0$
-						var end = this._view.getNextOffset(curOffset, 
-											{ unit: "word", count: 0}); //$NON-NLS-0$
-						this._setContentRange(start, end);
-					} else {
-						this._hoverArea = {
-							left: this._lastTarget.clientX-8, top: this._lastTarget.clientY -8,
-							width: 16, height: 16
-						};
-					}
-				}
+			if (!this._anchorArea){
+				this._anchorArea = this._computeAnchorArea(info);
 			}
-			
-			// Align the tooltip with the hover area
-			var tipDiv = this._tooltipDiv;
-			var divBounds = lib.bounds(tipDiv);
-			if (!this._position) { this._position = "below"; } //$NON-NLS-0$
-			if (!this._offsetX) { this._offsetX = 0; }
-			if (!this._offsetY) { this._offsetY = 0; }
-
-			var tipRect = {
-				width: divBounds.width,
-				height: divBounds.height
-			};	
-			switch (this._position) {
-				case "left": //$NON-NLS-0$
-					tipRect.left = this._hoverArea.left - (divBounds.width + this._offsetX);
-					tipRect.top = this._hoverArea.top + this._offsetY;
-				break;
-				case "right": //$NON-NLS-0$
-					tipRect.left = (this._hoverArea.left + this._hoverArea.width) + this._offsetX;
-					tipRect.top = this._hoverArea.top + this._offsetY;
-				break;
-				case "above": //$NON-NLS-0$
-					tipRect.left = this._hoverArea.left + this._offsetX;
-					tipRect.top = this._hoverArea.top - (divBounds.height + this._offsetY);
-				break;
-				case "below": //$NON-NLS-0$
-					tipRect.left = this._hoverArea.left + this._offsetX;
-					tipRect.top = (this._hoverArea.top + this._hoverArea.height) + this._offsetY;
-				break;
+			if (!this._tooltipArea){
+				// This function performs two tasks, computing the rectangle and setting all the style properties
+				this._tooltipArea = this._computeTooltipArea(info, this._anchorArea, this._tooltipDiv);
+			}
+			if (!this._outerArea){
+				this._outerArea = this._computeOuterArea(this._anchorArea, this._tooltipArea);
 			}
 
-			tipDiv.style.left = tipRect.left + "px"; //$NON-NLS-0$
-			tipDiv.style.top = tipRect.top + "px"; //$NON-NLS-0$
-
-			this._setHoverRect(this._hoverArea, tipRect);
-			
 			this._tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
 			
 			if (this._giveFocus) {
 				this._setInitialFocus(this._tooltipDiv);
 				this._giveFocus = undefined;
 			}
-		},		
-		_setHoverRect: function(hoverArea, tipRect) {
-			var left = Math.min(hoverArea.left, tipRect.left);
-			var top = Math.min(hoverArea.top, tipRect.top);
-			var positionRight = hoverArea.left + hoverArea.width;
-			var tipRight = tipRect.left + tipRect.width;
-			var right = Math.max(positionRight, tipRight);
-			var positionBottom = hoverArea.top + hoverArea.height;
-			var tipBottom = tipRect.top + tipRect.height;
-			var bottom = Math.max(positionBottom, tipBottom);
+		},
+		
+		/**
+		 * @name computeAnchorArea
+		 * @description Returns the rectangle that the tooltip is anchored to, for example the text of the current annotation range
+		 * @function
+		 */
+		/**
+		 * @name _computeAnchorArea
+		 * @description Computes and returns the rectangle that the tooltip is anchored to.  For example the anchor for an annotation 
+		 * 				may be its text range.
+		 * @function
+		 * @private
+		 * @param info {Object} the info object passed by the caller.
+		 * @returns returns the computed rectangle anchor area
+		 */
+		_computeAnchorArea: function _computeAnchorArea(info){
+			if (info.anchorArea){
+				if (info.anchorArea.top && info.anchorArea.left && info.anchorArea.height && info.anchorArea.width){
+					return info.anchorArea;
+				}
+			}
 			
-			this._tipRect = tipRect;
-			this._hoverRect = {
-				left: left,
-				top : top,
-				width: right - left,
-				height: bottom - top
-			};
+			if (info.context){
+				if (info.context.offsetStart && info.context.offsetEnd){
+					return this._computeRectangleFromOffset(info.context.offsetStart, info.context.offsetEnd);
+				}
+				
+				if (info.context.offset >= 0){
+					// Use the enclosing word
+					var start = this._view.getNextOffset(info.context.offset, { unit: "word", count: -1}); //$NON-NLS-0$
+					var end = this._view.getNextOffset(info.context.offset, { unit: "word", count: 0}); //$NON-NLS-0$
+					return this._computeRectangleFromOffset(start, end);
+				}
+			}
+			
+			return {top: 0, left: 0, height: 0, width: 0};
+		},
+		
+		/**
+		 * @name _computeTooltipPosition
+		 * @description Defines the tooltip area and placement.  Returns the rectangle defining the tooltip area and sets the tooltipDiv
+		 * 				style to match the rectangles values.
+		 * @param info the tooltip info object passed by the caller
+		 * @param anchorArea the computed tooltip anchor area to which the tooltip will be positioned
+		 * @param tooltipDiv the div for the tooltip, this function will modify its style to match the computed position/size
+		 * @returns returns the computed tooltip area rectangle
+		 * @function
+		 * @private
+		 */
+		_computeTooltipArea: function _computeTooltipArea(info, anchorArea, tooltipDiv){
+			var documentElement = tooltipDiv.ownerDocument.documentElement;
+			
+			// Callers can specify the exact placement of the tooltip
+			if (info.tooltipArea && info.tooltipArea.top && info.tooltipArea.left && info.tooltipArea.height && info.tooltipArea.width){										 
+					tooltipDiv.style.overflowY = "auto"; //$NON-NLS-0$ // If caller specifies a height, allow scrolling
+					tooltipDiv.style.resize = "none"; //$NON-NLS-0$
+					tooltipDiv.style.top = (info.tooltipArea.top) + "px"; //$NON-NLS-0$
+					tooltipDiv.style.left = (info.tooltipArea.left) + "px"; //$NON-NLS-0$
+					tooltipDiv.style.height = (info.tooltipArea.height) + "px"; //$NON-NLS-0$
+					tooltipDiv.style.width = (info.tooltipArea.width) + "px"; //$NON-NLS-0$
+					return info.tooltipArea;
+			}
+			
+			var divBounds = lib.bounds(tooltipDiv);
+			var tipRect = {
+				width: divBounds.width,
+				height: divBounds.height
+			};	
+			
+			var position = info.position ? info.position : "below"; //$NON-NLS-0$
+			
+			// TODO Consider restricting tooltip area to editor area rather than client, note that content assist uses client size
+			var viewportWidth = documentElement.clientWidth;
+			var viewportHeight =  documentElement.clientHeight;
+
+			var spaceBelow = viewportHeight - (anchorArea.top + anchorArea.height);
+			var spaceAbove = anchorArea.top;
+			var spaceLeft = anchorArea.left;
+			var spaceRight = viewportWidth - (anchorArea.left + anchorArea.width);
+			
+			// If there is not enough space above or below, swap the position.  Can't do the same for right/left because rulers are at client bounds
+			if (position === "above" && tipRect.height > spaceAbove && tipRect.height <= spaceBelow){ //$NON-NLS-0$
+				position = "below"; //$NON-NLS-0$
+			} else if (position === "below" && tipRect.height > spaceBelow && tipRect.height <= spaceAbove){ //$NON-NLS-0$
+				position = "above"; //$NON-NLS-0$
+			}
+			
+			// TODO Could adjust top for rulers that run out of space at the bottom of the page
+			var offsetX = info.tooltipOffsetX ? info.tooltipOffsetX : 0;
+			var offsetY = info.tooltipOffsetY ? info.tooltipOffsetY : 0;
+
+			switch (position){
+				case "left": //$NON-NLS-0$
+					tipRect.left =  anchorArea.left - tipRect.width + offsetX;
+					tipRect.top = anchorArea.top + offsetY;
+					tooltipDiv.style.maxWidth = spaceLeft + offsetX;
+					tooltipDiv.style.maxHeight = viewportHeight;
+				break;
+				case "right": //$NON-NLS-0$
+					tipRect.left = anchorArea.left + anchorArea.width + offsetX;
+					tipRect.top = anchorArea.top + offsetY;
+					tooltipDiv.style.maxWidth = spaceRight + offsetX;
+					tooltipDiv.style.maxHeight = viewportHeight;
+				break;
+				case "above": //$NON-NLS-0$
+					if ((tipRect.width + offsetX) > (spaceRight + anchorArea.width) && tipRect.width <= viewportWidth){
+						// Shift the left side of the tooltip to the left, ignore the offset value
+						tipRect.left = viewportWidth - tipRect.width;
+					} else {
+						tipRect.left = anchorArea.left + offsetX;
+					}
+					tipRect.top = anchorArea.top - tipRect.height + offsetY;
+					tooltipDiv.style.maxWidth = viewportWidth - tipRect.left;
+					tooltipDiv.style.maxHeight = spaceAbove + offsetY;
+				break;
+				case "below": //$NON-NLS-0$
+					if ((tipRect.width + offsetX) > (spaceRight + anchorArea.width) && tipRect.width <= viewportWidth){
+						// Shift the left side of the tooltip to the left, ignore the offset value
+						tipRect.left = viewportWidth - tipRect.width;
+					} else {
+						tipRect.left = anchorArea.left + offsetX;
+					}
+					tipRect.top = anchorArea.top + anchorArea.height + offsetY;
+					tooltipDiv.style.maxWidth = viewportWidth - tipRect.left;
+					tooltipDiv.style.maxHeight = spaceBelow + offsetY;
+				break;
+			}
+			
+			tooltipDiv.style.left = tipRect.left + "px"; //$NON-NLS-0$
+			tooltipDiv.style.top = tipRect.top + "px"; //$NON-NLS-0$
+			return tipRect;
+		},
+		
+		_computeOuterArea: function _computeOuterArea(anchorArea, tooltipArea){
+			var left = Math.min(anchorArea.left, tooltipArea.left);
+			var top = Math.min(anchorArea.top, tooltipArea.top);
+			var positionRight = anchorArea.left + anchorArea.width;
+			var tipRight = tooltipArea.left + tooltipArea.width;
+			var right = Math.max(positionRight, tipRight);
+			var positionBottom = anchorArea.top + anchorArea.height;
+			var tipBottom = tooltipArea.top + tooltipArea.height;
+			var bottom = Math.max(positionBottom, tipBottom);
+				
+			return {
+					left: left,
+					top : top,
+					width: right - left,
+					height: bottom - top
+				};
+		},
+		
+		/*
+		 ******************************************************************************************************************* 
+		 * Utility: This section contains various utility methods
+		 ******************************************************************************************************************* 
+		 */
+		_hasFocus: function() {
+			var tooltipDiv = this._tooltipDiv;
+			if (!tooltipDiv) { return false; }
+			return textUtil.contains(tooltipDiv, tooltipDiv.ownerDocument.activeElement);
+		},
+		_isNode: function (obj) {
+			return typeof Node === "object" ? obj instanceof Node : //$NON-NLS-0$
+				obj && typeof obj === "object" && typeof obj.nodeType === "number" && typeof obj.nodeName === "string"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		_setInitialFocus: function(tooltipDiv) {
 			// Any buttons ?
@@ -442,61 +532,21 @@ function Tooltip (view) {
 				toFocus.focus();
 			}
 		},
-		
-		/*
-		 ******************************************************************************************************************* 
-		 * Utility: This section contains various utility methods
-		 ******************************************************************************************************************* 
-		 */
-		_getWindow: function() {
-			var document = this._tooltipDiv.ownerDocument;
-			return document.defaultView || document.parentWindow;
-		},
-		_hasFocus: function() {
-			var tooltipDiv = this._tooltipDiv;
-			if (!tooltipDiv) { return false; }
-			return textUtil.contains(tooltipDiv, tooltipDiv.ownerDocument.activeElement);
-		},
-		setInitialFocus: function(tooltipDiv) {
-			// Any buttons ?
-			var button = lib.$("button", tooltipDiv); //$NON-NLS-0$
-			if (button) {
-				button.focus();
-				return;
+		_isInRect: function(rect, x, y) {
+			if (!rect){
+				return false;
 			}
-			// Any links ?
-			var link = lib.$("a", tooltipDiv); //$NON-NLS-0$
-			if (link) {
-				link.focus();
-				var self = this;
-				link.addEventListener("click", function() { //$NON-NLS-0$
-					self.hide();
-				});
-				return;
-			}
-			// Give up and focus on the first tabbable
-			var toFocus = lib.firstTabbable(tooltipDiv);
-			if (toFocus) {
-				toFocus.focus();
-			}
+			var xOK = x >= rect.left && x <= (rect.left + rect.width);
+			var yOK = y >= rect.top && y <= (rect.top + rect.height);
+			return xOK && yOK;
 		},
-		_getNodeStyle: function(node, prop, defaultValue) {
-			return textUtil.getNodeStyle(node, prop, defaultValue);
-		},
-		_isNode: function (obj) {
-			return typeof Node === "object" ? obj instanceof Node : //$NON-NLS-0$
-				obj && typeof obj === "object" && typeof obj.nodeType === "number" && typeof obj.nodeName === "string"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		},
-		_setContentRange: function(start, end) {
-			this._contentRangeStart = start;
-			this._contentRangeEnd = end;
+		_computeRectangleFromOffset: function(start, end) {
 			var tv = this._view;
 			var curLine = tv.getLineAtOffset(start);
 			var endLine = tv.getLineAtOffset(end);
 			
 			// Adjust start / end to be on the current line if necessary
 			if (curLine !== endLine) {
-				start = tv.getLineStart(curLine);
 				// 'getLineEnd' isn't API in textView but is in textModel...
 				end = tv.getModel().getLineEnd(curLine);
 			}
@@ -509,16 +559,7 @@ function Tooltip (view) {
 								width: endPos.x - startPos.x, height: height};
 								
 			viewRect = this._view.convert(viewRect, "document", "page"); //$NON-NLS-0$ //$NON-NLS-1$
-			this._hoverArea = {left: viewRect.x, top: viewRect.y, 
-								width: viewRect.width, height: viewRect.height};
-		},
-		_isInRect: function(rect, x, y) {
-			if (!rect){
-				return false;
-			}
-			var xOK = x >= rect.left && x <= (rect.left + rect.width);
-			var yOK = y >= rect.top && y <= (rect.top + rect.height);
-			return xOK && yOK;
+			return {left: viewRect.x, top: viewRect.y, width: viewRect.width, height: viewRect.height};
 		},
 		/*
 		 ******************************************************************************************************************* 
@@ -607,8 +648,6 @@ function Tooltip (view) {
 				contentsDiv.appendChild(contents);
 				return true;
 			} else if (contents instanceof mProjectionTextModel.ProjectionTextModel) {
-				this._tooltipContents = contentsDiv;
-				this._tooltipDiv.appendChild(contentsDiv);
 				var view = this._view;
 				var options = view.getOptions();
 				options.wrapMode = false;
@@ -632,10 +671,14 @@ function Tooltip (view) {
 				};
 				contentsView.addEventListener("LineStyle", listener.onLineStyle); //$NON-NLS-0$
 				contentsView.setModel(contents);
+				
+				// TODO This is a hack to compute the projection size we will have in the tooltip, we remove the child after computing
+				this._tooltipDiv.appendChild(contentsDiv);
 				var size = contentsView.computeSize();
 				contentsDiv.style.width = size.width + "px"; //$NON-NLS-0$
 				contentsDiv.style.height = size.height + "px"; //$NON-NLS-0$
 				contentsView.resize();
+				this._tooltipDiv.removeChild(contentsDiv);
 				return true;
 			}
 			return false;
@@ -711,9 +754,11 @@ function Tooltip (view) {
 				// Handle quick fixes
 				if (inEditor) {
 					self.hover.renderQuickFixes(annotation, result);
-					
+				}
+				if (context){	
 					// Set the hover area to the annotation if it's not already set
-					self._setContentRange(annotation.start, annotation.end);
+					context.offsetStart = annotation.start;
+					context.offsetEnd = annotation.end;
 				}
 				return result;
 			}
@@ -736,7 +781,6 @@ function Tooltip (view) {
 					}
 					return html;
 				} else {
-					// TODO Test that the source here is still correct
 					// Don't create a projection model if we are in the editor it will just duplicate the content the user is looking at
 					if (context && context.source && context.source === 'editor'){ //$NON-NLS-0$
 						return null;

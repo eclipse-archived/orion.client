@@ -360,7 +360,10 @@ define([
 		    }
 		    var that = this;
 		    return editorContext.getFileMetadata().then(function(meta) {
-		        if(meta.contentType.id === 'application/javascript') {
+		    	if (!meta){
+		    		return null;
+		    	}
+		        if(meta && meta.contentType.id === 'application/javascript') {
 		            return that.astManager.getAST(editorContext).then(function(ast) {
         				return that._doHover(ast, editorContext, ctxt, meta);
         			});
