@@ -152,11 +152,11 @@ function Tooltip (view) {
 			// Don't process if we're in the anchor or tooltip
 			if (this._isInRect(this._anchorArea, x, y)
 					|| this._isInRect(this._tooltipArea, x, y)
-					|| this._locked) {
+					|| this._locked
+					|| this._hasFocus()) {
 				return;
 			}
 			
-			// TODO Should we process if an open tooltip has focus?  Currently we close the open tooltip and open the new one
 			this._processInfo(tooltipInfo.getTooltipInfo());
 		},		
 	
@@ -250,7 +250,6 @@ function Tooltip (view) {
 		 */
 		_processInfo: function(info, update) {
 			var newTooltipContents;
-			// TODO Should we provide a default width/height of the tooltip?
 			if (update && this._tooltipContents) {
 				this._tooltipContents.innerHTML = "";
 				newTooltipContents = this._tooltipContents;
