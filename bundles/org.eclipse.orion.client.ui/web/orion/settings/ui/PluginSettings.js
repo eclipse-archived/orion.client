@@ -15,15 +15,15 @@ define([
 	'orion/Deferred',
 	'orion/objects',
 	'orion/webui/dialogs/ConfirmDialog',
-	'orion/widgets/input/LabeledCheckbox',
-	'orion/widgets/input/LabeledTextfield',
-	'orion/widgets/input/LabeledSelect',
+	'orion/widgets/input/SettingsCheckbox',
+	'orion/widgets/input/SettingsTextfield',
+	'orion/widgets/input/SettingsSelect',
 	'i18n!orion/settings/nls/messages',
 	'orion/i18nUtil',
 	'orion/metrics',
 	'orion/commands'
-], function(mExplorer, mSection, Deferred, objects, mConfirmDialog, LabeledCheckbox, LabeledTextfield, 
-		LabeledSelect, messages, i18nUtil, mMetrics, Commands) {
+], function(mExplorer, mSection, Deferred, objects, mConfirmDialog, SettingsCheckbox, SettingsTextfield, 
+		SettingsSelect, messages, i18nUtil, mMetrics, Commands) {
 	var Explorer = mExplorer.Explorer,
 	    SelectionRenderer = mExplorer.SelectionRenderer,
 	    Section = mSection.Section,
@@ -72,15 +72,15 @@ define([
 	});
 
 	/**
-	 * Widget displaying a string-typed plugin setting. Mixes in LabeledTextfield and PropertyWidget.
+	 * Widget displaying a string-typed plugin setting. Mixes in SettingsTextfield and PropertyWidget.
 	 */
 	var PropertyTextField = function(options) {
 		PropertyWidget.apply(this, arguments);
-		LabeledTextfield.apply(this, arguments);
+		SettingsTextfield.apply(this, arguments);
 	};
-	objects.mixin(PropertyTextField.prototype, LabeledTextfield.prototype, PropertyWidget.prototype, {
+	objects.mixin(PropertyTextField.prototype, SettingsTextfield.prototype, PropertyWidget.prototype, {
 		postCreate: function() {
-			LabeledTextfield.prototype.postCreate.apply(this, arguments);
+			SettingsTextfield.prototype.postCreate.apply(this, arguments);
 			PropertyWidget.prototype.postCreate.apply(this, arguments);
 			var type = this.property.getType();
 			if (type === 'number') { //$NON-NLS-0$
@@ -98,19 +98,19 @@ define([
 	});
 
 	/**
-	 * Widget displaying a boolean-typed plugin setting. Mixes in LabeledCheckbox and PropertyWidget.
+	 * Widget displaying a boolean-typed plugin setting. Mixes in SettingsCheckbox and PropertyWidget.
 	 */
 	var PropertyCheckbox = function(options) {
 		PropertyWidget.apply(this, arguments);
-		LabeledCheckbox.apply(this, arguments);
+		SettingsCheckbox.apply(this, arguments);
 	};
-	objects.mixin(PropertyCheckbox.prototype, LabeledCheckbox.prototype, PropertyWidget.prototype, {
+	objects.mixin(PropertyCheckbox.prototype, SettingsCheckbox.prototype, PropertyWidget.prototype, {
 		change: function(event) {
 			this.changeProperty(event.target.checked); //$NON-NLS-0$
 		},
 		postCreate: function() {
 			PropertyWidget.prototype.postCreate.call(this);
-			LabeledCheckbox.prototype.postCreate.call(this);
+			SettingsCheckbox.prototype.postCreate.call(this);
 		},
 		updateField: function(value) {
 			this.checkbox.checked = value;
@@ -118,13 +118,13 @@ define([
 	});
 
 	/**
-	 * Widget displaying a plugin setting whose value is restricted to an enumerated set (options). Mixes in LabeledSelect and PropertyWidget.
+	 * Widget displaying a plugin setting whose value is restricted to an enumerated set (options). Mixes in SettingsSelect and PropertyWidget.
 	 */
 	var PropertySelect = function(options) {
 		PropertyWidget.apply(this, arguments);
-		LabeledSelect.apply(this, arguments);
+		SettingsSelect.apply(this, arguments);
 	};
-	objects.mixin(PropertySelect.prototype, LabeledSelect.prototype, PropertyWidget.prototype, {
+	objects.mixin(PropertySelect.prototype, SettingsSelect.prototype, PropertyWidget.prototype, {
 		postCreate: function() {
 			var values = this.property.getOptionValues();
 			var labels = this.property.getOptionLabels(); // TODO nls
@@ -132,11 +132,11 @@ define([
 				var label = (typeof labels[i] === 'string' ? labels[i] : value); //$NON-NLS-0$
 				return {value: label, label: label};
 			});
-			LabeledSelect.prototype.postCreate.apply(this, arguments);
+			SettingsSelect.prototype.postCreate.apply(this, arguments);
 			PropertyWidget.prototype.postCreate.apply(this, arguments);
 		},
 		change: function(event) {
-			LabeledSelect.prototype.change.apply(this, arguments);
+			SettingsSelect.prototype.change.apply(this, arguments);
 			var selectedOptionValue = this.property.getOptionValues()[this.getSelectedIndex()];
 			if (typeof selectedOptionValue !== 'undefined') { //$NON-NLS-0$
 				this.changeProperty(selectedOptionValue);

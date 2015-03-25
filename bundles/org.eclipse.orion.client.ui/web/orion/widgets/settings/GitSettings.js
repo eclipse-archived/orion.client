@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/git/gitPreferenceStorage', 'orion/git/gitConfigPreference', 'orion/webui/littlelib', 'orion/objects', 'orion/i18nUtil',
-		'orion/widgets/settings/Subsection', 'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledCheckbox', 'orion/widgets/input/LabeledCommand'
-		], function(messages, require, mCommands, GitPreferenceStorage, GitConfigPreference, lib, objects, i18nUtil, Subsection, LabeledTextfield, LabeledCheckbox, LabeledCommand) {
+		'orion/widgets/settings/Subsection', 'orion/widgets/input/SettingsTextfield', 'orion/widgets/input/SettingsCheckbox', 'orion/widgets/input/SettingsCommand'
+		], function(messages, require, mCommands, GitPreferenceStorage, GitConfigPreference, lib, objects, i18nUtil, Subsection, SettingsTextfield, SettingsCheckbox, SettingsCommand) {
 
 	function GitSettings(options, node) {
 		objects.mixin(this, options);
@@ -60,12 +60,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			/* - git --------------------------------------------------------- */
 			this.gitFields = [
-				new LabeledTextfield( 
+				new SettingsTextfield( 
 					{	fieldlabel:messages['Git Email Address'],
 						postChange: this.update.bind(this)
 					} 
 				),
-				new LabeledTextfield( 
+				new SettingsTextfield( 
 					{	fieldlabel:messages['Git Username'],
 						postChange: this.update.bind(this)
 					} 
@@ -75,7 +75,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			gitSection.show();
 			
 			/* - git select all -------------------------------------------------- */
-			this.gitAlwaysSelect = [ new LabeledCheckbox( 
+			this.gitAlwaysSelect = [ new SettingsCheckbox( 
 				{	fieldlabel: messages["SelectUnstagedChanges"], 
 					postChange: this.update.bind(this)
 				} 
@@ -84,7 +84,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			gitSection2.show();
 			
 			//--------- git credentials -------------------------------
-			this.gitCredentialsFields = [ new LabeledCheckbox( 
+			this.gitCredentialsFields = [ new SettingsCheckbox( 
 				{	fieldlabel:messages["Enable Storage"], 
 					postChange: this.updateGitCredentials.bind(this)
 				} 
@@ -121,8 +121,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			gitPreferenceStorage.getRepositories().then(
 				function(repositories){
 					for(var i=0; i<repositories.length; ++i){
-						var labeledCommand = new LabeledCommand( {keyIndex: i, fieldlabel: repositories[i], commandService: that.commandService, scopeId: "repositoryItemCommands"} );
-						that.gitCredentialsFields.push(labeledCommand);
+						var SettingsCommand = new SettingsCommand( {keyIndex: i, fieldlabel: repositories[i], commandService: that.commandService, scopeId: "repositoryItemCommands"} );
+						that.gitCredentialsFields.push(SettingsCommand);
 					}
 					
 					gitCredentialsSection = new Subsection( {sectionName: messages["Git Credentials Storage"], parentNode: that.sections, children: that.gitCredentialsFields} ); //$NON-NLS-0$
