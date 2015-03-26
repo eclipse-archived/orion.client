@@ -414,14 +414,15 @@ function Tooltip (view) {
 			
 			var position = info.position ? info.position : "below"; //$NON-NLS-0$
 			
-			// TODO Consider restricting tooltip area to editor area rather than client, note that content assist uses client size
-			var viewportWidth = documentElement.clientWidth;
-			var viewportHeight =  documentElement.clientHeight;
+			var viewBounds = lib.bounds(this._view._rootDiv ? this._view._rootDiv : documentElement);
+			var viewportLeft = viewBounds.left;
+			var viewportTop = viewBounds.top;
+			var viewportWidth = viewBounds.width;
+			var viewportHeight = viewBounds.height;
 
-			var spaceBelow = viewportHeight - (anchorArea.top + anchorArea.height);
-			var spaceAbove = anchorArea.top;
-			var spaceLeft = anchorArea.left;
-			var spaceRight = viewportWidth - (anchorArea.left + anchorArea.width);
+			var spaceBelow = viewportHeight - (anchorArea.top + anchorArea.height - viewportTop);
+			var spaceAbove = anchorArea.top - viewportTop;
+			var spaceRight = viewportWidth - (anchorArea.left + anchorArea.width - viewportLeft);
 			
 			// If there is not enough space above or below, swap the position.  Can't do the same for right/left because rulers are at client bounds
 			if (position === "above" && tipRect.height > spaceAbove && tipRect.height <= spaceBelow){ //$NON-NLS-0$
@@ -430,47 +431,58 @@ function Tooltip (view) {
 				position = "above"; //$NON-NLS-0$
 			}
 			
-			// TODO Could adjust top for rulers that run out of space at the bottom of the page
 			var offsetX = info.tooltipOffsetX ? info.tooltipOffsetX : 0;
 			var offsetY = info.tooltipOffsetY ? info.tooltipOffsetY : 0;
 
+			// Attempt to line up tooltip with the anchor area
+			// If not enough space, shift the tooltip horiz (above/below) or vert (left/right) until it fits
+			// Force the tooltip to start within the viewport area
+			// Set maximum sizes for remaining area in the viewport area
 			switch (position){
 				case "left": //$NON-NLS-0$
-					tipRect.left =  anchorArea.left - tipRect.width + offsetX;
-					tipRect.top = anchorArea.top + offsetY;
-					tipRect.maxWidth = spaceLeft + offsetX;
-					tipRect.maxHeight = viewportHeight;
+					if ((tipRect.height + offsetY) > (spaceBelow + anchorArea.height)){
+						// Shift the top of the tooltip upwards to fit, ignore the offset value
+						tipRect.top = viewportHeight + viewportTop - tipRect.height;
+					} else {
+						tipRect.top = anchorArea.top + offsetY;
+					}
+					tipRect.top = Math.max(tipRect.top, viewportTop);
+					tipRect.left = Math.max(anchorArea.left - tipRect.width + offsetX, viewportLeft);
 				break;
 				case "right": //$NON-NLS-0$
-					tipRect.left = anchorArea.left + anchorArea.width + offsetX;
-					tipRect.top = anchorArea.top + offsetY;
-					tipRect.maxWidth = spaceRight + offsetX;
-					tipRect.maxHeight = viewportHeight;
+					if ((tipRect.height + offsetY) > (spaceBelow + anchorArea.height)){
+						// Shift the top of the tooltip upwards to fit, ignore the offset value
+						tipRect.top = viewportHeight + viewportTop - tipRect.height;
+					} else {
+						tipRect.top = anchorArea.top + offsetY;
+					}
+					tipRect.top = Math.max(tipRect.top, viewportTop);
+					tipRect.left = Math.max(anchorArea.left + anchorArea.width + offsetX, viewportLeft);
 				break;
 				case "above": //$NON-NLS-0$
-					if ((tipRect.width + offsetX) > (spaceRight + anchorArea.width) && tipRect.width <= viewportWidth){
+					if ((tipRect.width + offsetX) > (spaceRight + anchorArea.width)){
 						// Shift the left side of the tooltip to the left, ignore the offset value
-						tipRect.left = viewportWidth - tipRect.width;
+						tipRect.left = viewportWidth + viewportLeft - tipRect.width;
 					} else {
 						tipRect.left = anchorArea.left + offsetX;
 					}
-					tipRect.top = anchorArea.top - tipRect.height + offsetY;
-					tipRect.maxWidth = viewportWidth - tipRect.left;
-					tipRect.maxHeight = spaceAbove + offsetY;
+					tipRect.left = Math.max(tipRect.left, viewportLeft);
+					tipRect.top = Math.max(anchorArea.top - tipRect.height + offsetY, viewportTop);
 				break;
 				case "below": //$NON-NLS-0$
-					if ((tipRect.width + offsetX) > (spaceRight + anchorArea.width) && tipRect.width <= viewportWidth){
+					if ((tipRect.width + offsetX) > (spaceRight + anchorArea.width)){
 						// Shift the left side of the tooltip to the left, ignore the offset value
-						tipRect.left = viewportWidth - tipRect.width;
+						tipRect.left = viewportWidth + viewportLeft - tipRect.width;
 					} else {
 						tipRect.left = anchorArea.left + offsetX;
 					}
-					tipRect.top = anchorArea.top + anchorArea.height + offsetY;
-					tipRect.maxWidth = viewportWidth - tipRect.left;
-					tipRect.maxHeight = spaceBelow + offsetY;
+					tipRect.left = Math.max(tipRect.left, viewportLeft);
+					tipRect.top = Math.max(anchorArea.top + anchorArea.height + offsetY, viewportTop);
 				break;
 			}
 			
+			tipRect.maxWidth = Math.min(viewportWidth + viewportLeft - tipRect.left, viewportWidth);
+			tipRect.maxHeight = Math.min(viewportHeight + viewportTop - tipRect.top, viewportHeight);
 			// Adjust max sizes for the border and padding
 			tipRect.maxWidth -= 6;
 			tipRect.maxHeight -= 6;
