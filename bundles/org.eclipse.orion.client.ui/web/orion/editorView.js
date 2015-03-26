@@ -93,7 +93,6 @@ define([
 		this.undoStack = options.undoStack;
 		this.problemsServiceID = options.problemsServiceID || "orion.core.marker"; //$NON-NLS-0$
 		this.editContextServiceID = options.editContextServiceID || "orion.edit.context"; //$NON-NLS-0$
-		this.blameServiceID = options.blameServiceID || "orion.core.blame"; //$NON-NLS-0$
 		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
 		this.typeDefRegistry = new TypeDefRegistry(this.serviceRegistry);
 		var keyAssist = mGlobalCommands.getKeyAssist();

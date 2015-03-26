@@ -687,7 +687,6 @@ objects.mixin(EditorSetup.prototype, {
 					editorOptions.selection = selection;
 					editorOptions.problemsServiceID = "orion.core.marker.split"; //$NON-NLS-0$
 					editorOptions.editContextServiceID = "orion.edit.context.split"; //$NON-NLS-0$
-					editorOptions.blameServiceID = "orion.core.blame.split"; //$NON-NLS-0$
 					var newView = new mEditorView.EditorView(editorOptions);
 					
 					inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$

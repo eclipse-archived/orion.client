@@ -148,28 +148,10 @@ define([
 		this.blamer = options.blamer;
 	}
 	EditorCommandFactory.prototype = {
-//		/**
-//		 * Creates the common text editing commands.  Also generates commands for any installed plug-ins that
-//		 * contribute editor actions.
-//		 */
-//TODO fix compare editor
-		generateSimpleEditorCommands: function(editor, saveCmdId, saveCommandOrderNumber) {
-			if (!this.isReadOnly) {
-				this._createUndoStackCommands();
-				this._createSaveCommand();
-			}
-			this._createSearchFilesCommand();
-			this._createGotoLineCommnand();
-			this._createFindCommnand();
-		},
-		updateCommands: function(target) {
-			this.editor = target.editor;
-			this.inputManager = target.inputManager;
-			this.localSettings = target.localSettings;
-			this.differ = target.differ;
-			this.blamer = target.blamer;
-			this.textSearcher = target.textSearcher;
-		},
+		/**
+		 * Creates the common text editing commands. Also generates commands for any installed plug-ins that
+		 * contribute editor actions.
+		 */
 		createCommands: function() {
 			this._createSettingsCommand();
 			this._createSearchFilesCommand();
@@ -193,15 +175,24 @@ define([
 			}
 			return commands;
 		},
+		updateCommands: function(target) {
+			this.editor = target.editor;
+			this.inputManager = target.inputManager;
+			this.localSettings = target.localSettings;
+			this.differ = target.differ;
+			this.blamer = target.blamer;
+			this.textSearcher = target.textSearcher;
+		},
 		registerCommands: function() {
 			var commandRegistry = this.commandService;
+			
 			commandRegistry.registerCommandContribution("settingsActions", "orion.edit.settings", 1, null, false, new mKeyBinding.KeyBinding("s", true, true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.undo", 400, this.editToolbarId ? "orion.menuBarEditGroup/orion.undoGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('z', true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.redo", 401, this.editToolbarId ? "orion.menuBarEditGroup/orion.undoGroup" : null, !this.editToolbarId, util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.searchFiles", 1, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding("h", true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.save", 1, this.saveToolbarId ? "orion.menuBarFileGroup/orion.saveGroup" : null, false, new mKeyBinding.KeyBinding('s', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.gotoLine", 3, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.editor.find", 0, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.edit.undo", 400, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.undoGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('z', true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.edit.redo", 401, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.undoGroup" : null, !this.editToolbarId, util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.searchFiles", 1, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding("h", true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.edit.save", 1, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, new mKeyBinding.KeyBinding('s', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.gotoLine", 3, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.find", 0, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$ //$NON-NLS-0$ 
@@ -231,28 +222,31 @@ define([
 			if (editor.getTextView && editor.getTextView()) {
 				var textView = editor.getTextView();
 				textView.setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
-				var saveCommand = that.commandService.findCommand("orion.save"); //$NON-NLS-0$
-				textView.setAction("save", saveCommand.callback, saveCommand); //$NON-NLS-0$
+				var saveCommand = that.commandService.findCommand("orion.edit.save"); //$NON-NLS-0$
+				textView.setAction("save", function() { //$NON-NLS-0$
+					saveCommand.callback.call({inputManager: that.inputManager});
+					return true;
+				}, saveCommand); //$NON-NLS-0$
 			
 				textView.setAction("gotoLine", function (data) { //$NON-NLS-0$
 					if (data) {
 						editor.onGotoLine(data.line - 1, 0, undefined, data.callback);
 						return true;
 					}
-					that.commandService.runCommand("orion.gotoLine"); //$NON-NLS-0$
+					that.commandService.runCommand("orion.edit.gotoLine"); //$NON-NLS-0$
 					return true;
-				}, that.commandService.findCommand("orion.gotoLine")); //$NON-NLS-0$
+				}, that.commandService.findCommand("orion.edit.gotoLine")); //$NON-NLS-0$
 
 				textView.setAction("find", function (data) { //$NON-NLS-0$
 					if (data) {
 						that.textSearcher.show(data);
 						return true;
 					}
-					that.commandService.runCommand("orion.editor.find", null, null, new mCommandRegistry.ParametersDescription( //$NON-NLS-0$
+					that.commandService.runCommand("orion.edit.find", null, null, new mCommandRegistry.ParametersDescription( //$NON-NLS-0$
 						[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						{clientCollect: true}));
 					return true;
-				}, that.commandService.findCommand("orion.editor.find")); //$NON-NLS-0$
+				}, that.commandService.findCommand("orion.edit.find")); //$NON-NLS-0$
 			}
 		},
 		showKeyBindings: function(keyAssist) {
@@ -340,7 +334,7 @@ define([
 			var that = this;
 			var undoCommand = new mCommands.Command({
 				name: messages.Undo,
-				id: "orion.undo", //$NON-NLS-0$
+				id: "orion.edit.undo", //$NON-NLS-0$
 				visibleWhen: /** @callback */ function(items, data) {
 					var editor = data.handler.editor || that.editor;
 					return editor && editor.installed;
@@ -354,7 +348,7 @@ define([
 
 			var redoCommand = new mCommands.Command({
 				name: messages.Redo,
-				id: "orion.redo", //$NON-NLS-0$
+				id: "orion.edit.redo", //$NON-NLS-0$
 				visibleWhen: /** @callback */ function(items, data) {
 					var editor = data.handler.editor || that.editor;
 					return editor && editor.installed;
@@ -374,7 +368,7 @@ define([
 			var searchCommand =  new mCommands.Command({
 				name: messages.searchFiles,
 				tooltip: messages.searchFiles,
-				id: "orion.searchFiles", //$NON-NLS-0$
+				id: "orion.edit.searchFiles", //$NON-NLS-0$
 				visibleWhen: /** @callback */ function(items, data) {
 					var editor = data.handler.editor || that.editor;
 					var searcher = data.handler.searcher || that.searcher;
@@ -416,10 +410,10 @@ define([
 				name: messages.Save,
 				tooltip: messages.saveFile,
 				imageClass : "core-sprite-save", //$NON-NLS-0$
-				id: "orion.save", //$NON-NLS-0$
+				id: "orion.edit.save", //$NON-NLS-0$
 				visibleWhen: /** @callback */ function(items, data) {
-					var editor = data.handler.editor || that.editor;
 					var inputManager = data.handler.inputManager || that.inputManager;
+					var editor = data.handler.editor || that.editor || (inputManager && inputManager.getEditor());
 					if (!editor || !editor.installed || !inputManager || !inputManager.isSaveEnabled()) {
 						return false;
 					}
@@ -428,7 +422,6 @@ define([
 				callback: function() {
 					var inputManager = this.inputManager || that.inputManager;
 					inputManager.save();
-					return true;
 				}
 			});
 			this.commandService.addCommand(saveCommand);
@@ -450,7 +443,7 @@ define([
 			var gotoLineCommand =  new mCommands.Command({
 				name: messages.gotoLine,
 				tooltip: messages.gotoLineTooltip,
-				id: "orion.gotoLine", //$NON-NLS-0$
+				id: "orion.edit.gotoLine", //$NON-NLS-0$
 				visibleWhen: /** @callback */ function(items, data) {
 					var editor = data.handler.editor || that.editor;
 					return editor && editor.installed;
@@ -501,7 +494,7 @@ define([
 			var findCommand =  new mCommands.Command({
 				name: messages.Find,
 				tooltip: messages.Find,
-				id: "orion.editor.find", //$NON-NLS-0$
+				id: "orion.edit.find", //$NON-NLS-0$
 				visibleWhen: /** @callback */ function(items, data) {
 					var editor = data.handler.editor || that.editor;
 					var textSearcher = data.handler.textSearcher || that.textSearcher;
@@ -543,7 +536,6 @@ define([
 					} else {
 						textSearcher.show({findString: searchString});
 					}
-					return true;
 				}
 			});
 			this.commandService.addCommand(findCommand);
