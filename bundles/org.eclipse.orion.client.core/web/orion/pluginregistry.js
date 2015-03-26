@@ -924,6 +924,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
         if (!_storage.getItem) {
             _storage = _asStorage(_storage);
         }
+        var _defaultTimeout = parseInt(_storage.getItem("pluginregistry.default.timeout"), 10) || undefined;
         var _state = "installed";
         var _parent;
         var _plugins = [];
@@ -947,6 +948,8 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                         error: error
                     });
                 }
+                
+                timeout = timeout || _defaultTimeout;
 
                 var loadTimeout = setTimeout(sendTimeout.bind(null, "Load timeout for: " + url), timeout || 15000);
                 var iframe = document.createElement("iframe"); //$NON-NLS-0$
@@ -954,7 +957,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                 iframe.src = url;
                 iframe.onload = function() {
                     clearTimeout(loadTimeout);
-                    loadTimeout = setTimeout(sendTimeout.bind(null, "Plugin handshake timeout for: " + url), 5000);
+                    loadTimeout = setTimeout(sendTimeout.bind(null, "Plugin handshake timeout for: " + url), timeout || 5000);
                 };
                 iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
         		iframe.style.width = iframe.style.height = "100%"; //$NON-NLS-0$
