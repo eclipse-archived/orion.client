@@ -46,13 +46,14 @@ define([
 	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/Deferred',
-	'orion/projectClient'
+	'orion/projectClient',
+	'orion/webui/splitter'
 ], function(
 	messages, Sidebar, mInputManager, mCommands, util, mKeyBinding, mGlobalCommands,
 	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient
+	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient, mSplitter
 ) {
 
 var exports = {};
@@ -486,30 +487,62 @@ objects.mixin(EditorSetup.prototype, {
 		this._pipInfo._inputManager.setInput(this._pipInfo._pipURLS[this._pipInfo._pipSel]);
 		this._pipInfo._urlField.value = this._pipInfo._inputManager._title;		
 	},
+	_addPipSplitter: function(vertical) {
+		// Already there, jsut show it...
+		if (this._pipInfo._pipSplitter && this._pipInfo._splitterDiv) {
+			this._pipInfo._splitterDiv.style.display = "block";
+		} else {
+			this._pipInfo._splitterDiv = util.createElement(this._pipInfo._pipDiv.ownerDocument, "div");
+			this._pipInfo._splitterDiv.id = "splitterDiv";
+			this._pipInfo._splitterDiv.style["z-index"] = "100";
+			this._pipInfo._pipDiv.parentNode.appendChild(this._pipInfo._splitterDiv);
+			
+			this._pipInfo._pipSplitter = new mSplitter.Splitter({
+					node: this._pipInfo._splitterDiv,
+					sidePanel: this._pipInfo._editorDiv,
+					mainPanel: this._pipInfo._pipDiv,
+					toggle: false,
+					proportional: true,
+					vertical: vertical,
+					closeByDefault: false
+				});
+		}
+	},
+	_removePipSplitter: function() {
+		if (!this._pipInfo._pipSplitter)
+			return;
+			
+		var sDiv = this._pipInfo._splitterDiv;
+		sDiv.parentNode.removeChild(sDiv);
+		this._pipInfo._pipSplitter = undefined;
+		this._pipInfo._splitterDiv = undefined;
+
+		this._pipInfo._editorDiv.style.width = "100%";
+		this._pipInfo._editorDiv.style.height = "100%";
+	},	
 	_setPipMode: function(mode) {
-		var editorDiv = this._pipInfo._editorDiv;
 		var pipDiv = this._pipInfo._pipDiv;
 		if (mode === "P") {
-			pipDiv.classList.remove("auxEditorVertical");
-			pipDiv.classList.remove("auxEditorHorizontal");
+			this._removePipSplitter();
 			pipDiv.classList.add("auxEditorPicInPic");
-			
-			editorDiv.style.width = "100%";
-			editorDiv.style.height = "100%";
+		} else if (mode === "X") {
+			this._removePipSplitter();
+			pipDiv.classList.remove("auxEditorPicInPic");
+			this._pipInfo._pipDiv.style.display = "none";
 		} else if (mode === "H") {
-			editorDiv.style.width = "100%";
-			editorDiv.style.height = "50%";
-			
-			pipDiv.classList.remove("auxEditorVertical");
 			pipDiv.classList.remove("auxEditorPicInPic");
-			pipDiv.classList.add("auxEditorHorizontal");
+			if (this._pipInfo._pipSplitter) {
+				this._pipInfo._pipSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL);
+			} else {
+				this._addPipSplitter(false);
+			}
 		} else if (mode === "V") {
-			editorDiv.style.width = "50%";
-			editorDiv.style.height = "100%";
-			
 			pipDiv.classList.remove("auxEditorPicInPic");
-			pipDiv.classList.remove("auxEditorHorizontal");
-			pipDiv.classList.add("auxEditorVertical");
+			if (this._pipInfo._pipSplitter) {
+				this._pipInfo._pipSplitter.setOrientation(mSplitter.ORIENTATION_VERTICAL);
+			} else {
+				this._addPipSplitter(true);
+			}
 		}
 	},
 	_createButton: function(parentDiv, xPos, label, id, doit) {
@@ -561,6 +594,9 @@ objects.mixin(EditorSetup.prototype, {
 		});
 		nextX = this._createButton(pipDiv, nextX, "V", "VerticalSplit", function() {
 			this._setPipMode("V");
+		});
+		nextX = this._createButton(pipDiv, nextX, "X", "VerticalSplit", function() {
+			this._setPipMode("X");
 		});
 		nextX = this._createButton(pipDiv, nextX, "S", "Swap", function() {
 			this._swapPip();
@@ -648,10 +684,10 @@ objects.mixin(EditorSetup.prototype, {
 					// Now, populate the Pip with some files
 					this._pipInfo._inputManager = inputManager;
 					this._pipInfo._pipURLS = [
-						"/file/emoffatt-OrionContent/org.eclipse.orion.client-2/bundles/org.eclipse.orion.client.ui/web/edit/setup.js",
-						"/file/emoffatt-OrionContent/org.eclipse.orion.client-2/bundles/org.eclipse.orion.client.ui/web/edit/common.css"
+						"/file/emoffatt-OrionContent/org.eclipse.orion.client-2/bundles/org.eclipse.orion.client.ui/web/plugins/HoverTestPlugin2.js",
+						"/file/emoffatt-OrionContent/org.eclipse.orion.client-2/bundles/org.eclipse.orion.client.ui/web/plugins/HoverTestPlugin2.html"
 					];
-					this._setPipMode('P');
+					this._setPipMode('H');
 					this._setPipSel(0);
 					
 				}.bind(this)

@@ -360,8 +360,7 @@ hard-coded numbers elsewhere.
 	position: absolute;
 	z-index: 100;
 	background: #9090f0;
-	border-style: solid;
-	border-color: #9090f0;
+	border: 5px solid #9090f0;
 }
 
 .auxEditorContent {
