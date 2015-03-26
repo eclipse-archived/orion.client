@@ -16,7 +16,7 @@ define([
 	'orion/compare/diffParser' //$NON-NLS-0$
 ], function(mExtensionCommands, mDiffParser) {
 
-	function DiffService(serviceRegistry, inputManager, editor) {
+	function Differ(serviceRegistry, inputManager, editor) {
 		this._serviceRegistry = serviceRegistry;
 		this._inputManager = inputManager;
 		this._editor = editor;
@@ -24,33 +24,39 @@ define([
 		this.init();
 	}
 
-	DiffService.prototype = {
+	Differ.prototype = {
 		init: function(){
-			var self = this;
+			var that = this;
 			this._changeListener = function() {
-				if (self._enabled) {
-					if (self.occurrenceTimer) {
-						window.clearTimeout(self.occurrenceTimer);
+				if (that._enabled) {
+					if (that.occurrenceTimer) {
+						window.clearTimeout(that.occurrenceTimer);
 					}
-					self.occurrenceTimer = window.setTimeout(function() {
-						self.occurrenceTimer = null;
-						self.doDiff();
+					that.occurrenceTimer = window.setTimeout(function() {
+						that.occurrenceTimer = null;
+						that.doDiff();
 					}, 500);
 				}
 			};
 			this._inputManager.addEventListener("InputChanged", function() { //$NON-NLS-0$
-				var service = self.service = self.getDiffServices();
+				var textView = that._editor.getTextView();
+				if (textView) {
+					textView.removeEventListener("ModelChanged", that._changeListener); //$NON-NLS-0$
+				}
+				var service = that.service = that.getDiffer();
 				if (service) {
-					var textView = self._editor.getTextView();
 					if (textView) {
-						textView.removeEventListener("ModelChanged", self._changeListener); //$NON-NLS-0$
-						textView.addEventListener("ModelChanged", self._changeListener); //$NON-NLS-0$
+						textView.addEventListener("ModelChanged", that._changeListener); //$NON-NLS-0$
 					}
 				}
 			});
 		},
+		
+		isVisible: function() {
+			return !!this.getDiffer();
+		},
 
-		getDiffServices: function(){
+		getDiffer: function(){
 			var metadata = this._inputManager.getFileMetadata();
 			var diffServices = this._serviceRegistry.getServiceReferences("orion.edit.diff"); //$NON-NLS-0$
 			for (var i = 0; i < diffServices.length; i++) {
@@ -67,7 +73,7 @@ define([
 		},
 
 		showAnnotations: function(service){
-			var self = this;
+			var that = this;
 			var diffParser = new mDiffParser.DiffParser();
 			var context = {
 				metadata: this._inputManager.getFileMetadata()
@@ -78,31 +84,14 @@ define([
 				var oBlocks = diffParser.getOriginalBlocks();
 				var nBlocks = diffParser.getNewBlocks();
 				var diffArray = diffParser.getDiffArray();
-				var diffRanges = self.getDiffRanges(oBlocks, nBlocks, diffArray);
-				if(self._enabled){//for cases when user turns off diffService computing diff
-					self._editor.showDiffAnnotations(diffRanges);
+				var diffRanges = that.getDiffRanges(oBlocks, nBlocks, diffArray);
+				if(that._enabled){//for cases when user turns off diffService computing diff
+					that._editor.showDiffAnnotations(diffRanges);
 				}
 			});
 		},
-
-		_getOriginalText: function(originalHunkBlock, diffArray, diffArraySubstrIndex, lineDelim) {
-			var oldSize = originalHunkBlock[1];
-			var oldStartInDiffArra = originalHunkBlock[2];
-			var oText = "";
-			if(oldSize > 0) {
-				for(var i = 0; i < oldSize; i++) {
-					var lineText = diffArray[oldStartInDiffArra + i];
-					if(lineText) {
-						oText = oText + lineText.substring(diffArraySubstrIndex) + lineDelim;
-					} else {
-						oText = oText + lineDelim;
-					}
-				}
-			}
-			return oText;
-		},
 		
-		getDiffRanges: function(originalHunkBlocks, newHunkBlocks, diffArray){
+		getDiffRanges: function(originalHunkBlocks, newHunkBlocks){
 			var diffResult = [];
 			for (var i = 0; i < newHunkBlocks.length; i++) {
 				var lineStart = newHunkBlocks[i][0];
@@ -121,7 +110,6 @@ define([
 						type:"added" //$NON-NLS-0$
 					});
 				} else {
-					//this._getOriginalText(originalHunkBlocks[i], diffArray.array, diffArray.index, "\n");
 					diffResult.push({
 						lineStart: lineStart - 1,
 						lineEnd: lineStart + newSize - 1,
@@ -150,9 +138,9 @@ define([
 				this._editor.showDiffAnnotations([]);
 			} else {
 				if (this.service) {
-					var self = this;
+					var that = this;
 					this._inputManager.save().then(function() {
-						self.showAnnotations(self.service);
+						that.showAnnotations(that.service);
 					});
 				}
 			}
@@ -160,8 +148,8 @@ define([
 
 	};
 
-	DiffService.prototype.constructor = DiffService;
+	Differ.prototype.constructor = Differ;
 
 	//return the module exports
-	return {DiffService: DiffService};
+	return {Differ: Differ};
 });

@@ -38,13 +38,12 @@ define([
 	'orion/syntaxchecker',
 	'orion/liveEditSession',
 	'orion/problems',
-	'orion/blameAnnotations',
+	'orion/blamer',
+	'orion/differ',
 	'orion/keyBinding',
-	'orion/uiUtils',
 	'orion/util',
 	'orion/objects',
 	'orion/metrics',
-	'orion/diffService'
 ], function(
 	messages,
 	mEditor, mEventTarget, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mHoverFactory, mContentAssist,
@@ -52,8 +51,8 @@ define([
 	mSearcher, mEditorCommands, mGlobalCommands,
 	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
 	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
-	mProblems, mBlameAnnotation,
-	mKeyBinding, mUIUtils, util, objects,  mMetrics, mDiffService
+	mProblems, mBlamer, mDiffer,
+	mKeyBinding, util, objects,  mMetrics
 ) {
 	var Dispatcher = mDispatcher.Dispatcher;
 
@@ -83,6 +82,7 @@ define([
 		this.commandRegistry = options.commandRegistry;
 		this.progress = options.progress;
 		this.statusService = options.statusService;
+		this.editorCommands = options.editorCommands;
 		this.fileClient = options.fileService;
 		this.inputManager = options.inputManager;
 		this.preferences = options.preferences;
@@ -98,7 +98,7 @@ define([
 		this.typeDefRegistry = new TypeDefRegistry(this.serviceRegistry);
 		var keyAssist = mGlobalCommands.getKeyAssist();
 		if(keyAssist) {
-			keyAssist.addProvider(this);
+			keyAssist.addProvider(this.editorCommands);
 		}
 		var mainSplitter = mGlobalCommands.getMainSplitter();
 		if(mainSplitter) {
@@ -185,7 +185,7 @@ define([
 			inputManager.setAutoLoadEnabled(prefs.autoLoad);
 			inputManager.setAutoSaveTimeout(prefs.autoSave ? prefs.autoSaveTimeout : -1);
 			inputManager.setSaveDiffsEnabled(prefs.saveDiffs);
-			this.diffService.setEnabled(this.settings.diffService);
+			this.differ.setEnabled(this.settings.diffService);
 			this.updateStyler(prefs);
 			var textView = editor.getTextView();
 			if (textView) {
@@ -216,54 +216,6 @@ define([
 			if (styler) {
 				if (styler.setWhitespacesVisible) {
 					styler.setWhitespacesVisible(prefs.showWhitespaces, true);
-				}
-			}
-		},
-		showKeyBindings: function(keyAssist) {
-			var editor = this.editor;
-			if (editor && editor.getTextView && editor.getTextView()) {
-				var textView = editor.getTextView();
-				// Remove actions without descriptions
-				var editorActions = textView.getActions(true).filter(function (element) {
-					var desc = textView.getActionDescription(element);
-					return desc && desc.name;
-				});
-				editorActions.sort(function (a, b) {
-					return textView.getActionDescription(a).name.localeCompare(textView.getActionDescription(b).name);
-				});
-				keyAssist.createHeader(messages["Editor"]);
-				var execute = function (actionID) {
-					return function () {
-						textView.focus();
-						return textView.invokeAction(actionID);
-					};
-				};
-				var scopes = {}, binding;
-				for (var i = 0; i < editorActions.length; i++) {
-					var actionID = editorActions[i];
-					var actionDescription = textView.getActionDescription(actionID);
-					var bindings = textView.getKeyBindings(actionID);
-					for (var j = 0; j < bindings.length; j++) {
-						binding = bindings[j];
-						var bindingString = mUIUtils.getUserKeyString(binding);
-						if (binding.scopeName) {
-							if (!scopes[binding.scopeName]) {
-								scopes[binding.scopeName] = [];
-							}
-							scopes[binding.scopeName].push({bindingString: bindingString, name: actionDescription.name, execute: execute(actionID)});
-						} else {
-							keyAssist.createItem(bindingString, actionDescription.name, execute(actionID));
-						}
-					}
-				}
-				for (var scopedBinding in scopes) {
-					if (scopes[scopedBinding].length) {
-						keyAssist.createHeader(scopedBinding);
-						for (var k = 0; k < scopes[scopedBinding].length; k++) {
-							binding = scopes[scopedBinding][k];
-							keyAssist.createItem(binding.bindingString, binding.name, binding.execute);
-						}
-					}
 				}
 			}
 		},
@@ -306,34 +258,33 @@ define([
 			}
 		},
 		_init: function() {
-			var editorPreferences = null;
 			if(this.preferences) {
-				editorPreferences = this.editorPreferences = new mEditorPreferences.EditorPreferences(this.preferences, function (prefs) {
+				// There should be only one editor preferences
+				this.editorCommands.editorPreferences = this.editorPreferences = this.editorCommands.editorPreferences || new mEditorPreferences.EditorPreferences(this.preferences);
+				this.editorPreferences.addEventListener("Changed", function (evt) { //$NON-NLS-0$
+					var prefs = evt.preferences;
 					if (!prefs) {
-						editorPreferences.getPrefs(this.updateSettings.bind(this));
+						this.editorPreferences.getPrefs(this.updateSettings.bind(this));
 					} else {
 						this.updateSettings(prefs);
 					}
 				}.bind(this));
 			}
-			var themePreferences = null;
 			if(this.preferences) {
-				themePreferences = new mThemePreferences.ThemePreferences(this.preferences, new mThemeData.ThemeData());
-				themePreferences.apply();
+				// There should be only one theme preferences
+				this.editorCommands.themePreferences = this.themePreferences = this.editorCommands.themePreferences || new mThemePreferences.ThemePreferences(this.preferences, new mThemeData.ThemeData());
+				this.themePreferences.apply();
 			}
-			var localSettings;
 
 			var that = this;
 
-//			var editorDomNode = this._parent;
 			var readonly = this.readonly;
 			var commandRegistry = this.commandRegistry;
 			var serviceRegistry = this.serviceRegistry;
-			var fileClient = this.fileClient;
 			var inputManager = this.inputManager;
-			var searcher = this.searcher;
 			var progress = this.progress;
 			var contentTypeRegistry = this.contentTypeRegistry;
+			var editorCommands = this.editorCommands;
 
 			var textViewFactory = function() {
 				var options = that.updateViewOptions(that.settings);
@@ -343,36 +294,23 @@ define([
 					wrappable: true
 				});
 				var textView = new mTextView.TextView(options);
+				textView.addEventListener("Focus", function() { //$NON-NLS-0$
+					editorCommands.updateCommands(that);
+					if (that.renderToolbars) {
+						that.renderToolbars(inputManager.getFileMetadata());
+					}
+				});
 				return textView;
 			};
 
 			var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 
-				var localSearcher = new mSearcher.TextSearcher(editor, serviceRegistry, commandRegistry, undoStack);
+				var localSearcher = that.textSearcher = new mSearcher.TextSearcher(editor, serviceRegistry, commandRegistry, undoStack);
 
 				var keyBindings = new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
 				that.updateSourceCodeActions(that.settings, keyBindings.sourceCodeActions);
 
-				// Register commands that depend on external services, the registry, etc.  Do this after
-				// the generic keybindings so that we can override some of them.
-				var commandGenerator = new mEditorCommands.EditorCommandFactory({
-					serviceRegistry: serviceRegistry,
-					commandRegistry: commandRegistry,
-					fileClient: fileClient,
-					inputManager: inputManager,
-					toolbarId: "toolsActions", //$NON-NLS-0$
-					saveToolbarId: "fileActions", //$NON-NLS-0$
-					editToolbarId: "editActions", //$NON-NLS-0$
-					readonly: readonly,
-					navToolbarId: "pageNavigationActions", //$NON-NLS-0$
-					textSearcher: localSearcher,
-					searcher: searcher,
-					editorSettings: function() { return that.settings; },
-					localSettings: localSettings,
-					editorPreferences: that.editorPreferences,
-					diffService: that.diffService
-				});
-				commandGenerator.generateEditorCommands(editor);
+				editorCommands.overwriteKeyBindings(editor);
 
 				var textView = editor.getTextView();
 				var keyAssistCommand = commandRegistry.findCommand("orion.keyAssist"); //$NON-NLS-0$
@@ -384,8 +322,8 @@ define([
 					textView.invokeAction("toggleWrapMode", true); //$NON-NLS-0$
 					var wordWrap = textView.getOptions("wrapMode"); //$NON-NLS-0$
 					that.settings.wordWrap = wordWrap;
-					if(editorPreferences) {
-						editorPreferences.setPrefs(that.settings);
+					if (that.editorPreferences) {
+						that.editorPreferences.setPrefs(that.settings);
 					}
 					return true;
 				});
@@ -394,8 +332,8 @@ define([
 				textView.setAction("toggleZoomRuler", function() { //$NON-NLS-0$
 					if (!that.settings.zoomRulerVisible) return false;
 					that.settings.zoomRuler = !that.settings.zoomRuler;
-					if(editorPreferences) {
-						editorPreferences.setPrefs(that.settings);
+					if (that.editorPreferences) {
+						that.editorPreferences.setPrefs(that.settings);
 					}
 					return true;
 				}, {name: messages.toggleZoomRuler});
@@ -498,8 +436,8 @@ define([
 			};
 
 			this.dispatcher = new Dispatcher(this.serviceRegistry, this.contentTypeRegistry, editor, inputManager);
-			if(themePreferences && editorPreferences){
-				localSettings = new EditorSettings({local: true, editor: editor, themePreferences: themePreferences, preferences: editorPreferences});
+			if(this.themePreferences && this.editorPreferences){
+				this.localSettings = new EditorSettings({local: true, editor: editor, themePreferences: this.themePreferences, preferences: this.editorPreferences});
 			}
 			var liveEditSession = new LiveEditSession(serviceRegistry, editor);
 			var recordListener = function() {
@@ -561,21 +499,17 @@ define([
 				}
 			});
 
+			this.blamer = new mBlamer.Blamer(serviceRegistry, inputManager, editor);
+			this.differ = new mDiffer.Differ(serviceRegistry, inputManager, editor);
+
 			this.problemService = new mProblems.ProblemService(serviceRegistry, this.problemsServiceID);
-			this.blameService = new mBlameAnnotation.BlameService(serviceRegistry, this.blameServiceID);
-			this.diffService = new mDiffService.DiffService(serviceRegistry, inputManager, editor);
 			var markerService = serviceRegistry.getService(this.problemsServiceID);
 			if(markerService) {
 				markerService.addEventListener("problemsChanged", function(event) { //$NON-NLS-0$
 					editor.showProblems(event.problems);
 				});
 			}
-			var blameService = serviceRegistry.getService(this.blameServiceID);
-			if(blameService) {
-				blameService.addEventListener("blameChanged", function(event) { //$NON-NLS-0$
-					editor.showBlame(event.blameInfo);
-				});
-			}
+
 			var markOccurrences = this.markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, inputManager, editor);
 			markOccurrences.setOccurrencesVisible(this.settings.occurrencesVisible);
 			markOccurrences.findOccurrences();
@@ -590,6 +524,7 @@ define([
 					editor.reportStatus(messages.readonly, "error"); //$NON-NLS-0$
 				}
 			});
+
 			var contextImpl = Object.create(null);
 			[
 				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-0$

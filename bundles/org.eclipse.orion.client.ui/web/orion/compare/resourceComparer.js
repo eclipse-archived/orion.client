@@ -312,6 +312,10 @@ exports.ResourceComparer = (function() {
 				getEditor: function() {
 					return that._compareView.getWidget().getEditors()[this._editorIndex];
 				},
+				
+				isSaveEnabled: function() {
+					return !that._saveCmdVisible();
+				},
 							
 				setInput: function(fileURI, editor) {
 					this._parsedLocation = {resource:fileURI};

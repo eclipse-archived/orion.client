@@ -30,6 +30,7 @@ define([
 	'orion/contentTypes',
 	'orion/fileClient',
 	'orion/fileCommands',
+	'orion/editorCommands',
 	'orion/selection',
 	'orion/status',
 	'orion/progress',
@@ -52,7 +53,7 @@ define([
 	messages, Sidebar, mInputManager, mCommands, util, mKeyBinding, mGlobalCommands,
 	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
-	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
+	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
 	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient, mSplitter
 ) {
 
@@ -66,6 +67,7 @@ function MenuBar(options) {
 	this.serviceRegistry = options.serviceRegistry;
 	this.fileClient = options.fileClient;
 	this.inputManager = options.inputManager;
+	this.editorCommands = options.editorCommands;
 	this.parentNode = options.parentNode;
 	this.fileActionsScope = "fileActions"; //$NON-NLS-0$
 	this.editActionsScope = "editActions"; //$NON-NLS-0$
@@ -114,14 +116,18 @@ objects.mixin(MenuBar.prototype, {
 		var serviceRegistry = this.serviceRegistry;
 		var commandRegistry = this.commandRegistry;
 		var fileClient = this.fileClient;
-		return mFileCommands.createFileCommands(serviceRegistry, commandRegistry, fileClient).then(function() {
-			return mExtensionCommands.createFileCommands(serviceRegistry, null, "all", true, commandRegistry).then(function() { //$NON-NLS-0$
-				var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
-				return projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
-					return projectClient.getProjectDeployTypes().then(function(deployTypes){
-						return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes, deployTypes);
-					}, function(){
-						return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes);
+		var editorCommands = this.editorCommands;
+		return editorCommands.createCommands().then(function() {
+			editorCommands.registerCommands();
+			return mFileCommands.createFileCommands(serviceRegistry, commandRegistry, fileClient).then(function() {
+				return mExtensionCommands.createFileCommands(serviceRegistry, null, "all", true, commandRegistry).then(function() { //$NON-NLS-0$
+					var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
+					return projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
+						return projectClient.getProjectDeployTypes().then(function(deployTypes){
+							return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes, deployTypes);
+						}, function(){
+							return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes);
+						});
 					});
 				});
 			});
@@ -176,13 +182,24 @@ objects.mixin(EditorSetup.prototype, {
 		this.dialogService = new mDialogs.DialogService(serviceRegistry);
 		this.commandRegistry = new mCommandRegistry.CommandRegistry({selection: this.selection});
 		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry);
-
+		
 		// Editor needs additional services
 		this.outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: this.preferences});
 		this.contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		this.fileClient = new mFileClient.FileClient(serviceRegistry);
 		this.projectClient = new mProjectClient.ProjectClient(serviceRegistry, this.fileClient);
 		this.searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: this.commandRegistry, fileService: this.fileClient});
+		this.editorCommands = new mEditorCommands.EditorCommandFactory({
+			serviceRegistry: serviceRegistry,
+			commandRegistry: this.commandRegistry,
+			fileClient: this.fileClient,
+			searcher: this.searcher,
+			readonly: this.isReadOnly,
+			toolbarId: "toolsActions", //$NON-NLS-0$
+			saveToolbarId: "fileActions", //$NON-NLS-0$
+			editToolbarId: "editActions", //$NON-NLS-0$
+			navToolbarId: "pageNavigationActions", //$NON-NLS-0$
+		});
 	},
 	
 	createBanner: function() {
@@ -281,6 +298,7 @@ objects.mixin(EditorSetup.prototype, {
 			parentNode: this.pageToolbar,
 			fileClient: this.fileClient,
 			inputManager: this.inputManager,
+			editorCommands: this.editorCommands,
 			commandRegistry: this.commandRegistry,
 			serviceRegistry: this.serviceRegistry
 		});
@@ -378,6 +396,7 @@ objects.mixin(EditorSetup.prototype, {
 			pluginRegistry: this.pluginRegistry,
 			commandRegistry: this.commandRegistry,
 			contentTypeRegistry: this.contentTypeRegistry,
+			editorCommands: this.editorCommands,
 			renderToolbars: this.renderToolbars.bind(this),
 			inputManager: this.inputManager,
 			readonly: this.isReadOnly,

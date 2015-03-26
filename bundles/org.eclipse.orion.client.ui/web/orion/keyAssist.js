@@ -24,7 +24,9 @@ define([
 	}
 	KeyAssistPanel.prototype = {
 		addProvider: function(provider) {
-			this._providers.push(provider);	
+			if (this._providers.indexOf(provider) === -1) {
+				this._providers.push(provider);
+			}
 		},
 		create: function () {
 			var keyAssistDiv = this._keyAssistDiv = document.createElement("div"); //$NON-NLS-0$

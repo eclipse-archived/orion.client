@@ -255,6 +255,9 @@ define([
 		getFileMetadata: function() {
 			return this._fileMetadata;
 		},
+		isSaveEnabled: function() {
+			return !this.getReadOnly();
+		},
 		getReadOnly: function() {
 			var data = this._fileMetadata;
 			return this._readonly || !data || (data.Attributes && data.Attributes.ReadOnly);

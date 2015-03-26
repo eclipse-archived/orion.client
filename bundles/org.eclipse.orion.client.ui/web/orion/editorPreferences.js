@@ -10,7 +10,9 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
-define([], function() {
+define([
+	'orion/EventTarget',
+], function(EventTarget) {
 
 	var SETTINGS_SECTION = "/editor/settings"; //$NON-NLS-0$
 	var SETTINGS_KEY = "editorSettings"; //$NON-NLS-0$
@@ -85,13 +87,16 @@ define([], function() {
 
 	function EditorPreferences(preferences, callback) {
 		this._preferences = preferences;
-		this._callback = callback;
+		EventTarget.attach(this);
+		var storageKey = preferences.listenForChangedSettings(SETTINGS_SECTION, function (e) {
+			if (e.key === storageKey) {
+				this.dispatchEvent({type: "Changed"}); //$NON-NLS-0$
+			}
+		}.bind(this));
 		if (callback) {
-			var storageKey = preferences.listenForChangedSettings(SETTINGS_SECTION, function (e) {
-				if (e.key === storageKey) {
-					callback();
-				}
-			}.bind(this));
+			this.addEventListener("Changed", function(evt) { //$NON-NLS-0$
+				callback(evt.preferences);
+			});
 		}
 	}
 
@@ -121,9 +126,7 @@ define([], function() {
 				if (callback) {
 					callback(object);
 				}
-				if (this._callback) {
-					this._callback(object);
-				}
+				this.dispatchEvent({type: "Changed", preferences: object}); //$NON-NLS-0$
 			}.bind(this));
 		}
 	};

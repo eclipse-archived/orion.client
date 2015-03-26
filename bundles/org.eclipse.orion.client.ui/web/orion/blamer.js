@@ -17,49 +17,54 @@ define ([
 	'orion/URITemplate' //$NON-NLS-0$
 ], function(mExtensionCommands, PageLinks, URITemplate) {
 	
-	function getBlamer(serviceRegistry, inputManager) {
-		var metadata = inputManager.getFileMetadata();
-		var blamers = serviceRegistry.getServiceReferences("orion.edit.blamer"); //$NON-NLS-0$
-		for (var i=0; i < blamers.length; i++) {
-			var serviceReference = blamers[i];
-			var info = {};
-			info.validationProperties = serviceReference.getProperty("validationProperties"); //$NON-NLS-0$
-			info.forceSingleItem = true;
-			var validator = mExtensionCommands._makeValidator(info, serviceRegistry);
-			if (validator.validationFunction.bind(validator)(metadata)) {
-				return serviceRegistry.getService(serviceReference);
-			}
-		}
-		return null;
+	function Blamer(serviceRegistry, inputManager, editor) {
+		this._serviceRegistry = serviceRegistry;
+		this._inputManager = inputManager;
+		this._editor = editor;
 	}
-
-	function isVisible(serviceRegistry, inputManager) {
-		return !!getBlamer(serviceRegistry, inputManager) && !!serviceRegistry.getService("orion.core.blame"); //$NON-NLS-1$ //$NON-NLS-0$
-	}
-
-	function getBlame(serviceRegistry, inputManager){
-		var service = getBlamer(serviceRegistry, inputManager);
-		if (service) {
-			var handleResult = function(results) {
-				var orionHome = PageLinks.getOrionHome();
-				for (var i=0; i<results.length; i++) {
-					var range = results[i];
-					var uriTemplate = new URITemplate(range.CommitLink);
-					var params = {};
-					params.OrionHome = orionHome;
-					range.CommitLink = uriTemplate.expand(params);
+	
+	Blamer.prototype = {
+		getBlamer: function() {
+			var metadata = this._inputManager.getFileMetadata();
+			var blamers = this._serviceRegistry.getServiceReferences("orion.edit.blamer"); //$NON-NLS-0$
+			for (var i=0; i < blamers.length; i++) {
+				var serviceReference = blamers[i];
+				var info = {};
+				info.validationProperties = serviceReference.getProperty("validationProperties"); //$NON-NLS-0$
+				info.forceSingleItem = true;
+				var validator = mExtensionCommands._makeValidator(info, this._serviceRegistry);
+				if (validator.validationFunction.bind(validator)(metadata)) {
+					return this._serviceRegistry.getService(serviceReference);
 				}
-				serviceRegistry.getService("orion.core.blame")._setAnnotations(results); //$NON-NLS-0$
-			};
-			if (service.computeBlame) {
+			}
+			return null;
+		},
+
+		isVisible: function() {
+			return !!this.getBlamer();
+		},
+		
+		doBlame: function() {
+			var service = this.getBlamer();
+			if (service) {
+				var handleResult = function(results) {
+					var orionHome = PageLinks.getOrionHome();
+					for (var i=0; i<results.length; i++) {
+						var range = results[i];
+						var uriTemplate = new URITemplate(range.CommitLink);
+						var params = {};
+						params.OrionHome = orionHome;
+						range.CommitLink = uriTemplate.expand(params);
+					}
+					this._editor.showBlame(results);
+				}.bind(this);
+				var inputManager = this._inputManager;
 				var context = {metadata: inputManager.getFileMetadata()};
 				service.computeBlame(inputManager.getEditor().getEditorContext(), context).then(handleResult);
-			} else {
-				service.doBlame(inputManager.getInput()).then(handleResult);
 			}
 		}
-	}
-	return {isVisible: isVisible, getBlame: getBlame}; 
+	};
+	return {Blamer: Blamer}; 
 });
 
 

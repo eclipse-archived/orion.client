@@ -12,10 +12,9 @@
 define([
 	'orion/editor/editor',
 	'orion/commands',
-	'orion/editorCommands',
 	'orion/objects',
 	'orion/webui/littlelib'
-], function(mEditor, Commands, mEditorCommands, objects, lib) {
+], function(mEditor, Commands, objects, lib) {
 	
 	function handleError(statusService, error) {
 		if (!statusService) {
@@ -155,6 +154,7 @@ define([
 		this.statusService = options.statusService;
 		this.progressService = options.progressService;
 		this.editorService = options.editorService;
+		this.editorCommands = options.editorCommands;
 		this.metadata = options.metadata;
 		this.inputManager = options.inputManager;
 		this.readonly = options.readonly;
@@ -176,17 +176,7 @@ define([
 			});
 			this.editor.install();
 			
-			var commandGenerator = new mEditorCommands.EditorCommandFactory({
-				serviceRegistry: this.serviceRegistry,
-				commandRegistry: this.commandRegistry,
-				inputManager: this.inputManager,
-				readonly: this.readonly,
-				toolbarId: "toolsActions", //$NON-NLS-0$
-				saveToolbarId: "fileActions", //$NON-NLS-0$
-				editToolbarId: "editActions", //$NON-NLS-0$
-				navToolbarId: "pageNavigationActions" //$NON-NLS-0$
-			});
-			commandGenerator.generateBaseEditorCommands(this.editor);
+			this.editorCommands.updateCommands(this);
 		},
 		destroy: function() {
 			if (this.editor) {
