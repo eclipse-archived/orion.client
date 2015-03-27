@@ -157,9 +157,9 @@ define([
 			this._createSearchFilesCommand();
 			this._createGotoLineCommnand();
 			this._createFindCommnand();
-			this._createBlame();
-			this._createDiff();
-			this._createShowTooltip();
+			this._createBlameCommand();
+			this._createDiffCommand();
+			this._createShowTooltipCommand();
 			this._createUndoStackCommands();
 			this._createSaveCommand();
 			return this._createEditCommands();
@@ -541,7 +541,7 @@ define([
 			this.commandService.addCommand(findCommand);
 		},
 
-		_createBlame: function(){
+		_createBlameCommand: function(){
 			var that = this;
 			var blameCommand = new mCommands.Command({
 				name: messages.Blame,
@@ -579,7 +579,7 @@ define([
 			this.commandService.addCommand(blameCommand);
 		},
 
-		_createDiff: function(){
+		_createDiffCommand: function(){
 			var that = this;
 			var diffCommand = new mCommands.Command({
 				name: messages.Diff,
@@ -603,7 +603,7 @@ define([
 			this.commandService.addCommand(diffCommand);
 		},
 
-		_createShowTooltip: function(){
+		_createShowTooltipCommand: function(){
 			var that = this;
 			var showTooltipCommand = new mCommands.Command({
 				name: messages.showTooltip,
