@@ -615,8 +615,8 @@ objects.mixin(EditorSetup.prototype, {
 		var pipDiv = this._constructPipDivs(this.editorDomNode);
 
 		var selection = new mSelection.Selection(this.serviceRegistry, "pipSel");
-		var model = this.model = new mTextModel.TextModel();
-		var undoStack = new mUndoStack.UndoStack(this.model, 500);
+		var model = new mTextModel.TextModel();
+		var undoStack = new mUndoStack.UndoStack(model, 500);
 		var inputManager = new mInputManager.InputManager({
 			serviceRegistry: this.serviceRegistry,
 			fileClient: this.fileClient,
