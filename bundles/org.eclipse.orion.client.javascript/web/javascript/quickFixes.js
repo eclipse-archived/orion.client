@@ -16,8 +16,9 @@ define([
 'orion/Deferred',
 'orion/editor/textModel',
 'javascript/finder',
-'javascript/compilationUnit'
-], function(Objects, Deferred, TextModel, Finder, CU) {
+'javascript/compilationUnit',
+'orion/metrics'
+], function(Objects, Deferred, TextModel, Finder, CU, Metrics) {
 	
 	/**
 	 * @description Creates a new JavaScript quick fix computer
@@ -248,6 +249,7 @@ define([
 		execute: function(editorContext, context) {
 		    var id = context.annotation.fixid ? context.annotation.fixid : context.annotation.id;
 		    delete context.annotation.fixid;
+		    Metrics.logEvent('language tools', 'quickfix', id, 'application/javascript');
 		    var fixes = this[id];
 	        if(fixes) {
 	            var that = this;

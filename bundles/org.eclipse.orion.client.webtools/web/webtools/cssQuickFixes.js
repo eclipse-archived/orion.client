@@ -12,8 +12,9 @@
 /*eslint-env amd*/
 /* global doctrine */
 define([
-'orion/objects'
-], function(Objects) {
+'orion/objects',
+'orion/metrics'
+], function(Objects, Metrics) {
 	
 	/**
 	 * @description Creates a new CSS quick fix computer
@@ -31,7 +32,9 @@ define([
 		 * @param {Object} context The context params
 		 */
 		execute: function(editorContext, context) {
-		    var fixes = this[context.annotation.id];
+			var id = context.annotation.id;
+			Metrics.logEvent('language tools', 'quickfix', id, 'text/css');
+		    var fixes = this[id];
 	        if(fixes) {
 	            return fixes(editorContext, context.annotation);
 	        }
