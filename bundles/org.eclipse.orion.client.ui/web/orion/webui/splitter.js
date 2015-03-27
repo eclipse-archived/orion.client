@@ -423,6 +423,9 @@ define([
 			}
 			
 			this._adjustToOffset();	
+			
+			this._notifyResizeListeners(this.$trailing);
+			this._notifyResizeListeners(this.$leading);
 		},
 		
 		_up: function() {
@@ -466,6 +469,8 @@ define([
 		_mouseMove: function(event) {
 			if (this._tracking) {
 				this._move(event.clientX, event.clientY);
+				
+				this._resize();
 			}
 		},
 
@@ -476,8 +481,6 @@ define([
 				this._tracking = null;
 				this._up();
 				lib.stop(event);
-				
-				this._resize();
 			}
 		},
 		
