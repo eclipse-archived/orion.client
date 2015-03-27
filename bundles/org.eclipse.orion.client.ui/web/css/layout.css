@@ -359,15 +359,14 @@ hard-coded numbers elsewhere.
 .auxEditorFrame {
 	position: absolute;
 	z-index: 100;
-	background: #9090f0;
-	border: 5px solid #9090f0;
+	width: 100%;
+	height: 100%;
 }
 
 .auxEditorContent {
 	position: absolute;
-	top: 28px;
-	bottom: 0;
 	width: 100%;
+	height: 100%;
 }
 
 .auxEditorButton {

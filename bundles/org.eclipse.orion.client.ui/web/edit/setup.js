@@ -504,7 +504,6 @@ objects.mixin(EditorSetup.prototype, {
 			
 		this._pipInfo._pipSel = index;
 		this._pipInfo._inputManager.setInput(this._pipInfo._pipURLS[this._pipInfo._pipSel]);
-		this._pipInfo._urlField.value = this._pipInfo._inputManager._title;		
 	},
 	_addPipSplitter: function(vertical) {
 		// Already there, jsut show it...
@@ -525,6 +524,11 @@ objects.mixin(EditorSetup.prototype, {
 					vertical: vertical,
 					closeByDefault: false
 				});
+			this._pipInfo._pipSplitter.addEventListener("resize", function (evt) { //$NON-NLS-0$
+				if (this._pipInfo._editorView.editor && evt.node === this._pipInfo._pipDiv) {
+					this._pipInfo._editorView.editor.resize();
+				}
+			}.bind(this));
 		}
 	},
 	_removePipSplitter: function() {
@@ -544,11 +548,13 @@ objects.mixin(EditorSetup.prototype, {
 		if (mode === "P") {
 			this._removePipSplitter();
 			pipDiv.classList.add("auxEditorPicInPic");
+			this._pipInfo._pipDiv.style.display = "block";
 		} else if (mode === "X") {
 			this._removePipSplitter();
 			pipDiv.classList.remove("auxEditorPicInPic");
 			this._pipInfo._pipDiv.style.display = "none";
 		} else if (mode === "H") {
+			this._pipInfo._pipDiv.style.display = "block";
 			pipDiv.classList.remove("auxEditorPicInPic");
 			if (this._pipInfo._pipSplitter) {
 				this._pipInfo._pipSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL);
@@ -556,6 +562,7 @@ objects.mixin(EditorSetup.prototype, {
 				this._addPipSplitter(false);
 			}
 		} else if (mode === "V") {
+			this._pipInfo._pipDiv.style.display = "block";
 			pipDiv.classList.remove("auxEditorPicInPic");
 			if (this._pipInfo._pipSplitter) {
 				this._pipInfo._pipSplitter.setOrientation(mSplitter.ORIENTATION_VERTICAL);
@@ -563,19 +570,6 @@ objects.mixin(EditorSetup.prototype, {
 				this._addPipSplitter(true);
 			}
 		}
-	},
-	_createButton: function(parentDiv, xPos, label, id, doit) {
-		// Create the div for the new button
-		var newButton = util.createElement(parentDiv.ownerDocument, "button");
-		newButton.id = id;
-		newButton.innerHTML = label;
-		newButton.classList.add("auxEditorButton");
-		newButton.style.left = xPos + "px";
-
-		newButton.addEventListener("click", doit.bind(this));
-		parentDiv.appendChild(newButton);
-		
-		return xPos + 20 + 3;		
 	},
 	_addURL: function(newURL) {
 		console.log(newURL);
@@ -597,41 +591,7 @@ objects.mixin(EditorSetup.prototype, {
 		var pipDiv = util.createElement(theDoc, "div");
 		pipDiv.id = "PipDiv";
 		pipDiv.classList.add("auxEditorFrame");
-		
-		// Construct control UI
-		var nextX = this._createButton(pipDiv, 3, "<", "prevEditor", function() {
-			this._setPipSel(this._pipInfo._pipSel - 1);
-		});
-		nextX = this._createButton(pipDiv, nextX, ">", "nextEditor", function() {
-			this._setPipSel(this._pipInfo._pipSel + 1);
-		});
-		nextX = this._createButton(pipDiv, nextX, "P", "PipMode", function() {
-			this._setPipMode("P");
-		});
-		nextX = this._createButton(pipDiv, nextX, "H", "HorizontalSplit", function() {
-			this._setPipMode("H");
-		});
-		nextX = this._createButton(pipDiv, nextX, "V", "VerticalSplit", function() {
-			this._setPipMode("V");
-		});
-		nextX = this._createButton(pipDiv, nextX, "X", "VerticalSplit", function() {
-			this._setPipMode("X");
-		});
-		nextX = this._createButton(pipDiv, nextX, "S", "Swap", function() {
-			this._swapPip();
-		});
-		// Create the div for the new button
-		var urlField = util.createElement(pipDiv.ownerDocument, "input");
-		urlField.id = "URLField";
-		urlField.classList.add("auxEditorField");
-		urlField.style.left = (nextX+7) + "px";
-		urlField.addEventListener("keydown", function(ev) {
-			if(ev.keyCode === lib.KEY.ENTER) {
-				this._addURL(ev.target.value);
-			}
-		}.bind(this), false);
-		pipDiv.appendChild(urlField);
-		this._pipInfo._urlField = urlField;
+		pipDiv.style.display = "none";
 		
 		// Create the div for the editors
 		var pipContent = util.createElement(theDoc, "div");
@@ -647,73 +607,74 @@ objects.mixin(EditorSetup.prototype, {
 		
 		return pipContent;
 	},
-		_generateShowPip: function(){
+	_installPip: function() {
+		this._pipInfo = {};
+		var pipDiv = this._constructPipDivs(this.editorDomNode);
+
+		var selection = new mSelection.Selection(this.serviceRegistry, "pipSel");
+		var model = this.model = new mTextModel.TextModel();
+		var undoStack = new mUndoStack.UndoStack(this.model, 500);
+		var inputManager = new mInputManager.InputManager({
+			serviceRegistry: this.serviceRegistry,
+			fileClient: this.fileClient,
+			progressService: this.progressService,
+			statusReporter: this.statusReporter.bind(this),
+			selection: selection,
+			contentTypeRegistry: this.contentTypeRegistry
+		});
+					
+		var editorOptions = this.defaultOptions();
+		editorOptions.parent = pipDiv;
+		editorOptions.model = model;
+		editorOptions.menuBar = this.menuBar;
+		editorOptions.undoStack = undoStack;
+		editorOptions.renderToolbars = this.renderToolbars.bind(this);
+		editorOptions.inputManager = inputManager;
+		editorOptions.selection = selection;
+		editorOptions.problemsServiceID = "orion.core.marker.split"; //$NON-NLS-0$
+		editorOptions.editContextServiceID = "orion.edit.context.split"; //$NON-NLS-0$
+		var newView = new mEditorView.EditorView(editorOptions);
+		this._pipInfo._editorView = newView;
+		
+		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
+			evt.editor = newView.editor;
+		}.bind(this));
+		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
+			inputManager.setInput(event.selection);
+		});
+		newView.create();
+		
+		// Now, populate the Pip with some files
+		this._pipInfo._inputManager = inputManager;
+		this._pipInfo._pipURLS = [
+			"/file/emoffatt-OrionContent/org.eclipse.orion.client-2/bundles/org.eclipse.orion.client.ui/web/plugins/HoverTestPlugin2.js",
+			"/file/emoffatt-OrionContent/org.eclipse.orion.client-2/bundles/org.eclipse.orion.client.ui/web/plugins/HoverTestPlugin2.html"
+		];
+		this._setPipSel(0);					
+	},
+	_addPipCommand: function(label) {
 			var showPipCommand = new mCommands.Command({
-				name: "Show Pip",
-				tooltip: "Display Picture-in-Picture",
-				id: "orion.edit.showPip", //$NON-NLS-0$
+				name: label,
+				tooltip: label,
+				id: "orion.edit.showPip" + label, //$NON-NLS-0$
 				visibleWhen: function() {
 					return true;
 				},
 				callback: function(data) {
-					var existingPip = lib.node("PipDiv");
-					if (existingPip) {
-						existingPip.parentNode.removeChild(existingPip);
-						return;
-					}
-					
-					this._pipInfo = {};
-					var pipDiv = this._constructPipDivs(this.editorDomNode);
-
-					var selection = new mSelection.Selection(this.serviceRegistry, "pipSel");
-					var model = this.model = new mTextModel.TextModel();
-					var undoStack = new mUndoStack.UndoStack(this.model, 500);
-					var inputManager = new mInputManager.InputManager({
-						serviceRegistry: this.serviceRegistry,
-						fileClient: this.fileClient,
-						progressService: this.progressService,
-						statusReporter: this.statusReporter.bind(this),
-						selection: selection,
-						contentTypeRegistry: this.contentTypeRegistry
-					});
-								
-					var editorOptions = this.defaultOptions();
-					editorOptions.parent = pipDiv;
-					editorOptions.model = model;
-					editorOptions.menuBar = this.menuBar;
-					editorOptions.undoStack = undoStack;
-					editorOptions.renderToolbars = this.renderToolbars.bind(this);
-					editorOptions.inputManager = inputManager;
-					editorOptions.selection = selection;
-					editorOptions.problemsServiceID = "orion.core.marker.split"; //$NON-NLS-0$
-					editorOptions.editContextServiceID = "orion.edit.context.split"; //$NON-NLS-0$
-					var newView = new mEditorView.EditorView(editorOptions);
-					
-					inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
-						var view =  newView;
-						this.setEditor(view ? view.editor : null);
-						evt.editor = this.editor;
-					}.bind(this));
-					selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-						inputManager.setInput(event.selection);
-					});
-					newView.create();
-					
-					// Now, populate the Pip with some files
-					this._pipInfo._inputManager = inputManager;
-					this._pipInfo._pipURLS = [
-						"/file/emoffatt-OrionContent/org.eclipse.orion.client-2/bundles/org.eclipse.orion.client.ui/web/plugins/HoverTestPlugin2.js",
-						"/file/emoffatt-OrionContent/org.eclipse.orion.client-2/bundles/org.eclipse.orion.client.ui/web/plugins/HoverTestPlugin2.html"
-					];
-					this._setPipMode('H');
-					this._setPipSel(0);
-					
+					var mode = data.command.tooltip;
+					this._setPipMode(mode);
 				}.bind(this)
 			});
 			this.commandRegistry.addCommand(showPipCommand);
-			this.commandRegistry.registerCommandContribution("pageActions" , "orion.edit.showPip", 1, "orion.menuBarToolsGroup", false, //$NON-NLS-1$ //$NON-NLS-0$
-				new mKeyBinding.KeyBinding('e', true, true));
-		},	
+			this.commandRegistry.registerCommandContribution("pageActions" , "orion.edit.showPip" + label, 1, "orion.menuBarToolsGroup", false, //$NON-NLS-1$ //$NON-NLS-0$
+				new mKeyBinding.KeyBinding('e', true, true));		
+	},
+	_generateShowPip: function(){
+		this._addPipCommand("H");
+		this._addPipCommand("V");
+		this._addPipCommand("P");
+		this._addPipCommand("X");
+	},
 	load: function() {
 		var inputManager = this.inputManager;
 		var sidebarNavInputManager = this.sidebarNavInputManager;
@@ -751,6 +712,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		setup.createInputManager();
 		setup.createMenuBar().then(function() {
 			setup.createEditorView();
+			setup._installPip();
 			setup.createSideBar();
 			setup.load();
 		});
