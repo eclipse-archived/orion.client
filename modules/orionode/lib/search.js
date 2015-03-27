@@ -19,6 +19,7 @@ var resource = require('./resource');
 
 module.exports = function(options) {
 	var workspaceRoot = options.root;
+	var fileRoot = options.fileRoot;
 	var workspaceDir = options.workspaceDir;
 	if (!workspaceRoot) { throw 'options.root path required'; }
 	var workspaceId = 'orionode';
@@ -26,6 +27,10 @@ module.exports = function(options) {
 
 	var fieldNames = "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive";
 	var fieldList = fieldNames.split(",");
+
+	function originalFileRoot(req) {
+		return fileUtil.getContextPath(req) + fileRoot;
+	}
 
 	function searchOptions(req, res){
 		this.defaultLocation = null;
@@ -78,44 +83,73 @@ module.exports = function(options) {
 		}
 	};
 
-	function searchPattern(searchOptions) {
-		this.undoLuceneEscape = function(searchTerm){
-			var specialChars = "+-&|!(){}[]^\"~:\\";
-			for (var i = 0; i < specialChars.length; i++) {
-				var character = specialChars.substring(i,i+1);
-				var escaped = "\\" + character;
-				searchTerm = searchTerm.replace(new RegExp(escaped,"g"), character);
+	function undoLuceneEscape(searchTerm){
+		var specialChars = "+-&|!(){}[]^\"~:\\";
+		for (var i = 0; i < specialChars.length; i++) {
+			var character = specialChars.substring(i,i+1);
+			var escaped = "\\" + character;
+			searchTerm = searchTerm.replace(new RegExp(escaped,"g"), character);
+		}
+		return searchTerm;
+	}
+
+	function buildSearchPattern(searchOpts){
+		var searchTerm = searchOpts.searchTerm;
+		if (!searchOpts.regEx) {
+			if (searchTerm.indexOf("\"") === 0) {
+				searchTerm = searchTerm.substring(1, searchTerm.length - 1);
 			}
-			return searchTerm;
-		}
+			searchTerm = undoLuceneEscape(searchTerm);
+			if (searchTerm.indexOf("?") != -1 || searchTerm.indexOf("*") != -1) {
+				if (searchTerm.indexOf("*") === 0) {
+					searchTerm = searchTerm.substring(1);
+				}
+				if (searchTerm.indexOf("?") != -1) {
+					searchTerm = searchTerm.replace("?",".");
+				}
+				if (searchTerm.indexOf("*") != -1) {
+					searchTerm = searchTerm.replace("*", ".*");
+				}
+			}
 
-		this.buildSearchPattern = function(){
-			var searchTerm = searchOptions.searchTerm;
-			if (!searchOptions.regEx) {
-				if (searchTerm.indexOf("\"") === 0) {
-					searchTerm = searchTerm.substring(1, searchTerm.length - 1);
-				}
-				searchTerm = this.undoLuceneEscape(searchTerm);
-				if (searchTerm.indexOf("?") != -1 || searchTerm.indexOf("*") != -1) {
-					if (searchTerm.indexOf("*") === 0) {
-						searchTerm = searchTerm.substring(1);
-					}
-					if (searchTerm.indexOf("?") != -1) {
-						searchTerm = searchTerm.replace("?",".");
-					}
-					if (searchTerm.indexOf("*") != -1) {
-						searchTerm = searchTerm.replace("*", ".*");
-					}
-				}
+			if (!searchOpts.searchTermCaseSensitive) {
+				return new RegExp(searchTerm, "i");
+			} else {
+				return new RegExp(searchTerm);
+			}
+		};
+	}
 
-				if (!searchOptions.searchTermCaseSensitive) {
-					this.pattern = new RegExp(searchTerm, "i");
-				} else {
-					console.log(searchTerm);
-					this.pattern = new RegExp(searchTerm);
+	function searchChild(location, isDir, searchPattern){
+		var results = [];
+		if (!isDir) {
+			var file = fs.readFileSync(location, 'utf8');
+			var matches = file.match(searchPattern);
+			//if (matches) results = results.concat(matches);
+			if (matches) results.push(location);
+			/*
+			fs.readFile(location, 'utf8', function (err, data){
+				if (err) throw err;
+				if (data.match(searchPattern)) {
+					console.log(data.match(searchPattern));
+					console.log(data);
 				}
-			};
+				results.concat(data.match(searchPattern));
+			})
+			*/
 		}
+		return results;
+		/*
+		else {
+			var directoryResults = [];
+			fs.readdir(location, function (err, data){
+				if (err) throw err;
+				list.forEach(function (file) {
+					var results = searchChild()
+				})
+			})
+		}
+		*/
 	}
 
 	return connect()
@@ -125,17 +159,27 @@ module.exports = function(options) {
 			var searchOpt = new searchOptions(req, res);
 			searchOpt.buildOptions();
 
-			var searchPat = new searchPattern(searchOpt);
-			searchPat.buildSearchPattern();
+			var searchPat = buildSearchPattern(searchOpt);
 
-			console.log(searchPat.pattern);
+			var searchPattern = /middle/gi;
+			var parentFileLocation = originalFileRoot(req);
 
-			var ws = JSON.stringify({
+			fileUtil.getChildren(workspaceDir, parentFileLocation, function(children) {
+				var results = [];
+				for (var i = 0; i < children.length; i++){
+					var child = children[i];
+					var matches = searchChild(child.Location.substring(6), child.Directory, searchPattern);
+					if (matches) results = results.concat(matches);
+				};
+
+				var ws = JSON.stringify({
 					    "search": searchOpt,
-					    "pattern": searchPat
+					    "pattern": searchPat.toString(),
+					    "results": results
 					});
-			res.setHeader('Content-Type', 'application/json');
-			res.end(ws);
+				res.setHeader('Content-Type', 'application/json');
+				res.end(ws);
+			});
 		}
 	}));
 };
