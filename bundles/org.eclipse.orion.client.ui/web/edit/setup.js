@@ -528,7 +528,7 @@ objects.mixin(EditorSetup.prototype, {
 				if (this._pipInfo._editorView.editor && evt.node === this._pipInfo._pipDiv) {
 					this._pipInfo._editorView.editor.resize();
 				} else {
-					this._editorView.editor.resize();
+					this.editorView.editor.resize();
 				}
 			}.bind(this));
 		}
