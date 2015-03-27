@@ -527,6 +527,8 @@ objects.mixin(EditorSetup.prototype, {
 			this._pipInfo._pipSplitter.addEventListener("resize", function (evt) { //$NON-NLS-0$
 				if (this._pipInfo._editorView.editor && evt.node === this._pipInfo._pipDiv) {
 					this._pipInfo._editorView.editor.resize();
+				} else {
+					this._editorView.editor.resize();
 				}
 			}.bind(this));
 		}
@@ -570,6 +572,7 @@ objects.mixin(EditorSetup.prototype, {
 				this._addPipSplitter(true);
 			}
 		}
+		this._pipInfo._editorView.editor.resize();
 	},
 	_addURL: function(newURL) {
 		console.log(newURL);

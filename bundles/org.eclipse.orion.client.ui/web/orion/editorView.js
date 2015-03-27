@@ -257,7 +257,7 @@ define([
 			}
 		},
 		_init: function() {
-			if(this.preferences) {
+			if (this.preferences) {
 				// There should be only one editor preferences
 				this.editorCommands.editorPreferences = this.editorPreferences = this.editorCommands.editorPreferences || new mEditorPreferences.EditorPreferences(this.preferences);
 				this.editorPreferences.addEventListener("Changed", function (evt) { //$NON-NLS-0$
@@ -268,8 +268,6 @@ define([
 						this.updateSettings(prefs);
 					}
 				}.bind(this));
-			}
-			if(this.preferences) {
 				// There should be only one theme preferences
 				this.editorCommands.themePreferences = this.themePreferences = this.editorCommands.themePreferences || new mThemePreferences.ThemePreferences(this.preferences, new mThemeData.ThemeData());
 				this.themePreferences.apply();
@@ -482,7 +480,7 @@ define([
 						}
 					}.bind(this));
 					if(textView.onInputChanged) {
-					   textView.onInputChanged({type:event.type});
+						textView.onInputChanged({type:event.type});
 					}
 				} else {
 					liveEditSession.start();
@@ -494,7 +492,7 @@ define([
 				}
 				var textView = editor.getTextView();
 				if(textView && textView.onSaving) {
-				    textView.onSaving({type:event.type});
+					textView.onSaving({type:event.type});
 				}
 			});
 
