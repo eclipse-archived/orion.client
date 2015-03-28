@@ -39,6 +39,99 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
     };
 
     NoMatchingOperationsClient.prototype.constructor = NoMatchingOperationsClient;
+    
+    function LocalOperationsClient(serviceRegistry) {
+    	this._serviceRegistry = serviceRegistry;
+    }
+    
+    function _generateLocation() {
+    	return "/localtask/id/" + Math.floor(Math.random()*65534);
+    }
+
+    
+    LocalOperationsClient.prototype = {
+    	getOperation: function(taskLocation) {
+    		var def = new Deferred();
+    		this._serviceRegistry.getService("orion.core.preference").getPreferences("/local/operations").then(function(localOperations) {
+				var operation = localOperations.get(taskLocation);
+				if (operation) {
+					def.resolve(operation);
+				} else {
+					def.reject({
+						Severity: "Error",
+						Message: "Local Operation " + taskLocation + "not found" 
+					});
+				}
+			});
+    		return def;
+    	},
+    	getOperations: function(options) {
+    		var def = new Deferred();
+    		this._serviceRegistry.getService("orion.core.preference").getPreferences("/local/operations").then(function(localOperations){
+    			var result = [];
+    			localOperations.keys().forEach(function(key) {
+    				result.push(localOperations.get(key));
+    			});
+    			def.resolve(result);
+    		});
+    		return def;
+    	},
+    	removeCompletedOperations: function() {
+    		var def = new Deferred();
+    		this._serviceRegistry.getService("orion.core.preference").getPreferences("/local/operations").then(function(localOperations){
+    			var result = [];
+    			localOperations.keys().forEach(function(key) {
+    				var operation = localOperations.get(key);
+    				if (!operation || !operation.type || operation.type === "loadend") {
+    					localOperations.remove(key);
+    				} else {
+    					result.push(key);
+    				}
+    			});
+    			def.resolve(result);
+    		});
+    		return def;
+    	},
+    	removeOperation: function(taskLocation) {
+    		var def = new Deferred();
+    		this._serviceRegistry.getService("orion.core.preference").getPreferences("/local/operations").then(function(localOperations){
+    			var operation = localOperations.get(taskLocation);
+    			if (operation) {
+    				localOperations.remove(taskLocation);
+    			}
+    			def.resolve(taskLocation);
+    		});
+    		return def;
+    	},
+    	cancelOperation: returnNoMatchingError,
+    	createOperation: function (operationName, type, result, expTime) {
+			var exp = new Date();
+			exp.setTime(exp.getTime()+5*60);
+			if (expTime) {
+				exp = expTime;
+			}
+			var location = 	_generateLocation();
+			var operation = {
+				Name: operationName,
+				expires: exp.getTime(),
+				Location: location,
+				location: location,
+				type: type,
+				Result: result
+			};
+			if(operation.Location){
+				this._serviceRegistry.getService("orion.core.preference").getPreferences("/local/operations").then(function(localOperations){
+					localOperations.put(operation.Location, operation);
+				});
+				this._serviceRegistry.getService("orion.core.preference").getPreferences("/operations").then(function(globalOperations){
+					globalOperations.put(operation.Location, {Name: operation.Name, expires: operation.expires});
+				});
+			}
+			return operation;
+    	}
+    };
+
+    LocalOperationsClient.prototype.constructor = LocalOperationsClient;
 
     function OperationsClient(serviceRegistry) {
         this._services = [];
@@ -58,6 +151,8 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
             }
             this._patterns[i] = new RegExp(patternString);
         }
+        this._patterns.unshift(/^\/localtask/);
+        this._services.unshift(new LocalOperationsClient(serviceRegistry));
 
         this._getService = function(location) {
             if (!location) {
@@ -90,6 +185,9 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
     }
 
     OperationsClient.prototype = {
+    	createOperation: function(operationName, type, result) {
+    		return _doServiceCall(this._getService(_generateLocation()), "createOperation", arguments); //$NON-NLS-0$
+    	},
         getOperations: function() {
             var def = new Deferred();
             if (this._operations) {

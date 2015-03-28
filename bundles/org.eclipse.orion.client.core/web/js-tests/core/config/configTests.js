@@ -21,6 +21,7 @@ define([
 	var assert = chai.assert,
 	    ConfigAdminFactory = config.ConfigurationAdminFactory,
 	    MANAGED_SERVICE = 'orion.cm.managedservice';
+	var PREF_NAME = '/cm/configurations'; //$NON-NLS-0$
 
 	var serviceRegistry, prefsService, pluginRegistry, configAdmin;
 
@@ -70,7 +71,7 @@ define([
 
 	function putAll(provider, pids) {
 		Object.keys(pids).forEach(function(pid) {
-			provider.put(pid, pids[pid]);
+			provider.put(PREF_NAME, pid, pids[pid]);
 		});
 	}
 
@@ -157,7 +158,7 @@ define([
 			it("should use lazy Pref storage for Configurations", function() {
 				var pid = 'GRUNNUR';
 				var configuration = configAdmin.getConfiguration(pid);
-				return prefsService.getPreferences().then(function(preferences) {
+				return prefsService.getPreferences(PREF_NAME).then(function(preferences) {
 					assert.equal(preferences._contains(pid), false, 'config data exists in Prefs');
 					configuration.update({foo: 'bar'});
 					assert.equal(preferences._contains(pid), true, 'config data exists in Prefs');
@@ -201,7 +202,7 @@ define([
 				}).then(function() {
 					var config = configAdmin.getConfiguration("foo");
 					config.update({ qux: 11011 });
-					return prefsService.getPreferences().then(function(prefs) {
+					return prefsService.getPreferences(PREF_NAME).then(function(prefs) {
 						assert.equal(prefs._contains("11011"), true, "config data was persisted");
 					});
 				});
@@ -216,11 +217,11 @@ define([
 					configuration.update({ gak: 1, buzz: 1 });
 
 					// default provider should be unchanged -- configuration updates should happen against user provider
-					var defaultPid = prefsService._defaultsProvider.get("some_pid");
+					var defaultPid = prefsService._defaultsProvider.get(PREF_NAME, "some_pid");
 					assert.equal(defaultPid.gak, 42);
 					assert.notProperty(defaultPid, "buzz");
 
-					var userPid = prefsService._userProvider.get("some_pid");
+					var userPid = prefsService._userProvider.get(PREF_NAME, "some_pid");
 					assert.equal(userPid.gak, 1);
 					assert.equal(userPid.buzz, 1);
 				});
