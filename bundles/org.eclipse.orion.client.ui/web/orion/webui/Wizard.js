@@ -75,8 +75,9 @@ define([
 			} else {
 				this._pagesNodes.push(this.pages[this.currentPage]._construct(this.currentPage, this));
 				this._pagesNode.appendChild(this._pagesNodes[this.currentPage]);
-				this.pages[this.currentPage].render();
+				
 			}
+			this.pages[this.currentPage].render();
 			this.backButton.style.visibility = this.currentPage===0 ?  "hidden" : "visible";
 			this.nextButton.style.visibility = this.currentPage===this.pages.length-1 ?  "hidden" : "visible";
 			this.validate(this.currentPage);
