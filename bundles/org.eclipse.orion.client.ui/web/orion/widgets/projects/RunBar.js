@@ -345,7 +345,11 @@ define([
 				
 				if (checkStatus) {
 					this._displayStatusCheck(launchConfiguration);
+					var startTime = Date.now();
 					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(status) {
+						var interval = Date.now() - startTime;
+						mMetrics.logTiming("deployment", "check status (launch config)", interval, launchConfiguration.Type);
+
 						launchConfiguration.status = status;
 						this._updateLaunchConfiguration(launchConfiguration);
 					}.bind(this), errorHandler);
@@ -751,7 +755,11 @@ define([
 					// need to confirm with user before redeploying over a running app
 					// get the latest app status
 					this._displayStatusCheck(launchConfiguration);
+					var startTime = Date.now();
 					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(status) {
+						var interval = Date.now() - startTime;
+						mMetrics.logTiming("deployment", "check status (deploy)", interval, launchConfiguration.Type);
+
 						var dialogTitle = messages["redeployConfirmationDialogTitle"]; //$NON-NLS-0$
 						var appName = this._getDisplayName(launchConfiguration);
 						var confirmMessage = i18nUtil.formatMessage(messages["redeployConfirmationDialogMessage"], appName); //$NON-NLS-0$
@@ -816,7 +824,11 @@ define([
 						this._stopStatusPolling();
 						return;
 					}
+					var startTime = Date.now();
 					this._checkLaunchConfigurationStatus(launchConfiguration).then(function(status) {
+						var interval = Date.now() - startTime;
+						mMetrics.logTiming("deployment", "check status (poll)", interval, launchConfiguration.Type);
+
 						launchConfiguration.status = status;
 						this._updateLaunchConfiguration(launchConfiguration);
 					}.bind(this));

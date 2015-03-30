@@ -614,6 +614,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					var launchConfToPass = objects.clone(item);
 					launchConfToPass.Params = params;
 
+					var startTime = Date.now();
 					projectClient.getProjectDeployService(item.ServiceId, item.Type).then(function(service){
 						var progressMessage = start ? messages["starting"] : messages["stopping"]; //$NON-NLS-1$ //$NON-NLS-0$
 						if(service && (start ? service.start : service.stop)){
@@ -622,6 +623,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
 							}
 							(start ? service.start : service.stop)(launchConfToPass).then(function(result){
+								var interval = Date.now() - startTime;
+								mMetrics.logTiming("deployment", start ? "restart" : "stop", interval, launchConfToPass.Type);
+
 								item.status = result;
 								if(sharedLaunchConfigurationDispatcher){
 									sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
