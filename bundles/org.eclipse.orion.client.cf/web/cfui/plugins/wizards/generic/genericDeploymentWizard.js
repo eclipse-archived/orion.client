@@ -12,10 +12,10 @@
 
 define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfui/cFClient', 'orion/PageUtil',
 	'orion/PageLinks', 'orion/preferences', 'orion/fileClient', 'cfui/cfUtil', 'cfui/plugins/wizards/common/wizardUtils',
-	'orion/webui/Wizard', 'cfui/plugins/wizards/common/deploymentLogic', 'cfui/plugins/wizards/common/commonPaneBuilder', 'cfui/plugins/wizards/common/corePageBuilder',
+	'orion/webui/Wizard', 'cfui/plugins/wizards/common/deploymentLogic', 'cfui/plugins/wizards/common/corePageBuilder',
 	'cfui/plugins/wizards/common/servicesPageBuilder', 'cfui/plugins/wizards/common/additionalParamPageBuilder', 'orion/Deferred'],
 		function(messages, mBootstrap, objects, CFClient, PageUtil, PageLinks, Preferences, mFileClient, mCfUtil, mWizardUtils, Wizard,
-				mDeploymentLogic, mCommonPaneBuilder, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder, Deferred) {
+				mDeploymentLogic, mCorePageBuilder, mServicesPageBuilder, mAdditionalParamPageBuilder, Deferred) {
 
 	/* plugin-host communication */
 	var postMsg = mWizardUtils.defaultPostMsg;
@@ -99,11 +99,6 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 			var clouds = resp.clouds;
 			var defaultTarget = launchConfParams.Target || resp.defaultTarget;
 
-			/* init common pane builder */
-			var commonPaneBuilder = new mCommonPaneBuilder.CommonPaneBuilder({
-		    	AppPath : resource.AppPath /* relative application path */
-		    });
-
 			/* init core page builder */
 		    var corePageBuilder = new mCorePageBuilder.CorePageBuilder({
 				ConfName: launchConfName,
@@ -146,7 +141,6 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 		    });
 
 		    /* build pages */
-		    var commonPane = commonPaneBuilder.build();
 		    var page1 = corePageBuilder.build();
 		    var page2 = servicesPageBuilder.build();
 		    var page3 = additionalParamPageBuilder.build();

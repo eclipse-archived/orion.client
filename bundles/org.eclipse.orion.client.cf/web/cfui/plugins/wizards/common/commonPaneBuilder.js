@@ -16,6 +16,10 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 	 * 
 	 * @param options.AppPath {String} [options.AppPath=""] Application deployment path
 	 */
+	
+	/*****************************************************************/
+	// THIS CLASS IS DEPRECATED AND ALL REFERENCES HAS BEEN REMOVED //
+	/****************************************************************/
 	function CommonPaneBuilder(options){
 		options = options || {};
 		this._init(options);
