@@ -259,7 +259,7 @@ define([
 			this.selectCategory(id);
 
 			lib.empty(this.table);
-		
+
 			this.updateToolbar(id);
 
 			var themeSettingsNode = document.createElement('div'); //$NON-NLS-0$
@@ -267,14 +267,19 @@ define([
 
 			var editorTheme = new editorThemeData.ThemeData();
 			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, editorTheme);
-			
-			var editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme, toolbarId: 'editorThemeSettingsToolActionsArea', serviceRegistry: this.registry}); //$NON-NLS-0$
-				
-			var command = { name:messages.Import, tip:messages['Import a theme'], id:0, callback: editorTheme.importTheme.bind(editorTheme) };
-			editorThemeWidget.addAdditionalCommand( command );
 
+			var editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme, toolbarId: 'editorThemeSettingsToolActionsArea', serviceRegistry: this.registry}); //$NON-NLS-0$
+
+			var command = {
+				name:messages.Import,
+				tip:messages['Import a theme'],
+				id: "orion.importTheme",
+				callback: editorTheme.showImportThemeDialog.bind(editorTheme)
+			};
+			this.commandService.addCommand(command);
+			this.commandService.registerCommandContribution('themeCommands', "orion.importTheme", 4); //$NON-NLS-1$ //$NON-NLS-0$
 			var editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences);
-			
+
 			this.themeSettings = new ThemeSettings({
 				registry: this.registry,
 				preferences: editorPreferences,
@@ -285,7 +290,7 @@ define([
 				commandService: this.commandService,
 				userClient: this.userClient
 			}, themeSettingsNode);
-			
+
 			this.themeSettings.show();
 		},
 		

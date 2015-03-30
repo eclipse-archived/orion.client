@@ -512,6 +512,10 @@ and (max-device-width : 1024px)  {
 	margin-right: 4px !important;
 }
 
+.commandMargins:last-child {
+	margin-right: 0 !important;
+}
+
 /* ----- side menu begin ----- */
 
 .sideMenu{
