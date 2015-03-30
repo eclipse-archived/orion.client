@@ -366,7 +366,13 @@ define("orion/editor/rulers", [
 				this._hoverTimeout = null;
 			}
 			
-			this._curElementBounds = lib.bounds(e.target ? e.target : e.srcElement);
+			var target = e.target ? e.target : e.srcElement;
+			this._curElementBounds = lib.bounds(target);
+			// If we have the entire ruler selected, just use a 1 pixel high area in the ruler (Bug 463486)
+			if (target._ruler){
+				this._curElementBounds.top = e.clientY;
+				this._curElementBounds.height = 1;
+			}
 			
 			var self = this;
 			self._hoverTimeout = window.setTimeout(function() {
@@ -496,8 +502,6 @@ define("orion/editor/rulers", [
 		},
 		/** @ignore */
 		_getTooltipInfo: function(contents, y, context) {
-			
-			// TODO We aren't creating line number annotations anymore
 			
 			if (!contents) { return null; } // TODO: shouldn't this check the length, it'll never be null
 		
