@@ -1,0 +1,45 @@
+<div>
+	<style>
+	#importThemeContainer {
+		width: 300px;
+	}
+
+	.msg {
+		color: #333;
+		margin-bottom: 12px;
+	}
+
+	.drop-zone {
+		border: 2px dashed #bbb;
+		border-radius: 5px;
+		color: #bbb;
+		font-family: Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana;
+		font-size: 24px;
+		font-weight: bold;
+		margin-bottom: 12px;
+		padding: 25px;
+		text-align: center;
+		transition: background-color 250ms ease-out;
+	}
+
+	.drop-zone.over {
+		background-color: #dadada;
+		transition: background-color 250ms ease-in;
+	}
+
+	.error {
+		background-color: #f2dede;
+		border: 1px solid #ebccd1;
+		color: #a94442;
+		padding: 12px;
+	}
+
+	#themeText {
+		box-sizing: border-box;
+  		width: 100%;
+	}
+	</style>
+	<div id="importThemeContainer">
+		<div class="msg" id="importThemeMessage">${ImportThemeDialogMessage}</div>
+	</div>
+</div>

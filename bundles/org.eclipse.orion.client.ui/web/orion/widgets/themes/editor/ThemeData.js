@@ -13,8 +13,13 @@
 define([
 		'i18n!orion/settings/nls/messages',
 		'orion/editor/textTheme',
-		'orion/widgets/themes/ThemeVersion'
-], function(messages, mTextTheme, THEMES_VERSION) {
+		'orion/webui/dialog',
+		'orion/widgets/themes/ThemeVersion',
+		'text!orion/widgets/themes/templates/ImportThemeDialogTemplate.html',
+		'orion/widgets/themes/dialogs/urlImportDialog',
+		'orion/objects'
+
+], function(messages, mTextTheme, dialog, THEMES_VERSION, ImportThemeDialogTemplate, urlImportDialog, objects) {
 
 	// *******************************************************************************
 	//
@@ -35,10 +40,6 @@ define([
 			darkSeaGreen	Comments	Comments	Comments
 			cornFlowerblue	String		String		String
 			----------------------------------------------- */
-
-		function StyleSet(){
-		
-		}
 		
 		var defaultFont = '"Consolas", "Monaco", "Vera Mono", monospace'; //$NON-NLS-0$
 		var defaultFontSize = '12px'; //$NON-NLS-0$
@@ -168,15 +169,140 @@ define([
 		
 			return styleElement.sheet.cssRules;
 		}
+
+		var ImportThemeDialog = function(options) {
+			options = options || {};
+			this.options = options;
+			objects.mixin(this, options);
+			this._init(options);
+		};
+		ImportThemeDialog.prototype = new dialog.Dialog();
+		objects.mixin(ImportThemeDialog.prototype, {
+			TEMPLATE: ImportThemeDialogTemplate,
+			_init: function(options) {
+				this.title = messages["Import a theme"]; //$NON-NLS-1$
+				this.buttons = [
+					/*{ text: "Import from a URL", callback: this.urlButtonClicked.bind(this), id: "urlThemeImportBtn" }, Hidden for now*/
+					{ text: messages["Import"], callback: this.importFromTextarea.bind(this), id: "textAreaImportBtn" }, //$NON-NLS-1$
+					{ text: messages["Close"], callback: this.closeButtonClicked.bind(this) }
+				];
+				this.modal = true;
+
+				this._initialize();
+			},
+			_bindToDom: function() {
+				this.$importButton = this.$buttonContainer.firstChild;
+				this.$importButton.classList.add('disabled'); //$NON-NLS-0$
+
+				this.appendThemeList();
+			},
+			appendThemeList: function() {
+				var self = this;
+
+				var docFragment = document.createDocumentFragment(),
+					dropZone = document.createElement("div"), //$NON-NLS-0$
+					textBox = document.createElement("textarea"); //$NON-NLS-0$
+
+				dropZone.className = "drop-zone"; //$NON-NLS-0$
+				dropZone.id = "dropZone"; //$NON-NLS-0$
+				dropZone.textContent = messages["dndTheme"];
+				docFragment.appendChild(dropZone);
+
+				dropZone.addEventListener("dragenter", self.dragEnter.bind(self)); //$NON-NLS-0$
+				dropZone.addEventListener("dragleave", self.dragLeave.bind(self)); //$NON-NLS-0$
+				dropZone.addEventListener("dragover", self.dragOver.bind(self)); //$NON-NLS-0$
+				dropZone.addEventListener("drop", self.dragAndDropped.bind(self)); //$NON-NLS-0$
+
+				textBox.rows = "4"; //$NON-NLS-0$
+				textBox.cols = "35"; //$NON-NLS-0$
+				textBox.placeholder = messages["textTheme"];
+				textBox.id = "themeText"; //$NON-NLS-0$
+				textBox.tabIndex = "-1"; //$NON-NLS-0$
+				textBox.addEventListener("input", self.watchTextarea.bind(this)); //$NON-NLS-0$
+
+				docFragment.appendChild(textBox);
+				self.$importThemeMessage.innerHTML = messages["ImportThemeDialogMessage"];
+				self.$importThemeContainer.appendChild(docFragment, null);
+			},
+			watchTextarea: function() {
+				var textArea = document.getElementById("themeText"); //$NON-NLS-0$
+				if (textArea.value.length > 0) {
+					this.$importButton.classList.remove("disabled"); //$NON-NLS-0$
+				} else {
+					this.$importButton.classList.add("disabled"); //$NON-NLS-0$
+				}
+			},
+			dragEnter: function(e) {
+				var dropZone = document.getElementById("dropZone"); //$NON-NLS-0$
+				dropZone.className = "drop-zone over"; //$NON-NLS-0$
+			},
+			dragLeave: function(e) {
+				var dropZone = document.getElementById("dropZone"); //$NON-NLS-0$
+				dropZone.className = "drop-zone"; //$NON-NLS-0$
+			},
+			dragOver: function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				e.dataTransfer.dropEffect = "copy"; //$NON-NLS-0$
+			},
+			dragAndDropped: function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+
+				var file = e.dataTransfer.files[0],
+					reader = new FileReader(),
+					self = this;
+
+				reader.onloadend = function(e) {
+					if (e.target.readyState == FileReader.DONE) {
+						var dropZone = document.getElementById("dropZone"); //$NON-NLS-0$
+						dropZone.className = "drop-zone"; //$NON-NLS-0$
+						self.importTheme(self, e.target.result);
+					}
+				};
+				reader.readAsText(file);
+			},
+			importFromTextarea: function() {
+				var styles = document.getElementById("themeText").value; //$NON-NLS-0$
+				if (styles.length) {
+					this.importTheme(this, styles);
+				}
+			},
+			importTheme: function(commandInvocation, styles) {
+				importTheme(commandInvocation, styles);
+			},
+			closeButtonClicked: function() {
+				this.hide();
+			},
+			urlButtonClicked: function() {
+				var importURLdialog = new urlImportDialog.showUrlImportDialog({
+					title: "Import theme from a URL",
+					message: "A friendly explanation for the urls that can be used goes here",
+					func: this.onURL.bind(this, "Message to send")
+				});
+				this._addChildDialog(importURLdialog);
+				importURLdialog.show();
+
+			},
+			onURL: function(huy, url) {
+				alert(huy + " this.onURL.bind");
+				alert(url);
+			}
+		});
+
+		function showImportThemeDialog(data) {
+			var dialog = new ImportThemeDialog(data);
+			dialog.show();
+		}
+		ThemeData.prototype.showImportThemeDialog = showImportThemeDialog;
 		
-		function importTheme(data) {
-			var body = data.parameters.valueFor("name"); //$NON-NLS-0$
-			var xml = this.parseToXML(body);
+		function importTheme(data, styles) {
+			var body = styles;
+			var xml = parseToXML(body);
 			var rules = rulesForCssText(body);
 			
 			if(rules.length !== 0){
-				var newStyle = new StyleSet(); //sets the default styling
-					newStyle = {"className":"default","name":"default","styles":{"annotationLine":{"currentLine":{"backgroundColor":"#EAF2FE"}},"annotationRange":{"currentBracket":{"backgroundColor":"#00FE00"},"matchingBracket":{"backgroundColor":"#00FE00"},"matchingSearch":{"backgroundColor":"#c3e1ff","currentSearch":{"backgroundColor":"#53d1ff"}},"writeOccurrence":{"backgroundColor":"#ffff00"}},"backgroundColor":"#ffffff","color":"#151515","comment":{"color":"#3C802C"},"constant":{"color":"#9932CC","numeric":{"color":"#9932CC","hex":{"color":"#9932CC"}}},"entity":{"name":{"color":"#98937B","function":{"color":"#67BBB8","fontWeight":"bold"}},"other":{"attribute-name":{"color":"#5F9EA0"}}},"fontFamily":"\"Consolas\", \"Monaco\", \"Vera Mono\", monospace","fontSize":"12px","keyword":{"control":{"color":"#CC4C07","fontWeight":"bold"},"operator":{"color":"#9F4177","fontWeight":"bold"},"other":{"documentation":{"color":"#7F9FBF","task":{"color":"#5595ff"}}}},"markup":{"bold":{"fontWeight":"bold"},"heading":{"color":"blue"},"italic":{"fontStyle":"italic"},"list":{"color":"#CC4C07"},"other":{"separator":{"color":"#00008F"},"strikethrough":{"textDecoration":"line-through"},"table":{"color":"#3C802C"}},"quote":{"color":"#446FBD"},"raw":{"fontFamily":"monospace"},"underline":{"link":{"textDecoration":"underline"}}},"meta":{"documentation":{"annotation":{"color":"#7F9FBF"},"tag":{"color":"#7F7F9F"}},"tag":{"color":"#CC4C07"}},"ruler":{"annotations":{"backgroundColor":"#ffffff"},"backgroundColor":"#ffffff","overview":{"backgroundColor":"#ffffff"}},"rulerLines":{"color":"#CCCCCC"},"string":{"color":"#446FBD"},"support":{"type":{"propertyName":{"color":"#9F4177"}}},"textviewContent ::-moz-selection":{"backgroundColor":"#b4d5ff"},"textviewContent ::selection":{"backgroundColor":"#b4d5ff"},"textviewLeftRuler":{"borderRight":"1px solid transparent"},"textviewRightRuler":{"borderLeft":"1px solid transparent"},"textviewSelection":{"backgroundColor":"#b4d5ff"},"textviewSelectionUnfocused":{"backgroundColor":"#b4d5ff"},"variable":{"language":{"color":"#7F0055","fontWeight":"bold"},"other":{"color":"#E038AD"},"parameter":{"color":"#D1416F"}}}};
+				var newStyle = {"className":"default","name":"default","styles":{"annotationLine":{"currentLine":{"backgroundColor":"#EAF2FE"}},"annotationRange":{"currentBracket":{"backgroundColor":"#00FE00"},"matchingBracket":{"backgroundColor":"#00FE00"},"matchingSearch":{"backgroundColor":"#c3e1ff","currentSearch":{"backgroundColor":"#53d1ff"}},"writeOccurrence":{"backgroundColor":"#ffff00"}},"backgroundColor":"#ffffff","color":"#151515","comment":{"color":"#3C802C"},"constant":{"color":"#9932CC","numeric":{"color":"#9932CC","hex":{"color":"#9932CC"}}},"entity":{"name":{"color":"#98937B","function":{"color":"#67BBB8","fontWeight":"bold"}},"other":{"attribute-name":{"color":"#5F9EA0"}}},"fontFamily":"\"Consolas\", \"Monaco\", \"Vera Mono\", monospace","fontSize":"12px","keyword":{"control":{"color":"#CC4C07","fontWeight":"bold"},"operator":{"color":"#9F4177","fontWeight":"bold"},"other":{"documentation":{"color":"#7F9FBF","task":{"color":"#5595ff"}}}},"markup":{"bold":{"fontWeight":"bold"},"heading":{"color":"blue"},"italic":{"fontStyle":"italic"},"list":{"color":"#CC4C07"},"other":{"separator":{"color":"#00008F"},"strikethrough":{"textDecoration":"line-through"},"table":{"color":"#3C802C"}},"quote":{"color":"#446FBD"},"raw":{"fontFamily":"monospace"},"underline":{"link":{"textDecoration":"underline"}}},"meta":{"documentation":{"annotation":{"color":"#7F9FBF"},"tag":{"color":"#7F7F9F"}},"tag":{"color":"#CC4C07"}},"ruler":{"annotations":{"backgroundColor":"#ffffff"},"backgroundColor":"#ffffff","overview":{"backgroundColor":"#ffffff"}},"rulerLines":{"color":"#CCCCCC"},"string":{"color":"#446FBD"},"support":{"type":{"propertyName":{"color":"#9F4177"}}},"textviewContent ::-moz-selection":{"backgroundColor":"#b4d5ff"},"textviewContent ::selection":{"backgroundColor":"#b4d5ff"},"textviewLeftRuler":{"borderRight":"1px solid transparent"},"textviewRightRuler":{"borderLeft":"1px solid transparent"},"textviewSelection":{"backgroundColor":"#b4d5ff"},"textviewSelectionUnfocused":{"backgroundColor":"#b4d5ff"},"variable":{"language":{"color":"#7F0055","fontWeight":"bold"},"other":{"color":"#E038AD"},"parameter":{"color":"#D1416F"}}}};
 					
 				for (var i = 0; i< rules.length; i++){
 					var classes = rules[i].selectorText.split(",");
@@ -260,8 +386,7 @@ define([
 			}
 			else if(xml && xml.children[0].tagName === "plist"){ //$NON-NLS-0$ //assume it uses tmTheme structure [sublime, textmate, etc]
 				var themeJson = xmlToJson(xml); //convert to Json
-				var newStyle = new StyleSet(); //sets the default styling
-				newStyle = {"className":"default","name":"default","styles":{"annotationLine":{"currentLine":{"backgroundColor":"#EAF2FE"}},"annotationRange":{"currentBracket":{"backgroundColor":"#00FE00"},"matchingBracket":{"backgroundColor":"#00FE00"},"matchingSearch":{"backgroundColor":"#c3e1ff","currentSearch":{"backgroundColor":"#53d1ff"}},"writeOccurrence":{"backgroundColor":"#ffff00"}},"backgroundColor":"#ffffff","color":"#151515","comment":{"color":"#3C802C"},"constant":{"color":"#9932CC","numeric":{"color":"#9932CC","hex":{"color":"#9932CC"}}},"entity":{"name":{"color":"#98937B","function":{"color":"#67BBB8","fontWeight":"bold"}},"other":{"attribute-name":{"color":"#5F9EA0"}}},"fontFamily":"\"Consolas\", \"Monaco\", \"Vera Mono\", monospace","fontSize":"12px","keyword":{"control":{"color":"#CC4C07","fontWeight":"bold"},"operator":{"color":"#9F4177","fontWeight":"bold"},"other":{"documentation":{"color":"#7F9FBF","task":{"color":"#5595ff"}}}},"markup":{"bold":{"fontWeight":"bold"},"heading":{"color":"blue"},"italic":{"fontStyle":"italic"},"list":{"color":"#CC4C07"},"other":{"separator":{"color":"#00008F"},"strikethrough":{"textDecoration":"line-through"},"table":{"color":"#3C802C"}},"quote":{"color":"#446FBD"},"raw":{"fontFamily":"monospace"},"underline":{"link":{"textDecoration":"underline"}}},"meta":{"documentation":{"annotation":{"color":"#7F9FBF"},"tag":{"color":"#7F7F9F"}},"tag":{"color":"#CC4C07"}},"ruler":{"annotations":{"backgroundColor":"#ffffff"},"backgroundColor":"#ffffff","overview":{"backgroundColor":"#ffffff"}},"rulerLines":{"color":"#CCCCCC"},"string":{"color":"#446FBD"},"support":{"type":{"propertyName":{"color":"#9F4177"}}},"textviewContent ::-moz-selection":{"backgroundColor":"#b4d5ff"},"textviewContent ::selection":{"backgroundColor":"#b4d5ff"},"textviewLeftRuler":{"borderRight":"1px solid transparent"},"textviewRightRuler":{"borderLeft":"1px solid transparent"},"textviewSelection":{"backgroundColor":"#b4d5ff"},"textviewSelectionUnfocused":{"backgroundColor":"#b4d5ff"},"variable":{"language":{"color":"#7F0055","fontWeight":"bold"},"other":{"color":"#E038AD"},"parameter":{"color":"#D1416F"}}}}; //$NON-NLS-0$
+				var newStyle = {"className":"default","name":"default","styles":{"annotationLine":{"currentLine":{"backgroundColor":"#EAF2FE"}},"annotationRange":{"currentBracket":{"backgroundColor":"#00FE00"},"matchingBracket":{"backgroundColor":"#00FE00"},"matchingSearch":{"backgroundColor":"#c3e1ff","currentSearch":{"backgroundColor":"#53d1ff"}},"writeOccurrence":{"backgroundColor":"#ffff00"}},"backgroundColor":"#ffffff","color":"#151515","comment":{"color":"#3C802C"},"constant":{"color":"#9932CC","numeric":{"color":"#9932CC","hex":{"color":"#9932CC"}}},"entity":{"name":{"color":"#98937B","function":{"color":"#67BBB8","fontWeight":"bold"}},"other":{"attribute-name":{"color":"#5F9EA0"}}},"fontFamily":"\"Consolas\", \"Monaco\", \"Vera Mono\", monospace","fontSize":"12px","keyword":{"control":{"color":"#CC4C07","fontWeight":"bold"},"operator":{"color":"#9F4177","fontWeight":"bold"},"other":{"documentation":{"color":"#7F9FBF","task":{"color":"#5595ff"}}}},"markup":{"bold":{"fontWeight":"bold"},"heading":{"color":"blue"},"italic":{"fontStyle":"italic"},"list":{"color":"#CC4C07"},"other":{"separator":{"color":"#00008F"},"strikethrough":{"textDecoration":"line-through"},"table":{"color":"#3C802C"}},"quote":{"color":"#446FBD"},"raw":{"fontFamily":"monospace"},"underline":{"link":{"textDecoration":"underline"}}},"meta":{"documentation":{"annotation":{"color":"#7F9FBF"},"tag":{"color":"#7F7F9F"}},"tag":{"color":"#CC4C07"}},"ruler":{"annotations":{"backgroundColor":"#ffffff"},"backgroundColor":"#ffffff","overview":{"backgroundColor":"#ffffff"}},"rulerLines":{"color":"#CCCCCC"},"string":{"color":"#446FBD"},"support":{"type":{"propertyName":{"color":"#9F4177"}}},"textviewContent ::-moz-selection":{"backgroundColor":"#b4d5ff"},"textviewContent ::selection":{"backgroundColor":"#b4d5ff"},"textviewLeftRuler":{"borderRight":"1px solid transparent"},"textviewRightRuler":{"borderLeft":"1px solid transparent"},"textviewSelection":{"backgroundColor":"#b4d5ff"},"textviewSelectionUnfocused":{"backgroundColor":"#b4d5ff"},"variable":{"language":{"color":"#7F0055","fontWeight":"bold"},"other":{"color":"#E038AD"},"parameter":{"color":"#D1416F"}}}}; //$NON-NLS-0$
 				//finds the name tag
 				for(var i = 0; i < themeJson.plist[1].dict.key.length; i++){
 					if(themeJson.plist[1].dict.key[i]["#text"] === "name"){ //$NON-NLS-0$
@@ -431,8 +556,8 @@ define([
 			}
 			else if (xml) {
 				/* old-style theme definition */
-				var newStyle = new StyleSet();
-				
+				var newStyle = {};
+
 				newStyle.name = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
 				newStyle.annotationRuler = xml.getElementsByTagName("background")[0].attributes[0].value; 
 				newStyle.background = xml.getElementsByTagName("background")[0].attributes[0].value;
@@ -453,10 +578,22 @@ define([
 			}
 
 			if (newStyle) {
-				data.items.addTheme(newStyle);
-			} 
+				data.options.items.addTheme(newStyle);
+				data.hide();
+			} else {
+				if (!document.getElementById("themeImportError")) {
+					var docFragment = document.createDocumentFragment(),
+						errorContainer = document.createElement("div"); //$NON-NLS-0$
+
+					errorContainer.className = "error"; //$NON-NLS-0$
+					errorContainer.id = "themeImportError"; //$NON-NLS-0$
+					errorContainer.textContent = messages["ImportThemeError"];
+					docFragment.appendChild(errorContainer);
+
+					document.getElementById("importThemeContainer").appendChild(docFragment, null); //$NON-NLS-0$
+				}
+			}
 		}
-		
 		ThemeData.prototype.importTheme = importTheme;
 		
 		function processSettings(settings, preferences) {
@@ -464,7 +601,6 @@ define([
 			var theme = mTextTheme.TextTheme.getTheme();
 			theme.setThemeClass(themeClass, theme.buildStyleSheet(themeClass, settings));
 		}
-
 		ThemeData.prototype.processSettings = processSettings;
 
 		return {
