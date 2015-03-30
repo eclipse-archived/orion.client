@@ -186,6 +186,10 @@ function Tooltip (view) {
 				this._tooltipDiv.removeChild(this._tooltipContents);
 				this._tooltipContents = null;
 			}
+			
+			// Code projections are displayed using the editor theme colors
+			this._tooltipDiv.classList.remove("textviewTooltipCodeProjection"); //$NON-NLS-0$
+			
 			this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
 			this._tooltipDiv.style.left = "";
 			this._tooltipDiv.style.right = "";
@@ -484,8 +488,8 @@ function Tooltip (view) {
 			tipRect.maxWidth = Math.min(viewportWidth + viewportLeft - tipRect.left, viewportWidth);
 			tipRect.maxHeight = Math.min(viewportHeight + viewportTop - tipRect.top, viewportHeight);
 			// Adjust max sizes for the border and padding
-			tipRect.maxWidth -= 6;
-			tipRect.maxHeight -= 6;
+			tipRect.maxWidth -= 8;
+			tipRect.maxHeight -= 8;
 			
 			tooltipDiv.style.maxWidth = tipRect.maxWidth + "px"; //$NON-NLS-0$
 			tooltipDiv.style.maxHeight = tipRect.maxHeight + "px"; //$NON-NLS-0$
@@ -691,9 +695,12 @@ function Tooltip (view) {
 				
 				// TODO This is a hack to compute the projection size we will have in the tooltip, we remove the child after computing
 				this._tooltipDiv.appendChild(contentsDiv);
+				// Use the editor colors with a simple border
+				this._tooltipDiv.classList.add("textviewTooltipCodeProjection");
 				var size = contentsView.computeSize();
-				contentsDiv.style.width = size.width + "px"; //$NON-NLS-0$
-				contentsDiv.style.height = size.height + "px"; //$NON-NLS-0$
+				// Adjust the size for the padding
+				contentsDiv.style.width = (size.width+8) + "px"; //$NON-NLS-0$
+				contentsDiv.style.height = (size.height+8) + "px"; //$NON-NLS-0$
 				contentsView.resize();
 				this._tooltipDiv.removeChild(contentsDiv);
 				return true;

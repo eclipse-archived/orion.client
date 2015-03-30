@@ -1,25 +1,34 @@
-.tooltipTheme.textview {
+/*.tooltipTheme.textview {
 	background-color: InfoBackground !important;
 	color: InfoText !important;
-}
-
+}*/
 .tooltipTheme .textviewScroll {
 	padding: 0;
+}
+/* Overrides the normal tooltip for code projections as editor 
+ * styled text may not be legible on a dark background
+ */
+.textviewTooltipCodeProjection {
+	border: 1px solid black !important;
+	/*background-color: InfoBackground !important;
+	color: InfoText !important;*/
+	padding: 0 !important;
 }
 
 /* Styles for the view tooltips */
 .textviewTooltip {
 	font-family: "Consolas", "Monaco", "Vera Mono", monospace;
 	font-size: 12px;
-	background-color: InfoBackground;
-	color: InfoText;
-	padding: 2px;
-	border-radius: 4px;
-	border: 1px solid black;
+	background-color: #4A4A4A;
+	color: #DADADA;
+	padding: 8px;
+	border-radius: 3px;
 	z-index: 100;
 	position: fixed;
-	overflow-x: hidden;
-	overflow-y: hidden;
+	overflow: hidden;
+}
+.textviewTooltip a {
+	color: rgb(187, 187, 187);
 }
 
 .textviewTooltip em {
@@ -58,7 +67,7 @@
 .textviewTooltip .commandButton {
 	border: 0;
 	background-color: inherit;
-	color: #3333CC;
+	color: rgb(187, 187, 187);
 }
 
 .textviewTooltip .commandButton:not(.dropdownTrigger){
