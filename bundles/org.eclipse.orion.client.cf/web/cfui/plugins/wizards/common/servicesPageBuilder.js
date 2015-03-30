@@ -13,8 +13,12 @@ define([
 	'i18n!cfui/nls/messages',
 	'orion/webui/tooltip',
 	'orion/webui/Wizard',
-], function(messages, mTooltip, mWizard){
+	'orion/webui/littlelib'
+], function(messages, mTooltip, mWizard, lib){
 	var Tooltip = mTooltip.Tooltip;
+	
+	var rendered = false;
+	var target = null;
 
 	/**
 	 * A services page builder.
@@ -22,6 +26,14 @@ define([
 	function ServicesPageBuilder(options){
 		options = options || {};
 		this._init(options);
+	}
+	
+	function isRendered(){
+		return rendered;
+	}
+	
+	function setRenderState(state){
+		rendered = state;
 	}
 	
 	ServicesPageBuilder.constructor = ServicesPageBuilder;
@@ -69,151 +81,168 @@ define([
 				'</div>', //$NON-NLS-0$
 				
 				render: function(){
-					document.getElementById("servicesManifestSettings").textContent = messages["manifestSettings"]; //$NON-NLS-0$
-		    		document.getElementById("allServicesLabel").appendChild(document.createTextNode(messages["bindServicesFromTheList."])); //$NON-NLS-0$
-		    		document.getElementById("servicesLabel").appendChild(document.createTextNode(messages["availableServices:"])); //$NON-NLS-0$
-					document.getElementById("servicesOverrideNote").textContent = messages["manifestOverride"]; //$NON-NLS-1$ //$NON-NLS-0$
-		    		
-		    		self._servicesDropdown = document.createElement("select"); //$NON-NLS-0$
-		    		self._servicesDropdown.size = 7;
-		    		self._servicesDropdown.multiple="multiple"; //$NON-NLS-0$
-			    	
-		    		document.getElementById("servicesDropdown").appendChild(self._servicesDropdown); //$NON-NLS-0$
-			    	
-			    	document.getElementById("servicesAdded").appendChild(document.createTextNode(messages["boundServices:"])); //$NON-NLS-0$
-			    	self._servicesList = document.createElement("select"); //$NON-NLS-0$
-			    	self._servicesList.multiple="multiple"; //$NON-NLS-0$
-			    	self._servicesList.size = 7;
-		    		
-			    	document.getElementById("servicesList").appendChild(self._servicesList); //$NON-NLS-0$
-			    	
-			    	var addButton = document.createElement("button"); //$NON-NLS-0$
-			    	addButton.appendChild(document.createTextNode(">")); //$NON-NLS-0$
-			    	addButton.className = "orionButton commandButton"; //$NON-NLS-0$
-			    	
-			    	var removeButton = document.createElement("button"); //$NON-NLS-0$
-			    	removeButton.className = "orionButton commandButton"; //$NON-NLS-0$
-			    	removeButton.appendChild(document.createTextNode("<")); //$NON-NLS-0$
-			    	
-			    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(removeButton); //$NON-NLS-0$
-			    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(addButton); //$NON-NLS-0$
-			    	
-			    	addButton.addEventListener('click', function(){ //$NON-NLS-0$
-			    		for(var i=self._servicesDropdown.options.length-1; i>=0; i--){
-			    			var option = self._servicesDropdown.options[i];
-							if(option.selected){
-								self._servicesDropdown.removeChild(option);
-								self._servicesList.appendChild(option);
-							}
-						}
+
+					if(!isRendered()){
+						document.getElementById("servicesManifestSettings").textContent = messages["manifestSettings"]; //$NON-NLS-0$
+			    		document.getElementById("allServicesLabel").appendChild(document.createTextNode(messages["bindServicesFromTheList."])); //$NON-NLS-0$
+			    		document.getElementById("servicesLabel").appendChild(document.createTextNode(messages["availableServices:"])); //$NON-NLS-0$
+						document.getElementById("servicesOverrideNote").textContent = messages["manifestOverride"]; //$NON-NLS-1$ //$NON-NLS-0$
 			    		
-			    		var selectedServices = [];
-	    				for(var i=0; i<self._servicesList.options.length; i++){
-	    					selectedServices.push(self._servicesList.options[i].value);
-						}
-	    				var manifestServices = self._manifestServices || [];
-	    				
-	    				if (manifestServices.length === selectedServices.length) {
-	    					self._servicesList.classList.remove("modifiedCell");
-	    					for (var i=0; i<manifestServices.length; i++){
-	    						if (manifestServices[i] !== selectedServices[i]){
-	    							self._servicesList.classList.add("modifiedCell");
-	    							break;
-	    						}
-	    					}
-	    				} else {
-	    					self._servicesList.classList.add("modifiedCell");
-	    				}
-					});
-						
-					removeButton.addEventListener('click', function(){ //$NON-NLS-0$
-			    		for(var i=self._servicesList.options.length-1; i>=0; i--){
-			    			var option = self._servicesList.options[i];
-							if(option.selected){
-								self._servicesList.removeChild(option);
-								self._servicesDropdown.appendChild(option);
-							}
-						}
-			    		
-			    		var selectedServices = [];
-	    				for(var i=0; i<self._servicesList.options.length; i++){
-	    					selectedServices.push(self._servicesList.options[i].value);
-						}
-	    				var manifestServices = self._manifestServices || [];
-	    				
-	    				if (manifestServices.length === selectedServices.length) {
-	    					self._servicesList.classList.remove("modifiedCell");
-	    					for (var i=0; i<manifestServices.length; i++){
-	    						if (manifestServices[i] !== selectedServices[i]){
-	    							self._servicesList.classList.add("modifiedCell");
-	    							break;
-	    						}
-	    					}
-	    				} else {
-	    					self._servicesList.classList.add("modifiedCell");
-	    				}
-					});
-					
-					var services = self._manifestInstrumentation.services || self._manifestServices;
-					if(services){
-						if(!Array.isArray(services)){
-							if(typeof services === "object"){ //$NON-NLS-0$
-								services = Object.keys(services);
-								if(services.lengh > 0){
-									document.getElementById("allServicesLabel").appendChild(document.createElement("br")); //$NON-NLS-0$//$NON-NLS-1$
-									document.getElementById("allServicesLabel").appendChild(document.createTextNode(messages["convertMyManifest.ymlFileTo"])); //$NON-NLS-0$
-								}
-							} else {
-								services = [];
-							}
-						}
-						
-		    			services.forEach(function(serviceName){
-			    			var serviceOption = document.createElement("option"); //$NON-NLS-0$
-			    			if(typeof serviceName !== "string"){ //$NON-NLS-0$
-			    				return;
-			    			}
-			    			
-							serviceOption.appendChild(document.createTextNode(serviceName));
-							serviceOption.service = serviceName;
-							serviceOption.id = "service_" + serviceName; //$NON-NLS-0$
-							new Tooltip({ node: serviceOption, text: serviceName });
-							self._servicesList.appendChild(serviceOption);	
-		    			});
-		    		}
-					
-					if (self._manifestInstrumentation.services)
-	    				self._servicesList.classList.add("modifiedCell");
-		    		
-					self._showMessage(messages["loadingServices..."]);
-					self._targetSelection = self._getTargetSelection();
-					
-					self._cfService.getServices(self._targetSelection.getSelection()).then(function(servicesResp){
-						self._hideMessage();
-				    	var servicesToChooseFrom = [];
-				    		
-						if(servicesResp.Children){
-							servicesResp.Children.forEach(function(service){
-								if(services && services.some(function(manService){return manService === service.Name;})){
-									
-								} else {
-									servicesToChooseFrom.push(service.Name);
-								}
-							});
-						}
-								
-				    	servicesToChooseFrom.forEach(function(serviceName){
-							var serviceOption = document.createElement("option"); //$NON-NLS-0$
-							serviceOption.appendChild(document.createTextNode(serviceName));
-							serviceOption.service = serviceName;
-							serviceOption.id = "service_" + serviceName; //$NON-NLS-0$
-							new Tooltip({ node: serviceOption, text: serviceName });
-							self._servicesDropdown.appendChild(serviceOption);
-				    	});
+			    		self._servicesDropdown = document.createElement("select"); //$NON-NLS-0$
+			    		self._servicesDropdown.size = 7;
+			    		self._servicesDropdown.multiple="multiple"; //$NON-NLS-0$
 				    	
-			    	}, function(error){
-			    		self._handleError(error, self._targetSelection.getSelection());
-			    	});
+			    		document.getElementById("servicesDropdown").appendChild(self._servicesDropdown); //$NON-NLS-0$
+				    	
+				    	document.getElementById("servicesAdded").appendChild(document.createTextNode(messages["boundServices:"])); //$NON-NLS-0$
+				    	self._servicesList = document.createElement("select"); //$NON-NLS-0$
+				    	self._servicesList.multiple="multiple"; //$NON-NLS-0$
+				    	self._servicesList.size = 7;
+			    		
+				    	document.getElementById("servicesList").appendChild(self._servicesList); //$NON-NLS-0$
+				    	
+				    	var addButton = document.createElement("button"); //$NON-NLS-0$
+				    	addButton.appendChild(document.createTextNode(">")); //$NON-NLS-0$
+				    	addButton.className = "orionButton commandButton"; //$NON-NLS-0$
+				    	
+				    	var removeButton = document.createElement("button"); //$NON-NLS-0$
+				    	removeButton.className = "orionButton commandButton"; //$NON-NLS-0$
+				    	removeButton.appendChild(document.createTextNode("<")); //$NON-NLS-0$
+				    	
+				    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(removeButton); //$NON-NLS-0$
+				    	document.getElementById("servicesAddRemoveButtonsCol").appendChild(addButton); //$NON-NLS-0$
+				    	
+				    	addButton.addEventListener('click', function(){ //$NON-NLS-0$
+				    		for(var i=self._servicesDropdown.options.length-1; i>=0; i--){
+				    			var option = self._servicesDropdown.options[i];
+								if(option.selected){
+									self._servicesDropdown.removeChild(option);
+									self._servicesList.appendChild(option);
+								}
+							}
+				    		
+				    		var selectedServices = [];
+		    				for(var i=0; i<self._servicesList.options.length; i++){
+		    					selectedServices.push(self._servicesList.options[i].value);
+							}
+		    				var manifestServices = self._manifestServices || [];
+		    				
+		    				if (manifestServices.length === selectedServices.length) {
+		    					self._servicesList.classList.remove("modifiedCell");
+		    					for (var i=0; i<manifestServices.length; i++){
+		    						if (manifestServices[i] !== selectedServices[i]){
+		    							self._servicesList.classList.add("modifiedCell");
+		    							break;
+		    						}
+		    					}
+		    				} else {
+		    					self._servicesList.classList.add("modifiedCell");
+		    				}
+						});
+							
+						removeButton.addEventListener('click', function(){ //$NON-NLS-0$
+				    		for(var i=self._servicesList.options.length-1; i>=0; i--){
+				    			var option = self._servicesList.options[i];
+								if(option.selected){
+									self._servicesList.removeChild(option);
+									self._servicesDropdown.appendChild(option);
+								}
+							}
+				    		
+				    		var selectedServices = [];
+		    				for(var i=0; i<self._servicesList.options.length; i++){
+		    					selectedServices.push(self._servicesList.options[i].value);
+							}
+		    				var manifestServices = self._manifestServices || [];
+		    				
+		    				if (manifestServices.length === selectedServices.length) {
+		    					self._servicesList.classList.remove("modifiedCell");
+		    					for (var i=0; i<manifestServices.length; i++){
+		    						if (manifestServices[i] !== selectedServices[i]){
+		    							self._servicesList.classList.add("modifiedCell");
+		    							break;
+		    						}
+		    					}
+		    				} else {
+		    					self._servicesList.classList.add("modifiedCell");
+		    				}
+						});
+						
+						var services = self._manifestInstrumentation.services || self._manifestServices;
+						if(services){
+							if(!Array.isArray(services)){
+								if(typeof services === "object"){ //$NON-NLS-0$
+									services = Object.keys(services);
+									if(services.lengh > 0){
+										document.getElementById("allServicesLabel").appendChild(document.createElement("br")); //$NON-NLS-0$//$NON-NLS-1$
+										document.getElementById("allServicesLabel").appendChild(document.createTextNode(messages["convertMyManifest.ymlFileTo"])); //$NON-NLS-0$
+									}
+								} else {
+									services = [];
+								}
+							}
+							
+			    			services.forEach(function(serviceName){
+				    			var serviceOption = document.createElement("option"); //$NON-NLS-0$
+				    			if(typeof serviceName !== "string"){ //$NON-NLS-0$
+				    				return;
+				    			}
+				    			
+								serviceOption.appendChild(document.createTextNode(serviceName));
+								serviceOption.service = serviceName;
+								serviceOption.id = "service_" + serviceName; //$NON-NLS-0$
+								new Tooltip({ node: serviceOption, text: serviceName });
+								self._servicesList.appendChild(serviceOption);	
+			    			});
+			    		}
+						
+						if (self._manifestInstrumentation.services)
+		    				self._servicesList.classList.add("modifiedCell");
+					}
+					
+					if(!isRendered() || target.Org != self._getTargetSelection().getSelection().Org ||  target.Space != self._getTargetSelection().getSelection().Space){
+						
+						if(self._servicesDropdown.hasChildNodes()){
+							lib.empty(self._servicesDropdown);
+						}
+						if(self._servicesList.hasChildNodes()){
+							lib.empty(self._servicesList);
+							self._servicesList.classList.remove("modifiedCell");
+						}
+						
+						self._showMessage(messages["loadingServices..."]);
+						self._targetSelection = self._getTargetSelection();
+						target = self._getTargetSelection().getSelection();
+						
+						self._cfService.getServices(self._targetSelection.getSelection()).then(function(servicesResp){
+							self._hideMessage();
+					    	var servicesToChooseFrom = [];
+					    		
+							if(servicesResp.Children){
+								servicesResp.Children.forEach(function(service){
+									if(services && services.some(function(manService){return manService === service.Name;})){
+										
+									} else {
+										servicesToChooseFrom.push(service.Name);
+									}
+								});
+							}
+							
+					    	servicesToChooseFrom.forEach(function(serviceName){
+								var serviceOption = document.createElement("option"); //$NON-NLS-0$
+								serviceOption.appendChild(document.createTextNode(serviceName));
+								serviceOption.service = serviceName;
+								serviceOption.id = "service_" + serviceName; //$NON-NLS-0$
+								new Tooltip({ node: serviceOption, text: serviceName });
+								self._servicesDropdown.appendChild(serviceOption);
+					    	});
+					    	
+				    	}, function(error){
+				    		self._handleError(error, self._targetSelection.getSelection());
+				    	});
+						
+						setRenderState(true);
+					}
 			    },
 			    
 			    getResults: function(){
