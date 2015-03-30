@@ -573,6 +573,7 @@ objects.mixin(EditorSetup.prototype, {
 			}
 		}
 		this._pipInfo._editorView.editor.resize();
+		this.editorView.editor.resize();
 	},
 	_addURL: function(newURL) {
 		console.log(newURL);
