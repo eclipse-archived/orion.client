@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -17,9 +17,20 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 	 * deployment parameters, i.e. target, application name & host.
 	 *
 	 */
+	
+	var rendered = false;
+	
 	function CorePageBuilder(options){
 		options = options || {};
 		this._init(options);
+	}
+	
+	function isRendered(){
+		return rendered;
+	}
+	
+	function setRendered(state){
+		rendered = state;
 	}
 	
 	CorePageBuilder.constructor = CorePageBuilder;
@@ -262,189 +273,194 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 				
 				render: function(){
 					
-					function addListener(inputField, manifestValue){
-						inputField.onkeyup = function(evt) {
-				    		if (inputField.value === ""){
-				    			inputField.value = manifestValue || "";
-				    			inputField.classList.remove("modifiedCell");
-				    		} else if (inputField.value === manifestValue){
-				    			inputField.classList.remove("modifiedCell");
-				    		} else {
-				    			inputField.classList.add("modifiedCell");
-				    		}
-				    	}
-					};
-					
-					this.wizard.validate();
-					self._targets = {};
-
-					// render the override note
-					document.getElementById("overrideNote").textContent = messages["manifestOverride"]; //$NON-NLS-1$ //$NON-NLS-0$
-
-					// render the launch config field
-					document.getElementById("launchConfLabel").textContent = messages["launchConfLabel"]; //$NON-NLS-1$ //$NON-NLS-0$
-					self._launchConfInput = document.createElement("input"); //$NON-NLS-0$
-					self._launchConfInput.value = self._confName;
-					document.getElementById("launchConf").appendChild(self._launchConfInput); //$NON-NLS-0$
-					
-					/* render the clouds field */
-					if (self._clouds.length > 1){
-						document.getElementById("cloudsLabel").appendChild(document.createTextNode(messages["target*:"])); //$NON-NLS-0$
-						self._cloudsDropdown = document.createElement("select"); //$NON-NLS-0$
-						
-						self._clouds.forEach(function(cloud){
-							var option = document.createElement("option"); //$NON-NLS-0$
-							option.appendChild(document.createTextNode(cloud.Name || cloud.Url));
-							option.cloud = cloud;
-							
-							if (self._defaultTarget && self._defaultTarget.Url === cloud.Url)
-								option.selected = "selected"; //$NON-NLS-0$
-							
-							self._cloudsDropdown.appendChild(option);
-						});
-						
-						self._cloudsDropdown.onchange = function(event){
-							lib.empty(self._orgsDropdown);
-							lib.empty(self._spacesDropdown);
-							lib.empty(self._domainsDropdown);
-							self._setSelection();
-							
-							var selectedCloud = self._clouds[event.target.selectedIndex];
-							self._loadTargets(selectedCloud);
+					if(!isRendered()){
+						function addListener(inputField, manifestValue){
+							inputField.onkeyup = function(evt) {
+					    		if (inputField.value === ""){
+					    			inputField.value = manifestValue || "";
+					    			inputField.classList.remove("modifiedCell");
+					    		} else if (inputField.value === manifestValue){
+					    			inputField.classList.remove("modifiedCell");
+					    		} else {
+					    			inputField.classList.add("modifiedCell");
+					    		}
+					    	}
 						};
 						
-						document.getElementById("clouds").appendChild(self._cloudsDropdown); //$NON-NLS-0$
-						
-					} else {
-						document.getElementById("cloudsLabel").appendChild(document.createTextNode(messages["target:"])); //$NON-NLS-0$
-						var span = document.createElement("span");
-						span.textContent = self._clouds[0].Name || self._clouds[0].Url;
-						document.getElementById("clouds").appendChild(span); //$NON-NLS-0$
-					}
+						this.wizard.validate();
+						self._targets = {};
 	
-					/* render the organizations field */
-					document.getElementById("orgsLabel").appendChild(document.createTextNode(messages["organization*:"])); //$NON-NLS-0$
-					self._orgsDropdown = document.createElement("select"); //$NON-NLS-0$
-					self._orgsDropdown.onchange = function(event){
-						var selectedOrg = event.target.value;
-						self._loadSpaces(selectedOrg);
-					};
-					
-					document.getElementById("orgs").appendChild(self._orgsDropdown); //$NON-NLS-0$
-					
-					/* render the spaces field */
-					self._selection = new mSelection.Selection(self._serviceRegistry, "orion.Spaces.selection"); //$NON-NLS-0$
-					self._selection.addEventListener("selectionChanged", function(){this.validate();}.bind(this.wizard)); //$NON-NLS-0$
-					
-					document.getElementById("spacesLabel").appendChild(document.createTextNode(messages["space*:"])); //$NON-NLS-0$
-					self._spacesDropdown = document.createElement("select"); //$NON-NLS-0$
-					self._spacesDropdown.onchange = function(/*event*/){
-						self._setSelection();
-						var selection = self._selection.getSelection();
-						self._loadDomains(selection);
-						self._loadApplications(selection);
-						self._loadHosts(selection);
-					};
-					
-					document.getElementById("spaces").appendChild(self._spacesDropdown); //$NON-NLS-0$
-					
-					// render the manifest file
-					document.getElementById("manifestLabel").textContent = messages["manifestLabel"];
-					var manifestInput = document.createElement("input"); //$NON-NLS-0$
-					manifestInput.value = self._manifestPath || "";
-					manifestInput.readOnly = true; // TODO should be editable
-					document.getElementById("manifest").appendChild(manifestInput); //$NON-NLS-0$
-					
-					// Manifest Settings section
-					document.getElementById("manifestSettings").textContent = messages["manifestSettings"]; //$NON-NLS-0$
-					
-					/* render the domains field */
-					document.getElementById("domainsLabel").appendChild(document.createTextNode(messages["domain*:"])); //$NON-NLS-0$
-					self._domainsDropdown = document.createElement("select"); //$NON-NLS-0$
-					document.getElementById("domains").appendChild(self._domainsDropdown); //$NON-NLS-0$
-					
-					/* render the application name field */
-					document.getElementById("nameLabel").appendChild(document.createTextNode(messages["applicationName*:"])); //$NON-NLS-0$
-					self._appsDropdown = new ComboTextInput({
-						id: "applicationNameTextInput", //$NON-NLS-0$
-						parentNode: document.getElementById("name"), //$NON-NLS-0$
-						insertBeforeNode: this._replaceWrapper,
-						hasButton: false,
-						hasInputCompletion: true,
-						serviceRegistry: this._serviceRegistry,
-						onRecentEntryDelete: null,
-						defaultRecentEntryProposalProvider: function(onItem){
-							self._appsDeferred.then(function(){
+						// render the override note
+						document.getElementById("overrideNote").textContent = messages["manifestOverride"]; //$NON-NLS-1$ //$NON-NLS-0$
+	
+						// render the launch config field
+						document.getElementById("launchConfLabel").textContent = messages["launchConfLabel"]; //$NON-NLS-1$ //$NON-NLS-0$
+						self._launchConfInput = document.createElement("input"); //$NON-NLS-0$
+						self._launchConfInput.value = self._confName;
+						document.getElementById("launchConf").appendChild(self._launchConfInput); //$NON-NLS-0$
+						
+						/* render the clouds field */
+						if (self._clouds.length > 1){
+							document.getElementById("cloudsLabel").appendChild(document.createTextNode(messages["target*:"])); //$NON-NLS-0$
+							self._cloudsDropdown = document.createElement("select"); //$NON-NLS-0$
+							
+							self._clouds.forEach(function(cloud){
+								var option = document.createElement("option"); //$NON-NLS-0$
+								option.appendChild(document.createTextNode(cloud.Name || cloud.Url));
+								option.cloud = cloud;
 								
-								var ret = [];
-								self._appsList.forEach(function(app){
-									if(!app) return;
-									ret.push({
-										type: "proposal", //$NON-NLS-0$
-										label: app,
-										value: app
-									});
-								});
+								if (self._defaultTarget && self._defaultTarget.Url === cloud.Url)
+									option.selected = "selected"; //$NON-NLS-0$
 								
-								onItem(ret);									
+								self._cloudsDropdown.appendChild(option);
 							});
-						}
-					});
-					
-					self._appsInput = self._appsDropdown.getTextInputNode();						
-					self._appsInput.onkeyup = function(){this.validate();}.bind(this.wizard);
-					self._appsInput.addEventListener("focus",function(){this.validate();}.bind(this.wizard)); //$NON-NLS-0$
-					
-//					if(self._manifestApplication.name)
-//						self._appsInput.value = self._manifestApplication.name;
-					
-					if (self._manifestInstrumentation.name) {
-			    		self._appsInput.value = self._manifestInstrumentation.name;
-			    	} else if (self._manifestApplication.name){
-			    		self._appsInput.value = self._manifestApplication.name;
-			    	}
-					
-					/* render the application host field */
-					document.getElementById("hostLabel").appendChild(document.createTextNode(messages["host:"])); //$NON-NLS-0$
-					self._hostDropdown = new ComboTextInput({
-						id: "applicationRouteTextInput", //$NON-NLS-0$
-						parentNode: document.getElementById("host"), //$NON-NLS-0$
-						insertBeforeNode: this._replaceWrapper,
-						hasButton: false,
-						hasInputCompletion: true,
-						serviceRegistry: this._serviceRegistry,
-						onRecentEntryDelete: null,
-						defaultRecentEntryProposalProvider: function(onItem){
-							self._routesDeferred.then(function(){
+							
+							self._cloudsDropdown.onchange = function(event){
+								lib.empty(self._orgsDropdown);
+								lib.empty(self._spacesDropdown);
+								lib.empty(self._domainsDropdown);
+								self._setSelection();
 								
-								var ret = [];
-								self._routesList.forEach(function(route){
-									if(!route) return;
-									ret.push({
-										type: "proposal", //$NON-NLS-0$
-										label: route,
-										value: route
+								var selectedCloud = self._clouds[event.target.selectedIndex];
+								self._loadTargets(selectedCloud);
+							};
+							
+							document.getElementById("clouds").appendChild(self._cloudsDropdown); //$NON-NLS-0$
+							
+						} else {
+							document.getElementById("cloudsLabel").appendChild(document.createTextNode(messages["target:"])); //$NON-NLS-0$
+							var span = document.createElement("span");
+							span.textContent = self._clouds[0].Name || self._clouds[0].Url;
+							document.getElementById("clouds").appendChild(span); //$NON-NLS-0$
+						}
+		
+						/* render the organizations field */
+						document.getElementById("orgsLabel").appendChild(document.createTextNode(messages["organization*:"])); //$NON-NLS-0$
+						self._orgsDropdown = document.createElement("select"); //$NON-NLS-0$
+						self._orgsDropdown.onchange = function(event){
+							var selectedOrg = event.target.value;
+							self._loadSpaces(selectedOrg);
+	
+						};
+						
+						document.getElementById("orgs").appendChild(self._orgsDropdown); //$NON-NLS-0$
+						
+						/* render the spaces field */
+						self._selection = new mSelection.Selection(self._serviceRegistry, "orion.Spaces.selection"); //$NON-NLS-0$
+						self._selection.addEventListener("selectionChanged", function(){this.validate();}.bind(this.wizard)); //$NON-NLS-0$
+						
+						document.getElementById("spacesLabel").appendChild(document.createTextNode(messages["space*:"])); //$NON-NLS-0$
+						self._spacesDropdown = document.createElement("select"); //$NON-NLS-0$
+						self._spacesDropdown.onchange = function(/*event*/){
+							self._setSelection();
+							var selection = self._selection.getSelection();
+							self._loadDomains(selection);
+							self._loadApplications(selection);
+							self._loadHosts(selection);
+						};
+						
+						document.getElementById("spaces").appendChild(self._spacesDropdown); //$NON-NLS-0$
+						
+						// render the manifest file
+						document.getElementById("manifestLabel").textContent = messages["manifestLabel"];
+						var manifestInput = document.createElement("input"); //$NON-NLS-0$
+						manifestInput.value = self._manifestPath || "";
+						manifestInput.readOnly = true; // TODO should be editable
+						document.getElementById("manifest").appendChild(manifestInput); //$NON-NLS-0$
+						
+						// Manifest Settings section
+						document.getElementById("manifestSettings").textContent = messages["manifestSettings"]; //$NON-NLS-0$
+						
+						/* render the domains field */
+						document.getElementById("domainsLabel").appendChild(document.createTextNode(messages["domain*:"])); //$NON-NLS-0$
+						self._domainsDropdown = document.createElement("select"); //$NON-NLS-0$
+						document.getElementById("domains").appendChild(self._domainsDropdown); //$NON-NLS-0$
+						
+						/* render the application name field */
+						document.getElementById("nameLabel").appendChild(document.createTextNode(messages["applicationName*:"])); //$NON-NLS-0$
+						self._appsDropdown = new ComboTextInput({
+							id: "applicationNameTextInput", //$NON-NLS-0$
+							parentNode: document.getElementById("name"), //$NON-NLS-0$
+							insertBeforeNode: this._replaceWrapper,
+							hasButton: false,
+							hasInputCompletion: true,
+							serviceRegistry: this._serviceRegistry,
+							onRecentEntryDelete: null,
+							defaultRecentEntryProposalProvider: function(onItem){
+								self._appsDeferred.then(function(){
+									
+									var ret = [];
+									self._appsList.forEach(function(app){
+										if(!app) return;
+										ret.push({
+											type: "proposal", //$NON-NLS-0$
+											label: app,
+											value: app
+										});
 									});
+									
+									onItem(ret);									
 								});
-								
-								onItem(ret);
-							});
-						}
-					});
-					
-					self._hostInput = self._hostDropdown.getTextInputNode();
-//					self._hostInput.value = self._manifestApplication.host || self._manifestApplication.name || "";
-					
-					if (self._manifestInstrumentation.host) {
-			    		self._hostInput.value = self._manifestInstrumentation.host;
-			    		self._hostInput.classList.add("modifiedCell");
-			    	} else if (self._manifestApplication.host){
-			    		self._hostInput.value = self._manifestApplication.host;
-			    	}
-			    	addListener(self._hostInput, self._manifestApplication.host);
-					
-					var selectedCloud = self._clouds[self._clouds.length > 1 ? self._cloudsDropdown.selectedIndex : 0];
-					self._loadTargets(selectedCloud);
+							}
+						});
+						
+						self._appsInput = self._appsDropdown.getTextInputNode();						
+						self._appsInput.onkeyup = function(){this.validate();}.bind(this.wizard);
+						self._appsInput.addEventListener("focus",function(){this.validate();}.bind(this.wizard)); //$NON-NLS-0$
+						
+	//					if(self._manifestApplication.name)
+	//						self._appsInput.value = self._manifestApplication.name;
+						
+						if (self._manifestInstrumentation.name) {
+				    		self._appsInput.value = self._manifestInstrumentation.name;
+				    	} else if (self._manifestApplication.name){
+				    		self._appsInput.value = self._manifestApplication.name;
+				    	}
+						
+						/* render the application host field */
+						document.getElementById("hostLabel").appendChild(document.createTextNode(messages["host:"])); //$NON-NLS-0$
+						self._hostDropdown = new ComboTextInput({
+							id: "applicationRouteTextInput", //$NON-NLS-0$
+							parentNode: document.getElementById("host"), //$NON-NLS-0$
+							insertBeforeNode: this._replaceWrapper,
+							hasButton: false,
+							hasInputCompletion: true,
+							serviceRegistry: this._serviceRegistry,
+							onRecentEntryDelete: null,
+							defaultRecentEntryProposalProvider: function(onItem){
+								self._routesDeferred.then(function(){
+									
+									var ret = [];
+									self._routesList.forEach(function(route){
+										if(!route) return;
+										ret.push({
+											type: "proposal", //$NON-NLS-0$
+											label: route,
+											value: route
+										});
+									});
+									
+									onItem(ret);
+								});
+							}
+						});
+						
+						self._hostInput = self._hostDropdown.getTextInputNode();
+	//					self._hostInput.value = self._manifestApplication.host || self._manifestApplication.name || "";
+						
+						if (self._manifestInstrumentation.host) {
+				    		self._hostInput.value = self._manifestInstrumentation.host;
+				    		self._hostInput.classList.add("modifiedCell");
+				    	} else if (self._manifestApplication.host){
+				    		self._hostInput.value = self._manifestApplication.host;
+				    	}
+				    	addListener(self._hostInput, self._manifestApplication.host);
+						
+						var selectedCloud = self._clouds[self._clouds.length > 1 ? self._cloudsDropdown.selectedIndex : 0];
+						self._loadTargets(selectedCloud);
+						
+						setRendered(true);
+					}
 			    },
 			    
 			    validate: function(setValid) {
