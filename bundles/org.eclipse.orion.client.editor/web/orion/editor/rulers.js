@@ -502,7 +502,6 @@ define("orion/editor/rulers", [
 		},
 		/** @ignore */
 		_getTooltipInfo: function(contents, y, context) {
-			
 			if (!contents) { return null; } // TODO: shouldn't this check the length, it'll never be null
 		
 			var hoverArea = this._curElementBounds;
@@ -517,13 +516,18 @@ define("orion/editor/rulers", [
 			// The tooltip is positioned opposite to where the ruler is
 			var position = rulerLocation === "left" ? "right" : "left"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 			
+			
+			var viewRect = lib.bounds(this._view._clientDiv);
 			var offsetX = 0;
 			var offsetY = 0;
-			var viewRect = lib.bounds(this._view._clientDiv);
 			offsetX = viewRect.left - (hoverArea.left + hoverArea.width);
 			offsetY = hoverArea.height;
 			if (position === "left") { //$NON-NLS-0$
-				offsetX = -23;
+				offsetX = -25;
+				// Hack for when the hoverArea is a sliver of the ruler, ruler is 2px wider than annotations
+				if (hoverArea.height === 1){
+					offsetX += 2;
+				}
 			}
 			// Adjust the tooltip for folding comments to exactly cover the unfolded text location
 			if (rulerStyle.styleClass.indexOf("folding") >= 0){ //$NON-NLS-0$
