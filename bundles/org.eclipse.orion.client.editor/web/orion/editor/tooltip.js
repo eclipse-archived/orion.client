@@ -286,9 +286,16 @@ function Tooltip (view) {
 					this._hoverPromises = this.hover.computeHoverInfo(info.context);
 					if (this._hoverPromises) {
 						var self = this;
-						this._hoverPromises.forEach(function(hoverPromise) {
+						var promises = this._hoverPromises.slice(0);
+						promises.forEach(function(hoverPromise) {
 							Deferred.when(hoverPromise, function (data) {
-								hoverPromise.resolved = true;  // resolved
+								// Remove this promise from the list so we don't try cancelling it while processing (see hide())
+								if (self._hoverPromises){
+									var index = self._hoverPromises.indexOf(hoverPromise);
+									if (index >= 0){
+										self._hoverPromises.splice(index, 1);
+									}
+								}
 								if (data) {
 									if (self._renderPluginContent(newTooltipContents, data)) {
 										if (data.offsetStart){
