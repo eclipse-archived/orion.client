@@ -64,7 +64,6 @@ function MenuBar(options) {
 	this.commandRegistry = options.commandRegistry;
 	this.serviceRegistry = options.serviceRegistry;
 	this.fileClient = options.fileClient;
-	this.inputManager = options.inputManager;
 	this.editorCommands = options.editorCommands;
 	this.parentNode = options.parentNode;
 	this.fileActionsScope = "fileActions"; //$NON-NLS-0$
@@ -134,15 +133,20 @@ objects.mixin(MenuBar.prototype, {
 	setActiveExplorer: function(explorer) {
 		this.explorer = explorer;
 	},
+	setActiveEditorViewer: function(editorViewer) {
+		this.editorViewer = editorViewer;
+	},
 	updateCommands: function() {
 		var explorer = this.explorer;
-		var visible, selection, treeRoot;
+		var visible, selection, treeRoot, metadata;
 		if (explorer) {
 			visible = explorer.isCommandsVisible();
 			selection = explorer.selection;
 			treeRoot = explorer.getTreeRoot();
 		}
-		var metadata = this.inputManager.getFileMetadata();
+		if (this.editorViewer) {
+			metadata = this.editorViewer.inputManager.getFileMetadata();
+		}
 		var commandRegistry = this.commandRegistry, serviceRegistry = this.serviceRegistry;
 		commandRegistry.registerSelectionService(this.fileActionsScope, visible ? selection : null);
 		commandRegistry.registerSelectionService(this.editActionsScope, visible ? selection : null);
@@ -168,6 +172,10 @@ function EditorViewer(options) {
 	var contentNode = this.contentNode = document.createElement("div"); //$NON-NLS-0$
 	contentNode.className = "editorViewerContent"; //$NON-NLS-0$
 	domNode.appendChild(contentNode);
+	
+	domNode.addEventListener("mousedown", function() { //$NON-NLS-0$
+		this.activateContext.setActiveEditorViewer(this);
+	}.bind(this));
 }
 EditorViewer.prototype = {};
 objects.mixin(EditorViewer.prototype, {
@@ -211,50 +219,7 @@ objects.mixin(EditorViewer.prototype, {
 			this.setEditor(view ? view.editor : null);
 			evt.editor = this.editor;
 			
-			this.renderToolbars(metadata);
-			var targetName = evt.name, target = metadata;
-			if (evt.input === null || evt.input === undefined) {
-				targetName = this.lastRoot ? this.lastRoot.Name : "";
-				target = this.lastRoot;
-			} else if (target && !target.Parents) {//If the target is file system root then we use the file service name
-				targetName = this.fileClient.fileServiceName(target.Location);
-			}
-			// Exclude the "Show current folder" command: it's useless on editor page with built-in nav.
-			// TODO the command exclusions should be an API and specified by individual pages (page links)?
-			mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
-			mGlobalCommands.setPageTarget({
-				task: messages["Editor"],
-				name: targetName,
-				target: target,
-				makeAlternate: function() {
-					if (metadata && metadata.parent) {
-						return metadata.parent;
-					} else if (metadata && metadata.Parents && metadata.Parents.length > 0) {
-						// The mini-nav in sidebar wants to do the same work, can we share it?
-						return this.progressService.progress(this.fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages.ReadingMetadata, metadata.Parents[0].Location));
-					}
-				}.bind(this),
-				makeBreadcrumbLink: function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
-					var resource = folder ? folder.Location : this.fileClient.fileServiceRootURL(folderLocation);
-					segment.href = uriTemplate.expand({resource: resource});
-					if (folder) {
-						var fileMetadata = this.inputManager.getFileMetadata();
-						if (fileMetadata && fileMetadata.Location === folder.Location) {
-							segment.addEventListener("click", function() { //$NON-NLS-0$
-								this.sidebarNavInputManager.reveal(folder);
-							}.bind(this));
-						}
-					}
-				}.bind(this),
-				makeBreadcrumFinalLink: true,
-				serviceRegistry: this.serviceRegistry,
-				commandService: this.commandRegistry,
-				searchService: this.searcher,
-				fileService: this.fileClient
-			});
-			if (this.editor) {
-				mGlobalCommands.setDirtyIndicator(this.editor.isDirty());
-			}
+			this.activateContext.setActiveEditorViewer(this);
 	
 			this.commandRegistry.processURL(window.location.href);
 		}.bind(this));
@@ -428,7 +393,6 @@ objects.mixin(EditorSetup.prototype, {
 		var menuBar = this.menuBar = new MenuBar({
 			parentNode: this.pageToolbar,
 			fileClient: this.fileClient,
-//			inputManager: this.inputManager,
 			editorCommands: this.editorCommands,
 			commandRegistry: this.commandRegistry,
 			serviceRegistry: this.serviceRegistry
@@ -493,6 +457,7 @@ objects.mixin(EditorSetup.prototype, {
 		var editorViewer = new EditorViewer({
 			id: id,
 			parent: this.editorDomNode,
+			activateContext: this,
 			model: this.model,
 			menuBar: this.menuBar,
 			undoStack: this.undoStack,
@@ -511,27 +476,7 @@ objects.mixin(EditorSetup.prototype, {
 			progressService: this.progressService
 		});
 		editorViewer.create();
-		
-		//TODO hack
-		this.menuBar.inputManager = editorViewer.inputManager;
-		
 		return editorViewer;
-	},
-
-	renderToolbars: function(metadata) {
-		var menuBar = this.menuBar;
-		var commandRegistry = this.commandRegistry;
-		var editor = this.editorViewers[0].editor;
-		menuBar.updateCommands();
-		["pageActions", "pageNavigationActions", "settingsActions"].forEach(function(id) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var toolbar = lib.node(id);
-			if (toolbar) {
-				commandRegistry.destroy(toolbar);
-				if (metadata) {
-					commandRegistry.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
-				}
-			}
-		});
 	},
 	
 	createSplitters: function(vertical) {
@@ -562,6 +507,111 @@ objects.mixin(EditorSetup.prototype, {
 		this._setSplitterMode("X"); //$NON-NLS-0$
 	},
 
+	load: function() {
+		var lastEditedFile = sessionStorage.lastFile;
+		var currentHash = PageUtil.hash();
+		// lastEditedFile exists in session storage and if the project didn't change.
+		if (lastEditedFile && lastEditedFile.lastIndexOf(currentHash, 0) === 0 && lastEditedFile !== currentHash) {
+			window.location.hash = currentHash = lastEditedFile;
+		}
+		
+		var setInput = function(hash) {
+			this.activeEditorViewer.inputManager.setInput(hash);
+			this.sidebarNavInputManager.processHash(PageUtil.hash());
+		}.bind(this);
+		setInput(currentHash);
+
+		window.addEventListener("hashchange", function() { setInput(PageUtil.hash()); }); //$NON-NLS-0$
+		window.onbeforeunload = function() {
+			var dirty, autoSave;
+			this.editorViewers.forEach(function(viewer) {
+				var editor = viewer.editor;
+				if (editor && editor.isDirty()) {
+					dirty = true;
+					if (viewer.inputManager.getAutoSaveEnabled()) {
+						viewer.inputManager.save();
+						autoSave = true;
+					}
+				}
+			});
+			return dirty ? (autoSave ? messages.unsavedAutoSaveChanges : messages.unsavedChanges) : null;
+		}.bind(this);
+	},
+
+	renderToolbars: function(metadata) {
+		var menuBar = this.menuBar;
+		var commandRegistry = this.commandRegistry;
+		var editor = this.activeEditorViewer.editor;
+		menuBar.updateCommands();
+		["pageActions", "pageNavigationActions", "settingsActions"].forEach(function(id) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var toolbar = lib.node(id);
+			if (toolbar) {
+				commandRegistry.destroy(toolbar);
+				if (metadata) {
+					commandRegistry.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
+				}
+			}
+		});
+	},
+	
+	setActiveEditorViewer: function(editorViewer) {
+		this.activeEditorViewer = editorViewer;
+		
+		this.menuBar.setActiveEditorViewer(editorViewer);
+		
+		var metadata = editorViewer.inputManager.getFileMetadata();
+		if (this.lastTarget && metadata && this.lastTarget.Location === metadata.Location) return;
+		this.lastTarget = metadata;
+		
+		this.renderToolbars(metadata);
+		var target = metadata, targetName;
+		if (!target) { //evt.input === null || evt.input === undefined) {
+			targetName = this.lastRoot ? this.lastRoot.Name : "";
+			target = this.lastRoot;
+		} else if (target && !target.Parents) {//If the target is file system root then we use the file service name
+			targetName = this.fileClient.fileServiceName(target.Location);
+		} else {
+			targetName = target.Name;
+		}
+		// Exclude the "Show current folder" command: it's useless on editor page with built-in nav.
+		// TODO the command exclusions should be an API and specified by individual pages (page links)?
+		mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
+		mGlobalCommands.setPageTarget({
+			task: messages["Editor"],
+			name: targetName,
+			target: target,
+			makeAlternate: function() {
+				if (metadata && metadata.parent) {
+					return metadata.parent;
+				} else if (metadata && metadata.Parents && metadata.Parents.length > 0) {
+					// The mini-nav in sidebar wants to do the same work, can we share it?
+					return this.progressService.progress(this.fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages.ReadingMetadata, metadata.Parents[0].Location));
+				}
+			}.bind(this),
+			makeBreadcrumbLink: function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
+				var resource = folder ? folder.Location : this.fileClient.fileServiceRootURL(folderLocation);
+				segment.href = uriTemplate.expand({resource: resource});
+				if (folder) {
+					var fileMetadata = this.activeEditorViewer.inputManager.getFileMetadata();
+					if (fileMetadata && fileMetadata.Location === folder.Location) {
+						segment.addEventListener("click", function() { //$NON-NLS-0$
+							this.sidebarNavInputManager.reveal(folder);
+						}.bind(this));
+					}
+				}
+			}.bind(this),
+			makeBreadcrumFinalLink: true,
+			serviceRegistry: this.serviceRegistry,
+			commandService: this.commandRegistry,
+			searchService: this.searcher,
+			fileService: this.fileClient
+		});
+		var editor = editorViewer.editor;
+		if (editor) {
+			mGlobalCommands.setDirtyIndicator(editor.isDirty());
+		}
+	},
+
 	_setSplitterMode: function(mode) {
 		var mainEditorViewerNode = this.editorViewers[0].domNode;
 		mainEditorViewerNode.style.width = mainEditorViewerNode.style.height = "100%"; //$NON-NLS-0$
@@ -580,6 +630,9 @@ objects.mixin(EditorSetup.prototype, {
 		} else if (mode === "X") { //$NON-NLS-0$
 			splitterNode.style.display = "none"; //$NON-NLS-0$
 			splitEditorViewerNode.style.display = "none"; //$NON-NLS-0$
+			
+			this.setActiveEditorViewer(this.editorViewers[0]);
+			
 		} else if (mode === "H") { //$NON-NLS-0$
 			this.editorSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL);
 		} else if (mode === "V") { //$NON-NLS-0$
@@ -616,35 +669,6 @@ objects.mixin(EditorSetup.prototype, {
 		this._addPipCommand("P");
 		this._addPipCommand("X");
 	},
-
-	load: function() {
-		var inputManager = this.editorViewers[0].inputManager;
-		var sidebarNavInputManager = this.sidebarNavInputManager;
-		
-		var lastEditedFile = sessionStorage.lastFile;
-		var currentHash = PageUtil.hash();
-		// lastEditedFile exists in session storage and if the project didn't change.
-		if (lastEditedFile && lastEditedFile.lastIndexOf(currentHash, 0) === 0 && lastEditedFile !== currentHash) {
-			window.location.hash = currentHash = lastEditedFile;
-		}
-		inputManager.setInput(currentHash);
-		sidebarNavInputManager.processHash(PageUtil.hash());
-
-		window.addEventListener("hashchange", function() { //$NON-NLS-0$
-			inputManager.setInput(PageUtil.hash());
-			sidebarNavInputManager.processHash(PageUtil.hash());
-		});
-		window.onbeforeunload = function() {
-			var editor = this.editorViewers[0].editor;
-			if (editor && editor.isDirty()) {
-				if (inputManager.getAutoSaveEnabled()) {
-					inputManager.save();
-					return messages.unsavedAutoSaveChanges;
-				}
-				return messages.unsavedChanges;
-			}
-		}.bind(this);
-	}
 });
 
 exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, readonly) {
