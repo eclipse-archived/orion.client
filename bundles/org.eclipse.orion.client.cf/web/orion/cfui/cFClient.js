@@ -275,11 +275,15 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 				return this._xhrV1("GET", url);
 			},
 
-			getDomains: function(target) {
+			getDomains: function(target, defaultDomainMode) {
 				var url = require.toUrl("cfapi/domains");
 
-				if (target)
+				if (target) {
 					url += "?Target=" + JSON.stringify(target);
+					if (defaultDomainMode) {
+						url += "&Default=true";
+					}
+				}
 
 				return this._xhrV1("GET", url);
 			},
