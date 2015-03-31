@@ -32,6 +32,8 @@ define([
 	
 	Objects.mixin(HTMLHover.prototype, /** @lends webtools.HTMLHover.prototype*/ {
 		
+		_hoverableTags: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'body', 'p', 'ol', 'ul', 'li', 'table', 'td', 'tr'],
+		
 		/**
 		 * @description Callback from the editor to compute the hover
 		 * @function
@@ -49,6 +51,9 @@ define([
 			        if(node) {
 			            switch(node.type) {
 			                case 'tag': {
+			                	if (that._hoverableTags.indexOf(node.name) >= 0){
+			                		return that._getTagContentsHover(editorContext, node.range);
+			                	}
 			                    break;
 			                }
 			                case 'attr': {
@@ -233,6 +238,43 @@ define([
 		_getColorHover: function _getColorHover(colorID){
 			var html = '<html><body style=\"background-color: ' + colorID + ';\"></html>'; //$NON-NLS-0$  //$NON-NLS-1$
 			return {type: "html", content: html, width: "50px", height: "25px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+		},
+		
+		_getTagContentsHover: function _getTagContentsHover(editorContext, range){
+			if (range){
+				var self = this;
+				return editorContext.getText().then(function(text) {
+					if(range[0] >= 0 && range[0] < text.length && range[1] > range[0] && range[1] < text.length){
+						var start = self._findTagStart(text, range[0]);
+						if (start === null){
+							return null;
+						}
+						var html = "<body style=\"color: #DADADA\">" + text.substring(start, range[1]) + "</body>";  //$NON-NLS-0$  //$NON-NLS-1$
+						return {type: "html", content: html /*, width: "50px", height: "25px"*/};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+					}
+				});
+			}
+			return null;
+		},
+		
+		/**
+		 * @description Returns the offset that the tag starts with (location of '<');
+		 * @param {String} contents The text to search for the tag start
+		 * @param {Number} offset The offset in the contents to start the search
+		 * @returns {Number} offset of the tag or <code>null</code>
+		 * @since 8.0
+		 */
+		_findTagStart: function(contents, offset) {
+			if(contents && offset) {
+				var pos = offset;
+				while(pos >= 0) {
+					if(contents.charAt(pos) === '<') {  //$NON-NLS-0$ 
+						return pos;
+					}
+					pos--;
+				}
+			}
+			return null;
 		}
 		
 	});

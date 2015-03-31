@@ -618,8 +618,8 @@ function Tooltip (view) {
 							iframe.type = "text/html"; //$NON-NLS-0$
 							iframe.sandbox = "allow-scripts allow-same-origin allow-forms"; //$NON-NLS-0$
 							iframe.style.border = "none"; //$NON-NLS-0$
-							iframe.style.width = "auto"; //$NON-NLS-0$
-							iframe.style.height = "auto"; //$NON-NLS-0$
+							iframe.style.width = "100%"; //$NON-NLS-0$
+							iframe.style.height = "100%"; //$NON-NLS-0$
 							iframe.srcdoc = data.content;
 							if (data.width) {
 								iframe.style.width = data.width;
@@ -627,6 +627,8 @@ function Tooltip (view) {
 							if (data.height) {
 								iframe.style.height = data.height;
 							}
+							sectionDiv.style.height = '100%';  //$NON-NLS-0$ // Height should grow on resize
+							contentsDiv.style.height = '100%';  //$NON-NLS-0$
 							sectionDiv.appendChild(iframe);
 						}
 						break;
@@ -793,6 +795,7 @@ function Tooltip (view) {
 				inEditor = false;
 			}			
 			
+			// TODO This is where we create projection models for occurrences for no good reason (Bug 463515)
 			if (annotations.length === 1) {
 				annotation = annotations[0];
 				if (annotation.title !== undefined) {
@@ -834,7 +837,7 @@ function Tooltip (view) {
 				}
 				return tooltipHTML;
 			}
-		},
+		}
 		
 	};
 	return {Tooltip: Tooltip};
