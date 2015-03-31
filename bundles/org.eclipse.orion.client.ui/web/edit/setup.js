@@ -16,8 +16,6 @@ define([
 	'orion/sidebar',
 	'orion/inputManager',
 	'orion/commands',
-	'orion/util',
-	'orion/keyBinding',
 	'orion/globalCommands',
 	'orion/editor/textModel',
 	'orion/editor/undoStack',
@@ -50,7 +48,7 @@ define([
 	'orion/projectClient',
 	'orion/webui/splitter'
 ], function(
-	messages, Sidebar, mInputManager, mCommands, util, mKeyBinding, mGlobalCommands,
+	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
@@ -159,53 +157,25 @@ objects.mixin(MenuBar.prototype, {
 	}
 });
 
-function EditorSetup(serviceRegistry, pluginRegistry, preferences, isReadOnly) {
-	this.serviceRegistry = serviceRegistry;
-	this.pluginRegistry = pluginRegistry;
-	this.preferences = preferences;
-	this.isReadOnly = isReadOnly;
-	this.initializeServices();
-	
-	this.editorDomNode = lib.node("editor"); //$NON-NLS-0$
-	this.sidebarDomNode = lib.node("sidebar"); //$NON-NLS-0$
-	this.sidebarToolbar = lib.node("sidebarToolbar"); //$NON-NLS-0$
-	this.pageToolbar = lib.node("pageToolbar"); //$NON-NLS-0$
+function EditorViewer(options) {
+	objects.mixin(this, options);
+	this.id = this.id || ""; //$NON-NLS-0$
+	this.selection = this.id ? new mSelection.Selection(this.serviceRegistry, "orion.page.selection" + this.id) : this.selection; //$NON-NLS-0$
+	var domNode = this.domNode = document.createElement("div"); //$NON-NLS-0$
+	domNode.className = "editorViewerFrame"; //$NON-NLS-0$
+	this.parent.appendChild(domNode);
+	//TODO add header 
+	var contentNode = this.contentNode = document.createElement("div"); //$NON-NLS-0$
+	contentNode.className = "editorViewerContent"; //$NON-NLS-0$
+	domNode.appendChild(contentNode);
 }
-EditorSetup.prototype = {};
-objects.mixin(EditorSetup.prototype, {
+EditorViewer.prototype = {};
+objects.mixin(EditorViewer.prototype, {
 	
-	initializeServices: function() {
-		var serviceRegistry = this.serviceRegistry;
-		this.selection = new mSelection.Selection(serviceRegistry);
-		this.operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-		this.statusService = new mStatus.StatusReportingService(serviceRegistry, this.operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		this.dialogService = new mDialogs.DialogService(serviceRegistry);
-		this.commandRegistry = new mCommandRegistry.CommandRegistry({selection: this.selection});
-		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry);
-		
-		// Editor needs additional services
-		this.outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: this.preferences});
-		this.contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
-		this.fileClient = new mFileClient.FileClient(serviceRegistry);
-		this.projectClient = new mProjectClient.ProjectClient(serviceRegistry, this.fileClient);
-		this.searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: this.commandRegistry, fileService: this.fileClient});
-		this.editorCommands = new mEditorCommands.EditorCommandFactory({
-			serviceRegistry: serviceRegistry,
-			commandRegistry: this.commandRegistry,
-			fileClient: this.fileClient,
-			searcher: this.searcher,
-			readonly: this.isReadOnly,
-			toolbarId: "toolsActions", //$NON-NLS-0$
-			saveToolbarId: "fileActions", //$NON-NLS-0$
-			editToolbarId: "editActions", //$NON-NLS-0$
-			navToolbarId: "pageNavigationActions", //$NON-NLS-0$
-		});
-	},
-	
-	createBanner: function() {
-			// Do not collapse sidebar, https://bugs.eclipse.org/bugs/show_bug.cgi?id=418558
-		var collapseSidebar = false; //PageUtil.hash() !== ""
-		return mGlobalCommands.generateBanner("orion-editor", this.serviceRegistry, this.commandRegistry, this.preferences, this.searcher, null, null, collapseSidebar, this.fileClient); //$NON-NLS-0$
+	create: function() {
+		this.createTextModel();
+		this.createInputManager();
+		this.createEditorView();
 	},
 	
 	createTextModel: function() {
@@ -218,7 +188,7 @@ objects.mixin(EditorSetup.prototype, {
 		].forEach(function(method) {
 			contextImpl[method] = model[method].bind(model);
 		});
-		this.serviceRegistry.registerService("orion.edit.model.context", contextImpl, null); //$NON-NLS-0$
+		this.serviceRegistry.registerService("orion.edit.model.context" + this.id, contextImpl, null); //$NON-NLS-0$
 	},
 	
 	createEditorView: function() {
@@ -272,7 +242,7 @@ objects.mixin(EditorSetup.prototype, {
 						if (fileMetadata && fileMetadata.Location === folder.Location) {
 							segment.addEventListener("click", function() { //$NON-NLS-0$
 								this.sidebarNavInputManager.reveal(folder);
-							});
+							}.bind(this));
 						}
 					}
 				}.bind(this),
@@ -292,103 +262,10 @@ objects.mixin(EditorSetup.prototype, {
 			inputManager.setInput(event.selection);
 		});
 	},
-	
-	createMenuBar: function() {
-		var menuBar = this.menuBar = new MenuBar({
-			parentNode: this.pageToolbar,
-			fileClient: this.fileClient,
-			inputManager: this.inputManager,
-			editorCommands: this.editorCommands,
-			commandRegistry: this.commandRegistry,
-			serviceRegistry: this.serviceRegistry
-		});
-		return menuBar.createCommands();
-	},
-	
-	createSideBar: function() {
-		var commandRegistry = this.commandRegistry;
-		function SidebarNavInputManager() {
-			EventTarget.attach(this);
-		}
-		this.sidebarNavInputManager = new SidebarNavInputManager();
-		var sidebar = this.sidebar = new Sidebar({
-			commandRegistry: this.commandRegistry,
-			contentTypeRegistry: this.contentTypeRegistry,
-			editorInputManager: this.inputManager,
-			preferences: this.preferences,
-			fileClient: this.fileClient,
-			outlineService: this.outlineService,
-			parent: this.sidebarDomNode,
-			progressService: this.progressService,
-			selection: this.selection,
-			serviceRegistry: this.serviceRegistry,
-			sidebarNavInputManager: this.sidebarNavInputManager,
-			switcherScope: "viewActions", //$NON-NLS-0$
-			editScope: "editActions", //$NON-NLS-0$
-			menuBar: this.menuBar,
-			toolbar: this.sidebarToolbar
-		});
-		SidebarNavInputManager.prototype.processHash = function() {
-			var navigate = PageUtil.matchResourceParameters().navigate;
-			if (typeof navigate === "string" && this.setInput && sidebar.getActiveViewModeId() === "nav") { //$NON-NLS-1$ //$NON-NLS-0$
-				this.setInput(navigate);
-			}
-		};
-		sidebar.create();
-		this.sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
-			this.lastRoot = evt.root;
-		}.bind(this));
-		var gotoInput = function(evt) { //$NON-NLS-0$
-			var newInput = evt.newInput || evt.parent || ""; //$NON-NLS-0$
-			window.location = uriTemplate.expand({resource: newInput}); //$NON-NLS-0$
-		};
-		this.sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
-		this.sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$
-		this.sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
-			if (evt.newValue && !evt.ignoreRedirect) {
-				var item = evt.newValue;
-				var openWithCommand = mExtensionCommands.getOpenWithCommand(commandRegistry, evt.newValue);
-				if (openWithCommand) {
-					var href = openWithCommand.hrefCallback({items: item});
-				} else {
-					href = uriTemplate.expand({resource: evt.newValue.Location});
-				}
-				window.location = href;
-			}
-		});
-	},
 
-	renderToolbars: function(metadata) {
-		var menuBar = this.menuBar;
-		var commandRegistry = this.commandRegistry;
-		var editor = this.editor;
-		menuBar.updateCommands();
-		var toolbar = lib.node("pageActions"); //$NON-NLS-0$
-		if (toolbar) {
-			commandRegistry.destroy(toolbar);
-			if (metadata) {
-				commandRegistry.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
-			}
-		}
-		var rightToolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
-		if (rightToolbar) {
-			commandRegistry.destroy(rightToolbar);
-			if (metadata) {
-				commandRegistry.renderCommands(rightToolbar.id, rightToolbar, metadata, editor, "button"); //$NON-NLS-0$
-			}
-		}
-		var settingsToolbar = lib.node("settingsActions"); //$NON-NLS-0$
-		if (settingsToolbar) {
-			commandRegistry.destroy(settingsToolbar);
-			if (metadata) {
-				commandRegistry.renderCommands(settingsToolbar.id, settingsToolbar, metadata, editor, "button"); //$NON-NLS-0$
-			}
-		}		
-	},
-	
 	defaultOptions: function() {
 		return {
-			parent: this.editorDomNode,
+			parent: this.contentNode,
 			model: this.model,
 			menuBar: this.menuBar,
 			undoStack: this.undoStack,
@@ -397,12 +274,14 @@ objects.mixin(EditorSetup.prototype, {
 			commandRegistry: this.commandRegistry,
 			contentTypeRegistry: this.contentTypeRegistry,
 			editorCommands: this.editorCommands,
-			renderToolbars: this.renderToolbars.bind(this),
+			renderToolbars: this.renderToolbars,
 			inputManager: this.inputManager,
-			readonly: this.isReadOnly,
+			readonly: this.readonly,
 			preferences: this.preferences,
 			searcher: this.searcher,
 			selection: this.selection,
+			problemsServiceID: "orion.core.marker" + this.id, //$NON-NLS-0$
+			editContextServiceID: "orion.edit.context" + this.id, //$NON-NLS-0$
 			fileService: this.fileClient,
 			statusReporter: this.statusReporter.bind(this),
 			statusService: this.statusService,
@@ -433,7 +312,7 @@ objects.mixin(EditorSetup.prototype, {
 				view = new mFolderView.FolderView(options);
 			} else {
 				var id = input.editor;
-				this.editorView.setParent(this.editorDomNode);
+				this.editorView.setParent(this.contentNode);
 				if (!id || id === "orion.editor") { //$NON-NLS-0$
 					view = this.editorView;
 				} else if (id === "orion.viewer.markdown") { //$NON-NLS-0$
@@ -494,184 +373,242 @@ objects.mixin(EditorSetup.prototype, {
 			}.bind(this));
 		}
 	},
-	_setPipSel: function(index) {
-		if (this._pipInfo._pipURLS.length === 0)
-			return;
-		if (index < 0)
-			index = this._pipInfo._pipURLS.length - 1;
-		if (index >= this._pipInfo._pipURLS.length)
-			index = 0;
-			
-		this._pipInfo._pipSel = index;
-		this._pipInfo._inputManager.setInput(this._pipInfo._pipURLS[this._pipInfo._pipSel]);
-	},
-	_addPipSplitter: function(vertical) {
-		// Already there, jsut show it...
-		if (this._pipInfo._pipSplitter && this._pipInfo._splitterDiv) {
-			this._pipInfo._splitterDiv.style.display = "block";
-		} else {
-			this._pipInfo._splitterDiv = util.createElement(this._pipInfo._pipDiv.ownerDocument, "div");
-			this._pipInfo._splitterDiv.id = "splitterDiv";
-			this._pipInfo._splitterDiv.style["z-index"] = "100";
-			this._pipInfo._pipDiv.parentNode.appendChild(this._pipInfo._splitterDiv);
-			
-			this._pipInfo._pipSplitter = new mSplitter.Splitter({
-					node: this._pipInfo._splitterDiv,
-					sidePanel: this._pipInfo._editorDiv,
-					mainPanel: this._pipInfo._pipDiv,
-					toggle: false,
-					proportional: true,
-					vertical: vertical,
-					closeByDefault: false
-				});
-			this._pipInfo._pipSplitter.addEventListener("resize", function (evt) { //$NON-NLS-0$
-				if (this._pipInfo._editorView.editor && evt.node === this._pipInfo._pipDiv) {
-					this._pipInfo._editorView.editor.resize();
-				} else {
-					this.editorView.editor.resize();
-				}
-			}.bind(this));
-		}
-	},
-	_removePipSplitter: function() {
-		if (!this._pipInfo._pipSplitter)
-			return;
-			
-		var sDiv = this._pipInfo._splitterDiv;
-		sDiv.parentNode.removeChild(sDiv);
-		this._pipInfo._pipSplitter = undefined;
-		this._pipInfo._splitterDiv = undefined;
+});
 
-		this._pipInfo._editorDiv.style.width = "100%";
-		this._pipInfo._editorDiv.style.height = "100%";
-	},	
-	_setPipMode: function(mode) {
-		var pipDiv = this._pipInfo._pipDiv;
-		if (mode === "P") {
-			this._removePipSplitter();
-			pipDiv.classList.add("auxEditorPicInPic");
-			this._pipInfo._pipDiv.style.display = "block";
-		} else if (mode === "X") {
-			this._removePipSplitter();
-			pipDiv.classList.remove("auxEditorPicInPic");
-			this._pipInfo._pipDiv.style.display = "none";
-		} else if (mode === "H") {
-			this._pipInfo._pipDiv.style.display = "block";
-			pipDiv.classList.remove("auxEditorPicInPic");
-			if (this._pipInfo._pipSplitter) {
-				this._pipInfo._pipSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL);
-			} else {
-				this._addPipSplitter(false);
-			}
-		} else if (mode === "V") {
-			this._pipInfo._pipDiv.style.display = "block";
-			pipDiv.classList.remove("auxEditorPicInPic");
-			if (this._pipInfo._pipSplitter) {
-				this._pipInfo._pipSplitter.setOrientation(mSplitter.ORIENTATION_VERTICAL);
-			} else {
-				this._addPipSplitter(true);
-			}
-		}
-		this._pipInfo._editorView.editor.resize();
-		this.editorView.editor.resize();
-	},
-	_addURL: function(newURL) {
-		console.log(newURL);
-	},
-	_swapPip: function() {
-		var editorInputMgr = this.inputManager;
-		var pipInputMgr = this._pipInfo._inputManager;
-		var curPipInput = pipInputMgr._input;
+function EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly) {
+	this.serviceRegistry = serviceRegistry;
+	this.pluginRegistry = pluginRegistry;
+	this.preferences = preferences;
+	this.readonly = readonly;
+	this.initializeServices();
+	
+	this.editorDomNode = lib.node("editor"); //$NON-NLS-0$
+	this.sidebarDomNode = lib.node("sidebar"); //$NON-NLS-0$
+	this.sidebarToolbar = lib.node("sidebarToolbar"); //$NON-NLS-0$
+	this.pageToolbar = lib.node("pageToolbar"); //$NON-NLS-0$
+}
+EditorSetup.prototype = {};
+objects.mixin(EditorSetup.prototype, {
+	
+	initializeServices: function() {
+		var serviceRegistry = this.serviceRegistry;
+		this.selection = new mSelection.Selection(serviceRegistry);
+		this.operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
+		this.statusService = new mStatus.StatusReportingService(serviceRegistry, this.operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this.dialogService = new mDialogs.DialogService(serviceRegistry);
+		this.commandRegistry = new mCommandRegistry.CommandRegistry({selection: this.selection});
+		this.progressService = new mProgress.ProgressService(serviceRegistry, this.operationsClient, this.commandRegistry);
 		
-		this._pipInfo._pipURLS[this._pipInfo._pipSel] = editorInputMgr._input;
-		
-		pipInputMgr.setInput(editorInputMgr._input);
-		editorInputMgr.setInput(curPipInput);
-	},
-	_constructPipDivs: function(editorDiv) {
-		var theDoc = editorDiv.ownerDocument;
-		
-		// Create the div for the Pip itself
-		var pipDiv = util.createElement(theDoc, "div");
-		pipDiv.id = "PipDiv";
-		pipDiv.classList.add("auxEditorFrame");
-		pipDiv.style.display = "none";
-		
-		// Create the div for the editors
-		var pipContent = util.createElement(theDoc, "div");
-		pipContent.id = "PipContents";
-		pipContent.classList.add("auxEditorContent");
-		pipDiv.appendChild(pipContent);
-		
-		editorDiv.parentElement.appendChild(pipDiv);
-		
-		this._pipInfo._editorDiv = editorDiv;
-		this._pipInfo._pipDiv = pipDiv;
-		this._pipInfo._pipContent = pipContent;
-		
-		return pipContent;
-	},
-	_installPip: function() {
-		this._pipInfo = {};
-		var pipDiv = this._constructPipDivs(this.editorDomNode);
-
-		var selection = new mSelection.Selection(this.serviceRegistry, "pipSel");
-		var model = new mTextModel.TextModel();
-		var undoStack = new mUndoStack.UndoStack(model, 500);
-		var inputManager = new mInputManager.InputManager({
-			serviceRegistry: this.serviceRegistry,
+		// Editor needs additional services
+		this.outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: this.preferences});
+		this.contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
+		this.fileClient = new mFileClient.FileClient(serviceRegistry);
+		this.projectClient = new mProjectClient.ProjectClient(serviceRegistry, this.fileClient);
+		this.searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: this.commandRegistry, fileService: this.fileClient});
+		this.editorCommands = new mEditorCommands.EditorCommandFactory({
+			serviceRegistry: serviceRegistry,
+			commandRegistry: this.commandRegistry,
 			fileClient: this.fileClient,
+			searcher: this.searcher,
+			readonly: this.readonly,
+			toolbarId: "toolsActions", //$NON-NLS-0$
+			saveToolbarId: "fileActions", //$NON-NLS-0$
+			editToolbarId: "editActions", //$NON-NLS-0$
+			navToolbarId: "pageNavigationActions", //$NON-NLS-0$
+		});
+	},
+	
+	createBanner: function() {
+			// Do not collapse sidebar, https://bugs.eclipse.org/bugs/show_bug.cgi?id=418558
+		var collapseSidebar = false; //PageUtil.hash() !== ""
+		return mGlobalCommands.generateBanner("orion-editor", this.serviceRegistry, this.commandRegistry, this.preferences, this.searcher, null, null, collapseSidebar, this.fileClient); //$NON-NLS-0$
+	},
+	
+	createMenuBar: function() {
+		var menuBar = this.menuBar = new MenuBar({
+			parentNode: this.pageToolbar,
+			fileClient: this.fileClient,
+//			inputManager: this.inputManager,
+			editorCommands: this.editorCommands,
+			commandRegistry: this.commandRegistry,
+			serviceRegistry: this.serviceRegistry
+		});
+		return menuBar.createCommands();
+	},
+	
+	createSideBar: function() {
+		var commandRegistry = this.commandRegistry;
+		function SidebarNavInputManager() {
+			EventTarget.attach(this);
+		}
+		this.sidebarNavInputManager = new SidebarNavInputManager();
+		var sidebar = this.sidebar = new Sidebar({
+			commandRegistry: this.commandRegistry,
+			contentTypeRegistry: this.contentTypeRegistry,
+			editorInputManager: this.editorViewers[0].inputManager,
+			preferences: this.preferences,
+			fileClient: this.fileClient,
+			outlineService: this.outlineService,
+			parent: this.sidebarDomNode,
 			progressService: this.progressService,
-			statusReporter: this.statusReporter.bind(this),
-			selection: selection,
-			contentTypeRegistry: this.contentTypeRegistry
+			selection: this.selection,
+			serviceRegistry: this.serviceRegistry,
+			sidebarNavInputManager: this.sidebarNavInputManager,
+			switcherScope: "viewActions", //$NON-NLS-0$
+			editScope: "editActions", //$NON-NLS-0$
+			menuBar: this.menuBar,
+			toolbar: this.sidebarToolbar
 		});
-					
-		var editorOptions = this.defaultOptions();
-		editorOptions.parent = pipDiv;
-		editorOptions.model = model;
-		editorOptions.menuBar = this.menuBar;
-		editorOptions.undoStack = undoStack;
-		editorOptions.renderToolbars = this.renderToolbars.bind(this);
-		editorOptions.inputManager = inputManager;
-		editorOptions.selection = selection;
-		editorOptions.problemsServiceID = "orion.core.marker.split"; //$NON-NLS-0$
-		editorOptions.editContextServiceID = "orion.edit.context.split"; //$NON-NLS-0$
-		var newView = new mEditorView.EditorView(editorOptions);
-		this._pipInfo._editorView = newView;
-		
-		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
-			evt.editor = newView.editor;
+		SidebarNavInputManager.prototype.processHash = function() {
+			var navigate = PageUtil.matchResourceParameters().navigate;
+			if (typeof navigate === "string" && this.setInput && sidebar.getActiveViewModeId() === "nav") { //$NON-NLS-1$ //$NON-NLS-0$
+				this.setInput(navigate);
+			}
+		};
+		sidebar.create();
+		this.sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
+			this.lastRoot = evt.root;
 		}.bind(this));
-		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-			inputManager.setInput(event.selection);
+		var gotoInput = function(evt) { //$NON-NLS-0$
+			var newInput = evt.newInput || evt.parent || ""; //$NON-NLS-0$
+			window.location = uriTemplate.expand({resource: newInput}); //$NON-NLS-0$
+		};
+		this.sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
+		this.sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$
+		this.sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
+			if (evt.newValue && !evt.ignoreRedirect) {
+				var item = evt.newValue;
+				var openWithCommand = mExtensionCommands.getOpenWithCommand(commandRegistry, evt.newValue);
+				if (openWithCommand) {
+					var href = openWithCommand.hrefCallback({items: item});
+				} else {
+					href = uriTemplate.expand({resource: evt.newValue.Location});
+				}
+				window.location = href;
+			}
 		});
-		newView.create();
+	},
+
+	createEditorViewer: function(id) {
+		var editorViewer = new EditorViewer({
+			id: id,
+			parent: this.editorDomNode,
+			model: this.model,
+			menuBar: this.menuBar,
+			undoStack: this.undoStack,
+			serviceRegistry: this.serviceRegistry,
+			pluginRegistry: this.pluginRegistry,
+			commandRegistry: this.commandRegistry,
+			contentTypeRegistry: this.contentTypeRegistry,
+			editorCommands: this.editorCommands,
+			renderToolbars: this.renderToolbars.bind(this),
+			readonly: this.readonly,
+			preferences: this.preferences,
+			searcher: this.searcher,
+			selection: this.selection,
+			fileClient: this.fileClient,
+			statusService: this.statusService,
+			progressService: this.progressService
+		});
+		editorViewer.create();
 		
-		// Now, populate the Pip with some files
-		this._pipInfo._inputManager = inputManager;
-		this._pipInfo._pipURLS = [
-			"/file/emoffatt-OrionContent/org.eclipse.orion.client-2/bundles/org.eclipse.orion.client.ui/web/plugins/HoverTestPlugin2.js",
-			"/file/emoffatt-OrionContent/org.eclipse.orion.client-2/bundles/org.eclipse.orion.client.ui/web/plugins/HoverTestPlugin2.html"
-		];
-		this._setPipSel(0);					
+		//TODO hack
+		this.menuBar.inputManager = editorViewer.inputManager;
+		
+		return editorViewer;
+	},
+
+	renderToolbars: function(metadata) {
+		var menuBar = this.menuBar;
+		var commandRegistry = this.commandRegistry;
+		var editor = this.editorViewers[0].editor;
+		menuBar.updateCommands();
+		["pageActions", "pageNavigationActions", "settingsActions"].forEach(function(id) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var toolbar = lib.node(id);
+			if (toolbar) {
+				commandRegistry.destroy(toolbar);
+				if (metadata) {
+					commandRegistry.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
+				}
+			}
+		});
+	},
+	
+	createSplitters: function(vertical) {
+		//TODO create as many splitters as necessary given the number of editors viewers. 
+		// Note that depending on the number of viewers it may be necessary to create intermediate parents
+		var splitterDiv = document.createElement("div"); //$NON-NLS-0$
+		splitterDiv.id = "editorSplitter"; //$NON-NLS-0$
+		splitterDiv.style.zIndex = "100"; //$NON-NLS-0$
+		this.editorDomNode.appendChild(splitterDiv);
+		
+		var splitter = this.editorSplitter = new mSplitter.Splitter({
+			node: splitterDiv,
+			sidePanel: this.editorViewers[0].domNode,
+			mainPanel: this.editorViewers[1].domNode,
+			toggle: false,
+			proportional: true,
+			vertical: vertical,
+			closeByDefault: false
+		});
+		splitter.addEventListener("resize", function (evt) { //$NON-NLS-0$
+			this.editorViewers.forEach(function(viewer) {
+				if (viewer.domNode === evt.node) {
+					viewer.editorView.editor.resize();
+				}
+			});
+		}.bind(this));
+		
+		this._setSplitterMode("X"); //$NON-NLS-0$
+	},
+
+	_setSplitterMode: function(mode) {
+		var mainEditorViewerNode = this.editorViewers[0].domNode;
+		mainEditorViewerNode.style.width = mainEditorViewerNode.style.height = "100%"; //$NON-NLS-0$
+		var splitEditorViewerNode = this.editorViewers[1].domNode;
+		var splitterNode = this.editorSplitter.$splitter;
+		splitEditorViewerNode.classList.remove("editorViewerPicInPic"); //$NON-NLS-0$
+		splitEditorViewerNode.style.display = "block"; //$NON-NLS-0$
+		splitEditorViewerNode.style.width = splitEditorViewerNode.style.height = "100%"; //$NON-NLS-0$
+		["top", "left", "right", "bottom", "width", "height"].forEach(function(p) { //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			splitEditorViewerNode.style[p] = ""; //$NON-NLS-0$
+		});
+		splitterNode.style.display = "block"; //$NON-NLS-0$
+		if (mode === "P") { //$NON-NLS-0$
+			splitterNode.style.display = "none"; //$NON-NLS-0$
+			splitEditorViewerNode.classList.add("editorViewerPicInPic"); //$NON-NLS-0$
+		} else if (mode === "X") { //$NON-NLS-0$
+			splitterNode.style.display = "none"; //$NON-NLS-0$
+			splitEditorViewerNode.style.display = "none"; //$NON-NLS-0$
+		} else if (mode === "H") { //$NON-NLS-0$
+			this.editorSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL);
+		} else if (mode === "V") { //$NON-NLS-0$
+			this.editorSplitter.setOrientation(mSplitter.ORIENTATION_VERTICAL);
+		}
+		this.editorViewers.forEach(function(viewer) {
+			viewer.editorView.editor.resize();
+		});
+		
+		if (!this.editorViewers[1].inputManager.getFileMetadata()) {
+			this.editorViewers[1].inputManager.setInput(PageUtil.hash());
+		}
 	},
 	_addPipCommand: function(label) {
-			var showPipCommand = new mCommands.Command({
-				name: label,
-				tooltip: label,
-				id: "orion.edit.showPip" + label, //$NON-NLS-0$
-				visibleWhen: function() {
-					return true;
-				},
-				callback: function(data) {
-					var mode = data.command.tooltip;
-					this._setPipMode(mode);
-				}.bind(this)
-			});
-			this.commandRegistry.addCommand(showPipCommand);
-			this.commandRegistry.registerCommandContribution("pageActions" , "orion.edit.showPip" + label, 1, "orion.menuBarToolsGroup", false, //$NON-NLS-1$ //$NON-NLS-0$
-				new mKeyBinding.KeyBinding('e', true, true));		
+		var id = "orion.edit.showPip" + label; //$NON-NLS-0$
+		var showPipCommand = new mCommands.Command({
+			name: label,
+			tooltip: label,
+			id: id,
+			visibleWhen: function() {
+				return true;
+			},
+			callback: function(data) {
+				var mode = data.command.tooltip;
+				this._setSplitterMode(mode);
+			}.bind(this)
+		});
+		this.commandRegistry.addCommand(showPipCommand);
+		this.commandRegistry.registerCommandContribution("pageActions" , id, 1); //$NON-NLS-0$
 	},
 	_generateShowPip: function(){
 		this._addPipCommand("H");
@@ -679,8 +616,9 @@ objects.mixin(EditorSetup.prototype, {
 		this._addPipCommand("P");
 		this._addPipCommand("X");
 	},
+
 	load: function() {
-		var inputManager = this.inputManager;
+		var inputManager = this.editorViewers[0].inputManager;
 		var sidebarNavInputManager = this.sidebarNavInputManager;
 		
 		var lastEditedFile = sessionStorage.lastFile;
@@ -697,7 +635,8 @@ objects.mixin(EditorSetup.prototype, {
 			sidebarNavInputManager.processHash(PageUtil.hash());
 		});
 		window.onbeforeunload = function() {
-			if (this.editor && this.editor.isDirty()) {
+			var editor = this.editorViewers[0].editor;
+			if (editor && editor.isDirty()) {
 				if (inputManager.getAutoSaveEnabled()) {
 					inputManager.save();
 					return messages.unsavedAutoSaveChanges;
@@ -708,15 +647,16 @@ objects.mixin(EditorSetup.prototype, {
 	}
 });
 
-exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isReadOnly) {
-	var setup = new EditorSetup(serviceRegistry, pluginRegistry, preferences, isReadOnly);
+exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, readonly) {
+	var setup = new EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly);
 	Deferred.when(setup.createBanner(), function() {
 		setup._generateShowPip();
-		setup.createTextModel();
-		setup.createInputManager();
 		setup.createMenuBar().then(function() {
-			setup.createEditorView();
-			setup._installPip();
+			setup.editorViewers = [];
+			for (var i=0; i<2; i++) {
+				setup.editorViewers.push(setup.createEditorViewer(i === 0 ? "" : "" + i)); //$NON-NLS-1$ //$NON-NLS-0$
+			}
+			setup.createSplitters();
 			setup.createSideBar();
 			setup.load();
 		});

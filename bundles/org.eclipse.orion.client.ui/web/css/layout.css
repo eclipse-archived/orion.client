@@ -352,64 +352,29 @@ hard-coded numbers elsewhere.
 	width: 100%;
 	bottom: 0;
 	overflow-y: auto;
-	margin-right: 2px;
 	background: #FFF;
 }
 
-.auxEditorFrame {
-	position: absolute;
-	z-index: 100;
+.editorViewerFrame {
 	width: 100%;
 	height: 100%;
 }
 
-.auxEditorContent {
-	position: absolute;
+.editorViewerContent {
 	width: 100%;
 	height: 100%;
 }
 
-.auxEditorButton {
-	position: absolute;
-	text-align: center;
-	top: 3px;
-	width: 20px;
-	height: 20px;
-}
-
-.auxEditorField {
-	position: absolute;
-	text-align: center;
-	background: white;
-	top: 3px;
-	width: 200px;
-}
-
-.auxEditorHorizontal {
-	position: absolute;
-	left: 0;
-	right: auto;
-	top: 50%;
-	height: 50%;
-	width: 100%;
-}
-
-.auxEditorVertical {
-	position: absolute;
-	top: 0;
-	right: auto;
-	left: 50%;
-	height: 100%;
-	width: 50%;
-}
-
-.auxEditorPicInPic {
+.editorViewerPicInPic {
 	position: absolute;
 	top: 10px;
+	border: 1px solid #ccc;
+	background-color: white;
+	z-index: 100;
 	left: auto;
 	right: 40px;
-	width: 500px;
-	height: 400px;
+	width: 40%;
+	height: 40%;
 }
 
 /* 

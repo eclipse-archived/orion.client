@@ -343,6 +343,8 @@ define([
 		},
 
 		_resize: function() {
+			if (this.$splitter.style.display === "none") return; //$NON-NLS-0$
+			
 			if (this._proportional) {
 				this._adjustSplitterSize();
 				this._adjustToOffset();
