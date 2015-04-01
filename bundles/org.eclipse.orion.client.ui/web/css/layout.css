@@ -370,6 +370,7 @@ hard-coded numbers elsewhere.
 	top: 10px;
 	border: 1px solid #ccc;
 	background-color: white;
+	overflow: auto;
 	z-index: 100;
 	left: auto;
 	right: 40px;
