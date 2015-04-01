@@ -359,6 +359,14 @@ define([
                 return null;
             });
         },
+        /** fix for the no-throw-literal linting rule */
+        "no-throw-literal": function(editorContext, annotation, astManager) {
+            return astManager.getAST(editorContext).then(function(ast) {
+                var node = Finder.findNode(annotation.start, ast, {parents:true});
+                var source = node.raw || ast.source.slice(node.range[0], node.range[1]);
+                return editorContext.setText('new Error(' + source + ')', annotation.start, annotation.end);
+            });
+        },
         /** fix for the no-undef-defined linting rule */
         "no-undef-defined": function(editorContext, annotation, astManager) {
             function assignLike(node) {

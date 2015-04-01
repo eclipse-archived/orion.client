@@ -92,5 +92,7 @@ define({//Default message bundle
 	'noCommaDangleFixTooltip': 'Remove the extra comma', //$NON-NLS-0$ //$NON-NLS-1$
 	'addBBreakFixName': 'Add break statement', //$NON-NLS-0$ //$NON-NLS-1$
 	'addBBreakFixTooltip': 'Add a break statement to the proceeding line', //$NON-NLS-0$ //$NON-NLS-1$
-	'noShadowGlobals': 'Global shadowing:' //$NON-NLS-0$ //$NON-NLS-1$
+	'noShadowGlobals': 'Global shadowing:', //$NON-NLS-0$ //$NON-NLS-1$
+	'noThrowLiteralFixName': 'Change to Error' , //$NON-NLS-0$ //$NON-NLS-1$
+	'noThrowLiteralFixTooltip': 'Change the literal to an Error' , //$NON-NLS-0$ //$NON-NLS-1$
 });

@@ -364,7 +364,21 @@ define([
                     ]
     			}
     	);
-    	
+
+        provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+                quickFixComputer,
+                {
+                    name: javascriptMessages["noThrowLiteralFixName"],  //$NON-NLS-0$
+                    tooltip : javascriptMessages['noThrowLiteralFixTooltip'],  //$NON-NLS-0$
+                    scopeId: "orion.edit.quickfix",
+                    id : "no.throw.literal.fix",  //$NON-NLS-0$
+                    contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$
+                    validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-throw-literal)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
+                }
+        );
+
     	/**
     	 * Register the jsdoc-based outline
     	 */

@@ -507,6 +507,32 @@ define([
 		                      fixid: 'no-fallthrough-break',
 		                      contentType: 'text/html'});
 		});
+    //NO-THROW-LITERAL
+        it("Test no-throw-literal-number", function() {
+            var rule = createTestRule('no-throw-literal');
+            return getFixes({
+                buffer: 'throw 1',
+                rule: rule,
+                expected: { value: "new Error(1)", start: 6,  end: 7 }
+            });
+        });
+        it("Test no-throw-literal-string", function() {
+            var rule = createTestRule('no-throw-literal');
+            return getFixes({
+                buffer: 'throw "fizz buzz"',
+                rule: rule,
+                expected: { value: "new Error(\"fizz buzz\")", start: 6,  end: 17 }
+            });
+        });
+        it("Test no-throw-literal-ArrayExpression", function() {
+            var rule = createTestRule('no-throw-literal');
+            return getFixes({
+                buffer: 'throw [1,  2]',
+                rule: rule,
+                expected: { value: "new Error([1,  2])", start: 6,  end: 13 }
+            });
+       });
+
 	//NO-UNDEF
 	     /**
 	      * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=458567
