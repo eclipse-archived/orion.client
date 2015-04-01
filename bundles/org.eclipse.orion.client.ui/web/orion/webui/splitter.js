@@ -209,6 +209,9 @@ define([
 			this.$trailing.style.display = "block"; //$NON-NLS-0$
 			this.$leading.style.display = "block"; //$NON-NLS-0$
 		},
+		resize: function() {
+			this._resize();
+		},
 
 		_setStyleConstants: function() {
 			if (this._vertical) {

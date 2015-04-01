@@ -658,6 +658,8 @@ objects.mixin(EditorSetup.prototype, {
 	},
 
 	_setSplitterMode: function(mode) {
+		if (this.splitterMode === mode) return;
+		this.splitterMode = mode;
 		var mainEditorViewerNode = this.editorViewers[0].domNode;
 		mainEditorViewerNode.style.width = mainEditorViewerNode.style.height = "100%"; //$NON-NLS-0$
 		var splitEditorViewerNode = this.editorViewers[1].domNode;
@@ -679,9 +681,17 @@ objects.mixin(EditorSetup.prototype, {
 			this.setActiveEditorViewer(this.editorViewers[0]);
 			
 		} else if (mode === "H") { //$NON-NLS-0$
-			this.editorSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL);
+			if (this.editorSplitter.getOrientation() === mSplitter.ORIENTATION_HORIZONTAL) {
+				this.editorSplitter.resize();
+			} else {
+				this.editorSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL);
+			}
 		} else if (mode === "V") { //$NON-NLS-0$
-			this.editorSplitter.setOrientation(mSplitter.ORIENTATION_VERTICAL);
+			if (this.editorSplitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL) {
+				this.editorSplitter.resize();
+			} else {
+				this.editorSplitter.setOrientation(mSplitter.ORIENTATION_VERTICAL);
+			}
 		}
 		this.editorViewers.forEach(function(viewer) {
 			viewer.editorView.editor.resize();
