@@ -35,7 +35,7 @@ define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],func
                         var responseObject = JSON.parse(mypostrequest.responseText);
                         showStatusMessage(responseObject.error);
                     } else {
-                        finishLogin(username, password);
+                        finishLogin();
                     }
                 }
             };
@@ -315,6 +315,7 @@ define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],func
         createOAuthLink: createOAuthLink,
         decodeBase64: decodeBase64,
         getParam: getParam,
+        getRedirect: getRedirect,
         passwordSwitcher: passwordSwitcher,
         removeClass: removeClass,
         showStatusMessage: showStatusMessage
