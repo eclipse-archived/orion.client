@@ -308,7 +308,7 @@ function Tooltip (view) {
 									}
 								}
 							}, function(error) {
-								if (typeof console !== "undefined") { //$NON-NLS-0$
+								if (typeof console !== "undefined" && error && error.name !== 'Cancel') { //$NON-NLS-0$ //$NON-NLS-1$
 									console.log("Error computing hover tooltip"); //$NON-NLS-0$
 									console.log(error && error.stack);
 								}
@@ -627,6 +627,7 @@ function Tooltip (view) {
 							iframe.style.border = "none"; //$NON-NLS-0$
 							iframe.style.width = "100%"; //$NON-NLS-0$
 							iframe.style.height = "100%"; //$NON-NLS-0$
+							iframe.style.backgroundColor = "#FFFFFF"; //$NON-NLS-0$
 							iframe.srcdoc = data.content;
 							if (data.width) {
 								iframe.style.width = data.width;
@@ -705,7 +706,7 @@ function Tooltip (view) {
 				// TODO This is a hack to compute the projection size we will have in the tooltip, we remove the child after computing
 				this._tooltipDiv.appendChild(contentsDiv);
 				// Use the editor colors with a simple border
-				this._tooltipDiv.classList.add("textviewTooltipCodeProjection");
+				this._tooltipDiv.classList.add("textviewTooltipCodeProjection"); //$NON-NLS-0$
 				var size = contentsView.computeSize();
 				// Adjust the size for the padding
 				contentsDiv.style.width = (size.width+8) + "px"; //$NON-NLS-0$

@@ -249,7 +249,7 @@ define([
 						if (start === null){
 							return null;
 						}
-						var html = "<body style=\"color: #DADADA\">" + text.substring(start, range[1]) + "</body>";  //$NON-NLS-0$  //$NON-NLS-1$
+						var html = text.substring(start, range[1])
 						return {type: "html", content: html /*, width: "50px", height: "25px"*/};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
 					}
 				});
