@@ -242,8 +242,16 @@
 
 .mainToolbar #configSection {
 	float: right;
-	padding-top: 4px;
-} 
+	padding: 2px;
+	height: 18px;
+}
+
+.mainToolbar #configSection:hover {
+	background-color: #e6e6e6;
+	border: 1px solid #ccc;
+	box-shadow: none;
+	border-radius: 0;
+}
 
 .mainToolbar #configSection:not(:hover):not(.sectionOpened) {
 	border-color: transparent;
