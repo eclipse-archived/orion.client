@@ -648,7 +648,7 @@ objects.mixin(EditorSetup.prototype, {
 			viewer.editorView.editor.resize();
 		});
 		
-		if (!this.editorViewers[1].inputManager.getFileMetadata()) {
+		if (splitEditorViewerNode.style.display !== "none" && !this.editorViewers[1].inputManager.getFileMetadata()) { //$NON-NLS-0$
 			this.editorViewers[1].inputManager.setInput(PageUtil.hash());
 		}
 	},
