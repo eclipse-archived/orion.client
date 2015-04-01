@@ -272,7 +272,7 @@ define([
 				this.save();
 				return;
 			}
-			if (this._autoLoadEnabled) {
+			if (this._autoLoadEnabled && this._fileMetadata) {
 				this.load();
 			}
 		},
