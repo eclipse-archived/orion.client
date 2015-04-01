@@ -308,7 +308,7 @@ function Tooltip (view) {
 									}
 								}
 							}, function(error) {
-								if (typeof console !== "undefined" && error && error.name !== 'Cancel') { //$NON-NLS-0$ //$NON-NLS-1$
+								if (console && error && error.name !== 'Cancel') { //$NON-NLS-0$ //$NON-NLS-1$
 									console.log("Error computing hover tooltip"); //$NON-NLS-0$
 									console.log(error && error.stack);
 								}
@@ -568,7 +568,19 @@ function Tooltip (view) {
 			var yOK = y >= rect.top && y <= (rect.top + rect.height);
 			return xOK && yOK;
 		},
+		mapOffset: function(offset, parent) {
+			var textView = this._view;
+			var model = textView.getModel();
+			if (model.getBaseModel) {
+				offset = model.mapOffset(offset, parent);
+			}
+			return offset;
+		},
 		_computeRectangleFromOffset: function(start, end) {
+			// The offsets from annotations/hovering don't account for the projection model (folded comments) Bug 456715
+			start = this.mapOffset(start);
+			end = this.mapOffset(end);
+			
 			var tv = this._view;
 			var curLine = tv.getLineAtOffset(start);
 			var endLine = tv.getLineAtOffset(end);
