@@ -612,7 +612,7 @@ objects.mixin(EditorSetup.prototype, {
 			mGlobalCommands.setDirtyIndicator(editor.isDirty());
 		}
 		if (target) {
-			var params = PageUtil.matchResouceParameters();
+			var params = PageUtil.matchResourceParameters();
 			delete params.resource;
 			window.location = uriTemplate.expand({resource: target.Location, params: params});
 		}
