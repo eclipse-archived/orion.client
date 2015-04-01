@@ -360,9 +360,19 @@ hard-coded numbers elsewhere.
 	height: 100%;
 }
 
-.editorViewerContent {
+.editorHeader {
+	position: absolute;
+	top : 0;
 	width: 100%;
-	height: 100%;
+	height: 20px;
+	background: aliceblue;
+}
+
+.editorViewerContent {
+	position: absolute;
+	width: 100%;
+	top: 20px;
+	bottom: 0;
 }
 
 .editorViewerPicInPic {

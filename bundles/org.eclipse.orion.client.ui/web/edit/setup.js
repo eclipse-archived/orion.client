@@ -168,7 +168,20 @@ function EditorViewer(options) {
 	var domNode = this.domNode = document.createElement("div"); //$NON-NLS-0$
 	domNode.className = "editorViewerFrame"; //$NON-NLS-0$
 	this.parent.appendChild(domNode);
-	//TODO add header 
+	
+	// Create the header 
+	var headerNode = this.headerNode = document.createElement("div"); //$NON-NLS-0$
+	headerNode.id = "EditorViewerHeader";
+	headerNode.className = "editorHeader"; //$NON-NLS-0$
+	
+	// Create a breadcrumb
+	this.localBreadcrumbNode = document.createElement("div"); //$NON-NLS-0$
+	this.localBreadcrumbNode.id = "Header Breadcrumb";
+	this.localBreadcrumbNode.style.height = "20px";
+	headerNode.appendChild(this.localBreadcrumbNode);
+	domNode.appendChild(headerNode);
+	
+	// Create the editor content area
 	var contentNode = this.contentNode = document.createElement("div"); //$NON-NLS-0$
 	contentNode.className = "editorViewerContent"; //$NON-NLS-0$
 	domNode.appendChild(contentNode);
@@ -221,8 +234,7 @@ objects.mixin(EditorViewer.prototype, {
 			
 			var href = window.location.href;
 			this.activateContext.setActiveEditorViewer(this);
-			this.commandRegistry.processURL(href);
-			
+			this.commandRegistry.processURL(href);			
 		}.bind(this));
 		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			inputManager.setInput(event.selection);
@@ -608,6 +620,7 @@ objects.mixin(EditorSetup.prototype, {
 		// TODO the command exclusions should be an API and specified by individual pages (page links)?
 		mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({
+			viewer: editorViewer,
 			task: messages["Editor"],
 			name: targetName,
 			target: target,
