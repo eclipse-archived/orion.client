@@ -23,6 +23,8 @@ define([
 	'orion/webui/tooltip'
 ], function(messages, i18nUtil, URITemplate, lib, Deferred, objects, mProjectCommands, PageLinks, mExplorer, mSection, mTooltip) {
 
+	var ID_COUNT = 0;
+
 	var editTemplate = new URITemplate("./edit.html#{,resource,params*}");
 
 	function ProjectInfoModel(project){
@@ -291,6 +293,7 @@ define([
 	};
 
 	function ProjectEditor(options){
+		this.idCount = ID_COUNT++;
 		this.serviceRegistry = options.serviceRegistry;
 		this.fileClient = options.fileClient;
 		this.progress = options.progress;
@@ -445,9 +448,9 @@ define([
 		renderProjectInfo: function(parent, sectionName){
 
 			var title = sectionName || messages.ProjectInfo;
-			var projectInfoSection = new mSection.Section(parent, {id: "projectInfoSection", headerClass: ["sectionTreeTableHeader"], title: title, canHide: true});
+			var projectInfoSection = new mSection.Section(parent, {id: "projectInfoSection" + this.idCount, headerClass: ["sectionTreeTableHeader"], title: title, canHide: true});
 			var explorerParent = document.createElement("div");
-			explorerParent.id = "projectInformationNode";
+			explorerParent.id = "projectInformationNode" + this.idCount;
 			var projectInfoRenderer = new ProjectInfoRenderer({
 				checkbox: false,
 				treeTableClass: "sectionTreeTable",
@@ -475,9 +478,9 @@ define([
 						if(!cat.Name){
 							continue;
 						}
-						var addotopnalInfoSection = new mSection.Section(parent, {id: cat.Name + "Section", headerClass: ["sectionTreeTableHeader"], title: cat.Name, canHide: true});
+						var addotopnalInfoSection = new mSection.Section(parent, {id: cat.Name + "Section" + this.idCount, headerClass: ["sectionTreeTableHeader"], title: cat.Name, canHide: true});
 						var explorerParent = document.createElement("div");
-						explorerParent.id = cat.Name + "Table";
+						explorerParent.id = cat.Name + "Table" + this.idCount;
 						var additionalInfoRenderer = new AdditionalInfoRenderer({
 							treeTableClass: "sectionTreeTable",
 							checkbox: false
