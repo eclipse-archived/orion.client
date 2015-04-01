@@ -251,12 +251,12 @@ if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') {
                 state.pos += 3;
                 return;
             }
-            if (!match[1] && match[2].substr(0, 8) === '![CDATA[') {
+            if (!match[1] && match[2].substr(0, 8).toUpperCase() === '![CDATA[') {
                 state.mode = Mode.CData;
                 state.pos += 8;
                 return;
             }
-            if (!match[1] && match[2].substr(0, 8) === '!DOCTYPE') {
+            if (!match[1] && match[2].substr(0, 8).toUpperCase() === '!DOCTYPE') {
                 state.mode = Mode.Doctype;
                 state.pos += 8;
                 return;
