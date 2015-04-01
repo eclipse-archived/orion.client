@@ -1,20 +1,3 @@
-/*.tooltipTheme.textview {
-	background-color: InfoBackground !important;
-	color: InfoText !important;
-}*/
-.tooltipTheme .textviewScroll {
-	padding: 0;
-}
-/* Overrides the normal tooltip for code projections as editor 
- * styled text may not be legible on a dark background
- */
-.textviewTooltipCodeProjection {
-	border: 1px solid black !important;
-	/*background-color: InfoBackground !important;
-	color: InfoText !important;*/
-	padding: 0 !important;
-}
-
 /* Styles for the view tooltips */
 .textviewTooltip {
 	font-family: "Consolas", "Monaco", "Vera Mono", monospace;
@@ -27,49 +10,70 @@
 	position: fixed;
 	overflow: hidden;
 }
+
+/* Styles for overriding the projection view theme inside tooltips */
+/*.tooltipTheme.textview {
+	background-color: InfoBackground !important;
+	color: InfoText !important;
+}*/
+.tooltipTheme .textviewScroll {
+	padding: 0;
+}
+.tooltipTheme .annotationLine.currentLine {
+	background-color: transparent !important;
+}
+/* Overrides the normal tooltip for code projections as editor 
+ * styled text may not be legible on a dark background
+ */
+.textviewTooltipCodeProjection {
+	border: 1px solid black !important;
+	/*background-color: InfoBackground !important;
+	color: InfoText !important;*/
+	padding: 0 !important;
+}
+
+/* Modify the html elements that the markdown renderer creates */
 .textviewTooltip a {
 	color: rgb(187, 187, 187);
 }
-
+.textviewTooltip h3 {
+	-webkit-margin-before: 0;
+}
 .textviewTooltip em {
 	font-style: normal;
 	font-weight: bold;
 }
-
 .textviewTooltip span {
 	vertical-align: baseline;
 }
 
+/* Classes for displaying annotations in tooltips */
 .textviewTooltip .tooltipRow {
 	display: table-row;
 }
-
 .textviewTooltip .tooltipImage {
 	display: inline-block;
 	vertical-align: middle;
 	padding: 1px;
 }
-
 .textviewTooltip .tooltipTitle {
 	padding-left: 3px;
 	vertical-align: middle;
 }
+.textviewTooltip .commandButton { /* Styling quickfixes */
+	border: 0;
+	background-color: inherit;
+	color: rgb(187, 187, 187);
+}
+.textviewTooltip .commandButton:not(.dropdownTrigger){ /* In certain themes command buttons are set to all caps */
+  text-transform: initial; 
+}
 
+/* Styles for custom behaviour */
 .textViewTooltipAllowResize {
 	resize: both;
 	overflow: auto;
 }
 
-.tooltipTheme .annotationLine.currentLine {
-	background-color: transparent !important;
-}
 
-.textviewTooltip .commandButton {
-	border: 0;
-	background-color: inherit;
-	color: rgb(187, 187, 187);
-}
 
-.textviewTooltip .commandButton:not(.dropdownTrigger){
-  text-transform: initial; 
-}
