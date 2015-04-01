@@ -32,7 +32,7 @@ define([
 	
 	Objects.mixin(HTMLHover.prototype, /** @lends webtools.HTMLHover.prototype*/ {
 		
-		_hoverableTags: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'body', 'p', 'ol', 'ul', 'li', 'table', 'td', 'tr'],
+		_hoverableTags: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'body', 'p', 'ol', 'ul', 'li', 'table', 'td', 'tr', 'textarea', 'select', 'form', 'pre'],
 		
 		/**
 		 * @description Callback from the editor to compute the hover
@@ -249,8 +249,8 @@ define([
 						if (start === null){
 							return null;
 						}
-						var html = text.substring(start, range[1])
-						return {type: "html", content: html /*, width: "50px", height: "25px"*/};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+						var html = "<body style=\"background-color:white\">" + text.substring(start, range[1]) + "</body>";  //$NON-NLS-0$  //$NON-NLS-1$
+						return {type: "html", content: html};  //$NON-NLS-0$  //$NON-NLS-1$
 					}
 				});
 			}

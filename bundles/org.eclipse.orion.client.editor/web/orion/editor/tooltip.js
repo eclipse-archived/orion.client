@@ -639,7 +639,6 @@ function Tooltip (view) {
 							iframe.style.border = "none"; //$NON-NLS-0$
 							iframe.style.width = "100%"; //$NON-NLS-0$
 							iframe.style.height = "100%"; //$NON-NLS-0$
-							iframe.style.backgroundColor = "#FFFFFF"; //$NON-NLS-0$
 							// TODO The iframe computed height is always 3px smaller than the tooltip, giving the impression of inconsistent padding
 							this._tooltipDiv.style.paddingBottom = "5px";  //$NON-NLS-0$
 							iframe.srcdoc = data.content;

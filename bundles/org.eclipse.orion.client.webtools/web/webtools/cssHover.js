@@ -73,7 +73,7 @@ define([
 			    var token = Util.findToken(ctxt.offset, results.tokens);
 				if (token){
 				    //TODO, investigate creating an AST in the CSS parser, walking tokens can be expensive
-				    if(this.hasPreviousToken(token, results.tokens, 'IMPORT_SYM')) {
+				    if(this.hasPreviousToken(token, results.tokens, 'IMPORT_SYM')) {//$NON-NLS-0$
 				        return this._getFileHover(token, metadata);
 				    }
 				    if(this.hasPreviousToken(token, results.tokens, 'IDENT', ['background', 'background-image', '-webkit-border-image', '-o-border-image', 'border-image', 'border-image-source', 'icon'])) {
@@ -117,12 +117,12 @@ define([
 		    if(token && tokens) {
 		        for(var i = token.index; i > -1; i--) {
 		            var tok = tokens[i];
-		            if(tok.type === 'IDENT' || tok.type === 'COMMA' || tok.type === 'STRING' || tok.type === 'LENGTH' || tok.type === 'NUMBER' || tok.type === 'HASH') {
+		            if(tok.type === 'IDENT' || tok.type === 'COMMA' || tok.type === 'STRING' || tok.type === 'LENGTH' || tok.type === 'NUMBER' || tok.type === 'HASH') {//$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		                continue;
-		            } else if(tok.type === 'COLON') {
+		            } else if(tok.type === 'COLON') {   //$NON-NLS-0$
 		                //the next one would have to be IDENT and 'font-family'
 		                tok = tokens[i-1];
-		                if(tok.type === 'IDENT' && this.fontLikeNames.indexOf(tok.value.toLowerCase()) > -1) {
+		                if(tok.type === 'IDENT' && this.fontLikeNames.indexOf(tok.value.toLowerCase()) > -1) {   //$NON-NLS-0$
 		                    tok.index = i-1;
 		                    return tok;
 		                } else {
@@ -142,20 +142,20 @@ define([
 		        var next = null;
 		        var idx = token.index;
 		        //skip the colon
-		        if(tokens[idx+1].type !== 'COLON') {
+		        if(tokens[idx+1].type !== 'COLON') {   //$NON-NLS-0$
 		            return null;
 		        }
 		        ++idx;
 		        for(var i = idx+1; i < tokens.length; i++) {
 		            next = tokens[i];
-		            if(next.type === 'IDENT' || next.type === 'COMMA' || next.type === 'STRING' || next.type === 'NUMBER' || next.type === 'LENGTH' || next.type === 'HASH') {
+		            if(next.type === 'IDENT' || next.type === 'COMMA' || next.type === 'STRING' || next.type === 'NUMBER' || next.type === 'LENGTH' || next.type === 'HASH') {   //$NON-NLS-0$ //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$  //$NON-NLS-4$ //$NON-NLS-5$
 		                id += next.value;
 		                if(i < tokens.length-1) {
 		                    id += ' ';
 		                }
 		                continue;
 		            }
-		            if(next.type === 'RBRACE' || next.type === 'SEMICOLON' || next.type === 'RPAREN') {
+		            if(next.type === 'RBRACE' || next.type === 'SEMICOLON' || next.type === 'RPAREN') {   //$NON-NLS-0$ //$NON-NLS-1$  //$NON-NLS-2$
 		                return id;
 		            } else {
 		                break;
@@ -166,17 +166,17 @@ define([
 		},
 		
 		_getFontHover: function _getFontHover(prop, font){
-			var html = '<html><body><div style="'+prop+':'+font+';margin:0px">'+messages['fontHoverExampleText']+'</div></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
-			return {type: "html", content: html, height: '42px', width: '235px'};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
+			var html = '<html><body style=\"background-color:white\"><div style="'+prop+':'+font+';margin:0px">'+messages['fontHoverExampleText']+'</div></body></html>';  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
+			return {type: "html", content: html, height: '42px', width: '235px'};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
 		},
 		
 		_isColorFnName: function _isColorFnName(name) {
 		    var val = name.toLowerCase();
-		    return val === 'rgba(' || val === 'rgb(' || val === 'hsl(' || val === 'hsla(';
+		    return val === 'rgba(' || val === 'rgb(' || val === 'hsl(' || val === 'hsla(';   //$NON-NLS-0$ //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
 		},
  		
 		_isRgbLike: function _isRgbLike(token, tokens) {
-		    if(token.type === 'FUNCTION') {
+		    if(token.type === 'FUNCTION') {  //$NON-NLS-0$
 		        if(this._isColorFnName(token.value.toLowerCase())) {
 		            return token;
 		        }
@@ -192,9 +192,9 @@ define([
 		    if(token && tokens) {
 		        for(var i = token.index; i > -1; i--) {
 		            var tok = tokens[i];
-		            if(tok.type === 'NUMBER' || tok.type === 'COMMA' || tok.type === 'PERCENTAGE') {
+		            if(tok.type === 'NUMBER' || tok.type === 'COMMA' || tok.type === 'PERCENTAGE') {  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
 		                continue;
-		            } else if(tok.type === 'FUNCTION') {
+		            } else if(tok.type === 'FUNCTION') {  //$NON-NLS-0$
 		                if(this._isColorFnName(tok.value)) {
 		                    tok.index = i;
 		                    return tok;
@@ -216,11 +216,11 @@ define([
 		        var idx = token.index;
 		        for(var i = idx+1; i < tokens.length; i++) {
 		            next = tokens[i];
-		            if(next.type === 'COMMA' || next.type === 'NUMBER' || next.type === 'PERCENTAGE') {
+		            if(next.type === 'COMMA' || next.type === 'NUMBER' || next.type === 'PERCENTAGE') {  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
 		                id += next.value;
 		                continue;
 		            }
-		            if(next.type === 'RPAREN') {
+		            if(next.type === 'RPAREN') {  //$NON-NLS-0$
 		                id += next.value;
 		                return id;
 		            } else {
@@ -234,13 +234,13 @@ define([
 		hasPreviousToken: function hasPreviousToken(token, tokens, name, id) {
 		    if(token && tokens) {
 		        switch(token.type) {
-		            case 'URI': 
-		            case 'STRING': {
+		            case 'URI':   //$NON-NLS-0$
+		            case 'STRING': {  //$NON-NLS-0$
 		                if(token.index > 0) {
 		                    var prev = null;
 		                    for(var i = token.index-1; i >= 0; i--) {
 		                        prev = tokens[i];
-		                        if(prev.type === 'COLON' || prev.type === 'STRING' || prev.type === 'URI' || prev.type === 'COMMA') {
+		                        if(prev.type === 'COLON' || prev.type === 'STRING' || prev.type === 'URI' || prev.type === 'COMMA') {  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
 		                            continue;
 		                        } else {
 		                            break;
@@ -267,7 +267,7 @@ define([
     	            return this._formatFilesHover(path);
     	        } else {
     	            var that = this;
-        	        return that.resolver.getWorkspaceFile(path, {ext:'css', type:'CSS', icon:'../webtools/images/css.png'}).then(function(files) {
+        	        return that.resolver.getWorkspaceFile(path, {ext:'css', type:'CSS', icon:'../webtools/images/css.png'}).then(function(files) {  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
         		        if(files && files.length > 0) {
         		            var resolved = that.resolver.resolveRelativeFiles(path, files, metadata);
         		            if(resolved.length > 0) {
@@ -283,20 +283,20 @@ define([
 		_getPathFromToken: function _getPathFromToken(token) {
 		    var path = token.value;
 		    switch(token.type) {
-		        case 'STRING': {
+		        case 'STRING': {  //$NON-NLS-0$
 		            path = token.value.slice(1, token.value.length-1); //peel off the quotes
 		            break;
 		        }
-		        case 'URI': {
+		        case 'URI': {  //$NON-NLS-0$
 		            var val = /^\s*(?:url)\s*\(\s*(.*)\s*\)/i.exec(token.value);
     		        if(val) {
     		            path = val[1];
     		            var c = path.charAt(0);
-    		            if(c === '\'' || c === '"') {
+    		            if(c === '\'' || c === '"') {  //$NON-NLS-0$  //$NON-NLS-1$
     		                path = path.slice(1);
     		            }
     		            c = path.charAt(path.length-1);
-    		            if(c === '\'' || c === '"') {
+    		            if(c === '\'' || c === '"') {  //$NON-NLS-0$  //$NON-NLS-1$
     		                path = path.slice(0, path.length-1);
     		            }
     		        } else {
@@ -319,7 +319,7 @@ define([
     	    if(path) {
     	        var title = null; 
     	        if(files.length > 1) {
-    	            title = '###Open file for \''+path+'\'###';
+    	            title = '###Open file for \''+path+'\'###';  //$NON-NLS-0$  //$NON-NLS-1$
     	        }
     	        var hover = '';
     	        if(Array.isArray(files)) {  
@@ -328,25 +328,25 @@ define([
         	            if(file.name && file.path && file.contentType) {
         	                hover += '[';
         	                if(file.contentType.icon) {
-        	                    hover += '!['+file.contentType.name+']('+file.contentType.icon+')';
+        	                    hover += '!['+file.contentType.name+']('+file.contentType.icon+')';  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
         	                }
-        	                var href = new URITemplate("#{,resource,params*}").expand(
+        	                var href = new URITemplate("#{,resource,params*}").expand(  //$NON-NLS-0$
         		                      {
         		                      resource: file.location, 
         		                      params: {}
         		                      }); //$NON-NLS-0$
-        	                hover += file.name + ']('+href+') - '+file.path+'\n\n';
+        	                hover += file.name + ']('+href+') - '+file.path+'\n\n';  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
         	            }
         	            
         	        }
     	        } else {
-    	            var name = path.slice(path.lastIndexOf('/')+1);
-    	            title = '###Open file for \''+name+'\'###';
-	                hover += '[!['+name+'](../webtools/images/css.png)';
-	                hover += name + ']('+path+') - '+path+'\n\n';
+    	            var name = path.slice(path.lastIndexOf('/')+1);  //$NON-NLS-0$
+    	            title = '###Open file for \''+name+'\'###';  //$NON-NLS-0$  //$NON-NLS-1$
+	                hover += '[!['+name+'](../webtools/images/css.png)';  //$NON-NLS-0$  //$NON-NLS-1$
+	                hover += name + ']('+path+') - '+path+'\n\n';  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
     	        }
     	        if(hover !== '') {
-    	           return {title: title, content: hover, type:'markdown'};
+    	           return {title: title, content: hover, type:'markdown'};  //$NON-NLS-0$
     	        }
     	    }
     	    return null;
@@ -360,10 +360,10 @@ define([
     		          var html = '<html><body style="margin:1px;"><img src="'+path+'" style="width:100%;height:100%;"/></body></html>'; //$NON-NLS-0$  //$NON-NLS-1$
     			      return {type: "html", content: html, width: "100px", height: "100px"};  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
 		          } else {
-		              var idx = path.lastIndexOf('.');
+		              var idx = path.lastIndexOf('.');  //$NON-NLS-0$
 		              if(idx > -1) {
 		                  var ext = path.slice(idx+1);
-    		              return that.resolver.getWorkspaceFile(path, {ext:ext, type:'Image', icon:'../webtools/images/file.png'}).then(function(files) {
+    		              return that.resolver.getWorkspaceFile(path, {ext:ext, type:'Image', icon:'../webtools/images/file.png'}).then(function(files) {  //$NON-NLS-0$
                 		        if(files) {
                 		            //TODO we have to resolve each time as same-named files could be referenced from different locations
                 		            //and the resolver caches all hits for the name
