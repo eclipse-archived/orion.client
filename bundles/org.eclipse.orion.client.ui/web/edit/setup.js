@@ -403,6 +403,36 @@ objects.mixin(EditorSetup.prototype, {
 	
 	createSideBar: function() {
 		var commandRegistry = this.commandRegistry;
+		// Create input manager wrapper to handle multiple editors
+		function EditorInputManager() {
+			EventTarget.attach(this);
+		}
+		objects.mixin(EditorInputManager.prototype, {
+			getFileMetadata: function() {
+				return this.inputManager.getFileMetadata();
+			},
+			getContentType: function() {
+				return this.inputManager.getContentType();
+			},
+			getEditor: function() {
+				return this.inputManager.getEditor();
+			},
+			getInput: function() {
+				return this.inputManager.getInput();
+			},
+			getTitle: function() {
+				return this.inputManager.getTitle();
+			},
+			getReadOnly: function() {
+				return this.inputManager.getReadOnly();
+			},
+			setInputManager: function(inputManager) {
+				this.inputManager = inputManager;
+				this.selection = inputManager.selection;
+				this.editor = inputManager.editor;
+			}
+		});
+		this.editorInputManager = new EditorInputManager();
 		function SidebarNavInputManager() {
 			EventTarget.attach(this);
 		}
@@ -410,7 +440,7 @@ objects.mixin(EditorSetup.prototype, {
 		var sidebar = this.sidebar = new Sidebar({
 			commandRegistry: this.commandRegistry,
 			contentTypeRegistry: this.contentTypeRegistry,
-			editorInputManager: this.editorViewers[0].inputManager,
+			editorInputManager: this.editorInputManager,
 			preferences: this.preferences,
 			fileClient: this.fileClient,
 			outlineService: this.outlineService,
@@ -611,10 +641,19 @@ objects.mixin(EditorSetup.prototype, {
 		if (editor) {
 			mGlobalCommands.setDirtyIndicator(editor.isDirty());
 		}
-		if (target) {
+		if (metadata) {
 			var params = PageUtil.matchResourceParameters();
 			delete params.resource;
 			window.location = uriTemplate.expand({resource: target.Location, params: params});
+
+			this.editorInputManager.setInputManager(editorViewer.inputManager);
+			this.editorInputManager.dispatchEvent({
+				type: "InputChanged", //$NON-NLS-0$
+				contentType: this.editorInputManager.getContentType(),
+				metadata: metadata,
+				editor: editor,
+				location: window.location,
+			});
 		}
 	},
 
@@ -682,12 +721,12 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, rea
 	Deferred.when(setup.createBanner(), function() {
 		setup._generateShowPip();
 		setup.createMenuBar().then(function() {
+			setup.createSideBar();
 			setup.editorViewers = [];
 			for (var i=0; i<2; i++) {
 				setup.editorViewers.push(setup.createEditorViewer(i === 0 ? "" : "" + i)); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			setup.createSplitters();
-			setup.createSideBar();
 			setup.load();
 		});
 	});
