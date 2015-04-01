@@ -295,6 +295,240 @@ define([
 			dialog.show();
 		}
 		ThemeData.prototype.showImportThemeDialog = showImportThemeDialog;
+
+		function importSublimeTheme(xml) {
+			var themeJson = xmlToJson(xml); //convert to Json
+			ThemeData();
+			var defaultStyles = getStyles();
+			var newStyle = defaultStyles[0];
+
+			//finds the name tag
+			for(var i = 0; i < themeJson.plist[1].dict.key.length; i++){
+				if(themeJson.plist[1].dict.key[i]["#text"] === "name"){ //$NON-NLS-0$
+					newStyle.name = themeJson.plist[1].dict.string[i]["#text"];
+					newStyle.className = newStyle.name.replace(/\s+/g, '');
+				}
+			}
+			var dictKey = themeJson.plist[1].dict.array.dict[0].dict.key;
+			var dictString = themeJson.plist[1].dict.array.dict[0].dict.string;
+
+			//finds the general attributes
+			for(var i = 0; i<dictKey.length; i++){
+				if(dictKey[i]["#text"] === "background" && dictString[i]["#text"].length < 8){ //$NON-NLS-0$
+					newStyle.styles.backgroundColor = dictString[i]["#text"];
+				}
+				else if(dictKey[i]["#text"] === "foreground" && dictString[i]["#text"].length < 8){ //$NON-NLS-0$
+					newStyle.styles.color = dictString[i]["#text"];
+				}
+				else if(dictKey[i]["#text"] === "lineHighlight" && dictString[i]["#text"].length < 8){ //$NON-NLS-0$
+					newStyle.styles.annotationLine.currentLine.backgroundColor = dictString[i]["#text"];
+				}////annotationRange matchingSearch
+				else if(dictKey[i]["#text"] === "selection" && dictString[i]["#text"].length < 8){ //$NON-NLS-0$
+					newStyle.styles.annotationRange.matchingSearch.backgroundColor = dictString[i]["#text"];
+					newStyle.styles.annotationRange.matchingSearch.currentSearch.backgroundColor = dictString[i]["#text"];
+					newStyle.styles.textviewSelection.backgroundColor = dictString[i]["#text"];
+					newStyle.styles["textviewContent ::selection"].backgroundColor = dictString[i]["#text"];
+					newStyle.styles["textviewContent ::-moz-selection"].backgroundColor = dictString[i]["#text"];
+				}
+			}
+			//finds the scope attributes
+			var restKey = themeJson.plist[1].dict.array.dict;
+
+			for(var i = 1; i< restKey.length; i++){
+				try{
+					var target = restKey[i].string[0]["#text"].split(",");
+
+					for (var k = 0; k < target.length; k++){
+						var found = false;
+						if(target[k].trim() === "Comment"){ //$NON-NLS-0$
+							found = true;
+							if (restKey[i].dict.key instanceof Array){
+								for(var l = 0; l< restKey[i].dict.key.length; l++){
+									if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
+										newStyle.styles.comment.color = restKey[i].dict.string[l]["#text"];
+										newStyle.styles.comment.block.color = restKey[i].dict.string[l]["#text"];
+										newStyle.styles.comment.line.color = restKey[i].dict.string[l]["#text"];
+									}
+								}
+							}
+							else{
+								if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
+									newStyle.styles.comment.color = restKey[i].dict.string["#text"];
+									newStyle.styles.comment.block.color = restKey[i].dict.string["#text"];
+									newStyle.styles.comment.line.color = restKey[i].dict.string["#text"];
+								}
+							}
+						}
+						else if(target[k].trim() === "Keyword"){ //$NON-NLS-0$
+							found = true;
+							if (restKey[i].dict.key instanceof Array){
+								for(var l = 0; l< restKey[i].dict.key.length; l++){
+									if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
+										newStyle.styles.keyword.control.color = restKey[i].dict.string[l]["#text"];
+									}
+								}
+							}
+							else{
+								if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
+									newStyle.styles.keyword.control.color = restKey[i].dict.string["#text"];
+								}
+							}
+						}
+						else if(target[k].trim() === "Tag name"){ //$NON-NLS-0$
+							found = true;
+							if (restKey[i].dict.key instanceof Array){
+								for(var l = 0; l< restKey[i].dict.key.length; l++){
+									if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
+										newStyle.styles.meta.tag.color = restKey[i].dict.string[l]["#text"];
+									}
+								}
+							}
+							else{
+								if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
+									newStyle.styles.meta.tag.color = restKey[i].dict.string["#text"];
+								}
+							}
+						}
+						else if(target[k].trim() === "HTML: Doctype"){ //$NON-NLS-0$
+							found = true;
+							if (restKey[i].dict.key instanceof Array){
+								for(var l = 0; l< restKey[i].dict.key.length; l++){
+									if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
+										newStyle.styles.meta.tag.doctype = {};
+										newStyle.styles.meta.tag.doctype.color = restKey[i].dict.string[l]["#text"];
+									}
+								}
+							}
+							else{
+								if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
+									newStyle.styles.meta.tag.doctype = {};
+									newStyle.styles.meta.tag.doctype.color = restKey[i].dict.string["#text"];
+								}
+							}
+						}
+						else if(target[k].trim() === "CSS: Property"){ //$NON-NLS-0$
+							found = true;
+							if (restKey[i].dict.key instanceof Array){
+								for(var l = 0; l< restKey[i].dict.key.length; l++){
+									if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
+										newStyle.styles.support.type.propertyName.color = restKey[i].dict.string[l]["#text"];
+									}
+								}
+							}
+							else{
+								if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
+									newStyle.styles.support.type.propertyName.color = restKey[i].dict.string["#text"];
+								}
+							}
+						}
+						else if(target[k].trim() === "Variable" || target[k].trim() === "Function argument"){ //$NON-NLS-1$ //$NON-NLS-0$
+							found = true;
+							if (restKey[i].dict.key instanceof Array){
+								for(var l = 0; l< restKey[i].dict.key.length; l++){
+									if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
+										newStyle.styles.variable.language.color = restKey[i].dict.string[l]["#text"];
+										newStyle.styles.variable.other.color = restKey[i].dict.string[l]["#text"];
+										newStyle.styles.variable.parameter.color = restKey[i].dict.string[l]["#text"];
+									}
+								}
+							}
+							else{
+								if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
+									newStyle.styles.variable.language.color = restKey[i].dict.string["#text"];
+									newStyle.styles.variable.other.color = restKey[i].dict.string["#text"];
+									newStyle.styles.variable.parameter.color = restKey[i].dict.string["#text"];
+								}
+							}
+						}
+						else if(target[k].trim() === "Constant" || target[k].trim() === "Number"){ //$NON-NLS-1$ //$NON-NLS-0$
+							found = true;
+							if (restKey[i].dict.key instanceof Array){
+								for(var l = 0; l< restKey[i].dict.key.length; l++){
+									if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
+										newStyle.styles.constant.color = restKey[i].dict.string[l]["#text"];
+										newStyle.styles.constant.numeric.color = restKey[i].dict.string[l]["#text"];
+										newStyle.styles.constant.numeric.hex.color = restKey[i].dict.string[l]["#text"];
+									}
+								}
+							}
+							else{
+								if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
+									newStyle.styles.constant.color = restKey[i].dict.string["#text"];
+									newStyle.styles.constant.numeric.color = restKey[i].dict.string["#text"];
+									newStyle.styles.constant.numeric.hex.color = restKey[i].dict.string["#text"];
+								}
+							}
+						}
+						else if(target[k].trim() === "String"){ //$NON-NLS-0$
+							found = true;
+							if (restKey[i].dict.key instanceof Array){
+								for(var l = 0; l< restKey[i].dict.key.length; l++){
+									if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
+										newStyle.styles.string.color = restKey[i].dict.string[l]["#text"];
+										newStyle.styles.string.quoted.single.color = restKey[i].dict.string[l]["#text"];
+										newStyle.styles.string.quoted.double.color = restKey[i].dict.string[l]["#text"];
+									}
+								}
+							}
+							else{
+								if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
+									newStyle.styles.string.color = restKey[i].dict.string["#text"];
+									newStyle.styles.string.quoted.single.color = restKey[i].dict.string["#text"];
+									newStyle.styles.string.quoted.double.color = restKey[i].dict.string["#text"];
+								}
+							}
+						}
+						else if(target[k].trim() === "Storage" || target[k].trim() === "Storage type"){ //$NON-NLS-1$ //$NON-NLS-0$
+							found = true;
+							if (restKey[i].dict.key instanceof Array){
+								for(var l = 0; l< restKey[i].dict.key.length; l++){
+									if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
+										newStyle.styles.keyword.operator.color = restKey[i].dict.string[l]["#text"];
+									}
+								}
+							}
+							else{
+								if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
+									newStyle.styles.keyword.operator.color = restKey[i].dict.string["#text"];
+								}
+							}
+						}
+						else if(target[k].trim() === "Function" || target[k].trim() === "Entity" || target[k].trim() === "Function name"){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							found = true;
+							if (restKey[i].dict.key instanceof Array){
+								for(var l = 0; l< restKey[i].dict.key.length; l++){
+									if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
+										newStyle.styles.entity.name.color = restKey[i].dict.string[l]["#text"];
+										newStyle.styles.entity.name["function"].color = restKey[i].dict.string[l]["#text"];
+									}
+								}
+							}
+							else{
+								if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
+									newStyle.styles.entity.name.color = restKey[i].dict.string["#text"];
+										newStyle.styles.entity.name["function"].color = restKey[i].dict.string["#text"];
+								}
+							}
+						}
+
+						newStyle.styles.rulerLines.color = "#3d3d3d"; //$NON-NLS-0$
+						newStyle.styles.ruler.annotations.backgroundColor = "#1e1e1e"; //$NON-NLS-0$
+						newStyle.styles.ruler.backgroundColor = "#1e1e1e"; //$NON-NLS-0$
+						newStyle.styles.ruler.overview.backgroundColor = "#1e1e1e"; //$NON-NLS-0$
+
+						if(found === false){
+							//console.log("Theme scope ignored : " + target[k].trim()); //$NON-NLS-0$
+						}
+					}
+				}
+				catch (e){
+					//console.log("Exception : " + e); //$NON-NLS-0$
+				}
+			}
+
+			return newStyle;
+		}
+		ThemeData.prototype.importSublimeTheme = importSublimeTheme;
 		
 		function importTheme(data, styles) {
 			var body = styles;
@@ -385,174 +619,7 @@ define([
 				}
 			}
 			else if(xml && xml.children[0].tagName === "plist"){ //$NON-NLS-0$ //assume it uses tmTheme structure [sublime, textmate, etc]
-				var themeJson = xmlToJson(xml); //convert to Json
-				var newStyle = {"className":"default","name":"default","styles":{"annotationLine":{"currentLine":{"backgroundColor":"#EAF2FE"}},"annotationRange":{"currentBracket":{"backgroundColor":"#00FE00"},"matchingBracket":{"backgroundColor":"#00FE00"},"matchingSearch":{"backgroundColor":"#c3e1ff","currentSearch":{"backgroundColor":"#53d1ff"}},"writeOccurrence":{"backgroundColor":"#ffff00"}},"backgroundColor":"#ffffff","color":"#151515","comment":{"color":"#3C802C"},"constant":{"color":"#9932CC","numeric":{"color":"#9932CC","hex":{"color":"#9932CC"}}},"entity":{"name":{"color":"#98937B","function":{"color":"#67BBB8","fontWeight":"bold"}},"other":{"attribute-name":{"color":"#5F9EA0"}}},"fontFamily":"\"Consolas\", \"Monaco\", \"Vera Mono\", monospace","fontSize":"12px","keyword":{"control":{"color":"#CC4C07","fontWeight":"bold"},"operator":{"color":"#9F4177","fontWeight":"bold"},"other":{"documentation":{"color":"#7F9FBF","task":{"color":"#5595ff"}}}},"markup":{"bold":{"fontWeight":"bold"},"heading":{"color":"blue"},"italic":{"fontStyle":"italic"},"list":{"color":"#CC4C07"},"other":{"separator":{"color":"#00008F"},"strikethrough":{"textDecoration":"line-through"},"table":{"color":"#3C802C"}},"quote":{"color":"#446FBD"},"raw":{"fontFamily":"monospace"},"underline":{"link":{"textDecoration":"underline"}}},"meta":{"documentation":{"annotation":{"color":"#7F9FBF"},"tag":{"color":"#7F7F9F"}},"tag":{"color":"#CC4C07"}},"ruler":{"annotations":{"backgroundColor":"#ffffff"},"backgroundColor":"#ffffff","overview":{"backgroundColor":"#ffffff"}},"rulerLines":{"color":"#CCCCCC"},"string":{"color":"#446FBD"},"support":{"type":{"propertyName":{"color":"#9F4177"}}},"textviewContent ::-moz-selection":{"backgroundColor":"#b4d5ff"},"textviewContent ::selection":{"backgroundColor":"#b4d5ff"},"textviewLeftRuler":{"borderRight":"1px solid transparent"},"textviewRightRuler":{"borderLeft":"1px solid transparent"},"textviewSelection":{"backgroundColor":"#b4d5ff"},"textviewSelectionUnfocused":{"backgroundColor":"#b4d5ff"},"variable":{"language":{"color":"#7F0055","fontWeight":"bold"},"other":{"color":"#E038AD"},"parameter":{"color":"#D1416F"}}}}; //$NON-NLS-0$
-				//finds the name tag
-				for(var i = 0; i < themeJson.plist[1].dict.key.length; i++){
-					if(themeJson.plist[1].dict.key[i]["#text"] === "name"){ //$NON-NLS-0$
-						newStyle.name = themeJson.plist[1].dict.string[i]["#text"];
-						newStyle.className = newStyle.name.replace(/\s+/g, '');
-					}
-				}
-				var dictKey = themeJson.plist[1].dict.array.dict[0].dict.key;
-				var dictString = themeJson.plist[1].dict.array.dict[0].dict.string;
-				
-				//finds the general attributes
-				for(var i = 0; i<dictKey.length; i++){
-					if(dictKey[i]["#text"] === "background" && dictString[i]["#text"].length < 8){ //$NON-NLS-0$
-						newStyle.styles.backgroundColor = dictString[i]["#text"];
-					}
-					else if(dictKey[i]["#text"] === "foreground" && dictString[i]["#text"].length < 8){ //$NON-NLS-0$
-						newStyle.styles.color = dictString[i]["#text"];
-					}
-					else if(dictKey[i]["#text"] === "lineHighlight" && dictString[i]["#text"].length < 8){ //$NON-NLS-0$
-						newStyle.styles.annotationLine.currentLine.backgroundColor = dictString[i]["#text"];
-					}////annotationRange matchingSearch
-					else if(dictKey[i]["#text"] === "selection" && dictString[i]["#text"].length < 8){ //$NON-NLS-0$
-						newStyle.styles.annotationRange.matchingSearch.backgroundColor = dictString[i]["#text"];
-						newStyle.styles.annotationRange.matchingSearch.currentSearch.backgroundColor = dictString[i]["#text"];
-					}
-				}
-				//finds the scope attributes
-				var restKey = themeJson.plist[1].dict.array.dict;
-				for(var i = 1; i< restKey.length; i++){
-					try{
-						var target = restKey[i].string[0]["#text"].split(",");
-						for (var k = 0; k < target.length; k++){
-							var found = false;
-							if(target[k].trim() === "Comment"){ //$NON-NLS-0$
-								found = true;
-								if (restKey[i].dict.key instanceof Array){
-									for(var l = 0; l< restKey[i].dict.key.length; l++){
-										if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
-											newStyle.styles.comment.color = restKey[i].dict.string[l]["#text"];
-											newStyle.styles.comment.block.color = restKey[i].dict.string[l]["#text"];
-											newStyle.styles.comment.line.color = restKey[i].dict.string[l]["#text"];
-										}
-									}
-								}
-								else{
-									if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
-										newStyle.styles.comment.color = restKey[i].dict.string["#text"];
-										newStyle.styles.comment.block.color = restKey[i].dict.string["#text"];
-										newStyle.styles.comment.line.color = restKey[i].dict.string["#text"];
-									}
-								}
-							}
-							else if(target[k].trim() === "Keyword"){ //$NON-NLS-0$
-								found = true;
-								if (restKey[i].dict.key instanceof Array){
-									for(var l = 0; l< restKey[i].dict.key.length; l++){
-										if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
-											newStyle.styles.keyword.control.color = restKey[i].dict.string[l]["#text"];
-										}
-									}
-								}
-								else{
-									if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
-										newStyle.styles.keyword.control.color = restKey[i].dict.string["#text"];
-									}
-								}
-							}
-							else if(target[k].trim() === "Variable" || target[k].trim() === "Function argument"){ //$NON-NLS-1$ //$NON-NLS-0$
-								found = true;
-								if (restKey[i].dict.key instanceof Array){
-									for(var l = 0; l< restKey[i].dict.key.length; l++){
-										if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
-											newStyle.styles.variable.language.color = restKey[i].dict.string[l]["#text"];
-											newStyle.styles.variable.other.color = restKey[i].dict.string[l]["#text"];
-											newStyle.styles.variable.parameter.color = restKey[i].dict.string[l]["#text"];
-										}
-									}
-								}
-								else{
-									if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
-										newStyle.styles.variable.language.color = restKey[i].dict.string["#text"];
-										newStyle.styles.variable.other.color = restKey[i].dict.string["#text"];
-										newStyle.styles.variable.parameter.color = restKey[i].dict.string["#text"];
-									}
-								}
-							}
-							else if(target[k].trim() === "Constant" || target[k].trim() === "Number"){ //$NON-NLS-1$ //$NON-NLS-0$
-								found = true;
-								if (restKey[i].dict.key instanceof Array){
-									for(var l = 0; l< restKey[i].dict.key.length; l++){
-										if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
-											newStyle.styles.constant.color = restKey[i].dict.string[l]["#text"];
-											newStyle.styles.constant.numeric.color = restKey[i].dict.string[l]["#text"];
-											newStyle.styles.constant.numeric.hex.color = restKey[i].dict.string[l]["#text"];
-										}
-									}
-								}
-								else{
-									if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
-										newStyle.styles.constant.color = restKey[i].dict.string["#text"];
-										newStyle.styles.constant.numeric.color = restKey[i].dict.string["#text"];
-										newStyle.styles.constant.numeric.hex.color = restKey[i].dict.string["#text"];
-									}
-								}
-							}
-							else if(target[k].trim() === "String"){ //$NON-NLS-0$
-								found = true;
-								if (restKey[i].dict.key instanceof Array){
-									for(var l = 0; l< restKey[i].dict.key.length; l++){
-										if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
-											newStyle.styles.string.color = restKey[i].dict.string[l]["#text"];
-											newStyle.styles.string.quoted.single.color = restKey[i].dict.string[l]["#text"];
-											newStyle.styles.string.quoted.double.color = restKey[i].dict.string[l]["#text"];
-										}
-									}
-								}
-								else{
-									if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
-										newStyle.styles.string.color = restKey[i].dict.string["#text"];
-										newStyle.styles.string.quoted.single.color = restKey[i].dict.string["#text"];
-										newStyle.styles.string.quoted.double.color = restKey[i].dict.string["#text"];
-									}
-								}
-							}
-							else if(target[k].trim() === "Storage" || target[k].trim() === "Storage type"){ //$NON-NLS-1$ //$NON-NLS-0$
-								found = true;
-								if (restKey[i].dict.key instanceof Array){
-									for(var l = 0; l< restKey[i].dict.key.length; l++){
-										if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
-											newStyle.styles.keyword.operator.color = restKey[i].dict.string[l]["#text"];
-										}
-									}
-								}
-								else{
-									if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
-										newStyle.styles.keyword.operator.color = restKey[i].dict.string["#text"];
-									}
-								}
-							}
-							else if(target[k].trim() === "Function" || target[k].trim() === "Entity" || target[k].trim() === "Function name"){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-								found = true;
-								if (restKey[i].dict.key instanceof Array){
-									for(var l = 0; l< restKey[i].dict.key.length; l++){
-										if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
-											newStyle.styles.entity.name.color = restKey[i].dict.string[l]["#text"];
-											newStyle.styles.entity.name["function"].color = restKey[i].dict.string[l]["#text"];
-										}
-									}
-								}
-								else{
-									if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
-										newStyle.styles.entity.name.color = restKey[i].dict.string["#text"];
-											newStyle.styles.entity.name["function"].color = restKey[i].dict.string["#text"];
-									}
-								}
-							}
-							
-							if(found === false){
-								//console.log("Theme scope ignored : " + target[k].trim()); //$NON-NLS-0$
-							}
-						}
-					}
-					catch (e){
-						//console.log("Exception : " + e); //$NON-NLS-0$
-					}
-				}
+				var newStyle = importSublimeTheme(xml);
 			}
 			else if (xml && xml.children[0].tagName === "colorTheme") { //this is an Eclipse theme
 				ThemeData();
@@ -626,10 +693,6 @@ define([
 				styles.textviewSelection.backgroundColor = getValuesFromXML(xml, "selectionBackground");
 				styles["textviewContent ::selection"].backgroundColor = styles.textviewSelection.backgroundColor;
 				styles["textviewContent ::-moz-selection"].backgroundColor = styles.textviewSelection.backgroundColor;
-
-				styles.textviewSelection.color = getValuesFromXML(xml, "selectionForeground");
-				styles["textviewContent ::selection"].color = styles.textviewSelection.selectionForeground;
-				styles["textviewContent ::-moz-selection"].color = styles.textviewSelection.selectionForeground;
 
 				// No quicksearch in Eclipse, so setting the search background same as selection background
 				styles.annotationRange.matchingSearch.backgroundColor = styles.textviewSelection.backgroundColor;
