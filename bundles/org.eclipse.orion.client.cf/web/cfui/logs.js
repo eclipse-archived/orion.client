@@ -10,11 +10,11 @@
 /*eslint-env browser, amd*/
 
 define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',  'orion/keyBinding', 'orion/dialogs', 'orion/selection',
-	'orion/contentTypes','orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/links',
-	'orion/cfui/cFClient', 'orion/PageUtil', 'orion/cfui/logView', 'orion/section',  'orion/cfui/widgets/CfLoginDialog', 'orion/i18nUtil'], 
+	'orion/contentTypes','orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/links', 'orion/cfui/cFClient',
+	'orion/PageUtil', 'orion/cfui/logView', 'orion/section', 'orion/metrics', 'orion/cfui/widgets/CfLoginDialog', 'orion/i18nUtil'], 
 	function(messages, lib, mBootstrap, mStatus, mProgress, CommandRegistry, KeyBinding, mDialogs, mSelection,
 	mContentTypes, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mLinks,
-	mCFClient, PageUtil, mLogView, mSection, CfLoginDialog, i18Util) {
+	mCFClient, PageUtil, mLogView, mSection, mMetrics, CfLoginDialog, i18Util) {
 	mBootstrap.startup().then(
 		function(core) {
 			var serviceRegistry = core.serviceRegistry;
@@ -102,8 +102,12 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 
 				logEditorView.create();
 				
+				var startTime = Date.now();
 				progressService.showWhile(cFClient.getLogz(target, logParams.resource), messages["gettingLogs"]).then(
 					function(logs){
+						var interval = Date.now() - startTime;
+						mMetrics.logTiming("deployment", "retrieve logs", interval);
+
 						var logsInfo = {
 							Target: target,
 							Application: logParams.resource,
@@ -116,6 +120,9 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 						mainLogView.classList.add("toolbarTarget");
 						logEditorView.inputManager.setInput("logs for " + logParams.resource);
 					}, function(e){
+						var interval = Date.now() - startTime;
+						mMetrics.logTiming("deployment", "retrieve logs (error)", interval);
+
 						if(e.JsonData && e.JsonData.error_code){
 							var err = e.JsonData;
 							if (err.error_code === "CF-InvalidAuthToken" || err.error_code === "CF-NotAuthenticated"){
