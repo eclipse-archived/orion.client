@@ -219,9 +219,10 @@ objects.mixin(EditorViewer.prototype, {
 			this.setEditor(view ? view.editor : null);
 			evt.editor = this.editor;
 			
+			var href = window.location.href;
 			this.activateContext.setActiveEditorViewer(this);
-	
-			this.commandRegistry.processURL(window.location.href);
+			this.commandRegistry.processURL(href);
+			
 		}.bind(this));
 		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			inputManager.setInput(event.selection);
@@ -609,6 +610,11 @@ objects.mixin(EditorSetup.prototype, {
 		var editor = editorViewer.editor;
 		if (editor) {
 			mGlobalCommands.setDirtyIndicator(editor.isDirty());
+		}
+		if (target) {
+			var params = PageUtil.matchResouceParameters();
+			delete params.resource;
+			window.location = uriTemplate.expand({resource: target.Location, params: params});
 		}
 	},
 
