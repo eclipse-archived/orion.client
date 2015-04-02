@@ -331,29 +331,7 @@ define([
 			this.reportStatus(messages['Saving...']);
 
 			if (!this._saveEventLogged) {
-				var label = "(none)"; //$NON-NLS-0$
-				if (this._contentType) {
-					label = this._contentType.id;
-				} else if (this._fileMetadata) {
-					var index = this._fileMetadata.Location.lastIndexOf("."); //$NON-NLS-0$
-					if (index >= 0) {
-						label = "unregistered: " + this._fileMetadata.Location.substring(index); //$NON-NLS-0$
-					} else {
-						index = this._fileMetadata.Location.lastIndexOf("/"); //$NON-NLS-0$
-						var name = this._fileMetadata.Location.substring(index + 1);
-						switch (name) {
-							case "AUTHORS": //$NON-NLS-0$
-							case "config": //$NON-NLS-0$
-							case "LICENSE": //$NON-NLS-0$
-							case "make": //$NON-NLS-0$
-							case "Makefile": { //$NON-NLS-0$ 
-								label = "unregistered: " + name; //$NON-NLS-0$
-								break;
-							}
-						}
-					}
-				}
-				mMetrics.logEvent("editor", "save", label); //$NON-NLS-1$ //$NON-NLS-0$
+				this._logMetrics("save"); //$NON-NLS-0$
 				this._saveEventLogged = true;
 			}
 
@@ -536,6 +514,32 @@ define([
 		_getSaveDiffsEnabled: function() {
 			return this._saveDiffsEnabled && this._acceptPatch !== null && this._acceptPatch.indexOf("application/json-patch") !== -1; //$NON-NLS-0$
 		},
+		_logMetrics: function(type) {
+			var label = "(none)"; //$NON-NLS-0$
+			var contentType = this.getContentType();
+			var metadata = this.getFileMetadata();
+			if (contentType) {
+				label = contentType.id;
+			} else if (metadata) {
+				var name = metadata.Name;
+				var index = name.lastIndexOf("."); //$NON-NLS-0$
+				if (index >= 0) {
+					label = "unregistered: " + name.substring(index); //$NON-NLS-0$
+				} else {
+					switch (name) {
+						case "AUTHORS": //$NON-NLS-0$
+						case "config": //$NON-NLS-0$
+						case "LICENSE": //$NON-NLS-0$
+						case "make": //$NON-NLS-0$
+						case "Makefile": { //$NON-NLS-0$ 
+							label = "unregistered: " + name; //$NON-NLS-0$
+							break;
+						}
+					}
+				}
+			}
+			mMetrics.logEvent("editor", type, label); //$NON-NLS-1$ //$NON-NLS-0$
+		},
 		_unknownContentTypeAsText: function() {// Return true if we think unknown content type is text type
 			return true;
 		},
@@ -597,6 +601,7 @@ define([
 				location: window.location,
 				contents: contents
 			};
+			this._logMetrics("open"); //$NON-NLS-0$
 			this.dispatchEvent(evt);
 			this.editor = editor = evt.editor;
 			if (!isDir) {
