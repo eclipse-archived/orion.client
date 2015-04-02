@@ -22,6 +22,7 @@ var IS_WINDOWS = process.platform === 'win32';
 
 var pathToTranslationRoot = 'C:/IDSDev/translations/';
 var pathToDestBundle = 'C:/IDSDev/OrionSource/org.eclipse.orion.client/bundles/';
+var configFile = 'C:/temp/config.js';
 var pathToCWDDir = path.resolve(__dirname, './');
 /**
  * Pass varargs to get numbered parameters, or a single object for named parameters.
@@ -70,12 +71,14 @@ function getCopyFileCmd(src, dest) {
 }
 
 function section(name) {
-	console.log('-------------------------------------------------------\n' + name + '...\n');
+	console.log('-------------------------------------------------------\n' + name + '\n');
 }
 
 function copySingleFile(copyEntry) {
 	var pathToDest = path.resolve(__dirname, copyEntry.dest);
 	var pathToSource = path.resolve(__dirname, copyEntry.source);
+	var pathToDestConfig = path.resolve(__dirname, copyEntry.destConfig);
+	var pathToConfigFile = path.resolve(__dirname, configFile);
 	/*
 	 * Copy steps begin here
 	 */
@@ -85,7 +88,11 @@ function copySingleFile(copyEntry) {
 			return dfs.mkdir(pathToDest);
 		}
 	}).then(function() {
-		return execCommand(getCopyFileCmd(pathToSource, pathToDest));
+		return execCommand(getCopyFileCmd(pathToSource, pathToDest)).then(function() {
+			section(configFile);
+			section(pathToDestConfig);
+			return execCommand(getCopyFileCmd(pathToConfigFile, pathToDestConfig));}
+		);
 	});
 }
 
@@ -142,8 +149,11 @@ function generateCopyArray(sourceRoot, destRoot) {
 		var destTemplate = folderTemplate.map(function(folder){
 			return destRoot + folder.replace(/dummy_language.*/, language.locale);
 		}); 
+		var destTemplateConfig = folderTemplate.map(function(folder){
+			return destRoot + folder.replace("/dummy_language/", "/") + ".js";
+		}); 
 		for(var i = 0; i < sourceTemplate.length; i++) {
-			copyArray.push({source: sourceTemplate[i], dest: destTemplate[i]});
+			copyArray.push({source: sourceTemplate[i], dest: destTemplate[i], destConfig: destTemplateConfig[i]});
 		}
 	});
 	return copyArray;
