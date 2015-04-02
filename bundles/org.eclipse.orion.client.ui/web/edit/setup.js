@@ -352,6 +352,10 @@ objects.mixin(EditorViewer.prototype, {
 			}.bind(this));
 		}
 	},
+	
+	setInput: function(hash) {
+		this.inputManager.setInput(hash);
+	},
 });
 
 function EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly) {
@@ -502,9 +506,7 @@ objects.mixin(EditorSetup.prototype, {
 			id: id,
 			parent: this.editorDomNode,
 			activateContext: this,
-			model: this.model,
 			menuBar: this.menuBar,
-			undoStack: this.undoStack,
 			serviceRegistry: this.serviceRegistry,
 			pluginRegistry: this.pluginRegistry,
 			commandRegistry: this.commandRegistry,
@@ -550,6 +552,11 @@ objects.mixin(EditorSetup.prototype, {
 		
 		this._setSplitterMode("X"); //$NON-NLS-0$
 	},
+	
+	setInput: function(hash) {
+		this.activeEditorViewer.setInput(hash);
+		this.sidebarNavInputManager.processHash(hash);
+	},
 
 	load: function() {
 		var lastEditedFile = sessionStorage.lastFile;
@@ -558,14 +565,12 @@ objects.mixin(EditorSetup.prototype, {
 		if (lastEditedFile && lastEditedFile.lastIndexOf(currentHash, 0) === 0 && lastEditedFile !== currentHash) {
 			window.location.hash = currentHash = lastEditedFile;
 		}
-		
-		var setInput = function(hash) {
-			this.activeEditorViewer.inputManager.setInput(hash);
-			this.sidebarNavInputManager.processHash(PageUtil.hash());
-		}.bind(this);
-		setInput(currentHash);
 
-		window.addEventListener("hashchange", function() { setInput(PageUtil.hash()); }); //$NON-NLS-0$
+		this.setInput(currentHash);
+		window.addEventListener("hashchange", function() { //$NON-NLS-0$
+			this.setInput(PageUtil.hash());
+		}.bind(this));
+
 		window.onbeforeunload = function() {
 			var dirty, autoSave;
 			this.editorViewers.forEach(function(viewer) {

@@ -114,8 +114,6 @@ define([
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.selection = options.selection;
 		this._input = this._title = "";
-		this.dispatcher = null;
-		this._unsavedChanges = [];
 	}
 	objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
 		/**
@@ -169,7 +167,7 @@ define([
 							if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
 								progress(fileClient.read(resource), messages.Reading, fileURI).then(function(contents) {
 									editor.setInput(fileURI, null, contents);
-									this._unsavedChanges = [];
+									this._clearUnsavedChanges();
 								}.bind(this));
 							}
 						}
@@ -276,35 +274,6 @@ define([
 				this.load();
 			}
 		},
-		onChanging: function(e) {
-			if (!this._getSaveDiffsEnabled()) { return; }
-			var length = this._unsavedChanges.length;
-			var addedCharCount = e.addedCharCount;
-			var removedCharCount = e.removedCharCount;
-			var start = e.start;
-			var end = e.start + removedCharCount;
-			var type = 0;
-			if (addedCharCount === 0) {
-				type = -1;
-			} else if (removedCharCount === 0) {
-				type = 1;
-			}
-			if (length > 0) {
-				if (type === this.previousChangeType) {
-					var previousChange = this._unsavedChanges[length-1];
-					if (removedCharCount === 0 && start === previousChange.end + previousChange.text.length) {
-						previousChange.text += e.text;
-						return;
-					}
-					if (e.addedCharCount === 0 && end === previousChange.start) {
-						previousChange.start = start;
-						return;
-					}
-				}
-			}
-			this.previousChangeType = type;
-			this._unsavedChanges.push({start:start, end:end, text:e.text});
-		},
 		reportStatus: function(msg) {
 			if (this.statusReporter) {
 				this.statusReporter(msg);
@@ -340,18 +309,20 @@ define([
 			var contents = editor.getText();
 			var data = contents;
 			if (this._getSaveDiffsEnabled() && !this._errorSaving) {
-				var changes = this._unsavedChanges;
-				var length = 0;
-				for (var i = 0; i < changes.length; i++) {
-					length += changes[i].text.length;
-				}
-				if (contents.length > length) {
-					data = {
-						diff: changes
-					};
+				var changes = this._getUnsavedChanges();
+				if (changes) {
+					var length = 0;
+					for (var i = 0; i < changes.length; i++) {
+						length += changes[i].text.length;
+					}
+					if (contents.length > length) {
+						data = {
+							diff: changes
+						};
+					}
 				}
 			}
-			this._unsavedChanges = [];
+			this._clearUnsavedChanges();
 			this._errorSaving = false;
 
 			var etag = this.getFileMetadata().ETag;
@@ -510,6 +481,10 @@ define([
 		},
 		setSaveDiffsEnabled: function(enabled) {
 			this._saveDiffsEnabled = enabled;
+			var editor = this.editor;
+			if (editor && !editor.isDirty()) {
+				this._clearUnsavedChanges();
+			}
 		},
 		_getSaveDiffsEnabled: function() {
 			return this._saveDiffsEnabled && this._acceptPatch !== null && this._acceptPatch.indexOf("application/json-patch") !== -1; //$NON-NLS-0$
@@ -585,12 +560,6 @@ define([
 				}
 				this._focusListener = null;
 			}
-			if (this._changingListener) {
-				if (editor && editor.getModel && editor.getModel()) {
-					editor.getModel().removeEventListener("Changing", this._changingListener); //$NON-NLS-0$
-				}
-				this._changingListener = null;
-			}
 			var evt = {
 				type: "InputChanged", //$NON-NLS-0$
 				input: input,
@@ -605,9 +574,6 @@ define([
 			this.dispatchEvent(evt);
 			this.editor = editor = evt.editor;
 			if (!isDir) {
-				if (editor && editor.getModel && editor.getModel()) {
-					editor.getModel().addEventListener("Changing", this._changingListener = this.onChanging.bind(this)); //$NON-NLS-0$
-				}
 				if (!noSetInput) {
 					editor.setInput(title, null, contents);
 				}
@@ -615,7 +581,7 @@ define([
 					var textView = editor.getTextView();
 					textView.addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
 				}
-				this._unsavedChanges = [];
+				this._clearUnsavedChanges();
 				this.processParameters(input);
 			}
 			if (evt.session) {
@@ -624,6 +590,19 @@ define([
 
 			this._saveEventLogged = false;
 			mMetrics.logPageLoadTiming("interactive", window.location.pathname); //$NON-NLS-0$
+		},
+		_getUnsavedChanges: function() {
+			var editor = this.editor;
+			if (editor && editor.getUndoStack()) {
+				return editor.getUndoStack()._unsavedChanges;
+			}
+			return null;
+		},
+		_clearUnsavedChanges: function() {
+			var editor = this.editor;
+			if (editor && editor.getUndoStack()) {
+				editor.getUndoStack()._unsavedChanges = this._getSaveDiffsEnabled() ? [] : null;
+			}
 		}
 	});
 	return {
