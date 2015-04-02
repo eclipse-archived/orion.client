@@ -46,13 +46,14 @@ define([
 	'orion/webui/littlelib',
 	'orion/Deferred',
 	'orion/projectClient',
-	'orion/webui/splitter'
+	'orion/webui/splitter',
+	'orion/webui/SplitMenu'
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient, mSplitter
+	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient, mSplitter, mSplitMenu
 ) {
 
 var exports = {};
@@ -714,12 +715,14 @@ objects.mixin(EditorSetup.prototype, {
 			this.editorViewers[1].inputManager.setInput(PageUtil.hash());
 		}
 	},
-	_addPipCommand: function(label) {
-		var id = "orion.edit.showPip" + label; //$NON-NLS-0$
-		var showPipCommand = new mCommands.Command({
+	_createPipCommand: function(label){
+		
+		var id = "orion.edit.showPip" + label;
+		
+		var pipCommand = new mCommands.Command({
 			name: label,
 			tooltip: label,
-			id: id,
+			id: id, //$NON-NLS-0$
 			visibleWhen: function() {
 				return true;
 			},
@@ -728,14 +731,22 @@ objects.mixin(EditorSetup.prototype, {
 				this._setSplitterMode(mode);
 			}.bind(this)
 		});
-		this.commandRegistry.addCommand(showPipCommand);
-		this.commandRegistry.registerCommandContribution("pageActions" , id, 1); //$NON-NLS-0$
+			
+		this.commandRegistry.addCommand(pipCommand);	
+		return pipCommand;
+	},
+	_addPipCommand: function(label) {
+		var pipCommand = this._createPipCommand(label);
+		this.commandRegistry.registerCommandContribution("pageActions" , pipCommand.id, 1); //$NON-NLS-0$
 	},
 	_generateShowPip: function(){
-		this._addPipCommand("H");
-		this._addPipCommand("V");
-		this._addPipCommand("P");
-		this._addPipCommand("X");
+		
+		var splitMenu = new mSplitMenu('SplitMenu');
+
+		splitMenu.addMenuItem(splitMenu.MODE_HORIZONTAL, this._createPipCommand("V"));
+		splitMenu.addMenuItem(splitMenu.MODE_VERTICAL, this._createPipCommand("H"));
+		splitMenu.addMenuItem(splitMenu.MODE_SINGLE, this._createPipCommand("X"));
+		splitMenu.addMenuItem(splitMenu.MODE_PIP, this._createPipCommand("P"));		
 	},
 });
 

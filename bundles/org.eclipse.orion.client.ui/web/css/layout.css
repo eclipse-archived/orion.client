@@ -818,3 +818,56 @@ and (max-device-width : 1024px)  {
 .userMenu > .dropdownMenuOpen {
 	top: 36px;
 }
+
+/* Split View Menu */
+
+.splitMenuBox{
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    z-index: 100;
+    margin-left: 10px;
+    margin-top: 9px;
+}
+
+.splitMenuSelectionTable{
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    background: white;
+    border: 1px solid #eee;
+    margin: 1px;
+    margin-top:2px;
+    visibility:collapse;
+    padding: 5px;
+    box-shadow: 2px 2px 5px 3px rgba(0, 0, 0, 0.2);
+    z-index:100;
+}
+
+.splitMenuSelectionItem{
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    padding-top: 2px;
+}
+
+.splitMenuSelectionItem:hover{
+    cursor: pointer;
+}
+
+.splitMenuState{
+    height: 16px;
+    width: 16px;
+    margin-right: 5px;
+}
+
+.splitMenuDescription{
+    margin-left:5px;
+    color:#777;
+    margin-right: 10px;
+}
+
+
+
+
+

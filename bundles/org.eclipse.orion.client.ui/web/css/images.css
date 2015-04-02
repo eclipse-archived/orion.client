@@ -693,6 +693,10 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.core-sprite-page,
+.core-sprite-horizontal,
+.core-sprite-vertical,
+.core-sprite-pip,
 .core-sprite-dashboard,
 .core-sprite-runlogs,
 .core-sprite-play,
@@ -768,6 +772,11 @@
 .core-sprite-open:before{ content:'\E059'; }
 .core-sprite-dashboard:before{ content:'\E062'; }
 .core-sprite-runlogs:before{ content:'\E064'; }
+.core-sprite-checkmark:before{ content:'\E050'; }
+.core-sprite-page:before{ content:'\E066'; }
+.core-sprite-horizontal:before{ content:'\E042'; }
+.core-sprite-vertical:before{ content:'\E041'; }
+.core-sprite-pip:before{ content:'\E067'; }
 
 
 /* icons for file types - possibly more to come - at least one for images */ 
