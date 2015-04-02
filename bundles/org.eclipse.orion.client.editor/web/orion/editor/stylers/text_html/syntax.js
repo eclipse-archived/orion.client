@@ -20,6 +20,12 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/applicati
 	grammars.push({
 		id: "orion.html", //$NON-NLS-0$
 		contentTypes: ["text/html"], //$NON-NLS-0$
+		repository: {
+			attribute: {
+				match: "hidden|high|href|hreflang|http-equiv|icon|id|ismap|itemprop|keytype|kind|label|lang|language|list|loop|low|manifest|max|maxlength|media|method|min|multiple|name|novalidate|open|optimum|pattern|ping|placeholder|poster|preload|pubdate|radiogroup|readonly|rel|required|reversed|rows|rowspan|sandbox|spellcheck|scope|scoped|seamless|selected|shape|size|sizes|span|src|srcdoc|srclang|srcset|start|step|style|summary|tabindex|target|title|type|usemap|value|width|wrap|border|buffered|challenge|charset|checked|cite|class|code|codebase|color|cols|colspan|content|contenteditable|contextmenu|controls|coords|data-[A-Za-z]+|data|datetime|default|defer|dir|dirname|disabled|download|draggable|dropzone|enctype|for|form|formaction|headers|height|accept|accept-charset|accesskey|action|align|alt|async|autocomplete|autofocus|autoplay|autosave|bgcolor", //$NON-NLS-0$
+				name: "meta.tag.html.attribute" //$NON-NLS-0$
+			}
+		},
 		patterns: [
 			{
 				begin: "(?i)(<style)([^>]*)(>)", //$NON-NLS-0$
@@ -43,9 +49,24 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/applicati
 					{include: "orion.js"} //$NON-NLS-0$
 				]
 			},
+			{
+				begin: "</?[A-Za-z0-9]+", //$NON-NLS-0$
+				end: "/?>", //$NON-NLS-0$
+				captures: {
+					0: {name: "meta.tag.xml"}, //$NON-NLS-0$
+				},
+				name: "meta.tag.xml", //$NON-NLS-0$
+				patterns: [
+					{include: "orion.xml#comment"}, //$NON-NLS-0$
+					{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
+					{include: "orion.lib#string_singleQuote"}, //$NON-NLS-0$
+					{include: "#attribute"} //$NON-NLS-0$
+				]
+			},
 			{include: "orion.xml#comment"}, //$NON-NLS-0$
 			{include: "orion.xml#doctype"}, //$NON-NLS-0$
 			{include: "orion.xml#tag"}, //$NON-NLS-0$
+			{include: "orion.xml#huy"}, //$NON-NLS-0$
 			{include: "orion.xml#ampersandEscape"} //$NON-NLS-0$
 		]
 	});
