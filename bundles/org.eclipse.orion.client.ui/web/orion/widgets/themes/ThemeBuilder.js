@@ -25,6 +25,11 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 	var editorLanguage, editorTheme, originalTheme, currentTheme, revertBtn, deleteBtn ,saveBtn, themeNameInput;
 	var protectedThemes = [];
 	var defaultColor = "#ff80c0";
+	var htmlExclusions = [];
+	var jsExclusions = ["editorThemePropertyName", "editorThemeMetaTag"];
+	var javaExclusions = ["editorThemeColorEntityColor", "editorThemeFunctionParameterColor", "editorThemePropertyName", "editorThemeMetaTag"];
+	var cssExclusions = ["editorThemeColorEntityColor", "editorThemeControlColor", "editorThemeOperatorColor", "editorThemeFunctionParameterColor", "editorThemeMetaTag"];
+
 	var scopeList = [
 		{
 			display:"font size", //$NON-NLS-0$
@@ -186,7 +191,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 					'<button id="editorThemeRevert" class="editorThemeCleanButton"><span class="git-sprite-revert editorThemeButton"></span></button>'+
 				'</div>' +
 				'<ul class="scopeList" id="scopeList">' +
-					generateScopeList() +
+					generateScopeList(jsExclusions) +
 				'</ul>' +
 			'</div>' +//$NON-NLS-0$
 			ThemeBuilder.prototype.template;
@@ -295,9 +300,10 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 	ThemeBuilder.prototype.apply = apply;
 	
 	//generates the html structure for list of scopes
-	function generateScopeList(){
+	function generateScopeList(hiddenValues){
 		var htmlString = "";
 		var ieClass = util.isIE ? "-ie" : ""; //$NON-NLS-0$
+		var hideValueCSS = "";
 
 		for (var i = 0; i < scopeList.length; i++){
 			if (scopeList[i].id === "editorThemeFontSize"){
@@ -310,8 +316,14 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 				}
 				htmlString += "</select></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
-			else
-				htmlString = htmlString + "<li><span>" + scopeList[i].display + "</span><input id='"+scopeList[i].id+"' class='colorpicker-input" + ieClass + "' type='color' value='" + scopeList[i].value + "'></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			else {
+				if (hiddenValues.indexOf(scopeList[i].id) >= 0) {
+					console.log(scopeList[i].id);
+					hideValueCSS = "style='display: none'"; //$NON-NLS-0$
+				}
+
+				htmlString = htmlString + "<li " + hideValueCSS + "><span>" + scopeList[i].display + "</span><input id='"+scopeList[i].id+"' class='colorpicker-input" + ieClass + "' type='color' value='" + scopeList[i].value + "'></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			}
 		}
 		return htmlString;
 	}
@@ -430,28 +442,45 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 		this.settings['name'] = theme;
 	}
 	ThemeBuilder.prototype.changeTheme = changeTheme;
-		
+
 	function changeLanguage(){
 		var language = editorLanguage.options[editorLanguage.selectedIndex].value;
-		
+
 		switch (language) {
 			case "javascript":
 				mSetup.setupView(jsExample, "js"); //$NON-NLS-0$
+				this.updateLHS(jsExclusions);
 				break;
 			case "html":
 				mSetup.setupView(htmlExample, "html"); //$NON-NLS-0$
+				this.updateLHS(htmlExclusions);
 				break;
 			case "css":
 				mSetup.setupView(cssExample, "css"); //$NON-NLS-0$
+				this.updateLHS(cssExclusions);
 				break;
 			case "java":
 				mSetup.setupView(javaExample, "java"); //$NON-NLS-0$
+				this.updateLHS(javaExclusions);
 				break;
 		}
-		
+
 		return true;
 	}
 	ThemeBuilder.prototype.changeLanguage = changeLanguage;
+
+	function updateLHS(exclusions) {
+		for (var i = scopeList.length - 1; i >= 0; i--) {
+			document.getElementById(scopeList[i].id).parentNode.style.display = "";
+		};
+
+		if (exclusions && exclusions.length > 0) {
+			for (var i = exclusions.length - 1; i >= 0; i--) {
+				document.getElementById(exclusions[i]).parentNode.style.display = "none";
+			};
+		}
+	}
+	ThemeBuilder.prototype.updateLHS = updateLHS;
 
 	function selectTheme(name) {
 		this.preferences.getTheme(function(themeStyles) {
