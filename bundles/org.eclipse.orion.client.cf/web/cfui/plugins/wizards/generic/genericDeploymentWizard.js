@@ -156,7 +156,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 				pages: [page1, page2, page3],
 				onCancel: closeFrame,
 				buttonNames: { ok: messages["save"] },
-				size: { width: "calc(100% - 24px)", height: "360px" }, //$NON-NLS-0$//$NON-NLS-1$
+				size: { width: "calc(100% - 24px)", height: "370px" }, //$NON-NLS-0$//$NON-NLS-1$
 				onSubmit: mDeploymentLogic.buildDeploymentTrigger({
 					ConfName : launchConfName,
 					showMessage : showMessage,
