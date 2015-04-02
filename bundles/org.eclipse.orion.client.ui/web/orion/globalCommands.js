@@ -456,7 +456,7 @@ define([
 				
 				// If the viewer has a node for breadcrumbs replace it as well
 				var viewer = options.viewer;
-				if (viewer.localBreadcrumbNode) {
+				if (viewer && viewer.localBreadcrumbNode) {
 					if (viewer.currentBreadcrumb) {
 						viewer.currentBreadcrumb.destroy();
 					}
