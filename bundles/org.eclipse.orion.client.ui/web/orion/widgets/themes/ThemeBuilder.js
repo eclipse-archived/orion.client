@@ -303,7 +303,6 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 	function generateScopeList(hiddenValues){
 		var htmlString = "";
 		var ieClass = util.isIE ? "-ie" : ""; //$NON-NLS-0$
-		var hideValueCSS = "";
 
 		for (var i = 0; i < scopeList.length; i++){
 			if (scopeList[i].id === "editorThemeFontSize"){
@@ -317,11 +316,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 				htmlString += "</select></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			else {
-				if (hiddenValues.indexOf(scopeList[i].id) >= 0) {
-					console.log(scopeList[i].id);
-					hideValueCSS = "style='display: none'"; //$NON-NLS-0$
-				}
-
+				var hideValueCSS = hiddenValues.indexOf(scopeList[i].id) >= 0 ? "style='display: none'" : ""; //$NON-NLS-0$
 				htmlString = htmlString + "<li " + hideValueCSS + "><span>" + scopeList[i].display + "</span><input id='"+scopeList[i].id+"' class='colorpicker-input" + ieClass + "' type='color' value='" + scopeList[i].value + "'></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		}
@@ -472,12 +467,12 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 	function updateLHS(exclusions) {
 		for (var i = scopeList.length - 1; i >= 0; i--) {
 			document.getElementById(scopeList[i].id).parentNode.style.display = "";
-		};
+		}
 
 		if (exclusions && exclusions.length > 0) {
-			for (var i = exclusions.length - 1; i >= 0; i--) {
+			for (i = exclusions.length - 1; i >= 0; i--) {
 				document.getElementById(exclusions[i]).parentNode.style.display = "none";
-			};
+			}
 		}
 	}
 	ThemeBuilder.prototype.updateLHS = updateLHS;
