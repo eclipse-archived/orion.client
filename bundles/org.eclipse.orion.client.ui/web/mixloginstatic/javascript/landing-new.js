@@ -61,6 +61,8 @@ define(['domReady', 'orion/xhr', './common', './jquery', 'orion/URL-shim'], func
 	}
 
 	domReady(function() {
+		common.checkUserCreationEnabled();
+
 		var doc = $(document);
 		var pos = $("#tryIt").offset().top;
 		var buttonClone = $("#tryIt").clone();

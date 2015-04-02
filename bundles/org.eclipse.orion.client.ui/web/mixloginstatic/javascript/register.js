@@ -122,6 +122,9 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domRea
 	}
 
 	domReady(function() {
+		common.checkUserCreationEnabled();
+		common.checkEmailConfigured();
+
 		/* initialize metrics collection for this page */
 		var url = new URL("../metrics", window.location); //$NON-NLS-0$
 		xhr("GET", url.href, { //$NON-NLS-0$

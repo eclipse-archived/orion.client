@@ -55,6 +55,8 @@ define(['domReady', 'orion/xhr', 'orion/webui/littlelib', './common'], function(
 	}
 
 	domReady(function() {
+		common.checkEmailConfigured();
+
 		/* initialize metrics collection for this page */
 		var url = new URL("../metrics", window.location); //$NON-NLS-0$
 		xhr("GET", url.href, { //$NON-NLS-0$
