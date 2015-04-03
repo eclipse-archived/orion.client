@@ -841,7 +841,7 @@ and (max-device-width : 1024px)  {
     visibility:collapse;
     padding: 5px;
     box-shadow: 2px 2px 5px 3px rgba(0, 0, 0, 0.2);
-    z-index:100;
+    z-index:1000;
 }
 
 .splitMenuSelectionItem{
@@ -865,6 +865,10 @@ and (max-device-width : 1024px)  {
     margin-left:5px;
     color:#777;
     margin-right: 10px;
+}
+
+.chosen{
+	cursor:pointer;
 }
 
 

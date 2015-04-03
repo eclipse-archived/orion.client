@@ -578,7 +578,9 @@ objects.mixin(EditorSetup.prototype, {
 			});
 		}.bind(this));
 		
-		this._setSplitterMode("X"); //$NON-NLS-0$
+		var splitMenu = new mSplitMenu();
+		
+		this._setSplitterMode(splitMenu.MODE_SINGLE); //$NON-NLS-0$
 	},
 	
 	setInput: function(hash) {
@@ -705,6 +707,9 @@ objects.mixin(EditorSetup.prototype, {
 	},
 
 	_setSplitterMode: function(mode) {
+		
+		var splitMenu = new mSplitMenu();
+		
 		if (this.splitterMode === mode) return;
 		this.splitterMode = mode;
 		var mainEditorViewerNode = this.editorViewers[0].domNode;
@@ -718,28 +723,37 @@ objects.mixin(EditorSetup.prototype, {
 			splitEditorViewerNode.style[p] = ""; //$NON-NLS-0$
 		});
 		splitterNode.style.display = "block"; //$NON-NLS-0$
-		if (mode === "P") { //$NON-NLS-0$
-			splitterNode.style.display = "none"; //$NON-NLS-0$
-			splitEditorViewerNode.classList.add("editorViewerPicInPic"); //$NON-NLS-0$
-		} else if (mode === "X") { //$NON-NLS-0$
-			splitterNode.style.display = "none"; //$NON-NLS-0$
-			splitEditorViewerNode.style.display = "none"; //$NON-NLS-0$
+		
+		switch(mode){
 			
-			this.setActiveEditorViewer(this.editorViewers[0]);
+			case splitMenu.MODE_PIP:
+				splitterNode.style.display = "none"; //$NON-NLS-0$
+				splitEditorViewerNode.classList.add("editorViewerPicInPic"); //$NON-NLS-0$
+				break;
+				
+			case splitMenu.MODE_SINGLE:
+				splitterNode.style.display = "none"; //$NON-NLS-0$
+				splitEditorViewerNode.style.display = "none"; //$NON-NLS-0$
+				this.setActiveEditorViewer(this.editorViewers[0]);
+				break;
+				
+			case splitMenu.MODE_HORIZONTAL:						
+				if (this.editorSplitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL) {
+					this.editorSplitter.resize();
+				} else {
+					this.editorSplitter.setOrientation(mSplitter.ORIENTATION_VERTICAL);
+				}
+				break;
 			
-		} else if (mode === "H") { //$NON-NLS-0$
-			if (this.editorSplitter.getOrientation() === mSplitter.ORIENTATION_HORIZONTAL) {
-				this.editorSplitter.resize();
-			} else {
-				this.editorSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL);
-			}
-		} else if (mode === "V") { //$NON-NLS-0$
-			if (this.editorSplitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL) {
-				this.editorSplitter.resize();
-			} else {
-				this.editorSplitter.setOrientation(mSplitter.ORIENTATION_VERTICAL);
-			}
+			case splitMenu.MODE_VERTICAL:
+				if (this.editorSplitter.getOrientation() === mSplitter.ORIENTATION_HORIZONTAL) {
+					this.editorSplitter.resize();
+				} else {
+					this.editorSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL);
+				}
+				break;			
 		}
+		
 		this.editorViewers.forEach(function(viewer) {
 			viewer.editorView.editor.resize();
 		});
@@ -774,12 +788,14 @@ objects.mixin(EditorSetup.prototype, {
 	},
 	_generateShowPip: function(){
 		
-		var splitMenu = new mSplitMenu('SplitMenu');
-
-		splitMenu.addMenuItem(splitMenu.MODE_HORIZONTAL, this._createPipCommand("V"));
-		splitMenu.addMenuItem(splitMenu.MODE_VERTICAL, this._createPipCommand("H"));
-		splitMenu.addMenuItem(splitMenu.MODE_SINGLE, this._createPipCommand("X"));
-		splitMenu.addMenuItem(splitMenu.MODE_PIP, this._createPipCommand("P"));		
+		var splitMenu = new mSplitMenu( 'SplitMenu' );
+		
+		var modes = splitMenu.modes;
+		
+		for( var mode in modes ){
+			var command = this._createPipCommand( modes[mode].mode );		
+			splitMenu.addMenuItem( command );
+		}
 	},
 });
 

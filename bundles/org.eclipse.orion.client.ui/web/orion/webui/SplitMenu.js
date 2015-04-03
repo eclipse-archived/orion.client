@@ -33,30 +33,18 @@ define([], function() {
 	    this.MODE_VERTICAL = 1;
 	    this.MODE_HORIZONTAL = 2;
 	    this.MODE_PIP = 3;
-
 	    
+	    this.DESCRIPTION_SINGLE = 'Single Page';
+	    this.DESCRIPTION_VERTICAL = 'Vertical Split';
+	    this.DESCRIPTION_HORIZONTAL = 'Horizontal Split';
+	    this.DESCRIPTION_PIP = 'Picture in Picture';
+    
 	    this.menuItems = [];
 	    
-	    var single = { description: 'Single Page', 
-	                   className: 'core-sprite-page', 
-	                   mode: this.MODE_SINGLE };
-	    
-	    var vertical = { description: 'Vertical Split', 
-	                     className: 'core-sprite-vertical', 
-	                     mode: this.MODE_VERTICAL };
-	    
-	    var horizontal = { description: 'Horizontal Split', 
-	                       className: 'core-sprite-horizontal', 
-	                       mode: this.MODE_HORIZONTAL };
-	    
-	    var pip = { description: 'Picture in Picture', 
-	                className:'core-sprite-pip', 
-	                mode: this.MODE_PIP };
-	    
-//	    this.menuItems[ this.MODE_SINGLE ] = new SplitMenuItem( single );
-//	    this.menuItems[ this.MODE_VERTICAL ] = new SplitMenuItem( vertical );
-//	    this.menuItems[ this.MODE_HORIZONTAL ] = new SplitMenuItem( horizontal );
-//	    this.menuItems[ this.MODE_PIP ] = new SplitMenuItem( pip );
+	    this.modes = [ { description: this.DESCRIPTION_SINGLE, className: 'core-sprite-page', mode: this.MODE_SINGLE },
+	    			   { description: this.DESCRIPTION_VERTICAL, className: 'core-sprite-vertical', mode: this.MODE_VERTICAL },
+	    			   { description: this.DESCRIPTION_HORIZONTAL, className: 'core-sprite-horizontal', mode: this.MODE_HORIZONTAL },
+	                   { description: this.DESCRIPTION_PIP, className:'core-sprite-pip', mode: this.MODE_PIP } ];
 	    
 	    this.chosenMode =  this.MODE_SINGLE;
 	    
@@ -81,7 +69,6 @@ define([], function() {
 	        splitMenu.appendChild( this.currentModeElement );
 	        splitMenu.appendChild( this.selectionTable );
 	        this.anchor.appendChild( splitMenu );
-//	        this.addMenuItems();
 	    }
 	}
 	
@@ -116,30 +103,11 @@ define([], function() {
 	
 	SplitMenu.prototype.createMenuItem = createMenuItem;
 	
-	function addMenuItem( mode, command ){
-		
-		var element = { description: command.name, mode: mode, command: command };
-		
-		switch(mode){
-			
-			case this.MODE_SINGLE:
-				element.className = 'core-sprite-page';
-				break;
-				
-			case this.MODE_VERTICAL:
-				element.className = 'core-sprite-vertical';
-				break;
-				
-			case this.MODE_HORIZONTAL:
-				element.className = 'core-sprite-horizontal';
-				break;
-			
-			case this.MODE_PIP:
-				element.className = 'core-sprite-pip'; 
-				break;
-		}
+	function addMenuItem( command ){
+
+		this.modes[command.name].command = command;
 	
-		this.menuItems[mode] = new SplitMenuItem( element );
+		this.menuItems[command.name] = new SplitMenuItem( this.modes[command.name] );
 		
 		while(this.selectionTable.firstChild ){
 	    	this.selectionTable.removeChild( this.selectionTable.firstChild );
