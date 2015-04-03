@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -208,23 +208,11 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 				return deferred;
 			}
 
-			/* check if there's a manifest in the selected sub-folder */
-			self._findManifest(relativeFilePath).then(function(manifest){
-
-				if(manifest !== null)
-					/* use the sub-folder manifest */
-					deferred.resolve({
-						path: relativeFilePath,
-						appPath: appPath
-					});
-				else
-					/* use the project as deployment path */
-					deferred.resolve({
-						path: project.ContentLocation,
-						appPath: "" /* Note that the appPath has to be updated as well */
-					});
-
-			}, deferred.reject);
+			/* use the project as deployment path */
+			deferred.resolve({
+				path: relativeFilePath,
+				appPath: appPath || "" /* Note that the appPath has to be updated as well */
+			});
 
 			return deferred;
 		},
@@ -247,7 +235,7 @@ function(messages, mBootstrap, objects, Deferred, CFClient, mCfUtil, mFileClient
 				this._getAdditionalLaunchConfigurations(launchConf, project).then(function performPush(manifest) {
 					if (manifest === null) {
 						/* could not find the launch configuration manifest, get the main manifest.yml if present */
-						self._findManifest(project.ContentLocation).then(function(manifest) {
+						self._findManifest(project.ContentLocation + appPath).then(function(manifest) {
 
 							if (manifest === null) {
 								if (appName) {
