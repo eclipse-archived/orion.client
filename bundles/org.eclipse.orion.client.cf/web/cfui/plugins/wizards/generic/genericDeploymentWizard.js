@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -106,7 +106,7 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 		    	Clouds : clouds,
 		    	DefaultTarget : defaultTarget,
 
-				ManifestPath : plan.ManifestPath,
+				ManifestPath : resource.AppPath + (plan.ManifestPath || "manifest.yml"),
 		    	ManifestApplication : manifestApplication,
 		    	ManifestInstrumentation: launchConfParams.Instrumentation,
 		    	serviceRegistry : serviceRegistry,
@@ -173,7 +173,9 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 			    		return corePageBuilder.getSelection();
 			    	},
 
-			    	Manifest : plan.Manifest,
+			    	getManifestPath : function(){
+			    		return corePageBuilder.getManifestPath();
+			    	},
 			    	ContentLocation : resource.ContentLocation,
 			    	AppPath : resource.AppPath
 				})
