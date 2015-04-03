@@ -166,6 +166,10 @@ function EditorViewer(options) {
 	objects.mixin(this, options);
 	this.id = this.id || ""; //$NON-NLS-0$
 	this.selection = this.id ? new mSelection.Selection(this.serviceRegistry, "orion.page.selection" + this.id) : this.selection; //$NON-NLS-0$
+	this.problemsServiceID = "orion.core.marker" + this.id; //$NON-NLS-0$
+	this.editContextServiceID = "orion.edit.context" + this.id; //$NON-NLS-0$
+	this.editModelContextServiceID = this.ownEditModelContextServiceID = "orion.edit.model.context" + this.id; //$NON-NLS-0$
+	
 	var domNode = this.domNode = document.createElement("div"); //$NON-NLS-0$
 	domNode.className = "editorViewerFrame"; //$NON-NLS-0$
 	this.parent.appendChild(domNode);
@@ -201,8 +205,8 @@ objects.mixin(EditorViewer.prototype, {
 	},
 	
 	createTextModel: function() {
-		var model = this.model = new mTextModel.TextModel();
-		this.undoStack = new mUndoStack.UndoStack(this.model, 500);
+		var model = this.model = this.ownModel = new mTextModel.TextModel();
+		this.undoStack = this.ownUndoStack = new mUndoStack.UndoStack(this.model, 500);
 		var contextImpl = {};
 		[	
 			"getText", //$NON-NLS-0$
@@ -210,7 +214,7 @@ objects.mixin(EditorViewer.prototype, {
 		].forEach(function(method) {
 			contextImpl[method] = model[method].bind(model);
 		});
-		this.serviceRegistry.registerService("orion.edit.model.context" + this.id, contextImpl, null); //$NON-NLS-0$
+		this.serviceRegistry.registerService(this.ownEditModelContextServiceID, contextImpl, null);
 	},
 	
 	createEditorView: function() {
@@ -259,8 +263,9 @@ objects.mixin(EditorViewer.prototype, {
 			preferences: this.preferences,
 			searcher: this.searcher,
 			selection: this.selection,
-			problemsServiceID: "orion.core.marker" + this.id, //$NON-NLS-0$
-			editContextServiceID: "orion.edit.context" + this.id, //$NON-NLS-0$
+			problemsServiceID: this.problemsServiceID,
+			editContextServiceID: this.editContextServiceID,
+			editModelContextServiceID: this.editModelContextServiceID,
 			fileService: this.fileClient,
 			statusReporter: this.statusReporter.bind(this),
 			statusService: this.statusService,
@@ -522,6 +527,29 @@ objects.mixin(EditorSetup.prototype, {
 			progressService: this.progressService
 		});
 		editorViewer.create();
+		editorViewer.inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$
+			var previousModel = editorViewer.model;
+			editorViewer.model = editorViewer.editorView.model = editorViewer.ownModel;
+			editorViewer.undoStack = editorViewer.editorView.undoStack = editorViewer.ownUndoStack;
+			editorViewer.editModelContextServiceID = editorViewer.editorView.editModelContextServiceID = editorViewer.ownEditModelContextServiceID;
+			this.editorViewers.some(function(viewer) {
+				if (editorViewer !== viewer && viewer.inputManager.getInput() === e.input.resource) {
+					editorViewer.model = editorViewer.editorView.model = viewer.model;
+					editorViewer.undoStack = editorViewer.editorView.undoStack = viewer.undoStack;
+					editorViewer.editModelContextServiceID = editorViewer.editorView.editModelContextServiceID = viewer.editModelContextServiceID;
+					e.sharedInputManager = viewer.inputManager;
+					return true;
+				}
+				return false;
+			});
+			if (previousModel !== editorViewer.model) {
+				var editor = editorViewer.editorView.editor;
+				if (editor.installed) {
+					editor.uninstall();
+					editor.install();
+				}
+			}
+		}.bind(this));
 		return editorViewer;
 	},
 	

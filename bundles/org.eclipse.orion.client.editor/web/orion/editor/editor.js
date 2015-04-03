@@ -124,6 +124,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @returns {Boolean} whether the editor is dirty
 		 */
 		isDirty: function() {
+			if (this._undoStack) return !this._undoStack.isClean();
 			return this._dirty;
 		},
 		/**

@@ -447,12 +447,17 @@ define([
 				this.selection.setSelections(location);
 			}
 			this._ignoreInput = false;
-			var fileURI = input.resource;
 			var evt = {
 				type: "InputChanging", //$NON-NLS-0$
 				input: input
 			};
 			this.dispatchEvent(evt);
+			var fileURI = input.resource;
+			if (evt.sharedInputManager) {
+				this.reportStatus("");
+				this._setInputContents(input, fileURI, null, evt.sharedInputManager._fileMetadata, this._isText(evt.sharedInputManager._fileMetadata));
+				return;
+			}
 			if (fileURI) {
 				if (fileURI === this._input) {
 					if (editorChanged) {
@@ -593,14 +598,14 @@ define([
 		},
 		_getUnsavedChanges: function() {
 			var editor = this.editor;
-			if (editor && editor.getUndoStack()) {
+			if (editor && editor.getUndoStack && editor.getUndoStack()) {
 				return editor.getUndoStack()._unsavedChanges;
 			}
 			return null;
 		},
 		_clearUnsavedChanges: function() {
 			var editor = this.editor;
-			if (editor && editor.getUndoStack()) {
+			if (editor && editor.getUndoStack && editor.getUndoStack()) {
 				editor.getUndoStack()._unsavedChanges = this._getSaveDiffsEnabled() ? [] : null;
 			}
 		}

@@ -47,6 +47,7 @@ define([
 		this.pluginRegistry = options.pluginRegistry;
 		this.statusService = options.statusService;
 		this.inputManager = options.inputManager;
+		this.editModelContextServiceID = options.editModelContextServiceID;
 	}
 		
 	PluginEditor.prototype = Object.create(BaseEditor.prototype);
@@ -71,7 +72,7 @@ define([
 			if (service.setTextModel) {
 
 				//HACK
-				var context = serviceRegistry.getService(serviceRegistry.getServiceReferences("orion.edit.model.context")[0]); //$NON-NLS-0$
+				var context = serviceRegistry.getService(serviceRegistry.getServiceReferences(this.editModelContextServiceID)[0]); //$NON-NLS-0$
 				
 				var self = this;
 				self.oldSetText = context.setText;
@@ -136,7 +137,7 @@ define([
 			//HACK
 			var serviceRegistry = this.serviceRegistry;
 			if (this.oldSetText) {
-				var context = serviceRegistry.getService(serviceRegistry.getServiceReferences("orion.edit.model.context")[0]); //$NON-NLS-0$
+				var context = serviceRegistry.getService(serviceRegistry.getServiceReferences(this.editModelContextServiceID)[0]); //$NON-NLS-0$
 				context.setText = this.oldSetText;
 			}
 			
@@ -155,6 +156,7 @@ define([
 		this.progressService = options.progressService;
 		this.editorService = options.editorService;
 		this.editorCommands = options.editorCommands;
+		this.editModelContextServiceID = options.editModelContextServiceID;
 		this.metadata = options.metadata;
 		this.inputManager = options.inputManager;
 		this.readonly = options.readonly;
@@ -172,6 +174,7 @@ define([
 				editorService: this.editorService,
 				statusService: this.statusService,
 				inputManager: this.inputManager,
+				editModelContextServiceID: this.editModelContextServiceID,
 				metadata: this.metadata
 			});
 			this.editor.install();
