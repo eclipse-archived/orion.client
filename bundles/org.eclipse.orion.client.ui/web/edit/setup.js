@@ -162,13 +162,63 @@ objects.mixin(MenuBar.prototype, {
 	}
 });
 
+function TextModelPool(options) {
+	this.serviceRegistry = options.serviceRegistry;
+	this.all = [];
+}
+TextModelPool.prototype = {};
+objects.mixin(TextModelPool.prototype, {
+	create: function(serviceID) {
+		var model = new mTextModel.TextModel();
+		var undoStack = new mUndoStack.UndoStack(model, 500);
+		var contextImpl = {};
+		[	
+			"getText", //$NON-NLS-0$
+			"setText" //$NON-NLS-0$
+		].forEach(function(method) {
+			contextImpl[method] = model[method].bind(model);
+		});
+		this.serviceRegistry.registerService(serviceID, contextImpl, null);
+		var result = {
+			useCount: 1,
+			model: model,
+			undoStack: undoStack,
+			serviceID: serviceID
+		};
+		this.all.push(result);
+		return result;
+	},
+	search: function(resource) {
+		for (var i = 0; i<this.all.length; i++) {
+			var p = this.all[i];
+			if (p.useCount > 0 && p.metadata && p.metadata.Location === resource) return p;
+		}
+		return null;
+	},
+	release: function(p) {
+		p.useCount--;
+		return p;
+	},
+	retain: function(p) {
+		p.useCount++;
+		return p;
+	},
+	get: function() {
+		for (var i = 0; i<this.all.length; i++) {
+			var p = this.all[i];
+			if (p.useCount === 0) return this.retain(p);
+		}
+		return null;
+	}
+});
+
 function EditorViewer(options) {
 	objects.mixin(this, options);
 	this.id = this.id || ""; //$NON-NLS-0$
 	this.selection = this.id ? new mSelection.Selection(this.serviceRegistry, "orion.page.selection" + this.id) : this.selection; //$NON-NLS-0$
 	this.problemsServiceID = "orion.core.marker" + this.id; //$NON-NLS-0$
 	this.editContextServiceID = "orion.edit.context" + this.id; //$NON-NLS-0$
-	this.editModelContextServiceID = this.ownEditModelContextServiceID = "orion.edit.model.context" + this.id; //$NON-NLS-0$
+	this.editModelContextServiceID = "orion.edit.model.context" + this.id; //$NON-NLS-0$
 	
 	var domNode = this.domNode = document.createElement("div"); //$NON-NLS-0$
 	domNode.className = "editorViewerFrame"; //$NON-NLS-0$
@@ -193,7 +243,7 @@ function EditorViewer(options) {
 	
 	domNode.addEventListener("mousedown", function() { //$NON-NLS-0$
 		this.activateContext.setActiveEditorViewer(this);
-	}.bind(this));
+	}.bind(this), true);
 }
 EditorViewer.prototype = {};
 objects.mixin(EditorViewer.prototype, {
@@ -205,16 +255,7 @@ objects.mixin(EditorViewer.prototype, {
 	},
 	
 	createTextModel: function() {
-		var model = this.model = this.ownModel = new mTextModel.TextModel();
-		this.undoStack = this.ownUndoStack = new mUndoStack.UndoStack(this.model, 500);
-		var contextImpl = {};
-		[	
-			"getText", //$NON-NLS-0$
-			"setText" //$NON-NLS-0$
-		].forEach(function(method) {
-			contextImpl[method] = model[method].bind(model);
-		});
-		this.serviceRegistry.registerService(this.ownEditModelContextServiceID, contextImpl, null);
+		this.pool = this.modelPool.create(this.editModelContextServiceID);
 	},
 	
 	createEditorView: function() {
@@ -236,10 +277,38 @@ objects.mixin(EditorViewer.prototype, {
 			var view = this.getEditorView(evt.input, metadata);
 			this.setEditor(view ? view.editor : null);
 			evt.editor = this.editor;
-			
+			this.pool.metadata = metadata;
 			var href = window.location.href;
 			this.activateContext.setActiveEditorViewer(this);
 			this.commandRegistry.processURL(href);			
+		}.bind(this));
+		inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$
+			var previousPool = this.pool;
+			var modelPool = this.modelPool;
+			var p = modelPool.search(e.input.resource);
+			if (p) {
+				modelPool.release(this.pool);
+				this.pool = modelPool.retain(p);
+			} else if (this.pool.useCount > 1) {
+				modelPool.release(this.pool);
+				this.pool = modelPool.get();
+			}
+			// If shared, ask input manager to reuse metadata and buffer
+			if (this.pool.useCount > 1) {
+				e.metadata = p.metadata;
+			}
+			if (previousPool !== this.pool) {
+				// This is necessary because the editor view is reused
+				var editorView = this.editorView;
+				editorView.model = this.pool.model;
+				editorView.undoStack = this.pool.undoStack;
+				editorView.editModelContextServiceID = this.pool.serviceID;
+				var editor = editorView.editor;
+				if (editor.installed && editorView === this.currentEditorView) {
+					editor.uninstall();
+					editor.install();
+				}
+			}
 		}.bind(this));
 		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			inputManager.setInput(event.selection);
@@ -249,9 +318,10 @@ objects.mixin(EditorViewer.prototype, {
 	defaultOptions: function() {
 		return {
 			parent: this.contentNode,
-			model: this.model,
+			model: this.pool.model,
+			undoStack: this.pool.undoStack,
+			editModelContextServiceID: this.pool.serviceID,
 			menuBar: this.menuBar,
-			undoStack: this.undoStack,
 			serviceRegistry: this.serviceRegistry,
 			pluginRegistry: this.pluginRegistry,
 			commandRegistry: this.commandRegistry,
@@ -265,7 +335,6 @@ objects.mixin(EditorViewer.prototype, {
 			selection: this.selection,
 			problemsServiceID: this.problemsServiceID,
 			editContextServiceID: this.editContextServiceID,
-			editModelContextServiceID: this.editModelContextServiceID,
 			fileService: this.fileClient,
 			statusReporter: this.statusReporter.bind(this),
 			statusService: this.statusService,
@@ -334,7 +403,7 @@ objects.mixin(EditorViewer.prototype, {
 				this.currentEditorView.destroy();
 			}
 			if (this.lastMetadata && this.lastMetadata.Location !== metadata.Location) {
-				this.model.setText("");
+				this.pool.model.setText("");
 			}
 			this.currentEditorView = view;
 			if (this.currentEditorView) {
@@ -370,6 +439,8 @@ function EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly) {
 	this.readonly = readonly;
 	this.initializeServices();
 	
+	this.modelPool = new TextModelPool({serviceRegistry: this.serviceRegistry});
+
 	this.editorDomNode = lib.node("editor"); //$NON-NLS-0$
 	this.sidebarDomNode = lib.node("sidebar"); //$NON-NLS-0$
 	this.sidebarToolbar = lib.node("sidebarToolbar"); //$NON-NLS-0$
@@ -511,6 +582,7 @@ objects.mixin(EditorSetup.prototype, {
 			id: id,
 			parent: this.editorDomNode,
 			activateContext: this,
+			modelPool: this.modelPool,
 			menuBar: this.menuBar,
 			serviceRegistry: this.serviceRegistry,
 			pluginRegistry: this.pluginRegistry,
@@ -527,29 +599,6 @@ objects.mixin(EditorSetup.prototype, {
 			progressService: this.progressService
 		});
 		editorViewer.create();
-		editorViewer.inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$
-			var previousModel = editorViewer.model;
-			editorViewer.model = editorViewer.editorView.model = editorViewer.ownModel;
-			editorViewer.undoStack = editorViewer.editorView.undoStack = editorViewer.ownUndoStack;
-			editorViewer.editModelContextServiceID = editorViewer.editorView.editModelContextServiceID = editorViewer.ownEditModelContextServiceID;
-			this.editorViewers.some(function(viewer) {
-				if (editorViewer !== viewer && viewer.inputManager.getInput() === e.input.resource) {
-					editorViewer.model = editorViewer.editorView.model = viewer.model;
-					editorViewer.undoStack = editorViewer.editorView.undoStack = viewer.undoStack;
-					editorViewer.editModelContextServiceID = editorViewer.editorView.editModelContextServiceID = viewer.editModelContextServiceID;
-					e.sharedInputManager = viewer.inputManager;
-					return true;
-				}
-				return false;
-			});
-			if (previousModel !== editorViewer.model) {
-				var editor = editorViewer.editorView.editor;
-				if (editor.installed) {
-					editor.uninstall();
-					editor.install();
-				}
-			}
-		}.bind(this));
 		return editorViewer;
 	},
 	
@@ -584,6 +633,8 @@ objects.mixin(EditorSetup.prototype, {
 	},
 	
 	setInput: function(hash) {
+		if (this.lastHash === hash) return;
+		this.lastHash = hash;
 		this.activeEditorViewer.setInput(hash);
 		this.sidebarNavInputManager.processHash(hash);
 	},
@@ -694,6 +745,7 @@ objects.mixin(EditorSetup.prototype, {
 			var params = PageUtil.matchResourceParameters();
 			delete params.resource;
 			window.location = uriTemplate.expand({resource: target.Location, params: params});
+			this.lastHash = PageUtil.hash();
 
 			this.editorInputManager.setInputManager(editorViewer.inputManager);
 			this.editorInputManager.dispatchEvent({

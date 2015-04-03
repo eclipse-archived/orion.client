@@ -453,9 +453,11 @@ define([
 			};
 			this.dispatchEvent(evt);
 			var fileURI = input.resource;
-			if (evt.sharedInputManager) {
+			if (evt.metadata) {
 				this.reportStatus("");
-				this._setInputContents(input, fileURI, null, evt.sharedInputManager._fileMetadata, this._isText(evt.sharedInputManager._fileMetadata));
+				this._input = fileURI;
+				var metadata = objects.mixin({}, evt.metadata);
+				this._setInputContents(input, fileURI, null, metadata, this._isText(metadata));
 				return;
 			}
 			if (fileURI) {
