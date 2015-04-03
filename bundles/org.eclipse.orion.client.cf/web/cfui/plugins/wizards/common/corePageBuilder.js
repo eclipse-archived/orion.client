@@ -224,6 +224,13 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 		getSelection : function(){
 			return this._selection;
 		},
+
+		getManifestPath : function(){
+			var path;
+			
+			path = this._manifestInput.value.substring(0, this._manifestInput.value.lastIndexOf("/") + 1);
+			return path;
+		},
 			
 		build : function(){
 			
@@ -363,10 +370,10 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						
 						// render the manifest file
 						document.getElementById("manifestLabel").textContent = messages["manifestLabel"];
-						var manifestInput = document.createElement("input"); //$NON-NLS-0$
-						manifestInput.value = self._manifestPath || "";
-						manifestInput.readOnly = true; // TODO should be editable
-						document.getElementById("manifest").appendChild(manifestInput); //$NON-NLS-0$
+						self._manifestInput = document.createElement("input"); //$NON-NLS-0$
+						self._manifestInput.value = self._manifestPath || "";
+						self._manifestInput.readOnly = false; // TODO should be editable
+						document.getElementById("manifest").appendChild(self._manifestInput); //$NON-NLS-0$
 						
 						// Manifest Settings section
 						document.getElementById("manifestSettings").textContent = messages["manifestSettings"]; //$NON-NLS-0$
