@@ -74,7 +74,8 @@ define([
 	 * @returns {Boolean} true if the `mochaResults` object exceeds the Sauce Labs 64KB API size limit
 	 */
 	function tooBig(mochaResults) {
-		return JSON.stringify(mochaResults).length >= 64000 ;
+		var results = JSON.stringify(mochaResults);
+		return results && results.length >= 64000 ;
 	}
 	
 	function pruneReports(mochaResults) {
