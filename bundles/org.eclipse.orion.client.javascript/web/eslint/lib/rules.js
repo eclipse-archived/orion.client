@@ -37,8 +37,8 @@ exports.define = define;
  * @param {String} [rulesDir] Path to rules directory, may be relative. Defaults to `lib/rules`.
  * @returns {void}
  */
-function load(rulesDir) {
-    var newRules = Rules.getESLintRules(rulesDir);
+function load() {
+    var newRules = Rules.getESLintRules();
     Object.keys(newRules).forEach(function(ruleId) {
         define(ruleId, newRules[ruleId]);
     });
@@ -85,6 +85,7 @@ exports.testClear = function() {
 
 // loads built-in rules
 load();
+
 
 return exports;
 });

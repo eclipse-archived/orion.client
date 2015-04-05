@@ -7,10 +7,11 @@ define([
 './rules', 
 './util', 
 './rule-context', 
-'./events', 
+'./events',
+'./token-store',
 'require', 
 'module'
-], function(esprima, estraverse, escope, environments, rules, util, RuleContext, events, require, module) {
+], function(esprima, estraverse, escope, environments, rules, util, RuleContext, events, createTokenStore, require, module) {
 
 /**
  * @fileoverview Main ESLint object.
@@ -18,6 +19,7 @@ define([
  */
 "use strict";
 var EventEmitter = events.EventEmitter;
+
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -171,13 +173,13 @@ function addDeclaredGlobals(program, globalScope, config) {
  * starting from start location
  * @param  {Object[]} reportingConfig Current reporting configuration
  * @param  {Object} start Position to start
- * @param  {string[]} rules List of rules
+ * @param  {string[]} rulesToDisable List of rules
  * @returns {void}
  */
-function disableReporting(reportingConfig, start, rules) {
+function disableReporting(reportingConfig, start, rulesToDisable) {
 
-    if (rules.length) {
-        rules.forEach(function(rule){
+    if (rulesToDisable.length) {
+        rulesToDisable.forEach(function(rule) {
             reportingConfig.push({
                 start: start,
                 end: null,
@@ -198,13 +200,15 @@ function disableReporting(reportingConfig, start, rules) {
  * starting from start location
  * @param  {Object[]} reportingConfig Current reporting configuration
  * @param  {Object} start Position to start
- * @param  {string[]} rules List of rules
+ * @param  {string[]} rulesToEnable List of rules
  * @returns {void}
  */
-function enableReporting(reportingConfig, start, rules) {
-    if (rules.length) {
-        rules.forEach(function(rule){
-            for (var i = reportingConfig.length - 1; i >= 0; i--) {
+function enableReporting(reportingConfig, start, rulesToEnable) {
+    var i;
+
+    if (rulesToEnable.length) {
+        rulesToEnable.forEach(function(rule) {
+            for (i = reportingConfig.length - 1; i >= 0; i--) {
                 if (!reportingConfig[i].end && reportingConfig[i].rule === rule ) {
                     reportingConfig[i].end = start;
                     break;
@@ -214,7 +218,7 @@ function enableReporting(reportingConfig, start, rules) {
     } else {
         // find all previous disabled locations if they was started as list of rules
         var prevStart;
-        for (var i = reportingConfig.length - 1; i >= 0; i--) {
+        for (i = reportingConfig.length - 1; i >= 0; i--) {
             if (prevStart && prevStart !== reportingConfig[i].start) {
                 break;
             }
@@ -283,7 +287,7 @@ function modifyConfigsFromComments(ast, config, reportingConfig) {
                         });
                         break;
 
-                    //no default
+                    // no default
                 }
             }
         }
@@ -316,7 +320,7 @@ function isDisabledByReportingConfig(reportingConfig, ruleId, location) {
         if ((!ignore.rule || ignore.rule === ruleId) &&
             (location.line > ignore.start.line || (location.line === ignore.start.line && location.column >= ignore.start.column)) &&
             (!ignore.end || (location.line < ignore.end.line || (location.line === ignore.end.line && location.column <= ignore.end.column)))) {
-                return true;
+            return true;
         }
     }
 
@@ -333,9 +337,11 @@ function prepareConfig(config) {
     config.globals = config.globals || config.global || {};
     delete config.global;
 
-    var copiedRules = {};
+    var copiedRules = {},
+        ecmaFeatures = {};
+
     if (typeof config.rules === "object") {
-        Object.keys(config.rules).forEach(function(k){
+        Object.keys(config.rules).forEach(function(k) {
             var rule = config.rules[k];
             if (Array.isArray(rule)) {
                 copiedRules[k] = rule.slice();
@@ -345,11 +351,22 @@ function prepareConfig(config) {
         });
     }
 
+    // merge in environment ecmaFeatures
+    if (typeof config.env === "object") {
+        Object.keys(config.env).forEach(function(env) {
+            if (environments[env].ecmaFeatures) {
+                assign(ecmaFeatures, environments[env].ecmaFeatures);
+            }
+        });
+    }
+
     return {
         rules: copiedRules,
+        parser: config.parser || "esprima",
         globals: util.mergeConfigs({}, config.globals),
         env: util.mergeConfigs({}, config.env || {}),
-        settings: util.mergeConfigs({}, config.settings || {})
+        settings: util.mergeConfigs({}, config.settings || {}),
+        ecmaFeatures: util.mergeConfigs(ecmaFeatures, config.ecmaFeatures || {})
     };
 }
 
@@ -371,21 +388,24 @@ module.exports = (function() {
         currentTokens = null,
         currentScopes = null,
         scopeMap = null,
+        scopeManager = null,
         currentFilename = null,
         controller = null,
         reportingConfig = [],
         commentLocsEnter = [],
-        commentLocsExit = [];
+        commentLocsExit = [],
+        currentAST = null;
 
     /**
      * Parses text into an AST. Moved out here because the try-catch prevents
      * optimization of functions, so it's best to keep the try-catch as isolated
      * as possible
      * @param {string} text The text to parse.
+     * @param {Object} config The ESLint configuration object.
      * @returns {ASTNode} The AST if successful or null if not.
      * @private
      */
-    function parse(text) {
+    function parse(text, config) {
         /*
          * Check for parsing errors first. If there's a parsing error, nothing
          * else can happen. However, a parsing error does not throw an error
@@ -399,8 +419,9 @@ module.exports = (function() {
                 raw: true,
                 tokens: true,
                 comment: true,
-                tolerant: true,  //ORION
-                attachComment: true
+                tolerant: true, //ORION
+                attachComment: true,
+                ecmaFeatures: config.ecmaFeatures
             });
         } catch (ex) {
 
@@ -498,12 +519,14 @@ module.exports = (function() {
     api.reset = function() {
         this.removeAllListeners();
         messages = [];
+        currentAST = null;
         currentConfig = null;
         currentText = null;
         currentTextLines = [];
         currentTokens = null;
         currentScopes = null;
         scopeMap = null;
+        scopeManager = null;
         controller = null;
         reportingConfig = [];
         commentLocsEnter = [];
@@ -522,6 +545,9 @@ module.exports = (function() {
      */
     api.verify = function(textOrAST, config, filename, saveState) {
 
+        var ast,
+            shebang;
+
         // set the current parsed filename
         currentFilename = filename;
 
@@ -529,12 +555,26 @@ module.exports = (function() {
             this.reset();
         }
         
-        var ast = (textOrAST && typeof textOrAST === "object") ? textOrAST : ast = parse(textOrAST.replace(/^#!([^\r\n]+[\r\n]+)/, "//$1"));
+        var text = textOrAST && typeof textOrAST === "string" ? textOrAST : textOrAST.source;
 
-        //if Esprima failed to parse the file, there's no sense in setting up rules
+        // there's no input, just exit here
+        if (text.trim().length === 0) {
+            currentText = text;
+            return messages;
+        }
+
+        // process initial config to make it safe to extend
+        config = prepareConfig(config || {});
+
+        ast = (textOrAST && typeof textOrAST === "object") ? textOrAST : parse(text.replace(/^#!([^\r\n]+)/, function(match, captured) {
+            shebang = captured;
+            return "//" + captured;
+        }), config);
+
+        // if espree failed to parse the file, there's no sense in setting up rules
         if (ast) {
-            // process initial config to make it safe to extend
-            config = prepareConfig(config);
+
+            currentAST = ast;
 
             // parse global comments and modify config
             modifyConfigsFromComments(ast, config, reportingConfig);
@@ -543,6 +583,7 @@ module.exports = (function() {
             Object.keys(config.rules).filter(function(key) {
                 return getRuleSeverity(config.rules[key]) > 0;
             }).forEach(function(key) {
+
                 var ruleCreator = rules.get(key),
                     severity = getRuleSeverity(config.rules[key]),
                     options = getRuleOptions(config.rules[key]),
@@ -550,7 +591,10 @@ module.exports = (function() {
 
                 if (ruleCreator) {
                     try {
-                        rule = ruleCreator(new RuleContext(key, api, severity, options, config)); // ORION
+                        rule = ruleCreator(new RuleContext(
+                            key, api, severity, options,
+                            config.settings, config.ecmaFeatures, config.env //ORION
+                        ));
 
                         // add all the node types as listeners
                         Object.keys(rule).forEach(function(nodeType) {
@@ -568,11 +612,15 @@ module.exports = (function() {
 
             // save config so rules can access as necessary
             currentConfig = config;
-            currentText = textOrAST && typeof textOrAST === "string" ? textOrAST : textOrAST.source;
+            currentText = text;
             controller = new estraverse.Controller();
 
             // gather data that may be needed by the rules
-            currentScopes = escope.analyze(ast, { ignoreEval: true }).scopes;
+            scopeManager = escope.analyze(ast, {
+                ignoreEval: true,
+                ecmaVersion: currentConfig.ecmaFeatures.blockBindings ? 6 : 5
+            });
+            currentScopes = scopeManager.scopes;
 
             /*
              * Index the scopes by the start range of their block for efficient
@@ -594,22 +642,27 @@ module.exports = (function() {
              * it's not being done repeatedly
              * by individual rules.
              */
-            currentTextLines = currentText.split(/\r?\n/g);
+            currentTextLines = currentText.split(/\r?\n|\u2028|\u2029/g);
 
             // Freezing so array isn't accidentally changed by a rule.
             Object.freeze(currentTextLines);
 
-            /* get all tokens from the ast and store them as a hashtable to
-             * improve traversal speed when wanting to find tokens for a given
-             * node
-             */
-            currentTokens = [];
-            ast.tokens.forEach(function(token) {
-                currentTokens[token.range[0]] = token;
+            currentTokens = createTokenStore(ast.tokens);
+            Object.keys(currentTokens).forEach(function(method) {
+                api[method] = currentTokens[method];
             });
 
             // augment global scope with declared global variables
             addDeclaredGlobals(ast, currentScopes[0], currentConfig);
+
+            // remove shebang comments
+            if (shebang && ast.comments.length && ast.comments[0].value === shebang) {
+                ast.comments.splice(0, 1);
+
+                if (ast.body.length && ast.body[0].leadingComments && ast.body[0].leadingComments[0].value === shebang) {
+                    ast.body[0].leadingComments.splice(0, 1);
+                }
+            }
 
             /*
              * Each node has a type property. Whenever a particular type of node is found,
@@ -637,6 +690,17 @@ module.exports = (function() {
             });
 
         }
+
+        // sort by line and column
+        messages.sort(function(a, b) {
+            var lineDiff = a.line - b.line;
+
+            if (lineDiff === 0) {
+                return a.column - b.column;
+            } else {
+                return lineDiff;
+            }
+        });
 
         return messages;
     };
@@ -683,7 +747,10 @@ module.exports = (function() {
             node: node,
             message: message,
             args: opts, //mrennie Orion
-            source: api.getSource(node),
+            line: location.line,
+            column: location.column,
+            nodeType: node.type,
+            source: currentTextLines[location.line - 1] || "",
             related: typeof related !== "undefined" ? related : null
         });
     };
@@ -697,7 +764,7 @@ module.exports = (function() {
      */
     api.getSource = function(node, beforeCount, afterCount) {
         if (node) {
-            return (currentText !== null) ? currentText.slice(node.range[0] - (beforeCount || 0),
+            return (currentText !== null) ? currentText.slice(Math.max(node.range[0] - (beforeCount || 0), 0),
                 node.range[1] + (afterCount || 0)) : null;
         } else {
             return currentText;
@@ -714,6 +781,14 @@ module.exports = (function() {
     };
 
     /**
+     * Retrieves an array containing all comments in the source code.
+     * @returns {ASTNode[]} An array of comment nodes.
+     */
+    api.getAllComments = function() {
+        return currentAST.comments;
+    };
+
+    /**
      * Gets all comments for the given node.
      * @param {ASTNode} node The AST node to get the comments for.
      * @returns {Object} The list of comments indexed by their position.
@@ -724,7 +799,7 @@ module.exports = (function() {
             trailingComments = node.trailingComments || [];
 
         /*
-         * Esprima adds a "comments" array on Program nodes rather than
+         * espree adds a "comments" array on Program nodes rather than
          * leadingComments/trailingComments. Comments are only left in the
          * Program node comments array if there is no executable code.
          */
@@ -779,189 +854,21 @@ module.exports = (function() {
             case "FunctionDeclaration":
                 return findJSDocComment(node.leadingComments);
 
+            case "ArrowFunctionExpression":
             case "FunctionExpression":
 
                 if (parent.type !== "CallExpression" || parent.callee !== node) {
-                    while (parent && !parent.leadingComments && parent.type !== "FunctionExpression" && parent.type !== "FunctionDeclaration") {
+                    while (parent && !parent.leadingComments && !/Function/.test(parent.type)) {
                         parent = parent.parent;
                     }
 
                     return parent && (parent.type !== "FunctionDeclaration") ? findJSDocComment(parent.leadingComments) : null;
                 }
-            //$FALLTHROUGH$
+
+                // falls through
+
             default:
                 return null;
-        }
-    };
-
-    /**
-     * Gets a number of tokens that precede a given node's tokens in the token stream.
-     * @param {ASTNode} node The AST node.
-     * @param {int} [beforeCount=0] The number of tokens before the node to retrieve.
-     * @returns {[Token]} Array of objects representing tokens.
-     */
-    api.getTokensBefore = function(node, beforeCount) {
-        var beforeTokens = [], cursor = node.range[0] - 1;
-        while (beforeCount > 0 && cursor >= 0) {
-            if (currentTokens[cursor]) {
-                beforeTokens.unshift(currentTokens[cursor]);
-                --beforeCount;
-            }
-            --cursor;
-        }
-        return beforeTokens;
-    };
-
-    /**
-     * Gets the token that precedes a given node's tokens in the token stream.
-     * @param {ASTNode} node The AST node.
-     * @param {int} [skip=0] A number of tokens to skip before the given node.
-     * @returns {Token} An object representing the token.
-     */
-    api.getTokenBefore = function(node, skip) {
-        for (var cursor = node.range[0] - 1; cursor >= 0; --cursor) {
-            if (currentTokens[cursor]) {
-                if (skip > 0) {
-                    --skip;
-                } else {
-                    return currentTokens[cursor];
-                }
-            }
-        }
-    };
-
-    /**
-     * Gets a number of tokens that precede a given node's tokens in the token stream.
-     * @param {ASTNode} node The AST node.
-     * @param {int} [afterCount=0] The number of tokens after the node to retrieve.
-     * @returns {[Token]} Array of objects representing tokens.
-     */
-    api.getTokensAfter = function(node, afterCount) {
-        var afterTokens = [], cursor = node.range[1];
-        while (afterCount > 0 && cursor < currentTokens.length) {
-            if (currentTokens[cursor]) {
-                afterTokens.push(currentTokens[cursor]);
-                --afterCount;
-                cursor = currentTokens[cursor].range[1];
-            } else {
-                ++cursor;
-            }
-        }
-        return afterTokens;
-    };
-
-    /**
-     * Gets the token that follows a given node's tokens in the token stream.
-     * @param {ASTNode} node The AST node.
-     * @param {int} [skip=0] A number of tokens to skip after the given node.
-     * @returns {Token} An object representing the token.
-     */
-    api.getTokenAfter = function(node, skip) {
-        for (var cursor = node.range[1]; cursor < currentTokens.length; ++cursor) {
-            if (currentTokens[cursor]) {
-                if (skip > 0) {
-                    --skip;
-                } else {
-                    return currentTokens[cursor];
-                }
-            }
-        }
-    };
-
-    /**
-     * Gets all tokens that are related to the given node.
-     * @param {ASTNode} node The AST node.
-     * @param {int} [beforeCount=0] The number of tokens before the node to retrieve.
-     * @param {int} [afterCount=0] The number of tokens after the node to retrieve.
-     * @returns {[Token]} Array of objects representing tokens.
-     */
-    api.getTokens = function(node, beforeCount, afterCount) {
-        var beforeTokens = api.getTokensBefore(node, beforeCount),
-            afterTokens = api.getTokensAfter(node, afterCount),
-            tokens = [],
-            cursor = node.range[0];
-        while (cursor < node.range[1]) {
-            if (currentTokens[cursor]) {
-                tokens.push(currentTokens[cursor]);
-                cursor = currentTokens[cursor].range[1];
-            } else {
-                ++cursor;
-            }
-        }
-        return beforeTokens.concat(tokens, afterTokens);
-    };
-
-    /**
-     * Gets the first `count` tokens of the given node's token stream.
-     * @param {ASTNode} node The AST node.
-     * @param {int} [count=0] The number of tokens of the node to retrieve.
-     * @returns {[Token]} Array of objects representing tokens.
-     */
-    api.getFirstTokens = function(node, count) {
-        var tokens = [], cursor = node.range[0];
-        while (count > 0 && cursor < node.range[1]) {
-            if (currentTokens[cursor]) {
-                tokens.push(currentTokens[cursor]);
-                --count;
-                cursor = currentTokens[cursor].range[1];
-            } else {
-                ++cursor;
-            }
-        }
-        return tokens;
-    };
-
-    /**
-     * Gets the first token of the given node's token stream.
-     * @param {ASTNode} node The AST node.
-     * @param {int} [skip=0] A number of tokens to skip.
-     * @returns {Token} An object representing the token.
-     */
-    api.getFirstToken = function(node, skip) {
-        for (var cursor = node.range[0]; cursor < node.range[1]; ++cursor) {
-            if (currentTokens[cursor]) {
-                if (skip > 0) {
-                    --skip;
-                } else {
-                    return currentTokens[cursor];
-                }
-            }
-        }
-    };
-
-    /**
-     * Gets the last `count` tokens of the given node.
-     * @param {ASTNode} node The AST node.
-     * @param {int} [count=0] The number of tokens of the node to retrieve.
-     * @returns {[Token]} Array of objects representing tokens.
-     */
-    api.getLastTokens = function(node, count) {
-        var tokens = [], cursor = node.range[1] - 1;
-        while (count > 0 && cursor >= node.range[0]) {
-            if (currentTokens[cursor]) {
-                tokens.unshift(currentTokens[cursor]);
-                --count;
-            }
-            --cursor;
-        }
-        return tokens;
-    };
-
-    /**
-     * Gets the last token of the given node's token stream.
-     * @param {ASTNode} node The AST node.
-     * @param {int} [skip=0] A number of tokens to skip.
-     * @returns {Token} An object representing the token.
-     */
-    api.getLastToken = function(node, skip) {
-        for (var cursor = node.range[1] - 1; cursor >= node.range[0]; --cursor) {
-            if (currentTokens[cursor]) {
-                if (skip > 0) {
-                    --skip;
-                } else {
-                    return currentTokens[cursor];
-                }
-            }
         }
     };
 
@@ -973,6 +880,31 @@ module.exports = (function() {
         return controller.parents();
     };
 
+    /**
+     * Gets the deepest node containing a range index.
+     * @param {int} index Range index of the desired node.
+     * @returns {ASTNode} [description]
+     */
+    api.getNodeByRangeIndex = function(index) {
+        var result = null;
+
+        estraverse.traverse(controller.root, {
+            enter: function (node) {
+                if (node.range[0] <= index && index < node.range[1]) {
+                    result = node;
+                } else {
+                    this.skip();
+                }
+            },
+            leave: function (node) {
+                if (node === result) {
+                    this.break();
+                }
+            }
+        });
+
+        return result;
+    };
 
     /**
      * Gets the scope for the current node.
@@ -980,8 +912,7 @@ module.exports = (function() {
      */
     api.getScope = function() {
         var parents = controller.parents(),
-            innerBlock = null,
-            selectedScopeIndex;
+            scope = currentScopes[0];
 
         // Don't do this for Program nodes - they have no parents
         if (parents.length) {
@@ -995,28 +926,16 @@ module.exports = (function() {
             // Ascend the current node's parents
             for (var i = parents.length - 1; i >= 0; --i) {
 
-                // The first node that requires a scope is the node that will be
-                // our current node's innermost scope.
-                if (escope.Scope.isScopeRequired(parents[i])) {
-                    innerBlock = parents[i];
-                    break;
+                scope = scopeManager.acquire(parents[i]);
+                if (scope) {
+                    return scope;
                 }
+
             }
 
-            // Find and return the innermost scope
-            selectedScopeIndex = scopeMap[innerBlock.range[0]];
-
-            // Named function expressions create two nested scope objects. The
-            // outer scope contains only the function expression name. We return
-            // the inner scope.
-            if (innerBlock.type === "FunctionExpression" && innerBlock.id && innerBlock.id.name) {
-                ++selectedScopeIndex;
-            }
-
-            return currentScopes[selectedScopeIndex];
-        } else {
-            return currentScopes[0];    // global scope
         }
+
+        return currentScopes[0];
     };
 
     /**
@@ -1044,12 +963,12 @@ module.exports = (function() {
 
     /**
      * Defines many new linting rules.
-     * @param {object} rules map from unique rule identifier to rule
+     * @param {object} rulesToDefine map from unique rule identifier to rule
      * @returns {void}
      */
-    api.defineRules = function(rules) {
-        Object.getOwnPropertyNames(rules).forEach(function(ruleId){
-            defineRule(ruleId, rules[ruleId]);
+    api.defineRules = function(rulesToDefine) {
+        Object.getOwnPropertyNames(rulesToDefine).forEach(function(ruleId) {
+            defineRule(ruleId, rulesToDefine[ruleId]);
         });
     };
 

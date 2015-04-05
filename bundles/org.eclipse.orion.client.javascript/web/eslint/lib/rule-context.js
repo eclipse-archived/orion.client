@@ -12,22 +12,26 @@ define([
 //------------------------------------------------------------------------------
 
 var PASSTHROUGHS = [
+        "getAllComments",
+        "getAncestors",
+        "getComments",
+        "getFilename",
+        "getFirstToken",
+        "getFirstTokens",
+        "getJSDocComment",
+        "getLastToken",
+        "getLastTokens",
+        "getNodeByRangeIndex",
+        "getScope",
         "getSource",
         "getSourceLines",
-        "getTokens",
-        "getTokensBefore",
-        "getTokenBefore",
-        "getTokensAfter",
         "getTokenAfter",
-        "getFirstTokens",
-        "getFirstToken",
-        "getLastTokens",
-        "getLastToken",
-        "getComments",
-        "getAncestors",
-        "getScope",
-        "getJSDocComment",
-        "getFilename"
+        "getTokenBefore",
+        "getTokenByRangeStart",
+        "getTokens",
+        "getTokensAfter",
+        "getTokensBefore",
+        "getTokensBetween"
     ];
 
 //------------------------------------------------------------------------------
@@ -42,9 +46,16 @@ var PASSTHROUGHS = [
  * @param {number} severity The configured severity level of the rule.
  * @param {array} options The configuration information to be added to the rule.
  * @param {object} settings The configuration settings passed from the config file.
+ * @param {object} ecmaFeatures The ecmaFeatures settings passed from the config file.
+ * @param {Object} env The backing environment 
  */
-function RuleContext(ruleId, eslint, severity, options, settings) {
-
+function RuleContext(ruleId, eslint, severity, options, settings, ecmaFeatures, env) { //ORION
+    /**
+     * ORION
+     */
+    Object.defineProperty(this, "env", {
+       value: env 
+    });
     /**
      * The read-only ID of the rule.
      */
@@ -66,6 +77,14 @@ function RuleContext(ruleId, eslint, severity, options, settings) {
         value: settings
     });
 
+    /**
+     * The read-only ecmaFeatures shared across all rules
+     */
+    Object.defineProperty(this, "ecmaFeatures", {
+        value: Object.create(ecmaFeatures)
+    });
+    Object.freeze(this.ecmaFeatures);
+
     // copy over passthrough methods
     PASSTHROUGHS.forEach(function(name) {
         this[name] = function() {
@@ -80,11 +99,10 @@ function RuleContext(ruleId, eslint, severity, options, settings) {
      * @param {string} message The message to display to the user.
      * @param {Object} opts Optional template data which produces a formatted message
      *     with symbols being replaced by this object's values.
-     * @param {Object} related Optional related token or node.
      * @returns {void}
      */
-    this.report = function(node, location, message, opts, related) {
-        eslint.report(ruleId, severity, node, location, message, opts, related);
+    this.report = function(node, location, message, opts) {
+        eslint.report(ruleId, severity, node, location, message, opts);
     };
 
 }

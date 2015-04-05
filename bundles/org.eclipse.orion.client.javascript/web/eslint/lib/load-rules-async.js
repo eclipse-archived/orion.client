@@ -328,7 +328,7 @@ define([
                     'MemberExpression': function(node) {
                         if(node.object.name === 'console') {
                             //are we using the browser env?
-                            if(context.settings && context.settings.env['browser']) {
+                            if(context.env && context.env['browser']) {
                                 context.report(node.object, 'Discouraged use of console in browser-based code.');
                             }
                         }
@@ -837,7 +837,7 @@ define([
             rule: function(context) {
                 
                 function checkShadow(node) {
-                    var env = context.settings && context.settings.env ? context.settings.env : {};
+                    var env = context.env ? context.env : {};
                     env.builtin = true;
                     switch(node.type) {
                         case 'VariableDeclarator': {

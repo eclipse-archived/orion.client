@@ -8,6 +8,12 @@ define([
 "use strict";
 
 //------------------------------------------------------------------------------
+// Constants
+//------------------------------------------------------------------------------
+
+var PLUGIN_NAME_PREFIX = "eslint-plugin-";
+
+//------------------------------------------------------------------------------
 // Public Interface
 //------------------------------------------------------------------------------
 /**
@@ -48,7 +54,7 @@ exports.mergeConfigs = function mergeConfigs(base, custom) {
         }
 
         if (Array.isArray(base[key]) && !Array.isArray(property) && typeof property === "number") {
-            //assume that we are just overriding first attribute
+            // assume that we are just overriding first attribute
             base[key][0] = custom[key];
             return;
         }
@@ -63,6 +69,25 @@ exports.mergeConfigs = function mergeConfigs(base, custom) {
 
     return base;
 };
+
+/**
+ * Removes the prefix `eslint-plugin-` from a plugin name.
+ * @param {string} pluginName The name of the plugin which may has the prefix.
+ * @returns {string} The name of the plugin without prefix.
+ */
+exports.removePluginPrefix = function removePluginPrefix(pluginName) {
+    var nameWithoutPrefix;
+
+    if (pluginName.indexOf(PLUGIN_NAME_PREFIX) === 0) {
+        nameWithoutPrefix = pluginName.substring(PLUGIN_NAME_PREFIX.length);
+    } else {
+        nameWithoutPrefix = pluginName;
+    }
+
+    return nameWithoutPrefix;
+};
+
+exports.PLUGIN_NAME_PREFIX = PLUGIN_NAME_PREFIX;
 
 /**
  * @description Looks up the given reference in the current scope and its parent scopes
