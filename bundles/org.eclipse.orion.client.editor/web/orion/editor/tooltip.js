@@ -253,6 +253,10 @@ function Tooltip (view) {
 		 * @param update Whether to update the existing tooltip contents or open a new tooltip
 		 */
 		_processInfo: function(info, update) {
+			if (!this._tooltipDiv){
+				return;
+			}
+			
 			var newTooltipContents;
 			if (update && this._tooltipContents) {
 				this._tooltipContents.innerHTML = "";
