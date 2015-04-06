@@ -73,8 +73,13 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			value:defaultColor
 		},{
 			display:"constant",//$NON-NLS-0$
-			objPath:["styles.constant.color","styles.constant.numeric.color","styles.constant.numeric.numeric.hex.color"], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			objPath:["styles.constant.color"], //$NON-NLS-0$
 			id:"editorThemeConstantColor",  //$NON-NLS-0$
+			value:defaultColor
+		},{
+			display:"numeric constant",//$NON-NLS-0$
+			objPath:["styles.constant.numeric.color","styles.constant.numeric.hex.color"], //$NON-NLS-1$ //$NON-NLS-0$
+			id:"editorThemeNumericConstantColor",  //$NON-NLS-0$
 			value:defaultColor
 		},{
 			display:"string",//$NON-NLS-0$
