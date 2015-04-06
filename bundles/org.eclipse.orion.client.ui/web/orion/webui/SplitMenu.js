@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 /*global URL*/
-define([], function() {
+define(['orion/webui/littlelib'], function(lib) {
 		
 	function SplitMenuItem( meta ){
         this.description = meta.description;
@@ -70,6 +70,8 @@ define([], function() {
 	        splitMenu.appendChild( this.selectionTable );
 	        this.anchor.appendChild( splitMenu );
 	    }
+	    
+	    lib.addAutoDismiss( [this.anchor], this.toggleMenu.bind(this) );
 	}
 	
 	function createMenuItem( data ){
