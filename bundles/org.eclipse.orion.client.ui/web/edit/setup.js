@@ -244,6 +244,9 @@ function EditorViewer(options) {
 	domNode.addEventListener("mousedown", function() { //$NON-NLS-0$
 		this.activateContext.setActiveEditorViewer(this);
 	}.bind(this), true);
+	domNode.addEventListener("keyup", function() { //$NON-NLS-0$
+		this.activateContext.setActiveEditorViewer(this);
+	}.bind(this), true);
 }
 EditorViewer.prototype = {};
 objects.mixin(EditorViewer.prototype, {
