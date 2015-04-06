@@ -448,6 +448,8 @@ function EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly) {
 	this.sidebarDomNode = lib.node("sidebar"); //$NON-NLS-0$
 	this.sidebarToolbar = lib.node("sidebarToolbar"); //$NON-NLS-0$
 	this.pageToolbar = lib.node("pageToolbar"); //$NON-NLS-0$
+
+	this.editorViewers = [];
 }
 EditorSetup.prototype = {};
 objects.mixin(EditorSetup.prototype, {
@@ -605,9 +607,12 @@ objects.mixin(EditorSetup.prototype, {
 		return editorViewer;
 	},
 	
-	createSplitters: function(vertical) {
-		//TODO create as many splitters as necessary given the number of editors viewers. 
+	createSplitters: function(mode) {
+		//TODO create as many splitters as necessary given the number of editors viewers.
 		// Note that depending on the number of viewers it may be necessary to create intermediate parents
+		if (this.editorSplitter) return;
+		if (mode === this.splitMenu.MODE_SINGLE) return;
+		
 		var splitterDiv = document.createElement("div"); //$NON-NLS-0$
 		splitterDiv.id = "editorSplitter"; //$NON-NLS-0$
 		splitterDiv.style.zIndex = "100"; //$NON-NLS-0$
@@ -619,7 +624,7 @@ objects.mixin(EditorSetup.prototype, {
 			mainPanel: this.editorViewers[1].domNode,
 			toggle: false,
 			proportional: true,
-			vertical: vertical,
+			vertical: true,
 			closeByDefault: false
 		});
 		splitter.addEventListener("resize", function (evt) { //$NON-NLS-0$
@@ -629,10 +634,6 @@ objects.mixin(EditorSetup.prototype, {
 				}
 			});
 		}.bind(this));
-		
-		var splitMenu = new mSplitMenu();
-		
-		this._setSplitterMode(splitMenu.MODE_SINGLE); //$NON-NLS-0$
 	},
 	
 	setInput: function(hash) {
@@ -761,42 +762,54 @@ objects.mixin(EditorSetup.prototype, {
 		}
 	},
 
-	_setSplitterMode: function(mode) {
-		
-		var splitMenu = new mSplitMenu();
+	setSplitterMode: function(mode) {
 		
 		if (this.splitterMode === mode) return;
 		this.splitterMode = mode;
+		
+		if (mode !== this.splitMenu.MODE_SINGLE && this.editorViewers.length < 2) {
+			this.editorViewers.push(this.createEditorViewer(this.editorViewers.length + "")); //$NON-NLS-0$
+		}
+		this.createSplitters(mode);
+		
 		var mainEditorViewerNode = this.editorViewers[0].domNode;
 		mainEditorViewerNode.style.width = mainEditorViewerNode.style.height = "100%"; //$NON-NLS-0$
-		var splitEditorViewerNode = this.editorViewers[1].domNode;
-		var splitterNode = this.editorSplitter.$splitter;
-		splitEditorViewerNode.classList.remove("editorViewerPicInPic"); //$NON-NLS-0$
-		splitEditorViewerNode.style.display = "block"; //$NON-NLS-0$
-		splitEditorViewerNode.style.width = splitEditorViewerNode.style.height = "100%"; //$NON-NLS-0$
-		["top", "left", "right", "bottom", "width", "height"].forEach(function(p) { //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			splitEditorViewerNode.style[p] = ""; //$NON-NLS-0$
-		});
-		splitterNode.style.display = "block"; //$NON-NLS-0$
+
+		var splitEditorViewerNode, splitterNode;
+		if (this.editorViewers. length > 1) {
+			splitEditorViewerNode = this.editorViewers[1].domNode;
+			splitterNode = this.editorSplitter.$splitter;
+			splitEditorViewerNode.classList.remove("editorViewerPicInPic"); //$NON-NLS-0$
+			splitEditorViewerNode.style.display = "block"; //$NON-NLS-0$
+			splitEditorViewerNode.style.width = splitEditorViewerNode.style.height = "100%"; //$NON-NLS-0$
+			["top", "left", "right", "bottom", "width", "height"].forEach(function(p) { //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				splitEditorViewerNode.style[p] = ""; //$NON-NLS-0$
+			});
+			splitterNode.style.display = "block"; //$NON-NLS-0$
+		}
 		
 		switch(mode){
 			
-			case splitMenu.MODE_PIP:
+			case this.splitMenu.MODE_PIP:
 				splitterNode.style.display = "none"; //$NON-NLS-0$
 				splitEditorViewerNode.classList.add("editorViewerPicInPic"); //$NON-NLS-0$
 				break;
 				
-			case splitMenu.MODE_SINGLE:
-				splitterNode.style.display = "none"; //$NON-NLS-0$
-				splitEditorViewerNode.style.display = "none"; //$NON-NLS-0$
+			case this.splitMenu.MODE_SINGLE:
+				if (splitterNode) {
+					splitterNode.style.display = "none"; //$NON-NLS-0$
+				}
+				if (splitEditorViewerNode) {
+					splitEditorViewerNode.style.display = "none"; //$NON-NLS-0$
+				}
 				this.setActiveEditorViewer(this.editorViewers[0]);
 				break;
 				
-			case splitMenu.MODE_HORIZONTAL:						
+			case this.splitMenu.MODE_HORIZONTAL:						
 				this.editorSplitter.setOrientation(mSplitter.ORIENTATION_VERTICAL, true);
 				break;
 			
-			case splitMenu.MODE_VERTICAL:
+			case this.splitMenu.MODE_VERTICAL:
 				this.editorSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL, true);
 				break;			
 		}
@@ -805,15 +818,13 @@ objects.mixin(EditorSetup.prototype, {
 			viewer.editorView.editor.resize();
 		});
 		
-		if (splitEditorViewerNode.style.display !== "none" && !this.editorViewers[1].inputManager.getFileMetadata()) { //$NON-NLS-0$
+		if (splitEditorViewerNode && splitEditorViewerNode.style.display !== "none" && !this.editorViewers[1].inputManager.getFileMetadata()) { //$NON-NLS-0$
 			this.editorViewers[1].inputManager.setInput(PageUtil.hash());
 		}
 	},
-	_createPipCommand: function(label){
-		
-		var id = "orion.edit.showPip" + label;
-		
-		var pipCommand = new mCommands.Command({
+	_createSplitCommand: function(label){
+		var id = "orion.edit.showPip" + label; //$NON-NLS-0$
+		var splitCommand = new mCommands.Command({
 			name: label,
 			tooltip: label,
 			id: id, //$NON-NLS-0$
@@ -822,25 +833,21 @@ objects.mixin(EditorSetup.prototype, {
 			},
 			callback: function(data) {
 				var mode = data.command.tooltip;
-				this._setSplitterMode(mode);
+				this.setSplitterMode(mode);
 			}.bind(this)
 		});
 			
-		this.commandRegistry.addCommand(pipCommand);	
-		return pipCommand;
+		this.commandRegistry.addCommand(splitCommand);	
+		return splitCommand;
 	},
-	_addPipCommand: function(label) {
-		var pipCommand = this._createPipCommand(label);
-		this.commandRegistry.registerCommandContribution("pageActions" , pipCommand.id, 1); //$NON-NLS-0$
-	},
-	_generateShowPip: function(){
+	createSplitMenu: function(){
 		
-		var splitMenu = new mSplitMenu( 'SplitMenu' );
+		var splitMenu = this.splitMenu = new mSplitMenu( 'SplitMenu' ); //$NON-NLS-0$
 		
 		var modes = splitMenu.modes;
 		
 		for( var mode in modes ){
-			var command = this._createPipCommand( modes[mode].mode );		
+			var command = this._createSplitCommand( modes[mode].mode );		
 			splitMenu.addMenuItem( command );
 		}
 	},
@@ -849,14 +856,11 @@ objects.mixin(EditorSetup.prototype, {
 exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, readonly) {
 	var setup = new EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly);
 	Deferred.when(setup.createBanner(), function() {
-		setup._generateShowPip();
+		setup.createSplitMenu();
 		setup.createMenuBar().then(function() {
 			setup.createSideBar();
-			setup.editorViewers = [];
-			for (var i=0; i<2; i++) {
-				setup.editorViewers.push(setup.createEditorViewer(i === 0 ? "" : "" + i)); //$NON-NLS-1$ //$NON-NLS-0$
-			}
-			setup.createSplitters();
+			setup.editorViewers.push(setup.createEditorViewer());
+			setup.setSplitterMode(setup.splitMenu.MODE_SINGLE);
 			setup.load();
 		});
 	});
