@@ -26,9 +26,9 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 	var protectedThemes = [];
 	var defaultColor = "#ff80c0";
 	var htmlExclusions = [];
-	var jsExclusions = ["editorThemePropertyName", "editorThemeMetaTag"];
-	var javaExclusions = ["editorThemeColorEntityColor", "editorThemeFunctionParameterColor", "editorThemePropertyName", "editorThemeMetaTag"];
-	var cssExclusions = ["editorThemeColorEntityColor", "editorThemeControlColor", "editorThemeOperatorColor", "editorThemeFunctionParameterColor", "editorThemeMetaTag"];
+	var jsExclusions = ["editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
+	var javaExclusions = ["editorThemeColorEntityColor", "editorThemeFunctionParameterColor", "editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
+	var cssExclusions = ["editorThemeColorEntityColor", "editorThemeControlColor", "editorThemeOperatorColor", "editorThemeFunctionParameterColor", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
 
 	var scopeList = [
 		{
@@ -42,7 +42,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			id:"editorThemeBackground", //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"font-color", //$NON-NLS-0$
+			display:"font color", //$NON-NLS-0$
 			objPath:["styles.color"], //$NON-NLS-0$
 			id:"editorThemeColor", //$NON-NLS-0$
 			value:defaultColor
@@ -117,17 +117,22 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			id:"editorThemeDocumentationTask", //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"CSS - Property name color",//$NON-NLS-0$
+			display:"CSS property name color",//$NON-NLS-0$
 			objPath:["styles.support.type.propertyName.color"], //$NON-NLS-0$
 			id:"editorThemePropertyName", //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"HTML - Tag",//$NON-NLS-0$
+			display:"HTML tag",//$NON-NLS-0$
 			objPath:["styles.meta.tag.color"], //$NON-NLS-0$
 			id:"editorThemeMetaTag", //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"Selection Background",//$NON-NLS-0$
+			display:"HTML attribute",//$NON-NLS-0$
+			objPath:["styles.meta.tag.attribute.color"], //$NON-NLS-0$
+			id:"editorThemeMetaTagAttribute", //$NON-NLS-0$
+			value:defaultColor
+		},{
+			display:"selection Background",//$NON-NLS-0$
 			objPath:["styles.textviewContent ::selection.backgroundColor", "styles.textviewContent ::-moz-selection.backgroundColor", "styles.textviewSelection.backgroundColor", "styles.textviewSelectionUnfocused.backgroundColor"], //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			id:"editorSelection", //$NON-NLS-0$
 			value:defaultColor
