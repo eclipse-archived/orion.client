@@ -28,7 +28,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 	var htmlExclusions = [];
 	var jsExclusions = ["editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
 	var javaExclusions = ["editorThemeColorEntityColor", "editorThemeFunctionParameterColor", "editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
-	var cssExclusions = ["editorThemeColorEntityColor", "editorThemeControlColor", "editorThemeOperatorColor", "editorThemeFunctionParameterColor", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
+	var cssExclusions = ["editorThemeColorEntityColor", "editorThemeControlColor", "editorThemeLanguageVariableColor", "editorThemeOperatorColor", "editorThemeFunctionParameterColor", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
 
 	var scopeList = [
 		{
@@ -65,6 +65,11 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			display:"comment",//$NON-NLS-0$
 			objPath:["styles.comment.color","styles.comment.block.color","styles.comment.line.color"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			id:"editorThemeCommentColor",  //$NON-NLS-0$
+			value:defaultColor
+		},{
+			display:"language-specific variable",//$NON-NLS-0$
+			objPath:["styles.variable.language.color"], //$NON-NLS-0$
+			id:"editorThemeLanguageVariableColor",  //$NON-NLS-0$
 			value:defaultColor
 		},{
 			display:"constant",//$NON-NLS-0$
