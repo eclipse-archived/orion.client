@@ -72,12 +72,12 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			id:"editorThemeLanguageVariableColor",  //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"constant",//$NON-NLS-0$
+			display:"language constant",//$NON-NLS-0$
 			objPath:["styles.constant.color"], //$NON-NLS-0$
 			id:"editorThemeConstantColor",  //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"numeric constant",//$NON-NLS-0$
+			display:"number",//$NON-NLS-0$
 			objPath:["styles.constant.numeric.color","styles.constant.numeric.hex.color"], //$NON-NLS-1$ //$NON-NLS-0$
 			id:"editorThemeNumericConstantColor",  //$NON-NLS-0$
 			value:defaultColor
@@ -92,12 +92,12 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			id:"editorThemeColorEntityColor",  //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"keyword-control",//$NON-NLS-0$
+			display:"keyword (control)",//$NON-NLS-0$
 			objPath:["styles.keyword.control.color"], //$NON-NLS-0$
 			id:"editorThemeControlColor", //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"keyword-operator",//$NON-NLS-0$
+			display:"keyword (operator)",//$NON-NLS-0$
 			objPath:["styles.keyword.operator.color"], //$NON-NLS-0$
 			id:"editorThemeOperatorColor", //$NON-NLS-0$
 			value:defaultColor
