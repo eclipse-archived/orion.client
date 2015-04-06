@@ -790,19 +790,11 @@ objects.mixin(EditorSetup.prototype, {
 				break;
 				
 			case splitMenu.MODE_HORIZONTAL:						
-				if (this.editorSplitter.getOrientation() === mSplitter.ORIENTATION_VERTICAL) {
-					this.editorSplitter.resize();
-				} else {
-					this.editorSplitter.setOrientation(mSplitter.ORIENTATION_VERTICAL);
-				}
+				this.editorSplitter.setOrientation(mSplitter.ORIENTATION_VERTICAL, true);
 				break;
 			
 			case splitMenu.MODE_VERTICAL:
-				if (this.editorSplitter.getOrientation() === mSplitter.ORIENTATION_HORIZONTAL) {
-					this.editorSplitter.resize();
-				} else {
-					this.editorSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL);
-				}
+				this.editorSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL, true);
 				break;			
 		}
 		

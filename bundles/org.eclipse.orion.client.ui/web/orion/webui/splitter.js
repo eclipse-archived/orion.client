@@ -118,9 +118,9 @@ define([
 		getOrientation: function() {
 			return this._vertical ? ORIENTATION_VERTICAL : ORIENTATION_HORIZONTAL;
 		},		
-		setOrientation: function(value) {
+		setOrientation: function(value, force) {
 			var vertical = value === ORIENTATION_VERTICAL;
-			if (vertical === this._vertical) {
+			if (vertical === this._vertical && !force) {
 				return;
 			}
 
