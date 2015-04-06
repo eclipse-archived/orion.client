@@ -160,10 +160,10 @@ define([
 			var editor = this.getEditor();
 			if (this._fileMetadata) {
 				//Reload if out of sync, unless we are already in the process of saving
-				if (!this._saving && !this._fileMetadata.Directory && !this._readonly) {
+				if (!this._fileMetadata._saving && !this._fileMetadata.Directory && !this.getReadOnly()) {
 					progress(fileClient.read(resource, true), messages.ReadingMetadata, fileURI).then(function(data) {
 						if (this._fileMetadata && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
-							this._fileMetadata = data;
+							this._fileMetadata = objects.mixin(this._fileMetadata, data);
 							if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
 								progress(fileClient.read(resource), messages.Reading, fileURI).then(function(contents) {
 									editor.setInput(fileURI, null, contents);
@@ -282,15 +282,17 @@ define([
 			}
 		},
 		save: function(closing) {
-			if (this._saving) { return this._savingDeferred; }
+			var metadata = this.getFileMetadata();
+			if (!metadata) return new Deferred().reject();
+			if (metadata._saving) { return metadata._savingDeferred; }
 			var self = this;
-			this._savingDeferred = new Deferred();
-			this._saving = true;
+			metadata._savingDeferred = new Deferred();
+			metadata._saving = true;
 			function done(result) {
-				var deferred = self._savingDeferred;
+				var deferred = metadata._savingDeferred;
 				deferred.resolve(result);
-				self._savingDeferred = null;
-				self._saving = false;
+				metadata._savingDeferred = null;
+				metadata._saving = false;
 				return deferred;
 			}
 			var editor = this.getEditor();
@@ -325,7 +327,7 @@ define([
 			this._clearUnsavedChanges();
 			this._errorSaving = false;
 
-			var etag = this.getFileMetadata().ETag;
+			var etag = metadata.ETag;
 			var args = { "ETag" : etag }; //$NON-NLS-0$
 			var resource = this._parsedLocation.resource;
 			var def = this.fileClient.write(resource, data, args);
@@ -339,7 +341,7 @@ define([
 			}
 			function successHandler(result) {
 				if (input === self.getInput()) {
-					self.getFileMetadata().ETag = result.ETag;
+					metadata.ETag = result.ETag;
 					editor.setInput(input, null, contents, true);
 				}
 				self.reportStatus("");
@@ -379,7 +381,7 @@ define([
 					errorHandler(error);
 				}
 			});
-			return this._savingDeferred;
+			return metadata._savingDeferred;
 		},
 		setAutoLoadEnabled: function(enabled) {
 			this._autoLoadEnabled = enabled;
@@ -456,7 +458,7 @@ define([
 			if (evt.metadata) {
 				this.reportStatus("");
 				this._input = fileURI;
-				var metadata = objects.mixin({}, evt.metadata);
+				var metadata = evt.metadata;
 				this._setInputContents(input, fileURI, null, metadata, this._isText(metadata));
 				return;
 			}
