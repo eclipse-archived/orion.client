@@ -176,6 +176,7 @@ define([
 			return commands;
 		},
 		updateCommands: function(target) {
+			target = target || {};
 			this.editor = target.editor;
 			this.inputManager = target.inputManager;
 			this.localSettings = target.localSettings;

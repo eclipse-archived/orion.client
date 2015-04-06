@@ -690,13 +690,15 @@ objects.mixin(EditorSetup.prototype, {
 	},
 	
 	setActiveEditorViewer: function(editorViewer) {
+		var oldEditorViewer = this.activeEditorViewer;
+		
 		this.activeEditorViewer = editorViewer;
 		
 		this.menuBar.setActiveEditorViewer(editorViewer);
 		
 		var metadata = editorViewer.inputManager.getFileMetadata();
 		
-		if (this.activeEditorViewer !== editorViewer || this.lastTarget !== metadata) {
+		if (oldEditorViewer !== editorViewer || this.lastTarget !== metadata) {
 			this.renderToolbars(metadata);
 		}
 		
