@@ -67,7 +67,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			id:"editorThemeCommentColor",  //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"language-specific variable",//$NON-NLS-0$
+			display:"language variable",//$NON-NLS-0$
 			objPath:["styles.variable.language.color"], //$NON-NLS-0$
 			id:"editorThemeLanguageVariableColor",  //$NON-NLS-0$
 			value:defaultColor
