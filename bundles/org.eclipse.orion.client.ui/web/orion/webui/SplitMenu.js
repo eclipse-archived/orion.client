@@ -71,7 +71,7 @@ define(['orion/webui/littlelib'], function(lib) {
 	        this.anchor.appendChild( splitMenu );
 	    }
 	    
-	    lib.addAutoDismiss( [this.anchor], this.toggleMenu.bind(this) );
+	    lib.addAutoDismiss( [this.anchor], this.hideMenu.bind(this) );
 	}
 	
 	function createMenuItem( data ){
@@ -139,6 +139,15 @@ define(['orion/webui/littlelib'], function(lib) {
 	}
 	
 	SplitMenu.prototype.toggleMenu = toggleMenu;
+	
+	
+	function hideMenu(){
+		if( this.selectionTable.style.visibility === 'visible' ){
+	        this.selectionTable.style.visibility = 'collapse';
+	    }
+	}
+	
+	SplitMenu.prototype.hideMenu = hideMenu;
 	
 	function switchMode( mode ){
 	    
