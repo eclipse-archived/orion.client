@@ -147,6 +147,7 @@ objects.mixin(MenuBar.prototype, {
 		}
 		if (this.editorViewer) {
 			metadata = this.editorViewer.inputManager.getFileMetadata();
+			this.editorCommands.updateCommands(this.editorViewer.currentEditorView);
 		}
 		var commandRegistry = this.commandRegistry, serviceRegistry = this.serviceRegistry;
 		commandRegistry.registerSelectionService(this.fileActionsScope, visible ? selection : null);
@@ -283,7 +284,7 @@ objects.mixin(EditorViewer.prototype, {
 			this.pool.metadata = metadata;
 			var href = window.location.href;
 			this.activateContext.setActiveEditorViewer(this);
-			this.commandRegistry.processURL(href);			
+			this.commandRegistry.processURL(href);
 		}.bind(this));
 		inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$
 			var previousPool = this.pool;
@@ -694,10 +695,19 @@ objects.mixin(EditorSetup.prototype, {
 		this.menuBar.setActiveEditorViewer(editorViewer);
 		
 		var metadata = editorViewer.inputManager.getFileMetadata();
+		
+		if (this.activeEditorViewer !== editorViewer || this.lastTarget !== metadata) {
+			this.renderToolbars(metadata);
+		}
+		
+		this.setPageTarget(metadata);
+	},
+	
+	setPageTarget: function (metadata) {
 		if (this.lastTarget && metadata && this.lastTarget.Location === metadata.Location) return;
 		this.lastTarget = metadata;
 		
-		this.renderToolbars(metadata);
+		var editorViewer = this.activeEditorViewer;
 		var target = metadata, targetName;
 		if (!target) { //evt.input === null || evt.input === undefined) {
 			targetName = this.lastRoot ? this.lastRoot.Name : "";
@@ -805,13 +815,13 @@ objects.mixin(EditorSetup.prototype, {
 				this.setActiveEditorViewer(this.editorViewers[0]);
 				break;
 				
-			case this.splitMenu.MODE_HORIZONTAL:						
+			case this.splitMenu.MODE_HORIZONTAL:
 				this.editorSplitter.setOrientation(mSplitter.ORIENTATION_VERTICAL, true);
 				break;
 			
 			case this.splitMenu.MODE_VERTICAL:
 				this.editorSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL, true);
-				break;			
+				break;
 		}
 		
 		this.editorViewers.forEach(function(viewer) {

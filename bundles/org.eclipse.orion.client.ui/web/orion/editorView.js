@@ -291,12 +291,6 @@ define([
 					wrappable: true
 				});
 				var textView = new mTextView.TextView(options);
-				textView.addEventListener("Focus", function() { //$NON-NLS-0$
-					editorCommands.updateCommands(that);
-					if (that.renderToolbars) {
-						that.renderToolbars(inputManager.getFileMetadata());
-					}
-				});
 				return textView;
 			};
 
