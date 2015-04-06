@@ -256,7 +256,7 @@ objects.mixin(EditorSetup.prototype, {
 						if (fileMetadata && fileMetadata.Location === folder.Location) {
 							segment.addEventListener("click", function() { //$NON-NLS-0$
 								this.sidebarNavInputManager.reveal(folder);
-							});
+							}.bind(this));
 						}
 					}
 				}.bind(this),
