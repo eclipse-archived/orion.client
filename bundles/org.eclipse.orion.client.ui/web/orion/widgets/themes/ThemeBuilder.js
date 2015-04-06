@@ -72,6 +72,11 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			id:"editorThemeConstantColor",  //$NON-NLS-0$
 			value:defaultColor
 		},{
+			display:"string",//$NON-NLS-0$
+			objPath:["styles.string.color","styles.string.quoted.double.color","styles.string.quoted.single.color"], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			id:"editorThemeStringColor",  //$NON-NLS-0$
+			value:defaultColor
+		},{
 			display:"entity",//$NON-NLS-0$
 			objPath:["styles.entity.name.color","styles.entity.name.function.color"], //$NON-NLS-1$ //$NON-NLS-0$
 			id:"editorThemeColorEntityColor",  //$NON-NLS-0$
@@ -132,7 +137,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			id:"editorThemeMetaTagAttribute", //$NON-NLS-0$
 			value:defaultColor
 		},{
-			display:"selection Background",//$NON-NLS-0$
+			display:"selection background",//$NON-NLS-0$
 			objPath:["styles.textviewContent ::selection.backgroundColor", "styles.textviewContent ::-moz-selection.backgroundColor", "styles.textviewSelection.backgroundColor", "styles.textviewSelectionUnfocused.backgroundColor"], //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			id:"editorSelection", //$NON-NLS-0$
 			value:defaultColor
