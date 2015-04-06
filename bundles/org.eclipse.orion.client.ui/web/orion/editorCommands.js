@@ -146,6 +146,17 @@ define([
 		this.editorPreferences = options.editorPreferences;
 		this.differ = options.differ;
 		this.blamer = options.blamer;
+		var that = this;
+		this.listener = {
+			onServiceAdded: function(event) {
+				that._onServiceAdded(event.serviceReference);
+			},
+			onServiceRemoved: function(event) {
+				that._onServiceRemoved(event.serviceReference);
+			}
+		};
+		this.serviceRegistry.addEventListener("registered", this.listener.onServiceAdded); //$NON-NLS-0$
+		this.serviceRegistry.addEventListener("unregistering", this.listener.onServiceRemoved); //$NON-NLS-0$
 	}
 	EditorCommandFactory.prototype = {
 		/**
@@ -183,6 +194,12 @@ define([
 			this.differ = target.differ;
 			this.blamer = target.blamer;
 			this.textSearcher = target.textSearcher;
+			
+			if (this._recreateEditCommands) {
+				this._createEditCommands().then(function() {
+					this.registerCommands();
+				}.bind(this));
+			}
 		},
 		registerCommands: function() {
 			var commandRegistry = this.commandService;
@@ -631,8 +648,19 @@ define([
 			});
 			this.commandService.addCommand(showTooltipCommand);
 		},
+		_onServiceRemoved: function(serviceReference) {
+			if (serviceReference.getProperty("objectClass").indexOf("orion.edit.command") !== -1) { //$NON-NLS-1$ //$NON-NLS-0$
+				this._recreateEditCommands = true;
+			}
+		},
+		_onServiceAdded: function(serviceReference) {
+			if (serviceReference.getProperty("objectClass").indexOf("orion.edit.command") !== -1) { //$NON-NLS-1$ //$NON-NLS-0$
+				this._recreateEditCommands = true;
+			}
+		},
 		_createEditCommands: function() {
 			var that = this;
+			this._recreateEditCommands = false;
 
 			function getContentTypes(serviceRegistry) {
 				if (contentTypesCache) {

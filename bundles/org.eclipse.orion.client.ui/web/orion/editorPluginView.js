@@ -178,8 +178,6 @@ define([
 				metadata: this.metadata
 			});
 			this.editor.install();
-			
-			this.editorCommands.updateCommands(this);
 		},
 		destroy: function() {
 			if (this.editor) {
