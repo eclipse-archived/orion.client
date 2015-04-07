@@ -58,6 +58,8 @@ define([
 
 var exports = {};
 
+var enableSplitEditor = false;
+
 var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 
 function MenuBar(options) {
@@ -242,6 +244,11 @@ function EditorViewer(options) {
 	var contentNode = this.contentNode = document.createElement("div"); //$NON-NLS-0$
 	contentNode.className = "editorViewerContent"; //$NON-NLS-0$
 	domNode.appendChild(contentNode);
+	
+	if (!enableSplitEditor) {
+		headerNode.style.display = "none"; //$NON-NLS-0$
+		contentNode.style.top = "0"; //$NON-NLS-0$
+	}
 	
 	domNode.addEventListener("mousedown", function() { //$NON-NLS-0$
 		this.activateContext.setActiveEditorViewer(this);
@@ -724,7 +731,7 @@ objects.mixin(EditorSetup.prototype, {
 		// TODO the command exclusions should be an API and specified by individual pages (page links)?
 		mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({
-			viewer: editorViewer,
+			viewer: enableSplitEditor ? editorViewer : null,
 			task: messages["Editor"],
 			name: targetName,
 			target: target,
@@ -867,13 +874,18 @@ objects.mixin(EditorSetup.prototype, {
 });
 
 exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, readonly) {
+	enableSplitEditor = localStorage.enableSplitEditor;
+
 	var setup = new EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly);
 	Deferred.when(setup.createBanner(), function() {
-		setup.createSplitMenu();
 		setup.createMenuBar().then(function() {
 			setup.createSideBar();
 			setup.editorViewers.push(setup.createEditorViewer());
-			setup.setSplitterMode(setup.splitMenu.MODE_SINGLE);
+			setup.setActiveEditorViewer(setup.editorViewers[0]);
+			if (enableSplitEditor) {
+				setup.createSplitMenu();
+				setup.setSplitterMode(setup.splitMenu.MODE_SINGLE);
+			}
 			setup.load();
 		});
 	});
