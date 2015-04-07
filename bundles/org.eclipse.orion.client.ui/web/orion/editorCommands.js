@@ -526,6 +526,10 @@ define([
 					}
 					var editor = this.editor || that.editor;
 					var textSearcher = this.textSearcher || that.textSearcher;
+					if (findCommand.textSearcher && findCommand.textSearcher !== textSearcher) {
+						findCommand.textSearcher.hide();
+					}
+					findCommand.textSearcher = textSearcher;
 					var searchString = "";
 					var parsedParam = null;
 					var selection = editor.getSelection();
