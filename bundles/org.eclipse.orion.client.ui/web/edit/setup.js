@@ -776,7 +776,7 @@ objects.mixin(EditorSetup.prototype, {
 	},
 
 	setSplitterMode: function(mode) {
-		
+		var oldSplitterMode = this.splitterMode;
 		if (this.splitterMode === mode) return;
 		this.splitterMode = mode;
 		
@@ -831,7 +831,7 @@ objects.mixin(EditorSetup.prototype, {
 			viewer.editorView.editor.resize();
 		});
 		
-		if (splitEditorViewerNode && splitEditorViewerNode.style.display !== "none" && !this.editorViewers[1].inputManager.getFileMetadata()) { //$NON-NLS-0$
+		if (oldSplitterMode === this.splitMenu.MODE_SINGLE && mode !== this.splitMenu.MODE_SINGLE) {
 			this.editorViewers[1].inputManager.setInput(PageUtil.hash());
 		}
 	},
