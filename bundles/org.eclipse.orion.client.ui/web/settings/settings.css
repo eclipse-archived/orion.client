@@ -592,12 +592,13 @@ div.page section:last-child {
 }
 
 .colorpicker-input {
+	border: 1px solid #ddd;
+	border-radius: 100%;
     padding: 0;
     margin: 0;
     width: 14px;
     height: 14px;
     cursor: pointer;
-    border: 0;
     float: right;
     background: none;
     position:relative;
