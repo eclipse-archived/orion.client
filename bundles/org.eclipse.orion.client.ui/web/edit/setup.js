@@ -145,9 +145,10 @@ objects.mixin(MenuBar.prototype, {
 			selection = explorer.selection;
 			treeRoot = explorer.getTreeRoot();
 		}
-		if (this.editorViewer) {
-			metadata = this.editorViewer.inputManager.getFileMetadata();
-			this.editorCommands.updateCommands(this.editorViewer.currentEditorView);
+		var editorViewer = this.editorViewer;
+		if (editorViewer) {
+			metadata = editorViewer.inputManager.getFileMetadata();
+			this.editorCommands.updateCommands(editorViewer.currentEditorView);
 		}
 		var commandRegistry = this.commandRegistry, serviceRegistry = this.serviceRegistry;
 		commandRegistry.registerSelectionService(this.fileActionsScope, visible ? selection : null);
@@ -308,9 +309,8 @@ objects.mixin(EditorViewer.prototype, {
 				editorView.undoStack = this.pool.undoStack;
 				editorView.editModelContextServiceID = this.pool.serviceID;
 				var editor = editorView.editor;
-				if (editor.installed && editorView === this.currentEditorView) {
-					editor.uninstall();
-					editor.install();
+				if (editor.installed) {
+					this._recreate = true;
 				}
 			}
 		}.bind(this));
@@ -390,7 +390,8 @@ objects.mixin(EditorViewer.prototype, {
 				}
 			}
 		}
-		if (this.currentEditorView !== view) {
+		if (this.currentEditorView !== view || this._recreate) {
+			this._recreate = false;
 			
 			var mainSplitter = mGlobalCommands.getMainSplitter();
 			if (mainSplitter) {
