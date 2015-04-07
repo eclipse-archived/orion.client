@@ -459,7 +459,7 @@ define([
 				this.reportStatus("");
 				this._input = fileURI;
 				var metadata = evt.metadata;
-				this._setInputContents(input, fileURI, null, metadata, this._isText(metadata));
+				this._setInputContents(input, fileURI, null, metadata);
 				return;
 			}
 			if (fileURI) {

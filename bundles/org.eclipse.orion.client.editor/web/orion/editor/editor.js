@@ -207,10 +207,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				} else {
 					if (contents !== null && contents !== undefined && typeof contents === "string") { //$NON-NLS-0$
 						this._setModelText(contents);
+						if (this._undoStack) {
+							this._undoStack.reset();
+						}
 					}
-				}
-				if (this._undoStack) {
-					this._undoStack.reset();
 				}
 			}
 			this.checkDirty();
