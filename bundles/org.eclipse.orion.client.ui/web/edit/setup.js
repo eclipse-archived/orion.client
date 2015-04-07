@@ -874,7 +874,7 @@ objects.mixin(EditorSetup.prototype, {
 });
 
 exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, readonly) {
-	enableSplitEditor = localStorage.enableSplitEditor;
+	enableSplitEditor = localStorage.enableSplitEditor === "true"; //$NON-NLS-0$
 
 	var setup = new EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly);
 	Deferred.when(setup.createBanner(), function() {
