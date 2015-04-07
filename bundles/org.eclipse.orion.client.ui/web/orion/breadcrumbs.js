@@ -295,6 +295,10 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         },
         
         destroy: function() {
+        	if (this.crumbs) {
+        		lib.empty(this._container);
+        		this.crumbs = this.dirty = null;
+        	}
         	if (this._resizeListener) {
         		window.removeEventListener("resize", this._resizeListener); //$NON-NLS-0$
         		this._resizeListener = null;

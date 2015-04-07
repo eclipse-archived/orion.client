@@ -443,7 +443,7 @@ define([
 				var fileClient = options.fileService || (serviceRegistry && new mFileClient.FileClient(serviceRegistry));
 				var resource = options.breadcrumbTarget || options.target;
 				var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
-				currentBreadcrumb = new mBreadcrumbs.BreadCrumbs({
+				var breadcrumbOptions = {
 					container: locationNode,
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
@@ -451,7 +451,19 @@ define([
 					workspaceRootURL: workspaceRootURL,
 					makeFinalHref: options.makeBreadcrumFinalLink,
 					makeHref: options.makeBreadcrumbLink
-				});
+				};
+				currentBreadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
+				
+				// If the viewer has a node for breadcrumbs replace it as well
+				var viewer = options.viewer;
+				if (viewer && viewer.localBreadcrumbNode) {
+					if (viewer.currentBreadcrumb) {
+						viewer.currentBreadcrumb.destroy();
+					}
+					breadcrumbOptions.id = "HeaderBreadcrumb" + viewer.id;
+					breadcrumbOptions.container = viewer.localBreadcrumbNode;					
+					viewer.currentBreadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
+				}
 			}
 		}
 	}

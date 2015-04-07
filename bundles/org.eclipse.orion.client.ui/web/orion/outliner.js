@@ -20,19 +20,18 @@ define([
 	'orion/URITemplate',
 	'orion/EventTarget',
 	'orion/i18nUtil',
-	'orion/edit/editorContext',
 	'orion/keyBinding',
 	'orion/globalCommands',
 	'orion/webui/Slideout'
-], function(objects, messages, Deferred, lib, mUIUtils, mExplorer, mCommands, URITemplate, EventTarget, i18nUtil, EditorContext, KeyBinding, mGlobalCommands, mSlideout) {
+], function(objects, messages, Deferred, lib, mUIUtils, mExplorer, mCommands, URITemplate, EventTarget, i18nUtil, KeyBinding, mGlobalCommands, mSlideout) {
 
 	var OUTLINE_TIMEOUT_MS = 2 * 60 * 1000; // determines how many milliseconds we will wait for the outline service to compute and return an outline before considering it timed out
 	
-	function OutlineRenderer (options, explorer, title, selectionService) {
+	function OutlineRenderer (options, explorer, title, inputManager) {
 		this.explorer = explorer;
 		this._init(options);
 		this.title = title;
-		this.selectionService = selectionService;
+		this.inputManager = inputManager;
 	}
 	
 	OutlineRenderer.prototype = new mExplorer.SelectionRenderer();
@@ -100,6 +99,10 @@ define([
 			contentsNode.appendChild(linkContents); //$NON-NLS-0$
  		}
  	};
+ 	
+ 	OutlineRenderer.prototype.getSelectionService = function() {
+ 		return this.inputManager.selection;
+ 	}
 	
 	OutlineRenderer.prototype._createLink = function(contentsNode, href, parentNode) {
 		var link = document.createElement("a"); //$NON-NLS-0$
@@ -110,7 +113,8 @@ define([
 		
 		// if a selection service has been specified, we will use it for link selection.
 		// Otherwise we assume following the href in the anchor tag is enough.
-		if (this.selectionService) {
+		var selectionService = this.getSelectionService();
+		if (selectionService) {
 			link.style.cursor = "pointer"; //$NON-NLS-0$
 			link.addEventListener("click", function(event) { //$NON-NLS-0$
 				this._followLink(event, href);
@@ -130,7 +134,7 @@ define([
     };
     
     OutlineRenderer.prototype._followLink = function(event, url) {
-		var selectionService = this.selectionService;
+		var selectionService = this.getSelectionService();
 		if (selectionService) {
 			if (mUIUtils.openInNewWindow(event)) {
 				mUIUtils.followLink(url, event);
@@ -141,14 +145,14 @@ define([
     };
 	
 	
-	function OutlineExplorer(serviceRegistry, selection, title) {
+	function OutlineExplorer(serviceRegistry, inputManager, title) {
 		/*	we intentionally do not do this:
 				this.selection = selection;
 			Our renderer is going to trigger the selection events using specialized URL's when an outline
 			link is clicked.  We don't want the explorer triggering selection events on the outline model item
 		*/
 		this.registry = serviceRegistry;
-		this.renderer = new OutlineRenderer({checkbox: false, treeTableClass: "outlineExplorer"}, this, title, selection);  //$NON-NLS-0$ 
+		this.renderer = new OutlineRenderer({checkbox: false, treeTableClass: "outlineExplorer"}, this, title, inputManager);  //$NON-NLS-0$ 
 	}
 	OutlineExplorer.prototype = new mExplorer.Explorer();	
 	OutlineExplorer.prototype.constructor = OutlineExplorer;
@@ -343,7 +347,8 @@ define([
 	 * @param {orion.serviceRegistry.ServiceRegistry} options.serviceRegistry The service registry.
 	 * @param {orion.commands.CommandService} options.commandService
 	 * @param {Service of type orion.outliner.OutlineService} options.outlineService The outline service to use.
-	 * @param {orion.selection.Selection} [options.selectionService] If provided, the 
+	 * @param {orion.InputManager} [options.inputManager] the editor input manager
+	 * @param {orion.selection.Selection} [options.inputManager.selection] If provided, the 
 	 * selection service will be notified on outline selection rather than using anchor tag hrefs.
 	 * @param {orion.sidebar.Sidebar} Parent sidebar
 	 */
@@ -375,7 +380,6 @@ define([
 			this._contentTypeRegistry = options.contentTypeRegistry;
 			this._outlineService = options.outlineService;
 			this._commandService = options.commandService;
-			this._selectionService = options.selectionService;
 			this._inputManager = options.inputManager;
 			this._sidebar = options.sidebar;
 			this._switcherNode = options.switcherNode;
@@ -457,13 +461,13 @@ define([
 				this._outlineTimeout = null;
 			}
 			lib.empty(this._outlineNode);
-			outlineModel = outlineModel instanceof Array ? outlineModel : [outlineModel];
 			if (outlineModel) {
+				outlineModel = outlineModel instanceof Array ? outlineModel : [outlineModel];
 				var treeModel = new OutlineModel(outlineModel);
 				if (this.explorer) {
 					this.explorer.destroy();
 				}
-				this.explorer = new OutlineExplorer(this._serviceRegistry, this._selectionService, title);
+				this.explorer = new OutlineExplorer(this._serviceRegistry, this._inputManager, title);
 				this.explorer.createTree(this._outlineNode, treeModel, {selectionPolicy: "cursorOnly", setFocus: false}); //$NON-NLS-1$ //$NON-NLS-0$
 				treeModel.doExpansions(this.explorer.myTree);
 			}
@@ -709,14 +713,19 @@ define([
 		emitOutline: function(inputManager) {
 			var self = this;
 			Deferred.when(this.getProvider(), function(provider) {
-				var editor = inputManager.getEditor(), title = editor.getTitle();
+				var editor = inputManager.getEditor();
+				if (!editor) {
+					self.dispatchEvent({ type:"outline", outline: null}); //$NON-NLS-0$
+					return;
+				}
+				var title = editor.getTitle();
 				var serviceRegistry = self._serviceRegistry;
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				var outlineProviderService = serviceRegistry.getService(provider);
 				var method, args;
 				if ((method = outlineProviderService.computeOutline)) {
 					var contentType = inputManager.getContentType();
-					args = [EditorContext.getEditorContext(serviceRegistry), {
+					args = [editor.getEditorContext(), {
 						contentType: contentType && contentType.id
 					}];
 				} else if ((method = outlineProviderService.getOutline)) {

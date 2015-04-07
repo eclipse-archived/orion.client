@@ -17,6 +17,8 @@ define([
 	'orion/section'
 ], function(messages, URITemplate, lib, mExplorer, mSection){
 	
+	var ID_COUNT = 0;
+	
 	var editTemplate = new URITemplate("../edit/edit.html#{,resource,params*}"); //$NON-NLS-0$
 			
 	function ProjectsRenderer(options){
@@ -85,6 +87,7 @@ define([
 	};
 
 	function ProjectExplorer(parentId, serviceRegistry, selection, commandRegistry) {
+		this.idCount = ID_COUNT++;
 		this.registry = serviceRegistry;
 		this.selection = selection;
 		this.commandRegistry = commandRegistry;
@@ -100,9 +103,9 @@ define([
 	ProjectExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	
 	ProjectExplorer.prototype._init = function(){
-		var projectsSection = new mSection.Section(lib.node(this.parentId), {id: "projectsSection", title: messages['projectsSectionTitle'], canHide: true});
+		var projectsSection = new mSection.Section(lib.node(this.parentId), {id: "projectsSection" + this.idCount, title: messages['projectsSectionTitle'], canHide: true});
 		var div = document.createElement("div");
-		div.id = "projectsExplorer";
+		div.id = "projectsExplorer" + this.idCount;
 		projectsSection.embedExplorer(this, div);
 	};
 	

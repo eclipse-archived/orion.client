@@ -30,11 +30,10 @@ define([
 	'orion/PageUtil',
 	'orion/PageLinks',
 	'orion/editor/annotations',
-	'orion/blamer',
 	'orion/regex',
-	'orion/util',
-	'orion/edit/editorContext'
-], function(messages, i18nUtil, lib, openResource, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, blamer, regex, util, EditorContext) {
+	'orion/uiUtils',
+	'orion/util'
+], function(messages, i18nUtil, lib, openResource, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, objects, mPageUtil, PageLinks, mAnnotations, regex, mUIUtils, util) {
 
 	var exports = {};
 
@@ -141,57 +140,193 @@ define([
 		this.editToolbarId = options.editToolbarId;
 		this.pageNavId = options.navToolbarId;
 		this.isReadOnly = options.readonly;
-		this._localSearcher = options.textSearcher;
-		this._searcher = options.searcher;
-		this.editorSettings = options.editorSettings;
+		this.textSearcher = options.textSearcher;
+		this.searcher = options.searcher;
 		this.localSettings = options.localSettings;
 		this.editorPreferences = options.editorPreferences;
-		this.diffService = options.diffService;
+		this.differ = options.differ;
+		this.blamer = options.blamer;
+		var that = this;
+		this.listener = {
+			onServiceAdded: function(event) {
+				that._onServiceAdded(event.serviceReference);
+			},
+			onServiceRemoved: function(event) {
+				that._onServiceRemoved(event.serviceReference);
+			}
+		};
+		this.serviceRegistry.addEventListener("registered", this.listener.onServiceAdded); //$NON-NLS-0$
+		this.serviceRegistry.addEventListener("unregistering", this.listener.onServiceRemoved); //$NON-NLS-0$
 	}
 	EditorCommandFactory.prototype = {
 		/**
-		 * Creates the common text editing commands.  Also generates commands for any installed plug-ins that
+		 * Creates the common text editing commands. Also generates commands for any installed plug-ins that
 		 * contribute editor actions.
 		 */
-		generateSimpleEditorCommands: function(editor, saveCmdId, saveCmdVisibleFunc, saveCommandOrderNumber) {
-			if (!this.isReadOnly) {
-				this._generateUndoStackCommands(editor);
-				this._generateSaveCommand(editor, saveCmdId, saveCmdVisibleFunc, saveCommandOrderNumber);
+		createCommands: function() {
+			this._createSettingsCommand();
+			this._createSearchFilesCommand();
+			this._createGotoLineCommnand();
+			this._createFindCommnand();
+			this._createBlameCommand();
+			this._createDiffCommand();
+			this._createShowTooltipCommand();
+			this._createUndoStackCommands();
+			this._createSaveCommand();
+			return this._createEditCommands();
+		},
+		getEditCommands: function() {
+			var commands = [];
+			var commandRegistry = this.commandService;
+			for (var commandId in commandRegistry._commandList) {
+				var command = commandRegistry._commandList[commandId];
+				if (command.editInfo) {
+					commands.push(command);
+				}
 			}
-			this._generateSearchFilesCommand(editor);
-			this._generateGotoLineCommnand(editor);
-			this._generateFindCommnand(editor);
+			return commands;
 		},
-		generateEditorCommands: function(editor) {
-			this.generateBaseEditorCommands(editor);
-			this.generateExtraEditorCommands(editor);
-		},
-		generateBaseEditorCommands: function(editor) {
-			if (!this.isReadOnly) {
-				this._generateUndoStackCommands(editor);
-				this._generateSaveCommand(editor);
-				this._generateEditCommands(editor);
+		updateCommands: function(target) {
+			target = target || {};
+			this.editor = target.editor;
+			this.inputManager = target.inputManager;
+			this.localSettings = target.localSettings;
+			this.differ = target.differ;
+			this.blamer = target.blamer;
+			this.textSearcher = target.textSearcher;
+			
+			if (this._recreateEditCommands) {
+				this._createEditCommands().then(function() {
+					this.registerCommands();
+				}.bind(this));
 			}
 		},
-		generateExtraEditorCommands: function(editor) {
-			this._generateSettingsCommand(editor);
-			this._generateSearchFilesCommand(editor);
-			this._generateGotoLineCommnand(editor);
-			this._generateFindCommnand(editor);
-			this._generateBlame(editor);
-			this._generateDiff(editor);
-			this._generateShowTooltip(editor);
+		registerCommands: function() {
+			var commandRegistry = this.commandService;
+			
+			commandRegistry.registerCommandContribution("settingsActions", "orion.edit.settings", 1, null, false, new mKeyBinding.KeyBinding("s", true, true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.edit.undo", 400, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.undoGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('z', true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.edit.redo", 401, this.editToolbarId ? "orion.menuBarEditGroup/orion.edit.undoGroup" : null, !this.editToolbarId, util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.searchFiles", 1, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding("h", true), null, this); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.saveToolbarId || this.toolbarId, "orion.edit.save", 1, this.saveToolbarId ? "orion.menuBarFileGroup/orion.edit.saveGroup" : null, false, new mKeyBinding.KeyBinding('s', true), null, this); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.gotoLine", 3, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.edit.find", 0, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.blame", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.diff", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff"), this); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding(113), null, this);//$NON-NLS-1$ //$NON-NLS-0$ 
+
+			// KB exists so that we can pass an array (from info.key) rather than actual arguments
+			function createKeyBinding(args) {
+				if (!args) { return null; }
+				var keyBinding = new mKeyBinding.KeyBinding();
+				mKeyBinding.KeyBinding.apply(keyBinding, args);
+				return keyBinding;
+			}
+			var commands = this.getEditCommands();
+			for (var i = 0, position = 100; i < commands.length; i++, position++) {
+				var command = commands[i], info = command.editInfo;
+				
+				// Handle quick fixes
+				if (info.scopeId) {
+					commandRegistry.registerCommandContribution(info.scopeId, command.id, position, info.scopeId + "Group", info.bindingOnly, createKeyBinding(info.key), null, this); //$NON-NLS-0$
+				} else {
+					commandRegistry.registerCommandContribution(this.toolbarId, command.id, position, "orion.menuBarToolsGroup", info.bindingOnly, createKeyBinding(info.key), null, this); //$NON-NLS-0$
+				}
+			}
 		},
-		_generateSettingsCommand: function(editor) {
-			var self = this;
+		overwriteKeyBindings: function(editor) {
+			var that = this;
+			this.editor = editor;
+			if (editor.getTextView && editor.getTextView()) {
+				var textView = editor.getTextView();
+				textView.setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
+				var saveCommand = that.commandService.findCommand("orion.edit.save"); //$NON-NLS-0$
+				textView.setAction("save", function() { //$NON-NLS-0$
+					saveCommand.callback.call({inputManager: that.inputManager});
+					return true;
+				}, saveCommand); //$NON-NLS-0$
+			
+				textView.setAction("gotoLine", function (data) { //$NON-NLS-0$
+					if (data) {
+						editor.onGotoLine(data.line - 1, 0, undefined, data.callback);
+						return true;
+					}
+					that.commandService.runCommand("orion.edit.gotoLine"); //$NON-NLS-0$
+					return true;
+				}, that.commandService.findCommand("orion.edit.gotoLine")); //$NON-NLS-0$
+
+				textView.setAction("find", function (data) { //$NON-NLS-0$
+					if (data) {
+						that.textSearcher.show(data);
+						return true;
+					}
+					that.commandService.runCommand("orion.edit.find", null, null, new mCommandRegistry.ParametersDescription( //$NON-NLS-0$
+						[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						{clientCollect: true}));
+					return true;
+				}, that.commandService.findCommand("orion.edit.find")); //$NON-NLS-0$
+			}
+		},
+		showKeyBindings: function(keyAssist) {
+			var editor = this.editor;
+			if (editor && editor.getTextView && editor.getTextView()) {
+				var textView = editor.getTextView();
+				// Remove actions without descriptions
+				var editorActions = textView.getActions(true).filter(function (element) {
+					var desc = textView.getActionDescription(element);
+					return desc && desc.name;
+				});
+				editorActions.sort(function (a, b) {
+					return textView.getActionDescription(a).name.localeCompare(textView.getActionDescription(b).name);
+				});
+				keyAssist.createHeader(messages["Editor"]);
+				var execute = function (actionID) {
+					return function () {
+						textView.focus();
+						return textView.invokeAction(actionID);
+					};
+				};
+				var scopes = {}, binding;
+				for (var i = 0; i < editorActions.length; i++) {
+					var actionID = editorActions[i];
+					var actionDescription = textView.getActionDescription(actionID);
+					var bindings = textView.getKeyBindings(actionID);
+					for (var j = 0; j < bindings.length; j++) {
+						binding = bindings[j];
+						var bindingString = mUIUtils.getUserKeyString(binding);
+						if (binding.scopeName) {
+							if (!scopes[binding.scopeName]) {
+								scopes[binding.scopeName] = [];
+							}
+							scopes[binding.scopeName].push({bindingString: bindingString, name: actionDescription.name, execute: execute(actionID)});
+						} else {
+							keyAssist.createItem(bindingString, actionDescription.name, execute(actionID));
+						}
+					}
+				}
+				for (var scopedBinding in scopes) {
+					if (scopes[scopedBinding].length) {
+						keyAssist.createHeader(scopedBinding);
+						for (var k = 0; k < scopes[scopedBinding].length; k++) {
+							binding = scopes[scopedBinding][k];
+							keyAssist.createItem(binding.bindingString, binding.name, binding.execute);
+						}
+					}
+				}
+			}
+		},
+		_createSettingsCommand: function() {
+			var that = this;
 			var settingsCommand = new mCommands.Command({
 				imageClass: "core-sprite-wrench", //$NON-NLS-0$
 				tooltip: messages.LocalEditorSettings,
 				id: "orion.edit.settings", //$NON-NLS-0$
-				visibleWhen: function() {
-					return editor.installed;
+				visibleWhen: /** @callback */ function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					return editor && editor.installed && data.handler.localSettings;
 				},
 				callback: function(data) {
+					var localSettings = this.localSettings || that.localSettings;
 					var dropDown = settingsCommand.settingsDropDown;
 					if (!dropDown || dropDown.isDestroyed()) {
 						dropDown = settingsCommand.settingsDropDown = new DropDownMenu(data.domNode.parentNode, data.domNode, {
@@ -201,10 +336,10 @@ define([
 								dropDown.focus();
 							},
 							onHide: function() {
-								editor.focus();
+								that.editor.focus();
 							}
 						});
-						dropDown.updateContent = self.localSettings.show.bind(self.localSettings);
+						dropDown.updateContent = localSettings.show.bind(localSettings);
 						var menu = dropDown.getContentNode();
 						menu.tabIndex = menu.style.marginTop = 0;
 					}
@@ -212,118 +347,112 @@ define([
 				}
 			});
 			this.commandService.addCommand(settingsCommand);
-			this.commandService.registerCommandContribution("settingsActions", "orion.edit.settings", 1, null, false, new mKeyBinding.KeyBinding("s", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
-		_generateUndoStackCommands: function(editor) {
+		_createUndoStackCommands: function() {
+			var that = this;
 			var undoCommand = new mCommands.Command({
 				name: messages.Undo,
-				id: "orion.undo", //$NON-NLS-0$
-				visibleWhen: function() {
-					return editor.installed;
+				id: "orion.edit.undo", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					return editor && editor.installed;
 				},
-				callback: function(data) {
+				callback: function() {
+					var editor = this.editor || that.editor;
 					editor.getUndoStack().undo();
 				}
 			});
 			this.commandService.addCommand(undoCommand);
-			this.commandService.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.undo", 400, this.editToolbarId ? "orion.menuBarEditGroup/orion.undoGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('z', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 			var redoCommand = new mCommands.Command({
 				name: messages.Redo,
-				id: "orion.redo", //$NON-NLS-0$
-				visibleWhen: function() {
-					return editor.installed;
+				id: "orion.edit.redo", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					return editor && editor.installed;
 				},
-				callback: function(data) {
+				callback: function() {
+					var editor = this.editor || that.editor;
 					editor.getUndoStack().redo();
 				}
 			});
 			this.commandService.addCommand(redoCommand);
-			this.commandService.registerCommandContribution(this.editToolbarId || this.toolbarId, "orion.redo", 401, this.editToolbarId ? "orion.menuBarEditGroup/orion.undoGroup" : null, !this.editToolbarId, util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true)); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
-		_generateSearchFilesCommand: function(editor) {
-			var self = this;
+		_createSearchFilesCommand: function() {
+			var that = this;
 
 			// global search
-			if (self._searcher) {
-				var showingSearchDialog = false;
-				var searchCommand =  new mCommands.Command({
-					name: messages.searchFiles,
-					tooltip: messages.searchFiles,
-					id: "orion.searchFiles", //$NON-NLS-0$
-					visibleWhen: function() {
-						return editor.installed;
-					},
-					callback: function(data) {
-						if (showingSearchDialog) {
-							return;
-						}
-						var selection = editor.getSelection();
-						var searchTerm = editor.getText(selection.start, selection.end);
-						var serviceRegistry = self.serviceRegistry;
-						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-						var dialog = new openResource.OpenResourceDialog({
-							searcher: self._searcher,
-							progress: progress,
-							searchRenderer: self._searcher.defaultRenderer,
-							nameSearch: false,
-							title: messages.searchFiles,
-							message: messages.searchTerm,
-							initialText: searchTerm,
-							onHide: function () {
-								showingSearchDialog = false;
-								editor.focus();
-							}
-						});
-						window.setTimeout(function () {
-							showingSearchDialog = true;
-							dialog.show(lib.node(self.toolbarId));
-						}, 0);
+			var showingSearchDialog = false;
+			var searchCommand =  new mCommands.Command({
+				name: messages.searchFiles,
+				tooltip: messages.searchFiles,
+				id: "orion.edit.searchFiles", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					var searcher = data.handler.searcher || that.searcher;
+					return editor && editor.installed && searcher;
+				},
+				callback: function() {
+					var editor = this.editor || that.editor;
+					if (showingSearchDialog) {
+						return;
 					}
-				});
-				this.commandService.addCommand(searchCommand);
-				this.commandService.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.searchFiles", 1, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding("h", true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			}
+					var selection = editor.getSelection();
+					var searchTerm = editor.getText(selection.start, selection.end);
+					var serviceRegistry = that.serviceRegistry;
+					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+					var dialog = new openResource.OpenResourceDialog({
+						searcher: that.searcher,
+						progress: progress,
+						searchRenderer: that.searcher.defaultRenderer,
+						nameSearch: false,
+						title: messages.searchFiles,
+						message: messages.searchTerm,
+						initialText: searchTerm,
+						onHide: function () {
+							showingSearchDialog = false;
+							editor.focus();
+						}
+					});
+					window.setTimeout(function () {
+						showingSearchDialog = true;
+						dialog.show(lib.node(that.toolbarId));
+					}, 0);
+				}
+			});
+			this.commandService.addCommand(searchCommand);
 		},
-		_generateSaveCommand: function(editor, saveCmdId, saveCmdVisibleFunc, commandOrderNumber) {
-			var self = this;
-			var cmdId = saveCmdId ? saveCmdId : "orion.save"; //$NON-NLS-0$
+		_createSaveCommand: function() {
+			var that = this;
 			var saveCommand = new mCommands.Command({
 				name: messages.Save,
 				tooltip: messages.saveFile,
 				imageClass : "core-sprite-save", //$NON-NLS-0$
-				id: cmdId,
-				visibleWhen: function() {
-					if(saveCmdVisibleFunc) {
-						return saveCmdVisibleFunc();
-					}
-					if (!editor.installed || self.inputManager.getReadOnly()) {
+				id: "orion.edit.save", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					var inputManager = data.handler.inputManager || that.inputManager;
+					var editor = data.handler.editor || that.editor || (inputManager && inputManager.getEditor());
+					if (!editor || !editor.installed || !inputManager || !inputManager.isSaveEnabled()) {
 						return false;
 					}
 					return true;
 				},
-				callback: function(data) {
-					self.inputManager.save();
-					return true;
+				callback: function() {
+					var inputManager = this.inputManager || that.inputManager;
+					inputManager.save();
 				}
 			});
 			this.commandService.addCommand(saveCommand);
-			this.commandService.registerCommandContribution(this.saveToolbarId || this.toolbarId, cmdId, typeof commandOrderNumber === "number" ? commandOrderNumber : 1, this.saveToolbarId ? "orion.menuBarFileGroup/orion.saveGroup" : null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
-
-			// Add key binding to editor so that the user agent save dialog does not show when auto save is enabled
-			if (editor.getTextView && editor.getTextView()) {
-				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
-				editor.getTextView().setAction("save", saveCommand.callback, saveCommand); //$NON-NLS-0$
-			}
 		},
-		_generateGotoLineCommnand: function(editor) {
-			var self = this;
+		_createGotoLineCommnand: function() {
+			var that = this;
 
 			// page navigation commands (go to line)
 			var lineParameter = new mCommandRegistry.ParametersDescription(
 				[new mCommandRegistry.CommandParameter('line', 'number', messages.gotoLinePrompt)], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				{hasOptionalParameters: false},
-				function() {
+				function(data) {
+					var editor = data.handler.editor || that.editor;
 					var line = editor.getModel().getLineAtOffset(editor.getCaretOffset()) + 1;
 					return [new mCommandRegistry.CommandParameter('line', 'number', messages.gotoLinePrompt, line.toString())]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
@@ -332,13 +461,15 @@ define([
 			var gotoLineCommand =  new mCommands.Command({
 				name: messages.gotoLine,
 				tooltip: messages.gotoLineTooltip,
-				id: "orion.gotoLine", //$NON-NLS-0$
-				visibleWhen: function() {
-					return editor.installed;
+				id: "orion.edit.gotoLine", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					return editor && editor.installed;
 				},
 				parameters: lineParameter,
 				callback: function(data) {
 					var line;
+					var editor = this.editor || that.editor;
 					var model = editor.getModel();
 					if (data.parameters && data.parameters.valueFor('line')) { //$NON-NLS-0$
 						line = data.parameters.valueFor('line'); //$NON-NLS-0$
@@ -355,33 +486,23 @@ define([
 				}
 			});
 			this.commandService.addCommand(gotoLineCommand);
-			this.commandService.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.gotoLine", 3, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			// override the editor binding
-			if (editor.getTextView && editor.getTextView()) {
-				editor.getTextView().setAction("gotoLine", function (data) { //$NON-NLS-0$
-					if (data) {
-						editor.onGotoLine(data.line - 1, 0, undefined, data.callback);
-						return true;
-					}
-					self.commandService.runCommand("orion.gotoLine"); //$NON-NLS-0$
-					return true;
-				}, gotoLineCommand);
-			}
 		},
-		_generateFindCommnand: function(editor) {
-			var self = this;
+		_createFindCommnand: function() {
+			var that = this;
 
 			// find&&replace commands (find)
 			var findParameter = new mCommandRegistry.ParametersDescription(
 				[new mCommandRegistry.CommandParameter('find', 'text', 'Find:')], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				{clientCollect: true},
-				function() {
+				function(data) {
+					var editor = data.handler.editor || that.editor;
+					var textSearcher = data.handler.textSearcher || that.textSearcher;
 					var selection = editor.getSelection();
 					var searchString = "";
 					if (selection.end > selection.start) {
 						var model = editor.getModel();
 						searchString = model.getText(selection.start, selection.end);
-						if (self._localSearcher && self._localSearcher.getOptions().regex) {
+						if (textSearcher && textSearcher.getOptions().regex) {
 							searchString = regex.escape(searchString);
 						}
 					}
@@ -391,81 +512,73 @@ define([
 			var findCommand =  new mCommands.Command({
 				name: messages.Find,
 				tooltip: messages.Find,
-				id: "orion.editor.find", //$NON-NLS-0$
-				visibleWhen: function() {
-					return editor.installed;
+				id: "orion.edit.find", //$NON-NLS-0$
+				visibleWhen: /** @callback */ function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					var textSearcher = data.handler.textSearcher || that.textSearcher;
+					return editor && editor.installed && textSearcher;
 				},
 				parameters: findParameter,
 				callback: function(data) {
-					if (lib.node("replaceCompareDiv").classList.contains("replaceCompareDivVisible")) { //$NON-NLS-1$ //$NON-NLS-0$
+					var node = lib.node("replaceCompareDiv"); //$NON-NLS-0$
+					if (node && node.classList.contains("replaceCompareDivVisible")) { //$NON-NLS-0$
 						return false; //TODO is there a better way of preventing the command from being executed?
 					}
-					if (self._localSearcher) {
-						var searchString = "";
-						var parsedParam = null;
-						var selection = editor.getSelection();
-						if (selection.end > selection.start && data.parameters.valueFor('useEditorSelection')) {//$NON-NLS-0$ If there is selection from editor, we want to use it as the default keyword
-							var model = editor.getModel();
-							searchString = model.getText(selection.start, selection.end);
-							if (self._localSearcher.getOptions().regex) {
-								searchString = regex.escape(searchString);
-							}
-						} else {//If there is no selection from editor, we want to parse the parameter from URL binding
-							if (data.parameters && data.parameters.valueFor('find')) { //$NON-NLS-0$
-								searchString = data.parameters.valueFor('find'); //$NON-NLS-0$
-								parsedParam = mPageUtil.matchResourceParameters();
-								mSearchUtils.convertFindURLBinding(parsedParam);
-							}
-						}
-						if(parsedParam){
-							self._localSearcher.setOptions({regex: parsedParam.regEx, caseInsensitive: !parsedParam.caseSensitive});
-							var tempOptions = {};
-							if(parsedParam.atLine){
-								tempOptions.start = editor.getModel().getLineStart(parsedParam.atLine-1);
-							}
-							self._localSearcher.show({findString: searchString, replaceString: parsedParam.replaceWith});
-							self._localSearcher.find(true, tempOptions);
-							self.commandService.closeParameterCollector(); //TODO is there a better way of hiding the parameter collector?
-						} else {
-							self._localSearcher.show({findString: searchString});
-						}
-						return true;
+					var editor = this.editor || that.editor;
+					var textSearcher = this.textSearcher || that.textSearcher;
+					if (findCommand.textSearcher && findCommand.textSearcher !== textSearcher) {
+						findCommand.textSearcher.hide();
 					}
-					return false;
+					findCommand.textSearcher = textSearcher;
+					var searchString = "";
+					var parsedParam = null;
+					var selection = editor.getSelection();
+					if (selection.end > selection.start && data.parameters.valueFor('useEditorSelection')) {//$NON-NLS-0$ If there is selection from editor, we want to use it as the default keyword
+						var model = editor.getModel();
+						searchString = model.getText(selection.start, selection.end);
+						if (textSearcher.getOptions().regex) {
+							searchString = regex.escape(searchString);
+						}
+					} else {//If there is no selection from editor, we want to parse the parameter from URL binding
+						if (data.parameters && data.parameters.valueFor('find')) { //$NON-NLS-0$
+							searchString = data.parameters.valueFor('find'); //$NON-NLS-0$
+							parsedParam = mPageUtil.matchResourceParameters();
+							mSearchUtils.convertFindURLBinding(parsedParam);
+						}
+					}
+					if(parsedParam){
+						textSearcher.setOptions({regex: parsedParam.regEx, caseInsensitive: !parsedParam.caseSensitive});
+						var tempOptions = {};
+						if(parsedParam.atLine){
+							tempOptions.start = editor.getModel().getLineStart(parsedParam.atLine-1);
+						}
+						textSearcher.show({findString: searchString, replaceString: parsedParam.replaceWith});
+						textSearcher.find(true, tempOptions);
+						that.commandService.closeParameterCollector(); //TODO is there a better way of hiding the parameter collector?
+					} else {
+						textSearcher.show({findString: searchString});
+					}
 				}
 			});
 			this.commandService.addCommand(findCommand);
-			this.commandService.registerCommandContribution(this.editToolbarId || this.pageNavId, "orion.editor.find", 0, this.editToolbarId ? "orion.menuBarEditGroup/orion.findGroup" : null, !this.editToolbarId, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			// override the editor binding
-			if (editor.getTextView && editor.getTextView()) {
-				editor.getTextView().setAction("find", function (data) { //$NON-NLS-0$
-					if (data) {
-						self._localSearcher.show(data);
-						return true;
-					}
-					self.commandService.runCommand("orion.editor.find", null, null, new mCommandRegistry.ParametersDescription( //$NON-NLS-0$
-						[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						{clientCollect: true}));
-					return true;
-				}, findCommand);
-			}
 		},
 
-		_generateBlame: function(editor){
-			var self = this;
+		_createBlameCommand: function(){
+			var that = this;
 			var blameCommand = new mCommands.Command({
 				name: messages.Blame,
 				tooltip: messages.BlameTooltip,
 				id: "orion.edit.blame", //$NON-NLS-0$
 				parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('blame', 'boolean')], {clientCollect: true}), //$NON-NLS-1$ //$NON-NLS-0$
-				visibleWhen: function() {
-					if (!editor.installed) {
-						return false;
-					}
-					return blamer.isVisible(self.serviceRegistry, self.inputManager);
+				visibleWhen: /** @callback */ function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					var blamer = data.handler.blamer || that.blamer;
+					return editor && editor.installed && blamer && blamer.isVisible();
 				},
 				callback: function(data) {
 					var visible = false;
+					var editor = this.editor || that.editor;
+					var blamer = this.blamer || that.blamer;
 					var annotations = editor.getAnnotationModel().getAnnotations();
 					while (annotations.hasNext()) {
 						var annotation = annotations.next();
@@ -479,52 +592,53 @@ define([
 						visible = data.parameters.valueFor('blame') === "true"; //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					if (visible) {
-						blamer.getBlame(self.serviceRegistry, self.inputManager);
+						blamer.doBlame();
 					} else{
 						editor.showBlame([]);
 					}
 				}
 			});
 			this.commandService.addCommand(blameCommand);
-			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.blame", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 
-		_generateDiff: function(editor){
-			var self = this;
+		_createDiffCommand: function(){
+			var that = this;
 			var diffCommand = new mCommands.Command({
 				name: messages.Diff,
 				tooltip: messages.DiffTooltip,
 				id: "orion.edit.diff", //$NON-NLS-0$
-				visibleWhen: function() {
-					if (!editor.installed) {
-						return false;
-					}
-					return true;
+				visibleWhen: /** @callback */ function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					var differ = data.handler.differ || that.differ;
+					return editor && editor.installed && differ && differ.isVisible();
 				},
-				callback: function(data) {
-					self.diffService.toggleEnabled(editor);
-					self.editorPreferences.getPrefs(function(pref){
-						pref.diffService = self.diffService.isEnabled();
-						self.editorPreferences.setPrefs(pref);
+				callback: function() {
+					var differ = this.differ || that.differ;
+					differ.toggleEnabled();
+					var editorPreferences = this.editorPreferences;
+					editorPreferences.getPrefs(function(pref){
+						pref.diffService = differ.isEnabled();
+						editorPreferences.setPrefs(pref);
 					});
-
 				}
 			});
 			this.commandService.addCommand(diffCommand);
-			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.diff", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('d', true, true), new mCommandRegistry.URLBinding("diff", "diff")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 
-		_generateShowTooltip: function(editor){
-			var tooltip = editor.getTooltip();
+		_createShowTooltipCommand: function(){
+			var that = this;
 			var showTooltipCommand = new mCommands.Command({
 				name: messages.showTooltip,
 				tooltip: messages.showTooltipTooltip,
 				id: "orion.edit.showTooltip", //$NON-NLS-0$
-				visibleWhen: function() {
-					return editor.installed;
+				visibleWhen: /** @callback */ function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					return editor && editor.installed;
 				},
-				callback: function(data) {
-					var tv = editor._textView;
+				callback: function() {
+					var editor = this.editor || that.editor;
+					var tooltip = editor.getTooltip();
+					var tv = editor.getTextView();
 					var offset = tv.getCaretOffset();
 					var pos = tv.getLocationAtOffset(offset);
 					tooltip.show({
@@ -537,21 +651,20 @@ define([
 				}
 			});
 			this.commandService.addCommand(showTooltipCommand);
-			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.showTooltip", 1, "orion.menuBarToolsGroup", false, //$NON-NLS-1$ //$NON-NLS-0$
-				new mKeyBinding.KeyBinding(113));
 		},
-	
-		/**
-		 * Helper for {@link #_generateEditCommands}. Creates and returns the Command objects and the service info
-		 * that derived them. Does not render commands.
-		 * @returns {orion.Promise} A promise resolving to {@link Object[]} with each element having 2 properties:
-		 * <p>
-		 * <tt>info: Object</tt><br>
-		 * <tt>command: {@link orion.edit.Command}</tt>
-		 * </p>
-		 */
-		_createEditCommands: function(editor) {
-			var self = this;
+		_onServiceRemoved: function(serviceReference) {
+			if (serviceReference.getProperty("objectClass").indexOf("orion.edit.command") !== -1) { //$NON-NLS-1$ //$NON-NLS-0$
+				this._recreateEditCommands = true;
+			}
+		},
+		_onServiceAdded: function(serviceReference) {
+			if (serviceReference.getProperty("objectClass").indexOf("orion.edit.command") !== -1) { //$NON-NLS-1$ //$NON-NLS-0$
+				this._recreateEditCommands = true;
+			}
+		},
+		_createEditCommands: function() {
+			var that = this;
+			this._recreateEditCommands = false;
 
 			function getContentTypes(serviceRegistry) {
 				if (contentTypesCache) {
@@ -577,21 +690,29 @@ define([
 			//
 			// iterate through the extension points and generate commands for each one.
 			var serviceRegistry = this.serviceRegistry;
+			var commandRegistry = this.commandService;
 			var actionReferences = serviceRegistry.getServiceReferences("orion.edit.command"); //$NON-NLS-0$
-			var inputManager = this.inputManager;
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 			var handleStatus = handleStatusMessage.bind(null, serviceRegistry);
 			var makeCommand = function(info, service, options) {
 				var commandVisibleWhen = options.visibleWhen;
-				options.visibleWhen = function(item) {
-					if (!editor.installed || inputManager.getReadOnly()) {
+				options.visibleWhen = function(items, data) {
+					var editor = data.handler.editor || that.editor;
+					var inputManager = data.handler.inputManager || that.inputManager;
+					if (!editor || !editor.installed || !inputManager) {
 						return false;
 					}
-					return !commandVisibleWhen || commandVisibleWhen(item);
+					if (info.editor && editor.id && info.editor !== editor.id) {
+						return false;
+					}
+					if (that.inputManager.getReadOnly()) {
+						return false;
+					}
+					return !commandVisibleWhen || commandVisibleWhen(items);
 				};
 				options.callback = function(data) {
-					// command service will provide editor parameter but editor widget callback will not
-					editor = this;
+					var editor = this.editor || that.editor;
+					var inputManager = this.inputManager || that.inputManager;
 					//TODO should all text editors have selection?
 					var selection = editor.getSelection ? editor.getSelection() : {start: 0, end: 0};
 					var model = editor.getModel();
@@ -628,7 +749,7 @@ define([
 						};
 						
 						// TODO: Make this more generic
-						if (info.scopeId === "orion.edit.quickfix") {
+						if (info.scopeId === "orion.edit.quickfix") { //$NON-NLS-0$
 							context.annotation = {
 								start: data.userData.start,
 								end: data.userData.end,
@@ -636,15 +757,15 @@ define([
 								id: data.userData.id
 							};
 						}
-						var editorContext = EditorContext.getEditorContext(serviceRegistry);
+						var editorContext = editor.getEditorContext();
 						// Hook up delegated UI and Status handling
 						editorContext.openDelegatedUI = function(/*options, ..*/) {
-							var options = arguments[0];
-							options = options || {};
-							options.done = processEditorResult;
-							options.status = handleStatus;
-							options.params = options.params || {};
-							objects.mixin(options.params, inputManager.getFileMetadata());
+							var options1 = arguments[0];
+							options1 = options1 || {};
+							options1.done = processEditorResult;
+							options1.status = handleStatus;
+							options1.params = options1.params || {};
+							objects.mixin(options1.params, inputManager.getFileMetadata());
 							createDelegatedUI.apply(null, Array.prototype.slice.call(arguments));
 						};
 						editorContext.setStatus = handleStatus;
@@ -655,15 +776,15 @@ define([
 						serviceCall = service.run(model.getText(selection.start,selection.end), model.getText(), selection, inputManager.getInput());
 						handleResult = function(result){
 							if (result && result.uriTemplate) {
-							    var options = {};
-								options.uriTemplate = result.uriTemplate;
-							    options.params = inputManager.getFileMetadata();
-								options.id = info.id;
-								options.width = result.width;
-								options.height = result.height;
-								options.done = processEditorResult;
-								options.status = handleStatus;
-							    createDelegatedUI(options);
+								var options1 = {};
+								options1.uriTemplate = result.uriTemplate;
+								options1.params = inputManager.getFileMetadata();
+								options1.id = info.id;
+								options1.width = result.width;
+								options1.height = result.height;
+								options1.done = processEditorResult;
+								options1.status = handleStatus;
+								createDelegatedUI(options1);
 							} else if (result && (result.Status || result.status)) {
 								handleStatus(result.Status || result.status);
 							} else {
@@ -674,19 +795,13 @@ define([
 					progress.showWhile(serviceCall, i18nUtil.formatMessage(messages.running, options.name)).then(handleResult);
 					return true;
 				};
-				options.callback = options.callback.bind(editor);
 				return new mCommands.Command(options);
 			};
 			return Deferred.when(getContentTypes(this.serviceRegistry), function() {
 				// Create Commands
 				var commandPromises = [];
 				actionReferences.forEach(function(serviceReference) {
-					var id = serviceReference.getProperty("editor"); //$NON-NLS-0$
-					//TODO should this filtering be done in extension commands
-					if (id && editor.id && id !== editor.id) {
-						return;
-					}
-					var service = self.serviceRegistry.getService(serviceReference);
+					var service = that.serviceRegistry.getService(serviceReference);
 					var info = {};
 					var propertyNames = serviceReference.getPropertyKeys();
 					for (var j = 0; j < propertyNames.length; j++) {
@@ -694,65 +809,18 @@ define([
 					}
 					info.forceSingleItem = true;  // for compatibility with mExtensionCommands._createCommandOptions
 
-					var deferred = mExtensionCommands._createCommandOptions(info, serviceReference, self.serviceRegistry, contentTypesCache, false, function(items) {
+					var deferred = mExtensionCommands._createCommandOptions(info, serviceReference, that.serviceRegistry, contentTypesCache, false, /* @callback */ function(items) {
 						// items is the editor and we care about the file metadata for validation
-						return inputManager.getFileMetadata();
+						return that.inputManager.getFileMetadata();
 					}).then(function(commandOptions){
-						return {
-							info: info,
-							command: makeCommand(info, service, commandOptions)
-						};
+						var command = makeCommand(info, service, commandOptions);
+						command.editInfo = info;
+						commandRegistry.addCommand(command);
+						return command;
 					});
 					commandPromises.push(deferred);
 				});
 				return Deferred.all(commandPromises, errorTransformer);
-			});
-		},
-
-		/**
-		 * Creates and renders commands.
-		 * @returns {orion.Promise}
-		 */
-		_generateEditCommands: function(editor) {
-			// KB exists so that we can pass an array (from info.key) rather than actual arguments
-			function createKeyBinding(args) {
-				if (!args) { return null; }
-				var keyBinding = new mKeyBinding.KeyBinding();
-				mKeyBinding.KeyBinding.apply(keyBinding, args);
-				return keyBinding;
-			}
-
-			var toolbarId = this.toolbarId, commandService = this.commandService, inputManager = this.inputManager;
-			return this._createEditCommands(editor).then(function(commandObjects) {
-				// Add and register commands.
-				for (var i = 0, position = 100; i < commandObjects.length; i++, position++) {
-					var command = commandObjects[i].command, info = commandObjects[i].info;
-					commandService.addCommand(command);
-					
-					// Handle quick fixes
-					if (info.scopeId) {
-						commandService.registerCommandContribution(info.scopeId, command.id, position, info.scopeId + "Group", info.bindingOnly, createKeyBinding(info.key)); //$NON-NLS-0$
-					} else {
-						commandService.registerCommandContribution(toolbarId, command.id, position, "orion.menuBarToolsGroup", info.bindingOnly, createKeyBinding(info.key)); //$NON-NLS-0$
-					}
-				}
-
-				// Render commands.
-				// In the editor, we generate page level commands to the banner.  Don't bother if we don't know the input
-				// metadata, because we'll generate again once we know.
-				var metadata;
-				if ((metadata = inputManager.getFileMetadata())) {
-					var toolbar = lib.node(toolbarId); //$NON-NLS-0$
-					if (toolbar) {
-						commandService.destroy(toolbar);
-						commandService.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
-					}
-					toolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
-					if (toolbar) {
-						commandService.destroy(toolbar);
-						commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button");   //$NON-NLS-0$
-					}
-				}
 			});
 		}
 	};

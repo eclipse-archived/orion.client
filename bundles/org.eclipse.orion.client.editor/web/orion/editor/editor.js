@@ -124,6 +124,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @returns {Boolean} whether the editor is dirty
 		 */
 		isDirty: function() {
+			if (this._undoStack) return !this._undoStack.isClean();
 			return this._dirty;
 		},
 		/**
@@ -206,10 +207,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				} else {
 					if (contents !== null && contents !== undefined && typeof contents === "string") { //$NON-NLS-0$
 						this._setModelText(contents);
+						if (this._undoStack) {
+							this._undoStack.reset();
+						}
 					}
-				}
-				if (this._undoStack) {
-					this._undoStack.reset();
 				}
 			}
 			this.checkDirty();
@@ -971,7 +972,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 
 			if (this._zoomRulerFactory) {
 				this._zoomRuler = this._zoomRulerFactory.createZoomRuler(this._annotationModel);
-				this.setZoomRulerVisible(this._zoomRulerVisible || this._zoomRulerVisible === undefined, true);
+				this.setZoomRulerVisible(this._zoomRulerVisible, true);
 			}
 
 			if (this._lineNumberRulerFactory) {

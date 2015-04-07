@@ -32,7 +32,6 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 	 * @param {orion.editor.InputManager} params.editorInputManager
 	 * @param {orion.outliner.OutlineService} params.outlineService
 	 * @param {orion.progress.ProgressService} params.progressService
-	 * @param {orion.selection.Selection} params.selection
 	 * @param {orion.serviceregistry.ServiceRegistry} params.serviceRegistry
 	 * @param {Object} [params.sidebarNavInputManager]
 	 * @param {Element|String} params.parent
@@ -50,7 +49,6 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 		this.outlineService = params.outlineService;
 		this.parentNode = lib.node(params.parent);
 		this.toolbarNode = lib.node(params.toolbar);
-		this.selection = params.selection;
 		this.serviceRegistry = params.serviceRegistry;
 		this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.menuBar = params.menuBar;
@@ -237,7 +235,6 @@ define(['orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/little
 				preferences: this.preferences,
 				outlineService: this.outlineService,
 				commandService: this.commandRegistry,
-				selectionService: this.selection,
 				inputManager: this.editorInputManager,
 				progressService: this.progressService,
 				sidebar: this,

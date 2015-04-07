@@ -30,10 +30,14 @@ define([
 	'orion/inputManager', 
 	'orion/editor/editorFeatures', 
 	'orion/contentTypes', 
+	'orion/util',
+	'orion/commandRegistry',
 	'orion/URL-shim'
-], function(messages, i18nUtil, Deferred, lib, mCompareUtils, mDiffProvider, mCompareView, Highlight, mFileClient, mGlobalCommands, mCommands, mKeyBinding, mSearcher, mEditorCommands, objects, mInputManager, mEditorFeatures, mContentTypes) {
+], function(messages, i18nUtil, Deferred, lib, mCompareUtils, mDiffProvider, mCompareView, Highlight, mFileClient, mGlobalCommands, mCommands, mKeyBinding, mSearcher, mEditorCommands, objects, mInputManager, mEditorFeatures, mContentTypes, util, mCommandRegistry) {
 
 var exports = {};
+
+var editorCommands;
 
 exports.DefaultDiffProvider = (function() {
 	function DefaultDiffProvider(serviceRegistry){
@@ -138,7 +142,7 @@ exports.ResourceComparer = (function() {
 		this._registry = serviceRegistry;
 		this._commandService = commandRegistry;
 		this._fileClient = new mFileClient.FileClient(serviceRegistry);
-		this._searchService = this._registry.getService("orion.core.search"); //$NON-NLS-0$
+		this._searchService = options.searcher || this._registry.getService("orion.core.search"); //$NON-NLS-0$
 		var progressService = this._progress = this._registry.getService("orion.page.progress"); //$NON-NLS-0$
 		this._progressFunc =  function(deferred, msgKey, uri) {
 			if (!progressService) { return deferred; }
@@ -240,19 +244,30 @@ exports.ResourceComparer = (function() {
 					var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 						var localSearcher = new mSearcher.TextSearcher(editor, that._registry, that._commandService, undoStack);
 						var keyBindings = new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
-						var commandGenerator = new mEditorCommands.EditorCommandFactory({
-							serviceRegistry: that._registry,
-							commandRegistry: that._commandService,
-							fileClient: that._fileClient,
+						if (!editorCommands) {
+							editorCommands = new mEditorCommands.EditorCommandFactory({
+								serviceRegistry: that._registry,
+								commandRegistry: that._commandService,
+								fileClient: that._fileClient,
+								searcher: that._searchService,
+								readonly: false,
+							});
+							editorCommands.createCommands();
+						}
+						editorCommands.overwriteKeyBindings(editor);
+						var commandRegistry = that._commandService;
+						var handler = {
+							editor: editor,
 							inputManager: inputManager.manager,
-							toolbarId: inputManager.manager._actionBarId,
-							readonly: false,
-							navToolbarId: "pageNavigationActions", //$NON-NLS-0$
 							textSearcher: localSearcher
+						};
+						commandRegistry.registerCommandContribution(inputManager.manager._actionBarId, "orion.edit.save", 2000, null, false, new mKeyBinding.KeyBinding('s', true), null, handler); //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.registerCommandContribution("pageNavigationActions", "orion.edit.gotoLine", 0, null, true, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.registerCommandContribution("pageNavigationActions", "orion.edit.find", 0, null, true, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.registerCommandContribution("pageNavigationActions", "orion.edit.searchFiles", 0, null, true, new mKeyBinding.KeyBinding("h", true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						editor.getTextView().addEventListener("Focus", function() { //$NON-NLS-0$
+							editorCommands.updateCommands(handler);
 						});
-						var saveCmdId = inputManager.manager._editorIndex === 1 ? (that.options.saveLeft ? that.options.saveLeft.saveCmdId : "orion.compare.save.left") : 
-													(that.options.saveRight ? that.options.saveRight.saveCmdId : "orion.compare.save.right"); //$NON-NLS-1$ //$NON-NLS-0$
-						commandGenerator.generateSimpleEditorCommands(editor, saveCmdId, function() {return that._saveCmdVisible();}, 2000);
 						return keyBindings;
 					};
 					this._getFileOptions(inputManager.manager._editorIndex).keyBindingFactory = keyBindingFactory;
@@ -311,6 +326,10 @@ exports.ResourceComparer = (function() {
 				
 				getEditor: function() {
 					return that._compareView.getWidget().getEditors()[this._editorIndex];
+				},
+				
+				isSaveEnabled: function() {
+					return that._saveCmdVisible();
 				},
 							
 				setInput: function(fileURI, editor) {

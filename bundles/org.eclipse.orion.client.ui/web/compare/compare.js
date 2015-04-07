@@ -46,6 +46,7 @@ define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/Deferred', 'orio
 					generateLink: true,
 					hasConflicts: compareParams.conflict === "true", //$NON-NLS-0$
 					diffProvider: diffProvider,
+					searcher: searcher,
 					resource: compareParams.resource,
 					compareTo: compareParams.compareTo
 				};

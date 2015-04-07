@@ -579,8 +579,9 @@ define([
 		 * @param {boolean} [bindingOnly=false] if true, then the command is never rendered, but the key or URL binding is hooked.
 		 * @param {orion.KeyBinding} [keyBinding] a keyBinding for the command.  Optional.
 		 * @param {orion.commands.URLBinding} [urlBinding] a url binding for the command.  Optional.
+		 * @param {Object} [handler] the object that should perform the command for this contribution.  Optional.
 		 */
-		registerCommandContribution: function(scopeId, commandId, position, parentPath, bindingOnly, keyBinding, urlBinding) {
+		registerCommandContribution: function(scopeId, commandId, position, parentPath, bindingOnly, keyBinding, urlBinding, handler) {
 			if (!this._contributionsByScopeId[scopeId]) {
 				this._contributionsByScopeId[scopeId] = {};
 			}
@@ -590,7 +591,7 @@ define([
 			} 
 			
 			// store the contribution
-			parentTable[commandId] = {position: position};
+			parentTable[commandId] = {position: position, handler: handler};
 			
 			var command;
 			// add to the bindings table now
@@ -924,11 +925,11 @@ define([
 					var keyBinding = null;
 					var urlBinding = null;
 					if (command) {
-						invocation = new Commands.CommandInvocation(handler, items, userData, command, self);
+						invocation = new Commands.CommandInvocation(contribution.handler || handler, items, userData, command, self);
 						invocation.domParent = parent;
 						var enabled = false;
 						try {
-							enabled = render && (command.visibleWhen ? command.visibleWhen(items) : true);
+							enabled = render && (command.visibleWhen ? command.visibleWhen(items, invocation) : true);
 						} catch (e) {
 							console.log(e);
 							throw e;

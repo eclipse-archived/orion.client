@@ -12,9 +12,8 @@
 /*eslint-env browser, amd*/
 
 define ([
-	'marked/marked', //$NON-NLS-0$
-	'orion/edit/editorContext'//$NON-NLS-0$
-], function(Markdown, EditorContext) {
+	'marked/marked' //$NON-NLS-0$
+], function(Markdown) {
 
 	function Hover(editor, hoverFactory) {
 		this.editor = editor;
@@ -32,7 +31,7 @@ define ([
 			this.hoverFactory._applicableProviders.forEach(function(provider) {
 				var providerImpl = this.serviceRegistry.getService(provider);
 				if (providerImpl && providerImpl.computeHoverInfo) {
-					var editorContext = EditorContext.getEditorContext(this.serviceRegistry);
+					var editorContext = this.editor.getEditorContext();
 					hoverInfo.push(providerImpl.computeHoverInfo(editorContext, context));
 				}
 			}.bind(this));

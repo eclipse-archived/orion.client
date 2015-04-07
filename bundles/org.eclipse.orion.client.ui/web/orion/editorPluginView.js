@@ -12,10 +12,9 @@
 define([
 	'orion/editor/editor',
 	'orion/commands',
-	'orion/editorCommands',
 	'orion/objects',
 	'orion/webui/littlelib'
-], function(mEditor, Commands, mEditorCommands, objects, lib) {
+], function(mEditor, Commands, objects, lib) {
 	
 	function handleError(statusService, error) {
 		if (!statusService) {
@@ -48,6 +47,7 @@ define([
 		this.pluginRegistry = options.pluginRegistry;
 		this.statusService = options.statusService;
 		this.inputManager = options.inputManager;
+		this.editModelContextServiceID = options.editModelContextServiceID;
 	}
 		
 	PluginEditor.prototype = Object.create(BaseEditor.prototype);
@@ -72,7 +72,7 @@ define([
 			if (service.setTextModel) {
 
 				//HACK
-				var context = serviceRegistry.getService(serviceRegistry.getServiceReferences("orion.edit.model.context")[0]); //$NON-NLS-0$
+				var context = serviceRegistry.getService(serviceRegistry.getServiceReferences(this.editModelContextServiceID)[0]); //$NON-NLS-0$
 				
 				var self = this;
 				self.oldSetText = context.setText;
@@ -137,7 +137,7 @@ define([
 			//HACK
 			var serviceRegistry = this.serviceRegistry;
 			if (this.oldSetText) {
-				var context = serviceRegistry.getService(serviceRegistry.getServiceReferences("orion.edit.model.context")[0]); //$NON-NLS-0$
+				var context = serviceRegistry.getService(serviceRegistry.getServiceReferences(this.editModelContextServiceID)[0]); //$NON-NLS-0$
 				context.setText = this.oldSetText;
 			}
 			
@@ -155,6 +155,8 @@ define([
 		this.statusService = options.statusService;
 		this.progressService = options.progressService;
 		this.editorService = options.editorService;
+		this.editorCommands = options.editorCommands;
+		this.editModelContextServiceID = options.editModelContextServiceID;
 		this.metadata = options.metadata;
 		this.inputManager = options.inputManager;
 		this.readonly = options.readonly;
@@ -172,21 +174,10 @@ define([
 				editorService: this.editorService,
 				statusService: this.statusService,
 				inputManager: this.inputManager,
+				editModelContextServiceID: this.editModelContextServiceID,
 				metadata: this.metadata
 			});
 			this.editor.install();
-			
-			var commandGenerator = new mEditorCommands.EditorCommandFactory({
-				serviceRegistry: this.serviceRegistry,
-				commandRegistry: this.commandRegistry,
-				inputManager: this.inputManager,
-				readonly: this.readonly,
-				toolbarId: "toolsActions", //$NON-NLS-0$
-				saveToolbarId: "fileActions", //$NON-NLS-0$
-				editToolbarId: "editActions", //$NON-NLS-0$
-				navToolbarId: "pageNavigationActions" //$NON-NLS-0$
-			});
-			commandGenerator.generateBaseEditorCommands(this.editor);
 		},
 		destroy: function() {
 			if (this.editor) {

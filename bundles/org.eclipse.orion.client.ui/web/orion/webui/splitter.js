@@ -118,9 +118,9 @@ define([
 		getOrientation: function() {
 			return this._vertical ? ORIENTATION_VERTICAL : ORIENTATION_HORIZONTAL;
 		},		
-		setOrientation: function(value) {
+		setOrientation: function(value, force) {
 			var vertical = value === ORIENTATION_VERTICAL;
-			if (vertical === this._vertical) {
+			if (vertical === this._vertical && !force) {
 				return;
 			}
 
@@ -208,6 +208,9 @@ define([
 			this.$splitter.style.visibility = "visible"; //$NON-NLS-0$
 			this.$trailing.style.display = "block"; //$NON-NLS-0$
 			this.$leading.style.display = "block"; //$NON-NLS-0$
+		},
+		resize: function() {
+			this._resize();
 		},
 
 		_setStyleConstants: function() {
@@ -343,6 +346,8 @@ define([
 		},
 
 		_resize: function() {
+			if (this.$splitter.style.display === "none") return; //$NON-NLS-0$
+			
 			if (this._proportional) {
 				this._adjustSplitterSize();
 				this._adjustToOffset();
@@ -423,6 +428,9 @@ define([
 			}
 			
 			this._adjustToOffset();	
+			
+			this._notifyResizeListeners(this.$trailing);
+			this._notifyResizeListeners(this.$leading);
 		},
 		
 		_up: function() {
@@ -466,6 +474,8 @@ define([
 		_mouseMove: function(event) {
 			if (this._tracking) {
 				this._move(event.clientX, event.clientY);
+				
+				this._resize();
 			}
 		},
 
@@ -476,8 +486,6 @@ define([
 				this._tracking = null;
 				this._up();
 				lib.stop(event);
-				
-				this._resize();
 			}
 		},
 		

@@ -51,7 +51,6 @@ define([], function() {
         "operations": {source: "org.eclipse.orion.client.ui/web/operations"},
         "orion/cfui"		: {source: "org.eclipse.orion.client.cf/web/orion/cfui"},
         "orion/Base64.js"		: {source: "org.eclipse.orion.client.core/web/orion/Base64.js"},
-        "orion/blameAnnotations.js": {source: "org.eclipse.orion.client.core/web/orion/blameAnnotations.js"},
         "orion/bootstrap.js"	: {source: "org.eclipse.orion.client.core/web/orion/bootstrap.js"},
         "orion/config.js"		: {source: "org.eclipse.orion.client.core/web/orion/config.js"},
         "orion/contentTypes.js"	: {source: "org.eclipse.orion.client.core/web/orion/contentTypes.js"},

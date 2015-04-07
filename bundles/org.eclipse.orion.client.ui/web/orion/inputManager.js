@@ -114,8 +114,6 @@ define([
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.selection = options.selection;
 		this._input = this._title = "";
-		this.dispatcher = null;
-		this._unsavedChanges = [];
 	}
 	objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
 		/**
@@ -162,14 +160,14 @@ define([
 			var editor = this.getEditor();
 			if (this._fileMetadata) {
 				//Reload if out of sync, unless we are already in the process of saving
-				if (!this._saving && !this._fileMetadata.Directory && !this._readonly) {
+				if (!this._fileMetadata._saving && !this._fileMetadata.Directory && !this.getReadOnly()) {
 					progress(fileClient.read(resource, true), messages.ReadingMetadata, fileURI).then(function(data) {
 						if (this._fileMetadata && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
-							this._fileMetadata = data;
+							this._fileMetadata = objects.mixin(this._fileMetadata, data);
 							if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
 								progress(fileClient.read(resource), messages.Reading, fileURI).then(function(contents) {
 									editor.setInput(fileURI, null, contents);
-									this._unsavedChanges = [];
+									this._clearUnsavedChanges();
 								}.bind(this));
 							}
 						}
@@ -255,6 +253,9 @@ define([
 		getFileMetadata: function() {
 			return this._fileMetadata;
 		},
+		isSaveEnabled: function() {
+			return !this.getReadOnly();
+		},
 		getReadOnly: function() {
 			var data = this._fileMetadata;
 			return this._readonly || !data || (data.Attributes && data.Attributes.ReadOnly);
@@ -269,38 +270,9 @@ define([
 				this.save();
 				return;
 			}
-			if (this._autoLoadEnabled) {
+			if (this._autoLoadEnabled && this._fileMetadata) {
 				this.load();
 			}
-		},
-		onChanging: function(e) {
-			if (!this._getSaveDiffsEnabled()) { return; }
-			var length = this._unsavedChanges.length;
-			var addedCharCount = e.addedCharCount;
-			var removedCharCount = e.removedCharCount;
-			var start = e.start;
-			var end = e.start + removedCharCount;
-			var type = 0;
-			if (addedCharCount === 0) {
-				type = -1;
-			} else if (removedCharCount === 0) {
-				type = 1;
-			}
-			if (length > 0) {
-				if (type === this.previousChangeType) {
-					var previousChange = this._unsavedChanges[length-1];
-					if (removedCharCount === 0 && start === previousChange.end + previousChange.text.length) {
-						previousChange.text += e.text;
-						return;
-					}
-					if (e.addedCharCount === 0 && end === previousChange.start) {
-						previousChange.start = start;
-						return;
-					}
-				}
-			}
-			this.previousChangeType = type;
-			this._unsavedChanges.push({start:start, end:end, text:e.text});
 		},
 		reportStatus: function(msg) {
 			if (this.statusReporter) {
@@ -310,15 +282,17 @@ define([
 			}
 		},
 		save: function(closing) {
-			if (this._saving) { return this._savingDeferred; }
+			var metadata = this.getFileMetadata();
+			if (!metadata) return new Deferred().reject();
+			if (metadata._saving) { return metadata._savingDeferred; }
 			var self = this;
-			this._savingDeferred = new Deferred();
-			this._saving = true;
+			metadata._savingDeferred = new Deferred();
+			metadata._saving = true;
 			function done(result) {
-				var deferred = self._savingDeferred;
+				var deferred = metadata._savingDeferred;
 				deferred.resolve(result);
-				self._savingDeferred = null;
-				self._saving = false;
+				metadata._savingDeferred = null;
+				metadata._saving = false;
 				return deferred;
 			}
 			var editor = this.getEditor();
@@ -328,29 +302,7 @@ define([
 			this.reportStatus(messages['Saving...']);
 
 			if (!this._saveEventLogged) {
-				var label = "(none)"; //$NON-NLS-0$
-				if (this._contentType) {
-					label = this._contentType.id;
-				} else if (this._fileMetadata) {
-					var index = this._fileMetadata.Location.lastIndexOf("."); //$NON-NLS-0$
-					if (index >= 0) {
-						label = "unregistered: " + this._fileMetadata.Location.substring(index); //$NON-NLS-0$
-					} else {
-						index = this._fileMetadata.Location.lastIndexOf("/"); //$NON-NLS-0$
-						var name = this._fileMetadata.Location.substring(index + 1);
-						switch (name) {
-							case "AUTHORS": //$NON-NLS-0$
-							case "config": //$NON-NLS-0$
-							case "LICENSE": //$NON-NLS-0$
-							case "make": //$NON-NLS-0$
-							case "Makefile": { //$NON-NLS-0$ 
-								label = "unregistered: " + name; //$NON-NLS-0$
-								break;
-							}
-						}
-					}
-				}
-				mMetrics.logEvent("editor", "save", label); //$NON-NLS-1$ //$NON-NLS-0$
+				this._logMetrics("save"); //$NON-NLS-0$
 				this._saveEventLogged = true;
 			}
 
@@ -359,21 +311,23 @@ define([
 			var contents = editor.getText();
 			var data = contents;
 			if (this._getSaveDiffsEnabled() && !this._errorSaving) {
-				var changes = this._unsavedChanges;
-				var length = 0;
-				for (var i = 0; i < changes.length; i++) {
-					length += changes[i].text.length;
-				}
-				if (contents.length > length) {
-					data = {
-						diff: changes
-					};
+				var changes = this._getUnsavedChanges();
+				if (changes) {
+					var length = 0;
+					for (var i = 0; i < changes.length; i++) {
+						length += changes[i].text.length;
+					}
+					if (contents.length > length) {
+						data = {
+							diff: changes
+						};
+					}
 				}
 			}
-			this._unsavedChanges = [];
+			this._clearUnsavedChanges();
 			this._errorSaving = false;
 
-			var etag = this.getFileMetadata().ETag;
+			var etag = metadata.ETag;
 			var args = { "ETag" : etag }; //$NON-NLS-0$
 			var resource = this._parsedLocation.resource;
 			var def = this.fileClient.write(resource, data, args);
@@ -387,7 +341,7 @@ define([
 			}
 			function successHandler(result) {
 				if (input === self.getInput()) {
-					self.getFileMetadata().ETag = result.ETag;
+					metadata.ETag = result.ETag;
 					editor.setInput(input, null, contents, true);
 				}
 				self.reportStatus("");
@@ -427,7 +381,7 @@ define([
 					errorHandler(error);
 				}
 			});
-			return this._savingDeferred;
+			return metadata._savingDeferred;
 		},
 		setAutoLoadEnabled: function(enabled) {
 			this._autoLoadEnabled = enabled;
@@ -495,12 +449,19 @@ define([
 				this.selection.setSelections(location);
 			}
 			this._ignoreInput = false;
-			var fileURI = input.resource;
 			var evt = {
 				type: "InputChanging", //$NON-NLS-0$
 				input: input
 			};
 			this.dispatchEvent(evt);
+			var fileURI = input.resource;
+			if (evt.metadata) {
+				this.reportStatus("");
+				this._input = fileURI;
+				var metadata = evt.metadata;
+				this._setInputContents(input, fileURI, null, metadata);
+				return;
+			}
 			if (fileURI) {
 				if (fileURI === this._input) {
 					if (editorChanged) {
@@ -529,9 +490,39 @@ define([
 		},
 		setSaveDiffsEnabled: function(enabled) {
 			this._saveDiffsEnabled = enabled;
+			var editor = this.editor;
+			if (editor && !editor.isDirty()) {
+				this._clearUnsavedChanges();
+			}
 		},
 		_getSaveDiffsEnabled: function() {
 			return this._saveDiffsEnabled && this._acceptPatch !== null && this._acceptPatch.indexOf("application/json-patch") !== -1; //$NON-NLS-0$
+		},
+		_logMetrics: function(type) {
+			var label = "(none)"; //$NON-NLS-0$
+			var contentType = this.getContentType();
+			var metadata = this.getFileMetadata();
+			if (contentType) {
+				label = contentType.id;
+			} else if (metadata) {
+				var name = metadata.Name;
+				var index = name.lastIndexOf("."); //$NON-NLS-0$
+				if (index >= 0) {
+					label = "unregistered: " + name.substring(index); //$NON-NLS-0$
+				} else {
+					switch (name) {
+						case "AUTHORS": //$NON-NLS-0$
+						case "config": //$NON-NLS-0$
+						case "LICENSE": //$NON-NLS-0$
+						case "make": //$NON-NLS-0$
+						case "Makefile": { //$NON-NLS-0$ 
+							label = "unregistered: " + name; //$NON-NLS-0$
+							break;
+						}
+					}
+				}
+			}
+			mMetrics.logEvent("editor", type, label); //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		_unknownContentTypeAsText: function() {// Return true if we think unknown content type is text type
 			return true;
@@ -578,12 +569,6 @@ define([
 				}
 				this._focusListener = null;
 			}
-			if (this._changingListener) {
-				if (editor && editor.getModel && editor.getModel()) {
-					editor.getModel().removeEventListener("Changing", this._changingListener); //$NON-NLS-0$
-				}
-				this._changingListener = null;
-			}
 			var evt = {
 				type: "InputChanged", //$NON-NLS-0$
 				input: input,
@@ -594,12 +579,10 @@ define([
 				location: window.location,
 				contents: contents
 			};
+			this._logMetrics("open"); //$NON-NLS-0$
 			this.dispatchEvent(evt);
 			this.editor = editor = evt.editor;
 			if (!isDir) {
-				if (editor && editor.getModel && editor.getModel()) {
-					editor.getModel().addEventListener("Changing", this._changingListener = this.onChanging.bind(this)); //$NON-NLS-0$
-				}
 				if (!noSetInput) {
 					editor.setInput(title, null, contents);
 				}
@@ -607,7 +590,7 @@ define([
 					var textView = editor.getTextView();
 					textView.addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
 				}
-				this._unsavedChanges = [];
+				this._clearUnsavedChanges();
 				this.processParameters(input);
 			}
 			if (evt.session) {
@@ -616,6 +599,19 @@ define([
 
 			this._saveEventLogged = false;
 			mMetrics.logPageLoadTiming("interactive", window.location.pathname); //$NON-NLS-0$
+		},
+		_getUnsavedChanges: function() {
+			var editor = this.editor;
+			if (editor && editor.getUndoStack && editor.getUndoStack()) {
+				return editor.getUndoStack()._unsavedChanges;
+			}
+			return null;
+		},
+		_clearUnsavedChanges: function() {
+			var editor = this.editor;
+			if (editor && editor.getUndoStack && editor.getUndoStack()) {
+				editor.getUndoStack()._unsavedChanges = this._getSaveDiffsEnabled() ? [] : null;
+			}
 		}
 	});
 	return {

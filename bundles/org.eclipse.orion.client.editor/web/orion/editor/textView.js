@@ -4316,11 +4316,15 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				*/
 				var metrics = this._calculateMetrics();
 				if (!compare(metrics, this._metrics)) {
-					if (this._variableLineHeight) {
-						this._variableLineHeight = false;
-						this._resetLineHeight();
+					if (this._metrics.invalid && !metrics.invalid) {
+						this._updateStyle(false, metrics);
+					} else {
+						if (this._variableLineHeight) {
+							this._variableLineHeight = false;
+							this._resetLineHeight();
+						}
+						this._metrics = metrics;
 					}
-					this._metrics = metrics;
 					queue = true;
 				}
 
@@ -7800,11 +7804,11 @@ define("orion/editor/textView", [  //$NON-NLS-0$
 				}
 			}
 		},
-		_updateStyle: function (init) {
+		_updateStyle: function (init, metrics) {
 			if (!init && util.isIE) {
 				this._rootDiv.style.lineHeight = "normal"; //$NON-NLS-0$
 			}
-			var metrics = this._metrics = this._calculateMetrics();
+			metrics = this._metrics = metrics || this._calculateMetrics();
 			if (this._variableLineHeight) {
 				this._variableLineHeight = false;
 				this._resetLineHeight();
