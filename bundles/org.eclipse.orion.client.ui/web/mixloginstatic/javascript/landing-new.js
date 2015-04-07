@@ -104,6 +104,12 @@ define(['domReady', 'orion/xhr', './common', './jquery', 'orion/URL-shim'], func
 			pos = $(".buttonClone").length ? $(".buttonClone").offset().top : pos;
 		}, false);
 
+		// Listen for orientation changes
+		window.addEventListener("orientationchange", function() {
+			// Get screen size (inner/outerWidth, inner/outerHeight)
+			pos = $(".buttonClone").length ? $(".buttonClone").offset().top : pos;
+		}, false);
+
 		// Parse and insert blogfeed
 		parseRSS(newsRssFeedUrl, formHTML, "blogFeed");
 

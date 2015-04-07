@@ -631,8 +631,9 @@ header .orion-container {
   bottom: 4px;
   left: 5px;
   display: inline-block;
-  font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;
   font-size: 18px;
+  font-weight: bold;
 }
 .contentSwitcher .contentContainer .titleContent .icon {
   line-height: 100%;
@@ -788,6 +789,9 @@ header .orion-container {
   .imageRow {
     padding-bottom: 0;
   }
+  .contentSwitcher .row {
+    border-bottom: none;
+  }
   .contentSwitcher .contentContainer {
     padding: 0;
   }
@@ -809,6 +813,9 @@ header .orion-container {
     -webkit-justify-content: center;
         -ms-flex-pack: center;
             justify-content: center;
+  }
+  .pre-footer {
+    margin-top: 0;
   }
   .pre-footer .button {
     display: block;
