@@ -122,13 +122,7 @@ define([
 		}
 
 		ThemeData.prototype.parseToXML = parseToXML;
-		
-		function selectFontSize(size) {
-			window.console.log("fontsize: " + size ); //$NON-NLS-0$
-		}
-		
-		ThemeData.prototype.selectFontSize = selectFontSize;
-		
+
 		// Changes XML to JSON
 		function xmlToJson(xml) {
 			// Create the return object
@@ -192,8 +186,7 @@ define([
 				this.title = messages["Import a theme"]; //$NON-NLS-1$
 				this.buttons = [
 					/*{ text: "Import from a URL", callback: this.urlButtonClicked.bind(this), id: "urlThemeImportBtn" }, Hidden for now*/
-					{ text: messages["Import"], callback: this.importFromTextarea.bind(this), id: "textAreaImportBtn" }, //$NON-NLS-1$
-					{ text: messages["Close"], callback: this.closeButtonClicked.bind(this) }
+					{ text: messages["Import"], callback: this.importFromTextarea.bind(this), id: "textAreaImportBtn" } //$NON-NLS-1$
 				];
 				this.modal = true;
 
@@ -522,15 +515,8 @@ define([
 						newStyle.styles.ruler.annotations.backgroundColor = "#1e1e1e"; //$NON-NLS-0$
 						newStyle.styles.ruler.backgroundColor = "#1e1e1e"; //$NON-NLS-0$
 						newStyle.styles.ruler.overview.backgroundColor = "#1e1e1e"; //$NON-NLS-0$
-
-						if(found === false){
-							//console.log("Theme scope ignored : " + target[k].trim()); //$NON-NLS-0$
-						}
 					}
-				}
-				catch (e){
-					//console.log("Exception : " + e); //$NON-NLS-0$
-				}
+				}catch(e){}
 			}
 
 			return newStyle;
@@ -540,7 +526,24 @@ define([
 		function importBracketsTheme(rules) {
 			var newStyle = getDefaultTheme();
 
-			var themeName = prompt("This lovely theme will need a name. Please name it.", "New Theme");
+			var activelineBgString = "-activeline-background",
+				atomString = "-atom",
+				bracketString = "-bracket",
+				commentString = "-comment",
+				defString = "-def",
+				guttersString = "-gutters",
+				keywordString = "-keyword",
+				lineNumString = "-linenumber",
+				matchingBracketString = "-matchingbracket",
+				metaString = "-meta",
+				numberString = "-number",
+				propertyString = "-property",
+				scrollString = "-scroll",
+				selectedString = "-selected",
+				stringString = "-string",
+				tagString = "-tag";
+
+			var themeName = prompt(messages["nameImportedTheme"], messages["defaultImportedThemeName"]);
 			newStyle.name = themeName;
 			newStyle.className = themeName;
 
@@ -550,42 +553,41 @@ define([
 					try{
 						classes[l] = classes[l].trim();
 
-						if (classes[l].substr(classes[l].length - 7) === "-scroll"){ //$NON-NLS-0$
+						if (classes[l].substr(classes[l].length - scrollString.length) === scrollString){ //$NON-NLS-0$
 							if(rules[i].style.background){
 								newStyle.styles.backgroundColor = colorToHex(rules[i].style.background);
 							}
 							if(rules[i].style.color){
-								console.log(rules[i].style.color);
 								newStyle.styles.color = colorToHex(rules[i].style.color);
 							}
 						}
-						else if (classes[l].substr(classes[l].length - 8) === "-comment"){ //$NON-NLS-0$
+						else if (classes[l].substr(classes[l].length - commentString.length) === commentString){ //$NON-NLS-0$
 							if(rules[i].style.color){
 								newStyle.styles.comment.color = colorToHex(rules[i].style.color);
 								newStyle.styles.comment.block.color = colorToHex(rules[i].style.color);
 								newStyle.styles.comment.line.color = colorToHex(rules[i].style.color);
 							}
 						}
-						else if(classes[l].substr(classes[l].length - 7) === "-string"){ //$NON-NLS-0$
+						else if(classes[l].substr(classes[l].length - stringString.length) === stringString){ //$NON-NLS-0$
 							if(rules[i].style.color){
 								newStyle.styles.string.color = colorToHex(rules[i].style.color);
 								newStyle.styles.string.quoted.single.color = colorToHex(rules[i].style.color);
 								newStyle.styles.string.quoted.double.color = colorToHex(rules[i].style.color);
 							}
 						}
-						else if(classes[l].substr(classes[l].length - 7) === "-number" || classes[l].substr(classes[l].length - 5) === "-atom"){ //$NON-NLS-1$ //$NON-NLS-0$
+						else if(classes[l].substr(classes[l].length - numberString.length) === numberString || classes[l].substr(classes[l].length - atomString.length) === atomString){ //$NON-NLS-1$ //$NON-NLS-0$
 							if(rules[i].style.color){
 								newStyle.styles.constant.color = colorToHex(rules[i].style.color);
 								newStyle.styles.constant.numeric.color = colorToHex(rules[i].style.color);
 								newStyle.styles.constant.numeric.hex.color = colorToHex(rules[i].style.color);
 							}
 						}
-						else if(classes[l].substr(classes[l].length - 9) === "-property"){ //$NON-NLS-0$
+						else if(classes[l].substr(classes[l].length - propertyString.length) === propertyString){ //$NON-NLS-0$
 							if(rules[i].style.color){
 								newStyle.styles.support.type.propertyName.color = colorToHex(rules[i].style.color);
 							}
 						}
-						else if(classes[l].substr(classes[l].length - 4) === "-def"){ //$NON-NLS-0$
+						else if(classes[l].substr(classes[l].length - defString.length) === defString){ //$NON-NLS-0$
 							if(rules[i].style.color){
 								newStyle.styles.entity.name.color = colorToHex(rules[i].style.color);
 								newStyle.styles.entity.name["function"].color = colorToHex(rules[i].style.color);
@@ -594,29 +596,30 @@ define([
 								newStyle.styles.variable.language.color = colorToHex(rules[i].style.color);
 							}
 						}
-						else if(classes[l].substr(classes[l].length - 8) === "-keyword"){ //$NON-NLS-0$
+						else if(classes[l].substr(classes[l].length - keywordString.length) === keywordString){ //$NON-NLS-0$
 							if(rules[i].style.color){
 								newStyle.styles.keyword.control.color = colorToHex(rules[i].style.color);
 								newStyle.styles.keyword.operator.color = colorToHex(rules[i].style.color);
 							}
 						}
-						else if(classes[l].substr(classes[l].length - 4) === "-tag"){ //$NON-NLS-0$
+						else if(classes[l].substr(classes[l].length - tagString.length) === tagString){ //$NON-NLS-0$
 							if(rules[i].style.color){
 								newStyle.styles.meta.tag.color = colorToHex(rules[i].style.color);
 							}
 						}
-						else if(classes[l].substr(classes[l].length - 5) === "-meta"){ //$NON-NLS-0$
+						else if(classes[l].substr(classes[l].length - metaString.length) === metaString){ //$NON-NLS-0$
 							if(rules[i].style.color){
 								newStyle.styles.meta.tag.doctype = {};
 								newStyle.styles.meta.tag.doctype.color = colorToHex(rules[i].style.color);
+								newStyle.styles.meta.documentation.annotation.color = colorToHex(rules[i].style.color);
 							}
 						}
-						else if(classes[l].substr(classes[l].length - 11) === "-linenumber"){ //$NON-NLS-0$
+						else if(classes[l].substr(classes[l].length - lineNumString.length) === lineNumString){ //$NON-NLS-0$
 							if(rules[i].style.color){
 								newStyle.styles.rulerLines.color = colorToHex(rules[i].style.color);
 							}
 						}
-						else if(classes[l].substr(classes[l].length - 22) === "-activeline-background"){ //$NON-NLS-0$
+						else if(classes[l].substr(classes[l].length - activelineBgString.length) === activelineBgString){ //$NON-NLS-0$
 							if(rules[i].style.backgroundColor){
 								newStyle.styles.annotationLine.currentLine.backgroundColor = rules[i].style.backgroundColor;
 							}
@@ -630,7 +633,7 @@ define([
 								newStyle.styles.annotationLine.currentLine.border = rules[i].style.border;
 							}
 						}
-						else if(classes[l].substr(classes[l].length - 16) === "-matchingbracket"){ //$NON-NLS-0$
+						else if(classes[l].substr(classes[l].length - matchingBracketString.length) === matchingBracketString){ //$NON-NLS-0$
 							if(rules[i].style.backgroundColor){
 								newStyle.styles.annotationRange.matchingBracket.backgroundColor = rules[i].style.backgroundColor;
 								newStyle.styles.annotationRange.currentBracket.backgroundColor = rules[i].style.backgroundColor;
@@ -639,14 +642,14 @@ define([
 								newStyle.styles.annotationRange.currentBracket.backgroundColor = "transparent"; //$NON-NLS-0$
 							}
 						}
-						else if(classes[l].substr(classes[l].length - 9) === "-selected"){ //$NON-NLS-0$
+						else if(classes[l].substr(classes[l].length - selectedString.length) === selectedString){ //$NON-NLS-0$
 							if(rules[i].style.backgroundColor){
 								newStyle.styles.textviewSelection.backgroundColor = rules[i].style.backgroundColor;
 								newStyle.styles["textviewContent ::selection"].backgroundColor = rules[i].style.backgroundColor;
 								newStyle.styles["textviewContent ::-moz-selection"].backgroundColor = rules[i].style.backgroundColor;
 							}
 						}
-						else if(classes[l].substr(classes[l].length - 8) === "-gutters"){ //$NON-NLS-0$
+						else if(classes[l].substr(classes[l].length - guttersString.length) === guttersString){ //$NON-NLS-0$
 							if(rules[i].style.backgroundColor){
 								newStyle.styles.ruler.backgroundColor = colorToHex(rules[i].style.backgroundColor);
 								newStyle.styles.ruler.overview.backgroundColor = colorToHex(rules[i].style.backgroundColor);
@@ -657,12 +660,7 @@ define([
 								newStyle.styles.textviewLeftRuler.borderRight = rules[i].style.borderRight;
 							}
 						}
-						else if(classes[l].substr(classes[l].length - 5) === "-meta"){ //$NON-NLS-0$
-							if(rules[i].style.color){
-								newStyle.styles.meta.documentation.annotation.color = colorToHex(rules[i].style.color);
-							}
-						}
-						else if(classes[l].substr(classes[l].length - 8) === "-bracket"){ //$NON-NLS-0$
+						else if(classes[l].substr(classes[l].length - bracketString.length) === bracketString){ //$NON-NLS-0$
 							if(rules[i].style.color){
 								newStyle.styles.punctuation.block.color = colorToHex(rules[i].style.color);
 							}
@@ -760,13 +758,16 @@ define([
 			return newStyle;
 		}
 		ThemeData.prototype.importEclipseTheme = importEclipseTheme;
-		
+
 		function importTheme(data, styles) {
 			var body = styles;
+			var rules = "",
+				newStyle = "";
 			var xml = parseToXML(body);
-			var rules = rulesForCssText(body);
-			var newStyle = "";
-			
+			if (!xml) {
+				rules = rulesForCssText(body);
+			}
+
 			if(rules.length !== 0){
 				newStyle = importBracketsTheme(rules);
 			}
@@ -775,6 +776,22 @@ define([
 			}
 			else if (xml && xml.children[0].tagName === "colorTheme") { //this is an Eclipse theme
 				newStyle = importEclipseTheme(xml);
+			} else if (xml) {
+				/* old-style theme definition */
+				var newStyle = new StyleSet();
+
+				newStyle.name = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
+				newStyle.annotationRuler = xml.getElementsByTagName("background")[0].attributes[0].value;
+				newStyle.background = xml.getElementsByTagName("background")[0].attributes[0].value;
+				newStyle.comment = xml.getElementsByTagName("singleLineComment")[0].attributes[0].value;
+				newStyle.keyword = xml.getElementsByTagName("keyword")[0].attributes[0].value;
+				newStyle.text = xml.getElementsByTagName("foreground")[0].attributes[0].value;
+				newStyle.string = xml.getElementsByTagName("string")[0].attributes[0].value;
+				newStyle.overviewRuler = xml.getElementsByTagName("background")[0].attributes[0].value;
+				newStyle.lineNumberOdd = xml.getElementsByTagName("lineNumber")[0].attributes[0].value;
+				newStyle.lineNumberEven = xml.getElementsByTagName("lineNumber")[0].attributes[0].value;
+				newStyle.lineNumber = xml.getElementsByTagName("lineNumber")[0].attributes[0].value;
+				newStyle.currentLine = xml.getElementsByTagName("selectionBackground")[0].attributes[0].value;
 			} else {
 				/* parsing the data as xml failed, now try the new-style theme definition (JSON) */
 				try {
