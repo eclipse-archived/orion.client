@@ -61,6 +61,15 @@ define([
 		
 		ThemeData.prototype.styles = [];
 		ThemeData.prototype.getStyles = getStyles;
+
+		function getDefaultTheme(id) {
+			var id = id !== undefined ? id : 0;
+
+			ThemeData();
+			var defaultStyles = getStyles();
+			var newStyle = defaultStyles[id];
+			return newStyle;
+		}
 		
 		function getProtectedThemes() {
 			return ["Prospecto", "Darker"]; //$NON-NLS-1$ //$NON-NLS-0$
@@ -298,9 +307,7 @@ define([
 
 		function importSublimeTheme(xml) {
 			var themeJson = xmlToJson(xml); //convert to Json
-			ThemeData();
-			var defaultStyles = getStyles();
-			var newStyle = defaultStyles[0];
+			var newStyle = getDefaultTheme();
 
 			//finds the name tag
 			for(var i = 0; i < themeJson.plist[1].dict.key.length; i++){
@@ -531,9 +538,7 @@ define([
 		ThemeData.prototype.importSublimeTheme = importSublimeTheme;
 
 		function importBracketsTheme(rules) {
-			ThemeData();
-			var defaultStyles = getStyles();
-			var newStyle = defaultStyles[0];
+			var newStyle = getDefaultTheme();
 
 			var themeName = prompt("This lovely theme will need a name. Please name it.", "New Theme");
 			newStyle.name = themeName;
@@ -669,101 +674,107 @@ define([
 			return newStyle;
 		}
 		ThemeData.prototype.importBracketsTheme = importBracketsTheme;
+
+		function importEclipseTheme(xml) {
+			var newStyle = getDefaultTheme();
+
+			newStyle.name = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
+			newStyle.className = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
+
+			var styles = newStyle.styles;
+
+			// Set the background and text colors
+			styles.backgroundColor = getValuesFromXML(xml, "background");
+			styles.color = getValuesFromXML(xml, "foreground");
+
+			styles.comment.color = getValuesFromXML(xml, "singleLineComment");
+			styles.annotationLine.currentLine.backgroundColor = getValuesFromXML(xml, "currentLine");
+
+			// Eclipse themes do not set the background color for matching brackets. Instead, they set a border for the matching bracket.
+			styles.annotationRange.matchingBracket.backgroundColor = "transparent";
+			styles.annotationRange.currentBracket.backgroundColor = styles.annotationRange.matchingBracket.backgroundColor;
+			styles.annotationRange.matchingBracket.borderColor = getValuesFromXML(xml, "bracket");
+			styles.annotationRange.matchingBracket.borderWidth = "1px";
+			styles.annotationRange.matchingBracket.borderStyle = "solid";
+
+			// Set the bracket color to be the same as border color
+			styles.punctuation = {};
+			styles.punctuation.section = {};
+			styles.punctuation.section.color = styles.annotationRange.matchingBracket.borderColor;
+
+
+			styles.annotationRange.writeOccurrence.backgroundColor = getValuesFromXML(xml, "writeOccurrenceIndication");
+			styles.constant.color = getValuesFromXML(xml, "constant");
+			styles.entity.name.color = getValuesFromXML(xml, "class");
+			styles.entity.name.function.color = getValuesFromXML(xml, "class");
+			styles.entity.name.function.fontWeight = getValuesFromXML(xml, "class", 1);
+			styles.entity.other["attribute-name"].color = styles.entity.name.function.color;
+			styles.keyword.control.color = getValuesFromXML(xml, "keyword");
+			styles.keyword.control.fontWeight = getValuesFromXML(xml, "keyword", 1);
+			styles.keyword.operator.color = styles.keyword.control.color;
+
+			// Set language variable to the same color as keywords since Eclipse doesn't make a distrinction between the two
+			styles.variable.language.color = styles.keyword.operator.color;
+
+			// Setting JAVA-specific keyword styling for certain words
+			styles.constantDeclaration = {};
+			styles.constantDeclaration.keyword = {};
+			styles.constantDeclaration.keyword.color = getValuesFromXML(xml, "sourceHoverBackground");
+
+			// "TO DO" task styling
+			styles.keyword.other.documentation.task.color = getValuesFromXML(xml, "commentTaskTag");
+
+			// HTML styling
+			styles.meta.tag.color = getValuesFromXML(xml, "localVariable");
+			styles.meta.tag.doctype = {};
+			styles.meta.tag.doctype.color = getValuesFromXML(xml, "method");
+
+
+			styles.string.color = getValuesFromXML(xml, "string");
+
+			// Jade-specific. Eclipse themes don't know about Jade
+			styles.string.interpolated.color = styles.string.color;
+
+			// Setting the CSS property name color to string color since Eclipse themese don't style CSS
+			styles.support.type.propertyName.color = styles.string.color;
+
+			// Eclipse themes set a different color specifically for numeric values.
+			styles.constant.numeric = {};
+			styles.constant.numeric.color = getValuesFromXML(xml, "number");
+
+			styles.textviewSelection.backgroundColor = getValuesFromXML(xml, "selectionBackground");
+			styles["textviewContent ::selection"].backgroundColor = styles.textviewSelection.backgroundColor;
+			styles["textviewContent ::-moz-selection"].backgroundColor = styles.textviewSelection.backgroundColor;
+
+			// No quicksearch in Eclipse, so setting the search background same as selection background
+			styles.annotationRange.matchingSearch.backgroundColor = styles.textviewSelection.backgroundColor;
+			styles.annotationRange.matchingSearch.currentSearch.backgroundColor = styles.textviewSelection.backgroundColor;
+
+			// No ruler background styling in Eclipse so settings the styles same as regular background
+			styles.ruler.annotations.backgroundColor = styles.backgroundColor;
+			styles.ruler.backgroundColor = styles.backgroundColor;
+			styles.ruler.overview.backgroundColor = styles.backgroundColor;
+
+			styles.rulerLines.color = getValuesFromXML(xml, "lineNumber");
+
+			return newStyle;
+		}
+		ThemeData.prototype.importEclipseTheme = importEclipseTheme;
 		
 		function importTheme(data, styles) {
 			var body = styles;
 			var xml = parseToXML(body);
 			var rules = rulesForCssText(body);
+			var newStyle = "";
 			
 			if(rules.length !== 0){
-				var newStyle = importBracketsTheme(rules);
+				newStyle = importBracketsTheme(rules);
 			}
 			else if(xml && xml.children[0].tagName === "plist"){ //$NON-NLS-0$ //assume it uses tmTheme structure [sublime, textmate, etc]
-				var newStyle = importSublimeTheme(xml);
+				newStyle = importSublimeTheme(xml);
 			}
 			else if (xml && xml.children[0].tagName === "colorTheme") { //this is an Eclipse theme
-				ThemeData();
-				var defaultStyles = getStyles();
-				var newStyle = defaultStyles[0];
-
-				newStyle.name = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
-				newStyle.className = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
-
-				var styles = newStyle.styles;
-
-				// Set the background and text colors
-				styles.backgroundColor = getValuesFromXML(xml, "background");
-				styles.color = getValuesFromXML(xml, "foreground");
-
-				styles.comment.color = getValuesFromXML(xml, "singleLineComment");
-				styles.annotationLine.currentLine.backgroundColor = getValuesFromXML(xml, "currentLine");
-
-				// Eclipse themes do not set the background color for matching brackets. Instead, they set a border for the matching bracket.
-				styles.annotationRange.matchingBracket.backgroundColor = "transparent";
-				styles.annotationRange.currentBracket.backgroundColor = styles.annotationRange.matchingBracket.backgroundColor;
-				styles.annotationRange.matchingBracket.borderColor = getValuesFromXML(xml, "bracket");
-				styles.annotationRange.matchingBracket.borderWidth = "1px";
-				styles.annotationRange.matchingBracket.borderStyle = "solid";
-
-				// Set the bracket color to be the same as border color
-				styles.punctuation = {};
-				styles.punctuation.section = {};
-				styles.punctuation.section.color = styles.annotationRange.matchingBracket.borderColor;
-
-
-				styles.annotationRange.writeOccurrence.backgroundColor = getValuesFromXML(xml, "writeOccurrenceIndication");
-				styles.constant.color = getValuesFromXML(xml, "constant");
-				styles.entity.name.color = getValuesFromXML(xml, "class");
-				styles.entity.name.function.color = getValuesFromXML(xml, "class");
-				styles.entity.name.function.fontWeight = getValuesFromXML(xml, "class", 1);
-				styles.entity.other["attribute-name"].color = styles.entity.name.function.color;
-				styles.keyword.control.color = getValuesFromXML(xml, "keyword");
-				styles.keyword.control.fontWeight = getValuesFromXML(xml, "keyword", 1);
-				styles.keyword.operator.color = styles.keyword.control.color;
-
-				// Set language variable to the same color as keywords since Eclipse doesn't make a distrinction between the two
-				styles.variable.language.color = styles.keyword.operator.color;
-
-				// Setting JAVA-specific keyword styling for certain words
-				styles.constantDeclaration = {};
-				styles.constantDeclaration.keyword = {};
-				styles.constantDeclaration.keyword.color = getValuesFromXML(xml, "sourceHoverBackground");
-
-				// "TO DO" task styling
-				styles.keyword.other.documentation.task.color = getValuesFromXML(xml, "commentTaskTag");
-
-				// HTML styling
-				styles.meta.tag.color = getValuesFromXML(xml, "localVariable");
-				styles.meta.tag.doctype = {};
-				styles.meta.tag.doctype.color = getValuesFromXML(xml, "method");
-
-
-				styles.string.color = getValuesFromXML(xml, "string");
-
-				// Jade-specific. Eclipse themes don't know about Jade
-				styles.string.interpolated.color = styles.string.color;
-
-				// Setting the CSS property name color to string color since Eclipse themese don't style CSS
-				styles.support.type.propertyName.color = styles.string.color;
-
-				// Eclipse themes set a different color specifically for numeric values.
-				styles.constant.numeric = {};
-				styles.constant.numeric.color = getValuesFromXML(xml, "number");
-
-				styles.textviewSelection.backgroundColor = getValuesFromXML(xml, "selectionBackground");
-				styles["textviewContent ::selection"].backgroundColor = styles.textviewSelection.backgroundColor;
-				styles["textviewContent ::-moz-selection"].backgroundColor = styles.textviewSelection.backgroundColor;
-
-				// No quicksearch in Eclipse, so setting the search background same as selection background
-				styles.annotationRange.matchingSearch.backgroundColor = styles.textviewSelection.backgroundColor;
-				styles.annotationRange.matchingSearch.currentSearch.backgroundColor = styles.textviewSelection.backgroundColor;
-
-				// No ruler background styling in Eclipse so settings the styles same as regular background
-				styles.ruler.annotations.backgroundColor = styles.backgroundColor;
-				styles.ruler.backgroundColor = styles.backgroundColor;
-				styles.ruler.overview.backgroundColor = styles.backgroundColor;
-
-				styles.rulerLines.color = getValuesFromXML(xml, "lineNumber");
+				newStyle = importEclipseTheme(xml);
 			} else {
 				/* parsing the data as xml failed, now try the new-style theme definition (JSON) */
 				try {
