@@ -18,23 +18,23 @@ define ([
 ], function(mExtensionCommands, PageLinks, URITemplate) {
 	
 	function Blamer(serviceRegistry, inputManager, editor) {
-		this._serviceRegistry = serviceRegistry;
-		this._inputManager = inputManager;
-		this._editor = editor;
+		this.serviceRegistry = serviceRegistry;
+		this.inputManager = inputManager;
+		this.editor = editor;
 	}
 	
 	Blamer.prototype = {
 		getBlamer: function() {
-			var metadata = this._inputManager.getFileMetadata();
-			var blamers = this._serviceRegistry.getServiceReferences("orion.edit.blamer"); //$NON-NLS-0$
+			var metadata = this.inputManager.getFileMetadata();
+			var blamers = this.serviceRegistry.getServiceReferences("orion.edit.blamer"); //$NON-NLS-0$
 			for (var i=0; i < blamers.length; i++) {
 				var serviceReference = blamers[i];
 				var info = {};
 				info.validationProperties = serviceReference.getProperty("validationProperties"); //$NON-NLS-0$
 				info.forceSingleItem = true;
-				var validator = mExtensionCommands._makeValidator(info, this._serviceRegistry);
+				var validator = mExtensionCommands._makeValidator(info, this.serviceRegistry);
 				if (validator.validationFunction.bind(validator)(metadata)) {
-					return this._serviceRegistry.getService(serviceReference);
+					return this.serviceRegistry.getService(serviceReference);
 				}
 			}
 			return null;
@@ -56,11 +56,11 @@ define ([
 						params.OrionHome = orionHome;
 						range.CommitLink = uriTemplate.expand(params);
 					}
-					this._editor.showBlame(results);
+					this.editor.showBlame(results);
 				}.bind(this);
-				var inputManager = this._inputManager;
+				var inputManager = this.inputManager;
 				var context = {metadata: inputManager.getFileMetadata()};
-				service.computeBlame(inputManager.getEditor().getEditorContext(), context).then(handleResult);
+				service.computeBlame(this.editor.getEditorContext(), context).then(handleResult);
 			}
 		}
 	};

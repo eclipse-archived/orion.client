@@ -150,7 +150,7 @@ objects.mixin(MenuBar.prototype, {
 		var editorViewer = this.editorViewer;
 		if (editorViewer) {
 			metadata = editorViewer.inputManager.getFileMetadata();
-			this.editorCommands.updateCommands(editorViewer.currentEditorView);
+			this.editorCommands.updateCommands(editorViewer.getCurrentEditorView());
 		}
 		var commandRegistry = this.commandRegistry, serviceRegistry = this.serviceRegistry;
 		commandRegistry.registerSelectionService(this.fileActionsScope, visible ? selection : null);
@@ -364,6 +364,15 @@ objects.mixin(EditorViewer.prototype, {
 		}
 	},
 	
+	getCurrentEditorView: function() {
+		if (this.currentEditorView) {
+			if (this.currentEditorView.editorID === "orion.editor.markdown") { //$NON-NLS-0$
+				return this.editorView;
+			}
+		}
+		return this.currentEditorView;
+	},
+	
 	getEditorView: function (input, metadata) {
 		var view = null;
 		if (metadata && input) {
@@ -396,6 +405,7 @@ objects.mixin(EditorViewer.prototype, {
 					}
 				}
 			}
+			view.editorID = id;
 		}
 		if (this.currentEditorView !== view || this._recreate) {
 			this._recreate = false;
