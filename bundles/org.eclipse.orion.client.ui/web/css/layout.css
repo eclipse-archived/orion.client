@@ -365,25 +365,24 @@ hard-coded numbers elsewhere.
 	top : 0;
 	width: 100%;
 	height: 20px;
-	background: aliceblue;
+	border-bottom: 1px solid #ddd;
 }
 
 .editorViewerContent {
 	position: absolute;
 	width: 100%;
-	top: 20px;
+	top: 21px;
 	bottom: 0;
 	overflow: auto
 }
 
 .editorViewerPicInPic {
 	position: absolute;
-	top: 10px;
 	border: 1px solid #ccc;
 	background-color: white;
 	z-index: 100;
-	left: auto;
-	right: 40px;
+	bottom: 30px;
+	right: 30px;
 	width: 40%;
 	height: 40%;
 }
@@ -397,9 +396,8 @@ hard-coded numbers elsewhere.
 	left: 33%;  /* override this value if you want a different proportion of the two split panes */
 	height: 100%;
 	z-index: 50;
-	width: 10px;
+	width: 3px;
 	cursor: e-resize;
-	overflow: hidden;
 	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
 }
 
@@ -412,9 +410,8 @@ hard-coded numbers elsewhere.
 	top: 33%;  /* override this value if you want a different proportion of the two split panes */
 	width: 100%;
 	z-index: 50;
-	height: 10px;
+	height: 3px;
 	cursor: n-resize;
-	overflow: hidden;
 	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
 }
 
@@ -432,7 +429,6 @@ and (max-device-width : 1024px)  {
 		z-index: 50;
 		width: 20px;
 		cursor: e-resize;
-		overflow: hidden;
 		visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
 	}
 	
@@ -447,7 +443,6 @@ and (max-device-width : 1024px)  {
 		z-index: 50;
 		height: 20px;
 		cursor: n-resize;
-		overflow: hidden;
 		visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
 	}
 	
@@ -455,46 +450,46 @@ and (max-device-width : 1024px)  {
 
 .splitThumbLeftLayout {
 	position: absolute;
-	right: 0;
+	left: 100%;
 	height: 3em;
-	width: 50%;
+	width: 200%;
 	top: calc(50% - 1.5em);
 	cursor: pointer;
-	border-top-left-radius: 5px;
-	border-bottom-left-radius: 5px;	
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
 }
 
 .splitThumbRightLayout {
 	position: absolute;
-	left: 0;
+	right: 100%;
 	height: 3em;
-	width: 50%;
+	width: 200%;
 	top: calc(50% - 1.5em);
 	cursor: pointer;
-	border-top-right-radius: 5px;
-	border-bottom-right-radius: 5px;	
+	border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;
 }
 
 .splitVerticalThumbUpLayout {
 	position: absolute;
-	bottom: 0;
+	top: 100%;
 	width: 3em;
-	height: 50%;
+	height: 200%;
 	left: calc(50% - 1.5em);
 	cursor: pointer;
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;	
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
 }
 
 .splitVerticalThumbDownLayout {
 	position: absolute;
-	top: 0;
+	top: -200%;
 	width: 3em;
-	height: 50%;
+	height: 200%;
 	left: calc(50% - 1.5em);
 	cursor: pointer;
-	border-bottom-left-radius: 5px;
-	border-bottom-right-radius: 5px;	
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
 }
 
 .splitLayoutAnimation {

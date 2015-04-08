@@ -399,17 +399,6 @@ objects.mixin(EditorViewer.prototype, {
 		}
 		if (this.currentEditorView !== view || this._recreate) {
 			this._recreate = false;
-			
-			var mainSplitter = mGlobalCommands.getMainSplitter();
-			if (mainSplitter) {
-				var classList = mainSplitter.splitter.$splitter.classList;
-				if (view && view.editor && view.editor.getTextView) {
-					classList.add("ruler"); //$NON-NLS-0$
-				} else {
-					classList.remove("ruler"); //$NON-NLS-0$
-				}
-			}
-			
 			this.commandRegistry.closeParameterCollector();
 			if (this.currentEditorView) {
 				this.currentEditorView.destroy();
