@@ -269,7 +269,6 @@ define([
 			var editorTheme = new editorThemeData.ThemeData();
 			var themeImporter = new editorThemeImporter.ThemeImporter();
 			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, editorTheme);
-			console.log(editorTheme);
 			var editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme, toolbarId: 'editorThemeSettingsToolActionsArea', serviceRegistry: this.registry}); //$NON-NLS-0$
 
 			var command = {
@@ -431,7 +430,7 @@ define([
 		},
 		
 		handleError: function( error ){
-			console.log( error );
+			window.console.log( error );
 		}
 	});
 	return SettingsContainer;
