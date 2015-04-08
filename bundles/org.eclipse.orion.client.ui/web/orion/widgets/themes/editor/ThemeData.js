@@ -386,6 +386,25 @@ define([
 							else{
 								if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
 									newStyle.styles.meta.tag.color = restKey[i].dict.string["#text"];
+								} else {
+									newStyle.styles.meta.tag.color = newStyle.styles.color;
+								}
+							}
+						}
+						else if(target[k].trim() === "Tag attribute"){ //$NON-NLS-0$
+							found = true;
+							if (restKey[i].dict.key instanceof Array){
+								for(var l = 0; l< restKey[i].dict.key.length; l++){
+									if (restKey[i].dict.key[l]["#text"] === "foreground"){ //$NON-NLS-0$
+										newStyle.styles.meta.tag.attribute.color = restKey[i].dict.string[l]["#text"];
+									}
+								}
+							}
+							else{
+								if (restKey[i].dict.key["#text"] === "foreground"){ //$NON-NLS-0$
+									newStyle.styles.meta.tag.attribute.color = restKey[i].dict.string["#text"];
+								} else {
+									newStyle.styles.meta.tag.attribute.color = newStyle.styles.color;
 								}
 							}
 						}
@@ -528,6 +547,7 @@ define([
 
 			var activelineBgString = "-activeline-background",
 				atomString = "-atom",
+				attributeString = "-attribute",
 				bracketString = "-bracket",
 				commentString = "-comment",
 				defString = "-def",
@@ -559,6 +579,11 @@ define([
 							}
 							if(rules[i].style.color){
 								newStyle.styles.color = colorToHex(rules[i].style.color);
+							}
+						}
+						else if (classes[l].substr(classes[l].length - attributeString.length) === attributeString){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.meta.tag.attribute.color = colorToHex(rules[i].style.color);
 							}
 						}
 						else if (classes[l].substr(classes[l].length - commentString.length) === commentString){ //$NON-NLS-0$
@@ -722,11 +747,13 @@ define([
 			// "TO DO" task styling
 			styles.keyword.other.documentation.task.color = getValuesFromXML(xml, "commentTaskTag");
 
-			// HTML styling
-			styles.meta.tag.color = getValuesFromXML(xml, "localVariable");
+			// HTML tag styling
+			styles.meta.tag.color = getValuesFromXML(xml, "localVariableDeclaration");
 			styles.meta.tag.doctype = {};
 			styles.meta.tag.doctype.color = getValuesFromXML(xml, "method");
 
+			// HTML tag attribute styling
+			styles.meta.tag.attribute.color = getValuesFromXML(xml, "javadocTag");
 
 			styles.string.color = getValuesFromXML(xml, "string");
 
@@ -753,7 +780,12 @@ define([
 			styles.ruler.backgroundColor = styles.backgroundColor;
 			styles.ruler.overview.backgroundColor = styles.backgroundColor;
 
+			// Line number color
 			styles.rulerLines.color = getValuesFromXML(xml, "lineNumber");
+
+			// Setting the border to the same color as the line number since this is how it works in Eclipse
+			styles.textviewLeftRuler.borderColor = styles.rulerLines.color;
+			styles.textviewRightRuler.borderColor = styles.rulerLines.color;
 
 			return newStyle;
 		}
