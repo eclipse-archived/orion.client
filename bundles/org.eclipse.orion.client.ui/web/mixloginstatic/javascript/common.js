@@ -13,6 +13,7 @@
 define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],function(PageUtil, xsrfUtils, PageLinks) {
     var errorClass = "has-error";
     var successClass = "success";
+    var emailConfigured = true;
 
     function addClass(ele,cls) {
       if (!hasClass(ele,cls)) ele.className += " "+cls;
@@ -63,6 +64,8 @@ define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],func
                         if (document.getElementById("email")) {
                             document.getElementById("email").style.display = 'none';
                         }
+                        
+                        emailConfigured = false;
                     }
                 }
             }
@@ -354,6 +357,10 @@ define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],func
         });
     }
 
+    function getEmailConfigured() {
+    	return emailConfigured;
+    }
+
     setUpPage();
 
     return {
@@ -368,6 +375,7 @@ define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],func
         getRedirect: getRedirect,
         passwordSwitcher: passwordSwitcher,
         removeClass: removeClass,
-        showStatusMessage: showStatusMessage
+        showStatusMessage: showStatusMessage,
+        getEmailConfigured: getEmailConfigured
     };
 });

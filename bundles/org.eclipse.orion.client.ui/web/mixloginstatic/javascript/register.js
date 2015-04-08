@@ -42,6 +42,9 @@ define(['domReady', 'orion/xhr', 'orion/xsrfUtils', './common'], function(domRea
 					if(mypostrequest.status === 201){
 						common.showStatusMessage(mypostrequest.statusText);
 						common.addClass(authForm, regCompleteClass);
+						if (!common.getEmailConfigured()) {
+							common.confirmLogin(e, username, password);
+						}
 					}
 					common.removeClass(authForm, processClass);
 					authFormElements.removeAttribute("disabled");
