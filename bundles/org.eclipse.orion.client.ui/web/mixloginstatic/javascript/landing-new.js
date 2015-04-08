@@ -70,7 +70,10 @@ define(['domReady', 'orion/xhr', './common', './jquery', 'orion/URL-shim'], func
 		var btnOffset = ($("body").width() > 640) ? 10 : 0;
 
 		var signinBtn = $("#signinBtn");
-		signinBtn.attr("href", signinBtn.attr("href") + "?redirect=" + common.getRedirect());
+
+		if (common.getRedirect()) {
+			signinBtn.attr("href", signinBtn.attr("href") + "?redirect=" + common.getRedirect());
+		}
 
 		/* initialize metrics collection for this page */
 		var url = new URL("../metrics", window.location); //$NON-NLS-0$
