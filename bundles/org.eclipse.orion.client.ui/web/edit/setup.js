@@ -624,7 +624,6 @@ objects.mixin(EditorSetup.prototype, {
 		
 		var splitterDiv = document.createElement("div"); //$NON-NLS-0$
 		splitterDiv.id = "editorSplitter"; //$NON-NLS-0$
-		splitterDiv.style.zIndex = "100"; //$NON-NLS-0$
 		this.editorDomNode.appendChild(splitterDiv);
 		
 		var splitter = this.editorSplitter = new mSplitter.Splitter({
@@ -839,6 +838,7 @@ objects.mixin(EditorSetup.prototype, {
 		});
 		
 		if (oldSplitterMode === this.splitMenu.MODE_SINGLE && mode !== this.splitMenu.MODE_SINGLE) {
+			this.lastTarget = null;
 			this.editorViewers[1].inputManager.setInput(PageUtil.hash());
 		}
 	},
@@ -875,7 +875,7 @@ objects.mixin(EditorSetup.prototype, {
 
 exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, readonly) {
 	enableSplitEditor = localStorage.enableSplitEditor === "true"; //$NON-NLS-0$
-
+	
 	var setup = new EditorSetup(serviceRegistry, pluginRegistry, preferences, readonly);
 	Deferred.when(setup.createBanner(), function() {
 		setup.createMenuBar().then(function() {
