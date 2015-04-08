@@ -529,6 +529,146 @@ define([
 			return newStyle;
 		}
 		ThemeData.prototype.importSublimeTheme = importSublimeTheme;
+
+		function importBracketsTheme(rules) {
+			ThemeData();
+			var defaultStyles = getStyles();
+			var newStyle = defaultStyles[0];
+
+			var themeName = prompt("This lovely theme will need a name. Please name it.", "New Theme");
+			newStyle.name = themeName;
+			newStyle.className = themeName;
+
+			for (var i = 0; i< rules.length; i++){
+				var classes = rules[i].selectorText.split(",");
+				for (var l = 0; l< classes.length; l++){
+					try{
+						classes[l] = classes[l].trim();
+
+						if (classes[l].substr(classes[l].length - 7) === "-scroll"){ //$NON-NLS-0$
+							if(rules[i].style.background){
+								newStyle.styles.backgroundColor = colorToHex(rules[i].style.background);
+							}
+							if(rules[i].style.color){
+								console.log(rules[i].style.color);
+								newStyle.styles.color = colorToHex(rules[i].style.color);
+							}
+						}
+						else if (classes[l].substr(classes[l].length - 8) === "-comment"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.comment.color = colorToHex(rules[i].style.color);
+								newStyle.styles.comment.block.color = colorToHex(rules[i].style.color);
+								newStyle.styles.comment.line.color = colorToHex(rules[i].style.color);
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 7) === "-string"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.string.color = colorToHex(rules[i].style.color);
+								newStyle.styles.string.quoted.single.color = colorToHex(rules[i].style.color);
+								newStyle.styles.string.quoted.double.color = colorToHex(rules[i].style.color);
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 7) === "-number" || classes[l].substr(classes[l].length - 5) === "-atom"){ //$NON-NLS-1$ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.constant.color = colorToHex(rules[i].style.color);
+								newStyle.styles.constant.numeric.color = colorToHex(rules[i].style.color);
+								newStyle.styles.constant.numeric.hex.color = colorToHex(rules[i].style.color);
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 9) === "-property"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.support.type.propertyName.color = colorToHex(rules[i].style.color);
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 4) === "-def"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.entity.name.color = colorToHex(rules[i].style.color);
+								newStyle.styles.entity.name["function"].color = colorToHex(rules[i].style.color);
+								newStyle.styles.variable.parameter.color = colorToHex(rules[i].style.color);
+								newStyle.styles.variable.other.color = colorToHex(rules[i].style.color);
+								newStyle.styles.variable.language.color = colorToHex(rules[i].style.color);
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 8) === "-keyword"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.keyword.control.color = colorToHex(rules[i].style.color);
+								newStyle.styles.keyword.operator.color = colorToHex(rules[i].style.color);
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 4) === "-tag"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.meta.tag.color = colorToHex(rules[i].style.color);
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 5) === "-meta"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.meta.tag.doctype = {};
+								newStyle.styles.meta.tag.doctype.color = colorToHex(rules[i].style.color);
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 11) === "-linenumber"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.rulerLines.color = colorToHex(rules[i].style.color);
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 22) === "-activeline-background"){ //$NON-NLS-0$
+							if(rules[i].style.backgroundColor){
+								newStyle.styles.annotationLine.currentLine.backgroundColor = rules[i].style.backgroundColor;
+							}
+							if(rules[i].style.borderTop){
+								newStyle.styles.annotationLine.currentLine.borderTop = rules[i].style.borderTop;
+							}
+							if(rules[i].style.borderBottom){
+								newStyle.styles.annotationLine.currentLine.borderBottom = rules[i].style.borderBottom;
+							}
+							if(rules[i].style.border){
+								newStyle.styles.annotationLine.currentLine.border = rules[i].style.border;
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 16) === "-matchingbracket"){ //$NON-NLS-0$
+							if(rules[i].style.backgroundColor){
+								newStyle.styles.annotationRange.matchingBracket.backgroundColor = rules[i].style.backgroundColor;
+								newStyle.styles.annotationRange.currentBracket.backgroundColor = rules[i].style.backgroundColor;
+							} else {
+								newStyle.styles.annotationRange.matchingBracket.backgroundColor = "transparent"; //$NON-NLS-0$
+								newStyle.styles.annotationRange.currentBracket.backgroundColor = "transparent"; //$NON-NLS-0$
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 9) === "-selected"){ //$NON-NLS-0$
+							if(rules[i].style.backgroundColor){
+								newStyle.styles.textviewSelection.backgroundColor = rules[i].style.backgroundColor;
+								newStyle.styles["textviewContent ::selection"].backgroundColor = rules[i].style.backgroundColor;
+								newStyle.styles["textviewContent ::-moz-selection"].backgroundColor = rules[i].style.backgroundColor;
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 8) === "-gutters"){ //$NON-NLS-0$
+							if(rules[i].style.backgroundColor){
+								newStyle.styles.ruler.backgroundColor = colorToHex(rules[i].style.backgroundColor);
+								newStyle.styles.ruler.overview.backgroundColor = colorToHex(rules[i].style.backgroundColor);
+								newStyle.styles.ruler.annotations.backgroundColor = colorToHex(rules[i].style.backgroundColor);
+							}
+							if(rules[i].style.borderRight){
+								newStyle.styles.textviewRightRuler.borderLeft = rules[i].style.borderRight;
+								newStyle.styles.textviewLeftRuler.borderRight = rules[i].style.borderRight;
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 5) === "-meta"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.meta.documentation.annotation.color = colorToHex(rules[i].style.color);
+							}
+						}
+						else if(classes[l].substr(classes[l].length - 8) === "-bracket"){ //$NON-NLS-0$
+							if(rules[i].style.color){
+								newStyle.styles.punctuation.block.color = colorToHex(rules[i].style.color);
+							}
+						}
+					}catch(e){}
+				}
+			}
+
+			return newStyle;
+		}
+		ThemeData.prototype.importBracketsTheme = importBracketsTheme;
 		
 		function importTheme(data, styles) {
 			var body = styles;
@@ -536,87 +676,7 @@ define([
 			var rules = rulesForCssText(body);
 			
 			if(rules.length !== 0){
-				var newStyle = {"className":"default","name":"default","styles":{"annotationLine":{"currentLine":{"backgroundColor":"#EAF2FE"}},"annotationRange":{"currentBracket":{"backgroundColor":"#00FE00"},"matchingBracket":{"backgroundColor":"#00FE00"},"matchingSearch":{"backgroundColor":"#c3e1ff","currentSearch":{"backgroundColor":"#53d1ff"}},"writeOccurrence":{"backgroundColor":"#ffff00"}},"backgroundColor":"#ffffff","color":"#151515","comment":{"color":"#3C802C"},"constant":{"color":"#9932CC","numeric":{"color":"#9932CC","hex":{"color":"#9932CC"}}},"entity":{"name":{"color":"#98937B","function":{"color":"#67BBB8","fontWeight":"bold"}},"other":{"attribute-name":{"color":"#5F9EA0"}}},"fontFamily":"\"Consolas\", \"Monaco\", \"Vera Mono\", monospace","fontSize":"12px","keyword":{"control":{"color":"#CC4C07","fontWeight":"bold"},"operator":{"color":"#9F4177","fontWeight":"bold"},"other":{"documentation":{"color":"#7F9FBF","task":{"color":"#5595ff"}}}},"markup":{"bold":{"fontWeight":"bold"},"heading":{"color":"blue"},"italic":{"fontStyle":"italic"},"list":{"color":"#CC4C07"},"other":{"separator":{"color":"#00008F"},"strikethrough":{"textDecoration":"line-through"},"table":{"color":"#3C802C"}},"quote":{"color":"#446FBD"},"raw":{"fontFamily":"monospace"},"underline":{"link":{"textDecoration":"underline"}}},"meta":{"documentation":{"annotation":{"color":"#7F9FBF"},"tag":{"color":"#7F7F9F"}},"tag":{"color":"#CC4C07"}},"ruler":{"annotations":{"backgroundColor":"#ffffff"},"backgroundColor":"#ffffff","overview":{"backgroundColor":"#ffffff"}},"rulerLines":{"color":"#CCCCCC"},"string":{"color":"#446FBD"},"support":{"type":{"propertyName":{"color":"#9F4177"}}},"textviewContent ::-moz-selection":{"backgroundColor":"#b4d5ff"},"textviewContent ::selection":{"backgroundColor":"#b4d5ff"},"textviewLeftRuler":{"borderRight":"1px solid transparent"},"textviewRightRuler":{"borderLeft":"1px solid transparent"},"textviewSelection":{"backgroundColor":"#b4d5ff"},"textviewSelectionUnfocused":{"backgroundColor":"#b4d5ff"},"variable":{"language":{"color":"#7F0055","fontWeight":"bold"},"other":{"color":"#E038AD"},"parameter":{"color":"#D1416F"}}}};
-					
-				for (var i = 0; i< rules.length; i++){
-					var classes = rules[i].selectorText.split(",");
-					for (var l = 0; l< classes.length; l++){
-						try{
-							classes[l] = classes[l].trim();
-							if (classes[l].substr(classes[l].length - 10) === "CodeMirror"){ //$NON-NLS-0$
-								if(rules[i].style.background){
-									newStyle.styles.background = colorToHex(rules[i].style.background);
-								}
-								if(rules[i].style.color){
-									newStyle.styles.color = colorToHex(rules[i].style.color); 
-								}
-							}
-							else if (classes[l].substr(classes[l].length - 8) === "-comment"){ //$NON-NLS-0$
-								if(rules[i].style.color){
-									newStyle.styles.comment.color = colorToHex(rules[i].style.color);
-									newStyle.styles.comment.block.color = colorToHex(rules[i].style.color);
-									newStyle.styles.comment.line.color = colorToHex(rules[i].style.color);
-								}
-							}
-							else if(classes[l].substr(classes[l].length - 7) === "-string"){ //$NON-NLS-0$
-								if(rules[i].style.color){
-									newStyle.styles.string.color = colorToHex(rules[i].style.color);
-									newStyle.styles.string.quoted.single.color = colorToHex(rules[i].style.color);
-									newStyle.styles.string.quoted.double.color = colorToHex(rules[i].style.color);
-								}
-							}
-							else if(classes[l].substr(classes[l].length - 7) === "-number" || classes[l].substr(classes[l].length - 5) === "-atom"){ //$NON-NLS-1$ //$NON-NLS-0$
-								if(rules[i].style.color){
-									newStyle.styles.constant.color = colorToHex(rules[i].style.color);
-									newStyle.styles.constant.numeric.color = colorToHex(rules[i].style.color);
-									newStyle.styles.constant.numeric.hex.color = colorToHex(rules[i].style.color);
-								}
-							}
-							else if(classes[l].substr(classes[l].length - 4) === "-def"){ //$NON-NLS-0$
-								if(rules[i].style.color){
-									newStyle.styles.entity.name.color = colorToHex(rules[i].style.color);
-									newStyle.styles.entity.name["function"].color = colorToHex(rules[i].style.color);
-									newStyle.styles.variable.parameter.color = colorToHex(rules[i].style.color);
-									newStyle.styles.variable.other.color = colorToHex(rules[i].style.color);
-									newStyle.styles.variable.language.color = colorToHex(rules[i].style.color);
-								}
-							}
-							else if(classes[l].substr(classes[l].length - 8) === "-keyword"){ //$NON-NLS-0$
-								if(rules[i].style.color){
-									newStyle.styles.keyword.control.color = colorToHex(rules[i].style.color);
-									newStyle.styles.keyword.operator.color = colorToHex(rules[i].style.color);
-								}
-							}
-							else if(classes[l].indexOf("activeline") > -1){ //$NON-NLS-0$
-								if(rules[i].style.backgroundColor){
-									newStyle.styles.annotationLine.currentLine.backgroundColor = colorToHex(rules[i].style.backgroundColor);
-								}
-							}
-							else if(classes[l].substr(classes[l].length - 8) === "-gutters"){ //$NON-NLS-0$
-								if(rules[i].style.backgroundColor){
-									newStyle.styles.ruler.backgroundColor = colorToHex(rules[i].style.backgroundColor);
-									newStyle.styles.ruler.overview.backgroundColor = colorToHex(rules[i].style.backgroundColor);
-									newStyle.styles.ruler.annotations.backgroundColor = colorToHex(rules[i].style.backgroundColor);
-								}
-								if(rules[i].style.color){
-									newStyle.styles.rulerLines.odd.color = colorToHex(rules[i].style.color);
-									newStyle.styles.rulerLines.even.color = colorToHex(rules[i].style.color);
-									newStyle.styles.rulerLines.color = colorToHex(rules[i].style.color);
-								}
-							}
-							else if(classes[l].substr(classes[l].length - 5) === "-meta"){ //$NON-NLS-0$
-								if(rules[i].style.color){
-									newStyle.styles.meta.documentation.annotation.color = colorToHex(rules[i].style.color);
-								}
-							}
-							else if(classes[l].substr(classes[l].length - 8) === "-bracket"){ //$NON-NLS-0$
-								if(rules[i].style.color){
-									newStyle.styles.punctuation.block.color = colorToHex(rules[i].style.color);
-								}
-							}
-						}catch(e){}
-					}
-				}
+				var newStyle = importBracketsTheme(rules);
 			}
 			else if(xml && xml.children[0].tagName === "plist"){ //$NON-NLS-0$ //assume it uses tmTheme structure [sublime, textmate, etc]
 				var newStyle = importSublimeTheme(xml);
