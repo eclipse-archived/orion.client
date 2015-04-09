@@ -247,6 +247,9 @@ define([
 		getInput: function() {
 			return this._input;
 		},
+		getLocation: function() {
+			return this._location;
+		},
 		getTitle: function() {
 			return this._title;
 		},

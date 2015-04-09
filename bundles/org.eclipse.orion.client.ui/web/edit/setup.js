@@ -764,7 +764,7 @@ objects.mixin(EditorSetup.prototype, {
 			mGlobalCommands.setDirtyIndicator(editor.isDirty());
 		}
 		if (metadata) {
-			var params = PageUtil.matchResourceParameters();
+			var params = PageUtil.matchResourceParameters(editorViewer.inputManager.getLocation());
 			delete params.resource;
 			window.location = uriTemplate.expand({resource: target.Location, params: params});
 			this.lastHash = PageUtil.hash();
