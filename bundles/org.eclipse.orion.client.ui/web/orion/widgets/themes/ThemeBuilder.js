@@ -57,6 +57,12 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			id:"editorThemeRulerColor", //$NON-NLS-0$
 			value:defaultColor
 		},{
+			display:"ruler border color",//$NON-NLS-0$
+			objPath:["styles.textviewLeftRuler.borderColor","styles.textviewRightRuler.borderColor"],  //$NON-NLS-1$ //$NON-NLS-0$
+			id:"editorThemeRulerBorderColor", //$NON-NLS-0$
+			value:defaultColor
+		},
+		{
 			display:"current line background",//$NON-NLS-0$
 			objPath:["styles.annotationLine.currentLine.backgroundColor"],  //$NON-NLS-0$
 			id:"editorThemeColorCurrentLineBackground",  //$NON-NLS-0$
