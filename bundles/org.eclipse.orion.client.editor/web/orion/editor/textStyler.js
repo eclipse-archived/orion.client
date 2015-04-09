@@ -1179,9 +1179,6 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			return null;
 		},
 		_getStyles: function(block, model, text, offset, startIndex) {
-			if (model.getBaseModel) {
-				offset = model.mapOffset(offset);
-			}
 			var end = offset + text.length;
 
 			var styles = [];
@@ -1256,13 +1253,7 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 				lineStart = model.getLineStart(lineIndex);
 				this._stylerAdapter.parse(text.substring(lineStart - offset, end - offset), lineStart, start - lineStart, block, styles);
 			}
-			if (model.getBaseModel) {
-				for (var j = 0; j < styles.length; j++) {
-					var length = styles[j].end - styles[j].start;
-					styles[j].start = model.mapOffset(styles[j].start, true);
-					styles[j].end = styles[j].start + length;
-				}
-			}
+
 			return styles;
 		},
 		_isRenderingWhitespace: function() {
@@ -1275,8 +1266,21 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			if (e.textView === this._view) {
 				e.style = this._getLineStyle(e.lineIndex);
 			}
-			e.ranges = this._getStyles(this._rootBlock, e.textView.getModel(), e.lineText, e.lineStart, 0);
+
+			var offset = e.lineStart;
+			var model = e.textView.getModel();
+			if (model.getBaseModel) {
+				offset = model.mapOffset(offset);
+				var baseModel = model.getBaseModel();
+			}
+
+			e.ranges = this._getStyles(this._rootBlock, baseModel || model, e.lineText, offset, 0);
 			e.ranges.forEach(function(current) {
+				if (baseModel) {
+					var length = current.end - current.start;
+					current.start = model.mapOffset(current.start, true);
+					current.end = current.start + length;
+				}
 				if (current.style) {
 					current.style = {styleClass: current.style.replace(/\./g, " ")};
 				}
