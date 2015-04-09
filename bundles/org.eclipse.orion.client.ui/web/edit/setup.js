@@ -297,17 +297,7 @@ function EditorViewer(options) {
 
 	// Create a breadcrumb
 	this.localBreadcrumbNode = document.createElement("div"); //$NON-NLS-0$
-	this.localBreadcrumbNode.id = "Header Breadcrumb";
-	this.localBreadcrumbNode.style.position = "absolute";
-	this.localBreadcrumbNode.style.background = "white";
-	this.localBreadcrumbNode.style.width = "500px";
-	this.localBreadcrumbNode.style.height = "20px";
-	this.localBreadcrumbNode.style["z-index"] = "100";
-	this.localBreadcrumbNode.style.visibility = "visible";
-	
 	var tipContainer = this.fileNodeTooltip.contentContainer();
-	tipContainer.parentNode.style["max-width"] = "auto";
-	tipContainer.parentNode.style["width"] = "750px";
 	tipContainer.appendChild(this.localBreadcrumbNode);
 	
 	domNode.appendChild(headerNode);

@@ -163,7 +163,6 @@ a.breadcrumb:hover {
 div.currentLocation {
 	align-items: center;
 	display: flex;
-	height: 36px;
 	justify-content: center;
 	width: 100%;
 	
@@ -174,6 +173,14 @@ div.currentLocation {
 
 .breadcrumbContainer > .currentLocation {
 	margin: 0;
+}
+
+.tooltipContainer .breadcrumb {
+	color: white;
+}
+
+.tooltipContainer .breadcrumbSeparator {
+	color: white;
 }
 
 a.currentLocation:hover {
