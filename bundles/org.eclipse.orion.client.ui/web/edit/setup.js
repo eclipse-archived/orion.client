@@ -231,29 +231,12 @@ function EditorViewer(options) {
 	
 	// Create the header 
 	var headerNode = this.headerNode = document.createElement("div"); //$NON-NLS-0$
-	headerNode.id = "EditorViewerHeader";
-	headerNode.className = "editorHeader"; //$NON-NLS-0$
-
-	// Create search and filefields
-	this.headerSearchButton = document.createElement("button"); //$NON-NLS-0$
-	this.headerSearchButton.id = "Header Search";
-	this.headerSearchButton.classList.add("core-sprite-search");
-	this.headerSearchButton.style.width = "20px";
-	
-	this.headerSearchButton.addEventListener("click", function() { //$NON-NLS-0$
-		this.curFileNode.style.visibility = "hidden";
-		this.searchField.style.visibility = "visible";
-		this.searchField.focus();
-	}.bind(this));
-	
-	headerNode.appendChild(this.headerSearchButton);
+	headerNode.className = "editorViewerHeader"; //$NON-NLS-0$
 
 	this.curFileNode = document.createElement("span"); //$NON-NLS-0$
-	this.curFileNode.id = "Cur File";
-	this.curFileNode.style.left = "25px";
-	this.curFileNode.style.display = "inline-block";
-	this.curFileNode.style.position = "absolute";
-	this.curFileNode.style.width = "75%";
+	this.curFileNode.className = "editorViewerHeaderTitle"; //$NON-NLS-0$
+//	this.curFileNode.style.left = "25px";
+//	this.curFileNode.style.position = "absolute";
 	headerNode.appendChild(this.curFileNode);
 	this.fileNodeTooltip = new mTooltip.Tooltip({
 		node: this.curFileNode,
@@ -261,39 +244,51 @@ function EditorViewer(options) {
 		position: ["below", "above", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	});
 
-	this.searchField = document.createElement("input"); //$NON-NLS-0$
-	this.searchField.id = "fileSearchField";
-	this.searchField.style.display = "inline-block";
-	this.searchField.style.position = "absolute";
-	this.searchField.style.left = "25px";
-	this.searchField.style.width = "75%";
-	this.searchField.style.visibility = "hidden";
-	this.searchField.addEventListener("keyup", function(e) { //$NON-NLS-0$
-		if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
-			return;
-		}
-		var keyCode= e.charCode || e.keyCode;
-		if (keyCode === lib.KEY.ENTER) {
-			this.curFileNode.style.visibility = "visible";
-			this.searchField.style.visibility = "hidden";
-		} else if (keyCode === lib.KEY.ESCAPE) {
-			this.curFileNode.style.visibility = "visible";
-			this.searchField.style.visibility = "hidden";
-		} else {
-			var searchParams = {
-				keyword: this.searchField.value,
-				nameSearch: true,
-				resource: "/file",
-				rows: 100,
-				sort: "NameLower asc",
-				start: 0
-			};
-			this.searcher.search(searchParams, null, function() {
-				var result = arguments;
-			}.bind(this));
-		}
-	}.bind(this));
-	headerNode.appendChild(this.searchField);
+	// Create search and filefields
+//	this.headerSearchButton = document.createElement("button"); //$NON-NLS-0$
+//	this.headerSearchButton.id = "Header Search";
+//	this.headerSearchButton.classList.add("core-sprite-search");
+//	this.headerSearchButton.style.width = "20px";
+//	
+//	this.headerSearchButton.addEventListener("click", function() { //$NON-NLS-0$
+//		this.curFileNode.style.visibility = "hidden";
+//		this.searchField.style.visibility = "visible";
+//		this.searchField.focus();
+//	}.bind(this));
+//	
+//	headerNode.appendChild(this.headerSearchButton);//	this.searchField = document.createElement("input"); //$NON-NLS-0$
+//	this.searchField.id = "fileSearchField";
+//	this.searchField.style.display = "inline-block";
+//	this.searchField.style.position = "absolute";
+//	this.searchField.style.left = "25px";
+//	this.searchField.style.width = "75%";
+//	this.searchField.style.visibility = "hidden";
+//	this.searchField.addEventListener("keyup", function(e) { //$NON-NLS-0$
+//		if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
+//			return;
+//		}
+//		var keyCode= e.charCode || e.keyCode;
+//		if (keyCode === lib.KEY.ENTER) {
+//			this.curFileNode.style.visibility = "visible";
+//			this.searchField.style.visibility = "hidden";
+//		} else if (keyCode === lib.KEY.ESCAPE) {
+//			this.curFileNode.style.visibility = "visible";
+//			this.searchField.style.visibility = "hidden";
+//		} else {
+//			var searchParams = {
+//				keyword: this.searchField.value,
+//				nameSearch: true,
+//				resource: "/file",
+//				rows: 100,
+//				sort: "NameLower asc",
+//				start: 0
+//			};
+//			this.searcher.search(searchParams, null, function() {
+//				var result = arguments;
+//			}.bind(this));
+//		}
+//	}.bind(this));
+//	headerNode.appendChild(this.searchField);
 
 	// Create a breadcrumb
 	this.localBreadcrumbNode = document.createElement("div"); //$NON-NLS-0$
@@ -356,7 +351,7 @@ objects.mixin(EditorViewer.prototype, {
 			this.activateContext.setActiveEditorViewer(this);
 			this.commandRegistry.processURL(href);
 			if (this.curFileNode) {
-					this.curFileNode.innerHTML = evt.name;
+				this.curFileNode.innerHTML = evt.name;
 			}
 		}.bind(this));
 		inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$
