@@ -510,7 +510,7 @@ img {
 /* ---------------------------- Header area  ----------------------- */
 header .logo-container {
   margin-top: 20px;
-  margin-bottom: auto;
+  margin-bottom: 20px;
 }
 header .orion-auth-buttons {
   display: -webkit-flex;

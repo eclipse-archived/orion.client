@@ -1,47 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-<title>Orion Server Status</title>
-<link rel="icon" href="images/favicon.ico" />
-<meta name="copyright" content="Copyright (c) 2012 IBM Corporation and others.">
-<meta http-equiv="Content-Language" content="en-us">
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" type="text/css" href="stylesheets/serverstatus.css" />
-<script src="../requirejs/require.min.js"></script>
-<script type="text/javascript">
-/*eslint-env browser, amd*/
-require({
-  baseUrl: '../',
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+	<title>Orion - Open Source Web and Cloud Development Environment</title>
+	<link rel="icon" href="images/favicon.ico" />
+	<link rel="stylesheet" href="fonts/font.css" />
+	<link rel="stylesheet" href="stylesheets/landing-new.min.css" />
+	<style>
+		.orion-messages-dt{
+			font-size:16px;
+			font-weight:bold;
+			line-height:1.2;
+			margin:0 0 5px 0;
+		}
+		.orion-messages-dd{
+			margin:0 0 15px 0;
+			margin-left:10px;
+			font-size:14px;
+			line-height:1.4;
+			color:#666;
+		}
+	</style>
+	<script src="../requirejs/require.min.js"></script>
+	<script type="text/javascript">
+	/*eslint-env browser, amd*/
+	require({
+	  baseUrl: '../',
 
-  // set the paths to our library packages
-  packages: [
-  ],
-  paths: {
-	  i18n: 'requirejs/i18n',
-	  domReady: 'requirejs/domReady'
-  }
-});
+	  // set the paths to our library packages
+	  packages: [
+	  ],
+	  paths: {
+		  i18n: 'requirejs/i18n',
+		  domReady: 'requirejs/domReady'
+	  }
+	});
 
-require(["mixloginstatic/javascript/ServerStatus"]);
-</script>
-<title>Orion Server Status</title>
+	require(["mixloginstatic/javascript/ServerStatus"]);
+	</script>
+	<title>Orion Server Status</title>
 </head>
 <body style="margin: 0; padding: 0; min-height:400px;">
-	<div class="orion-banner">
-		<div class="orion-nav-bar">
-			<div class="orion-logo"></div>
-			<a class="orion-rss-link" href="http://planetorion.org/news/" target="_blank"></a>
-			<a class="orion-twitter-link" href="http://twitter.com/orionhub" target="_blank"></a>
+	<header class="border-bottom stretch">
+		<div class="container">
+			<div class="col-sm-12">
+				<div class="row header-content separate">
+					<div class="logo-container">
+						<h1 class="hide">Orion</h1>
+						<span class="orion-logo"><a href="/"><img src="images/assets/orion.png" width="110px" /></a></span>
+					</div>
+				</div>
+			</div>
 		</div>
-	</div>
-	<div class="orion-header">
-		<h1 id = "orionServerMessage">Orion Server Messages</h1>
-	</div>
-	<div id = "orionMessages" class="orion-messages">
-		<dl id = "loadingmessage">
-			<dt>loading...</dt>
-		</dl>
+	</header>
+
+	<div class="container">
+		<section class="intro">
+			<div class="row">
+				<div class="col-sm-12 center">
+					<h2>Orion Server Messages</h2>
+					<div id = "orionMessages" class="orion-messages">
+						<dl id = "loadingmessage">
+							<dt>loading...</dt>
+						</dl>
+					</div>
+				</div>
+			</div>
+		</section>
 	</div>
 </body>
 </html>
