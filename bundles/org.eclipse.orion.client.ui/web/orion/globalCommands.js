@@ -463,6 +463,9 @@ define([
 					breadcrumbOptions.id = "HeaderBreadcrumb" + viewer.id;
 					breadcrumbOptions.container = viewer.localBreadcrumbNode;					
 					viewer.currentBreadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
+					viewer.localBreadcrumbNode.style.width = "800px";
+					viewer.localBreadcrumbNode.parentNode.style.width = "800px";
+					viewer.localBreadcrumbNode.parentNode.style.height = "20px";
 				}
 			}
 		}

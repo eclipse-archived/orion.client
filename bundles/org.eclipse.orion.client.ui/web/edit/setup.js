@@ -47,13 +47,14 @@ define([
 	'orion/Deferred',
 	'orion/projectClient',
 	'orion/webui/splitter',
-	'orion/webui/SplitMenu'
+	'orion/webui/SplitMenu',
+	'orion/webui/tooltip'
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient, mSplitter, mSplitMenu
+	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient, mSplitter, mSplitMenu, mTooltip
 ) {
 
 var exports = {};
@@ -232,12 +233,83 @@ function EditorViewer(options) {
 	var headerNode = this.headerNode = document.createElement("div"); //$NON-NLS-0$
 	headerNode.id = "EditorViewerHeader";
 	headerNode.className = "editorHeader"; //$NON-NLS-0$
+
+	// Create search and filefields
+	this.headerSearchButton = document.createElement("button"); //$NON-NLS-0$
+	this.headerSearchButton.id = "Header Search";
+	this.headerSearchButton.classList.add("core-sprite-search");
+	this.headerSearchButton.style.width = "20px";
 	
+	this.headerSearchButton.addEventListener("click", function() { //$NON-NLS-0$
+		this.curFileNode.style.visibility = "hidden";
+		this.searchField.style.visibility = "visible";
+		this.searchField.focus();
+	}.bind(this));
+	
+	headerNode.appendChild(this.headerSearchButton);
+
+	this.curFileNode = document.createElement("span"); //$NON-NLS-0$
+	this.curFileNode.id = "Cur File";
+	this.curFileNode.style.left = "25px";
+	this.curFileNode.style.display = "inline-block";
+	this.curFileNode.style.position = "absolute";
+	this.curFileNode.style.width = "75%";
+	headerNode.appendChild(this.curFileNode);
+	this.fileNodeTooltip = new mTooltip.Tooltip({
+		node: this.curFileNode,
+//		text: "Test Tooltip",
+		position: ["below", "above", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	});
+
+	this.searchField = document.createElement("input"); //$NON-NLS-0$
+	this.searchField.id = "fileSearchField";
+	this.searchField.style.display = "inline-block";
+	this.searchField.style.position = "absolute";
+	this.searchField.style.left = "25px";
+	this.searchField.style.width = "75%";
+	this.searchField.style.visibility = "hidden";
+	this.searchField.addEventListener("keyup", function(e) { //$NON-NLS-0$
+		if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
+			return;
+		}
+		var keyCode= e.charCode || e.keyCode;
+		if (keyCode === lib.KEY.ENTER) {
+			this.curFileNode.style.visibility = "visible";
+			this.searchField.style.visibility = "hidden";
+		} else if (keyCode === lib.KEY.ESCAPE) {
+			this.curFileNode.style.visibility = "visible";
+			this.searchField.style.visibility = "hidden";
+		} else {
+			var searchParams = {
+				keyword: this.searchField.value,
+				nameSearch: true,
+				resource: "/file",
+				rows: 100,
+				sort: "NameLower asc",
+				start: 0
+			};
+			this.searcher.search(searchParams, null, function() {
+				var result = arguments;
+			}.bind(this));
+		}
+	}.bind(this));
+	headerNode.appendChild(this.searchField);
+
 	// Create a breadcrumb
 	this.localBreadcrumbNode = document.createElement("div"); //$NON-NLS-0$
 	this.localBreadcrumbNode.id = "Header Breadcrumb";
+	this.localBreadcrumbNode.style.position = "absolute";
+	this.localBreadcrumbNode.style.background = "white";
+	this.localBreadcrumbNode.style.width = "500px";
 	this.localBreadcrumbNode.style.height = "20px";
-	headerNode.appendChild(this.localBreadcrumbNode);
+	this.localBreadcrumbNode.style["z-index"] = "100";
+	this.localBreadcrumbNode.style.visibility = "visible";
+	
+	var tipContainer = this.fileNodeTooltip.contentContainer();
+	tipContainer.parentNode.style["max-width"] = "auto";
+	tipContainer.parentNode.style["width"] = "750px";
+	tipContainer.appendChild(this.localBreadcrumbNode);
+	
 	domNode.appendChild(headerNode);
 	
 	// Create the editor content area
@@ -293,6 +365,9 @@ objects.mixin(EditorViewer.prototype, {
 			var href = window.location.href;
 			this.activateContext.setActiveEditorViewer(this);
 			this.commandRegistry.processURL(href);
+			if (this.curFileNode) {
+					this.curFileNode.innerHTML = evt.name;
+			}
 		}.bind(this));
 		inputManager.addEventListener("InputChanging", function(e) { //$NON-NLS-0$
 			var previousPool = this.pool;
