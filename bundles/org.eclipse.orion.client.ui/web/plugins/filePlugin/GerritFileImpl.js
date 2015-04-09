@@ -21,7 +21,6 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 		this._listTemplate = new URITemplate(pluginURL + "/git/{project}/list/{+ref}/{+path}");
 		this._contentTemplate = new URITemplate(pluginURL + "/git/{project}/contents/{+ref}/{+path}");
 		this._repoURL = this._listTemplate.expand({project: project});
-		console.log("_repoURL=" + this._repoURL + ", pluginURL=" + pluginURL + ", project=" + project);
 	}
 
 	GerritFileImpl.prototype = {
@@ -50,7 +49,6 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			
 			// root location of the file browser repo, this is static
 			var rootLocation = this._listTemplate.expand({project: project, ref: ref});
-			console.log("_getParents rootLocation=" + rootLocation);
 			// relative parent location of the repo (i.e. one directory below current context)
 			var parentLocation = "";
 
@@ -65,7 +63,6 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			else {
 				parentLocation = this._listTemplate.expand({project: project, ref: ref});
 			}
-			console.log("_getParents parentLocation=" + parentLocation);
 
 			result.push({
 				Name: ref,
@@ -78,7 +75,6 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 				var parentName = segments[i];
 				parentPath += parentName;
 				parentLocation = this._listTemplate.expand({project: project, ref: ref, path: parentPath});
-				console.log("_getParents parentLocation1=" + parentLocation);
 				result.push({
 					Name: parentName,
 					Location: parentLocation,
@@ -89,7 +85,6 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			return result.reverse();
 		},
 		fetchChildren: function(location) {
-			console.log("fetchChildren() " + location);
 			var _this = this;
 			return xhr("GET", location, {
 				headers: this._headers,
@@ -104,7 +99,6 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 						entry.path = null;
 					}
 					var location = template.expand({project: entry.project, ref: ref, path: entry.path});
-					console.log("fetchChildren location=" + location);
 					var result = {
 						Attributes: {
 							Archive: false,
@@ -128,11 +122,9 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			}, function(error) { return _this._handleError(error);});
 		},
 		loadWorkspaces: function() {
-			console.log("loadWorkspaces()");
 			return this.loadWorkspace(this._repoURL + "/list");
 		},
 		loadWorkspace: function(location) {
-			console.log("loadWorkspace() " + location);
 			var _this = this;
 			var url = new URL(location);
 			var pathmatch = url.pathname.match(pathRegex);
@@ -190,7 +182,6 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			throw "Not supported";
 		},
 		read: function(location, isMetadata) {
-			console.log("read() " + location + " " + isMetadata);
 			if (isMetadata) {
 				//var _this = this;
 				var url = new URL(location);
@@ -254,7 +245,6 @@ define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], f
 			throw "Not supported";
 		},
 		readBlob: function(location) {
-			console.log("readBlob() " + location);
 			var _this = this;
 			return xhr("GET", location, {
 				responseType: "arraybuffer",
