@@ -361,24 +361,22 @@ hard-coded numbers elsewhere.
 }
 
 .editorViewerHeader {
-	position: absolute;
-	top : 0;
-	width: 100%;
-	height: 20px;
-	border-bottom: 1px solid #ddd;
+	display:flex;
+	flex-direction:row;
+	align-items:center;
+	line-height:24px;
+	border-bottom: 1px solid #dedede;
 }
 
 .editorViewerHeaderTitle {
-	padding-left: 4px;
-	padding-top: 4px;
-	display: inline-block;
-	width: 75%;
+	padding-left: 5px;
+	color: #555;
 }
 
 .editorViewerContent {
 	position: absolute;
 	width: 100%;
-	top: 21px;
+	top: 25px;
 	bottom: 0;
 	overflow: auto
 }
