@@ -20,9 +20,9 @@ define(['orion/PageUtil', 'orion/xsrfUtils', 'orion/PageLinks', './jquery'],func
     }
 
     function confirmLogin(e, username, password) {
-		if (e.preventDefault) {
-			e.preventDefault();
-		}
+        if (e !== undefined) {
+            e.preventDefault();
+        }
 
         if (!username) {
             username = document.getElementById('username').value.trim();
