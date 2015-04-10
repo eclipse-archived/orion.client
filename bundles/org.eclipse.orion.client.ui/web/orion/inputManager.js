@@ -499,7 +499,7 @@ define([
 			}
 		},
 		_getSaveDiffsEnabled: function() {
-			return this._saveDiffsEnabled && this._acceptPatch !== null && this._acceptPatch.indexOf("application/json-patch") !== -1; //$NON-NLS-0$
+			return this._saveDiffsEnabled && this._acceptPatch && this._acceptPatch.indexOf("application/json-patch") !== -1; //$NON-NLS-0$
 		},
 		_logMetrics: function(type) {
 			var label = "(none)"; //$NON-NLS-0$
