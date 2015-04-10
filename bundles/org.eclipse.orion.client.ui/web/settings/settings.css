@@ -614,12 +614,14 @@ div.page section:last-child {
 _:-moz-tree-row(hover), .colorpicker-input { /* Firefox  HACK */
 		width:19px;
 		height: 14px;
+		border: none;
 }
 
 @media screen and (min-color-index:0) and(-webkit-min-device-pixel-ratio:0) { @media /* SAFARI 6.1 + HACK */
 {
 	.colorpicker-input { 
 		width:60px;
+		border-radius: 0;
 	}
 	input.colorpicker-input[type=color]{
 		text-transform:lowercase;
