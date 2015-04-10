@@ -735,7 +735,7 @@ objects.mixin(EditorSetup.prototype, {
 					}
 				}
 			});
-			return dirty ? (autoSave ? messages.unsavedAutoSaveChanges : messages.unsavedChanges) : null;
+			return dirty ? (autoSave ? messages.unsavedAutoSaveChanges : messages.unsavedChanges) : undefined;
 		}.bind(this);
 	},
 
