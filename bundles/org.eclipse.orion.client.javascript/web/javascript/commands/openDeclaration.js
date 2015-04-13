@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -22,12 +22,14 @@ define([
 	 * @public
 	 * @param {javascript.ASTManager} ASTManager The backing AST manager
 	 * @param {javascript.ScriptResolver} Resolver The backing script resolver 
+	 * @param {TernWorker} ternWorker The running Tern worker 
 	 * @returns {javascript.commands.OpenDeclarationCommand} A new command
 	 * @since 8.0
 	 */
-	function OpenDeclarationCommand(ASTManager, Resolver) {
+	function OpenDeclarationCommand(ASTManager, Resolver, ternWorker) {
 		this.astManager = ASTManager;
 		this.resolver = Resolver;
+		this.ternworker = ternWorker;
 	}
 	
 	Objects.mixin(OpenDeclarationCommand.prototype, {

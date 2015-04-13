@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*eslint-env amd */
+/*eslint-env amd, browser*/
 /*
  * This module may be loaded in a web worker or a regular Window. Therefore it must NOT use the DOM or other
  * APIs not available in workers.
@@ -24,6 +24,7 @@ define([
 'javascript/scriptResolver',
 'javascript/astManager',
 'javascript/quickFixes',
+'javascript/contentAssist/ternAssist',
 'javascript/contentAssist/indexFiles/mongodbIndex',
 'javascript/contentAssist/indexFiles/mysqlIndex',
 'javascript/contentAssist/indexFiles/postgresIndex',
@@ -36,6 +37,7 @@ define([
 'javascript/hover',
 'javascript/outliner',
 'orion/util',
+'logger',
 'javascript/commands/generateDocCommand',
 'javascript/commands/openDeclaration',
 'orion/editor/stylers/application_javascript/syntax',
@@ -43,8 +45,8 @@ define([
 'orion/editor/stylers/application_schema_json/syntax',
 'orion/editor/stylers/application_x-ejs/syntax',
 'i18n!javascript/nls/messages'
-], function(PluginProvider, Bootstrap, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
-			EslintValidator, Occurrences, Hover, Outliner,	Util, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
+], function(PluginProvider, Bootstrap, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
+			EslintValidator, Occurrences, Hover, Outliner,	Util, Logger, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
     Bootstrap.startup().then(function(core) {
 
@@ -104,6 +106,23 @@ define([
     	 */
     	var astManager = new ASTManager.ASTManager(Esprima);
     	
+    	// Start the worker
+    	var ternWorker = new Worker(new URL("ternWorker.js", window.location.href).href);
+    	ternWorker.onerror = function(error) {
+    		Logger.log(error.message);
+    	};
+    	ternWorker.postMessage("start");
+/*    	
+    	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker),  //$NON-NLS-0$
+    			{
+    				contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$
+    				nls: 'javascript/nls/messages',  //$NON-NLS-0$
+    				name: 'ternContentAssist',  //$NON-NLS-0$
+    				id: "orion.edit.contentassist.javascript.tern",  //$NON-NLS-0$
+    				charTriggers: "[.]",  //$NON-NLS-0$
+    				excludedStyles: "(string.*)"  //$NON-NLS-0$
+    		});
+*/    	
     	/**
     	 * Register AST manager as Model Change listener
     	 */
@@ -128,7 +147,7 @@ define([
     	);
     	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
-    			new OpenDeclCommand.OpenDeclarationCommand(astManager, scriptresolver), 
+    			new OpenDeclCommand.OpenDeclarationCommand(astManager, scriptresolver, ternWorker), 
     			{
     		name: javascriptMessages["openDeclName"],  //$NON-NLS-0$
     		tooltip : javascriptMessages['openDeclTooltip'],  //$NON-NLS-0$
