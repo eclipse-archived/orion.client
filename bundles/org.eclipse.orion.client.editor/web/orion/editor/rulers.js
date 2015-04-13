@@ -928,7 +928,7 @@ define("orion/editor/rulers", [
 	};
 	/** @ignore */
 	FoldingRuler.prototype._getTooltipContents = function(lineIndex, annotations) {
-		if (annotations.length > 0) {
+		if (annotations && annotations.length > 0) {
 			var view = this._view;
 			var model = view.getModel();
 			var start = model.getLineStart(lineIndex);
