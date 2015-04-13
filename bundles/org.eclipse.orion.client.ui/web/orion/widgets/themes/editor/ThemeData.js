@@ -37,7 +37,7 @@ define([
 			cornFlowerblue  String      String      String
 			----------------------------------------------- */
 		
-		var defaultFont = '"Consolas", "Monaco", "Vera Mono", monospace'; //$NON-NLS-0$
+		var defaultFont = 'Source Code Pro'; //$NON-NLS-0$
 		var defaultFontSize = '12px'; //$NON-NLS-0$
 
 		function ThemeData() {
@@ -157,6 +157,7 @@ define([
 							}
 						}
 					},
+					"lineHeight": "1.4 !important",
 					"meta": {
 						"documentation": {
 							"annotation": {
@@ -239,7 +240,7 @@ define([
 				}
 			};
 			this.styles.push(prospecto);
-	
+
 			var darker = {
 				"className": "darker",
 				"name": "Darker",
@@ -323,6 +324,7 @@ define([
 							}
 						}
 					},
+					"lineHeight": "1.4 !important",
 					"markup": {
 						"bold": {
 							"fontWeight": "bold"

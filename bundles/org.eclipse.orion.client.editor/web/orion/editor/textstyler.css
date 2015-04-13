@@ -1,3 +1,17 @@
+@font-face {
+	font-family: 'Source Code Pro';
+	src: url('fonts/SourceCodePro-Regular.otf.woff') format('woff');
+	font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+	font-family: 'Source Code Pro';
+	src: url('fonts/SourceCodePro-Bold.otf.woff') format('woff');
+	font-weight: bold;
+    font-style: normal;
+}
+
 .comment {
 	color: #3C802C;
 }

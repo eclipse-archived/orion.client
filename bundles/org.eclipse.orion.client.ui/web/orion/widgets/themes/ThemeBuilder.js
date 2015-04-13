@@ -29,6 +29,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 	var jsExclusions = ["editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
 	var javaExclusions = ["editorThemeColorEntityColor", "editorThemeFunctionParameterColor", "editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
 	var cssExclusions = ["editorThemeColorEntityColor", "editorThemeControlColor", "editorThemeLanguageVariableColor", "editorThemeOperatorColor", "editorThemeFunctionParameterColor", "editorThemeLogicalOperatorColor", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
+	var fontList = ["Source Code Pro", "Andale Mono", "Arial", "Consolas", "Courier New", "Helvetica", "Helvetica Neue", "Menlo Regular", "Monaco", "Ubuntu Mono", "Verdana", "Vera Mono"];
 
 	var scopeList = [
 		{
@@ -36,6 +37,11 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 			objPath:["styles.fontSize"], //$NON-NLS-0$
 			id:"editorThemeFontSize", //$NON-NLS-0$
 			value:"" //$NON-NLS-0$
+		},{
+			display:"font family", //$NON-NLS-0$
+			objPath:["styles.fontFamily"], //$NON-NLS-0$
+			id:"editorThemeFontFamily", //$NON-NLS-0$
+			value:defaultColor
 		},{
 			display:"background", //$NON-NLS-0$
 			objPath:["styles.backgroundColor"], //$NON-NLS-0$
@@ -266,7 +272,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 		val = namedToHex(val);
 		var isHexColor = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(val);
 
-		if (isHexColor || id === "editorThemeFontSize") {
+		if (isHexColor || id === "editorThemeFontSize" || id === "editorThemeFontFamily") {
 			for (var i = 0; i < scopeList.length; i++){
 				if (scopeList[i].id === id){
 					scopeList[i].value = val;
@@ -329,7 +335,7 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 		checkForChanges(); // checks if any value is changed
 	}
 	ThemeBuilder.prototype.apply = apply;
-	
+
 	//generates the html structure for list of scopes
 	function generateScopeList(hiddenValues){
 		var htmlString = "";
@@ -345,15 +351,66 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 					htmlString = htmlString + "<option value='" + l+"pt'>"+l+"pt</option>";
 				}
 				htmlString += "</select></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			}
-			else {
+			} else if (scopeList[i].id === "editorThemeFontFamily") {
+				htmlString = htmlString + "<li><span>" + scopeList[i].display + "</span><select id='editorThemeFontFamily'>";
+
+				fontList = returnAvailableFontsList(fontList);
+				fontList.forEach(function(element, index, array) {
+					htmlString = htmlString + "<option value='" + element + "'>" + element + "</option>";
+				});
+				htmlString += "</select></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			} else {
 				var hideValueCSS = hiddenValues.indexOf(scopeList[i].id) >= 0 ? "style='display: none'" : ""; //$NON-NLS-0$
 				htmlString = htmlString + "<li " + hideValueCSS + "><span>" + scopeList[i].display + "</span><input id='"+scopeList[i].id+"' class='colorpicker-input" + ieClass + "' type='color' value='" + scopeList[i].value + "'></li>";//$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		}
 		return htmlString;
 	}
-	
+
+	// inspired by https://samclarke.com/2013/06/javascript-is-font-available/
+	function returnAvailableFontsList(fontList) {
+		var calculateWidth, monoWidth, serifWidth, sansWidth, width;
+		var body          = document.body;
+		var container     = document.createElement('div');
+		var containerCss  = [
+			'position:absolute',
+			'width:auto',
+			'font-size:128px',
+			'left:-99999px'
+		];
+
+		// Create a span element to contain the test text.
+		// Use innerHTML instead of createElement as it's smaller
+		container.innerHTML = '<span style="' + containerCss.join(' !important;') + '">' + Array(100).join('wi') + '</span>';
+		container = container.firstChild;
+
+		calculateWidth = function (fontFamily) {
+			container.style.fontFamily = fontFamily;
+
+			body.appendChild(container);
+			width = container.clientWidth;
+			body.removeChild(container);
+
+			return width;
+		};
+
+		// Pre calculate the widths of monospace, serif & sans-serif to improve performance.
+		monoWidth  = calculateWidth('monospace');
+		serifWidth = calculateWidth('serif');
+		sansWidth  = calculateWidth('sans-serif');
+
+		for (i = 0; i < fontList.length; i++) {
+			if (fontList[i] !== "Source Code Pro") { // We always want to have Source Code Pro in the list
+				if (monoWidth === calculateWidth(fontList[i] + ',monospace') && sansWidth === calculateWidth(fontList[i] + ',sans-serif') && serifWidth === calculateWidth(fontList[i] + ',serif')) {
+					fontList.splice(i, 1);
+					i--;
+				}
+			}
+		};
+
+		return fontList;
+	}
+
 	function ThemeBuilder(args) {
 		this.settings = {};
 		this.themeData = args.themeData;
