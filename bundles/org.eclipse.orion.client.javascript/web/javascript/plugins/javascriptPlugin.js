@@ -397,6 +397,19 @@ define([
                     ]
                 }
         );
+        
+        provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+                quickFixComputer,
+                {
+                    name: javascriptMessages["noNonNLSLiteralsFixName"],  //$NON-NLS-0$
+                    scopeId: "orion.edit.quickfix", //$NON-NLS-0$
+                    id : "no.throw.literal.fix",  //$NON-NLS-0$
+                    contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-1$
+                    validationProperties: [
+                        {source: "annotation:id", match: "^(?:no-non-nls-literals)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                    ]
+                }
+        );
 
     	/**
     	 * Register the jsdoc-based outline
@@ -709,6 +722,12 @@ define([
 				 	        	                	name: javascriptMessages["unsupportedJSLint"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
+				 	        	                	options: severities
+				 	        	                },
+				 	        	                {	id: "no-non-nls-literals",  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["noNonNLSLiterals"],  //$NON-NLS-0$
+				 	        	                	type: "number",  //$NON-NLS-0$
+				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                }]
 				 	        	}]

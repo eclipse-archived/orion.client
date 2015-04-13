@@ -34,6 +34,7 @@ define({
 	'no-new-func' : 'The Function constructor is eval.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-object' : 'Use the object literal notation \'{}\' or Object.create(null).', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-new-wrappers' : 'Do not use \'${0}\' as a constructor.', //$NON-NLS-0$  //$NON-NLS-1$
+	'no-non-nls-literals' : 'Non externalized string literal \'${0}\'.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-redeclare' : '\'${0}\' is already defined.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-regex-spaces' : 'Avoid multiple spaces in regular expressions. Use \' {${0}}\' instead.', //$NON-NLS-0$  //$NON-NLS-1$
 	'no-reserved-keys' : 'Reserved words should not be used as property keys.', //$NON-NLS-0$  //$NON-NLS-1$
