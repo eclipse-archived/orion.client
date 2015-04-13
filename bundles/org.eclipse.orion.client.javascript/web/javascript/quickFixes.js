@@ -45,10 +45,31 @@ define([
        }
        var off = offset;
        var char = text[off];
-       while(off > -1 && !/[\R\r\n]/.test(char)) {
+       while(off > -1 && !/[\r\n]/.test(char)) {
            char = text[--off];
        }
        return off+1; //last char inspected will be @ -1 or the new line char
+	}
+		
+	/**
+    * @description Finds the end of the line in the given text starting at the given offset
+    * @param {String} text The text
+    * @param {Number} offset The offset
+    * @returns {Number} The offset in the text before the new line or end of file
+    */
+   function getLineEnd(text, offset) {
+       if(!text) {
+           return 0;
+       }
+       if(offset < 0) {
+           return 0;
+       }
+       var off = offset;
+       var char = text[off];
+       while(off < text.length && !/[\r\n]/.test(char)) {
+           char = text[++off];
+       }
+       return off;
 	}
 		
 	/**
@@ -560,6 +581,19 @@ define([
         /** fix for the semi linting rule */
         "semi": function(editorContext, annotation) {
             return editorContext.setText(';', annotation.end, annotation.end);
+        },
+        /** fix for the no-non-nls-literal rule */
+        "no-non-nls-literals": function(editorContext, annotation, astManager){
+        	// We depend on the validator rule in eslint to count the number of literals on the line
+        	if (annotation.data && typeof annotation.data.indexOnLine === 'number'){
+	        	return astManager.getAST(editorContext).then(function(ast) {
+	                // Insert the correct non nls comment
+	                var end = getLineEnd(ast.source, annotation.end);
+	                var comment = " //$NON-NLS-" + annotation.data.indexOnLine + "$";
+	                return editorContext.setText(comment, end, end);
+	            });
+			}
+			return null;
         }
 	});
 	

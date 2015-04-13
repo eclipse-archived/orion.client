@@ -671,6 +671,78 @@ define([
         		}, context);
         	}
         },
+        "no-non-nls-literals": {
+        	description: 'Disallow non externalized string literals',
+        	rule: function(context){
+        		function reportNonNLS(node, index){
+        			var data = Object.create(null);
+        			data.indexOnLine = index;
+        			context.report(node, "Non externalized string literal \'${0}\'.", {0:node.value, data: data});
+        		}
+        		
+        		return {
+                    'Literal': function(node) {
+        				// Create a map of line numbers to a list of literal nodes
+                    	if (typeof node.value === 'string' && node.value.length > 0){
+                    		if (node.parent){
+                    			// Don't consider strings in the define statement
+                    			if (node.parent.parent && node.parent.parent.type === 'CallExpression' && node.parent.parent.callee && node.parent.parent.callee.name === "define"){
+	                    			return;
+	                    		}
+	                    		// Don't consider strings that are member expression keys (such as NLS keys for the messages bundle)
+	                    		if (node.parent.type === 'MemberExpression'){
+	                    			return;
+	                    		}
+	                    			
+                    		}
+                    		lineNum = node.loc.end.line-1;
+                    		if (!context._linesWithStringLiterals[lineNum]){
+                    			context._linesWithStringLiterals[lineNum] = [];
+                    		}
+                    		context._linesWithStringLiterals[lineNum].push(node);
+                    	}
+                    },
+                    'Program': function(node){
+                    	context._linesWithStringLiterals = {};
+                    },
+                    'Program:exit': function(node){
+                    	// Read each line in the map and check if there are non-nls statements
+                    	if (context._linesWithStringLiterals){
+                    		for (var lineNumber in context._linesWithStringLiterals) {
+							    if (context._linesWithStringLiterals.hasOwnProperty(lineNumber)) {
+							        var line = context.getSourceLines()[lineNumber];
+							        var nodes = context._linesWithStringLiterals[lineNumber];
+							        
+							        if (nodes){
+								        var nonNlsRegExp = /\/\/\$NON-NLS-([0-9])+\$/g;
+								        var match;
+								        var comments = [];
+								        while ((match = nonNlsRegExp.exec(line)) != null){
+								        	comments.push(match[1]);
+								        }
+								        
+								        for (var i=0; i<nodes.length; i++) {
+								        	var match = false;
+								        	for (var j=0; j<comments.length; j++) {
+								        		if (comments[j] === (""+i)){
+								        			match = true;
+								        			break;
+								        		}
+								        	}
+								        	if (!match){
+								        		reportNonNLS(nodes[i], i);
+								        	}
+								        }
+								    }
+								    
+								    // TODO Report unused non-nls comments
+							    }
+							}
+                    	}
+                    }
+				};
+        	}
+        },
 		"no-redeclare": {
 		    description: 'Warn when variable or function is redeclared',
 		    rule: function(context) {

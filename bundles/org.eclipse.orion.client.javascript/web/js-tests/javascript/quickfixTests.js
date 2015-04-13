@@ -1289,5 +1289,36 @@ define([
 		                      pid: 'no-unused-vars-unused-funcdecl',
 		                      contentType: 'text/html'});
 		});
+	//NO-UNUSED-VARS-UNUSED
+	    it("Test no-non-nls-literals-1", function() {
+		    var rule = createTestRule('no-non-nls-literals');
+		    var expected = {value: " //$NON-NLS-0$",
+		                    start: 12, 
+		                    end: 12};
+		    return getFixes({buffer: 'var a = "a";', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'no-non-nls-literals'});
+		});
+		it("Test no-non-nls-literals-2", function() {
+		    var rule = createTestRule('no-non-nls-literals');
+		    var expected = {value: " //$NON-NLS-1$",
+		                    start: 39, 
+		                    end: 39};
+		    return getFixes({buffer: 'var a = "a"; var b = "b"; //$NON-NLS-0$', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'no-non-nls-literals'});
+		});
+		it("Test no-non-nls-literals-3", function() {
+		    var rule = createTestRule('no-non-nls-literals');
+		    var expected = {value: " //$NON-NLS-0$",
+		                    start: 39, 
+		                    end: 39};
+		    return getFixes({buffer: 'var a = "a"; var b = "b"; //$NON-NLS-1$', 
+		                      rule: rule,
+		                      expected: expected,
+		                      pid: 'no-non-nls-literals'});
+		});
 	});
 });
