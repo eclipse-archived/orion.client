@@ -141,8 +141,6 @@ define([], function() {
         "plugins/jslintPlugin.html"	: {source: "org.eclipse.orion.client.ui/web/plugins/jslintPlugin.html"},
         "plugins/jslintPlugin.js"		: {source: "org.eclipse.orion.client.ui/web/plugins/jslintPlugin.js"},
         "plugins/lowerPlugin.html"	: {source: "org.eclipse.orion.client.ui/web/plugins/lowerPlugin.html"},
-        "plugins/nonnlsPlugin.html"	: {source: "org.eclipse.orion.client.ui/web/plugins/nonnlsPlugin.html"},
-        "plugins/nonnlsPlugin.js"		: {source: "org.eclipse.orion.client.ui/web/plugins/nonnlsPlugin.js"},
         "plugins/pageLinksPlugin.html"	: {source: "org.eclipse.orion.client.ui/web/plugins/pageLinksPlugin.html"},
         "plugins/pageLinksPlugin.js"	: {source: "org.eclipse.orion.client.ui/web/plugins/pageLinksPlugin.js"},
         "plugins/preferencesPlugin.html"	: {source: "org.eclipse.orion.client.ui/web/plugins/preferencesPlugin.html"},
