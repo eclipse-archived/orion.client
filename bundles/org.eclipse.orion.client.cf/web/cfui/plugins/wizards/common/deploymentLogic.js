@@ -91,7 +91,6 @@ define([
 			var postError = options.postError;
 
 			var fileService = options.FileService;
-//			var cfService = options.CFService;
 			var targetSelection = options.getTargetSelection();
 
 			var userManifest = options.Manifest;
