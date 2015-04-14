@@ -239,7 +239,7 @@ define([
 				}
 			};
 			this.styles.push(prospecto);
-	
+
 			var darker = {
 				"className": "darker",
 				"name": "Darker",

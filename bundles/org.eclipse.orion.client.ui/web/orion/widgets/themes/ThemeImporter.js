@@ -18,6 +18,9 @@ define([
         'orion/widgets/themes/editor/ThemeData',
         'orion/objects'
 ], function(messages, dialog, ImportThemeDialogTemplate, urlImportDialog, themeData, objects) {
+        var luminanceDarkLimit = 70;
+
+
         function ThemeImporter() {
 
         }
@@ -228,19 +231,16 @@ define([
             var themeJson = xmlToJson(xml); //convert to Json
             var newStyle = themeData.getDefaultTheme();
 
-            //finds the name tag
-            for (var i = 0; i < themeJson.plist[1].dict.key.length; i++) {
-                if (themeJson.plist[1].dict.key[i]["#text"] === "name") { //$NON-NLS-0$
-                    newStyle.name = themeJson.plist[1].dict.string[i]["#text"];
-                    newStyle.className = newStyle.name.replace(/\s+/g, '');
-                }
-            }
             var dictKey = themeJson.plist[1].dict.array.dict[0].dict.key;
             var dictString = themeJson.plist[1].dict.array.dict[0].dict.string;
 
             //finds the general attributes
             for (i = 0; i<dictKey.length; i++) {
                 if (dictKey[i]["#text"] === "background" && dictString[i]["#text"].length < 8) { //$NON-NLS-0$
+                    if (calculateLuminance(dictString[i]["#text"]) < luminanceDarkLimit) {
+                        // Get the Darker theme if luminance is low (i.e. the theme being imported is dark)
+                        newStyle = themeData.getDefaultTheme(1);
+                    }
                     newStyle.styles.backgroundColor = dictString[i]["#text"];
                 }
                 else if (dictKey[i]["#text"] === "foreground" && dictString[i]["#text"].length < 8) { //$NON-NLS-0$
@@ -257,6 +257,15 @@ define([
                     newStyle.styles["textviewContent ::-moz-selection"].backgroundColor = dictString[i]["#text"];
                 }
             }
+
+            //finds the name tag
+            for (var i = 0; i < themeJson.plist[1].dict.key.length; i++) {
+                if (themeJson.plist[1].dict.key[i]["#text"] === "name") { //$NON-NLS-0$
+                    newStyle.name = themeJson.plist[1].dict.string[i]["#text"];
+                    newStyle.className = newStyle.name.replace(/\s+/g, '');
+                }
+            }
+
             //finds the scope attributes
             var restKey = themeJson.plist[1].dict.array.dict;
 
@@ -443,11 +452,57 @@ define([
                                 }
                             }
                         }
+                        else if (target[k].trim() === "Markdown Titles" || target[k].trim() === "Headings") { //$NON-NLS-0$
+                            if (restKey[i].dict.key instanceof Array) {
+                                for (l = 0; l< restKey[i].dict.key.length; l++) {
+                                    if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
+                                        newStyle.styles.markup.heading.color = restKey[i].dict.string[l]["#text"];
+                                    }
+                                }
+                            }
+                            else {
+                                if (restKey[i].dict.key["#text"] === "foreground") { //$NON-NLS-0$
+                                    newStyle.styles.markup.heading.color = restKey[i].dict.string["#text"];
+                                }
+                            }
+                        }
+                        else if (target[k].trim() === "String" || target[k].trim() === "Markdown Raw") { //$NON-NLS-0$
+                            if (restKey[i].dict.key instanceof Array) {
+                                for (l = 0; l< restKey[i].dict.key.length; l++) {
+                                    if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
+                                        newStyle.styles.markup.raw.color = restKey[i].dict.string[l]["#text"];
+                                    }
+                                }
+                            }
+                            else {
+                                if (restKey[i].dict.key["#text"] === "foreground") { //$NON-NLS-0$
+                                    newStyle.styles.markup.raw.color = restKey[i].dict.string["#text"];
+                                }
+                            }
+                        }
+                        else if (target[k].trim() === "Constants" || target[k].trim() === "Constant") { //$NON-NLS-0$
+                            if (restKey[i].dict.key instanceof Array) {
+                                for (l = 0; l< restKey[i].dict.key.length; l++) {
+                                    if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
+                                        newStyle.styles.markup.other.separator.color = restKey[i].dict.string[l]["#text"];
+                                    }
+                                }
+                            }
+                            else {
+                                if (restKey[i].dict.key["#text"] === "foreground") { //$NON-NLS-0$
+                                    newStyle.styles.markup.other.separator.color = restKey[i].dict.string["#text"];
+                                }
+                            }
+                        }
 
+                        // Setting the ruler background and color to that of Sublime Text's ruler background and color
                         newStyle.styles.rulerLines.color = "#3d3d3d"; //$NON-NLS-0$
                         newStyle.styles.ruler.annotations.backgroundColor = "#1e1e1e"; //$NON-NLS-0$
                         newStyle.styles.ruler.backgroundColor = "#1e1e1e"; //$NON-NLS-0$
                         newStyle.styles.ruler.overview.backgroundColor = "#1e1e1e"; //$NON-NLS-0$
+
+                        // Calculate luminance for the background color and decide on what background color to use for raw html based on it
+                        newStyle.styles.markup.raw.html.backgroundColor = calculateLuminance(newStyle.styles.backgroundColor) < luminanceDarkLimit ? "#000000" : newStyle.styles.markup.raw.html.backgroundColor; //$NON-NLS-0$
                     }
                 } catch(e) {}
             }
@@ -455,6 +510,19 @@ define([
             return newStyle;
         }
         ThemeImporter.prototype.importSublimeTheme = importSublimeTheme;
+
+        function calculateLuminance(c) {
+            var c = c.substring(1);      // strip #
+            var rgb = parseInt(c, 16);   // convert rrggbb to decimal
+            var r = (rgb >> 16) & 0xff;  // extract red
+            var g = (rgb >>  8) & 0xff;  // extract green
+            var b = (rgb >>  0) & 0xff;  // extract blue
+
+            var luminence = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+
+            return luminence;
+        }
+        ThemeImporter.prototype.calculateLuminance = calculateLuminance;
 
         function importBracketsTheme(rules) {
             var newStyle = themeData.getDefaultTheme();
@@ -477,9 +545,7 @@ define([
                 stringString = "-string",
                 tagString = "-tag";
 
-            var themeName = prompt(messages["nameImportedTheme"], messages["defaultImportedThemeName"]);
-            newStyle.name = themeName;
-            newStyle.className = themeName;
+            
 
             for (var i = 0; i< rules.length; i++) {
                 var classes = rules[i].selectorText.split(",");
@@ -489,6 +555,10 @@ define([
 
                         if (classes[l].substr(classes[l].length - scrollString.length) === scrollString) { //$NON-NLS-0$
                             if (rules[i].style.background) {
+                                if (calculateLuminance(colorToHex(rules[i].style.background)) < luminanceDarkLimit) {
+                                    // Get the Darker theme if luminance is low (i.e. the theme being imported is dark)
+                                    var newStyle = themeData.getDefaultTheme(1);
+                                }
                                 newStyle.styles.backgroundColor = colorToHex(rules[i].style.background);
                             }
                             if (rules[i].style.color) {
@@ -505,6 +575,9 @@ define([
                                 newStyle.styles.comment.color = colorToHex(rules[i].style.color);
                                 newStyle.styles.comment.block.color = colorToHex(rules[i].style.color);
                                 newStyle.styles.comment.line.color = colorToHex(rules[i].style.color);
+
+                                // Brackets styles raw html in markdown as comments
+                                newStyle.styles.markup.raw.code.color = newStyle.styles.comment.color
                             }
                         }
                         else if (classes[l].substr(classes[l].length - stringString.length) === stringString) { //$NON-NLS-0$
@@ -608,6 +681,11 @@ define([
                 }
             }
 
+            // Ask the user to name the theme since css files contain no theme name information
+            var themeName = prompt(messages["nameImportedTheme"], messages["defaultImportedThemeName"]);
+            newStyle.name = themeName;
+            newStyle.className = themeName;
+
             return newStyle;
         }
         ThemeImporter.prototype.importBracketsTheme = importBracketsTheme;
@@ -615,8 +693,10 @@ define([
         function importEclipseTheme(xml) {
             var newStyle = themeData.getDefaultTheme();
 
-            newStyle.name = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
-            newStyle.className = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
+            if (calculateLuminance(getValuesFromXML(xml, "background")) < luminanceDarkLimit) {
+                // Get the Darker theme if luminance is low (i.e. the theme being imported is dark)
+                newStyle = themeData.getDefaultTheme(1);
+            }
 
             var styles = newStyle.styles;
 
@@ -700,6 +780,10 @@ define([
             // Setting the border to the same color as the line number since this is how it works in Eclipse
             styles.textviewLeftRuler.borderColor = styles.rulerLines.color;
             styles.textviewRightRuler.borderColor = styles.rulerLines.color;
+
+            // Get the theme name
+            newStyle.name = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
+            newStyle.className = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
 
             return newStyle;
         }
