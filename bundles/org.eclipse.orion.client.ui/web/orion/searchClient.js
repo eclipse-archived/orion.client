@@ -48,7 +48,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 		 */
 		var _self = this;
 		function render(resources, queryName, error, searchParams) {
-			Deferred.when(_self.openWithCommands, function(openWithCommands) {
+			return Deferred.when(_self.openWithCommands, function(openWithCommands) {
 				if (error) {
 					lib.empty(resultsNode);
 					var message = document.createElement("div"); //$NON-NLS-0$
