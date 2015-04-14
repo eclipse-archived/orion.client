@@ -71,14 +71,14 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 			}
 		});
 
-		/* deployment plan */
-		var plan = resource.Plan;
-		var manifestApplication = plan.Manifest.applications[0];
+		var projectLocation = resource.ContentLocation;
+		var appPath = resource.AppPath;
+		
 		var launchConfParams = resource.ConfParams || {};
 		if (launchConfParams.Instrumentation)
 			launchConfParams.Instrumentation.name = launchConfParams.Name;
 
-		function ensureLaunchConfName() {
+		function ensureLaunchConfName(manifestApplication) {
 			if (!resource.ConfName) {
 				// Creating a new launch config -- generate a name based on the app name
 				var appName = manifestApplication.name;
@@ -87,97 +87,119 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 			return new Deferred().resolve(resource.ConfName);
 		}
 
-		Deferred.all([ensureLaunchConfName(), mWizardUtils.loadClouds({
+		function checkPlan() {
+			var deferred = new Deferred();
+			
+			var relativeFilePath = new URL(projectLocation + appPath).href;
+			var orionHomeUrl = new URL(PageLinks.getOrionHome());
+			
+			if (relativeFilePath.indexOf(orionHomeUrl.origin) === 0) relativeFilePath = relativeFilePath.substring(orionHomeUrl.origin.length);
+
+			cfService.getDeploymentPlans(relativeFilePath).then(function(resp) {
+				var plans = resp.Children;
+				deferred.resolve(plans[0]);
+			});
+			
+			return deferred;
+		}
+
+		Deferred.all([checkPlan(), mWizardUtils.loadClouds({
 			showMessage : showMessage,
 			hideMessage : hideMessage,
 			preferences : preferences,
 			fileClient : fileClient,
 			resource : resource
 		})]).then(function(results){
-			var launchConfName = results[0];
+			var plan = results[0];
 			var resp = results[1];
 			var clouds = resp.clouds;
 			var defaultTarget = launchConfParams.Target || resp.defaultTarget;
+			var manifestApplication = plan.Manifest.applications[0];
 
-			/* init core page builder */
-		    var corePageBuilder = new mCorePageBuilder.CorePageBuilder({
-				ConfName: launchConfName,
-
-		    	Clouds : clouds,
-		    	DefaultTarget : defaultTarget,
-
-				ManifestPath : plan.ManifestPath,
-		    	ManifestApplication : manifestApplication,
-		    	ManifestInstrumentation: launchConfParams.Instrumentation,
-		    	serviceRegistry : serviceRegistry,
-		    	CFService : cfService,
-
-		    	showMessage : showMessage,
-		    	hideMessage : hideMessage,
-		    	handleError : handleError,
-		    	postError : postError
-		    });
-
-		    /* init services page builder */
-		    var servicesPageBuilder = new mServicesPageBuilder.ServicesPageBuilder({
-		    	ManifestServices : manifestApplication.services,
-		    	ManifestInstrumentation: launchConfParams.Instrumentation,
-
-		    	CFService : cfService,
-		    	getTargetSelection : function(){
-		    		return corePageBuilder.getSelection();
-		    	},
-
-		    	showMessage : showMessage,
-		    	hideMessage : hideMessage,
-		    	handleError : handleError,
-		    	postError : postError
-		    });
-
-		    /* init additional parameters page builder */
-		    var additionalParamPageBuilder = new mAdditionalParamPageBuilder.AdditionalParamPageBuilder({
-		    	ManifestApplication : manifestApplication,
-		    	ManifestInstrumentation: launchConfParams.Instrumentation
-		    });
-
-		    /* build pages */
-		    var page1 = corePageBuilder.build();
-		    var page2 = servicesPageBuilder.build();
-		    var page3 = additionalParamPageBuilder.build();
-			var setUIState = function(disable) {
-				if(corePageBuilder._orgsDropdown)
-					corePageBuilder._orgsDropdown.disabled = disable;
-				if(corePageBuilder._spacesDropdown)
-					corePageBuilder._spacesDropdown.disabled = disable;
-			};
-
-			new Wizard.Wizard({
-				parent: "wizard", //$NON-NLS-0$
-				pages: [page1, page2, page3],
-				onCancel: closeFrame,
-				buttonNames: { ok: messages["save"] },
-				size: { width: "calc(100% - 24px)", height: "370px" }, //$NON-NLS-0$//$NON-NLS-1$
-				onSubmit: mDeploymentLogic.buildDeploymentTrigger({
-					ConfName : launchConfName,
-					showMessage : showMessage,
-					closeFrame : closeFrame,
-					disableUI : setUIState.bind(null, true),
-					enableUI  : setUIState.bind(null, false),
-
-					postMsg : postMsg,
-					postError : postError,
-
-					FileService: fileClient,
-					CFService : cfService,
-					getTargetSelection : function(){
-			    		return corePageBuilder.getSelection();
-			    	},
-
-			    	Manifest : plan.Manifest,
-			    	ContentLocation : resource.ContentLocation,
-			    	AppPath : resource.AppPath
-				})
-			});
+			ensureLaunchConfName(manifestApplication).then(
+				function(launchConfName){
+					
+					/* init core page builder */
+				    var corePageBuilder = new mCorePageBuilder.CorePageBuilder({
+						ConfName: launchConfName,
+		
+				    	Clouds : clouds,
+				    	DefaultTarget : defaultTarget,
+		
+						ManifestPath : plan.ManifestPath,
+				    	ManifestApplication : manifestApplication,
+				    	ManifestInstrumentation: launchConfParams.Instrumentation,
+				    	serviceRegistry : serviceRegistry,
+				    	CFService : cfService,
+		
+				    	showMessage : showMessage,
+				    	hideMessage : hideMessage,
+				    	handleError : handleError,
+				    	postError : postError
+				    });
+		
+				    /* init services page builder */
+				    var servicesPageBuilder = new mServicesPageBuilder.ServicesPageBuilder({
+				    	ManifestServices : manifestApplication.services,
+				    	ManifestInstrumentation: launchConfParams.Instrumentation,
+		
+				    	CFService : cfService,
+				    	getTargetSelection : function(){
+				    		return corePageBuilder.getSelection();
+				    	},
+		
+				    	showMessage : showMessage,
+				    	hideMessage : hideMessage,
+				    	handleError : handleError,
+				    	postError : postError
+				    });
+		
+				    /* init additional parameters page builder */
+				    var additionalParamPageBuilder = new mAdditionalParamPageBuilder.AdditionalParamPageBuilder({
+				    	ManifestApplication : manifestApplication,
+				    	ManifestInstrumentation: launchConfParams.Instrumentation
+				    });
+		
+				    /* build pages */
+				    var page1 = corePageBuilder.build();
+				    var page2 = servicesPageBuilder.build();
+				    var page3 = additionalParamPageBuilder.build();
+					var setUIState = function(disable) {
+						if(corePageBuilder._orgsDropdown)
+							corePageBuilder._orgsDropdown.disabled = disable;
+						if(corePageBuilder._spacesDropdown)
+							corePageBuilder._spacesDropdown.disabled = disable;
+					};
+		
+					new Wizard.Wizard({
+						parent: "wizard", //$NON-NLS-0$
+						pages: [page1, page2, page3],
+						onCancel: closeFrame,
+						buttonNames: { ok: messages["save"] },
+						size: { width: "calc(100% - 24px)", height: "370px" }, //$NON-NLS-0$//$NON-NLS-1$
+						onSubmit: mDeploymentLogic.buildDeploymentTrigger({
+							ConfName : launchConfName,
+							showMessage : showMessage,
+							closeFrame : closeFrame,
+							disableUI : setUIState.bind(null, true),
+							enableUI  : setUIState.bind(null, false),
+		
+							postMsg : postMsg,
+							postError : postError,
+		
+							FileService: fileClient,
+							CFService : cfService,
+							getTargetSelection : function(){
+					    		return corePageBuilder.getSelection();
+					    	},
+		
+					    	Manifest : plan.Manifest,
+					    	ContentLocation : resource.ContentLocation,
+					    	AppPath : resource.AppPath
+						})
+					});
+				}
+			)
 		}, postError);
 	});
 });
