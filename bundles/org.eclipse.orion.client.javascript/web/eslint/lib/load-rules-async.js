@@ -684,16 +684,20 @@ define([
                     'Literal': function(node) {
         				// Create a map of line numbers to a list of literal nodes
                     	if (typeof node.value === 'string' && node.value.length > 0){
+                    		if (node.value.toLowerCase() === 'use strict'){
+                    			return;
+                    		}
                     		if (node.parent){
+	                    		if (node.parent.type === 'UnaryExpression' || node.parent.type === 'BinaryExpression' || node.parent.type === 'MemberExpression'){
+	                    			return;
+	                    		}
+	                    		if (node.parent.type === 'Property' && node.parent.key === node){
+	                    			return;
+	                    		}
                     			// Don't consider strings in the define statement
                     			if (node.parent.parent && node.parent.parent.type === 'CallExpression' && node.parent.parent.callee && node.parent.parent.callee.name === "define"){
 	                    			return;
 	                    		}
-	                    		// Don't consider strings that are member expression keys (such as NLS keys for the messages bundle)
-	                    		if (node.parent.type === 'MemberExpression'){
-	                    			return;
-	                    		}
-	                    			
                     		}
                     		lineNum = node.loc.end.line-1;
                     		if (!context._linesWithStringLiterals[lineNum]){

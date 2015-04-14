@@ -718,16 +718,16 @@ define([
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
-				 	        	                {	id: "no-jslint",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessages["unsupportedJSLint"],  //$NON-NLS-0$
-				 	        	                	type: "number",  //$NON-NLS-0$
-				 	        	                	defaultValue: warning,
-				 	        	                	options: severities
-				 	        	                },
 				 	        	                {	id: "no-non-nls-literals",  //$NON-NLS-0$
 				 	        	                	name: javascriptMessages["noNonNLSLiterals"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: ignore,
+				 	        	                	options: severities
+				 	        	                },
+				 	        	                {	id: "no-jslint",  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["unsupportedJSLint"],  //$NON-NLS-0$
+				 	        	                	type: "number",  //$NON-NLS-0$
+				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                }]
 				 	        	}]

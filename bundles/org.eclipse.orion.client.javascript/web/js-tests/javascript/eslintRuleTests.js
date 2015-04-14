@@ -2990,6 +2990,48 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 0);
     		});
+    		it("Ignore 'use strict'", function() {
+    			var topic = "'use strict';";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("Ignore binary comparisons", function() {
+    			var topic = "var i; var a = ((i='b') === 'c');";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Non externalized string literal 'b'.");
+    			assert.equal(messages[0].node.type, "Literal");
+    		});
+    		it("Ignore binary comparisons", function() {
+    			var topic = "var a = {'a':'b'};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Non externalized string literal 'b'.");
+    			assert.equal(messages[0].node.type, "Literal");
+    		});
+    		it("Ignore unary expressions", function() {
+    			var topic = "var a = typeof 'b';";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
     	});
     		
 //NO-REDECLARE -------------------------------------------------------    	
