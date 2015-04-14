@@ -288,12 +288,14 @@ define([
                                 for (l = 0; l< restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
                                         newStyle.styles.keyword.control.color = restKey[i].dict.string[l]["#text"];
+                                        newStyle.styles.punctuation.operator.color = restKey[i].dict.string[l]["#text"];
                                     }
                                 }
                             }
                             else {
                                 if (restKey[i].dict.key["#text"] === "foreground") { //$NON-NLS-0$
                                     newStyle.styles.keyword.control.color = restKey[i].dict.string["#text"];
+                                    newStyle.styles.punctuation.operator.color = restKey[i].dict.string["#text"];
                                 }
                             }
                         }
@@ -395,6 +397,21 @@ define([
                                 }
                             }
                         }
+                        else if (target[k].trim() === "Operators" || target[k].trim() === "Operator") { //$NON-NLS-1$ //$NON-NLS-0$
+                            console.log(target[k].trim());
+                            if (restKey[i].dict.key instanceof Array) {
+                                for (l = 0; l< restKey[i].dict.key.length; l++) {
+                                    if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
+                                        newStyle.styles.punctuation.operator.color = restKey[i].dict.string[l]["#text"];
+                                    }
+                                }
+                            }
+                            else {
+                                if (restKey[i].dict.key["#text"] === "foreground") { //$NON-NLS-0$
+                                    newStyle.styles.punctuation.operator.color = restKey[i].dict.string["#text"];
+                                }
+                            }
+                        }
                         else if (target[k].trim() === "String") { //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l< restKey[i].dict.key.length; l++) {
@@ -444,6 +461,9 @@ define([
                             }
                         }
 
+                        // Setting the ruler styling to that matching Sublime Text
+                        newStyle.styles.textviewRightRuler.borderColor = "#1e1e1e"; //$NON-NLS-0$
+                        newStyle.styles.textviewLeftRuler.borderColor = "#1e1e1e"; //$NON-NLS-0$
                         newStyle.styles.rulerLines.color = "#3d3d3d"; //$NON-NLS-0$
                         newStyle.styles.ruler.annotations.backgroundColor = "#1e1e1e"; //$NON-NLS-0$
                         newStyle.styles.ruler.backgroundColor = "#1e1e1e"; //$NON-NLS-0$
@@ -471,6 +491,7 @@ define([
                 matchingBracketString = "-matchingbracket",
                 metaString = "-meta",
                 numberString = "-number",
+                operatorString = "-operator",
                 propertyString = "-property",
                 scrollString = "-scroll",
                 selectedString = "-selected",
@@ -519,6 +540,11 @@ define([
                                 newStyle.styles.constant.color = colorToHex(rules[i].style.color);
                                 newStyle.styles.constant.numeric.color = colorToHex(rules[i].style.color);
                                 newStyle.styles.constant.numeric.hex.color = colorToHex(rules[i].style.color);
+                            }
+                        }
+                        else if (classes[l].substr(classes[l].length - operatorString.length) === operatorString) { //$NON-NLS-0$
+                            if (rules[i].style.color) {
+                                newStyle.styles.punctuation.operator.color = colorToHex(rules[i].style.color);
                             }
                         }
                         else if (classes[l].substr(classes[l].length - propertyString.length) === propertyString) { //$NON-NLS-0$
@@ -635,7 +661,6 @@ define([
             styles.annotationRange.matchingBracket.borderStyle = "solid";
 
             // Set the bracket color to be the same as border color
-            styles.punctuation = {};
             styles.punctuation.section = {};
             styles.punctuation.section.color = styles.annotationRange.matchingBracket.borderColor;
 
@@ -673,6 +698,9 @@ define([
 
             // Jade-specific. Eclipse themes don't know about Jade
             styles.string.interpolated.color = styles.string.color;
+
+            // Logical and comparison operator styling
+            styles.punctuation.operator.color = getValuesFromXML(xml, "operator");
 
             // Setting the CSS property name color to string color since Eclipse themese don't style CSS
             styles.support.type.propertyName.color = styles.string.color;
