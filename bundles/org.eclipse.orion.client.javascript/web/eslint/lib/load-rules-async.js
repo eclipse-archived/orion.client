@@ -724,7 +724,8 @@ define([
 								        for (var i=0; i<nodes.length; i++) {
 								        	var match = false;
 								        	for (var j=0; j<comments.length; j++) {
-								        		if (comments[j] === (""+i)){
+								        		// NON-NLS comments start at 1
+								        		if (comments[j] === (""+(i+1))){
 								        			match = true;
 								        			break;
 								        		}

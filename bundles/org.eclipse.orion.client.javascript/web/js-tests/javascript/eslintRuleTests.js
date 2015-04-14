@@ -2904,7 +2904,7 @@ define([
     			assert.equal(messages[1].node.type, "Literal");
     		});
     		it("Ignore commented 1", function() {
-    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-0$ //$NON-NLS-1$";
+    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-1$ //$NON-NLS-2$";
     	
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
@@ -2913,7 +2913,7 @@ define([
     			assert.equal(messages.length, 0);
     		});
     		it("Ignore commented 2", function() {
-    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-0$";
+    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-1$";
     	
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
@@ -2925,7 +2925,7 @@ define([
     			assert.equal(messages[0].node.type, "Literal");
     		});
     		it("Ignore commented 3", function() {
-    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-1$";
+    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-2$";
     	
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
@@ -2937,7 +2937,7 @@ define([
     			assert.equal(messages[0].node.type, "Literal");
     		});
     		it("Ignore commented 4", function() {
-    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-1$ //$NON-NLS-0$";
+    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-2$ //$NON-NLS-1$";
     	
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
@@ -2946,7 +2946,7 @@ define([
     			assert.equal(messages.length, 0);
     		});
     		it("Ignore commented 5", function() {
-    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-2$";
+    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-0$";
     	
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;

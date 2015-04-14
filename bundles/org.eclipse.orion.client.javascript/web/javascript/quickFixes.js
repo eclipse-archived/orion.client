@@ -589,7 +589,8 @@ define([
 	        	return astManager.getAST(editorContext).then(function(ast) {
 	                // Insert the correct non nls comment
 	                var end = getLineEnd(ast.source, annotation.end);
-	                var comment = " //$NON-NLS-" + annotation.data.indexOnLine + "$";
+	                // indexOnLine starts at 0, non-nls comments start at one
+	                var comment = " //$NON-NLS-" + (annotation.data.indexOnLine + 1) + "$";
 	                return editorContext.setText(comment, end, end);
 	            });
 			}
