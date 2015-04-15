@@ -2153,7 +2153,7 @@ parseStatement: true, parseSourceElement: true */
      * to <code>expect(value)</code>
      * @since 2.0
      */
-    function expectCommaSeparator() {
+    function expectCommaSeparator(closing) {
         var token;
 
         if(extra.errors) {
@@ -2162,11 +2162,16 @@ parseStatement: true, parseSourceElement: true */
         		lex();
             } else if (token.type === Token.Punctuator && token.value === ';') {
                 lex();
-                //ORION we want the previous token
-                if(extra.tokens && extra.tokens.length > 0) {
-        			token = extra.tokens[extra.tokens.length-2];
-        		}
-                tolerateUnexpectedToken(token, Messages.MissingToken, ';');
+                if(lookahead.value === closing) {
+                	tolerateUnexpectedToken(token, Messages.UnexpectedToken, ';');
+                } else {
+	                var value = (closing && closing !== token.value) ? closing : ';';
+	                //ORION we want the previous token
+	                if(extra.tokens && extra.tokens.length > 0) {
+	        			token = extra.tokens[extra.tokens.length-2];
+	        		}
+	                tolerateUnexpectedToken(token, Messages.MissingToken, value);
+                }
             } else if(token.type !== Token.EOF){
                 //ORION we want the previous token and don't report missing on EOF
                 if(extra.tokens && extra.tokens.length > 0) {
@@ -2419,7 +2424,7 @@ parseStatement: true, parseSourceElement: true */
             properties.push(property);
 
             if (!match('}')) {
-                expectCommaSeparator();
+                expectCommaSeparator('}');
             }
         }
 
@@ -2525,7 +2530,7 @@ parseStatement: true, parseSourceElement: true */
                 if (match(')')) {
                     break;
                 }
-                expectCommaSeparator();
+                expectCommaSeparator(')');
             }
         }
 

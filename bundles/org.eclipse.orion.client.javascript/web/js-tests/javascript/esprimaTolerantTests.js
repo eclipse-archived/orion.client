@@ -2021,6 +2021,62 @@ define([
 				comments: []
 			});
 		});
+		/**
+		 * incomplete arguments witha missing ')'
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=464695
+		 * @since 9.0
+		 */
+		it('Incomplete args 1 - missing ")"', function() {
+			runTest({
+				source: "myfunc(a, b;",
+                nodes: [{"type":"ExpressionStatement","range":[0,12]},{"type":"CallExpression","range":[0,12]},{"type":"Identifier","name":"myfunc","range":[0,6]},{"type":"Identifier","name":"a","range":[7,8]},{"type":"Identifier","name":"b","range":[10,11]}],
+				tokens: [{"type":"Identifier","range":[0,6],"value":"myfunc"},{"type":"Punctuator","range":[6,7],"value":"("},{"type":"Identifier","range":[7,8],"value":"a"},{"type":"Punctuator","range":[8,9],"value":","},{"type":"Identifier","range":[10,11],"value":"b"},{"type":"Punctuator","range":[11,12],"value":";"}],
+				errors: [{"lineNumber":1,"index":10,"message":"Missing expected ')'","token":"b"},{"lineNumber":1,"index":12,"message":"Unexpected end of input"}],
+				comments: []
+			});
+		});
+		/**
+		 * incomplete arguments with a missing ')'
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=464695
+		 * @since 9.0
+		 */
+		it('Incomplete args 2 - missing ")"', function() {
+			runTest({
+				source: "/*globals Objects */function MyC() {} Objects.mixin(MyC.prototype, {};",
+                nodes: [{"type":"FunctionDeclaration","range":[20,37]},{"type":"Identifier","name":"MyC","range":[29,32]},{"type":"BlockStatement","range":[35,37]},{"type":"ExpressionStatement","range":[38,70]},{"type":"CallExpression","range":[38,70]},{"type":"MemberExpression","range":[38,51]},{"type":"Identifier","name":"Objects","range":[38,45]},{"type":"Identifier","name":"mixin","range":[46,51]},{"type":"MemberExpression","range":[52,65]},{"type":"Identifier","name":"MyC","range":[52,55]},{"type":"Identifier","name":"prototype","range":[56,65]},{"type":"ObjectExpression","range":[67,69]}],
+				tokens: [{"type":"Keyword","range":[20,28],"value":"function"},{"type":"Identifier","range":[29,32],"value":"MyC"},{"type":"Punctuator","range":[32,33],"value":"("},{"type":"Punctuator","range":[33,34],"value":")"},{"type":"Punctuator","range":[35,36],"value":"{"},{"type":"Punctuator","range":[36,37],"value":"}"},{"type":"Identifier","range":[38,45],"value":"Objects"},{"type":"Punctuator","range":[45,46],"value":"."},{"type":"Identifier","range":[46,51],"value":"mixin"},{"type":"Punctuator","range":[51,52],"value":"("},{"type":"Identifier","range":[52,55],"value":"MyC"},{"type":"Punctuator","range":[55,56],"value":"."},{"type":"Identifier","range":[56,65],"value":"prototype"},{"type":"Punctuator","range":[65,66],"value":","},{"type":"Punctuator","range":[67,68],"value":"{"},{"type":"Punctuator","range":[68,69],"value":"}"},{"type":"Punctuator","range":[69,70],"value":";"}],
+				errors: [{"lineNumber":1,"index":68,"message":"Missing expected ')'","token":"}"},{"lineNumber":1,"index":70,"message":"Unexpected end of input"}],
+				comments: [{"start":0,"end":20,"value":"globals Objects "}]
+			});
+		});
+		/**
+		 * incomplete arguments with an unexpected ';'
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=464695
+		 * @since 9.0
+		 */
+		it('Incomplete args 3 - unexpected ";"', function() {
+			runTest({
+				source: "var o = {one: 1;}",
+                nodes: [{"type":"VariableDeclaration","kind":"var","range":[0,17]},{"type":"VariableDeclarator","range":[4,17]},{"type":"Identifier","name":"o","range":[4,5]},{"type":"ObjectExpression","range":[8,17]},{"type":"Property","kind":"init","range":[9,15]},{"type":"Identifier","name":"one","range":[9,12]},{"type":"Literal","range":[14,15],"value":1}],
+				tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Identifier","range":[4,5],"value":"o"},{"type":"Punctuator","range":[6,7],"value":"="},{"type":"Punctuator","range":[8,9],"value":"{"},{"type":"Identifier","range":[9,12],"value":"one"},{"type":"Punctuator","range":[12,13],"value":":"},{"type":"Numeric","range":[14,15],"value":"1"},{"type":"Punctuator","range":[15,16],"value":";"},{"type":"Punctuator","range":[16,17],"value":"}"}],
+				errors: [{"lineNumber":1,"index":15,"message":"Unexpected token ;","token":";"}],
+				comments: []
+			});
+		});
+		/**
+		 * incomplete arguments with a missing '}'
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=464695
+		 * @since 9.0
+		 */
+		it('Incomplete args 4 - missing "}"', function() {
+			runTest({
+				source: "var o = {one: 1;",
+                nodes: [],
+				tokens: [{"type":"Keyword","range":[0,3],"value":"var"},{"type":"Identifier","range":[4,5],"value":"o"},{"type":"Punctuator","range":[6,7],"value":"="},{"type":"Punctuator","range":[8,9],"value":"{"},{"type":"Identifier","range":[9,12],"value":"one"},{"type":"Punctuator","range":[12,13],"value":":"},{"type":"Numeric","range":[14,15],"value":"1"},{"type":"Punctuator","range":[15,16],"value":";"}],
+				errors: [{"lineNumber":1,"index":14,"message":"Missing expected '}'","token":"1"},{"lineNumber":1,"index":16,"message":"Unexpected end of input"}],
+				comments: []
+			});
+		});
 		describe('ES6 Tests', function() {
     	 //ARROW EXPRESSIONS ==============================================================================================================================================
     	   it('arrow expression 1', function() {
