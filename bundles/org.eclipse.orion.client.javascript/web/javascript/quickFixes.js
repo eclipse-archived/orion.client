@@ -582,14 +582,15 @@ define([
         "semi": function(editorContext, annotation) {
             return editorContext.setText(';', annotation.end, annotation.end);
         },
-        /** fix for the no-non-nls-literal rule */
-        "no-non-nls-literals": function(editorContext, annotation, astManager){
+        /** fix for the missing-nls rule */
+        "missing-nls": function(editorContext, annotation, astManager){
         	// We depend on the validator rule in eslint to count the number of literals on the line
         	if (annotation.data && typeof annotation.data.indexOnLine === 'number'){
 	        	return astManager.getAST(editorContext).then(function(ast) {
 	                // Insert the correct non nls comment
 	                var end = getLineEnd(ast.source, annotation.end);
-	                var comment = " //$NON-NLS-" + annotation.data.indexOnLine + "$";
+	                // indexOnLine starts at 0, non-nls comments start at one
+	                var comment = " //$NON-NLS-" + (annotation.data.indexOnLine + 1) + "$";
 	                return editorContext.setText(comment, end, end);
 	            });
 			}

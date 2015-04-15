@@ -2870,9 +2870,9 @@ define([
     		});
     	});
     	
-//NO-NON-NLS-LITERALS -------------------------------------------------------    
-    	describe('no-non-nls-literals', function() {
-    	    var RULE_ID = "no-non-nls-literals";
+//MISSING-NLS -------------------------------------------------------    
+    	describe('missing-nls', function() {
+    	    var RULE_ID = "missing-nls";
     		it("Mark double quotes", function() {
     			var topic = "var a = \"a\"; var b = \"bb\";";
     	
@@ -2882,10 +2882,10 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 2);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Non externalized string literal 'a'.");
+    			assert.equal(messages[0].message, "Non-externalized string literal 'a'.");
     			assert.equal(messages[0].node.type, "Literal");
     			assert.equal(messages[1].ruleId, RULE_ID);
-    			assert.equal(messages[1].message, "Non externalized string literal 'bb'.");
+    			assert.equal(messages[1].message, "Non-externalized string literal 'bb'.");
     			assert.equal(messages[1].node.type, "Literal");
     		});
     		it("Mark single quotes", function() {
@@ -2897,14 +2897,14 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 2);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Non externalized string literal 'a'.");
+    			assert.equal(messages[0].message, "Non-externalized string literal 'a'.");
     			assert.equal(messages[0].node.type, "Literal");
     			assert.equal(messages[1].ruleId, RULE_ID);
-    			assert.equal(messages[1].message, "Non externalized string literal 'bb'.");
+    			assert.equal(messages[1].message, "Non-externalized string literal 'bb'.");
     			assert.equal(messages[1].node.type, "Literal");
     		});
     		it("Ignore commented 1", function() {
-    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-0$ //$NON-NLS-1$";
+    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-1$ //$NON-NLS-2$";
     	
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
@@ -2913,18 +2913,6 @@ define([
     			assert.equal(messages.length, 0);
     		});
     		it("Ignore commented 2", function() {
-    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-0$";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    	
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 1);
-    			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Non externalized string literal 'bb'.");
-    			assert.equal(messages[0].node.type, "Literal");
-    		});
-    		it("Ignore commented 3", function() {
     			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-1$";
     	
     			var config = { rules: {} };
@@ -2933,11 +2921,23 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Non externalized string literal 'a'.");
+    			assert.equal(messages[0].message, "Non-externalized string literal 'bb'.");
+    			assert.equal(messages[0].node.type, "Literal");
+    		});
+    		it("Ignore commented 3", function() {
+    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-2$";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Non-externalized string literal 'a'.");
     			assert.equal(messages[0].node.type, "Literal");
     		});
     		it("Ignore commented 4", function() {
-    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-1$ //$NON-NLS-0$";
+    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-2$ //$NON-NLS-1$";
     	
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
@@ -2946,7 +2946,7 @@ define([
     			assert.equal(messages.length, 0);
     		});
     		it("Ignore commented 5", function() {
-    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-2$";
+    			var topic = "var a = 'a'; var b = 'bb'; //$NON-NLS-3$";
     	
     			var config = { rules: {} };
     			config.rules[RULE_ID] = 1;
@@ -2954,10 +2954,10 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 2);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Non externalized string literal 'a'.");
+    			assert.equal(messages[0].message, "Non-externalized string literal 'a'.");
     			assert.equal(messages[0].node.type, "Literal");
     			assert.equal(messages[1].ruleId, RULE_ID);
-    			assert.equal(messages[1].message, "Non externalized string literal 'bb'.");
+    			assert.equal(messages[1].message, "Non-externalized string literal 'bb'.");
     			assert.equal(messages[1].node.type, "Literal");
     		});
     		it("Ignore define", function() {
@@ -2978,7 +2978,7 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 1);
     			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Non externalized string literal 'a'.");
+    			assert.equal(messages[0].message, "Non-externalized string literal 'a'.");
     			assert.equal(messages[0].node.type, "Literal");
     		});
     		it("Ignore non-string literals", function() {
@@ -2990,6 +2990,69 @@ define([
     			var messages = eslint.verify(topic, config);
     			assert.equal(messages.length, 0);
     		});
+    		it("Ignore 'use strict'", function() {
+    			var topic = "'use strict';";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("Ignore binary comparisons", function() {
+    			var topic = "var i; var a = ((i='b') === 'c');";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Non-externalized string literal 'b'.");
+    			assert.equal(messages[0].node.type, "Literal");
+    		});
+    		it("Ignore binary comparisons", function() {
+    			var topic = "var a = {'a':'b'};";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Non-externalized string literal 'b'.");
+    			assert.equal(messages[0].node.type, "Literal");
+    		});
+    		it("Ignore unary expressions", function() {
+    			var topic = "var a = typeof 'b';";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("Ignore require call expressions", function() {
+    			var topic = "require('a');";
+    	
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    	
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+	    	it("Allow NON-NLS-0", function() {
+				var topic = "var a = \"a\"; var b = \"bb\"; //$NON-NLS-0$ //$NON-NLS-1$";
+		
+				var config = { rules: {} };
+				config.rules[RULE_ID] = 1;
+		
+				var messages = eslint.verify(topic, config);
+				assert.equal(messages.length, 1);
+				assert.equal(messages[0].ruleId, RULE_ID);
+				assert.equal(messages[0].message, "Non-externalized string literal 'bb'.");
+				assert.equal(messages[0].node.type, "Literal");
+			});
     	});
     		
 //NO-REDECLARE -------------------------------------------------------    	

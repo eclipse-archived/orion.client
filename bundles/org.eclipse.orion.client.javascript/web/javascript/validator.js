@@ -26,6 +26,7 @@ define([
 			"curly" : 0, //$NON-NLS-0$
 			"eqeqeq": 1, //$NON-NLS-0$
 			"missing-doc": 0,  //$NON-NLS-0$
+			'missing-nls': 0,  //$NON-NLS-0$
 			"new-parens" : 1, //$NON-NLS-0$
 			"no-caller": 1, //$NON-NLS-0$
 			"no-cond-assign": 2, //$NON-NLS-0$
@@ -59,8 +60,7 @@ define([
 			'no-fallthrough' : 2,  //$NON-NLS-0$
 			'no-empty-block' : 0,  //$NON-NLS-0$
 			'valid-typeof': 2,  //$NON-NLS-0$
-			'no-sparse-arrays': 1,  //$NON-NLS-0$
-			'no-non-nls-literals': 0  //$NON-NLS-0$
+			'no-sparse-arrays': 1  //$NON-NLS-0$
 		},
 		
 		/**

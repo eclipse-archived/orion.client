@@ -401,12 +401,12 @@ define([
         provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
                 quickFixComputer,
                 {
-                    name: javascriptMessages["noNonNLSLiteralsFixName"],  //$NON-NLS-0$
+                    name: javascriptMessages["missingNlsFixName"],  //$NON-NLS-0$
                     scopeId: "orion.edit.quickfix", //$NON-NLS-0$
                     id : "no.throw.literal.fix",  //$NON-NLS-0$
                     contentType: ['application/javascript', 'text/html'],  //$NON-NLS-0$ //$NON-NLS-1$
                     validationProperties: [
-                        {source: "annotation:id", match: "^(?:no-non-nls-literals)$"} //$NON-NLS-1$ //$NON-NLS-0$
+                        {source: "annotation:id", match: "^(?:missing-nls)$"} //$NON-NLS-1$ //$NON-NLS-0$
                     ]
                 }
         );
@@ -718,16 +718,16 @@ define([
 				 	        	                	defaultValue: warning,
 				 	        	                	options: severities
 				 	        	                },
+				 	        	                {	id: "missing-nls",  //$NON-NLS-0$
+				 	        	                	name: javascriptMessages["missingNls"],  //$NON-NLS-0$
+				 	        	                	type: "number",  //$NON-NLS-0$
+				 	        	                	defaultValue: ignore,
+				 	        	                	options: severities
+				 	        	                },
 				 	        	                {	id: "no-jslint",  //$NON-NLS-0$
 				 	        	                	name: javascriptMessages["unsupportedJSLint"],  //$NON-NLS-0$
 				 	        	                	type: "number",  //$NON-NLS-0$
 				 	        	                	defaultValue: warning,
-				 	        	                	options: severities
-				 	        	                },
-				 	        	                {	id: "no-non-nls-literals",  //$NON-NLS-0$
-				 	        	                	name: javascriptMessages["noNonNLSLiterals"],  //$NON-NLS-0$
-				 	        	                	type: "number",  //$NON-NLS-0$
-				 	        	                	defaultValue: ignore,
 				 	        	                	options: severities
 				 	        	                }]
 				 	        	}]

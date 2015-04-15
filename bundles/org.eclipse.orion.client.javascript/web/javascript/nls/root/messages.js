@@ -55,7 +55,7 @@ define({//Default message bundle
 	'unusedParams' : 'Unused parameters:', //$NON-NLS-0$  //$NON-NLS-1$
 	'unsupportedJSLint' : 'Unsupported environment directive:',  //$NON-NLS-0$  //$NON-NLS-1$
 	'noThrowLiteral': 'Literal used in \'throw\':',  //$NON-NLS-0$  //$NON-NLS-1$
-	'noNonNLSLiterals': 'Non externalized string literals:', //$NON-NLS-0$ //$NON-NLS-1$
+	'missingNls': 'Non-externalized string literals (missing $NON-NLS$ tag):', //$NON-NLS-0$ //$NON-NLS-1$
 	'generateDocName' : 'Generate Element Comment',  //$NON-NLS-0$  //$NON-NLS-1$
 	'generateDocTooltip' : 'Generate a JSDoc-like comment for the selected JavaScript element',  //$NON-NLS-0$  //$NON-NLS-1$
 	'openDeclName' : 'Open Declaration',  //$NON-NLS-0$  //$NON-NLS-1$
@@ -97,5 +97,5 @@ define({//Default message bundle
 	'noShadowGlobals': 'Global shadowing:', //$NON-NLS-0$ //$NON-NLS-1$
 	'noThrowLiteralFixName': 'Change to Error' , //$NON-NLS-0$ //$NON-NLS-1$
 	'noThrowLiteralFixTooltip': 'Change the literal to an Error', //$NON-NLS-0$ //$NON-NLS-1$
-	'noNonNLSLiteralsFixName': 'Add missing $NON-NLS$ tag' //$NON-NLS-0$ //$NON-NLS-1$
+	'missingNlsFixName': 'Add missing $NON-NLS$ tag' //$NON-NLS-0$ //$NON-NLS-1$
 });

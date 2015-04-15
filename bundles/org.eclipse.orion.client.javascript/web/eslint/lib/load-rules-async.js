@@ -662,7 +662,7 @@ define([
         	}
         },
 		"no-new-wrappers": {
-		    description: 'Disabllow creating new String, Number or Boolean via their constructor',
+		    description: 'Disallow creating new String, Number or Boolean via their constructor',
 		    rule: function(context) {
         		var wrappers = ["String", "Number", "Math", "Boolean", "JSON"]; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
         
@@ -671,29 +671,36 @@ define([
         		}, context);
         	}
         },
-        "no-non-nls-literals": {
-        	description: 'Disallow non externalized string literals',
+        "missing-nls": {
+        	description: 'Disallow non-externalized string literals',
         	rule: function(context){
         		function reportNonNLS(node, index){
         			var data = Object.create(null);
         			data.indexOnLine = index;
-        			context.report(node, "Non externalized string literal \'${0}\'.", {0:node.value, data: data});
+        			context.report(node, "Non-externalized string literal \'${0}\'.", {0:node.value, data: data});
         		}
         		
         		return {
                     'Literal': function(node) {
         				// Create a map of line numbers to a list of literal nodes
                     	if (typeof node.value === 'string' && node.value.length > 0){
+                    		if (node.value.toLowerCase() === 'use strict'){
+                    			return;
+                    		}
                     		if (node.parent){
+	                    		if (node.parent.type === 'UnaryExpression' || node.parent.type === 'BinaryExpression' || node.parent.type === 'MemberExpression'){
+	                    			return;
+	                    		}
+	                    		if (node.parent.type === 'Property' && node.parent.key === node){
+	                    			return;
+	                    		}
+	                    		if (node.parent.type === 'CallExpression' && node.parent.callee && node.parent.callee.name === 'require'){
+	                    			return;
+	                    		}
                     			// Don't consider strings in the define statement
-                    			if (node.parent.parent && node.parent.parent.type === 'CallExpression' && node.parent.parent.callee && node.parent.parent.callee.name === "define"){
+                    			if (node.parent.parent && node.parent.parent.type === 'CallExpression' && node.parent.parent.callee && node.parent.parent.callee.name === 'define'){
 	                    			return;
 	                    		}
-	                    		// Don't consider strings that are member expression keys (such as NLS keys for the messages bundle)
-	                    		if (node.parent.type === 'MemberExpression'){
-	                    			return;
-	                    		}
-	                    			
                     		}
                     		lineNum = node.loc.end.line-1;
                     		if (!context._linesWithStringLiterals[lineNum]){
@@ -724,7 +731,14 @@ define([
 								        for (var i=0; i<nodes.length; i++) {
 								        	var match = false;
 								        	for (var j=0; j<comments.length; j++) {
-								        		if (comments[j] === (""+i)){
+								        		
+								        		// NON-NLS comments start at 1
+								        		if (comments[j] === (""+(i+1))){
+								        			match = true;
+								        			break;
+								        		}
+								        		// For now allow NON-NLS-0 comments
+								        		if (i===0 && comments[j] === '0'){
 								        			match = true;
 								        			break;
 								        		}
