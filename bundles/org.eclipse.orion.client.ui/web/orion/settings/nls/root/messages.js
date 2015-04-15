@@ -140,7 +140,7 @@ define({//Default message bundle
 	"editorSettings": "Editor Settings",
 	"EditorThemes": "Editor Styles",
 	"defaultImportedThemeName": "New Theme",
-	"nameImportedTheme": "This lovely theme will need a name. Please name it.",
+	"nameImportedTheme": "Please enter a name for this new theme:",
 	"dndTheme": "Drag and drop here...",
 	"textTheme": "...or paste editor styles here",
 	"Import": "Import",

@@ -39,12 +39,13 @@ define([
 		
 		var defaultFont = '"Consolas", "Monaco", "Vera Mono", monospace'; //$NON-NLS-0$
 		var defaultFontSize = '12px'; //$NON-NLS-0$
+		var prospecto, darker;
 
 		function ThemeData() {
 
 			this.styles = [];
 			
-			var prospecto = {
+			prospecto = {
 				"className": "prospecto",
 				"name": "Prospecto",
 				"styles": {
@@ -240,7 +241,7 @@ define([
 			};
 			this.styles.push(prospecto);
 
-			var darker = {
+			darker = {
 				"className": "darker",
 				"name": "Darker",
 				"styles": {
@@ -467,13 +468,9 @@ define([
 		ThemeData.prototype.styles = [];
 		ThemeData.prototype.getStyles = getStyles;
 
-		function getDefaultTheme(id) {
-			var id = id !== undefined ? id : 0;
-
-			ThemeData();
-			var defaultStyles = getStyles();
-			var newStyle = defaultStyles[id];
-			return newStyle;
+		function getDefaultTheme(options) {
+			/* return a copy of the appropriate theme definition */
+			return JSON.parse(JSON.stringify((options || {}).dark ? darker : prospecto));
 		}
 		ThemeData.prototype.getDefaultTheme = getDefaultTheme;
 		
@@ -498,7 +495,7 @@ define([
 		}
 		ThemeData.prototype.getThemeStorageInfo = getThemeStorageInfo;
 
-		function processSettings(settings, preferences) {
+		function processSettings(settings) {
             var themeClass = "editorTheme"; //$NON-NLS-0$
             var theme = mTextTheme.TextTheme.getTheme();
             theme.setThemeClass(themeClass, theme.buildStyleSheet(themeClass, settings));
@@ -506,9 +503,9 @@ define([
         ThemeData.prototype.processSettings = processSettings;
 
 		return {
-			ThemeData:ThemeData,
-			getStyles:getStyles,
-			getDefaultTheme:getDefaultTheme
+			ThemeData: ThemeData,
+			getStyles: getStyles,
+			getDefaultTheme: getDefaultTheme
 		};
 	}
 );
