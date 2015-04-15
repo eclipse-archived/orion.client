@@ -33,6 +33,7 @@ define([
 		description: "This plugin provides Git Support to the Orion File Service.",
 		login: login
 	};
+	var gitTimeout = 60000;
 
 	var provider = new PluginProvider(headers);
 
@@ -298,7 +299,7 @@ define([
 				headers: {
 					"Orion-Version": "1"
 				},
-				timeout: 15000
+				timeout: gitTimeout
 			}).then(function(xhrResult) {
 				return xhrResult.responseText;
 			});
@@ -310,7 +311,7 @@ define([
 				headers: {
 					"Orion-Version": "1"
 				},
-				timeout: 15000
+				timeout: gitTimeout
 			}).then(function(xhrResult) {
 				return JSON.parse(xhrResult.responseText);
 			});
