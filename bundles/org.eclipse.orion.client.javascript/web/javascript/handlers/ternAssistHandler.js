@@ -95,27 +95,63 @@ define([
 	 */
 	function calculateFunctionProposal(completion, args, proposal) {
 		var positions = [];
+		proposal.relevance += 5;
 		var type = completion.type.slice(2);
 		var ret = /\s*->\s*(\w*|\d*|(?:fn\(.*\))|(?:\[.*\]))$/.exec(type);
 		if(ret) {
 			proposal.description = ' : ' + convertTypes(ret[1]);
 			type = type.slice(0, ret.index);
 		}
-		var _c = completion.name + convertTypes(type);
-		proposal.name = proposal.proposal = _c;
-		proposal.escapePosition = (args.params.offset - args.params.prefix.length) + _c.length;
-		//TODO collect positions
-		var params = /(?:^|,)(.*):(?: fn\(.*?\)|.*)/g.exec(type.slice(1, type.length-1));
+		var _p = completion.name + '(';
+		var params = collectParams(type.slice(1, type.length-1));
 		if(params) {
-			for(var i = 1; i < params.length; i++) {
-				var _p = params[i];
+			for(var i = 0; i < params.length; i++) {
+				positions.push({offset: (args.params.offset+_p.length)-args.params.prefix.length, length: params[i].length});
+				_p += params[i];
+				if(i < params.length-1) {
+					_p += ', ';
+				}
 			}
 		}
+		_p += ')';
+		proposal.name = proposal.proposal = _p;
+		proposal.escapePosition = (args.params.offset - args.params.prefix.length) + _p.length;
 		if(positions.length > 0) {
 			proposal.positions = positions;
 		}
 	}
 
+	function collectParams(type) {
+		if(type && type.length > 0) {
+			var params = [];
+			var parencount = 0, char, param = '', index = 0, aftercolon = false;
+			while(index < type.length) {
+				char = type.charAt(index);
+				if(char === 'f') {
+					if(type.charAt(index+1) === 'n' && type.charAt(index+2) === '(') {
+						parencount++;
+					} else if(!aftercolon) {
+						param += char;
+					}
+				} else if(char === ')') {
+					parencount--;
+				} else if(char === ':' && parencount < 1) {
+					params.push(param);
+					param = '';
+					aftercolon = true;
+				} else if(char === ',') {
+					index++; //eat the space
+					aftercolon = false;
+				} else if(!aftercolon && parencount < 1) {
+					param += char;
+				}
+				index++;
+			}
+			return params;
+		}
+		return null;
+	}
+	
 	/**
 	 * @description Convert the Tern types to be more Orion-like
 	 * @param {String} type The type computed from Tern
@@ -123,10 +159,10 @@ define([
 	 */
 	function convertTypes(type) {
 		//TODO do we want to convert all types? make arrays pretty?
-		type = type.replace(/:\s*\?/g, ': Any');
-		type = type.replace(/:\s*bool/g, ': Boolean');
-		type = type.replace(/:\s*number/g, ': Number');
-		type = type.replace(/:\s*string/g, ': String');
+		type = type.replace(/:?\s*\?/g, ': Any');
+		type = type.replace(/:?\s*bool/g, ': Boolean');
+		type = type.replace(/:?\s*number/g, ': Number');
+		type = type.replace(/:?\s*string/g, ': String');
 		return type;
 	}
 
@@ -236,6 +272,9 @@ define([
 	    var locals = [];
 	    for(var i = 0; i < completions.length; i++) {
 	        var _c = completions[i];
+	        if(!isReachable(_c.origin, args.meta)) {
+	        	continue;
+	        }
 	        if(_looselyMatches(args.params.prefix, _c.name)) {
     	        var _o = _c.origin;
     	        _o = _o ? _o : '?';
@@ -259,6 +298,17 @@ define([
 	        proposals = proposals.concat(_p[key]);
 	    }
 	    return proposals;
+	}
+	
+	/**
+	 * @description Determines if the given proposal is reachable from the current file context
+	 * @param {String} origin The origin of the proposal
+	 * @param {Object} meta The metadata describing the location
+	 * @returns {Boolean} if the given proposal origin is reachable from the current file context
+	 */
+	function isReachable(origin, meta) {
+		//TODO until we collect the requires graph we only want to show from the file context + indexes
+		return (origin === meta.location) || origin.indexOf('/') < 0;
 	}
 	
 	function _binInsert(arr, comp) {
