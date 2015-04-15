@@ -16,6 +16,8 @@ define(["orion/xhr", "orion/Deferred", "orion/encoding-shim", "orion/URL-shim"],
 	function GitFileImpl(fileBase) {
 		this.fileBase = fileBase;
 	}
+	
+	var GIT_TIMEOUT = 60000;
 
 	GitFileImpl.prototype = {
 		fetchChildren: function(location) {
@@ -32,7 +34,7 @@ define(["orion/xhr", "orion/Deferred", "orion/encoding-shim", "orion/URL-shim"],
 					"Orion-Version": "1", //$NON-NLS-0$  //$NON-NLS-1$
 					"Content-Type": "charset=UTF-8" //$NON-NLS-0$  //$NON-NLS-1$
 				},
-				timeout: 15000
+				timeout: GIT_TIMEOUT
 			}).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
 				return jsonData.Children || [];
@@ -51,7 +53,7 @@ define(["orion/xhr", "orion/Deferred", "orion/encoding-shim", "orion/URL-shim"],
 					"Orion-Version": "1", //$NON-NLS-0$  //$NON-NLS-1$
 					"Content-Type": "charset=UTF-8" //$NON-NLS-0$  //$NON-NLS-1$
 				},
-				timeout: 15000
+				timeout: GIT_TIMEOUT
 			}).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
 				return jsonData || {};
@@ -81,7 +83,7 @@ define(["orion/xhr", "orion/Deferred", "orion/encoding-shim", "orion/URL-shim"],
 				url.query.set("parts", "meta"); //$NON-NLS-0$  //$NON-NLS-1$
 			}
 			return xhr("GET", url.href, {
-				timeout: 15000,
+				timeout: GIT_TIMEOUT,
 				headers: { "Orion-Version": "1" }, //$NON-NLS-0$  //$NON-NLS-1$
 				log: false
 			}).then(function(result) {
@@ -104,7 +106,7 @@ define(["orion/xhr", "orion/Deferred", "orion/encoding-shim", "orion/URL-shim"],
 		readBlob: function(location) {
 			return xhr("GET", location, { //$NON-NLS-0$ 
 				responseType: "arraybuffer", //$NON-NLS-0$ 
-				timeout: 15000
+				timeout: GIT_TIMEOUT
 			}).then(function(result) {
 				return result.response;
 			});
