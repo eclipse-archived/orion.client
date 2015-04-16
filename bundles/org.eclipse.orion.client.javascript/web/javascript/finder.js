@@ -17,6 +17,12 @@ define([
 ], function(Estraverse, Objects, ESlintEnv) {
 
 	/**
+	 * make sure we are skipping the recovered node
+	 * @since 9.0
+	 */
+	Estraverse.VisitorKeys.RecoveredNode = []; //do not visit
+
+	/**
 	 * @name javascript.Visitor
 	 * @description The AST visitor passed into estraverse
 	 * @constructor
