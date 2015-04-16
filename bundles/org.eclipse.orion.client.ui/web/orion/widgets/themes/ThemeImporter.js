@@ -816,7 +816,7 @@ define([
                 newStyle = importEclipseTheme(xml);
             } else if (xml) {
                 /* old-style theme definition */
-                var newStyle = {};
+                newStyle = {};
 
                 newStyle.name = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
                 newStyle.annotationRuler = xml.getElementsByTagName("background")[0].attributes[0].value;
