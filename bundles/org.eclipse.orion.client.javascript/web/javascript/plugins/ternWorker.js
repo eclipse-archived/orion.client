@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*globals importScripts onmessage:true doctrine*/
+/*globals importScripts onmessage:true doctrine onconnect:true*/
 /*eslint-env node, browser*/
 importScripts('../../requirejs/require.js'); // synchronous
 require({
@@ -37,9 +37,12 @@ require({
 [
     'javascript/signatures',
 	'tern/lib/tern',
-	'tern/plugin/doc_comment', //TODO must load them, they self-register with Tern
+	'tern/plugin/doc_comment',
+	//TODO Load these on the fly
 	//'tern/plugin/requirejs',
-	'tern/plugin/orion_requirejs',
+	//'tern/plugin/orion_requirejs',
+	//'tern/plugin/mongodb2_0_27',
+	//'tern/plugin/node',
 	'tern/defs/ecma5',
 	'tern/defs/browser',
 	'javascript/handlers/ternAssistHandler',
@@ -49,7 +52,8 @@ require({
 	'javascript/handlers/ternRenameHandler',
 	'doctrine'  //stays last - exports into global
 ],
-/* @callback */ function(Signatures, Tern, docPlugin, /*requirePlugin,*/ orionRequirePlugin, ecma5, browser, AssistHandler, DeclHandler, HoverHandler, OccurrencesHandler, RenameHandler) {
+/* @callback */ function(Signatures, Tern, docPlugin, /*requirePlugin, orionRequirePlugin, mongodbPlugin, nodePlugin,*/ ecma5, browser, AssistHandler, DeclHandler, 
+						HoverHandler, OccurrencesHandler, RenameHandler) {
     
     var ternserver, pendingReads = Object.create(null);
     
@@ -58,7 +62,7 @@ require({
      */
     function startServer() {
         var options = {
-                //async: true,
+                async: true,
                 debug:true,
                 defs: [ecma5, browser],
                 projectDir: '/',
@@ -66,8 +70,11 @@ require({
                     doc_comment: {
                         fullDocs: true
                     }
-                }
-               // getFile: _getFile
+                    //mongodb2_0_27:{},
+                    //node: {}
+                    //orion_requirejs: {}
+                },
+                getFile: _getFile
             };
         
         ternserver = new Tern.Server(options);
@@ -84,23 +91,23 @@ require({
             if(typeof(_d.request) === 'string') {
                 switch(_d.request) {
                     case 'completions': {
-                        AssistHandler.computeProposals(ternserver, postMessage, _d.args);
+                        AssistHandler.computeProposals(ternserver, getPostMessage(), _d.args);
                         break;
                     }
                     case 'occurrences': {
-                        OccurrencesHandler.computeOccurrences(ternserver, postMessage, _d.args);
+                        OccurrencesHandler.computeOccurrences(ternserver, getPostMessage(), _d.args);
                         break;
                     }
                     case 'decl': {
-                        DeclHandler.computeDeclaration(ternserver, postMessage, _d.args);
+                        DeclHandler.computeDeclaration(ternserver, getPostMessage(), _d.args);
                         break;
                     }
                     case 'hover': {
-                        HoverHandler.computeHover(ternserver, postMessage, _d.args);
+                        HoverHandler.computeHover(ternserver, getPostMessage(), _d.args);
                         break;
                     }
                     case 'rename': {
-                        RenameHandler.computeRename(ternserver, postMessage, _d.args);
+                        RenameHandler.computeRename(ternserver, getPostMessage(), _d.args);
                         break;
                     }
                     case 'addFile': {
@@ -111,7 +118,7 @@ require({
                         _deleteFile(_d.args);
                         break;
                     }
-                    case 'contents': {
+                    case 'read': {
                         _contents(_d.args);
                         break;
                     }
@@ -119,6 +126,19 @@ require({
             }
         }
     };
+    
+    onconnect = function(event) {
+    	this.port = event.ports[0];
+    	this.port.onmessage = onmessage;
+    	this.port.start();
+    };
+    
+    function getPostMessage() {
+    	if(this.port) {
+    		return this.port.postMessage;
+    	}
+    	return postMessage;
+    }
     
     /**
      * @description Notifies the Tern server that file contents are ready
@@ -135,7 +155,7 @@ require({
         file = args.logical;
         read = pendingReads[file];
         if(typeof(read) === 'function') {
-            read(err, {contents: contents, file:args.file, logical:args.logical});
+            read(err, {contents: contents, file:file, logical:args.logical});
         }
         delete pendingReads[file];
     }

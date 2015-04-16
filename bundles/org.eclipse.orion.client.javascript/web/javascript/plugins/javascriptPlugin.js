@@ -25,13 +25,6 @@ define([
 'javascript/astManager',
 'javascript/quickFixes',
 'javascript/contentAssist/ternAssist',
-'javascript/contentAssist/indexFiles/mongodbIndex',
-'javascript/contentAssist/indexFiles/mysqlIndex',
-'javascript/contentAssist/indexFiles/postgresIndex',
-'javascript/contentAssist/indexFiles/redisIndex',
-'javascript/contentAssist/indexFiles/expressIndex',
-'javascript/contentAssist/indexFiles/amqpIndex',
-'javascript/contentAssist/contentAssist',
 'javascript/validator',
 'javascript/occurrences',
 'javascript/hover',
@@ -45,7 +38,7 @@ define([
 'orion/editor/stylers/application_schema_json/syntax',
 'orion/editor/stylers/application_x-ejs/syntax',
 'i18n!javascript/nls/messages'
-], function(PluginProvider, Bootstrap, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
+], function(PluginProvider, Bootstrap, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, 
 			EslintValidator, Occurrences, Hover, Outliner,	Util, Logger, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
     Bootstrap.startup().then(function(core) {
@@ -106,13 +99,60 @@ define([
     	 */
     	var astManager = new ASTManager.ASTManager(Esprima);
     	
-    	// Start the worker
-    	var ternWorker = new Worker(new URL("ternWorker.js", window.location.href).href);
-    	ternWorker.onerror = function(error) {
-    		Logger.log(error.message);
+    	function WrappedWorker(script, onmessage, onerror) {
+    		/*if(typeof(SharedWorker) === 'function') {
+    			this.shared = true;
+    			this.worker = new SharedWorker(new URL(script, window.location.href).href);
+    			this.worker.port.onmessage = onmessage;
+    			this.worker.port.onerror = onerror;
+    			this.worker.port.start();
+    		} else { */
+    			this.worker = new Worker(new URL(script, window.location.href).href);
+    			this.worker.postMessage("start");
+    			this.worker.onmessage = onmessage;
+    			this.worker.onerror = onerror;
+    	//	}
+    	}
+    	
+    	WrappedWorker.prototype.postMessage = function(msg) {
+    		if(this.shared) {
+    			this.worker.port.postMessage(msg);
+    		} else {
+    			this.worker.postMessage(msg);
+    		}
     	};
-    	ternWorker.postMessage("start");
-/*    	
+    	
+    	WrappedWorker.prototype.addEventListener = function(msg, handler) {
+    		this.worker.addEventListener(msg, handler);	
+    	};
+    	
+    	// Start the worker
+    	var ternWorker = new WrappedWorker("ternWorker.js", 
+		    	function(event) {
+		    		if(typeof(event.data) === 'object') {
+		    			var _d  = event.data;
+		    			switch(_d.request) {
+		    				case 'read': {
+		    					if(typeof(_d.args.file) === 'object') {
+		    						scriptresolver.getWorkspaceFile(_d.args.file.logical).then(function(files) {
+		    							if(files && files.length > 0) {
+		    								return fileClient.read(files[0].location).then(function(contents) {
+		    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:files[0].location, logical:_d.args.file.logical, path:files[0].path}});	
+		    								});
+		    							} else {
+		    								ternWorker.postMessage({request: 'read', args: {error: 'Failed to read file '+_d.args.file.logical}});
+		    							}
+		    						});	
+		    					}
+		    					break;
+		    				}
+		    			}
+		    		}
+		    	}, 
+		    	function(err) {
+		    		Logger.log(err);	
+		    	});
+    	
     	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker),  //$NON-NLS-0$
     			{
     				contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$
@@ -122,7 +162,7 @@ define([
     				charTriggers: "[.]",  //$NON-NLS-0$
     				excludedStyles: "(string.*)"  //$NON-NLS-0$
     		});
-*/    	
+    	
     	/**
     	 * Register AST manager as Model Change listener
     	 */
@@ -437,16 +477,16 @@ define([
     		name: javascriptMessages['jsHover'],
     		contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
     			});
-    	
+/*    	
     	provider.registerService("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager),  //$NON-NLS-0$
     			{
-    		contentType: ["application/javascript", 'text/html'],  //$NON-NLS-0$
+    		contentType: ["application/javascript", 'text/html'],  //$NON-NLS-0$ //$NON-NLS-1$
     		name: javascriptMessages["contentAssist"],  //$NON-NLS-0$
     		id: "orion.edit.contentassist.javascript",  //$NON-NLS-0$
     		charTriggers: "[.]",  //$NON-NLS-0$
     		excludedStyles: "(string.*)"  //$NON-NLS-0$
     			});
-    	
+  */  	
     	var validator = new EslintValidator(astManager);
     	
     	/**
@@ -754,41 +794,7 @@ define([
     			provider.registerService("orion.edit.highlighter", {}, newGrammars[current]);
     		}
     	}
-    	
-    	/**
-    	 * Register type definitions for known JS libraries
-    	 */
-    	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
-    		id: "node.redis",  //$NON-NLS-0$
-    		type: "tern",  //$NON-NLS-0$
-    		defs: RedisIndex
-    	});
-    	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
-    		id: "node.mysql",  //$NON-NLS-0$
-    		type: "tern",  //$NON-NLS-0$
-    		defs: MysqlIndex
-    	});
-    	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
-    		id: "node.postgres",  //$NON-NLS-0$
-    		type: "tern",  //$NON-NLS-0$
-    		defs: PostgresIndex
-    	});
-    	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
-    		id: "node.mongodb",  //$NON-NLS-0$
-    		type: "tern",  //$NON-NLS-0$
-    		defs: MongodbIndex
-    	});
-    	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
-    		id: "node.express",  //$NON-NLS-0$
-    		type: "tern", //$NON-NLS-0$
-    		defs: ExpressIndex
-    	});
-    	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
-    		id: "node.amqp",  //$NON-NLS-0$
-    		type: "tern",  //$NON-NLS-0$
-    		defs: AMQPIndex
-    	});
-    	
     	provider.connect();
 	});
 });
+
