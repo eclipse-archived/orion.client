@@ -3140,6 +3140,9 @@ parseStatement: true, parseSourceElement: true */
     function parseExpressionStatement(node) {
         var expr = parseExpression();
         consumeSemicolon();
+        if(!expr) {
+        	expr = recoveredNode(node);  //ORION don't insert null expressions
+        }
         return node.finishExpressionStatement(expr);
     }
 
