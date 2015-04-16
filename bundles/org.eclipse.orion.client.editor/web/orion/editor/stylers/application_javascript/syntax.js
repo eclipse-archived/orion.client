@@ -24,7 +24,8 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 		"static", "super", //$NON-NLS-1$ //$NON-NLS-0$
 		"typeof", //$NON-NLS-0$
 		"var", "void", //$NON-NLS-1$ //$NON-NLS-0$
-		"with" //$NON-NLS-0$
+		"with", //$NON-NLS-0$
+		"this" //$NON-NLS-1$
 	];
 	var controlKeywords = [
 		"break", //$NON-NLS-0$
