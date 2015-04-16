@@ -703,8 +703,8 @@ define([
         ThemeImporter.prototype.importBracketsTheme = importBracketsTheme;
 
         function importEclipseTheme(xml) {
-        	/* use a dark base theme if luminance is low (the theme being imported is dark) */
-        	var useDarkBase = calculateLuminance(getValuesFromXML(xml, "background")) < luminanceDarkLimit;
+            /* use a dark base theme if luminance is low (the theme being imported is dark) */
+            var useDarkBase = calculateLuminance(getValuesFromXML(xml, "background")) < luminanceDarkLimit;
             var newStyle = themeData.getDefaultTheme({dark: useDarkBase});
 
             var styles = newStyle.styles;
@@ -838,7 +838,7 @@ define([
             }
 
             if (newStyle) {
-                data.options.items.addTheme(newStyle);
+                data.options.items.saveTheme(newStyle);
                 data.hide();
             } else {
                 if (!document.getElementById("themeImportError")) {

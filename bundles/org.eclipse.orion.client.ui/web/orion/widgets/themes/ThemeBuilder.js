@@ -566,8 +566,16 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 	ThemeBuilder.prototype.deleteTheme = deleteTheme;
 	
 	function saveTheme(){
-		if (protectedThemes.indexOf(currentTheme.name) !== -1){
-			window.alert(currentTheme.name + messages["cannotModifyMsg"]);
+		if (arguments[0].styles) {
+			currentTheme = arguments[0];
+		}
+
+		if (protectedThemes.indexOf(currentTheme.name) !== -1) {
+			var newName = prompt(currentTheme.name + messages["cannotModifyMsg"], messages["defaultImportedThemeName"]);
+			if (newName !== null && newName.length > 0 && protectedThemes.indexOf(newName) === -1) {
+				currentTheme.name = newName;
+				this.addTheme(currentTheme);
+			}
 		}
 		else {
 			this.addTheme(currentTheme);
