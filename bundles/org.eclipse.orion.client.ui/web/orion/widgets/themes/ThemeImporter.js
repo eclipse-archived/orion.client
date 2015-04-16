@@ -228,18 +228,16 @@ define([
 
         function importSublimeTheme(xml) {
             var themeJson = xmlToJson(xml); //convert to Json
-            var newStyle = themeData.getDefaultTheme();
-
             var dictKey = themeJson.plist[1].dict.array.dict[0].dict.key;
             var dictString = themeJson.plist[1].dict.array.dict[0].dict.string;
+
+            var bgColor = getBackgroundColor(dictKey, dictString);
+            var useDarkBase = calculateLuminance(bgColor) < luminanceDarkLimit;
+            var newStyle = themeData.getDefaultTheme({dark: useDarkBase});
 
             //finds the general attributes
             for (var i = 0; i < dictKey.length; i++) {
                 if (dictKey[i]["#text"] === "background" && dictString[i]["#text"].length < 8) { //$NON-NLS-0$
-                    if (calculateLuminance(dictString[i]["#text"]) < luminanceDarkLimit) {
-                        /* use a dark base theme if luminance is low (the theme being imported is dark) */
-                        newStyle = themeData.getDefaultTheme({dark: true});
-                    }
                     newStyle.styles.backgroundColor = dictString[i]["#text"];
                 }
                 else if (dictKey[i]["#text"] === "foreground" && dictString[i]["#text"].length < 8) { //$NON-NLS-0$
@@ -271,10 +269,9 @@ define([
             for (i = 1; i < restKey.length; i++) {
                 try {
                     var target = restKey[i].string[0]["#text"].split(",");
-                    var targetKey = target[k].trim();
 
                     for (var k = 0; k < target.length; k++) {
-                        if (targetKey === "Comment") { //$NON-NLS-0$
+                        if (target[k].trim() === "Comment") { //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (var l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -293,7 +290,7 @@ define([
                                 }
                             }
                         }
-                        else if (targetKey === "Keyword") { //$NON-NLS-0$
+                        else if (target[k].trim() === "Keyword") { //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -308,7 +305,7 @@ define([
                                 }
                             }
                         }
-                        else if (targetKey === "Tag name") { //$NON-NLS-0$
+                        else if (target[k].trim() === "Tag name") { //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -325,7 +322,7 @@ define([
                                 }
                             }
                         }
-                        else if (targetKey === "Tag attribute") { //$NON-NLS-0$
+                        else if (target[k].trim() === "Tag attribute") { //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -342,7 +339,7 @@ define([
                                 }
                             }
                         }
-                        else if (targetKey === "HTML: Doctype") { //$NON-NLS-0$
+                        else if (target[k].trim() === "HTML: Doctype") { //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -359,7 +356,7 @@ define([
                                 }
                             }
                         }
-                        else if (targetKey === "CSS: Property") { //$NON-NLS-0$
+                        else if (target[k].trim() === "CSS: Property") { //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -374,7 +371,7 @@ define([
                                 }
                             }
                         }
-                        else if (targetKey === "Variable" || targetKey === "Function argument") { //$NON-NLS-1$ //$NON-NLS-0$
+                        else if (target[k].trim() === "Variable" || target[k].trim() === "Function argument") { //$NON-NLS-1$ //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -393,7 +390,7 @@ define([
                                 }
                             }
                         }
-                        else if (targetKey === "Constant" || targetKey === "Number") { //$NON-NLS-1$ //$NON-NLS-0$
+                        else if (target[k].trim() === "Constant" || target[k].trim() === "Number") { //$NON-NLS-1$ //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -412,7 +409,7 @@ define([
                                 }
                             }
                         }
-                        else if (targetKey === "String") { //$NON-NLS-0$
+                        else if (target[k].trim() === "String") { //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -431,7 +428,7 @@ define([
                                 }
                             }
                         }
-                        else if (targetKey === "Storage" || targetKey === "Storage type") { //$NON-NLS-1$ //$NON-NLS-0$
+                        else if (target[k].trim() === "Storage" || target[k].trim() === "Storage type") { //$NON-NLS-1$ //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -446,7 +443,7 @@ define([
                                 }
                             }
                         }
-                        else if (targetKey === "Function" || targetKey === "Entity" || targetKey === "Function name") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+                        else if (target[k].trim() === "Function" || target[k].trim() === "Entity" || target[k].trim() === "Function name") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -463,7 +460,7 @@ define([
                                 }
                             }
                         }
-                        else if (targetKey === "Markdown Titles" || targetKey === "Headings") { //$NON-NLS-0$
+                        else if (target[k].trim() === "Markdown Titles" || target[k].trim() === "Headings") { //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -478,7 +475,7 @@ define([
                                 }
                             }
                         }
-                        else if (targetKey === "String" || targetKey === "Markdown Raw") { //$NON-NLS-0$
+                        else if (target[k].trim() === "String" || target[k].trim() === "Markdown Raw") { //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -493,7 +490,7 @@ define([
                                 }
                             }
                         }
-                        else if (targetKey === "Constants" || targetKey === "Constant") { //$NON-NLS-0$
+                        else if (target[k].trim() === "Constants" || target[k].trim() === "Constant") { //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (l = 0; l < restKey[i].dict.key.length; l++) {
                                     if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
@@ -538,8 +535,40 @@ define([
         }
         ThemeImporter.prototype.calculateLuminance = calculateLuminance;
 
+        function getBackgroundColor(styles, dictString) {
+            var rules = styles;
+            var scrollString = "-scroll";
+            if (styles[0].cssText) { /* this is a brackets style definition */
+                for (var i = 0; i < rules.length; i++) {
+                    var classes = rules[i].selectorText.split(",");
+                    for (var l = 0; l < classes.length; l++) {
+                        try {
+                            classes[l] = classes[l].trim();
+                            if (classes[l].substr(classes[l].length - scrollString.length) === scrollString) { //$NON-NLS-0$
+                                if (rules[i].style.background) {
+                                    return colorToHex(rules[i].style.background);
+                                }
+                            }
+                        } catch(e) {}
+                    }
+                }
+            } else if (styles[0]["#text"]) { /* this is a sublime style definition */
+                for (var i = 0; i < styles.length; i++) {
+                    if (styles[i]["#text"] === "background") { //$NON-NLS-0$
+                        return dictString[i]["#text"];
+                    } else { /* return default sublime background color if no color is specified */
+                        return "#1e1e1e";
+                    }
+                }
+            }
+        }
+        ThemeImporter.prototype.getBackgroundColor = calculateLuminance;
+
         function importBracketsTheme(rules) {
-            var newStyle = themeData.getDefaultTheme();
+            var bgColor = getBackgroundColor(rules);
+            /* use a dark base theme if luminance is low (the theme being imported is dark) */
+            var useDarkBase = calculateLuminance(bgColor) < luminanceDarkLimit;
+            var newStyle = themeData.getDefaultTheme({dark: useDarkBase});
 
             var activelineBgString = "-activeline-background",
                 atomString = "-atom",
@@ -567,10 +596,6 @@ define([
 
                         if (classes[l].substr(classes[l].length - scrollString.length) === scrollString) { //$NON-NLS-0$
                             if (rules[i].style.background) {
-                                if (calculateLuminance(colorToHex(rules[i].style.background)) < luminanceDarkLimit) {
-                                    /* use a dark base theme if luminance is low (the theme being imported is dark) */
-                                    newStyle = themeData.getDefaultTheme({dark: true});
-                                }
                                 newStyle.styles.backgroundColor = colorToHex(rules[i].style.background);
                             }
                             if (rules[i].style.color) {
@@ -703,8 +728,8 @@ define([
         ThemeImporter.prototype.importBracketsTheme = importBracketsTheme;
 
         function importEclipseTheme(xml) {
-        	/* use a dark base theme if luminance is low (the theme being imported is dark) */
-        	var useDarkBase = calculateLuminance(getValuesFromXML(xml, "background")) < luminanceDarkLimit;
+            /* use a dark base theme if luminance is low (the theme being imported is dark) */
+            var useDarkBase = calculateLuminance(getValuesFromXML(xml, "background")) < luminanceDarkLimit;
             var newStyle = themeData.getDefaultTheme({dark: useDarkBase});
 
             var styles = newStyle.styles;
