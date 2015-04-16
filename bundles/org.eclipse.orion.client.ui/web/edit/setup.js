@@ -473,7 +473,7 @@ objects.mixin(EditorViewer.prototype, {
 			if (this.currentEditorView) {
 				this.currentEditorView.destroy();
 			}
-			if (this.pool.lastMetadata && this.pool.lastMetadata.Location !== metadata.Location) {
+			if (this.pool.lastMetadata && metadata && this.pool.lastMetadata.Location !== metadata.Location) {
 				this.pool.model.setText("");
 			}
 			this.currentEditorView = view;
