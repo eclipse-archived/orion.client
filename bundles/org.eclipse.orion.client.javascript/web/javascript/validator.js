@@ -183,7 +183,7 @@ define([
 		var prob = {
 		    id: getProblemId(e),
 			description: description,
-			severity: getSeverity(e),
+			severity: getSeverity(e)
 		};
 		if(typeof(start) !== 'undefined') {
 		    prob.start = start;
