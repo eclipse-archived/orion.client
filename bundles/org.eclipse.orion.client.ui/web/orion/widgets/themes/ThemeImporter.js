@@ -228,18 +228,16 @@ define([
 
         function importSublimeTheme(xml) {
             var themeJson = xmlToJson(xml); //convert to Json
-            var newStyle = themeData.getDefaultTheme();
-
             var dictKey = themeJson.plist[1].dict.array.dict[0].dict.key;
             var dictString = themeJson.plist[1].dict.array.dict[0].dict.string;
+
+            var bgColor = getBackgroundColor(dictKey, dictString);
+            var useDarkBase = calculateLuminance(bgColor) < luminanceDarkLimit;
+            var newStyle = themeData.getDefaultTheme({dark: useDarkBase});
 
             //finds the general attributes
             for (var i = 0; i < dictKey.length; i++) {
                 if (dictKey[i]["#text"] === "background" && dictString[i]["#text"].length < 8) { //$NON-NLS-0$
-                    if (calculateLuminance(dictString[i]["#text"]) < luminanceDarkLimit) {
-                        /* use a dark base theme if luminance is low (the theme being imported is dark) */
-                        newStyle = themeData.getDefaultTheme({dark: true});
-                    }
                     newStyle.styles.backgroundColor = dictString[i]["#text"];
                 }
                 else if (dictKey[i]["#text"] === "foreground" && dictString[i]["#text"].length < 8) { //$NON-NLS-0$
@@ -271,9 +269,9 @@ define([
             for (i = 1; i < restKey.length; i++) {
                 try {
                     var target = restKey[i].string[0]["#text"].split(",");
-                    var targetKey = target[k].trim();
-
+                    var targetKey = "";
                     for (var k = 0; k < target.length; k++) {
+                        targetKey = target[k].trim();
                         if (targetKey === "Comment") { //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (var l = 0; l < restKey[i].dict.key.length; l++) {
@@ -538,8 +536,42 @@ define([
         }
         ThemeImporter.prototype.calculateLuminance = calculateLuminance;
 
+        function getBackgroundColor(styles, dictString) {
+            if (styles[0].cssText) { /* this is a brackets style definition */
+                var rules = styles;
+                var scrollString = "-scroll";
+                for (var i = 0; i < rules.length; i++) {
+                    var classes = rules[i].selectorText.split(",");
+                    for (var l = 0; l < classes.length; l++) {
+                        try {
+                            classes[l] = classes[l].trim();
+                            if (classes[l].substr(classes[l].length - scrollString.length) === scrollString) { //$NON-NLS-0$
+                                if (rules[i].style.background) {
+                                    return colorToHex(rules[i].style.background);
+                                } else { /* return default brackets background color if no color is specified */
+                                    return "#f0f0f0";
+                                }
+                            }
+                        } catch(e) {}
+                    }
+                }
+            } else if (styles[0]["#text"]) { /* this is a sublime style definition */
+                for (var i = 0; i < styles.length; i++) {
+                    if (styles[i]["#text"] === "background") { //$NON-NLS-0$
+                        return dictString[i]["#text"];
+                    } else { /* return default sublime background color if no color is specified */
+                        return "#1e1e1e";
+                    }
+                }
+            }
+        }
+        ThemeImporter.prototype.getBackgroundColor = calculateLuminance;
+
         function importBracketsTheme(rules) {
-            var newStyle = themeData.getDefaultTheme();
+            var bgColor = getBackgroundColor(rules);
+            /* use a dark base theme if luminance is low (the theme being imported is dark) */
+            var useDarkBase = calculateLuminance(bgColor) < luminanceDarkLimit;
+            var newStyle = themeData.getDefaultTheme({dark: useDarkBase});
 
             var activelineBgString = "-activeline-background",
                 atomString = "-atom",
@@ -567,10 +599,6 @@ define([
 
                         if (classes[l].substr(classes[l].length - scrollString.length) === scrollString) { //$NON-NLS-0$
                             if (rules[i].style.background) {
-                                if (calculateLuminance(colorToHex(rules[i].style.background)) < luminanceDarkLimit) {
-                                    /* use a dark base theme if luminance is low (the theme being imported is dark) */
-                                    newStyle = themeData.getDefaultTheme({dark: true});
-                                }
                                 newStyle.styles.backgroundColor = colorToHex(rules[i].style.background);
                             }
                             if (rules[i].style.color) {
