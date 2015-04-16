@@ -80,15 +80,16 @@ define([
 		generateNavigationMenu: mCustomGlobalCommands.generateNavigationMenu || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {
 			var sideMenuParent = lib.node("sideMenu"); //$NON-NLS-0$
 			if (sideMenuParent) {
-				var nav = lib.node('centralNavigation'); //$NON-NLS-0$
-				new mTooltip.Tooltip({
-					node: nav,
-					text: messages["CentralNavTooltip"], //$NON-NLS-0$
-					position: ["right"] //$NON-NLS-0$
-				});
-
 				this.sideMenu = new SideMenu(sideMenuParent, lib.node("pageContent")); //$NON-NLS-0$
-				nav.addEventListener("click", this.sideMenu.toggle.bind(this.sideMenu)); //$NON-NLS-0$
+				var nav = lib.node('centralNavigation'); //$NON-NLS-0$
+				if (nav) {
+					new mTooltip.Tooltip({
+						node: nav,
+						text: messages["CentralNavTooltip"], //$NON-NLS-0$
+						position: ["right"] //$NON-NLS-0$
+					});
+					nav.addEventListener("click", this.sideMenu.toggle.bind(this.sideMenu)); //$NON-NLS-0$
+				}
 
 				var sideMenuToggle = lib.node("sideMenuToggle"); //$NON-NLS-0$
 				if (sideMenuToggle) {
@@ -429,6 +430,18 @@ define([
 		window.document.title = title;
 		customGlobalCommands.afterSetPageTarget.apply(this, arguments);
 		var locationNode = options.breadCrumbContainer ? lib.node(options.breadCrumbContainer) : lib.node("location"); //$NON-NLS-0$
+		var fileClient = options.fileService || (serviceRegistry && new mFileClient.FileClient(serviceRegistry));
+		var resource = options.breadcrumbTarget || options.target;
+		var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
+		var breadcrumbOptions = {
+			container: locationNode,
+			resource: resource,
+			rootSegmentName: breadcrumbRootName,
+			workspaceRootSegmentName: fileSystemRootName,
+			workspaceRootURL: workspaceRootURL,
+			makeFinalHref: options.makeBreadcrumFinalLink,
+			makeHref: options.makeBreadcrumbLink
+		};
 		if (locationNode) {
 			lib.empty(locationNode);
 			if (currentBreadcrumb) {
@@ -440,31 +453,19 @@ define([
 					rootSegmentName: breadcrumbRootName
 				});
 			} else {
-				var fileClient = options.fileService || (serviceRegistry && new mFileClient.FileClient(serviceRegistry));
-				var resource = options.breadcrumbTarget || options.target;
-				var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
-				var breadcrumbOptions = {
-					container: locationNode,
-					resource: resource,
-					rootSegmentName: breadcrumbRootName,
-					workspaceRootSegmentName: fileSystemRootName,
-					workspaceRootURL: workspaceRootURL,
-					makeFinalHref: options.makeBreadcrumFinalLink,
-					makeHref: options.makeBreadcrumbLink
-				};
 				currentBreadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
-				
-				// If the viewer has a node for breadcrumbs replace it as well
-				var viewer = options.viewer;
-				if (viewer && viewer.localBreadcrumbNode) {
-					if (viewer.currentBreadcrumb) {
-						viewer.currentBreadcrumb.destroy();
-					}
-					breadcrumbOptions.id = "headerBreadcrumb" + viewer.id;
-					breadcrumbOptions.container = viewer.localBreadcrumbNode;
-					viewer.currentBreadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
-				}
 			}
+		}
+		
+		// If the viewer has a node for breadcrumbs replace it as well
+		var viewer = options.viewer;
+		if (viewer && viewer.localBreadcrumbNode) {
+			if (viewer.currentBreadcrumb) {
+				viewer.currentBreadcrumb.destroy();
+			}
+			breadcrumbOptions.id = "headerBreadcrumb" + viewer.id;
+			breadcrumbOptions.container = viewer.localBreadcrumbNode;
+			viewer.currentBreadcrumb = new mBreadcrumbs.BreadCrumbs(breadcrumbOptions);
 		}
 	}
 
@@ -608,8 +609,6 @@ define([
 		var home = lib.node("home"); //$NON-NLS-0$
 		home.href = require.toUrl("edit/edit.html"); //$NON-NLS-0$
 		home.setAttribute("aria-label", messages['Orion Home']); //$NON-NLS-1$ //$NON-NLS-0$
-		var progressPane = lib.node("progressPane"); //$NON-NLS-0$
-		progressPane.src = mCommands.NO_IMAGE;
 
 		var toolbar = lib.node("pageToolbar"); //$NON-NLS-0$
 		if (toolbar) {

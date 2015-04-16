@@ -27,6 +27,17 @@ hard-coded numbers elsewhere.
 /* $ToolbarHeight */
 .toolbarLayout {
 	height: 39px;
+	
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex;
+	flex-direction: row;
+	-ms-flex-direction: row;
+	-webkit-flex-direction: row;
+	-webkit-align-items: center;		 		 /* Safari */
+	align-items: center;
 }
 
 /*
@@ -136,7 +147,7 @@ hard-coded numbers elsewhere.
 	clear: both;
 	overflow: hidden;
     position: absolute;
-    top: 37px;
+    top: 0;
 	/* bottom: 36px; $FooterHeight + footer border (1px) */    
     bottom: 0;
     left: 0;
@@ -183,6 +194,12 @@ hard-coded numbers elsewhere.
 .layoutRight {
 	float: right;
 	margin: 0;
+}
+
+.layoutFlexStretch {
+	flex: 1 1;
+	-ms-flex: 1 1;
+	-webkit-flex: 1 1;
 }
 
 .spacingLeft {
@@ -318,7 +335,7 @@ hard-coded numbers elsewhere.
 
 .toolbarTarget {
 	position: absolute;
-	top: 36px;  /* $ToolbarHeight + 2 */
+	top: 40px;  /* $ToolbarHeight + 2 */
  	width: 100%;
  	bottom: 10px;
  	overflow-y: auto;
@@ -555,7 +572,7 @@ and (max-device-width : 1024px)  {
     background: #4a4a4a;
 	float: left;
     position: absolute;
-    top: 36px;
+    top: 0;
 	/* bottom: 36px; $FooterHeight + footer border (1px) */   
     bottom: 0;
     /*z-index: 0;*/
@@ -814,9 +831,7 @@ and (max-device-width : 1024px)  {
 }
 
 .userMenu > .userTrigger {
-	margin-top: -4px;
-	padding: 13px 11px;
-	border-left: 1px solid #ddd !important;
+	padding: 3px 3px;
 }
 
 .userMenu > .dropdownMenuOpen {

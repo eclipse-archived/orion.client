@@ -53,7 +53,8 @@
 	height: 16px;
 	background: transparent;
 	border: none;
-	margin-right: 10px;
+	margin-right: 2px;
+	margin-left: 5px;
 }
 
 .watchButton {

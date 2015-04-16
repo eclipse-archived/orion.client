@@ -27,19 +27,22 @@
 		<div id="sideMenu" class="sideMenu"></div>
 		<div id="pageContent" class="content-fixedHeight">
 			<div id="sideMenuToggle" class="sideMenuToggle"></div>
-			<div id="auxpane" class="auxpane sidePanelLayout hasSplit">
-				<div class="fixedToolbarHolder">
-					<div id="sidebarToolbar" class="sidebarToolbar mainToolbar toolComposite toolbarLayout"></div>
-					<div id="categoriesTitle" class="categoriesTitle"></div>
-					<div id="categoriesContainer" class="toolbarTarget categoriesContainer"></div>
+			<div id="pageToolbar" class="mainToolbar toolComposite toolbarLayout"></div>
+			<div id="innerPanels" class="innerPanels">
+				<div id="auxpane" class="auxpane sidePanelLayout hasSplit">
+					<div class="fixedToolbarHolder">
+						<div id="sidebarToolbar" class="sidebarToolbar mainToolbar toolComposite toolbarLayout"></div>
+						<div id="categoriesTitle" class="categoriesTitle"></div>
+						<div id="categoriesContainer" class="toolbarTarget categoriesContainer toolbarTarget-toolbarHidden"></div>
+					</div>
 				</div>
-			</div>
-			<div class="split splitLayout settingsSplitLayout" style="left: 300px;"></div>
-			<div id="rightPane" class="mainpane mainPanelLayout hasSplit">
-				<div class="fixedToolbarHolder">
-					<div class="mainToolbar toolComposite" id="pageToolbar"></div>
-					<div class="toolbarTarget workingTarget" tabindex="0" id="settings">
-					</div>				
+				<div class="split splitLayout settingsSplitLayout" style="left: 300px;"></div>
+				<div id="rightPane" class="mainpane mainPanelLayout hasSplit">
+					<div class="fixedToolbarHolder">
+						<div class="mainToolbar toolComposite" id="pageToolbar"></div>
+						<div class="toolbarTarget workingTarget toolbarTarget-toolbarHidden" tabindex="0" id="settings">
+						</div>				
+				</div>
 			</div>
 		</div>
 		<div class="footer-fixed-bottom footer" id="footer"></div>

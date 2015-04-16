@@ -24,7 +24,6 @@
 }
 
 .categoriesTitle {
-	margin-top: 36px;
 	background: white;
 	border: 1px solid #dadada;
 	font-size: 12px;
@@ -39,7 +38,7 @@
 }
 
 .categoriesContainer {
-	height: calc(100% - 84px);
+	height: calc(100% - 48px);
 	position: relative;
 	top: 0;
 }

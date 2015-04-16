@@ -60,8 +60,6 @@
 }
 
 .pageActions {
-	min-height: 20px;
-	margin-top: 8px;
 }
 
 .runBar {
@@ -74,7 +72,6 @@
 
 /* 4px margin used by toolbar, plus 4px of border/padding */
 .status {
-	padding-top: 10px;
 	color:#555;
 	vertical-align: baseline;
 }

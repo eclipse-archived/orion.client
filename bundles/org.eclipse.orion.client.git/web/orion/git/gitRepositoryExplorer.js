@@ -435,12 +435,14 @@ define([
 	GitRepositoryExplorer.prototype.displayRepositories = function(location, mode, links) {
 		this.destroyRepositories();
 		var parent = lib.node('pageToolbar'); //$NON-NLS-0$
+		var sibling = lib.node('pageActions'); //$NON-NLS-0$
 		
-		this.repositoriesLabel = this.createLabel(parent, messages["Repository:"]);
+		this.repositoriesLabel = this.createLabel(parent, messages["Repository:"], sibling);
 		
 		var section = this.repositoriesSection = new mSection.Section(parent, {
 			id: "repoSection", //$NON-NLS-0$
 			title: messages["Repo"],
+			sibling: sibling,
 //			iconClass: ["gitImageSprite", "git-sprite-repository"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="repositoryNode" class="repoDropdownList"></div><div id="dropdownRepositoryActionsNode" class="sectionDropdownActions toolComposite"></div>', //$NON-NLS-0$
@@ -491,12 +493,14 @@ define([
 	GitRepositoryExplorer.prototype.displayBranches = function(repository) {
 		this.destroyBranches();
 		var parent = lib.node('pageToolbar'); //$NON-NLS-0$
+		var sibling = lib.node('pageActions'); //$NON-NLS-0$
 		
-		this.branchesLabel = this.createLabel(parent, messages["Reference:"]);
+		this.branchesLabel = this.createLabel(parent, messages["Reference:"], sibling);
 		
 		var section = this.branchesSection = new mSection.Section(parent, {
 			id: "branchSection", //$NON-NLS-0$
 			title: this.previousBranchTitle || "\u00A0", //$NON-NLS-0$
+			sibling: sibling,
 //			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="branchNode" class="branchDropdownList"></div><div id="dropdownBranchesActionsNode" class="sectionDropdownActions toolComposite"></div>', //$NON-NLS-0$
@@ -733,7 +737,7 @@ define([
 	
 	GitRepositoryExplorer.prototype.displayConfig = function(repository, mode) {
 		this.destroyConfig();
-		var parent = lib.node('pageToolbar'); //$NON-NLS-0$
+		var parent = lib.node('settingsActions'); //$NON-NLS-0$
 		
 		var section = this.configSection = new mSection.Section(parent, {
 			id: "configSection", //$NON-NLS-0$
