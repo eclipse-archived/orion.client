@@ -196,10 +196,11 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 					if (failedOperation !== "undefined") {
 						that._progressService.removeOperation(failedOperation);
 					}
-					that.options.func({ gitSshUsername : that.$gitSshUsername.value,
-					gitSshPassword : that.$gitSshPassword.value,
-					gitPrivateKey : pKey,
-					gitPassphrase : that.$gitPassphrase.value,
+					that.options.func({
+						gitSshUsername : that.$gitSshUsername.value,
+						gitSshPassword : that.$gitSshPassword.value,
+						gitPrivateKey : pKey,
+						gitPassphrase : that.$gitPassphrase.value,
 					knownHosts : that.$gitSshKnownHosts.value
 					});
 				}
@@ -216,8 +217,10 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 					var gitPreferenceStorage = new GitPreferenceStorage(that.options.serviceRegistry);
 					if (that.$gitSaveCredentials.checked) {
 
-						gitPreferenceStorage.put(repository, { gitPrivateKey : loadedPrivateKey,
-						gitPassphrase : that.$gitPassphrase.value
+						gitPreferenceStorage.put(repository, {
+							gitSshUsername : that.$gitSshUsername.value,
+							gitPrivateKey : loadedPrivateKey,
+							gitPassphrase : that.$gitPassphrase.value
 						}).then(function() {
 							process(loadedPrivateKey);
 						});
