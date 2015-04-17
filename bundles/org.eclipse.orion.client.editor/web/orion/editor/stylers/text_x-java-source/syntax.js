@@ -41,6 +41,7 @@ define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/
 	var constants = [
 		"false", "null", "true" //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
+	var languageVariables = ["this", "super"]; //$NON-NLS-1$ //$NON-NLS-0$
 
 	var grammars = [];
 	grammars.push.apply(grammars, mLib.grammars);
@@ -75,7 +76,7 @@ define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/
 				name: "constant.language.java" //$NON-NLS-0$
 			},
 			{
-				match: "\\b(?:this|super)\\b", //$NON-NLS-0$
+				match: "\\b(?:" + languageVariables.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "variable.language.java" //$NON-NLS-0$
 			}
 		]
@@ -83,6 +84,6 @@ define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/
 	return {
 		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
-		keywords: keywords.concat(controlKeywords)
+		keywords: keywords.concat(controlKeywords).concat(constants).concat(languageVariables)
 	};
 });
