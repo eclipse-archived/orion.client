@@ -42,6 +42,11 @@ define({//Default message bundle
 	"running": "Running ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"Saving..." : "Saving...", //$NON-NLS-1$ //$NON-NLS-0$
 	"View": "View", //$NON-NLS-1$ //$NON-NLS-0$
+	"SplitSinglePage": "Single Page", //$NON-NLS-1$ //$NON-NLS-0$
+	"SplitVertical": "Split Vertical", //$NON-NLS-1$ //$NON-NLS-0$
+	"SplitHorizontal": "Split Horizontal", //$NON-NLS-1$ //$NON-NLS-0$
+	"SplitPipInPip": "Picture in Picture", //$NON-NLS-1$ //$NON-NLS-0$
+	"SplitModeTooltip": "Change split editor mode", //$NON-NLS-1$ //$NON-NLS-0$
 	"SidePanel": "Side Panel", //$NON-NLS-1$ //$NON-NLS-0$
 	"SidePanelTooltip": "Choose what to show in the side panel.", //$NON-NLS-1$ //$NON-NLS-0$
 	"Slideout": "Slideout", //$NON-NLS-1$ //$NON-NLS-0$

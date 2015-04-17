@@ -47,19 +47,23 @@ define([
 	'orion/Deferred',
 	'orion/projectClient',
 	'orion/webui/splitter',
-	'orion/webui/SplitMenu',
 	'orion/webui/tooltip'
 ], function(
 	messages, Sidebar, mInputManager, mCommands, mGlobalCommands,
 	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView, mMarkdownEditor,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mEditorCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, ProjectCommands, mSearchClient,
-	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient, mSplitter, mSplitMenu, mTooltip
+	EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, Deferred, mProjectClient, mSplitter, mTooltip
 ) {
 
 var exports = {};
 
 var enableSplitEditor = false;
+
+var MODE_SINGLE = 0;
+var MODE_VERTICAL = 1;
+var MODE_HORIZONTAL = 2;
+var MODE_PIP = 3;
 
 var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 
@@ -381,8 +385,8 @@ objects.mixin(EditorViewer.prototype, {
 				}
 			}
 		}.bind(this));
-		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-			inputManager.setInput(event.selection);
+		this.selection.addEventListener("selectionChanged", function(evt) { //$NON-NLS-0$
+			inputManager.setInput(evt.selection);
 		});
 	},
 
@@ -679,7 +683,7 @@ objects.mixin(EditorSetup.prototype, {
 		//TODO create as many splitters as necessary given the number of editors viewers.
 		// Note that depending on the number of viewers it may be necessary to create intermediate parents
 		if (this.editorSplitter) return;
-		if (mode === this.splitMenu.MODE_SINGLE) return;
+		if (mode === MODE_SINGLE) return;
 		
 		var splitterDiv = document.createElement("div"); //$NON-NLS-0$
 		splitterDiv.id = "editorSplitter"; //$NON-NLS-0$
@@ -845,7 +849,7 @@ objects.mixin(EditorSetup.prototype, {
 		if (this.splitterMode === mode) return;
 		this.splitterMode = mode;
 		
-		if (mode !== this.splitMenu.MODE_SINGLE && this.editorViewers.length < 2) {
+		if (mode !== MODE_SINGLE && this.editorViewers.length < 2) {
 			this.editorViewers.push(this.createEditorViewer(this.editorViewers.length + "")); //$NON-NLS-0$
 		}
 		this.createSplitters(mode);
@@ -868,12 +872,12 @@ objects.mixin(EditorSetup.prototype, {
 		
 		switch(mode){
 			
-			case this.splitMenu.MODE_PIP:
+			case MODE_PIP:
 				splitterNode.style.display = "none"; //$NON-NLS-0$
 				splitEditorViewerNode.classList.add("editorViewerPicInPic"); //$NON-NLS-0$
 				break;
 				
-			case this.splitMenu.MODE_SINGLE:
+			case MODE_SINGLE:
 				if (splitterNode) {
 					splitterNode.style.display = "none"; //$NON-NLS-0$
 				}
@@ -883,11 +887,11 @@ objects.mixin(EditorSetup.prototype, {
 				this.setActiveEditorViewer(this.editorViewers[0]);
 				break;
 				
-			case this.splitMenu.MODE_HORIZONTAL:
+			case MODE_HORIZONTAL:
 				this.editorSplitter.setOrientation(mSplitter.ORIENTATION_VERTICAL, true);
 				break;
 			
-			case this.splitMenu.MODE_VERTICAL:
+			case MODE_VERTICAL:
 				this.editorSplitter.setOrientation(mSplitter.ORIENTATION_HORIZONTAL, true);
 				break;
 		}
@@ -896,7 +900,7 @@ objects.mixin(EditorSetup.prototype, {
 			viewer.editorView.editor.resize();
 		});
 		
-		if (oldSplitterMode === this.splitMenu.MODE_SINGLE && mode !== this.splitMenu.MODE_SINGLE) {
+		if (oldSplitterMode === MODE_SINGLE && mode !== MODE_SINGLE) {
 			this.lastTarget = null;
 			this.editorViewers[1].inputManager.setInput(PageUtil.hash());
 		}
@@ -919,17 +923,42 @@ objects.mixin(EditorSetup.prototype, {
 		this.commandRegistry.addCommand(splitCommand);	
 		return splitCommand;
 	},
-	createSplitMenu: function(){
-		
-		var splitMenu = this.splitMenu = new mSplitMenu( 'SplitMenu' ); //$NON-NLS-0$
-		
-		var modes = splitMenu.modes;
-		
-		for( var mode in modes ){
-			var command = this._createSplitCommand( modes[mode].mode );		
-			splitMenu.addMenuItem( command );
+	createSplitMenu: function() {
+		var that = this;
+		var currentChoice;
+		var toolbar = "pageActions";
+		var changeSplitModeCommand;
+		function callback() {
+			this.checked = true;
+			currentChoice.checked = false;
+			currentChoice = this;
+			changeSplitModeCommand.imageClass = this.imageClass;
+			that.setSplitterMode(this.mode);
+			that.commandRegistry.destroy(toolbar);
+			that.commandRegistry.renderCommands(toolbar, toolbar, that, that, "button"); //$NON-NLS-0$
 		}
-	},
+		var choices = [
+			{name: messages["SplitSinglePage"], mode: MODE_SINGLE, imageClass: "core-sprite-page", checked: true, callback: callback}, //$NON-NLS-0$
+			{name: messages["SplitVertical"], mode: MODE_VERTICAL, imageClass: "core-sprite-vertical", callback: callback}, //$NON-NLS-0$
+			{name: messages["SplitHorizontal"], mode: MODE_HORIZONTAL, imageClass: "core-sprite-horizontal", callback: callback}, //$NON-NLS-0$
+			{name: messages["SplitPipInPip"], mode: MODE_PIP, imageClass: "core-sprite-pip", callback: callback}, //$NON-NLS-0$
+		];
+		currentChoice = choices[0];
+		changeSplitModeCommand = new mCommands.Command({
+			imageClass: currentChoice.imageClass,
+			selectionClass: "dropdownSelection", //$NON-NLS-0$
+			tooltip: messages["SplitModeTooltip"],
+			id: "orion.edit.splitmode", //$NON-NLS-0$
+			visibleWhen: function() {
+				return true;
+			},
+			choiceCallback: function() {
+				return choices;
+			}
+		});
+		this.commandRegistry.addCommand(changeSplitModeCommand);
+		this.commandRegistry.registerCommandContribution(toolbar, "orion.edit.splitmode", 0); //$NON-NLS-1$ //$NON-NLS-0$
+	}
 });
 
 exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, readonly) {
@@ -943,7 +972,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, rea
 			setup.setActiveEditorViewer(setup.editorViewers[0]);
 			if (enableSplitEditor) {
 				setup.createSplitMenu();
-				setup.setSplitterMode(setup.splitMenu.MODE_SINGLE);
+				setup.setSplitterMode(MODE_SINGLE);
 			}
 			setup.load();
 		});

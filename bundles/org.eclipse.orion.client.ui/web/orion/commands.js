@@ -628,20 +628,23 @@ define([
 						check.appendChild(document.createTextNode(choice.checked ? "\u25CF" : "")); //$NON-NLS-1$ //$NON-NLS-0$
 						node.appendChild(check);
 					}
+					if (choice.imageClass) {
+						var image = document.createElement("span"); //$NON-NLS-0$
+						image.classList.add(choice.imageClass);
+						node.appendChild(image);
+					}
+					var span = document.createElement("span"); //$NON-NLS-0$
 					var text = document.createTextNode(choice.name);
-					node.appendChild(text);
+					span.appendChild(text);
+					node.appendChild(span);
 					itemNode.appendChild(node);
 					node.choice = choice;
 					node.addEventListener("click", function(event) { //$NON-NLS-0$
-						if (event.target.choice) {
-							event.target.choice.callback.call(event.target.choice, items);
-						}
+						choice.callback.call(choice, items);
 					}, false); 
 					node.addEventListener("keydown", function(event) { //$NON-NLS-0$
 						if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.SPACE) {
-							if (event.target.choice) {
-								event.target.choice.callback.call(event.target.choice, items);
-							}
+							choice.callback.call(choice, items);
 						}
 					}, false);
 				} else {  // anything not named is a separator

@@ -641,6 +641,8 @@ a.breadcrumb.currentLocation {
 }
 
 .dropdownMenuItem, .dropdownMenuItem a {
+	align-items: center;
+	-webkit-align-items: center;		/* Safari */
 	align-content: stretch;
 	-webkit-align-content: stretch;		/* Safari */
 	display: inline-flex;
