@@ -58,6 +58,8 @@ define({//Default message bundle
 	'missingNls': 'Non-externalized string literals (missing $NON-NLS$ tag):', //$NON-NLS-0$ //$NON-NLS-1$
 	'generateDocName' : 'Generate Element Comment',  //$NON-NLS-0$  //$NON-NLS-1$
 	'generateDocTooltip' : 'Generate a JSDoc-like comment for the selected JavaScript element',  //$NON-NLS-0$  //$NON-NLS-1$
+	'renameElement' : 'Rename Element',  //$NON-NLS-0$  //$NON-NLS-1$
+	'renameElementTooltip' : 'Renmae the selected JavaScript element',  //$NON-NLS-0$  //$NON-NLS-1$
 	'openDeclName' : 'Open Declaration',  //$NON-NLS-0$  //$NON-NLS-1$
 	'openDeclTooltip' : 'Open the declaration of the selected element',  //$NON-NLS-0$  //$NON-NLS-1$
 	'validTypeof': 'Invalid \'typeof\' comparison',  //$NON-NLS-0$ //$NON-NLS-1$

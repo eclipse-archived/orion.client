@@ -27,12 +27,13 @@ define([
 		           type: "rename", 
 		           file: args.meta.location,
 		           end: args.params.offset,
+		           newName: args.newname
 	           }}, 
 	           function(error, changes) {
 	               if(error) {
 	                   postMessage({error: error.message, message: 'Failed to rename changes'});
 	               }
-	               if(Array.isArray(changes)) {
+	               if(Array.isArray(changes.changes)) {
         			   postMessage({request: 'rename', changes:changes});
 	               }
 	           });

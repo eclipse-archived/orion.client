@@ -33,13 +33,14 @@ define([
 'logger',
 'javascript/commands/generateDocCommand',
 'javascript/commands/openDeclaration',
+'javascript/commands/renameCommand',
 'orion/editor/stylers/application_javascript/syntax',
 'orion/editor/stylers/application_json/syntax',
 'orion/editor/stylers/application_schema_json/syntax',
 'orion/editor/stylers/application_x-ejs/syntax',
 'i18n!javascript/nls/messages'
 ], function(PluginProvider, Bootstrap, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, 
-			EslintValidator, Occurrences, Hover, Outliner,	Util, Logger, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
+			EslintValidator, Occurrences, Hover, Outliner,	Util, Logger, GenerateDocCommand, OpenDeclCommand, RenameCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
     Bootstrap.startup().then(function(core) {
 
@@ -143,6 +144,11 @@ define([
 		    								ternWorker.postMessage({request: 'read', args: {error: 'Failed to read file '+_d.args.file.logical}});
 		    							}
 		    						});	
+		    					} else {
+		    						var file = _d.args.file;
+		    						return fileClient.read(file).then(function(contents) {
+		    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:file}});	
+		    								});
 		    					}
 		    					break;
 		    				}
@@ -196,7 +202,18 @@ define([
     		contentType: ['application/javascript']  //$NON-NLS-0$
     			}
     	);
-    	
+    /*	
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+    			new RenameCommand.RenameCommand(astManager, ternWorker), 
+    			{
+    		name: javascriptMessages['renameElement'],  //$NON-NLS-0$
+    		tooltip : javascriptMessages['renameElementTooltip'],  //$NON-NLS-0$
+    		id : "rename.js.element",  //$NON-NLS-0$
+    		key : [ 'R', false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+    		contentType: ['application/javascript']  //$NON-NLS-0$
+    			}
+    	);
+    */	
     	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager);
     	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
