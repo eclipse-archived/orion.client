@@ -74,7 +74,13 @@ define([
 					"backgroundColor": "#ffffff",
 					"color": "#151515",
 					"comment": {
-						"color": "#3C802C"
+						"block": {
+							"color": "#3C802C"
+						},
+						"color": "#3C802C",
+						"line": {
+							"color": "#3C802C"
+						}
 					},
 					"constant": {
 						"color": "#9932CC",
@@ -147,7 +153,10 @@ define([
 							"color": "#446FBD"
 						},
 						"raw": {
-							"fontFamily": "monospace",
+							"code": {
+								"color": "#151515"
+							},
+							"fontFamily": defaultFont,
 							"html": {
 								"backgroundColor": "#E4F7EF"
 							}
@@ -164,6 +173,9 @@ define([
 								"color": "#7F9FBF"
 							},
 							"tag": {
+								"doctype": {
+									"color": "#93a2aa"
+								},
 								"color": "#7F7F9F"
 							}
 						},
@@ -178,6 +190,9 @@ define([
 						}
 					},
 					"punctuation": {
+						"block": {
+							"color":"#151515"
+						},
 						"operator": {
 							"color":"#D1416F"
 						}
@@ -198,12 +213,31 @@ define([
 						"color": "#446FBD",
 						"interpolated": {
 							"color": "#151515"
+						},
+						"quoted": {
+							"double": {
+								"color": "#446FBD"
+							},
+							"single": {
+								"color": "#446FBD"
+							}
 						}
 					},
 					"support": {
 						"type": {
 							"propertyName": {
 								"color": "#9F4177"
+							},
+							"css": {
+								"selector": {
+									"color": "#151515",
+									"class": {
+										"color": "#151515"
+									},
+									"id": {
+										"color": "#151515"
+									}
+								}
 							}
 						}
 					},
@@ -352,7 +386,10 @@ define([
 							"color": "#55b5db"
 						},
 						"raw": {
-							"fontFamily": "monospace",
+							"code": {
+								"color": "#dadada"
+							},
+							"fontFamily": defaultFont,
 							"html": {
 								"backgroundColor": "#3B4B53"
 							}
@@ -369,7 +406,10 @@ define([
 								"color": "#7F9FBF"
 							},
 							"tag": {
-								"color": "#7F7F9F"
+								"color": "#7F7F9F",
+								"doctype": {
+									"color": "#dadada"
+								}
 							}
 						},
 						"preprocessor": {
@@ -383,6 +423,9 @@ define([
 						}
 					},
 					"punctuation": {
+						"block": {
+							"color":"#dadada"
+						},
 						"operator": {
 							"color":"#FF8C00"
 						}
@@ -423,6 +466,17 @@ define([
 						"type": {
 							"propertyName": {
 								"color": "#9fca56"
+							},
+							"css": {
+								"selector": {
+									"color": "#dadada",
+									"class": {
+										"color": "#dadada"
+									},
+									"id": {
+										"color": "#dadada"
+									}
+								}
 							}
 						}
 					},

@@ -1,6 +1,10 @@
 @import "../css/test.css";
 
 /* This is a CSS comment */
+div .hide, span .hide {
+    display: none !important; /* bad practice */
+}
+
 #identity {
     background: white;
     color: #222;
@@ -14,10 +18,10 @@
 	background: papayawhip;
 }
 
-.className *{
+.className * {
 	border: 1px solid black;
 }
 
-.className > .right{
+.className > .right {
 	text-align: right;
 }
