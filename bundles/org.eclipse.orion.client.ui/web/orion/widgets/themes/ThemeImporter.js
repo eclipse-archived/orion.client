@@ -270,6 +270,7 @@ define([
                 try {
                     var target = restKey[i].string[0]["#text"].split(",");
                     var targetKey = "";
+
                     for (var k = 0; k < target.length; k++) {
                         targetKey = target[k].trim();
                         if (targetKey === "Comment") { //$NON-NLS-0$
@@ -352,7 +353,6 @@ define([
                             }
                             else {
                                 if (restKey[i].dict.key["#text"] === "foreground") { //$NON-NLS-0$
-                                    newStyle.styles.meta.tag.doctype = {};
                                     newStyle.styles.meta.tag.doctype.color = restKey[i].dict.string["#text"];
                                 }
                             }
@@ -369,6 +369,36 @@ define([
                             else {
                                 if (restKey[i].dict.key["#text"] === "foreground") { //$NON-NLS-0$
                                     newStyle.styles.support.type.propertyName.color = restKey[i].dict.string["#text"];
+                                }
+                            }
+                        }
+                        else if (targetKey === "CSS Class" || targetKey === "css.class" || targetKey === "CSS .class") { //$NON-NLS-0$
+                            if (restKey[i].dict.key instanceof Array) {
+                                for (l = 0; l < restKey[i].dict.key.length; l++) {
+                                    if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
+                                        newStyle.styles.support.type.css.class.color = restKey[i].dict.string[l]["#text"];
+                                        break;
+                                    }
+                                }
+                            }
+                            else {
+                                if (restKey[i].dict.key["#text"] === "foreground") { //$NON-NLS-0$
+                                    newStyle.styles.support.type.css.class.color = restKey[i].dict.string["#text"];
+                                }
+                            }
+                        }
+                        else if (targetKey === "css.id" || targetKey === "CSS: #id") { //$NON-NLS-0$
+                            if (restKey[i].dict.key instanceof Array) {
+                                for (l = 0; l < restKey[i].dict.key.length; l++) {
+                                    if (restKey[i].dict.key[l]["#text"] === "foreground") { //$NON-NLS-0$
+                                        newStyle.styles.support.type.css.id.color = restKey[i].dict.string[l]["#text"];
+                                        break;
+                                    }
+                                }
+                            }
+                            else {
+                                if (restKey[i].dict.key["#text"] === "foreground") { //$NON-NLS-0$
+                                    newStyle.styles.support.type.css.id.color = restKey[i].dict.string["#text"];
                                 }
                             }
                         }
@@ -578,6 +608,7 @@ define([
                 atomString = "-atom",
                 attributeString = "-attribute",
                 bracketString = "-bracket",
+                builtInString = "-builtin",
                 commentString = "-comment",
                 defString = "-def",
                 guttersString = "-gutters",
@@ -590,7 +621,8 @@ define([
                 scrollString = "-scroll",
                 selectedString = "-selected",
                 stringString = "-string",
-                tagString = "-tag";
+                tagString = "-tag",
+                qualifierString = "-qualifier";
 
             for (var i = 0; i < rules.length; i++) {
                 var classes = rules[i].selectorText.split(",");
@@ -638,6 +670,16 @@ define([
                         else if (classes[l].substr(classes[l].length - propertyString.length) === propertyString) { //$NON-NLS-0$
                             if (rules[i].style.color) {
                                 newStyle.styles.support.type.propertyName.color = colorToHex(rules[i].style.color);
+                            }
+                        }
+                        else if (classes[l].substr(classes[l].length - qualifierString.length) === qualifierString) { //$NON-NLS-0$
+                            if (rules[i].style.color) {
+                                newStyle.styles.support.type.css.class.color = colorToHex(rules[i].style.color);
+                            }
+                        }
+                        else if (classes[l].substr(classes[l].length - builtInString.length) === builtInString) { //$NON-NLS-0$
+                            if (rules[i].style.color) {
+                                newStyle.styles.support.type.css.id.color = colorToHex(rules[i].style.color);
                             }
                         }
                         else if (classes[l].substr(classes[l].length - defString.length) === defString) { //$NON-NLS-0$
@@ -715,7 +757,8 @@ define([
                         }
                         else if (classes[l].substr(classes[l].length - bracketString.length) === bracketString) { //$NON-NLS-0$
                             if (rules[i].style.color) {
-                                newStyle.styles.punctuation.block.color = colorToHex(rules[i].style.color);
+                                // this was styling the wrong thing. what it needs to style is the bracket part of the html tag (i.e. < and >). we do not currently detect these.
+                                // newStyle.styles.punctuation.block.color = colorToHex(rules[i].style.color);
                             }
                         }
                     } catch(e) {}
@@ -753,7 +796,6 @@ define([
             styles.annotationRange.matchingBracket.borderStyle = "solid";
 
             // Set the bracket color to be the same as border color
-            styles.punctuation = {};
             styles.punctuation.section = {};
             styles.punctuation.section.color = styles.annotationRange.matchingBracket.borderColor;
 
@@ -795,8 +837,11 @@ define([
             // Setting the CSS property name color to string color since Eclipse themese don't style CSS
             styles.support.type.propertyName.color = styles.string.color;
 
+            // Setting the CSS class and id colors to font color since no CSS styling in Eclipse
+            styles.support.type.css.class.color = styles.color;
+            styles.support.type.css.id.color = styles.color;
+
             // Eclipse themes set a different color specifically for numeric values.
-            styles.constant.numeric = {};
             styles.constant.numeric.color = getValuesFromXML(xml, "number");
 
             styles.textviewSelection.backgroundColor = getValuesFromXML(xml, "selectionBackground");

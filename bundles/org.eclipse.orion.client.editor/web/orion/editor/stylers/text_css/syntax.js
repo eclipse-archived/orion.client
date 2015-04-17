@@ -77,11 +77,13 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/lib/syntax
 			{include: "orion.lib#parenthesis_close"}, //$NON-NLS-0$
 			{include: "orion.lib#number_decimal"}, //$NON-NLS-0$
 			{include: "#number_hex"}, //$NON-NLS-0$
+			{include: "#css_id"}, //$NON-NLS-0$
+			{include: "#css_class"}, //$NON-NLS-0$
 			{
 				match: "(?i)\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?\\b", //$NON-NLS-0$
 				name: "constant.numeric.value.css" //$NON-NLS-0$
 			},
-			{			
+			{
 				match: "(?:-webkit-|-moz-|-ms-|-o-|\\b)(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "support.type.propertyName.css" //$NON-NLS-0$
 			}
@@ -90,6 +92,14 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/lib/syntax
 			number_hex: {
 				match: "#[0-9A-Fa-f]+\\b", //$NON-NLS-0$
 				name: "constant.numeric.hex.css" //$NON-NLS-0$
+			},
+			css_id: {
+				match: "#-?[_a-zA-Z]+[_a-zA-Z0-9-]*(?=[^}]*\{)", //$NON-NLS-0$
+				name: "support.type.css.id" //$NON-NLS-0$
+			},
+			css_class: {
+				match: ".-?[_a-zA-Z]+[_a-zA-Z0-9-]*(?=[^}]*\{)", //$NON-NLS-0$
+				name: "support.type.css.class" //$NON-NLS-0$
 			}
 		}
 	});

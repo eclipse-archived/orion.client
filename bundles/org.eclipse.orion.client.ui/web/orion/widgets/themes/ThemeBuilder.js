@@ -27,8 +27,8 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mSetup, colors, u
 	var protectedThemes = [];
 	var defaultColor = "#ff80c0";
 	var htmlExclusions = [];
-	var jsExclusions = ["editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
-	var javaExclusions = ["editorThemeColorEntityColor", "editorThemeFunctionParameterColor", "editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
+	var jsExclusions = ["editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute", "editorThemeCssClass", "editorThemeCssId"];
+	var javaExclusions = ["editorThemeColorEntityColor", "editorThemeFunctionParameterColor", "editorThemePropertyName", "editorThemeMetaTag", "editorThemeMetaTagAttribute", "editorThemeCssClass", "editorThemeCssId"];
 	var cssExclusions = ["editorThemeColorEntityColor", "editorThemeControlColor", "editorThemeLanguageVariableColor", "editorThemeOperatorColor", "editorThemeFunctionParameterColor", "editorThemeLogicalOperatorColor", "editorThemeMetaTag", "editorThemeMetaTagAttribute"];
 
 	var scopeList = [
@@ -147,6 +147,16 @@ function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mSetup, colors, u
 			display:"CSS property name color",//$NON-NLS-0$
 			objPath:["styles.support.type.propertyName.color"], //$NON-NLS-0$
 			id:"editorThemePropertyName", //$NON-NLS-0$
+			value:defaultColor
+		},{
+			display:"CSS id",//$NON-NLS-0$
+			objPath:["styles.support.type.css.id.color"], //$NON-NLS-0$
+			id:"editorThemeCssId", //$NON-NLS-0$
+			value:defaultColor
+		},{
+			display:"CSS class",//$NON-NLS-0$
+			objPath:["styles.support.type.css.class.color"], //$NON-NLS-0$
+			id:"editorThemeCssClass", //$NON-NLS-0$
 			value:defaultColor
 		},{
 			display:"HTML tag",//$NON-NLS-0$
