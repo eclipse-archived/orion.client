@@ -17,8 +17,9 @@ define([
 	'text!orion/webui/dropdowntriggerbutton.html',
 	'text!orion/webui/dropdowntriggerbuttonwitharrow.html',
 	'text!orion/webui/checkedmenuitem.html',
-	'orion/webui/tooltip'
-], function(lib, mCommandsProxy, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, CheckedMenuItemFragment, Tooltip) {
+	'orion/webui/tooltip',
+	'orion/metrics'
+], function(lib, mCommandsProxy, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, CheckedMenuItemFragment, Tooltip, mMetrics) {
 		/**
 		 * @name orion.commands.NO_IMAGE
 		 * @description Image data for 16x16 transparent png.
@@ -634,20 +635,22 @@ define([
 					node.choice = choice;
 					node.addEventListener("click", function(event) { //$NON-NLS-0$
 						if (event.target.choice) {
+							mMetrics.logEvent("command", "invoke", this.id + ">" + event.target.choice.name); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							event.target.choice.callback.call(event.target.choice, items);
 						}
-					}, false); 
+					}.bind(this), false); 
 					node.addEventListener("keydown", function(event) { //$NON-NLS-0$
 						if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.SPACE) {
 							if (event.target.choice) {
+								mMetrics.logEvent("command", "invoke", this.id + ">" + event.target.choice.name); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 								event.target.choice.callback.call(event.target.choice, items);
 							}
 						}
-					}, false);
+					}.bind(this), false);
 				} else {  // anything not named is a separator
 					commandService._generateMenuSeparator(parent);
 				}
-			});
+			}.bind(this));
 		},
 		
 		/**
