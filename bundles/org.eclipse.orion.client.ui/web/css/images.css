@@ -720,6 +720,15 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+
+.core-sprite-page,
+.core-sprite-horizontal,
+.core-sprite-vertical,
+.core-sprite-pip {
+	padding: 3px;
+	padding-top: 0;
+}
+
 .core-sprite-hamburger:before{ content:'\E000'; }
 .core-sprite-gear:before{ content:'\E001'; }
 .core-sprite-silhouette:before{ content:'\E003'; float: right;}
