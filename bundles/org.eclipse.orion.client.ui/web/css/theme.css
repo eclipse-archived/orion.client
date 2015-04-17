@@ -106,9 +106,11 @@ a:hover {
 .breadcrumbContainer {
 	align-items: baseline;
 	display: inline-flex;
+	justify-content: center;
 	
 	-webkit-align-items: baseline;		/* Safari */
 	display: -webkit-inline-flex;		/* Safari */
+	-webkit-justify-content: center;	/* Safari */
 	
 	margin-right: 0;
 	overflow: hidden;
