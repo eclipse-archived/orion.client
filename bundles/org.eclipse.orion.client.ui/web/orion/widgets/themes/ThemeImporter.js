@@ -76,7 +76,7 @@ define([
                     var nodeName = item.nodeName;
                     if (typeof(obj[nodeName]) === "undefined") { //$NON-NLS-0$
                         var tmp = xmlToJson(item);
-                        if (tmp != "") // if not empty string
+                        if (tmp !== "") // if not empty string
                             obj[nodeName] = tmp;
                     } else {
                         if (typeof(obj[nodeName].push) === "undefined") { //$NON-NLS-0$
@@ -84,7 +84,7 @@ define([
                             obj[nodeName] = [];
                             obj[nodeName].push(old);
                         }
-                        var tmp = xmlToJson(item);
+                        tmp = xmlToJson(item);
                         if (tmp !== "") // if not empty string
                             obj[nodeName].push(tmp);
                     }
@@ -524,7 +524,7 @@ define([
         ThemeImporter.prototype.importSublimeTheme = importSublimeTheme;
 
         function calculateLuminance(c) {
-            var c = c.substring(1);      // strip #
+            c = c.substring(1);      // strip #
             var rgb = parseInt(c, 16);   // convert rrggbb to decimal
             var r = (rgb >> 16) & 0xff;  // extract red
             var g = (rgb >>  8) & 0xff;  // extract green
@@ -548,22 +548,23 @@ define([
                             if (classes[l].substr(classes[l].length - scrollString.length) === scrollString) { //$NON-NLS-0$
                                 if (rules[i].style.background) {
                                     return colorToHex(rules[i].style.background);
-                                } else { /* return default brackets background color if no color is specified */
-                                    return "#f0f0f0";
                                 }
                             }
                         } catch(e) {}
                     }
                 }
-            } else if (styles[0]["#text"]) { /* this is a sublime style definition */
-                for (var i = 0; i < styles.length; i++) {
-                    if (styles[i]["#text"] === "background") { //$NON-NLS-0$
-                        return dictString[i]["#text"];
-                    } else { /* return default sublime background color if no color is specified */
-                        return "#1e1e1e";
-                    }
+                /* return default brackets background color if no color is specified */
+                return "#f0f0f0";
+            }
+
+            /* presumably is a sublime style definition */
+            for (i = 0; i < styles.length; i++) {
+                if (styles[i]["#text"] === "background") { //$NON-NLS-0$
+                    return dictString[i]["#text"];
                 }
             }
+			/* return default sublime background color if no color is specified */
+            return "#1e1e1e";
         }
         ThemeImporter.prototype.getBackgroundColor = calculateLuminance;
 
@@ -617,7 +618,7 @@ define([
                                 newStyle.styles.comment.line.color = colorToHex(rules[i].style.color);
 
                                 // Brackets styles raw html in markdown as comments
-                                newStyle.styles.markup.raw.code.color = newStyle.styles.comment.color
+                                newStyle.styles.markup.raw.code.color = newStyle.styles.comment.color;
                             }
                         }
                         else if (classes[l].substr(classes[l].length - stringString.length) === stringString) { //$NON-NLS-0$
