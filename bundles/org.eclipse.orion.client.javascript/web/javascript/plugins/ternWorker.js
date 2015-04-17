@@ -57,6 +57,26 @@ require({
     
     var ternserver, pendingReads = Object.create(null);
     
+    function warmUp() {
+    	if(ternserver) {
+    		ternserver.request({
+	           query: {
+	           type: "completions", 
+	           file: 'warmup',
+	           types: true, 
+	           origins: true,
+	           urls: true,
+	           docs: true,
+	           end: 0,
+	           sort:true
+	           }}, 
+	           /* @callback */ function(error, comps) {
+	               //do nothing
+	           });
+	      }
+	      ternserver.delFile('warmup'); //don't leave it in there
+    }
+    
     /**
      * @description Start up the Tern server, send a message after trying
      */
@@ -85,6 +105,8 @@ require({
         }
     }
     startServer();
+    warmUp();
+    
     onmessage = function(event) {
         if(typeof(event.data) === 'object') {
             var _d = event.data;
@@ -179,7 +201,9 @@ require({
      * @param {Function} callback The callback once the file has been read or failed to read
      */
     function _getFile(file, callback) {
-        if(ternserver) {
+    	if(file === 'warmup') {
+    		callback(null, null);
+    	} else if(ternserver) {
         	var _f = file;
            if(typeof(file) === 'object') {
            		_f = file.logical;
