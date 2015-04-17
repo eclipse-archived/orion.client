@@ -14,10 +14,10 @@
 	background: papayawhip;
 }
 
-.className *{
+.className * {
 	border: 1px solid black;
 }
 
-.className > .right{
+.className > .right {
 	text-align: right;
 }
