@@ -94,6 +94,7 @@ module.exports = function(options) {
 	}
 
 	function buildSearchPattern(searchOpts){
+		console.log(searchOpts);
 		var searchTerm = searchOpts.searchTerm;
 		if (!searchOpts.regEx) {
 			if (searchTerm.indexOf("\"") === 0) {
@@ -120,36 +121,23 @@ module.exports = function(options) {
 		};
 	}
 
-	function searchChild(location, isDir, searchPattern){
-		var results = [];
-		if (!isDir) {
+	function searchChild(location, searchPattern, results){
+		var stats = fs.statSync(location);
+		if (stats.isDirectory()) {
+			if (location.substring(location.length - 1) != "/") {
+				location = location + "/";
+			}
+			var dirFiles = fs.readdirSync(location);
+			dirFiles.forEach(function (file) {
+				var resultsForEach = searchChild(location + file, searchPattern, results);
+				if (resultsForEach) results.concat(resultsForEach);
+			})
+		} else {
 			var file = fs.readFileSync(location, 'utf8');
 			var matches = file.match(searchPattern);
-			//if (matches) results = results.concat(matches);
 			if (matches) results.push(location);
-			/*
-			fs.readFile(location, 'utf8', function (err, data){
-				if (err) throw err;
-				if (data.match(searchPattern)) {
-					console.log(data.match(searchPattern));
-					console.log(data);
-				}
-				results.concat(data.match(searchPattern));
-			})
-			*/
 		}
 		return results;
-		/*
-		else {
-			var directoryResults = [];
-			fs.readdir(location, function (err, data){
-				if (err) throw err;
-				list.forEach(function (file) {
-					var results = searchChild()
-				})
-			})
-		}
-		*/
 	}
 
 	return connect()
@@ -161,14 +149,15 @@ module.exports = function(options) {
 
 			var searchPat = buildSearchPattern(searchOpt);
 
-			var searchPattern = /middle/gi;
+			var searchPattern = /plugin.js/gi;
 			var parentFileLocation = originalFileRoot(req);
 
 			fileUtil.getChildren(workspaceDir, parentFileLocation, function(children) {
 				var results = [];
 				for (var i = 0; i < children.length; i++){
 					var child = children[i];
-					var matches = searchChild(child.Location.substring(6), child.Directory, searchPattern);
+					var childResults = [];
+					var matches = searchChild(child.Location.substring(6), searchPattern, childResults);
 					if (matches) results = results.concat(matches);
 				};
 
