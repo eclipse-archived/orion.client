@@ -1275,16 +1275,19 @@ define("orion/editor/textStyler", ['orion/editor/annotations', 'orion/editor/eve
 			}
 
 			e.ranges = this._getStyles(this._rootBlock, baseModel || model, e.lineText, offset, 0);
-			e.ranges.forEach(function(current) {
-				if (baseModel) {
-					var length = current.end - current.start;
-					current.start = model.mapOffset(current.start, true);
-					current.end = current.start + length;
-				}
+			for (var i = e.ranges.length - 1; i >= 0; i--) {
+				var current = e.ranges[i];
 				if (current.style) {
 					current.style = {styleClass: current.style.replace(/\./g, " ")};
+					if (baseModel) {
+						var length = current.end - current.start;
+						current.start = model.mapOffset(current.start, true);
+						current.end = current.start + length;
+					}
+				} else {
+					e.ranges.splice(i, 1);
 				}
-			});
+			};
 			if (this._isRenderingWhitespace()) {
 				this._spliceStyles(this._spacePattern, e.ranges, e.lineText, e.lineStart);
 				this._spliceStyles(this._tabPattern, e.ranges, e.lineText, e.lineStart);
