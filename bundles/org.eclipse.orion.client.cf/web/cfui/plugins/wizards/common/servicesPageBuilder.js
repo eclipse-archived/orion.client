@@ -44,6 +44,10 @@ define([
 			this._manifestInstrumentation = options.ManifestInstrumentation || {};
 			this._getTargetSelection = options.getTargetSelection;
 			
+			this._initManifestPath = options.InitManifestPath;
+			this._getUserPath = options.getUserPath;
+			this._getPlan = options.getPlan;
+			
 			this._cfService = options.CFService;
 			
 			this._showMessage = options.showMessage;
@@ -242,6 +246,33 @@ define([
 				    	});
 						
 						setRendered(true);
+					}
+					
+					if(self._getUserPath() != self._initManifestPath){
+						self._getPlan().then(function(result){
+
+							self._manifestApplication = result.Manifest.applications[0];
+							if(self._servicesList.hasChildNodes()){
+								lib.empty(self._servicesList);
+								self._servicesList.classList.remove("modifiedCell");
+							}
+
+							var services = self._manifestApplication.services;
+							if(services){
+								services.forEach(function(serviceName){
+					    			var serviceOption = document.createElement("option"); //$NON-NLS-0$
+					    			if(typeof serviceName !== "string"){ //$NON-NLS-0$
+					    				return;
+					    			}
+									serviceOption.appendChild(document.createTextNode(serviceName));
+									serviceOption.service = serviceName;
+									serviceOption.id = "service_" + serviceName; //$NON-NLS-0$
+									new Tooltip({ node: serviceOption, text: serviceName });
+									self._servicesList.appendChild(serviceOption);
+				    			});
+							}
+							self._initManifestPath = self._getUserPath();
+						});
 					}
 			    },
 			    

@@ -122,16 +122,14 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 					/* init core page builder */
 				    var corePageBuilder = new mCorePageBuilder.CorePageBuilder({
 						ConfName: launchConfName,
-		
 				    	Clouds : clouds,
 				    	DefaultTarget : defaultTarget,
-		
-						ManifestPath : plan.ManifestPath,
+				    	FilePath : relativeFilePath,
+						InitManifestPath : resource.AppPath,
 				    	ManifestApplication : manifestApplication,
 				    	ManifestInstrumentation: launchConfParams.Instrumentation,
 				    	serviceRegistry : serviceRegistry,
 				    	CFService : cfService,
-		
 				    	showMessage : showMessage,
 				    	hideMessage : hideMessage,
 				    	handleError : handleError,
@@ -142,12 +140,17 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 				    var servicesPageBuilder = new mServicesPageBuilder.ServicesPageBuilder({
 				    	ManifestServices : manifestApplication.services,
 				    	ManifestInstrumentation: launchConfParams.Instrumentation,
-		
 				    	CFService : cfService,
+				    	InitManifestPath : resource.AppPath,
 				    	getTargetSelection : function(){
 				    		return corePageBuilder.getSelection();
 				    	},
-		
+				    	getUserPath : function(){
+				    		return corePageBuilder.getManifestPath();
+				    	},
+				    	getPlan : function(){
+				    		return corePageBuilder.getPlan();
+				    	},
 				    	showMessage : showMessage,
 				    	hideMessage : hideMessage,
 				    	handleError : handleError,
@@ -157,7 +160,14 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 				    /* init additional parameters page builder */
 				    var additionalParamPageBuilder = new mAdditionalParamPageBuilder.AdditionalParamPageBuilder({
 				    	ManifestApplication : manifestApplication,
-				    	ManifestInstrumentation: launchConfParams.Instrumentation
+				    	ManifestInstrumentation: launchConfParams.Instrumentation,
+				    	InitManifestPath : resource.AppPath,
+				    	getUserPath : function(){
+				    		return corePageBuilder.getManifestPath();
+				    	},
+				    	getPlan : function(){
+				    		return corePageBuilder.getPlan();
+				    	},
 				    });
 		
 				    /* build pages */
@@ -189,11 +199,14 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 		
 							FileService: fileClient,
 							CFService : cfService,
+		
 							getTargetSelection : function(){
 					    		return corePageBuilder.getSelection();
 					    	},
-		
-					    	Manifest : plan.Manifest,
+					    	getManifestPath : function(){
+					    		return corePageBuilder.getManifestPath();
+					    	},
+
 					    	ContentLocation : resource.ContentLocation,
 					    	AppPath : resource.AppPath
 						})
