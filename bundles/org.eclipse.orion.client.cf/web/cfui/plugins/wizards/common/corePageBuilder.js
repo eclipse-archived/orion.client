@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wizard', 'orion/webui/littlelib'], 
-		function(messages, mSelection, ComboTextInput, mWizard, lib){
+define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wizard', 'orion/webui/littlelib', 'orion/Deferred'], 
+		function(messages, mSelection, ComboTextInput, mWizard, lib, Deferred){
 	
 	/**
 	 * A core page builder. The page gathers the minimum necessary
@@ -40,7 +40,8 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			this._confName = options.ConfName || null,
 			this._clouds = options.Clouds || [];
 			this._defaultTarget = options.DefaultTarget;
-			this._manifestPath = options.ManifestPath || ""; //$NON-NLS-0$
+			this._filePath = options.FilePath;
+			this._initManifestPath = options.InitManifestPath || ""; //$NON-NLS-0$
 			this._manifestApplication = options.ManifestApplication;
 			this._manifestInstrumentation = options.ManifestInstrumentation || {};
 			this._serviceRegistry = options.serviceRegistry;
@@ -224,7 +225,25 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 		getSelection : function(){
 			return this._selection;
 		},
-			
+
+		getManifestPath : function(){
+			var path;
+
+			path = this._manifestInput.value;
+			return path;
+		},
+		
+		getPlan : function(){
+			var deferred = new Deferred();
+			var relativeFilePath = this._filePath + this.getManifestPath();
+			this._cfService.getDeploymentPlans(relativeFilePath).then(function(resp) {
+				var plans = resp.Children;
+				deferred.resolve(plans[0]);
+			});
+
+			return deferred;
+		},
+		
 		build : function(){
 			
 			var self = this;
@@ -363,11 +382,26 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						
 						// render the manifest file
 						document.getElementById("manifestLabel").textContent = messages["manifestLabel"];
-						var manifestInput = document.createElement("input"); //$NON-NLS-0$
-						manifestInput.value = self._manifestPath || "";
-						manifestInput.readOnly = true; // TODO should be editable
-						document.getElementById("manifest").appendChild(manifestInput); //$NON-NLS-0$
+						self._manifestInput = document.createElement("input"); //$NON-NLS-0$
+						self._manifestInput.value = (self._initManifestPath == "") ? "manifest.yml" : self._initManifestPath;
+						self._manifestInput.readOnly = true; // TODO should be editable
+						document.getElementById("manifest").appendChild(self._manifestInput); //$NON-NLS-0$
 						
+						self._manifestinput = document.getElementById("manifest").firstChild;
+						self._manifestinput.onblur = function(){
+							if(self.getManifestPath() != self._initManifestPath){
+								var selection = self._selection.getSelection();
+								self.getPlan().then(function(result){
+									self._manifestApplication = result.Manifest.applications[0];
+									self._appsInput.value = self._manifestApplication.name;
+									self._hostInput.value = self._manifestApplication.host;
+									lib.empty(self._domainsDropdown);
+									self._loadDomains(selection);
+								});
+								self._initManifestPath = self.getManifestPath();
+							}
+						};
+
 						// Manifest Settings section
 						document.getElementById("manifestSettings").textContent = messages["manifestSettings"]; //$NON-NLS-0$
 						
