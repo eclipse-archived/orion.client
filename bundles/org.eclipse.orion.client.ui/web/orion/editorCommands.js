@@ -745,7 +745,8 @@ define([
 					if (service.execute) {
 						var context = {
 							contentType: inputManager.getContentType(),
-							input: inputManager.getInput()
+							input: inputManager.getInput(),
+							offset: editor.getCaretOffset()
 						};
 						
 						// TODO: Make this more generic
