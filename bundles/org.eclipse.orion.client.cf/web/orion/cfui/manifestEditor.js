@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -320,20 +320,6 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 					/* empty lines are fine */
 					if(line.length === 0 || !line.trim())
 						continue;
-
-					/* check for incorrect indentation */
-					if(!/(^[a-zA-Z\-].*)|(^ +[a-zA-Z\-].*)/.test(line)){
-
-						var match = line.match(/^\s+/);
-						var end = match !== null ? match[0].length + 1 : undefined;
-
-						problems.push({
-							description : messages["invalidIndentation:MixedSpacesAnd"],
-							line : lineNumber,
-							start : 1,
-							end : end
-						});
-					}
 
 					if(/^ *command: .*/.test(line))
 						missingCommand = false;
