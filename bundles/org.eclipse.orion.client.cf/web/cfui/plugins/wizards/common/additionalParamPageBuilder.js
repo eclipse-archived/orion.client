@@ -37,8 +37,12 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 		_init : function(options){
 			this._manifestApplication = options.ManifestApplication || {};
 			this._manifestInstrumentation = options.ManifestInstrumentation || {};
+
+			this._manifestPath = options.ManifestPath;
+			this._getPath = options.getPath;
+			this._getPlan = options.getPlan;
 		},
-			
+
 		build : function(){
 			
 			var self = this;
@@ -180,6 +184,31 @@ define(['i18n!cfui/nls/messages', 'orion/webui/Wizard'], function(messages, mWiz
 				    	
 				    	setRendered(true);
 					}
+					
+					if(self._getPath() != self._manifestPath){
+						self._getPlan().then(function(result){
+							self._manifestApplication = result.Manifest.applications[0];
+							if(self._manifestApplication.command){
+					    		self._command.value = self._manifestApplication.command;
+					    	}
+							if(self._manifestApplication.path){
+					    		self._path.value = self._manifestApplication.path;
+					    	}
+							if(self._manifestApplication.buildpack){
+					    		self._buildpack.value = self._manifestApplication.buildpack;
+					    	}
+							if(self._manifestApplication.memory){
+					    		self._memory.value = self._manifestApplication.memory;
+					    	}
+							if(self._manifestApplication.instances){
+					    		self._instances.value = self._manifestApplication.instances;
+					    	}
+							if(self._manifestApplication.timeout){
+					    		self._timeout.value = self._manifestApplication.timeout;
+					    	}
+						});
+					}
+					
 			    },
 			    
 			    getResults: function(){

@@ -125,8 +125,10 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 		
 				    	Clouds : clouds,
 				    	DefaultTarget : defaultTarget,
-		
-						ManifestPath : plan.ManifestPath,
+				    	
+				    	FilePath : relativeFilePath,
+
+						ManifestPath : resource.AppPath,
 				    	ManifestApplication : manifestApplication,
 				    	ManifestInstrumentation: launchConfParams.Instrumentation,
 				    	serviceRegistry : serviceRegistry,
@@ -144,10 +146,20 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 				    	ManifestInstrumentation: launchConfParams.Instrumentation,
 		
 				    	CFService : cfService,
+				    	ManifestPath : resource.AppPath,
+				    	
 				    	getTargetSelection : function(){
 				    		return corePageBuilder.getSelection();
 				    	},
-		
+
+				    	getPath : function(){
+				    		return corePageBuilder.getManifestPath();
+				    	},
+
+				    	getPlan : function(){
+				    		return corePageBuilder.getPlan();
+				    	},
+
 				    	showMessage : showMessage,
 				    	hideMessage : hideMessage,
 				    	handleError : handleError,
@@ -157,7 +169,14 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 				    /* init additional parameters page builder */
 				    var additionalParamPageBuilder = new mAdditionalParamPageBuilder.AdditionalParamPageBuilder({
 				    	ManifestApplication : manifestApplication,
-				    	ManifestInstrumentation: launchConfParams.Instrumentation
+				    	ManifestInstrumentation: launchConfParams.Instrumentation,
+				    	ManifestPath : resource.AppPath,
+				    	getPath : function(){
+				    		return corePageBuilder.getManifestPath();
+				    	},
+				    	getPlan : function(){
+				    		return corePageBuilder.getPlan();
+				    	},
 				    });
 		
 				    /* build pages */
@@ -189,11 +208,14 @@ define(['i18n!cfui/nls/messages', "orion/bootstrap", 'orion/objects', 'orion/cfu
 		
 							FileService: fileClient,
 							CFService : cfService,
+		
 							getTargetSelection : function(){
 					    		return corePageBuilder.getSelection();
 					    	},
-		
-					    	Manifest : plan.Manifest,
+					    	getManifestPath : function(){
+					    		return corePageBuilder.getManifestPath();
+					    	},
+
 					    	ContentLocation : resource.ContentLocation,
 					    	AppPath : resource.AppPath
 						})
