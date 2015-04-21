@@ -10,10 +10,10 @@
 /*eslint-env browser, amd*/
 
 define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',  'orion/keyBinding', 'orion/dialogs', 'orion/selection',
-	'orion/contentTypes','orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/links', 'orion/cfui/cFClient',
+	'orion/contentTypes','orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/editorCommands', 'orion/links', 'orion/cfui/cFClient',
 	'orion/PageUtil', 'orion/cfui/logView', 'orion/section', 'orion/metrics', 'orion/cfui/widgets/CfLoginDialog', 'orion/i18nUtil'], 
 	function(messages, lib, mBootstrap, mStatus, mProgress, CommandRegistry, KeyBinding, mDialogs, mSelection,
-	mContentTypes, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mLinks,
+	mContentTypes, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mEditorCommands, mLinks,
 	mCFClient, PageUtil, mLogView, mSection, mMetrics, CfLoginDialog, i18Util) {
 	mBootstrap.startup().then(
 		function(core) {
@@ -34,6 +34,15 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 			var cFClient = new mCFClient.CFService(serviceRegistry);
 			var contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
+			var editorCommands = new mEditorCommands.EditorCommandFactory({
+				serviceRegistry: serviceRegistry,
+				commandRegistry: commandRegistry,
+				fileClient: fileClient,
+				searcher: searcher,
+				readonly: true,
+				toolbarId: "pageActions", //$NON-NLS-0$
+				navToolbarId: "pageNavigationActions", //$NON-NLS-0$
+			});
 			var mainLogView = lib.node("log");
 			
 			function statusReporter(message, type, isAccessible) {
@@ -60,6 +69,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 				statusReporter: statusReporter,
 				statusService: statusService,
 				progressService: progressService,
+				editorCommands: editorCommands,
 				cFClient: cFClient
 			});
 
