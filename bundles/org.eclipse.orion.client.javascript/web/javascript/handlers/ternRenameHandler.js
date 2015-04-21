@@ -32,8 +32,7 @@ define([
 	           function(error, changes) {
 	               if(error) {
 	                   postMessage({error: error.message, message: 'Failed to rename changes'});
-	               }
-	               if(Array.isArray(changes.changes)) {
+	               } else if(changes && Array.isArray(changes.changes)) {
         			   postMessage({request: 'rename', changes:changes});
 	               }
 	           });
