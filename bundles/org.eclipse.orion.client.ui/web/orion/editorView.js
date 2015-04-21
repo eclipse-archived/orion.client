@@ -496,6 +496,7 @@ define([
 			[
 				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-0$
 				"getSelection", "setSelection", //$NON-NLS-1$ //$NON-NLS-0$
+				"getSelections", "setSelections", //$NON-NLS-1$ //$NON-NLS-0$
 				"getText", "setText", //$NON-NLS-1$ //$NON-NLS-0$
 				"getLineAtOffset", //$NON-NLS-0$
 				"getLineStart", //$NON-NLS-0$

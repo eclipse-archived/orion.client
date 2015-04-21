@@ -26,7 +26,7 @@ define([
 	 * @public
 	 * @param {ASTManager} ASTManager The backing AST manager
 	 * @param {TernWorker} ternWorker The running Tern worker
-	 * @returns {javascript.commands.GenerateDocCommand} A new command
+	 * @returns {javascript.commands.RenameCommand} A new command
 	 * @since 9.0
 	 */
 	function RenameCommand(ASTManager, ternWorker) {
@@ -38,7 +38,8 @@ define([
 				if(_d.request === 'rename') {
 					var changes = _d.changes;
 					if(changes && changes.changes && changes.changes.length > 0) {
-						deferred.resolve(cachedContext.setText()); //TODO apply all edits at once
+						
+						deferred.resolve(cachedContext.setSelections(changes.changes)); //TODO apply all edits at once
 					} else {
 						deferred.reject();
 					}
