@@ -135,6 +135,7 @@ define([
 		this.commandService = options.commandRegistry;
 		this.fileClient = options.fileClient;
 		this.inputManager = options.inputManager;
+		this.renderToolbars = options.renderToolbars;
 		this.toolbarId = options.toolbarId;
 		this.saveToolbarId = options.saveToolbarId;
 		this.editToolbarId = options.editToolbarId;
@@ -198,6 +199,9 @@ define([
 			if (this._recreateEditCommands) {
 				this._createEditCommands().then(function() {
 					this.registerCommands();
+					if (this.renderToolbars) {
+						this.renderToolbars();
+					}
 				}.bind(this));
 			}
 		},

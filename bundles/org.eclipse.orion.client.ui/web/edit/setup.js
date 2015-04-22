@@ -541,6 +541,7 @@ objects.mixin(EditorSetup.prototype, {
 			serviceRegistry: serviceRegistry,
 			commandRegistry: this.commandRegistry,
 			fileClient: this.fileClient,
+			renderToolbars: this.renderToolbars.bind(this),
 			searcher: this.searcher,
 			readonly: this.readonly,
 			toolbarId: "toolsActions", //$NON-NLS-0$
@@ -740,6 +741,7 @@ objects.mixin(EditorSetup.prototype, {
 	},
 
 	renderToolbars: function(metadata) {
+		metadata = metadata || this.activeEditorViewer.inputManager.getFileMetadata();
 		var menuBar = this.menuBar;
 		var commandRegistry = this.commandRegistry;
 		var editor = this.activeEditorViewer.editor;
