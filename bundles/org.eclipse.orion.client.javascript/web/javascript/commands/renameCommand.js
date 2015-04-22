@@ -38,8 +38,17 @@ define([
 				if(_d.request === 'rename') {
 					var changes = _d.changes;
 					if(changes && changes.changes && changes.changes.length > 0) {
-						
-						deferred.resolve(cachedContext.setSelections(changes.changes)); //TODO apply all edits at once
+						var ranges = changes.changes;
+
+						// turn the ranges into offset / length
+						var offsets = [ranges.length];
+						for (var i = 0; i < ranges.length; i++) {
+							offsets[i] = {offset: ranges[i].start,
+										length: ranges[i].end - ranges[i].start};
+						}
+						var groups = [{data: {}, positions: offsets}];
+						var linkModel = {groups: groups};
+						deferred.resolve(cachedContext.enterLinkedMode(linkModel));
 					} else {
 						deferred.reject();
 					}
@@ -79,7 +88,7 @@ define([
 		 * @description Actually do the work
 		 * @function
 		 * @private
-		 * @returns {Deferred} A deferred to insert the template
+		 * @returns null
 		 */
 		_doRename: function _doRename(editorContext, ast, params, meta) {
 			//TODO show dialog for new name
