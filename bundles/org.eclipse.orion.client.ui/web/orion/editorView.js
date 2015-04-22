@@ -508,6 +508,9 @@ define([
 			contextImpl.showMarkers = function(markers) {
 				serviceRegistry.getService(that.problemsServiceID)._setProblems(markers);
 			};
+			contextImpl.enterLinkedMode = function(linkedModeModel) {
+				editor.getLinkedMode().enterLinkedMode(linkedModeModel);
+			};
 			/**
 			 * @since 7.0
 			 */
