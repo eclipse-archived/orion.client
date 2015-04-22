@@ -1,6 +1,6 @@
 .sectionWrapper, .sectionTable{
-	margin-left: 2px;
-	margin-right: 2px;
+	margin-left: 0;
+	margin-right: 0;
 	margin-top: 2px;
 	background: white;
 }
