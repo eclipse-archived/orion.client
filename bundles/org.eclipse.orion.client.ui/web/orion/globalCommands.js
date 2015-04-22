@@ -572,7 +572,7 @@ define([
 	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, closeSplitter, fileClient) {
 		mMetrics.initFromRegistry(serviceRegistry);
 		prefsService.addChangeListener(function(name, value) {
-			if (value.length < METRICS_MAXLENGTH) {
+			if (value.length < METRICS_MAXLENGTH && name.indexOf("/git/credentials/")) { //$NON-NLS-0$
 				mMetrics.logEvent("preferenceChange", name, value); //$NON-NLS-0$
 			}
 		});
