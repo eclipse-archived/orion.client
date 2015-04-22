@@ -18,9 +18,8 @@ define([
     'eslint/load-rules-async',
 	'eslint/conf/environments',
     'orion/editor/templates', //$NON-NLS-0$
-	'orion/editor/stylers/application_javascript/syntax', //$NON-NLS-0$
 	'javascript/contentAssist/templates',  //$NON-NLS-0$
-], function(Objects, Hover, Finder, Signatures, Rules, ESLintEnv, mTemplates, JSSyntax, Templates) {
+], function(Objects, Hover, Finder, Signatures, Rules, ESLintEnv, mTemplates, Templates) {
 
     /**
 	 * @description Creates a new delegate to create keyword and template proposals
@@ -29,7 +28,7 @@ define([
 	    //constructor
  	}
  	
- 	TemplateProvider.prototype = new mTemplates.TemplateContentAssist(JSSyntax.keywords, []);
+ 	TemplateProvider.prototype = new mTemplates.TemplateContentAssist([], []);
  	
  	Objects.mixin(TemplateProvider.prototype, {
  		uninterestingChars: ":!#$^&.?<>", //$NON-NLS-0$
@@ -37,45 +36,6 @@ define([
  		isValid: function(prefix, buffer, offset) {
 			var char = buffer.charAt(offset-prefix.length-1);
 			return !char || this.uninterestingChars.indexOf(char) === -1;
-		},
-		
-		getKeywordProposals: function(prefix, kind) {
-			if(!kind) {
-				return [];
-			}
-			var proposals = [];
-			switch(kind.kind) {
-				case 'top':
-					proposals = this._createKeywordProposals(this._keywords, prefix);
-					break;
-				case 'prop':
-					proposals = this._createKeywordProposals(['false', 'function', 'new', 'null', 'this', 'true', 'typeof', 'undefined'], prefix);
-					break;
-			}
-			if(proposals.length > 0) {
-				proposals.splice(0, 0,{
-					proposal: '',
-					description: 'Keywords', //$NON-NLS-0$
-					style: 'noemphasis_title_keywords', //$NON-NLS-0$
-					unselectable: true
-				});	
-			}
-			return proposals;
-		},
-		
-		_createKeywordProposals: function(keywords, prefix) {
-			var proposals = [];
-			var len = keywords.length;
-			for (var i = 0; i < len; i++) {
-				if (keywords[i].slice(0, prefix.length) === prefix) {
-					proposals.push({
-						proposal: keywords[i].slice(prefix.length), 
-						description: keywords[i],
-						style: 'noemphasis_keyword'//$NON-NLS-0$
-					});
-				}
-			}
-			return proposals;
 		},
 		
 		getTemplateProposals: function(prefix, offset, context, kind) {
@@ -86,6 +46,12 @@ define([
 				var template = templates[t];
 				if (this.templateMatches(template, prefix, kind, context)) {
 					var proposal = template.getProposal(prefix, offset, context);
+					var obj = Object.create(null);
+			        obj.type = 'markdown';
+			        obj.content = 'Template source code:\n\n';
+			        obj.content += Hover.formatMarkdownHover('```'+template.template+'```').content;
+			        proposal.hover = obj;
+			        delete proposal.style;
 					this.removePrefix(prefix, proposal);
 					proposals.push(proposal);
 				}
@@ -158,22 +124,6 @@ define([
 		if((typeof params.template === 'undefined' || params.template) && 
 				provider.isValid(params.prefix, buffer, params.offset, params)) {
 			return provider.getTemplateProposals(params.prefix, params.offset, params, kind);
-		}
-		return [];
-	}
-    
-    /**
-	 * @description Create the keyword proposals
-	 * @private
-	 * @param {Object} params The completion context
-	 * @param {Object} kind The computed completion kind to make
-	 * @param {String} buffer The compilation unit buffer
-	 * @returns {Array} The array of keyword proposals
-	 */
-	function createKeywordProposals(params, kind, buffer) {
-		if((typeof params.keyword === 'undefined' || params.keyword) && 
-				provider.isValid(params.prefix, buffer, params.offset, params)) {
-			return provider.getKeywordProposals(params.prefix, kind);
 		}
 		return [];
 	}
@@ -401,12 +351,11 @@ define([
     /**
      * @description Computes the content assist proposals
      * @param {Object} ternserver The server to send requests to
-     * @param {Function} postMessage The postMessage callback to use to report back to the worker
      * @param {Object} args The arguments from the original request 
-     * @returns {Array.<Object>} The array of assist proposals or an empty array, never <code>null</code>
+     * @param {Function} callback The function to call back to once the request completes or fails
      * @since 9.0
      */
-    function computeProposals(ternserver, postMessage, args) {
+    function computeProposals(ternserver, args, callback) {
         if(ternserver) {
 	       ternserver.request({
 	           query: {
@@ -417,30 +366,56 @@ define([
 	           urls: true,
 	           docs: true,
 	           end: args.params.offset,
-	           sort:true
-	           }}, 
+	           sort:true,
+	           includeKeywords: true
+	           },
+	           files: args.files}, 
 	           function(error, comps) {
 	               if(error) {
-	                   postMessage({error: error.message, message: 'Failed to compute proposals'});
+	               		callback({error: error.message, message: 'Failed to compute proposals'});
 	               } else if(comps && comps.completions) {
 	               		var file = ternserver.fileMap[args.meta.location];
 	               		var kind = getKind(file.ast, args.params.offset, file.text);
 	               		args.params.prefix = getPrefix(args.params, kind, file.text);
 	               		if(kind && (kind.kind === 'jsdoc' || kind.kind === 'doc')) {
-	               			postMessage({request: 'completions', proposals:[].concat(createDocProposals(args.params, kind, file.ast, file.text),
+	               			callback({request: 'completions', proposals:[].concat(createDocProposals(args.params, kind, file.ast, file.text),
 	               								  createTemplateProposals(args.params, kind, file.text))});
 	               		} else {
-	               			postMessage({request: 'completions', proposals:[].concat(sortProposals(comps.completions, args),
+	               			callback({request: 'completions', proposals:[].concat(sortProposals(comps.completions, args),
 	               								  createDocProposals(args.params, kind, file.ast, file.text),
-	               								  createTemplateProposals(args.params, kind, file.text),
-	               								  createKeywordProposals(args.params, kind, file.text))});
+	               								  createTemplateProposals(args.params, kind, file.text))});
                			}
 	               }
 	           });
 	       
 	   } else {
-	       postMessage({message: 'failed to compute proposals, server not started'});
+	       callback({message: 'Failed to compute proposals, server not started'});
 	   }
+    }
+    
+    var operators = {
+    	'delete': true,
+    	'new': true,
+    	'instanceof': true,
+    	'super': true,
+    	'this': true,
+    	'typeof': true,
+    	'void': true,
+    	'yield': true
+    };
+    
+    /**
+     * @description Returns the root URL to use for the online doc portion of a keyword proposal
+     * @param keyword
+     * @returns returns
+     */
+    function getKeywordLink(keyword) {
+    	if(operators[keyword]) {
+    		return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/'+keyword;
+    	} else if(keyword === 'extends') {
+    		return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/'+keyword;
+    	}
+    	return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/'+keyword;
     }
     
     /**
@@ -462,6 +437,13 @@ define([
         if(typeof(completion.type) !== 'undefined') {
             if(/^fn/.test(completion.type)) {
             	calculateFunctionProposal(completion, args, proposal);
+            } else if(typeof(completion.origin) === 'undefined') {
+            	//keyword
+            	proposal.relevance -= 2; //103
+            	//proposal.style = 'noemphasis_keyword';//$NON-NLS-1$
+            	proposal.description = ' - Keyword';
+            	completion.doc = 'ECMAScript reserved keyword';
+            	completion.url = getKeywordLink(proposal.name);
             } else {
     		    proposal.description = convertTypes(' : ' + completion.type);
 		    }
@@ -687,6 +669,10 @@ define([
 	        var _c = completions[i];
 	        if(looselyMatches(args.params.prefix, _c.name)) {
     	        var _o = _c.origin;
+    	        if(typeof(_o) === 'undefined') {
+    	        	locals.push(_formatTernProposal(_c, args));
+    	        	continue;
+    	        }
     	        _o = _o ? _o : '?';
     	        if(_o === args.meta.location) {
     	            locals.push(_formatTernProposal(_c, args));

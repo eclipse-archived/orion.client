@@ -39,7 +39,7 @@ define([
 	function TernContentAssist(astManager, ternWorker) {
 		this.astManager = astManager;
 		this.ternworker = ternWorker;
-		this.ternworker.addEventListener('message', handler);
+		this.ternworker.addEventListener('message', handler, false);
 	}
 
 	/**
@@ -67,11 +67,13 @@ define([
 			                var cu = new CU(blocks, meta);
         			        if(cu.validOffset(params.offset)) {
         			            return self.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-        			            	self.ternworker.postMessage({request: 'addFile', args: {file: meta.location, source: ast.source}});
         			            	var env = self.getActiveEnvironments(ast);
         			            	env.ecma5 = true;
         			            	env.browser = true;
-        			            	self.ternworker.postMessage({request: 'completions', args: {params: params, meta: meta, envs:env}});
+        			            	var files = [
+			        			    	{type:'full', name: meta.location, text: ast.source}
+			        			    ];
+        			            	self.ternworker.postMessage({request: 'completions', args: {params: params, meta: meta, envs:env, files: files}});
         			            	deferred = new Deferred();
                     				return deferred;
                     			});
@@ -80,10 +82,12 @@ define([
 			        });
 			    } else {
 			        return self.astManager.getAST(editorContext).then(function(ast) {
-			        	self.ternworker.postMessage({request: 'addFile', args: {file: meta.location, source: ast.source}});
 			        	var env = self.getActiveEnvironments(ast);
         			    env.ecma5 = true;
-			        	self.ternworker.postMessage({request: 'completions', args: {params: params, meta: meta, envs:env}});
+        			    var files = [
+        			    	{type:'full', name: meta.location, text: ast.source}
+        			    ];
+			        	self.ternworker.postMessage({request: 'completions', args: {params: params, meta: meta, envs:env, files: files}});
 			        	deferred = new Deferred();
                     	return deferred;
         			});
