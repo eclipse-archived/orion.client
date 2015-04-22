@@ -426,7 +426,7 @@ define([
 	               		var file = ternserver.fileMap[args.meta.location];
 	               		var kind = getKind(file.ast, args.params.offset, file.text);
 	               		args.params.prefix = getPrefix(args.params, kind, file.text);
-	               		if(kind && kind.kind === 'jsdoc' || kind.kind === 'doc') {
+	               		if(kind && (kind.kind === 'jsdoc' || kind.kind === 'doc')) {
 	               			postMessage({request: 'completions', proposals:[].concat(createDocProposals(args.params, kind, file.ast, file.text),
 	               								  createTemplateProposals(args.params, kind, file.text))});
 	               		} else {
