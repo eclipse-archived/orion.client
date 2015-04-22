@@ -35,7 +35,6 @@ require({
 	]
 },
 [
-    'javascript/signatures',
 	'tern/lib/tern',
 	'tern/plugin/doc_comment',
 	//TODO Load these on the fly
@@ -52,7 +51,7 @@ require({
 	'javascript/handlers/ternRenameHandler',
 	'doctrine'  //stays last - exports into global
 ],
-/* @callback */ function(Signatures, Tern, docPlugin, /*requirePlugin, orionRequirePlugin, mongodbPlugin, nodePlugin,*/ ecma5, browser, AssistHandler, DeclHandler, 
+/* @callback */ function(Tern, docPlugin, /*requirePlugin, orionRequirePlugin, mongodbPlugin, nodePlugin,*/ ecma5, browser, AssistHandler, DeclHandler, 
 						HoverHandler, OccurrencesHandler, RenameHandler) {
     
     var ternserver, pendingReads = Object.create(null);
@@ -69,7 +68,8 @@ require({
 	           docs: true,
 	           end: 0,
 	           sort:true
-	           }}, 
+	           },
+	           files: [{type:'full', name: 'warmup', text: ''}]}, 
 	           /* @callback */ function(error, comps) {
 	               //do nothing
 	           });
@@ -98,38 +98,36 @@ require({
             };
         
         ternserver = new Tern.Server(options);
-        if(ternserver) {
-            postMessage("ternstarted");
-        } else {
-            postMessage("ternfailed");
-        }
     }
     startServer();
-    warmUp();
     
-    onmessage = function(event) {
-        if(typeof(event.data) === 'object') {
-            var _d = event.data;
+    /**
+     * @description Worker callback when a message is sent to the worker
+     * @callback
+     */
+    onmessage = function(evnt) {
+        if(typeof(evnt.data) === 'object') {
+            var _d = evnt.data;
             if(typeof(_d.request) === 'string') {
                 switch(_d.request) {
                     case 'completions': {
-                        AssistHandler.computeProposals(ternserver, getPostMessage(), _d.args);
+                        AssistHandler.computeProposals(ternserver, _d.args, post);
                         break;
                     }
                     case 'occurrences': {
-                        OccurrencesHandler.computeOccurrences(ternserver, getPostMessage(), _d.args);
+                        OccurrencesHandler.computeOccurrences(ternserver, _d.args, post);
                         break;
                     }
                     case 'decl': {
-                        DeclHandler.computeDeclaration(ternserver, getPostMessage(), _d.args);
+                        DeclHandler.computeDeclaration(ternserver, _d.args, post);
                         break;
                     }
                     case 'hover': {
-                        HoverHandler.computeHover(ternserver, getPostMessage(), _d.args);
+                        HoverHandler.computeHover(ternserver, _d.args, post);
                         break;
                     }
                     case 'rename': {
-                        RenameHandler.computeRename(ternserver, getPostMessage(), _d.args);
+                        RenameHandler.computeRename(ternserver, _d.args, post);
                         break;
                     }
                     case 'addFile': {
@@ -149,17 +147,43 @@ require({
         }
     };
     
-    onconnect = function(event) {
-    	this.port = event.ports[0];
+    /**
+     * @description Worker callback when an error occurs
+     * @callback
+     */
+   	onerror = function(evnt) {
+    	post(evnt);
+    };
+    
+    /**
+     * @description Worker callback when a shared worker starts up
+     * @callback
+     */
+    onconnect = function(evnt) {
+    	this.port = evnt.ports[0];
     	this.port.onmessage = onmessage;
     	this.port.start();
     };
     
-    function getPostMessage() {
-    	if(this.port) {
-    		return this.port.postMessage;
+    post('server_ready');
+    //Warm up after we have finished attaching all our listeners
+    warmUp();
+    
+    /**
+     * @description Sends the given message back to the client. If the msg is null, send an Error
+     * object with the optional given error message
+     * @param {Object} msg The message to send back to the client
+     * @param {String} errormsg The optional error message to send back to the client if the main message is null
+     */
+    function post(msg, errormsg) {
+    	if(!msg) {
+    		msg = new Error(errormsg ? errormsg : 'An unknown error occurred.');
     	}
-    	return postMessage;
+    	if(this.port) {
+    		this.port.postMessage(msg);
+    	} else {
+    		postMessage(msg);
+    	}
     }
     
     /**
@@ -190,7 +214,7 @@ require({
         if(ternserver && typeof(args.file) === 'string') {
             ternserver.delFile(args.file);
         } else {
-            postMessage('Failed to delete file from Tern: '+args.file);
+            post('Failed to delete file from Tern: '+args.file);
         }
     }
     
@@ -209,9 +233,9 @@ require({
            		_f = file.logical;
            }
            pendingReads[_f] = callback;
-           postMessage({request: 'read', args: {file:file}});
+           post({request: 'read', args: {file:file}});
 	    } else {
-	       postMessage('Failed to read file into Tern: '+_f);
+	       post('Failed to read file into Tern: '+_f);
 	    }
     }
 });

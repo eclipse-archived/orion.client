@@ -16,11 +16,11 @@ define([
    /**
     * @description Computes the complete rename changes for the given arguments
     * @param {Object} ternserver The server to query
-    * @param {Function} postMessage The callback to post back from the worker
     * @param {Object} args The arguments
+    * @param {Function} callback The callback to call once the request completes or fails
     * @since 9.0
     */
-   function computeRename(ternserver, postMessage, args) {
+   function computeRename(ternserver, args, callback) {
         if(ternserver) {
 	       ternserver.request({
 	           query: {
@@ -31,13 +31,13 @@ define([
 	           }}, 
 	           function(error, changes) {
 	               if(error) {
-	                   postMessage({error: error.message, message: 'Failed to rename changes'});
+	                   callback({error: error.message, message: 'Failed to rename changes'});
 	               } else if(changes && Array.isArray(changes.changes)) {
-        			   postMessage({request: 'rename', changes:changes});
+        			   callback({request: 'rename', changes:changes});
 	               }
 	           });
 	   } else {
-	       postMessage({message: 'failed to rename, server not started'});
+	       callback({message: 'failed to rename, server not started'});
 	   }
    }
    

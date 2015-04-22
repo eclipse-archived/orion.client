@@ -17,28 +17,28 @@ define([
    /**
     * @description Computes the declaration for the given arguments
     * @param {Object} ternserver The server to query
-    * @param {Function} postMessage The callback to post back from the worker
     * @param {Object} args The arguments
+    * @param {Function} callback The callback to call once the request completes or fails
     * @since 9.0
     */
-   function computeDeclaration(ternserver, postMessage, args) {
+   function computeDeclaration(ternserver, args, callback) {
        if(ternserver) {
 	       ternserver.request({
 	           query: {
 		           type: "definition", 
 		           file: args.meta.location,
-		           end: args.params.offset,
+		           end: args.params.offset
 	           }}, 
 	           function(error, decl) {
 	               if(error) {
-	                   postMessage({error: error.message, message: 'Failed to compute declaration'});
+	                   callback({error: error.message, message: 'Failed to compute declaration'});
 	               }
-	               if(Array.isArray(decl)) {
-        			   postMessage({request: 'decl', decl:decl});
+	               if(decl && Array.isArray(decl)) {
+        			   callback({request: 'decl', decl:decl});
 	               }
 	           });
 	   } else {
-	       postMessage({message: 'failed to compute declaration, server not started'});
+	       callback({message: 'Failed to compute declaration, server not started'});
 	   }
    }
    
