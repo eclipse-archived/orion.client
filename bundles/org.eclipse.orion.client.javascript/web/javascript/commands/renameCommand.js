@@ -66,7 +66,7 @@ define([
 			var that = this;
 		    if(options.contentType.id === 'application/javascript') {
 		        return that.astManager.getAST(editorContext).then(function(ast) {
-    				return that._doRename(editorContext, ast, options);
+    				return that._doRename(editorContext, options);
     			});
 		    } else {
 		        return editorContext.getText().then(function(text) {
@@ -76,7 +76,7 @@ define([
 		                var cu = new CU(blocks, {location:options.input, contentType:options.contentType});
     			        if(cu.validOffset(offset)) {
     			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-    			               return that._doRename(editorContext, ast, options); 
+    			               return that._doRename(editorContext, options); 
     			            });
     			        }
 			        }
@@ -90,11 +90,11 @@ define([
 		 * @private
 		 * @returns null
 		 */
-		_doRename: function _doRename(editorContext, ast, params, meta) {
+		_doRename: function _doRename(editorContext, params) {
 			//TODO show dialog for new name
 			cachedContext = editorContext;
 			deferred = new Deferred();
-			this.ternworker.postMessage({request:'rename', args:{params:{offset: params.offset, selection:params.selection}, meta:{location: params.input}, newname:'FOO'}});
+			this.ternworker.postMessage({request:'rename', args:{params:{offset: params.offset}, meta:{location: params.input}, newname:'FOO'}});
 			return deferred;
 		}
 	});
