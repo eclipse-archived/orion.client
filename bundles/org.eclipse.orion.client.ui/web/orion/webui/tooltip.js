@@ -183,31 +183,37 @@ define(['orion/webui/littlelib'], function(lib) {
 					left = rect.left + rect.width + this._tailSize + 1;
 					break;
 			}
-			var totalRect = lib.bounds(document.documentElement);
-			if (top + tipRect.height > totalRect.height) {
+			//Checking if the tooltip will fit inside the viewport of the browser
+			var body = document.body, html = document.documentElement;
+			var vPortLeft = Math.max(html.scrollLeft, body.scrollLeft);
+			var vPortTop = Math.max(html.scrollTop, body.scrollTop);
+			var vPortRight = vPortLeft + html.clientWidth;
+			var vPortBottom = vPortTop + html.clientHeight;			
+			
+			if (top + tipRect.height > vPortBottom) {
 				if (force) {
-					top = totalRect.height - tipRect.height - 1;
+					top = vPortBottom - tipRect.height - 1;
 				} else {
 					return false;
 				}
 			}
-			if (left + tipRect.width > totalRect.width) {
+			if (left + tipRect.width > vPortRight) {
 				if (force) {
-					left = totalRect.width - tipRect.width - 1;
+					left = vPortRight - tipRect.width - 1;
 				} else {
 					return false;
 				}
 			}
-			if (left < 0) {
+			if (left < vPortLeft) {
 				if (force) {
-					left = 4;
+					left = vPortLeft + 4;
 				} else {
 					return false;
 				}
 			}
-			if (top < 0) {
+			if (top < vPortTop) {
 				if (force) {
-					top = 4;
+					top = vPortTop + 4;
 				} else {
 					return false;
 				}
