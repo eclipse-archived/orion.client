@@ -73,6 +73,9 @@ define([
         			            	var files = [
 			        			    	{type:'full', name: meta.location, text: ast.source}
 			        			    ];
+			        			    if(typeof(params.keywords) === 'undefined') {
+			        			    	params.keywords = true;
+			        			    }
         			            	self.ternworker.postMessage({request: 'completions', args: {params: params, meta: meta, envs:env, files: files}});
         			            	deferred = new Deferred();
                     				return deferred;
@@ -87,6 +90,9 @@ define([
         			    var files = [
         			    	{type:'full', name: meta.location, text: ast.source}
         			    ];
+        			    if(typeof(params.keywords) === 'undefined') {
+        			    	params.keywords = true;
+        			    }
 			        	self.ternworker.postMessage({request: 'completions', args: {params: params, meta: meta, envs:env, files: files}});
 			        	deferred = new Deferred();
                     	return deferred;

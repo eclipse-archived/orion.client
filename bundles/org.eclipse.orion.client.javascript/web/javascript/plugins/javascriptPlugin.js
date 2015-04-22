@@ -100,18 +100,19 @@ define([
     	 */
     	var astManager = new ASTManager.ASTManager(Esprima);
     	
-    	function WrappedWorker(script, onmessage, onerror) {
+    	function WrappedWorker(script, onMessage, onError) {
     		/*if(typeof(SharedWorker) === 'function') {
     			this.shared = true;
     			this.worker = new SharedWorker(new URL(script, window.location.href).href);
-    			this.worker.port.onmessage = onmessage;
-    			this.worker.port.onerror = onerror;
+    			this.worker.port.onmessage = onMessage;
+    			this.worker.port.onerror = onError;
     			this.worker.port.start();
+    			this.worker.port.postMessage('');
     		} else { */
     			this.worker = new Worker(new URL(script, window.location.href).href);
-    			this.worker.postMessage("start");
-    			this.worker.onmessage = onmessage;
-    			this.worker.onerror = onerror;
+    			this.worker.onmessage = onMessage;
+    			this.worker.onerror = onError;
+    			this.worker.postMessage('');
     	//	}
     	}
     	
@@ -129,9 +130,9 @@ define([
     	
     	// Start the worker
     	var ternWorker = new WrappedWorker("ternWorker.js", 
-		    	function(event) {
-		    		if(typeof(event.data) === 'object') {
-		    			var _d  = event.data;
+		    	function(evnt) {
+		    		if(typeof(evnt.data) === 'object') {
+		    			var _d  = evnt.data;
 		    			switch(_d.request) {
 		    				case 'read': {
 		    					if(typeof(_d.args.file) === 'object') {
@@ -213,7 +214,7 @@ define([
     		contentType: ['application/javascript']  //$NON-NLS-0$
     			}
     	);
-    */	
+   */
     	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager);
     	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$

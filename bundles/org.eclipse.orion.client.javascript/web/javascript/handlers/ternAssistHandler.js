@@ -367,7 +367,7 @@ define([
 	           docs: true,
 	           end: args.params.offset,
 	           sort:true,
-	           includeKeywords: true
+	           includeKeywords: args.params.keywords
 	           },
 	           files: args.files}, 
 	           function(error, comps) {
