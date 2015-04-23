@@ -905,24 +905,6 @@ objects.mixin(EditorSetup.prototype, {
 			this.editorViewers[1].inputManager.setInput(PageUtil.hash());
 		}
 	},
-	_createSplitCommand: function(label){
-		var id = "orion.edit.showPip" + label; //$NON-NLS-0$
-		var splitCommand = new mCommands.Command({
-			name: label,
-			tooltip: label,
-			id: id, //$NON-NLS-0$
-			visibleWhen: function() {
-				return true;
-			},
-			callback: function(data) {
-				var mode = data.command.tooltip;
-				this.setSplitterMode(mode);
-			}.bind(this)
-		});
-			
-		this.commandRegistry.addCommand(splitCommand);	
-		return splitCommand;
-	},
 	createSplitMenu: function() {
 		var that = this;
 		var currentChoice;
@@ -933,6 +915,7 @@ objects.mixin(EditorSetup.prototype, {
 			currentChoice.checked = false;
 			currentChoice = this;
 			changeSplitModeCommand.imageClass = this.imageClass;
+			changeSplitModeCommand.name = this.name;
 			that.setSplitterMode(this.mode);
 			that.commandRegistry.destroy(toolbar);
 			that.commandRegistry.renderCommands(toolbar, toolbar, that, that, "button"); //$NON-NLS-0$
@@ -947,6 +930,7 @@ objects.mixin(EditorSetup.prototype, {
 		changeSplitModeCommand = new mCommands.Command({
 			imageClass: currentChoice.imageClass,
 			selectionClass: "dropdownSelection", //$NON-NLS-0$
+			name: currentChoice.name,
 			tooltip: messages["SplitModeTooltip"],
 			id: "orion.edit.splitmode", //$NON-NLS-0$
 			visibleWhen: function() {

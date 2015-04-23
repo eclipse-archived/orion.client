@@ -1080,7 +1080,7 @@ define([
 				var tooltipText, hasDefault = defaultInvocation && defaultInvocation.command && (defaultInvocation.command.tooltip || defaultInvocation.command.name);
 				if (hasDefault) {
 					tooltipText = defaultInvocation.command.tooltip || defaultInvocation.command.name;
-				} else if (hasDefault) {
+				} else {
 					tooltipText = tooltip;
 				}
 				if (tooltipText) {
