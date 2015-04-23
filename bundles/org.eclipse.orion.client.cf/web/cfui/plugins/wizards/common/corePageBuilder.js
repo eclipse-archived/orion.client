@@ -235,22 +235,18 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 		},
 		
 		getPlan : function(){
-			
-			
 			if(this.getManifestPath() != this._initManifestPath){
 				var deferred = new Deferred();
 				var relativeFilePath = this._filePath + this.getManifestPath();
 				this._cfService.getDeploymentPlans(relativeFilePath).then(function(resp) {
 					var plans = resp.Children;
 					plan = deferred.resolve(plans[0]);
-					deferred.resolve(plans[0]);
+					return plan;
 				});	
 				this._initManifestPath = this.getManifestPath();
 				return deferred;
 			}
-			
 			return plan;
-			
 		},
 		
 		build : function(){
@@ -393,7 +389,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						document.getElementById("manifestLabel").textContent = messages["manifestLabel"];
 						self._manifestInput = document.createElement("input"); //$NON-NLS-0$
 						self._manifestInput.value = (self._initManifestPath == "") ? "manifest.yml" : self._initManifestPath;
-						self._manifestInput.readOnly = false; // TODO should be editable
+						self._manifestInput.readOnly = true; // TODO should be editable
 						document.getElementById("manifest").appendChild(self._manifestInput); //$NON-NLS-0$
 						
 						self._manifestinput = document.getElementById("manifest").firstChild;
