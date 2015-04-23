@@ -348,8 +348,10 @@ table .sectionTable {
 }
 
 .gitChangeListCheckLabel {
-	padding-right: 10px;
+	display: inline-block;
 	font-size: 12px;
+	margin-top: 10px;
+	padding-right: 10px;
 }
 
 .gitChangeListInput {
@@ -358,7 +360,13 @@ table .sectionTable {
 }
 
 .gitChangeListCheck {
-	margin-top: 10px;
+	margin: 0 3px 0 10px;
+	padding: 0;
+	vertical-align: text-top;
+}
+
+_:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
+	vertical-align: text-bottom;
 }
 
 .gitChangeListGroup {
