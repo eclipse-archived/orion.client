@@ -26,6 +26,10 @@
 	max-width:700px;
 }
 
+#branchSectionContent .sectionTableItem .stretch {
+	top: 4px;
+}
+
 .activeBranch {
 	font-weight: bold;
 }

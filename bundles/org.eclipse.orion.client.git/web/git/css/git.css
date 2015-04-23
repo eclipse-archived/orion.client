@@ -501,6 +501,12 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	background-color: #f4f4f4;
 }
 
+#commitsNodeOutgoing .gitListCell,
+#commitsNodeIncoming .gitListCell,
+#commitsNodeSynchronized .gitListCell {
+	line-height: 11px;
+}
+
 .gitListCell {
 	padding-top: 6px;
 	padding-bottom: 4px;
@@ -511,7 +517,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	font-weight: bold;
 	font-size: 8pt;
 	text-transform: uppercase;
-	margin-top: 4px;
+	margin-top: 6px;
 }
 
 .gitCommitSectionTableItem {
