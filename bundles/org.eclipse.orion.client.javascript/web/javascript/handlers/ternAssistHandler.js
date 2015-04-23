@@ -410,12 +410,39 @@ define([
      * @returns returns
      */
     function getKeywordLink(keyword) {
-    	if(operators[keyword]) {
-    		return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/'+keyword;
-    	} else if(keyword === 'extends') {
-    		return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/'+keyword;
+    	var key = keyword;
+    	switch(keyword) {
+    		case 'do': {
+    			key = 'do...while';
+    			break;
+    		}
+    		case 'in': {
+    			key = 'for...in';
+    			break;
+    		}
+    		case 'try':
+    		case 'catch': 
+    		case 'finally': {
+    			key = 'try...catch';
+    			break;
+    		}
+    		case 'case': 
+    		case 'default' : {
+    			key = 'switch';
+    			break;
+    		}
+    		case 'if':
+    		case 'else': {
+    			key = 'if...else';
+    			break;
+    		}
     	}
-    	return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/'+keyword;
+    	if(operators[keyword]) {
+    		return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/'+key;
+    	} else if(keyword === 'extends') {
+    		return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/'+key;
+    	}
+    	return 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/'+key;
     }
     
     /**
