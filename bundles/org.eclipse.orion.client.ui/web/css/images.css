@@ -221,7 +221,7 @@
 .core-sprite-openarrow{
 	font-size: 16px;
 	line-height: normal;
-	vertical-align:middle;
+	vertical-align: bottom;
 	color: #777;
 	font-family: 'Orion Icon Font';
 	padding: 0;
@@ -236,8 +236,8 @@
 	font-size: 16px;
 	color: #777;
 	line-height: normal;
-	vertical-align:middle;
-	font-family: 'Orion Icon Font'; 
+	vertical-align: bottom;
+	font-family: 'Orion Icon Font';
 	padding: 0;
 	background: none;
 	border: none;
@@ -320,7 +320,7 @@
 	font-size: 16px;
 	color: #555555;
 	line-height: 16px;
-	vertical-align:middle;
+	vertical-align: bottom;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
@@ -392,7 +392,7 @@
 	font-size: 16px;
 	color: #555;
 	line-height: normal;
-	vertical-align:middle;
+	vertical-align: bottom;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
@@ -406,7 +406,7 @@
 	font-size: 16px;
 	color: #555;
 	line-height: 16px;
-	vertical-align:middle;
+	vertical-align: bottom;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
@@ -420,7 +420,7 @@
 	font-size: 16px;
 	color: #555;
 	line-height: 16px;
-	vertical-align:middle;
+	vertical-align: bottom;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
@@ -434,7 +434,7 @@
 	font-size: 16px;
 	color: #555;
 	line-height: 16px;
-	vertical-align:middle;
+	vertical-align: bottom;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
@@ -448,7 +448,7 @@
 	font-size: 16px;
 	color: #555;
 	line-height: 16px;
-	vertical-align:middle;
+	vertical-align: bottom;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
@@ -462,7 +462,7 @@
 	font-size: 16px;
 	color: #555;
 	line-height: 16px;
-	vertical-align:middle;
+	vertical-align: bottom;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;

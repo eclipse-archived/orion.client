@@ -574,11 +574,8 @@ a.breadcrumb.currentLocation {
 }
 
 .dropdownTrigger a {
+	line-height: 9px;
 	text-decoration: none;
-}
-
-.dropdownTriggerOpen {
-	
 }
 
 .dropdownMenu {
