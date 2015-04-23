@@ -127,7 +127,6 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					);
 					
 					self._loadSpaces(self._orgsDropdown.value);
-					self._hideMessage();
 				}, function(error){
 					self._handleError(error, target, function(){ self._loadTargets(target); });
 				}
@@ -154,13 +153,9 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 				
 				self._spacesDropdown.appendChild(option);
 			});
-			
-			self._setSelection();
-			self._selection.getSelection(function(selection){
-				self._loadDomains(selection);
-				self._loadApplications(selection);
-				self._loadHosts(selection);
-			});
+				self._loadDomains(self._targets[org][0]);
+				self._loadApplications(self._targets[org][0]);
+				self._loadHosts(self._targets[org][0]);
 		},
 		
 		_loadDomains : function(target){
@@ -191,6 +186,8 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			    			self._domainsDropdown.classList.add("modifiedCell");
 			    		}
 			    	}
+					self._setSelection();
+					self._hideMessage();
 				}
 			});
 		},
