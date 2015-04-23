@@ -186,6 +186,17 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			    			self._domainsDropdown.classList.add("modifiedCell");
 			    		}
 			    	}
+
+					if(self._cloudsDropdown && self._cloudsDropdown.disabled == true){
+						self._cloudsDropdown.disabled = false;
+					}
+					if(self._orgsDropdown.disabled == true){
+						self._orgsDropdown.disabled = false;
+					}
+					if(self._spacesDropdown.disabled == true){
+						self._spacesDropdown.disabled = false;
+					}
+
 					self._setSelection();
 					self._hideMessage();
 				}
@@ -340,6 +351,11 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 								lib.empty(self._orgsDropdown);
 								lib.empty(self._spacesDropdown);
 								lib.empty(self._domainsDropdown);
+								if(self._cloudsDropdown){
+									self._cloudsDropdown.disabled = true;
+								}
+								self._orgsDropdown.disabled = true;
+								self._spacesDropdown.disabled = true;
 								self._setSelection();
 								
 								var selectedCloud = self._clouds[event.target.selectedIndex];
@@ -360,6 +376,11 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						self._orgsDropdown = document.createElement("select"); //$NON-NLS-0$
 						self._orgsDropdown.onchange = function(event){
 							var selectedOrg = event.target.value;
+							if(self._cloudsDropdown){
+								self._cloudsDropdown.disabled = true;
+							}
+							self._orgsDropdown.disabled = true;
+							self._spacesDropdown.disabled = true;
 							self._loadSpaces(selectedOrg);
 	
 						};
@@ -375,6 +396,11 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						self._spacesDropdown.onchange = function(/*event*/){
 							self._setSelection();
 							var selection = self._selection.getSelection();
+							if(self._cloudsDropdown){
+								self._cloudsDropdown.disabled = true;
+							}
+							self._orgsDropdown.disabled = true;
+							self._spacesDropdown.disabled = true;
 							self._loadDomains(selection);
 							self._loadApplications(selection);
 							self._loadHosts(selection);
