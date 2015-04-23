@@ -400,8 +400,12 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 									self._manifestApplication = result.Manifest.applications[0];
 									self._appsInput.value = self._manifestApplication.name;
 									self._hostInput.value = self._manifestApplication.host;
-									lib.empty(self._domainsDropdown);
-									self._loadDomains(selection);
+									
+									for(var i = 0; self._domainsDropdown.length > i; i++){
+										if(self._domainsDropdown[i].value === (self._manifestApplication.domain || self._manifestInstrumentation.domain)){
+											self._domainsDropdown[i].selected = "selected";
+										}
+									}
 								});
 							}
 						};
