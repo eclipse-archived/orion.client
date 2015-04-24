@@ -94,7 +94,6 @@ module.exports = function(options) {
 	}
 
 	function buildSearchPattern(searchOpts){
-		console.log(searchOpts);
 		var searchTerm = searchOpts.searchTerm;
 		if (!searchOpts.regEx) {
 			if (searchTerm.indexOf("\"") === 0) {
@@ -147,9 +146,7 @@ module.exports = function(options) {
 			var searchOpt = new searchOptions(req, res);
 			searchOpt.buildOptions();
 
-			var searchPat = buildSearchPattern(searchOpt);
-
-			var searchPattern = /plugin.js/gi;
+			var searchPattern = buildSearchPattern(searchOpt);
 			var parentFileLocation = originalFileRoot(req);
 
 			fileUtil.getChildren(workspaceDir, parentFileLocation, function(children) {
@@ -163,7 +160,7 @@ module.exports = function(options) {
 
 				var ws = JSON.stringify({
 					    "search": searchOpt,
-					    "pattern": searchPat.toString(),
+					    "pattern": searchPattern.toString(),
 					    "results": results
 					});
 				res.setHeader('Content-Type', 'application/json');
