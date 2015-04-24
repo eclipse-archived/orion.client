@@ -468,8 +468,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	border: none;
 	background: transparent;
 	font-weight: bold;
-	margin-top: 5px;
-	margin-right: 5px;
+	margin-top: 10px;
 	color: #FF4500;
 	cursor: pointer;
 }
