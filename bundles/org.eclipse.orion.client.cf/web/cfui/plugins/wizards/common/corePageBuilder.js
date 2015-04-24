@@ -76,6 +76,11 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 				return;
 			}
 			
+			if(!self._domainsDropdown.value){
+				self._selection.setSelections();
+				return;
+			}
+
 			for(var i=0; i<orgTargets.length; i++){
 				if(orgTargets[i].Space == self._spacesDropdown.value){
 					self._selection.setSelections(orgTargets[i]);
@@ -361,6 +366,9 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						self._orgsDropdown.onchange = function(event){
 							var selectedOrg = event.target.value;
 							self._loadSpaces(selectedOrg);
+							
+							self._setSelection();
+							self._showMessage(messages["loadingDeploymentSettings..."]);
 	
 						};
 						
@@ -373,11 +381,13 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						document.getElementById("spacesLabel").appendChild(document.createTextNode(messages["space*:"])); //$NON-NLS-0$
 						self._spacesDropdown = document.createElement("select"); //$NON-NLS-0$
 						self._spacesDropdown.onchange = function(/*event*/){
-							self._setSelection();
 							var selection = self._selection.getSelection();
 							self._loadDomains(selection);
 							self._loadApplications(selection);
 							self._loadHosts(selection);
+							
+							self._setSelection();
+							self._showMessage(messages["loadingDeploymentSettings..."]);
 						};
 						
 						document.getElementById("spaces").appendChild(self._spacesDropdown); //$NON-NLS-0$
