@@ -16,10 +16,9 @@ define("orion/editor/rulers", [
 	'orion/editor/annotations',
 	'orion/editor/tooltip', 
 	'orion/objects',
-	'orion/webui/littlelib', //$NON-NLS-0$
 	'orion/editor/util',
 	'orion/util'
-], function(messages, mTextView, mAnnotations, mTooltip, objects, lib, textUtil, util) {
+], function(messages, mTextView, mAnnotations, mTooltip, objects, textUtil, util) {
 
 	function BaseRuler (rulerLocation, rulerOverview, rulerStyle) {
 		this._location = rulerLocation || "left"; //$NON-NLS-0$
@@ -367,7 +366,7 @@ define("orion/editor/rulers", [
 			}
 			
 			var target = e.target ? e.target : e.srcElement;
-			this._curElementBounds = lib.bounds(target);
+			this._curElementBounds = target.getBoundingClientRect();
 			// If we have the entire ruler selected, just use a 1 pixel high area in the ruler (Bug 463486)
 			if (target._ruler){
 				this._curElementBounds.top = e.clientY;
@@ -517,7 +516,7 @@ define("orion/editor/rulers", [
 			var position = rulerLocation === "left" ? "right" : "left"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 			
 			
-			var viewRect = lib.bounds(this._view._clientDiv);
+			var viewRect = this._view._clientDiv.getBoundingClientRect();
 			var offsetX = 0;
 			var offsetY = 0;
 			offsetX = viewRect.left - (hoverArea.left + hoverArea.width);
@@ -569,7 +568,7 @@ define("orion/editor/rulers", [
 				anchorArea: hoverArea
 			};
 			
-			var viewRect = lib.bounds(view._clientDiv);
+			var viewRect = view._clientDiv.getBoundingClientRect();
 
 			info.offsetX = viewRect.left - (hoverArea.left + hoverArea.width);
 			info.offsetY = hoverArea.height;

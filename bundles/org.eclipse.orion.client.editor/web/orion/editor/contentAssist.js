@@ -950,7 +950,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var self = this;
 			var target = {
 				getTooltipInfo: function() {
-					var bounds = lib.bounds(self.widget.parentNode);
+					var bounds = self.widget.parentNode.getBoundingClientRect();
 					var tipArea = {width: 350, height: bounds.height - 10, top: bounds.top};
 					if ((bounds.left + bounds.width) >= document.documentElement.clientWidth){
 						tipArea.left = bounds.left - tipArea.width;
@@ -1262,8 +1262,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					}
 					
 					var textNode = node.firstChild || node;  
-					var textBounds = lib.bounds(textNode);
-					var parentWidth = this.parentNode.clientWidth ? this.parentNode.clientWidth : lib.bounds(this.parentNode); // Scrollbar can cover text
+					var textBounds = textNode.getBoundingClientRect();
+					var parentWidth = this.parentNode.clientWidth ? this.parentNode.clientWidth : this.parentNode.getBoundingClientRect(); // Scrollbar can cover text
 					var parentStyle = window.getComputedStyle(this.parentNode);
 					var nodeStyle = window.getComputedStyle(node);
 					var allPadding = parseInt(parentStyle.paddingLeft) + parseInt(parentStyle.paddingRight) + parseInt(nodeStyle.paddingLeft) + parseInt(nodeStyle.paddingRight);

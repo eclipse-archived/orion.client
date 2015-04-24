@@ -421,7 +421,7 @@ function Tooltip (view) {
 					return info.tooltipArea;
 			}
 			
-			var divBounds = lib.bounds(tooltipDiv);
+			var divBounds = tooltipDiv.getBoundingClientRect();
 			var tipRect = {
 				width: divBounds.width,
 				height: divBounds.height
@@ -429,7 +429,7 @@ function Tooltip (view) {
 			
 			var position = info.position ? info.position : "below"; //$NON-NLS-0$
 			
-			var viewBounds = lib.bounds(this._view._rootDiv ? this._view._rootDiv : documentElement);
+			var viewBounds = (this._view._rootDiv ? this._view._rootDiv : documentElement).getBoundingClientRect();
 			var viewportLeft = viewBounds.left;
 			var viewportTop = viewBounds.top;
 			var viewportWidth = viewBounds.width;
