@@ -360,9 +360,13 @@ table .sectionTable {
 }
 
 .gitChangeListCheck {
-	margin: 0 3px 0 10px;
+	margin: 0 3px 0 0;
 	padding: 0;
 	vertical-align: text-top;
+}
+
+#persitCheck.gitChangeListCheck {
+	margin-left: 10px; /*  We only need margin on the left for the Save checkbox */
 }
 
 _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
@@ -407,7 +411,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	background-color: #FFF;
 	padding: 5px;
 	padding-bottom: 0;
-	margin: 10px;
+	margin: 10px 10px 10px 4px;
 	margin-bottom: 0;
 	border-radius: 5px;
 	border: 1px solid #b2cfb9;
@@ -438,7 +442,7 @@ _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 .gitCommitMessage .gitCommitMessageBottomRow {
 	width: calc(100% - 20px);
 	padding: 2px;
-	margin-left: 10px;
+	margin-left: 4px;
 	margin-right: 10px;
 	overflow: hidden;
 }
