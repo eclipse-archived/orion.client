@@ -369,6 +369,10 @@ table .sectionTable {
 	margin-left: 10px; /*  We only need margin on the left for the Save checkbox */
 }
 
+#persitCheck.gitChangeListCheck ~ label {
+	margin-top: 0;
+}
+
 _:-moz-tree-row(hover), .gitChangeListCheck { /* Firefox  HACK */
 	vertical-align: text-bottom;
 }
