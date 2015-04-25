@@ -81,7 +81,7 @@ a:hover {
 /* Row selection */
 
 .checkedRow {
-	background-color: #cedce7 !important; /* was e3e3e3 */
+	background-color: #4CAAC6 !important; /* was e3e3e3 */
 }
 
 .checkedRow.disabledRow {
@@ -93,7 +93,7 @@ a:hover {
 }
 
 .navRow.checkedRow > td:first-child {
-	border-left-color: #7fa4c0;
+	border-left-color: #d57152;
 }
 
 .navbar-item-selected {
@@ -198,13 +198,13 @@ a.breadcrumb.currentLocation {
 
 .auxpane {
 	border: 0;
-	background: #eeeeee;
+	background: #37474F;
 }
 
 .mainpane {
 	border: 0;
-	background: #eee !important;
-	padding-right:15px;
+	background: #37474F !important;
+	padding-right:20px;
 }
 
 .editorTheme .mainpane{
@@ -214,13 +214,12 @@ a.breadcrumb.currentLocation {
 }
 
 .mainToolbar {
- 	background: #eeeeee;
+ 	background: #263238;
  	padding-left: 2px;
  	padding-right: 5px;
 	/* border-bottom: 1px solid #ebebeb; */
 	/* padding-left:50px; */
 	white-space: nowrap;
-	border-bottom: 1px solid #DDD;
 }
 
 /* Filesystem switcher toolbar */
@@ -322,7 +321,7 @@ a.breadcrumb.currentLocation {
 }
 
 .commandButton {
-	color: #222;
+	color: white;
 	border: 1px solid #dedede;
 	background-color: #ddd;
 	border-radius: 2px;
@@ -538,7 +537,7 @@ a.breadcrumb.currentLocation {
 /* widget theming */
 /* splitter - typically the color of the title area */
 .split {
-	background: #efefef;
+	background: #263238;
 }
 
 .splitTracking {

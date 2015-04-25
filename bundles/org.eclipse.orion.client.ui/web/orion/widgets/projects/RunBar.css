@@ -3,8 +3,6 @@
 .runBarWrapper {
 	-webkit-align-items: center;		 		 /* Safari */
 	align-items: center;
-	border-left: solid 1px #ccc;
-	border-right: solid 1px #ccc;
 	display: -webkit-inline-flex;		 /* Safari */
 	display: inline-flex;
 	overflow: visible;
@@ -22,7 +20,6 @@
 }
 
 .launchConfigurationsWrapper {
-	background: white;
 	border-radius: 5px;
 	display: inline-block;
 	margin: 0 8px 0 0;
@@ -33,7 +30,7 @@
 }
 
 .launchConfigurationsWrapper > .launchConfigurationsButton.dropdownTrigger {
-	background: white;
+	background: #37474F;
 	border-radius: 5px;
 	padding: 2px 0 2px 4px;
 	width: 270px;
@@ -226,6 +223,7 @@
 	height: 17px;
 	line-height: 17px;
 	margin: -4px 0 0 6px;
+	color:white;
 }
 
 .logsLink {

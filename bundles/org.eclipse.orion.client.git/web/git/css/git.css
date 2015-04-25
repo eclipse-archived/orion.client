@@ -83,8 +83,8 @@
 	background-color: #FFF;
 	border: 1px solid #DDD;
 	border-radius: 4px;
-	padding-top: 2px;
-	padding-bottom: 2px;
+	padding-top: 0;
+	padding-bottom: 0;
 }
 
 .mainToolbar .sectionWrapper.sectionOpened {
@@ -114,7 +114,7 @@
 }
 
 .innerPanels {
-	top: 50px;
+	top: 70px;
 }
 
 .gitSectionLabel {
@@ -127,8 +127,8 @@
 }
 
 .sidebar > .sectionWrapper {
-	margin-left: 15px;
-	margin-right:5px;
+	margin-left: 20px;
+	margin-right:20px;
 	margin-top: 0;
 	flex: 0 0 main-size;
 	-ms-flex: 0 0 main-size;
@@ -140,8 +140,8 @@
 }
 
 .sidebar > .sectionTable {
-	margin-left: 15px;
-	margin-right: 5px;
+	margin-left: 20px;
+	margin-right: 20px;
 	margin-bottom: 0;
 	background-color: #fcfcfc;
 	flex: 1 0;
@@ -317,7 +317,7 @@ table .sectionTable {
 }
 
 .sidebarWrapper > .sidebar {
-	height: calc(100% - 10px);
+	height: calc(100% - 20px);
 }
 
 .sidebarWrapper {
@@ -379,9 +379,16 @@ table .sectionTable {
 }
 
 .gitCommitInfoValue {
-	color: black;
+	color: #596876;
 }
 
+.checkedRow .gitCommitInfoValue{
+	color: white;
+}
+
+.checkedRow{
+	color:white !important;
+}
 .tooltip .gitCommitInfoValue {
 	color: white;
 }
@@ -391,7 +398,7 @@ table .sectionTable {
 }
 
 .gitCommitMessageSection {
-	background-color: #F3FAF5;
+	background-color: #e4eef7;
 }
 
 .gitCommitMessage .gitCommitMessageTopRow {
@@ -402,7 +409,7 @@ table .sectionTable {
 	margin: 10px;
 	margin-bottom: 0;
 	border-radius: 5px;
-	border: 1px solid #b2cfb9;
+	border: 1px solid #4CAAC6;
 }
 
 .gitCommitMessage .gitCommitMessageTopRow.invalidParam {
@@ -454,7 +461,7 @@ table .sectionTable {
 	font-weight: bold;
 	margin-top: 5px;
 	margin-right: 5px;
-	color: #FF4500;
+	color: #ff3c6e;
 	cursor: pointer;
 }
 
@@ -490,7 +497,7 @@ table .sectionTable {
 }
 
 .gitCommitListSection {
-	background-color: #f4f4f4;
+	background-color: #f5f8fc;
 }
 
 .gitListCell {
@@ -571,7 +578,11 @@ table .sectionTable {
 .gitCommitTitle {
 	font-weight: bold;
 	padding-bottom: 5px;
-	color: #555;
+	color: #596876;
+}
+
+.checkedRow .gitCommitTitle{
+	color:white;
 }
 
 .gitCommitWarningBadge {
@@ -603,11 +614,26 @@ table .sectionTable {
 	padding-right: 6px;
 	margin-right: 10px;
 	margin-top: 5px;
-	color:#637367;
+	color:#1D3649;
+}
+
+.checkedRow .gitStatusIcon {
+	font-size: 30px;
+	float: left;
+	position: relative;
+	height: 30px;
+	vertical-align: text-top;
+	width: 30px;
+	padding: 2px;
+	padding-left: 6px;
+	padding-right: 6px;
+	margin-right: 10px;
+	margin-top: 5px;
+	color:white;
 }
 
 .gitStatusSection{
-	background: #F3FAF5;
+	background: #E4EEF7;
 	color:#8AA190;
 }
 
@@ -615,9 +641,19 @@ table .sectionTable {
 	padding-left: 24px;
 }
 
+.checkedRow .gitStatusTitle {
+	font-weight: bold;
+	color: white;
+	padding-bottom:5px;
+}
+
+.checkedRow .stretch{
+	color:white;
+}
+
 .gitStatusTitle {
 	font-weight: bold;
-	color: #637367;
+	color: #1D3649;
 	padding-bottom:5px;
 }
 
@@ -659,7 +695,6 @@ table .sectionTable {
 	height: 30px;
 	vertical-align: text-top;
 	width: 30px;
-	border: 1px solid lightGrey;
 	padding: 3px;
 	margin-right: 10px;
 }

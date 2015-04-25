@@ -26,7 +26,7 @@ hard-coded numbers elsewhere.
 
 /* $ToolbarHeight */
 .toolbarLayout {
-	height: 39px;
+	height: 50px;
 	
 	display: -webkit-box;
 	display: -moz-box;
@@ -152,6 +152,7 @@ hard-coded numbers elsewhere.
     bottom: 0;
     left: 0;
     right: 0;
+    background: #37474F;
 	/*margin-bottom: 29px;*/
 }
 
@@ -327,7 +328,7 @@ hard-coded numbers elsewhere.
 	position: absolute;
 	top: 0;
 	width: 100%;
-	bottom: 10px;
+	bottom: 20px;
 	overflow-y: auto;
 	margin-right: 2px;
 	background: #FFF;
@@ -379,21 +380,22 @@ hard-coded numbers elsewhere.
 
 .editorViewerHeader {
 	display:flex;
+	background: #37474F;
 	flex-direction:row;
 	align-items:center;
-	line-height:24px;
-	border-bottom: 1px solid #dedede;
+	line-height:26px;
+	border-bottom: 1px solid #263238;
 }
 
 .editorViewerHeaderTitle {
 	padding-left: 5px;
-	color: #555;
+	color: white;
 }
 
 .editorViewerContent {
 	position: absolute;
 	width: 100%;
-	top: 25px;
+	top: 27px;
 	bottom: 0;
 	overflow: auto
 }
@@ -418,7 +420,7 @@ hard-coded numbers elsewhere.
 	left: 33%;  /* override this value if you want a different proportion of the two split panes */
 	height: 100%;
 	z-index: 51;
-	width: 3px;
+	width: 1px;
 	cursor: e-resize;
 	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
 }
@@ -569,7 +571,7 @@ and (max-device-width : 1024px)  {
 
 .sideMenu{
     width: 0;
-    background: #4a4a4a;
+    background: #263238;
 	float: left;
     position: absolute;
     top: 0;
@@ -602,17 +604,16 @@ and (max-device-width : 1024px)  {
 
 .sideMenuList{
 	display:inline-block !important;
-	height: calc(100% - 4px);
+	height: calc(100% - 44px);
 	margin: 0;
 	overflow-y: hidden;
 	padding: 0;
 	text-align: center;
 	width: 100%;
+	margin-top:40px;
 }
 
 .sideMenuItem{
-	border-bottom: 1px solid #444;
-	border-top: 1px solid transparent;
 	list-style-type: none;
 	font-size:16px !important;
 	padding: 0;
@@ -654,7 +655,7 @@ and (max-device-width : 1024px)  {
 
 /* icon links */
 .sideMenuItem > .submenu-trigger {
-	color: #bbb !important;
+	color: #455A64 !important;
 	text-decoration:none !important;
 	width: 100%;
 	display: inline-block;
@@ -666,13 +667,10 @@ and (max-device-width : 1024px)  {
 }
 
 .sideMenuItemActive {
-	background: radial-gradient(circle 20px, #3a3a3a, #333);
-	border-top: 1px solid #555;
-	border-bottom: 1px solid #666;
 }
 
 .sideMenuItemActive > .submenu-trigger {
-	color: white !important;
+	color: #46aac6 !important;
 }
 
 .sideMenuToggle {
@@ -814,7 +812,7 @@ and (max-device-width : 1024px)  {
 .innerPanels{
 	position:absolute;
 	width:100%;
-	top:40px;
+	top:50px;
 	bottom:0;
 }
 

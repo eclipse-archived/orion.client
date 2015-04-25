@@ -222,7 +222,7 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #777;
+	color: white;
 	font-family: 'Orion Icon Font';
 	padding: 0;
 	background: none;
@@ -234,7 +234,7 @@
 
 .core-sprite-closedarrow{
 	font-size: 16px;
-	color: #777;
+	color: white;
 	line-height: normal;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font'; 
@@ -693,14 +693,25 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.core-sprite-dashboard,
+.core-sprite-runlogs,
+.core-sprite-play,
+.core-sprite-stop{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: white;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
 .core-sprite-page,
 .core-sprite-horizontal,
 .core-sprite-vertical,
 .core-sprite-pip,
-.core-sprite-dashboard,
-.core-sprite-runlogs,
-.core-sprite-play,
-.core-sprite-stop,
 .core-sprite-open,
 .core-sprite-debug,
 .core-sprite-download,

@@ -36,6 +36,26 @@
 	color: #F58B0F;
 }
 
+/* ----- side panel ----- */
+
+#auxpane .navlinkonpage, .nav_fakelink {
+	text-decoration: none;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	color: white;
+}
+
+#auxpane .navlink {
+	display: inline-block;
+	padding: 2px;
+	color: white;
+}
+
+
+
+
+
+
 .dragOver {
 	background: #ffffd8;
 	outline: #AAA 2px dotted !important;
@@ -233,7 +253,7 @@ textarea.parameterInput {
 }
 
 .selectableNavRow:hover {
-	background-color: #cedce7;
+	background-color: #607D8B;
 }
 
 .disabledNavRow > .navColumn > .mainNavColumn {
@@ -687,7 +707,7 @@ textarea.parameterInput {
 }
 
 .treeIterationCursorRow {
-	background-color: white;
+	background-color: #37474F;
 }
 
 .treeIterationCursorRow_Dotted {
@@ -900,7 +920,7 @@ textarea.parameterInput {
 }
 
 .projectPrimaryNavColumn {
-	color: #000;
+	color: white;
 }
 
 .projectNavColumn a{
@@ -941,10 +961,6 @@ textarea.parameterInput {
 	margin-top: 0;
 	margin-left: 8%;
 	margin-right: 8%;
-	border: 1px solid;
-	border-bottom-left-radius: 3px;
-	border-bottom-right-radius: 3px;
-	border-color:#dadada;
 	-webkit-transition: all 0.1s ease, left 0;
 	transition: all 0.1s ease, left 0;
 	-webkit-transform-origin: top;
@@ -978,7 +994,7 @@ textarea.parameterInput {
 	padding: 6px;
 	color: gray;
 	margin-bottom: 0;
-	border-color: #dadada;
+	border-color: #e3e7ea;
 	transition: all 0.1s ease;
 }
 
@@ -995,7 +1011,7 @@ textarea.parameterInput {
 }
 
 .sectionTable td {
-	border-bottom: 1px solid #dadada;
+	border-bottom: 1px solid #f1f3f4;
 	vertical-align: middle;
 	color: gray;
 }
