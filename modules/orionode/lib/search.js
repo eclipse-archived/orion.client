@@ -120,21 +120,44 @@ module.exports = function(options) {
 		};
 	}
 
-	function searchChild(location, searchPattern, results){
+	function buildFilenamePattern(searchOpts){
+		var filenamePattern = searchOpts.filenamePattern;
+		if (filenamePattern.indexOf("?") != -1 || filenamePattern.indexOf("*") != -1) {
+			if (filenamePattern.indexOf("*") === 0) {
+				filenamePattern = filenamePattern.substring(1);
+			}
+			if (filenamePattern.indexOf("?") != -1) {
+				filenamePattern = filenamePattern.replace("?",".");
+			}
+			if (filenamePattern.indexOf("*") != -1) {
+				filenamePattern = filenamePattern.replace("*", ".*");
+			}
+		}
+
+		if (!searchOpts.filenamePatternCaseSensitive) {
+			return new RegExp(filenamePattern, "i");
+		} else {
+			return new RegExp(filenamePattern);
+		}
+	}
+
+	function searchChild(dirLocation, fileLocation, searchPattern, filenamePattern, results){
+		var location = dirLocation + fileLocation;
 		var stats = fs.statSync(location);
 		if (stats.isDirectory()) {
 			if (location.substring(location.length - 1) != "/") {
 				location = location + "/";
 			}
 			var dirFiles = fs.readdirSync(location);
-			dirFiles.forEach(function (file) {
-				var resultsForEach = searchChild(location + file, searchPattern, results);
+			dirFiles.forEach(function (dirFile) {
+				var resultsForEach = searchChild(location, dirFile, searchPattern, filenamePattern, results);
 				if (resultsForEach) results.concat(resultsForEach);
 			})
 		} else {
 			var file = fs.readFileSync(location, 'utf8');
-			var matches = file.match(searchPattern);
-			if (matches) results.push(location);
+			if (file.match(searchPattern) && fileLocation.match(filenamePattern)){
+				results.push(location);
+			}
 		}
 		return results;
 	}
@@ -147,6 +170,8 @@ module.exports = function(options) {
 			searchOpt.buildOptions();
 
 			var searchPattern = buildSearchPattern(searchOpt);
+			var filenamePattern = buildFilenamePattern(searchOpt);
+
 			var parentFileLocation = originalFileRoot(req);
 
 			fileUtil.getChildren(workspaceDir, parentFileLocation, function(children) {
@@ -154,13 +179,12 @@ module.exports = function(options) {
 				for (var i = 0; i < children.length; i++){
 					var child = children[i];
 					var childResults = [];
-					var matches = searchChild(child.Location.substring(6), searchPattern, childResults);
+					var matches = searchChild(workspaceDir + "/", child.Location.substring(6), searchPattern, filenamePattern, childResults);
 					if (matches) results = results.concat(matches);
 				};
 
 				var ws = JSON.stringify({
 					    "search": searchOpt,
-					    "pattern": searchPattern.toString(),
 					    "results": results
 					});
 				res.setHeader('Content-Type', 'application/json');
