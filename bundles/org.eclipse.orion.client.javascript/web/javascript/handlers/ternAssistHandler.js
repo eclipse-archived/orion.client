@@ -49,9 +49,9 @@ define([
 					var obj = Object.create(null);
 			        obj.type = 'markdown';
 			        obj.content = 'Template source code:\n\n';
-			        obj.content += Hover.formatMarkdownHover('```'+template.template+'```').content;
+			        obj.content += Hover.formatMarkdownHover(proposal.proposal).content;
 			        proposal.hover = obj;
-			        delete proposal.style;
+			        proposal.style = 'emphasis';
 					this.removePrefix(prefix, proposal);
 					proposals.push(proposal);
 				}
