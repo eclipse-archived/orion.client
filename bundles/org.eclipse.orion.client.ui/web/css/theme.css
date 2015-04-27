@@ -541,11 +541,11 @@ a.breadcrumb.currentLocation {
 }
 
 .splitTracking {
-	background: #dedede;
+	background: #37474F;
 }
 
 .splitThumb {
-	background: #ccc;
+	background: #37474F;
 }
 
 /* dropdowns */
@@ -697,6 +697,7 @@ a.breadcrumb.currentLocation {
  * specificity correctly for all users.
  */
 	background-color: white !important;
+	color: #555 !important;
 	border: 1px solid #bbbbbb !important;
 	border-bottom: none !important;
 	border-bottom-left-radius: 0 !important;
