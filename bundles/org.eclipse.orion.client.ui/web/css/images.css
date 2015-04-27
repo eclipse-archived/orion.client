@@ -722,7 +722,6 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: #555;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
@@ -810,39 +809,6 @@
 .file-sprite-javascript:hover{
 	text-decoration:none;
 }
-
-.dropdownMenuItem .core-sprite-page {
-    color: #333; 
-} 
-
-.dropdownMenuItem .core-sprite-horizontal {
-    color: #333; 
-} 
-
-.dropdownMenuItem .core-sprite-vertical {
-    color: #333; 
-} 
-
-.dropdownMenuItem .core-sprite-pip{
-    color: #333; 
-} 
-
-.dropdownTrigger .core-sprite-page {
-    color: white; 
-} 
-
-.dropdownTrigger .core-sprite-horizontal {
-    color: white; 
-} 
-
-.dropdownTrigger .core-sprite-vertical {
-    color: white;
-} 
-
-.dropdownTrigger .core-sprite-pip{
-    color: white;
-} 
-
 
 /* unicode alternatives
 

@@ -321,7 +321,11 @@ a.breadcrumb.currentLocation {
 	border-color: #ccc;
 }
 
-#pageToolbar .commandButton{
+.mainToolbar .commandButton {
+	color:white;
+}
+
+.mainToolbar .commandImage {
 	color:white;
 }
 
