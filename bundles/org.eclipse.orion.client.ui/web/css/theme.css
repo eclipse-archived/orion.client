@@ -370,6 +370,7 @@ a.breadcrumb.currentLocation {
 }
 
 .commandImage:hover, .commandImage:focus {
+	color: #555;
 	background-color: #e6e6e6;
 	border: 1px solid #ccc;
 }
