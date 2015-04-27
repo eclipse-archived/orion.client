@@ -58,7 +58,7 @@
 }
 
 .watchButton {
-	border-top: 1px solid #ddd;
+	border-top: 1px solid #515a5f;
 	position: absolute;
 	top: 0;
 	width: 3px;
@@ -75,7 +75,7 @@
 	width: calc(100% - 5px); /* subtract borders and button height */
 	height: calc(100% - 5px); /* subtract borders, button height and space between button and body */
 	background: transparent;
-	border: 1px solid #ddd;
+	border: 1px solid #515a5f;
 	-moz-border-radius: 50%;
 	-webkit-border-radius: 50%;
 	border-radius: 50%;
@@ -103,7 +103,7 @@
 	display: block;
 	border-radius: 40%;
 	height: 5px;
-	background: #ddd;
+	background: #515a5f;
 	transition: background-color 1s ease;
 }
 
@@ -122,7 +122,7 @@
 	border-radius: 40%;
 	right: 0;
 	width: 4px;
-	background: #ddd;
+	background: #515a5f;
 	
 	transition: background-color 1s ease;
 }
@@ -153,20 +153,20 @@
 }
 
 .progressWatch.running .watchButton {
-	border-color: #333333;
+	border-color: white;
 	top: 1px;
 }
 
 .progressWatch.running .watchBody {
-	border-color: #333333;
+	border-color: white;
 }
 
 .progressWatch.running .watchBody .hand.longHour > .darkSide {
-	background-color: #333333;
+	background-color: white;
 }
 
 .progressWatch.running .watchBody .hand.longMinute > .darkSide {
-	background-color: #333333;
+	background-color: white;
 }
 
 /* warning */
