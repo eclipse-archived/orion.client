@@ -367,7 +367,9 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						document.getElementById("orgsLabel").appendChild(document.createTextNode(messages["organization*:"])); //$NON-NLS-0$
 						self._orgsDropdown = document.createElement("select"); //$NON-NLS-0$
 						self._orgsDropdown.onchange = function(event){
+							self._showMessage(messages["loadingDeploymentSettings..."]);
 							lib.empty(self._domainsDropdown);
+							self._setSelection();
 							var selectedOrg = event.target.value;
 							self._loadSpaces(selectedOrg);
 	
@@ -382,6 +384,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						document.getElementById("spacesLabel").appendChild(document.createTextNode(messages["space*:"])); //$NON-NLS-0$
 						self._spacesDropdown = document.createElement("select"); //$NON-NLS-0$
 						self._spacesDropdown.onchange = function(/*event*/){
+							self._showMessage(messages["loadingDeploymentSettings..."]);
 							lib.empty(self._domainsDropdown);
 							self._setSelection();
 							var selection = self._selection.getSelection();
@@ -520,6 +523,11 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					}
 					
 					if (!self._launchConfInput.value) {
+						setValid(false);
+						return;
+					}
+					
+					if(!self._domainsDropdown.value){
 						setValid(false);
 						return;
 					}
