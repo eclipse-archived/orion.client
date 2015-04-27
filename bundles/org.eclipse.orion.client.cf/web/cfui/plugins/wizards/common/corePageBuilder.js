@@ -94,39 +94,40 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			self._showMessage(messages["loadingDeploymentSettings..."]);
 			self._cfService.getOrgs(target).then(
 				function(orgs){
-					lib.empty(self._orgsDropdown);
-					orgs.Orgs.forEach(
-						function(org){
-							var option = document.createElement("option"); //$NON-NLS-0$
-							option.appendChild(document.createTextNode(org.Name));
-							option.org = org;
-							
-							if (self._defaultTarget && (self._defaultTarget.OrgId === org.Guid
-									|| self._defaultTarget.Org === org.Name)){
-								option.selected = "selected"; //$NON-NLS-0$
-								self._defaultTarget.Org = org.Name;
+					if(target.Name === self._cloudsDropdown.value){
+						lib.empty(self._orgsDropdown);
+						orgs.Orgs.forEach(
+							function(org){
+								var option = document.createElement("option"); //$NON-NLS-0$
+								option.appendChild(document.createTextNode(org.Name));
+								option.org = org;
+								
+								if (self._defaultTarget && (self._defaultTarget.OrgId === org.Guid
+										|| self._defaultTarget.Org === org.Name)){
+									option.selected = "selected"; //$NON-NLS-0$
+									self._defaultTarget.Org = org.Name;
+								}
+								
+								self._orgsDropdown.appendChild(option);
+								self._targets[org.Name] = [];
+								
+								if (org.Spaces){
+									org.Spaces.forEach(function(space){
+										var newTarget = {};
+										newTarget.Url = target.Url;
+										if (target.ManageUrl)
+											newTarget.ManageUrl = target.ManageUrl;
+										
+										newTarget.Org = org.Name;
+										newTarget.Space = space.Name;
+										newTarget.SpaceId = space.Guid;
+										self._targets[org.Name].push(newTarget);
+									});
+								}
 							}
-							
-							self._orgsDropdown.appendChild(option);
-							self._targets[org.Name] = [];
-							
-							if (org.Spaces){
-								org.Spaces.forEach(function(space){
-									var newTarget = {};
-									newTarget.Url = target.Url;
-									if (target.ManageUrl)
-										newTarget.ManageUrl = target.ManageUrl;
-									
-									newTarget.Org = org.Name;
-									newTarget.Space = space.Name;
-									newTarget.SpaceId = space.Guid;
-									self._targets[org.Name].push(newTarget);
-								});
-							}
-						}
-					);
-					
-					self._loadSpaces(self._orgsDropdown.value);
+						);
+						self._loadSpaces(self._orgsDropdown.value);
+					}
 				}, function(error){
 					self._handleError(error, target, function(){ self._loadTargets(target); });
 				}
@@ -138,7 +139,6 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			
 			var targetsToDisplay = self._targets[org];
 			lib.empty(self._spacesDropdown);
-			lib.empty(self._domainsDropdown);
 			
 			targetsToDisplay.forEach(function(target){
 				var option = document.createElement("option"); //$NON-NLS-0$
@@ -153,41 +153,48 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 				
 				self._spacesDropdown.appendChild(option);
 			});
-				self._loadDomains(self._targets[org][0]);
-				self._loadApplications(self._targets[org][0]);
-				self._loadHosts(self._targets[org][0]);
+			self._setSelection();
+			self._selection.getSelection(function(selection){
+				self._loadDomains(selection);
+				self._loadApplications(selection);
+				self._loadHosts(selection);
+			});
 		},
 		
 		_loadDomains : function(target){
 			var self = this;
-			lib.empty(self._domainsDropdown);
-			
+
 			self._domainsDeferred = self._cfService.getDomains(target);
 			self._domainsDeferred.then(function(domains){
-				if(domains.Domains){
-					domains.Domains.forEach(function(domain){
-						var option = document.createElement("option"); //$NON-NLS-0$
-						option.appendChild(document.createTextNode(domain.DomainName));
+				
+				self._setSelection();
+				var selected = self._selection.getSelection();
+				if(selected && target.Url === selected.Url && target.ManageUrl === selected.ManageUrl && target.Org === selected.Org && target.Space === selected.Space && target.SpaceId === selected.SpaceId){
+					if(domains.Domains){
+						lib.empty(self._domainsDropdown);
+						domains.Domains.forEach(function(domain){
+							var option = document.createElement("option"); //$NON-NLS-0$
+							option.appendChild(document.createTextNode(domain.DomainName));
+							
+							if (domain.DomainName === (self._manifestInstrumentation.domain || self._manifestApplication.domain)){
+								option.selected = "selected"; //$NON-NLS-0$
+					    	}
+							if (self._manifestInstrumentation.domain) {
+								self._domainsDropdown.classList.add("modifiedCell");
+							}
+							
+							self._domainsDropdown.appendChild(option);
+						});
 						
-						if (domain.DomainName === (self._manifestInstrumentation.domain || self._manifestApplication.domain)){
-							option.selected = "selected"; //$NON-NLS-0$
+						self._domainsDropdown.onchange = function(evt) {
+				    		if (self._domainsDropdown.value === self._manifestApplication.domain){
+				    			self._domainsDropdown.classList.remove("modifiedCell");
+				    		} else {
+				    			self._domainsDropdown.classList.add("modifiedCell");
+				    		}
 				    	}
-						if (self._manifestInstrumentation.domain) {
-							self._domainsDropdown.classList.add("modifiedCell");
-						}
-						
-						self._domainsDropdown.appendChild(option);
-					});
-					
-					self._domainsDropdown.onchange = function(evt) {
-			    		if (self._domainsDropdown.value === self._manifestApplication.domain){
-			    			self._domainsDropdown.classList.remove("modifiedCell");
-			    		} else {
-			    			self._domainsDropdown.classList.add("modifiedCell");
-			    		}
-			    	}
-					self._setSelection();
-					self._hideMessage();
+						self._hideMessage();
+					}
 				}
 			});
 		},
@@ -359,6 +366,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						document.getElementById("orgsLabel").appendChild(document.createTextNode(messages["organization*:"])); //$NON-NLS-0$
 						self._orgsDropdown = document.createElement("select"); //$NON-NLS-0$
 						self._orgsDropdown.onchange = function(event){
+							lib.empty(self._domainsDropdown);
 							var selectedOrg = event.target.value;
 							self._loadSpaces(selectedOrg);
 	
@@ -373,6 +381,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						document.getElementById("spacesLabel").appendChild(document.createTextNode(messages["space*:"])); //$NON-NLS-0$
 						self._spacesDropdown = document.createElement("select"); //$NON-NLS-0$
 						self._spacesDropdown.onchange = function(/*event*/){
+							lib.empty(self._domainsDropdown);
 							self._setSelection();
 							var selection = self._selection.getSelection();
 							self._loadDomains(selection);
@@ -515,6 +524,11 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					}
 					
 					if(!self._appsInput.value){
+						setValid(false);
+						return;
+					}
+					
+					if(!self._domainsDropdown.value){
 						setValid(false);
 						return;
 					}
