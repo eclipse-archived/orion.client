@@ -199,6 +199,7 @@ a.breadcrumb.currentLocation {
 .auxpane {
 	border: 0;
 	background: #37474F;
+	color: white;
 }
 
 .mainpane {
@@ -561,7 +562,6 @@ a.breadcrumb.currentLocation {
 	display: inline-block;
 	vertical-align: top;
 	line-height: 12px;
-	color: white;
 }
 
 .dropdownArrowRight {

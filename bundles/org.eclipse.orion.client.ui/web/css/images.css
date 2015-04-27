@@ -222,7 +222,6 @@
 	font-size: 16px;
 	line-height: normal;
 	vertical-align:middle;
-	color: white;
 	font-family: 'Orion Icon Font';
 	padding: 0;
 	background: none;
@@ -234,7 +233,6 @@
 
 .core-sprite-closedarrow{
 	font-size: 16px;
-	color: white;
 	line-height: normal;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font'; 

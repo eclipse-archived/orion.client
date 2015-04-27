@@ -80,6 +80,7 @@
 	margin-top: 0;
 	width: auto;
 	float: left;
+	color: white;
 	background-color: #37474F;
 	border: none;
 	border-radius: 4px;
@@ -487,18 +488,6 @@ table .sectionTable {
 	width: calc(100% - 6px);
 	padding: 0;
 	overflow: hidden;
-}
-
-#branchSection > .sectionTitle {
-	font-size: 12px;
-	color: white;
-	padding-bottom: 3px;
-}
-
-#repoSection > .sectionTitle {
-	font-size: 12px;
-	color: white;
-	padding-bottom: 3px;
 }
 
 .sectionTitle {
