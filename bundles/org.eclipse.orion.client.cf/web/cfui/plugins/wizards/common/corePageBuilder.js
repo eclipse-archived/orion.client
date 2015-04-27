@@ -94,7 +94,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			self._showMessage(messages["loadingDeploymentSettings..."]);
 			self._cfService.getOrgs(target).then(
 				function(orgs){
-					if(target.Name === self._cloudsDropdown.value){
+					if(self._clouds.length == 1 || target.Name === self._cloudsDropdown.value){
 						lib.empty(self._orgsDropdown);
 						orgs.Orgs.forEach(
 							function(org){
