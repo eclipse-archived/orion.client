@@ -338,7 +338,6 @@ hard-coded numbers elsewhere.
 	position: absolute;
 	top: 50px;  /* $ToolbarHeight + 2 */
  	width: 100%;
- 	bottom: 10px;
  	overflow-y: auto;
 }
 
