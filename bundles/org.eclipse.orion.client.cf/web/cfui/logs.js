@@ -105,9 +105,6 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 			
 			function reloadLogs(applicationInfo){
 				var that = this;
-				
-				
-				
 				setTimeout(function(){
 					if (document.visibilityState === 'visible'){
 						cFClient.getLogz(applicationInfo.Target, applicationInfo.Application, applicationInfo.logsTimestamp).then(

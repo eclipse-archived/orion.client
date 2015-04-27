@@ -387,9 +387,9 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 				}
 				if (timestamp) {
 					if (target) {
-						url += "&Timestamp=timestamp";
+						url += "&Timestamp=" + timestamp;
 					} else {
-						url += "?Timestamp=timestamp";
+						url += "?Timestamp=" + timestamp;
 					}
 				}
 				
