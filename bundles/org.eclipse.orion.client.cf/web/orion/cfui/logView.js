@@ -79,7 +79,7 @@ define(['i18n!cfui/nls/messages',
 				commandService: this.commandRegistry});
 			
 			this._setInputContents(this._parsedLocation, logName, fullLog, {Name: logName});
-
+			this.editor.setSelection(fullLog.length, fullLog.length);
 		},
 		constructor: LogInputManager
 	});
