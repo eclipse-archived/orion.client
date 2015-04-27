@@ -30,6 +30,7 @@ define(['i18n!cfui/nls/messages', 'orion/Deferred', 'orion/i18nUtil', 'orion/URI
 				if (cloud && cloud.targetUrl){
 					var target = {};
 					target.Url = cloud.targetUrl;
+					target.Name = cloud.targetUrl;
 					if (cloud.manageUrl)
 						target.ManageUrl = cloud.manageUrl;
 					return [target];
