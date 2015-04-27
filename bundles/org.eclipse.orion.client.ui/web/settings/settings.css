@@ -567,8 +567,6 @@ div.page section:last-child {
 .workingTarget {
 	border: 1px solid #dadada;
 	box-shadow: none;
-	border-bottom-left-radius: 3px;
-	border-bottom-right-radius: 3px;
 }
 
 .sidePanelMargins {
@@ -579,8 +577,6 @@ div.page section:last-child {
 	border: 1px solid #dadada;
 	border-top: none;
 	background: white;
-	border-bottom-left-radius: 3px;
-	border-bottom-right-radius: 3px;
 	overflow-y: auto;
 }
 

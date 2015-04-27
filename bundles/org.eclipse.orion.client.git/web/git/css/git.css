@@ -80,8 +80,8 @@
 	margin-top: 0;
 	width: auto;
 	float: left;
-	background-color: #FFF;
-	border: 1px solid #DDD;
+	background-color: #37474F;
+	border: none;
 	border-radius: 4px;
 	padding-top: 0;
 	padding-bottom: 0;
@@ -127,9 +127,10 @@
 	float: left;
 	font-weight: bold;
 	text-transform: uppercase;
-	font-size: 12px;
+	font-size: 11px;
 	padding-right: 6px;
 	padding-left: 20px;
+	color:white;
 }
 
 .sidebar > .sectionWrapper {
@@ -488,9 +489,20 @@ table .sectionTable {
 	overflow: hidden;
 }
 
+#branchSection > .sectionTitle {
+	font-size: 12px;
+	color: white;
+	padding-bottom: 3px;
+}
+
+#repoSection > .sectionTitle {
+	font-size: 12px;
+	color: white;
+	padding-bottom: 3px;
+}
+
 .sectionTitle {
 	font-size: 12px;
-	color: #333;
 	padding-bottom: 3px;
 }
 

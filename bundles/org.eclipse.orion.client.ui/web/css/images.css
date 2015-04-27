@@ -113,7 +113,7 @@
 	font-size: 16px;
 	line-height: 14px;
 	vertical-align: top;
-	color: #333333;
+	color: white;
 	font-family: 'Orion Icon Font';
 	padding: 0;
 	background: none;
@@ -152,10 +152,10 @@
 }
 
 .core-sprite-wrench{
-	font-size: 16px;
+	font-size: 14px;
 	line-height:16px;
 	vertical-align:middle;
-	color: #555555;
+	color: white;
 	font-family: 'Orion Icon Font';
 	padding: 0;
 	background: none;
@@ -693,6 +693,7 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+
 .core-sprite-dashboard,
 .core-sprite-runlogs,
 .core-sprite-play,
@@ -811,6 +812,39 @@
 .file-sprite-javascript:hover{
 	text-decoration:none;
 }
+
+.dropdownMenuItem .core-sprite-page {
+    color: #333; 
+} 
+
+.dropdownMenuItem .core-sprite-horizontal {
+    color: #333; 
+} 
+
+.dropdownMenuItem .core-sprite-vertical {
+    color: #333; 
+} 
+
+.dropdownMenuItem .core-sprite-pip{
+    color: #333; 
+} 
+
+.dropdownTrigger .core-sprite-page {
+    color: white; 
+} 
+
+.dropdownTrigger .core-sprite-horizontal {
+    color: white; 
+} 
+
+.dropdownTrigger .core-sprite-vertical {
+    color: white;
+} 
+
+.dropdownTrigger .core-sprite-pip{
+    color: white;
+} 
+
 
 /* unicode alternatives
 

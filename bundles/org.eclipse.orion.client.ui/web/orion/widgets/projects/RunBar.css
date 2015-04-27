@@ -10,7 +10,7 @@
 }
 
 .runBarWrapper .disabled {
-	opacity: 0.15;
+	opacity: 0.30;
 }
 
 .runBarWrapper .disabled:hover {
@@ -39,7 +39,7 @@
 .launchConfigurationsButton > .dropdownTriggerButtonLabel {
 	-webkit-align-items: center;		 		 /* Safari */
 	align-items: center;
-	color: #999;
+	color: #CCCCCC;
 	display: -webkit-inline-flex;		 /* Safari */
 	display: inline-flex;
 	overflow: hidden;

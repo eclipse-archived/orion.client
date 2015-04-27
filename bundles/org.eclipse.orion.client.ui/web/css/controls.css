@@ -92,7 +92,7 @@
 
 /* 4px margin used by toolbar, plus 4px of border/padding */
 .status {
-	color:#555;
+	color: white;
 	vertical-align: baseline;
 }
 
@@ -253,7 +253,6 @@ textarea.parameterInput {
 }
 
 .selectableNavRow:hover {
-	background-color: #607D8B;
 }
 
 .disabledNavRow > .navColumn > .mainNavColumn {
@@ -405,9 +404,7 @@ textarea.parameterInput {
 }
 
 .slideParameters {
-	border: 1px solid #bbb;
-	background-color: lightgrey;
-	border-radius: 5px;
+	background-color: #C0E6FF;
 }
 
 .mainToolbar .slideContainer {

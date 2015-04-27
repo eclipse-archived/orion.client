@@ -40,9 +40,9 @@ input {
 	-moz-user-select: text;
 	text-indent: 0;
 	text-shadow: none;
-	border: solid 1px #bbb;
+	border: none;
 	color: #333;
-	font-size: 9pt;
+	font-size: 8pt;
 	padding: 2px;
 	margin-left: 5px;
 }

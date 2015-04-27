@@ -246,7 +246,7 @@ a.breadcrumb.currentLocation {
 	-webkit-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	color:#555;
+	color:white;
 }
 
 .filesystemSwitcher {
@@ -320,17 +320,22 @@ a.breadcrumb.currentLocation {
 	border-color: #ccc;
 }
 
+#pageToolbar .commandButton{
+	color:white;
+}
+
 .commandButton {
-	color: white;
-	border: 1px solid #dedede;
-	background-color: #ddd;
-	border-radius: 2px;
-	vertical-align:middle;
+  color: #1D3649;
+  border: 1px solid #C0E6FF;
+  background-color: #C0E6FF;
+  border-radius: 2px;
+  vertical-align: middle;
 }
 
 .commandButton:hover, .commandButton:focus {
-	background-color: #eee;
-	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
+  background-color: #7CC7FF;
+  border: 1px solid #7CC7FF;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 }
 
 .commandButton.disabled {
@@ -556,7 +561,7 @@ a.breadcrumb.currentLocation {
 	display: inline-block;
 	vertical-align: top;
 	line-height: 12px;
-	color: #555;
+	color: white;
 }
 
 .dropdownArrowRight {
@@ -661,9 +666,10 @@ a.breadcrumb.currentLocation {
 	border-left: 6px solid transparent;
 }
 
+
 .dropdownMenu .dropdownMenuItemSelected {
-	background-color: #FEEFDE;
-	border-left-color: #F58B0F;
+  background-color: #4CAAC6;
+  color: #FFF !important;
 }
 
 .dropdownMenuItem .check {
@@ -863,7 +869,7 @@ a.breadcrumb.currentLocation {
 .dialogTitle {
 	padding-top: 5px;
 	display: inline-block;
-	background: #555;
+	background: #264A60;
 	width: 100%;
 	padding-bottom: 5px;
 	border-top-left-radius: 1px;
