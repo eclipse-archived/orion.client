@@ -24,7 +24,7 @@ define([
 
 	var state;
 	var ternworker = new Worker('javascript/plugins/ternWorker.js');
-	ternworker.addEventListener('message', function(ev) {
+	ternworker.onmessage = function(ev) {
 		if(typeof(ev.data) === 'object') {
 			var _d = ev.data;
 			if(_d.request === 'read') {
@@ -51,8 +51,8 @@ define([
 				state.callback(new Error('Got message I don\'t know'));
 			}
 		}
-	}, false);
-	ternworker.addEventListener('error', function(err) {
+	};
+	ternworker.onerror = function(err) {
 		if(err instanceof Error) {
 			state.callback(err);
 		} else if(typeof(err) === 'string') {
@@ -61,7 +61,7 @@ define([
 		} else if(err && typeof(err.message) === 'string') {
 			state.callback(new Error(err.message));
 		}
-	});
+	};
 	ternworker.postMessage('tests_ready');
 	
 	var astManager = new ASTManager.ASTManager(Esprima);
@@ -100,7 +100,7 @@ define([
 			}
 		};
 		astManager.onModelChanging({file: {location: file}});
-		var params = {offset: offset, prefix : prefix, keyword: keywords, template: templates};
+		var params = {offset: offset, prefix : prefix, keywords: keywords, template: templates};
 		return {
 			editorContext: editorContext,
 			params: params
@@ -163,7 +163,7 @@ define([
 							assert.equal(ap.description, description, "Invalid proposal description"); //$NON-NLS-0$
 						}
 					}
-					if(expectedProposals[i].length === 3) {
+					if(expectedProposals[i].length === 3 && !ap.unselectable /*headers have no hover*/) {
 					    //check for doc hover
 					    assert(ap.hover, 'There should be a hover entry for the proposal');
 					    assert(ap.hover.indexOf(ep[2]) === 0, "The doc should have started with the given value"); 
@@ -179,10 +179,23 @@ define([
 		});
 	}
 
+	before('Message the server', function() {
+		ternworker.postMessage('before_all');
+	});
+
 	describe('Tern Content Assist Tests', function() {
-		this.timeout(0);
+		this.timeout(20000);
 		describe('Complete Syntax', function() {
 			it("test no dupe 1", function(done) {
+				var options = {
+					buffer: "x",
+					prefix: "x",
+					offset: 1,
+					callback: done
+				};
+				testProposals(options, []);
+			});
+			it("test no dupe 2", function(done) {
 				var options = {
 					buffer: "var coo = 9; var other = function(coo) { c }",
 					prefix: "c",
@@ -194,7 +207,7 @@ define([
 				]);
 			});
 		
-			it("test no dupe 2", function(done) {
+			it("test no dupe 3", function(done) {
 				var options = {
 					buffer: "var coo = { }; var other = function(coo) { coo = 9;\nc }",
 					prefix: "c",
@@ -206,6 +219,36 @@ define([
 				]);
 			});
 		});
-		
+		describe('Incomplete Syntax', function() {
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=465334
+			 */
+			it("test shorthand if 1", function(done) {
+				var options = {
+					buffer: "var foo = {}; var bar = foo ? f",
+					prefix: "f",
+					offset: 31,
+					callback: done
+				};
+				testProposals(options, [
+					["foo", "foo : foo"]
+				]);
+			});
+			/**
+			 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=465334
+			 */
+			it("test shorthand if 2", function(done) {
+				var options = {
+					buffer: "var foo = {}; var bar = foo && !false && foo.baz || foo.err ? foo : u",
+					prefix: "u",
+					offset: 69,
+					callback: done
+				};
+				testProposals(options, [
+					["", "ecma5", ""],
+					["undefined", "undefined : Any"]
+				]);
+			});
+		});
 	});
 });

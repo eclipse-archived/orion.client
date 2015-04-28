@@ -3681,7 +3681,9 @@ parseStatement: true, parseSourceElement: true */
         }
 
         consumeSemicolon();
-
+		if(!expr) {
+			expr = recoveredNode(node); //ORION do not set a null expression
+		}
         return node.finishExpressionStatement(expr);
     }
 
