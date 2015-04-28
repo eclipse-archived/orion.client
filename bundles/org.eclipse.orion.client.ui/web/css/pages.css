@@ -9,7 +9,7 @@ html {
 html, body {
 	margin: 0;
 	padding: 0;
-	font: 9pt Helvetica, Ariel, Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
+	font: 9pt Helvetica, Arial, Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	min-width:700px;
 	-webkit-font-smoothing: antialiased;
   	-moz-osx-font-smoothing: grayscale;
@@ -40,7 +40,7 @@ input {
 	-moz-user-select: text;
 	text-indent: 0;
 	text-shadow: none;
-	border: none;
+	border: 1px solid #f1f3f4;
 	color: #333;
 	font-size: 8pt;
 	padding: 2px;

@@ -49,12 +49,9 @@
 	display: inline-block;
 	padding: 2px;
 	color: white;
+	vertical-align: bottom;
+    line-height: 12px;
 }
-
-
-
-
-
 
 .dragOver {
 	background: #ffffd8;
