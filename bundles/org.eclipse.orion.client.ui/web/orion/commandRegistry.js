@@ -35,7 +35,7 @@ define([
 		this._activeBindings = {};
 		this._urlBindings = {};
 		this._pendingBindings = {}; // bindings for as-yet-unknown commands
-		this._init(options);
+		this._init(options || {});
 		this._parameterCollector = null;
 	}
 	CommandRegistry.prototype = /** @lends orion.commandregistry.CommandRegistry.prototype */ {
