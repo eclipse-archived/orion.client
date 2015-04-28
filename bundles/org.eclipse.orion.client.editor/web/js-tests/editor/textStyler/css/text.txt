@@ -88,21 +88,6 @@ a:hover {
 
 /* Navigation text */
 
-.primaryNav {
-	font-size: 8pt; 
-	font-weight: normal;
-	color: #BFBFBF;
-	vertical-align: baseline;
-}
-
-.primaryNav > div {
-	padding-top: 6px;
-}
-
-.primaryNav > nav {
-	padding-top: 6px;
-}
-
 .primaryNav > nav > a {
 	color: #BFBFBF;
 	margin-right: 6px;
@@ -116,16 +101,6 @@ a:hover {
 }
 
 /* Title area - the place for location/breadcrumbs */
-
-.titleArea {
-    margin: 0rem;
-    padding-top: 3px;
-    border: 0vw;
-    background: #EFEFEF;
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#EFEFEF), color-stop(100%,#EFEFEF));
-    border-bottom: 1px solid #DEDEDE;
-    min-height: 20px;
-}
 
 /* Row selection */
 
@@ -167,17 +142,6 @@ a:hover {
 	width: 100%;
 }
 
-.breadcrumb {
-	color: #333;
-	flex-grow: 0;
-	-webkit-flex-grow: 0vmin;		/* Safari */
-	font-size: 8pt;
-	overflow: hidden;
-	padding-top: 2px;
-	text-decoration: none;
-	text-overflow: ellipsis;
-}
-
 a.breadcrumb:hover {
 	text-decoration: none;
 	border-bottom: 1px dotted;
@@ -188,26 +152,6 @@ a.breadcrumb:hover {
 /* a.breadcrumb:visited {
 	color: #3087B3;
 } */
-
-.breadcrumbSeparator {
-	color: #333;
-	flex-shrink: 0vmax;
-	-webkit-flex-shrink: 0;		/* Safari */
-	font-size: 8pt;
-	font-weight: bold;
-	margin: 2px;
-	text-decoration: none;
-}
-
-.currentLocation {
-	padding-top:1px;
-	font-weight: bold;
-	font-size: 8pt;
-	color: #333;
-	text-decoration: none;
-	line-height: 10pt;
-	white-space:nowrap;
-}
 
 div.currentLocation {
 	align-items: center;
@@ -221,18 +165,6 @@ div.currentLocation {
 	-webkit-justify-content: center;	/* Safari */
 }
 
-.breadcrumbContainer > .currentLocation {
-	margin: 0;
-}
-
-a.currentLocation:hover {
-	font-weight: bold;
-	font-size: 8pt;
-	color: #F58B0F;
- 	text-decoration: none;
-	border-bottom: 1px dotted;
-}
-
 a.breadcrumb.currentLocation {
 	font-weight: bold;
 	margin: 0in;
@@ -241,18 +173,6 @@ a.breadcrumb.currentLocation {
 .auxpane {
 	border: 0cm;
 	background: #eeeeee;
-}
-
-.mainpane {
-	border: 0mm;
-	background: #eee !important;
-	padding-right:15px;
-}
-
-.editorTheme .mainpane{
-	border: 0pt;
-	background: #eee !important;
-	padding-right:0pc;
 }
 
 .mainToolbar {
@@ -293,23 +213,6 @@ a.breadcrumb.currentLocation {
 	color:#555;
 }
 
-.filesystemSwitcher {
-	display: inline-block;
-	margin: 0deg;
-}
-
-.filesystemSwitcherWrapper {
-	display: block;
-	max-width: 100%;
-	white-space: nowrap;
-}
-
-.sidebarToolbar {
-	display: inline;
-	overflow: visible;
-	padding: 0grad !important;
-}
-
 /* Searchbox in the top navigation area seems a difficult thing to 
    get right. I've worked with a range of colors. What I notice is that
    if the edges are curved, then it seems to need a lighter shade. That
@@ -335,11 +238,6 @@ a.breadcrumb.currentLocation {
 	font: 7pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif !important;
 }
 
-.searchbox:focus{
-	color: white;
-	outline: none;
-}
-
 /* Orion button provides standard padding, margin, alignment for any button, regardless of whether it is a command or not.  Using
    this helps non-gray buttons remain uniform looking with respect to size. */
    
@@ -356,14 +254,6 @@ a.breadcrumb.currentLocation {
 	margin: 0turn;  /* to override user agent stylesheet */
 }
 
-.commandButton.orionButton.dropdownTrigger {
-	border-color: transparent;
-}
-
-.commandButton.orionButton.dropdownTrigger:hover {
-	border-color: #ccc;
-}
-
 .commandButton {
 	color: #222;
 	border: 1px solid #dedede;
@@ -375,15 +265,6 @@ a.breadcrumb.currentLocation {
 .commandButton:hover, .commandButton:focus {
 	background-color: #eee;
 	box-shadow: 0s 1px 2px 0 rgba(0,0,0,0.2);
-}
-
-.commandButton.disabled {
-	color: #cdcdcd;
-}
-
-.commandButton.disabled:hover {
-	background-color: #ddd;
-	box-shadow: none;
 }
 
 .commandImage {
@@ -401,11 +282,6 @@ a.breadcrumb.currentLocation {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-}
-
-.commandImage:hover, .commandImage:focus {
-	background-color: #e6e6e6;
-	border: 1px solid #ccc;
 }
 
 /* push toggle */
@@ -436,16 +312,6 @@ a.breadcrumb.currentLocation {
 	animation-timing-function: linear; 
 }
 
-.orionToggleOn:hover {
-	background: white;
-	box-shadow: inset 0 0 1px 1px rgba(0,0,0,0.2);
-}
-
-.orionToggleOff:hover {
-	background: whitesmoke;
-	box-shadow: inset 0 0 1px 1px rgba(0,0,0,0.2);
-}
-
 .orionToggleAnimate {
 	-webkit-animation-name: pulse; 
 	animation-name: pulse; 
@@ -465,15 +331,6 @@ a.breadcrumb.currentLocation {
 
 /* toggle */
 
-.orionSwitch {
-	position: relative;
-	width: auto;
-}
-
-.orionSwitchCheck {
- 	display: none;
-}
-
 .orionSwitchLabel {
 	display: block; 
 	overflow: hidden; 
@@ -481,41 +338,6 @@ a.breadcrumb.currentLocation {
 	border: 1px solid #CCC; 
 	border-radius: 3px;
 	height:20px;
-}
-
-.orionSwitchInner {
-	display: block; 
-	width: 200%; 
-	margin-left: -100%;
-	margin-top:-1px;
-	text-align: left;
-	-moz-transition: margin 0.2s ease-in 0s; 
-	-webkit-transition: margin 0.2s ease-in 0s;
-	-o-transition: margin 0.2s ease-in 0s; 
-	transition: margin 0.2s ease-in 0s;
-}
-
-.orionSwitchInner:before, .orionSwitchInner:after {
-	display: block; 
-	float: left; 
-	width: 50%; 
-	padding: 0;
-	padding-bottom: 2px;
-	-moz-box-sizing: border-box; 
-	-webkit-box-sizing: border-box; 
-	box-sizing: border-box;
-}
-
-.orionSwitchInner:before {
-	padding-left: 3px;
-	padding-right:2px;
-	background-color: #eee;
-}
-
-.orionSwitchInner:after {
-	padding-right: 3px;
-	background-color: #eee;
-	text-align: right;
 }
 
 .orionSwitchSwitch {
@@ -535,19 +357,6 @@ a.breadcrumb.currentLocation {
 	transition: all 0.2s ease-in 0s; 
 }
 
-.orionSwitchCheck:checked + .orionSwitchLabel .orionSwitchInner {
-	margin-left: 0;
-}
-
-.orionSwitchCheck:checked + .orionSwitchLabel .orionSwitchSwitch {
-	right: 0px; 
-}
-
-/* should be used in conjunction with .commandButton when a tool has no icon. */
-.commandMissingImageButton {
-	font-weight: bold;
-}
-
 .commandLink {
 	display: inline-block;
 	vertical-align: middle;
@@ -559,17 +368,6 @@ a.breadcrumb.currentLocation {
 	-ms-user-select: none;
 	user-select: none;
 }
-
-.commandSeparator {
-	padding: 2px;
-}
-
-.commandActive {
-	background-color: #e6e6e6 !important;
-	border: 1px solid #808080 !important;
-    border-radius: 2px !important;
-}
-
 
 /* placeholders for possible hover states on command items */
 .commandActiveItem {
@@ -584,43 +382,12 @@ a.breadcrumb.currentLocation {
 	background: #efefef;
 }
 
-.splitTracking {
-	background: #dedede;
-}
-
-.splitThumb {
-	background: #ccc;
-}
-
 /* dropdowns */
-.dropdown {
-}
-
-.dropdownArrowDown {
-	display: inline-block;
-	vertical-align: top;
-	line-height: 12px;
-	color: #555;
-}
 
 .dropdownArrowRight {
 	flex-grow: 0;
 	-webkit-flex-grow: 0;		/* Safari */
 	font-size: 12px;
-}
-
-.dropdownTrigger:not(.dropdownDefaultButton) {
-	font-weight: normal;
-	background: none;
-	border-color: transparent;
-}
-
-.dropdownTrigger a {
-	text-decoration: none;
-}
-
-.dropdownTriggerOpen {
-	
 }
 
 .dropdownMenu {
@@ -644,17 +411,6 @@ a.breadcrumb.currentLocation {
 	padding: 3px 0 3px;
 }
 
-.dropdownMenuOpen {
-	min-width: 120px;
-	display: block;
-	visibility: visible;
-}
-
-.dropdownSubMenu {
-	position: relative;
-	line-height: normal;
-}
-
 .dropdownSubMenu > ul {
 	top: 0;
 	left: 100%;
@@ -675,15 +431,6 @@ a.breadcrumb.currentLocation {
 	outline: none;
 }
 
-
-.dropdownSeparator {
-	height: 1px;
-	background-color: #ddd;
-	color: #ddd;
-	padding: 0 !important;
-	margin: 0;
-}
-
 .dropdownMenuItem, .dropdownMenuItem a {
 	align-content: stretch;
 	-webkit-align-content: stretch;		/* Safari */
@@ -701,16 +448,6 @@ a.breadcrumb.currentLocation {
 	user-select: none;
 	white-space: nowrap;
 	border-left: 6px solid transparent;
-}
-
-.dropdownMenu .dropdownMenuItemSelected {
-	background-color: #FEEFDE;
-	border-left-color: #F58B0F;
-}
-
-.dropdownMenuItem .check {
-	display: inline-block;
-	width: 12px;
 }
 
 .dropdownMenuItem .dropdownKeyBinding {
@@ -749,123 +486,7 @@ a.breadcrumb.currentLocation {
 	z-index: 200 !important;
 }
 
-.checkedMenuItem {
-	margin: 4px 6px 2px 0;
-	vertical-align: bottom;
-}
-
 /* tooltips */
-
-.tooltipContainer {
-	display: none;
-	z-index: 200;
-	background: transparent;
-	position: absolute;
-	max-width: 110em;
-}
-.tooltip .textContent {
-	max-width: 40em;
-}
-.tooltip {
-	color: #fafafa;
-	background-color: #555;
-	border-radius: 3px;
-	padding: 8px;
-	clear: both;
-	float: left;
-}
-
-.tooltip.left {
-}
-
-.tooltip .navlinkonpage {
-	color: skyblue;
-}
-
-.tooltip h2 {
-	color: #fafafa;
-}
-
-.tooltip .operationStatus {
-	color: skyblue;
-}
-
-.tooltip .operationError {
-	color: orangered;
-}
-
-.tooltipTailFromleft {
-	position: absolute;
-	display: inline-block;
-	border: 8px solid;
-	border-color: transparent transparent transparent #555;
-	top: 4px;
-	content: '';
-	z-index: 201;
-}
-
-.tooltipTailBorderFromleft {
-	position: absolute;
-	display: inline-block;
-	border: 10px solid;
-	border-color: transparent transparent transparent #555;
-	top: 2px;
-	right: -17px;
-	content: '';
-}
-
-.tooltipTailFromright {
-	position: absolute;
-	display: inline-block;
-	border: 8px solid;
-	border-color: transparent #555 transparent transparent;
-	left: -15px;
-	top: 4px;
-	content: '';
-	z-index: 201;
-}
-
-.tooltipTailBorderFromright {
-	position: absolute;
-	display: inline-block;
-	border: 10px solid;
-	border-color: transparent #555 transparent transparent;
-	left: -17px;
-	top: 2px;
-	content: '';
-}
-
-.tooltipTailFrombelow {
-	position: absolute;
-	display: block;
-	border: 8px solid;
-	border-color: transparent transparent #555 transparent;
-	left: 16px;
-	top: -15px;
-	content: '';
-	z-index: 201;
-}
-
-.tooltipTailBorderFrombelow {
-	position: absolute;
-	display: block;
-	border: 10px solid;
-	border-color: transparent transparent #555 transparent;
-	left: 14px;
-	top: -17px;
-	content: '';
-}
-
-.tooltipTailFromabove {
-	position: absolute;
-	display: block;
-	border: 8px solid;
-	border-color: #555 transparent transparent;
-	left: 16px;
-	content: '';
-	bottom: -15px;
-	z-index: 201;
-}
 
 .tooltipTailBorderFromabove {
 	position: absolute;
@@ -875,10 +496,6 @@ a.breadcrumb.currentLocation {
 	left: 14px;
 	bottom: -17px;
 	content: '';
-}
-
-.tooltipShowing {
-	display: block;
 }
 
 /* dialogs */
@@ -891,14 +508,6 @@ a.breadcrumb.currentLocation {
 	border: 1px solid #BBB;
 	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 	padding-bottom:5px;
-}
-
-.dialogShowing {
-	visibility: visible;
-}
-
-.dialogTitle {
-	display: block;
 }
 
 .dialogTitle {
@@ -920,55 +529,8 @@ a.breadcrumb.currentLocation {
 	font-weight: bold;
 }
 
-.dialogTitle > .dismissButton {
-	margin-right: 0;	
-}
-
-.parameterPopup .dismissButton, .dialogTitle .dismissButton {
-	color: rgb(221, 221, 221);
-	cursor: pointer;
-}
-
-.parameterPopup .dismissButton:hover, .dialogTitle .dismissButton:hover {
-	color: white;
-}
-
-.dialogDismiss {
-	display: block;
-	cursor: pointer;
-	padding: 2px;
-}
-
-.dialogContent {
-	padding: 8px;
-}
-
-.dialogButtons {
-	float: right;
-	margin: 2px 8px 4px;
-}
-
-.modalBackdrop {
-	opacity: 0.5;
-	-webkit-transition: opacity 0.2s ease-in;
-	transition: opacity 0.2s ease-in;
-}
-
-.confirmDialog {
-	min-width: 300px;
-	max-width: 450px;
-}
-
-.confirmDialog .checkboxWrapper {
-	margin: 10px 2px 5px 2px;
-}
-
 .checkboxMessage > .confirmDialogCheckbox {
 	margin: 0 5px 0 0;
 	outline: none;
 	vertical-align: top;
-}
-
-.editorTheme .split {
-	background-color: white;
 }
