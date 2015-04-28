@@ -21,7 +21,7 @@
 	height:25px;
 	background-color: #f4f4f4;
 	padding-top:5px;
-	border-top: 1px solid #cacaca;
+	border-top: 1px solid #f1f3f4;
 	padding-bottom:4px;
 }
 
@@ -32,7 +32,7 @@
 
 .gitChangeListCompare {
 	height: 420px;
-	border: 1px solid lightgray;
+	border: 1px solid #f1f3f4;
 	margin-right: 10px;
 	min-height: 50px;
 }
@@ -107,7 +107,11 @@
 	min-width: 400px;
 	z-index: 200;
 	background-color: white;
-	border: 1px solid #aaa;
+	border: 1px solid #f1f3f4;
+}
+
+.mainToolbar .sectionTable .commandButton {
+	color: #555;
 }
 
 .mainToolbar {
@@ -174,7 +178,7 @@
 	margin-left: 10px;
 	margin-right: 10px;
 	position: absolute;
-	width: calc(100% - 42px);
+	width: calc(100% - 20px);
 	z-index: 200;
 	margin-top: -1px;
 	background-color: white;
@@ -215,7 +219,7 @@
 	margin-right: 5px;
 	margin-left: 5px;
 	background-color: white;
-	border-top: 1px solid #ddd;
+	border-top: 1px solid #f1f3f4;
 	overflow-y: auto;
 }
 
@@ -752,7 +756,7 @@ table .sectionTable {
 	height: 25px;
 	padding-top: 5px;
 	padding-bottom: 5px;
-	border-bottom: 1px solid #cacaca;
+	border-bottom: 1px solid #f1f3f4;
 }
 
 .sidebar .gitFilterBox {
