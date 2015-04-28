@@ -18,21 +18,18 @@
 }
 
 .progressWarning {
-	color: #c09853 !important;
-	background-color: #fcf8e3 !important;
-	border: 1px solid #fbeed5 !important;
+	color: #3C3200 !important;
+ 	background-color: #FDE876 !important;
 }
 
 .progressError {
-	color: #b94a48 !important;
-	background-color: #f2dede !important;
-	border: 1px solid #eed3d7 !important;
+	color: #E71D32 !important;
+  	background-color: #FFD2DD !important;
 }
 
 .progressNormal {
 	color: #144D14 !important;
   	background-color: #B4E051 !important;
-	border: none;
 }
 
 .progressPane {
@@ -276,8 +273,7 @@
 	z-index: 100; 
 	border-bottom-right-radius: 5px; 
 	border-bottom-left-radius: 5px; 
-	border: 1px solid #dff0d8;
-	border-top:none;
+	border:none;
 	transition:top 0.7s;
 	-webkit-transition: top 0.7s;	
 	-moz-transition: top 0.7s;
