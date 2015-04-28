@@ -388,7 +388,7 @@
 .file-sprite-css{
 	font-size: 16px;
 	color: #555;
-	line-height: normal;
+	line-height: 16px;
 	vertical-align: bottom;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
