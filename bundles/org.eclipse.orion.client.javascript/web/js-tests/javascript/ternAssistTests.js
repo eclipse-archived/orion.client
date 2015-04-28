@@ -23,7 +23,7 @@ define([
 	var assert = chai.assert;
 
 	var state;
-	var ternworker = new Worker('javascript/plugins/ternWorker.js');
+	var ternworker = new Worker('../../javascript/plugins/ternWorker.js');
 	ternworker.onmessage = function(ev) {
 		if(typeof(ev.data) === 'object') {
 			var _d = ev.data;
