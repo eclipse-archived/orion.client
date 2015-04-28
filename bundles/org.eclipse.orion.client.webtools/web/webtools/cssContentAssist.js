@@ -140,7 +140,7 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
 			"unqualified-attributes", //$NON-NLS-0$
 			"vendor-prefix", //$NON-NLS-0$
 			"zero-units" //$NON-NLS-0$
-		],
+		]
 	};
 	var severityValues = {
 		type: "link", //$NON-NLS-0$
@@ -320,6 +320,7 @@ define("webtools/cssContentAssist", [ //$NON-NLS-0$
         /**
          * @description Computes the proposals from the given offset, also returns all keyword and template proposals
          * @since 8.0
+         * @callback
          */
         _computeProposals: function _computeProposals(editorContext, buffer, context) {
             //TODO compute completion context

@@ -13,10 +13,12 @@
 define([
 'orion/objects',
 'javascript/finder',
-'javascript/signatures',
 'orion/Deferred',
 'javascript/compilationUnit'
-], function(Objects, Finder, Signatures, Deferred, CU) {
+], function(Objects, Finder, Deferred, CU) {
+	
+	var deferred;
+	var cachedContext;
 	
 	/**
 	 * @description Creates a new rename command
@@ -24,51 +26,76 @@ define([
 	 * @public
 	 * @param {ASTManager} ASTManager The backing AST manager
 	 * @param {TernWorker} ternWorker The running Tern worker
-	 * @returns {javascript.commands.GenerateDocCommand} A new command
+	 * @returns {javascript.commands.RenameCommand} A new command
 	 * @since 9.0
 	 */
 	function RenameCommand(ASTManager, ternWorker) {
 		this.astManager = ASTManager;
-		this.ternWorker = ternWorker;
+		this.ternworker = ternWorker;
+		this.ternworker.addEventListener('message', function(event) {
+			if(typeof(event.data) === 'object') {
+				var _d = event.data;
+				if(_d.request === 'rename') {
+					var changes = _d.changes;
+					if(changes && changes.changes && changes.changes.length > 0) {
+						var ranges = changes.changes;
+
+						// turn the ranges into offset / length
+						var offsets = [ranges.length];
+						for (var i = 0; i < ranges.length; i++) {
+							offsets[i] = {offset: ranges[i].start,
+										length: ranges[i].end - ranges[i].start};
+						}
+						var groups = [{data: {}, positions: offsets}];
+						var linkModel = {groups: groups};
+						deferred.resolve(cachedContext.enterLinkedMode(linkModel));
+					} else {
+						deferred.reject();
+					}
+				}
+			}
+		});
 	}
 	
 	Objects.mixin(RenameCommand.prototype, {
-		/* override
+		/* 
+		 * override
 		 * @callback
 		 */
 		execute: function(editorContext, options) {
 			var that = this;
-			return editorContext.getFileMetadata().then(function(meta) {
-			    if(meta.contentType.id === 'application/javascript') {
-			        return that.astManager.getAST(editorContext).then(function(ast) {
-        				that._doRename(editorContext, ast, options.offset);
-        			});
-			    } else {
-			        return editorContext.getText().then(function(text) {
-			            var offset = options.offset;
-			            var blocks = Finder.findScriptBlocks(text);
-			            if(blocks && blocks.length > 0) {
-			                var cu = new CU(blocks, meta);
-        			        if(cu.validOffset(offset)) {
-        			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-        			               that._doRename(editorContext, ast, offset); 
-        			            });
-        			        }
+		    if(options.contentType.id === 'application/javascript') {
+		        return that.astManager.getAST(editorContext).then(function(ast) {
+    				return that._doRename(editorContext, options);
+    			});
+		    } else {
+		        return editorContext.getText().then(function(text) {
+		            var offset = options.offset;
+		            var blocks = Finder.findScriptBlocks(text);
+		            if(blocks && blocks.length > 0) {
+		                var cu = new CU(blocks, {location:options.input, contentType:options.contentType});
+    			        if(cu.validOffset(offset)) {
+    			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+    			               return that._doRename(editorContext, options); 
+    			            });
     			        }
-			        });
-			    }
-			});
+			        }
+		        });
+		    }
 		},
 		
 		/**
 		 * @description Actually do the work
 		 * @function
 		 * @private
-		 * @returns {Deferred} A deferred to insert the template
+		 * @returns null
 		 */
-		_doRename: function _doRename(editorContext, ast, offset) {
+		_doRename: function _doRename(editorContext, params) {
 			//TODO show dialog for new name
-			//TODO request the worker
+			cachedContext = editorContext;
+			deferred = new Deferred();
+			this.ternworker.postMessage({request:'rename', args:{params:{offset: params.offset}, meta:{location: params.input}, newname:'FOO'}});
+			return deferred;
 		}
 	});
 	

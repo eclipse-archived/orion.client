@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*eslint-env browser, amd*/
-define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wizard', 'orion/webui/littlelib'], 
-		function(messages, mSelection, ComboTextInput, mWizard, lib){
+define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboTextInput', 'orion/webui/Wizard', 'orion/webui/littlelib', 'orion/Deferred'], 
+		function(messages, mSelection, ComboTextInput, mWizard, lib, Deferred){
 	
 	/**
 	 * A core page builder. The page gathers the minimum necessary
@@ -19,6 +19,7 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 	 */
 	
 	var rendered = false;
+	var plan;
 	
 	function CorePageBuilder(options){
 		options = options || {};
@@ -40,7 +41,8 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			this._confName = options.ConfName || null,
 			this._clouds = options.Clouds || [];
 			this._defaultTarget = options.DefaultTarget;
-			this._manifestPath = options.ManifestPath || ""; //$NON-NLS-0$
+			this._filePath = options.FilePath;
+			this._initManifestPath = options.InitManifestPath || ""; //$NON-NLS-0$
 			this._manifestApplication = options.ManifestApplication;
 			this._manifestInstrumentation = options.ManifestInstrumentation || {};
 			this._serviceRegistry = options.serviceRegistry;
@@ -125,7 +127,6 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 					);
 					
 					self._loadSpaces(self._orgsDropdown.value);
-					self._hideMessage();
 				}, function(error){
 					self._handleError(error, target, function(){ self._loadTargets(target); });
 				}
@@ -152,13 +153,9 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 				
 				self._spacesDropdown.appendChild(option);
 			});
-			
-			self._setSelection();
-			self._selection.getSelection(function(selection){
-				self._loadDomains(selection);
-				self._loadApplications(selection);
-				self._loadHosts(selection);
-			});
+				self._loadDomains(self._targets[org][0]);
+				self._loadApplications(self._targets[org][0]);
+				self._loadHosts(self._targets[org][0]);
 		},
 		
 		_loadDomains : function(target){
@@ -189,6 +186,8 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 			    			self._domainsDropdown.classList.add("modifiedCell");
 			    		}
 			    	}
+					self._setSelection();
+					self._hideMessage();
 				}
 			});
 		},
@@ -224,7 +223,29 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 		getSelection : function(){
 			return this._selection;
 		},
-			
+
+		getManifestPath : function(){
+			var path;
+
+			path = this._manifestInput.value;
+			return path;
+		},
+		
+		getPlan : function(){
+			if(this.getManifestPath() != this._initManifestPath){
+				var deferred = new Deferred();
+				var relativeFilePath = this._filePath + this.getManifestPath();
+				this._cfService.getDeploymentPlans(relativeFilePath).then(function(resp) {
+					var plans = resp.Children;
+					plan = deferred.resolve(plans[0]);
+					return plan;
+				});
+				this._initManifestPath = this.getManifestPath();
+				return deferred;
+			}
+			return plan;
+		},
+		
 		build : function(){
 			
 			var self = this;
@@ -363,11 +384,29 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 						
 						// render the manifest file
 						document.getElementById("manifestLabel").textContent = messages["manifestLabel"];
-						var manifestInput = document.createElement("input"); //$NON-NLS-0$
-						manifestInput.value = self._manifestPath || "";
-						manifestInput.readOnly = true; // TODO should be editable
-						document.getElementById("manifest").appendChild(manifestInput); //$NON-NLS-0$
+						self._manifestInput = document.createElement("input"); //$NON-NLS-0$
+						self._manifestInput.value = (self._initManifestPath == "") ? "manifest.yml" : self._initManifestPath;
+						self._manifestInput.readOnly = false; // TODO should be editable
+						document.getElementById("manifest").appendChild(self._manifestInput); //$NON-NLS-0$
 						
+						self._manifestinput = document.getElementById("manifest").firstChild;
+						self._manifestinput.onblur = function(){
+							if(self.getManifestPath() != self._initManifestPath){
+								var selection = self._selection.getSelection();
+								self.getPlan().then(function(result){
+									self._manifestApplication = result.Manifest.applications[0];
+									self._appsInput.value = self._manifestApplication.name;
+									self._hostInput.value = self._manifestApplication.host;
+
+									for(var i = 0; self._domainsDropdown.length > i; i++){
+										if(self._domainsDropdown[i].value === (self._manifestApplication.domain || self._manifestInstrumentation.domain)){
+											self._domainsDropdown[i].selected = "selected";
+										}
+									}
+								});
+							}
+						};
+
 						// Manifest Settings section
 						document.getElementById("manifestSettings").textContent = messages["manifestSettings"]; //$NON-NLS-0$
 						

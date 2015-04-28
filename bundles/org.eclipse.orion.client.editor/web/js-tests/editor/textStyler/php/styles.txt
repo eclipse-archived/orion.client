@@ -223,7 +223,9 @@
 {"start":887,"end":891,"style":{"styleClass":"constant language php"}}
 {"start":891,"end":893,"style":{"styleClass":"source php embedded"}}
 {"start":893,"end":897,"style":{"styleClass":"constant language php"}}
-{"start":899,"end":912,"style":{"styleClass":"source php embedded"}}
+{"start":899,"end":910,"style":{"styleClass":"source php embedded"}}
+{"start":910,"end":911,"style":{"styleClass":"punctuation operator"}}
+{"start":911,"end":912,"style":{"styleClass":"source php embedded"}}
 {"start":912,"end":932,"style":{"styleClass":"string quoted double"}}
 {"start":932,"end":933,"style":{"styleClass":"source php embedded"}}
 {"start":934,"end":936,"style":{"styleClass":"entity name declaration php"}}
@@ -258,19 +260,25 @@
 {"start":1203,"end":1246,"style":{"styleClass":"string quoted double"}}
 {"start":1246,"end":1247,"style":{"styleClass":"punctuation section parens end"}}
 {"start":1247,"end":1248,"style":{"styleClass":"source php embedded"}}
-{"start":1249,"end":1257,"style":{"styleClass":"source php embedded"}}
+{"start":1249,"end":1255,"style":{"styleClass":"source php embedded"}}
+{"start":1255,"end":1256,"style":{"styleClass":"punctuation operator"}}
+{"start":1256,"end":1257,"style":{"styleClass":"source php embedded"}}
 {"start":1257,"end":1260,"style":{"styleClass":"keyword operator php"}}
 {"start":1260,"end":1264,"style":{"styleClass":"source php embedded"}}
 {"start":1264,"end":1265,"style":{"styleClass":"punctuation section parens begin"}}
 {"start":1265,"end":1266,"style":{"styleClass":"punctuation section parens end"}}
 {"start":1266,"end":1267,"style":{"styleClass":"source php embedded"}}
-{"start":1268,"end":1275,"style":{"styleClass":"source php embedded"}}
+{"start":1268,"end":1273,"style":{"styleClass":"source php embedded"}}
+{"start":1273,"end":1274,"style":{"styleClass":"punctuation operator"}}
+{"start":1274,"end":1275,"style":{"styleClass":"source php embedded"}}
 {"start":1275,"end":1278,"style":{"styleClass":"keyword operator php"}}
 {"start":1278,"end":1282,"style":{"styleClass":"source php embedded"}}
 {"start":1282,"end":1283,"style":{"styleClass":"punctuation section parens begin"}}
 {"start":1283,"end":1284,"style":{"styleClass":"punctuation section parens end"}}
 {"start":1284,"end":1285,"style":{"styleClass":"source php embedded"}}
-{"start":1286,"end":1295,"style":{"styleClass":"source php embedded"}}
+{"start":1286,"end":1293,"style":{"styleClass":"source php embedded"}}
+{"start":1293,"end":1294,"style":{"styleClass":"punctuation operator"}}
+{"start":1294,"end":1295,"style":{"styleClass":"source php embedded"}}
 {"start":1295,"end":1298,"style":{"styleClass":"keyword operator php"}}
 {"start":1298,"end":1303,"style":{"styleClass":"source php embedded"}}
 {"start":1303,"end":1304,"style":{"styleClass":"punctuation section parens begin"}}
@@ -278,7 +286,9 @@
 {"start":1305,"end":1306,"style":{"styleClass":"source php embedded"}}
 {"start":1307,"end":1314,"style":{"styleClass":"keyword operator php"}}
 {"start":1314,"end":1315,"style":{"styleClass":"punctuation section parens begin"}}
-{"start":1315,"end":1337,"style":{"styleClass":"source php embedded"}}
+{"start":1315,"end":1319,"style":{"styleClass":"source php embedded"}}
+{"start":1319,"end":1321,"style":{"styleClass":"punctuation operator"}}
+{"start":1321,"end":1337,"style":{"styleClass":"source php embedded"}}
 {"start":1337,"end":1338,"style":{"styleClass":"punctuation section parens begin"}}
 {"start":1338,"end":1340,"style":{"styleClass":"punctuation section parens end"}}
 {"start":1340,"end":1341,"style":{"styleClass":"source php embedded"}}
@@ -291,17 +301,23 @@
 {"start":1407,"end":1445,"style":{"styleClass":"string unquoted heredoc php"}}
 {"start":1446,"end":1477,"style":{"styleClass":"string unquoted heredoc php"}}
 {"start":1478,"end":1483,"style":{"styleClass":"string unquoted heredoc php"}}
-{"start":1484,"end":1497,"style":{"styleClass":"source php embedded"}}
+{"start":1484,"end":1495,"style":{"styleClass":"source php embedded"}}
+{"start":1495,"end":1496,"style":{"styleClass":"punctuation operator"}}
+{"start":1496,"end":1497,"style":{"styleClass":"source php embedded"}}
 {"start":1497,"end":1517,"style":{"styleClass":"string quoted double"}}
 {"start":1517,"end":1518,"style":{"styleClass":"source php embedded"}}
 {"start":1519,"end":1521,"style":{"styleClass":"entity name declaration php"}}
 {"start":5636,"end":5641,"style":{"styleClass":"entity name declaration php"}}
-{"start":5642,"end":5662,"style":{"styleClass":"source php embedded"}}
+{"start":5642,"end":5648,"style":{"styleClass":"source php embedded"}}
+{"start":5648,"end":5649,"style":{"styleClass":"punctuation operator"}}
+{"start":5649,"end":5662,"style":{"styleClass":"source php embedded"}}
 {"start":5662,"end":5663,"style":{"styleClass":"punctuation section parens begin"}}
 {"start":5663,"end":5664,"style":{"styleClass":"punctuation section parens end"}}
 {"start":5664,"end":5665,"style":{"styleClass":"source php embedded"}}
 {"start":5667,"end":5690,"style":{"styleClass":"comment line number-sign php"}}
-{"start":5691,"end":5709,"style":{"styleClass":"source php embedded"}}
+{"start":5691,"end":5695,"style":{"styleClass":"source php embedded"}}
+{"start":5695,"end":5697,"style":{"styleClass":"punctuation operator"}}
+{"start":5697,"end":5709,"style":{"styleClass":"source php embedded"}}
 {"start":5709,"end":5710,"style":{"styleClass":"punctuation section parens begin"}}
 {"start":5710,"end":5776,"style":{"styleClass":"source php embedded"}}
 {"start":5776,"end":5777,"style":{"styleClass":"punctuation section parens end"}}

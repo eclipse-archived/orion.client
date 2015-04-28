@@ -917,6 +917,9 @@
   }
 
   var inferExprVisitor = {
+  	RecoveredNode: ret(function(node, scope, c, out, name) {
+  		return new AVal;
+  	}),  //ORION ignore the recovered node
     ArrayExpression: ret(function(node, scope, c) {
       var eltval = new AVal;
       for (var i = 0; i < node.elements.length; ++i) {

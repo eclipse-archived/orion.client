@@ -376,15 +376,23 @@ define(['i18n!cfui/nls/messages', 'require', 'orion/xhr', 'orion/Deferred', 'ori
 				return this._xhrV1("GET", url);
 			},
 
-			getLogz: function(target, appName){
+			getLogz: function(target, appName, timestamp){
 				if(!appName){
 					var deferred = new Deferred();
 					deferred.reject(messages["appNameIsMissing"]);
 				}
 				var url = require.toUrl("cfapi/logz/" + appName);
-				if(target){
-					url += ("?Target=" + JSON.stringify(target));
+				if (target) {
+					url += "?Target=" + JSON.stringify(target);
 				}
+				if (timestamp) {
+					if (target) {
+						url += "&Timestamp=" + timestamp;
+					} else {
+						url += "?Timestamp=" + timestamp;
+					}
+				}
+				
 				return this._xhrV1("GET", url);
 			},
 		};

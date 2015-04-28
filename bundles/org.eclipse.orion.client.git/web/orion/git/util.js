@@ -122,7 +122,7 @@ define([
 	
 	function _generateSignedOffBy(name, email) {
 		if (name && email) {
-			return "\nSigned-off-by: " + name + " <" + email + ">";
+			return "\n\nSigned-off-by: " + name + " <" + email + ">";
 		}
 	}
 	

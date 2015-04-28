@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*globals importScripts onmessage:true doctrine*/
+/*globals importScripts onmessage:true doctrine onconnect:true*/
 /*eslint-env node, browser*/
 importScripts('../../requirejs/require.js'); // synchronous
 require({
@@ -35,11 +35,13 @@ require({
 	]
 },
 [
-    'javascript/signatures',
 	'tern/lib/tern',
-	'tern/plugin/doc_comment', //TODO must load them, they self-register with Tern
+	'tern/plugin/doc_comment',
+	//TODO Load these on the fly
 	//'tern/plugin/requirejs',
-	'tern/plugin/orion_requirejs',
+	//'tern/plugin/orion_requirejs',
+	//'tern/plugin/mongodb2_0_27',
+	//'tern/plugin/node',
 	'tern/defs/ecma5',
 	'tern/defs/browser',
 	'javascript/handlers/ternAssistHandler',
@@ -49,16 +51,38 @@ require({
 	'javascript/handlers/ternRenameHandler',
 	'doctrine'  //stays last - exports into global
 ],
-/* @callback */ function(Signatures, Tern, docPlugin, /*requirePlugin,*/ orionRequirePlugin, ecma5, browser, AssistHandler, DeclHandler, HoverHandler, OccurrencesHandler, RenameHandler) {
+/* @callback */ function(Tern, docPlugin, /*requirePlugin, orionRequirePlugin, mongodbPlugin, nodePlugin,*/ ecma5, browser, AssistHandler, DeclHandler, 
+						HoverHandler, OccurrencesHandler, RenameHandler) {
     
     var ternserver, pendingReads = Object.create(null);
+    
+    function warmUp() {
+    	if(ternserver) {
+    		ternserver.request({
+	           query: {
+	           type: "completions", 
+	           file: 'warmup',
+	           types: true, 
+	           origins: true,
+	           urls: true,
+	           docs: true,
+	           end: 0,
+	           sort:true
+	           },
+	           files: [{type:'full', name: 'warmup', text: ''}]}, 
+	           /* @callback */ function(error, comps) {
+	               //do nothing
+	           });
+	      }
+	      ternserver.delFile('warmup'); //don't leave it in there
+    }
     
     /**
      * @description Start up the Tern server, send a message after trying
      */
     function startServer() {
         var options = {
-                //async: true,
+                async: true,
                 debug:true,
                 defs: [ecma5, browser],
                 projectDir: '/',
@@ -66,41 +90,44 @@ require({
                     doc_comment: {
                         fullDocs: true
                     }
-                }
-               // getFile: _getFile
+                    //mongodb2_0_27:{},
+                    //node: {}
+                    //orion_requirejs: {}
+                },
+                getFile: _getFile
             };
         
         ternserver = new Tern.Server(options);
-        if(ternserver) {
-            postMessage("ternstarted");
-        } else {
-            postMessage("ternfailed");
-        }
     }
     startServer();
-    onmessage = function(event) {
-        if(typeof(event.data) === 'object') {
-            var _d = event.data;
+    
+    /**
+     * @description Worker callback when a message is sent to the worker
+     * @callback
+     */
+    onmessage = function(evnt) {
+        if(typeof(evnt.data) === 'object') {
+            var _d = evnt.data;
             if(typeof(_d.request) === 'string') {
                 switch(_d.request) {
                     case 'completions': {
-                        AssistHandler.computeProposals(ternserver, postMessage, _d.args);
+                        AssistHandler.computeProposals(ternserver, _d.args, post);
                         break;
                     }
                     case 'occurrences': {
-                        OccurrencesHandler.computeOccurrences(ternserver, postMessage, _d.args);
+                        OccurrencesHandler.computeOccurrences(ternserver, _d.args, post);
                         break;
                     }
                     case 'decl': {
-                        DeclHandler.computeDeclaration(ternserver, postMessage, _d.args);
+                        DeclHandler.computeDeclaration(ternserver, _d.args, post);
                         break;
                     }
                     case 'hover': {
-                        HoverHandler.computeHover(ternserver, postMessage, _d.args);
+                        HoverHandler.computeHover(ternserver, _d.args, post);
                         break;
                     }
                     case 'rename': {
-                        RenameHandler.computeRename(ternserver, postMessage, _d.args);
+                        RenameHandler.computeRename(ternserver, _d.args, post);
                         break;
                     }
                     case 'addFile': {
@@ -111,7 +138,7 @@ require({
                         _deleteFile(_d.args);
                         break;
                     }
-                    case 'contents': {
+                    case 'read': {
                         _contents(_d.args);
                         break;
                     }
@@ -119,6 +146,45 @@ require({
             }
         }
     };
+    
+    /**
+     * @description Worker callback when an error occurs
+     * @callback
+     */
+   	onerror = function(evnt) {
+    	post(evnt);
+    };
+    
+    /**
+     * @description Worker callback when a shared worker starts up
+     * @callback
+     */
+    onconnect = function(evnt) {
+    	this.port = evnt.ports[0];
+    	this.port.onmessage = onmessage;
+    	this.port.start();
+    };
+    
+    post('server_ready');
+    //Warm up after we have finished attaching all our listeners
+    warmUp();
+    
+    /**
+     * @description Sends the given message back to the client. If the msg is null, send an Error
+     * object with the optional given error message
+     * @param {Object} msg The message to send back to the client
+     * @param {String} errormsg The optional error message to send back to the client if the main message is null
+     */
+    function post(msg, errormsg) {
+    	if(!msg) {
+    		msg = new Error(errormsg ? errormsg : 'An unknown error occurred.');
+    	}
+    	if(this.port) {
+    		this.port.postMessage(msg);
+    	} else {
+    		postMessage(msg);
+    	}
+    }
     
     /**
      * @description Notifies the Tern server that file contents are ready
@@ -135,7 +201,7 @@ require({
         file = args.logical;
         read = pendingReads[file];
         if(typeof(read) === 'function') {
-            read(err, {contents: contents, file:args.file, logical:args.logical});
+            read(err, {contents: contents, file:file, logical:args.logical});
         }
         delete pendingReads[file];
     }
@@ -148,7 +214,7 @@ require({
         if(ternserver && typeof(args.file) === 'string') {
             ternserver.delFile(args.file);
         } else {
-            postMessage('Failed to delete file from Tern: '+args.file);
+            post('Failed to delete file from Tern: '+args.file);
         }
     }
     
@@ -159,15 +225,17 @@ require({
      * @param {Function} callback The callback once the file has been read or failed to read
      */
     function _getFile(file, callback) {
-        if(ternserver) {
+    	if(file === 'warmup') {
+    		callback(null, null);
+    	} else if(ternserver) {
         	var _f = file;
            if(typeof(file) === 'object') {
            		_f = file.logical;
            }
            pendingReads[_f] = callback;
-           postMessage({request: 'read', args: {file:file}});
+           post({request: 'read', args: {file:file}});
 	    } else {
-	       postMessage('Failed to read file into Tern: '+_f);
+	       post('Failed to read file into Tern: '+_f);
 	    }
     }
 });

@@ -275,7 +275,7 @@ define([
 	}
 	var queries = new URL(window.location.href).query;
 	var gitFSPattern = queries.get("gitFSPattern");
-	var gitBase = makeParentRelative(new URL(gitFSPattern ? gitFSPattern : "../../gitapi/", window.location.href).href);
+	var gitBase = gitFSPattern ? gitFSPattern : makeParentRelative(new URL("../../gitapi/", window.location.href).href);
 	var service = new GitFileImpl(gitBase);
 
 	provider.registerService("orion.core.file", service, {
@@ -285,7 +285,7 @@ define([
 	});
 
 	var gitDiffPattern = queries.get("gitDiffPattern");
-	var base = new URL(gitDiffPattern ? gitDiffPattern : "../../gitapi/diff/", window.location.href).href;
+	var base = gitDiffPattern ? gitDiffPattern : new URL("../../gitapi/diff/", window.location.href).href;
 	provider.registerService("orion.core.diff", {
 		getDiffContent: function(diffURI, options){	
 			var url = new URL(diffURI, window.location);

@@ -775,7 +775,18 @@ eclipse.GitService = (function() {
 					"New" : commitName //$NON-NLS-0$
 				})
 			}).then(function(result) {
-				clientDeferred1.resolve(result.xhr.getResponseHeader("Location")); //TODO bug 367344 //$NON-NLS-0$
+				var logLocation = null;
+				//Bug 464972. We should use response instead of result.xhr.getResponseHeader. The result.xhr.getResponseHeader converts the non-english characters in the response, into "???"
+				if(result.response && typeof result.response === "string") {
+					var resonseObj = JSON.parse(result.response);
+					if(resonseObj.Location) {
+						logLocation = resonseObj.Location;	
+					} 
+				}
+				if(!logLocation) {
+					logLocation = result.xhr.getResponseHeader("Location");
+				}
+				clientDeferred1.resolve(logLocation);
 			}, function(error){
 				service._handleGitServiceResponseError(clientDeferred, error);
 			});

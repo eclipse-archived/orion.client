@@ -17,10 +17,10 @@ define([
 	'orion/webui/littlelib', 
 	'orion/objects', 
 	'orion/widgets/settings/Subsection', 
-	'orion/widgets/input/LabeledTextfield', 
-	'orion/widgets/input/LabeledCheckbox',
+	'orion/widgets/input/SettingsTextfield', 
+	'orion/widgets/input/SettingsCheckbox',
 	'orion/webui/tooltip'
-], function(messages, mCommands, mSection, lib, objects, Subsection, LabeledTextfield, LabeledCheckbox, mTooltip) {
+], function(messages, mCommands, mSection, lib, objects, Subsection, SettingsTextfield, SettingsCheckbox, mTooltip) {
 
 	function UserSettings(options, node) {
 		objects.mixin(this, options);
@@ -63,19 +63,19 @@ define([
 			
 			/* - account ----------------------------------------------------- */
 			this.accountFields = [
-				new LabeledTextfield( {fieldlabel:messages['User Name'], editmode:'readonly'}),  //$NON-NLS-0$
-				new LabeledTextfield( {fieldlabel:messages['Full Name'], postChange: updateAccountFunction}),
-				new LabeledTextfield( {fieldlabel:messages['Email Address'], postChange: updateAccountFunction}),
-				new LabeledCheckbox( {fieldlabel: messages['Email Confirmed'], editmode:'readonly'})  //$NON-NLS-0$
+				new SettingsTextfield( {fieldlabel:messages['User Name'], editmode:'readonly'}),  //$NON-NLS-0$
+				new SettingsTextfield( {fieldlabel:messages['Full Name'], postChange: updateAccountFunction}),
+				new SettingsTextfield( {fieldlabel:messages['Email Address'], postChange: updateAccountFunction}),
+				new SettingsCheckbox( {fieldlabel: messages['Email Confirmed'], editmode:'readonly'})  //$NON-NLS-0$
 			];
 			var accountSubsection = new Subsection( {sectionName: messages['Account'], parentNode: this.sections, children: this.accountFields} );
 			accountSubsection.show();
 
 			/* - password ---------------------------------------------------- */
 			this.passwordFields = [
-				new LabeledTextfield( {fieldlabel:messages['Current Password'], inputType:'password', postChange: updatePasswordFunction} ), //$NON-NLS-1$  //$NON-NLS-0$
-				new LabeledTextfield( {fieldlabel:messages['New Password'], inputType:'password', postChange: updatePasswordFunction} ), //$NON-NLS-1$  //$NON-NLS-0$
-				new LabeledTextfield( {fieldlabel:messages['Verify Password'], inputType:'password', postChange: updatePasswordFunction} ) //$NON-NLS-1$  //$NON-NLS-0$
+				new SettingsTextfield( {fieldlabel:messages['Current Password'], inputType:'password', postChange: updatePasswordFunction} ), //$NON-NLS-1$  //$NON-NLS-0$
+				new SettingsTextfield( {fieldlabel:messages['New Password'], inputType:'password', postChange: updatePasswordFunction} ), //$NON-NLS-1$  //$NON-NLS-0$
+				new SettingsTextfield( {fieldlabel:messages['Verify Password'], inputType:'password', postChange: updatePasswordFunction} ) //$NON-NLS-1$  //$NON-NLS-0$
 			];
 			var passwordSection = new Subsection( {sectionName:messages['Password'], parentNode: this.sections, children: this.passwordFields } );
 			passwordSection.show();

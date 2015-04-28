@@ -9,7 +9,8 @@
  ******************************************************************************/
 /*eslint-env browser, amd*/
 
-define(['i18n!orion/settings/nls/messages', 
+define(['i18n!orion/settings/nls/messages',
+		'orion/i18nUtil',
 		'orion/commands', 
 		'orion/commandRegistry', 
 		'orion/webui/littlelib', 
@@ -20,7 +21,7 @@ define(['i18n!orion/settings/nls/messages',
 		'text!examples/html-demo.html',
 		'text!examples/css-demo.css',
 		'text!examples/java-demo.java'],
-function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExample, htmlExample, cssExample, javaExample) {
+function(messages, i18nUtil, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExample, htmlExample, cssExample, javaExample) {
 
 	var editorLanguage, editorTheme, originalTheme, currentTheme, revertBtn, deleteBtn ,saveBtn, themeNameInput;
 	var protectedThemes = [];
@@ -565,9 +566,17 @@ function(messages, mCommands, mCommandRegistry, lib, mSetup, colors, util, jsExa
 	}
 	ThemeBuilder.prototype.deleteTheme = deleteTheme;
 	
-	function saveTheme(){
-		if (protectedThemes.indexOf(currentTheme.name) !== -1){
-			window.alert(currentTheme.name + messages["cannotModifyMsg"]);
+	function saveTheme(theme) {
+		if (theme && theme.styles) {
+			currentTheme = theme;
+		}
+
+		if (protectedThemes.indexOf(currentTheme.name) !== -1) {
+			var newName = prompt(i18nUtil.formatMessage(messages["cannotModifyMsg"], currentTheme.name), messages["defaultImportedThemeName"]);
+			if (newName && newName.length > 0 && protectedThemes.indexOf(newName) === -1) {
+				currentTheme.name = newName;
+				this.addTheme(currentTheme);
+			}
 		}
 		else {
 			this.addTheme(currentTheme);

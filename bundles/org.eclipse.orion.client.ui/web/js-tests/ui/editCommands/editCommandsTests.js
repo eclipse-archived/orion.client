@@ -18,6 +18,7 @@
 define([
 	"chai/chai",
 	"js-tests/editor/mockEditor",
+	"orion/commandRegistry",
 	"orion/contentTypes",
 	"orion/Deferred",
 	"orion/editorCommands",
@@ -25,15 +26,15 @@ define([
 	"orion/progress",
 	"orion/serviceregistry",
 	"orion/URL-shim", // no exports
-], function(chai, MockEditor, mContentTypes, Deferred, mEditorCommands, mInputManager, mProgress, mServiceRegistry) {
+], function(chai, MockEditor, mCommandRegistry, mContentTypes, Deferred, mEditorCommands, mInputManager, mProgress, mServiceRegistry) {
 	var EDITOR_COMMAND = "orion.edit.command",
 	    MESSAGE = "orion.page.message",
 	    BOGUS_FRAME_URL = "/urlthatdoesntexistanywhere", // "http://example.org/foo";
 	    assert = chai.assert;
 
 	// Test variables
-	var serviceRegistry, contentTypeRegistry, progress, editorCommandFactory, inputManager, editor,
-	    initialFrames;
+	var serviceRegistry, contentTypeRegistry, progress, commandRegistry, editorCommandFactory,
+	     inputManager, editor, editorView, initialFrames;
 
 	function setup() {
 		serviceRegistry = new mServiceRegistry.ServiceRegistry();
@@ -42,19 +43,29 @@ define([
 		inputManager =  new mInputManager.InputManager({
 			serviceRegistry: serviceRegistry,
 		});
+		commandRegistry = new mCommandRegistry.CommandRegistry();
 		editorCommandFactory = new mEditorCommands.EditorCommandFactory({
 			inputManager: inputManager,
-			serviceRegistry: serviceRegistry
+			serviceRegistry: serviceRegistry,
+			commandRegistry: commandRegistry
 		});
 		editor = new MockEditor({});
 		editor.installTextView();
 		initialFrames = Array.prototype.map.call(document.getElementsByTagName("iframe"), function(iframe) {
 			return iframe.src;
 		});
+		editorView = {
+			editor: editor,
+			inputManager: inputManager
+		};
+		// Apparently editorCommands.js needs this function defined on the editor
+		editor.getEditorContext = function() {
+			return {};
+		};
 	}
 
 	function teardown() {
-		serviceRegistry = contentTypeRegistry = editorCommandFactory = inputManager = editor = null;
+		serviceRegistry = contentTypeRegistry = commandRegistry = editorCommandFactory = inputManager = editor = editorView = null;
 		// Remove any iframes created during the test
 		Array.prototype.forEach.call(document.getElementsByTagName("iframe"), function(iframe) {
 			if (initialFrames.indexOf(iframe.src) === -1)
@@ -84,14 +95,16 @@ define([
 		// service must be registered before we invoke an editor command, else it will throw.
 		registerMessageService();
 
-		return editorCommandFactory._createEditCommands(editor).then(function(commandObjects) {
-			commandObjects.some(function(obj) {
-				if (obj.info.id === "example") {
-					// Execute command programatically
-					obj.command.callback(/* .. */);
+		return editorCommandFactory._createEditCommands().then(function(commandObjects) {
+			//editorCommandFactory.updateCommands(editorView);
+			var found = commandObjects.some(function(obj) {
+				if (obj.id === "example") {
+					obj.callback.call(editorView); // Command's `this` must be the Editor View
 					return true;
 				}
 			});
+			if (!found)
+				throw new Error("Could not obtain registered edit command");
 		});
 	}
 
@@ -202,8 +215,9 @@ define([
 						}, 0);
 					}
 				});
-				executeCommand();
-				return promise;
+				return executeCommand().then(function() {
+					return promise;
+				});
 			});
 			it("iframe should be able to set status", function() {
 				registerEditorCommand({
@@ -224,8 +238,9 @@ define([
 						promise.resolve();
 					}
 				});
-				executeCommand();
-				return promise;
+				return executeCommand().then(function() {
+					return promise;
+				});
 			});
 		});
 	});

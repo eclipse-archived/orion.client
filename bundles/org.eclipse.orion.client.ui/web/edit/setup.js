@@ -477,7 +477,7 @@ objects.mixin(EditorViewer.prototype, {
 			if (this.currentEditorView) {
 				this.currentEditorView.destroy();
 			}
-			if (this.pool.lastMetadata && this.pool.lastMetadata.Location !== metadata.Location) {
+			if (this.pool.lastMetadata && metadata && this.pool.lastMetadata.Location !== metadata.Location) {
 				this.pool.model.setText("");
 			}
 			this.currentEditorView = view;
@@ -545,6 +545,7 @@ objects.mixin(EditorSetup.prototype, {
 			serviceRegistry: serviceRegistry,
 			commandRegistry: this.commandRegistry,
 			fileClient: this.fileClient,
+			renderToolbars: this.renderToolbars.bind(this),
 			searcher: this.searcher,
 			readonly: this.readonly,
 			toolbarId: "toolsActions", //$NON-NLS-0$
@@ -744,6 +745,7 @@ objects.mixin(EditorSetup.prototype, {
 	},
 
 	renderToolbars: function(metadata) {
+		metadata = metadata || this.activeEditorViewer.inputManager.getFileMetadata();
 		var menuBar = this.menuBar;
 		var commandRegistry = this.commandRegistry;
 		var editor = this.activeEditorViewer.editor;

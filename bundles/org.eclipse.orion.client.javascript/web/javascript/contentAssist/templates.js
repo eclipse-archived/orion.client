@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -17,13 +17,13 @@ define([
 	var typeofValues = {
 		type: "link", //$NON-NLS-0$
 		values: [
-			"undefined", //$NON-NLS-0$
-			"object", //$NON-NLS-0$
 			"boolean", //$NON-NLS-0$
-			"number", //$NON-NLS-0$
-			"string", //$NON-NLS-0$
 			"function", //$NON-NLS-0$
-			"xml" //$NON-NLS-0$
+			"number", //$NON-NLS-0$
+			"object", //$NON-NLS-0$
+			"string", //$NON-NLS-0$
+			"symbol",
+			"undefined" //$NON-NLS-0$
 		]
 	};
 

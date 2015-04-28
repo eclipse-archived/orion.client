@@ -76,7 +76,7 @@ define([
                     var nodeName = item.nodeName;
                     if (typeof(obj[nodeName]) === "undefined") { //$NON-NLS-0$
                         var tmp = xmlToJson(item);
-                        if (tmp != "") // if not empty string
+                        if (tmp !== "") // if not empty string
                             obj[nodeName] = tmp;
                     } else {
                         if (typeof(obj[nodeName].push) === "undefined") { //$NON-NLS-0$
@@ -84,7 +84,7 @@ define([
                             obj[nodeName] = [];
                             obj[nodeName].push(old);
                         }
-                        var tmp = xmlToJson(item);
+                        tmp = xmlToJson(item);
                         if (tmp !== "") // if not empty string
                             obj[nodeName].push(tmp);
                     }
@@ -228,18 +228,16 @@ define([
 
         function importSublimeTheme(xml) {
             var themeJson = xmlToJson(xml); //convert to Json
-            var newStyle = themeData.getDefaultTheme();
-
             var dictKey = themeJson.plist[1].dict.array.dict[0].dict.key;
             var dictString = themeJson.plist[1].dict.array.dict[0].dict.string;
+
+            var bgColor = getBackgroundColor(dictKey, dictString);
+            var useDarkBase = calculateLuminance(bgColor) < luminanceDarkLimit;
+            var newStyle = themeData.getDefaultTheme({dark: useDarkBase});
 
             //finds the general attributes
             for (var i = 0; i < dictKey.length; i++) {
                 if (dictKey[i]["#text"] === "background" && dictString[i]["#text"].length < 8) { //$NON-NLS-0$
-                    if (calculateLuminance(dictString[i]["#text"]) < luminanceDarkLimit) {
-                        /* use a dark base theme if luminance is low (the theme being imported is dark) */
-                        newStyle = themeData.getDefaultTheme({dark: true});
-                    }
                     newStyle.styles.backgroundColor = dictString[i]["#text"];
                 }
                 else if (dictKey[i]["#text"] === "foreground" && dictString[i]["#text"].length < 8) { //$NON-NLS-0$
@@ -271,9 +269,9 @@ define([
             for (i = 1; i < restKey.length; i++) {
                 try {
                     var target = restKey[i].string[0]["#text"].split(",");
-                    var targetKey = target[k].trim();
-
+                    var targetKey = "";
                     for (var k = 0; k < target.length; k++) {
+                        targetKey = target[k].trim();
                         if (targetKey === "Comment") { //$NON-NLS-0$
                             if (restKey[i].dict.key instanceof Array) {
                                 for (var l = 0; l < restKey[i].dict.key.length; l++) {
@@ -526,7 +524,7 @@ define([
         ThemeImporter.prototype.importSublimeTheme = importSublimeTheme;
 
         function calculateLuminance(c) {
-            var c = c.substring(1);      // strip #
+            c = c.substring(1);      // strip #
             var rgb = parseInt(c, 16);   // convert rrggbb to decimal
             var r = (rgb >> 16) & 0xff;  // extract red
             var g = (rgb >>  8) & 0xff;  // extract green
@@ -538,8 +536,43 @@ define([
         }
         ThemeImporter.prototype.calculateLuminance = calculateLuminance;
 
+        function getBackgroundColor(styles, dictString) {
+            if (styles[0].cssText) { /* this is a brackets style definition */
+                var rules = styles;
+                var scrollString = "-scroll";
+                for (var i = 0; i < rules.length; i++) {
+                    var classes = rules[i].selectorText.split(",");
+                    for (var l = 0; l < classes.length; l++) {
+                        try {
+                            classes[l] = classes[l].trim();
+                            if (classes[l].substr(classes[l].length - scrollString.length) === scrollString) { //$NON-NLS-0$
+                                if (rules[i].style.background) {
+                                    return colorToHex(rules[i].style.background);
+                                }
+                            }
+                        } catch(e) {}
+                    }
+                }
+                /* return default brackets background color if no color is specified */
+                return "#f0f0f0";
+            }
+
+            /* presumably is a sublime style definition */
+            for (i = 0; i < styles.length; i++) {
+                if (styles[i]["#text"] === "background") { //$NON-NLS-0$
+                    return dictString[i]["#text"];
+                }
+            }
+			/* return default sublime background color if no color is specified */
+            return "#1e1e1e";
+        }
+        ThemeImporter.prototype.getBackgroundColor = calculateLuminance;
+
         function importBracketsTheme(rules) {
-            var newStyle = themeData.getDefaultTheme();
+            var bgColor = getBackgroundColor(rules);
+            /* use a dark base theme if luminance is low (the theme being imported is dark) */
+            var useDarkBase = calculateLuminance(bgColor) < luminanceDarkLimit;
+            var newStyle = themeData.getDefaultTheme({dark: useDarkBase});
 
             var activelineBgString = "-activeline-background",
                 atomString = "-atom",
@@ -567,10 +600,6 @@ define([
 
                         if (classes[l].substr(classes[l].length - scrollString.length) === scrollString) { //$NON-NLS-0$
                             if (rules[i].style.background) {
-                                if (calculateLuminance(colorToHex(rules[i].style.background)) < luminanceDarkLimit) {
-                                    /* use a dark base theme if luminance is low (the theme being imported is dark) */
-                                    newStyle = themeData.getDefaultTheme({dark: true});
-                                }
                                 newStyle.styles.backgroundColor = colorToHex(rules[i].style.background);
                             }
                             if (rules[i].style.color) {
@@ -589,7 +618,7 @@ define([
                                 newStyle.styles.comment.line.color = colorToHex(rules[i].style.color);
 
                                 // Brackets styles raw html in markdown as comments
-                                newStyle.styles.markup.raw.code.color = newStyle.styles.comment.color
+                                newStyle.styles.markup.raw.code.color = newStyle.styles.comment.color;
                             }
                         }
                         else if (classes[l].substr(classes[l].length - stringString.length) === stringString) { //$NON-NLS-0$
@@ -703,8 +732,8 @@ define([
         ThemeImporter.prototype.importBracketsTheme = importBracketsTheme;
 
         function importEclipseTheme(xml) {
-        	/* use a dark base theme if luminance is low (the theme being imported is dark) */
-        	var useDarkBase = calculateLuminance(getValuesFromXML(xml, "background")) < luminanceDarkLimit;
+            /* use a dark base theme if luminance is low (the theme being imported is dark) */
+            var useDarkBase = calculateLuminance(getValuesFromXML(xml, "background")) < luminanceDarkLimit;
             var newStyle = themeData.getDefaultTheme({dark: useDarkBase});
 
             var styles = newStyle.styles;
@@ -816,7 +845,7 @@ define([
                 newStyle = importEclipseTheme(xml);
             } else if (xml) {
                 /* old-style theme definition */
-                var newStyle = {};
+                newStyle = {};
 
                 newStyle.name = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
                 newStyle.annotationRuler = xml.getElementsByTagName("background")[0].attributes[0].value;
@@ -838,7 +867,7 @@ define([
             }
 
             if (newStyle) {
-                data.options.items.addTheme(newStyle);
+                data.options.items.saveTheme(newStyle);
                 data.hide();
             } else {
                 if (!document.getElementById("themeImportError")) {

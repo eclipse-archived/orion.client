@@ -697,9 +697,17 @@ define([
 	                    		if (node.parent.type === 'CallExpression' && node.parent.callee && node.parent.callee.name === 'require'){
 	                    			return;
 	                    		}
-                    			// Don't consider strings in the define statement
-                    			if (node.parent.parent && node.parent.parent.type === 'CallExpression' && node.parent.parent.callee && node.parent.parent.callee.name === 'define'){
-	                    			return;
+                    			// Don't consider strings in the define statement (both property keys and values)
+                    			if (node.parent.parent){
+                    				var callExpression;
+                    				if (node.parent.parent.type === 'CallExpression'){
+                    					callExpression = node.parent.parent;
+                    				} else if (node.parent.parent.parent && node.parent.parent.parent.type === 'CallExpression'){
+                    					callExpression = node.parent.parent.parent;
+                    				}
+                    				if (callExpression && callExpression.callee && callExpression.callee.name === 'define'){
+		                    			return;
+	                    			}
 	                    		}
                     		}
                     		lineNum = node.loc.end.line-1;

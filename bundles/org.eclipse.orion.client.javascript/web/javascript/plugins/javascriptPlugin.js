@@ -25,13 +25,6 @@ define([
 'javascript/astManager',
 'javascript/quickFixes',
 'javascript/contentAssist/ternAssist',
-'javascript/contentAssist/indexFiles/mongodbIndex',
-'javascript/contentAssist/indexFiles/mysqlIndex',
-'javascript/contentAssist/indexFiles/postgresIndex',
-'javascript/contentAssist/indexFiles/redisIndex',
-'javascript/contentAssist/indexFiles/expressIndex',
-'javascript/contentAssist/indexFiles/amqpIndex',
-'javascript/contentAssist/contentAssist',
 'javascript/validator',
 'javascript/occurrences',
 'javascript/hover',
@@ -40,13 +33,14 @@ define([
 'logger',
 'javascript/commands/generateDocCommand',
 'javascript/commands/openDeclaration',
+'javascript/commands/renameCommand',
 'orion/editor/stylers/application_javascript/syntax',
 'orion/editor/stylers/application_json/syntax',
 'orion/editor/stylers/application_schema_json/syntax',
 'orion/editor/stylers/application_x-ejs/syntax',
 'i18n!javascript/nls/messages'
-], function(PluginProvider, Bootstrap, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, 
-			EslintValidator, Occurrences, Hover, Outliner,	Util, Logger, GenerateDocCommand, OpenDeclCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
+], function(PluginProvider, Bootstrap, FileClient, Metrics, Esprima, Estraverse, ScriptResolver, ASTManager, QuickFixes, TernAssist, 
+			EslintValidator, Occurrences, Hover, Outliner,	Util, Logger, GenerateDocCommand, OpenDeclCommand, RenameCommand, mJS, mJSON, mJSONSchema, mEJS, javascriptMessages) {
 
     Bootstrap.startup().then(function(core) {
 
@@ -106,13 +100,66 @@ define([
     	 */
     	var astManager = new ASTManager.ASTManager(Esprima);
     	
-    	// Start the worker
-    	var ternWorker = new Worker(new URL("ternWorker.js", window.location.href).href);
-    	ternWorker.onerror = function(error) {
-    		Logger.log(error.message);
+    	function WrappedWorker(script, onMessage, onError) {
+    		/*if(typeof(SharedWorker) === 'function') {
+    			this.shared = true;
+    			this.worker = new SharedWorker(new URL(script, window.location.href).href);
+    			this.worker.port.onmessage = onMessage;
+    			this.worker.port.onerror = onError;
+    			this.worker.port.start();
+    			this.worker.port.postMessage('');
+    		} else { */
+    			this.worker = new Worker(new URL(script, window.location.href).href);
+    			this.worker.onmessage = onMessage;
+    			this.worker.onerror = onError;
+    			this.worker.postMessage('');
+    	//	}
+    	}
+    	
+    	WrappedWorker.prototype.postMessage = function(msg) {
+    		if(this.shared) {
+    			this.worker.port.postMessage(msg);
+    		} else {
+    			this.worker.postMessage(msg);
+    		}
     	};
-    	ternWorker.postMessage("start");
-/*    	
+    	
+    	WrappedWorker.prototype.addEventListener = function(msg, handler) {
+    		this.worker.addEventListener(msg, handler);	
+    	};
+    	
+    	// Start the worker
+    	var ternWorker = new WrappedWorker("ternWorker.js", 
+		    	function(evnt) {
+		    		if(typeof(evnt.data) === 'object') {
+		    			var _d  = evnt.data;
+		    			switch(_d.request) {
+		    				case 'read': {
+		    					if(typeof(_d.args.file) === 'object') {
+		    						scriptresolver.getWorkspaceFile(_d.args.file.logical).then(function(files) {
+		    							if(files && files.length > 0) {
+		    								return fileClient.read(files[0].location).then(function(contents) {
+		    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:files[0].location, logical:_d.args.file.logical, path:files[0].path}});	
+		    								});
+		    							} else {
+		    								ternWorker.postMessage({request: 'read', args: {error: 'Failed to read file '+_d.args.file.logical}});
+		    							}
+		    						});	
+		    					} else {
+		    						var file = _d.args.file;
+		    						return fileClient.read(file).then(function(contents) {
+		    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:file}});	
+		    								});
+		    					}
+		    					break;
+		    				}
+		    			}
+		    		}
+		    	}, 
+		    	function(err) {
+		    		Logger.log(err);	
+		    	});
+    	
     	provider.registerService("orion.edit.contentassist", new TernAssist.TernContentAssist(astManager, ternWorker),  //$NON-NLS-0$
     			{
     				contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$
@@ -122,7 +169,7 @@ define([
     				charTriggers: "[.]",  //$NON-NLS-0$
     				excludedStyles: "(string.*)"  //$NON-NLS-0$
     		});
-*/    	
+    	
     	/**
     	 * Register AST manager as Model Change listener
     	 */
@@ -156,7 +203,18 @@ define([
     		contentType: ['application/javascript']  //$NON-NLS-0$
     			}
     	);
-    	
+    /*	
+    	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
+    			new RenameCommand.RenameCommand(astManager, ternWorker), 
+    			{
+    		name: javascriptMessages['renameElement'],  //$NON-NLS-0$
+    		tooltip : javascriptMessages['renameElementTooltip'],  //$NON-NLS-0$
+    		id : "rename.js.element",  //$NON-NLS-0$
+    		key : [ 'R', false, true, !Util.isMac, Util.isMac],  //$NON-NLS-0$
+    		contentType: ['application/javascript']  //$NON-NLS-0$
+    			}
+    	);
+   */
     	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager);
     	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
@@ -437,16 +495,16 @@ define([
     		name: javascriptMessages['jsHover'],
     		contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
     			});
-    	
+/*    	
     	provider.registerService("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager),  //$NON-NLS-0$
     			{
-    		contentType: ["application/javascript", 'text/html'],  //$NON-NLS-0$
+    		contentType: ["application/javascript", 'text/html'],  //$NON-NLS-0$ //$NON-NLS-1$
     		name: javascriptMessages["contentAssist"],  //$NON-NLS-0$
     		id: "orion.edit.contentassist.javascript",  //$NON-NLS-0$
     		charTriggers: "[.]",  //$NON-NLS-0$
     		excludedStyles: "(string.*)"  //$NON-NLS-0$
     			});
-    	
+  */  	
     	var validator = new EslintValidator(astManager);
     	
     	/**
@@ -754,41 +812,7 @@ define([
     			provider.registerService("orion.edit.highlighter", {}, newGrammars[current]);
     		}
     	}
-    	
-    	/**
-    	 * Register type definitions for known JS libraries
-    	 */
-    	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
-    		id: "node.redis",  //$NON-NLS-0$
-    		type: "tern",  //$NON-NLS-0$
-    		defs: RedisIndex
-    	});
-    	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
-    		id: "node.mysql",  //$NON-NLS-0$
-    		type: "tern",  //$NON-NLS-0$
-    		defs: MysqlIndex
-    	});
-    	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
-    		id: "node.postgres",  //$NON-NLS-0$
-    		type: "tern",  //$NON-NLS-0$
-    		defs: PostgresIndex
-    	});
-    	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
-    		id: "node.mongodb",  //$NON-NLS-0$
-    		type: "tern",  //$NON-NLS-0$
-    		defs: MongodbIndex
-    	});
-    	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
-    		id: "node.express",  //$NON-NLS-0$
-    		type: "tern", //$NON-NLS-0$
-    		defs: ExpressIndex
-    	});
-    	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
-    		id: "node.amqp",  //$NON-NLS-0$
-    		type: "tern",  //$NON-NLS-0$
-    		defs: AMQPIndex
-    	});
-    	
     	provider.connect();
 	});
 });
+

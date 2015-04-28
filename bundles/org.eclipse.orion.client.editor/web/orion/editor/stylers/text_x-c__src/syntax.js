@@ -71,8 +71,8 @@ define("orion/editor/stylers/text_x-c__src/syntax", ["orion/editor/stylers/lib/s
 		],
 		repository: {
 			directive: {
-				match: "(#\\s*(?:" + directives.join("|") + "))\\b",
-				name: "keyword.operator.directive.cpp"
+				match: "#\\s*(?:" + directives.join("|") + ")\\b[^$]*", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				name: "meta.preprocessor.cpp" //$NON-NLS-0$
 			}
 		}
 	});

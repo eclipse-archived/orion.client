@@ -39,6 +39,7 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 		"while", //$NON-NLS-0$
 		"yield" //$NON-NLS-0$
 	];
+	var languageVariables = ["this"]; //$NON-NLS-0$
 	var constants = [
 		"false", "null", "true", "undefined" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
@@ -90,7 +91,7 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 				name: "constant.language.js" //$NON-NLS-0$
 			},
 			{
-				match: "\\bthis\\b", //$NON-NLS-0$
+				match: "\\b(?:" + languageVariables.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "variable.language.js" //$NON-NLS-0$
 			}
 		],
@@ -121,6 +122,6 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 	return {
 		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
-		keywords: keywords.concat(controlKeywords)
+		keywords: keywords.concat(controlKeywords).concat(languageVariables).concat(constants)
 	};
 });

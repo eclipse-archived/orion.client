@@ -37,7 +37,7 @@ define([
 			cornFlowerblue  String      String      String
 			----------------------------------------------- */
 		
-		var defaultFont = '"Consolas", "Monaco", "Vera Mono", monospace'; //$NON-NLS-0$
+		var defaultFont = '"Source Code Pro", "Consolas", "Monaco", "Vera Mono", monospace'; //$NON-NLS-0$
 		var defaultFontSize = '12px'; //$NON-NLS-0$
 		var prospecto, darker;
 

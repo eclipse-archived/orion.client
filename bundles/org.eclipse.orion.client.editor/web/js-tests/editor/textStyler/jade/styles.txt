@@ -6,57 +6,85 @@
 {"start":47,"end":48,"style":{"styleClass":"meta tag jade"}}
 {"start":55,"end":59,"style":{"styleClass":"meta tag jade"}}
 {"start":60,"end":63,"style":{"styleClass":"meta tag jade"}}
+{"start":67,"end":68,"style":{"styleClass":"punctuation operator"}}
 {"start":68,"end":73,"style":{"styleClass":"string quoted single"}}
 {"start":74,"end":75,"style":{"styleClass":"meta tag jade"}}
 {"start":77,"end":78,"style":{"styleClass":"meta tag jade"}}
 {"start":107,"end":108,"style":{"styleClass":"meta tag jade"}}
 {"start":109,"end":114,"style":{"styleClass":"keyword operator js"}}
+{"start":114,"end":115,"style":{"styleClass":"punctuation operator"}}
 {"start":115,"end":123,"style":{"styleClass":"string quoted single"}}
+{"start":129,"end":130,"style":{"styleClass":"punctuation operator"}}
 {"start":130,"end":142,"style":{"styleClass":"string quoted single"}}
+{"start":152,"end":153,"style":{"styleClass":"punctuation operator"}}
 {"start":154,"end":157,"style":{"styleClass":"keyword operator js"}}
+{"start":172,"end":173,"style":{"styleClass":"punctuation operator"}}
 {"start":174,"end":178,"style":{"styleClass":"constant language js"}}
 {"start":179,"end":183,"style":{"styleClass":"meta tag jade"}}
 {"start":184,"end":189,"style":{"styleClass":"keyword operator js"}}
+{"start":189,"end":190,"style":{"styleClass":"punctuation operator"}}
 {"start":206,"end":214,"style":{"styleClass":"string quoted single"}}
 {"start":217,"end":223,"style":{"styleClass":"string quoted single"}}
 {"start":226,"end":231,"style":{"styleClass":"meta tag jade"}}
+{"start":239,"end":240,"style":{"styleClass":"punctuation operator"}}
 {"start":240,"end":250,"style":{"styleClass":"string quoted single"}}
+{"start":257,"end":258,"style":{"styleClass":"punctuation operator"}}
 {"start":258,"end":269,"style":{"styleClass":"string quoted single"}}
 {"start":283,"end":286,"style":{"styleClass":"meta tag jade"}}
+{"start":294,"end":295,"style":{"styleClass":"punctuation operator"}}
 {"start":295,"end":303,"style":{"styleClass":"string quoted double"}}
 {"start":305,"end":308,"style":{"styleClass":"meta tag jade"}}
+{"start":318,"end":320,"style":{"styleClass":"punctuation operator"}}
 {"start":320,"end":328,"style":{"styleClass":"string quoted double"}}
 {"start":331,"end":336,"style":{"styleClass":"meta tag jade"}}
+{"start":341,"end":342,"style":{"styleClass":"punctuation operator"}}
 {"start":342,"end":352,"style":{"styleClass":"string quoted single"}}
 {"start":363,"end":368,"style":{"styleClass":"meta tag jade"}}
+{"start":373,"end":374,"style":{"styleClass":"punctuation operator"}}
 {"start":374,"end":384,"style":{"styleClass":"string quoted single"}}
+{"start":393,"end":394,"style":{"styleClass":"punctuation operator"}}
 {"start":394,"end":398,"style":{"styleClass":"constant language js"}}
 {"start":400,"end":405,"style":{"styleClass":"meta tag jade"}}
+{"start":410,"end":411,"style":{"styleClass":"punctuation operator"}}
 {"start":411,"end":421,"style":{"styleClass":"string quoted single"}}
+{"start":430,"end":431,"style":{"styleClass":"punctuation operator"}}
 {"start":431,"end":436,"style":{"styleClass":"constant language js"}}
 {"start":438,"end":443,"style":{"styleClass":"meta tag jade"}}
+{"start":448,"end":449,"style":{"styleClass":"punctuation operator"}}
 {"start":449,"end":459,"style":{"styleClass":"string quoted single"}}
+{"start":468,"end":469,"style":{"styleClass":"punctuation operator"}}
 {"start":469,"end":473,"style":{"styleClass":"constant language js"}}
 {"start":482,"end":483,"style":{"styleClass":"punctuation section parens begin"}}
 {"start":487,"end":499,"style":{"styleClass":"meta tag doctype jade"}}
 {"start":500,"end":505,"style":{"styleClass":"meta tag jade"}}
+{"start":510,"end":511,"style":{"styleClass":"punctuation operator"}}
 {"start":511,"end":521,"style":{"styleClass":"string quoted single"}}
 {"start":532,"end":537,"style":{"styleClass":"meta tag jade"}}
+{"start":542,"end":543,"style":{"styleClass":"punctuation operator"}}
 {"start":543,"end":553,"style":{"styleClass":"string quoted single"}}
+{"start":562,"end":563,"style":{"styleClass":"punctuation operator"}}
 {"start":563,"end":567,"style":{"styleClass":"constant language js"}}
 {"start":569,"end":574,"style":{"styleClass":"meta tag jade"}}
+{"start":579,"end":580,"style":{"styleClass":"punctuation operator"}}
 {"start":580,"end":590,"style":{"styleClass":"string quoted single"}}
+{"start":599,"end":600,"style":{"styleClass":"punctuation operator"}}
 {"start":600,"end":605,"style":{"styleClass":"constant language js"}}
 {"start":607,"end":612,"style":{"styleClass":"meta tag jade"}}
+{"start":617,"end":618,"style":{"styleClass":"punctuation operator"}}
 {"start":618,"end":628,"style":{"styleClass":"string quoted single"}}
+{"start":637,"end":638,"style":{"styleClass":"punctuation operator"}}
 {"start":638,"end":642,"style":{"styleClass":"constant language js"}}
+{"start":643,"end":645,"style":{"styleClass":"punctuation operator"}}
 {"start":646,"end":655,"style":{"styleClass":"string quoted single"}}
 {"start":658,"end":659,"style":{"styleClass":"meta tag jade"}}
+{"start":665,"end":666,"style":{"styleClass":"punctuation operator"}}
 {"start":666,"end":667,"style":{"styleClass":"punctuation section block begin"}}
 {"start":674,"end":679,"style":{"styleClass":"string quoted single"}}
 {"start":693,"end":700,"style":{"styleClass":"string quoted single"}}
 {"start":700,"end":701,"style":{"styleClass":"punctuation section block end"}}
+{"start":704,"end":705,"style":{"styleClass":"punctuation operator"}}
 {"start":706,"end":709,"style":{"styleClass":"keyword operator js"}}
+{"start":718,"end":719,"style":{"styleClass":"punctuation operator"}}
 {"start":720,"end":721,"style":{"styleClass":"punctuation section bracket begin"}}
 {"start":721,"end":726,"style":{"styleClass":"string quoted single"}}
 {"start":728,"end":733,"style":{"styleClass":"string quoted single"}}
@@ -64,38 +92,55 @@
 {"start":740,"end":741,"style":{"styleClass":"punctuation section bracket end"}}
 {"start":742,"end":743,"style":{"styleClass":"meta tag jade"}}
 {"start":744,"end":749,"style":{"styleClass":"keyword operator js"}}
+{"start":749,"end":750,"style":{"styleClass":"punctuation operator"}}
 {"start":759,"end":819,"style":{"styleClass":"comment line double-slash jade"}}
 {"start":820,"end":821,"style":{"styleClass":"meta tag jade"}}
 {"start":827,"end":832,"style":{"styleClass":"keyword operator js"}}
+{"start":832,"end":833,"style":{"styleClass":"punctuation operator"}}
 {"start":841,"end":846,"style":{"styleClass":"keyword operator js"}}
+{"start":846,"end":847,"style":{"styleClass":"punctuation operator"}}
 {"start":847,"end":848,"style":{"styleClass":"punctuation section bracket begin"}}
 {"start":848,"end":854,"style":{"styleClass":"string quoted single"}}
 {"start":854,"end":855,"style":{"styleClass":"punctuation section bracket end"}}
+{"start":858,"end":859,"style":{"styleClass":"punctuation operator"}}
 {"start":860,"end":863,"style":{"styleClass":"keyword operator js"}}
+{"start":875,"end":876,"style":{"styleClass":"punctuation operator"}}
 {"start":877,"end":885,"style":{"styleClass":"string quoted single"}}
 {"start":886,"end":887,"style":{"styleClass":"meta tag jade"}}
 {"start":888,"end":893,"style":{"styleClass":"keyword operator js"}}
+{"start":893,"end":894,"style":{"styleClass":"punctuation operator"}}
 {"start":894,"end":895,"style":{"styleClass":"punctuation section block begin"}}
+{"start":914,"end":917,"style":{"styleClass":"punctuation operator"}}
 {"start":918,"end":921,"style":{"styleClass":"string quoted single"}}
 {"start":921,"end":922,"style":{"styleClass":"punctuation section block end"}}
+{"start":927,"end":928,"style":{"styleClass":"punctuation operator"}}
 {"start":928,"end":931,"style":{"styleClass":"string quoted single"}}
 {"start":938,"end":939,"style":{"styleClass":"meta tag jade"}}
 {"start":940,"end":945,"style":{"styleClass":"keyword operator js"}}
+{"start":945,"end":946,"style":{"styleClass":"punctuation operator"}}
 {"start":946,"end":947,"style":{"styleClass":"punctuation section block begin"}}
+{"start":966,"end":969,"style":{"styleClass":"punctuation operator"}}
 {"start":970,"end":978,"style":{"styleClass":"string quoted single"}}
 {"start":978,"end":979,"style":{"styleClass":"punctuation section block end"}}
+{"start":984,"end":985,"style":{"styleClass":"punctuation operator"}}
 {"start":985,"end":993,"style":{"styleClass":"string quoted single"}}
 {"start":1002,"end":1003,"style":{"styleClass":"meta tag jade"}}
 {"start":1022,"end":1023,"style":{"styleClass":"meta tag jade"}}
 {"start":1045,"end":1048,"style":{"styleClass":"meta tag jade"}}
+{"start":1057,"end":1058,"style":{"styleClass":"punctuation operator"}}
+{"start":1061,"end":1062,"style":{"styleClass":"punctuation operator"}}
 {"start":1062,"end":1067,"style":{"styleClass":"string quoted double"}}
 {"start":1068,"end":1079,"style":{"styleClass":"keyword operator jade"}}
+{"start":1095,"end":1096,"style":{"styleClass":"punctuation operator"}}
 {"start":1097,"end":1100,"style":{"styleClass":"keyword operator js"}}
+{"start":1112,"end":1113,"style":{"styleClass":"punctuation operator"}}
 {"start":1114,"end":1115,"style":{"styleClass":"punctuation section block begin"}}
 {"start":1115,"end":1125,"style":{"styleClass":"string quoted single"}}
 {"start":1127,"end":1132,"style":{"styleClass":"string quoted single"}}
 {"start":1132,"end":1133,"style":{"styleClass":"punctuation section block end"}}
 {"start":1135,"end":1138,"style":{"styleClass":"meta tag jade"}}
+{"start":1147,"end":1148,"style":{"styleClass":"punctuation operator"}}
+{"start":1151,"end":1152,"style":{"styleClass":"punctuation operator"}}
 {"start":1152,"end":1157,"style":{"styleClass":"string quoted double"}}
 {"start":1158,"end":1169,"style":{"styleClass":"keyword operator jade"}}
 {"start":1183,"end":1203,"style":{"styleClass":"comment line double-slash jade"}}
@@ -109,14 +154,20 @@
 {"start":1265,"end":1269,"style":{"styleClass":"comment line double-slash jade"}}
 {"start":1274,"end":1276,"style":{"styleClass":"meta tag jade"}}
 {"start":1303,"end":1306,"style":{"styleClass":"meta tag jade"}}
+{"start":1321,"end":1322,"style":{"styleClass":"punctuation operator"}}
 {"start":1323,"end":1326,"style":{"styleClass":"keyword control js"}}
 {"start":1327,"end":1328,"style":{"styleClass":"punctuation section parens begin"}}
 {"start":1328,"end":1331,"style":{"styleClass":"keyword operator js"}}
+{"start":1334,"end":1335,"style":{"styleClass":"punctuation operator"}}
 {"start":1336,"end":1337,"style":{"styleClass":"constant numeric number"}}
+{"start":1341,"end":1342,"style":{"styleClass":"punctuation operator"}}
 {"start":1343,"end":1344,"style":{"styleClass":"constant numeric number"}}
+{"start":1347,"end":1349,"style":{"styleClass":"punctuation operator"}}
 {"start":1349,"end":1350,"style":{"styleClass":"punctuation section parens end"}}
 {"start":1352,"end":1353,"style":{"styleClass":"meta tag jade"}}
+{"start":1353,"end":1354,"style":{"styleClass":"punctuation operator"}}
 {"start":1355,"end":1369,"style":{"styleClass":"string quoted single"}}
+{"start":1370,"end":1371,"style":{"styleClass":"punctuation operator"}}
 {"start":1372,"end":1385,"style":{"styleClass":"string quoted single"}}
 {"start":1386,"end":1389,"style":{"styleClass":"keyword control js"}}
 {"start":1390,"end":1392,"style":{"styleClass":"keyword operator js"}}
@@ -126,6 +177,7 @@
 {"start":1405,"end":1405,"style":{"styleClass":"meta annotation task todo"}}
 {"start":1405,"end":1413,"style":{"styleClass":"comment block"}}
 {"start":1420,"end":1421,"style":{"styleClass":"meta tag jade"}}
+{"start":1421,"end":1423,"style":{"styleClass":"punctuation operator"}}
 {"start":1424,"end":1468,"style":{"styleClass":"string quoted single"}}
 {"start":1469,"end":1472,"style":{"styleClass":"keyword control js"}}
 {"start":1473,"end":1475,"style":{"styleClass":"keyword operator js"}}
@@ -135,6 +187,7 @@
 {"start":1488,"end":1488,"style":{"styleClass":"meta annotation task todo"}}
 {"start":1488,"end":1496,"style":{"styleClass":"comment block"}}
 {"start":1503,"end":1504,"style":{"styleClass":"meta tag jade"}}
+{"start":1507,"end":1509,"style":{"styleClass":"punctuation operator"}}
 {"start":1510,"end":1554,"style":{"styleClass":"string quoted single"}}
 {"start":1555,"end":1558,"style":{"styleClass":"keyword control js"}}
 {"start":1559,"end":1561,"style":{"styleClass":"keyword operator js"}}
@@ -143,17 +196,22 @@
 {"start":1570,"end":1574,"style":{"styleClass":"keyword other documentation task"}}
 {"start":1574,"end":1574,"style":{"styleClass":"meta annotation task todo"}}
 {"start":1574,"end":1582,"style":{"styleClass":"comment block"}}
+{"start":1589,"end":1590,"style":{"styleClass":"punctuation operator"}}
 {"start":1591,"end":1594,"style":{"styleClass":"keyword operator js"}}
+{"start":1600,"end":1601,"style":{"styleClass":"punctuation operator"}}
 {"start":1602,"end":1603,"style":{"styleClass":"punctuation section block begin"}}
 {"start":1617,"end":1630,"style":{"styleClass":"string quoted single"}}
 {"start":1631,"end":1632,"style":{"styleClass":"punctuation section block end"}}
+{"start":1633,"end":1634,"style":{"styleClass":"punctuation operator"}}
 {"start":1635,"end":1638,"style":{"styleClass":"keyword operator js"}}
+{"start":1650,"end":1651,"style":{"styleClass":"punctuation operator"}}
 {"start":1652,"end":1657,"style":{"styleClass":"constant language js"}}
 {"start":1666,"end":1668,"style":{"styleClass":"keyword control jade"}}
 {"start":1686,"end":1691,"style":{"styleClass":"string quoted single"}}
 {"start":1692,"end":1705,"style":{"styleClass":"comment block"}}
 {"start":1710,"end":1712,"style":{"styleClass":"meta tag jade"}}
 {"start":1749,"end":1750,"style":{"styleClass":"meta tag jade"}}
+{"start":1762,"end":1763,"style":{"styleClass":"punctuation operator"}}
 {"start":1783,"end":1790,"style":{"styleClass":"keyword control jade"}}
 {"start":1802,"end":1807,"style":{"styleClass":"string quoted single"}}
 {"start":1808,"end":1821,"style":{"styleClass":"comment block"}}
@@ -187,6 +245,7 @@
 {"start":2123,"end":2124,"style":{"styleClass":"constant numeric number"}}
 {"start":2124,"end":2125,"style":{"styleClass":"punctuation section bracket end"}}
 {"start":2130,"end":2132,"style":{"styleClass":"meta tag jade"}}
+{"start":2132,"end":2133,"style":{"styleClass":"punctuation operator"}}
 {"start":2139,"end":2141,"style":{"styleClass":"meta tag jade"}}
 {"start":2144,"end":2148,"style":{"styleClass":"keyword control jade"}}
 {"start":2160,"end":2162,"style":{"styleClass":"keyword operator js"}}
@@ -196,7 +255,10 @@
 {"start":2179,"end":2184,"style":{"styleClass":"string quoted single"}}
 {"start":2184,"end":2185,"style":{"styleClass":"punctuation section bracket end"}}
 {"start":2190,"end":2192,"style":{"styleClass":"meta tag jade"}}
+{"start":2192,"end":2193,"style":{"styleClass":"punctuation operator"}}
+{"start":2200,"end":2201,"style":{"styleClass":"punctuation operator"}}
 {"start":2202,"end":2206,"style":{"styleClass":"string quoted single"}}
+{"start":2207,"end":2208,"style":{"styleClass":"punctuation operator"}}
 {"start":2214,"end":2216,"style":{"styleClass":"meta tag jade"}}
 {"start":2219,"end":2222,"style":{"styleClass":"keyword control jade"}}
 {"start":2234,"end":2236,"style":{"styleClass":"keyword operator js"}}
@@ -209,9 +271,14 @@
 {"start":2256,"end":2263,"style":{"styleClass":"string quoted single"}}
 {"start":2263,"end":2264,"style":{"styleClass":"punctuation section block end"}}
 {"start":2269,"end":2271,"style":{"styleClass":"meta tag jade"}}
+{"start":2271,"end":2272,"style":{"styleClass":"punctuation operator"}}
+{"start":2279,"end":2280,"style":{"styleClass":"punctuation operator"}}
 {"start":2281,"end":2285,"style":{"styleClass":"string quoted single"}}
+{"start":2286,"end":2287,"style":{"styleClass":"punctuation operator"}}
+{"start":2293,"end":2294,"style":{"styleClass":"punctuation operator"}}
 {"start":2295,"end":2298,"style":{"styleClass":"keyword control js"}}
 {"start":2299,"end":2302,"style":{"styleClass":"keyword operator js"}}
+{"start":2310,"end":2311,"style":{"styleClass":"punctuation operator"}}
 {"start":2312,"end":2313,"style":{"styleClass":"punctuation section bracket begin"}}
 {"start":2313,"end":2314,"style":{"styleClass":"punctuation section bracket end"}}
 {"start":2316,"end":2318,"style":{"styleClass":"meta tag jade"}}
@@ -221,12 +288,18 @@
 {"start":2359,"end":2380,"style":{"styleClass":"string quoted single"}}
 {"start":2380,"end":2381,"style":{"styleClass":"punctuation section bracket end"}}
 {"start":2386,"end":2388,"style":{"styleClass":"meta tag jade"}}
+{"start":2388,"end":2389,"style":{"styleClass":"punctuation operator"}}
+{"start":2395,"end":2396,"style":{"styleClass":"punctuation operator"}}
 {"start":2397,"end":2400,"style":{"styleClass":"keyword operator js"}}
+{"start":2403,"end":2404,"style":{"styleClass":"punctuation operator"}}
 {"start":2405,"end":2406,"style":{"styleClass":"constant numeric number"}}
 {"start":2407,"end":2409,"style":{"styleClass":"meta tag jade"}}
 {"start":2412,"end":2417,"style":{"styleClass":"keyword control jade"}}
+{"start":2420,"end":2421,"style":{"styleClass":"punctuation operator"}}
 {"start":2422,"end":2423,"style":{"styleClass":"constant numeric number"}}
 {"start":2428,"end":2430,"style":{"styleClass":"meta tag jade"}}
+{"start":2430,"end":2431,"style":{"styleClass":"punctuation operator"}}
+{"start":2433,"end":2435,"style":{"styleClass":"punctuation operator"}}
 {"start":2437,"end":2444,"style":{"styleClass":"keyword operator jade"}}
 {"start":2470,"end":2477,"style":{"styleClass":"keyword operator jade"}}
 {"start":2499,"end":2514,"style":{"styleClass":"comment line double-slash jade"}}
@@ -243,6 +316,7 @@
 {"start":2591,"end":2594,"style":{"styleClass":"entity name mixin jade"}}
 {"start":2595,"end":2599,"style":{"styleClass":"variable parameter jade"}}
 {"start":2603,"end":2605,"style":{"styleClass":"meta tag jade"}}
+{"start":2609,"end":2610,"style":{"styleClass":"punctuation operator"}}
 {"start":2616,"end":2618,"style":{"styleClass":"meta tag jade"}}
 {"start":2621,"end":2625,"style":{"styleClass":"entity name mixin jade"}}
 {"start":2626,"end":2631,"style":{"styleClass":"string quoted single"}}
@@ -256,6 +330,7 @@
 {"start":2686,"end":2692,"style":{"styleClass":"variable parameter jade"}}
 {"start":2694,"end":2700,"style":{"styleClass":"variable parameter jade"}}
 {"start":2740,"end":2742,"style":{"styleClass":"meta tag jade"}}
+{"start":2742,"end":2743,"style":{"styleClass":"punctuation operator"}}
 {"start":2756,"end":2758,"style":{"styleClass":"keyword control jade"}}
 {"start":2773,"end":2778,"style":{"styleClass":"keyword operator jade"}}
 {"start":2785,"end":2789,"style":{"styleClass":"keyword control jade"}}
@@ -273,7 +348,10 @@
 {"start":2929,"end":2963,"style":{"styleClass":"comment line double-slash jade"}}
 {"start":2966,"end":2967,"style":{"styleClass":"meta tag jade"}}
 {"start":2968,"end":2973,"style":{"styleClass":"keyword operator js"}}
+{"start":2973,"end":2975,"style":{"styleClass":"punctuation operator"}}
 {"start":2986,"end":2991,"style":{"styleClass":"keyword operator js"}}
+{"start":2997,"end":2998,"style":{"styleClass":"punctuation operator"}}
+{"start":3003,"end":3004,"style":{"styleClass":"punctuation operator"}}
 {"start":3011,"end":3016,"style":{"styleClass":"entity name mixin jade"}}
 {"start":3017,"end":3023,"style":{"styleClass":"string quoted single"}}
 {"start":3025,"end":3030,"style":{"styleClass":"string quoted single"}}
@@ -290,7 +368,9 @@
 {"start":3191,"end":3196,"style":{"styleClass":"meta tag jade"}}
 {"start":3212,"end":3217,"style":{"styleClass":"keyword operator jade"}}
 {"start":3228,"end":3230,"style":{"styleClass":"meta tag jade"}}
+{"start":3243,"end":3244,"style":{"styleClass":"punctuation operator"}}
 {"start":3245,"end":3248,"style":{"styleClass":"keyword operator js"}}
+{"start":3257,"end":3258,"style":{"styleClass":"punctuation operator"}}
 {"start":3259,"end":3261,"style":{"styleClass":"constant numeric number"}}
 {"start":3262,"end":3266,"style":{"styleClass":"keyword control jade"}}
 {"start":3277,"end":3281,"style":{"styleClass":"keyword control jade"}}
@@ -303,7 +383,9 @@
 {"start":3357,"end":3358,"style":{"styleClass":"meta tag jade"}}
 {"start":3368,"end":3370,"style":{"styleClass":"string interpolated js jade"}}
 {"start":3377,"end":3378,"style":{"styleClass":"string interpolated js jade"}}
+{"start":3388,"end":3389,"style":{"styleClass":"punctuation operator"}}
 {"start":3390,"end":3393,"style":{"styleClass":"keyword operator js"}}
+{"start":3402,"end":3403,"style":{"styleClass":"punctuation operator"}}
 {"start":3404,"end":3405,"style":{"styleClass":"constant numeric number"}}
 {"start":3406,"end":3410,"style":{"styleClass":"keyword control jade"}}
 {"start":3421,"end":3425,"style":{"styleClass":"keyword control jade"}}
@@ -315,7 +397,9 @@
 {"start":3483,"end":3484,"style":{"styleClass":"meta tag jade"}}
 {"start":3494,"end":3496,"style":{"styleClass":"string interpolated js jade"}}
 {"start":3503,"end":3504,"style":{"styleClass":"string interpolated js jade"}}
+{"start":3514,"end":3515,"style":{"styleClass":"punctuation operator"}}
 {"start":3516,"end":3519,"style":{"styleClass":"keyword operator js"}}
+{"start":3528,"end":3529,"style":{"styleClass":"punctuation operator"}}
 {"start":3530,"end":3531,"style":{"styleClass":"constant numeric number"}}
 {"start":3532,"end":3536,"style":{"styleClass":"keyword control jade"}}
 {"start":3547,"end":3551,"style":{"styleClass":"keyword control jade"}}
@@ -330,26 +414,40 @@
 {"start":3718,"end":3724,"style":{"styleClass":"meta tag jade"}}
 {"start":3727,"end":3734,"style":{"styleClass":"entity other filter jade"}}
 {"start":3739,"end":3746,"style":{"styleClass":"meta tag jade"}}
+{"start":3776,"end":3777,"style":{"styleClass":"punctuation operator"}}
 {"start":3778,"end":3781,"style":{"styleClass":"keyword operator js"}}
+{"start":3788,"end":3789,"style":{"styleClass":"punctuation operator"}}
 {"start":3790,"end":3818,"style":{"styleClass":"string quoted double"}}
+{"start":3820,"end":3821,"style":{"styleClass":"punctuation operator"}}
 {"start":3822,"end":3825,"style":{"styleClass":"keyword operator js"}}
+{"start":3833,"end":3834,"style":{"styleClass":"punctuation operator"}}
 {"start":3835,"end":3843,"style":{"styleClass":"string quoted double"}}
+{"start":3845,"end":3846,"style":{"styleClass":"punctuation operator"}}
 {"start":3847,"end":3850,"style":{"styleClass":"keyword operator js"}}
+{"start":3860,"end":3861,"style":{"styleClass":"punctuation operator"}}
 {"start":3862,"end":3884,"style":{"styleClass":"string quoted double"}}
 {"start":3887,"end":3889,"style":{"styleClass":"meta tag jade"}}
+{"start":3889,"end":3890,"style":{"styleClass":"punctuation operator"}}
 {"start":3897,"end":3898,"style":{"styleClass":"meta tag jade"}}
 {"start":3920,"end":3922,"style":{"styleClass":"string interpolated js jade"}}
 {"start":3928,"end":3929,"style":{"styleClass":"string interpolated js jade"}}
 {"start":3930,"end":3931,"style":{"styleClass":"meta tag jade"}}
 {"start":3951,"end":3953,"style":{"styleClass":"string interpolated js jade"}}
 {"start":3961,"end":3962,"style":{"styleClass":"string interpolated js jade"}}
+{"start":3964,"end":3965,"style":{"styleClass":"punctuation operator"}}
 {"start":3966,"end":3969,"style":{"styleClass":"keyword operator js"}}
+{"start":3976,"end":3977,"style":{"styleClass":"punctuation operator"}}
 {"start":3978,"end":4006,"style":{"styleClass":"string quoted double"}}
+{"start":4008,"end":4009,"style":{"styleClass":"punctuation operator"}}
 {"start":4010,"end":4013,"style":{"styleClass":"keyword operator js"}}
+{"start":4021,"end":4022,"style":{"styleClass":"punctuation operator"}}
 {"start":4023,"end":4031,"style":{"styleClass":"string quoted double"}}
+{"start":4033,"end":4034,"style":{"styleClass":"punctuation operator"}}
 {"start":4035,"end":4038,"style":{"styleClass":"keyword operator js"}}
+{"start":4048,"end":4049,"style":{"styleClass":"punctuation operator"}}
 {"start":4050,"end":4072,"style":{"styleClass":"string quoted double"}}
 {"start":4075,"end":4077,"style":{"styleClass":"meta tag jade"}}
+{"start":4077,"end":4078,"style":{"styleClass":"punctuation operator"}}
 {"start":4085,"end":4086,"style":{"styleClass":"meta tag jade"}}
 {"start":4108,"end":4110,"style":{"styleClass":"string interpolated js jade"}}
 {"start":4117,"end":4119,"style":{"styleClass":"keyword control js"}}
@@ -357,26 +455,36 @@
 {"start":4122,"end":4123,"style":{"styleClass":"meta tag jade"}}
 {"start":4143,"end":4145,"style":{"styleClass":"string interpolated js jade"}}
 {"start":4153,"end":4154,"style":{"styleClass":"string interpolated js jade"}}
+{"start":4156,"end":4157,"style":{"styleClass":"punctuation operator"}}
 {"start":4158,"end":4161,"style":{"styleClass":"keyword operator js"}}
+{"start":4176,"end":4177,"style":{"styleClass":"punctuation operator"}}
 {"start":4178,"end":4240,"style":{"styleClass":"string quoted double"}}
 {"start":4251,"end":4252,"style":{"styleClass":"meta tag jade"}}
 {"start":4280,"end":4281,"style":{"styleClass":"meta tag jade"}}
+{"start":4288,"end":4289,"style":{"styleClass":"punctuation operator"}}
 {"start":4289,"end":4297,"style":{"styleClass":"string quoted double"}}
+{"start":4303,"end":4304,"style":{"styleClass":"punctuation operator"}}
 {"start":4304,"end":4388,"style":{"styleClass":"string quoted double"}}
 {"start":4393,"end":4394,"style":{"styleClass":"meta tag jade"}}
 {"start":4398,"end":4400,"style":{"styleClass":"meta tag jade"}}
 {"start":4439,"end":4441,"style":{"styleClass":"string interpolated tag jade"}}
 {"start":4441,"end":4442,"style":{"styleClass":"meta tag jade"}}
+{"start":4449,"end":4450,"style":{"styleClass":"punctuation operator"}}
 {"start":4450,"end":4458,"style":{"styleClass":"string quoted double"}}
+{"start":4464,"end":4465,"style":{"styleClass":"punctuation operator"}}
 {"start":4465,"end":4549,"style":{"styleClass":"string quoted double"}}
 {"start":4560,"end":4561,"style":{"styleClass":"string interpolated tag jade"}}
 {"start":4565,"end":4568,"style":{"styleClass":"meta tag jade"}}
 {"start":4633,"end":4637,"style":{"styleClass":"meta tag jade"}}
+{"start":4649,"end":4650,"style":{"styleClass":"punctuation operator"}}
 {"start":4651,"end":4654,"style":{"styleClass":"keyword operator js"}}
+{"start":4666,"end":4667,"style":{"styleClass":"punctuation operator"}}
 {"start":4668,"end":4669,"style":{"styleClass":"punctuation section block begin"}}
 {"start":4669,"end":4679,"style":{"styleClass":"string quoted single"}}
 {"start":4681,"end":4686,"style":{"styleClass":"string quoted single"}}
 {"start":4686,"end":4687,"style":{"styleClass":"punctuation section block end"}}
 {"start":4689,"end":4692,"style":{"styleClass":"meta tag jade"}}
+{"start":4701,"end":4702,"style":{"styleClass":"punctuation operator"}}
+{"start":4705,"end":4706,"style":{"styleClass":"punctuation operator"}}
 {"start":4706,"end":4711,"style":{"styleClass":"string quoted double"}}
 {"start":4712,"end":4723,"style":{"styleClass":"keyword operator jade"}}

@@ -421,7 +421,7 @@ function Tooltip (view) {
 					return info.tooltipArea;
 			}
 			
-			var divBounds = lib.bounds(tooltipDiv);
+			var divBounds = tooltipDiv.getBoundingClientRect();
 			var tipRect = {
 				width: divBounds.width,
 				height: divBounds.height
@@ -429,7 +429,7 @@ function Tooltip (view) {
 			
 			var position = info.position ? info.position : "below"; //$NON-NLS-0$
 			
-			var viewBounds = lib.bounds(this._view._rootDiv ? this._view._rootDiv : documentElement);
+			var viewBounds = (this._view._rootDiv ? this._view._rootDiv : documentElement).getBoundingClientRect();
 			var viewportLeft = viewBounds.left;
 			var viewportTop = viewBounds.top;
 			var viewportWidth = viewBounds.width;
@@ -757,18 +757,64 @@ function Tooltip (view) {
 			if (annotations.length === 0) {
 				return null;
 			}
+			
 			var self = this;
 			var html;
 			var document = this._tooltipDiv.ownerDocument;
 			var view = this._view;
 			var model = view.getModel();
 			var baseModel = model.getBaseModel ? model.getBaseModel() : model;
-			function getText(start, end) {
-				var textStart = baseModel.getLineStart(baseModel.getLineAtOffset(start));
-				var textEnd = baseModel.getLineEnd(baseModel.getLineAtOffset(end), true);
-				return baseModel.getText(textStart, textEnd);
+			
+			
+			// Don't show quickfixes for ruler annotations (left or right side)
+			var inEditor = self.hover ? true : false;
+			if (inEditor && context && context.source && context.source.indexOf('ruler') >= 0){ //$NON-NLS-0$
+				inEditor = false;
 			}
+			
+			// If this is a code folding annotation, display code projection
+			if (annotations.length === 1 && annotations[0].type === "orion.annotation.folding") {
+				var newModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
+				var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(annotations[0].start));
+				var charCount = baseModel.getCharCount();
+				if (annotations[0].end !== charCount) {
+					newModel.addProjection({start: annotations[0].end, end: charCount});
+				}
+				if (lineStart > 0) {
+					newModel.addProjection({start: 0, end: lineStart});
+				}
+				return newModel;
+			}
+			
+			if (annotations.length === 1) {
+				html = getAnnotationHTML(annotations[0], inEditor);
+				if (html && html.firstChild) {
+					var className = html.firstChild.className;
+					if (className) { className += " "; } //$NON-NLS-0$
+					className += "single"; //$NON-NLS-0$
+					html.firstChild.className = className;
+				}
+				return html;
+			} else {
+				var tooltipHTML = util.createElement(document, "div"); //$NON-NLS-0$
+				var em = util.createElement(document, "em"); //$NON-NLS-0$
+				em.appendChild(document.createTextNode(messages.multipleAnnotations));
+				tooltipHTML.appendChild(em);
+				for (var i = 0; i < annotations.length; i++) {
+					html = getAnnotationHTML(annotations[i], inEditor);
+					if (html) {
+						tooltipHTML.appendChild(html);
+					}
+				}
+				return tooltipHTML;
+			}
+			
 			function getAnnotationHTML(annotation, inEditor) {
+				// Don't display untitle annotations in the editor such as occurrences as the code is already visible
+				if (inEditor && !annotation.title){
+					return null;
+				}
+				
 				var title = annotation.title;
 				var result = util.createElement(document, "div"); //$NON-NLS-0$
 				result.className = "tooltipRow"; //$NON-NLS-0$
@@ -789,7 +835,9 @@ function Tooltip (view) {
 					result.appendChild(htmlHolder); //$NON-NLS-0$
 				}
 				if (!title) {
-					title = getText(annotation.start, annotation.end);
+					var textStart = baseModel.getLineStart(baseModel.getLineAtOffset(annotation.start));
+					var textEnd = baseModel.getLineEnd(baseModel.getLineAtOffset(annotation.end), true);
+					title = baseModel.getText(textStart, textEnd);
 				}
 				if (typeof title === "function") { //$NON-NLS-0$
 					title = annotation.title();
@@ -812,55 +860,6 @@ function Tooltip (view) {
 					context.offsetEnd = annotation.end;
 				}
 				return result;
-			}
-			
-			// Don't show quickfixes for ruler annotations (left or right side)
-			var inEditor = self.hover ? true : false;
-			if (inEditor && context && context.source && context.source.indexOf('ruler') >= 0){ //$NON-NLS-0$
-				inEditor = false;
-			}			
-			
-			// TODO This is where we create projection models for occurrences for no good reason (Bug 463515)
-			if (annotations.length === 1) {
-				annotation = annotations[0];
-				if (annotation.title !== undefined) {
-					html = getAnnotationHTML(annotation, inEditor);
-					if (html.firstChild) {
-						var className = html.firstChild.className;
-						if (className) { className += " "; } //$NON-NLS-0$
-						className += "single"; //$NON-NLS-0$
-						html.firstChild.className = className;
-					}
-					return html;
-				} else {
-					// Don't create a projection model if we are in the editor it will just duplicate the content the user is looking at
-					if (context && context.source && context.source === 'editor'){ //$NON-NLS-0$
-						return null;
-					}
-					var newModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
-					var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(annotation.start));
-					var charCount = baseModel.getCharCount();
-					if (annotation.end !== charCount) {
-						newModel.addProjection({start: annotation.end, end: charCount});
-					}
-					if (lineStart > 0) {
-						newModel.addProjection({start: 0, end: lineStart});
-					}
-					return newModel;
-				}
-			} else {
-				var tooltipHTML = util.createElement(document, "div"); //$NON-NLS-0$
-				var em = util.createElement(document, "em"); //$NON-NLS-0$
-				em.appendChild(document.createTextNode(messages.multipleAnnotations));
-				tooltipHTML.appendChild(em);
-				for (var i = 0; i < annotations.length; i++) {
-					annotation = annotations[i];
-					html = getAnnotationHTML(annotation, inEditor);
-					if (html) {
-						tooltipHTML.appendChild(html);
-					}
-				}
-				return tooltipHTML;
 			}
 		}
 		

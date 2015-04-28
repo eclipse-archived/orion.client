@@ -1,19 +1,26 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014, 2015 IBM Corporation.
- * All rights reserved. This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License v1.0
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ * Copyright (c) 2015 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  * Contributors:
- *     IBM Corporation - Initial API and implementation
- ******************************************************************************/
-  /*eslint-env amd*/
-define('javascript/contentAssist/indexFiles/expressIndex', [], 
-function () {
-	return {
-  		"!name": "express",
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+/*eslint-env node, amd*/
+/*globals infer tern*/
+(function(mod) {
+  if (typeof exports === "object" && typeof module === "object") // CommonJS
+    return mod(require("../lib/infer"), require("../lib/tern"), require);
+  if (typeof define === "function" && define.amd) // AMD
+    return define(["../lib/infer", "../lib/tern"], mod);
+  mod(infer, tern);
+})(/* @callback */ function(infer, tern) {
+
+	var defs = {
+		"!name": "express",
   		"!define": {
       		"express": {
         		"createServer": {
@@ -205,5 +212,11 @@ function () {
   				}
 			}
         }
-	};
+  	};
+	
+	tern.registerPlugin("express", /* @callback */ function(server, options) {
+	    return {
+	      defs : defs
+	    };
+	});
 });

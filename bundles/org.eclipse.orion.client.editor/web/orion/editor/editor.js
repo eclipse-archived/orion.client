@@ -205,8 +205,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				if (message) {
 					this.reportStatus(message, "error"); //$NON-NLS-0$
 				} else {
-					if (contents !== null && contents !== undefined && typeof contents === "string") { //$NON-NLS-0$
-						this._setModelText(contents);
+					if (contents !== null && contents !== undefined) {
+						if (typeof contents === "string") { //$NON-NLS-0$
+							this._setModelText(contents);
+						}
 						if (this._undoStack) {
 							this._undoStack.reset();
 						}
