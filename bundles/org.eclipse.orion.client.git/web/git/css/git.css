@@ -130,9 +130,9 @@
 	margin-left: 15px;
 	margin-right:5px;
 	margin-top: 0;
-	flex: 0 0 main-size;
-	-ms-flex: 0 0 main-size;
-	-webkit-flex: 0 0 main-size;
+	flex: 0 0 auto;
+	-ms-flex: 0 0 auto;
+	-webkit-flex: 0 0 auto;
 }
 
 .sidebar .sectionWrapper.sectionOpened {
@@ -262,9 +262,9 @@
 	margin-left: 0;
 	margin-right: 0;
 	margin-top: 0;
-	flex: 0 0 main-size;
-	-ms-flex: 0 0 main-size;
-	-webkit-flex: 0 0 main-size;
+	flex: 0 0 auto;
+	-ms-flex: 0 0 auto;
+	-webkit-flex: 0 0 auto;
 	background:white;
 }
 
