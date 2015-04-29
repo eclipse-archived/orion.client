@@ -910,7 +910,7 @@ objects.mixin(EditorSetup.prototype, {
 	createSplitMenu: function() {
 		var that = this;
 		var currentChoice;
-		var toolbar = "pageActions";
+		var toolbar = "settingsActions";
 		var changeSplitModeCommand;
 		function callback() {
 			this.checked = true;
