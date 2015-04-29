@@ -577,6 +577,8 @@ objects.mixin(SiteEditor.prototype, {
 	},
 
 	_onSuccess: function(deferred) {
+		this._statusService.setMessage("");
+		this._statusService.setProgressMessage("");
 		this.onSuccess(deferred);
 	},
 
