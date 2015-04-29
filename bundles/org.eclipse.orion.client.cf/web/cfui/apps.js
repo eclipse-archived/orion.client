@@ -50,6 +50,7 @@ mBootstrap.startup().then(function(core) {
 
 	var currentRegion;
 
+	var regionDropdown;
 	var orgDropdown;
 	var spaceDropdown;
 
@@ -95,6 +96,12 @@ mBootstrap.startup().then(function(core) {
 
 			var targetTable = createElement("table", null, "centerTable");
 
+			// region drop-down
+			var regionRow = createDropDownWithLabel("region:");
+			regionDropdown = regionRow.dropdown;
+			regionDropdown.onchange = loadSelectedRegion;
+			targetTable.appendChild(regionRow.row);
+
 			// organization drop-down
 			var orgRow = createDropDownWithLabel("organization:");
 			orgDropdown = orgRow.dropdown;
@@ -112,18 +119,22 @@ mBootstrap.startup().then(function(core) {
 
 			targetNode.appendChild(targetTable);
 
-			progressService.showWhile(cFService.getOrgs(currentRegion), messages["loading..."]).then(function(result){
-				fillOrgDropdown(result.Orgs);
-				fillSpaceDropdown();
-				loadApplications();
-			},
-			function(error){
-				handleError(error);
-			});
-
+			fillRegionDropdown(targets);
+			loadSelectedRegion();
 		}.bind(this),
 		function(error){
 			handleError(error);
+		});
+	}
+
+	function fillRegionDropdown(regions) {
+		if (!regions) return;
+
+		regions.forEach(function(region){
+			var option = createElement("option");
+			option.appendChild(document.createTextNode(region.Name));
+			option.region = region;
+			regionDropdown.appendChild(option);
 		});
 	}
 
@@ -155,9 +166,9 @@ mBootstrap.startup().then(function(core) {
 	}
 
 	function loadApplications() {
-		var target = currentRegion;
-
 		// collect data from drop-downs
+		var target = regionDropdown.options[regionDropdown.selectedIndex].region;
+
 		if (isDropdownEmpty(orgDropdown)) return;
 		target.Org = orgDropdown.options[orgDropdown.selectedIndex].organization.Name;
 
@@ -165,6 +176,29 @@ mBootstrap.startup().then(function(core) {
 		target.Space = spaceDropdown.options[spaceDropdown.selectedIndex].space.Name;
 
 		displayApplications(target);
+	}
+
+	function loadSelectedRegion() {
+		// clear drop-downs and applications section
+		orgDropdown.options.length = 0;
+		spaceDropdown.options.length = 0;
+		lib.empty(applicationsNode);
+		lib.empty(orphanRoutesNode);
+
+		if (isDropdownEmpty(regionDropdown)) return;
+
+		var region = regionDropdown.options[regionDropdown.selectedIndex].region;
+		if (!region) return;
+		currentRegion = region;
+
+		progressService.showWhile(cFService.getOrgs(region), messages["loading..."]).then(function(result){
+			fillOrgDropdown(result.Orgs);
+			fillSpaceDropdown();
+			loadApplications();
+		},
+		function(error){
+			handleError(error);
+		});
 	}
 
 	function isDropdownEmpty(dropdown) {
