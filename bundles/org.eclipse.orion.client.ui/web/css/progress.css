@@ -53,6 +53,9 @@
 	border: none;
 	margin-right: 2px;
 	margin-left: 5px;
+	flex: 0 0 auto;
+	-ms-flex: 0 0 auto;
+	-webkit-flex: 0 0 auto;
 }
 
 .watchButton {

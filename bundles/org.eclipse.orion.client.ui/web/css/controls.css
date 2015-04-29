@@ -77,6 +77,9 @@
 }
 
 .pageActions {
+	flex: 0 0 auto;
+	-ms-flex: 0 0 auto;
+	-webkit-flex: 0 0 auto;
 }
 
 .runBar {
@@ -85,12 +88,18 @@
 	display: -webkit-inline-flex !important;		 /* Safari */
 	display: inline-flex !important;
 	height: 100%;
+	flex: 0 0 auto;
+	-ms-flex: 0 0 auto;
+	-webkit-flex: 0 0 auto;
 }
 
 /* 4px margin used by toolbar, plus 4px of border/padding */
 .status {
 	color: white;
 	vertical-align: baseline;
+	flex: 0 0 auto;
+	-ms-flex: 0 0 auto;
+	-webkit-flex: 0 0 auto;
 }
 
 /* marker for finding section and main toolbars */

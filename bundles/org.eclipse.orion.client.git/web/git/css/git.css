@@ -86,6 +86,9 @@
 	border-radius: 4px;
 	padding-top: 0;
 	padding-bottom: 0;
+	flex: 0 0 auto;
+	-ms-flex: 0 0 auto;
+	-webkit-flex: 0 0 auto;
 }
 
 .mainToolbar .sectionWrapper.sectionOpened {
@@ -136,6 +139,9 @@
 	padding-right: 6px;
 	padding-left: 20px;
 	color:white;
+	flex: 0 0 auto;
+	-ms-flex: 0 0 auto;
+	-webkit-flex: 0 0 auto;
 }
 
 .sidebar > .sectionWrapper {
