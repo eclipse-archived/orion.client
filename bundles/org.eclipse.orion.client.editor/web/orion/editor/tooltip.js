@@ -425,7 +425,11 @@ function Tooltip (view) {
 			var tipRect = {
 				width: divBounds.width,
 				height: divBounds.height
-			};	
+			};
+			
+			// Adjust the tooltip size for the default padding
+			tipRect.width += 16;
+			tipRect.height += 16;
 			
 			var position = info.position ? info.position : "below"; //$NON-NLS-0$
 			
@@ -498,9 +502,10 @@ function Tooltip (view) {
 			
 			tipRect.maxWidth = Math.min(viewportWidth + viewportLeft - tipRect.left, viewportWidth);
 			tipRect.maxHeight = Math.min(viewportHeight + viewportTop - tipRect.top, viewportHeight);
+			
 			// Adjust max sizes for the border and padding
-			tipRect.maxWidth -= 8;
-			tipRect.maxHeight -= 8;
+			tipRect.maxWidth -= 16;
+			tipRect.maxHeight -= 16;
 			
 			tooltipDiv.style.maxWidth = tipRect.maxWidth + "px"; //$NON-NLS-0$
 			tooltipDiv.style.maxHeight = tipRect.maxHeight + "px"; //$NON-NLS-0$
