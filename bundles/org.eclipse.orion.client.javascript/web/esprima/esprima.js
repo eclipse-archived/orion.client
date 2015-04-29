@@ -1574,6 +1574,68 @@ parseStatement: true, parseSourceElement: true */
         scanning = false;
     }
 
+	/**
+	 * @description Adds all of the entries from the array of deps to the global state
+	 * @param {Array} array The array of deps to add
+	 * ORION
+	 */
+	function addArrayDeps(array) {
+		if(extra.deps) {
+			var len = array.length;
+			for(var i = 0; i < len; i++) {
+				var arg = array[i];
+				if(arg.type === Syntax.Literal) {
+					extra.deps.push(arg);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * @description Collects the dependencies from call expressions and new expressions
+	 * @param {Node} callee The named callee node 
+	 * @param {Array.<Node>} args The list of arguments for the expression
+	 * ORION
+	 */
+	function collectDeps(callee, args) {
+		if(extra.deps) {
+        	var len = args.length;
+    		if(callee.name === 'importScripts') {
+    			addArrayDeps(args); //importScripts('foo', 'bar'...)
+    		} else if(callee.name === 'Worker') {
+    			if(args[0].type === Syntax.Literal) {
+    				extra.deps.push(args[0]);
+    			}
+    		} else if(callee.name === 'require') {
+    			var _a = args[0];
+    			if(_a.type === Syntax.ArrayExpression) {
+    				addArrayDeps(_a.elements); //require([foo])
+    			} else if(_a.type === Syntax.Literal) {
+    				extra.deps.push(_a); // require('foo')
+    			}
+    			if(len > 1) {
+    				_a = args[1];
+    				if(_a.type === Syntax.ArrayExpression) {
+    					addArrayDeps(_a.elements);
+    				}
+    			}
+    		} else if(callee.name === 'requirejs') {
+    			_a = args[0];
+    			if(_a.type === Syntax.ArrayExpression) {
+    				addArrayDeps(_a.elements); //requirejs([foo])
+    			}
+    		} else if(callee.name === 'define' && len > 1) {//second arg must be array
+    			_a = args[0];
+    			if(_a.type === Syntax.Literal) {
+    				_a = args[1];
+    			}
+    			if(_a.type === Syntax.ArrayExpression) {
+    				addArrayDeps(_a.elements);
+    			}
+    		}
+    	}
+	}
+	
     function Position() {
         this.line = startLineNumber;
         this.column = startIndex - startLineStart;
@@ -1760,6 +1822,7 @@ parseStatement: true, parseSourceElement: true */
             this.type = Syntax.CallExpression;
             this.callee = callee;
             this.arguments = args;
+            collectDeps(callee, args);
             this.finish();
             return this;
         },
@@ -1909,6 +1972,7 @@ parseStatement: true, parseSourceElement: true */
             this.type = Syntax.NewExpression;
             this.callee = callee;
             this.arguments = args;
+            collectDeps(callee, args);
             this.finish();
             return this;
         },
@@ -4147,6 +4211,9 @@ parseStatement: true, parseSourceElement: true */
 
         extra = {};
         if (typeof options !== 'undefined') {
+        	if(typeof(options.deps) === 'boolean' && options.deps)  { //ORION dependencies
+        		extra.deps = [];
+        	}
             extra.range = (typeof options.range === 'boolean') && options.range;
             extra.loc = (typeof options.loc === 'boolean') && options.loc;
             extra.attachComment = (typeof options.attachComment === 'boolean') && options.attachComment;
@@ -4192,6 +4259,9 @@ parseStatement: true, parseSourceElement: true */
             }
             if (typeof extra.errors !== 'undefined') {
                 program.errors = extra.errors;
+            }
+            if(typeof(extra.deps) != 'undefined') {
+            	program.dependencies = extra.deps;
             }
         } catch (e) {
             throw e;
