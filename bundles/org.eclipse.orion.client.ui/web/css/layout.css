@@ -653,7 +653,7 @@ and (max-device-width : 1024px)  {
 
 /* icon links */
 .sideMenuItem > .submenu-trigger {
-	color: #455A64 !important;
+	color: #325C80 !important;
 	text-decoration:none !important;
 	width: 100%;
 	display: inline-block;
@@ -661,14 +661,14 @@ and (max-device-width : 1024px)  {
 }
 .sideMenuItem>.submenu-trigger:hover, .sideMenuItem.expanded>.submenu-trigger{
 	text-decoration:none;
-	color:white !important;
+	color:#C0E6FF !important;
 }
 
 .sideMenuItemActive {
 }
 
 .sideMenuItemActive > .submenu-trigger {
-	color: #46aac6 !important;
+	color: white !important;
 }
 
 .sideMenuToggle {

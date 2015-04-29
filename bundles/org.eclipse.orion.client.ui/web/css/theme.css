@@ -318,7 +318,7 @@ a.breadcrumb.currentLocation {
 }
 
 .commandButton.orionButton.dropdownTrigger:hover {
-	border-color: #ccc;
+	border-color: #C0E6FF;
 }
 
 .mainToolbar .commandButton {
@@ -370,9 +370,7 @@ a.breadcrumb.currentLocation {
 }
 
 .commandImage:hover, .commandImage:focus {
-	color: #555;
-	background-color: #e6e6e6;
-	border: 1px solid #ccc;
+	color: #C0E6FF;
 }
 
 /* push toggle */

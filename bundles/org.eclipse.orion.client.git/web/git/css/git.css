@@ -262,9 +262,7 @@
 }
 
 .mainToolbar #configSection:hover {
-	color: #555;
-	background-color: #e6e6e6;
-	border: 1px solid #ccc;
+	color: #C0E6FF;
 	box-shadow: none;
 	border-radius: 0;
 }
