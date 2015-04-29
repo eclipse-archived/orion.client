@@ -39,7 +39,8 @@ define([
 			}
 			var dropdownNode = lib.node("userDropdown"); //$NON-NLS-0$
 			var userDropdown = new mDropdown.Dropdown({
-				dropdown: dropdownNode
+				dropdown: dropdownNode,
+				selectionClass: "dropdownSelection" //$NON-NLS-0$
 			});
 			var menuGenerator = new mUserMenu.UserMenu({
 				dropdownNode: dropdownNode,

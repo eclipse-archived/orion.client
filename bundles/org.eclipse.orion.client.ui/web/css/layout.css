@@ -827,7 +827,8 @@ and (max-device-width : 1024px)  {
 }
 
 .userMenu > .userTrigger {
-	padding: 3px 3px;
+	padding: 4px 4px;
+	border: 1px solid transparent;
 }
 
 .userMenu > .dropdownMenuOpen {
