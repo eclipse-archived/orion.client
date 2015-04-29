@@ -4,19 +4,19 @@
 @import "../../css/images.css";
 @import "../../css/theme.css";
 
-.orgsLabel {
+.targetLabel {
 	color: #6d6d6d;
     font-size: 1.1em;
     font-weight: bold;
 }
 
-.orgsSelect{
+.targetSelect{
     padding-top: 4px;
     padding-left: 15px;
     text-align: right;
 }
 
-.orgsSelect select{
+.targetSelect select{
 	height: 24px;
     width: 250px;
 }
@@ -26,6 +26,6 @@
     margin-right: auto;
 }
 
-#orgsNode{
-	text-align: center;
+#targetNode{
+	text-align: right;
 }
