@@ -710,6 +710,10 @@ textarea.parameterInput {
 }
 
 .treeIterationCursorRow {
+	background-color: white;
+}
+
+#auxpane .treeIterationCursorRow {
 	background-color: #37474F;
 }
 
