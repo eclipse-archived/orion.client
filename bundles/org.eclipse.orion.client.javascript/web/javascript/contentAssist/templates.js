@@ -24,7 +24,9 @@ define([
 			"string", //$NON-NLS-0$
 			"symbol",
 			"undefined" //$NON-NLS-0$
-		]
+		],
+		title: 'Typeof Options',
+		style: 'emphasis'
 	};
 
 	/**
@@ -283,7 +285,7 @@ define([
 			name: "try", //$NON-NLS-0$
 			nodes: {top:true, member:false, prop:false},
 			description: " - try..catch statement with finally block", //$NON-NLS-0$
-			template: "try {\n\t${cursor}\n} catch (${err}) {\n} finally {\n}" //$NON-NLS-0$
+			template: "try {\n\t${cursor}\n} catch (${err}) {\n} \n finally {\n}" //$NON-NLS-0$
 		},
 		{
 			prefix: "typeof", //$NON-NLS-0$
