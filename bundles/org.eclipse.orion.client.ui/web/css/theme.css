@@ -321,7 +321,7 @@ a.breadcrumb.currentLocation {
 	border-color: #C0E6FF;
 }
 
-.mainToolbar .commandButton {
+.mainToolbar .commandButton.orionButton.dropdownTrigger {
 	color:white;
 }
 
