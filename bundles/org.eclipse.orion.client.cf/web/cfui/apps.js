@@ -48,15 +48,16 @@ mBootstrap.startup().then(function(core) {
 
 	var cfEventDispatcher = mCfCommands.getEventDispatcher();
 
-	var currentRegion;
+	var selectedRegion;
 
+	var regionDropdown;
 	var orgDropdown;
 	var spaceDropdown;
 
 	function promptLogin(cFService) {
 		var deferred = new Deferred();
 		function loginFunc(user, password){
-			progressService.showWhile(cFService.login(currentRegion.Url, user, password), messages["loggingInToCloudFoundry"]).then(function (result) {
+			progressService.showWhile(cFService.login(selectedRegion.Url, user, password), messages["loggingInToCloudFoundry"]).then(function (result) {
 				deferred.resolve(result);
 			}, function(error) {
 				deferred.reject(error);
@@ -91,9 +92,15 @@ mBootstrap.startup().then(function(core) {
 		lib.empty(targetNode);
 
 		progressService.showWhile(mCfUtil.getTargets(preferences), messages["checkingForCloudFoundrySettings"]).then(function(targets){
-			currentRegion = targets[0];
+			selectedRegion = targets[0];
 
 			var targetTable = createElement("table", null, "centerTable");
+
+			// region drop-down
+			var regionRow = createDropDownWithLabel("region:");
+			regionDropdown = regionRow.dropdown;
+			regionDropdown.onchange = loadSelectedRegion;
+			targetTable.appendChild(regionRow.row);
 
 			// organization drop-down
 			var orgRow = createDropDownWithLabel("organization:");
@@ -112,18 +119,25 @@ mBootstrap.startup().then(function(core) {
 
 			targetNode.appendChild(targetTable);
 
-			progressService.showWhile(cFService.getOrgs(currentRegion), messages["loading..."]).then(function(result){
-				fillOrgDropdown(result.Orgs);
-				fillSpaceDropdown();
-				loadApplications();
-			},
-			function(error){
-				handleError(error);
-			});
-
+			fillRegionDropdown(targets);
+			loadSelectedRegion();
 		}.bind(this),
 		function(error){
 			handleError(error);
+		});
+	}
+
+	function fillRegionDropdown(regions) {
+		if (!regions) return;
+
+		regions.forEach(function(region){
+			var option = createElement("option");
+			if (!region.Name) {
+				region.Name = region.Url;
+			}
+			option.appendChild(document.createTextNode(region.Name));
+			option.region = region;
+			regionDropdown.appendChild(option);
 		});
 	}
 
@@ -155,9 +169,9 @@ mBootstrap.startup().then(function(core) {
 	}
 
 	function loadApplications() {
-		var target = currentRegion;
-
 		// collect data from drop-downs
+		var target = regionDropdown.options[regionDropdown.selectedIndex].region;
+
 		if (isDropdownEmpty(orgDropdown)) return;
 		target.Org = orgDropdown.options[orgDropdown.selectedIndex].organization.Name;
 
@@ -165,6 +179,29 @@ mBootstrap.startup().then(function(core) {
 		target.Space = spaceDropdown.options[spaceDropdown.selectedIndex].space.Name;
 
 		displayApplications(target);
+	}
+
+	function loadSelectedRegion() {
+		// clear drop-downs and applications section
+		orgDropdown.options.length = 0;
+		spaceDropdown.options.length = 0;
+		lib.empty(applicationsNode);
+		lib.empty(orphanRoutesNode);
+
+		if (isDropdownEmpty(regionDropdown)) return;
+
+		var region = regionDropdown.options[regionDropdown.selectedIndex].region;
+		if (!region) return;
+		selectedRegion = region;
+
+		progressService.showWhile(cFService.getOrgs(region), messages["loading..."]).then(function(result){
+			fillOrgDropdown(result.Orgs);
+			fillSpaceDropdown();
+			loadApplications();
+		},
+		function(error){
+			handleError(error);
+		});
 	}
 
 	function isDropdownEmpty(dropdown) {
