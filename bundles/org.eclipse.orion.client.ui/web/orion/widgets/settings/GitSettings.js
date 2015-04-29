@@ -121,8 +121,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			gitPreferenceStorage.getRepositories().then(
 				function(repositories){
 					for(var i=0; i<repositories.length; ++i){
-						var SettingsCommand = new SettingsCommand( {keyIndex: i, fieldlabel: repositories[i], commandService: that.commandService, scopeId: "repositoryItemCommands"} );
-						that.gitCredentialsFields.push(SettingsCommand);
+						var settingsCommand = new SettingsCommand( {keyIndex: i, fieldlabel: repositories[i], commandService: that.commandService, scopeId: "repositoryItemCommands"} );
+						that.gitCredentialsFields.push(settingsCommand);
 					}
 					
 					gitCredentialsSection = new Subsection( {sectionName: messages["Git Credentials Storage"], parentNode: that.sections, children: that.gitCredentialsFields} ); //$NON-NLS-0$
