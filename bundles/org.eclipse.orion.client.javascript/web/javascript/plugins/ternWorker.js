@@ -45,14 +45,14 @@ require({
 	'tern/defs/ecma5',
 	'tern/defs/browser',
 	'javascript/handlers/ternAssistHandler',
-	'javascript/handlers/ternFindDeclarationHandler',
+	'javascript/handlers/ternDeclarationHandler',
 	'javascript/handlers/ternHoverHandler',
 	'javascript/handlers/ternOccurrencesHandler',
 	'javascript/handlers/ternRenameHandler',
 	'doctrine'  //stays last - exports into global
 ],
-/* @callback */ function(Tern, docPlugin, /*requirePlugin, orionRequirePlugin, mongodbPlugin, nodePlugin,*/ ecma5, browser, AssistHandler, DeclHandler, 
-						HoverHandler, OccurrencesHandler, RenameHandler) {
+/* @callback */ function(Tern, docPlugin, /*requirePlugin, orionRequirePlugin, mongodbPlugin, nodePlugin,*/ ecma5, browser, 
+							AssistHandler, DeclarationHandler, HoverHandler, OccurrencesHandler, RenameHandler) {
     
     var ternserver, pendingReads = Object.create(null);
     
@@ -118,8 +118,8 @@ require({
                         OccurrencesHandler.computeOccurrences(ternserver, _d.args, post);
                         break;
                     }
-                    case 'decl': {
-                        DeclHandler.computeDeclaration(ternserver, _d.args, post);
+                    case 'definition': {
+                        DeclarationHandler.computeDeclaration(ternserver, _d.args, post);
                         break;
                     }
                     case 'hover': {
@@ -167,7 +167,7 @@ require({
     
     post('server_ready');
     //Warm up after we have finished attaching all our listeners
-    warmUp();
+    //warmUp();
     
     /**
      * @description Sends the given message back to the client. If the msg is null, send an Error
