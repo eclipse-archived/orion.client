@@ -211,4 +211,5 @@ define({//Default message bundle
 	"createNew": "Create New",
 	"manifestOverride": "Yellow boxes indicate modified fields, which will override manifest file settings.",
 	"noManifest": "No manifest found at /manifest.yml",
+	"refreshLogsPage": "[ Refresh the page to get the latest logs... ]"
 });

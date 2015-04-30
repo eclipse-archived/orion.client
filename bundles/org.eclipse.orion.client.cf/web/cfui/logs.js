@@ -119,7 +119,18 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 									logEditorView.inputManager.load();
 								}
 								reloadLogs(applicationInfo);
-							}, handleError
+							}, function(error){
+								var oldLogs = applicationInfo.logs;
+								oldLogs.push("");
+								oldLogs.push(messages["refreshLogsPage"]);
+								
+								applicationInfo.logs = oldLogs;
+								logEditorView.inputManager.setApplicationInfo(applicationInfo);
+
+								logEditorView.inputManager.setInput("logs for " + applicationInfo.Application);
+								logEditorView.inputManager.load();
+								handleError(error);
+							}
 						);
 					} else {
 						reloadLogs(applicationInfo);
