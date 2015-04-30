@@ -107,7 +107,7 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 				var that = this;
 				setTimeout(function(){
 					if (document.visibilityState === 'visible'){
-						cFClient.getLogz(applicationInfo.Target, applicationInfo.Application, applicationInfo.logsTimestamp).then(
+						progressService.showWhile(cFClient.getLogz(applicationInfo.Target, applicationInfo.Application, applicationInfo.logsTimestamp)).then(
 							function(newLogs){
 								if (newLogs.Messages.length !== 0){
 									var oldLogs = applicationInfo.logs;
