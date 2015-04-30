@@ -285,3 +285,26 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 	bottom: 75px;
 	width: calc(100% - 24px);
 }
+td#manifest::before{
+	padding-right: 50px;
+	  position: absolute;
+	  left: 32%;
+	  margin-top: 3px;
+	  content: "";
+	  height: 16px;
+}
+
+.wrongPath::before{
+	  background: url(../../../../images/warning.gif) scroll no-repeat;  
+}
+
+.correctPath::before{
+	background: url(../../../../images/success.png) scroll no-repeat;
+}
+
+.wrongPath input{
+	border: #FFA60C 2px solid;
+}
+.correctPath input{
+	border: #609B60 2px solid;
+}
