@@ -109,6 +109,10 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 						return true;
 					}
 				}, this);
+				
+				var sideMenuHome = document.createElement("div"); //$NON-NLS-0$
+				sideMenuHome.classList.add("sideMenuHome"); //$NON-NLS-0$
+				this._sideMenuHome = sideMenuHome;
 
 				var sideMenuList = document.createElement("ul"); //$NON-NLS-0$
 				sideMenuList.classList.add("sideMenuList"); //$NON-NLS-0$
@@ -185,6 +189,7 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 
 				this._updateCategoryAnchors();
 				this._show = function() {
+					this._parentNode.appendChild(sideMenuHome);
 					this._parentNode.appendChild(this._topScrollButton);
 					this._parentNode.appendChild(sideMenuList);
 					this._parentNode.appendChild(this._bottomScrollButton);
