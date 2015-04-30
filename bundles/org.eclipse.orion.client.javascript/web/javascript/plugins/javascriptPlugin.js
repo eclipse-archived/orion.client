@@ -203,7 +203,7 @@ define([
     		contentType: ['application/javascript']  //$NON-NLS-0$
     			}
     	);
-    /*	
+
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
     			new RenameCommand.RenameCommand(astManager, ternWorker), 
     			{
@@ -214,7 +214,7 @@ define([
     		contentType: ['application/javascript']  //$NON-NLS-0$
     			}
     	);
-   */
+
     	var quickFixComputer = new QuickFixes.JavaScriptQuickfixes(astManager);
     	
     	provider.registerServiceProvider("orion.edit.command",  //$NON-NLS-0$
