@@ -52,6 +52,7 @@ define({//Default message bundle
 	"password:": "Password:",
 	"Cancelled": "Cancelled",
 	"Could not find the launch configuration manifest": "Could not find the launch configuration manifest nor use the top-level project manifest. Please restore it or provide a project manifest.",
+	"CouldNotFindManifestInProvidedPath" : "Could not find manifest in provided path. The launch conifguration will use default values.",
 	"Would you like to use the top-level project manifest": "Could not find the launch configuration manifest. Would you like to use the top-level project manifest instead and bind it to the launch configuration?",
 	"iD:": "ID:",
 	"setUpYourCloud.Go": "Set up your Cloud. Go to [Settings](${0}).",
