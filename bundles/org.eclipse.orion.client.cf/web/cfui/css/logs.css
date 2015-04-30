@@ -5,7 +5,7 @@
 @import "../../css/theme.css";
 
 #LogsNavigationTitle {
-	-moz-user-select: none;
+    -moz-user-select: none;
     font-weight: bold;
     margin-left: 4px;
     margin-top: 8px;
@@ -14,4 +14,8 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     position: absolute;
+}
+
+.textviewScroll {
+    padding: 4px 2px 4px 2px;
 }
