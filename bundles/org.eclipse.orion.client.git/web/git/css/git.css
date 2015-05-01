@@ -113,10 +113,6 @@
 	border: 1px solid #f1f3f4;
 }
 
-.mainToolbar {
-	height: 50px;
-}
-
 .innerPanels {
 	margin: 20px;
 	width: calc(100% - 2px)
