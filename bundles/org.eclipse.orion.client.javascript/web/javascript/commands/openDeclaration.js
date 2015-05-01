@@ -41,7 +41,7 @@ define([
 					if(_d.declaration && (typeof(_d.declaration.start) === 'number' && typeof(_d.declaration.end) === 'number')) {
 						deferred.resolve(cachedContext.setSelection(_d.declaration.start, _d.declaration.end, true));
 					} else {
-						deferred.reject();
+						deferred.resolve();
 					}
 				}
 			}

@@ -32,7 +32,7 @@ define([
 	           files: args.files}, 
 	           function(error, decl) {
 	               if(error) {
-	                   callback({error: error.message, message: 'Failed to compute declaration'});
+	                   callback({request: 'definition', error: error.message, message: 'Failed to compute declaration'});
 	               }
 	               if(decl && typeof(decl.start) === 'number' && typeof(decl.end) === "number" &&
 	               		decl.file === args.meta.location) { //TODO only work on local decls
@@ -42,7 +42,7 @@ define([
        			   }
 	           });
 	   } else {
-	       callback({message: 'Failed to compute declaration, server not started'});
+	       callback({request: 'definition', message: 'Failed to compute declaration, server not started'});
 	   }
    }
    

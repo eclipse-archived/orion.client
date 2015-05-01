@@ -39,19 +39,19 @@ define([
 					var changes = _d.changes;
 					if(changes && changes.changes && changes.changes.length > 0) {
 						var ranges = changes.changes;
-
 						// turn the ranges into offset / length
 						var offsets = [ranges.length];
 						for (var i = 0; i < ranges.length; i++) {
-							offsets[i] = {offset: ranges[i].start,
-										length: ranges[i].end - ranges[i].start};
+							offsets[i] = {
+								offset: ranges[i].start,
+								length: ranges[i].end - ranges[i].start
+							};
 						}
 						var groups = [{data: {}, positions: offsets}];
 						var linkModel = {groups: groups};
 						deferred.resolve(cachedContext.enterLinkedMode(linkModel));
-					} else {
-						deferred.reject();
-					}
+					} 
+					deferred.resolve();
 				}
 			}
 		});
@@ -65,9 +65,7 @@ define([
 		execute: function(editorContext, options) {
 			var that = this;
 		    if(options.contentType.id === 'application/javascript') {
-		        return that.astManager.getAST(editorContext).then(function(ast) {
-    				return that._doRename(editorContext, options);
-    			});
+    			return that._doRename(editorContext, options);
 		    } else {
 		        return editorContext.getText().then(function(text) {
 		            var offset = options.offset;
@@ -75,9 +73,7 @@ define([
 		            if(blocks && blocks.length > 0) {
 		                var cu = new CU(blocks, {location:options.input, contentType:options.contentType});
     			        if(cu.validOffset(offset)) {
-    			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-    			               return that._doRename(editorContext, options); 
-    			            });
+    			        	return that._doRename(editorContext, options); 
     			        }
 			        }
 		        });
@@ -88,14 +84,19 @@ define([
 		 * @description Actually do the work
 		 * @function
 		 * @private
-		 * @returns null
+		 * @param {orion.editor.EditorContext} editorContext The editor context
+		 * @param {Object} params The parameters 
+		 * @returns {Deferred} A deferred to resolve
 		 */
 		_doRename: function _doRename(editorContext, params) {
-			//TODO show dialog for new name
-			cachedContext = editorContext;
-			deferred = new Deferred();
-			this.ternworker.postMessage({request:'rename', args:{params:{offset: params.offset}, meta:{location: params.input}, newname:'FOO'}});
-			return deferred;
+			var that = this;
+			return editorContext.getText().then(function(text) {
+				cachedContext = editorContext;
+				deferred = new Deferred();
+				var files = [{type:'full', name:params.input, text:text}];
+				that.ternworker.postMessage({request:'rename', args:{params:{offset: params.offset}, files: files, meta:{location: params.input}, newname:''}});
+				return deferred;
+			});
 		}
 	});
 	

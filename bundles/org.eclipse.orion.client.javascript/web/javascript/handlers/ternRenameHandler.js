@@ -28,16 +28,19 @@ define([
 		           file: args.meta.location,
 		           end: args.params.offset,
 		           newName: args.newname
-	           }}, 
+	           },
+	           files: args.files}, 
 	           function(error, changes) {
 	               if(error) {
-	                   callback({error: error.message, message: 'Failed to rename changes'});
+	                   callback({request: 'rename', error: error.message, message: 'Failed to rename changes'});
 	               } else if(changes && Array.isArray(changes.changes)) {
         			   callback({request: 'rename', changes:changes});
+	               } else {
+	               		callback({request: 'rename', changes:[]});
 	               }
 	           });
 	   } else {
-	       callback({message: 'failed to rename, server not started'});
+	       callback({request: 'rename', message: 'failed to rename, server not started'});
 	   }
    }
    

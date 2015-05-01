@@ -32,15 +32,14 @@ define([
 	           function(error, doc) {
 	               if(error) {
 	                   callback({request: 'documentation', error: error.message, message: 'Failed to compute documentation'});
-	               }
-	               if(doc && doc.doc) {
+	               } else if(doc && doc.doc) {
         			   callback({request: 'documentation', doc:doc});
 	               } else {
 						callback({request: 'documentation', doc: null});
 	               }
 	           });
 	   } else {
-	       callback({message: 'Failed to compute documentation, server not started'});
+	       callback({request: 'documentation', message: 'Failed to compute documentation, server not started'});
 	   }
     }
     
