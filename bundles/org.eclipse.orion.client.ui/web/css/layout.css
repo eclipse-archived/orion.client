@@ -435,7 +435,7 @@ hard-coded numbers elsewhere.
 	position: absolute;
 	top: 33%;  /* override this value if you want a different proportion of the two split panes */
 	width: 100%;
-	z-index: 5;
+	z-index: 51;
 	height: 1px;
 	cursor: n-resize;
 	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
