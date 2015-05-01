@@ -14,7 +14,7 @@
 define(["orion/xhr", "orion/URITemplate", "orion/Deferred", "orion/URL-shim"], function(xhr, URITemplate, Deferred) {
 
 	// regex pattern for the file browser requests
-	var pathRegex = /.*\/git\/(\w+[%2F|\/]\w+)\/(browse|contents|list)(\/([^\/]+)(\/(.*))?)?/;
+	var pathRegex = /.*\/git\/([^\/]+)\/(browse|contents|list)(\/([^\/]+)(\/(.*))?)?/;
 
 	function GerritFileImpl(pluginURL, project) {
 		// url templates for the Git router service requests
