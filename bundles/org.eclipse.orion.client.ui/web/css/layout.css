@@ -628,6 +628,7 @@ and (max-device-width : 1024px)  {
 	list-style-type: none;
 	font-size:16px !important;
 	padding: 0;
+	margin: 3px;
 }
 
 .sideMenuItem:hover, .sideMenuItem.expanded {
