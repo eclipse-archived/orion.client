@@ -829,24 +829,6 @@ and (max-device-width : 1024px)  {
 }
 
 .userMenu {
-	align-items: center;
-	color: #ccc;
-	line-height: 16px;
-	display: flex;
-	justify-content: flex-end;
-	
-	-webkit-align-items: center;		/* Safari */
-	display: -webkit-flex; 				/* Safari */
-	-webkit-justify-content: flex-end;	/* Safari */
-}
-
-.userMenu > .userTrigger {
-	padding: 4px 4px;
-	border: 1px solid transparent;
-}
-
-.userMenu > .dropdownMenuOpen {
-	top: 36px;
 }
 
 /* Split View Menu */

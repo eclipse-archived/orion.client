@@ -19,8 +19,11 @@
 </div>
 <ul class="layoutRight commandList pageActions" id="pageNavigationActions"></ul>
 <ul class="layoutRight commandList pageActions" id="settingsActions"></ul>
-<div class="layoutRight userMenu" id="userMenu">
-	<span id="userTrigger" tabindex="0" role="button" class="dropdownTrigger userTrigger">
-	</span>
-	<ul id="userDropdown" class="dropdownMenu" role="menu"></ul>
-</div>
+<ul class="layoutRight commandList pageActions userMenu" id="userMenu">
+	<li>
+		<button id="userTrigger" class="dropdownTrigger commandImage"/>
+			<span class="commandSprite core-sprite-silhouette"></span>
+		</button>
+		<ul id="userDropdown" class="dropdownMenu" role="menu"></ul>
+	</li>
+</ul>

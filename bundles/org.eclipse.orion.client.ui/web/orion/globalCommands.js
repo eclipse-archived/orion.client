@@ -58,11 +58,6 @@ define([
 			/*
 			 * To add user name call: setUserName(serviceRegistry, dropdownTrigger);
 			 */
-
-			var userTrigger = document.getElementById('userTrigger');
-			userTrigger.classList.add("imageSprite");
-			userTrigger.classList.add("core-sprite-silhouette");
-
 			menuGenerator.setKeyAssist(keyAssistFunction);
 
 			return menuGenerator;

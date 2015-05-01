@@ -248,7 +248,8 @@
 
 .mainToolbar #configSection {
 	float: right;
-	padding: 2px;
+	padding: 4px;
+	padding-top: 0;
 	border: 1px solid transparent;
 	height: 18px;
 }
