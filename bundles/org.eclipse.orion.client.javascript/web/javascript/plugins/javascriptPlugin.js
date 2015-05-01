@@ -171,6 +171,44 @@ define([
     		});
     	
     	/**
+    	 * Register the jsdoc-based outline
+    	 */
+    	provider.registerService("orion.edit.outliner", new Outliner.JSOutliner(astManager),  //$NON-NLS-0$
+    			{ contentType: ["application/javascript"],  //$NON-NLS-0$
+    		name: javascriptMessages["sourceOutline"],  //$NON-NLS-0$
+    		title: javascriptMessages['sourceOutlineTitle'],  //$NON-NLS-0$
+    		id: "orion.javascript.outliner.source"  //$NON-NLS-0$
+    			});
+    	
+    	/**
+    	 * Register the mark occurrences support
+    	 */
+    	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(astManager),  //$NON-NLS-0$
+    			{
+    		contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
+    			});
+    	
+    	/**
+    	 * Register the hover support
+    	 */
+    	provider.registerService("orion.edit.hover", new Hover.JavaScriptHover(astManager, scriptresolver, ternWorker),  //$NON-NLS-0$
+    			{
+    		name: javascriptMessages['jsHover'],
+    		contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
+    			});
+
+    	var validator = new EslintValidator(astManager);
+    	
+    	/**
+    	 * Register the ESLint validator
+    	 */
+    	provider.registerService("orion.edit.validator", validator,  //$NON-NLS-0$  //$NON-NLS-1$
+    			{
+    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$ //$NON-NLS-1$
+    		pid: 'eslint.config'  //$NON-NLS-0$
+    			});
+    			
+    	/**
     	 * Register AST manager as Model Change listener
     	 */
     	provider.registerService("orion.edit.model", {  //$NON-NLS-0$
@@ -469,53 +507,6 @@ define([
                 }
         );
 
-    	/**
-    	 * Register the jsdoc-based outline
-    	 */
-    	provider.registerService("orion.edit.outliner", new Outliner.JSOutliner(astManager),  //$NON-NLS-0$
-    			{ contentType: ["application/javascript"],  //$NON-NLS-0$
-    		name: javascriptMessages["sourceOutline"],  //$NON-NLS-0$
-    		title: javascriptMessages['sourceOutlineTitle'],  //$NON-NLS-0$
-    		id: "orion.javascript.outliner.source"  //$NON-NLS-0$
-    			});
-    	
-    	/**
-    	 * Register the mark occurrences support
-    	 */
-    	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(astManager),  //$NON-NLS-0$
-    			{
-    		contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
-    			});
-    	
-    	/**
-    	 * Register the hover support
-    	 */
-    	provider.registerService("orion.edit.hover", new Hover.JavaScriptHover(astManager, scriptresolver),  //$NON-NLS-0$
-    			{
-    		name: javascriptMessages['jsHover'],
-    		contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
-    			});
-/*    	
-    	provider.registerService("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager),  //$NON-NLS-0$
-    			{
-    		contentType: ["application/javascript", 'text/html'],  //$NON-NLS-0$ //$NON-NLS-1$
-    		name: javascriptMessages["contentAssist"],  //$NON-NLS-0$
-    		id: "orion.edit.contentassist.javascript",  //$NON-NLS-0$
-    		charTriggers: "[.]",  //$NON-NLS-0$
-    		excludedStyles: "(string.*)"  //$NON-NLS-0$
-    			});
-  */  	
-    	var validator = new EslintValidator(astManager);
-    	
-    	/**
-    	 * Register the ESLint validator
-    	 */
-    	provider.registerService("orion.edit.validator", validator,  //$NON-NLS-0$  //$NON-NLS-1$
-    			{
-    		contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$ //$NON-NLS-1$
-    		pid: 'eslint.config'  //$NON-NLS-0$
-    			});
-    	
     	/**
     	 * legacy pref id
     	 */

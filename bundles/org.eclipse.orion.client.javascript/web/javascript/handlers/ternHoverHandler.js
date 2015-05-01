@@ -27,13 +27,16 @@ define([
 		           type: "documentation", 
 		           file: args.meta.location,
 		           end: args.params.offset
-	           }}, 
+	           },
+	           files: args.files}, 
 	           function(error, doc) {
 	               if(error) {
-	                   callback({error: error.message, message: 'Failed to compute documentation'});
+	                   callback({request: 'documentation', error: error.message, message: 'Failed to compute documentation'});
 	               }
-	               if(doc && Array.isArray(doc)) {
-        			   callback({request: 'hover', doc:doc});
+	               if(doc && doc.doc) {
+        			   callback({request: 'documentation', doc:doc});
+	               } else {
+						callback({request: 'documentation', doc: null});
 	               }
 	           });
 	   } else {

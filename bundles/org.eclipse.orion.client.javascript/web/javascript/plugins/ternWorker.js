@@ -122,7 +122,7 @@ require({
                         DeclarationHandler.computeDeclaration(ternserver, _d.args, post);
                         break;
                     }
-                    case 'hover': {
+                    case 'documentation': {
                         HoverHandler.computeHover(ternserver, _d.args, post);
                         break;
                     }
