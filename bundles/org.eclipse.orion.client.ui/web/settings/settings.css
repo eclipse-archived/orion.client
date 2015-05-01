@@ -567,6 +567,7 @@ div.page section:last-child {
 .workingTarget {
 	border: 1px solid #dadada;
 	box-shadow: none;
+	background: #FFF;
 }
 
 .sidePanelMargins {
