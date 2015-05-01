@@ -14,8 +14,7 @@
 }
 
 .runBarWrapper .disabled:hover {
-	color: #555;
-	opacity: 0.15;
+	opacity: 0.30;
 	cursor: default;
 }
 
