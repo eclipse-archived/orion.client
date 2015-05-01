@@ -15,7 +15,6 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 	var OPEN_STATE = "open";
 	var CLOSED_STATE = "closed";
 	var DEFAULT_STATE = OPEN_STATE;
-	var SIDE_MENU_OPEN_WIDTH = "50px";
 	var TRANSITION_DURATION_MS = 301; /* this should always be greater than the duration of the left transition of .content-fixedHeight */
 
 	function SideMenu(parentNode, contentNode) {
@@ -113,7 +112,7 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 				var sideMenuHome = document.createElement("div"); //$NON-NLS-0$
 				sideMenuHome.classList.add("sideMenuHome"); //$NON-NLS-0$
 				this._sideMenuHome = sideMenuHome;
-
+				
 				var sideMenuList = document.createElement("ul"); //$NON-NLS-0$
 				sideMenuList.classList.add("sideMenuList"); //$NON-NLS-0$
 				this._sideMenuList = sideMenuList;
@@ -206,13 +205,13 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 			}
 
 			if (this._state === CLOSED_STATE) {
-				this._contentNode.style.left = "0"; //$NON-NLS-0$
+				this._contentNode.classList.add("content-sideMenu-closed"); //$NON-NLS-0$
 				if (this._renderTimeout) {
 					window.clearTimeout(this._renderTimeout);
 					this._renderTimeout = null;
 				}
 				this._renderTimeout = window.setTimeout(function() {
-					this._parentNode.style.display = 'none'; //$NON-NLS-0$
+					this._parentNode.classList.add("sideMenu-closed"); //$NON-NLS-0$
 					this._renderTimeout = null;
 				}.bind(this), TRANSITION_DURATION_MS);
 				this._parentNode.classList.add("animating"); //$NON-NLS-0$
@@ -222,9 +221,8 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 					this._renderTimeout = null;
 				}
 				this._parentNode.classList.remove("animating"); //$NON-NLS-0$
-				this._parentNode.style.display = 'block'; //$NON-NLS-0$
-				this._parentNode.style.width = SIDE_MENU_OPEN_WIDTH;
-				this._contentNode.style.left = SIDE_MENU_OPEN_WIDTH;
+				this._parentNode.classList.remove("sideMenu-closed"); //$NON-NLS-0$
+				this._contentNode.classList.remove("content-sideMenu-closed"); //$NON-NLS-0$
 			}
 		},
 		_updateScrollButtonVisibility: function() {
@@ -260,7 +258,8 @@ define(['orion/webui/littlelib', 'orion/PageUtil', 'orion/URL-shim'], function(l
 		},
 		hide: function() {
 			localStorage.setItem(LOCAL_STORAGE_NAME, CLOSED_STATE);
-			this._contentNode.style.left = "0"; //$NON-NLS-0$
+			this._parentNode.classList.add("sideMenu-closed"); //$NON-NLS-0$
+			this._contentNode.classList.add("content-sideMenu-closed"); //$NON-NLS-0$
 		},
 		toggle: function() {
 			// add animation if necessary

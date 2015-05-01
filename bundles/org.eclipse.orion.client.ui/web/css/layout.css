@@ -150,7 +150,7 @@ hard-coded numbers elsewhere.
     top: 0;
 	/* bottom: 36px; $FooterHeight + footer border (1px) */    
     bottom: 0;
-    left: 0;
+    left: 50px;
     right: 0;
     background: #37474F;
 	/*margin-bottom: 29px;*/
@@ -163,6 +163,10 @@ hard-coded numbers elsewhere.
 .content-fixedHeight-maximized {
 	top: 0;
 	bottom: 0;
+}
+
+.content-sideMenu-closed {
+	left: 0;
 }
 
 .content-fluid {
@@ -568,7 +572,7 @@ and (max-device-width : 1024px)  {
 /* ----- side menu begin ----- */
 
 .sideMenu{
-    width: 0;
+    width: 50px;
     background: #263238;
 	float: left;
     position: absolute;
@@ -598,6 +602,11 @@ and (max-device-width : 1024px)  {
 .sideMenu-maximized {
 	top: 0;
 	bottom: 0;
+}
+
+.sideMenu-closed {
+	width: 0;
+	display: none;
 }
 
 .sideMenuHome{
