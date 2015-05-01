@@ -9,7 +9,7 @@ html,body {
 }
 
 .sidebarWrapper > .sidebar {
-	height: calc(100% - 10px);
+	height: calc(100% - 0px);
 	width: calc(100% - 10px);
 	left: 10px;
 }
