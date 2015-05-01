@@ -37,6 +37,7 @@ define([
 			"no-dupe-keys" : 2, //$NON-NLS-0$
 			"no-eval" : 0, //$NON-NLS-0$
 			"no-extra-semi": 1, //$NON-NLS-0$
+			"no-implied-eval" : 0, //$NON-NLS-0$
 			"no-iterator": 2,  //$NON-NLS-0$
 			'no-jslint' : 1,  //$NON-NLS-0$
 			"no-new-array": 1, //$NON-NLS-0$
