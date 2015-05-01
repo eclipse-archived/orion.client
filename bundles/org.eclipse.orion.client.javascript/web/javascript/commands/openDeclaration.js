@@ -76,7 +76,7 @@ define([
 			cachedContext = editorContext;
 			deferred = new Deferred();
 			var files = [{type: 'full', name: options.input, text: ast.source}];
-			this.ternworker.postMessage({request:'definition', args:{params:{offset: options.offset, files: files}, meta:{location: options.input}}});
+			this.ternworker.postMessage({request:'definition', args:{params:{offset: options.offset}, files: files, meta:{location: options.input}}});
 			return deferred;
 		}
 	});
