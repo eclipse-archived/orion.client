@@ -42,13 +42,13 @@
 	text-decoration: none;
 	padding-top: 2px;
 	padding-bottom: 2px;
-	color: white;
+	color: inherit;
 }
 
 #auxpane .navlink {
 	display: inline-block;
 	padding: 2px;
-	color: white;
+	color: inherit;
 	vertical-align: bottom;
     line-height: 12px;
 }
