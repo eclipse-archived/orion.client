@@ -509,7 +509,7 @@ and (max-device-width : 1024px)  {
 
 .splitVerticalThumbDownLayout {
 	position: absolute;
-	top: -200%;
+	bottom: 100%;
 	width: 3em;
 	height: 4px;
 	left: calc(50% - 1.5em);
