@@ -19,7 +19,8 @@ define([
 	'eslint/conf/environments',
     'orion/editor/templates', //$NON-NLS-0$
 	'javascript/contentAssist/templates',  //$NON-NLS-0$
-], function(Objects, Hover, Finder, Signatures, Rules, ESLintEnv, mTemplates, Templates) {
+	'orion/editor/stylers/application_javascript/syntax'
+], function(Objects, Hover, Finder, Signatures, Rules, ESLintEnv, mTemplates, Templates, JsSyntax) {
 
     /**
 	 * @description Creates a new delegate to create keyword and template proposals
@@ -464,7 +465,7 @@ define([
         if(typeof(completion.type) !== 'undefined') {
             if(/^fn/.test(completion.type)) {
             	calculateFunctionProposal(completion, args, proposal);
-            } else if(typeof(completion.origin) === 'undefined') {
+            } else if(typeof(completion.origin) === 'undefined' && (JsSyntax.keywords.indexOf(completion.name) > -1)) {
             	//keyword
             	proposal.relevance -= 2; //103
             	//proposal.style = 'noemphasis_keyword';//$NON-NLS-1$
