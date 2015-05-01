@@ -637,6 +637,12 @@ define([
     			 	        	                	defaultValue: ignore,
     			 	        	                	options: severities
     			 	        	                },
+    			 	        	                {	id: "no-implied-eval",  //$NON-NLS-0$
+    			 	        	                	name: javascriptMessages["noImpliedEval"],  //$NON-NLS-0$
+    			 	        	                	type: "number",  //$NON-NLS-0$
+    			 	        	                	defaultValue: ignore,
+    			 	        	                	options: severities
+    			 	        	                },
     			 	        	                {	id: "no-iterator",  //$NON-NLS-0$
     			 	        	                	name: javascriptMessages["noIterator"], //$NON-NLS-0$
     			 	        	                	type: "number", //$NON-NLS-0$

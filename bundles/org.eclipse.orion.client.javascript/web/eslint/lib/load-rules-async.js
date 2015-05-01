@@ -467,27 +467,6 @@ define([
         					if('eval' === name) {
         						context.report(node.callee, "${0} function calls are discouraged.", {0:'\'eval\''}, context.getTokens(node.callee)[0]);
         					}
-        					else if('setInterval' === name || 'setTimeout' === name) {
-        						if(node.arguments.length > 0) {
-        							var arg = node.arguments[0];
-        							if(arg.type === 'Literal') {
-        								context.report(node.callee, "${0} function calls are discouraged.", {0:'Implicit \'eval\''}, context.getTokens(node.callee)[0]);
-        							}
-        							else if(arg.type === 'Identifier') {
-        								//lets see if we can find it definition
-        								var scope = context.getScope();
-        								var decl = util.getDeclaration(arg, scope);
-        								if (decl && decl.defs && decl.defs.length) {
-        									var def = decl.defs[0];
-        									var dnode = def.node;
-        									if(def.type === 'Variable' && dnode && dnode.type === 'VariableDeclarator' &&
-        										dnode.init && dnode.init.type === 'Literal') {
-        										context.report(node.callee, "${0} function calls are discouraged.", {0:'Implicit \'eval\''}, context.getTokens(node.callee)[0]);
-        									}
-        								}
-        							}
-        						}
-        					}
         				}
         				catch(ex) {
         					Logger.log(ex);
@@ -589,6 +568,45 @@ define([
         			        Logger.log(ex);
         			    }
         			 }
+        		};
+        	}
+        },
+        "no-implied-eval" : {
+        	description: 'Disallow use of implied eval function',
+        	rule: function(context) {
+        		return {
+        			"CallExpression": function(node) {
+        				try {
+        					var name = node.callee.name;
+        					if(!name) {
+        						return;
+        					}
+        					if('setInterval' === name || 'setTimeout' === name) {
+        						if(node.arguments.length > 0) {
+        							var arg = node.arguments[0];
+        							if(arg.type === 'Literal') {
+        								context.report(node.callee, "${0} function calls are discouraged.", {0:'Implicit \'eval\''}, context.getTokens(node.callee)[0]);
+        							}
+        							else if(arg.type === 'Identifier') {
+        								//lets see if we can find it's definition
+        								var scope = context.getScope();
+        								var decl = util.getDeclaration(arg, scope);
+        								if (decl && decl.defs && decl.defs.length) {
+        									var def = decl.defs[0];
+        									var dnode = def.node;
+        									if(def.type === 'Variable' && dnode && dnode.type === 'VariableDeclarator' &&
+        											dnode.init && dnode.init.type === 'Literal') {
+        										context.report(node.callee, "${0} function calls are discouraged.", {0:'Implicit \'eval\''}, context.getTokens(node.callee)[0]);
+        									}
+        								}
+        							}
+        						}
+        					}
+        				}
+        				catch(ex) {
+        					Logger.log(ex);
+        				}
+        			}
         		};
         	}
         },

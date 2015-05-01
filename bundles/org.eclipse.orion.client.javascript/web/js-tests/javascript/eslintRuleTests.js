@@ -2047,72 +2047,6 @@ define([
     			assert.equal(messages[0].message, "\'eval\' function calls are discouraged.");
     			assert.equal(messages[0].node.type, "Identifier");
     		});
-    		it("should flag setInterval() use call literal arg", function() {
-    			var topic = "function setInterval() {} setInterval('code', 300);";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    	
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 1);
-    			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Implicit \'eval\' function calls are discouraged.");
-    			assert.equal(messages[0].node.type, "Identifier");
-    		});
-    		it("should flag setInterval() use call infer literal arg", function() {
-    			var topic = "function setInterval() {} var s = 'code'; setInterval(s, 300);";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    	
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 1);
-    			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Implicit \'eval\' function calls are discouraged.");
-    			assert.equal(messages[0].node.type, "Identifier");
-    		});
-    		it("should not flag setInterval() use call non literal", function() {
-    			var topic = "function setInterval() {} setInterval({}, 300);";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    	
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
-    		});
-    		it("should flag setTimeout() use call literal arg", function() {
-    			var topic = "function setTimeout() {} setTimeout('code', 300);";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    	
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 1);
-    			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Implicit \'eval\' function calls are discouraged.");
-    			assert.equal(messages[0].node.type, "Identifier");
-    		});
-    		it("should flag setTimeout() use call infer literal arg", function() {
-    			var topic = "function setTimeout() {} var s = 'code'; setTimeout(s, 300);";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    	
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 1);
-    			assert.equal(messages[0].ruleId, RULE_ID);
-    			assert.equal(messages[0].message, "Implicit \'eval\' function calls are discouraged.");
-    			assert.equal(messages[0].node.type, "Identifier");
-    		});
-    		it("should not flag setTimeout() use call non-literal", function() {
-    			var topic = "function setTimeout() {} setTimeout({}, 300);";
-    	
-    			var config = { rules: {} };
-    			config.rules[RULE_ID] = 1;
-    	
-    			var messages = eslint.verify(topic, config);
-    			assert.equal(messages.length, 0);
-    		});
     	});
     	
 //NO-EXTRA-SEMI -----------------------------------------------------    	
@@ -2357,6 +2291,78 @@ define([
     			assert.equal(messages.length, 0);
     		});
     	});
+
+//NO-IMPLIED-EVAL ---------------------------------------------------------    	
+    	describe('no-implied-eval', function() {
+    		var RULE_ID = "no-implied-eval";
+    		it("should flag setInterval() use call literal arg", function() {
+    			var topic = "function setInterval() {} setInterval('code', 300);";
+    			
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Implicit \'eval\' function calls are discouraged.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		it("should flag setInterval() use call infer literal arg", function() {
+    			var topic = "function setInterval() {} var s = 'code'; setInterval(s, 300);";
+    			
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Implicit \'eval\' function calls are discouraged.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		it("should not flag setInterval() use call non literal", function() {
+    			var topic = "function setInterval() {} setInterval({}, 300);";
+    			
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    		it("should flag setTimeout() use call literal arg", function() {
+    			var topic = "function setTimeout() {} setTimeout('code', 300);";
+    			
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Implicit \'eval\' function calls are discouraged.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		it("should flag setTimeout() use call infer literal arg", function() {
+    			var topic = "function setTimeout() {} var s = 'code'; setTimeout(s, 300);";
+    			
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 1);
+    			assert.equal(messages[0].ruleId, RULE_ID);
+    			assert.equal(messages[0].message, "Implicit \'eval\' function calls are discouraged.");
+    			assert.equal(messages[0].node.type, "Identifier");
+    		});
+    		it("should not flag setTimeout() use call non-literal", function() {
+    			var topic = "function setTimeout() {} setTimeout({}, 300);";
+    			
+    			var config = { rules: {} };
+    			config.rules[RULE_ID] = 1;
+    			
+    			var messages = eslint.verify(topic, config);
+    			assert.equal(messages.length, 0);
+    		});
+    	});
+    	
 //NO-ITERATOR ----------------------------------------------------
         describe('no-iterator', function() {
     	    var RULE_ID = "no-iterator";
