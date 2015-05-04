@@ -1166,6 +1166,7 @@
         options.tokens = true;
         options.comment = true;
         options.range = true;
+        options.deps = true;
         options.loc = true;
         ast = acorn.parse(text, options); 
         ast.sourceFile  = Object.create(null);
