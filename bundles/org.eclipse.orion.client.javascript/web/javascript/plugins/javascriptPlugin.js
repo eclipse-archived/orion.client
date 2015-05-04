@@ -136,14 +136,18 @@ define([
 		    			switch(_d.request) {
 		    				case 'read': {
 		    					if(typeof(_d.args.file) === 'object') {
-		    						scriptresolver.getWorkspaceFile(_d.args.file.logical).then(function(files) {
+		    						var _l = _d.args.file.logical;
+		    						scriptresolver.getWorkspaceFile(_l).then(function(files) {
 		    							if(files && files.length > 0) {
 		    								return fileClient.read(files[0].location).then(function(contents) {
-		    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:files[0].location, logical:_d.args.file.logical, path:files[0].path}});	
+		    									ternWorker.postMessage({request: 'read', args:{contents:contents, file:files[0].location, logical:_l, path:files[0].path}});	
 		    								});
 		    							} else {
-		    								ternWorker.postMessage({request: 'read', args: {error: 'Failed to read file '+_d.args.file.logical}});
+		    								ternWorker.postMessage({request: 'read', args: {logical:_l, error: 'Failed to read file '+_l}});
 		    							}
+		    						},
+		    						function(err) {
+		    							ternWorker.postMessage({request: 'read', args: {logical: _l, message: err.toString(), error: 'Failed to read file '+_l}});
 		    						});	
 		    					} else {
 		    						var file = _d.args.file;
