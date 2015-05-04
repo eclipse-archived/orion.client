@@ -33,7 +33,7 @@ define([
 		saveDiffsVisible: true,
 		contentAssistAutoTrigger: true,
 		contentAssistAutoTriggerVisible: true,
-		showOccurrences: false,
+		showOccurrences: true,
 		showOccurrencesVisible: true,
 		autoPairParentheses: true,
 		autoPairParenthesesVisible: true,
