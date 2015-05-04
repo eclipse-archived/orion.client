@@ -110,9 +110,11 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 						progressService.showWhile(cFClient.getLogz(applicationInfo.Target, applicationInfo.Application, applicationInfo.logsTimestamp)).then(
 							function(newLogs){
 								if (newLogs.Messages.length !== 0){
-									var oldLogs = applicationInfo.logs;
-									applicationInfo.logs = newLogs.Messages;
+									var currentLogs = applicationInfo.logs;
+									currentLogs = currentLogs.concat(newLogs.Messages);
+									applicationInfo.logs = currentLogs;
 									applicationInfo.logsTimestamp = newLogs.Timestamp;
+									
 									logEditorView.inputManager.setApplicationInfo(applicationInfo);
 	
 									logEditorView.inputManager.setInput("logs for " + applicationInfo.Application);
