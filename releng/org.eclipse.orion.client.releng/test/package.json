@@ -36,7 +36,7 @@
     {
       "browserName": "chrome",
       "platform": "Windows 7",
-      "version": "26"
+      "version": "42"
     },
     {
       "browserName": "internet explorer",
@@ -50,7 +50,7 @@
     },
     {
       "browserName": "firefox",
-      "version": "24",
+      "version": "31",
       "platform": "linux"
     }
   ]
