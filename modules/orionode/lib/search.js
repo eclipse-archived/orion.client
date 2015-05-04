@@ -31,6 +31,9 @@ module.exports = function(options) {
 	function originalFileRoot(req) {
 		return fileUtil.getContextPath(req) + fileRoot;
 	}
+	function originalWorkspaceRoot(req) {
+		return fileUtil.getContextPath(req) + workspaceRoot;
+	}
 
 	function searchOptions(req, res){
 		this.defaultLocation = null;
@@ -141,22 +144,27 @@ module.exports = function(options) {
 		}
 	}
 
-	function searchChild(dirLocation, fileLocation, searchPattern, filenamePattern, results){
+	function searchChild(dirLocation, fileLocation, searchPattern, filenamePattern, results, workspaceRootUrl){
 		var location = dirLocation + fileLocation;
 		var stats = fs.statSync(location);
 		if (stats.isDirectory()) {
-			if (location.substring(location.length - 1) != "/") {
-				location = location + "/";
-			}
+			if (location.substring(location.length - 1) != "/") location = location + "/";
 			var dirFiles = fs.readdirSync(location);
 			dirFiles.forEach(function (dirFile) {
-				var resultsForEach = searchChild(location, dirFile, searchPattern, filenamePattern, results);
+				var resultsForEach = searchChild(location, dirFile, searchPattern, filenamePattern, results, workspaceRootUrl);
 				if (resultsForEach) results.concat(resultsForEach);
 			})
 		} else {
 			var file = fs.readFileSync(location, 'utf8');
 			if (file.match(searchPattern) && fileLocation.match(filenamePattern)){
-				results.push(location);
+				results.push({
+					"Directory": stats.isDirectory(),
+					"LastModified": stats.mtime.getTime(),
+					"Length": stats.size,
+					"Location": "/file" + location.substring(workspaceDir.length),
+					"Name:": fileLocation,
+					"Path:": location
+				});
 			}
 		}
 		return results;
@@ -166,6 +174,8 @@ module.exports = function(options) {
 	.use(connect.json())
 	.use(resource(workspaceRoot, {
 		GET: function(req, res, next, rest) {
+			var workspaceRootUrl = originalWorkspaceRoot(req);
+
 			var searchOpt = new searchOptions(req, res);
 			searchOpt.buildOptions();
 
@@ -173,20 +183,38 @@ module.exports = function(options) {
 			var filenamePattern = buildFilenamePattern(searchOpt);
 
 			var parentFileLocation = originalFileRoot(req);
-
-			fileUtil.getChildren(workspaceDir, parentFileLocation, function(children) {
+			var scope = workspaceDir + searchOpt.location.substring(5, searchOpt.location.length - 1);
+			if (scope.charAt(scope.length-1) != "/") scope = scope + "/";
+			fileUtil.getChildren(scope, parentFileLocation, function(children) {
 				var results = [];
 				for (var i = 0; i < children.length; i++){
 					var child = children[i];
 					var childResults = [];
-					var matches = searchChild(workspaceDir + "/", child.Location.substring(6), searchPattern, filenamePattern, childResults);
+					var matches = searchChild(scope, child.Location.substring(6), searchPattern, filenamePattern, childResults, workspaceRootUrl);
 					if (matches) results = results.concat(matches);
 				};
 
 				var ws = JSON.stringify({
-					    "search": searchOpt,
-					    "results": results
-					});
+				  "response": {
+				    "docs": results,
+				    "numFound": results.length,
+				    "start": 0
+				  },
+				  "responseHeader": {
+				    "params": {
+				      "fl": "Name,NameLower,Length,Directory,LastModified,Location,Path,RegEx,CaseSensitive",
+				      "fq": [
+				        "Location:"+searchOpt.location,
+				        "UserName:anonymous"
+				      ],
+				      "rows": "10000",
+				      "sort": "Path asc",
+				      "start": "0",
+				      "wt": "json"
+				    },
+				    "status": 0
+				  }
+				});
 				res.setHeader('Content-Type', 'application/json');
 				res.end(ws);
 			});
