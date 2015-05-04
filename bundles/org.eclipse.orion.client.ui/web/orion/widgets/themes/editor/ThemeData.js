@@ -39,7 +39,7 @@ define([
 		
 		var defaultFont = '"Source Code Pro", "Consolas", "Monaco", "Vera Mono", monospace'; //$NON-NLS-0$
 		var defaultFontSize = '12px'; //$NON-NLS-0$
-		var prospecto, darker;
+		var prospecto, darker, ceol;
 
 		function ThemeData() {
 
@@ -240,6 +240,12 @@ define([
 				}
 			};
 			this.styles.push(prospecto);
+
+
+			ceol = {"className":"ceol","name":"Ceol","styles":{"annotationLine":{"currentLine":{"backgroundColor":"#152935"}},"annotationRange":{"currentBracket":{"backgroundColor":"#00FE00"},"matchingBracket":{"backgroundColor":"#4178be"},"matchingSearch":{"backgroundColor":"#c3e1ff","currentSearch":{"backgroundColor":"#53d1ff"}},"writeOccurrence":{"backgroundColor":"#ffff00"}},"backgroundColor":"#152935","color":"#ffa5b4","comment":{"color":"#406d89"},"constant":{"color":"#7cc7ff","numeric":{"color":"#71c9ff","hex":{"color":"#71c9ff"}}},"entity":{"name":{"color":"#98937B","function":{"color":"#67BBB8","fontWeight":"bold"}},"other":{"attribute-name":{"color":"#5F9EA0"}}},"fontFamily":"\"Source Code Pro\", \"Consolas\", \"Monaco\", \"Vera Mono\", monospace","fontSize":"12px","keyword":{"control":{"color":"#a7fae6","fontWeight":"bold"},"operator":{"color":"#a7fae6","fontWeight":"bold"},"other":{"documentation":{"color":"#7F9FBF","task":{"color":"#5595ff"}}}},"markup":{"bold":{"fontWeight":"bold"},"heading":{"color":"#0000FF"},"italic":{"fontStyle":"italic"},"list":{"color":"#CC4C07"},"other":{"separator":{"color":"#00008F"},"strikethrough":{"textDecoration":"line-through"},"table":{"color":"#3C802C"}},"quote":{"color":"#446FBD"},"raw":{"fontFamily":"monospace","html":{"backgroundColor":"#E4F7EF"}},"underline":{"link":{"textDecoration":"underline"}}},"meta":{"documentation":{"annotation":{"color":"#7F9FBF"},"tag":{"color":"#7F7F9F"}},"preprocessor":{"color":"#A4A4A4"},"tag":{"color":"#a7fae7","attribute":{"color":"#eed2ff"}}},"punctuation":{"operator":{"color":"#ba8ff7"}},"ruler":{"annotations":{"backgroundColor":"#112935"},"backgroundColor":"#112935","overview":{"backgroundColor":"#112935"}},"rulerLines":{"color":"#396f8a","odd":{"color":"#396f8a"},"even":{"color":"#396f8a"}},"string":{"color":"#61cdff","interpolated":{"color":"#151515"}},"support":{"type":{"propertyName":{"color":"#a7fae7"}}},"textviewContent ::-moz-selection":{"backgroundColor":"#b4d5ff"},"textviewContent ::selection":{"backgroundColor":"#b4d5ff"},"textviewLeftRuler":{"borderColor":"#112935"},"textviewRightRuler":{"borderColor":"#112935"},"textviewSelection":{"backgroundColor":"#b4d5ff"},"textviewSelectionUnfocused":{"backgroundColor":"#b4d5ff"},"variable":{"language":{"color":"#a2f9e7","fontWeight":"bold"},"other":{"color":"#E038AD"},"parameter":{"color":"#a2f9e7"}}}};
+			this.styles.push(ceol);
+
+
 
 			darker = {
 				"className": "darker",
