@@ -208,6 +208,8 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 		this._contentParent.role = "region"; //$NON-NLS-0$
 		this._contentParent.classList.add("sectionTable"); //$NON-NLS-0$
 		this._contentParent.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
+		// initially style as hidden until we determine what needs to happen
+		this._collapse();
 		if (options.sibling) {
 			parent.insertBefore(this._contentParent, options.sibling);
 		} else {
@@ -222,8 +224,6 @@ define(['orion/EventTarget', 'orion/webui/littlelib', 'orion/commonHTMLFragments
 			this._onExpandCollapse = options.onExpandCollapse;
 		}
 		this._preferenceService = options.preferenceService;
-		// initially style as hidden until we determine what needs to happen
-		this._collapse();
 		if (!options.dropdown) {
 			// should we consult a preference?
 			if (this._preferenceService) {
