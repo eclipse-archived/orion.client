@@ -13,8 +13,12 @@
 define([
 'orion/objects',
 'javascript/finder',
+'javascript/compilationUnit',
 'orion/Deferred'
-], function(Objects, Finder, Deferred) {
+], function(Objects, Finder, CU, Deferred) {
+	
+	var cachedContext;
+	var deferred;
 	
 	/**
 	 * @description Creates a new open declaration command
@@ -30,54 +34,50 @@ define([
 		this.astManager = ASTManager;
 		this.resolver = Resolver;
 		this.ternworker = ternWorker;
+		this.ternworker.addEventListener('message', function(evnt) {
+			if(typeof(evnt.data) === 'object') {
+				var _d = evnt.data;
+				if(_d.request === 'definition') {
+					if(_d.declaration && (typeof(_d.declaration.start) === 'number' && typeof(_d.declaration.end) === 'number')) {
+						deferred.resolve(cachedContext.setSelection(_d.declaration.start, _d.declaration.end, true));
+					} else {
+						deferred.resolve();
+					}
+				}
+			}
+		});
 	}
 	
 	Objects.mixin(OpenDeclarationCommand.prototype, {
 		/* override */
-		execute: function(editorContext/*, options*/) {
+		execute: function(editorContext, options) {
 		    var that = this;
-			return Deferred.all([
-				this.astManager.getAST(editorContext),
-				editorContext.getCaretOffset()
-			]).then(function(results) {
-				var node = Finder.findNode(results[1], results[0], {parents:true});
-				if(node) {
-				    var parents = node.parents;
-				    if(parents) {
-    				    var parent = parents.pop();
-    				    switch(parent.type) {
-    				        case 'CallExpression': {
-    				            if(node.type === 'Literal' && (parent.callee.name === 'require' || parent.callee.name === 'importScripts')) {
-    				                that.resolver.getWorkspaceFile(node.value).then(function(files) {
-    				                    // TODO uncomment when we get a file open strategy
-    				                    //window.open(that.resolver.convertToURL(files[0]));
-    				                });
-    				            } else {
-        				            if(parent.callee.type === 'Identifier') {
-            				            var decl = Finder.findDeclaration(results[1], results[0], {id: parent.callee.name, kind: Finder.SearchOptions.FUNCTION_DECLARATION});
-                    					if(decl) {
-                    					    return editorContext.setSelection(decl.id.range[0], decl.id.range[1]);
-                    					}
-                					} else if(parent.callee.type === 'MemberExpression') {
-                					    //TODO need the env to find the containing object expression / func expr
-                					}
-            					}
-            					break;
-    				        }
-    				        case 'ArrayExpression': {
-    				            parent = parents.pop();
-    				            if(parent.type === 'CallExpression' && parent.callee.name === 'define') {
-    				                that.resolver.getWorkspaceFile(node.value).then(function(files) {
-    				                    // TODO uncomment when we get a file open strategy
-    				                    //window.open(that.resolver.convertToURL(files[0]));
-    				                });
-    				            }
-    				            break;
-    				        }
-    				    }
-				    }
-				}
-			});
+		    if(options.contentType.id === 'application/javascript') {
+		        return that.astManager.getAST(editorContext).then(function(ast) {
+    				return that._findDecl(editorContext, options, ast);
+    			});
+		    } else {
+		        return editorContext.getText().then(function(text) {
+		            var offset = options.offset;
+		            var blocks = Finder.findScriptBlocks(text);
+		            if(blocks && blocks.length > 0) {
+		                var cu = new CU(blocks, {location:options.input, contentType:options.contentType});
+    			        if(cu.validOffset(offset)) {
+    			            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
+    			               return that._findDecl(editorContext, options, ast); 
+    			            });
+    			        }
+			        }
+		        });
+		    }
+		},
+		
+		_findDecl: function(editorContext, options, ast) {
+			cachedContext = editorContext;
+			deferred = new Deferred();
+			var files = [{type: 'full', name: options.input, text: ast.source}];
+			this.ternworker.postMessage({request:'definition', args:{params:{offset: options.offset}, files: files, meta:{location: options.input}}});
+			return deferred;
 		}
 	});
 	

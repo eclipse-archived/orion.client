@@ -15,7 +15,7 @@ define([
 ], function() {
    
    /**
-    * @description Computes the declaration for the given arguments
+    * @description Computes the definition for the given arguments
     * @param {Object} ternserver The server to query
     * @param {Object} args The arguments
     * @param {Function} callback The callback to call once the request completes or fails
@@ -28,17 +28,21 @@ define([
 		           type: "definition", 
 		           file: args.meta.location,
 		           end: args.params.offset
-	           }}, 
+	           },
+	           files: args.files}, 
 	           function(error, decl) {
 	               if(error) {
-	                   callback({error: error.message, message: 'Failed to compute declaration'});
+	                   callback({request: 'definition', error: error.message, message: 'Failed to compute declaration'});
 	               }
-	               if(decl && Array.isArray(decl)) {
-        			   callback({request: 'decl', decl:decl});
-	               }
+	               if(decl && typeof(decl.start) === 'number' && typeof(decl.end) === "number" &&
+	               		decl.file === args.meta.location) { //TODO only work on local decls
+       			   		callback({request: 'definition', declaration:decl});
+       			   } else {
+       			   		callback({request: 'definition', declaration: null});
+       			   }
 	           });
 	   } else {
-	       callback({message: 'Failed to compute declaration, server not started'});
+	       callback({request: 'definition', message: 'Failed to compute declaration, server not started'});
 	   }
    }
    

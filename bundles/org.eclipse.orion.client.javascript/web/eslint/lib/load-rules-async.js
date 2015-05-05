@@ -688,7 +688,10 @@ define([
                     			return;
                     		}
                     		if (node.parent){
-	                    		if (node.parent.type === 'UnaryExpression' || node.parent.type === 'BinaryExpression' || node.parent.type === 'MemberExpression'){
+	                    		if (node.parent.type === 'UnaryExpression' || node.parent.type === 'MemberExpression'){
+	                    			return;
+	                    		}
+	                    		if (node.parent.type === 'BinaryExpression' && node.parent.operator !== '+'){
 	                    			return;
 	                    		}
 	                    		if (node.parent.type === 'Property' && node.parent.key === node){

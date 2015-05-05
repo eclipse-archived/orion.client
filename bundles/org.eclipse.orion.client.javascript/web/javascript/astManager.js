@@ -99,7 +99,8 @@ define([
 					tolerant: true,
 					tokens: true,
 					attachComment: true,
-					directSourceFile: file
+					directSourceFile: file,
+					deps: true
 				});
 			} catch (e) {
 				ast = emptyAST;

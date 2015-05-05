@@ -132,7 +132,7 @@ define([
 			var targetRef = this.getTargetReference();
 			var location = (targetRef.CommitLocation || targetRef.Location) + that.repositoryPath  + that.getQueries("mergeBase=true"); //$NON-NLS-0$
 			var id = activeBranch.Name;
-			return that.progressService.progress(that.gitClient.getLog(location, id), messages["Getting git log"]).then(function(resp) {
+			return that.syncCommits = that.progressService.progress(that.gitClient.getLog(location, id), messages["Getting git log"]).then(function(resp) {
 				return that.syncCommits = resp;
 			});
 		},
@@ -789,7 +789,8 @@ define([
 				selectionPolicy: this.selectionPolicy,
 				onComplete: function() {
 					that.status = model.status;
-					var fetched = function() {
+					var fetched = function(result) {
+						if (result) return; // fetching already expanded sections in #changedItem
 						var children = [];
 						that.model.getRoot(function(root) {
 							that.model.getChildren(root, function(c) {

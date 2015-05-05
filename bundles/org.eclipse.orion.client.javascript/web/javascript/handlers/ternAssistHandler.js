@@ -19,7 +19,8 @@ define([
 	'eslint/conf/environments',
     'orion/editor/templates', //$NON-NLS-0$
 	'javascript/contentAssist/templates',  //$NON-NLS-0$
-], function(Objects, Hover, Finder, Signatures, Rules, ESLintEnv, mTemplates, Templates) {
+	'orion/editor/stylers/application_javascript/syntax'
+], function(Objects, Hover, Finder, Signatures, Rules, ESLintEnv, mTemplates, Templates, JsSyntax) {
 
     /**
 	 * @description Creates a new delegate to create keyword and template proposals
@@ -372,7 +373,7 @@ define([
 	           files: args.files}, 
 	           function(error, comps) {
 	               if(error) {
-	               		callback({error: error.message, message: 'Failed to compute proposals'});
+	               		callback({request: 'completions', error: error.message, message: 'Failed to compute proposals'});
 	               } else if(comps && comps.completions) {
 	               		var file = ternserver.fileMap[args.meta.location];
 	               		var kind = getKind(file.ast, args.params.offset, file.text);
@@ -385,11 +386,13 @@ define([
 	               								  createDocProposals(args.params, kind, file.ast, file.text),
 	               								  createTemplateProposals(args.params, kind, file.text))});
                			}
+	               } else {
+	               		callback({request: 'completions', proposals:[]});
 	               }
 	           });
 	       
 	   } else {
-	       callback({message: 'Failed to compute proposals, server not started'});
+	       callback({request: 'completions', message: 'Failed to compute proposals, server not started'});
 	   }
     }
     
@@ -464,7 +467,7 @@ define([
         if(typeof(completion.type) !== 'undefined') {
             if(/^fn/.test(completion.type)) {
             	calculateFunctionProposal(completion, args, proposal);
-            } else if(typeof(completion.origin) === 'undefined') {
+            } else if(typeof(completion.origin) === 'undefined' && (JsSyntax.keywords.indexOf(completion.name) > -1)) {
             	//keyword
             	proposal.relevance -= 2; //103
             	//proposal.style = 'noemphasis_keyword';//$NON-NLS-1$

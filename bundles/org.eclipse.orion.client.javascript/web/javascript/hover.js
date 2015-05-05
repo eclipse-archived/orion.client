@@ -17,9 +17,9 @@ define([
 'javascript/signatures',
 'javascript/compilationUnit',  
 'orion/URITemplate',
+'orion/Deferred',
 'doctrine' //last, exports into global
-], function(Objects, Finder, Signatures, CU, URITemplate) {
-	
+], function(Objects, Finder, Signatures, CU, URITemplate, Deferred) {
 	
 	/**
 	 * @description Formats the hover info as markdown text
@@ -91,7 +91,7 @@ define([
 		            }
 		        }
 	        }
-	        if(comment.node) {
+	        if(comment.node && typeof(comment.node) !== 'string') {
     	        var name = Signatures.computeSignature(comment.node);
     	        var title = '###';
     	        if(format.isprivate) {
@@ -135,135 +135,6 @@ define([
 	    	result.offsetEnd = offsetRange[1];
 	    }
 	    return result;
-	}
-	
-	/**
-	 * @description Formats the hover info as HTML
-	 * @function
-	 * @private
-	 * @param {Object} node The AST node
-	 * @returns returns
-	 */
-	function formatHtmlHover(node) {
-	    if(!node) {
-	        return null;
-	    }
-	    try {
-	        var format = Object.create(null);
-	        var comment = Finder.findCommentForNode(node);
-	        if(typeof node === "string") {
-	           comment.value = node;
-	        }
-	        if(comment) {
-		        var doc = doctrine.parse(comment.value, {recoverable:true, unwrap : true});
-		        format.params = [];
-		        format.desc = (doc.description ? doc.description : '');
-		        if(doc.tags) {
-		            var len = doc.tags.length;
-		            for(var i = 0; i < len; i++) {
-		                var tag = doc.tags[i];
-		                switch(tag.title) {
-		                    case 'name': {
-		                        if(tag.name) {
-		                          format.name = tag.name; 
-		                        }
-		                        break;
-		                    }
-		                    case 'description': {
-		                        if(tag.description !== null) {
-		                          format.desc = (format.desc === '' ? tag.description : format.desc+'\n'+tag.description);
-		                        }
-		                        break;
-		                    }
-		                    case 'param': {
-		                        format.params.push('<i>' + _convertTagType(tag.type) + '</i>' +
-		                                  (tag.name ? '<b>'+tag.name+'</b> ' : '') + 
-		                                  (tag.description ? tag.description+'\n' : ''));
-		                        break;
-		                    }
-		                    case 'returns': 
-		                    case 'return': {
-		                        format.returns = _convertTagType(tag.type) +
-		                              (tag.description ? tag.description+'\n' : '');
-		                         break;
-		                    }
-		                    case 'since': {
-		                        if(tag.description) {
-		                          format.since = tag.description;
-		                        }
-		                        break;
-		                    }
-		                    case 'function': {
-		                        format.isfunc = true;
-		                        break;
-		                    }
-		                    case 'constructor': {
-		                        format.iscon = true;
-		                        break;
-		                    }
-		                    case 'private': {
-		                        format.isprivate = true;
-		                        break; 
-		                    }
-	                }
-		            }
-		        }
-	        }
-	        
-	        var hover = '<style>\n' +
-	        			'.monospace {\n' +
-	        			'font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;' + 
-	        			'}\n' +
-	        			'div {\n' +
-	        			'margin: 5px, 0\n' + 
-	        			'}</style>\n';
-	        			
-	        hover += '<div >\n';
-	        
-	        if(comment.node) {
-    	        // Name
-    	        var name = Signatures.computeSignature(comment.node);
-    	        hover += '<div class="monospace"><b>';
-    	        if(format.isprivate) {
-    	            hover += 'private ';
-    	        }
-    	        if(format.iscon) {
-    	            hover += 'constructor ';
-    	        }
-    	        hover += name.sig;
-    	        hover += '</b></div>\n';
-	        }
-	        // Description
-	        if(format.desc !== '') {
-	            hover += '<div style="margin-top: 5px">' + format.desc + '</div>\n';
-	        }
-	        if(format.params.length > 0) {
-	            hover += '<div style="margin-top: 5px"><b>Parameters:</b></div>\n';
-	            for(i = 0; i < format.params.length; i++) {
-	                hover += '<div style="margin-left: 10px">'+format.params[i] + '</div>\n';
-	            }
-	        }
-	        if(format.returns) {
-	            hover += '<div style="margin-top: 5px"><b>Returns:</b></div>\n';
-	            hover += '<div style="margin-left: 10px">' + format.returns + '</div>\n';
-	        }
-	        if(format.since) {
-	            hover += '<div style="margin-top: 5px"><b>Since:</b> ' + format.since + '</div>\n';
-	        }
-	        //TODO scope this to not show when you are on a decl
-	        /**var href = new URITemplate("#{,resource,params*}").expand(
-	                      {
-	                      resource: metadata.location, 
-	                      params: {start:node.range[0], end: node.range[1]}
-	                      }); //$NON-NLS-0$
-	        hover += '\n\n\n  [Jump to declaration]('+href+')';*/
-	       
-	       hover += '</div>';
-	    }
-	    catch(e) {
-	       //do nothing, show what we have
-	    }
-	    return {content: hover, type:'html'};
 	}
 	
 	/**
@@ -330,6 +201,8 @@ define([
         }
 	}
 	
+	var deferred;
+	
 	/**
 	 * @name javascript.JavaScriptHover
 	 * @description creates a new instance of the hover
@@ -339,9 +212,22 @@ define([
 	 * @param {javascript.ScriptResolver} resolver
 	 * @since 7.0
 	 */
-	function JavaScriptHover(astManager, resolver) {
+	function JavaScriptHover(astManager, resolver, ternWorker) {
 		this.astManager = astManager;
 		this.resolver = resolver;
+		this.ternworker = ternWorker;
+		this.ternworker.addEventListener('message', function(evnt) {
+			if(typeof(evnt.data) === 'object') {
+				var _d = evnt.data;
+				var hover = '';
+				if(_d.request === 'documentation') {
+					if(_d.doc) {
+						hover = formatMarkdownHover(_d.doc.doc);
+					}
+					deferred.resolve(hover);
+				} 
+			}
+		});
 	}
 	
 	Objects.mixin(JavaScriptHover.prototype, /** @lends javascript.JavaScriptHover.prototype*/ {
@@ -354,7 +240,7 @@ define([
 		 * @param {Object} editorContext The current editor context
 		 * @param {Object} ctxt The current selection context
 		 */
-		computeHoverInfo: function computeHover(editorContext, ctxt) {
+		computeHoverInfo: function computeHoverInfo(editorContext, ctxt) {
 		    if(ctxt.proposal) {
 		        return ctxt.proposal.hover;
 		    }
@@ -365,7 +251,7 @@ define([
 		    	}
 		        if(meta && meta.contentType.id === 'application/javascript') {
 		            return that.astManager.getAST(editorContext).then(function(ast) {
-        				return that._doHover(ast, editorContext, ctxt, meta);
+        				return that._doHover(ast, ctxt, meta);
         			});
 		        }
 		        return editorContext.getText().then(function(text) {
@@ -374,7 +260,7 @@ define([
     		            var cu = new CU(blocks, meta);
     		            if(cu.validOffset(ctxt.offset)) {
         		            return that.astManager.getAST(cu.getEditorContext()).then(function(ast) {
-                				return that._doHover(ast, editorContext, ctxt, meta);
+                				return that._doHover(ast, ctxt, meta);
                 			});
             			}
         			}
@@ -384,151 +270,57 @@ define([
 			
 		},
 		
-		_doHover: function _doHover(ast, editorContext, ctxt, meta) {
-		    if(!ctxt.offset || ctxt.offset < ast.range[0] || ctxt.offset >= ast.range[1]) {
-		        //end of the AST, nothing to hover
-		        return null;
-		    }
-		    var node = Finder.findNode(ctxt.offset, ast, {parents:true});
-		    if(node) {
-		    	switch(node.type) {
-		            case 'Identifier': {
-		                return formatMarkdownHover(this._getIdentifierHover(node, ctxt.offset, ast), node.range);
-		            }
-		            case 'FunctionDeclaration': {
-		                return formatMarkdownHover(node, node.range);
-		            }
-		            case 'FunctionExpression': {
-		                return formatMarkdownHover(this._getFunctionExprHover(node), node.range);
-		            }
-		            case 'CallExpression': {
-    	               return formatMarkdownHover(this._getCallExprHover(node, ctxt.offset, ast), node.range);
-		            }
-		            case 'Literal': {
-		                if(ctxt.offset <= node.range[0] || ctxt.offset >= node.range[1]) {
-		                    //be a bit more precise than finder
-		                    return null;
-		                }
-		                var parents = node.parents;
-		                var parent = parents.pop();
-		                var that = this;
-		                if(parent.type === 'ArrayExpression') {
-		                    parent = parents.pop();
-		                    if(parent.type === 'CallExpression' && parent.callee.name === 'define') {
-		                        var path = node.value;
-    		                    return that.resolver.getWorkspaceFile(path).then(function(files) {
+		_doHover: function _doHover(ast, ctxt, meta) {
+			var node = Finder.findNode(ctxt.offset, ast, {parents:true});
+		    if(node && node.type === 'Literal') {
+		    	//Symantic navigation
+		    	if(ctxt.offset <= node.range[0] || ctxt.offset >= node.range[1]) {
+                    //be a bit more precise than finder
+                    return null;
+                }
+                var parents = node.parents;
+                var parent = parents.pop();
+                var that = this;
+                if(parent.type === 'ArrayExpression') {
+                    parent = parents.pop();
+                    if(parent.type === 'CallExpression' && parent.callee.name === 'define') {
+                        var path = node.value;
+	                    return that.resolver.getWorkspaceFile(path).then(function(files) {
+		                    return that._formatFilesHover(path, files);
+		                });
+                    }
+                } else if(parent.type === 'CallExpression') {
+                    var path = node.value;
+                    switch(parent.callee.name) {
+                        case 'require': {
+                            var char = path.charAt(0);
+                            if(char !== '.' && char !== '/') {
+                                return that.resolver.getWorkspaceFile(path).then(function(files) {
     			                    return that._formatFilesHover(path, files);
     			                });
-		                    }
-		                } else if(parent.type === 'CallExpression') {
-		                    var path = node.value;
-		                    switch(parent.callee.name) {
-		                        case 'require': {
-		                            var char = path.charAt(0);
-		                            if(char !== '.' && char !== '/') {
-		                                return that.resolver.getWorkspaceFile(path).then(function(files) {
-            			                    return that._formatFilesHover(path, files);
-            			                });
-		                            }
-		                        }
-		                        //$FALLTHROUGH$
-		                        case 'importScripts': {
-		                            var path = node.value;
-    		                        return that.resolver.getWorkspaceFile(path).then(function(files) {
-    		                            if(!/\.js$/.test(path)) {
-    		                                path += '.js';
-    		                            }
-    		                            var rels = that.resolver.resolveRelativeFiles(path, files, meta);
-    		                            if(rels && rels.length > 0) {
-        			                        return that._formatFilesHover(node.value, rels);
-        			                    }
-        			                });
-		                        }
-		                    }
-		                }
-		            }
-		        }
-		    }
-		    return null;
-		},
-		
-		/**
-		 * @description Computes the hover for a FunctionExpression
-		 * @function
-		 * @private
-		 * @param {Object} node The AST node
-		 * @returns {String} The hover text
-		 */
-		_getFunctionExprHover: function _getFunctionExprHover(node) {
-		    if(node.parents) {
-    	        var parent = node.parents[node.parents.length-1];
-    	        if(parent.type === 'Property') {
-    	           return parent;
-    	        }
-    	    }
-    	    return null;
-		},
-		
-		/**
-		 * @description Computes the hover for a CallExpression
-		 * @function
-		 * @private
-		 * @param {Object} node The AST node
-		 * @param {Number} offset The offset into the file
-		 * @param {Object} ast The AST
-		 * @returns {String} The hover text
-		 */
-		_getCallExprHover: function _getCallExprHover(node, offset, ast) {
-	        switch(node.callee.type) {
-	            case 'MemberExpression': {
-	                //do we know the type locally?
-	                break;
-	            }
-	            case 'ThisExpression': {
-	                //only need to look in the last function closure
-	                break;
-	            }
-	            case 'Identifier': {
-	                return Finder.findDeclaration(offset, ast, {id: node.callee.name, kind: Finder.SearchOptions.FUNCTION_DECLARATION});
-	            }
-		    }
-		    return null;
-		},
-		
-		/**
-		 * @description Computes the hover for an Identifier node
-		 * @function
-		 * @private
-		 * @param {Object} node The AST node
-		 * @param {Number} offset The offset into the file
-		 * @param {Object} ast The AST
-		 * @returns {String} The hover text
-		 */
-		_getIdentifierHover: function _getIdentifierHover(node, offset, ast) {
-		    if(node.parents) {
-		        //find what it ids
-		        var parent = node.parents[node.parents.length-1];
-		        switch(parent.type) {
-		            case 'FunctionDeclaration': {
-		                return parent;
-		            }
-		            case 'FunctionExpression': {
-		                return this._getFunctionExprHover(parent);
-		            }
-		            case 'CallExpression': {
-		                return this._getCallExprHover(parent, offset, ast);
-		            }
-		            case 'Property': {
-		                if(parent.kind === 'init' && parent.value && parent.value.type === 'FunctionExpression') {
-		                    return parent;
-		                } else {
-		                    return null;
-		                }
-		            }
-		        }
-		        //now the hard part, find the declaration
-		    }
-		    return null;
+                            }
+                        }
+                        //$FALLTHROUGH$
+                        case 'importScripts': {
+                            var path = node.value;
+	                        return that.resolver.getWorkspaceFile(path).then(function(files) {
+	                            if(!/\.js$/.test(path)) {
+	                                path += '.js';
+	                            }
+	                            var rels = that.resolver.resolveRelativeFiles(path, files, meta);
+	                            if(rels && rels.length > 0) {
+			                        return that._formatFilesHover(node.value, rels);
+			                    }
+			                });
+                        }
+                    }
+                }
+                return null;
+		    } 
+			deferred = new Deferred();
+			var files = [{type: 'full', name: meta.location, text: ast.source}];
+			this.ternworker.postMessage({request:'documentation', args:{params:{offset: ctxt.offset}, files: files, meta:{location: meta.location}}});
+			return deferred;
 		},
 		
 		/**
@@ -572,7 +364,6 @@ define([
 	
 	return {
 		JavaScriptHover: JavaScriptHover,
-		formatMarkdownHover: formatMarkdownHover,
-		formatHtmlHover: formatHtmlHover
+		formatMarkdownHover: formatMarkdownHover
 		};
 });

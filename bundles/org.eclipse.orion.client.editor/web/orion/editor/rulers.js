@@ -503,7 +503,11 @@ define("orion/editor/rulers", [
 		_getTooltipInfo: function(contents, y, context) {
 			if (!contents) { return null; } // TODO: shouldn't this check the length, it'll never be null
 		
-			var hoverArea = this._curElementBounds;
+			var hoverArea = Object.create(null);
+			hoverArea.top = this._curElementBounds.top;
+			hoverArea.left = this._curElementBounds.left;
+			hoverArea.height = this._curElementBounds.height;
+			hoverArea.width = this._curElementBounds.width;
 			if (typeof contents === 'string' && y) { //$NON-NLS-0$
 				// Hack for line numbers
 				hoverArea.top = y;
@@ -559,7 +563,11 @@ define("orion/editor/rulers", [
 		
 		_getOnClickTooltipInfo: function(annotation) {
 			var view = this._view;
-			var hoverArea = this._curElementBounds;
+			var hoverArea = Object.create(null);
+			hoverArea.top = this._curElementBounds.top;
+			hoverArea.left = this._curElementBounds.left;
+			hoverArea.height = this._curElementBounds.height;
+			hoverArea.width = this._curElementBounds.width;
 			var rulerLocation = this.getLocation();
 			var position = rulerLocation === "left" ? "right" : "left"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 			var info = {

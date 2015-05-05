@@ -107,19 +107,32 @@ define(['i18n!cfui/nls/messages', 'orion/webui/littlelib', 'orion/bootstrap', 'o
 				var that = this;
 				setTimeout(function(){
 					if (document.visibilityState === 'visible'){
-						cFClient.getLogz(applicationInfo.Target, applicationInfo.Application, applicationInfo.logsTimestamp).then(
+						progressService.showWhile(cFClient.getLogz(applicationInfo.Target, applicationInfo.Application, applicationInfo.logsTimestamp)).then(
 							function(newLogs){
 								if (newLogs.Messages.length !== 0){
-									var oldLogs = applicationInfo.logs;
-									applicationInfo.logs = newLogs.Messages;
+									var currentLogs = applicationInfo.logs;
+									currentLogs = currentLogs.concat(newLogs.Messages);
+									applicationInfo.logs = currentLogs;
 									applicationInfo.logsTimestamp = newLogs.Timestamp;
+									
 									logEditorView.inputManager.setApplicationInfo(applicationInfo);
 	
 									logEditorView.inputManager.setInput("logs for " + applicationInfo.Application);
 									logEditorView.inputManager.load();
 								}
 								reloadLogs(applicationInfo);
-							}, handleError
+							}, function(error){
+								var oldLogs = applicationInfo.logs;
+								oldLogs.push("");
+								oldLogs.push(messages["refreshLogsPage"]);
+								
+								applicationInfo.logs = oldLogs;
+								logEditorView.inputManager.setApplicationInfo(applicationInfo);
+
+								logEditorView.inputManager.setInput("logs for " + applicationInfo.Application);
+								logEditorView.inputManager.load();
+								handleError(error);
+							}
 						);
 					} else {
 						reloadLogs(applicationInfo);
