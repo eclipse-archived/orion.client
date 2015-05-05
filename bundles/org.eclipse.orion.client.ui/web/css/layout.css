@@ -479,7 +479,7 @@ and (max-device-width : 1024px)  {
 	left: 100%;
 	height: 4em;
 	width: 4px;
-	top: calc(50% - 1.5em);
+	top: calc(50% - 2em);
 	margin-left: -1px;
 	cursor: pointer;
 	border-top-right-radius: 3px;
@@ -489,34 +489,37 @@ and (max-device-width : 1024px)  {
 .splitThumbRightLayout {
 	position: absolute;
 	right: 100%;
-	height: 3em;
+	height: 4em;
 	width: 4px;
-	top: calc(50% - 1.5em);
+	top: calc(50% - 2em);
+	margin-right: -1px;
 	cursor: pointer;
-	border-top-left-radius: 5px;
-	border-bottom-left-radius: 5px;
+	border-top-left-radius: 3px;
+	border-bottom-left-radius: 3px;
 }
 
 .splitVerticalThumbUpLayout {
 	position: absolute;
 	top: 100%;
-	width: 3em;
+	width: 4em;
 	height: 4px;
-	left: calc(50% - 1.5em);
+	left: calc(50% - 2em);
+	margin-top: -1px;
 	cursor: pointer;
-	border-bottom-left-radius: 5px;
-	border-bottom-right-radius: 5px;
+	border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
 }
 
 .splitVerticalThumbDownLayout {
 	position: absolute;
 	bottom: 100%;
-	width: 3em;
+	width: 4em;
 	height: 4px;
-	left: calc(50% - 1.5em);
+	left: calc(50% - 2em);
+	margin-bottom: -1px;
 	cursor: pointer;
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
 }
 
 .splitLayoutAnimation {
