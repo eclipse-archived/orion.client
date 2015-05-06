@@ -204,29 +204,39 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 		
 		_loadApplications : function(target){
 			var self = this;
-			
+
+			if(self._appsDropdown._recentEntryButton.disabled != true){
+				self._appsDropdown._recentEntryButton.disabled = true;
+			}
+
 			self._appsDeferred = self._cfService.getApps(target);
 			self._appsDeferred.then(function(apps){
 				self._appsList = [];
-				if(apps.Apps){
+				if(apps && apps.Apps){
 					apps.Apps.forEach(function(app){
 						self._appsList.push(app.Name);
 					});
 				}
+				self._appsDropdown._recentEntryButton.disabled = false;
 			});
 		},
 		
 		_loadHosts : function(target){
 			var self = this;
-			
+
+			if(self._hostDropdown._recentEntryButton.disabled != true){
+				self._hostDropdown._recentEntryButton.disabled = true;
+			}
+
 			self._routesDeferred = self._cfService.getRoutes(target);
 			self._routesDeferred.then(function(routes){
-				if(routes.Routes){
-					self._routesList = [];
+				self._routesList = [];
+				if(routes && routes.Routes){
 					routes.Routes.forEach(function(route){
 						self._routesList.push(route.Host);
 					});
 				}
+				self._hostDropdown._recentEntryButton.disabled = false;
 			});							
 		},
 		
@@ -525,28 +535,27 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 							hasInputCompletion: true,
 							serviceRegistry: this._serviceRegistry,
 							onRecentEntryDelete: null,
-							defaultRecentEntryProposalProvider: function(onItem){
-								self._appsDeferred.then(function(){
-									
-									var ret = [];
+							defaultRecentEntryProposalProvider: function(onItem){	
+
+									var result = [];
 									self._appsList.forEach(function(app){
 										if(!app) return;
-										ret.push({
+										result.push({
 											type: "proposal", //$NON-NLS-0$
 											label: app,
 											value: app
 										});
-									});
-									
-									onItem(ret);									
-								});
+									});							
+									onItem(result);	
 							}
 						});
 						
 						self._appsInput = self._appsDropdown.getTextInputNode();						
 						self._appsInput.onkeyup = function(){this.validate();}.bind(this.wizard);
 						self._appsInput.addEventListener("focus",function(){this.validate();}.bind(this.wizard)); //$NON-NLS-0$
-						
+
+						self._appsDropdown._recentEntryButton.disabled = true;
+
 	//					if(self._manifestApplication.name)
 	//						self._appsInput.value = self._manifestApplication.name;
 						
@@ -567,23 +576,22 @@ define(['i18n!cfui/nls/messages', 'orion/selection', 'orion/widgets/input/ComboT
 							serviceRegistry: this._serviceRegistry,
 							onRecentEntryDelete: null,
 							defaultRecentEntryProposalProvider: function(onItem){
-								self._routesDeferred.then(function(){
-									
-									var ret = [];
+
+									var result = [];
 									self._routesList.forEach(function(route){
 										if(!route) return;
-										ret.push({
+										result.push({
 											type: "proposal", //$NON-NLS-0$
 											label: route,
 											value: route
 										});
 									});
-									
-									onItem(ret);
-								});
+									onItem(result);
 							}
 						});
-						
+
+						self._hostDropdown._recentEntryButton.disabled = true;
+
 						self._hostInput = self._hostDropdown.getTextInputNode();
 	//					self._hostInput.value = self._manifestApplication.host || self._manifestApplication.name || "";
 						

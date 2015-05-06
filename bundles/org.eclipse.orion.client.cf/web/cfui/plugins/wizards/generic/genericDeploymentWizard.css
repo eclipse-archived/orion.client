@@ -57,7 +57,6 @@ select {
 	height: 24px;
 	width: 290px;
 	margin-left: 0;
-	border: 1px solid #bbb;
 }
 
 .selectCell>input, .selectCell>select, .selectCell>.comboTextInputWrapper {
@@ -73,6 +72,9 @@ select {
 }
 .selectCell .core-sprite-openarrow {
 	color: inherit;
+	font-size: 13px !important;
+	padding-left: 5px;
+	-webkit-padding-start: 3px !important;
 }
 
 .modifiedCell {
