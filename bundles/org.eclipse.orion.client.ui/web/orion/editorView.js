@@ -42,8 +42,7 @@ define([
 	'orion/differ',
 	'orion/keyBinding',
 	'orion/util',
-	'orion/objects',
-	'orion/metrics',
+	'orion/objects'
 ], function(
 	messages,
 	mEditor, mEventTarget, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mHoverFactory, mContentAssist,
@@ -52,7 +51,7 @@ define([
 	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
 	mMarkOccurrences, mSyntaxchecker, LiveEditSession,
 	mProblems, mBlamer, mDiffer,
-	mKeyBinding, util, objects,  mMetrics
+	mKeyBinding, util, objects
 ) {
 	var Dispatcher = mDispatcher.Dispatcher;
 
